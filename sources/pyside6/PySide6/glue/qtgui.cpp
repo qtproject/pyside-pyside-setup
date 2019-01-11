@@ -557,6 +557,10 @@ WId id = %1;
 %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](retval);
 // @snippet qwindow-fromWinId
 
+// @snippet set-qtkey-shortcut
+%CPPSELF.%FUNCTION_NAME(QKeyCombination(%1));
+// @snippet set-qtkey-shortcut
+
 // @snippet qshortcut-1
 %0 = new %TYPE(%1, %2);
 // @snippet qshortcut-1

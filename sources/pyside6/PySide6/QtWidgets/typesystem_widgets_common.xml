@@ -1156,7 +1156,11 @@
       </modify-argument>
     </modify-function>
   </object-type>
-  <object-type name="QAbstractButton"/>
+  <object-type name="QAbstractButton">
+    <add-function signature="setShortcut(Qt::Key)">
+      <inject-code file="../glue/qtgui.cpp" snippet="set-qtkey-shortcut"/>
+    </add-function>
+  </object-type>
   <object-type name="QStyle">
     <enum-type name="ComplexControl"/>
     <enum-type name="ContentsType"/>

@@ -37,7 +37,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import SLOT
+from PySide6.QtCore import Qt, SLOT
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QMenuBar, QPushButton
 
@@ -62,6 +62,7 @@ class AddActionTest(UsesQApplication):
         menubar = QMenuBar()
         action = menubar.addAction("Accounts", self._callback)
         action.activate(QAction.Trigger)
+        action.setShortcut(Qt.Key_A)
         self.assertTrue(self.called)
 
     def testWithCppSlot(self):
@@ -71,6 +72,7 @@ class AddActionTest(UsesQApplication):
         widget.setCheckable(True)
         widget.setChecked(False)
         action = menubar.addAction("Accounts", widget, SLOT("toggle()"))
+        action.setShortcut(Qt.Key_A)
         action.activate(QAction.Trigger)
         self.assertTrue(widget.isChecked())
 

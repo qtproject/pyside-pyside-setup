@@ -195,6 +195,9 @@
       </modify-argument>
     </modify-function>
     <modify-function signature="triggered(bool)" allow-thread="yes"/>
+    <add-function signature="setShortcut(Qt::Key)">
+        <inject-code file="../glue/qtgui.cpp" snippet="set-qtkey-shortcut"/>
+    </add-function>
   </object-type>
   <object-type name="QActionGroup">
     <enum-type name="ExclusionPolicy" since="5.14"/>
