@@ -37,7 +37,7 @@ init_test_paths(False)
 
 from helper.usesqapplication import UsesQApplication
 from PySide6.QtWidgets import QPushButton, QMenu, QWidget
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import QTimer, Qt
 
 
 class MyWidget(QWidget):
@@ -67,6 +67,7 @@ class QPushButtonTest(UsesQApplication):
     def testBoolinSignal(self):
         b = QPushButton()
         b.setCheckable(True)
+        b.setShortcut(Qt.Key_A)
         self._clicked = False
         b.toggled[bool].connect(self.buttonCb)
         b.toggle()
