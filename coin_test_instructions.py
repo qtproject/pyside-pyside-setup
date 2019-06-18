@@ -39,7 +39,6 @@
 from build_scripts.options import has_option
 from build_scripts.options import option_value
 from build_scripts.utils import install_pip_dependencies
-from build_scripts.utils import install_pip_wheel_package
 from build_scripts.utils import get_qtci_virtualEnv
 from build_scripts.utils import run_instruction
 from build_scripts.utils import rmtree
@@ -68,8 +67,7 @@ def call_testrunner(python_ver, buildnro):
     rmtree(_env, True)
     run_instruction(["virtualenv", "-p", _pExe,  _env], "Failed to create virtualenv")
     # Keeping PyInstaller 3.4, because 3.5 seems to have broken our test
-    install_pip_dependencies(env_pip, ["pip", "numpy", "PyOpenGL", "setuptools", "six", "pyinstaller==3.4"])
-    install_pip_wheel_package(env_pip)
+    install_pip_dependencies(env_pip, ["pip", "numpy", "PyOpenGL", "setuptools", "six", "pyinstaller==3.4", "wheel"])
     cmd = [env_python, "testrunner.py", "test",
                   "--blacklist", "build_history/blacklist.txt",
                   "--buildno=" + buildnro]
