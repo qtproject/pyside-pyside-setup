@@ -457,6 +457,10 @@
     <enum-type identified-by-value="AnonymousGlobalEnum_Value0"/>
 
     <namespace-type name="SampleNamespace">
+        <namespace-type name="InlineNamespace">
+            <value-type name="ClassWithinInlineNamespace"/>
+            <enum-type name="EnumWithinInlineNamespace"/>
+        </namespace-type>
         <enum-type name="Option"/>
         <enum-type name="InValue"/>
         <enum-type name="OutValue"/>

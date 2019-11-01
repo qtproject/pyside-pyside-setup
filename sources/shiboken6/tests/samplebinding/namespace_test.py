@@ -64,5 +64,11 @@ class TestClassesUnderNamespace(unittest.TestCase):
             "sample.SampleNamespace.SomeClass.PublicScopedEnum")
 
 
+    def testInlineNamespaces(self):
+        cls = SampleNamespace.ClassWithinInlineNamespace()
+        cls.setValue(SampleNamespace.EWIN_Value1)
+        self.assertEqual(cls.value(), SampleNamespace.EWIN_Value1)
+
+
 if __name__ == '__main__':
     unittest.main()

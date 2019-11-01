@@ -19,6 +19,25 @@ enum {
 namespace SampleNamespace
 {
 
+inline namespace InlineNamespace
+{
+    enum EnumWithinInlineNamespace { EWIN_Value0, EWIN_Value1 };
+
+    class LIBSAMPLE_API ClassWithinInlineNamespace {
+    public:
+        ClassWithinInlineNamespace() = default;
+        ~ClassWithinInlineNamespace() = default;
+        ClassWithinInlineNamespace(const ClassWithinInlineNamespace &) = default;
+        ClassWithinInlineNamespace& operator=(const ClassWithinInlineNamespace &) = default;
+
+        void setValue(EnumWithinInlineNamespace v) { m_value = v; }
+        EnumWithinInlineNamespace value() const { return m_value; }
+
+    private:
+        EnumWithinInlineNamespace m_value = EWIN_Value0;
+    };
+} // inline ns
+
 enum Option {
     None_,
     RandomNumber,
