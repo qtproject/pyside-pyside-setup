@@ -2878,6 +2878,9 @@
     <enum-type name="ItemRole"/>
     <enum-type name="RowWrapPolicy"/>
 
+    <value-type name="TakeRowResult">
+      <include file-name="QFormLayout" location="global"/>
+    </value-type>
 
     <modify-function signature="getLayoutPosition(QLayout*,int*,QFormLayout::ItemRole*)const">
         <modify-argument index="0">
