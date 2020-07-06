@@ -101,6 +101,9 @@
     <object-type name="QSGDynamicTexture"/>
     <object-type name="QSGFlatColorMaterial"/>
     <object-type name="QSGGeometry">
+        <extra-includes>
+            <include file-name="algorithm" location="global"/>
+        </extra-includes>
         <enum-type name="DataPattern"/>
         <enum-type name="AttributeType"/>
         <enum-type name="DrawingMode" python-type="IntEnum"/>
@@ -110,6 +113,21 @@
         <value-type name="ColoredPoint2D"/>
         <value-type name="Point2D"/>
         <value-type name="TexturedPoint2D"/>
+        <modify-function signature="vertexDataAsPoint2D()">
+            <modify-argument index="return">
+                <replace-type modified-type="PyObject*"/>
+            </modify-argument>
+            <inject-code class="target" file="../glue/qtquick.cpp" snippet="qsgeometry-vertexdataaspoint2d"/>
+        </modify-function>
+        <add-function signature="setVertexDataAsPoint2D(const QList&lt;QSGGeometry::Point2D&gt;&amp;@points@)">
+            <inject-code class="target" file="../glue/qtquick.cpp" snippet="qsgeometry-setvertexdataaspoint2d"/>
+            <inject-documentation format="target" mode="append">
+            Sets the vertex data from a list of QSGGeometry.Point2D.
+            The list size must match the allocated number of vertexes
+            as returned by QSGGeometry.vertexCount().
+            </inject-documentation>
+        </add-function>
+
     </object-type>
     <object-type name="QSGGeometryNode"/>
 
