@@ -1,0 +1,3 @@
+{
+    "files": ["model.py","main.qml","main.py","MovingRectangle.qml"]
+}
