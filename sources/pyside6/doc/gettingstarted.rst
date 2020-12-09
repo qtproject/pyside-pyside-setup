@@ -18,7 +18,7 @@ General Requirements
  * **Qt:** 6.0+ is recommended
  * **libclang:** The libclang library, recommended: version 10 for 6.0+.
    Prebuilt versions of it can be `downloaded here`_.
- * **CMake:** 3.1+ is needed.
+ * **CMake:** 3.18+ is needed.
 
 .. _downloaded here: http://download.qt.io/development_releases/prebuilt/libclang/
 
