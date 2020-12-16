@@ -1027,19 +1027,31 @@ AbstractMetaArgumentList OverloadData::getArgumentsWithDefaultValues(const Abstr
 #ifndef QT_NO_DEBUG_STREAM
 void OverloadData::formatDebug(QDebug &d) const
 {
-    const int count = m_overloads.size();
-    d << "argType=" << m_argType << ", minArgs=" << m_minArgs << ", maxArgs=" << m_maxArgs
-        << ", argPos=" << m_argPos << ", argTypeReplaced=\"" << m_argTypeReplaced
-        << "\", overloads[" << count << "]=(";
-    const int oldVerbosity = d.verbosity();
-    d.setVerbosity(3);
-    for (int i = 0; i < count; ++i) {
-        if (i)
-            d << '\n';
-        d << m_overloads.at(i);
-    }
-    d << ')';
-    d.setVerbosity(oldVerbosity);
+    const qsizetype count = m_overloads.size();
+    auto refFunc = referenceFunction();
+    d << '"';
+    if (auto owner = refFunc->ownerClass())
+        d << owner->qualifiedCppName() << "::";
+    d << refFunc->minimalSignature() << '"';
+    if (m_overloads.constFirst()->isReverseOperator())
+        d << " [reverseop]";
+    d << ", argType=" << m_argType << ", minArgs=" << m_minArgs << ", maxArgs=" << m_maxArgs
+        << ", argPos=" << m_argPos;
+    if (!m_argTypeReplaced.isEmpty())
+        d << ", argTypeReplaced=\"" << m_argTypeReplaced << '"';
+
+    if (count < 2)
+        return;
+     d << "\", overloads[" << count << "]=(";
+     const int oldVerbosity = d.verbosity();
+     d.setVerbosity(3);
+     for (int i = 0; i < count; ++i) {
+         if (i)
+             d << '\n';
+         d << m_overloads.at(i);
+     }
+     d.setVerbosity(oldVerbosity);
+     d << ')';
 }
 
 QDebug operator<<(QDebug d, const OverloadData *od)
