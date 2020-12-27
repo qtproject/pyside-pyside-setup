@@ -7,29 +7,15 @@ selected when using the online installer.
 Requirements
 ------------
 
- * Qt package from `here`_ or a custom build of Qt (preferably 6.0)
- * A Python interpreter (version Python 3.6+). Preferably get it from the `official website`_.
  * `MSVC2017`_ (or MSVC2019) for Python 3 on Windows,
- * `CMake`_  version 3.1 or greater
- * `Git`_ version 2 or greater
- * `libclang`_ prebuilt version from the ``Qt Downloads`` page is recommended. We recommend
-   libclang10 for 6.0+.
  * `OpenSSL`_ (optional for SSL support, Qt must have been configured using the same SSL library).
- * ``venv`` or ``virtualenv`` is strongly recommended, but optional.
  * ``sphinx`` package for the documentation (optional).
 
 .. note:: Python 3.8.0 was missing some API required for PySide/Shiboken so it's not possible
     to use it for a Windows build.
 
-
-.. _here: https://qt.io/download
-.. _official website: https://www.python.org/downloads/
 .. _MSVC2017: https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=BuildTools
-.. _CMake: https://cmake.org/download/
-.. _Git: https://git-scm.com/download/win
-.. _libclang: http://download.qt.io/development_releases/prebuilt/libclang/
 .. _OpenSSL: https://sourceforge.net/projects/openssl/
-
 
 Building from source on Windows 10
 ----------------------------------

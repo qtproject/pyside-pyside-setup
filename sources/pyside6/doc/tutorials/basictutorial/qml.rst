@@ -1,5 +1,5 @@
-Your First Application Using PySide6 and QtQuick/QML
-*****************************************************
+Your First QtQuick/QML Application
+**********************************
 
 QML is a declarative language that lets you develop applications
 faster than with traditional languages. It is ideal for designing the

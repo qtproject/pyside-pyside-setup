@@ -1473,7 +1473,7 @@ pre, .LegaleseLeft {
   background-color:#222840;
   color:#fff;
   display:block;
-  font-family:"Droid Sans Mono";
+  font-family: 'Droid Sans Mono', monospace;
   line-height:1.5;
   overflow-x:auto;
   margin-bottom:25px;
@@ -1553,7 +1553,13 @@ pre span.wrap {
 }
 
 span.pre {
-    color: #09102d;
+    color: black;
+    font-family: monospace;
+    font-weight: normal;
+    background-color: #eaeaea;
+    padding: 2px 4px;
+    color: black;
+    border-radius: 2px;
 }
 
 span.wrap:hover {
@@ -1579,7 +1585,7 @@ span.wrap:active {
   color:#46a2da
 }
 code,.codelike {
-  font-family:"Droid Sans Mono"
+  font-family: 'Droid Sans Mono', monospace;
 }
 #detailed-description .function dt > code,
 #detailed-description .function dt > em {
@@ -2073,4 +2079,23 @@ table.special td {
     padding-top: 2px;
     padding-bottom: 2px;
     border-bottom: 4px solid #41cd52;
+}
+
+.command {
+    font-family: monospace;
+    font-weight: normal;
+    background-color: #9cd1a6;
+    padding: 2px 4px;
+    color: black;
+    border-radius: 2px;
+}
+
+div.leftside {
+    width: 50%;
+    padding: 0px 50px 0px 0px;
+    float: left;
+}
+
+div.rightside {
+    margin-left: 50%;
 }

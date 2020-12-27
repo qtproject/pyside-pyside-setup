@@ -1,5 +1,7 @@
-Widget Styling
-**************
+.. _widgetstyling:
+
+Styling the Widgets Application
+===============================
 
 Qt Widgets application use a default theme depending on the platform.
 In some cases, there are system-wide configurations that modify the Qt theme,
@@ -81,7 +83,7 @@ page.
 .. _`Qt Style Sheet Examples`: https://doc.qt.io/qt-5/stylesheet-examples.html
 
 Qt Style Sheets
-===============
+---------------
 
 .. warning::
 

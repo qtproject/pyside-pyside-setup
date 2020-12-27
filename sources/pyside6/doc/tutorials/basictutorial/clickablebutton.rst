@@ -1,5 +1,5 @@
-A Simple Button Tutorial
-************************
+Using a Simple Button
+=====================
 
 In this tutorial, we'll show you how to handle **signals and slots**
 using Qt for Python. **Signals and slots** is a Qt feature that lets

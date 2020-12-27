@@ -1,24 +1,28 @@
 |project| Getting Started
 ==========================
 
-This page is focused on building |project| from source, if you just want to install |pymodname|
-with ``pip`` you need to run::
+.. important:: This page is focused on building |project| **from source**.
+  If you just want to install |pymodname|, you need to run: :command:`pip install pyside6`.
 
-    pip install pyside6
-
-for more details, refer to our `Quick Start`_ guide. Additionally, you can
-check the :ref:`FAQ <faq>` related to the project.
+  For more details, refer to our `Quick Start`_ guide. Additionally, you can check the
+  :ref:`FAQ <faq>` related to the project.
 
 .. _Quick Start: quickstart.html
 
 General Requirements
 --------------------
 
- * **Python**: 3.6+
- * **Qt:** 6.0+ is recommended
+The following prerequisites must be installed before you build |project|.
+On **Linux** you might get them with your operating system package manager, on **macOS**
+you might get them with ``brew``, and on **Windows** you can download the installer from each
+website.
+
+ * **Python**: 3.6+ `[official website] <https://www.python.org/downloads/>`_
+ * **Qt:** 6.0+ `[online installer] <https://download.qt.io/official_releases/online_installers/>`_
+ * **CMake:** 3.18+ `[official website] <https://cmake.org/download/>`_
+ * **Git:** 2.0+. `[official website] <https://git-scm.com/downloads>`_
  * **libclang:** The libclang library, recommended: version 10 for 6.0+.
-   Prebuilt versions of it can be `downloaded here`_.
- * **CMake:** 3.18+ is needed.
+   Prebuilt versions for each OS can be `downloaded here`_.
 
 .. _downloaded here: http://download.qt.io/development_releases/prebuilt/libclang/
 
@@ -27,18 +31,27 @@ Guides per platform
 
 You can refer to the following pages for platform specific instructions:
 
- * `Windows`_
- * `macOS`_
- * `Linux`_
- * Mobile platforms (iOS/Android) **(no support)**
- * Embedded platforms **(no official support)**
+.. raw:: html
 
-   .. note:: Most Linux-based embedded OS provide PySide with their official
-             package manager (e.g. `Raspbian`_ and `ArchlinuxARM`_).
+    <table class="special">
+        <colgroup>
+            <col style="width: 200px" />
+            <col style="width: 200px" />
+            <col style="width: 200px" />
+        </colgroup>
+        <tr>
+            <td><a href="gettingstarted-windows.html"><p><strong>Windows</strong></p></a></td>
+            <td><a href="gettingstarted-macOS.html"><p><strong>macOS</strong></p></a></td>
+            <td><a href="gettingstarted-linux.html"><p><strong>Linux</strong></p></a></td>
+        </tr>
+    </table>
 
-.. _Windows: gettingstarted-windows.html
-.. _macOS: gettingstarted-macOS.html
-.. _Linux: gettingstarted-linux.html
+.. important:: The |project| does not yet support WebAssembly and the mobile operating
+      systems (Android or iOS).
+
+  Most Linux-based embedded OS provide PySide with their official
+  package manager (for example, `Raspbian`_ and `ArchlinuxARM`_).
+
 .. _Raspbian: https://www.raspbian.org/
 .. _ArchlinuxARM: https://archlinuxarm.org/
 
@@ -49,20 +62,20 @@ A normal building command will look like this::
                             --debug \
                             --build-tests \
                             --parallel=8 \
-                            --make-spec=ninja \
                             --verbose-build \
                             --module-subset=Core,Gui,Widgets
 
 Which will build and install the project with **debug** symbols, including the **tests**,
-using **ninja** (instead of make), and considering only the **module subset** of QtCore, QtGUI
-and QtWidgets.
+using **ninja** (instead of make), and considering only the **module subset** of
+:mod:`QtCore <PySide6.QtCore>`, :mod:`QtGui <PySide6.QtGui>`, and
+:mod:`QtWidgets <PySide6.QtWidgets`.
 
 Other important options to consider are:
  * ``--cmake``, to specify the path to the cmake binary,
  * ``--reuse-build``, to rebuild only the modified files,
  * ``--openssl=/path/to/openssl/bin``, to use a different path for OpenSSL,
- * ``--standalone``, to copy over the Qt libraries into the final package
-   to make it work on other machines,
+ * ``--standalone``, to copy over the Qt libraries into the final package to make it work on other
+   machines,
  * ``--doc-build-online``, to build documentation using the online template.
 
 Testing the installation
@@ -70,17 +83,17 @@ Testing the installation
 
 Once the installation finishes, you will be able to execute any of our examples::
 
-    python examples/widgets/widgets/tetrix.py
+  python examples/widgets/widgets/tetrix.py
 
 Running Tests
 -------------
 
 Using the ``--build-tests`` option will enable us to run all the auto tests inside the project::
 
-    python testrunner.py test > testlog.txt
+  python testrunner.py test > testlog.txt
 
 .. note:: On Windows, don't forget to have qmake in your path
-   (``set PATH=E:\Path\to\Qt\6.0.0\msvc2019_64\bin;%PATH%``)
+   (:command:`set PATH=E:\\\Path\\\to\\\Qt\\\6.0.0\\\msvc2019_64\\\bin;%PATH%`)
 
 You can also run a specific test (for example ``qpainter_test``) by running::
 
@@ -98,7 +111,7 @@ The process of parsing Qt headers to generate the PySide API documentation can t
 minutes, this means that modifying a specific section of the rst files we currently have, might
 become a hard task.
 
-For this, you can install ``sphinx`` on a virtual environment, and execute the following command::
+For this, you can install :command:`sphinx` on a virtual environment, and execute the following command::
 
     python setup.py build_rst_docs
 
@@ -142,8 +155,8 @@ directory, and run::
 
     make apidoc
 
-.. note:: The ``apidoc`` make target builds offline documenation in QCH (Qt Creator Help) format
-   by default. You can switch to building for the online use with the ``--doc-build-online``
+.. note:: The :command:`apidoc` make target builds offline documenation in QCH (Qt Creator Help)
+   format by default. You can switch to building for the online use with the ``--doc-build-online``
    configure option.
 
 Finally, you will get a ``html`` directory containing all the generated documentation. The offline
@@ -159,7 +172,7 @@ a standalone application for viewing QCH files.
 To view the QCH using Qt Creator, following the instructions outlined in
 `Using Qt Creator Help Mode <https://doc.qt.io/qtcreator/creator-help.html>`_. If you chose to
 use Qt Assistant instead, use the following command to register the QCH file before launching
-Qt Assistant:
+Qt Assistant::
 
     assistant -register PySide.qch
 
@@ -189,10 +202,10 @@ A set of tools can be found under the ``tools/`` directory inside the ``pyside-s
 * ``debug_windows.py``: This script can be used to find out why PySide modules
   fail to load with various DLL errors like Missing DLL or Missing symbol in DLL.
 
-  You can think of it as a Windows version of ``ldd`` / ``LD_DEBUG``.
+  You can think of it as a Windows version of :command:`ldd` / ``LD_DEBUG``.
 
-  Underneath it uses the ``cdb.exe`` command line debugger, and the ``gflags.exe`` tool, both
-  installed with the latest Windows Kit.
+  Underneath, it uses the :command:`cdb.exe` command line debugger and the :command:`gflags.exe`
+  tool, which are installed with the latest Windows Kit.
 
   The aim is to help developers debug issues that they may encounter using the PySide imports on
   Windows. The user should then provide the generated log file.
@@ -210,7 +223,6 @@ A set of tools can be found under the ``tools/`` directory inside the ``pyside-s
 
 .. note:: The script relies on BeautifulSoup to parse the content and generate a list of the
    missing bindings.
-
 
 .. _repository: https://github.com/liyanage/macosx-shell-scripts/
 .. _`wiki page`: https://wiki.qt.io/Qt_for_Python_Missing_Bindings
