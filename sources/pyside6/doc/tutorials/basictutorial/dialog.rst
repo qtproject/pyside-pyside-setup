@@ -1,5 +1,5 @@
-Creating a Simple PySide6 Dialog Application
-*********************************************
+Creating a Dialog Application
+=============================
 
 This tutorial shows how to build a simple dialog with some
 basic widgets. The idea is to let users provide their name
@@ -43,7 +43,7 @@ just sets the title of the dialog window. In `main()`, you can see
 that we are creating a *Form object* and showing it to the world.
 
 Create the Widgets
-===================
+------------------
 
 We are going to create two widgets: a `QLineEdit` where users can
 enter their name, and a `QPushButton` that prints the contents of
@@ -59,7 +59,7 @@ It's obvious from the code that both widgets will show the corresponding
 texts.
 
 Create a layout to organize the Widgets
-========================================
+---------------------------------------
 
 Qt comes with layout-support that helps you organize the widgets
 in your application. In this case, let's use `QVBoxLayout` to lay out
@@ -68,18 +68,14 @@ after creating the widgets:
 ::
 
     # Create layout and add widgets
-    layout = QVBoxLayout()
+    layout = QVBoxLayout(self)
     layout.addWidget(self.edit)
     layout.addWidget(self.button)
-    # Set dialog layout
-    self.setLayout(layout)
 
-So, we create the layout, add the widgets with `addWidget()`,
-and finally we say that our **Form** will have our `QVBoxLayout`
-as its layout.
+So, we create the layout, add the widgets with `addWidget()`.
 
 Create the function to greet and connect the Button
-====================================================
+---------------------------------------------------
 
 Finally, we just have to add a function to our custom **Form**
 and *connect* our button to it. Our function will be a part of
@@ -106,7 +102,7 @@ Once executed, you can enter your name in the `QLineEdit` and watch
 the console for greetings.
 
 Complete code
-=============
+-------------
 
 Here is the complete code for this tutorial:
 ::

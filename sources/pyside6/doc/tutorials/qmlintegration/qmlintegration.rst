@@ -1,6 +1,5 @@
-########################
-QML Integration Tutorial
-########################
+Python-based context properties
+===============================
 
 This tutorial provides a quick walk-through of a python application that loads, and interacts with
 a QML file.  QML is a declarative language that lets you design UIs faster than a traditional
