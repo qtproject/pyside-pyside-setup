@@ -676,14 +676,7 @@ def detect_clang():
         source = 'CLANG_INSTALL_DIR'
         clang_dir = os.environ.get(source, None)
         if not clang_dir:
-            source = find_llvm_config()
-            try:
-                if source is not None:
-                    output = run_process_output([source, '--prefix'])
-                    if output:
-                        clang_dir = output[0]
-            except OSError:
-                pass
+            raise OSError("clang not found")
     if clang_dir:
         arch = '64' if sys.maxsize > 2 ** 31 - 1 else '32'
         clang_dir = clang_dir.replace('_ARCH_', arch)
