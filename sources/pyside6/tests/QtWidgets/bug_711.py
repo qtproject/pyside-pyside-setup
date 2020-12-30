@@ -37,16 +37,11 @@ init_test_paths(False)
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QToolBar, QApplication, QToolButton
 
-try:
-    xrange
-except NameError:
-    xrange = range # py3k
-
 class TestLabelPixmap(unittest.TestCase):
     def testReference(self):
         toolbar = QToolBar()
 
-        for i in xrange(20):
+        for i in range(20):
             toolbar.addAction(QAction("Action %d" % i, None))
 
         buttons = toolbar.findChildren(QToolButton, "")

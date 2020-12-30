@@ -1,3 +1,0 @@
-
-OLD_PYTHONPATH=$PYTHONPATH
-PYTHONPATH=`pwd`/util/module_wrapper:$PYTHONPATH
