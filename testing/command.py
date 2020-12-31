@@ -108,7 +108,7 @@ def test_project(project, args, blacklist, runs):
         index = idx + 1
         runner = TestRunner(builds.selected, project, index)
         print()
-        print("********* Start testing of %s *********" % project)
+        print(f"********* Start testing of {project} *********")
         print("Config: Using", " ".join(builds.classifiers))
         print()
         if os.path.exists(runner.logfile) and args.skip:
@@ -117,12 +117,11 @@ def test_project(project, args, blacklist, runs):
             if index > 1 and COIN_RERUN_FAILED_ONLY:
                 rerun = rerun_list
                 if not rerun:
-                    print("--- no re-runs found, stopping before test {} ---"
-                          .format(index))
+                    print(f"--- no re-runs found, stopping before test {index} ---")
                     break
             else:
                 rerun = None
-            runner.run("RUN {}:".format(idx + 1), rerun, 10 * 60)
+            runner.run(f"RUN {idx + 1}:", rerun, 10 * 60)
         results = TestParser(runner.logfile)
         r = 5 * [0]
         rerun_list = []
@@ -130,7 +129,7 @@ def test_project(project, args, blacklist, runs):
         fatal = False
         for item in results.iter_blacklist(blacklist):
             res = item.rich_result
-            sharp = "#" + str(item.sharp)
+            sharp = f"#{item.sharp}"
             mod_name = decorate(item.mod_name)
             print(f"RES {index}: Test {sharp:>4}: {res:<6} {mod_name}()")
             r[0] += 1 if res == "PASS" else 0
@@ -144,9 +143,8 @@ def test_project(project, args, blacklist, runs):
             if item.fatal:
                 fatal = item
         print()
-        print("Totals:", sum(r), "tests.",
-              "{} passed, {} failed, {} skipped, {} blacklisted, {} bpassed."
-              .format(*r))
+        print(f"Totals: {sum(r)} tests. "
+              f"{r[0]} passed, {r[1]} failed, {r[2]} skipped, {r[3]} blacklisted, {r[4]} bpassed.")
         print()
         print(f"********* Finished testing of {project} *********")
         print()
@@ -163,16 +161,17 @@ def main():
     start_time = timer()
     all_projects = "shiboken6 pyside6".split()
     tested_projects = "shiboken6 pyside6".split()
+    tested_projects_quoted = " ".join("'i'" for i in tested_projects)
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=dedent("""\
-        Run the tests for some projects, default = '{}'.
+        Run the tests for some projects, default = {tested_projects_quoted}.
 
-        Testing is now repeated up to {rep} times, and errors are
-        only reported if they occur {thr} or more times.
+        Testing is now repeated up to {COIN_TESTING} times, and errors are
+        only reported if they occur {COIN_THRESHOLD} or more times.
         The environment variable COIN_RERUN_FAILED_ONLY controls if errors
         are only repeated if there are errors. The default is "1".
-        """.format("' '".join(tested_projects), thr=COIN_THRESHOLD, rep=COIN_TESTING)))
+        """))
     subparsers = parser.add_subparsers(dest="subparser_name")
 
     # create the parser for the "test" command
@@ -181,7 +180,7 @@ def main():
     blacklist_default = os.path.join(script_dir, 'build_history', 'blacklist.txt')
     group.add_argument("--blacklist", "-b", type=argparse.FileType('r'),
                        default=blacklist_default,
-                       help='a Qt blacklist file (default: {})'.format(blacklist_default))
+                       help=f'a Qt blacklist file (default: {blacklist_default})')
     parser_test.add_argument("--skip", action='store_true',
                              help="skip the tests if they were run before")
     parser_test.add_argument("--environ", nargs='+',
@@ -191,8 +190,7 @@ def main():
     parser_test.add_argument("--projects", nargs='+', type=str,
                              default=tested_projects,
                              choices=all_projects,
-                             help="use '{}'' (default) or other projects"
-                             .format("' '".join(tested_projects)))
+                             help=f"use {tested_projects_quoted} (default) or other projects")
     parser_getcwd = subparsers.add_parser("getcwd")
     parser_getcwd.add_argument("filename", type=argparse.FileType('w'),
                                help="write the build dir name into a file")
@@ -242,15 +240,14 @@ def main():
 
     print(dedent("""\
         System:
-          Platform={platform}
-          Executable={executable}
-          Version={version_lf}
-          API version={api_version}
+          Platform={sys.__dict__["platform"]}
+          Executable={sys.__dict__["executable"]}
+          Version={sys.version.replace("\n", " ")}
+          API version={sys.__dict__["api_version"]}
 
-        Environment:""").format(version_lf=sys.version.replace("\n", " "),
-                                **sys.__dict__))
+        Environment:"""))
     for key, value in sorted(os.environ.items()):
-        print("  {}={}".format(key, value))
+        print(f"  {key}={value}")
     print()
 
     q = 5 * [0]
@@ -267,9 +264,8 @@ def main():
             q = list(map(lambda x, y: x + y, r, q))
 
     if len(args.projects) > 1:
-        print("All above projects:", sum(q), "tests.",
-              "{} passed, {} failed, {} skipped, {} blacklisted, {} bpassed."
-              .format(*q))
+        print(f"All above projects: {sum(q)} tests. "
+              f"{q[0]} passed, {q[1]} failed, {q[2]} skipped, {q[3]} blacklisted, {q[4]} bpassed.")
         print()
 
     tot_res = OrderedDict()
@@ -279,7 +275,7 @@ def main():
             runner = TestRunner(builds.selected, project, index)
             results = TestParser(runner.logfile)
             for item in results.iter_blacklist(bl):
-                key = project + ":" + item.mod_name
+                key = f"{project}:{item.mod_name}"
                 tot_res.setdefault(key, [])
                 tot_res[key].append(item.rich_result)
     tot_flaky = 0
@@ -312,8 +308,8 @@ def main():
             continue
         empty = False
         padding = 6 * runs
-        txt = " ".join(("{:<{width}}".format(piece, width=5) for piece in res))
-        txt = (txt + padding * " ")[:padding]
+        txt = " ".join((f"{piece:<5}" for piece in res))
+        txt = (f"{txt}{padding * ' '}")[:padding]
         testpad = 36
         if len(test) < testpad:
             test += (testpad - len(test)) * " "
@@ -325,7 +321,7 @@ def main():
     print("*" * 79)
     print()
     if runs > 1:
-        print("Total flaky tests: errors but not always = {}".format(tot_flaky))
+        print(f"Total flaky tests: errors but not always = {tot_flaky}")
         print()
     else:
         print("For info about flaky tests, we need to perform more than one run.")
@@ -342,8 +338,8 @@ def main():
     # Now create an error if the criterion is met:
     try:
         if fatal:
-            raise ValueError("FATAL format error:", fatal)
-        err_crit = "'FAIL! >= {}'".format(fail_crit)
+            raise ValueError(f"FATAL format error: {fatal}")
+        err_crit = f"'FAIL! >= {fail_crit}'"
         fail_count = 0
         for res in tot_res.values():
             if res.count("FAIL!") >= fail_crit:
@@ -353,9 +349,9 @@ def main():
         elif fail_count > 1:
             raise ValueError(f"{fail_count} failures were not blacklisted "
                              f"and met the criterion {err_crit}")
-        print("No test met the error criterion {}".format(err_crit))
+        print(f"No test met the error criterion {err_crit}")
     finally:
         print()
-        print("Total time of whole Python script = {:0.2f} sec".format(used_time))
+        print(f"Total time of whole Python script = {used_time:0.2f} sec")
         print()
 # eof

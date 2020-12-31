@@ -43,7 +43,7 @@ import re
 import subprocess
 import inspect
 
-from textwrap import dedent
+from textwrap import dedent, indent
 from subprocess import TimeoutExpired
 
 # Get the dir path to the utils module
@@ -66,9 +66,9 @@ class TestRunner(object):
         self.test_dir = os.path.join(built_path, project)
         log_dir = log_entry.log_dir
         if index is not None:
-            self.logfile = os.path.join(log_dir, project + ".{}.log".format(index))
+            self.logfile = os.path.join(log_dir, f"{project}.{index}.log")
         else:
-            self.logfile = os.path.join(log_dir, project + ".log")
+            self.logfile = os.path.join(log_dir, f"{project}.log")
         os.environ['CTEST_OUTPUT_ON_FAILURE'] = '1'
         self._setup_clang()
         self._setup()
@@ -82,7 +82,7 @@ class TestRunner(object):
             path = os.environ.get('PATH')
             if clang_bin_dir not in path:
                 os.environ['PATH'] = clang_bin_dir + os.pathsep + path
-                print("Adding %s as detected by %s to PATH" % (clang_bin_dir, clang_dir[1]))
+                print(f"Adding {clang_bin_dir} as detected by {clang_dir[1]} to PATH")
 
     def _find_ctest_in_file(self, file_name):
         """
@@ -99,14 +99,14 @@ class TestRunner(object):
                 # We have probably forgotten to build the tests.
                 # Give a nice error message with a shortened but exact path.
                 rel_path = os.path.relpath(file_name)
-                msg = dedent("""\n
-                    {line}
-                    **  ctest is not in '{}'.
+                msg = dedent(f"""\n
+                    {'*' * 79}
+                    **  ctest is not in '{rel_path}'.
                     *   Did you forget to build the tests with '--build-tests' in setup.py?
-                    """).format(rel_path, line=79 * "*")
+                    """)
                 raise RuntimeError(msg)
         # the ctest program is on the left to look_for
-        assert line, "Did not find {}".format(look_for)
+        assert line, f"Did not find {look_for}"
         ctest = re.search(r'(\S+|"([^"]+)")\s+' + look_for, line).groups()
         return ctest[1] or ctest[0]
 
@@ -126,8 +126,8 @@ class TestRunner(object):
             path = os.path.join(self.test_dir, candidate)
             if os.path.exists(path):
                 return self._find_ctest_in_file(path)
-        raise RuntimeError('Cannot find any of the build system files {}.'.format(
-                           ', '.join(candidate_files)))
+        raise RuntimeError("Cannot find any of the build system files "
+                           f"{', '.join(candidate_files)}.")
 
     def _setup(self):
         self.ctestCommand = self._find_ctest()
@@ -151,10 +151,10 @@ class TestRunner(object):
         # without a caret are interpreted as such which leads to weirdness.
         # Since we have all commands with explicit paths and don't use shell
         # commands, this should work fine.
-        print(dedent("""\
-            running {cmd}
-                 in {test_dir}
-            """).format(**self.__dict__))
+        print(dedent(f"""\
+            running {self.cmd}
+                 in {self.test_dir}
+            """))
         ctest_process = subprocess.Popen(self.cmd,
                                          cwd=self.test_dir,
                                          stdout=subprocess.PIPE,
@@ -196,11 +196,8 @@ class TestRunner(object):
                 if line.startswith(text_z):
                     labelled = True
 
-        tee_src = dedent("""\
-            import sys
-            {}
-            py_tee(sys.stdin, sys.stdout, '{label}')
-            """).format(dedent(inspect.getsource(py_tee)), label=label)
+        tee_src = dedent(inspect.getsource(py_tee))
+        tee_src = f"import sys\n{tee_src}\npy_tee(sys.stdin, sys.stdout, '{label}')"
         tee_cmd = (sys.executable, "-E", "-u", "-c", tee_src)
         tee_process = subprocess.Popen(tee_cmd,
                                        cwd=self.test_dir,
@@ -214,7 +211,7 @@ class TestRunner(object):
             ctest_process.kill()
             _ = ctest_process.communicate()
             # ctest lists to a temp file. Move it to the log
-            tmp_name = self.logfile + ".tmp"
+            tmp_name = f"{self.logfile}.tmp"
             if os.path.exists(tmp_name):
                 if os.path.exists(self.logfile):
                     os.unlink(self.logfile)

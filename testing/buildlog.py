@@ -86,10 +86,10 @@ class BuildLog(object):
                         build_dir = f_contents_split[0]
                         build_classifiers = ""
                 except IndexError:
-                    print(dedent("""
+                    print(dedent(f"""
                         Error: There was an issue finding the build dir and its
-                        characteristics, in the following considered file: '{}'
-                    """.format(fpath)))
+                        characteristics, in the following considered file: '{fpath}'
+                    """))
                     sys.exit(1)
 
                 if not os.path.exists(build_dir):
@@ -100,7 +100,7 @@ class BuildLog(object):
                         if os.path.exists(build_dir):
                             print("Note: build_dir was probably moved.")
                         else:
-                            print("Warning: missing build dir %s" % build_dir)
+                            print(f"Warning: missing build dir {build_dir}")
                             continue
             entry = LogEntry(log_dir, build_dir, build_classifiers)
             build_history.append(entry)
@@ -122,9 +122,8 @@ class BuildLog(object):
         if lst:
             def warn_problem(func, path, exc_info):
                 cls, ins, _ = exc_info
-                print("rmtree({}) warning: problem with {}:\n   {}: {}".format(
-                    func.__name__, path,
-                    cls.__name__, ins.args))
+                print(f"rmtree({func.__name__}) warning: problem with "
+                      f"{path}:\n   {cls.__name__}: {ins.args}")
 
             lst.sort()
             log_dir = lst[-1]

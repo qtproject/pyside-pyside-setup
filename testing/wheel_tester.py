@@ -79,23 +79,22 @@ log.set_verbosity(1)
 
 def find_executable(executable, command_line_value):
     value = command_line_value
-    option_str = '--{}'.format(executable)
+    option_str = f"--{executable}"
 
     if value:
-        log.info("{} option given: {}".format(option_str, value))
+        log.info(f"{option_str} option given: {value}")
         if not os.path.exists(value):
-            raise RuntimeError("No executable exists at: {}".format(value))
+            raise RuntimeError(f"No executable exists at: {value}")
     else:
-        log.info("No {} option given, trying to find {} in PATH.".format(option_str, executable))
+        log.info(f"No {option_str} option given, trying to find {executable} in PATH.")
         paths = find_glob_in_path(executable)
-        log.info("{} executables found in PATH: {}".format(executable, paths))
+        log.info(f"{executable} executables found in PATH: {paths}")
         if not paths:
-            raise RuntimeError(
-                "No {} option was specified and no {} was found "
-                "in PATH.".format(option_str, executable))
+            raise RuntimeError(f"No {option_str} option was specified and no {executable} was "
+                               "found in PATH.")
         else:
             value = paths[0]
-            log.info("Using {} found in PATH: {}".format(executable, value))
+            log.info(f"Using {executable} found in PATH: {value}")
     log.info("")
     return value
 
@@ -127,16 +126,16 @@ def clean_egg_info():
     # safe to do so.
     paths = find_files_using_glob(setup_script_dir, "*.egg-info")
     for p in paths:
-        log.info("Removing {}".format(p))
+        log.info(f"Removing {p}")
         rmtree(p)
 
 
 def install_wheel(wheel_path):
-    log.info("Installing wheel: {}".format(wheel_path))
+    log.info(f"Installing wheel: {wheel_path}")
     exit_code = run_process([sys.executable, "-m", "pip", "install", wheel_path])
     log.info("")
     if exit_code:
-        raise RuntimeError("Error while installing wheel {}".format(wheel_path))
+        raise RuntimeError(f"Error while installing wheel {wheel_path}")
 
 
 def try_install_wheels(wheels_dir, py_version):
@@ -145,16 +144,16 @@ def try_install_wheels(wheels_dir, py_version):
     all_wheels = find_files_using_glob(wheels_dir, all_wheels_pattern)
 
     if len(all_wheels) > 1:
-        log.info("Found the following wheels in {}: ".format(wheels_dir))
+        log.info(f"Found the following wheels in {wheels_dir}: ")
         for wheel in all_wheels:
             log.info(wheel)
     else:
-        log.info("No wheels found in {}".format(wheels_dir))
+        log.info(f"No wheels found in {wheels_dir}")
     log.info("")
 
     for p in package_prefix_names():
         log.info(f"Trying to install {p}:")
-        pattern = "{}-*cp{}*.whl".format(p, int(float(py_version)))
+        pattern = f"{p}-*cp{int(float(py_version))}*.whl"
         files = find_files_using_glob(wheels_dir, pattern)
         if files and len(files) == 1:
             wheel_path = files[0]
@@ -179,11 +178,11 @@ def generate_build_cmake():
     else:
         args.extend(["-G", "NMake Makefiles"])
     args.append("-DCMAKE_BUILD_TYPE=Release")
-    args.append("-Dpython_interpreter={}".format(sys.executable))
+    args.append(f"-Dpython_interpreter={sys.executable}")
 
     # Specify prefix path so find_package(Qt5) works.
     qmake_dir = os.path.abspath(os.path.join(os.path.dirname(QMAKE_PATH), ".."))
-    args.append("-DCMAKE_PREFIX_PATH={}".format(qmake_dir))
+    args.append(f"-DCMAKE_PREFIX_PATH={qmake_dir}")
 
     args.append("..")
 
@@ -194,7 +193,7 @@ def generate_build_cmake():
 
 
 def generate_build_qmake():
-    exit_code = run_process([QMAKE_PATH, "..", "python_interpreter={}".format(sys.executable)])
+    exit_code = run_process([QMAKE_PATH, "..", f"python_interpreter={sys.executable}"])
     if exit_code:
         raise RuntimeError("Failure while running qmake.")
     log.info("")
@@ -264,7 +263,7 @@ def run_make():
 
     exit_code = run_process(args)
     if exit_code:
-        raise RuntimeError("Failure while running {}.".format(executable))
+        raise RuntimeError(f"Failure while running {executable}.")
     log.info("")
 
 
@@ -279,7 +278,7 @@ def run_make_install():
 
     exit_code = run_process(args)
     if exit_code:
-        raise RuntimeError("Failed while running {} install.".format(executable))
+        raise RuntimeError(f"Failed while running {executable} install.")
     log.info("")
 
 
@@ -287,7 +286,7 @@ def run_compiled_script(binary_path):
     args = [binary_path]
     exit_code = run_process(args)
     if exit_code:
-        raise_error_pyinstaller("Failure while executing compiled script: {}".format(binary_path))
+        raise_error_pyinstaller(f"Failure while executing compiled script: {binary_path}")
     log.info("")
 
 
@@ -295,7 +294,7 @@ def execute_script(script_path, *extra):
     args = list(map(str, (sys.executable, script_path) + extra))
     exit_code = run_process(args)
     if exit_code:
-        raise RuntimeError("Failure while executing script: {}".format(script_path))
+        raise RuntimeError(f"Failure while executing script: {script_path}")
     log.info("")
 
 
@@ -305,10 +304,10 @@ def prepare_build_folder(src_path, build_folder_name):
     # The script can be called for Python 3 wheels, so
     # preparing a build folder should clean any previous existing build.
     if os.path.exists(build_path):
-        log.info("Removing {}".format(build_path))
+        log.info(f"Removing {build_path}")
         rmtree(build_path)
 
-    log.info("Creating {}".format(build_path))
+    log.info(f"Creating {build_path}")
     os.makedirs(build_path)
     os.chdir(build_path)
 
@@ -370,7 +369,7 @@ def try_build_examples():
 
 def run_wheel_tests(install_wheels):
     wheels_dir = get_wheels_dir()
-    py_version = "{v.major}.{v.minor}".format(v=sys.version_info)
+    py_version = f"{sys.version_info.major}.{sys.version_info.minor}"
 
     if install_wheels:
         log.info("Attempting to install wheels.\n")
