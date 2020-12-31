@@ -145,9 +145,9 @@ def _parse_tests(test_log):
         if idx + 1 != item.idx:
             # The numbering is disrupted. Provoke an error in this line!
             passed = False
-            code += ", but lines are disrupted!"
+            code = f"{code}, but lines are disrupted!"
             result[idx] = item._replace(passed=False,
-                                        code=item.code + ", but lines are disrupted!",
+                                        code=f"{item.code}, but lines are disrupted!",
                                         fatal=True)
             break
     return result
