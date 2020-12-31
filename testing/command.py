@@ -89,8 +89,9 @@ COIN_THRESHOLD = 3    # report error if >=
 COIN_TESTING = 5      # number of runs
 
 if (os.environ.get("COIN_RERUN_FAILED_ONLY", "1").lower() in
-    "0 f false n no".split()):
+        "0 f false n no".split()):
     COIN_RERUN_FAILED_ONLY = False
+
 
 def test_project(project, args, blacklist, runs):
     ret = []
@@ -102,6 +103,7 @@ def test_project(project, args, blacklist, runs):
         if os.path.exists(runner.logfile) and not args.skip:
             os.unlink(runner.logfile)
     # now start the real run
+    rerun_list = None
     for idx in range(runs):
         index = idx + 1
         runner = TestRunner(builds.selected, project, index)
@@ -133,7 +135,7 @@ def test_project(project, args, blacklist, runs):
             print(f"RES {index}: Test {sharp:>4}: {res:<6} {mod_name}()")
             r[0] += 1 if res == "PASS" else 0
             r[1] += 1 if res == "FAIL!" else 0
-            r[2] += 1 if res == "SKIPPED" else 0 # not yet supported
+            r[2] += 1 if res == "SKIPPED" else 0  # not yet supported
             r[3] += 1 if res == "BFAIL" else 0
             r[4] += 1 if res == "BPASS" else 0
             if res not in ("PASS", "BPASS"):
@@ -154,6 +156,7 @@ def test_project(project, args, blacklist, runs):
             print("Repetitions cancelled!")
             break
     return ret, fatal
+
 
 def main():
     # create the top-level command parser
@@ -180,22 +183,21 @@ def main():
                        default=blacklist_default,
                        help='a Qt blacklist file (default: {})'.format(blacklist_default))
     parser_test.add_argument("--skip", action='store_true',
-                        help="skip the tests if they were run before")
+                             help="skip the tests if they were run before")
     parser_test.add_argument("--environ", nargs='+',
-                        help="use name=value ... to set environment variables")
+                             help="use name=value ... to set environment variables")
     parser_test.add_argument("--buildno", default=-1, type=int,
-                        help="use build number n (0-based), latest = -1 (default)")
+                             help="use build number n (0-based), latest = -1 (default)")
     parser_test.add_argument("--projects", nargs='+', type=str,
-                        default=tested_projects,
-                        choices=all_projects,
-                        help="use '{}'' (default) or other projects"
-                        .format("' '".join(tested_projects)))
+                             default=tested_projects,
+                             choices=all_projects,
+                             help="use '{}'' (default) or other projects"
+                             .format("' '".join(tested_projects)))
     parser_getcwd = subparsers.add_parser("getcwd")
     parser_getcwd.add_argument("filename", type=argparse.FileType('w'),
-                        help="write the build dir name into a file")
+                               help="write the build dir name into a file")
     parser_getcwd.add_argument("--buildno", default=-1, type=int,
-                        help="use build number n (0-based), latest = -1 (default)")
-    parser_list = subparsers.add_parser("list")
+                               help="use build number n (0-based), latest = -1 (default)")
     args = parser.parse_args()
 
     if hasattr(args, "buildno"):
@@ -210,7 +212,7 @@ def main():
         print(builds.selected.build_dir, "written to file", args.filename.name)
         sys.exit(0)
     elif args.subparser_name == "test":
-        pass # we do it afterwards
+        pass  # we do it afterwards
     elif args.subparser_name == "list":
         rp = os.path.relpath
         print()
@@ -245,8 +247,8 @@ def main():
           Version={version_lf}
           API version={api_version}
 
-        Environment:""")
-        .format(version_lf=sys.version.replace("\n", " "), **sys.__dict__))
+        Environment:""").format(version_lf=sys.version.replace("\n", " "),
+                                **sys.__dict__))
     for key, value in sorted(os.environ.items()):
         print("  {}={}".format(key, value))
     print()
@@ -262,7 +264,7 @@ def main():
         if fatal:
             runs = 1
         for idx, r in enumerate(res):
-            q = list(map(lambda x, y: x+y, r, q))
+            q = list(map(lambda x, y: x + y, r, q))
 
     if len(args.projects) > 1:
         print("All above projects:", sum(q), "tests.",
@@ -332,7 +334,7 @@ def main():
     # nag us about unsupported projects
     ap, tp = set(all_projects), set(tested_projects)
     if ap != tp:
-        print("+++++ Note: please support", " ".join(ap-tp), "+++++")
+        print("+++++ Note: please support", " ".join(ap - tp), "+++++")
         print()
 
     stop_time = timer()

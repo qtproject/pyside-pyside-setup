@@ -44,26 +44,18 @@ Some tools that do not fit elsewhere.
 """
 
 import os
-import sys
-from collections import namedtuple
-
-from subprocess import PIPE
-from subprocess import TimeoutExpired
-from io import StringIO
 
 
 script_dir = os.path.dirname(os.path.dirname(__file__))
+
 
 def decorate(mod_name):
     """
     Write the combination of "modulename_funcname"
     in the Qt-like form "modulename::funcname"
     """
-    if "_" not in mod_name:
+    if "_" not in mod_name or "::" in mod_name:
         return mod_name
-    if "::" in mod_name:
-        return mod_name
-    name, rest = mod_name.split("_", 1)
-    return name + "::" + rest
-
-#eof
+    else:
+        name, rest = mod_name.split("_", 1)
+        return f"{name}::{rest}"

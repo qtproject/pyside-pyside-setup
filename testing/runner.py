@@ -43,11 +43,8 @@ import re
 import subprocess
 import inspect
 
-from collections import namedtuple
 from textwrap import dedent
-
-from .buildlog import builds
-from .helper import decorate, TimeoutExpired
+from subprocess import TimeoutExpired
 
 # Get the dir path to the utils module
 try:
@@ -60,6 +57,7 @@ build_scripts_dir = os.path.abspath(os.path.join(this_dir, '../build_scripts'))
 
 sys.path.append(build_scripts_dir)
 from utils import detect_clang
+
 
 class TestRunner(object):
     def __init__(self, log_entry, project, index):
@@ -82,7 +80,7 @@ class TestRunner(object):
         if clang_dir[0]:
             clang_bin_dir = os.path.join(clang_dir[0], 'bin')
             path = os.environ.get('PATH')
-            if not clang_bin_dir in path:
+            if clang_bin_dir not in path:
                 os.environ['PATH'] = clang_bin_dir + os.pathsep + path
                 print("Adding %s as detected by %s to PATH" % (clang_bin_dir, clang_dir[1]))
 
@@ -161,6 +159,7 @@ class TestRunner(object):
                                          cwd=self.test_dir,
                                          stdout=subprocess.PIPE,
                                          stderr=subprocess.STDOUT)
+
         def py_tee(input, output, label):
             '''
             A simple (incomplete) tee command in Python
@@ -208,12 +207,12 @@ class TestRunner(object):
                                        stdin=ctest_process.stdout)
         try:
             comm = tee_process.communicate
-            output = comm(timeout=timeout)[0]
+            _ = comm(timeout=timeout)[0]
         except (TimeoutExpired, KeyboardInterrupt):
             print()
             print("aborted, partial result")
             ctest_process.kill()
-            outs, errs = ctest_process.communicate()
+            _ = ctest_process.communicate()
             # ctest lists to a temp file. Move it to the log
             tmp_name = self.logfile + ".tmp"
             if os.path.exists(tmp_name):
@@ -237,4 +236,3 @@ class TestRunner(object):
             words = "^(" + "|".join(rerun) + ")$"
             cmd += ("--tests-regex", words)
         self._run(cmd, label, timeout)
-# eof

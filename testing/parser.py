@@ -40,7 +40,7 @@
 import os
 import re
 from collections import namedtuple
-from .helper import StringIO
+from io import StringIO
 
 """
 testing/parser.py
@@ -105,6 +105,7 @@ assert len(re.match(_TEST_PAT, _EXAMPLE.splitlines()[7], re.VERBOSE).groups()) =
 TestResult = namedtuple("TestResult", "idx n sharp mod_name passed "
                                       "code time fatal rich_result".split())
 
+
 def _parse_tests(test_log):
     """
     Create a TestResult object for every entry.
@@ -124,7 +125,7 @@ def _parse_tests(test_log):
         match = re.match(pat, line, re.VERBOSE)
         if match and line.split()[-1] != "sec":
             # don't change the number of lines
-            lines[idx : idx + 2] = [line.rstrip() + lines[idx + 1], ""]
+            lines[idx:idx + 2] = [line.rstrip() + lines[idx + 1], ""]
 
     pat = _TEST_PAT
     for line in lines:

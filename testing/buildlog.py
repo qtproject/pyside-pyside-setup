@@ -121,7 +121,7 @@ class BuildLog(object):
             lst.append(log_dir)
         if lst:
             def warn_problem(func, path, exc_info):
-                cls, ins, tb = exc_info
+                cls, ins, _ = exc_info
                 print("rmtree({}) warning: problem with {}:\n   {}: {}".format(
                     func.__name__, path,
                     cls.__name__, ins.args))
@@ -137,7 +137,7 @@ class BuildLog(object):
                     shutil.rmtree(log_dir, onerror=warn_problem)
 
     def set_buildno(self, buildno):
-        self.history[buildno] # test
+        self.history[buildno]  # test
         self._buildno = buildno
 
     @property
@@ -173,5 +173,6 @@ class BuildLog(object):
                 if key not in res:
                     res.append(key)
         return res
+
 
 builds = BuildLog()

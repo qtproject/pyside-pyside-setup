@@ -53,7 +53,8 @@ directory (e.g. setup.py bdist_wheel was already executed).
 """
 
 from argparse import ArgumentParser, RawTextHelpFormatter
-import os, sys
+import os
+import sys
 
 try:
     this_file = __file__
@@ -202,7 +203,7 @@ def raise_error_pyinstaller(msg):
     print(f"PYINST: {msg}")
     print(f"PYINST:   sys.version         = {sys.version.splitlines()[0]}")
     print(f"PYINST:   platform.platform() = {platform.platform()}")
-    print(f"PYINST: See the error message above.")
+    print("PYINST: See the error message above.")
     print()
     for line in run_process_output([sys.executable, "-m", "pip", "list"]):
         print(f"PyInstaller pip list:   {line}")
@@ -211,13 +212,13 @@ def raise_error_pyinstaller(msg):
 
 
 def compile_using_pyinstaller():
-    src_path = os.path.join("..", "hello.py")
+    _ = os.path.join("..", "hello.py")
     spec_path = os.path.join("..", "hello_app.spec")
     exit_code = run_process([sys.executable, "-m", "PyInstaller", spec_path])
-        # to create the spec file, this setting was used:
-        #"--name=hello_app", "--console", "--log-level=DEBUG", src_path])
-        # By using a spec file, we avoid all the probing that might disturb certain
-        # platforms and also save some analysis time.
+    # to create the spec file, this setting was used:
+    # "--name=hello_app", "--console", "--log-level=DEBUG", src_path])
+    # By using a spec file, we avoid all the probing that might disturb certain
+    # platforms and also save some analysis time.
     if exit_code:
         # 2019-04-28 Raising on error is again enabled
         raise_error_pyinstaller("Failure while compiling script using PyInstaller.")
@@ -296,7 +297,7 @@ def try_build_examples():
 
     compile_using_pyinstaller()
     run_compiled_script(os.path.join(src_path,
-                            "pyinstaller", "dist", "hello_app", "hello_app"))
+                        "pyinstaller", "dist", "hello_app", "hello_app"))
 
     log.info("Attempting to build and run samplebinding using cmake.")
     src_path = os.path.join(examples_dir, "samplebinding")
@@ -335,7 +336,7 @@ def run_wheel_tests(install_wheels):
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="wheel_tester",
-                           formatter_class=RawTextHelpFormatter)
+                            formatter_class=RawTextHelpFormatter)
     parser.add_argument('--no-install-wheels', '-n', action='store_true',
                         help='Do not install wheels'
                              ' (for developer builds with virtualenv)')

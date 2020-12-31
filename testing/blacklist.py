@@ -45,13 +45,14 @@ Take a blacklist file and build classifiers for all tests.
 find_matching_line() adds info using classifiers.
 """
 
-from .helper import decorate, StringIO
+from io import StringIO
+from .helper import decorate
 from .buildlog import builds
 
 
 class BlackList(object):
     def __init__(self, blname):
-        if blname == None:
+        if not blname:
             f = StringIO()
             self.raw_data = []
         else:
@@ -62,7 +63,7 @@ class BlackList(object):
 
         def filtered_line(line):
             if '#' in line:
-                line = line[0 : line.index('#')]
+                line = line[line.index('#')]
             return line.split()
 
         # now put every bracketed line in a test
@@ -127,4 +128,4 @@ class BlackList(object):
                 # found a match!
                 return line
         else:
-            return None # nothing found
+            return None  # nothing found
