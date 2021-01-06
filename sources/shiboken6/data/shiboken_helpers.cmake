@@ -316,29 +316,22 @@ macro(shiboken_compute_python_libraries)
         "SHIBOKEN_COMPUTE_LIBS" "shiboken_compute_python_libraries"
         "IS_CALLED_FROM_EXPORT" "" "" ${ARGN})
 
-    if (NOT SHIBOKEN_PYTHON_LIBRARIES)
-        set(SHIBOKEN_PYTHON_LIBRARIES "")
-    endif()
-
-    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-        if(WIN32 AND NOT SHIBOKEN_PYTHON_LIBRARIES)
-            set(SHIBOKEN_PYTHON_LIBRARIES ${PYTHON_DEBUG_LIBRARIES})
-        endif()
-    endif()
-
-    if(CMAKE_BUILD_TYPE STREQUAL "Release")
-        if(WIN32 AND NOT SHIBOKEN_PYTHON_LIBRARIES)
-            set(SHIBOKEN_PYTHON_LIBRARIES ${PYTHON_LIBRARIES})
-        endif()
-    endif()
-
-    # If the resulting variable
-    # contains a "debug;X;optimized;Y" list like described in shiboken_check_if_limited_api,
-    # make sure to pick just one, so that the final generator expressions are valid.
-    shiboken_get_library_for_current_config("${SHIBOKEN_PYTHON_LIBRARIES}" "${CMAKE_BUILD_TYPE}" "SHIBOKEN_PYTHON_LIBRARIES")
-
     if(APPLE)
         set(SHIBOKEN_PYTHON_LIBRARIES "-undefined dynamic_lookup")
+    else()
+        if(NOT SHIBOKEN_PYTHON_LIBRARIES)
+            if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+                set(SHIBOKEN_PYTHON_LIBRARIES ${PYTHON_DEBUG_LIBRARIES})
+            else()
+                set(SHIBOKEN_PYTHON_LIBRARIES ${PYTHON_LIBRARIES})
+            endif()
+        endif()
+        # If the resulting variable contains a "debug;X;optimized;Y" list like
+        # described in shiboken_check_if_limited_api, make sure to pick just
+        # one, so that the final generator expressions are valid.
+        shiboken_get_library_for_current_config("${SHIBOKEN_PYTHON_LIBRARIES}"
+                                                "${CMAKE_BUILD_TYPE}"
+                                                "SHIBOKEN_PYTHON_LIBRARIES")
     endif()
 
     # If the installed shiboken config file is used,
