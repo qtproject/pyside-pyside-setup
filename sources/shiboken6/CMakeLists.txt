@@ -32,10 +32,6 @@ else()
     shiboken_find_required_python()
 endif()
 
-if (NOT PYTHON_ARCH)
-    get_python_arch()
-endif()
-
 setup_clang()
 
 set(SHIBOKEN_VERSION_FILE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/shiboken_version.py")

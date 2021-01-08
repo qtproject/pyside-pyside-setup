@@ -687,9 +687,6 @@ def detect_clang():
         clang_dir = os.environ.get(source, None)
         if not clang_dir:
             raise OSError("clang not found")
-    if clang_dir:
-        arch = '64' if sys.maxsize > 2 ** 31 - 1 else '32'
-        clang_dir = clang_dir.replace('_ARCH_', arch)
     return (clang_dir, source)
 
 

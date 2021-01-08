@@ -167,17 +167,6 @@ macro(get_python_extension_suffix)
   message(STATUS "PYTHON_EXTENSION_SUFFIX: " ${PYTHON_EXTENSION_SUFFIX})
 endmacro()
 
-macro(get_python_arch)
-  execute_process(
-    COMMAND ${PYTHON_EXECUTABLE} -c "if True:
-       import sys
-       print('64' if sys.maxsize > 2**31-1 else '32')
-       "
-    OUTPUT_VARIABLE PYTHON_ARCH
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-  message(STATUS "PYTHON_ARCH:             " ${PYTHON_ARCH})
-endmacro()
-
 macro(shiboken_parse_all_arguments prefix type flags options multiopts)
     cmake_parse_arguments(${prefix} "${flags}" "${options}" "${multiopts}" ${ARGN})
     if(DEFINED ${prefix}_UNPARSED_ARGUMENTS)
