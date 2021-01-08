@@ -109,6 +109,7 @@ DEFAULT_CONFIG_FILE = f"Modules={DEFAULT_MODULES}\n"
 
 build_mode = BuildMode.NONE
 opt_dry_run = False
+opt_verbose = False
 
 
 def which(needle):
@@ -302,9 +303,12 @@ def build(target):
     acceleration = read_acceleration_config()
     if not IS_WINDOWS and acceleration == Acceleration.INCREDIBUILD:
         arguments.append(INCREDIBUILD_CONSOLE)
-        arguments.append('--avoid')  # caching, v0.96.74
+        arguments.appendh('--avoid')  # caching, v0.96.74
     arguments.extend([read_config_python_binary(), 'setup.py', target])
-    arguments.extend(read_config_build_arguments())
+    build_arguments = read_config_build_arguments()
+    if opt_verbose and '--quiet' in build_arguments:
+        build_arguments.remove('--quiet')
+    arguments.extend(build_arguments)
     generator = read_config(GENERATOR_KEY)
     if generator == 'Ninja':
         arguments.extend(['--make-spec', 'ninja'])
@@ -363,6 +367,8 @@ def create_argument_parser(desc):
     parser.add_argument('--test', '-t', action='store_true',
                         help='Run tests')
     parser.add_argument('--version', '-v', action='version', version='%(prog)s 1.0')
+    parser.add_argument('--verbose', '-V', action='store_true',
+                        help='Turn off --quiet specified in build arguments')
     return parser
 
 
@@ -376,6 +382,7 @@ if __name__ == '__main__':
     argument_parser = create_argument_parser(DESC.replace('%CONFIGFILE%', config_file))
     options = argument_parser.parse_args()
     opt_dry_run = options.dry_run
+    opt_verbose = options.verbose
 
     if options.edit:
         sys.exit(edit_config_file())
