@@ -60,21 +60,27 @@
 class BINDINGS_API WigglyWidget : public QWidget
 {
     Q_OBJECT
+    Q_PROPERTY(bool running READ isRunning WRITE setRunning)
+    Q_PROPERTY(QString text READ text WRITE setText)
 
 public:
     WigglyWidget(QWidget *parent = nullptr);
 
+    QString text() const;
+    bool isRunning() const;
+
 public slots:
-    void setText(const QString &newText) { text = newText; }
+    void setText(const QString &newText);
+    void setRunning(bool r);
 
 protected:
     void paintEvent(QPaintEvent *event) override;
     void timerEvent(QTimerEvent *event) override;
 
 private:
-    QBasicTimer timer;
-    QString text;
-    int step;
+    QBasicTimer m_timer;
+    QString m_text;
+    int m_step = 0;
 };
 //! [0]
 
