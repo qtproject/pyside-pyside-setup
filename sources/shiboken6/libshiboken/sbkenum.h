@@ -46,6 +46,9 @@
 extern "C"
 {
 
+/// exposed for the signature module
+LIBSHIBOKEN_API void init_enum();
+
 extern LIBSHIBOKEN_API PyTypeObject *SbkEnumType_TypeF(void);
 struct SbkObjectType;
 struct SbkConverter;

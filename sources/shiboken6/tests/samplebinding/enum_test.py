@@ -3,7 +3,7 @@
 #
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -140,6 +140,19 @@ class EnumTest(unittest.TestCase):
         '''Option enumArgumentWithDefaultValue(Option opt = UnixTime);'''
         self.assertEqual(SampleNamespace.enumArgumentWithDefaultValue(), SampleNamespace.UnixTime)
         self.assertEqual(SampleNamespace.enumArgumentWithDefaultValue(SampleNamespace.RandomNumber), SampleNamespace.RandomNumber)
+
+    def testSignature(self):
+        enum = SampleNamespace.Option(1)
+        types = type(enum).mro()
+        klass = types[0]
+        base = types[1]
+        # The class has an empty signature.
+        self.assertEqual(klass.__signature__, None)
+        # The base class must be Enum
+        self.assertNotEqual(base.__signature__, None)
+        # It contains an int annotation.
+        param = base.__signature__.parameters["itemValue"]
+        self.assertEqual(param.annotation, int)
 
 
 class MyEvent(Event):
