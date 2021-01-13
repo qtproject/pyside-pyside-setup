@@ -48,6 +48,7 @@
 #include "sbkstring.h"
 #include "sbkstaticstrings.h"
 #include "sbkstaticstrings_p.h"
+#include "sbkenum.h"
 
 #include "signature_p.h"
 
@@ -289,6 +290,8 @@ void init_module_2(void)
         // Therefore we set init_done prior to init_phase_2().
         init_done = 1;
         init_phase_2(pyside_globals, signature_methods);
+        // Enum must be initialized when signatures exist, not earlier.
+        init_enum();
     }
 }
 
