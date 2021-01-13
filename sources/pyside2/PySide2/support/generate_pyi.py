@@ -131,6 +131,7 @@ class Formatter(Writer):
         self.optional_replacer = optional_replacer
         # self.level is maintained by enum_sig.py
         # self.after_enum() is a one-shot set by enum_sig.py .
+        # self.is_method() is true for non-plain functions.
 
     @contextmanager
     def module(self, mod_name):
@@ -187,7 +188,7 @@ class Formatter(Writer):
         yield key
 
     def _function(self, func_name, signature, spaces):
-        if "self" not in tuple(signature.parameters.keys()):
+        if self.is_method() and "self" not in tuple(signature.parameters.keys()):
             self.print('{spaces}@staticmethod'.format(**locals()))
         signature = self.optional_replacer(signature)
         self.print('{spaces}def {func_name}{signature}: ...'.format(**locals()))

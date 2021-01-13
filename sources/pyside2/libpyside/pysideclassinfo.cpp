@@ -179,7 +179,7 @@ void classInfoFree(void *self)
 namespace PySide { namespace ClassInfo {
 
 static const char *ClassInfo_SignatureStrings[] = {
-    "PySide2.QtCore.ClassInfo(**info:typing.Dict[str,str])",
+    "PySide2.QtCore.ClassInfo(self,**info:typing.Dict[str,str])",
     nullptr}; // Sentinel
 
 void init(PyObject *module)

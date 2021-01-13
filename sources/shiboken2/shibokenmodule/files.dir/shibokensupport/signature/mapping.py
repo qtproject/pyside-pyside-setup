@@ -361,6 +361,8 @@ def init_Shiboken():
     })
     return locals()
 
+# side effect of different shiboken namings
+init_shiboken2 = init_shiboken2_shiboken2 = init_Shiboken
 
 def init_minimal():
     type_map.update({

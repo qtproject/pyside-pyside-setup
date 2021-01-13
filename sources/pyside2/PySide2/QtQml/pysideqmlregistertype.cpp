@@ -470,13 +470,13 @@ PyTypeObject *QtQml_VolatileBoolTypeF(void)
 }
 
 static const char *PropertyList_SignatureStrings[] = {
-    "PySide2.QtQml.ListProperty(type:type,append:typing.Callable,"
+    "PySide2.QtQml.ListProperty(self,type:type,append:typing.Callable,"
         "at:typing.Callable=None,clear:typing.Callable=None,count:typing.Callable=None)",
     nullptr}; // Sentinel
 
 static const char *VolatileBool_SignatureStrings[] = {
-    "PySide2.QtQml.VolatileBool.get()->bool",
-    "PySide2.QtQml.VolatileBool.set(a:object)",
+    "PySide2.QtQml.VolatileBool.get(self)->bool",
+    "PySide2.QtQml.VolatileBool.set(self,a:object)",
     nullptr}; // Sentinel
 
 void PySide::initQmlSupport(PyObject *module)

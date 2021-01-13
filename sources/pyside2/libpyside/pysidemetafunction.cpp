@@ -102,7 +102,7 @@ PyObject *functionCall(PyObject *self, PyObject *args, PyObject * /* kw */)
 namespace PySide { namespace MetaFunction {
 
 static const char *MetaFunction_SignatureStrings[] = {
-    "PySide2.QtCore.MetaFunction.__call__(*args:typing.Any)->typing.Any",
+    "PySide2.QtCore.MetaFunction.__call__(self,*args:typing.Any)->typing.Any",
     nullptr}; // Sentinel
 
 void init(PyObject *module)
