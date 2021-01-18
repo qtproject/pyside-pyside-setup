@@ -268,11 +268,22 @@ def read_config_modules_argument():
 
 def read_config_python_binary():
     binary = read_config(PYTHON_KEY)
-    if binary:
-        return binary
-    # Use 'python3' unless virtualenv is set
-    use_py3 = (not os.environ.get('VIRTUAL_ENV') and which('python3'))
-    return 'python3' if use_py3 else 'python'
+    virtual_env = os.environ.get('VIRTUAL_ENV')
+    if not binary:
+        # Use 'python3' unless virtualenv is set
+        use_py3 = not virtual_env and which('python3')
+        binary = 'python3' if use_py3 else 'python'
+    if not os.path.isabs(binary):
+        abs_path = which(binary)
+        if abs_path:
+            binary = abs_path
+        else:
+            warnings.warn(f'Unable to find "{binary}"', RuntimeWarning)
+    if virtual_env:
+        if not binary.startswith(virtual_env):
+            w = f'Python "{binary}" is not under VIRTUAL_ENV "{virtual_env}"'
+            warnings.warn(w, RuntimeWarning)
+    return binary
 
 
 def get_config_file(base_name):
