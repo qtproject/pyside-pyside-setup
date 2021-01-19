@@ -1,7 +1,7 @@
 
 #############################################################################
 ##
-## Copyright (C) 2017 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -45,7 +45,8 @@ import os
 import sys
 from PySide6.QtCore import QProcess
 from PySide6.QtWidgets import QApplication, QMainWindow
-from PySide6.QtCharts import QtCharts
+from PySide6.QtCharts import QChart, QChartView, QPieSeries
+
 
 def runProcess(command, arguments):
     process = QProcess()
@@ -103,22 +104,22 @@ class MainWindow(QMainWindow):
         if len(memoryUsage) > 5:
             memoryUsage = memoryUsage[0:4]
 
-        self.series = QtCharts.QPieSeries()
+        self.series = QPieSeries()
         for item in memoryUsage:
             self.series.append(item[0], item[1])
 
         slice = self.series.slices()[0]
         slice.setExploded()
         slice.setLabelVisible()
-        self.chart = QtCharts.QChart()
+        self.chart = QChart()
         self.chart.addSeries(self.series)
-        self.chartView = QtCharts.QChartView(self.chart)
+        self.chartView = QChartView(self.chart)
         self.setCentralWidget(self.chartView)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     mainWin = MainWindow()
-    availableGeometry = app.desktop().availableGeometry(mainWin)
+    availableGeometry = mainWin.screen().availableGeometry()
     size = availableGeometry.height() * 3 / 4
     mainWin.resize(size, size)
     mainWin.show()

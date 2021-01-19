@@ -1,7 +1,7 @@
 
 #############################################################################
 ##
-## Copyright (C) 2018 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -42,7 +42,7 @@
 """PySide6 port of the charts/audio example from Qt v5.x"""
 
 import sys
-from PySide6.QtCharts import QtCharts
+from PySide6.QtCharts import QChart, QChartView, QLineSeries, QValueAxis
 from PySide6.QtCore import QPointF
 from PySide6.QtMultimedia import (QAudioDeviceInfo, QAudioFormat,
         QAudioInput)
@@ -55,14 +55,14 @@ class MainWindow(QMainWindow):
     def __init__(self, device):
         super(MainWindow, self).__init__()
 
-        self.series = QtCharts.QLineSeries()
-        self.chart = QtCharts.QChart()
+        self.series = QLineSeries()
+        self.chart = QChart()
         self.chart.addSeries(self.series)
-        self.axisX = QtCharts.QValueAxis()
+        self.axisX = QValueAxis()
         self.axisX.setRange(0, sampleCount)
         self.axisX.setLabelFormat("%g")
         self.axisX.setTitleText("Samples")
-        self.axisY = QtCharts.QValueAxis()
+        self.axisY = QValueAxis()
         self.axisY.setRange(-1, 1)
         self.axisY.setTitleText("Audio level")
         self.chart.setAxisX(self.axisX, self.series)
@@ -82,7 +82,7 @@ class MainWindow(QMainWindow):
         self.ioDevice = self.audioInput.start()
         self.ioDevice.readyRead.connect(self._readyRead)
 
-        self.chartView = QtCharts.QChartView(self.chart)
+        self.chartView = QChartView(self.chart)
         self.setCentralWidget(self.chartView)
 
         self.buffer = [QPointF(x, 0) for x in range(sampleCount)]

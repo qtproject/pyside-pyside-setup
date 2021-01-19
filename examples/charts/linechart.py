@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2020 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -44,14 +44,14 @@ import sys
 from PySide6.QtCore import QPointF
 from PySide6.QtGui import QPainter
 from PySide6.QtWidgets import QMainWindow, QApplication
-from PySide6.QtCharts import QtCharts
+from PySide6.QtCharts import QChart, QChartView, QLineSeries
 
 
 class TestChart(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
 
-        self.series = QtCharts.QLineSeries()
+        self.series = QLineSeries()
         self.series.append(0, 6)
         self.series.append(2, 4)
         self.series.append(3, 8)
@@ -63,13 +63,13 @@ class TestChart(QMainWindow):
         self.series.append(QPointF(18, 3))
         self.series.append(QPointF(20, 2))
 
-        self.chart = QtCharts.QChart()
+        self.chart = QChart()
         self.chart.legend().hide()
         self.chart.addSeries(self.series)
         self.chart.createDefaultAxes()
         self.chart.setTitle("Simple line chart example")
 
-        self.chartView = QtCharts.QChartView(self.chart)
+        self.chartView = QChartView(self.chart)
         self.chartView.setRenderHint(QPainter.Antialiasing)
 
         self.setCentralWidget(self.chartView)

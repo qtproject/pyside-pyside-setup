@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2020 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -44,35 +44,36 @@ import sys
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPainter
 from PySide6.QtWidgets import QMainWindow, QApplication
-from PySide6.QtCharts import QtCharts
+from PySide6.QtCharts import (QBarCategoryAxis, QBarSet, QChart, QChartView,
+                              QStackedBarSeries, QValueAxis)
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
-        low = QtCharts.QBarSet("Min")
-        high = QtCharts.QBarSet("Max")
+        low = QBarSet("Min")
+        high = QBarSet("Max")
         low.append([-52, -50, -45.3, -37.0, -25.6, -8.0,
                     -6.0, -11.8, -19.7, -32.8, -43.0, -48.0])
         high.append([11.9, 12.8, 18.5, 26.5, 32.0, 34.8,
                      38.2, 34.8, 29.8, 20.4, 15.1, 11.8])
 
-        series = QtCharts.QStackedBarSeries()
+        series = QStackedBarSeries()
         series.append(low)
         series.append(high)
 
-        chart = QtCharts.QChart()
+        chart = QChart()
         chart.addSeries(series)
         chart.setTitle("Temperature records in celcius")
-        chart.setAnimationOptions(QtCharts.QChart.SeriesAnimations)
+        chart.setAnimationOptions(QChart.SeriesAnimations)
 
         categories = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
                       "Aug", "Sep", "Oct", "Nov", "Dec"]
-        axisX = QtCharts.QBarCategoryAxis()
+        axisX = QBarCategoryAxis()
         axisX.append(categories)
         axisX.setTitleText("Month")
         chart.addAxis(axisX, Qt.AlignBottom)
-        axisY = QtCharts.QValueAxis()
+        axisY = QValueAxis()
         axisY.setRange(-52, 52)
         axisY.setTitleText("Temperature [&deg;C]")
         chart.addAxis(axisY, Qt.AlignLeft)
@@ -82,7 +83,7 @@ class MainWindow(QMainWindow):
         chart.legend().setVisible(True)
         chart.legend().setAlignment(Qt.AlignBottom)
 
-        chart_view = QtCharts.QChartView(chart)
+        chart_view = QChartView(chart)
         chart_view.setRenderHint(QPainter.Antialiasing)
 
         self.setCentralWidget(chart_view)

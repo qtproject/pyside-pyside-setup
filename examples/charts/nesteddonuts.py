@@ -46,7 +46,8 @@ import sys
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QPainter
 from PySide6.QtWidgets import QApplication, QGridLayout, QWidget
-from PySide6.QtCharts import QtCharts
+from PySide6.QtCharts import QChart, QChartView, QPieSeries, QPieSlice
+
 
 from random import randrange
 from functools import partial
@@ -56,12 +57,12 @@ class Widget(QWidget):
         QWidget.__init__(self)
         self.setMinimumSize(800, 600)
         self.donuts = []
-        self.chart_view = QtCharts.QChartView()
+        self.chart_view = QChartView()
         self.chart_view.setRenderHint(QPainter.Antialiasing)
         self.chart = self.chart_view.chart()
         self.chart.legend().setVisible(False)
         self.chart.setTitle("Nested donuts demo")
-        self.chart.setAnimationOptions(QtCharts.QChart.AllAnimations)
+        self.chart.setAnimationOptions(QChart.AllAnimations)
 
         self.min_size = 0.1
         self.max_size = 0.9
@@ -80,15 +81,15 @@ class Widget(QWidget):
 
     def setup_donuts(self):
         for i in range(self.donut_count):
-            donut = QtCharts.QPieSeries()
+            donut = QPieSeries()
             slccount = randrange(3, 6)
             for j in range(slccount):
                 value = randrange(100, 200)
 
-                slc = QtCharts.QPieSlice(str(value), value)
+                slc = QPieSlice(str(value), value)
                 slc.setLabelVisible(True)
                 slc.setLabelColor(Qt.white)
-                slc.setLabelPosition(QtCharts.QPieSlice.LabelInsideTangential)
+                slc.setLabelPosition(QPieSlice.LabelInsideTangential)
 
                 # Connection using an extra parameter for the slot
                 slc.hovered[bool].connect(partial(self.explode_slice, slc=slc))

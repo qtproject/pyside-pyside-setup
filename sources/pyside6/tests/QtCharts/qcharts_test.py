@@ -2,7 +2,7 @@
 
 #############################################################################
 ##
-## Copyright (C) 2017 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -41,13 +41,13 @@ init_test_paths(False)
 from helper.usesqapplication import UsesQApplication
 from PySide6.QtCore import QRect, QSize, QTimer
 from PySide6.QtGui import QGuiApplication, QScreen
-from PySide6.QtCharts import QtCharts
+from PySide6.QtCharts import QChart, QChartView, QPieSeries
 
 class QChartsTestCase(UsesQApplication):
     '''Tests related to QCharts'''
 
     def testCharts(self):
-        self.series = QtCharts.QPieSeries()
+        self.series = QPieSeries()
         self.series.append("Jane", 1);
         self.series.append("Joe", 2);
         self.series.append("Andy", 3);
@@ -56,9 +56,9 @@ class QChartsTestCase(UsesQApplication):
         slice = self.series.slices()[1]
         slice.setExploded();
         slice.setLabelVisible();
-        self.chart = QtCharts.QChart()
+        self.chart = QChart()
         self.chart.addSeries(self.series);
-        chartView = QtCharts.QChartView(self.chart)
+        chartView = QChartView(self.chart)
         screenSize = QGuiApplication.primaryScreen().geometry().size()
         chartView.resize(screenSize / 2)
         chartView.show()

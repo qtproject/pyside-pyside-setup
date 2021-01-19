@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2020 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -44,7 +44,7 @@ import sys
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPainter, QPen
 from PySide6.QtWidgets import QMainWindow, QApplication
-from PySide6.QtCharts import QtCharts
+from PySide6.QtCharts import QChart, QChartView, QPieSeries
 
 
 class TestChart(QMainWindow):
@@ -52,7 +52,7 @@ class TestChart(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
 
-        self.series = QtCharts.QPieSeries()
+        self.series = QPieSeries()
 
         self.series.append('Jane', 1)
         self.series.append('Joe', 2)
@@ -66,12 +66,12 @@ class TestChart(QMainWindow):
         self.slice.setPen(QPen(Qt.darkGreen, 2))
         self.slice.setBrush(Qt.green)
 
-        self.chart = QtCharts.QChart()
+        self.chart = QChart()
         self.chart.addSeries(self.series)
         self.chart.setTitle('Simple piechart example')
         self.chart.legend().hide()
 
-        self.chartView = QtCharts.QChartView(self.chart)
+        self.chartView = QChartView(self.chart)
         self.chartView.setRenderHint(QPainter.Antialiasing)
 
         self.setCentralWidget(self.chartView)

@@ -1,7 +1,7 @@
 
 #############################################################################
 ##
-## Copyright (C) 2018 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -48,7 +48,8 @@ from PySide6.QtCore import QAbstractTableModel, QModelIndex, QRect, Qt
 from PySide6.QtGui import QColor, QPainter
 from PySide6.QtWidgets import (QApplication, QGridLayout, QHeaderView,
     QTableView, QWidget)
-from PySide6.QtCharts import QtCharts
+from PySide6.QtCharts import QChart, QChartView, QLineSeries, QVXYModelMapper
+
 
 class CustomTableModel(QAbstractTableModel):
     def __init__(self):
@@ -127,12 +128,12 @@ class TableWidget(QWidget):
         self.table_view.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.table_view.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
-        self.chart = QtCharts.QChart()
-        self.chart.setAnimationOptions(QtCharts.QChart.AllAnimations)
+        self.chart = QChart()
+        self.chart.setAnimationOptions(QChart.AllAnimations)
 
-        self.series = QtCharts.QLineSeries()
+        self.series = QLineSeries()
         self.series.setName("Line 1")
-        self.mapper = QtCharts.QVXYModelMapper(self)
+        self.mapper = QVXYModelMapper(self)
         self.mapper.setXColumn(0)
         self.mapper.setYColumn(1)
         self.mapper.setSeries(self.series)
@@ -147,10 +148,10 @@ class TableWidget(QWidget):
         self.model.add_mapping(seriesColorHex, QRect(0, 0, 2, self.model.rowCount()))
 
         # series 2
-        self.series = QtCharts.QLineSeries()
+        self.series = QLineSeries()
         self.series.setName("Line 2")
 
-        self.mapper = QtCharts.QVXYModelMapper(self)
+        self.mapper = QVXYModelMapper(self)
         self.mapper.setXColumn(2)
         self.mapper.setYColumn(3)
         self.mapper.setSeries(self.series)
@@ -162,7 +163,7 @@ class TableWidget(QWidget):
         self.model.add_mapping(seriesColorHex, QRect(2, 0, 2, self.model.rowCount()))
 
         self.chart.createDefaultAxes()
-        self.chart_view = QtCharts.QChartView(self.chart)
+        self.chart_view = QChartView(self.chart)
         self.chart_view.setRenderHint(QPainter.Antialiasing)
         self.chart_view.setMinimumSize(640, 480)
 

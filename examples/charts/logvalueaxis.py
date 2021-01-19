@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2020 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -46,31 +46,32 @@ import sys
 from PySide6.QtCore import Qt, QPointF
 from PySide6.QtGui import QPainter
 from PySide6.QtWidgets import QMainWindow, QApplication
-from PySide6.QtCharts import QtCharts
+from PySide6.QtCharts import (QChart, QChartView, QLineSeries, QLogValueAxis,
+                              QValueAxis)
 
 
 class TestChart(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
 
-        self.series = QtCharts.QLineSeries()
+        self.series = QLineSeries()
         self.series.append([
             QPointF(1.0, 1.0), QPointF(2.0, 73.0), QPointF(3.0, 268.0),
             QPointF(4.0, 17.0), QPointF(5.0, 4325.0), QPointF(6.0, 723.0)])
 
-        self.chart = QtCharts.QChart()
+        self.chart = QChart()
         self.chart.addSeries(self.series)
         self.chart.legend().hide()
         self.chart.setTitle("Logarithmic axis example")
 
-        self.axisX = QtCharts.QValueAxis()
+        self.axisX = QValueAxis()
         self.axisX.setTitleText("Data point")
         self.axisX.setLabelFormat("%i")
         self.axisX.setTickCount(self.series.count())
         self.chart.addAxis(self.axisX, Qt.AlignBottom)
         self.series.attachAxis(self.axisX)
 
-        self.axisY = QtCharts.QLogValueAxis()
+        self.axisY = QLogValueAxis()
         self.axisY.setTitleText("Values")
         self.axisY.setLabelFormat("%g")
         self.axisY.setBase(8.0)
@@ -78,7 +79,7 @@ class TestChart(QMainWindow):
         self.chart.addAxis(self.axisY, Qt.AlignLeft)
         self.series.attachAxis(self.axisY)
 
-        self.chartView = QtCharts.QChartView(self.chart)
+        self.chartView = QChartView(self.chart)
         self.chartView.setRenderHint(QPainter.Antialiasing)
 
         self.setCentralWidget(self.chartView)

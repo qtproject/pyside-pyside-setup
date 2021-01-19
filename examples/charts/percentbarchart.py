@@ -1,7 +1,7 @@
 
 #############################################################################
 ##
-## Copyright (C) 2018 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -45,17 +45,18 @@ import sys
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPainter
 from PySide6.QtWidgets import (QMainWindow, QApplication)
-from PySide6.QtCharts import QtCharts
+from PySide6.QtCharts import (QBarCategoryAxis, QBarSet, QChart, QChartView,
+                              QPercentBarSeries)
 
 class MainWindow(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
 
-        set0 = QtCharts.QBarSet("Jane")
-        set1 = QtCharts.QBarSet("John")
-        set2 = QtCharts.QBarSet("Axel")
-        set3 = QtCharts.QBarSet("Mary")
-        set4 = QtCharts.QBarSet("Samantha")
+        set0 = QBarSet("Jane")
+        set1 = QBarSet("John")
+        set2 = QBarSet("Axel")
+        set3 = QBarSet("Mary")
+        set4 = QBarSet("Samantha")
 
         set0.append([1, 2, 3,  4, 5, 6])
         set1.append([5, 0, 0,  4, 0, 7])
@@ -63,20 +64,20 @@ class MainWindow(QMainWindow):
         set3.append([5, 6, 7,  3, 4, 5])
         set4.append([9, 7, 5,  3, 1, 2])
 
-        series = QtCharts.QPercentBarSeries()
+        series = QPercentBarSeries()
         series.append(set0)
         series.append(set1)
         series.append(set2)
         series.append(set3)
         series.append(set4)
 
-        chart = QtCharts.QChart()
+        chart = QChart()
         chart.addSeries(series)
         chart.setTitle("Simple percentbarchart example")
-        chart.setAnimationOptions(QtCharts.QChart.SeriesAnimations)
+        chart.setAnimationOptions(QChart.SeriesAnimations)
 
         categories = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]
-        axis = QtCharts.QBarCategoryAxis()
+        axis = QBarCategoryAxis()
         axis.append(categories)
         chart.createDefaultAxes()
         chart.setAxisX(axis, series)
@@ -84,7 +85,7 @@ class MainWindow(QMainWindow):
         chart.legend().setVisible(True)
         chart.legend().setAlignment(Qt.AlignBottom)
 
-        chart_view = QtCharts.QChartView(chart)
+        chart_view = QChartView(chart)
         chart_view.setRenderHint(QPainter.Antialiasing)
 
         self.setCentralWidget(chart_view)

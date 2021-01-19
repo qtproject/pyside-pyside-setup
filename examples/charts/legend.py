@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2018 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -45,13 +45,13 @@ from PySide6.QtCore import Qt, QRectF
 from PySide6.QtGui import QBrush, QColor, QPainter, QPen
 from PySide6.QtWidgets import (QApplication, QDoubleSpinBox,
     QFormLayout, QGridLayout, QGroupBox, QPushButton, QWidget)
-from PySide6.QtCharts import QtCharts
+from PySide6.QtCharts import QBarSeries, QBarSet, QChart, QChartView
 
 class MainWidget(QWidget):
     def __init__(self, parent=None):
         super(MainWidget, self).__init__(parent)
-        self.chart = QtCharts.QChart()
-        self.series = QtCharts.QBarSeries()
+        self.chart = QChart()
+        self.series = QBarSeries()
 
         self.main_layout = QGridLayout()
         self.button_layout = QGridLayout()
@@ -105,7 +105,7 @@ class MainWidget(QWidget):
         self.legend_settings.setVisible(False)
 
         # Create chart view with the chart
-        self.chart_view = QtCharts.QChartView(self.chart, self)
+        self.chart_view = QChartView(self.chart, self)
 
         # Create spinbox to modify font size
         self.font_size.setValue(self.chart.legend().font().pointSizeF())
@@ -177,7 +177,7 @@ class MainWidget(QWidget):
 
     def add_barset(self):
         series_count = self.series.count()
-        bar_set = QtCharts.QBarSet("set {}".format(series_count))
+        bar_set = QBarSet(f"set {series_count}")
         delta = series_count * 0.1
         bar_set.append([1 + delta, 2 + delta, 3 + delta, 4 + delta])
         self.series.append(bar_set)
@@ -245,7 +245,7 @@ class MainWidget(QWidget):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     w = MainWidget()
-    available_geometry = app.desktop().availableGeometry(w)
+    available_geometry = w.screen().availableGeometry()
     size = available_geometry.height() * 0.75
     w.setFixedSize(size, size)
     w.show()

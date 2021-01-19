@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2018 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -43,11 +43,11 @@
 
 import sys
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QColor, QFont, QPainter
+from PySide6.QtGui import QColor, QFont, QPainter, QScreen
 from PySide6.QtWidgets import QApplication, QMainWindow
-from PySide6.QtCharts import QtCharts
+from PySide6.QtCharts import QChart, QChartView, QPieSeries, QPieSlice
 
-class MainSlice(QtCharts.QPieSlice):
+class MainSlice(QPieSlice):
     def __init__(self, breakdown_series, parent=None):
         super(MainSlice, self).__init__(parent)
 
@@ -70,10 +70,11 @@ class MainSlice(QtCharts.QPieSlice):
             self.percentage() * 100))
 
 
-class DonutBreakdownChart(QtCharts.QChart):
+class DonutBreakdownChart(QChart):
     def __init__(self, parent=None):
-        super(DonutBreakdownChart, self).__init__(QtCharts.QChart.ChartTypeCartesian, parent, Qt.WindowFlags())
-        self.main_series = QtCharts.QPieSeries()
+        super(DonutBreakdownChart, self).__init__(QChart.ChartTypeCartesian,
+                                                  parent, Qt.WindowFlags())
+        self.main_series = QPieSeries()
         self.main_series.setPieSize(0.7)
         self.addSeries(self.main_series)
 
@@ -90,7 +91,7 @@ class DonutBreakdownChart(QtCharts.QChart):
         main_slice.setBrush(color)
         main_slice.setLabelVisible()
         main_slice.setLabelColor(Qt.white)
-        main_slice.setLabelPosition(QtCharts.QPieSlice.LabelInsideHorizontal)
+        main_slice.setLabelPosition(QPieSlice.LabelInsideHorizontal)
         main_slice.setLabelFont(font)
 
         # position and customize the breakdown series
@@ -142,27 +143,27 @@ if __name__ == "__main__":
     #    'Total consumption of energy increased by 10 per cent in 2010'
     # Statistics Finland, 13 December 2011
     # http://www.stat.fi/til/ekul/2010/ekul_2010_2011-12-13_tie_001_en.html
-    series1 = QtCharts.QPieSeries()
+    series1 = QPieSeries()
     series1.setName("Fossil fuels")
     series1.append("Oil", 353295)
     series1.append("Coal", 188500)
     series1.append("Natural gas", 148680)
     series1.append("Peat", 94545)
 
-    series2 = QtCharts.QPieSeries()
+    series2 = QPieSeries()
     series2.setName("Renewables")
     series2.append("Wood fuels", 319663)
     series2.append("Hydro power", 45875)
     series2.append("Wind power", 1060)
 
-    series3 = QtCharts.QPieSeries()
+    series3 = QPieSeries()
     series3.setName("Others")
     series3.append("Nuclear energy", 238789)
     series3.append("Import energy", 37802)
     series3.append("Other", 32441)
 
     donut_breakdown = DonutBreakdownChart()
-    donut_breakdown.setAnimationOptions(QtCharts.QChart.AllAnimations)
+    donut_breakdown.setAnimationOptions(QChart.AllAnimations)
     donut_breakdown.setTitle("Total consumption of energy in Finland 2010")
     donut_breakdown.legend().setAlignment(Qt.AlignRight)
     donut_breakdown.add_breakdown_series(series1, Qt.red)
@@ -170,10 +171,10 @@ if __name__ == "__main__":
     donut_breakdown.add_breakdown_series(series3, Qt.darkBlue)
 
     window = QMainWindow()
-    chart_view = QtCharts.QChartView(donut_breakdown)
+    chart_view = QChartView(donut_breakdown)
     chart_view.setRenderHint(QPainter.Antialiasing)
     window.setCentralWidget(chart_view)
-    available_geometry = app.desktop().availableGeometry(window)
+    available_geometry = window.screen().availableGeometry()
     size = available_geometry.height() * 0.75
     window.resize(size, size * 0.8)
     window.show()
