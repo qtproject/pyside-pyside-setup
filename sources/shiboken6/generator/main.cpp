@@ -293,54 +293,51 @@ void printUsage()
     QString pathSyntax;
     QTextStream(&pathSyntax) << "<path>[" << pathSplitter << "<path>"
         << pathSplitter << "...]";
-    OptionDescriptions generalOptions = OptionDescriptions()
-        << qMakePair(QLatin1String("api-version=<\"package mask\">,<\"version\">"),
-                     QLatin1String("Specify the supported api version used to generate the bindings"))
-        << qMakePair(QLatin1String("debug-level=[sparse|medium|full]"),
-                     QLatin1String("Set the debug level"))
-        << qMakePair(QLatin1String("documentation-only"),
-                     QLatin1String("Do not generates any code, just the documentation"))
-        << qMakePair(QLatin1String("drop-type-entries=\"<TypeEntry0>[;TypeEntry1;...]\""),
-                     QLatin1String("Semicolon separated list of type system entries (classes, namespaces,\n"
-                                   "global functions and enums) to be dropped from generation."))
-        << qMakePair(QLatin1String("-F<path>"), QString())
-        << qMakePair(QLatin1String("framework-include-paths=") + pathSyntax,
-                     QLatin1String("Framework include paths used by the C++ parser"))
-        << qMakePair(QLatin1String("-isystem<path>"), QString())
-        << qMakePair(QLatin1String("system-include-paths=") + pathSyntax,
-                     QLatin1String("System include paths used by the C++ parser"))
-        << qMakePair(QLatin1String("generator-set=<\"generator module\">"),
-                     QLatin1String("generator-set to be used. e.g. qtdoc"))
-        << qMakePair(skipDeprecatedOption(),
-                     QLatin1String("Skip deprecated functions"))
-        << qMakePair(diffOption(),
-                     QLatin1String("Print a diff of wrapper files"))
-        << qMakePair(dryrunOption(),
-                     QLatin1String("Dry run, do not generate wrapper files"))
-        << qMakePair(QLatin1String("-h"), QString())
-        << qMakePair(helpOption(),
-                     QLatin1String("Display this help and exit"))
-        << qMakePair(QLatin1String("-I<path>"), QString())
-        << qMakePair(QLatin1String("include-paths=") + pathSyntax,
-                     QLatin1String("Include paths used by the C++ parser"))
-        << qMakePair(languageLevelOption() + QLatin1String("=, -std=<level>"),
-                     languageLevelDescription())
-        << qMakePair(QLatin1String("license-file=<license-file>"),
-                     QLatin1String("File used for copyright headers of generated files"))
-        << qMakePair(QLatin1String("no-suppress-warnings"),
-                     QLatin1String("Show all warnings"))
-        << qMakePair(QLatin1String("output-directory=<path>"),
-                     QLatin1String("The directory where the generated files will be written"))
-        << qMakePair(QLatin1String("project-file=<file>"),
-                     QLatin1String("text file containing a description of the binding project.\n"
-                                   "Replaces and overrides command line arguments"))
-        << qMakePair(QLatin1String("silent"),
-                     QLatin1String("Avoid printing any message"))
-        << qMakePair(QLatin1String("-T<path>"), QString())
-        << qMakePair(QLatin1String("typesystem-paths=") + pathSyntax,
-                     QLatin1String("Paths used when searching for typesystems"))
-        << qMakePair(QLatin1String("version"),
-                     QLatin1String("Output version information and exit"));
+    OptionDescriptions generalOptions = {
+        {QLatin1String("api-version=<\"package mask\">,<\"version\">"),
+         QLatin1String("Specify the supported api version used to generate the bindings")},
+        {QLatin1String("debug-level=[sparse|medium|full]"),
+         QLatin1String("Set the debug level")},
+        {QLatin1String("documentation-only"),
+         QLatin1String("Do not generates any code, just the documentation")},
+        {QLatin1String("drop-type-entries=\"<TypeEntry0>[;TypeEntry1;...]\""),
+         QLatin1String("Semicolon separated list of type system entries (classes, namespaces,\n"
+                       "global functions and enums) to be dropped from generation.")},
+        {QLatin1String("-F<path>"), {} },
+        {QLatin1String("framework-include-paths=") + pathSyntax,
+         QLatin1String("Framework include paths used by the C++ parser")},
+        {QLatin1String("-isystem<path>"), {} },
+        {QLatin1String("system-include-paths=") + pathSyntax,
+         QLatin1String("System include paths used by the C++ parser")},
+        {QLatin1String("generator-set=<\"generator module\">"),
+         QLatin1String("generator-set to be used. e.g. qtdoc")},
+        {skipDeprecatedOption(),
+         QLatin1String("Skip deprecated functions")},
+        {diffOption(), QLatin1String("Print a diff of wrapper files")},
+        {dryrunOption(), QLatin1String("Dry run, do not generate wrapper files")},
+        {QLatin1String("-h"), {} },
+        {helpOption(), QLatin1String("Display this help and exit")},
+        {QLatin1String("-I<path>"), {} },
+        {QLatin1String("include-paths=") + pathSyntax,
+        QLatin1String("Include paths used by the C++ parser")},
+        {languageLevelOption() + QLatin1String("=, -std=<level>"),
+         languageLevelDescription()},
+        {QLatin1String("license-file=<license-file>"),
+         QLatin1String("File used for copyright headers of generated files")},
+        {QLatin1String("no-suppress-warnings"),
+         QLatin1String("Show all warnings")},
+        {QLatin1String("output-directory=<path>"),
+         QLatin1String("The directory where the generated files will be written")},
+        {QLatin1String("project-file=<file>"),
+         QLatin1String("text file containing a description of the binding project.\n"
+                       "Replaces and overrides command line arguments")},
+        {QLatin1String("silent"), QLatin1String("Avoid printing any message")},
+        {QLatin1String("-T<path>"), {} },
+        {QLatin1String("typesystem-paths=") + pathSyntax,
+         QLatin1String("Paths used when searching for typesystems")},
+        {QLatin1String("version"),
+         QLatin1String("Output version information and exit")}
+    };
     printOptions(s, generalOptions);
 
     const Generators generators = shibokenGenerators() + docGenerators();
