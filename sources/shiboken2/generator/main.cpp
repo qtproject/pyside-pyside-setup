@@ -109,7 +109,7 @@ static bool processProjectFile(QFile &projectFile, CommandLineArguments &args)
         QByteArray key;
         QString value;
         if (split > 0) {
-            key = line.left(split - 1).trimmed();
+            key = line.left(split).trimmed();
             value = QString::fromUtf8(line.mid(split + 1).trimmed());
         } else {
             key = line;
