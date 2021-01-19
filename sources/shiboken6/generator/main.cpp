@@ -88,12 +88,18 @@ static void printOptions(QTextStream &s, const OptionDescriptions &options)
     }
 }
 
-static bool processProjectFile(QFile &projectFile, CommandLineArguments &args)
+static std::optional<CommandLineArguments>
+    processProjectFile(const QString &appName, QFile &projectFile)
 {
     QByteArray line = projectFile.readLine().trimmed();
-    if (line.isEmpty() || line != "[generator-project]")
-        return false;
+    if (line.isEmpty() || line != "[generator-project]") {
+        std::cerr << qPrintable(appName) << ": first line of project file \""
+            << qPrintable(projectFile.fileName())
+            << "\" must be the string \"[generator-project]\"\n";
+        return {};
+    }
 
+    CommandLineArguments args;
     QStringList includePaths;
     QStringList frameworkIncludePaths;
     QStringList systemIncludePaths;
@@ -153,12 +159,11 @@ static bool processProjectFile(QFile &projectFile, CommandLineArguments &args)
         args.options.insert(QLatin1String("api-version"), apiVersions.join(QLatin1Char('|')));
     if (!languageLevel.isEmpty())
         args.options.insert(languageLevelOption(), languageLevel);
-    return true;
+    return args;
 }
 
-static CommandLineArguments getProjectFileArguments()
+static std::optional<CommandLineArguments> getProjectFileArguments()
 {
-    CommandLineArguments args;
     QStringList arguments = QCoreApplication::arguments();
     QString appName = arguments.constFirst();
     arguments.removeFirst();
@@ -174,27 +179,22 @@ static CommandLineArguments getProjectFileArguments()
     }
 
     if (projectFileName.isEmpty())
-        return args;
+        return CommandLineArguments{};
 
     if (!QFile::exists(projectFileName)) {
-        std::cerr << qPrintable(appName) << ": Project file \"";
-        std::cerr << qPrintable(projectFileName) << "\" not found.";
-        std::cerr << std::endl;
-        return args;
+        std::cerr << qPrintable(appName) << ": Project file \""
+            << qPrintable(projectFileName) << "\" not found.\n";
+        return {};
     }
 
     QFile projectFile(projectFileName);
-    if (!projectFile.open(QIODevice::ReadOnly))
-        return args;
-
-    if (!processProjectFile(projectFile, args)) {
-        std::cerr << qPrintable(appName) << ": first line of project file \"";
-        std::cerr << qPrintable(projectFileName) << "\" must be the string \"[generator-project]\"";
-        std::cerr << std::endl;
-        return args;
+    if (!projectFile.open(QIODevice::ReadOnly)) {
+        std::cerr << qPrintable(appName) << ": Cannot open project file \""
+            << qPrintable(projectFileName) << "\" : " << qPrintable(projectFile.errorString())
+            << '\n';
+        return {};
     }
-
-    return args;
+    return processProjectFile(appName, projectFile);
 }
 
 // Concatenate values of path arguments that can occur multiple times on the
@@ -392,7 +392,11 @@ int main(int argc, char *argv[])
         qCInfo(lcShiboken()).noquote().nospace() << QCoreApplication::arguments().join(QLatin1Char(' '));
 
     // Store command arguments in a map
-    const CommandLineArguments projectFileArguments = getProjectFileArguments();
+    const auto projectFileArgumentsOptional = getProjectFileArguments();
+    if (!projectFileArgumentsOptional.has_value())
+        return EXIT_FAILURE;
+
+    const CommandLineArguments projectFileArguments = projectFileArgumentsOptional.value();
     CommandLineArguments args = projectFileArguments;
     getCommandLineArgs(args);
     Generators generators;
