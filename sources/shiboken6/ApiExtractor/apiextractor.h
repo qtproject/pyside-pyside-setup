@@ -81,6 +81,8 @@ public:
     void setDropTypeEntries(const QStringList &dropEntries);
     LanguageLevel languageLevel() const;
     void setLanguageLevel(LanguageLevel languageLevel);
+    QStringList clangOptions() const;
+    void setClangOptions(const QStringList &co);
 
     const AbstractMetaEnumList &globalEnums() const;
     const AbstractMetaFunctionCList &globalFunctions() const;
@@ -95,6 +97,7 @@ private:
     QString m_typeSystemFileName;
     QFileInfoList m_cppFileNames;
     HeaderPaths m_includePaths;
+    QStringList m_clangOptions;
     AbstractMetaBuilder* m_builder = nullptr;
     QString m_logDirectory;
     LanguageLevel m_languageLevel = LanguageLevel::Default;

@@ -44,9 +44,12 @@
 #include "headergenerator.h"
 #include "qtdocgenerator.h"
 
+static const QChar clangOptionsSplitter = u',';
 static const QChar dropTypeEntriesSplitter = u';';
 static const QChar apiVersionSplitter = u'|';
 
+static inline QString clangOptionOption() { return QStringLiteral("clang-option"); }
+static inline QString clangOptionsOption() { return QStringLiteral("clang-options"); }
 static inline QString apiVersionOption() { return QStringLiteral("api-version"); }
 static inline QString dropTypeEntriesOption() { return QStringLiteral("drop-type-entries"); }
 static inline QString languageLevelOption() { return QStringLiteral("language-level"); }
@@ -177,6 +180,11 @@ static std::optional<CommandLineArguments>
                                   QDir::toNativeSeparators(value));
         } else if (key == "language-level") {
             args.options.insert(languageLevelOption(), value);
+        } else if (key == "clang-option") {
+            args.addToOptionsList(clangOptionsOption(), value);
+        } else if (key == "clang-options") {
+            args.addToOptionsList(clangOptionsOption(),
+                                  value, clangOptionsSplitter);
         } else if (key == "api-version") {
             args.addToOptionsList(apiVersionOption(),
                                   value, apiVersionSplitter);
@@ -248,6 +256,10 @@ static void getCommandLineArg(QString arg, int &argNum, CommandLineArguments &ar
             args.addToOptionsList(apiVersionOption(), value, apiVersionSplitter);
         } else if (option == dropTypeEntriesOption()) {
             args.addToOptionsList(dropTypeEntriesOption(), value, dropTypeEntriesSplitter);
+        } else if (option == clangOptionOption()) {
+            args.addToOptionsList(clangOptionsOption(), value);
+        } else if (option == clangOptionsOption()) {
+            args.addToOptionsList(clangOptionsOption(), value, clangOptionsSplitter);
         } else {
             args.options.insert(option, value);
         }
@@ -329,6 +341,10 @@ void printUsage()
         {QLatin1String("drop-type-entries=\"<TypeEntry0>[;TypeEntry1;...]\""),
          QLatin1String("Semicolon separated list of type system entries (classes, namespaces,\n"
                        "global functions and enums) to be dropped from generation.")},
+        {clangOptionOption(),
+         QLatin1String("Option to be passed to clang")},
+        {clangOptionsOption(),
+         QLatin1String("A comma-separated list of options to be passed to clang")},
         {QLatin1String("-F<path>"), {} },
         {QLatin1String("framework-include-paths=") + pathSyntax,
          QLatin1String("Framework include paths used by the C++ parser")},
@@ -559,6 +575,12 @@ int main(int argc, char *argv[])
     ait = args.options.find(typesystemPathOption());
     if (ait != args.options.end()) {
         extractor.addTypesystemSearchPath(ait.value().toStringList());
+        args.options.erase(ait);
+    }
+
+    ait = args.options.find(clangOptionsOption());
+    if (ait != args.options.end()) {
+        extractor.setClangOptions(ait.value().toStringList());
         args.options.erase(ait);
     }
 

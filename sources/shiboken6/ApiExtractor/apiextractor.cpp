@@ -199,8 +199,22 @@ bool ApiExtractor::runHelper(bool usePySideExtensions)
     m_builder->setGlobalHeaders(m_cppFileNames);
     m_builder->setSkipDeprecated(m_skipDeprecated);
     m_builder->setHeaderPaths(m_includePaths);
+
     QByteArrayList arguments;
-    arguments.reserve(m_includePaths.size() + 1);
+    const auto clangOptionsSize = m_clangOptions.size();
+    arguments.reserve(m_includePaths.size() + clangOptionsSize + 1);
+
+    bool addCompilerSupportArguments = true;
+    if (clangOptionsSize > 0) {
+        qsizetype i = 0;
+        if (m_clangOptions.at(i) == u"-") {
+            ++i;
+            addCompilerSupportArguments = false; // No built-in options
+        }
+        for (; i < clangOptionsSize; ++i)
+            arguments.append(m_clangOptions.at(i).toUtf8());
+    }
+
     for (const HeaderPath &headerPath : qAsConst(m_includePaths))
         arguments.append(HeaderPath::includeOption(headerPath));
     arguments.append(QFile::encodeName(preprocessedCppFileName));
@@ -213,7 +227,7 @@ bool ApiExtractor::runHelper(bool usePySideExtensions)
     if (usePySideExtensions)
         addPySideExtensions(&arguments);
 
-    const bool result = m_builder->build(arguments, m_languageLevel);
+    const bool result = m_builder->build(arguments, addCompilerSupportArguments, m_languageLevel);
     if (!result)
         autoRemove = false;
     if (!autoRemove) {
@@ -250,6 +264,16 @@ LanguageLevel ApiExtractor::languageLevel() const
 void ApiExtractor::setLanguageLevel(LanguageLevel languageLevel)
 {
     m_languageLevel = languageLevel;
+}
+
+QStringList ApiExtractor::clangOptions() const
+{
+    return m_clangOptions;
+}
+
+void ApiExtractor::setClangOptions(const QStringList &co)
+{
+    m_clangOptions = co;
 }
 
 #ifndef QT_NO_DEBUG_STREAM

@@ -229,6 +229,7 @@ static QByteArray msgCreateTranslationUnit(const QByteArrayList &clangArgs, unsi
 
 static CXTranslationUnit createTranslationUnit(CXIndex index,
                                                const QByteArrayList &args,
+                                               bool addCompilerSupportArguments,
                                                unsigned flags = 0)
 {
     // courtesy qdoc
@@ -245,7 +246,12 @@ static CXTranslationUnit createTranslationUnit(CXIndex index,
         "-Wno-constant-logical-operand"
     };
 
-    const QByteArrayList clangArgs = emulatedCompilerOptions() + defaultArgs + args;
+    QByteArrayList clangArgs;
+    if (addCompilerSupportArguments) {
+        clangArgs += emulatedCompilerOptions();
+        clangArgs += defaultArgs;
+    }
+    clangArgs += args;
     QScopedArrayPointer<const char *> argv(byteArrayListToFlatArgV(clangArgs));
     qDebug().noquote().nospace() << msgCreateTranslationUnit(clangArgs, flags);
 
@@ -265,7 +271,8 @@ static CXTranslationUnit createTranslationUnit(CXIndex index,
  * CXTranslationUnit_KeepGoing (from CINDEX_VERSION_MAJOR/CINDEX_VERSION_MINOR 0.35)
  */
 
-bool parse(const QByteArrayList  &clangArgs, unsigned clangFlags, BaseVisitor &bv)
+bool parse(const QByteArrayList  &clangArgs, bool addCompilerSupportArguments,
+           unsigned clangFlags, BaseVisitor &bv)
 {
     CXIndex index = clang_createIndex(0 /* excludeDeclarationsFromPCH */,
                                       1 /* displayDiagnostics */);
@@ -274,7 +281,9 @@ bool parse(const QByteArrayList  &clangArgs, unsigned clangFlags, BaseVisitor &b
         return false;
     }
 
-    CXTranslationUnit translationUnit = createTranslationUnit(index, clangArgs, clangFlags);
+    CXTranslationUnit translationUnit =
+        createTranslationUnit(index, clangArgs, addCompilerSupportArguments,
+                              clangFlags);
     if (!translationUnit)
         return false;
 

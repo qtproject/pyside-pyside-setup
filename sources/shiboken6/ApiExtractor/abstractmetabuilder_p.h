@@ -63,6 +63,7 @@ public:
     ~AbstractMetaBuilderPrivate();
 
     static FileModelItem buildDom(QByteArrayList arguments,
+                                  bool addCompilerSupportArguments,
                                   LanguageLevel level,
                                   unsigned clangFlags);
     void traverseDom(const FileModelItem &dom);

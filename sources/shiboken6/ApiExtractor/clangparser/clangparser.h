@@ -89,7 +89,9 @@ private:
     Diagnostics m_diagnostics;
 };
 
-bool parse(const QByteArrayList  &clangArgs, unsigned clangFlags, BaseVisitor &ctx);
+bool parse(const QByteArrayList  &clangArgs,
+           bool addCompilerSupportArguments,
+           unsigned clangFlags, BaseVisitor &ctx);
 
 } // namespace clang
 

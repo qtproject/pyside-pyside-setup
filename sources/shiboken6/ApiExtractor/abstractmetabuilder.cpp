@@ -377,16 +377,20 @@ void AbstractMetaBuilderPrivate::sortLists()
 }
 
 FileModelItem AbstractMetaBuilderPrivate::buildDom(QByteArrayList arguments,
+                                                   bool addCompilerSupportArguments,
                                                    LanguageLevel level,
                                                    unsigned clangFlags)
 {
     clang::Builder builder;
     builder.setSystemIncludes(TypeDatabase::instance()->systemIncludes());
-    if (level == LanguageLevel::Default)
-        level = clang::emulatedCompilerLanguageLevel();
-    arguments.prepend(QByteArrayLiteral("-std=")
-                      + clang::languageLevelOption(level));
-    FileModelItem result = clang::parse(arguments, clangFlags, builder)
+    if (addCompilerSupportArguments) {
+        if (level == LanguageLevel::Default)
+            level = clang::emulatedCompilerLanguageLevel();
+        arguments.prepend(QByteArrayLiteral("-std=")
+                          + clang::languageLevelOption(level));
+    }
+    FileModelItem result = clang::parse(arguments, addCompilerSupportArguments,
+                                        clangFlags, builder)
         ? builder.dom() : FileModelItem();
     const clang::BaseVisitor::Diagnostics &diagnostics = builder.diagnostics();
     if (const int diagnosticsCount = diagnostics.size()) {
@@ -618,10 +622,12 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
 }
 
 bool AbstractMetaBuilder::build(const QByteArrayList &arguments,
+                                bool addCompilerSupportArguments,
                                 LanguageLevel level,
                                 unsigned clangFlags)
 {
-    const FileModelItem dom = d->buildDom(arguments, level, clangFlags);
+    const FileModelItem dom = d->buildDom(arguments, addCompilerSupportArguments,
+                                          level, clangFlags);
     if (dom.isNull())
         return false;
     if (ReportHandler::isDebug(ReportHandler::MediumDebug))

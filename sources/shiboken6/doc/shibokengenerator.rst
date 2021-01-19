@@ -153,6 +153,18 @@ Options
     Text file containing a description of the binding project.
     Replaces and overrides command line arguments.
 
+.. _clang_option:
+
+``--clang-option=<option>``
+    Option to be passed to clang
+
+.. _clang_options:
+
+``--clang-options=<option1>[,<option2>,...]>``
+    Options to be passed to clang.
+    When '-' is passed as the first option in the list, none of the options
+    built into shiboken will be added, allowing for a complete replacement.
+
 .. _include-paths:
 
 ``-I<path>, --include-paths=<path>[:<path>:...]``

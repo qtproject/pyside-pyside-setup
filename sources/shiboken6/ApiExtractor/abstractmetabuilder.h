@@ -73,6 +73,7 @@ public:
     const QHash<const TypeEntry *, AbstractMetaEnum> &typeEntryToEnumsHash() const;
 
     bool build(const QByteArrayList &arguments,
+               bool addCompilerSupportArguments = true,
                LanguageLevel level = LanguageLevel::Default,
                unsigned clangFlags = 0);
     void setLogDirectory(const QString& logDir);

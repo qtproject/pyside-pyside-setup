@@ -266,7 +266,7 @@ int main(int argc, char **argv)
 
     optJoinNamespaces = parser.isSet(joinNamespacesOption);
 
-    const FileModelItem dom = AbstractMetaBuilderPrivate::buildDom(arguments, level, 0);
+    const FileModelItem dom = AbstractMetaBuilderPrivate::buildDom(arguments, true, level, 0);
     if (dom.isNull()) {
         QString message = QLatin1String("Unable to parse ") + positionalArguments.join(QLatin1Char(' '));
         std::cerr << qPrintable(message) << '\n';
