@@ -186,7 +186,7 @@ QString msgConversionTypesDiffer(const QString &varType, const QString &conversi
 QString msgCannotFindSmartPointer(const QString &instantiationType,
                                   const AbstractMetaClassCList &pointers);
 
-QString msgLeftOverArguments(const QMap<QString, QString> &remainingArgs);
+QString msgLeftOverArguments(const QVariantMap &remainingArgs);
 
 QString msgInvalidVersion(const QString &package, const QString &version);
 

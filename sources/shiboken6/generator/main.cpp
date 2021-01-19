@@ -30,6 +30,7 @@
 #include <QLibrary>
 #include <QtCore/QFile>
 #include <QtCore/QDir>
+#include <QtCore/QVariant>
 #include <iostream>
 #include <apiextractor.h>
 #include <apiextractorresult.h>
@@ -43,12 +44,11 @@
 #include "headergenerator.h"
 #include "qtdocgenerator.h"
 
-#ifdef Q_OS_WIN
-static const QChar pathSplitter = QLatin1Char(';');
-#else
-static const QChar pathSplitter = QLatin1Char(':');
-#endif
+static const QChar dropTypeEntriesSplitter = u';';
+static const QChar apiVersionSplitter = u'|';
 
+static inline QString apiVersionOption() { return QStringLiteral("api-version"); }
+static inline QString dropTypeEntriesOption() { return QStringLiteral("drop-type-entries"); }
 static inline QString languageLevelOption() { return QStringLiteral("language-level"); }
 static inline QString includePathOption() { return QStringLiteral("include-paths"); }
 static inline QString frameworkIncludePathOption() { return QStringLiteral("framework-include-paths"); }
@@ -65,9 +65,56 @@ using OptionDescriptions = Generator::OptionDescriptions;
 
 struct CommandLineArguments
 {
-    QMap<QString, QString> options;
+    void addToOptionsList(const QString &option,
+                          const QString &value);
+    void addToOptionsList(const QString &option,
+                          const QStringList &value);
+    void addToOptionsList(const QString &option,
+                          const QString &listValue,
+                          QChar separator);
+    void addToOptionsPathList(const QString &option,
+                              const QString &pathListValue)
+    {
+        addToOptionsList(option, pathListValue, QDir::listSeparator());
+    }
+
+    QVariantMap options; // string,stringlist for path lists, etc.
     QStringList positionalArguments;
 };
+
+void CommandLineArguments::addToOptionsList(const QString &option,
+                                            const QString &value)
+{
+    auto it = options.find(option);
+    if (it == options.end()) {
+        options.insert(option, QVariant(QStringList(value)));
+    } else {
+        auto list = it.value().toStringList();
+        list += value;
+        options[option] = QVariant(list);
+    }
+}
+
+void CommandLineArguments::addToOptionsList(const QString &option,
+                                            const QStringList &value)
+{
+    auto it = options.find(option);
+    if (it == options.end()) {
+        options.insert(option, QVariant(value));
+    } else {
+        auto list = it.value().toStringList();
+        list += value;
+        options[option] = QVariant(list);
+    }
+}
+
+void CommandLineArguments::addToOptionsList(const QString &option,
+                                            const QString &listValue,
+                                            QChar separator)
+{
+    const auto newValues = listValue.split(separator, Qt::SkipEmptyParts);
+    addToOptionsList(option, newValues);
+}
 
 static void printOptions(QTextStream &s, const OptionDescriptions &options)
 {
@@ -100,12 +147,6 @@ static std::optional<CommandLineArguments>
     }
 
     CommandLineArguments args;
-    QStringList includePaths;
-    QStringList frameworkIncludePaths;
-    QStringList systemIncludePaths;
-    QStringList typesystemPaths;
-    QStringList apiVersions;
-    QString languageLevel;
 
     while (!projectFile.atEnd()) {
         line = projectFile.readLine().trimmed();
@@ -122,43 +163,35 @@ static std::optional<CommandLineArguments>
             key = line;
         }
 
-        if (key == "include-path")
-            includePaths << QDir::toNativeSeparators(value);
-        else if (key == "framework-include-path")
-            frameworkIncludePaths << QDir::toNativeSeparators(value);
-        else if (key == "system-include-paths")
-            systemIncludePaths << QDir::toNativeSeparators(value);
-        else if (key == "typesystem-path")
-            typesystemPaths << QDir::toNativeSeparators(value);
-        else if (key == "language-level")
-            languageLevel = value;
-        else if (key == "api-version")
-            apiVersions << value;
-        else if (key == "header-file")
+        if (key == "include-path") {
+            args.addToOptionsList(includePathOption(),
+                                  QDir::toNativeSeparators(value));
+        } else if (key == "framework-include-path") {
+            args.addToOptionsList(frameworkIncludePathOption(),
+                                  QDir::toNativeSeparators(value));
+        } else if (key == "system-include-paths") {
+            args.addToOptionsList(systemIncludePathOption(),
+                                  QDir::toNativeSeparators(value));
+        } else if (key == "typesystem-path") {
+            args.addToOptionsList(typesystemPathOption(),
+                                  QDir::toNativeSeparators(value));
+        } else if (key == "language-level") {
+            args.options.insert(languageLevelOption(), value);
+        } else if (key == "api-version") {
+            args.addToOptionsList(apiVersionOption(),
+                                  value, apiVersionSplitter);
+        } else if (key == "drop-type-entries") {
+            args.addToOptionsList(dropTypeEntriesOption(),
+                                  value, dropTypeEntriesSplitter);
+        } else if (key == "header-file") {
             args.positionalArguments.prepend(value);
-        else if (key == "typesystem-file")
+        } else if (key == "typesystem-file") {
             args.positionalArguments.append(value);
-        else
+        } else {
             args.options.insert(QString::fromUtf8(key), value);
+        }
     }
 
-    if (!includePaths.isEmpty())
-        args.options.insert(includePathOption(), includePaths.join(pathSplitter));
-
-    if (!frameworkIncludePaths.isEmpty())
-        args.options.insert(frameworkIncludePathOption(),
-                            frameworkIncludePaths.join(pathSplitter));
-    if (!systemIncludePaths.isEmpty()) {
-        args.options.insert(systemIncludePathOption(),
-                            systemIncludePaths.join(pathSplitter));
-    }
-
-    if (!typesystemPaths.isEmpty())
-        args.options.insert(typesystemPathOption(), typesystemPaths.join(pathSplitter));
-    if (!apiVersions.isEmpty())
-        args.options.insert(QLatin1String("api-version"), apiVersions.join(QLatin1Char('|')));
-    if (!languageLevel.isEmpty())
-        args.options.insert(languageLevelOption(), languageLevel);
     return args;
 }
 
@@ -197,18 +230,6 @@ static std::optional<CommandLineArguments> getProjectFileArguments()
     return processProjectFile(appName, projectFile);
 }
 
-// Concatenate values of path arguments that can occur multiple times on the
-// command line.
-static void addPathOptionValue(const QString &option, const QString &value,
-                               CommandLineArguments &args)
-{
-    auto it = args.options.find(option);
-    if (it != args.options.end())
-        it.value().append(pathSplitter + value);
-    else
-        args.options.insert(option, value);
-}
-
 static void getCommandLineArg(QString arg, int &argNum, CommandLineArguments &args)
 {
     if (arg.startsWith(QLatin1String("--"))) {
@@ -222,7 +243,11 @@ static void getCommandLineArg(QString arg, int &argNum, CommandLineArguments &ar
         const QString value = arg.mid(split + 1).trimmed();
         if (option == includePathOption() || option == frameworkIncludePathOption()
             || option == systemIncludePathOption() || option == typesystemPathOption()) {
-            addPathOptionValue(option, value, args);
+            args.addToOptionsPathList(option, value);
+        } else if (option == apiVersionOption()) {
+            args.addToOptionsList(apiVersionOption(), value, apiVersionSplitter);
+        } else if (option == dropTypeEntriesOption()) {
+            args.addToOptionsList(dropTypeEntriesOption(), value, dropTypeEntriesSplitter);
         } else {
             args.options.insert(option, value);
         }
@@ -231,13 +256,13 @@ static void getCommandLineArg(QString arg, int &argNum, CommandLineArguments &ar
     if (arg.startsWith(QLatin1Char('-'))) {
         arg.remove(0, 1);
         if (arg.startsWith(QLatin1Char('I'))) // Shorthand path arguments -I/usr/include...
-            addPathOptionValue(includePathOption(), arg.mid(1), args);
+            args.addToOptionsPathList(includePathOption(), arg.mid(1));
         else if (arg.startsWith(QLatin1Char('F')))
-            addPathOptionValue(frameworkIncludePathOption(), arg.mid(1), args);
+            args.addToOptionsPathList(frameworkIncludePathOption(), arg.mid(1));
         else if (arg.startsWith(QLatin1String("isystem")))
-            addPathOptionValue(systemIncludePathOption(), arg.mid(7), args);
+            args.addToOptionsPathList(systemIncludePathOption(), arg.mid(7));
         else if (arg.startsWith(QLatin1Char('T')))
-            addPathOptionValue(typesystemPathOption(), arg.mid(1), args);
+            args.addToOptionsPathList(typesystemPathOption(), arg.mid(1));
         else if (arg == QLatin1String("h"))
             args.options.insert(helpOption(), QString());
         else if (arg.startsWith(QLatin1String("std=")))
@@ -286,6 +311,7 @@ static inline QString languageLevelDescription()
 
 void printUsage()
 {
+    const QChar pathSplitter = QDir::listSeparator();
     QTextStream s(stdout);
     s << "Usage:\n  "
       << "shiboken [options] header-file(s) typesystem-file\n\n"
@@ -370,8 +396,7 @@ static void parseIncludePathOption(const QString &option, HeaderType headerType,
 {
     const auto it = args.options.find(option);
     if (it != args.options.end()) {
-        const QStringList includePathListList =
-            it.value().split(pathSplitter, Qt::SkipEmptyParts);
+        const auto includePathListList = it.value().toStringList();
         args.options.erase(it);
         for (const QString &s : includePathListList) {
             auto path = QFile::encodeName(QDir::cleanPath(s));
@@ -413,7 +438,7 @@ int main(int argc, char *argv[])
     if (ait == args.options.end()) // Also check QLatin1String("generatorSet") command line argument for backward compatibility.
         ait = args.options.find(QLatin1String("generatorSet"));
     if (ait != args.options.end()) {
-        generatorSet = ait.value();
+        generatorSet = ait.value().toString();
         args.options.erase(ait);
     }
 
@@ -453,7 +478,7 @@ int main(int argc, char *argv[])
     QString licenseComment;
     ait = args.options.find(QLatin1String("license-file"));
     if (ait != args.options.end()) {
-        QFile licenseFile(ait.value());
+        QFile licenseFile(ait.value().toString());
         args.options.erase(ait);
         if (licenseFile.open(QIODevice::ReadOnly)) {
             licenseComment = QString::fromUtf8(licenseFile.readAll());
@@ -467,7 +492,7 @@ int main(int argc, char *argv[])
     QString outputDirectory = QLatin1String("out");
     ait = args.options.find(QLatin1String("output-directory"));
     if (ait != args.options.end()) {
-        outputDirectory = ait.value();
+        outputDirectory = ait.value().toString();
         args.options.erase(ait);
     }
 
@@ -495,8 +520,9 @@ int main(int argc, char *argv[])
     } else {
         ait = args.options.find(QLatin1String("debug-level"));
         if (ait != args.options.end()) {
-            if (!ReportHandler::setDebugLevelFromArg(ait.value())) {
-                errorPrint(QLatin1String("Invalid debug level: ") + ait.value());
+            const QString value = ait.value().toString();
+            if (!ReportHandler::setDebugLevelFromArg(value)) {
+                errorPrint(QLatin1String("Invalid debug level: ") + value);
                 return EXIT_FAILURE;
             }
             args.options.erase(ait);
@@ -507,9 +533,9 @@ int main(int argc, char *argv[])
         args.options.erase(ait);
         extractor.setSuppressWarnings(false);
     }
-    ait = args.options.find(QLatin1String("api-version"));
+    ait = args.options.find(apiVersionOption());
     if (ait != args.options.end()) {
-        const QStringList &versions = ait.value().split(QLatin1Char('|'));
+        const QStringList &versions = ait.value().toStringList();
         args.options.erase(ait);
         for (const QString &fullVersion : versions) {
             QStringList parts = fullVersion.split(QLatin1Char(','));
@@ -524,15 +550,15 @@ int main(int argc, char *argv[])
         }
     }
 
-    ait = args.options.find(QLatin1String("drop-type-entries"));
+    ait = args.options.find(dropTypeEntriesOption());
     if (ait != args.options.end()) {
-        extractor.setDropTypeEntries(ait.value());
+        extractor.setDropTypeEntries(ait.value().toStringList());
         args.options.erase(ait);
     }
 
-    ait = args.options.find(QLatin1String("typesystem-paths"));
+    ait = args.options.find(typesystemPathOption());
     if (ait != args.options.end()) {
-        extractor.addTypesystemSearchPath(ait.value().split(pathSplitter));
+        extractor.addTypesystemSearchPath(ait.value().toStringList());
         args.options.erase(ait);
     }
 
@@ -570,7 +596,7 @@ int main(int argc, char *argv[])
     for (ait = args.options.begin(); ait != args.options.end(); ) {
         bool found = false;
         for (const GeneratorPtr &generator : qAsConst(generators))
-            found |= generator->handleOption(ait.key(), ait.value());
+            found |= generator->handleOption(ait.key(), ait.value().toString());
         if (found)
             ait = args.options.erase(ait);
         else
@@ -579,7 +605,7 @@ int main(int argc, char *argv[])
 
     ait = args.options.find(languageLevelOption());
     if (ait != args.options.end()) {
-        const QByteArray languageLevelBA = ait.value().toLatin1();
+        const QByteArray languageLevelBA = ait.value().toString().toLatin1();
         args.options.erase(ait);
         const LanguageLevel level = clang::languageLevelFromOption(languageLevelBA.constData());
         if (level == LanguageLevel::Default) {

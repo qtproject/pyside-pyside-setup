@@ -591,15 +591,16 @@ QString msgCannotFindSmartPointer(const QString &instantiationType,
 
 // main.cpp
 
-QString msgLeftOverArguments(const QMap<QString, QString> &remainingArgs)
+QString msgLeftOverArguments(const QVariantMap &remainingArgs)
 {
     QString message;
     QTextStream str(&message);
     str << "shiboken: Called with wrong arguments:";
     for (auto it = remainingArgs.cbegin(), end = remainingArgs.cend(); it != end; ++it) {
         str << ' ' << it.key();
-        if (!it.value().isEmpty())
-            str << ' ' << it.value();
+        const QString value = it.value().toString();
+        if (!value.isEmpty())
+            str << ' ' << value;
     }
     str << "\nCommand line: " << QCoreApplication::arguments().join(QLatin1Char(' '));
     return message;

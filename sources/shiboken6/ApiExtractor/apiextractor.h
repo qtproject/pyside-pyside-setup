@@ -78,7 +78,7 @@ public:
     HeaderPaths includePaths() const { return m_includePaths; }
     void setLogDirectory(const QString& logDir);
     bool setApiVersion(const QString& package, const QString& version);
-    void setDropTypeEntries(QString dropEntries);
+    void setDropTypeEntries(const QStringList &dropEntries);
     LanguageLevel languageLevel() const;
     void setLanguageLevel(LanguageLevel languageLevel);
 
