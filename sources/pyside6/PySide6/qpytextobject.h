@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2021 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -55,9 +55,6 @@ class QPyTextObject : public QObject, public QTextObjectInterface
     Q_INTERFACES(QTextObjectInterface)
 public:
     QPyTextObject(QObject *parent = nullptr) : QObject(parent) {}
-    void drawObject(QPainter *painter, const QRectF &rect, QTextDocument *doc,
-                    int posInDocument, const QTextFormat &format) = 0;
-    QSizeF intrinsicSize(QTextDocument *doc, int posInDocument, const QTextFormat &format) = 0;
 };
 #endif
 
