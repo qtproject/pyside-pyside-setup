@@ -11,10 +11,12 @@ ${Qt3DAnimation_GEN_DIR}/qt3danimation_qadditiveclipblend_wrapper.cpp
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_qanimationaspect_wrapper.cpp
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_qanimationcallback_wrapper.cpp
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_qanimationclip_wrapper.cpp
+${Qt3DAnimation_GEN_DIR}/qt3danimation_qanimationclipdata_wrapper.cpp
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_qanimationcliploader_wrapper.cpp
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_qanimationcontroller_wrapper.cpp
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_qanimationgroup_wrapper.cpp
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_qblendedclipanimator_wrapper.cpp
+${Qt3DAnimation_GEN_DIR}/qt3danimation_qchannelmapper_wrapper.cpp
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_qclipanimator_wrapper.cpp
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_qclock_wrapper.cpp
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_qkeyframe_wrapper.cpp

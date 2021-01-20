@@ -119,6 +119,7 @@
     <value-type name="QJSValue">
         <enum-type name="ErrorType" since="5.12"/>
         <enum-type name="SpecialValue"/>
+        <enum-type name="ObjectConversionBehavior" since="6.1"/>
     </value-type>
     <object-type name="QJSValueIterator"/>
     <object-type name="QQmlAbstractUrlInterceptor">

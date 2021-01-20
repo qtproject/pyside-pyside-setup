@@ -47,6 +47,7 @@
             <enum-type name="AnimationType"/>
         </object-type>
         <object-type name="QAbstractAnimationClip"/>
+        <value-type name="QAnimationClipData" since="6.1"/>
         <object-type name="QAbstractChannelMapping"/>
         <object-type name="QAbstractClipAnimator">
             <enum-type name="Loops"/>
@@ -64,6 +65,7 @@
         <object-type name="QAnimationController"/>
         <object-type name="QAnimationGroup"/>
         <object-type name="QBlendedClipAnimator"/>
+        <object-type name="QChannelMapper" since="6.1"/>
         <object-type name="QClipAnimator"/>
         <object-type name="QClock"/>
         <object-type name="QKeyFrame">
