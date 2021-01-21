@@ -40,7 +40,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from shiboken_paths import init_paths
 init_paths()
 
-import shiboken6 as shiboken
+from shiboken6 import Shiboken
 from sample import PrivateDtor
 
 
@@ -93,7 +93,7 @@ class PrivateDtorTest(unittest.TestCase):
 
         for i in range(1000):
             obj = PrivateDtor.instance()
-            shiboken.invalidate(obj)
+            Shiboken.invalidate(obj)
 
         after = sys.getrefcount(PrivateDtor)
 

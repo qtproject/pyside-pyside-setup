@@ -38,7 +38,7 @@ init_test_paths(True)
 
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QLabel
-import shiboken6 as shiboken
+from shiboken6 import Shiboken
 
 from helper.usesqapplication import UsesQApplication
 
@@ -72,7 +72,7 @@ class QLabelTest(UsesQApplication):
         ret_p = self.label.pixmap()
         self.assertIsNot(p1, ret_p)
         # Save the address of the pointer
-        ret_p_addr = shiboken.getCppPointer(ret_p)
+        ret_p_addr = Shiboken.getCppPointer(ret_p)
         # Remove the QPixmap
         del ret_p
         # Set new QPixmap
@@ -81,8 +81,8 @@ class QLabelTest(UsesQApplication):
         # There should be no pointers remaining with the same
         # address that our QPixmap p1 because it was deleted
         # using `del ret_p`
-        self.assertTrue(all(shiboken.getCppPointer(o) != ret_p_addr
-                   for o in shiboken.getAllValidWrappers()))
+        self.assertTrue(all(Shiboken.getCppPointer(o) != ret_p_addr
+                   for o in Shiboken.getAllValidWrappers()))
 
 if __name__ == '__main__':
     unittest.main()

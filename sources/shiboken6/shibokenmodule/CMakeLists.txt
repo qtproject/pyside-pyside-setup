@@ -3,7 +3,7 @@ project(shibokenmodule)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/shibokenmodule.txt.in"
                "${CMAKE_CURRENT_BINARY_DIR}/shibokenmodule.txt" @ONLY)
 
-set(sample_SRC ${CMAKE_CURRENT_BINARY_DIR}/shiboken6/shiboken6_module_wrapper.cpp)
+set(sample_SRC ${CMAKE_CURRENT_BINARY_DIR}/Shiboken/shiboken_module_wrapper.cpp)
 
 set(shibokenmodule_TYPESYSTEM ${CMAKE_CURRENT_SOURCE_DIR}/typesystem_shiboken.xml)
 
@@ -16,14 +16,15 @@ BYPRODUCTS ${sample_SRC}
 COMMAND shiboken6 --project-file=${CMAKE_CURRENT_BINARY_DIR}/shibokenmodule.txt ${GENERATOR_EXTRA_FLAGS}
 DEPENDS ${shibokenmodule_TYPESYSTEM}
 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-COMMENT "Running generator for 'shiboken6'..."
+COMMENT "Running generator for 'Shiboken'..."
 )
 
 add_library(shibokenmodule MODULE ${sample_SRC})
 target_include_directories(shibokenmodule PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
                                                   ${CMAKE_SOURCE_DIR})
 set_property(TARGET shibokenmodule PROPERTY PREFIX "")
-set_property(TARGET shibokenmodule PROPERTY OUTPUT_NAME "shiboken6${PYTHON_EXTENSION_SUFFIX}")
+# PYSIDE-1497: This `..` is the crucial trick to unify the path location of `Shiboken`.
+set_property(TARGET shibokenmodule PROPERTY OUTPUT_NAME "../Shiboken${PYTHON_EXTENSION_SUFFIX}")
 
 if(WIN32)
     set_property(TARGET shibokenmodule PROPERTY SUFFIX ".pyd")
@@ -39,8 +40,9 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/_config.py.in"
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/_config.py"
         DESTINATION "${PYTHON_SITE_PACKAGES}/shiboken6")
 
+# PYSIDE-1497: This `..` is the crucial trick to unify the path location of `Shiboken`.
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/__init__.py.in"
-               "${CMAKE_CURRENT_BINARY_DIR}/__init__.py" @ONLY)
+               "${CMAKE_CURRENT_BINARY_DIR}/../__init__.py" @ONLY)
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/files.dir/shibokensupport/__feature__.py"
                "${CMAKE_CURRENT_BINARY_DIR}/files.dir/shibokensupport/__feature__.py" COPYONLY)
@@ -70,7 +72,8 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/files.dir/shibokensupport/signature/
 install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/files.dir"
         DESTINATION "${PYTHON_SITE_PACKAGES}/shiboken6")
 
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/__init__.py"
+# PYSIDE-1497: This `..` is the crucial trick to unify the path location of `Shiboken`.
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/../__init__.py"
        DESTINATION "${PYTHON_SITE_PACKAGES}/shiboken6")
 
 # Use absolute path instead of relative path, to avoid ninja build errors due to

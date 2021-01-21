@@ -46,7 +46,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from shiboken_paths import init_paths
 init_paths()
 
-import shiboken6
+from shiboken6 import Shiboken
 _init_pyside_extension()   # trigger bootstrap
 
 from shibokensupport.signature.lib.tool import build_brace_pattern

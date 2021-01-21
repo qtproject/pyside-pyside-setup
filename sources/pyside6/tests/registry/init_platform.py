@@ -120,8 +120,6 @@ def set_ospaths(build_dir):
     os.environ[ospath_var] = ospath
 
 set_ospaths(all_build_dir)
-sys.path[:0] = [os.path.join(shiboken_build_dir, "shibokenmodule"),
-                pyside_build_dir]
 
 import PySide6
 
@@ -134,9 +132,7 @@ import testbinding
 all_modules.append("testbinding")
 
 # Note: This is not the shiboken dir as usual, but the binary.
-import shiboken6 as Shiboken
-Shiboken.__name__ = "Shiboken"
-sys.modules["Shiboken"] = sys.modules.pop("shiboken6")
+from shiboken6 import Shiboken
 all_modules.append("Shiboken")
 
 # 'sample/smart' are needed by 'other', so import them first.

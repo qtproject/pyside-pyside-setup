@@ -362,9 +362,6 @@ def init_Shiboken():
     })
     return locals()
 
-# side effect of different shiboken namings
-init_shiboken6 = init_shiboken6_shiboken6 = init_Shiboken
-
 def init_minimal():
     type_map.update({
         "MinBool": bool,

@@ -390,19 +390,8 @@ extern "C" {
 // Initialization
 static bool _init_enum()
 {
-    static PyObject *shiboken_name = Py_BuildValue("s", "shiboken6");
-    if (shiboken_name == nullptr)
-        return false;
-    Shiboken::AutoDecRef shibo(PyImport_GetModule(shiboken_name));
-    if (shibo.isNull())
-        return false;
-    Shiboken::AutoDecRef sub(PyObject_GetAttr(shibo, shiboken_name));
-    PyObject *mod = sub.object();
-    if (mod == nullptr) {
-        // We are in the build dir and already in shiboken.
-        PyErr_Clear();
-        mod = shibo.object();
-    }
+    Shiboken::AutoDecRef shibo(PyImport_ImportModule("shiboken6.Shiboken"));
+    auto mod = shibo.object();
     // publish Shiboken.Enum so that the signature gets initialized
     if (PyObject_SetAttrString(mod, "Enum", reinterpret_cast<PyObject *>(SbkEnum_TypeF())) < 0)
         return false;

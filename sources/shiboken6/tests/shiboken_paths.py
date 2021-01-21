@@ -108,8 +108,8 @@ def shiboken_paths(include_shiboken_tests=False):
     python_dirs = []
     if include_shiboken_tests:
         python_dirs.append(src_dir)  # For shiboken_test_helper
+    python_dirs.append(get_build_dir())  # for toplevel shiboken6 import
     shiboken_dir = os.path.join(get_build_dir(), 'shiboken6')
-    python_dirs.append(os.path.join(shiboken_dir, 'shibokenmodule'))
     lib_dirs = [os.path.join(shiboken_dir, 'libshiboken')]
     if include_shiboken_tests:
         shiboken_test_dir = os.path.join(shiboken_dir, 'tests')

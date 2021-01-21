@@ -22,7 +22,7 @@ import keyword
 import functools
 import typing
 
-from .shiboken6 import *
+from shiboken6.Shiboken import *
 
 # Trigger signature initialization via __builtins__.
 _init_pyside_extension()

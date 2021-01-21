@@ -36,8 +36,7 @@ init_test_paths(False)
 
 from PySide6.QtGui import QStandardItemModel, QStandardItem
 from PySide6.QtWidgets import QWidget
-import shiboken6 as shiboken
-
+from shiboken6 import Shiboken
 from helper.usesqapplication import UsesQApplication
 
 
@@ -62,7 +61,7 @@ class QStandardItemModelTest(UsesQApplication):
         model = QStandardItemModel()
         root = model.invisibleRootItem()
         model.clear()
-        self.assertFalse(shiboken.isValid(root))
+        self.assertFalse(Shiboken.isValid(root))
 
 
 class QStandardItemModelRef(UsesQApplication):

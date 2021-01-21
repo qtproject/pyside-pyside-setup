@@ -198,7 +198,7 @@ macro(create_pyside_module)
     endif()
     set(generate_pyi_options ${module_NAME} --sys-path
         "${pysidebindings_BINARY_DIR}"
-        "${SHIBOKEN_PYTHON_MODULE_DIR}")
+        "${SHIBOKEN_PYTHON_MODULE_DIR}/..")     # use the layer above shiboken6
     if (QUIET_BUILD)
         list(APPEND generate_pyi_options "--quiet")
     endif()

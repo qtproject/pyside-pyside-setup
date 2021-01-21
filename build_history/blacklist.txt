@@ -33,9 +33,6 @@
     linux
     darwin
     win32
-[QtWidgets::qstandarditemmodel_test]
-    py2
-    py3
 [QtTest::touchevent_test]
     linux
     darwin

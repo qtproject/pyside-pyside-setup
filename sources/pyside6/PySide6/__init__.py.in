@@ -54,10 +54,12 @@ def _setupQtDirectories():
             os.add_dll_directory(dir)
 
     try:
-        import shiboken6
+        # PYSIDE-1497: we use the build dir or install dir or site-packages, whatever the path
+        #              setting dictates. There is no longer a difference in path structure.
+        from shiboken6 import Shiboken
     except Exception:
         paths = ', '.join(sys.path)
-        print(f"PySide6/__init__.py: Unable to import shiboken6 from {paths}",
+        print(f"PySide6/__init__.py: Unable to import Shiboken from {paths}",
               file=sys.stderr)
         raise
 
@@ -66,16 +68,17 @@ def _setupQtDirectories():
         # PYSIDE-829: Avoid non-existent attributes in compiled code (Nuitka).
         # We now use an explicit function instead of touching a signature.
         _init_pyside_extension()
-    except AttributeError:
+    except (AttributeError, NameError):
         stars = 79 * "*"
+        fname = Shiboken.__file__
         print(dedent(f'''\
             {stars}
             PySide6/__init__.py: The `signature` module was not initialized.
             This libshiboken module was loaded from
 
-            "{shiboken6.__file__}".
+            "{fname}".
 
-            Please make sure that this is the real shiboken6 binary and not just a folder.
+            Please make sure that this is the real Shiboken binary and not just a folder.
             {stars}
             '''), file=sys.stderr)
         raise

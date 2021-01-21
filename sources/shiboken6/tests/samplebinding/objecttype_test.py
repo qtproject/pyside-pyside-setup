@@ -41,7 +41,7 @@ init_paths()
 import sys
 
 from sample import ObjectType, Str
-import shiboken6 as shiboken
+from shiboken6 import Shiboken
 
 
 class ObjectTypeTest(unittest.TestCase):
@@ -95,7 +95,7 @@ class ObjectTypeTest(unittest.TestCase):
         child = ObjectType(parent)
         next_focus = child.nextInFocusChain()
 
-        shiboken.invalidate(parent)
+        Shiboken.invalidate(parent)
 
     def testNextInFocusChainCycleList(self):
         '''As above but in for a list of objects'''
@@ -110,7 +110,7 @@ class ObjectTypeTest(unittest.TestCase):
             children.append(child)
             focus_chains.append(next_focus)
 
-        shiboken.invalidate(parents)
+        Shiboken.invalidate(parents)
 
     def testClassDecref(self):
         # Bug was that class PyTypeObject wasn't decrefed when instance died
@@ -118,7 +118,7 @@ class ObjectTypeTest(unittest.TestCase):
 
         for i in range(1000):
             obj = ObjectType()
-            shiboken.delete(obj)
+            Shiboken.delete(obj)
 
         after = sys.getrefcount(ObjectType)
 

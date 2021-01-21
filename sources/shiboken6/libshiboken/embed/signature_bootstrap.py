@@ -100,12 +100,9 @@ def bootstrap():
             sys.exit(-1)
         sys.path.remove(support_path)
 
-    try:
-        import shiboken6 as root
-    except ImportError:
-        # uninstalled case without ctest, try only this one which has __init__:
-        import shibokenmodule as root
-    rp = os.path.realpath(os.path.dirname(root.__file__))
+    import shiboken6 as root
+    path = root.__file__
+    rp = os.path.realpath(os.path.dirname(path))
     # This can be the shiboken6 directory or the binary module, so search.
     look_for = os.path.join("files.dir", "shibokensupport", "signature", "loader.py")
     while not os.path.exists(os.path.join(rp, look_for)):

@@ -36,8 +36,9 @@ import unittest
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from shiboken_paths import init_paths
 init_paths()
+
 import sample
-import shiboken6 as shiboken
+from shiboken6 import Shiboken
 
 class DeleteTest(unittest.TestCase):
     def testNonCppWrapperClassDelete(self):
@@ -45,8 +46,8 @@ class DeleteTest(unittest.TestCase):
         Python """
         obj = sample.ObjectType()
         child = obj.createChild(None)
-        shiboken.delete(child)
-        assert not shiboken.isValid(child)
+        Shiboken.delete(child)
+        assert not Shiboken.isValid(child)
 
 if __name__ == '__main__':
     unittest.main()

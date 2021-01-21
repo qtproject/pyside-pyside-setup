@@ -34,7 +34,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-import shiboken6 as shiboken
+from shiboken6 import Shiboken
 from PySide6.support import VoidPtr
 from PySide6.QtCore import QByteArray
 
@@ -50,7 +50,7 @@ class PySide6Support(unittest.TestCase):
         b = b"Hello world"
         ba = QByteArray(b)
         vp = VoidPtr(ba, ba.size())
-        self.assertIsInstance(vp, shiboken.VoidPtr)
+        self.assertIsInstance(vp, Shiboken.VoidPtr)
 
         # Create QByteArray from voidptr byte interpretation
         nba = QByteArray(vp.toBytes())

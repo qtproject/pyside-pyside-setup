@@ -35,7 +35,7 @@ from shiboken_paths import init_paths
 init_paths()
 from sample import *
 from other import *
-import shiboken6 as shiboken
+from shiboken6 import Shiboken
 
 class TestHashFuncs (unittest.TestCase):
 
@@ -48,7 +48,7 @@ class TestHashFuncs (unittest.TestCase):
         self.assertNotEqual(hash1, hash2)
 
         # Now invalidate the object and test its hash.  It shouldn't segfault.
-        shiboken.invalidate(obj1)
+        Shiboken.invalidate(obj1)
 
         hash1_2 = hash(obj1)
         self.assertEqual(hash1_2, hash1)
