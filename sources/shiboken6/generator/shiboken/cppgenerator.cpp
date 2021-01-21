@@ -6246,6 +6246,14 @@ bool CppGenerator::finishGeneration()
         << "_SignatureStrings);\n"
         << "\nreturn module;\n" << outdent << "}\n";
 
+    // Temporary hack to allow that the same module can be used both as
+    // `Shiboken` and `shiboken6`; this will go away in 6.1.
+    if (moduleName() == QLatin1String("Shiboken")) {
+        s << "\n// This function should be removed in version 6.2.\n"
+            << "extern \"C\" LIBSHIBOKEN_EXPORT PyObject *PyInit_shiboken6()\n{\n" << indent
+                << "return PyInit_Shiboken();\n" << outdent
+            << "}\n";
+    }
     return file.done() != FileOut::Failure;
 }
 

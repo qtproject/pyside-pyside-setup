@@ -82,3 +82,27 @@ configure_file("${shiboken_version_path}"
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/_git_shiboken_module_version.py"
         DESTINATION "${PYTHON_SITE_PACKAGES}/shiboken6")
+
+# Temporary copy of `Shiboken` to `shiboken6` until PySide 6.2
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/copy_renamed_binary.py" "if True:
+    import os, sys
+    from shutil import copyfile
+    fpath = sys.argv[-1]
+    fname = os.path.basename(fpath).replace('Shiboken', 'shiboken6')
+    # copying to `install`
+    instdir = os.path.join('${PYTHON_SITE_PACKAGES}', 'shiboken6')
+    os.makedirs(instdir, exist_ok=True)
+    newname = os.path.join(instdir, fname)
+    copyfile(fpath, newname)
+    # copying to `build`
+    builddir = '${CMAKE_CURRENT_BINARY_DIR}'
+    newname = os.path.join(builddir, '..', fname)
+    copyfile(fpath, newname)
+    ")
+
+add_custom_command(TARGET shibokenmodule POST_BUILD
+    COMMAND ${PYTHON_EXECUTABLE}
+        "${CMAKE_CURRENT_BINARY_DIR}/copy_renamed_binary.py"
+        "$<TARGET_FILE:shibokenmodule>"
+    COMMENT "running Python postprocess"
+    )
