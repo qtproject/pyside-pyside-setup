@@ -84,8 +84,9 @@ private:
                        const AbstractMetaFunctionCPtr &func, bool indexed = true);
     void writeFunctionParametersType(TextStream &s, const AbstractMetaClass *cppClass,
                                      const AbstractMetaFunctionCPtr &func) const;
-    void writeFunctionList(TextStream& s, const AbstractMetaClass* cppClass);
-    void writeFunctionBlock(TextStream& s, const QString& title, QStringList& functions);
+    static void writeFunctionList(TextStream& s, const AbstractMetaClass* cppClass);
+    static void writeFunctionBlock(TextStream& s, const QString& title,
+                                   QStringList& functions);
     void writeParameterType(TextStream &s, const AbstractMetaClass *cppClass,
                             const AbstractMetaArgument &arg) const;
 
@@ -96,7 +97,8 @@ private:
     bool writeInjectDocumentation(TextStream& s, TypeSystem::DocModificationMode mode,
                                   const AbstractMetaClass* cppClass,
                                   const AbstractMetaFunctionCPtr &func);
-    void writeDocSnips(TextStream &s, const CodeSnipList &codeSnips, TypeSystem::CodeSnipPosition position, TypeSystem::Language language);
+    static void writeDocSnips(TextStream &s, const CodeSnipList &codeSnips,
+                              TypeSystem::CodeSnipPosition position, TypeSystem::Language language);
 
     void writeModuleDocumentation();
     void writeAdditionalDocumentation() const;

@@ -69,7 +69,8 @@ void HeaderGenerator::writeCopyCtor(TextStream &s, const AbstractMetaClass *meta
       << "& self) : " << metaClass->qualifiedCppName() << "(self)\n{\n}\n\n";
 }
 
-void HeaderGenerator::writeProtectedFieldAccessors(TextStream &s, const AbstractMetaField &field) const
+void HeaderGenerator::writeProtectedFieldAccessors(TextStream &s,
+                                                   const AbstractMetaField &field)
 {
     const AbstractMetaType &metaType = field.type();
     QString fieldType = metaType.cppSignature();

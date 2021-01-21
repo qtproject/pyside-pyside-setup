@@ -52,10 +52,10 @@ protected:
     bool finishGeneration() override;
 
 private:
-    void writeInitFunc(TextStream &declStr, TextStream &callStr,
-                       const QString &initFunctionName,
-                       const TypeEntry *enclosingEntry = nullptr) const;
-    void writeCacheResetNative(TextStream &s, const GeneratorContext &classContext) const;
+    static void writeInitFunc(TextStream &declStr, TextStream &callStr,
+                              const QString &initFunctionName,
+                              const TypeEntry *enclosingEntry = nullptr);
+    static void writeCacheResetNative(TextStream &s, const GeneratorContext &classContext);
     void writeConstructorNative(TextStream &s, const GeneratorContext &classContext,
                                 const AbstractMetaFunctionCPtr &func) const;
     void writeDestructorNative(TextStream &s, const GeneratorContext &classContext) const;
@@ -71,7 +71,7 @@ private:
                                        const AbstractMetaFunctionCPtr &func,
                                        const FunctionModificationList &functionModifications);
     void writeMetaObjectMethod(TextStream &s, const GeneratorContext &classContext) const;
-    void writeMetaCast(TextStream &s, const GeneratorContext &classContext) const;
+    static void writeMetaCast(TextStream &s, const GeneratorContext &classContext);
 
     void writeEnumConverterFunctions(TextStream &s, const TypeEntry *enumType) const;
     void writeEnumConverterFunctions(TextStream &s, const AbstractMetaEnum &metaEnum) const;
@@ -81,8 +81,8 @@ private:
                                        const CustomConversion *customConversion) const;
     void writeConverterRegister(TextStream &s, const AbstractMetaClass *metaClass,
                                 const GeneratorContext &classContext) const;
-    void writeCustomConverterRegister(TextStream &s, const CustomConversion *customConversion,
-                                      const QString &converterVar) const;
+    static void writeCustomConverterRegister(TextStream &s, const CustomConversion *customConversion,
+                                             const QString &converterVar);
 
     void writeContainerConverterFunctions(TextStream &s,
                                           const AbstractMetaType &containerType) const;
@@ -238,12 +238,12 @@ private:
                                   const QString &targetTypeName) const;
 
     /// Writes a Python to C++ convertible check function.
-    void writeIsPythonConvertibleToCppFunction(TextStream &s,
-                                               const QString &sourceTypeName,
-                                               const QString &targetTypeName,
-                                               const QString &condition,
-                                               QString pythonToCppFuncName = QString(),
-                                               bool acceptNoneAsCppNull = false) const;
+    static void writeIsPythonConvertibleToCppFunction(TextStream &s,
+                                                       const QString &sourceTypeName,
+                                                       const QString &targetTypeName,
+                                                       const QString &condition,
+                                                       QString pythonToCppFuncName = QString(),
+                                                       bool acceptNoneAsCppNull = false);
 
     /// Writes a pair of Python to C++ conversion and check functions.
     void writePythonToCppConversionFunctions(TextStream &s,
@@ -261,9 +261,9 @@ private:
     void writePythonToCppConversionFunctions(TextStream &s,
                                              const AbstractMetaType &containerType) const;
 
-    void writeAddPythonToCppConversion(TextStream &s, const QString &converterVar,
+    static void writeAddPythonToCppConversion(TextStream &s, const QString &converterVar,
                                        const QString &pythonToCppFunc,
-                                       const QString &isConvertibleFunc) const;
+                                       const QString &isConvertibleFunc);
 
     void writeNamedArgumentResolution(TextStream &s, const AbstractMetaFunctionCPtr &func,
                                       bool usePyArgs, const OverloadData &overloadData) const;
@@ -279,9 +279,9 @@ private:
     QString getInitFunctionName(const GeneratorContext &context) const;
     QString getSimpleClassInitFunctionName(const AbstractMetaClass *metaClass) const;
 
-    void writeSignatureStrings(TextStream &s, const QString &signatures,
-                               const QString &arrayName,
-                               const char *comment) const;
+    static void writeSignatureStrings(TextStream &s, const QString &signatures,
+                                      const QString &arrayName,
+                                      const char *comment);
     void writeClassRegister(TextStream &s,
                             const AbstractMetaClass *metaClass,
                             const GeneratorContext &classContext,
@@ -309,8 +309,8 @@ private:
 
     void writeTypeAsNumberDefinition(TextStream &s, const AbstractMetaClass *metaClass) const;
 
-    void writeTpTraverseFunction(TextStream &s, const AbstractMetaClass *metaClass) const;
-    void writeTpClearFunction(TextStream &s, const AbstractMetaClass *metaClass) const;
+    static void writeTpTraverseFunction(TextStream &s, const AbstractMetaClass *metaClass);
+    static void writeTpClearFunction(TextStream &s, const AbstractMetaClass *metaClass);
 
     void writeCopyFunction(TextStream &s, const GeneratorContext &context) const;
 
@@ -342,7 +342,7 @@ private:
     void writeFlagsMethods(TextStream &s, const AbstractMetaEnum &cppEnum) const;
     void writeFlagsToLong(TextStream &s, const AbstractMetaEnum &cppEnum) const;
     void writeFlagsNonZero(TextStream &s, const AbstractMetaEnum &cppEnum) const;
-    void writeFlagsNumberMethodsDefinition(TextStream &s, const AbstractMetaEnum &cppEnum) const;
+    static void writeFlagsNumberMethodsDefinition(TextStream &s, const AbstractMetaEnum &cppEnum);
     void writeFlagsNumberMethodsDefinitions(TextStream &s, const AbstractMetaEnumList &enums) const;
     void writeFlagsBinaryOperator(TextStream &s, const AbstractMetaEnum &cppEnum,
                                   const QString &pyOpName, const QString &cppOpName) const;
@@ -355,21 +355,21 @@ private:
     /// Writes the implementation of special cast functions, used when we need to cast a class with multiple inheritance.
     static void writeSpecialCastFunction(TextStream &s, const AbstractMetaClass *metaClass);
 
-    void writePrimitiveConverterInitialization(TextStream &s,
-                                               const CustomConversion *customConversion) const;
-    void writeEnumConverterInitialization(TextStream &s, const TypeEntry *enumType) const;
-    void writeEnumConverterInitialization(TextStream &s, const AbstractMetaEnum &metaEnum) const;
+    static void writePrimitiveConverterInitialization(TextStream &s,
+                                                      const CustomConversion *customConversion);
+    static void writeEnumConverterInitialization(TextStream &s, const TypeEntry *enumType);
+    static void writeEnumConverterInitialization(TextStream &s, const AbstractMetaEnum &metaEnum);
     void writeContainerConverterInitialization(TextStream &s, const AbstractMetaType &type) const;
     void writeSmartPointerConverterInitialization(TextStream &s, const AbstractMetaType &ype) const;
-    void writeExtendedConverterInitialization(TextStream &s, const TypeEntry *externalType,
-                                              const AbstractMetaClassCList &conversions) const;
+    static void writeExtendedConverterInitialization(TextStream &s, const TypeEntry *externalType,
+                                                     const AbstractMetaClassCList &conversions);
 
     void writeParentChildManagement(TextStream &s, const AbstractMetaFunctionCPtr &func,
                                     bool userHeuristicForReturn) const;
     bool writeParentChildManagement(TextStream &s, const AbstractMetaFunctionCPtr &func,
                                     int argIndex, bool userHeuristicPolicy) const;
     void writeReturnValueHeuristics(TextStream &s, const AbstractMetaFunctionCPtr &func) const;
-    void writeInitQtMetaTypeFunctionBody(TextStream &s, const GeneratorContext &context) const;
+    static void writeInitQtMetaTypeFunctionBody(TextStream &s, const GeneratorContext &context);
 
     /**
      *   Returns the multiple inheritance initializer function for the given class.

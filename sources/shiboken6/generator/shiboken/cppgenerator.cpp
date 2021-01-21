@@ -774,7 +774,7 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
     }
 }
 
-void CppGenerator::writeCacheResetNative(TextStream &s, const GeneratorContext &classContext) const
+void CppGenerator::writeCacheResetNative(TextStream &s, const GeneratorContext &classContext)
 {
     s << "void " << classContext.wrapperName()
         << "::resetPyMethodCache()\n{\n" << indent
@@ -1273,7 +1273,7 @@ void CppGenerator::writeMetaObjectMethod(TextStream &s,
 }
 
 void CppGenerator::writeMetaCast(TextStream &s,
-                                 const GeneratorContext &classContext) const
+                                 const GeneratorContext &classContext)
 {
     const QString wrapperClassName = classContext.wrapperName();
     const QString qualifiedCppName = classContext.metaClass()->qualifiedCppName();
@@ -1721,7 +1721,7 @@ void CppGenerator::writeConverterRegister(TextStream &s, const AbstractMetaClass
 }
 
 void CppGenerator::writeCustomConverterRegister(TextStream &s, const CustomConversion *customConversion,
-                                                const QString &converterVar) const
+                                                const QString &converterVar)
 {
     if (!customConversion)
         return;
@@ -3066,7 +3066,7 @@ void CppGenerator::writeIsPythonConvertibleToCppFunction(TextStream &s,
                                                          const QString &targetTypeName,
                                                          const QString &condition,
                                                          QString pythonToCppFuncName,
-                                                         bool acceptNoneAsCppNull) const
+                                                         bool acceptNoneAsCppNull)
 {
     if (pythonToCppFuncName.isEmpty())
         pythonToCppFuncName = pythonToCppFunctionName(sourceTypeName, targetTypeName);
@@ -3226,7 +3226,7 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s, const Abst
 
 void CppGenerator::writeAddPythonToCppConversion(TextStream &s, const QString &converterVar,
                                                  const QString &pythonToCppFunc,
-                                                 const QString &isConvertibleFunc) const
+                                                 const QString &isConvertibleFunc)
 {
     s << "Shiboken::Conversions::addPythonToCppValueConversion(" << converterVar << ',' << '\n';
     {
@@ -3902,7 +3902,8 @@ void CppGenerator::writeSpecialCastFunction(TextStream &s, const AbstractMetaCla
     s << "return me;\n" << outdent << "}\n\n";
 }
 
-void CppGenerator::writePrimitiveConverterInitialization(TextStream &s, const CustomConversion *customConversion) const
+void CppGenerator::writePrimitiveConverterInitialization(TextStream &s,
+                                                         const CustomConversion *customConversion)
 {
     const TypeEntry *type = customConversion->ownerType();
     QString converter = converterObject(type);
@@ -3921,14 +3922,14 @@ void CppGenerator::writePrimitiveConverterInitialization(TextStream &s, const Cu
     writeCustomConverterRegister(s, customConversion, converter);
 }
 
-void CppGenerator::writeEnumConverterInitialization(TextStream &s, const AbstractMetaEnum &metaEnum) const
+void CppGenerator::writeEnumConverterInitialization(TextStream &s, const AbstractMetaEnum &metaEnum)
 {
     if (metaEnum.isPrivate() || metaEnum.isAnonymous())
         return;
     writeEnumConverterInitialization(s, metaEnum.typeEntry());
 }
 
-void CppGenerator::writeEnumConverterInitialization(TextStream &s, const TypeEntry *enumType) const
+void CppGenerator::writeEnumConverterInitialization(TextStream &s, const TypeEntry *enumType)
 {
     if (!enumType)
         return;
@@ -4067,7 +4068,7 @@ void CppGenerator::writeSmartPointerConverterInitialization(TextStream &s, const
 }
 
 void CppGenerator::writeExtendedConverterInitialization(TextStream &s, const TypeEntry *externalType,
-                                                        const AbstractMetaClassCList &conversions) const
+                                                        const AbstractMetaClassCList &conversions)
 {
     s << "// Extended implicit conversions for " << externalType->qualifiedTargetLangName()
       << ".\n";
@@ -4526,7 +4527,7 @@ void CppGenerator::writeTypeAsNumberDefinition(TextStream &s, const AbstractMeta
     }
 }
 
-void CppGenerator::writeTpTraverseFunction(TextStream &s, const AbstractMetaClass *metaClass) const
+void CppGenerator::writeTpTraverseFunction(TextStream &s, const AbstractMetaClass *metaClass)
 {
     QString baseName = cpythonBaseName(metaClass);
     s << "static int " << baseName
@@ -4535,7 +4536,7 @@ void CppGenerator::writeTpTraverseFunction(TextStream &s, const AbstractMetaClas
         << outdent << "}\n";
 }
 
-void CppGenerator::writeTpClearFunction(TextStream &s, const AbstractMetaClass *metaClass) const
+void CppGenerator::writeTpClearFunction(TextStream &s, const AbstractMetaClass *metaClass)
 {
     QString baseName = cpythonBaseName(metaClass);
     s << "static int " << baseName << "_clear(PyObject *self)\n{\n" << indent
@@ -5213,7 +5214,7 @@ void CppGenerator::writeFlagsMethods(TextStream &s, const AbstractMetaEnum &cppE
     s << '\n';
 }
 
-void CppGenerator::writeFlagsNumberMethodsDefinition(TextStream &s, const AbstractMetaEnum &cppEnum) const
+void CppGenerator::writeFlagsNumberMethodsDefinition(TextStream &s, const AbstractMetaEnum &cppEnum)
 {
     QString cpythonName = cpythonEnumName(cppEnum);
 
@@ -5312,7 +5313,7 @@ QString CppGenerator::getInitFunctionName(const GeneratorContext &context) const
 void CppGenerator::writeSignatureStrings(TextStream &s,
                                          const QString &signatures,
                                          const QString &arrayName,
-                                         const char *comment) const
+                                         const char *comment)
 {
     s << "// The signatures string for the " << comment << ".\n"
         << "// Multiple signatures have their index \"n:\" in front.\n"
@@ -5542,7 +5543,7 @@ void CppGenerator::writeClassRegister(TextStream &s,
     s << outdent << "}\n";
 }
 
-void CppGenerator::writeInitQtMetaTypeFunctionBody(TextStream &s, const GeneratorContext &context) const
+void CppGenerator::writeInitQtMetaTypeFunctionBody(TextStream &s, const GeneratorContext &context)
 {
     const AbstractMetaClass *metaClass = context.metaClass();
     // Gets all class name variants used on different possible scopes
@@ -5886,7 +5887,7 @@ PyErr_Format(PyExc_AttributeError,
 // function.
 void CppGenerator::writeInitFunc(TextStream &declStr, TextStream &callStr,
                                  const QString &initFunctionName,
-                                 const TypeEntry *enclosingEntry) const
+                                 const TypeEntry *enclosingEntry)
 {
     const bool hasParent =
         enclosingEntry && enclosingEntry->type() != TypeEntry::TypeSystemType;

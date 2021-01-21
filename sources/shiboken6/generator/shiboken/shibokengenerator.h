@@ -359,7 +359,7 @@ protected:
                            const AbstractMetaFunctionCPtr &metaFunc,
                            Options options = NoOption) const;
 
-    void writeUnusedVariableCast(TextStream &s, const QString &variableName) const;
+    static void writeUnusedVariableCast(TextStream &s, const QString &variableName);
 
     AbstractMetaFunctionCList filterFunctions(const AbstractMetaClass *metaClass) const;
 

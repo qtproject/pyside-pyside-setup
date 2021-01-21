@@ -1426,7 +1426,7 @@ void ShibokenGenerator::writeFunctionCall(TextStream &s,
     s << ')';
 }
 
-void ShibokenGenerator::writeUnusedVariableCast(TextStream &s, const QString &variableName) const
+void ShibokenGenerator::writeUnusedVariableCast(TextStream &s, const QString &variableName)
 {
     s << "SBK_UNUSED(" << variableName<< ")\n";
 }

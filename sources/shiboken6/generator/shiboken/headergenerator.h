@@ -53,7 +53,8 @@ protected:
 
 private:
     void writeCopyCtor(TextStream &s, const AbstractMetaClass *metaClass) const;
-    void writeProtectedFieldAccessors(TextStream &s, const AbstractMetaField &field) const;
+    static void writeProtectedFieldAccessors(TextStream &s,
+                                             const AbstractMetaField &field);
     void writeFunction(TextStream &s, const AbstractMetaFunctionCPtr &func);
     void writeSbkTypeFunction(TextStream &s, const AbstractMetaEnum &cppEnum) const;
     void writeSbkTypeFunction(TextStream &s, const AbstractMetaClass *cppClass) const;
