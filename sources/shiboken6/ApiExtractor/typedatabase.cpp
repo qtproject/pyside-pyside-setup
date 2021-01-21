@@ -155,11 +155,11 @@ void TypeDatabase::addSystemInclude(const QString &name)
 void TypeDatabase::addInlineNamespaceLookups(const NamespaceTypeEntry *n)
 {
     TypeEntryList additionalEntries; // Store before modifying the hash
-    for (TypeEntry *entry : m_entries) {
+    for (TypeEntry *entry : qAsConst(m_entries)) {
         if (entry->isChildOf(n))
             additionalEntries.append(entry);
     }
-    for (const auto &ae : additionalEntries)
+    for (const auto &ae : qAsConst(additionalEntries))
         m_entries.insert(ae->shortName(), ae);
 }
 

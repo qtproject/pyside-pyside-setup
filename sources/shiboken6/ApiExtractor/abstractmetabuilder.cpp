@@ -541,7 +541,6 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
                 }
             } else if (entry->isEnum() && entry->generateCode()) {
                 auto enumEntry = static_cast<const EnumTypeEntry *>(entry);
-                const QString name = enumEntry->targetLangQualifier();
                 AbstractMetaClass *cls = AbstractMetaClass::findClass(m_metaClasses,
                                                                       enumEntry->parent());
 

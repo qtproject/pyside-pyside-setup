@@ -682,8 +682,6 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
         }
     }
 
-    const QString signaturesString = signatureStream.toString();
-
     if (supportsSequenceProtocol(metaClass)) {
         writeSequenceMethods(s, metaClass, classContext);
     }
@@ -1053,7 +1051,6 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
             if (func->argumentRemoved(arg.argumentIndex() + 1))
                 continue;
 
-            QString argConv;
             const auto &argType = arg.type();
             auto argTypeEntry = static_cast<const PrimitiveTypeEntry *>(argType.typeEntry());
             bool convert = argTypeEntry->isObject()
@@ -2277,8 +2274,6 @@ void CppGenerator::writeErrorSection(TextStream &s, OverloadData &overloadData) 
     const auto rfunc = overloadData.referenceFunction();
     s  << '\n' << cpythonFunctionName(rfunc) << "_TypeError:\n";
     Indentation indentation(s);
-    QString funcName = fullPythonFunctionName(rfunc, true);
-
     QString argsVar = pythonFunctionWrapperUsesListOfArguments(overloadData)
         ? QLatin1String("args") : QLatin1String(PYTHON_ARG);
     s << "Shiboken::setErrorAboutWrongArguments(" << argsVar
@@ -3354,7 +3349,7 @@ QString CppGenerator::argumentNameFromIndex(const ApiExtractorResult &api,
             *errorMessage = msgClassNotFound(argType.typeEntry());
         if (argIndex == 1
             && !func->isConstructor()
-            && OverloadData::isSingleArgument(getFunctionGroups(func->implementingClass())[func->name()]))
+            && OverloadData::isSingleArgument(getFunctionGroups(func->implementingClass()).value(func->name())))
             pyArgName = QLatin1String(PYTHON_ARG);
         else
             pyArgName = pythonArgsAt(argIndex - 1);
@@ -4192,12 +4187,8 @@ void CppGenerator::writeClassDefinition(TextStream &s,
                      QLatin1String("Sbk_object_dealloc /* PYSIDE-832: Prevent replacement of \"0\" with subtype_dealloc. */");
         tp_init.clear();
     } else {
-        QString deallocClassName = classContext.useWrapper()
-            ? classContext.wrapperName() : cppClassName;
-        if (isQApp)
-            tp_dealloc = QLatin1String("&SbkDeallocQAppWrapper");
-        else
-            tp_dealloc = QLatin1String("&SbkDeallocWrapper");
+        tp_dealloc = isQApp
+            ? QLatin1String("&SbkDeallocQAppWrapper") : QLatin1String("&SbkDeallocWrapper");
         if (!onlyPrivCtor && !ctors.isEmpty())
             tp_init = cpythonFunctionName(ctors.constFirst());
     }
@@ -6397,7 +6388,6 @@ void CppGenerator::writeDefaultSequenceMethods(TextStream &s,
     writeCppSelfDefinition(s, context);
     writeIndexError(s, QLatin1String("index out of bounds"));
 
-    QString value;
     s << metaClass->qualifiedCppName() << "::const_iterator _item = "
         << CPP_SELF_VAR << "->begin();\n"
         << "std::advance(_item, _i);\n";

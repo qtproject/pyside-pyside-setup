@@ -352,7 +352,6 @@ static PyObject *signalInstanceConnect(PyObject *self, PyObject *args, PyObject 
         bool isFunction = PyFunction_Check(slot);
         bool matchedSlot = false;
 
-        QByteArray functionName;
         PySideSignalInstance *it = source;
 
         if (isMethod || isFunction) {
@@ -896,9 +895,8 @@ void registerSignals(SbkObjectType *pyObj, const QMetaObject *metaObject)
 
         // Empty signatures comes first! So they will be the default signal signature
         std::stable_sort(it.value().begin(), it.value().end(), &compareSignals);
-        SignalSigMap::mapped_type::const_iterator j = it.value().begin();
-        SignalSigMap::mapped_type::const_iterator endJ = it.value().end();
-        for (; j != endJ; ++j) {
+        const auto endJ = it.value().cend();
+        for (auto j = it.value().cbegin(); j != endJ; ++j) {
             const SignalSignature &sig = *j;
             appendSignature(self, sig);
         }

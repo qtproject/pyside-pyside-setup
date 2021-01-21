@@ -129,7 +129,7 @@ static QString msgCyclicDependency(const QString &funcName, const QString &graph
     str << "Cyclic dependency found on overloaddata for \"" << funcName
          << "\" method! The graph boy saved the graph at \"" << QDir::toNativeSeparators(graphName)
          << "\". Cyclic functions:";
-    for (auto c : cyclic)
+    for (const auto &c : cyclic)
         str << ' ' << c->signature();
     if (const int count = involvedConversions.size()) {
         str << " Implicit conversions (" << count << "): ";

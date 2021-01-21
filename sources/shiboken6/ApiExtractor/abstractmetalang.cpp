@@ -948,7 +948,6 @@ AbstractMetaFunctionCList AbstractMetaClass::queryFunctionList(const AbstractMet
 AbstractMetaFunctionCPtr AbstractMetaClass::queryFirstFunction(const AbstractMetaFunctionCList &list,
                                                                FunctionQueryOptions query)
 {
-    AbstractMetaFunctionCList result;
     for (const auto &f : list) {
         if (queryFunction(f.data(), query))
             return f;
@@ -1116,7 +1115,7 @@ void AbstractMetaClass::fixFunctions()
     AbstractMetaFunctionCList funcs = functions();
     AbstractMetaFunctionCList nonRemovedFuncs;
     nonRemovedFuncs.reserve(funcs.size());
-    for (auto f : qAsConst(funcs)) {
+    for (const auto &f : qAsConst(funcs)) {
         // Fishy: Setting up of implementing/declaring/base classes changes
         // the applicable modifications; clear cached ones.
         qSharedPointerConstCast<AbstractMetaFunction>(f)->clearModificationsCache();
@@ -1459,7 +1458,7 @@ bool AbstractMetaClass::isValueTypeWithCopyConstructorOnly() const
         return false;
     const auto ctors = queryFunctions(FunctionQueryOption::Constructors);
     bool copyConstructorFound = false;
-    for (auto ctor : ctors) {
+    for (const auto &ctor : ctors) {
         switch (ctor->functionType()) {
         case AbstractMetaFunction::ConstructorFunction:
             return false;

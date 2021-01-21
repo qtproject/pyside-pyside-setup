@@ -826,7 +826,6 @@ static void writeFancyToc(TextStream& s, const QStringList& items, int cols = 2)
         QtXmlToSphinx::TableCell cell(currentColData);
         row << cell;
         currentColData.clear();
-        i = 0;
     }
     table.appendRow(row);
     table.normalize();

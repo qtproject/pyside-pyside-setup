@@ -584,9 +584,8 @@ static PyObject *modifyStaticToClassMethod(PyTypeObject *type, PyObject *sm)
     new_func->ml_meth = func->m_ml->ml_meth;
     new_func->ml_flags = (func->m_ml->ml_flags & ~METH_STATIC) | METH_CLASS;
     new_func->ml_doc = func->m_ml->ml_doc;
-    auto cfunc = PyCFunction_NewEx(new_func, nullptr, nullptr);
-    cfunc = PyDescr_NewClassMethod(type, new_func);
-    return cfunc;
+    PyCFunction_NewEx(new_func, nullptr, nullptr);
+    return PyDescr_NewClassMethod(type, new_func);
 }
 
 static PyObject *createProperty(PyTypeObject *type, PyObject *getter, PyObject *setter)

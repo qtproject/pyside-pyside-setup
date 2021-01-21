@@ -1397,7 +1397,7 @@ void ShibokenGenerator::writeArgumentNames(TextStream &s,
 {
     const AbstractMetaArgumentList arguments = func->arguments();
     int argCount = 0;
-    for (auto argument : arguments) {
+    for (const auto &argument : arguments) {
         const int index = argument.argumentIndex() + 1;
         if ((options & Generator::SkipRemovedArguments) && (func->argumentRemoved(index)))
             continue;

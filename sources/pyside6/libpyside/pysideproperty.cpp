@@ -128,8 +128,6 @@ static void qpropertyMetaCall(PySideProperty *pp, PyObject *self, QMetaObject::C
     Shiboken::Conversions::SpecificConverter converter(pp->d->typeName);
     Q_ASSERT(converter);
 
-    QByteArray type(pp->d->typeName);
-
     switch(call) {
         case QMetaObject::ReadProperty:
         {

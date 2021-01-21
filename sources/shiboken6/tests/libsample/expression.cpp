@@ -48,6 +48,8 @@ Expression::Expression(const Expression& other)
 
 Expression& Expression::operator=(const Expression& other)
 {
+    if (&other == this)
+        return *this;
     delete m_operand1;
     delete m_operand2;
     m_operand1 = other.m_operand1 ? new Expression(*other.m_operand1) : nullptr;
