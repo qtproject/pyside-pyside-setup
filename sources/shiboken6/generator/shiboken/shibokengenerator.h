@@ -248,7 +248,7 @@ protected:
         QString checkFunction;
         std::optional<AbstractMetaType> type;
     };
-    CPythonCheckFunctionResult guessCPythonCheckFunction(const QString &type) const;
+    static CPythonCheckFunctionResult guessCPythonCheckFunction(const QString &type);
     static QString cpythonIsConvertibleFunction(const ApiExtractorResult &api,
                                                 const TypeEntry *type,
                                                 bool genericNumberType = false,
@@ -337,14 +337,16 @@ protected:
      *   \return A new AbstractMetaType object that must be deleted by the caller,
      *           or a nullptr pointer in case of failure.
      */
-    std::optional<AbstractMetaType>
+    static std::optional<AbstractMetaType>
         buildAbstractMetaTypeFromString(QString typeSignature,
-                                        QString *errorMessage = nullptr) const;
+                                        QString *errorMessage = nullptr);
 
     /// Creates an AbstractMetaType object from a TypeEntry.
-    AbstractMetaType buildAbstractMetaTypeFromTypeEntry(const TypeEntry *typeEntry) const;
+    static AbstractMetaType
+        buildAbstractMetaTypeFromTypeEntry(const TypeEntry *typeEntry);
     /// Creates an AbstractMetaType object from an AbstractMetaClass.
-    AbstractMetaType buildAbstractMetaTypeFromAbstractMetaClass(const AbstractMetaClass *metaClass) const;
+    static AbstractMetaType
+        buildAbstractMetaTypeFromAbstractMetaClass(const AbstractMetaClass *metaClass);
 
     static void writeMinimalConstructorExpression(TextStream &s, const ApiExtractorResult &api,
                                                   const AbstractMetaType &type,
@@ -439,14 +441,15 @@ private:
     /// Utility function for writeCodeSnips.
     using ArgumentVarReplacementPair = QPair<AbstractMetaArgument, QString>;
     using ArgumentVarReplacementList = QList<ArgumentVarReplacementPair>;
-    ArgumentVarReplacementList getArgumentReplacement(const AbstractMetaFunctionCPtr &func,
-                                                      bool usePyArgs, TypeSystem::Language language,
-                                                      const AbstractMetaArgument *lastArg) const;
+    static ArgumentVarReplacementList
+        getArgumentReplacement(const AbstractMetaFunctionCPtr &func,
+                               bool usePyArgs, TypeSystem::Language language,
+                               const AbstractMetaArgument *lastArg);
 
     /// Returns a string with the user's custom code snippets that comply with \p position and \p language.
-    QString getCodeSnippets(const CodeSnipList &codeSnips,
-                            TypeSystem::CodeSnipPosition position,
-                            TypeSystem::Language language) const;
+    static QString getCodeSnippets(const CodeSnipList &codeSnips,
+                                   TypeSystem::CodeSnipPosition position,
+                                   TypeSystem::Language language);
 
     enum TypeSystemConverterVariable {
         TypeSystemCheckFunction = 0,
@@ -505,9 +508,6 @@ private:
     bool m_useIsNullAsNbNonZero = false;
     bool m_avoidProtectedHack = false;
     bool m_wrapperDiagnostics = false;
-
-    using AbstractMetaTypeCache = QHash<QString, AbstractMetaType>;
-    mutable AbstractMetaTypeCache m_metaTypeFromStringCache;
 
     /// Type system converter variable replacement names and regular expressions.
     static const QHash<int, QString> &typeSystemConvName();

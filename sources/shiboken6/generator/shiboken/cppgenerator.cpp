@@ -2448,7 +2448,7 @@ static const QStringList &knownPythonTypes()
 }
 
 std::optional<AbstractMetaType>
-    CppGenerator::getArgumentType(const AbstractMetaFunctionCPtr &func, int argPos) const
+    CppGenerator::getArgumentType(const AbstractMetaFunctionCPtr &func, int argPos)
 {
     if (argPos < 0 || argPos > func->arguments().size()) {
         qCWarning(lcShiboken).noquote().nospace()

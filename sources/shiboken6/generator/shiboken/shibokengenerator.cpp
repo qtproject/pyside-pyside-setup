@@ -125,6 +125,10 @@ using GeneratorClassInfoCache = QHash<const AbstractMetaClass *, GeneratorClassI
 
 Q_GLOBAL_STATIC(GeneratorClassInfoCache, generatorClassInfoCache)
 
+using AbstractMetaTypeCache = QHash<QString, AbstractMetaType>;
+
+Q_GLOBAL_STATIC(AbstractMetaTypeCache, metaTypeFromStringCache)
+
 static const char CHECKTYPE_REGEX[] = R"(%CHECKTYPE\[([^\[]*)\]\()";
 static const char ISCONVERTIBLE_REGEX[] = R"(%ISCONVERTIBLE\[([^\[]*)\]\()";
 static const char CONVERTTOPYTHON_REGEX[] = R"(%CONVERTTOPYTHON\[([^\[]*)\]\()";
@@ -1124,7 +1128,7 @@ QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry *type, bool gene
 }
 
 ShibokenGenerator::CPythonCheckFunctionResult
-    ShibokenGenerator::guessCPythonCheckFunction(const QString &type) const
+    ShibokenGenerator::guessCPythonCheckFunction(const QString &type)
 {
     // PYSIDE-795: We abuse PySequence for iterables.
     // This part handles the overrides in the XML files.
@@ -1527,7 +1531,7 @@ static QString getArgumentsFromMethodCall(const QString &str)
 
 QString ShibokenGenerator::getCodeSnippets(const CodeSnipList &codeSnips,
                                            TypeSystem::CodeSnipPosition position,
-                                           TypeSystem::Language language) const
+                                           TypeSystem::Language language)
 {
     QString code;
     for (const CodeSnip &snip : codeSnips) {
@@ -1571,7 +1575,7 @@ void ShibokenGenerator::processCodeSnip(QString &code) const
 ShibokenGenerator::ArgumentVarReplacementList
     ShibokenGenerator::getArgumentReplacement(const AbstractMetaFunctionCPtr &func,
                                               bool usePyArgs, TypeSystem::Language language,
-                                              const AbstractMetaArgument *lastArg) const
+                                              const AbstractMetaArgument *lastArg)
 {
     ArgumentVarReplacementList argReplacements;
     TypeSystem::Language convLang = (language == TypeSystem::TargetLangCode)
@@ -2154,14 +2158,15 @@ QString ShibokenGenerator::getModuleHeaderFileName(const QString &moduleName) co
 
 std::optional<AbstractMetaType>
     ShibokenGenerator::buildAbstractMetaTypeFromString(QString typeSignature,
-                                                       QString *errorMessage) const
+                                                       QString *errorMessage)
 {
     typeSignature = typeSignature.trimmed();
     if (typeSignature.startsWith(QLatin1String("::")))
         typeSignature.remove(0, 2);
 
-    auto it = m_metaTypeFromStringCache.find(typeSignature);
-    if (it == m_metaTypeFromStringCache.end()) {
+    auto &cache = *metaTypeFromStringCache();
+    auto it = cache.find(typeSignature);
+    if (it == cache.end()) {
         auto metaType =
               AbstractMetaBuilder::translateType(typeSignature, nullptr, {}, errorMessage);
         if (Q_UNLIKELY(!metaType.has_value())) {
@@ -2169,29 +2174,32 @@ std::optional<AbstractMetaType>
                 errorMessage->prepend(msgCannotBuildMetaType(typeSignature));
             return {};
         }
-        it = m_metaTypeFromStringCache.insert(typeSignature, metaType.value());
+        it = cache.insert(typeSignature, metaType.value());
     }
     return it.value();
 }
 
 AbstractMetaType
-    ShibokenGenerator::buildAbstractMetaTypeFromTypeEntry(const TypeEntry *typeEntry) const
+    ShibokenGenerator::buildAbstractMetaTypeFromTypeEntry(const TypeEntry *typeEntry)
 {
     QString typeName = typeEntry->qualifiedCppName();
     if (typeName.startsWith(QLatin1String("::")))
         typeName.remove(0, 2);
-    if (m_metaTypeFromStringCache.contains(typeName))
-        return m_metaTypeFromStringCache.value(typeName);
+    auto &cache  = *metaTypeFromStringCache();
+    auto it = cache.find(typeName);
+    if (it != cache.end())
+        return it.value();
     AbstractMetaType metaType(typeEntry);
     metaType.clearIndirections();
     metaType.setReferenceType(NoReference);
     metaType.setConstant(false);
     metaType.decideUsagePattern();
-    m_metaTypeFromStringCache.insert(typeName, metaType);
+    cache.insert(typeName, metaType);
     return metaType;
 }
+
 AbstractMetaType
-    ShibokenGenerator::buildAbstractMetaTypeFromAbstractMetaClass(const AbstractMetaClass *metaClass) const
+    ShibokenGenerator::buildAbstractMetaTypeFromAbstractMetaClass(const AbstractMetaClass *metaClass)
 {
     return ShibokenGenerator::buildAbstractMetaTypeFromTypeEntry(metaClass->typeEntry());
 }
