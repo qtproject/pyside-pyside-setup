@@ -118,7 +118,7 @@ private:
                         bool isNumber = false, const QString &customType = QString(),
                         bool rejectNull = false) const;
     void writeTypeCheck(TextStream& s, const OverloadData *overloadData,
-                        QString argumentName) const;
+                        const QString &argumentName) const;
 
     static void writeTypeDiscoveryFunction(TextStream &s, const AbstractMetaClass *metaClass);
 

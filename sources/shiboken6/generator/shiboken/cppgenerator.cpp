@@ -515,7 +515,7 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
         // Manifested as crash when calling QPlainTextEdit::find() (clash with
         // static QWidget::find(WId)).
         if (!staticEncountered) {
-            for (int i = overloads.size() - 1; i >= 0; --i) {
+            for (qsizetype i = overloads.size() - 1; i >= 0; --i) {
                 if (overloads.at(i)->isStatic())
                     overloads.removeAt(i);
             }
@@ -1253,7 +1253,7 @@ void CppGenerator::writeMetaObjectMethod(TextStream &s,
 
     CodeSnipList snips;
     if (list.size() == 1) {
-        const auto func = list.constFirst();
+        const auto &func = list.constFirst();
         snips = func->injectedCodeSnips();
         if (func->isUserAdded()) {
             CodeSnipList snips = func->injectedCodeSnips();
@@ -2392,7 +2392,7 @@ static void checkTypeViability(const AbstractMetaFunctionCPtr &func)
 }
 
 void CppGenerator::writeTypeCheck(TextStream &s, const OverloadData *overloadData,
-                                  QString argumentName) const
+                                  const QString &argumentName) const
 {
     QSet<const TypeEntry *> numericTypes;
     const OverloadDataList &overloads = overloadData->previousOverloadData()->nextOverloadData();
@@ -4162,7 +4162,6 @@ void CppGenerator::writeClassDefinition(TextStream &s,
     QString tp_dealloc;
     QString tp_hash;
     QString tp_call;
-    QString cppClassName = metaClass->qualifiedCppName();
     const QString className = chopType(cpythonTypeName(metaClass));
     QString baseClassName;
     AbstractMetaFunctionCList ctors;
@@ -4570,7 +4569,7 @@ void CppGenerator::writeGetterFunction(TextStream &s,
 
     writeCppSelfDefinition(s, context);
 
-    AbstractMetaType fieldType = metaField.type();
+    const AbstractMetaType &fieldType = metaField.type();
     // Force use of pointer to return internal variable memory
     bool newWrapperSameObject = !fieldType.isConstant() && fieldType.isWrapperType()
             && !fieldType.isPointer();
@@ -6275,7 +6274,7 @@ bool CppGenerator::writeParentChildManagement(TextStream &s, const AbstractMetaF
     ArgumentOwner::Action action = argOwner.action;
     int parentIndex = argOwner.index;
     int childIndex = argIndex;
-    if (ctorHeuristicEnabled && argIndex > 0 && numArgs) {
+    if (ctorHeuristicEnabled && argIndex > 0 && argIndex <= numArgs) {
         const AbstractMetaArgument &arg = func->arguments().at(argIndex-1);
         if (arg.name() == QLatin1String("parent") && arg.type().isObjectType()) {
             action = ArgumentOwner::Add;

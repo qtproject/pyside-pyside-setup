@@ -2089,8 +2089,8 @@ bool TypeSystemParser::parseRename(const QXmlStreamReader &,
     return true;
 }
 
-bool TypeSystemParser::parseModifyField(const QXmlStreamReader &reader,
-                               QXmlStreamAttributes *attributes)
+bool TypeSystemParser::parseModifyField(const QXmlStreamReader &,
+                                        QXmlStreamAttributes *attributes)
 {
     FieldModification fm;
     for (int i = attributes->size() - 1; i >= 0; --i) {
@@ -2713,7 +2713,7 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
         return true;
     }
 
-    auto *element = new StackElement(m_current);
+    std::unique_ptr<StackElement> element(new StackElement(m_current));
     element->type = elementType;
 
     if (element->type == StackElement::Root && m_generate == TypeEntry::GenerateCode)
@@ -2761,8 +2761,8 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
         if (m_database->hasDroppedTypeEntries()) {
             const QString identifier = element->type == StackElement::FunctionTypeEntry
                 ? attributes.value(signatureAttribute()).toString() : name;
-            if (shouldDropTypeEntry(m_database, element, identifier)) {
-                m_currentDroppedEntry = element;
+            if (shouldDropTypeEntry(m_database, element.get(), identifier)) {
+                m_currentDroppedEntry = element.release();
                 m_currentDroppedEntryDepth = 1;
                 if (ReportHandler::isDebug(ReportHandler::SparseDebug)) {
                     qCInfo(lcShiboken, "Type system entry '%s' was intentionally dropped from generation.",
@@ -3038,7 +3038,7 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
             m_contextStack.top()->functionMods.last().argument_mods().last().setArray(true);
             break;
         case StackElement::InjectCode:
-            if (!parseInjectCode(reader, topElement, element, &attributes))
+            if (!parseInjectCode(reader, topElement, element.get(), &attributes))
                 return false;
             break;
         case StackElement::Include:
@@ -3070,7 +3070,7 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
                 return false;
             break;
         case StackElement::Replace:
-            if (!parseReplace(reader, topElement, element, &attributes))
+            if (!parseReplace(reader, topElement, element.get(), &attributes))
                 return false;
             break;
         default:
@@ -3083,6 +3083,6 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
         qCWarning(lcShiboken, "%s", qPrintable(msgReaderWarning(reader, message)));
     }
 
-    m_current = element;
+    m_current = element.release();
     return true;
 }

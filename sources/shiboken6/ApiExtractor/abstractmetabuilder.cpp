@@ -2560,6 +2560,8 @@ AbstractMetaClass* AbstractMetaBuilderPrivate::findTemplateClass(const QString &
                                                                  TypeInfo *info,
                                                                  ComplexTypeEntry **baseContainerType) const
 {
+    if (baseContainerType)
+        *baseContainerType = nullptr;
     TypeDatabase* types = TypeDatabase::instance();
 
     QStringList scope = context->typeEntry()->qualifiedCppName().split(colonColon());
