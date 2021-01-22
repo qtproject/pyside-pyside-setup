@@ -253,7 +253,7 @@ public:
      *  dots ('.') the generator subclass must overload this method.
      *  \return a string representing the last part of a package name
      */
-    QString moduleName() const;
+    static QString moduleName();
 
 protected:
     /// Returns all primitive types found by APIExtractor

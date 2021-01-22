@@ -173,7 +173,6 @@ struct Generator::GeneratorPrivate
     QString outDir;
     // License comment
     QString licenseComment;
-    QString moduleName;
     QStringList instantiatedContainersNames;
     AbstractMetaTypeList instantiatedContainers;
     AbstractMetaTypeList instantiatedSmartPointers;
@@ -383,13 +382,17 @@ QString Generator::packageName()
     return TypeDatabase::instance()->defaultPackageName();
 }
 
-QString Generator::moduleName() const
+static QString getModuleName()
 {
-    if (m_d->moduleName.isEmpty()) {
-        m_d->moduleName = packageName();
-        m_d->moduleName.remove(0, m_d->moduleName.lastIndexOf(QLatin1Char('.')) + 1);
-    }
-    return m_d->moduleName;
+    QString result = TypeDatabase::instance()->defaultPackageName();
+    result.remove(0, result.lastIndexOf(QLatin1Char('.')) + 1);
+    return result;
+}
+
+QString Generator::moduleName()
+{
+    static const QString result = getModuleName();
+    return result;
 }
 
 QString Generator::outputDirectory() const
