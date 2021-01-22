@@ -57,8 +57,8 @@ private:
                                              const AbstractMetaField &field);
     void writeFunction(TextStream &s, const AbstractMetaFunctionCPtr &func);
     void writeSbkTypeFunction(TextStream &s, const AbstractMetaEnum &cppEnum) const;
-    void writeSbkTypeFunction(TextStream &s, const AbstractMetaClass *cppClass) const;
-    void writeSbkTypeFunction(TextStream &s, const AbstractMetaType &metaType) const;
+    static void writeSbkTypeFunction(TextStream &s, const AbstractMetaClass *cppClass) ;
+    static void writeSbkTypeFunction(TextStream &s, const AbstractMetaType &metaType) ;
     static void writeTypeIndexValueLine(TextStream &s, const ApiExtractorResult &api,
                                         const TypeEntry *typeEntry);
     static void writeTypeIndexValueLines(TextStream &s, const ApiExtractorResult &api,

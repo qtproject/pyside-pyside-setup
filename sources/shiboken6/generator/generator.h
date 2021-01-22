@@ -263,18 +263,18 @@ protected:
     static ContainerTypeEntryList containerTypes();
 
     virtual GeneratorContext contextForClass(const AbstractMetaClass *c) const;
-    GeneratorContext contextForSmartPointer(const AbstractMetaClass *c,
-                                            const AbstractMetaType &t) const;
+    static GeneratorContext contextForSmartPointer(const AbstractMetaClass *c,
+                                                   const AbstractMetaType &t);
 
     /// Generates a file for given AbstractMetaClass or AbstractMetaType (smart pointer case).
     bool generateFileForContext(const GeneratorContext &context);
 
     /// Returns the file base name for a smart pointer.
-    QString getFileNameBaseForSmartPointer(const AbstractMetaType &smartPointerType,
-                                           const AbstractMetaClass *smartPointerClass) const;
+    static QString getFileNameBaseForSmartPointer(const AbstractMetaType &smartPointerType,
+                                                  const AbstractMetaClass *smartPointer);
 
     /// Returns true if the generator should generate any code for the TypeEntry.
-    bool shouldGenerateTypeEntry(const TypeEntry *) const;
+    static bool shouldGenerateTypeEntry(const TypeEntry *) ;
 
     /// Returns true if the generator should generate any code for the AbstractMetaClass.
     virtual bool shouldGenerate(const AbstractMetaClass *) const;

@@ -69,16 +69,16 @@ public:
     void setCppFileNames(const QFileInfoList &cppFileNames);
     QFileInfoList cppFileNames() const { return m_cppFileNames; }
     void setSkipDeprecated(bool value);
-    void setSuppressWarnings(bool value);
-    void setSilent(bool value);
-    void addTypesystemSearchPath(const QString& path);
-    void addTypesystemSearchPath(const QStringList& paths);
+    static void setSuppressWarnings(bool value);
+    static void setSilent(bool value);
+    static void addTypesystemSearchPath(const QString &path);
+    static void addTypesystemSearchPath(const QStringList& paths);
     void addIncludePath(const HeaderPath& path);
     void addIncludePath(const HeaderPaths& paths);
     HeaderPaths includePaths() const { return m_includePaths; }
     void setLogDirectory(const QString& logDir);
-    bool setApiVersion(const QString& package, const QString& version);
-    void setDropTypeEntries(const QStringList &dropEntries);
+    static bool setApiVersion(const QString &package, const QString &version);
+    static void setDropTypeEntries(const QStringList &dropEntries);
     LanguageLevel languageLevel() const;
     void setLanguageLevel(LanguageLevel languageLevel);
     QStringList clangOptions() const;

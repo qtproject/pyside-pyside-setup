@@ -163,7 +163,7 @@ private:
     void handleRstPassTroughTag(QXmlStreamReader& reader);
 
     LinkContext *handleLinkStart(const QString &type, QString ref) const;
-    void handleLinkText(LinkContext *linkContext, const QString &linktext) const;
+    static void handleLinkText(LinkContext *linkContext, const QString &linktext) ;
     void handleLinkEnd(LinkContext *linkContext);
 
     void warn(const QString &message) const;
@@ -190,7 +190,7 @@ private:
 
     QString readFromLocations(const QStringList &locations, const QString &path,
                               const QString &identifier, QString *errorMessage);
-    QString readFromLocation(const QString &location, const QString &identifier,
+    static QString readFromLocation(const QString &location, const QString &identifier,
                              QString *errorMessage);
     void pushOutputBuffer();
     QString popOutputBuffer();

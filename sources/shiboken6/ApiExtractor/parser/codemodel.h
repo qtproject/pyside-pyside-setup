@@ -105,7 +105,8 @@ public:
     void addFile(const FileModelItem &item);
     FileModelItem findFile(const QString &name) const;
 
-    CodeModelItem findItem(const QStringList &qualifiedName, const ScopeModelItem &scope) const;
+    static CodeModelItem findItem(const QStringList &qualifiedName,
+                                  const ScopeModelItem &scope);
 
 private:
     FileList m_files;

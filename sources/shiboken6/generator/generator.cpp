@@ -426,7 +426,7 @@ bool Generator::generateFileForContext(const GeneratorContext &context)
 }
 
 QString Generator::getFileNameBaseForSmartPointer(const AbstractMetaType &smartPointerType,
-                                                  const AbstractMetaClass *smartPointerClass) const
+                                                  const AbstractMetaClass *smartPointerClass)
 {
     const AbstractMetaType innerType = smartPointerType.getSmartPointerInnerType();
     QString fileName = smartPointerClass->qualifiedCppName().toLower();
@@ -445,7 +445,7 @@ GeneratorContext Generator::contextForClass(const AbstractMetaClass *c) const
 }
 
 GeneratorContext Generator::contextForSmartPointer(const AbstractMetaClass *c,
-                                                   const AbstractMetaType &t) const
+                                                   const AbstractMetaType &t)
 {
     GeneratorContext result;
     result.m_metaClass = c;
@@ -477,7 +477,7 @@ bool Generator::generate()
     return finishGeneration();
 }
 
-bool Generator::shouldGenerateTypeEntry(const TypeEntry *type) const
+bool Generator::shouldGenerateTypeEntry(const TypeEntry *type)
 {
     return type->generateCode() && NamespaceTypeEntry::isVisibleScope(type);
 }

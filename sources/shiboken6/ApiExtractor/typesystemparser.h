@@ -235,7 +235,7 @@ private:
                              QXmlStreamAttributes *);
     bool parseReplaceDefaultExpression(const QXmlStreamReader &,
                                        const StackElement &topElement, QXmlStreamAttributes *);
-    CustomFunction *
+    static CustomFunction *
         parseCustomMetaConstructor(const QXmlStreamReader &,
                                    StackElement::ElementType type,
                                    const StackElement &topElement, QXmlStreamAttributes *);

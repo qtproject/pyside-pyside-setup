@@ -996,7 +996,7 @@ static QString fixLinkText(const QtXmlToSphinx::LinkContext *linkContext,
     return  linktext;
 }
 
-void QtXmlToSphinx::handleLinkText(LinkContext *linkContext, const QString &linktext) const
+void QtXmlToSphinx::handleLinkText(LinkContext *linkContext, const QString &linktext)
 {
     linkContext->linkText = fixLinkText(linkContext, linktext);
 }

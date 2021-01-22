@@ -40,13 +40,13 @@ public:
     Documentation retrieveModuleDocumentation(const QString& name) override;
 
 private:
-    QString queryFunctionDocumentation(const QString &sourceFileName,
-                                       const AbstractMetaClass* metaClass,
-                                       const QString &classQuery,
-                                       const AbstractMetaFunctionCPtr &func,
-                                       const DocModificationList &signedModifs,
-                                       const XQueryPtr &xquery,
-                                       QString *errorMessage);
+    static QString queryFunctionDocumentation(const QString &sourceFileName,
+                                              const AbstractMetaClass* metaClass,
+                                              const QString &classQuery,
+                                              const AbstractMetaFunctionCPtr &func,
+                                              const DocModificationList &signedModifs,
+                                              const XQueryPtr &xquery,
+                                              QString *errorMessage);
 };
 
 #endif // QTDOCPARSER_H

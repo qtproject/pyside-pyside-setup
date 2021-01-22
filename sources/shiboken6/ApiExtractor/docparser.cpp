@@ -58,13 +58,13 @@ DocParser::DocParser()
 DocParser::~DocParser() = default;
 
 QString DocParser::getDocumentation(const XQueryPtr &xquery, const QString& query,
-                                    const DocModificationList& mods) const
+                                    const DocModificationList& mods)
 {
     QString doc = execXQuery(xquery, query);
     return applyDocModifications(mods, doc.trimmed());
 }
 
-QString DocParser::execXQuery(const XQueryPtr &xquery, const QString& query) const
+QString DocParser::execXQuery(const XQueryPtr &xquery, const QString& query)
 {
     QString errorMessage;
     const QString result = xquery->evaluate(query, &errorMessage);
@@ -109,7 +109,7 @@ static inline bool isXpathDocModification(const DocModification &mod)
     return mod.mode() == TypeSystem::DocModificationXPathReplace;
 }
 
-QString DocParser::applyDocModifications(const DocModificationList& mods, const QString& xml) const
+QString DocParser::applyDocModifications(const DocModificationList& mods, const QString& xml)
 {
     const char xslPrefix[] =
 R"(<xsl:template match="/">

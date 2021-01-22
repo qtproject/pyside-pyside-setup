@@ -2085,7 +2085,7 @@ void CppGenerator::writeMethodWrapper(TextStream &s, const AbstractMetaFunctionC
     s<< outdent << "}\n\n";
 }
 
-void CppGenerator::writeArgumentsInitializer(TextStream &s, OverloadData &overloadData) const
+void CppGenerator::writeArgumentsInitializer(TextStream &s, OverloadData &overloadData)
 {
     const auto rfunc = overloadData.referenceFunction();
     s << "PyTuple_GET_SIZE(args);\n";
@@ -2183,7 +2183,7 @@ void CppGenerator::writeArgumentsInitializer(TextStream &s, OverloadData &overlo
 }
 
 void CppGenerator::writeCppSelfConversion(TextStream &s, const GeneratorContext &context,
-                                          const QString &className, bool useWrapperClass) const
+                                          const QString &className, bool useWrapperClass)
 {
     static const QString pythonSelfVar = QLatin1String("self");
     if (useWrapperClass)
@@ -2269,7 +2269,7 @@ void CppGenerator::writeCppSelfDefinition(TextStream &s,
     writeCppSelfDefinition(s, context, hasStaticOverload);
 }
 
-void CppGenerator::writeErrorSection(TextStream &s, OverloadData &overloadData) const
+void CppGenerator::writeErrorSection(TextStream &s, OverloadData &overloadData)
 {
     const auto rfunc = overloadData.referenceFunction();
     s  << '\n' << cpythonFunctionName(rfunc) << "_TypeError:\n";
@@ -4084,7 +4084,7 @@ QString CppGenerator::multipleInheritanceInitializerFunctionName(const AbstractM
     return cpythonBaseName(metaClass->typeEntry()) + QLatin1String("_mi_init");
 }
 
-bool CppGenerator::supportsMappingProtocol(const AbstractMetaClass *metaClass) const
+bool CppGenerator::supportsMappingProtocol(const AbstractMetaClass *metaClass)
 {
     for (const auto &m : mappingProtocols()) {
         if (metaClass->hasFunction(m.name))
@@ -4102,7 +4102,7 @@ bool CppGenerator::supportsNumberProtocol(const AbstractMetaClass *metaClass) co
             || hasBoolCast(metaClass);
 }
 
-bool CppGenerator::supportsSequenceProtocol(const AbstractMetaClass *metaClass) const
+bool CppGenerator::supportsSequenceProtocol(const AbstractMetaClass *metaClass)
 {
     for (const auto &seq : sequenceProtocols()) {
         if (metaClass->hasFunction(seq.name))
@@ -4380,7 +4380,8 @@ static const QHash<QString, QString> &sqFuncs()
     return result;
 }
 
-void CppGenerator::writeTypeAsSequenceDefinition(TextStream &s, const AbstractMetaClass *metaClass) const
+void CppGenerator::writeTypeAsSequenceDefinition(TextStream &s,
+                                                 const AbstractMetaClass *metaClass)
 {
     bool hasFunctions = false;
     QMap<QString, QString> funcs;
@@ -4411,7 +4412,8 @@ void CppGenerator::writeTypeAsSequenceDefinition(TextStream &s, const AbstractMe
     }
 }
 
-void CppGenerator::writeTypeAsMappingDefinition(TextStream &s, const AbstractMetaClass *metaClass) const
+void CppGenerator::writeTypeAsMappingDefinition(TextStream &s,
+                                                const AbstractMetaClass *metaClass)
 {
     // Sequence protocol structure members names
     static const QHash<QString, QString> mpFuncs{
@@ -5164,7 +5166,7 @@ void CppGenerator::writeSignalInitialization(TextStream &s, const AbstractMetaCl
        << metaClass->qualifiedCppName() << "::staticMetaObject);\n";
 }
 
-void CppGenerator::writeFlagsToLong(TextStream &s, const AbstractMetaEnum &cppEnum) const
+void CppGenerator::writeFlagsToLong(TextStream &s, const AbstractMetaEnum &cppEnum)
 {
     FlagsTypeEntry *flagsEntry = cppEnum.typeEntry()->flags();
     if (!flagsEntry)
@@ -5178,7 +5180,7 @@ void CppGenerator::writeFlagsToLong(TextStream &s, const AbstractMetaEnum &cppEn
         << outdent << "}\n";
 }
 
-void CppGenerator::writeFlagsNonZero(TextStream &s, const AbstractMetaEnum &cppEnum) const
+void CppGenerator::writeFlagsNonZero(TextStream &s, const AbstractMetaEnum &cppEnum)
 {
     FlagsTypeEntry *flagsEntry = cppEnum.typeEntry()->flags();
     if (!flagsEntry)
@@ -5191,7 +5193,7 @@ void CppGenerator::writeFlagsNonZero(TextStream &s, const AbstractMetaEnum &cppE
         << outdent << "}\n";
 }
 
-void CppGenerator::writeFlagsMethods(TextStream &s, const AbstractMetaEnum &cppEnum) const
+void CppGenerator::writeFlagsMethods(TextStream &s, const AbstractMetaEnum &cppEnum)
 {
     writeFlagsBinaryOperator(s, cppEnum, QLatin1String("and"), QLatin1String("&"));
     writeFlagsBinaryOperator(s, cppEnum, QLatin1String("or"), QLatin1String("|"));
@@ -5220,7 +5222,8 @@ void CppGenerator::writeFlagsNumberMethodsDefinition(TextStream &s, const Abstra
         << "};\n\n";
 }
 
-void CppGenerator::writeFlagsNumberMethodsDefinitions(TextStream &s, const AbstractMetaEnumList &enums) const
+void CppGenerator::writeFlagsNumberMethodsDefinitions(TextStream &s,
+                                                      const AbstractMetaEnumList &enums)
 {
     for (const AbstractMetaEnum &e : enums) {
         if (!e.isAnonymous() && !e.isPrivate() && e.typeEntry()->flags()) {
@@ -5232,7 +5235,7 @@ void CppGenerator::writeFlagsNumberMethodsDefinitions(TextStream &s, const Abstr
 }
 
 void CppGenerator::writeFlagsBinaryOperator(TextStream &s, const AbstractMetaEnum &cppEnum,
-                                            const QString &pyOpName, const QString &cppOpName) const
+                                            const QString &pyOpName, const QString &cppOpName)
 {
     FlagsTypeEntry *flagsEntry = cppEnum.typeEntry()->flags();
     Q_ASSERT(flagsEntry);
@@ -5257,7 +5260,7 @@ void CppGenerator::writeFlagsBinaryOperator(TextStream &s, const AbstractMetaEnu
 
 void CppGenerator::writeFlagsUnaryOperator(TextStream &s, const AbstractMetaEnum &cppEnum,
                                            const QString &pyOpName,
-                                           const QString &cppOpName, bool boolResult) const
+                                           const QString &cppOpName, bool boolResult)
 {
     FlagsTypeEntry *flagsEntry = cppEnum.typeEntry()->flags();
     Q_ASSERT(flagsEntry);
@@ -5282,7 +5285,7 @@ void CppGenerator::writeFlagsUnaryOperator(TextStream &s, const AbstractMetaEnum
     s << ";\n" << outdent << "}\n\n";
 }
 
-QString CppGenerator::getSimpleClassInitFunctionName(const AbstractMetaClass *metaClass) const
+QString CppGenerator::getSimpleClassInitFunctionName(const AbstractMetaClass *metaClass)
 {
     QString initFunctionName;
     // Disambiguate namespaces per module to allow for extending them.
@@ -5293,7 +5296,7 @@ QString CppGenerator::getSimpleClassInitFunctionName(const AbstractMetaClass *me
     return initFunctionName;
 }
 
-QString CppGenerator::getInitFunctionName(const GeneratorContext &context) const
+QString CppGenerator::getInitFunctionName(const GeneratorContext &context)
 {
     return !context.forSmartPointer()
         ? getSimpleClassInitFunctionName(context.metaClass())

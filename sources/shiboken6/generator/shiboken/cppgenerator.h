@@ -96,9 +96,11 @@ private:
                                  const GeneratorContext &classContext) const;
     void writeMethodWrapper(TextStream &s, const AbstractMetaFunctionCList &overloads,
                             const GeneratorContext &classContext) const;
-    void writeArgumentsInitializer(TextStream &s, OverloadData &overloadData) const;
-    void writeCppSelfConversion(TextStream &s, const GeneratorContext &context,
-                                const QString &className, bool useWrapperClass) const;
+    static void writeArgumentsInitializer(TextStream &s, OverloadData &overloadData) ;
+    static void writeCppSelfConversion(TextStream &s,
+                                       const GeneratorContext &context,
+                                       const QString &className,
+                                       bool useWrapperClass);
     void writeCppSelfDefinition(TextStream &s,
                                 const AbstractMetaFunctionCPtr &func,
                                 const GeneratorContext &context,
@@ -108,7 +110,7 @@ private:
                                 bool hasStaticOverload = false,
                                 bool cppSelfAsReference = false) const;
 
-    void writeErrorSection(TextStream &s, OverloadData &overloadData) const;
+    static void writeErrorSection(TextStream &s, OverloadData &overloadData) ;
     static void writeFunctionReturnErrorCheckSection(TextStream &s, bool hasReturnValue = true);
 
     /// Writes the check section for the validity of wrapped C++ objects.
@@ -276,8 +278,8 @@ private:
     void writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr &func,
                          const GeneratorContext &context, int maxArgs = 0) const;
 
-    QString getInitFunctionName(const GeneratorContext &context) const;
-    QString getSimpleClassInitFunctionName(const AbstractMetaClass *metaClass) const;
+    static QString getInitFunctionName(const GeneratorContext &context) ;
+    static QString getSimpleClassInitFunctionName(const AbstractMetaClass *metaClass) ;
 
     static void writeSignatureStrings(TextStream &s, const QString &signatures,
                                       const QString &arrayName,
@@ -299,10 +301,12 @@ private:
     void writeSequenceMethods(TextStream &s,
                               const AbstractMetaClass *metaClass,
                               const GeneratorContext &context) const;
-    void writeTypeAsSequenceDefinition(TextStream &s, const AbstractMetaClass *metaClass) const;
+    static void writeTypeAsSequenceDefinition(TextStream &s,
+                                         const AbstractMetaClass *metaClass);
 
     /// Writes the PyMappingMethods structure for types that supports the python mapping protocol.
-    void writeTypeAsMappingDefinition(TextStream &s, const AbstractMetaClass *metaClass) const;
+    static void writeTypeAsMappingDefinition(TextStream &s,
+                                        const AbstractMetaClass *metaClass);
     void writeMappingMethods(TextStream &s,
                              const AbstractMetaClass *metaClass,
                              const GeneratorContext &context) const;
@@ -339,16 +343,21 @@ private:
 
     static void writeSignalInitialization(TextStream &s, const AbstractMetaClass *metaClass);
 
-    void writeFlagsMethods(TextStream &s, const AbstractMetaEnum &cppEnum) const;
-    void writeFlagsToLong(TextStream &s, const AbstractMetaEnum &cppEnum) const;
-    void writeFlagsNonZero(TextStream &s, const AbstractMetaEnum &cppEnum) const;
+    static void writeFlagsMethods(TextStream &s, const AbstractMetaEnum &cppEnum);
+    static void writeFlagsToLong(TextStream &s, const AbstractMetaEnum &cppEnum);
+    static void writeFlagsNonZero(TextStream &s, const AbstractMetaEnum &cppEnum);
     static void writeFlagsNumberMethodsDefinition(TextStream &s, const AbstractMetaEnum &cppEnum);
-    void writeFlagsNumberMethodsDefinitions(TextStream &s, const AbstractMetaEnumList &enums) const;
-    void writeFlagsBinaryOperator(TextStream &s, const AbstractMetaEnum &cppEnum,
-                                  const QString &pyOpName, const QString &cppOpName) const;
-    void writeFlagsUnaryOperator(TextStream &s, const AbstractMetaEnum &cppEnum,
-                                 const QString &pyOpName, const QString &cppOpName,
-                                 bool boolResult = false) const;
+    static void writeFlagsNumberMethodsDefinitions(TextStream &s,
+                                                   const AbstractMetaEnumList &enums);
+    static void writeFlagsBinaryOperator(TextStream &s,
+                                         const AbstractMetaEnum &cppEnum,
+                                         const QString &pyOpName,
+                                         const QString &cppOpName);
+    static void writeFlagsUnaryOperator(TextStream &s,
+                                        const AbstractMetaEnum &cppEnum,
+                                        const QString &pyOpName,
+                                        const QString &cppOpName,
+                                        bool boolResult = false);
 
     /// Writes the function that registers the multiple inheritance information for the classes that need it.
     static void writeMultipleInheritanceInitializerFunction(TextStream &s, const AbstractMetaClass *metaClass);
@@ -386,10 +395,10 @@ private:
     bool supportsNumberProtocol(const AbstractMetaClass *metaClass) const;
 
     /// Returns true if the given class supports the python sequence protocol
-    bool supportsSequenceProtocol(const AbstractMetaClass *metaClass) const;
+    static bool supportsSequenceProtocol(const AbstractMetaClass *metaClass) ;
 
     /// Returns true if the given class supports the python mapping protocol
-    bool supportsMappingProtocol(const AbstractMetaClass *metaClass) const;
+    static bool supportsMappingProtocol(const AbstractMetaClass *metaClass) ;
 
     /// Returns true if generator should produce getters and setters for the given class.
     bool shouldGenerateGetSetList(const AbstractMetaClass *metaClass) const;

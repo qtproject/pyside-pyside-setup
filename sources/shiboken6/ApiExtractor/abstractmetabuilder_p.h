@@ -103,7 +103,7 @@ public:
                                                      AbstractMetaClass::Attributes *constructorAttributes,
                                                      AbstractMetaClass *currentClass);
     void traverseFunctions(ScopeModelItem item, AbstractMetaClass *parent);
-    void applyFunctionModifications(AbstractMetaFunction* func);
+    static void applyFunctionModifications(AbstractMetaFunction *func);
     void traverseFields(const ScopeModelItem &item, AbstractMetaClass *parent);
     bool traverseStreamOperator(const FunctionModelItem &functionItem,
                                 AbstractMetaClass *currentClass);
@@ -135,18 +135,20 @@ public:
      *   said class.
      *   \param metaFunction conversion operator function to be fixed.
      */
-    void fixReturnTypeOfConversionOperator(AbstractMetaFunction *metaFunction);
+    static void fixReturnTypeOfConversionOperator(AbstractMetaFunction *metaFunction);
 
     void parseQ_Properties(AbstractMetaClass *metaClass, const QStringList &declarations);
     void setupEquals(AbstractMetaClass *metaClass);
     void setupComparable(AbstractMetaClass *metaClass);
-    void setupClonable(AbstractMetaClass *cls);
+    static void setupClonable(AbstractMetaClass *cls);
     void setupExternalConversion(AbstractMetaClass *cls);
-    void setupFunctionDefaults(AbstractMetaFunction *metaFunction,
-                               AbstractMetaClass *metaClass);
+    static void setupFunctionDefaults(AbstractMetaFunction *metaFunction,
+                                      AbstractMetaClass *metaClass);
 
-    QString fixDefaultValue(const ArgumentModelItem &item, const AbstractMetaType &type,
-                            const AbstractMetaClass *, int argumentIndex);
+    static QString fixDefaultValue(const ArgumentModelItem &item,
+                                   const AbstractMetaType &type,
+                                   const AbstractMetaClass *,
+                                   int argumentIndex);
     std::optional<AbstractMetaType>
         translateType(const TypeInfo &type, const AbstractMetaClass *currentClass,
                       TranslateTypeFlags flags = {}, QString *errorMessage = nullptr);
@@ -170,21 +172,21 @@ public:
     AbstractMetaClassList getBaseClasses(const AbstractMetaClass *metaClass) const;
     bool ancestorHasPrivateCopyConstructor(const AbstractMetaClass *metaClass) const;
 
-    bool inheritTemplate(AbstractMetaClass *subclass,
-                         const AbstractMetaClass *templateClass,
-                         const TypeInfo &info);
+    static bool inheritTemplate(AbstractMetaClass *subclass,
+                                const AbstractMetaClass *templateClass,
+                                const TypeInfo &info);
     void inheritTemplateFunctions(AbstractMetaClass *subclass);
     std::optional<AbstractMetaType>
         inheritTemplateType(const AbstractMetaTypeList &templateTypes,
                             const AbstractMetaType &metaType);
 
-    bool isQObject(const FileModelItem &dom, const QString &qualifiedName);
-    bool isEnum(const FileModelItem &dom, const QStringList &qualifiedName);
+    static bool isQObject(const FileModelItem &dom, const QString &qualifiedName);
+    static bool isEnum(const FileModelItem &dom, const QStringList &qualifiedName);
 
     void sortLists();
-    AbstractMetaArgumentList reverseList(const AbstractMetaArgumentList &list);
+    static AbstractMetaArgumentList reverseList(const AbstractMetaArgumentList &list);
     void setInclude(TypeEntry *te, const QString &path) const;
-    void fixArgumentNames(AbstractMetaFunction *func, const FunctionModificationList &mods);
+    static void fixArgumentNames(AbstractMetaFunction *func, const FunctionModificationList &mods);
 
     void fillAddedFunctions(AbstractMetaClass *metaClass);
     const AbstractMetaClass *resolveTypeSystemTypeDef(const AbstractMetaType &t) const;

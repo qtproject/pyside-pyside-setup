@@ -608,13 +608,13 @@ void HeaderGenerator::writeSbkTypeFunction(TextStream &s, const AbstractMetaEnum
     }
 }
 
-void HeaderGenerator::writeSbkTypeFunction(TextStream &s, const AbstractMetaClass *cppClass) const
+void HeaderGenerator::writeSbkTypeFunction(TextStream &s, const AbstractMetaClass *cppClass)
 {
     s <<  "template<> inline PyTypeObject *SbkType< ::" << cppClass->qualifiedCppName() << " >() "
       <<  "{ return reinterpret_cast<PyTypeObject *>(" << cpythonTypeNameExt(cppClass->typeEntry()) << "); }\n";
 }
 
-void HeaderGenerator::writeSbkTypeFunction(TextStream &s, const AbstractMetaType &metaType) const
+void HeaderGenerator::writeSbkTypeFunction(TextStream &s, const AbstractMetaType &metaType)
 {
     s <<  "template<> inline PyTypeObject *SbkType< ::" << metaType.cppSignature() << " >() "
       <<  "{ return reinterpret_cast<PyTypeObject *>(" << cpythonTypeNameExt(metaType) << "); }\n";

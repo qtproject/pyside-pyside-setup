@@ -115,9 +115,9 @@ public:
     static bool skipForQuery(const AbstractMetaFunctionCPtr &func);
 
 protected:
-    QString getDocumentation(const XQueryPtr &xquery, const QString& query,
-                             const DocModificationList& mods) const;
-
+    static QString getDocumentation(const XQueryPtr &xquery,
+                                    const QString &query,
+                                    const DocModificationList &mods);
 
     static AbstractMetaFunctionCList documentableFunctions(const AbstractMetaClass *metaClass);
 
@@ -126,9 +126,8 @@ private:
     QString m_docDataDir;
     QString m_libSourceDir;
 
-    QString execXQuery(const XQueryPtr &xquery, const QString& query) const;
-    QString applyDocModifications(const DocModificationList& mods, const QString& xml) const;
+    static QString execXQuery(const XQueryPtr &xquery, const QString &query) ;
+    static QString applyDocModifications(const DocModificationList &mods, const QString &xml) ;
 };
 
 #endif // DOCPARSER_H
-

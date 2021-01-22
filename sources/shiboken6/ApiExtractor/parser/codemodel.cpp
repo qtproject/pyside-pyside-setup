@@ -109,7 +109,7 @@ static CodeModelItem findRecursion(const ScopeModelItem &scope,
     return CodeModelItem();
 }
 
-CodeModelItem CodeModel::findItem(const QStringList &qualifiedName, const ScopeModelItem &scope) const
+CodeModelItem CodeModel::findItem(const QStringList &qualifiedName, const ScopeModelItem &scope)
 {
     return findRecursion(scope, qualifiedName);
 }

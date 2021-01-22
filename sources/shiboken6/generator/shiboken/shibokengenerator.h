@@ -166,18 +166,26 @@ protected:
     AttroCheck checkAttroFunctionNeeds(const AbstractMetaClass *metaClass) const;
 
     /// Returns a list of methods of the given class where each one is part of a different overload with both static and non-static method.
-    AbstractMetaFunctionCList getMethodsWithBothStaticAndNonStaticMethods(const AbstractMetaClass *metaClass) const;
+    static AbstractMetaFunctionCList
+        getMethodsWithBothStaticAndNonStaticMethods(const AbstractMetaClass *metaClass);
 
-    void writeToPythonConversion(TextStream &s, const AbstractMetaType &type,
-                                 const AbstractMetaClass *context, const QString &argumentName) const;
-    void writeToCppConversion(TextStream &s, const AbstractMetaType &type, const AbstractMetaClass *context,
-                              const QString &inArgName, const QString &outArgName) const;
-    void writeToCppConversion(TextStream &s, const AbstractMetaClass *metaClass, const QString &inArgName,
-                              const QString &outArgName) const;
+    static void writeToPythonConversion(TextStream &s,
+                                        const AbstractMetaType &type,
+                                        const AbstractMetaClass *context,
+                                        const QString &argumentName);
+    static void writeToCppConversion(TextStream &s,
+                                     const AbstractMetaType &type,
+                                     const AbstractMetaClass *context,
+                                     const QString &inArgName,
+                                     const QString &outArgName);
+    static void writeToCppConversion(TextStream &s,
+                                     const AbstractMetaClass *metaClass, const QString &inArgName,
+                                     const QString &outArgName);
 
     /// Returns true if the argument is a pointer that rejects nullptr values.
     static bool shouldRejectNullPointerArgument(const ApiExtractorResult &api,
-                                                const AbstractMetaFunctionCPtr &func, int argIndex);
+                                                const AbstractMetaFunctionCPtr &func,
+                                                int argIndex);
 
     /// Verifies if the class should have a C++ wrapper generated for it, instead of only a Python wrapper.
     bool shouldGenerateCppWrapper(const AbstractMetaClass *metaClass) const;
@@ -221,7 +229,7 @@ protected:
 
     static bool isNullPtr(const QString &value);
 
-    QString converterObject(const AbstractMetaType &type) const;
+    static QString converterObject(const AbstractMetaType &type) ;
     static QString converterObject(const TypeEntry *type);
 
     static QString cpythonBaseName(const AbstractMetaClass *metaClass);
@@ -230,7 +238,7 @@ protected:
     static QString cpythonTypeName(const AbstractMetaClass *metaClass);
     static QString cpythonTypeName(const TypeEntry *type);
     static QString cpythonTypeNameExt(const TypeEntry *type);
-    QString cpythonTypeNameExt(const AbstractMetaType &type) const;
+    static QString cpythonTypeNameExt(const AbstractMetaType &type) ;
     QString cpythonCheckFunction(const TypeEntry *type, bool genericNumberType = false) const;
     QString cpythonCheckFunction(AbstractMetaType metaType, bool genericNumberType = false) const;
     /**
@@ -258,15 +266,15 @@ protected:
     QString cpythonIsConvertibleFunction(const AbstractMetaArgument &metaArg,
                                          bool genericNumberType = false) const;
 
-    QString cpythonToCppConversionFunction(const AbstractMetaClass *metaClass) const;
-    QString cpythonToCppConversionFunction(const AbstractMetaType &type,
-                                           const AbstractMetaClass *context = nullptr) const;
-    QString cpythonToPythonConversionFunction(const AbstractMetaType &type,
-                                              const AbstractMetaClass *context = nullptr) const;
-    QString cpythonToPythonConversionFunction(const AbstractMetaClass *metaClass) const;
-    QString cpythonToPythonConversionFunction(const TypeEntry *type) const;
+    static QString cpythonToCppConversionFunction(const AbstractMetaClass *metaClass) ;
+    static QString cpythonToCppConversionFunction(const AbstractMetaType &type,
+                                                  const AbstractMetaClass *context = nullptr);
+    static QString cpythonToPythonConversionFunction(const AbstractMetaType &type,
+                                                     const AbstractMetaClass *context = nullptr);
+    static QString cpythonToPythonConversionFunction(const AbstractMetaClass *metaClass);
+    static QString cpythonToPythonConversionFunction(const TypeEntry *type);
 
-    QString cpythonFunctionName(const AbstractMetaFunctionCPtr &func) const;
+    static QString cpythonFunctionName(const AbstractMetaFunctionCPtr &func) ;
     static QString cpythonMethodDefinitionName(const AbstractMetaFunctionCPtr &func);
     static QString cpythonGettersSettersDefinitionName(const AbstractMetaClass *metaClass);
     static QString cpythonGetattroFunctionName(const AbstractMetaClass *metaClass);
@@ -278,8 +286,9 @@ protected:
     static QString cpythonSetterFunctionName(const QPropertySpec &property,
                                              const AbstractMetaClass *metaClass);
     static QString cpythonWrapperCPtr(const AbstractMetaClass *metaClass,
-                               const QString &argName = QLatin1String("self"));
-    QString cpythonWrapperCPtr(const AbstractMetaType &metaType, const QString &argName) const;
+                                      const QString &argName = QLatin1String("self"));
+     static QString cpythonWrapperCPtr(const AbstractMetaType &metaType,
+                                      const QString &argName);
     static QString cpythonWrapperCPtr(const TypeEntry *type, const QString &argName);
 
     /// Guesses the scope to where belongs an argument's default value.
@@ -300,7 +309,7 @@ protected:
     static QString getFormatUnitString(const AbstractMetaFunctionCPtr &func, bool incRef = false);
 
     /// Returns the file name for the module global header. If no module name is provided the current will be used.
-    QString getModuleHeaderFileName(const QString &moduleName = QString()) const;
+    static QString getModuleHeaderFileName(const QString &moduleName = QString()) ;
 
     OptionDescriptions options() const override;
     bool handleOption(const QString &key, const QString &value) override;
@@ -325,7 +334,7 @@ protected:
     static QString getTypeIndexVariableName(const AbstractMetaClass *metaClass,
                                             bool alternativeTemplateName = false);
     static QString getTypeIndexVariableName(const TypeEntry *type);
-    QString getTypeIndexVariableName(const AbstractMetaType &type) const;
+    static QString getTypeIndexVariableName(const AbstractMetaType &type) ;
 
     /// Returns true if the user don't want verbose error messages on the generated bindings.
     bool verboseErrorMessagesDisabled() const;
@@ -357,9 +366,9 @@ protected:
 
     void collectContainerTypesFromConverterMacros(const QString &code, bool toPythonMacro);
 
-    void writeFunctionCall(TextStream &s,
-                           const AbstractMetaFunctionCPtr &metaFunc,
-                           Options options = NoOption) const;
+    static void writeFunctionCall(TextStream &s,
+                                  const AbstractMetaFunctionCPtr &metaFunc,
+                                  Options options = NoOption);
 
     static void writeUnusedVariableCast(TextStream &s, const QString &variableName);
 
@@ -372,7 +381,7 @@ protected:
     ExtendedConverterData getExtendedConverters() const;
 
     /// Returns a list of converters for the non wrapper types of the current module.
-    QList<const CustomConversion *> getPrimitiveCustomConversions() const;
+    static QList<const CustomConversion *> getPrimitiveCustomConversions() ;
 
     /// Returns true if the Python wrapper for the received OverloadData must accept a list of arguments.
     static bool pythonFunctionWrapperUsesListOfArguments(const OverloadData &overloadData);
@@ -490,9 +499,9 @@ private:
     /// \param func the pointer to metafunction information
     /// \param count the number of function arguments
     /// \param options some extra options used during the parser
-    void writeArgumentNames(TextStream &s,
-                            const AbstractMetaFunctionCPtr &func,
-                            Options options = NoOption) const;
+    static void writeArgumentNames(TextStream &s,
+                                   const AbstractMetaFunctionCPtr &func,
+                                   Options option);
 
     void writeFunctionArguments(TextStream &s,
                                 const AbstractMetaFunctionCPtr &func,

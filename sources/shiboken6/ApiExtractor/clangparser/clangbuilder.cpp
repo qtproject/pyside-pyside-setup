@@ -195,7 +195,7 @@ public:
     TemplateParameterModelItem createNonTypeTemplateParameter(const CXCursor &cursor) const;
     void addField(const CXCursor &cursor);
 
-    QString cursorValueExpression(BaseVisitor *bv, const CXCursor &cursor) const;
+    static QString cursorValueExpression(BaseVisitor *bv, const CXCursor &cursor);
     void addBaseClass(const CXCursor &cursor);
 
     template <class Item>
@@ -651,7 +651,7 @@ void BuilderPrivate::endTemplateTypeAlias(const CXCursor &typeAliasCursor)
 
 // extract an expression from the cursor via source
 // CXCursor_EnumConstantDecl, ParmDecl (a = Flag1 | Flag2)
-QString BuilderPrivate::cursorValueExpression(BaseVisitor *bv, const CXCursor &cursor) const
+QString BuilderPrivate::cursorValueExpression(BaseVisitor *bv, const CXCursor &cursor)
 {
     const std::string_view snippet = bv->getCodeSnippet(cursor);
     auto equalSign = snippet.find('=');
