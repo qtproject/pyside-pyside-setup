@@ -21,7 +21,7 @@ accept_configuration:
           not_in_values: [Mingw, MSVC2015]
         - condition: property
           property: host.osVersion
-          not_in_values: [MacOS_10_15, MacOS_11_00]
+          not_in_values: [MacOS_10_15]
 
 upload_pyside: &upload_pyside
      type: Group
