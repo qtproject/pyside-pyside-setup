@@ -1,0 +1,3 @@
+// Not included by the module header
+#include <QtDesigner/QExtensionFactory>
+#include <QtDesigner/QExtensionManager>

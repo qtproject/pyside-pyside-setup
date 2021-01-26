@@ -16,6 +16,7 @@ endmacro()
 macro(collect_optional_modules)
 # Collect all optional modules.
 set(ALL_OPTIONAL_MODULES
+    Designer
     Xml
     Help Multimedia
     MultimediaWidgets

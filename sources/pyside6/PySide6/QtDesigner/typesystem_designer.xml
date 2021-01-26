@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/****************************************************************************
+**
+** Copyright (C) 2021 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt for Python.
+**
+** $QT_BEGIN_LICENSE:LGPL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPL3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 2.0 or (at your option) the GNU General
+** Public license version 3 or any later version approved by the KDE Free
+** Qt Foundation. The licenses are as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-2.0.html and
+** https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+-->
+<typesystem package="PySide6.QtDesigner">
+  <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no"/>
+  <object-type name="QAbstractExtensionFactory"/>
+  <object-type name="QAbstractExtensionManager"/>
+  <object-type name="QAbstractFormBuilder"/>
+  <object-type name="QDesignerActionEditorInterface"/>
+  <object-type name="QDesignerContainerExtension"/>
+  <object-type name="QDesignerCustomWidgetCollectionInterface"/>
+  <object-type name="QDesignerCustomWidgetInterface">
+    <modify-function signature="createWidget(QWidget*)">
+        <modify-argument index="return">
+          <define-ownership class="native" owner="c++"/>
+        </modify-argument>
+    </modify-function>
+  </object-type>
+  <!-- QDesignerDnDItemInterface has abstract functions dealing with the
+       unexposed DomUI classes, we cannot generate a wrapper. -->
+  <object-type name="QDesignerDnDItemInterface" disable-wrapper="yes">
+    <enum-type name="DropType"/>
+    <modify-function signature="QDesignerDnDItemInterface()" remove="all"/>
+  </object-type>
+  <object-type name="QDesignerDynamicPropertySheetExtension"/>
+  <object-type name="QDesignerFormEditorInterface"/>
+  <object-type name="QDesignerFormWindowCursorInterface">
+      <enum-type name="MoveMode"/>
+      <enum-type name="MoveOperation"/>
+  </object-type>
+  <!-- QDesignerFormWindowInterface has abstract functions dealing with private
+       class QtResourceSet, so, we cannot generate a wrapper. -->
+  <object-type name="QDesignerFormWindowInterface" disable-wrapper="yes">
+    <enum-type name="FeatureFlag" flags="Feature"/>
+    <enum-type name="ResourceFileSaveMode"/>
+    <modify-function signature="QDesignerFormWindowInterface(QWidget*,QFlags&lt;Qt::WindowType&gt;)" remove="all"/>
+  </object-type>
+  <object-type name="QDesignerFormWindowManagerInterface">
+     <enum-type name="Action"/>
+     <enum-type name="ActionGroup"/>
+  </object-type>
+  <object-type name="QDesignerFormWindowToolInterface"/>
+  <object-type name="QDesignerMemberSheetExtension"/>
+  <object-type name="QDesignerObjectInspectorInterface"/>
+  <object-type name="QDesignerPropertyEditorInterface"/>
+  <object-type name="QDesignerPropertySheetExtension"/>
+  <object-type name="QDesignerTaskMenuExtension"/>
+  <object-type name="QDesignerWidgetBoxInterface">
+    <value-type name="Category">
+      <enum-type name="Type"/>
+    </value-type>
+    <value-type name="Widget">
+      <enum-type name="Type"/>
+    </value-type>
+  </object-type>
+  <object-type name="QExtensionManager"/>
+  <object-type name="QExtensionFactory"/>
+  <object-type name="QPyDesignerContainerExtension">
+    <extra-includes>
+      <include file-name="qpydesignerextensions.h" location="global"/>
+    </extra-includes>
+  </object-type>
+  <object-type name="QPyDesignerMemberSheetExtension">
+  <extra-includes>
+    <include file-name="qpydesignerextensions.h" location="global"/>
+  </extra-includes>
+  </object-type>
+  <object-type name="QPyDesignerPropertySheetExtension">
+    <extra-includes>
+      <include file-name="qpydesignerextensions.h" location="global"/>
+    </extra-includes>
+  </object-type>
+  <object-type name="QPyDesignerTaskMenuExtension">
+    <extra-includes>
+      <include file-name="qpydesignerextensions.h" location="global"/>
+    </extra-includes>
+  </object-type>
+
+  <!-- Suppress all QString */int * out parameters -->
+  <suppress-warning text="^There's no user provided way.*handle the primitive type.*$"/>
+  <suppress-warning text="^.*skipping abstract function.*QtResourceSet.*$"/>
+</typesystem>
