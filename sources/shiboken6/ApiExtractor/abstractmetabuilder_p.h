@@ -110,10 +110,13 @@ public:
     void traverseOperatorFunction(const FunctionModelItem &item,
                                   AbstractMetaClass *currentClass);
     AbstractMetaFunction *traverseAddedFunctionHelper(const AddedFunctionPtr &addedFunc,
-                                                      AbstractMetaClass *metaClass = nullptr);
-    bool traverseAddedGlobalFunction(const AddedFunctionPtr &addedFunc);
+                                                      AbstractMetaClass *metaClass,
+                                                      QString *errorMessage);
+    bool traverseAddedGlobalFunction(const AddedFunctionPtr &addedFunc,
+                                     QString *errorMessage);
     bool traverseAddedMemberFunction(const AddedFunctionPtr &addedFunc,
-                                     AbstractMetaClass *metaClass);
+                                     AbstractMetaClass *metaClass,
+                                     QString *errorMessage);
     AbstractMetaFunction *traverseFunction(const FunctionModelItem &function,
                                            const AbstractMetaClass *currentClass);
     std::optional<AbstractMetaField> traverseField(const VariableModelItem &field,

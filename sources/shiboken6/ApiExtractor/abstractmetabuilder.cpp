@@ -606,12 +606,11 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
     sortLists();
 
     // Functions added to the module on the type system.
+    QString errorMessage;
     const AddedFunctionList &globalUserFunctions = types->globalUserFunctions();
     for (const AddedFunctionPtr &addedFunc : globalUserFunctions) {
-        if (!traverseAddedGlobalFunction(addedFunc)) {
-            qFatal("Unable to traverse added global function \"%s\".",
-                   qPrintable(addedFunc->name()));
-        }
+        if (!traverseAddedGlobalFunction(addedFunc, &errorMessage))
+            qFatal("%s", qPrintable(errorMessage));
     }
 
     m_itemToClass.clear();
@@ -1344,12 +1343,11 @@ void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
 void AbstractMetaBuilderPrivate::fillAddedFunctions(AbstractMetaClass *metaClass)
 {
     // Add the functions added by the typesystem
+    QString errorMessage;
     const AddedFunctionList &addedFunctions = metaClass->typeEntry()->addedFunctions();
     for (const AddedFunctionPtr &addedFunc : addedFunctions) {
-        if (!traverseAddedMemberFunction(addedFunc, metaClass)) {
-                qFatal("Unable to traverse function \"%s\" added to \"%s\".",
-                       qPrintable(addedFunc->name()), qPrintable(metaClass->name()));
-        }
+        if (!traverseAddedMemberFunction(addedFunc, metaClass, &errorMessage))
+            qFatal("%s", qPrintable(errorMessage));
     }
 }
 
@@ -1543,9 +1541,11 @@ static void applyDefaultExpressionModifications(const FunctionModificationList &
 
 static AbstractMetaFunction::FunctionType functionTypeFromName(const QString &);
 
-bool AbstractMetaBuilderPrivate::traverseAddedGlobalFunction(const AddedFunctionPtr &addedFunc)
+bool AbstractMetaBuilderPrivate::traverseAddedGlobalFunction(const AddedFunctionPtr &addedFunc,
+                                                             QString *errorMessage)
 {
-    AbstractMetaFunction *metaFunction = traverseAddedFunctionHelper(addedFunc);
+    AbstractMetaFunction *metaFunction =
+        traverseAddedFunctionHelper(addedFunc, nullptr, errorMessage);
     if (metaFunction == nullptr)
         return false;
     m_globalFunctions << AbstractMetaFunctionCPtr(metaFunction);
@@ -1554,17 +1554,15 @@ bool AbstractMetaBuilderPrivate::traverseAddedGlobalFunction(const AddedFunction
 
 AbstractMetaFunction *
     AbstractMetaBuilderPrivate::traverseAddedFunctionHelper(const AddedFunctionPtr &addedFunc,
-                                                            AbstractMetaClass *metaClass)
+                                                            AbstractMetaClass *metaClass /* = nullptr */,
+                                                            QString *errorMessage)
 {
-    QString errorMessage;
-
-    auto returnType = translateType(addedFunc->returnType(), metaClass, {}, &errorMessage);
+    auto returnType = translateType(addedFunc->returnType(), metaClass, {}, errorMessage);
     if (!returnType.has_value()) {
-        qCWarning(lcShiboken, "%s",
-                  qPrintable(msgAddedFunctionInvalidReturnType(addedFunc->name(),
-                                                               addedFunc->returnType().qualifiedName(),
-                                                               errorMessage,
-                                                               metaClass)));
+        *errorMessage =
+            msgAddedFunctionInvalidReturnType(addedFunc->name(),
+                                              addedFunc->returnType().qualifiedName(),
+                                              *errorMessage, metaClass);
         return nullptr;
     }
 
@@ -1576,13 +1574,12 @@ AbstractMetaFunction *
 
     for (int i = 0; i < args.count(); ++i) {
         const AddedFunction::Argument &arg = args.at(i);
-        auto type = translateType(arg.typeInfo, metaClass, {}, &errorMessage);
+        auto type = translateType(arg.typeInfo, metaClass, {}, errorMessage);
         if (Q_UNLIKELY(!type.has_value())) {
-            qCWarning(lcShiboken, "%s",
-                      qPrintable(msgAddedFunctionInvalidArgType(addedFunc->name(),
-                                                                arg.typeInfo.qualifiedName(), i + 1,
-                                                                errorMessage,
-                                                                metaClass)));
+            *errorMessage =
+                msgAddedFunctionInvalidArgType(addedFunc->name(),
+                                               arg.typeInfo.qualifiedName(), i + 1,
+                                               *errorMessage, metaClass);
             delete metaFunction;
             return nullptr;
         }
@@ -1638,9 +1635,11 @@ AbstractMetaFunction *
 }
 
 bool AbstractMetaBuilderPrivate::traverseAddedMemberFunction(const AddedFunctionPtr &addedFunc,
-                                                             AbstractMetaClass *metaClass)
+                                                             AbstractMetaClass *metaClass,
+                                                             QString *errorMessage)
 {
-    AbstractMetaFunction *metaFunction = traverseAddedFunctionHelper(addedFunc, metaClass);
+    AbstractMetaFunction *metaFunction =
+        traverseAddedFunctionHelper(addedFunc, metaClass, errorMessage);
     if (metaFunction == nullptr)
         return false;
 

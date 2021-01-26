@@ -114,6 +114,20 @@ static void msgFormatEnumType(Stream &str,
         str << " (class: " << className << ')';
 }
 
+static void formatAddedFuncError(const QString &addedFuncName,
+                                 const AbstractMetaClass *context,
+                                 QTextStream &str)
+{
+    if (context) {
+        str << context->typeEntry()->sourceLocation()
+            <<  "Unable to traverse function \"" << addedFuncName
+            << "\" added to \"" << context->name() << "\": ";
+    } else {
+        str << "Unable to traverse added global function \""
+            << addedFuncName << "\": ";
+    }
+}
+
 QString msgAddedFunctionInvalidArgType(const QString &addedFuncName,
                                        const QStringList &typeName,
                                        int pos, const QString &why,
@@ -121,8 +135,7 @@ QString msgAddedFunctionInvalidArgType(const QString &addedFuncName,
 {
     QString result;
     QTextStream str(&result);
-    if (context)
-        str << context->typeEntry()->sourceLocation();
+    formatAddedFuncError(addedFuncName, context, str);
     str << "Unable to translate type \"" << typeName.join(colonColon())
         << "\" of argument " << pos << " of added function \""
         << addedFuncName << "\": " << why;
@@ -135,8 +148,7 @@ QString msgAddedFunctionInvalidReturnType(const QString &addedFuncName,
 {
     QString result;
     QTextStream str(&result);
-    if (context)
-        str << context->typeEntry()->sourceLocation();
+    formatAddedFuncError(addedFuncName, context, str);
     str << "Unable to translate return type \"" << typeName.join(colonColon())
         << "\" of added function \"" << addedFuncName << "\": "
         << why;
