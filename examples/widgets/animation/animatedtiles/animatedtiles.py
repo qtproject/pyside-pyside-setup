@@ -2,7 +2,7 @@
 #############################################################################
 ##
 ## Copyright (C) 2010 Riverbank Computing Limited.
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -40,7 +40,7 @@
 ##
 #############################################################################
 
-from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtStateMachine, QtWidgets
 
 import animatedtiles_rc
 
@@ -179,14 +179,16 @@ if __name__ == '__main__':
     buttonParent.setZValue(65)
 
     # States.
-    rootState = QtCore.QState()
-    ellipseState = QtCore.QState(rootState)
-    figure8State = QtCore.QState(rootState)
-    randomState = QtCore.QState(rootState)
-    tiledState = QtCore.QState(rootState)
-    centeredState = QtCore.QState(rootState)
+    rootState = QtStateMachine.QState()
+    ellipseState = QtStateMachine.QState(rootState)
+    figure8State = QtStateMachine.QState(rootState)
+    randomState = QtStateMachine.QState(rootState)
+    tiledState = QtStateMachine.QState(rootState)
+    centeredState = QtStateMachine.QState(rootState)
 
     # Values.
+    generator = QtCore.QRandomGenerator.global_()
+
     for i, item in enumerate(items):
         # Ellipse.
         ellipseState.assignProperty(item, 'pos',
@@ -200,8 +202,8 @@ if __name__ == '__main__':
 
         # Random.
         randomState.assignProperty(item, 'pos',
-                QtCore.QPointF(-250 + QtCore.qrand() % 500,
-                        -250 + QtCore.qrand() % 500))
+                QtCore.QPointF(-250 + generator.bounded(0, 500),
+                               -250 + generator.bounded(0, 500)))
 
         # Tiled.
         tiledState.assignProperty(item, 'pos',
@@ -221,7 +223,7 @@ if __name__ == '__main__':
             QtGui.QPainter.Antialiasing | QtGui.QPainter.SmoothPixmapTransform)
     view.show()
 
-    states = QtCore.QStateMachine()
+    states = QtStateMachine.QStateMachine()
     states.addState(rootState)
     states.setInitialState(rootState)
     rootState.setInitialState(centeredState)

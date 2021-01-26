@@ -43,6 +43,8 @@
 from PySide6.QtWidgets import *
 from PySide6.QtGui import *
 from PySide6.QtCore import *
+from PySide6.QtStateMachine import QFinalState, QState, QStateMachine
+
 
 class LightWidget(QWidget):
     def __init__(self, color):
@@ -83,7 +85,7 @@ class TrafficLightWidget(QWidget):
         self.greenLight = LightWidget(Qt.green)
         vbox.addWidget(self.greenLight)
         pal = QPalette()
-        pal.setColor(QPalette.Background, Qt.black)
+        pal.setColor(QPalette.Window, Qt.black)
         self.setPalette(pal)
         self.setAutoFillBackground(True)
 

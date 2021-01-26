@@ -32,6 +32,7 @@ set(ALL_OPTIONAL_MODULES
     Scxml
     Sensors
     SerialPort
+    StateMachine
     TextToSpeech
     Charts
     Svg

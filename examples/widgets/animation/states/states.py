@@ -2,7 +2,7 @@
 #############################################################################
 ##
 ## Copyright (C) 2010 Riverbank Computing Limited.
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -40,7 +40,7 @@
 ##
 #############################################################################
 
-from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtStateMachine, QtWidgets
 
 import states_rc
 
@@ -116,10 +116,10 @@ if __name__ == '__main__':
     scene.addItem(p5)
     scene.addItem(p6)
 
-    machine = QtCore.QStateMachine()
-    state1 = QtCore.QState(machine)
-    state2 = QtCore.QState(machine)
-    state3 = QtCore.QState(machine)
+    machine = QtStateMachine.QStateMachine()
+    state1 = QtStateMachine.QState(machine)
+    state2 = QtStateMachine.QState(machine)
+    state3 = QtStateMachine.QState(machine)
     machine.setInitialState(state1)
 
     # State 1.

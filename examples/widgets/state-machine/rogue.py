@@ -2,7 +2,7 @@
 #############################################################################
 ##
 ## Copyright (C) 2010 velociraptor Genjix <aphidia@hotmail.com>
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -43,6 +43,9 @@
 from PySide6.QtWidgets import *
 from PySide6.QtGui import *
 from PySide6.QtCore import *
+from PySide6.QtStateMachine import (QEventTransition, QFinalState,
+                                    QKeyEventTransition, QState, QStateMachine)
+
 
 class MovementTransition(QEventTransition):
     def __init__(self, window):
@@ -83,12 +86,11 @@ class MainWindow(QMainWindow):
         self.height = 20
         self.statusStr = ''
 
-        database = QFontDatabase()
         font = QFont()
-        if 'Monospace' in database.families():
+        if 'Monospace' in QFontDatabase.families():
             font = QFont('Monospace', 12)
         else:
-            for family in database.families():
+            for family in QFontDatabase.families():
                 if database.isFixedPitch(family):
                     font = QFont(family, 12)
         self.setFont(font)
@@ -98,12 +100,12 @@ class MainWindow(QMainWindow):
         self.show()
     def setupMap(self):
         self.map = []
-        qsrand(QTime(0, 0, 0).secsTo(QTime.currentTime()))
+        generator = QRandomGenerator().global_()
         for x in range(self.width):
             column = []
             for y in range(self.height):
                 if x == 0 or x == self.width - 1 or y == 0 or \
-                  y == self.height - 1 or qrand() % 40 == 0:
+                  y == self.height - 1 or generator.bounded(0, 40) == 0:
                     column.append('#')
                 else:
                     column.append('.')

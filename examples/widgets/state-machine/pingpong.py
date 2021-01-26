@@ -2,7 +2,7 @@
 #############################################################################
 ##
 ## Copyright (C) 2010 velociraptor Genjix <aphidia@hotmail.com>
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -42,6 +42,8 @@
 
 from PySide6.QtWidgets import *
 from PySide6.QtCore import *
+from PySide6.QtStateMachine import QAbstractTransition, QState, QStateMachine
+
 
 class PingEvent(QEvent):
     def __init__(self):

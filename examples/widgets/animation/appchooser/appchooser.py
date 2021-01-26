@@ -2,7 +2,7 @@
 #############################################################################
 ##
 ## Copyright (C) 2010 Riverbank Computing Limited.
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -40,7 +40,7 @@
 ##
 #############################################################################
 
-from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtStateMachine, QtWidgets
 
 import appchooser_rc
 
@@ -71,7 +71,7 @@ class Pixmap(QtWidgets.QGraphicsWidget):
 
 def createStates(objects, selectedRect, parent):
     for obj in objects:
-        state = QtCore.QState(parent)
+        state = QtStateMachine.QState(parent)
         state.assignProperty(obj, 'geometry', selectedRect)
         parent.addTransition(obj.clicked, state)
 
@@ -111,13 +111,13 @@ if __name__ == '__main__':
     window.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
     window.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
 
-    machine = QtCore.QStateMachine()
-    machine.setGlobalRestorePolicy(QtCore.QStateMachine.RestoreProperties)
+    machine = QtStateMachine.QStateMachine()
+    machine.setGlobalRestorePolicy(QtStateMachine.QStateMachine.RestoreProperties)
 
-    group = QtCore.QState(machine)
+    group = QtStateMachine.QState(machine)
     selectedRect = QtCore.QRect(86, 86, 128, 128)
 
-    idleState = QtCore.QState(group)
+    idleState = QtStateMachine.QState(group)
     group.setInitialState(idleState)
 
     objects = [p1, p2, p3, p4]
