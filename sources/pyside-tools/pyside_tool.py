@@ -97,6 +97,8 @@ def designer():
     # Add the Wiggly Widget example
     wiggly_dir = os.fspath(pyside_dir / 'examples' / 'widgetbinding')
     _append_to_path_var('PYSIDE_DESIGNER_PLUGINS', wiggly_dir)
+    taskmenu_dir = os.fspath(pyside_dir / 'examples' / 'designer' / 'taskmenuextension')
+    _append_to_path_var('PYSIDE_DESIGNER_PLUGINS', taskmenu_dir)
 
     if sys.platform == "darwin":
         qt_tool_wrapper("Designer.app/Contents/MacOS/Designer", sys.argv[1:])

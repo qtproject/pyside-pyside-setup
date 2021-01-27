@@ -1,0 +1,4 @@
+{
+    "files": ["tictactoe.py", "main.py", "registertictactoe.py", "tictactoeplugin.py",
+    "tictactoetaskmenu.py"]
+}
