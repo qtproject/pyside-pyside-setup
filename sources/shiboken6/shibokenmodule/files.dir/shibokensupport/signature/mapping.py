@@ -639,17 +639,17 @@ def init_PySide6_QtWinExtras():
 
 # from 5.12, macOS
 def init_PySide6_QtDataVisualization():
-    from PySide6.QtDataVisualization import QtDataVisualization
-    QtDataVisualization.QBarDataRow = typing.List[QtDataVisualization.QBarDataItem]
-    QtDataVisualization.QBarDataArray = typing.List[QtDataVisualization.QBarDataRow]
-    QtDataVisualization.QSurfaceDataRow = typing.List[QtDataVisualization.QSurfaceDataItem]
-    QtDataVisualization.QSurfaceDataArray = typing.List[QtDataVisualization.QSurfaceDataRow]
+    from PySide6.QtDataVisualization import (QBarDataItem, QSurfaceDataItem)
+    QBarDataRow = typing.List[QBarDataItem]
+    QBarDataArray = typing.List[QBarDataRow]
+    QSurfaceDataRow = typing.List[QSurfaceDataItem]
+    QSurfaceDataArray = typing.List[QSurfaceDataRow]
     type_map.update({
         "100.0f": 100.0,
-        "QtDataVisualization.QBarDataArray": QtDataVisualization.QBarDataArray,
-        "QtDataVisualization.QBarDataArray*": QtDataVisualization.QBarDataArray,
-        "QtDataVisualization.QSurfaceDataArray": QtDataVisualization.QSurfaceDataArray,
-        "QtDataVisualization.QSurfaceDataArray*": QtDataVisualization.QSurfaceDataArray,
+        "QBarDataArray": QBarDataArray,
+        "QBarDataArray*": QBarDataArray,
+        "QSurfaceDataArray": QSurfaceDataArray,
+        "QSurfaceDataArray*": QSurfaceDataArray,
     })
     return locals()
 

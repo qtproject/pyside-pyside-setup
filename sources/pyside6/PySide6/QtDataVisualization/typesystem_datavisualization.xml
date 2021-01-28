@@ -43,380 +43,378 @@
 
   <load-typesystem name="templates/datavisualization_common.xml" generate="no" />
   <load-typesystem name="QtGui/typesystem_gui.xml" generate="no" />
-  <namespace-type name="QtDataVisualization">
-    <primitive-type name="QBarDataArray">
-      <include file-name="qbardataproxy.h" location="global"/>
-      <conversion-rule>
-          <native-to-target>
-              <insert-template name="cppqlistofptrtoqvectors_to_py_conversion">
-                <replace from="%INTYPE_0" to="QtDataVisualization::QBarDataItem"/>
-              </insert-template>
-          </native-to-target>
-          <target-to-native>
-              <add-conversion type="PySequence">
-                  <insert-template name="py_to_cppqlistofptrtoqvectors_conversion">
-                      <replace from="%OUTTYPE_0" to="QtDataVisualization::QBarDataItem"/>
-                  </insert-template>
-              </add-conversion>
-          </target-to-native>
-      </conversion-rule>
-    </primitive-type>
-    <primitive-type name="QSurfaceDataArray">
-      <include file-name="qsurfacedataproxy.h" location="global"/>
-      <conversion-rule>
-          <native-to-target>
-              <insert-template name="cppqlistofptrtoqvectors_to_py_conversion">
-                <replace from="%INTYPE_0" to="QtDataVisualization::QSurfaceDataItem"/>
-              </insert-template>
-          </native-to-target>
-          <target-to-native>
-              <add-conversion type="PySequence">
-                  <insert-template name="py_to_cppqlistofptrtoqvectors_conversion">
-                      <replace from="%OUTTYPE_0" to="QtDataVisualization::QSurfaceDataItem"/>
-                  </insert-template>
-              </add-conversion>
-          </target-to-native>
-      </conversion-rule>
-    </primitive-type>
+  <primitive-type name="QBarDataArray">
+    <include file-name="qbardataproxy.h" location="global"/>
+    <conversion-rule>
+        <native-to-target>
+            <insert-template name="cppqlistofptrtoqvectors_to_py_conversion">
+              <replace from="%INTYPE_0" to="QBarDataItem"/>
+            </insert-template>
+        </native-to-target>
+        <target-to-native>
+            <add-conversion type="PySequence">
+                <insert-template name="py_to_cppqlistofptrtoqvectors_conversion">
+                    <replace from="%OUTTYPE_0" to="QBarDataItem"/>
+                </insert-template>
+            </add-conversion>
+        </target-to-native>
+    </conversion-rule>
+  </primitive-type>
+  <primitive-type name="QSurfaceDataArray">
+    <include file-name="qsurfacedataproxy.h" location="global"/>
+    <conversion-rule>
+        <native-to-target>
+            <insert-template name="cppqlistofptrtoqvectors_to_py_conversion">
+              <replace from="%INTYPE_0" to="QSurfaceDataItem"/>
+            </insert-template>
+        </native-to-target>
+        <target-to-native>
+            <add-conversion type="PySequence">
+                <insert-template name="py_to_cppqlistofptrtoqvectors_conversion">
+                    <replace from="%OUTTYPE_0" to="QSurfaceDataItem"/>
+                </insert-template>
+            </add-conversion>
+        </target-to-native>
+    </conversion-rule>
+  </primitive-type>
 
-    <object-type name="QAbstract3DAxis">
-      <enum-type name="AxisOrientation"/>
-      <enum-type name="AxisType"/>
-    </object-type>
-    <object-type name="QCategory3DAxis"/>
-    <object-type name="QLogValue3DAxisFormatter"/>
-    <object-type name="QValue3DAxis"/>
-    <object-type name="QValue3DAxisFormatter">
-      <modify-function signature="populateCopy(QtDataVisualization::QValue3DAxisFormatter&amp;)const">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-    </object-type>
-    <object-type name="QAbstract3DSeries">
-      <enum-type name="Mesh"/>
-      <enum-type name="SeriesType"/>
-    </object-type>
-    <object-type name="QAbstractDataProxy">
-      <enum-type name="DataType"/>
-    </object-type>
-    <object-type name="QBar3DSeries">
-      <modify-function signature="setDataProxy(QtDataVisualization::QBarDataProxy*)">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-    </object-type>
-    <value-type name="QBarDataItem"/>
-    <object-type name="QBarDataProxy">
-      <modify-function signature="resetArray(QtDataVisualization::QBarDataArray*)">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="resetArray(QtDataVisualization::QBarDataArray*,const QStringList&amp;,const QStringList&amp;)">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="addRow(QVector&lt;QtDataVisualization::QBarDataItem&gt;*)">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="addRow(QVector&lt;QtDataVisualization::QBarDataItem&gt;*, const QString&amp;)">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="addRows(const QtDataVisualization::QBarDataArray&amp;)">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="addRows(const QtDataVisualization::QBarDataArray&amp;, const QStringList&amp;)">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="insertRow(int, QVector&lt;QtDataVisualization::QBarDataItem&gt;*)">
-        <modify-argument index="2">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="insertRow(int, QVector&lt;QtDataVisualization::QBarDataItem&gt;*, const QString&amp;)">
-        <modify-argument index="2">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="insertRows(int, const QtDataVisualization::QBarDataArray&amp;)">
-        <modify-argument index="2">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="insertRows(int, const QtDataVisualization::QBarDataArray&amp;, const QStringList&amp;)">
-        <modify-argument index="2">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="setRow(int, QVector&lt;QtDataVisualization::QBarDataItem&gt;*)">
-        <modify-argument index="2">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="setRow(int, QVector&lt;QtDataVisualization::QBarDataItem&gt;*, const QString&amp;)">
-        <modify-argument index="2">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="setRows(int, const QtDataVisualization::QBarDataArray&amp;)">
-        <modify-argument index="2">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="setRows(int, const QtDataVisualization::QBarDataArray&amp;, const QStringList&amp;)">
-        <modify-argument index="2">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-    </object-type>
-    <object-type name="QCustom3DItem"/>
-    <object-type name="QCustom3DLabel"/>
-    <object-type name="QCustom3DVolume"/>
-    <object-type name="QHeightMapSurfaceDataProxy"/>
-    <object-type name="QItemModelBarDataProxy">
-      <enum-type name="MultiMatchBehavior"/>
-    </object-type>
-    <object-type name="QItemModelScatterDataProxy"/>
-    <object-type name="QItemModelSurfaceDataProxy">
-      <enum-type name="MultiMatchBehavior"/>
-    </object-type>
-    <object-type name="QScatter3DSeries">
-      <modify-function signature="setDataProxy(QtDataVisualization::QScatterDataProxy*)">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-    </object-type>
-    <value-type name="QScatterDataItem"/>
-    <object-type name="QScatterDataProxy">
-      <modify-function signature="resetArray(QVector&lt;QtDataVisualization::QScatterDataItem&gt;*)">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="addItem(const QtDataVisualization::QScatterDataItem&amp;)">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="addItems(const QVector&lt;QtDataVisualization::QScatterDataItem&gt;&amp;)">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="insertItem(int, const QtDataVisualization::QScatterDataItem&amp;)">
-        <modify-argument index="2">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="insertItems(int, const QVector&lt;QtDataVisualization::QScatterDataItem&gt;&amp;)">
-        <modify-argument index="2">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="setItem(int, const QtDataVisualization::QScatterDataItem&amp;)">
-        <modify-argument index="2">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="setItems(int, const QVector&lt;QtDataVisualization::QScatterDataItem&gt;&amp;)">
-        <modify-argument index="2">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-    </object-type>
-    <object-type name="QSurface3DSeries">
-      <enum-type name="DrawFlag" flags="DrawFlags"/>
-      <modify-function signature="QSurface3DSeries(QtDataVisualization::QSurfaceDataProxy*,QObject*)">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="setDataProxy(QtDataVisualization::QSurfaceDataProxy*)">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-    </object-type>
-    <value-type name="QSurfaceDataItem"/>
-    <object-type name="QSurfaceDataProxy">
-      <modify-function signature="addRow(QVector&lt;QtDataVisualization::QSurfaceDataItem&gt;*)">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="insertRow(int, QVector&lt;QtDataVisualization::QSurfaceDataItem&gt;*)">
-        <modify-argument index="2">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="setRow(int, QVector&lt;QtDataVisualization::QSurfaceDataItem&gt;*)">
-        <modify-argument index="2">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="resetArray(QtDataVisualization::QSurfaceDataArray*)">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-    </object-type>
-    <object-type name="Q3DBars">
-      <modify-function signature="addAxis(QtDataVisualization::QAbstract3DAxis*)">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="releaseAxis(QtDataVisualization::QAbstract3DAxis*)">
-        <modify-argument index="1">
-          <reference-count action="set"/>
-        </modify-argument>
-        <inject-code file="../glue/qtdatavisualization.cpp" snippet="releaseownership"/>
-      </modify-function>
-      <modify-function signature="setColumnAxis(QtDataVisualization::QCategory3DAxis*)">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="setRowAxis(QtDataVisualization::QCategory3DAxis*)">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-    </object-type>
-    <object-type name="Q3DCamera">
-      <enum-type name="CameraPreset"/>
-    </object-type>
-    <object-type name="Q3DLight"/>
-    <object-type name="Q3DObject"/>
-    <object-type name="Q3DScatter">
-      <modify-function signature="addAxis(QtDataVisualization::QValue3DAxis*)">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="releaseAxis(QtDataVisualization::QValue3DAxis*)">
-        <modify-argument index="1">
-          <reference-count action="set"/>
-        </modify-argument>
-        <inject-code file="../glue/qtdatavisualization.cpp" snippet="releaseownership"/>
-      </modify-function>
-      <modify-function signature="setAxisX(QtDataVisualization::QValue3DAxis*)">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="setAxisY(QtDataVisualization::QValue3DAxis*)">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="setAxisZ(QtDataVisualization::QValue3DAxis*)">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-    </object-type>
-    <object-type name="Q3DScene"/>
-    <object-type name="Q3DSurface">
-      <modify-function signature="addAxis(QtDataVisualization::QValue3DAxis*)">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="releaseAxis(QtDataVisualization::QValue3DAxis*)">
-        <modify-argument index="1">
-          <reference-count action="set"/>
-        </modify-argument>
-        <inject-code file="../glue/qtdatavisualization.cpp" snippet="releaseownership"/>
-      </modify-function>
-      <modify-function signature="setAxisX(QtDataVisualization::QValue3DAxis*)">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="setAxisY(QtDataVisualization::QValue3DAxis*)">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="setAxisZ(QtDataVisualization::QValue3DAxis*)">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-    </object-type>
-    <object-type name="QAbstract3DGraph">
-      <enum-type name="ElementType"/>
-      <enum-type name="OptimizationHint" flags="OptimizationHints"/>
-      <enum-type name="SelectionFlag" flags="SelectionFlags"/>
-      <enum-type name="ShadowQuality"/>
-      <modify-function signature="addCustomItem(QtDataVisualization::QCustom3DItem*)">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="addInputHandler(QtDataVisualization::QAbstract3DInputHandler*)">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="addTheme(QtDataVisualization::Q3DTheme*)">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="releaseCustomItem(QtDataVisualization::QCustom3DItem*)">
-        <modify-argument index="1">
-          <reference-count action="set"/>
-        </modify-argument>
-        <inject-code file="../glue/qtdatavisualization.cpp" snippet="releaseownership"/>
-      </modify-function>
-      <modify-function signature="releaseInputHandler(QtDataVisualization::QAbstract3DInputHandler*)">
-        <modify-argument index="1">
-          <reference-count action="set"/>
-        </modify-argument>
-        <inject-code file="../glue/qtdatavisualization.cpp" snippet="releaseownership"/>
-      </modify-function>
-      <modify-function signature="releaseTheme(QtDataVisualization::Q3DTheme*)">
-        <modify-argument index="1">
-          <reference-count action="set"/>
-        </modify-argument>
-        <inject-code file="../glue/qtdatavisualization.cpp" snippet="releaseownership"/>
-      </modify-function>
-      <modify-function signature="setActiveInputHandler(QtDataVisualization::QAbstract3DInputHandler*)">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="setActiveTheme(QtDataVisualization::Q3DTheme*)">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-    </object-type>
-    <object-type name="Q3DInputHandler"/>
-    <object-type name="QAbstract3DInputHandler">
-      <enum-type name="InputView"/>
-    </object-type>
-    <object-type name="QTouch3DInputHandler"/>
-    <object-type name="Q3DTheme">
-      <enum-type name="ColorStyle"/>
-      <enum-type name="Theme"/>
-    </object-type>
-    <extra-includes>
-      <include file-name="qutils.h" location="global"/>
-    </extra-includes>
-  </namespace-type>
+  <object-type name="QAbstract3DAxis">
+    <enum-type name="AxisOrientation"/>
+    <enum-type name="AxisType"/>
+  </object-type>
+  <object-type name="QCategory3DAxis"/>
+  <object-type name="QLogValue3DAxisFormatter"/>
+  <object-type name="QValue3DAxis"/>
+  <object-type name="QValue3DAxisFormatter">
+    <modify-function signature="populateCopy(QValue3DAxisFormatter&amp;)const">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QAbstract3DSeries">
+    <enum-type name="Mesh"/>
+    <enum-type name="SeriesType"/>
+  </object-type>
+  <object-type name="QAbstractDataProxy">
+    <enum-type name="DataType"/>
+  </object-type>
+  <object-type name="QBar3DSeries">
+    <modify-function signature="setDataProxy(QBarDataProxy*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <value-type name="QBarDataItem"/>
+  <object-type name="QBarDataProxy">
+    <modify-function signature="resetArray(QBarDataArray*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="resetArray(QBarDataArray*,const QStringList&amp;,const QStringList&amp;)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addRow(QVector&lt;QBarDataItem&gt;*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addRow(QVector&lt;QBarDataItem&gt;*, const QString&amp;)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addRows(const QBarDataArray&amp;)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addRows(const QBarDataArray&amp;, const QStringList&amp;)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertRow(int, QVector&lt;QBarDataItem&gt;*)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertRow(int, QVector&lt;QBarDataItem&gt;*, const QString&amp;)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertRows(int, const QBarDataArray&amp;)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertRows(int, const QBarDataArray&amp;, const QStringList&amp;)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setRow(int, QVector&lt;QBarDataItem&gt;*)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setRow(int, QVector&lt;QBarDataItem&gt;*, const QString&amp;)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setRows(int, const QBarDataArray&amp;)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setRows(int, const QBarDataArray&amp;, const QStringList&amp;)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QCustom3DItem"/>
+  <object-type name="QCustom3DLabel"/>
+  <object-type name="QCustom3DVolume"/>
+  <object-type name="QHeightMapSurfaceDataProxy"/>
+  <object-type name="QItemModelBarDataProxy">
+    <enum-type name="MultiMatchBehavior"/>
+  </object-type>
+  <object-type name="QItemModelScatterDataProxy"/>
+  <object-type name="QItemModelSurfaceDataProxy">
+    <enum-type name="MultiMatchBehavior"/>
+  </object-type>
+  <object-type name="QScatter3DSeries">
+    <modify-function signature="setDataProxy(QScatterDataProxy*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <value-type name="QScatterDataItem"/>
+  <object-type name="QScatterDataProxy">
+    <modify-function signature="resetArray(QVector&lt;QScatterDataItem&gt;*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addItem(const QScatterDataItem&amp;)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addItems(const QVector&lt;QScatterDataItem&gt;&amp;)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertItem(int, const QScatterDataItem&amp;)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertItems(int, const QVector&lt;QScatterDataItem&gt;&amp;)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setItem(int, const QScatterDataItem&amp;)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setItems(int, const QVector&lt;QScatterDataItem&gt;&amp;)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QSurface3DSeries">
+    <enum-type name="DrawFlag" flags="DrawFlags"/>
+    <modify-function signature="QSurface3DSeries(QSurfaceDataProxy*,QObject*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setDataProxy(QSurfaceDataProxy*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <value-type name="QSurfaceDataItem"/>
+  <object-type name="QSurfaceDataProxy">
+    <modify-function signature="addRow(QVector&lt;QSurfaceDataItem&gt;*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertRow(int, QVector&lt;QSurfaceDataItem&gt;*)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setRow(int, QVector&lt;QSurfaceDataItem&gt;*)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="resetArray(QSurfaceDataArray*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="Q3DBars">
+    <modify-function signature="addAxis(QAbstract3DAxis*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="releaseAxis(QAbstract3DAxis*)">
+      <modify-argument index="1">
+        <reference-count action="set"/>
+      </modify-argument>
+      <inject-code file="../glue/qtdatavisualization.cpp" snippet="releaseownership"/>
+    </modify-function>
+    <modify-function signature="setColumnAxis(QCategory3DAxis*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setRowAxis(QCategory3DAxis*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="Q3DCamera">
+    <enum-type name="CameraPreset"/>
+  </object-type>
+  <object-type name="Q3DLight"/>
+  <object-type name="Q3DObject"/>
+  <object-type name="Q3DScatter">
+    <modify-function signature="addAxis(QValue3DAxis*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="releaseAxis(QValue3DAxis*)">
+      <modify-argument index="1">
+        <reference-count action="set"/>
+      </modify-argument>
+      <inject-code file="../glue/qtdatavisualization.cpp" snippet="releaseownership"/>
+    </modify-function>
+    <modify-function signature="setAxisX(QValue3DAxis*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setAxisY(QValue3DAxis*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setAxisZ(QValue3DAxis*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="Q3DScene"/>
+  <object-type name="Q3DSurface">
+    <modify-function signature="addAxis(QValue3DAxis*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="releaseAxis(QValue3DAxis*)">
+      <modify-argument index="1">
+        <reference-count action="set"/>
+      </modify-argument>
+      <inject-code file="../glue/qtdatavisualization.cpp" snippet="releaseownership"/>
+    </modify-function>
+    <modify-function signature="setAxisX(QValue3DAxis*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setAxisY(QValue3DAxis*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setAxisZ(QValue3DAxis*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QAbstract3DGraph">
+    <enum-type name="ElementType"/>
+    <enum-type name="OptimizationHint" flags="OptimizationHints"/>
+    <enum-type name="SelectionFlag" flags="SelectionFlags"/>
+    <enum-type name="ShadowQuality"/>
+    <modify-function signature="addCustomItem(QCustom3DItem*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addInputHandler(QAbstract3DInputHandler*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addTheme(Q3DTheme*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="releaseCustomItem(QCustom3DItem*)">
+      <modify-argument index="1">
+        <reference-count action="set"/>
+      </modify-argument>
+      <inject-code file="../glue/qtdatavisualization.cpp" snippet="releaseownership"/>
+    </modify-function>
+    <modify-function signature="releaseInputHandler(QAbstract3DInputHandler*)">
+      <modify-argument index="1">
+        <reference-count action="set"/>
+      </modify-argument>
+      <inject-code file="../glue/qtdatavisualization.cpp" snippet="releaseownership"/>
+    </modify-function>
+    <modify-function signature="releaseTheme(Q3DTheme*)">
+      <modify-argument index="1">
+        <reference-count action="set"/>
+      </modify-argument>
+      <inject-code file="../glue/qtdatavisualization.cpp" snippet="releaseownership"/>
+    </modify-function>
+    <modify-function signature="setActiveInputHandler(QAbstract3DInputHandler*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setActiveTheme(Q3DTheme*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="Q3DInputHandler"/>
+  <object-type name="QAbstract3DInputHandler">
+    <enum-type name="InputView"/>
+  </object-type>
+  <object-type name="QTouch3DInputHandler"/>
+  <object-type name="Q3DTheme">
+    <enum-type name="ColorStyle"/>
+    <enum-type name="Theme"/>
+  </object-type>
+  <extra-includes>
+    <include file-name="qutils.h" location="global"/>
+  </extra-includes>
 </typesystem>

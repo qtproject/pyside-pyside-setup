@@ -45,10 +45,12 @@ import sys
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import QApplication, QSizePolicy, QMainWindow, QWidget
-from PySide6.QtDataVisualization import QtDataVisualization
+from PySide6.QtDataVisualization import (Q3DBars, QBar3DSeries, QBarDataItem,
+                                         QCategory3DAxis, QValue3DAxis)
+
 
 def dataToBarDataRow(data):
-    return list(QtDataVisualization.QBarDataItem(d) for d in data)
+    return list(QBarDataItem(d) for d in data)
 
 def dataToBarDataArray(data):
     return list(dataToBarDataRow(row) for row in data)
@@ -60,21 +62,21 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle('Qt DataVisualization 3D Bars')
 
-        self.bars = QtDataVisualization.Q3DBars()
+        self.bars = Q3DBars()
 
-        self.columnAxis = QtDataVisualization.QCategory3DAxis()
+        self.columnAxis = QCategory3DAxis()
         self.columnAxis.setTitle('Columns')
         self.columnAxis.setTitleVisible(True)
         self.columnAxis.setLabels(['Column1', 'Column2'])
         self.columnAxis.setLabelAutoRotation(30)
 
-        self.rowAxis = QtDataVisualization.QCategory3DAxis()
+        self.rowAxis = QCategory3DAxis()
         self.rowAxis.setTitle('Rows')
         self.rowAxis.setTitleVisible(True)
         self.rowAxis.setLabels(['Row1', 'Row2'])
         self.rowAxis.setLabelAutoRotation(30)
 
-        self.valueAxis = QtDataVisualization.QValue3DAxis()
+        self.valueAxis = QValue3DAxis()
         self.valueAxis.setTitle('Values')
         self.valueAxis.setTitleVisible(True)
         self.valueAxis.setRange(0, 5)
@@ -83,7 +85,7 @@ class MainWindow(QMainWindow):
         self.bars.setColumnAxis(self.columnAxis)
         self.bars.setValueAxis(self.valueAxis)
 
-        self.series = QtDataVisualization.QBar3DSeries()
+        self.series = QBar3DSeries()
         self.arrayData = [[1, 2], [3, 4]]
         self.series.dataProxy().addRows(dataToBarDataArray(self.arrayData))
 
