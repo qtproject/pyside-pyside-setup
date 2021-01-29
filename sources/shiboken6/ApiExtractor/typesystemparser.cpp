@@ -1575,8 +1575,8 @@ void TypeSystemParser::applyComplexTypeAttributes(const QXmlStreamReader &reader
         } else if (name == QLatin1String("hash-function")) {
             ctype->setHashFunction(attributes->takeAt(i).value().toString());
         } else if (name == forceAbstractAttribute()) {
-            qCWarning(lcShiboken, "%s",
-                      qPrintable(msgUnimplementedAttributeWarning(reader, name)));
+            if (convertBoolean(attributes->takeAt(i).value(), forceAbstractAttribute(), false))
+                ctype->setTypeFlags(ctype->typeFlags() | ComplexTypeEntry::ForceAbstract);
         } else if (name == deprecatedAttribute()) {
             if (convertBoolean(attributes->takeAt(i).value(), deprecatedAttribute(), false))
                 ctype->setTypeFlags(ctype->typeFlags() | ComplexTypeEntry::Deprecated);

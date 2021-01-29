@@ -982,6 +982,8 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
     auto *metaClass = new AbstractMetaClass;
     metaClass->setSourceLocation(classItem->sourceLocation());
     metaClass->setTypeEntry(type);
+    if ((type->typeFlags() & ComplexTypeEntry::ForceAbstract) != 0)
+        *metaClass += AbstractMetaAttributes::Abstract;
 
     if (classItem->isFinal())
         *metaClass += AbstractMetaAttributes::FinalCppClass;

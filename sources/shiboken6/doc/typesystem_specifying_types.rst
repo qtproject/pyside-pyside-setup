@@ -349,6 +349,7 @@ object-type
              allow-thread="..."
              disable-wrapper="yes | no"
              exception-handling="..."
+             force-abstract="yes | no"
              hash-function="..."
              stream="yes | no"
              revision="..."
@@ -360,6 +361,11 @@ object-type
     superclass for the given type, in the generated target language API. The
     **copyable** and **hash-function** attributes are the same as described for
     :ref:`value-type`.
+
+    The *optional* **force-abstract** attribute forces the class to be
+    abstract, disabling its instantiation. The generator will normally detect
+    this automatically unless the class inherits from an abstract base class
+    that is not in the type system.
 
     The *optional* **disable-wrapper** attribute disables the generation of a
     **C++ Wrapper** (see :ref:`codegenerationterminology`). This will
