@@ -704,8 +704,9 @@ newTypeWithName(const char *name,
         copyNumberMethods(numbers_fromFlag, newslots, &idx);
     newspec.slots = newslots;
     Shiboken::AutoDecRef bases(PyTuple_New(1));
-    static auto basetype = SbkEnum_TypeF();
-    PyTuple_SetItem(bases, 0, reinterpret_cast<PyObject *>(basetype));
+    static auto basetype = reinterpret_cast<PyObject *>(SbkEnum_TypeF());
+    Py_INCREF(basetype);
+    PyTuple_SetItem(bases, 0, basetype);
     auto *type = reinterpret_cast<PyTypeObject *>(SbkType_FromSpecWithBases(&newspec, bases));
     Py_TYPE(type) = SbkEnumType_TypeF();
 
