@@ -732,6 +732,7 @@ newTypeWithName(const char *name,
     newspec.slots = newslots;
     Shiboken::AutoDecRef bases(PyTuple_New(1));
     static auto basetype = SbkEnum_TypeF();
+    Py_INCREF(basetype);
     PyTuple_SetItem(bases, 0, reinterpret_cast<PyObject *>(basetype));
     auto *type = reinterpret_cast<PyTypeObject *>(SbkType_FromSpecWithBases(&newspec, bases));
     PyErr_Print();
