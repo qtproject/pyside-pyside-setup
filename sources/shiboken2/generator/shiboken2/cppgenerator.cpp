@@ -1897,6 +1897,10 @@ void CppGenerator::writeConstructorWrapper(QTextStream &s, const AbstractMetaFun
             s << outdent(INDENT) << '\n';
     }
 
+    // PYSIDE-1478: Switching must also happen at object creation time.
+    if (usePySideExtensions())
+        s << "PySide::Feature::Select(self);\n";
+
     writeMethodWrapperPreamble(s, overloadData, classContext);
 
     s << Qt::endl;
