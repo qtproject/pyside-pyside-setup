@@ -2208,8 +2208,11 @@ void CppGenerator::writeCppSelfDefinition(TextStream &s,
     Q_ASSERT(!(cppSelfAsReference && hasStaticOverload));
 
     const AbstractMetaClass *metaClass = context.metaClass();
-    bool useWrapperClass = avoidProtectedHack() && metaClass->hasProtectedMembers()
-        && !metaClass->attributes().testFlag(AbstractMetaAttributes::FinalCppClass);
+    const auto cppWrapper = context.metaClass()->cppWrapper();
+    // In the Python method, use the wrapper to access the protected
+    // functions.
+    const bool useWrapperClass = avoidProtectedHack()
+        && cppWrapper.testFlag(AbstractMetaClass::CppProtectedHackWrapper);
     Q_ASSERT(!useWrapperClass || context.useWrapper());
     QString className;
     if (!context.forSmartPointer()) {
@@ -3573,8 +3576,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                                 if (avoidProtectedHack()) {
                                     auto ownerClass = func->ownerClass();
                                     mc << "const_cast<const ::";
-                                    if (ownerClass->hasProtectedMembers()
-                                        && !ownerClass->attributes().testFlag(AbstractMetaAttributes::FinalCppClass)) {
+                                    if (ownerClass->cppWrapper().testFlag(AbstractMetaClass::CppProtectedHackWrapper)) {
                                         // PYSIDE-500: Need a special wrapper cast when inherited
                                         const QString selfWrapCast = ownerClass == func->implementingClass()
                                             ? QLatin1String(CPP_SELF_VAR)

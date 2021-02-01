@@ -65,7 +65,8 @@ public:
           m_hasEqualsOperator(false),
           m_hasCloneOperator(false),
           m_isTypeDef(false),
-          m_hasToStringCapability(false)
+          m_hasToStringCapability(false),
+          m_hasCachedWrapper(false)
     {
     }
 
@@ -84,6 +85,7 @@ public:
     uint m_hasCloneOperator : 1;
     uint m_isTypeDef : 1;
     uint m_hasToStringCapability : 1;
+    mutable uint m_hasCachedWrapper : 1;
 
     Documentation m_doc;
 
@@ -107,6 +109,7 @@ public:
     ComplexTypeEntry *m_typeEntry = nullptr;
     SourceLocation m_sourceLocation;
 
+    mutable AbstractMetaClass::CppWrapper m_cachedWrapper;
     bool m_stream = false;
     uint m_toStringCapabilityIndirections = 0;
 };
@@ -850,6 +853,47 @@ bool AbstractMetaClass::generateExceptionHandling() const
     return queryFirstFunction(d->m_functions, FunctionQueryOption::Visible
                               | FunctionQueryOption::GenerateExceptionHandling) != nullptr;
 }
+
+static bool needsProtectedWrapper(const AbstractMetaFunctionCPtr &func)
+{
+    return func->isProtected()
+        && !(func->isSignal() || func->isModifiedRemoved())
+        && !func->isOperatorOverload();
+}
+
+static AbstractMetaClass::CppWrapper determineCppWrapper(const AbstractMetaClass *metaClass)
+{
+
+    AbstractMetaClass::CppWrapper result;
+
+    if (metaClass->isNamespace()
+        || metaClass->attributes().testFlag(AbstractMetaAttributes::FinalCppClass)
+        || metaClass->typeEntry()->typeFlags().testFlag(ComplexTypeEntry::DisableWrapper)) {
+        return result;
+    }
+
+    // Need checking for Python overrides?
+    if (metaClass->isPolymorphic() && !metaClass->hasPrivateDestructor())
+        result |= AbstractMetaClass::CppVirtualMethodWrapper;
+
+    // Is there anything protected that needs to be made accessible?
+    if (metaClass->hasProtectedFields() || metaClass->hasProtectedDestructor()
+        || std::any_of(metaClass->functions().cbegin(), metaClass->functions().cend(),
+                       needsProtectedWrapper)) {
+        result |= AbstractMetaClass::CppProtectedHackWrapper;
+    }
+    return result;
+}
+
+AbstractMetaClass::CppWrapper AbstractMetaClass::cppWrapper() const
+{
+    if (!d->m_hasCachedWrapper) {
+        d->m_cachedWrapper = determineCppWrapper(this);
+        d->m_hasCachedWrapper = true;
+    }
+    return d->m_cachedWrapper;
+}
+
 /* Goes through the list of functions and returns a list of all
    functions matching all of the criteria in \a query.
  */

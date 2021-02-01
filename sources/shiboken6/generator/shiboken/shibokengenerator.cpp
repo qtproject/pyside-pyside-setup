@@ -227,31 +227,10 @@ QString ShibokenGenerator::translateTypeForWrapperMethod(const AbstractMetaType 
 
 bool ShibokenGenerator::shouldGenerateCppWrapper(const AbstractMetaClass *metaClass) const
 {
-    if (metaClass->isNamespace()
-        || metaClass->attributes().testFlag(AbstractMetaAttributes::FinalCppClass)
-        || metaClass->typeEntry()->typeFlags().testFlag(ComplexTypeEntry::DisableWrapper)) {
-        return false;
-    }
-    bool result = metaClass->isPolymorphic() || metaClass->hasVirtualDestructor();
-    if (avoidProtectedHack()) {
-        result = result || metaClass->hasProtectedFields() || metaClass->hasProtectedDestructor();
-        if (!result && metaClass->hasProtectedFunctions()) {
-            int protectedFunctions = 0;
-            int protectedOperators = 0;
-            for (const auto &func : metaClass->functions()) {
-                if (!func->isProtected() || func->isSignal() || func->isModifiedRemoved())
-                    continue;
-                if (func->isOperatorOverload())
-                    protectedOperators++;
-                else
-                    protectedFunctions++;
-            }
-            result = result || (protectedFunctions > protectedOperators);
-        }
-    } else {
-        result = result && !metaClass->hasPrivateDestructor();
-    }
-    return result;
+    const auto wrapper = metaClass->cppWrapper();
+    return wrapper.testFlag(AbstractMetaClass::CppVirtualMethodWrapper)
+        || (avoidProtectedHack()
+            && wrapper.testFlag(AbstractMetaClass::CppProtectedHackWrapper));
 }
 
 bool ShibokenGenerator::shouldWriteVirtualMethodNative(const AbstractMetaFunctionCPtr &func) const

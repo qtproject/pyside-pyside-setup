@@ -55,6 +55,13 @@ class AbstractMetaClass : public AbstractMetaAttributes, public EnclosingClassMi
 public:
     Q_DISABLE_COPY_MOVE(AbstractMetaClass)
 
+    enum CppWrapperFlag {
+        NoCppWrapper = 0x0,
+        CppProtectedHackWrapper = 0x1,// Make protected functions accessible
+        CppVirtualMethodWrapper = 0x2 // Need C++ wrapper for calling Python overrides
+    };
+    Q_DECLARE_FLAGS(CppWrapper, CppWrapperFlag)
+
     AbstractMetaClass();
     ~AbstractMetaClass();
 
@@ -91,6 +98,8 @@ public:
     bool isConstructible() const;
 
     bool generateExceptionHandling() const;
+
+    CppWrapper cppWrapper() const;
 
     AbstractMetaFunctionCList queryFunctionsByName(const QString &name) const;
     static bool queryFunction(const AbstractMetaFunction *f, FunctionQueryOptions query);
@@ -336,5 +345,7 @@ void AbstractMetaClass::invisibleNamespaceRecursion(Function f) const
         }
     }
 }
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaClass::CppWrapper);
 
 #endif // ABSTRACTMETALANG_H
