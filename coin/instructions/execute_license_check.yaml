@@ -18,6 +18,12 @@ instructions:
       directory: qt/qtqa-latest
       userMessageOnFailure: >
               Could not install source archive. Please investigate why.
+    - type: ExecuteCommand
+      command: /bin/mv pyside/tqtc-pyside-setup pyside/pyside-setup
+      maxTimeInSeconds: 300
+      maxTimeBetweenOutput: 120
+      userMessageOnFailure: >
+              Failed to rename tqtc-pyside-setup dir
     - type: EnvironmentVariable
       variableName: QT_MODULE_TO_TEST
       variableValue: pyside/pyside-setup

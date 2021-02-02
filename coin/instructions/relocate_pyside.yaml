@@ -11,7 +11,7 @@ instructions:
     userMessageOnFailure: >
          Failed to change to pyside dir
   - type: ExecuteCommand
-    command: c:\\users\\qt\\MSVC.bat rd /s /q pyside-setup
+    command: c:\\users\\qt\\MSVC.bat rd /s /q tqtc-pyside-setup
     maxTimeInSeconds: 300
     maxTimeBetweenOutput: 120
     enable_if:
@@ -19,9 +19,9 @@ instructions:
       property: host.os
       equals_value: Windows
     userMessageOnFailure: >
-         Failed to remove pyside-setup dir
+         Failed to remove tqtc-pyside-setup dir
   - type: ExecuteCommand
-    command: /bin/rm -rf pyside-setup
+    command: /bin/rm -rf tqtc-pyside-setup
     maxTimeInSeconds: 300
     maxTimeBetweenOutput: 120
     enable_if:
@@ -29,14 +29,14 @@ instructions:
       property: host.os
       not_equals_value: Windows
     userMessageOnFailure: >
-         Failed to remove pyside-setup dir
+         Failed to remove tqtc-pyside-setup dir
   - type: InstallBinaryArchive
     relativeStoragePath: "{{.Env.MODULE_ARTIFACTS_RELATIVE_STORAGE_PATH}}/artifacts.tar.gz"
     directory: "pyside"
     maxTimeInSeconds: 1200
     maxTimeBetweenOutput: 1200
   - type: ChangeDirectory
-    directory: "{{.AgentWorkingDir}}\\pyside\\pyside-setup"
+    directory: "{{.AgentWorkingDir}}\\pyside\\tqtc-pyside-setup"
     maxTimeInSeconds: 7200
     maxTimeBetweenOutput: 120
     enable_if:
@@ -46,7 +46,7 @@ instructions:
     userMessageOnFailure: >
          Failed to install binary artifacts
   - type: ChangeDirectory
-    directory: "{{.AgentWorkingDir}}/pyside/pyside-setup"
+    directory: "{{.AgentWorkingDir}}/pyside/tqtc-pyside-setup"
     maxTimeInSeconds: 7200
     maxTimeBetweenOutput: 120
     enable_if:
@@ -54,4 +54,4 @@ instructions:
       property: host.os
       not_equals_value: Windows
     userMessageOnFailure: >
-         Failed to change to pyside-setup dir
+         Failed to change to tqtc-pyside-setup dir
