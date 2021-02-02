@@ -64,7 +64,9 @@ private:
     static void writeTypeIndexValueLines(TextStream &s, const ApiExtractorResult &api,
                                          const AbstractMetaClass *metaClass);
     void writeProtectedEnumSurrogate(TextStream &s, const AbstractMetaEnum &cppEnum) const;
-    void writeInheritedOverloads(TextStream &s) const;
+    void writeMemberFunctionWrapper(TextStream &s,
+                                    const AbstractMetaFunctionCPtr &func,
+                                    const QString &postfix = {}) const;
 
     QSet<AbstractMetaFunctionCPtr> m_inheritedOverloads;
 };

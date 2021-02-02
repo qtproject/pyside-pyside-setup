@@ -190,7 +190,8 @@ void *qt_metacast(const char *_clname) override;
 
         if (!m_inheritedOverloads.isEmpty()) {
             s << "// Inherited overloads, because the using keyword sux\n";
-            writeInheritedOverloads(s);
+            for (const auto &func : qAsConst(m_inheritedOverloads))
+                writeMemberFunctionWrapper(s, func);
             m_inheritedOverloads.clear();
         }
 
@@ -224,6 +225,48 @@ void *qt_metacast(const char *_clname) override;
     s << "#endif // SBK_" << outerHeaderGuard << "_H\n\n";
 }
 
+// Write an inline wrapper around a function
+void HeaderGenerator::writeMemberFunctionWrapper(TextStream &s,
+                                                 const AbstractMetaFunctionCPtr &func,
+                                                 const QString &postfix) const
+{
+    Q_ASSERT(!func->isConstructor() && !func->isOperatorOverload());
+    s << "inline ";
+    if (func->isStatic())
+        s << "static ";
+    s << functionSignature(func, {}, postfix,
+                           Generator::EnumAsInts | Generator::OriginalTypeDescription)
+      << " { ";
+    if (!func->isVoid())
+        s << "return ";
+    if (!func->isAbstract()) {
+        // Use implementingClass() in case of multiple inheritance (for example
+        // function setProperty() being inherited from QObject and
+        // QDesignerPropertySheetExtension).
+        auto klass = func->implementingClass();
+        if (klass == nullptr)
+            klass = func->ownerClass();
+        s << klass->qualifiedCppName() << "::";
+    }
+    s << func->originalName() << '(';
+    const AbstractMetaArgumentList &arguments = func->arguments();
+    for (qsizetype i = 0, size = arguments.size(); i < size; ++i) {
+        if (i > 0)
+            s << ", ";
+        const AbstractMetaArgument &arg = arguments.at(i);
+        const TypeEntry *enumTypeEntry = nullptr;
+        if (arg.type().isFlags())
+            enumTypeEntry = static_cast<const FlagsTypeEntry *>(arg.type().typeEntry())->originator();
+        else if (arg.type().isEnum())
+            enumTypeEntry = arg.type().typeEntry();
+        if (enumTypeEntry)
+            s << arg.type().cppSignature() << '(' << arg.name() << ')';
+        else
+            s << arg.name();
+    }
+    s << "); }\n";
+}
+
 void HeaderGenerator::writeFunction(TextStream &s, const AbstractMetaFunctionCPtr &func)
 {
 
@@ -235,30 +278,9 @@ void HeaderGenerator::writeFunction(TextStream &s, const AbstractMetaFunctionCPt
     if (func->isUserAdded())
         return;
 
-    if (avoidProtectedHack() && func->isProtected() && !func->isConstructor() && !func->isOperatorOverload()) {
-        s << "inline " << (func->isStatic() ? "static " : "");
-        s << functionSignature(func, QString(), QLatin1String("_protected"), Generator::EnumAsInts|Generator::OriginalTypeDescription)
-            << " { ";
-        if (!func->isVoid())
-            s << "return ";
-        if (!func->isAbstract())
-            s << func->ownerClass()->qualifiedCppName() << "::";
-        s << func->originalName() << '(';
-        QStringList args;
-        const AbstractMetaArgumentList &arguments = func->arguments();
-        for (const AbstractMetaArgument &arg : arguments) {
-            QString argName = arg.name();
-            const TypeEntry *enumTypeEntry = nullptr;
-            if (arg.type().isFlags())
-                enumTypeEntry = static_cast<const FlagsTypeEntry *>(arg.type().typeEntry())->originator();
-            else if (arg.type().isEnum())
-                enumTypeEntry = arg.type().typeEntry();
-            if (enumTypeEntry)
-                argName = QString::fromLatin1("%1(%2)").arg(arg.type().cppSignature(), argName);
-            args << argName;
-        }
-        s << args.join(QLatin1String(", ")) << ')';
-        s << "; }\n";
+    if (avoidProtectedHack() && func->isProtected() && !func->isConstructor()
+        && !func->isOperatorOverload()) {
+        writeMemberFunctionWrapper(s, func, QLatin1String("_protected"));
     }
 
     // pure virtual functions need a default implementation
@@ -618,31 +640,4 @@ void HeaderGenerator::writeSbkTypeFunction(TextStream &s, const AbstractMetaType
 {
     s <<  "template<> inline PyTypeObject *SbkType< ::" << metaType.cppSignature() << " >() "
       <<  "{ return reinterpret_cast<PyTypeObject *>(" << cpythonTypeNameExt(metaType) << "); }\n";
-}
-
-void HeaderGenerator::writeInheritedOverloads(TextStream &s) const
-{
-    for (const auto &func : qAsConst(m_inheritedOverloads)) {
-        s << "inline ";
-        s << functionSignature(func, QString(), QString(), Generator::EnumAsInts|Generator::OriginalTypeDescription)
-            << " { ";
-        if (!func->isVoid())
-            s << "return ";
-        s << func->ownerClass()->qualifiedCppName() << "::" << func->originalName() << '(';
-        QStringList args;
-        const AbstractMetaArgumentList &arguments = func->arguments();
-        for (const AbstractMetaArgument &arg : arguments) {
-            QString argName = arg.name();
-            const TypeEntry *enumTypeEntry = nullptr;
-            if (arg.type().isFlags())
-                enumTypeEntry = static_cast<const FlagsTypeEntry *>(arg.type().typeEntry())->originator();
-            else if (arg.type().isEnum())
-                enumTypeEntry = arg.type().typeEntry();
-            if (enumTypeEntry)
-                argName = arg.type().cppSignature() + QLatin1Char('(') + argName + QLatin1Char(')');
-            args << argName;
-        }
-        s << args.join(QLatin1String(", ")) << ')';
-        s << "; }\n";
-    }
 }
