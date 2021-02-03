@@ -296,16 +296,6 @@ QString ShibokenGenerator::protectedEnumSurrogateName(const AbstractMetaEnum &me
     return result + QLatin1String("_Surrogate");
 }
 
-QString ShibokenGenerator::protectedFieldGetterName(const AbstractMetaField &field)
-{
-    return QLatin1String("protected_") + field.name() + QLatin1String("_getter");
-}
-
-QString ShibokenGenerator::protectedFieldSetterName(const AbstractMetaField &field)
-{
-    return QLatin1String("protected_") + field.name() + QLatin1String("_setter");
-}
-
 QString ShibokenGenerator::cpythonFunctionName(const AbstractMetaFunctionCPtr &func)
 {
     QString result;

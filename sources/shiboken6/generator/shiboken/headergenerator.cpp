@@ -69,32 +69,6 @@ void HeaderGenerator::writeCopyCtor(TextStream &s, const AbstractMetaClass *meta
       << "& self) : " << metaClass->qualifiedCppName() << "(self)\n{\n}\n\n";
 }
 
-void HeaderGenerator::writeProtectedFieldAccessors(TextStream &s,
-                                                   const AbstractMetaField &field)
-{
-    const AbstractMetaType &metaType = field.type();
-    QString fieldType = metaType.cppSignature();
-    const QString fieldName = field.qualifiedCppName();
-
-    // Force use of pointer to return internal variable memory
-    bool useReference = (!metaType.isConstant() &&
-                         !metaType.isEnum() &&
-                         !metaType.isPrimitive() &&
-                         metaType.indirections() == 0);
-
-
-    // Get function
-    s << "inline " << fieldType
-      << (useReference ? " *" : " ")
-      << ' ' << protectedFieldGetterName(field) << "()"
-      << " { return "
-      << (useReference ? " &" : " ") << "this->" << fieldName << "; }\n";
-
-    // Set function
-    s << "inline void " << protectedFieldSetterName(field) << '(' << fieldType << " value)"
-      << " { " << fieldName << " = value; }\n";
-}
-
 void HeaderGenerator::generateClass(TextStream &s, const GeneratorContext &classContextIn)
 {
     GeneratorContext classContext = classContextIn;
@@ -145,6 +119,16 @@ void HeaderGenerator::generateClass(TextStream &s, const GeneratorContext &class
            << " : public " << metaClass->qualifiedCppName()
            << "\n{\npublic:\n" << indent;
 
+        if (avoidProtectedHack() && metaClass->hasProtectedFields()) {
+            s << "\n// Make protected fields accessible\n";
+            const QString name = metaClass->qualifiedCppName();
+            for (const auto &f : metaClass->fields()) {
+                if (f.isProtected())
+                    s << "using " << name << "::" << f.originalName() << ";\n";
+            }
+            s << '\n';
+        }
+
         const auto &funcs = filterFunctions(metaClass);
         int maxOverrides = 0;
         for (const auto &func : funcs) {
@@ -157,14 +141,6 @@ void HeaderGenerator::generateClass(TextStream &s, const GeneratorContext &class
         }
         if (!maxOverrides)
             maxOverrides = 1;
-
-        if (avoidProtectedHack() && metaClass->hasProtectedFields()) {
-            for (const AbstractMetaField &field : metaClass->fields()) {
-                if (!field.isProtected())
-                    continue;
-                writeProtectedFieldAccessors(s, field);
-            }
-        }
 
         //destructor
         // PYSIDE-504: When C++ 11 is used, then the destructor must always be written.

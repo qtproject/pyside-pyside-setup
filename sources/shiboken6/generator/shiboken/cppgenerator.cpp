@@ -4568,6 +4568,19 @@ static inline void writeGetterFunctionStart(TextStream &s, const QString &funcNa
        << "{\n" << indent;
 }
 
+QString CppGenerator::cppFieldAccess(const AbstractMetaField &metaField,
+                                     const GeneratorContext &context) const
+{
+    QString result;
+    QTextStream str(&result);
+    if (avoidProtectedHack() && metaField.isProtected())
+        str << "static_cast<" << context.wrapperName() << " *>(" << CPP_SELF_VAR << ')';
+    else
+        str << CPP_SELF_VAR;
+    str << "->" << metaField.originalName();
+    return result;
+}
+
 void CppGenerator::writeGetterFunction(TextStream &s,
                                        const AbstractMetaField &metaField,
                                        const GeneratorContext &context) const
@@ -4582,32 +4595,15 @@ void CppGenerator::writeGetterFunction(TextStream &s,
     bool newWrapperSameObject = !fieldType.isConstant() && fieldType.isWrapperType()
             && !fieldType.isPointer();
 
-    QString cppField;
-    if (avoidProtectedHack() && metaField.isProtected()) {
-        QTextStream(&cppField) << "static_cast<"
-            << context.wrapperName() << " *>("
-            << CPP_SELF_VAR << ")->" << protectedFieldGetterName(metaField) << "()";
-    } else {
-        cppField = QLatin1String(CPP_SELF_VAR) + QLatin1String("->")
-                   + metaField.originalName();
-        if (newWrapperSameObject) {
-            cppField.prepend(QLatin1String("&("));
-            cppField.append(QLatin1Char(')'));
-        }
+    QString cppField = cppFieldAccess(metaField, context);
+    if (newWrapperSameObject) {
+        cppField.prepend(u"&(");
+        cppField.append(u')');
     }
+
     if (fieldType.isCppIntegralPrimitive() || fieldType.isEnum()) {
         s << getFullTypeNameWithoutModifiers(fieldType) << " cppOut_local = " << cppField << ";\n";
         cppField = QLatin1String("cppOut_local");
-    } else if (avoidProtectedHack() && metaField.isProtected()) {
-        s << getFullTypeNameWithoutModifiers(fieldType);
-        if (fieldType.isContainer() || fieldType.isFlags() || fieldType.isSmartPointer()) {
-            s << " &";
-            cppField.prepend(QLatin1Char('*'));
-        } else if ((!fieldType.isConstant() && !fieldType.isEnum() && !fieldType.isPrimitive()) || fieldType.indirections() == 1) {
-            s << " *";
-        }
-        s << " fieldValue = " << cppField << ";\n";
-        cppField = QLatin1String("fieldValue");
     }
 
     s << "PyObject *pyOut = {};\n";
@@ -4710,18 +4706,9 @@ void CppGenerator::writeSetterFunction(TextStream &s,
                                 fieldType, context);
 
 
-    const QString cppField = QLatin1String(CPP_SELF_VAR) + QLatin1String("->")
-                             + metaField.originalName();
-    if (avoidProtectedHack() && metaField.isProtected()) {
-        s << getFullTypeNameWithoutModifiers(fieldType);
-        if (fieldType.indirections() == 1)
-            s << " *";
-        s << " cppOut;\n"
-            << PYTHON_TO_CPP_VAR << "(pyIn, &cppOut);\n"
-            << "static_cast<" << context.wrapperName()
-            << " *>(" << CPP_SELF_VAR << ")->" << protectedFieldSetterName(metaField)
-            << "(cppOut)";
-    } else if (fieldType.isCppIntegralPrimitive() || fieldType.typeEntry()->isEnum()
+    const QString cppField = cppFieldAccess(metaField, context);
+
+    if (fieldType.isCppIntegralPrimitive() || fieldType.typeEntry()->isEnum()
                || fieldType.typeEntry()->isFlags()) {
         s << getFullTypeNameWithoutModifiers(fieldType) << " cppOut_local = "
             << cppField << ";\n"

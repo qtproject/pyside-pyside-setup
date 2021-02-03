@@ -318,6 +318,8 @@ private:
 
     void writeCopyFunction(TextStream &s, const GeneratorContext &context) const;
 
+    QString cppFieldAccess(const AbstractMetaField &metaField,
+                           const GeneratorContext &context) const;
     void writeGetterFunction(TextStream &s,
                              const AbstractMetaField &metaField,
                              const GeneratorContext &context) const;
