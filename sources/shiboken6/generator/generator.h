@@ -191,7 +191,6 @@ public:
         ExcludeConst             = 0x00000001,
         ExcludeReference         = 0x00000002,
 
-        EnumAsInts               = 0x00000004,
         SkipName                 = 0x00000008,
         SkipReturnType           = 0x00000010,
         OriginalName             = 0x00000020,

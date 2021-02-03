@@ -2500,7 +2500,7 @@ void CppGenerator::writePythonToCppTypeConversion(TextStream &s,
                                                   const AbstractMetaType &type,
                                                   const QString &pyIn,
                                                   const QString &cppOut,
-                                                  const AbstractMetaClass * /* context */,
+                                                  const AbstractMetaClass *context,
                                                   const QString &defaultValue) const
 {
     const TypeEntry *typeEntry = type.typeEntry();
@@ -2539,7 +2539,8 @@ void CppGenerator::writePythonToCppTypeConversion(TextStream &s,
     } else if (avoidProtectedHack() && isEnum) {
         auto metaEnum = api().findAbstractMetaEnum(type.typeEntry());
         if (metaEnum.has_value() && metaEnum->isProtected()) {
-            typeName = QLatin1String("long");
+            typeName = wrapperName(context) + QLatin1String("::")
+                       + metaEnum.value().name();
             isProtectedEnum = true;
         }
     }
@@ -2567,9 +2568,9 @@ void CppGenerator::writePythonToCppTypeConversion(TextStream &s,
         if (isProtectedEnum && avoidProtectedHack()) {
             s << " = ";
             if (defaultValue.isEmpty())
-                s << "0";
+                s << "{}";
             else
-                s << "(long)" << defaultValue;
+                s << defaultValue;
         } else if (type.isUserPrimitive() || isEnum || isFlags) {
             writeMinimalConstructorExpression(s, api(), typeEntry, defaultValue);
         } else if (!type.isContainer() && !type.isSmartPointer()) {
@@ -3659,10 +3660,12 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                     auto metaEnum = api().findAbstractMetaEnum(func->type().typeEntry());
                     if (metaEnum.has_value()) {
                         QString enumName;
-                        if (metaEnum->isProtected())
-                            enumName = protectedEnumSurrogateName(metaEnum.value());
-                        else
+                        if (metaEnum->isProtected()) {
+                            enumName = context.wrapperName() + QLatin1String("::")
+                                       + metaEnum.value().name();
+                        } else {
                             enumName = func->type().cppSignature();
+                        }
                         const QString methodCall = enumName + QLatin1Char('(')
                                                    + mc.toString() + QLatin1Char(')');
                         mc.clear();

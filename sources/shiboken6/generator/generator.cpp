@@ -783,8 +783,6 @@ QString Generator::translateType(AbstractMetaType cType,
         s = QLatin1String("void");
     } else if (cType.isArray()) {
         s = translateType(*cType.arrayElementType(), context, options) + QLatin1String("[]");
-    } else if ((options & Generator::EnumAsInts) && useEnumAsIntForProtectedHack(cType)) {
-        s = intT();
     } else {
         if (options & Generator::OriginalName) {
             s = cType.originalTypeDescription().trimmed();

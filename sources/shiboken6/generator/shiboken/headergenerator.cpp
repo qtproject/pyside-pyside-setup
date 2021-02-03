@@ -32,6 +32,7 @@
 #include <abstractmetafield.h>
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
+#include <abstractmetalang_helpers.h>
 #include <modifications.h>
 #include <typedatabase.h>
 #include <reporthandler.h>
@@ -67,6 +68,15 @@ void HeaderGenerator::writeCopyCtor(TextStream &s, const AbstractMetaClass *meta
 {
     s << wrapperName(metaClass) << "(const " << metaClass->qualifiedCppName()
       << "& self) : " << metaClass->qualifiedCppName() << "(self)\n{\n}\n\n";
+}
+
+static void writeProtectedEnums(TextStream &s, const AbstractMetaClass *metaClass)
+{
+    const QString name = metaClass->qualifiedCppName();
+    for (const auto &e : metaClass->enums()) {
+        if (e.isProtected())
+            s << "using " << name << "::" << e.name() << ";\n";
+    }
 }
 
 void HeaderGenerator::generateClass(TextStream &s, const GeneratorContext &classContextIn)
@@ -118,6 +128,14 @@ void HeaderGenerator::generateClass(TextStream &s, const GeneratorContext &class
         s << "class " << wrapperName
            << " : public " << metaClass->qualifiedCppName()
            << "\n{\npublic:\n" << indent;
+
+        // Make protected enums accessible
+        if (avoidProtectedHack()) {
+            recurseClassHierarchy(metaClass, [&s] (const AbstractMetaClass *metaClass) {
+                writeProtectedEnums(s, metaClass);
+                return false;
+            });
+        }
 
         if (avoidProtectedHack() && metaClass->hasProtectedFields()) {
             s << "\n// Make protected fields accessible\n";
@@ -210,8 +228,7 @@ void HeaderGenerator::writeMemberFunctionWrapper(TextStream &s,
     s << "inline ";
     if (func->isStatic())
         s << "static ";
-    s << functionSignature(func, {}, postfix,
-                           Generator::EnumAsInts | Generator::OriginalTypeDescription)
+    s << functionSignature(func, {}, postfix, Generator::OriginalTypeDescription)
       << " { ";
     if (!func->isVoid())
         s << "return ";
