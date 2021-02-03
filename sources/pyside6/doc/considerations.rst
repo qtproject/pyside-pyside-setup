@@ -1,7 +1,7 @@
 .. _pysideapi2:
 
 |project| Considerations
-=========================
+========================
 
 API Changes
 -----------
@@ -147,3 +147,59 @@ There was a long-standing bug in the ``tp_richcompare`` implementation of PySide
   was disabled, and expressions like ``obj in sequence`` failed with ``NotImplemented``.
 
 This oversight was fixed in version 5.15.1 .
+
+
+|project| Features
+==================
+
+In |project|, we begin for the first time to support a more pythonic user interface.
+With a special import statement, you can switch on features which replace certain aspects of
+the Python interpreter. This is done by an import statement right after the PySide6 import.
+
+snake_case
+----------
+
+With the statement:
+
+.. code-block:: python
+
+    from __feature__ import snake_case
+
+all methods in the current module are switched from ``camelCase`` to ``snake_case``.
+A single upper case letter is replaced by an underscore and the lower case letter.
+
+true_property
+-------------
+
+With the statement:
+
+.. code-block:: python
+
+    from __feature__ import true_property
+
+all getter and setter functions which are marked as a property in the Qt6 docs
+are replaced by Python property objects. Properties are also listed as such
+in the according QMetaObject of a class.
+
+Example for both features
+-------------------------
+
+Some |project| snippet might read:
+
+.. code-block:: python
+
+    self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+
+With the above features selected, this reads:
+
+.. code-block:: python
+
+    self.table.horizontal_header().section_resize_mode = QHeaderView.Stretch
+
+Additionally, properties can also be declared directly in Shiboken for
+non Qt-libraries, see :ref:`property-declare`.
+
+More about features
+-------------------
+
+Detailed info about features can be found here: :ref:`feature-why`

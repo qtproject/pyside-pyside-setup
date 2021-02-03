@@ -287,6 +287,7 @@ conversion-rule
 
     The ``file`` and ``snippet`` attributes are also supported (see :ref:`inject-code` nodes).
 
+.. _property-declare:
 
 property
 ^^^^^^^^
