@@ -761,6 +761,9 @@ class PysideBuild(_build, DistUtilsCommandMixin):
         cmake_cmd.append(f"-DQT_SRC_DIR={cmake_src_dir}")
         log.info(f"Qt Source dir: {cmake_src_dir}")
 
+        if OPTION['AVOID_PROTECTED_HACK']:
+            cmake_cmd.append("-DAVOID_PROTECTED_HACK=1")
+
         if self.build_type.lower() == 'debug':
             cmake_cmd.append(f"-DPYTHON_DEBUG_LIBRARY={self.py_library}")
 

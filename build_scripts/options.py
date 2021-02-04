@@ -187,6 +187,7 @@ class DistUtilsCommandMixin(object):
     _finalized = False
 
     mixin_user_options = [
+        ('avoid-protected-hack', None, 'Force --avoid-protected-hack'),
         ('debug', None, 'Build with debug information'),
         ('relwithdebinfo', None, 'Build in release mode with debug information'),
         ('only-package', None, 'Package only'),
@@ -221,6 +222,7 @@ class DistUtilsCommandMixin(object):
         ('qt-src-dir=', None, 'Qt source directory')]
 
     def __init__(self):
+        self.avoid_protected_hack = False
         self.debug = False
         self.relwithdebinfo = False
         self.only_package = False
@@ -266,6 +268,7 @@ class DistUtilsCommandMixin(object):
     def _do_finalize(self):
         if not self._determine_defaults_and_check():
             sys.exit(-1)
+        OPTION['AVOID_PROTECTED_HACK'] = self.avoid_protected_hack
         OPTION['DEBUG'] = self.debug
         OPTION['RELWITHDEBINFO'] = self.relwithdebinfo
         OPTION['ONLYPACKAGE'] = self.only_package
