@@ -3564,8 +3564,9 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                 else if (func->ownerClass())
                     methodCallClassName = func->ownerClass()->qualifiedCppName();
 
-                if (func->ownerClass()) {
-                    if (!avoidProtectedHack() || !func->isProtected()) {
+                if (auto ownerClass = func->ownerClass()) {
+                    const bool hasWrapper = shouldGenerateCppWrapper(ownerClass);
+                    if (!avoidProtectedHack() || !func->isProtected() || !hasWrapper) {
                         if (func->isStatic()) {
                             mc << "::" << methodCallClassName << "::";
                         } else {
@@ -3575,7 +3576,6 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                                   + QLatin1String(" *>(") + QLatin1String(CPP_SELF_VAR) + QLatin1Char(')');
                             if (func->isConstant()) {
                                 if (avoidProtectedHack()) {
-                                    auto ownerClass = func->ownerClass();
                                     mc << "const_cast<const ::";
                                     if (ownerClass->cppWrapper().testFlag(AbstractMetaClass::CppProtectedHackWrapper)) {
                                         // PYSIDE-500: Need a special wrapper cast when inherited
@@ -3605,10 +3605,9 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                         mc << func->originalName();
                     } else {
                         if (!func->isStatic()) {
-                            const auto *owner = func->ownerClass();
-                            const bool directInheritance = context.metaClass() == owner;
+                            const bool directInheritance = context.metaClass() == ownerClass;
                             mc << (directInheritance ? "static_cast" : "reinterpret_cast")
-                                << "<::" << wrapperName(owner) << " *>(" << CPP_SELF_VAR << ")->";
+                                << "<::" << wrapperName(ownerClass) << " *>(" << CPP_SELF_VAR << ")->";
                         }
 
                         if (!func->isAbstract())

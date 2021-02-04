@@ -161,8 +161,9 @@ void HeaderGenerator::generateClass(TextStream &s, const GeneratorContext &class
             maxOverrides = 1;
 
         //destructor
-        // PYSIDE-504: When C++ 11 is used, then the destructor must always be written.
-        // See generator.h for further reference.
+        // PYSIDE-504: When C++ 11 is used, then the destructor must always be declared.
+        // See abstractmetalang.cpp, determineCppWrapper() and generator.h for further
+        // reference.
         if (!avoidProtectedHack() || !metaClass->hasPrivateDestructor() || alwaysGenerateDestructor) {
             if (avoidProtectedHack() && metaClass->hasPrivateDestructor())
                 s << "// C++11: need to declare (unimplemented) destructor because "

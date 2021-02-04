@@ -872,8 +872,16 @@ static AbstractMetaClass::CppWrapper determineCppWrapper(const AbstractMetaClass
         return result;
     }
 
+#ifndef Q_CC_MSVC
+    // PYSIDE-504: When C++ 11 is used, then the destructor must always be
+    // declared. Only MSVC can handle this, the others generate a link error.
+    // See also HeaderGenerator::generateClass().
+    if (metaClass->hasPrivateDestructor())
+        return result;
+#endif
+
     // Need checking for Python overrides?
-    if (metaClass->isPolymorphic() && !metaClass->hasPrivateDestructor())
+    if (metaClass->isPolymorphic())
         result |= AbstractMetaClass::CppVirtualMethodWrapper;
 
     // Is there anything protected that needs to be made accessible?
