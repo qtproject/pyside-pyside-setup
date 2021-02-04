@@ -191,19 +191,12 @@ public:
         ExcludeConst             = 0x00000001,
         ExcludeReference         = 0x00000002,
 
-        SkipName                 = 0x00000008,
         SkipReturnType           = 0x00000010,
-        OriginalName             = 0x00000020,
         VirtualCall              = 0x00000040,
         OriginalTypeDescription  = 0x00000080,
         SkipRemovedArguments     = 0x00000100,
 
         SkipDefaultValues        = 0x00000200,
-
-        WriteSelf                = 0x00000400,
-        ExcludeMethodConst       = 0x00000800,
-
-        ForceValueType           = ExcludeReference | ExcludeConst
     };
     Q_DECLARE_FLAGS(Options, Option)
 

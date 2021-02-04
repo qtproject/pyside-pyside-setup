@@ -771,7 +771,6 @@ QString Generator::translateType(AbstractMetaType cType,
                                  Options options) const
 {
     QString s;
-    static int constLen = strlen("const");
 
     if (context &&
         context->typeEntry()->isGenericClass() &&
@@ -784,19 +783,7 @@ QString Generator::translateType(AbstractMetaType cType,
     } else if (cType.isArray()) {
         s = translateType(*cType.arrayElementType(), context, options) + QLatin1String("[]");
     } else {
-        if (options & Generator::OriginalName) {
-            s = cType.originalTypeDescription().trimmed();
-            if ((options & Generator::ExcludeReference) && s.endsWith(QLatin1Char('&')))
-                s.chop(1);
-
-            // remove only the last const (avoid remove template const)
-            if (options & Generator::ExcludeConst) {
-                int index = s.lastIndexOf(QLatin1String("const"));
-
-                if (index >= (s.size() - (constLen + 1))) // (VarType const)  or (VarType const[*|&])
-                    s = s.remove(index, constLen);
-            }
-        } else if (options & Generator::ExcludeConst || options & Generator::ExcludeReference) {
+        if (options & Generator::ExcludeConst || options & Generator::ExcludeReference) {
             AbstractMetaType copyType = cType;
 
             if (options & Generator::ExcludeConst)

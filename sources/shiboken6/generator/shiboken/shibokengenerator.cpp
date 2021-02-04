@@ -1257,14 +1257,12 @@ QString ShibokenGenerator::argumentString(const AbstractMetaFunctionCPtr &func,
     else
         arg = modified_type.replace(QLatin1Char('$'), QLatin1Char('.'));
 
-    if (!(options & Generator::SkipName)) {
-        // "int a", "int a[]"
-        const int arrayPos = arg.indexOf(QLatin1Char('['));
-        if (arrayPos != -1)
-            arg.insert(arrayPos, QLatin1Char(' ') + argument.name());
-        else
-            arg.append(QLatin1Char(' ') + argument.name());
-    }
+    // "int a", "int a[]"
+    const int arrayPos = arg.indexOf(QLatin1Char('['));
+    if (arrayPos != -1)
+        arg.insert(arrayPos, QLatin1Char(' ') + argument.name());
+    else
+        arg.append(QLatin1Char(' ') + argument.name());
 
     if ((options & Generator::SkipDefaultValues) != Generator::SkipDefaultValues &&
         !argument.originalDefaultValueExpression().isEmpty())
@@ -1297,18 +1295,12 @@ void ShibokenGenerator::writeFunctionArguments(TextStream &s,
 {
     AbstractMetaArgumentList arguments = func->arguments();
 
-    if (options & Generator::WriteSelf) {
-        s << func->implementingClass()->name() << '&';
-        if (!(options & SkipName))
-            s << " self";
-    }
-
     int argUsed = 0;
     for (int i = 0; i < arguments.size(); ++i) {
         if ((options & Generator::SkipRemovedArguments) && func->argumentRemoved(i+1))
             continue;
 
-        if ((options & Generator::WriteSelf) || argUsed != 0)
+        if (argUsed != 0)
             s << ", ";
         writeArgument(s, func, arguments[i], options);
         argUsed++;
@@ -1355,7 +1347,7 @@ QString ShibokenGenerator::functionSignature(const AbstractMetaFunctionCPtr &fun
     writeFunctionArguments(s, func, options);
     s << ')';
 
-    if (func->isConstant() && !(options & Generator::ExcludeMethodConst))
+    if (func->isConstant())
         s << " const";
 
     if (func->exceptionSpecification() == ExceptionSpecification::NoExcept)
@@ -1392,9 +1384,8 @@ void ShibokenGenerator::writeFunctionCall(TextStream &s,
                                           const AbstractMetaFunctionCPtr &func,
                                           Options options)
 {
-    if (!(options & Generator::SkipName))
-        s << (func->isConstructor() ? func->ownerClass()->qualifiedCppName() : func->originalName());
-    s << '(';
+    s << (func->isConstructor() ? func->ownerClass()->qualifiedCppName() : func->originalName())
+        << '(';
     writeArgumentNames(s, func, options);
     s << ')';
 }
