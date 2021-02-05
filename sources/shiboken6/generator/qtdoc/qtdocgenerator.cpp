@@ -1018,6 +1018,7 @@ bool QtDocGenerator::doSetup()
 
     m_docParser->setDocumentationDataDirectory(m_parameters.docDataDir);
     m_docParser->setLibrarySourceDirectory(m_parameters.libSourceDir);
+    m_parameters.outputDirectory = outputDirectory();
     return true;
 }
 
