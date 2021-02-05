@@ -1,5 +1,0 @@
-{
-    "files": ["percentbarchart.py", "donutbreakdown.py", "legend.py", "nesteddonuts.py",
-              "modeldata.py", "lineandbar.py", "memoryusage.py", "callout.py", "audio.py",
-              "linechart.py", "logvalueaxis.py", "piechart.py", "temperaturerecords.py"]
-}

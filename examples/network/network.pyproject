@@ -1,4 +1,0 @@
-{
-    "files": ["blockingfortuneclient.py", "fortuneserver.py",
-              "threadedfortuneserver.py", "fortuneclient.py"]
-}
