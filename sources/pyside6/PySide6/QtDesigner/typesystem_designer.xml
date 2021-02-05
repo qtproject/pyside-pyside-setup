@@ -93,6 +93,25 @@
   </object-type>
   <object-type name="QExtensionManager"/>
   <object-type name="QExtensionFactory"/>
+  <object-type name="QPyDesignerCustomWidgetCollection" disable-wrapper="yes">
+    <extra-includes>
+      <include file-name="qpydesignerextensions.h" location="global"/>
+    </extra-includes>
+    <modify-function signature="addCustomWidget(QDesignerCustomWidgetInterface*)">
+      <modify-argument index="1">
+        <define-ownership owner="c++"/>
+      </modify-argument>
+    </modify-function>
+    <!-- Force VARARGS/keyword arguments by giving a default parameters -->
+    <add-function signature='registerCustomWidget(PyObject*,const QString&amp; @xml@ = {}, const QString&amp; @tool_tip@ = {}, const QString&amp; @group@ = {}, const QString&amp; @module@ = {}, bool @container@ = false, const QString&amp; @icon@ = {})'
+                  return-type='void' static='true'>
+       <modify-argument index="1">
+          <rename to="customWidgetType"/>
+       </modify-argument>
+       <inject-code class="target" position="beginning" file="../glue/qtdesigner.cpp" snippet="qtdesigner-registercustomwidget"/>
+    </add-function>
+    <modify-function signature="QPyDesignerCustomWidgetCollection()" remove="all"/>
+  </object-type>
   <object-type name="QPyDesignerContainerExtension">
     <extra-includes>
       <include file-name="qpydesignerextensions.h" location="global"/>

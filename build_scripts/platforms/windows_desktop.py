@@ -416,13 +416,19 @@ def copy_qt_artifacts(self, copy_pdbs, vars):
 
     if copy_plugins:
         # <qt>/plugins/* -> <setup>/{st_package_name}/plugins
+        plugins_target = "{st_build_dir}/{st_package_name}/plugins"
         plugin_dll_patterns = ["*{}.dll"]
         pdb_pattern = "*{}.pdb"
         if copy_pdbs:
             plugin_dll_patterns += [pdb_pattern]
         plugin_dll_filter = functools.partial(qt_build_config_filter, plugin_dll_patterns)
-        copydir("{qt_plugins_dir}", "{st_build_dir}/{st_package_name}/plugins",
+        copydir("{qt_plugins_dir}", plugins_target,
                 file_filter_function=plugin_dll_filter,
+                vars=vars)
+        copydir("{install_dir}/plugins/designer",
+                f"{plugins_target}/designer",
+                filter=["*.dll"],
+                recursive=False,
                 vars=vars)
 
     if copy_translations:

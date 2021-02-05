@@ -185,3 +185,91 @@ command prompt:
 .. code-block:: python
 
     python main.py
+
+Custom Widgets in Qt Designer
+=============================
+
+**Qt Designer** is able to use user-provided (custom) widgets. They are shown
+in the widget box and can be dragged onto the form just like Qt's widgets (see
+`Using Custom Widgets with Qt Designer <https://doc.qt.io/qt-6/designer-using-custom-widgets.html>`_
+). Normally, this requires implementing the widget as a plugin to Qt Designer
+written in  C++ implementing its
+`QDesignerCustomWidgetInterface <https://doc.qt.io/qt-6/qdesignercustomwidgetinterface.html>`_ .
+
+Qt for Python provides a simple interface for this which is similar to
+`QUiLoader.registerCustomWidget()`.
+
+The widget needs to be provided as a Python module, as shown by
+the widgetbinding example (file ``wigglywidget.py``) or
+the taskmenuextension example (file ``tictactoe.py``).
+
+Registering this with Qt Designer is done by providing
+a registration script named ``register*.py`` and pointing
+the  path-type environment variable ``PYSIDE_DESIGNER_PLUGINS``
+to the directory.
+
+The code of the registration script looks as follows:
+
+.. code-block:: python
+
+    # File: registerwigglywidget.py
+    from wigglywidget import WigglyWidget
+
+    import QtDesigner
+
+
+    TOOLTIP = "A cool wiggly widget (Python)"
+    DOM_XML = """
+    <ui language='c++'>
+        <widget class='WigglyWidget' name='wigglyWidget'>
+            <property name='geometry'>
+                <rect>
+                    <x>0</x>
+                    <y>0</y>
+                    <width>400</width>
+                    <height>200</height>
+                </rect>
+            </property>
+            <property name='text'>
+                <string>Hello, world</string>
+            </property>
+        </widget>
+    </ui>
+    """
+
+    QPyDesignerCustomWidgetCollection.registerCustomWidget(WigglyWidget, module="wigglywidget",
+                                                           tool_tip=TOOLTIP, xml=DOM_XML)
+
+
+QPyDesignerCustomWidgetCollection provides an implementation of
+`QDesignerCustomWidgetCollectionInterface <https://doc.qt.io/qt-6/qdesignercustomwidgetcollectioninterface.html>`_
+exposing custom widgets to **Qt Designer** with static convenience functions
+for registering types or adding instances of
+`QDesignerCustomWidgetInterface <https://doc.qt.io/qt-6/qdesignercustomwidgetinterface.html>`_ .
+
+The function QPyDesignerCustomWidgetCollection.registerCustomWidget() is used
+to register a widget type with **Qt Designer**. In the simple case, it can be
+used like `QUiLoader.registerCustomWidget()`. It takes the custom widget type
+and some optional keyword arguments passing values that correspond to the
+getters of
+`QDesignerCustomWidgetInterface <https://doc.qt.io/qt-6/qdesignercustomwidgetinterface.html>`_ :
+
+* ``xml`` (str) A snippet of XML code in ``.ui`` format that specifies
+  how the widget is created and sets initial property values.
+* ``tool_tip`` (str) Tool tip to be shown in the widget box.
+* ``icon`` (str) Path to an icon file be shown in the widget box.
+* ``group`` (str) Category for grouping widgets in the widget box.
+* ``module`` (str) Module name for generating the import code by
+  `uic <https://doc.qt.io/qt-6/uic.html>`_ .
+* ``container`` (bool) Indicates whether the widget is a container
+  like `QGroupBox`, that is, child widgets can be placed on it.
+
+When launching **Qt Designer** via its launcher ``pyside6-designer``,
+the custom widget should be visible in the widget box.
+
+For advanced usage, it is also possible to pass the function an implementation
+of the class QDesignerCustomWidgetInterface instead of the type.
+This is shown in taskmenuextension example, where a custom context menu
+is registered for the custom widget. The example is a port of the
+corresponding C++
+`Task Menu Extension Example <https://doc.qt.io/qt-6/qtdesigner-taskmenuextension-example.html>`_ .

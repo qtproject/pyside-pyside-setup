@@ -253,6 +253,9 @@ macro(shiboken_compute_python_includes)
 
 
     set(SHIBOKEN_PYTHON_INCLUDE_DIRS "${PYTHON_INCLUDE_DIRS}")
+
+    set_property(GLOBAL PROPERTY shiboken_python_include_dirs "${SHIBOKEN_PYTHON_INCLUDE_DIRS}")
+
     message(STATUS
             "SHIBOKEN_PYTHON_INCLUDE_DIRS computed to value: '${SHIBOKEN_PYTHON_INCLUDE_DIRS}'")
 endmacro()
@@ -337,6 +340,8 @@ macro(shiboken_compute_python_libraries)
         target_link_libraries(libshiboken
                               PUBLIC $<BUILD_INTERFACE:${SHIBOKEN_PYTHON_LIBRARIES}>)
     endif()
+
+    set_property(GLOBAL PROPERTY shiboken_python_libraries "${SHIBOKEN_PYTHON_LIBRARIES}")
 
     message(STATUS "SHIBOKEN_PYTHON_LIBRARIES computed to value: '${SHIBOKEN_PYTHON_LIBRARIES}'")
 endmacro()

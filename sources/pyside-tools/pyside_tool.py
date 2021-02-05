@@ -40,6 +40,7 @@
 #############################################################################
 import sys
 import os
+from pathlib import Path
 import subprocess
 
 from subprocess import Popen, PIPE
@@ -79,7 +80,24 @@ def rcc():
     qt_tool_wrapper("rcc", ['-g', 'python'] + sys.argv[1:])
 
 
+def _append_to_path_var(var, value):
+    env_value = os.environ.get(var)
+    if env_value:
+        env_value = f'{env_value}{os.pathsep}{value}'
+    else:
+        env_value = value
+    os.environ[var] = env_value
+
+
 def designer():
+    # Add the examples to PYSIDE_DESIGNER_PLUGINS, as determined by starting from
+    # PySide6/scripts.
+    pyside_dir = Path(__file__).resolve().parents[1]
+
+    # Add the Wiggly Widget example
+    wiggly_dir = os.fspath(pyside_dir / 'examples' / 'widgetbinding')
+    _append_to_path_var('PYSIDE_DESIGNER_PLUGINS', wiggly_dir)
+
     if sys.platform == "darwin":
         qt_tool_wrapper("Designer.app/Contents/MacOS/Designer", sys.argv[1:])
     else:

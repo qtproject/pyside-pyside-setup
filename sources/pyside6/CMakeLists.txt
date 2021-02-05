@@ -235,6 +235,7 @@ add_subdirectory(libpyside)
 find_package(Qt${QT_MAJOR_VERSION}Designer)
 if(Qt${QT_MAJOR_VERSION}UiTools_FOUND AND Qt${QT_MAJOR_VERSION}Designer_FOUND)
     add_subdirectory(plugins/uitools)
+    add_subdirectory(plugins/designer)
 endif()
 
 # project directories

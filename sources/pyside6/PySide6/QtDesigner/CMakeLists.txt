@@ -1,6 +1,7 @@
 project(QtDesigner)
 
-qt_wrap_cpp(QPYDESIGNEREXTENSIONS_MOC "${pyside6_SOURCE_DIR}/qpydesignerextensions.h")
+qt_wrap_cpp(QtDesigner_static_src "${pyside6_SOURCE_DIR}/qpydesignerextensions.h")
+list(APPEND QtDesigner_static_src "${QtDesigner_SOURCE_DIR}/qpydesignercustomwidgetcollection.cpp")
 
 set(QtDesigner_SRC
 ${QtDesigner_GEN_DIR}/qabstractextensionfactory_wrapper.cpp
@@ -25,8 +26,9 @@ ${QtDesigner_GEN_DIR}/qdesignertaskmenuextension_wrapper.cpp
 ${QtDesigner_GEN_DIR}/qdesignerwidgetboxinterface_wrapper.cpp
 ${QtDesigner_GEN_DIR}/qdesignerwidgetboxinterface_category_wrapper.cpp
 ${QtDesigner_GEN_DIR}/qdesignerwidgetboxinterface_widget_wrapper.cpp
-${QtDesigner_GEN_DIR}/qextensionfactory_wrapper.cpp
 ${QtDesigner_GEN_DIR}/qextensionmanager_wrapper.cpp
+${QtDesigner_GEN_DIR}/qextensionfactory_wrapper.cpp
+${QtDesigner_GEN_DIR}/qpydesignercustomwidgetcollection_wrapper.cpp
 ${QtDesigner_GEN_DIR}/qpydesignercontainerextension_wrapper.cpp
 ${QtDesigner_GEN_DIR}/qpydesignermembersheetextension_wrapper.cpp
 ${QtDesigner_GEN_DIR}/qpydesignerpropertysheetextension_wrapper.cpp
@@ -61,7 +63,7 @@ create_pyside_module(NAME QtDesigner
                      DEPS QtDesigner_deps
                      TYPESYSTEM_PATH QtDesigner_SOURCE_DIR
                      SOURCES QtDesigner_SRC
-                     STATIC_SOURCES QPYDESIGNEREXTENSIONS_MOC
+                     STATIC_SOURCES QtDesigner_static_src
                      TYPESYSTEM_NAME ${QtDesigner_BINARY_DIR}/typesystem_designer.xml)
 
 install(FILES ${pyside6_SOURCE_DIR}/qpydesignerextensions.h DESTINATION include/PySide6/QtDesigner)

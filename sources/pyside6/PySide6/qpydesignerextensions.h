@@ -44,6 +44,8 @@
 #include <QtDesigner/QDesignerMemberSheetExtension>
 #include <QtDesigner/QDesignerPropertySheetExtension>
 #include <QtDesigner/QDesignerTaskMenuExtension>
+#include <QtUiPlugin/QDesignerCustomWidgetCollectionInterface>
+#include <QtUiPlugin/QDesignerCustomWidgetInterface>
 
 // Not automatically found since "find_package(Qt6 COMPONENTS Designer)" is not used
 
@@ -52,6 +54,7 @@ Q_DECLARE_INTERFACE(QDesignerContainerExtension, "org.qt-project.Qt.Designer.Con
 Q_DECLARE_INTERFACE(QDesignerMemberSheetExtension, "org.qt-project.Qt.Designer.MemberSheet")
 Q_DECLARE_EXTENSION_INTERFACE(QDesignerPropertySheetExtension, "org.qt-project.Qt.Designer.PropertySheet")
 Q_DECLARE_INTERFACE(QDesignerTaskMenuExtension, "org.qt-project.Qt.Designer.TaskMenu")
+Q_DECLARE_INTERFACE(QDesignerCustomWidgetCollectionInterface, "org.qt-project.Qt.QDesignerCustomWidgetCollectionInterface")
 #endif
 
 // Extension implementations need to inherit QObject which cannot be done in Python.
@@ -87,6 +90,27 @@ class QPyDesignerTaskMenuExtension : public QObject, public QDesignerTaskMenuExt
     Q_INTERFACES(QDesignerTaskMenuExtension)
 public:
     explicit QPyDesignerTaskMenuExtension(QObject *parent = nullptr) : QObject(parent) {}
+};
+
+struct _object; // PyObject
+
+class QPyDesignerCustomWidgetCollection : public QDesignerCustomWidgetCollectionInterface
+{
+public:
+    ~QPyDesignerCustomWidgetCollection();
+
+    static QPyDesignerCustomWidgetCollection *instance();
+
+    QList<QDesignerCustomWidgetInterface *> customWidgets() const override;
+
+    static void addCustomWidget(QDesignerCustomWidgetInterface *c);
+
+    static bool _registerCustomWidgetHelper(_object *typeArg, _object *kwds);
+
+private:
+    QPyDesignerCustomWidgetCollection();
+
+    QList<QDesignerCustomWidgetInterface *> m_customWidgets;
 };
 
 #endif // QPYDESIGNEREXTENSIONS_H

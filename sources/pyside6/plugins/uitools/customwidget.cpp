@@ -93,6 +93,8 @@ QString PyCustomWidget::whatsThis() const
     return QString();
 }
 
+// A copy of this code exists in PyDesignerCustomWidget::createWidget()
+// (see sources/pyside6/PySide6/QtDesigner/qpydesignercustomwidgetcollection.cpp).
 QWidget *PyCustomWidget::createWidget(QWidget *parent)
 {
     // Create a python instance and return cpp object

@@ -112,10 +112,15 @@ def prepare_standalone_package_linux(self, vars):
 
     if copy_plugins:
         # <qt>/plugins/* -> <setup>/{st_package_name}/Qt/plugins
-        copydir("{qt_plugins_dir}",
-                "{st_build_dir}/{st_package_name}/Qt/plugins",
+        plugins_target = "{st_build_dir}/{st_package_name}/Qt/plugins"
+        copydir("{qt_plugins_dir}", plugins_target,
                 filter=["*.so"],
                 recursive=True,
+                vars=vars)
+        copydir("{install_dir}/plugins/designer",
+                f"{plugins_target}/designer",
+                filter=["*.so"],
+                recursive=False,
                 vars=vars)
 
     if copy_qml:
