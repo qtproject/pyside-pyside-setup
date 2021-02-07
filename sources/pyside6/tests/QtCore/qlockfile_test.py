@@ -34,8 +34,9 @@ import os
 import sys
 import unittest
 
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from pathlib import Path
+sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
+sys.path.append(os.fspath(Path(__file__).resolve().parents[1] / "util"))
 from init_paths import init_test_paths
 init_test_paths()
 
