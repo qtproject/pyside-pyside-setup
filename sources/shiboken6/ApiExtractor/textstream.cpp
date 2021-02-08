@@ -70,6 +70,8 @@ qint64 TextStream::pos() const
     // QTextStream::pos() only works for QIODevice, be a bit smarter
     if (auto s = m_str.string())
         return s->size();
+    // QIODevices need to flushed to tell the correct position.
+    const_cast<QTextStream &>(m_str).flush();
     return m_str.pos();
 }
 

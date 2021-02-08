@@ -431,4 +431,24 @@ void QtXmlToSphinxTest::testTableFormatting()
     QCOMPARE(actual, expected);
 }
 
+void QtXmlToSphinxTest::testTableFormattingIoDevice_data()
+{
+    testTableFormatting_data();
+}
+
+void QtXmlToSphinxTest::testTableFormattingIoDevice()
+{
+    QFETCH(TablePtr, table);
+    QFETCH(QString, expected);
+
+    QByteArray byteArray;
+    {
+        TextStream str(&byteArray);
+        table->format(str);
+    }
+    const QString actual = QString::fromUtf8(byteArray);
+
+    QCOMPARE(actual, expected);
+}
+
 QTEST_APPLESS_MAIN( QtXmlToSphinxTest)
