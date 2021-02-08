@@ -52,7 +52,7 @@ div.body p.centered {
     margin-top: 25px;
 }
 
-div.warning, div.seealso, div.note {
+div.warning, div.seealso, div.note, div.important {
     padding: 6px 0px 6px 10px;
     border: none;
 }
@@ -61,12 +61,18 @@ div.warning {
     background-color: #ffe4e4;
 }
 
+div.important {
+    background-color: #fef9f3;
+    border-left: 5px solid #feeec8;
+}
+
 div.seealso {
     background-color: #fff2d6;
 }
 
 div.note {
-    background-color: #f3f3f4;
+    background-color: #c5d3f4;
+    border-left: 5px solid #7899f4;
 }
 
 table.docutils {
@@ -346,7 +352,7 @@ tt.descname {
 
 #detailed-description dd > blockquote,
 #detailed-description dd > .field-list {
-    font-family: 'Droid Sans Mono';
+    font-family: 'Droid Sans Mono', monospace;
     font-size: small;
     border-left: 10px solid #e2e2e2;
     padding-left: 10px;
@@ -443,7 +449,7 @@ tt.descname {
 }
 
 #detailed-description .attribute td:nth-child(1) {
-    font-family: 'Droid Sans Mono';
+    font-family: 'Droid Sans Mono', monospace;
 }
 
 /* Qt theme */
@@ -895,7 +901,7 @@ tt.descname {
   /* Legacy iOS */
 }
 @font-face {
-  font-family:'Droid Sans Mono';
+  font-family: 'Droid Sans Mono', monospace;
   font-style:normal;
   font-weight:400;
   src:local("Droid Sans Mono"),local("DroidSansMono"),url(//fonts.gstatic.com/s/droidsansmono/v7/ns-m2xQYezAtqh7ai59hJUYuTAAIFFn5GTWtryCmBQ4.woff) format("woff")
@@ -2038,6 +2044,8 @@ table.special {
     border-collapse: separate;
     border-spacing: 20px;
     line-height: 1.5em;
+    table-layout: fixed;
+    width: 80%;
 }
 
 .special p {
@@ -2073,12 +2081,14 @@ table.special td {
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
     -khtml-border-radius: 5px;
+    overflow: hidden;
 }
 
 .special td:hover {
-    padding-top: 2px;
-    padding-bottom: 2px;
+    padding-top: 14px;
+    padding-bottom: 10px;
     border-bottom: 4px solid #41cd52;
+    overflow: hidden;
 }
 
 .command {
