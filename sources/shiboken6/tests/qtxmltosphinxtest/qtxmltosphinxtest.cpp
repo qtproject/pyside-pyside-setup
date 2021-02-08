@@ -364,4 +364,71 @@ void QtXmlToSphinxTest::testTable()
     QCOMPARE(actual, expected);
 }
 
+using TablePtr = QSharedPointer<QtXmlToSphinx::Table>;
+
+Q_DECLARE_METATYPE(TablePtr);
+
+void QtXmlToSphinxTest::testTableFormatting_data()
+{
+    using TableRow = QtXmlToSphinx::TableRow;
+    using TableCell = QtXmlToSphinx::TableCell;
+
+    QTest::addColumn<TablePtr>("table");
+    QTest::addColumn<QString>("expected");
+
+    TablePtr table(new QtXmlToSphinx::Table);
+    TableRow row;
+    row << TableCell("item11")  << TableCell("item12");
+    table->appendRow(row);
+    row.clear();
+    row << TableCell("")  << TableCell("item22");
+    table->appendRow(row);
+    row.clear();
+    table->normalize();
+
+    const char *expected = R"(+------+------+
+|item11|item12|
++------+------+
+|      |item22|
++------+------+
+
+)";
+
+    QTest::newRow("normal") << table << QString::fromLatin1(expected);
+
+    table.reset(new QtXmlToSphinx::Table);
+    row << TableCell("item11")  << TableCell("item12\nline2");
+    table->appendRow(row);
+    row.clear();
+    row << TableCell("")  << TableCell("item22\nline2\nline3");
+    table->appendRow(row);
+    row.clear();
+    table->normalize();
+
+    expected = R"(+------+------+
+|item11|item12|
+|      |line2 |
++------+------+
+|      |item22|
+|      |line2 |
+|      |line3 |
++------+------+
+
+)";
+
+    QTest::newRow("multi-line") << table << QString::fromLatin1(expected);
+}
+
+void QtXmlToSphinxTest::testTableFormatting()
+{
+    QFETCH(TablePtr, table);
+    QFETCH(QString, expected);
+
+    StringStream str;
+    table->format(str);
+    const QString actual = str.toString();
+
+    QCOMPARE(actual, expected);
+}
+
 QTEST_APPLESS_MAIN( QtXmlToSphinxTest)
