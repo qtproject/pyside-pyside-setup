@@ -1304,15 +1304,15 @@ void QtXmlToSphinx::Table::format(TextStream& s) const
 
     // calc width and height of each column and row
     const int headerColumnCount = m_rows.constFirst().count();
-    QList<int> colWidths(headerColumnCount);
-    QList<int> rowHeights(m_rows.count());
+    QList<int> colWidths(headerColumnCount, 0);
+    QList<int> rowHeights(m_rows.count(), 0);
     for (int i = 0, maxI = m_rows.count(); i < maxI; ++i) {
         const QtXmlToSphinx::TableRow& row = m_rows.at(i);
         for (int j = 0, maxJ = std::min(row.count(), colWidths.size()); j < maxJ; ++j) {
             const auto rowLines = QStringView{row[j].data}.split(QLatin1Char('\n')); // cache this would be a good idea
             for (const auto &str : rowLines)
                 colWidths[j] = std::max(colWidths[j], int(str.size()));
-            rowHeights[i] = std::max(rowHeights[i], int(row[j].data.count(QLatin1Char('\n')) + 1));
+            rowHeights[i] = std::max(rowHeights[i], int(rowLines.size()));
         }
     }
 
