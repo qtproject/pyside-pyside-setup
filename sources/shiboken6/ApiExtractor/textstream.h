@@ -170,7 +170,7 @@ public:
         const auto oldPos = s.pos();
         s << m_value;
         // Ensure something is written when an empty string is encountered
-        if (oldPos == s.pos())
+        if (oldPos == s.pos() && m_fieldWidth > 0)
             s << ' ';
         s.setFieldAlignment(oldFieldAlignment);
         s.setFieldWidth(oldFieldWidth);
