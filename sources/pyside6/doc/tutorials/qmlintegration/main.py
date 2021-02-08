@@ -39,7 +39,8 @@
 #############################################################################
 
 import sys
-from os.path import abspath, dirname, join
+import os
+from pathlib import Path
 
 from PySide6.QtCore import QObject, Slot
 from PySide6.QtGui import QGuiApplication
@@ -104,8 +105,8 @@ if __name__ == '__main__':
 
     # Get the path of the current directory, and then add the name
     # of the QML file, to load it.
-    qmlFile = join(dirname(__file__), 'view.qml')
-    engine.load(abspath(qmlFile))
+    qmlFile = Path(__file__).parent / 'view.qml'
+    engine.load(os.fspath(qmlFile.resolve()))
 
     if not engine.rootObjects():
         sys.exit(-1)

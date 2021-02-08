@@ -66,6 +66,7 @@ def bootstrap():
     import tempfile
     import traceback
     from contextlib import contextmanager
+    from pathlib import Path
 
     global recursion_trap
     if recursion_trap:
@@ -78,7 +79,7 @@ def bootstrap():
     def ensure_shibokensupport(support_path):
         # Make sure that we always have the shibokensupport containing package first.
         # Also remove any prior loaded module of this name, just in case.
-        sys.path.insert(0, support_path)
+        sys.path.insert(0, os.fspath(support_path))
 
         sbks = "shibokensupport"
         if sbks in sys.modules:
@@ -98,15 +99,15 @@ def bootstrap():
                 print("  " + p)
             sys.stdout.flush()
             sys.exit(-1)
-        sys.path.remove(support_path)
+        sys.path.remove(os.fspath(support_path))
 
     import shiboken6 as root
-    path = root.__file__
-    rp = os.path.realpath(os.path.dirname(path))
+    path = Path(root.__file__)
+    rp = path.parent.resolve()
     # This can be the shiboken6 directory or the binary module, so search.
-    look_for = os.path.join("files.dir", "shibokensupport", "signature", "loader.py")
-    while not os.path.exists(os.path.join(rp, look_for)):
-        dir = os.path.dirname(rp)
+    look_for = Path("files.dir") / "shibokensupport" / "signature" / "loader.py"
+    while not (rp / look_for).exists():
+        dir = rp.parent
         if dir == rp:  # Hit root, '/', 'C:\', '\\server\share'
             break
         rp = dir
@@ -116,14 +117,14 @@ def bootstrap():
     use_embedding = bool(getattr(sys, embedding_var, False))
     # We keep the zip file for inspection if the sys variable has been set.
     keep_zipfile = hasattr(sys, embedding_var)
-    loader_path = os.path.join(rp, look_for)
-    files_dir = os.path.abspath(os.path.join(loader_path, "..", "..", ".."))
-    assert files_dir.endswith("files.dir")
+    loader_path = rp / look_for
+    files_dir = loader_path.parents[2]
+    assert files_dir.name == "files.dir"
 
     # We report in sys what we used. We could put more here as well.
-    if not os.path.exists(loader_path):
+    if not loader_path.exists():
         use_embedding = True
-    support_path = prepare_zipfile() if use_embedding else files_dir
+    support_path = Path(prepare_zipfile()) if use_embedding else files_dir
     setattr(sys, embedding_var, use_embedding)
 
     try:

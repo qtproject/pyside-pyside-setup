@@ -46,22 +46,21 @@ class SimpleFileTest(unittest.TestCase):
     '''Test cases for SimpleFile class.'''
 
     def setUp(self):
-        filename = 'simplefile%d.txt' % os.getpid()
-        self.existing_filename = os.path.join(os.path.curdir, filename)
+        filename = f'simplefile{os.getpid()}.txt'
+        self.existing_filename = Path(os.curdir) / filename
         self.delete_file = False
-        if not os.path.exists(self.existing_filename):
-            f = open(self.existing_filename, 'w')
-            for line in range(10):
-                f.write('sbrubbles\n')
-            f.close()
+        if not self.existing_filename.exists():
+            with self.existing_filename.open('w') as f:
+                for line in range(10):
+                    f.write('sbrubbles\n')
             self.delete_file = True
 
-        self.non_existing_filename = os.path.join(os.path.curdir, 'inexistingfile.txt')
+        self.non_existing_filename = Path(os.curdir) / 'inexistingfile.txt'
         i = 0
-        while os.path.exists(self.non_existing_filename):
+        while self.non_existing_filename.exists():
             i += 1
-            filename = 'inexistingfile-%d.txt' % i
-            self.non_existing_filename = os.path.join(os.path.curdir, filename)
+            filename = f'inexistingfile-{i}.txt'
+            self.non_existing_filename = Path(os.curdir) / filename
 
     def tearDown(self):
         if self.delete_file:
@@ -69,16 +68,16 @@ class SimpleFileTest(unittest.TestCase):
 
     def testExistingFile(self):
         '''Test SimpleFile class with existing file.'''
-        f = SimpleFile(self.existing_filename)
-        self.assertEqual(f.filename(), self.existing_filename)
+        f = SimpleFile(os.fspath(self.existing_filename))
+        self.assertEqual(f.filename(), os.fspath(self.existing_filename))
         f.open()
         self.assertNotEqual(f.size(), 0)
         f.close()
 
     def testNonExistingFile(self):
         '''Test SimpleFile class with non-existing file.'''
-        f = SimpleFile(self.non_existing_filename)
-        self.assertEqual(f.filename(), self.non_existing_filename)
+        f = SimpleFile(os.fspath(self.non_existing_filename))
+        self.assertEqual(f.filename(), os.fspath(self.non_existing_filename))
         self.assertRaises(IOError, f.open)
         self.assertEqual(f.size(), 0)
 

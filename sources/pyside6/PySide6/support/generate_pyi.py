@@ -50,13 +50,14 @@ import io
 import re
 import subprocess
 import argparse
+from pathlib import Path
 from contextlib import contextmanager
 from textwrap import dedent
 import logging
 
 
 # Make sure not to get .pyc in Python2.
-sourcepath = os.path.splitext(__file__)[0] + ".py"
+sourcepath = Path(__file__).parent.resolve() / (Path(__file__).stem + ".py")
 
 # Can we use forward references?
 USE_PEP563 = sys.version_info[:2] >= (3, 7)
@@ -215,10 +216,10 @@ def generate_pyi(import_name, outpath, options):
     Generates a .pyi file.
     """
     plainname = import_name.split(".")[-1]
-    outfilepath = os.path.join(outpath, plainname + ".pyi")
+    outfilepath = Path(outpath) / (plainname + ".pyi")
     top = __import__(import_name)
     obj = getattr(top, plainname)
-    if not getattr(obj, "__file__", None) or os.path.isdir(obj.__file__):
+    if not getattr(obj, "__file__", None) or Path(obj.__file__).is_dir():
         raise ModuleNotFoundError(f"We do not accept a namespace as module {plainname}")
     module = sys.modules[import_name]
 
@@ -269,7 +270,8 @@ def generate_all_pyi(outpath, options):
     ps = os.pathsep
     if options.sys_path:
         # make sure to propagate the paths from sys_path to subprocesses
-        sys_path = [os.path.normpath(_) for _ in options.sys_path]
+        normpath = lambda x: os.fspath(Path(x).resolve())
+        sys_path = [normpath(_) for _ in options.sys_path]
         sys.path[0:0] = sys_path
         pypath = ps.join(sys_path)
         os.environ["PYTHONPATH"] = pypath
@@ -285,7 +287,7 @@ def generate_all_pyi(outpath, options):
     # Perhaps this can be automated?
     PySide6.support.signature.mapping.USE_PEP563 = USE_PEP563
 
-    outpath = outpath or os.path.dirname(PySide6.__file__)
+    outpath = Path(outpath) if outpath and os.fspath(outpath) else Path(PySide6.__file__).parent
     name_list = PySide6.__all__ if options.modules == ["all"] else options.modules
     errors = ", ".join(set(name_list) - set(PySide6.__all__))
     if errors:
@@ -316,7 +318,7 @@ if __name__ == "__main__":
     if options.quiet:
         logger.setLevel(logging.WARNING)
     outpath = options.outpath
-    if outpath and not os.path.exists(outpath):
+    if outpath and not Path(outpath).exists():
         os.makedirs(outpath)
         logger.info(f"+++ Created path {outpath}")
     generate_all_pyi(outpath, options=options)

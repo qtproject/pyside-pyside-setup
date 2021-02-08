@@ -29,6 +29,7 @@
 
 import os
 import sys
+from pathlib import Path
 
 
 def get_dir_env_var(var_name):
@@ -36,7 +37,7 @@ def get_dir_env_var(var_name):
     result = os.environ.get(var_name)
     if not result:
         raise ValueError(f'{var_name} is not set!')
-    if not os.path.isdir(result):
+    if not Path(result).is_dir():
         raise ValueError(f'{result} is not a directory!')
     return result
 
@@ -49,14 +50,16 @@ def get_build_dir():
     try:
         return get_dir_env_var('BUILD_DIR')
     except ValueError:
-        look_for = "testing"
-        here = os.path.dirname(__file__)
-        while look_for not in os.listdir(here):
-            here = os.path.dirname(here)
-            if len(here) <= 3:
+        look_for = Path("testing")
+        here = Path(__file__).resolve().parent
+        while here / look_for not in here.iterdir():
+            import pprint
+            parent = here.parent
+            if parent == here:
                 raise SystemError(look_for + " not found!")
+            here = parent
         try:
-            sys.path.insert(0, here)
+            sys.path.insert(0, os.fspath(here))
             from testing.buildlog import builds
             if not builds.history:
                 raise
@@ -104,20 +107,20 @@ def shiboken_paths(include_shiboken_tests=False):
        using the shiboken6 module from the build directory or running the
        shiboken tests depending on a single environment variable BUILD_DIR
        pointing to the build directory."""
-    src_dir = os.path.dirname(os.path.abspath(__file__))
+    src_dir = Path(__file__).resolve().parent
     python_dirs = []
     if include_shiboken_tests:
-        python_dirs.append(src_dir)  # For shiboken_test_helper
+        python_dirs.append(os.fspath(src_dir))  # For shiboken_test_helper
     python_dirs.append(get_build_dir())  # for toplevel shiboken6 import
-    shiboken_dir = os.path.join(get_build_dir(), 'shiboken6')
-    lib_dirs = [os.path.join(shiboken_dir, 'libshiboken')]
+    shiboken_dir = Path(get_build_dir()) / 'shiboken6'
+    lib_dirs = [os.fspath(shiboken_dir / 'libshiboken')]
     if include_shiboken_tests:
-        shiboken_test_dir = os.path.join(shiboken_dir, 'tests')
+        shiboken_test_dir = shiboken_dir /'tests'
         for module in ['minimal', 'sample', 'smart', 'other']:
-            module_dir = os.path.join(shiboken_test_dir, module + 'binding')
-            python_dirs.append(module_dir)
-            lib_dir = os.path.join(shiboken_test_dir, 'lib' + module)
-            lib_dirs.append(lib_dir)
+            module_dir = shiboken_test_dir / f"{module}binding"
+            python_dirs.append(os.fspath(module_dir))
+            lib_dir = shiboken_test_dir / f"lib{module}"
+            lib_dirs.append(os.fspath(lib_dir))
     return (python_dirs, lib_dirs)
 
 

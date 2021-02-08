@@ -41,11 +41,12 @@
 import sys
 import os
 import subprocess
+from pathlib import Path
 
 def main():
     # The tools listed as entrypoints in setup.py are copied to 'scripts/..'
-    cmd = os.path.join("..", os.path.basename(sys.argv[0]))
-    command = [os.path.join(os.path.dirname(os.path.realpath(__file__)), cmd)]
+    cmd = Path("..") / Path(sys.argv[0]).name
+    command = [os.fspath(Path(__file__).parent.resolve() / cmd)]
     command.extend(sys.argv[1:])
     sys.exit(subprocess.call(command))
 

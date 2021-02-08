@@ -38,20 +38,24 @@
 ##
 #############################################################################
 
-import copy, os
+import copy
+import os
+from pathlib import Path
+
 from PySide6.QtSql import QSqlRelationalDelegate
 from PySide6.QtWidgets import (QItemDelegate, QSpinBox, QStyledItemDelegate,
     QStyle, QStyleOptionViewItem)
 from PySide6.QtGui import QMouseEvent, QPixmap, QPalette, QImage
 from PySide6.QtCore import QEvent, QSize, Qt, QUrl
 
+
 class BookDelegate(QSqlRelationalDelegate):
     """Books delegate to rate the books"""
 
     def __init__(self, star_png, parent=None):
         QSqlRelationalDelegate.__init__(self, parent)
-        star_png = os.path.dirname(__file__) + "\images\star.png"
-        self.star = QPixmap(star_png)
+        star_png = Path(__file__).parent / "images" / "star.png"
+        self.star = QPixmap(os.fspath(star_png))
 
     def paint(self, painter, option, index):
         """ Paint the items in the table.

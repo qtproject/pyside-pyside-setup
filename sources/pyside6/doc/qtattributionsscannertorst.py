@@ -41,7 +41,13 @@
 Tool to run qtattributionsscanner and convert its output to rst
 """
 
-import os, json, subprocess, sys, warnings
+import os
+import json
+import subprocess
+import sys
+import warnings
+from pathlib import Path
+
 
 def indent(lines, indent):
     result = ''
@@ -113,7 +119,7 @@ def runScanner(directory, targetFileName):
             content += entry['License'] + '\n\n'
             licenseFile = entry['LicenseFile']
             if licenseFile:
-                if os.path.isfile(licenseFile):
+                if Path(licenseFile).is_file():
                     content += rstLiteralBlock(readFile(licenseFile))
                 else:
                     warnings.warn(f'"{licenseFile}" is not a file', RuntimeWarning)

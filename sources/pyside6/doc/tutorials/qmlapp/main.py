@@ -41,11 +41,17 @@
 #!/usr/bin/env python
 # -*- conding: utf-8 -*-
 
-import os, sys, urllib.request, json
+import os
+import sys
+import urllib.request
+import json
+from pathlib import Path
+
 import PySide6.QtQml
 from PySide6.QtQuick import QQuickView
 from PySide6.QtCore import QStringListModel, Qt, QUrl
 from PySide6.QtGui import QGuiApplication
+
 
 if __name__ == '__main__':
 
@@ -66,11 +72,11 @@ if __name__ == '__main__':
     #Expose the list to the Qml code
     my_model = QStringListModel()
     my_model.setStringList(data_list)
-    view.rootContext().setContextProperty("myModel",my_model)
+    view.rootContext().setContextProperty("myModel", my_model)
 
     #Load the QML file
-    qml_file = os.path.join(os.path.dirname(__file__),"view.qml")
-    view.setSource(QUrl.fromLocalFile(os.path.abspath(qml_file)))
+    qml_file = Path(__file__).parent / "view.qml"
+    view.setSource(QUrl.fromLocalFile(os.fspath(qml_file.resolve())))
 
     #Show the window
     if view.status() == QQuickView.Error:

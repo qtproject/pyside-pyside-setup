@@ -41,12 +41,12 @@ from shiboken_paths import init_paths
 init_paths()
 
 
-orig_path = os.path.join(os.path.dirname(__file__))
-workdir = os.getcwd()
-src = os.path.join(orig_path, 'test_module_template.py')
-dst = os.path.join(workdir, 'test_module.py')
+orig_path = Path(__file__).parent
+workdir = Path.cwd()
+src = orig_path / 'test_module_template.py'
+dst = workdir / 'test_module.py'
 shutil.copyfile(src, dst)
-sys.path.append(workdir)
+sys.path.append(os.fspath(workdir))
 
 class TestModuleReloading(unittest.TestCase):
 

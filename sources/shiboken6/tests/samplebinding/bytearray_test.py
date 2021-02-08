@@ -37,7 +37,6 @@ from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from shiboken_paths import init_paths
 init_paths()
-from os.path import isdir
 from sample import ByteArray
 
 
@@ -45,9 +44,9 @@ class ByteArrayBufferProtocolTest(unittest.TestCase):
     '''Tests ByteArray implementation of Python buffer protocol.'''
 
     def testByteArrayBufferProtocol(self):
-        # Tests ByteArray implementation of Python buffer protocol using the os.path.isdir
-        # function which an unicode object or other object implementing the Python buffer protocol.
-        isdir(str(ByteArray('/tmp')))
+        # Tests ByteArray implementation of Python buffer protocol using the Path().is_dir
+        # function with a unicode object or other object implementing the Python buffer protocol.
+        Path(str(ByteArray('/tmp'))).is_dir()
 
 
 class ByteArrayConcatenationOperatorTest(unittest.TestCase):

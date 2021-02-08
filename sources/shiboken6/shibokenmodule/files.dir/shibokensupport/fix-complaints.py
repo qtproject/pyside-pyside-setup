@@ -50,6 +50,7 @@ you are changing messages (what I did, of course :-) .
 
 import os
 import glob
+from pathlib import Path
 
 patched_file_patterns = "backport_inspect.py typing27.py python_minilib_*.py"
 
@@ -60,10 +61,10 @@ offending_words = {
 }
 
 utf8_line = "# This Python file uses the following encoding: utf-8\n"
-marker_line = f"# It has been edited by {os.path.basename(__file__)} .\n"
+marker_line = f"# It has been edited by {Path(__file__).name} .\n"
 
 def patch_file(fname):
-    with open(fname) as f:
+    with fname.open() as f:
         lines = f.readlines()
     dup = lines[:]
     for idx, line in enumerate(lines):
@@ -80,10 +81,10 @@ def patch_file(fname):
             f.write("".join(lines))
 
 def doit():
-    dirname = os.path.dirname(__file__)
+    dirname = Path(__file__).parent
     patched_files = []
     for name in patched_file_patterns.split():
-        pattern = os.path.join(dirname, name)
+        pattern = dirname / name
         patched_files += glob.glob(pattern)
     for fname in patched_files:
         print("Working on", fname)

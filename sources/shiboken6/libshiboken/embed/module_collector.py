@@ -59,16 +59,18 @@ import os
 import argparse
 import pickle
 from textwrap import dedent
+from pathlib import path
+
 
 def source_archive(module, modname):
-    fname = os.path.splitext(module.__file__)[0] + ".py"
+    fname = Path(module.__file__).stem + ".py"
     with open(fname) as source:
         text = source.read()
     encoded = text.replace("'''", "(triple_single)")
     # modname = module.__name__
     # Do not use: Some modules rename themselves!
     version = ".".join(map(str, sys.version_info[:3]))
-    shortname = os.path.basename(fname)
+    shortname = fname.stem
     preamble = dedent(fr"""
         # BEGIN SOURCE ARCHIVE    Python {version}  module {modname}
 
@@ -80,6 +82,7 @@ def source_archive(module, modname):
         """)
     return preamble
 
+
 def read_all(modules):
     collected = ""
     for modname in modules:
@@ -87,10 +90,12 @@ def read_all(modules):
         collected += source_archive(mod, modname)
     return collected
 
+
 def license_header():
-    license = os.path.join(os.path.dirname(__file__), "qt_python_license.txt")
-    with open(license) as f:
+    license = Path(__file__).parent / "qt_python_license.txt"
+    with license.open() as f:
         return f.read()
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -99,7 +104,7 @@ if __name__ == "__main__":
     print("modules:", args.modules)
     ret = license_header() + read_all(args.modules)
     ma_mi = "_".join(map(str, sys.version_info[:2]))
-    outpath = os.path.join(os.path.dirname(__file__), "..", "..", "shibokenmodule",
+    outpath = Path(__file__).parents[2] / Path("shibokenmodule",
         "files.dir", "shibokensupport", f"python_minilib_{ma_mi}.py")
-    with open(outpath, "w") as f:
+    with outpath.open("w") as f:
         f.write(ret)

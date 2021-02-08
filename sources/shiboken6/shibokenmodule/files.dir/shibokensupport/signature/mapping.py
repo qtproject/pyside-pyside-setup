@@ -50,6 +50,7 @@ in sys.modules. This minimizes the loading overhead.
 import sys
 import struct
 import os
+from pathlib import Path
 
 from shibokensupport.signature import typing
 from shibokensupport.signature.typing import TypeVar, Generic
@@ -175,8 +176,8 @@ class Reloader(object):
 
     @staticmethod
     def module_valid(mod):
-        if getattr(mod, "__file__", None) and not os.path.isdir(mod.__file__):
-            ending = os.path.splitext(mod.__file__)[-1]
+        if getattr(mod, "__file__", None) and not Path(mod.__file__).is_dir():
+            ending = Path(mod.__file__).suffix
             return ending not in (".py", ".pyc", ".pyo", ".pyi")
         return False
 
