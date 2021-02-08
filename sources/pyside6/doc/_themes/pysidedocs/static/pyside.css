@@ -2044,6 +2044,8 @@ table.special {
     border-collapse: separate;
     border-spacing: 20px;
     line-height: 1.5em;
+    table-layout: fixed;
+    width: 80%;
 }
 
 .special p {
@@ -2079,12 +2081,14 @@ table.special td {
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
     -khtml-border-radius: 5px;
+    overflow: hidden;
 }
 
 .special td:hover {
-    padding-top: 2px;
-    padding-bottom: 2px;
+    padding-top: 14px;
+    padding-bottom: 10px;
     border-bottom: 4px solid #41cd52;
+    overflow: hidden;
 }
 
 .command {
