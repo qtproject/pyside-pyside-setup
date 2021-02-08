@@ -797,11 +797,7 @@ static void writeFancyToc(TextStream& s, const QStringList& items, int cols = 2)
     QString currentColData;
     int i = 0;
     TextStream ss(&currentColData);
-    QMutableMapIterator<QChar, QStringList> it(tocMap);
-    while (it.hasNext()) {
-        it.next();
-        std::sort(it.value().begin(), it.value().end());
-
+    for (auto it = tocMap.cbegin(), end = tocMap.cend(); it != end; ++it) {
         if (i)
             ss << '\n';
 
@@ -846,6 +842,8 @@ void QtDocGenerator::writeModuleDocumentation()
 {
     QMap<QString, QStringList>::iterator it = m_packages.begin();
     for (; it != m_packages.end(); ++it) {
+        std::sort(it.value().begin(), it.value().end());
+
         QString key = it.key();
         key.replace(QLatin1Char('.'), QLatin1Char('/'));
         QString outputDir = outputDirectory() + QLatin1Char('/') + key;
