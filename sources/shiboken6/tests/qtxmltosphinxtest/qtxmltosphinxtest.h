@@ -47,6 +47,8 @@ public:
 private slots:
     void testTable_data();
     void testTable();
+    void testTableFormatting_data();
+    void testTableFormatting();
 
 private:
     QString transformXml(const QString &xml) const;
