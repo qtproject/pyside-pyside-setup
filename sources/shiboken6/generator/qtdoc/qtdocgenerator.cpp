@@ -772,7 +772,7 @@ void QtDocGenerator::writeFunction(TextStream& s, const AbstractMetaClass* cppCl
     writeInjectDocumentation(s, TypeSystem::DocModificationAppend, cppClass, func);
 }
 
-static void writeFancyToc(TextStream& s, const QStringList& items, int cols = 2)
+static void writeFancyToc(TextStream& s, const QStringList& items)
 {
     using TocMap = QMap<QChar, QStringList>;
     TocMap tocMap;
@@ -790,41 +790,30 @@ static void writeFancyToc(TextStream& s, const QStringList& items, int cols = 2)
             idx = className[0];
         tocMap[idx] << item;
     }
+
+    static const qsizetype numColumns = 4;
+
     QtXmlToSphinx::Table table;
-    QtXmlToSphinx::TableRow row;
-
-    int itemsPerCol = (items.size() + tocMap.size()*2) / cols;
-    QString currentColData;
-    int i = 0;
-    TextStream ss(&currentColData);
     for (auto it = tocMap.cbegin(), end = tocMap.cend(); it != end; ++it) {
-        if (i)
-            ss << '\n';
-
-        ss << "**" << it.key() << "**\n\n";
-        i += 2; // a letter title is equivalent to two entries in space
+        QtXmlToSphinx::TableRow row;
+        const QString charEntry = QLatin1String("**") + it.key() + QLatin1String("**");
+        row << QtXmlToSphinx::TableCell(charEntry);
         for (const QString &item : qAsConst(it.value())) {
-            ss << "* :doc:`" << item << "`\n";
-            ++i;
-
-            // end of column detected!
-            if (i > itemsPerCol) {
-                ss.flush();
-                QtXmlToSphinx::TableCell cell(currentColData);
-                row << cell;
-                currentColData.clear();
-                i = 0;
+            if (row.size() >= numColumns) {
+                table.appendRow(row);
+                row.clear();
+                row << QtXmlToSphinx::TableCell(QString{});
             }
+            const QString entry = QLatin1String("* :doc:`") + item + QLatin1Char('`');
+            row << QtXmlToSphinx::TableCell(entry);
+        }
+        if (!row.isEmpty()) {
+            while (row.size() < numColumns)
+                row << QtXmlToSphinx::TableCell(QString{});
+            table.appendRow(row);
         }
     }
-    if (i) {
-        ss.flush();
-        QtXmlToSphinx::TableCell cell(currentColData);
-        row << cell;
-        currentColData.clear();
-        i = 0;
-    }
-    table.appendRow(row);
+
     table.normalize();
     s << ".. container:: pysidetoc\n\n";
     table.format(s);
