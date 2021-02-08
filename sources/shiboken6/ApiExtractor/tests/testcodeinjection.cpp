@@ -141,6 +141,8 @@ void TestCodeInjections::testTextStream()
         << AlignedField("bla", 40, QTextStream::AlignRight) << "|\n|"
         << AlignedField("bla", 40, QTextStream::AlignLeft) << "|\n|"
         << AlignedField(QString(), 40, QTextStream::AlignLeft) << "|\n";
+    str << "\n2nd table\n|" << AlignedField("bla", 3, QTextStream::AlignLeft)
+        << '|' << AlignedField(QString{}, 0, QTextStream::AlignLeft) << "|\n";
 
 static const char expected[] = R"(void foo(int a, int b) {
     if (a == b)
@@ -155,6 +157,9 @@ static const char expected[] = R"(void foo(int a, int b) {
 |                                     bla|
 |bla                                     |
 |                                        |
+
+2nd table
+|bla||
 )";
 
     QCOMPARE(str.toString(), QLatin1String(expected));
