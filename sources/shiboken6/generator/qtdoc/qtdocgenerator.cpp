@@ -861,8 +861,10 @@ void QtDocGenerator::writeModuleDocumentation()
         // Store the it.key() in a QString so that it can be stripped off unwanted
         // information when neeeded. For example, the RST files in the extras directory
         // doesn't include the PySide# prefix in their names.
-        const QString moduleName = it.key();
+        QString moduleName = it.key();
         const int lastIndex = moduleName.lastIndexOf(QLatin1Char('.'));
+        if (lastIndex >= 0)
+            moduleName.remove(0, lastIndex + 1);
 
         // Search for extra-sections
         if (!m_extraSectionDir.isEmpty()) {
@@ -870,21 +872,23 @@ void QtDocGenerator::writeModuleDocumentation()
             if (!extraSectionDir.exists())
                 qCWarning(lcShibokenDoc) << m_extraSectionDir << "doesn't exist";
 
-            QStringList fileList = extraSectionDir.entryList(QStringList() << (moduleName.mid(lastIndex + 1) + QLatin1String("?*.rst")), QDir::Files);
-            QStringList::iterator it2 = fileList.begin();
-            for (; it2 != fileList.end(); ++it2) {
-                QString origFileName(*it2);
-                it2->remove(0, moduleName.indexOf(QLatin1Char('.')));
-                QString newFilePath = outputDir + QLatin1Char('/') + *it2;
+            // Filter for "QtCore.Property.rst", skipping module doc "QtCore.rst"
+            const QString filter = moduleName + QLatin1String(".?*.rst");
+            const auto fileList =
+                extraSectionDir.entryInfoList({filter}, QDir::Files, QDir::Name);
+            for (const auto &fi : fileList) {
+                // Strip to "Property.rst" in output directory
+                const QString newFileName = fi.fileName().mid(moduleName.size() + 1);
+                it.value().append(newFileName);
+                const QString newFilePath = outputDir + QLatin1Char('/') + newFileName;
                 if (QFile::exists(newFilePath))
                     QFile::remove(newFilePath);
-                if (!QFile::copy(m_extraSectionDir + QLatin1Char('/') + origFileName, newFilePath)) {
+                if (!QFile::copy(fi.absoluteFilePath(), newFilePath)) {
                     qCDebug(lcShibokenDoc).noquote().nospace() << "Error copying extra doc "
-                        << QDir::toNativeSeparators(m_extraSectionDir + QLatin1Char('/') + origFileName)
+                        << QDir::toNativeSeparators(fi.absoluteFilePath())
                         << " to " << QDir::toNativeSeparators(newFilePath);
                 }
             }
-            it.value().append(fileList);
         }
 
         writeFancyToc(s, it.value());
@@ -898,7 +902,8 @@ void QtDocGenerator::writeModuleDocumentation()
             << "Detailed Description\n--------------------\n\n";
 
         // module doc is always wrong and C++istic, so go straight to the extra directory!
-        QFile moduleDoc(m_extraSectionDir + QLatin1Char('/') + moduleName.mid(lastIndex + 1) + QLatin1String(".rst"));
+        QFile moduleDoc(m_extraSectionDir + QLatin1Char('/') + moduleName
+                        + QLatin1String(".rst"));
         if (moduleDoc.open(QIODevice::ReadOnly | QIODevice::Text)) {
             s << moduleDoc.readAll();
             moduleDoc.close();
