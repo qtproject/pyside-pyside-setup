@@ -37,7 +37,20 @@ div.admonition a:last-child:after {
 }
 
 .body {
-    width: 100%
+    width: 100%;
+  background-color: #00FF00;
+  clear: both;
+  display:inline-block;
+  background-color:#fff;
+  padding: 25px 35px 20px 30px;
+  -webkit-box-sizing:border-box;
+  -moz-box-sizing:border-box;
+  -ms-box-sizing:border-box;
+  box-sizing:border-box;
+}
+.bodywrapper {
+    position: relative;
+    /*background-color: #0000ff;*/
 }
 .bodywrapper .admonition p.admonition-title {
   margin-bottom:5px
@@ -112,6 +125,14 @@ h2 em {
 
 .documentwrapper {
     margin-left: 255px;
+    position: relative;
+}
+@media screen and (max-width: 700px) {
+    .documentwrapper {
+        clear: both;
+        margin-left: 0px;
+        position: relative;
+    }
 }
 
 .body blockquote {
@@ -123,9 +144,10 @@ h2 em {
 .sphinxsidebar {
     float: left;
     width: 186px;
-    padding: 25px;
+    padding: 15px;
     text-align: left;
     background-color: #fff;
+    clear: both;
 }
 
 .sphinxsidebar ul {
@@ -1112,7 +1134,8 @@ a:hover {
 .main_index .row>div {
   letter-spacing:normal
 }
-.col-1,.body {
+.col-1 {
+  clear: both;
   display:inline-block;
   background-color:#fff;
   padding: 25px 35px 20px 30px;
@@ -1184,6 +1207,7 @@ div.multi-column div {
   position: -webkit-sticky;
   position: sticky;
   top: 64px;
+  width: 200px;
   overflow: scroll;
   overflow-x: hidden;
   overflow-y: hidden;
@@ -1192,6 +1216,30 @@ div.multi-column div {
   font-weight: bold;
   margin-bottom:1em;
 }
+
+/* On screens that are less than 700px wide, make the sidebar into a topbar */
+@media screen and (max-width: 700px) {
+  .sphinxsidebar {
+    top: 64px;
+    /*overflow-x: hidden;
+    overflow-y: hidden;*/
+    width: 100%;
+    height: auto;
+    position: relative;
+  }
+  /*.sidebar a {float: left;}*/
+  div.content {margin-left: 0;}
+}
+
+/* On screens that are less than 400px, display the bar vertically, instead of horizontally
+@media screen and (max-width: 400px) {
+  .sphinxsidebar a {
+    text-align: center;
+    float: none;
+  }
+}
+*/
+
 .toc h3 a {
   color:#404244
 }
@@ -1254,7 +1302,8 @@ div.multi-column div {
 }
 .bodywrapper .naviNextPrevious {
   margin-top:25px;
-  max-width:100%
+  max-width:100%;
+  position: relative;
 }
 .naviNextPrevious.headerNavi,
 p.naviNextPrevious + p {
@@ -1353,7 +1402,7 @@ li a.active {
   min-height:1.25em
 }
 .bodywrapper .qmldoc {
-  margin-top:0.75em
+  margin-top:0.75em;
 }
 .body h2 {
   margin-top: 1.5em;
@@ -1489,7 +1538,7 @@ pre, .LegaleseLeft {
 }
 .bodywrapper .LegaleseLeft p {
   color:#fff;
-  white-space: pre-wrap
+  white-space: pre-wrap;
 }
 pre .str,code .str {
   color:#aaaaaa
