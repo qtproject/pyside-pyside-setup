@@ -855,8 +855,6 @@ void QtDocGenerator::writeModuleDocumentation()
             << title << '\n'
             << Pad('*', title.length()) << "\n\n";
 
-        /* Avoid showing "Detailed Description for *every* class in toc tree */
-        Indentation indentation(s);
         // Store the it.key() in a QString so that it can be stripped off unwanted
         // information when neeeded. For example, the RST files in the extras directory
         // doesn't include the PySide# prefix in their names.
