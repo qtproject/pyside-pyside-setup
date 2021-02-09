@@ -6,6 +6,10 @@
 /SciTE.*
 /pysideuic
 
+# Auto-generated examples
+sources/pyside6/doc/examples/index.rst
+example_*.rst
+
 distribute-*.egg
 distribute-*.tar.gz
 explore2

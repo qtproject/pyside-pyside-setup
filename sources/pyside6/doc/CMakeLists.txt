@@ -16,6 +16,19 @@ set(TS_ROOT "${ROOT}/PySide6")
 
 file(REMOVE ${CMAKE_CURRENT_LIST_DIR}/pyside.qdocconf ${CMAKE_CURRENT_LIST_DIR}/pyside.qdocconf.in)
 
+# We need to find the interpreter when running this only
+# for a rst_build_docs case, and not a full doc build
+if (NOT FULLDOCSBUILD)
+    find_package(Python COMPONENTS Interpreter)
+    set(PYTHON_EXECUTABLE ${Python_EXECUTABLE})
+endif()
+
+# Generate example gallery
+message(STATUS "Generating example gallery")
+set(EXAMPLE_TOOL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../tools/example_gallery/main.py")
+execute_process(COMMAND ${PYTHON_EXECUTABLE} ${EXAMPLE_TOOL_DIR}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
+
 set(SHIBOKEN_INTERSPHINX_FILE "${ROOT}/pyside6/shiboken6/objects.inv")
 set(HAS_WEBENGINE_WIDGETS 0)
 set(SKIP_SPHINX_WARNINGS 1)
