@@ -153,7 +153,7 @@ you will use with your ``qmake`` is located::
 Once the build process finishes, you can go to the generated ``*_build/*_release/pyside6``
 directory, and run::
 
-    make apidoc
+    ninja apidoc
 
 .. note:: The :command:`apidoc` make target builds offline documenation in QCH (Qt Creator Help)
    format by default. You can switch to building for the online use with the ``--doc-build-online``
@@ -162,6 +162,11 @@ directory, and run::
 Finally, you will get a ``html`` directory containing all the generated documentation. The offline
 help files, ``PySide.qch`` and ``Shiboken.qch``, can be moved to any directory of your choice. You
 can find ``Shiboken.qch`` in the build directory, ``*_build\*_release\shiboken6\doc\html``.
+
+If you want to temporarily change a ``.rst`` file to examine the impact on
+formatting, you can re-run ``sphinx`` in the ``doc`` directory::
+
+    sphinx-build rst html
 
 Viewing offline documentation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
