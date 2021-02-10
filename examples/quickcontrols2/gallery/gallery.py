@@ -87,7 +87,11 @@ if __name__ == "__main__":
     engine.rootContext().setContextProperty("builtInStyles", built_in_styles)
 
     engine.load(":/gallery.qml")
-    if not engine.rootObjects():
+    rootObjects = engine.rootObjects()
+    if not rootObjects:
         sys.exit(-1)
+
+    window = rootObjects[0]
+    window.setIcon(QIcon(':/qt-project.org/logos/pysidelogo.png'))
 
     sys.exit(app.exec_())
