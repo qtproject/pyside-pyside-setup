@@ -212,6 +212,11 @@ void PySide::initQuickSupport(PyObject *module)
 {
     Q_UNUSED(module);
 #ifdef PYSIDE_QML_SUPPORT
+    // We need to manually register a pointer version of these types in order for them to be used as property types.
+    qRegisterMetaType<QQuickPaintedItem*>("QQuickPaintedItem*");
+    qRegisterMetaType<QQuickFramebufferObject*>("QQuickFramebufferObject*");
+    qRegisterMetaType<QQuickItem*>("QQuickItem*");
+
     setQuickRegisterItemFunction(quickRegisterType);
 #endif
 }
