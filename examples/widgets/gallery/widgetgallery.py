@@ -149,6 +149,7 @@ class WidgetGallery(QDialog):
     def __init__(self):
         super(WidgetGallery, self).__init__()
 
+        self.setWindowIcon(QIcon(':/qt-project.org/logos/pysidelogo.png'))
         self._progress_bar = self.create_progress_bar()
 
         self._style_combobox = QComboBox()

@@ -56,6 +56,8 @@ set(libpyside_SRC
     pysidestaticstrings.cpp
 )
 
+qt6_add_resources(libpyside_SRC libpyside.qrc)
+
 # Add python files to project explorer in Qt Creator, when opening the CMakeLists.txt as a project,
 # so you can look up python files with the Locator.
 macro(add_other_files)
