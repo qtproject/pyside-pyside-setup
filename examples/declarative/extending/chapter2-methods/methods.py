@@ -44,15 +44,20 @@
 import os
 import sys
 
-from PySide6.QtCore import Property, Signal, Slot, QUrl, Qt
+from PySide6.QtCore import Property, Signal, Slot, Qt, QUrl
 from PySide6.QtGui import QGuiApplication, QPen, QPainter, QColor
 from PySide6.QtQml import qmlRegisterType
 from PySide6.QtQuick import QQuickPaintedItem, QQuickView
 
 class PieChart (QQuickPaintedItem):
+
+    chartCleared = Signal()
+    nameChanged = Signal()
+
     def __init__(self, parent = None):
         QQuickPaintedItem.__init__(self, parent)
         self._name = u''
+        self._color = QColor()
 
     def paint(self, painter):
         pen = QPen(self.color, 2)
@@ -60,25 +65,25 @@ class PieChart (QQuickPaintedItem):
         painter.setRenderHints(QPainter.Antialiasing, True)
         painter.drawPie(self.boundingRect().adjusted(1,1,-1,-1), 90 * 16, 290 * 16)
 
-    def getColor(self):
+    @Property(QColor)
+    def color(self):
         return self._color
 
-    def setColor(self, value):
+    @color.setter
+    def color(self, value):
         self._color = value
 
-    def getName(self):
+    @Property(str, notify=nameChanged)
+    def name(self):
         return self._name
 
-    def setName(self, value):
+    @name.setter
+    def name(self, value):
         self._name = value
-
-    color = Property(QColor, getColor, setColor)
-    name = Property(str, getName, setName)
-    chartCleared = Signal()
 
     @Slot() # This should be something like @Invokable
     def clearChart(self):
-        self.setColor(Qt.transparent)
+        self.color = Qt.transparent
         self.update()
         self.chartCleared.emit()
 

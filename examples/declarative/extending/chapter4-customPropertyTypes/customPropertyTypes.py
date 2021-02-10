@@ -55,13 +55,13 @@ class PieSlice (QQuickPaintedItem):
         QQuickPaintedItem.__init__(self, parent)
         self._color = QColor()
 
-    def getColor(self):
+    @Property(QColor)
+    def color(self):
         return self._color
 
-    def setColor(self, value):
+    @color.setter
+    def color(self, value):
         self._color = value
-
-    color = Property(QColor, getColor, setColor)
 
     def paint(self, painter):
         pen = QPen(self._color, 2)
@@ -75,22 +75,22 @@ class PieChart (QQuickItem):
         self._name = None
         self._pieSlice = None
 
-    def getName(self):
+    @Property(str)
+    def name(self):
         return self._name
 
-    def setName(self, value):
+    @name.setter
+    def name(self, value):
         self._name = value
 
-    name = Property(str, getName, setName)
-
-    def getPieSlice(self):
+    @Property(PieSlice)
+    def pieSlice(self):
         return self._pieSlice
 
-    def setPieSlice(self, value):
+    @pieSlice.setter
+    def pieSlice(self, value):
         self._pieSlice = value
         self._pieSlice.setParentItem(self)
-
-    pieSlice = Property(PieSlice, getPieSlice, setPieSlice)
 
 if __name__ == '__main__':
     app = QGuiApplication(sys.argv)

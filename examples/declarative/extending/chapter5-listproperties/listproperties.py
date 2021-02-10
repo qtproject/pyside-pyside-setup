@@ -56,27 +56,29 @@ class PieSlice (QQuickPaintedItem):
         self._fromAngle = 0
         self._angleSpan = 0
 
-    def getColor(self):
+    @Property(QColor)
+    def color(self):
         return self._color
 
-    def setColor(self, value):
+    @color.setter
+    def color(self, value):
         self._color = value
 
-    def getFromAngle(self):
+    @Property(int)
+    def fromAngle(self):
         return self._angle
 
-    def setFromAngle(self, value):
+    @fromAngle.setter
+    def fromAngle(self, value):
         self._fromAngle = value
 
-    def getAngleSpan(self):
+    @Property(int)
+    def angleSpan(self):
         return self._angleSpan
 
-    def setAngleSpan(self, value):
+    @angleSpan.setter
+    def angleSpan(self, value):
         self._angleSpan = value
-
-    color = Property(QColor, getColor, setColor)
-    fromAngle = Property(int, getFromAngle, setFromAngle)
-    angleSpan = Property(int, getAngleSpan, setAngleSpan)
 
     def paint(self, painter):
         pen = QPen(self._color, 2)
@@ -90,13 +92,13 @@ class PieChart (QQuickItem):
         self._name = u''
         self._slices = []
 
-    def getName(self):
+    @Property(str)
+    def name(self):
         return self._name
 
-    def setName(self, value):
+    @name.setter
+    def name(self, value):
         self._name = value
-
-    name = Property(str, getName, setName)
 
     def appendSlice(self, _slice):
         _slice.setParentItem(self)

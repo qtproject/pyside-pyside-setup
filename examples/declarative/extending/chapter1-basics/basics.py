@@ -44,15 +44,19 @@
 import os
 import sys
 
-from PySide6.QtCore import Property, Signal, QUrl
+from PySide6.QtCore import Property, Signal, Qt, QUrl
 from PySide6.QtGui import QGuiApplication, QPen, QPainter, QColor
 from PySide6.QtQml import qmlRegisterType
 from PySide6.QtQuick import QQuickPaintedItem, QQuickView
 
 class PieChart (QQuickPaintedItem):
+
+    nameChanged = Signal()
+
     def __init__(self, parent = None):
         QQuickPaintedItem.__init__(self, parent)
         self._name = u''
+        self._color = QColor()
 
     def paint(self, painter):
         pen = QPen(self.color, 2)
@@ -60,22 +64,22 @@ class PieChart (QQuickPaintedItem):
         painter.setRenderHints(QPainter.Antialiasing, True)
         painter.drawPie(self.boundingRect().adjusted(1,1,-1,-1), 90 * 16, 290 * 16)
 
-    def getColor(self):
+    @Property(QColor)
+    def color(self):
         return self._color
 
-    def setColor(self, value):
+    @color.setter
+    def color(self, value):
         self._color = value
 
-    def getName(self):
+    @Property(str, notify=nameChanged)
+    def name(self):
         return self._name
 
-    def setName(self, value):
+    @name.setter
+    def name(self, value):
         self._name = value
 
-    nameChanged = Signal()
-
-    color = Property(QColor, getColor, setColor)
-    name = Property(str, getName, setName, notify=nameChanged)
 
 if __name__ == '__main__':
     app = QGuiApplication(sys.argv)
