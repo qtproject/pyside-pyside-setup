@@ -38,7 +38,7 @@
 ###############
 
 
-"""
+DESCRIPTION = """
 This tool reads all the examples from the main repository that have a
 '.pyproject' file, and generates a special table/gallery in the documentation
 page.
@@ -48,10 +48,14 @@ For the usage, simply run:
 since there is no special requirements.
 """
 
+from argparse import ArgumentParser, RawTextHelpFormatter
 import json
 import math
 from pathlib import Path
 from textwrap import dedent
+
+
+opt_quiet = False
 
 
 def ind(x):
@@ -136,6 +140,12 @@ if __name__ == "__main__":
     columns = 5
     gallery = ""
 
+    parser = ArgumentParser(description=DESCRIPTION,
+                            formatter_class=RawTextHelpFormatter)
+    parser.add_argument('--quiet', '-q', action='store_true',
+                        help='Quiet')
+    options = parser.parse_args()
+    opt_quiet = options.quiet
 
     # This main loop will be in charge of:
     #   * Getting all the .pyproject files,
@@ -193,9 +203,11 @@ if __name__ == "__main__":
                     content_f += add_indent(_content, 1)
                     content_f += "\n\n"
                 out_f.write(content_f)
-            print(f"Written: {EXAMPLES_DOC}/{rst_file}")
+            if not opt_quiet:
+                print(f"Written: {EXAMPLES_DOC}/{rst_file}")
         else:
-            print("Empty '.pyproject' file, skipping")
+            if not opt_quiet:
+                print("Empty '.pyproject' file, skipping")
 
     base_content = dedent("""\
     ..
@@ -253,4 +265,5 @@ if __name__ == "__main__":
         for i in index_files:
             f.write(f"   {i}\n")
 
-    print(f"Written index: {EXAMPLES_DOC}/index.rst")
+    if not opt_quiet:
+        print(f"Written index: {EXAMPLES_DOC}/index.rst")
