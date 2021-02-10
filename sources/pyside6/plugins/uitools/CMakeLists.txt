@@ -14,9 +14,7 @@ set(ui_plugin_src
     customwidget.cpp
 )
 
-qt_wrap_cpp(MOC_FILES ${ui_plugin_moc})
-
-add_library(uiplugin STATIC ${ui_plugin_src} ${MOC_FILES})
+add_library(uiplugin STATIC ${ui_plugin_src})
 if(CMAKE_HOST_UNIX AND NOT CYGWIN)
     add_definitions(-fPIC)
 endif()

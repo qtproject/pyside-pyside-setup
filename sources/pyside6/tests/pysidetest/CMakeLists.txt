@@ -9,6 +9,8 @@ set(QT_USE_QTCORE 1)
 # removed after qtbase/054b66a65748c9ebfafeca88bf31669a24994237, is this required?
 # add_definitions(${Qt${QT_MAJOR_VERSION}Core_DEFINITIONS})
 
+set(CMAKE_AUTOMOC ON)
+
 add_definitions(-DQT_SHARED)
 add_definitions(-DRXX_ALLOCATOR_INIT_0)
 
@@ -20,15 +22,6 @@ testobject.cpp
 testview.cpp
 hiddenobject.cpp
 )
-
-set(pysidetest_MOC_HEADERS
-flagstest.h
-testobject.h
-testview.h
-hiddenobject.h
-)
-
-qt_wrap_cpp(pysidetest_MOC_SRC ${pysidetest_MOC_HEADERS})
 
 set(testbinding_SRC
 ${CMAKE_CURRENT_BINARY_DIR}/testbinding/flagsnamespace_classforenum_wrapper.cpp
@@ -49,15 +42,9 @@ ${CMAKE_CURRENT_BINARY_DIR}/testbinding/testbinding_module_wrapper.cpp
 # ./qt/lib/QtCore.framework; ./qt/lib/QtCore.framework/Headers ; ./qt/mkspecs/macx-clang
 # Thus we use the second direct path, which contains the actual header files.
 
-if(${QT_MAJOR_VERSION} GREATER_EQUAL 6)
-    set(Qt6Core_DIRECT_INCLUDE_DIR ${Qt6Core_INCLUDE_DIRS})
-    set(Qt6Gui_DIRECT_INCLUDE_DIR ${Qt6Gui_INCLUDE_DIRS})
-    set(Qt6Widgets_DIRECT_INCLUDE_DIR ${Qt6Widgets_INCLUDE_DIRS})
-else()
-    list(GET Qt5Core_INCLUDE_DIRS 1 Qt5Core_DIRECT_INCLUDE_DIR)
-    list(GET Qt5Gui_INCLUDE_DIRS 1 Qt5Gui_DIRECT_INCLUDE_DIR)
-    list(GET Qt5Widgets_INCLUDE_DIRS 1 Qt5Widgets_DIRECT_INCLUDE_DIR)
-endif()
+set(Qt6Core_DIRECT_INCLUDE_DIR ${Qt6Core_INCLUDE_DIRS})
+set(Qt6Gui_DIRECT_INCLUDE_DIR ${Qt6Gui_INCLUDE_DIRS})
+set(Qt6Widgets_DIRECT_INCLUDE_DIR ${Qt6Widgets_INCLUDE_DIRS})
 
 # Adjust include headers paths for frameworks.
 set(shiboken_framework_include_dirs_option "")
@@ -106,7 +93,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${QtWidgets_GEN_DIR}
                     ${libpyside_SOURCE_DIR})
 
-add_library(pysidetest SHARED ${pysidetest_SRC} ${pysidetest_MOC_SRC})
+add_library(pysidetest SHARED ${pysidetest_SRC})
 set_target_properties(pysidetest PROPERTIES
                       DEFINE_SYMBOL BUILD_PYSIDETEST)
 
