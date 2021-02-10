@@ -48,6 +48,7 @@ by producing a lot of clarity.
 """
 
 import sys
+import types
 from shibokensupport.signature import inspect
 from shibokensupport.signature import get_signature as get_sig
 
@@ -80,12 +81,10 @@ class ExactEnumerator(object):
     def is_method(self):
         """
         Is this function a method?
-        We check if it is not in a sub-structure
+        We check if it is a simple function.
         """
-        func = self.func
-        if hasattr(func, "__func__"):
-            func = func.__func__
-        return func.__name__ != func.__qualname__
+        tp = type(self.func)
+        return tp not in (types.BuiltinFunctionType, types.FunctionType)
 
     def after_enum(self):
         ret = self._after_enum
