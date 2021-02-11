@@ -392,7 +392,7 @@ void QtXmlToSphinx::formatCurrentTable()
         return;
     m_currentTable.setHeaderEnabled(m_tableHasHeader);
     m_currentTable.normalize();
-    m_output << ensureEndl;
+    m_output << '\n';
     m_currentTable.format(m_output);
 }
 
