@@ -68,6 +68,11 @@ public:
      * \param pyobj A borrowed reference to a Python object
      */
     explicit AutoDecRef(SbkObject *pyObj) : m_pyObj(reinterpret_cast<PyObject *>(pyObj)) {}
+    /**
+     * AutoDecref constructor.
+     * To be used later with reset():
+     */
+    AutoDecRef() : m_pyObj(nullptr) {}
 
     /// Decref the borrowed python reference
     ~AutoDecRef()

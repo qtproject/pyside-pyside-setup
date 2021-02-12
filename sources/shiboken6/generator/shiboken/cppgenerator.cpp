@@ -1814,8 +1814,7 @@ void CppGenerator::writeMethodWrapperPreamble(TextStream &s, OverloadData &overl
         initPythonArguments = minArgs != maxArgs || maxArgs > 1;
     }
 
-    s << R"(PyObject *errInfo{};
-SBK_UNUSED(errInfo)
+    s << R"(Shiboken::AutoDecRef errInfo{};
 static const char *fullName = ")" << fullPythonFunctionName(rfunc, true)
          << "\";\nSBK_UNUSED(fullName)\n";
     if (maxArgs > 0) {
@@ -1901,8 +1900,6 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const AbstractMetaFunc
     {
         Indentation indent(s);
         s << "delete cptr;\n";
-        if (overloadData.maxArgs() > 0)
-            s << "Py_XDECREF(errInfo);\n";
         s << returnStatement(m_currentErrorCode) << '\n';
     }
     s << "}\n";
@@ -1933,10 +1930,9 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const AbstractMetaFunc
         s << "\n// QObject setup\n"
             << "PySide::Signal::updateSourceObject(self);\n"
             << "metaObject = cptr->metaObject(); // <- init python qt properties\n"
-            << "if (errInfo && PyDict_Check(errInfo)) {\n" << indent
-            << "if (!PySide::fillQtProperties(self, metaObject, errInfo))\n" << indent
-            << "goto " << cpythonFunctionName(rfunc) << "_TypeError;\n" << outdent
-            << "Py_DECREF(errInfo);\n" << outdent
+            << "if (!errInfo.isNull() && PyDict_Check(errInfo.object())) {\n" << indent
+                << "if (!PySide::fillQtProperties(self, metaObject, errInfo))\n" << indent
+                    << "goto " << cpythonFunctionName(rfunc) << "_TypeError;\n" << outdent << outdent
             << "};\n";
     }
 
@@ -2127,8 +2123,8 @@ void CppGenerator::writeArgumentsInitializer(TextStream &s, OverloadData &overlo
                 Indentation indent(s);
                 s << "static PyObject *const too_many = "
                      "Shiboken::String::createStaticString(\">\");\n"
-                    << "errInfo = too_many;\n"
-                    << "Py_INCREF(errInfo);\n"
+                    << "errInfo.reset(too_many);\n"
+                    << "Py_INCREF(errInfo.object());\n"
                     << "goto " << cpythonFunctionName(rfunc) << "_TypeError;\n";
             }
             s << '}';
@@ -2141,8 +2137,8 @@ void CppGenerator::writeArgumentsInitializer(TextStream &s, OverloadData &overlo
                 Indentation indent(s);
                 s << "static PyObject *const too_few = "
                      "Shiboken::String::createStaticString(\"<\");\n"
-                    << "errInfo = too_few;\n"
-                    << "Py_INCREF(errInfo);\n"
+                    << "errInfo.reset(too_few);\n"
+                    << "Py_INCREF(errInfo.object());\n"
                     << "goto " << cpythonFunctionName(rfunc) << "_TypeError;\n";
             }
             s << '}';
@@ -2283,9 +2279,7 @@ void CppGenerator::writeErrorSection(TextStream &s, OverloadData &overloadData)
     Indentation indentation(s);
     QString argsVar = pythonFunctionWrapperUsesListOfArguments(overloadData)
         ? QLatin1String("args") : QLatin1String(PYTHON_ARG);
-    s << "Shiboken::setErrorAboutWrongArguments(" << argsVar
-                << ", fullName, errInfo);\n"
-        << "Py_XDECREF(errInfo);\n"
+    s << "Shiboken::setErrorAboutWrongArguments(" << argsVar << ", fullName, errInfo);\n"
         << "return " << m_currentErrorCode << ";\n";
 }
 
@@ -3248,8 +3242,8 @@ void CppGenerator::writeNamedArgumentResolution(TextStream &s, const AbstractMet
             s << "if (kwds) {\n";
             {
                 Indentation indent(s);
-                s << "errInfo = kwds;\n"
-                    << "Py_INCREF(errInfo);\n"
+                s << "errInfo.reset(kwds);\n"
+                    << "Py_INCREF(errInfo.object());\n"
                     << "goto " << cpythonFunctionName(func) << "_TypeError;\n";
             }
             s << "}\n";
@@ -3276,8 +3270,8 @@ void CppGenerator::writeNamedArgumentResolution(TextStream &s, const AbstractMet
                     << "if (value && " << pyArgName << ") {\n";
                 {
                     Indentation indent(s);
-                    s << "errInfo = " << pyKeyName << ";\n"
-                        << "Py_INCREF(errInfo);\n"
+                    s << "errInfo.reset(" << pyKeyName << ");\n"
+                        << "Py_INCREF(errInfo.object());\n"
                         << "goto " << cpythonFunctionName(func) << "_TypeError;\n";
                 }
                 s << "}\nif (value) {\n";
@@ -3303,16 +3297,11 @@ void CppGenerator::writeNamedArgumentResolution(TextStream &s, const AbstractMet
         s << "if (PyDict_Size(kwds_dup) > 0) {\n";
         {
             Indentation indent(s);
-            s << "errInfo = kwds_dup;\n";
+            s << "errInfo.reset(kwds_dup);\n";
             if (!(func->isConstructor() && func->ownerClass()->isQObject()))
                 s << "goto " << cpythonFunctionName(func) << "_TypeError;\n";
             else
                 s << "// fall through to handle extra keyword signals and properties\n";
-        }
-        s << "} else {\n";
-        {
-            Indentation indent(s);
-            s << "Py_DECREF(kwds_dup);\n";
         }
         s << "}\n";
     }
