@@ -552,6 +552,13 @@ bool AbstractMetaFunction::isConstructor() const
             || d->m_functionType == MoveConstructorFunction;
 }
 
+bool AbstractMetaFunction::isDefaultConstructor() const
+{
+    return d->m_functionType == ConstructorFunction
+        && (d->m_arguments.isEmpty()
+            || d->m_arguments.constFirst().hasDefaultValueExpression());
+}
+
 bool AbstractMetaFunction::needsReturnType() const
 {
     switch (d->m_functionType) {

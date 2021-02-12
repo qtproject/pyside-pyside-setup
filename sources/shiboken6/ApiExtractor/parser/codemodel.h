@@ -502,6 +502,7 @@ public:
     bool isVariadics() const;
     void setVariadics(bool isVariadics);
 
+    bool isDefaultConstructor() const;
 
     bool isSimilar(const FunctionModelItem &other) const;
 

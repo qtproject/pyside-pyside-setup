@@ -78,13 +78,19 @@ public:
     bool hasPrivateCopyConstructor() const;
 
     void addDefaultConstructor();
-    void addDefaultCopyConstructor(bool isPrivate = false);
+    void addDefaultCopyConstructor();
 
     bool hasNonPrivateConstructor() const;
     void setHasNonPrivateConstructor(bool value);
 
     bool hasPrivateConstructor() const;
     void setHasPrivateConstructor(bool value);
+
+    bool hasDeletedDefaultConstructor() const;
+    void setHasDeletedDefaultConstructor(bool value);
+
+    bool hasDeletedCopyConstructor() const;
+    void setHasDeletedCopyConstructor(bool value);
 
     bool hasPrivateDestructor() const;
     void setHasPrivateDestructor(bool value);
@@ -95,7 +101,13 @@ public:
     bool hasVirtualDestructor() const;
     void setHasVirtualDestructor(bool value);
 
-    bool isConstructible() const;
+    bool isDefaultConstructible() const;
+    bool isImplicitlyDefaultConstructible() const;
+    bool canAddDefaultConstructor() const;
+
+    bool isCopyConstructible() const;
+    bool isImplicitlyCopyConstructible() const;
+    bool canAddDefaultCopyConstructor() const;
 
     bool generateExceptionHandling() const;
 

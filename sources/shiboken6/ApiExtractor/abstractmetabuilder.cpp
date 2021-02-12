@@ -499,16 +499,12 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
     for (AbstractMetaClass *cls : qAsConst(m_metaClasses)) {
         cls->fixFunctions();
 
-        const bool couldAddDefaultCtors = cls->isConstructible()
-            && !cls->isNamespace()
-            && (cls->attributes() & AbstractMetaAttributes::HasRejectedConstructor) == 0;
-        if (couldAddDefaultCtors) {
-            if (!cls->hasConstructors())
-                cls->addDefaultConstructor();
-            if (cls->typeEntry()->isValue() && !cls->isAbstract() && !cls->hasCopyConstructor())
-                cls->addDefaultCopyConstructor(ancestorHasPrivateCopyConstructor(cls));
-        }
+        if (cls->canAddDefaultConstructor())
+             cls->addDefaultConstructor();
+        if (cls->canAddDefaultCopyConstructor())
+            cls->addDefaultCopyConstructor();
     }
+
     const auto &allEntries = types->entries();
 
     ReportHandler::startProgress("Detecting inconsistencies in typesystem ("
@@ -1804,10 +1800,25 @@ static bool applyArrayArgumentModifications(const FunctionModificationList &func
 }
 
 AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const FunctionModelItem &functionItem,
-                                                                   const AbstractMetaClass *currentClass)
+                                                                   AbstractMetaClass *currentClass)
 {
-    if (functionItem->isDeleted() || !functionItem->templateParameters().isEmpty())
+    if (!functionItem->templateParameters().isEmpty())
         return nullptr;
+
+    if (functionItem->isDeleted()) {
+        switch (functionItem->functionType()) {
+        case CodeModel::Constructor:
+            if (functionItem->isDefaultConstructor())
+                currentClass->setHasDeletedDefaultConstructor(true);
+            break;
+        case CodeModel::CopyConstructor:
+            currentClass->setHasDeletedCopyConstructor(true);
+            break;
+        default:
+            break;
+        }
+        return nullptr;
+    }
     QString functionName = functionItem->name();
     QString className;
     if (currentClass) {
@@ -2620,18 +2631,6 @@ AbstractMetaClassList AbstractMetaBuilderPrivate::getBaseClasses(const AbstractM
             baseClasses << cls;
     }
     return baseClasses;
-}
-
-bool AbstractMetaBuilderPrivate::ancestorHasPrivateCopyConstructor(const AbstractMetaClass *metaClass) const
-{
-    if (metaClass->hasPrivateCopyConstructor())
-        return true;
-    const AbstractMetaClassList &baseClasses = getBaseClasses(metaClass);
-    for (const AbstractMetaClass *cls : baseClasses) {
-        if (ancestorHasPrivateCopyConstructor(cls))
-            return true;
-    }
-    return false;
 }
 
 std::optional<AbstractMetaType>

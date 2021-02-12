@@ -56,6 +56,8 @@ public:
           m_hasNonpublic(false),
           m_hasNonPrivateConstructor(false),
           m_hasPrivateConstructor(false),
+          m_hasDeletedDefaultConstructor(false),
+          m_hasDeletedCopyConstructor(false),
           m_functionsFixed(false),
           m_inheritanceDone(false),
           m_hasPrivateDestructor(false),
@@ -75,6 +77,8 @@ public:
     uint m_hasNonpublic : 1;
     uint m_hasNonPrivateConstructor : 1;
     uint m_hasPrivateConstructor : 1;
+    uint m_hasDeletedDefaultConstructor : 1;
+    uint m_hasDeletedCopyConstructor : 1;
     uint m_functionsFixed : 1;
     uint m_inheritanceDone : 1; // m_baseClasses has been populated from m_baseClassNames
     uint m_hasPrivateDestructor : 1;
@@ -759,8 +763,9 @@ void AbstractMetaClass::addDefaultConstructor()
     this->setHasNonPrivateConstructor(true);
 }
 
-void AbstractMetaClass::addDefaultCopyConstructor(bool isPrivate)
+void AbstractMetaClass::addDefaultCopyConstructor()
 {
+    d->m_hasNonPrivateConstructor = true;
     auto f = new AbstractMetaFunction;
     f->setType(AbstractMetaType::createVoid());
     f->setOriginalName(name());
@@ -780,10 +785,7 @@ void AbstractMetaClass::addDefaultCopyConstructor(bool isPrivate)
     f->addArgument(arg);
 
     AbstractMetaAttributes::Attributes attr = FinalInTargetLang | AddedMethod;
-    if (isPrivate)
-        attr |= AbstractMetaAttributes::Private;
-    else
-        attr |= AbstractMetaAttributes::Public;
+    attr |= AbstractMetaAttributes::Public;
     f->setAttributes(attr);
     f->setImplementingClass(this);
     f->setOriginalAttributes(f->attributes());
@@ -809,6 +811,26 @@ bool AbstractMetaClass::hasPrivateConstructor() const
 void AbstractMetaClass::setHasPrivateConstructor(bool value)
 {
     d->m_hasPrivateConstructor = value;
+}
+
+bool AbstractMetaClass::hasDeletedDefaultConstructor() const
+{
+    return d->m_hasDeletedDefaultConstructor;
+}
+
+void AbstractMetaClass::setHasDeletedDefaultConstructor(bool value)
+{
+    d->m_hasDeletedDefaultConstructor = value;
+}
+
+bool AbstractMetaClass::hasDeletedCopyConstructor() const
+{
+    return d->m_hasDeletedCopyConstructor;
+}
+
+void AbstractMetaClass::setHasDeletedCopyConstructor(bool value)
+{
+    d->m_hasDeletedCopyConstructor = value;
 }
 
 bool AbstractMetaClass::hasPrivateDestructor() const
@@ -843,9 +865,81 @@ void AbstractMetaClass::setHasVirtualDestructor(bool value)
         d->m_hasVirtuals = d->m_isPolymorphic = 1;
 }
 
-bool AbstractMetaClass::isConstructible() const
+bool AbstractMetaClass::isDefaultConstructible() const
 {
-    return (hasNonPrivateConstructor() || !hasPrivateConstructor()) && !hasPrivateDestructor();
+    // Private constructors are skipped by the builder.
+    if (hasDeletedDefaultConstructor() || hasPrivateConstructor())
+        return false;
+    const AbstractMetaFunctionCList ctors =
+        queryFunctions(FunctionQueryOption::Constructors);
+    for (const auto &ct : ctors) {
+        if (ct->isDefaultConstructor())
+            return ct->visibility() == AbstractMetaAttributes::Public;
+    }
+    return ctors.isEmpty() && isImplicitlyDefaultConstructible();
+}
+
+// Non-comprehensive check for default constructible field
+// (non-ref or not const value).
+static bool defaultConstructibleField(const AbstractMetaField &f)
+{
+    const auto &type = f.type();
+    return type.referenceType() == NoReference
+        && !(type.indirections() == 0 && type.isConstant()); // no const values
+}
+
+bool AbstractMetaClass::isImplicitlyDefaultConstructible() const
+{
+    return std::all_of(d->m_fields.cbegin(), d->m_fields.cend(),
+                        defaultConstructibleField)
+        && std::all_of(d->m_baseClasses.cbegin(), d->m_baseClasses.cend(),
+                       [] (const AbstractMetaClass *c) {
+                           return c->isDefaultConstructible();
+                       });
+}
+
+static bool canAddDefaultConstructorHelper(const AbstractMetaClass *cls)
+{
+    return !cls->isNamespace()
+        && !cls->attributes().testFlag(AbstractMetaAttributes::HasRejectedConstructor)
+        && !cls->hasPrivateDestructor();
+}
+
+bool AbstractMetaClass::canAddDefaultConstructor() const
+{
+    return canAddDefaultConstructorHelper(this) && !hasConstructors()
+        && !hasPrivateConstructor() && isImplicitlyDefaultConstructible();
+}
+
+bool AbstractMetaClass::isCopyConstructible() const
+{
+    // Private constructors are skipped by the builder.
+    if (hasDeletedCopyConstructor() || hasPrivateCopyConstructor())
+        return false;
+    const AbstractMetaFunctionCList copyCtors =
+        queryFunctions(FunctionQueryOption::CopyConstructor);
+    return copyCtors.isEmpty()
+        ? isImplicitlyCopyConstructible()
+        : copyCtors.constFirst()->visibility() == AbstractMetaAttributes::Public;
+}
+
+bool AbstractMetaClass::isImplicitlyCopyConstructible() const
+{
+    // Fields are currently not considered
+    return std::all_of(d->m_baseClasses.cbegin(), d->m_baseClasses.cend(),
+                       [] (const AbstractMetaClass *c) {
+                           return c->isCopyConstructible();
+                       });
+}
+
+bool AbstractMetaClass::canAddDefaultCopyConstructor() const
+{
+    if (!canAddDefaultConstructorHelper(this)
+        || !d->m_typeEntry->isValue() || isAbstract()
+        || hasPrivateCopyConstructor() || hasCopyConstructor()) {
+        return false;
+    }
+    return isImplicitlyCopyConstructible();
 }
 
 bool AbstractMetaClass::generateExceptionHandling() const
@@ -947,8 +1041,10 @@ bool AbstractMetaClass::queryFunction(const AbstractMetaFunction *f, FunctionQue
         return false;
     }
 
-    if (!query.testFlag(FunctionQueryOption::Constructors) && f->isConstructor())
+    if (query.testFlag(FunctionQueryOption::CopyConstructor)
+        && (!f->isCopyConstructor() || f->ownerClass() != f->implementingClass())) {
         return false;
+    }
 
     // Destructors are never included in the functions of a class currently
     /*

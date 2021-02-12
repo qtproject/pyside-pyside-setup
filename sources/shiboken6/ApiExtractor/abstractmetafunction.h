@@ -202,6 +202,8 @@ public:
     bool isDeprecated() const;
     bool isDestructor() const { return functionType() == DestructorFunction; }
     bool isConstructor() const;
+    bool isCopyConstructor() const { return functionType() == CopyConstructorFunction; }
+    bool isDefaultConstructor() const;
     bool needsReturnType() const;
     bool isInGlobalScope() const;
     bool isSignal() const { return functionType() == SignalFunction; }

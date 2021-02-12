@@ -118,7 +118,7 @@ public:
                                      AbstractMetaClass *metaClass,
                                      QString *errorMessage);
     AbstractMetaFunction *traverseFunction(const FunctionModelItem &function,
-                                           const AbstractMetaClass *currentClass);
+                                           AbstractMetaClass *currentClass);
     std::optional<AbstractMetaField> traverseField(const VariableModelItem &field,
                                                    const AbstractMetaClass *cls);
     void checkFunctionModifications();
@@ -173,7 +173,6 @@ public:
                                          TypeInfo *info = Q_NULLPTR,
                                          ComplexTypeEntry **baseContainerType = Q_NULLPTR) const;
     AbstractMetaClassList getBaseClasses(const AbstractMetaClass *metaClass) const;
-    bool ancestorHasPrivateCopyConstructor(const AbstractMetaClass *metaClass) const;
 
     static bool inheritTemplate(AbstractMetaClass *subclass,
                                 const AbstractMetaClass *templateClass,

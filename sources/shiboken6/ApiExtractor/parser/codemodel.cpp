@@ -784,6 +784,12 @@ void _FunctionModelItem::setVariadics(bool isVariadics)
     m_isVariadics = isVariadics;
 }
 
+bool _FunctionModelItem::isDefaultConstructor() const
+{
+    return m_functionType == CodeModel::Constructor
+        && (m_arguments.isEmpty() || m_arguments.constFirst()->defaultValue());
+}
+
 bool _FunctionModelItem::isNoExcept() const
 {
     return m_exceptionSpecification == ExceptionSpecification::NoExcept;
