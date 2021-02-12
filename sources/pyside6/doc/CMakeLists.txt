@@ -25,7 +25,6 @@ endif()
 
 # Generate example gallery
 message(STATUS "Generating example gallery")
-set (EXAMPLE_TOOL_OPTIONS '')
 if (QUIET_BUILD)
     set (EXAMPLE_TOOL_OPTIONS '-q')
 endif()
