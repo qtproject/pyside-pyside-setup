@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -45,6 +45,13 @@ class QFileConstructor(unittest.TestCase):
     def testBasic(self):
         '''QFileInfo(QFile)'''
         obj = QFileInfo(QFile())
+
+    def testQFileInfoPath(self):
+        # PYSIDE-1499: Test QFileInfo with Path objects
+        test_path = Path("some") / "dir"
+        qinf1 = QFileInfo(os.fspath(test_path))
+        qinf2 = QFileInfo(test_path)
+        self.assertEqual(qinf1, qinf2)
 
 
 if __name__ == '__main__':

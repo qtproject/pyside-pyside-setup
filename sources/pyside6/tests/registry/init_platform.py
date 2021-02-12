@@ -136,9 +136,8 @@ if not have_build_dir:
 import testbinding
 all_modules.append("testbinding")
 
-# Note: This is not the shiboken dir as usual, but the binary.
 from shiboken6 import Shiboken
-all_modules.append("Shiboken")
+all_modules.append("shiboken6.Shiboken")
 
 # 'sample/smart' are needed by 'other', so import them first.
 for modname in "minimal sample smart other".split():

@@ -53,6 +53,30 @@ bool checkIterable(PyObject *obj)
     return PyObject_HasAttr(obj, Shiboken::PyMagicName::iter());
 }
 
+static PyObject *initPathLike()
+{
+    PyObject *PathLike{};
+    auto osmodule = PyImport_ImportModule("os");
+    if (osmodule == nullptr
+        || (PathLike = PyObject_GetAttrString(osmodule, "PathLike")) == nullptr) {
+        PyErr_Print();
+        Py_FatalError("cannot import os.PathLike");
+    }
+    return PathLike;
+}
+
+// PYSIDE-1499: Migrate to pathlib.Path and support __fspath__ in PySide
+bool checkPath(PyObject *path)
+{
+    // Let normal strings through, unchanged.
+    if (PyUnicode_Check(path) || PyBytes_Check(path))
+        return true;
+    // Without the Limited API, we could look up an `__fspath__` class attribute.
+    // But we use `isinstance(os.PathLike)`, instead.
+    static PyObject *PathLike = initPathLike();
+    return PyObject_IsInstance(path, PathLike);
+}
+
 bool checkType(PyTypeObject *type)
 {
     return type == &PyUnicode_Type;

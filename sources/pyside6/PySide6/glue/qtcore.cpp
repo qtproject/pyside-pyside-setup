@@ -1662,6 +1662,14 @@ PyMem_Free(temp);
 %out = %OUTTYPE();
 // @snippet conversion-pynone
 
+// @snippet qfile-path-1
+auto cppArg0 = PySide::pyPathToQString(%PYARG_1);
+// @snippet qfile-path-1
+
+// @snippet qfile-path-2
+auto cppArg1 = PySide::pyPathToQString(%PYARG_2);
+// @snippet qfile-path-2
+
 // @snippet conversion-pystring-char
 char c = %CONVERTTOCPP[char](%in);
 %out = %OUTTYPE(c);

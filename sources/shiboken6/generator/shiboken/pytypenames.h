@@ -38,6 +38,9 @@ static inline QString pyLongT() { return QStringLiteral("PyLong"); }
 static inline QString pyObjectT() { return QStringLiteral("object"); }
 static inline QString pyStrT() { return QStringLiteral("str"); }
 
+// PYSIDE-1499: A custom type determined by existence of an `__fspath__` attribute.
+static inline QString pyPathLikeT() { return QStringLiteral("PyPathLike"); }
+
 static inline QString cPyBufferT() { return QStringLiteral("PyBuffer"); }
 static inline QString cPyListT() { return QStringLiteral("PyList"); }
 static inline QString cPyObjectT() { return QStringLiteral("PyObject"); }

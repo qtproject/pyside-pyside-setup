@@ -157,6 +157,11 @@ PYSIDE_API void setQuickRegisterItemFunction(QuickRegisterItemFunction function)
 PYSIDE_API QString pyStringToQString(PyObject *str);
 
 /**
+ * Provide an efficient, correct PathLike interface.
+ */
+PYSIDE_API QString pyPathToQString(PyObject *path);
+
+/**
  * Registers a dynamic "qt.conf" file with the Qt resource system.
  *
  * This is used in a standalone build, to inform QLibraryInfo of the Qt prefix (where Qt libraries

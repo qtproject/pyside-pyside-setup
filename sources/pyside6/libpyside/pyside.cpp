@@ -478,7 +478,8 @@ void setQuickRegisterItemFunction(QuickRegisterItemFunction function)
 #endif // PYSIDE_QML_SUPPORT
 
 // Inspired by Shiboken::String::toCString;
-QString pyStringToQString(PyObject *str) {
+QString pyStringToQString(PyObject *str)
+{
     if (str == Py_None)
         return QString();
 
@@ -493,6 +494,20 @@ QString pyStringToQString(PyObject *str) {
             return QString::fromLatin1(asciiBuffer);
     }
     return QString();
+}
+
+// PySide-1499: Provide an efficient, correct PathLike interface
+QString pyPathToQString(PyObject *path)
+{
+    // str or bytes pass through
+    if (PyUnicode_Check(path) || PyBytes_Check(path))
+        return pyStringToQString(path);
+
+    // Let PyOS_FSPath do its work and then fix the result for Windows.
+    Shiboken::AutoDecRef strPath(PyOS_FSPath(path));
+    if (strPath.isNull())
+        return QString();
+    return QDir::fromNativeSeparators(pyStringToQString(strPath));
 }
 
 static const unsigned char qt_resource_name[] = {

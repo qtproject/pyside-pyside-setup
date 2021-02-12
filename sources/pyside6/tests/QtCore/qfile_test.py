@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -84,6 +84,26 @@ class GetCharTest(unittest.TestCase):
         saveFile.write(bytes("Test", "UTF-8"))
         self.assertTrue(saveFile.commit())
         self.assertTrue(os.path.exists(QDir.toNativeSeparators(saveFile.fileName())))
+
+
+class GetCharTestPath(GetCharTest):
+    # PYSIDE-1499: Do the same with Path objects
+
+    def setUp(self):
+        '''Acquire resources'''
+        handle, filename = tempfile.mkstemp()
+        self.filename = Path(filename)
+        os.write(handle, bytes('a', "UTF-8"))
+        os.close(handle)
+
+
+class DirPath(unittest.TestCase):
+    # PYSIDE-1499: Test QDir with Path objects
+    def testQDirPath(self):
+        test_path = Path("some") / "dir"
+        qdir1 = QDir(os.fspath(test_path))
+        qdir2 = QDir(test_path)
+        self.assertEqual(qdir1, qdir2)
 
 
 if __name__ == '__main__':

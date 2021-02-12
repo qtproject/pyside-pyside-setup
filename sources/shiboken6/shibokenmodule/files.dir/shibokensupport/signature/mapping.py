@@ -237,6 +237,7 @@ type_map.update({
     "PyObject": object,
     "PyObject*": object,
     "PyArrayObject": ArrayLikeVariable, # numpy
+    "PyPathLike": typing.Union[str, bytes, os.PathLike],
     "PySequence": typing.Iterable,  # important for numpy
     "PyTypeObject": type,
     "QChar": str,

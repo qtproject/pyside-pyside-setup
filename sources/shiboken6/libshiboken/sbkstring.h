@@ -49,6 +49,7 @@ namespace String
 {
     LIBSHIBOKEN_API bool check(PyObject *obj);
     LIBSHIBOKEN_API bool checkIterable(PyObject *obj);
+    LIBSHIBOKEN_API bool checkPath(PyObject *path);
     LIBSHIBOKEN_API bool checkType(PyTypeObject *obj);
     LIBSHIBOKEN_API bool checkChar(PyObject *obj);
     LIBSHIBOKEN_API bool isConvertible(PyObject *obj);

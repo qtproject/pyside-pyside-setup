@@ -1124,6 +1124,10 @@ ShibokenGenerator::CPythonCheckFunctionResult
     if (type == cPyArrayObjectT())
          return {QLatin1String("PyArray_Check"), {}};
 
+    // PYSIDE-1499: We replace some strings by path objects.
+    if (type == pyPathLikeT())
+        return {QLatin1String("Shiboken::String::checkPath"), {}};
+
     CPythonCheckFunctionResult result;
     result.type = buildAbstractMetaTypeFromString(type);
 
