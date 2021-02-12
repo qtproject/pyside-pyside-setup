@@ -539,7 +539,7 @@ struct Primitive<std::nullptr_t> : TwoPrimitive<std::nullptr_t>
 {
     static PyObject *toPython(const void * /* cppIn */)
     {
-        return Py_None;
+        Py_RETURN_NONE;
     }
     static void toCpp(PyObject *, void *cppOut)
     {
