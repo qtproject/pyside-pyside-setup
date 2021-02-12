@@ -151,6 +151,10 @@ QString msgPropertyExists(const QString &className, const QString &name);
 QString msgFunctionVisibilityModified(const AbstractMetaClass *c,
                                       const AbstractMetaFunction *f);
 
+QString msgUsingMemberClassNotFound(const AbstractMetaClass *c,
+                                    const QString &baseClassName,
+                                    const QString &memberName);
+
 QString msgCannotFindDocumentation(const QString &fileName,
                                    const char *what, const QString &name,
                                    const QString &query);

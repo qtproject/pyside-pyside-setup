@@ -595,6 +595,8 @@
             %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
             </inject-code>
         </add-function>
+
+        <object-type name="CtParam"/>
     </namespace-type>
 
     <namespace-type name="RemovedNamespace1" visible='false'>
@@ -648,6 +650,8 @@
         <enum-type name="OtherOverloadedFuncEnum"/>
         <value-type name="SomeInnerClass" />
     </object-type>
+
+    <object-type name="DerivedUsingCt"/>
 
     <object-type name="ModifiedConstructor">
         <modify-function signature="ModifiedConstructor(int)">

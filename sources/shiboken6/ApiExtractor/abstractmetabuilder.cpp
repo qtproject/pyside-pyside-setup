@@ -37,6 +37,7 @@
 #include "sourcelocation.h"
 #include "typedatabase.h"
 #include "typesystem.h"
+#include "usingmember.h"
 
 #include "parser/codemodel.h"
 
@@ -485,6 +486,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
     for (AbstractMetaClass *cls : qAsConst(m_metaClasses)) {
         if (cls->needsInheritanceSetup()) {
             setupInheritance(cls);
+            traverseUsingMembers(cls);
             if (cls->templateBaseClass())
                 inheritTemplateFunctions(cls);
             if (!cls->hasVirtualDestructor() && cls->baseClass()
@@ -608,6 +610,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
     }
 
     m_itemToClass.clear();
+    m_classToItem.clear();
     m_typeSystemTypeDefs.clear();
 
     ReportHandler::endProgress();
@@ -640,6 +643,7 @@ void AbstractMetaBuilderPrivate::addAbstractMetaClass(AbstractMetaClass *cls,
                                                       const _CodeModelItem *item)
 {
     m_itemToClass.insert(item, cls);
+    m_classToItem.insert(cls, item);
     if (cls->typeEntry()->isContainer()) {
         m_templates << cls;
     } else if (cls->typeEntry()->isSmartPointer()) {
@@ -1053,6 +1057,31 @@ void AbstractMetaBuilderPrivate::traverseClassMembers(const ClassModelItem &item
 
     // Class members
     traverseScopeMembers(item, metaClass);
+}
+
+void AbstractMetaBuilderPrivate::traverseUsingMembers(AbstractMetaClass *metaClass)
+{
+    const _CodeModelItem *item = m_classToItem.value(metaClass);
+    if (item == nullptr || item->kind() != _CodeModelItem::Kind_Class)
+        return;
+    auto classItem = static_cast<const _ClassModelItem *>(item);
+    for (const auto &um : classItem->usingMembers()) {
+        QString className = um.className;
+        int pos = className.indexOf(u'<'); // strip "QList<value>"
+        if (pos != -1)
+            className.truncate(pos);
+        if (auto baseClass = metaClass->AbstractMetaClass::findBaseClass(className)) {
+            QString name = um.memberName;
+            const int lastQualPos = name.lastIndexOf(colonColon());
+            if (lastQualPos != -1)
+                name.remove(0, lastQualPos + 2);
+            metaClass->addUsingMember({name, baseClass, um.access});
+        } else {
+            qCWarning(lcShiboken, "%s",
+                      qPrintable(msgUsingMemberClassNotFound(metaClass, um.className,
+                                                             um.memberName)));
+        }
+    }
 }
 
 void AbstractMetaBuilderPrivate::traverseNamespaceMembers(const NamespaceModelItem &item)

@@ -90,6 +90,7 @@ public:
                                      AbstractMetaClass *currentClass);
     void traverseScopeMembers(const ScopeModelItem &item, AbstractMetaClass *metaClass);
     void traverseClassMembers(const ClassModelItem &scopeItem);
+    void traverseUsingMembers(AbstractMetaClass *metaClass);
     void traverseNamespaceMembers(const NamespaceModelItem &scopeItem);
     bool setupInheritance(AbstractMetaClass *metaClass);
     AbstractMetaClass *traverseNamespace(const FileModelItem &dom,
@@ -198,6 +199,7 @@ public:
     AbstractMetaClassList m_templates;
     AbstractMetaClassList m_smartPointers;
     QHash<const _CodeModelItem *, AbstractMetaClass *> m_itemToClass;
+    QHash<const AbstractMetaClass *, const _CodeModelItem *> m_classToItem;
     AbstractMetaFunctionCList m_globalFunctions;
     AbstractMetaEnumList m_globalEnums;
 

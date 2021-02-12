@@ -7,8 +7,10 @@ bytearray.cpp
 bucket.cpp
 collector.cpp
 complex.cpp
+ctparam.cpp
 onlycopy.cpp
 derived.cpp
+derivedusingct.cpp
 echo.cpp
 exceptiontest.cpp
 functions.cpp

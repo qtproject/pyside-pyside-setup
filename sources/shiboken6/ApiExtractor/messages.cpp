@@ -474,6 +474,17 @@ QString msgFunctionVisibilityModified(const AbstractMetaClass *c,
     return result;
 }
 
+QString msgUsingMemberClassNotFound(const AbstractMetaClass *c,
+                                    const QString &baseClassName,
+                                    const QString &memberName)
+{
+    QString result;
+    QTextStream str(&result);
+    str << c->sourceLocation() << "base class \"" << baseClassName
+        << "\" of \"" << c->qualifiedCppName() << "\" for using member \""
+        << memberName << "\" not found.";
+     return result;
+}
 // docparser.cpp
 
 QString msgCannotFindDocumentation(const QString &fileName,

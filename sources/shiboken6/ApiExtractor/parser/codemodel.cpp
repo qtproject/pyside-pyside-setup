@@ -394,6 +394,18 @@ bool _ClassModelItem::extendsClass(const QString &name) const
     return false;
 }
 
+const QList<_ClassModelItem::UsingMember> &_ClassModelItem::usingMembers() const
+{
+    return m_usingMembers;
+}
+
+void _ClassModelItem::addUsingMember(const QString &className,
+                                     const QString &memberName,
+                                     Access accessPolicy)
+{
+    m_usingMembers.append({className, memberName, accessPolicy});
+}
+
 void _ClassModelItem::setClassType(CodeModel::ClassType type)
 {
     m_classType = type;
@@ -449,6 +461,9 @@ void _ClassModelItem::formatDebug(QDebug &d) const
             d << m_baseClasses.at(i).name << " (" << m_baseClasses.at(i).accessPolicy << ')';
         }
     }
+    for (const auto &im : m_usingMembers)
+        d << ", using " << im.className << "::" << im.memberName
+            << " (" << im.access << ')';
     formatModelItemList(d, ", templateParameters=", m_templateParameters);
     formatScopeItemsDebug(d);
     if (!m_propertyDeclarations.isEmpty())

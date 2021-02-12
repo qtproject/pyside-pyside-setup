@@ -32,6 +32,7 @@
 #include "testutil.h"
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
+#include <usingmember.h>
 #include <typesystem.h>
 
 void TestAbstractMetaClass::testClassName()
@@ -668,6 +669,48 @@ void TestAbstractMetaClass::testFreeOperators()
     QVERIFY(classes.constFirst()->hasArithmeticOperatorOverload());
     FunctionQueryOptions opts(FunctionQueryOption::OperatorOverloads);
     QCOMPARE(classes.constFirst()->queryFunctions(opts).size(), 1);
+}
+
+void TestAbstractMetaClass::testUsingMembers()
+{
+    const char cppCode[] =R"CPP(
+class Base {
+public:
+    explicit Base(int);
+
+protected:
+    void member();
+};
+
+class Derived : public Base {
+public:
+    using Base::Base;
+    using Base::member;
+};
+)CPP";
+    const char xmlCode[] = R"XML(
+<typesystem package='Foo'>
+    <primitive-type name='int'/>
+    <object-type name='Base'/>
+    <object-type name='Derived'/>
+</typesystem>
+)XML";
+
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
+    QCOMPARE(classes.count(), 2);
+    auto base = AbstractMetaClass::findClass(classes, QLatin1String("Base"));
+    QVERIFY(base);
+    auto derived = AbstractMetaClass::findClass(classes, QLatin1String("Derived"));
+    QVERIFY(derived);
+    const auto usingMembers = derived->usingMembers();
+    QCOMPARE(usingMembers.count(), 2);
+    for (const auto &um : usingMembers) {
+        QCOMPARE(um.access, Access::Public);
+        QCOMPARE(um.baseClass, base);
+        QVERIFY(um.memberName == u"Base" || um.memberName == u"member");
+    }
 }
 
 QTEST_APPLESS_MAIN(TestAbstractMetaClass)

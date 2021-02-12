@@ -41,12 +41,14 @@
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 
+enum class Access;
 class AbstractMetaClassPrivate;
 class ComplexTypeEntry;
 class Documentation;
 class EnumTypeEntry;
 class QPropertySpec;
 class SourceLocation;
+struct UsingMember;
 
 class AbstractMetaClass : public EnclosingClassMixin
 {
@@ -135,6 +137,11 @@ public:
     bool generateExceptionHandling() const;
 
     CppWrapper cppWrapper() const;
+
+    const UsingMembers &usingMembers() const;
+    void addUsingMember(const UsingMember &um);
+    bool isUsingMember(const AbstractMetaClass *c, const QString &memberName,
+                       Access minimumAccess) const;
 
     AbstractMetaFunctionCList queryFunctionsByName(const QString &name) const;
     static bool queryFunction(const AbstractMetaFunction *f, FunctionQueryOptions query);
@@ -343,6 +350,8 @@ public:
                                         const TypeEntry* typeEntry);
     static const AbstractMetaClass *findClass(const AbstractMetaClassCList &classes,
                                               const TypeEntry* typeEntry);
+    const AbstractMetaClass *findBaseClass(const QString &qualifiedName) const;
+
     static std::optional<AbstractMetaEnumValue> findEnumValue(const AbstractMetaClassList &classes,
                                                               const QString &string);
     static  std::optional<AbstractMetaEnum> findEnum(const AbstractMetaClassList &classes,

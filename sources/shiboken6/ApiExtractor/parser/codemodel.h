@@ -265,6 +265,13 @@ public:
         Access accessPolicy = Access::Public;
     };
 
+    struct UsingMember // Introducing a base class member via 'using' directive
+    {
+        QString className;
+        QString memberName;
+        Access access = Access::Public;
+    };
+
     explicit _ClassModelItem(CodeModel *model, int kind = __node_kind)
         : _ScopeModelItem(model, kind), m_classType(CodeModel::Class) {}
     explicit _ClassModelItem(CodeModel *model, const QString &name, int kind = __node_kind)
@@ -272,6 +279,10 @@ public:
     ~_ClassModelItem();
 
     QList<BaseClass> baseClasses() const { return m_baseClasses; }
+
+    const QList<UsingMember> &usingMembers() const;
+    void addUsingMember(const QString &className, const QString &memberName,
+                        Access accessPolicy);
 
     void addBaseClass(const QString &name, Access accessPolicy);
 
@@ -298,6 +309,7 @@ public:
 
 private:
     QList<BaseClass> m_baseClasses;
+    QList<UsingMember> m_usingMembers;
     TemplateParameterList m_templateParameters;
     CodeModel::ClassType m_classType;
 

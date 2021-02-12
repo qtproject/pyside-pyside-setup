@@ -196,6 +196,7 @@ public:
     void addField(const CXCursor &cursor);
 
     static QString cursorValueExpression(BaseVisitor *bv, const CXCursor &cursor);
+    QString getBaseClassName(CXType type) const;
     void addBaseClass(const CXCursor &cursor);
 
     template <class Item>
@@ -227,6 +228,8 @@ public:
     TemplateTypeAliasModelItem m_currentTemplateTypeAlias;
     QByteArrayList m_systemIncludes; // files, like "memory"
     QByteArrayList m_systemIncludePaths; // paths, like "/usr/include/Qt/"
+    QString m_usingTypeRef; // Base classes in "using Base::member;"
+    bool m_withinUsingDeclaration = false;
 
     int m_anonymousEnumCount = 0;
     CodeModel::FunctionType m_currentFunctionType = CodeModel::Normal;
@@ -670,7 +673,7 @@ QString BuilderPrivate::cursorValueExpression(BaseVisitor *bv, const CXCursor &c
                                   qsizetype(snippet.size() - equalSign)).trimmed();
 }
 
-// Resolve declaration and type of a base class
+// Resolve a type (loop over aliases/typedefs), for example for base classes
 
 struct TypeDeclaration
 {
@@ -678,30 +681,28 @@ struct TypeDeclaration
     CXCursor declaration;
 };
 
-static TypeDeclaration resolveBaseSpecifier(const CXCursor &cursor)
+static TypeDeclaration resolveType(CXType type)
 {
-    Q_ASSERT(clang_getCursorKind(cursor) == CXCursor_CXXBaseSpecifier);
-    CXType inheritedType = clang_getCursorType(cursor);
-    CXCursor decl = clang_getTypeDeclaration(inheritedType);
-    if (inheritedType.kind != CXType_Unexposed) {
+    CXCursor decl = clang_getTypeDeclaration(type);
+    if (type.kind != CXType_Unexposed) {
         while (true) {
             auto kind = clang_getCursorKind(decl);
             if (kind != CXCursor_TypeAliasDecl && kind != CXCursor_TypedefDecl)
                 break;
-            inheritedType = clang_getTypedefDeclUnderlyingType(decl);
-            decl = clang_getTypeDeclaration(inheritedType);
+            type = clang_getTypedefDeclUnderlyingType(decl);
+            decl = clang_getTypeDeclaration(type);
         }
     }
-    return {inheritedType, decl};
+    return {type, decl};
 }
 
-// Add a base class to the current class from CXCursor_CXXBaseSpecifier
-void BuilderPrivate::addBaseClass(const CXCursor &cursor)
+// Note: Return the baseclass for cursors like CXCursor_CXXBaseSpecifier,
+// where the cursor spelling has "struct baseClass".
+QString BuilderPrivate::getBaseClassName(CXType type) const
 {
-    Q_ASSERT(clang_getCursorKind(cursor) == CXCursor_CXXBaseSpecifier);
+    const auto decl = resolveType(type);
     // Note: spelling has "struct baseClass", use type
     QString baseClassName;
-    const auto decl = resolveBaseSpecifier(cursor);
     if (decl.type.kind == CXType_Unexposed) {
         // The type is unexposed when the base class is a template type alias:
         // "class QItemSelection : public QList<X>" where QList is aliased to QVector.
@@ -716,13 +717,12 @@ void BuilderPrivate::addBaseClass(const CXCursor &cursor)
         baseClassName = getTypeName(decl.type);
 
     auto it = m_cursorClassHash.constFind(decl.declaration);
-    const Access access = accessPolicy(clang_getCXXAccessSpecifier(cursor));
-    if (it == m_cursorClassHash.constEnd()) {
-        // Set unqualified name. This happens in cases like "class X : public std::list<...>"
-        // "template<class T> class Foo : public T" and standard types like true_type, false_type.
-        m_currentClass->addBaseClass(baseClassName, access);
-        return;
-    }
+    // Not found: Set unqualified name. This happens in cases like
+    // "class X : public std::list<...>", "template<class T> class Foo : public T"
+    // and standard types like true_type, false_type.
+    if (it == m_cursorClassHash.constEnd())
+        return baseClassName;
+
     // Completely qualify the class name by looking it up and taking its scope
     // plus the actual baseClass stripped off any scopes. Consider:
     //   namespace std {
@@ -741,6 +741,15 @@ void BuilderPrivate::addBaseClass(const CXCursor &cursor)
         baseClassName.prepend(colonColon());
         baseClassName.prepend(baseScope.join(colonColon()));
     }
+    return baseClassName;
+}
+
+// Add a base class to the current class from CXCursor_CXXBaseSpecifier
+void BuilderPrivate::addBaseClass(const CXCursor &cursor)
+{
+    Q_ASSERT(clang_getCursorKind(cursor) == CXCursor_CXXBaseSpecifier);
+    const auto access = accessPolicy(clang_getCXXAccessSpecifier(cursor));
+    QString baseClassName = getBaseClassName(clang_getCursorType(cursor));
     m_currentClass->addBaseClass(baseClassName, access);
 }
 
@@ -1173,6 +1182,15 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
             return Skip;
     }
         break;
+    // Using declarations look as follows:
+    // 1) Normal, non-template case ("using QObject::parent"): UsingDeclaration, TypeRef
+    // 2) Simple template case ("using QList::append()"): UsingDeclaration, TypeRef "QList<T>"
+    // 3) Template case with parameters ("using QList<T>::append()"):
+    //    UsingDeclaration, TemplateRef "QList", TypeRef "T"
+    case CXCursor_TemplateRef:
+        if (d->m_withinUsingDeclaration && d->m_usingTypeRef.isEmpty())
+            d->m_usingTypeRef = getCursorSpelling(cursor);
+        break;
     case CXCursor_TypeRef:
         if (!d->m_currentFunction.isNull()) {
             if (d->m_currentArgument.isNull())
@@ -1181,6 +1199,8 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
                 d->qualifyTypeDef(cursor, d->m_currentArgument);
         } else if (!d->m_currentField.isNull()) {
             d->qualifyTypeDef(cursor, d->m_currentField);
+        } else if (d->m_withinUsingDeclaration && d->m_usingTypeRef.isEmpty()) {
+            d->m_usingTypeRef = d->getBaseClassName(clang_getCursorType(cursor));
         }
         break;
     case CXCursor_CXXFinalAttr:
@@ -1204,6 +1224,20 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
                 const QString qProperty = QString::fromUtf8(snippet.data() + 11, length - 12);
                 d->m_currentClass->addPropertyDeclaration(qProperty);
             }
+        }
+        break;
+    // UsingDeclaration: consists of a TypeRef (base) and OverloadedDeclRef (member name)
+    case CXCursor_UsingDeclaration:
+        if (!d->m_currentClass.isNull())
+            d->m_withinUsingDeclaration = true;
+        break;
+    case CXCursor_OverloadedDeclRef:
+        if (d->m_withinUsingDeclaration && !d->m_usingTypeRef.isEmpty()) {
+            QString member = getCursorSpelling(cursor);
+            if (member == d->m_currentClass->name())
+                member = d->m_usingTypeRef; // Overloaded member is Constructor, use base
+            const auto ap = accessPolicy(clang_getCXXAccessSpecifier(cursor));
+            d->m_currentClass->addUsingMember(d->m_usingTypeRef, member, ap);
         }
         break;
     default:
@@ -1272,6 +1306,10 @@ bool Builder::endToken(const CXCursor &cursor)
         break;
     case CXCursor_TypeAliasTemplateDecl:
         d->m_currentTemplateTypeAlias.reset();
+        break;
+    case CXCursor_UsingDeclaration:
+        d->m_withinUsingDeclaration = false;
+        d->m_usingTypeRef.clear();
         break;
     default:
         break;

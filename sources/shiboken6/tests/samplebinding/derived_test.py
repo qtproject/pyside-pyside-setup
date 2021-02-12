@@ -41,7 +41,7 @@ from shiboken_paths import init_paths
 init_paths()
 
 import sample
-from sample import Abstract, Derived, OverloadedFuncEnum
+from sample import Abstract, Derived, DerivedUsingCt, OverloadedFuncEnum
 
 class Deviant(Derived):
     def __init__(self):
@@ -153,6 +153,12 @@ class DerivedTest(unittest.TestCase):
         '''Derived class creates an instance of itself in C++ and returns it as a pointer to its ancestor Abstract.'''
         obj = Derived.createObject()
         self.assertEqual(type(obj), Derived)
+
+    def testDerivedUsingCt(self):
+        '''Test whether a constructor of the base class declared by using works'''
+        obj = DerivedUsingCt(42)
+        self.assertEqual(obj.value(), 42)
+
 
 if __name__ == '__main__':
     unittest.main()

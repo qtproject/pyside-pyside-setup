@@ -1,9 +1,9 @@
 /****************************************************************************
 **
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2021 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
-** This file is part of Qt for Python.
+** This file is part of the test suite of Qt for Python.
 **
 ** $QT_BEGIN_LICENSE:GPL-EXCEPT$
 ** Commercial License Usage
@@ -26,46 +26,20 @@
 **
 ****************************************************************************/
 
-#ifndef CODEMODEL_ENUMS_H
-#define CODEMODEL_ENUMS_H
+#include "ctparam.h"
 
-enum ReferenceType {
-    NoReference,
-    LValueReference,
-    RValueReference
-};
-
-enum EnumKind {
-    CEnum,         // Standard C: enum Foo { value1, value2 }
-    AnonymousEnum, //             enum { value1, value2 }
-    EnumClass      // C++ 11    : enum class Foo { value1, value2 }
-};
-
-enum class Indirection
+namespace SampleNamespace
 {
-    Pointer, // int *
-    ConstPointer // int *const
-};
 
-enum class ExceptionSpecification
+CtParam::CtParam(int value) : m_value(value)
 {
-    Unknown,
-    NoExcept,
-    Throws
-};
+}
 
-enum class NamespaceType
+CtParam::~CtParam() = default;
+
+int CtParam::value() const
 {
-    Default,
-    Anonymous,
-    Inline
-};
+    return m_value;
+}
 
-enum class Access
-{
-    Private,
-    Protected,
-    Public
-};
-
-#endif // CODEMODEL_ENUMS_H
+} // namespace SampleNamespace

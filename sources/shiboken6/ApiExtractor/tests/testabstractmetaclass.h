@@ -54,6 +54,7 @@ private slots:
     void testClassTypedefedBaseClass();
     void testFreeOperators_data();
     void testFreeOperators();
+    void testUsingMembers();
 };
 
 #endif // TESTABSTRACTMETACLASS_H

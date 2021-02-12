@@ -27,6 +27,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/cvlistuser_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/cvvaluetype_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/sbkdate_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/derived_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/derivedusingct_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/derived_someinnerclass_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/echo_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/event_wrapper.cpp
@@ -103,6 +104,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/sample_module_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/sample_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/sample_sample_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/samplenamespace_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/samplenamespace_ctparam_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/samplenamespace_someclass_someinnerclass_okthisisrecursiveenough_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/samplenamespace_someclass_someinnerclass_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/samplenamespace_someclass_someotherinnerclass_wrapper.cpp

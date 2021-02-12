@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2021 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -26,46 +26,21 @@
 **
 ****************************************************************************/
 
-#ifndef CODEMODEL_ENUMS_H
-#define CODEMODEL_ENUMS_H
+#ifndef USINGMEMBER_H
+#define USINGMEMBER_H
 
-enum ReferenceType {
-    NoReference,
-    LValueReference,
-    RValueReference
-};
+#include "abstractmetalang_typedefs.h"
+#include "parser/codemodel.h"
 
-enum EnumKind {
-    CEnum,         // Standard C: enum Foo { value1, value2 }
-    AnonymousEnum, //             enum { value1, value2 }
-    EnumClass      // C++ 11    : enum class Foo { value1, value2 }
-};
+QT_FORWARD_DECLARE_CLASS(QDebug)
 
-enum class Indirection
+struct UsingMember // Introducing a base class member via 'using' directive
 {
-    Pointer, // int *
-    ConstPointer // int *const
+    QString memberName;
+    const AbstractMetaClass *baseClass;
+    Access access;
 };
 
-enum class ExceptionSpecification
-{
-    Unknown,
-    NoExcept,
-    Throws
-};
+QDebug operator<<(QDebug debug, const UsingMember &d);
 
-enum class NamespaceType
-{
-    Default,
-    Anonymous,
-    Inline
-};
-
-enum class Access
-{
-    Private,
-    Protected,
-    Public
-};
-
-#endif // CODEMODEL_ENUMS_H
+#endif // USINGMEMBER_H

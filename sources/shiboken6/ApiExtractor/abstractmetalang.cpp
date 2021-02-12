@@ -39,6 +39,7 @@
 #include "sourcelocation.h"
 #include "typedatabase.h"
 #include "typesystem.h"
+#include "usingmember.h"
 
 #include <QtCore/QDebug>
 
@@ -77,6 +78,10 @@ public:
                         Access access,
                         const AbstractMetaArgumentList &arguments,
                         AbstractMetaClass *q);
+    void addUsingConstructors(AbstractMetaClass *q);
+    bool isUsingMember(const AbstractMetaClass *c, const QString &memberName,
+                       Access minimumAccess) const;
+    bool hasConstructors() const;
 
     uint m_hasVirtuals : 1;
     uint m_isPolymorphic : 1;
@@ -118,6 +123,7 @@ public:
     TypeEntries m_templateArgs;
     ComplexTypeEntry *m_typeEntry = nullptr;
     SourceLocation m_sourceLocation;
+    UsingMembers m_usingMembers;
 
     mutable AbstractMetaClass::CppWrapper m_cachedWrapper;
     AbstractMetaClass::Attributes m_attributes;
@@ -751,10 +757,15 @@ bool AbstractMetaClass::deleteInMainThread() const
             || (!d->m_baseClasses.isEmpty() && d->m_baseClasses.constFirst()->deleteInMainThread());
 }
 
+bool AbstractMetaClassPrivate::hasConstructors() const
+{
+    return AbstractMetaClass::queryFirstFunction(m_functions,
+                                                 FunctionQueryOption::Constructors) != nullptr;
+}
+
 bool AbstractMetaClass::hasConstructors() const
 {
-    return AbstractMetaClass::queryFirstFunction(d->m_functions,
-                                                 FunctionQueryOption::Constructors) != nullptr;
+    return d->hasConstructors();
 }
 
 AbstractMetaFunctionCPtr AbstractMetaClass::copyConstructor() const
@@ -1024,6 +1035,34 @@ AbstractMetaClass::CppWrapper AbstractMetaClass::cppWrapper() const
     return d->m_cachedWrapper;
 }
 
+const UsingMembers &AbstractMetaClass::usingMembers() const
+{
+    return d->m_usingMembers;
+}
+
+void AbstractMetaClass::addUsingMember(const UsingMember &um)
+{
+    d->m_usingMembers.append(um);
+}
+
+bool AbstractMetaClassPrivate::isUsingMember(const AbstractMetaClass *c,
+                                             const QString &memberName,
+                                             Access minimumAccess) const
+{
+    auto it = std::find_if(m_usingMembers.cbegin(), m_usingMembers.cend(),
+                           [c, &memberName](const UsingMember &um) {
+                               return um.baseClass == c && um.memberName == memberName;
+                           });
+    return it != m_usingMembers.cend() && it->access >= minimumAccess;
+}
+
+bool AbstractMetaClass::isUsingMember(const AbstractMetaClass *c,
+                                      const QString &memberName,
+                                      Access minimumAccess) const
+{
+    return d->isUsingMember(c, memberName, minimumAccess);
+}
+
 /* Goes through the list of functions and returns a list of all
    functions matching all of the criteria in \a query.
  */
@@ -1281,6 +1320,34 @@ static bool addSuperFunction(const AbstractMetaFunctionCPtr &f)
     return true;
 }
 
+// Add constructors imported via "using" from the base classes. This is not
+// needed for normal hidden inherited member functions since we generate a
+// cast to the base class to call them into binding code.
+void AbstractMetaClassPrivate::addUsingConstructors(AbstractMetaClass *q)
+{
+    // Restricted to the non-constructor case currently to avoid
+    // having to compare the parameter lists of existing constructors.
+    if (m_baseClasses.isEmpty() || m_usingMembers.isEmpty()
+        || hasConstructors()) {
+        return;
+    }
+
+    for (auto superClass : m_baseClasses) {
+        // Find any "using base-constructor" directives
+        if (isUsingMember(superClass, superClass->name(), Access::Protected)) {
+            // Add to derived class with parameter lists.
+            const auto ctors = superClass->queryFunctions(FunctionQueryOption::Constructors);
+            for (const auto &ctor : ctors) {
+                if (ctor->functionType() == AbstractMetaFunction::ConstructorFunction
+                    && !ctor->isPrivate()) {
+                    addConstructor(AbstractMetaFunction::ConstructorFunction,
+                                   ctor->access(), ctor->arguments(), q);
+                }
+            }
+        }
+    }
+}
+
 void AbstractMetaClass::fixFunctions()
 {
     if (d->m_functionsFixed)
@@ -1291,6 +1358,9 @@ void AbstractMetaClass::fixFunctions()
     AbstractMetaFunctionCList funcs = functions();
     AbstractMetaFunctionCList nonRemovedFuncs;
     nonRemovedFuncs.reserve(funcs.size());
+
+    d->addUsingConstructors(this);
+
     for (const auto &f : qAsConst(funcs)) {
         // Fishy: Setting up of implementing/declaring/base classes changes
         // the applicable modifications; clear cached ones.
@@ -1611,6 +1681,17 @@ const AbstractMetaClass *AbstractMetaClass::findClass(const AbstractMetaClassCLi
     return nullptr;
 }
 
+const AbstractMetaClass *AbstractMetaClass::findBaseClass(const QString &qualifiedName) const
+{
+    if (d->m_templateBaseClass != nullptr
+        && d->m_templateBaseClass->qualifiedCppName() == qualifiedName) {
+        return d->m_templateBaseClass;
+    }
+    return recurseClassHierarchy(this, [&qualifiedName](const AbstractMetaClass *c) {
+        return c->qualifiedCppName() == qualifiedName;
+    });
+}
+
 // Query functions for generators
 bool AbstractMetaClass::isObjectType() const
 {
@@ -1675,6 +1756,15 @@ void AbstractMetaClass::format(QDebug &debug) const
         for (auto b : d->m_baseClasses)
             debug << " \"" << b->name() << '"';
     }
+
+    if (const qsizetype count = d->m_usingMembers.size()) {
+        for (qsizetype i = 0; i < count; ++i) {
+            if (i)
+                debug << ", ";
+            debug << d->m_usingMembers.at(i);
+        }
+    }
+
     if (auto templateBase = templateBaseClass()) {
         const auto &instantiatedTypes = templateBaseClassInstantiations();
         debug << ", instantiates \"" << templateBase->name();
@@ -1726,6 +1816,16 @@ SourceLocation AbstractMetaClass::sourceLocation() const
 void AbstractMetaClass::setSourceLocation(const SourceLocation &sourceLocation)
 {
     d->m_sourceLocation = sourceLocation;
+}
+
+QDebug operator<<(QDebug debug, const UsingMember &d)
+{
+    QDebugStateSaver saver(debug);
+    debug.noquote();
+    debug.nospace();
+    debug << "UsingMember(" << d.access << ' '
+        << d.baseClass->qualifiedCppName() << "::" << d.memberName << ')';
+    return debug;
 }
 
 QDebug operator<<(QDebug d, const AbstractMetaClass *ac)
