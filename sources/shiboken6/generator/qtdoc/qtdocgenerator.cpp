@@ -807,11 +807,8 @@ static void writeFancyToc(TextStream& s, const QStringList& items)
             const QString entry = QLatin1String("* :doc:`") + item + QLatin1Char('`');
             row << QtXmlToSphinx::TableCell(entry);
         }
-        if (!row.isEmpty()) {
-            while (row.size() < numColumns)
-                row << QtXmlToSphinx::TableCell(QString{});
+        if (!row.isEmpty())
             table.appendRow(row);
-        }
     }
 
     table.normalize();
