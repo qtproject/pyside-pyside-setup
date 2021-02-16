@@ -63,6 +63,7 @@
         <enum-type name="KeyType"/>
         <enum-type name="SslOption" flags="SslOptions"/>
         <enum-type name="SslProtocol"/>
+        <enum-type name="SupportedFeature" since="6.1"/>
         <extra-includes>
             <include file-name="qssl.h" location="global"/>
         </extra-includes>
@@ -249,6 +250,7 @@
     <value-type name="QAuthenticator"/>
     <value-type name="QNetworkCookie">
         <enum-type name="RawForm"/>
+        <enum-type name="SameSite" since="6.1"/>
         <extra-includes>
             <include file-name="QDateTime" location="global"/>
         </extra-includes>
