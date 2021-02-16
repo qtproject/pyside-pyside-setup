@@ -27,7 +27,7 @@ def _additional_dll_directories(package_dir):
     result = [shiboken6, root / 'libpyside']
     for path in os.environ.get('PATH').split(';'):
         if path:
-             if (path / 'qmake.exe').exits():
+             if (Path(path) / 'qmake.exe').exists():
                  result.append(path)
                  break
     return result
