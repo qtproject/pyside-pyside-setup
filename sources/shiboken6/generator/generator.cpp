@@ -747,25 +747,6 @@ std::optional<DefaultValue>
     return {};
 }
 
-// Should int be used for a (protected) enum when generating the public wrapper?
-bool Generator::useEnumAsIntForProtectedHack(const AbstractMetaType &metaType) const
-{
-    if (metaType.isFlags())
-        return true;
-    if (!metaType.isEnum())
-        return false;
-    auto metaEnum = m_d->api.findAbstractMetaEnum(metaType.typeEntry());
-    if (!metaEnum.has_value())
-        return true;
-    if (metaEnum->attributes() & AbstractMetaAttributes::Public) // No reason, type is public
-        return false;
-    // Only ordinary C-enums can be used as int, scoped enums fail when used
-    // as function arguments.
-    if (metaEnum->enumKind() == EnumKind::EnumClass)
-        qWarning(lcShiboken, "%s", qPrintable(msgCannotUseEnumAsInt(metaEnum->name())));
-    return true;
-}
-
 QString Generator::translateType(AbstractMetaType cType,
                                  const AbstractMetaClass *context,
                                  Options options) const

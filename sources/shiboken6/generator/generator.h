@@ -358,8 +358,6 @@ protected:
                                                    const QString &context);
 
 private:
-    bool useEnumAsIntForProtectedHack(const AbstractMetaType &cType) const;
-
     struct GeneratorPrivate;
     GeneratorPrivate *m_d;
     void collectInstantiatedContainersAndSmartPointers(const AbstractMetaFunctionCPtr &func);
