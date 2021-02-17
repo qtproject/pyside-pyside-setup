@@ -2511,7 +2511,7 @@ void CppGenerator::writePythonToCppTypeConversion(TextStream &s,
 
     const bool isEnum = typeEntry->isEnum();
     const bool isFlags = typeEntry->isFlags();
-    bool treatAsPointer = isValueTypeWithCopyConstructorOnly(api(), type);
+    bool treatAsPointer = valueTypeWithCopyConstructorOnlyPassed(api(), type);
     bool isPointerOrObjectType = (type.isObjectType() || type.isPointer())
         && !type.isUserPrimitive() && !type.isExtendedCppPrimitive()
         && !isEnum && !isFlags;
@@ -3196,7 +3196,7 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s, const Abst
     for (int i = 0; i < containerType.instantiations().count(); ++i) {
         const AbstractMetaType &type = containerType.instantiations().at(i);
         QString typeName = getFullTypeName(type);
-        if (type.isValue() && isValueTypeWithCopyConstructorOnly(api(), type)) {
+        if (valueTypeWithCopyConstructorOnlyPassed(api(), type)) {
             for (int pos = 0; ; ) {
                 const QRegularExpressionMatch match = convertToCppRegEx().match(code, pos);
                 if (!match.hasMatch())
@@ -3447,7 +3447,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                         userArgs.append(QLatin1String(CPP_ARG_REMOVED) + QString::number(i));
                 } else {
                     int idx = arg.argumentIndex() - removedArgs;
-                    bool deRef = isValueTypeWithCopyConstructorOnly(api(), arg.type())
+                    bool deRef = valueTypeWithCopyConstructorOnlyPassed(api(), arg.type())
                                  || arg.type().isObjectTypeUsedAsValueType()
                                  || (arg.type().referenceType() == LValueReference
                                      && arg.type().isWrapperType() && !arg.type().isPointer());

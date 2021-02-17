@@ -220,10 +220,16 @@ protected:
     static bool isPyInt(const TypeEntry *type);
     static bool isPyInt(const AbstractMetaType &type);
 
+    /// Returns whether the underlying type is a value type with copy constructor only
     static bool isValueTypeWithCopyConstructorOnly(const ApiExtractorResult &api,
                                                    const TypeEntry *type);
     static bool isValueTypeWithCopyConstructorOnly(const ApiExtractorResult &api,
                                                    const AbstractMetaType &type);
+    /// Returns whether the type (function argument) is a value type with
+    /// copy constructor only is passed as value or const-ref and thus
+    /// no default value can be constructed.
+    static bool valueTypeWithCopyConstructorOnlyPassed(const ApiExtractorResult &api,
+                                                       const AbstractMetaType &type);
 
     static bool isNullPtr(const QString &value);
 

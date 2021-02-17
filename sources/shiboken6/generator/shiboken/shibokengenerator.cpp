@@ -997,7 +997,14 @@ bool ShibokenGenerator::isValueTypeWithCopyConstructorOnly(const ApiExtractorRes
                                                            const AbstractMetaType &type)
 {
    return type.typeEntry()->isValue()
-       && isValueTypeWithCopyConstructorOnly(api, type.typeEntry());
+           && isValueTypeWithCopyConstructorOnly(api, type.typeEntry());
+}
+
+bool ShibokenGenerator::valueTypeWithCopyConstructorOnlyPassed(const ApiExtractorResult &api,
+                                                               const AbstractMetaType &type)
+{
+    return (type.passByValue() || type.passByConstRef())
+        && isValueTypeWithCopyConstructorOnly(api, type);
 }
 
 bool ShibokenGenerator::isNullPtr(const QString &value)
