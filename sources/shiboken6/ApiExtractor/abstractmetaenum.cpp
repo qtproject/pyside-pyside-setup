@@ -113,6 +113,7 @@ public:
     Documentation m_doc;
 
     EnumKind m_enumKind = CEnum;
+    Access m_access = Access::Public;
     uint m_hasQenumsDeclaration : 1;
     uint m_signed : 1;
 };
@@ -171,6 +172,17 @@ QString AbstractMetaEnum::qualifiedCppName() const
     return enclosingClass()
         ? enclosingClass()->qualifiedCppName() + QLatin1String("::") + name()
         : name();
+}
+
+Access AbstractMetaEnum::access() const
+{
+     return d->m_access;
+}
+
+void AbstractMetaEnum::setAccess(Access a)
+{
+    if (a != d->m_access)
+        d->m_access = a;
 }
 
 const Documentation &AbstractMetaEnum::documentation() const

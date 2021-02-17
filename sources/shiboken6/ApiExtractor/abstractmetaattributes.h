@@ -43,11 +43,7 @@ public:
     enum Attribute {
         None                        = 0x00000000,
 
-        Private                     = 0x00000001,
-        Protected                   = 0x00000002,
-        Public                      = 0x00000004,
         Friendly                    = 0x00000008,
-        Visibility                  = 0x0000000f,
 
         Abstract                    = 0x00000020,
         Static                      = 0x00000040,
@@ -80,17 +76,6 @@ public:
     Attributes attributes() const { return m_attributes; }
 
     void setAttributes(Attributes attributes) { m_attributes = attributes; }
-
-    Attributes originalAttributes() const { return m_originalAttributes; }
-
-    void setOriginalAttributes(Attributes attributes) { m_originalAttributes = attributes; }
-
-    Attributes visibility() const { return m_attributes & Visibility; }
-
-    void setVisibility(Attributes visi)
-    {
-        m_attributes = (m_attributes & ~Visibility) | visi;
-    }
 
     void operator+=(Attribute attribute)
     {
@@ -137,34 +122,9 @@ public:
         return m_attributes.testFlag(PropertyResetter);
     }
 
-    bool isPrivate() const
-    {
-        return m_attributes.testFlag(Private);
-    }
-
-    bool isProtected() const
-    {
-        return m_attributes.testFlag(Protected);
-    }
-
-    bool isPublic() const
-    {
-        return m_attributes.testFlag(Public);
-    }
-
     bool isFriendly() const
     {
         return m_attributes.testFlag(Friendly);
-    }
-
-    bool wasPrivate() const
-    {
-        return m_originalAttributes.testFlag(Private);
-    }
-
-    bool wasPublic() const
-    {
-        return m_originalAttributes.testFlag(Public);
     }
 
 #ifndef QT_NO_DEBUG_STREAM
@@ -176,7 +136,6 @@ protected:
 
 private:
     Attributes m_attributes;
-    Attributes m_originalAttributes;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaAttributes::Attributes)

@@ -100,15 +100,15 @@ static inline bool insertTemplateParameterIntoClassName(const QString &parmName,
      return result;
 }
 
-static inline CodeModel::AccessPolicy accessPolicy(CX_CXXAccessSpecifier access)
+static inline Access accessPolicy(CX_CXXAccessSpecifier access)
 {
-    CodeModel::AccessPolicy result = CodeModel::Public;
+    Access result = Access::Public;
     switch (access) {
     case CX_CXXProtected:
-        result = CodeModel::Protected;
+        result = Access::Protected;
         break;
     case CX_CXXPrivate:
-        result = CodeModel::Private;
+        result = Access::Private;
         break;
     default:
         break;
@@ -716,7 +716,7 @@ void BuilderPrivate::addBaseClass(const CXCursor &cursor)
         baseClassName = getTypeName(decl.type);
 
     auto it = m_cursorClassHash.constFind(decl.declaration);
-    const CodeModel::AccessPolicy access = accessPolicy(clang_getCXXAccessSpecifier(cursor));
+    const Access access = accessPolicy(clang_getCXXAccessSpecifier(cursor));
     if (it == m_cursorClassHash.constEnd()) {
         // Set unqualified name. This happens in cases like "class X : public std::list<...>"
         // "template<class T> class Foo : public T" and standard types like true_type, false_type.

@@ -227,7 +227,7 @@ void AbstractMetaBuilderPrivate::registerToStringCapability(const FunctionModelI
 void AbstractMetaBuilderPrivate::traverseOperatorFunction(const FunctionModelItem &item,
                                                           AbstractMetaClass *currentClass)
 {
-    if (item->accessPolicy() != CodeModel::Public)
+    if (item->accessPolicy() != Access::Public)
         return;
 
     ArgumentList arguments = item->arguments();
@@ -278,8 +278,7 @@ void AbstractMetaBuilderPrivate::traverseOperatorFunction(const FunctionModelIte
                 metaFunction->setArguments(arguments);
                 metaFunction->setReverseOperator(true);
             }
-            metaFunction->setVisibility(AbstractMetaFunction::Public);
-            metaFunction->setOriginalAttributes(metaFunction->attributes());
+            metaFunction->setAccess(Access::Public);
             setupFunctionDefaults(metaFunction, baseoperandClass);
             baseoperandClass->addFunction(AbstractMetaFunctionCPtr(metaFunction));
             Q_ASSERT(!metaFunction->wasPrivate());
@@ -293,7 +292,7 @@ bool AbstractMetaBuilderPrivate::traverseStreamOperator(const FunctionModelItem 
                                                         AbstractMetaClass *currentClass)
 {
     ArgumentList itemArguments = item->arguments();
-    if (itemArguments.size() != 2 || item->accessPolicy() != CodeModel::Public)
+    if (itemArguments.size() != 2 || item->accessPolicy() != Access::Public)
         return false;
     auto streamClass = argumentToClass(itemArguments.at(0), currentClass);
     if (streamClass == nullptr || !streamClass->isStream())
@@ -316,8 +315,7 @@ bool AbstractMetaBuilderPrivate::traverseStreamOperator(const FunctionModelItem 
     streamFunction->setArguments(arguments);
 
     *streamFunction += AbstractMetaAttributes::FinalInTargetLang;
-    *streamFunction += AbstractMetaAttributes::Public;
-    streamFunction->setOriginalAttributes(streamFunction->attributes());
+    streamFunction->setAccess(Access::Public);
 
     AbstractMetaClass *funcClass;
 
@@ -460,7 +458,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
     // Global functions
     const FunctionList &functions = dom->functions();
     for (const FunctionModelItem &func : functions) {
-        if (func->accessPolicy() != CodeModel::Public || func->name().startsWith(QLatin1String("operator")))
+        if (func->accessPolicy() != Access::Public || func->name().startsWith(QLatin1String("operator")))
             continue;
 
         FunctionTypeEntry *funcEntry = types->findFunctionType(func->name());
@@ -641,7 +639,6 @@ void AbstractMetaBuilder::setLogDirectory(const QString &logDir)
 void AbstractMetaBuilderPrivate::addAbstractMetaClass(AbstractMetaClass *cls,
                                                       const _CodeModelItem *item)
 {
-    cls->setOriginalAttributes(cls->attributes());
     m_itemToClass.insert(item, cls);
     if (cls->typeEntry()->isContainer()) {
         m_templates << cls;
@@ -682,7 +679,6 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(const FileModel
     if (!metaClass) {
         metaClass = new AbstractMetaClass;
         metaClass->setTypeEntry(type);
-        *metaClass += AbstractMetaAttributes::Public;
         addAbstractMetaClass(metaClass, namespaceItem.data());
         if (auto extendsType = type->extends()) {
             AbstractMetaClass *extended = AbstractMetaClass::findClass(m_metaClasses, extendsType);
@@ -749,7 +745,7 @@ std::optional<AbstractMetaEnum>
 
     TypeEntry *typeEntry = nullptr;
     const TypeEntry *enclosingTypeEntry = enclosing ? enclosing->typeEntry() : nullptr;
-    if (enumItem->accessPolicy() == CodeModel::Private) {
+    if (enumItem->accessPolicy() == Access::Private) {
         typeEntry = new EnumTypeEntry(enumItem->qualifiedName().constLast(),
                                       QVersionNumber(0, 0), enclosingTypeEntry);
         TypeDatabase::instance()->addType(typeEntry);
@@ -810,20 +806,9 @@ std::optional<AbstractMetaEnum>
 
     auto *enumTypeEntry = static_cast<EnumTypeEntry *>(typeEntry);
     metaEnum.setTypeEntry(enumTypeEntry);
-    switch (enumItem->accessPolicy()) {
-    case CodeModel::Public:
-        metaEnum += AbstractMetaAttributes::Public;
-        break;
-    case CodeModel::Protected:
-        metaEnum += AbstractMetaAttributes::Protected;
-        break;
-    case CodeModel::Private:
-        metaEnum += AbstractMetaAttributes::Private;
+    metaEnum.setAccess(enumItem->accessPolicy());
+    if (metaEnum.access() == Access::Private)
         typeEntry->setCodeGeneration(TypeEntry::GenerateNothing);
-        break;
-    default:
-        break;
-    }
 
     const EnumeratorList &enums = enumItem->enumerators();
     for (const EnumeratorModelItem &value : enums) {
@@ -839,8 +824,6 @@ std::optional<AbstractMetaEnum>
 
     if (!metaEnum.typeEntry()->include().isValid())
         setInclude(metaEnum.typeEntry(), enumItem->fileName());
-
-    metaEnum.setOriginalAttributes(metaEnum.attributes());
 
     // Register all enum values on Type database
     const bool isScopedEnum = enumItem->enumKind() == EnumClass;
@@ -895,7 +878,6 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseTypeDef(const FileModelIt
     metaClass->setTypeDef(true);
     metaClass->setTypeEntry(type);
     metaClass->setBaseClassNames(QStringList(typeDef->type().toString()));
-    *metaClass += AbstractMetaAttributes::Public;
 
     // Set the default include file name
     if (!type->include().isValid())
@@ -916,7 +898,6 @@ void AbstractMetaBuilderPrivate::traverseTypesystemTypedefs()
         metaClass->setTypeDef(true);
         metaClass->setTypeEntry(te->target());
         metaClass->setBaseClassNames(QStringList(te->sourceType()));
-        *metaClass += AbstractMetaAttributes::Public;
         fillAddedFunctions(metaClass);
         addAbstractMetaClass(metaClass, nullptr);
         // Ensure base classes are set up when traversing functions for the
@@ -987,12 +968,11 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
     QStringList baseClassNames;
     const QList<_ClassModelItem::BaseClass> &baseClasses = classItem->baseClasses();
     for (const _ClassModelItem::BaseClass &baseClass : baseClasses) {
-        if (baseClass.accessPolicy == CodeModel::Public)
+        if (baseClass.accessPolicy == Access::Public)
             baseClassNames.append(baseClass.name);
     }
 
     metaClass->setBaseClassNames(baseClassNames);
-    *metaClass += AbstractMetaAttributes::Public;
     if (type->stream())
         metaClass->setStream(true);
 
@@ -1112,7 +1092,7 @@ std::optional<AbstractMetaField>
     if (field->isFriend())
         return {};
 
-    if (field->accessPolicy() == CodeModel::Private)
+    if (field->accessPolicy() == Access::Private)
         return {};
 
     QString rejectReason;
@@ -1141,18 +1121,8 @@ std::optional<AbstractMetaField>
 
     metaField.setType(metaType.value());
 
-    AbstractMetaAttributes::Attributes attr;
-    if (field->isStatic())
-        attr |= AbstractMetaAttributes::Static;
-
-    CodeModel::AccessPolicy policy = field->accessPolicy();
-    if (policy == CodeModel::Public)
-        attr |= AbstractMetaAttributes::Public;
-    else if (policy == CodeModel::Protected)
-        attr |= AbstractMetaAttributes::Protected;
-    else
-        attr |= AbstractMetaAttributes::Private;
-    metaField.setAttributes(attr);
+    metaField.setStatic(field->isStatic());
+    metaField.setAccess(field->accessPolicy());
 
     return metaField;
 }
@@ -1172,7 +1142,6 @@ static bool applyFieldModifications(AbstractMetaField *f)
             f->setSetterEnabled(false);
         }
     }
-    f->setOriginalAttributes(f->attributes());
     return true;
 }
 
@@ -1260,7 +1229,6 @@ void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
     metaClass->setAttributes(metaClass->attributes() | constructorAttributes);
 
     for (AbstractMetaFunction *metaFunction : functions) {
-        metaFunction->setOriginalAttributes(metaFunction->attributes());
         if (metaClass->isNamespace())
             *metaFunction += AbstractMetaAttributes::Static;
 
@@ -1402,17 +1370,14 @@ void AbstractMetaBuilderPrivate::applyFunctionModifications(AbstractMetaFunction
             func->setOriginalName(func->name());
             func->setName(mod.renamedToName());
         } else if (mod.isAccessModifier()) {
-            funcRef -= AbstractMetaAttributes::Public;
-            funcRef -= AbstractMetaAttributes::Protected;
-            funcRef -= AbstractMetaAttributes::Private;
             funcRef -= AbstractMetaAttributes::Friendly;
 
             if (mod.isPublic())
-                funcRef += AbstractMetaAttributes::Public;
+                funcRef.modifyAccess(Access::Public);
             else if (mod.isProtected())
-                funcRef += AbstractMetaAttributes::Protected;
+                funcRef.modifyAccess(Access::Protected);
             else if (mod.isPrivate())
-                funcRef += AbstractMetaAttributes::Private;
+                funcRef.modifyAccess(Access::Private);
             else if (mod.isFriendly())
                 funcRef += AbstractMetaAttributes::Friendly;
         }
@@ -1625,7 +1590,6 @@ AbstractMetaFunction *
         metaArg.setOriginalDefaultValueExpression(metaArg.defaultValueExpression()); // appear unmodified
     }
 
-    metaFunction->setOriginalAttributes(metaFunction->attributes());
     if (!metaArguments.isEmpty())
         fixArgumentNames(metaFunction, metaFunction->modifications(metaClass));
 
@@ -1899,12 +1863,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
     }
 
     // Access rights
-    if (functionItem->accessPolicy() == CodeModel::Public)
-        *metaFunction += AbstractMetaAttributes::Public;
-    else if (functionItem->accessPolicy() == CodeModel::Private)
-        *metaFunction += AbstractMetaAttributes::Private;
-    else
-        *metaFunction += AbstractMetaAttributes::Protected;
+    metaFunction->setAccess(functionItem->accessPolicy());
 
     QString errorMessage;
     switch (metaFunction->functionType()) {
@@ -2837,7 +2796,7 @@ void AbstractMetaBuilderPrivate::inheritTemplateFunctions(AbstractMetaClass *sub
         // If the field is modified or the instantiation has a field named
         // the same as an existing field we have shadowing, so we need to skip it.
         if (field.isModifiedRemoved(TypeSystem::All)
-            || field.attributes().testFlag(AbstractMetaAttributes::Static)
+            || field.isStatic()
             || AbstractMetaField::find(existingSubclassFields, field.name()).has_value()) {
             continue;
         }

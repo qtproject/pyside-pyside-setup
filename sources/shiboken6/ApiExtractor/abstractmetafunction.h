@@ -115,6 +115,17 @@ public:
 
     void setOriginalName(const QString &name);
 
+    Access access() const;
+    void setAccess(Access a);
+    void modifyAccess(Access a);
+
+    bool isPrivate() const { return access() == Access::Private; }
+    bool isProtected() const { return access() == Access::Protected; }
+    bool isPublic() const { return access() == Access::Public; }
+    bool wasPrivate() const;
+    bool wasProtected() const;
+    bool wasPublic() const;
+
     const Documentation &documentation() const;
     void setDocumentation(const Documentation& doc);
 

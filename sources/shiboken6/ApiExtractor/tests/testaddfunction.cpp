@@ -127,7 +127,7 @@ struct A {
 
     auto addedFunc = classA->findFunction(QLatin1String("b"));
     QVERIFY(addedFunc);
-    QCOMPARE(addedFunc->visibility(), AbstractMetaFunction::Protected);
+    QCOMPARE(addedFunc->access(), Access::Protected);
     QCOMPARE(addedFunc->functionType(), AbstractMetaFunction::NormalFunction);
     QVERIFY(addedFunc->isUserAdded());
     QCOMPARE(addedFunc->ownerClass(), classA);
@@ -167,7 +167,7 @@ void TestAddFunction::testAddFunctionConstructor()
     QVERIFY(classA);
     QCOMPARE(classA->functions().count(), 3); // default and added ctors
     const auto addedFunc = classA->functions().constLast();
-    QCOMPARE(addedFunc->visibility(), AbstractMetaFunction::Public);
+    QCOMPARE(addedFunc->access(), Access::Public);
     QCOMPARE(addedFunc->functionType(), AbstractMetaFunction::ConstructorFunction);
     QCOMPARE(addedFunc->arguments().size(), 1);
     QVERIFY(addedFunc->isUserAdded());
@@ -190,7 +190,7 @@ void TestAddFunction::testAddFunctionTagDefaultValues()
     QVERIFY(classA);
     QCOMPARE(classA->functions().count(), 3); // default ctor, default copy ctor and the added function
     const auto addedFunc = classA->functions().constLast();
-    QCOMPARE(addedFunc->visibility(), AbstractMetaFunction::Public);
+    QCOMPARE(addedFunc->access(), Access::Public);
     QCOMPARE(addedFunc->functionType(), AbstractMetaFunction::NormalFunction);
     QVERIFY(addedFunc->isUserAdded());
     QVERIFY(addedFunc->isVoid());

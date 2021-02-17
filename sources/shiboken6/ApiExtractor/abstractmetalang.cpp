@@ -217,7 +217,7 @@ AbstractMetaFunctionCList AbstractMetaClass::implicitConversions() const
             && f->functionType() != AbstractMetaFunction::CopyConstructorFunction
             && !f->usesRValueReferences()
             && !f->isModifiedRemoved()
-            && (f->originalAttributes() & Public)) {
+            && f->wasPublic()) {
             returned += f;
         }
     }
@@ -754,10 +754,9 @@ void AbstractMetaClass::addDefaultConstructor()
     f->setFunctionType(AbstractMetaFunction::ConstructorFunction);
     f->setArguments(AbstractMetaArgumentList());
     f->setDeclaringClass(this);
-
-    f->setAttributes(Public | FinalInTargetLang | AddedMethod);
+    f->setAccess(Access::Public);
+    f->setAttributes(FinalInTargetLang | AddedMethod);
     f->setImplementingClass(this);
-    f->setOriginalAttributes(f->attributes());
 
     addFunction(AbstractMetaFunctionCPtr(f));
     this->setHasNonPrivateConstructor(true);
@@ -783,12 +782,9 @@ void AbstractMetaClass::addDefaultCopyConstructor()
     arg.setType(argType);
     arg.setName(name());
     f->addArgument(arg);
-
-    AbstractMetaAttributes::Attributes attr = FinalInTargetLang | AddedMethod;
-    attr |= AbstractMetaAttributes::Public;
-    f->setAttributes(attr);
+    f->setAccess(Access::Public);
+    f->setAttributes(FinalInTargetLang | AddedMethod);
     f->setImplementingClass(this);
-    f->setOriginalAttributes(f->attributes());
 
     addFunction(AbstractMetaFunctionCPtr(f));
 }
@@ -874,7 +870,7 @@ bool AbstractMetaClass::isDefaultConstructible() const
         queryFunctions(FunctionQueryOption::Constructors);
     for (const auto &ct : ctors) {
         if (ct->isDefaultConstructor())
-            return ct->visibility() == AbstractMetaAttributes::Public;
+            return ct->isPublic();
     }
     return ctors.isEmpty() && isImplicitlyDefaultConstructible();
 }
@@ -920,7 +916,7 @@ bool AbstractMetaClass::isCopyConstructible() const
         queryFunctions(FunctionQueryOption::CopyConstructor);
     return copyCtors.isEmpty()
         ? isImplicitlyCopyConstructible()
-        : copyCtors.constFirst()->visibility() == AbstractMetaAttributes::Public;
+        : copyCtors.constFirst()->isPublic();
 }
 
 bool AbstractMetaClass::isImplicitlyCopyConstructible() const
@@ -1325,7 +1321,7 @@ void AbstractMetaClass::fixFunctions()
                             }
                         }
 
-                        if (f->visibility() != sf->visibility()) {
+                        if (f->access() != sf->access()) {
                             qCWarning(lcShiboken, "%s",
                                       qPrintable(msgFunctionVisibilityModified(this, f.data())));
 #if 0

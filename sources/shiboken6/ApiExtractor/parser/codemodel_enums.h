@@ -61,4 +61,11 @@ enum class NamespaceType
     Inline
 };
 
+enum class Access
+{
+    Public,
+    Protected,
+    Private
+};
+
 #endif // CODEMODEL_ENUMS_H

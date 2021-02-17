@@ -75,7 +75,7 @@ void TestNestedTypes::testNestedTypesModifications()
 
     const auto addedFunc = ins->functions().constFirst();
     QVERIFY(addedFunc->isUserAdded());
-    QCOMPARE(addedFunc->visibility(), AbstractMetaFunction::Public);
+    QCOMPARE(addedFunc->access(), Access::Public);
     QCOMPARE(addedFunc->functionType(), AbstractMetaFunction::NormalFunction);
     QCOMPARE(addedFunc->type().minimalSignature(),
              QLatin1String("OuterNamespace::InnerNamespace::SomeClass"));

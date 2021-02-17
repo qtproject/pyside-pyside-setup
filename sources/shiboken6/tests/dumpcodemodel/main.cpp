@@ -100,7 +100,7 @@ static void formatXmlScopeMembers(QXmlStreamWriter &writer, const ScopeModelItem
 static bool isPublicCopyConstructor(const FunctionModelItem &f)
 {
     return f->functionType() == CodeModel::CopyConstructor
-        && f->accessPolicy() == CodeModel::Public && !f->isDeleted();
+        && f->accessPolicy() == Access::Public && !f->isDeleted();
 }
 
 static void formatXmlLocationComment(QXmlStreamWriter &writer, const CodeModelItem &i)

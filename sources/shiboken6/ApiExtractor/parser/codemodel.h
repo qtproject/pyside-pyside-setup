@@ -58,13 +58,6 @@ class CodeModel
 public:
     Q_DISABLE_COPY(CodeModel)
 
-    enum AccessPolicy {
-        Public,
-        Protected,
-        Private
-    };
-    Q_ENUM(AccessPolicy)
-
     enum FunctionType {
         Normal,
         Constructor,
@@ -114,6 +107,7 @@ private:
 };
 
 #ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, Access a);
 QDebug operator<<(QDebug d, const CodeModel *m);
 #endif
 
@@ -268,7 +262,7 @@ public:
     struct BaseClass
     {
         QString name;
-        CodeModel::AccessPolicy accessPolicy = CodeModel::Public;
+        Access accessPolicy = Access::Public;
     };
 
     explicit _ClassModelItem(CodeModel *model, int kind = __node_kind)
@@ -279,7 +273,7 @@ public:
 
     QList<BaseClass> baseClasses() const { return m_baseClasses; }
 
-    void addBaseClass(const QString &name, CodeModel::AccessPolicy accessPolicy);
+    void addBaseClass(const QString &name, Access accessPolicy);
 
     TemplateParameterList templateParameters() const;
     void setTemplateParameters(const TemplateParameterList &templateParameters);
@@ -390,9 +384,9 @@ public:
     DECLARE_MODEL_NODE(Member)
 
     explicit _MemberModelItem(CodeModel *model, int kind = __node_kind)
-        : _CodeModelItem(model, kind), m_accessPolicy(CodeModel::Public), m_flags(0) {}
+        : _CodeModelItem(model, kind), m_accessPolicy(Access::Public), m_flags(0) {}
     explicit _MemberModelItem(CodeModel *model, const QString &name, int kind = __node_kind)
-        : _CodeModelItem(model, name, kind), m_accessPolicy(CodeModel::Public), m_flags(0) {}
+        : _CodeModelItem(model, name, kind), m_accessPolicy(Access::Public), m_flags(0) {}
     ~_MemberModelItem();
 
     bool isConstant() const;
@@ -419,8 +413,8 @@ public:
     bool isMutable() const;
     void setMutable(bool isMutable);
 
-    CodeModel::AccessPolicy accessPolicy() const;
-    void setAccessPolicy(CodeModel::AccessPolicy accessPolicy);
+    Access accessPolicy() const;
+    void setAccessPolicy(Access accessPolicy);
 
     TemplateParameterList templateParameters() const { return m_templateParameters; }
     void setTemplateParameters(const TemplateParameterList &templateParameters) { m_templateParameters = templateParameters; }
@@ -435,7 +429,7 @@ public:
 private:
     TemplateParameterList m_templateParameters;
     TypeInfo m_type;
-    CodeModel::AccessPolicy m_accessPolicy;
+    Access m_accessPolicy;
     union {
         struct {
             uint m_isConstant: 1;
@@ -610,8 +604,8 @@ public:
         : _CodeModelItem(model, kind) {}
     ~_EnumModelItem();
 
-    CodeModel::AccessPolicy accessPolicy() const;
-    void setAccessPolicy(CodeModel::AccessPolicy accessPolicy);
+    Access accessPolicy() const;
+    void setAccessPolicy(Access accessPolicy);
 
     bool hasValues() const { return !m_enumerators.isEmpty(); }
     EnumeratorList enumerators() const;
@@ -628,7 +622,7 @@ public:
     void setSigned(bool s);
 
 private:
-    CodeModel::AccessPolicy m_accessPolicy = CodeModel::Public;
+    Access m_accessPolicy = Access::Public;
     EnumeratorList m_enumerators;
     EnumKind m_enumKind = CEnum;
     bool m_signed = true;

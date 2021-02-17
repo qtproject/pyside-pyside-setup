@@ -30,7 +30,6 @@
 #define ABSTRACTMETAENUM_H
 
 #include "abstractmetalang_typedefs.h"
-#include "abstractmetaattributes.h"
 #include "enclosingclassmixin.h"
 #include "parser/codemodel_enums.h"
 
@@ -73,7 +72,7 @@ private:
     QSharedDataPointer<AbstractMetaEnumValueData> d;
 };
 
-class AbstractMetaEnum : public AbstractMetaAttributes, public EnclosingClassMixin
+class AbstractMetaEnum : public EnclosingClassMixin
 {
 public:
     AbstractMetaEnum();
@@ -90,6 +89,11 @@ public:
 
     QString name() const;
     QString qualifiedCppName() const;
+
+    Access access() const;
+    void setAccess(Access a);
+    bool isPrivate() const { return access() == Access::Private; }
+    bool isProtected() const { return access() == Access::Protected; }
 
     const Documentation &documentation() const;
     void setDocumentation(const Documentation& doc);

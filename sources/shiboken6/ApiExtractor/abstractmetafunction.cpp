@@ -98,6 +98,8 @@ public:
     uint m_pointerOperator          : 1;
     uint m_isCallOperator           : 1;
     mutable int m_cachedOverloadNumber = TypeSystem::OverloadNumberUnset;
+    Access m_access = Access::Public;
+    Access m_originalAccess = Access::Public;
     ExceptionSpecification m_exceptionSpecification = ExceptionSpecification::Unknown;
     TypeSystem::AllowThread m_allowThreadModification = TypeSystem::AllowThread::Unspecified;
     TypeSystem::ExceptionHandling m_exceptionHandlingModification = TypeSystem::ExceptionHandling::Unspecified;
@@ -110,17 +112,17 @@ AbstractMetaFunction::AbstractMetaFunction(const AddedFunctionPtr &addedFunc) :
     setConstant(addedFunc->isConstant());
     setName(addedFunc->name());
     setOriginalName(addedFunc->name());
-    auto atts = attributes() | AbstractMetaAttributes::FinalInTargetLang;
     switch (addedFunc->access()) {
     case AddedFunction::InvalidAccess:
         break;
     case AddedFunction::Protected:
-        atts |= AbstractMetaAttributes::Protected;
+        setAccess(Access::Protected);
         break;
     case AddedFunction::Public:
-        atts |= AbstractMetaAttributes::Public;
+        setAccess(Access::Public);
         break;
     }
+    AbstractMetaAttributes::Attributes atts = AbstractMetaAttributes::FinalInTargetLang;
     if (addedFunc->isStatic())
         atts |= AbstractMetaFunction::Static;
     setAttributes(atts);
@@ -144,6 +146,36 @@ QString AbstractMetaFunction::originalName() const
 void AbstractMetaFunction::setOriginalName(const QString &name)
 {
     d->m_originalName = name;
+}
+
+Access AbstractMetaFunction::access() const
+{
+    return d->m_access;
+}
+
+void AbstractMetaFunction::setAccess(Access a)
+{
+    d->m_originalAccess = d->m_access = a;
+}
+
+void AbstractMetaFunction::modifyAccess(Access a)
+{
+    d->m_access = a;
+}
+
+bool AbstractMetaFunction::wasPrivate() const
+{
+    return d->m_originalAccess == Access::Private;
+}
+
+bool AbstractMetaFunction::wasProtected() const
+{
+    return d->m_originalAccess == Access::Protected;
+}
+
+bool AbstractMetaFunction::wasPublic() const
+{
+    return d->m_originalAccess == Access::Public;
 }
 
 QStringList AbstractMetaFunction::definitionNames() const
@@ -317,6 +349,7 @@ AbstractMetaFunction *AbstractMetaFunction::copy() const
 {
     auto *cpy = new AbstractMetaFunction;
     cpy->assignMetaAttributes(*this);
+    cpy->setAccess(access());
     cpy->setName(name());
     cpy->setOriginalName(originalName());
     cpy->setOwnerClass(ownerClass());
@@ -1228,7 +1261,10 @@ void AbstractMetaFunction::formatDebugBrief(QDebug &debug) const
 
 void AbstractMetaFunction::formatDebugVerbose(QDebug &debug) const
 {
-    debug << d->m_functionType << ' ' << d->m_type << ' ' << d->m_name;
+    debug << d->m_functionType << ' ';
+    if (d->m_class)
+        debug << d->m_access << ' ';
+    debug << d->m_type << ' ' << d->m_name;
     switch (d->m_exceptionSpecification) {
     case ExceptionSpecification::Unknown:
         break;

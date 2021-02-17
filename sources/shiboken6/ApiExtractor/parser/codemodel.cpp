@@ -115,6 +115,26 @@ CodeModelItem CodeModel::findItem(const QStringList &qualifiedName, const ScopeM
 }
 
 #ifndef QT_NO_DEBUG_STREAM
+
+QDebug operator<<(QDebug d, Access a)
+{
+    QDebugStateSaver s(d);
+    d.noquote();
+    d.nospace();
+    switch (a) {
+    case Access::Public:
+        d << "public";
+        break;
+    case Access::Protected:
+        d << "protected";
+        break;
+    case Access::Private:
+        d << "private";
+        break;
+    }
+    return d;
+}
+
 QDebug operator<<(QDebug d, const CodeModel *m)
 {
     QDebugStateSaver s(d);
@@ -357,7 +377,7 @@ void _ClassModelItem::setTemplateParameters(const TemplateParameterList &templat
     m_templateParameters = templateParameters;
 }
 
-void _ClassModelItem::addBaseClass(const QString &name, CodeModel::AccessPolicy accessPolicy)
+void _ClassModelItem::addBaseClass(const QString &name, Access accessPolicy)
 {
     _ClassModelItem::BaseClass baseClass;
     baseClass.name = name;
@@ -1101,14 +1121,14 @@ void _TemplateTypeAliasModelItem::formatDebug(QDebug &d) const
 #endif // !QT_NO_DEBUG_STREAM
 
 // ---------------------------------------------------------------------------
-CodeModel::AccessPolicy _EnumModelItem::accessPolicy() const
+Access _EnumModelItem::accessPolicy() const
 {
     return m_accessPolicy;
 }
 
 _EnumModelItem::~_EnumModelItem() = default;
 
-void _EnumModelItem::setAccessPolicy(CodeModel::AccessPolicy accessPolicy)
+void _EnumModelItem::setAccessPolicy(Access accessPolicy)
 {
     m_accessPolicy = accessPolicy;
 }
@@ -1218,14 +1238,14 @@ void _MemberModelItem::setType(const TypeInfo &type)
     m_type = type;
 }
 
-CodeModel::AccessPolicy _MemberModelItem::accessPolicy() const
+Access _MemberModelItem::accessPolicy() const
 {
     return m_accessPolicy;
 }
 
 _MemberModelItem::~_MemberModelItem() = default;
 
-void _MemberModelItem::setAccessPolicy(CodeModel::AccessPolicy accessPolicy)
+void _MemberModelItem::setAccessPolicy(Access accessPolicy)
 {
     m_accessPolicy = accessPolicy;
 }
@@ -1314,18 +1334,7 @@ void _MemberModelItem::setMutable(bool isMutable)
 void _MemberModelItem::formatDebug(QDebug &d) const
 {
     _CodeModelItem::formatDebug(d);
-    switch (m_accessPolicy) {
-    case CodeModel::Public:
-        d << ", public";
-        break;
-    case CodeModel::Protected:
-        d << ", protected";
-        break;
-    case CodeModel::Private:
-        d << ", private";
-        break;
-    }
-    d << ", type=";
+    d << ", " << m_accessPolicy << ", type=";
     if (m_isConstant)
         d << "const ";
     if (m_isVolatile)

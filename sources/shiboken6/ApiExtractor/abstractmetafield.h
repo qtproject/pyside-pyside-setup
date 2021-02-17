@@ -30,9 +30,9 @@
 #define ABSTRACTMETAFIELD_H
 
 #include "abstractmetalang_typedefs.h"
+#include "parser/codemodel_enums.h"
 #include "typesystem_enums.h"
 #include "typesystem_typedefs.h"
-#include "abstractmetaattributes.h"
 #include "enclosingclassmixin.h"
 
 #include <QtCore/QSharedDataPointer>
@@ -44,7 +44,7 @@ QT_FORWARD_DECLARE_CLASS(QDebug)
 class Documentation;
 class AbstractMetaFieldData;
 
-class AbstractMetaField : public AbstractMetaAttributes, public EnclosingClassMixin
+class AbstractMetaField : public EnclosingClassMixin
 {
 public:
     AbstractMetaField();
@@ -63,6 +63,14 @@ public:
 
     QString name() const;
     void setName(const QString &name);
+
+    Access access() const;
+    void setAccess(Access a);
+    bool isPrivate() const { return access() == Access::Private; }
+    bool isProtected() const { return access() == Access::Protected; }
+
+    bool isStatic() const;
+    void setStatic(bool s);
 
     QString qualifiedCppName() const;
 

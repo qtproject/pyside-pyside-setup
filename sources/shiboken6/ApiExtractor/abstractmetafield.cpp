@@ -33,6 +33,7 @@
 #include "documentation.h"
 #include "modifications.h"
 #include "typesystem.h"
+#include "parser/codemodel.h"
 
 #include <QtCore/QDebug>
 
@@ -45,6 +46,8 @@ public:
     Documentation m_doc;
     bool m_setterEnabled = true; // Modifications
     bool m_getterEnabled = true; // Modifications
+    bool m_static = false;
+    Access m_access = Access::Public;
 };
 
 AbstractMetaField::AbstractMetaField() : d(new AbstractMetaFieldData)
@@ -104,6 +107,28 @@ void AbstractMetaField::setName(const QString &name)
 {
     if (d->m_name != name)
         d->m_name = name;
+}
+
+Access AbstractMetaField::access() const
+{
+    return d->m_access;
+}
+
+void AbstractMetaField::setAccess(Access a)
+{
+    if (a != d->m_access)
+        d->m_access = a;
+}
+
+bool AbstractMetaField::isStatic() const
+{
+    return d->m_static;
+}
+
+void AbstractMetaField::setStatic(bool s)
+{
+    if (s != d->m_static)
+        d->m_static = s;
 }
 
 QString AbstractMetaField::qualifiedCppName() const
@@ -205,8 +230,10 @@ FieldModificationList AbstractMetaField::modifications() const
 #ifndef QT_NO_DEBUG_STREAM
 void AbstractMetaField::formatDebug(QDebug &d) const
 {
-    AbstractMetaAttributes::formatMetaAttributes(d, attributes());
-    d << ' ' << type().name() << " \"" << name() << '"';
+    if (isStatic())
+        d << "static ";
+    d << access() << ' ' << type().name() << " \"" << name() << '"';
+
 }
 
 QDebug operator<<(QDebug d, const AbstractMetaField *af)
