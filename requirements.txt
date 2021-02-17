@@ -1,5 +1,6 @@
 setuptools
 sphinx
+sphinx-tabs
 six
 wheel>=0.35
 PyOpenGL

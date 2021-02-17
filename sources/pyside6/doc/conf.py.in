@@ -29,7 +29,8 @@ if @HAS_WEBENGINE_WIDGETS@:
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.ifconfig',
 'sphinx.ext.coverage', 'sphinx.ext.intersphinx', 'sphinx.ext.todo',
 'sphinx.ext.graphviz', 'inheritance_diagram', 'pysideinclude',
-'sphinx.ext.viewcode']
+'sphinx.ext.viewcode',
+'sphinx_tabs.tabs']
 
 output_format='@DOC_OUTPUT_FORMAT@'
 
