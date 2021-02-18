@@ -92,6 +92,7 @@ public:
     AbstractMetaArgumentList m_arguments;
     AddedFunctionPtr m_addedFunction;
     SourceLocation m_sourceLocation;
+    AbstractMetaFunction::Attributes m_attributes;
     uint m_constant                 : 1;
     uint m_reverse                  : 1;
     uint m_explicit                 : 1;
@@ -122,7 +123,7 @@ AbstractMetaFunction::AbstractMetaFunction(const AddedFunctionPtr &addedFunc) :
         setAccess(Access::Public);
         break;
     }
-    AbstractMetaAttributes::Attributes atts = AbstractMetaAttributes::FinalInTargetLang;
+    AbstractMetaFunction::Attributes atts = AbstractMetaFunction::FinalInTargetLang;
     if (addedFunc->isStatic())
         atts |= AbstractMetaFunction::Static;
     setAttributes(atts);
@@ -228,6 +229,26 @@ AbstractMetaFunction::AbstractMetaFunction() : d(new AbstractMetaFunctionPrivate
 }
 
 AbstractMetaFunction::~AbstractMetaFunction() = default;
+
+AbstractMetaFunction::Attributes AbstractMetaFunction::attributes() const
+{
+    return d->m_attributes;
+}
+
+void AbstractMetaFunction::setAttributes(Attributes attributes)
+{
+    d->m_attributes = attributes;
+}
+
+void AbstractMetaFunction::operator+=(AbstractMetaFunction::Attribute attribute)
+{
+    d->m_attributes.setFlag(attribute);
+}
+
+void AbstractMetaFunction::operator-=(AbstractMetaFunction::Attribute attribute)
+{
+    d->m_attributes.setFlag(attribute, false);
+}
 
 /*******************************************************************************
  * Indicates that this function has a modification that removes it
@@ -348,7 +369,7 @@ AbstractMetaFunction::CompareResult AbstractMetaFunction::compareTo(const Abstra
 AbstractMetaFunction *AbstractMetaFunction::copy() const
 {
     auto *cpy = new AbstractMetaFunction;
-    cpy->assignMetaAttributes(*this);
+    cpy->setAttributes(attributes());
     cpy->setAccess(access());
     cpy->setName(name());
     cpy->setOriginalName(originalName());
@@ -1072,7 +1093,7 @@ bool AbstractMetaFunction::isInplaceOperator() const
 
 bool AbstractMetaFunction::isVirtual() const
 {
-    return attributes() & AbstractMetaAttributes::VirtualCppMethod;
+    return d->m_attributes.testFlag(AbstractMetaFunction::VirtualCppMethod);
 }
 
 QString AbstractMetaFunctionPrivate::modifiedName(const AbstractMetaFunction *q) const
@@ -1294,7 +1315,7 @@ void AbstractMetaFunction::formatDebugVerbose(QDebug &debug) const
         debug << " [userDeclared]";
     if (d->m_explicit)
         debug << " [explicit]";
-    if (attributes().testFlag(AbstractMetaAttributes::Deprecated))
+    if (attributes().testFlag(AbstractMetaFunction::Deprecated))
         debug << " [deprecated]";
     if (d->m_pointerOperator)
         debug << " [operator->]";

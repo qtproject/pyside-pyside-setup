@@ -114,6 +114,8 @@ public:
     SourceLocation m_sourceLocation;
 
     mutable AbstractMetaClass::CppWrapper m_cachedWrapper;
+    AbstractMetaClass::Attributes m_attributes;
+
     bool m_stream = false;
     uint m_toStringCapabilityIndirections = 0;
 };
@@ -123,6 +125,26 @@ AbstractMetaClass::AbstractMetaClass() : d(new AbstractMetaClassPrivate)
 }
 
 AbstractMetaClass::~AbstractMetaClass() = default;
+
+AbstractMetaClass::Attributes AbstractMetaClass::attributes() const
+{
+    return d->m_attributes;
+}
+
+void AbstractMetaClass::setAttributes(Attributes attributes)
+{
+    d->m_attributes = attributes;
+}
+
+void AbstractMetaClass::operator+=(AbstractMetaClass::Attribute attribute)
+{
+    d->m_attributes.setFlag(attribute);
+}
+
+void AbstractMetaClass::operator-=(AbstractMetaClass::Attribute attribute)
+{
+     d->m_attributes.setFlag(attribute, false);
+}
 
 /*******************************************************************************
  * Returns true if this class is a subclass of the given class
@@ -755,7 +777,8 @@ void AbstractMetaClass::addDefaultConstructor()
     f->setArguments(AbstractMetaArgumentList());
     f->setDeclaringClass(this);
     f->setAccess(Access::Public);
-    f->setAttributes(FinalInTargetLang | AddedMethod);
+    f->setAttributes(AbstractMetaFunction::FinalInTargetLang
+                     | AbstractMetaFunction::AddedMethod);
     f->setImplementingClass(this);
 
     addFunction(AbstractMetaFunctionCPtr(f));
@@ -783,7 +806,8 @@ void AbstractMetaClass::addDefaultCopyConstructor()
     arg.setName(name());
     f->addArgument(arg);
     f->setAccess(Access::Public);
-    f->setAttributes(FinalInTargetLang | AddedMethod);
+    f->setAttributes(AbstractMetaFunction::FinalInTargetLang
+                     | AbstractMetaFunction::AddedMethod);
     f->setImplementingClass(this);
 
     addFunction(AbstractMetaFunctionCPtr(f));
@@ -897,7 +921,7 @@ bool AbstractMetaClass::isImplicitlyDefaultConstructible() const
 static bool canAddDefaultConstructorHelper(const AbstractMetaClass *cls)
 {
     return !cls->isNamespace()
-        && !cls->attributes().testFlag(AbstractMetaAttributes::HasRejectedConstructor)
+        && !cls->attributes().testFlag(AbstractMetaClass::HasRejectedConstructor)
         && !cls->hasPrivateDestructor();
 }
 
@@ -957,7 +981,7 @@ static AbstractMetaClass::CppWrapper determineCppWrapper(const AbstractMetaClass
     AbstractMetaClass::CppWrapper result;
 
     if (metaClass->isNamespace()
-        || metaClass->attributes().testFlag(AbstractMetaAttributes::FinalCppClass)
+        || metaClass->attributes().testFlag(AbstractMetaClass::FinalCppClass)
         || metaClass->typeEntry()->typeFlags().testFlag(ComplexTypeEntry::DisableWrapper)) {
         return result;
     }
@@ -1277,7 +1301,7 @@ void AbstractMetaClass::fixFunctions()
         if (superClass->isFinalInTargetLang()) {
             qCWarning(lcShiboken).noquote().nospace()
                 << "Final class '" << superClass->name() << "' set to non-final, as it is extended by other classes";
-            *superClass -= AbstractMetaAttributes::FinalInTargetLang;
+            *superClass -= AbstractMetaClass::FinalInTargetLang;
         }
         superFuncs = superClass->queryFunctions(FunctionQueryOption::ClassImplements);
         const auto virtuals = superClass->queryFunctions(FunctionQueryOption::VirtualInCppFunctions);
@@ -1306,7 +1330,7 @@ void AbstractMetaClass::fixFunctions()
                         if (!(cmp & AbstractMetaFunction::EqualAttributes)) {
                             if (!f->isEmptyFunction()) {
                                 if (!sf->isFinalInTargetLang() && f->isFinalInTargetLang()) {
-                                    *f -= AbstractMetaAttributes::FinalInTargetLang;
+                                    *f -= AbstractMetaFunction::FinalInTargetLang;
                                 }
 #if 0
                                 if (!f->isFinalInTargetLang() && f->isPrivate()) {
@@ -1337,7 +1361,7 @@ void AbstractMetaClass::fixFunctions()
                             // But they don't need to be implemented, since they can never be called.
                             if (f->isPrivate()) {
                                 f->setFunctionType(AbstractMetaFunction::EmptyFunction);
-                                *f += AbstractMetaAttributes::FinalInTargetLang;
+                                *f += AbstractMetaFunction::FinalInTargetLang;
                             }
                         }
 
@@ -1401,7 +1425,7 @@ void AbstractMetaClass::fixFunctions()
 
         for (const auto &f : qAsConst(funcsToAdd)) {
             AbstractMetaFunction *copy = f->copy();
-            (*copy) += AddedMethod;
+            (*copy) += AbstractMetaFunction::AddedMethod;
             funcs.append(AbstractMetaFunctionCPtr(copy));
         }
     }
@@ -1416,8 +1440,8 @@ void AbstractMetaClass::fixFunctions()
 
         // Make sure class is abstract if one of the functions is
         if (func->isAbstract()) {
-            (*this) += AbstractMetaAttributes::Abstract;
-            (*this) -= AbstractMetaAttributes::FinalInTargetLang;
+            (*this) += AbstractMetaClass::Abstract;
+            (*this) -= AbstractMetaClass::FinalInTargetLang;
         }
 
         if (func->isConstructor()) {
@@ -1434,8 +1458,8 @@ void AbstractMetaClass::fixFunctions()
     }
 
     if (hasPrivateConstructors && !hasPublicConstructors) {
-        (*this) += AbstractMetaAttributes::Abstract;
-        (*this) -= AbstractMetaAttributes::FinalInTargetLang;
+        (*this) += AbstractMetaClass::Abstract;
+        (*this) -= AbstractMetaClass::FinalInTargetLang;
     }
 
     setFunctions(funcs);
@@ -1598,7 +1622,7 @@ bool AbstractMetaClass::isValueTypeWithCopyConstructorOnly() const
 {
     if (!typeEntry()->isValue())
         return false;
-    if (attributes().testFlag(AbstractMetaAttributes::HasRejectedDefaultConstructor))
+    if (attributes().testFlag(AbstractMetaClass::HasRejectedDefaultConstructor))
         return false;
     const auto ctors = queryFunctions(FunctionQueryOption::Constructors);
     bool copyConstructorFound = false;
@@ -1634,9 +1658,9 @@ void AbstractMetaClass::format(QDebug &debug) const
     debug << '"';
     if (isNamespace())
         debug << " [namespace]";
-    if (attributes() & AbstractMetaAttributes::FinalCppClass)
+    if (attributes().testFlag(AbstractMetaClass::FinalCppClass))
         debug << " [final]";
-    if (attributes().testFlag(AbstractMetaAttributes::Deprecated))
+    if (attributes().testFlag(AbstractMetaClass::Deprecated))
         debug << " [deprecated]";
     if (!d->m_baseClasses.isEmpty()) {
         debug << ", inherits ";

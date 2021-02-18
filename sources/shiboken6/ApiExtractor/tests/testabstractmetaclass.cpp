@@ -147,7 +147,7 @@ public:
     QCOMPARE(b->functions().size(), 2);
     QCOMPARE(c->functions().size(), 2);
     QCOMPARE(f->functions().size(), 2);
-    QVERIFY(f->attributes() & AbstractMetaAttributes::FinalCppClass);
+    QVERIFY(f->attributes().testFlag(AbstractMetaClass::FinalCppClass));
 
     // implementing class, ownclass, declaringclass
     const auto ctorA = a->queryFunctions(FunctionQueryOption::Constructors).constFirst();
@@ -178,11 +178,11 @@ public:
     const auto funcF = virtualFunctionsF.constFirst();
 
     QCOMPARE(funcA->ownerClass(), a);
-    QVERIFY(funcC->attributes() & AbstractMetaAttributes::VirtualCppMethod);
+    QVERIFY(funcC->attributes().testFlag(AbstractMetaFunction::VirtualCppMethod));
     QCOMPARE(funcB->ownerClass(), b);
     QCOMPARE(funcC->ownerClass(), c);
-    QVERIFY(funcC->attributes() & AbstractMetaAttributes::OverriddenCppMethod);
-    QVERIFY(funcF->attributes() & AbstractMetaAttributes::FinalCppMethod);
+    QVERIFY(funcC->attributes().testFlag(AbstractMetaFunction::OverriddenCppMethod));
+    QVERIFY(funcF->attributes().testFlag(AbstractMetaFunction::FinalCppMethod));
 
     QCOMPARE(funcA->declaringClass(), a);
     QCOMPARE(funcB->declaringClass(), a);

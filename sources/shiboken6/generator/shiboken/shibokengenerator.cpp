@@ -239,7 +239,7 @@ bool ShibokenGenerator::shouldWriteVirtualMethodNative(const AbstractMetaFunctio
     const AbstractMetaClass *metaClass = func->ownerClass();
     return (!avoidProtectedHack() || !metaClass->hasPrivateDestructor())
             && ((func->isVirtual() || func->isAbstract())
-            && (func->attributes() & AbstractMetaAttributes::FinalCppMethod) == 0);
+                 && !func->attributes().testFlag(AbstractMetaFunction::FinalCppMethod));
 }
 
 QString ShibokenGenerator::wrapperName(const AbstractMetaClass *metaClass) const

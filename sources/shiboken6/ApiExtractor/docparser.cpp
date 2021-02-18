@@ -77,7 +77,7 @@ bool DocParser::skipForQuery(const AbstractMetaFunctionCPtr &func)
 {
     // Skip private functions and copies created by AbstractMetaClass::fixFunctions()
     if (!func || func->isPrivate()
-        || (func->attributes() & AbstractMetaAttributes::AddedMethod) != 0
+        || func->attributes().testFlag(AbstractMetaFunction::AddedMethod)
         || func->isModifiedRemoved()
         || func->declaringClass() != func->ownerClass()
         || func->isConversionOperator()) {

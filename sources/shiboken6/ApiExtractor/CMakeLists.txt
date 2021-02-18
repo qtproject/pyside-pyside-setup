@@ -8,7 +8,6 @@ set(CMAKE_AUTOMOC ON)
 set(apiextractor_SRC
 apiextractor.cpp
 apiextractorresult.cpp
-abstractmetaattributes.cpp
 abstractmetaargument.cpp
 abstractmetabuilder.cpp
 abstractmetaenum.cpp

@@ -314,7 +314,7 @@ bool AbstractMetaBuilderPrivate::traverseStreamOperator(const FunctionModelItem 
 
     streamFunction->setArguments(arguments);
 
-    *streamFunction += AbstractMetaAttributes::FinalInTargetLang;
+    *streamFunction += AbstractMetaFunction::FinalInTargetLang;
     streamFunction->setAccess(Access::Public);
 
     AbstractMetaClass *funcClass;
@@ -960,10 +960,10 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
     metaClass->setSourceLocation(classItem->sourceLocation());
     metaClass->setTypeEntry(type);
     if ((type->typeFlags() & ComplexTypeEntry::ForceAbstract) != 0)
-        *metaClass += AbstractMetaAttributes::Abstract;
+        *metaClass += AbstractMetaClass::Abstract;
 
     if (classItem->isFinal())
-        *metaClass += AbstractMetaAttributes::FinalCppClass;
+        *metaClass += AbstractMetaClass::FinalCppClass;
 
     QStringList baseClassNames;
     const QList<_ClassModelItem::BaseClass> &baseClasses = classItem->baseClasses();
@@ -1212,9 +1212,9 @@ AbstractMetaFunctionRawPtrList
             result.append(metaFunction);
         } else if (function->functionType() == CodeModel::Constructor) {
             auto arguments = function->arguments();
-            *constructorAttributes |= AbstractMetaAttributes::HasRejectedConstructor;
+            *constructorAttributes |= AbstractMetaClass::HasRejectedConstructor;
             if (arguments.isEmpty() || arguments.constFirst()->defaultValue())
-                *constructorAttributes |= AbstractMetaAttributes::HasRejectedDefaultConstructor;
+                *constructorAttributes |= AbstractMetaClass::HasRejectedDefaultConstructor;
         }
     }
     return result;
@@ -1223,14 +1223,14 @@ AbstractMetaFunctionRawPtrList
 void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
                                                    AbstractMetaClass *metaClass)
 {
-    AbstractMetaAttributes::Attributes constructorAttributes;
+    AbstractMetaClass::Attributes constructorAttributes;
     const AbstractMetaFunctionRawPtrList functions =
         classFunctionList(scopeItem, &constructorAttributes, metaClass);
     metaClass->setAttributes(metaClass->attributes() | constructorAttributes);
 
     for (AbstractMetaFunction *metaFunction : functions) {
         if (metaClass->isNamespace())
-            *metaFunction += AbstractMetaAttributes::Static;
+            *metaFunction += AbstractMetaFunction::Static;
 
         const auto propertyFunction = metaClass->searchPropertyFunction(metaFunction->name());
         if (propertyFunction.index >= 0) {
@@ -1241,7 +1241,7 @@ void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
                 if (!metaFunction->isSignal()
                     && prop.typeEntry() == metaFunction->type().typeEntry()
                     && metaFunction->arguments().isEmpty()) {
-                    *metaFunction += AbstractMetaAttributes::PropertyReader;
+                    *metaFunction += AbstractMetaFunction::PropertyReader;
                     metaFunction->setPropertySpecIndex(propertyFunction.index);
                 }
                 break;
@@ -1252,14 +1252,14 @@ void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
                 // in the typesystem.
                 if (metaFunction->isVoid() && metaFunction->arguments().size() == 1
                     && (prop.typeEntry() == metaFunction->arguments().at(0).type().typeEntry())) {
-                    *metaFunction += AbstractMetaAttributes::PropertyWriter;
+                    *metaFunction += AbstractMetaFunction::PropertyWriter;
                     metaFunction->setPropertySpecIndex(propertyFunction.index);
                 }
                 break;
             case AbstractMetaClass::PropertyFunction::Reset:
                 // Property resetter must be in the form "void name()"
                 if (metaFunction->isVoid() && metaFunction->arguments().isEmpty()) {
-                    *metaFunction += AbstractMetaAttributes::PropertyResetter;
+                    *metaFunction += AbstractMetaFunction::PropertyResetter;
                     metaFunction->setPropertySpecIndex(propertyFunction.index);
                 }
                 break;
@@ -1273,9 +1273,9 @@ void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
             metaClass->setHasPrivateConstructor(true);
         if ((isInvalidDestructor || isInvalidConstructor)
             && !metaClass->hasNonPrivateConstructor()) {
-            *metaClass += AbstractMetaAttributes::FinalInTargetLang;
+            *metaClass += AbstractMetaClass::FinalInTargetLang;
         } else if (metaFunction->isConstructor() && !metaFunction->isPrivate()) {
-            *metaClass -= AbstractMetaAttributes::FinalInTargetLang;
+            *metaClass -= AbstractMetaClass::FinalInTargetLang;
             metaClass->setHasNonPrivateConstructor(true);
         }
 
@@ -1370,7 +1370,7 @@ void AbstractMetaBuilderPrivate::applyFunctionModifications(AbstractMetaFunction
             func->setOriginalName(func->name());
             func->setName(mod.renamedToName());
         } else if (mod.isAccessModifier()) {
-            funcRef -= AbstractMetaAttributes::Friendly;
+            funcRef -= AbstractMetaFunction::Friendly;
 
             if (mod.isPublic())
                 funcRef.modifyAccess(Access::Public);
@@ -1379,13 +1379,13 @@ void AbstractMetaBuilderPrivate::applyFunctionModifications(AbstractMetaFunction
             else if (mod.isPrivate())
                 funcRef.modifyAccess(Access::Private);
             else if (mod.isFriendly())
-                funcRef += AbstractMetaAttributes::Friendly;
+                funcRef += AbstractMetaFunction::Friendly;
         }
 
         if (mod.isFinal())
-            funcRef += AbstractMetaAttributes::FinalInTargetLang;
+            funcRef += AbstractMetaFunction::FinalInTargetLang;
         else if (mod.isNonFinal())
-            funcRef -= AbstractMetaAttributes::FinalInTargetLang;
+            funcRef -= AbstractMetaFunction::FinalInTargetLang;
     }
 }
 
@@ -1831,7 +1831,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
     auto *metaFunction = new AbstractMetaFunction;
     metaFunction->setSourceLocation(functionItem->sourceLocation());
     if (deprecated)
-        *metaFunction += AbstractMetaAttributes::Deprecated;
+        *metaFunction += AbstractMetaFunction::Deprecated;
 
     // Additional check for assignment/move assignment down below
     metaFunction->setFunctionType(functionTypeFromCodeModel(functionItem->functionType()));
@@ -1842,24 +1842,24 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
     metaFunction->setOriginalName(functionItem->name());
 
     if (functionItem->isAbstract())
-        *metaFunction += AbstractMetaAttributes::Abstract;
+        *metaFunction += AbstractMetaFunction::Abstract;
 
     if (functionItem->isVirtual()) {
-        *metaFunction += AbstractMetaAttributes::VirtualCppMethod;
+        *metaFunction += AbstractMetaFunction::VirtualCppMethod;
         if (functionItem->isOverride())
-            *metaFunction += AbstractMetaAttributes::OverriddenCppMethod;
+            *metaFunction += AbstractMetaFunction::OverriddenCppMethod;
         if (functionItem->isFinal())
-            *metaFunction += AbstractMetaAttributes::FinalCppMethod;
+            *metaFunction += AbstractMetaFunction::FinalCppMethod;
     } else {
-        *metaFunction += AbstractMetaAttributes::FinalInTargetLang;
+        *metaFunction += AbstractMetaFunction::FinalInTargetLang;
     }
 
     if (functionItem->isInvokable())
-        *metaFunction += AbstractMetaAttributes::Invokable;
+        *metaFunction += AbstractMetaFunction::Invokable;
 
     if (functionItem->isStatic()) {
-        *metaFunction += AbstractMetaAttributes::Static;
-        *metaFunction += AbstractMetaAttributes::FinalInTargetLang;
+        *metaFunction += AbstractMetaFunction::Static;
+        *metaFunction += AbstractMetaFunction::FinalInTargetLang;
     }
 
     // Access rights

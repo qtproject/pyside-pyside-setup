@@ -2878,7 +2878,7 @@ void CppGenerator::writeFunctionCalls(TextStream &s, const OverloadData &overloa
                 {
                     Indentation indent(s);
                     writeSingleFunctionCall(s, overloadData, func, context);
-                    if (func->attributes().testFlag(AbstractMetaAttributes::Deprecated)) {
+                    if (func->attributes().testFlag(AbstractMetaFunction::Deprecated)) {
                         s << "PyErr_WarnEx(PyExc_DeprecationWarning, \"";
                         if (auto cls = context.metaClass())
                             s << cls->name() << '.';

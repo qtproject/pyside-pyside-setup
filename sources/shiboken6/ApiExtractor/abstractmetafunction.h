@@ -32,7 +32,6 @@
 #include "abstractmetalang_enums.h"
 #include "abstractmetalang_typedefs.h"
 #include "abstractmetaargument.h"
-#include "abstractmetaattributes.h"
 #include "typesystem_enums.h"
 #include "typesystem_typedefs.h"
 
@@ -50,7 +49,7 @@ class SourceLocation;
 struct ArgumentOwner;
 struct ReferenceCount;
 
-class AbstractMetaFunction : public AbstractMetaAttributes
+class AbstractMetaFunction
 {
     Q_GADGET
 public:
@@ -100,6 +99,50 @@ public:
     };
     Q_DECLARE_FLAGS(CompareResult, CompareResultFlag)
     Q_FLAG(CompareResultFlag)
+
+    enum Attribute {
+        None                        = 0x00000000,
+
+        Friendly                    = 0x00000001,
+
+        Abstract                    = 0x00000002,
+        Static                      = 0x00000004,
+
+        FinalInTargetLang           = 0x00000010,
+
+        GetterFunction              = 0x00000020,
+        SetterFunction              = 0x00000040,
+
+        PropertyReader              = 0x00000100,
+        PropertyWriter              = 0x00000200,
+        PropertyResetter            = 0x00000400,
+
+        Invokable                   = 0x00001000,
+
+        VirtualCppMethod            = 0x00010000,
+        OverriddenCppMethod         = 0x00020000,
+        FinalCppMethod              = 0x00040000,
+        // Add by meta builder (implicit constructors, inherited methods, etc)
+        AddedMethod                 = 0x001000000,
+        Deprecated                  = 0x002000000
+    };
+    Q_DECLARE_FLAGS(Attributes, Attribute)
+    Q_FLAG(Attribute)
+
+    Attributes attributes() const;
+    void setAttributes(Attributes attributes);
+
+    void operator+=(Attribute attribute);
+    void operator-=(Attribute attribute);
+
+    bool isFinalInTargetLang() const;
+    bool isAbstract() const;
+    bool isStatic() const;
+    bool isInvokable() const;
+    bool isPropertyReader() const;
+    bool isPropertyWriter() const;
+    bool isPropertyResetter() const;
+    bool isFriendly() const;
 
     AbstractMetaFunction();
     explicit AbstractMetaFunction(const AddedFunctionPtr &addedFunc);
@@ -357,7 +400,49 @@ private:
     QScopedPointer<AbstractMetaFunctionPrivate> d;
 };
 
+inline bool AbstractMetaFunction::isFinalInTargetLang() const
+{
+    return attributes().testFlag(FinalInTargetLang);
+}
+
+inline bool AbstractMetaFunction::isAbstract() const
+{
+    return attributes().testFlag(Abstract);
+}
+
+inline bool AbstractMetaFunction::isStatic() const
+{
+    return attributes().testFlag(Static);
+}
+
+inline bool AbstractMetaFunction::isInvokable() const
+{
+    return attributes().testFlag(Invokable);
+}
+
+inline bool AbstractMetaFunction::isPropertyReader() const
+{
+    return attributes().testFlag(PropertyReader);
+}
+
+inline bool AbstractMetaFunction::isPropertyWriter() const
+{
+    return attributes().testFlag(PropertyWriter);
+}
+
+inline bool AbstractMetaFunction::isPropertyResetter() const
+{
+    return attributes().testFlag(PropertyResetter);
+}
+
+inline bool AbstractMetaFunction::isFriendly() const
+{
+    return attributes().testFlag(Friendly);
+}
+
 Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaFunction::CompareResult)
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaFunction::Attributes);
 
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug debug, const AbstractMetaFunction *af);

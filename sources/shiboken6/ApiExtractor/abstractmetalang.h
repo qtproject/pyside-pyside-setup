@@ -31,7 +31,6 @@
 
 #include "abstractmetalang_enums.h"
 #include "abstractmetalang_typedefs.h"
-#include "abstractmetaattributes.h"
 #include "enclosingclassmixin.h"
 #include "typesystem_enums.h"
 #include "typesystem_typedefs.h"
@@ -49,7 +48,7 @@ class EnumTypeEntry;
 class QPropertySpec;
 class SourceLocation;
 
-class AbstractMetaClass : public AbstractMetaAttributes, public EnclosingClassMixin
+class AbstractMetaClass : public EnclosingClassMixin
 {
     Q_GADGET
 public:
@@ -61,6 +60,30 @@ public:
         CppVirtualMethodWrapper = 0x2 // Need C++ wrapper for calling Python overrides
     };
     Q_DECLARE_FLAGS(CppWrapper, CppWrapperFlag)
+
+    enum Attribute {
+        None                          = 0x00000000,
+
+        Abstract                      = 0x00000001,
+        FinalInTargetLang             = 0x00000002,
+
+        HasRejectedConstructor        = 0x00000010,
+        HasRejectedDefaultConstructor = 0x00000020,
+
+        FinalCppClass                 = 0x00000100,
+        Deprecated                    = 0x00000200
+    };
+    Q_DECLARE_FLAGS(Attributes, Attribute)
+    Q_FLAG(Attribute)
+
+    Attributes attributes() const;
+    void setAttributes(Attributes attributes);
+
+    void operator+=(Attribute attribute);
+    void operator-=(Attribute attribute);
+
+    bool isFinalInTargetLang() const;
+    bool isAbstract() const;
 
     AbstractMetaClass();
     ~AbstractMetaClass();
@@ -347,6 +370,16 @@ private:
     QScopedPointer<AbstractMetaClassPrivate> d;
 };
 
+inline bool AbstractMetaClass::isFinalInTargetLang() const
+{
+    return attributes().testFlag(FinalInTargetLang);
+}
+
+inline bool AbstractMetaClass::isAbstract() const
+{
+    return attributes().testFlag(Abstract);
+}
+
 template <class Function>
 void AbstractMetaClass::invisibleNamespaceRecursion(Function f) const
 {
@@ -359,5 +392,7 @@ void AbstractMetaClass::invisibleNamespaceRecursion(Function f) const
 }
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaClass::CppWrapper);
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaClass::Attributes);
 
 #endif // ABSTRACTMETALANG_H

@@ -150,7 +150,7 @@ void HeaderGenerator::generateClass(TextStream &s, const GeneratorContext &class
         const auto &funcs = filterFunctions(metaClass);
         int maxOverrides = 0;
         for (const auto &func : funcs) {
-            if ((func->attributes() & AbstractMetaAttributes::FinalCppMethod) == 0) {
+            if (!func->attributes().testFlag(AbstractMetaFunction::FinalCppMethod)) {
                 writeFunction(s, func);
                 // PYSIDE-803: Build a boolean cache for unused overrides.
                 if (shouldWriteVirtualMethodNative(func))
