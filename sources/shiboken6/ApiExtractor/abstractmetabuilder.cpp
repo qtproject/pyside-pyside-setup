@@ -2718,6 +2718,20 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
     return true;
 }
 
+static bool inheritTemplateFunction(const AbstractMetaFunctionCPtr &function,
+                                    const AbstractMetaFunctionCList &existingSubclassFuncs,
+                                    const AbstractMetaClass *subclass,
+                                    const AbstractMetaClass *templateBaseClass)
+{
+    // If the function is modified or the instantiation has an equally named
+    // function we are shadowing, so we need to skip it (unless the subclass
+    // declares it via "using").
+    if (function->isModifiedRemoved())
+        return false;
+    return AbstractMetaFunction::find(existingSubclassFuncs, function->name()) == nullptr
+        || subclass->isUsingMember(templateBaseClass, function->name(), Access::Protected);
+}
+
 void AbstractMetaBuilderPrivate::inheritTemplateFunctions(AbstractMetaClass *subclass)
 {
     QString errorMessage;
@@ -2738,10 +2752,8 @@ void AbstractMetaBuilderPrivate::inheritTemplateFunctions(AbstractMetaClass *sub
         subclass->functions(); // Take copy
     const auto &templateClassFunctions = templateClass->functions();
     for (const auto &function : templateClassFunctions) {
-        // If the function is modified or the instantiation has an equally named
-        // function we have shadowing, so we need to skip it.
-        if (function->isModifiedRemoved()
-            || AbstractMetaFunction::find(existingSubclassFuncs, function->name()) != nullptr) {
+        if (!inheritTemplateFunction(function, existingSubclassFuncs,
+                                     subclass, templateClass)) {
             continue;
         }
 

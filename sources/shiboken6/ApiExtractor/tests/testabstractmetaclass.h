@@ -55,6 +55,8 @@ private slots:
     void testFreeOperators_data();
     void testFreeOperators();
     void testUsingMembers();
+    void testUsingTemplateMembers_data();
+    void testUsingTemplateMembers();
 };
 
 #endif // TESTABSTRACTMETACLASS_H

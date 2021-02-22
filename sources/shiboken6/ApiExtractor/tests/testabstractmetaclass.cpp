@@ -713,4 +713,52 @@ public:
     }
 }
 
+void TestAbstractMetaClass::testUsingTemplateMembers_data()
+{
+    const QByteArray cppCode(R"CPP(
+struct Value {
+   int value = 0;
+};
+
+template <class T> class List {
+public:
+    List();
+    void append(const T &t);
+};
+
+class ValueList : public List<Value> {
+public:
+   void append(const Value &v1, const Value &v2);
+)CPP");
+
+    QTest::addColumn<QByteArray>("code");
+    QTest::newRow("simple")
+        << (cppCode + "using List::append;\n};\n");
+    QTest::newRow("with-template-params")
+        << (cppCode + "using List<Value>::append;\n};\n");
+}
+
+void TestAbstractMetaClass::testUsingTemplateMembers()
+{
+    QFETCH(QByteArray, code);
+
+    const char xmlCode[] = R"XML(
+<typesystem package='Foo'>
+    <primitive-type name='int'/>
+    <value-type name='Value'/>
+    <container-type name='List' type='list'/>
+    <value-type name='ValueList'/>
+</typesystem>
+)XML";
+
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(code.constData(), xmlCode));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
+    auto valueList = AbstractMetaClass::findClass(classes, QLatin1String("ValueList"));
+    QVERIFY(valueList);
+    auto list = valueList->templateBaseClass();
+    QVERIFY(valueList->isUsingMember(list, QLatin1String("append"), Access::Public));
+    QCOMPARE(valueList->queryFunctionsByName(QLatin1String("append")).size(), 2);
+}
+
 QTEST_APPLESS_MAIN(TestAbstractMetaClass)
