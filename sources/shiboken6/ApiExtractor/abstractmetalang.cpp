@@ -72,6 +72,12 @@ public:
     {
     }
 
+    void addFunction(const AbstractMetaFunctionCPtr &function);
+    void addConstructor(AbstractMetaFunction::FunctionType t,
+                        Access access,
+                        const AbstractMetaArgumentList &arguments,
+                        AbstractMetaClass *q);
+
     uint m_hasVirtuals : 1;
     uint m_isPolymorphic : 1;
     uint m_hasNonpublic : 1;
@@ -389,19 +395,24 @@ void AbstractMetaClass::addPropertySpec(const QPropertySpec &spec)
     d->m_propertySpecs << spec;
 }
 
-void AbstractMetaClass::addFunction(const AbstractMetaFunctionCPtr &function)
+void AbstractMetaClassPrivate::addFunction(const AbstractMetaFunctionCPtr &function)
 {
     Q_ASSERT(!function->signature().startsWith(QLatin1Char('(')));
-    qSharedPointerConstCast<AbstractMetaFunction>(function)->setOwnerClass(this);
 
     if (!function->isDestructor())
-        d->m_functions << function;
+        m_functions << function;
     else
         Q_ASSERT(false); //memory leak
 
-    d->m_hasVirtuals |= function->isVirtual();
-    d->m_isPolymorphic |= d->m_hasVirtuals;
-    d->m_hasNonpublic |= !function->isPublic();
+    m_hasVirtuals |= function->isVirtual();
+    m_isPolymorphic |= m_hasVirtuals;
+    m_hasNonpublic |= !function->isPublic();
+}
+
+void AbstractMetaClass::addFunction(const AbstractMetaFunctionCPtr &function)
+{
+    qSharedPointerConstCast<AbstractMetaFunction>(function)->setOwnerClass(this);
+    d->addFunction(function);
 }
 
 bool AbstractMetaClass::hasSignal(const AbstractMetaFunction *other) const
@@ -766,36 +777,37 @@ bool AbstractMetaClass::hasPrivateCopyConstructor() const
     return !copyCt.isNull() && copyCt->isPrivate();
 }
 
-void AbstractMetaClass::addDefaultConstructor()
+void AbstractMetaClassPrivate::addConstructor(AbstractMetaFunction::FunctionType t,
+                                              Access access,
+                                              const AbstractMetaArgumentList &arguments,
+                                              AbstractMetaClass *q)
 {
     auto *f = new AbstractMetaFunction;
     f->setType(AbstractMetaType::createVoid());
-    f->setOriginalName(name());
-    f->setName(name());
-    f->setOwnerClass(this);
-    f->setFunctionType(AbstractMetaFunction::ConstructorFunction);
-    f->setArguments(AbstractMetaArgumentList());
-    f->setDeclaringClass(this);
-    f->setAccess(Access::Public);
+    f->setOriginalName(q->name());
+    f->setName(q->name());
+    f->setOwnerClass(q);
+    f->setFunctionType(t);
+    f->setArguments(arguments);
+    f->setDeclaringClass(q);
+    f->setAccess(access);
+    if (access != Access::Private)
+         m_hasNonPrivateConstructor = true;
     f->setAttributes(AbstractMetaFunction::FinalInTargetLang
                      | AbstractMetaFunction::AddedMethod);
-    f->setImplementingClass(this);
+    f->setImplementingClass(q);
 
     addFunction(AbstractMetaFunctionCPtr(f));
-    this->setHasNonPrivateConstructor(true);
+}
+
+void AbstractMetaClass::addDefaultConstructor()
+{
+    d->addConstructor(AbstractMetaFunction::ConstructorFunction,
+                      Access::Public, {}, this);
 }
 
 void AbstractMetaClass::addDefaultCopyConstructor()
 {
-    d->m_hasNonPrivateConstructor = true;
-    auto f = new AbstractMetaFunction;
-    f->setType(AbstractMetaType::createVoid());
-    f->setOriginalName(name());
-    f->setName(name());
-    f->setOwnerClass(this);
-    f->setFunctionType(AbstractMetaFunction::CopyConstructorFunction);
-    f->setDeclaringClass(this);
-
     AbstractMetaType argType(typeEntry());
     argType.setReferenceType(LValueReference);
     argType.setConstant(true);
@@ -804,13 +816,9 @@ void AbstractMetaClass::addDefaultCopyConstructor()
     AbstractMetaArgument arg;
     arg.setType(argType);
     arg.setName(name());
-    f->addArgument(arg);
-    f->setAccess(Access::Public);
-    f->setAttributes(AbstractMetaFunction::FinalInTargetLang
-                     | AbstractMetaFunction::AddedMethod);
-    f->setImplementingClass(this);
 
-    addFunction(AbstractMetaFunctionCPtr(f));
+    d->addConstructor(AbstractMetaFunction::CopyConstructorFunction,
+                      Access::Public, {arg}, this);
 }
 
 bool AbstractMetaClass::hasNonPrivateConstructor() const
