@@ -1,7 +1,7 @@
 # WigglyWidget
 
 The original Qt/C++ example can be found here:
-https://doc.qt.io/qt-5/qtwidgets-widgets-wiggly-example.html
+https://doc.qt.io/qt-6/qtwidgets-widgets-wiggly-example.html
 
 This example shows how to interact with a custom widget from two
 different ways:
@@ -39,33 +39,35 @@ The most important files are:
  * `pyside_config.py` which is located in the utils directory, one level
    up, to get the path for Shiboken and PySide.
 
-Now create a `build/` directory, and from inside run `cmake ..` to use
-the provided `CMakeLists.txt`.
-To build, just run `make`, and `make install` to copy the generated files
-to the main example directory to be able to run the final example:
-`python main.py`.
-You should be able to see two identical custom widgets, one being the
-Python translation, and the other one being the C++ one.
+Now create a `build/` directory, and from inside run `cmake` to use
+the provided `CMakeLists.txt`:
 
-### Windows
-
-For windows it's recommended to use either `nmake`, `jom` or `ninja`,
-when running cmake.
-
+macOS/Linux:
 ```bash
-cmake -H.. -B. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release  # for nmake
-cmake -H.. -B. -G "NMake Makefiles JOM" -DCMAKE_BUILD_TYPE=Release  # for jom
-cmake -H.. -B. -G Ninja -DCMAKE_BUILD_TYPE=Release  # for ninja
+cd ~/pyside-setup/examples/widgetbinding
 ```
 
-### Linux, macOS
-
-Generally using `make` will be enough, but as in the Windows case, you can use
-ninja to build the project.
+On Windows:
+```bash
+cd C:\pyside-setup\examples\widgetbinding
+```
 
 ```bash
+mkdir build
+cd build
 cmake -H.. -B. -G Ninja -DCMAKE_BUILD_TYPE=Release
+ninja
+ninja install
+cd ..
 ```
+
+The final example can then be run by:
+```bash
+python main.py
+```
+
+You should see two identical custom widgets, one being the
+Python translation, and the other one being the C++ one.
 
 ## Final words
 
