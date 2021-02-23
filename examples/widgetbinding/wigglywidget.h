@@ -53,8 +53,8 @@
 
 #include "macros.h"
 
-#include <QWidget>
-#include <QBasicTimer>
+#include <QtWidgets/QWidget>
+#include <QtCore/QBasicTimer>
 
 //! [0]
 class BINDINGS_API WigglyWidget : public QWidget
