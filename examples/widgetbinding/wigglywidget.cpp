@@ -50,9 +50,9 @@
 
 #include "wigglywidget.h"
 
-#include <QFontMetrics>
-#include <QPainter>
-#include <QTimerEvent>
+#include <QtGui/QFontMetrics>
+#include <QtGui/QPainter>
+#include <QtCore/QTimerEvent>
 
 //! [0]
 WigglyWidget::WigglyWidget(QWidget *parent)

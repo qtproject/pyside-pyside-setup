@@ -116,13 +116,10 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 # =============================== CMake target - wiggly_library ===============================
 
 
-# Get all relevant Qt include dirs, to pass them on to shiboken.
-get_property(QT_CORE_INCLUDE_DIRS TARGET Qt6::Core PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
-get_property(QT_GUI_INCLUDE_DIRS TARGET Qt6::Gui PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
+# Get the relevant Qt include dirs, to pass them on to shiboken.
 get_property(QT_WIDGETS_INCLUDE_DIRS TARGET Qt6::Widgets PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
-set(QT_INCLUDE_DIRS ${QT_CORE_INCLUDE_DIRS} ${QT_GUI_INCLUDE_DIRS} ${QT_WIDGETS_INCLUDE_DIRS})
 set(INCLUDES "")
-foreach(INCLUDE_DIR ${QT_INCLUDE_DIRS})
+foreach(INCLUDE_DIR ${QT_WIDGETS_INCLUDE_DIRS})
     list(APPEND INCLUDES "-I${INCLUDE_DIR}")
 endforeach()
 
