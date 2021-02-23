@@ -60,26 +60,22 @@ To build this example with CMake you will need a recent version of CMake (3.1+).
 You can build this example by executing the following commands
 (slightly adapted to your file system layout) in a terminal:
 
-On macOS/Linux:
+macOS/Linux:
 ```bash
 cd ~/pyside-setup/examples/scriptableapplication
-mkdir build
-cd build
-cmake -H.. -B. -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release
-make
-./scriptableapplication
 ```
 
 On Windows:
 ```bash
 cd C:\pyside-setup\examples\scriptableapplication
+```
+
+```bash
 mkdir build
 cd build
-cmake -H.. -B. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release
-# or if you have jom available
-# cmake -H.. -B. -G "NMake Makefiles JOM" -DCMAKE_BUILD_TYPE=Release
-nmake # or jom
-scriptableapplication.exe
+cmake -H.. -B. -G Ninja -DCMAKE_BUILD_TYPE=Release
+ninja
+./scriptableapplication
 ```
 
 ### Using QMake

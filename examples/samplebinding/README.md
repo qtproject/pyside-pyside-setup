@@ -130,6 +130,7 @@ The following requirements need to be met:
 * A PySide package is installed into the current active Python
   environment (system or virtualenv)
 * A new enough version of CMake (**3.1+**).
+* ninja
 
 For Windows you will also need:
 * a Visual Studio environment to be active in your terminal
@@ -146,28 +147,30 @@ using the current PySide/Shiboken installation.
 You can build and run this example by executing the following commands
 (slightly adapted to your file system layout) in a terminal:
 
-On macOS/Linux:
+macOS/Linux:
 ```bash
 cd ~/pyside-setup/examples/samplebinding
-mkdir build
-cd build
-cmake -H.. -B. -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release
-make
-make install
-python ../main.py
 ```
 
 On Windows:
 ```bash
 cd C:\pyside-setup\examples\samplebinding
+```
+
+```bash
 mkdir build
 cd build
-cmake -H.. -B. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release
-# or if you have jom available
-# cmake -H.. -B. -G "NMake Makefiles JOM" -DCMAKE_BUILD_TYPE=Release
-nmake # or jom
-nmake install # or jom install
-python ..\main.py
+mkdir build
+cd build
+cmake -H.. -B. -G Ninja -DCMAKE_BUILD_TYPE=Release
+ninja
+ninja install
+cd ..
+```
+
+The final example can then be run by:
+```bash
+python main.py
 ```
 
 #### Windows troubleshooting
