@@ -140,7 +140,7 @@ for the local Python related notes.
 The system required ``libxml2`` and ``libxslt``, also on the Python environment, ``sphinx`` and
 ``graphviz`` need to be installed before running the installation process::
 
-    pip install graphviz sphinx
+    pip install graphviz sphinx sphinx_tabs
 
 After installing ``graphviz``, the ``dot`` command needs to be in PATH, otherwise,
 the process will fail. Installing ``graphviz`` system-wide is also an option.
@@ -155,9 +155,20 @@ directory, and run::
 
     ninja apidoc
 
-.. note:: The :command:`apidoc` make target builds offline documenation in QCH (Qt Creator Help)
+.. note:: The :command:`apidoc` make target builds offline documentation in QCH (Qt Creator Help)
    format by default. You can switch to building for the online use with the ``--doc-build-online``
    configure option.
+
+The target executes several steps:
+
+#. The ``qdoc`` tool is run over the Qt source code to produce documentation in WebXML format.
+#. ``shiboken6`` is run to extract the functions for which bindings exist from WebXML and convert it into RST.
+#. ``sphinx`` is run to produce the documentation in HTML format.
+
+Re-running the command will not execute step 1 unless the file
+``qdoc_output/webxml/qtcore-index.webxml`` is removed from the build tree.
+Similarly, step 2 will not be executed unless the file ``rst/PySide6/QtCore/index.rst``
+is removed.
 
 Finally, you will get a ``html`` directory containing all the generated documentation. The offline
 help files, ``PySide.qch`` and ``Shiboken.qch``, can be moved to any directory of your choice. You

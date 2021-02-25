@@ -112,15 +112,16 @@ if (FULLDOCSBUILD)
 
     set(QDOC_TYPESYSTEM_PATH "${pyside6_SOURCE_DIR}${PATH_SEP}${pyside6_BINARY_DIR}")
 
-    add_custom_target(qdoc
-                    # Use dummy Qt version information, QDoc needs it but has no effect on WebXML output
-                    COMMAND ${CMAKE_COMMAND} -E env BUILDDIR=${CMAKE_CURRENT_LIST_DIR}/src QT_INSTALL_DOCS=${QT_SRC_DIR}/doc
-                    QT_VERSION=${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH}
-                    QT_VER=${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}
-                    QT_VERSION_TAG=${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH}
-                    qdoc pyside.qdocconf -single-exec -installdir ${DOC_DATA_DIR} -outputdir ${DOC_DATA_DIR}
-                    COMMENT "Running qdoc against Qt source code..."
-                    SOURCE "pyside.qdocconf")
+    add_custom_target(qdoc DEPENDS "${DOC_DATA_DIR}/webxml/qtcore-index.webxml")
+
+    add_custom_command(OUTPUT "${DOC_DATA_DIR}/webxml/qtcore-index.webxml"
+                       # Use dummy Qt version information, QDoc needs it but has no effect on WebXML output
+                       COMMAND ${CMAKE_COMMAND} -E env BUILDDIR=${CMAKE_CURRENT_LIST_DIR}/src QT_INSTALL_DOCS=${QT_SRC_DIR}/doc
+                       QT_VERSION=${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH}
+                       QT_VER=${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}
+                       QT_VERSION_TAG=${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH}
+                       qdoc pyside.qdocconf -single-exec -installdir ${DOC_DATA_DIR} -outputdir ${DOC_DATA_DIR}
+                       COMMENT "Running qdoc against Qt source code...")
 endif()
 
 # conditional tag for sphinx build
@@ -171,22 +172,24 @@ endif()
 # create conf.py based on conf.py.in
 configure_file("conf.py.in" "rst/conf.py" @ONLY)
 
+add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/rst/PySide6/QtCore/index.rst"
+                   COMMAND Shiboken6::shiboken6 --generator-set=qtdoc ${docHeader}
+                           --include-paths="${QT_INCLUDE_DIR}${PATH_SEP}${pyside6_SOURCE_DIR}${PATH_SEP}${TS_ROOT}"
+                           --api-version=${SUPPORTED_QT_VERSION}
+                           --typesystem-paths="${QDOC_TYPESYSTEM_PATH}"
+                           --library-source-dir=${QT_SRC_DIR}
+                           --documentation-data-dir=${DOC_DATA_DIR}/webxml
+                           --output-directory=${CMAKE_CURRENT_BINARY_DIR}/rst
+                           --documentation-code-snippets-dir=${CMAKE_CURRENT_BINARY_DIR}/rst/codesnippets/doc/src/snippets${PATH_SEP}${CMAKE_CURRENT_BINARY_DIR}/rst/codesnippets/examples
+                           --documentation-extra-sections-dir=${CMAKE_CURRENT_BINARY_DIR}/rst/extras
+                           --additional-documentation=${CMAKE_CURRENT_BINARY_DIR}/rst/additionaldocs.lst
+                           ${CMAKE_CURRENT_BINARY_DIR}/typesystem_doc.xml
+                   WORKING_DIRECTORY ${${module}_SOURCE_DIR}
+                   COMMENT "Running generator to generate documentation...")
+
 add_custom_target("docrsts"
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/rst
-    COMMAND Shiboken6::shiboken6 --generator-set=qtdoc ${docHeader}
-            --include-paths="${QT_INCLUDE_DIR}${PATH_SEP}${pyside6_SOURCE_DIR}${PATH_SEP}${TS_ROOT}"
-            --api-version=${SUPPORTED_QT_VERSION}
-            --typesystem-paths="${QDOC_TYPESYSTEM_PATH}"
-            --library-source-dir=${QT_SRC_DIR}
-            --documentation-data-dir=${DOC_DATA_DIR}/webxml
-            --output-directory=${CMAKE_CURRENT_BINARY_DIR}/rst
-            --documentation-code-snippets-dir=${CMAKE_CURRENT_BINARY_DIR}/rst/codesnippets/doc/src/snippets${PATH_SEP}${CMAKE_CURRENT_BINARY_DIR}/rst/codesnippets/examples
-            --documentation-extra-sections-dir=${CMAKE_CURRENT_BINARY_DIR}/rst/extras
-            --additional-documentation=${CMAKE_CURRENT_BINARY_DIR}/rst/additionaldocs.lst
-            ${CMAKE_CURRENT_BINARY_DIR}/typesystem_doc.xml
-    WORKING_DIRECTORY ${${module}_SOURCE_DIR}
-    COMMENT "Running generator to generate documentation..."
-)
+    DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/rst/PySide6/QtCore/index.rst")
 
 add_custom_target("licensedocrsts"
     COMMAND ${PYTHON_EXECUTABLE}
