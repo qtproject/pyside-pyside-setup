@@ -28,6 +28,7 @@
 
 #include "modifications.h"
 #include "modifications_p.h"
+#include "exception.h"
 #include "typedatabase.h"
 #include "typeparser.h"
 #include "typesystem.h"
@@ -42,8 +43,11 @@ static inline QString callOperator() { return QStringLiteral("operator()"); }
 QString TemplateInstance::expandCode() const
 {
     TemplateEntry *templateEntry = TypeDatabase::instance()->findTemplate(m_name);
-    if (!templateEntry)
-        qFatal("<insert-template> referring to non-existing template '%s'.", qPrintable(m_name));
+    if (!templateEntry) {
+        const QString m = QLatin1String("<insert-template> referring to non-existing template '")
+                          + m_name + QLatin1String("'.");
+        throw Exception(m);
+    }
 
     QString code = templateEntry->code();
     for (auto it = replaceRules.cbegin(), end = replaceRules.cend(); it != end; ++it)

@@ -31,6 +31,7 @@
 #include "cppgenerator.h"
 #include "apiextractorresult.h"
 #include "ctypenames.h"
+#include <exception.h>
 #include "pytypenames.h"
 #include "fileout.h"
 #include "overloaddata.h"
@@ -2927,8 +2928,11 @@ void CppGenerator::writeSingleFunctionCall(TextStream &s,
             } else if (!injectCodeCallsFunc && !func->isUserAdded() && !hasConversionRule) {
                 // When an argument is removed from a method signature and no other means of calling
                 // the method are provided (as with code injection) the generator must abort.
-                qFatal("No way to call '%s::%s' with the modifications described in the type system.",
-                       qPrintable(func->ownerClass()->name()), qPrintable(func->signature()));
+                QString m;
+                QTextStream(&m) << "No way to call '" << func->ownerClass()->name()
+                    << "::" << func->signature()
+                    << "' with the modifications described in the type system.";
+                throw Exception(m);
             }
             removedArgs++;
             continue;
@@ -3027,9 +3031,11 @@ void CppGenerator::writeCppToPythonFunction(TextStream &s, const AbstractMetaTyp
 {
     const CustomConversion *customConversion = containerType.typeEntry()->customConversion();
     if (!customConversion) {
-        qFatal("Can't write the C++ to Python conversion function for container type '%s' - "\
-               "no conversion rule was defined for it in the type system.",
-               qPrintable(containerType.typeEntry()->qualifiedCppName()));
+        QString m;
+        QTextStream(&m) << "Can't write the C++ to Python conversion function for container type '"
+             << containerType.typeEntry()->qualifiedCppName()
+             << "' - no conversion rule was defined for it in the type system.";
+        throw Exception(m);
     }
     if (!containerType.typeEntry()->isContainer()) {
         writeCppToPythonFunction(s, customConversion);
@@ -3157,10 +3163,10 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s,
     }
     if (typeCheck.isEmpty()) {
         if (!toNative->sourceType() || toNative->sourceType()->isPrimitive()) {
-            qFatal("User added implicit conversion for C++ type '%s' must provide either an input "\
-                   "type check function or a non primitive type entry.",
-                   qPrintable(targetType->qualifiedCppName()));
-
+            QString m;
+            QTextStream(&m) << "User added implicit conversion for C++ type '" << targetType->qualifiedCppName()
+                << "' must provide either an input type check function or a non primitive type entry.";
+            throw Exception(m);
         }
         typeCheck = QString::fromLatin1("PyObject_TypeCheck(%in, %1)").arg(cpythonTypeNameExt(toNative->sourceType()));
     }
@@ -6388,8 +6394,11 @@ void CppGenerator::writeDefaultSequenceMethods(TextStream &s,
 
     const AbstractMetaTypeList &instantiations = metaClass->templateBaseClassInstantiations();
     if (instantiations.isEmpty()) {
-        qFatal("shiboken: %s: Internal error, no instantiations of \"%s\" were found.",
-               __FUNCTION__, qPrintable(metaClass->qualifiedCppName()));
+        QString m;
+        QTextStream(&m) << "shiboken: " << __FUNCTION__
+            << ": Internal error, no instantiations of \"" << metaClass->qualifiedCppName()
+            << "\" were found.";
+        throw Exception(m);
     }
     const AbstractMetaType &itemType = instantiations.constFirst();
 

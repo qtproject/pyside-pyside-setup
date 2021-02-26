@@ -33,6 +33,7 @@
 #include <abstractmetafield.h>
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
+#include <exception.h>
 #include <messages.h>
 #include <modifications.h>
 #include "overloaddata.h"
@@ -1892,7 +1893,7 @@ static QString getConverterTypeSystemVariableArgument(const QString &code, int p
         ++count;
     }
     if (parenthesisDepth != 0)
-        qFatal("Unbalanced parenthesis on type system converter variable call.");
+        throw Exception("Unbalanced parenthesis on type system converter variable call.");
     return arg;
 }
 
@@ -1922,9 +1923,9 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
         QString message;
         const auto conversionTypeO = buildAbstractMetaTypeFromString(conversionTypeName, &message);
         if (!conversionTypeO.has_value()) {
-            qFatal("%s", qPrintable(msgCannotFindType(conversionTypeName,
-                                                      typeSystemConvName().value(converterVariable),
-                                                      message)));
+            throw Exception(msgCannotFindType(conversionTypeName,
+                                              typeSystemConvName().value(converterVariable),
+                                              message));
         }
         const auto conversionType = conversionTypeO.value();
         QString conversion;
@@ -1944,7 +1945,7 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
                 if (!varType.isEmpty()) {
                     const QString conversionSignature = conversionType.cppSignature();
                     if (varType != QLatin1String("auto") && varType != conversionSignature)
-                        qFatal("%s", qPrintable(msgConversionTypesDiffer(varType, conversionSignature)));
+                        throw Exception(msgConversionTypesDiffer(varType, conversionSignature));
                     c << getFullTypeName(conversionType) << ' ' << varName;
                     writeMinimalConstructorExpression(c, api(), conversionType);
                     c << ";\n";
@@ -1984,8 +1985,10 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
                 QString arg = getConverterTypeSystemVariableArgument(code, match.capturedEnd());
                 conversionString += arg;
                 if (converterVariable == TypeSystemToPythonFunction && !isVariable(arg)) {
-                    qFatal("Only variables are acceptable as argument to %%CONVERTTOPYTHON type system variable on code snippet: '%s'",
-                           qPrintable(code));
+                    QString m;
+                    QTextStream(&m) << "Only variables are acceptable as argument to %%CONVERTTOPYTHON type system variable on code snippet: '"
+                        << code << '\'';
+                    throw Exception(m);
                 }
                 if (conversion.contains(QLatin1String("%in"))) {
                     conversion.prepend(QLatin1Char('('));
@@ -2430,8 +2433,10 @@ void ShibokenGenerator::collectContainerTypesFromConverterMacros(const QString &
             if (type.has_value()) {
                 addInstantiatedContainersAndSmartPointers(type.value(), type->originalTypeDescription());
             } else {
-                qFatal("%s: Cannot translate type \"%s\": %s", __FUNCTION__,
-                       qPrintable(typeString), qPrintable(errorMessage));
+                QString m;
+                QTextStream(&m) << __FUNCTION__ << ": Cannot translate type \""
+                    << typeString << "\": " << errorMessage;
+                throw Exception(m);
             }
         }
         start = end;

@@ -31,6 +31,7 @@
 #include "abstractmetafield.h"
 #include "abstractmetafunction.h"
 #include "graph.h"
+#include "exception.h"
 #include "messages.h"
 #include "propertyspec.h"
 #include "reporthandler.h"
@@ -606,7 +607,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
     const AddedFunctionList &globalUserFunctions = types->globalUserFunctions();
     for (const AddedFunctionPtr &addedFunc : globalUserFunctions) {
         if (!traverseAddedGlobalFunction(addedFunc, &errorMessage))
-            qFatal("%s", qPrintable(errorMessage));
+            throw Exception(errorMessage);
     }
 
     m_itemToClass.clear();
@@ -1342,7 +1343,7 @@ void AbstractMetaBuilderPrivate::fillAddedFunctions(AbstractMetaClass *metaClass
     const AddedFunctionList &addedFunctions = metaClass->typeEntry()->addedFunctions();
     for (const AddedFunctionPtr &addedFunc : addedFunctions) {
         if (!traverseAddedMemberFunction(addedFunc, metaClass, &errorMessage))
-            qFatal("%s", qPrintable(errorMessage));
+            throw Exception(qPrintable(errorMessage));
     }
 }
 

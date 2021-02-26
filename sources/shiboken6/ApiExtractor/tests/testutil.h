@@ -36,6 +36,9 @@
 #include "reporthandler.h"
 #include "typedatabase.h"
 
+#include <exception>
+#include <memory>
+
 namespace TestUtil
 {
     static AbstractMetaBuilder *parse(const char *cppCode, const char *xmlCode,
@@ -70,12 +73,16 @@ namespace TestUtil
         arguments.append(QFile::encodeName(tempSource.fileName()));
         tempSource.write(cppCode, qint64(strlen(cppCode)));
         tempSource.close();
-        auto *builder = new AbstractMetaBuilder;
-        if (!builder->build(arguments)) {
-            delete builder;
-            return Q_NULLPTR;
+
+        auto builder = std::make_unique<AbstractMetaBuilder>();
+        try {
+            if (!builder->build(arguments))
+                return nullptr;
+        } catch (const std::exception &e) {
+            qWarning("%s", e.what());
+            return nullptr;
         }
-        return builder;
+        return builder.release();
     }
 } // namespace TestUtil
 

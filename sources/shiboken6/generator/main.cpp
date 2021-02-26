@@ -44,6 +44,8 @@
 #include "headergenerator.h"
 #include "qtdocgenerator.h"
 
+#include <exception>
+
 static const QChar clangOptionsSplitter = u',';
 static const QChar dropTypeEntriesSplitter = u';';
 static const QChar apiVersionSplitter = u'|';
@@ -421,7 +423,7 @@ static void parseIncludePathOption(const QString &option, HeaderType headerType,
     }
 }
 
-int main(int argc, char *argv[])
+int shibokenMain(int argc, char *argv[])
 {
     // PYSIDE-757: Request a deterministic ordering of QHash in the code model
     // and type system.
@@ -698,4 +700,16 @@ int main(int argc, char *argv[])
     std::cout << doneMessage.constData() << std::endl;
 
     return EXIT_SUCCESS;
+}
+
+int main(int argc, char *argv[])
+{
+    int ex = EXIT_SUCCESS;
+    try {
+        ex = shibokenMain(argc, argv);
+    }  catch (const std::exception &e) {
+        std::cerr << e.what() << std::endl;
+        ex = EXIT_FAILURE;
+    }
+    return ex;
 }
