@@ -40,7 +40,7 @@
 ****************************************************************************/
 -->
 <typesystem>
-    <template name="cppqlistofptrtoqvectors_to_py_conversion">
+    <template name="cppqlistofptrtoqlists_to_py_conversion">
         const int rowCount = %in.size();
         PyObject* %out = PyList_New(rowCount);
         for (int r = 0; r &lt; rowCount; ++r) {
@@ -56,7 +56,7 @@
         return %out;
     </template>
 
-    <template name="py_to_cppqlistofptrtoqvectors_conversion">
+    <template name="py_to_cppqlistofptrtoqlists_conversion">
         const int rowCount = int(PySequence_Size(%in));
         %OUTTYPE &amp;result = %out;
         result.reserve(rowCount);

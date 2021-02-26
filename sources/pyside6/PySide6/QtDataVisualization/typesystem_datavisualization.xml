@@ -47,13 +47,13 @@
     <include file-name="qbardataproxy.h" location="global"/>
     <conversion-rule>
         <native-to-target>
-            <insert-template name="cppqlistofptrtoqvectors_to_py_conversion">
+            <insert-template name="cppqlistofptrtoqlists_to_py_conversion">
               <replace from="%INTYPE_0" to="QBarDataItem"/>
             </insert-template>
         </native-to-target>
         <target-to-native>
             <add-conversion type="PySequence">
-                <insert-template name="py_to_cppqlistofptrtoqvectors_conversion">
+                <insert-template name="py_to_cppqlistofptrtoqlists_conversion">
                     <replace from="%OUTTYPE_0" to="QBarDataItem"/>
                 </insert-template>
             </add-conversion>
@@ -64,13 +64,13 @@
     <include file-name="qsurfacedataproxy.h" location="global"/>
     <conversion-rule>
         <native-to-target>
-            <insert-template name="cppqlistofptrtoqvectors_to_py_conversion">
+            <insert-template name="cppqlistofptrtoqlists_to_py_conversion">
               <replace from="%INTYPE_0" to="QSurfaceDataItem"/>
             </insert-template>
         </native-to-target>
         <target-to-native>
             <add-conversion type="PySequence">
-                <insert-template name="py_to_cppqlistofptrtoqvectors_conversion">
+                <insert-template name="py_to_cppqlistofptrtoqlists_conversion">
                     <replace from="%OUTTYPE_0" to="QSurfaceDataItem"/>
                 </insert-template>
             </add-conversion>
@@ -118,12 +118,12 @@
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="addRow(QVector&lt;QBarDataItem&gt;*)">
+    <modify-function signature="addRow(QList&lt;QBarDataItem&gt;*)">
       <modify-argument index="1">
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="addRow(QVector&lt;QBarDataItem&gt;*, const QString&amp;)">
+    <modify-function signature="addRow(QList&lt;QBarDataItem&gt;*, const QString&amp;)">
       <modify-argument index="1">
         <parent index="this" action="add"/>
       </modify-argument>
@@ -138,12 +138,12 @@
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="insertRow(int, QVector&lt;QBarDataItem&gt;*)">
+    <modify-function signature="insertRow(int, QList&lt;QBarDataItem&gt;*)">
       <modify-argument index="2">
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="insertRow(int, QVector&lt;QBarDataItem&gt;*, const QString&amp;)">
+    <modify-function signature="insertRow(int, QList&lt;QBarDataItem&gt;*, const QString&amp;)">
       <modify-argument index="2">
         <parent index="this" action="add"/>
       </modify-argument>
@@ -158,12 +158,12 @@
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="setRow(int, QVector&lt;QBarDataItem&gt;*)">
+    <modify-function signature="setRow(int, QList&lt;QBarDataItem&gt;*)">
       <modify-argument index="2">
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="setRow(int, QVector&lt;QBarDataItem&gt;*, const QString&amp;)">
+    <modify-function signature="setRow(int, QList&lt;QBarDataItem&gt;*, const QString&amp;)">
       <modify-argument index="2">
         <parent index="this" action="add"/>
       </modify-argument>
@@ -199,7 +199,7 @@
   </object-type>
   <value-type name="QScatterDataItem"/>
   <object-type name="QScatterDataProxy">
-    <modify-function signature="resetArray(QVector&lt;QScatterDataItem&gt;*)">
+    <modify-function signature="resetArray(QList&lt;QScatterDataItem&gt;*)">
       <modify-argument index="1">
         <parent index="this" action="add"/>
       </modify-argument>
@@ -209,7 +209,7 @@
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="addItems(const QVector&lt;QScatterDataItem&gt;&amp;)">
+    <modify-function signature="addItems(const QList&lt;QScatterDataItem&gt;&amp;)">
       <modify-argument index="1">
         <parent index="this" action="add"/>
       </modify-argument>
@@ -219,7 +219,7 @@
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="insertItems(int, const QVector&lt;QScatterDataItem&gt;&amp;)">
+    <modify-function signature="insertItems(int, const QList&lt;QScatterDataItem&gt;&amp;)">
       <modify-argument index="2">
         <parent index="this" action="add"/>
       </modify-argument>
@@ -229,7 +229,7 @@
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="setItems(int, const QVector&lt;QScatterDataItem&gt;&amp;)">
+    <modify-function signature="setItems(int, const QList&lt;QScatterDataItem&gt;&amp;)">
       <modify-argument index="2">
         <parent index="this" action="add"/>
       </modify-argument>
@@ -250,17 +250,17 @@
   </object-type>
   <value-type name="QSurfaceDataItem"/>
   <object-type name="QSurfaceDataProxy">
-    <modify-function signature="addRow(QVector&lt;QSurfaceDataItem&gt;*)">
+    <modify-function signature="addRow(QList&lt;QSurfaceDataItem&gt;*)">
       <modify-argument index="1">
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="insertRow(int, QVector&lt;QSurfaceDataItem&gt;*)">
+    <modify-function signature="insertRow(int, QList&lt;QSurfaceDataItem&gt;*)">
       <modify-argument index="2">
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="setRow(int, QVector&lt;QSurfaceDataItem&gt;*)">
+    <modify-function signature="setRow(int, QList&lt;QSurfaceDataItem&gt;*)">
       <modify-argument index="2">
         <parent index="this" action="add"/>
       </modify-argument>
