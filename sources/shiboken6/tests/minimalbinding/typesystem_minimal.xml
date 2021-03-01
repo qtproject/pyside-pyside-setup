@@ -21,9 +21,9 @@
         <include file-name="list" location="global"/>
         <conversion-rule>
             <native-to-target>
-            PyObject* %out = PyList_New((int) %in.size());
-            %INTYPE::const_iterator it = %in.begin();
-            for (int idx = 0; it != %in.end(); ++it, ++idx) {
+            PyObject* %out = PyList_New(Py_ssize_t(%in.size()));
+            Py_ssize_t idx = 0;
+            for (auto it = %in.cbegin(), end = %in.cend(); it != end; ++it, ++idx) {
                 %INTYPE_0 cppItem(*it);
                 PyList_SET_ITEM(%out, idx, %CONVERTTOPYTHON[%INTYPE_0](cppItem));
             }
@@ -32,7 +32,8 @@
             <target-to-native>
                 <add-conversion type="PySequence">
                 Shiboken::AutoDecRef seq(PySequence_Fast(%in, 0));
-                for (int i = 0; i &lt; PySequence_Fast_GET_SIZE(seq.object()); i++) {
+                const Py_ssize_t size = PySequence_Fast_GET_SIZE(seq.object());
+                for (Py_ssize_t i = 0; i &lt; size; ++i) {
                     PyObject* pyItem = PySequence_Fast_GET_ITEM(seq.object(), i);
                     %OUTTYPE_0 cppItem = %CONVERTTOCPP[%OUTTYPE_0](pyItem);
                     %out.push_back(cppItem);
@@ -54,7 +55,7 @@
         <conversion-rule>
             <native-to-target>
             %INTYPE::size_type vectorSize = %in.size();
-            PyObject* %out = PyList_New((int) vectorSize);
+            PyObject* %out = PyList_New(Py_ssize_t(vectorSize));
             for (%INTYPE::size_type idx = 0; idx &lt; vectorSize; ++idx) {
                 %INTYPE_0 cppItem(%in[idx]);
                 PyList_SET_ITEM(%out, idx, %CONVERTTOPYTHON[%INTYPE_0](cppItem));
@@ -64,9 +65,9 @@
             <target-to-native>
                 <add-conversion type="PySequence">
                 Shiboken::AutoDecRef seq(PySequence_Fast(%in, 0));
-                int vectorSize = PySequence_Fast_GET_SIZE(seq.object());
+                const Py_ssize_t vectorSize = PySequence_Fast_GET_SIZE(seq.object());
                 %out.reserve(vectorSize);
-                for (int idx = 0; idx &lt; vectorSize; ++idx ) {
+                for (Py_ssize_t idx = 0; idx &lt; vectorSize; ++idx ) {
                     PyObject* pyItem = PySequence_Fast_GET_ITEM(seq.object(), idx);
                     %OUTTYPE_0 cppItem = %CONVERTTOCPP[%OUTTYPE_0](pyItem);
                     %out.push_back(cppItem);
