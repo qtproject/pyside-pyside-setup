@@ -3006,7 +3006,7 @@ void CppGenerator::writeCppToPythonFunction(TextStream &s, const QString &code, 
     processCodeSnip(prettyCode);
 
     s << "static PyObject *" << cppToPythonFunctionName(sourceTypeName, targetTypeName)
-        << "(const void *cppIn) {\n" << indent << prettyCode
+        << "(const void *cppIn)\n{\n" << indent << prettyCode
         << ensureEndl << outdent << "}\n";
 }
 
@@ -3060,7 +3060,7 @@ void CppGenerator::writePythonToCppFunction(TextStream &s, const QString &code, 
     QString prettyCode = code;
     processCodeSnip(prettyCode);
     s << "static void " << pythonToCppFunctionName(sourceTypeName, targetTypeName)
-        << "(PyObject *pyIn, void *cppOut) {\n" << indent << prettyCode
+        << "(PyObject *pyIn, void *cppOut)\n{\n" << indent << prettyCode
         << ensureEndl << outdent << "}\n";
 }
 
@@ -3075,7 +3075,7 @@ void CppGenerator::writeIsPythonConvertibleToCppFunction(TextStream &s,
         pythonToCppFuncName = pythonToCppFunctionName(sourceTypeName, targetTypeName);
 
     s << "static PythonToCppFunc " << convertibleToCppFunctionName(sourceTypeName, targetTypeName);
-    s << "(PyObject *pyIn) {\n" << indent;
+    s << "(PyObject *pyIn)\n{\n" << indent;
     if (acceptNoneAsCppNull) {
         s << "if (pyIn == Py_None)\n";
         Indentation indent(s);
@@ -6070,7 +6070,7 @@ bool CppGenerator::finishGeneration()
     if (!typeConversions.isEmpty()) {
         s  << "\n// Primitive Type converters.\n\n";
         for (const CustomConversion *conversion : typeConversions) {
-            s << "// C++ to Python conversion for type '" << conversion->ownerType()->qualifiedCppName() << "'.\n";
+            s << "// C++ to Python conversion for primitive type '" << conversion->ownerType()->qualifiedCppName() << "'.\n";
             writeCppToPythonFunction(s, conversion);
             writeCustomConverterFunctions(s, conversion);
         }
@@ -6081,7 +6081,7 @@ bool CppGenerator::finishGeneration()
     if (!containers.isEmpty()) {
         s << "// Container Type converters.\n\n";
         for (const AbstractMetaType &container : containers) {
-            s << "// C++ to Python conversion for type '" << container.cppSignature() << "'.\n";
+            s << "// C++ to Python conversion for container type '" << container.cppSignature() << "'.\n";
             writeContainerConverterFunctions(s, container);
         }
         s << '\n';
@@ -6092,7 +6092,7 @@ bool CppGenerator::finishGeneration()
     if (!smartPointersList.isEmpty()) {
         s << "// SmartPointers converters.\n\n";
         for (const AbstractMetaType &smartPointer : smartPointersList) {
-            s << "// C++ to Python conversion for type '" << smartPointer.cppSignature() << "'.\n";
+            s << "// C++ to Python conversion for smart pointer type '" << smartPointer.cppSignature() << "'.\n";
             writeSmartPointerConverterFunctions(s, smartPointer);
         }
         s << '\n';
