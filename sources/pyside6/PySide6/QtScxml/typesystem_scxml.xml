@@ -73,7 +73,6 @@
             </inject-code>
         </modify-function>
     </object-type>
-    <object-type name="QScxmlEcmaScriptDataModel" since="5.12"/>
     <value-type name="QScxmlError"/>
     <namespace-type name="QScxmlExecutableContent">
         <value-type name="AssignmentInfo"/>

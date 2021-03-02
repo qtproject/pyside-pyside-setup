@@ -29,7 +29,6 @@ if (Qt${QT_MAJOR_VERSION}Scxml_VERSION VERSION_EQUAL 5.12.0
     list(APPEND QtScxml_SRC
          ${QtScxml_GEN_DIR}/qscxmldatamodel_wrapper.cpp
          ${QtScxml_GEN_DIR}/qscxmldatamodel_foreachloopbody_wrapper.cpp
-         ${QtScxml_GEN_DIR}/qscxmlecmascriptdatamodel_wrapper.cpp
          ${QtScxml_GEN_DIR}/qscxmlcppdatamodel_wrapper.cpp
          ${QtScxml_GEN_DIR}/qscxmlnulldatamodel_wrapper.cpp)
 endif()

@@ -193,8 +193,8 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
     <enum-type name="Error"/>
     <enum-type name="EventPriority"/>
 
-    <value-type name="SignalEvent"/>
-    <value-type name="WrappedEvent"/>
+    <object-type name="SignalEvent"/>
+    <object-type name="WrappedEvent"/>
 
     <modify-function signature="addState(QAbstractState*)">
       <modify-argument index="1">
