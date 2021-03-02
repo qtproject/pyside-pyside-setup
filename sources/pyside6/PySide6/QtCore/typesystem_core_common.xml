@@ -239,8 +239,6 @@
     </conversion-rule>
   </primitive-type>
 
-  <inject-code class="native" position="beginning" file="../glue/qtcore.cpp" snippet="pystring-check"/>
-
   <primitive-type name="QString" target-lang-api-name="PyUnicode">
     <include file-name="QString" location="global"/>
     <conversion-rule>

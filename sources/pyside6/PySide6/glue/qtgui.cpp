@@ -471,11 +471,6 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[%ARG1_TYPE](%1));
 %CPPSELF.%FUNCTION_NAME(%1.data(), %1.size(), %2);
 // @snippet qpainter-drawpolygon
 
-// @snippet qmatrix-map-point
-QPoint p(%CPPSELF.%FUNCTION_NAME(%1));
-%PYARG_0 = %CONVERTTOPYTHON[QPoint](p);
-// @snippet qmatrix-map-point
-
 // @snippet qmatrix4x4
 // PYSIDE-795: All PySequences can be made iterable with PySequence_Fast.
 Shiboken::AutoDecRef seq(PySequence_Fast(%PYARG_1, "Can't turn into sequence"));

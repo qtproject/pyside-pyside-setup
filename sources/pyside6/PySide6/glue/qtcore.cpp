@@ -853,11 +853,6 @@ if (ret > 0 && ((strcmp(%1, SIGNAL(destroyed())) == 0) || (strcmp(%1, SIGNAL(des
 %PYARG_0 = %CONVERTTOPYTHON[int](ret);
 // @snippet qobject-receivers
 
-// @snippet qregexp-replace
-%1.replace(*%CPPSELF, %2);
-%PYARG_0 = %CONVERTTOPYTHON[QString](%1);
-// @snippet qregexp-replace
-
 // @snippet qbytearray-mgetitem
 if (PyIndex_Check(_key)) {
     Py_ssize_t _i;
@@ -1130,14 +1125,6 @@ QByteArray b(Py_TYPE(%PYSELF)->tp_name);
 Py_DECREF(aux);
 // @snippet qbytearray-repr
 
-// @snippet qbytearray-1
-if (PyBytes_Check(%PYARG_1)) {
-    %0 = new QByteArray(PyBytes_AsString(%PYARG_1), PyBytes_GET_SIZE(%PYARG_1));
-} else if (Shiboken::String::check(%PYARG_1)) {
-    %0 = new QByteArray(Shiboken::String::toCString(%PYARG_1), Shiboken::String::len(%PYARG_1));
-}
-// @snippet qbytearray-1
-
 // @snippet qbytearray-2
 %0 = new QByteArray(PyByteArray_AsString(%PYARG_1), PyByteArray_Size(%PYARG_1));
 // @snippet qbytearray-2
@@ -1153,11 +1140,6 @@ PepType_AS_BUFFER(Shiboken::SbkType<QByteArray>()) = &SbkQByteArrayBufferProc;
 // @snippet qbytearray-data
 %PYARG_0 = PyBytes_FromStringAndSize(%CPPSELF.%FUNCTION_NAME(), %CPPSELF.size());
 // @snippet qbytearray-data
-
-// @snippet qbytearray-fromrawdata
-%RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME(PyBytes_AsString(%PYARG_1), PyBytes_GET_SIZE(%PYARG_1));
-%PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
-// @snippet qbytearray-fromrawdata
 
 // @snippet qbytearray-str
 PyObject *aux = PyBytes_FromStringAndSize(%CPPSELF.constData(), %CPPSELF.size());
@@ -1596,10 +1578,6 @@ Py_END_ALLOW_THREADS
 %out = %OUTTYPE(PyLong_AsLong(%in));
 // @snippet conversion-pylong
 
-// @snippet conversion-pylong-unsigned
-%out = %OUTTYPE(PyLong_AsUnsignedLong(%in));
-// @snippet conversion-pylong-unsigned
-
 // @snippet conversion-pylong-quintptr
 #if QT_POINTER_SIZE == 8
 %out = %OUTTYPE(PyLong_AsUnsignedLongLong(%in));
@@ -1763,10 +1741,6 @@ return PyBytes_FromStringAndSize(%in.constData(), %in.size());
 return PyLong_FromLong(%in);
 // @snippet return-pylong
 
-// @snippet return-pylong-unsigned
-return PyLong_FromUnsignedLong(%in);
-// @snippet return-pylong-unsigned
-
 // @snippet return-pylong-quintptr
 #if QT_POINTER_SIZE == 8
 return PyLong_FromUnsignedLongLong(%in);
@@ -1812,17 +1786,6 @@ if (converter) {
 PyErr_Format(PyExc_RuntimeError, "Can't find converter for '%s'.", %in.typeName());
 return 0;
 // @snippet return-qvariant
-
-// @snippet return-qvariant-type
-const char *typeName = QMetaType(%in).name();
-PyObject *%out;
-PyTypeObject *pyType = nullptr;
-if (typeName)
-    pyType = Shiboken::Conversions::getPythonTypeObject(typeName);
-%out = pyType ? (reinterpret_cast<PyObject *>(pyType)) : Py_None;
-Py_INCREF(%out);
-return %out;
-// @snippet return-qvariant-type
 
 // @snippet return-qjsonobject
 // The QVariantMap returned by QJsonObject seems to cause a segfault, so
