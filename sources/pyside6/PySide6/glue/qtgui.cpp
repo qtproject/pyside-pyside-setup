@@ -98,7 +98,7 @@ if (QTransform::squareToQuad(%1, _result)) {
 // @snippet qtransform-squaretoquad
 
 // @snippet qbitmap-fromdata
-uchar *buffer = reinterpret_cast<uchar *>(Shiboken::Buffer::getPointer(%PYARG_2));
+auto *buffer = reinterpret_cast<uchar *>(Shiboken::Buffer::getPointer(%PYARG_2));
 QBitmap %0 = QBitmap::fromData(%1, buffer, %3);
 %PYARG_0 = %CONVERTTOPYTHON[QBitmap](%0);
 // @snippet qbitmap-fromdata
@@ -150,11 +150,12 @@ int value = %2;
 // @snippet qopenglshaderprogram_setuniformvalue_int
 
 // @snippet qpolygon-reduce
-PyObject *points = PyList_New(%CPPSELF.count());
-for (int i = 0, i_max = %CPPSELF.count(); i < i_max; ++i){
+const Py_ssize_t count = %CPPSELF.count();
+PyObject *points = PyList_New(count);
+for (Py_ssize_t i = 0; i < count; ++i){
     int x, y;
     %CPPSELF.point(i, &x, &y);
-    QPoint pt = QPoint(x, y);
+    QPoint pt{x, y};
     PyList_SET_ITEM(points, i, %CONVERTTOPYTHON[QPoint](pt));
 }
 // @snippet qpolygon-reduce
@@ -189,7 +190,7 @@ for (int i = 0, i_max = %CPPSELF.count(); i < i_max; ++i){
 // @snippet qcolor-setstate
 Shiboken::AutoDecRef func(PyObject_GetAttr(%PYSELF, PyTuple_GET_ITEM(%1, 0)));
 PyObject *args = PyTuple_GET_ITEM(%1, 1);
-%PYARG_0 = PyObject_Call(func, args, NULL);
+%PYARG_0 = PyObject_Call(func, args, nullptr);
 // @snippet qcolor-setstate
 
 // @snippet qcolor-reduce
@@ -476,7 +477,7 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[%ARG1_TYPE](%1));
 Shiboken::AutoDecRef seq(PySequence_Fast(%PYARG_1, "Can't turn into sequence"));
 if (PySequence_Size(seq) == 16) {
     float values[16];
-    for (int i=0; i < 16; ++i) {
+    for (Py_ssize_t i = 0; i < 16; ++i) {
         PyObject *pv = PySequence_Fast_GET_ITEM(seq.object(), i);
         values[i] = PyFloat_AsDouble(pv);
     }
@@ -492,7 +493,7 @@ if (PySequence_Size(seq) == 16) {
 float values[16];
 %CPPSELF.%FUNCTION_NAME(values);
 %PYARG_0 = PyTuple_New(16);
-for (int i = 0; i < 16; ++i) {
+for (Py_ssize_t i = 0; i < 16; ++i) {
   PyObject *v = PyFloat_FromDouble(values[i]);
   PyTuple_SET_ITEM(%PYARG_0, i, v);
 }

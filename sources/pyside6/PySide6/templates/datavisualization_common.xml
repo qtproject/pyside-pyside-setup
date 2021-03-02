@@ -41,13 +41,13 @@
 -->
 <typesystem>
     <template name="cppqlistofptrtoqlists_to_py_conversion">
-        const int rowCount = %in.size();
+        const Py_ssize_t rowCount = %in.size();
         PyObject* %out = PyList_New(rowCount);
-        for (int r = 0; r &lt; rowCount; ++r) {
-            const QVector&lt;%INTYPE_0&gt; *row = %in.at(r);
-            const int columnCount = row->size();
+        for (Py_ssize_t r = 0; r &lt; rowCount; ++r) {
+            const QList&lt;%INTYPE_0&gt; *row = %in.at(r);
+            const Py_ssize_t columnCount = row->size();
             PyObject *pyRow = PyList_New(columnCount);
-            for (int c = 0; c &lt; columnCount; ++c) {
+            for (Py_ssize_t c = 0; c &lt; columnCount; ++c) {
                 const %INTYPE_0 &amp;cppItem = row->at(c);
                 PyList_SET_ITEM(pyRow, c, %CONVERTTOPYTHON[%INTYPE_0](cppItem));
             }
@@ -57,15 +57,15 @@
     </template>
 
     <template name="py_to_cppqlistofptrtoqlists_conversion">
-        const int rowCount = int(PySequence_Size(%in));
+        const Py_ssize_t rowCount = PySequence_Size(%in);
         %OUTTYPE &amp;result = %out;
         result.reserve(rowCount);
-        for (int r = 0; r &lt; rowCount; ++r) {
+        for (Py_ssize_t r = 0; r &lt; rowCount; ++r) {
             Shiboken::AutoDecRef rowItem(PySequence_GetItem(%in, r));
-            const int columnCount = int(PySequence_Size(rowItem));
-            QVector&lt;%OUTTYPE_0&gt; *row = new QVector&lt;%OUTTYPE_0&gt;;
+            const Py_ssize_t columnCount = PySequence_Size(rowItem);
+            auto *row = new QList&lt;%OUTTYPE_0&gt;;
             row->reserve(columnCount);
-            for (int c = 0; c &lt; columnCount; ++c) {
+            for (Py_ssize_t c = 0; c &lt; columnCount; ++c) {
                Shiboken::AutoDecRef pyItem(PySequence_GetItem(rowItem, c));
                %OUTTYPE_0 v = %CONVERTTOCPP[%OUTTYPE_0](pyItem);
                row->append(v);

@@ -44,9 +44,10 @@
  */
 
 #include <shiboken.h>
-#include <QUiLoader>
-#include <QFile>
-#include <QWidget>
+
+#include <QtUiTools/QUiLoader>
+#include <QtWidgets/QWidget>
+#include <QtCore/QFile>
 
 static void createChildrenNameAttributes(PyObject *root, QObject *object)
 {

@@ -54,21 +54,21 @@
 
     <template name="load_xpm">
         Shiboken::AutoDecRef strList(PySequence_Fast(%PYARG_1, "Invalid sequence."));
-        int lineCount = PySequence_Fast_GET_SIZE(strList.object());
-        for (int line = 0; line &lt; lineCount; ++line) {
+        Py_ssize_t lineCount = PySequence_Fast_GET_SIZE(strList.object());
+        for (Py_ssize_t line = 0; line &lt; lineCount; ++line) {
             if (!Shiboken::String::check(PySequence_Fast_GET_ITEM(strList.object(), line))) {
                 PyErr_SetString(PyExc_TypeError, "The argument must be a sequence of strings.");
                 break;
             }
         }
 
-        const char **xpm = reinterpret_cast&lt;const char**&gt;(malloc(lineCount * sizeof(const char**)));
-        for (int line = 0; line &lt; lineCount; ++line)
+        auto xpm = new const char*[lineCount];
+        for (Py_ssize_t line = 0; line &lt; lineCount; ++line)
             xpm[line] = Shiboken::String::toCString(PySequence_Fast_GET_ITEM(strList.object(), line));
 
         %0 = new %TYPE(xpm);
 
-        free(xpm);
+        delete [] xpm;
     </template>
 
     <template name="qmatrix_map">
@@ -139,7 +139,7 @@
 
           if (PySequence_Check(%PYARG_0)) {
               Shiboken::AutoDecRef seq(PySequence_Fast(%PYARG_0, 0));
-              int size = PySequence_Fast_GET_SIZE(seq.object());
+              const Py_ssize_t size = PySequence_Fast_GET_SIZE(seq.object());
 
               if (size > 1) {
                   if (%ISCONVERTIBLE[QString](PySequence_Fast_GET_ITEM(seq.object(), 1)))
@@ -203,7 +203,7 @@
 
     <template name="repr_code_matrix">
         QByteArray format(Py_TYPE(%PYSELF)->tp_name);
-        format += QByteArray("((");
+        format += QByteArrayLiteral("((");
 
         QList&lt; %MATRIX_TYPE &gt; cppArgs;
         %MATRIX_TYPE data[%MATRIX_SIZE];

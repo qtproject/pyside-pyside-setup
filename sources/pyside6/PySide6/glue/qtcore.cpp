@@ -70,11 +70,11 @@ if (typeObj) {
         QByteArray out_ba = out.toByteArray();
         if (!out_ba.isEmpty()) {
             QByteArrayList valuesList = out_ba.split(',');
-            const int valuesSize = valuesList.size();
+            const Py_ssize_t valuesSize = valuesList.size();
             if (valuesSize > 0) {
                 PyObject *list = PyList_New(valuesSize);
-                for (int i = 0; i < valuesSize; i++) {
-                    PyObject *item = PyUnicode_FromString(valuesList[i].data());
+                for (Py_ssize_t i = 0; i < valuesSize; ++i) {
+                    PyObject *item = PyUnicode_FromString(valuesList.at(i).constData());
                     PyList_SET_ITEM(list, i, item);
                 }
                 %PYARG_0 = list;
@@ -87,10 +87,10 @@ if (typeObj) {
         }
     } else if (typeObj == &PyBytes_Type) {
         QByteArray asByteArray = out.toByteArray();
-        %PYARG_0 = PyBytes_FromString(asByteArray.data());
+        %PYARG_0 = PyBytes_FromString(asByteArray.constData());
     } else if (typeObj == &PyUnicode_Type) {
         QByteArray asByteArray = out.toByteArray();
-        %PYARG_0 = PyUnicode_FromString(asByteArray.data());
+        %PYARG_0 = PyUnicode_FromString(asByteArray.constData());
     } else if (typeObj == &PyLong_Type) {
         float asFloat = out.toFloat();
         pyResult = PyLong_FromDouble(asFloat);
@@ -1020,8 +1020,8 @@ static int SbkQByteArray_getbufferproc(PyObject *obj, Py_buffer *view, int flags
     view->ndim = 1;
     view->shape = (flags & PyBUF_ND) == PyBUF_ND ? &(view->len) : nullptr;
     view->strides = &view->itemsize;
-    view->suboffsets = NULL;
-    view->internal = NULL;
+    view->suboffsets = nullptr;
+    view->internal = nullptr;
 
     Py_XINCREF(obj);
     return 0;
@@ -1186,8 +1186,8 @@ uchar *ptr = reinterpret_cast<uchar *>(Shiboken::Buffer::getPointer(%PYARG_1));
 // @snippet qfiledevice-map
 
 // @snippet qiodevice-readdata
-QByteArray ba(1 + int(%2), char(0));
-%CPPSELF.%FUNCTION_NAME(ba.data(), int(%2));
+QByteArray ba(1 + qsizetype(%2), char(0));
+%CPPSELF.%FUNCTION_NAME(ba.data(), qint64(%2));
 %PYARG_0 = Shiboken::String::fromCString(ba.constData());
 // @snippet qiodevice-readdata
 
@@ -1222,7 +1222,7 @@ if (socket != nullptr) {
 
 // @snippet qtranslator-load
 Py_ssize_t size;
-uchar *ptr = reinterpret_cast<uchar *>(Shiboken::Buffer::getPointer(%PYARG_1, &size));
+auto *ptr = reinterpret_cast<uchar *>(Shiboken::Buffer::getPointer(%PYARG_1, &size));
 %RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME(const_cast<const uchar *>(ptr), size);
 %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
 // @snippet qtranslator-load
@@ -1231,8 +1231,9 @@ uchar *ptr = reinterpret_cast<uchar *>(Shiboken::Buffer::getPointer(%PYARG_1, &s
 // %FUNCTION_NAME() - disable generation of c++ function call
 (void) %2; // remove warning about unused variable
 Shiboken::AutoDecRef emptyTuple(PyTuple_New(0));
-PyObject *pyTimer = reinterpret_cast<PyTypeObject *>(Shiboken::SbkType<QTimer>())->tp_new(Shiboken::SbkType<QTimer>(), emptyTuple, 0);
-reinterpret_cast<PyTypeObject *>(Shiboken::SbkType<QTimer>())->tp_init(pyTimer, emptyTuple, 0);
+auto *timerType = reinterpret_cast<PyTypeObject *>(Shiboken::SbkType<QTimer>());
+auto *pyTimer = timerType->tp_new(Shiboken::SbkType<QTimer>(), emptyTuple, nullptr);
+timerType->tp_init(pyTimer, emptyTuple, nullptr);
 
 auto timer = %CONVERTTOCPP[QTimer *](pyTimer);
 //XXX  /|\ omitting this space crashes shiboken!
@@ -1245,18 +1246,19 @@ Shiboken::AutoDecRef result(
                         %PYARG_2,
                         %3)
 );
-Shiboken::Object::releaseOwnership((SbkObject *)pyTimer);
+Shiboken::Object::releaseOwnership(reinterpret_cast<SbkObject *>(pyTimer));
 Py_XDECREF(pyTimer);
 timer->setSingleShot(true);
-timer->connect(timer, SIGNAL(timeout()), timer, SLOT(deleteLater()));
+timer->connect(timer, &QTimer::timeout, timer, &QObject::deleteLater);
 timer->start(%1);
 // @snippet qtimer-singleshot-1
 
 // @snippet qtimer-singleshot-2
 // %FUNCTION_NAME() - disable generation of c++ function call
 Shiboken::AutoDecRef emptyTuple(PyTuple_New(0));
-PyObject *pyTimer = reinterpret_cast<PyTypeObject *>(Shiboken::SbkType<QTimer>())->tp_new(Shiboken::SbkType<QTimer>(), emptyTuple, 0);
-reinterpret_cast<PyTypeObject *>(Shiboken::SbkType<QTimer>())->tp_init(pyTimer, emptyTuple, 0);
+auto *timerType = reinterpret_cast<PyTypeObject *>(Shiboken::SbkType<QTimer>());
+auto *pyTimer = timerType->tp_new(Shiboken::SbkType<QTimer>(), emptyTuple, nullptr);
+timerType->tp_init(pyTimer, emptyTuple, nullptr);
 QTimer * timer = %CONVERTTOCPP[QTimer *](pyTimer);
 timer->setSingleShot(true);
 
@@ -1283,7 +1285,7 @@ if (PyObject_TypeCheck(%2, PySideSignalInstanceTypeF())) {
     );
 }
 
-timer->connect(timer, SIGNAL(timeout()), timer, SLOT(deleteLater()), Qt::DirectConnection);
+timer->connect(timer, &QTimer::timeout, timer, &QObject::deleteLater, Qt::DirectConnection);
 Shiboken::Object::releaseOwnership(reinterpret_cast<SbkObject *>(pyTimer));
 Py_XDECREF(pyTimer);
 timer->start(%1);
@@ -1406,8 +1408,10 @@ if (PyObject_TypeCheck(%1, PySideSignalInstanceTypeF())) {
 // @snippet qsignaltransition
 
 // @snippet qstate-addtransition-1
-QString signalName(%2);
-if (PySide::SignalManager::registerMetaMethod(%1, signalName.mid(1).toLatin1().data(), QMetaMethod::Signal)) {
+QByteArray signalName(%2);
+signalName.remove(0, 1);
+if (PySide::SignalManager::registerMetaMethod(%1, signalName.constData(),
+                                              QMetaMethod::Signal)) {
     QSignalTransition *%0 = %CPPSELF->addTransition(%1, %2, %3);
     %PYARG_0 = %CONVERTTOPYTHON[QSignalTransition *](%0);
 } else {
@@ -1534,9 +1538,9 @@ if (PyBytes_Check(%PYARG_0)) {
 // @snippet return-readData
 
 // @snippet qiodevice-readData
-QByteArray ba(1 + int(%2), char(0));
+QByteArray ba(1 + qsizetype(%2), char(0));
 Py_BEGIN_ALLOW_THREADS
-%CPPSELF.%FUNCTION_NAME(ba.data(), int(%2));
+%CPPSELF.%FUNCTION_NAME(ba.data(), qint64(%2));
 Py_END_ALLOW_THREADS
 %PYARG_0 = Shiboken::String::fromCString(ba.constData());
 // @snippet qiodevice-readData
@@ -1604,7 +1608,7 @@ Py_UNICODE *unicode = PyUnicode_AS_UNICODE(%in);
 #    endif // Qt 6
 # endif
 #else
-wchar_t *temp = PyUnicode_AsWideCharString(%in, NULL);
+wchar_t *temp = PyUnicode_AsWideCharString(%in, nullptr);
 %out = QString::fromWCharArray(temp);
 PyMem_Free(temp);
 #endif
@@ -1755,7 +1759,7 @@ return PyUnicode_FromStringAndSize(ba.constData(), ba.size());
 // @snippet return-pyunicode
 
 // @snippet return-pyunicode-qchar
-wchar_t c = (wchar_t)%in.unicode();
+auto c = wchar_t(%in.unicode());
 return PyUnicode_FromWideChar(&c, 1);
 // @snippet return-pyunicode-qchar
 

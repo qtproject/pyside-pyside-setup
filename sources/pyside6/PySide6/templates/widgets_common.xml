@@ -45,16 +45,16 @@
         $CHILD_TYPE* oldChild = %CPPSELF.$FUNCTION_GET_OLD();
         if (oldChild &amp;&amp; (oldChild != $CPPARG)) {
             Shiboken::AutoDecRef pyChild(%CONVERTTOPYTHON[$CHILD_TYPE*](oldChild));
-            Shiboken::Object::setParent(0, pyChild);
+            Shiboken::Object::setParent(nullptr, pyChild);
             Shiboken::Object::releaseOwnership(pyChild);
         }
         Shiboken::Object::setParent(%PYSELF, $PYARG);
     </template>
 
     <template name="qgraphicsitem_pysequence">
-        int numItems = PySequence_Size(%PYARG_1);
+        const Py_ssize_t numItems = PySequence_Size(%PYARG_1);
         Shiboken::AutoArrayPointer&lt;QGraphicsItem*&gt; %out(numItems);
-        for (int i=0; i &lt; numItems; i++) {
+        for (Py_ssize_t i = 0; i &lt; numItems; ++i) {
             %out[i] = %CONVERTTOCPP[QGraphicsItem*](PySequence_Fast_GET_ITEM(%PYARG_1, i));
         }
     </template>
@@ -77,9 +77,9 @@
     </template>
 
     <template name="pysequence_qstyleoptiongraphicsitem">
-        int numOptions = PySequence_Size(%PYARG_2);
+        const Py_ssize_t numOptions = PySequence_Size(%PYARG_2);
         Shiboken::AutoArrayPointer&lt;QStyleOptionGraphicsItem&gt; %out(numOptions);
-        for (int i=0; i &lt; numOptions; i++) {
+        for (Py_ssize_t i=0; i &lt; numOptions; ++i) {
             %out[i] = %CONVERTTOCPP[QStyleOptionGraphicsItem](PySequence_Fast_GET_ITEM(%PYARG_1, i));
         }
     </template>
