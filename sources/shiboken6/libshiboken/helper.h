@@ -84,8 +84,8 @@ class AutoArrayPointer
         AutoArrayPointer &operator=(const AutoArrayPointer &) = delete;
         AutoArrayPointer &operator=(AutoArrayPointer &&) = delete;
 
-        explicit AutoArrayPointer(int size) { data = new T[size]; }
-        T &operator[](int pos) { return data[pos]; }
+        explicit AutoArrayPointer(ssize_t size) { data = new T[size]; }
+        T &operator[](ssize_t pos) { return data[pos]; }
         operator T *() const { return data; }
         ~AutoArrayPointer() { delete[] data; }
     private:
