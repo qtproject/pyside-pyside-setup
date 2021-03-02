@@ -37,7 +37,8 @@ set(ALL_OPTIONAL_MODULES
     Charts
     Svg
     SvgWidgets
-    DataVisualization)
+    DataVisualization
+    Bluetooth)
 find_package(Qt${QT_MAJOR_VERSION}UiTools)
 if(Qt${QT_MAJOR_VERSION}UiTools_FOUND)
     list(APPEND ALL_OPTIONAL_MODULES UiTools)

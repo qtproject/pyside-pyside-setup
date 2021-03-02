@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/****************************************************************************
+**
+** Copyright (C) 2021 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt for Python.
+**
+** $QT_BEGIN_LICENSE:LGPL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPL3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 2.0 or (at your option) the GNU General
+** Public license version 3 or any later version approved by the KDE Free
+** Qt Foundation. The licenses are as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-2.0.html and
+** https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+-->
+<typesystem package="PySide6.QtBluetooth">
+    <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
+    <namespace-type name="QBluetooth">
+        <enum-type name="AttAccessConstraint" flags="AttAccessConstraints"/>
+        <enum-type name="Security" flags="SecurityFlags"/>
+    </namespace-type>
+    <value-type name="QBluetoothAddress"/>
+    <value-type name="QBluetoothHostInfo"/>
+    <object-type name="QBluetoothLocalDevice">
+        <enum-type name="Error"/>
+        <enum-type name="HostMode"/>
+        <enum-type name="Pairing"/>
+    </object-type>
+    <object-type name="QBluetoothDeviceDiscoveryAgent">
+        <enum-type name="DiscoveryMethod" flags="DiscoveryMethods"/>
+        <enum-type name="Error"/>
+        <enum-type name="InquiryType"/>
+    </object-type>
+    <value-type name="QBluetoothDeviceInfo">
+        <enum-type name="CoreConfiguration" flags="CoreConfigurations"/>
+        <enum-type name="DataCompleteness"/>
+        <enum-type name="Field" flags="Fields"/>
+        <enum-type name="MajorDeviceClass"/>
+        <enum-type name="MinorAudioVideoClass"/>
+        <enum-type name="MinorComputerClass"/>
+        <enum-type name="MinorHealthClass"/>
+        <enum-type name="MinorImagingClass"/>
+        <enum-type name="MinorMiscellaneousClass"/>
+        <enum-type name="MinorNetworkClass"/>
+        <enum-type name="MinorPeripheralClass"/>
+        <enum-type name="MinorPhoneClass"/>
+        <enum-type name="MinorToyClass"/>
+        <enum-type name="MinorWearableClass"/>
+        <enum-type name="ServiceClass" flags="ServiceClasses"/>
+    </value-type>
+    <object-type name="QBluetoothServiceDiscoveryAgent">
+        <enum-type name="DiscoveryMode"/>
+        <enum-type name="Error"/>
+    </object-type>
+    <object-type name="QBluetoothServer">
+        <enum-type name="Error"/>
+    </object-type>
+    <value-type name="QBluetoothServiceInfo">
+        <enum-type name="AttributeId"/>
+        <enum-type name="Protocol"/>
+    </value-type>
+    <object-type name="QBluetoothSocket">
+        <enum-type name="SocketError"/>
+        <enum-type name="SocketState"/>
+    </object-type>
+    <value-type name="QBluetoothUuid">
+        <enum-type name="CharacteristicType"/>
+        <enum-type name="DescriptorType"/>
+        <enum-type name="ProtocolUuid"/>
+        <enum-type name="ServiceClassUuid"/>
+    </value-type>
+    <value-type name="QLowEnergyAdvertisingData">
+        <enum-type name="Discoverability"/>
+    </value-type>
+    <value-type name="QLowEnergyAdvertisingParameters">
+        <value-type name="AddressInfo"/>
+        <enum-type name="FilterPolicy"/>
+        <enum-type name="Mode"/>
+    </value-type>
+    <object-type name="QLowEnergyCharacteristic">
+        <enum-type name="PropertyType" flags="PropertyTypes"/>
+    </object-type>
+    <object-type name="QLowEnergyCharacteristicData"/>
+    <value-type name="QLowEnergyConnectionParameters"/>
+    <object-type name="QLowEnergyController">
+        <enum-type name="ControllerState"/>
+        <enum-type name="Error"/>
+        <enum-type name="RemoteAddressType"/>
+        <enum-type name="Role"/>
+    </object-type>
+    <object-type name="QLowEnergyDescriptor">
+    </object-type>
+    <object-type name="QLowEnergyDescriptorData">
+    </object-type>
+    <object-type name="QLowEnergyService">
+        <enum-type name="ServiceError"/>
+        <enum-type name="ServiceState"/>
+        <enum-type name="ServiceType" flags="ServiceTypes"/>
+        <enum-type name="WriteMode"/>
+    </object-type>
+    <value-type name="QLowEnergyServiceData">
+        <enum-type name="ServiceType"/>
+    </value-type>
+</typesystem>

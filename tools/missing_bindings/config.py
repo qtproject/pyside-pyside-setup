@@ -77,6 +77,7 @@ modules_to_test = {
     #'QtDataVisualization':  'qtdatavisualization-module.html',
 
     # 6.2
+    'QtBluetooth': 'qtbluetooth-module.html',
     #'QtPositioning':  'qtpositioning-module.html',
     #'QtMultimedia':  'qtmultimedia-module.html',
     #'QtRemoteObjects':  'qtremoteobjects-module.html',
