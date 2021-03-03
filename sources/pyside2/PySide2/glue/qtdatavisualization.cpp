@@ -22,3 +22,35 @@
 // @snippet releaseownership
 Shiboken::Object::releaseOwnership(%PYARG_1);
 // @snippet releaseownership
+
+// @snippet dataproxy-addrow
+using VectorType = decltype(%1);
+%RETURN_TYPE %0 = %CPPSELF.addRow(new VectorType(%1));
+%PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
+// @snippet dataproxy-addrow
+
+// @snippet dataproxy-addrow-string
+using VectorType = decltype(%1);
+%RETURN_TYPE %0 = %CPPSELF.addRow(new VectorType(%1), %2);
+%PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
+// @snippet dataproxy-addrow-string
+
+// @snippet dataproxy-insertrow
+using VectorType = decltype(%2);
+%CPPSELF.insertRow(%1, new VectorType(%2));
+// @snippet dataproxy-insertrow
+
+// @snippet dataproxy-insertrow-string
+using VectorType = decltype(%2);
+%CPPSELF.insertRow(%1, new VectorType(%2), %3);
+// @snippet dataproxy-insertrow-string
+
+// @snippet dataproxy-setrow
+using VectorType = decltype(%2);
+%CPPSELF.setRow(%1, new VectorType(%2));
+// @snippet dataproxy-setrow
+
+// @snippet dataproxy-setrow-string
+using VectorType = decltype(%2);
+%CPPSELF.setRow(%1, new VectorType(%2), %3);
+// @snippet dataproxy-setrow-string

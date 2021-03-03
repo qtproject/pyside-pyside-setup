@@ -119,56 +119,43 @@
           <parent index="this" action="add"/>
         </modify-argument>
       </modify-function>
-      <modify-function signature="addRow(QVector&lt;QtDataVisualization::QBarDataItem&gt;*)">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="addRow(QVector&lt;QtDataVisualization::QBarDataItem&gt;*, const QString&amp;)">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="addRows(const QtDataVisualization::QBarDataArray&amp;)">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="addRows(const QtDataVisualization::QBarDataArray&amp;, const QStringList&amp;)">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="insertRow(int, QVector&lt;QtDataVisualization::QBarDataItem&gt;*)">
-        <modify-argument index="2">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="insertRow(int, QVector&lt;QtDataVisualization::QBarDataItem&gt;*, const QString&amp;)">
-        <modify-argument index="2">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="insertRows(int, const QtDataVisualization::QBarDataArray&amp;)">
-        <modify-argument index="2">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="insertRows(int, const QtDataVisualization::QBarDataArray&amp;, const QStringList&amp;)">
-        <modify-argument index="2">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="setRow(int, QVector&lt;QtDataVisualization::QBarDataItem&gt;*)">
-        <modify-argument index="2">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="setRow(int, QVector&lt;QtDataVisualization::QBarDataItem&gt;*, const QString&amp;)">
-        <modify-argument index="2">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
+
+      <!-- PYSIDE-1438: Replace all add/set/insertRow() taking a 'QVector*' by overloads
+           taking 'const QVector &' since an allocated list needs to be passed. -->
+      <modify-function signature="addRow(QVector&lt;QtDataVisualization::QBarDataItem&gt;*)" remove="all"/>
+      <add-function signature="addRow(const QVector&lt;QtDataVisualization::QBarDataItem&gt;&amp;)" return-type="int">
+          <inject-code class="target" position="beginning" file="../glue/qtdatavisualization.cpp"
+                       snippet="dataproxy-addrow"/>
+      </add-function>
+      <modify-function signature="addRow(QVector&lt;QtDataVisualization::QBarDataItem&gt;*,const QString&amp;)" remove="all"/>
+      <add-function signature="addRow(const QVector&lt;QtDataVisualization::QBarDataItem&gt;&amp;,const QString&amp;)"
+                    return-type="int">
+          <inject-code class="target" position="beginning" file="../glue/qtdatavisualization.cpp"
+                       snippet="dataproxy-addrow-string"/>
+      </add-function>
+
+      <modify-function signature="insertRow(int,QVector&lt;QtDataVisualization::QBarDataItem&gt;*)" remove="all"/>
+      <add-function signature="insertRow(int,const QVector&lt;QtDataVisualization::QBarDataItem&gt;&amp;)">
+          <inject-code class="target" position="beginning" file="../glue/qtdatavisualization.cpp"
+                       snippet="dataproxy-insertrow"/>
+      </add-function>
+      <modify-function signature="insertRow(int,QVector&lt;QtDataVisualization::QBarDataItem&gt;*,const QString&amp;)" remove="all"/>
+      <add-function signature="insertRow(int,const QVector&lt;QtDataVisualization::QBarDataItem&gt;&amp;, const QString&amp;)">
+          <inject-code class="target" position="beginning" file="../glue/qtdatavisualization.cpp"
+                       snippet="dataproxy-insertrow-string"/>
+      </add-function>
+
+      <modify-function signature="setRow(int,QVector&lt;QtDataVisualization::QBarDataItem&gt;*)" remove="all"/>
+      <add-function signature="setRow(int,const QVector&lt;QtDataVisualization::QBarDataItem&gt;&amp;)">
+          <inject-code class="target" position="beginning" file="../glue/qtdatavisualization.cpp"
+                       snippet="dataproxy-setrow"/>
+      </add-function>
+      <modify-function signature="setRow(int,QVector&lt;QtDataVisualization::QBarDataItem&gt;*,const QString&amp;)" remove="all"/>
+      <add-function signature="setRow(int,const QVector&lt;QtDataVisualization::QBarDataItem&gt;&amp;,const QString&amp;)">
+          <inject-code class="target" position="beginning" file="../glue/qtdatavisualization.cpp"
+                       snippet="dataproxy-setrow-string"/>
+      </add-function>
+
       <modify-function signature="setRows(int, const QtDataVisualization::QBarDataArray&amp;)">
         <modify-argument index="2">
           <parent index="this" action="add"/>
@@ -251,21 +238,27 @@
     </object-type>
     <value-type name="QSurfaceDataItem"/>
     <object-type name="QSurfaceDataProxy">
-      <modify-function signature="addRow(QVector&lt;QtDataVisualization::QSurfaceDataItem&gt;*)">
-        <modify-argument index="1">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="insertRow(int, QVector&lt;QtDataVisualization::QSurfaceDataItem&gt;*)">
-        <modify-argument index="2">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
-      <modify-function signature="setRow(int, QVector&lt;QtDataVisualization::QSurfaceDataItem&gt;*)">
-        <modify-argument index="2">
-          <parent index="this" action="add"/>
-        </modify-argument>
-      </modify-function>
+
+    <!-- PYSIDE-1438: Replace all add/set/insertRow() taking a 'QVector*' by overloads
+         taking 'const QVector &' since an allocated list needs to be passed. -->
+    <modify-function signature="addRow(QVector&lt;QtDataVisualization::QSurfaceDataItem&gt;*)" remove="all"/>
+    <add-function signature="addRow(const QVector&lt;QtDataVisualization::QSurfaceDataItem&gt;&amp;)" return-type="int">
+        <inject-code class="target" position="beginning" file="../glue/qtdatavisualization.cpp"
+                     snippet="dataproxy-addrow"/>
+    </add-function>
+
+    <modify-function signature="insertRow(int,QVector&lt;QtDataVisualization::QSurfaceDataItem&gt;*)" remove="all"/>
+    <add-function signature="insertRow(int,const QVector&lt;QtDataVisualization::QSurfaceDataItem&gt;&amp;)">
+        <inject-code class="target" position="beginning" file="../glue/qtdatavisualization.cpp"
+                     snippet="dataproxy-insertrow"/>
+    </add-function>
+
+    <modify-function signature="setRow(int,QVector&lt;QtDataVisualization::QSurfaceDataItem&gt;*)" remove="all"/>
+    <add-function signature="setRow(int,const QVector&lt;QtDataVisualization::QSurfaceDataItem&gt;&amp;)">
+        <inject-code class="target" position="beginning" file="../glue/qtdatavisualization.cpp"
+                     snippet="dataproxy-setrow"/>
+    </add-function>
+
       <modify-function signature="resetArray(QtDataVisualization::QSurfaceDataArray*)">
         <modify-argument index="1">
           <parent index="this" action="add"/>
