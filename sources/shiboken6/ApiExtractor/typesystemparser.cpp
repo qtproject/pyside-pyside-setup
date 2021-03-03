@@ -45,6 +45,7 @@
 #include <QtCore/QXmlStreamEntityResolver>
 
 #include <algorithm>
+#include <optional>
 #include <memory>
 
 const char *TARGET_CONVERSION_RULE_FLAG = "0";
@@ -137,7 +138,8 @@ static bool setRejectionRegularExpression(const QString &patternIn,
 }
 
 // Extract a snippet from a file within annotation "// @snippet label".
-static QString extractSnippet(const QString &code, const QString &snippetLabel)
+std::optional<QString>
+    extractSnippet(const QString &code, const QString &snippetLabel)
 {
     if (snippetLabel.isEmpty())
         return code;
@@ -148,16 +150,20 @@ static QString extractSnippet(const QString &code, const QString &snippetLabel)
     Q_ASSERT(snippetRe.isValid());
 
     bool useLine = false;
+    bool foundLabel = false;
     QString result;
     const auto lines = QStringView{code}.split(QLatin1Char('\n'));
     for (const auto &line : lines) {
         if (snippetRe.match(line).hasMatch()) {
+            foundLabel = true;
             useLine = !useLine;
             if (!useLine)
                 break; // End of snippet reached
         } else if (useLine)
             result += line.toString() + QLatin1Char('\n');
     }
+    if (!foundLabel)
+        return {};
     return CodeSnipAbstract::fixSpaces(result);
 }
 
@@ -1889,16 +1895,18 @@ bool TypeSystemParser::parseCustomConversion(const QXmlStreamReader &,
                 conversionFlag = TARGET_CONVERSION_RULE_FLAG;
 
             QFile conversionSource(sourceFile);
-            if (conversionSource.open(QIODevice::ReadOnly | QIODevice::Text)) {
-                const QString conversionRule =
-                    extractSnippet(QString::fromUtf8(conversionSource.readAll()), snippetLabel);
-                topElement.entry->setConversionRule(QLatin1String(conversionFlag) + conversionRule);
-            } else {
-                qCWarning(lcShiboken).noquote().nospace()
-                    << "File containing conversion code for "
-                    << topElement.entry->name() << " type does not exist or is not readable: "
-                    << sourceFile;
+            if (!conversionSource.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                m_error = msgCannotOpenForReading(conversionSource);
+                return false;
             }
+            const auto conversionRuleOptional =
+                extractSnippet(QString::fromUtf8(conversionSource.readAll()), snippetLabel);
+            if (!conversionRuleOptional.has_value()) {
+                m_error = msgCannotFindSnippet(sourceFile, snippetLabel);
+                return false;
+            }
+            topElement.entry->setConversionRule(QLatin1String(conversionFlag)
+                                                + conversionRuleOptional.value());
         }
     }
 
@@ -2496,6 +2504,13 @@ bool TypeSystemParser::readFileSnippet(QXmlStreamAttributes *attributes, CodeSni
         m_error = msgCannotOpenForReading(codeFile);
         return false;
     }
+    const auto codeOptional = extractSnippet(QString::fromUtf8(codeFile.readAll()), snippetLabel);
+    codeFile.close();
+    if (!codeOptional.has_value()) {
+        m_error = msgCannotFindSnippet(resolved, snippetLabel);
+        return false;
+    }
+
     QString source = fileName;
     if (!snippetLabel.isEmpty())
         source += QLatin1String(" (") + snippetLabel + QLatin1Char(')');
@@ -2503,8 +2518,7 @@ bool TypeSystemParser::readFileSnippet(QXmlStreamAttributes *attributes, CodeSni
     QTextStream str(&content);
     str << "// ========================================================================\n"
            "// START of custom code block [file: "
-        << source << "]\n"
-        << extractSnippet(QString::fromUtf8(codeFile.readAll()), snippetLabel)
+        << source << "]\n" << codeOptional.value()
         << "// END of custom code block [file: " << source
         << "]\n// ========================================================================\n";
     snip->addCode(content);

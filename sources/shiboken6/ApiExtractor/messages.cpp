@@ -779,6 +779,15 @@ QString msgCannotFindView(const QString &viewedName, const QString &name)
         + QLatin1String(" for ") + name;
 }
 
+QString msgCannotFindSnippet(const QString &file, const QString &snippetLabel)
+{
+    QString result;
+    QTextStream str(&result);
+    str << "Cannot find snippet \"" << snippetLabel << "\" in "
+        << QDir::toNativeSeparators(file) << '.';
+    return result;
+}
+
 // cppgenerator.cpp
 
 QString msgPureVirtualFunctionRemoved(const AbstractMetaFunction *f)
