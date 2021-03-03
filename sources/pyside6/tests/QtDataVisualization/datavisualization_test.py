@@ -42,7 +42,8 @@ init_test_paths(False)
 from helper.usesqguiapplication import UsesQGuiApplication
 from PySide6.QtCore import QTimer
 from PySide6.QtDataVisualization import (Q3DBars, QBar3DSeries, QBarDataItem,
-                                         QCategory3DAxis, QValue3DAxis)
+                                         QBarDataProxy, QCategory3DAxis,
+                                         QValue3DAxis)
 
 
 def dataToBarDataRow(data):
@@ -90,6 +91,19 @@ class QtDataVisualizationTestCase(UsesQGuiApplication):
         self.bars.show()
         QTimer.singleShot(500, self.app.quit)
         self.app.exec_()
+
+    def testBarDataProxy(self):
+        '''PSYSIDE-1438, crashes in QBarDataProxy.addRow()'''
+        items = [QBarDataItem(v) for v in [1.0, 2.0]]
+        data_proxy = QBarDataProxy()
+        data_proxy.addRow(items)
+        data_proxy.addRow(items, 'bla')
+        data_proxy.insertRow(0, items)
+        data_proxy.insertRow(0, items, 'bla')
+        data_proxy.setRow(0, items)
+        data_proxy.setRow(0, items, 'bla')
+        self.assertTrue(data_proxy.rowCount(), 4)
+
 
 if __name__ == '__main__':
     unittest.main()

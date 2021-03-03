@@ -40,3 +40,35 @@
 // @snippet releaseownership
 Shiboken::Object::releaseOwnership(%PYARG_1);
 // @snippet releaseownership
+
+// @snippet dataproxy-addrow
+using ListType = decltype(%1);
+%RETURN_TYPE %0 = %CPPSELF.addRow(new ListType(%1));
+%PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
+// @snippet dataproxy-addrow
+
+// @snippet dataproxy-addrow-string
+using ListType = decltype(%1);
+%RETURN_TYPE %0 = %CPPSELF.addRow(new ListType(%1), %2);
+%PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
+// @snippet dataproxy-addrow-string
+
+// @snippet dataproxy-insertrow
+using ListType = decltype(%2);
+%CPPSELF.insertRow(%1, new ListType(%2));
+// @snippet dataproxy-insertrow
+
+// @snippet dataproxy-insertrow-string
+using ListType = decltype(%2);
+%CPPSELF.insertRow(%1, new ListType(%2), %3);
+// @snippet dataproxy-insertrow-string
+
+// @snippet dataproxy-setrow
+using ListType = decltype(%2);
+%CPPSELF.setRow(%1, new ListType(%2));
+// @snippet dataproxy-setrow
+
+// @snippet dataproxy-setrow-string
+using ListType = decltype(%2);
+%CPPSELF.setRow(%1, new ListType(%2), %3);
+// @snippet dataproxy-setrow-string
