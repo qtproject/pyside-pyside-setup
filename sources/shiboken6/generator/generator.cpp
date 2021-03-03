@@ -286,7 +286,12 @@ void Generator::addInstantiatedContainersAndSmartPointers(const AbstractMetaType
         const QString typeName = getSimplifiedContainerTypeName(type);
         if (!m_d->instantiatedContainersNames.contains(typeName)) {
             m_d->instantiatedContainersNames.append(typeName);
-            m_d->instantiatedContainers.append(type);
+            auto simplifiedType = type;
+            simplifiedType.setIndirections(0);
+            simplifiedType.setConstant(false);
+            simplifiedType.setReferenceType(NoReference);
+            simplifiedType.decideUsagePattern();
+            m_d->instantiatedContainers.append(simplifiedType);
         }
         return;
     }
