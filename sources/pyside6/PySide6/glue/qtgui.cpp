@@ -63,6 +63,10 @@ const char *sources[] = {buffer.constData()};
 %CPPSELF->%FUNCTION_NAME(%1, 1, sources, nullptr);
 // @snippet glshadersource
 
+// @snippet glgetstring-return
+%PYARG_0 = %CONVERTTOPYTHON[const char *](%0);
+// @snippet glgetstring-return
+
 // @snippet qtransform-quadtoquad
 QTransform _result;
 if (QTransform::quadToQuad(%1, %2, _result)) {

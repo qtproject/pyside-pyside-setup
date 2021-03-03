@@ -2690,7 +2690,8 @@
           <modify-argument index="return">
               <replace-type modified-type="QString"/>
           </modify-argument>
-          <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qstring-return"/>
+          <inject-code class="target" position="end" file="../glue/qtgui.cpp"
+                       snippet="glgetstring-return"/>
       </modify-function>
   </object-type>
   <object-type name="QOpenGLFunctions" since="5.0">
