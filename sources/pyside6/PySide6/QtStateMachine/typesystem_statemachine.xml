@@ -147,7 +147,7 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
         <modify-argument index="2">
             <replace-default-expression with="0"/>
         </modify-argument>
-        <inject-code file="../glue/qtcore.cpp" snippet="qsignaltransition"/>
+        <inject-code file="../glue/qtstatemachine.cpp" snippet="qsignaltransition"/>
     </add-function>
   </object-type>
 
@@ -164,7 +164,8 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
       <modify-argument index="return">
         <parent index="this" action="add"/>
       </modify-argument>
-      <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qstate-addtransition-1"/>
+      <inject-code class="target" position="beginning" file="../glue/qtstatemachine.cpp"
+                   snippet="qstate-addtransition-1"/>
     </modify-function>
     <modify-function signature="addTransition(QAbstractState*)">
       <modify-argument index="1">
@@ -179,7 +180,8 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
       <modify-argument index="return">
         <parent index="this" action="add"/>
       </modify-argument>
-      <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qstate-addtransition-2"/>
+      <inject-code class="target" position="beginning" file="../glue/qtstatemachine.cpp"
+                   snippet="qstate-addtransition-2"/>
     </add-function>
 
     <modify-function signature="removeTransition(QAbstractTransition*)">
@@ -208,13 +210,15 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
     </modify-function>
 
     <add-function signature="configuration()" return-type="QSet&lt;QAbstractState*&gt;">
-        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qstatemachine-configuration"/>
+        <inject-code class="target" position="beginning" file="../glue/qtstatemachine.cpp"
+                     snippet="qstatemachine-configuration"/>
     </add-function>
 
     <!-- Replaced by a added function -->
     <modify-function signature="defaultAnimations()const" remove="all"/>
     <add-function signature="defaultAnimations()" return-type="QList&lt;QAbstractAnimation*&gt;">
-        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qstatemachine-defaultanimations"/>
+        <inject-code class="target" position="beginning" file="../glue/qtstatemachine.cpp"
+                     snippet="qstatemachine-defaultanimations"/>
     </add-function>
   </object-type>
 

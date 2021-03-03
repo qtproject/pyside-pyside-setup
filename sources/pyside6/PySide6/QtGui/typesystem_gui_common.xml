@@ -206,15 +206,15 @@
       <modify-argument index="4">
         <replace-default-expression with="Qt::WindowShortcut"/>
       </modify-argument>
-      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qshortcut-1"/>
-      <inject-code class="target" position="end" file="../glue/qtwidgets.cpp" snippet="qshortcut-2"/>
+      <inject-code class="target" position="beginning" file="../glue/qtgui.cpp" snippet="qshortcut-1"/>
+      <inject-code class="target" position="end" file="../glue/qtgui.cpp" snippet="qshortcut-2"/>
     </add-function>
     <add-function signature="QShortcut(QKeySequence::StandardKey,QObject*,PyCallable*,Qt::ShortcutContext)">
       <modify-argument index="4">
         <replace-default-expression with="Qt::WindowShortcut"/>
       </modify-argument>
-      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qshortcut-1"/>
-      <inject-code class="target" position="end" file="../glue/qtwidgets.cpp" snippet="qshortcut-2"/>
+      <inject-code class="target" position="beginning" file="../glue/qtgui.cpp" snippet="qshortcut-1"/>
+      <inject-code class="target" position="end" file="../glue/qtgui.cpp" snippet="qshortcut-2"/>
     </add-function>
   </object-type>
 

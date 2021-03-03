@@ -203,20 +203,6 @@ for (auto *act : actions) {
 %CPPSELF.addAction(%1);
 // @snippet qmenubar-addaction-2
 
-// @snippet qshortcut-1
-%0 = new %TYPE(%1, %2);
-// @snippet qshortcut-1
-
-// @snippet qshortcut-2
-Shiboken::AutoDecRef result(PyObject_CallMethod(%PYSELF,
-    const_cast<char *>("connect"),
-    const_cast<char *>("OsO"),
-    %PYSELF, SIGNAL(activated()), %PYARG_3)
-);
-if (!result.isNull())
-    Shiboken::Object::setParent(%PYARG_2, %PYSELF);
-// @snippet qshortcut-2
-
 // @snippet qtoolbox-removeitem
 QWidget *_widget = %CPPSELF.widget(%1);
 if (_widget) {

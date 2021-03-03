@@ -139,16 +139,6 @@ if (doc) {
 }
 // @snippet qtextblock-userdata
 
-// @snippet qopenglshaderprogram_setuniformvalue_float
-float value = %2;
-%CPPSELF.setUniformValue(%1, value);
-// @snippet qopenglshaderprogram_setuniformvalue_float
-
-// @snippet qopenglshaderprogram_setuniformvalue_int
-int value = %2;
-%CPPSELF.setUniformValue(%1, value);
-// @snippet qopenglshaderprogram_setuniformvalue_int
-
 // @snippet qpolygon-reduce
 const Py_ssize_t count = %CPPSELF.count();
 PyObject *points = PyList_New(count);
@@ -551,6 +541,20 @@ WId id = %1;
 %RETURN_TYPE retval = %CPPSELF.%FUNCTION_NAME(id);
 %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](retval);
 // @snippet qwindow-fromWinId
+
+// @snippet qshortcut-1
+%0 = new %TYPE(%1, %2);
+// @snippet qshortcut-1
+
+// @snippet qshortcut-2
+Shiboken::AutoDecRef result(PyObject_CallMethod(%PYSELF,
+                                                const_cast<char *>("connect"),
+                                                const_cast<char *>("OsO"),
+                                                %PYSELF, SIGNAL(activated()), %PYARG_3)
+                            );
+if (!result.isNull())
+    Shiboken::Object::setParent(%PYARG_2, %PYSELF);
+// @snippet qshortcut-2
 
 /*********************************************************************
  * CONVERSIONS
