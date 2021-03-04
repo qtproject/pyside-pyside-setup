@@ -41,6 +41,28 @@
  * INJECT CODE
  ********************************************************************/
 
+// @snippet glgetshadersource
+GLsizei bufSize = 4096;
+GLsizei length = bufSize - 1;
+QByteArray buffer;
+for (; length == bufSize - 1; bufSize += 4096) {
+    buffer.resize(qsizetype(bufSize));
+    %CPPSELF->%FUNCTION_NAME(%1, bufSize, &length, buffer.data());
+    if (%CPPSELF->glGetError() != GL_NO_ERROR) {
+        buffer.clear();
+        break;
+    }
+}
+auto *data = buffer.constData();
+%PYARG_0 = %CONVERTTOPYTHON[char *](data);
+// @snippet glgetshadersource
+
+// @snippet glshadersource
+const QByteArray buffer = %2.toUtf8();
+const char *sources[] = {buffer.constData()};
+%CPPSELF->%FUNCTION_NAME(%1, 1, sources, nullptr);
+// @snippet glshadersource
+
 // @snippet qtransform-quadtoquad
 QTransform _result;
 if (QTransform::quadToQuad(%1, %2, _result)) {

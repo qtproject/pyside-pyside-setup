@@ -2695,6 +2695,14 @@
   </object-type>
   <object-type name="QOpenGLFunctions" since="5.0">
       <enum-type name="OpenGLFeature" flags="OpenGLFeatures"/>
+      <add-function signature="glGetShaderSource(unsigned int @shader@)" return-type="const char *">
+          <inject-code class="target" position="beginning" file="../glue/qtgui.cpp"
+                       snippet="glgetshadersource"/>
+      </add-function>
+      <add-function signature="glShaderSource(unsigned int @shader@,const QString &amp; @source@)">
+          <inject-code class="target" position="beginning" file="../glue/qtgui.cpp"
+                       snippet="glshadersource"/>
+      </add-function>
       <modify-function signature="glGetAttachedShaders(unsigned int,int,int*,unsigned int*)">
           <modify-argument index="3"><array/></modify-argument>
           <modify-argument index="4"><array/></modify-argument>
