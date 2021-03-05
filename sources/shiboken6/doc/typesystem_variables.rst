@@ -1,3 +1,5 @@
+.. _typesystemvariables:
+
 *********************
 Type System Variables
 *********************
@@ -24,9 +26,9 @@ Variables
 
 .. _arg_number:
 
-**%#**
+**%<number>**
 
-  Replaced by the name of a C++ argument in the position indicated by ``#``.
+  Replaced by the name of a C++ argument in the position indicated by ``<number>``.
   The argument counting starts with ``%1``, since ``%0`` represents the return
   variable name. If the number indicates a variable that was removed in the
   type system description, but there is a default value for it, this value will
@@ -214,13 +216,13 @@ Variables
 
 .. _pyarg:
 
-**%PYARG_#**
+**%PYARG_<number>**
 
-  Similar to ``%#``, but is replaced by the Python arguments (PyObjects)
+  Similar to ``%<number>``, but is replaced by the Python arguments (PyObjects)
   received by the Python wrapper method.
 
   If used in the context of a native code injection, i.e. in a virtual method
-  override, ``%PYARG_#`` will be translated to one item of the Python tuple
+  override, ``%PYARG_<number>`` will be translated to one item of the Python tuple
   holding the arguments that should be passed to the Python override for this
   virtual method.
 
