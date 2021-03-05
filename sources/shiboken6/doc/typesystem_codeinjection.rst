@@ -112,7 +112,8 @@ Below is the example C++ class for whom wrapper code will be generated.
 
     .. code-block:: c++
 
-        class InjectCode {
+        class InjectCode
+        {
         public:
             InjectCode();
             double overloadedMethod(int arg);
@@ -123,6 +124,10 @@ Below is the example C++ class for whom wrapper code will be generated.
 From the C++ class, |project| will generate a ``injectcode_wrapper.cpp`` file
 with the binding code. The next section will use a simplified version of the
 generated wrapper code with the injection spots marked with comments.
+
+There are a number of placeholders indicated by a percent sign ``%``, which
+will be expanded when inserting the code. For a list, see
+:ref:`typesystemvariables`.
 
 Noteworthy Cases
 ----------------
@@ -196,7 +201,7 @@ class is polymorphic.
 
         int InjectCodeWrapper::virtualMethod(int arg)
         {
-            PyObject* method = BindingManager::instance().getOverride(this, "virtualMethod");
+            PyObject *method = BindingManager::instance().getOverride(this, "virtualMethod");
             if (!py_override)
                 return this->InjectCode::virtualMethod(arg);
 
@@ -228,10 +233,9 @@ own ``beginning`` and ``end`` code injections.
 
     .. code-block:: c++
 
-            static PyObject*
-            PyInjectCode_overloadedMethod(PyObject* self, PyObject* arg)
+            static PyObject *PyInjectCode_overloadedMethod(PyObject *self, PyObject *arg)
             {
-                PyObject* py_result = 0;
+                PyObject* py_result{};
                 if (PyFloat_Check(arg)) {
                     double cpp_arg0 = Shiboken::Converter<double >::toCpp(arg);
 
@@ -250,13 +254,13 @@ own ``beginning`` and ``end`` code injections.
                 } else goto PyInjectCode_overloadedMethod_TypeError;
 
                 if (PyErr_Occurred() || !py_result)
-                    return 0;
+                    return {};
 
                 return py_result;
 
                 PyInjectCode_overloadedMethod_TypeError:
                     PyErr_SetString(PyExc_TypeError, "'overloadedMethod()' called with wrong parameters.");
-                    return 0;
+                    return {};
             }
 
 
@@ -371,7 +375,7 @@ to prevent bad custom code to pass unnoticed.
             // INJECT-CODE: <typesystem><inject-code class="target" position="beginning">
             // Uses: do something before the module is created.
 
-            PyObject* module = Py_InitModule("MODULENAME", MODULENAME_methods);
+            PyObject *module = Py_InitModule("MODULENAME", MODULENAME_methods);
 
             (... initialization of wrapped classes, namespaces, functions and enums ...)
 
