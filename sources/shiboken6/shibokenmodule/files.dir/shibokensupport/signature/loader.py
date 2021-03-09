@@ -110,12 +110,20 @@ def make_helptext(func):
 def finish_import(module):
     return importhandler.finish_import(module)
 
+# name used in signature.cpp
+def feature_import(*args, **kwds):
+    # don't spend a stack level here for speed and compatibility
+    global feature_import
+    feature_import = __feature__.feature_import
+    return feature_import(*args, **kwds)
+
 
 import signature_bootstrap
 from shibokensupport import signature, feature as __feature__
 signature.get_signature = signature_bootstrap.get_signature
 # PYSIDE-1019: Publish the __feature__ dictionary.
 __feature__.pyside_feature_dict = signature_bootstrap.pyside_feature_dict
+__builtins__["__feature_import__"] = signature_bootstrap.__feature_import__
 del signature_bootstrap
 
 def _get_modname(mod):
@@ -212,7 +220,7 @@ if "PySide6" in sys.modules:
     # __feature__ is already in sys.modules, so this is actually no import
     import PySide6.support.__feature__
     sys.modules["__feature__"] = PySide6.support.__feature__
-    PySide6.support.__feature__.original_import = __builtins__["__import__"]
-    __builtins__["__import__"] = PySide6.support.__feature__._import
+    __builtins__["__orig_import__"] = __builtins__["__import__"]
+    __builtins__["__import__"] = __builtins__["__feature_import__"]
 
 # end of file

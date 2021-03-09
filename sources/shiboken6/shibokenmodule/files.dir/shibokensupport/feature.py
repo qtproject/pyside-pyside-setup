@@ -99,11 +99,26 @@ Note: This are two imports.
              12 LOAD_CONST               0 (None)
              14 RETURN_VALUE
 """
-# XXX build an improved C version? I guess not.
-def _import(name, *args, **kwargs):
+
+"""
+The redirection of __import__
+-----------------------------
+
+This construction avoids irritating extra redirections in tracebacks.
+
+The normal `__import__` is replaced by C function `__feature_import__`.
+`__feature_import__` calls this `feature_import` function first, to
+see if a feature is requested. If this function does not handle it, it returns
+None to indicate that a normal import should be performed, and
+`__feature_import__` calls the original import `__orig_import__`.
+All these variables are transparently kept in module `builtins`.
+"""
+
+def feature_import(name, *args, **kwargs):
     # PYSIDE-1368: The `__name__` attribute does not need to exist in all modules.
     # PYSIDE-1398: sys._getframe(1) may not exist when embedding.
-    calling_frame = _cf = sys._getframe().f_back
+    # PYSIDE-1338: The "1" below is the redirection in loader.py .
+    calling_frame = _cf = sys._getframe(1).f_back
     importing_module = _cf.f_globals.get("__name__", "__main__") if _cf else "__main__"
     existing = pyside_feature_dict.get(importing_module, 0)
 
@@ -137,7 +152,8 @@ def _import(name, *args, **kwargs):
         # This is some other module. Ignore it in switching.
         flag = -1
     pyside_feature_dict[importing_module] = flag
-    return original_import(name, *args, **kwargs)
+    # Redirect to the original import
+    return None
 
 _is_initialized = False
 

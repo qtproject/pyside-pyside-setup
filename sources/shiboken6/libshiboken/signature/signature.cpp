@@ -270,7 +270,32 @@ static PyObject *get_signature(PyObject * /* self */, PyObject *args)
     Py_RETURN_NONE;
 }
 
+////////////////////////////////////////////////////////////////////////////
+//
+// feature_import  --  special handling for `from __feature__ import ...`
+//
+// The actual function is implemented in Python.
+// When no features are involved, we redirect to the original import.
+// This avoids an extra function level in tracebacks that is irritating.
+//
+
+static PyObject *feature_import(PyObject * /* self */, PyObject *args, PyObject *kwds)
+{
+    PyObject *ret = PyObject_Call(pyside_globals->feature_import_func, args, kwds);
+    if (ret != Py_None)
+        return ret;
+    // feature_import did not handle it, so call the normal import.
+    Py_DECREF(ret);
+    static PyObject *builtins = PyEval_GetBuiltins();
+    PyObject *import_func = PyDict_GetItemString(builtins, "__orig_import__");
+    if (import_func == nullptr) {
+        Py_FatalError("builtins has no \"__orig_import__\" function");
+    }
+    return PyObject_Call(import_func, args, kwds);
+}
+
 PyMethodDef signature_methods[] = {
+    {"__feature_import__", (PyCFunction)feature_import, METH_VARARGS | METH_KEYWORDS},
     {"get_signature", (PyCFunction)get_signature, METH_VARARGS,
         "get the __signature__, but pass an optional string parameter"},
     {nullptr, nullptr}

@@ -219,3 +219,29 @@ seems to be quite cumbersome, and instead of looking all properties up in
 the Qt documentation, it would be easier to add all properties that
 should be properties and are obviously missing.
 
+
+The __feature__ import
+======================
+
+The implementation of ``from __feature__ import ...`` is built by a slight
+modification of the ``__import__`` builtin. We made that explicit by assigning
+variables in the builtin module. This modification takes place at |project|
+import time:
+
+* The original function in ``__import__`` is kept in ``__orig_import__``.
+* The new function is in ``__feature_import__`` and assigned to ``__import__``.
+
+This function calls the Python function ``PySide6.support.__feature__.feature_import``
+first, and falls back to ``__orig_import__`` if feature import is not applicable.
+
+
+Overriding __import__
+---------------------
+
+This is not recommended. Import modifications should be done using import hooks,
+see the Python documentation on `Import-Hooks`_.
+
+If you would like to modify ``__import__`` anyway without destroying the features,
+please override just the ``__orig_import__`` function.
+
+.. _`Import-Hooks`:  https://docs.python.org/3/reference/import.html#import-hooks

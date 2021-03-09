@@ -197,6 +197,12 @@ static int init_phase_2(safe_globals_struc *p, PyMethodDef *methods)
                 goto error;
             Py_DECREF(v);
         }
+        // The first entry is __feature_import__, add documentation.
+        PyObject *builtins = PyEval_GetBuiltins();
+        PyObject *imp_func = PyDict_GetItemString(builtins, "__import__");
+        PyObject *imp_doc = PyObject_GetAttrString(imp_func, "__doc__");
+        signature_methods[0].ml_doc = String::toCString(imp_doc);
+
         PyObject *bootstrap_func = PyObject_GetAttrString(p->helper_module, "bootstrap");
         if (bootstrap_func == nullptr)
             goto error;
@@ -219,6 +225,9 @@ static int init_phase_2(safe_globals_struc *p, PyMethodDef *methods)
             goto error;
         p->finish_import_func = PyObject_GetAttrString(loader, "finish_import");
         if (p->finish_import_func == nullptr)
+            goto error;
+        p->feature_import_func = PyObject_GetAttrString(loader, "feature_import");
+        if (p->feature_import_func == nullptr)
             goto error;
         return 0;
     }
