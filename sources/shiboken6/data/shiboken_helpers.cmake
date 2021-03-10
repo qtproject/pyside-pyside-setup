@@ -119,7 +119,8 @@ macro(setup_clang)
 
     find_package(Clang CONFIG REQUIRED)
     # CLANG_LIBRARY is read out from the cmake cache to deploy libclang
-    get_target_property(CLANG_LIBRARY_NAME libclang IMPORTED_LOCATION_RELEASE)
+    get_target_property(CLANG_BUILD_TYPE libclang IMPORTED_CONFIGURATIONS)
+    get_target_property(CLANG_LIBRARY_NAME libclang IMPORTED_LOCATION_${CLANG_BUILD_TYPE})
     set(CLANG_LIBRARY "${CLANG_LIBRARY_NAME}" CACHE FILEPATH "libclang")
     message(STATUS "CLANG: ${Clang_DIR}, ${CLANG_LIBRARY} detected")
 endmacro()
