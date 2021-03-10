@@ -65,7 +65,7 @@ private:
     void writeMemberFunctionWrapper(TextStream &s,
                                     const AbstractMetaFunctionCPtr &func,
                                     const QString &postfix = {}) const;
-    bool writePrivateHeader(const QString &moduleHeaderDir,
+    void writePrivateHeader(const QString &moduleHeaderDir,
                             const QString &publicIncludeShield,
                             const QSet<Include> &privateIncludes,
                             const QString &privateTypeFunctions);

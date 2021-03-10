@@ -631,15 +631,16 @@ bool HeaderGenerator::finishGeneration()
         << "} // namespace Shiboken\n\n"
         << "#endif // " << includeShield << "\n\n";
 
-    if (file.done() == FileOut::Failure)
-        return false;
+    file.done();
 
-    return !hasPrivateClasses()
-        || writePrivateHeader(moduleHeaderDir, includeShield,
-                              privateIncludes, privateTypeFunctions.toString());
+    if (hasPrivateClasses()) {
+        writePrivateHeader(moduleHeaderDir, includeShield,
+                           privateIncludes, privateTypeFunctions.toString());
+    }
+    return true;
 }
 
-bool HeaderGenerator::writePrivateHeader(const QString &moduleHeaderDir,
+void HeaderGenerator::writePrivateHeader(const QString &moduleHeaderDir,
                                          const QString &publicIncludeShield,
                                          const QSet<Include> &privateIncludes,
                                          const QString &privateTypeFunctions)
@@ -674,7 +675,7 @@ bool HeaderGenerator::writePrivateHeader(const QString &moduleHeaderDir,
         ps << "QT_WARNING_POP\n";
 
     ps << "#endif\n";
-    return privateFile.done() != FileOut::Failure;
+    privateFile.done();
 }
 
 void HeaderGenerator::writeProtectedEnumSurrogate(TextStream &s, const AbstractMetaEnum &cppEnum) const

@@ -428,7 +428,8 @@ bool Generator::generateFileForContext(const GeneratorContext &context)
 
     generateClass(fileOut.stream, context);
 
-    return fileOut.done() != FileOut::Failure;
+    fileOut.done();
+    return true;
 }
 
 QString Generator::getFileNameBaseForSmartPointer(const AbstractMetaType &smartPointerType,

@@ -31,6 +31,8 @@
 
 #include "textstream.h"
 
+class Exception;
+
 QT_FORWARD_DECLARE_CLASS(QFile)
 
 class FileOut
@@ -39,15 +41,14 @@ class FileOut
 public:
     Q_DISABLE_COPY(FileOut)
 
-    enum State { Failure, Unchanged, Success };
+    enum State { Unchanged, Success };
 
     explicit FileOut(QString name);
     ~FileOut();
 
     QString filePath() const { return m_name; }
 
-    State done();
-    State done(QString *errorMessage);
+    State done() noexcept(false);
 
     TextStream stream;
 

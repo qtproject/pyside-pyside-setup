@@ -6387,7 +6387,8 @@ bool CppGenerator::finishGeneration()
                 << "return PyInit_Shiboken();\n" << outdent
             << "}\n";
     }
-    return file.done() != FileOut::Failure;
+    file.done();
+    return true;
 }
 
 static ArgumentOwner getArgumentOwner(const AbstractMetaFunctionCPtr &func, int argIndex)

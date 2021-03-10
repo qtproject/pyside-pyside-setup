@@ -884,6 +884,7 @@ void QtDocGenerator::writeModuleDocumentation()
                 s << moduleDoc.detailed();
             }
         }
+        output.done();
     }
 }
 
@@ -1060,7 +1061,8 @@ bool QtDocGenerator::convertToRst(const QString &sourceFileName,
     FileOut targetFile(targetFileName);
     QtXmlToSphinx x(this, m_parameters, doc, context);
     targetFile.stream << x;
-    return targetFile.done(errorMessage) != FileOut::Failure;
+    targetFile.done();
+    return true;
 }
 
 // QtXmlToSphinxDocGeneratorInterface

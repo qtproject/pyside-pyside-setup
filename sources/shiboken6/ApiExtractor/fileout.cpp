@@ -29,6 +29,7 @@
 #include "fileout.h"
 #include "messages.h"
 #include "reporthandler.h"
+#include "exception.h"
 
 #include <QtCore/QFileInfo>
 #include <QtCore/QDir>
@@ -60,8 +61,7 @@ FileOut::FileOut(QString n) :
 
 FileOut::~FileOut()
 {
-    if (!m_isDone)
-        done();
+    Q_ASSERT(m_isDone);
 }
 
 static QList<int> lcsLength(const QByteArrayList &a, const QByteArrayList &b)
@@ -172,62 +172,49 @@ static void diff(const QByteArrayList &a, const QByteArrayList &b)
 
 FileOut::State FileOut::done()
 {
-    QString errorMessage;
-    const State result = done(&errorMessage);
-    if (result == Failure)
-         qCWarning(lcShiboken, "%s", qPrintable(errorMessage));
-    return result;
-}
+    if (m_isDone)
+        return Success;
 
-FileOut::State FileOut::done(QString *errorMessage)
-{
-    Q_ASSERT(!m_isDone);
-    if (m_name.isEmpty())
-        return Failure;
-
-    m_isDone = true;
     bool fileEqual = false;
     QFile fileRead(m_name);
     QFileInfo info(fileRead);
     stream.flush();
     QByteArray original;
     if (info.exists() && (m_diff || (info.size() == m_buffer.size()))) {
-        if (!fileRead.open(QIODevice::ReadOnly)) {
-            *errorMessage = msgCannotOpenForReading(fileRead);
-            return Failure;
-        }
+        if (!fileRead.open(QIODevice::ReadOnly))
+            throw Exception(msgCannotOpenForReading(fileRead));
 
         original = fileRead.readAll();
         fileRead.close();
         fileEqual = (original == m_buffer);
     }
 
-    if (fileEqual)
+    if (fileEqual) {
+        m_isDone = true;
         return Unchanged;
+    }
 
     if (!FileOut::m_dryRun) {
         QDir dir(info.absolutePath());
         if (!dir.mkpath(dir.absolutePath())) {
-            *errorMessage = QStringLiteral("unable to create directory '%1'")
-                            .arg(QDir::toNativeSeparators(dir.absolutePath()));
-            return Failure;
+            const QString message = QStringLiteral("Unable to create directory '%1'")
+                                        .arg(QDir::toNativeSeparators(dir.absolutePath()));
+            throw Exception(message);
         }
 
         QFile fileWrite(m_name);
-        if (!fileWrite.open(QIODevice::WriteOnly)) {
-            *errorMessage = msgCannotOpenForWriting(fileWrite);
-            return Failure;
-        }
-        if (fileWrite.write(m_buffer) == -1 || !fileWrite.flush()) {
-            *errorMessage = msgWriteFailed(fileWrite, m_buffer.size());
-            return Failure;
-        }
+        if (!fileWrite.open(QIODevice::WriteOnly))
+            throw Exception(msgCannotOpenForWriting(fileWrite));
+        if (fileWrite.write(m_buffer) == -1 || !fileWrite.flush())
+            throw Exception(msgWriteFailed(fileWrite, m_buffer.size()));
     }
     if (m_diff) {
         std::printf("%sFile: %s%s\n", colorInfo, qPrintable(m_name), colorReset);
         ::diff(original.split('\n'), m_buffer.split('\n'));
         std::printf("\n");
     }
+
+    m_isDone = true;
 
     return Success;
 }
