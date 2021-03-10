@@ -234,11 +234,11 @@
         <include file-name="strlist.h" location="global"/>
         <conversion-rule>
             <native-to-target>
-            PyObject* %out = PyList_New((int) %in.size());
-            PStrList::const_iterator it = %in.begin();
-            for (int idx = 0; it != %in.end(); ++it, ++idx) {
-                PStr cppItem(*it);
-                PyList_SET_ITEM(%out, idx, %CONVERTTOPYTHON[PStr](cppItem));
+            PyObject *%out = PyList_New(Py_ssize_t(%in.size()));
+            Py_ssize_t idx = 0;
+            for (const auto &amp;s : %in) {
+                PStr cppItem(s);
+                PyList_SET_ITEM(%out, idx++, %CONVERTTOPYTHON[PStr](cppItem));
             }
             return %out;
             </native-to-target>

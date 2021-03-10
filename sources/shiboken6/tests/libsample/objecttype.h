@@ -155,6 +155,7 @@ private:
     ObjectType& operator=(const ObjectType&);
 
     ObjectTypeLayout* takeLayout();
+    ObjectTypeList::iterator findChildByName(const Str &name);
 
     Str m_objectName;
     ObjectType* m_parent;

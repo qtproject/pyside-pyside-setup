@@ -30,22 +30,21 @@
 #include <cstdlib>
 #include "listuser.h"
 
+#include <algorithm>
+#include <numeric>
+
 std::list<int>
 ListUser::createIntList(int num)
 {
-    std::list<int> retval;
-    for (int i = 0; i < num; ++i)
-        retval.push_back(i);
+    std::list<int> retval(num);
+    std::iota(retval.begin(), retval.end(), 0);
     return retval;
 }
 
 int
 ListUser::sumIntList(std::list<int> intList)
 {
-    int total = 0;
-    for (std::list<int>::iterator iter = intList.begin(); iter != intList.end(); iter++)
-        total += *iter;
-    return total;
+    return std::accumulate(intList.begin(), intList.end(), 0);
 }
 
 std::list<MinBool>
@@ -61,8 +60,8 @@ MinBool
 ListUser::oredMinBoolList(std::list<MinBool> minBoolList)
 {
     MinBool result(false);
-    for (std::list<MinBool>::iterator iter = minBoolList.begin(); iter != minBoolList.end(); iter++)
-        result |= *iter;
+    for (const auto &m : minBoolList)
+        result |= m;
     return result;
 }
 
@@ -79,8 +78,8 @@ int
 ListUser::sumValList(std::list<Val> valList)
 {
     int total = 0;
-    for (std::list<Val>::iterator iter = valList.begin(); iter != valList.end(); iter++)
-        total += iter->valId();
+    for (const auto &v : valList)
+        total += v.valId();
     return total;
 }
 
@@ -97,8 +96,8 @@ int
 ListUser::sumObjList(std::list<Obj*> objList)
 {
     int total = 0;
-    for (std::list<Obj*>::iterator iter = objList.begin(); iter != objList.end(); iter++)
-        total += (*iter)->objId();
+    for (const auto *obj : objList)
+        total += obj->objId();
     return total;
 }
 
@@ -115,10 +114,8 @@ int
 ListUser::sumListOfIntLists(std::list<std::list<int> > intListList)
 {
     int total = 0;
-    for (std::list<std::list<int> >::iterator it0 = intListList.begin(); it0 != intListList.end(); it0++) {
-        for (std::list<int>::iterator it1 = (*it0).begin(); it1 != (*it0).end(); it1++)
-            total += *it1;
-    }
+    for (const auto &list : intListList)
+        total += std::accumulate(list.begin(), list.end(), 0);
     return total;
 }
 

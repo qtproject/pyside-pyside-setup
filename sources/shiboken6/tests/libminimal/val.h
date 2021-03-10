@@ -37,7 +37,7 @@ public:
     explicit Val(int valId) : m_valId(valId) {}
     virtual ~Val() {}
 
-    int valId() { return m_valId; }
+    int valId() const { return m_valId; }
     void setValId(int valId) { m_valId = valId; }
 
     virtual Val passValueType(Val val) { return val; }

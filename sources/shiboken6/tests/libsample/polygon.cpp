@@ -56,8 +56,8 @@ Polygon
 Polygon::doublePolygonScale(Polygon polygon)
 {
     Polygon result;
-    for(PointList::const_iterator piter = result.points().begin(); piter != result.points().end(); piter++)
-        result.addPoint((*piter) * 2.0);
+    for (const auto &point : polygon.points())
+        result.addPoint(point * 2.0);
     return result;
 }
 

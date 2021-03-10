@@ -165,10 +165,8 @@ bool Str::operator<(const Str& other) const
 unsigned int strHash(const Str& str)
 {
     unsigned int result = 0;
-    const std::string& cppStr = str.m_str;
-    std::string::const_iterator it = cppStr.begin();
-    for (; it != cppStr.end(); ++it)
-        result = 5 * result + *it;
+    for (char c : str.m_str)
+        result = 5u * result + unsigned(c);
     return result;
 }
 

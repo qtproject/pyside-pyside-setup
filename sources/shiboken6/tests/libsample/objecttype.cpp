@@ -33,6 +33,8 @@
 #include <string>
 #include <assert.h>
 
+#include <algorithm>
+
 using namespace std;
 
 ObjectType::ObjectType(ObjectType* parent) : m_parent(nullptr), m_layout(nullptr), m_call_id(-1)
@@ -42,9 +44,8 @@ ObjectType::ObjectType(ObjectType* parent) : m_parent(nullptr), m_layout(nullptr
 
 ObjectType::~ObjectType()
 {
-    for (ObjectTypeList::iterator child_iter = m_children.begin();
-         child_iter != m_children.end(); ++child_iter)
-        delete *child_iter;
+    for (auto *o : m_children)
+        delete o;
 }
 
 ObjectType*
@@ -69,7 +70,7 @@ ObjectType::removeChild(ObjectType* child)
     if (!child)
         return;
 
-    ObjectTypeList::iterator child_iter = std::find(m_children.begin(), m_children.end(), child);
+    auto child_iter = std::find(m_children.begin(), m_children.end(), child);
     if (child_iter != m_children.end()) {
         m_children.erase(child_iter);
         child->m_parent = nullptr;
@@ -82,7 +83,7 @@ ObjectType::takeChild(ObjectType* child)
     if (!child)
         return nullptr;
 
-    ObjectTypeList::iterator child_iter = std::find(m_children.begin(), m_children.end(), child);
+    auto child_iter = std::find(m_children.begin(), m_children.end(), child);
     if (child_iter != m_children.end()) {
         m_children.erase(child_iter);
         child->m_parent = nullptr;
@@ -98,30 +99,29 @@ ObjectType::takeChild(const Str& name)
 
 }
 
+ObjectTypeList::iterator ObjectType::findChildByName(const Str &name)
+{
+    return std::find_if(m_children.begin(), m_children.end(),
+                        [&name](const ObjectType *o) {
+                            return o->objectName() == name;
+                        });
+}
+
 ObjectType*
 ObjectType::findChild(const Str& name)
 {
-    for (ObjectTypeList::iterator child_iter = m_children.begin();
-         child_iter != m_children.end(); ++child_iter) {
-
-        if ((*child_iter)->objectName() == name)
-            return *child_iter;
-    }
-    return nullptr;
+    auto it = findChildByName(name);
+    return it != m_children.end() ? *it : nullptr;
 }
 
 void
 ObjectType::killChild(const Str& name)
 {
-    for (ObjectTypeList::iterator child_iter = m_children.begin();
-         child_iter != m_children.end(); ++child_iter) {
-
-        if ((*child_iter)->objectName() == name) {
-            ObjectType* child = *child_iter;
-            removeChild(child);
-            delete child;
-            break;
-        }
+    auto it = findChildByName(name);
+    if (it != m_children.end()) {
+        ObjectType *child = *it;
+        removeChild(child);
+        delete child;
     }
 }
 
@@ -167,16 +167,10 @@ ObjectType::event(Event* event)
 int
 ObjectType::processEvent(ObjectTypeList objects, Event *event)
 {
-    int evaluated = 0;
-
-    for (ObjectTypeList::iterator obj_iter = objects.begin();
-         obj_iter != objects.end(); ++obj_iter) {
-        if((*obj_iter)->event(event))
-            evaluated++;
-    }
-
-    return evaluated;
-
+    return std::count_if(objects.begin(), objects.end(),
+                         [event] (ObjectType *o) {
+                             return o->event(event);
+                         });
 }
 
 void

@@ -32,9 +32,7 @@ Obj::Obj(int objId) : m_objId(objId)
 {
 }
 
-Obj::~Obj()
-{
-}
+Obj::~Obj() = default;
 
 bool
 Obj::virtualMethod(int val)

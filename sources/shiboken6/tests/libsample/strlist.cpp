@@ -28,28 +28,23 @@
 
 #include "strlist.h"
 
+#include <algorithm>
+
 bool
 StrList::operator==(const std::list<Str>& other) const
 {
-    if (size() != other.size())
-        return false;
-    StrList::const_iterator this_it = begin();
-    StrList::const_iterator other_it = begin();
-    while (this_it != end()) {
-        if (!((*this_it) == (*other_it)))
-            return false;
-        ++this_it;
-        ++other_it;
-    }
-    return true;
+    return size() == other.size()
+        && std::equal(begin(), end(), other.begin());
 }
 
 Str
 StrList::join(const Str& sep) const
 {
     Str result;
-    for (StrList::const_iterator it = begin(); it != end(); ++it) {
-        if (it != begin())
+    const auto i1 = begin();
+    const auto i2 = end();
+    for (auto it = i1; i1 != i2; ++it) {
+        if (it != i1)
             result.append(sep);
         result.append(*it);
     }

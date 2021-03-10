@@ -57,7 +57,7 @@ BlackBox::keepObjectType(ObjectType* object)
 ObjectType*
 BlackBox::retrieveObjectType(int ticket)
 {
-    map<int, ObjectType*>::iterator it = m_objects.find(ticket);
+    const auto it = m_objects.find(ticket);
     if (it != m_objects.end()) {
         ObjectType* second = it->second;
         m_objects.erase(it);
@@ -87,7 +87,7 @@ BlackBox::keepPoint(Point* point)
 Point*
 BlackBox::retrievePoint(int ticket)
 {
-    map<int, Point*>::iterator it = m_points.find(ticket);
+    const auto it = m_points.find(ticket);
     if (it != m_points.end()) {
         Point* second = it->second;
         m_points.erase(it);
@@ -109,9 +109,8 @@ std::list<ObjectType*>
 BlackBox::objects()
 {
     std::list<ObjectType*> l;
-    map<int, ObjectType*>::iterator it;
 
-    for ( it = m_objects.begin() ; it != m_objects.end(); it++ )
+    for (auto it = m_objects.begin(), end = m_objects.end(); it != end; ++it)
         l.push_back((*it).second);
 
     return l;
@@ -121,9 +120,8 @@ std::list<Point*>
 BlackBox::points()
 {
     std::list<Point*> l;
-    map<int, Point*>::iterator it;
 
-    for ( it = m_points.begin() ; it != m_points.end(); it++ )
+    for (auto it = m_points.begin(), end = m_points.end(); it != end; ++it)
         l.push_back((*it).second);
 
     return l;

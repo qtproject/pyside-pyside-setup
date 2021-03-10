@@ -61,9 +61,8 @@ MapUser::createMap()
 void
 MapUser::showMap(std::map<std::string, int> mapping)
 {
-    std::map<std::string, int>::iterator it;
     cout << __FUNCTION__ << endl;
-    for (it = mapping.begin() ; it != mapping.end(); it++)
+    for (auto it = mapping.begin(), end = mapping.end(); it != end; ++it)
         cout << (*it).first << " => " << (*it).second << endl;
 }
 

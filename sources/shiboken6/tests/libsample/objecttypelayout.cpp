@@ -57,12 +57,11 @@ std::list< ObjectType* > ObjectTypeLayout::objects() const
 
 void ObjectTypeLayout::reparentChildren(ObjectType* parent)
 {
-    std::list<ObjectType*>::const_iterator it = m_objects.begin();
-    for (; it != m_objects.end(); ++it) {
-        if ((*it)->isLayoutType())
-            reinterpret_cast<ObjectTypeLayout*>(*it)->reparentChildren(parent);
+    for (auto *o : m_objects) {
+        if (o->isLayoutType())
+            reinterpret_cast<ObjectTypeLayout *>(o)->reparentChildren(parent);
         else
-            (*it)->setParent(parent);
+            o->setParent(parent);
     }
 }
 

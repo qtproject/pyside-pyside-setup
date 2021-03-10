@@ -37,7 +37,7 @@ public:
     explicit Obj(int objId);
     virtual ~Obj();
 
-    int objId() { return m_objId; }
+    int objId() const { return m_objId; }
     void setObjId(int objId) { m_objId = objId; }
 
     virtual bool virtualMethod(int val);

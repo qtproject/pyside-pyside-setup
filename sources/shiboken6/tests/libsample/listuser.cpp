@@ -83,9 +83,9 @@ ListUser::listOfPoints(const std::list<PointF>& pointlist)
 void
 ListUser::multiplyPointList(PointList& points, double multiplier)
 {
-    for(PointList::iterator piter = points.begin(); piter != points.end(); piter++) {
-        (*piter)->setX((*piter)->x() * multiplier);
-        (*piter)->setY((*piter)->y() * multiplier);
+    for (auto *point : points) {
+        point->setX(point->x() * multiplier);
+        point->setY(point->y() * multiplier);
     }
 }
 
