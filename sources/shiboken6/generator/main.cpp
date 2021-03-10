@@ -484,13 +484,13 @@ int shibokenMain(int argc, char *argv[])
     ait = args.options.find(diffOption());
     if (ait != args.options.end()) {
         args.options.erase(ait);
-        FileOut::diff = true;
+        FileOut::setDiff(true);
     }
 
     ait = args.options.find(dryrunOption());
     if (ait != args.options.end()) {
         args.options.erase(ait);
-        FileOut::dummy = true;
+        FileOut::setDryRun(true);
     }
 
     QString licenseComment;

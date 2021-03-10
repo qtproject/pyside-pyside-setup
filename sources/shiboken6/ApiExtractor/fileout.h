@@ -29,17 +29,13 @@
 #ifndef FILEOUT_H
 #define FILEOUT_H
 
-#include <QtCore/QObject>
 #include "textstream.h"
 
 QT_FORWARD_DECLARE_CLASS(QFile)
 
-class FileOut : public QObject
+class FileOut
 {
-private:
-    QByteArray tmp;
-    QString name;
-
+    QByteArray m_buffer;
 public:
     Q_DISABLE_COPY(FileOut)
 
@@ -48,22 +44,24 @@ public:
     explicit FileOut(QString name);
     ~FileOut();
 
-    QString filePath() const { return name; }
+    QString filePath() const { return m_name; }
 
     State done();
     State done(QString *errorMessage);
 
-    void touch() { touchFile(name); }
-
-    static void touchFile(const QString &filePath);
-
     TextStream stream;
 
-    static bool dummy;
-    static bool diff;
+    static bool diff() { return m_diff; }
+    static void setDiff(bool diff) { m_diff = diff; }
+
+    static bool dryRun() { return m_dryRun; }
+    static void setDryRun(bool dryRun) { m_dryRun = dryRun; }
 
 private:
-    bool isDone;
+    QString m_name;
+    bool m_isDone;
+    static bool m_dryRun;
+    static bool m_diff;
 };
 
 #endif // FILEOUT_H

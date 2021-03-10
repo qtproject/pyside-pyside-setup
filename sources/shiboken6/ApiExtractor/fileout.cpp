@@ -36,8 +36,8 @@
 
 #include <cstdio>
 
-bool FileOut::dummy = false;
-bool FileOut::diff = false;
+bool FileOut::m_dryRun = false;
+bool FileOut::m_diff = false;
 
 #ifdef Q_OS_LINUX
 static const char colorDelete[] = "\033[31m";
@@ -52,15 +52,15 @@ static const char colorReset[] = "";
 #endif
 
 FileOut::FileOut(QString n) :
-    name(std::move(n)),
-    stream(&tmp),
-    isDone(false)
+    stream(&m_buffer),
+    m_name(std::move(n)),
+    m_isDone(false)
 {
 }
 
 FileOut::~FileOut()
 {
-    if (!isDone)
+    if (!m_isDone)
         done();
 }
 
@@ -181,17 +181,17 @@ FileOut::State FileOut::done()
 
 FileOut::State FileOut::done(QString *errorMessage)
 {
-    Q_ASSERT(!isDone);
-    if (name.isEmpty())
+    Q_ASSERT(!m_isDone);
+    if (m_name.isEmpty())
         return Failure;
 
-    isDone = true;
+    m_isDone = true;
     bool fileEqual = false;
-    QFile fileRead(name);
+    QFile fileRead(m_name);
     QFileInfo info(fileRead);
     stream.flush();
     QByteArray original;
-    if (info.exists() && (diff || (info.size() == tmp.size()))) {
+    if (info.exists() && (m_diff || (info.size() == m_buffer.size()))) {
         if (!fileRead.open(QIODevice::ReadOnly)) {
             *errorMessage = msgCannotOpenForReading(fileRead);
             return Failure;
@@ -199,13 +199,13 @@ FileOut::State FileOut::done(QString *errorMessage)
 
         original = fileRead.readAll();
         fileRead.close();
-        fileEqual = (original == tmp);
+        fileEqual = (original == m_buffer);
     }
 
     if (fileEqual)
         return Unchanged;
 
-    if (!FileOut::dummy) {
+    if (!FileOut::m_dryRun) {
         QDir dir(info.absolutePath());
         if (!dir.mkpath(dir.absolutePath())) {
             *errorMessage = QStringLiteral("unable to create directory '%1'")
@@ -213,36 +213,21 @@ FileOut::State FileOut::done(QString *errorMessage)
             return Failure;
         }
 
-        QFile fileWrite(name);
+        QFile fileWrite(m_name);
         if (!fileWrite.open(QIODevice::WriteOnly)) {
             *errorMessage = msgCannotOpenForWriting(fileWrite);
             return Failure;
         }
-        if (fileWrite.write(tmp) == -1 || !fileWrite.flush()) {
-            *errorMessage = msgWriteFailed(fileWrite, tmp.size());
+        if (fileWrite.write(m_buffer) == -1 || !fileWrite.flush()) {
+            *errorMessage = msgWriteFailed(fileWrite, m_buffer.size());
             return Failure;
         }
     }
-    if (diff) {
-        std::printf("%sFile: %s%s\n", colorInfo, qPrintable(name), colorReset);
-        ::diff(original.split('\n'), tmp.split('\n'));
+    if (m_diff) {
+        std::printf("%sFile: %s%s\n", colorInfo, qPrintable(m_name), colorReset);
+        ::diff(original.split('\n'), m_buffer.split('\n'));
         std::printf("\n");
     }
 
     return Success;
-}
-
-void FileOut::touchFile(const QString &filePath)
-{
-    QFile toucher(filePath);
-    qint64 size = toucher.size();
-    if (!toucher.open(QIODevice::ReadWrite)) {
-        qCWarning(lcShiboken).noquote().nospace()
-                << QStringLiteral("Failed to touch file '%1'")
-                   .arg(QDir::toNativeSeparators(filePath));
-        return;
-    }
-    toucher.resize(size+1);
-    toucher.resize(size);
-    toucher.close();
 }
