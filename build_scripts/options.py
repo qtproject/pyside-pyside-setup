@@ -219,7 +219,8 @@ class DistUtilsCommandMixin(object):
         ('module-subset=', None, 'Qt modules to be built'),
         ('rpath=', None, 'RPATH'),
         ('qt-conf-prefix=', None, 'Qt configuration prefix'),
-        ('qt-src-dir=', None, 'Qt source directory')]
+        ('qt-src-dir=', None, 'Qt source directory'),
+        ('no-qt-tools', None, 'Do not copy the Qt tools')]
 
     def __init__(self):
         self.avoid_protected_hack = False
@@ -256,6 +257,7 @@ class DistUtilsCommandMixin(object):
         self.rpath = None
         self.qt_conf_prefix = None
         self.qt_src_dir = None
+        self.no_qt_tools = False
 
     def mixin_finalize_options(self):
         # Bail out on 2nd call to mixin_finalize_options() since that is the
@@ -306,6 +308,7 @@ class DistUtilsCommandMixin(object):
         OPTION['RPATH_VALUES'] = self.rpath
         OPTION['QT_CONF_PREFIX'] = self.qt_conf_prefix
         OPTION['QT_SRC'] = self.qt_src_dir
+        OPTION['NO_QT_TOOLS'] = self.no_qt_tools
 
     def _determine_defaults_and_check(self):
         if not self.cmake:

@@ -759,6 +759,8 @@ class PysideBuild(_build, DistUtilsCommandMixin):
         # Add source location for generating documentation
         cmake_src_dir = OPTION["QT_SRC"] if OPTION["QT_SRC"] else qt_src_dir
         cmake_cmd.append(f"-DQT_SRC_DIR={cmake_src_dir}")
+        if OPTION['NO_QT_TOOLS']:
+            cmake_cmd.append("-DNO_QT_TOOLS=yes")
         log.info(f"Qt Source dir: {cmake_src_dir}")
 
         if OPTION['AVOID_PROTECTED_HACK']:

@@ -132,26 +132,29 @@ def prepare_packages_posix(self, vars):
         executables.extend(copydir(
             "{install_dir}/bin/",
             "{st_build_dir}/{st_package_name}",
-            filter=[
-                f"{PYSIDE}-lupdate",
-                "uic",
-                "rcc",
-            ],
+            filter=[f"{PYSIDE}-lupdate"],
             recursive=False, vars=vars))
 
-        # Copying designer
-        if sys.platform == "darwin":
-            executables.extend(copydir(
-                "{install_dir}/bin/Designer.app",
-                "{st_build_dir}/{st_package_name}/Designer.app",
-                filter=None, recursive=True,
-                force=False, vars=vars))
-        else:
+        if not OPTION['NO_QT_TOOLS']:
             executables.extend(copydir(
                 "{install_dir}/bin/",
-                "{st_build_dir}/{st_package_name}/",
-                filter=["designer"],
-                force=False, vars=vars))
+                "{st_build_dir}/{st_package_name}",
+                filter=["uic", "rcc"],
+                recursive=False, vars=vars))
+
+            # Copying designer
+            if sys.platform == "darwin":
+                executables.extend(copydir(
+                    "{install_dir}/bin/Designer.app",
+                    "{st_build_dir}/{st_package_name}/Designer.app",
+                    filter=None, recursive=True,
+                    force=False, vars=vars))
+            else:
+                executables.extend(copydir(
+                    "{install_dir}/bin/",
+                    "{st_build_dir}/{st_package_name}/",
+                    filter=["designer"],
+                    force=False, vars=vars))
 
         # <install>/lib/lib* -> {st_package_name}/
         copydir(

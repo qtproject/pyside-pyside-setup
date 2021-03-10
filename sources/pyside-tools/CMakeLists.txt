@@ -8,47 +8,50 @@ endif()
 
 find_package(Qt6 COMPONENTS Core HostInfo)
 
-set(TOOLS_PATH "${QT6_INSTALL_PREFIX}/${QT6_HOST_INFO_BINDIR}")
-set(LIBEXEC_PATH "${QT6_INSTALL_PREFIX}/${QT6_HOST_INFO_LIBEXECDIR}")
+if(NOT NO_QT_TOOLS STREQUAL "yes")
+    set(TOOLS_PATH "${QT6_INSTALL_PREFIX}/${QT6_HOST_INFO_BINDIR}")
+    set(LIBEXEC_PATH "${QT6_INSTALL_PREFIX}/${QT6_HOST_INFO_LIBEXECDIR}")
 
-set(UIC_PATH "${LIBEXEC_PATH}/uic${CMAKE_EXECUTABLE_SUFFIX}")
-set(RCC_PATH "${LIBEXEC_PATH}/rcc${CMAKE_EXECUTABLE_SUFFIX}")
-if (APPLE)
-    set(DESIGNER_PATH "${TOOLS_PATH}/Designer.app")
-else()
-    set(DESIGNER_PATH "${TOOLS_PATH}/designer${CMAKE_EXECUTABLE_SUFFIX}")
-endif()
-
-install(FILES "${UIC_PATH}"
-        DESTINATION bin
-        PERMISSIONS
-        OWNER_EXECUTE OWNER_WRITE OWNER_READ
-        GROUP_EXECUTE GROUP_READ
-        WORLD_EXECUTE WORLD_READ)
-
-install(FILES "${RCC_PATH}"
-        DESTINATION bin
-        PERMISSIONS
-        OWNER_EXECUTE OWNER_WRITE OWNER_READ
-        GROUP_EXECUTE GROUP_READ
-        WORLD_EXECUTE WORLD_READ)
-
-if (EXISTS ${DESIGNER_PATH})
+    set(UIC_PATH "${LIBEXEC_PATH}/uic${CMAKE_EXECUTABLE_SUFFIX}")
+    set(RCC_PATH "${LIBEXEC_PATH}/rcc${CMAKE_EXECUTABLE_SUFFIX}")
     if (APPLE)
-        install(DIRECTORY "${DESIGNER_PATH}"
-                DESTINATION bin
-                FILE_PERMISSIONS
-                OWNER_EXECUTE OWNER_WRITE OWNER_READ
-                GROUP_EXECUTE GROUP_READ
-                WORLD_EXECUTE WORLD_READ)
+        set(DESIGNER_PATH "${TOOLS_PATH}/Designer.app")
     else()
-        install(FILES "${DESIGNER_PATH}"
-                DESTINATION bin
-                PERMISSIONS
-                OWNER_EXECUTE OWNER_WRITE OWNER_READ
-                GROUP_EXECUTE GROUP_READ
-                WORLD_EXECUTE WORLD_READ)
+        set(DESIGNER_PATH "${TOOLS_PATH}/designer${CMAKE_EXECUTABLE_SUFFIX}")
     endif()
+
+    install(FILES "${UIC_PATH}"
+            DESTINATION bin
+            PERMISSIONS
+            OWNER_EXECUTE OWNER_WRITE OWNER_READ
+            GROUP_EXECUTE GROUP_READ
+            WORLD_EXECUTE WORLD_READ)
+
+    install(FILES "${RCC_PATH}"
+            DESTINATION bin
+            PERMISSIONS
+            OWNER_EXECUTE OWNER_WRITE OWNER_READ
+            GROUP_EXECUTE GROUP_READ
+            WORLD_EXECUTE WORLD_READ)
+
+    if (EXISTS ${DESIGNER_PATH})
+        if (APPLE)
+            install(DIRECTORY "${DESIGNER_PATH}"
+                    DESTINATION bin
+                    FILE_PERMISSIONS
+                    OWNER_EXECUTE OWNER_WRITE OWNER_READ
+                    GROUP_EXECUTE GROUP_READ
+                    WORLD_EXECUTE WORLD_READ)
+        else()
+            install(FILES "${DESIGNER_PATH}"
+                    DESTINATION bin
+                    PERMISSIONS
+                    OWNER_EXECUTE OWNER_WRITE OWNER_READ
+                    GROUP_EXECUTE GROUP_READ
+                    WORLD_EXECUTE WORLD_READ)
+        endif()
+    endif()
+
 endif()
 
 # pyside6-rcc, pyside6-uic, pyside6-designer, shiboken and pyside6-lupdate entrypoints

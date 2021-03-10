@@ -158,10 +158,13 @@ def prepare_packages_win32(self, vars):
             force=False, vars=vars)
 
         # <install>/bin/*.exe,*.dll -> {st_package_name}/
+        filters = ["pyside*.exe", "pyside*.dll"]
+        if not OPTION['NO_QT_TOOLS']:
+            filters.extend(["uic.exe", "rcc.exe", "designer.exe"])
         copydir(
             "{install_dir}/bin/",
             "{st_build_dir}/{st_package_name}",
-            filter=["pyside*.exe", "pyside*.dll", "uic.exe", "rcc.exe", "designer.exe"],
+            filter=filters,
             recursive=False, vars=vars)
 
         # <install>/lib/*.lib -> {st_package_name}/
