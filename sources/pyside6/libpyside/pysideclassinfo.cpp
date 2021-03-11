@@ -56,12 +56,12 @@ static void classInfoFree(void *);
 static PyObject *classCall(PyObject *, PyObject *, PyObject *);
 
 static PyType_Slot PySideClassInfoType_slots[] = {
-    {Py_tp_call, (void *)classCall},
-    {Py_tp_init, (void *)classInfoTpInit},
-    {Py_tp_new, (void *)classInfoTpNew},
-    {Py_tp_free, (void *)classInfoFree},
-    {Py_tp_dealloc, (void *)Sbk_object_dealloc},
-    {0, 0}
+    {Py_tp_call, reinterpret_cast<void *>(classCall)},
+    {Py_tp_init, reinterpret_cast<void *>(classInfoTpInit)},
+    {Py_tp_new, reinterpret_cast<void *>(classInfoTpNew)},
+    {Py_tp_free, reinterpret_cast<void *>(classInfoFree)},
+    {Py_tp_dealloc, reinterpret_cast<void *>(Sbk_object_dealloc)},
+    {0, nullptr}
 };
 static PyType_Spec PySideClassInfoType_spec = {
     "2:PySide6.QtCore.ClassInfo",
@@ -85,7 +85,7 @@ PyObject *classCall(PyObject *self, PyObject *args, PyObject * /* kw */)
         PyErr_Format(PyExc_TypeError,
                      "The ClassInfo decorator takes exactly 1 positional argument (%zd given)",
                      PyTuple_Size(args));
-        return 0;
+        return nullptr;
     }
 
     PySideClassInfo *data = reinterpret_cast<PySideClassInfo *>(self);
@@ -93,7 +93,7 @@ PyObject *classCall(PyObject *self, PyObject *args, PyObject * /* kw */)
 
     if (pData->m_alreadyWrapped) {
         PyErr_SetString(PyExc_TypeError, "This instance of ClassInfo() was already used to wrap an object");
-        return 0;
+        return nullptr;
     }
 
     PyObject *klass = PyTuple_GetItem(args, 0);
@@ -102,7 +102,7 @@ PyObject *classCall(PyObject *self, PyObject *args, PyObject * /* kw */)
     // This will sometimes segfault if you mistakenly use it on a function declaration
     if (!PyType_Check(klass)) {
         PyErr_SetString(PyExc_TypeError, "This decorator can only be used on class declarations");
-        return 0;
+        return nullptr;
     }
 
     PyTypeObject *klassType = reinterpret_cast<PyTypeObject *>(klass);
@@ -117,7 +117,7 @@ PyObject *classCall(PyObject *self, PyObject *args, PyObject * /* kw */)
 
     if (!validClass) {
         PyErr_SetString(PyExc_TypeError, "This decorator can only be used on classes that are subclasses of QObject");
-        return 0;
+        return nullptr;
     }
 
     Py_INCREF(klass);

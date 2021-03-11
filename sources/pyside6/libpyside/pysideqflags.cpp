@@ -72,7 +72,7 @@ extern "C" {
                 val = PyLong_AsLong(number);
             } else {
                 PyErr_SetString(PyExc_TypeError,"QFlags must be created using enums or numbers.");
-                return 0;
+                return nullptr;
             }
         }
         PySideQFlagsObject *self = PyObject_New(PySideQFlagsObject, type);
@@ -96,7 +96,7 @@ extern "C" {
         int result = 0;
         if (!PyNumber_Check(other)) {
             PyErr_BadArgument();
-            return NULL;
+            return nullptr;
         }
 
         long valA = PYSIDE_QFLAGS(self)->ob_value;
@@ -126,13 +126,12 @@ extern "C" {
                 break;
             default:
                 PyErr_BadArgument();
-                return NULL;
+                return nullptr;
             }
         }
         if (result)
             Py_RETURN_TRUE;
-        else
-            Py_RETURN_FALSE;
+        Py_RETURN_FALSE;
     }
 }
 
@@ -141,17 +140,17 @@ namespace PySide
 namespace QFlags
 {
     static PyType_Slot SbkNewQFlagsType_slots[] = {
-        {Py_nb_bool, 0},
-        {Py_nb_invert, 0},
-        {Py_nb_and, 0},
-        {Py_nb_xor, 0},
-        {Py_nb_or, 0},
+        {Py_nb_bool, nullptr},
+        {Py_nb_invert, nullptr},
+        {Py_nb_and, nullptr},
+        {Py_nb_xor, nullptr},
+        {Py_nb_or, nullptr},
         {Py_nb_int, reinterpret_cast<void*>(qflag_int)},
         {Py_nb_index, reinterpret_cast<void*>(qflag_int)},
-        {Py_tp_new, (void *)PySideQFlagsNew},
-        {Py_tp_richcompare, (void *)PySideQFlagsRichCompare},
-        {Py_tp_dealloc, (void *)Sbk_object_dealloc},
-        {0, 0}
+        {Py_tp_new, reinterpret_cast<void *>(PySideQFlagsNew)},
+        {Py_tp_richcompare, reinterpret_cast<void *>(PySideQFlagsRichCompare)},
+        {Py_tp_dealloc, reinterpret_cast<void *>(Sbk_object_dealloc)},
+        {0, nullptr}
     };
     static PyType_Spec SbkNewQFlagsType_spec = {
         "missing QFlags name", // to be inserted later
@@ -185,7 +184,7 @@ namespace QFlags
         PepType_PFTP(flagsType)->converterPtr = &PepType_PFTP(flagsType)->converter;
 
         if (PyType_Ready(type) < 0)
-            return 0;
+            return nullptr;
 
         return type;
     }

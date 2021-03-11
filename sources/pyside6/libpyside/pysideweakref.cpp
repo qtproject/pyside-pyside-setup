@@ -52,9 +52,9 @@ typedef struct {
 static PyObject *CallableObject_call(PyObject *callable_object, PyObject *args, PyObject *kw);
 
 static PyType_Slot PySideCallableObjectType_slots[] = {
-    {Py_tp_call, (void *)CallableObject_call},
-    {Py_tp_dealloc, (void *)Sbk_object_dealloc},
-    {0, 0}
+    {Py_tp_call, reinterpret_cast<void *>(CallableObject_call)},
+    {Py_tp_dealloc, reinterpret_cast<void *>(Sbk_object_dealloc)},
+    {0, nullptr}
 };
 static PyType_Spec PySideCallableObjectType_spec = {
     "1:PySide.Callable",
@@ -86,10 +86,9 @@ namespace PySide { namespace WeakRef {
 PyObject *create(PyObject *obj, PySideWeakRefFunction func, void *userData)
 {
     if (obj == Py_None)
-        return 0;
+        return nullptr;
 
-    if (Py_TYPE(PySideCallableObjectTypeF()) == 0)
-    {
+    if (Py_TYPE(PySideCallableObjectTypeF()) == nullptr) {
         Py_TYPE(PySideCallableObjectTypeF()) = &PyType_Type;
         PyType_Ready(PySideCallableObjectTypeF());
     }
@@ -97,11 +96,11 @@ PyObject *create(PyObject *obj, PySideWeakRefFunction func, void *userData)
     PyTypeObject *type = PySideCallableObjectTypeF();
     PySideCallableObject *callable = PyObject_New(PySideCallableObject, type);
     if (!callable || PyErr_Occurred())
-        return 0;
+        return nullptr;
 
     PyObject *weak = PyWeakref_NewRef(obj, reinterpret_cast<PyObject *>(callable));
     if (!weak || PyErr_Occurred())
-        return 0;
+        return nullptr;
 
     callable->weakref_func = func;
     callable->user_data = userData;

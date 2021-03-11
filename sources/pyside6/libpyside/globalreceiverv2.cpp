@@ -49,6 +49,8 @@
 #include <QtCore/QMetaMethod>
 #include <QtCore/QSet>
 
+#include <cstring>
+
 #define RECEIVER_DESTROYED_SLOT_NAME "__receiverDestroyed__(QObject*)"
 
 namespace
@@ -159,7 +161,7 @@ int DynamicSlotDataV2::addSlot(const char *signature)
 void DynamicSlotDataV2::onCallbackDestroyed(void *data)
 {
     auto self = reinterpret_cast<DynamicSlotDataV2 *>(data);
-    self->m_weakRef = 0;
+    self->m_weakRef = nullptr;
     Py_BEGIN_ALLOW_THREADS
     delete self->m_parent;
     Py_END_ALLOW_THREADS
@@ -170,7 +172,7 @@ DynamicSlotDataV2::~DynamicSlotDataV2()
     Shiboken::GilState gil;
 
     Py_XDECREF(m_weakRef);
-    m_weakRef = 0;
+    m_weakRef = nullptr;
 
     if (!m_isMethod)
        Py_DECREF(m_callback);
@@ -184,7 +186,7 @@ GlobalReceiverV2::GlobalReceiverV2(PyObject *callback, GlobalReceiverV2MapPtr ma
     m_data = new DynamicSlotDataV2(callback, this);
     m_metaObject.addSlot(RECEIVER_DESTROYED_SLOT_NAME);
     m_metaObject.update();
-    m_refs.append(NULL);
+    m_refs.append(nullptr);
 
 
     if (DESTROY_SIGNAL_ID == 0)
@@ -222,7 +224,7 @@ void GlobalReceiverV2::incRef(const QObject *link)
 {
     if (link) {
         if (!m_refs.contains(link)) {
-            bool connected;
+            bool connected{};
             Py_BEGIN_ALLOW_THREADS
             connected = QMetaObject::connect(link, DESTROY_SIGNAL_ID, this, DESTROY_SLOT_ID);
             Py_END_ALLOW_THREADS
@@ -234,7 +236,7 @@ void GlobalReceiverV2::incRef(const QObject *link)
             m_refs.append(link);
         }
     } else {
-        m_refs.append(NULL);
+        m_refs.append(nullptr);
     }
 }
 
@@ -247,7 +249,7 @@ void GlobalReceiverV2::decRef(const QObject *link)
     m_refs.removeOne(link);
     if (link) {
         if (!m_refs.contains(link)) {
-            bool result;
+            bool result{};
             Py_BEGIN_ALLOW_THREADS
             result = QMetaObject::disconnect(link, DESTROY_SIGNAL_ID, this, DESTROY_SLOT_ID);
             Py_END_ALLOW_THREADS
@@ -324,7 +326,7 @@ int GlobalReceiverV2::qt_metacall(QMetaObject::Call call, int id, void **args)
         m_refs.removeAll(obj); // remove all refs to this object
         decRef(); //remove the safe ref
     } else {
-        bool isShortCuit = (strstr(slot.methodSignature(), "(") == 0);
+        const bool isShortCuit = std::strchr(slot.methodSignature(), '(') == nullptr;
         Shiboken::AutoDecRef callback(m_data->callback());
         SignalManager::callPythonMetaMethod(slot, args, callback, isShortCuit);
     }

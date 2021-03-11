@@ -340,10 +340,10 @@ void propListTpFree(void *self)
 }
 
 static PyType_Slot PropertyListType_slots[] = {
-    {Py_tp_init, (void *)propListTpInit},
-    {Py_tp_free, (void *)propListTpFree},
-    {Py_tp_dealloc, (void *)Sbk_object_dealloc},
-    {0, 0}
+    {Py_tp_init, reinterpret_cast<void *>(propListTpInit)},
+    {Py_tp_free, reinterpret_cast<void *>(propListTpFree)},
+    {Py_tp_dealloc, reinterpret_cast<void *>(Sbk_object_dealloc)},
+    {0, nullptr}
 };
 static PyType_Spec PropertyListType_spec = {
     "2:PySide6.QtQml.ListProperty",
@@ -558,7 +558,7 @@ static PyMethodDef QtQml_VolatileBoolObject_methods[] = {
     {"set", reinterpret_cast<PyCFunction>(QtQml_VolatileBoolObject_set), METH_VARARGS,
      "B.set(a) -> None. Sets the value of the volatile boolean"
     },
-    {Q_NULLPTR}  /* Sentinel */
+    {nullptr, nullptr, 0, nullptr}  /* Sentinel */
 };
 
 static PyObject *
@@ -592,11 +592,11 @@ QtQml_VolatileBoolObject_str(QtQml_VolatileBoolObject *self)
 }
 
 static PyType_Slot QtQml_VolatileBoolType_slots[] = {
-    {Py_tp_repr, (void *)reinterpret_cast<reprfunc>(QtQml_VolatileBoolObject_repr)},
-    {Py_tp_str, (void *)reinterpret_cast<reprfunc>(QtQml_VolatileBoolObject_str)},
-    {Py_tp_methods, (void *)QtQml_VolatileBoolObject_methods},
-    {Py_tp_new, (void *)QtQml_VolatileBoolObject_new},
-    {Py_tp_dealloc, (void *)QtQml_VolatileBoolObject_dealloc},
+    {Py_tp_repr, reinterpret_cast<void *>(QtQml_VolatileBoolObject_repr)},
+    {Py_tp_str, reinterpret_cast<void *>(QtQml_VolatileBoolObject_str)},
+    {Py_tp_methods, reinterpret_cast<void *>(QtQml_VolatileBoolObject_methods)},
+    {Py_tp_new, reinterpret_cast<void *>(QtQml_VolatileBoolObject_new)},
+    {Py_tp_dealloc, reinterpret_cast<void *>(QtQml_VolatileBoolObject_dealloc)},
     {0, 0}
 };
 static PyType_Spec QtQml_VolatileBoolType_spec = {

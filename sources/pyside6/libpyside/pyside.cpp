@@ -85,7 +85,7 @@ namespace PySide
 
 void init(PyObject *module)
 {
-    qobjectNextAddr = 0;
+    qobjectNextAddr = nullptr;
     ClassInfo::init(module);
     Signal::init(module);
     Slot::init(module);
@@ -323,7 +323,7 @@ PyObject *getMetaDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *nam
         PyObject *value = Property::getValue(reinterpret_cast<PySideProperty *>(attr), self);
         Py_DECREF(attr);
         if (!value)
-            return 0;
+            return nullptr;
         attr = value;
     }
 
@@ -376,7 +376,7 @@ bool inherits(PyTypeObject *objType, const char *class_name)
         return true;
 
     PyTypeObject *base = objType->tp_base;
-    if (base == 0)
+    if (base == nullptr)
         return false;
 
     return inherits(base, class_name);
@@ -408,7 +408,7 @@ static void invalidatePtr(any_t *object)
     Shiboken::GilState state;
 
     SbkObject *wrapper = Shiboken::BindingManager::instance().retrieveWrapper(object);
-    if (wrapper != NULL)
+    if (wrapper != nullptr)
         Shiboken::BindingManager::instance().releaseWrapper(wrapper);
 }
 
@@ -548,7 +548,7 @@ bool registerInternalQtConf()
     // because tests are executed before the package is installed, and thus the Prefix specified
     // in qt.conf would point to a not yet existing location.
     bool disableInternalQtConf =
-            qEnvironmentVariableIntValue("PYSIDE_DISABLE_INTERNAL_QT_CONF") > 0 ? true : false;
+            qEnvironmentVariableIntValue("PYSIDE_DISABLE_INTERNAL_QT_CONF") > 0;
     if (disableInternalQtConf || executableQtConfAvailable) {
         registrationAttempted = true;
         return false;

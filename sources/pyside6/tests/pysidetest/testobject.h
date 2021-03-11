@@ -95,11 +95,11 @@ class PYSIDETEST_API TestObjectWithNamespace :  public QObject
     Q_OBJECT
 public:
     TestObjectWithNamespace(QObject* parent) : QObject(parent) {}
-    QString name() { return "TestObjectWithNamespace"; }
+    QString name() { return QStringLiteral("TestObjectWithNamespace"); }
 
-    void callSignal(TestObjectWithNamespace* obj) { emitSignal(obj); }
-    void callSignalWithNamespace(TestObjectWithNamespace* obj) { emitSignalWithNamespace(obj); }
-    void callSignalWithTypedef(int val) { emitSignalWithTypedef(val); }
+    void callSignal(TestObjectWithNamespace* obj) { emit emitSignal(obj); }
+    void callSignalWithNamespace(TestObjectWithNamespace* obj) { emit emitSignalWithNamespace(obj); }
+    void callSignalWithTypedef(int val) { emit emitSignalWithTypedef(val); }
 
 signals:
     void emitSignal(TestObjectWithNamespace* obj);
@@ -114,7 +114,7 @@ class PYSIDETEST_API TestObject2WithNamespace :  public QObject
     Q_OBJECT
 public:
     TestObject2WithNamespace(QObject* parent) : QObject(parent) {}
-    QString name() { return "TestObject2WithNamespace"; }
+    QString name() { return QStringLiteral("TestObject2WithNamespace"); }
 };
 
 PYSIDETEST_API QDebug operator<<(QDebug dbg, TestObject2WithNamespace& testObject);
@@ -134,7 +134,7 @@ class PYSIDETEST_API TestObjectWithoutNamespace :  public QObject
 public:
     enum Enum2 { Option3 = 3, Option4 =  4};
     TestObjectWithoutNamespace(QObject* parent) : QObject(parent) {}
-    QString name() { return "TestObjectWithoutNamespace"; }
+    QString name() { return QStringLiteral("TestObjectWithoutNamespace"); }
 
     void callSignal(TestObjectWithoutNamespace* obj) { emitSignal(obj); }
     void callSignalWithNamespace(TestObjectWithoutNamespace* obj) { emitSignalWithNamespace(obj); }

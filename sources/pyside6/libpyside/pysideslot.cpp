@@ -70,11 +70,11 @@ static PyObject *slotCall(PyObject *, PyObject *, PyObject *);
 
 // Class Definition -----------------------------------------------
 static PyType_Slot PySideSlotType_slots[] = {
-    {Py_tp_call, (void *)slotCall},
-    {Py_tp_init, (void *)slotTpInit},
-    {Py_tp_new, (void *)PyType_GenericNew},
-    {Py_tp_dealloc, (void *)Sbk_object_dealloc},
-    {0, 0}
+    {Py_tp_call, reinterpret_cast<void *>(slotCall)},
+    {Py_tp_init, reinterpret_cast<void *>(slotTpInit)},
+    {Py_tp_new, reinterpret_cast<void *>(PyType_GenericNew)},
+    {Py_tp_dealloc, reinterpret_cast<void *>(Sbk_object_dealloc)},
+    {0, nullptr}
 };
 static PyType_Spec PySideSlotType_spec = {
     "2:PySide6.QtCore.Slot",
@@ -85,7 +85,7 @@ static PyType_Spec PySideSlotType_spec = {
 };
 
 
-static PyTypeObject *PySideSlotTypeF(void)
+static PyTypeObject *PySideSlotTypeF()
 {
     static PyTypeObject *type = reinterpret_cast<PyTypeObject *>(
         SbkType_FromSpec(&PySideSlotType_spec));
@@ -99,7 +99,7 @@ int slotTpInit(PyObject *self, PyObject *args, PyObject *kw)
     char *argName = nullptr;
     PyObject *argResult = nullptr;
 
-    if (emptyTuple == 0)
+    if (emptyTuple == nullptr)
         emptyTuple = PyTuple_New(0);
 
     if (!PyArg_ParseTupleAndKeywords(emptyTuple, kw, "|sO:QtCore.Slot",
@@ -179,8 +179,7 @@ PyObject *slotCall(PyObject *self, PyObject *args, PyObject * /* kw */)
 
 } // extern "C"
 
-namespace PySide {
-namespace Slot {
+namespace PySide::Slot {
 
 static const char *Slot_SignatureStrings[] = {
     "PySide6.QtCore.Slot(self,*types:type,name:str=nullptr,result:str=nullptr)->typing.Callable[...,typing.Optional[str]]",
@@ -195,5 +194,4 @@ void init(PyObject *module)
     PyModule_AddObject(module, "Slot", reinterpret_cast<PyObject *>(PySideSlotTypeF()));
 }
 
-} // namespace Slot
-} // namespace PySide
+} // namespace PySide::Slot

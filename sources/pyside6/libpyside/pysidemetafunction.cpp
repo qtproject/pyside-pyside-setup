@@ -59,11 +59,11 @@ static void functionFree(void *);
 static PyObject *functionCall(PyObject *, PyObject *, PyObject *);
 
 static PyType_Slot PySideMetaFunctionType_slots[] = {
-    {Py_tp_call, (void *)functionCall},
-    {Py_tp_new, (void *)PyType_GenericNew},
-    {Py_tp_free, (void *)functionFree},
-    {Py_tp_dealloc, (void *)Sbk_object_dealloc},
-    {0, 0}
+    {Py_tp_call, reinterpret_cast<void *>(functionCall)},
+    {Py_tp_new, reinterpret_cast<void *>(PyType_GenericNew)},
+    {Py_tp_free, reinterpret_cast<void *>(functionFree)},
+    {Py_tp_dealloc, reinterpret_cast<void *>(Sbk_object_dealloc)},
+    {0, nullptr}
 };
 static PyType_Spec PySideMetaFunctionType_spec = {
     "2:PySide6.QtCore.MetaFunction",
@@ -93,13 +93,13 @@ PyObject *functionCall(PyObject *self, PyObject *args, PyObject * /* kw */)
 
     PyObject *retVal;
     if (!PySide::MetaFunction::call(function->d->qobject, function->d->methodIndex, args, &retVal))
-        return 0;
+        return nullptr;
     return retVal;
 }
 
 } // extern "C"
 
-namespace PySide { namespace MetaFunction {
+namespace PySide::MetaFunction {
 
 static const char *MetaFunction_SignatureStrings[] = {
     "PySide6.QtCore.MetaFunction.__call__(self,*args:typing.Any)->typing.Any",
@@ -117,7 +117,7 @@ void init(PyObject *module)
 PySideMetaFunction *newObject(QObject *source, int methodIndex)
 {
     if (methodIndex >= source->metaObject()->methodCount())
-        return 0;
+        return nullptr;
 
     QMetaMethod method = source->metaObject()->method(methodIndex);
     if ((method.methodType() == QMetaMethod::Slot) ||
@@ -128,7 +128,7 @@ PySideMetaFunction *newObject(QObject *source, int methodIndex)
         function->d->methodIndex = methodIndex;
         return function;
     }
-    return 0;
+    return nullptr;
 }
 
 bool call(QObject *self, int methodIndex, PyObject *args, PyObject **retVal)
@@ -138,7 +138,7 @@ bool call(QObject *self, int methodIndex, PyObject *args, PyObject **retVal)
     QList<QByteArray> argTypes = method.parameterTypes();
 
     // args given plus return type
-    Shiboken::AutoDecRef sequence(PySequence_Fast(args, 0));
+    Shiboken::AutoDecRef sequence(PySequence_Fast(args, nullptr));
     int numArgs = PySequence_Fast_GET_SIZE(sequence.object()) + 1;
 
     if (numArgs - 1 > argTypes.count()) {
@@ -165,12 +165,12 @@ bool call(QObject *self, int methodIndex, PyObject *args, PyObject **retVal)
     else
         argTypes.prepend(QByteArray());
 
-    int i;
-    for (i = 0; i < numArgs; ++i) {
+    int i = 0;
+    for (; i < numArgs; ++i) {
         const QByteArray &typeName = argTypes.at(i);
         // This must happen only when the method hasn't return type.
         if (typeName.isEmpty()) {
-            methArgs[i] = 0;
+            methArgs[i] = nullptr;
             continue;
         }
 
@@ -225,7 +225,5 @@ bool call(QObject *self, int methodIndex, PyObject *args, PyObject **retVal)
     return ok;
 }
 
-
-} //namespace MetaFunction
-} //namespace PySide
+} //namespace PySide::MetaFunction
 

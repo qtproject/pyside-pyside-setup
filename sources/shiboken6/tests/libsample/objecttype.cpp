@@ -220,7 +220,7 @@ ObjectTypeLayout* ObjectType::takeLayout()
     if (!l)
         return nullptr;
     m_layout = nullptr;
-    l->setParent(0);
+    l->setParent(nullptr);
     return l;
 }
 

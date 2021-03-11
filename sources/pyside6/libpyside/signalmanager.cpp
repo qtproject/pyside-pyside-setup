@@ -141,7 +141,8 @@ void PyObjectWrapper::reset(PyObject *o)
 
 PyObjectWrapper &PyObjectWrapper::operator=(const PySide::PyObjectWrapper &other)
 {
-    reset(other.m_me);
+    if (this != &other)
+        reset(other.m_me);
     return *this;
 }
 
@@ -351,10 +352,9 @@ bool SignalManager::emitSignal(QObject *source, const char *signal, PyObject *ar
         // if the signature doesn't have a '(' it's a shor circuited signal, i.e. std::find
         // returned the string null terminator.
         bool isShortCircuit = !*std::find(signal, signal + std::strlen(signal), '(');
-        if (isShortCircuit)
-            return emitShortCircuitSignal(source, signalIndex, args);
-        else
-            return MetaFunction::call(source, signalIndex, args);
+        return isShortCircuit
+            ? emitShortCircuitSignal(source, signalIndex, args)
+            : MetaFunction::call(source, signalIndex, args);
     }
     return false;
 }
@@ -546,24 +546,21 @@ int SignalManager::registerMetaMethodGetIndex(QObject *source, const char *signa
         if (!Shiboken::Object::hasCppWrapper(self)) {
             qWarning() << "Invalid Signal signature:" << signature;
             return -1;
-        } else {
-            auto pySelf = reinterpret_cast<PyObject *>(self);
-            PyObject *dict = self->ob_dict;
-            MetaObjectBuilder *dmo = metaBuilderFromDict(dict);
-
-            // Create a instance meta object
-            if (!dmo) {
-                dmo = new MetaObjectBuilder(Py_TYPE(pySelf), metaObject);
-                PyObject *pyDmo = PyCapsule_New(dmo, nullptr, destroyMetaObject);
-                PyObject_SetAttr(pySelf, metaObjectAttr, pyDmo);
-                Py_DECREF(pyDmo);
-            }
-
-            if (type == QMetaMethod::Signal)
-                return dmo->addSignal(signature);
-            else
-                return dmo->addSlot(signature);
         }
+        auto pySelf = reinterpret_cast<PyObject *>(self);
+        PyObject *dict = self->ob_dict;
+        MetaObjectBuilder *dmo = metaBuilderFromDict(dict);
+
+        // Create a instance meta object
+        if (!dmo) {
+            dmo = new MetaObjectBuilder(Py_TYPE(pySelf), metaObject);
+            PyObject *pyDmo = PyCapsule_New(dmo, nullptr, destroyMetaObject);
+            PyObject_SetAttr(pySelf, metaObjectAttr, pyDmo);
+            Py_DECREF(pyDmo);
+        }
+
+        return type == QMetaMethod::Signal
+            ? dmo->addSignal(signature) : dmo->addSlot(signature);
     }
     return methodIndex;
 }
@@ -623,7 +620,7 @@ static PyObject *parseArguments(const QList<QByteArray>& paramTypes, void **args
         } else {
             PyErr_Format(PyExc_TypeError, "Can't call meta function because I have no idea how to handle %s", dataType);
             Py_DECREF(preparedArgs);
-            return 0;
+            return nullptr;
         }
     }
     return preparedArgs;

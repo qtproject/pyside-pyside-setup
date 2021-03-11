@@ -44,9 +44,9 @@ QWidget*
 TestView::getEditorWidgetFromItemDelegate() const
 {
     if (!m_delegate)
-        return 0;
+        return nullptr;
 
     QModelIndex index;
     QStyleOptionViewItem options;
-    return m_delegate->createEditor(0, options, index);
+    return m_delegate->createEditor(nullptr, options, index);
 }

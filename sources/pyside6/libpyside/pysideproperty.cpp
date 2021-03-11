@@ -74,14 +74,14 @@ static PyObject *qProperty_freset(PyObject *, void *);
 static PyObject *qProperty_fdel(PyObject *, void *);
 
 static PyMethodDef PySidePropertyMethods[] = {
-    {"getter", (PyCFunction)qPropertyGetter, METH_O, 0},
-    {"setter", (PyCFunction)qPropertySetter, METH_O, 0},
-    {"resetter", (PyCFunction)qPropertyResetter, METH_O, 0},
-    {"deleter", (PyCFunction)qPropertyDeleter, METH_O, 0},
+    {"getter", reinterpret_cast<PyCFunction>(qPropertyGetter), METH_O, nullptr},
+    {"setter", reinterpret_cast<PyCFunction>(qPropertySetter), METH_O,  nullptr},
+    {"resetter", reinterpret_cast<PyCFunction>(qPropertyResetter), METH_O,  nullptr},
+    {"deleter", reinterpret_cast<PyCFunction>(qPropertyDeleter), METH_O, nullptr},
     // Synonyms from Qt
-    {"read", (PyCFunction)qPropertyGetter, METH_O, 0},
-    {"write", (PyCFunction)qPropertySetter, METH_O, 0},
-    {0, 0, 0, 0}
+    {"read", reinterpret_cast<PyCFunction>(qPropertyGetter), METH_O, nullptr},
+    {"write", reinterpret_cast<PyCFunction>(qPropertySetter), METH_O, nullptr},
+    {nullptr, nullptr, 0, nullptr}
 };
 
 static PyGetSetDef PySidePropertyType_getset[] = {
@@ -96,15 +96,15 @@ static PyGetSetDef PySidePropertyType_getset[] = {
 };
 
 static PyType_Slot PySidePropertyType_slots[] = {
-    {Py_tp_dealloc, (void *)qpropertyDeAlloc},
-    {Py_tp_call, (void *)qPropertyCall},
-    {Py_tp_traverse, (void *)qpropertyTraverse},
-    {Py_tp_clear, (void *)qpropertyClear},
-    {Py_tp_methods, (void *)PySidePropertyMethods},
-    {Py_tp_init, (void *)qpropertyTpInit},
-    {Py_tp_new, (void *)qpropertyTpNew},
+    {Py_tp_dealloc, reinterpret_cast<void *>(qpropertyDeAlloc)},
+    {Py_tp_call, reinterpret_cast<void *>(qPropertyCall)},
+    {Py_tp_traverse, reinterpret_cast<void *>(qpropertyTraverse)},
+    {Py_tp_clear, reinterpret_cast<void *>(qpropertyClear)},
+    {Py_tp_methods, reinterpret_cast<void *>(PySidePropertyMethods)},
+    {Py_tp_init, reinterpret_cast<void *>(qpropertyTpInit)},
+    {Py_tp_new, reinterpret_cast<void *>(qpropertyTpNew)},
     {Py_tp_getset, PySidePropertyType_getset},
-    {0, 0}
+    {0, nullptr}
 };
 // Dotted modulename is crucial for SbkType_FromSpec to work. Is this name right?
 static PyType_Spec PySidePropertyType_spec = {
@@ -183,7 +183,7 @@ static int qpropertyTpInit(PyObject *self, PyObject *args, PyObject *kwds)
 
     static const char *kwlist[] = {"type", "fget", "fset", "freset", "fdel", "doc", "notify",
                                    "designable", "scriptable", "stored",
-                                   "user", "constant", "final", 0};
+                                   "user", "constant", "final", nullptr};
     char *doc{};
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds,
@@ -514,7 +514,7 @@ PyObject *getValue(PySideProperty *self, PyObject *source)
         PyTuple_SET_ITEM(args, 0, source);
         return  PyObject_CallObject(fget, args);
     }
-    return 0;
+    return nullptr;
 }
 
 int reset(PySideProperty *self, PyObject *source)
@@ -548,7 +548,7 @@ PySideProperty *getObject(PyObject *source, PyObject *name)
     if (!attr)
         PyErr_Clear(); //Clear possible error caused by PyObject_GenericGetAttr
 
-    return 0;
+    return nullptr;
 }
 
 bool isReadable(const PySideProperty * /* self */)
@@ -558,12 +558,12 @@ bool isReadable(const PySideProperty * /* self */)
 
 bool isWritable(const PySideProperty *self)
 {
-    return (self->d->fset != 0);
+    return self->d->fset != nullptr;
 }
 
 bool hasReset(const PySideProperty *self)
 {
-    return (self->d->freset != 0);
+    return self->d->freset != nullptr;
 }
 
 bool isDesignable(const PySideProperty *self)
