@@ -100,7 +100,9 @@ class ImageViewer(QMainWindow):
         w = self._image.width()
         h = self._image.height()
         d = self._image.depth()
-        message = f'Opened "{native_filename}", {w}x{h}, Depth: {d}'
+        color_space = self._image.colorSpace()
+        description = color_space.description() if color_space.isValid() else 'unknown'
+        message = f'Opened "{native_filename}", {w}x{h}, Depth: {d} ({description})'
         self.statusBar().showMessage(message)
         return True
 
