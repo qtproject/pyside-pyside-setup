@@ -72,7 +72,6 @@ SbkArrayConverter *createArrayConverter(IsArrayConvertibleToCppFunc toCppCheckFu
 
 static PythonToCppFunc unimplementedArrayCheck(PyObject *, int, int)
 {
-    warning(PyExc_RuntimeWarning, 0, "SbkConverter: Unimplemented C++ array type.");
     return nullptr;
 }
 
