@@ -55,6 +55,7 @@
 #  include <QtOpenGL/qopenglfunctions_4_4_core.h>
 #  include <QtOpenGL/qopenglfunctions_4_5_compatibility.h>
 #  include <QtOpenGL/qopenglfunctions_4_5_core.h>
+#  include <QtOpenGL/qopenglversionfunctionsfactory.h>
 #endif
 #if QT_CONFIG(opengles2)
 #  include <QtOpenGL/qopenglfunctions_es2.h>

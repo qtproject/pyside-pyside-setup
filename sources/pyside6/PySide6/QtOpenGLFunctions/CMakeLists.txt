@@ -39,7 +39,8 @@ else()
          ${QtOpenGLFunctions_GEN_DIR}/qopenglfunctions_4_4_compatibility_wrapper.cpp
          ${QtOpenGLFunctions_GEN_DIR}/qopenglfunctions_4_4_core_wrapper.cpp
          ${QtOpenGLFunctions_GEN_DIR}/qopenglfunctions_4_5_compatibility_wrapper.cpp
-         ${QtOpenGLFunctions_GEN_DIR}/qopenglfunctions_4_5_core_wrapper.cpp)
+         ${QtOpenGLFunctions_GEN_DIR}/qopenglfunctions_4_5_core_wrapper.cpp
+         ${QtOpenGLFunctions_GEN_DIR}/qopenglversionfunctionsfactory_wrapper.cpp)
    message(STATUS "Qt${QT_MAJOR_VERSION}OpenGLFunctions: Adding Desktop OpenGL classes")
 endif()
 
