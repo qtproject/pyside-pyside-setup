@@ -163,12 +163,19 @@ PyObject *SbkVoidPtrObject_richcmp(PyObject *obj1, PyObject *obj2, int op)
 
     if (validObjects) {
         switch (op) {
-        case Py_EQ: if (cptr1 == cptr2) result = Py_True; break;
-        case Py_NE: if (cptr1 != cptr2) result = Py_True; break;
-        case Py_LT: break;
-        case Py_LE: break;
-        case Py_GT: break;
-        case Py_GE: break;
+        case Py_EQ:
+            if (cptr1 == cptr2)
+                result = Py_True;
+            break;
+        case Py_NE:
+            if (cptr1 != cptr2)
+                result = Py_True;
+            break;
+        case Py_LT:
+        case Py_LE:
+        case Py_GT:
+        case Py_GE:
+            break;
         }
     }
 
@@ -287,15 +294,15 @@ static PyBufferProcs SbkVoidPtrObjectBufferProc = {
 
 // Void pointer type definition.
 static PyType_Slot SbkVoidPtrType_slots[] = {
-    {Py_tp_repr, (void *)SbkVoidPtrObject_repr},
-    {Py_nb_int, (void *)SbkVoidPtrObject_int},
-    {Py_sq_length, (void *)SbkVoidPtrObject_length},
-    {Py_tp_str, (void *)SbkVoidPtrObject_str},
-    {Py_tp_richcompare, (void *)SbkVoidPtrObject_richcmp},
-    {Py_tp_init, (void *)SbkVoidPtrObject_init},
-    {Py_tp_new, (void *)SbkVoidPtrObject_new},
-    {Py_tp_dealloc, (void *)Sbk_object_dealloc},
-    {Py_tp_methods, (void *)SbkVoidPtrObject_methods},
+    {Py_tp_repr, reinterpret_cast<void *>(SbkVoidPtrObject_repr)},
+    {Py_nb_int, reinterpret_cast<void *>(SbkVoidPtrObject_int)},
+    {Py_sq_length, reinterpret_cast<void *>(SbkVoidPtrObject_length)},
+    {Py_tp_str, reinterpret_cast<void *>(SbkVoidPtrObject_str)},
+    {Py_tp_richcompare, reinterpret_cast<void *>(SbkVoidPtrObject_richcmp)},
+    {Py_tp_init, reinterpret_cast<void *>(SbkVoidPtrObject_init)},
+    {Py_tp_new, reinterpret_cast<void *>(SbkVoidPtrObject_new)},
+    {Py_tp_dealloc, reinterpret_cast<void *>(Sbk_object_dealloc)},
+    {Py_tp_methods, reinterpret_cast<void *>(SbkVoidPtrObject_methods)},
     {0, nullptr}
 };
 static PyType_Spec SbkVoidPtrType_spec = {

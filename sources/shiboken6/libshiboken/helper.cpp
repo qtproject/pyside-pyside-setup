@@ -44,7 +44,7 @@
 #include <iomanip>
 #include <iostream>
 
-#include <stdarg.h>
+#include <cstdarg>
 
 #ifdef _WIN32
 #  ifndef NOMINMAX

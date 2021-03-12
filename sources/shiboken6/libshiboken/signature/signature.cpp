@@ -72,7 +72,7 @@ static PyObject *CreateSignature(PyObject *props, PyObject *key)
      * to support '_signature_is_functionlike()'.
      */
     return PyObject_CallFunction(pyside_globals->create_signature_func,
-                                 const_cast<char *>("(OO)"), props, key);
+                                 "(OO)", props, key);
 }
 
 PyObject *GetClassOrModOf(PyObject *ob)
@@ -392,7 +392,7 @@ static int PySide_FinishSignatures(PyObject *module, const char *signatures[])
         return 0;
     }
     AutoDecRef ret(PyObject_CallFunction(
-        pyside_globals->finish_import_func, const_cast<char *>("(O)"), module));
+        pyside_globals->finish_import_func, "(O)", module));
     return ret.isNull() ? -1 : 0;
 }
 

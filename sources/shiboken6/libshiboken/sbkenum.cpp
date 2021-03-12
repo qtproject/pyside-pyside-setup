@@ -47,12 +47,11 @@
 #include "sbkpython.h"
 #include "signature.h"
 
-#include <string.h>
 #include <cstring>
 #include <vector>
 
 #define SbkEnumType_Check(o) (Py_TYPE(Py_TYPE(o)) == SbkEnumType_TypeF())
-typedef PyObject *(*enum_func)(PyObject *, PyObject *);
+using enum_func = PyObject *(*)(PyObject *, PyObject *);
 
 extern "C"
 {
@@ -81,10 +80,12 @@ static PyTypeObject *SbkEnum_TypeF();   // forward
 static PyObject *SbkEnumObject_repr(PyObject *self)
 {
     const SbkEnumObject *enumObj = reinterpret_cast<SbkEnumObject *>(self);
-    if (enumObj->ob_name)
-        return Shiboken::String::fromFormat("%s.%s", (Py_TYPE(self))->tp_name, PyBytes_AS_STRING(enumObj->ob_name));
-    else
-        return Shiboken::String::fromFormat("%s(%ld)", (Py_TYPE(self))->tp_name, enumObj->ob_value);
+    auto name = Py_TYPE(self)->tp_name;
+    if (enumObj->ob_name) {
+        return Shiboken::String::fromFormat("%s.%s", name,
+                                            PyBytes_AS_STRING(enumObj->ob_name));
+    }
+    return Shiboken::String::fromFormat("%s(%ld)", name, enumObj->ob_value);
 }
 
 static PyObject *SbkEnumObject_name(PyObject *self, void *)
@@ -153,9 +154,9 @@ static PyObject *_enum_op(enum_func f, PyObject *a, PyObject *b) {
     if (!(enumA || enumB)) {
         Py_INCREF(Py_NotImplemented);
         return Py_NotImplemented;
-    } else {
-        result = f(valA, valB);
     }
+
+    result = f(valA, valB);
 
     // Decreasing the reference of the used variables a and b.
     if (enumA)
@@ -260,7 +261,7 @@ static Py_hash_t enum_hash(PyObject *pyObj)
 }
 
 static PyGetSetDef SbkEnumGetSetList[] = {
-    {const_cast<char *>("name"), &SbkEnumObject_name, nullptr, nullptr, nullptr},
+    {"name", SbkEnumObject_name, nullptr, nullptr, nullptr},
     {nullptr, nullptr, nullptr, nullptr, nullptr} // Sentinel
 };
 
@@ -268,11 +269,11 @@ static void SbkEnumTypeDealloc(PyObject *pyObj);
 static PyObject *SbkEnumTypeTpNew(PyTypeObject *metatype, PyObject *args, PyObject *kwds);
 
 static PyType_Slot SbkEnumType_Type_slots[] = {
-    {Py_tp_dealloc, (void *)SbkEnumTypeDealloc},
-    {Py_tp_base, (void *)&PyType_Type},
-    {Py_tp_alloc, (void *)PyType_GenericAlloc},
-    {Py_tp_new, (void *)SbkEnumTypeTpNew},
-    {Py_tp_free, (void *)PyObject_GC_Del},
+    {Py_tp_dealloc, reinterpret_cast<void *>(SbkEnumTypeDealloc)},
+    {Py_tp_base, reinterpret_cast<void *>(&PyType_Type)},
+    {Py_tp_alloc, reinterpret_cast<void *>(PyType_GenericAlloc)},
+    {Py_tp_new, reinterpret_cast<void *>(SbkEnumTypeTpNew)},
+    {Py_tp_free, reinterpret_cast<void *>(PyObject_GC_Del)},
     {0, nullptr}
 };
 static PyType_Spec SbkEnumType_Type_spec = {
@@ -354,7 +355,7 @@ namespace Shiboken { namespace Enum {
 PyObject *unpickleEnum(PyObject *enum_class_name, PyObject *value)
 {
     Shiboken::AutoDecRef parts(PyObject_CallMethod(enum_class_name,
-        const_cast<char *>("split"), const_cast<char *>("s"), "."));
+                               "split", "s", "."));
     if (parts.isNull())
         return nullptr;
     PyObject *top_name = PyList_GetItem(parts, 0); // borrowed ref
@@ -412,7 +413,7 @@ void init_enum()
 }
 
 static PyMethodDef SbkEnumObject_Methods[] = {
-    {const_cast<char *>("__reduce__"), reinterpret_cast<PyCFunction>(enum___reduce__),
+    {"__reduce__", reinterpret_cast<PyCFunction>(enum___reduce__),
         METH_NOARGS, nullptr},
     {nullptr, nullptr, 0, nullptr} // Sentinel
 };
@@ -586,24 +587,24 @@ newItem(PyTypeObject *enumType, long itemValue, const char *itemName)
 } // namespace Enum
 
 static PyType_Slot SbkNewEnum_slots[] = {
-    {Py_tp_repr, (void *)SbkEnumObject_repr},
-    {Py_tp_str, (void *)SbkEnumObject_repr},
-    {Py_tp_getset, (void *)SbkEnumGetSetList},
-    {Py_tp_methods, (void *)SbkEnumObject_Methods},
-    {Py_tp_new, (void *)SbkEnum_tp_new},
-    {Py_nb_add, (void *)enum_add},
-    {Py_nb_subtract, (void *)enum_subtract},
-    {Py_nb_multiply, (void *)enum_multiply},
-    {Py_nb_positive, (void *)enum_int},
-    {Py_nb_bool, (void *)enum_bool},
-    {Py_nb_and, (void *)enum_and},
-    {Py_nb_xor, (void *)enum_xor},
-    {Py_nb_or, (void *)enum_or},
-    {Py_nb_int, (void *)enum_int},
-    {Py_nb_index, (void *)enum_int},
-    {Py_tp_richcompare, (void *)enum_richcompare},
-    {Py_tp_hash, (void *)enum_hash},
-    {Py_tp_dealloc, (void *)enum_object_dealloc},
+    {Py_tp_repr, reinterpret_cast<void *>(SbkEnumObject_repr)},
+    {Py_tp_str, reinterpret_cast<void *>(SbkEnumObject_repr)},
+    {Py_tp_getset, reinterpret_cast<void *>(SbkEnumGetSetList)},
+    {Py_tp_methods, reinterpret_cast<void *>(SbkEnumObject_Methods)},
+    {Py_tp_new, reinterpret_cast<void *>(SbkEnum_tp_new)},
+    {Py_nb_add, reinterpret_cast<void *>(enum_add)},
+    {Py_nb_subtract, reinterpret_cast<void *>(enum_subtract)},
+    {Py_nb_multiply, reinterpret_cast<void *>(enum_multiply)},
+    {Py_nb_positive, reinterpret_cast<void *>(enum_int)},
+    {Py_nb_bool, reinterpret_cast<void *>(enum_bool)},
+    {Py_nb_and, reinterpret_cast<void *>(enum_and)},
+    {Py_nb_xor, reinterpret_cast<void *>(enum_xor)},
+    {Py_nb_or, reinterpret_cast<void *>(enum_or)},
+    {Py_nb_int, reinterpret_cast<void *>(enum_int)},
+    {Py_nb_index, reinterpret_cast<void *>(enum_int)},
+    {Py_tp_richcompare, reinterpret_cast<void *>(enum_richcompare)},
+    {Py_tp_hash, reinterpret_cast<void *>(enum_hash)},
+    {Py_tp_dealloc, reinterpret_cast<void *>(enum_object_dealloc)},
     {0, nullptr}
 };
 static PyType_Spec SbkNewEnum_spec = {

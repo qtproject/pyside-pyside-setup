@@ -44,10 +44,7 @@
 #include <vector>
 #include <unordered_set>
 
-namespace Shiboken
-{
-
-namespace String
+namespace Shiboken::String
 {
 
 // PYSIDE-795: Redirecting PySequence to Iterable
@@ -282,5 +279,4 @@ PyObject *getSnakeCaseName(PyObject *name, bool lower)
     return name;
 }
 
-} // namespace String
-} // namespace Shiboken
+} // namespace Shiboken::String

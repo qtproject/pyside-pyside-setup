@@ -66,7 +66,7 @@ using namespace Shiboken;
 
 extern "C" {
 
-typedef PyObject *(*signaturefunc)(PyObject *, PyObject *);
+using signaturefunc = PyObject *(*)(PyObject *, PyObject *);
 
 static PyObject *_get_written_signature(signaturefunc sf, PyObject *ob, PyObject *modifier)
 {
@@ -169,7 +169,7 @@ static PyObject *handle_doc(PyObject *ob, PyObject *old_descr)
     handle_doc_in_progress++;
     PyObject *res = PyObject_CallFunction(
                         pyside_globals->make_helptext_func,
-                        const_cast<char *>("(O)"), ob);
+                        "(O)", ob);
     handle_doc_in_progress--;
     if (res == nullptr) {
         PyErr_Print();
@@ -222,38 +222,48 @@ static int pyside_set___signature__(PyObject *op, PyObject *value)
 }
 
 static PyGetSetDef new_PyCFunction_getsets[] = {
-    {const_cast<char *>("__doc__"), (getter)pyside_cf_get___doc__},
-    {const_cast<char *>("__signature__"), (getter)pyside_cf_get___signature__,
-                                          (setter)pyside_set___signature__},
-    {nullptr}
+    {"__doc__",       reinterpret_cast<getter>(pyside_cf_get___doc__),
+                      nullptr, nullptr, nullptr},
+    {"__signature__", reinterpret_cast<getter>(pyside_cf_get___signature__),
+                      reinterpret_cast<setter>(pyside_set___signature__),
+                      nullptr, nullptr},
+    {nullptr, nullptr, nullptr, nullptr, nullptr}
 };
 
 static PyGetSetDef new_PyStaticMethod_getsets[] = {
-    {const_cast<char *>("__doc__"), (getter)pyside_sm_get___doc__},
-    {const_cast<char *>("__signature__"), (getter)pyside_sm_get___signature__,
-                                          (setter)pyside_set___signature__},
-    {nullptr}
+    {"__doc__",       reinterpret_cast<getter>(pyside_sm_get___doc__),
+                      nullptr, nullptr, nullptr},
+    {"__signature__", reinterpret_cast<getter>(pyside_sm_get___signature__),
+                      reinterpret_cast<setter>(pyside_set___signature__),
+                      nullptr, nullptr},
+    {nullptr, nullptr, nullptr, nullptr, nullptr}
 };
 
 static PyGetSetDef new_PyMethodDescr_getsets[] = {
-    {const_cast<char *>("__doc__"), (getter)pyside_md_get___doc__},
-    {const_cast<char *>("__signature__"), (getter)pyside_md_get___signature__,
-                                          (setter)pyside_set___signature__},
-    {nullptr}
+    {"__doc__",       reinterpret_cast<getter>(pyside_md_get___doc__),
+                      nullptr, nullptr, nullptr},
+    {"__signature__", reinterpret_cast<getter>(pyside_md_get___signature__),
+                      reinterpret_cast<setter>(pyside_set___signature__),
+                      nullptr, nullptr},
+    {nullptr, nullptr, nullptr, nullptr, nullptr}
 };
 
 static PyGetSetDef new_PyType_getsets[] = {
-    {const_cast<char *>("__doc__"), (getter)pyside_tp_get___doc__},
-    {const_cast<char *>("__signature__"), (getter)pyside_tp_get___signature__,
-                                          (setter)pyside_set___signature__},
-    {nullptr}
+    {"__doc__",       reinterpret_cast<getter>(pyside_tp_get___doc__),
+                      nullptr, nullptr, nullptr},
+    {"__signature__", reinterpret_cast<getter>(pyside_tp_get___signature__),
+                      reinterpret_cast<setter>(pyside_set___signature__),
+                      nullptr, nullptr},
+    {nullptr, nullptr, nullptr, nullptr, nullptr}
 };
 
 static PyGetSetDef new_PyWrapperDescr_getsets[] = {
-    {const_cast<char *>("__doc__"), (getter)pyside_wd_get___doc__},
-    {const_cast<char *>("__signature__"), (getter)pyside_wd_get___signature__,
-                                          (setter)pyside_set___signature__},
-    {nullptr}
+    {"__doc__",       reinterpret_cast<getter>(pyside_wd_get___doc__),
+                      nullptr, nullptr, nullptr},
+    {"__signature__", reinterpret_cast<getter>(pyside_wd_get___signature__),
+                      reinterpret_cast<setter>(pyside_set___signature__),
+                      nullptr, nullptr},
+    {nullptr, nullptr, nullptr, nullptr, nullptr}
 };
 
 int PySide_PatchTypes(void)

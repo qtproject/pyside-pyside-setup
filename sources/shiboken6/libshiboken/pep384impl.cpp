@@ -41,8 +41,9 @@
 #include "autodecref.h"
 #include "sbkstaticstrings.h"
 #include "sbkstaticstrings_p.h"
-#include <stdlib.h>
 
+#include <cstdlib>
+#include <cstring>
 
 extern "C"
 {
@@ -655,7 +656,7 @@ const char *
 PepType_GetNameStr(PyTypeObject *type)
 {
     const char *ret = type->tp_name;
-    const char *nodots = strrchr(ret, '.');
+    const char *nodots = std::strrchr(ret, '.');
     if (nodots)
         ret = nodots + 1;
     return ret;

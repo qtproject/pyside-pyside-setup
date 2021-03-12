@@ -135,10 +135,13 @@ type_set_doc(PyTypeObject *type, PyObject *value, void *context)
 // explicitly pass __doc__. For __signature__ it _did_ actually work, because
 // it was not existing before. We add them both for clarity.
 static PyGetSetDef SbkObjectType_Type_getsetlist[] = {
-    {const_cast<char *>("__signature__"), (getter)Sbk_TypeGet___signature__},
-    {const_cast<char *>("__doc__"),       (getter)Sbk_TypeGet___doc__, (setter)type_set_doc},
-    {const_cast<char *>("__dict__"),      (getter)Sbk_TypeGet___dict__},
-    {nullptr}  // Sentinel
+    {"__signature__", reinterpret_cast<getter>(Sbk_TypeGet___signature__),
+                      nullptr, nullptr, nullptr},
+    {"__doc__",       reinterpret_cast<getter>(Sbk_TypeGet___doc__),
+                      reinterpret_cast<setter>(type_set_doc), nullptr, nullptr},
+    {"__dict__",      reinterpret_cast<getter>(Sbk_TypeGet___dict__),
+                      nullptr, nullptr, nullptr},
+    {nullptr, nullptr, nullptr, nullptr, nullptr}  // Sentinel
 };
 
 static PyObject *(*type_getattro)(PyObject *type, PyObject *name);          // forward
@@ -188,7 +191,7 @@ static PyObject *SbkObjectGetDict(PyObject *pObj, void *)
 }
 
 static PyGetSetDef SbkObjectGetSetList[] = {
-    {const_cast<char *>("__dict__"), SbkObjectGetDict, nullptr, nullptr, nullptr},
+    {"__dict__", SbkObjectGetDict, nullptr, nullptr, nullptr},
     {nullptr, nullptr, nullptr, nullptr, nullptr} // Sentinel
 };
 
@@ -287,9 +290,9 @@ static void SbkDeallocWrapperCommon(PyObject *pyObj, bool canDelete)
     // Need to decref the type if this is the dealloc func; if type
     // is subclassed, that dealloc func will decref (see subtype_dealloc
     // in typeobject.c in the python sources)
-    bool needTypeDecref = (false
-                           || PyType_GetSlot(pyType, Py_tp_dealloc) == SbkDeallocWrapper
-                           || PyType_GetSlot(pyType, Py_tp_dealloc) == SbkDeallocWrapperWithPrivateDtor);
+    auto dealloc = PyType_GetSlot(pyType, Py_tp_dealloc);
+    bool needTypeDecref = dealloc == SbkDeallocWrapper
+        || dealloc == SbkDeallocWrapperWithPrivateDtor;
     if (PepRuntime_38_flag) {
         // PYSIDE-939: Additional rule: Also when a subtype is heap allocated,
         // then the subtype_dealloc deref will be suppressed, and we need again

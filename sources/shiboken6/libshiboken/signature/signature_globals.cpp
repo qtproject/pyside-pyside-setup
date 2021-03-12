@@ -117,8 +117,7 @@ static safe_globals_struc *init_phase_1(PyMethodDef *init_meth)
 #endif
         if (code_obj.isNull())
             goto error;
-        p->helper_module = PyImport_ExecCodeModule(const_cast<char *>
-                                                       ("signature_bootstrap"), code_obj);
+        p->helper_module = PyImport_ExecCodeModule("signature_bootstrap", code_obj);
         if (p->helper_module == nullptr)
             goto error;
         // Initialize the module
@@ -202,7 +201,7 @@ static int init_phase_2(safe_globals_struc *p, PyMethodDef *methods)
         if (bootstrap_func == nullptr)
             goto error;
         // The return value of the bootstrap function is the loader module.
-        PyObject *loader = PyObject_CallFunction(bootstrap_func, const_cast<char *>("()"));
+        PyObject *loader = PyObject_CallFunction(bootstrap_func, "()");
         if (loader == nullptr)
             goto error;
         // now the loader should be initialized
