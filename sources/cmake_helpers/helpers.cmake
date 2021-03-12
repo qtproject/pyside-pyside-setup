@@ -21,7 +21,6 @@ set(ALL_OPTIONAL_MODULES
     Help Multimedia
     MultimediaWidgets
     OpenGL
-    OpenGLFunctions
     OpenGLWidgets
     Positioning
     Location

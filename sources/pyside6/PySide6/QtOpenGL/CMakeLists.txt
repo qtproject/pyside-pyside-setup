@@ -27,13 +27,44 @@ get_property(QtGui_enabled_features  TARGET Qt${QT_MAJOR_VERSION}::Gui
 
 if("opengles2" IN_LIST QtGui_enabled_features)
     list(APPEND QtOpenGL_DROPPED_ENTRIES QOpenGLTimeMonitor QOpenGLTimerQuery)
+    list(APPEND QtOpenGL_SRC ${QtOpenGL_GEN_DIR}/qopenglfunctions_es2_wrapper.cpp)
     message(STATUS "Qt${QT_MAJOR_VERSION}Gui: Dropping Desktop OpenGL classes (GLES2)")
 else()
     list(APPEND QtOpenGL_SRC
+         ${QtOpenGL_GEN_DIR}/qopenglfunctions_1_0_wrapper.cpp
+         ${QtOpenGL_GEN_DIR}/qopenglfunctions_1_1_wrapper.cpp
+         ${QtOpenGL_GEN_DIR}/qopenglfunctions_1_2_wrapper.cpp
+         ${QtOpenGL_GEN_DIR}/qopenglfunctions_1_3_wrapper.cpp
+         ${QtOpenGL_GEN_DIR}/qopenglfunctions_1_4_wrapper.cpp
+         ${QtOpenGL_GEN_DIR}/qopenglfunctions_1_5_wrapper.cpp
+         ${QtOpenGL_GEN_DIR}/qopenglfunctions_2_0_wrapper.cpp
+         ${QtOpenGL_GEN_DIR}/qopenglfunctions_2_1_wrapper.cpp
+         ${QtOpenGL_GEN_DIR}/qopenglfunctions_3_0_wrapper.cpp
+         ${QtOpenGL_GEN_DIR}/qopenglfunctions_3_1_wrapper.cpp
+         ${QtOpenGL_GEN_DIR}/qopenglfunctions_3_2_compatibility_wrapper.cpp
+         ${QtOpenGL_GEN_DIR}/qopenglfunctions_3_2_core_wrapper.cpp
+         ${QtOpenGL_GEN_DIR}/qopenglfunctions_3_3_compatibility_wrapper.cpp
+         ${QtOpenGL_GEN_DIR}/qopenglfunctions_3_3_core_wrapper.cpp
+         ${QtOpenGL_GEN_DIR}/qopenglfunctions_4_0_compatibility_wrapper.cpp
+         ${QtOpenGL_GEN_DIR}/qopenglfunctions_4_0_core_wrapper.cpp
+         ${QtOpenGL_GEN_DIR}/qopenglfunctions_4_1_compatibility_wrapper.cpp
+         ${QtOpenGL_GEN_DIR}/qopenglfunctions_4_1_core_wrapper.cpp
+         ${QtOpenGL_GEN_DIR}/qopenglfunctions_4_2_compatibility_wrapper.cpp
+         ${QtOpenGL_GEN_DIR}/qopenglfunctions_4_2_core_wrapper.cpp
+         ${QtOpenGL_GEN_DIR}/qopenglfunctions_4_3_compatibility_wrapper.cpp
+         ${QtOpenGL_GEN_DIR}/qopenglfunctions_4_3_core_wrapper.cpp
+         ${QtOpenGL_GEN_DIR}/qopenglfunctions_4_4_compatibility_wrapper.cpp
+         ${QtOpenGL_GEN_DIR}/qopenglfunctions_4_4_core_wrapper.cpp
+         ${QtOpenGL_GEN_DIR}/qopenglfunctions_4_5_compatibility_wrapper.cpp
+         ${QtOpenGL_GEN_DIR}/qopenglfunctions_4_5_core_wrapper.cpp
+         ${QtOpenGL_GEN_DIR}/qopenglversionfunctionsfactory_wrapper.cpp
          ${QtOpenGL_GEN_DIR}/qopengltimemonitor_wrapper.cpp
          ${QtOpenGL_GEN_DIR}/qopengltimerquery_wrapper.cpp)
     message(STATUS "Qt${QT_MAJOR_VERSION}OpenGL: Adding Desktop OpenGL classes")
 endif()
+
+configure_file("${QtOpenGL_SOURCE_DIR}/QtOpenGL_global.post.h.in"
+               "${QtOpenGL_BINARY_DIR}/QtOpenGL_global.post.h" @ONLY)
 
 set(QtOpenGL_include_dirs   ${QtOpenGL_SOURCE_DIR}
                             ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}

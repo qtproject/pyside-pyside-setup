@@ -2,7 +2,7 @@
 <!--
 /****************************************************************************
 **
-** Copyright (C) 2020 The Qt Company Ltd.
+** Copyright (C) 2021 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -59,6 +59,10 @@
   <rejection class="^QOpenGL.*$" argument-type="QOpenGLTextureHelper*"/>
   <rejection class="^QOpenGL.*$" argument-type="^(const )?QVector.D ?\*$"/>
   <rejection class="^QOpenGL.*$" argument-type="^(const )?void ?\*\*$"/>
+  <rejection class="^QOpenGLFunctions.*$" function-name="^glGet(Buffer|VertexAttrib)?Pointer.*$"/>
+  <rejection class="^QOpenGLFunctions.*$" function-name="^glMultiDrawElements.*$"/>
+  <!-- Reject any non-const array of the version functions -->
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" argument-type="^GL\w+ ?\*$"/>
 
   <object-type name="QOpenGLBuffer" since="5.0">
     <enum-type name="Access"/>
@@ -74,6 +78,351 @@
       <enum-type name="Type" flags="Types"/>
       <enum-type name="Severity" flags="Severities"/>
   </value-type>
+
+  <object-type name="QOpenGLFunctions_1_0" since="5.1">
+      &opengl_modifications1_0;
+      &opengl_modifications1_0_compat;
+  </object-type>
+  <object-type name="QOpenGLFunctions_1_1" since="5.1">
+      &opengl_modifications1_0;
+      &opengl_modifications1_0_compat;
+      &opengl_modifications1_1;
+      &opengl_modifications1_1_compat;
+  </object-type>
+  <object-type name="QOpenGLFunctions_1_2" since="5.1">
+      &opengl_modifications1_0;
+      &opengl_modifications1_0_compat;
+      &opengl_modifications1_1;
+      &opengl_modifications1_1_compat;
+      &opengl_modifications1_2_compat;
+  </object-type>
+  <object-type name="QOpenGLFunctions_1_3" since="5.1">
+      &opengl_modifications1_0;
+      &opengl_modifications1_0_compat;
+      &opengl_modifications1_1;
+      &opengl_modifications1_1_compat;
+      &opengl_modifications1_2_compat;
+      &opengl_modifications1_3_compat;
+  </object-type>
+  <object-type name="QOpenGLFunctions_1_4" since="5.1">
+      &opengl_modifications1_0;
+      &opengl_modifications1_0_compat;
+      &opengl_modifications1_1;
+      &opengl_modifications1_1_compat;
+      &opengl_modifications1_2_compat;
+      &opengl_modifications1_3_compat;
+      &opengl_modifications1_4;
+      &opengl_modifications1_4_compat;
+  </object-type>
+  <object-type name="QOpenGLFunctions_1_5" since="5.1">
+      &opengl_modifications1_0;
+      &opengl_modifications1_0_compat;
+      &opengl_modifications1_1;
+      &opengl_modifications1_1_compat;
+      &opengl_modifications1_2_compat;
+      &opengl_modifications1_3_compat;
+      &opengl_modifications1_4;
+      &opengl_modifications1_4_compat;
+  </object-type>
+  <object-type name="QOpenGLFunctions_2_0" since="5.1">
+      &opengl_modifications1_0;
+      &opengl_modifications1_0_compat;
+      &opengl_modifications1_1;
+      &opengl_modifications1_1_compat;
+      &opengl_modifications1_2_compat;
+      &opengl_modifications1_3_compat;
+      &opengl_modifications1_4;
+      &opengl_modifications1_4_compat;
+      &opengl_modifications2_0;
+      &opengl_modifications2_0_compat;
+  </object-type>
+  <object-type name="QOpenGLFunctions_2_1" since="5.1">
+      &opengl_modifications1_0;
+      &opengl_modifications1_0_compat;
+      &opengl_modifications1_1;
+      &opengl_modifications1_1_compat;
+      &opengl_modifications1_2_compat;
+      &opengl_modifications1_3_compat;
+      &opengl_modifications1_4;
+      &opengl_modifications1_4_compat;
+      &opengl_modifications2_0;
+      &opengl_modifications2_0_compat;
+      &opengl_modifications2_1;
+  </object-type>
+  <object-type name="QOpenGLFunctions_3_0" since="5.1">
+      &opengl_modifications1_0;
+      &opengl_modifications1_0_compat;
+      &opengl_modifications1_1;
+      &opengl_modifications1_1_compat;
+      &opengl_modifications1_2_compat;
+      &opengl_modifications1_3_compat;
+      &opengl_modifications1_4;
+      &opengl_modifications1_4_compat;
+      &opengl_modifications2_0;
+      &opengl_modifications2_0_compat;
+      &opengl_modifications2_1;
+      &opengl_modifications3_0;
+  </object-type>
+  <object-type name="QOpenGLFunctions_3_1" since="5.1">
+      &opengl_modifications1_0;
+      &opengl_modifications1_1;
+      &opengl_modifications1_4;
+      &opengl_modifications2_0;
+      &opengl_modifications2_1;
+      &opengl_modifications3_0;
+  </object-type>
+  <object-type name="QOpenGLFunctions_3_2_Compatibility" since="5.1">
+      &opengl_modifications1_0;
+      &opengl_modifications1_0_compat;
+      &opengl_modifications1_1;
+      &opengl_modifications1_1_compat;
+      &opengl_modifications1_2_compat;
+      &opengl_modifications1_3_compat;
+      &opengl_modifications1_4;
+      &opengl_modifications1_4_compat;
+      &opengl_modifications2_0;
+      &opengl_modifications2_0_compat;
+      &opengl_modifications2_1;
+      &opengl_modifications3_0;
+  </object-type>
+  <object-type name="QOpenGLFunctions_3_2_Core" since="5.1">
+      &opengl_modifications1_0;
+      &opengl_modifications1_1;
+      &opengl_modifications1_4;
+      &opengl_modifications2_0;
+      &opengl_modifications2_1;
+      &opengl_modifications3_0;
+  </object-type>
+  <object-type name="QOpenGLFunctions_3_3_Compatibility" since="5.1">
+      &opengl_modifications1_0;
+      &opengl_modifications1_0_compat;
+      &opengl_modifications1_1;
+      &opengl_modifications1_1_compat;
+      &opengl_modifications1_2_compat;
+      &opengl_modifications1_3_compat;
+      &opengl_modifications1_4;
+      &opengl_modifications1_4_compat;
+      &opengl_modifications2_0;
+      &opengl_modifications2_0_compat;
+      &opengl_modifications2_1;
+      &opengl_modifications3_0;
+      &opengl_modifications3_3;
+      &opengl_modifications3_3a;
+  </object-type>
+  <object-type name="QOpenGLFunctions_3_3_Core" since="5.1">
+      &opengl_modifications1_0;
+      &opengl_modifications1_1;
+      &opengl_modifications1_4;
+      &opengl_modifications2_0;
+      &opengl_modifications2_1;
+      &opengl_modifications3_0;
+      &opengl_modifications3_3;
+  </object-type>
+  <object-type name="QOpenGLFunctions_4_0_Compatibility" since="5.1">
+      &opengl_modifications1_0;
+      &opengl_modifications1_0_compat;
+      &opengl_modifications1_1;
+      &opengl_modifications1_1_compat;
+      &opengl_modifications1_2_compat;
+      &opengl_modifications1_3_compat;
+      &opengl_modifications1_4;
+      &opengl_modifications1_4_compat;
+      &opengl_modifications2_0;
+      &opengl_modifications2_0_compat;
+      &opengl_modifications2_1;
+      &opengl_modifications3_0;
+      &opengl_modifications3_3;
+      &opengl_modifications3_3a;
+      &opengl_modifications4_0;
+  </object-type>
+  <object-type name="QOpenGLFunctions_4_0_Core" since="5.1">
+      &opengl_modifications1_0;
+      &opengl_modifications1_1;
+      &opengl_modifications1_4;
+      &opengl_modifications2_0;
+      &opengl_modifications2_1;
+      &opengl_modifications3_0;
+      &opengl_modifications3_3;
+      &opengl_modifications4_0;
+  </object-type>
+  <object-type name="QOpenGLFunctions_4_1_Compatibility" since="5.1">
+      &opengl_modifications1_0;
+      &opengl_modifications1_0_compat;
+      &opengl_modifications1_1;
+      &opengl_modifications1_1_compat;
+      &opengl_modifications1_2_compat;
+      &opengl_modifications1_3_compat;
+      &opengl_modifications1_4;
+      &opengl_modifications1_4_compat;
+      &opengl_modifications2_0;
+      &opengl_modifications2_0_compat;
+      &opengl_modifications2_1;
+      &opengl_modifications3_0;
+      &opengl_modifications3_3;
+      &opengl_modifications3_3a;
+      &opengl_modifications4_1;
+      &opengl_modifications4_0;
+  </object-type>
+  <object-type name="QOpenGLFunctions_4_1_Core" since="5.1">
+      &opengl_modifications1_0;
+      &opengl_modifications1_1;
+      &opengl_modifications1_4;
+      &opengl_modifications2_0;
+      &opengl_modifications2_1;
+      &opengl_modifications3_0;
+      &opengl_modifications3_3;
+      &opengl_modifications4_0;
+      &opengl_modifications4_1;
+      &opengl_modifications_va;
+  </object-type>
+  <object-type name="QOpenGLFunctions_4_2_Compatibility" since="5.1">
+      &opengl_modifications1_0;
+      &opengl_modifications1_0_compat;
+      &opengl_modifications1_1;
+      &opengl_modifications1_1_compat;
+      &opengl_modifications1_2_compat;
+      &opengl_modifications1_3_compat;
+      &opengl_modifications1_4;
+      &opengl_modifications1_4_compat;
+      &opengl_modifications2_0;
+      &opengl_modifications2_0_compat;
+      &opengl_modifications2_1;
+      &opengl_modifications3_0;
+      &opengl_modifications3_3;
+      &opengl_modifications3_3a;
+      &opengl_modifications4_0;
+      &opengl_modifications4_1;
+  </object-type>
+  <object-type name="QOpenGLFunctions_4_2_Core" since="5.1">
+      &opengl_modifications1_0;
+      &opengl_modifications1_1;
+      &opengl_modifications1_4;
+      &opengl_modifications2_0;
+      &opengl_modifications2_1;
+      &opengl_modifications3_0;
+      &opengl_modifications3_3;
+      &opengl_modifications4_0;
+      &opengl_modifications4_1;
+      &opengl_modifications_va;
+  </object-type>
+  <object-type name="QOpenGLFunctions_4_3_Compatibility" since="5.1">
+      &opengl_modifications1_0;
+      &opengl_modifications1_0_compat;
+      &opengl_modifications1_1;
+      &opengl_modifications1_1_compat;
+      &opengl_modifications1_2_compat;
+      &opengl_modifications1_3_compat;
+      &opengl_modifications1_4;
+      &opengl_modifications1_4_compat;
+      &opengl_modifications2_0;
+      &opengl_modifications2_0_compat;
+      &opengl_modifications2_1;
+      &opengl_modifications3_0;
+      &opengl_modifications3_3;
+      &opengl_modifications3_3a;
+      &opengl_modifications4_0;
+      &opengl_modifications4_1;
+      &opengl_modifications4_3;
+  </object-type>
+  <object-type name="QOpenGLFunctions_4_3_Core" since="5.1">
+      &opengl_modifications1_0;
+      &opengl_modifications1_1;
+      &opengl_modifications1_4;
+      &opengl_modifications2_0;
+      &opengl_modifications2_1;
+      &opengl_modifications3_0;
+      &opengl_modifications3_3;
+      &opengl_modifications4_0;
+      &opengl_modifications4_3;
+      &opengl_modifications4_1;
+      &opengl_modifications_va;
+  </object-type>
+  <object-type name="QOpenGLFunctions_4_4_Compatibility" since="5.5">
+      &opengl_modifications1_0;
+      &opengl_modifications1_0_compat;
+      &opengl_modifications1_1;
+      &opengl_modifications1_1_compat;
+      &opengl_modifications1_2_compat;
+      &opengl_modifications1_3_compat;
+      &opengl_modifications1_4;
+      &opengl_modifications1_4_compat;
+      &opengl_modifications2_0;
+      &opengl_modifications2_0_compat;
+      &opengl_modifications2_1;
+      &opengl_modifications3_0;
+      &opengl_modifications3_3;
+      &opengl_modifications3_3a;
+      &opengl_modifications4_0;
+      &opengl_modifications4_1;
+      &opengl_modifications4_3;
+      &opengl_modifications4_4;
+      &opengl_modifications4_4_core;
+  </object-type>
+  <object-type name="QOpenGLFunctions_4_4_Core" since="5.5">
+      &opengl_modifications1_0;
+      &opengl_modifications1_1;
+      &opengl_modifications1_4;
+      &opengl_modifications2_0;
+      &opengl_modifications2_1;
+      &opengl_modifications3_0;
+      &opengl_modifications3_3;
+      &opengl_modifications4_0;
+      &opengl_modifications4_1;
+      &opengl_modifications_va;
+      &opengl_modifications4_3;
+      &opengl_modifications4_4;
+      &opengl_modifications4_4_core;
+  </object-type>
+  <object-type name="QOpenGLFunctions_4_5_Compatibility" since="5.5">
+      &opengl_modifications1_0;
+      &opengl_modifications1_0_compat;
+      &opengl_modifications1_1;
+      &opengl_modifications1_1_compat;
+      &opengl_modifications1_2_compat;
+      &opengl_modifications1_3_compat;
+      &opengl_modifications1_4;
+      &opengl_modifications1_4_compat;
+      &opengl_modifications2_0;
+      &opengl_modifications2_0_compat;
+      &opengl_modifications2_1;
+      &opengl_modifications3_0;
+      &opengl_modifications3_3;
+      &opengl_modifications3_3a;
+      &opengl_modifications4_0;
+      &opengl_modifications4_1;
+      &opengl_modifications4_3;
+      &opengl_modifications4_4;
+      &opengl_modifications4_4_core;
+      &opengl_modifications4_5;
+  </object-type>
+  <object-type name="QOpenGLFunctions_4_5_Core" since="5.5">
+      &opengl_modifications1_0;
+      &opengl_modifications1_1;
+      &opengl_modifications1_4;
+      &opengl_modifications2_0;
+      &opengl_modifications2_1;
+      &opengl_modifications3_0;
+      &opengl_modifications3_3;
+      &opengl_modifications4_0;
+      &opengl_modifications4_1;
+      &opengl_modifications4_3;
+      &opengl_modifications4_4;
+      &opengl_modifications4_4_core;
+      &opengl_modifications4_5;
+      &opengl_modifications_va;
+  </object-type>
+  <object-type name="QOpenGLFunctions_ES2" since="5.1">
+      &opengl_modifications1_0;
+      &opengl_modifications1_1;
+  </object-type>
+
+  <object-type name="QOpenGLVersionFunctionsFactory">
+      <modify-function signature="get(const QOpenGLVersionProfile &amp;,QOpenGLContext *)">
+          <inject-code class="target" position="beginning" file="../glue/qtopengl.cpp"
+                       snippet="qopenglversionfunctionsfactory-get"/>
+      </modify-function>
+  </object-type>
+
   <object-type name="QOpenGLFramebufferObject" since="5.0">
     <enum-type name="Attachment"/>
     <enum-type name="FramebufferRestorePolicy" since="5.7"/>
@@ -169,5 +518,7 @@
   <object-type name="QOpenGLVertexArrayObject">
       <object-type name="Binder"/>
   </object-type>
+
+  <suppress-warning text="^There's no user provided way.*QOpenGLFunctions_\d_\d.*::glIndex.*$"/>
 
 </typesystem>

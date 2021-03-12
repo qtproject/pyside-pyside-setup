@@ -58,4 +58,9 @@
             %CPPSELF.%FUNCTION_NAME(%1, ($ATTR_TYPE*)nullptr, $ARG1);
          }
     </template>
+    <template name="glGetString_return_QString">
+        const GLubyte *us = %CPPSELF.%FUNCTION_NAME(%ARGUMENT_NAMES);
+        const QString s = QString::fromLocal8Bit(reinterpret_cast&lt;const char *&gt;(us));
+        %PYARG_0 = %CONVERTTOPYTHON[QString](s);
+    </template>
 </typesystem>
