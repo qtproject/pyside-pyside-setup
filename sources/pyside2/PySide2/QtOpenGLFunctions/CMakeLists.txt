@@ -42,7 +42,8 @@ else()
          ${QtOpenGLFunctions_GEN_DIR}/qopenglfunctions_4_4_compatibility_wrapper.cpp
          ${QtOpenGLFunctions_GEN_DIR}/qopenglfunctions_4_4_core_wrapper.cpp
          ${QtOpenGLFunctions_GEN_DIR}/qopenglfunctions_4_5_compatibility_wrapper.cpp
-         ${QtOpenGLFunctions_GEN_DIR}/qopenglfunctions_4_5_core_wrapper.cpp)
+         ${QtOpenGLFunctions_GEN_DIR}/qopenglfunctions_4_5_core_wrapper.cpp
+         ${QtOpenGLFunctions_GEN_DIR}/qopenglversionfunctionsfactory_wrapper.cpp)
    message(STATUS "Qt${QT_MAJOR_VERSION}OpenGLFunctions: Adding Desktop OpenGL classes")
 endif()
 
@@ -71,3 +72,6 @@ create_pyside_module(NAME QtOpenGLFunctions
                      SOURCES QtOpenGLFunctions_SRC
                      TYPESYSTEM_NAME ${QtOpenGLFunctions_BINARY_DIR}/typesystem_openglfunctions.xml
                      DROPPED_ENTRIES QtOpenGLFunctions_DROPPED_ENTRIES)
+
+install(FILES ${pyside2_SOURCE_DIR}/qopenglversionfunctionsfactory.h
+        DESTINATION include/PySide2/QtOpenGLFunctions)

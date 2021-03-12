@@ -52,3 +52,5 @@
 #if QT_CONFIG(opengles2)
 #  include <QtGui/qopenglfunctions_es2.h>
 #endif
+
+#include "qopenglversionfunctionsfactory.h" // PySide class
