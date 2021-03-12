@@ -2035,7 +2035,7 @@ void CppGenerator::writeMethodWrapper(TextStream &s, const AbstractMetaFunctionC
                 s << "if (revOpMethod && PyCallable_Check(revOpMethod)) {\n";
                 {
                     Indentation indent(s);
-                    s << PYTHON_RETURN_VAR << " = PyObject_CallFunction(revOpMethod, const_cast<char *>(\"O\"), self);\n"
+                    s << PYTHON_RETURN_VAR << " = PyObject_CallFunction(revOpMethod, \"O\", self);\n"
                         << "if (PyErr_Occurred() && (PyErr_ExceptionMatches(PyExc_NotImplementedError)"
                         << " || PyErr_ExceptionMatches(PyExc_AttributeError))) {\n";
                     {
@@ -5630,12 +5630,6 @@ void CppGenerator::writeTypeDiscoveryFunction(TextStream &s, const AbstractMetaC
     s << "return {};\n" << outdent << "}\n\n";
 }
 
-QString CppGenerator::writeSmartPointerGetterCast()
-{
-    return QLatin1String("const_cast<char *>(")
-           + QLatin1String(SMART_POINTER_GETTER) + QLatin1Char(')');
-}
-
 void CppGenerator::writeSetattroDefinition(TextStream &s, const AbstractMetaClass *metaClass) const
 {
     s << "static int " << ShibokenGenerator::cpythonSetattroFunctionName(metaClass)
@@ -5705,7 +5699,7 @@ void CppGenerator::writeSmartPointerSetattroFunction(TextStream &s,
     writeSetattroDefinition(s, context.metaClass());
     s << "// Try to find the 'name' attribute, by retrieving the PyObject for the corresponding C++ object held by the smart pointer.\n"
          << "PyObject *rawObj = PyObject_CallMethod(self, "
-         << writeSmartPointerGetterCast() << ", 0);\n";
+         << SMART_POINTER_GETTER << ", 0);\n";
     s << "if (rawObj) {\n";
     {
         Indentation indent(s);
@@ -5842,7 +5836,7 @@ void CppGenerator::writeSmartPointerGetattroFunction(TextStream &s, const Genera
     s << "// Try to find the 'name' attribute, by retrieving the PyObject for "
                    "the corresponding C++ object held by the smart pointer.\n"
         << "if (auto rawObj = PyObject_CallMethod(self, "
-        << writeSmartPointerGetterCast() << ", 0)) {\n";
+        << SMART_POINTER_GETTER << ", 0)) {\n";
     {
         Indentation indent(s);
         s << "if (auto attribute = PyObject_GetAttr(rawObj, name))\n";

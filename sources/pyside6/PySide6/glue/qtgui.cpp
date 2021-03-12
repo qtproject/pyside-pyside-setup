@@ -547,9 +547,7 @@ WId id = %1;
 // @snippet qshortcut-1
 
 // @snippet qshortcut-2
-Shiboken::AutoDecRef result(PyObject_CallMethod(%PYSELF,
-                                                const_cast<char *>("connect"),
-                                                const_cast<char *>("OsO"),
+Shiboken::AutoDecRef result(PyObject_CallMethod(%PYSELF, "connect", "OsO",
                                                 %PYSELF, SIGNAL(activated()), %PYARG_3)
                             );
 if (!result.isNull())

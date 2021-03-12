@@ -133,7 +133,6 @@ private:
     static void writeSmartPointerGetattroFunction(TextStream &s, const GeneratorContext &context);
     void writeGetattroFunction(TextStream &s, AttroCheck attroCheck,
                                const GeneratorContext &context) const;
-    static QString writeSmartPointerGetterCast();
     QString qObjectGetAttroFunction() const;
 
     /**

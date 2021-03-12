@@ -120,9 +120,7 @@ inline PyObject *addActionWithPyObject(QMenu *self, const QIcon &icon, const QSt
     self->addAction(act);
 
     PyObject *pyAct = %CONVERTTOPYTHON[QAction *](act);
-    Shiboken::AutoDecRef result(PyObject_CallMethod(pyAct,
-                                                    const_cast<char *>("connect"),
-                                                    const_cast<char *>("OsO"),
+    Shiboken::AutoDecRef result(PyObject_CallMethod(pyAct, "connect", "OsO",
                                                     pyAct,
                                                     SIGNAL(triggered()), callback));
     if (result.isNull()) {
@@ -169,9 +167,7 @@ addActionWithPyObject(QMenuBar *self, const QString &text, PyObject *callback)
     self->addAction(act);
 
     PyObject *pyAct = %CONVERTTOPYTHON[QAction *](act);
-    PyObject *result = PyObject_CallMethod(pyAct,
-                                           const_cast<char *>("connect"),
-                                           const_cast<char *>("OsO"),
+    PyObject *result = PyObject_CallMethod(pyAct, "connect", "OsO",
                                            pyAct,
                                            SIGNAL(triggered(bool)), callback);
 
@@ -573,8 +569,7 @@ for (int i = 0, count = %CPPSELF.count(); i < count; ++i) {
 QAction *action = %CPPSELF.addAction(%1, %2);
 %PYARG_0 = %CONVERTTOPYTHON[QAction *](action);
 Shiboken::AutoDecRef result(PyObject_CallMethod(%PYARG_0,
-    const_cast<char *>("connect"),
-    const_cast<char *>("OsO"),
+    "connect", "OsO",
     %PYARG_0, SIGNAL(triggered()), %PYARG_3)
 );
 // @snippet qtoolbar-addaction-1
@@ -583,8 +578,7 @@ Shiboken::AutoDecRef result(PyObject_CallMethod(%PYARG_0,
 QAction *action = %CPPSELF.addAction(%1);
 %PYARG_0 = %CONVERTTOPYTHON[QAction *](action);
 Shiboken::AutoDecRef result(PyObject_CallMethod(%PYARG_0,
-    const_cast<char *>("connect"),
-    const_cast<char *>("OsO"),
+    "connect", "OsO",
     %PYARG_0, SIGNAL(triggered()), %PYARG_2)
 );
 // @snippet qtoolbar-addaction-2

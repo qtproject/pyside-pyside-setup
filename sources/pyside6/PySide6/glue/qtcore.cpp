@@ -1238,9 +1238,7 @@ timerType->tp_init(pyTimer, emptyTuple, nullptr);
 auto timer = %CONVERTTOCPP[QTimer *](pyTimer);
 //XXX  /|\ omitting this space crashes shiboken!
 Shiboken::AutoDecRef result(
-    PyObject_CallMethod(pyTimer,
-                        const_cast<char *>("connect"),
-                        const_cast<char *>("OsOs"),
+    PyObject_CallMethod(pyTimer, "connect", "OsOs",
                         pyTimer,
                         SIGNAL(timeout()),
                         %PYARG_2,
@@ -1266,9 +1264,7 @@ if (PyObject_TypeCheck(%2, PySideSignalInstanceTypeF())) {
     PySideSignalInstance *signalInstance = reinterpret_cast<PySideSignalInstance *>(%2);
     Shiboken::AutoDecRef signalSignature(Shiboken::String::fromFormat("2%s", PySide::Signal::getSignature(signalInstance)));
     Shiboken::AutoDecRef result(
-        PyObject_CallMethod(pyTimer,
-                            const_cast<char *>("connect"),
-                            const_cast<char *>("OsOO"),
+        PyObject_CallMethod(pyTimer, "connect", "OsOO",
                             pyTimer,
                             SIGNAL(timeout()),
                             PySide::Signal::getObject(signalInstance),
@@ -1276,9 +1272,7 @@ if (PyObject_TypeCheck(%2, PySideSignalInstanceTypeF())) {
     );
 } else {
     Shiboken::AutoDecRef result(
-        PyObject_CallMethod(pyTimer,
-                            const_cast<char *>("connect"),
-                            const_cast<char *>("OsO"),
+        PyObject_CallMethod(pyTimer, "connect", "OsO",
                             pyTimer,
                             SIGNAL(timeout()),
                             %PYARG_2)
