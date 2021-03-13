@@ -2601,6 +2601,10 @@
   </object-type>
   <object-type name="QOpenGLContext">
     <enum-type name="OpenGLModuleType"/>
+    <modify-function signature="versionFunctions(const QOpenGLVersionProfile&amp;) const">
+    <inject-code class="target" position="beginning" file="../glue/qtgui.cpp"
+                 snippet="qopenglcontext-versionfunctions"/>
+    </modify-function>
   </object-type>
   <object-type name="QOpenGLContextGroup" since="5.0"/>
   <object-type name="QOpenGLDebugLogger" since="5.1">

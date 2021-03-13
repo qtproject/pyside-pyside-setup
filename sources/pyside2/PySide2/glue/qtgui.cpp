@@ -23,6 +23,27 @@
  * INJECT CODE
  ********************************************************************/
 
+// @snippet qopenglcontext-versionfunctions
+
+// %CPPSELF.%FUNCTION_NAME(%1, %2); Pretend to shiboken we call the function
+
+// Import QtOpenGLFunctions and call the factory function
+// QOpenGLVersionFunctionsFactory.get()
+PyObject *module = PyImport_ImportModule("PySide2.QtOpenGLFunctions");
+if (module == nullptr)
+    return nullptr;
+PyObject *loc = PyModule_GetDict(module);
+static PyObject *const factoryName =
+    Shiboken::String::createStaticString("QOpenGLVersionFunctionsFactory");
+auto factory = PyDict_GetItem(loc, factoryName);
+if (factory == nullptr)
+    return nullptr;
+
+static PyObject *const getMethod = Shiboken::String::createStaticString("get");
+%PYARG_0 = PyObject_CallMethodObjArgs(factory, getMethod, pyArgs[0], %PYSELF,
+                                       nullptr);
+// @snippet qopenglcontext-versionfunctions
+
 // @snippet glgetshadersource
 GLsizei bufSize = 4096;
 GLsizei length = bufSize - 1;
