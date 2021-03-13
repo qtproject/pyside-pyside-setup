@@ -38,7 +38,7 @@
 #############################################################################
 
 """
-__feature__.py
+__feature__.py  (renamed to feature.py)
 
 This is the feature file for the Qt for Python project. There is some
 similarity to Python's `__future__` file, but also some distinction.

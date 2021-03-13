@@ -112,7 +112,7 @@ def finish_import(module):
 
 
 import signature_bootstrap
-from shibokensupport import signature, __feature__
+from shibokensupport import signature, feature as __feature__
 signature.get_signature = signature_bootstrap.get_signature
 # PYSIDE-1019: Publish the __feature__ dictionary.
 __feature__.pyside_feature_dict = signature_bootstrap.pyside_feature_dict
@@ -176,7 +176,7 @@ def move_into_pyside_package():
         import PySide6.support
     except ModuleNotFoundError:
         PySide6.support = types.ModuleType("PySide6.support")
-    put_into_package(PySide6.support, __feature__)
+    put_into_package(PySide6.support, __feature__, "__feature__")
     put_into_package(PySide6.support, signature)
     put_into_package(PySide6.support.signature, mapping)
     put_into_package(PySide6.support.signature, errorhandler)
@@ -200,6 +200,13 @@ from shibokensupport.signature.lib import enum_sig
 if "PySide6" in sys.modules:
     # We publish everything under "PySide6.support.signature", again.
     move_into_pyside_package()
+    # PYSIDE-1502: Make sure that support can be imported.
+    try:
+        import PySide6.support
+    except ModuleNotFoundError as e:
+        print("PySide6.support could not be imported. "
+              "This is a serious configuration error.", file=sys.stderr)
+        raise e from None
     # PYSIDE-1019: Modify `__import__` to be `__feature__` aware.
     # __feature__ is already in sys.modules, so this is actually no import
     try:
@@ -210,6 +217,6 @@ if "PySide6" in sys.modules:
         # Maybe we should optimize that and change `__import__` from C, instead?
     except ModuleNotFoundError:
         print("__feature__ could not be imported. "
-              "This is an unsolved PyInstaller problem.", file=sys.stderr)
+              "This may be an unsolved PyInstaller problem.", file=sys.stderr)
 
 # end of file
