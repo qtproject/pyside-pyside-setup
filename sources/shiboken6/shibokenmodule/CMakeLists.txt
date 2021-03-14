@@ -87,20 +87,20 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/_git_shiboken_module_version.py"
         DESTINATION "${PYTHON_SITE_PACKAGES}/shiboken6")
 
 # Temporary copy of `Shiboken` to `shiboken6` until PySide 6.2
+# This code can (but need not) be removed after that.
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/copy_renamed_binary.py" "if True:
     import os, sys
     from shutil import copyfile
     fpath = sys.argv[-1]
     fname = os.path.basename(fpath).replace('Shiboken', 'shiboken6')
-    # copying to `install`
-    instdir = os.path.join('${PYTHON_SITE_PACKAGES}', 'shiboken6')
-    os.makedirs(instdir, exist_ok=True)
-    newname = os.path.join(instdir, fname)
-    copyfile(fpath, newname)
     # copying to `build`
     builddir = '${CMAKE_CURRENT_BINARY_DIR}'
     newname = os.path.join(builddir, '..', fname)
-    copyfile(fpath, newname)
+    version_info = (${shiboken_MAJOR_VERSION}, ${shiboken_MINOR_VERSION})
+    if version_info < (6, 2):
+        copyfile(fpath, newname)
+    # PYSIDE-1541: copying to `install` will be handled by INSTAll below.
+    #              That solves the permission problems.
     ")
 
 add_custom_command(TARGET shibokenmodule POST_BUILD
@@ -109,3 +109,7 @@ add_custom_command(TARGET shibokenmodule POST_BUILD
         "$<TARGET_FILE:shibokenmodule>"
     COMMENT "running Python postprocess"
     )
+
+install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/../"
+        DESTINATION "${PYTHON_SITE_PACKAGES}/shiboken6/"
+        FILES_MATCHING PATTERN "shiboken6.*")
