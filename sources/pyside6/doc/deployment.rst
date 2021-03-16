@@ -1,4 +1,4 @@
-.. _deployment:
+.. _deployment-guides:
 
 |project| Deployment
 ====================

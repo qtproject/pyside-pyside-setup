@@ -2158,3 +2158,21 @@ div.leftside {
 div.rightside {
     margin-left: 50%;
 }
+
+.btn-qt:hover,
+.btn-qt:active,
+.btn-qt:focus,
+.btn-qt.active {
+  background: #41cd52;
+  color: #fff !important;
+  border-color: #fff;
+}
+
+/* Using !important is not recommended, but out CSS is being added
+ * to the pages before the bootstrap ones, so we cannot override them
+ * without using it */
+.btn-qt {
+  color: #41cd52 !important;
+  border-color: #41cd52 !important;
+  font-weight: bold !important;
+}

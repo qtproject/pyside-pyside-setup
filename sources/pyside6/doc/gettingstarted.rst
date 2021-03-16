@@ -17,10 +17,10 @@ On **Linux** you might get them with your operating system package manager, on *
 you might get them with ``brew``, and on **Windows** you can download the installer from each
 website.
 
- * **Python**: 3.6+ `[official website] <https://www.python.org/downloads/>`_
+ * **Python**: 3.6+ `[official Python website] <https://www.python.org/downloads/>`_
  * **Qt:** 6.0+ `[online installer] <https://download.qt.io/official_releases/online_installers/>`_
- * **CMake:** 3.18+ `[official website] <https://cmake.org/download/>`_
- * **Git:** 2.0+. `[official website] <https://git-scm.com/downloads>`_
+ * **CMake:** 3.18+ `[official CMake website] <https://cmake.org/download/>`_
+ * **Git:** 2.0+. `[official Git website] <https://git-scm.com/downloads>`_
  * **libclang:** The libclang library, recommended: version 10 for 6.0+.
    Prebuilt versions for each OS can be `downloaded here`_.
 
