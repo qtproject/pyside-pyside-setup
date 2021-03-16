@@ -1057,7 +1057,7 @@ void AbstractMetaClass::getFunctionsFromInvisibleNamespacesToBeGenerated(Abstrac
 
 QString AbstractMetaClass::fullName() const
 {
-    return package() + QLatin1Char('.') + name();
+    return package() + QLatin1Char('.') + d->m_typeEntry->targetLangName();
 }
 
 static void addExtraIncludeForType(AbstractMetaClass *metaClass, const AbstractMetaType &type)
