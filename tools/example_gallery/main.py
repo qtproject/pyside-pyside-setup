@@ -71,12 +71,6 @@ def ind(x):
     return " " * 4 * x
 
 
-def get_colgroup(columns, indent=2):
-    width = 80  # percentage
-    width_column = width // columns
-    return f'{ind(indent)}<col style="width: {width_column}%" />\n' * columns
-
-
 def get_lexer(suffix):
     if suffix in suffixes:
         return suffixes[suffix]
@@ -99,45 +93,29 @@ def get_module_gallery(examples):
     information, from one specific module.
     """
 
-    gallery = dedent(
-        f"""\
-    <table class="special">
-        <colgroup>
-{get_colgroup(columns, indent=3)}
-        </colgroup>
-    """
+    gallery = (
+        ".. panels::\n"
+        f"{ind(1)}:container: container-lg pb-3\n"
+        f"{ind(1)}:column: col-lg-3 col-md-4 col-sm-6 col-xs-12 p-2\n\n"
     )
-
     # Iteration per rows
-    for i in range(math.ceil(len(examples) / columns)):
-        gallery += f"{ind(1)}<tr>\n"
-        # Iteration per columns
-        for j in range(columns):
-            # We use a 'try-except' to handle when the examples are
-            # not an exact 'rows x columns', meaning that some cells
-            # will be empty.
-            try:
-                e = examples[i * columns + j]
-                url = e["rst"].replace(".rst", ".html")
-                name = e["example"]
-                underline = f'{e["module"]}'
-                if e["extra"]:
-                    underline += f'/{e["extra"]}'
-                gallery += (
-                    f'{ind(2)}<td><a href="{url}"><p><strong>{name}</strong><br/>'
-                    f"({underline})</p></a></td>\n"
-                )
-            except IndexError:
-                # We use display:none to hide the cell
-                gallery += f'{ind(2)}<td style="display: none;"></td>\n'
-        gallery += f"{ind(1)}</tr>\n"
+    for i in range(math.ceil(len(examples))):
+        e = examples[i]
+        url = e["rst"].replace(".rst", ".html")
+        name = e["example"]
+        underline = f'{e["module"]}'
+        if e["extra"]:
+            underline += f'/{e["extra"]}'
 
-    gallery += dedent(
-        """\
-    </table>
-    """
-    )
-    return gallery
+        if i > 0:
+            gallery += f"{ind(1)}---\n"
+
+        gallery += f"{ind(1)}`{name} <{url}>`_\n"
+        # TODO: Use the body to add the screenshot
+        gallery += f"{ind(1)}+++\n"
+        gallery += f"{ind(1)}{underline}\n"
+
+    return f"{gallery}\n"
 
 
 def remove_licenses(s):
@@ -157,11 +135,10 @@ def get_code_tabs(files, project_file):
         if pfile.suffix in (".png", ".pyc"):
             continue
 
-        if i == 0:
-            content += ".. tabs::\n\n"
+        content += f".. tabbed:: {project_file}\n\n"
 
-        suffix = get_lexer(pfile.suffix)
-        content += add_indent(f".. code-tab:: {suffix} {project_file}", 1)
+        lexer = get_lexer(pfile.suffix)
+        content += add_indent(f".. code-block:: {lexer}", 1)
         content += "\n"
 
         _path = f_path.resolve().parents[0] / project_file
@@ -294,7 +271,6 @@ if __name__ == "__main__":
        :maxdepth: 1
 
        tabbedbrowser.rst
-       ../pyside-examples/all-pyside-examples.rst
 
     Gallery
     -------
@@ -302,8 +278,6 @@ if __name__ == "__main__":
     You can find all these examples inside the ``pyside-setup`` on the ``examples``
     directory, or you can access them after installing |pymodname| from ``pip``
     inside the ``site-packages/PySide6/examples`` directory.
-
-    .. raw:: html
 
        """
     )
@@ -329,8 +303,9 @@ if __name__ == "__main__":
         for module_name, e in sorted(examples.items()):
             for i in e:
                 index_files.append(i["rst"])
-            f.write(f"{ind(1)}<h3>{module_name.title()}</h3>\n")
-            f.write(add_indent(get_module_gallery(e), 1))
+            f.write(f"{module_name.title()}\n")
+            f.write(f"{'*' * len(module_name.title())}\n")
+            f.write(get_module_gallery(e))
         f.write("\n\n")
         f.write(footer_index)
         for i in index_files:

@@ -15,6 +15,10 @@
     licenses.rst
     modules.rst
     considerations.rst
+..
+    Intersphinx references in toctrees is not supported
+    https://github.com/sphinx-doc/sphinx/issues/1836
+..
     shiboken6/index.rst
 
 Module Index

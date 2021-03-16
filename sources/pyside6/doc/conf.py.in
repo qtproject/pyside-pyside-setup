@@ -27,10 +27,11 @@ if @HAS_WEBENGINE_WIDGETS@:
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 #extensions = ['sphinx.ext.todo', 'sphinx.ext.graphviz', 'inheritance_diagram', 'pysideinclude']
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.ifconfig',
-'sphinx.ext.coverage', 'sphinx.ext.intersphinx', 'sphinx.ext.todo',
-'sphinx.ext.graphviz', 'inheritance_diagram', 'pysideinclude',
-'sphinx.ext.viewcode',
-'sphinx_tabs.tabs']
+    'sphinx.ext.coverage', 'sphinx.ext.intersphinx', 'sphinx.ext.todo',
+    'sphinx.ext.graphviz', 'inheritance_diagram', 'pysideinclude',
+    'sphinx.ext.viewcode',
+    'sphinx_panels',
+    ]
 
 output_format='@DOC_OUTPUT_FORMAT@'
 
