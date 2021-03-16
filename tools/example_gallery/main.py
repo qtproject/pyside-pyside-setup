@@ -267,14 +267,6 @@ if __name__ == "__main__":
     A collection of examples are provided with |project| to help new users
     to understand different use cases of the module.
 
-    .. toctree::
-       :maxdepth: 1
-
-       tabbedbrowser.rst
-
-    Gallery
-    -------
-
     You can find all these examples inside the ``pyside-setup`` on the ``examples``
     directory, or you can access them after installing |pymodname| from ``pip``
     inside the ``site-packages/PySide6/examples`` directory.

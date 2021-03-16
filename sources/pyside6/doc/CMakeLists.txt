@@ -97,11 +97,6 @@ if (FULLDOCSBUILD)
         endif()
     endforeach()
 
-    #Appending the additional qdocconf that describes the pyside-examples
-    #doc project.
-    configure_file("qtmodules/pyside-examples.qdocconf.in" "${CMAKE_CURRENT_LIST_DIR}/qtmodules/pyside-examples.qdocconf" @ONLY)
-    file(APPEND "pyside.qdocconf.in" "\@CMAKE_CURRENT_LIST_DIR\@/qtmodules/pyside-examples.qdocconf\n")
-
     set(typeSystemDocXmlContents "${typeSystemDocXmlContents}\n</typesystem>\n")
     file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/typesystem_doc.xml" "${typeSystemDocXmlContents}")
 

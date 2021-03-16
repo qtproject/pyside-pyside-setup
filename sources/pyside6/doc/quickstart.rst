@@ -116,5 +116,5 @@ guide you through the development process:
 
   Try clicking the button at the bottom to see which greeting you get.
 
-  .. image:: pyside-examples/images/screenshot_hello.png
+  .. image:: images/screenshot_hello.png
      :alt: Hello World application
