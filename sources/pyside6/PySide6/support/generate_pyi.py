@@ -120,7 +120,7 @@ class Formatter(Writer):
         # I tried hard to replace typing.Optional by a simple override, but
         # this became _way_ too much.
         # See also the comment in layout.py .
-        brace_pat = build_brace_pattern(3)
+        brace_pat = build_brace_pattern(3, ",")
         pattern = fr"\b Union \s* \[ \s* {brace_pat} \s*, \s* NoneType \s* \]"
         replace = r"Optional[\1]"
         optional_searcher = re.compile(pattern, flags=re.VERBOSE)

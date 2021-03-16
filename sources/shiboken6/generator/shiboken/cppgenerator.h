@@ -296,6 +296,7 @@ private:
                                       qsizetype maxEntries = -1) const;
     void writeMethodDefinition(TextStream &s, const AbstractMetaFunctionCList &overloads) const;
     void writeSignatureInfo(TextStream &s, const AbstractMetaFunctionCList &overloads) const;
+    QString signatureParameter(const AbstractMetaArgument &arg) const;
     /// Writes the implementation of all methods part of python sequence protocol
     void writeSequenceMethods(TextStream &s,
                               const AbstractMetaClass *metaClass,

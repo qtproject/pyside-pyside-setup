@@ -4944,6 +4944,50 @@ void CppGenerator::writeMethodDefinition(TextStream &s, const AbstractMetaFuncti
     s << ',' << '\n';
 }
 
+// Format the type signature of a function parameter
+QString CppGenerator::signatureParameter(const AbstractMetaArgument &arg) const
+{
+    QString result;
+    QTextStream s(&result);
+
+    auto metaType = arg.type();
+    if (auto viewOn = metaType.viewOn())
+        metaType = *viewOn;
+    s << arg.name() << ':';
+
+    QStringList signatures(metaType.pythonSignature());
+
+    // Implicit conversions (C++): Check for converting constructors
+    // "QColor(Qt::GlobalColor)" or conversion operators
+    const AbstractMetaFunctionCList conversions =
+        api().implicitConversions(metaType);
+    for (const auto &f : conversions) {
+        if (f->isConstructor() && !f->arguments().isEmpty())
+            signatures << f->arguments().constFirst().type().pythonSignature();
+        else if (f->isConversionOperator())
+            signatures << f->ownerClass()->fullName();
+    }
+
+    const qsizetype size = signatures.size();
+    if (size > 1)
+        s << "typing.Union[";
+    for (qsizetype i = 0; i < size; ++i) {
+        if (i > 0)
+            s << ", ";
+        s << signatures.at(i);
+    }
+    if (size > 1)
+        s << ']';
+
+    if (!arg.defaultValueExpression().isEmpty()) {
+        s << '=';
+        QString e = arg.defaultValueExpression();
+        e.replace(QLatin1String("::"), QLatin1String("."));
+        s << e;
+    }
+    return result;
+}
+
 void CppGenerator::writeSignatureInfo(TextStream &s, const AbstractMetaFunctionCList &overloads) const
 {
     OverloadData overloadData(overloads, api());
@@ -4959,20 +5003,9 @@ void CppGenerator::writeSignatureInfo(TextStream &s, const AbstractMetaFunctionC
         // Toplevel functions like `PySide6.QtCore.QEnum` are always self-less.
         if (!(f->isStatic()) && f->ownerClass())
             args << QLatin1String("self");
-        const AbstractMetaArgumentList &arguments = f->arguments();
-        for (const AbstractMetaArgument &arg : arguments)  {
-            auto metaType = arg.type();
-            if (auto viewOn = metaType.viewOn())
-                metaType = *viewOn;
-            QString strArg = metaType.pythonSignature();
-            if (!arg.defaultValueExpression().isEmpty()) {
-                strArg += QLatin1Char('=');
-                QString e = arg.defaultValueExpression();
-                e.replace(QLatin1String("::"), QLatin1String("."));
-                strArg += e;
-            }
-            args << arg.name() + QLatin1Char(':') + strArg;
-        }
+        for (const AbstractMetaArgument &arg : f->arguments())
+            args.append(signatureParameter(arg));
+
         // mark the multiple signatures as such, to make it easier to generate different code
         if (multiple)
             s << idx-- << ':';

@@ -430,7 +430,7 @@ def init_smart():
 
 # The PySide Part
 def init_PySide6_QtCore():
-    from PySide6.QtCore import Qt, QUrl, QDir
+    from PySide6.QtCore import Qt, QUrl, QDir, QKeyCombination
     from PySide6.QtCore import QRect, QSize, QPoint, QLocale, QByteArray
     from PySide6.QtCore import QMarginsF # 5.9
     try:
@@ -551,7 +551,7 @@ def init_PySide6_QtSql():
 
 
 def init_PySide6_QtNetwork():
-    from PySide6.QtNetwork import QNetworkRequest
+    from PySide6.QtNetwork import QNetworkRequest, QHostAddress
     best_structure = typing.OrderedDict if getattr(typing, "OrderedDict", None) else typing.Dict
     type_map.update({
         "QMultiMap[PySide6.QtNetwork.QSsl.AlternativeNameEntryType, QString]":

@@ -112,7 +112,7 @@ class TestBracePattern(unittest.TestCase):
                 self.assertFalse(check(test))
 
     def test_the_brace_pattern(self):
-        func = re.compile(build_brace_pattern(5) + "$", re.VERBOSE).match
+        func = re.compile(build_brace_pattern(5, ",") + "$", re.VERBOSE).match
         for test, result in self.tests:
             if result:
                 self.assertTrue(func(test))

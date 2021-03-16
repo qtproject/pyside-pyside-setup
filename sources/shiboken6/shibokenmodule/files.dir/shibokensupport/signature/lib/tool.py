@@ -68,7 +68,7 @@ except ImportError:
     pass
 
 
-def build_brace_pattern(level, separators=""):
+def build_brace_pattern(level, separators):
     """
     Build a brace pattern upto a given depth
 
@@ -92,6 +92,8 @@ def build_brace_pattern(level, separators=""):
     avoiding this problem completely. It might be considered to switch to
     such an engine if the external module is not a problem.
     """
+    assert type(separators) is str
+
     def escape(txt):
         return "".join("\\" + c for c in txt)
 
