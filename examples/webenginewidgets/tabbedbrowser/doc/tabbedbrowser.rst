@@ -10,7 +10,7 @@ is apt for a web browser. The application offers the following features:
     * Download manager using a QProgressBar and QWebEngineDownloadItem.
     * Bookmark manager using QTreeView.
 
-.. image:: images/tabbedbrowser.png
+.. image:: tabbedbrowser.png
 
 The application's code is organized in several parts for ease of maintenance. For example,
 :code:`DownloadWidget` provides a widget to track progress of a download item. In the following
