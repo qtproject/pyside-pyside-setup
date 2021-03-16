@@ -1435,10 +1435,7 @@ public:
 
     void getFunctionsFromInvisibleNamespacesToBeGenerated(AbstractMetaFunctionList *funcList) const;
 
-    QString fullName() const
-    {
-        return package() + QLatin1Char('.') + name();
-    }
+    QString fullName() const;
 
     /**
      *   Retrieves the class name without any namespace/scope information.
