@@ -93,7 +93,7 @@ int qmlRegisterSingletonType(PyObject *pyObj,const char *uri, int versionMajor, 
 PyObject *qmlElementMacro(PyObject *pyObj);
 }
 
-PyAPI_FUNC(PyTypeObject *) QtQml_VolatileBoolTypeF(void);
+PyTypeObject *QtQml_VolatileBoolTypeF(void);
 
 #define VolatileBool_Check(op) (Py_TYPE(op) == QtQml_VolatileBoolTypeF())
 
