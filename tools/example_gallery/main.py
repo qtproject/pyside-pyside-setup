@@ -167,7 +167,7 @@ def get_header_title(f_path):
 if __name__ == "__main__":
     # Only examples with a '.pyproject' file will be listed.
     DIR = Path(__file__).parent
-    EXAMPLES_DOC = f"{DIR}/../../sources/pyside6/doc/examples"
+    EXAMPLES_DOC = Path(f"{DIR}/../../sources/pyside6/doc/examples")
     EXAMPLES_DIR = Path(f"{DIR}/../../examples/")
     BASE_URL = "https://code.qt.io/cgit/pyside/pyside-setup.git/tree/examples"
     columns = 5
@@ -184,6 +184,11 @@ if __name__ == "__main__":
     #   * Read the .pyproject file to output the content of each file
     #     on the final .rst file for that specific example.
     examples = {}
+
+    # Create the 'examples' directory if it doesn't exist
+    if not EXAMPLES_DOC.is_dir():
+        EXAMPLES_DOC.mkdir()
+
     for f_path in EXAMPLES_DIR.glob("**/*.pyproject"):
         if str(f_path).endswith("examples.pyproject"):
             continue
@@ -222,7 +227,7 @@ if __name__ == "__main__":
             pyproject = json.load(pyf)
 
         if pyproject:
-            rst_file_full = Path(EXAMPLES_DOC) / rst_file
+            rst_file_full = EXAMPLES_DOC / rst_file
 
             with open(rst_file_full, "w") as out_f:
                 if has_doc:
@@ -239,7 +244,7 @@ if __name__ == "__main__":
                         if _f == doc_rst or _f.is_dir():
                             continue
                         src = _f
-                        dst = Path(EXAMPLES_DOC) / _f.name
+                        dst = EXAMPLES_DOC / _f.name
 
                         resource_written = shutil.copy(src, dst)
                         if not opt_quiet:
