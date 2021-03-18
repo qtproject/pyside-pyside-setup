@@ -85,8 +85,6 @@ class ExactEnumerator(object):
             self.fmt.class_name = None
             for class_name, klass in members:
                 ret.update(self.klass(class_name, klass))
-            if isinstance(klass, EnumMeta):
-                raise SystemError("implement enum instances at module level")
             for func_name, func in functions:
                 ret.update(self.function(func_name, func))
             return ret
