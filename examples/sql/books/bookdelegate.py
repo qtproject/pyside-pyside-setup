@@ -112,7 +112,7 @@ class BookDelegate(QSqlRelationalDelegate):
             return False
 
         if event.type() == QEvent.MouseButtonPress:
-            mouse_pos = event.pos()
+            mouse_pos = event.position()
             new_stars = int(0.7 + (mouse_pos.x() - option.rect.x()) / self.star.width())
             stars = max(0, min(new_stars, 5))
             model.setData(index, stars)
