@@ -42,6 +42,8 @@ The following table summarizes the platform support for those packaging tools:
         <tr>
           <th class="head">Name</th>
           <th class="head">License</th>
+          <th class="head">Qt 6</th>
+          <th class="head">Qt 5</th>
           <th class="head">Linux</th>
           <th class="head">macOS</th>
           <th class="head">Windows</th>
@@ -51,6 +53,8 @@ The following table summarizes the platform support for those packaging tools:
         <tr>
           <td><p>fbs</p></td>
           <td><p>GPL</p></td>
+          <td></td>
+          <td><p style="color: green;">yes</p></td>
           <td><p style="color: green;">yes</p></td>
           <td><p style="color: green;">yes</p></td>
           <td><p style="color: green;">yes</p></td>
@@ -58,6 +62,8 @@ The following table summarizes the platform support for those packaging tools:
         <tr>
           <td><p>PyInstaller</p></td>
           <td><p>GPL</p></td>
+          <td><p style="color: green;">partial</p></td>
+          <td><p style="color: green;">yes</p></td>
           <td><p style="color: green;">yes</p></td>
           <td><p style="color: green;">yes</p></td>
           <td><p style="color: green;">yes</p></td>
@@ -68,10 +74,14 @@ The following table summarizes the platform support for those packaging tools:
           <td><p style="color: green;">yes</p></td>
           <td><p style="color: green;">yes</p></td>
           <td><p style="color: green;">yes</p></td>
+          <td><p style="color: green;">yes</p></td>
+          <td><p style="color: green;">yes</p></td>
         </tr>
         <tr>
           <td><p>py2exe</p></td>
           <td><p>MIT</p></td>
+          <td><p style="color: green;">partial</p></td>
+          <td><p style="color: green;">partial</p></td>
           <td><p style="color: red;">no</p></td>
           <td><p style="color: red;">no</p></td>
           <td><p style="color: green;">yes</p></td>
@@ -79,6 +89,8 @@ The following table summarizes the platform support for those packaging tools:
         <tr>
           <td><p>py2app</p></td>
           <td><p>MIT</p></td>
+          <td><p style="color: green;">yes</p></td>
+          <td><p style="color: green;">yes</p></td>
           <td><p style="color: red;">no</p></td>
           <td><p style="color: green;">yes</p></td>
           <td><p style="color: red;">no</p></td>
@@ -86,6 +98,8 @@ The following table summarizes the platform support for those packaging tools:
         <tr>
           <td><p>briefcase</p></td>
           <td><p>BSD3</p></td>
+          <td><p style="color: red;">no</p></td>
+          <td><p style="color: green;">yes</p></td>
           <td><p style="color: green;">yes</p></td>
           <td><p style="color: green;">yes</p></td>
           <td><p style="color: green;">yes</p></td>
@@ -119,3 +133,4 @@ Here's a set of tutorials on how to use these tools:
     deployment-pyinstaller.rst
     deployment-cxfreeze.rst
     deployment-briefcase.rst
+    deployment-py2exe.rst

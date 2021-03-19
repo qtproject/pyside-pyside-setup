@@ -9,6 +9,11 @@
 
 For more details, see the `official documentation <https://briefcase.readthedocs.io/en/latest/index.html>`_.
 
+Status of Qt 6 Support
+======================
+
+As of March 2021, Qt 6 is not supported yet.
+
 Preparation
 ===========
 
