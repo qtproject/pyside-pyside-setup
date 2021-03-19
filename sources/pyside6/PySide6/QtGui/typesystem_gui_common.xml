@@ -1376,7 +1376,18 @@
           <inject-code class="target" file="../glue/qtgui.cpp" snippet="qkeyevent-operatornotequal"/>
       </add-function>
   </object-type>
-  <object-type name="QMouseEvent" copyable= "false" polymorphic-id-expression="%1-&gt;type() == QEvent::MouseButtonDblClick || %1-&gt;type() == QEvent::MouseButtonPress || %1-&gt;type() == QEvent::MouseButtonRelease || %1-&gt;type() == QEvent::MouseMove"/>
+  <object-type name="QMouseEvent" copyable= "false"
+               polymorphic-id-expression="%1-&gt;type() == QEvent::MouseButtonDblClick || %1-&gt;type() == QEvent::MouseButtonPress || %1-&gt;type() == QEvent::MouseButtonRelease || %1-&gt;type() == QEvent::MouseMove">
+      <modify-function signature="globalPos() const" deprecated="yes"/>
+      <modify-function signature="localPos() const" deprecated="yes"/>
+      <modify-function signature="pos() const" deprecated="yes"/>
+      <modify-function signature="windowPos() const" deprecated="yes"/>
+      <modify-function signature="screenPos() const" deprecated="yes"/>
+      <modify-function signature="x() const" deprecated="yes"/>
+      <modify-function signature="y() const" deprecated="yes"/>
+      <modify-function signature="globalX() const" deprecated="yes"/>
+      <modify-function signature="globalY() const" deprecated="yes"/>
+  </object-type>
   <object-type name="QPaintEvent" copyable= "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Paint"/>
   <object-type name="QScrollEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::Scroll">
       <enum-type name="ScrollState"/>
