@@ -7,6 +7,24 @@ compatible with 3rd-party Python modules, such as |pymodname|.
 
 For more details, see the `official documentation <https://www.pyinstaller.org/documentation.html>`_.
 
+Status of Qt 6 Support
+======================
+
+As of March 2021, Qt 6 is not supported yet. PyInstaller is unable to properly
+deploy Qt; the Qt plugins are not copied. With that, using `--onefile` is not
+possible.
+
+It is possible to use PyInstaller for the non `--onefile` case though by
+manually copying the Qt plugins, QML imports and translations into
+the dist directory after running PyInstaller.
+
+On Windows, this can be achieved by running the `windeployqt` tool
+from the Qt SDK on the Qt libraries present in the `dist` directory, for
+example:
+
+   windeployqt dist\\app\\Qt6Widgets.dll
+
+
 Preparation
 ===========
 
