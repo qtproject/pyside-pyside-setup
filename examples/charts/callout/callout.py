@@ -45,7 +45,7 @@ import sys
 from PySide6.QtWidgets import (QApplication, QGraphicsScene,
     QGraphicsView, QGraphicsSimpleTextItem, QGraphicsItem)
 from PySide6.QtCore import Qt, QPointF, QRectF, QRect
-from PySide6.QtCharts import QtCharts
+from PySide6.QtCharts import QChart, QLineSeries, QSplineSeries
 from PySide6.QtGui import QPainter, QFont, QFontMetrics, QPainterPath, QColor
 
 
@@ -162,12 +162,12 @@ class View(QGraphicsView):
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         # Chart
-        self._chart = QtCharts.QChart()
+        self._chart = QChart()
         self._chart.setMinimumSize(640, 480)
         self._chart.setTitle("Hover the line to show callout. Click the line "
             "to make it stay")
         self._chart.legend().hide()
-        self.series = QtCharts.QLineSeries()
+        self.series = QLineSeries()
         self.series.append(1, 3)
         self.series.append(4, 5)
         self.series.append(5, 4.5)
@@ -175,7 +175,7 @@ class View(QGraphicsView):
         self.series.append(11, 2)
         self._chart.addSeries(self.series)
 
-        self.series2 = QtCharts.QSplineSeries()
+        self.series2 = QSplineSeries()
         self.series2.append(1.6, 1.4)
         self.series2.append(2.4, 3.5)
         self.series2.append(3.7, 2.5)
@@ -225,10 +225,11 @@ class View(QGraphicsView):
 
 
     def mouseMoveEvent(self, event):
-        self._coordX.setText("X: {0:.2f}"
-            .format(self._chart.mapToValue(event.pos()).x()))
-        self._coordY.setText("Y: {0:.2f}"
-            .format(self._chart.mapToValue(event.pos()).y()))
+        pos = self._chart.mapToValue(event.position().toPoint())
+        x = pos.x()
+        y = pos.y()
+        self._coordX.setText(f"X: {x:.2f}")
+        self._coordY.setText(f"Y: {y:.2f}")
         QGraphicsView.mouseMoveEvent(self, event)
 
     def keepCallout(self):

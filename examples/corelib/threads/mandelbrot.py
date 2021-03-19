@@ -42,7 +42,7 @@
 
 """PySide6 port of the corelib/threads/mandelbrot example from Qt v5.x, originating from PyQt"""
 
-from PySide6.QtCore import (Signal, QMutex, QMutexLocker, QPoint, QSize, Qt,
+from PySide6.QtCore import (Signal, QMutex, QMutexLocker, QPointF, QSize, Qt,
         QThread, QWaitCondition)
 from PySide6.QtGui import QColor, QImage, QPainter, QPixmap, qRgb
 from PySide6.QtWidgets import QApplication, QWidget
@@ -215,8 +215,8 @@ class MandelbrotWidget(QWidget):
 
         self.thread = RenderThread()
         self.pixmap = QPixmap()
-        self.pixmapOffset = QPoint()
-        self.lastDragPos = QPoint()
+        self.pixmapOffset = QPointF()
+        self.lastDragPos = QPointF()
 
         self.centerX = DefaultCenterX
         self.centerY = DefaultCenterY
@@ -295,18 +295,19 @@ class MandelbrotWidget(QWidget):
 
     def mousePressEvent(self, event):
         if event.buttons() == Qt.LeftButton:
-            self.lastDragPos = QPoint(event.pos())
+            self.lastDragPos = event.position()
 
     def mouseMoveEvent(self, event):
         if event.buttons() & Qt.LeftButton:
-            self.pixmapOffset += event.pos() - self.lastDragPos
-            self.lastDragPos = QPoint(event.pos())
+            pos = event.position()
+            self.pixmapOffset += pos - self.lastDragPos
+            self.lastDragPos = pos
             self.update()
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
-            self.pixmapOffset += event.pos() - self.lastDragPos
-            self.lastDragPos = QPoint()
+            self.pixmapOffset += event.position() - self.lastDragPos
+            self.lastDragPos = QPointF()
 
             deltaX = (self.width() - self.pixmap.width()) / 2 - self.pixmapOffset.x()
             deltaY = (self.height() - self.pixmap.height()) / 2 - self.pixmapOffset.y()
@@ -317,8 +318,8 @@ class MandelbrotWidget(QWidget):
             return
 
         self.pixmap = QPixmap.fromImage(image)
-        self.pixmapOffset = QPoint()
-        self.lastDragPosition = QPoint()
+        self.pixmapOffset = QPointF()
+        self.lastDragPosition = QPointF()
         self.pixmapScale = scaleFactor
         self.update()
 

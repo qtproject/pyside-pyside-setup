@@ -46,7 +46,7 @@ import sys
 import math
 import numpy
 import ctypes
-from PySide6.QtCore import QCoreApplication, Signal, SIGNAL, SLOT, Qt, QSize, QPoint
+from PySide6.QtCore import QCoreApplication, Signal, SIGNAL, SLOT, Qt, QSize, QPointF
 from PySide6.QtGui import (QVector3D, QOpenGLFunctions,
     QMatrix4x4, QOpenGLContext, QSurfaceFormat)
 from PySide6.QtOpenGL import (QOpenGLVertexArrayObject, QOpenGLBuffer,
@@ -231,7 +231,7 @@ class GLWidget(QOpenGLWidget, QOpenGLFunctions):
         self.xRot = 0
         self.yRot = 0
         self.zRot = 0
-        self.lastPos = 0
+        self.lastPos = QPointF()
         self.logo = Logo()
         self.vao = QOpenGLVertexArrayObject()
         self.logoVbo = QOpenGLBuffer()
@@ -437,11 +437,12 @@ class GLWidget(QOpenGLWidget, QOpenGLFunctions):
         self.proj.perspective(45, width / height, 0.01, 100)
 
     def mousePressEvent(self, event):
-        self.lastPos = QPoint(event.pos())
+        self.lastPos = event.position()
 
     def mouseMoveEvent(self, event):
-        dx = event.x() - self.lastPos.x()
-        dy = event.y() - self.lastPos.y()
+        pos = event.position()
+        dx = pos.x() - self.lastPos.x()
+        dy = pos.y() - self.lastPos.y()
 
         if event.buttons() & Qt.LeftButton:
             self.setXRotation(self.xRot + 8 * dy)
@@ -450,7 +451,7 @@ class GLWidget(QOpenGLWidget, QOpenGLFunctions):
             self.setXRotation(self.xRot + 8 * dy)
             self.setZRotation(self.zRot + 8 * dx)
 
-        self.lastPos = QPoint(event.pos())
+        self.lastPos = pos
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

@@ -58,7 +58,7 @@ class DragLabel(QLabel):
         self.setFrameShadow(QFrame.Raised)
 
     def mousePressEvent(self, event):
-        hotSpot = event.pos()
+        hotSpot = event.position().toPoint()
 
         mimeData = QMimeData()
         mimeData.setText(self.text())
@@ -121,7 +121,7 @@ class DragWidget(QWidget):
         if event.mimeData().hasText():
             mime = event.mimeData()
             pieces = mime.text().split()
-            position = event.pos()
+            position = event.position().toPoint()
             hotSpot = QPoint()
 
             hotSpotPos = mime.data('application/x-hotspot').split(' ')
