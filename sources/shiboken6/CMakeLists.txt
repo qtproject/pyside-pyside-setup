@@ -195,6 +195,7 @@ endif()
 set(shiboken_python_files
     "signature/lib/__init__.py"
     "signature/lib/enum_sig.py"
+    "signature/lib/pyi_generator.py"
     "signature/lib/tool.py"
     "signature/__init__.py"
     "signature/errorhandler.py"
