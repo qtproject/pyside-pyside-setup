@@ -74,8 +74,6 @@ class ExactEnumerator(object):
         self.fmt = formatter
         self.result_type = result_type
         self.fmt.level = 0
-        self.fmt.after_enum = self.after_enum
-        self._after_enum = False
         self.fmt.is_method = self.is_method
 
     def is_method(self):
@@ -86,9 +84,9 @@ class ExactEnumerator(object):
         tp = type(self.func)
         return tp not in (types.BuiltinFunctionType, types.FunctionType)
 
-    def after_enum(self):
-        ret = self._after_enum
-        self._after_enum = False
+    def section(self):
+        if hasattr(self.fmt, "section"):
+            self.fmt.section()
 
     def module(self, mod_name):
         __import__(mod_name)
@@ -101,8 +99,12 @@ class ExactEnumerator(object):
             self.fmt.class_name = None
             for class_name, klass in members:
                 ret.update(self.klass(class_name, klass))
+            if len(members):
+                self.section()
             for func_name, func in functions:
                 ret.update(self.function(func_name, func))
+            if len(functions):
+                self.section()
             return ret
 
     def klass(self, class_name, klass):
@@ -151,6 +153,8 @@ class ExactEnumerator(object):
                 for enum_name, enum_class_name, value in enums:
                     with self.fmt.enum(enum_class_name, enum_name, int(value)):
                         pass
+                if len(enums):
+                    self.section()
             for subclass_name, subclass in subclasses:
                 if klass == subclass:
                     # this is a side effect of the typing module for Python 2.7
@@ -159,11 +163,15 @@ class ExactEnumerator(object):
                     continue
                 ret.update(self.klass(subclass_name, subclass))
                 self.fmt.class_name = class_name
+            if len(subclasses):
+                self.section()
             ret.update(self.function("__init__", klass))
             for func_name, func in functions:
                 if func_name != "__init__":
                     ret.update(self.function(func_name, func))
             self.fmt.level -= 1
+            if len(functions):
+                self.section()
         return ret
 
     @staticmethod

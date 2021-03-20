@@ -52,15 +52,16 @@ import re
 import subprocess
 import sys
 import typing
+
 from pathlib import Path
 from contextlib import contextmanager
 from textwrap import dedent
 
-sourcepath = Path(__file__).resolve()
-
 from shiboken6 import Shiboken
 from shibokensupport.signature.lib.enum_sig import HintingEnumerator
 from shibokensupport.signature.lib.tool import build_brace_pattern
+
+sourcepath = Path(__file__).resolve()
 
 # Can we use forward references?
 USE_PEP563 = sys.version_info[:2] >= (3, 7)
@@ -74,7 +75,7 @@ logger = logging.getLogger("generate_pyi")
 
 
 class Writer(object):
-    def __init__(self, outfile):
+    def __init__(self, outfile, *args):
         self.outfile = outfile
         self.history = [True, True]
 
@@ -101,8 +102,9 @@ class Formatter(Writer):
     The separation in formatter and enumerator is done to keep the
     unrelated tasks of enumeration and formatting apart.
     """
-    def __init__(self, *args):
-        Writer.__init__(self, *args)
+    def __init__(self, outfile, options, *args):
+        self.options = options
+        Writer.__init__(self, outfile, *args)
         # patching __repr__ to disable the __repr__ of typing.TypeVar:
         """
             def __repr__(self):
@@ -115,7 +117,7 @@ class Formatter(Writer):
                 return prefix + self.__name__
         """
         def _typevar__repr__(self):
-            return "typing." + self.__name__
+            return f"typing.{self.__name__}"
         typing.TypeVar.__repr__ = _typevar__repr__
 
         # Adding a pattern to substitute "Union[T, NoneType]" by "Optional[T]"
@@ -130,24 +132,31 @@ class Formatter(Writer):
             return optional_searcher.sub(replace, str(source))
         self.optional_replacer = optional_replacer
         # self.level is maintained by enum_sig.py
-        # self.after_enum() is a one-shot set by enum_sig.py .
         # self.is_method() is true for non-plain functions.
+
+    def section(self):
+        if self.level == 0:
+            self.print()
+        self.print()
 
     @contextmanager
     def module(self, mod_name):
         self.mod_name = mod_name
-        self.print("# Module", mod_name)
-        self.print("import PySide6")
-        self.print("import typing")
-        self.print("from typing import Any, Callable, Dict, List, Optional, Tuple, Union")
-        self.print("from PySide6.support.signature.mapping import (")
-        self.print("    Virtual, Missing, Invalid, Default, Instance)")
-        self.print()
-        self.print("class Object(object): pass")
-        self.print()
-        self.print("from shiboken6 import Shiboken")
-        self.print("Shiboken.Object = Object")
-        self.print()
+        support = "PySide6.support" if self.options._pyside_call else "shibokensupport"
+        txt = f"""\
+            # Module `{mod_name}`
+
+            import typing
+            from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+            from shiboken6 import Shiboken
+            from {support}.signature.mapping import (
+                Virtual, Missing, Invalid, Default, Instance)
+
+            class Object(object): pass
+
+            Shiboken.Object = Object
+            """
+        self.print(dedent(txt))
         # This line will be replaced by the missing imports postprocess.
         self.print("IMPORTS")
         yield
@@ -158,9 +167,6 @@ class Formatter(Writer):
         while "." in class_name:
             class_name = class_name.split(".", 1)[-1]
             class_str = class_str.split(".", 1)[-1]
-        self.print()
-        if self.level == 0:
-            self.print()
         here = self.outfile.tell()
         if self.have_body:
             self.print(f"{spaces}class {class_str}:")
@@ -170,11 +176,11 @@ class Formatter(Writer):
 
     @contextmanager
     def function(self, func_name, signature):
-        if self.after_enum() or func_name == "__init__":
+        if func_name == "__init__":
             self.print()
         key = func_name
         spaces = indent * self.level
-        if type(signature) == type([]):
+        if isinstance(signature, list):
             for sig in signature:
                 self.print(f'{spaces}@typing.overload')
                 self._function(func_name, sig, spaces)
@@ -185,7 +191,7 @@ class Formatter(Writer):
         yield key
 
     def _function(self, func_name, signature, spaces):
-        if self.is_method() and "self" not in tuple(signature.parameters.keys()):
+        if self.is_method() and "self" not in signature.parameters:
             self.print(f'{spaces}@staticmethod')
         signature = self.optional_replacer(signature)
         self.print(f'{spaces}def {func_name}{signature}: ...')
@@ -201,8 +207,8 @@ class Formatter(Writer):
 def get_license_text():
     with sourcepath.open() as f:
         lines = f.readlines()
-        license_line = next((lno for lno, line in enumerate(lines)
-                             if "$QT_END_LICENSE$" in line))
+    license_line = next((lno for lno, line in enumerate(lines)
+                         if "$QT_END_LICENSE$" in line))
     return "".join(lines[:license_line + 3])
 
 
@@ -210,15 +216,15 @@ def find_imports(text):
     return [imp for imp in PySide6.__all__ if imp + "." in text]
 
 
-def find_module(import_name, outpath):
+def find_module(import_name, outpath, from_pyside):
     """
     Find a module either directly by import, or use the full path,
     add the path to sys.path and import then.
     """
-    if import_name.startswith("PySide6."):
+    if from_pyside:
         # internal mode for generate_pyi.py
         plainname = import_name.split(".")[-1]
-        outfilepath = Path(outpath) / (plainname + ".pyi")
+        outfilepath = Path(outpath) / f"{plainname}.pyi"
         return import_name, plainname, outfilepath
     # we are alone in external module mode
     p = Path(import_name).resolve()
@@ -229,22 +235,24 @@ def find_module(import_name, outpath):
     # temporarily add the path and do the import
     sys.path.insert(0, os.fspath(p.parent))
     plainname = p.name.split(".")[0]
-    return plainname, plainname, outpath / (plainname + ".pyi")
+    __import__(plainname)
+    sys.path.pop(0)
+    return plainname, plainname, Path(outpath) / (plainname + ".pyi")
 
 
 def generate_pyi(import_name, outpath, options):
     """
     Generates a .pyi file.
     """
-    import_name, plainname, outfilepath = find_module(import_name, outpath)
+    import_name, plainname, outfilepath = find_module(import_name, outpath, options._pyside_call)
     top = __import__(import_name)
     obj = getattr(top, plainname) if import_name != plainname else top
     if not getattr(obj, "__file__", None) or Path(obj.__file__).is_dir():
-        raise ModuleNotFoundError(f"We do not accept a namespace as module {plainname}")
+        raise ModuleNotFoundError(f"We do not accept a namespace as module `{plainname}`")
     module = sys.modules[import_name]
 
     outfile = io.StringIO()
-    fmt = Formatter(outfile)
+    fmt = Formatter(outfile, options)
     fmt.print(get_license_text())  # which has encoding, already
     need_imports = options._pyside_call and not USE_PEP563
     if USE_PEP563:
@@ -257,13 +265,12 @@ def generate_pyi(import_name, outpath, options):
         """
         '''))
     HintingEnumerator(fmt).module(import_name)
-    fmt.print()
     fmt.print("# eof")
     # Postprocess: resolve the imports
     if options._pyside_call:
         global PySide6
         import PySide6
-    with open(outfilepath, "w") as realfile:
+    with outfilepath.open("w") as realfile:
         wr = Writer(realfile)
         outfile.seek(0)
         while True:
@@ -289,17 +296,25 @@ def generate_pyi(import_name, outpath, options):
         if USE_PEP563:
             subprocess.check_output([sys.executable, outfilepath])
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="This script generates the .pyi file for an arbitrary module.")
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=dedent("""\
+            pyi_generator.py
+            ----------------
+
+            This script generates the .pyi file for an arbitrary module.
+            You pass in the full path of a compiled, importable module.
+            pyi_generator will try to generate an interface "<module>.pyi".
+            """))
     parser.add_argument("module",
-        help="The name of an importable module, or the full path to the binary")
+        help="The full path name of an importable module binary (.pyd, .so)")
     parser.add_argument("--check", action="store_true", help="Test the output")
     parser.add_argument("--outpath",
         help="the output directory (default = binary location)")
     options = parser.parse_args()
     module = options.module
-    # XXX find a path that ends in a module and use that
     outpath = options.outpath
     if outpath and not Path(outpath).exists():
         os.makedirs(outpath)
