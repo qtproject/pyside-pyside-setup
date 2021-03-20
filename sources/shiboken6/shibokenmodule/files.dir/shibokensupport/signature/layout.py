@@ -175,10 +175,10 @@ That information would be lost when we use the "..." convention.
 
 Note that the typing module has the remarkable expansion
 
-    Optional[T]    is    Variant[T, NoneType]
+    Optional[T]    is    Union[T, NoneType]
 
 We want to avoid that when generating the .pyi file.
-This is done by a regex in generate_pyi.py .
+This is done by a regex in pyi_generator.py .
 The following would work in Python 3, but this is a version-dependent
 hack that also won't work in Python 2 and would be _very_ complex.
 """

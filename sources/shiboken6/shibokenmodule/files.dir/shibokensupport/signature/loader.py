@@ -151,6 +151,7 @@ def move_into_pyside_package():
     put_into_package(PySide6.support.signature, parser)
     put_into_package(PySide6.support.signature, importhandler)
     put_into_package(PySide6.support.signature.lib, enum_sig)
+    put_into_package(PySide6.support.signature.lib, pyi_generator)
 
 from shibokensupport.signature import mapping
 from shibokensupport.signature import errorhandler
@@ -159,6 +160,7 @@ from shibokensupport.signature import lib
 from shibokensupport.signature import parser
 from shibokensupport.signature import importhandler
 from shibokensupport.signature.lib import enum_sig
+from shibokensupport.signature.lib import pyi_generator
 
 if "PySide6" in sys.modules:
     # We publish everything under "PySide6.support", again.
