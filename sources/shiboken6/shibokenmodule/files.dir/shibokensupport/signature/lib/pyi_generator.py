@@ -71,7 +71,7 @@ is_ci = os.environ.get("QTEST_ENVIRONMENT", "") == "ci"
 is_debug = is_ci or os.environ.get("QTEST_ENVIRONMENT")
 
 logging.basicConfig(level=logging.DEBUG if is_debug else logging.INFO)
-logger = logging.getLogger("generate_pyi")
+logger = logging.getLogger("pyi_generator")
 
 
 class Writer(object):
@@ -83,8 +83,7 @@ class Writer(object):
         # controlling too much blank lines
         if self.outfile:
             if args == () or args == ("",):
-                # Python 2.7 glitch: Empty tuples have wrong encoding.
-                # But we use that to skip too many blank lines:
+                # We use that to skip too many blank lines:
                 if self.history[-2:] == [True, True]:
                     return
                 print("", file=self.outfile, **kw)
@@ -151,10 +150,6 @@ class Formatter(Writer):
             from shiboken6 import Shiboken
             from {support}.signature.mapping import (
                 Virtual, Missing, Invalid, Default, Instance)
-
-            class Object(object): pass
-
-            Shiboken.Object = Object
             """
         self.print(dedent(txt))
         # This line will be replaced by the missing imports postprocess.
@@ -213,7 +208,7 @@ def get_license_text():
 
 
 def find_imports(text):
-    return [imp for imp in PySide6.__all__ if imp + "." in text]
+    return [imp for imp in PySide6.__all__ if f"PySide6.{imp}." in text]
 
 
 def find_module(import_name, outpath, from_pyside):
@@ -229,7 +224,7 @@ def find_module(import_name, outpath, from_pyside):
     # we are alone in external module mode
     p = Path(import_name).resolve()
     if not p.exists():
-        raise ValueError(f"File {import_name} does not exist.")
+        raise ValueError(f"File {p} does not exist.")
     if not outpath:
         outpath = p.parent
     # temporarily add the path and do the import
@@ -285,16 +280,20 @@ def generate_pyi(import_name, outpath, options):
                         imp = "PySide6." + mod_name
                         if imp != import_name:
                             wr.print("import " + imp)
-                wr.print("import " + import_name)
+                # Do not import Shiboken which is handled already.
+                if import_name != "Shiboken":
+                    wr.print("import " + import_name)
                 wr.print()
                 wr.print()
             else:
                 wr.print(line)
-    logger.info(f"Generated: {outfilepath}")
+    if not options.quiet:
+        options.logger.info(f"Generated: {outfilepath}")
     if options and options.check or is_ci:
         # Python 3.7 and up: We can check the file directly if the syntax is ok.
         if USE_PEP563:
             subprocess.check_output([sys.executable, outfilepath])
+
 
 
 if __name__ == "__main__":
@@ -310,9 +309,10 @@ if __name__ == "__main__":
             """))
     parser.add_argument("module",
         help="The full path name of an importable module binary (.pyd, .so)")
+    parser.add_argument("--quiet", action="store_true", help="Run quietly")
     parser.add_argument("--check", action="store_true", help="Test the output")
     parser.add_argument("--outpath",
-        help="the output directory (default = binary location)")
+        help="the output directory (default = location of module binary)")
     options = parser.parse_args()
     module = options.module
     outpath = options.outpath
@@ -320,6 +320,7 @@ if __name__ == "__main__":
         os.makedirs(outpath)
         logger.info(f"+++ Created path {outpath}")
     options._pyside_call = False
+    options.logger = logger
     generate_pyi(module, outpath, options=options)
 
 # eof

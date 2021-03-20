@@ -43,6 +43,11 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/_config.py"
 # PYSIDE-1497: This `..` is the crucial trick to unify the path location of `Shiboken`.
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/__init__.py.in"
                "${CMAKE_CURRENT_BINARY_DIR}/../__init__.py" @ONLY)
+# PYSIDE-1415: Copy Shiboken.pyi into the target.
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/Shiboken.pyi"
+               "${CMAKE_CURRENT_BINARY_DIR}/../Shiboken.pyi" @ONLY)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/../Shiboken.pyi"
+        DESTINATION "${PYTHON_SITE_PACKAGES}/shiboken6")
 
 # Variable from enclosing scope.
 foreach(item IN LISTS shiboken_python_files)

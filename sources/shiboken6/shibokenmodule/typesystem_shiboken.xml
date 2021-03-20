@@ -124,6 +124,7 @@
         PyModule_AddObject(module, "__version_info__", version);
         PyModule_AddStringConstant(module, "__version__", SHIBOKEN_VERSION);
 
+        Shiboken::initSignature(module);
         VoidPtr::addVoidPtrToModule(module);
     </inject-code>
 </typesystem>

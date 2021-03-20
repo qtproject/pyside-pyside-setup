@@ -119,5 +119,6 @@ if __name__ == "__main__":
         os.makedirs(outpath)
         logger.info(f"+++ Created path {outpath}")
     options._pyside_call = True
+    options.logger = logger
     generate_all_pyi(outpath, options=options)
 # eof
