@@ -37,6 +37,7 @@
 ##
 #############################################################################
 
+import inspect
 import os
 import sys
 import unittest
@@ -48,7 +49,6 @@ init_test_paths(False)
 
 import PySide6.QtCore
 import PySide6.QtWidgets
-from shibokensupport.signature import inspect
 
 
 class PySideSignatureTest(unittest.TestCase):

@@ -44,17 +44,18 @@ generate_pyi.py
 This script generates the .pyi files for all PySide modules.
 """
 
-import sys
-import os
-import io
-import re
-import subprocess
 import argparse
-from pathlib import Path
-from contextlib import contextmanager
-from textwrap import dedent
+import inspect
+import io
 import logging
+import os
+import re
+import sys
+import typing
 
+from contextlib import contextmanager
+from pathlib import Path
+from textwrap import dedent
 
 # Make sure not to get .pyc in Python2.
 sourcepath = Path(__file__).parent.resolve() / (Path(__file__).stem + ".py")
@@ -136,11 +137,7 @@ class Formatter(Writer):
         self.mod_name = mod_name
         self.print("# Module", mod_name)
         self.print("import PySide6")
-        from PySide6.support.signature import typing
-        self.print("try:")
-        self.print("    import typing")
-        self.print("except ImportError:")
-        self.print("    from PySide6.support.signature import typing")
+        self.print("import typing")
         self.print("from PySide6.support.signature.mapping import (")
         self.print("    Virtual, Missing, Invalid, Default, Instance)")
         self.print()
@@ -279,7 +276,6 @@ def generate_all_pyi(outpath, options):
     # now we can import
     global PySide6, inspect, typing, HintingEnumerator, build_brace_pattern
     import PySide6
-    from PySide6.support.signature import inspect, typing
     from PySide6.support.signature.lib.enum_sig import HintingEnumerator
     from PySide6.support.signature.lib.tool import build_brace_pattern
 

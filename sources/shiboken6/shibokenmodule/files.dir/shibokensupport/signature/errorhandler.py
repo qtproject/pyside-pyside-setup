@@ -54,9 +54,9 @@ enough to produce a useful ValueError.
 This matter will be improved in a later version.
 """
 
+import inspect
 import sys
 
-from shibokensupport.signature import inspect
 from shibokensupport.signature import get_signature
 from shibokensupport.signature.mapping import update_mapping, namespace
 from textwrap import dedent

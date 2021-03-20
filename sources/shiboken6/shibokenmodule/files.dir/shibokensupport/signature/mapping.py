@@ -47,13 +47,13 @@ The PySide modules are not loaded in advance, but only after they appear
 in sys.modules. This minimizes the loading overhead.
 """
 
-import sys
-import struct
 import os
-from pathlib import Path
+import struct
+import sys
+import typing
 
-from shibokensupport.signature import typing
-from shibokensupport.signature.typing import TypeVar, Generic
+from pathlib import Path
+from typing import TypeVar, Generic
 from shibokensupport.signature.lib.tool import with_metaclass
 
 class ellipsis(object):

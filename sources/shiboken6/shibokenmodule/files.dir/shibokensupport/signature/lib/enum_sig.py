@@ -47,9 +47,9 @@ It is not easy to adhere to this protocol, but in the end, it paid off
 by producing a lot of clarity.
 """
 
+import inspect
 import sys
 import types
-from shibokensupport.signature import inspect
 from shibokensupport.signature import get_signature as get_sig
 
 

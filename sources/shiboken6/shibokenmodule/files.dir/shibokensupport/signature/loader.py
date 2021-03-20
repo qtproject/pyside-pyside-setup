@@ -64,31 +64,6 @@ import os
 import traceback
 import types
 
-# On Python 2, we only have ImportError, which is way too coarse.
-# When problems occour, please use Python 3, because it has the finer
-# ModuleNotFoundError.
-
-try:
-    ModuleNotFoundError
-except NameError:
-    ModuleNotFoundError = ImportError
-
-def _qualname(x):
-    return getattr(x, "__qualname__", x.__name__)
-
-# patching inspect's formatting to keep the word "typing":
-def formatannotation(annotation, base_module=None):
-    # if getattr(annotation, '__module__', None) == 'typing':
-    #     return repr(annotation).replace('typing.', '')
-    if isinstance(annotation, type):
-        name = _qualname(annotation)
-        if annotation.__module__ in ('builtins', base_module):
-            return name
-        return annotation.__module__ + '.' + name
-    return repr(annotation)
-
-# Note also that during the tests we have a different encoding that would
-# break the Python license decorated files without an encoding line.
 
 # name used in signature.cpp
 def pyside_type_init(type_key, sig_strings):
@@ -157,26 +132,7 @@ def list_modules(message):
     for (name, module) in sorted(ext_modules.items()):
         print(f"  {name:23}", repr(module)[:70])
 
-
-orig_typing = True
-import typing
-import inspect
-inspect.formatannotation = formatannotation
-
-# Fix the module names in typing if possible. This is important since
-# the typing names should be I/O compatible, so that typing.Dict
-# shows itself as "typing.Dict".
-for name, obj in typing.__dict__.items():
-    if hasattr(obj, "__module__"):
-        try:
-            obj.__module__ = "typing"
-        except (TypeError, AttributeError):
-            pass
-
 import shibokensupport
-put_into_package(shibokensupport.signature, typing, "typing")
-put_into_package(shibokensupport.signature, inspect, "inspect")
-
 
 def move_into_pyside_package():
     import PySide6
@@ -194,9 +150,6 @@ def move_into_pyside_package():
     put_into_package(PySide6.support.signature, parser)
     put_into_package(PySide6.support.signature, importhandler)
     put_into_package(PySide6.support.signature.lib, enum_sig)
-
-    put_into_package(None if orig_typing else PySide6.support.signature, typing)
-    put_into_package(PySide6.support.signature, inspect)
 
 from shibokensupport.signature import mapping
 from shibokensupport.signature import errorhandler

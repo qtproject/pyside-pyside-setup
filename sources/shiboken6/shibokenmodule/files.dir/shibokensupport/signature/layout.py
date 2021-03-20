@@ -53,8 +53,9 @@ It also implements them in this file. The configurations are
 used literally as strings like "signature", "existence", etc.
 """
 
+import inspect
+import typing
 from textwrap import dedent
-from shibokensupport.signature import inspect, typing
 from shibokensupport.signature.mapping import ellipsis
 from shibokensupport.signature.lib.tool import SimpleNamespace
 
