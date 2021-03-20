@@ -327,6 +327,14 @@ This serves as an extra challenge that has a very positive effect on
 the completeness and correctness of signatures.
 
 
+pyi_generator.py
+----------------
+
+``shiboken6/shibokenmodule/files.dir/shibokensupport/signature/lib/pyi_generator.py``
+has been extracted from ``generate_pyi.py``. It allows the generation of ``.pyi``
+files from arbitrary extension modules created with shiboken.
+
+
 Current Extensions
 ------------------
 
