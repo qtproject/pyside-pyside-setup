@@ -261,6 +261,9 @@ static PyType_Spec SbkObject_Type_spec = {
     SbkObject_Type_slots,
 };
 
+static const char *SbkObject_SignatureStrings[] = {
+    "Shiboken.Object(self)",
+    nullptr}; // Sentinel
 
 SbkObjectType *SbkObject_TypeF(void)
 {
@@ -879,6 +882,17 @@ void init()
     VoidPtr::init();
 
     shibokenAlreadInitialised = true;
+}
+
+// PYSIDE-1415: Publish Shiboken objects.
+void initSignature(PyObject *module)
+{
+    auto type = reinterpret_cast<PyTypeObject *>(SbkObject_TypeF());
+    if (InitSignatureStrings(type, SbkObject_SignatureStrings) < 0)
+        return;
+
+    Py_INCREF(SbkObject_TypeF());
+    PyModule_AddObject(module, "Object", reinterpret_cast<PyObject *>(SbkObject_TypeF()));
 }
 
 // setErrorAboutWrongArguments now gets overload info from the signature module.

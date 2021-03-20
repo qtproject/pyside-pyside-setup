@@ -128,5 +128,13 @@ def designer():
         qt_tool_wrapper("designer", sys.argv[1:])
 
 
+def genpyi():
+    pyside_dir = Path(__file__).resolve().parents[1]
+    support = pyside_dir / "support"
+    cmd = support / "generate_pyi.py"
+    command = [sys.executable, os.fspath(cmd)] + sys.argv[1:]
+    sys.exit(subprocess.call(command))
+
+
 if __name__ == "__main__":
     main()

@@ -203,7 +203,8 @@ class Config(object):
             setup_kwargs['install_requires'] = [f"{self.shiboken_module_st_name}=={package_version}"]
             setup_kwargs['entry_points'] = {
                 'console_scripts': [
-                    f'{SHIBOKEN} = {package_name}.scripts.shiboken_tool:main'
+                    f'{SHIBOKEN} = {package_name}.scripts.shiboken_tool:main',
+                    f'{SHIBOKEN}-genpyi = {package_name}.scripts.shiboken_tool:genpyi',
                 ]
             }
 
@@ -217,6 +218,7 @@ class Config(object):
                     f'{PYSIDE}-rcc = {package_name}.scripts.pyside_tool:rcc',
                     f'{PYSIDE}-designer= {package_name}.scripts.pyside_tool:designer',
                     f'{PYSIDE}-lupdate = {package_name}.scripts.pyside_tool:main',
+                    f'{PYSIDE}-genpyi = {package_name}.scripts.pyside_tool:genpyi',
                 ]
             }
         self.setup_kwargs = setup_kwargs

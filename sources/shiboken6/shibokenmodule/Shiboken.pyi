@@ -1,8 +1,7 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+# This Python file uses the following encoding: utf-8
 #############################################################################
 ##
-## Copyright (C) 2018 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of Qt for Python.
@@ -38,27 +37,44 @@
 ## $QT_END_LICENSE$
 ##
 #############################################################################
-import sys
-import os
-import subprocess
-from pathlib import Path
+
+from __future__ import annotations
+
+"""
+This file contains the exact signatures for all functions in module
+Shiboken, except for defaults which are replaced by "...".
+"""
+
+# Module `Shiboken`
+
+import typing
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from shiboken6 import Shiboken
+from shibokensupport.signature.mapping import (
+    Virtual, Missing, Invalid, Default, Instance)
 
 
-def main():
-    # The tools listed as entrypoints in setup.py are copied to 'scripts/..'
-    cmd = Path("..") / Path(sys.argv[0]).name
-    command = [os.fspath(Path(__file__).parent.resolve() / cmd)]
-    command.extend(sys.argv[1:])
-    sys.exit(subprocess.call(command))
+class Enum(object):
+
+    def __init__(self, itemValue: int = ...) -> None: ...
+
+class Object(object):
+
+    def __init__(self) -> None: ...
+
+class VoidPtr(object): ...
 
 
-def genpyi():
-    shiboken_dir = Path(__file__).resolve().parents[2] / "shiboken6"
-    support = shiboken_dir / "files.dir" / "shibokensupport"
-    cmd = support / "signature" / "lib" / "pyi_generator.py"
-    command = [sys.executable, os.fspath(cmd)] + sys.argv[1:]
-    sys.exit(subprocess.call(command))
+def _unpickle_enum(arg__1: object, arg__2: object) -> object: ...
+def createdByPython(arg__1: object) -> bool: ...
+def delete(arg__1: object) -> None: ...
+def dump(arg__1: object) -> object: ...
+def getAllValidWrappers() -> object: ...
+def getCppPointer(arg__1: object) -> object: ...
+def invalidate(arg__1: object) -> None: ...
+def isValid(arg__1: object) -> bool: ...
+def ownedByPython(arg__1: object) -> bool: ...
+def wrapInstance(arg__1: int, arg__2: type) -> object: ...
 
 
-if __name__ == "__main__":
-     main()
+# eof
