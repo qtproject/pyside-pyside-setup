@@ -175,7 +175,8 @@ def move_into_pyside_package():
     try:
         import PySide6.support
     except ModuleNotFoundError:
-        PySide6.support = types.ModuleType("PySide6.support")
+        # This can happen in the embedding case.
+        put_into_package(PySide6, shibokensupport, "support")
     put_into_package(PySide6.support, __feature__, "__feature__")
     put_into_package(PySide6.support, signature)
     put_into_package(PySide6.support.signature, mapping)
@@ -198,7 +199,7 @@ from shibokensupport.signature import importhandler
 from shibokensupport.signature.lib import enum_sig
 
 if "PySide6" in sys.modules:
-    # We publish everything under "PySide6.support.signature", again.
+    # We publish everything under "PySide6.support", again.
     move_into_pyside_package()
     # PYSIDE-1502: Make sure that support can be imported.
     try:
@@ -206,17 +207,12 @@ if "PySide6" in sys.modules:
     except ModuleNotFoundError as e:
         print("PySide6.support could not be imported. "
               "This is a serious configuration error.", file=sys.stderr)
-        raise e from None
+        raise
     # PYSIDE-1019: Modify `__import__` to be `__feature__` aware.
     # __feature__ is already in sys.modules, so this is actually no import
-    try:
-        import PySide6.support.__feature__
-        sys.modules["__feature__"] = PySide6.support.__feature__
-        PySide6.support.__feature__.original_import = __builtins__["__import__"]
-        __builtins__["__import__"] = PySide6.support.__feature__._import
-        # Maybe we should optimize that and change `__import__` from C, instead?
-    except ModuleNotFoundError:
-        print("__feature__ could not be imported. "
-              "This may be an unsolved PyInstaller problem.", file=sys.stderr)
+    import PySide6.support.__feature__
+    sys.modules["__feature__"] = PySide6.support.__feature__
+    PySide6.support.__feature__.original_import = __builtins__["__import__"]
+    __builtins__["__import__"] = PySide6.support.__feature__._import
 
 # end of file
