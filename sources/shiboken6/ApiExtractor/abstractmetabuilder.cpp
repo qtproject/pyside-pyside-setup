@@ -3067,8 +3067,11 @@ AbstractMetaClassList AbstractMetaBuilderPrivate::classesTopologicalSorted(const
         }
         // Member fields need to be initialized
         for (const AbstractMetaField &field : clazz->fields()) {
-            addClassDependency(classList, field.type().typeEntry(),
-                               clazz, &graph);
+            auto typeEntry = field.type().typeEntry();
+            if (typeEntry->isEnum()) // Enum defined in class?
+                typeEntry = typeEntry->parent();
+            if (typeEntry != nullptr)
+                addClassDependency(classList, typeEntry, clazz, &graph);
         }
     }
 
