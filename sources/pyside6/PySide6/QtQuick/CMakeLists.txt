@@ -54,9 +54,11 @@ ${QtQuick_GEN_DIR}/qtquick_module_wrapper.cpp
 set(QtQuick_include_dirs  ${QtQuick_SOURCE_DIR}
                           ${QtQml_SOURCE_DIR}
                           ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
+                          ${Qt${QT_MAJOR_VERSION}Core_PRIVATE_INCLUDE_DIRS}
                           ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
                           ${Qt${QT_MAJOR_VERSION}Network_INCLUDE_DIRS}
                           ${Qt${QT_MAJOR_VERSION}Qml_INCLUDE_DIRS}
+                          ${Qt${QT_MAJOR_VERSION}Qml_PRIVATE_INCLUDE_DIRS}
                           ${Qt${QT_MAJOR_VERSION}Quick_INCLUDE_DIRS}
                           ${libpyside_SOURCE_DIR}
                           ${QtGui_GEN_DIR}

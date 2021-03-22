@@ -43,6 +43,11 @@
 #include <pyside_p.h>
 #include <shiboken.h>
 
+// TODO: Remove this ifdef once 6.1.0 is released
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 2, 0))
+#include <QtQml/private/qqmlmetatype_p.h>
+#endif
+
 // Auto generated headers.
 #include "qquickitem_wrapper.h"
 #include "qquickpainteditem_wrapper.h"
@@ -80,6 +85,25 @@ bool pyTypeObjectInheritsFromClass(PyTypeObject *pyObjType, QByteArray className
     return isDerived;
 }
 
+// TODO: Remove this ifdef once 6.1.0 is released
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 2, 0))
+template <typename T>
+struct QPysideQmlMetaTypeInterface : public QQmlMetaTypeInterface
+{
+    const QMetaObject *metaObject;
+
+    static const QMetaObject *metaObjectFun(const QMetaTypeInterface *mti)
+    {
+        return static_cast<const QPysideQmlMetaTypeInterface *>(mti)->metaObject;
+    }
+
+    QPysideQmlMetaTypeInterface(const QByteArray &name, const QMetaObject *metaObjectIn = nullptr)
+        : QQmlMetaTypeInterface(name, static_cast<T*>(nullptr)), metaObject(metaObjectIn) {
+        metaObjectFn = metaObjectFun;
+    }
+};
+#else
+// TODO: Remove this case once 6.1.0 is released!
 template <typename T>
 struct QPysideQmlMetaTypeInterface : QtPrivate::QMetaTypeInterface
 {
@@ -120,6 +144,8 @@ struct QPysideQmlMetaTypeInterface : QtPrivate::QMetaTypeInterface
         , name(name), metaObject(metaObjectIn) {}
 };
 
+#endif
+
 template <class WrapperClass>
 void registerTypeIfInheritsFromClass(
         QByteArray className,
@@ -132,8 +158,15 @@ void registerTypeIfInheritsFromClass(
 {
     bool shouldRegister = !registered && pyTypeObjectInheritsFromClass(typeToRegister, className);
     if (shouldRegister) {
+
         QMetaType ptrType(new QPysideQmlMetaTypeInterface<WrapperClass *>(typePointerName, typeMetaObject));
+
+    // TODO: Remove this ifdef once 6.1.0 is released
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 2, 0))
+        QMetaType lstType(new QQmlListMetaTypeInterface(typeListName, static_cast<QQmlListProperty<WrapperClass>*>(nullptr), ptrType.iface()));
+#else
         QMetaType lstType(new QPysideQmlMetaTypeInterface<QQmlListProperty<WrapperClass>>(typeListName));
+#endif
 
         type->typeId = std::move(ptrType);
         type->listId = std::move(lstType);
