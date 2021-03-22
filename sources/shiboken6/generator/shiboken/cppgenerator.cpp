@@ -5768,11 +5768,19 @@ void CppGenerator::writeGetattroFunction(TextStream &s, AttroCheck attroCheck,
             Indentation indent(s);
             // PYSIDE-772: Perform optimized name mangling.
             s << "Shiboken::AutoDecRef tmp(_Pep_PrivateMangle(self, name));\n"
-               << "if (auto meth = PyDict_GetItem(Py_TYPE(self)->tp_dict, tmp))\n";
+               << "if (auto meth = PyDict_GetItem(Py_TYPE(self)->tp_dict, tmp)) {\n";
             {
                 Indentation indent(s);
-                s << "return PyFunction_Check(meth) ? SBK_PyMethod_New(meth, self) : " << getattrFunc << ";\n";
+                // PYSIDE-1523: PyFunction_Check is not accepting compiled functions.
+                s << "if (strcmp(Py_TYPE(meth)->tp_name, \"compiled_function\") == 0)\n";
+                {
+                    Indentation indent(s);
+                    s << "return Py_TYPE(meth)->tp_descr_get(meth, self, nullptr);\n";
+                }
+                s << "return PyFunction_Check(meth) ? SBK_PyMethod_New(meth, self)\n"
+                  << "                              : " << getattrFunc << ";\n";
             }
+            s << "}\n";
         }
         s << "}\n";
 

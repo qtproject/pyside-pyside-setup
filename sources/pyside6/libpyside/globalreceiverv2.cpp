@@ -40,6 +40,7 @@
 #include "globalreceiverv2.h"
 #include "dynamicqmetaobject_p.h"
 #include "pysideweakref.h"
+#include "pysidestaticstrings.h"
 #include "signalmanager.h"
 
 #include <autodecref.h>
@@ -101,21 +102,35 @@ class DynamicSlotDataV2
 using namespace PySide;
 
 DynamicSlotDataV2::DynamicSlotDataV2(PyObject *callback, GlobalReceiverV2 *parent) :
-    m_isMethod(PyMethod_Check(callback)),
     m_parent(parent)
 {
     Shiboken::GilState gil;
 
-    if (m_isMethod) {
-        //Can not store calback pointe because this will be destroyed at the end of the scope
-        //To avoid increment intance reference keep the callback information
+    if (PyMethod_Check(callback)) {
+        m_isMethod = true;
+        // To avoid increment instance reference keep the callback information
         m_callback = PyMethod_GET_FUNCTION(callback);
+        Py_INCREF(m_callback);
         m_pythonSelf = PyMethod_GET_SELF(callback);
 
         //monitor class from method lifetime
         m_weakRef = WeakRef::create(m_pythonSelf, DynamicSlotDataV2::onCallbackDestroyed, this);
+    } else if (PyObject_HasAttr(callback, PySide::PyName::im_func())
+               && PyObject_HasAttr(callback, PySide::PyName::im_self())) {
+        // PYSIDE-1523: PyMethod_Check is not accepting compiled form, we just go by attributes.
+        m_isMethod = true;
 
+        m_callback = PyObject_GetAttr(callback, PySide::PyName::im_func());
+        Py_DECREF(m_callback);
+
+        m_pythonSelf = PyObject_GetAttr(callback, PySide::PyName::im_self());
+        Py_DECREF(m_pythonSelf);
+
+        //monitor class from method lifetime
+        m_weakRef = WeakRef::create(m_pythonSelf, DynamicSlotDataV2::onCallbackDestroyed, this);
     } else {
+        m_isMethod = false;
+
         m_callback = callback;
         Py_INCREF(m_callback);
     }
@@ -137,7 +152,7 @@ PyObject *DynamicSlotDataV2::callback()
 
     //create a callback based on method data
     if (m_isMethod)
-        callback = PyMethod_New(m_callback, m_pythonSelf);
+        callback = Py_TYPE(m_callback)->tp_descr_get(m_callback, m_pythonSelf, nullptr);
     else
         Py_INCREF(callback);
 
@@ -174,8 +189,7 @@ DynamicSlotDataV2::~DynamicSlotDataV2()
     Py_XDECREF(m_weakRef);
     m_weakRef = nullptr;
 
-    if (!m_isMethod)
-       Py_DECREF(m_callback);
+    Py_DECREF(m_callback);
 }
 
 GlobalReceiverV2::GlobalReceiverV2(PyObject *callback, GlobalReceiverV2MapPtr map) :

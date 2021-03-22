@@ -316,27 +316,61 @@ PyModule_AddStringConstant(module, "__version__", qVersion());
 // @snippet qt-version
 
 // @snippet qobject-connect
-static bool isDecorator(PyObject *method, PyObject *self)
+static bool isMethodDecorator(PyObject *method, bool is_pymethod, PyObject *self)
 {
     Shiboken::AutoDecRef methodName(PyObject_GetAttr(method, Shiboken::PyMagicName::name()));
     if (!PyObject_HasAttr(self, methodName))
         return true;
     Shiboken::AutoDecRef otherMethod(PyObject_GetAttr(self, methodName));
-    return PyMethod_GET_FUNCTION(otherMethod.object()) != PyMethod_GET_FUNCTION(method);
+
+    PyObject *function1, *function2;
+
+    // PYSIDE-1523: Each could be a compiled method or a normal method here, for the
+    // compiled ones we can use the attributes.
+    if (PyMethod_Check(otherMethod.object())) {
+        function1 = PyMethod_GET_FUNCTION(otherMethod.object());
+    } else {
+        function1 = PyObject_GetAttr(otherMethod.object(), Shiboken::PyName::im_func());
+        Py_DECREF(function1);
+        // Not retaining a reference inline with what PyMethod_GET_FUNCTION does.
+    }
+
+    if (is_pymethod) {
+        function2 = PyMethod_GET_FUNCTION(method);
+    } else {
+        function2 = PyObject_GetAttr(method, Shiboken::PyName::im_func());
+        Py_DECREF(function2);
+        // Not retaining a reference inline with what PyMethod_GET_FUNCTION does.
+    }
+
+    return function1 != function2;
 }
 
-static bool getReceiver(QObject *source, const char *signal, PyObject *callback, QObject **receiver, PyObject **self, QByteArray *callbackSig)
+static bool getReceiver(QObject *source,
+                        const char *signal,
+                        PyObject *callback,
+                        QObject **receiver,
+                        PyObject **self,
+                        QByteArray *callbackSig)
 {
     bool forceGlobalReceiver = false;
     if (PyMethod_Check(callback)) {
         *self = PyMethod_GET_SELF(callback);
         if (%CHECKTYPE[QObject *](*self))
             *receiver = %CONVERTTOCPP[QObject *](*self);
-        forceGlobalReceiver = isDecorator(callback, *self);
+        forceGlobalReceiver = isMethodDecorator(callback, true, *self);
     } else if (PyCFunction_Check(callback)) {
         *self = PyCFunction_GET_SELF(callback);
         if (*self && %CHECKTYPE[QObject *](*self))
             *receiver = %CONVERTTOCPP[QObject *](*self);
+    } else if (PyObject_HasAttr(callback, Shiboken::PyName::im_func())
+               && PyObject_HasAttr(callback, Shiboken::PyName::im_self())) {
+        *self = PyObject_GetAttr(callback, Shiboken::PyName::im_self());
+        Py_DECREF(*self);
+
+        if (%CHECKTYPE[QObject *](*self))
+            *receiver = %CONVERTTOCPP[QObject *](*self);
+        forceGlobalReceiver = isMethodDecorator(callback, false, *self);
     } else if (PyCallable_Check(callback)) {
         // Ok, just a callable object
         *receiver = nullptr;

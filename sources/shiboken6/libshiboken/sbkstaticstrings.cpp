@@ -55,6 +55,8 @@ namespace PyName {
 STATIC_STRING_IMPL(dumps, "dumps")
 STATIC_STRING_IMPL(fget, "fget")
 STATIC_STRING_IMPL(fset, "fset")
+STATIC_STRING_IMPL(im_func, "im_func")
+STATIC_STRING_IMPL(im_self, "im_self")
 STATIC_STRING_IMPL(loads, "loads")
 STATIC_STRING_IMPL(multi, "multi")
 STATIC_STRING_IMPL(name, "name")

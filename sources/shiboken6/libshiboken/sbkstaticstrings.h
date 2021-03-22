@@ -54,6 +54,8 @@ LIBSHIBOKEN_API PyObject *fget();
 LIBSHIBOKEN_API PyObject *fset();
 LIBSHIBOKEN_API PyObject *f_code();
 LIBSHIBOKEN_API PyObject *f_lineno();
+LIBSHIBOKEN_API PyObject *im_func();
+LIBSHIBOKEN_API PyObject *im_self();
 LIBSHIBOKEN_API PyObject *loads();
 LIBSHIBOKEN_API PyObject *multi();
 LIBSHIBOKEN_API PyObject *name();

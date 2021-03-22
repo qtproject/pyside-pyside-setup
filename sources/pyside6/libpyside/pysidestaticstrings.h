@@ -51,12 +51,15 @@ PyObject *qtConnect();
 PyObject *qtDisconnect();
 PyObject *qtEmit();
 PyObject *dict_ring();
+PyObject *im_func();
+PyObject *im_self();
 PyObject *name();
 PyObject *property();
 PyObject *select_id();
 } // namespace PyName
 namespace PyMagicName
 {
+PyObject *code();
 PyObject *doc();
 PyObject *func();
 PyObject *name();

@@ -56,12 +56,15 @@ STATIC_STRING_IMPL(qtConnect, "connect")
 STATIC_STRING_IMPL(qtDisconnect, "disconnect")
 STATIC_STRING_IMPL(qtEmit, "emit")
 STATIC_STRING_IMPL(dict_ring, "dict_ring")
+STATIC_STRING_IMPL(im_func, "im_func")
+STATIC_STRING_IMPL(im_self, "im_self")
 STATIC_STRING_IMPL(name, "name")
 STATIC_STRING_IMPL(property, "property")
 STATIC_STRING_IMPL(select_id, "select_id")
 } // namespace PyName
 namespace PyMagicName
 {
+STATIC_STRING_IMPL(code, "__code__")
 STATIC_STRING_IMPL(doc, "__doc__")
 STATIC_STRING_IMPL(func, "__func__")
 STATIC_STRING_IMPL(name, "__name__")

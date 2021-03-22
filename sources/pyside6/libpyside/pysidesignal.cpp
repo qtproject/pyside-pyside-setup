@@ -309,6 +309,82 @@ static void signalInstanceFree(void *self)
     Py_TYPE(pySelf)->tp_base->tp_free(self);
 }
 
+// PYSIDE-1523: PyFunction_Check is not accepting compiled functions and
+// PyMethod_Check is not allowing compiled methods, therefore also lookup
+// "im_func" and "__code__" attributes, we allow for that with a dedicated
+// function handling both.
+static void extractFunctionArgumentsFromSlot(PyObject *slot,
+                                             PyObject *& function,
+                                             PepCodeObject *& objCode,
+                                             bool &isMethod,
+                                             QByteArray *functionName)
+{
+    isMethod = PyMethod_Check(slot);
+    bool isFunction = PyFunction_Check(slot);
+
+    function = nullptr;
+    objCode = nullptr;
+
+    if (isMethod || isFunction) {
+        function = isMethod ? PyMethod_GET_FUNCTION(slot) : slot;
+        objCode = reinterpret_cast<PepCodeObject *>(PyFunction_GET_CODE(function));
+
+        if (functionName != nullptr) {
+            *functionName = Shiboken::String::toCString(PepFunction_GetName(function));
+        }
+    } else if (PyObject_HasAttr(slot, PySide::PyName::im_func())) {
+        // PYSIDE-1523: PyFunction_Check and PyMethod_Check are not accepting compiled forms, we
+        // just go by attributes.
+        isMethod = true;
+
+        function = PyObject_GetAttr(slot, PySide::PyName::im_func());
+
+        // Not retaining a reference inline with what PyMethod_GET_FUNCTION does.
+        Py_DECREF(function);
+
+        if (functionName != nullptr) {
+            PyObject *name = PyObject_GetAttr(function, PySide::PyMagicName::name());
+            *functionName = Shiboken::String::toCString(name);
+            // Not retaining a reference inline with what PepFunction_GetName does.
+            Py_DECREF(name);
+        }
+
+        objCode = reinterpret_cast<PepCodeObject *>(
+                    PyObject_GetAttr(function, PySide::PyMagicName::code()));
+        // Not retaining a reference inline with what PyFunction_GET_CODE does.
+        Py_XDECREF(objCode);
+
+        if (objCode == nullptr) {
+            // Should not happen, but lets handle it gracefully, maybe Nuitka one day
+            // makes these optional, or somebody defined a type named like it without
+            // it being actually being that.
+            function = nullptr;
+        }
+    } else if (strcmp(Py_TYPE(slot)->tp_name, "compiled_function") == 0) {
+        isMethod = false;
+        function = slot;
+
+        if (functionName != nullptr) {
+            PyObject *name = PyObject_GetAttr(function, PySide::PyMagicName::name());
+            *functionName = Shiboken::String::toCString(name);
+            // Not retaining a reference inline with what PepFunction_GetName does.
+            Py_DECREF(name);
+        }
+
+        objCode = reinterpret_cast<PepCodeObject *>(
+                    PyObject_GetAttr(function, PySide::PyMagicName::code()));
+        // Not retaining a reference inline with what PyFunction_GET_CODE does.
+        Py_XDECREF(objCode);
+
+        if (objCode == nullptr) {
+            // Should not happen, but lets handle it gracefully, maybe Nuitka one day
+            // makes these optional, or somebody defined a type named like it without
+            // it being actually being that.
+            function = nullptr;
+        }
+    }
+}
+
 static PyObject *signalInstanceConnect(PyObject *self, PyObject *args, PyObject *kwds)
 {
     PyObject *slot = nullptr;
@@ -349,17 +425,17 @@ static PyObject *signalInstanceConnect(PyObject *self, PyObject *args, PyObject 
     } else {
         // Check signature of the slot (method or function) to match signal
         int slotArgs = -1;
-        bool useSelf = false;
-        bool isMethod = PyMethod_Check(slot);
-        bool isFunction = PyFunction_Check(slot);
         bool matchedSlot = false;
 
         PySideSignalInstance *it = source;
 
-        if (isMethod || isFunction) {
-            PyObject *function = isMethod ? PyMethod_GET_FUNCTION(slot) : slot;
-            auto *objCode = reinterpret_cast<PepCodeObject *>(PyFunction_GET_CODE(function));
-            useSelf = isMethod;
+        PyObject *function = nullptr;
+        PepCodeObject *objCode = nullptr;
+        bool useSelf = false;
+
+        extractFunctionArgumentsFromSlot(slot, function, objCode, useSelf, nullptr);
+
+        if (function != nullptr) {
             slotArgs = PepCode_GET_FLAGS(objCode) & CO_VARARGS ? -1 : PepCode_GET_ARGCOUNT(objCode);
             if (useSelf)
                 slotArgs -= 1;
@@ -942,15 +1018,14 @@ QString getCallbackSignature(const char *signal, QObject *receiver, PyObject *ca
 {
     QByteArray functionName;
     int numArgs = -1;
-    bool useSelf = false;
-    bool isMethod = PyMethod_Check(callback);
-    bool isFunction = PyFunction_Check(callback);
 
-    if (isMethod || isFunction) {
-        PyObject *function = isMethod ? PyMethod_GET_FUNCTION(callback) : callback;
-        auto objCode = reinterpret_cast<PepCodeObject *>(PyFunction_GET_CODE(function));
-        functionName = Shiboken::String::toCString(PepFunction_GetName(function));
-        useSelf = isMethod;
+    PyObject *function = nullptr;
+    PepCodeObject *objCode = nullptr;
+    bool useSelf = false;
+
+    extractFunctionArgumentsFromSlot(callback, function, objCode, useSelf, &functionName);
+
+    if (function != nullptr) {
         numArgs = PepCode_GET_FLAGS(objCode) & CO_VARARGS ? -1 : PepCode_GET_ARGCOUNT(objCode);
     } else if (PyCFunction_Check(callback)) {
         const PyCFunctionObject *funcObj = reinterpret_cast<const PyCFunctionObject *>(callback);
@@ -1023,6 +1098,14 @@ QString codeCallbackName(PyObject *callback, const QString &funcName)
     if (PyMethod_Check(callback)) {
         PyObject *self = PyMethod_GET_SELF(callback);
         PyObject *func = PyMethod_GET_FUNCTION(callback);
+        return funcName + QString::number(quint64(self), 16) + QString::number(quint64(func), 16);
+    }
+    // PYSIDE-1523: Handle the compiled case.
+    if (PyObject_HasAttr(callback, PySide::PyName::im_func())
+        && PyObject_HasAttr(callback, PySide::PyName::im_self())) {
+        // Not retaining references inline with what PyMethod_GET_(SELF|FUNC) does.
+        Shiboken::AutoDecRef self(PyObject_GetAttr(callback, PySide::PyName::im_self()));
+        Shiboken::AutoDecRef func(PyObject_GetAttr(callback, PySide::PyName::im_func()));
         return funcName + QString::number(quint64(self), 16) + QString::number(quint64(func), 16);
     }
     return funcName + QString::number(quint64(callback), 16);

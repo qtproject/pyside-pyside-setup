@@ -317,8 +317,39 @@ PyObject *BindingManager::getOverride(const void *cptr,
 
     PyObject *method = PyObject_GetAttr(reinterpret_cast<PyObject *>(wrapper), pyMethodName);
 
-    if (method && PyMethod_Check(method)
-        && PyMethod_GET_SELF(method) == reinterpret_cast<PyObject *>(wrapper)) {
+    PyObject *function = nullptr;
+
+    // PYSIDE-1523: PyMethod_Check is not accepting compiled methods, we do this rather
+    // crude check for them.
+    if (method) {
+        if (PyMethod_Check(method)) {
+            if (PyMethod_GET_SELF(method) == reinterpret_cast<PyObject *>(wrapper)) {
+                function = PyMethod_GET_FUNCTION(method);
+            } else {
+                Py_DECREF(method);
+                method = nullptr;
+            }
+        } else if (PyObject_HasAttr(method, PyName::im_self())
+                   && PyObject_HasAttr(method, PyName::im_func())) {
+            PyObject *im_self = PyObject_GetAttr(method, PyName::im_self());
+            // Not retaining a reference inline with what PyMethod_GET_SELF does.
+            Py_DECREF(im_self);
+
+            if (im_self == reinterpret_cast<PyObject *>(wrapper)) {
+                function = PyObject_GetAttr(method, PyName::im_func());
+                // Not retaining a reference inline with what PyMethod_GET_FUNCTION does.
+                Py_DECREF(function);
+            } else {
+                Py_DECREF(method);
+                method = nullptr;
+            }
+        } else {
+            Py_DECREF(method);
+            method = nullptr;
+        }
+    }
+
+    if (method != nullptr) {
         PyObject *defaultMethod;
         PyObject *mro = Py_TYPE(wrapper)->tp_mro;
 
@@ -329,13 +360,14 @@ PyObject *BindingManager::getOverride(const void *cptr,
             auto *parent = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
             if (parent->tp_dict) {
                 defaultMethod = PyDict_GetItem(parent->tp_dict, pyMethodName);
-                if (defaultMethod && PyMethod_GET_FUNCTION(method) != defaultMethod)
+                if (defaultMethod && function != defaultMethod)
                     return method;
             }
         }
-    } else {
-        Py_XDECREF(method);
+
+        Py_DECREF(method);
     }
+
     return nullptr;
 }
 
