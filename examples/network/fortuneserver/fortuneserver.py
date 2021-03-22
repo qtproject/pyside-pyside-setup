@@ -52,18 +52,20 @@ class Server(QtWidgets.QDialog):
         super(Server, self).__init__(parent)
 
         statusLabel = QtWidgets.QLabel()
+        statusLabel.setTextInteractionFlags(QtCore.Qt.TextBrowserInteraction)
         quitButton = QtWidgets.QPushButton("Quit")
         quitButton.setAutoDefault(False)
 
         self.tcpServer = QtNetwork.QTcpServer(self)
         if not self.tcpServer.listen():
+            reason = self.tcpServer.errorString()
             QtWidgets.QMessageBox.critical(self, "Fortune Server",
-                    "Unable to start the server: %s." % self.tcpServer.errorString())
+                    f"Unable to start the server: {reason}.")
             self.close()
             return
-
-        statusLabel.setText("The server is running on port %d.\nRun the "
-                "Fortune Client example now." % self.tcpServer.serverPort())
+        port = self.tcpServer.serverPort()
+        statusLabel.setText(f"The server is running on port {port}.\nRun the "
+                "Fortune Client example now.")
 
         self.fortunes = (
                 "You've been leading a dog's life. Stay off the furniture.",

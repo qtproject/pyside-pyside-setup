@@ -77,9 +77,9 @@ class LCDRange(QtWidgets.QWidget):
 
     def setRange(self, minValue, maxValue):
         if minValue < 0 or maxValue > 99 or minValue > maxValue:
-            QtCore.qWarning("LCDRange.setRange(%d, %d)\n"
+            QtCore.qWarning("LCDRange.setRange({minValue}, {maxValue})\n"
                     "\tRange must be 0..99\n"
-                    "\tand minValue must not be greater than maxValue" % (minValue, maxValue))
+                    "\tand minValue must not be greater than maxValue")
             return
 
         self.slider.setRange(minValue, maxValue)
@@ -111,7 +111,7 @@ class CannonField(QtWidgets.QWidget):
 
     def paintEvent(self, event):
         painter = QtGui.QPainter(self)
-        painter.drawText(200, 200, "Angle = %d" % self.currentAngle)
+        painter.drawText(200, 200, f"Angle = {self.currentAngle}")
 
 
 class MyWidget(QtWidgets.QWidget):

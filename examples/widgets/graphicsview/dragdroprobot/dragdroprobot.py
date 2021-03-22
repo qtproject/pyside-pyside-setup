@@ -57,10 +57,9 @@ class ColorItem(QtWidgets.QGraphicsItem):
 
         self.color = QtGui.QColor(random(256), random(256), random(256))
 
+        (r, g, b) = (self.color.red(), self.color.green(), self.color.blue())
         self.setToolTip(
-            "QColor(%d, %d, %d)\nClick and drag this color onto the robot!" %
-              (self.color.red(), self.color.green(), self.color.blue())
-        )
+            f"QColor({r}, {g}, {b})\nClick and drag this color onto the robot!")
         self.setCursor(QtCore.Qt.OpenHandCursor)
 
     def boundingRect(self):

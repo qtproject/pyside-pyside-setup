@@ -62,8 +62,9 @@ class DragLabel(QLabel):
 
         mimeData = QMimeData()
         mimeData.setText(self.text())
-        mimeData.setData('application/x-hotspot',
-                b'%d %d' % (hotSpot.x(), hotSpot.y()))
+        hx = hotSpot.x()
+        hy = hotSpot.y()
+        mimeData.setData('application/x-hotspot', f'{hx} {hy}'.encode('utf-8'))
 
         pixmap = QPixmap(self.size())
         self.render(pixmap)

@@ -205,7 +205,7 @@ class BlockingClient(QWidget):
                     "and port settings are correct.")
         else:
             QMessageBox.information(self, "Blocking Fortune Client",
-                    "The following error occurred: %s." % message)
+                    f"The following error occurred: {message}.")
 
         self.getFortuneButton.setEnabled(True)
 

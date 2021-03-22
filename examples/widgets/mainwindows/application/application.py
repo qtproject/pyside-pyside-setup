@@ -216,8 +216,9 @@ class MainWindow(QtWidgets.QMainWindow):
     def loadFile(self, fileName):
         file = QtCore.QFile(fileName)
         if not file.open(QtCore.QFile.ReadOnly | QtCore.QFile.Text):
+            reason = file.errorString()
             QtWidgets.QMessageBox.warning(self, "Application",
-                    "Cannot read file %s:\n%s." % (fileName, file.errorString()))
+                    f"Cannot read file {fileName}:\n{reason}.")
             return
 
         inf = QtCore.QTextStream(file)
@@ -236,9 +237,11 @@ class MainWindow(QtWidgets.QMainWindow):
             outf = QtCore.QTextStream(file)
             outf << self.textEdit.toPlainText()
             if not file.commit():
-                error = "Cannot write file %s:\n%s." % (fileName, file.errorString())
+                reason = file.errorString()
+                error = f"Cannot write file {fileName}:\n{reason}."
         else:
-            error = "Cannot open file %s:\n%s." % (fileName, file.errorString())
+            reason = file.errorString()
+            error = f"Cannot open file {fileName}:\n{reason}."
         QtWidgets.QApplication.restoreOverrideCursor()
 
         if error:
@@ -259,7 +262,7 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             shownName = 'untitled.txt'
 
-        self.setWindowTitle("%s[*] - Application" % shownName)
+        self.setWindowTitle(f"{shownName}[*] - Application")
 
     def strippedName(self, fullFileName):
         return QtCore.QFileInfo(fullFileName).fileName()

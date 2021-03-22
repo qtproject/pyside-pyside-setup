@@ -70,8 +70,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         inFile = QtCore.QFile(fileName)
         if not inFile.open(QtCore.QFile.ReadOnly | QtCore.QFile.Text):
+            reason = inFile.errorString()
             QtWidgets.QMessageBox.warning(self, "DOM Bookmarks",
-                    "Cannot read file %s:\n%s." % (fileName, inFile.errorString()))
+                    f"Cannot read file {fileName}:\n{reason}.")
             return
 
         if self.xbelTree.read(inFile):
@@ -87,8 +88,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         outFile = QtCore.QFile(fileName)
         if not outFile.open(QtCore.QFile.WriteOnly | QtCore.QFile.Text):
+            reason = outFile.errorString()
             QtWidgets.QMessageBox.warning(self, "DOM Bookmarks",
-                    "Cannot write file %s:\n%s." % (fileName, outFile.errorString()))
+                    "Cannot write file {fileName}:\n{reason}.")
             return
 
         if self.xbelTree.write(outFile):
@@ -151,7 +153,7 @@ class XbelTree(QtWidgets.QTreeWidget):
         ok, errorStr, errorLine, errorColumn = self.domDocument.setContent(device, True)
         if not ok:
             QtWidgets.QMessageBox.information(self.window(), "DOM Bookmarks",
-                    "Parse error at line %d, column %d:\n%s" % (errorLine, errorColumn, errorStr))
+                    f"Parse error at line {errorLine}, column {errorColumn}:\n{errorStr}")
             return False
 
         root = self.domDocument.documentElement()
@@ -215,7 +217,7 @@ class XbelTree(QtWidgets.QTreeWidget):
         item.setText(0, title)
 
         folded = (element.attribute('folded') != 'no')
-        self.setItemExpanded(item, not folded)
+        item.setExpanded(not folded)
 
         child = element.firstChildElement()
         while not child.isNull():

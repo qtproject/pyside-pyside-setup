@@ -109,8 +109,8 @@ class MainWindow(QtWidgets.QMainWindow):
         cursor.insertBlock()
 
         date = QtCore.QDate.currentDate()
-        cursor.insertText("Date: %s" % date.toString('d MMMM yyyy'),
-                textFormat)
+        date_str = date.toString('d MMMM yyyy')
+        cursor.insertText(f"Date: {date_str}", textFormat)
         cursor.insertBlock()
 
         bodyFrameFormat = QtGui.QTextFrameFormat()

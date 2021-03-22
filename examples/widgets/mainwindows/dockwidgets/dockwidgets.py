@@ -134,8 +134,9 @@ class MainWindow(QMainWindow):
 
         file = QFile(filename)
         if not file.open(QFile.WriteOnly | QFile.Text):
+            reason = file.errorString()
             QMessageBox.warning(self, "Dock Widgets",
-                    "Cannot write file %s:\n%s." % (filename, file.errorString()))
+                    "Cannot write file {filename}:\n{reason}.")
             return
 
         out = QTextStream(file)
@@ -143,7 +144,7 @@ class MainWindow(QMainWindow):
         out << self.textEdit.toHtml()
         QApplication.restoreOverrideCursor()
 
-        self.statusBar().showMessage("Saved '%s'" % filename, 2000)
+        self.statusBar().showMessage(f"Saved '{filename}'", 2000)
 
     def undo(self):
         document = self.textEdit.document()

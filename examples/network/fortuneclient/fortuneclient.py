@@ -118,7 +118,6 @@ class Client(QtWidgets.QDialog):
             return
 
         nextFortune = instr.readString()
-        nextFortune = str(nextFortune, encoding='ascii')
 
         if nextFortune == self.currentFortune:
             QtCore.QTimer.singleShot(0, self.requestNewFortune)
@@ -141,8 +140,9 @@ class Client(QtWidgets.QDialog):
                     "fortune server is running, and check that the host name "
                     "and port settings are correct.")
         else:
+            reason = self.tcpSocket.errorString()
             QtWidgets.QMessageBox.information(self, "Fortune Client",
-                    "The following error occurred: %s." % self.tcpSocket.errorString())
+                    f"The following error occurred: {reason}.")
 
         self.getFortuneButton.setEnabled(True)
 

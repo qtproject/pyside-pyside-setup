@@ -91,7 +91,7 @@ class Dialog(QtWidgets.QDialog):
         layout = QtWidgets.QHBoxLayout()
 
         for i in range(Dialog.NumButtons):
-            button = QtWidgets.QPushButton("Button %d" % (i + 1))
+            button = QtWidgets.QPushButton(f"Button {i + 1}")
             layout.addWidget(button)
 
         self.horizontalGroupBox.setLayout(layout)
@@ -101,7 +101,7 @@ class Dialog(QtWidgets.QDialog):
         layout = QtWidgets.QGridLayout()
 
         for i in range(Dialog.NumGridRows):
-            label = QtWidgets.QLabel("Line %d:" % (i + 1))
+            label = QtWidgets.QLabel(f"Line {i + 1}:")
             lineEdit = QtWidgets.QLineEdit()
             layout.addWidget(label, i + 1, 0)
             layout.addWidget(lineEdit, i + 1, 1)

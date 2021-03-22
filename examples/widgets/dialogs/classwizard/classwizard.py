@@ -122,8 +122,10 @@ class ClassWizard(QtWidgets.QWizard):
         headerFile = QtCore.QFile(outputDir + '/' + header)
 
         if not headerFile.open(QtCore.QFile.WriteOnly | QtCore.QFile.Text):
+            name = headerFile.fileName()
+            reason = headerFile.errorString()
             QtWidgets.QMessageBox.warning(None, "Class Wizard",
-                    "Cannot write file %s:\n%s" % (headerFile.fileName(), headerFile.errorString()))
+                    f"Cannot write file {name}:\n{reason}")
             return
 
         headerFile.write(QtCore.QByteArray(block.encode("utf-8")))
@@ -175,8 +177,10 @@ class ClassWizard(QtWidgets.QWizard):
         implementationFile = QtCore.QFile(outputDir + '/' + implementation)
 
         if not implementationFile.open(QtCore.QFile.WriteOnly | QtCore.QFile.Text):
+            name = implementationFile.fileName()
+            reason = implementationFile.errorString()
             QtWidgets.QMessageBox.warning(None, "Class Wizard",
-                    "Cannot write file %s:\n%s" % (implementationFile.fileName(), implementationFile.errorString()))
+                    f"Cannot write file {name}:\n{reason}")
             return
 
         implementationFile.write(QtCore.QByteArray(block.encode("utf-8")))
@@ -389,7 +393,7 @@ class ConclusionPage(QtWidgets.QWizardPage):
     def initializePage(self):
         finishText = self.wizard().buttonText(QtWidgets.QWizard.FinishButton)
         finishText.replace('&', '')
-        self.label.setText("Click %s to generate the class skeleton." % finishText)
+        self.label.setText(f"Click {finishText} to generate the class skeleton.")
 
 
 if __name__ == '__main__':

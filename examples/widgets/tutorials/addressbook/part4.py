@@ -165,26 +165,26 @@ class AddressBook(QtWidgets.QWidget):
             if name not in self.contacts:
                 self.contacts[name] = address
                 QtWidgets.QMessageBox.information(self, "Add Successful",
-                        "\"%s\" has been added to your address book." % name)
+                        f'"{name}" has been added to your address book.')
             else:
                 QtWidgets.QMessageBox.information(self, "Add Unsuccessful",
-                        "Sorry, \"%s\" is already in your address book." % name)
+                        f'Sorry, "{name}" is already in your address book.')
                 return
 
         elif self.currentMode == self.EditingMode:
             if self.oldName != name:
                 if name not in self.contacts:
                     QtWidgets.QMessageBox.information(self, "Edit Successful",
-                            "\"%s\" has been edited in your address book." % self.oldName)
+                            f'"{self.oldName}" has been edited in your address book.')
                     del self.contacts[self.oldName]
                     self.contacts[name] = address
                 else:
                     QtWidgets.QMessageBox.information(self, "Edit Unsuccessful",
-                            "Sorry, \"%s\" is already in your address book." % name)
+                            f'Sorry, "{name}" is already in your address book.')
                     return
             elif self.oldAddress != address:
                 QtWidgets.QMessageBox.information(self, "Edit Successful",
-                        "\"%s\" has been edited in your address book." % name)
+                        f'"{name}" has been edited in your address book.')
                 self.contacts[name] = address
 
         self.updateInterface(self.NavigationMode)
@@ -200,7 +200,7 @@ class AddressBook(QtWidgets.QWidget):
 
         if name in self.contacts:
             button = QtWidgets.QMessageBox.question(self, "Confirm Remove",
-                    "Are you sure you want to remove \"%s\"?" % name,
+                    f'Are you sure you want to remove "{name}"?',
                     QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
 
             if button == QtWidgets.QMessageBox.Yes:
@@ -208,7 +208,7 @@ class AddressBook(QtWidgets.QWidget):
                 del self.contacts[name]
 
                 QtWidgets.QMessageBox.information(self, "Remove Successful",
-                        "\"%s\" has been removed from your address book." % name)
+                        f'"{name}" has been removed from your address book.')
 
         self.updateInterface(self.NavigationMode)
 

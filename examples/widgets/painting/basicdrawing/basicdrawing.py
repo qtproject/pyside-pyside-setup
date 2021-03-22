@@ -153,8 +153,9 @@ class RenderArea(QWidget):
                 elif self.shape == RenderArea.Path:
                     painter.drawPath(path)
                 elif self.shape == RenderArea.Text:
+                    qv = qVersion()
                     painter.drawText(rect, Qt.AlignCenter,
-                                     "PySide 2\nQt %s" % qVersion())
+                                     f"PySide 6\nQt {qv}")
                 elif self.shape == RenderArea.Pixmap:
                     painter.drawPixmap(10, 10, self.pixmap)
 

@@ -154,10 +154,10 @@ class AddressBook(QtWidgets.QWidget):
         if name not in self.contacts:
             self.contacts[name] = address
             QtWidgets.QMessageBox.information(self, "Add Successful",
-                    "\"%s\" has been added to your address book." % name)
+                    f'"{name}" has been added to your address book.')
         else:
             QtWidgets.QMessageBox.information(self, "Add Unsuccessful",
-                    "Sorry, \"%s\" is already in your address book." % name)
+                    f'Sorry, "{name}" is already in your address book.')
             return
 
         if not self.contacts:

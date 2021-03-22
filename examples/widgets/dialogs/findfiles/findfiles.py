@@ -130,7 +130,8 @@ class Window(QtWidgets.QDialog):
 
         for i in range(len(files)):
             progressDialog.setValue(i)
-            progressDialog.setLabelText("Searching file number %d of %d..." % (i, len(files)))
+            n = len(files)
+            progressDialog.setLabelText(f"Searching file number {i} of {n}...")
             QtCore.QCoreApplication.processEvents()
 
             if progressDialog.wasCanceled():
@@ -159,7 +160,8 @@ class Window(QtWidgets.QDialog):
 
             fileNameItem = QtWidgets.QTableWidgetItem(fn)
             fileNameItem.setFlags(fileNameItem.flags() ^ QtCore.Qt.ItemIsEditable)
-            sizeItem = QtWidgets.QTableWidgetItem("%d KB" % (int((size + 1023) / 1024)))
+            size_kb = int((size + 1023) / 1024)
+            sizeItem = QtWidgets.QTableWidgetItem(f"{size_kb} KB")
             sizeItem.setTextAlignment(QtCore.Qt.AlignVCenter | QtCore.Qt.AlignRight)
             sizeItem.setFlags(sizeItem.flags() ^ QtCore.Qt.ItemIsEditable)
 
@@ -168,7 +170,8 @@ class Window(QtWidgets.QDialog):
             self.filesTable.setItem(row, 0, fileNameItem)
             self.filesTable.setItem(row, 1, sizeItem)
 
-        self.filesFoundLabel.setText("%d file(s) found (Double click on a file to open it)" % len(files))
+        n = len(files)
+        self.filesFoundLabel.setText(f"{n} file(s) found (Double click on a file to open it)")
 
     def createButton(self, text, member):
         button = QtWidgets.QPushButton(text)

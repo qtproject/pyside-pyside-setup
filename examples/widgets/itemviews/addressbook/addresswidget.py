@@ -94,7 +94,7 @@ class AddressWidget(QTabWidget):
         try:
             addresses.remove(address)
             QMessageBox.information(self, "Duplicate Name",
-                                    "The name \"%s\" already exists." % name)
+                                    f'The name "{name}" already exists.')
         except ValueError:
             # The address didn't already exist, so let's add it to the model.
 
@@ -129,13 +129,14 @@ class AddressWidget(QTabWidget):
 
         # Get the name and address of the currently selected row.
         indexes = selectionModel.selectedRows()
+        if len(indexes) != 1:
+            return
 
-        for index in indexes:
-            row = proxyModel.mapToSource(index).row()
-            ix = self.tableModel.index(row, 0, QModelIndex())
-            name = self.tableModel.data(ix, Qt.DisplayRole)
-            ix = self.tableModel.index(row, 1, QModelIndex())
-            address = self.tableModel.data(ix, Qt.DisplayRole)
+        row = proxyModel.mapToSource(indexes[0]).row()
+        ix = self.tableModel.index(row, 0, QModelIndex())
+        name = self.tableModel.data(ix, Qt.DisplayRole)
+        ix = self.tableModel.index(row, 1, QModelIndex())
+        address = self.tableModel.data(ix, Qt.DisplayRole)
 
         # Open an addDialogWidget, and only allow the user to edit the address.
         addDialog = AddDialogWidget()
@@ -216,12 +217,12 @@ class AddressWidget(QTabWidget):
             f = open(filename, "rb")
             addresses = pickle.load(f)
         except IOError:
-            QMessageBox.information(self, "Unable to open file: %s" % filename)
+            QMessageBox.information(self, f"Unable to open file: {filename}")
         finally:
             f.close()
 
         if len(addresses) == 0:
-            QMessageBox.information(self, "No contacts in file: %s" % filename)
+            QMessageBox.information(self, f"No contacts in file: {filename}")
         else:
             for address in addresses:
                 self.addEntry(address["name"], address["address"])
@@ -233,7 +234,7 @@ class AddressWidget(QTabWidget):
             pickle.dump(self.tableModel.addresses, f)
 
         except IOError:
-            QMessageBox.information(self, "Unable to open file: %s" % filename)
+            QMessageBox.information(self, f"Unable to open file: {filename}")
         finally:
             f.close()
 

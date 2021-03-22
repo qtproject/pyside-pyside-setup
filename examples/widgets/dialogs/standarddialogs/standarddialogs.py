@@ -185,7 +185,7 @@ class Dialog(QtWidgets.QDialog):
         i, ok = QtWidgets.QInputDialog.getInt(self,
                 "QInputDialog.getInteger()", "Percentage:", 25, 0, 100, 1)
         if ok:
-            self.integerLabel.setText("%d%%" % i)
+            self.integerLabel.setText(f"{i}%")
 
     def setDouble(self):
         d, ok = QtWidgets.QInputDialog.getDouble(self, "QInputDialog.getDouble()",
@@ -249,7 +249,8 @@ class Dialog(QtWidgets.QDialog):
                 "All Files (*);;Text Files (*.txt)", "", options)
         if files:
             self.openFilesPath = files[0]
-            self.openFileNamesLabel.setText("[%s]" % ', '.join(files))
+            file_list = ', '.join(files)
+            self.openFileNamesLabel.setText(f"[{file_list}]")
 
     def setSaveFileName(self):
         options = QtWidgets.QFileDialog.Options()

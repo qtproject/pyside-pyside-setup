@@ -132,7 +132,7 @@ class Window(QtWidgets.QWidget):
         self.setWindowTitle("Fetch More Example")
 
     def updateLog(self, number):
-        self.logViewer.append("%d items added." % number)
+        self.logViewer.append(f"{number} items added.")
 
 
 if __name__ == '__main__':
