@@ -84,7 +84,7 @@ class CustomTableModel(QAbstractTableModel):
             else:
                 return "y"
         else:
-            return "{}".format(section + 1)
+            return str(section + 1)
 
     def data(self, index, role=Qt.DisplayRole):
         if role == Qt.DisplayRole:
@@ -144,8 +144,8 @@ class TableWidget(QWidget):
         seriesColorHex = "#000000"
 
         # get the color of the series and use it for showing the mapped area
-        seriesColorHex = "{}".format(self.series.pen().color().name())
-        self.model.add_mapping(seriesColorHex, QRect(0, 0, 2, self.model.rowCount()))
+        self.model.add_mapping(self.series.pen().color().name(),
+                               QRect(0, 0, 2, self.model.rowCount()))
 
         # series 2
         self.series = QLineSeries()
@@ -159,8 +159,8 @@ class TableWidget(QWidget):
         self.chart.addSeries(self.series)
 
         # get the color of the series and use it for showing the mapped area
-        seriesColorHex = "{}".format(self.series.pen().color().name())
-        self.model.add_mapping(seriesColorHex, QRect(2, 0, 2, self.model.rowCount()))
+        self.model.add_mapping(self.series.pen().color().name(),
+                               QRect(2, 0, 2, self.model.rowCount()))
 
         self.chart.createDefaultAxes()
         self.chart_view = QChartView(self.chart)

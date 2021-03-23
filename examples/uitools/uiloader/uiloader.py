@@ -59,7 +59,8 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     ui_file = QFile(ui_file_name)
     if not ui_file.open(QIODevice.ReadOnly):
-        print("Cannot open {}: {}".format(ui_file_name, ui_file.errorString()))
+        reason = ui_file.errorString()
+        print(f"Cannot open {ui_file_name}: {reason}")
         sys.exit(-1)
     loader = QUiLoader()
     widget = loader.load(ui_file, None)

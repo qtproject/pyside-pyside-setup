@@ -194,7 +194,7 @@ class AddressWidget(QTabWidget):
             # tab. The regex will end up looking like "^[ABC].*", only
             # allowing this tab to display items where the name starts with
             # "A", "B", or "C". Notice that we set it to be case-insensitive.
-            re = QRegularExpression("^[{}].*".format(group))
+            re = QRegularExpression(f"^[{group}].*")
             assert re.isValid()
             re.setPatternOptions(QRegularExpression.CaseInsensitiveOption)
             proxyModel.setFilterRegularExpression(re)

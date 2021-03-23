@@ -66,8 +66,8 @@ class MainSlice(QPieSlice):
         return self.name
 
     def update_label(self):
-        self.setLabel("{} {:.2f}%".format(self.name,
-            self.percentage() * 100))
+        p = self.percentage() * 100
+        self.setLabel(f"{self.name} {p:.2f}%")
 
 
 class DonutBreakdownChart(QChart):
@@ -132,9 +132,9 @@ class DonutBreakdownChart(QChart):
                     marker.setVisible(False)
                 else:
                     # modify markers from breakdown series
-                    marker.setLabel("{} {:.2f}%".format(
-                        marker.slice().label(),
-                        marker.slice().percentage() * 100, 0))
+                    label = marker.slice().label()
+                    p = marker.slice().percentage() * 100
+                    marker.setLabel(f"{label} {p:.2f}%")
                     marker.setFont(QFont("Arial", 8))
 
 if __name__ == "__main__":

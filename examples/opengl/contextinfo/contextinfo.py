@@ -112,8 +112,9 @@ colors = numpy.array([1, 0, 0, 0, 1, 0, 0, 0, 1], dtype = numpy.float32)
 
 def print_surface_format(surface_format):
     profile_name = 'core' if surface_format.profile() == QSurfaceFormat.CoreProfile else 'compatibility'
-    return "{} version {}.{}".format(profile_name,
-        surface_format.majorVersion(), surface_format.minorVersion())
+    major = surface_format.majorVersion()
+    minor = surface_format.minorVersion()
+    return f"{profile_name} version {major}.{minor}"
 
 class RenderWindow(QWindow):
     def __init__(self, format):
@@ -145,11 +146,14 @@ class RenderWindow(QWindow):
         vertexShader = vertexShaderSource if useNewStyleShader else vertexShaderSource110
         fragmentShader = fragmentShaderSource if useNewStyleShader else fragmentShaderSource110
         if not self.program.addShaderFromSourceCode(QOpenGLShader.Vertex, vertexShader):
-            raise Exception("Vertex shader could not be added: {} ({})".format(self.program.log(), vertexShader))
+            log = self.program.log()
+            raise Exception("Vertex shader could not be added: {log} ({vertexShader})")
         if not self.program.addShaderFromSourceCode(QOpenGLShader.Fragment, fragmentShader):
-            raise Exception("Fragment shader could not be added: {} ({})".format(self.program.log(), fragmentShader))
+            log = self.program.log()
+            raise Exception(f"Fragment shader could not be added: {log} ({fragmentShader})")
         if not self.program.link():
-            raise Exception("Could not link shaders: {}".format(self.program.log()))
+            log = self.program.log()
+            raise Exception(f"Could not link shaders: {log}")
 
         self.posAttr = self.program.attributeLocation("posAttr")
         self.colAttr = self.program.attributeLocation("colAttr")
@@ -257,8 +261,9 @@ class MainWindow(QWidget):
         hBoxLayout.addWidget(container)
 
     def updateDescription(self):
-        text = "{}\n\nPython {}\n\n{}".format(QLibraryInfo.build(), sys.version,
-                                              self.renderWindow.glInfo())
+        build = QLibraryInfo.build()
+        gl = self.renderWindow.glInfo()
+        text = f"{build}\n\nPython {sys.version}\n\n{gl}"
         self.plainTextEdit.setPlainText(text)
 
 if __name__ == '__main__':

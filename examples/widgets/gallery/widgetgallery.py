@@ -75,7 +75,7 @@ def class_name(o):
 def help_url(page):
     """Build a Qt help URL from the page name"""
     major_version = qVersion().split('.')[0]
-    return "https://doc.qt.io/qt-{}/{}.html".format(major_version, page)
+    return f"https://doc.qt.io/qt-{major_version}/{page}.html"
 
 
 def launch_help(widget):
@@ -204,7 +204,8 @@ class WidgetGallery(QDialog):
         main_layout.addWidget(self._progress_bar, 3, 0, 1, 2)
         main_layout.addWidget(dialog_buttonbox, 4, 0, 1, 2)
 
-        self.setWindowTitle("Widget Gallery Qt {}".format(qVersion()))
+        qv = qVersion()
+        self.setWindowTitle(f"Widget Gallery Qt {qv}")
 
     def setVisible(self, visible):
         super(WidgetGallery, self).setVisible(visible)

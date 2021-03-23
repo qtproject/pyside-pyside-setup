@@ -67,9 +67,10 @@ def getMemoryUsage():
                 memoryUsage = float(line[64:74].strip().replace(',', '').replace('.', ''))
                 legend = ''
                 if memoryUsage > 10240:
-                    legend = '{} {}M'.format(command, round(memoryUsage / 1024))
+                    mb = memoryUsage / 1024
+                    legend = f'{command} {mb}M'
                 else:
-                    legend = '{} {}K'.format(command, round(memoryUsage))
+                    legend = f'{command} {memoryUsage}K'
                 result.append([legend, memoryUsage])
     else:
         # Unix: Obtain memory usage percentage from 'ps'
@@ -87,7 +88,7 @@ def getMemoryUsage():
                 if not command.startswith('['):
                     command = os.path.basename(command)
                     memoryUsage = round(float(tokens[memoryColumn].replace(',', '.')))
-                    legend = '{} {}%'.format(command, memoryUsage)
+                    legend = f'{command} {memoryUsage}%'
                     result.append([legend, memoryUsage])
 
     result.sort(key = lambda x: x[1], reverse=True)

@@ -122,7 +122,7 @@ options.append(("--pyside-shared-libraries-cmake",
 
 options_usage = ''
 for i, (flag, _, _, description) in enumerate(options):
-    options_usage += '    {:<45} {}'.format(flag, description)
+    options_usage += f'    {flag:<45} {description}'
     if i < len(options) - 1:
         options_usage += '\n'
 
@@ -250,20 +250,24 @@ def python_link_flags_qmake():
         for d in libdir.split("\\"):
             if " " in d:
                 libdir = libdir.replace(d, d.split(" ")[0][:-1]+"~1")
-        return '-L{} -l{}'.format(libdir, flags['lib'])
+        lib_flags = flags['lib']
+        return f'-L{libdir} -l{lib_flags}'
     elif sys.platform == 'darwin':
-        return '-L{} -l{}'.format(flags['libdir'], flags['lib'])
-
+        libdir = flags['libdir']
+        lib_flags = flags['lib']
+        return f'-L{libdir} -l{lib_flags}'
     else:
         # Linux and anything else
-        return '-L{} -l{}'.format(flags['libdir'], flags['lib'])
+        libdir = flags['libdir']
+        lib_flags = flags['lib']
+        return f'-L{libdir} -l{lib_flags}'
 
 
 def python_link_flags_cmake():
     flags = python_link_data()
     libdir = flags['libdir']
     lib = re.sub(r'.dll$', '.lib', flags['lib'])
-    return '{};{}'.format(libdir, lib)
+    return f'{libdir};{lib}'
 
 
 def python_link_data():
@@ -279,14 +283,14 @@ def python_link_data():
     flags['libdir'] = libdir
     if sys.platform == 'win32':
         suffix = '_d' if is_debug() else ''
-        flags['lib'] = 'python{}{}'.format(version_no_dots, suffix)
+        flags['lib'] = f'python{version_no_dots}{suffix}'
 
     elif sys.platform == 'darwin':
-        flags['lib'] = 'python{}'.format(version)
+        flags['lib'] = f'python{version}'
 
     # Linux and anything else
     else:
-        flags['lib'] = 'python{}{}'.format(version, sys.abiflags)
+        flags['lib'] = f'python{version}{sys.abiflags}'
 
     return flags
 
@@ -306,7 +310,7 @@ def get_package_qmake_lflags(which_package):
     if package_path is None:
         return None
 
-    link = "-L{}".format(package_path)
+    link = f"-L{package_path}"
     glob_result = glob.glob(os.path.join(package_path, shared_library_glob_pattern()))
     for lib in filter_shared_libraries(glob_result):
         link += ' '
@@ -367,5 +371,5 @@ for argument, handler, error, _ in options:
 
         line = handler_result
         if print_all:
-            line = "{:<40}: ".format(argument) + line
+            line = f"{argument:<40}: {line}"
         print(line)

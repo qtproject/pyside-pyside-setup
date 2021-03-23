@@ -45,7 +45,9 @@ from PySide6.QtCore import QPointF, Qt
 from PySide6.QtGui import QColor, QPainter, QPalette
 from PySide6.QtWidgets import (QApplication, QMainWindow, QSizePolicy,
     QWidget)
-from PySide6.QtCharts import QtCharts
+from PySide6.QtCharts import (QAreaSeries, QBarSet, QChart, QChartView,
+                              QLineSeries, QPieSeries, QScatterSeries,
+                              QSplineSeries, QStackedBarSeries)
 
 from ui_themewidget import Ui_ThemeWidgetForm as ui
 
@@ -69,34 +71,34 @@ class ThemeWidget(QWidget):
         self.populate_legendbox()
 
         # Area Chart
-        chart_view =  QtCharts.QChartView(self.create_areachart())
+        chart_view =  QChartView(self.create_areachart())
         self.ui.gridLayout.addWidget(chart_view, 1, 0)
         self.charts.append(chart_view)
 
         # Pie Chart
-        chart_view =  QtCharts.QChartView(self.createPieChart())
+        chart_view =  QChartView(self.createPieChart())
         chart_view.setSizePolicy(QSizePolicy.Ignored,
             QSizePolicy.Ignored)
         self.ui.gridLayout.addWidget(chart_view, 1, 1)
         self.charts.append(chart_view)
 
         # Line Chart
-        chart_view =  QtCharts.QChartView(self.createLineChart())
+        chart_view =  QChartView(self.createLineChart())
         self.ui.gridLayout.addWidget(chart_view, 1, 2)
         self.charts.append(chart_view)
 
         # Bar Chart
-        chart_view =  QtCharts.QChartView(self.createBarChart())
+        chart_view =  QChartView(self.createBarChart())
         self.ui.gridLayout.addWidget(chart_view, 2, 0)
         self.charts.append(chart_view)
 
         # Spline Chart
-        chart_view =  QtCharts.QChartView(self.createSplineChart())
+        chart_view =  QChartView(self.createSplineChart())
         self.ui.gridLayout.addWidget(chart_view, 2, 1)
         self.charts.append(chart_view)
 
         # Scatter Chart
-        chart_view =  QtCharts.QChartView(self.create_scatterchart())
+        chart_view =  QChartView(self.create_scatterchart())
         self.ui.gridLayout.addWidget(chart_view, 2, 2)
         self.charts.append(chart_view)
 
@@ -122,7 +124,7 @@ class ThemeWidget(QWidget):
                 y_value += uniform(0, constant)
                 x_value = (j + random()) * constant
                 value = QPointF(x_value, y_value)
-                label = "Slice {}: {}".format(i, j)
+                label = f"Slice {i}: {j}"
                 data_list.append((value, label))
             data_table.append(data_list)
 
@@ -131,22 +133,22 @@ class ThemeWidget(QWidget):
     def populate_themebox(self):
         theme = self.ui.themeComboBox
 
-        theme.addItem("Light", QtCharts.QChart.ChartThemeLight)
-        theme.addItem("Blue Cerulean", QtCharts.QChart.ChartThemeBlueCerulean)
-        theme.addItem("Dark", QtCharts.QChart.ChartThemeDark)
-        theme.addItem("Brown Sand", QtCharts.QChart.ChartThemeBrownSand)
-        theme.addItem("Blue NCS", QtCharts.QChart.ChartThemeBlueNcs)
-        theme.addItem("High Contrast", QtCharts.QChart.ChartThemeHighContrast)
-        theme.addItem("Blue Icy", QtCharts.QChart.ChartThemeBlueIcy)
-        theme.addItem("Qt", QtCharts.QChart.ChartThemeQt)
+        theme.addItem("Light", QChart.ChartThemeLight)
+        theme.addItem("Blue Cerulean", QChart.ChartThemeBlueCerulean)
+        theme.addItem("Dark", QChart.ChartThemeDark)
+        theme.addItem("Brown Sand", QChart.ChartThemeBrownSand)
+        theme.addItem("Blue NCS", QChart.ChartThemeBlueNcs)
+        theme.addItem("High Contrast", QChart.ChartThemeHighContrast)
+        theme.addItem("Blue Icy", QChart.ChartThemeBlueIcy)
+        theme.addItem("Qt", QChart.ChartThemeQt)
 
     def populate_animationbox(self):
         animated = self.ui.animatedComboBox
 
-        animated.addItem("No Animations", QtCharts.QChart.NoAnimation)
-        animated.addItem("GridAxis Animations", QtCharts.QChart.GridAxisAnimations)
-        animated.addItem("Series Animations", QtCharts.QChart.SeriesAnimations)
-        animated.addItem("All Animations", QtCharts.QChart.AllAnimations)
+        animated.addItem("No Animations", QChart.NoAnimation)
+        animated.addItem("GridAxis Animations", QChart.GridAxisAnimations)
+        animated.addItem("Series Animations", QChart.SeriesAnimations)
+        animated.addItem("All Animations", QChart.AllAnimations)
 
     def populate_legendbox(self):
         legend = self.ui.legendComboBox
@@ -158,14 +160,14 @@ class ThemeWidget(QWidget):
         legend.addItem("Legend Right", Qt.AlignRight)
 
     def create_areachart(self):
-        chart = QtCharts.QChart()
+        chart = QChart()
         chart.setTitle("Area Chart")
 
         # The lower series initialized to zero values
         lower_series = None
         name = "Series "
         for i in range(len(self.data_table)):
-            upper_series = QtCharts.QLineSeries(chart)
+            upper_series = QLineSeries(chart)
             for j in range(len(self.data_table[i])):
                 data = self.data_table[i][j]
                 if lower_series:
@@ -174,8 +176,8 @@ class ThemeWidget(QWidget):
                     upper_series.append(QPointF(j, y_value))
                 else:
                     upper_series.append(QPointF(j, data[0].y()))
-            area = QtCharts.QAreaSeries(upper_series, lower_series)
-            area.setName("{}{}".format(name, i))
+            area = QAreaSeries(upper_series, lower_series)
+            area.setName(f"{name}{i}")
             chart.addSeries(area)
             lower_series = upper_series
 
@@ -188,12 +190,12 @@ class ThemeWidget(QWidget):
         return chart
 
     def createBarChart(self):
-        chart = QtCharts.QChart()
+        chart = QChart()
         chart.setTitle("Bar chart")
 
-        series = QtCharts.QStackedBarSeries(chart)
+        series = QStackedBarSeries(chart)
         for i in range(len(self.data_table)):
-            barset = QtCharts.QBarSet("Bar set {}".format(i))
+            barset = QBarSet(f"Bar set {i}")
             for data in self.data_table[i]:
                 barset.append(data[0].y())
             series.append(barset)
@@ -208,15 +210,15 @@ class ThemeWidget(QWidget):
         return chart
 
     def createLineChart(self):
-        chart = QtCharts.QChart()
+        chart = QChart()
         chart.setTitle("Line chart")
 
         name = "Series "
         for i, lst in enumerate(self.data_table):
-            series = QtCharts.QLineSeries(chart)
+            series = QLineSeries(chart)
             for data in lst:
                 series.append(data[0])
-            series.setName("{}{}".format(name, i))
+            series.setName(f"{name}{i}")
             chart.addSeries(series)
 
         chart.createDefaultAxes()
@@ -228,10 +230,10 @@ class ThemeWidget(QWidget):
         return chart
 
     def createPieChart(self):
-        chart = QtCharts.QChart()
+        chart = QChart()
         chart.setTitle("Pie chart")
 
-        series = QtCharts.QPieSeries(chart)
+        series = QPieSeries(chart)
         for data in self.data_table[0]:
             slc = series.append(data[1], data[0].y())
             if data == self.data_table[0][0]:
@@ -246,14 +248,14 @@ class ThemeWidget(QWidget):
         return chart
 
     def createSplineChart(self):
-        chart = QtCharts.QChart()
+        chart = QChart()
         chart.setTitle("Spline chart")
         name = "Series "
         for i, lst in enumerate(self.data_table):
-            series = QtCharts.QSplineSeries(chart)
+            series = QSplineSeries(chart)
             for data in lst:
                 series.append(data[0])
-            series.setName("{}{}".format(name, i))
+            series.setName(f"{name}{i}")
             chart.addSeries(series)
 
         chart.createDefaultAxes()
@@ -265,14 +267,14 @@ class ThemeWidget(QWidget):
         return chart
 
     def create_scatterchart(self):
-        chart = QtCharts.QChart()
+        chart = QChart()
         chart.setTitle("Scatter chart")
         name = "Series "
         for i, lst in enumerate(self.data_table):
-            series = QtCharts.QScatterSeries(chart)
+            series = QScatterSeries(chart)
             for data in lst:
                 series.append(data[0])
-            series.setName("{}{}".format(name, i))
+            series.setName(f"{name}{i}")
             chart.addSeries(series)
 
         chart.createDefaultAxes()
@@ -298,40 +300,40 @@ class ThemeWidget(QWidget):
             if chart_theme != theme:
                 for chart_view in self.charts:
                     if theme == 0:
-                        theme_name = QtCharts.QChart.ChartThemeLight
+                        theme_name = QChart.ChartThemeLight
                     elif theme == 1:
-                        theme_name = QtCharts.QChart.ChartThemeBlueCerulean
+                        theme_name = QChart.ChartThemeBlueCerulean
                     elif theme == 2:
-                        theme_name = QtCharts.QChart.ChartThemeDark
+                        theme_name = QChart.ChartThemeDark
                     elif theme == 3:
-                        theme_name = QtCharts.QChart.ChartThemeBrownSand
+                        theme_name = QChart.ChartThemeBrownSand
                     elif theme == 4:
-                        theme_name = QtCharts.QChart.ChartThemeBlueNcs
+                        theme_name = QChart.ChartThemeBlueNcs
                     elif theme == 5:
-                        theme_name = QtCharts.QChart.ChartThemeHighContrast
+                        theme_name = QChart.ChartThemeHighContrast
                     elif theme == 6:
-                        theme_name = QtCharts.QChart.ChartThemeBlueIcy
+                        theme_name = QChart.ChartThemeBlueIcy
                     elif theme == 7:
-                        theme_name = QtCharts.QChart.ChartThemeQt
+                        theme_name = QChart.ChartThemeQt
                     else:
-                        theme_name = QtCharts.QChart.ChartThemeLight
+                        theme_name = QChart.ChartThemeLight
 
                     chart_view.chart().setTheme(theme_name)
 
                 # Set palette colors based on selected theme
-                if theme == QtCharts.QChart.ChartThemeLight:
+                if theme == QChart.ChartThemeLight:
                     set_colors(QColor(0xf0f0f0), QColor(0x404044))
-                elif theme == QtCharts.QChart.ChartThemeDark:
+                elif theme == QChart.ChartThemeDark:
                     set_colors(QColor(0x121218), QColor(0xd6d6d6))
-                elif theme == QtCharts.QChart.ChartThemeBlueCerulean:
+                elif theme == QChart.ChartThemeBlueCerulean:
                     set_colors(QColor(0x40434a), QColor(0xd6d6d6))
-                elif theme == QtCharts.QChart.ChartThemeBrownSand:
+                elif theme == QChart.ChartThemeBrownSand:
                     set_colors(QColor(0x9e8965), QColor(0x404044))
-                elif theme == QtCharts.QChart.ChartThemeBlueNcs:
+                elif theme == QChart.ChartThemeBlueNcs:
                     set_colors(QColor(0x018bba), QColor(0x404044))
-                elif theme == QtCharts.QChart.ChartThemeHighContrast:
+                elif theme == QChart.ChartThemeHighContrast:
                     set_colors(QColor(0xffab03), QColor(0x181818))
-                elif theme == QtCharts.QChart.ChartThemeBlueIcy:
+                elif theme == QChart.ChartThemeBlueIcy:
                     set_colors(QColor(0xcee7f0), QColor(0x404044))
                 else:
                     set_colors(QColor(0xf0f0f0), QColor(0x404044))
@@ -351,15 +353,15 @@ class ThemeWidget(QWidget):
             animation_options = chart.animationOptions()
             if animation_options != options:
                 for chart_view in self.charts:
-                    options_name = QtCharts.QChart.NoAnimation
+                    options_name = QChart.NoAnimation
                     if options == 0:
-                        options_name = QtCharts.QChart.NoAnimation
+                        options_name = QChart.NoAnimation
                     elif options == 1:
-                        options_name = QtCharts.QChart.GridAxisAnimations
+                        options_name = QChart.GridAxisAnimations
                     elif options == 2:
-                        options_name = QtCharts.QChart.SeriesAnimations
+                        options_name = QChart.SeriesAnimations
                     elif options == 3:
-                        options_name = QtCharts.QChart.AllAnimations
+                        options_name = QChart.AllAnimations
                     chart_view.chart().setAnimationOptions(options_name)
 
         # Update legend alignment
@@ -389,7 +391,7 @@ if __name__ == "__main__":
     window = QMainWindow()
     widget = ThemeWidget(None)
     window.setCentralWidget(widget)
-    available_geometry = app.desktop().availableGeometry(window)
+    available_geometry = window.screen().availableGeometry()
     size = available_geometry.height() * 0.75
     window.setFixedSize(size, size * 0.8)
     window.show()

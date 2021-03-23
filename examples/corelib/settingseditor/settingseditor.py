@@ -87,14 +87,14 @@ class TypeChecker:
         self.size_exp = QRegularExpression(self.point_exp)
 
         date_pattern = '([0-9]{,4})-([0-9]{,2})-([0-9]{,2})'
-        self.date_exp = QRegularExpression('^{}$'.format(date_pattern))
+        self.date_exp = QRegularExpression(f'^{date_pattern}$')
         assert self.date_exp.isValid()
 
         time_pattern = '([0-9]{,2}):([0-9]{,2}):([0-9]{,2})'
-        self.time_exp = QRegularExpression('^{}$'.format(time_pattern))
+        self.time_exp = QRegularExpression(f'^{time_pattern}$')
         assert self.time_exp.isValid()
 
-        pattern = '^{}T{}$'.format(date_pattern, time_pattern)
+        pattern = f'^{date_pattern}T{time_pattern}$'
         self.dateTime_exp = QRegularExpression(pattern)
         assert self.dateTime_exp.isValid()
 
@@ -315,7 +315,7 @@ class MainWindow(QMainWindow):
         if not settings.isWritable():
             nice_name += " (read only)"
 
-        self.setWindowTitle("{} - Settings Editor".format(nice_name))
+        self.setWindowTitle(f"{nice_name} - Settings Editor")
 
 
 class LocationDialog(QDialog):
@@ -752,23 +752,30 @@ class VariantDelegate(QItemDelegate):
         if isinstance(value, (int, float, QByteArray)):
             return str(value)
         if isinstance(value, QColor):
-            return '({},{},{},{})'.format(value.red(), value.green(),
-                                          value.blue(), value.alpha())
+            (r, g, b, a) = (value.red(), value.green(), value.blue(), value.alpha())
+            return f'({r},{g},{b},{a})'
         if isinstance(value, (QDate, QDateTime, QTime)):
             return value.toString(Qt.ISODate)
         if isinstance(value, QPoint):
-            return '({},{})'.format(value.x(), value.y())
+            x = value.x()
+            y = value.y()
+            return f'({x},{y})'
         if isinstance(value, QRect):
-            return '({},{},{},{})'.format(value.x(), value.y(), value.width(),
-                                          value.height())
+            x = value.x()
+            y = value.y()
+            w = value.width()
+            h = value.height()
+            return f'({x},{y},{w},{h})'
         if isinstance(value, QSize):
-            return '({},{})'.format(value.width(), value.height())
+            w = value.width()
+            h = value.height()
+            return f'({w},{h})'
         if isinstance(value, list):
             return ','.join(value)
         if value is None:
             return '<Invalid>'
 
-        return '<{}>'.format(value)
+        return f'<{value}>'
 
 
 if __name__ == '__main__':

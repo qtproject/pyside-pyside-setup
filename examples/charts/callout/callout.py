@@ -241,8 +241,9 @@ class View(QGraphicsView):
             self._tooltip = Callout(self._chart)
 
         if state:
-            self._tooltip.setText("X: {0:.2f} \nY: {1:.2f} "
-                .format(point.x(),point.y()))
+            x = point.x()
+            y = point.y()
+            self._tooltip.setText(f"X: {x:.2f} \nY: {y:.2f} ")
             self._tooltip.setAnchor(point)
             self._tooltip.setZValue(11)
             self._tooltip.updateGeometry()
