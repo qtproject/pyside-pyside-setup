@@ -42,6 +42,7 @@
 """PySide6 port of the qml/tutorials/extending-qml/chapter4-customPropertyTypes example from Qt v5.x"""
 
 import os
+from pathlib import Path
 import sys
 
 from PySide6.QtCore import Property, QUrl
@@ -100,8 +101,8 @@ if __name__ == '__main__':
 
     view = QQuickView()
     view.setResizeMode(QQuickView.SizeRootObjectToView)
-    qmlFile = os.path.join(os.path.dirname(__file__), 'app.qml')
-    view.setSource(QUrl.fromLocalFile(os.path.abspath(qmlFile)))
+    qml_file = os.fspath(Path(__file__).resolve().parent / 'app.qml')
+    view.setSource(QUrl.fromLocalFile(qml_file))
     if view.status() == QQuickView.Error:
         sys.exit(-1)
     view.show()

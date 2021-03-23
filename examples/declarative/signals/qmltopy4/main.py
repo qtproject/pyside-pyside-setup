@@ -40,6 +40,7 @@
 #############################################################################
 
 import os
+from pathlib import Path
 import sys
 from PySide6.QtCore import QObject, QUrl
 from PySide6.QtGui import QGuiApplication
@@ -51,8 +52,8 @@ def sayThis(s):
 if __name__ == '__main__':
     app = QGuiApplication(sys.argv)
     view = QQuickView()
-    qmlFile = os.path.join(os.path.dirname(__file__), 'view.qml')
-    view.setSource(QUrl.fromLocalFile(os.path.abspath(qmlFile)))
+    qml_file = os.fspath(Path(__file__).resolve().parent / 'view.qml')
+    view.setSource(QUrl.fromLocalFile(qml_file))
     if view.status() == QQuickView.Error:
         sys.exit(-1)
 
