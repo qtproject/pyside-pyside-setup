@@ -6,9 +6,11 @@
 /SciTE.*
 /pysideuic
 
+# Auto-generated snippets
+sources/pyside6/doc/codesnippets/*
+
 # Auto-generated examples
-sources/pyside6/doc/examples/index.rst
-example_*.rst
+sources/pyside6/doc/examples/*
 
 distribute-*.egg
 distribute-*.tar.gz
