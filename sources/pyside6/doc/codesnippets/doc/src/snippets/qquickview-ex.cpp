@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (d18660 shiboken6: Fix 32 bit builds)
 /****************************************************************************
 **
 ** Copyright (C) 2018 The Qt Company Ltd.
@@ -65,3 +66,5 @@ if __name__ == '__main__':
     # sure all child QML instances are destroyed in the correct order.
     del view
 //! [0]
+=======
+>>>>>>> CHANGE (9a4fb2 doc: enable snippets translate tool)

@@ -69,12 +69,14 @@ except ModuleNotFoundError:
     extra = {}
 
 log = logging.getLogger("snippets_translate")
+opt_quiet = False
 
 # Filter and paths configuration
 SKIP_END = (".pro", ".pri", ".cmake", ".qdoc", ".yaml", ".frag", ".qsb", ".vert", "CMakeLists.txt")
 SKIP_BEGIN = ("changes-", ".")
-OUT_SNIPPETS = Path("sources/pyside6/doc/codesnippets/doc/src/snippets/")
-OUT_EXAMPLES = Path("sources/pyside6/doc/codesnippets/examples/")
+OUT_MAIN = Path("sources/pyside6/doc/codesnippets/")
+OUT_SNIPPETS = OUT_MAIN / "doc/src/snippets/"
+OUT_EXAMPLES = OUT_MAIN / "doc/codesnippets/examples/"
 
 
 class FileStatus(Enum):
@@ -107,6 +109,13 @@ def get_parser():
         action="store_true",
         dest="write_files",
         help="Actually copy over the files to the pyside-setup directory",
+    )
+
+    parser.add_argument(
+        "-q",
+        "--quiet",
+        action="store_true",
+        help="Quiet"
     )
 
     parser.add_argument(
@@ -145,14 +154,16 @@ def check_arguments(options):
 
     # Notify 'write' option
     if options.write_files:
-        log.warning(
-            f"Files will be copied from '{options.qt_dir}':\n" f"\tto '{options.pyside_dir}'"
-        )
+        if not opt_quiet:
+            log.warning(
+                f"Files will be copied from '{options.qt_dir}':\n" f"\tto '{options.pyside_dir}'"
+            )
     else:
         msg = "This is a listing only, files are not being copied"
         if have_rich:
             msg = f"[green]{msg}[/green]"
-        log.info(msg, extra=extra)
+        if not opt_quiet:
+            log.info(msg, extra=extra)
 
     # Check 'qt_dir' and 'pyside_dir'
     if is_directory(options.qt_dir) and is_directory(options.pyside_dir):
@@ -254,10 +265,12 @@ def translate_file(file_path, final_path, verbose, write):
                     if have_rich:
                         table.add_row(line, translated_line)
                     else:
-                        print(line, translated_line)
+                        if not opt_quiet:
+                            print(line, translated_line)
 
             if verbose and have_rich:
-                console.print(table)
+                if not opt_quiet:
+                    console.print(table)
 
             file_snippets.append("\n".join(translated_lines))
 
@@ -273,9 +286,11 @@ def translate_file(file_path, final_path, verbose, write):
 
             # Rename to .py
             written_file = shutil.move(str(final_path), str(final_path.with_suffix(".py")))
-            log.info(f"Written: {written_file}")
+            if not opt_quiet:
+                log.info(f"Written: {written_file}")
     else:
-        log.warning("No snippets were found")
+        if not opt_quiet:
+            log.warning("No snippets were found")
 
 
 
@@ -303,13 +318,15 @@ def copy_file(file_path, py_path, category, category_path, write=False, verbose=
         status = FileStatus.New
 
     if verbose:
-        log.info(f"From {file_path} to")
-        log.info(f"==> {final_path}")
+        if not opt_quiet:
+            log.info(f"From {file_path} to")
+            log.info(f"==> {final_path}")
 
-    if have_rich:
-        log.info(f"{status_msg} {final_path}", extra={"markup": True})
-    else:
-        log.info(f"{status_msg:10s} {final_path}")
+    if not opt_quiet:
+        if have_rich:
+            log.info(f"{status_msg} {final_path}", extra={"markup": True})
+        else:
+            log.info(f"{status_msg:10s} {final_path}")
 
     # Directory where the file will be placed, if it does not exists
     # we create it. The option 'parents=True' will create the parents
@@ -338,6 +355,13 @@ def process(options):
 
     # (new, exists)
     valid_new, valid_exists = 0, 0
+
+    # Creating directories in case they don't exist
+    if not OUT_SNIPPETS.is_dir():
+        OUT_SNIPPETS.mkdir(parents=True)
+
+    if not OUT_EXAMPLES.is_dir():
+        OUT_EXAMPLES.mkdir(parents=True)
 
     if options.single_snippet:
         f = Path(options.single_snippet)
@@ -382,7 +406,8 @@ def process(options):
             # Filter only Qt modules
             if not module_name.startswith("qt"):
                 continue
-            log.info(f"Module {module_name}")
+            if not opt_quiet:
+                log.info(f"Module {module_name}")
 
             # Iterating everything
             for f in i.glob("**/*.*"):
@@ -416,21 +441,23 @@ def process(options):
                     elif status == FileStatus.Exists:
                         valid_exists += 1
 
-            log.info(
-                dedent(
-                    f"""\
-                Summary:
-                  Total valid files: {valid_new + valid_exists}
-                     New files:      {valid_new}
-                     Existing files: {valid_exists}
-                """
+            if not opt_quiet:
+                log.info(
+                    dedent(
+                        f"""\
+                    Summary:
+                      Total valid files: {valid_new + valid_exists}
+                         New files:      {valid_new}
+                         Existing files: {valid_exists}
+                    """
+                    )
                 )
-            )
 
 
 if __name__ == "__main__":
     parser = get_parser()
     options = parser.parse_args()
+    opt_quiet = options.quiet
 
     if not check_arguments(options):
         parser.print_help()
