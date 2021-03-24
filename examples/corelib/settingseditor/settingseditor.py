@@ -233,14 +233,14 @@ class MainWindow(QMainWindow):
                 "The <b>Settings Editor</b> example shows how to access "
                 "application settings using Qt.")
 
-    def createActions(self):
-        self.openSettingsAct = QtGui.QAction("&Open Application Settings...",
+    def create_actions(self):
+        self._open_settings_act = QtGui.QAction("&Open Application Settings...",
                 self, shortcut="Ctrl+O", triggered=self.openSettings)
 
-        self.openIniFileAct = QtGui.QAction("Open I&NI File...", self,
+        self._open_ini_file_act = QtGui.QAction("Open I&NI File...", self,
                 shortcut="Ctrl+N", triggered=self.openIniFile)
 
-        self.openPropertyListAct = QtGui.QAction("Open macOS &Property List...",
+        self._open_property_list_act = QtGui.QAction("Open macOS &Property List...",
                 self, shortcut="Ctrl+P", triggered=self.openPropertyList)
 
     def create_actions(self):
@@ -378,17 +378,17 @@ class LocationDialog(QDialog):
         locations_layout = QVBoxLayout(self.locations_groupbox)
         locations_layout.addWidget(self.locations_table)
 
-        mainLayout = QGridLayout(self)
-        mainLayout.addWidget(format_label, 0, 0)
-        mainLayout.addWidget(self.format_combo, 0, 1)
-        mainLayout.addWidget(scope_label, 1, 0)
-        mainLayout.addWidget(self.scope_cCombo, 1, 1)
-        mainLayout.addWidget(organization_label, 2, 0)
-        mainLayout.addWidget(self.organization_combo, 2, 1)
-        mainLayout.addWidget(application_label, 3, 0)
-        mainLayout.addWidget(self.application_combo, 3, 1)
-        mainLayout.addWidget(self.locations_groupbox, 4, 0, 1, 2)
-        mainLayout.addWidget(self.button_box, 5, 0, 1, 2)
+        main_layout = QGridLayout(self)
+        main_layout.addWidget(format_label, 0, 0)
+        main_layout.addWidget(self.format_combo, 0, 1)
+        main_layout.addWidget(scope_label, 1, 0)
+        main_layout.addWidget(self.scope_cCombo, 1, 1)
+        main_layout.addWidget(organization_label, 2, 0)
+        main_layout.addWidget(self.organization_combo, 2, 1)
+        main_layout.addWidget(application_label, 3, 0)
+        main_layout.addWidget(self.application_combo, 3, 1)
+        main_layout.addWidget(self.locations_groupbox, 4, 0, 1, 2)
+        main_layout.addWidget(self.button_box, 5, 0, 1, 2)
 
         self.update_locations()
 
@@ -425,21 +425,21 @@ class LocationDialog(QDialog):
                 if self.scope() == QSettings.SystemScope:
                     continue
 
-                actualScope = QSettings.UserScope
+                actual_scope = QSettings.UserScope
             else:
-                actualScope = QSettings.SystemScope
+                actual_scope = QSettings.SystemScope
 
             for j in range(2):
                 if j == 0:
                     if not self.application():
                         continue
 
-                    actualApplication = self.application()
+                    actual_application = self.application()
                 else:
-                    actualApplication = ''
+                    actual_application = ''
 
-                settings = QSettings(self.format(), actualScope,
-                                     self.organization(), actualApplication)
+                settings = QSettings(self.format(), actual_scope,
+                                     self.organization(), actual_application)
 
                 row = self.locations_table.rowCount()
                 self.locations_table.setRowCount(row + 1)
@@ -613,7 +613,7 @@ class SettingsTree(QTreeWidget):
                     if value_type:
                         value = self.settings.value(key, type=value_type)
                 child.setText(1, value.__class__.__name__)
-            child.setText(2, VariantDelegate.displayText(value))
+            child.setText(2, VariantDelegate.display_text(value))
             child.setData(2, Qt.UserRole, value)
 
         while divider_index < self.child_count(parent):
@@ -711,7 +711,7 @@ class VariantDelegate(QItemDelegate):
         elif isinstance(editor, QSpinBox):
             editor.setValue(value)
         else:
-            editor.setText(self.displayText(value))
+            editor.setText(self.display_text(value))
 
     def value_from_lineedit(self, lineedit, model, index):
         if not lineedit.isModified():
@@ -735,7 +735,7 @@ class VariantDelegate(QItemDelegate):
             value = self.value_from_lineedit(editor, model, index)
         if not value is None:
             model.setData(index, value, Qt.UserRole)
-            model.setData(index, self.displayText(value), Qt.DisplayRole)
+            model.setData(index, self.display_text(value), Qt.DisplayRole)
 
     @staticmethod
     def is_supported_type(value):
@@ -744,7 +744,7 @@ class VariantDelegate(QItemDelegate):
                                   QSize, list))
 
     @staticmethod
-    def displayText(value):
+    def display_text(value):
         if isinstance(value, str):
             return value
         if isinstance(value, bool):

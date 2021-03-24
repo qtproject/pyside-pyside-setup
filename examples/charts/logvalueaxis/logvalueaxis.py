@@ -64,25 +64,25 @@ class TestChart(QMainWindow):
         self.chart.legend().hide()
         self.chart.setTitle("Logarithmic axis example")
 
-        self.axisX = QValueAxis()
-        self.axisX.setTitleText("Data point")
-        self.axisX.setLabelFormat("%i")
-        self.axisX.setTickCount(self.series.count())
-        self.chart.addAxis(self.axisX, Qt.AlignBottom)
-        self.series.attachAxis(self.axisX)
+        self._axis_x = QValueAxis()
+        self._axis_x.setTitleText("Data point")
+        self._axis_x.setLabelFormat("%i")
+        self._axis_x.setTickCount(self.series.count())
+        self.chart.addAxis(self._axis_x, Qt.AlignBottom)
+        self.series.attachAxis(self._axis_x)
 
-        self.axisY = QLogValueAxis()
-        self.axisY.setTitleText("Values")
-        self.axisY.setLabelFormat("%g")
-        self.axisY.setBase(8.0)
-        self.axisY.setMinorTickCount(-1)
-        self.chart.addAxis(self.axisY, Qt.AlignLeft)
-        self.series.attachAxis(self.axisY)
+        self._axis_y = QLogValueAxis()
+        self._axis_y.setTitleText("Values")
+        self._axis_y.setLabelFormat("%g")
+        self._axis_y.setBase(8.0)
+        self._axis_y.setMinorTickCount(-1)
+        self.chart.addAxis(self._axis_y, Qt.AlignLeft)
+        self.series.attachAxis(self._axis_y)
 
-        self.chartView = QChartView(self.chart)
-        self.chartView.setRenderHint(QPainter.Antialiasing)
+        self._chart_view = QChartView(self.chart)
+        self._chart_view.setRenderHint(QPainter.Antialiasing)
 
-        self.setCentralWidget(self.chartView)
+        self.setCentralWidget(self._chart_view)
 
 
 if __name__ == "__main__":

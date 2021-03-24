@@ -51,20 +51,20 @@ class Server(QtWidgets.QDialog):
     def __init__(self, parent=None):
         super(Server, self).__init__(parent)
 
-        statusLabel = QtWidgets.QLabel()
-        statusLabel.setTextInteractionFlags(QtCore.Qt.TextBrowserInteraction)
-        quitButton = QtWidgets.QPushButton("Quit")
-        quitButton.setAutoDefault(False)
+        status_label = QtWidgets.QLabel()
+        status_label.setTextInteractionFlags(QtCore.Qt.TextBrowserInteraction)
+        quit_button = QtWidgets.QPushButton("Quit")
+        quit_button.setAutoDefault(False)
 
-        self.tcpServer = QtNetwork.QTcpServer(self)
-        if not self.tcpServer.listen():
-            reason = self.tcpServer.errorString()
+        self._tcp_server = QtNetwork.QTcpServer(self)
+        if not self._tcp_server.listen():
+            reason = self._tcp_server.errorString()
             QtWidgets.QMessageBox.critical(self, "Fortune Server",
                     f"Unable to start the server: {reason}.")
             self.close()
             return
-        port = self.tcpServer.serverPort()
-        statusLabel.setText(f"The server is running on port {port}.\nRun the "
+        port = self._tcp_server.serverPort()
+        status_label.setText(f"The server is running on port {port}.\nRun the "
                 "Fortune Client example now.")
 
         self.fortunes = (
@@ -76,22 +76,22 @@ class Server(QtWidgets.QDialog):
                 "You cannot kill time without injuring eternity.",
                 "Computers are not intelligent. They only think they are.")
 
-        quitButton.clicked.connect(self.close)
-        self.tcpServer.newConnection.connect(self.sendFortune)
+        quit_button.clicked.connect(self.close)
+        self._tcp_server.newConnection.connect(self.send_fortune)
 
-        buttonLayout = QtWidgets.QHBoxLayout()
-        buttonLayout.addStretch(1)
-        buttonLayout.addWidget(quitButton)
-        buttonLayout.addStretch(1)
+        button_layout = QtWidgets.QHBoxLayout()
+        button_layout.addStretch(1)
+        button_layout.addWidget(quit_button)
+        button_layout.addStretch(1)
 
-        mainLayout = QtWidgets.QVBoxLayout()
-        mainLayout.addWidget(statusLabel)
-        mainLayout.addLayout(buttonLayout)
-        self.setLayout(mainLayout)
+        main_layout = QtWidgets.QVBoxLayout()
+        main_layout.addWidget(status_label)
+        main_layout.addLayout(button_layout)
+        self.setLayout(main_layout)
 
         self.setWindowTitle("Fortune Server")
 
-    def sendFortune(self):
+    def send_fortune(self):
         block = QtCore.QByteArray()
         out = QtCore.QDataStream(block, QtCore.QIODevice.WriteOnly)
         out.setVersion(QtCore.QDataStream.Qt_4_0)
@@ -102,11 +102,11 @@ class Server(QtWidgets.QDialog):
         out.device().seek(0)
         out.writeUInt16(block.size() - 2)
 
-        clientConnection = self.tcpServer.nextPendingConnection()
-        clientConnection.disconnected.connect(clientConnection.deleteLater)
+        client_connection = self._tcp_server.nextPendingConnection()
+        client_connection.disconnected.connect(client_connection.deleteLater)
 
-        clientConnection.write(block)
-        clientConnection.disconnectFromHost()
+        client_connection.write(block)
+        client_connection.disconnectFromHost()
 
 
 if __name__ == '__main__':

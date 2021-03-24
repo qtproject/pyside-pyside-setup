@@ -49,85 +49,85 @@ class Client(QtWidgets.QDialog):
     def __init__(self, parent=None):
         super(Client, self).__init__(parent)
 
-        self.blockSize = 0
-        self.currentFortune = ''
+        self._block_size = 0
+        self._current_fortune = ''
 
-        hostLabel = QtWidgets.QLabel("&Server name:")
-        portLabel = QtWidgets.QLabel("S&erver port:")
+        host_label = QtWidgets.QLabel("&Server name:")
+        port_label = QtWidgets.QLabel("S&erver port:")
 
-        self.hostLineEdit = QtWidgets.QLineEdit('Localhost')
-        self.portLineEdit = QtWidgets.QLineEdit()
-        self.portLineEdit.setValidator(QtGui.QIntValidator(1, 65535, self))
+        self._host_line_edit = QtWidgets.QLineEdit('Localhost')
+        self._port_line_edit = QtWidgets.QLineEdit()
+        self._port_line_edit.setValidator(QtGui.QIntValidator(1, 65535, self))
 
-        hostLabel.setBuddy(self.hostLineEdit)
-        portLabel.setBuddy(self.portLineEdit)
+        host_label.setBuddy(self._host_line_edit)
+        port_label.setBuddy(self._port_line_edit)
 
-        self.statusLabel = QtWidgets.QLabel("This examples requires that you run "
+        self._status_label = QtWidgets.QLabel("This examples requires that you run "
                 "the Fortune Server example as well.")
 
-        self.getFortuneButton = QtWidgets.QPushButton("Get Fortune")
-        self.getFortuneButton.setDefault(True)
-        self.getFortuneButton.setEnabled(False)
+        self._get_fortune_button = QtWidgets.QPushButton("Get Fortune")
+        self._get_fortune_button.setDefault(True)
+        self._get_fortune_button.setEnabled(False)
 
-        quitButton = QtWidgets.QPushButton("Quit")
+        quit_button = QtWidgets.QPushButton("Quit")
 
-        buttonBox = QtWidgets.QDialogButtonBox()
-        buttonBox.addButton(self.getFortuneButton,
+        button_box = QtWidgets.QDialogButtonBox()
+        button_box.addButton(self._get_fortune_button,
                 QtWidgets.QDialogButtonBox.ActionRole)
-        buttonBox.addButton(quitButton, QtWidgets.QDialogButtonBox.RejectRole)
+        button_box.addButton(quit_button, QtWidgets.QDialogButtonBox.RejectRole)
 
-        self.tcpSocket = QtNetwork.QTcpSocket(self)
+        self._tcp_socket = QtNetwork.QTcpSocket(self)
 
-        self.hostLineEdit.textChanged.connect(self.enableGetFortuneButton)
-        self.portLineEdit.textChanged.connect(self.enableGetFortuneButton)
-        self.getFortuneButton.clicked.connect(self.requestNewFortune)
-        quitButton.clicked.connect(self.close)
-        self.tcpSocket.readyRead.connect(self.readFortune)
-        self.tcpSocket.errorOccurred.connect(self.displayError)
+        self._host_line_edit.textChanged.connect(self.enable_get_fortune_button)
+        self._port_line_edit.textChanged.connect(self.enable_get_fortune_button)
+        self._get_fortune_button.clicked.connect(self.request_new_fortune)
+        quit_button.clicked.connect(self.close)
+        self._tcp_socket.readyRead.connect(self.read_fortune)
+        self._tcp_socket.errorOccurred.connect(self.display_error)
 
-        mainLayout = QtWidgets.QGridLayout()
-        mainLayout.addWidget(hostLabel, 0, 0)
-        mainLayout.addWidget(self.hostLineEdit, 0, 1)
-        mainLayout.addWidget(portLabel, 1, 0)
-        mainLayout.addWidget(self.portLineEdit, 1, 1)
-        mainLayout.addWidget(self.statusLabel, 2, 0, 1, 2)
-        mainLayout.addWidget(buttonBox, 3, 0, 1, 2)
-        self.setLayout(mainLayout)
+        main_layout = QtWidgets.QGridLayout()
+        main_layout.addWidget(host_label, 0, 0)
+        main_layout.addWidget(self._host_line_edit, 0, 1)
+        main_layout.addWidget(port_label, 1, 0)
+        main_layout.addWidget(self._port_line_edit, 1, 1)
+        main_layout.addWidget(self._status_label, 2, 0, 1, 2)
+        main_layout.addWidget(button_box, 3, 0, 1, 2)
+        self.setLayout(main_layout)
 
         self.setWindowTitle("Fortune Client")
-        self.portLineEdit.setFocus()
+        self._port_line_edit.setFocus()
 
-    def requestNewFortune(self):
-        self.getFortuneButton.setEnabled(False)
-        self.blockSize = 0
-        self.tcpSocket.abort()
-        self.tcpSocket.connectToHost(self.hostLineEdit.text(),
-                int(self.portLineEdit.text()))
+    def request_new_fortune(self):
+        self._get_fortune_button.setEnabled(False)
+        self._block_size = 0
+        self._tcp_socket.abort()
+        self._tcp_socket.connectToHost(self._host_line_edit.text(),
+                int(self._port_line_edit.text()))
 
-    def readFortune(self):
-        instr = QtCore.QDataStream(self.tcpSocket)
+    def read_fortune(self):
+        instr = QtCore.QDataStream(self._tcp_socket)
         instr.setVersion(QtCore.QDataStream.Qt_4_0)
 
-        if self.blockSize == 0:
-            if self.tcpSocket.bytesAvailable() < 2:
+        if self._block_size == 0:
+            if self._tcp_socket.bytesAvailable() < 2:
                 return
 
-            self.blockSize = instr.readUInt16()
+            self._block_size = instr.readUInt16()
 
-        if self.tcpSocket.bytesAvailable() < self.blockSize:
+        if self._tcp_socket.bytesAvailable() < self._block_size:
             return
 
-        nextFortune = instr.readString()
+        next_fortune = instr.readString()
 
-        if nextFortune == self.currentFortune:
-            QtCore.QTimer.singleShot(0, self.requestNewFortune)
+        if next_fortune == self._current_fortune:
+            QtCore.QTimer.singleShot(0, self.request_new_fortune)
             return
 
-        self.currentFortune = nextFortune
-        self.statusLabel.setText(self.currentFortune)
-        self.getFortuneButton.setEnabled(True)
+        self._current_fortune = next_fortune
+        self._status_label.setText(self._current_fortune)
+        self._get_fortune_button.setEnabled(True)
 
-    def displayError(self, socketError):
+    def display_error(self, socketError):
         if socketError == QtNetwork.QAbstractSocket.RemoteHostClosedError:
             pass
         elif socketError == QtNetwork.QAbstractSocket.HostNotFoundError:
@@ -140,15 +140,15 @@ class Client(QtWidgets.QDialog):
                     "fortune server is running, and check that the host name "
                     "and port settings are correct.")
         else:
-            reason = self.tcpSocket.errorString()
+            reason = self._tcp_socket.errorString()
             QtWidgets.QMessageBox.information(self, "Fortune Client",
                     f"The following error occurred: {reason}.")
 
-        self.getFortuneButton.setEnabled(True)
+        self._get_fortune_button.setEnabled(True)
 
-    def enableGetFortuneButton(self):
-        self.getFortuneButton.setEnabled(bool(self.hostLineEdit.text() and
-                self.portLineEdit.text()))
+    def enable_get_fortune_button(self):
+        self._get_fortune_button.setEnabled(bool(self._host_line_edit.text() and
+                self._port_line_edit.text()))
 
 
 if __name__ == '__main__':

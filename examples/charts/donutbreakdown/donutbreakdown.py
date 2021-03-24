@@ -59,7 +59,7 @@ class MainSlice(QPieSlice):
     def get_breakdown_series(self):
         return self.breakdown_series
 
-    def setName(self, name):
+    def set_name(self, name):
         self.name = name
 
     def name(self):
@@ -83,7 +83,7 @@ class DonutBreakdownChart(QChart):
 
         # add breakdown series as a slice to center pie
         main_slice = MainSlice(breakdown_series)
-        main_slice.setName(breakdown_series.name())
+        main_slice.set_name(breakdown_series.name())
         main_slice.setValue(breakdown_series.sum())
         self.main_series.append(main_slice)
 

@@ -69,16 +69,16 @@ class MainWindow(QMainWindow):
 
         categories = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
                       "Aug", "Sep", "Oct", "Nov", "Dec"]
-        axisX = QBarCategoryAxis()
-        axisX.append(categories)
-        axisX.setTitleText("Month")
-        chart.addAxis(axisX, Qt.AlignBottom)
-        axisY = QValueAxis()
-        axisY.setRange(-52, 52)
-        axisY.setTitleText("Temperature [&deg;C]")
-        chart.addAxis(axisY, Qt.AlignLeft)
-        series.attachAxis(axisX)
-        series.attachAxis(axisY)
+        axis_x = QBarCategoryAxis()
+        axis_x.append(categories)
+        axis_x.setTitleText("Month")
+        chart.addAxis(axis_x, Qt.AlignBottom)
+        axis_y = QValueAxis()
+        axis_y.setRange(-52, 52)
+        axis_y.setTitleText("Temperature [&deg;C]")
+        chart.addAxis(axis_y, Qt.AlignLeft)
+        series.attachAxis(axis_x)
+        series.attachAxis(axis_y)
 
         chart.legend().setVisible(True)
         chart.legend().setAlignment(Qt.AlignBottom)

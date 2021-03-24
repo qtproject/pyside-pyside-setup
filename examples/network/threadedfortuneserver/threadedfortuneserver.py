@@ -58,13 +58,13 @@ class FortuneThread(QThread):
     def __init__(self, socketDescriptor, fortune, parent):
         super(FortuneThread, self).__init__(parent)
 
-        self.socketDescriptor = socketDescriptor
+        self._socket_descriptor = socketDescriptor
         self.text = fortune
 
     def run(self):
-        tcpSocket = QTcpSocket()
-        if not tcpSocket.setSocketDescriptor(self.socketDescriptor):
-            self.error.emit(tcpSocket.error())
+        tcp_socket = QTcpSocket()
+        if not tcp_socket.setSocketDescriptor(self._socket_descriptor):
+            self.error.emit(tcp_socket.error())
             return
 
         block = QByteArray()
@@ -75,9 +75,9 @@ class FortuneThread(QThread):
         outstr.device().seek(0)
         outstr.writeUInt16(block.size() - 2)
 
-        tcpSocket.write(block)
-        tcpSocket.disconnectFromHost()
-        tcpSocket.waitForDisconnected()
+        tcp_socket.write(block)
+        tcp_socket.disconnectFromHost()
+        tcp_socket.waitForDisconnected()
 
 
 class FortuneServer(QTcpServer):
@@ -104,11 +104,11 @@ class Dialog(QDialog):
 
         self.server = FortuneServer()
 
-        statusLabel = QLabel()
-        statusLabel.setTextInteractionFlags(Qt.TextBrowserInteraction)
-        statusLabel.setWordWrap(True)
-        quitButton = QPushButton("Quit")
-        quitButton.setAutoDefault(False)
+        status_label = QLabel()
+        status_label.setTextInteractionFlags(Qt.TextBrowserInteraction)
+        status_label.setWordWrap(True)
+        quit_button = QPushButton("Quit")
+        quit_button.setAutoDefault(False)
 
         if not self.server.listen():
             reason = self.server.errorString()
@@ -117,29 +117,29 @@ class Dialog(QDialog):
             self.close()
             return
 
-        for ipAddress in QNetworkInterface.allAddresses():
-            if ipAddress != QHostAddress.LocalHost and ipAddress.toIPv4Address() != 0:
+        for ip_address in QNetworkInterface.allAddresses():
+            if ip_address != QHostAddress.LocalHost and ip_address.toIPv4Address() != 0:
                 break
         else:
-            ipAddress = QHostAddress(QHostAddress.LocalHost)
+            ip_address = QHostAddress(QHostAddress.LocalHost)
 
-        ipAddress = ipAddress.toString()
+        ip_address = ip_address.toString()
         port = self.server.serverPort()
 
-        statusLabel.setText(f"The server is running on\n\nIP: {ipAddress}\nport: {port}\n\n"
+        status_label.setText(f"The server is running on\n\nIP: {ip_address}\nport: {port}\n\n"
                 "Run the Fortune Client example now.")
 
-        quitButton.clicked.connect(self.close)
+        quit_button.clicked.connect(self.close)
 
-        buttonLayout = QHBoxLayout()
-        buttonLayout.addStretch(1)
-        buttonLayout.addWidget(quitButton)
-        buttonLayout.addStretch(1)
+        button_layout = QHBoxLayout()
+        button_layout.addStretch(1)
+        button_layout.addWidget(quit_button)
+        button_layout.addStretch(1)
 
-        mainLayout = QVBoxLayout()
-        mainLayout.addWidget(statusLabel)
-        mainLayout.addLayout(buttonLayout)
-        self.setLayout(mainLayout)
+        main_layout = QVBoxLayout()
+        main_layout.addWidget(status_label)
+        main_layout.addLayout(button_layout)
+        self.setLayout(main_layout)
 
         self.setWindowTitle("Threaded Fortune Server")
 

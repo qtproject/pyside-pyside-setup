@@ -80,36 +80,36 @@ class Callout(QGraphicsItem):
 
             # establish the position of the anchor point in relation to _rect
             above = anchor.y() <= self._rect.top()
-            aboveCenter = (anchor.y() > self._rect.top() and
+            above_center = (anchor.y() > self._rect.top() and
                 anchor.y() <= self._rect.center().y())
-            belowCenter = (anchor.y() > self._rect.center().y() and
+            below_center = (anchor.y() > self._rect.center().y() and
                 anchor.y() <= self._rect.bottom())
             below = anchor.y() > self._rect.bottom()
 
-            onLeft = anchor.x() <= self._rect.left()
-            leftOfCenter = (anchor.x() > self._rect.left() and
+            on_left = anchor.x() <= self._rect.left()
+            left_of_center = (anchor.x() > self._rect.left() and
                 anchor.x() <= self._rect.center().x())
-            rightOfCenter = (anchor.x() > self._rect.center().x() and
+            right_of_center = (anchor.x() > self._rect.center().x() and
                 anchor.x() <= self._rect.right())
-            onRight = anchor.x() > self._rect.right()
+            on_right = anchor.x() > self._rect.right()
 
             # get the nearest _rect corner.
-            x = (onRight + rightOfCenter) * self._rect.width()
-            y = (below + belowCenter) * self._rect.height()
-            cornerCase = ((above and onLeft) or (above and onRight) or
-                (below and onLeft) or (below and onRight))
+            x = (on_right + right_of_center) * self._rect.width()
+            y = (below + below_center) * self._rect.height()
+            corner_case = ((above and on_left) or (above and on_right) or
+                (below and on_left) or (below and on_right))
             vertical = abs(anchor.x() - x) > abs(anchor.y() - y)
 
-            x1 = (x + leftOfCenter * 10 - rightOfCenter * 20 + cornerCase *
-                int(not vertical) * (onLeft * 10 - onRight * 20))
-            y1 = (y + aboveCenter * 10 - belowCenter * 20 + cornerCase *
+            x1 = (x + left_of_center * 10 - right_of_center * 20 + corner_case *
+                int(not vertical) * (on_left * 10 - on_right * 20))
+            y1 = (y + above_center * 10 - below_center * 20 + corner_case *
                 vertical * (above * 10 - below * 20))
             point1.setX(x1)
             point1.setY(y1)
 
-            x2 = (x + leftOfCenter * 20 - rightOfCenter * 10 + cornerCase *
-                int(not vertical) * (onLeft * 20 - onRight * 10))
-            y2 = (y + aboveCenter * 20 - belowCenter * 10 + cornerCase *
+            x2 = (x + left_of_center * 20 - right_of_center * 10 + corner_case *
+                int(not vertical) * (on_left * 20 - on_right * 10))
+            y2 = (y + above_center * 20 - below_center * 10 + corner_case *
                 vertical * (above * 20 - below * 10))
             point2.setX(x2)
             point2.setY(y2)
@@ -134,7 +134,7 @@ class Callout(QGraphicsItem):
         else:
             event.setAccepted(False)
 
-    def setText(self, text):
+    def set_text(self, text):
         self._text = text
         metrics = QFontMetrics(self._font)
         self._textRect = QRectF(metrics.boundingRect(
@@ -143,10 +143,10 @@ class Callout(QGraphicsItem):
         self.prepareGeometryChange()
         self._rect = self._textRect.adjusted(-5, -5, 5, 5)
 
-    def setAnchor(self, point):
+    def set_anchor(self, point):
         self._anchor = QPointF(point)
 
-    def updateGeometry(self):
+    def update_geometry(self):
         self.prepareGeometryChange()
         self.setPos(self._chart.mapToPosition(
             self._anchor) + QPointF(10, -50))
@@ -201,10 +201,10 @@ class View(QGraphicsView):
         self._callouts = []
         self._tooltip = Callout(self._chart)
 
-        self.series.clicked.connect(self.keepCallout)
+        self.series.clicked.connect(self.keep_callout)
         self.series.hovered.connect(self.tooltip)
 
-        self.series2.clicked.connect(self.keepCallout)
+        self.series2.clicked.connect(self.keep_callout)
         self.series2.hovered.connect(self.tooltip)
 
         self.setMouseTracking(True)
@@ -232,7 +232,7 @@ class View(QGraphicsView):
         self._coordY.setText(f"Y: {y:.2f}")
         QGraphicsView.mouseMoveEvent(self, event)
 
-    def keepCallout(self):
+    def keep_callout(self):
         self._callouts.append(self._tooltip)
         self._tooltip = Callout(self._chart)
 
@@ -243,10 +243,10 @@ class View(QGraphicsView):
         if state:
             x = point.x()
             y = point.y()
-            self._tooltip.setText(f"X: {x:.2f} \nY: {y:.2f} ")
-            self._tooltip.setAnchor(point)
+            self._tooltip.set_text(f"X: {x:.2f} \nY: {y:.2f} ")
+            self._tooltip.set_anchor(point)
             self._tooltip.setZValue(11)
-            self._tooltip.updateGeometry()
+            self._tooltip.update_geometry()
             self._tooltip.show()
         else:
             self._tooltip.hide()

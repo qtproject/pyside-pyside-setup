@@ -49,11 +49,11 @@ from PySide6.QtDataVisualization import (Q3DBars, QBar3DSeries, QBarDataItem,
                                          QCategory3DAxis, QValue3DAxis)
 
 
-def dataToBarDataRow(data):
+def data_to_bar_data_row(data):
     return list(QBarDataItem(d) for d in data)
 
-def dataToBarDataArray(data):
-    return list(dataToBarDataRow(row) for row in data)
+def data_to_bar_data_array(data):
+    return list(data_to_bar_data_row(row) for row in data)
 
 class MainWindow(QMainWindow):
 
@@ -64,30 +64,30 @@ class MainWindow(QMainWindow):
 
         self.bars = Q3DBars()
 
-        self.columnAxis = QCategory3DAxis()
-        self.columnAxis.setTitle('Columns')
-        self.columnAxis.setTitleVisible(True)
-        self.columnAxis.setLabels(['Column1', 'Column2'])
-        self.columnAxis.setLabelAutoRotation(30)
+        self._column_axis = QCategory3DAxis()
+        self._column_axis.setTitle('Columns')
+        self._column_axis.setTitleVisible(True)
+        self._column_axis.setLabels(['Column1', 'Column2'])
+        self._column_axis.setLabelAutoRotation(30)
 
-        self.rowAxis = QCategory3DAxis()
-        self.rowAxis.setTitle('Rows')
-        self.rowAxis.setTitleVisible(True)
-        self.rowAxis.setLabels(['Row1', 'Row2'])
-        self.rowAxis.setLabelAutoRotation(30)
+        self._row_axis = QCategory3DAxis()
+        self._row_axis.setTitle('Rows')
+        self._row_axis.setTitleVisible(True)
+        self._row_axis.setLabels(['Row1', 'Row2'])
+        self._row_axis.setLabelAutoRotation(30)
 
-        self.valueAxis = QValue3DAxis()
-        self.valueAxis.setTitle('Values')
-        self.valueAxis.setTitleVisible(True)
-        self.valueAxis.setRange(0, 5)
+        self._value_axis = QValue3DAxis()
+        self._value_axis.setTitle('Values')
+        self._value_axis.setTitleVisible(True)
+        self._value_axis.setRange(0, 5)
 
-        self.bars.setRowAxis(self.rowAxis)
-        self.bars.setColumnAxis(self.columnAxis)
-        self.bars.setValueAxis(self.valueAxis)
+        self.bars.setRowAxis(self._row_axis)
+        self.bars.setColumnAxis(self._column_axis)
+        self.bars.setValueAxis(self._value_axis)
 
         self.series = QBar3DSeries()
-        self.arrayData = [[1, 2], [3, 4]]
-        self.series.dataProxy().addRows(dataToBarDataArray(self.arrayData))
+        self._array_data = [[1, 2], [3, 4]]
+        self.series.dataProxy().addRows(data_to_bar_data_array(self._array_data))
 
         self.bars.setPrimarySeries(self.series)
 
@@ -110,6 +110,6 @@ class MainWindow(QMainWindow):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    mainWin = MainWindow()
-    mainWin.show()
+    main_win = MainWindow()
+    main_win.show()
     sys.exit(app.exec_())

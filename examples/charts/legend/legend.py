@@ -156,7 +156,7 @@ class MainWidget(QWidget):
         self.legend_height.setMaximum(chart_viewrect.height())
         self.legend_height.setValue(75)
 
-    def hideLegendSpinbox(self):
+    def hide_legend_spinbox(self):
         self.legend_settings.setVisible(False)
 
     def toggle_attached(self):
@@ -172,7 +172,7 @@ class MainWidget(QWidget):
         else:
             legend.attachToChart()
             legend.setBackgroundVisible(False)
-            self.hideLegendSpinbox()
+            self.hide_legend_spinbox()
         self.update()
 
     def add_barset(self):

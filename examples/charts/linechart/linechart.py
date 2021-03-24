@@ -69,10 +69,10 @@ class TestChart(QMainWindow):
         self.chart.createDefaultAxes()
         self.chart.setTitle("Simple line chart example")
 
-        self.chartView = QChartView(self.chart)
-        self.chartView.setRenderHint(QPainter.Antialiasing)
+        self._chart_view = QChartView(self.chart)
+        self._chart_view.setRenderHint(QPainter.Antialiasing)
 
-        self.setCentralWidget(self.chartView)
+        self.setCentralWidget(self._chart_view)
 
 
 if __name__ == "__main__":

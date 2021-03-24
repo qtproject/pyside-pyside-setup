@@ -52,7 +52,7 @@ from PySide6.QtNetwork import (QAbstractSocket, QHostAddress, QNetworkInterface,
 
 
 class FortuneThread(QThread):
-    newFortune = Signal(str)
+    new_fortune = Signal(str)
 
     error = Signal(int, str)
 
@@ -60,7 +60,7 @@ class FortuneThread(QThread):
         super(FortuneThread, self).__init__(parent)
 
         self.quit = False
-        self.hostName = ''
+        self._host_name = ''
         self.cond = QWaitCondition()
         self.mutex = QMutex()
         self.port = 0
@@ -72,9 +72,9 @@ class FortuneThread(QThread):
         self.mutex.unlock()
         self.wait()
 
-    def requestNewFortune(self, hostname, port):
+    def request_new_fortune(self, hostname, port):
         locker = QMutexLocker(self.mutex)
-        self.hostName = hostname
+        self._host_name = hostname
         self.port = port
         if not self.isRunning():
             self.start()
@@ -83,41 +83,41 @@ class FortuneThread(QThread):
 
     def run(self):
         self.mutex.lock()
-        serverName = self.hostName
-        serverPort = self.port
+        server_name = self._host_name
+        server_port = self.port
         self.mutex.unlock()
 
         while not self.quit:
-            Timeout = 5 * 1000
+            timeout = 5 * 1000
 
             socket = QTcpSocket()
-            socket.connectToHost(serverName, serverPort)
+            socket.connectToHost(server_name, server_port)
 
-            if not socket.waitForConnected(Timeout):
+            if not socket.waitForConnected(timeout):
                 self.error.emit(socket.error(), socket.errorString())
                 return
 
             while socket.bytesAvailable() < 2:
-                if not socket.waitForReadyRead(Timeout):
+                if not socket.waitForReadyRead(timeout):
                     self.error.emit(socket.error(), socket.errorString())
                     return
 
             instr = QDataStream(socket)
             instr.setVersion(QDataStream.Qt_4_0)
-            blockSize = instr.readUInt16()
+            block_size = instr.readUInt16()
 
-            while socket.bytesAvailable() < blockSize:
-                if not socket.waitForReadyRead(Timeout):
+            while socket.bytesAvailable() < block_size:
+                if not socket.waitForReadyRead(timeout):
                     self.error.emit(socket.error(), socket.errorString())
                     return
 
             self.mutex.lock()
             fortune = instr.readQString()
-            self.newFortune.emit(fortune)
+            self.new_fortune.emit(fortune)
 
             self.cond.wait(self.mutex)
-            serverName = self.hostName
-            serverPort = self.port
+            server_name = self._host_name
+            server_port = self.port
             self.mutex.unlock()
 
 
@@ -126,74 +126,74 @@ class BlockingClient(QWidget):
         super(BlockingClient, self).__init__(parent)
 
         self.thread = FortuneThread()
-        self.currentFortune = ''
+        self._current_fortune = ''
 
-        hostLabel = QLabel("&Server name:")
-        portLabel = QLabel("S&erver port:")
+        host_label = QLabel("&Server name:")
+        port_label = QLabel("S&erver port:")
 
-        for ipAddress in QNetworkInterface.allAddresses():
-            if ipAddress != QHostAddress.LocalHost and ipAddress.toIPv4Address() != 0:
+        for ip_address in QNetworkInterface.allAddresses():
+            if ip_address != QHostAddress.LocalHost and ip_address.toIPv4Address() != 0:
                 break
         else:
-            ipAddress = QHostAddress(QHostAddress.LocalHost)
+            ip_address = QHostAddress(QHostAddress.LocalHost)
 
-        ipAddress = ipAddress.toString()
+        ip_address = ip_address.toString()
 
-        self.hostLineEdit = QLineEdit(ipAddress)
-        self.portLineEdit = QLineEdit()
-        self.portLineEdit.setValidator(QIntValidator(1, 65535, self))
+        self._host_line_edit = QLineEdit(ip_address)
+        self._port_line_edit = QLineEdit()
+        self._port_line_edit.setValidator(QIntValidator(1, 65535, self))
 
-        hostLabel.setBuddy(self.hostLineEdit)
-        portLabel.setBuddy(self.portLineEdit)
+        host_label.setBuddy(self._host_line_edit)
+        port_label.setBuddy(self._port_line_edit)
 
-        self.statusLabel = QLabel(
+        self._status_label = QLabel(
                 "This example requires that you run the Fortune Server example as well.")
-        self.statusLabel.setWordWrap(True)
+        self._status_label.setWordWrap(True)
 
-        self.getFortuneButton = QPushButton("Get Fortune")
-        self.getFortuneButton.setDefault(True)
-        self.getFortuneButton.setEnabled(False)
+        self._get_fortune_button = QPushButton("Get Fortune")
+        self._get_fortune_button.setDefault(True)
+        self._get_fortune_button.setEnabled(False)
 
-        quitButton = QPushButton("Quit")
+        quit_button = QPushButton("Quit")
 
-        buttonBox = QDialogButtonBox()
-        buttonBox.addButton(self.getFortuneButton, QDialogButtonBox.ActionRole)
-        buttonBox.addButton(quitButton, QDialogButtonBox.RejectRole)
+        button_box = QDialogButtonBox()
+        button_box.addButton(self._get_fortune_button, QDialogButtonBox.ActionRole)
+        button_box.addButton(quit_button, QDialogButtonBox.RejectRole)
 
-        self.getFortuneButton.clicked.connect(self.requestNewFortune)
-        quitButton.clicked.connect(self.close)
-        self.hostLineEdit.textChanged.connect(self.enableGetFortuneButton)
-        self.portLineEdit.textChanged.connect(self.enableGetFortuneButton)
-        self.thread.newFortune.connect(self.showFortune)
-        self.thread.error.connect(self.displayError)
+        self._get_fortune_button.clicked.connect(self.request_new_fortune)
+        quit_button.clicked.connect(self.close)
+        self._host_line_edit.textChanged.connect(self.enable_get_fortune_button)
+        self._port_line_edit.textChanged.connect(self.enable_get_fortune_button)
+        self.thread.new_fortune.connect(self.show_fortune)
+        self.thread.error.connect(self.display_error)
 
-        mainLayout = QGridLayout()
-        mainLayout.addWidget(hostLabel, 0, 0)
-        mainLayout.addWidget(self.hostLineEdit, 0, 1)
-        mainLayout.addWidget(portLabel, 1, 0)
-        mainLayout.addWidget(self.portLineEdit, 1, 1)
-        mainLayout.addWidget(self.statusLabel, 2, 0, 1, 2)
-        mainLayout.addWidget(buttonBox, 3, 0, 1, 2)
-        self.setLayout(mainLayout)
+        main_layout = QGridLayout()
+        main_layout.addWidget(host_label, 0, 0)
+        main_layout.addWidget(self._host_line_edit, 0, 1)
+        main_layout.addWidget(port_label, 1, 0)
+        main_layout.addWidget(self._port_line_edit, 1, 1)
+        main_layout.addWidget(self._status_label, 2, 0, 1, 2)
+        main_layout.addWidget(button_box, 3, 0, 1, 2)
+        self.setLayout(main_layout)
 
         self.setWindowTitle("Blocking Fortune Client")
-        self.portLineEdit.setFocus()
+        self._port_line_edit.setFocus()
 
-    def requestNewFortune(self):
-        self.getFortuneButton.setEnabled(False)
-        self.thread.requestNewFortune(self.hostLineEdit.text(),
-                int(self.portLineEdit.text()))
+    def request_new_fortune(self):
+        self._get_fortune_button.setEnabled(False)
+        self.thread.request_new_fortune(self._host_line_edit.text(),
+                int(self._port_line_edit.text()))
 
-    def showFortune(self, nextFortune):
-        if nextFortune == self.currentFortune:
-            self.requestNewFortune()
+    def show_fortune(self, nextFortune):
+        if nextFortune == self._current_fortune:
+            self.request_new_fortune()
             return
 
-        self.currentFortune = nextFortune
-        self.statusLabel.setText(self.currentFortune)
-        self.getFortuneButton.setEnabled(True)
+        self._current_fortune = nextFortune
+        self._status_label.setText(self._current_fortune)
+        self._get_fortune_button.setEnabled(True)
 
-    def displayError(self, socketError, message):
+    def display_error(self, socketError, message):
         if socketError == QAbstractSocket.HostNotFoundError:
             QMessageBox.information(self, "Blocking Fortune Client",
                     "The host was not found. Please check the host and port "
@@ -207,11 +207,11 @@ class BlockingClient(QWidget):
             QMessageBox.information(self, "Blocking Fortune Client",
                     f"The following error occurred: {message}.")
 
-        self.getFortuneButton.setEnabled(True)
+        self._get_fortune_button.setEnabled(True)
 
-    def enableGetFortuneButton(self):
-        self.getFortuneButton.setEnabled(self.hostLineEdit.text() != '' and
-                self.portLineEdit.text() != '')
+    def enable_get_fortune_button(self):
+        self._get_fortune_button.setEnabled(self._host_line_edit.text() != '' and
+                self._port_line_edit.text() != '')
 
 
 if __name__ == '__main__':

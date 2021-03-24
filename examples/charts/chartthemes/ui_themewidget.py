@@ -3,19 +3,19 @@
 ################################################################################
 ## Form generated from reading UI file 'themewidget.ui'
 ##
-## Created by: Qt User Interface Compiler version 5.14.0
+## Created by: Qt User Interface Compiler version 6.2.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCore import (QCoreApplication, QMetaObject, QObject, QPoint,
-    QRect, QSize, QUrl, Qt)
-from PySide6.QtGui import (QColor, QFont, QIcon, QPixmap)
+from PySide6.QtCore import *
+from PySide6.QtGui import *
 from PySide6.QtWidgets import *
+
 
 class Ui_ThemeWidgetForm(object):
     def setupUi(self, ThemeWidgetForm):
-        if ThemeWidgetForm.objectName():
+        if not ThemeWidgetForm.objectName():
             ThemeWidgetForm.setObjectName(u"ThemeWidgetForm")
         ThemeWidgetForm.resize(900, 600)
         self.gridLayout = QGridLayout(ThemeWidgetForm)
@@ -67,10 +67,10 @@ class Ui_ThemeWidgetForm(object):
 
 
         self.retranslateUi(ThemeWidgetForm)
-        self.themeComboBox.currentIndexChanged.connect(ThemeWidgetForm.updateUI)
-        self.antialiasCheckBox.toggled.connect(ThemeWidgetForm.updateUI)
-        self.legendComboBox.currentIndexChanged.connect(ThemeWidgetForm.updateUI)
-        self.animatedComboBox.currentIndexChanged.connect(ThemeWidgetForm.updateUI)
+        self.themeComboBox.currentIndexChanged.connect(ThemeWidgetForm.update_ui)
+        self.antialiasCheckBox.toggled.connect(ThemeWidgetForm.update_ui)
+        self.legendComboBox.currentIndexChanged.connect(ThemeWidgetForm.update_ui)
+        self.animatedComboBox.currentIndexChanged.connect(ThemeWidgetForm.update_ui)
 
         QMetaObject.connectSlotsByName(ThemeWidgetForm)
     # setupUi
@@ -80,5 +80,6 @@ class Ui_ThemeWidgetForm(object):
         self.animatedLabel.setText(QCoreApplication.translate("ThemeWidgetForm", u"Animation:", None))
         self.legendLabel.setText(QCoreApplication.translate("ThemeWidgetForm", u"Legend:", None))
         self.antialiasCheckBox.setText(QCoreApplication.translate("ThemeWidgetForm", u"Anti-aliasing", None))
+        pass
     # retranslateUi
 

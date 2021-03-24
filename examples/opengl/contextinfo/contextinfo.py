@@ -58,14 +58,14 @@ try:
     from OpenGL import GL
 except ImportError:
     app = QApplication(sys.argv)
-    messageBox = QMessageBox(QMessageBox.Critical, "ContextInfo",
+    message_box = QMessageBox(QMessageBox.Critical, "ContextInfo",
                              "PyOpenGL must be installed to run this example.",
                              QMessageBox.Close)
-    messageBox.setDetailedText("Run:\npip install PyOpenGL PyOpenGL_accelerate")
-    messageBox.exec_()
+    message_box.setDetailedText("Run:\npip install PyOpenGL PyOpenGL_accelerate")
+    message_box.exec_()
     sys.exit(1)
 
-vertexShaderSource110 = dedent("""
+vertex_shader_source_110 = dedent("""
     // version 110
     attribute highp vec4 posAttr;
     attribute lowp vec4 colAttr;
@@ -77,7 +77,7 @@ vertexShaderSource110 = dedent("""
     }
     """)
 
-fragmentShaderSource110 = dedent("""
+fragment_shader_source_110 = dedent("""
     // version 110
     varying lowp vec4 col;
     void main() {
@@ -85,7 +85,7 @@ fragmentShaderSource110 = dedent("""
     }
     """)
 
-vertexShaderSource = dedent("""
+vertex_shader_source = dedent("""
     // version 150
     in vec4 posAttr;
     in vec4 colAttr;
@@ -97,7 +97,7 @@ vertexShaderSource = dedent("""
     }
     """)
 
-fragmentShaderSource = dedent("""
+fragment_shader_source = dedent("""
     // version 150
     in vec4 col;
     out vec4 fragColor;
@@ -129,56 +129,56 @@ class RenderWindow(QWindow):
         self.timer = None
         self.angle = 0
 
-    def initGl(self):
+    def init_gl(self):
         self.program = QOpenGLShaderProgram(self)
         self.vao = QOpenGLVertexArrayObject()
         self.vbo = QOpenGLBuffer()
 
         format = self.context.format()
-        useNewStyleShader = format.profile() == QSurfaceFormat.CoreProfile
+        use_new_style_shader = format.profile() == QSurfaceFormat.CoreProfile
         # Try to handle 3.0 & 3.1 that do not have the core/compatibility profile
         # concept 3.2+ has. This may still fail since version 150 (3.2) is
         # specified in the sources but it's worth a try.
         if (format.renderableType() == QSurfaceFormat.OpenGL and format.majorVersion() == 3
             and format.minorVersion() <= 1):
-            useNewStyleShader = not format.testOption(QSurfaceFormat.DeprecatedFunctions)
+            use_new_style_shader = not format.testOption(QSurfaceFormat.DeprecatedFunctions)
 
-        vertexShader = vertexShaderSource if useNewStyleShader else vertexShaderSource110
-        fragmentShader = fragmentShaderSource if useNewStyleShader else fragmentShaderSource110
-        if not self.program.addShaderFromSourceCode(QOpenGLShader.Vertex, vertexShader):
+        vertex_shader = vertex_shader_source if use_new_style_shader else vertex_shader_source_110
+        fragment_shader = fragment_shader_source if use_new_style_shader else fragment_shader_source_110
+        if not self.program.addShaderFromSourceCode(QOpenGLShader.Vertex, vertex_shader):
             log = self.program.log()
             raise Exception("Vertex shader could not be added: {log} ({vertexShader})")
-        if not self.program.addShaderFromSourceCode(QOpenGLShader.Fragment, fragmentShader):
+        if not self.program.addShaderFromSourceCode(QOpenGLShader.Fragment, fragment_shader):
             log = self.program.log()
-            raise Exception(f"Fragment shader could not be added: {log} ({fragmentShader})")
+            raise Exception(f"Fragment shader could not be added: {log} ({fragment_shader})")
         if not self.program.link():
             log = self.program.log()
             raise Exception(f"Could not link shaders: {log}")
 
-        self.posAttr = self.program.attributeLocation("posAttr")
-        self.colAttr = self.program.attributeLocation("colAttr")
-        self.matrixUniform = self.program.uniformLocation("matrix")
+        self._pos_attr = self.program.attributeLocation("posAttr")
+        self._col_attr = self.program.attributeLocation("colAttr")
+        self._matrix_uniform = self.program.uniformLocation("matrix")
 
         self.vbo.create()
         self.vbo.bind()
-        self.verticesData = vertices.tobytes()
-        self.colorsData = colors.tobytes()
-        verticesSize = 4 * vertices.size
-        colorsSize = 4 * colors.size
-        self.vbo.allocate(VoidPtr(self.verticesData), verticesSize + colorsSize)
-        self.vbo.write(verticesSize, VoidPtr(self.colorsData), colorsSize)
+        self._vertices_data = vertices.tobytes()
+        self._colors_data = colors.tobytes()
+        vertices_size = 4 * vertices.size
+        colors_size = 4 * colors.size
+        self.vbo.allocate(VoidPtr(self._vertices_data), vertices_size + colors_size)
+        self.vbo.write(vertices_size, VoidPtr(self._colors_data), colors_size)
         self.vbo.release()
 
-        vaoBinder = QOpenGLVertexArrayObject.Binder(self.vao)
+        vao_binder = QOpenGLVertexArrayObject.Binder(self.vao)
         if self.vao.isCreated(): # have VAO support, use it
-            self.setupVertexAttribs()
+            self.setup_vertex_attribs()
 
-    def setupVertexAttribs(self):
+    def setup_vertex_attribs(self):
         self.vbo.bind()
-        self.program.setAttributeBuffer(self.posAttr, GL.GL_FLOAT, 0, 2)
-        self.program.setAttributeBuffer(self.colAttr, GL.GL_FLOAT, 4 * vertices.size, 3)
-        self.program.enableAttributeArray(self.posAttr)
-        self.program.enableAttributeArray(self.colAttr)
+        self.program.setAttributeBuffer(self._pos_attr, GL.GL_FLOAT, 0, 2)
+        self.program.setAttributeBuffer(self._col_attr, GL.GL_FLOAT, 4 * vertices.size, 3)
+        self.program.enableAttributeArray(self._pos_attr)
+        self.program.enableAttributeArray(self._col_attr)
         self.vbo.release()
 
     def exposeEvent(self, event):
@@ -186,7 +186,7 @@ class RenderWindow(QWindow):
             self.render()
             if self.timer is None:
                 self.timer = QTimer(self)
-                self.timer.timeout.connect(self.slotTimer)
+                self.timer.timeout.connect(self.slot_timer)
             if not self.timer.isActive():
                 self.timer.start(10)
         else:
@@ -200,11 +200,11 @@ class RenderWindow(QWindow):
         if self.program is None:
             functions.glEnable(GL.GL_DEPTH_TEST)
             functions.glClearColor(0, 0, 0, 1)
-            self.initGl()
+            self.init_gl()
 
-        retinaScale = self.devicePixelRatio()
-        functions.glViewport(0, 0, self.width() * retinaScale,
-                             self.height() * retinaScale)
+        retina_scale = self.devicePixelRatio()
+        functions.glViewport(0, 0, self.width() * retina_scale,
+                             self.height() * retina_scale)
         functions.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
 
         self.program.bind()
@@ -212,12 +212,12 @@ class RenderWindow(QWindow):
         matrix.perspective(60, 4 / 3, 0.1, 100)
         matrix.translate(0, 0, -2)
         matrix.rotate(self.angle, 0, 1, 0)
-        self.program.setUniformValue(self.matrixUniform, matrix)
+        self.program.setUniformValue(self._matrix_uniform, matrix)
 
         if self.vao.isCreated():
             self.vao.bind()
         else: # no VAO support, set the vertex attribute arrays now
-            self.setupVertexAttribs()
+            self.setup_vertex_attribs()
 
         functions.glDrawArrays(GL.GL_TRIANGLES, 0, 3)
 
@@ -229,7 +229,7 @@ class RenderWindow(QWindow):
         self.context.swapBuffers(self)
         self.context.doneCurrent()
 
-    def slotTimer(self):
+    def slot_timer(self):
         self.render()
         self.angle += 1
 
@@ -250,21 +250,21 @@ class RenderWindow(QWindow):
 class MainWindow(QWidget):
     def __init__(self):
         super(MainWindow, self).__init__()
-        hBoxLayout = QHBoxLayout(self)
-        self.plainTextEdit = QPlainTextEdit()
-        self.plainTextEdit.setMinimumWidth(400)
-        self.plainTextEdit.setReadOnly(True)
-        hBoxLayout.addWidget(self.plainTextEdit)
-        self.renderWindow = RenderWindow(QSurfaceFormat())
-        container = QWidget.createWindowContainer(self.renderWindow)
+        h_box_layout = QHBoxLayout(self)
+        self._plain_text_edit = QPlainTextEdit()
+        self._plain_text_edit.setMinimumWidth(400)
+        self._plain_text_edit.setReadOnly(True)
+        h_box_layout.addWidget(self._plain_text_edit)
+        self._render_window = RenderWindow(QSurfaceFormat())
+        container = QWidget.createWindowContainer(self._render_window)
         container.setMinimumSize(QSize(400, 400))
-        hBoxLayout.addWidget(container)
+        h_box_layout.addWidget(container)
 
-    def updateDescription(self):
+    def update_description(self):
         build = QLibraryInfo.build()
-        gl = self.renderWindow.glInfo()
+        gl = self._render_window.glInfo()
         text = f"{build}\n\nPython {sys.version}\n\n{gl}"
-        self.plainTextEdit.setPlainText(text)
+        self._plain_text_edit.setPlainText(text)
 
 if __name__ == '__main__':
     parser = ArgumentParser(description="contextinfo", formatter_class=RawTextHelpFormatter)
@@ -283,7 +283,7 @@ if __name__ == '__main__':
         QCoreApplication.setAttribute(Qt.AA_UseDesktopOpenGL)
 
     app = QApplication(sys.argv)
-    mainWindow = MainWindow()
-    mainWindow.show()
-    mainWindow.updateDescription()
+    main_window = MainWindow()
+    main_window.show()
+    main_window.update_description()
     sys.exit(app.exec_())

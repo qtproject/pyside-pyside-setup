@@ -71,34 +71,34 @@ class ThemeWidget(QWidget):
         self.populate_legendbox()
 
         # Area Chart
-        chart_view =  QChartView(self.create_areachart())
+        chart_view = QChartView(self.create_areachart())
         self.ui.gridLayout.addWidget(chart_view, 1, 0)
         self.charts.append(chart_view)
 
         # Pie Chart
-        chart_view =  QChartView(self.createPieChart())
+        chart_view = QChartView(self.create_pie_chart())
         chart_view.setSizePolicy(QSizePolicy.Ignored,
             QSizePolicy.Ignored)
         self.ui.gridLayout.addWidget(chart_view, 1, 1)
         self.charts.append(chart_view)
 
         # Line Chart
-        chart_view =  QChartView(self.createLineChart())
+        chart_view = QChartView(self.create_line_chart())
         self.ui.gridLayout.addWidget(chart_view, 1, 2)
         self.charts.append(chart_view)
 
         # Bar Chart
-        chart_view =  QChartView(self.createBarChart())
+        chart_view = QChartView(self.create_bar_chart())
         self.ui.gridLayout.addWidget(chart_view, 2, 0)
         self.charts.append(chart_view)
 
         # Spline Chart
-        chart_view =  QChartView(self.createSplineChart())
+        chart_view = QChartView(self.create_spline_chart())
         self.ui.gridLayout.addWidget(chart_view, 2, 1)
         self.charts.append(chart_view)
 
         # Scatter Chart
-        chart_view =  QChartView(self.create_scatterchart())
+        chart_view = QChartView(self.create_scatterchart())
         self.ui.gridLayout.addWidget(chart_view, 2, 2)
         self.charts.append(chart_view)
 
@@ -111,7 +111,7 @@ class ThemeWidget(QWidget):
         pal.setColor(QPalette.WindowText, QColor(0x404044))
         qApp.setPalette(pal)
 
-        self.updateUI()
+        self.update_ui()
 
 
     def generate_random_data(self, list_count, value_max, value_count):
@@ -189,7 +189,7 @@ class ThemeWidget(QWidget):
 
         return chart
 
-    def createBarChart(self):
+    def create_bar_chart(self):
         chart = QChart()
         chart.setTitle("Bar chart")
 
@@ -209,7 +209,7 @@ class ThemeWidget(QWidget):
 
         return chart
 
-    def createLineChart(self):
+    def create_line_chart(self):
         chart = QChart()
         chart.setTitle("Line chart")
 
@@ -229,7 +229,7 @@ class ThemeWidget(QWidget):
 
         return chart
 
-    def createPieChart(self):
+    def create_pie_chart(self):
         chart = QChart()
         chart.setTitle("Pie chart")
 
@@ -247,7 +247,7 @@ class ThemeWidget(QWidget):
 
         return chart
 
-    def createSplineChart(self):
+    def create_spline_chart(self):
         chart = QChart()
         chart.setTitle("Spline chart")
         name = "Series "
@@ -285,7 +285,7 @@ class ThemeWidget(QWidget):
 
         return chart
 
-    def updateUI(self):
+    def update_ui(self):
         def set_colors(window_color, text_color):
             pal = self.window().palette()
             pal.setColor(QPalette.Window, window_color)

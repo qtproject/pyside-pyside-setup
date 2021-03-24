@@ -76,28 +76,28 @@
    <sender>themeComboBox</sender>
    <signal>currentIndexChanged(int)</signal>
    <receiver>ThemeWidgetForm</receiver>
-   <slot>updateUI()</slot>
+   <slot>update_ui()</slot>
   </connection>
   <connection>
    <sender>antialiasCheckBox</sender>
    <signal>toggled(bool)</signal>
    <receiver>ThemeWidgetForm</receiver>
-   <slot>updateUI()</slot>
+   <slot>update_ui()</slot>
   </connection>
   <connection>
    <sender>legendComboBox</sender>
    <signal>currentIndexChanged(int)</signal>
    <receiver>ThemeWidgetForm</receiver>
-   <slot>updateUI()</slot>
+   <slot>update_ui()</slot>
   </connection>
   <connection>
    <sender>animatedComboBox</sender>
    <signal>currentIndexChanged(int)</signal>
    <receiver>ThemeWidgetForm</receiver>
-   <slot>updateUI()</slot>
+   <slot>update_ui()</slot>
   </connection>
  </connections>
  <slots>
-  <slot>updateUI()</slot>
+  <slot>update_ui()</slot>
  </slots>
 </ui>
