@@ -47,7 +47,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 
 class LCDRange(QtWidgets.QWidget):
-    valueChanged = QtCore.Signal(int)
+    value_changed = QtCore.Signal(int)
     def __init__(self, parent=None):
         QtWidgets.QWidget.__init__(self, parent)
 
@@ -72,10 +72,10 @@ class LCDRange(QtWidgets.QWidget):
         return self.slider.value()
 
     @QtCore.Slot(int)
-    def setValue(self, value):
+    def set_value(self, value):
         self.slider.setValue(value)
 
-    def setRange(self, minValue, maxValue):
+    def set_range(self, minValue, maxValue):
         if minValue < 0 or maxValue > 99 or minValue > maxValue:
             QtCore.qWarning(f"LCDRange::setRange({minValue}, {maxValue})\n"
                     "\tRange must be 0..99\n"
@@ -86,28 +86,28 @@ class LCDRange(QtWidgets.QWidget):
 
 
 class CannonField(QtWidgets.QWidget):
-    angleChanged = QtCore.Signal(int)
+    angle_changed = QtCore.Signal(int)
     def __init__(self, parent=None):
         QtWidgets.QWidget.__init__(self, parent)
 
-        self.currentAngle = 45
+        self._current_angle = 45
         self.setPalette(QtGui.QPalette(QtGui.QColor(250, 250, 200)))
         self.setAutoFillBackground(True)
 
     def angle(self):
-        return self.currentAngle
+        return self._current_angle
 
     @QtCore.Slot(int)
-    def setAngle(self, angle):
+    def set_angle(self, angle):
         if angle < 5:
             angle = 5
         if angle > 70:
             angle = 70
-        if self.currentAngle == angle:
+        if self._current_angle == angle:
             return
-        self.currentAngle = angle
+        self._current_angle = angle
         self.update()
-        self.emit(QtCore.SIGNAL("angleChanged(int)"), self.currentAngle)
+        self.emit(QtCore.SIGNAL("angleChanged(int)"), self._current_angle)
 
     def paintEvent(self, event):
         painter = QtGui.QPainter(self)
@@ -117,7 +117,7 @@ class CannonField(QtWidgets.QWidget):
 
         painter.translate(0, self.rect().height())
         painter.drawPie(QtCore.QRect(-35, -35, 70, 70), 0, 90 * 16)
-        painter.rotate(-self.currentAngle)
+        painter.rotate(-self._current_angle)
         painter.drawRect(QtCore.QRect(33, -4, 15, 8))
 
 
@@ -132,23 +132,23 @@ class MyWidget(QtWidgets.QWidget):
                      qApp, QtCore.SLOT("quit()"))
 
         angle = LCDRange()
-        angle.setRange(5, 70)
+        angle.set_range(5, 70)
 
-        cannonField = CannonField()
+        cannon_field = CannonField()
 
         self.connect(angle, QtCore.SIGNAL("valueChanged(int)"),
-                     cannonField.setAngle)
-        self.connect(cannonField, QtCore.SIGNAL("angleChanged(int)"),
-                     angle.setValue)
+                     cannon_field.set_angle)
+        self.connect(cannon_field, QtCore.SIGNAL("angleChanged(int)"),
+                     angle.set_value)
 
-        gridLayout = QtWidgets.QGridLayout()
-        gridLayout.addWidget(quit, 0, 0)
-        gridLayout.addWidget(angle, 1, 0)
-        gridLayout.addWidget(cannonField, 1, 1, 2, 1)
-        gridLayout.setColumnStretch(1, 10)
-        self.setLayout(gridLayout)
+        grid_layout = QtWidgets.QGridLayout()
+        grid_layout.addWidget(quit, 0, 0)
+        grid_layout.addWidget(angle, 1, 0)
+        grid_layout.addWidget(cannon_field, 1, 1, 2, 1)
+        grid_layout.setColumnStretch(1, 10)
+        self.setLayout(grid_layout)
 
-        angle.setValue(60)
+        angle.set_value(60)
         angle.setFocus()
 
 

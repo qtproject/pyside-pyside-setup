@@ -47,7 +47,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 
 class LCDRange(QtWidgets.QWidget):
-    valueChanged = QtCore.Signal(int)
+    value_changed = QtCore.Signal(int)
     def __init__(self, parent=None):
         QtWidgets.QWidget.__init__(self, parent)
 
@@ -72,10 +72,10 @@ class LCDRange(QtWidgets.QWidget):
         return self.slider.value()
 
     @QtCore.Slot(int)
-    def setValue(self, value):
+    def set_value(self, value):
         self.slider.setValue(value)
 
-    def setRange(self, minValue, maxValue):
+    def set_range(self, minValue, maxValue):
         if minValue < 0 or maxValue > 99 or minValue > maxValue:
             QtCore.qWarning(f"LCDRange::setRange({minValue}, {maxValue})\n"
                     "\tRange must be 0..99\n"
@@ -86,42 +86,42 @@ class LCDRange(QtWidgets.QWidget):
 
 
 class CannonField(QtWidgets.QWidget):
-    angleChanged = QtCore.Signal(int)
-    forceChanged = QtCore.Signal(int)
+    angle_changed = QtCore.Signal(int)
+    force_changed = QtCore.Signal(int)
     def __init__(self, parent=None):
         QtWidgets.QWidget.__init__(self, parent)
 
-        self.currentAngle = 45
-        self.currentForce = 0
+        self._current_angle = 45
+        self._current_force = 0
         self.setPalette(QtGui.QPalette(QtGui.QColor(250, 250, 200)))
         self.setAutoFillBackground(True)
 
     def angle(self):
-        return self.currentAngle
+        return self._current_angle
 
     @QtCore.Slot(int)
-    def setAngle(self, angle):
+    def set_angle(self, angle):
         if angle < 5:
             angle = 5
         if angle > 70:
             angle = 70
-        if self.currentAngle == angle:
+        if self._current_angle == angle:
             return
-        self.currentAngle = angle
+        self._current_angle = angle
         self.update()
-        self.emit(QtCore.SIGNAL("angleChanged(int)"), self.currentAngle)
+        self.emit(QtCore.SIGNAL("angleChanged(int)"), self._current_angle)
 
     def force(self):
-        return self.currentForce
+        return self._current_force
 
     @QtCore.Slot(int)
-    def setForce(self, force):
+    def set_force(self, force):
         if force < 0:
             force = 0
-        if self.currentForce == force:
+        if self._current_force == force:
             return
-        self.currentForce = force
-        self.emit(QtCore.SIGNAL("forceChanged(int)"), self.currentForce)
+        self._current_force = force
+        self.emit(QtCore.SIGNAL("forceChanged(int)"), self._current_force)
 
     def paintEvent(self, event):
         painter = QtGui.QPainter(self)
@@ -131,10 +131,10 @@ class CannonField(QtWidgets.QWidget):
 
         painter.translate(0, self.height())
         painter.drawPie(QtCore.QRect(-35, -35, 70, 70), 0, 90 * 16)
-        painter.rotate(-self.currentAngle)
+        painter.rotate(-self._current_angle)
         painter.drawRect(QtCore.QRect(33, -4, 15, 8))
 
-    def cannonRect(self):
+    def cannon_rect(self):
         result = QtCore.QRect(0, 0, 50, 50)
         result.moveBottomLeft(self.rect().bottomLect())
         return result
@@ -151,36 +151,36 @@ class MyWidget(QtWidgets.QWidget):
                      qApp, QtCore.SLOT("quit()"))
 
         angle = LCDRange()
-        angle.setRange(5, 70)
+        angle.set_range(5, 70)
 
         force = LCDRange()
-        force.setRange(10, 50)
+        force.set_range(10, 50)
 
-        cannonField = CannonField()
+        cannon_field = CannonField()
 
         self.connect(angle, QtCore.SIGNAL("valueChanged(int)"),
-                     cannonField.setAngle)
-        self.connect(cannonField, QtCore.SIGNAL("angleChanged(int)"),
-                     angle.setValue)
+                     cannon_field.set_angle)
+        self.connect(cannon_field, QtCore.SIGNAL("angleChanged(int)"),
+                     angle.set_value)
 
         self.connect(force, QtCore.SIGNAL("valueChanged(int)"),
-                     cannonField.setForce)
-        self.connect(cannonField, QtCore.SIGNAL("forceChanged(int)"),
-                     force.setValue)
+                     cannon_field.set_force)
+        self.connect(cannon_field, QtCore.SIGNAL("forceChanged(int)"),
+                     force.set_value)
 
-        leftLayout = QtWidgets.QVBoxLayout()
-        leftLayout.addWidget(angle)
-        leftLayout.addWidget(force)
+        left_layout = QtWidgets.QVBoxLayout()
+        left_layout.addWidget(angle)
+        left_layout.addWidget(force)
 
-        gridLayout = QtWidgets.QGridLayout()
-        gridLayout.addWidget(quit, 0, 0)
-        gridLayout.addLayout(leftLayout, 1, 0)
-        gridLayout.addWidget(cannonField, 1, 1, 2, 1)
-        gridLayout.setColumnStretch(1, 10)
-        self.setLayout(gridLayout)
+        grid_layout = QtWidgets.QGridLayout()
+        grid_layout.addWidget(quit, 0, 0)
+        grid_layout.addLayout(left_layout, 1, 0)
+        grid_layout.addWidget(cannon_field, 1, 1, 2, 1)
+        grid_layout.setColumnStretch(1, 10)
+        self.setLayout(grid_layout)
 
-        angle.setValue(60)
-        force.setValue(25)
+        angle.set_value(60)
+        force.set_value(25)
         angle.setFocus()
 
 

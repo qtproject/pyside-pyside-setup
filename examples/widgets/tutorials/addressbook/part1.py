@@ -47,19 +47,19 @@ class AddressBook(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super(AddressBook, self).__init__(parent)
 
-        nameLabel = QtWidgets.QLabel("Name:")
-        self.nameLine = QtWidgets.QLineEdit()
+        name_label = QtWidgets.QLabel("Name:")
+        self._name_line = QtWidgets.QLineEdit()
 
-        addressLabel = QtWidgets.QLabel("Address:")
-        self.addressText = QtWidgets.QTextEdit()
+        address_label = QtWidgets.QLabel("Address:")
+        self._address_text = QtWidgets.QTextEdit()
 
-        mainLayout = QtWidgets.QGridLayout()
-        mainLayout.addWidget(nameLabel, 0, 0)
-        mainLayout.addWidget(self.nameLine, 0, 1)
-        mainLayout.addWidget(addressLabel, 1, 0, QtCore.Qt.AlignTop)
-        mainLayout.addWidget(self.addressText, 1, 1)
+        main_layout = QtWidgets.QGridLayout()
+        main_layout.addWidget(name_label, 0, 0)
+        main_layout.addWidget(self._name_line, 0, 1)
+        main_layout.addWidget(address_label, 1, 0, QtCore.Qt.AlignTop)
+        main_layout.addWidget(self._address_text, 1, 1)
 
-        self.setLayout(mainLayout)
+        self.setLayout(main_layout)
         self.setWindowTitle("Simple Address Book")
 
 
@@ -68,7 +68,7 @@ if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
 
-    addressBook = AddressBook()
-    addressBook.show()
+    address_book = AddressBook()
+    address_book.show()
 
     sys.exit(app.exec_())

@@ -47,7 +47,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 
 class LCDRange(QtWidgets.QWidget):
-    valueChanged = QtCore.Signal(int)
+    value_changed = QtCore.Signal(int)
     def __init__(self, parent=None):
         QtWidgets.QWidget.__init__(self, parent)
 
@@ -71,7 +71,7 @@ class LCDRange(QtWidgets.QWidget):
         return self.slider.value()
 
     @QtCore.Slot(int)
-    def setValue(self, value):
+    def set_value(self, value):
         self.slider.setValue(value)
 
 
@@ -86,7 +86,7 @@ class MyWidget(QtWidgets.QWidget):
                      qApp, QtCore.SLOT("quit()"))
 
         grid = QtWidgets.QGridLayout()
-        previousRange = None
+        previous_range = None
 
 
         layout = QtWidgets.QVBoxLayout()
@@ -96,14 +96,14 @@ class MyWidget(QtWidgets.QWidget):
 
         for row in range(3):
             for column in range(3):
-                lcdRange = LCDRange()
-                grid.addWidget(lcdRange, row, column)
+                lcd_range = LCDRange()
+                grid.addWidget(lcd_range, row, column)
 
-                if previousRange:
-                    self.connect(lcdRange, QtCore.SIGNAL("valueChanged(int)"),
-                                 previousRange.setValue)
+                if previous_range:
+                    self.connect(lcd_range, QtCore.SIGNAL("valueChanged(int)"),
+                                 previous_range.set_value)
 
-                previousRange = lcdRange
+                previous_range = lcd_range
 
 
 

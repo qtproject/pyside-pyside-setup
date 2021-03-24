@@ -77,61 +77,61 @@ class AddressBook(QtWidgets.QWidget):
         super(AddressBook, self).__init__(parent)
 
         self.contacts = SortedDict()
-        self.oldName = ''
-        self.oldAddress = ''
+        self._old_name = ''
+        self._old_address = ''
 
-        nameLabel = QtWidgets.QLabel("Name:")
-        self.nameLine = QtWidgets.QLineEdit()
-        self.nameLine.setReadOnly(True)
+        name_label = QtWidgets.QLabel("Name:")
+        self._name_line = QtWidgets.QLineEdit()
+        self._name_line.setReadOnly(True)
 
-        addressLabel = QtWidgets.QLabel("Address:")
-        self.addressText = QtWidgets.QTextEdit()
-        self.addressText.setReadOnly(True)
+        address_label = QtWidgets.QLabel("Address:")
+        self._address_text = QtWidgets.QTextEdit()
+        self._address_text.setReadOnly(True)
 
-        self.addButton = QtWidgets.QPushButton("&Add")
-        self.submitButton = QtWidgets.QPushButton("&Submit")
-        self.submitButton.hide()
-        self.cancelButton = QtWidgets.QPushButton("&Cancel")
-        self.cancelButton.hide()
+        self._add_button = QtWidgets.QPushButton("&Add")
+        self._submit_button = QtWidgets.QPushButton("&Submit")
+        self._submit_button.hide()
+        self._cancel_button = QtWidgets.QPushButton("&Cancel")
+        self._cancel_button.hide()
 
-        self.addButton.clicked.connect(self.addContact)
-        self.submitButton.clicked.connect(self.submitContact)
-        self.cancelButton.clicked.connect(self.cancel)
+        self._add_button.clicked.connect(self.add_contact)
+        self._submit_button.clicked.connect(self.submit_contact)
+        self._cancel_button.clicked.connect(self.cancel)
 
-        buttonLayout1 = QtWidgets.QVBoxLayout()
-        buttonLayout1.addWidget(self.addButton, QtCore.Qt.AlignTop)
-        buttonLayout1.addWidget(self.submitButton)
-        buttonLayout1.addWidget(self.cancelButton)
-        buttonLayout1.addStretch()
+        button_layout_1 = QtWidgets.QVBoxLayout()
+        button_layout_1.addWidget(self._add_button, QtCore.Qt.AlignTop)
+        button_layout_1.addWidget(self._submit_button)
+        button_layout_1.addWidget(self._cancel_button)
+        button_layout_1.addStretch()
 
-        mainLayout = QtWidgets.QGridLayout()
-        mainLayout.addWidget(nameLabel, 0, 0)
-        mainLayout.addWidget(self.nameLine, 0, 1)
-        mainLayout.addWidget(addressLabel, 1, 0, QtCore.Qt.AlignTop)
-        mainLayout.addWidget(self.addressText, 1, 1)
-        mainLayout.addLayout(buttonLayout1, 1, 2)
+        main_layout = QtWidgets.QGridLayout()
+        main_layout.addWidget(name_label, 0, 0)
+        main_layout.addWidget(self._name_line, 0, 1)
+        main_layout.addWidget(address_label, 1, 0, QtCore.Qt.AlignTop)
+        main_layout.addWidget(self._address_text, 1, 1)
+        main_layout.addLayout(button_layout_1, 1, 2)
 
-        self.setLayout(mainLayout)
+        self.setLayout(main_layout)
         self.setWindowTitle("Simple Address Book")
 
-    def addContact(self):
-        self.oldName = self.nameLine.text()
-        self.oldAddress = self.addressText.toPlainText()
+    def add_contact(self):
+        self._old_name = self._name_line.text()
+        self._old_address = self._address_text.toPlainText()
 
-        self.nameLine.clear()
-        self.addressText.clear()
+        self._name_line.clear()
+        self._address_text.clear()
 
-        self.nameLine.setReadOnly(False)
-        self.nameLine.setFocus(QtCore.Qt.OtherFocusReason)
-        self.addressText.setReadOnly(False)
+        self._name_line.setReadOnly(False)
+        self._name_line.setFocus(QtCore.Qt.OtherFocusReason)
+        self._address_text.setReadOnly(False)
 
-        self.addButton.setEnabled(False)
-        self.submitButton.show()
-        self.cancelButton.show()
+        self._add_button.setEnabled(False)
+        self._submit_button.show()
+        self._cancel_button.show()
 
-    def submitContact(self):
-        name = self.nameLine.text()
-        address = self.addressText.toPlainText()
+    def submit_contact(self):
+        name = self._name_line.text()
+        address = self._address_text.toPlainText()
 
         if name == "" or address == "":
             QtWidgets.QMessageBox.information(self, "Empty Field",
@@ -148,25 +148,25 @@ class AddressBook(QtWidgets.QWidget):
             return
 
         if not self.contacts:
-            self.nameLine.clear()
-            self.addressText.clear()
+            self._name_line.clear()
+            self._address_text.clear()
 
-        self.nameLine.setReadOnly(True)
-        self.addressText.setReadOnly(True)
-        self.addButton.setEnabled(True)
-        self.submitButton.hide()
-        self.cancelButton.hide()
+        self._name_line.setReadOnly(True)
+        self._address_text.setReadOnly(True)
+        self._add_button.setEnabled(True)
+        self._submit_button.hide()
+        self._cancel_button.hide()
 
     def cancel(self):
-        self.nameLine.setText(self.oldName)
-        self.nameLine.setReadOnly(True)
+        self._name_line.setText(self._old_name)
+        self._name_line.setReadOnly(True)
 
-        self.addressText.setText(self.oldAddress)
-        self.addressText.setReadOnly(True)
+        self._address_text.setText(self._old_address)
+        self._address_text.setReadOnly(True)
 
-        self.addButton.setEnabled(True)
-        self.submitButton.hide()
-        self.cancelButton.hide()
+        self._add_button.setEnabled(True)
+        self._submit_button.hide()
+        self._cancel_button.hide()
 
 
 if __name__ == '__main__':
@@ -174,7 +174,7 @@ if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
 
-    addressBook = AddressBook()
-    addressBook.show()
+    address_book = AddressBook()
+    address_book.show()
 
     sys.exit(app.exec_())
