@@ -481,7 +481,7 @@ static PyObject *adjustFuncName(const char *func_name)
     }
 
     // Finally, generate the correct path expression.
-    char _buf[200 + 1] = {};
+    char _buf[250 + 1] = {};
     if (is_prop) {
         auto _prop_name = String::toCString(prop_name);
         if (is_class_prop)
