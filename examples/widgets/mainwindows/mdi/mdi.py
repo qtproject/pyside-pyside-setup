@@ -2,7 +2,7 @@
 #############################################################################
 ##
 ## Copyright (C) 2013 Riverbank Computing Limited.
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -40,9 +40,13 @@
 ##
 #############################################################################
 
-"""PySide6 port of the widgets/draganddrop/draggabletext example from Qt v5.x, originating from PyQt"""
+"""PySide6 port of the widgets/mainwindows/mdi example from Qt v5.x, originating from PyQt"""
 
-from PySide6.QtCore import (QFile, QFileInfo, QPoint, QSettings, QSignalMapper,
+from argparse import ArgumentParser, RawTextHelpFormatter
+from functools import partial
+import sys
+
+from PySide6.QtCore import (QByteArray, QFile, QFileInfo, QPoint, QSettings,
         QSaveFile, QSize, QTextStream, Qt)
 from PySide6.QtGui import QAction, QIcon, QKeySequence
 from PySide6.QtWidgets import (QApplication, QFileDialog, QMainWindow,
@@ -173,8 +177,6 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self._mdi_area)
 
         self._mdi_area.subWindowActivated.connect(self.update_menus)
-        self._window_mapper = QSignalMapper(self)
-        self._window_mapper.mappedObject.connect(self.set_active_sub_window)
 
         self.create_actions()
         self.create_menus()
@@ -200,19 +202,21 @@ class MainWindow(QMainWindow):
         child.show()
 
     def open(self):
-        fileName, _ = QFileDialog.getOpenFileName(self)
-        if fileName:
-            existing = self.find_mdi_child(fileName)
+        file_name, _ = QFileDialog.getOpenFileName(self)
+        if file_name:
+            existing = self.find_mdi_child(file_name)
             if existing:
                 self._mdi_area.setActiveSubWindow(existing)
-                return
-
-            child = self.create_mdi_child()
-            if child.load_file(fileName):
-                self.statusBar().showMessage("File loaded", 2000)
-                child.show()
             else:
-                child.close()
+                self.load(file_name)
+
+    def load(self, file_name):
+        child = self.create_mdi_child()
+        if child.load_file(file_name):
+            self.statusBar().showMessage("File loaded", 2000)
+            child.show()
+        else:
+            child.close()
 
     def save(self):
         if self.active_mdi_child() and self.active_mdi_child().save():
@@ -283,8 +287,8 @@ class MainWindow(QMainWindow):
             action = self._window_menu.addAction(text)
             action.setCheckable(True)
             action.setChecked(child is self.active_mdi_child())
-            action.triggered.connect(self._window_mapper.map)
-            self._window_mapper.setMapping(action, window)
+            slot_func = partial(self.set_active_sub_window, window=window)
+            action.triggered.connect(slot_func)
 
     def create_mdi_child(self):
         child = MdiChild()
@@ -415,16 +419,14 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage("Ready")
 
     def read_settings(self):
-        settings = QSettings('Trolltech', 'MDI Example')
-        pos = settings.value('pos', QPoint(200, 200))
-        size = settings.value('size', QSize(400, 400))
-        self.move(pos)
-        self.resize(size)
+        settings = QSettings('QtProject', 'MDI Example')
+        geometry = settings.value('geometry', QByteArray)
+        if geometry.size():
+            self.restoreGeometry(geometry)
 
     def write_settings(self):
-        settings = QSettings('Trolltech', 'MDI Example')
-        settings.setValue('pos', self.pos())
-        settings.setValue('size', self.size())
+        settings = QSettings('QtProject', 'MDI Example')
+        settings.setValue('geometry', self.saveGeometry())
 
     def active_mdi_child(self):
         active_sub_window = self._mdi_area.activeSubWindow()
@@ -436,7 +438,7 @@ class MainWindow(QMainWindow):
         canonical_file_path = QFileInfo(fileName).canonicalFilePath()
 
         for window in self._mdi_area.subWindowList():
-            if window.widget().currentFile() == canonical_file_path:
+            if window.widget().current_file() == canonical_file_path:
                 return window
         return None
 
@@ -452,10 +454,15 @@ class MainWindow(QMainWindow):
 
 
 if __name__ == '__main__':
-
-    import sys
+    argument_parser = ArgumentParser(description='MDI Example',
+                                     formatter_class=RawTextHelpFormatter)
+    argument_parser.add_argument("files", help="Files",
+                                 nargs='*', type=str)
+    options = argument_parser.parse_args()
 
     app = QApplication(sys.argv)
     main_win = MainWindow()
+    for f in options.files:
+        main_win.load(f)
     main_win.show()
     sys.exit(app.exec_())
