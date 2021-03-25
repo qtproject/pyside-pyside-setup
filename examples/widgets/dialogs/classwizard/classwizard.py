@@ -62,12 +62,12 @@ class ClassWizard(QtWidgets.QWizard):
         self.setWindowTitle("Class Wizard")
 
     def accept(self):
-        className = self.field('className')
-        baseClass = self.field('baseClass')
-        macroName = self.field('macroName')
-        baseInclude = self.field('baseInclude')
+        class_name = self.field('className')
+        base_class = self.field('baseClass')
+        macro_name = self.field('macroName')
+        base_include = self.field('baseInclude')
 
-        outputDir = self.field('outputDir')
+        output_dir = self.field('outputDir')
         header = self.field('header')
         implementation = self.field('implementation')
 
@@ -80,17 +80,17 @@ class ClassWizard(QtWidgets.QWizard):
             block += '\n'
 
         if self.field('protect'):
-            block += '#ifndef ' + macroName + '\n'
-            block += '#define ' + macroName + '\n'
+            block += '#ifndef ' + macro_name + '\n'
+            block += '#define ' + macro_name + '\n'
             block += '\n'
 
         if self.field('includeBase'):
-            block += '#include ' + baseInclude + '\n'
+            block += '#include ' + base_include + '\n'
             block += '\n'
 
-        block += 'class ' + className
-        if baseClass:
-            block += ' : public ' + baseClass
+        block += 'class ' + class_name
+        if base_class:
+            block += ' : public ' + base_class
 
         block += '\n'
         block += '{\n'
@@ -102,16 +102,16 @@ class ClassWizard(QtWidgets.QWizard):
         block += 'public:\n'
 
         if self.field('qobjectCtor'):
-            block += '    ' + className + '(QObject *parent = 0);\n'
+            block += '    ' + class_name + '(QObject *parent = 0);\n'
         elif self.field('qwidgetCtor'):
-            block += '    ' + className + '(QWidget *parent = 0);\n'
+            block += '    ' + class_name + '(QWidget *parent = 0);\n'
         elif self.field('defaultCtor'):
-            block += '    ' + className + '();\n'
+            block += '    ' + class_name + '();\n'
 
             if self.field('copyCtor'):
-                block += '    ' + className + '(const ' + className + ' &other);\n'
+                block += '    ' + class_name + '(const ' + class_name + ' &other);\n'
                 block += '\n'
-                block += '    ' + className + ' &operator=' + '(const ' + className + ' &other);\n'
+                block += '    ' + class_name + ' &operator=' + '(const ' + class_name + ' &other);\n'
 
         block += '};\n'
 
@@ -119,16 +119,16 @@ class ClassWizard(QtWidgets.QWizard):
             block += '\n'
             block += '#endif\n'
 
-        headerFile = QtCore.QFile(outputDir + '/' + header)
+        header_file = QtCore.QFile(output_dir + '/' + header)
 
-        if not headerFile.open(QtCore.QFile.WriteOnly | QtCore.QFile.Text):
-            name = headerFile.fileName()
-            reason = headerFile.errorString()
+        if not header_file.open(QtCore.QFile.WriteOnly | QtCore.QFile.Text):
+            name = header_file.fileName()
+            reason = header_file.errorString()
             QtWidgets.QMessageBox.warning(None, "Class Wizard",
                     f"Cannot write file {name}:\n{reason}")
             return
 
-        headerFile.write(QtCore.QByteArray(block.encode("utf-8")))
+        header_file.write(QtCore.QByteArray(block.encode("utf-8")))
 
         block = ''
 
@@ -142,48 +142,48 @@ class ClassWizard(QtWidgets.QWizard):
         block += '\n'
 
         if self.field('qobjectCtor'):
-            block += className + '::' + className + '(QObject *parent)\n'
-            block += '    : ' + baseClass + '(parent)\n'
+            block += class_name + '::' + class_name + '(QObject *parent)\n'
+            block += '    : ' + base_class + '(parent)\n'
             block += '{\n'
             block += '}\n'
         elif self.field('qwidgetCtor'):
-            block += className + '::' + className + '(QWidget *parent)\n'
-            block += '    : ' + baseClass + '(parent)\n'
+            block += class_name + '::' + class_name + '(QWidget *parent)\n'
+            block += '    : ' + base_class + '(parent)\n'
             block += '{\n'
             block += '}\n'
         elif self.field('defaultCtor'):
-            block += className + '::' + className + '()\n'
+            block += class_name + '::' + class_name + '()\n'
             block += '{\n'
             block += '    // missing code\n'
             block += '}\n'
 
             if self.field('copyCtor'):
                 block += '\n'
-                block += className + '::' + className + '(const ' + className + ' &other)\n'
+                block += class_name + '::' + class_name + '(const ' + class_name + ' &other)\n'
                 block += '{\n'
                 block += '    *this = other;\n'
                 block += '}\n'
                 block += '\n'
-                block += className + ' &' + className + '::operator=(const ' + className + ' &other)\n'
+                block += class_name + ' &' + class_name + '::operator=(const ' + class_name + ' &other)\n'
                 block += '{\n'
 
-                if baseClass:
-                    block += '    ' + baseClass + '::operator=(other);\n'
+                if base_class:
+                    block += '    ' + base_class + '::operator=(other);\n'
 
                 block += '    // missing code\n'
                 block += '    return *this;\n'
                 block += '}\n'
 
-        implementationFile = QtCore.QFile(outputDir + '/' + implementation)
+        implementation_file = QtCore.QFile(output_dir + '/' + implementation)
 
-        if not implementationFile.open(QtCore.QFile.WriteOnly | QtCore.QFile.Text):
-            name = implementationFile.fileName()
-            reason = implementationFile.errorString()
+        if not implementation_file.open(QtCore.QFile.WriteOnly | QtCore.QFile.Text):
+            name = implementation_file.fileName()
+            reason = implementation_file.errorString()
             QtWidgets.QMessageBox.warning(None, "Class Wizard",
                     f"Cannot write file {name}:\n{reason}")
             return
 
-        implementationFile.write(QtCore.QByteArray(block.encode("utf-8")))
+        implementation_file.write(QtCore.QByteArray(block.encode("utf-8")))
 
         super(ClassWizard, self).accept()
 
@@ -218,49 +218,49 @@ class ClassInfoPage(QtWidgets.QWizardPage):
         self.setPixmap(QtWidgets.QWizard.LogoPixmap,
                 QtGui.QPixmap(':/images/logo1.png'))
 
-        classNameLabel = QtWidgets.QLabel("&Class name:")
-        classNameLineEdit = QtWidgets.QLineEdit()
-        classNameLabel.setBuddy(classNameLineEdit)
+        class_name_label = QtWidgets.QLabel("&Class name:")
+        class_name_line_edit = QtWidgets.QLineEdit()
+        class_name_label.setBuddy(class_name_line_edit)
 
-        baseClassLabel = QtWidgets.QLabel("B&ase class:")
-        baseClassLineEdit = QtWidgets.QLineEdit()
-        baseClassLabel.setBuddy(baseClassLineEdit)
+        base_class_label = QtWidgets.QLabel("B&ase class:")
+        base_class_line_edit = QtWidgets.QLineEdit()
+        base_class_label.setBuddy(base_class_line_edit)
 
-        qobjectMacroCheckBox = QtWidgets.QCheckBox("Generate Q_OBJECT &macro")
+        qobject_macro_check_box = QtWidgets.QCheckBox("Generate Q_OBJECT &macro")
 
-        groupBox = QtWidgets.QGroupBox("C&onstructor")
+        group_box = QtWidgets.QGroupBox("C&onstructor")
 
-        qobjectCtorRadioButton = QtWidgets.QRadioButton("&QObject-style constructor")
-        qwidgetCtorRadioButton = QtWidgets.QRadioButton("Q&Widget-style constructor")
-        defaultCtorRadioButton = QtWidgets.QRadioButton("&Default constructor")
-        copyCtorCheckBox = QtWidgets.QCheckBox("&Generate copy constructor and operator=")
+        qobject_ctor_radio_button = QtWidgets.QRadioButton("&QObject-style constructor")
+        qwidget_ctor_radio_button = QtWidgets.QRadioButton("Q&Widget-style constructor")
+        default_ctor_radio_button = QtWidgets.QRadioButton("&Default constructor")
+        copy_ctor_check_box = QtWidgets.QCheckBox("&Generate copy constructor and operator=")
 
-        defaultCtorRadioButton.setChecked(True)
+        default_ctor_radio_button.setChecked(True)
 
-        defaultCtorRadioButton.toggled.connect(copyCtorCheckBox.setEnabled)
+        default_ctor_radio_button.toggled.connect(copy_ctor_check_box.setEnabled)
 
-        self.registerField('className*', classNameLineEdit)
-        self.registerField('baseClass', baseClassLineEdit)
-        self.registerField('qobjectMacro', qobjectMacroCheckBox)
-        self.registerField('qobjectCtor', qobjectCtorRadioButton)
-        self.registerField('qwidgetCtor', qwidgetCtorRadioButton)
-        self.registerField('defaultCtor', defaultCtorRadioButton)
-        self.registerField('copyCtor', copyCtorCheckBox)
+        self.registerField('className*', class_name_line_edit)
+        self.registerField('baseClass', base_class_line_edit)
+        self.registerField('qobjectMacro', qobject_macro_check_box)
+        self.registerField('qobjectCtor', qobject_ctor_radio_button)
+        self.registerField('qwidgetCtor', qwidget_ctor_radio_button)
+        self.registerField('defaultCtor', default_ctor_radio_button)
+        self.registerField('copyCtor', copy_ctor_check_box)
 
-        groupBoxLayout = QtWidgets.QVBoxLayout()
-        groupBoxLayout.addWidget(qobjectCtorRadioButton)
-        groupBoxLayout.addWidget(qwidgetCtorRadioButton)
-        groupBoxLayout.addWidget(defaultCtorRadioButton)
-        groupBoxLayout.addWidget(copyCtorCheckBox)
-        groupBox.setLayout(groupBoxLayout)
+        group_box_layout = QtWidgets.QVBoxLayout()
+        group_box_layout.addWidget(qobject_ctor_radio_button)
+        group_box_layout.addWidget(qwidget_ctor_radio_button)
+        group_box_layout.addWidget(default_ctor_radio_button)
+        group_box_layout.addWidget(copy_ctor_check_box)
+        group_box.setLayout(group_box_layout)
 
         layout = QtWidgets.QGridLayout()
-        layout.addWidget(classNameLabel, 0, 0)
-        layout.addWidget(classNameLineEdit, 0, 1)
-        layout.addWidget(baseClassLabel, 1, 0)
-        layout.addWidget(baseClassLineEdit, 1, 1)
-        layout.addWidget(qobjectMacroCheckBox, 2, 0, 1, 2)
-        layout.addWidget(groupBox, 3, 0, 1, 2)
+        layout.addWidget(class_name_label, 0, 0)
+        layout.addWidget(class_name_line_edit, 0, 1)
+        layout.addWidget(base_class_label, 1, 0)
+        layout.addWidget(base_class_line_edit, 1, 1)
+        layout.addWidget(qobject_macro_check_box, 2, 0, 1, 2)
+        layout.addWidget(group_box, 3, 0, 1, 2)
         self.setLayout(layout)
 
 
@@ -273,64 +273,64 @@ class CodeStylePage(QtWidgets.QWizardPage):
         self.setPixmap(QtWidgets.QWizard.LogoPixmap,
                 QtGui.QPixmap(':/images/logo2.png'))
 
-        commentCheckBox = QtWidgets.QCheckBox("&Start generated files with a "
+        comment_check_box = QtWidgets.QCheckBox("&Start generated files with a "
                 "comment")
-        commentCheckBox.setChecked(True)
+        comment_check_box.setChecked(True)
 
-        protectCheckBox = QtWidgets.QCheckBox("&Protect header file against "
+        protect_check_box = QtWidgets.QCheckBox("&Protect header file against "
                 "multiple inclusions")
-        protectCheckBox.setChecked(True)
+        protect_check_box.setChecked(True)
 
-        macroNameLabel = QtWidgets.QLabel("&Macro name:")
-        self.macroNameLineEdit = QtWidgets.QLineEdit()
-        macroNameLabel.setBuddy(self.macroNameLineEdit)
+        macro_name_label = QtWidgets.QLabel("&Macro name:")
+        self._macro_name_line_edit = QtWidgets.QLineEdit()
+        macro_name_label.setBuddy(self._macro_name_line_edit)
 
-        self.includeBaseCheckBox = QtWidgets.QCheckBox("&Include base class "
+        self._include_base_check_box = QtWidgets.QCheckBox("&Include base class "
                 "definition")
-        self.baseIncludeLabel = QtWidgets.QLabel("Base class include:")
-        self.baseIncludeLineEdit = QtWidgets.QLineEdit()
-        self.baseIncludeLabel.setBuddy(self.baseIncludeLineEdit)
+        self._base_include_label = QtWidgets.QLabel("Base class include:")
+        self._base_include_line_edit = QtWidgets.QLineEdit()
+        self._base_include_label.setBuddy(self._base_include_line_edit)
 
-        protectCheckBox.toggled.connect(macroNameLabel.setEnabled)
-        protectCheckBox.toggled.connect(self.macroNameLineEdit.setEnabled)
-        self.includeBaseCheckBox.toggled.connect(self.baseIncludeLabel.setEnabled)
-        self.includeBaseCheckBox.toggled.connect(self.baseIncludeLineEdit.setEnabled)
+        protect_check_box.toggled.connect(macro_name_label.setEnabled)
+        protect_check_box.toggled.connect(self._macro_name_line_edit.setEnabled)
+        self._include_base_check_box.toggled.connect(self._base_include_label.setEnabled)
+        self._include_base_check_box.toggled.connect(self._base_include_line_edit.setEnabled)
 
-        self.registerField('comment', commentCheckBox)
-        self.registerField('protect', protectCheckBox)
-        self.registerField('macroName', self.macroNameLineEdit)
-        self.registerField('includeBase', self.includeBaseCheckBox)
-        self.registerField('baseInclude', self.baseIncludeLineEdit)
+        self.registerField('comment', comment_check_box)
+        self.registerField('protect', protect_check_box)
+        self.registerField('macroName', self._macro_name_line_edit)
+        self.registerField('includeBase', self._include_base_check_box)
+        self.registerField('baseInclude', self._base_include_line_edit)
 
         layout = QtWidgets.QGridLayout()
         layout.setColumnMinimumWidth(0, 20)
-        layout.addWidget(commentCheckBox, 0, 0, 1, 3)
-        layout.addWidget(protectCheckBox, 1, 0, 1, 3)
-        layout.addWidget(macroNameLabel, 2, 1)
-        layout.addWidget(self.macroNameLineEdit, 2, 2)
-        layout.addWidget(self.includeBaseCheckBox, 3, 0, 1, 3)
-        layout.addWidget(self.baseIncludeLabel, 4, 1)
-        layout.addWidget(self.baseIncludeLineEdit, 4, 2)
+        layout.addWidget(comment_check_box, 0, 0, 1, 3)
+        layout.addWidget(protect_check_box, 1, 0, 1, 3)
+        layout.addWidget(macro_name_label, 2, 1)
+        layout.addWidget(self._macro_name_line_edit, 2, 2)
+        layout.addWidget(self._include_base_check_box, 3, 0, 1, 3)
+        layout.addWidget(self._base_include_label, 4, 1)
+        layout.addWidget(self._base_include_line_edit, 4, 2)
         self.setLayout(layout)
 
     def initializePage(self):
-        className = self.field('className')
-        self.macroNameLineEdit.setText(className.upper() + "_H")
+        class_name = self.field('className')
+        self._macro_name_line_edit.setText(class_name.upper() + "_H")
 
-        baseClass = self.field('baseClass')
-        is_baseClass = bool(baseClass)
+        base_class = self.field('baseClass')
+        is_baseClass = bool(base_class)
 
-        self.includeBaseCheckBox.setChecked(is_baseClass)
-        self.includeBaseCheckBox.setEnabled(is_baseClass)
-        self.baseIncludeLabel.setEnabled(is_baseClass)
-        self.baseIncludeLineEdit.setEnabled(is_baseClass)
+        self._include_base_check_box.setChecked(is_baseClass)
+        self._include_base_check_box.setEnabled(is_baseClass)
+        self._base_include_label.setEnabled(is_baseClass)
+        self._base_include_line_edit.setEnabled(is_baseClass)
 
         if not is_baseClass:
-            self.baseIncludeLineEdit.clear()
-        elif QtCore.QRegularExpression('^Q[A-Z].*$').match(baseClass).hasMatch():
-            self.baseIncludeLineEdit.setText('<' + baseClass + '>')
+            self._base_include_line_edit.clear()
+        elif QtCore.QRegularExpression('^Q[A-Z].*$').match(base_class).hasMatch():
+            self._base_include_line_edit.setText('<' + base_class + '>')
         else:
-            self.baseIncludeLineEdit.setText('"' + baseClass.lower() + '.h"')
+            self._base_include_line_edit.setText('"' + base_class.lower() + '.h"')
 
 
 class OutputFilesPage(QtWidgets.QWizardPage):
@@ -343,36 +343,36 @@ class OutputFilesPage(QtWidgets.QWizardPage):
         self.setPixmap(QtWidgets.QWizard.LogoPixmap,
                 QtGui.QPixmap(':/images/logo3.png'))
 
-        outputDirLabel = QtWidgets.QLabel("&Output directory:")
-        self.outputDirLineEdit = QtWidgets.QLineEdit()
-        outputDirLabel.setBuddy(self.outputDirLineEdit)
+        output_dir_label = QtWidgets.QLabel("&Output directory:")
+        self._output_dir_line_edit = QtWidgets.QLineEdit()
+        output_dir_label.setBuddy(self._output_dir_line_edit)
 
-        headerLabel = QtWidgets.QLabel("&Header file name:")
-        self.headerLineEdit = QtWidgets.QLineEdit()
-        headerLabel.setBuddy(self.headerLineEdit)
+        header_label = QtWidgets.QLabel("&Header file name:")
+        self._header_line_edit = QtWidgets.QLineEdit()
+        header_label.setBuddy(self._header_line_edit)
 
-        implementationLabel = QtWidgets.QLabel("&Implementation file name:")
-        self.implementationLineEdit = QtWidgets.QLineEdit()
-        implementationLabel.setBuddy(self.implementationLineEdit)
+        implementation_label = QtWidgets.QLabel("&Implementation file name:")
+        self._implementation_line_edit = QtWidgets.QLineEdit()
+        implementation_label.setBuddy(self._implementation_line_edit)
 
-        self.registerField('outputDir*', self.outputDirLineEdit)
-        self.registerField('header*', self.headerLineEdit)
-        self.registerField('implementation*', self.implementationLineEdit)
+        self.registerField('outputDir*', self._output_dir_line_edit)
+        self.registerField('header*', self._header_line_edit)
+        self.registerField('implementation*', self._implementation_line_edit)
 
         layout = QtWidgets.QGridLayout()
-        layout.addWidget(outputDirLabel, 0, 0)
-        layout.addWidget(self.outputDirLineEdit, 0, 1)
-        layout.addWidget(headerLabel, 1, 0)
-        layout.addWidget(self.headerLineEdit, 1, 1)
-        layout.addWidget(implementationLabel, 2, 0)
-        layout.addWidget(self.implementationLineEdit, 2, 1)
+        layout.addWidget(output_dir_label, 0, 0)
+        layout.addWidget(self._output_dir_line_edit, 0, 1)
+        layout.addWidget(header_label, 1, 0)
+        layout.addWidget(self._header_line_edit, 1, 1)
+        layout.addWidget(implementation_label, 2, 0)
+        layout.addWidget(self._implementation_line_edit, 2, 1)
         self.setLayout(layout)
 
     def initializePage(self):
-        className = self.field('className')
-        self.headerLineEdit.setText(className.lower() + '.h')
-        self.implementationLineEdit.setText(className.lower() + '.cpp')
-        self.outputDirLineEdit.setText(QtCore.QDir.toNativeSeparators(QtCore.QDir.tempPath()))
+        class_name = self.field('className')
+        self._header_line_edit.setText(class_name.lower() + '.h')
+        self._implementation_line_edit.setText(class_name.lower() + '.cpp')
+        self._output_dir_line_edit.setText(QtCore.QDir.toNativeSeparators(QtCore.QDir.tempPath()))
 
 
 class ConclusionPage(QtWidgets.QWizardPage):
@@ -391,9 +391,9 @@ class ConclusionPage(QtWidgets.QWizardPage):
         self.setLayout(layout)
 
     def initializePage(self):
-        finishText = self.wizard().buttonText(QtWidgets.QWizard.FinishButton)
-        finishText.replace('&', '')
-        self.label.setText(f"Click {finishText} to generate the class skeleton.")
+        finish_text = self.wizard().buttonText(QtWidgets.QWizard.FinishButton)
+        finish_text.replace('&', '')
+        self.label.setText(f"Click {finish_text} to generate the class skeleton.")
 
 
 if __name__ == '__main__':

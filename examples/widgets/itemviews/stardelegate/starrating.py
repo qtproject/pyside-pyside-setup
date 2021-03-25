@@ -53,26 +53,26 @@ class StarRating(object):
     """ Handle the actual painting of the stars themselves. """
 
     def __init__(self, starCount=1, maxStarCount=5):
-        self.starCount = starCount
-        self.maxStarCount = maxStarCount
+        self.star_count = starCount
+        self.MAX_STAR_COUNT = maxStarCount
 
         # Create the star shape we'll be drawing.
-        self.starPolygon = QPolygonF()
-        self.starPolygon.append(QPointF(1.0, 0.5))
+        self._star_polygon = QPolygonF()
+        self._star_polygon.append(QPointF(1.0, 0.5))
         for i in range(1, 5):
-            self.starPolygon.append(QPointF(0.5 + 0.5 * cos(0.8 * i * pi),
+            self._star_polygon.append(QPointF(0.5 + 0.5 * cos(0.8 * i * pi),
                                     0.5 + 0.5 * sin(0.8 * i * pi)))
 
         # Create the diamond shape we'll show in the editor
-        self.diamondPolygon = QPolygonF()
-        diamondPoints = [QPointF(0.4, 0.5), QPointF(0.5, 0.4),
+        self._diamond_polygon = QPolygonF()
+        diamond_points = [QPointF(0.4, 0.5), QPointF(0.5, 0.4),
                          QPointF(0.6, 0.5), QPointF(0.5, 0.6),
                          QPointF(0.4, 0.5)]
-        self.diamondPolygon.append(diamondPoints)
+        self._diamond_polygon.append(diamond_points)
 
     def sizeHint(self):
         """ Tell the caller how big we are. """
-        return PAINTING_SCALE_FACTOR * QSize(self.maxStarCount, 1)
+        return PAINTING_SCALE_FACTOR * QSize(self.MAX_STAR_COUNT, 1)
 
     def paint(self, painter, rect, palette, isEditable=False):
         """ Paint the stars (and/or diamonds if we're in editing mode). """
@@ -86,15 +86,15 @@ class StarRating(object):
         else:
             painter.setBrush(palette.windowText())
 
-        yOffset = (rect.height() - PAINTING_SCALE_FACTOR) / 2
-        painter.translate(rect.x(), rect.y() + yOffset)
+        y_offset = (rect.height() - PAINTING_SCALE_FACTOR) / 2
+        painter.translate(rect.x(), rect.y() + y_offset)
         painter.scale(PAINTING_SCALE_FACTOR, PAINTING_SCALE_FACTOR)
 
-        for i in range(self.maxStarCount):
-            if i < self.starCount:
-                painter.drawPolygon(self.starPolygon, Qt.WindingFill)
+        for i in range(self.MAX_STAR_COUNT):
+            if i < self.star_count:
+                painter.drawPolygon(self._star_polygon, Qt.WindingFill)
             elif isEditable:
-                painter.drawPolygon(self.diamondPolygon, Qt.WindingFill)
+                painter.drawPolygon(self._diamond_polygon, Qt.WindingFill)
             painter.translate(1.0, 0.0)
 
         painter.restore()

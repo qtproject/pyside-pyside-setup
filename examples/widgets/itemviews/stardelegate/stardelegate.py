@@ -66,7 +66,7 @@ class StarDelegate(QStyledItemDelegate):
             it works for the purposes of this example.
         """
         if index.column() == 3:
-            starRating = StarRating(index.data())
+            star_rating = StarRating(index.data())
 
             # If the row is currently selected, we need to make sure we
             # paint the background accordingly.
@@ -85,15 +85,15 @@ class StarDelegate(QStyledItemDelegate):
 
             # Now that we've painted the background, call starRating.paint()
             # to paint the stars.
-            starRating.paint(painter, option.rect, option.palette)
+            star_rating.paint(painter, option.rect, option.palette)
         else:
             QStyledItemDelegate.paint(self, painter, option, index)
 
     def sizeHint(self, option, index):
         """ Returns the size needed to display the item in a QSize object. """
         if index.column() == 3:
-            starRating = StarRating(index.data())
-            return starRating.sizeHint()
+            star_rating = StarRating(index.data())
+            return star_rating.sizeHint()
         else:
             return QStyledItemDelegate.sizeHint(self, option, index)
 
@@ -107,7 +107,7 @@ class StarDelegate(QStyledItemDelegate):
         """
         if index.column() == 3:
             editor = StarEditor(parent)
-            editor.editingFinished.connect(self.commitAndCloseEditor)
+            editor.editing_finished.connect(self.commit_and_close_editor)
             return editor
         else:
             return QStyledItemDelegate.createEditor(self, parent, option, index)
@@ -115,7 +115,7 @@ class StarDelegate(QStyledItemDelegate):
     def setEditorData(self, editor, index):
         """ Sets the data to be displayed and edited by our custom editor. """
         if index.column() == 3:
-            editor.starRating = StarRating(index.data())
+            editor.star_rating = StarRating(index.data())
         else:
             QStyledItemDelegate.setEditorData(self, editor, index)
 
@@ -123,11 +123,11 @@ class StarDelegate(QStyledItemDelegate):
         """ Get the data from our custom editor and stuffs it into the model.
         """
         if index.column() == 3:
-            model.setData(index, editor.starRating.starCount)
+            model.setData(index, editor.star_rating.star_count)
         else:
             QStyledItemDelegate.setModelData(self, editor, model, index)
 
-    def commitAndCloseEditor(self):
+    def commit_and_close_editor(self):
         """ Erm... commits the data and closes the editor. :) """
         editor = self.sender()
 
@@ -146,12 +146,12 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     # Create and populate the tableWidget
-    tableWidget = QTableWidget(4, 4)
-    tableWidget.setItemDelegate(StarDelegate())
-    tableWidget.setEditTriggers(QAbstractItemView.DoubleClicked |
+    table_widget = QTableWidget(4, 4)
+    table_widget.setItemDelegate(StarDelegate())
+    table_widget.setEditTriggers(QAbstractItemView.DoubleClicked |
                                 QAbstractItemView.SelectedClicked)
-    tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
-    tableWidget.setHorizontalHeaderLabels(["Title", "Genre", "Artist", "Rating"])
+    table_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
+    table_widget.setHorizontalHeaderLabels(["Title", "Genre", "Artist", "Rating"])
 
     data = [ ["Mass in B-Minor", "Baroque", "J.S. Bach", 5],
              ["Three More Foxes", "Jazz", "Maynard Ferguson", 4],
@@ -159,15 +159,15 @@ if __name__ == "__main__":
              ["Barbie Girl", "Pop", "Aqua", 5] ]
 
     for r in range(len(data)):
-        tableWidget.setItem(r, 0, QTableWidgetItem(data[r][0]))
-        tableWidget.setItem(r, 1, QTableWidgetItem(data[r][1]))
-        tableWidget.setItem(r, 2, QTableWidgetItem(data[r][2]))
+        table_widget.setItem(r, 0, QTableWidgetItem(data[r][0]))
+        table_widget.setItem(r, 1, QTableWidgetItem(data[r][1]))
+        table_widget.setItem(r, 2, QTableWidgetItem(data[r][2]))
         item = QTableWidgetItem()
-        item.setData(0, StarRating(data[r][3]).starCount)
-        tableWidget.setItem(r, 3, item)
+        item.setData(0, StarRating(data[r][3]).star_count)
+        table_widget.setItem(r, 3, item)
 
-    tableWidget.resizeColumnsToContents()
-    tableWidget.resize(500, 300)
-    tableWidget.show()
+    table_widget.resizeColumnsToContents()
+    table_widget.resize(500, 300)
+    table_widget.show()
 
     sys.exit(app.exec_())

@@ -50,36 +50,36 @@ class NewAddressTab(QWidget):
         To be displayed only when there are no contacts in the model.
     """
 
-    sendDetails = Signal(str, str)
+    send_details = Signal(str, str)
 
     def __init__(self, parent=None):
         super(NewAddressTab, self).__init__(parent)
 
-        descriptionLabel = QLabel("There are no contacts in your address book."
+        description_label = QLabel("There are no contacts in your address book."
                                    "\nClick Add to add new contacts.")
 
-        addButton = QPushButton("Add")
+        add_button = QPushButton("Add")
 
         layout = QVBoxLayout()
-        layout.addWidget(descriptionLabel)
-        layout.addWidget(addButton, 0, Qt.AlignCenter)
+        layout.addWidget(description_label)
+        layout.addWidget(add_button, 0, Qt.AlignCenter)
 
         self.setLayout(layout)
 
-        addButton.clicked.connect(self.addEntry)
+        add_button.clicked.connect(self.add_entry)
 
-    def addEntry(self):
-        addDialog = AddDialogWidget()
+    def add_entry(self):
+        add_dialog = AddDialogWidget()
 
-        if addDialog.exec_():
-            name = addDialog.name
-            address = addDialog.address
-            self.sendDetails.emit(name, address)
+        if add_dialog.exec_():
+            name = add_dialog.name
+            address = add_dialog.address
+            self.send_details.emit(name, address)
 
 
 if __name__ == "__main__":
 
-    def printAddress(name, address):
+    def print_address(name, address):
         print("Name:" + name)
         print("Address:" + address)
 
@@ -87,7 +87,7 @@ if __name__ == "__main__":
     from PySide6.QtWidgets import QApplication
 
     app = QApplication(sys.argv)
-    newAddressTab = NewAddressTab()
-    newAddressTab.sendDetails.connect(printAddress)
-    newAddressTab.show()
+    new_address_tab = NewAddressTab()
+    new_address_tab.send_details.connect(print_address)
+    new_address_tab.show()
     sys.exit(app.exec_())

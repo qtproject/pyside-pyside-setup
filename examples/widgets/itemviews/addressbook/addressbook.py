@@ -51,37 +51,37 @@ class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
 
-        self.addressWidget = AddressWidget()
-        self.setCentralWidget(self.addressWidget)
-        self.createMenus()
+        self._address_widget = AddressWidget()
+        self.setCentralWidget(self._address_widget)
+        self.create_menus()
         self.setWindowTitle("Address Book")
 
-    def createMenus(self):
+    def create_menus(self):
         # Create the main menuBar menu items
-        fileMenu = self.menuBar().addMenu("&File")
-        toolMenu = self.menuBar().addMenu("&Tools")
+        file_menu = self.menuBar().addMenu("&File")
+        tool_menu = self.menuBar().addMenu("&Tools")
 
         # Populate the File menu
-        openAction = self.createAction("&Open...", fileMenu, self.openFile)
-        saveAction = self.createAction("&Save As...", fileMenu, self.saveFile)
-        fileMenu.addSeparator()
-        exitAction = self.createAction("E&xit", fileMenu, self.close)
+        open_action = self.create_action("&Open...", file_menu, self.open_file)
+        save_action = self.create_action("&Save As...", file_menu, self.save_file)
+        file_menu.addSeparator()
+        exit_action = self.create_action("E&xit", file_menu, self.close)
 
         # Populate the Tools menu
-        addAction = self.createAction("&Add Entry...", toolMenu, self.addressWidget.addEntry)
-        self.editAction = self.createAction("&Edit Entry...", toolMenu, self.addressWidget.editEntry)
-        toolMenu.addSeparator()
-        self.removeAction = self.createAction("&Remove Entry", toolMenu, self.addressWidget.removeEntry)
+        add_action = self.create_action("&Add Entry...", tool_menu, self._address_widget.add_entry)
+        self._edit_action = self.create_action("&Edit Entry...", tool_menu, self._address_widget.edit_entry)
+        tool_menu.addSeparator()
+        self._remove_action = self.create_action("&Remove Entry", tool_menu, self._address_widget.remove_entry)
 
         # Disable the edit and remove menu items initially, as there are
         # no items yet.
-        self.editAction.setEnabled(False)
-        self.removeAction.setEnabled(False)
+        self._edit_action.setEnabled(False)
+        self._remove_action.setEnabled(False)
 
         # Wire up the updateActions slot
-        self.addressWidget.selectionChanged.connect(self.updateActions)
+        self._address_widget.selection_changed.connect(self.update_actions)
 
-    def createAction(self, text, menu, slot):
+    def create_action(self, text, menu, slot):
         """ Helper function to save typing when populating menus
             with action.
         """
@@ -98,28 +98,28 @@ class MainWindow(QMainWindow):
     #
     # In PySide6, these functions return a tuple: (filename, filter)
 
-    def openFile(self):
+    def open_file(self):
         filename, _ = QFileDialog.getOpenFileName(self)
         if filename:
-            self.addressWidget.readFromFile(filename)
+            self._address_widget.read_from_file(filename)
 
-    def saveFile(self):
+    def save_file(self):
         filename, _ = QFileDialog.getSaveFileName(self)
         if filename:
-            self.addressWidget.writeToFile(filename)
+            self._address_widget.write_to_file(filename)
 
-    def updateActions(self, selection):
+    def update_actions(self, selection):
         """ Only allow the user to remove or edit an item if an item
             is actually selected.
         """
         indexes = selection.indexes()
 
         if len(indexes) > 0:
-            self.removeAction.setEnabled(True)
-            self.editAction.setEnabled(True)
+            self._remove_action.setEnabled(True)
+            self._edit_action.setEnabled(True)
         else:
-            self.removeAction.setEnabled(False)
-            self.editAction.setEnabled(False)
+            self._remove_action.setEnabled(False)
+            self._edit_action.setEnabled(False)
 
 
 if __name__ == "__main__":

@@ -52,18 +52,18 @@ class CircleWidget(QWidget):
     def __init__(self, parent=None):
         super(CircleWidget, self).__init__(parent)
 
-        self.floatBased = False
+        self._float_based = False
         self.antialiased = False
-        self.frameNo = 0
+        self._frame_no = 0
 
         self.setBackgroundRole(QPalette.Base)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
-    def setFloatBased(self, floatBased):
-        self.floatBased = floatBased
+    def set_float_based(self, floatBased):
+        self._float_based = floatBased
         self.update()
 
-    def setAntialiased(self, antialiased):
+    def set_antialiased(self, antialiased):
         self.antialiased = antialiased
         self.update()
 
@@ -73,8 +73,8 @@ class CircleWidget(QWidget):
     def sizeHint(self):
         return QSize(180, 180)
 
-    def nextAnimationFrame(self):
-        self.frameNo += 1
+    def next_animation_frame(self):
+        self._frame_no += 1
         self.update()
 
     def paintEvent(self, event):
@@ -83,12 +83,12 @@ class CircleWidget(QWidget):
         painter.translate(self.width() / 2, self.height() / 2)
 
         for diameter in range(0, 256, 9):
-            delta = abs((self.frameNo % 128) - diameter / 2)
+            delta = abs((self._frame_no % 128) - diameter / 2)
             alpha = 255 - (delta * delta) / 4 - diameter
             if alpha > 0:
                 painter.setPen(QPen(QColor(0, diameter / 2, 127, alpha), 3))
 
-                if self.floatBased:
+                if self._float_based:
                     painter.drawEllipse(QRectF(-diameter / 2.0,
                             -diameter / 2.0, diameter, diameter))
                 else:
@@ -100,26 +100,26 @@ class Window(QWidget):
     def __init__(self):
         super(Window, self).__init__()
 
-        aliasedLabel = self.createLabel("Aliased")
-        antialiasedLabel = self.createLabel("Antialiased")
-        intLabel = self.createLabel("Int")
-        floatLabel = self.createLabel("Float")
+        aliased_label = self.create_label("Aliased")
+        antialiased_label = self.create_label("Antialiased")
+        int_label = self.create_label("Int")
+        float_label = self.create_label("Float")
 
         layout = QGridLayout()
-        layout.addWidget(aliasedLabel, 0, 1)
-        layout.addWidget(antialiasedLabel, 0, 2)
-        layout.addWidget(intLabel, 1, 0)
-        layout.addWidget(floatLabel, 2, 0)
+        layout.addWidget(aliased_label, 0, 1)
+        layout.addWidget(antialiased_label, 0, 2)
+        layout.addWidget(int_label, 1, 0)
+        layout.addWidget(float_label, 2, 0)
 
         timer = QTimer(self)
 
         for i in range(2):
             for j in range(2):
                 w = CircleWidget()
-                w.setAntialiased(j != 0)
-                w.setFloatBased(i != 0)
+                w.set_antialiased(j != 0)
+                w.set_float_based(i != 0)
 
-                timer.timeout.connect(w.nextAnimationFrame)
+                timer.timeout.connect(w.next_animation_frame)
 
                 layout.addWidget(w, i + 1, j + 1)
 
@@ -128,7 +128,7 @@ class Window(QWidget):
 
         self.setWindowTitle("Concentric Circles")
 
-    def createLabel(self, text):
+    def create_label(self, text):
         label = QLabel(text)
         label.setAlignment(Qt.AlignCenter)
         label.setMargin(2)

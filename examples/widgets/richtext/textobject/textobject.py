@@ -48,7 +48,7 @@ from PySide6 import QtCore, QtGui, QtWidgets, QtSvg
 class SvgTextObject(QtCore.QObject, QtGui.QTextObjectInterface):
 
     def intrinsicSize(self, doc, posInDocument, format):
-        renderer = QtSvg.QSvgRenderer(format.property(Window.SvgData).toByteArray())
+        renderer = QtSvg.QSvgRenderer(format.property(Window.svg_data).toByteArray())
         size = renderer.defaultSize()
 
         if size.height() > 25:
@@ -57,66 +57,66 @@ class SvgTextObject(QtCore.QObject, QtGui.QTextObjectInterface):
         return QtCore.QSizeF(size)
 
     def drawObject(self, painter, rect, doc, posInDocument, format):
-        renderer = QtSvg.QSvgRenderer(format.property(Window.SvgData).toByteArray())
+        renderer = QtSvg.QSvgRenderer(format.property(Window.svg_data).toByteArray())
         renderer.render(painter, rect)
 
 
 class Window(QtWidgets.QWidget):
 
-    SvgTextFormat = QtGui.QTextFormat.UserObject + 1
+    svg_text_format = QtGui.QTextFormat.UserObject + 1
 
-    SvgData = 1
+    svg_data = 1
 
     def __init__(self):
         super(Window, self).__init__()
 
-        self.setupGui()
-        self.setupTextObject()
+        self.setup_gui()
+        self.setup_text_object()
 
         self.setWindowTitle(self.tr("Text Object Example"))
 
-    def insertTextObject(self):
-        fileName = self.fileNameLineEdit.text()
-        file = QtCore.QFile(fileName)
+    def insert_text_object(self):
+        file_name = self._file_name_line_edit.text()
+        file = QtCore.QFile(file_name)
 
         if not file.open(QtCore.QIODevice.ReadOnly):
             QtWidgets.QMessageBox.warning(self, self.tr("Error Opening File"),
-                    self.tr("Could not open '%1'").arg(fileName))
+                    self.tr("Could not open '%1'").arg(file_name))
 
-        svgData = file.readAll()
+        svg_data = file.readAll()
 
-        svgCharFormat = QtGui.QTextCharFormat()
-        svgCharFormat.setObjectType(Window.SvgTextFormat)
-        svgCharFormat.setProperty(Window.SvgData, svgData)
+        svg_char_format = QtGui.QTextCharFormat()
+        svg_char_format.setObjectType(Window.svg_text_format)
+        svg_char_format.setProperty(Window.svg_data, svg_data)
 
-        cursor = self.textEdit.textCursor()
-        cursor.insertText(u"\uFFFD", svgCharFormat)
-        self.textEdit.setTextCursor(cursor)
+        cursor = self._text_edit.textCursor()
+        cursor.insertText(u"\uFFFD", svg_char_format)
+        self._text_edit.setTextCursor(cursor)
 
-    def setupTextObject(self):
-        svgInterface = SvgTextObject(self)
-        self.textEdit.document().documentLayout().registerHandler(Window.SvgTextFormat, svgInterface)
+    def setup_text_object(self):
+        svg_interface = SvgTextObject(self)
+        self._text_edit.document().documentLayout().registerHandler(Window.svg_text_format, svg_interface)
 
-    def setupGui(self):
-        fileNameLabel = QtWidgets.QLabel(self.tr("Svg File Name:"))
-        self.fileNameLineEdit = QtWidgets.QLineEdit()
-        insertTextObjectButton = QtWidgets.QPushButton(self.tr("Insert Image"))
+    def setup_gui(self):
+        file_name_label = QtWidgets.QLabel(self.tr("Svg File Name:"))
+        self._file_name_line_edit = QtWidgets.QLineEdit()
+        insert_text_object_button = QtWidgets.QPushButton(self.tr("Insert Image"))
 
-        self.fileNameLineEdit.setText('./files/heart.svg')
-        QtCore.QObject.connect(insertTextObjectButton, QtCore.SIGNAL('clicked()'), self.insertTextObject)
+        self._file_name_line_edit.setText('./files/heart.svg')
+        QtCore.QObject.connect(insert_text_object_button, QtCore.SIGNAL('clicked()'), self.insert_text_object)
 
-        bottomLayout = QtWidgets.QHBoxLayout()
-        bottomLayout.addWidget(fileNameLabel)
-        bottomLayout.addWidget(self.fileNameLineEdit)
-        bottomLayout.addWidget(insertTextObjectButton)
+        bottom_layout = QtWidgets.QHBoxLayout()
+        bottom_layout.addWidget(file_name_label)
+        bottom_layout.addWidget(self._file_name_line_edit)
+        bottom_layout.addWidget(insert_text_object_button)
 
-        self.textEdit = QtWidgets.QTextEdit()
+        self._text_edit = QtWidgets.QTextEdit()
 
-        mainLayout = QtWidgets.QVBoxLayout()
-        mainLayout.addWidget(self.textEdit)
-        mainLayout.addLayout(bottomLayout)
+        main_layout = QtWidgets.QVBoxLayout()
+        main_layout.addWidget(self._text_edit)
+        main_layout.addLayout(bottom_layout)
 
-        self.setLayout(mainLayout)
+        self.setLayout(main_layout)
 
 
 if __name__ == '__main__':

@@ -49,48 +49,48 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
 
-        fileMenu = QtWidgets.QMenu("&File", self)
-        newAction = fileMenu.addAction("&New...")
-        newAction.setShortcut("Ctrl+N")
-        self.printAction = fileMenu.addAction("&Print...", self.printFile)
-        self.printAction.setShortcut("Ctrl+P")
-        self.printAction.setEnabled(False)
-        quitAction = fileMenu.addAction("E&xit")
-        quitAction.setShortcut("Ctrl+Q")
-        self.menuBar().addMenu(fileMenu)
+        file_menu = QtWidgets.QMenu("&File", self)
+        new_action = file_menu.addAction("&New...")
+        new_action.setShortcut("Ctrl+N")
+        self._print_action = file_menu.addAction("&Print...", self.print_file)
+        self._print_action.setShortcut("Ctrl+P")
+        self._print_action.setEnabled(False)
+        quit_action = file_menu.addAction("E&xit")
+        quit_action.setShortcut("Ctrl+Q")
+        self.menuBar().addMenu(file_menu)
 
         self.letters = QtWidgets.QTabWidget()
 
-        newAction.triggered.connect(self.openDialog)
-        quitAction.triggered.connect(self.close)
+        new_action.triggered.connect(self.open_dialog)
+        quit_action.triggered.connect(self.close)
 
         self.setCentralWidget(self.letters)
         self.setWindowTitle("Order Form")
 
-    def createLetter(self, name, address, orderItems, sendOffers):
+    def create_letter(self, name, address, orderItems, sendOffers):
         editor = QtWidgets.QTextEdit()
-        tabIndex = self.letters.addTab(editor, name)
-        self.letters.setCurrentIndex(tabIndex)
+        tab_index = self.letters.addTab(editor, name)
+        self.letters.setCurrentIndex(tab_index)
 
         cursor = editor.textCursor()
         cursor.movePosition(QtGui.QTextCursor.Start)
-        topFrame = cursor.currentFrame()
-        topFrameFormat = topFrame.frameFormat()
-        topFrameFormat.setPadding(16)
-        topFrame.setFrameFormat(topFrameFormat)
+        top_frame = cursor.currentFrame()
+        top_frame_format = top_frame.frameFormat()
+        top_frame_format.setPadding(16)
+        top_frame.setFrameFormat(top_frame_format)
 
-        textFormat = QtGui.QTextCharFormat()
-        boldFormat = QtGui.QTextCharFormat()
-        boldFormat.setFontWeight(QtGui.QFont.Bold)
+        text_format = QtGui.QTextCharFormat()
+        bold_format = QtGui.QTextCharFormat()
+        bold_format.setFontWeight(QtGui.QFont.Bold)
 
-        referenceFrameFormat = QtGui.QTextFrameFormat()
-        referenceFrameFormat.setBorder(1)
-        referenceFrameFormat.setPadding(8)
-        referenceFrameFormat.setPosition(QtGui.QTextFrameFormat.FloatRight)
-        referenceFrameFormat.setWidth(QtGui.QTextLength(QtGui.QTextLength.PercentageLength, 40))
-        cursor.insertFrame(referenceFrameFormat)
+        reference_frame_format = QtGui.QTextFrameFormat()
+        reference_frame_format.setBorder(1)
+        reference_frame_format.setPadding(8)
+        reference_frame_format.setPosition(QtGui.QTextFrameFormat.FloatRight)
+        reference_frame_format.setWidth(QtGui.QTextLength(QtGui.QTextLength.PercentageLength, 40))
+        cursor.insertFrame(reference_frame_format)
 
-        cursor.insertText("A company", boldFormat)
+        cursor.insertText("A company", bold_format)
         cursor.insertBlock()
         cursor.insertText("321 City Street")
         cursor.insertBlock()
@@ -98,9 +98,9 @@ class MainWindow(QtWidgets.QMainWindow):
         cursor.insertBlock()
         cursor.insertText("Another country")
 
-        cursor.setPosition(topFrame.lastPosition())
+        cursor.setPosition(top_frame.lastPosition())
 
-        cursor.insertText(name, textFormat)
+        cursor.insertText(name, text_format)
         for line in address.split("\n"):
             cursor.insertBlock()
             cursor.insertText(line)
@@ -110,41 +110,41 @@ class MainWindow(QtWidgets.QMainWindow):
 
         date = QtCore.QDate.currentDate()
         date_str = date.toString('d MMMM yyyy')
-        cursor.insertText(f"Date: {date_str}", textFormat)
+        cursor.insertText(f"Date: {date_str}", text_format)
         cursor.insertBlock()
 
-        bodyFrameFormat = QtGui.QTextFrameFormat()
-        bodyFrameFormat.setWidth(QtGui.QTextLength(QtGui.QTextLength.PercentageLength, 100))
-        cursor.insertFrame(bodyFrameFormat)
+        body_frame_format = QtGui.QTextFrameFormat()
+        body_frame_format.setWidth(QtGui.QTextLength(QtGui.QTextLength.PercentageLength, 100))
+        cursor.insertFrame(body_frame_format)
 
         cursor.insertText("I would like to place an order for the following "
-                "items:", textFormat)
+                "items:", text_format)
         cursor.insertBlock()
         cursor.insertBlock()
 
-        orderTableFormat = QtGui.QTextTableFormat()
-        orderTableFormat.setAlignment(QtCore.Qt.AlignHCenter)
-        orderTable = cursor.insertTable(1, 2, orderTableFormat)
+        order_table_format = QtGui.QTextTableFormat()
+        order_table_format.setAlignment(QtCore.Qt.AlignHCenter)
+        order_table = cursor.insertTable(1, 2, order_table_format)
 
-        orderFrameFormat = cursor.currentFrame().frameFormat()
-        orderFrameFormat.setBorder(1)
-        cursor.currentFrame().setFrameFormat(orderFrameFormat)
+        order_frame_format = cursor.currentFrame().frameFormat()
+        order_frame_format.setBorder(1)
+        cursor.currentFrame().setFrameFormat(order_frame_format)
 
-        cursor = orderTable.cellAt(0, 0).firstCursorPosition()
-        cursor.insertText("Product", boldFormat)
-        cursor = orderTable.cellAt(0, 1).firstCursorPosition()
-        cursor.insertText("Quantity", boldFormat)
+        cursor = order_table.cellAt(0, 0).firstCursorPosition()
+        cursor.insertText("Product", bold_format)
+        cursor = order_table.cellAt(0, 1).firstCursorPosition()
+        cursor.insertText("Quantity", bold_format)
 
         for text, quantity in orderItems:
-            row = orderTable.rows()
+            row = order_table.rows()
 
-            orderTable.insertRows(row, 1)
-            cursor = orderTable.cellAt(row, 0).firstCursorPosition()
-            cursor.insertText(text, textFormat)
-            cursor = orderTable.cellAt(row, 1).firstCursorPosition()
-            cursor.insertText(str(quantity), textFormat)
+            order_table.insertRows(row, 1)
+            cursor = order_table.cellAt(row, 0).firstCursorPosition()
+            cursor.insertText(text, text_format)
+            cursor = order_table.cellAt(row, 1).firstCursorPosition()
+            cursor.insertText(str(quantity), text_format)
 
-        cursor.setPosition(topFrame.lastPosition())
+        cursor.setPosition(top_frame.lastPosition())
 
         cursor.insertBlock()
 
@@ -152,46 +152,46 @@ class MainWindow(QtWidgets.QMainWindow):
                 "following privacy information:")
         cursor.insertBlock()
 
-        offersTable = cursor.insertTable(2, 2)
+        offers_table = cursor.insertTable(2, 2)
 
-        cursor = offersTable.cellAt(0, 1).firstCursorPosition()
+        cursor = offers_table.cellAt(0, 1).firstCursorPosition()
         cursor.insertText("I want to receive more information about your "
-                "company's products and special offers.", textFormat)
-        cursor = offersTable.cellAt(1, 1).firstCursorPosition()
+                "company's products and special offers.", text_format)
+        cursor = offers_table.cellAt(1, 1).firstCursorPosition()
         cursor.insertText("I do not want to receive any promotional "
-                "information from your company.", textFormat)
+                "information from your company.", text_format)
 
         if sendOffers:
-            cursor = offersTable.cellAt(0, 0).firstCursorPosition()
+            cursor = offers_table.cellAt(0, 0).firstCursorPosition()
         else:
-            cursor = offersTable.cellAt(1, 0).firstCursorPosition()
+            cursor = offers_table.cellAt(1, 0).firstCursorPosition()
 
-        cursor.insertText('X', boldFormat)
+        cursor.insertText('X', bold_format)
 
-        cursor.setPosition(topFrame.lastPosition())
+        cursor.setPosition(top_frame.lastPosition())
         cursor.insertBlock()
-        cursor.insertText("Sincerely,", textFormat)
+        cursor.insertText("Sincerely,", text_format)
         cursor.insertBlock()
         cursor.insertBlock()
         cursor.insertBlock()
         cursor.insertText(name)
 
-        self.printAction.setEnabled(True)
+        self._print_action.setEnabled(True)
 
-    def createSample(self):
+    def create_sample(self):
         dialog = DetailsDialog('Dialog with default values', self)
-        self.createLetter('Mr Smith',
+        self.create_letter('Mr Smith',
                 '12 High Street\nSmall Town\nThis country',
-                dialog.orderItems(), True)
+                dialog.order_items(), True)
 
-    def openDialog(self):
+    def open_dialog(self):
         dialog = DetailsDialog("Enter Customer Details", self)
 
         if dialog.exec_() == QtWidgets.QDialog.Accepted:
-            self.createLetter(dialog.senderName(), dialog.senderAddress(),
-                    dialog.orderItems(), dialog.sendOffers())
+            self.create_letter(dialog.sender_name(), dialog.sender_address(),
+                    dialog.order_items(), dialog.send_offers())
 
-    def printFile(self):
+    def print_file(self):
         editor = self.letters.currentWidget()
         printer = QtPrintSupport.QPrinter()
 
@@ -213,65 +213,65 @@ class DetailsDialog(QtWidgets.QDialog):
 
         self.items = ("T-shirt", "Badge", "Reference book", "Coffee cup")
 
-        nameLabel = QtWidgets.QLabel("Name:")
-        addressLabel = QtWidgets.QLabel("Address:")
-        addressLabel.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
+        name_label = QtWidgets.QLabel("Name:")
+        address_label = QtWidgets.QLabel("Address:")
+        address_label.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
 
-        self.nameEdit = QtWidgets.QLineEdit()
-        self.addressEdit = QtWidgets.QTextEdit()
-        self.offersCheckBox = QtWidgets.QCheckBox("Send information about "
+        self._name_edit = QtWidgets.QLineEdit()
+        self._address_edit = QtWidgets.QTextEdit()
+        self._offers_check_box = QtWidgets.QCheckBox("Send information about "
                 "products and special offers:")
 
-        self.setupItemsTable()
+        self.setup_items_table()
 
-        buttonBox = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
+        button_box = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
 
-        buttonBox.accepted.connect(self.verify)
-        buttonBox.rejected.connect(self.reject)
+        button_box.accepted.connect(self.verify)
+        button_box.rejected.connect(self.reject)
 
-        mainLayout = QtWidgets.QGridLayout()
-        mainLayout.addWidget(nameLabel, 0, 0)
-        mainLayout.addWidget(self.nameEdit, 0, 1)
-        mainLayout.addWidget(addressLabel, 1, 0)
-        mainLayout.addWidget(self.addressEdit, 1, 1)
-        mainLayout.addWidget(self.itemsTable, 0, 2, 2, 1)
-        mainLayout.addWidget(self.offersCheckBox, 2, 1, 1, 2)
-        mainLayout.addWidget(buttonBox, 3, 0, 1, 3)
-        self.setLayout(mainLayout)
+        main_layout = QtWidgets.QGridLayout()
+        main_layout.addWidget(name_label, 0, 0)
+        main_layout.addWidget(self._name_edit, 0, 1)
+        main_layout.addWidget(address_label, 1, 0)
+        main_layout.addWidget(self._address_edit, 1, 1)
+        main_layout.addWidget(self._items_table, 0, 2, 2, 1)
+        main_layout.addWidget(self._offers_check_box, 2, 1, 1, 2)
+        main_layout.addWidget(button_box, 3, 0, 1, 3)
+        self.setLayout(main_layout)
 
         self.setWindowTitle(title)
 
-    def setupItemsTable(self):
-        self.itemsTable = QtWidgets.QTableWidget(len(self.items), 2)
+    def setup_items_table(self):
+        self._items_table = QtWidgets.QTableWidget(len(self.items), 2)
 
         for row, item in enumerate(self.items):
             name = QtWidgets.QTableWidgetItem(item)
             name.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
-            self.itemsTable.setItem(row, 0, name)
+            self._items_table.setItem(row, 0, name)
             quantity = QtWidgets.QTableWidgetItem('1')
-            self.itemsTable.setItem(row, 1, quantity)
+            self._items_table.setItem(row, 1, quantity)
 
-    def orderItems(self):
-        orderList = []
+    def order_items(self):
+        order_list = []
 
         for row in range(len(self.items)):
-            text = self.itemsTable.item(row, 0).text()
-            quantity = int(self.itemsTable.item(row, 1).data(QtCore.Qt.DisplayRole))
-            orderList.append((text, max(0, quantity)))
+            text = self._items_table.item(row, 0).text()
+            quantity = int(self._items_table.item(row, 1).data(QtCore.Qt.DisplayRole))
+            order_list.append((text, max(0, quantity)))
 
-        return orderList
+        return order_list
 
-    def senderName(self):
-        return self.nameEdit.text()
+    def sender_name(self):
+        return self._name_edit.text()
 
-    def senderAddress(self):
-        return self.addressEdit.toPlainText()
+    def sender_address(self):
+        return self._address_edit.toPlainText()
 
-    def sendOffers(self):
-        return self.offersCheckBox.isChecked()
+    def send_offers(self):
+        return self._offers_check_box.isChecked()
 
     def verify(self):
-        if self.nameEdit.text() and self.addressEdit.toPlainText():
+        if self._name_edit.text() and self._address_edit.toPlainText():
             self.accept()
             return
 
@@ -292,5 +292,5 @@ if __name__ == '__main__':
     window = MainWindow()
     window.resize(640, 480)
     window.show()
-    window.createSample()
+    window.create_sample()
     sys.exit(app.exec_())

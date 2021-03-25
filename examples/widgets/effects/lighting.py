@@ -56,7 +56,7 @@ class Lighting(QtWidgets.QGraphicsView):
 
         self.setScene(self.m_scene)
 
-        self.setupScene()
+        self.setup_scene()
 
         timer = QtCore.QTimer(self)
         timer.timeout.connect(self.animate)
@@ -66,26 +66,26 @@ class Lighting(QtWidgets.QGraphicsView):
         self.setRenderHint(QtGui.QPainter.Antialiasing)
         self.setFrameStyle(QtWidgets.QFrame.NoFrame)
 
-    def setupScene(self):
+    def setup_scene(self):
         self.m_scene.setSceneRect(-300, -200, 600, 460)
 
-        linearGrad = QtGui.QLinearGradient(QtCore.QPointF(-100, -100),
+        linear_grad = QtGui.QLinearGradient(QtCore.QPointF(-100, -100),
                 QtCore.QPointF(100, 100))
-        linearGrad.setColorAt(0, QtGui.QColor(255, 255, 255))
-        linearGrad.setColorAt(1, QtGui.QColor(192, 192, 255))
-        self.setBackgroundBrush(linearGrad)
+        linear_grad.setColorAt(0, QtGui.QColor(255, 255, 255))
+        linear_grad.setColorAt(1, QtGui.QColor(192, 192, 255))
+        self.setBackgroundBrush(linear_grad)
 
-        radialGrad = QtGui.QRadialGradient(30, 30, 30)
-        radialGrad.setColorAt(0, QtCore.Qt.yellow)
-        radialGrad.setColorAt(0.2, QtCore.Qt.yellow)
-        radialGrad.setColorAt(1, QtCore.Qt.transparent)
+        radial_grad = QtGui.QRadialGradient(30, 30, 30)
+        radial_grad.setColorAt(0, QtCore.Qt.yellow)
+        radial_grad.setColorAt(0.2, QtCore.Qt.yellow)
+        radial_grad.setColorAt(1, QtCore.Qt.transparent)
 
         pixmap = QtGui.QPixmap(60, 60)
         pixmap.fill(QtCore.Qt.transparent)
 
         painter = QtGui.QPainter(pixmap)
         painter.setPen(QtCore.Qt.NoPen)
-        painter.setBrush(radialGrad)
+        painter.setBrush(radial_grad)
         painter.drawEllipse(0, 0, 60, 60)
         painter.end()
 

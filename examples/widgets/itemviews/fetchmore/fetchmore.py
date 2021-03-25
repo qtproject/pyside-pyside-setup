@@ -45,26 +45,26 @@ from PySide6 import QtCore, QtWidgets
 
 
 class FileListModel(QtCore.QAbstractListModel):
-    numberPopulated = QtCore.Signal(int)
+    number_populated = QtCore.Signal(int)
 
     def __init__(self, parent=None):
         super(FileListModel, self).__init__(parent)
 
-        self.fileCount = 0
-        self.fileList = []
+        self._file_count = 0
+        self._file_list = []
 
     def rowCount(self, parent=QtCore.QModelIndex()):
-        return self.fileCount
+        return self._file_count
 
     def data(self, index, role=QtCore.Qt.DisplayRole):
         if not index.isValid():
             return None
 
-        if index.row() >= len(self.fileList) or index.row() < 0:
+        if index.row() >= len(self._file_list) or index.row() < 0:
             return None
 
         if role == QtCore.Qt.DisplayRole:
-            return self.fileList[index.row()]
+            return self._file_list[index.row()]
 
         if role == QtCore.Qt.BackgroundRole:
             batch = (index.row() // 100) % 2
@@ -77,27 +77,27 @@ class FileListModel(QtCore.QAbstractListModel):
         return None
 
     def canFetchMore(self, index):
-        return self.fileCount < len(self.fileList)
+        return self._file_count < len(self._file_list)
 
     def fetchMore(self, index):
-        remainder = len(self.fileList) - self.fileCount
-        itemsToFetch = min(100, remainder)
+        remainder = len(self._file_list) - self._file_count
+        items_to_fetch = min(100, remainder)
 
-        self.beginInsertRows(QtCore.QModelIndex(), self.fileCount,
-                self.fileCount + itemsToFetch)
+        self.beginInsertRows(QtCore.QModelIndex(), self._file_count,
+                self._file_count + items_to_fetch)
 
-        self.fileCount += itemsToFetch
+        self._file_count += items_to_fetch
 
         self.endInsertRows()
 
-        self.numberPopulated.emit(itemsToFetch)
+        self.number_populated.emit(items_to_fetch)
 
-    def setDirPath(self, path):
+    def set_dir_path(self, path):
         dir = QtCore.QDir(path)
 
         self.beginResetModel()
-        self.fileList = list(dir.entryList())
-        self.fileCount = 0
+        self._file_list = list(dir.entryList())
+        self._file_count = 0
         self.endResetModel()
 
 
@@ -106,33 +106,33 @@ class Window(QtWidgets.QWidget):
         super(Window, self).__init__(parent)
 
         model = FileListModel(self)
-        model.setDirPath(QtCore.QLibraryInfo.location(QtCore.QLibraryInfo.PrefixPath))
+        model.set_dir_path(QtCore.QLibraryInfo.location(QtCore.QLibraryInfo.PrefixPath))
 
         label = QtWidgets.QLabel("Directory")
-        lineEdit = QtWidgets.QLineEdit()
-        label.setBuddy(lineEdit)
+        line_edit = QtWidgets.QLineEdit()
+        label.setBuddy(line_edit)
 
         view = QtWidgets.QListView()
         view.setModel(model)
 
-        self.logViewer = QtWidgets.QTextBrowser()
-        self.logViewer.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred))
+        self._log_viewer = QtWidgets.QTextBrowser()
+        self._log_viewer.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred))
 
-        lineEdit.textChanged.connect(model.setDirPath)
-        lineEdit.textChanged.connect(self.logViewer.clear)
-        model.numberPopulated.connect(self.updateLog)
+        line_edit.textChanged.connect(model.set_dir_path)
+        line_edit.textChanged.connect(self._log_viewer.clear)
+        model.number_populated.connect(self.update_log)
 
         layout = QtWidgets.QGridLayout()
         layout.addWidget(label, 0, 0)
-        layout.addWidget(lineEdit, 0, 1)
+        layout.addWidget(line_edit, 0, 1)
         layout.addWidget(view, 1, 0, 1, 2)
-        layout.addWidget(self.logViewer, 2, 0, 1, 2)
+        layout.addWidget(self._log_viewer, 2, 0, 1, 2)
 
         self.setLayout(layout)
         self.setWindowTitle("Fetch More Example")
 
-    def updateLog(self, number):
-        self.logViewer.append(f"{number} items added.")
+    def update_log(self, number):
+        self._log_viewer.append(f"{number} items added.")
 
 
 if __name__ == '__main__':

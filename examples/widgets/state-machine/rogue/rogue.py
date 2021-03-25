@@ -61,13 +61,13 @@ class MovementTransition(QEventTransition):
     def onTransition(self, event):
         key = event.event().key()
         if key == Qt.Key_4:
-            self.window.movePlayer(self.window.Left)
+            self.window.move_player(self.window.left)
         if key == Qt.Key_8:
-            self.window.movePlayer(self.window.Up)
+            self.window.move_player(self.window.Up)
         if key == Qt.Key_6:
-            self.window.movePlayer(self.window.Right)
+            self.window.move_player(self.window.right)
         if key == Qt.Key_2:
-            self.window.movePlayer(self.window.Down)
+            self.window.move_player(self.window.down)
 
 class Custom(QState):
     def __init__(self, parent, mw):
@@ -84,7 +84,7 @@ class MainWindow(QMainWindow):
         self.pY = 5
         self.width = 35
         self.height = 20
-        self.statusStr = ''
+        self._status_str = ''
 
         font = QFont()
         if 'Monospace' in QFontDatabase.families():
@@ -95,10 +95,10 @@ class MainWindow(QMainWindow):
                     font = QFont(family, 12)
         self.setFont(font)
 
-        self.setupMap()
-        self.buildMachine()
+        self.setup_map()
+        self.build_machine()
         self.show()
-    def setupMap(self):
+    def setup_map(self):
         self.map = []
         generator = QRandomGenerator().global_()
         for x in range(self.width):
@@ -111,38 +111,38 @@ class MainWindow(QMainWindow):
                     column.append('.')
             self.map.append(column)
 
-    def buildMachine(self):
+    def build_machine(self):
         machine = QStateMachine(self)
 
-        inputState = Custom(machine, self)
+        input_state = Custom(machine, self)
         # this line sets the status
         self.status = 'hello!'
         # however this line does not
-        inputState.assignProperty(self, 'status', 'Move the rogue with 2, 4, 6, and 8')
+        input_state.assignProperty(self, 'status', 'Move the rogue with 2, 4, 6, and 8')
 
-        machine.setInitialState(inputState)
+        machine.setInitialState(input_state)
         machine.start()
 
         transition = MovementTransition(self)
-        inputState.addTransition(transition)
+        input_state.addTransition(transition)
 
-        quitState = QState(machine)
-        quitState.assignProperty(self, 'status', 'Really quit(y/n)?')
+        quit_state = QState(machine)
+        quit_state.assignProperty(self, 'status', 'Really quit(y/n)?')
 
-        yesTransition = QKeyEventTransition(self, QEvent.KeyPress, Qt.Key_Y)
-        self.finalState = QFinalState(machine)
-        yesTransition.setTargetState(self.finalState)
-        quitState.addTransition(yesTransition)
+        yes_transition = QKeyEventTransition(self, QEvent.KeyPress, Qt.Key_Y)
+        self._final_state = QFinalState(machine)
+        yes_transition.setTargetState(self._final_state)
+        quit_state.addTransition(yes_transition)
 
-        noTransition = QKeyEventTransition(self, QEvent.KeyPress, Qt.Key_N)
-        noTransition.setTargetState(inputState)
-        quitState.addTransition(noTransition)
+        no_transition = QKeyEventTransition(self, QEvent.KeyPress, Qt.Key_N)
+        no_transition.setTargetState(input_state)
+        quit_state.addTransition(no_transition)
 
-        quitTransition = QKeyEventTransition(self, QEvent.KeyPress, Qt.Key_Q)
-        quitTransition.setTargetState(quitState)
-        inputState.addTransition(quitTransition)
+        quit_transition = QKeyEventTransition(self, QEvent.KeyPress, Qt.Key_Q)
+        quit_transition.setTargetState(quit_state)
+        input_state.addTransition(quit_transition)
 
-        machine.setInitialState(inputState)
+        machine.setInitialState(input_state)
         machine.finished.connect(qApp.quit)
         machine.start()
 
@@ -153,53 +153,53 @@ class MainWindow(QMainWindow):
     def paintEvent(self, event):
         metrics = QFontMetrics(self.font())
         painter = QPainter(self)
-        fontHeight = metrics.height()
-        fontWidth = metrics.horizontalAdvance('X')
+        font_height = metrics.height()
+        font_width = metrics.horizontalAdvance('X')
 
         painter.fillRect(self.rect(), Qt.black)
         painter.setPen(Qt.white)
 
-        yPos = fontHeight
-        painter.drawText(QPoint(0, yPos), self.status)
+        y_pos = font_height
+        painter.drawText(QPoint(0, y_pos), self.status)
         for y in range(self.height):
-            yPos += fontHeight
-            xPos = 0
+            y_pos += font_height
+            x_pos = 0
             for x in range(self.width):
                 if y == self.pY and x == self.pX:
-                    xPos += fontWidth
+                    x_pos += font_width
                     continue
-                painter.drawText(QPoint(xPos, yPos), self.map[x][y])
-                xPos += fontWidth
-        painter.drawText(QPoint(self.pX * fontWidth, (self.pY + 2) * fontHeight), '@')
-    def movePlayer(self, direction):
-        if direction == self.Left:
+                painter.drawText(QPoint(x_pos, y_pos), self.map[x][y])
+                x_pos += font_width
+        painter.drawText(QPoint(self.pX * font_width, (self.pY + 2) * font_height), '@')
+    def move_player(self, direction):
+        if direction == self.left:
             if self.map[self.pX - 1][self.pY] != '#':
                 self.pX -= 1
-        elif direction == self.Right:
+        elif direction == self.right:
             if self.map[self.pX + 1][self.pY] != '#':
                 self.pX += 1
         elif direction == self.Up:
             if self.map[self.pX][self.pY - 1] != '#':
                 self.pY -= 1
-        elif direction == self.Down:
+        elif direction == self.down:
             if self.map[self.pX][self.pY + 1] != '#':
                 self.pY += 1
         self.repaint()
-    def getStatus(self):
-        return self.statusStr
-    def setStatus(self, status):
-        self.statusStr = status
+    def get_status(self):
+        return self._status_str
+    def set_status(self, status):
+        self._status_str = status
         self.repaint()
-    status = Property(str, getStatus, setStatus)
+    status = Property(str, get_status, set_status)
     Up = 0
-    Down = 1
-    Left = 2
-    Right = 3
-    Width = 35
-    Height = 20
+    down = 1
+    left = 2
+    right = 3
+    width = 35
+    height = 20
 
 if __name__ == '__main__':
     import sys
     app = QApplication(sys.argv)
-    mainWin = MainWindow()
+    main_win = MainWindow()
     sys.exit(app.exec_())

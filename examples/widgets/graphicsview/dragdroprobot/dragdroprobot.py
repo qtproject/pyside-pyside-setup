@@ -125,7 +125,7 @@ class RobotPart(QtWidgets.QGraphicsItem):
 
         self.color = QtGui.QColor(QtCore.Qt.lightGray)
         self.pixmap = None
-        self.dragOver = False
+        self._drag_over = False
 
         self.setAcceptDrops(True)
 
@@ -133,17 +133,17 @@ class RobotPart(QtWidgets.QGraphicsItem):
         if event.mimeData().hasColor() or \
           (isinstance(self, RobotHead) and event.mimeData().hasImage()):
             event.setAccepted(True)
-            self.dragOver = True
+            self._drag_over = True
             self.update()
         else:
             event.setAccepted(False)
 
     def dragLeaveEvent(self, event):
-        self.dragOver = False
+        self._drag_over = False
         self.update()
 
     def dropEvent(self, event):
-        self.dragOver = False
+        self._drag_over = False
         if event.mimeData().hasColor():
             self.color = QtGui.QColor(event.mimeData().colorData())
         elif event.mimeData().hasImage():
@@ -158,7 +158,7 @@ class RobotHead(RobotPart):
 
     def paint(self, painter, option, widget=None):
         if not self.pixmap:
-            painter.setBrush(self.dragOver and self.color.lighter(130)
+            painter.setBrush(self._drag_over and self.color.lighter(130)
                                             or self.color)
             painter.drawRoundedRect(-10, -30, 20, 30, 25, 25,
                     QtCore.Qt.RelativeSize)
@@ -181,7 +181,7 @@ class RobotTorso(RobotPart):
         return QtCore.QRectF(-30, -20, 60, 60)
 
     def paint(self, painter, option, widget=None):
-        painter.setBrush(self.dragOver and self.color.lighter(130)
+        painter.setBrush(self._drag_over and self.color.lighter(130)
                                         or self.color)
         painter.drawRoundedRect(-20, -20, 40, 60, 25, 25,
                 QtCore.Qt.RelativeSize)
@@ -196,7 +196,7 @@ class RobotLimb(RobotPart):
         return QtCore.QRectF(-5, -5, 40, 10)
 
     def paint(self, painter, option, widget=None):
-        painter.setBrush(self.dragOver and self.color.lighter(130) or self.color)
+        painter.setBrush(self._drag_over and self.color.lighter(130) or self.color)
         painter.drawRoundedRect(self.boundingRect(), 50, 50,
                 QtCore.Qt.RelativeSize)
         painter.drawEllipse(-5, -5, 10, 10)
@@ -210,10 +210,10 @@ class Robot(RobotPart):
         self.headItem          = RobotHead(self.torsoItem)
         self.upperLeftArmItem  = RobotLimb(self.torsoItem)
         self.lowerLeftArmItem  = RobotLimb(self.upperLeftArmItem)
-        self.upperRightArmItem = RobotLimb(self.torsoItem)
-        self.lowerRightArmItem = RobotLimb(self.upperRightArmItem)
-        self.upperRightLegItem = RobotLimb(self.torsoItem)
-        self.lowerRightLegItem = RobotLimb(self.upperRightLegItem)
+        self._upper_right_arm_item = RobotLimb(self.torsoItem)
+        self._lower_right_arm_item = RobotLimb(self._upper_right_arm_item)
+        self._upper_right_leg_item = RobotLimb(self.torsoItem)
+        self._lower_right_leg_item = RobotLimb(self._upper_right_leg_item)
         self.upperLeftLegItem  = RobotLimb(self.torsoItem)
         self.lowerLeftLegItem  = RobotLimb(self.upperLeftLegItem)
 
@@ -224,10 +224,10 @@ class Robot(RobotPart):
             ( self.headItem,              0,  -18,      20,   -20 ),
             ( self.upperLeftArmItem,    -15,  -10,     190,   180 ),
             ( self.lowerLeftArmItem,     30,    0,      50,    10 ),
-            ( self.upperRightArmItem,    15,  -10,     300,   310 ),
-            ( self.lowerRightArmItem,    30,    0,       0,   -70 ),
-            ( self.upperRightLegItem,    10,   32,      40,   120 ),
-            ( self.lowerRightLegItem,    30,    0,      10,    50 ),
+            ( self._upper_right_arm_item,    15,  -10,     300,   310 ),
+            ( self._lower_right_arm_item,    30,    0,       0,   -70 ),
+            ( self._upper_right_leg_item,    10,   32,      40,   120 ),
+            ( self._lower_right_leg_item,    30,    0,      10,    50 ),
             ( self.upperLeftLegItem,    -10,   32,     150,    80 ),
             ( self.lowerLeftLegItem,     30,    0,      70,    10 ),
             ( self.torsoItem,             0,    0,       5,   -20 )

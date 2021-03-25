@@ -59,31 +59,31 @@ class AddressWidget(QTabWidget):
         functionality is contained in this class.
     """
 
-    selectionChanged = Signal(QItemSelection)
+    selection_changed = Signal(QItemSelection)
 
     def __init__(self, parent=None):
         """ Initialize the AddressWidget. """
         super(AddressWidget, self).__init__(parent)
 
-        self.tableModel = TableModel()
-        self.newAddressTab = NewAddressTab()
-        self.newAddressTab.sendDetails.connect(self.addEntry)
+        self._table_model = TableModel()
+        self._new_address_tab = NewAddressTab()
+        self._new_address_tab.send_details.connect(self.add_entry)
 
-        self.addTab(self.newAddressTab, "Address Book")
+        self.addTab(self._new_address_tab, "Address Book")
 
-        self.setupTabs()
+        self.setup_tabs()
 
-    def addEntry(self, name=None, address=None):
+    def add_entry(self, name=None, address=None):
         """ Add an entry to the addressbook. """
         if name is None and address is None:
-            addDialog = AddDialogWidget()
+            add_dialog = AddDialogWidget()
 
-            if addDialog.exec_():
-                name = addDialog.name
-                address = addDialog.address
+            if add_dialog.exec_():
+                name = add_dialog.name
+                address = add_dialog.address
 
         address = {"name": name, "address": address}
-        addresses = self.tableModel.addresses[:]
+        addresses = self._table_model.addresses[:]
 
         # The QT docs for this example state that what we're doing here
         # is checking if the entered name already exists. What they
@@ -99,95 +99,95 @@ class AddressWidget(QTabWidget):
             # The address didn't already exist, so let's add it to the model.
 
             # Step 1: create the  row
-            self.tableModel.insertRows(0)
+            self._table_model.insertRows(0)
 
             # Step 2: get the index of the newly created row and use it.
             # to set the name
-            ix = self.tableModel.index(0, 0, QModelIndex())
-            self.tableModel.setData(ix, address["name"], Qt.EditRole)
+            ix = self._table_model.index(0, 0, QModelIndex())
+            self._table_model.setData(ix, address["name"], Qt.EditRole)
 
             # Step 3: lather, rinse, repeat for the address.
-            ix = self.tableModel.index(0, 1, QModelIndex())
-            self.tableModel.setData(ix, address["address"], Qt.EditRole)
+            ix = self._table_model.index(0, 1, QModelIndex())
+            self._table_model.setData(ix, address["address"], Qt.EditRole)
 
             # Remove the newAddressTab, as we now have at least one
             # address in the model.
-            self.removeTab(self.indexOf(self.newAddressTab))
+            self.removeTab(self.indexOf(self._new_address_tab))
 
             # The screenshot for the QT example shows nicely formatted
             # multiline cells, but the actual application doesn't behave
             # quite so nicely, at least on Ubuntu. Here we resize the newly
             # created row so that multiline addresses look reasonable.
-            tableView = self.currentWidget()
-            tableView.resizeRowToContents(ix.row())
+            table_view = self.currentWidget()
+            table_view.resizeRowToContents(ix.row())
 
-    def editEntry(self):
+    def edit_entry(self):
         """ Edit an entry in the addressbook. """
-        tableView = self.currentWidget()
-        proxyModel = tableView.model()
-        selectionModel = tableView.selectionModel()
+        table_view = self.currentWidget()
+        proxy_model = table_view.model()
+        selection_model = table_view.selectionModel()
 
         # Get the name and address of the currently selected row.
-        indexes = selectionModel.selectedRows()
+        indexes = selection_model.selectedRows()
         if len(indexes) != 1:
             return
 
-        row = proxyModel.mapToSource(indexes[0]).row()
-        ix = self.tableModel.index(row, 0, QModelIndex())
-        name = self.tableModel.data(ix, Qt.DisplayRole)
-        ix = self.tableModel.index(row, 1, QModelIndex())
-        address = self.tableModel.data(ix, Qt.DisplayRole)
+        row = proxy_model.mapToSource(indexes[0]).row()
+        ix = self._table_model.index(row, 0, QModelIndex())
+        name = self._table_model.data(ix, Qt.DisplayRole)
+        ix = self._table_model.index(row, 1, QModelIndex())
+        address = self._table_model.data(ix, Qt.DisplayRole)
 
         # Open an addDialogWidget, and only allow the user to edit the address.
-        addDialog = AddDialogWidget()
-        addDialog.setWindowTitle("Edit a Contact")
+        add_dialog = AddDialogWidget()
+        add_dialog.setWindowTitle("Edit a Contact")
 
-        addDialog.nameText.setReadOnly(True)
-        addDialog.nameText.setText(name)
-        addDialog.addressText.setText(address)
+        add_dialog._name_text.setReadOnly(True)
+        add_dialog._name_text.setText(name)
+        add_dialog._address_text.setText(address)
 
         # If the address is different, add it to the model.
-        if addDialog.exec_():
-            newAddress = addDialog.address
-            if newAddress != address:
-                ix = self.tableModel.index(row, 1, QModelIndex())
-                self.tableModel.setData(ix, newAddress, Qt.EditRole)
+        if add_dialog.exec_():
+            new_address = add_dialog.address
+            if new_address != address:
+                ix = self._table_model.index(row, 1, QModelIndex())
+                self._table_model.setData(ix, new_address, Qt.EditRole)
 
-    def removeEntry(self):
+    def remove_entry(self):
         """ Remove an entry from the addressbook. """
-        tableView = self.currentWidget()
-        proxyModel = tableView.model()
-        selectionModel = tableView.selectionModel()
+        table_view = self.currentWidget()
+        proxy_model = table_view.model()
+        selection_model = table_view.selectionModel()
 
         # Just like editEntry, but this time remove the selected row.
-        indexes = selectionModel.selectedRows()
+        indexes = selection_model.selectedRows()
 
         for index in indexes:
-            row = proxyModel.mapToSource(index).row()
-            self.tableModel.removeRows(row)
+            row = proxy_model.mapToSource(index).row()
+            self._table_model.removeRows(row)
 
         # If we've removed the last address in the model, display the
         # newAddressTab
-        if self.tableModel.rowCount() == 0:
-            self.insertTab(0, self.newAddressTab, "Address Book")
+        if self._table_model.rowCount() == 0:
+            self.insertTab(0, self._new_address_tab, "Address Book")
 
-    def setupTabs(self):
+    def setup_tabs(self):
         """ Setup the various tabs in the AddressWidget. """
         groups = ["ABC", "DEF", "GHI", "JKL", "MNO", "PQR", "STU", "VW", "XYZ"]
 
         for group in groups:
-            proxyModel = QSortFilterProxyModel(self)
-            proxyModel.setSourceModel(self.tableModel)
-            proxyModel.setDynamicSortFilter(True)
+            proxy_model = QSortFilterProxyModel(self)
+            proxy_model.setSourceModel(self._table_model)
+            proxy_model.setDynamicSortFilter(True)
 
-            tableView = QTableView()
-            tableView.setModel(proxyModel)
-            tableView.setSortingEnabled(True)
-            tableView.setSelectionBehavior(QAbstractItemView.SelectRows)
-            tableView.horizontalHeader().setStretchLastSection(True)
-            tableView.verticalHeader().hide()
-            tableView.setEditTriggers(QAbstractItemView.NoEditTriggers)
-            tableView.setSelectionMode(QAbstractItemView.SingleSelection)
+            table_view = QTableView()
+            table_view.setModel(proxy_model)
+            table_view.setSortingEnabled(True)
+            table_view.setSelectionBehavior(QAbstractItemView.SelectRows)
+            table_view.horizontalHeader().setStretchLastSection(True)
+            table_view.verticalHeader().hide()
+            table_view.setEditTriggers(QAbstractItemView.NoEditTriggers)
+            table_view.setSelectionMode(QAbstractItemView.SingleSelection)
 
             # This here be the magic: we use the group name (e.g. "ABC") to
             # build the regex for the QSortFilterProxyModel for the group's
@@ -197,21 +197,21 @@ class AddressWidget(QTabWidget):
             re = QRegularExpression(f"^[{group}].*")
             assert re.isValid()
             re.setPatternOptions(QRegularExpression.CaseInsensitiveOption)
-            proxyModel.setFilterRegularExpression(re)
-            proxyModel.setFilterKeyColumn(0) # Filter on the "name" column
-            proxyModel.sort(0, Qt.AscendingOrder)
+            proxy_model.setFilterRegularExpression(re)
+            proxy_model.setFilterKeyColumn(0) # Filter on the "name" column
+            proxy_model.sort(0, Qt.AscendingOrder)
 
             # This prevents an application crash (see: http://www.qtcentre.org/threads/58874-QListView-SelectionModel-selectionChanged-Crash)
-            viewselectionmodel = tableView.selectionModel()
-            tableView.selectionModel().selectionChanged.connect(self.selectionChanged)
+            viewselectionmodel = table_view.selectionModel()
+            table_view.selectionModel().selectionChanged.connect(self.selection_changed)
 
-            self.addTab(tableView, group)
+            self.addTab(table_view, group)
 
     # Note: the QT example uses a QDataStream for the saving and loading.
     # Here we're using a python dictionary to store the addresses, which
     # can't be streamed using QDataStream, so we just use cpickle for this
     # example.
-    def readFromFile(self, filename):
+    def read_from_file(self, filename):
         """ Read contacts in from a file. """
         try:
             f = open(filename, "rb")
@@ -225,13 +225,13 @@ class AddressWidget(QTabWidget):
             QMessageBox.information(self, f"No contacts in file: {filename}")
         else:
             for address in addresses:
-                self.addEntry(address["name"], address["address"])
+                self.add_entry(address["name"], address["address"])
 
-    def writeToFile(self, filename):
+    def write_to_file(self, filename):
         """ Save all contacts in the model to a file. """
         try:
             f = open(filename, "wb")
-            pickle.dump(self.tableModel.addresses, f)
+            pickle.dump(self._table_model.addresses, f)
 
         except IOError:
             QMessageBox.information(self, f"Unable to open file: {filename}")
@@ -244,6 +244,6 @@ if __name__ == "__main__":
     from PySide6.QtWidgets import QApplication
 
     app = QApplication(sys.argv)
-    addressWidget = AddressWidget()
-    addressWidget.show()
+    address_widget = AddressWidget()
+    address_widget.show()
     sys.exit(app.exec_())

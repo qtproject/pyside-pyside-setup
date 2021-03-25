@@ -47,28 +47,28 @@ from PySide6.QtStateMachine import (QFinalState, QSignalTransition, QState,
 
 
 class Factorial(QObject):
-    xChanged = Signal(int)
+    x_changed = Signal(int)
     def __init__(self):
         super(Factorial, self).__init__()
         self.xval = -1
         self.facval = 1
-    def getX(self):
+    def get_x(self):
         return self.xval
-    def setX(self, x):
+    def set_x(self, x):
         if self.xval == x:
             return
         self.xval = x
-        self.xChanged.emit(x)
-    x = Property(int, getX, setX)
-    def getFact(self):
+        self.x_changed.emit(x)
+    x = Property(int, get_x, set_x)
+    def get_fact(self):
         return self.facval
-    def setFact(self, fac):
+    def set_fact(self, fac):
         self.facval = fac
-    fac = Property(int, getFact, setFact)
+    fac = Property(int, get_fact, set_fact)
 
 class FactorialLoopTransition(QSignalTransition):
     def __init__(self, fact):
-        super(FactorialLoopTransition, self).__init__(fact, SIGNAL('xChanged(int)'))
+        super(FactorialLoopTransition, self).__init__(fact, SIGNAL('x_changed(int)'))
         self.fact = fact
     def eventTest(self, e):
         if not super(FactorialLoopTransition, self).eventTest(e):
@@ -82,7 +82,7 @@ class FactorialLoopTransition(QSignalTransition):
 
 class FactorialDoneTransition(QSignalTransition):
     def __init__(self, fact):
-        super(FactorialDoneTransition, self).__init__(fact, SIGNAL('xChanged(int)'))
+        super(FactorialDoneTransition, self).__init__(fact, SIGNAL('x_changed(int)'))
         self.fact = fact
     def eventTest(self, e):
         if not super(FactorialDoneTransition, self).eventTest(e):
@@ -103,9 +103,9 @@ if __name__ == '__main__':
     compute.addTransition(FactorialLoopTransition(factorial))
 
     done = QFinalState(machine)
-    doneTransition = FactorialDoneTransition(factorial)
-    doneTransition.setTargetState(done)
-    compute.addTransition(doneTransition)
+    done_transition = FactorialDoneTransition(factorial)
+    done_transition.setTargetState(done)
+    compute.addTransition(done_transition)
 
     machine.setInitialState(compute)
     machine.finished.connect(app.quit)

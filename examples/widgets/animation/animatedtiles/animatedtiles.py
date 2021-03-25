@@ -145,88 +145,88 @@ if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
 
-    kineticPix = QtGui.QPixmap(':/images/kinetic.png')
-    bgPix = QtGui.QPixmap(':/images/Time-For-Lunch-2.jpg')
+    kinetic_pix = QtGui.QPixmap(':/images/kinetic.png')
+    bg_pix = QtGui.QPixmap(':/images/Time-For-Lunch-2.jpg')
 
     scene = QtWidgets.QGraphicsScene(-350, -350, 700, 700)
 
     items = []
     for i in range(64):
-        item = Pixmap(kineticPix)
-        item.pixmap_item.setOffset(-kineticPix.width() / 2,
-                -kineticPix.height() / 2)
+        item = Pixmap(kinetic_pix)
+        item.pixmap_item.setOffset(-kinetic_pix.width() / 2,
+                -kinetic_pix.height() / 2)
         item.pixmap_item.setZValue(i)
         items.append(item)
         scene.addItem(item.pixmap_item)
 
     # Buttons.
-    buttonParent = QtWidgets.QGraphicsRectItem()
-    ellipseButton = Button(QtGui.QPixmap(':/images/ellipse.png'), buttonParent)
-    figure8Button = Button(QtGui.QPixmap(':/images/figure8.png'), buttonParent)
-    randomButton = Button(QtGui.QPixmap(':/images/random.png'), buttonParent)
-    tiledButton = Button(QtGui.QPixmap(':/images/tile.png'), buttonParent)
-    centeredButton = Button(QtGui.QPixmap(':/images/centered.png'), buttonParent)
+    button_parent = QtWidgets.QGraphicsRectItem()
+    ellipse_button = Button(QtGui.QPixmap(':/images/ellipse.png'), button_parent)
+    figure_8button = Button(QtGui.QPixmap(':/images/figure8.png'), button_parent)
+    random_button = Button(QtGui.QPixmap(':/images/random.png'), button_parent)
+    tiled_button = Button(QtGui.QPixmap(':/images/tile.png'), button_parent)
+    centered_button = Button(QtGui.QPixmap(':/images/centered.png'), button_parent)
 
-    ellipseButton.setPos(-100, -100)
-    figure8Button.setPos(100, -100)
-    randomButton.setPos(0, 0)
-    tiledButton.setPos(-100, 100)
-    centeredButton.setPos(100, 100)
+    ellipse_button.setPos(-100, -100)
+    figure_8button.setPos(100, -100)
+    random_button.setPos(0, 0)
+    tiled_button.setPos(-100, 100)
+    centered_button.setPos(100, 100)
 
-    scene.addItem(buttonParent)
-    buttonParent.setTransform(QtGui.QTransform().scale(0.75, 0.75))
-    buttonParent.setPos(200, 200)
-    buttonParent.setZValue(65)
+    scene.addItem(button_parent)
+    button_parent.setTransform(QtGui.QTransform().scale(0.75, 0.75))
+    button_parent.setPos(200, 200)
+    button_parent.setZValue(65)
 
     # States.
-    rootState = QtStateMachine.QState()
-    ellipseState = QtStateMachine.QState(rootState)
-    figure8State = QtStateMachine.QState(rootState)
-    randomState = QtStateMachine.QState(rootState)
-    tiledState = QtStateMachine.QState(rootState)
-    centeredState = QtStateMachine.QState(rootState)
+    root_state = QtStateMachine.QState()
+    ellipse_state = QtStateMachine.QState(root_state)
+    figure_8state = QtStateMachine.QState(root_state)
+    random_state = QtStateMachine.QState(root_state)
+    tiled_state = QtStateMachine.QState(root_state)
+    centered_state = QtStateMachine.QState(root_state)
 
     # Values.
     generator = QtCore.QRandomGenerator.global_()
 
     for i, item in enumerate(items):
         # Ellipse.
-        ellipseState.assignProperty(item, 'pos',
+        ellipse_state.assignProperty(item, 'pos',
                 QtCore.QPointF(math.cos((i / 63.0) * 6.28) * 250,
                         math.sin((i / 63.0) * 6.28) * 250))
 
         # Figure 8.
-        figure8State.assignProperty(item, 'pos',
+        figure_8state.assignProperty(item, 'pos',
                 QtCore.QPointF(math.sin((i / 63.0) * 6.28) * 250,
                         math.sin(((i * 2)/63.0) * 6.28) * 250))
 
         # Random.
-        randomState.assignProperty(item, 'pos',
+        random_state.assignProperty(item, 'pos',
                 QtCore.QPointF(-250 + generator.bounded(0, 500),
                                -250 + generator.bounded(0, 500)))
 
         # Tiled.
-        tiledState.assignProperty(item, 'pos',
-                QtCore.QPointF(((i % 8) - 4) * kineticPix.width() + kineticPix.width() / 2,
-                        ((i // 8) - 4) * kineticPix.height() + kineticPix.height() / 2))
+        tiled_state.assignProperty(item, 'pos',
+                QtCore.QPointF(((i % 8) - 4) * kinetic_pix.width() + kinetic_pix.width() / 2,
+                        ((i // 8) - 4) * kinetic_pix.height() + kinetic_pix.height() / 2))
 
         # Centered.
-        centeredState.assignProperty(item, 'pos', QtCore.QPointF())
+        centered_state.assignProperty(item, 'pos', QtCore.QPointF())
 
     # Ui.
     view = View(scene)
     view.setWindowTitle("Animated Tiles")
     view.setViewportUpdateMode(QtWidgets.QGraphicsView.BoundingRectViewportUpdate)
-    view.setBackgroundBrush(QtGui.QBrush(bgPix))
+    view.setBackgroundBrush(QtGui.QBrush(bg_pix))
     view.setCacheMode(QtWidgets.QGraphicsView.CacheBackground)
     view.setRenderHints(
             QtGui.QPainter.Antialiasing | QtGui.QPainter.SmoothPixmapTransform)
     view.show()
 
     states = QtStateMachine.QStateMachine()
-    states.addState(rootState)
-    states.setInitialState(rootState)
-    rootState.setInitialState(centeredState)
+    states.addState(root_state)
+    states.setInitialState(root_state)
+    root_state.setInitialState(centered_state)
 
     group = QtCore.QParallelAnimationGroup()
     for i, item in enumerate(items):
@@ -235,25 +235,25 @@ if __name__ == '__main__':
         anim.setEasingCurve(QtCore.QEasingCurve.InOutBack)
         group.addAnimation(anim)
 
-    trans = rootState.addTransition(ellipseButton.pressed, ellipseState)
+    trans = root_state.addTransition(ellipse_button.pressed, ellipse_state)
     trans.addAnimation(group)
 
-    trans = rootState.addTransition(figure8Button.pressed, figure8State)
+    trans = root_state.addTransition(figure_8button.pressed, figure_8state)
     trans.addAnimation(group)
 
-    trans = rootState.addTransition(randomButton.pressed, randomState)
+    trans = root_state.addTransition(random_button.pressed, random_state)
     trans.addAnimation(group)
 
-    trans = rootState.addTransition(tiledButton.pressed, tiledState)
+    trans = root_state.addTransition(tiled_button.pressed, tiled_state)
     trans.addAnimation(group)
 
-    trans = rootState.addTransition(centeredButton.pressed, centeredState)
+    trans = root_state.addTransition(centered_button.pressed, centered_state)
     trans.addAnimation(group)
 
     timer = QtCore.QTimer()
     timer.start(125)
     timer.setSingleShot(True)
-    trans = rootState.addTransition(timer.timeout, ellipseState)
+    trans = root_state.addTransition(timer.timeout, ellipse_state)
     trans.addAnimation(group)
 
     states.start()

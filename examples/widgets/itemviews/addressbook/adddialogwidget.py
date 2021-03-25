@@ -50,42 +50,42 @@ class AddDialogWidget(QDialog):
     def __init__(self, parent=None):
         super(AddDialogWidget, self).__init__(parent)
 
-        nameLabel = QLabel("Name")
-        addressLabel = QLabel("Address")
-        buttonBox = QDialogButtonBox(QDialogButtonBox.Ok |
+        name_label = QLabel("Name")
+        address_label = QLabel("Address")
+        button_box = QDialogButtonBox(QDialogButtonBox.Ok |
                                       QDialogButtonBox.Cancel)
 
-        self.nameText = QLineEdit()
-        self.addressText = QTextEdit()
+        self._name_text = QLineEdit()
+        self._address_text = QTextEdit()
 
         grid = QGridLayout()
         grid.setColumnStretch(1, 2)
-        grid.addWidget(nameLabel, 0, 0)
-        grid.addWidget(self.nameText, 0, 1)
-        grid.addWidget(addressLabel, 1, 0, Qt.AlignLeft | Qt.AlignTop)
-        grid.addWidget(self.addressText, 1, 1, Qt.AlignLeft)
+        grid.addWidget(name_label, 0, 0)
+        grid.addWidget(self._name_text, 0, 1)
+        grid.addWidget(address_label, 1, 0, Qt.AlignLeft | Qt.AlignTop)
+        grid.addWidget(self._address_text, 1, 1, Qt.AlignLeft)
 
         layout = QVBoxLayout()
         layout.addLayout(grid)
-        layout.addWidget(buttonBox)
+        layout.addWidget(button_box)
 
         self.setLayout(layout)
 
         self.setWindowTitle("Add a Contact")
 
-        buttonBox.accepted.connect(self.accept)
-        buttonBox.rejected.connect(self.reject)
+        button_box.accepted.connect(self.accept)
+        button_box.rejected.connect(self.reject)
 
     # These properties make using this dialog a little cleaner. It's much
     # nicer to type "addDialog.address" to retrieve the address as compared
     # to "addDialog.addressText.toPlainText()"
     @property
     def name(self):
-        return self.nameText.text()
+        return self._name_text.text()
 
     @property
     def address(self):
-        return self.addressText.toPlainText()
+        return self._address_text.toPlainText()
 
 
 if __name__ == "__main__":

@@ -76,9 +76,9 @@ class MainWindow(QMainWindow):
                                                        "qmake Files (*.pro *.prf *.pri)")
 
         if file_name:
-            inFile = QFile(file_name)
-            if inFile.open(QFile.ReadOnly | QFile.Text):
-                stream = QTextStream(inFile)
+            in_file = QFile(file_name)
+            if in_file.open(QFile.ReadOnly | QFile.Text):
+                stream = QTextStream(in_file)
                 self._editor.setPlainText(stream.readAll())
 
     def setup_editor(self):

@@ -50,58 +50,58 @@ class LightWidget(QWidget):
     def __init__(self, color):
         super(LightWidget, self).__init__()
         self.color = color
-        self.onVal = False
-    def isOn(self):
-        return self.onVal
-    def setOn(self, on):
-        if self.onVal == on:
+        self._on_val = False
+    def is_on(self):
+        return self._on_val
+    def set_on(self, on):
+        if self._on_val == on:
             return
-        self.onVal = on
+        self._on_val = on
         self.update()
     @Slot()
-    def turnOff(self):
-        self.setOn(False)
+    def turn_off(self):
+        self.set_on(False)
     @Slot()
-    def turnOn(self):
-        self.setOn(True)
+    def turn_on(self):
+        self.set_on(True)
     def paintEvent(self, e):
-        if not self.onVal:
+        if not self._on_val:
             return
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
         painter.setBrush(self.color)
         painter.drawEllipse(0, 0, self.width(), self.height())
 
-    on = Property(bool, isOn, setOn)
+    on = Property(bool, is_on, set_on)
 
 class TrafficLightWidget(QWidget):
     def __init__(self):
         super(TrafficLightWidget, self).__init__()
         vbox = QVBoxLayout(self)
-        self.redLight = LightWidget(Qt.red)
-        vbox.addWidget(self.redLight)
-        self.yellowLight = LightWidget(Qt.yellow)
-        vbox.addWidget(self.yellowLight)
-        self.greenLight = LightWidget(Qt.green)
-        vbox.addWidget(self.greenLight)
+        self._red_light = LightWidget(Qt.red)
+        vbox.addWidget(self._red_light)
+        self._yellow_light = LightWidget(Qt.yellow)
+        vbox.addWidget(self._yellow_light)
+        self._green_light = LightWidget(Qt.green)
+        vbox.addWidget(self._green_light)
         pal = QPalette()
         pal.setColor(QPalette.Window, Qt.black)
         self.setPalette(pal)
         self.setAutoFillBackground(True)
 
-def createLightState(light, duration, parent=None):
-    lightState = QState(parent)
-    timer = QTimer(lightState)
+def create_light_state(light, duration, parent=None):
+    light_state = QState(parent)
+    timer = QTimer(light_state)
     timer.setInterval(duration)
     timer.setSingleShot(True)
-    timing = QState(lightState)
-    timing.entered.connect(light.turnOn)
+    timing = QState(light_state)
+    timing.entered.connect(light.turn_on)
     timing.entered.connect(timer.start)
-    timing.exited.connect(light.turnOff)
-    done = QFinalState(lightState)
+    timing.exited.connect(light.turn_off)
+    done = QFinalState(light_state)
     timing.addTransition(timer, SIGNAL('timeout()'), done)
-    lightState.setInitialState(timing)
-    return lightState
+    light_state.setInitialState(timing)
+    return light_state
 
 class TrafficLight(QWidget):
     def __init__(self):
@@ -112,24 +112,24 @@ class TrafficLight(QWidget):
         vbox.setContentsMargins(0, 0, 0, 0)
 
         machine = QStateMachine(self)
-        redGoingYellow = createLightState(widget.redLight, 1000)
-        redGoingYellow.setObjectName('redGoingYellow')
-        yellowGoingGreen = createLightState(widget.redLight, 1000)
-        yellowGoingGreen.setObjectName('redGoingYellow')
-        redGoingYellow.addTransition(redGoingYellow, SIGNAL('finished()'), yellowGoingGreen)
-        greenGoingYellow = createLightState(widget.yellowLight, 3000)
-        greenGoingYellow.setObjectName('redGoingYellow')
-        yellowGoingGreen.addTransition(yellowGoingGreen, SIGNAL('finished()'), greenGoingYellow)
-        yellowGoingRed = createLightState(widget.greenLight, 1000)
-        yellowGoingRed.setObjectName('redGoingYellow')
-        greenGoingYellow.addTransition(greenGoingYellow, SIGNAL('finished()'), yellowGoingRed)
-        yellowGoingRed.addTransition(yellowGoingRed, SIGNAL('finished()'), redGoingYellow)
+        red_going_yellow = create_light_state(widget._red_light, 1000)
+        red_going_yellow.setObjectName('redGoingYellow')
+        yellow_going_green = create_light_state(widget._red_light, 1000)
+        yellow_going_green.setObjectName('redGoingYellow')
+        red_going_yellow.addTransition(red_going_yellow, SIGNAL('finished()'), yellow_going_green)
+        green_going_yellow = create_light_state(widget._yellow_light, 3000)
+        green_going_yellow.setObjectName('redGoingYellow')
+        yellow_going_green.addTransition(yellow_going_green, SIGNAL('finished()'), green_going_yellow)
+        yellow_going_red = create_light_state(widget._green_light, 1000)
+        yellow_going_red.setObjectName('redGoingYellow')
+        green_going_yellow.addTransition(green_going_yellow, SIGNAL('finished()'), yellow_going_red)
+        yellow_going_red.addTransition(yellow_going_red, SIGNAL('finished()'), red_going_yellow)
 
-        machine.addState(redGoingYellow)
-        machine.addState(yellowGoingGreen)
-        machine.addState(greenGoingYellow)
-        machine.addState(yellowGoingRed)
-        machine.setInitialState(redGoingYellow)
+        machine.addState(red_going_yellow)
+        machine.addState(yellow_going_green)
+        machine.addState(green_going_yellow)
+        machine.addState(yellow_going_red)
+        machine.setInitialState(red_going_yellow)
         machine.start()
 
 if __name__ == '__main__':

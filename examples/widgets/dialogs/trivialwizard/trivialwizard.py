@@ -45,7 +45,7 @@
 from PySide6 import QtWidgets
 
 
-def createIntroPage():
+def create_intro_page():
     page = QtWidgets.QWizardPage()
     page.setTitle("Introduction")
 
@@ -60,28 +60,28 @@ def createIntroPage():
     return page
 
 
-def createRegistrationPage():
+def create_registration_page():
     page = QtWidgets.QWizardPage()
     page.setTitle("Registration")
     page.setSubTitle("Please fill both fields.")
 
-    nameLabel = QtWidgets.QLabel("Name:")
-    nameLineEdit = QtWidgets.QLineEdit()
+    name_label = QtWidgets.QLabel("Name:")
+    name_line_edit = QtWidgets.QLineEdit()
 
-    emailLabel = QtWidgets.QLabel("Email address:")
-    emailLineEdit = QtWidgets.QLineEdit()
+    email_label = QtWidgets.QLabel("Email address:")
+    email_line_edit = QtWidgets.QLineEdit()
 
     layout = QtWidgets.QGridLayout()
-    layout.addWidget(nameLabel, 0, 0)
-    layout.addWidget(nameLineEdit, 0, 1)
-    layout.addWidget(emailLabel, 1, 0)
-    layout.addWidget(emailLineEdit, 1, 1)
+    layout.addWidget(name_label, 0, 0)
+    layout.addWidget(name_line_edit, 0, 1)
+    layout.addWidget(email_label, 1, 0)
+    layout.addWidget(email_line_edit, 1, 1)
     page.setLayout(layout)
 
     return page
 
 
-def createConclusionPage():
+def create_conclusion_page():
     page = QtWidgets.QWizardPage()
     page.setTitle("Conclusion")
 
@@ -102,9 +102,9 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
 
     wizard = QtWidgets.QWizard()
-    wizard.addPage(createIntroPage())
-    wizard.addPage(createRegistrationPage())
-    wizard.addPage(createConclusionPage())
+    wizard.addPage(create_intro_page())
+    wizard.addPage(create_registration_page())
+    wizard.addPage(create_conclusion_page())
 
     wizard.setWindowTitle("Trivial Wizard")
     wizard.show()

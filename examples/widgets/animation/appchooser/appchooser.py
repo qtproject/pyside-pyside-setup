@@ -69,14 +69,14 @@ class Pixmap(QtWidgets.QGraphicsWidget):
             self.p = QtGui.QPixmap(self.orig)
 
 
-def createStates(objects, selectedRect, parent):
+def create_states(objects, selectedRect, parent):
     for obj in objects:
         state = QtStateMachine.QState(parent)
         state.assignProperty(obj, 'geometry', selectedRect)
         parent.addTransition(obj.clicked, state)
 
 
-def createAnimations(objects, machine):
+def create_animations(objects, machine):
     for obj in objects:
         animation = QtCore.QPropertyAnimation(obj, b'geometry', obj)
         machine.addDefaultAnimation(animation)
@@ -115,14 +115,14 @@ if __name__ == '__main__':
     machine.setGlobalRestorePolicy(QtStateMachine.QStateMachine.RestoreProperties)
 
     group = QtStateMachine.QState(machine)
-    selectedRect = QtCore.QRect(86, 86, 128, 128)
+    selected_rect = QtCore.QRect(86, 86, 128, 128)
 
-    idleState = QtStateMachine.QState(group)
-    group.setInitialState(idleState)
+    idle_state = QtStateMachine.QState(group)
+    group.setInitialState(idle_state)
 
     objects = [p1, p2, p3, p4]
-    createStates(objects, selectedRect, group)
-    createAnimations(objects, machine)
+    create_states(objects, selected_rect, group)
+    create_animations(objects, machine)
 
     machine.setInitialState(group)
     machine.start()

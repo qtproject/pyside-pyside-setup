@@ -52,12 +52,12 @@ class Window(QWidget):
     def __init__(self):
         super(Window, self).__init__()
 
-        flowLayout = FlowLayout(self)
-        flowLayout.addWidget(QPushButton("Short"))
-        flowLayout.addWidget(QPushButton("Longer"))
-        flowLayout.addWidget(QPushButton("Different text"))
-        flowLayout.addWidget(QPushButton("More text"))
-        flowLayout.addWidget(QPushButton("Even longer button text"))
+        flow_layout = FlowLayout(self)
+        flow_layout.addWidget(QPushButton("Short"))
+        flow_layout.addWidget(QPushButton("Longer"))
+        flow_layout.addWidget(QPushButton("Different text"))
+        flow_layout.addWidget(QPushButton("More text"))
+        flow_layout.addWidget(QPushButton("Even longer button text"))
 
         self.setWindowTitle("Flow Layout")
 
@@ -72,9 +72,9 @@ class FlowLayout(QLayout):
         self._item_list = []
 
     def __del__(self):
-        item = self.takeAt(0)
+        item = self.take_at(0)
         while item:
-            item = self.takeAt(0)
+            item = self.take_at(0)
 
     def addItem(self, item):
         self._item_list.append(item)
@@ -155,6 +155,6 @@ class FlowLayout(QLayout):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    mainWin = Window()
-    mainWin.show()
+    main_win = Window()
+    main_win.show()
     sys.exit(app.exec_())

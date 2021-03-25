@@ -51,7 +51,7 @@ class StarEditor(QWidget):
     """ The custom editor for editing StarRatings. """
 
     # A signal to tell the delegate when we've finished editing.
-    editingFinished = Signal()
+    editing_finished = Signal()
 
     def __init__(self, parent=None):
         """ Initialize the editor object, making sure we can watch mouse
@@ -61,40 +61,40 @@ class StarEditor(QWidget):
 
         self.setMouseTracking(True)
         self.setAutoFillBackground(True)
-        self.starRating = StarRating()
+        self.star_rating = StarRating()
 
     def sizeHint(self):
         """ Tell the caller how big we are. """
-        return self.starRating.sizeHint()
+        return self.star_rating.sizeHint()
 
     def paintEvent(self, event):
         """ Paint the editor, offloading the work to the StarRating class. """
         painter = QPainter(self)
-        self.starRating.paint(painter, self.rect(), self.palette(), isEditable=True)
+        self.star_rating.paint(painter, self.rect(), self.palette(), isEditable=True)
 
     def mouseMoveEvent(self, event):
         """ As the mouse moves inside the editor, track the position and
             update the editor to display as many stars as necessary.
         """
-        star = self.starAtPosition(event.x())
+        star = self.star_at_position(event.x())
 
-        if (star != self.starRating.starCount) and (star != -1):
-            self.starRating.starCount = star
+        if (star != self.star_rating.star_count) and (star != -1):
+            self.star_rating.star_count = star
             self.update()
 
     def mouseReleaseEvent(self, event):
         """ Once the user has clicked his/her chosen star rating, tell the
             delegate we're done editing.
         """
-        self.editingFinished.emit()
+        self.editing_finished.emit()
 
-    def starAtPosition(self, x):
+    def star_at_position(self, x):
         """ Calculate which star the user's mouse cursor is currently
             hovering over.
         """
-        star = (x / (self.starRating.sizeHint().width() /
-                     self.starRating.maxStarCount)) + 1
-        if (star <= 0) or (star > self.starRating.maxStarCount):
+        star = (x / (self.star_rating.sizeHint().width() /
+                     self.star_rating.MAX_STAR_COUNT)) + 1
+        if (star <= 0) or (star > self.star_rating.MAX_STAR_COUNT):
             return -1
 
         return star

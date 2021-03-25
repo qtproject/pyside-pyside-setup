@@ -43,7 +43,7 @@
 from PySide6 import QtCore, QtWidgets
 
 
-def createItem(minimum, preferred, maximum, name):
+def create_item(minimum, preferred, maximum, name):
     w = QtWidgets.QGraphicsProxyWidget()
 
     w.setWidget(QtWidgets.QPushButton(name))
@@ -64,17 +64,17 @@ if __name__ == '__main__':
     scene = QtWidgets.QGraphicsScene()
     scene.setSceneRect(0, 0, 800, 480)
 
-    minSize = QtCore.QSizeF(30, 100)
-    prefSize = QtCore.QSizeF(210, 100)
-    maxSize = QtCore.QSizeF(300, 100)
+    min_size = QtCore.QSizeF(30, 100)
+    pref_size = QtCore.QSizeF(210, 100)
+    max_size = QtCore.QSizeF(300, 100)
 
-    a = createItem(minSize, prefSize, maxSize, "A")
-    b = createItem(minSize, prefSize, maxSize, "B")
-    c = createItem(minSize, prefSize, maxSize, "C")
-    d = createItem(minSize, prefSize, maxSize, "D")
-    e = createItem(minSize, prefSize, maxSize, "E")
-    f = createItem(QtCore.QSizeF(30, 50), QtCore.QSizeF(150, 50), maxSize, "F")
-    g = createItem(QtCore.QSizeF(30, 50), QtCore.QSizeF(30, 100), maxSize, "G")
+    a = create_item(min_size, pref_size, max_size, "A")
+    b = create_item(min_size, pref_size, max_size, "B")
+    c = create_item(min_size, pref_size, max_size, "C")
+    d = create_item(min_size, pref_size, max_size, "D")
+    e = create_item(min_size, pref_size, max_size, "E")
+    f = create_item(QtCore.QSizeF(30, 50), QtCore.QSizeF(150, 50), max_size, "F")
+    g = create_item(QtCore.QSizeF(30, 50), QtCore.QSizeF(30, 100), max_size, "G")
 
     l = QtWidgets.QGraphicsAnchorLayout()
     l.setSpacing(0)

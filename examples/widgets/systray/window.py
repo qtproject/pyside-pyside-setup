@@ -53,67 +53,67 @@ class Window(QDialog):
     def __init__(self, parent=None):
         super(Window, self).__init__(parent)
 
-        self.iconGroupBox = QGroupBox()
-        self.iconLabel = QLabel()
-        self.iconComboBox = QComboBox()
-        self.showIconCheckBox = QCheckBox()
+        self._icon_group_box = QGroupBox()
+        self._icon_label = QLabel()
+        self._icon_combo_box = QComboBox()
+        self._show_icon_check_box = QCheckBox()
 
-        self.messageGroupBox = QGroupBox()
-        self.typeLabel = QLabel()
-        self.durationLabel = QLabel()
-        self.durationWarningLabel = QLabel()
-        self.titleLabel = QLabel()
-        self.bodyLabel = QLabel()
+        self._message_group_box = QGroupBox()
+        self._type_label = QLabel()
+        self._duration_label = QLabel()
+        self._duration_warning_label = QLabel()
+        self._title_label = QLabel()
+        self._body_label = QLabel()
 
-        self.typeComboBox = QComboBox()
-        self.durationSpinBox = QSpinBox()
-        self.titleEdit = QLineEdit()
-        self.bodyEdit = QTextEdit()
-        self.showMessageButton = QPushButton()
+        self._type_combo_box = QComboBox()
+        self._duration_spin_box = QSpinBox()
+        self._title_edit = QLineEdit()
+        self._body_edit = QTextEdit()
+        self._show_message_button = QPushButton()
 
-        self.minimizeAction = QAction()
-        self.maximizeAction = QAction()
-        self.restoreAction = QAction()
-        self.quitAction = QAction()
+        self._minimize_action = QAction()
+        self._maximize_action = QAction()
+        self._restore_action = QAction()
+        self._quit_action = QAction()
 
-        self.trayIcon = QSystemTrayIcon()
-        self.trayIconMenu = QMenu()
+        self._tray_icon = QSystemTrayIcon()
+        self._tray_icon_menu = QMenu()
 
-        self.createIconGroupBox()
-        self.createMessageGroupBox()
+        self.create_icon_group_box()
+        self.create_message_group_box()
 
-        self.iconLabel.setMinimumWidth(self.durationLabel.sizeHint().width())
+        self._icon_label.setMinimumWidth(self._duration_label.sizeHint().width())
 
-        self.createActions()
-        self.createTrayIcon()
+        self.create_actions()
+        self.create_tray_icon()
 
-        self.showMessageButton.clicked.connect(self.showMessage)
-        self.showIconCheckBox.toggled.connect(self.trayIcon.setVisible)
-        self.iconComboBox.currentIndexChanged.connect(self.setIcon)
-        self.trayIcon.messageClicked.connect(self.messageClicked)
-        self.trayIcon.activated.connect(self.iconActivated)
+        self._show_message_button.clicked.connect(self.show_message)
+        self._show_icon_check_box.toggled.connect(self._tray_icon.setVisible)
+        self._icon_combo_box.currentIndexChanged.connect(self.set_icon)
+        self._tray_icon.messageClicked.connect(self.message_clicked)
+        self._tray_icon.activated.connect(self.icon_activated)
 
-        self.mainLayout = QVBoxLayout()
-        self.mainLayout.addWidget(self.iconGroupBox)
-        self.mainLayout.addWidget(self.messageGroupBox)
-        self.setLayout(self.mainLayout)
+        self._main_layout = QVBoxLayout()
+        self._main_layout.addWidget(self._icon_group_box)
+        self._main_layout.addWidget(self._message_group_box)
+        self.setLayout(self._main_layout)
 
-        self.iconComboBox.setCurrentIndex(1)
-        self.trayIcon.show()
+        self._icon_combo_box.setCurrentIndex(1)
+        self._tray_icon.show()
 
         self.setWindowTitle("Systray")
         self.resize(400, 300)
 
     def setVisible(self, visible):
-        self.minimizeAction.setEnabled(visible)
-        self.maximizeAction.setEnabled(not self.isMaximized())
-        self.restoreAction.setEnabled(self.isMaximized() or not visible)
+        self._minimize_action.setEnabled(visible)
+        self._maximize_action.setEnabled(not self.isMaximized())
+        self._restore_action.setEnabled(self.isMaximized() or not visible)
         super().setVisible(visible)
 
     def closeEvent(self, event):
         if not event.spontaneous() or not self.isVisible():
             return
-        if self.trayIcon.isVisible():
+        if self._tray_icon.isVisible():
             QMessageBox.information(self, "Systray",
                                     "The program will keep running in the system tray. "
                                     "To terminate the program, choose <b>Quit</b> in the context "
@@ -122,152 +122,152 @@ class Window(QDialog):
             event.ignore()
 
     @Slot(int)
-    def setIcon(self, index):
-        icon = self.iconComboBox.itemIcon(index)
-        self.trayIcon.setIcon(icon)
+    def set_icon(self, index):
+        icon = self._icon_combo_box.itemIcon(index)
+        self._tray_icon.setIcon(icon)
         self.setWindowIcon(icon)
-        self.trayIcon.setToolTip(self.iconComboBox.itemText(index))
+        self._tray_icon.setToolTip(self._icon_combo_box.itemText(index))
 
     @Slot(str)
-    def iconActivated(self, reason):
+    def icon_activated(self, reason):
         if reason == QSystemTrayIcon.Trigger:
             pass
         if reason == QSystemTrayIcon.DoubleClick:
-            self.iconComboBox.setCurrentIndex(
-                (self.iconComboBox.currentIndex() + 1) % self.iconComboBox.count()
+            self._icon_combo_box.setCurrentIndex(
+                (self._icon_combo_box.currentIndex() + 1) % self._icon_combo_box.count()
             )
         if reason == QSystemTrayIcon.MiddleClick:
-            self.showMessage()
+            self.show_message()
 
     @Slot()
-    def showMessage(self):
-        self.showIconCheckBox.setChecked(True)
-        selectedIcon = self.typeComboBox.itemData(self.typeComboBox.currentIndex())
-        msgIcon = QSystemTrayIcon.MessageIcon(selectedIcon)
+    def show_message(self):
+        self._show_icon_check_box.setChecked(True)
+        selected_icon = self._type_combo_box.itemData(self._type_combo_box.currentIndex())
+        msg_icon = QSystemTrayIcon.MessageIcon(selected_icon)
 
-        if selectedIcon == -1:  # custom icon
-            icon = QIcon(self.iconComboBox.itemIcon(self.iconComboBox.currentIndex()))
-            self.trayIcon.showMessage(
-                self.titleEdit.text(),
-                self.bodyEdit.toPlainText(),
+        if selected_icon == -1:  # custom icon
+            icon = QIcon(self._icon_combo_box.itemIcon(self._icon_combo_box.currentIndex()))
+            self._tray_icon.showMessage(
+                self._title_edit.text(),
+                self._body_edit.toPlainText(),
                 icon,
-                self.durationSpinBox.value() * 1000,
+                self._duration_spin_box.value() * 1000,
             )
         else:
-            self.trayIcon.showMessage(
-                self.titleEdit.text(),
-                self.bodyEdit.toPlainText(),
-                msgIcon,
-                self.durationSpinBox.value() * 1000,
+            self._tray_icon.showMessage(
+                self._title_edit.text(),
+                self._body_edit.toPlainText(),
+                msg_icon,
+                self._duration_spin_box.value() * 1000,
             )
 
     @Slot()
-    def messageClicked(self):
+    def message_clicked(self):
         QMessageBox.information(None, "Systray",
                                 "Sorry, I already gave what help I could.\n"
                                 "Maybe you should try asking a human?")
 
-    def createIconGroupBox(self):
-        self.iconGroupBox = QGroupBox("Tray Icon")
+    def create_icon_group_box(self):
+        self._icon_group_box = QGroupBox("Tray Icon")
 
-        self.iconLabel = QLabel("Icon:")
+        self._icon_label = QLabel("Icon:")
 
-        self.iconComboBox = QComboBox()
-        self.iconComboBox.addItem(QIcon(":/images/bad.png"), "Bad")
-        self.iconComboBox.addItem(QIcon(":/images/heart.png"), "Heart")
-        self.iconComboBox.addItem(QIcon(":/images/trash.png"), "Trash")
+        self._icon_combo_box = QComboBox()
+        self._icon_combo_box.addItem(QIcon(":/images/bad.png"), "Bad")
+        self._icon_combo_box.addItem(QIcon(":/images/heart.png"), "Heart")
+        self._icon_combo_box.addItem(QIcon(":/images/trash.png"), "Trash")
 
-        self.showIconCheckBox = QCheckBox("Show icon")
-        self.showIconCheckBox.setChecked(True)
+        self._show_icon_check_box = QCheckBox("Show icon")
+        self._show_icon_check_box.setChecked(True)
 
-        iconLayout = QHBoxLayout()
-        iconLayout.addWidget(self.iconLabel)
-        iconLayout.addWidget(self.iconComboBox)
-        iconLayout.addStretch()
-        iconLayout.addWidget(self.showIconCheckBox)
-        self.iconGroupBox.setLayout(iconLayout)
+        icon_layout = QHBoxLayout()
+        icon_layout.addWidget(self._icon_label)
+        icon_layout.addWidget(self._icon_combo_box)
+        icon_layout.addStretch()
+        icon_layout.addWidget(self._show_icon_check_box)
+        self._icon_group_box.setLayout(icon_layout)
 
-    def createMessageGroupBox(self):
-        self.messageGroupBox = QGroupBox("Balloon Message")
+    def create_message_group_box(self):
+        self._message_group_box = QGroupBox("Balloon Message")
 
-        self.typeLabel = QLabel("Type:")
+        self._type_label = QLabel("Type:")
 
-        self.typeComboBox = QComboBox()
-        self.typeComboBox.addItem("None", QSystemTrayIcon.NoIcon)
-        self.typeComboBox.addItem(
+        self._type_combo_box = QComboBox()
+        self._type_combo_box.addItem("None", QSystemTrayIcon.NoIcon)
+        self._type_combo_box.addItem(
             self.style().standardIcon(QStyle.SP_MessageBoxInformation),
             "Information",
             QSystemTrayIcon.Information,
         )
-        self.typeComboBox.addItem(
+        self._type_combo_box.addItem(
             self.style().standardIcon(QStyle.SP_MessageBoxWarning),
             "Warning",
             QSystemTrayIcon.Warning,
         )
-        self.typeComboBox.addItem(
+        self._type_combo_box.addItem(
             self.style().standardIcon(QStyle.SP_MessageBoxCritical),
             "Critical",
             QSystemTrayIcon.Critical,
         )
-        self.typeComboBox.addItem(QIcon(), "Custom icon", -1)
-        self.typeComboBox.setCurrentIndex(1)
+        self._type_combo_box.addItem(QIcon(), "Custom icon", -1)
+        self._type_combo_box.setCurrentIndex(1)
 
-        self.durationLabel = QLabel("Duration:")
+        self._duration_label = QLabel("Duration:")
 
-        self.durationSpinBox = QSpinBox()
-        self.durationSpinBox.setRange(5, 60)
-        self.durationSpinBox.setSuffix(" s")
-        self.durationSpinBox.setValue(15)
+        self._duration_spin_box = QSpinBox()
+        self._duration_spin_box.setRange(5, 60)
+        self._duration_spin_box.setSuffix(" s")
+        self._duration_spin_box.setValue(15)
 
-        self.durationWarningLabel = QLabel("(some systems might ignore this hint)")
-        self.durationWarningLabel.setIndent(10)
+        self._duration_warning_label = QLabel("(some systems might ignore this hint)")
+        self._duration_warning_label.setIndent(10)
 
-        self.titleLabel = QLabel("Title:")
-        self.titleEdit = QLineEdit("Cannot connect to network")
-        self.bodyLabel = QLabel("Body:")
+        self._title_label = QLabel("Title:")
+        self._title_edit = QLineEdit("Cannot connect to network")
+        self._body_label = QLabel("Body:")
 
-        self.bodyEdit = QTextEdit()
-        self.bodyEdit.setPlainText("Don't believe me. Honestly, I don't have a clue."
+        self._body_edit = QTextEdit()
+        self._body_edit.setPlainText("Don't believe me. Honestly, I don't have a clue."
                                    "\nClick this balloon for details.")
 
-        self.showMessageButton = QPushButton("Show Message")
-        self.showMessageButton.setDefault(True)
+        self._show_message_button = QPushButton("Show Message")
+        self._show_message_button.setDefault(True)
 
-        messageLayout = QGridLayout()
-        messageLayout.addWidget(self.typeLabel, 0, 0)
-        messageLayout.addWidget(self.typeComboBox, 0, 1, 1, 2)
-        messageLayout.addWidget(self.durationLabel, 1, 0)
-        messageLayout.addWidget(self.durationSpinBox, 1, 1)
-        messageLayout.addWidget(self.durationWarningLabel, 1, 2, 1, 3)
-        messageLayout.addWidget(self.titleLabel, 2, 0)
-        messageLayout.addWidget(self.titleEdit, 2, 1, 1, 4)
-        messageLayout.addWidget(self.bodyLabel, 3, 0)
-        messageLayout.addWidget(self.bodyEdit, 3, 1, 2, 4)
-        messageLayout.addWidget(self.showMessageButton, 5, 4)
-        messageLayout.setColumnStretch(3, 1)
-        messageLayout.setRowStretch(4, 1)
-        self.messageGroupBox.setLayout(messageLayout)
+        message_layout = QGridLayout()
+        message_layout.addWidget(self._type_label, 0, 0)
+        message_layout.addWidget(self._type_combo_box, 0, 1, 1, 2)
+        message_layout.addWidget(self._duration_label, 1, 0)
+        message_layout.addWidget(self._duration_spin_box, 1, 1)
+        message_layout.addWidget(self._duration_warning_label, 1, 2, 1, 3)
+        message_layout.addWidget(self._title_label, 2, 0)
+        message_layout.addWidget(self._title_edit, 2, 1, 1, 4)
+        message_layout.addWidget(self._body_label, 3, 0)
+        message_layout.addWidget(self._body_edit, 3, 1, 2, 4)
+        message_layout.addWidget(self._show_message_button, 5, 4)
+        message_layout.setColumnStretch(3, 1)
+        message_layout.setRowStretch(4, 1)
+        self._message_group_box.setLayout(message_layout)
 
-    def createActions(self):
-        self.minimizeAction = QAction("Minimize", self)
-        self.minimizeAction.triggered.connect(self.hide)
+    def create_actions(self):
+        self._minimize_action = QAction("Minimize", self)
+        self._minimize_action.triggered.connect(self.hide)
 
-        self.maximizeAction = QAction("Maximize", self)
-        self.maximizeAction.triggered.connect(self.showMaximized)
+        self._maximize_action = QAction("Maximize", self)
+        self._maximize_action.triggered.connect(self.showMaximized)
 
-        self.restoreAction = QAction("Restore", self)
-        self.restoreAction.triggered.connect(self.showNormal)
+        self._restore_action = QAction("Restore", self)
+        self._restore_action.triggered.connect(self.showNormal)
 
-        self.quitAction = QAction("Quit", self)
-        self.quitAction.triggered.connect(qApp.quit)
+        self._quit_action = QAction("Quit", self)
+        self._quit_action.triggered.connect(qApp.quit)
 
-    def createTrayIcon(self):
-        self.trayIconMenu = QMenu(self)
-        self.trayIconMenu.addAction(self.minimizeAction)
-        self.trayIconMenu.addAction(self.maximizeAction)
-        self.trayIconMenu.addAction(self.restoreAction)
-        self.trayIconMenu.addSeparator()
-        self.trayIconMenu.addAction(self.quitAction)
+    def create_tray_icon(self):
+        self._tray_icon_menu = QMenu(self)
+        self._tray_icon_menu.addAction(self._minimize_action)
+        self._tray_icon_menu.addAction(self._maximize_action)
+        self._tray_icon_menu.addAction(self._restore_action)
+        self._tray_icon_menu.addSeparator()
+        self._tray_icon_menu.addAction(self._quit_action)
 
-        self.trayIcon = QSystemTrayIcon(self)
-        self.trayIcon.setContextMenu(self.trayIconMenu)
+        self._tray_icon = QSystemTrayIcon(self)
+        self._tray_icon.setContextMenu(self._tray_icon_menu)

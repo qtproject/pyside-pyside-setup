@@ -46,83 +46,83 @@ from PySide6 import QtWidgets
 
 
 class Dialog(QtWidgets.QDialog):
-    NumGridRows = 3
-    NumButtons = 4
+    num_grid_rows = 3
+    num_buttons = 4
 
     def __init__(self):
         super(Dialog, self).__init__()
 
-        self.createMenu()
-        self.createHorizontalGroupBox()
-        self.createGridGroupBox()
-        self.createFormGroupBox()
+        self.create_menu()
+        self.create_horizontal_group_box()
+        self.create_grid_group_box()
+        self.create_form_group_box()
 
-        bigEditor = QtWidgets.QTextEdit()
-        bigEditor.setPlainText("This widget takes up all the remaining space "
+        big_editor = QtWidgets.QTextEdit()
+        big_editor.setPlainText("This widget takes up all the remaining space "
                 "in the top-level layout.")
 
-        buttonBox = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
+        button_box = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
 
-        buttonBox.accepted.connect(self.accept)
-        buttonBox.rejected.connect(self.reject)
+        button_box.accepted.connect(self.accept)
+        button_box.rejected.connect(self.reject)
 
-        mainLayout = QtWidgets.QVBoxLayout()
-        mainLayout.setMenuBar(self.menuBar)
-        mainLayout.addWidget(self.horizontalGroupBox)
-        mainLayout.addWidget(self.gridGroupBox)
-        mainLayout.addWidget(self.formGroupBox)
-        mainLayout.addWidget(bigEditor)
-        mainLayout.addWidget(buttonBox)
-        self.setLayout(mainLayout)
+        main_layout = QtWidgets.QVBoxLayout()
+        main_layout.setMenuBar(self._menu_bar)
+        main_layout.addWidget(self._horizontal_group_box)
+        main_layout.addWidget(self._grid_group_box)
+        main_layout.addWidget(self._form_group_box)
+        main_layout.addWidget(big_editor)
+        main_layout.addWidget(button_box)
+        self.setLayout(main_layout)
 
         self.setWindowTitle("Basic Layouts")
 
-    def createMenu(self):
-        self.menuBar = QtWidgets.QMenuBar()
+    def create_menu(self):
+        self._menu_bar = QtWidgets.QMenuBar()
 
-        self.fileMenu = QtWidgets.QMenu("&File", self)
-        self.exitAction = self.fileMenu.addAction("E&xit")
-        self.menuBar.addMenu(self.fileMenu)
+        self._file_menu = QtWidgets.QMenu("&File", self)
+        self._exit_action = self._file_menu.addAction("E&xit")
+        self._menu_bar.addMenu(self._file_menu)
 
-        self.exitAction.triggered.connect(self.accept)
+        self._exit_action.triggered.connect(self.accept)
 
-    def createHorizontalGroupBox(self):
-        self.horizontalGroupBox = QtWidgets.QGroupBox("Horizontal layout")
+    def create_horizontal_group_box(self):
+        self._horizontal_group_box = QtWidgets.QGroupBox("Horizontal layout")
         layout = QtWidgets.QHBoxLayout()
 
-        for i in range(Dialog.NumButtons):
+        for i in range(Dialog.num_buttons):
             button = QtWidgets.QPushButton(f"Button {i + 1}")
             layout.addWidget(button)
 
-        self.horizontalGroupBox.setLayout(layout)
+        self._horizontal_group_box.setLayout(layout)
 
-    def createGridGroupBox(self):
-        self.gridGroupBox = QtWidgets.QGroupBox("Grid layout")
+    def create_grid_group_box(self):
+        self._grid_group_box = QtWidgets.QGroupBox("Grid layout")
         layout = QtWidgets.QGridLayout()
 
-        for i in range(Dialog.NumGridRows):
+        for i in range(Dialog.num_grid_rows):
             label = QtWidgets.QLabel(f"Line {i + 1}:")
-            lineEdit = QtWidgets.QLineEdit()
+            line_edit = QtWidgets.QLineEdit()
             layout.addWidget(label, i + 1, 0)
-            layout.addWidget(lineEdit, i + 1, 1)
+            layout.addWidget(line_edit, i + 1, 1)
 
-        self.smallEditor = QtWidgets.QTextEdit()
-        self.smallEditor.setPlainText("This widget takes up about two thirds "
+        self._small_editor = QtWidgets.QTextEdit()
+        self._small_editor.setPlainText("This widget takes up about two thirds "
                 "of the grid layout.")
 
-        layout.addWidget(self.smallEditor, 0, 2, 4, 1)
+        layout.addWidget(self._small_editor, 0, 2, 4, 1)
 
         layout.setColumnStretch(1, 10)
         layout.setColumnStretch(2, 20)
-        self.gridGroupBox.setLayout(layout)
+        self._grid_group_box.setLayout(layout)
 
-    def createFormGroupBox(self):
-        self.formGroupBox = QtWidgets.QGroupBox("Form layout")
+    def create_form_group_box(self):
+        self._form_group_box = QtWidgets.QGroupBox("Form layout")
         layout = QtWidgets.QFormLayout()
         layout.addRow(QtWidgets.QLabel("Line 1:"), QtWidgets.QLineEdit())
         layout.addRow(QtWidgets.QLabel("Line 2, long text:"), QtWidgets.QComboBox())
         layout.addRow(QtWidgets.QLabel("Line 3:"), QtWidgets.QSpinBox())
-        self.formGroupBox.setLayout(layout)
+        self._form_group_box.setLayout(layout)
 
 
 if __name__ == '__main__':

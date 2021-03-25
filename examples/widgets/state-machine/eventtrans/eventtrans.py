@@ -57,24 +57,24 @@ class MainWindow(QMainWindow):
         s2 = QState()
         s2.assignProperty(button, 'text', 'Inside')
 
-        enterTransition = QEventTransition(button, QEvent.Enter)
-        enterTransition.setTargetState(s2)
-        s1.addTransition(enterTransition)
+        enter_transition = QEventTransition(button, QEvent.Enter)
+        enter_transition.setTargetState(s2)
+        s1.addTransition(enter_transition)
 
-        leaveTransition = QEventTransition(button, QEvent.Leave)
-        leaveTransition.setTargetState(s1)
-        s2.addTransition(leaveTransition)
+        leave_transition = QEventTransition(button, QEvent.Leave)
+        leave_transition.setTargetState(s1)
+        s2.addTransition(leave_transition)
 
         s3 = QState()
         s3.assignProperty(button, 'text', 'Pressing...')
 
-        pressTransition = QEventTransition(button, QEvent.MouseButtonPress)
-        pressTransition.setTargetState(s3)
-        s2.addTransition(pressTransition)
+        press_transition = QEventTransition(button, QEvent.MouseButtonPress)
+        press_transition.setTargetState(s3)
+        s2.addTransition(press_transition)
 
-        releaseTransition = QEventTransition(button, QEvent.MouseButtonRelease)
-        releaseTransition.setTargetState(s2)
-        s3.addTransition(releaseTransition)
+        release_transition = QEventTransition(button, QEvent.MouseButtonRelease)
+        release_transition.setTargetState(s2)
+        s3.addTransition(release_transition)
 
         machine.addState(s1)
         machine.addState(s2)
@@ -90,5 +90,5 @@ if __name__ == '__main__':
     import sys
 
     app = QApplication(sys.argv)
-    mainWin = MainWindow()
+    main_win = MainWindow()
     sys.exit(app.exec_())

@@ -281,16 +281,16 @@ class WidgetGallery(QDialog):
         checkbox.setTristate(True)
         checkbox.setCheckState(Qt.PartiallyChecked)
 
-        checkableLayout = QVBoxLayout()
-        checkableLayout.addWidget(radiobutton_1)
-        checkableLayout.addWidget(radiobutton_2)
-        checkableLayout.addWidget(radiobutton_3)
-        checkableLayout.addWidget(checkbox)
-        checkableLayout.addStretch(1)
+        checkable_layout = QVBoxLayout()
+        checkable_layout.addWidget(radiobutton_1)
+        checkable_layout.addWidget(radiobutton_2)
+        checkable_layout.addWidget(radiobutton_3)
+        checkable_layout.addWidget(checkbox)
+        checkable_layout.addStretch(1)
 
         main_layout = QHBoxLayout(result)
         main_layout.addLayout(button_layout)
-        main_layout.addLayout(checkableLayout)
+        main_layout.addLayout(checkable_layout)
         main_layout.addStretch()
         return result
 
