@@ -3,19 +3,19 @@
 ################################################################################
 ## Form generated from reading UI file 'form.ui'
 ##
-## Created by: Qt User Interface Compiler version 5.14.0
+## Created by: Qt User Interface Compiler version 6.2.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCore import (QCoreApplication, QMetaObject, QObject, QPoint,
-    QRect, QSize, QUrl, Qt)
-from PySide6.QtGui import (QColor, QFont, QIcon, QPixmap)
+from PySide6.QtCore import *
+from PySide6.QtGui import *
 from PySide6.QtWidgets import *
+
 
 class Ui_Form(object):
     def setupUi(self, Form):
-        if Form.objectName():
+        if not Form.objectName():
             Form.setObjectName(u"Form")
         Form.resize(545, 471)
         self.gridLayout = QGridLayout(Form)
@@ -45,7 +45,7 @@ class Ui_Form(object):
         self.lineRadio = QRadioButton(self.groupBox_2)
         self.buttonGroup = QButtonGroup(Form)
         self.buttonGroup.setObjectName(u"buttonGroup")
-        self.buttonGroup.setExclusive(False)
+        self.buttonGroup.setExclusive(True)
         self.buttonGroup.addButton(self.lineRadio)
         self.lineRadio.setObjectName(u"lineRadio")
         self.lineRadio.setChecked(True)

@@ -62,7 +62,7 @@
            <bool>true</bool>
           </property>
           <attribute name="buttonGroup">
-           <string>buttonGroup</string>
+           <string notr="true">buttonGroup</string>
           </attribute>
          </widget>
         </item>
@@ -72,7 +72,7 @@
            <string>Circle</string>
           </property>
           <attribute name="buttonGroup">
-           <string>buttonGroup</string>
+           <string notr="true">buttonGroup</string>
           </attribute>
          </widget>
         </item>
@@ -198,7 +198,7 @@
  <buttongroups>
   <buttongroup name="buttonGroup">
    <property name="exclusive">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
   </buttongroup>
  </buttongroups>
