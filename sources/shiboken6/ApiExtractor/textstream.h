@@ -103,7 +103,9 @@ public:
     TextStream &operator<<(const char *s) { putString(s); return *this; }
     TextStream &operator<<(char c) { putChar(c); return *this; }
     TextStream &operator<<(int t) { putInt(t); return *this; }
+#if QT_POINTER_SIZE != 4
     TextStream &operator<<(qsizetype t) { putSizeType(t); return *this; }
+#endif
 
     inline TextStream &operator<<(QTextStreamManipulator m) { m_str << m; return *this; }
     inline TextStream &operator<<(ManipulatorFunc f) { f(*this); return *this; }
