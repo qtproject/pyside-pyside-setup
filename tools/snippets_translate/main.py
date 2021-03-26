@@ -316,7 +316,8 @@ def copy_file(file_path, py_path, category, category_path, write=False, verbose=
     # directories if they don't exist, and if some of them exists,
     # the option 'exist_ok=True' will ignore them.
     if write and not final_path.parent.is_dir():
-        log.info(f"Creating directories for {final_path.parent}")
+        if not opt_quiet:
+            log.info(f"Creating directories for {final_path.parent}")
         final_path.parent.mkdir(parents=True, exist_ok=True)
 
     # Change .cpp to .py
