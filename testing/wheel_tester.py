@@ -53,8 +53,10 @@ directory (e.g. setup.py bdist_wheel was already executed).
 """
 
 from argparse import ArgumentParser, RawTextHelpFormatter
+from pathlib import Path
 import os
 import sys
+import tempfile
 
 try:
     this_file = __file__
@@ -111,7 +113,7 @@ def get_examples_dir():
 
 
 def package_prefix_names():
-    # Note: shiboken6_generator is not needed for compile_using_pyinstaller,
+    # Note: shiboken6_generator is not needed for compile_using_nuitka,
     # but building modules with cmake needs it.
     return ["shiboken6", "shiboken6_generator", "PySide6"]
 
@@ -225,6 +227,33 @@ def compile_using_pyinstaller():
     log.info("")
 
 
+def test_nuitka(example):
+    testprog = "Nuitka"
+    name = os.path.splitext(os.path.basename(example))[0]
+    print(f"Running {testprog} test of {name}")
+    current_dir = os.getcwd()
+    result = False
+    tmpdirname = tempfile.mkdtemp()
+    try:
+        os.chdir(tmpdirname)
+        cmd = [sys.executable, "-m", "nuitka", "--run", example]#, "--standalone"]
+        exit_code = run_process(cmd)
+        result = True
+    except RuntimeError as e:
+        print(str(e))
+    finally:
+        os.chdir(current_dir)
+    print(f"Executable is in {tmpdirname}")
+    return result
+
+
+def run_nuitka_test(example):
+    if test_nuitka(example):
+        log.info("")
+    else:
+        raise RuntimeError(f"Failure running {example} with Nuitka.")
+
+
 def run_make():
     args = []
     if is_unix():
@@ -287,17 +316,24 @@ def prepare_build_folder(src_path, build_folder_name):
 def try_build_examples():
     examples_dir = get_examples_dir()
 
-    # This script should better go to the last place, here.
-    # But because it is most likely to break, we put it here for now.
-    log.info("Attempting to build hello.py using PyInstaller.")
-    # PyInstaller is loaded by coin_build_instructions.py, but not when
-    # testing directly this script.
-    src_path = os.path.join(examples_dir, "installer_test")
-    prepare_build_folder(src_path, "pyinstaller")
 
-    compile_using_pyinstaller()
-    run_compiled_script(os.path.join(src_path,
-                        "pyinstaller", "dist", "hello_app", "hello_app"))
+    # Disabled PyInstaller until it supports PySide 6
+    if False:
+        # But because it is most likely to break, we put it here for now.
+        log.info("Attempting to build hello.py using PyInstaller.")
+        # PyInstaller is loaded by coin_build_instructions.py, but not when
+        # testing directly this script.
+        src_path = os.path.join(examples_dir, "installer_test")
+        prepare_build_folder(src_path, "pyinstaller")
+        compile_using_pyinstaller()
+        run_compiled_script(os.path.join(src_path,
+                            "pyinstaller", "dist", "hello_app", "hello_app"))
+
+    src_path = Path(examples_dir) / "installer_test"
+    log.info("Attempting to build hello.py using Nuitka.")
+    # Nuitka is loaded by coin_build_instructions.py, but not when
+    # testing directly this script.
+    run_nuitka_test(os.fspath(src_path / "hello.py"))
 
     log.info("Attempting to build and run samplebinding using cmake.")
     src_path = os.path.join(examples_dir, "samplebinding")
@@ -307,11 +343,12 @@ def try_build_examples():
     run_make_install()
     execute_script(os.path.join(src_path, "main.py"))
 
-    log.info("Attempting to build scriptableapplication using cmake.")
-    src_path = os.path.join(examples_dir, "scriptableapplication")
-    prepare_build_folder(src_path, "cmake")
-    generate_build_cmake()
-    run_make()
+    log.info("*** Defunct: build scriptableapplication using cmake.")
+    # log.info("Attempting to build scriptableapplication using cmake.")
+    # src_path = os.path.join(examples_dir, "scriptableapplication")
+    # prepare_build_folder(src_path, "cmake")
+    # generate_build_cmake()
+    # run_make()
 
     log.info("Attempting to build scriptableapplication using qmake.")
     src_path = os.path.join(examples_dir, "scriptableapplication")

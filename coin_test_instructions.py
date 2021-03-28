@@ -98,8 +98,7 @@ def call_testrunner(python_ver, buildnro):
     if CI_RELEASE_CONF:
         wheel_tester_path = os.path.join("testing", "wheel_tester.py")
         cmd = [env_python, wheel_tester_path, qmake_path]
-        print("Disabled running wheel_tester.py while failing with qt6")
-        # run_instruction(cmd, "Error while running wheel_tester.py")
+        run_instruction(cmd, "Error while running wheel_tester.py")
 
 def run_test_instructions():
     # Remove some environment variables that impact cmake

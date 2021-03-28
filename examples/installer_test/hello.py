@@ -46,10 +46,10 @@ hello.py
 
 This simple script shows a label with changing "Hello World" messages.
 It can be used directly as a script, but we use it also to automatically
-test PyInstaller. See testing/wheel_tester.py .
+test PyInstaller or Nuitka. See testing/wheel_tester.py .
 
-When used with PyInstaller, it automatically stops its execution after
-2 seconds.
+When compiled with Nuitka or used with PyInstaller, it automatically
+stops its execution after 2 seconds.
 """
 
 import sys
@@ -61,6 +61,11 @@ from PySide6.QtWidgets import (QApplication, QLabel, QPushButton,
                                QVBoxLayout, QWidget)
 from PySide6.QtCore import Slot, Qt, QTimer
 
+is_compiled = "__compiled__" in globals()   # Nuitka
+uses_embedding = sys.pyside_uses_embedding  # PyInstaller
+auto_quit = "Nuitka" if is_compiled else "PyInst" if uses_embedding else False
+
+
 class MyWidget(QWidget):
     def __init__(self):
         QWidget.__init__(self)
@@ -69,7 +74,7 @@ class MyWidget(QWidget):
             "Hola Mundo", "Привет мир"]
 
         self.button = QPushButton("Click me!")
-        self.text = QLabel("Hello World embedded={}".format(sys.pyside_uses_embedding))
+        self.text = QLabel("Hello World auto_quit={}".format(auto_quit))
         self.text.setAlignment(Qt.AlignCenter)
 
         self.layout = QVBoxLayout()
@@ -94,7 +99,7 @@ if __name__ == "__main__":
     widget = MyWidget()
     widget.resize(800, 600)
     widget.show()
-    if sys.pyside_uses_embedding:
+    if auto_quit:
         milliseconds = 2 * 1000 # run 2 second
         QTimer.singleShot(milliseconds, app.quit)
     retcode = app.exec_()

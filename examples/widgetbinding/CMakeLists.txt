@@ -126,7 +126,7 @@ endforeach()
 # On macOS, check if Qt is a framework build. This affects how include paths should be handled.
 get_target_property(QtCore_is_framework Qt6::Core FRAMEWORK)
 if (QtCore_is_framework)
-    get_target_property(qt_core_library_location Qt5::Core LOCATION)
+    get_target_property(qt_core_library_location Qt6::Core LOCATION)
     get_filename_component(qt_core_library_location_dir "${qt_core_library_location}" DIRECTORY)
     get_filename_component(lib_dir "${qt_core_library_location_dir}/../" ABSOLUTE)
     list(APPEND INCLUDES "--framework-include-paths=${lib_dir}")
