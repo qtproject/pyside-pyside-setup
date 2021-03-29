@@ -2,7 +2,7 @@
 #############################################################################
 ##
 ## Copyright (C) 2013 Riverbank Computing Limited.
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -43,10 +43,38 @@
 """PySide6 port of the widgets/dialogs/standarddialogs example from Qt v5.x"""
 
 import sys
-from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtCore import QDir, QRect, Qt
+from PySide6.QtGui import QFont, QPalette, QScreen
+from PySide6.QtWidgets import (QApplication, QColorDialog, QCheckBox, QDialog,
+                               QErrorMessage, QFontDialog, QFileDialog, QFrame,
+                               QGridLayout, QGroupBox, QInputDialog, QLabel,
+                               QLineEdit, QMessageBox, QPushButton,
+                               QSizePolicy, QSpacerItem, QToolBox,
+                               QVBoxLayout, QWidget)
 
 
-class Dialog(QtWidgets.QDialog):
+class DialogOptionsWidget(QGroupBox):
+    """Widget displaying a number of check boxes representing the dialog
+       options."""
+    def __init__(self, parent=None):
+        super(DialogOptionsWidget, self).__init__(parent)
+        self._layout = QVBoxLayout(self)
+        self._mapping = {}
+
+    def value(self):
+        result = 0
+        for checkbox, value in self._mapping.items():
+            if checkbox.isChecked():
+                result |= value
+        return result
+
+    def add_checkbox(self, text, value):
+        checkbox = QCheckBox(text)
+        self._layout.addWidget(checkbox);
+        self._mapping[checkbox] = value
+
+
+class Dialog(QDialog):
     MESSAGE = "<p>Message boxes have a caption, a text, and up to three " \
             "buttons, each with standard or custom texts.</p>" \
             "<p>Click a button to close the message box. Pressing the Esc " \
@@ -55,266 +83,355 @@ class Dialog(QtWidgets.QDialog):
     def __init__(self, parent=None):
         super(Dialog, self).__init__(parent)
 
-        self.openFilesPath = ''
+        self._open_files_path = ''
 
-        self.errorMessageDialog = QtWidgets.QErrorMessage(self)
+        self._error_message_dialog = QErrorMessage(self)
 
-        frameStyle = QtWidgets.QFrame.Sunken | QtWidgets.QFrame.Panel
+        frame_style = QFrame.Sunken | QFrame.Panel
 
-        self.integerLabel = QtWidgets.QLabel()
-        self.integerLabel.setFrameStyle(frameStyle)
-        self.integerButton = QtWidgets.QPushButton("QInputDialog.get&Integer()")
+        self._integer_label = QLabel()
+        self._integer_label.setFrameStyle(frame_style)
+        self._integer_button = QPushButton("QInputDialog.get&Integer()")
 
-        self.doubleLabel = QtWidgets.QLabel()
-        self.doubleLabel.setFrameStyle(frameStyle)
-        self.doubleButton = QtWidgets.QPushButton("QInputDialog.get&Double()")
+        self._double_label = QLabel()
+        self._double_label.setFrameStyle(frame_style)
+        self._double_button = QPushButton("QInputDialog.get&Double()")
 
-        self.itemLabel = QtWidgets.QLabel()
-        self.itemLabel.setFrameStyle(frameStyle)
-        self.itemButton = QtWidgets.QPushButton("QInputDialog.getIte&m()")
+        self._item_label = QLabel()
+        self._item_label.setFrameStyle(frame_style)
+        self._item_button = QPushButton("QInputDialog.getIte&m()")
 
-        self.textLabel = QtWidgets.QLabel()
-        self.textLabel.setFrameStyle(frameStyle)
-        self.textButton = QtWidgets.QPushButton("QInputDialog.get&Text()")
+        self._text_label = QLabel()
+        self._text_label.setFrameStyle(frame_style)
+        self._text_button = QPushButton("QInputDialog.get&Text()")
 
-        self.colorLabel = QtWidgets.QLabel()
-        self.colorLabel.setFrameStyle(frameStyle)
-        self.colorButton = QtWidgets.QPushButton("QColorDialog.get&Color()")
+        self._multiline_text_label = QLabel()
+        self._multiline_text_label.setFrameStyle(frame_style)
+        self._multiline_text_button = QPushButton("QInputDialog::get&MultiLineText()")
 
-        self.fontLabel = QtWidgets.QLabel()
-        self.fontLabel.setFrameStyle(frameStyle)
-        self.fontButton = QtWidgets.QPushButton("QFontDialog.get&Font()")
+        self._color_label = QLabel()
+        self._color_label.setFrameStyle(frame_style)
+        self._color_button = QPushButton("QColorDialog.get&Color()")
+        self._color_options = DialogOptionsWidget()
+        self._color_options.add_checkbox("Show alpha channel",
+                                         QColorDialog.ShowAlphaChannel)
+        self._color_options.add_checkbox("No buttons",
+                                         QColorDialog.NoButtons)
 
-        self.directoryLabel = QtWidgets.QLabel()
-        self.directoryLabel.setFrameStyle(frameStyle)
-        self.directoryButton = QtWidgets.QPushButton("QFileDialog.getE&xistingDirectory()")
+        self._font_label = QLabel()
+        self._font_label.setFrameStyle(frame_style)
+        self._font_button = QPushButton("QFontDialog.get&Font()")
+        self._font_options = DialogOptionsWidget()
+        self._font_options.add_checkbox("Do not use native dialog",
+                                        QFontDialog.DontUseNativeDialog)
+        self._font_options.add_checkbox("Show scalable fonts",
+                                        QFontDialog.ScalableFonts)
+        self._font_options.add_checkbox("Show non-scalable fonts",
+                                        QFontDialog.NonScalableFonts)
+        self._font_options.add_checkbox("Show monospaced fonts",
+                                        QFontDialog.MonospacedFonts)
+        self._font_options.add_checkbox("Show proportional fonts",
+                                        QFontDialog.ProportionalFonts)
+        self._font_options.add_checkbox("No buttons", QFontDialog.NoButtons);
 
-        self.openFileNameLabel = QtWidgets.QLabel()
-        self.openFileNameLabel.setFrameStyle(frameStyle)
-        self.openFileNameButton = QtWidgets.QPushButton("QFileDialog.get&OpenFileName()")
+        self._directory_label = QLabel()
+        self._directory_label.setFrameStyle(frame_style)
+        self._directory_button = QPushButton("QFileDialog.getE&xistingDirectory()")
 
-        self.openFileNamesLabel = QtWidgets.QLabel()
-        self.openFileNamesLabel.setFrameStyle(frameStyle)
-        self.openFileNamesButton = QtWidgets.QPushButton("QFileDialog.&getOpenFileNames()")
+        self._open_file_name_label = QLabel()
+        self._open_file_name_label.setFrameStyle(frame_style)
+        self._open_file_name_button = QPushButton("QFileDialog.get&OpenFileName()")
 
-        self.saveFileNameLabel = QtWidgets.QLabel()
-        self.saveFileNameLabel.setFrameStyle(frameStyle)
-        self.saveFileNameButton = QtWidgets.QPushButton("QFileDialog.get&SaveFileName()")
+        self._open_file_names_label = QLabel()
+        self._open_file_names_label.setFrameStyle(frame_style)
+        self._open_file_names_button = QPushButton("QFileDialog.&getOpenFileNames()")
 
-        self.criticalLabel = QtWidgets.QLabel()
-        self.criticalLabel.setFrameStyle(frameStyle)
-        self.criticalButton = QtWidgets.QPushButton("QMessageBox.critica&l()")
+        self._save_file_name_label = QLabel()
+        self._save_file_name_label.setFrameStyle(frame_style)
+        self._save_file_name_button = QPushButton("QFileDialog.get&SaveFileName()")
 
-        self.informationLabel = QtWidgets.QLabel()
-        self.informationLabel.setFrameStyle(frameStyle)
-        self.informationButton = QtWidgets.QPushButton("QMessageBox.i&nformation()")
+        self._file_options = DialogOptionsWidget()
+        self._file_options.add_checkbox("Do not use native dialog",
+                                        QFileDialog.DontUseNativeDialog)
+        self._file_options.add_checkbox("Show directories only",
+                                        QFileDialog.ShowDirsOnly)
+        self._file_options.add_checkbox("Do not resolve symlinks",
+                                        QFileDialog.DontResolveSymlinks)
+        self._file_options.add_checkbox("Do not confirm overwrite",
+                                        QFileDialog.DontConfirmOverwrite);
+        self._file_options.add_checkbox("Readonly", QFileDialog.ReadOnly)
+        self._file_options.add_checkbox("Hide name filter details",
+                                        QFileDialog.HideNameFilterDetails)
+        self._file_options.add_checkbox("Do not use custom directory icons (Windows)",
+                                        QFileDialog.DontUseCustomDirectoryIcons)
 
-        self.questionLabel = QtWidgets.QLabel()
-        self.questionLabel.setFrameStyle(frameStyle)
-        self.questionButton = QtWidgets.QPushButton("QMessageBox.&question()")
+        self._critical_label = QLabel()
+        self._critical_label.setFrameStyle(frame_style)
+        self._critical_button = QPushButton("QMessageBox.critica&l()")
 
-        self.warningLabel = QtWidgets.QLabel()
-        self.warningLabel.setFrameStyle(frameStyle)
-        self.warningButton = QtWidgets.QPushButton("QMessageBox.&warning()")
+        self._information_label = QLabel()
+        self._information_label.setFrameStyle(frame_style)
+        self._information_button = QPushButton("QMessageBox.i&nformation()")
 
-        self.errorLabel = QtWidgets.QLabel()
-        self.errorLabel.setFrameStyle(frameStyle)
-        self.errorButton = QtWidgets.QPushButton("QErrorMessage.showM&essage()")
+        self._question_label = QLabel()
+        self._question_label.setFrameStyle(frame_style)
+        self._question_button = QPushButton("QMessageBox.&question()")
 
-        self.integerButton.clicked.connect(self.setInteger)
-        self.doubleButton.clicked.connect(self.setDouble)
-        self.itemButton.clicked.connect(self.setItem)
-        self.textButton.clicked.connect(self.setText)
-        self.colorButton.clicked.connect(self.setColor)
-        self.fontButton.clicked.connect(self.setFont)
-        self.directoryButton.clicked.connect(self.setExistingDirectory)
-        self.openFileNameButton.clicked.connect(self.setOpenFileName)
-        self.openFileNamesButton.clicked.connect(self.setOpenFileNames)
-        self.saveFileNameButton.clicked.connect(self.setSaveFileName)
-        self.criticalButton.clicked.connect(self.criticalMessage)
-        self.informationButton.clicked.connect(self.informationMessage)
-        self.questionButton.clicked.connect(self.questionMessage)
-        self.warningButton.clicked.connect(self.warningMessage)
-        self.errorButton.clicked.connect(self.errorMessage)
+        self._warning_label = QLabel()
+        self._warning_label.setFrameStyle(frame_style)
+        self._warning_button = QPushButton("QMessageBox.&warning()")
 
-        self.native = QtWidgets.QCheckBox()
-        self.native.setText("Use native file dialog.")
-        self.native.setChecked(True)
-        if sys.platform not in ("win32", "darwin"):
-            self.native.hide()
+        self._error_label = QLabel()
+        self._error_label.setFrameStyle(frame_style)
+        self._error_button = QPushButton("QErrorMessage.showM&essage()")
 
-        layout = QtWidgets.QGridLayout()
-        layout.setColumnStretch(1, 1)
-        layout.setColumnMinimumWidth(1, 250)
-        layout.addWidget(self.integerButton, 0, 0)
-        layout.addWidget(self.integerLabel, 0, 1)
-        layout.addWidget(self.doubleButton, 1, 0)
-        layout.addWidget(self.doubleLabel, 1, 1)
-        layout.addWidget(self.itemButton, 2, 0)
-        layout.addWidget(self.itemLabel, 2, 1)
-        layout.addWidget(self.textButton, 3, 0)
-        layout.addWidget(self.textLabel, 3, 1)
-        layout.addWidget(self.colorButton, 4, 0)
-        layout.addWidget(self.colorLabel, 4, 1)
-        layout.addWidget(self.fontButton, 5, 0)
-        layout.addWidget(self.fontLabel, 5, 1)
-        layout.addWidget(self.directoryButton, 6, 0)
-        layout.addWidget(self.directoryLabel, 6, 1)
-        layout.addWidget(self.openFileNameButton, 7, 0)
-        layout.addWidget(self.openFileNameLabel, 7, 1)
-        layout.addWidget(self.openFileNamesButton, 8, 0)
-        layout.addWidget(self.openFileNamesLabel, 8, 1)
-        layout.addWidget(self.saveFileNameButton, 9, 0)
-        layout.addWidget(self.saveFileNameLabel, 9, 1)
-        layout.addWidget(self.criticalButton, 10, 0)
-        layout.addWidget(self.criticalLabel, 10, 1)
-        layout.addWidget(self.informationButton, 11, 0)
-        layout.addWidget(self.informationLabel, 11, 1)
-        layout.addWidget(self.questionButton, 12, 0)
-        layout.addWidget(self.questionLabel, 12, 1)
-        layout.addWidget(self.warningButton, 13, 0)
-        layout.addWidget(self.warningLabel, 13, 1)
-        layout.addWidget(self.errorButton, 14, 0)
-        layout.addWidget(self.errorLabel, 14, 1)
-        layout.addWidget(self.native, 15, 0)
-        self.setLayout(layout)
+        self._integer_button.clicked.connect(self.set_integer)
+        self._double_button.clicked.connect(self.set_double)
+        self._item_button.clicked.connect(self.set_item)
+        self._text_button.clicked.connect(self.set_text)
+        self._multiline_text_button.clicked.connect(self.set_multiline_text)
+
+        self._color_button.clicked.connect(self.set_color)
+        self._font_button.clicked.connect(self.set_font)
+        self._directory_button.clicked.connect(self.set_existing_directory)
+        self._open_file_name_button.clicked.connect(self.set_open_file_name)
+        self._open_file_names_button.clicked.connect(self.set_open_file_names)
+        self._save_file_name_button.clicked.connect(self.set_save_file_name)
+        self._critical_button.clicked.connect(self.critical_message)
+        self._information_button.clicked.connect(self.information_message)
+        self._question_button.clicked.connect(self.question_message)
+        self._warning_button.clicked.connect(self.warning_message)
+        self._error_button.clicked.connect(self.error_message)
+
+        vertical_layout = QVBoxLayout(self)
+        toolbox = QToolBox()
+
+        vertical_layout.addWidget(toolbox)
+        page = QWidget()
+        layout = QGridLayout(page)
+        layout.addWidget(self._integer_button, 0, 0)
+        layout.addWidget(self._integer_label, 0, 1)
+        layout.addWidget(self._double_button, 1, 0)
+        layout.addWidget(self._double_label, 1, 1)
+        layout.addWidget(self._item_button, 2, 0)
+        layout.addWidget(self._item_label, 2, 1)
+        layout.addWidget(self._text_button, 3, 0)
+        layout.addWidget(self._text_label, 3, 1)
+        layout.addWidget(self._multiline_text_label, 4, 1)
+        layout.addWidget(self._multiline_text_button, 4, 0)
+        spacer = QSpacerItem(0, 0, QSizePolicy.Ignored, QSizePolicy.MinimumExpanding)
+        layout.addItem(spacer, 5, 0)
+        toolbox.addItem(page, "Input Dialogs")
+
+        page = QWidget()
+        layout = QGridLayout(page)
+        layout.addWidget(self._color_button, 0, 0)
+        layout.addWidget(self._color_label, 0, 1)
+        spacer = QSpacerItem(0, 0, QSizePolicy.Ignored, QSizePolicy.MinimumExpanding)
+        layout.addItem(spacer, 1, 0)
+        layout.addWidget(self._color_options, 2, 0, 1, 2)
+        toolbox.addItem(page, "Color Dialog");
+
+        page = QWidget()
+        layout = QGridLayout(page)
+        layout.addWidget(self._font_button, 0, 0)
+        layout.addWidget(self._font_label, 0, 1)
+        spacer = QSpacerItem(0, 0, QSizePolicy.Ignored, QSizePolicy.MinimumExpanding)
+        layout.addItem(spacer, 1, 0)
+        layout.addWidget(self._font_options, 2, 0, 1, 2)
+        toolbox.addItem(page, "Font Dialog")
+
+        page = QWidget()
+        layout = QGridLayout(page)
+        layout.addWidget(self._directory_button, 0, 0)
+        layout.addWidget(self._directory_label, 0, 1)
+        layout.addWidget(self._open_file_name_button, 1, 0)
+        layout.addWidget(self._open_file_name_label, 1, 1)
+        layout.addWidget(self._open_file_names_button, 2, 0)
+        layout.addWidget(self._open_file_names_label, 2, 1)
+        layout.addWidget(self._save_file_name_button, 3, 0)
+        layout.addWidget(self._save_file_name_label, 3, 1)
+        spacer = QSpacerItem(0, 0, QSizePolicy.Ignored, QSizePolicy.MinimumExpanding)
+        layout.addItem(spacer, 4, 0)
+        layout.addWidget(self._file_options, 5, 0, 1, 2)
+
+        toolbox.addItem(page, "File Dialogs")
+
+        page = QWidget()
+        layout = QGridLayout(page)
+        layout.addWidget(self._critical_button, 0, 0)
+        layout.addWidget(self._critical_label, 0, 1)
+        layout.addWidget(self._information_button, 1, 0)
+        layout.addWidget(self._information_label, 1, 1)
+        layout.addWidget(self._question_button, 2, 0)
+        layout.addWidget(self._question_label, 2, 1)
+        layout.addWidget(self._warning_button, 3, 0)
+        layout.addWidget(self._warning_label, 3, 1)
+        layout.addWidget(self._error_button, 4, 0)
+        layout.addWidget(self._error_label, 4, 1)
+        spacer = QSpacerItem(0, 0, QSizePolicy.Ignored, QSizePolicy.MinimumExpanding)
+        layout.addItem(spacer, 5, 0)
+        toolbox.addItem(page, "Message Boxes")
 
         self.setWindowTitle("Standard Dialogs")
 
-    def setInteger(self):
-        i, ok = QtWidgets.QInputDialog.getInt(self,
+    def set_integer(self):
+        i, ok = QInputDialog.getInt(self,
                 "QInputDialog.getInteger()", "Percentage:", 25, 0, 100, 1)
         if ok:
-            self.integerLabel.setText(f"{i}%")
+            self._integer_label.setText(f"{i}%")
 
-    def setDouble(self):
-        d, ok = QtWidgets.QInputDialog.getDouble(self, "QInputDialog.getDouble()",
+    def set_double(self):
+        d, ok = QInputDialog.getDouble(self, "QInputDialog.getDouble()",
                 "Amount:", 37.56, -10000, 10000, 2)
         if ok:
-            self.doubleLabel.setText("$%g" % d)
+            self._double_label.setText("$%g" % d)
 
-    def setItem(self):
+    def set_item(self):
         items = ("Spring", "Summer", "Fall", "Winter")
 
-        item, ok = QtWidgets.QInputDialog.getItem(self, "QInputDialog.getItem()",
+        item, ok = QInputDialog.getItem(self, "QInputDialog.getItem()",
                 "Season:", items, 0, False)
         if ok and item:
-            self.itemLabel.setText(item)
+            self._item_label.setText(item)
 
-    def setText(self):
-        text, ok = QtWidgets.QInputDialog.getText(self, "QInputDialog.getText()",
-                "User name:", QtWidgets.QLineEdit.Normal,
-                QtCore.QDir.home().dirName())
+    def set_text(self):
+        text, ok = QInputDialog.getText(self, "QInputDialog.getText()",
+                "User name:", QLineEdit.Normal,
+                QDir.home().dirName())
         if ok and text != '':
-            self.textLabel.setText(text)
+            self._text_label.setText(text)
 
-    def setColor(self):
-        color = QtWidgets.QColorDialog.getColor(QtCore.Qt.green, self)
+    def set_multiline_text(self):
+        text, ok = QInputDialog.getMultiLineText(self, "QInputDialog::getMultiLineText()",
+                "Address:", "John Doe\nFreedom Street")
+        if ok and text != '':
+            self._multiline_text_label.setText(text)
+
+    def set_color(self):
+        options_value = self._color_options.value()
+        options = QColorDialog.ColorDialogOptions(options_value)
+        color = QColorDialog.getColor(Qt.green, self, "Select Color", options)
+
         if color.isValid():
-            self.colorLabel.setText(color.name())
-            self.colorLabel.setPalette(QtGui.QPalette(color))
-            self.colorLabel.setAutoFillBackground(True)
+            self._color_label.setText(color.name())
+            self._color_label.setPalette(QPalette(color))
+            self._color_label.setAutoFillBackground(True)
 
-    def setFont(self):
-        ok, font = QtWidgets.QFontDialog.getFont(QtGui.QFont(self.fontLabel.text()), self)
+    def set_font(self):
+        options_value = self._font_options.value()
+        options =  QFontDialog.FontDialogOptions(options_value)
+
+        description = self._font_label.text()
+        default_font = QFont()
+        if description:
+            default_font.fromString(description)
+
+        ok, font = QFontDialog.getFont(default_font, self, "Select Font", options)
         if ok:
-            self.fontLabel.setText(font.key())
-            self.fontLabel.setFont(font)
+            self._font_label.setText(font.key())
+            self._font_label.setFont(font)
 
-    def setExistingDirectory(self):
-        options = QtWidgets.QFileDialog.DontResolveSymlinks | QtWidgets.QFileDialog.ShowDirsOnly
-        directory = QtWidgets.QFileDialog.getExistingDirectory(self,
+    def set_existing_directory(self):
+        options_value = self._file_options.value()
+        options = QFileDialog.Options(options_value) | QFileDialog.ShowDirsOnly
+
+        directory = QFileDialog.getExistingDirectory(self,
                 "QFileDialog.getExistingDirectory()",
-                self.directoryLabel.text(), options)
+                self._directory_label.text(), options)
         if directory:
-            self.directoryLabel.setText(directory)
+            self._directory_label.setText(directory)
 
-    def setOpenFileName(self):
-        options = QtWidgets.QFileDialog.Options()
-        if not self.native.isChecked():
-            options |= QtWidgets.QFileDialog.DontUseNativeDialog
-        fileName, filtr = QtWidgets.QFileDialog.getOpenFileName(self,
+    def set_open_file_name(self):
+        options_value = self._file_options.value()
+        options = QFileDialog.Options(options_value)
+
+        fileName, filtr = QFileDialog.getOpenFileName(self,
                 "QFileDialog.getOpenFileName()",
-                self.openFileNameLabel.text(),
+                self._open_file_name_label.text(),
                 "All Files (*);;Text Files (*.txt)", "", options)
         if fileName:
-            self.openFileNameLabel.setText(fileName)
+            self._open_file_name_label.setText(fileName)
 
-    def setOpenFileNames(self):
-        options = QtWidgets.QFileDialog.Options()
-        if not self.native.isChecked():
-            options |= QtWidgets.QFileDialog.DontUseNativeDialog
-        files, filtr = QtWidgets.QFileDialog.getOpenFileNames(self,
-                "QFileDialog.getOpenFileNames()", self.openFilesPath,
+    def set_open_file_names(self):
+        options_value = self._file_options.value()
+        options = QFileDialog.Options(options_value)
+
+        files, filtr = QFileDialog.getOpenFileNames(self,
+                "QFileDialog.getOpenFileNames()", self._open_files_path,
                 "All Files (*);;Text Files (*.txt)", "", options)
         if files:
-            self.openFilesPath = files[0]
+            self._open_files_path = files[0]
             file_list = ', '.join(files)
-            self.openFileNamesLabel.setText(f"[{file_list}]")
+            self._open_file_names_label.setText(f"[{file_list}]")
 
-    def setSaveFileName(self):
-        options = QtWidgets.QFileDialog.Options()
-        if not self.native.isChecked():
-            options |= QtWidgets.QFileDialog.DontUseNativeDialog
-        fileName, filtr = QtWidgets.QFileDialog.getSaveFileName(self,
+    def set_save_file_name(self):
+        options_value = self._file_options.value()
+        options = QFileDialog.Options(options_value)
+
+        fileName, filtr = QFileDialog.getSaveFileName(self,
                 "QFileDialog.getSaveFileName()",
-                self.saveFileNameLabel.text(),
+                self._save_file_name_label.text(),
                 "All Files (*);;Text Files (*.txt)", "", options)
         if fileName:
-            self.saveFileNameLabel.setText(fileName)
+            self._save_file_name_label.setText(fileName)
 
-    def criticalMessage(self):
-        reply = QtWidgets.QMessageBox.critical(self, "QMessageBox.critical()",
+    def critical_message(self):
+        reply = QMessageBox.critical(self, "QMessageBox.critical()",
                 Dialog.MESSAGE,
-                QtWidgets.QMessageBox.Abort | QtWidgets.QMessageBox.Retry | QtWidgets.QMessageBox.Ignore)
-        if reply == QtWidgets.QMessageBox.Abort:
-            self.criticalLabel.setText("Abort")
-        elif reply == QtWidgets.QMessageBox.Retry:
-            self.criticalLabel.setText("Retry")
+                QMessageBox.Abort | QMessageBox.Retry | QMessageBox.Ignore)
+        if reply == QMessageBox.Abort:
+            self._critical_label.setText("Abort")
+        elif reply == QMessageBox.Retry:
+            self._critical_label.setText("Retry")
         else:
-            self.criticalLabel.setText("Ignore")
+            self._critical_label.setText("Ignore")
 
-    def informationMessage(self):
-        reply = QtWidgets.QMessageBox.information(self,
+    def information_message(self):
+        reply = QMessageBox.information(self,
                 "QMessageBox.information()", Dialog.MESSAGE)
-        if reply == QtWidgets.QMessageBox.Ok:
-            self.informationLabel.setText("OK")
+        if reply == QMessageBox.Ok:
+            self._information_label.setText("OK")
         else:
-            self.informationLabel.setText("Escape")
+            self._information_label.setText("Escape")
 
-    def questionMessage(self):
-        reply = QtWidgets.QMessageBox.question(self, "QMessageBox.question()",
+    def question_message(self):
+        reply = QMessageBox.question(self, "QMessageBox.question()",
                 Dialog.MESSAGE,
-                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Cancel)
-        if reply == QtWidgets.QMessageBox.Yes:
-            self.questionLabel.setText("Yes")
-        elif reply == QtWidgets.QMessageBox.No:
-            self.questionLabel.setText("No")
+                QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
+        if reply == QMessageBox.Yes:
+            self._question_label.setText("Yes")
+        elif reply == QMessageBox.No:
+            self._question_label.setText("No")
         else:
-            self.questionLabel.setText("Cancel")
+            self._question_label.setText("Cancel")
 
-    def warningMessage(self):
-        msgBox = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Warning,
+    def warning_message(self):
+        msg_box = QMessageBox(QMessageBox.Warning,
                 "QMessageBox.warning()", Dialog.MESSAGE,
-                QtWidgets.QMessageBox.NoButton, self)
-        msgBox.addButton("Save &Again", QtWidgets.QMessageBox.AcceptRole)
-        msgBox.addButton("&Continue", QtWidgets.QMessageBox.RejectRole)
-        if msgBox.exec_() == QtWidgets.QMessageBox.AcceptRole:
-            self.warningLabel.setText("Save Again")
+                QMessageBox.NoButton, self)
+        msg_box.addButton("Save &Again", QMessageBox.AcceptRole)
+        msg_box.addButton("&Continue", QMessageBox.RejectRole)
+        if msg_box.exec_() == QMessageBox.AcceptRole:
+            self._warning_label.setText("Save Again")
         else:
-            self.warningLabel.setText("Continue")
+            self._warning_label.setText("Continue")
 
-    def errorMessage(self):
-        self.errorMessageDialog.showMessage("This dialog shows and remembers "
+    def error_message(self):
+        self._error_message_dialog.showMessage("This dialog shows and remembers "
                 "error messages. If the checkbox is checked (as it is by "
                 "default), the shown message will be shown again, but if the "
                 "user unchecks the box the message will not appear again if "
                 "QErrorMessage.showMessage() is called with the same message.")
-        self.errorLabel.setText("If the box is unchecked, the message won't "
+        self._error_label.setText("If the box is unchecked, the message won't "
                 "appear again.")
 
 
 if __name__ == '__main__':
-    app = QtWidgets.QApplication(sys.argv)
+    app = QApplication(sys.argv)
     dialog = Dialog()
+    availableGeometry = dialog.screen().availableGeometry()
+    dialog.resize(availableGeometry.width() / 3, availableGeometry.height() * 2 / 3)
+    dialog.move((availableGeometry.width() - dialog.width()) / 2,
+                (availableGeometry.height() - dialog.height()) / 2)
     sys.exit(dialog.exec_())
