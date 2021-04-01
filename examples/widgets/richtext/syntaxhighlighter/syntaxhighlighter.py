@@ -2,7 +2,7 @@
 ############################################################################
 ##
 ## Copyright (C) 2013 Riverbank Computing Limited.
-## Copyright (C) 2020 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -42,15 +42,15 @@
 
 """PySide6 port of the widgets/richtext/syntaxhighlighter example from Qt v5.x"""
 
+import os
+from pathlib import Path
 import sys
 import re
 from PySide6.QtCore import (QFile, Qt, QTextStream)
-from PySide6.QtGui import (QColor, QFont, QKeySequence, QSyntaxHighlighter,
-    QTextCharFormat)
+from PySide6.QtGui import (QColor, QFont, QFontDatabase, QKeySequence,
+                           QSyntaxHighlighter, QTextCharFormat)
 from PySide6.QtWidgets import (QApplication, QFileDialog, QMainWindow,
     QPlainTextEdit)
-
-import syntaxhighlighter_rc
 
 
 class MainWindow(QMainWindow):
@@ -73,7 +73,7 @@ class MainWindow(QMainWindow):
 
         if not file_name:
             file_name, _ = QFileDialog.getOpenFileName(self, self.tr("Open File"), "",
-                                                       "qmake Files (*.pro *.prf *.pri)")
+                                                       "Python Files (*.py)")
 
         if file_name:
             in_file = QFile(file_name)
@@ -82,30 +82,23 @@ class MainWindow(QMainWindow):
                 self._editor.setPlainText(stream.readAll())
 
     def setup_editor(self):
-        variable_format = QTextCharFormat()
-        variable_format.setFontWeight(QFont.Bold)
-        variable_format.setForeground(Qt.blue)
-        self._highlighter.add_mapping("\\b[A-Z_]+\\b", variable_format)
-
-        single_line_comment_format = QTextCharFormat()
-        single_line_comment_format.setBackground(QColor("#77ff77"))
-        self._highlighter.add_mapping("#[^\n]*", single_line_comment_format)
-
-        quotation_format = QTextCharFormat()
-        quotation_format.setBackground(Qt.cyan)
-        quotation_format.setForeground(Qt.blue)
-        self._highlighter.add_mapping("\".*\"", quotation_format)
+        class_format = QTextCharFormat()
+        class_format.setFontWeight(QFont.Bold)
+        class_format.setForeground(Qt.blue)
+        pattern = r'^\s*class\s+\w+\(.*$'
+        self._highlighter.add_mapping(pattern, class_format)
 
         function_format = QTextCharFormat()
         function_format.setFontItalic(True)
         function_format.setForeground(Qt.blue)
-        self._highlighter.add_mapping("\\b[a-z0-9_]+\\(.*\\)", function_format)
+        pattern = r'^\s*def\s+\w+\s*\(.*\)\s*:\s*$'
+        self._highlighter.add_mapping(pattern, function_format)
 
-        font = QFont()
-        font.setFamily("Courier")
-        font.setFixedPitch(True)
-        font.setPointSize(10)
+        comment_format = QTextCharFormat()
+        comment_format.setBackground(QColor("#77ff77"))
+        self._highlighter.add_mapping(r'^\s*#.*$', comment_format)
 
+        font = QFontDatabase.systemFont(QFontDatabase.FixedFont)
         self._editor = QPlainTextEdit()
         self._editor.setFont(font)
         self._highlighter.setDocument(self._editor.document())
@@ -150,5 +143,5 @@ if __name__ == '__main__':
     window = MainWindow()
     window.resize(640, 512)
     window.show()
-    window.open_file(":/examples/example")
+    window.open_file(os.fspath(Path(__file__).resolve()))
     sys.exit(app.exec_())
