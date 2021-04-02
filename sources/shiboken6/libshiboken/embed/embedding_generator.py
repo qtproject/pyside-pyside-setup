@@ -62,7 +62,7 @@ import marshal
 import traceback
 from pathlib import Path
 
-# work_dir is set to the source for testing, onl.
+# work_dir is set to the source for testing, only.
 # It can be overridden in the command line.
 work_dir = Path(__file__).parent.resolve()
 embed_dir = work_dir
@@ -81,7 +81,7 @@ def runpy(cmd, **kw):
     subprocess.call([sys.executable, '-E'] + cmd.split(), **kw)
 
 
-def create_zipfile(limited_api):
+def create_zipfile(limited_api, quiet):
     """
     Collect all Python files, compile them, create a zip file
     and make a chunked base64 encoded file from it.
@@ -124,11 +124,26 @@ def create_zipfile(limited_api):
     with open(inc_name, "w") as inc:
         _embed_file(tmp, inc)
     tmp.close()
+
     # also generate a simple embeddable .pyc file for signature_bootstrap.pyc
     boot_name = "signature_bootstrap.py" if limited_api else "signature_bootstrap.pyc"
     with open(boot_name, "rb") as ldr, open("signature_bootstrap_inc.h", "w") as inc:
         _embed_bytefile(ldr, inc, limited_api)
     os.chdir(cur_dir)
+    if quiet:
+        return
+
+    # have a look at our populated folder unless quiet option
+    def tree(directory):
+        print(f'+ {directory}')
+        for path in sorted(directory.rglob('*')):
+            depth = len(path.relative_to(directory).parts)
+            spacer = '    ' * depth
+            print(f'{spacer}+ {path.name}')
+
+    print("++++ Current contents of")
+    tree(work_dir)
+    print("++++")
 
 
 def _embed_file(fin, fout):
@@ -233,7 +248,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--cmake-dir', nargs="?")
     parser.add_argument('--limited-api', type=str2bool)
+    parser.add_argument('--quiet', action='store_true')
     args = parser.parse_args()
     if args.cmake_dir:
         work_dir = Path(args.cmake_dir).resolve()
-    create_zipfile(args.limited_api)
+    create_zipfile(args.limited_api, args.quiet)
