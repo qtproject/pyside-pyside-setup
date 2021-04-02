@@ -29,13 +29,35 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/sbkversion.h.in"
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/embed/signature_bootstrap.py"
                "${CMAKE_CURRENT_BINARY_DIR}/embed/signature_bootstrap.py" @ONLY)
 
+# Variable from enclosing scope.
+# list(TRANSFORM shiboken_python_files
+#      PREPEND "${CMAKE_CURRENT_SOURCE_DIR}/../shibokenmodule/files.dir/shibokensupport/"
+#      OUTPUT_VARIABLE embedded_shiboken_files)
+# Replacement for CMake version < 3.12:
+set(embedded_shiboken_files "")
+foreach(item IN LISTS shiboken_python_files)
+    list(APPEND embedded_shiboken_files
+                "${CMAKE_CURRENT_SOURCE_DIR}/../shibokenmodule/files.dir/shibokensupport/${item}")
+endforeach()
+
+if (QUIET_BUILD)
+    set(embedding_option "--quiet")
+else()
+    set(embedding_option "")
+endif()
+
 add_custom_command(
     OUTPUT  "${CMAKE_CURRENT_BINARY_DIR}/embed/signature_bootstrap_inc.h"
     OUTPUT  "${CMAKE_CURRENT_BINARY_DIR}/embed/signature_inc.h"
     COMMAND ${PYTHON_EXECUTABLE} -E
             "${CMAKE_CURRENT_SOURCE_DIR}/embed/embedding_generator.py"
             --cmake-dir "${CMAKE_CURRENT_BINARY_DIR}/embed"
-            --limited-api ${PYTHON_LIMITED_API})
+            --limited-api ${PYTHON_LIMITED_API}
+            ${embedding_option}
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/embed/embedding_generator.py"
+            "${CMAKE_CURRENT_SOURCE_DIR}/embed/signature_bootstrap.py"
+            ${embedded_shiboken_files}
+    )
 
 set(libshiboken_MAJOR_VERSION ${shiboken_MAJOR_VERSION})
 set(libshiboken_MINOR_VERSION ${shiboken_MINOR_VERSION})

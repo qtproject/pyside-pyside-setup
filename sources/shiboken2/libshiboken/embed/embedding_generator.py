@@ -64,7 +64,7 @@ def runpy(cmd, **kw):
     subprocess.call([sys.executable, '-E'] + cmd.split(), **kw)
 
 
-def create_zipfile(limited_api):
+def create_zipfile(limited_api, quiet):
     """
     Collect all Python files, compile them, create a zip file
     and make a chunked base64 encoded file from it.
@@ -111,11 +111,28 @@ def create_zipfile(limited_api):
     with open(inc_name, "w") as inc:
         _embed_file(tmp, inc)
     tmp.close()
+
     # also generate a simple embeddable .pyc file for signature_bootstrap.pyc
     boot_name = "signature_bootstrap.py" if limited_api else "signature_bootstrap.pyc"
     with open(boot_name, "rb") as ldr, open("signature_bootstrap_inc.h", "w") as inc:
         _embed_bytefile(ldr, inc, limited_api)
     os.chdir(cur_dir)
+    if quiet:
+        return
+
+    # have a look at our populated folder unless quiet option
+    def list_files(startpath):
+        for root, dirs, files in os.walk(startpath):
+            level = root.replace(startpath, '').count(os.sep)
+            indent = ' ' * 4 * (level)
+            print('+ {}{}/'.format(indent, os.path.basename(root)))
+            subindent = ' ' * 4 * (level + 1)
+            for f in files:
+                print('+ {}{}'.format(subindent, f))
+
+    print("++++ Current contents of")
+    list_files(work_dir)
+    print("++++")
 
 
 def _embed_file(fin, fout):
@@ -218,7 +235,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--cmake-dir', nargs="?")
     parser.add_argument('--limited-api', type=str2bool)
+    parser.add_argument('--quiet', action='store_true')
     args = parser.parse_args()
     if args.cmake_dir:
         work_dir = os.path.abspath(args.cmake_dir)
-    create_zipfile(args.limited_api)
+    create_zipfile(args.limited_api, args.quiet)
