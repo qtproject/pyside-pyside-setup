@@ -190,6 +190,28 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 
 ######################################################################
+## Define the Python files involved in the build process.
+##
+## They are installed into the file system (see shibokenmodule)
+## and embedded into the libshiboken binary through a .zip file.
+######################################################################
+
+set(shiboken_python_files
+    "signature/lib/__init__.py"
+    "signature/lib/enum_sig.py"
+    "signature/lib/tool.py"
+    "signature/__init__.py"
+    "signature/errorhandler.py"
+    "signature/importhandler.py"
+    "signature/layout.py"
+    "signature/loader.py"
+    "signature/mapping.py"
+    "signature/parser.py"
+    "__init__.py"
+    "feature.py"
+    )
+
+######################################################################
 # Adding sub directories to build
 ######################################################################
 add_subdirectory(ApiExtractor)

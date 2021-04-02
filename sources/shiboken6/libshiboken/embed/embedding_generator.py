@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2019 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of PySide6.
@@ -60,18 +60,19 @@ import tempfile
 import argparse
 import marshal
 import traceback
+from pathlib import Path
 
-# work_dir is set to the source for testing, onl.
+# work_dir is set to the source for testing, only.
 # It can be overridden in the command line.
-work_dir = os.path.abspath(os.path.dirname(__file__))
+work_dir = Path(__file__).parent.resolve()
 embed_dir = work_dir
-cur_dir = os.getcwd()
-source_dir = os.path.normpath(os.path.join(work_dir, "..", "..", ".."))
-assert os.path.basename(source_dir) == "sources"
-build_script_dir = os.path.normpath(os.path.join(work_dir, "..", "..", "..", ".."))
-assert os.path.exists(os.path.join(build_script_dir, "build_scripts"))
+cur_dir = Path.cwd()
+source_dir = work_dir.parents[2]
+assert source_dir.name == "sources"
+build_script_dir = work_dir.parents[3]
+assert (build_script_dir / "build_scripts").exists()
 
-sys.path.insert(0, build_script_dir)
+sys.path.insert(0, os.fspath(build_script_dir))
 
 from build_scripts import utils
 
@@ -80,7 +81,7 @@ def runpy(cmd, **kw):
     subprocess.call([sys.executable, '-E'] + cmd.split(), **kw)
 
 
-def create_zipfile(limited_api):
+def create_zipfile(limited_api, quiet):
     """
     Collect all Python files, compile them, create a zip file
     and make a chunked base64 encoded file from it.
@@ -94,21 +95,20 @@ def create_zipfile(limited_api):
     # Note that we could improve that with the PyZipfile function to use .pyc files
     # in different folders, but that makes only sense when COIN allows us to have
     # multiple Python versions in parallel.
-    from os.path import join, getsize
     for root, dirs, files in os.walk(work_dir):
         for name in files:
-            fpath = os.path.join(root, name)
+            fpath = Path(root) / name
             ew = name.endswith
             if ew(".pyc") or ew(".pyo") or ew(".zip") or ew(".inc"):
                 os.remove(fpath)
     # We copy every Python file into this dir, but only for the right version.
     # For testing in the source dir, we need to filter.
     ignore = []
-    utils.copydir(os.path.join(source_dir, "shiboken6", "shibokenmodule", "files.dir", "shibokensupport"),
-                  os.path.join(work_dir, "shibokensupport"),
+    utils.copydir(source_dir / "shiboken6" / "shibokenmodule" / "files.dir" / "shibokensupport",
+                  work_dir / "shibokensupport",
                   ignore=ignore, file_filter_function=lambda name, n2: name.endswith(".py"))
     if embed_dir != work_dir:
-        utils.copyfile(os.path.join(embed_dir, "signature_bootstrap.py"), work_dir)
+        utils.copyfile(embed_dir / "signature_bootstrap.py", work_dir)
 
     if limited_api:
         pass   # We cannot compile, unless we have folders per Python version
@@ -124,11 +124,26 @@ def create_zipfile(limited_api):
     with open(inc_name, "w") as inc:
         _embed_file(tmp, inc)
     tmp.close()
+
     # also generate a simple embeddable .pyc file for signature_bootstrap.pyc
     boot_name = "signature_bootstrap.py" if limited_api else "signature_bootstrap.pyc"
     with open(boot_name, "rb") as ldr, open("signature_bootstrap_inc.h", "w") as inc:
         _embed_bytefile(ldr, inc, limited_api)
     os.chdir(cur_dir)
+    if quiet:
+        return
+
+    # have a look at our populated folder unless quiet option
+    def tree(directory):
+        print(f'+ {directory}')
+        for path in sorted(directory.rglob('*')):
+            depth = len(path.relative_to(directory).parts)
+            spacer = '    ' * depth
+            print(f'{spacer}+ {path.name}')
+
+    print("++++ Current contents of")
+    tree(work_dir)
+    print("++++")
 
 
 def _embed_file(fin, fout):
@@ -233,7 +248,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--cmake-dir', nargs="?")
     parser.add_argument('--limited-api', type=str2bool)
+    parser.add_argument('--quiet', action='store_true')
     args = parser.parse_args()
     if args.cmake_dir:
-        work_dir = os.path.abspath(args.cmake_dir)
-    create_zipfile(args.limited_api)
+        work_dir = Path(args.cmake_dir).resolve()
+    create_zipfile(args.limited_api, args.quiet)
