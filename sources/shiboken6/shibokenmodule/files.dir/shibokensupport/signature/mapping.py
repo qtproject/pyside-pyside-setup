@@ -352,6 +352,10 @@ type_map.update({
     "self"  : "self",
     })
 
+# PYSIDE-1538: We need to treat "std::optional" accordingly.
+type_map.update({
+    "std.optional": typing.Optional,
+    })
 
 # The Shiboken Part
 def init_Shiboken():
