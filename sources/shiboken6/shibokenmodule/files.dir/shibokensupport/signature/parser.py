@@ -194,7 +194,7 @@ def _resolve_value(thing, valtype, line):
     if res is not None:
         type_map[thing] = res
         return res
-    warnings.warn(f"""pyside_type_init:
+    warnings.warn(f"""pyside_type_init:_resolve_value
 
         UNRECOGNIZED:   {thing!r}
         OFFENDING LINE: {line!r}
@@ -275,7 +275,15 @@ def _resolve_type(thing, line, level, var_handler):
             pieces.append(to_string(part))
         thing = ", ".join(pieces)
         result = f"{contr}[{thing}]"
-        return eval(result, namespace)
+        # PYSIDE-1538: Make sure that the eval does not crash.
+        try:
+            return eval(result, namespace)
+        except Exception as e:
+            warnings.warn(f"""pyside_type_init:_resolve_type
+
+                UNRECOGNIZED:   {result!r}
+                OFFENDING LINE: {line!r}
+                """, RuntimeWarning)
     return _resolve_value(thing, None, line)
 
 
