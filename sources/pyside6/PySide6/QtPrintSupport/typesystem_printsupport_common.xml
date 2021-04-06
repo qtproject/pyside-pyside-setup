@@ -43,7 +43,10 @@
   <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no"/>
 
   <object-type name="QPageSetupDialog">
-    <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>
+    <modify-function signature="exec()" allow-thread="yes"/>
+    <add-function signature="exec_()" return-type="int">
+      <inject-code file="../glue/qtprintsupport.cpp" snippet="exec" />
+    </add-function>
   </object-type>
 
   <object-type name="QAbstractPrintDialog">
@@ -52,7 +55,10 @@
   </object-type>
 
   <object-type name="QPrintDialog">
-    <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>
+    <modify-function signature="exec()" allow-thread="yes"/>
+    <add-function signature="exec_()" return-type="int">
+      <inject-code file="../glue/qtprintsupport.cpp" snippet="exec" />
+    </add-function>
   </object-type>
   <object-type name="QPrintEngine">
     <enum-type name="PrintEnginePropertyKey"/>

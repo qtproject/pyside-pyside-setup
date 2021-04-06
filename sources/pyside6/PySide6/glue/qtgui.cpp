@@ -559,6 +559,51 @@ if (!result.isNull())
     Shiboken::Object::setParent(%PYARG_2, %PYSELF);
 // @snippet qshortcut-2
 
+// @snippet qguiapplication-exec
+if (PyErr_WarnEx(PyExc_DeprecationWarning,
+                 "'exec_' will be removed in the future. "
+                 "Use 'exec' instead.",
+                 1)) {
+    return nullptr;
+}
+%BEGIN_ALLOW_THREADS
+int cppResult = %CPPSELF.exec();
+%END_ALLOW_THREADS
+%PYARG_0 = %CONVERTTOPYTHON[int](cppResult);
+// @snippet qguiapplication-exec
+
+// @snippet qdrag-exec-arg1
+if (PyErr_WarnEx(PyExc_DeprecationWarning,
+                 "'exec_' will be removed in the future. "
+                 "Use 'exec' instead.",
+                 1)) {
+    return nullptr;
+}
+%BEGIN_ALLOW_THREADS
+int cppResult = %CPPSELF.exec(%1);
+%END_ALLOW_THREADS
+%PYARG_0 = %CONVERTTOPYTHON[int](cppResult);
+// @snippet qdrag-exec-arg1
+
+// @snippet qdrag-exec-arg2
+if (PyErr_WarnEx(PyExc_DeprecationWarning,
+                 "'exec_' will be removed in the future. "
+                 "Use 'exec' instead.",
+                 1)) {
+    return nullptr;
+}
+%BEGIN_ALLOW_THREADS
+int cppResult;
+if (numArgs == 2)
+    cppResult = %CPPSELF.exec(%1, %2);
+else if (numArgs == 1)
+    cppResult = %CPPSELF.exec(%1);
+else
+    cppResult = %CPPSELF.exec();
+%END_ALLOW_THREADS
+%PYARG_0 = %CONVERTTOPYTHON[int](cppResult);
+// @snippet qdrag-exec-arg2
+
 /*********************************************************************
  * CONVERSIONS
  ********************************************************************/

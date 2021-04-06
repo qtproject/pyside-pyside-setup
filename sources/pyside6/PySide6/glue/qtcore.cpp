@@ -1541,7 +1541,78 @@ Py_END_ALLOW_THREADS
     }
 }
 // @snippet qt-module-shutdown
+//
+// @snippet qthread_exec_
+if (PyErr_WarnEx(PyExc_DeprecationWarning,
+                 "'exec_' will be removed in the future. "
+                 "Use 'exec' instead.",
+                 1)) {
+    return nullptr;
+}
+%BEGIN_ALLOW_THREADS
+#ifndef AVOID_PROTECTED_HACK
+int cppResult = %CPPSELF.exec();
+#else
+int cppResult = static_cast<::QThreadWrapper *>(cppSelf)->QThreadWrapper::exec_protected();
+#endif
+%END_ALLOW_THREADS
+%PYARG_0 = %CONVERTTOPYTHON[int](cppResult);
+// @snippet qthread_exec_
 
+// @snippet exec_
+if (PyErr_WarnEx(PyExc_DeprecationWarning,
+                 "'exec_' will be removed in the future. "
+                 "Use 'exec' instead.",
+                 1)) {
+    return nullptr;
+}
+%BEGIN_ALLOW_THREADS
+int cppResult = %CPPSELF.exec();
+%END_ALLOW_THREADS
+%PYARG_0 = %CONVERTTOPYTHON[int](cppResult);
+// @snippet exec_
+
+// @snippet exec_arg1
+if (PyErr_WarnEx(PyExc_DeprecationWarning,
+                 "'exec_' will be removed in the future. "
+                 "Use 'exec' instead.",
+                 1)) {
+    return nullptr;
+}
+%BEGIN_ALLOW_THREADS
+int cppResult;
+if (numArgs == 1)
+    cppResult = %CPPSELF.exec(%1);
+else
+    cppResult = %CPPSELF.exec();
+%END_ALLOW_THREADS
+%PYARG_0 = %CONVERTTOPYTHON[int](cppResult);
+// @snippet exec_arg1
+
+// @snippet exec_arg1_noreturn
+if (PyErr_WarnEx(PyExc_DeprecationWarning,
+                 "'exec_' will be removed in the future. "
+                 "Use 'exec' instead.",
+                 1)) {
+    return nullptr;
+}
+%BEGIN_ALLOW_THREADS
+if (numArgs == 1)
+    %CPPSELF.exec(%1);
+else
+    %CPPSELF.exec();
+%END_ALLOW_THREADS
+// @snippet exec_arg1_noreturn
+
+// @snippet qtextstreammanipulator-exec
+if (PyErr_WarnEx(PyExc_DeprecationWarning,
+                 "'exec_' will be removed in the future. "
+                 "Use 'exec' instead.",
+                 1)) {
+    return nullptr;
+}
+%CPPSELF.exec(%1);
+// @snippet qtextstreammanipulator-exec
 
 /*********************************************************************
  * CONVERSIONS
