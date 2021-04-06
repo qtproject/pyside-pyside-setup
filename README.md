@@ -77,7 +77,7 @@ e.g.:
 
 * First, we create a bdist_wheel from a full PySide6 build:
   ```
-  python setup.py bdist_wheel --qmake=c:\Qt\5.12\bin\qmake.exe
+  python setup.py bdist_wheel --qmake=c:\Qt\6.0\bin\qmake.exe
         --cmake=c:\tools\cmake\bin\cmake.exe
         --openssl=c:\libs\OpenSSL32bit\bin
   ```
@@ -85,7 +85,7 @@ e.g.:
   `--only-package`:
   ```
   python setup.py bdist_egg --only-package
-        --qmake=c:\Qt\5.15\bin\qmake.exe
+        --qmake=c:\Qt\6.0\bin\qmake.exe
         --cmake=c:\tools\cmake\bin\cmake.exe
         --openssl=c:\libs\OpenSSL32bit\bin
   ```
@@ -137,10 +137,10 @@ using `setup.py build`:
 
 ## Requirements
 
- * Python 3.6+ are supported,
+ * Python 3.6+ is supported,
  * CMake: Specify the path to cmake with `--cmake` option or add cmake to the
    system path.
- * Qt 5.12+ is supported. Specify the path to qmake with `--qmake` option or
+ * Qt 6.0+ is supported. Specify the path to qmake with `--qmake` option or
    add qmake to the system path.
 
 ### Optional
@@ -152,7 +152,7 @@ platforms.
 
 Please note that official Windows packages do not ship the OpenSSL libraries
 due to import/export restrictions as described in
-http://doc.qt.io/qt-5/ssl.html#import-and-export-restrictions
+http://doc.qt.io/qt-6/ssl.html#import-and-export-restrictions
 
 You can specify the location of the OpenSSL DLLs with the following option:
 `--openssl=</path/to/openssl/bin-directory>`.
