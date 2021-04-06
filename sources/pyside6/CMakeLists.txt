@@ -248,7 +248,7 @@ endif ()
 find_program(SPHINX_BUILD sphinx-build)
 find_program(DOT_EXEC dot)
 
-if (QT_SRC_DIR AND SPHINX_BUILD AND DOT_EXEC)
+if (QT_SRC_DIR AND SPHINX_BUILD AND DOT_EXEC AND NOT SKIP_DOCS)
     add_subdirectory(doc)
 else ()
     set(DOCS_TARGET_DISABLED_MESSAGE "apidoc generation targets disabled.")
