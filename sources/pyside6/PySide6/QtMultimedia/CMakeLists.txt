@@ -45,6 +45,7 @@ ${QtMultimedia_GEN_DIR}/qcameraviewfindersettingscontrol_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qcameraviewfindersettings_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qcamera_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qcamerazoomcontrol_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qcustomaudiorolecontrol_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qimageencodercontrol_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qimageencodersettings_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qmediaaudioprobecontrol_wrapper.cpp
@@ -96,12 +97,6 @@ ${QtMultimedia_GEN_DIR}/qvideowindowcontrol_wrapper.cpp
 # module is always needed
 ${QtMultimedia_GEN_DIR}/qtmultimedia_module_wrapper.cpp
 )
-
-if (Qt${QT_MAJOR_VERSION}Multimedia_VERSION VERSION_EQUAL 5.11.0
-    OR Qt${QT_MAJOR_VERSION}Multimedia_VERSION VERSION_GREATER 5.11.0)
-    list(APPEND QtMultimedia_SRC
-         ${QtMultimedia_GEN_DIR}/qcustomaudiorolecontrol_wrapper.cpp)
-endif()
 
 set(QtMultimedia_include_dirs   ${QtMultimedia_SOURCE_DIR}
                                 ${QtMultimedia_BINARY_DIR}

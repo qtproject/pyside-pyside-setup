@@ -10,6 +10,7 @@ ${QtLocation_GEN_DIR}/qgeoroute_wrapper.cpp
 ${QtLocation_GEN_DIR}/qgeoroutereply_wrapper.cpp
 ${QtLocation_GEN_DIR}/qgeoroutesegment_wrapper.cpp
 ${QtLocation_GEN_DIR}/qgeoserviceprovider_wrapper.cpp
+${QtLocation_GEN_DIR}/qgeoserviceproviderfactoryv2_wrapper.cpp
 ${QtLocation_GEN_DIR}/qplace_wrapper.cpp
 ${QtLocation_GEN_DIR}/qplacecontentreply_wrapper.cpp
 ${QtLocation_GEN_DIR}/qplacedetailsreply_wrapper.cpp
@@ -47,11 +48,6 @@ ${QtLocation_GEN_DIR}/qplacesupplier_wrapper.cpp
 ${QtLocation_GEN_DIR}/qtlocation_module_wrapper.cpp
 )
 
-if (Qt${QT_MAJOR_VERSION}Location_VERSION VERSION_EQUAL 5.11.0
-    OR Qt${QT_MAJOR_VERSION}Location_VERSION VERSION_GREATER 5.11.0)
-    list(APPEND QtLocation_SRC
-         ${QtLocation_GEN_DIR}/qgeoserviceproviderfactoryv2_wrapper.cpp)
-endif()
 
 set(QtLocation_include_dirs ${QtLocation_SOURCE_DIR}
                             ${QtLocation_BINARY_DIR}

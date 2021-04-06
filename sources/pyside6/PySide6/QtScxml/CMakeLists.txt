@@ -6,10 +6,14 @@ set(QtScxml_DROPPED_ENTRIES )
 set(QtScxml_SRC
 ${QtScxml_GEN_DIR}/qscxmlcompiler_wrapper.cpp
 ${QtScxml_GEN_DIR}/qscxmlcompiler_loader_wrapper.cpp
+${QtScxml_GEN_DIR}/qscxmlcppdatamodel_wrapper.cpp
+${QtScxml_GEN_DIR}/qscxmldatamodel_foreachloopbody_wrapper.cpp
+${QtScxml_GEN_DIR}/qscxmldatamodel_wrapper.cpp
 ${QtScxml_GEN_DIR}/qscxmlevent_wrapper.cpp
 ${QtScxml_GEN_DIR}/qscxmldynamicscxmlservicefactory_wrapper.cpp
 ${QtScxml_GEN_DIR}/qscxmlinvokableservice_wrapper.cpp
 ${QtScxml_GEN_DIR}/qscxmlinvokableservicefactory_wrapper.cpp
+${QtScxml_GEN_DIR}/qscxmlnulldatamodel_wrapper.cpp
 ${QtScxml_GEN_DIR}/qscxmlstaticscxmlservicefactory_wrapper.cpp
 ${QtScxml_GEN_DIR}/qscxmlstatemachine_wrapper.cpp
 ${QtScxml_GEN_DIR}/qscxmltabledata_wrapper.cpp
@@ -23,16 +27,6 @@ ${QtScxml_GEN_DIR}/qscxmlexecutablecontent_parameterinfo_wrapper.cpp
 # module is always needed
 ${QtScxml_GEN_DIR}/qtscxml_module_wrapper.cpp
 )
-
-if (Qt${QT_MAJOR_VERSION}Scxml_VERSION VERSION_EQUAL 5.12.0
-    OR Qt${QT_MAJOR_VERSION}Scxml_VERSION VERSION_GREATER 5.12.0)
-    list(APPEND QtScxml_SRC
-         ${QtScxml_GEN_DIR}/qscxmldatamodel_wrapper.cpp
-         ${QtScxml_GEN_DIR}/qscxmldatamodel_foreachloopbody_wrapper.cpp
-         ${QtScxml_GEN_DIR}/qscxmlecmascriptdatamodel_wrapper.cpp
-         ${QtScxml_GEN_DIR}/qscxmlcppdatamodel_wrapper.cpp
-         ${QtScxml_GEN_DIR}/qscxmlnulldatamodel_wrapper.cpp)
-endif()
 
 set(QtScxml_include_dirs ${QtScxml_SOURCE_DIR}
                          ${QtScxml_BINARY_DIR}
