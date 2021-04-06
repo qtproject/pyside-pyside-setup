@@ -1454,7 +1454,10 @@
         <inject-code file="../glue/qtcore.cpp" class="native" position="end"
                      snippet="qthread_pthread_cleanup_uninstall"/>
     </modify-function>
-    <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>
+    <modify-function signature="exec()" allow-thread="yes"/>
+    <add-function signature="exec_()" return-type="int">
+        <inject-code file="../glue/qtcore.cpp" snippet="qthread_exec_"/>
+    </add-function>
     <modify-function signature="msleep(unsigned long)" allow-thread="yes"/>
     <modify-function signature="sleep(unsigned long)" allow-thread="yes"/>
     <modify-function signature="usleep(unsigned long)" allow-thread="yes"/>
@@ -2085,7 +2088,10 @@
 
   <object-type name="QEventLoop">
       <enum-type name="ProcessEventsFlag" flags="ProcessEventsFlags"/>
-      <modify-function signature="exec(QFlags&lt;QEventLoop::ProcessEventsFlag>)" rename="exec_" allow-thread="yes"/>
+      <modify-function signature="exec(QFlags&lt;QEventLoop::ProcessEventsFlag>)" allow-thread="yes"/>
+      <add-function signature="exec_(QFlags&lt;QEventLoop::ProcessEventsFlag> @flags@ = QEventLoop::AllEvents)" return-type="int">
+          <inject-code file="../glue/qtcore.cpp" snippet="exec_arg1"/>
+      </add-function>
       <modify-function signature="processEvents(QFlags&lt;QEventLoop::ProcessEventsFlag>)" allow-thread="yes"/>
       <modify-function signature="processEvents(QFlags&lt;QEventLoop::ProcessEventsFlag>,int)" allow-thread="yes"/>
   </object-type>
@@ -2408,7 +2414,10 @@
       <inject-code class="target" file="../glue/qtcore.cpp" snippet="qcoreapplication-instance"/>
     </modify-function>
 
-    <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>
+    <modify-function signature="exec()" allow-thread="yes"/>
+    <add-function signature="exec_()" return-type="int">
+        <inject-code file="../glue/qtcore.cpp" snippet="exec_"/>
+    </add-function>
     <modify-function signature="notify(QObject*,QEvent*)" allow-thread="yes">
       <modify-argument index="2" invalidate-after-use="yes"/>
     </modify-function>
@@ -2628,7 +2637,10 @@
   </object-type>
 
   <value-type name="QTextStreamManipulator" default-constructor="QTextStreamManipulator(0, 0)">
-    <modify-function signature="exec(QTextStream &amp;)" rename="exec_"/>
+    <!-- Since exec() here doesn't need an allow-threads, we don't modify the original -->
+    <add-function signature="exec_(QTextStream &amp;)">
+        <inject-code file="../glue/qtcore.cpp" snippet="qtextstreammanipulator-exec"/>
+    </add-function>
   </value-type>
   <object-type name="QTextStream" stream="yes">
     <enum-type name="FieldAlignment"/>

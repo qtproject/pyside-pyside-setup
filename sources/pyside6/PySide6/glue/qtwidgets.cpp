@@ -632,6 +632,58 @@ if (_old)
 Shiboken::Object::setParent(%PYSELF, %PYARG_1);
 // @snippet qgraphicsproxywidget-setwidget
 
+// @snippet qapplication-exec
+if (PyErr_WarnEx(PyExc_DeprecationWarning,
+                 "'exec_' will be removed in the future. "
+                 "Use 'exec' instead.",
+                 1)) {
+    return nullptr;
+}
+%BEGIN_ALLOW_THREADS
+int cppResult = %CPPSELF.exec();
+%END_ALLOW_THREADS
+%PYARG_0 = %CONVERTTOPYTHON[int](cppResult);
+// @snippet qapplication-exec
+
+// @snippet qmenu-exec-1
+if (PyErr_WarnEx(PyExc_DeprecationWarning,
+                 "'exec_' will be removed in the future. "
+                 "Use 'exec' instead.",
+                 1)) {
+    return nullptr;
+}
+%BEGIN_ALLOW_THREADS
+QAction *cppResult = %CPPSELF.exec();
+%END_ALLOW_THREADS
+%PYARG_0 = %CONVERTTOPYTHON[QAction](cppResult);
+// @snippet qmenu-exec-1
+
+// @snippet qmenu-exec-2
+if (PyErr_WarnEx(PyExc_DeprecationWarning,
+                 "'exec_' will be removed in the future. "
+                 "Use 'exec' instead.",
+                 1)) {
+    return nullptr;
+}
+%BEGIN_ALLOW_THREADS
+QAction *cppResult = %CPPSELF.exec(%1, %2);
+%END_ALLOW_THREADS
+%PYARG_0 = %CONVERTTOPYTHON[QAction](cppResult);
+// @snippet qmenu-exec-2
+
+// @snippet qmenu-exec-3
+if (PyErr_WarnEx(PyExc_DeprecationWarning,
+                 "'exec_' will be removed in the future. "
+                 "Use 'exec' instead.",
+                 1)) {
+    return nullptr;
+}
+%BEGIN_ALLOW_THREADS
+QAction *cppResult = %CPPSELF.exec(%1, %2, %3, %4);
+%END_ALLOW_THREADS
+%PYARG_0 = %CONVERTTOPYTHON[QAction*](cppResult);
+// @snippet qmenu-exec-3
+
 /*********************************************************************
  * CONVERSIONS
  ********************************************************************/

@@ -490,7 +490,10 @@
   <object-type name="QDateEdit"/>
   <object-type name="QDialog">
     <enum-type name="DialogCode"/>
-    <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>
+    <modify-function signature="exec()" allow-thread="yes"/>
+    <add-function signature="exec_()" return-type="int">
+        <inject-code file="../glue/qtwidgets.cpp" snippet="qapplication-exec"/>
+    </add-function>
   </object-type>
   <object-type name="QDialogButtonBox">
     <enum-type name="ButtonLayout"/>
@@ -780,10 +783,21 @@
   </object-type>
   <object-type name="QMenu">
     <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp" snippet="qmenu-glue"/>
-
-    <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>
-    <modify-function signature="exec(const QPoint&amp;,QAction*)" rename="exec_" allow-thread="yes"/>
-    <modify-function signature="exec(QList&lt;QAction*>,const QPoint&amp;,QAction*,QWidget*)" rename="exec_" allow-thread="yes"/>
+    <!-- exec() -->
+    <modify-function signature="exec()" allow-thread="yes"/>
+    <add-function signature="exec_()" return-type="QAction*">
+        <inject-code file="../glue/qtwidgets.cpp" snippet="qmenu-exec-1"/>
+    </add-function>
+    <!-- exec(QPoint, QAction) -->
+    <modify-function signature="exec(const QPoint&amp;,QAction*)" allow-thread="yes"/>
+    <add-function signature="exec_(const QPoint&amp;,QAction* @action@ = nullptr)" return-type="QAction*">
+        <inject-code file="../glue/qtwidgets.cpp" snippet="qmenu-exec-2"/>
+    </add-function>
+    <!-- exec(QList<QPoint>, QPoint, QAction, QWidget) -->
+    <modify-function signature="exec(QList&lt;QAction*>,const QPoint&amp;,QAction*,QWidget*)" allow-thread="yes"/>
+    <add-function signature="exec_(QList&lt;QAction*>,const QPoint&amp;,QAction* @at@ = nullptr,QWidget* @parent@ = nullptr)" return-type="QAction*">
+        <inject-code file="../glue/qtwidgets.cpp" snippet="qmenu-exec-3"/>
+    </add-function>
     <modify-function signature="addAction(const QString&amp;)">
       <modify-argument index="return">
         <parent index="this" action="add"/>
@@ -2801,7 +2815,10 @@
     <modify-function signature="setStyle(QStyle*)">
       <inject-code class="target" position="end" file="../glue/qtwidgets.cpp" snippet="qapplication-setStyle"/>
     </modify-function>
-    <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>
+    <modify-function signature="exec()" allow-thread="yes"/>
+    <add-function signature="exec_()" return-type="int">
+        <inject-code file="../glue/qtwidgets.cpp" snippet="qapplication-exec"/>
+    </add-function>
     <modify-function signature="notify(QObject*,QEvent*)" allow-thread="yes"/>
     <modify-function signature="alert(QWidget*,int)" allow-thread="yes"/>
     <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp" snippet="qapplication-init"/>

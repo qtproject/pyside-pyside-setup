@@ -1504,8 +1504,14 @@
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="exec(QFlags&lt;Qt::DropAction&gt;)" rename="exec_" allow-thread="yes"/>
-    <modify-function signature="exec(QFlags&lt;Qt::DropAction&gt;,Qt::DropAction)" rename="exec_" allow-thread="yes"/>
+    <modify-function signature="exec(QFlags&lt;Qt::DropAction&gt;)" allow-thread="yes"/>
+    <add-function signature="exec_(QFlags&lt;Qt::DropAction&gt; @supportedActions@ = Qt::MoveAction)" return-type="Qt::DropAction">
+        <inject-code file="../glue/qtgui.cpp" snippet="qdrag-exec-arg1"/>
+    </add-function>
+    <modify-function signature="exec(QFlags&lt;Qt::DropAction&gt;,Qt::DropAction)" allow-thread="yes"/>
+    <add-function signature="exec_(QFlags&lt;Qt::DropAction&gt;,Qt::DropAction)" return-type="Qt::DropAction">
+        <inject-code file="../glue/qtgui.cpp" snippet="qdrag-exec-arg2"/>
+    </add-function>
   </object-type>
 
   <object-type name="QStandardItemModel" polymorphic-id-expression="qobject_cast&lt;QStandardItemModel*&gt;(%1)">
@@ -2491,7 +2497,10 @@
         <inject-code file="../glue/qtgui.cpp" snippet="qguiapplication-2"/>
     </add-function>
     <inject-code class="native" position="beginning" file="../glue/qtgui.cpp" snippet="qguiapplication-init"/>
-    <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>
+    <modify-function signature="exec()" allow-thread="yes"/>
+    <add-function signature="exec_()" return-type="int">
+        <inject-code file="../glue/qtgui.cpp" snippet="qguiapplication-exec"/>
+    </add-function>
 
   </object-type>
 
