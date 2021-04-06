@@ -20,7 +20,7 @@ option(DISABLE_DOCSTRINGS "Disable documentation extraction." FALSE)
 
 set (QT_MAJOR_VERSION 6)
 message(STATUS "Using Qt ${QT_MAJOR_VERSION}")
-find_package(Qt${QT_MAJOR_VERSION} 5.12 REQUIRED COMPONENTS Core)
+find_package(Qt${QT_MAJOR_VERSION} 6.0 REQUIRED COMPONENTS Core)
 
 if (QUIET_BUILD)
     set_quiet_build()

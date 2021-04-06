@@ -79,7 +79,7 @@ if (SHIBOKEN_PYTHON_LIMITED_API)
     message(STATUS "******************************************************")
 endif()
 
-find_package(Qt${QT_MAJOR_VERSION} 5.12 REQUIRED COMPONENTS Core)
+find_package(Qt${QT_MAJOR_VERSION} 6.0 REQUIRED COMPONENTS Core)
 add_definitions(${Qt${QT_MAJOR_VERSION}Core_DEFINITIONS})
 
 option(BUILD_TESTS "Build tests." TRUE)

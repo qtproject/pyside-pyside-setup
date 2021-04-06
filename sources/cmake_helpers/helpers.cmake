@@ -48,7 +48,7 @@ if(WIN32)
     list(APPEND ALL_OPTIONAL_MODULES AxContainer)
 endif()
 list(APPEND ALL_OPTIONAL_MODULES WebChannel WebEngineCore WebEngine WebEngineWidgets WebSockets)
-if (Qt${QT_MAJOR_VERSION}Core_VERSION VERSION_GREATER 5.9.3) # Depending on fixes in Qt3D
+if (Qt${QT_MAJOR_VERSION}Core_VERSION VERSION_GREATER 6.0.2)
     list(APPEND ALL_OPTIONAL_MODULES 3DCore 3DRender 3DInput 3DLogic 3DAnimation 3DExtras)
 endif()
 if(WIN32)
