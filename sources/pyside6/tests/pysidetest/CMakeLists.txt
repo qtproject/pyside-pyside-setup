@@ -131,10 +131,7 @@ create_generator_target(testbinding)
 
 PYSIDE_TEST(constructor_properties_test.py)
 PYSIDE_TEST(decoratedslot_test.py)
-# Will always crash when built against Qt 5.6, no point in running it.
-if (Qt${QT_MAJOR_VERSION}Core_VERSION VERSION_GREATER 5.7.0)
-    PYSIDE_TEST(delegatecreateseditor_test.py)
-endif()
+PYSIDE_TEST(delegatecreateseditor_test.py)
 PYSIDE_TEST(all_modules_load_test.py)
 PYSIDE_TEST(bug_1016.py)
 PYSIDE_TEST(embedding_test.py)
