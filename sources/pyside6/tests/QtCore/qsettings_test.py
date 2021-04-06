@@ -37,7 +37,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QDir, QSettings
+from PySide6.QtCore import QDir, QSettings, QTemporaryDir
 
 class TestQSettings(unittest.TestCase):
     def testConversions(self):
@@ -57,7 +57,11 @@ class TestQSettings(unittest.TestCase):
 
 
     def testDefaultValueConversion(self):
-        settings = QSettings('foo.ini', QSettings.IniFormat)
+        temp_dir = QDir.tempPath()
+        dir = QTemporaryDir(f'{temp_dir}/qsettings_XXXXXX')
+        self.assertTrue(dir.isValid())
+        file_name = dir.filePath('foo.ini')
+        settings = QSettings(file_name, QSettings.IniFormat)
         settings.setValue('zero_value', 0)
         settings.setValue('empty_list', [])
         settings.setValue('bool1', False)
@@ -65,7 +69,7 @@ class TestQSettings(unittest.TestCase):
         del settings
 
         # Loading values already set
-        settings = QSettings('foo.ini', QSettings.IniFormat)
+        settings = QSettings(file_name, QSettings.IniFormat)
 
         # Getting value that doesn't exist
         r = settings.value("variable")
