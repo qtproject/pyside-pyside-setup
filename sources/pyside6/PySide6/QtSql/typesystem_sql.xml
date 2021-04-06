@@ -65,7 +65,10 @@
         <include file-name="QStringList" location="global"/>
         <include file-name="QSize" location="global"/>
     </extra-includes>
-    <modify-function signature="exec(QString)const" rename="exec_" allow-thread="yes"/>
+    <modify-function signature="exec(QString)const" allow-thread="yes"/>
+    <add-function signature="exec_(QString @query@ = QString())const" return-type="QSqlQuery">
+        <inject-code file="../glue/qtsql.cpp" snippet="qsqldatabase-exec"/>
+    </add-function>
     <modify-function signature="open()" allow-thread="yes"/>
     <modify-function signature="open(const QString&amp;, const QString&amp;)" allow-thread="yes"/>
     <modify-function signature="commit()" allow-thread="yes"/>
@@ -86,8 +89,16 @@
         <include file-name="QStringList" location="global"/>
         <include file-name="QSize" location="global"/>
     </extra-includes>
-    <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>
-    <modify-function signature="exec(const QString&amp;)" rename="exec_" allow-thread="yes"/>
+    <!-- exec() -->
+    <modify-function signature="exec()" allow-thread="yes"/>
+    <add-function signature="exec_()" return-type="bool">
+        <inject-code file="../glue/qtsql.cpp" snippet="simple-exec"/>
+    </add-function>
+    <!-- exec(QString) -->
+    <modify-function signature="exec(const QString&amp;)" allow-thread="yes"/>
+    <add-function signature="exec_(const QString&amp;)" return-type="bool">
+        <inject-code file="../glue/qtsql.cpp" snippet="qsqlquery-exec"/>
+    </add-function>
     <modify-function signature="prepare(const QString&amp;)" allow-thread="yes"/>
     <modify-function signature="clear()" allow-thread="yes"/>
     <modify-function signature="last()" allow-thread="yes"/>
@@ -169,7 +180,10 @@
       <!-- ### This isn't part of Qt public API -->
       <modify-function signature="virtual_hook(int,void*)" remove="all"/>
       <!-- ### -->
-      <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>
+      <modify-function signature="exec()" allow-thread="yes"/>
+      <add-function signature="exec_()" return-type="bool">
+          <inject-code file="../glue/qtsql.cpp" snippet="qsqlresult-exec"/>
+      </add-function>
       <modify-function signature="fetchLast()" allow-thread="yes"/>
       <modify-function signature="fetchFirst()" allow-thread="yes"/>
       <modify-function signature="fetchNext()" allow-thread="yes"/>
