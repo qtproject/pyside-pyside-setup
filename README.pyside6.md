@@ -2,9 +2,11 @@
 
 ### Introduction
 
+**Important:** for Qt5 compatibility, check [PySide2](https://pypi.org/project/PySide2)
+
 PySide6 is the official Python module from the
 [Qt for Python project](http://wiki.qt.io/Qt_for_Python),
-which provides access to the complete Qt 5.12+ framework.
+which provides access to the complete Qt 6.0+ framework.
 
 The Qt for Python project is developed in the open, with all facilities you'd expect
 from any modern OSS project such as all code in a git repository and an open
@@ -23,8 +25,8 @@ pip install PySide6
 
 #### Dependencies
 
-PySide6 versions following 5.12 use a C++ parser based on
-[Clang](http://clang.org/). The Clang library (C-bindings), version 6.0 or
+PySide6 versions following 6.0 use a C++ parser based on
+[Clang](http://clang.org/). The Clang library (C-bindings), version 10.0 or
 higher is required for building. Prebuilt versions of it can be downloaded from
 [download.qt.io](http://download.qt.io/development_releases/prebuilt/libclang/).
 
@@ -46,21 +48,20 @@ SET LLVM_INSTALL_DIR=%CD%\libclang
 ### Building from source
 
 For building PySide6 from scratch, please read about
-[getting started](https://wiki.qt.io/Qt_for_Python/GettingStarted).
+[getting started](https://doc.qt.io/qtforpython/gettingstarted.html).
 This process will include getting the code:
 
 ```
 git clone https://code.qt.io/pyside/pyside-setup
 cd pyside-setup
-git branch --track 5.14 origin/5.15
-git checkout 5.15
+git checkout 6.x # if a specific version is needed
 ```
 
 then install the dependencies, and following the instructions per platform.
 A common build command will look like:
 
 ```
-python setup.py install --qmake=path/to/qmake/ --parallel=8 --build-tests
+python setup.py install --qmake=/path/to/bin/qmake --parallel=8 --build-tests
 ```
 
 You can obtain more information about the options to build PySide and Shiboken

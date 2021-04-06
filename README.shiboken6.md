@@ -1,6 +1,6 @@
 # Shiboken6 module
 
-The purpose of the [shiboken6 Python module](https://wiki.qt.io/Qt_for_Python/Shiboken)
+The purpose of the **shiboken6 Python module**
 is to access information related to the binding generation that could be used to integrate
 C++ programs to Python, or even to get useful information to debug
 an application.
