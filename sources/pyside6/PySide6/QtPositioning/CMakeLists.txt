@@ -11,6 +11,7 @@ ${QtPositioning_GEN_DIR}/qgeolocation_wrapper.cpp
 ${QtPositioning_GEN_DIR}/qgeocircle_wrapper.cpp
 ${QtPositioning_GEN_DIR}/qgeocoordinate_wrapper.cpp
 ${QtPositioning_GEN_DIR}/qgeopath_wrapper.cpp
+${QtPositioning_GEN_DIR}/qgeopolygon_wrapper.cpp
 ${QtPositioning_GEN_DIR}/qgeopositioninfo_wrapper.cpp
 ${QtPositioning_GEN_DIR}/qgeopositioninfosource_wrapper.cpp
 ${QtPositioning_GEN_DIR}/qgeopositioninfosourcefactory_wrapper.cpp
@@ -22,12 +23,6 @@ ${QtPositioning_GEN_DIR}/qnmeapositioninfosource_wrapper.cpp
 # module is always needed
 ${QtPositioning_GEN_DIR}/qtpositioning_module_wrapper.cpp
 )
-
-if (Qt${QT_MAJOR_VERSION}Positioning_VERSION VERSION_EQUAL 5.10.0
-    OR Qt${QT_MAJOR_VERSION}Positioning_VERSION VERSION_GREATER 5.10.0)
-    list(APPEND QtPositioning_SRC
-         ${QtPositioning_GEN_DIR}/qgeopolygon_wrapper.cpp)
-endif()
 
 set(QtPositioning_include_dirs ${QtPositioning_SOURCE_DIR}
                                ${QtPositioning_BINARY_DIR}

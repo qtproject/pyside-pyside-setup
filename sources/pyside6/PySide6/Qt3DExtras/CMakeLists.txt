@@ -2,6 +2,9 @@ project(Qt3DExtras)
 
 set(Qt3DExtras_SRC
 ${Qt3DExtras_GEN_DIR}/qt3dextras_wrapper.cpp
+${Qt3DExtras_GEN_DIR}/qt3dextras_qabstractcameracontroller_inputstate_wrapper.cpp
+${Qt3DExtras_GEN_DIR}/qt3dextras_qabstractcameracontroller_wrapper.cpp
+${Qt3DExtras_GEN_DIR}/qt3dextras_qabstractspritesheet_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qconegeometry_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qconemesh_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qcuboidgeometry_wrapper.cpp
@@ -10,6 +13,7 @@ ${Qt3DExtras_GEN_DIR}/qt3dextras_qcylindergeometry_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qcylindermesh_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qdiffusemapmaterial_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qdiffusespecularmapmaterial_wrapper.cpp
+${Qt3DExtras_GEN_DIR}/qt3dextras_qdiffusespecularmaterial_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qextrudedtextgeometry_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qextrudedtextmesh_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qfirstpersoncameracontroller_wrapper.cpp
@@ -29,6 +33,9 @@ ${Qt3DExtras_GEN_DIR}/qt3dextras_qplanemesh_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qskyboxentity_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qspheregeometry_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qspheremesh_wrapper.cpp
+${Qt3DExtras_GEN_DIR}/qt3dextras_qspritegrid_wrapper.cpp
+${Qt3DExtras_GEN_DIR}/qt3dextras_qspritesheet_wrapper.cpp
+${Qt3DExtras_GEN_DIR}/qt3dextras_qspritesheetitem_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qtext2dentity_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qtexturematerial_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qtorusgeometry_wrapper.cpp
@@ -37,17 +44,6 @@ ${Qt3DExtras_GEN_DIR}/qt3dextras_qt3dwindow_wrapper.cpp
 # module is always needed
 ${Qt3DExtras_GEN_DIR}/qt3dextras_module_wrapper.cpp)
 
-if (Qt${QT_MAJOR_VERSION}3DExtras_VERSION VERSION_EQUAL 5.10.0
-    OR Qt${QT_MAJOR_VERSION}3DExtras_VERSION VERSION_GREATER 5.10.0)
-    list(APPEND Qt3DExtras_SRC
-         ${Qt3DExtras_GEN_DIR}/qt3dextras_qabstractcameracontroller_wrapper.cpp
-         ${Qt3DExtras_GEN_DIR}/qt3dextras_qabstractcameracontroller_inputstate_wrapper.cpp
-         ${Qt3DExtras_GEN_DIR}/qt3dextras_qabstractspritesheet_wrapper.cpp
-         ${Qt3DExtras_GEN_DIR}/qt3dextras_qdiffusespecularmaterial_wrapper.cpp
-         ${Qt3DExtras_GEN_DIR}/qt3dextras_qspritegrid_wrapper.cpp
-         ${Qt3DExtras_GEN_DIR}/qt3dextras_qspritesheet_wrapper.cpp
-         ${Qt3DExtras_GEN_DIR}/qt3dextras_qspritesheetitem_wrapper.cpp)
-endif()
 
 set(Qt3DExtras_include_dirs
                      ${Qt3DExtras_SOURCE_DIR}
