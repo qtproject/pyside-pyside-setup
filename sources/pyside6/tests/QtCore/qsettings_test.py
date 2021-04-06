@@ -37,12 +37,13 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.helper import adjust_filename
-from PySide6.QtCore import QSettings
+from PySide6.QtCore import QDir, QSettings
 
 class TestQSettings(unittest.TestCase):
     def testConversions(self):
-        file_path = adjust_filename('qsettings_test.ini', __file__)
+        file = Path(__file__).resolve().parent / 'qsettings_test.ini'
+        self.assertTrue(file.is_file())
+        file_path = QDir.fromNativeSeparators(os.fspath(file))
         settings = QSettings(file_path, QSettings.IniFormat)
 
         r = settings.value('var1')

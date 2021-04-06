@@ -35,8 +35,6 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.helper import adjust_filename
-
 from PySide6 import QtUiTools
 from PySide6 import QtCore
 from PySide6 import QtWidgets
@@ -44,7 +42,9 @@ from PySide6 import QtWidgets
 
 app = QtWidgets.QApplication([])
 loader = QtUiTools.QUiLoader()
-file = QtCore.QFile(adjust_filename('bug_552.ui', __file__))
+file = Path(__file__).resolve().parent / 'bug_552.ui'
+assert(file.is_file())
+file = QtCore.QFile(os.fspath(file))
 w = QtWidgets.QWidget()
 # An exception can't be thrown
 mainWindow = loader.load(file, w)

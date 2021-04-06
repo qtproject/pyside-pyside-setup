@@ -39,8 +39,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.helper import adjust_filename
-from PySide6.QtCore import QFile, QIODevice
+from PySide6.QtCore import QByteArray, QFile, QIODevice
 import resources_mc
 
 class ResourcesUsage(unittest.TestCase):
@@ -48,25 +47,30 @@ class ResourcesUsage(unittest.TestCase):
 
     def testPhrase(self):
         #Test loading of quote.txt resource
-        f = open(adjust_filename('quoteEnUS.txt', __file__), "r")
-        orig = f.read()
-        f.close()
+        file = Path(__file__).resolve().parent / 'quoteEnUS.txt'
+        self.assertTrue(file.is_file())
+        orig = QByteArray(file.read_bytes())
+        # In case the file is checked out in 'crlf' mode, strip '\r'
+        # since we read binary.
+        if sys.platform == 'win32':
+            carriage_return = orig.indexOf('\r')
+            if carriage_return != -1:
+                orig.remove(carriage_return, 1)
 
-        f = QFile(':/quote.txt')
-        f.open(QIODevice.ReadOnly) #|QIODevice.Text)
-        print("Error:", f.errorString())
+        f = QFile(':/quote.txt')  #|QIODevice.Text
+        self.assertTrue(f.open(QIODevice.ReadOnly), f.errorString())
         copy = f.readAll()
         f.close()
         self.assertEqual(orig, copy)
 
     def testImage(self):
         #Test loading of sample.png resource
-        f = open(adjust_filename('sample.png', __file__), "rb")
-        orig = f.read()
-        f.close()
+        file = Path(__file__).resolve().parent / 'sample.png'
+        self.assertTrue(file.is_file())
+        orig = file.read_bytes()
 
         f = QFile(':/sample.png')
-        f.open(QIODevice.ReadOnly)
+        self.assertTrue(f.open(QIODevice.ReadOnly), f.errorString())
         copy = f.readAll()
         f.close()
         self.assertEqual(len(orig), len(copy))

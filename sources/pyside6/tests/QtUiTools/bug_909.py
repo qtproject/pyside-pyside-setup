@@ -40,11 +40,12 @@ from PySide6.QtWidgets import QTabWidget
 from PySide6.QtUiTools import QUiLoader
 
 from helper.usesqapplication import UsesQApplication
-from helper.helper import adjust_filename
 
 class TestDestruction(UsesQApplication):
     def testBug909(self):
-        fileName = QFile(adjust_filename('bug_909.ui', __file__))
+        file = Path(__file__).resolve().parent / 'bug_909.ui'
+        self.assertTrue(file.is_file())
+        fileName = QFile(os.fspath(file))
         loader = QUiLoader()
         main_win = loader.load(fileName)
         self.assertEqual(sys.getrefcount(main_win), 2)

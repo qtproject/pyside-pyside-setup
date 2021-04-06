@@ -35,7 +35,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.helper import adjust_filename
+from helper.helper import quickview_errorstring
 from helper.timedqapplication import TimedQApplication
 
 from PySide6.QtCore import QUrl
@@ -60,7 +60,10 @@ class TestRegisterQMLType(TimedQApplication):
         qmlRegisterType(MyItem, "my.item", 1, 0, "MyItem")
 
         view = QQuickView()
-        view.setSource(QUrl.fromLocalFile(adjust_filename('bug_951.qml', __file__)))
+        file = Path(__file__).resolve().parent / 'bug_951.qml'
+        self.assertTrue(file.is_file())
+        view.setSource(QUrl.fromLocalFile(os.fspath(file)))
+        self.assertTrue(view.rootObject(), quickview_errorstring(view))
 
         self.app.exec_()
         self.assertTrue(MyItem.COMPONENT_COMPLETE_CALLED)

@@ -35,7 +35,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.helper import adjust_filename
+from helper.helper import qmlcomponent_errorstring
 
 from PySide6.QtCore import Property, QObject, QUrl
 from PySide6.QtGui import QGuiApplication
@@ -65,7 +65,9 @@ class TestQmlSupport(unittest.TestCase):
                                                    'Uncreatable', noCreationReason) != -1);
 
         engine = QQmlEngine()
-        component = QQmlComponent(engine, QUrl.fromLocalFile(adjust_filename('registeruncreatable.qml', __file__)))
+        file = Path(__file__).resolve().parent / 'registeruncreatable.qml'
+        self.assertTrue(file.is_file())
+        component = QQmlComponent(engine, QUrl.fromLocalFile(os.fspath(file)))
 
         # Check that the uncreatable item produces the correct error
         self.assertEqual(component.status(), QQmlComponent.Error)

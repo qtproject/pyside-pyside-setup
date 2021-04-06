@@ -35,7 +35,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.helper import adjust_filename
+from helper.helper import quickview_errorstring
 from helper.usesqapplication import UsesQApplication
 
 from PySide6.QtCore import Slot, Property, Signal, QObject, QUrl
@@ -99,9 +99,12 @@ class JavaScriptExceptionsTest(UsesQApplication):
         qmlRegisterType(TestClass, 'JavaScriptExceptions', 1, 0, 'JavaScriptExceptions');
 
         view = QQuickView()
-        qml_url = QUrl.fromLocalFile(adjust_filename('javascript_exceptions.qml', __file__))
+        file = Path(__file__).resolve().parent / 'javascript_exceptions.qml'
+        self.assertTrue(file.is_file())
+        qml_url = QUrl.fromLocalFile(os.fspath(file))
 
         view.setSource(qml_url)
+        self.assertTrue(view.rootObject(), quickview_errorstring(view))
 
         self.assertTrue(test_1)
         self.assertTrue(test_2)

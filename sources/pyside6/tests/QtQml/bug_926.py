@@ -36,7 +36,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.helper import adjust_filename
+from helper.helper import quickview_errorstring
 
 from PySide6.QtCore import QUrl, QTimer, QObject, Signal, Property
 from PySide6.QtGui import QGuiApplication
@@ -66,8 +66,11 @@ class TestBug926 (unittest.TestCase):
         app = QGuiApplication([])
         qmlRegisterType(MyClass,'Example',1,0,'MyClass')
         view = QQuickView()
-        view.setSource(QUrl.fromLocalFile(adjust_filename('bug_926.qml', __file__)))
-        self.assertEqual(len(view.errors()), 0)
+        file = Path(__file__).resolve().parent / 'bug_926.qml'
+        self.assertTrue(file.is_file())
+        view.setSource(QUrl.fromLocalFile(os.fspath(file)))
+        self.assertTrue(view.rootObject(), quickview_errorstring(view))
+
         view.show()
         QTimer.singleShot(0, app.quit)
         app.exec_()

@@ -38,7 +38,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.helper import adjust_filename
+from helper.helper import quickview_errorstring
 
 from PySide6.QtCore import QObject, QUrl, Slot, QTimer
 from PySide6.QtGui import QGuiApplication
@@ -76,8 +76,10 @@ class TestBug(unittest.TestCase):
         controller = CustomIncubationController(self)
         view.engine().setIncubationController(controller)
         view.setResizeMode(QQuickView.SizeRootObjectToView)
-        view.setSource(QUrl.fromLocalFile(adjust_filename('qqmlincubator_incubateWhile.qml',
-                       __file__)))
+        file = Path(__file__).resolve().parent / 'qqmlincubator_incubateWhile.qml'
+        self.assertTrue(file.is_file())
+        view.setSource(QUrl.fromLocalFile(os.fspath(file)))
+        self.assertTrue(view.rootObject(), quickview_errorstring(view))
         view.show()
 
         root = view.rootObject()

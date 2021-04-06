@@ -35,7 +35,6 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.helper import adjust_filename
 from PySide6 import QtWidgets, QtCore
 from PySide6.QtUiTools import QUiLoader
 
@@ -44,7 +43,9 @@ class View_1(QtWidgets.QWidget):
     def __init__(self):
         QtWidgets.QWidget.__init__(self)
         loader = QUiLoader()
-        widget = loader.load(adjust_filename('bug_552.ui', __file__), self)
+        file = Path(__file__).resolve().parent / 'bug_552.ui'
+        assert(file.is_file())
+        widget = loader.load(os.fspath(file), self)
         self.children = []
         for child in widget.findChildren(QtCore.QObject, None):
             self.children.append(child)

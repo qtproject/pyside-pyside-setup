@@ -35,7 +35,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.helper import adjust_filename
+from helper.helper import quickview_errorstring
 from helper.timedqapplication import TimedQApplication
 
 from PySide6 import QtCore, QtGui, QtQuick
@@ -46,8 +46,10 @@ class TestGrabToSharedPointerImage(TimedQApplication):
 
     def testQQuickItemGrabToImageSharedPointer(self):
         view = QtQuick.QQuickView()
-        view.setSource(QtCore.QUrl.fromLocalFile(
-                                   adjust_filename('qquickitem_grabToImage.qml', __file__)))
+        file = Path(__file__).resolve().parent / 'qquickitem_grabToImage.qml'
+        self.assertTrue(file.is_file())
+        view.setSource(QtCore.QUrl.fromLocalFile(os.fspath(file)))
+        self.assertTrue(view.rootObject(), quickview_errorstring(view))
         view.show()
 
         # Get the QQuickItem objects for the blue Rectangle and the Image item.

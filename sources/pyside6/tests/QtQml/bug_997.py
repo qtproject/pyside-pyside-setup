@@ -35,7 +35,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.helper import adjust_filename
+from helper.helper import quickview_errorstring
 from helper.usesqapplication import UsesQApplication
 
 from PySide6 import QtCore, QtQml, QtQuick
@@ -50,7 +50,10 @@ class TestBug(UsesQApplication):
         view = QtQuick.QQuickView()
         ctxt = view.rootContext()
         ctxt.setContextProperty('owner', ownerData)
-        view.setSource(QtCore.QUrl.fromLocalFile(adjust_filename('bug_997.qml', __file__)))
+        file = Path(__file__).resolve().parent / 'bug_997.qml'
+        self.assertTrue(file.is_file())
+        view.setSource(QtCore.QUrl.fromLocalFile(os.fspath(file)))
+        self.assertTrue(view.rootObject(), quickview_errorstring(view))
         view.show()
         QtCore.QTimer.singleShot(1000, self.app.quit)
         self.app.exec_()

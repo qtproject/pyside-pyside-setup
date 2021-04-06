@@ -43,7 +43,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.helper import adjust_filename
+from helper.helper import quickview_errorstring
 from helper.usesqapplication import UsesQApplication
 
 from PySide6.QtCore import Slot, Signal, QUrl, QTimer, QCoreApplication
@@ -71,11 +71,13 @@ class TestQML(UsesQApplication):
 
         # Connect first, then set the property.
         view.called.connect(self.done)
-        view.setSource(QUrl.fromLocalFile(adjust_filename('bug_847.qml', __file__)))
+        file = Path(__file__).resolve().parent / 'bug_847.qml'
+        self.assertTrue(file.is_file())
+        view.setSource(QUrl.fromLocalFile(os.fspath(file)))
         while view.status() == QQuickView.Loading:
             self.app.processEvents()
         self.assertEqual(view.status(), QQuickView.Ready)
-        self.assertTrue(view.rootObject())
+        self.assertTrue(view.rootObject(), quickview_errorstring(view))
         view.rootObject().setProperty('pythonObject', view)
 
         view.show()

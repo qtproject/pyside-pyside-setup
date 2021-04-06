@@ -47,5 +47,7 @@ engine = QQmlEngine()
 component = QQmlComponent(engine)
 
 # This should segfault if the QDeclarativeComponent has not QQmlEngine
-component.loadUrl(QUrl.fromLocalFile(adjust_filename('foo.qml', __file__)))
+file = Path(__file__).resolve().parent / 'foo.qml'
+assert(not file.is_file())
+component.loadUrl(QUrl.fromLocalFile(os.fspath(file)))
 

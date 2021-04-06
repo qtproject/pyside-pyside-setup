@@ -42,7 +42,7 @@ from PySide6.QtQuick import QQuickView
 from PySide6.QtQml import QQmlNetworkAccessManagerFactory
 from PySide6.QtNetwork import QNetworkAccessManager
 
-from helper.helper import adjust_filename
+from helper.helper import quickview_errorstring
 from helper.timedqapplication import TimedQApplication
 
 
@@ -64,9 +64,12 @@ class TestQQmlNetworkFactory(TimedQApplication):
         self.factory = CustomFactory()
         view.engine().setNetworkAccessManagerFactory(self.factory)
 
-        url = QUrl.fromLocalFile(adjust_filename('hw.qml', __file__))
+        file = Path(__file__).resolve().parent / 'hw.qml'
+        self.assertTrue(file.is_file())
+        url = QUrl.fromLocalFile(os.fspath(file))
 
         view.setSource(url)
+        self.assertTrue(view.rootObject(), quickview_errorstring(view))
         view.show()
 
         self.assertEqual(view.status(), QQuickView.Ready)

@@ -36,7 +36,6 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.helper import adjust_filename
 from PySide6.QtWidgets import QApplication
 from PySide6.QtUiTools import QUiLoader
 
@@ -51,5 +50,7 @@ class MyQUiLoader(QUiLoader):
 if __name__ == "__main__":
     app = QApplication([])
 
-    ui = MyQUiLoader().load(adjust_filename("bug_1060.ui", __file__))
+    file = Path(__file__).resolve().parent / 'bug_1060.ui'
+    assert(file.is_file())
+    ui = MyQUiLoader().load(os.fspath(file))
     ui.show()

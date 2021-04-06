@@ -42,7 +42,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.helper import adjust_filename
+from helper.helper import quickview_errorstring
 
 from PySide6 import QtCore, QtGui, QtQuick
 
@@ -83,8 +83,11 @@ class TestBug(unittest.TestCase):
         obj = PythonObject()
         context = view.rootContext()
         context.setContextProperty("python", obj)
-        view.setSource(QtCore.QUrl.fromLocalFile(adjust_filename('bug_451.qml', __file__)))
+        file = Path(__file__).resolve().parent / 'bug_451.qml'
+        self.assertTrue(file.is_file())
+        view.setSource(QtCore.QUrl.fromLocalFile(os.fspath(file)))
         root = view.rootObject()
+        self.assertTrue(root, quickview_errorstring(view))
         root.simpleFunction()
         self.assertEqual(obj.called, "simpleFunction")
 

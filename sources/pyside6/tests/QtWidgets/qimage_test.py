@@ -39,7 +39,6 @@ init_test_paths(False)
 
 from PySide6.QtGui import *
 from PySide6.QtWidgets import *
-from helper.helper import adjust_filename
 from helper.usesqapplication import UsesQApplication
 
 xpm = [
@@ -279,7 +278,9 @@ class QImageTest(UsesQApplication):
 
     def testQImageStringBuffer(self):
         '''Test if the QImage signatures receiving string buffers exist.'''
-        img0 = QImage(adjust_filename('sample.png', __file__))
+        file = Path(__file__).resolve().parent / 'sample.png'
+        self.assertTrue(file.is_file())
+        img0 = QImage(os.fspath(file))
 
         # btw let's test the bits() method
         img1 = QImage(img0.bits(), img0.width(), img0.height(), img0.format())

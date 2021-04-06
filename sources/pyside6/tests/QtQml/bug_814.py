@@ -46,7 +46,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.helper import adjust_filename
+from helper.helper import quickview_errorstring
 from helper.timedqapplication import TimedQApplication
 
 from PySide6.QtCore import QUrl, QAbstractListModel, QModelIndex, Qt
@@ -72,8 +72,11 @@ class TestBug814(TimedQApplication):
         view = QQuickView()
         model = ListModel()
         view.rootContext().setContextProperty("pythonModel", model)
-        view.setSource(QUrl.fromLocalFile(adjust_filename('bug_814.qml', __file__)))
+        file = Path(__file__).resolve().parent / 'bug_814.qml'
+        self.assertTrue(file.is_file())
+        view.setSource(QUrl.fromLocalFile(os.fspath(file)))
         root = view.rootObject()
+        self.assertTrue(root, quickview_errorstring(view))
         view.show()
 
 if __name__ == '__main__':

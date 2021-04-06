@@ -38,11 +38,14 @@ init_test_paths(False)
 from helper.helper import adjust_filename
 from helper.usesqapplication import UsesQApplication
 
+from PySide6.QtCore import QUrl
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQuick import QQuickView
 
 app = QGuiApplication([])
-view = QQuickView(adjust_filename('bug_995.qml', __file__))
+file = Path(__file__).resolve().parent / 'bug_995.qml'
+assert(file.is_file())
+view = QQuickView(QUrl.fromLocalFile(os.fspath(file)))
 view.show()
 view.resize(200, 200)
 contentItem = view.contentItem()

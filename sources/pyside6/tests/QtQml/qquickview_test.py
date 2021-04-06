@@ -37,7 +37,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.helper import adjust_filename
+from helper.helper import quickview_errorstring
 from helper.timedqapplication import TimedQApplication
 
 from PySide6.QtCore import QUrl, QObject, Property, Slot
@@ -70,8 +70,11 @@ class TestQQuickView(TimedQApplication):
         ctxt = view.rootContext()
         ctxt.setContextProperty("myModel", dataList)
 
-        url = QUrl.fromLocalFile(adjust_filename('view.qml', __file__))
+        file = Path(__file__).resolve().parent / 'view.qml'
+        self.assertTrue(file.is_file())
+        url = QUrl.fromLocalFile(os.fspath(file))
         view.setSource(url)
+        self.assertTrue(view.rootObject(), quickview_errorstring(view))
         view.show()
 
         self.assertEqual(view.status(), QQuickView.Ready)
@@ -88,8 +91,11 @@ class TestQQuickView(TimedQApplication):
         ctxt = view.rootContext()
         ctxt.setContextProperty("myModel", dataList)
 
-        url = QUrl.fromLocalFile(adjust_filename('viewmodel.qml', __file__))
+        file = Path(__file__).resolve().parent / 'viewmodel.qml'
+        self.assertTrue(file.is_file())
+        url = QUrl.fromLocalFile(os.fspath(file))
         view.setSource(url)
+        self.assertTrue(view.rootObject(), quickview_errorstring(view))
         view.show()
 
         self.assertEqual(view.status(), QQuickView.Ready)

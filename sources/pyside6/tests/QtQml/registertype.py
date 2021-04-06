@@ -35,7 +35,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.helper import adjust_filename
+from helper.helper import quickview_errorstring
 
 from PySide6.QtCore import Property, QObject, QTimer, QUrl
 from PySide6.QtGui import QGuiApplication, QPen, QColor, QPainter
@@ -115,7 +115,10 @@ class TestQmlSupport(unittest.TestCase):
         app = QGuiApplication([])
 
         view = QQuickView()
-        view.setSource(QUrl.fromLocalFile(adjust_filename('registertype.qml', __file__)))
+        file = Path(__file__).resolve().parent / 'registertype.qml'
+        self.assertTrue(file.is_file())
+        view.setSource(QUrl.fromLocalFile(os.fspath(file)))
+        self.assertTrue(view.rootObject(), quickview_errorstring(view))
         view.show()
         QTimer.singleShot(250, view.close)
         app.exec_()

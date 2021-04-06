@@ -38,7 +38,6 @@ init_test_paths(False)
 from PySide6.QtUiTools import QUiLoader
 
 from helper.usesqapplication import UsesQApplication
-from helper.helper import adjust_filename
 
 class MyQUiLoader(QUiLoader):
     def __init__(self):
@@ -50,7 +49,9 @@ class MyQUiLoader(QUiLoader):
 class BugTest(UsesQApplication):
     def testCase(self):
         loader = MyQUiLoader()
-        self.assertRaises(RuntimeError, loader.load, adjust_filename('bug_965.ui', __file__))
+        file = Path(__file__).resolve().parent / 'bug_965.ui'
+        self.assertTrue(file.is_file())
+        self.assertRaises(RuntimeError, loader.load, os.fspath(file))
 
 if __name__ == '__main__':
     unittest.main()

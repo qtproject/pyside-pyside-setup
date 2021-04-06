@@ -38,8 +38,6 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.helper import adjust_filename
-
 from PySide6.QtCore import *
 from PySide6.QtWidgets import *
 from PySide6.QtUiTools import *
@@ -50,7 +48,9 @@ class TestBug913 (unittest.TestCase):
         app = QApplication([])
 
         loader = QUiLoader()
-        widget = loader.load(adjust_filename('bug_913.ui', __file__))
+        file = Path(__file__).resolve().parent / 'bug_913.ui'
+        self.assertTrue(file.is_file())
+        widget = loader.load(os.fspath(file))
         widget.tabWidget.currentIndex() # direct child is available as member
         widget.le_first.setText('foo') # child of QTabWidget must also be available!
 

@@ -35,7 +35,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.helper import adjust_filename
+from helper.helper import quickview_errorstring
 from helper.timedqapplication import TimedQApplication
 
 from PySide6 import QtCore, QtGui, QtQuick
@@ -67,8 +67,11 @@ class TestConnectionWithInvalidSignature(TimedQApplication):
 
         context = view.rootContext()
         context.setContextProperty("rotatevalue", rotatevalue)
-        view.setSource(QtCore.QUrl.fromLocalFile(adjust_filename('bug_456.qml', __file__)))
+        file = Path(__file__).resolve().parent / 'bug_456.qml'
+        self.assertTrue(file.is_file())
+        view.setSource(QtCore.QUrl.fromLocalFile(os.fspath(file)))
         root = view.rootObject()
+        self.assertTrue(root, quickview_errorstring(view))
         button = root.findChild(QtCore.QObject, "buttonMouseArea")
         view.show()
         button.entered.emit()
