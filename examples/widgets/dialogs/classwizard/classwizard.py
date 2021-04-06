@@ -1,7 +1,7 @@
 #############################################################################
 ##
 ## Copyright (C) 2013 Riverbank Computing Limited.
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -39,368 +39,381 @@
 ##
 #############################################################################
 
-from PySide6 import QtCore, QtGui, QtWidgets
+import os
+from pathlib import Path
+import sys
+
+from PySide6.QtCore import (QByteArray, QDir, QFile, QFileInfo,
+                            QRegularExpression, Qt, QUrl, Slot)
+from PySide6.QtGui import QDesktopServices, QPixmap
+from PySide6.QtWidgets import (QApplication, QComboBox, QCheckBox, QFormLayout,
+                               QFileDialog, QGroupBox, QGridLayout,
+                               QHBoxLayout, QLabel, QLineEdit, QMessageBox,
+                               QPushButton, QRadioButton, QToolButton,
+                               QVBoxLayout, QWizard, QWizardPage)
+
+from listchooser import ListChooser, PropertyChooser, SignalChooser
 
 import classwizard_rc
 
 
-class ClassWizard(QtWidgets.QWizard):
+BASE_CLASSES = ['<None>', 'PySide6.QtCore.QObject',
+                'PySide6.QtWidgets.QDialog', 'PySide6.QtWidgets.QMainWindow'
+                'PySide6.QtWidgets.QWidget']
+
+
+PYTHON_TYPES = ['int', 'list', 'str']
+
+
+INTRODUCTION = """This wizard will generate a skeleton Python class definition,\
+ including a few functions. You simply need to specify the class name and set\
+ a few options to produce a Python file."""
+
+
+def property_accessors(property_type, name):
+    """Generate the property accessor functions."""
+    return (f'    @Property({property_type})\n'
+            f'    def {name}(self):\n'
+            f'        return self._{name}\n\n'
+            f'    @{name}.setter\n'
+            f'    def {name}(self, value):\n'
+            f'        self._{name} = value\n')
+
+
+def property_initialization(property_type, name):
+    """Generate the property initialization for __init__()."""
+    return f'        self._{name} = {property_type}()\n'
+
+
+def signal_initialization(signature):
+    """Generate the Signal initialization from the function signature."""
+    paren_pos = signature.find('(')
+    name = signature[:paren_pos]
+    parameters = signature[paren_pos:]
+    return f'    {name} = Signal{parameters}\n'
+
+
+class ClassWizard(QWizard):
     def __init__(self, parent=None):
         super(ClassWizard, self).__init__(parent)
 
         self.addPage(IntroPage())
-        self.addPage(ClassInfoPage())
-        self.addPage(CodeStylePage())
-        self.addPage(OutputFilesPage())
+        self._class_info_index = self.addPage(ClassInfoPage())
+        self._qobject_index = self.addPage(QObjectPage())
+        self._output_index = self.addPage(OutputFilesPage())
         self.addPage(ConclusionPage())
 
-        self.setPixmap(QtWidgets.QWizard.BannerPixmap,
-                QtGui.QPixmap(':/images/banner.png'))
-        self.setPixmap(QtWidgets.QWizard.BackgroundPixmap,
-                QtGui.QPixmap(':/images/background.png'))
+        self.setPixmap(QWizard.BannerPixmap,
+                       QPixmap(':/images/banner.png'))
+        self.setPixmap(QWizard.BackgroundPixmap,
+                       QPixmap(':/images/background.png'))
 
         self.setWindowTitle("Class Wizard")
 
-    def accept(self):
+    def nextId(self):
+        """Overrides QWizard.nextId() to insert the property/signal
+           page in case the class is a QObject."""
+        id = self.currentId()
+        if self.currentId() == self._class_info_index:
+            qobject = self.field('qobject')
+            return self._qobject_index if qobject else self._output_index
+        return super(ClassWizard, self).nextId()
+
+    def generate_code(self):
+        imports = []  # Classes to be imported
+        module_imports = {}  # Module->class list
+
+        def add_import(class_str):
+            """Add a class to the import list or module hash depending on
+               whether it is 'class' or 'module.class'. Returns the
+               class name."""
+            dot = class_str.rfind('.')
+            if dot < 0:
+                imports.append(class_str)
+                return class_str
+            module = class_str[0:dot]
+            class_name = class_str[dot + 1:]
+            class_list = module_imports.get(module)
+            if class_list:
+                if class_name not in class_list:
+                    class_list.append(class_name)
+            else:
+                module_imports[module] = [class_name]
+            return class_name
+
         class_name = self.field('className')
+        qobject = self.field('qobject')
         base_class = self.field('baseClass')
-        macro_name = self.field('macroName')
-        base_include = self.field('baseInclude')
+        if base_class.startswith('<'):  # <None>
+            base_class = ''
+        if qobject and not base_class:
+            base_class = 'PySide6.QtCore.QObject'
 
-        output_dir = self.field('outputDir')
-        header = self.field('header')
-        implementation = self.field('implementation')
-
-        block = ''
-
-        if self.field('comment'):
-            block += '/*\n'
-            block += '    ' + header + '\n'
-            block += '*/\n'
-            block += '\n'
-
-        if self.field('protect'):
-            block += '#ifndef ' + macro_name + '\n'
-            block += '#define ' + macro_name + '\n'
-            block += '\n'
-
-        if self.field('includeBase'):
-            block += '#include ' + base_include + '\n'
-            block += '\n'
-
-        block += 'class ' + class_name
         if base_class:
-            block += ' : public ' + base_class
+            base_class = add_import(base_class)
 
-        block += '\n'
-        block += '{\n'
+        signals = self.field('signals')
+        if signals:
+            add_import('PySide6.QtCore.Signal')
 
-        if self.field('qobjectMacro'):
-            block += '    Q_OBJECT\n'
+        property_types = []
+        property_names = []
+        for p in self.field('properties'):
+            property_type, property_name = str(p).split(' ')
+            if property_type not in PYTHON_TYPES:
+                property_type = add_import(property_type)
+            property_types.append(property_type)
+            property_names.append(property_name)
+
+        if property_names:
+            add_import('PySide6.QtCore.Property')
+
+        signals = self.field('signals')
+        if signals:
+            add_import('PySide6.QtCore.Signal')
+
+        property_types = []
+        property_names = []
+        for p in self.field('properties'):
+            property_type, property_name = str(p).split(' ')
+            if property_type not in PYTHON_TYPES:
+                property_type = add_import(property_type)
+            property_types.append(property_type)
+            property_names.append(property_name)
+
+        if property_names:
+            add_import('PySide6.QtCore.Property')
+
+        # Generate imports
+        block = '# This Python file uses the following encoding: utf-8\n\n'
+        for module, class_list in module_imports.items():
+            class_list.sort()
+            class_list_str = ', '.join(class_list)
+            block += f'from {module} import {class_list_str}\n'
+        for klass in imports:
+            block += f'import {klass}\n'
+
+        # Generate class definition
+        block += f'\n\nclass {class_name}'
+        if base_class:
+            block += f'({base_class})'
+        block += ':\n'
+        description = self.field('description')
+        if description:
+            block += f'    """{description}"""\n'
+
+        if signals:
             block += '\n'
+            for s in signals:
+                block += signal_initialization(str(s))
 
-        block += 'public:\n'
+        # Generate __init__ function
+        block += '\n    def __init__(self'
+        if qobject:
+            block += ', parent=None'
+        block += '):\n'
 
-        if self.field('qobjectCtor'):
-            block += '    ' + class_name + '(QObject *parent = 0);\n'
-        elif self.field('qwidgetCtor'):
-            block += '    ' + class_name + '(QWidget *parent = 0);\n'
-        elif self.field('defaultCtor'):
-            block += '    ' + class_name + '();\n'
+        if base_class:
+            block += f'        super({class_name}, self).__init__('
+            if qobject:
+                block += 'parent'
+            block += ')\n'
 
-            if self.field('copyCtor'):
-                block += '    ' + class_name + '(const ' + class_name + ' &other);\n'
-                block += '\n'
-                block += '    ' + class_name + ' &operator=' + '(const ' + class_name + ' &other);\n'
+        for i, name in enumerate(property_names):
+            block += property_initialization(property_types[i], name)
 
-        block += '};\n'
+        if not base_class and not property_names:
+            block += '        pass\n'
 
-        if self.field('protect'):
-            block += '\n'
-            block += '#endif\n'
+        # Generate property accessors
+        for i, name in enumerate(property_names):
+            block += '\n' + property_accessors(property_types[i], name)
 
-        header_file = QtCore.QFile(output_dir + '/' + header)
+        return block
 
-        if not header_file.open(QtCore.QFile.WriteOnly | QtCore.QFile.Text):
-            name = header_file.fileName()
-            reason = header_file.errorString()
-            QtWidgets.QMessageBox.warning(None, "Class Wizard",
-                    f"Cannot write file {name}:\n{reason}")
+    def accept(self):
+        file_name = self.field('file')
+        output_dir = self.field('outputDir')
+        python_file = Path(output_dir) / file_name
+        name = os.fspath(python_file)
+        try:
+            python_file.write_text(self.generate_code())
+        except (OSError, PermissionError) as e:
+            reason = str(e)
+            QMessageBox.warning(None, "Class Wizard",
+                                f"Cannot write file {name}:\n{reason}")
             return
 
-        header_file.write(QtCore.QByteArray(block.encode("utf-8")))
-
-        block = ''
-
-        if self.field('comment'):
-            block += '/*\n'
-            block += '    ' + implementation + '\n'
-            block += '*/\n'
-            block += '\n'
-
-        block += '#include "' + header + '"\n'
-        block += '\n'
-
-        if self.field('qobjectCtor'):
-            block += class_name + '::' + class_name + '(QObject *parent)\n'
-            block += '    : ' + base_class + '(parent)\n'
-            block += '{\n'
-            block += '}\n'
-        elif self.field('qwidgetCtor'):
-            block += class_name + '::' + class_name + '(QWidget *parent)\n'
-            block += '    : ' + base_class + '(parent)\n'
-            block += '{\n'
-            block += '}\n'
-        elif self.field('defaultCtor'):
-            block += class_name + '::' + class_name + '()\n'
-            block += '{\n'
-            block += '    // missing code\n'
-            block += '}\n'
-
-            if self.field('copyCtor'):
-                block += '\n'
-                block += class_name + '::' + class_name + '(const ' + class_name + ' &other)\n'
-                block += '{\n'
-                block += '    *this = other;\n'
-                block += '}\n'
-                block += '\n'
-                block += class_name + ' &' + class_name + '::operator=(const ' + class_name + ' &other)\n'
-                block += '{\n'
-
-                if base_class:
-                    block += '    ' + base_class + '::operator=(other);\n'
-
-                block += '    // missing code\n'
-                block += '    return *this;\n'
-                block += '}\n'
-
-        implementation_file = QtCore.QFile(output_dir + '/' + implementation)
-
-        if not implementation_file.open(QtCore.QFile.WriteOnly | QtCore.QFile.Text):
-            name = implementation_file.fileName()
-            reason = implementation_file.errorString()
-            QtWidgets.QMessageBox.warning(None, "Class Wizard",
-                    f"Cannot write file {name}:\n{reason}")
-            return
-
-        implementation_file.write(QtCore.QByteArray(block.encode("utf-8")))
+        if self.field('launch'):
+            url = QUrl.fromLocalFile(QDir.fromNativeSeparators(name))
+            QDesktopServices.openUrl(url)
 
         super(ClassWizard, self).accept()
 
 
-class IntroPage(QtWidgets.QWizardPage):
+class IntroPage(QWizardPage):
     def __init__(self, parent=None):
         super(IntroPage, self).__init__(parent)
 
         self.setTitle("Introduction")
-        self.setPixmap(QtWidgets.QWizard.WatermarkPixmap,
-                QtGui.QPixmap(':/images/watermark1.png'))
+        self.setPixmap(QWizard.WatermarkPixmap,
+                       QPixmap(':/images/watermark1.png'))
 
-        label = QtWidgets.QLabel("This wizard will generate a skeleton C++ class "
-                "definition, including a few functions. You simply need to "
-                "specify the class name and set a few options to produce a "
-                "header file and an implementation file for your new C++ "
-                "class.")
+        label = QLabel(INTRODUCTION)
         label.setWordWrap(True)
 
-        layout = QtWidgets.QVBoxLayout()
+        layout = QVBoxLayout(self)
         layout.addWidget(label)
-        self.setLayout(layout)
 
 
-class ClassInfoPage(QtWidgets.QWizardPage):
+class ClassInfoPage(QWizardPage):
     def __init__(self, parent=None):
         super(ClassInfoPage, self).__init__(parent)
 
         self.setTitle("Class Information")
         self.setSubTitle("Specify basic information about the class for "
-                "which you want to generate skeleton source code files.")
-        self.setPixmap(QtWidgets.QWizard.LogoPixmap,
-                QtGui.QPixmap(':/images/logo1.png'))
+                         "which you want to generate a skeleton source code file.")
+        self.setPixmap(QWizard.LogoPixmap,
+                       QPixmap(':/images/logo1.png'))
 
-        class_name_label = QtWidgets.QLabel("&Class name:")
-        class_name_line_edit = QtWidgets.QLineEdit()
-        class_name_label.setBuddy(class_name_line_edit)
+        class_name_line_edit = QLineEdit()
+        class_name_line_edit.setClearButtonEnabled(True)
 
-        base_class_label = QtWidgets.QLabel("B&ase class:")
-        base_class_line_edit = QtWidgets.QLineEdit()
-        base_class_label.setBuddy(base_class_line_edit)
+        self._base_class_combo = QComboBox()
+        self._base_class_combo.addItems(BASE_CLASSES)
+        self._base_class_combo.setEditable(True)
 
-        qobject_macro_check_box = QtWidgets.QCheckBox("Generate Q_OBJECT &macro")
+        base_class_line_edit = self._base_class_combo.lineEdit()
+        base_class_line_edit.setPlaceholderText('Module.Class')
+        self._base_class_combo.currentTextChanged.connect(self._base_class_changed)
 
-        group_box = QtWidgets.QGroupBox("C&onstructor")
+        description_line_edit = QLineEdit()
+        description_line_edit.setClearButtonEnabled(True)
 
-        qobject_ctor_radio_button = QtWidgets.QRadioButton("&QObject-style constructor")
-        qwidget_ctor_radio_button = QtWidgets.QRadioButton("Q&Widget-style constructor")
-        default_ctor_radio_button = QtWidgets.QRadioButton("&Default constructor")
-        copy_ctor_check_box = QtWidgets.QCheckBox("&Generate copy constructor and operator=")
-
-        default_ctor_radio_button.setChecked(True)
-
-        default_ctor_radio_button.toggled.connect(copy_ctor_check_box.setEnabled)
+        self._qobject_check_box = QCheckBox("Inherits QObject")
 
         self.registerField('className*', class_name_line_edit)
         self.registerField('baseClass', base_class_line_edit)
-        self.registerField('qobjectMacro', qobject_macro_check_box)
-        self.registerField('qobjectCtor', qobject_ctor_radio_button)
-        self.registerField('qwidgetCtor', qwidget_ctor_radio_button)
-        self.registerField('defaultCtor', default_ctor_radio_button)
-        self.registerField('copyCtor', copy_ctor_check_box)
+        self.registerField('description', description_line_edit)
+        self.registerField('qobject', self._qobject_check_box)
 
-        group_box_layout = QtWidgets.QVBoxLayout()
-        group_box_layout.addWidget(qobject_ctor_radio_button)
-        group_box_layout.addWidget(qwidget_ctor_radio_button)
-        group_box_layout.addWidget(default_ctor_radio_button)
-        group_box_layout.addWidget(copy_ctor_check_box)
-        group_box.setLayout(group_box_layout)
+        layout = QFormLayout(self)
+        layout.addRow("&Class name:", class_name_line_edit)
+        layout.addRow("B&ase class:", self._base_class_combo)
+        layout.addRow("&Description:", description_line_edit)
+        layout.addRow(self._qobject_check_box)
 
-        layout = QtWidgets.QGridLayout()
-        layout.addWidget(class_name_label, 0, 0)
-        layout.addWidget(class_name_line_edit, 0, 1)
-        layout.addWidget(base_class_label, 1, 0)
-        layout.addWidget(base_class_line_edit, 1, 1)
-        layout.addWidget(qobject_macro_check_box, 2, 0, 1, 2)
-        layout.addWidget(group_box, 3, 0, 1, 2)
-        self.setLayout(layout)
+    @Slot(str)
+    def _base_class_changed(self, text):
+        is_qobject = text.startswith('PySide')
+        self._qobject_check_box.setChecked(is_qobject)
 
 
-class CodeStylePage(QtWidgets.QWizardPage):
+class QObjectPage(QWizardPage):
+    """Allows for adding properties and signals to a QObject."""
     def __init__(self, parent=None):
-        super(CodeStylePage, self).__init__(parent)
+        super(QObjectPage, self).__init__(parent)
 
-        self.setTitle("Code Style Options")
-        self.setSubTitle("Choose the formatting of the generated code.")
-        self.setPixmap(QtWidgets.QWizard.LogoPixmap,
-                QtGui.QPixmap(':/images/logo2.png'))
-
-        comment_check_box = QtWidgets.QCheckBox("&Start generated files with a "
-                "comment")
-        comment_check_box.setChecked(True)
-
-        protect_check_box = QtWidgets.QCheckBox("&Protect header file against "
-                "multiple inclusions")
-        protect_check_box.setChecked(True)
-
-        macro_name_label = QtWidgets.QLabel("&Macro name:")
-        self._macro_name_line_edit = QtWidgets.QLineEdit()
-        macro_name_label.setBuddy(self._macro_name_line_edit)
-
-        self._include_base_check_box = QtWidgets.QCheckBox("&Include base class "
-                "definition")
-        self._base_include_label = QtWidgets.QLabel("Base class include:")
-        self._base_include_line_edit = QtWidgets.QLineEdit()
-        self._base_include_label.setBuddy(self._base_include_line_edit)
-
-        protect_check_box.toggled.connect(macro_name_label.setEnabled)
-        protect_check_box.toggled.connect(self._macro_name_line_edit.setEnabled)
-        self._include_base_check_box.toggled.connect(self._base_include_label.setEnabled)
-        self._include_base_check_box.toggled.connect(self._base_include_line_edit.setEnabled)
-
-        self.registerField('comment', comment_check_box)
-        self.registerField('protect', protect_check_box)
-        self.registerField('macroName', self._macro_name_line_edit)
-        self.registerField('includeBase', self._include_base_check_box)
-        self.registerField('baseInclude', self._base_include_line_edit)
-
-        layout = QtWidgets.QGridLayout()
-        layout.setColumnMinimumWidth(0, 20)
-        layout.addWidget(comment_check_box, 0, 0, 1, 3)
-        layout.addWidget(protect_check_box, 1, 0, 1, 3)
-        layout.addWidget(macro_name_label, 2, 1)
-        layout.addWidget(self._macro_name_line_edit, 2, 2)
-        layout.addWidget(self._include_base_check_box, 3, 0, 1, 3)
-        layout.addWidget(self._base_include_label, 4, 1)
-        layout.addWidget(self._base_include_line_edit, 4, 2)
-        self.setLayout(layout)
-
-    def initializePage(self):
-        class_name = self.field('className')
-        self._macro_name_line_edit.setText(class_name.upper() + "_H")
-
-        base_class = self.field('baseClass')
-        is_baseClass = bool(base_class)
-
-        self._include_base_check_box.setChecked(is_baseClass)
-        self._include_base_check_box.setEnabled(is_baseClass)
-        self._base_include_label.setEnabled(is_baseClass)
-        self._base_include_line_edit.setEnabled(is_baseClass)
-
-        if not is_baseClass:
-            self._base_include_line_edit.clear()
-        elif QtCore.QRegularExpression('^Q[A-Z].*$').match(base_class).hasMatch():
-            self._base_include_line_edit.setText('<' + base_class + '>')
-        else:
-            self._base_include_line_edit.setText('"' + base_class.lower() + '.h"')
+        self.setTitle("QObject parameters")
+        self.setSubTitle("Specify the signals, slots and properties.")
+        self.setPixmap(QWizard.LogoPixmap,
+                       QPixmap(':/images/logo2.png'))
+        layout = QVBoxLayout(self)
+        self._properties_chooser = PropertyChooser()
+        self.registerField('properties', self._properties_chooser, 'items')
+        layout.addWidget(self._properties_chooser)
+        self._signals_chooser = SignalChooser()
+        self.registerField('signals', self._signals_chooser, 'items')
+        layout.addWidget(self._signals_chooser)
 
 
-class OutputFilesPage(QtWidgets.QWizardPage):
+class OutputFilesPage(QWizardPage):
     def __init__(self, parent=None):
         super(OutputFilesPage, self).__init__(parent)
 
         self.setTitle("Output Files")
         self.setSubTitle("Specify where you want the wizard to put the "
-                "generated skeleton code.")
-        self.setPixmap(QtWidgets.QWizard.LogoPixmap,
-                QtGui.QPixmap(':/images/logo3.png'))
+                         "generated skeleton code.")
+        self.setPixmap(QWizard.LogoPixmap,
+                       QPixmap(':/images/logo3.png'))
 
-        output_dir_label = QtWidgets.QLabel("&Output directory:")
-        self._output_dir_line_edit = QtWidgets.QLineEdit()
+        output_dir_label = QLabel("&Output directory:")
+        output_dir_layout = QHBoxLayout()
+        self._output_dir_line_edit = QLineEdit()
+        output_dir_layout.addWidget(self._output_dir_line_edit)
         output_dir_label.setBuddy(self._output_dir_line_edit)
+        output_dir_button = QToolButton()
+        output_dir_button.setText('...')
+        output_dir_button.clicked.connect(self._choose_output_dir)
+        output_dir_layout.addWidget(output_dir_button)
 
-        header_label = QtWidgets.QLabel("&Header file name:")
-        self._header_line_edit = QtWidgets.QLineEdit()
-        header_label.setBuddy(self._header_line_edit)
-
-        implementation_label = QtWidgets.QLabel("&Implementation file name:")
-        self._implementation_line_edit = QtWidgets.QLineEdit()
-        implementation_label.setBuddy(self._implementation_line_edit)
+        self._file_line_edit = QLineEdit()
 
         self.registerField('outputDir*', self._output_dir_line_edit)
-        self.registerField('header*', self._header_line_edit)
-        self.registerField('implementation*', self._implementation_line_edit)
+        self.registerField('file*', self._file_line_edit)
 
-        layout = QtWidgets.QGridLayout()
-        layout.addWidget(output_dir_label, 0, 0)
-        layout.addWidget(self._output_dir_line_edit, 0, 1)
-        layout.addWidget(header_label, 1, 0)
-        layout.addWidget(self._header_line_edit, 1, 1)
-        layout.addWidget(implementation_label, 2, 0)
-        layout.addWidget(self._implementation_line_edit, 2, 1)
-        self.setLayout(layout)
+        layout = QFormLayout(self)
+        layout.addRow(output_dir_label, output_dir_layout)
+        layout.addRow("&File name:", self._file_line_edit)
 
     def initializePage(self):
         class_name = self.field('className')
-        self._header_line_edit.setText(class_name.lower() + '.h')
-        self._implementation_line_edit.setText(class_name.lower() + '.cpp')
-        self._output_dir_line_edit.setText(QtCore.QDir.toNativeSeparators(QtCore.QDir.tempPath()))
+        self._file_line_edit.setText(class_name.lower() + '.py')
+        self.set_output_dir(QDir.tempPath())
+
+    def set_output_dir(self, dir):
+        self._output_dir_line_edit.setText(QDir.toNativeSeparators(dir))
+
+    def output_dir(self):
+        return QDir.fromNativeSeparators(self._output_dir_line_edit.text())
+
+    def file_name(self):
+        return self.output_dir() + '/' + self._file_line_edit.text()
+
+    def _choose_output_dir(self):
+        dir = QFileDialog.getExistingDirectory(self, "Output Directory",
+                                               self.output_dir())
+        if dir:
+            self.set_output_dir(dir)
+
+    def validatePage(self):
+        """Ensure we do not overwrite existing files."""
+        name = self.file_name()
+        if QFileInfo.exists(name):
+            question = f'{name} already exists. Would you like to overwrite it?'
+            r = QMessageBox.question(self, 'File Exists', question)
+            if r != QMessageBox.Yes:
+                return False
+        return True
 
 
-class ConclusionPage(QtWidgets.QWizardPage):
+class ConclusionPage(QWizardPage):
     def __init__(self, parent=None):
         super(ConclusionPage, self).__init__(parent)
 
         self.setTitle("Conclusion")
-        self.setPixmap(QtWidgets.QWizard.WatermarkPixmap,
-                QtGui.QPixmap(':/images/watermark2.png'))
+        self.setPixmap(QWizard.WatermarkPixmap,
+                       QPixmap(':/images/watermark2.png'))
 
-        self.label = QtWidgets.QLabel()
+        self.label = QLabel()
         self.label.setWordWrap(True)
 
-        layout = QtWidgets.QVBoxLayout()
+        self._launch_check_box = QCheckBox("Launch")
+        self.registerField('launch', self._launch_check_box)
+
+        layout = QVBoxLayout(self)
         layout.addWidget(self.label)
-        self.setLayout(layout)
+        layout.addWidget(self._launch_check_box)
 
     def initializePage(self):
-        finish_text = self.wizard().buttonText(QtWidgets.QWizard.FinishButton)
-        finish_text.replace('&', '')
+        finish_text = self.wizard().buttonText(QWizard.FinishButton)
+        finish_text = finish_text.replace('&', '')
         self.label.setText(f"Click {finish_text} to generate the class skeleton.")
+        self._launch_check_box.setChecked(True)
 
 
 if __name__ == '__main__':
-
-    import sys
-
-    app = QtWidgets.QApplication(sys.argv)
+    app = QApplication(sys.argv)
     wizard = ClassWizard()
     wizard.show()
     sys.exit(app.exec_())
