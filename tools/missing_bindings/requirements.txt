@@ -1,0 +1,8 @@
+beautifulsoup4
+
+# PySide
+PySide6
+
+# PyQt
+PyQt6
+PyQt6-3D
