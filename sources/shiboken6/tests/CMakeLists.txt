@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 if(BUILD_TESTS)
-    find_package(Qt${QT_MAJOR_VERSION}Test 5.12 REQUIRED)
+    find_package(Qt${QT_MAJOR_VERSION}Test 6.0 REQUIRED)
 endif()
 
 add_subdirectory(libminimal)
