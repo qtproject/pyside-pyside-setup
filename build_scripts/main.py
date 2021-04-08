@@ -930,7 +930,8 @@ class PysideBuild(_build, DistUtilsCommandMixin):
         if run_process(cmd_make) != 0:
             raise DistutilsSetupError("Error compiling {}".format(extension))
 
-        if not OPTION["SKIP_DOCS"]:
+        # macOS Python3 shows an encoding problem with sphinx
+        if not OPTION["SKIP_DOCS"] and sys.platform != 'darwin':
             if extension.lower() == "shiboken2":
                 try:
                     # Check if sphinx is installed to proceed.
