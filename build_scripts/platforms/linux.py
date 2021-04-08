@@ -117,7 +117,11 @@ def prepare_standalone_package_linux(self, vars):
                 filter=["*.so"],
                 recursive=True,
                 vars=vars)
-        # FIXME QTBUG-92361: Bring back the designer plugin
+        copydir("{install_dir}/plugins/designer",
+                f"{plugins_target}/designer",
+                filter=["*.so"],
+                recursive=False,
+                vars=vars)
 
     if copy_qml:
         # <qt>/qml/* -> <setup>/{st_package_name}/Qt/qml

@@ -428,7 +428,11 @@ def copy_qt_artifacts(self, copy_pdbs, vars):
         copydir("{qt_plugins_dir}", plugins_target,
                 file_filter_function=plugin_dll_filter,
                 vars=vars)
-        # FIXME QTBUG-92361: Bring back the designer plugin
+        copydir("{install_dir}/plugins/designer",
+                f"{plugins_target}/designer",
+                filter=["*.dll"],
+                recursive=False,
+                vars=vars)
 
     if copy_translations:
         # <qt>/translations/* -> <setup>/{st_package_name}/translations
