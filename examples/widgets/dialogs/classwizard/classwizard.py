@@ -274,7 +274,7 @@ class ClassInfoPage(QWizardPage):
         self.setSubTitle("Specify basic information about the class for "
                          "which you want to generate a skeleton source code file.")
         self.setPixmap(QWizard.LogoPixmap,
-                       QPixmap(':/images/logo1.png'))
+                       QPixmap(':/qt-project.org/logos/pysidelogo.png'))
 
         class_name_line_edit = QLineEdit()
         class_name_line_edit.setClearButtonEnabled(True)
@@ -317,7 +317,7 @@ class QObjectPage(QWizardPage):
         self.setTitle("QObject parameters")
         self.setSubTitle("Specify the signals, slots and properties.")
         self.setPixmap(QWizard.LogoPixmap,
-                       QPixmap(':/images/logo2.png'))
+                       ':/qt-project.org/logos/pysidelogo.png')
         layout = QVBoxLayout(self)
         self._properties_chooser = PropertyChooser()
         self.registerField('properties', self._properties_chooser, 'items')
@@ -335,7 +335,7 @@ class OutputFilesPage(QWizardPage):
         self.setSubTitle("Specify where you want the wizard to put the "
                          "generated skeleton code.")
         self.setPixmap(QWizard.LogoPixmap,
-                       QPixmap(':/images/logo3.png'))
+                       QPixmap(':/qt-project.org/logos/pysidelogo.png'))
 
         output_dir_label = QLabel("&Output directory:")
         output_dir_layout = QHBoxLayout()
@@ -393,7 +393,7 @@ class ConclusionPage(QWizardPage):
 
         self.setTitle("Conclusion")
         self.setPixmap(QWizard.WatermarkPixmap,
-                       QPixmap(':/images/watermark2.png'))
+                       QPixmap(':/images/watermark1.png'))
 
         self.label = QLabel()
         self.label.setWordWrap(True)
