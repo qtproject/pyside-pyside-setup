@@ -43,6 +43,8 @@
 
 #include <QtCore/QDebug>
 
+#include <algorithm>
+
 bool function_sorter(const AbstractMetaFunctionCPtr &a, const AbstractMetaFunctionCPtr &b)
 {
     return a->signature() < b->signature();
@@ -325,6 +327,12 @@ void AbstractMetaClass::setFields(const AbstractMetaFieldList &fields)
 void AbstractMetaClass::addField(const AbstractMetaField &field)
 {
     d->m_fields << field;
+}
+
+bool AbstractMetaClass::hasStaticFields() const
+{
+   return std::any_of(d->m_fields.cbegin(), d->m_fields.cend(),
+                      [](const AbstractMetaField &f) { return f.isStatic(); });
 }
 
 void AbstractMetaClass::sortFunctions()
