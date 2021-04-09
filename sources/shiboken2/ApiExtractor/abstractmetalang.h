@@ -1417,6 +1417,8 @@ public:
 
     AbstractMetaField *findField(const QString &name) const;
 
+    bool hasStaticFields() const;
+
     const AbstractMetaEnumList &enums() const { return m_enums; }
     void setEnums(const AbstractMetaEnumList &enums)
     {

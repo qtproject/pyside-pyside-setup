@@ -2116,6 +2116,12 @@ AbstractMetaField *AbstractMetaClass::findField(const QString &name) const
     return AbstractMetaField::find(m_fields, name);
 }
 
+bool AbstractMetaClass::hasStaticFields() const
+{
+    return std::any_of(m_fields.cbegin(), m_fields.cend(),
+                       [](const AbstractMetaField *f) { return f->isStatic(); });
+}
+
 AbstractMetaEnum *AbstractMetaClass::findEnum(const QString &enumName)
 {
     if (AbstractMetaEnum *e = findByName(m_enums, enumName))

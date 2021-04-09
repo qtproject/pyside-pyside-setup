@@ -755,6 +755,9 @@ void CppGenerator::generateClass(QTextStream &s, const GeneratorContext &classCo
     writeConverterFunctions(s, metaClass, classContext);
     writeClassRegister(s, metaClass, classContext, signatureStream);
 
+    if (metaClass->hasStaticFields())
+        writeStaticFieldInitialization(s, metaClass);
+
     // class inject-code native/end
     if (!metaClass->typeEntry()->codeSnips().isEmpty()) {
         writeClassCodeSnips(s, metaClass->typeEntry()->codeSnips(),
@@ -5274,6 +5277,12 @@ QString CppGenerator::getSimpleClassInitFunctionName(const AbstractMetaClass *me
     return initFunctionName;
 }
 
+QString CppGenerator::getSimpleClassStaticFieldsInitFunctionName(const AbstractMetaClass *metaClass) const
+{
+    return QLatin1String("init_") + getSimpleClassInitFunctionName(metaClass)
+        + QLatin1String("StaticFields");
+}
+
 QString CppGenerator::getInitFunctionName(const GeneratorContext &context) const
 {
     return !context.forSmartPointer()
@@ -5476,18 +5485,6 @@ void CppGenerator::writeClassRegister(QTextStream &s,
     if (metaClass->hasSignals())
         writeSignalInitialization(s, metaClass);
 
-    // Write static fields
-    const AbstractMetaFieldList &fields = metaClass->fields();
-    for (const AbstractMetaField *field : fields) {
-        if (!field->isStatic())
-            continue;
-        s << INDENT << QLatin1String("PyDict_SetItemString(reinterpret_cast<PyTypeObject *>(") + cpythonTypeName(metaClass) + QLatin1String(")->tp_dict, \"");
-        s << field->name() << "\", ";
-        writeToPythonConversion(s, field->type(), metaClass, metaClass->qualifiedCppName() + QLatin1String("::") + field->name());
-        s << ");\n";
-    }
-    s << Qt::endl;
-
     // class inject-code target/end
     if (!classTypeEntry->codeSnips().isEmpty()) {
         s << Qt::endl;
@@ -5515,6 +5512,29 @@ void CppGenerator::writeClassRegister(QTextStream &s,
     }
 
     s << "}\n";
+}
+
+void CppGenerator::writeStaticFieldInitialization(QTextStream &s,
+                                                  const AbstractMetaClass *metaClass)
+{
+    s << "\nvoid " << getSimpleClassStaticFieldsInitFunctionName(metaClass)
+        << "()\n{\n" << INDENT << "auto dict = reinterpret_cast<PyTypeObject *>("
+        << cpythonTypeName(metaClass) << ")->tp_dict;\n";
+    const auto &fields = metaClass->fields();
+    for (const AbstractMetaField *field : fields) {
+        if (field->isStatic()) {
+            QString cppName = field->originalName();
+            if (cppName.isEmpty())
+                cppName = field->name();
+            const QString name = field->enclosingClass()->qualifiedCppName()
+                + QLatin1String("::") + cppName;
+            s << INDENT << "PyDict_SetItemString(dict, \"" << field->name()
+              << "\",\n" << INDENT << "                     ";
+            writeToPythonConversion(s, field->type(), metaClass, name);
+            s << ");\n";
+        }
+    }
+    s << "\n}\n";
 }
 
 void CppGenerator::writeInitQtMetaTypeFunctionBody(QTextStream &s, const GeneratorContext &context) const
@@ -5927,11 +5947,18 @@ bool CppGenerator::finishGeneration()
     }
     const AbstractMetaClassList lst = classesTopologicalSorted(additionalDependencies);
 
+    QVector<const AbstractMetaClass *> classesWithStaticFields;
+
     for (const AbstractMetaClass *cls : lst){
         if (shouldGenerate(cls)) {
             writeInitFunc(s_classInitDecl, s_classPythonDefines, INDENT,
                           getSimpleClassInitFunctionName(cls),
                           cls->typeEntry()->targetLangEnclosingEntry());
+            if (cls->hasStaticFields()) {
+                s_classInitDecl << "void "
+                    << getSimpleClassStaticFieldsInitFunctionName(cls) << "();\n";
+                classesWithStaticFields.append(cls);
+            }
         }
     }
 
@@ -6232,6 +6259,14 @@ bool CppGenerator::finishGeneration()
     if (maxTypeIndex)
         s << INDENT << "Shiboken::Module::registerTypes(module, " << cppApiVariableName() << ");\n";
     s << INDENT << "Shiboken::Module::registerTypeConverters(module, " << convertersVariableName() << ");\n";
+
+    // Static fields are registered last since they may use converter functions
+    // of the previously registered types (PYSIDE-1529).
+    if (!classesWithStaticFields.isEmpty()) {
+        s << "\n// Static field initialization\n";
+        for (auto cls : qAsConst(classesWithStaticFields))
+            s << getSimpleClassStaticFieldsInitFunctionName(cls) << "();\n";
+    }
 
     s << '\n' << INDENT << "if (PyErr_Occurred()) {\n" << indent(INDENT)
         << INDENT << "PyErr_Print();\n"
