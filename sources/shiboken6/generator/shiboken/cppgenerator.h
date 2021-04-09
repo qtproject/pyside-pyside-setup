@@ -278,6 +278,7 @@ private:
 
     QString getInitFunctionName(const GeneratorContext &context) const;
     QString getSimpleClassInitFunctionName(const AbstractMetaClass *metaClass) const;
+    QString getSimpleClassStaticFieldsInitFunctionName(const AbstractMetaClass *metaClass) const;
 
     void writeSignatureStrings(TextStream &s, const QString &signatures,
                                const QString &arrayName,
@@ -286,6 +287,8 @@ private:
                             const AbstractMetaClass *metaClass,
                             const GeneratorContext &classContext,
                             const QString &signatures) const;
+    void writeStaticFieldInitialization(TextStream &s,
+                                        const AbstractMetaClass *metaClass) const;
     void writeClassDefinition(TextStream &s,
                               const AbstractMetaClass *metaClass,
                               const GeneratorContext &classContext);

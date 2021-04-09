@@ -123,6 +123,7 @@ public:
     AbstractMetaFieldList &fields();
     void setFields(const AbstractMetaFieldList &fields);
     void addField(const AbstractMetaField &field);
+    bool hasStaticFields() const;
 
     std::optional<AbstractMetaField> findField(const QString &name) const;
 
