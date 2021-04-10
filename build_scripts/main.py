@@ -888,6 +888,13 @@ class PysideBuild(_build, DistUtilsCommandMixin):
         if run_process(cmd_make) != 0:
             raise DistutilsSetupError(f"Error compiling {extension}")
 
+        if sys.version_info == (3, 6) and sys.platform == "darwin":
+            # Python 3.6 has a Sphinx problem because of docutils 0.17 .
+            # Instead of pinning v0.16, setting the default encoding fixes that.
+            # Since other platforms are not affected, we restrict this to macOS.
+            if "UTF-8" not in os.environ.get("LC_ALL", ""):
+                os.environ["LC_ALL"] = "en_US.UTF-8"
+
         if not OPTION["SKIP_DOCS"]:
             if extension.lower() == SHIBOKEN:
                 try:
