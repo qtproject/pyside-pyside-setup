@@ -135,12 +135,12 @@ type_set_doc(PyTypeObject *type, PyObject *value, void *context)
 // explicitly pass __doc__. For __signature__ it _did_ actually work, because
 // it was not existing before. We add them both for clarity.
 static PyGetSetDef SbkObjectType_Type_getsetlist[] = {
-    {"__signature__", reinterpret_cast<getter>(Sbk_TypeGet___signature__),
-                      nullptr, nullptr, nullptr},
-    {"__doc__",       reinterpret_cast<getter>(Sbk_TypeGet___doc__),
-                      reinterpret_cast<setter>(type_set_doc), nullptr, nullptr},
-    {"__dict__",      reinterpret_cast<getter>(Sbk_TypeGet___dict__),
-                      nullptr, nullptr, nullptr},
+    {const_cast<char *>("__signature__"), reinterpret_cast<getter>(Sbk_TypeGet___signature__),
+                                          nullptr, nullptr, nullptr},
+    {const_cast<char *>("__doc__"),       reinterpret_cast<getter>(Sbk_TypeGet___doc__),
+                                          reinterpret_cast<setter>(type_set_doc), nullptr, nullptr},
+    {const_cast<char *>("__dict__"),      reinterpret_cast<getter>(Sbk_TypeGet___dict__),
+                                          nullptr, nullptr, nullptr},
     {nullptr, nullptr, nullptr, nullptr, nullptr}  // Sentinel
 };
 
@@ -191,7 +191,7 @@ static PyObject *SbkObjectGetDict(PyObject *pObj, void *)
 }
 
 static PyGetSetDef SbkObjectGetSetList[] = {
-    {"__dict__", SbkObjectGetDict, nullptr, nullptr, nullptr},
+    {const_cast<char *>("__dict__"), SbkObjectGetDict, nullptr, nullptr, nullptr},
     {nullptr, nullptr, nullptr, nullptr, nullptr} // Sentinel
 };
 

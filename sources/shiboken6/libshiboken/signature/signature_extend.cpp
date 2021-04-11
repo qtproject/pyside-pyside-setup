@@ -222,47 +222,47 @@ static int pyside_set___signature__(PyObject *op, PyObject *value)
 }
 
 static PyGetSetDef new_PyCFunction_getsets[] = {
-    {"__doc__",       reinterpret_cast<getter>(pyside_cf_get___doc__),
-                      nullptr, nullptr, nullptr},
-    {"__signature__", reinterpret_cast<getter>(pyside_cf_get___signature__),
-                      reinterpret_cast<setter>(pyside_set___signature__),
-                      nullptr, nullptr},
+    {const_cast<char *>("__doc__"),       reinterpret_cast<getter>(pyside_cf_get___doc__),
+                                          nullptr, nullptr, nullptr},
+    {const_cast<char *>("__signature__"), reinterpret_cast<getter>(pyside_cf_get___signature__),
+                                          reinterpret_cast<setter>(pyside_set___signature__),
+                                          nullptr, nullptr},
     {nullptr, nullptr, nullptr, nullptr, nullptr}
 };
 
 static PyGetSetDef new_PyStaticMethod_getsets[] = {
-    {"__doc__",       reinterpret_cast<getter>(pyside_sm_get___doc__),
-                      nullptr, nullptr, nullptr},
-    {"__signature__", reinterpret_cast<getter>(pyside_sm_get___signature__),
-                      reinterpret_cast<setter>(pyside_set___signature__),
-                      nullptr, nullptr},
+    {const_cast<char *>("__doc__"),       reinterpret_cast<getter>(pyside_sm_get___doc__),
+                                          nullptr, nullptr, nullptr},
+    {const_cast<char *>("__signature__"), reinterpret_cast<getter>(pyside_sm_get___signature__),
+                                          reinterpret_cast<setter>(pyside_set___signature__),
+                                          nullptr, nullptr},
     {nullptr, nullptr, nullptr, nullptr, nullptr}
 };
 
 static PyGetSetDef new_PyMethodDescr_getsets[] = {
-    {"__doc__",       reinterpret_cast<getter>(pyside_md_get___doc__),
-                      nullptr, nullptr, nullptr},
-    {"__signature__", reinterpret_cast<getter>(pyside_md_get___signature__),
-                      reinterpret_cast<setter>(pyside_set___signature__),
-                      nullptr, nullptr},
+    {const_cast<char *>("__doc__"),       reinterpret_cast<getter>(pyside_md_get___doc__),
+                                          nullptr, nullptr, nullptr},
+    {const_cast<char *>("__signature__"), reinterpret_cast<getter>(pyside_md_get___signature__),
+                                          reinterpret_cast<setter>(pyside_set___signature__),
+                                          nullptr, nullptr},
     {nullptr, nullptr, nullptr, nullptr, nullptr}
 };
 
 static PyGetSetDef new_PyType_getsets[] = {
-    {"__doc__",       reinterpret_cast<getter>(pyside_tp_get___doc__),
-                      nullptr, nullptr, nullptr},
-    {"__signature__", reinterpret_cast<getter>(pyside_tp_get___signature__),
-                      reinterpret_cast<setter>(pyside_set___signature__),
-                      nullptr, nullptr},
+    {const_cast<char *>("__doc__"),       reinterpret_cast<getter>(pyside_tp_get___doc__),
+                                          nullptr, nullptr, nullptr},
+    {const_cast<char *>("__signature__"), reinterpret_cast<getter>(pyside_tp_get___signature__),
+                                          reinterpret_cast<setter>(pyside_set___signature__),
+                                          nullptr, nullptr},
     {nullptr, nullptr, nullptr, nullptr, nullptr}
 };
 
 static PyGetSetDef new_PyWrapperDescr_getsets[] = {
-    {"__doc__",       reinterpret_cast<getter>(pyside_wd_get___doc__),
-                      nullptr, nullptr, nullptr},
-    {"__signature__", reinterpret_cast<getter>(pyside_wd_get___signature__),
-                      reinterpret_cast<setter>(pyside_set___signature__),
-                      nullptr, nullptr},
+    {const_cast<char *>("__doc__"),       reinterpret_cast<getter>(pyside_wd_get___doc__),
+                                          nullptr, nullptr, nullptr},
+    {const_cast<char *>("__signature__"), reinterpret_cast<getter>(pyside_wd_get___signature__),
+                                          reinterpret_cast<setter>(pyside_set___signature__),
+                                          nullptr, nullptr},
     {nullptr, nullptr, nullptr, nullptr, nullptr}
 };
 

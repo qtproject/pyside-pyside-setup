@@ -261,7 +261,7 @@ static Py_hash_t enum_hash(PyObject *pyObj)
 }
 
 static PyGetSetDef SbkEnumGetSetList[] = {
-    {"name", SbkEnumObject_name, nullptr, nullptr, nullptr},
+    {const_cast<char *>("name"), SbkEnumObject_name, nullptr, nullptr, nullptr},
     {nullptr, nullptr, nullptr, nullptr, nullptr} // Sentinel
 };
 

@@ -82,7 +82,6 @@ static inline QString indexAttribute() { return QStringLiteral("index"); }
 static inline QString invalidateAfterUseAttribute() { return QStringLiteral("invalidate-after-use"); }
 static inline QString locationAttribute() { return QStringLiteral("location"); }
 static inline QString modifiedTypeAttribute() { return QStringLiteral("modified-type"); }
-static inline QString modifierAttribute() { return QStringLiteral("modifier"); }
 static inline QString overloadNumberAttribute() { return QStringLiteral("overload-number"); }
 static inline QString ownershipAttribute() { return QStringLiteral("owner"); }
 static inline QString packageAttribute() { return QStringLiteral("package"); }

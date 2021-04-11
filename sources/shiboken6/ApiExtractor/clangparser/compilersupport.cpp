@@ -95,7 +95,7 @@ static bool runProcess(const QString &program, const QStringList &arguments,
 
 static QByteArray frameworkPath() { return QByteArrayLiteral(" (framework directory)"); }
 
-#if defined(Q_OS_MACOS)
+#  if defined(Q_OS_MACOS)
 static void filterHomebrewHeaderPaths(HeaderPaths &headerPaths)
 {
     QByteArray homebrewPrefix = qgetenv("HOMEBREW_OPT");
@@ -123,7 +123,7 @@ static void filterHomebrewHeaderPaths(HeaderPaths &headerPaths)
         }
     }
 }
-#endif
+#  endif
 
 // Determine g++'s internal include paths from the output of
 // g++ -E -x c++ - -v </dev/null
@@ -161,9 +161,9 @@ static HeaderPaths gppInternalIncludePaths(const QString &compiler)
         }
     }
 
-#if defined(Q_OS_MACOS)
+#  if defined(Q_OS_MACOS)
     filterHomebrewHeaderPaths(result);
-#endif
+#  endif
     return result;
 }
 #endif // Q_CC_MSVC
@@ -300,7 +300,7 @@ static QString compilerFromCMake(const QString &defaultCompiler)
 {
 // Added !defined(Q_OS_DARWIN) due to PYSIDE-1032
 #  if defined(CMAKE_CXX_COMPILER) && !defined(Q_OS_DARWIN)
-    Q_UNUSED(defaultCompiler)
+    Q_UNUSED(defaultCompiler);
     return QString::fromLocal8Bit(CMAKE_CXX_COMPILER);
 #  else
     return defaultCompiler;
@@ -329,6 +329,11 @@ static void appendClangBuiltinIncludes(HeaderPaths *p)
 // Returns clang options needed for emulating the host compiler
 QByteArrayList emulatedCompilerOptions()
 {
+#if defined(Q_CC_GNU)
+    // Needed to silence a warning, but needsGppInternalHeaders is used below.
+    // This seems to be a compiler bug on macOS.
+    Q_UNUSED(needsGppInternalHeaders);
+#endif
     QByteArrayList result;
 #if defined(Q_CC_MSVC)
     HeaderPaths headerPaths;

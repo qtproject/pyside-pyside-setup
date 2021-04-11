@@ -39,7 +39,7 @@ class QtXmlToSphinxTest : public QObject, public QtXmlToSphinxDocGeneratorInterf
 public:
     // QtXmlToSphinxDocGeneratorInterface
     QString expandFunction(const QString &) const override;
-    QString expandClass(const QString &, const QString &) const;
+    QString expandClass(const QString &, const QString &) const override;
     QString resolveContextForMethod(const QString &,
                                     const QString &) const override;
     const QLoggingCategory &loggingCategory() const override;
