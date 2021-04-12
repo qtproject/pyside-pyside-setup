@@ -59,6 +59,7 @@
         <enum-type name="AlertType" since="6.0"/>
         <enum-type name="AlternativeNameEntryType"/>
         <enum-type name="EncodingFormat"/>
+        <enum-type name="ImplementedClass" since="6.1"/>
         <enum-type name="KeyAlgorithm"/>
         <enum-type name="KeyType"/>
         <enum-type name="SslOption" flags="SslOptions"/>
