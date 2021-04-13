@@ -1871,18 +1871,23 @@
     <modify-function signature="drawRects(const QRect*,int)" remove="all"/>
     <modify-function signature="drawRects(const QRectF*,int)" remove="all"/>
     <!-- ### -->
+    <!-- PYSIDE-1540: Preferably use the QPolygon overloads first to avoid
+         a costly sequence type check on QPolygon. -->
     <modify-function signature="drawPoints(const QPoint*,int)" remove="all"/>
-    <add-function signature="drawPoints(QVector&lt;QPoint>)">
+    <add-function signature="drawPoints(QVector&lt;QPoint>)" overload-number="2">
         <inject-code>
             <insert-template name="qpainter_drawlist"/>
         </inject-code>
     </add-function>
     <modify-function signature="drawPoints(const QPointF*,int)" remove="all"/>
-    <add-function signature="drawPoints(QVector&lt;QPointF>)">
+    <add-function signature="drawPoints(QVector&lt;QPointF>)" overload-number="3">
         <inject-code>
             <insert-template name="qpainter_drawlist"/>
         </inject-code>
     </add-function>
+    <modify-function signature="drawPoints(const QPolygon&amp;)" overload-number="0"/>
+    <modify-function signature="drawPoints(const QPolygonF&amp;)" overload-number="1"/>
+
     <modify-function signature="drawPolygon(const QPoint*,int,Qt::FillRule)" remove="all"/>
     <add-function signature="drawPolygon(QVector&lt;QPoint>,Qt::FillRule)">
         <inject-code file="../glue/qtgui.cpp" snippet="qpainter-drawpolygon"/>
