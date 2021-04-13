@@ -102,7 +102,7 @@ if __name__=='__main__':
             sip.setapi('QVariant',2)
 
         for m in modules:
-            exec("from %s import %s" % (l,m), globals(), locals())
+            exec(f"from {l} import {m}", globals(), locals())
             dictionary += recurse_into(m, eval(m))
         librarySymbols[l] = dictionary
 

@@ -59,7 +59,9 @@ class VirtualList(QAbstractItemModel):
          return QModelIndex()
 
     def data(self, index, role):
-        return "(%i, %i)" % (index.row(), index.column())
+        row = index.row()
+        col = index.column()
+        return f"({row}, {col})"
 
 
 class TestQAbstractItemModel(UsesQApplication):

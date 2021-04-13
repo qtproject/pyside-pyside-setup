@@ -70,7 +70,8 @@ class AccessManagerCase(UsesQCoreApplication):
     def testNetworkRequest(self):
         manager = QNetworkAccessManager()
         manager.finished.connect(self.slot_replyFinished)
-        manager.get(QNetworkRequest(QUrl("http://127.0.0.1:%s" % self.httpd.port())))
+        port = self.httpd.port()
+        manager.get(QNetworkRequest(QUrl(f"http://127.0.0.1:{port}")))
         self.app.exec_()
         self.assertTrue(self.called)
 

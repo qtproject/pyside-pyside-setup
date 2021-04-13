@@ -154,7 +154,7 @@ class TestSignaturesExists(unittest.TestCase):
                 # We should fix them.
                 continue
             if key not in found_sigs:
-                warn("missing key: '{} value={}'".format(key, value), stacklevel=3)
+                warn(f"missing key: '{key} value={value}'", stacklevel=3)
             else:
                 found_val = found_sigs[key]
                 if type(value) is list and (

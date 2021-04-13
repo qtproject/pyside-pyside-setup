@@ -72,7 +72,7 @@ class QStandardItemModelRef(UsesQApplication):
         for r in range(5):
             row = []
             for c in range(5):
-                row.append(QStandardItem("%d,%d" % (r,c)) )
+                row.append(QStandardItem(f"{r},{c}"))
                 self.assertEqual(sys.getrefcount(row[c]), 2)
 
             model.insertRow(r, row)

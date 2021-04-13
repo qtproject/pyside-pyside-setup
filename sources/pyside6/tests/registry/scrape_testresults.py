@@ -320,7 +320,7 @@ def get_test_results(starturl):
     hours, remainder = divmod(runtime, 3600)
     minutes, seconds = divmod(remainder, 60)
 
-    runtime_formatted = '%d:%02d:%06.3f' % (hours, minutes, seconds)
+    runtime_formatted = f'{hours}:{minutes:%02d}:{seconds:%06.3f}'
     print(f"Run time: {runtime_formatted}s")
     if ok:
         found = eval_data()

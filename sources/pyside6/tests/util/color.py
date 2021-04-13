@@ -28,10 +28,9 @@
 
 '''Function to print a colored line to terminal'''
 
-RED='\033[0;31m%s\033[m'
 
-def print_colored(message, color=RED):
-    print(color % message)
+def print_colored(message):
+    print(f'\033[0;31m{message}\033[m')  # red
 
 if __name__ == '__main__':
     print('42 - the answer')

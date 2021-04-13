@@ -77,7 +77,7 @@ class Producer(QThread):
             value = int(random()*10) % 10
             self.bucket.push(value)
             self.production_list.append(value)
-            logging.debug('PRODUCER - pushed %d' % value)
+            logging.debug(f'PRODUCER - pushed {value}')
             self.runs += 1
             self.msleep(5)
 
@@ -98,7 +98,7 @@ class Consumer(QThread):
             try:
                 value = self.bucket.pop()
                 self.consumption_list.append(value)
-                logging.debug('CONSUMER - got %d' % value)
+                logging.debug(f'CONSUMER - got {value}')
                 self.runs += 1
             except IndexError:
                 logging.debug('CONSUMER - empty bucket')

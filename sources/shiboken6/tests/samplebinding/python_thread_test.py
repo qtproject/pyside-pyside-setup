@@ -64,7 +64,7 @@ class Producer(threading.Thread):
             value = int(random()*10) % 10
             self.bucket.push(value)
             self.production_list.append(value)
-            logging.debug('PRODUCER - pushed %d' % value)
+            logging.debug(f'PRODUCER - pushed {value}')
             self.runs += 1
             #self.msleep(5)
             time.sleep(0.01)
@@ -85,7 +85,7 @@ class Consumer(threading.Thread):
             if not self.bucket.empty():
                 value = self.bucket.pop()
                 self.consumption_list.append(value)
-                logging.debug('CONSUMER - got %d' % value)
+                logging.debug(f'CONSUMER - got {value}')
                 self.runs += 1
             else:
                 logging.debug('CONSUMER - empty bucket')

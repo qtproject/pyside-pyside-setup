@@ -103,22 +103,20 @@ class ParentCase(unittest.TestCase):
     def testFindChild(self):
         #QObject.findChild() with all QObject
         parent = QObject()
-        name = 'object%d'
         children = [QObject(parent) for i in range(20)]
 
         for i, child in enumerate(children):
-            child.setObjectName(name % i)
+            child.setObjectName(f'object{i}')
 
         for i, child in enumerate(children):
-            self.assertEqual(child, parent.findChild(QObject, name % i))
+            self.assertEqual(child, parent.findChild(QObject, f'object{i}'))
 
     def testFindChildWithoutName(self):
         parent = QObject()
-        name = 'object%d'
         children = [QObject(parent) for i in range(20)]
 
         for i, child in enumerate(children):
-            child.setObjectName(name % i)
+            child.setObjectName(f'object{i}')
 
         child = parent.findChild(QObject)
         self.assertTrue(isinstance(child, QObject))

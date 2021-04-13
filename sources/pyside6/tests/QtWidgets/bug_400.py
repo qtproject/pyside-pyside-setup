@@ -46,7 +46,7 @@ class BugTest(UsesQApplication):
         treeWidget.setColumnCount(1)
         items = []
         for i in range(10):
-            items.append(QTreeWidgetItem(None, ["item: %i" % i]))
+            items.append(QTreeWidgetItem(None, [f"item: {i}"]))
 
         treeWidget.insertTopLevelItems(0, items);
         _iter = QTreeWidgetItemIterator(treeWidget)
