@@ -56,9 +56,6 @@
 
 static inline QString additionalDocumentationOption() { return QStringLiteral("additional-documentation"); }
 
-static inline QString briefStartElement() { return QStringLiteral("<brief>"); }
-static inline QString briefEndElement() { return QStringLiteral("</brief>"); }
-
 static inline QString none() { return QStringLiteral("None"); }
 
 static bool shouldSkip(const AbstractMetaFunctionCPtr &func)
@@ -235,30 +232,6 @@ static void writeInheritedByList(TextStream& s, const AbstractMetaClass* metaCla
     s << classes.join(QLatin1String(", ")) << "\n\n";
 }
 
-// Extract the <brief> section from a WebXML (class) documentation and remove it
-// from the source.
-static bool extractBrief(Documentation *sourceDoc, Documentation *brief)
-{
-    if (sourceDoc->format() != Documentation::Native)
-        return false;
-    QString value = sourceDoc->value();
-    const int briefStart = value.indexOf(briefStartElement());
-    if (briefStart < 0)
-        return false;
-    const int briefEnd = value.indexOf(briefEndElement(), briefStart + briefStartElement().size());
-    if (briefEnd < briefStart)
-        return false;
-    const int briefLength = briefEnd + briefEndElement().size() - briefStart;
-    brief->setFormat(Documentation::Native);
-    QString briefValue = value.mid(briefStart, briefLength);
-    briefValue.insert(briefValue.size() - briefEndElement().size(),
-                      QLatin1String("<rst> More_...</rst>"));
-    brief->setValue(briefValue);
-    value.remove(briefStart, briefLength);
-    sourceDoc->setValue(value);
-    return true;
-}
-
 void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classContext)
 {
     const AbstractMetaClass *metaClass = classContext.metaClass();
@@ -277,9 +250,8 @@ void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classC
     s << Pad('*', className.count()) << "\n\n";
 
     auto documentation = metaClass->documentation();
-    Documentation brief;
-    if (extractBrief(&documentation, &brief))
-        writeFormattedText(s, brief.value(), metaClass);
+    if (documentation.hasBrief())
+        writeFormattedText(s, documentation.value(Documentation::Brief), metaClass);
 
     s << ".. inheritance-diagram:: " << metaClass->fullName()<< '\n'
       << "    :parts: 2\n\n";
@@ -306,7 +278,7 @@ void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classC
 
     writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, metaClass, nullptr);
     if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, metaClass, nullptr))
-        writeFormattedText(s, documentation.value(), metaClass);
+        writeFormattedText(s, documentation.value(Documentation::Detailed), metaClass);
 
     if (!metaClass->isNamespace())
         writeConstructors(s, metaClass);
