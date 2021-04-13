@@ -499,6 +499,16 @@
     </conversion-rule>
   </container-type>
 
+  <!-- QPair is implemented with std::pair since Qt 6 -->
+  <container-type name="std::pair" type="pair">
+    <conversion-rule>
+        <native-to-target file="../glue/qtcore.cpp" snippet="return-qpair"/>
+        <target-to-native>
+            <add-conversion type="PySequence" file="../glue/qtcore.cpp" snippet="conversion-qpair-pysequence"/>
+        </target-to-native>
+    </conversion-rule>
+  </container-type>
+
   <rejection class="*" function-name="d_func"/>
   <rejection class="*" function-name="data_ptr"/>
   <rejection class="*" function-name="detach"/>
