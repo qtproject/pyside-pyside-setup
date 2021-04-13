@@ -1581,30 +1581,6 @@ static void writeInheritedByList(QTextStream& s, const AbstractMetaClass* metaCl
     s << classes.join(QLatin1String(", ")) << Qt::endl << Qt::endl;
 }
 
-// Extract the <brief> section from a WebXML (class) documentation and remove it
-// from the source.
-static bool extractBrief(Documentation *sourceDoc, Documentation *brief)
-{
-    if (sourceDoc->format() != Documentation::Native)
-        return false;
-    QString value = sourceDoc->value();
-    const int briefStart = value.indexOf(briefStartElement());
-    if (briefStart < 0)
-        return false;
-    const int briefEnd = value.indexOf(briefEndElement(), briefStart + briefStartElement().size());
-    if (briefEnd < briefStart)
-        return false;
-    const int briefLength = briefEnd + briefEndElement().size() - briefStart;
-    brief->setFormat(Documentation::Native);
-    QString briefValue = value.mid(briefStart, briefLength);
-    briefValue.insert(briefValue.size() - briefEndElement().size(),
-                      QLatin1String("<rst> More_...</rst>"));
-    brief->setValue(briefValue);
-    value.remove(briefStart, briefLength);
-    sourceDoc->setValue(value);
-    return true;
-}
-
 void QtDocGenerator::generateClass(QTextStream &s, const GeneratorContext &classContext)
 {
     const AbstractMetaClass *metaClass = classContext.metaClass();
@@ -1623,9 +1599,8 @@ void QtDocGenerator::generateClass(QTextStream &s, const GeneratorContext &class
     s << Pad('*', className.count()) << Qt::endl << Qt::endl;
 
     auto documentation = metaClass->documentation();
-    Documentation brief;
-    if (extractBrief(&documentation, &brief))
-        writeFormattedText(s, brief.value(), metaClass);
+    if (documentation.hasBrief())
+        writeFormattedText(s, documentation.value(Documentation::Brief), metaClass);
 
     s << ".. inheritance-diagram:: " << metaClass->fullName() << Qt::endl
       << "    :parts: 2" << Qt::endl << Qt::endl;
@@ -1652,7 +1627,7 @@ void QtDocGenerator::generateClass(QTextStream &s, const GeneratorContext &class
 
     writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, metaClass, nullptr);
     if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, metaClass, nullptr))
-        writeFormattedText(s, documentation.value(), metaClass);
+        writeFormattedText(s, documentation.value(Documentation::Detailed), metaClass);
 
     if (!metaClass->isNamespace())
         writeConstructors(s, metaClass);

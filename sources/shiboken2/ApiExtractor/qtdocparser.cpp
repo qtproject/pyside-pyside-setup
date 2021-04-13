@@ -34,6 +34,9 @@
 #include <QtCore/QXmlStreamReader>
 #include <QUrl>
 
+static inline QString briefStartElement() { return QStringLiteral("<brief>"); }
+static inline QString briefEndElement() { return QStringLiteral("</brief>"); }
+
 Documentation QtDocParser::retrieveModuleDocumentation()
 {
     return retrieveModuleDocumentation(packageName());
@@ -199,6 +202,25 @@ QString QtDocParser::queryFunctionDocumentation(const QString &sourceFileName,
     return result;
 }
 
+// Extract the <brief> section from a WebXML (class) documentation and remove it
+// from the source.
+static QString extractBrief(QString *value)
+{
+    const auto briefStart = value->indexOf(briefStartElement());
+    if (briefStart < 0)
+        return {};
+    const auto briefEnd = value->indexOf(briefEndElement(),
+                                         briefStart + briefStartElement().size());
+    if (briefEnd < briefStart)
+        return {};
+    const auto briefLength = briefEnd + briefEndElement().size() - briefStart;
+    QString briefValue = value->mid(briefStart, briefLength);
+    briefValue.insert(briefValue.size() - briefEndElement().size(),
+                      QLatin1String("<rst> More_...</rst>"));
+    value->remove(briefStart, briefLength);
+    return briefValue;
+}
+
 void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
 {
     if (!metaClass)
@@ -250,9 +272,17 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
             signedModifs.append(docModif);
     }
 
-    Documentation doc(getDocumentation(xquery, query, classModifs));
-    if (doc.isEmpty())
-         qCWarning(lcShibokenDoc, "%s", qPrintable(msgCannotFindDocumentation(sourceFileName, "class", className, query)));
+    QString docString = getDocumentation(xquery, query, classModifs);
+    if (docString.isEmpty()) {
+        qCWarning(lcShibokenDoc, "%s",
+                  qPrintable(msgCannotFindDocumentation(sourceFileName, "class", className, query)));
+    }
+    const QString brief = extractBrief(&docString);
+
+    Documentation doc;
+    if (!brief.isEmpty())
+        doc.setValue(brief, Documentation::Brief);
+    doc.setValue(docString);
     metaClass->setDocumentation(doc);
 
     //Functions Documentation

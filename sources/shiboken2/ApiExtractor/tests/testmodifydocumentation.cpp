@@ -72,13 +72,14 @@ R"(<typesystem package="Foo">
     docParser.setDocumentationDataDirectory(tempDir.path());
     docParser.fillDocumentation(classA);
 
-    const QString actualDocSimplified = classA->documentation().value().simplified();
+    const Documentation &doc = classA->documentation();
+    const QString actualDocSimplified = doc.value(Documentation::Detailed).simplified();
+    const QString actualBriefSimplified = doc.value(Documentation::Brief).simplified();
     QVERIFY(!actualDocSimplified.isEmpty());
 
 const char expectedDoc[] =
 R"(<?xml version="1.0"?>
 <description>oi
-<brief>Modified Brief</brief>
 <para>Paragraph number 1</para>
 <para>Paragraph number 2</para>
 <para>Some changed contents here</para>
@@ -86,7 +87,7 @@ R"(<?xml version="1.0"?>
 )";
     const QString expectedDocSimplified = QString::fromLatin1(expectedDoc).simplified();
     // Check whether the first modification worked.
-    QVERIFY(actualDocSimplified.contains(QLatin1String("Modified Brief")));
+    QVERIFY(actualBriefSimplified.contains(QLatin1String("Modified Brief")));
 
 #ifndef HAVE_LIBXSLT
     // QtXmlPatterns is unable to handle para[3] in style sheets,

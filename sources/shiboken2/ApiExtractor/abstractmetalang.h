@@ -77,6 +77,7 @@ public:
                   Format fmt = Documentation::Native);
 
     bool isEmpty() const;
+    bool hasBrief() const { return m_data.contains(Brief); }
 
     QString value(Type t = Documentation::Detailed) const;
     void setValue(const QString& value, Type t = Documentation::Detailed,
