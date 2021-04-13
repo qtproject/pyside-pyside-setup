@@ -158,7 +158,7 @@ QRegularExpression CodeSnipAbstract::placeHolderRegex(int index)
 }
 
 // ---------------------- Modification
-QString Modification::accessModifierString() const
+QString FunctionModification::accessModifierString() const
 {
     if (isPrivate()) return QLatin1String("private");
     if (isProtected()) return QLatin1String("protected");
@@ -646,83 +646,11 @@ void ArgumentModification::addReferenceCount(const ReferenceCount &value)
     d->referenceCounts.append(value);
 }
 
-class ModificationData : public QSharedData
-{
-public:
-    QString renamedToName;
-    Modification::Modifiers modifiers;
-    bool removed = false;
-};
-
-Modification::Modification() : md(new ModificationData)
-{
-}
-
-Modification::Modification(const Modification &) = default;
-Modification &Modification::operator=(const Modification &) = default;
-Modification::Modification(Modification &&) = default;
-Modification &Modification::operator=(Modification &&) = default;
-Modification::~Modification() = default;
-
-void Modification::formatDebug(QDebug &debug) const
-{
-    debug << "modifiers=" << md->modifiers;
-    if (md->removed)
-      debug << ", removed";
-    if (!md->renamedToName.isEmpty())
-        debug << ", renamedToName=\"" << md->renamedToName << '"';
-}
-
-QString Modification::renamedToName() const
-{
-    return md->renamedToName;
-}
-
-void Modification::setRenamedToName(const QString &value)
-{
-    if (md->renamedToName != value)
-        md->renamedToName = value;
-}
-
-Modification::Modifiers Modification::modifiers() const
-{
-    return md->modifiers;
-}
-
-void Modification::setModifiers(Modifiers m)
-{
-    if (md->modifiers != m)
-        md->modifiers = m;
-}
-
-void Modification::setModifierFlag(Modification::ModifierFlag f)
-{
-    auto newMods = md->modifiers | f;
-    if (md->modifiers != newMods)
-        md->modifiers = newMods;
-}
-
-void Modification::clearModifierFlag(ModifierFlag f)
-{
-    auto newMods = md->modifiers & ~f;
-    if (md->modifiers != newMods)
-        md->modifiers = newMods;
-}
-
-bool Modification::isRemoved() const
-{
-    return md->removed;
-}
-
-void Modification::setRemoved(bool r)
-{
-    if (md->removed != r)
-        md->removed = r;
-}
-
 class FunctionModificationData : public QSharedData
 {
 public:
+    QString renamedToName;
+    FunctionModification::Modifiers modifiers;
     CodeSnipList m_snips;
     QList<ArgumentModification> m_argument_mods;
     QString m_signature;
@@ -730,6 +658,7 @@ public:
     QRegularExpression m_signaturePattern;
     int m_overloadNumber = TypeSystem::OverloadNumberUnset;
     bool m_thread = false;
+    bool removed = false;
     TypeSystem::AllowThread m_allowThread = TypeSystem::AllowThread::Unspecified;
     TypeSystem::ExceptionHandling m_exceptionHandling = TypeSystem::ExceptionHandling::Unspecified;
     TypeSystem::SnakeCase snakeCase = TypeSystem::SnakeCase::Unspecified;
@@ -751,8 +680,11 @@ void FunctionModification::formatDebug(QDebug &debug) const
         debug << "pattern=\"" << d->m_signaturePattern.pattern();
     else
         debug << "signature=\"" << d->m_signature;
-    debug << "\", ";
-    Modification::formatDebug(debug);
+    debug << "\", modifiers=" << d->modifiers;
+    if (d->removed)
+        debug << ", removed";
+    if (!d->renamedToName.isEmpty())
+        debug << ", renamedToName=\"" << d->renamedToName << '"';
     if (d->m_allowThread != TypeSystem::AllowThread::Unspecified)
         debug << ", allowThread=" << int(d->m_allowThread);
     if (d->m_thread)
@@ -763,6 +695,53 @@ void FunctionModification::formatDebug(QDebug &debug) const
         debug << ", snips=(" << d->m_snips << ')';
     if (!d->m_argument_mods.isEmpty())
         debug << ", argument_mods=(" << d->m_argument_mods << ')';
+}
+
+QString FunctionModification::renamedToName() const
+{
+    return d->renamedToName;
+}
+
+void FunctionModification::setRenamedToName(const QString &value)
+{
+    if (d->renamedToName != value)
+        d->renamedToName = value;
+}
+
+FunctionModification::Modifiers FunctionModification::modifiers() const
+{
+    return d->modifiers;
+}
+
+void FunctionModification::setModifiers(Modifiers m)
+{
+    if (d->modifiers != m)
+        d->modifiers = m;
+}
+
+void FunctionModification::setModifierFlag(FunctionModification::ModifierFlag f)
+{
+    auto newMods = d->modifiers | f;
+    if (d->modifiers != newMods)
+        d->modifiers = newMods;
+}
+
+void FunctionModification::clearModifierFlag(ModifierFlag f)
+{
+    auto newMods = d->modifiers & ~f;
+    if (d->modifiers != newMods)
+        d->modifiers = newMods;
+}
+
+bool FunctionModification::isRemoved() const
+{
+    return d->removed;
+}
+
+void FunctionModification::setRemoved(bool r)
+{
+    if (d->removed != r)
+        d->removed = r;
 }
 
 const QList<ArgumentModification> &FunctionModification::argument_mods() const

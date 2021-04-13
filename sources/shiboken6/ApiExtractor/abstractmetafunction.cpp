@@ -1268,7 +1268,7 @@ bool AbstractMetaFunction::injectedCodeUsesArgument(int argumentIndex) const
 bool AbstractMetaFunction::isVisibilityModifiedToPrivate() const
 {
     for (const auto &mod : modifications()) {
-        if (mod.modifiers().testFlag(Modification::Private))
+        if (mod.modifiers().testFlag(FunctionModification::Private))
             return true;
     }
     return false;

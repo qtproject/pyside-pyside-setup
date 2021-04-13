@@ -244,16 +244,16 @@ ENUM_LOOKUP_BEGIN(AddedFunction::Access, Qt::CaseInsensitive,
     };
 ENUM_LOOKUP_LINEAR_SEARCH()
 
-ENUM_LOOKUP_BEGIN(Modification::ModifierFlag, Qt::CaseSensitive,
-                  modifierFromAttribute, Modification::InvalidModifier)
+ENUM_LOOKUP_BEGIN(FunctionModification::ModifierFlag, Qt::CaseSensitive,
+                  modifierFromAttribute, FunctionModification::InvalidModifier)
     {
-        {u"private", Modification::Private},
-        {u"public", Modification::Public},
-        {u"protected", Modification::Protected},
-        {u"friendly", Modification::Friendly},
-        {u"rename", Modification::Rename},
-        {u"final", Modification::Final},
-        {u"non-final", Modification::NonFinal}
+        {u"private", FunctionModification::Private},
+        {u"public", FunctionModification::Public},
+        {u"protected", FunctionModification::Protected},
+        {u"friendly", FunctionModification::Friendly},
+        {u"rename", FunctionModification::Rename},
+        {u"final", FunctionModification::Final},
+        {u"non-final", FunctionModification::NonFinal}
     };
 ENUM_LOOKUP_LINEAR_SEARCH()
 
@@ -1653,7 +1653,7 @@ bool TypeSystemParser::parseRenameFunction(const QXmlStreamReader &,
         if (!mod.setSignature(signature, &m_error))
             return false;
         mod.setRenamedToName(rename);
-        mod.setModifierFlag(Modification::Rename);
+        mod.setModifierFlag(FunctionModification::Rename);
         m_contextStack.top()->functionMods << mod;
     }
     return true;
@@ -2338,12 +2338,12 @@ bool TypeSystemParser::parseModifyFunction(const QXmlStreamReader &reader,
     m_currentSignature = signature;
 
     if (!access.isEmpty()) {
-        const Modification::ModifierFlag m = modifierFromAttribute(access);
-        if ((m & (Modification::AccessModifierMask | Modification::FinalMask)) == 0) {
+        const FunctionModification::ModifierFlag m = modifierFromAttribute(access);
+        if ((m & (FunctionModification::AccessModifierMask | FunctionModification::FinalMask)) == 0) {
             m_error = QString::fromLatin1("Bad access type '%1'").arg(access);
             return false;
         }
-        if (m == Modification::Final || m == Modification::NonFinal) {
+        if (m == FunctionModification::Final || m == FunctionModification::NonFinal) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeValueWarning(reader,
                       accessAttribute(), access)));
@@ -2352,13 +2352,13 @@ bool TypeSystemParser::parseModifyFunction(const QXmlStreamReader &reader,
     }
 
     if (deprecated)
-        mod.setModifierFlag(Modification::Deprecated);
+        mod.setModifierFlag(FunctionModification::Deprecated);
 
     mod.setRemoved(removed);
 
     if (!rename.isEmpty()) {
         mod.setRenamedToName(rename);
-        mod.setModifierFlag(Modification::Rename);
+        mod.setModifierFlag(FunctionModification::Rename);
     }
 
     mod.setIsThread(isThread);

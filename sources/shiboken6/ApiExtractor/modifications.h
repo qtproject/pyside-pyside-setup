@@ -237,9 +237,17 @@ private:
     QSharedDataPointer<ArgumentModificationData> d;
 };
 
-class Modification
+class FunctionModification
 {
 public:
+    using AllowThread = TypeSystem::AllowThread;
+
+    FunctionModification();
+    FunctionModification(const FunctionModification &);
+    FunctionModification &operator=(const FunctionModification &);
+    FunctionModification(FunctionModification &&);
+    FunctionModification &operator=(FunctionModification &&);
+    ~FunctionModification();
 
     enum ModifierFlag {
         InvalidModifier =       0x0000,
@@ -263,13 +271,6 @@ public:
     };
 
     Q_DECLARE_FLAGS(Modifiers, ModifierFlag);
-
-    Modification();
-    Modification(const Modification &);
-    Modification &operator=(const Modification &);
-    Modification(Modification &&);
-    Modification &operator=(Modification &&);
-    ~Modification();
 
     QString renamedToName() const;
     void setRenamedToName(const QString &value);
@@ -327,27 +328,7 @@ public:
 
     bool isRemoveModifier() const { return isRemoved(); }
 
-#ifndef QT_NO_DEBUG_STREAM
-    void formatDebug(QDebug &d) const;
-#endif
 
-private:
-    QSharedDataPointer<ModificationData> md;
-};
-
-Q_DECLARE_OPERATORS_FOR_FLAGS(Modification::Modifiers)
-
-class FunctionModification: public Modification
-{
-public:
-    using AllowThread = TypeSystem::AllowThread;
-
-    FunctionModification();
-    FunctionModification(const FunctionModification &);
-    FunctionModification &operator=(const FunctionModification &);
-    FunctionModification(FunctionModification &&);
-    FunctionModification &operator=(FunctionModification &&);
-    ~FunctionModification();
 
     bool isCodeInjection() const
     {
@@ -392,6 +373,8 @@ public:
 private:
     QSharedDataPointer<FunctionModificationData> d;
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(FunctionModification::Modifiers)
 
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug d, const ReferenceCount &);
