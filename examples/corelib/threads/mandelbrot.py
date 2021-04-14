@@ -42,8 +42,12 @@
 
 """PySide6 port of the corelib/threads/mandelbrot example from Qt v5.x, originating from PyQt"""
 
-from PySide6.QtCore import (Signal, QMutex, QMutexLocker, QPointF, QSize, Qt,
-        QThread, QWaitCondition)
+from argparse import ArgumentParser, RawTextHelpFormatter
+import sys
+
+from PySide6.QtCore import (Signal, QMutex, QElapsedTimer, QMutexLocker,
+                            QPoint, QPointF, QSize, Qt, QThread,
+                            QWaitCondition)
 from PySide6.QtGui import QColor, QImage, QPainter, QPixmap, qRgb
 from PySide6.QtWidgets import QApplication, QWidget
 
@@ -55,6 +59,16 @@ DEFAULT_SCALE = 0.00403897
 ZOOM_IN_FACTOR = 0.8
 ZOOM_OUT_FACTOR = 1 / ZOOM_IN_FACTOR
 SCROLL_STEP = 20
+
+
+NUM_PASSES = 8
+
+
+INFO_KEY = 'info'
+
+
+HELP = "Use mouse wheel or the '+' and '-' keys to zoom. Press and " \
+       "hold left mouse button to scroll."
 
 
 class RenderThread(QThread):
@@ -102,6 +116,8 @@ class RenderThread(QThread):
             self.condition.wakeOne()
 
     def run(self):
+        timer = QElapsedTimer()
+
         while True:
             self.mutex.lock()
             resultSize = self._result_size
@@ -114,10 +130,10 @@ class RenderThread(QThread):
             half_height = resultSize.height() // 2
             image = QImage(resultSize, QImage.Format_RGB32)
 
-            NUM_PASSES = 8
             curpass = 0
 
             while curpass < NUM_PASSES:
+                timer.restart()
                 max_iterations = (1 << (2 * curpass + 6)) + 32
                 LIMIT = 4
                 all_black = True
@@ -164,6 +180,13 @@ class RenderThread(QThread):
                     curpass = 4
                 else:
                     if not self.restart:
+                        elapsed = timer.elapsed();
+                        unit = 'ms'
+                        if elapsed > 2000:
+                            elapsed /= 1000
+                            unit = 's'
+                        text = f"Pass {curpass+1}/{NUM_PASSES}, max iterations: {max_iterations}, time: {elapsed}{unit}"
+                        image.setText(INFO_KEY, text);
                         self.rendered_image.emit(image, scale_factor)
                     curpass += 1
 
@@ -227,7 +250,7 @@ class MandelbrotWidget(QWidget):
 
         self.setWindowTitle("Mandelbrot")
         self.setCursor(Qt.CrossCursor)
-        self.resize(550, 400)
+        self._info = ''
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -256,8 +279,9 @@ class MandelbrotWidget(QWidget):
             painter.drawPixmap(exposed, self.pixmap, exposed)
             painter.restore()
 
-        text = "Use mouse wheel or the '+' and '-' keys to zoom. Press and " \
-                "hold left mouse button to scroll."
+        text = HELP
+        if self._info:
+            text += ' ' + self._info
         metrics = painter.fontMetrics()
         text_width = metrics.horizontalAdvance(text)
 
@@ -285,6 +309,8 @@ class MandelbrotWidget(QWidget):
             self.scroll(0, -SCROLL_STEP)
         elif event.key() == Qt.Key_Up:
             self.scroll(0, +SCROLL_STEP)
+        elif event.key() == Qt.Key_Q:
+            self.close()
         else:
             super(MandelbrotWidget, self).keyPressEvent(event)
 
@@ -318,6 +344,7 @@ class MandelbrotWidget(QWidget):
         if not self._last_drag_pos.isNull():
             return
 
+        self._info = image.text(INFO_KEY)
         self.pixmap = QPixmap.fromImage(image)
         self._pixmap_offset = QPointF()
         self._last_drag_position = QPointF()
@@ -339,11 +366,23 @@ class MandelbrotWidget(QWidget):
 
 
 if __name__ == '__main__':
-
-    import sys
+    parser = ArgumentParser(description='Qt Mandelbrot Example',
+                            formatter_class=RawTextHelpFormatter)
+    parser.add_argument('--passes', '-p', type=int, help='Number of passes (1-8)')
+    options = parser.parse_args()
+    if options.passes:
+        NUM_PASSES = int(options.passes)
+        if NUM_PASSES < 1 or NUM_PASSES > 8:
+            print(f'Invalid value: {options.passes}')
+            sys.exit(-1)
 
     app = QApplication(sys.argv)
     widget = MandelbrotWidget()
+    geometry = widget.screen().availableGeometry()
+    widget.resize((2 * geometry.size()) / 3)
+    pos = (geometry.size() - widget.size()) / 2
+    widget.move(geometry.topLeft() + QPoint(pos.width(), pos.height()))
+
     widget.show()
     r = app.exec_()
     widget.thread.stop()
