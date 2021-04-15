@@ -486,12 +486,12 @@
 
     <!-- ### "QPolygon(int, const int*)" is an internal constructor. -->
     <modify-function signature="QPolygon(int,const int*)" remove="all"/>
-    <!-- ### A QVector parameter, for no defined type, will generate wrong code. -->
-    <modify-function signature="operator+=(QVector&lt;QPoint&gt;)" remove="all"/>
+    <!-- ### A QList parameter, for no defined type, will generate wrong code. -->
+    <modify-function signature="operator+=(QList&lt;QPoint&gt;)" remove="all"/>
     <add-function signature="operator&lt;&lt;(QPoint)">
         <inject-code file="../glue/qtgui.cpp" snippet="qpolygon-operatorlowerlower"/>
     </add-function>
-    <add-function signature="operator&lt;&lt;(QVector&lt;QPoint&gt;)">
+    <add-function signature="operator&lt;&lt;(QList&lt;QPoint&gt;)">
         <inject-code file="../glue/qtgui.cpp" snippet="qpolygon-operatorlowerlower"/>
     </add-function>
     <!-- ### -->
@@ -500,12 +500,12 @@
     <extra-includes>
       <include file-name="QTransform" location="global"/>
     </extra-includes>
-    <!-- ### A QVector parameter, for no defined type, will generate wrong code. -->
-    <modify-function signature="operator+=(QVector&lt;QPointF&gt;)" remove="all"/>
+    <!-- ### A QList parameter, for no defined type, will generate wrong code. -->
+    <modify-function signature="operator+=(QList&lt;QPointF&gt;)" remove="all"/>
     <!-- ### See bug 776 -->
     <modify-function signature="operator&lt;&lt;(QPointF)" remove="all"/>
     <!-- ### See bug 777 -->
-    <modify-function signature="operator&lt;&lt;(QVector&lt;QPointF&gt;)" remove="all"/>
+    <modify-function signature="operator&lt;&lt;(QList&lt;QPointF&gt;)" remove="all"/>
     <!-- ### -->
   </value-type>
   <value-type name="QIcon" >
@@ -1747,18 +1747,18 @@
 
 
     <modify-function signature="drawConvexPolygon(const QPoint*,int)" remove="all"/>
-    <add-function signature="drawConvexPolygon(QVector&lt;QPoint>)">
+    <add-function signature="drawConvexPolygon(QList&lt;QPoint>)">
         <inject-code>
             <insert-template name="qpainter_drawlist"/>
         </inject-code>
     </add-function>
     <modify-function signature="drawConvexPolygon(const QPointF*,int)" remove="all"/>
-    <add-function signature="drawConvexPolygon(QVector&lt;QPointF>)">
+    <add-function signature="drawConvexPolygon(QList&lt;QPointF>)">
         <inject-code>
             <insert-template name="qpainter_drawlist"/>
         </inject-code>
     </add-function>
-    <!-- ### Overloads using QVector<T> does the job of these methods -->
+    <!-- ### Overloads using QList<T> does the job of these methods -->
     <modify-function signature="drawLines(const QLine*,int)" remove="all"/>
     <modify-function signature="drawLines(const QLineF*,int)" remove="all"/>
     <modify-function signature="drawLines(const QPoint*,int)" remove="all"/>
@@ -1784,15 +1784,15 @@
     <modify-function signature="drawPoints(const QPolygonF&amp;)" overload-number="1"/>
 
     <modify-function signature="drawPolygon(const QPoint*,int,Qt::FillRule)" remove="all"/>
-    <add-function signature="drawPolygon(QVector&lt;QPoint>,Qt::FillRule)">
+    <add-function signature="drawPolygon(QList&lt;QPoint>,Qt::FillRule)">
         <inject-code file="../glue/qtgui.cpp" snippet="qpainter-drawpolygon"/>
     </add-function>
     <modify-function signature="drawPolygon(const QPointF*,int,Qt::FillRule)" remove="all"/>
-    <add-function signature="drawPolygon(QVector&lt;QPointF>,Qt::FillRule)">
+    <add-function signature="drawPolygon(QList&lt;QPointF>,Qt::FillRule)">
         <inject-code file="../glue/qtgui.cpp" snippet="qpainter-drawpolygon"/>
     </add-function>
     <modify-function signature="drawPolyline(const QPoint*,int)" remove="all"/>
-    <add-function signature="drawPolyline(QVector&lt;QPoint>)">
+    <add-function signature="drawPolyline(QList&lt;QPoint>)">
         <inject-code>
             <insert-template name="qpainter_drawlist"/>
         </inject-code>
@@ -1802,7 +1802,7 @@
     <modify-function signature="drawPolyline(const QPointF*,int)" remove="all"/>
     <modify-function signature="drawPolyline(const QPolygon&amp;)" overload-number="0"/>
     <modify-function signature="drawPolyline(const QPolygonF&amp;)" overload-number="1"/>
-    <add-function signature="drawPolyline(QVector&lt;QPointF>)">
+    <add-function signature="drawPolyline(QList&lt;QPointF>)">
         <inject-code>
             <insert-template name="qpainter_drawlist"/>
         </inject-code>

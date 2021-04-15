@@ -768,7 +768,7 @@ return !result ? -1 : 0;
 // @snippet qabstractitemmodel-createindex
 
 // @snippet qabstractitemmodel
-qRegisterMetaType<QVector<int> >("QVector<int>");
+qRegisterMetaType<QList<int> >("QList<int>");
 // @snippet qabstractitemmodel
 
 // @snippet qobject-metaobject
