@@ -38,6 +38,7 @@
 #############################################################################
 
 import sys
+from pathlib import Path
 import os
 import re
 import stat
@@ -81,6 +82,15 @@ def update_env_path(newpaths):
             log.info(f"Inserting path '{path}' to environment")
             paths.insert(0, path)
             os.environ['PATH'] = f"{path}{os.pathsep}{os.environ['PATH']}"
+
+
+def get_numpy_location():
+    for p in sys.path:
+        if 'site-' in p:
+            numpy = Path(p).resolve() / 'numpy'
+            if numpy.is_dir():
+               return os.fspath(numpy / 'core' / 'include')
+    return None
 
 
 def winsdk_setenv(platform_arch, build_type):

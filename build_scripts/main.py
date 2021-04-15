@@ -46,7 +46,7 @@ import sys
 from textwrap import dedent
 import time
 from .config import config
-from .utils import get_python_dict
+from .utils import get_numpy_location, get_python_dict
 from .options import DistUtilsCommandMixin, OPTION
 from .versions import PYSIDE, PYSIDE_MODULE, SHIBOKEN
 from .wheel_utils import (get_package_version, get_qt_version,
@@ -767,6 +767,10 @@ class PysideBuild(_build, DistUtilsCommandMixin):
 
         if OPTION['AVOID_PROTECTED_HACK']:
             cmake_cmd.append("-DAVOID_PROTECTED_HACK=1")
+
+        numpy = get_numpy_location()
+        if numpy:
+            cmake_cmd.append(f"-DNUMPY_INCLUDE_DIR={numpy}")
 
         if self.build_type.lower() == 'debug':
             cmake_cmd.append(f"-DPYTHON_DEBUG_LIBRARY={self.py_library}")

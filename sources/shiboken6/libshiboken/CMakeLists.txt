@@ -1,22 +1,5 @@
 project(libshiboken)
 
-macro(get_numpy_location)
-    execute_process(
-      COMMAND ${PYTHON_EXECUTABLE} -c "if True:
-      import sys
-      import os
-      numpy = ''
-      for p in sys.path:
-          if 'site-' in p:
-              numpy = os.path.join(p, 'numpy')
-              if os.path.exists(numpy):
-                  print(os.path.realpath(numpy))
-                  break"
-      OUTPUT_VARIABLE PYTHON_NUMPY_LOCATION
-      OUTPUT_STRIP_TRAILING_WHITESPACE)
-  message(STATUS "PYTHON_NUMPY_LOCATION: " ${PYTHON_NUMPY_LOCATION})
-endmacro()
-
 option(ENABLE_VERSION_SUFFIX "Used to use current version in suffix to generated files. This is used to allow multiples versions installed simultaneous." FALSE)
 if(ENABLE_VERSION_SUFFIX)
     set(shiboken6_SUFFIX "-${shiboken_MAJOR_VERSION}.${shiboken_MINOR_VERSION}")
@@ -85,10 +68,11 @@ signature/signature_extend.cpp
 signature/signature_helper.cpp
 )
 
-get_numpy_location()
-
-if (NOT "${PYTHON_NUMPY_LOCATION}" STREQUAL "")
+if (NOT "${NUMPY_INCLUDE_DIR}" STREQUAL "")
+    message(STATUS "NUMPY_INCLUDE_DIR: " ${NUMPY_INCLUDE_DIR})
     list(APPEND libshiboken_SRC sbknumpyarrayconverter.cpp)
+else()
+    message(STATUS "NUMPY not found")
 endif()
 
 set(APIEXTRACTOR_EXTRA_INCLUDES ${APIEXTRACTOR_EXTRA_INCLUDES} ${LIBXSLT_INCLUDE_DIR} ${LIBXML2_INCLUDE_DIR})
@@ -102,8 +86,8 @@ target_include_directories(libshiboken PUBLIC
   $<INSTALL_INTERFACE:include/shiboken6>
 )
 
-if (NOT "${PYTHON_NUMPY_LOCATION}" STREQUAL "")
-    target_include_directories(libshiboken PRIVATE ${PYTHON_NUMPY_LOCATION}/core/include)
+if (NOT "${NUMPY_INCLUDE_DIR}" STREQUAL "")
+    target_include_directories(libshiboken PRIVATE ${NUMPY_INCLUDE_DIR})
     target_compile_definitions(libshiboken PRIVATE -DHAVE_NUMPY
                                            PRIVATE -DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
 
