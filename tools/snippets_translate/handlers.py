@@ -38,6 +38,7 @@
 #############################################################################
 
 import re
+import sys
 
 from parse_utils import get_indent, dstrip, remove_ref, parse_arguments, replace_main_commas, get_qt_module_class
 
@@ -387,7 +388,13 @@ def handle_negate(x):
 def handle_emit(x):
     function_call = x.replace("emit ", "").strip()
     re_content = re.compile(r"\((.*)\)")
-    arguments = re_content.search(function_call).group(1)
+    match = re_content.search(function_call)
+    if not match:
+        stmt = x.strip()
+        print(f'snippets_translate: Warning "{stmt}" does not match function call',
+              file=sys.stderr)
+        return ''
+    arguments = match.group(1)
     method_name = function_call.split("(")[0].strip()
     return f"{get_indent(x)}{method_name}.emit({arguments})"
 
