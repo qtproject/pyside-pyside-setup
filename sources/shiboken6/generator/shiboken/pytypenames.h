@@ -44,6 +44,9 @@ static inline QString cPyObjectT() { return QStringLiteral("PyObject"); }
 static inline QString cPySequenceT() { return QStringLiteral("PySequence"); }
 static inline QString cPyTypeObjectT() { return QStringLiteral("PyTypeObject"); }
 
+// numpy
+static inline QString cPyArrayObjectT() { return QStringLiteral("PyArrayObject"); }
+
 static inline QString sbkCharT() { return QStringLiteral("SbkChar"); }
 
 #endif // PYTYPENAMES_H

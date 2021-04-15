@@ -1121,6 +1121,9 @@ ShibokenGenerator::CPythonCheckFunctionResult
     if (type == pyStrT())
         return {QLatin1String("Shiboken::String::check"), {}};
 
+    if (type == cPyArrayObjectT())
+         return {QLatin1String("PyArray_Check"), {}};
+
     CPythonCheckFunctionResult result;
     result.type = buildAbstractMetaTypeFromString(type);
     if (!result.type.has_value() || result.type->typeEntry()->isCustom())
