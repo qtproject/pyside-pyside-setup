@@ -458,6 +458,11 @@ PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
 PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[%ARG1_TYPE](%1));
 // @snippet qclipboard-text
 
+// @snippet qpainter-drawpointsnp-numpy-x-y
+const auto points = PySide::Numpy::xyDataToQPointFList(%PYARG_1, %PYARG_2);
+%CPPSELF.drawPoints(points);
+// @snippet qpainter-drawpointsnp-numpy-x-y
+
 // @snippet qpainter-drawpolygon
 %CPPSELF.%FUNCTION_NAME(%1.data(), %1.size(), %2);
 // @snippet qpainter-drawpolygon

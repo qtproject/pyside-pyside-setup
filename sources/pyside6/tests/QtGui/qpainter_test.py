@@ -40,6 +40,13 @@ from PySide6.QtGui import QPainter, QLinearGradient, QImage
 from PySide6.QtCore import QLine, QLineF, QPoint, QPointF, QRect, QRectF, Qt
 
 
+try:
+    import numpy as np
+    HAVE_NUMPY = True
+except ModuleNotFoundError:
+    HAVE_NUMPY = False
+
+
 class QPainterDrawText(UsesQGuiApplication):
     def setUp(self):
         super(QPainterDrawText, self).setUp()
@@ -109,6 +116,11 @@ class QPainterDrawText(UsesQGuiApplication):
                                    QPoint(20.0, 10.0),
                                    QPoint(80.0, 30.0),
                                    QPoint(90.0, 70.0)])
+        if HAVE_NUMPY:
+            x = np.array([10.0, 20.0, 80.0, 90.0])
+            y = np.array([80.0, 10.0, 30.0, 70.0])
+            self.painter.drawPointsNp(x, y)
+
 
 
 class SetBrushWithOtherArgs(UsesQGuiApplication):

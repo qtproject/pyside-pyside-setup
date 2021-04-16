@@ -266,5 +266,16 @@
   <object-type name="QVXYModelMapper"/>
   <object-type name="QXYLegendMarker"/>
   <object-type name="QXYModelMapper"/>
-  <object-type name="QXYSeries"/>
+  <!-- Add numpy versions as separate functions since passing ndarrays to other
+       typecheck macros causes:
+       FIXME Subscripted generics cannot be used with class and instance checks -->
+  <object-type name="QXYSeries">
+      <include file-name="pyside_numpy.h" location="global"/>
+      <add-function signature="appendNp(PyArrayObject *, PyArrayObject *)">
+          <inject-code file="../glue/qtcharts.cpp" snippet="qxyseries-appendnp-numpy-x-y"/>
+      </add-function>
+      <add-function signature="replaceNp(PyArrayObject *, PyArrayObject *)">
+          <inject-code file="../glue/qtcharts.cpp" snippet="qxyseries-replacenp-numpy-x-y"/>
+      </add-function>
+  </object-type>
 </typesystem>
