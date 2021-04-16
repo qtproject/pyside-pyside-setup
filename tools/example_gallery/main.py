@@ -96,22 +96,32 @@ def get_module_gallery(examples):
     gallery = (
         ".. panels::\n"
         f"{ind(1)}:container: container-lg pb-3\n"
-        f"{ind(1)}:column: col-lg-3 col-md-4 col-sm-6 col-xs-12 p-2\n\n"
+        f"{ind(1)}:column: col-lg-4 col-md-4 col-sm-6 col-xs-12 p-2\n\n"
     )
+
     # Iteration per rows
     for i in range(math.ceil(len(examples))):
         e = examples[i]
         url = e["rst"].replace(".rst", ".html")
         name = e["example"]
         underline = f'{e["module"]}'
+
+
         if e["extra"]:
             underline += f'/{e["extra"]}'
 
         if i > 0:
             gallery += f"{ind(1)}---\n"
+        elif e["img_doc"]:
+            gallery += f"{ind(1)}---\n"
+
+        if e["img_doc"]:
+            gallery += f"{ind(1)}:img-top: {e['img_doc'].name}\n\n"
+        else:
+            gallery += "\n"
+
 
         gallery += f"{ind(1)}`{name} <{url}>`_\n"
-        # TODO: Use the body to add the screenshot
         gallery += f"{ind(1)}+++\n"
         gallery += f"{ind(1)}{underline}\n"
 
@@ -202,11 +212,26 @@ if __name__ == "__main__":
 
         rst_file = f"example_{module_name}_{extra_names}_{example_name}.rst"
 
+        def check_img_ext(i):
+            EXT = (".png", ".jpg", ".jpeg")
+            if i.suffix in EXT:
+                return True
+            return False
+
         # Check for a 'doc' directory inside the example
         has_doc = False
+        img_doc = None
         original_doc_dir = Path(f_path.parent / "doc")
         if original_doc_dir.is_dir():
             has_doc = True
+            images = [i for i in original_doc_dir.glob("*") if i.is_file() and check_img_ext(i)]
+            if len(images) > 0:
+                # We look for an image with the same example_name first, if not, we select the first
+                image_path = [i for i in images if example_name in str(i)]
+                if not image_path:
+                    image_path = images[0]
+                else:
+                    img_doc = image_path[0]
 
         if module_name not in examples:
             examples[module_name] = []
@@ -219,6 +244,7 @@ if __name__ == "__main__":
                 "rst": rst_file,
                 "abs_path": str(f_path),
                 "has_doc": has_doc,
+                "img_doc": img_doc,
             }
         )
 
