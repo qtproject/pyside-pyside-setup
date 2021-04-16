@@ -234,6 +234,7 @@ type_map.update({
     "long": int,
     "PyCallable": typing.Callable,
     "PyObject": object,
+    "PyArrayObject": ArrayLikeVariable, # numpy
     "PySequence": typing.Iterable,  # important for numpy
     "PyTypeObject": type,
     "QChar": str,
