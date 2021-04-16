@@ -296,6 +296,12 @@
 
     <template name="pyseq_to_cpplist_conversion">
     // PYSIDE-795: Turn all sequences into iterables.
+    if (PyList_Check(%in)) {
+        const Py_ssize_t size = PySequence_Size(%in);
+        if (size &gt; 10)
+            (%out).reserve(size);
+    }
+
     Shiboken::AutoDecRef it(PyObject_GetIter(%in));
     PyObject *(*iternext)(PyObject *) = *Py_TYPE(it)->tp_iternext;
     for (;;) {
