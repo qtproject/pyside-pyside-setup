@@ -25,7 +25,76 @@ Shiboken
 Documentation
 =============
 
-.. raw:: html
+.. ifconfig:: output_format == 'html'
+
+    .. panels::
+        :body: text-center
+        :container: container-lg pb-3
+        :column: col-lg-4 col-md-4 col-sm-6 col-xs-12 p-2
+
+        Install and build from source.
+
+        +++
+
+        .. link-button:: gettingstarted
+            :type: ref
+            :text: Getting Started
+            :classes: btn-qt btn-block stretched-link
+        ---
+
+        Binding generator executable.
+
+        +++
+
+        .. link-button:: shibokengenerator
+            :type: ref
+            :text: Shiboken Generator
+            :classes: btn-qt btn-block stretched-link
+        ---
+
+        Python utility module.
+
+        +++
+
+        .. link-button:: shibokenmodule
+            :type: ref
+            :text: Shiboken Module
+            :classes: btn-qt btn-block stretched-link
+
+        ---
+
+        Reference and functionallities.
+
+        +++
+
+        .. link-button:: typesystem
+            :type: ref
+            :text: Type System
+            :classes: btn-qt btn-block stretched-link
+
+        ---
+
+        Using Shiboken.
+
+        +++
+
+        .. link-button:: examples/index
+            :type: ref
+            :text: Examples
+            :classes: btn-qt btn-block stretched-link
+
+        ---
+
+        Known issues and FAQ.
+
+        +++
+
+        .. link-button:: considerations
+            :type: ref
+            :text: Considerations
+            :classes: btn-qt btn-block stretched-link
+
+.. ifconfig:: output_format == 'qthelp'
 
     <table class="special">
         <colgroup>
