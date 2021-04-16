@@ -53,6 +53,7 @@ set(libpyside_SRC
     pysideqflags.cpp
     pysideweakref.cpp
     pyside.cpp
+    pyside_numpy.cpp
     pysidestaticstrings.cpp
 )
 
@@ -93,6 +94,12 @@ target_include_directories(pyside6 PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
   $<INSTALL_INTERFACE:include/PySide6>
 )
+
+if (NOT "${NUMPY_INCLUDE_DIR}" STREQUAL "")
+    target_include_directories(pyside6 PRIVATE ${NUMPY_INCLUDE_DIR})
+    target_compile_definitions(pyside6 PRIVATE -DHAVE_NUMPY
+                                       PRIVATE -DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
+endif()
 
 target_link_libraries(pyside6
                       PRIVATE Shiboken6::libshiboken

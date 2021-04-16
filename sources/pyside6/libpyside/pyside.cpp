@@ -38,6 +38,7 @@
 ****************************************************************************/
 
 #include "pyside.h"
+#include "pyside_numpy.h"
 #include "pyside_p.h"
 #include "signalmanager.h"
 #include "pysideclassinfo_p.h"
@@ -86,6 +87,7 @@ namespace PySide
 void init(PyObject *module)
 {
     qobjectNextAddr = nullptr;
+    Numpy::init();
     ClassInfo::init(module);
     Signal::init(module);
     Slot::init(module);
