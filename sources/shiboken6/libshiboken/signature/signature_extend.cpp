@@ -250,15 +250,6 @@ static PyGetSetDef new_PyMethodDescr_getsets[] = {
     {nullptr, nullptr, nullptr, nullptr, nullptr}
 };
 
-static PyGetSetDef new_PyType_getsets[] = {
-    {const_cast<char *>("__doc__"),       reinterpret_cast<getter>(pyside_tp_get___doc__),
-                                          nullptr, nullptr, nullptr},
-    {const_cast<char *>("__signature__"), reinterpret_cast<getter>(pyside_tp_get___signature__),
-                                          reinterpret_cast<setter>(pyside_set___signature__),
-                                          nullptr, nullptr},
-    {nullptr, nullptr, nullptr, nullptr, nullptr}
-};
-
 static PyGetSetDef new_PyWrapperDescr_getsets[] = {
     {const_cast<char *>("__doc__"),       reinterpret_cast<getter>(pyside_wd_get___doc__),
                                           nullptr, nullptr, nullptr},

@@ -571,8 +571,13 @@ bool registerInternalQtConf()
     // PyInstaller executable.
     // This will disable the internal qt.conf which points to the PySide6 subdirectory (due to the
     // subdirectory not existing anymore).
+#ifndef PYPY_VERSION
     QString executablePath =
     QString::fromWCharArray(Py_GetProgramFullPath());
+#else
+    // PYSIDE-535: FIXME: Add this function when available.
+    QString executablePath = QLatin1String("missing Py_GetProgramFullPath");
+#endif // PYPY_VERSION
     QString appDirPath = QFileInfo(executablePath).absolutePath();
     QString maybeQtConfPath = QDir(appDirPath).filePath(QStringLiteral("qt.conf"));
     bool executableQtConfAvailable = QFileInfo::exists(maybeQtConfPath);

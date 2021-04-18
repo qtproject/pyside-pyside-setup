@@ -79,8 +79,6 @@ static int _fixup_getset(PyTypeObject *type, const char *name, PyGetSetDef *new_
         for (; md->name != nullptr; md++)
             if (strcmp(md->name, name) == 0)
                 return 1;
-    // staticmethod has just a `__doc__` in the class
-    assert(strcmp(type->tp_name, "staticmethod") == 0 && strcmp(name, "__doc__") == 0);
     return 0;
 }
 
@@ -107,8 +105,13 @@ int add_more_getsets(PyTypeObject *type, PyGetSetDef *gsp, PyObject **doc_descr)
         AutoDecRef descr(PyDescr_NewGetSet(type, gsp));
         if (descr.isNull())
             return -1;
+#ifndef PYPY_VERSION
+        // PYSIDE-535: We cannot set the attribute. This will be re-implemented
+        //             in a clean way, either with extra heaptypes or with a
+        //             helper dict for signatures.
         if (PyDict_SetItemString(dict, gsp->name, descr) < 0)
             return -1;
+#endif
     }
     PyType_Modified(type);
     return 0;

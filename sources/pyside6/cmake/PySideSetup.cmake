@@ -46,6 +46,18 @@ if(NOT PYSIDE_VERSION_OUTPUT)
     message(FATAL_ERROR "Could not identify PySide6 version. Error: ${PYSIDE_VERSION_OUTPUT_ERROR}")
 endif()
 
+# Detect if the Python interpreter is actually PyPy
+execute_process(
+    COMMAND ${PYTHON_EXECUTABLE} -c "if True:
+        pypy_version = ''
+        import sys
+        if hasattr(sys, 'pypy_version_info'):
+            pypy_version = '.'.join(map(str, sys.pypy_version_info[:3]))
+        print(pypy_version)
+        "
+    OUTPUT_VARIABLE PYPY_VERSION
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+
 list(GET PYSIDE_VERSION_OUTPUT 0 BINDING_API_MAJOR_VERSION)
 list(GET PYSIDE_VERSION_OUTPUT 1 BINDING_API_MINOR_VERSION)
 list(GET PYSIDE_VERSION_OUTPUT 2 BINDING_API_MICRO_VERSION)

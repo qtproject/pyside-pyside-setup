@@ -98,7 +98,8 @@ def generate_all_pyi(outpath, options):
             generate_pyi(import_name, outpath, options)
 
 
-if __name__ == "__main__":
+# PYSIDE-535: Disable pyi generation until things work.
+if __name__ == "__main__" and not hasattr(sys, "pypy_version_info"):
     parser = argparse.ArgumentParser(
         description="This script generates the .pyi file for all PySide modules.")
     parser.add_argument("modules", nargs="+",
