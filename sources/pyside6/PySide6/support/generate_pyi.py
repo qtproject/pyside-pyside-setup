@@ -52,6 +52,7 @@ import sys
 import typing
 
 from pathlib import Path
+from types import SimpleNamespace
 
 # Can we use forward references?
 USE_PEP563 = sys.version_info[:2] >= (3, 7)
@@ -78,8 +79,6 @@ def generate_all_pyi(outpath, options):
     # Perhaps this can be automated?
     PySide6.support.signature.mapping.USE_PEP563 = USE_PEP563
 
-    import __feature__ as feature
-
     outpath = Path(outpath) if outpath and os.fspath(outpath) else Path(PySide6.__file__).parent
     name_list = PySide6.__all__ if options.modules == ["all"] else options.modules
     errors = ", ".join(set(name_list) - set(PySide6.__all__))
@@ -93,13 +92,17 @@ def generate_all_pyi(outpath, options):
         name_list = [quirk1, quirk2]
     for mod_name in name_list:
         import_name = "PySide6." + mod_name
-        feature_id = feature.get_select_id(options.feature)
-        with feature.force_selection(feature_id, import_name):
+        if hasattr(sys, "pypy_version_info"):
+            # PYSIDE-535: We cannot use __feature__ yet in PyPy
             generate_pyi(import_name, outpath, options)
+        else:
+            import __feature__ as feature
+            feature_id = feature.get_select_id(options.feature)
+            with feature.force_selection(feature_id, import_name):
+                generate_pyi(import_name, outpath, options)
 
 
-# PYSIDE-535: Disable pyi generation until things work.
-if __name__ == "__main__" and not hasattr(sys, "pypy_version_info"):
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="This script generates the .pyi file for all PySide modules.")
     parser.add_argument("modules", nargs="+",

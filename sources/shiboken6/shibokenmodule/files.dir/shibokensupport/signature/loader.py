@@ -158,9 +158,11 @@ if "PySide6" in sys.modules:
         raise
     # PYSIDE-1019: Modify `__import__` to be `__feature__` aware.
     # __feature__ is already in sys.modules, so this is actually no import
-    import PySide6.support.__feature__
-    sys.modules["__feature__"] = PySide6.support.__feature__
-    builtins.__orig_import__ = builtins.__import__
-    builtins.__import__ = builtins.__feature_import__
+    if not hasattr(sys, "pypy_version_info"):
+        # PYSIDE-535: Cannot enable __feature__ for various reasons.
+        import PySide6.support.__feature__
+        sys.modules["__feature__"] = PySide6.support.__feature__
+        builtins.__orig_import__ = builtins.__import__
+        builtins.__import__ = builtins.__feature_import__
 
 # end of file
