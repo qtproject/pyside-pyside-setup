@@ -51,6 +51,8 @@ class MyInjectCode(InjectCode):
 
 class InjectCodeTest(unittest.TestCase):
 
+    @unittest.skipIf(hasattr(sys, "pypy_version_info"),
+                             "PyPy type objects cannot be modified (yet) after creation")
     def testTypeNativeBeginning_TypeTargetBeginning(self):
         ic = InjectCode()
         self.assertEqual(str(ic), "Hi! I'm the inject code dummy class.")
