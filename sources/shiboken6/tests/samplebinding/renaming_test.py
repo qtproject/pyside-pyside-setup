@@ -43,6 +43,12 @@ init_paths()
 
 from sample import RenamedValue, RenamedUser
 
+from shiboken6 import Shiboken
+_init_pyside_extension()   # trigger bootstrap
+
+from shibokensupport.signature import get_signature
+
+
 class RenamingTest(unittest.TestCase):
     def test(self):
         '''Tests whether the C++ class ToBeRenamedValue renamed via attribute
@@ -54,7 +60,7 @@ class RenamingTest(unittest.TestCase):
                          "<class 'sample.RenamedValue'>")
         rename_user = RenamedUser()
         rename_user.useRenamedValue(renamed_value)
-        actual_signature = str(rename_user.useRenamedValue.__signature__)
+        actual_signature = str(get_signature(rename_user.useRenamedValue))
         self.assertTrue(re.match(r"^\(self,\s*?v:\s*?sample.RenamedValue\)\s*?->\s*?None$",
                                  actual_signature))
 

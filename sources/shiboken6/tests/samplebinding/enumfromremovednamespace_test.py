@@ -41,6 +41,11 @@ init_paths()
 import sample
 from shiboken_test_helper import objectFullname
 
+from shiboken6 import Shiboken
+_init_pyside_extension()   # trigger bootstrap
+
+from shibokensupport.signature import get_signature
+
 
 class TestEnumFromRemovedNamespace(unittest.TestCase):
     def testEnumPromotedToGlobal(self):
@@ -59,10 +64,10 @@ class TestEnumFromRemovedNamespace(unittest.TestCase):
                          "sample.ObjectOnInvisibleNamespace")
 
         # Function arguments
-        signature = sample.ObjectOnInvisibleNamespace.toInt.__signature__
+        signature = get_signature(sample.ObjectOnInvisibleNamespace.toInt)
         self.assertEqual(objectFullname(signature.parameters['e'].annotation),
                          "sample.RemovedNamespace1_Enum")
-        signature = sample.ObjectOnInvisibleNamespace.consume.__signature__
+        signature = get_signature(sample.ObjectOnInvisibleNamespace.consume)
         self.assertEqual(objectFullname(signature.parameters['other'].annotation),
                          "sample.ObjectOnInvisibleNamespace")
 

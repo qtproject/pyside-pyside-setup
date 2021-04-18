@@ -36,6 +36,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6 import *
+from PySide6.support.signature import get_signature
 for modname, mod in sys.modules.items():
     # Python 2 leaves "None" in the dict.
     if modname.startswith("PySide6.") and mod is not None:
@@ -175,7 +176,7 @@ class MainTest(unittest.TestCase):
         except AttributeError:
             unittest.TestCase().skipTest("this test makes only sense if QtWidgets is available.")
 
-        sigs = PySide6.QtWidgets.QApplication.palette.__signature__
+        sigs = get_signature(PySide6.QtWidgets.QApplication.palette)
         self.assertEqual(len(sigs), 3)
 
 

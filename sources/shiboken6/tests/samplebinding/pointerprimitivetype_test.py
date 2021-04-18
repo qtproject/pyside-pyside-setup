@@ -56,6 +56,8 @@ from sample import IntArray2, VirtualMethods
 
 import shiboken6
 _init_pyside_extension()   # trigger init, which does not happen in tests
+from shibokensupport.signature import get_signature
+
 import typing
 
 
@@ -75,7 +77,7 @@ class PointerPrimitiveTypeTest(unittest.TestCase):
 
     def testReturnVarSignature(self):
         # signature="getMargins(int*,int*,int*,int*)const">
-        ann = VirtualMethods.getMargins.__signature__.return_annotation
+        ann = get_signature(VirtualMethods.getMargins).return_annotation
         self.assertEqual(ann, typing.Tuple[int, int, int, int])
 
 

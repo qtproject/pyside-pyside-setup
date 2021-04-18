@@ -43,12 +43,18 @@ init_paths()
 from other import OtherObjectType
 from shiboken_test_helper import objectFullname
 
+from shiboken6 import Shiboken
+_init_pyside_extension()   # trigger bootstrap
+
+from shibokensupport.signature import get_signature
+
+
 class SignatureTest(unittest.TestCase):
 
     # Check if the argument of 'OtherObjectType::enumAsInt(SampleNamespace::SomeClass::PublicScopedEnum value)'
     # has the correct representation
     def testNamespaceFromOtherModule(self):
-        argType = OtherObjectType.enumAsInt.__signature__.parameters['value'].annotation
+        argType = get_signature(OtherObjectType.enumAsInt).parameters['value'].annotation
         self.assertEqual(objectFullname(argType), 'sample.SampleNamespace.SomeClass.PublicScopedEnum')
 
 if __name__ == '__main__':

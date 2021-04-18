@@ -43,6 +43,10 @@ init_paths()
 from sample import *
 from shiboken_test_helper import objectFullname
 
+from shiboken6 import Shiboken
+_init_pyside_extension()   # trigger bootstrap
+
+from shibokensupport.signature import get_signature
 
 # For tests of invisible namespaces, see
 # enumfromremovednamespace_test.py / removednamespaces.h
@@ -79,9 +83,9 @@ class TestClassesUnderNamespace(unittest.TestCase):
             "<class 'sample.SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough.NiceEnum'>")
 
         # Test if enum inside of class is correct represented
-        self.assertEqual(objectFullname(SampleNamespace.enumInEnumOut.__signature__.parameters['in_'].annotation),
+        self.assertEqual(objectFullname(get_signature(SampleNamespace.enumInEnumOut).parameters['in_'].annotation),
             "sample.SampleNamespace.InValue")
-        self.assertEqual(objectFullname(SampleNamespace.enumAsInt.__signature__.parameters['value'].annotation),
+        self.assertEqual(objectFullname(get_signature(SampleNamespace.enumAsInt).parameters['value'].annotation),
             "sample.SampleNamespace.SomeClass.PublicScopedEnum")
 
 
