@@ -284,7 +284,6 @@ dynamically compute the right offsets of the extended type structures:
 *   ``PepType_SOTP`` for ``SbkObjectTypePrivate``
 *   ``PepType_SETP`` for ``SbkEnumTypePrivate``
 *   ``PepType_PFTP`` for ``PySideQFlagsTypePrivate``
-*   ``PepType_SGTP`` for ``_SbkGenericTypePrivate``
 
 How these extension structures are used can best be seen by searching
 ``PepType_{four}`` in the source.

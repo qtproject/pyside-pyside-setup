@@ -38,6 +38,7 @@
 ****************************************************************************/
 
 #include "sbkenum.h"
+#include "sbkenum_p.h"
 #include "sbkstring.h"
 #include "sbkstaticstrings.h"
 #include "sbkstaticstrings_p.h"
@@ -55,13 +56,6 @@ using enum_func = PyObject *(*)(PyObject *, PyObject *);
 
 extern "C"
 {
-
-struct SbkEnumTypePrivate
-{
-    SbkConverter **converterPtr;
-    SbkConverter *converter;
-    const char *cppName;
-};
 
 struct SbkEnumType
 {
@@ -722,13 +716,13 @@ long int getValue(PyObject *enumItem)
 void setTypeConverter(PyTypeObject *enumType, SbkConverter *converter)
 {
     //reinterpret_cast<SbkEnumType *>(enumType)->converter = converter;
-    *PepType_SGTP(enumType)->converter = converter;
+    PepType_SETP(enumType)->converter = converter;
 }
 
 SbkConverter *getTypeConverter(PyTypeObject *enumType)
 {
     //return reinterpret_cast<SbkEnumType *>(enumType)->converter;
-    return *PepType_SGTP(enumType)->converter;
+    return PepType_SETP(enumType)->converter;
 }
 
 } // namespace Enum

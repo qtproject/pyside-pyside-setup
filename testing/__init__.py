@@ -44,19 +44,20 @@ testing/__init__.py
 - define command.main as entry point
 """
 
+import builtins
 import sys
 from . import command
 
 main = command.main
 
 # modify print so that it always flushes
-__builtins__["orig_print"] = __builtins__["print"]
+builtins.orig_print = builtins.print
 
 def print_flushed(*args, **kw):
     orig_print(*args, **kw)
     sys.stdout.flush()
 
-__builtins__["print"] = print_flushed
+builtins.print = print_flushed
 
 print = print_flushed
 

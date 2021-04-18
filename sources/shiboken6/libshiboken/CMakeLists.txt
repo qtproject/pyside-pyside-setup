@@ -123,12 +123,14 @@ set_target_properties(libshiboken PROPERTIES OUTPUT_NAME "shiboken6${shiboken6_S
 install(FILES
         autodecref.h
         basewrapper.h
+        basewrapper_p.h
         bindingmanager.h
         gilstate.h
         helper.h
         sbkarrayconverter.h
         sbkconverter.h
         sbkenum.h
+        sbkenum_p.h
         sbkmodule.h
         sbkstring.h
         sbkstaticstrings.h

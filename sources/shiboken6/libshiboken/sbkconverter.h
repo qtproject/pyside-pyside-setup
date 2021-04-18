@@ -42,6 +42,9 @@
 
 #include "sbkpython.h"
 #include "shibokenmacros.h"
+#include "sbkenum.h"
+#include "sbkenum_p.h"
+#include "basewrapper_p.h"
 
 #include <limits>
 #include <string>
@@ -397,9 +400,10 @@ template<> inline PyTypeObject *SbkType<std::nullptr_t>() { return Py_TYPE(&_Py_
 #define PyObject_Check(X) true
 #define SbkChar_Check(X) (SbkNumber_Check(X) || Shiboken::String::checkChar(X))
 
-struct _SbkGenericTypePrivate {
-    SbkConverter **converter;
+struct PySideQFlagsTypePrivate
+{
+    SbkConverter **converterPtr;
+    SbkConverter *converter;
 };
-
 
 #endif // SBK_CONVERTER_H

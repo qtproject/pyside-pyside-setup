@@ -152,7 +152,6 @@ LIBSHIBOKEN_API PyObject *_PepType_Lookup(PyTypeObject *type, PyObject *name);
 
 struct SbkObjectTypePrivate;
 struct PySideQFlagsTypePrivate;
-struct _SbkGenericTypePrivate;
 
 #define PepHeapType_SIZE \
     (reinterpret_cast<PyTypeObject *>(&PyType_Type)->tp_basicsize)
