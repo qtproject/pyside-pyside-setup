@@ -576,7 +576,7 @@ static PyObject *_setupNew(SbkObject *self, PyTypeObject *subtype)
     self->weakreflist = nullptr;
     self->d = d;
     PyObject_GC_Track(obSelf);
-    return reinterpret_cast<PyObject *>(self);
+    return obSelf;
 }
 
 PyObject *SbkObjectTpNew(PyTypeObject *subtype, PyObject *, PyObject *)

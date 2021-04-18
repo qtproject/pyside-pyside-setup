@@ -105,13 +105,11 @@ int add_more_getsets(PyTypeObject *type, PyGetSetDef *gsp, PyObject **doc_descr)
         AutoDecRef descr(PyDescr_NewGetSet(type, gsp));
         if (descr.isNull())
             return -1;
-#ifndef PYPY_VERSION
-        // PYSIDE-535: We cannot set the attribute. This will be re-implemented
-        //             in a clean way, either with extra heaptypes or with a
-        //             helper dict for signatures.
+        // PYSIDE-535: We cannot set the attribute. For simplicity, we use
+        //             get_signature in PyPy, instead. This can be re-implemented
+        //             later by deriving extra heap types.
         if (PyDict_SetItemString(dict, gsp->name, descr) < 0)
             return -1;
-#endif
     }
     PyType_Modified(type);
     return 0;

@@ -398,7 +398,7 @@ static bool get_lldebug_flag()
 static int PySide_FinishSignatures(PyObject *module, const char *signatures[])
 {
 #ifdef PYPY_VERSION
-    static bool have_problem = get_lldebug_flag();
+    static const bool have_problem = get_lldebug_flag();
     if (have_problem)
         return 0; // crash with lldebug at `PyDict_Next`
 #endif
@@ -470,7 +470,15 @@ void FinishSignatureInitialization(PyObject *module, const char *signatures[])
      * Still, it is not possible to call init phase 2 from here,
      * because the import is still running. Do it from Python!
      */
-    if (   PySide_PatchTypes() < 0
+#ifndef PYPY_VERSION
+    static const bool patch_types = true;
+#else
+    // PYSIDE-535: On PyPy we cannot patch builtin types. This can be
+    //             re-implemented later. For now, we use `get_signature`, instead.
+    static const bool patch_types = false;
+#endif
+
+    if ((patch_types && PySide_PatchTypes() < 0)
         || PySide_FinishSignatures(module, signatures) < 0) {
         PyErr_Print();
         PyErr_SetNone(PyExc_ImportError);

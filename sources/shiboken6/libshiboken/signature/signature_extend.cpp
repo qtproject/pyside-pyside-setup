@@ -223,6 +223,8 @@ static int pyside_set___signature__(PyObject *op, PyObject *value)
     return ret;
 }
 
+// PYSIDE-535: We cannot patch types easily in PyPy.
+//             Let's use the `get_signature` function, instead.
 static PyGetSetDef new_PyCFunction_getsets[] = {
     {const_cast<char *>("__doc__"),       reinterpret_cast<getter>(pyside_cf_get___doc__),
                                           nullptr, nullptr, nullptr},
