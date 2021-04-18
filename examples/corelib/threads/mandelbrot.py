@@ -260,6 +260,8 @@ class MandelbrotWidget(QWidget):
             painter.setPen(Qt.white)
             painter.drawText(self.rect(), Qt.AlignCenter,
                     "Rendering initial image, please wait...")
+            # QPainter needs an explicit end() in PyPy. This will become a context manager in 6.3.
+            painter.end()
             return
 
         if self._cur_scale == self._pixmap_scale:
@@ -292,6 +294,8 @@ class MandelbrotWidget(QWidget):
         painter.setPen(Qt.white)
         painter.drawText((self.width() - text_width) / 2,
                 metrics.leading() + metrics.ascent(), text)
+        # QPainter needs an explicit end() in PyPy. This will become a context manager in 6.3.
+        painter.end()
 
     def resizeEvent(self, event):
         self.thread.render(self._center_x, self._center_y, self._cur_scale, self.size())

@@ -106,6 +106,9 @@ class CodeEditor(QPlainTextEdit):
             bottom = top + self.blockBoundingRect(block).height()
             block_number += 1
 
+        # QPainter needs an explicit end() in PyPy. This will become a context manager in 6.3.
+        painter.end()
+
     @Slot()
     def update_line_number_area_width(self, newBlockCount):
         self.setViewportMargins(self.line_number_area_width(), 0, 0, 0)

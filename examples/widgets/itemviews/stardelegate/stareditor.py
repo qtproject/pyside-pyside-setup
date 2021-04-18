@@ -72,6 +72,8 @@ class StarEditor(QWidget):
         """ Paint the editor, offloading the work to the StarRating class. """
         painter = QPainter(self)
         self.star_rating.paint(painter, self.rect(), self.palette(), isEditable=True)
+        # QPainter needs an explicit end() in PyPy. This will become a context manager in 6.3.
+        painter.end()
 
     def mouseMoveEvent(self, event):
         """ As the mouse moves inside the editor, track the position and

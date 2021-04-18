@@ -78,6 +78,8 @@ class LightWidget(QWidget):
         painter.setRenderHint(QPainter.Antialiasing)
         painter.setBrush(self.color)
         painter.drawEllipse(0, 0, self.width(), self.height())
+        # QPainter needs an explicit end() in PyPy. This will become a context manager in 6.3.
+        painter.end()
 
     on = Property(bool, is_on, set_on)
 

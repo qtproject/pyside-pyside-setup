@@ -180,6 +180,8 @@ class MainWindow(QMainWindow):
                 painter.drawText(QPoint(x_pos, y_pos), self.map[x][y])
                 x_pos += font_width
         painter.drawText(QPoint(self.pX * font_width, (self.pY + 2) * font_height), '@')
+        # QPainter needs an explicit end() in PyPy. This will become a context manager in 6.3.
+        painter.end()
 
     def move_player(self, direction):
         if direction == self.left:

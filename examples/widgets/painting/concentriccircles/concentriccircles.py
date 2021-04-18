@@ -95,6 +95,9 @@ class CircleWidget(QWidget):
                     painter.drawEllipse(QRect(-diameter / 2,
                             -diameter / 2, diameter, diameter))
 
+        # QPainter needs an explicit end() in PyPy. This will become a context manager in 6.3.
+        painter.end()
+
 
 class Window(QWidget):
     def __init__(self):

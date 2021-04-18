@@ -242,6 +242,8 @@ class DiagramItem(QGraphicsPolygonItem):
         painter.setPen(QPen(Qt.black, 8))
         painter.translate(125, 125)
         painter.drawPolyline(self._my_polygon)
+        # QPainter needs an explicit end() in PyPy. This will become a context manager in 6.3.
+        painter.end()
         return pixmap
 
     def contextMenuEvent(self, event):

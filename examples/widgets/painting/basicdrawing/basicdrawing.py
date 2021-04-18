@@ -164,6 +164,8 @@ class RenderArea(QWidget):
         painter.setPen(self.palette().dark().color())
         painter.setBrush(Qt.NoBrush)
         painter.drawRect(QRect(0, 0, self.width() - 1, self.height() - 1))
+        # QPainter needs an explicit end() in PyPy. This will become a context manager in 6.3.
+        painter.end()
 
 
 id_role = Qt.UserRole

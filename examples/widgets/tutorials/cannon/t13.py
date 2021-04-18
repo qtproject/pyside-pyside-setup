@@ -232,6 +232,8 @@ class CannonField(QWidget):
             self.paint_shot(painter)
         if not self._game_ended:
             self.paint_target(painter)
+        # QPainter needs an explicit end() in PyPy. This will become a context manager in 6.3.
+        painter.end()
 
     def paint_shot(self, painter):
         painter.setPen(Qt.NoPen)

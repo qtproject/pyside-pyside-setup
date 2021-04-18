@@ -164,6 +164,8 @@ class CannonField(QWidget):
         self.paint_cannon(painter)
         if self._auto_shoot_timer.isActive():
             self.paint_shot(painter)
+        # QPainter needs an explicit end() in PyPy. This will become a context manager in 6.3.
+        painter.end()
 
     def paint_shot(self, painter):
         painter.setPen(Qt.NoPen)
