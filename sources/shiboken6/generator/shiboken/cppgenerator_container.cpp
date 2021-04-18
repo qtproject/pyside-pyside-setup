@@ -173,10 +173,9 @@ CppGenerator::OpaqueContainerData
     // type creation function that sets a key in the type dict.
     const QString typeCreationFName =  u"create"_qs + result.name + u"Type"_qs;
     s << "static inline PyTypeObject *" << typeCreationFName << "()\n{\n" << indent
-        << "auto *result = reinterpret_cast<PyTypeObject *>(SbkType_FromSpec(&"
-        << specName <<  "));\nPy_INCREF(Py_True);\n"
-        << "PyDict_SetItem(result->tp_dict, "
-           "Shiboken::PyMagicName::opaque_container(), Py_True);\n"
+        << "static auto *name = Shiboken::PyMagicName::opaque_container();\n"
+        << "static auto *opaque_entry = Py_BuildValue(\"{O:O}\", name, Py_True);\n"
+        << "static auto *result = SbkType_FromSpecAddDict(&" << specName << ", opaque_entry);\n"
         << "return result;\n" << outdent << "}\n\n";
 
     // typeF() function

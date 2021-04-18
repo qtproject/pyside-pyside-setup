@@ -45,30 +45,36 @@ extern "C"
 
 PyTypeObject *SbkType_FromSpec(PyType_Spec *spec)
 {
-    return SbkType_FromSpec_BMDWB(spec, nullptr, nullptr, 0, 0, nullptr);
+    return SbkType_FromSpec_BMDWBD(spec, nullptr, nullptr, 0, 0, nullptr, nullptr);
+}
+
+PyTypeObject *SbkType_FromSpecAddDict(PyType_Spec *spec, PyObject *dict_add)
+{
+    return SbkType_FromSpec_BMDWBD(spec, nullptr, nullptr, 0, 0, nullptr, dict_add);
 }
 
 PyTypeObject *SbkType_FromSpecWithMeta(PyType_Spec *spec, PyTypeObject *meta)
 {
-    return SbkType_FromSpec_BMDWB(spec, nullptr, meta, 0, 0, nullptr);
+    return SbkType_FromSpec_BMDWBD(spec, nullptr, meta, 0, 0, nullptr, nullptr);
 }
 
 PyTypeObject *SbkType_FromSpecWithBases(PyType_Spec *spec, PyObject *bases)
 {
-    return SbkType_FromSpec_BMDWB(spec, bases, nullptr, 0, 0, nullptr);
+    return SbkType_FromSpec_BMDWBD(spec, bases, nullptr, 0, 0, nullptr, nullptr);
 }
 
 PyTypeObject *SbkType_FromSpecBasesMeta(PyType_Spec *spec, PyObject *bases, PyTypeObject *meta)
 {
-    return SbkType_FromSpec_BMDWB(spec, bases, meta, 0, 0, nullptr);
+    return SbkType_FromSpec_BMDWBD(spec, bases, meta, 0, 0, nullptr, nullptr);
 }
 
-PyTypeObject *SbkType_FromSpec_BMDWB(PyType_Spec *spec,
-                                     PyObject *bases,
-                                     PyTypeObject *meta,
-                                     int dictoffset,
-                                     int weaklistoffset,
-                                     PyBufferProcs *bufferprocs)
+PyTypeObject *SbkType_FromSpec_BMDWBD(PyType_Spec *spec,
+                                      PyObject *bases,
+                                      PyTypeObject *meta,
+                                      int dictoffset,
+                                      int weaklistoffset,
+                                      PyBufferProcs *bufferprocs,
+                                      PyObject *dict_add)
 {
     // PYSIDE-1286: Generate correct __module__ and __qualname__
     // The name field can now be extended by an "n:" prefix which is
@@ -122,6 +128,8 @@ PyTypeObject *SbkType_FromSpec_BMDWB(PyType_Spec *spec,
         type->tp_weaklistoffset = weaklistoffset;
     if (bufferprocs)
         PepType_AS_BUFFER(type) = bufferprocs;
+    if (dict_add)
+        PyDict_Update(reinterpret_cast<PyObject *>(type->tp_dict), dict_add);
 
     PyType_Modified(type);
     return type;
