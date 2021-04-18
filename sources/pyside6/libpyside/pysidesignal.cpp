@@ -759,36 +759,33 @@ void updateSourceObject(PyObject *source)
     Py_XDECREF(objType);
 }
 
-QByteArray getTypeName(PyObject *type)
+QByteArray getTypeName(PyObject *obType)
 {
-    if (PyType_Check(type)) {
-        if (PyType_IsSubtype(reinterpret_cast<PyTypeObject *>(type),
-                             reinterpret_cast<PyTypeObject *>(SbkObject_TypeF()))) {
-            auto objType = reinterpret_cast<PyTypeObject *>(type);
-            return Shiboken::ObjectType::getOriginalName(objType);
-        }
-        // Translate python types to Qt names
-        auto objType = reinterpret_cast<PyTypeObject *>(type);
-        if (Shiboken::String::checkType(objType))
+    if (PyType_Check(obType)) {
+        auto *type = reinterpret_cast<PyTypeObject *>(obType);
+        if (PyType_IsSubtype(type, SbkObject_TypeF()))
+            return Shiboken::ObjectType::getOriginalName(type);
+        // Translate Python types to Qt names
+        if (Shiboken::String::checkType(type))
             return QByteArrayLiteral("QString");
-        if (objType == &PyLong_Type)
+        if (type == &PyLong_Type)
             return QByteArrayLiteral("int");
-        if (objType == &PyLong_Type)
+        if (type == &PyLong_Type)
             return QByteArrayLiteral("long");
-        if (objType == &PyFloat_Type)
+        if (type == &PyFloat_Type)
             return QByteArrayLiteral("double");
-        if (objType == &PyBool_Type)
+        if (type == &PyBool_Type)
             return QByteArrayLiteral("bool");
-        if (objType == &PyList_Type)
+        if (type == &PyList_Type)
             return QByteArrayLiteral("QVariantList");
-        if (Py_TYPE(objType) == SbkEnumType_TypeF())
-            return Shiboken::Enum::getCppName(objType);
+        if (Py_TYPE(type) == SbkEnumType_TypeF())
+            return Shiboken::Enum::getCppName(type);
         return QByteArrayLiteral("PyObject");
     }
-    if (type == Py_None) // Must be checked before as Shiboken::String::check accepts Py_None
+    if (obType == Py_None) // Must be checked before as Shiboken::String::check accepts Py_None
         return voidType();
-    if (Shiboken::String::check(type)) {
-        QByteArray result = Shiboken::String::toCString(type);
+    if (Shiboken::String::check(obType)) {
+        QByteArray result = Shiboken::String::toCString(obType);
         if (result == "qreal")
             result = sizeof(qreal) == sizeof(double) ? "double" : "float";
         return result;

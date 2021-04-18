@@ -1447,8 +1447,7 @@ void CppGenerator::writeConverterFunctions(TextStream &s, const AbstractMetaClas
     writePythonToCppFunction(s, c.toString(), sourceTypeName, targetTypeName);
 
     // "Is convertible" function for the Python object to C++ pointer conversion.
-    const QString pyTypeCheck = QLatin1String("PyObject_TypeCheck(pyIn, reinterpret_cast<PyTypeObject *>(")
-        + cpythonType + QLatin1String("))");
+    const QString pyTypeCheck = u"PyObject_TypeCheck(pyIn, "_qs + cpythonType + u")"_qs;
     writeIsPythonConvertibleToCppFunction(s, sourceTypeName, targetTypeName, pyTypeCheck, QString(), true);
     s << '\n';
 
@@ -1644,8 +1643,7 @@ void CppGenerator::writeConverterRegister(TextStream &s, const AbstractMetaClass
     if (metaClass->isNamespace())
         return;
     s << "// Register Converter\n"
-        << "SbkConverter *converter = Shiboken::Conversions::createConverter("
-        << cpythonTypeName(metaClass) << ',' << '\n';
+        << "SbkConverter *converter = Shiboken::Conversions::createConverter(pyType,\n";
     {
         Indentation indent(s);
         QString sourceTypeName = metaClass->name();
@@ -5338,7 +5336,7 @@ void CppGenerator::writeSignalInitialization(TextStream &s, const AbstractMetaCl
         }
     }
 
-    s << "PySide::Signal::registerSignals(" << cpythonTypeName(metaClass) << ", &::"
+    s << "PySide::Signal::registerSignals(pyType, &::"
        << metaClass->qualifiedCppName() << "::staticMetaObject);\n";
 }
 
@@ -5633,18 +5631,17 @@ void CppGenerator::writeClassRegister(TextStream &s,
         else
             s << wrapperFlags.join(" | ");
     }
-    s << ");\nauto pyType = reinterpret_cast<PyTypeObject *>(" << typePtr << ");\n"
+    s << ");\nauto *pyType = " << typePtr << ";\n"
         << "InitSignatureStrings(pyType, " << initFunctionName << "_SignatureStrings);\n";
 
     if (usePySideExtensions())
-        s << "SbkObjectType_SetPropertyStrings(reinterpret_cast<PyTypeObject *>(" << typePtr << "), "
+        s << "SbkObjectType_SetPropertyStrings(pyType, "
                     << chopType(pyTypeName) << "_PropertyStrings);\n";
 
     if (!classContext.forSmartPointer())
-        s << cpythonTypeNameExt(classTypeEntry) << '\n';
+        s << cpythonTypeNameExt(classTypeEntry) << " = pyType;\n\n";
     else
-        s << cpythonTypeNameExt(classContext.preciseType()) << '\n';
-    s << "    = " << pyTypeName << ";\n\n";
+        s << cpythonTypeNameExt(classContext.preciseType()) << " = pyType;\n\n";
 
     // Register conversions for the type.
     writeConverterRegister(s, metaClass, classContext);
@@ -5705,9 +5702,8 @@ void CppGenerator::writeClassRegister(TextStream &s,
     }
 
     if (usePySideExtensions() && metaClass->isQObject()) {
-        s << "Shiboken::ObjectType::setSubTypeInitHook(" << pyTypeName
-            << ", &PySide::initQObjectSubType);\n"
-            << "PySide::initDynamicMetaObject(" << pyTypeName << ", &::"
+        s << "Shiboken::ObjectType::setSubTypeInitHook(pyType, &PySide::initQObjectSubType);\n"
+            << "PySide::initDynamicMetaObject(pyType, &::"
             << metaClass->qualifiedCppName() << "::staticMetaObject, sizeof(";
         if (shouldGenerateCppWrapper(metaClass))
             s << wrapperName(metaClass);

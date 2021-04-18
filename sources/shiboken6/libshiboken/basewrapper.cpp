@@ -882,18 +882,15 @@ introduceWrapperType(PyObject *enclosingObject,
                      PyObject *baseTypes,
                      unsigned wrapperFlags)
 {
-    typeSpec->slots[0].pfunc = reinterpret_cast<void *>(baseType ? baseType : SbkObject_TypeF());
+    auto *base = baseType ? baseType : SbkObject_TypeF();
+    typeSpec->slots[0].pfunc = reinterpret_cast<void *>(base);
+    auto *bases = baseTypes ? baseTypes : PyTuple_Pack(1, base);
 
-    auto *type = SbkType_FromSpecBasesMeta(typeSpec, baseTypes, SbkObjectType_TypeF());
-    if (baseType) {
-        if (baseTypes) {
-            for (int i = 0; i < PySequence_Fast_GET_SIZE(baseTypes); ++i) {
-                auto *st = reinterpret_cast<PyTypeObject *>(PySequence_Fast_GET_ITEM(baseTypes, i));
-                BindingManager::instance().addClassInheritance(st, type);
-            }
-        } else {
-            BindingManager::instance().addClassInheritance(baseType, type);
-        }
+    auto *type = SbkType_FromSpecBasesMeta(typeSpec, bases, SbkObjectType_TypeF());
+
+    for (int i = 0; i < PySequence_Fast_GET_SIZE(bases); ++i) {
+        auto *st = reinterpret_cast<PyTypeObject *>(PySequence_Fast_GET_ITEM(bases, i));
+        BindingManager::instance().addClassInheritance(st, type);
     }
 
     auto sotp = PepType_SOTP(type);
@@ -912,7 +909,7 @@ introduceWrapperType(PyObject *enclosingObject,
     if (PyModule_AddObject(enclosingObject, typeName, ob_type) != 0) {
         std::cerr << "Warning: " << __FUNCTION__ << " returns nullptr for "
             << typeName << '/' << originalName << " due to PyModule_AddObject(enclosingObject="
-            << enclosingObject << ",ob_type=" << ob_type << ") failing\n";
+            << enclosingObject << ", ob_type=" << ob_type << ") failing\n";
         return nullptr;
     }
     return type;

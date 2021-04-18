@@ -45,6 +45,7 @@
 extern "C"
 {
 
+// PYSIDE-535: Encapsulation of PyType_FromSpec special-cased for PyPy
 LIBSHIBOKEN_API PyTypeObject *SbkType_FromSpec(PyType_Spec *);
 LIBSHIBOKEN_API PyTypeObject *SbkType_FromSpecWithMeta(PyType_Spec *, PyTypeObject *);
 LIBSHIBOKEN_API PyTypeObject *SbkType_FromSpecWithBases(PyType_Spec *, PyObject *);

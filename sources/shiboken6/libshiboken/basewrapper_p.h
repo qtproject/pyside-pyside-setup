@@ -247,8 +247,8 @@ private:
 /// \internal Internal function used to walk on classes inheritance trees.
 /**
 *   Walk on class hierarchy using a DFS algorithm.
-*   For each pure Shiboken type found, HiearchyVisitor::visit is called and the algorithm consider
-*   all children of this type as visited.
+*   For each pure Shiboken type found, HierarchyVisitor::visit is called and the algorithm
+*   considers all children of this type as visited.
 */
 bool walkThroughClassHierarchy(PyTypeObject *currentType, HierarchyVisitor *visitor);
 
