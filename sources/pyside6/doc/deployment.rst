@@ -25,7 +25,7 @@ If you choose Option 3, consider using one of these tools:
 
 .. _fbs: https://build-system.fman.io/
 .. _PyInstaller: https://www.pyinstaller.org/
-.. _cx_Freeze: https://anthony-tuininga.github.io/cx_Freeze/
+.. _cx_Freeze: https://marcelotduarte.github.io/cx_Freeze/
 .. _py2exe: http://www.py2exe.org/
 .. _py2app: https://py2app.readthedocs.io/en/latest/
 .. _briefcase: https://briefcase.readthedocs.io
