@@ -6103,16 +6103,12 @@ void CppGenerator::writeGetattroFunction(TextStream &s, AttroCheck attroCheck,
 
     if (attroCheck.testFlag(AttroCheckFlag::GetattroOverloads)) {
         s << "// Search the method in the instance dict\n"
-            << "if (auto ob_dict = reinterpret_cast<SbkObject *>(self)->ob_dict) {\n";
+            << "auto ob_dict = SbkObject_GetDict(self);\n";
+        s << "if (auto meth = PyDict_GetItem(ob_dict, name)) {\n";
         {
             Indentation indent(s);
-            s << "if (auto meth = PyDict_GetItem(ob_dict, name)) {\n";
-            {
-                Indentation indent(s);
-                s << "Py_INCREF(meth);\n"
-                    << "return meth;\n";
-            }
-            s << "}\n";
+            s << "Py_INCREF(meth);\n"
+                << "return meth;\n";
         }
         s << "}\n"
             << "// Search the method in the type dict\n"

@@ -103,6 +103,21 @@ void setDestroyQApplication(DestroyQAppHook func)
     DestroyQApplication = func;
 }
 
+// PYSIDE-535: Use the C API in PyPy instead of `op->ob_dict`, directly
+LIBSHIBOKEN_API PyObject *SbkObject_GetDict(PyObject *op)
+{
+#ifdef PYPY_VERSION
+    auto *ret = PyObject_GenericGetDict(op, nullptr);
+    Py_DECREF(ret);
+    return ret;
+#else
+    auto *sbkObj = reinterpret_cast<SbkObject *>(op);
+    if (!sbkObj->ob_dict)
+        sbkObj->ob_dict = PyDict_New();
+    return sbkObj->ob_dict;
+#endif
+}
+
 static int
 check_set_special_type_attr(PyTypeObject *type, PyObject *value, const char *name)
 {

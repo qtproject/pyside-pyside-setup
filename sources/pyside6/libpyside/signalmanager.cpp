@@ -525,8 +525,8 @@ int SignalManager::registerMetaMethodGetIndex(QObject *source, const char *signa
             qWarning() << "Invalid Signal signature:" << signature;
             return -1;
         }
-        auto pySelf = reinterpret_cast<PyObject *>(self);
-        PyObject *dict = self->ob_dict;
+        auto *pySelf = reinterpret_cast<PyObject *>(self);
+        auto *dict = SbkObject_GetDict(pySelf);
         MetaObjectBuilder *dmo = metaBuilderFromDict(dict);
 
         // Create a instance meta object
@@ -555,7 +555,8 @@ const QMetaObject *SignalManager::retrieveMetaObject(PyObject *self)
     // m_dirty flag is set.
     Q_ASSERT(self);
 
-    MetaObjectBuilder *builder = metaBuilderFromDict(reinterpret_cast<SbkObject *>(self)->ob_dict);
+    auto *ob_dict = SbkObject_GetDict(self);
+    MetaObjectBuilder *builder = metaBuilderFromDict(ob_dict);
     if (!builder)
         builder = &(retrieveTypeUserData(self)->mo);
 

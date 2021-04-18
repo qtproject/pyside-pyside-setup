@@ -303,12 +303,11 @@ PyObject *BindingManager::getOverride(const void *cptr,
         nameCache[is_snake] = pyMethodName;
     }
 
-    if (wrapper->ob_dict) {
-        PyObject *method = PyDict_GetItem(wrapper->ob_dict, pyMethodName);
-        if (method) {
-            Py_INCREF(method);
-            return method;
-        }
+    auto *obWrapper = reinterpret_cast<PyObject *>(wrapper);
+    auto *wrapper_dict = SbkObject_GetDict(obWrapper);
+    if (PyObject *method = PyDict_GetItem(wrapper_dict, pyMethodName)) {
+        Py_INCREF(method);
+        return method;
     }
 
     PyObject *method = PyObject_GetAttr(reinterpret_cast<PyObject *>(wrapper), pyMethodName);
