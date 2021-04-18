@@ -2,7 +2,7 @@
 |project| & cx_Freeze
 =====================
 
-`cx_Freeze <https://anthony-tuininga.github.io/cx_Freeze/>`_ lets you
+`cx_Freeze <https://marcelotduarte.github.io/cx_Freeze//>`_ lets you
 freeze your Python application into executables. The supported
 platforms are Linux, macOS, Windows, FreeBSD, among others.
 
