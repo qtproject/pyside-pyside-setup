@@ -111,6 +111,9 @@ while True:
     start_pos, end_pos = res.start(), res.end()
     beg, mid, end = line[:start_pos], line[start_pos : end_pos], line[end_pos:].rstrip()
     object_id, typename = mid.split()
+    if int(object_id) == 0:
+        print(f"{beg}{typename}_NULL{end}")
+        continue
     if typename not in known_types:
         known_types[typename] = OrderedDict()
     obj_store = known_types[typename]
