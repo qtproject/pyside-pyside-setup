@@ -124,6 +124,8 @@ class CannonField(QWidget):
         painter.drawPie(QRect(-35, -35, 70, 70), 0, 90 * 16)
         painter.rotate(-self._current_angle)
         painter.drawRect(QRect(33, -4, 15, 8))
+        # QPainter needs an explicit end() in PyPy. This will become a context manager in 6.3.
+        painter.end()
 
 
 class MyWidget(QWidget):

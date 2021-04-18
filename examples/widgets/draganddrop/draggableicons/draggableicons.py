@@ -152,6 +152,9 @@ class DragWidget(QFrame):
             child.show()
             child.setPixmap(pixmap)
 
+        # QPainter needs an explicit end() in PyPy. This will become a context manager in 6.3.
+        painter.end()
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

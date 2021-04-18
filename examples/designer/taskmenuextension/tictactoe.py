@@ -150,6 +150,9 @@ class TicTacToe(QWidget):
             painter.drawLine(0, self.height(), self.width(), 0)
             self._turn_number = 9
 
+        # QPainter needs an explicit end() in PyPy. This will become a context manager in 6.3.
+        painter.end()
+
     def _cell_rect(self, position):
         h_margin = self.width() / 30
         v_margin = self.height() / 30

@@ -218,6 +218,7 @@ class Window(QWidget):
             item.setText(curve_name)
             self._ui.easingCurvePicker.addItem(item)
 
+        # QPainter needs an explicit end() in PyPy. This will become a context manager in 6.3.
         painter.end()
 
     def start_animation(self):

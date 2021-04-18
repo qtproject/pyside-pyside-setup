@@ -99,6 +99,9 @@ class WigglyWidget(QWidget):
             painter.drawText(x, y - dy, str(c))
             x += metrics.horizontalAdvance(c)
 
+        # QPainter needs an explicit end() in PyPy. This will become a context manager in 6.3.
+        painter.end()
+
     def timerEvent(self, event):
         if event.timerId() == self._timer.timerId():
             self._step += 1
