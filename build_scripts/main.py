@@ -182,6 +182,15 @@ def _get_py_library_unix(build_type, py_version, py_prefix, py_libdir,
                 return py_library
             libs_tried.append(py_library)
 
+    # PYSIDE-535: See if this is PyPy.
+    if hasattr(sys, "pypy_version_info"):
+        pypy_libdir = os.path.join(os.path.dirname(py_libdir), "bin")
+        for lib_ext in lib_exts:
+            lib_name = f"libpypy3-c{lib_ext}"
+            pypy_library = os.path.join(pypy_libdir, lib_name)
+            if os.path.exists(pypy_library):
+                return pypy_library
+            libs_tried.append(pypy_library)
     raise DistutilsSetupError(f"Failed to locate the Python library with {', '.join(libs_tried)}")
 
 
@@ -519,6 +528,9 @@ class PysideBuild(_build, DistUtilsCommandMixin):
         # Used for test blacklists and registry test.
         self.build_classifiers = (f"py{py_version}-qt{qt_version}-{platform.architecture()[0]}-"
                                   f"{build_type.lower()}")
+        if hasattr(sys, "pypy_version_info"):
+            pypy_version = ".".join(map(str, sys.pypy_version_info[:3]))
+            self.build_classifiers += f"-pypy.{pypy_version}"
 
         if OPTION["SHORTER_PATHS"]:
             build_name = f"p{py_version}"

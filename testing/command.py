@@ -87,6 +87,7 @@ from .parser import TestParser
 COIN_RERUN_FAILED_ONLY = True
 COIN_THRESHOLD = 3  # report error if >=
 COIN_TESTING = 5  # number of runs
+TIMEOUT = 10 * 60
 
 if os.environ.get("COIN_RERUN_FAILED_ONLY", "1").lower() in "0 f false n no".split():
     COIN_RERUN_FAILED_ONLY = False
@@ -94,6 +95,14 @@ if os.environ.get("COIN_RERUN_FAILED_ONLY", "1").lower() in "0 f false n no".spl
 
 def test_project(project, args, blacklist, runs):
     ret = []
+
+    if "pypy" in builds.classifiers:
+        # As long as PyPy has so many bugs, we use 1 test only...
+        global COIN_TESTING
+        COIN_TESTING = runs = 1
+        # ...and extend the timeout.
+        global TIMEOUT
+        TIMEOUT = 100 * 60
 
     # remove files from a former run
     for idx in range(runs):
@@ -120,7 +129,7 @@ def test_project(project, args, blacklist, runs):
                     break
             else:
                 rerun = None
-            runner.run(f"RUN {idx + 1}:", rerun, 10 * 60)
+            runner.run(f"RUN {idx + 1}:", rerun, TIMEOUT)
         results = TestParser(runner.logfile)
         r = 5 * [0]
         rerun_list = []
@@ -154,7 +163,7 @@ def test_project(project, args, blacklist, runs):
             print("FATAL ERROR:", fatal)
             print("Repetitions cancelled!")
             break
-    return ret, fatal
+    return ret, fatal, runs
 
 
 def main():
@@ -285,7 +294,7 @@ def main():
     # now loop over the projects and accumulate
     fatal = False
     for project in args.projects:
-        res, fatal = test_project(project, args, bl, runs)
+        res, fatal, runs = test_project(project, args, bl, runs)
         if fatal:
             runs = 1
         for idx, r in enumerate(res):

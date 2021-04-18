@@ -52,3 +52,5 @@
     debug
 [signals::bug_79]
     debug
+[QtWidgets::paint_event_test]
+    pypy
