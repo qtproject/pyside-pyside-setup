@@ -63,6 +63,8 @@ There is much more to come.
 MethodDescriptorType = type(str.split)
 
 
+@unittest.skipIf(hasattr(sys, "pypy_version_info"),
+                 "__feature__ cannot yet be used with PyPy")
 class FeaturesTest(unittest.TestCase):
 
     def testAllFeatureCombinations(self):

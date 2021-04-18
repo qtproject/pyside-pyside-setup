@@ -61,6 +61,8 @@ This test is in its own file because combining it with
 """
 
 
+@unittest.skipIf(hasattr(sys, "pypy_version_info"),
+                 "__feature__ cannot yet be used with PyPy")
 class ErrormessagesWithFeatures(unittest.TestCase):
     probe = "called with wrong argument types"
     probe_miss = "missing signature"

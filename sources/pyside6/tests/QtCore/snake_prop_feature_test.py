@@ -64,6 +64,8 @@ class Window(QWidget):
         super().__init__()
 
 
+@unittest.skipIf(hasattr(sys, "pypy_version_info"),
+                 "__feature__ cannot yet be used with PyPy")
 class FeatureTest(unittest.TestCase):
     def setUp(self):
         qApp or QApplication()

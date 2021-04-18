@@ -62,9 +62,15 @@ from helper.usesqapplication import UsesQApplication
 from PySide6.QtCore import QCoreApplication, QLibraryInfo, qVersion
 from PySide6.QtWidgets import QApplication, QMainWindow
 
-from __feature__ import snake_case
+# PYSIDE-535: We cannot use __feature__ in PyPy, yet
+try:
+    from __feature__ import snake_case
 
-from feature_with_uic.window import Ui_MainWindow
+    from feature_with_uic.window import Ui_MainWindow
+    have_feature = True
+except ImportError:
+    Ui_MainWindow = object
+    have_feature = False
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -74,6 +80,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
 
 
+@unittest.skipIf(hasattr(sys, "pypy_version_info"),
+                 "__feature__ cannot yet be used with PyPy")
 class FeatureTest(UsesQApplication):
 
     def testFeaturesWorkWithUIC(self):
