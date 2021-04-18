@@ -186,7 +186,7 @@ PyObject *GetSignature_Function(PyObject *obfunc, PyObject *modifier)
 
     int flags = PyCFunction_GET_FLAGS(obfunc);
     PyObject *func_kind;
-    if (PyModule_Check(obtype_mod))
+    if (PyModule_Check(obtype_mod.object()))
         func_kind = PyName::function();
     else if (flags & METH_CLASS)
         func_kind = PyName::classmethod();

@@ -323,7 +323,7 @@ _PepUnicode_AsString(PyObject *str)
  * Support for longobject.h
  *
  */
-#ifdef Py_LIMITED_API
+#if defined(Py_LIMITED_API) || defined(PYPY_VERSION)
 
 /*
  * This is the original Python function _PyLong_AsInt() from longobject.c .
@@ -348,7 +348,7 @@ _PepLong_AsInt(PyObject *obj)
     }
     return int(result);
 }
-#endif // Py_LIMITED_API
+#endif // defined(Py_LIMITED_API) || defined(PYPY_VERSION)
 
 /*****************************************************************************
  *

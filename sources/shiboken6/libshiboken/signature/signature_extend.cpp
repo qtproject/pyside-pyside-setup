@@ -157,8 +157,8 @@ static PyObject *handle_doc(PyObject *ob, PyObject *old_descr)
     init_module_2();
     AutoDecRef ob_type_mod(GetClassOrModOf(ob));
     const char *name;
-    if (PyModule_Check(ob_type_mod))
-        name = PyModule_GetName(ob_type_mod);
+    if (PyModule_Check(ob_type_mod.object()))
+        name = PyModule_GetName(ob_type_mod.object());
     else
         name = reinterpret_cast<PyTypeObject *>(ob_type_mod.object())->tp_name;
     if (handle_doc_in_progress || name == nullptr

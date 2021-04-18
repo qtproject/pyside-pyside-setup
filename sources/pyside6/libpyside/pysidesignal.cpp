@@ -543,7 +543,7 @@ static PyObject *signalInstanceEmit(PyObject *self, PyObject *args)
                                                    PySide::PyName::qtEmit()));
 
     Shiboken::AutoDecRef tupleArgs(PyList_AsTuple(pyArgs));
-    return PyObject_CallObject(pyMethod, tupleArgs);
+    return PyObject_CallObject(pyMethod.object(), tupleArgs);
 }
 
 static PyObject *signalInstanceGetItem(PyObject *self, PyObject *key)
