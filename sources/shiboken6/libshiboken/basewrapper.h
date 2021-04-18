@@ -217,8 +217,6 @@ LIBSHIBOKEN_API MultipleInheritanceInitFunction getMultipleInheritanceFunction(S
 
 LIBSHIBOKEN_API void setDestructorFunction(SbkObjectType *self, ObjectDestructor func);
 
-LIBSHIBOKEN_API void initPrivateData(SbkObjectType *self);
-
 enum WrapperFlags
 {
     InnerClass = 0x1,
@@ -228,7 +226,7 @@ enum WrapperFlags
 /**
  *  Initializes a Shiboken wrapper type and adds it to the module,
  *  or to the enclosing class if the type is an inner class.
- *  This function also calls initPrivateData and setDestructorFunction.
+ *  This function also calls setDestructorFunction.
  *  \param enclosingObject  The module or enclosing class to where the new \p type will be added.
  *  \param typeName         Name by which the type will be known in Python.
  *  \param originalName     Original C++ name of the type.

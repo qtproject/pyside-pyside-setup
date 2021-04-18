@@ -119,7 +119,7 @@ static const char *SbkEnum_SignatureStrings[] = {
 
 void enum_object_dealloc(PyObject *ob)
 {
-    auto self = reinterpret_cast<SbkEnumObject *>(ob);
+    auto *self = reinterpret_cast<SbkEnumObject *>(ob);
     Py_XDECREF(self->ob_name);
     Sbk_object_dealloc(ob);
 }
@@ -272,35 +272,30 @@ static PyType_Slot SbkEnumType_Type_slots[] = {
 };
 static PyType_Spec SbkEnumType_Type_spec = {
     "1:Shiboken.EnumMeta",
-    0,    // filled in later
+    0,
     sizeof(PyMemberDef),
     Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES,
     SbkEnumType_Type_slots,
 };
 
-
 PyTypeObject *SbkEnumType_TypeF(void)
 {
-    static PyTypeObject *type = nullptr;
-    if (!type) {
-        SbkEnumType_Type_spec.basicsize =
-            PepHeapType_SIZE + sizeof(SbkEnumTypePrivate);
-        type = reinterpret_cast<PyTypeObject *>(SbkType_FromSpec(&SbkEnumType_Type_spec));
-    }
-    return type;
+    static PyObject *obType = SbkType_FromSpec(&SbkEnumType_Type_spec);
+    return reinterpret_cast<PyTypeObject *>(obType);
 }
 
 void SbkEnumTypeDealloc(PyObject *pyObj)
 {
-    auto sbkType = reinterpret_cast<SbkEnumType *>(pyObj);
+    auto *enumType = reinterpret_cast<SbkEnumType *>(pyObj);
+    auto *setp = PepType_SETP(enumType);
 
     PyObject_GC_UnTrack(pyObj);
 #ifndef Py_LIMITED_API
     Py_TRASHCAN_SAFE_BEGIN(pyObj);
 #endif
-    if (PepType_SETP(sbkType)->converter) {
-        Shiboken::Conversions::deleteConverter(PepType_SETP(sbkType)->converter);
-    }
+    if (setp->converter)
+        Shiboken::Conversions::deleteConverter(setp->converter);
+    PepType_SETP_delete(enumType);
 #ifndef Py_LIMITED_API
     Py_TRASHCAN_SAFE_END(pyObj);
 #endif
@@ -695,8 +690,9 @@ newTypeWithName(const char *name,
     Py_TYPE(type) = SbkEnumType_TypeF();
 
     auto *enumType = reinterpret_cast<SbkEnumType *>(type);
-    PepType_SETP(enumType)->cppName = cppName;
-    PepType_SETP(enumType)->converterPtr = &PepType_SETP(enumType)->converter;
+    auto *setp = PepType_SETP(enumType);
+    setp->cppName = cppName;
+    setp->converterPtr = &PepType_SETP(enumType)->converter;
     DeclaredEnumTypes::instance().addEnumType(type);
     return type;
 }
@@ -704,7 +700,9 @@ newTypeWithName(const char *name,
 const char *getCppName(PyTypeObject *enumType)
 {
     assert(Py_TYPE(enumType) == SbkEnumType_TypeF());
-    return PepType_SETP(reinterpret_cast<SbkEnumType *>(enumType))->cppName;
+    auto *type = reinterpret_cast<SbkEnumType *>(enumType);
+    auto *setp = PepType_SETP(type);
+    return setp->cppName;
 }
 
 long int getValue(PyObject *enumItem)
@@ -713,15 +711,21 @@ long int getValue(PyObject *enumItem)
     return reinterpret_cast<SbkEnumObject *>(enumItem)->ob_value;
 }
 
-void setTypeConverter(PyTypeObject *enumType, SbkConverter *converter)
+void setTypeConverter(PyTypeObject *type, SbkConverter *converter, bool isFlag)
 {
-    //reinterpret_cast<SbkEnumType *>(enumType)->converter = converter;
-    PepType_SETP(enumType)->converter = converter;
+    if (isFlag) {
+        auto *flagsType = reinterpret_cast<PySideQFlagsType *>(type);
+        PepType_PFTP(flagsType)->converter = converter;
+    }
+    else {
+        auto *enumType = reinterpret_cast<SbkEnumType *>(type);
+        PepType_SETP(enumType)->converter = converter;
+    }
 }
 
-SbkConverter *getTypeConverter(PyTypeObject *enumType)
+SbkConverter *getTypeConverter(PyTypeObject *type)
 {
-    //return reinterpret_cast<SbkEnumType *>(enumType)->converter;
+    auto *enumType = reinterpret_cast<SbkEnumType *>(type);
     return PepType_SETP(enumType)->converter;
 }
 

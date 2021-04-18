@@ -400,6 +400,7 @@ template<> inline PyTypeObject *SbkType<std::nullptr_t>() { return Py_TYPE(&_Py_
 #define PyObject_Check(X) true
 #define SbkChar_Check(X) (SbkNumber_Check(X) || Shiboken::String::checkChar(X))
 
+struct PySideQFlagsType;
 struct PySideQFlagsTypePrivate
 {
     SbkConverter **converterPtr;

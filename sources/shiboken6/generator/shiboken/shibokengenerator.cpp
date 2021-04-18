@@ -784,13 +784,17 @@ QString ShibokenGenerator::converterObject(const AbstractMetaType &type)
 QString ShibokenGenerator::converterObject(const TypeEntry *type)
 {
     if (type->isExtendedCppPrimitive())
-        return QString::fromLatin1("Shiboken::Conversions::PrimitiveTypeConverter<%1>()").arg(type->qualifiedCppName());
+        return QString::fromLatin1("Shiboken::Conversions::PrimitiveTypeConverter<%1>()")
+                                  .arg(type->qualifiedCppName());
     if (type->isWrapperType())
-        return QString::fromLatin1("PepType_SOTP(%1)->converter").arg(cpythonTypeNameExt(type));
+        return QString::fromLatin1("PepType_SOTP(reinterpret_cast<SbkObjectType *>(%1))->converter")
+                                  .arg(cpythonTypeNameExt(type));
     if (type->isEnum())
-        return QString::fromLatin1("PepType_SETP(%1)->converter").arg(cpythonTypeNameExt(type));
+        return QString::fromLatin1("PepType_SETP(reinterpret_cast<SbkEnumType *>(%1))->converter")
+                                  .arg(cpythonTypeNameExt(type));
     if (type->isFlags())
-        return QString::fromLatin1("PepType_PFTP(%1)->converter").arg(cpythonTypeNameExt(type));
+        return QString::fromLatin1("PepType_PFTP(reinterpret_cast<PySideQFlagsType *>(%1))->converter")
+                                  .arg(cpythonTypeNameExt(type));
 
     if (type->isArray()) {
         qDebug() << "Warning: no idea how to handle the Qt5 type " << type->qualifiedCppName();

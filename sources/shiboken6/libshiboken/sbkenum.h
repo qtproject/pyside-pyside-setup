@@ -114,7 +114,7 @@ namespace Enum
     LIBSHIBOKEN_API PyObject *getEnumItemFromValue(PyTypeObject *enumType, long itemValue);
 
     /// Sets the enum's type converter.
-    LIBSHIBOKEN_API void setTypeConverter(PyTypeObject *enumType, SbkConverter *converter);
+    LIBSHIBOKEN_API void setTypeConverter(PyTypeObject *enumType, SbkConverter *converter, bool isFlag);
     /// Returns the converter assigned to the enum \p type.
     LIBSHIBOKEN_API SbkConverter *getTypeConverter(PyTypeObject *enumType);
 

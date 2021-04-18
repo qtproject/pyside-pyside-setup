@@ -150,26 +150,31 @@ LIBSHIBOKEN_API PyObject *_PepType_Lookup(PyTypeObject *type, PyObject *name);
 
 #endif // Py_LIMITED_API
 
+/*****************************************************************************
+ *
+ * PYSIDE-535: Implement a clean type extension for PyPy
+ *
+ */
+
+struct SbkObjectType;
 struct SbkObjectTypePrivate;
+
+LIBSHIBOKEN_API SbkObjectTypePrivate *PepType_SOTP(SbkObjectType *type);
+LIBSHIBOKEN_API void PepType_SOTP_delete(SbkObjectType *type);
+
+struct SbkEnumType;
+struct SbkEnumTypePrivate;
+
+LIBSHIBOKEN_API SbkEnumTypePrivate *PepType_SETP(SbkEnumType *type);
+LIBSHIBOKEN_API void PepType_SETP_delete(SbkEnumType *enumType);
+
+struct PySideQFlagsType;
 struct PySideQFlagsTypePrivate;
 
-#define PepHeapType_SIZE \
-    (reinterpret_cast<PyTypeObject *>(&PyType_Type)->tp_basicsize)
+LIBSHIBOKEN_API PySideQFlagsTypePrivate *PepType_PFTP(PySideQFlagsType *type);
+LIBSHIBOKEN_API void PepType_PFTP_delete(PySideQFlagsType *flagsType);
 
-#define _genericTypeExtender(etype) \
-    (reinterpret_cast<char *>(etype) + PepHeapType_SIZE)
-
-#define PepType_SOTP(etype) \
-    (*reinterpret_cast<SbkObjectTypePrivate **>(_genericTypeExtender(etype)))
-
-#define PepType_SETP(etype) \
-    (reinterpret_cast<SbkEnumTypePrivate *>(_genericTypeExtender(etype)))
-
-#define PepType_PFTP(etype) \
-    (reinterpret_cast<PySideQFlagsTypePrivate *>(_genericTypeExtender(etype)))
-
-#define PepType_SGTP(etype) \
-    (reinterpret_cast<_SbkGenericTypePrivate *>(_genericTypeExtender(etype)))
+/*****************************************************************************/
 
 // functions used everywhere
 LIBSHIBOKEN_API const char *PepType_GetNameStr(PyTypeObject *type);

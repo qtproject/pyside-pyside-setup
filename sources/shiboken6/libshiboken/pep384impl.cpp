@@ -41,6 +41,11 @@
 #include "autodecref.h"
 #include "sbkstaticstrings.h"
 #include "sbkstaticstrings_p.h"
+#include "basewrapper.h"
+#include "basewrapper_p.h"
+#include "sbkenum.h"
+#include "sbkenum_p.h"
+#include "sbkconverter.h"
 
 #include <cstdlib>
 #include <cstring>
@@ -810,6 +815,156 @@ init_PepRuntime()
     if (std::atoi(version + 2) >= 8)
         PepRuntime_38_flag = 1;
 }
+
+/*****************************************************************************
+ *
+ * PYSIDE-535: Support for PyPy
+ *
+ * This has the nice side effect of a more clean implementation,
+ * and we don't keep the old macro version.
+ *
+ */
+
+/*
+ * SbkObjectType extender
+ */
+static std::unordered_map<SbkObjectType *, SbkObjectTypePrivate > SOTP_extender{};
+static thread_local SbkObjectType *SOTP_key{};
+static thread_local SbkObjectTypePrivate *SOTP_value{};
+
+SbkObjectTypePrivate *PepType_SOTP(SbkObjectType *sbkType)
+{
+    if (sbkType == SOTP_key)
+        return SOTP_value;
+    auto it = SOTP_extender.find(sbkType);
+    if (it == SOTP_extender.end()) {
+        it = SOTP_extender.insert({sbkType, {}}).first;
+        memset(&it->second, 0, sizeof(SbkObjectTypePrivate));
+    }
+    SOTP_key = sbkType;
+    SOTP_value = &it->second;
+    return SOTP_value;
+}
+
+void PepType_SOTP_delete(SbkObjectType *sbkType)
+{
+    SOTP_extender.erase(sbkType);
+    SOTP_key = nullptr;
+}
+
+/*
+ * SbkEnumType extender
+ */
+static std::unordered_map<SbkEnumType *, SbkEnumTypePrivate> SETP_extender{};
+static thread_local SbkEnumType *SETP_key{};
+static thread_local SbkEnumTypePrivate *SETP_value{};
+
+SbkEnumTypePrivate *PepType_SETP(SbkEnumType *enumType)
+{
+    if (enumType == SETP_key)
+        return SETP_value;
+    auto it = SETP_extender.find(enumType);
+    if (it == SETP_extender.end()) {
+        it = SETP_extender.insert({enumType, {}}).first;
+        memset(&it->second, 0, sizeof(SbkEnumTypePrivate));
+    }
+    SETP_key = enumType;
+    SETP_value = &it->second;
+    return SETP_value;
+}
+
+void PepType_SETP_delete(SbkEnumType *enumType)
+{
+    SETP_extender.erase(enumType);
+    SETP_key = nullptr;
+}
+
+/*
+ * PySideQFlagsType extender
+ */
+static std::unordered_map<PySideQFlagsType *, PySideQFlagsTypePrivate> PFTP_extender{};
+static thread_local PySideQFlagsType *PFTP_key{};
+static thread_local PySideQFlagsTypePrivate *PFTP_value{};
+
+PySideQFlagsTypePrivate *PepType_PFTP(PySideQFlagsType *flagsType)
+{
+    if (flagsType == PFTP_key)
+        return PFTP_value;
+    auto it = PFTP_extender.find(flagsType);
+    if (it == PFTP_extender.end()) {
+        it = PFTP_extender.insert({flagsType, {}}).first;
+        memset(&it->second, 0, sizeof(PySideQFlagsTypePrivate));
+    }
+    PFTP_key = flagsType;
+    PFTP_value = &it->second;
+    return PFTP_value;
+}
+
+void PepType_PFTP_delete(PySideQFlagsType *flagsType)
+{
+    PFTP_extender.erase(flagsType);
+    PFTP_key = nullptr;
+}
+
+/***************************************************************************
+ *
+ * PYSIDE-535: The enum/flag error
+ * -------------------------------
+ *
+ * This is a fragment of the code which was used to find the enum/flag
+ * alias error. See the change to `setTypeConverter` in sbkenum.cpp .
+ *
+
+Usage:
+
+python3 -c "from PySide6 import QtCore" 2>&1 | python3 tools/debug_renamer.py | uniq -c | head -10
+
+   5 PepType_ExTP:940 x_A SOTP s=96
+   4 PepType_ExTP:940 x_B SETP s=24
+   2 PepType_ExTP:940 x_C PFTP s=16
+   4 PepType_ExTP:940 x_D SETP s=24
+   1 PepType_ExTP:940 x_C SETP s=24
+   2 PepType_ExTP:940 x_E PFTP s=16
+   4 PepType_ExTP:940 x_F SETP s=24
+   1 PepType_ExTP:940 x_E SETP s=24
+   4 PepType_ExTP:940 x_G SETP s=24
+   4 PepType_ExTP:940 x_H SETP s=24
+
+static inline void *PepType_ExTP(PyTypeObject *type, size_t size)
+{
+    static const char *env_p = std::getenv("PFTP");
+    if (env_p) {
+        static PyTypeObject *alias{};
+        const char *kind = size == sizeof(SbkObjectTypePrivate) ? "SOTP" :
+                           size == sizeof(SbkEnumTypePrivate) ? "SETP" :
+                           size == sizeof(PySideQFlagsTypePrivate) ? "PFTP" :
+                           "unk.";
+        fprintf(stderr, "%s:%d %p x %s s=%ld\n", __func__, __LINE__, type, kind, size);
+        PyObject *kill{};
+        if (strlen(env_p) > 0) {
+            if (size == sizeof(PySideQFlagsTypePrivate)) {
+                if (alias == nullptr)
+                    alias = type;
+            }
+            if (size != sizeof(PySideQFlagsTypePrivate)) {
+                if (type == alias)
+                    Py_INCREF(kill);
+            }
+        }
+    }
+    const auto ikey = reinterpret_cast<std::uintptr_t>(type);
+    if (ikey == cached_key)
+        return cached_value;
+    auto it = SOTP_extender.find(ikey);
+    if (it == SOTP_extender.end()) {
+        PepType_ExTP_init(type, size);
+        return PepType_ExTP(type, size);
+    }
+    cached_key = ikey;
+    cached_value = reinterpret_cast<void *>(it->second);
+    return cached_value;
+}
+*/
 
 /*****************************************************************************
  *

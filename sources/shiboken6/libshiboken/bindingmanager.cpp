@@ -102,9 +102,9 @@ public:
             }
         }
         void *typeFound = nullptr;
-        if (PepType_SOTP(type) && PepType_SOTP(type)->type_discovery) {
-            typeFound = PepType_SOTP(type)->type_discovery(*cptr, baseType);
-        }
+        auto *sotp = PepType_SOTP(type);
+        if (sotp->type_discovery)
+            typeFound = sotp->type_discovery(*cptr, baseType);
         if (typeFound) {
             // This "typeFound != type" is needed for backwards compatibility with old modules using a newer version of
             // libshiboken because old versions of type_discovery function used to return a SbkObjectType *instead of
@@ -212,8 +212,8 @@ bool BindingManager::hasWrapper(const void *cptr)
 
 void BindingManager::registerWrapper(SbkObject *pyObj, void *cptr)
 {
-    auto instanceType = reinterpret_cast<SbkObjectType *>(Py_TYPE(pyObj));
-    SbkObjectTypePrivate *d = PepType_SOTP(instanceType);
+    auto *instanceType = reinterpret_cast<SbkObjectType *>(Py_TYPE(pyObj));
+    auto *d = PepType_SOTP(instanceType);
 
     if (!d)
         return;
@@ -233,8 +233,8 @@ void BindingManager::registerWrapper(SbkObject *pyObj, void *cptr)
 
 void BindingManager::releaseWrapper(SbkObject *sbkObj)
 {
-    auto sbkType = reinterpret_cast<SbkObjectType *>(Py_TYPE(sbkObj));
-    SbkObjectTypePrivate *d = PepType_SOTP(sbkType);
+    auto *sbkType = reinterpret_cast<SbkObjectType *>(Py_TYPE(sbkObj));
+    auto *d = PepType_SOTP(sbkType);
     int numBases = ((d && d->is_multicpp) ? getNumberOfCppBaseClasses(Py_TYPE(sbkObj)) : 1);
 
     void ** cptrs = reinterpret_cast<SbkObject *>(sbkObj)->d->cptr;

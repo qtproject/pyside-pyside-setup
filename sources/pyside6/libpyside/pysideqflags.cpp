@@ -133,6 +133,13 @@ extern "C" {
             Py_RETURN_TRUE;
         Py_RETURN_FALSE;
     }
+
+    static void PySideQFlagsDealloc(PyObject *self)
+    {
+        auto *flagsType = reinterpret_cast<PySideQFlagsType *>(self);
+        PepType_PFTP_delete(flagsType);
+        Sbk_object_dealloc(self);
+    }
 }
 
 namespace PySide
@@ -149,7 +156,7 @@ namespace QFlags
         {Py_nb_index, reinterpret_cast<void*>(qflag_int)},
         {Py_tp_new, reinterpret_cast<void *>(PySideQFlagsNew)},
         {Py_tp_richcompare, reinterpret_cast<void *>(PySideQFlagsRichCompare)},
-        {Py_tp_dealloc, reinterpret_cast<void *>(Sbk_object_dealloc)},
+        {Py_tp_dealloc, reinterpret_cast<void *>(PySideQFlagsDealloc)},
         {0, nullptr}
     };
     static PyType_Spec SbkNewQFlagsType_spec = {
@@ -181,7 +188,8 @@ namespace QFlags
         Py_TYPE(type) = &PyType_Type;
 
         PySideQFlagsType *flagsType = reinterpret_cast<PySideQFlagsType *>(type);
-        PepType_PFTP(flagsType)->converterPtr = &PepType_PFTP(flagsType)->converter;
+        auto *pftp = PepType_PFTP(flagsType);
+        pftp->converterPtr = &pftp->converter;
 
         if (PyType_Ready(type) < 0)
             return nullptr;

@@ -4036,7 +4036,8 @@ void CppGenerator::writeEnumConverterInitialization(TextStream &s, const TypeEnt
             writeAddPythonToCppConversion(s, QLatin1String("converter"), toCpp, isConv);
         }
 
-        s << "Shiboken::Enum::setTypeConverter(" << enumPythonType << ", converter);\n";
+        s << "Shiboken::Enum::setTypeConverter(" << enumPythonType
+            << ", converter, " << (enumType->isFlags() ? "true" : "false") << ");\n";
 
         QString signature = enumType->qualifiedCppName();
         // Replace "QFlags<Class::Option>" by "Class::Options"
