@@ -35,18 +35,23 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtGui import QPainter, QLinearGradient
+from helper.usesqguiapplication import UsesQGuiApplication
+from PySide6.QtGui import QPainter, QLinearGradient, QImage
 from PySide6.QtCore import QLine, QLineF, QPoint, QPointF, QRect, QRectF, Qt
 
-class QPainterDrawText(unittest.TestCase):
 
+class QPainterDrawText(UsesQGuiApplication):
     def setUp(self):
-        self.painter = QPainter()
+        super(QPainterDrawText, self).setUp()
+        self.image = QImage(32, 32, QImage.Format_ARGB32)
+        self.painter = QPainter(self.image)
         self.text = 'teste!'
 
     def tearDown(self):
         del self.text
+        self.painter.end()
         del self.painter
+        super(QPainterDrawText, self).tearDown()
 
     def testDrawText(self):
         # bug #254
@@ -105,13 +110,17 @@ class QPainterDrawText(unittest.TestCase):
                                    QPoint(80.0, 30.0),
                                    QPoint(90.0, 70.0)])
 
-class SetBrushWithOtherArgs(unittest.TestCase):
+
+class SetBrushWithOtherArgs(UsesQGuiApplication):
     '''Using qpainter.setBrush with args other than QBrush'''
 
     def testSetBrushGradient(self):
-        painter = QPainter()
+        image = QImage(32, 32, QImage.Format_ARGB32)
+        painter = QPainter(image)
         gradient = QLinearGradient(0, 0, 0, 0)
         painter.setBrush(gradient)
+        painter.end()
+
 
 if __name__ == '__main__':
     unittest.main()
