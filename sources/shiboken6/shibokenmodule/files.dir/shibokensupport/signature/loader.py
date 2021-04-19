@@ -93,12 +93,13 @@ def feature_import(*args, **kwds):
     return feature_import(*args, **kwds)
 
 
+import builtins
 import signature_bootstrap
 from shibokensupport import signature, feature as __feature__
 signature.get_signature = signature_bootstrap.get_signature
 # PYSIDE-1019: Publish the __feature__ dictionary.
 __feature__.pyside_feature_dict = signature_bootstrap.pyside_feature_dict
-__builtins__["__feature_import__"] = signature_bootstrap.__feature_import__
+builtins.__feature_import__ = signature_bootstrap.__feature_import__
 del signature_bootstrap
 
 def _get_modname(mod):
@@ -173,7 +174,7 @@ if "PySide6" in sys.modules:
     # __feature__ is already in sys.modules, so this is actually no import
     import PySide6.support.__feature__
     sys.modules["__feature__"] = PySide6.support.__feature__
-    __builtins__["__orig_import__"] = __builtins__["__import__"]
-    __builtins__["__import__"] = __builtins__["__feature_import__"]
+    builtins.__orig_import__ = builtins.__import__
+    builtins.__import__ = builtins.__feature_import__
 
 # end of file
