@@ -370,7 +370,9 @@ def fix_variables(props, line):
         if not isinstance(ann, ResultVariable):
             continue
         # We move the variable to the end and remove it.
-        retvars.append(ann.type)
+        # PYSIDE-1409: If the variable was the first arg, we move it to the front.
+        # XXX This algorithm should probably be replaced by more introspection.
+        retvars.insert(0 if idx == 0 else len(retvars), ann.type)
         deletions.append(idx)
         del annos[name]
     for idx in reversed(deletions):
