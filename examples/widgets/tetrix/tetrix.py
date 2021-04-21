@@ -44,8 +44,12 @@
 
 from enum import IntEnum
 import random
+import sys
 
-from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtCore import QBasicTimer, QSize, Qt, Signal, Slot
+from PySide6.QtGui import QColor, QPainter
+from PySide6.QtWidgets import (QApplication, QFrame, QGridLayout, QLabel,
+                               QLCDNumber, QPushButton, QWidget)
 
 
 class Piece(IntEnum):
@@ -59,30 +63,30 @@ class Piece(IntEnum):
      MirroredLShape = 7
 
 
-class TetrixWindow(QtWidgets.QWidget):
+class TetrixWindow(QWidget):
     def __init__(self):
         super(TetrixWindow, self).__init__()
 
         self.board = TetrixBoard()
 
-        next_piece_label = QtWidgets.QLabel()
-        next_piece_label.setFrameStyle(QtWidgets.QFrame.Box | QtWidgets.QFrame.Raised)
-        next_piece_label.setAlignment(QtCore.Qt.AlignCenter)
+        next_piece_label = QLabel()
+        next_piece_label.setFrameStyle(QFrame.Box | QFrame.Raised)
+        next_piece_label.setAlignment(Qt.AlignCenter)
         self.board.set_next_piece_label(next_piece_label)
 
-        score_lcd = QtWidgets.QLCDNumber(5)
-        score_lcd.setSegmentStyle(QtWidgets.QLCDNumber.Filled)
-        level_lcd = QtWidgets.QLCDNumber(2)
-        level_lcd.setSegmentStyle(QtWidgets.QLCDNumber.Filled)
-        lines_lcd = QtWidgets.QLCDNumber(5)
-        lines_lcd.setSegmentStyle(QtWidgets.QLCDNumber.Filled)
+        score_lcd = QLCDNumber(5)
+        score_lcd.setSegmentStyle(QLCDNumber.Filled)
+        level_lcd = QLCDNumber(2)
+        level_lcd.setSegmentStyle(QLCDNumber.Filled)
+        lines_lcd = QLCDNumber(5)
+        lines_lcd.setSegmentStyle(QLCDNumber.Filled)
 
-        start_button = QtWidgets.QPushButton("&Start")
-        start_button.setFocusPolicy(QtCore.Qt.NoFocus)
-        quit_button = QtWidgets.QPushButton("&Quit")
-        quit_button.setFocusPolicy(QtCore.Qt.NoFocus)
-        pause_button = QtWidgets.QPushButton("&Pause")
-        pause_button.setFocusPolicy(QtCore.Qt.NoFocus)
+        start_button = QPushButton("&Start")
+        start_button.setFocusPolicy(Qt.NoFocus)
+        quit_button = QPushButton("&Quit")
+        quit_button.setFocusPolicy(Qt.NoFocus)
+        pause_button = QPushButton("&Pause")
+        pause_button.setFocusPolicy(Qt.NoFocus)
 
         start_button.clicked.connect(self.board.start)
         pause_button.clicked.connect(self.board.pause)
@@ -91,7 +95,7 @@ class TetrixWindow(QtWidgets.QWidget):
         self.board.level_changed.connect(level_lcd.display)
         self.board.lines_removed_changed.connect(lines_lcd.display)
 
-        layout = QtWidgets.QGridLayout()
+        layout = QGridLayout(self)
         layout.addWidget(self.create_label("NEXT"), 0, 0)
         layout.addWidget(next_piece_label, 1, 0)
         layout.addWidget(self.create_label("LEVEL"), 2, 0)
@@ -104,31 +108,30 @@ class TetrixWindow(QtWidgets.QWidget):
         layout.addWidget(lines_lcd, 3, 2)
         layout.addWidget(quit_button, 4, 2)
         layout.addWidget(pause_button, 5, 2)
-        self.setLayout(layout)
 
         self.setWindowTitle("Tetrix")
         self.resize(550, 370)
 
     def create_label(self, text):
-        lbl = QtWidgets.QLabel(text)
-        lbl.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignBottom)
+        lbl = QLabel(text)
+        lbl.setAlignment(Qt.AlignHCenter | Qt.AlignBottom)
         return lbl
 
 
-class TetrixBoard(QtWidgets.QFrame):
+class TetrixBoard(QFrame):
     board_width = 10
     board_height = 22
 
-    score_changed = QtCore.Signal(int)
+    score_changed = Signal(int)
 
-    level_changed = QtCore.Signal(int)
+    level_changed = Signal(int)
 
-    lines_removed_changed = QtCore.Signal(int)
+    lines_removed_changed = Signal(int)
 
     def __init__(self, parent=None):
         super(TetrixBoard, self).__init__(parent)
 
-        self.timer = QtCore.QBasicTimer()
+        self.timer = QBasicTimer()
         self.nextPieceLabel = None
         self._is_waiting_after_line = False
         self._cur_piece = TetrixPiece()
@@ -141,8 +144,8 @@ class TetrixBoard(QtWidgets.QFrame):
         self.level = 0
         self.board = None
 
-        self.setFrameStyle(QtWidgets.QFrame.Panel | QtWidgets.QFrame.Sunken)
-        self.setFocusPolicy(QtCore.Qt.StrongFocus)
+        self.setFrameStyle(QFrame.Panel | QFrame.Sunken)
+        self.setFocusPolicy(Qt.StrongFocus)
         self._is_started = False
         self._is_paused = False
         self.clear_board()
@@ -168,11 +171,11 @@ class TetrixBoard(QtWidgets.QFrame):
         self.nextPieceLabel = label
 
     def sizeHint(self):
-        return QtCore.QSize(TetrixBoard.board_width * 15 + self.frameWidth() * 2,
+        return QSize(TetrixBoard.board_width * 15 + self.frameWidth() * 2,
                 TetrixBoard.board_height * 15 + self.frameWidth() * 2)
 
     def minimum_size_hint(self):
-        return QtCore.QSize(TetrixBoard.board_width * 5 + self.frameWidth() * 2,
+        return QSize(TetrixBoard.board_width * 5 + self.frameWidth() * 2,
                 TetrixBoard.board_height * 5 + self.frameWidth() * 2)
 
     def start(self):
@@ -209,11 +212,11 @@ class TetrixBoard(QtWidgets.QFrame):
     def paintEvent(self, event):
         super(TetrixBoard, self).paintEvent(event)
 
-        painter = QtGui.QPainter(self)
+        painter = QPainter(self)
         rect = self.contentsRect()
 
         if self._is_paused:
-            painter.drawText(rect, QtCore.Qt.AlignCenter, "Pause")
+            painter.drawText(rect, Qt.AlignCenter, "Pause")
             return
 
         board_top = rect.bottom() - TetrixBoard.board_height * self.square_height()
@@ -240,17 +243,17 @@ class TetrixBoard(QtWidgets.QFrame):
             return
 
         key = event.key()
-        if key == QtCore.Qt.Key_Left:
+        if key == Qt.Key_Left:
             self.try_move(self._cur_piece, self._cur_x - 1, self._cur_y)
-        elif key == QtCore.Qt.Key_Right:
+        elif key == Qt.Key_Right:
             self.try_move(self._cur_piece, self._cur_x + 1, self._cur_y)
-        elif key == QtCore.Qt.Key_Down:
+        elif key == Qt.Key_Down:
             self.try_move(self._cur_piece.rotated_right(), self._cur_x, self._cur_y)
-        elif key == QtCore.Qt.Key_Up:
+        elif key == Qt.Key_Up:
             self.try_move(self._cur_piece.rotated_left(), self._cur_x, self._cur_y)
-        elif key == QtCore.Qt.Key_Space:
+        elif key == Qt.Key_Space:
             self.drop_down()
-        elif key == QtCore.Qt.Key_D:
+        elif key == Qt.Key_D:
             self.one_line_down()
         else:
             super(TetrixBoard, self).keyPressEvent(event)
@@ -353,8 +356,8 @@ class TetrixBoard(QtWidgets.QFrame):
         dx = self._next_piece.max_x() - self._next_piece.min_x() + 1
         dy = self._next_piece.max_y() - self._next_piece.min_y() + 1
 
-        pixmap = QtGui.QPixmap(dx * self.square_width(), dy * self.square_height())
-        painter = QtGui.QPainter(pixmap)
+        pixmap = QPixmap(dx * self.square_width(), dy * self.square_height())
+        painter = QPainter(pixmap)
         painter.fillRect(pixmap.rect(), self.nextPieceLabel.palette().background())
 
         for int in range(4):
@@ -384,7 +387,7 @@ class TetrixBoard(QtWidgets.QFrame):
         color_table = [0x000000, 0xCC6666, 0x66CC66, 0x6666CC,
                       0xCCCC66, 0xCC66CC, 0x66CCCC, 0xDAAA00]
 
-        color = QtGui.QColor(color_table[shape])
+        color = QColor(color_table[shape])
         painter.fillRect(x + 1, y + 1, self.square_width() - 2,
                 self.square_height() - 2, color)
 
@@ -497,10 +500,7 @@ class TetrixPiece(object):
 
 
 if __name__ == '__main__':
-
-    import sys
-
-    app = QtWidgets.QApplication(sys.argv)
+    app = QApplication(sys.argv)
     window = TetrixWindow()
     window.show()
     random.seed(None)
