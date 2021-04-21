@@ -1,7 +1,7 @@
 
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -43,56 +43,55 @@
 
 
 import sys
-from PySide6 import QtCore, QtGui, QtWidgets
+
+from PySide6.QtCore import Signal, Slot, Qt
+from PySide6.QtGui import QFont
+from PySide6.QtWidgets import (QApplication, QGridLayout, QLCDNumber,
+                               QPushButton, QSlider, QVBoxLayout, QWidget)
 
 
-class LCDRange(QtWidgets.QWidget):
-    value_changed = QtCore.Signal(int)
+class LCDRange(QWidget):
+
+    value_changed = Signal(int)
+
     def __init__(self, parent=None):
-        QtWidgets.QWidget.__init__(self, parent)
+        super().__init__(parent)
 
-        lcd = QtWidgets.QLCDNumber(2)
+        lcd = QLCDNumber(2)
 
-        self.slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
+        self.slider = QSlider(Qt.Horizontal)
         self.slider.setRange(0, 99)
         self.slider.setValue(0)
 
-        self.connect(self.slider, QtCore.SIGNAL("valueChanged(int)"),
-                     lcd, QtCore.SLOT("display(int)"))
-        self.connect(self.slider, QtCore.SIGNAL("valueChanged(int)"),
-                     self, QtCore.SIGNAL("valueChanged(int)"))
+        self.slider.valueChanged.connect(lcd.display)
+        self.slider.valueChanged.connect(self.value_changed)
 
-        layout = QtWidgets.QVBoxLayout()
+        layout = QVBoxLayout(self)
         layout.addWidget(lcd)
         layout.addWidget(self.slider)
-        self.setLayout(layout)
 
     def value(self):
         return self.slider.value()
 
-    @QtCore.Slot(int)
+    @Slot(int)
     def set_value(self, value):
         self.slider.setValue(value)
 
 
-class MyWidget(QtWidgets.QWidget):
+class MyWidget(QWidget):
     def __init__(self, parent=None):
-        QtWidgets.QWidget.__init__(self, parent)
+        super().__init__(parent)
 
-        quit = QtWidgets.QPushButton("Quit")
-        quit.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
+        quit = QPushButton("Quit")
+        quit.setFont(QFont("Times", 18, QFont.Bold))
+        quit.clicked.connect(qApp.quit)
 
-        self.connect(quit, QtCore.SIGNAL("clicked()"),
-                     qApp, QtCore.SLOT("quit()"))
-
-        grid = QtWidgets.QGridLayout()
         previous_range = None
 
-
-        layout = QtWidgets.QVBoxLayout()
+        layout = QVBoxLayout(self)
         layout.addWidget(quit)
+        grid = QGridLayout()
         layout.addLayout(grid)
-        self.setLayout(layout)
 
         for row in range(3):
             for column in range(3):
@@ -100,14 +99,13 @@ class MyWidget(QtWidgets.QWidget):
                 grid.addWidget(lcd_range, row, column)
 
                 if previous_range:
-                    self.connect(lcd_range, QtCore.SIGNAL("valueChanged(int)"),
-                                 previous_range.set_value)
+                    lcd_range.value_changed.connect(previous_range.set_value)
 
                 previous_range = lcd_range
 
 
-
-app = QtWidgets.QApplication(sys.argv)
-widget = MyWidget()
-widget.show()
-sys.exit(app.exec_())
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    widget = MyWidget()
+    widget.show()
+    sys.exit(app.exec_())

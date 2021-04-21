@@ -1,7 +1,7 @@
 
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -43,17 +43,20 @@
 
 
 import sys
-from PySide6 import QtCore, QtGui, QtWidgets
+
+from PySide6.QtCore import (QPoint, QRect, QTime, QTimer, Qt)
+from PySide6.QtGui import QFont
+from PySide6.QtWidgets import (QApplication, QPushButton)
 
 
-app = QtWidgets.QApplication(sys.argv)
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
 
-quit = QtWidgets.QPushButton("Quit")
-quit.resize(75, 30)
-quit.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
+    quit = QPushButton("Quit")
+    quit.resize(75, 30)
+    quit.setFont(QFont("Times", 18, QFont.Bold))
 
-QtCore.QObject.connect(quit, QtCore.SIGNAL("clicked()"),
-                       app, QtCore.SLOT("quit()"))
+    quit.clicked.connect(app.quit)
 
-quit.show()
-sys.exit(app.exec_())
+    quit.show()
+    sys.exit(app.exec_())

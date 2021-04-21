@@ -1,7 +1,7 @@
 
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -44,41 +44,45 @@
 
 import sys
 import math
-from PySide6 import QtCore, QtGui, QtWidgets
+
+from PySide6.QtCore import QPoint, QRect, QTimer, Qt, Signal, Slot
+from PySide6.QtGui import QColor, QFont, QPainter, QPalette, QRegion
+from PySide6.QtWidgets import (QApplication, QGridLayout, QHBoxLayout,
+                               QLCDNumber, QPushButton, QSlider,
+                               QVBoxLayout, QWidget)
 
 
-class LCDRange(QtWidgets.QWidget):
-    value_changed = QtCore.Signal(int)
+class LCDRange(QWidget):
+
+    value_changed = Signal(int)
+
     def __init__(self, parent=None):
-        QtWidgets.QWidget.__init__(self, parent)
+        super().__init__(parent)
 
-        lcd = QtWidgets.QLCDNumber(2)
-        self.slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
+        lcd = QLCDNumber(2)
+        self.slider = QSlider(Qt.Horizontal)
         self.slider.setRange(0, 99)
         self.slider.setValue(0)
 
-        self.connect(self.slider, QtCore.SIGNAL("valueChanged(int)"),
-                     lcd, QtCore.SLOT("display(int)"))
-        self.connect(self.slider, QtCore.SIGNAL("valueChanged(int)"),
-                     self, QtCore.SIGNAL("valueChanged(int)"))
+        self.slider.valueChanged.connect(lcd.display)
+        self.slider.valueChanged.connect(self.value_changed)
 
-        layout = QtWidgets.QVBoxLayout()
+        layout = QVBoxLayout(self)
         layout.addWidget(lcd)
         layout.addWidget(self.slider)
-        self.setLayout(layout)
 
         self.setFocusProxy(self.slider)
 
     def value(self):
         return self.slider.value()
 
-    @QtCore.Slot(int)
+    @Slot(int)
     def set_value(self, value):
         self.slider.setValue(value)
 
     def set_range(self, minValue, maxValue):
         if minValue < 0 or maxValue > 99 or minValue > maxValue:
-            QtCore.qWarning(f"LCDRange::setRange({minValue}, {maxValue})\n"
+            qWarning(f"LCDRange::setRange({minValue}, {maxValue})\n"
                     "\tRange must be 0..99\n"
                     "\tand minValue must not be greater than maxValue")
             return
@@ -86,27 +90,28 @@ class LCDRange(QtWidgets.QWidget):
         self.slider.setRange(minValue, maxValue)
 
 
-class CannonField(QtWidgets.QWidget):
-    angle_changed = QtCore.Signal(int)
-    force_changed = QtCore.Signal(int)
+class CannonField(QWidget):
+
+    angle_changed = Signal(int)
+    force_changed = Signal(int)
+
     def __init__(self, parent=None):
-        QtWidgets.QWidget.__init__(self, parent)
+        super().__init__(parent)
 
         self._current_angle = 45
         self._current_force = 0
         self._timer_count = 0
-        self._auto_shoot_timer = QtCore.QTimer(self)
-        self.connect(self._auto_shoot_timer, QtCore.SIGNAL("timeout()"),
-                     self.move_shot)
+        self._auto_shoot_timer = QTimer(self)
+        self._auto_shoot_timer.timeout.connect(self.move_shot)
         self._shoot_angle = 0
         self._shoot_force = 0
-        self.setPalette(QtGui.QPalette(QtGui.QColor(250, 250, 200)))
+        self.setPalette(QPalette(QColor(250, 250, 200)))
         self.setAutoFillBackground(True)
 
     def angle(self):
         return self._current_angle
 
-    @QtCore.Slot(int)
+    @Slot(int)
     def set_angle(self, angle):
         if angle < 5:
             angle = 5
@@ -116,21 +121,21 @@ class CannonField(QtWidgets.QWidget):
             return
         self._current_angle = angle
         self.update()
-        self.emit(QtCore.SIGNAL("angleChanged(int)"), self._current_angle)
+        self.angle_changed.emit(self._current_angle)
 
     def force(self):
         return self._current_force
 
-    @QtCore.Slot(int)
+    @Slot(int)
     def set_force(self, force):
         if force < 0:
             force = 0
         if self._current_force == force:
             return
         self._current_force = force
-        self.emit(QtCore.SIGNAL("forceChanged(int)"), self._current_force)
+        self.force_changed.emit(self._current_force)
 
-    @QtCore.Slot()
+    @Slot()
     def shoot(self):
         if self._auto_shoot_timer.isActive():
             return
@@ -139,9 +144,9 @@ class CannonField(QtWidgets.QWidget):
         self._shoot_force = self._current_force
         self._auto_shoot_timer.start(5)
 
-    @QtCore.Slot()
+    @Slot()
     def move_shot(self):
-        region = QtGui.QRegion(self.shot_rect())
+        region = QRegion(self.shot_rect())
         self._timer_count += 1
 
         shot_r = self.shot_rect()
@@ -149,37 +154,37 @@ class CannonField(QtWidgets.QWidget):
         if shot_r.x() > self.width() or shot_r.y() > self.height():
             self._auto_shoot_timer.stop()
         else:
-            region = region.united(QtGui.QRegion(shot_r))
+            region = region.united(QRegion(shot_r))
 
         self.update(region)
 
     def paintEvent(self, event):
-        painter = QtGui.QPainter(self)
+        painter = QPainter(self)
 
         self.paint_cannon(painter)
         if self._auto_shoot_timer.isActive():
             self.paint_shot(painter)
 
     def paint_shot(self, painter):
-        painter.setPen(QtCore.Qt.NoPen)
-        painter.setBrush(QtCore.Qt.black)
+        painter.setPen(Qt.NoPen)
+        painter.setBrush(Qt.black)
         painter.drawRect(self.shot_rect())
 
-    barrel_rect = QtCore.QRect(33, -4, 15, 8)
+    barrel_rect = QRect(33, -4, 15, 8)
 
     def paint_cannon(self, painter):
-        painter.setPen(QtCore.Qt.NoPen)
-        painter.setBrush(QtCore.Qt.blue)
+        painter.setPen(Qt.NoPen)
+        painter.setBrush(Qt.blue)
 
         painter.save()
         painter.translate(0, self.height())
-        painter.drawPie(QtCore.QRect(-35, -35, 70, 70), 0, 90 * 16)
+        painter.drawPie(QRect(-35, -35, 70, 70), 0, 90 * 16)
         painter.rotate(-self._current_angle)
         painter.drawRect(CannonField.barrel_rect)
         painter.restore()
 
     def cannon_rect(self):
-        result = QtCore.QRect(0, 0, 50, 50)
+        result = QRect(0, 0, 50, 50)
         result.moveBottomLeft(self.rect().bottomLect())
         return result
 
@@ -188,7 +193,7 @@ class CannonField(QtWidgets.QWidget):
 
         time = self._timer_count / 40.0
         velocity = self._shoot_force
-        radians = self._shoot_angle * 3.14159265 / 180
+        radians = self._shoot_angle * math.pi / 180
 
         velx = velocity * math.cos(radians)
         vely = velocity * math.sin(radians)
@@ -197,20 +202,19 @@ class CannonField(QtWidgets.QWidget):
         x = x0 + velx * time
         y = y0 + vely * time - 0.5 * gravity * time * time
 
-        result = QtCore.QRect(0, 0, 6, 6)
-        result.moveCenter(QtCore.QPoint(round(x), self.height() - 1 - round(y)))
+        result = QRect(0, 0, 6, 6)
+        result.moveCenter(QPoint(round(x), self.height() - 1 - round(y)))
         return result
 
 
-class MyWidget(QtWidgets.QWidget):
+class MyWidget(QWidget):
     def __init__(self, parent=None):
-        QtWidgets.QWidget.__init__(self, parent)
+        super().__init__(parent)
 
-        quit = QtWidgets.QPushButton("&Quit")
-        quit.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
+        quit = QPushButton("&Quit")
+        quit.setFont(QFont("Times", 18, QFont.Bold))
 
-        self.connect(quit, QtCore.SIGNAL("clicked()"),
-                     qApp, QtCore.SLOT("quit()"))
+        quit.clicked.connect(qApp.quit)
 
         angle = LCDRange()
         angle.set_range(5, 70)
@@ -220,44 +224,40 @@ class MyWidget(QtWidgets.QWidget):
 
         cannon_field = CannonField()
 
-        self.connect(angle, QtCore.SIGNAL("valueChanged(int)"),
-                     cannon_field.set_angle)
-        self.connect(cannon_field, QtCore.SIGNAL("angleChanged(int)"),
-                     angle.set_value)
+        angle.value_changed.connect(cannon_field.set_angle)
+        cannon_field.angle_changed.connect(angle.set_value)
 
-        self.connect(force, QtCore.SIGNAL("valueChanged(int)"),
-                     cannon_field.set_force)
-        self.connect(cannon_field, QtCore.SIGNAL("forceChanged(int)"),
-                     force.set_value)
+        force.value_changed.connect(cannon_field.set_force)
+        cannon_field.force_changed.connect(force.set_value)
 
-        shoot = QtWidgets.QPushButton("&Shoot")
-        shoot.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
+        shoot = QPushButton("&Shoot")
+        shoot.setFont(QFont("Times", 18, QFont.Bold))
 
-        self.connect(shoot, QtCore.SIGNAL("clicked()"), cannon_field.shoot)
+        shoot.clicked.connect(cannon_field.shoot)
 
-        top_layout = QtWidgets.QHBoxLayout()
+        top_layout = QHBoxLayout()
         top_layout.addWidget(shoot)
         top_layout.addStretch(1)
 
-        left_layout = QtWidgets.QVBoxLayout()
+        left_layout = QVBoxLayout()
         left_layout.addWidget(angle)
         left_layout.addWidget(force)
 
-        grid_layout = QtWidgets.QGridLayout()
+        grid_layout = QGridLayout(self)
         grid_layout.addWidget(quit, 0, 0)
         grid_layout.addLayout(top_layout, 0, 1)
         grid_layout.addLayout(left_layout, 1, 0)
         grid_layout.addWidget(cannon_field, 1, 1, 2, 1)
         grid_layout.setColumnStretch(1, 10)
-        self.setLayout(grid_layout)
 
         angle.set_value(60)
         force.set_value(25)
         angle.setFocus()
 
 
-app = QtWidgets.QApplication(sys.argv)
-widget = MyWidget()
-widget.setGeometry(100, 100, 500, 355)
-widget.show()
-sys.exit(app.exec_())
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    widget = MyWidget()
+    widget.setGeometry(100, 100, 500, 355)
+    widget.show()
+    sys.exit(app.exec_())

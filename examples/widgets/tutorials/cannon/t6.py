@@ -1,7 +1,7 @@
 
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -43,48 +43,47 @@
 
 
 import sys
-from PySide6 import QtCore, QtGui, QtWidgets
+
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QFont
+from PySide6.QtWidgets import (QApplication, QGridLayout, QLCDNumber,
+                               QPushButton, QSlider, QVBoxLayout, QWidget)
 
 
-class LCDRange(QtWidgets.QWidget):
+class LCDRange(QWidget):
     def __init__(self, parent=None):
-        QtWidgets.QWidget.__init__(self, parent)
+        super().__init__(parent)
 
-        lcd = QtWidgets.QLCDNumber(2)
-        slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
+        lcd = QLCDNumber(2)
+        slider = QSlider(Qt.Horizontal)
         slider.setRange(0, 99)
         slider.setValue(0)
-        self.connect(slider, QtCore.SIGNAL("valueChanged(int)"),
-                     lcd, QtCore.SLOT("display(int)"))
+        slider.valueChanged.connect(lcd.display)
 
-        layout = QtWidgets.QVBoxLayout()
+        layout = QVBoxLayout(self)
         layout.addWidget(lcd)
         layout.addWidget(slider)
-        self.setLayout(layout)
 
 
-class MyWidget(QtWidgets.QWidget):
+class MyWidget(QWidget):
     def __init__(self, parent=None):
-        QtWidgets.QWidget.__init__(self, parent)
+        super().__init__(parent)
 
-        quit = QtWidgets.QPushButton("Quit")
-        quit.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
-        self.connect(quit, QtCore.SIGNAL("clicked()"),
-                     qApp, QtCore.SLOT("quit()"))
+        quit = QPushButton("Quit")
+        quit.setFont(QFont("Times", 18, QFont.Bold))
+        quit.clicked.connect(qApp.quit)
 
-        grid = QtWidgets.QGridLayout()
-        layout = QtWidgets.QVBoxLayout()
+        layout = QVBoxLayout(self)
         layout.addWidget(quit)
+        grid = QGridLayout()
         layout.addLayout(grid)
-        self.setLayout(layout)
         for row in range(3):
             for column in range(3):
                 grid.addWidget(LCDRange(), row, column)
 
 
-
-
-app = QtWidgets.QApplication(sys.argv)
-widget = MyWidget()
-widget.show()
-sys.exit(app.exec_())
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    widget = MyWidget()
+    widget.show()
+    sys.exit(app.exec_())

@@ -1,7 +1,7 @@
 
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -43,24 +43,26 @@
 
 
 import sys
-from PySide6 import QtCore, QtGui, QtWidgets
+
+from PySide6.QtGui import QFont
+from PySide6.QtWidgets import (QApplication, QPushButton, QWidget)
 
 
-class MyWidget(QtWidgets.QWidget):
+class MyWidget(QWidget):
     def __init__(self, parent=None):
-        QtWidgets.QWidget.__init__(self, parent)
+        super().__init__(parent)
 
         self.setFixedSize(200, 120)
 
-        self.quit = QtWidgets.QPushButton("Quit", self)
+        self.quit = QPushButton("Quit", self)
         self.quit.setGeometry(62, 40, 75, 30)
-        self.quit.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
+        self.quit.setFont(QFont("Times", 18, QFont.Bold))
 
-        self.connect(self.quit, QtCore.SIGNAL("clicked()"),
-                     qApp, QtCore.SLOT("quit()"))
+        self.quit.clicked.connect(qApp.quit)
 
 
-app = QtWidgets.QApplication(sys.argv)
-widget = MyWidget()
-widget.show()
-sys.exit(app.exec_())
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    widget = MyWidget()
+    widget.show()
+    sys.exit(app.exec_())

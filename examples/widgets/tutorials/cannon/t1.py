@@ -1,7 +1,7 @@
 
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -43,14 +43,16 @@
 
 
 import sys
-from PySide6 import QtWidgets
+
+from PySide6.QtWidgets import QApplication, QPushButton
 
 
-app = QtWidgets.QApplication(sys.argv)
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
 
-hello = QtWidgets.QPushButton("Hello world!")
-hello.resize(100, 30)
+    hello = QPushButton("Hello world!")
+    hello.resize(100, 30)
 
-hello.show()
+    hello.show()
 
-sys.exit(app.exec_())
+    sys.exit(app.exec_())
