@@ -32,6 +32,7 @@ add_custom_command(
             --limited-api ${PYTHON_LIMITED_API}
             ${embedding_option}
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/embed/embedding_generator.py"
+            "${CMAKE_CURRENT_SOURCE_DIR}/embed/signature_bootstrap.py"
             ${embedded_shiboken_files}
     )
 
