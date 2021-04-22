@@ -3,7 +3,7 @@
 ##
 ## Copyright (C) 2009 Darryl Wallace, 2009 <wallacdj@gmail.com>
 ## Copyright (C) 2013 Riverbank Computing Limited.
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -41,38 +41,58 @@
 ##
 #############################################################################
 
-from PySide6 import QtCore, QtWidgets
+"""PySide6 port of the itemviews/fetchmore/fetchmore example from Qt v6.x
+
+Navigate to a directory with many entries by doubleclicking and scroll
+down the list to see the model being populated on demand.
+"""
+
+import sys
+
+from PySide6.QtCore import (QAbstractListModel, QDir, QFileInfo, QLibraryInfo,
+                            QModelIndex, Qt, Signal, Slot)
+from PySide6.QtGui import QPalette
+from PySide6.QtWidgets import (QApplication, QFileIconProvider, QListView,
+                               QPlainTextEdit, QSizePolicy, QVBoxLayout,
+                               QWidget)
 
 
-class FileListModel(QtCore.QAbstractListModel):
-    number_populated = QtCore.Signal(int)
+BATCH_SIZE = 100
+
+
+class FileListModel(QAbstractListModel):
+
+    number_populated = Signal(str, int, int, int)
 
     def __init__(self, parent=None):
         super(FileListModel, self).__init__(parent)
 
+        self._path = ''
         self._file_count = 0
         self._file_list = []
+        self._icon_provider = QFileIconProvider()
 
-    def rowCount(self, parent=QtCore.QModelIndex()):
+    def rowCount(self, parent=QModelIndex()):
         return self._file_count
 
-    def data(self, index, role=QtCore.Qt.DisplayRole):
+    def data(self, index, role=Qt.DisplayRole):
         if not index.isValid():
             return None
 
-        if index.row() >= len(self._file_list) or index.row() < 0:
+        row = index.row()
+        if row >= len(self._file_list) or row < 0:
             return None
 
-        if role == QtCore.Qt.DisplayRole:
-            return self._file_list[index.row()]
+        if role == Qt.DisplayRole:
+            return self._file_list[row].fileName()
 
-        if role == QtCore.Qt.BackgroundRole:
-            batch = (index.row() // 100) % 2
-#  FIXME: QGuiApplication::palette() required
-            if batch == 0:
-                return qApp.palette().base()
+        if role == Qt.BackgroundRole:
+            batch = row // BATCH_SIZE
+            palette = qApp.palette()
+            return palette.base() if batch % 2 == 0 else palette.alternateBase()
 
-            return qApp.palette().alternateBase()
+        if role == Qt.DecorationRole:
+            return self._icon_provider.icon(self._file_list[row])
 
         return None
 
@@ -80,68 +100,77 @@ class FileListModel(QtCore.QAbstractListModel):
         return self._file_count < len(self._file_list)
 
     def fetchMore(self, index):
-        remainder = len(self._file_list) - self._file_count
-        items_to_fetch = min(100, remainder)
+        start = self._file_count
+        total = len(self._file_list)
+        remainder = total - start
+        items_to_fetch = min(BATCH_SIZE, remainder)
 
-        self.beginInsertRows(QtCore.QModelIndex(), self._file_count,
-                self._file_count + items_to_fetch)
+        self.beginInsertRows(QModelIndex(), start, start + items_to_fetch)
 
         self._file_count += items_to_fetch
 
         self.endInsertRows()
 
-        self.number_populated.emit(items_to_fetch)
+        self.number_populated.emit(self._path, start, items_to_fetch, total)
 
+    @Slot(str)
     def set_dir_path(self, path):
-        dir = QtCore.QDir(path)
+        self._path = path
+        dir = QDir(path)
 
         self.beginResetModel()
-        self._file_list = list(dir.entryList())
+        filter = QDir.AllEntries | QDir.NoDot
+        self._file_list = dir.entryInfoList(filter, QDir.Name)
         self._file_count = 0
         self.endResetModel()
 
+    def fileinfo_at(self, index):
+        return self._file_list[index.row()]
 
-class Window(QtWidgets.QWidget):
+
+class Window(QWidget):
     def __init__(self, parent=None):
         super(Window, self).__init__(parent)
 
-        model = FileListModel(self)
-        model.set_dir_path(QtCore.QLibraryInfo.location(QtCore.QLibraryInfo.PrefixPath))
+        self._model = FileListModel(self)
+        self._model.set_dir_path(QDir.rootPath())
 
-        label = QtWidgets.QLabel("Directory")
-        line_edit = QtWidgets.QLineEdit()
-        label.setBuddy(line_edit)
+        self._view = QListView()
+        self._view.setModel(self._model)
 
-        view = QtWidgets.QListView()
-        view.setModel(model)
+        self._log_viewer = QPlainTextEdit()
+        self._log_viewer.setSizePolicy(QSizePolicy(QSizePolicy.Preferred,
+                                       QSizePolicy.Preferred))
 
-        self._log_viewer = QtWidgets.QTextBrowser()
-        self._log_viewer.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred))
+        self._model.number_populated.connect(self.update_log)
+        self._view.activated.connect(self.activated)
 
-        line_edit.textChanged.connect(model.set_dir_path)
-        line_edit.textChanged.connect(self._log_viewer.clear)
-        model.number_populated.connect(self.update_log)
+        layout = QVBoxLayout(self)
+        layout.addWidget(self._view)
+        layout.addWidget(self._log_viewer)
 
-        layout = QtWidgets.QGridLayout()
-        layout.addWidget(label, 0, 0)
-        layout.addWidget(line_edit, 0, 1)
-        layout.addWidget(view, 1, 0, 1, 2)
-        layout.addWidget(self._log_viewer, 2, 0, 1, 2)
-
-        self.setLayout(layout)
         self.setWindowTitle("Fetch More Example")
 
-    def update_log(self, number):
-        self._log_viewer.append(f"{number} items added.")
+    @Slot(str, int, int)
+    def update_log(self, path, start, number, total):
+        native_path = QDir.toNativeSeparators(path)
+        last = start + number -1
+        entry = f'{start}..{last}/{total} items from "{native_path}" added.'
+        self._log_viewer.appendPlainText(entry)
+
+    @Slot(QModelIndex)
+    def activated(self, index):
+        fileinfo = self._model.fileinfo_at(index)
+        if fileinfo.isDir():
+            self._log_viewer.clear()
+            self._model.set_dir_path(fileinfo.absoluteFilePath())
 
 
 if __name__ == '__main__':
-
-    import sys
-
-    app = QtWidgets.QApplication(sys.argv)
+    app = QApplication(sys.argv)
 
     window = Window()
+    window.resize(400, 500)
     window.show()
 
     sys.exit(app.exec_())
