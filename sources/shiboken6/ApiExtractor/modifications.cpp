@@ -436,6 +436,32 @@ AddedFunction::AddedFunctionPtr
     return result;
 }
 
+// Remove the parameter names enclosed in '@' from an added function signature
+// so that it matches the C++ type signature.
+static QString removeParameterNames(QString signature)
+{
+    while (true) {
+        const auto ampPos = signature.indexOf(u'@');
+        if (ampPos == -1)
+            break;
+        const auto closingAmpPos = signature.indexOf(u'@', ampPos + 1);
+        if (closingAmpPos == -1)
+            break;
+        signature.remove(ampPos, closingAmpPos - ampPos + 1);
+    }
+    return signature;
+}
+
+DocModification::DocModification(const QString &xpath, const QString &signature) :
+    m_xpath(xpath), m_signature(removeParameterNames(signature))
+{
+}
+
+DocModification::DocModification(TypeSystem::DocModificationMode mode, const QString &signature) :
+    m_signature(removeParameterNames(signature)), m_mode(mode)
+{
+}
+
 void DocModification::setCode(const QString &code)
 {
     m_code = CodeSnipAbstract::fixSpaces(code);

@@ -523,10 +523,8 @@ class DocModification
 {
 public:
     DocModification() = default;
-    explicit DocModification(const QString& xpath, const QString& signature) :
-        m_xpath(xpath), m_signature(signature) {}
-    explicit DocModification(TypeSystem::DocModificationMode mode, const QString& signature) :
-        m_signature(signature), m_mode(mode) {}
+    explicit DocModification(const QString& xpath, const QString& signature);
+    explicit DocModification(TypeSystem::DocModificationMode mode, const QString& signature);
 
     void setCode(const QString& code);
     void setCode(QStringView code) { setCode(code.toString()); }
