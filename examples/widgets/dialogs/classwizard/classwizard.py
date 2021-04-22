@@ -58,7 +58,7 @@ import classwizard_rc
 
 
 BASE_CLASSES = ['<None>', 'PySide6.QtCore.QObject',
-                'PySide6.QtWidgets.QDialog', 'PySide6.QtWidgets.QMainWindow'
+                'PySide6.QtWidgets.QDialog', 'PySide6.QtWidgets.QMainWindow',
                 'PySide6.QtWidgets.QWidget']
 
 
@@ -95,7 +95,7 @@ def signal_initialization(signature):
 
 class ClassWizard(QWizard):
     def __init__(self, parent=None):
-        super(ClassWizard, self).__init__(parent)
+        super().__init__(parent)
 
         self.addPage(IntroPage())
         self._class_info_index = self.addPage(ClassInfoPage())
@@ -214,7 +214,7 @@ class ClassWizard(QWizard):
         block += '):\n'
 
         if base_class:
-            block += f'        super({class_name}, self).__init__('
+            block += f'        super().__init__('
             if qobject:
                 block += 'parent'
             block += ')\n'
@@ -253,7 +253,7 @@ class ClassWizard(QWizard):
 
 class IntroPage(QWizardPage):
     def __init__(self, parent=None):
-        super(IntroPage, self).__init__(parent)
+        super().__init__(parent)
 
         self.setTitle("Introduction")
         self.setPixmap(QWizard.WatermarkPixmap,
@@ -268,7 +268,7 @@ class IntroPage(QWizardPage):
 
 class ClassInfoPage(QWizardPage):
     def __init__(self, parent=None):
-        super(ClassInfoPage, self).__init__(parent)
+        super().__init__(parent)
 
         self.setTitle("Class Information")
         self.setSubTitle("Specify basic information about the class for "
@@ -312,7 +312,7 @@ class ClassInfoPage(QWizardPage):
 class QObjectPage(QWizardPage):
     """Allows for adding properties and signals to a QObject."""
     def __init__(self, parent=None):
-        super(QObjectPage, self).__init__(parent)
+        super().__init__(parent)
 
         self.setTitle("QObject parameters")
         self.setSubTitle("Specify the signals, slots and properties.")
@@ -329,7 +329,7 @@ class QObjectPage(QWizardPage):
 
 class OutputFilesPage(QWizardPage):
     def __init__(self, parent=None):
-        super(OutputFilesPage, self).__init__(parent)
+        super().__init__(parent)
 
         self.setTitle("Output Files")
         self.setSubTitle("Specify where you want the wizard to put the "
@@ -389,7 +389,7 @@ class OutputFilesPage(QWizardPage):
 
 class ConclusionPage(QWizardPage):
     def __init__(self, parent=None):
-        super(ConclusionPage, self).__init__(parent)
+        super().__init__(parent)
 
         self.setTitle("Conclusion")
         self.setPixmap(QWizard.WatermarkPixmap,
