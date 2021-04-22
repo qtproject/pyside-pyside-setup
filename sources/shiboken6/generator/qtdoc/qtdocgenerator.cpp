@@ -616,7 +616,7 @@ bool QtDocGenerator::writeInjectDocumentation(TextStream& s,
                     continue;
 
                 doc.setValue(mod.code(), Documentation::Detailed, fmt);
-                writeFormattedText(s, doc.value(), cppClass);
+                writeFormattedText(s, doc, cppClass);
                 didSomething = true;
             }
         }
