@@ -271,11 +271,19 @@
        FIXME Subscripted generics cannot be used with class and instance checks -->
   <object-type name="QXYSeries">
       <include file-name="pyside_numpy.h" location="global"/>
-      <add-function signature="appendNp(PyArrayObject *, PyArrayObject *)">
+      <add-function signature="appendNp(PyArrayObject *@x@, PyArrayObject *@y@)">
           <inject-code file="../glue/qtcharts.cpp" snippet="qxyseries-appendnp-numpy-x-y"/>
+          <inject-documentation format="target" mode="append">
+          Adds the list of data points specified by two
+          one-dimensional, equally sized numpy arrays representing the x, y values, respectively.
+          </inject-documentation>
       </add-function>
-      <add-function signature="replaceNp(PyArrayObject *, PyArrayObject *)">
+      <add-function signature="replaceNp(PyArrayObject *@x@, PyArrayObject *@y@)">
           <inject-code file="../glue/qtcharts.cpp" snippet="qxyseries-replacenp-numpy-x-y"/>
+          <inject-documentation format="target" mode="append">
+          Replaces the current points with the points specified by two
+          one-dimensional, equally sized numpy arrays representing the x, y values, respectively.
+          </inject-documentation>
       </add-function>
   </object-type>
 </typesystem>

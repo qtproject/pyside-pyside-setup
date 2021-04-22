@@ -1798,8 +1798,12 @@
     <!-- Add numpy versions as separate functions since passing ndarrays to other
          typecheck macros causes:
          FIXME Subscripted generics cannot be used with class and instance checks -->
-    <add-function signature="drawPointsNp(PyArrayObject *, PyArrayObject *)">
+    <add-function signature="drawPointsNp(PyArrayObject *@x@, PyArrayObject *@y@)">
         <inject-code file="../glue/qtgui.cpp" snippet="qpainter-drawpointsnp-numpy-x-y"/>
+        <inject-documentation format="target" mode="append">
+        Draws the points specified by two one-dimensional, equally sized numpy arrays
+        representing the x, y values, respectively.
+        </inject-documentation>
     </add-function>
 
     <modify-function signature="drawPolygon(const QPoint*,int,Qt::FillRule)" remove="all"/>
