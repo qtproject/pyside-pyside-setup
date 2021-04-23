@@ -149,3 +149,31 @@ which means we will be copying:
     ./sources/pyside6/doc/codesnippets/doc/src/snippets/qlistview-using
     ./sources/pyside6/doc/codesnippets/doc/src/snippets/layouts
 ```
+
+## The `module_classes` file
+
+This file is being used to identify
+if the `#include` from C++ have a counterpart from Python.
+
+The file was generated with:
+
+```
+from pprint import pprint
+from PySide2 import *
+
+_out = {}
+modules = {i for i in dir() if i.startswith("Q")}
+for m in modules:
+    exec(f"import PySide2.{m}")
+    exec(f"m_classes = [i for i in dir(PySide2.{m}) if i.startswith('Q')]")
+    if len(m_classes) == 1:
+        try:
+            exec(f"from PySide2.{m} import {m}")
+            exec(f"m_classes = [i for i in dir({m}) if i.startswith('Q')]")
+        except ImportError:
+            pass
+    _out[m] = m_classes
+pprint(_out)
+```
+
+PySide2 was used to cover more classes that are not available for Qt 6.0.

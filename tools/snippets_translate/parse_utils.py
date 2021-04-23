@@ -38,10 +38,7 @@
 #############################################################################
 
 import re
-
-# Bring all the PySide modules to find classes for the imports
-import PySide6
-from PySide6 import *
+from module_classes import module_classes
 
 
 def get_qt_module_class(x):
@@ -56,11 +53,13 @@ def get_qt_module_class(x):
 
     In case it doesn't find the class or the module, it will return None.
     """
-    for imodule in (m for m in dir(PySide6) if m.startswith("Qt")):
+    if "/" in x:
+        x = x.split("/")[-1]
+
+    for imodule, iclasses in module_classes.items():
         if imodule == x:
             return True, x
-        # we use eval() to transform 'QtModule' into QtModule
-        for iclass in (c for c in dir(eval(f"PySide6.{imodule}")) if c.startswith("Q")):
+        for iclass in iclasses:
             if iclass == x:
                 return False, imodule
     return None

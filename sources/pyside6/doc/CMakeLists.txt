@@ -38,7 +38,11 @@ if (FULLDOCSBUILD)
     # so we use the general SRC directory to copy all the other snippets
     execute_process(COMMAND ${PYTHON_EXECUTABLE} ${SNIPPETS_TOOL}
         --qt ${QT_SRC_DIR}/.. --pyside ${PYSIDE_ROOT} -w ${SNIPPETS_QUIET_OPTION}
-        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
+        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+        ERROR_VARIABLE SNIPPETS_ERROR)
+    if (SNIPPETS_ERROR)
+        message(FATAL_ERROR "The 'snippets_translate' tool failed: ${SNIPPETS_ERROR}")
+    endif()
 endif()
 
 # Generate example gallery
