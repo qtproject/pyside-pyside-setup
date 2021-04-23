@@ -2,7 +2,7 @@
 #############################################################################
 ##
 ## Copyright (C) 2013 Riverbank Computing Limited.
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -40,86 +40,89 @@
 ##
 #############################################################################
 
-from PySide6 import QtCore, QtWidgets
+import sys
+
+from PySide6.QtCore import QSizeF, Qt
+from PySide6.QtWidgets import (QApplication, QGraphicsAnchorLayout,
+                               QGraphicsProxyWidget, QGraphicsScene,
+                               QGraphicsView, QGraphicsWidget,
+                               QPushButton, QSizePolicy, QWidget)
 
 
 def create_item(minimum, preferred, maximum, name):
-    w = QtWidgets.QGraphicsProxyWidget()
+    w = QGraphicsProxyWidget()
 
-    w.setWidget(QtWidgets.QPushButton(name))
+    w.setWidget(QPushButton(name))
     w.setMinimumSize(minimum)
     w.setPreferredSize(preferred)
     w.setMaximumSize(maximum)
-    w.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+    w.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
 
     return w
 
 
 if __name__ == '__main__':
+    app = QApplication(sys.argv)
 
-    import sys
-
-    app = QtWidgets.QApplication(sys.argv)
-
-    scene = QtWidgets.QGraphicsScene()
+    scene = QGraphicsScene()
     scene.setSceneRect(0, 0, 800, 480)
 
-    min_size = QtCore.QSizeF(30, 100)
-    pref_size = QtCore.QSizeF(210, 100)
-    max_size = QtCore.QSizeF(300, 100)
+    min_size = QSizeF(30, 100)
+    pref_size = QSizeF(210, 100)
+    max_size = QSizeF(300, 100)
 
     a = create_item(min_size, pref_size, max_size, "A")
     b = create_item(min_size, pref_size, max_size, "B")
     c = create_item(min_size, pref_size, max_size, "C")
     d = create_item(min_size, pref_size, max_size, "D")
     e = create_item(min_size, pref_size, max_size, "E")
-    f = create_item(QtCore.QSizeF(30, 50), QtCore.QSizeF(150, 50), max_size, "F")
-    g = create_item(QtCore.QSizeF(30, 50), QtCore.QSizeF(30, 100), max_size, "G")
+    f = create_item(QSizeF(30, 50), QSizeF(150, 50), max_size, "F")
+    g = create_item(QSizeF(30, 50), QSizeF(30, 100), max_size, "G")
 
-    l = QtWidgets.QGraphicsAnchorLayout()
+    l = QGraphicsAnchorLayout()
     l.setSpacing(0)
 
-    w = QtWidgets.QGraphicsWidget(None, QtCore.Qt.Window)
+    w = QGraphicsWidget(None, Qt.Window)
     w.setPos(20, 20)
     w.setLayout(l)
 
     # Vertical.
-    l.addAnchor(a, QtCore.Qt.AnchorTop, l, QtCore.Qt.AnchorTop)
-    l.addAnchor(b, QtCore.Qt.AnchorTop, l, QtCore.Qt.AnchorTop)
+    l.addAnchor(a, Qt.AnchorTop, l, Qt.AnchorTop)
+    l.addAnchor(b, Qt.AnchorTop, l, Qt.AnchorTop)
 
-    l.addAnchor(c, QtCore.Qt.AnchorTop, a, QtCore.Qt.AnchorBottom)
-    l.addAnchor(c, QtCore.Qt.AnchorTop, b, QtCore.Qt.AnchorBottom)
-    l.addAnchor(c, QtCore.Qt.AnchorBottom, d, QtCore.Qt.AnchorTop)
-    l.addAnchor(c, QtCore.Qt.AnchorBottom, e, QtCore.Qt.AnchorTop)
+    l.addAnchor(c, Qt.AnchorTop, a, Qt.AnchorBottom)
+    l.addAnchor(c, Qt.AnchorTop, b, Qt.AnchorBottom)
+    l.addAnchor(c, Qt.AnchorBottom, d, Qt.AnchorTop)
+    l.addAnchor(c, Qt.AnchorBottom, e, Qt.AnchorTop)
 
-    l.addAnchor(d, QtCore.Qt.AnchorBottom, l, QtCore.Qt.AnchorBottom)
-    l.addAnchor(e, QtCore.Qt.AnchorBottom, l, QtCore.Qt.AnchorBottom)
+    l.addAnchor(d, Qt.AnchorBottom, l, Qt.AnchorBottom)
+    l.addAnchor(e, Qt.AnchorBottom, l, Qt.AnchorBottom)
 
-    l.addAnchor(c, QtCore.Qt.AnchorTop, f, QtCore.Qt.AnchorTop)
-    l.addAnchor(c, QtCore.Qt.AnchorVerticalCenter, f, QtCore.Qt.AnchorBottom)
-    l.addAnchor(f, QtCore.Qt.AnchorBottom, g, QtCore.Qt.AnchorTop)
-    l.addAnchor(c, QtCore.Qt.AnchorBottom, g, QtCore.Qt.AnchorBottom)
+    l.addAnchor(c, Qt.AnchorTop, f, Qt.AnchorTop)
+    l.addAnchor(c, Qt.AnchorVerticalCenter, f, Qt.AnchorBottom)
+    l.addAnchor(f, Qt.AnchorBottom, g, Qt.AnchorTop)
+    l.addAnchor(c, Qt.AnchorBottom, g, Qt.AnchorBottom)
 
     # Horizontal.
-    l.addAnchor(l, QtCore.Qt.AnchorLeft, a, QtCore.Qt.AnchorLeft)
-    l.addAnchor(l, QtCore.Qt.AnchorLeft, d, QtCore.Qt.AnchorLeft)
-    l.addAnchor(a, QtCore.Qt.AnchorRight, b, QtCore.Qt.AnchorLeft)
+    l.addAnchor(l, Qt.AnchorLeft, a, Qt.AnchorLeft)
+    l.addAnchor(l, Qt.AnchorLeft, d, Qt.AnchorLeft)
+    l.addAnchor(a, Qt.AnchorRight, b, Qt.AnchorLeft)
 
-    l.addAnchor(a, QtCore.Qt.AnchorRight, c, QtCore.Qt.AnchorLeft)
-    l.addAnchor(c, QtCore.Qt.AnchorRight, e, QtCore.Qt.AnchorLeft)
+    l.addAnchor(a, Qt.AnchorRight, c, Qt.AnchorLeft)
+    l.addAnchor(c, Qt.AnchorRight, e, Qt.AnchorLeft)
 
-    l.addAnchor(b, QtCore.Qt.AnchorRight, l, QtCore.Qt.AnchorRight)
-    l.addAnchor(e, QtCore.Qt.AnchorRight, l, QtCore.Qt.AnchorRight)
-    l.addAnchor(d, QtCore.Qt.AnchorRight, e, QtCore.Qt.AnchorLeft)
+    l.addAnchor(b, Qt.AnchorRight, l, Qt.AnchorRight)
+    l.addAnchor(e, Qt.AnchorRight, l, Qt.AnchorRight)
+    l.addAnchor(d, Qt.AnchorRight, e, Qt.AnchorLeft)
 
-    l.addAnchor(l, QtCore.Qt.AnchorLeft, f, QtCore.Qt.AnchorLeft)
-    l.addAnchor(l, QtCore.Qt.AnchorLeft, g, QtCore.Qt.AnchorLeft)
-    l.addAnchor(f, QtCore.Qt.AnchorRight, g, QtCore.Qt.AnchorRight)
+    l.addAnchor(l, Qt.AnchorLeft, f, Qt.AnchorLeft)
+    l.addAnchor(l, Qt.AnchorLeft, g, Qt.AnchorLeft)
+    l.addAnchor(f, Qt.AnchorRight, g, Qt.AnchorRight)
 
     scene.addItem(w)
-    scene.setBackgroundBrush(QtCore.Qt.darkGreen)
+    scene.setBackgroundBrush(Qt.darkGreen)
 
-    view = QtWidgets.QGraphicsView(scene)
+    view = QGraphicsView(scene)
     view.show()
 
     sys.exit(app.exec_())
