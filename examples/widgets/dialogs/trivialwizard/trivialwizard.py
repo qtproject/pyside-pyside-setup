@@ -2,7 +2,7 @@
 #############################################################################
 ##
 ## Copyright (C) 2013 Riverbank Computing Limited.
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -42,66 +42,55 @@
 
 """PySide6 port of the widgets/dialogs/trivialwizard example from Qt v5.x"""
 
-from PySide6 import QtWidgets
+import sys
+
+from PySide6.QtWidgets import (QApplication, QFormLayout, QLabel, QLineEdit,
+                               QVBoxLayout, QWidget, QWizardPage, QWizard)
 
 
 def create_intro_page():
-    page = QtWidgets.QWizardPage()
+    page = QWizardPage()
     page.setTitle("Introduction")
 
-    label = QtWidgets.QLabel("This wizard will help you register your copy of "
+    label = QLabel("This wizard will help you register your copy of "
             "Super Product Two.")
     label.setWordWrap(True)
 
-    layout = QtWidgets.QVBoxLayout()
+    layout = QVBoxLayout(page)
     layout.addWidget(label)
-    page.setLayout(layout)
 
     return page
 
 
 def create_registration_page():
-    page = QtWidgets.QWizardPage()
+    page = QWizardPage()
     page.setTitle("Registration")
     page.setSubTitle("Please fill both fields.")
 
-    name_label = QtWidgets.QLabel("Name:")
-    name_line_edit = QtWidgets.QLineEdit()
-
-    email_label = QtWidgets.QLabel("Email address:")
-    email_line_edit = QtWidgets.QLineEdit()
-
-    layout = QtWidgets.QGridLayout()
-    layout.addWidget(name_label, 0, 0)
-    layout.addWidget(name_line_edit, 0, 1)
-    layout.addWidget(email_label, 1, 0)
-    layout.addWidget(email_line_edit, 1, 1)
-    page.setLayout(layout)
+    layout = QFormLayout(page)
+    layout.addRow("Name:", QLineEdit())
+    layout.addRow("Email address:", QLineEdit())
 
     return page
 
 
 def create_conclusion_page():
-    page = QtWidgets.QWizardPage()
+    page = QWizardPage()
     page.setTitle("Conclusion")
 
-    label = QtWidgets.QLabel("You are now successfully registered. Have a nice day!")
+    label = QLabel("You are now successfully registered. Have a nice day!")
     label.setWordWrap(True)
 
-    layout = QtWidgets.QVBoxLayout()
+    layout = QVBoxLayout(page)
     layout.addWidget(label)
-    page.setLayout(layout)
 
     return page
 
 
 if __name__ == '__main__':
+    app = QApplication(sys.argv)
 
-    import sys
-
-    app = QtWidgets.QApplication(sys.argv)
-
-    wizard = QtWidgets.QWizard()
+    wizard = QWizard()
     wizard.addPage(create_intro_page())
     wizard.addPage(create_registration_page())
     wizard.addPage(create_conclusion_page())

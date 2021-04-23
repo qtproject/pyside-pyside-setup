@@ -2,7 +2,7 @@
 #############################################################################
 ##
 ## Copyright (C) 2013 Riverbank Computing Limited.
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -42,72 +42,74 @@
 
 """PySide6 port of the widgets/dialogs/extension example from Qt v5.x"""
 
-from PySide6 import QtCore, QtWidgets
+import sys
+
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import (QApplication, QCheckBox, QDialog,
+                               QDialogButtonBox, QGridLayout, QHBoxLayout,
+                               QLabel, QLayout, QLineEdit, QPushButton,
+                               QVBoxLayout, QWidget)
 
 
-class FindDialog(QtWidgets.QDialog):
+class FindDialog(QDialog):
     def __init__(self, parent=None):
         super(FindDialog, self).__init__(parent)
 
-        label = QtWidgets.QLabel("Find &what:")
-        line_edit = QtWidgets.QLineEdit()
+        label = QLabel("Find &what:")
+        line_edit = QLineEdit()
         label.setBuddy(line_edit)
 
-        case_check_box = QtWidgets.QCheckBox("Match &case")
-        from_start_check_box = QtWidgets.QCheckBox("Search from &start")
+        case_check_box = QCheckBox("Match &case")
+        from_start_check_box = QCheckBox("Search from &start")
         from_start_check_box.setChecked(True)
 
-        find_button = QtWidgets.QPushButton("&Find")
+        find_button = QPushButton("&Find")
         find_button.setDefault(True)
 
-        more_button = QtWidgets.QPushButton("&More")
+        more_button = QPushButton("&More")
         more_button.setCheckable(True)
         more_button.setAutoDefault(False)
 
-        button_box = QtWidgets.QDialogButtonBox(QtCore.Qt.Vertical)
-        button_box.addButton(find_button, QtWidgets.QDialogButtonBox.ActionRole)
-        button_box.addButton(more_button, QtWidgets.QDialogButtonBox.ActionRole)
+        button_box = QDialogButtonBox(Qt.Vertical)
+        button_box.addButton(find_button, QDialogButtonBox.ActionRole)
+        button_box.addButton(more_button, QDialogButtonBox.ActionRole)
 
-        extension = QtWidgets.QWidget()
+        extension = QWidget()
 
-        whole_words_check_box = QtWidgets.QCheckBox("&Whole words")
-        backward_check_box = QtWidgets.QCheckBox("Search &backward")
-        search_selection_check_box = QtWidgets.QCheckBox("Search se&lection")
+        whole_words_check_box = QCheckBox("&Whole words")
+        backward_check_box = QCheckBox("Search &backward")
+        search_selection_check_box = QCheckBox("Search se&lection")
 
         more_button.toggled.connect(extension.setVisible)
 
-        extension_layout = QtWidgets.QVBoxLayout()
+        extension_layout = QVBoxLayout()
         extension_layout.setContentsMargins(0, 0, 0, 0)
         extension_layout.addWidget(whole_words_check_box)
         extension_layout.addWidget(backward_check_box)
         extension_layout.addWidget(search_selection_check_box)
         extension.setLayout(extension_layout)
 
-        top_left_layout = QtWidgets.QHBoxLayout()
+        top_left_layout = QHBoxLayout()
         top_left_layout.addWidget(label)
         top_left_layout.addWidget(line_edit)
 
-        left_layout = QtWidgets.QVBoxLayout()
+        left_layout = QVBoxLayout()
         left_layout.addLayout(top_left_layout)
         left_layout.addWidget(case_check_box)
         left_layout.addWidget(from_start_check_box)
         left_layout.addStretch(1)
 
-        main_layout = QtWidgets.QGridLayout()
-        main_layout.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
+        main_layout = QGridLayout(self)
+        main_layout.setSizeConstraint(QLayout.SetFixedSize)
         main_layout.addLayout(left_layout, 0, 0)
         main_layout.addWidget(button_box, 0, 1)
         main_layout.addWidget(extension, 1, 0, 1, 2)
-        self.setLayout(main_layout)
 
         self.setWindowTitle("Extension")
         extension.hide()
 
 
 if __name__ == '__main__':
-
-    import sys
-
-    app = QtWidgets.QApplication(sys.argv)
+    app = QApplication(sys.argv)
     dialog = FindDialog()
     sys.exit(dialog.exec_())

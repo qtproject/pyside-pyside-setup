@@ -2,7 +2,7 @@
 ############################################################################
 ##
 ## Copyright (C) 2013 Riverbank Computing Limited.
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -42,10 +42,17 @@
 
 """PySide6 port of the widgets/layouts/basiclayout example from Qt v5.x"""
 
-from PySide6 import QtWidgets
+import sys
+
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import (QApplication, QComboBox, QDialog,
+                               QDialogButtonBox, QGridLayout, QGroupBox,
+                               QFormLayout, QHBoxLayout, QLabel, QLineEdit,
+                               QMenu, QMenuBar, QPushButton, QSpinBox,
+                               QTextEdit, QVBoxLayout, QWidget)
 
 
-class Dialog(QtWidgets.QDialog):
+class Dialog(QDialog):
     num_grid_rows = 3
     num_buttons = 4
 
@@ -57,16 +64,16 @@ class Dialog(QtWidgets.QDialog):
         self.create_grid_group_box()
         self.create_form_group_box()
 
-        big_editor = QtWidgets.QTextEdit()
+        big_editor = QTextEdit()
         big_editor.setPlainText("This widget takes up all the remaining space "
                 "in the top-level layout.")
 
-        button_box = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
+        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
 
         button_box.accepted.connect(self.accept)
         button_box.rejected.connect(self.reject)
 
-        main_layout = QtWidgets.QVBoxLayout()
+        main_layout = QVBoxLayout()
         main_layout.setMenuBar(self._menu_bar)
         main_layout.addWidget(self._horizontal_group_box)
         main_layout.addWidget(self._grid_group_box)
@@ -78,35 +85,35 @@ class Dialog(QtWidgets.QDialog):
         self.setWindowTitle("Basic Layouts")
 
     def create_menu(self):
-        self._menu_bar = QtWidgets.QMenuBar()
+        self._menu_bar = QMenuBar()
 
-        self._file_menu = QtWidgets.QMenu("&File", self)
+        self._file_menu = QMenu("&File", self)
         self._exit_action = self._file_menu.addAction("E&xit")
         self._menu_bar.addMenu(self._file_menu)
 
         self._exit_action.triggered.connect(self.accept)
 
     def create_horizontal_group_box(self):
-        self._horizontal_group_box = QtWidgets.QGroupBox("Horizontal layout")
-        layout = QtWidgets.QHBoxLayout()
+        self._horizontal_group_box = QGroupBox("Horizontal layout")
+        layout = QHBoxLayout()
 
         for i in range(Dialog.num_buttons):
-            button = QtWidgets.QPushButton(f"Button {i + 1}")
+            button = QPushButton(f"Button {i + 1}")
             layout.addWidget(button)
 
         self._horizontal_group_box.setLayout(layout)
 
     def create_grid_group_box(self):
-        self._grid_group_box = QtWidgets.QGroupBox("Grid layout")
-        layout = QtWidgets.QGridLayout()
+        self._grid_group_box = QGroupBox("Grid layout")
+        layout = QGridLayout()
 
         for i in range(Dialog.num_grid_rows):
-            label = QtWidgets.QLabel(f"Line {i + 1}:")
-            line_edit = QtWidgets.QLineEdit()
+            label = QLabel(f"Line {i + 1}:")
+            line_edit = QLineEdit()
             layout.addWidget(label, i + 1, 0)
             layout.addWidget(line_edit, i + 1, 1)
 
-        self._small_editor = QtWidgets.QTextEdit()
+        self._small_editor = QTextEdit()
         self._small_editor.setPlainText("This widget takes up about two thirds "
                 "of the grid layout.")
 
@@ -117,18 +124,15 @@ class Dialog(QtWidgets.QDialog):
         self._grid_group_box.setLayout(layout)
 
     def create_form_group_box(self):
-        self._form_group_box = QtWidgets.QGroupBox("Form layout")
-        layout = QtWidgets.QFormLayout()
-        layout.addRow(QtWidgets.QLabel("Line 1:"), QtWidgets.QLineEdit())
-        layout.addRow(QtWidgets.QLabel("Line 2, long text:"), QtWidgets.QComboBox())
-        layout.addRow(QtWidgets.QLabel("Line 3:"), QtWidgets.QSpinBox())
+        self._form_group_box = QGroupBox("Form layout")
+        layout = QFormLayout()
+        layout.addRow(QLabel("Line 1:"), QLineEdit())
+        layout.addRow(QLabel("Line 2, long text:"), QComboBox())
+        layout.addRow(QLabel("Line 3:"), QSpinBox())
         self._form_group_box.setLayout(layout)
 
 
 if __name__ == '__main__':
-
-    import sys
-
-    app = QtWidgets.QApplication(sys.argv)
+    app = QApplication(sys.argv)
     dialog = Dialog()
     sys.exit(dialog.exec_())

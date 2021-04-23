@@ -40,19 +40,30 @@
 ##
 #############################################################################
 
-from PySide6 import QtCore, QtGui, QtStateMachine, QtWidgets
+import sys
+import math
+
+from PySide6.QtCore import (QEasingCurve, QObject, QParallelAnimationGroup,
+                            QPointF, QPropertyAnimation, QRandomGenerator,
+                            QRectF, QTimer, Qt, Property, Signal)
+from PySide6.QtGui import (QBrush, QColor, QLinearGradient, QPainter,
+                           QPainterPath, QPixmap, QTransform)
+from PySide6.QtWidgets import (QApplication, QGraphicsItem, QGraphicsPixmapItem,
+                               QGraphicsRectItem, QGraphicsScene, QGraphicsView,
+                               QGraphicsWidget, QStyle, QWidget)
+from PySide6.QtStateMachine import QState, QStateMachine
 
 import animatedtiles_rc
 
 
 # Deriving from more than one wrapped class is not supported, so we use
 # composition and delegate the property.
-class Pixmap(QtCore.QObject):
+class Pixmap(QObject):
     def __init__(self, pix):
         super(Pixmap, self).__init__()
 
-        self.pixmap_item = QtWidgets.QGraphicsPixmapItem(pix)
-        self.pixmap_item.setCacheMode(QtWidgets.QGraphicsItem.DeviceCoordinateCache)
+        self.pixmap_item = QGraphicsPixmapItem(pix)
+        self.pixmap_item.setCacheMode(QGraphicsItem.DeviceCoordinateCache)
 
     def set_pos(self, pos):
         self.pixmap_item.setPos(pos)
@@ -60,11 +71,11 @@ class Pixmap(QtCore.QObject):
     def get_pos(self):
         return self.pixmap_item.pos()
 
-    pos = QtCore.Property(QtCore.QPointF, get_pos, set_pos)
+    pos = Property(QPointF, get_pos, set_pos)
 
 
-class Button(QtWidgets.QGraphicsWidget):
-    pressed = QtCore.Signal()
+class Button(QGraphicsWidget):
+    pressed = Signal()
 
     def __init__(self, pixmap, parent=None):
         super(Button, self).__init__(parent)
@@ -72,28 +83,28 @@ class Button(QtWidgets.QGraphicsWidget):
         self._pix = pixmap
 
         self.setAcceptHoverEvents(True)
-        self.setCacheMode(QtWidgets.QGraphicsItem.DeviceCoordinateCache)
+        self.setCacheMode(QGraphicsItem.DeviceCoordinateCache)
 
     def boundingRect(self):
-        return QtCore.QRectF(-65, -65, 130, 130)
+        return QRectF(-65, -65, 130, 130)
 
     def shape(self):
-        path = QtGui.QPainterPath()
+        path = QPainterPath()
         path.addEllipse(self.boundingRect())
 
         return path
 
     def paint(self, painter, option, widget):
-        down = option.state & QtWidgets.QStyle.State_Sunken
+        down = option.state & QStyle.State_Sunken
         r = self.boundingRect()
 
-        grad = QtGui.QLinearGradient(r.topLeft(), r.bottomRight())
-        if option.state & QtWidgets.QStyle.State_MouseOver:
-            color_0 = QtCore.Qt.white
+        grad = QLinearGradient(r.topLeft(), r.bottomRight())
+        if option.state & QStyle.State_MouseOver:
+            color_0 = Qt.white
         else:
-            color_0 = QtCore.Qt.lightGray
+            color_0 = Qt.lightGray
 
-        color_1 = QtCore.Qt.darkGray
+        color_1 = Qt.darkGray
 
         if down:
             color_0, color_1 = color_1, color_0
@@ -101,12 +112,12 @@ class Button(QtWidgets.QGraphicsWidget):
         grad.setColorAt(0, color_0)
         grad.setColorAt(1, color_1)
 
-        painter.setPen(QtCore.Qt.darkGray)
+        painter.setPen(Qt.darkGray)
         painter.setBrush(grad)
         painter.drawEllipse(r)
 
-        color_0 = QtCore.Qt.darkGray
-        color_1 = QtCore.Qt.lightGray
+        color_0 = Qt.darkGray
+        color_1 = Qt.lightGray
 
         if down:
             color_0, color_1 = color_1, color_0
@@ -114,7 +125,7 @@ class Button(QtWidgets.QGraphicsWidget):
         grad.setColorAt(0, color_0)
         grad.setColorAt(1, color_1)
 
-        painter.setPen(QtCore.Qt.NoPen)
+        painter.setPen(Qt.NoPen)
         painter.setBrush(grad)
 
         if down:
@@ -132,23 +143,19 @@ class Button(QtWidgets.QGraphicsWidget):
         self.update()
 
 
-class View(QtWidgets.QGraphicsView):
+class View(QGraphicsView):
     def resizeEvent(self, event):
         super(View, self).resizeEvent(event)
-        self.fitInView(self.sceneRect(), QtCore.Qt.KeepAspectRatio)
+        self.fitInView(self.sceneRect(), Qt.KeepAspectRatio)
 
 
 if __name__ == '__main__':
+    app = QApplication(sys.argv)
 
-    import sys
-    import math
+    kinetic_pix = QPixmap(':/images/kinetic.png')
+    bg_pix = QPixmap(':/images/Time-For-Lunch-2.jpg')
 
-    app = QtWidgets.QApplication(sys.argv)
-
-    kinetic_pix = QtGui.QPixmap(':/images/kinetic.png')
-    bg_pix = QtGui.QPixmap(':/images/Time-For-Lunch-2.jpg')
-
-    scene = QtWidgets.QGraphicsScene(-350, -350, 700, 700)
+    scene = QGraphicsScene(-350, -350, 700, 700)
 
     items = []
     for i in range(64):
@@ -160,12 +167,12 @@ if __name__ == '__main__':
         scene.addItem(item.pixmap_item)
 
     # Buttons.
-    button_parent = QtWidgets.QGraphicsRectItem()
-    ellipse_button = Button(QtGui.QPixmap(':/images/ellipse.png'), button_parent)
-    figure_8button = Button(QtGui.QPixmap(':/images/figure8.png'), button_parent)
-    random_button = Button(QtGui.QPixmap(':/images/random.png'), button_parent)
-    tiled_button = Button(QtGui.QPixmap(':/images/tile.png'), button_parent)
-    centered_button = Button(QtGui.QPixmap(':/images/centered.png'), button_parent)
+    button_parent = QGraphicsRectItem()
+    ellipse_button = Button(QPixmap(':/images/ellipse.png'), button_parent)
+    figure_8button = Button(QPixmap(':/images/figure8.png'), button_parent)
+    random_button = Button(QPixmap(':/images/random.png'), button_parent)
+    tiled_button = Button(QPixmap(':/images/tile.png'), button_parent)
+    centered_button = Button(QPixmap(':/images/centered.png'), button_parent)
 
     ellipse_button.setPos(-100, -100)
     figure_8button.setPos(100, -100)
@@ -174,65 +181,65 @@ if __name__ == '__main__':
     centered_button.setPos(100, 100)
 
     scene.addItem(button_parent)
-    button_parent.setTransform(QtGui.QTransform().scale(0.75, 0.75))
+    button_parent.setTransform(QTransform().scale(0.75, 0.75))
     button_parent.setPos(200, 200)
     button_parent.setZValue(65)
 
     # States.
-    root_state = QtStateMachine.QState()
-    ellipse_state = QtStateMachine.QState(root_state)
-    figure_8state = QtStateMachine.QState(root_state)
-    random_state = QtStateMachine.QState(root_state)
-    tiled_state = QtStateMachine.QState(root_state)
-    centered_state = QtStateMachine.QState(root_state)
+    root_state = QState()
+    ellipse_state = QState(root_state)
+    figure_8state = QState(root_state)
+    random_state = QState(root_state)
+    tiled_state = QState(root_state)
+    centered_state = QState(root_state)
 
     # Values.
-    generator = QtCore.QRandomGenerator.global_()
+    generator = QRandomGenerator.global_()
 
     for i, item in enumerate(items):
         # Ellipse.
         ellipse_state.assignProperty(item, 'pos',
-                QtCore.QPointF(math.cos((i / 63.0) * 6.28) * 250,
+                QPointF(math.cos((i / 63.0) * 6.28) * 250,
                         math.sin((i / 63.0) * 6.28) * 250))
 
         # Figure 8.
         figure_8state.assignProperty(item, 'pos',
-                QtCore.QPointF(math.sin((i / 63.0) * 6.28) * 250,
+                QPointF(math.sin((i / 63.0) * 6.28) * 250,
                         math.sin(((i * 2)/63.0) * 6.28) * 250))
 
         # Random.
         random_state.assignProperty(item, 'pos',
-                QtCore.QPointF(-250 + generator.bounded(0, 500),
+                QPointF(-250 + generator.bounded(0, 500),
                                -250 + generator.bounded(0, 500)))
 
         # Tiled.
         tiled_state.assignProperty(item, 'pos',
-                QtCore.QPointF(((i % 8) - 4) * kinetic_pix.width() + kinetic_pix.width() / 2,
+                QPointF(((i % 8) - 4) * kinetic_pix.width() + kinetic_pix.width() / 2,
                         ((i // 8) - 4) * kinetic_pix.height() + kinetic_pix.height() / 2))
 
         # Centered.
-        centered_state.assignProperty(item, 'pos', QtCore.QPointF())
+        centered_state.assignProperty(item, 'pos', QPointF())
 
     # Ui.
     view = View(scene)
     view.setWindowTitle("Animated Tiles")
-    view.setViewportUpdateMode(QtWidgets.QGraphicsView.BoundingRectViewportUpdate)
-    view.setBackgroundBrush(QtGui.QBrush(bg_pix))
-    view.setCacheMode(QtWidgets.QGraphicsView.CacheBackground)
+    view.setViewportUpdateMode(QGraphicsView.BoundingRectViewportUpdate)
+    view.setBackgroundBrush(QBrush(bg_pix))
+    view.setCacheMode(QGraphicsView.CacheBackground)
     view.setRenderHints(
-            QtGui.QPainter.Antialiasing | QtGui.QPainter.SmoothPixmapTransform)
+            QPainter.Antialiasing | QPainter.SmoothPixmapTransform)
     view.show()
 
-    states = QtStateMachine.QStateMachine()
+    states = QStateMachine()
     states.addState(root_state)
     states.setInitialState(root_state)
     root_state.setInitialState(centered_state)
 
-    group = QtCore.QParallelAnimationGroup()
+    group = QParallelAnimationGroup()
     for i, item in enumerate(items):
-        anim = QtCore.QPropertyAnimation(item, b'pos')
+        anim = QPropertyAnimation(item, b'pos')
         anim.setDuration(750 + i * 25)
-        anim.setEasingCurve(QtCore.QEasingCurve.InOutBack)
+        anim.setEasingCurve(QEasingCurve.InOutBack)
         group.addAnimation(anim)
 
     trans = root_state.addTransition(ellipse_button.pressed, ellipse_state)
@@ -250,7 +257,7 @@ if __name__ == '__main__':
     trans = root_state.addTransition(centered_button.pressed, centered_state)
     trans.addAnimation(group)
 
-    timer = QtCore.QTimer()
+    timer = QTimer()
     timer.start(125)
     timer.setSingleShot(True)
     trans = root_state.addTransition(timer.timeout, ellipse_state)

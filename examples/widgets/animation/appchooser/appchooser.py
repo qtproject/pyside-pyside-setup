@@ -40,22 +40,29 @@
 ##
 #############################################################################
 
-from PySide6 import QtCore, QtGui, QtStateMachine, QtWidgets
+import sys
+
+from PySide6.QtCore import (QPointF, QPropertyAnimation, QRect, QRectF, Qt,
+                            Signal)
+from PySide6.QtGui import QPixmap
+from PySide6.QtWidgets import (QApplication, QGraphicsScene, QGraphicsView,
+                               QGraphicsWidget, QWidget)
+from PySide6.QtStateMachine import QState, QStateMachine
 
 import appchooser_rc
 
 
-class Pixmap(QtWidgets.QGraphicsWidget):
-    clicked = QtCore.Signal()
+class Pixmap(QGraphicsWidget):
+    clicked = Signal()
 
     def __init__(self, pix, parent=None):
         super(Pixmap, self).__init__(parent)
 
-        self.orig = QtGui.QPixmap(pix)
-        self.p = QtGui.QPixmap(pix)
+        self.orig = QPixmap(pix)
+        self.p = QPixmap(pix)
 
     def paint(self, painter, option, widget):
-        painter.drawPixmap(QtCore.QPointF(), self.p)
+        painter.drawPixmap(QPointF(), self.p)
 
     def mousePressEvent(self, ev):
         self.clicked.emit()
@@ -66,58 +73,55 @@ class Pixmap(QtWidgets.QGraphicsWidget):
         if rect.size().width() > self.orig.size().width():
             self.p = self.orig.scaled(rect.size().toSize())
         else:
-            self.p = QtGui.QPixmap(self.orig)
+            self.p = QPixmap(self.orig)
 
 
 def create_states(objects, selectedRect, parent):
     for obj in objects:
-        state = QtStateMachine.QState(parent)
+        state = QState(parent)
         state.assignProperty(obj, 'geometry', selectedRect)
         parent.addTransition(obj.clicked, state)
 
 
 def create_animations(objects, machine):
     for obj in objects:
-        animation = QtCore.QPropertyAnimation(obj, b'geometry', obj)
+        animation = QPropertyAnimation(obj, b'geometry', obj)
         machine.addDefaultAnimation(animation)
 
 
 if __name__ == '__main__':
+    app = QApplication(sys.argv)
 
-    import sys
+    p1 = Pixmap(QPixmap(':/digikam.png'))
+    p2 = Pixmap(QPixmap(':/akregator.png'))
+    p3 = Pixmap(QPixmap(':/accessories-dictionary.png'))
+    p4 = Pixmap(QPixmap(':/k3b.png'))
 
-    app = QtWidgets.QApplication(sys.argv)
+    p1.setGeometry(QRectF(0.0, 0.0, 64.0, 64.0))
+    p2.setGeometry(QRectF(236.0, 0.0, 64.0, 64.0))
+    p3.setGeometry(QRectF(236.0, 236.0, 64.0, 64.0))
+    p4.setGeometry(QRectF(0.0, 236.0, 64.0, 64.0))
 
-    p1 = Pixmap(QtGui.QPixmap(':/digikam.png'))
-    p2 = Pixmap(QtGui.QPixmap(':/akregator.png'))
-    p3 = Pixmap(QtGui.QPixmap(':/accessories-dictionary.png'))
-    p4 = Pixmap(QtGui.QPixmap(':/k3b.png'))
-
-    p1.setGeometry(QtCore.QRectF(0.0, 0.0, 64.0, 64.0))
-    p2.setGeometry(QtCore.QRectF(236.0, 0.0, 64.0, 64.0))
-    p3.setGeometry(QtCore.QRectF(236.0, 236.0, 64.0, 64.0))
-    p4.setGeometry(QtCore.QRectF(0.0, 236.0, 64.0, 64.0))
-
-    scene = QtWidgets.QGraphicsScene(0, 0, 300, 300)
-    scene.setBackgroundBrush(QtCore.Qt.white)
+    scene = QGraphicsScene(0, 0, 300, 300)
+    scene.setBackgroundBrush(Qt.white)
     scene.addItem(p1)
     scene.addItem(p2)
     scene.addItem(p3)
     scene.addItem(p4)
 
-    window = QtWidgets.QGraphicsView(scene)
+    window = QGraphicsView(scene)
     window.setFrameStyle(0)
-    window.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
-    window.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-    window.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+    window.setAlignment(Qt.AlignLeft | Qt.AlignTop)
+    window.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+    window.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
-    machine = QtStateMachine.QStateMachine()
-    machine.setGlobalRestorePolicy(QtStateMachine.QStateMachine.RestoreProperties)
+    machine = QStateMachine()
+    machine.setGlobalRestorePolicy(QStateMachine.RestoreProperties)
 
-    group = QtStateMachine.QState(machine)
-    selected_rect = QtCore.QRect(86, 86, 128, 128)
+    group = QState(machine)
+    selected_rect = QRect(86, 86, 128, 128)
 
-    idle_state = QtStateMachine.QState(group)
+    idle_state = QState(group)
     group.setInitialState(idle_state)
 
     objects = [p1, p2, p3, p4]

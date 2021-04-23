@@ -40,23 +40,28 @@
 ##
 #############################################################################
 
-from PySide6 import QtCore, QtWidgets
+import sys
+
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import (QApplication, QGridLayout,
+                               QLabel, QGridLayout, QLineEdit, QTextEdit,
+                               QWidget)
 
 
-class AddressBook(QtWidgets.QWidget):
+class AddressBook(QWidget):
     def __init__(self, parent=None):
         super(AddressBook, self).__init__(parent)
 
-        name_label = QtWidgets.QLabel("Name:")
-        self._name_line = QtWidgets.QLineEdit()
+        name_label = QLabel("Name:")
+        self._name_line = QLineEdit()
 
-        address_label = QtWidgets.QLabel("Address:")
-        self._address_text = QtWidgets.QTextEdit()
+        address_label = QLabel("Address:")
+        self._address_text = QTextEdit()
 
-        main_layout = QtWidgets.QGridLayout()
+        main_layout = QGridLayout()
         main_layout.addWidget(name_label, 0, 0)
         main_layout.addWidget(self._name_line, 0, 1)
-        main_layout.addWidget(address_label, 1, 0, QtCore.Qt.AlignTop)
+        main_layout.addWidget(address_label, 1, 0, Qt.AlignTop)
         main_layout.addWidget(self._address_text, 1, 1)
 
         self.setLayout(main_layout)
@@ -64,9 +69,7 @@ class AddressBook(QtWidgets.QWidget):
 
 
 if __name__ == '__main__':
-    import sys
-
-    app = QtWidgets.QApplication(sys.argv)
+    app = QApplication(sys.argv)
 
     address_book = AddressBook()
     address_book.show()

@@ -2,7 +2,7 @@
 #############################################################################
 ##
 ## Copyright (C) 2013 Riverbank Computing Limited.
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -43,23 +43,28 @@
 """PySide6 port of the network/fortuneserver example from Qt v5.x"""
 
 import random
+import sys
 
-from PySide6 import QtCore, QtWidgets, QtNetwork
+from PySide6.QtCore import QByteArray, QDataStream, QIODevice, Qt
+from PySide6.QtNetwork import QTcpServer
+from PySide6.QtWidgets import (QApplication, QDialog, QHBoxLayout,
+                               QLabel, QMessageBox, QPushButton,
+                               QVBoxLayout, QWidget)
 
 
-class Server(QtWidgets.QDialog):
+class Server(QDialog):
     def __init__(self, parent=None):
         super(Server, self).__init__(parent)
 
-        status_label = QtWidgets.QLabel()
-        status_label.setTextInteractionFlags(QtCore.Qt.TextBrowserInteraction)
-        quit_button = QtWidgets.QPushButton("Quit")
+        status_label = QLabel()
+        status_label.setTextInteractionFlags(Qt.TextBrowserInteraction)
+        quit_button = QPushButton("Quit")
         quit_button.setAutoDefault(False)
 
-        self._tcp_server = QtNetwork.QTcpServer(self)
+        self._tcp_server = QTcpServer(self)
         if not self._tcp_server.listen():
             reason = self._tcp_server.errorString()
-            QtWidgets.QMessageBox.critical(self, "Fortune Server",
+            QMessageBox.critical(self, "Fortune Server",
                     f"Unable to start the server: {reason}.")
             self.close()
             return
@@ -79,22 +84,21 @@ class Server(QtWidgets.QDialog):
         quit_button.clicked.connect(self.close)
         self._tcp_server.newConnection.connect(self.send_fortune)
 
-        button_layout = QtWidgets.QHBoxLayout()
+        button_layout = QHBoxLayout()
         button_layout.addStretch(1)
         button_layout.addWidget(quit_button)
         button_layout.addStretch(1)
 
-        main_layout = QtWidgets.QVBoxLayout()
+        main_layout = QVBoxLayout(self)
         main_layout.addWidget(status_label)
         main_layout.addLayout(button_layout)
-        self.setLayout(main_layout)
 
         self.setWindowTitle("Fortune Server")
 
     def send_fortune(self):
-        block = QtCore.QByteArray()
-        out = QtCore.QDataStream(block, QtCore.QIODevice.WriteOnly)
-        out.setVersion(QtCore.QDataStream.Qt_4_0)
+        block = QByteArray()
+        out = QDataStream(block, QIODevice.WriteOnly)
+        out.setVersion(QDataStream.Qt_4_0)
         out.writeUInt16(0)
         fortune = self.fortunes[random.randint(0, len(self.fortunes) - 1)]
 
@@ -110,10 +114,7 @@ class Server(QtWidgets.QDialog):
 
 
 if __name__ == '__main__':
-
-    import sys
-
-    app = QtWidgets.QApplication(sys.argv)
+    app = QApplication(sys.argv)
     server = Server()
     random.seed(None)
     sys.exit(server.exec_())

@@ -42,10 +42,19 @@
 
 """PySide6 port of the widgets/dialogs/findfiles example from Qt v5.x"""
 
-from PySide6 import QtCore, QtGui, QtWidgets
+import sys
+
+from PySide6.QtCore import (QCoreApplication, QDir, QFile, QFileInfo,
+                            QIODevice,  QTextStream, QUrl, Qt)
+from PySide6.QtGui import QDesktopServices
+from PySide6.QtWidgets import (QAbstractItemView, QApplication, QComboBox,
+                               QDialog, QFileDialog, QGridLayout, QHBoxLayout,
+                               QHeaderView, QLabel, QLineEdit, QProgressDialog,
+                               QPushButton, QSizePolicy, QTableWidget,
+                               QTableWidgetItem, QVBoxLayout, QWidget)
 
 
-class Window(QtWidgets.QDialog):
+class Window(QDialog):
     def __init__(self, parent=None):
         super(Window, self).__init__(parent)
 
@@ -54,20 +63,20 @@ class Window(QtWidgets.QDialog):
 
         self._file_combo_box = self.create_combo_box("*")
         self._text_combo_box = self.create_combo_box()
-        self._directory_combo_box = self.create_combo_box(QtCore.QDir.currentPath())
+        self._directory_combo_box = self.create_combo_box(QDir.currentPath())
 
-        file_label = QtWidgets.QLabel("Named:")
-        text_label = QtWidgets.QLabel("Containing text:")
-        directory_label = QtWidgets.QLabel("In directory:")
-        self._files_found_label = QtWidgets.QLabel()
+        file_label = QLabel("Named:")
+        text_label = QLabel("Containing text:")
+        directory_label = QLabel("In directory:")
+        self._files_found_label = QLabel()
 
         self.create_files_table()
 
-        buttons_layout = QtWidgets.QHBoxLayout()
+        buttons_layout = QHBoxLayout()
         buttons_layout.addStretch()
         buttons_layout.addWidget(self._find_button)
 
-        main_layout = QtWidgets.QGridLayout()
+        main_layout = QGridLayout()
         main_layout.addWidget(file_label, 0, 0)
         main_layout.addWidget(self._file_combo_box, 0, 1, 1, 2)
         main_layout.addWidget(text_label, 1, 0)
@@ -84,8 +93,8 @@ class Window(QtWidgets.QDialog):
         self.resize(500, 300)
 
     def browse(self):
-        directory = QtWidgets.QFileDialog.getExistingDirectory(self, "Find Files",
-                QtCore.QDir.currentPath())
+        directory = QFileDialog.getExistingDirectory(self, "Find Files",
+                QDir.currentPath())
 
         if directory:
             if self._directory_combo_box.findText(directory) == -1:
@@ -109,18 +118,18 @@ class Window(QtWidgets.QDialog):
         self.update_combo_box(self._text_combo_box)
         self.update_combo_box(self._directory_combo_box)
 
-        self._current_dir = QtCore.QDir(path)
+        self._current_dir = QDir(path)
         if not file_name:
             file_name = "*"
         files = self._current_dir.entryList([file_name],
-                QtCore.QDir.Files | QtCore.QDir.NoSymLinks)
+                QDir.Files | QDir.NoSymLinks)
 
         if text:
             files = self.find_files(files, text)
         self.show_files(files)
 
     def find_files(self, files, text):
-        progress_dialog = QtWidgets.QProgressDialog(self)
+        progress_dialog = QProgressDialog(self)
 
         progress_dialog.setCancelButtonText("&Cancel")
         progress_dialog.setRange(0, len(files))
@@ -132,15 +141,15 @@ class Window(QtWidgets.QDialog):
             progress_dialog.setValue(i)
             n = len(files)
             progress_dialog.setLabelText(f"Searching file number {i} of {n}...")
-            QtCore.QCoreApplication.processEvents()
+            QCoreApplication.processEvents()
 
             if progress_dialog.wasCanceled():
                 break
 
-            in_file = QtCore.QFile(self._current_dir.absoluteFilePath(files[i]))
+            in_file = QFile(self._current_dir.absoluteFilePath(files[i]))
 
-            if in_file.open(QtCore.QIODevice.ReadOnly):
-                stream = QtCore.QTextStream(in_file)
+            if in_file.open(QIODevice.ReadOnly):
+                stream = QTextStream(in_file)
                 while not stream.atEnd():
                     if progress_dialog.wasCanceled():
                         break
@@ -155,15 +164,15 @@ class Window(QtWidgets.QDialog):
 
     def show_files(self, files):
         for fn in files:
-            file = QtCore.QFile(self._current_dir.absoluteFilePath(fn))
-            size = QtCore.QFileInfo(file).size()
+            file = QFile(self._current_dir.absoluteFilePath(fn))
+            size = QFileInfo(file).size()
 
-            file_name_item = QtWidgets.QTableWidgetItem(fn)
-            file_name_item.setFlags(file_name_item.flags() ^ QtCore.Qt.ItemIsEditable)
+            file_name_item = QTableWidgetItem(fn)
+            file_name_item.setFlags(file_name_item.flags() ^ Qt.ItemIsEditable)
             size_kb = int((size + 1023) / 1024)
-            size_item = QtWidgets.QTableWidgetItem(f"{size_kb} KB")
-            size_item.setTextAlignment(QtCore.Qt.AlignVCenter | QtCore.Qt.AlignRight)
-            size_item.setFlags(size_item.flags() ^ QtCore.Qt.ItemIsEditable)
+            size_item = QTableWidgetItem(f"{size_kb} KB")
+            size_item.setTextAlignment(Qt.AlignVCenter | Qt.AlignRight)
+            size_item.setFlags(size_item.flags() ^ Qt.ItemIsEditable)
 
             row = self._files_table.rowCount()
             self._files_table.insertRow(row)
@@ -174,24 +183,24 @@ class Window(QtWidgets.QDialog):
         self._files_found_label.setText(f"{n} file(s) found (Double click on a file to open it)")
 
     def create_button(self, text, member):
-        button = QtWidgets.QPushButton(text)
+        button = QPushButton(text)
         button.clicked.connect(member)
         return button
 
     def create_combo_box(self, text=""):
-        combo_box = QtWidgets.QComboBox()
+        combo_box = QComboBox()
         combo_box.setEditable(True)
         combo_box.addItem(text)
-        combo_box.setSizePolicy(QtWidgets.QSizePolicy.Expanding,
-                QtWidgets.QSizePolicy.Preferred)
+        combo_box.setSizePolicy(QSizePolicy.Expanding,
+                QSizePolicy.Preferred)
         return combo_box
 
     def create_files_table(self):
-        self._files_table = QtWidgets.QTableWidget(0, 2)
-        self._files_table.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+        self._files_table = QTableWidget(0, 2)
+        self._files_table.setSelectionBehavior(QAbstractItemView.SelectRows)
 
         self._files_table.setHorizontalHeaderLabels(("File Name", "Size"))
-        self._files_table.horizontalHeader().setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
+        self._files_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
         self._files_table.verticalHeader().hide()
         self._files_table.setShowGrid(False)
 
@@ -200,14 +209,14 @@ class Window(QtWidgets.QDialog):
     def open_file_of_item(self, row, column):
         item = self._files_table.item(row, 0)
 
-        QtGui.QDesktopServices.openUrl(QtCore.QUrl(self._current_dir.absoluteFilePath(item.text())))
+        QDesktopServices.openUrl(QUrl(self._current_dir.absoluteFilePath(item.text())))
 
 
 if __name__ == '__main__':
 
     import sys
 
-    app = QtWidgets.QApplication(sys.argv)
+    app = QApplication(sys.argv)
     window = Window()
     window.show()
     sys.exit(app.exec_())

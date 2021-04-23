@@ -42,10 +42,15 @@
 
 """PySide6 port of the xml/dombookmarks example from Qt v5.x"""
 
-from PySide6 import QtCore, QtGui, QtWidgets, QtXml
+import sys
+
+from PySide6.QtCore import QDir, QFile, Qt
+from PySide6.QtGui import QAction, QIcon
+from PySide6.QtWidgets import (QApplication, QFileDialog, QHeaderView, QMainWindow, QMessageBox, QStyle, QTreeWidget, QTreeWidgetItem, QWidget)
+from PySide6.QtXml import QDomDocument
 
 
-class MainWindow(QtWidgets.QMainWindow):
+class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
 
@@ -61,17 +66,17 @@ class MainWindow(QtWidgets.QMainWindow):
         self.resize(480, 320)
 
     def open(self):
-        file_name = QtWidgets.QFileDialog.getOpenFileName(self,
-                "Open Bookmark File", QtCore.QDir.currentPath(),
+        file_name = QFileDialog.getOpenFileName(self,
+                "Open Bookmark File", QDir.currentPath(),
                 "XBEL Files (*.xbel *.xml)")[0]
 
         if not file_name:
             return
 
-        in_file = QtCore.QFile(file_name)
-        if not in_file.open(QtCore.QFile.ReadOnly | QtCore.QFile.Text):
+        in_file = QFile(file_name)
+        if not in_file.open(QFile.ReadOnly | QFile.Text):
             reason = in_file.errorString()
-            QtWidgets.QMessageBox.warning(self, "DOM Bookmarks",
+            QMessageBox.warning(self, "DOM Bookmarks",
                     f"Cannot read file {file_name}:\n{reason}.")
             return
 
@@ -79,17 +84,17 @@ class MainWindow(QtWidgets.QMainWindow):
             self.statusBar().showMessage("File loaded", 2000)
 
     def save_as(self):
-        file_name = QtWidgets.QFileDialog.getSaveFileName(self,
-                "Save Bookmark File", QtCore.QDir.currentPath(),
+        file_name = QFileDialog.getSaveFileName(self,
+                "Save Bookmark File", QDir.currentPath(),
                 "XBEL Files (*.xbel *.xml)")[0]
 
         if not file_name:
             return
 
-        out_file = QtCore.QFile(file_name)
-        if not out_file.open(QtCore.QFile.WriteOnly | QtCore.QFile.Text):
+        out_file = QFile(file_name)
+        if not out_file.open(QFile.WriteOnly | QFile.Text):
             reason = out_file.errorString()
-            QtWidgets.QMessageBox.warning(self, "DOM Bookmarks",
+            QMessageBox.warning(self, "DOM Bookmarks",
                     "Cannot write file {fileName}:\n{reason}.")
             return
 
@@ -97,23 +102,23 @@ class MainWindow(QtWidgets.QMainWindow):
             self.statusBar().showMessage("File saved", 2000)
 
     def about(self):
-       QtWidgets.QMessageBox.about(self, "About DOM Bookmarks",
+       QMessageBox.about(self, "About DOM Bookmarks",
             "The <b>DOM Bookmarks</b> example demonstrates how to use Qt's "
             "DOM classes to read and write XML documents.")
 
     def create_actions(self):
-        self._open_act = QtGui.QAction("&Open...", self, shortcut="Ctrl+O",
+        self._open_act = QAction("&Open...", self, shortcut="Ctrl+O",
                 triggered=self.open)
 
-        self._save_as_act = QtGui.QAction("&Save As...", self, shortcut="Ctrl+S",
+        self._save_as_act = QAction("&Save As...", self, shortcut="Ctrl+S",
                 triggered=self.save_as)
 
-        self._exit_act = QtGui.QAction("E&xit", self, shortcut="Ctrl+Q",
+        self._exit_act = QAction("E&xit", self, shortcut="Ctrl+Q",
                 triggered=self.close)
 
-        self._about_act = QtGui.QAction("&About", self, triggered=self.about)
+        self._about_act = QAction("&About", self, triggered=self.about)
 
-        self._about_qt_act = QtGui.QAction("About &Qt", self,
+        self._about_qt_act = QAction("About &Qt", self,
                 triggered=qApp.aboutQt)
 
     def create_menus(self):
@@ -129,40 +134,40 @@ class MainWindow(QtWidgets.QMainWindow):
         self._help_menu.addAction(self._about_qt_act)
 
 
-class XbelTree(QtWidgets.QTreeWidget):
+class XbelTree(QTreeWidget):
     def __init__(self, parent=None):
         super(XbelTree, self).__init__(parent)
 
-        self.header().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
+        self.header().setSectionResizeMode(QHeaderView.Stretch)
         self.setHeaderLabels(("Title", "Location"))
 
-        self._dom_document = QtXml.QDomDocument()
+        self._dom_document = QDomDocument()
 
         self._dom_element_for_item = {}
 
-        self._folder_icon = QtGui.QIcon()
-        self._bookmark_icon = QtGui.QIcon()
+        self._folder_icon = QIcon()
+        self._bookmark_icon = QIcon()
 
-        self._folder_icon.addPixmap(self.style().standardPixmap(QtWidgets.QStyle.SP_DirClosedIcon),
-                QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self._folder_icon.addPixmap(self.style().standardPixmap(QtWidgets.QStyle.SP_DirOpenIcon),
-                QtGui.QIcon.Normal, QtGui.QIcon.On)
-        self._bookmark_icon.addPixmap(self.style().standardPixmap(QtWidgets.QStyle.SP_FileIcon))
+        self._folder_icon.addPixmap(self.style().standardPixmap(QStyle.SP_DirClosedIcon),
+                QIcon.Normal, QIcon.Off)
+        self._folder_icon.addPixmap(self.style().standardPixmap(QStyle.SP_DirOpenIcon),
+                QIcon.Normal, QIcon.On)
+        self._bookmark_icon.addPixmap(self.style().standardPixmap(QStyle.SP_FileIcon))
 
     def read(self, device):
         ok, errorStr, errorLine, errorColumn = self._dom_document.setContent(device, True)
         if not ok:
-            QtWidgets.QMessageBox.information(self.window(), "DOM Bookmarks",
+            QMessageBox.information(self.window(), "DOM Bookmarks",
                     f"Parse error at line {errorLine}, column {errorColumn}:\n{errorStr}")
             return False
 
         root = self._dom_document.documentElement()
         if root.tagName() != 'xbel':
-            QtWidgets.QMessageBox.information(self.window(), "DOM Bookmarks",
+            QMessageBox.information(self.window(), "DOM Bookmarks",
                     "The file is not an XBEL file.")
             return False
         elif root.hasAttribute('version') and root.attribute('version') != '1.0':
-            QtWidgets.QMessageBox.information(self.window(), "DOM Bookmarks",
+            QMessageBox.information(self.window(), "DOM Bookmarks",
                     "The file is not an XBEL version 1.0 file.")
             return False
 
@@ -186,7 +191,7 @@ class XbelTree(QtWidgets.QTreeWidget):
     def write(self, device):
         INDENT_SIZE = 4
 
-        out = QtCore.QTextStream(device)
+        out = QTextStream(device)
         self._dom_document.save(out, INDENT_SIZE)
         return True
 
@@ -212,7 +217,7 @@ class XbelTree(QtWidgets.QTreeWidget):
         if not title:
             title = "Folder"
 
-        item.setFlags(item.flags() | QtCore.Qt.ItemIsEditable)
+        item.setFlags(item.flags() | Qt.ItemIsEditable)
         item.setIcon(0, self._folder_icon)
         item.setText(0, title)
 
@@ -230,34 +235,31 @@ class XbelTree(QtWidgets.QTreeWidget):
                 if not title:
                     title = "Folder"
 
-                child_item.setFlags(item.flags() | QtCore.Qt.ItemIsEditable)
+                child_item.setFlags(item.flags() | Qt.ItemIsEditable)
                 child_item.setIcon(0, self._bookmark_icon)
                 child_item.setText(0, title)
                 child_item.setText(1, child.attribute('href'))
             elif child.tagName() == 'separator':
                 child_item = self.create_item(child, item)
-                child_item.setFlags(item.flags() & ~(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable))
+                child_item.setFlags(item.flags() & ~(Qt.ItemIsSelectable | Qt.ItemIsEditable))
                 child_item.setText(0, 30 * "\xb7")
 
             child = child.nextSiblingElement()
 
     def create_item(self, element, parentItem=None):
-        item = QtWidgets.QTreeWidgetItem()
+        item = QTreeWidgetItem()
 
         if parentItem is not None:
-            item = QtWidgets.QTreeWidgetItem(parentItem)
+            item = QTreeWidgetItem(parentItem)
         else:
-            item = QtWidgets.QTreeWidgetItem(self)
+            item = QTreeWidgetItem(self)
 
         self._dom_element_for_item[id(item)] = element
         return item
 
 
 if __name__ == '__main__':
-
-    import sys
-
-    app = QtWidgets.QApplication(sys.argv)
+    app = QApplication(sys.argv)
     main_win = MainWindow()
     main_win.show()
     main_win.open()

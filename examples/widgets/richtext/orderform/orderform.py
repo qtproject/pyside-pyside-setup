@@ -42,14 +42,24 @@
 
 """PySide6 port of the widgets/richtext/orderform example from Qt v5.x"""
 
-from PySide6 import QtCore, QtGui, QtWidgets, QtPrintSupport
+import sys
+
+from PySide6.QtCore import QDate, Qt, Signal, Slot
+from PySide6.QtGui import (QFont, QTextCharFormat, QTextCursor,
+                           QTextFrameFormat, QTextLength, QTextTableFormat)
+from PySide6.QtWidgets import (QApplication, QCheckBox, QDialog,
+                               QDialogButtonBox, QGridLayout, QLabel,
+                               QLineEdit, QMainWindow, QMenu, QMessageBox,
+                               QTableWidget, QTableWidgetItem, QTabWidget,
+                               QTextEdit, QWidget)
+from PySide6.QtPrintSupport import QAbstractPrintDialog, QPrintDialog, QPrinter
 
 
-class MainWindow(QtWidgets.QMainWindow):
+class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
 
-        file_menu = QtWidgets.QMenu("&File", self)
+        file_menu = QMenu("&File", self)
         new_action = file_menu.addAction("&New...")
         new_action.setShortcut("Ctrl+N")
         self._print_action = file_menu.addAction("&Print...", self.print_file)
@@ -59,7 +69,7 @@ class MainWindow(QtWidgets.QMainWindow):
         quit_action.setShortcut("Ctrl+Q")
         self.menuBar().addMenu(file_menu)
 
-        self.letters = QtWidgets.QTabWidget()
+        self.letters = QTabWidget()
 
         new_action.triggered.connect(self.open_dialog)
         quit_action.triggered.connect(self.close)
@@ -68,26 +78,26 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowTitle("Order Form")
 
     def create_letter(self, name, address, orderItems, sendOffers):
-        editor = QtWidgets.QTextEdit()
+        editor = QTextEdit()
         tab_index = self.letters.addTab(editor, name)
         self.letters.setCurrentIndex(tab_index)
 
         cursor = editor.textCursor()
-        cursor.movePosition(QtGui.QTextCursor.Start)
+        cursor.movePosition(QTextCursor.Start)
         top_frame = cursor.currentFrame()
         top_frame_format = top_frame.frameFormat()
         top_frame_format.setPadding(16)
         top_frame.setFrameFormat(top_frame_format)
 
-        text_format = QtGui.QTextCharFormat()
-        bold_format = QtGui.QTextCharFormat()
-        bold_format.setFontWeight(QtGui.QFont.Bold)
+        text_format = QTextCharFormat()
+        bold_format = QTextCharFormat()
+        bold_format.setFontWeight(QFont.Bold)
 
-        reference_frame_format = QtGui.QTextFrameFormat()
+        reference_frame_format = QTextFrameFormat()
         reference_frame_format.setBorder(1)
         reference_frame_format.setPadding(8)
-        reference_frame_format.setPosition(QtGui.QTextFrameFormat.FloatRight)
-        reference_frame_format.setWidth(QtGui.QTextLength(QtGui.QTextLength.PercentageLength, 40))
+        reference_frame_format.setPosition(QTextFrameFormat.FloatRight)
+        reference_frame_format.setWidth(QTextLength(QTextLength.PercentageLength, 40))
         cursor.insertFrame(reference_frame_format)
 
         cursor.insertText("A company", bold_format)
@@ -108,13 +118,13 @@ class MainWindow(QtWidgets.QMainWindow):
         cursor.insertBlock()
         cursor.insertBlock()
 
-        date = QtCore.QDate.currentDate()
+        date = QDate.currentDate()
         date_str = date.toString('d MMMM yyyy')
         cursor.insertText(f"Date: {date_str}", text_format)
         cursor.insertBlock()
 
-        body_frame_format = QtGui.QTextFrameFormat()
-        body_frame_format.setWidth(QtGui.QTextLength(QtGui.QTextLength.PercentageLength, 100))
+        body_frame_format = QTextFrameFormat()
+        body_frame_format.setWidth(QTextLength(QTextLength.PercentageLength, 100))
         cursor.insertFrame(body_frame_format)
 
         cursor.insertText("I would like to place an order for the following "
@@ -122,8 +132,8 @@ class MainWindow(QtWidgets.QMainWindow):
         cursor.insertBlock()
         cursor.insertBlock()
 
-        order_table_format = QtGui.QTextTableFormat()
-        order_table_format.setAlignment(QtCore.Qt.AlignHCenter)
+        order_table_format = QTextTableFormat()
+        order_table_format.setAlignment(Qt.AlignHCenter)
         order_table = cursor.insertTable(1, 2, order_table_format)
 
         order_frame_format = cursor.currentFrame().frameFormat()
@@ -187,49 +197,49 @@ class MainWindow(QtWidgets.QMainWindow):
     def open_dialog(self):
         dialog = DetailsDialog("Enter Customer Details", self)
 
-        if dialog.exec_() == QtWidgets.QDialog.Accepted:
+        if dialog.exec_() == QDialog.Accepted:
             self.create_letter(dialog.sender_name(), dialog.sender_address(),
                     dialog.order_items(), dialog.send_offers())
 
     def print_file(self):
         editor = self.letters.currentWidget()
-        printer = QtPrintSupport.QPrinter()
+        printer = QPrinter()
 
-        dialog = QtPrintSupport.QPrintDialog(printer, self)
+        dialog = QPrintDialog(printer, self)
         dialog.setWindowTitle("Print Document")
 
         if editor.textCursor().hasSelection():
-            dialog.addEnabledOption(QtPrintSupport.QAbstractPrintDialog.PrintSelection)
+            dialog.addEnabledOption(QAbstractPrintDialog.PrintSelection)
 
-        if dialog.exec_() != QtWidgets.QDialog.Accepted:
+        if dialog.exec_() != QDialog.Accepted:
             return
 
         editor.print_(printer)
 
 
-class DetailsDialog(QtWidgets.QDialog):
+class DetailsDialog(QDialog):
     def __init__(self, title, parent):
         super(DetailsDialog, self).__init__(parent)
 
         self.items = ("T-shirt", "Badge", "Reference book", "Coffee cup")
 
-        name_label = QtWidgets.QLabel("Name:")
-        address_label = QtWidgets.QLabel("Address:")
-        address_label.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
+        name_label = QLabel("Name:")
+        address_label = QLabel("Address:")
+        address_label.setAlignment(Qt.AlignLeft | Qt.AlignTop)
 
-        self._name_edit = QtWidgets.QLineEdit()
-        self._address_edit = QtWidgets.QTextEdit()
-        self._offers_check_box = QtWidgets.QCheckBox("Send information about "
+        self._name_edit = QLineEdit()
+        self._address_edit = QTextEdit()
+        self._offers_check_box = QCheckBox("Send information about "
                 "products and special offers:")
 
         self.setup_items_table()
 
-        button_box = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
+        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
 
         button_box.accepted.connect(self.verify)
         button_box.rejected.connect(self.reject)
 
-        main_layout = QtWidgets.QGridLayout()
+        main_layout = QGridLayout(self)
         main_layout.addWidget(name_label, 0, 0)
         main_layout.addWidget(self._name_edit, 0, 1)
         main_layout.addWidget(address_label, 1, 0)
@@ -237,18 +247,17 @@ class DetailsDialog(QtWidgets.QDialog):
         main_layout.addWidget(self._items_table, 0, 2, 2, 1)
         main_layout.addWidget(self._offers_check_box, 2, 1, 1, 2)
         main_layout.addWidget(button_box, 3, 0, 1, 3)
-        self.setLayout(main_layout)
 
         self.setWindowTitle(title)
 
     def setup_items_table(self):
-        self._items_table = QtWidgets.QTableWidget(len(self.items), 2)
+        self._items_table = QTableWidget(len(self.items), 2)
 
         for row, item in enumerate(self.items):
-            name = QtWidgets.QTableWidgetItem(item)
-            name.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
+            name = QTableWidgetItem(item)
+            name.setFlags(Qt.ItemIsEnabled | Qt.ItemIsSelectable)
             self._items_table.setItem(row, 0, name)
-            quantity = QtWidgets.QTableWidgetItem('1')
+            quantity = QTableWidgetItem('1')
             self._items_table.setItem(row, 1, quantity)
 
     def order_items(self):
@@ -256,7 +265,7 @@ class DetailsDialog(QtWidgets.QDialog):
 
         for row in range(len(self.items)):
             text = self._items_table.item(row, 0).text()
-            quantity = int(self._items_table.item(row, 1).data(QtCore.Qt.DisplayRole))
+            quantity = int(self._items_table.item(row, 1).data(Qt.DisplayRole))
             order_list.append((text, max(0, quantity)))
 
         return order_list
@@ -275,20 +284,17 @@ class DetailsDialog(QtWidgets.QDialog):
             self.accept()
             return
 
-        answer = QtWidgets.QMessageBox.warning(self, "Incomplete Form",
+        answer = QMessageBox.warning(self, "Incomplete Form",
                 "The form does not contain all the necessary information.\n"
                 "Do you want to discard it?",
-                QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No)
+                QMessageBox.Yes, QMessageBox.No)
 
-        if answer == QtWidgets.QMessageBox.Yes:
+        if answer == QMessageBox.Yes:
             self.reject()
 
 
 if __name__ == '__main__':
-
-    import sys
-
-    app = QtWidgets.QApplication(sys.argv)
+    app = QApplication(sys.argv)
     window = MainWindow()
     window.resize(640, 480)
     window.show()
