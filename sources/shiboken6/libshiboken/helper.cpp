@@ -157,6 +157,29 @@ std::ostream &operator<<(std::ostream &str, const debugPyObject &o)
     return str;
 }
 
+#ifdef _WIN32
+// Converts a Unicode string to a string encoded in the Windows console's
+// code page via wchar_t for use with argv (PYSIDE-1425).
+// FIXME: Remove once Windows console uses UTF-8
+static char *toWindowsConsoleEncoding(PyObject *unicode)
+{
+    wchar_t *buf =  PyUnicode_AsWideCharString(unicode, nullptr);
+    if (buf == nullptr)
+        return nullptr;
+    const int required = WideCharToMultiByte(CP_ACP, 0, buf, -1,
+                                             nullptr, 0, nullptr, nullptr);
+    if (required == 0) {
+        PyMem_Free(buf);
+        return nullptr;
+    }
+    char *result = new char[required];
+    WideCharToMultiByte(CP_ACP, 0, buf, -1,
+                        result, required, nullptr, nullptr);
+    PyMem_Free(buf);
+    return result;
+}
+#endif // _WIN32
+
 // PySide-510: Changed from PySequence to PyList, which is correct.
 bool listToArgcArgv(PyObject *argList, int *argc, char ***argv, const char *defaultAppName)
 {
@@ -192,7 +215,11 @@ bool listToArgcArgv(PyObject *argList, int *argc, char ***argv, const char *defa
             PyObject *item = PyList_GET_ITEM(args.object(), i);
             char *string = nullptr;
             if (Shiboken::String::check(item)) {
+#ifdef _WIN32
+                string = toWindowsConsoleEncoding(item);
+#else
                 string = strdup(Shiboken::String::toCString(item));
+#endif
             }
             (*argv)[i] = string;
         }
