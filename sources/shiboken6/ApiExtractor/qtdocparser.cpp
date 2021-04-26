@@ -304,12 +304,13 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
     //Functions Documentation
     const auto &funcs = DocParser::documentableFunctions(metaClass);
     for (const auto &func : funcs) {
-        const QString documentation =
+        const QString detailed =
             queryFunctionDocumentation(sourceFileName, metaClass, classQuery,
                                        func, signedModifs, xquery, &errorMessage);
         if (!errorMessage.isEmpty())
             qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
-        qSharedPointerConstCast<AbstractMetaFunction>(func)->setDocumentation(Documentation(documentation));
+        const Documentation documentation(detailed, {});
+        qSharedPointerConstCast<AbstractMetaFunction>(func)->setDocumentation(documentation);
     }
 #if 0
     // Fields
@@ -376,7 +377,8 @@ Documentation QtDocParser::retrieveModuleDocumentation(const QString& name)
     // Module documentation
     QString query = QLatin1String("/WebXML/document/module[@name=\"")
         + moduleName + QLatin1String("\"]/description");
-    Documentation doc = getDocumentation(xquery, query, DocModificationList());
+    const QString detailed = getDocumentation(xquery, query, DocModificationList());
+    Documentation doc(detailed, {});
     if (doc.isEmpty()) {
         qCWarning(lcShibokenDoc, "%s", qPrintable(msgCannotFindDocumentation(sourceFile, "module", name, query)));
         return doc;
@@ -385,11 +387,11 @@ Documentation QtDocParser::retrieveModuleDocumentation(const QString& name)
     // If a QML module info file exists, insert a link to the Qt docs.
     const QFileInfo qmlModuleFi(prefix + QLatin1String("-qmlmodule.webxml"));
     if (qmlModuleFi.isFile()) {
-        QString docString = doc.value();
+        QString docString = doc.detailed();
         const int pos = docString.lastIndexOf(QLatin1String("</description>"));
         if (pos != -1) {
             docString.insert(pos, qmlReferenceLink(qmlModuleFi));
-            doc.setValue(docString);
+            doc.setDetailed(docString);
         }
     }
 

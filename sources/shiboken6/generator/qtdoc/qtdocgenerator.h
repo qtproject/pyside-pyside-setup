@@ -91,9 +91,15 @@ private:
                             const AbstractMetaArgument &arg) const;
 
     void writeConstructors(TextStream &s, const AbstractMetaClass *cppClass) const;
-    void writeFormattedText(TextStream &s, const Documentation &doc,
-                            const AbstractMetaClass *metaclass = nullptr,
-                            Documentation::Type docType = Documentation::Detailed) const;
+
+    void writeFormattedText(TextStream &s, const QString &doc,
+                            Documentation::Format format,
+                            const AbstractMetaClass *metaClass = nullptr) const;
+    void writeFormattedBriefText(TextStream &s, const Documentation &doc,
+                                 const AbstractMetaClass *metaclass = nullptr) const;
+    void writeFormattedDetailedText(TextStream &s, const Documentation &doc,
+                                    const AbstractMetaClass *metaclass = nullptr) const;
+
     bool writeInjectDocumentation(TextStream& s, TypeSystem::DocModificationMode mode,
                                   const AbstractMetaClass* cppClass,
                                   const AbstractMetaFunctionCPtr &func);

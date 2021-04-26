@@ -28,38 +28,29 @@
 
 #include "documentation.h"
 
-Documentation::Documentation(const QString &value, Documentation::Type t, Documentation::Format fmt)
+Documentation::Documentation(const QString &detailed,
+                             const QString &brief,
+                             Format fmt) :
+    m_detailed(detailed.trimmed()), m_brief(brief.trimmed()), m_format(fmt)
 {
-    setValue(value, t, fmt);
 }
 
 bool Documentation::isEmpty() const
 {
-    for (int i = 0; i < Type::Last; i++) {
-        if (!m_data.value(static_cast<Type>(i)).isEmpty())
-            return false;
-    }
-    return true;
-}
-
-QString Documentation::value(Documentation::Type t) const
-{
-    return m_data.value(t);
-}
-
-void Documentation::setValue(const QString &value, Documentation::Type t, Documentation::Format fmt)
-{
-    const QString v = value.trimmed();
-    if (v.isEmpty())
-        m_data.remove(t);
-    else
-        m_data[t] = value.trimmed();
-    m_format = fmt;
+    return m_detailed.isEmpty() && m_brief.isEmpty();
 }
 
 Documentation::Format Documentation::format() const
 {
     return m_format;
+}
+
+void Documentation::setValue(const QString &value, Documentation::Type t)
+{
+    if (t == Brief)
+        setBrief(value);
+    else
+        setDetailed(value);
 }
 
 void Documentation::setFormat(Documentation::Format f)
@@ -69,5 +60,16 @@ void Documentation::setFormat(Documentation::Format f)
 
 bool Documentation::equals(const Documentation &rhs) const
 {
-    return m_format == rhs.m_format && m_data == rhs.m_data;
+    return m_format == rhs.m_format && m_detailed == rhs.m_detailed
+        && m_brief == rhs.m_brief;
+}
+
+void Documentation::setDetailed(const QString &detailed)
+{
+    m_detailed = detailed.trimmed();
+}
+
+void Documentation::setBrief(const QString &brief)
+{
+    m_brief = brief.trimmed();
 }

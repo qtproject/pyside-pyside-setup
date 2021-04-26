@@ -29,16 +29,16 @@
 #ifndef DOCUMENTATION_H
 #define DOCUMENTATION_H
 
-#include <QtCore/QMap>
 #include <QtCore/QString>
 
 class Documentation
 {
 public:
     enum Format {
-        Native,
-        Target
+        Native, // XML
+        Target  // RST
     };
+
     enum Type {
         Detailed,
         Brief,
@@ -46,23 +46,29 @@ public:
     };
 
     Documentation() = default;
-    Documentation(const QString& value, Type t = Documentation::Detailed,
-                  Format fmt = Documentation::Native);
+    explicit Documentation(const QString &detailed,
+                           const QString &brief,
+                           Format fmt = Documentation::Native);
 
     bool isEmpty() const;
-    bool hasBrief() const { return m_data.contains(Brief); }
 
-    QString value(Type t = Documentation::Detailed) const;
-    void setValue(const QString& value, Type t = Documentation::Detailed,
-                  Format fmt = Documentation::Native);
+    void setValue(const QString& value, Type t = Documentation::Detailed);
 
     Documentation::Format format() const;
     void setFormat(Format f);
 
     bool equals(const Documentation &rhs) const;
 
+    const QString &detailed() const { return m_detailed; }
+    void setDetailed(const QString &detailed);
+
+    bool hasBrief() const { return !m_brief.isEmpty(); }
+    const QString &brief() const { return m_brief; }
+    void setBrief(const QString &brief);
+
 private:
-    QMap<Type, QString> m_data;
+    QString m_detailed;
+    QString m_brief;
     Format m_format = Documentation::Native;
 };
 

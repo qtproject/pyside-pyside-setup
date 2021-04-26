@@ -178,21 +178,32 @@ QString QtDocGenerator::fileNameForContext(const GeneratorContext &context) cons
     return fileNameBase + fileNameSuffix();
 }
 
-void QtDocGenerator::writeFormattedText(TextStream &s, const Documentation &doc,
-                                        const AbstractMetaClass *metaClass,
-                                        Documentation::Type docType) const
+void QtDocGenerator::writeFormattedBriefText(TextStream &s, const Documentation &doc,
+                                             const AbstractMetaClass *metaclass) const
+{
+    writeFormattedText(s, doc.brief(), doc.format(), metaclass);
+}
+
+void QtDocGenerator::writeFormattedDetailedText(TextStream &s, const Documentation &doc,
+                                                const AbstractMetaClass *metaclass) const
+{
+    writeFormattedText(s, doc.detailed(), doc.format(), metaclass);
+}
+
+void QtDocGenerator::writeFormattedText(TextStream &s, const QString &doc,
+                                        Documentation::Format format,
+                                        const AbstractMetaClass *metaClass) const
 {
     QString metaClassName;
 
     if (metaClass)
         metaClassName = metaClass->fullName();
 
-    if (doc.format() == Documentation::Native) {
-        QtXmlToSphinx x(this, m_parameters, doc.value(docType), metaClassName);
+    if (format == Documentation::Native) {
+        QtXmlToSphinx x(this, m_parameters, doc, metaClassName);
         s << x;
     } else {
-        const QString &value = doc.value(docType);
-        const auto lines = QStringView{value}.split(QLatin1Char('\n'));
+        const auto lines = QStringView{doc}.split(QLatin1Char('\n'));
         int typesystemIndentation = std::numeric_limits<int>::max();
         // check how many spaces must be removed from the beginning of each line
         for (const auto &line : lines) {
@@ -251,7 +262,7 @@ void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classC
 
     auto documentation = metaClass->documentation();
     if (documentation.hasBrief())
-        writeFormattedText(s, documentation.value(Documentation::Brief), metaClass);
+        writeFormattedBriefText(s, documentation, metaClass);
 
     s << ".. inheritance-diagram:: " << metaClass->fullName()<< '\n'
       << "    :parts: 2\n\n";
@@ -278,7 +289,7 @@ void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classC
 
     writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, metaClass, nullptr);
     if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, metaClass, nullptr))
-        writeFormattedText(s, documentation.value(Documentation::Detailed), metaClass);
+        writeFormattedDetailedText(s, documentation, metaClass);
 
     if (!metaClass->isNamespace())
         writeConstructors(s, metaClass);
@@ -382,7 +393,7 @@ void QtDocGenerator::writeEnums(TextStream& s, const AbstractMetaClass* cppClass
 
     for (const AbstractMetaEnum &en : cppClass->enums()) {
         s << section_title << cppClass->fullName() << '.' << en.name() << "\n\n";
-        writeFormattedText(s, en.documentation().value(), cppClass);
+        writeFormattedDetailedText(s, en.documentation(), cppClass);
         const auto version = versionOf(en.typeEntry());
         if (!version.isNull())
             s << rstVersionAdded(version);
@@ -396,7 +407,7 @@ void QtDocGenerator::writeFields(TextStream& s, const AbstractMetaClass* cppClas
 
     for (const AbstractMetaField &field : cppClass->fields()) {
         s << section_title << cppClass->fullName() << "." << field.name() << "\n\n";
-        writeFormattedText(s, field.documentation().value(), cppClass);
+        writeFormattedDetailedText(s, field.documentation(), cppClass);
     }
 }
 
@@ -452,7 +463,7 @@ void QtDocGenerator::writeConstructors(TextStream& s, const AbstractMetaClass* c
     s << '\n';
 
     for (const auto &func : qAsConst(lst))
-        writeFormattedText(s, func->documentation().value(), cppClass);
+        writeFormattedDetailedText(s, func->documentation(), cppClass);
 }
 
 QString QtDocGenerator::parseArgDocStyle(const AbstractMetaClass* /* cppClass */,
@@ -577,7 +588,6 @@ bool QtDocGenerator::writeInjectDocumentation(TextStream& s,
             bool modOk = func ? mod.signature() == func->minimalSignature() : mod.signature().isEmpty();
 
             if (modOk) {
-                Documentation doc;
                 Documentation::Format fmt;
 
                 if (mod.format() == TypeSystem::NativeCode)
@@ -587,8 +597,7 @@ bool QtDocGenerator::writeInjectDocumentation(TextStream& s,
                 else
                     continue;
 
-                doc.setValue(mod.code(), Documentation::Detailed, fmt);
-                writeFormattedText(s, doc, cppClass);
+                writeFormattedText(s, mod.code(), fmt, cppClass);
                 didSomething = true;
             }
         }
@@ -738,8 +747,8 @@ void QtDocGenerator::writeFunction(TextStream& s, const AbstractMetaClass* cppCl
     }
     writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, cppClass, func);
     if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, cppClass, func)) {
-        writeFormattedText(s, func->documentation(), cppClass, Documentation::Brief);
-        writeFormattedText(s, func->documentation(), cppClass, Documentation::Detailed);
+        writeFormattedBriefText(s, func->documentation(), cppClass);
+        writeFormattedDetailedText(s, func->documentation(), cppClass);
     }
     writeInjectDocumentation(s, TypeSystem::DocModificationAppend, cppClass, func);
 }
@@ -869,10 +878,10 @@ void QtDocGenerator::writeModuleDocumentation()
             if (moduleDoc.format() == Documentation::Native) {
                 QString context = it.key();
                 QtXmlToSphinx::stripPythonQualifiers(&context);
-                QtXmlToSphinx x(this, m_parameters, moduleDoc.value(), context);
+                QtXmlToSphinx x(this, m_parameters, moduleDoc.detailed(), context);
                 s << x;
             } else {
-                s << moduleDoc.value();
+                s << moduleDoc.detailed();
             }
         }
     }

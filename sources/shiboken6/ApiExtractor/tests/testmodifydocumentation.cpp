@@ -75,8 +75,8 @@ R"(<typesystem package="Foo">
     docParser.fillDocumentation(classA);
 
     const Documentation &doc = classA->documentation();
-    const QString actualDocSimplified = doc.value(Documentation::Detailed).simplified();
-    const QString actualBriefSimplified = doc.value(Documentation::Brief).simplified();
+    const QString actualDocSimplified = doc.detailed().simplified();
+    const QString actualBriefSimplified = doc.brief().simplified();
     QVERIFY(!actualDocSimplified.isEmpty());
 
 const char expectedDoc[] =

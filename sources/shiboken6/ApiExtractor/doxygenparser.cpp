@@ -212,7 +212,7 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
             qCWarning(lcShibokenDoc, "%s",
                       qPrintable(msgCannotFindDocumentation(doxyFilePath, metaClass, meta_enum, query)));
         }
-        meta_enum.setDocumentation(doc);
+        meta_enum.setDocumentation(Documentation(doc, {}));
     }
 
 }
@@ -237,6 +237,7 @@ Documentation DoxygenParser::retrieveModuleDocumentation(const QString& name){
 
     // Module documentation
     QString query = QLatin1String("/doxygen/compounddef/detaileddescription");
-    return Documentation(getDocumentation(xquery, query, DocModificationList()));
+    const QString doc = getDocumentation(xquery, query, DocModificationList());
+    return Documentation(doc, {});
 }
 
