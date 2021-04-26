@@ -39,7 +39,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__f
 
 
 class TestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
-    DATA = "PySide Server"
+    DATA = b"PySide Server"
     allow_reuse_address = True
 
     def do_GET(self):
