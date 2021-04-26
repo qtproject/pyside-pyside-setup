@@ -37,8 +37,8 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1] / "util"))
 from init_paths import init_test_paths
 init_test_paths()
 
-from PySide6.QtCore import *
-from PySide6.QtWidgets  import *
+from PySide6.QtCore import QDir, QModelIndex, QTimer
+from PySide6.QtWidgets import QApplication, QFileSystemModel, QMainWindow, QTreeView
 
 
 class A(QMainWindow):

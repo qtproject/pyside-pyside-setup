@@ -39,8 +39,9 @@ init_test_paths(False)
 
 from sys import getrefcount
 from helper.usesqapplication import UsesQApplication
-from PySide6.QtCore import *
+from PySide6.QtCore import QAbstractTableModel
 from PySide6.QtWidgets import QTableView
+
 
 class TestModel(QAbstractTableModel):
     def __init__(self, parent=None):

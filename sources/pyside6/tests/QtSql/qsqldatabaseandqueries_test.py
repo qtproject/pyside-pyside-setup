@@ -40,42 +40,42 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtSql
-from PySide6.QtCore import *
-from PySide6.QtWidgets import *
+from PySide6.QtSql import QSqlDatabase, QSqlQuery, QSqlTableModel
+from PySide6.QtWidgets import QApplication, QWidget
+
 
 class Foo(QWidget):
     def __init__(self):
         QWidget.__init__(self)
-        self.model = QtSql.QSqlTableModel()
+        self.model = QSqlTableModel()
 
 class SqlDatabaseCreationDestructionAndQueries(unittest.TestCase):
     '''Test cases for QtSql database creation, destruction and queries'''
 
     def setUp(self):
         #Acquire resources
-        self.assertFalse(not QtSql.QSqlDatabase.drivers(), "installed Qt has no DB drivers")
-        self.assertTrue("QSQLITE" in QtSql.QSqlDatabase.drivers(), "\"QSQLITE\" driver not available in this Qt version")
-        self.db = QtSql.QSqlDatabase.addDatabase("QSQLITE")
+        self.assertFalse(not QSqlDatabase.drivers(), "installed Qt has no DB drivers")
+        self.assertTrue("QSQLITE" in QSqlDatabase.drivers(), "\"QSQLITE\" driver not available in this Qt version")
+        self.db = QSqlDatabase.addDatabase("QSQLITE")
         self.db.setDatabaseName(":memory:")
         self.assertTrue(self.db.open())
 
     def tearDown(self):
         #Release resources
         self.db.close()
-        QtSql.QSqlDatabase.removeDatabase(":memory:")
+        QSqlDatabase.removeDatabase(":memory:")
         del self.db
 
     def testTableCreationAndDestruction(self):
         #Test table creation and destruction
-        query = QtSql.QSqlQuery()
+        query = QSqlQuery()
         query.exec_("CREATE TABLE dummy(id int primary key, dummyfield varchar(20))")
         query.exec_("DROP TABLE dummy")
         query.clear()
 
     def testTableInsertionAndRetrieval(self):
         #Test table creation, insertion and retrieval
-        query = QtSql.QSqlQuery()
+        query = QSqlQuery()
         query.exec_("CREATE TABLE person(id int primary key, "
                     "firstname varchar(20), lastname varchar(20))")
         query.exec_("INSERT INTO person VALUES(101, 'George', 'Harrison')")

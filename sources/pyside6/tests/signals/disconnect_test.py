@@ -35,7 +35,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(True)
 
-from PySide6.QtCore import *
+from PySide6.QtCore import QObject, Signal
 from testbinding import TestObject
 
 

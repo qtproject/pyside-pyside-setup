@@ -35,7 +35,8 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1] / "util"))
 from init_paths import init_test_paths
 init_test_paths()
 
-from PySide6.QtCore import *
+from PySide6.QtCore import QCoreApplication, QObject, QTimer
+
 
 class Dispatcher(QObject):
     _me = None

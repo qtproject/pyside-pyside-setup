@@ -58,7 +58,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtCore import QObject
-from PySide6.QtWidgets import *
+from PySide6.QtWidgets import QApplication, QGraphicsItem, QGraphicsWidget, QGraphicsObject, QWidget
 import PySide6.QtCore
 
 

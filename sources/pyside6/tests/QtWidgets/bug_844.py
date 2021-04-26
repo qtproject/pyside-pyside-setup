@@ -34,8 +34,9 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths()
 
-from PySide6.QtWidgets import *
-from PySide6.QtCore import *
+from PySide6.QtWidgets import QApplication, QLabel
+from PySide6.QtCore import QObject, QTimer
+
 
 class QtKeyPressListener(QObject):
     def __init__(self, obj):

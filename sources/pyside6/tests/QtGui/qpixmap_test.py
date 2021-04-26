@@ -36,8 +36,9 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from helper.usesqapplication import UsesQApplication
-from PySide6.QtGui import *
-from PySide6.QtCore import *
+from PySide6.QtGui import QColor, QPixmap
+from PySide6.QtCore import QFile, QIODevice, QObject, QSize, Qt
+
 
 class QPixmapTest(UsesQApplication):
     def testQVariantConstructor(self):

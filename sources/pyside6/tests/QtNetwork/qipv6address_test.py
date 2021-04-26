@@ -37,7 +37,8 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtNetwork import *
+from PySide6.QtNetwork import QIPv6Address
+
 
 class QIPv6AddressGetItemTest(unittest.TestCase):
     def testLength(self):

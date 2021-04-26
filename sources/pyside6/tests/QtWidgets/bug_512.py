@@ -38,8 +38,8 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from helper.usesqapplication import UsesQApplication
-from PySide6.QtCore import *
-from PySide6.QtWidgets import *
+from PySide6.QtWidgets import QGridLayout, QLabel, QWidget
+
 
 class BugTest(UsesQApplication):
     def testCase(self):

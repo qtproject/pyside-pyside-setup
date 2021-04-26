@@ -36,7 +36,8 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtCore import QObject, QTimer, QThread
-from PySide6.QtWidgets import *
+from PySide6.QtWidgets import QTableView, QWidget
+
 
 class Foo(QTableView):
     def __init__(self, parent=None):

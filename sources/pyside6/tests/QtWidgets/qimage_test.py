@@ -37,9 +37,10 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtGui import *
-from PySide6.QtWidgets import *
+from PySide6.QtGui import QImage
+from PySide6.QtWidgets import QLabel
 from helper.usesqapplication import UsesQApplication
+
 
 xpm = [
     "27 22 206 2",

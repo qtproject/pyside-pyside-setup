@@ -36,8 +36,10 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from helper.usesqapplication import UsesQApplication
-from PySide6.QtCore import *
-from PySide6.QtWidgets import *
+from PySide6.QtCore import QTimer
+from PySide6.QtWidgets import (QFormLayout, QHBoxLayout, QLayout, QPushButton,
+                               QSpacerItem, QWidget, QWidgetItem)
+
 
 class MyLayout(QLayout):
     def __init__(self, parent=None):

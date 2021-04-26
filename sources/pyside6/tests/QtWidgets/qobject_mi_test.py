@@ -40,10 +40,11 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtCore import QObject
-from PySide6.QtGui import *
-from PySide6.QtWidgets import *
+from PySide6.QtGui import QIntValidator, QValidator
+from PySide6.QtWidgets import QWidget
 
 from helper.usesqapplication import UsesQApplication
+
 
 class WidgetValidator(QWidget, QIntValidator):
     def __init__(self, parent=None):

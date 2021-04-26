@@ -36,7 +36,8 @@ from init_paths import init_test_paths
 init_test_paths(True)
 
 import shiboken6
-from testbinding import *
+from testbinding import getHiddenObject
+
 
 class TestBug1016 (unittest.TestCase):
 

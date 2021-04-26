@@ -39,8 +39,10 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import *
-from PySide6.QtGui import *
+from PySide6.QtCore import QMargins, QPoint, QPointF, QSize, QSizeF
+from PySide6.QtGui import (QMatrix4x4, QQuaternion, QTransform, QVector2D,
+                           QVector3D, QVector4D)
+
 
 def testList():
     return [QPoint(10, 10), QPointF(1, 1), QSize(10, 10), QSizeF(1, 1),
