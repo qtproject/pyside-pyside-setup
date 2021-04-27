@@ -21,7 +21,6 @@ set(QtUiTools_include_dirs  ${QtUiTools_SOURCE_DIR}
                             ${libpyside_SOURCE_DIR}
                             ${plugins_SOURCE_DIR}
                             ${QtCore_GEN_DIR}
-                            ${QtXml_GEN_DIR}
                             ${QtGui_GEN_DIR}
                             ${QtWidgets_GEN_DIR}
                             )
