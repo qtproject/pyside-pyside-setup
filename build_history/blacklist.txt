@@ -1,11 +1,3 @@
-[pysidetest::delegatecreateseditor_test]
-    qt5.6
-[pysidetest::modelview_test]
-    darwin py3
-[pysidetest::qvariant_test]
-    darwin py3
-[pysidetest::utils_test]
-    win32
 [signals::signal_signature_test]
     linux
     darwin
@@ -14,54 +6,10 @@
     win32 ci
     linux
     darwin
-[QtCore::qfile_test]
-    win32
-    darwin py3
-[QtCore::qfileread_test]
-    darwin
-[QtCore::qobject_connect_notify_test]
-    linux
-    darwin
-    win32
-[QtGui::qmatrix_test]
-    win32
-[QtWidgets::bug_576]
-    linux
-    win32
-    darwin py3
-[QtWidgets::returnquadruplesofnumbers_test]
-    linux
-    darwin
-    win32
-[QtTest::touchevent_test]
-    linux
-    darwin
-    win32
 [QtMultimedia::audio_test]
     linux
     darwin
     win32
-[QtQml::bug_951]
-    py3
-[QtScript::qscriptvalue_test]
-    linux
-    darwin
-    win32
-[QtScriptTools::debugger_test]
-    linux
-    darwin
-    win32
-# AttributeError: 'PySide6.QtQuick.QQuickItem' object has no attribute 'simpleFunction'
-[QtQml::bug_451]
-    py2
-    py3
-# Crashes with Python 2 on Windows
-[QtQml::qqmlnetwork_test]
-    py2 win32
-[QtQml::qquickitem_grabToImage]
-    darwin
-[smart::smart_pointer]
-    py2
 # PYSIDE-474
 [QtWebEngineWidgets::pyside-474-qtwebengineview]
     py2
@@ -92,22 +40,9 @@
 # QItemSelection::operator+() degenerates to list<QItemSelectionRange> for which added operator==() does not work
 [QtWidgets::bug_785]
     qt6
-[QtQml::registertype]
-    qt6
-# Following test cases are failing with qt6 in ci
-[QtNetwork::accessManager_test]
-    win32 ci
-[QtQml::listproperty]
-    win32 ci
-    linux ci
-    darwin ci
 [QtCore::bug_686]
     linux ci
 [QtCore::qthread_signal_test]
     linux ci
 [QtQml::qqmlnetwork_test]
     linux ci
-[QtWidgets::bug_750]
-    darwin ci
-[QtWidgets::qpicture_test]
-    darwin ci
