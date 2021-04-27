@@ -63,13 +63,12 @@ try:
     from rich.table import Table
 
 except ModuleNotFoundError:
-    print("-- 'rich' not found, falling back to default logger")
+    # 'rich' not found, falling back to default logger"
     logging.basicConfig(level=logging.INFO)
     have_rich = False
     extra = {}
 
 log = logging.getLogger("snippets_translate")
-opt_quiet = False
 
 # Filter and paths configuration
 SKIP_END = (".pro", ".pri", ".cmake", ".qdoc", ".yaml", ".frag", ".qsb", ".vert", "CMakeLists.txt")
@@ -112,18 +111,19 @@ def get_parser():
     )
 
     parser.add_argument(
-        "-q",
-        "--quiet",
-        action="store_true",
-        help="Quiet"
-    )
-
-    parser.add_argument(
         "-v",
         "--verbose",
         action="store_true",
         dest="verbose",
         help="Generate more output",
+    )
+
+    parser.add_argument(
+        "-d",
+        "--debug",
+        action="store_true",
+        dest="debug",
+        help="Generate even more output",
     )
 
     parser.add_argument(
@@ -237,13 +237,13 @@ def get_license_from_file(filename):
     else:
         return ""
 
-def translate_file(file_path, final_path, verbose, write):
+def translate_file(file_path, final_path, debug, write):
     with open(str(file_path)) as f:
         snippets = get_snippets(f.read().splitlines())
     if snippets:
         # TODO: Get license header first
         license_header = get_license_from_file(str(file_path))
-        if verbose:
+        if debug:
             if have_rich:
                 console = Console()
                 table = Table(show_header=True, header_style="bold magenta")
@@ -261,14 +261,14 @@ def translate_file(file_path, final_path, verbose, write):
                 translated_lines.append(translated_line)
 
                 # logging
-                if verbose:
+                if debug:
                     if have_rich:
                         table.add_row(line, translated_line)
                     else:
                         if not opt_quiet:
                             print(line, translated_line)
 
-            if verbose and have_rich:
+            if debug and have_rich:
                 if not opt_quiet:
                     console.print(table)
 
@@ -294,10 +294,10 @@ def translate_file(file_path, final_path, verbose, write):
 
 
 
-def copy_file(file_path, py_path, category, category_path, write=False, verbose=False):
+def copy_file(file_path, py_path, category, category_path, write=False, debug=False):
 
     if not category:
-        translate_file(file_path, Path("_translated.py"), verbose, write)
+        translate_file(file_path, Path("_translated.py"), debug, write)
         return
     # Get path after the directory "snippets" or "examples"
     # and we add +1 to avoid the same directory
@@ -317,7 +317,7 @@ def copy_file(file_path, py_path, category, category_path, write=False, verbose=
         status_msg = "     [green][New][/green]" if have_rich else "[New]"
         status = FileStatus.New
 
-    if verbose:
+    if debug:
         if not opt_quiet:
             log.info(f"From {file_path} to")
             log.info(f"==> {final_path}")
@@ -344,7 +344,7 @@ def copy_file(file_path, py_path, category, category_path, write=False, verbose=
 
     # Translate C++ code into Python code
     if final_path.name.endswith(".cpp"):
-        translate_file(file_path, final_path, verbose, write)
+        translate_file(file_path, final_path, debug, write)
 
     return status
 
@@ -373,7 +373,7 @@ def process(options):
                     "snippets",
                     OUT_SNIPPETS,
                     write=options.write_files,
-                    verbose=options.verbose,
+                    debug=options.debug,
                 )
             elif "examples" in f.parts:
                 status = copy_file(
@@ -382,7 +382,7 @@ def process(options):
                     "examples",
                     OUT_EXAMPLES,
                     write=options.write_files,
-                    verbose=options.verbose,
+                    debug=options.debug,
                 )
         else:
             log.warning("Path did not contain 'snippets' nor 'examples'."
@@ -393,7 +393,7 @@ def process(options):
                 None,
                 None,
                 write=options.write_files,
-                verbose=options.verbose,
+                debug=options.debug,
             )
 
     else:
@@ -423,7 +423,7 @@ def process(options):
                             "snippets",
                             OUT_SNIPPETS,
                             write=options.write_files,
-                            verbose=options.verbose,
+                            debug=options.debug,
                         )
                     elif "examples" in f.parts:
                         status = copy_file(
@@ -432,7 +432,7 @@ def process(options):
                             "examples",
                             OUT_EXAMPLES,
                             write=options.write_files,
-                            verbose=options.verbose,
+                            debug=options.debug,
                         )
 
                     # Stats
@@ -457,7 +457,8 @@ def process(options):
 if __name__ == "__main__":
     parser = get_parser()
     options = parser.parse_args()
-    opt_quiet = options.quiet
+    opt_quiet = False if options.verbose else True
+    opt_quiet = False if options.debug else opt_quiet
 
     if not check_arguments(options):
         parser.print_help()

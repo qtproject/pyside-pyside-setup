@@ -30,14 +30,11 @@ if (FULLDOCSBUILD)
         message(FATAL_ERROR "There is no value set on QT_SRC_DIR, the snippet conversion will fail")
     endif()
     set(PYSIDE_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../../../")
-    if (QUIET_BUILD)
-        set(SNIPPETS_QUIET_OPTION "-q")
-    endif()
     set(SNIPPETS_TOOL "${CMAKE_CURRENT_SOURCE_DIR}/../../../tools/snippets_translate/main.py")
     # Note QT_SRC_DIR points to 'qtbase',
     # so we use the general SRC directory to copy all the other snippets
     execute_process(COMMAND ${PYTHON_EXECUTABLE} ${SNIPPETS_TOOL}
-        --qt ${QT_SRC_DIR}/.. --pyside ${PYSIDE_ROOT} -w ${SNIPPETS_QUIET_OPTION}
+        --qt ${QT_SRC_DIR}/.. --pyside ${PYSIDE_ROOT} -w
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
         ERROR_VARIABLE SNIPPETS_ERROR)
     if (SNIPPETS_ERROR)
