@@ -35,21 +35,23 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1] / "util"))
 from init_paths import init_test_paths
 init_test_paths()
 
-from PySide6 import QtCore, QtWidgets
+from PySide6.QtCore import QTimer, Qt
+from PySide6.QtWidgets import QApplication, QDockWidget, QMainWindow
 
-class Window(QtWidgets.QMainWindow):
+
+class Window(QMainWindow):
     def childEvent(self, event):
         super(Window, self).childEvent(event)
 
-app = QtWidgets.QApplication([])
+app = QApplication([])
 window = Window()
 
-dock1 = QtWidgets.QDockWidget()
-dock2 = QtWidgets.QDockWidget()
-window.addDockWidget(QtCore.Qt.LeftDockWidgetArea, dock1)
-window.addDockWidget(QtCore.Qt.LeftDockWidgetArea, dock2)
+dock1 = QDockWidget()
+dock2 = QDockWidget()
+window.addDockWidget(Qt.LeftDockWidgetArea, dock1)
+window.addDockWidget(Qt.LeftDockWidgetArea, dock2)
 window.tabifyDockWidget(dock1, dock2)
 
 window.show()
-QtCore.QTimer.singleShot(0, window.close)
+QTimer.singleShot(0, window.close)
 app.exec_()

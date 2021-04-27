@@ -35,16 +35,17 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtCore
+from PySide6.QtCore import QObject
 
-class MyObject(QtCore.QObject):
+
+class MyObject(QObject):
     def __init__(self, other=None):
-        QtCore.QObject.__init__(self, None)
+        super().__init__(None)
         self._o = other
 
 class TestDestructor(unittest.TestCase):
     def testReference(self):
-        o = QtCore.QObject()
+        o = QObject()
         m = MyObject(o)
         self.assertEqual(sys.getrefcount(o), 3)
         del m

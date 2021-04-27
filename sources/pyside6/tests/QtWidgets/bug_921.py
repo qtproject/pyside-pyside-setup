@@ -37,20 +37,21 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtCore, QtWidgets
-
+from PySide6.QtCore import QObject, Signal, Qt
+from PySide6.QtWidgets import QMainWindow
 from helper.timedqapplication import TimedQApplication
 
-class Signaller(QtCore.QObject):
-    s1 = QtCore.Signal()
-    s2 = QtCore.Signal()
-    s3 = QtCore.Signal()
+
+class Signaller(QObject):
+    s1 = Signal()
+    s2 = Signal()
+    s3 = Signal()
 
 class Window(object):
 
     def __init__(self, s):
-        self._window = QtWidgets.QMainWindow()
-        self._window.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
+        self._window = QMainWindow()
+        self._window.setAttribute(Qt.WA_DeleteOnClose, True)
         self._window.setWindowTitle("Demo!")
 
         self._s = s

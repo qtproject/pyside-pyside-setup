@@ -35,13 +35,15 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtWidgets
+from PySide6.QtWidgets import (QApplication, QGridLayout, QLabel, QVBoxLayout,
+                               QWidget)
 
-class BuggyWidget(QtWidgets.QWidget):
+
+class BuggyWidget(QWidget):
     def setup(self):
-        self.verticalLayout = QtWidgets.QVBoxLayout(self)
-        self.gridLayout = QtWidgets.QGridLayout()
-        self.lbl = QtWidgets.QLabel(self)
+        self.verticalLayout = QVBoxLayout(self)
+        self.gridLayout = QGridLayout()
+        self.lbl = QLabel(self)
         self.gridLayout.addWidget(self.lbl, 0, 1, 1, 1)
 
         # this cause a segfault during the ownership transfer
@@ -49,7 +51,7 @@ class BuggyWidget(QtWidgets.QWidget):
 
 class LayoutTransferOwnerShip(unittest.TestCase):
     def testBug(self):
-        app = QtWidgets.QApplication([])
+        app = QApplication([])
         w = BuggyWidget()
         w.setup()
         w.show()

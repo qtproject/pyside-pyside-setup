@@ -68,9 +68,10 @@ from init_paths import init_test_paths
 init_test_paths()
 
 from PySide6.QtCore import QTimer
-from PySide6 import QtWidgets
+from PySide6.QtWidgets import QApplication
 
-app_instance = QtWidgets.QApplication([])
+
+app_instance = QApplication([])
 # If the following line is commented, application doesn't crash on exit anymore.
 app_instance2 = app_instance
 QTimer.singleShot(0, qApp.quit)

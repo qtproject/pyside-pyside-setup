@@ -38,17 +38,18 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1] / "util"))
 from init_paths import init_test_paths
 init_test_paths()
 
-from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtGui import QSyntaxHighlighter
+from PySide6.QtWidgets import QApplication, QTextEdit, QWidget
 
 
-class Highlighter(QtGui.QSyntaxHighlighter):
+class Highlighter(QSyntaxHighlighter):
     def __init__(self, parent, mode):
-        QtGui.QSyntaxHighlighter.__init__(self, parent)
+        super().__init__(parent)
         self.tstamp = time.time()
 
 if __name__ == "__main__":
-    app = QtWidgets.QApplication([])
-    python = QtWidgets.QTextEdit()
+    app = QApplication([])
+    python = QTextEdit()
     python.setWindowTitle("python")
     hl = Highlighter(python.document(), "python")
     python.show()

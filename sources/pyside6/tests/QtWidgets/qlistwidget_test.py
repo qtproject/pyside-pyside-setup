@@ -35,17 +35,19 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtWidgets, QtCore
+from PySide6.QtCore import QObject, QTimer, Qt
+from PySide6.QtWidgets import QListWidget, QListWidgetItem
 from helper.usesqapplication import UsesQApplication
+
 
 class QListWidgetTest(UsesQApplication):
 
     def populateList(self, lst):
-        o = QtCore.QObject()
+        o = QObject()
         o.setObjectName("obj")
 
-        item = QtWidgets.QListWidgetItem("item0")
-        item.setData(QtCore.Qt.UserRole, o)
+        item = QListWidgetItem("item0")
+        item.setData(Qt.UserRole, o)
         #item._data = o
         self.assertTrue(sys.getrefcount(o), 3)
         self.assertTrue(sys.getrefcount(item), 2)
@@ -58,13 +60,13 @@ class QListWidgetTest(UsesQApplication):
 
     def checkItemData(self, lst):
         item = lst.currentItem()
-        o = item.data(QtCore.Qt.UserRole)
+        o = item.data(Qt.UserRole)
         self.assertTrue(sys.getrefcount(o), 4)
         self.assertEqual(o, item._data)
         self.assertTrue(sys.getrefcount(o), 2)
 
     def testConstructorWithParent(self):
-        lst = QtWidgets.QListWidget()
+        lst = QListWidget()
         self.populateList(lst)
         self.checkCurrentItem(lst)
         i = lst.item(0)
@@ -75,17 +77,17 @@ class QListWidgetTest(UsesQApplication):
         del i
 
     def testIt(self):
-        lst = QtWidgets.QListWidget()
+        lst = QListWidget()
         lst.show()
         slot = lambda : lst.removeItemWidget(lst.currentItem())
-        lst.addItem(QtWidgets.QListWidgetItem("foo"))
-        QtCore.QTimer.singleShot(0, slot)
-        QtCore.QTimer.singleShot(0, lst.close)
+        lst.addItem(QListWidgetItem("foo"))
+        QTimer.singleShot(0, slot)
+        QTimer.singleShot(0, lst.close)
         self.app.exec_()
         self.assertEqual(lst.count(), 1)
 
     def testClear(self):
-        lst = QtWidgets.QListWidget()
+        lst = QListWidget()
         lst.addItem("foo")
         item = lst.item(0)
         self.assertIsNone(lst.clear())

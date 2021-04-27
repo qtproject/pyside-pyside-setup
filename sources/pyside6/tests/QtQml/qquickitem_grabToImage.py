@@ -37,25 +37,27 @@ init_test_paths(False)
 
 from helper.helper import quickview_errorstring
 from helper.timedqapplication import TimedQApplication
+from PySide6.QtCore import QTimer, QUrl
+from PySide6.QtGui import QColor
+from PySide6.QtQuick import QQuickItem, QQuickView
 
-from PySide6 import QtCore, QtGui, QtQuick
 
 class TestGrabToSharedPointerImage(TimedQApplication):
     def setUp(self):
         TimedQApplication.setUp(self, 1000)
 
     def testQQuickItemGrabToImageSharedPointer(self):
-        view = QtQuick.QQuickView()
+        view = QQuickView()
         file = Path(__file__).resolve().parent / 'qquickitem_grabToImage.qml'
         self.assertTrue(file.is_file())
-        view.setSource(QtCore.QUrl.fromLocalFile(os.fspath(file)))
+        view.setSource(QUrl.fromLocalFile(os.fspath(file)))
         self.assertTrue(view.rootObject(), quickview_errorstring(view))
         view.show()
 
         # Get the QQuickItem objects for the blue Rectangle and the Image item.
         root = view.rootObject()
-        blueRectangle = root.findChild(QtQuick.QQuickItem, "blueRectangle")
-        imageContainer = root.findChild(QtQuick.QQuickItem, "imageContainer")
+        blueRectangle = root.findChild(QQuickItem, "blueRectangle")
+        imageContainer = root.findChild(QQuickItem, "imageContainer")
 
         # Start the image grabbing.
         grabResultSharedPtr = blueRectangle.grabToImage()
@@ -67,7 +69,7 @@ class TestGrabToSharedPointerImage(TimedQApplication):
         self.grabbedColor = None
         def onGrabReady():
             # Signal early exit.
-            QtCore.QTimer.singleShot(0, self.app.quit)
+            QTimer.singleShot(0, self.app.quit)
 
             # Show the grabbed image in the QML Image item.
             imageContainer.setProperty("source", grabResultSharedPtr.url())
@@ -83,7 +85,7 @@ class TestGrabToSharedPointerImage(TimedQApplication):
         self.assertTrue(self.grabbedColor.isValid())
 
         # Compare the grabbed color with the one we set in the rectangle.
-        blueColor = QtGui.QColor("blue")
+        blueColor = QColor("blue")
         self.assertEqual(self.grabbedColor, blueColor)
 
 

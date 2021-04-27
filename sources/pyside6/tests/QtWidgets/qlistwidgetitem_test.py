@@ -35,15 +35,15 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtWidgets
-
+from PySide6.QtWidgets import QListWidget, QListWidgetItem
 from helper.usesqapplication import UsesQApplication
+
 
 class QListWidgetItemConstructor(UsesQApplication):
 
     def setUp(self):
         super(QListWidgetItemConstructor, self).setUp()
-        self.widgetList = QtWidgets.QListWidget()
+        self.widgetList = QListWidget()
 
     def tearDown(self):
         del self.widgetList
@@ -51,13 +51,13 @@ class QListWidgetItemConstructor(UsesQApplication):
 
     def testConstructorWithParent(self):
         # Bug 235 - QListWidgetItem constructor not saving ownership
-        QtWidgets.QListWidgetItem(self.widgetList)
+        QListWidgetItem(self.widgetList)
         item = self.widgetList.item(0)
         self.assertEqual(item.listWidget(), self.widgetList)
 
     def testConstructorWithNone(self):
         # Bug 452 - QListWidgetItem() not casting NoneType to null correctly.
-        item = QtWidgets.QListWidgetItem(None, 123)
+        item = QListWidgetItem(None, 123)
 
 if __name__ == '__main__':
     unittest.main()

@@ -37,15 +37,16 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtCore, QtWidgets
+from PySide6.QtWidgets import QApplication, QTreeWidget, QTreeWidgetItem
+
 
 class Bug585(unittest.TestCase):
     def testCase(self):
-        app = QtWidgets.QApplication([])
-        self._tree = QtWidgets.QTreeWidget()
+        app = QApplication([])
+        self._tree = QTreeWidget()
         self._tree.setColumnCount(2)
-        i1 = QtWidgets.QTreeWidgetItem(self._tree, ['1', ])
-        i2 = QtWidgets.QTreeWidgetItem(self._tree, ['2', ])
+        i1 = QTreeWidgetItem(self._tree, ['1', ])
+        i2 = QTreeWidgetItem(self._tree, ['2', ])
         refCount = sys.getrefcount(i1)
 
         # this function return None

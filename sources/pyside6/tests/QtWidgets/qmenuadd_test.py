@@ -39,9 +39,9 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtWidgets
-
+from PySide6.QtWidgets import QMenu
 from helper.usesqapplication import UsesQApplication
+
 
 class QMenuAddAction(UsesQApplication):
 
@@ -49,7 +49,7 @@ class QMenuAddAction(UsesQApplication):
         self.arg = args
 
     def testQMenuAddAction(self):
-        fileMenu = QtWidgets.QMenu("&File")
+        fileMenu = QMenu("&File")
 
         addNewAction = fileMenu.addAction("&Open...", self.openFile)
         addNewAction.trigger()

@@ -37,11 +37,12 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtCore
+from PySide6.QtCore import QMutex
 
-class Lock(QtCore.QMutex):
+
+class Lock(QMutex):
     def tryLock(self,timeoutt=10):
-        return QtCore.QMutex.tryLock(self,timeoutt)
+        return QMutex.tryLock(self,timeoutt)
 
 class TestBug(unittest.TestCase):
 

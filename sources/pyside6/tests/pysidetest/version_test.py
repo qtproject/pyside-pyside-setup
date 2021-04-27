@@ -37,7 +37,8 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import __version_info__, __version__, QtCore
+from PySide6 import __version_info__, __version__
+
 
 class CheckForVariablesTest(unittest.TestCase):
     def testVesions(self):
@@ -47,8 +48,8 @@ class CheckForVariablesTest(unittest.TestCase):
         self.assertTrue(version_tuple < (99, 99, 99))
         self.assertTrue(__version__)
 
-        self.assertTrue(QtCore.__version_info__ >= (4, 5, 0))
-        self.assertTrue(QtCore.__version__)
+        self.assertTrue(__version_info__ >= (4, 5, 0))
+        self.assertTrue(__version__)
 
 if __name__ == '__main__':
     unittest.main()

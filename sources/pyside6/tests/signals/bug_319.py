@@ -38,22 +38,23 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtCore
+from PySide6.QtCore import QObject, Signal, Slot
 from helper.usesqcoreapplication import UsesQCoreApplication
 
-class Listener(QtCore.QObject):
+
+class Listener(QObject):
     def __init__(self):
-        QtCore.QObject.__init__(self, None)
+        super().__init__(None)
         self._phrase = []
 
-    @QtCore.Slot(tuple)
+    @Slot(tuple)
     def listen(self, words):
         for w in words:
             self._phrase.append(w)
 
-class Communicate(QtCore.QObject):
+class Communicate(QObject):
     # create a new signal on the fly and name it 'speak'
-    speak = QtCore.Signal(tuple)
+    speak = Signal(tuple)
 
 class SignaltoSignalTest(UsesQCoreApplication):
     def testBug(self):

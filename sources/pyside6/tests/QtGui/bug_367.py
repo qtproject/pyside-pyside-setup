@@ -38,14 +38,15 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from helper.usesqapplication import UsesQApplication
-from PySide6 import QtCore,QtGui
+from PySide6.QtGui import QStandardItem, QStandardItemModel
+
 
 class BugTest(UsesQApplication):
     def testCase(self):
-        model = QtGui.QStandardItemModel()
+        model = QStandardItemModel()
         parentItem = model.invisibleRootItem()
         for i in range(10):
-            item = QtGui.QStandardItem()
+            item = QStandardItem()
             rcount =  sys.getrefcount(item)
             parentItem.appendRow(item)
             self.assertEqual(rcount+1, sys.getrefcount(item))

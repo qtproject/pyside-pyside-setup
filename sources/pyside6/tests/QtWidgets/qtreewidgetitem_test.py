@@ -49,15 +49,16 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtCore, QtWidgets
+from PySide6.QtCore import QTimer
+from PySide6.QtWidgets import QApplication, QTreeWidget, QTreeWidgetItem
 
 
 class QTreeWidgetItemTest(unittest.TestCase):
     def testClass(self):
-        app = QtWidgets.QApplication([])
-        treewidget = QtWidgets.QTreeWidget()
-        item = QtWidgets.QTreeWidgetItem(["Words and stuff"])
-        item2 = QtWidgets.QTreeWidgetItem(["More words!"])
+        app = QApplication([])
+        treewidget = QTreeWidget()
+        item = QTreeWidgetItem(["Words and stuff"])
+        item2 = QTreeWidgetItem(["More words!"])
         treewidget.insertTopLevelItem(0, item)
 
         dummy_list = ["Numbers", "Symbols", "Spam"]
@@ -66,7 +67,7 @@ class QTreeWidgetItemTest(unittest.TestCase):
         self.assertFalse(item == item2)
         self.assertTrue(item != item2)
         treewidget.show()
-        QtCore.QTimer.singleShot(500, app.quit)
+        QTimer.singleShot(500, app.quit)
         app.exec_()
 
 

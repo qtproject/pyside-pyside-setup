@@ -44,11 +44,14 @@ init_test_paths(False)
 
 from helper.helper import quickview_errorstring
 
-from PySide6 import QtCore, QtGui, QtQuick
+from PySide6.QtCore import QObject, QUrl, Property
+from PySide6.QtGui import QGuiApplication
+from PySide6.QtQuick import QQuickView
 
-class PythonObject(QtCore.QObject):
+
+class PythonObject(QObject):
     def __init__(self):
-        QtCore.QObject.__init__(self, None)
+        super().__init__(None)
         self._called = ""
         self._arg1 = None
         self._arg2 = None
@@ -71,21 +74,21 @@ class PythonObject(QtCore.QObject):
     def getArg2(self):
         return self._arg2
 
-    called = QtCore.Property(str, getCalled, setCalled)
-    arg1 = QtCore.Property(int, getArg1, setArg1)
-    arg2 = QtCore.Property('QVariant', getArg2, setArg2)
+    called = Property(str, getCalled, setCalled)
+    arg1 = Property(int, getArg1, setArg1)
+    arg2 = Property('QVariant', getArg2, setArg2)
 
 class TestBug(unittest.TestCase):
     def testQMLFunctionCall(self):
-        app = QtGui.QGuiApplication(sys.argv)
-        view = QtQuick.QQuickView()
+        app = QGuiApplication(sys.argv)
+        view = QQuickView()
 
         obj = PythonObject()
         context = view.rootContext()
         context.setContextProperty("python", obj)
         file = Path(__file__).resolve().parent / 'bug_451.qml'
         self.assertTrue(file.is_file())
-        view.setSource(QtCore.QUrl.fromLocalFile(os.fspath(file)))
+        view.setSource(QUrl.fromLocalFile(os.fspath(file)))
         root = view.rootObject()
         self.assertTrue(root, quickview_errorstring(view))
         root.simpleFunction()

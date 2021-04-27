@@ -36,7 +36,9 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtGui, QtWidgets
+from PySide6.QtGui import QStandardItemModel
+from PySide6.QtWidgets import QApplication, QTreeView
+
 
 try:
     from sys import gettotalrefcount
@@ -52,9 +54,9 @@ class ConnectTest(unittest.TestCase):
 
     def testNoLeaks_ConnectAndDisconnect(self):
         self._called = None
-        app = QtWidgets.QApplication([])
-        o = QtWidgets.QTreeView()
-        o.setModel(QtGui.QStandardItemModel())
+        app = QApplication([])
+        o = QTreeView()
+        o.setModel(QStandardItemModel())
         o.selectionModel().destroyed.connect(self.callback)
         o.selectionModel().destroyed.disconnect(self.callback)
         gc.collect()

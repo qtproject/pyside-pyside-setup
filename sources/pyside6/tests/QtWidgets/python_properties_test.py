@@ -35,16 +35,18 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtCore, QtWidgets
+from PySide6.QtCore import QLocale
+from PySide6.QtWidgets import QGraphicsItem, QStyleOptionViewItem
+
 
 class Properties(unittest.TestCase):
 
     def testStaticProperty(self):
-        self.assertEqual(QtWidgets.QGraphicsItem.UserType, 65536)
+        self.assertEqual(QGraphicsItem.UserType, 65536)
 
     def testInstanceProperty(self):
-        p = QtWidgets.QStyleOptionViewItem()
-        self.assertTrue(isinstance(p.locale, QtCore.QLocale))
+        p = QStyleOptionViewItem()
+        self.assertTrue(isinstance(p.locale, QLocale))
 
         # PSYIDE-304, can assign to a "const QWidget *" field
         p.widget = None

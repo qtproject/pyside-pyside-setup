@@ -36,25 +36,25 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtWidgets
-from PySide6 import QtCore
-
+from PySide6.QtCore import QTimer
+from PySide6.QtWidgets import QMainWindow, QPushButton, QToolButton, QWidget
 from helper.usesqapplication import UsesQApplication
 
-class MainWindow(QtWidgets.QMainWindow):
+
+class MainWindow(QMainWindow):
     def __init__(self):
-        QtWidgets.QMainWindow.__init__(self)
+        super().__init__()
 
         self.createToolbar()
 
     def createToolbar(self):
-        pointerButton = QtWidgets.QToolButton()
+        pointerButton = QToolButton()
         pointerToolbar = self.addToolBar("Pointer type")
         pointerToolbar.addWidget(pointerButton)
 
-class MyButton(QtWidgets.QPushButton):
+class MyButton(QPushButton):
     def __init__(self, parent=None):
-        QtWidgets.QPushButton.__init__(self)
+        super().__init__()
         self._called = False
 
     def myCallback(self):
@@ -66,15 +66,15 @@ class TestMainWindow(UsesQApplication):
     def testCreateToolbar(self):
         w = MainWindow()
         w.show()
-        QtCore.QTimer.singleShot(1000, self.app.quit)
+        QTimer.singleShot(1000, self.app.quit)
         self.app.exec_()
 
     def objDel(self, obj):
         self.app.quit()
 
     def testRefCountToNull(self):
-        w = QtWidgets.QMainWindow()
-        c = QtWidgets.QWidget()
+        w = QMainWindow()
+        c = QWidget()
         self.assertEqual(sys.getrefcount(c), 2)
         w.setCentralWidget(c)
         self.assertEqual(sys.getrefcount(c), 3)
@@ -84,13 +84,13 @@ class TestMainWindow(UsesQApplication):
         self.app.exec_()
 
     def testRefCountToAnother(self):
-        w = QtWidgets.QMainWindow()
-        c = QtWidgets.QWidget()
+        w = QMainWindow()
+        c = QWidget()
         self.assertEqual(sys.getrefcount(c), 2)
         w.setCentralWidget(c)
         self.assertEqual(sys.getrefcount(c), 3)
 
-        c2 = QtWidgets.QWidget()
+        c2 = QWidget()
         w.setCentralWidget(c2)
         self.assertEqual(sys.getrefcount(c2), 3)
 
@@ -101,7 +101,7 @@ class TestMainWindow(UsesQApplication):
         self.app.exec_()
 
     def testSignalDisconect(self):
-        w = QtWidgets.QMainWindow()
+        w = QMainWindow()
         b = MyButton("button")
         b.clicked.connect(b.myCallback)
         w.setCentralWidget(b)

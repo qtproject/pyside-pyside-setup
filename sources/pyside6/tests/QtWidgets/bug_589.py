@@ -37,19 +37,19 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtCore, QtWidgets
+from PySide6.QtWidgets import QApplication, QGraphicsProxyWidget
 
 
-class CustomWidget(QtWidgets.QGraphicsProxyWidget):
+class CustomWidget(QGraphicsProxyWidget):
    def itemChange(self, eventType, value):
-      QtWidgets.QGraphicsProxyWidget.itemChange(self, eventType, value)
+      QGraphicsProxyWidget.itemChange(self, eventType, value)
 
 class Bug589(unittest.TestCase):
    def testCase(self):
-      widget = QtWidgets.QGraphicsProxyWidget()
+      widget = QGraphicsProxyWidget()
       custom = CustomWidget()
       custom.setParentItem(widget)
 
 if __name__ == "__main__":
-   app = QtWidgets.QApplication(sys.argv)
+   app = QApplication(sys.argv)
    unittest.main()

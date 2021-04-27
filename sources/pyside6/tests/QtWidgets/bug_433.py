@@ -35,16 +35,18 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1] / "util"))
 from init_paths import init_test_paths
 init_test_paths()
 
-from PySide6 import QtCore, QtWidgets
+from PySide6.QtCore import QTimer
+from PySide6.QtWidgets import QApplication, QGraphicsScene, QGraphicsView
 
-class Test(QtWidgets.QGraphicsView):
+
+class Test(QGraphicsView):
     def __init__(self, parent=None):
         super(Test, self).__init__(parent)
-        self.s = QtWidgets.QGraphicsScene()
+        self.s = QGraphicsScene()
         self.setScene(self.s)
 
-a = QtWidgets.QApplication(sys.argv)
+a = QApplication(sys.argv)
 t = Test()
 t.show()
-QtCore.QTimer.singleShot(0, t.close)
+QTimer.singleShot(0, t.close)
 sys.exit(a.exec_())

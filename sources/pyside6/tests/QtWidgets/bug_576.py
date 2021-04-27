@@ -39,20 +39,22 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtCore, QtWidgets
+from PySide6.QtCore import QObject
+from PySide6.QtWidgets import QApplication, QPushButton, QWidget
+
 
 class Bug576(unittest.TestCase):
     def onButtonDestroyed(self, button):
         self._destroyed = True
-        self.assertTrue(isinstance(button, QtWidgets.QPushButton))
+        self.assertTrue(isinstance(button, QPushButton))
 
     def testWidgetParent(self):
         self._destroyed = False
-        app = QtWidgets.QApplication(sys.argv)
-        w = QtWidgets.QWidget()
+        app = QApplication(sys.argv)
+        w = QWidget()
 
-        b = QtWidgets.QPushButton("test")
-        b.destroyed[QtCore.QObject].connect(self.onButtonDestroyed)
+        b = QPushButton("test")
+        b.destroyed[QObject].connect(self.onButtonDestroyed)
         self.assertEqual(sys.getrefcount(b), 2)
         b.setParent(w)
         self.assertEqual(sys.getrefcount(b), 3)

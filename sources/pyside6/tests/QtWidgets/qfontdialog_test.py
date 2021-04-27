@@ -35,22 +35,21 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtCore
-from PySide6 import QtGui
-from PySide6 import QtWidgets
-
+from PySide6.QtGui import QFont
+from PySide6.QtWidgets import QFontDialog
 from helper.timedqapplication import TimedQApplication
+
 
 class TestFontDialog(TimedQApplication):
 
     def testGetFont(self):
-        QtWidgets.QFontDialog.getFont()
+        QFontDialog.getFont()
 
     def testGetFontQDialog(self):
-        QtWidgets.QFontDialog.getFont(QtGui.QFont("FreeSans",10))
+        QFontDialog.getFont(QFont("FreeSans",10))
 
     def testGetFontQDialogQString(self):
-        QtWidgets.QFontDialog.getFont(QtGui.QFont("FreeSans",10), None, "Select font")
+        QFontDialog.getFont(QFont("FreeSans",10), None, "Select font")
 
 if __name__ == '__main__':
     unittest.main()

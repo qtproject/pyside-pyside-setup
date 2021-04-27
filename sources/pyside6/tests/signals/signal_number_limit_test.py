@@ -38,23 +38,24 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtCore
+from PySide6.QtCore import QObject, Signal
 
-class Emitter(QtCore.QObject):
-    s1 = QtCore.Signal()
-    s2 = QtCore.Signal()
-    s3 = QtCore.Signal()
-    s4 = QtCore.Signal()
-    s5 = QtCore.Signal()
-    s6 = QtCore.Signal()
-    s7 = QtCore.Signal()
-    s8 = QtCore.Signal()
-    s9 = QtCore.Signal()
-    s10 = QtCore.Signal()
-    s11 = QtCore.Signal()
-    s12 = QtCore.Signal()
-    s13 = QtCore.Signal()
-    s14 = QtCore.Signal()
+
+class Emitter(QObject):
+    s1 = Signal()
+    s2 = Signal()
+    s3 = Signal()
+    s4 = Signal()
+    s5 = Signal()
+    s6 = Signal()
+    s7 = Signal()
+    s8 = Signal()
+    s9 = Signal()
+    s10 = Signal()
+    s11 = Signal()
+    s12 = Signal()
+    s13 = Signal()
+    s14 = Signal()
 
 class SignalNumberLimitTest(unittest.TestCase):
     def myCb(self):

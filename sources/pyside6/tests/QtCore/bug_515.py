@@ -38,7 +38,8 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1] / "util"))
 from init_paths import init_test_paths
 init_test_paths()
 
-from PySide6 import QtCore
+from PySide6.QtCore import QCoreApplication, qAddPostRoutine
+
 
 callCleanup = False
 def _cleanup():
@@ -49,7 +50,7 @@ def _checkCleanup():
     global callCleanup
     assert(callCleanup)
 
-app = QtCore.QCoreApplication([])
-QtCore.qAddPostRoutine(_cleanup)
-QtCore.qAddPostRoutine(_checkCleanup)
+app = QCoreApplication([])
+qAddPostRoutine(_cleanup)
+qAddPostRoutine(_checkCleanup)
 del app

@@ -36,9 +36,9 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from helper.usesqapplication import UsesQApplication
-
-from PySide6 import QtCore, QtWidgets
+from PySide6.QtWidgets import QFrame, QWidget
 from PySide6.QtUiTools import QUiLoader
+
 
 class MyQUiLoader(QUiLoader):
     def __init__(self, baseinstance):
@@ -57,14 +57,14 @@ class MyQUiLoader(QUiLoader):
 
 class ButTest(UsesQApplication):
     def testCase(self):
-        w = QtWidgets.QWidget()
+        w = QWidget()
         loader = MyQUiLoader(w)
 
         filePath = os.path.join(os.path.dirname(__file__), 'minimal.ui')
         ui = loader.load(filePath)
 
         self.assertEqual(len(loader._widgets), 1)
-        self.assertEqual(type(loader._widgets[0]), QtWidgets.QFrame)
+        self.assertEqual(type(loader._widgets[0]), QFrame)
 
 if __name__ == '__main__':
     unittest.main()

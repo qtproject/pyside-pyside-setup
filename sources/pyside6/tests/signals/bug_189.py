@@ -35,8 +35,10 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtCore, QtWidgets
+from PySide6.QtCore import QTimer
+from PySide6.QtWidgets import QSlider
 from helper.usesqapplication import UsesQApplication
+
 
 class TestBugPYSIDE189(UsesQApplication):
 
@@ -46,12 +48,12 @@ class TestBugPYSIDE189(UsesQApplication):
         def onValueChanged(self, value):
             pass
 
-        sld = QtWidgets.QSlider()
+        sld = QSlider()
         sld.valueChanged.connect(onValueChanged)
 
         sld.deleteLater()
 
-        QtCore.QTimer.singleShot(0, self.app.quit)
+        QTimer.singleShot(0, self.app.quit)
         self.app.exec_()
 
         self.assertRaises(RuntimeError, sld.valueChanged.disconnect, onValueChanged)

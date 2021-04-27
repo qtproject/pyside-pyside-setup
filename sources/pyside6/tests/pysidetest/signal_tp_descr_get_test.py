@@ -52,7 +52,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtCore
+from PySide6.QtCore import QObject, Signal
 
 
 def emit_upon_success(signal):
@@ -66,8 +66,8 @@ def emit_upon_success(signal):
     return f_
 
 
-class Foo(QtCore.QObject):
-    SIG = QtCore.Signal()
+class Foo(QObject):
+    SIG = Signal()
 
     @emit_upon_success(SIG)
     def do_something(self):

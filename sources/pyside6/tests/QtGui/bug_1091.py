@@ -37,12 +37,13 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtGui
+from PySide6.QtGui import QPainter
+
 
 class QPainterTestCase(unittest.TestCase):
     def testIt(self):
-        self.assertTrue("PixmapFragment" in dir(QtGui.QPainter))
-        self.assertTrue("drawPixmapFragments" in dir(QtGui.QPainter))
+        self.assertTrue("PixmapFragment" in dir(QPainter))
+        self.assertTrue("drawPixmapFragments" in dir(QPainter))
 
 if __name__ == "__main__":
     unittest.main()

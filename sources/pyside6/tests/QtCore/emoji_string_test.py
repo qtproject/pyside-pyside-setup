@@ -59,12 +59,13 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1] / "util"))
 from init_paths import init_test_paths
 init_test_paths()
 
-from PySide6 import QtCore
+from PySide6.QtCore import QObject, Signal
+
 
 emoji_str = u'\U0001f632' + u' '  # "😲 "
 
-class TestStuff(QtCore.QObject):
-    testsig = QtCore.Signal(str)
+class TestStuff(QObject):
+    testsig = Signal(str)
 
     def a_nop(self, sendMeAnEmoji):
         print(sendMeAnEmoji)

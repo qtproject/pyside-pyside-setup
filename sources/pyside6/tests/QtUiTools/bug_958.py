@@ -35,14 +35,16 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtWidgets, QtUiTools
+from PySide6.QtWidgets import QMainWindow
+from PySide6.QtUiTools import QUiLoader
 from helper.timedqapplication import TimedQApplication
 
-class Gui_Qt(QtWidgets.QMainWindow):
+
+class Gui_Qt(QMainWindow):
     def __init__(self, parent=None):
         super(Gui_Qt, self).__init__(parent)
 
-        lLoader = QtUiTools.QUiLoader()
+        lLoader = QUiLoader()
 
         # this used to cause a segfault because the old inject code used to destroy the parent layout
         file = Path(__file__).resolve().parent / 'bug_958.ui'

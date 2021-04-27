@@ -35,22 +35,23 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtCore, QtWidgets
+from PySide6.QtCore import Signal, Slot
+from PySide6.QtWidgets import QMainWindow, QPushButton, QTextEdit
 from helper.usesqapplication import UsesQApplication
 
 
-class MyWindow(QtWidgets.QMainWindow):
-    appendText = QtCore.Signal(str)
+class MyWindow(QMainWindow):
+    appendText = Signal(str)
 
-    @QtCore.Slot()
+    @Slot()
     def onButtonPressed(self):
         self.appendText.emit("PySide")
 
     def __init__(self, parent=None):
         super(MyWindow, self).__init__(parent)
 
-        self.textEdit = QtWidgets.QTextEdit()
-        self.btn = QtWidgets.QPushButton("ClickMe")
+        self.textEdit = QTextEdit()
+        self.btn = QPushButton("ClickMe")
         self.btn.clicked.connect(self.onButtonPressed)
         self.appendText.connect(self.textEdit.append)
 

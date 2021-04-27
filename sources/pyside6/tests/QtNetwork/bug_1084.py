@@ -37,12 +37,12 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtNetwork
+from PySide6.QtNetwork import QTcpSocket
 
 
 class QTcpSocketTestCase(unittest.TestCase):
     def setUp(self):
-        self.sock = QtNetwork.QTcpSocket()
+        self.sock = QTcpSocket()
         self.sock.connectToHost('127.0.0.1', 25)
 
     def testIt(self):

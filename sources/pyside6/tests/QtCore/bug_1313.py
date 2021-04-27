@@ -37,11 +37,11 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtCore
+from PySide6.QtCore import QObject, Signal
 
 
-class MyQObject(QtCore.QObject):
-    sig = QtCore.Signal()
+class MyQObject(QObject):
+    sig = Signal()
 
 
 demo_coroutine_definition_code = """

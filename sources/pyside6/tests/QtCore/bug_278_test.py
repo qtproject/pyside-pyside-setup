@@ -37,7 +37,8 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtCore
+from PySide6.QtCore import QObject
+
 
 def setValue(o):
     values = ['Name']
@@ -47,7 +48,7 @@ class QQtVersionTest(unittest.TestCase):
     '''Tests for QVariant conversion of QStringList'''
 
     def testGet(self):
-        o = QtCore.QObject()
+        o = QObject()
         setValue(o)
         self.assertEqual(o.property('test1'), ['Name'])
 

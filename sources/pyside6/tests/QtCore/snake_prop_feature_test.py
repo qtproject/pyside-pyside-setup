@@ -46,7 +46,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtWidgets
+from PySide6.QtWidgets import QApplication, QWidget
 from PySide6.support import __feature__
 
 """
@@ -58,14 +58,14 @@ Test the snake_case and true_property feature.
 This works now, including class properties.
 """
 
-class Window(QtWidgets.QWidget):
+class Window(QWidget):
     def __init__(self):
         super(Window, self).__init__()
 
 
 class FeatureTest(unittest.TestCase):
     def setUp(self):
-        qApp or QtWidgets.QApplication()
+        qApp or QApplication()
         __feature__.set_selection(0)
 
     def tearDown(self):
@@ -91,7 +91,7 @@ class FeatureTest(unittest.TestCase):
 
         from __feature__ import snake_case, true_property
 
-        self.assertTrue(isinstance(QtWidgets.QWidget.modal, property))
+        self.assertTrue(isinstance(QWidget.modal, property))
         self.assertTrue(isinstance(window.modal, bool))
         with self.assertRaises(AttributeError):
             window.isModal
@@ -106,10 +106,10 @@ class FeatureTest(unittest.TestCase):
     def testClassProperty(self):
         from __feature__ import snake_case, true_property
         # We check the class...
-        self.assertEqual(type(QtWidgets.QApplication.quit_on_last_window_closed), bool)
-        x = QtWidgets.QApplication.quit_on_last_window_closed
-        QtWidgets.QApplication.quit_on_last_window_closed = not x
-        self.assertEqual(QtWidgets.QApplication.quit_on_last_window_closed, not x)
+        self.assertEqual(type(QApplication.quit_on_last_window_closed), bool)
+        x = QApplication.quit_on_last_window_closed
+        QApplication.quit_on_last_window_closed = not x
+        self.assertEqual(QApplication.quit_on_last_window_closed, not x)
         # ... and now the instance.
         self.assertEqual(type(qApp.quit_on_last_window_closed), bool)
         x = qApp.quit_on_last_window_closed
@@ -117,7 +117,7 @@ class FeatureTest(unittest.TestCase):
         self.assertEqual(qApp.quit_on_last_window_closed, not x)
         # make sure values are equal
         self.assertEqual(qApp.quit_on_last_window_closed,
-                         QtWidgets.QApplication.quit_on_last_window_closed)
+                         QApplication.quit_on_last_window_closed)
 
 
 if __name__ == '__main__':

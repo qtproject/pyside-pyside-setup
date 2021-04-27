@@ -38,13 +38,15 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from helper.usesqapplication import UsesQApplication
-from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtGui import QIcon
+from PySide6.QtWidgets import QStyle, QWidget
+
 
 class BugTest(UsesQApplication):
     def testCase(self):
-        s = QtWidgets.QWidget().style()
-        i = s.standardIcon(QtWidgets.QStyle.SP_TitleBarMinButton)
-        self.assertEqual(type(i), QtGui.QIcon)
+        s = QWidget().style()
+        i = s.standardIcon(QStyle.SP_TitleBarMinButton)
+        self.assertEqual(type(i), QIcon)
 
 if __name__ == '__main__':
     unittest.main()

@@ -46,7 +46,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtWidgets
+from PySide6.QtWidgets import QApplication, QLabel
 from PySide6.support import __feature__
 
 """
@@ -65,7 +65,7 @@ class ErrormessagesWithFeatures(unittest.TestCase):
     probe_miss = "missing signature"
 
     def setUp(self):
-        qApp or QtWidgets.QApplication()
+        qApp or QApplication()
         __feature__.set_selection(0)
 
     def tearDown(self):
@@ -74,35 +74,35 @@ class ErrormessagesWithFeatures(unittest.TestCase):
 
     def testCorrectErrorMessagesPlain(self):
         with self.assertRaises(TypeError) as cm:
-            QtWidgets.QLabel().setFont(42)
+            QLabel().setFont(42)
         print("\n\n" + cm.exception.args[0])
         self.assertTrue(self.probe in cm.exception.args[0])
 
     def testCorrectErrorMessagesSnake(self):
         from __feature__ import snake_case
         with self.assertRaises(TypeError) as cm:
-            QtWidgets.QLabel().set_font(42)
+            QLabel().set_font(42)
         print("\n\n" + cm.exception.args[0])
         self.assertTrue(self.probe in cm.exception.args[0])
 
     def testCorrectErrorMessagesProp(self):
         from __feature__ import true_property
         with self.assertRaises(TypeError) as cm:
-            QtWidgets.QLabel().font = 42
+            QLabel().font = 42
         print("\n\n" + cm.exception.args[0])
         self.assertTrue(self.probe in cm.exception.args[0])
 
     def testCorrectErrorMessagesSnakeProp(self):
         from __feature__ import snake_case, true_property
         with self.assertRaises(TypeError) as cm:
-            QtWidgets.QLabel().font = 42
+            QLabel().font = 42
         print("\n\n" + cm.exception.args[0])
         self.assertTrue(self.probe in cm.exception.args[0])
 
     def testCorrectErrorMessagesClassProp(self):
         from __feature__ import true_property
         with self.assertRaises(TypeError) as cm:
-            QtWidgets.QApplication.quitOnLastWindowClosed = object
+            QApplication.quitOnLastWindowClosed = object
         print("\n\n" + cm.exception.args[0])
         self.assertTrue(self.probe_miss in cm.exception.args[0])
         with self.assertRaises(TypeError) as cm:
@@ -112,7 +112,7 @@ class ErrormessagesWithFeatures(unittest.TestCase):
     def testCorrectErrorMessagesClassSnakeProp(self):
         from __feature__ import snake_case, true_property
         with self.assertRaises(TypeError) as cm:
-            QtWidgets.QApplication.quit_on_last_window_closed = object
+            QApplication.quit_on_last_window_closed = object
         print("\n\n" + cm.exception.args[0])
         self.assertTrue(self.probe_miss in cm.exception.args[0])
         with self.assertRaises(TypeError) as cm:

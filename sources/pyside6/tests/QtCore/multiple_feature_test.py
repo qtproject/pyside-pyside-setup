@@ -46,7 +46,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtCore
+from PySide6.QtCore import QCborArray, QObject
 from PySide6.support import __feature__
 from textwrap import dedent
 
@@ -71,31 +71,31 @@ class FeaturesTest(unittest.TestCase):
 
         def tst_bit0(flag, self, bits):
             if flag == 0:
-                QtCore.QCborArray.isEmpty
-                QtCore.QCborArray.__dict__["isEmpty"]
+                QCborArray.isEmpty
+                QCborArray.__dict__["isEmpty"]
                 with self.assertRaises(AttributeError):
-                    QtCore.QCborArray.is_empty
+                    QCborArray.is_empty
                 with self.assertRaises(KeyError):
-                    QtCore.QCborArray.__dict__["is_empty"]
+                    QCborArray.__dict__["is_empty"]
             else:
-                QtCore.QCborArray.is_empty
-                QtCore.QCborArray.__dict__["is_empty"]
+                QCborArray.is_empty
+                QCborArray.__dict__["is_empty"]
                 with self.assertRaises(AttributeError):
-                    QtCore.QCborArray.isEmpty
+                    QCborArray.isEmpty
                 with self.assertRaises(KeyError):
-                    QtCore.QCborArray.__dict__["isEmpty"]
+                    QCborArray.__dict__["isEmpty"]
 
         def tst_bit1(flag, self, bits):
             getter_name = "object_name" if bits & 1 else "objectName"
             setter_name = "set_object_name" if bits & 1 else "setObjectName"
-            thing = getattr(QtCore.QObject, getter_name)
+            thing = getattr(QObject, getter_name)
             if flag:
                 self.assertEqual(type(thing), property)
                 with self.assertRaises(AttributeError):
-                    getattr(QtCore.QObject, setter_name)
+                    getattr(QObject, setter_name)
             else:
                 self.assertEqual(type(thing), MethodDescriptorType)
-                getattr(QtCore.QObject, setter_name)
+                getattr(QObject, setter_name)
 
         edict = {}
         for bit in range(2, 8):
@@ -107,12 +107,12 @@ class FeaturesTest(unittest.TestCase):
         def tst_bit{bit}(flag, self, bits):
             if flag == 0:
                 with self.assertRaises(AttributeError):
-                    QtCore.QCborArray.fake_feature_{bit_pow:02x}
+                    QCborArray.fake_feature_{bit_pow:02x}
                 with self.assertRaises(KeyError):
-                    QtCore.QCborArray.__dict__["fake_feature_{bit_pow:02x}"]
+                    QCborArray.__dict__["fake_feature_{bit_pow:02x}"]
             else:
-                QtCore.QCborArray.fake_feature_{bit_pow:02x}
-                QtCore.QCborArray.__dict__["fake_feature_{bit_pow:02x}"]
+                QCborArray.fake_feature_{bit_pow:02x}
+                QCborArray.__dict__["fake_feature_{bit_pow:02x}"]
 
                         """), "<string>", "exec"), globals(), edict)
         globals().update(edict)

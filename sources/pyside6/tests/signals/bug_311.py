@@ -38,17 +38,17 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtCore
+from PySide6.QtCore import QDate, QObject, Signal
 from helper.usesqcoreapplication import UsesQCoreApplication
 
-class DerivedDate(QtCore.QDate):
+class DerivedDate(QDate):
     def __init__(self,y,m,d):
         super(DerivedDate,self).__init__(y,m,d)
 
-class Emitter(QtCore.QObject):
-    dateSignal1 = QtCore.Signal(QtCore.QDate)
-    dateSignal2 = QtCore.Signal(DerivedDate)
-    tupleSignal = QtCore.Signal(tuple)
+class Emitter(QObject):
+    dateSignal1 = Signal(QDate)
+    dateSignal2 = Signal(DerivedDate)
+    tupleSignal = Signal(tuple)
 
 class SignaltoSignalTest(UsesQCoreApplication):
     def myCb(self, dt):

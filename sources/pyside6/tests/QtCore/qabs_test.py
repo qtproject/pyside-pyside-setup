@@ -35,15 +35,15 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtCore
+from PySide6.QtCore import qAbs
 
 
 class QAbsTest(unittest.TestCase):
-    '''Tests for QtCore.qAbs'''
+    '''Tests for qAbs'''
 
     def testBasic(self):
         def check(x):
-            self.assertEqual(QtCore.qAbs(x), abs(x))
+            self.assertEqual(qAbs(x), abs(x))
 
         check(0)
         check(-10)

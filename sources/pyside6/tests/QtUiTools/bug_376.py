@@ -37,17 +37,18 @@ init_test_paths(False)
 
 from helper.usesqapplication import UsesQApplication
 
-from PySide6 import QtCore, QtWidgets
+from PySide6.QtWidgets import QFrame, QWidget
 from PySide6.QtUiTools import QUiLoader
+
 
 class BugTest(UsesQApplication):
     def testCase(self):
-        w = QtWidgets.QWidget()
+        w = QWidget()
         loader = QUiLoader()
 
         filePath = os.path.join(os.path.dirname(__file__), 'test.ui')
         result = loader.load(filePath, w)
-        self.assertTrue(isinstance(result.child_object, QtWidgets.QFrame))
+        self.assertTrue(isinstance(result.child_object, QFrame))
 
 if __name__ == '__main__':
     unittest.main()

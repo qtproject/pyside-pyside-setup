@@ -37,13 +37,13 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtCore
+from PySide6.QtCore import QByteArray, QDataStream, QIODevice
 
 
 class QDataStreamOpOverloadTestCase(unittest.TestCase):
     def setUp(self):
-        self.ba = QtCore.QByteArray()
-        self.stream = QtCore.QDataStream(self.ba, QtCore.QIODevice.WriteOnly)
+        self.ba = QByteArray()
+        self.stream = QDataStream(self.ba, QIODevice.WriteOnly)
 
     def testIt(self):
         self.stream << "hello"

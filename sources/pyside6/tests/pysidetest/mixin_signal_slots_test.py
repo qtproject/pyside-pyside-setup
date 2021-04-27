@@ -42,57 +42,58 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtCore
+from PySide6.QtCore import QObject, Signal, Slot
+
 
 class Mixin(object):
-    mixinSignal = QtCore.Signal()
+    mixinSignal = Signal()
     def __init__(self, *args, **kwargs):
         super(Mixin,self).__init__(*args, **kwargs)
 
 class MixinTwo(Mixin):
-    mixinTwoSignal = QtCore.Signal()
+    mixinTwoSignal = Signal()
 
     def __init__(self, *args, **kwargs):
         super(MixinTwo,self).__init__(*args, **kwargs)
         self.mixinTwoSlotCalled = False
 
-    @QtCore.Slot()
+    @Slot()
     def mixinTwoSlot(self):
         self.mixinTwoSlotCalled = True
 
 class MixinThree(object):
-    mixinThreeSignal = QtCore.Signal()
+    mixinThreeSignal = Signal()
 
     def __init__(self, *args, **kwargs):
         super(MixinThree,self).__init__(*args, **kwargs)
         self.mixinThreeSlotCalled = False
 
-    @QtCore.Slot()
+    @Slot()
     def mixinThreeSlot(self):
         self.mixinThreeSlotCalled = True
 
-class Derived(Mixin, QtCore.QObject):
-    derivedSignal = QtCore.Signal(str)
+class Derived(Mixin, QObject):
+    derivedSignal = Signal(str)
 
     def __init__(self):
         super(Derived,self).__init__()
         self.derivedSlotCalled = False
         self.derivedSlotString = ''
 
-    @QtCore.Slot(str)
+    @Slot(str)
     def derivedSlot(self, theString):
         self.derivedSlotCalled = True
         self.derivedSlotString = theString
 
-class MultipleDerived(MixinTwo, MixinThree, Mixin, QtCore.QObject):
-    derivedSignal = QtCore.Signal(str)
+class MultipleDerived(MixinTwo, MixinThree, Mixin, QObject):
+    derivedSignal = Signal(str)
 
     def __init__(self):
         super(MultipleDerived,self).__init__()
         self.derivedSlotCalled = False
         self.derivedSlotString = ''
 
-    @QtCore.Slot(str)
+    @Slot(str)
     def derivedSlot(self, theString):
         self.derivedSlotCalled = True
         self.derivedSlotString = theString
@@ -120,7 +121,7 @@ class MixinTest(unittest.TestCase):
 
         # Check derivedSignal emission after mixingSignal connection
         self.outsideSlotCalled = False
-        @QtCore.Slot()
+        @Slot()
         def outsideSlot():
             self.outsideSlotCalled = True
 
@@ -169,7 +170,7 @@ class MixinTest(unittest.TestCase):
 
         # Check derivedSignal emission after mixinThreeSignal connection
         self.outsideSlotCalled = False
-        @QtCore.Slot()
+        @Slot()
         def outsideSlot():
             self.outsideSlotCalled = True
 

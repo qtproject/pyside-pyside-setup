@@ -37,21 +37,22 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtCore
-from PySide6 import QtGui
-from PySide6 import QtWidgets
+from PySide6.QtCore import QRectF
+from PySide6.QtWidgets import QGraphicsItem
+from PySide6.QtGui import QColor
 from helper.usesqapplication import UsesQApplication
 
-class Item(QtWidgets.QGraphicsItem):
+
+class Item(QGraphicsItem):
 
     def __init__(self):
-        QtWidgets.QGraphicsItem.__init__(self)
+        super().__init__()
 
     def boundingRect(self):
-        return QtCore.QRectF(0, 0, 100, 100)
+        return QRectF(0, 0, 100, 100)
 
     def paint(self, painter, option, widget):
-        painter.setBrush(QtGui.QColor(255, 255, 255))
+        painter.setBrush(QColor(255, 255, 255))
         painter.drawRect(0, 0, 100, 100)
 
 

@@ -37,9 +37,10 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtCore, QtWidgets
+from PySide6.QtWidgets import QApplication, QGraphicsPolygonItem, QGraphicsScene
 
-class DiagramItem(QtWidgets.QGraphicsPolygonItem):
+
+class DiagramItem(QGraphicsPolygonItem):
     def __init__(self, parent=None, scene=None):
         super(DiagramItem, self).__init__(parent, scene)
 
@@ -49,8 +50,8 @@ class DiagramItem(QtWidgets.QGraphicsPolygonItem):
 
 class BugTest(unittest.TestCase):
     def test(self):
-        app = QtWidgets.QApplication(sys.argv)
-        scene = QtWidgets.QGraphicsScene()
+        app = QApplication(sys.argv)
+        scene = QGraphicsScene()
         item = DiagramItem()
         item2 = DiagramItem()
         #this cause segfault

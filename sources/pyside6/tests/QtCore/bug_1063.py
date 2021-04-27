@@ -38,17 +38,17 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtCore
+from PySide6.QtCore import QFile, QIODevice, QTextStream
 
 
 class QTextStreamTestCase(unittest.TestCase):
     def setUp(self):
         self.temp_file = tempfile.NamedTemporaryFile(delete=False)
         self.temp_file.close()
-        self.f = QtCore.QFile(self.temp_file.name)
-        self.f.open(QtCore.QIODevice.WriteOnly)
+        self.f = QFile(self.temp_file.name)
+        self.f.open(QIODevice.WriteOnly)
         self.strings = ('foo', 'bar')
-        self.stream = QtCore.QTextStream(self.f)
+        self.stream = QTextStream(self.f)
 
     def testIt(self):
         for s in self.strings:
@@ -57,7 +57,7 @@ class QTextStreamTestCase(unittest.TestCase):
         self.f.close()
 
         # make sure we didn't get an empty file
-        self.assertNotEqual(QtCore.QFile(self.temp_file.name).size(), 0)
+        self.assertNotEqual(QFile(self.temp_file.name).size(), 0)
 
         os.unlink(self.temp_file.name)
 

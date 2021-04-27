@@ -44,8 +44,10 @@ init_test_paths(False)
 
 from helper.helper import quickview_errorstring
 from helper.timedqapplication import TimedQApplication
+from PySide6.QtCore import QObject, QUrl, SIGNAL
+from PySide6.QtGui import QColor
+from PySide6.QtQuick import QQuickItem, QQuickView
 
-from PySide6 import QtCore, QtGui, QtQuick
 
 class TestConnectionWithInvalidSignature(TimedQApplication):
     def onButtonClicked(self):
@@ -58,14 +60,14 @@ class TestConnectionWithInvalidSignature(TimedQApplication):
     def testFailConnection(self):
         self.buttonClicked = False
         self.buttonFailClicked = False
-        view = QtQuick.QQuickView()
+        view = QQuickView()
         file = Path(__file__).resolve().parent / 'connect_python_qml.qml'
         self.assertTrue(file.is_file())
-        view.setSource(QtCore.QUrl.fromLocalFile(os.fspath(file)))
+        view.setSource(QUrl.fromLocalFile(os.fspath(file)))
         root = view.rootObject()
         self.assertTrue(root, quickview_errorstring(view))
-        button = root.findChild(QtCore.QObject, "buttonMouseArea")
-        self.assertRaises(TypeError, QtCore.QObject.connect, [button,QtCore.SIGNAL('entered()'), self.onButtonFailClicked])
+        button = root.findChild(QObject, "buttonMouseArea")
+        self.assertRaises(TypeError, QObject.connect, [button,SIGNAL('entered()'), self.onButtonFailClicked])
         button.entered.connect(self.onButtonClicked)
         button.entered.emit()
         view.show()

@@ -39,12 +39,13 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6 import QtWidgets
+from PySide6.QtWidgets import QApplication, QTreeWidget, QTreeWidgetItem
+
 
 class MyMainWindow(unittest.TestCase):
-    app = QtWidgets.QApplication(sys.argv)
+    app = QApplication(sys.argv)
     def testCase1(self):
-        self._tree = QtWidgets.QTreeWidget()
+        self._tree = QTreeWidget()
         self._tree.setColumnCount(2)
         self._i1 = None
         self._i11 = None
@@ -61,7 +62,7 @@ class MyMainWindow(unittest.TestCase):
         self.assertEqual(sys.getrefcount(self._i11), 3)
 
     def testCase2(self):
-        self._tree = QtWidgets.QTreeWidget()
+        self._tree = QTreeWidget()
         self._tree.setColumnCount(2)
         self._i1 = None
         self._i11 = None
@@ -82,9 +83,9 @@ class MyMainWindow(unittest.TestCase):
             self.assertEqual(sys.getrefcount(self._i1), 2)
             self.assertEqual(sys.getrefcount(self._i11), 2)
 
-        self._i1 = QtWidgets.QTreeWidgetItem(self._tree, ['1', ])
+        self._i1 = QTreeWidgetItem(self._tree, ['1', ])
         self.assertEqual(sys.getrefcount(self._i1), 3)
-        self._i11 = QtWidgets.QTreeWidgetItem(self._i1, ['11', ])
+        self._i11 = QTreeWidgetItem(self._i1, ['11', ])
         self.assertEqual(sys.getrefcount(self._i11), 3)
 
 if __name__ == '__main__':
