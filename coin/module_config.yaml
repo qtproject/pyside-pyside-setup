@@ -19,6 +19,14 @@ accept_configuration:
         - condition: property  # MibnGW and msvc2015 are not supported
           property: target.compiler
           not_in_values: [Mingw, MSVC2015]
+    - condition: and
+      conditions:
+        - condition: property  # No cross compilation
+          property: host.osVersion
+          equals_value: MacOS_10_15
+        - condition: property
+          property: features
+          contains_value: TestOnly
 
 upload_pyside: &upload_pyside
      type: Group
