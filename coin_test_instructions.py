@@ -111,13 +111,12 @@ def run_test_instructions():
     os.chdir(CI_ENV_AGENT_DIR)
     testRun = 0
 
-    if CI_RELEASE_CONF:
-        # In win machines, there are additional python versions to test with
-        if CI_HOST_OS == "Windows":
-            call_testrunner("3.6.1", str(testRun))
-            call_testrunner("3.8.1", str(testRun))
-        else:
-            call_testrunner("3", str(testRun))
+    # In win machines, there are additional python versions to test with
+    if CI_HOST_OS == "Windows":
+        call_testrunner("3.6.1", str(testRun))
+        call_testrunner("3.8.1", str(testRun))
+    else:
+        call_testrunner("3", str(testRun))
 
 if __name__ == "__main__":
     run_test_instructions()
