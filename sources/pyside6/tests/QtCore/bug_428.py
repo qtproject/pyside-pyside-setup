@@ -40,7 +40,7 @@ from PySide6.QtCore import QObject
 class MyBaseObject(QObject):
     def __init__(self, number):
         self.myMember = 'myMember' + number
-        QObject.__init__(self)
+        super().__init__()
 
 class QObjectConstructorTest(unittest.TestCase):
     def testBug(self):

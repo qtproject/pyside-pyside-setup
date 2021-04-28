@@ -43,7 +43,7 @@ from PySide6.QtCore import QObject, Signal, Slot, QUrl, QTimer, Property
 
 class Obj(QObject):
     def __init__(self):
-        QObject.__init__(self)
+        super().__init__()
         self.value = 0
 
     sumResult = Signal(int, name="sumResult", arguments=['sum'])

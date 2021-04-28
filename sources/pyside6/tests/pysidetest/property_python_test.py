@@ -75,7 +75,7 @@ class PropertyDel(PropertyBase):
 
 class BaseClass(QObject):
     def __init__(self):
-        QObject.__init__(self)
+        super().__init__()
 
         self._spam = 5
 
@@ -127,7 +127,7 @@ class PropertySubNewGetter(BaseClass):
 
 class PropertyNewGetter(QObject):
     def __init__(self):
-        QObject.__init__(self)
+        super().__init__()
 
     @Property(object)
     def spam(self):

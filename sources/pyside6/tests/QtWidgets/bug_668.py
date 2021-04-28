@@ -43,7 +43,7 @@ from PySide6.QtWidgets import QApplication, QFileSystemModel, QMainWindow, QTree
 
 class A(QMainWindow):
     def __init__(self, parent=None):
-        super(A, self).__init__(parent)
+        super().__init__(parent)
         a = QFileSystemModel(self)
         a.setRootPath(QDir.homePath())
 

@@ -72,7 +72,7 @@ class TestStuff(QObject):
         return
 
     def __init__(self):
-        super(TestStuff, self).__init__()
+        super().__init__()
         self.testsig.connect(self.a_nop)
         self.testsig.emit(emoji_str)
 

@@ -33,7 +33,7 @@ from PySide6.QtWidgets import QMainWindow, QTreeView, QAbstractItemView, QApplic
 
 class Item(QStandardItem):
     def __init__(self, text):
-        super(Item, self).__init__()
+        super().__init__()
         self.setText(text)
         self.setDragEnabled(True)
         self.setDropEnabled(True)
@@ -44,7 +44,7 @@ class Item(QStandardItem):
 
 class Project(QStandardItemModel):
     def __init__(self):
-        super(Project, self).__init__()
+        super().__init__()
         self.setItemPrototype(Item("Prototype"))
         # add some items so we have stuff to move around
         self.appendRow(Item("ABC"))
@@ -53,7 +53,7 @@ class Project(QStandardItemModel):
 
 class MainWindow(QMainWindow):
     def __init__(self):
-        super(MainWindow, self).__init__()
+        super().__init__()
 
         self.model = Project()
         self.view = QTreeView(self)

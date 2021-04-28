@@ -53,7 +53,7 @@ except ImportError:
 
 class OpenGLWindow(QOpenGLWindow):
     def __init__(self):
-        super(OpenGLWindow, self).__init__()
+        super().__init__()
 
         self.m_functions = None
         self.m_texture = None

@@ -42,7 +42,7 @@ from PySide6.QtWidgets import QApplication, QGraphicsPolygonItem, QGraphicsScene
 
 class DiagramItem(QGraphicsPolygonItem):
     def __init__(self, parent=None, scene=None):
-        super(DiagramItem, self).__init__(parent, scene)
+        super().__init__(parent, scene)
 
     def itemChange(self, change, value):
         return value

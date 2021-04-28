@@ -40,7 +40,7 @@ from PySide6.QtCore import QCoreApplication
 
 class CoreApp(QCoreApplication):
     def __init__(self,*args):
-        super(CoreApp,self).__init__(*args)
+        super().__init__(*args)
         # It shouldn't crash after the __init__ call
 
 import sys

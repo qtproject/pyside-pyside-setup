@@ -50,7 +50,7 @@ class MyWidget(QWidget):
         if app is None:
             app = QApplication([])
 
-        super(MyWidget, self).__init__()
+        super().__init__()
         self.app = app
         self.runs = 0
         self.max_runs = 5

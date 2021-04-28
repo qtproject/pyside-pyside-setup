@@ -48,7 +48,7 @@ class Whatever(QtCore.QObject):
     echoSignal = QtCore.Signal(str)
 
     def __init__(self):
-        super(Whatever, self).__init__()
+        super().__init__()
         self.echoSignal.connect(self.mySlot)
 
     def mySlot(self, v):

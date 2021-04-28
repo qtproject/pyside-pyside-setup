@@ -48,7 +48,7 @@ from helper.usesqapplication import UsesQApplication
 class KeyEventFilter(QObject):
 
     def __init__(self, widget, eventType, key):
-        QObject.__init__(self)
+        super().__init__()
 
         self.widget = widget
         self.eventType = eventType

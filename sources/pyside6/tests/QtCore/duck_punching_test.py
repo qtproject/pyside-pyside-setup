@@ -48,7 +48,7 @@ def MethodType(func, instance, instanceType):
 
 class Duck(QObject):
     def __init__(self):
-        QObject.__init__(self)
+        super().__init__()
     def childEvent(self, event):
         QObject.childEvent(self, event)
 

@@ -60,7 +60,7 @@ This works now, including class properties.
 
 class Window(QWidget):
     def __init__(self):
-        super(Window, self).__init__()
+        super().__init__()
 
 
 class FeatureTest(unittest.TestCase):

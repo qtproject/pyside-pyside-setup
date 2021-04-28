@@ -40,12 +40,12 @@ from PySide6.QtCore import QObject, QCoreApplication, QEvent, QThread
 class MyEvent(QEvent):
     def __init__(self,i):
         print("TYPE:", type(QEvent.User))
-        super(MyEvent,self).__init__(QEvent.Type(QEvent.User + 100 ))
+        super().__init__(QEvent.Type(QEvent.User + 100 ))
         self.i = i
 
 class MyThread (QThread):
     def __init__(self,owner):
-        super(MyThread,self).__init__()
+        super().__init__()
         self.owner=owner;
 
     def run(self):
@@ -55,7 +55,7 @@ class MyThread (QThread):
 
 class MyBaseObject(QObject):
     def __init__(self):
-        QObject.__init__(self)
+        super().__init__()
         self.events = []
         self.t = MyThread(self)
         self.t.start()

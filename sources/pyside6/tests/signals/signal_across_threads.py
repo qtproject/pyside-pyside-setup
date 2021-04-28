@@ -44,7 +44,7 @@ from helper.usesqcoreapplication import UsesQCoreApplication
 
 class ReceiverBase(QObject):
     def __init__(self, parent=None):
-        super(ReceiverBase, self).__init__(parent)
+        super().__init__(parent)
         self.senderThread = None
 
     @Slot()
@@ -58,7 +58,7 @@ class Receiver(ReceiverBase):
 
 class TestThread(QThread):
     def __init__(self, parent=None):
-        super(TestThread, self).__init__(parent)
+        super().__init__(parent)
 
     def run(self):
         pass

@@ -64,19 +64,19 @@ import PySide6.QtCore
 
 class MyQObject(QObject):
     def __init__(self):
-        QObject.__init__(self)
+        super().__init__()
 
 class MyQWidget(QWidget):
     def __init__(self):
-        QWidget.__init__(self)
+        super().__init__()
 
 class MyQGraphicsObject(QGraphicsObject):
     def __init__(self):
-        QGraphicsObject.__init__(self)
+        super().__init__()
 
 class MyQGraphicsItem(QGraphicsItem):
     def __init__(self):
-        QGraphicsItem.__init__(self)
+        super().__init__()
 
 class TestRepr (unittest.TestCase):
 

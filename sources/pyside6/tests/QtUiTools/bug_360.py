@@ -42,7 +42,7 @@ from PySide6.QtUiTools import QUiLoader
 
 class MyQUiLoader(QUiLoader):
     def __init__(self, baseinstance):
-        QUiLoader.__init__(self)
+        super().__init__()
         self.baseinstance = baseinstance
         self._widgets = []
 

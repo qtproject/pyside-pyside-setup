@@ -47,7 +47,7 @@ class MySpinButton(QSpinBox):
 
     def __init__(self, max_runs=5, app=None):
         #Creates a new spinbox that will run <max_runs> and quit <app>
-        super(MySpinButton, self).__init__()
+        super().__init__()
 
         if app is None:
             app = QApplication([])

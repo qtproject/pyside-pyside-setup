@@ -45,7 +45,7 @@ from PySide6.QtQuick import QQuickItem, QQuickView
 class MyItem(QQuickItem):
     COMPONENT_COMPLETE_CALLED = False
     def __init__(self,parent=None):
-        super(MyItem, self).__init__(parent)
+        super().__init__(parent)
         self.setObjectName("myitem")
 
     def componentComplete(self):

@@ -54,7 +54,7 @@ from PySide6.QtQuick import QQuickView
 
 class ListModel(QAbstractListModel):
     def __init__(self):
-        QAbstractListModel.__init__(self)
+        super().__init__()
 
     def roleNames(self):
         return { Qt.DisplayRole: b'pysideModelData' }

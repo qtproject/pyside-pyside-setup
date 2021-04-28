@@ -40,17 +40,17 @@ from PySide6.QtWidgets import QWidget, QApplication
 
 class TestW1(QWidget):
     def __init__(self, parent = None):
-        super(TestW1, self).__init__(parent)
+        super().__init__(parent)
         TestW2(parent, self)
 
 class TestW2(QWidget):
     def __init__(self, ancestor, parent = None):
-        super(TestW2, self).__init__(parent)
+        super().__init__(parent)
         self.ancestor_ref = ancestor
 
 class Test(QWidget):
     def __init__(self):
-        super(Test, self).__init__()
+        super().__init__()
         TestW1(self)
 
 class TestQApplicationDestrcutor(unittest.TestCase):

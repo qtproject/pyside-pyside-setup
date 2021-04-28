@@ -49,7 +49,7 @@ mutex = QMutex()
 class Dummy(QThread):
     '''Dummy thread'''
     def __init__(self, *args):
-        super(Dummy, self).__init__(*args)
+        super().__init__(*args)
         self.called = False
 
     def run(self):

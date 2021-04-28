@@ -59,7 +59,7 @@ class Harness(QWidget):
     clicked = Signal()
 
     def __init__(self):
-        QWidget.__init__(self)
+        super().__init__()
         self.clicked.connect(self.method)
         self.clicked.connect(self._method)
         self.clicked.connect(self.__method)
@@ -78,7 +78,7 @@ class _Under(QWidget):
     clicked = Signal()
 
     def __init__(self):
-        QWidget.__init__(self)
+        super().__init__()
         self.clicked.connect(self.method)
         self.clicked.connect(self._method)
         self.clicked.connect(self.__method)

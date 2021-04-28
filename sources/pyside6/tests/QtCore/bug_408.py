@@ -40,7 +40,7 @@ from PySide6.QtCore import QIODevice, QTextStream
 
 class MyDevice(QIODevice):
     def __init__(self, txt):
-        QIODevice.__init__(self)
+        super().__init__()
         self.txt = txt
         self.ptr = 0
 

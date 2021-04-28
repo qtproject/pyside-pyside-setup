@@ -47,7 +47,7 @@ from helper.usesqcoreapplication import UsesQCoreApplication
 class Dummy(QObject):
 
     def __init__(self, *args):
-        super(Dummy, self).__init__(*args)
+        super().__init__(*args)
 
 
 class BasicCase(unittest.TestCase):

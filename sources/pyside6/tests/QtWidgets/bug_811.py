@@ -43,7 +43,7 @@ from PySide6.QtWidgets import QTextEdit
 
 class TestUserData(QTextBlockUserData):
     def __init__(self, data):
-        super(TestUserData, self).__init__()
+        super().__init__()
         self.data = data
 
 class TestUserDataRefCount(UsesQApplication):

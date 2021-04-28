@@ -45,7 +45,7 @@ class TestEvent(QEvent):
     TestEventType = QEvent.Type(QEvent.registerEventType())
 
     def __init__(self, rand=0):
-        super(TestEvent, self).__init__(TestEvent.TestEventType)
+        super().__init__(TestEvent.TestEventType)
         self._rand = rand
 
     def getRand(self):

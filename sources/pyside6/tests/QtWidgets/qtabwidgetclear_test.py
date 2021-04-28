@@ -40,7 +40,7 @@ from helper.usesqapplication import UsesQApplication
 
 class TabWidgetClear(QMainWindow):
     def __init__(self):
-        QMainWindow.__init__(self)
+        super().__init__()
         self.tabWidget = QTabWidget(self)
         self.setCentralWidget(self.tabWidget)
         self.editBox = QTextEdit(self)

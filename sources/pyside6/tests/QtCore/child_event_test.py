@@ -44,7 +44,7 @@ from helper.usesqcoreapplication import UsesQCoreApplication
 
 class ExtQObject(QObject):
     def __init__(self):
-        QObject.__init__(self)
+        super().__init__()
         self.child_event_received = False
 
     def childEvent(self, event):
@@ -53,7 +53,7 @@ class ExtQObject(QObject):
 
 class ExtQTimer(QTimer):
     def __init__(self):
-        QTimer.__init__(self)
+        super().__init__()
         self.child_event_received = False
 
     def childEvent(self, event):

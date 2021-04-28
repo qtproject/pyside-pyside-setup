@@ -45,7 +45,7 @@ class ExtQObject(QObject):
     signalbetween = Signal('qreal')
 
     def __init__(self):
-        QObject.__init__(self)
+        super().__init__()
         self.counter = 0
 
     @Slot('qreal')

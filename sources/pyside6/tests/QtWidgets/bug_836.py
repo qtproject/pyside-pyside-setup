@@ -50,7 +50,7 @@ class Mixin3(object):
 
 class MainWindow(Mixin1, Mixin2, Mixin3, QFrame):
     def __init__(self):
-        super(MainWindow, self).__init__()
+        super().__init__()
 
 def main():
     app = QApplication([])

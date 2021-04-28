@@ -42,7 +42,7 @@ from PySide6.QtWidgets import QPushButton, QApplication
 
 class Test (QApplication) :
     def __init__(self, argv) :
-        super(Test, self).__init__(argv)
+        super().__init__(argv)
         self._called = False
 
     def called(self):

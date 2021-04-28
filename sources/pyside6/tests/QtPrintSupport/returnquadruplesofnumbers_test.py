@@ -43,15 +43,15 @@ from helper.usesqapplication import UsesQApplication
 
 class Layout(QLayout):
     def __init__(self):
-        QLayout.__init__(self)
+        super().__init__()
 
 class GraphicsLayout(QGraphicsLayout):
     def __init__(self):
-        QGraphicsLayout.__init__(self)
+        super().__init__()
 
 class GraphicsLayoutItem(QGraphicsLayoutItem):
     def __init__(self):
-        QGraphicsLayoutItem.__init__(self)
+        super().__init__()
 
 class ReturnsQuadruplesOfNumbers(UsesQApplication):
     def compareTuples(self, ta, tb):

@@ -39,7 +39,7 @@ from PySide6.QtGui import QStandardItemModel, QStandardItem
 
 class MyItemModel(QStandardItemModel):
     def __init__(self,parent=None):
-        super(MyItemModel,self).__init__(parent)
+        super().__init__(parent)
         self.appendRow([QStandardItem('Item 1'),])
 
     def mimeTypes(self):

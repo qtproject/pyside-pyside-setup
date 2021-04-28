@@ -40,7 +40,7 @@ from PySide6.QtGui import QTextBlockUserData, QTextCursor, QTextDocument
 
 class MyData(QTextBlockUserData):
     def __init__(self, data):
-        QTextBlockUserData.__init__(self)
+        super().__init__()
         self.data = data
 
     def getMyNiceData(self):

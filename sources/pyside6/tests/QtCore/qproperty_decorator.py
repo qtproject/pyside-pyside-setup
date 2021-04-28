@@ -40,7 +40,7 @@ from PySide6.QtCore import QObject, Property
 
 class MyObject(QObject):
     def __init__(self):
-        QObject.__init__(self)
+        super().__init__()
         self._value = None
 
     @Property(int)

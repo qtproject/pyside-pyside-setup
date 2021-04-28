@@ -45,7 +45,7 @@ class TestObject(QObject):
     valueChanged = Signal()
 
     def __init__(self, parent=None):
-        super(TestObject, self).__init__(parent)
+        super().__init__(parent)
         self._value = -1
         self.valueChanged.connect(self._changed)
         self.getter_called = 0
@@ -75,7 +75,7 @@ class TestDerivedObject(QStringListModel):
     valueChanged = Signal()
 
     def __init__(self, parent=None):
-        super(TestDerivedObject, self).__init__(parent)
+        super().__init__(parent)
         self._value = -1
         self.valueChanged.connect(self._changed)
         self.getter_called = 0

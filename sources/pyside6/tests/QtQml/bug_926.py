@@ -46,7 +46,7 @@ from PySide6.QtQuick import QQuickView
 class MyClass (QObject):
 
     def __init__(self):
-        super(MyClass,self).__init__()
+        super().__init__()
         self.__url = QUrl()
 
     def getUrl(self):

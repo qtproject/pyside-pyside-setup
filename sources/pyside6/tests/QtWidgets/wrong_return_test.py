@@ -47,7 +47,7 @@ warnings.simplefilter('error')
 
 class MyWidget(QWidget):
     def __init__(self, parent=None):
-        super(MyWidget, self).__init__(parent)
+        super().__init__(parent)
 
     def sizeHint(self):
         pass

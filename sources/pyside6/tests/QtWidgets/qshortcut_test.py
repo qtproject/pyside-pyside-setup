@@ -45,7 +45,7 @@ from PySide6.QtWidgets import QApplication, QWidget
 
 class Foo(QWidget):
     def __init__(self):
-        QWidget.__init__(self)
+        super().__init__()
         self.ok = False
         self.copy = False
 

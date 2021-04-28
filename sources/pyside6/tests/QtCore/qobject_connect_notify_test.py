@@ -48,7 +48,7 @@ def cute_slot():
 
 class Obj(QObject):
     def __init__(self):
-        QObject.__init__(self)
+        super().__init__()
         self.con_notified = False
         self.dis_notified = False
         self.signal = ""

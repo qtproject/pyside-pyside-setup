@@ -45,7 +45,7 @@ class ExtQObject(QObject):
     mySignal = Signal()
 
     def __init__(self):
-        QObject.__init__(self)
+        super().__init__()
 
 
 class UserSignalTest(unittest.TestCase):

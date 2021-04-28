@@ -41,7 +41,7 @@ from PySide6.QtCore import (QMutex, QMutexLocker, QReadLocker, QReadWriteLock,
 
 class MyWriteThread(QThread):
     def __init__(self, lock):
-        QThread.__init__(self)
+        super().__init__()
         self.lock = lock
         self.started = False
         self.canQuit = False
@@ -55,7 +55,7 @@ class MyWriteThread(QThread):
 
 class MyReadThread(QThread):
     def __init__(self, lock):
-        QThread.__init__(self)
+        super().__init__()
         self.lock = lock
         self.started = False
         self.canQuit = False
@@ -69,7 +69,7 @@ class MyReadThread(QThread):
 
 class MyMutexedThread(QThread):
     def __init__(self, mutex):
-        QThread.__init__(self)
+        super().__init__()
         self.mutex = mutex
         self.started = False
         self.canQuit = False

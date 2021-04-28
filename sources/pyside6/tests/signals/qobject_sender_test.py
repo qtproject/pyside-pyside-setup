@@ -46,11 +46,11 @@ from helper.usesqcoreapplication import UsesQCoreApplication
 
 class ExtQTimer(QTimer):
     def __init__(self):
-        QTimer.__init__(self)
+        super().__init__()
 
 class Receiver(QObject):
     def __init__(self):
-        QObject.__init__(self)
+        super().__init__()
         self.the_sender = None
 
     def callback(self):

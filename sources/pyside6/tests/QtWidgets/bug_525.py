@@ -40,7 +40,7 @@ from PySide6.QtWidgets import QMenu
 
 class M2(QMenu):
     def __init__(self,parent=None):
-        super(M2,self).__init__(parent)
+        super().__init__(parent)
         self.setTitle(self.tr("M2"))
 
 class TestMenuDerivedClass(unittest.TestCase):

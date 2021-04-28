@@ -40,7 +40,7 @@ from PySide6.QtCore import QObject, QTimer
 
 class QtKeyPressListener(QObject):
     def __init__(self, obj):
-        QObject.__init__(self)
+        super().__init__()
         obj.installEventFilter(self)
 
     def eventFilter(self, obj, event):

@@ -45,7 +45,7 @@ class WatchDog(QObject):
     '''Exits the QCoreApplication main loop after sometime.'''
 
     def __init__(self, watched):
-        QObject.__init__(self)
+        super().__init__()
         self.times_called = 0
         self.watched = watched
 

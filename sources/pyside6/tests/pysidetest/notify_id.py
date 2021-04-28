@@ -42,7 +42,7 @@ notify method.'''
 
 class Foo(QObject):
     def __init__(self):
-        QObject.__init__(self)
+        super().__init__()
         self._prop = "Empty"
 
     def getProp(self):

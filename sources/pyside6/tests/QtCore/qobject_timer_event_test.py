@@ -46,7 +46,7 @@ from helper.usesqcoreapplication import UsesQCoreApplication
 class Dummy(QObject):
 
     def __init__(self, app):
-        super(Dummy, self).__init__()
+        super().__init__()
         self.times_called = 0
         self.app = app
 

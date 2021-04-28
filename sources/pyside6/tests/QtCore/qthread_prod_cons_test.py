@@ -49,7 +49,7 @@ class Bucket(QObject):
     '''Dummy class to hold the produced values'''
     def __init__(self, max_size=10, *args):
         #Constructor which receives the max number of produced items
-        super(Bucket, self).__init__(*args)
+        super().__init__(*args)
         self.data = []
         self.max_size = 10
 
@@ -66,7 +66,7 @@ class Producer(QThread):
 
     def __init__(self, bucket, *args):
         #Constructor. Receives the bucket
-        super(Producer, self).__init__(*args)
+        super().__init__(*args)
         self.runs = 0
         self.bucket = bucket
         self.production_list = []
@@ -87,7 +87,7 @@ class Consumer(QThread):
     '''Consumer thread'''
     def __init__(self, bucket, *args):
         #Constructor. Receives the bucket
-        super(Consumer, self).__init__(*args)
+        super().__init__(*args)
         self.runs = 0
         self.bucket = bucket
         self.consumption_list = []

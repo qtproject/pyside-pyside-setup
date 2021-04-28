@@ -51,7 +51,7 @@ from PySide6.QtQuick import QQuickView
 
 class View(QQuickView):
     def __init__(self):
-        QQuickView.__init__(self)
+        super().__init__()
 
     called = Signal(int, int)
 

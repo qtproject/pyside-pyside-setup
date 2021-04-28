@@ -40,7 +40,7 @@ from PySide6.QtCore import QCoreApplication, QTimer, Slot
 
 class MyTimer (QTimer):
     def __init__(self):
-        QTimer.__init__(self)
+        super().__init__()
         self.startCalled = False
 
     @Slot()

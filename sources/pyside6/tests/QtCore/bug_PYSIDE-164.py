@@ -39,7 +39,7 @@ from PySide6.QtCore import QCoreApplication, QEventLoop, QObject, Qt, QThread, Q
 
 class Emitter(QThread):
     def __init__(self):
-        QThread.__init__(self)
+        super().__init__()
 
     def run(self):
         print("Before emit.")
@@ -48,7 +48,7 @@ class Emitter(QThread):
 
 class Receiver(QObject):
     def __init__(self, eventloop):
-        QObject.__init__(self)
+        super().__init__()
         self.eventloop = eventloop
 
     def receive(self, number):

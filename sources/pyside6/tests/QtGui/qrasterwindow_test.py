@@ -45,7 +45,7 @@ from PySide6.QtGui import QColor, QBackingStore, QPaintDevice, QPainter, QWindow
 # Window using convenience class QRasterWindow
 class TestRasterWindow(QRasterWindow):
     def __init__(self):
-        super(TestRasterWindow, self).__init__()
+        super().__init__()
         self.text = QStaticText("QRasterWindow")
 
     def paintEvent(self, event):

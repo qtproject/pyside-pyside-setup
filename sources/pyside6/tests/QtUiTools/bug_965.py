@@ -41,7 +41,7 @@ from helper.usesqapplication import UsesQApplication
 
 class MyQUiLoader(QUiLoader):
     def __init__(self):
-        super(MyQUiLoader, self).__init__()
+        super().__init__()
 
     def createWidget(self, className, parent=None, name=""):
         return None

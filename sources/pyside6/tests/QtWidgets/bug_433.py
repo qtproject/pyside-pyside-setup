@@ -41,7 +41,7 @@ from PySide6.QtWidgets import QApplication, QGraphicsScene, QGraphicsView
 
 class Test(QGraphicsView):
     def __init__(self, parent=None):
-        super(Test, self).__init__(parent)
+        super().__init__(parent)
         self.s = QGraphicsScene()
         self.setScene(self.s)
 

@@ -49,7 +49,7 @@ class Obj(QObject):
     dummySignalArgs = Signal(str)
     numberSignal = Signal(int)
     def __init__(self):
-        QObject.__init__(self)
+        super().__init__()
         self.signal = ''
 
     def connectNotify(self, signal):

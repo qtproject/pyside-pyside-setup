@@ -42,7 +42,7 @@ from helper.timedqapplication import TimedQApplication
 
 class Gui_Qt(QMainWindow):
     def __init__(self, parent=None):
-        super(Gui_Qt, self).__init__(parent)
+        super().__init__(parent)
 
         lLoader = QUiLoader()
 

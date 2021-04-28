@@ -236,7 +236,7 @@ class TestParentOwnership(unittest.TestCase):
 
 class ExtQObject(QObject):
     def __init__(self):
-        QObject.__init__(self)
+        super().__init__()
 
 class ReparentingTest(unittest.TestCase):
     '''Test cases for reparenting'''

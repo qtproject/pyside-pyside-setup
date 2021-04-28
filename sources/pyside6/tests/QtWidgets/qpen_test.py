@@ -43,7 +43,7 @@ from PySide6.QtWidgets import QWidget
 
 class Painting(QWidget):
     def __init__(self):
-        QWidget.__init__(self)
+        super().__init__()
         self.penFromEnum = None
         self.penFromInteger = None
 

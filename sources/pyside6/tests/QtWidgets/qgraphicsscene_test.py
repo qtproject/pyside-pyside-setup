@@ -63,7 +63,7 @@ class Constructor(unittest.TestCase):
 # QWidget due to handling multiple inheritance incorrectly.
 class CustomScene(QGraphicsScene):
     def __init__(self, parent = None):
-        super(CustomScene, self).__init__(parent)
+        super().__init__(parent)
         self.dpi = 0
 
     def drawBackground(self, painter, rect):

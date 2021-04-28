@@ -41,7 +41,7 @@ from testbinding import TestObject
 class Receiver(QObject):
 
     def __init__(self):
-        QObject.__init__(self)
+        super().__init__()
         self.received = None
 
     def slot(self, value):

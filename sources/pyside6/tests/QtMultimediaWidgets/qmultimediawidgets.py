@@ -44,7 +44,7 @@ from PySide6.QtCore import QTimer
 
 class MyWidget(QWidget):
     def __init__(self):
-        QWidget.__init__(self)
+        super().__init__()
 
         layout = QVBoxLayout(self)
         layout.addWidget(QVideoWidget())

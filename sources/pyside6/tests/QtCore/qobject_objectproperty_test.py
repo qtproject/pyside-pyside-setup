@@ -53,7 +53,7 @@ class ExtQObject(QObject):
         self.foobar = None
         # The parent __init__ method must be called after the
         # definition of "self.foobar".
-        QObject.__init__(self)
+        super().__init__()
 
 class TestBug378(unittest.TestCase):
     '''Test case for the bug #378'''

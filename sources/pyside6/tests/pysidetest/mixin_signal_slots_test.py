@@ -48,13 +48,13 @@ from PySide6.QtCore import QObject, Signal, Slot
 class Mixin(object):
     mixinSignal = Signal()
     def __init__(self, *args, **kwargs):
-        super(Mixin,self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 class MixinTwo(Mixin):
     mixinTwoSignal = Signal()
 
     def __init__(self, *args, **kwargs):
-        super(MixinTwo,self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.mixinTwoSlotCalled = False
 
     @Slot()
@@ -65,7 +65,7 @@ class MixinThree(object):
     mixinThreeSignal = Signal()
 
     def __init__(self, *args, **kwargs):
-        super(MixinThree,self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.mixinThreeSlotCalled = False
 
     @Slot()
@@ -76,7 +76,7 @@ class Derived(Mixin, QObject):
     derivedSignal = Signal(str)
 
     def __init__(self):
-        super(Derived,self).__init__()
+        super().__init__()
         self.derivedSlotCalled = False
         self.derivedSlotString = ''
 
@@ -89,7 +89,7 @@ class MultipleDerived(MixinTwo, MixinThree, Mixin, QObject):
     derivedSignal = Signal(str)
 
     def __init__(self):
-        super(MultipleDerived,self).__init__()
+        super().__init__()
         self.derivedSlotCalled = False
         self.derivedSlotString = ''
 

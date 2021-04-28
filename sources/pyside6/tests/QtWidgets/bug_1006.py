@@ -43,7 +43,7 @@ from helper.timedqapplication import TimedQApplication
 
 class LabelWindow(QDialog):
     def __init__(self, parent):
-        super(LabelWindow, self).__init__(parent)
+        super().__init__(parent)
 
         self.test_layout = QGridLayout()
         label = QLabel("Label")

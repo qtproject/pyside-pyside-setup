@@ -43,7 +43,7 @@ from helper.usesqcoreapplication import UsesQCoreApplication
 
 class DerivedDate(QDate):
     def __init__(self,y,m,d):
-        super(DerivedDate,self).__init__(y,m,d)
+        super().__init__(y,m,d)
 
 class Emitter(QObject):
     dateSignal1 = Signal(QDate)

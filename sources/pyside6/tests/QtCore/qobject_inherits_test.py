@@ -81,7 +81,7 @@ class InheritsCase(unittest.TestCase):
         class DerivedObject(QObject):
             def __init__(self):
                 self.member = 'member'
-                QObject.__init__(self)
+                super().__init__()
         obj0 = DerivedObject()
         # The second instantiation of DerivedObject will generate an exception
         # that will not come to surface immediately.

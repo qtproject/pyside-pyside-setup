@@ -43,7 +43,7 @@ from PySide6.QtQuick import QQuickView
 
 class RotateValue(QObject):
     def __init__(self):
-        super(RotateValue,self).__init__()
+        super().__init__()
 
     @Slot(result=int)
     def val(self):

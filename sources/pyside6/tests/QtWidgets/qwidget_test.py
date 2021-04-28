@@ -41,14 +41,14 @@ from helper.usesqapplication import UsesQApplication
 
 class QWidgetInherit(QMainWindow):
     def __init__(self):
-        QWidget.__init__(self)
+        QWidget.__init__(self)  # Intended: Initialize QWidget instead of base
 
 class NativeEventTestWidget(QWidget):
 
     nativeEventCount = 0
 
     def __init__(self):
-        QWidget.__init__(self)
+        super().__init__()
 
     def nativeEvent(self, eventType, message):
         self.nativeEventCount = self.nativeEventCount + 1
@@ -67,7 +67,7 @@ class QWidgetVisible(UsesQApplication):
         self.assertTrue(not widget.isVisible())
         widget.setVisible(True)
         self.assertTrue(widget.isVisible())
-        self.assertTrue(widget.winId() is not 0)
+        self.assertTrue(widget.winId() != 0)
         # skip this test on macOS since no native events are received
         if sys.platform == 'darwin':
             return

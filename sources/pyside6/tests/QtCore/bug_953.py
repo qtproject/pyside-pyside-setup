@@ -42,7 +42,7 @@ class Dispatcher(QObject):
     _me = None
 
     def __init__(self):
-        super(Dispatcher, self).__init__()
+        super().__init__()
         self._me = self
         QTimer.singleShot(0, self._finish)
 

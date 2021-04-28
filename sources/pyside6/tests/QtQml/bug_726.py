@@ -43,7 +43,7 @@ from PySide6.QtQuick import QQuickView
 
 class ProxyObject(QObject):
     def __init__(self):
-        super(ProxyObject,self).__init__()
+        super().__init__()
         self._o = None
         self._receivedName = ""
 

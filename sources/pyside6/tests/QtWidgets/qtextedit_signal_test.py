@@ -48,7 +48,7 @@ class MyWindow(QMainWindow):
         self.appendText.emit("PySide")
 
     def __init__(self, parent=None):
-        super(MyWindow, self).__init__(parent)
+        super().__init__(parent)
 
         self.textEdit = QTextEdit()
         self.btn = QPushButton("ClickMe")
