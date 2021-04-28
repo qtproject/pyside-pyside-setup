@@ -1402,7 +1402,12 @@
       <modify-function signature="unlock()" allow-thread="yes"/>
   </object-type>
   <object-type name="QMessageAuthenticationCode"/>
-  <object-type name="QSignalBlocker"/>
+  <object-type name="QSignalBlocker">
+      <add-function signature="__enter__()"/>
+      <add-function signature="__exit__(PyObject*,PyObject*,PyObject*)">
+          <inject-code file="../glue/qtcore.cpp" snippet="qsignalblocker-unblock"/>
+      </add-function>
+  </object-type>
   <value-type name="QStorageInfo"/>
   <!-- QReadWriteLock does not have a copy ctor! -->
   <object-type name="QReadWriteLock">

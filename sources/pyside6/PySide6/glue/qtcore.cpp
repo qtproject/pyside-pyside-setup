@@ -792,6 +792,10 @@ Py_XDECREF(result);
 return !result ? -1 : 0;
 // @snippet qbitarray-setitem
 
+// @snippet qsignalblocker-unblock
+%CPPSELF.unblock();
+// @snippet qsignalblocker-unblock
+
 // @snippet unlock
 %CPPSELF.unlock();
 // @snippet unlock
