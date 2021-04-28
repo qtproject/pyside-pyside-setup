@@ -57,7 +57,7 @@ class StarEditor(QWidget):
         """ Initialize the editor object, making sure we can watch mouse
             events.
         """
-        super(StarEditor, self).__init__(parent)
+        super().__init__(parent)
 
         self.setMouseTracking(True)
         self.setAutoFillBackground(True)

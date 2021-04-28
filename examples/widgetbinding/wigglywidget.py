@@ -55,7 +55,7 @@ from PySide6.QtWidgets import QWidget
 
 class WigglyWidget(QWidget):
     def __init__(self, parent=None):
-        super(WigglyWidget, self).__init__(parent)
+        super().__init__(parent)
         self._step = 0
         self._text = ""
         self.setBackgroundRole(QPalette.Midlight)

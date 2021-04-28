@@ -50,7 +50,7 @@ from PySide6.QtWidgets import (QApplication, QDialog,
 class MainWindow(QMainWindow):
 
     def __init__(self):
-        super(MainWindow, self).__init__()
+        super().__init__()
 
         toolBar = QToolBar()
         self.addToolBar(toolBar)

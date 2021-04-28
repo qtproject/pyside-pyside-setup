@@ -61,7 +61,7 @@ class Edge(QGraphicsItem):
     type = QGraphicsItem.UserType + 2
 
     def __init__(self, sourceNode, destNode):
-        QGraphicsItem.__init__(self)
+        super().__init__()
 
         self._arrow_size = 10.0
         self._source_point = QPointF()
@@ -160,7 +160,7 @@ class Node(QGraphicsItem):
     type = QGraphicsItem.UserType + 1
 
     def __init__(self, graphWidget):
-        QGraphicsItem.__init__(self)
+        super().__init__()
 
         self.graph = weakref.ref(graphWidget)
         self._edge_list = []
@@ -275,7 +275,7 @@ class Node(QGraphicsItem):
 
 class GraphWidget(QGraphicsView):
     def __init__(self):
-        QGraphicsView.__init__(self)
+        super().__init__()
 
         self._timer_id = 0
 

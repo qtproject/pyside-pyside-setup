@@ -50,7 +50,7 @@ from PySide6.QtWidgets import (QApplication, QFrame, QGridLayout, QLabel,
 
 class CircleWidget(QWidget):
     def __init__(self, parent=None):
-        super(CircleWidget, self).__init__(parent)
+        super().__init__(parent)
 
         self._float_based = False
         self.antialiased = False
@@ -98,7 +98,7 @@ class CircleWidget(QWidget):
 
 class Window(QWidget):
     def __init__(self):
-        super(Window, self).__init__()
+        super().__init__()
 
         aliased_label = self.create_label("Aliased")
         antialiased_label = self.create_label("Antialiased")

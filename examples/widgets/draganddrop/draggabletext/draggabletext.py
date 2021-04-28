@@ -51,7 +51,7 @@ import draggabletext_rc
 
 class DragLabel(QLabel):
     def __init__(self, text, parent):
-        super(DragLabel, self).__init__(text, parent)
+        super().__init__(text, parent)
 
         self.setAutoFillBackground(True)
         self.setFrameShape(QFrame.Panel)
@@ -83,7 +83,7 @@ class DragLabel(QLabel):
 
 class DragWidget(QWidget):
     def __init__(self, parent=None):
-        super(DragWidget, self).__init__(parent)
+        super().__init__(parent)
 
         dictionary_file = QFile(':/dictionary/words.txt')
         dictionary_file.open(QIODevice.ReadOnly)

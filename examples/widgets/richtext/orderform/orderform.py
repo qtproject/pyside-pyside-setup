@@ -57,7 +57,7 @@ from PySide6.QtPrintSupport import QAbstractPrintDialog, QPrintDialog, QPrinter
 
 class MainWindow(QMainWindow):
     def __init__(self):
-        super(MainWindow, self).__init__()
+        super().__init__()
 
         file_menu = QMenu("&File", self)
         new_action = file_menu.addAction("&New...")
@@ -219,7 +219,7 @@ class MainWindow(QMainWindow):
 
 class DetailsDialog(QDialog):
     def __init__(self, title, parent):
-        super(DetailsDialog, self).__init__(parent)
+        super().__init__(parent)
 
         self.items = ("T-shirt", "Badge", "Reference book", "Coffee cup")
 

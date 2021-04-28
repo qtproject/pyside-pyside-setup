@@ -54,7 +54,7 @@ except ImportError:
 
 class VCardMime(QtMacExtras.QMacPasteboardMime):
     def __init__(self, t = QtMacExtras.QMacPasteboardMime.MIME_ALL):
-        super(VCardMime, self).__init__(t)
+        super().__init__(t)
 
     def convertorName(self):
         return "VCardMime"
@@ -89,7 +89,7 @@ class VCardMime(QtMacExtras.QMacPasteboardMime):
 
 class TestWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
-        super(TestWidget, self).__init__(parent)
+        super().__init__(parent)
         self.vcardMime = VCardMime()
         self.setAcceptDrops(True)
 

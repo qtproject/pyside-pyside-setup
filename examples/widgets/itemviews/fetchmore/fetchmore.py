@@ -65,7 +65,7 @@ class FileListModel(QAbstractListModel):
     number_populated = Signal(str, int, int, int)
 
     def __init__(self, parent=None):
-        super(FileListModel, self).__init__(parent)
+        super().__init__(parent)
 
         self._path = ''
         self._file_count = 0
@@ -130,7 +130,7 @@ class FileListModel(QAbstractListModel):
 
 class Window(QWidget):
     def __init__(self, parent=None):
-        super(Window, self).__init__(parent)
+        super().__init__(parent)
 
         self._model = FileListModel(self)
         self._model.set_dir_path(QDir.rootPath())

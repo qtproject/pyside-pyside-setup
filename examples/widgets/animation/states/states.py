@@ -59,7 +59,7 @@ import states_rc
 
 class Pixmap(QGraphicsObject):
     def __init__(self, pix):
-        super(Pixmap, self).__init__()
+        super().__init__()
 
         self.p = QPixmap(pix)
 

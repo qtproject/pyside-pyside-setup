@@ -57,7 +57,7 @@ class WebSocketClientWrapper(QObject):
         """Construct the client wrapper with the given parent. All clients
            connecting to the QWebSocketServer will be automatically wrapped
            in WebSocketTransport objects."""
-        super(WebSocketClientWrapper, self).__init__(parent)
+        super().__init__(parent)
         self._server = server
         self._server.newConnection.connect(self.handleNewConnection)
         self._transports = []

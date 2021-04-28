@@ -56,7 +56,7 @@ FIXED_STRING = 2
 
 class Window(QWidget):
     def __init__(self):
-        super(Window, self).__init__()
+        super().__init__()
 
         self._proxy_model = QSortFilterProxyModel()
         self._proxy_model.setDynamicSortFilter(True)

@@ -58,7 +58,7 @@ from PySide6.QtDesigner import (QExtensionFactory, QPyDesignerTaskMenuExtension)
 
 class TicTacToeDialog(QDialog):
     def __init__(self, parent):
-        super(TicTacToeDialog, self).__init__(parent)
+        super().__init__(parent)
         layout = QVBoxLayout(self)
         self._ticTacToe = TicTacToe(self)
         layout.addWidget(self._ticTacToe)
@@ -80,7 +80,7 @@ class TicTacToeDialog(QDialog):
 
 class TicTacToeTaskMenu(QPyDesignerTaskMenuExtension):
     def __init__(self, ticTacToe, parent):
-        super(TicTacToeTaskMenu, self).__init__(parent)
+        super().__init__(parent)
         self._ticTacToe = ticTacToe
         self._edit_state_action = QAction('Edit State...', None)
         self._edit_state_action.triggered.connect(self._edit_state)
@@ -101,7 +101,7 @@ class TicTacToeTaskMenu(QPyDesignerTaskMenuExtension):
 
 class TicTacToeTaskMenuFactory(QExtensionFactory):
     def __init__(self, extension_manager):
-        super(TicTacToeTaskMenuFactory, self).__init__(extension_manager)
+        super().__init__(extension_manager)
 
     @staticmethod
     def task_menu_iid():

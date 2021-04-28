@@ -50,7 +50,7 @@ from PySide6.QtCharts import (QBarCategoryAxis, QBarSet, QChart, QChartView,
 
 class MainWindow(QMainWindow):
     def __init__(self):
-        QMainWindow.__init__(self)
+        super().__init__()
         low = QBarSet("Min")
         high = QBarSet("Max")
         low.append([-52, -50, -45.3, -37.0, -25.6, -8.0,

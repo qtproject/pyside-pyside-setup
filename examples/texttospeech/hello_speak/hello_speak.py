@@ -50,7 +50,7 @@ from PySide6.QtTextToSpeech import QTextToSpeech
 
 class MainWindow(QMainWindow):
     def __init__(self):
-        super(MainWindow, self).__init__()
+        super().__init__()
 
         centralWidget = QWidget()
         self.setCentralWidget(centralWidget)

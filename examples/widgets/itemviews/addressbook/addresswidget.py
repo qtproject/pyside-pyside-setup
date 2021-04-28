@@ -63,7 +63,7 @@ class AddressWidget(QTabWidget):
 
     def __init__(self, parent=None):
         """ Initialize the AddressWidget. """
-        super(AddressWidget, self).__init__(parent)
+        super().__init__(parent)
 
         self._table_model = TableModel()
         self._new_address_tab = NewAddressTab()

@@ -48,7 +48,7 @@ class AddDialogWidget(QDialog):
     """ A dialog to add a new address to the addressbook. """
 
     def __init__(self, parent=None):
-        super(AddDialogWidget, self).__init__(parent)
+        super().__init__(parent)
 
         name_label = QLabel("Name")
         address_label = QLabel("Address")

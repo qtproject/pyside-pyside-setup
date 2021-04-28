@@ -61,7 +61,7 @@ class PathType(IntEnum):
 
 class Animation(QPropertyAnimation):
     def __init__(self, target, prop):
-        super(Animation, self).__init__(target, prop)
+        super().__init__(target, prop)
         self.set_path_type(PathType.LINEAR_PATH)
 
     def set_path_type(self, pathType):
@@ -99,7 +99,7 @@ class Animation(QPropertyAnimation):
 # composition and delegate the property.
 class Pixmap(QObject):
     def __init__(self, pix):
-        super(Pixmap, self).__init__()
+        super().__init__()
 
         self.pixmap_item = QGraphicsPixmapItem(pix)
         self.pixmap_item.setCacheMode(QGraphicsItem.DeviceCoordinateCache)
@@ -115,7 +115,7 @@ class Pixmap(QObject):
 
 class Window(QWidget):
     def __init__(self, parent=None):
-        super(Window, self).__init__(parent)
+        super().__init__(parent)
 
         self._iconSize = QSize(64, 64)
         self._scene = QGraphicsScene()

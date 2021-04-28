@@ -49,7 +49,7 @@ from PySide6.QtCharts import QChart, QChartView, QLineSeries
 
 class TestChart(QMainWindow):
     def __init__(self):
-        QMainWindow.__init__(self)
+        super().__init__()
 
         self.series = QLineSeries()
         self.series.append(0, 6)

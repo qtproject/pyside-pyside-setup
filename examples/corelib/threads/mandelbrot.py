@@ -77,7 +77,7 @@ class RenderThread(QThread):
     rendered_image = Signal(QImage, float)
 
     def __init__(self, parent=None):
-        super(RenderThread, self).__init__(parent)
+        super().__init__(parent)
 
         self.mutex = QMutex()
         self.condition = QWaitCondition()
@@ -234,7 +234,7 @@ class RenderThread(QThread):
 
 class MandelbrotWidget(QWidget):
     def __init__(self, parent=None):
-        super(MandelbrotWidget, self).__init__(parent)
+        super().__init__(parent)
 
         self.thread = RenderThread()
         self.pixmap = QPixmap()

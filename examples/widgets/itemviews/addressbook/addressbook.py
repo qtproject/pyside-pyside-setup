@@ -49,7 +49,7 @@ from addresswidget import AddressWidget
 class MainWindow(QMainWindow):
 
     def __init__(self, parent=None):
-        super(MainWindow, self).__init__(parent)
+        super().__init__(parent)
 
         self._address_widget = AddressWidget()
         self.setCentralWidget(self._address_widget)

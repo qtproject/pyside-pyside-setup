@@ -47,7 +47,7 @@ from PySide6.QtWidgets import QApplication, QPushButton, QVBoxLayout, QWidget
 # Create a basic window with a layout and a button
 class MainForm(QWidget):
     def __init__(self):
-        QWidget.__init__(self)
+        super().__init__()
         self.setWindowTitle("My Form")
         self.layout = QVBoxLayout()
         self.button = QPushButton("Click me!")

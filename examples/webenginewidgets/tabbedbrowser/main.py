@@ -80,7 +80,7 @@ class MainWindow(QMainWindow):
     web browsing experience."""
 
     def __init__(self):
-        super(MainWindow, self).__init__()
+        super().__init__()
 
         self.setWindowTitle('PySide6 tabbed browser Example')
 

@@ -53,7 +53,7 @@ resolution = 4
 
 class MainWindow(QMainWindow):
     def __init__(self, device):
-        super(MainWindow, self).__init__()
+        super().__init__()
 
         self.series = QLineSeries()
         self.chart = QChart()

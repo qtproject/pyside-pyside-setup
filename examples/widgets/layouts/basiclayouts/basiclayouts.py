@@ -57,7 +57,7 @@ class Dialog(QDialog):
     num_buttons = 4
 
     def __init__(self):
-        super(Dialog, self).__init__()
+        super().__init__()
 
         self.create_menu()
         self.create_horizontal_group_box()

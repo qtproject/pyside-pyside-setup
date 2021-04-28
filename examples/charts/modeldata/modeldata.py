@@ -53,7 +53,7 @@ from PySide6.QtCharts import QChart, QChartView, QLineSeries, QVXYModelMapper
 
 class CustomTableModel(QAbstractTableModel):
     def __init__(self):
-        QAbstractTableModel.__init__(self)
+        super().__init__()
         self.input_data = []
         self.mapping = {}
         self.column_count = 4
@@ -119,7 +119,7 @@ class CustomTableModel(QAbstractTableModel):
 
 class TableWidget(QWidget):
     def __init__(self):
-        QWidget.__init__(self)
+        super().__init__()
 
         self.model = CustomTableModel()
 

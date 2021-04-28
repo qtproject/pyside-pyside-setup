@@ -50,7 +50,7 @@ from PySide6.QtCharts import (QBarCategoryAxis, QBarSet, QChart, QChartView,
 
 class MainWindow(QMainWindow):
     def __init__(self):
-        QMainWindow.__init__(self)
+        super().__init__()
 
         set0 = QBarSet("Jane")
         set1 = QBarSet("John")

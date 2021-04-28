@@ -49,7 +49,7 @@ from PySide6.QtStateMachine import (QFinalState, QSignalTransition, QState,
 class Factorial(QObject):
     x_changed = Signal(int)
     def __init__(self):
-        super(Factorial, self).__init__()
+        super().__init__()
         self.xval = -1
         self.facval = 1
     def get_x(self):
@@ -68,7 +68,7 @@ class Factorial(QObject):
 
 class FactorialLoopTransition(QSignalTransition):
     def __init__(self, fact):
-        super(FactorialLoopTransition, self).__init__(fact, SIGNAL('x_changed(int)'))
+        super().__init__(fact, SIGNAL('x_changed(int)'))
         self.fact = fact
     def eventTest(self, e):
         if not super(FactorialLoopTransition, self).eventTest(e):
@@ -82,7 +82,7 @@ class FactorialLoopTransition(QSignalTransition):
 
 class FactorialDoneTransition(QSignalTransition):
     def __init__(self, fact):
-        super(FactorialDoneTransition, self).__init__(fact, SIGNAL('x_changed(int)'))
+        super().__init__(fact, SIGNAL('x_changed(int)'))
         self.fact = fact
     def eventTest(self, e):
         if not super(FactorialDoneTransition, self).eventTest(e):

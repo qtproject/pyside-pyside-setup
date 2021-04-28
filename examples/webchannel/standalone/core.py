@@ -49,7 +49,7 @@ class Core(QObject):
     sendText = Signal(str)
 
     def __init__(self, dialog, parent=None):
-        super(Core, self).__init__(parent)
+        super().__init__(parent)
         self._dialog = dialog
         self._dialog.sendText.connect(self._emit_send_text)
 

@@ -58,7 +58,7 @@ FUNCTION_PATTERN = r'^\w+\([\w ,]*\)$'
 class ValidatingInputDialog(QDialog):
     """A dialog for text input with a regular expression validation."""
     def __init__(self, label, pattern, parent=None):
-        super(ValidatingInputDialog, self).__init__(parent)
+        super().__init__(parent)
         layout = QVBoxLayout(self)
 
         self._form_layout = QFormLayout()
@@ -111,8 +111,7 @@ class ValidatingInputDialog(QDialog):
 class FunctionSignatureDialog(ValidatingInputDialog):
     """A dialog for input of function signatures."""
     def __init__(self, name, parent=None):
-        super(FunctionSignatureDialog, self).__init__(name, FUNCTION_PATTERN,
-                                                      parent)
+        super().__init__(name, FUNCTION_PATTERN, parent)
         self.text = '()'
         self.cursor_position = 0
 
@@ -120,7 +119,7 @@ class FunctionSignatureDialog(ValidatingInputDialog):
 class PropertyDialog(ValidatingInputDialog):
     """A dialog for input of a property name and type."""
     def __init__(self, parent=None):
-        super(PropertyDialog, self).__init__('&Name:', r'^\w+$', parent)
+        super().__init__('&Name:', r'^\w+$', parent)
         self.setWindowTitle('Add a Property')
         self._type_combo = QComboBox()
         self._type_combo.addItems(DEFAULT_TYPES)
@@ -134,7 +133,7 @@ class ListChooser(QGroupBox):
     """A widget for editing a list of strings with a customization point
        for creating the strings."""
     def __init__(self, title, parent=None):
-        super(ListChooser, self).__init__(title, parent)
+        super().__init__(title, parent)
         main_layout = QHBoxLayout(self)
         self._list = QListWidget(self)
         self._list.currentItemChanged.connect(self._current_item_changed)
@@ -188,7 +187,7 @@ class ListChooser(QGroupBox):
 class SignalChooser(ListChooser):
     """A widget for editing a list of signal function signatures."""
     def __init__(self, parent=None):
-        super(SignalChooser, self).__init__('Signals', parent)
+        super().__init__('Signals', parent)
 
     def _create_new_item(self):
         dialog = FunctionSignatureDialog('&Signal signature:', self)
@@ -201,7 +200,7 @@ class SignalChooser(ListChooser):
 class PropertyChooser(ListChooser):
     """A widget for editing a list of properties as a string of 'type name'."""
     def __init__(self, parent=None):
-        super(PropertyChooser, self).__init__('Properties', parent)
+        super().__init__('Properties', parent)
 
     def _create_new_item(self):
         dialog = PropertyDialog(self)

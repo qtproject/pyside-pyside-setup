@@ -54,7 +54,7 @@ class WebSocketTransport(QWebChannelAbstractTransport):
     def __init__(self, socket):
         """Construct the transport object and wrap the given socket.
            The socket is also set as the parent of the transport object."""
-        super(WebSocketTransport, self).__init__(socket)
+        super().__init__(socket)
         self._socket = socket
         self._socket.textMessageReceived.connect(self.textMessageReceived)
         self._socket.disconnected.connect(self._disconnected)

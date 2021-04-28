@@ -65,7 +65,7 @@ shows how to use QPainter to print an image.</p>
 
 class ImageViewer(QMainWindow):
     def __init__(self, parent=None):
-        super(ImageViewer, self).__init__(parent)
+        super().__init__(parent)
         self._scale_factor = 1.0
         self._first_file_dialog = True
         self._image_label = QLabel()

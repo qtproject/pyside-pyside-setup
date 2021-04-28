@@ -118,7 +118,7 @@ def print_surface_format(surface_format):
 
 class RenderWindow(QWindow):
     def __init__(self, format):
-        super(RenderWindow, self).__init__()
+        super().__init__()
         self.setSurfaceType(QWindow.OpenGLSurface)
         self.setFormat(format)
         self.context = QOpenGLContext(self)
@@ -249,7 +249,7 @@ class RenderWindow(QWindow):
 
 class MainWindow(QWidget):
     def __init__(self):
-        super(MainWindow, self).__init__()
+        super().__init__()
         h_box_layout = QHBoxLayout(self)
         self._plain_text_edit = QPlainTextEdit()
         self._plain_text_edit.setMinimumWidth(400)

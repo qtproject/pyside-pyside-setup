@@ -63,7 +63,7 @@ class RenderArea(QWidget):
             Pie, Path, Text, Pixmap = range(13)
 
     def __init__(self, parent=None):
-        super(RenderArea, self).__init__(parent)
+        super().__init__(parent)
 
         self.pen = QPen()
         self.brush = QBrush()
@@ -170,7 +170,7 @@ id_role = Qt.UserRole
 
 class Window(QWidget):
     def __init__(self):
-        super(Window, self).__init__()
+        super().__init__()
 
         self._render_area = RenderArea()
 

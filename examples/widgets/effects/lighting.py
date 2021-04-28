@@ -53,7 +53,7 @@ from PySide6.QtWidgets import (QApplication, QFrame, QGraphicsDropShadowEffect,
 
 class Lighting(QGraphicsView):
     def __init__(self, parent=None):
-        super(Lighting, self).__init__(parent)
+        super().__init__(parent)
 
         self.angle = 0.0
         self.m_scene = QGraphicsScene()

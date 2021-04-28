@@ -57,7 +57,7 @@ class FortuneThread(QThread):
     error = Signal(int, str)
 
     def __init__(self, parent=None):
-        super(FortuneThread, self).__init__(parent)
+        super().__init__(parent)
 
         self.quit = False
         self._host_name = ''
@@ -123,7 +123,7 @@ class FortuneThread(QThread):
 
 class BlockingClient(QWidget):
     def __init__(self, parent=None):
-        super(BlockingClient, self).__init__(parent)
+        super().__init__(parent)
 
         self.thread = FortuneThread()
         self._current_fortune = ''

@@ -65,7 +65,7 @@ class Piece(IntEnum):
 
 class TetrixWindow(QWidget):
     def __init__(self):
-        super(TetrixWindow, self).__init__()
+        super().__init__()
 
         self.board = TetrixBoard()
 
@@ -129,7 +129,7 @@ class TetrixBoard(QFrame):
     lines_removed_changed = Signal(int)
 
     def __init__(self, parent=None):
-        super(TetrixBoard, self).__init__(parent)
+        super().__init__(parent)
 
         self.timer = QBasicTimer()
         self.nextPieceLabel = None

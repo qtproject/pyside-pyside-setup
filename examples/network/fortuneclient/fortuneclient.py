@@ -54,7 +54,7 @@ from PySide6.QtWidgets import (QApplication, QDialog, QDialogButtonBox, QGridLay
 
 class Client(QDialog):
     def __init__(self, parent=None):
-        super(Client, self).__init__(parent)
+        super().__init__(parent)
 
         self._block_size = 0
         self._current_fortune = ''

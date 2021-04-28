@@ -56,7 +56,7 @@ class Pixmap(QGraphicsWidget):
     clicked = Signal()
 
     def __init__(self, pix, parent=None):
-        super(Pixmap, self).__init__(parent)
+        super().__init__(parent)
 
         self.orig = QPixmap(pix)
         self.p = QPixmap(pix)

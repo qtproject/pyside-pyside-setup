@@ -47,14 +47,14 @@ from PySide6.QtStateMachine import QAbstractTransition, QState, QStateMachine
 
 class PingEvent(QEvent):
     def __init__(self):
-        super(PingEvent, self).__init__(QEvent.Type(QEvent.User+2))
+        super().__init__(QEvent.Type(QEvent.User+2))
 class PongEvent(QEvent):
     def __init__(self):
-        super(PongEvent, self).__init__(QEvent.Type(QEvent.User+3))
+        super().__init__(QEvent.Type(QEvent.User+3))
 
 class Pinger(QState):
     def __init__(self, parent):
-        super(Pinger, self).__init__(parent)
+        super().__init__(parent)
     def onEntry(self, e):
         self.p = PingEvent()
         self.machine().postEvent(self.p)

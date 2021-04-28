@@ -50,7 +50,7 @@ from PySide6.QtWidgets import (QApplication, QGridLayout,
 
 class AddressBook(QWidget):
     def __init__(self, parent=None):
-        super(AddressBook, self).__init__(parent)
+        super().__init__(parent)
 
         name_label = QLabel("Name:")
         self._name_line = QLineEdit()

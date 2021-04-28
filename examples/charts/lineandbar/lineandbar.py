@@ -51,7 +51,7 @@ from PySide6.QtCharts import (QBarCategoryAxis, QBarSeries, QBarSet, QChart,
 
 class TestChart(QMainWindow):
     def __init__(self):
-        QMainWindow.__init__(self)
+        super().__init__()
 
         self.set0 = QBarSet("Jane")
         self.set1 = QBarSet("John")

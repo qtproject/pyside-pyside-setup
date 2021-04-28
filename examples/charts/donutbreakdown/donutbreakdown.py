@@ -49,7 +49,7 @@ from PySide6.QtCharts import QChart, QChartView, QPieSeries, QPieSlice
 
 class MainSlice(QPieSlice):
     def __init__(self, breakdown_series, parent=None):
-        super(MainSlice, self).__init__(parent)
+        super().__init__(parent)
 
         self.breakdown_series = breakdown_series
         self.name = None
@@ -72,7 +72,7 @@ class MainSlice(QPieSlice):
 
 class DonutBreakdownChart(QChart):
     def __init__(self, parent=None):
-        super(DonutBreakdownChart, self).__init__(QChart.ChartTypeCartesian,
+        super().__init__(QChart.ChartTypeCartesian,
                                                   parent, Qt.WindowFlags())
         self.main_series = QPieSeries()
         self.main_series.setPieSize(0.7)

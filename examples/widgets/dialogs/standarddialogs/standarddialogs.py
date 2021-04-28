@@ -57,7 +57,7 @@ class DialogOptionsWidget(QGroupBox):
     """Widget displaying a number of check boxes representing the dialog
        options."""
     def __init__(self, parent=None):
-        super(DialogOptionsWidget, self).__init__(parent)
+        super().__init__(parent)
         self._layout = QVBoxLayout(self)
         self._mapping = {}
 
@@ -81,7 +81,7 @@ class Dialog(QDialog):
             "button will activate the detected escape button (if any).</p>"
 
     def __init__(self, parent=None):
-        super(Dialog, self).__init__(parent)
+        super().__init__(parent)
 
         self._open_files_path = ''
 

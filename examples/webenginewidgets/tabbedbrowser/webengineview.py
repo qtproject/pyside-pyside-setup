@@ -66,7 +66,7 @@ class WebEngineView(QWebEngineView):
         return 5
 
     def __init__(self, tab_factory_func, window_factory_func):
-        super(WebEngineView, self).__init__()
+        super().__init__()
         self._tab_factory_func = tab_factory_func
         self._window_factory_func = window_factory_func
         page = self.page()

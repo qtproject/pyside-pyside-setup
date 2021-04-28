@@ -137,7 +137,7 @@ class BookmarkWidget(QTreeView):
     changed = QtCore.Signal()
 
     def __init__(self):
-        super(BookmarkWidget, self).__init__()
+        super().__init__()
         self.setRootIsDecorated(False)
         self.setUniformRowHeights(True)
         self.setHeaderHidden(True)

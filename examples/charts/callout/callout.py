@@ -154,7 +154,7 @@ class Callout(QGraphicsItem):
 
 class View(QGraphicsView):
     def __init__(self, parent = None):
-        super(View, self).__init__(parent)
+        super().__init__(parent)
         self.setScene(QGraphicsScene(self))
 
         self.setDragMode(QGraphicsView.NoDrag)

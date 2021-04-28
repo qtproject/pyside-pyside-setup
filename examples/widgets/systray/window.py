@@ -51,7 +51,7 @@ import rc_systray
 
 class Window(QDialog):
     def __init__(self, parent=None):
-        super(Window, self).__init__(parent)
+        super().__init__(parent)
 
         self._icon_group_box = QGroupBox()
         self._icon_label = QLabel()

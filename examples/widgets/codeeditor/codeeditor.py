@@ -57,7 +57,7 @@ class LineNumberArea(QWidget):
 
 class CodeEditor(QPlainTextEdit):
     def __init__(self):
-        QPlainTextEdit.__init__(self)
+        super().__init__()
         self.line_number_area = LineNumberArea(self)
 
         self.blockCountChanged[int].connect(self.update_line_number_area_width)

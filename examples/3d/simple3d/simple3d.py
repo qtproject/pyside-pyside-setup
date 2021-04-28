@@ -49,7 +49,7 @@ from PySide6.Qt3DExtras import (Qt3DExtras)
 
 class OrbitTransformController(QObject):
     def __init__(self, parent):
-        super(OrbitTransformController, self).__init__(parent)
+        super().__init__(parent)
         self._target = None
         self._matrix = QMatrix4x4()
         self._radius = 1
@@ -93,7 +93,7 @@ class OrbitTransformController(QObject):
 
 class Window(Qt3DExtras.Qt3DWindow):
     def __init__(self):
-        super(Window, self).__init__()
+        super().__init__()
 
         # Camera
         self.camera().lens().setPerspectiveProjection(45, 16 / 9, 0.1, 1000)

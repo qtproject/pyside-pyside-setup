@@ -58,7 +58,7 @@ def data_to_bar_data_array(data):
 class MainWindow(QMainWindow):
 
     def __init__(self):
-        super(MainWindow, self).__init__()
+        super().__init__()
 
         self.setWindowTitle('Qt DataVisualization 3D Bars')
 

@@ -50,7 +50,7 @@ from PySide6.QtRemoteObjects import QRemoteObjectHost, QRemoteObjectRegistryHost
 
 class TimerHandler(QObject):
     def __init__(self, model):
-        super(TimerHandler, self).__init__()
+        super().__init__()
         self._model = model
 
     def change_data(self):

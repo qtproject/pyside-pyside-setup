@@ -147,7 +147,7 @@ class WidgetGallery(QDialog):
     """Dialog displaying a gallery of Qt Widgets"""
 
     def __init__(self):
-        super(WidgetGallery, self).__init__()
+        super().__init__()
 
         self.setWindowIcon(QIcon(':/qt-project.org/logos/pysidelogo.png'))
         self._progress_bar = self.create_progress_bar()

@@ -50,7 +50,7 @@ from PySide6.QtWidgets import (QApplication, QDialog, QLayout, QGridLayout,
 
 class Dialog(QDialog):
     def __init__(self):
-        super(Dialog, self).__init__()
+        super().__init__()
 
         self._rotable_widgets = []
 

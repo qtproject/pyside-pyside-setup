@@ -49,7 +49,7 @@ from PySide6.QtCharts import QBarSeries, QBarSet, QChart, QChartView
 
 class MainWidget(QWidget):
     def __init__(self, parent=None):
-        super(MainWidget, self).__init__(parent)
+        super().__init__(parent)
         self.chart = QChart()
         self.series = QBarSeries()
 

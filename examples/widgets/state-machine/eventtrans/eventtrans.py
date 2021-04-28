@@ -47,7 +47,7 @@ from PySide6.QtStateMachine import QEventTransition, QState, QStateMachine
 
 class MainWindow(QMainWindow):
     def __init__(self):
-        super(MainWindow, self).__init__()
+        super().__init__()
         button = QPushButton(self)
         button.setGeometry(QRect(100, 100, 100, 100))
 

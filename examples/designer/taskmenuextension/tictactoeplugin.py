@@ -77,7 +77,7 @@ DOM_XML = """
 
 class TicTacToePlugin(QDesignerCustomWidgetInterface):
     def __init__(self):
-        super(TicTacToePlugin, self).__init__()
+        super().__init__()
         self._form_editor = None
 
     def createWidget(self, parent):

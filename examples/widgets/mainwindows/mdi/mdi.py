@@ -59,7 +59,7 @@ class MdiChild(QTextEdit):
     sequence_number = 1
 
     def __init__(self):
-        super(MdiChild, self).__init__()
+        super().__init__()
 
         self.setAttribute(Qt.WA_DeleteOnClose)
         self._is_untitled = True
@@ -169,7 +169,7 @@ class MdiChild(QTextEdit):
 
 class MainWindow(QMainWindow):
     def __init__(self):
-        super(MainWindow, self).__init__()
+        super().__init__()
 
         self._mdi_area = QMdiArea()
         self._mdi_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)

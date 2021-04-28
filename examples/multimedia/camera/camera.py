@@ -52,7 +52,7 @@ from PySide6.QtMultimediaWidgets import QCameraViewfinder
 
 class ImageView(QWidget):
     def __init__(self, previewImage, fileName):
-        super(ImageView, self).__init__()
+        super().__init__()
 
         self.fileName = fileName
 
@@ -85,7 +85,7 @@ class ImageView(QWidget):
 
 class MainWindow(QMainWindow):
     def __init__(self):
-        super(MainWindow, self).__init__()
+        super().__init__()
 
         self.cameraInfo = QCameraInfo.defaultCamera()
         self.camera = QCamera(self.cameraInfo)

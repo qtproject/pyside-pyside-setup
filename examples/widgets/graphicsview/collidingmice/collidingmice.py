@@ -67,7 +67,7 @@ class Mouse(QGraphicsItem):
             83 + adjust)
 
     def __init__(self):
-        super(Mouse, self).__init__()
+        super().__init__()
 
         self.angle = 0.0
         self.speed = 0.0

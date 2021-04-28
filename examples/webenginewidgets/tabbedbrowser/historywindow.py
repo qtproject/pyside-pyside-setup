@@ -46,7 +46,7 @@ from PySide6.QtCore import Signal, QAbstractTableModel, QModelIndex, Qt, QUrl
 class HistoryModel(QAbstractTableModel):
 
     def __init__(self, history, parent=None):
-        super(HistoryModel, self).__init__(parent)
+        super().__init__(parent)
         self._history = history
 
     def headerData(self, section, orientation, role=Qt.DisplayRole):
@@ -80,7 +80,7 @@ class HistoryWindow(QTreeView):
     open_url = Signal(QUrl)
 
     def __init__(self, history, parent):
-        super(HistoryWindow, self).__init__(parent)
+        super().__init__(parent)
 
         self._model = HistoryModel(history, self)
         self.setModel(self._model)

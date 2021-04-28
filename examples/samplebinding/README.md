@@ -94,7 +94,7 @@ And actual C++ constructors are mapped to the Python `__init__` method.
 ```
 class VanillaChocolateIcecream(Icecream):
     def __init__(self, flavor=""):
-        super(VanillaChocolateIcecream, self).__init__(flavor)
+        super().__init__(flavor)
 ```
 
 

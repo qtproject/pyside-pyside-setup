@@ -53,7 +53,7 @@ class NewAddressTab(QWidget):
     send_details = Signal(str, str)
 
     def __init__(self, parent=None):
-        super(NewAddressTab, self).__init__(parent)
+        super().__init__(parent)
 
         description_label = QLabel("There are no contacts in your address book."
                                    "\nClick Add to add new contacts.")

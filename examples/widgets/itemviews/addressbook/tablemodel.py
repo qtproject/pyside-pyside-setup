@@ -45,7 +45,7 @@ from PySide6.QtCore import (Qt, QAbstractTableModel, QModelIndex)
 class TableModel(QAbstractTableModel):
 
     def __init__(self, addresses=None, parent=None):
-        super(TableModel, self).__init__(parent)
+        super().__init__(parent)
 
         if addresses is None:
             self.addresses = []

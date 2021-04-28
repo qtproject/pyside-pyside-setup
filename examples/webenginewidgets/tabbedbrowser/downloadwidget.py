@@ -53,7 +53,7 @@ class DownloadWidget(QProgressBar):
     remove_requested = QtCore.Signal()
 
     def __init__(self, download_item):
-        super(DownloadWidget, self).__init__()
+        super().__init__()
         self._download_item = download_item
         download_item.finished.connect(self._finished)
         download_item.downloadProgress.connect(self._download_progress)

@@ -60,7 +60,7 @@ import animatedtiles_rc
 # composition and delegate the property.
 class Pixmap(QObject):
     def __init__(self, pix):
-        super(Pixmap, self).__init__()
+        super().__init__()
 
         self.pixmap_item = QGraphicsPixmapItem(pix)
         self.pixmap_item.setCacheMode(QGraphicsItem.DeviceCoordinateCache)
@@ -78,7 +78,7 @@ class Button(QGraphicsWidget):
     pressed = Signal()
 
     def __init__(self, pixmap, parent=None):
-        super(Button, self).__init__(parent)
+        super().__init__(parent)
 
         self._pix = pixmap
 

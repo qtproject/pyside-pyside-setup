@@ -49,7 +49,7 @@ from PySide6.QtStateMachine import (QEventTransition, QFinalState,
 
 class MovementTransition(QEventTransition):
     def __init__(self, window):
-        super(MovementTransition, self).__init__(window, QEvent.KeyPress)
+        super().__init__(window, QEvent.KeyPress)
         self.window = window
     def eventTest(self, event):
         if event.type() == QEvent.StateMachineWrapped and \
@@ -71,7 +71,7 @@ class MovementTransition(QEventTransition):
 
 class Custom(QState):
     def __init__(self, parent, mw):
-        super(Custom, self).__init__(parent)
+        super().__init__(parent)
         self.mw = mw
 
     def onEntry(self, e):
@@ -79,7 +79,7 @@ class Custom(QState):
 
 class MainWindow(QMainWindow):
     def __init__(self):
-        super(MainWindow, self).__init__()
+        super().__init__()
         self.pX = 5
         self.pY = 5
         self.width = 35

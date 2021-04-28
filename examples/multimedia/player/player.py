@@ -52,7 +52,7 @@ from PySide6.QtMultimediaWidgets import QVideoWidget
 class MainWindow(QMainWindow):
 
     def __init__(self):
-        super(MainWindow, self).__init__()
+        super().__init__()
 
         self.playlist = QMediaPlaylist()
         self.player = QMediaPlayer()

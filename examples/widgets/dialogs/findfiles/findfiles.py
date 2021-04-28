@@ -56,7 +56,7 @@ from PySide6.QtWidgets import (QAbstractItemView, QApplication, QComboBox,
 
 class Window(QDialog):
     def __init__(self, parent=None):
-        super(Window, self).__init__(parent)
+        super().__init__(parent)
 
         self._browse_button = self.create_button("&Browse...", self.browse)
         self._find_button = self.create_button("&Find", self.find)

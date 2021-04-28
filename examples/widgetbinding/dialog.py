@@ -59,7 +59,7 @@ from wigglywidget import WigglyWidget as WigglyWidgetPY
 
 class Dialog(QDialog):
     def __init__(self, parent=None):
-        super(Dialog, self).__init__(parent)
+        super().__init__(parent)
         wiggly_widget_py = WigglyWidgetPY(self)
         wiggly_widget_cpp = WigglyWidgetCPP(self)
         lineEdit = QLineEdit(self)

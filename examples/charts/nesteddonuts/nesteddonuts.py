@@ -54,7 +54,7 @@ from functools import partial
 
 class Widget(QWidget):
     def __init__(self):
-        QWidget.__init__(self)
+        super().__init__()
         self.setMinimumSize(800, 600)
         self.donuts = []
         self.chart_view = QChartView()

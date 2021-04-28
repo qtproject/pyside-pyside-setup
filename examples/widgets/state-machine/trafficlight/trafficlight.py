@@ -48,7 +48,7 @@ from PySide6.QtStateMachine import QFinalState, QState, QStateMachine
 
 class LightWidget(QWidget):
     def __init__(self, color):
-        super(LightWidget, self).__init__()
+        super().__init__()
         self.color = color
         self._on_val = False
     def is_on(self):
@@ -76,7 +76,7 @@ class LightWidget(QWidget):
 
 class TrafficLightWidget(QWidget):
     def __init__(self):
-        super(TrafficLightWidget, self).__init__()
+        super().__init__()
         vbox = QVBoxLayout(self)
         self._red_light = LightWidget(Qt.red)
         vbox.addWidget(self._red_light)
@@ -105,7 +105,7 @@ def create_light_state(light, duration, parent=None):
 
 class TrafficLight(QWidget):
     def __init__(self):
-        super(TrafficLight, self).__init__()
+        super().__init__()
         vbox = QVBoxLayout(self)
         widget = TrafficLightWidget()
         vbox.addWidget(widget)

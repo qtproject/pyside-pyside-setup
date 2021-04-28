@@ -52,7 +52,7 @@ class BookWindow(QMainWindow, Ui_BookWindow):
     """A window to show the books available"""
 
     def __init__(self):
-        QMainWindow.__init__(self)
+        super().__init__()
         self.setupUi(self)
 
         #Initialize db

@@ -57,7 +57,7 @@ class BrowserTabWidget(QTabWidget):
     download_requested = QtCore.Signal(QWebEngineDownloadItem)
 
     def __init__(self, window_factory_function):
-        super(BrowserTabWidget, self).__init__()
+        super().__init__()
         self.setTabsClosable(True)
         self._window_factory_function = window_factory_function
         self._webengineviews = []

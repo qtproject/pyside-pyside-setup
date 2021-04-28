@@ -53,7 +53,7 @@ from PySide6.QtWidgets import (QApplication, QCheckBox, QDialog,
 
 class FindDialog(QDialog):
     def __init__(self, parent=None):
-        super(FindDialog, self).__init__(parent)
+        super().__init__(parent)
 
         label = QLabel("Find &what:")
         line_edit = QLineEdit()

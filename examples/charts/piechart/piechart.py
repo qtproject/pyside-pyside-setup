@@ -50,7 +50,7 @@ from PySide6.QtCharts import QChart, QChartView, QPieSeries
 class TestChart(QMainWindow):
 
     def __init__(self):
-        QMainWindow.__init__(self)
+        super().__init__()
 
         self.series = QPieSeries()
 

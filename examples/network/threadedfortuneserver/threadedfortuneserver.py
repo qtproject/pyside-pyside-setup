@@ -56,7 +56,7 @@ class FortuneThread(QThread):
     error = Signal(QTcpSocket.SocketError)
 
     def __init__(self, socketDescriptor, fortune, parent):
-        super(FortuneThread, self).__init__(parent)
+        super().__init__(parent)
 
         self._socket_descriptor = socketDescriptor
         self.text = fortune
@@ -100,7 +100,7 @@ class FortuneServer(QTcpServer):
 
 class Dialog(QDialog):
     def __init__(self, parent=None):
-        super(Dialog, self).__init__(parent)
+        super().__init__(parent)
 
         self.server = FortuneServer()
 

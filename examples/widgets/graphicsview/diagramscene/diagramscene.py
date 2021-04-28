@@ -61,7 +61,7 @@ import diagramscene_rc
 
 class Arrow(QGraphicsLineItem):
     def __init__(self, startItem, endItem, parent=None, scene=None):
-        super(Arrow, self).__init__(parent, scene)
+        super().__init__(parent, scene)
 
         self._arrow_head = QPolygonF()
 
@@ -160,7 +160,7 @@ class DiagramTextItem(QGraphicsTextItem):
     selected_change = Signal(QGraphicsItem)
 
     def __init__(self, parent=None, scene=None):
-        super(DiagramTextItem, self).__init__(parent, scene)
+        super().__init__(parent, scene)
 
         self.setFlag(QGraphicsItem.ItemIsMovable)
         self.setFlag(QGraphicsItem.ItemIsSelectable)
@@ -185,7 +185,7 @@ class DiagramItem(QGraphicsPolygonItem):
     Step, Conditional, StartEnd, Io = range(4)
 
     def __init__(self, diagram_type, contextMenu, parent=None, scene=None):
-        super(DiagramItem, self).__init__(parent, scene)
+        super().__init__(parent, scene)
 
         self.arrows = []
 
@@ -268,7 +268,7 @@ class DiagramScene(QGraphicsScene):
     item_selected = Signal(QGraphicsItem)
 
     def __init__(self, itemMenu, parent=None):
-        super(DiagramScene, self).__init__(parent)
+        super().__init__(parent)
 
         self._my_item_menu = itemMenu
         self._my_mode = self.MoveItem
@@ -396,7 +396,7 @@ class MainWindow(QMainWindow):
     insert_text_button = 10
 
     def __init__(self):
-        super(MainWindow, self).__init__()
+        super().__init__()
 
         self.create_actions()
         self.create_menus()

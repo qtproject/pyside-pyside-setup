@@ -49,7 +49,7 @@ class Dialog(QDialog):
     sendText = Signal(str)
 
     def __init__(self, parent=None):
-        super(Dialog, self).__init__(parent)
+        super().__init__(parent)
         self._ui = Ui_Dialog()
         self._ui.setupUi(self)
         self._ui.send.clicked.connect(self.clicked)

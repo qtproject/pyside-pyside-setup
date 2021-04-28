@@ -52,7 +52,7 @@ class StarDelegate(QStyledItemDelegate):
     """
 
     def __init__(self, parent=None):
-        super(StarDelegate, self).__init__(parent)
+        super().__init__(parent)
 
     def paint(self, painter, option, index):
         """ Paint the items in the table.

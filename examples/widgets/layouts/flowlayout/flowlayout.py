@@ -50,7 +50,7 @@ from PySide6.QtWidgets import (QApplication, QLayout, QPushButton,
 
 class Window(QWidget):
     def __init__(self):
-        super(Window, self).__init__()
+        super().__init__()
 
         flow_layout = FlowLayout(self)
         flow_layout.addWidget(QPushButton("Short"))
@@ -64,7 +64,7 @@ class Window(QWidget):
 
 class FlowLayout(QLayout):
     def __init__(self, parent=None):
-        super(FlowLayout, self).__init__(parent)
+        super().__init__(parent)
 
         if parent is not None:
             self.setContentsMargins(QMargins(0, 0, 0, 0))

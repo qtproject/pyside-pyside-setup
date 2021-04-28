@@ -51,7 +51,7 @@ DEFAULT_STATE = "---------"
 
 class TicTacToe(QWidget):
     def __init__(self, parent=None):
-        super(TicTacToe, self).__init__(parent)
+        super().__init__(parent)
         self._state = DEFAULT_STATE
         self._turn_number = 0
 

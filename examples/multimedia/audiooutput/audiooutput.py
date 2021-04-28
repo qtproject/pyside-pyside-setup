@@ -55,7 +55,7 @@ from PySide6.QtWidgets import (QApplication, QComboBox, QHBoxLayout, QLabel,
 class Generator(QIODevice):
 
     def __init__(self, format, durationUs, sampleRate, parent):
-        super(Generator, self).__init__(parent)
+        super().__init__(parent)
 
         self.m_pos = 0
         self.m_buffer = QByteArray()
@@ -139,7 +139,7 @@ class AudioTest(QMainWindow):
     DataSampleRateHz = 44100
 
     def __init__(self):
-        super(AudioTest, self).__init__()
+        super().__init__()
 
         self.m_device = QAudioDeviceInfo.defaultOutputDevice()
         self.m_output = None

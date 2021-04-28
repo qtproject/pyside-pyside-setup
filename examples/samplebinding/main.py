@@ -45,7 +45,7 @@ from Universe import Icecream, Truck
 
 class VanillaChocolateIcecream(Icecream):
     def __init__(self, flavor=""):
-        super(VanillaChocolateIcecream, self).__init__(flavor)
+        super().__init__(flavor)
 
     def clone(self):
         return VanillaChocolateIcecream(self.getFlavor())
@@ -55,7 +55,7 @@ class VanillaChocolateIcecream(Icecream):
 
 class VanillaChocolateCherryIcecream(VanillaChocolateIcecream):
     def __init__(self, flavor=""):
-        super(VanillaChocolateIcecream, self).__init__(flavor)
+        super().__init__(flavor)
 
     def clone(self):
         return VanillaChocolateCherryIcecream(self.getFlavor())

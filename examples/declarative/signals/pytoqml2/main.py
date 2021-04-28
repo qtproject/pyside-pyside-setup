@@ -51,7 +51,7 @@ class RotateValue(QObject):
     valueChanged = Signal(int, arguments=['val'])
 
     def __init__(self):
-        super(RotateValue, self).__init__()
+        super().__init__()
         self.r = 0
 
     @Slot()

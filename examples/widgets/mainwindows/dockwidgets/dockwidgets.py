@@ -56,7 +56,7 @@ import dockwidgets_rc
 
 class MainWindow(QMainWindow):
     def __init__(self):
-        super(MainWindow, self).__init__()
+        super().__init__()
 
         self._text_edit = QTextEdit()
         self.setCentralWidget(self._text_edit)

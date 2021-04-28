@@ -51,7 +51,7 @@ class FindToolBar(QToolBar):
     find = QtCore.Signal(str, QWebEnginePage.FindFlags)
 
     def __init__(self):
-        super(FindToolBar, self).__init__()
+        super().__init__()
         self._line_edit = QLineEdit()
         self._line_edit.setClearButtonEnabled(True)
         self._line_edit.setPlaceholderText("Find...")

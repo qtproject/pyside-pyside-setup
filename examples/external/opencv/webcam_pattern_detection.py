@@ -103,7 +103,7 @@ class Thread(QThread):
 
 class Window(QMainWindow):
     def __init__(self):
-        QMainWindow.__init__(self)
+        super().__init__()
         # Title and dimensions
         self.setWindowTitle("Patterns detection")
         self.setGeometry(0, 0, 800, 500)

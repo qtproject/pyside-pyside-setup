@@ -52,7 +52,7 @@ from PySide6.QtXml import QDomDocument
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
-        super(MainWindow, self).__init__(parent)
+        super().__init__(parent)
 
         self._xbel_tree = XbelTree()
         self.setCentralWidget(self._xbel_tree)
@@ -136,7 +136,7 @@ class MainWindow(QMainWindow):
 
 class XbelTree(QTreeWidget):
     def __init__(self, parent=None):
-        super(XbelTree, self).__init__(parent)
+        super().__init__(parent)
 
         self.header().setSectionResizeMode(QHeaderView.Stretch)
         self.setHeaderLabels(("Title", "Location"))

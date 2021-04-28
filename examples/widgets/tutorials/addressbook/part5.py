@@ -83,7 +83,7 @@ class AddressBook(QWidget):
     NavigationMode, AddingMode, EditingMode = range(3)
 
     def __init__(self, parent=None):
-        super(AddressBook, self).__init__(parent)
+        super().__init__(parent)
 
         self.contacts = SortedDict()
         self._old_name = ''
@@ -320,7 +320,7 @@ class AddressBook(QWidget):
 
 class FindDialog(QDialog):
     def __init__(self, parent=None):
-        super(FindDialog, self).__init__(parent)
+        super().__init__(parent)
 
         find_label = QLabel("Enter the name of a contact:")
         self._line_edit = QLineEdit()

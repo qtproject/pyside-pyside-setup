@@ -80,7 +80,7 @@ class SortedDict(dict):
 
 class AddressBook(QWidget):
     def __init__(self, parent=None):
-        super(AddressBook, self).__init__(parent)
+        super().__init__(parent)
 
         self.contacts = SortedDict()
         self._old_name = ''

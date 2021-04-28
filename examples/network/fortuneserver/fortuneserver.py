@@ -54,7 +54,7 @@ from PySide6.QtWidgets import (QApplication, QDialog, QHBoxLayout,
 
 class Server(QDialog):
     def __init__(self, parent=None):
-        super(Server, self).__init__(parent)
+        super().__init__(parent)
 
         status_label = QLabel()
         status_label.setTextInteractionFlags(Qt.TextBrowserInteraction)

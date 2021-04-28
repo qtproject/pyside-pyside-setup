@@ -167,7 +167,7 @@ class TypeChecker:
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
-        super(MainWindow, self).__init__(parent)
+        super().__init__(parent)
 
         self.settings_tree = SettingsTree()
         self.setCentralWidget(self.settings_tree)
@@ -320,7 +320,7 @@ class MainWindow(QMainWindow):
 
 class LocationDialog(QDialog):
     def __init__(self, parent=None):
-        super(LocationDialog, self).__init__(parent)
+        super().__init__(parent)
 
         self.format_combo = QComboBox()
         self.format_combo.addItem("Native")
@@ -472,7 +472,7 @@ class LocationDialog(QDialog):
 
 class SettingsTree(QTreeWidget):
     def __init__(self, parent=None):
-        super(SettingsTree, self).__init__(parent)
+        super().__init__(parent)
 
         self._type_checker = TypeChecker()
         self.setItemDelegate(VariantDelegate(self._type_checker, self))
@@ -666,7 +666,7 @@ class SettingsTree(QTreeWidget):
 
 class VariantDelegate(QItemDelegate):
     def __init__(self, type_checker, parent=None):
-        super(VariantDelegate, self).__init__(parent)
+        super().__init__(parent)
         self._type_checker = type_checker
 
     def paint(self, painter, option, index):
