@@ -51,7 +51,7 @@ class SignalManagerRefCount(unittest.TestCase):
             pass
         obj = QObject()
         refcount = getrefcount(obj)
-        QObject.connect(obj, SIGNAL('destroyed()'), callback)
+        obj.destroyed.connect(callback)
         self.assertEqual(refcount, getrefcount(obj))
         QObject.disconnect(obj, SIGNAL('destroyed()'), callback)
         self.assertEqual(refcount, getrefcount(obj))

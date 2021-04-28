@@ -50,7 +50,7 @@ class QObjectDestroyed(unittest.TestCase):
     def testDestroyed(self):
         """Emission of QObject.destroyed() to a python slot"""
         obj = QObject()
-        QObject.connect(obj, SIGNAL('destroyed()'), self.destroyed_cb)
+        obj.destroyed.connect(self.destroyed_cb)
         del obj
         self.assertTrue(self.called)
 

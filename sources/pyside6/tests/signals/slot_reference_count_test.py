@@ -81,7 +81,7 @@ class CppSignalRefCount(unittest.TestCase):
 
         self.assertEqual(getrefcount(cb), 2)
 
-        QObject.connect(self.emitter, SIGNAL('destroyed()'), cb)
+        self.emitter.destroyed.connect(cb)
         self.assertEqual(getrefcount(cb), 3)
 
         QObject.disconnect(self.emitter, SIGNAL('destroyed()'), cb)

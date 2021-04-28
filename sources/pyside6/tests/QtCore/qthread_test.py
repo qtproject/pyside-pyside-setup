@@ -90,7 +90,7 @@ class QThreadSimpleCase(UsesQCoreApplication):
     def testSignalFinished(self):
         # QThread.finished() (signal)
         obj = Dummy()
-        QObject.connect(obj, SIGNAL('finished()'), self.cb)
+        obj.finished.connect(self.cb)
         mutex.lock()
         obj.start()
         mutex.unlock()
@@ -104,7 +104,7 @@ class QThreadSimpleCase(UsesQCoreApplication):
     def testSignalStarted(self):
         # QThread.started() (signal)
         obj = Dummy()
-        QObject.connect(obj, SIGNAL('started()'), self.cb)
+        obj.started.connect(self.cb)
         obj.start()
 
         self._thread = obj

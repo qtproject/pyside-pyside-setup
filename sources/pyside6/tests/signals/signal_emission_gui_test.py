@@ -57,7 +57,7 @@ if hasQtGui:
         def testButtonClicked(self):
             """Connection of a python slot to QPushButton.clicked()"""
             button = QPushButton('Mylabel')
-            QObject.connect(button, SIGNAL('clicked()'), self.cb)
+            button.clicked.connect(self.cb)
             self.args = tuple()
             button.emit(SIGNAL('clicked(bool)'), False)
             self.assertTrue(self.called)
@@ -65,7 +65,7 @@ if hasQtGui:
         def testButtonClick(self):
             """Indirect qt signal emission using the QPushButton.click() method """
             button = QPushButton('label')
-            QObject.connect(button, SIGNAL('clicked()'), self.cb)
+            button.clicked.connect(self.cb)
             self.args = tuple()
             button.click()
             self.assertTrue(self.called)
@@ -85,14 +85,14 @@ if hasQtGui:
 
         def testSpinBoxValueChanged(self):
             """Connection of a python slot to QSpinBox.valueChanged(int)"""
-            QObject.connect(self.spin, SIGNAL('valueChanged(int)'), self.cb)
+            self.spin.valueChanged.connect(self.cb)
             self.args = [3]
             self.spin.emit(SIGNAL('valueChanged(int)'), *self.args)
             self.assertTrue(self.called)
 
         def testSpinBoxValueChangedImplicit(self):
             """Indirect qt signal emission using QSpinBox.setValue(int)"""
-            QObject.connect(self.spin, SIGNAL('valueChanged(int)'), self.cb)
+            self.spin.valueChanged.connect(self.cb)
             self.args = [42]
             self.spin.setValue(self.args[0])
             self.assertTrue(self.called)
@@ -100,7 +100,7 @@ if hasQtGui:
         def atestSpinBoxValueChangedFewArgs(self):
             """Emission of signals with fewer arguments than needed"""
             # XXX: PyQt4 crashes on the assertRaises
-            QObject.connect(self.spin, SIGNAL('valueChanged(int)'), self.cb)
+            self.spin.valueChanged.connect(self.cb)
             self.args = (554,)
             self.assertRaises(TypeError, self.spin.emit, SIGNAL('valueChanged(int)'))
 
@@ -117,7 +117,7 @@ if hasQtGui:
 
             spinRec.setValue(5)
 
-            QObject.connect(spinSend, SIGNAL('valueChanged(int)'), spinRec, SLOT('setValue(int)'))
+            spinSend.valueChanged.connect(spinRec.setValue)
             self.assertEqual(spinRec.value(), 5)
             spinSend.setValue(3)
             self.assertEqual(spinRec.value(), 3)
@@ -131,7 +131,7 @@ if hasQtGui:
             spinRec.setValue(5)
             spinSend.setValue(42)
 
-            QObject.connect(spinSend, SIGNAL('valueChanged(int)'), spinRec, SLOT('setValue(int)'))
+            spinSend.valueChanged.connect(spinRec.setValue)
             self.assertEqual(spinRec.value(), 5)
             self.assertEqual(spinSend.value(), 42)
             spinSend.emit(SIGNAL('valueChanged(int)'), 3)

@@ -54,9 +54,9 @@ class TestQObjectReceivers(unittest.TestCase):
         receiver1 = QObject()
         receiver2 = QObject()
         self.assertEqual(sender.receivers(SIGNAL("")), 0)
-        sender.connect(sender, SIGNAL("destroyed()"), receiver1, SLOT("deleteLater()"))
+        sender.destroyed.connect(receiver1.deleteLater)
         self.assertEqual(sender.receivers(SIGNAL("destroyed()")), 1)
-        sender.connect(sender, SIGNAL("destroyed()"), receiver2, SLOT("deleteLater()"))
+        sender.destroyed.connect(receiver2.deleteLater)
         self.assertEqual(sender.receivers(SIGNAL("destroyed()")), 2)
         sender.disconnect(sender, SIGNAL("destroyed()"), receiver2, SLOT("deleteLater()"))
         self.assertEqual(sender.receivers(SIGNAL("destroyed()")), 1)
@@ -67,9 +67,9 @@ class TestQObjectReceivers(unittest.TestCase):
     def testPySlots(self):
         sender = QObject()
         receiver = QObject()
-        sender.connect(sender, SIGNAL("destroyed()"), cute_slot)
+        sender.destroyed.connect(cute_slot)
         self.assertEqual(sender.receivers(SIGNAL("destroyed( )")), 1)
-        sender.connect(sender, SIGNAL("destroyed()"), receiver, SLOT("deleteLater()"))
+        sender.destroyed.connect(receiver.deleteLater)
         self.assertEqual(sender.receivers(SIGNAL("destroyed()")), 2)
         del sender
         del receiver

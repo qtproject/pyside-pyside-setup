@@ -60,7 +60,7 @@ class QObjectReceivers(unittest.TestCase):
         obj = Dummy()
         self.assertEqual(obj.receivers(SIGNAL("destroyed()")), 0)
 
-        QObject.connect(obj, SIGNAL("destroyed()"), self.cb)
+        obj.destroyed.connect(self.cb)
         self.assertEqual(obj.receivers(SIGNAL("destroyed()")), 1)
 
     def testQThreadReceiversExtern(self):
@@ -68,7 +68,7 @@ class QObjectReceivers(unittest.TestCase):
 
         obj = QThread()
         self.assertEqual(obj.receivers(SIGNAL('destroyed()')), 0)
-        QObject.connect(obj, SIGNAL("destroyed()"), self.cb)
+        obj.destroyed.connect(self.cb)
         self.assertEqual(obj.receivers(SIGNAL("destroyed()")), 1)
 
 

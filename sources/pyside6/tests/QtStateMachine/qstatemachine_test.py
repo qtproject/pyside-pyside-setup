@@ -55,7 +55,7 @@ class QStateMachineTest(UsesQCoreApplication):
         s2 = QState()
         s3 = QFinalState()
 
-        QObject.connect(self.machine, SIGNAL("started()"), self.cb)
+        self.machine.started.connect(self.cb)
 
         self.anim = QParallelAnimationGroup()
 

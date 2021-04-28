@@ -59,7 +59,7 @@ if hasQtGui:
             obj = QPushButton('label')
             ctr = Control()
             func = lambda: setattr(ctr, 'arg', True)
-            QObject.connect(obj, SIGNAL('clicked()'), func)
+            obj.clicked.connect(func)
             obj.click()
             self.assertTrue(ctr.arg)
             QObject.disconnect(obj, SIGNAL('clicked()'), func)
@@ -70,7 +70,7 @@ if hasQtGui:
             ctr = Control()
             arg = 444
             func = lambda x: setattr(ctr, 'arg', 444)
-            QObject.connect(obj, SIGNAL('valueChanged(int)'), func)
+            obj.valueChanged.connect(func)
             obj.setValue(444)
             self.assertEqual(ctr.arg, arg)
             QObject.disconnect(obj, SIGNAL('valueChanged(int)'), func)

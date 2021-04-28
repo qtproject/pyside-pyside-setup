@@ -85,8 +85,8 @@ class SignalWithDefaultValueTest(unittest.TestCase):
 
         def callbackBool(value):
             self.bool_called = True
-        QObject.connect(self.obj, SIGNAL('signalWithDefaultValue()'), callbackVoid)
-        QObject.connect(self.obj, SIGNAL('signalWithDefaultValue(bool)'), callbackBool)
+        self.obj.signalWithDefaultValue.connect(callbackVoid)
+        self.obj.signalWithDefaultValue.connect(callbackBool)
         self.obj.emitSignalWithDefaultValue_void()
         self.assertTrue(self.void_called)
         self.assertTrue(self.bool_called)
@@ -97,8 +97,8 @@ class SignalWithDefaultValueTest(unittest.TestCase):
 
         def callbackBool(value):
             self.bool_called = True
-        QObject.connect(self.obj, SIGNAL('signalWithDefaultValue()'), callbackVoid)
-        QObject.connect(self.obj, SIGNAL('signalWithDefaultValue(bool)'), callbackBool)
+        self.obj.signalWithDefaultValue.connect(callbackVoid)
+        self.obj.signalWithDefaultValue.connect(callbackBool)
         self.obj.emitSignalWithDefaultValue_bool()
         self.assertTrue(self.void_called)
         self.assertTrue(self.bool_called)

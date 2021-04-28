@@ -78,8 +78,8 @@ class SignalEmissionFromPython(unittest.TestCase):
 
         def callbackTwo():
             self.two_called += 1
-        QObject.connect(self.obj1, SIGNAL('signalWithDefaultValue()'), callbackOne)
-        QObject.connect(self.obj2, SIGNAL('signalWithDefaultValue()'), callbackTwo)
+        self.obj1.signalWithDefaultValue.connect(callbackOne)
+        self.obj2.signalWithDefaultValue.connect(callbackTwo)
         self.obj1.emitSignalWithDefaultValue_void()
         self.obj2.emitSignalWithDefaultValue_void()
         self.assertEqual(self.one_called, 1)
@@ -106,8 +106,8 @@ class SignalEmissionFromPython(unittest.TestCase):
 
         def callbackTwo():
             self.two_called += 1
-        QObject.connect(self.obj1, SIGNAL('signalWithDefaultValue()'), callbackOne)
-        QObject.connect(self.obj2, SIGNAL('signalWithDefaultValue()'), callbackTwo)
+        self.obj1.signalWithDefaultValue.connect(callbackOne)
+        self.obj2.signalWithDefaultValue.connect(callbackTwo)
         self.obj1.emitSignalWithDefaultValue_void()
         self.obj2.emitSignalWithDefaultValue_void()
         self.assertEqual(self.one_called, 1)

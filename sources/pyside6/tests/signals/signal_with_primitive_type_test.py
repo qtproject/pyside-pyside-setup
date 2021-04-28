@@ -49,7 +49,7 @@ class SignalPrimitiveTypeTest(unittest.TestCase):
     def createTimeLine(self):
         self.called = False
         tl = QTimeLine(10000)
-        QObject.connect(tl, SIGNAL("valueChanged(qreal)"), self.signalValueChanged)
+        tl.valueChanged.connect(self.signalValueChanged)
         return tl
 
     def testTimeLine(self):

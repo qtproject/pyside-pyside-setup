@@ -79,7 +79,7 @@ class TestTimeoutSignal(UsesQCoreApplication):
     def testTimeoutSignal(self):
         # Test the QTimer timeout() signal
         refCount = sys.getrefcount(self.timer)
-        QObject.connect(self.timer, SIGNAL('timeout()'), self.callback)
+        self.timer.timeout.connect(self.callback)
         self.timer.start(4)
         self.watchdog.startTimer(10)
 

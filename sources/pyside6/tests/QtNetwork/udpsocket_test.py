@@ -76,7 +76,7 @@ class HttpSignalsCase(unittest.TestCase):
     def testDefaultArgs(self):
         # QUdpSocket.readDatagram pythonic return
         # @bug 124
-        QObject.connect(self.server, SIGNAL('readyRead()'), self.callback)
+        self.server.readyRead.connect(self.callback)
         self.sendPackage()
         self.app.exec()
 
