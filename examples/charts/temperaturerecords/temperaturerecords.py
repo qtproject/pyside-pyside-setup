@@ -88,6 +88,7 @@ class MainWindow(QMainWindow):
 
         self.setCentralWidget(chart_view)
 
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     w = MainWindow()

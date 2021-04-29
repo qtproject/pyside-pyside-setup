@@ -51,6 +51,7 @@ from PySide6.QtWidgets import (QApplication, QFileDialog, QMainWindow,
 
 import application_rc
 
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()

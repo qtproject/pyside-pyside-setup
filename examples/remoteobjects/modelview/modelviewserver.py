@@ -48,6 +48,7 @@ from PySide6.QtGui import (QColor, QStandardItemModel, QStandardItem)
 from PySide6.QtWidgets import (QApplication, QTreeView)
 from PySide6.QtRemoteObjects import QRemoteObjectHost, QRemoteObjectRegistryHost
 
+
 class TimerHandler(QObject):
     def __init__(self, model):
         super().__init__()
@@ -87,9 +88,10 @@ def add_child(num_children, nesting_level):
         child = QStandardItem("Child num {}, nesting Level {}".format(i + 1,
                               nesting_level))
         if i == 0:
-            child.appendRow(add_child(num_children, nesting_level -1))
+            child.appendRow(add_child(num_children, nesting_level - 1))
         result.append(child)
     return result
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
@@ -112,8 +114,8 @@ if __name__ == '__main__':
 
     # Needed by QMLModelViewClient
     role_names = {
-        Qt.DisplayRole : QByteArray(b'_text'),
-        Qt.BackgroundRole : QByteArray(b'_color')
+        Qt.DisplayRole: QByteArray(b'_text'),
+        Qt.BackgroundRole: QByteArray(b'_color')
     }
     source_model.setItemRoleNames(role_names)
 

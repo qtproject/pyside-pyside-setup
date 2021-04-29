@@ -103,7 +103,7 @@ class ColorItem(QGraphicsItem):
         if ColorItem.n > 2 and random(3) == 0:
             image = QImage(':/images/head.png')
             mime.setImageData(image)
-            drag.setPixmap(QPixmap.fromImage(image).scaled(30,40))
+            drag.setPixmap(QPixmap.fromImage(image).scaled(30, 40))
             drag.setHotSpot(QPoint(15, 30))
         else:
             mime.setColorData(self.color)
@@ -184,7 +184,7 @@ class RobotHead(RobotPart):
             painter.drawArc(-6, -2 - 20, 12, 15, 190 * 16, 160 * 16)
         else:
             painter.scale(.2272, .2824)
-            painter.drawPixmap(QPointF(-15*4.4, -50*3.54), self.pixmap)
+            painter.drawPixmap(QPointF(-15 * 4.4, -50 * 3.54), self.pixmap)
 
 
 class RobotTorso(RobotPart):

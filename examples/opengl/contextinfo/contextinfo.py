@@ -106,8 +106,8 @@ fragment_shader_source = dedent("""
     }
     """)
 
-vertices = numpy.array([0, 0.707, -0.5, -0.5, 0.5, -0.5], dtype = numpy.float32)
-colors = numpy.array([1, 0, 0, 0, 1, 0, 0, 0, 1], dtype = numpy.float32)
+vertices = numpy.array([0, 0.707, -0.5, -0.5, 0.5, -0.5], dtype=numpy.float32)
+colors = numpy.array([1, 0, 0, 0, 1, 0, 0, 0, 1], dtype=numpy.float32)
 
 
 def print_surface_format(surface_format):
@@ -115,6 +115,7 @@ def print_surface_format(surface_format):
     major = surface_format.majorVersion()
     minor = surface_format.minorVersion()
     return f"{profile_name} version {major}.{minor}"
+
 
 class RenderWindow(QWindow):
     def __init__(self, format):
@@ -170,7 +171,7 @@ class RenderWindow(QWindow):
         self.vbo.release()
 
         vao_binder = QOpenGLVertexArrayObject.Binder(self.vao)
-        if self.vao.isCreated(): # have VAO support, use it
+        if self.vao.isCreated():  # have VAO support, use it
             self.setup_vertex_attribs()
 
     def setup_vertex_attribs(self):
@@ -216,7 +217,7 @@ class RenderWindow(QWindow):
 
         if self.vao.isCreated():
             self.vao.bind()
-        else: # no VAO support, set the vertex attribute arrays now
+        else:  # no VAO support, set the vertex attribute arrays now
             self.setup_vertex_attribs()
 
         functions.glDrawArrays(GL.GL_TRIANGLES, 0, 3)
@@ -247,6 +248,7 @@ class RenderWindow(QWindow):
         self.context.doneCurrent()
         return text
 
+
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
@@ -265,6 +267,7 @@ class MainWindow(QWidget):
         gl = self._render_window.glInfo()
         text = f"{build}\n\nPython {sys.version}\n\n{gl}"
         self._plain_text_edit.setPlainText(text)
+
 
 if __name__ == '__main__':
     parser = ArgumentParser(description="contextinfo", formatter_class=RawTextHelpFormatter)

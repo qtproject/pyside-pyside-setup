@@ -198,7 +198,7 @@ class AddressWidget(QTabWidget):
             assert re.isValid()
             re.setPatternOptions(QRegularExpression.CaseInsensitiveOption)
             proxy_model.setFilterRegularExpression(re)
-            proxy_model.setFilterKeyColumn(0) # Filter on the "name" column
+            proxy_model.setFilterKeyColumn(0)  # Filter on the "name" column
             proxy_model.sort(0, Qt.AscendingOrder)
 
             # This prevents an application crash (see: http://www.qtcentre.org/threads/58874-QListView-SelectionModel-selectionChanged-Crash)

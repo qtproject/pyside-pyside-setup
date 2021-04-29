@@ -48,6 +48,7 @@ from PySide6.QtWidgets import (QApplication, QLineEdit,
     QMainWindow, QPushButton, QToolBar)
 from PySide6.QtWebEngineWidgets import QWebEnginePage, QWebEngineView
 
+
 class MainWindow(QMainWindow):
 
     def __init__(self):
@@ -91,6 +92,7 @@ class MainWindow(QMainWindow):
 
     def urlChanged(self, url):
         self.addressLineEdit.setText(url.toString())
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

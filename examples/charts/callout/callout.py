@@ -138,7 +138,7 @@ class Callout(QGraphicsItem):
         self._text = text
         metrics = QFontMetrics(self._font)
         self._textRect = QRectF(metrics.boundingRect(
-            QRect(0.0, 0.0, 150.0, 150.0),Qt.AlignLeft, self._text))
+            QRect(0.0, 0.0, 150.0, 150.0), Qt.AlignLeft, self._text))
         self._textRect.translate(5, 5)
         self.prepareGeometryChange()
         self._rect = self._textRect.adjusted(-5, -5, 5, 5)
@@ -153,7 +153,7 @@ class Callout(QGraphicsItem):
 
 
 class View(QGraphicsView):
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         super().__init__(parent)
         self.setScene(QGraphicsScene(self))
 
@@ -191,11 +191,11 @@ class View(QGraphicsView):
 
         self._coordX = QGraphicsSimpleTextItem(self._chart)
         self._coordX.setPos(
-            self._chart.size().width()/2 - 50, self._chart.size().height())
+            self._chart.size().width() / 2 - 50, self._chart.size().height())
         self._coordX.setText("X: ")
         self._coordY = QGraphicsSimpleTextItem(self._chart)
         self._coordY.setPos(
-            self._chart.size().width()/2 + 50, self._chart.size().height())
+            self._chart.size().width() / 2 + 50, self._chart.size().height())
         self._coordY.setText("Y: ")
 
         self._callouts = []
@@ -214,15 +214,14 @@ class View(QGraphicsView):
             self.scene().setSceneRect(QRectF(QPointF(0, 0), event.size()))
             self._chart.resize(event.size())
             self._coordX.setPos(
-                self._chart.size().width()/2 - 50,
+                self._chart.size().width() / 2 - 50,
                 self._chart.size().height() - 20)
             self._coordY.setPos(
-                self._chart.size().width()/2 + 50,
+                self._chart.size().width() / 2 + 50,
                 self._chart.size().height() - 20)
             for callout in self._callouts:
                 callout.updateGeometry()
         QGraphicsView.resizeEvent(self, event)
-
 
     def mouseMoveEvent(self, event):
         pos = self._chart.mapToValue(event.position().toPoint())

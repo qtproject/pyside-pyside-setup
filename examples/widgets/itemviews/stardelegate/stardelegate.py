@@ -46,6 +46,7 @@ from PySide6.QtWidgets import QStyledItemDelegate, QStyle
 from starrating import StarRating
 from stareditor import StarEditor
 
+
 class StarDelegate(QStyledItemDelegate):
     """ A subclass of QStyledItemDelegate that allows us to render our
         pretty star ratings.

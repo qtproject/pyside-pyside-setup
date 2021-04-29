@@ -47,6 +47,7 @@ from PySide6.QtCore import Signal
 
 from starrating import StarRating
 
+
 class StarEditor(QWidget):
     """ The custom editor for editing StarRatings. """
 

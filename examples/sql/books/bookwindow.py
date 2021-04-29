@@ -55,7 +55,7 @@ class BookWindow(QMainWindow, Ui_BookWindow):
         super().__init__()
         self.setupUi(self)
 
-        #Initialize db
+        # Initialize db
         createdb.init_db()
 
         model = QSqlRelationalTableModel(self.bookTable)

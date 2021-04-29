@@ -52,8 +52,9 @@ except ImportError:
     messageBox.exec_()
     sys.exit(1)
 
+
 class VCardMime(QtMacExtras.QMacPasteboardMime):
-    def __init__(self, t = QtMacExtras.QMacPasteboardMime.MIME_ALL):
+    def __init__(self, t=QtMacExtras.QMacPasteboardMime.MIME_ALL):
         super().__init__(t)
 
     def convertorName(self):
@@ -87,6 +88,7 @@ class VCardMime(QtMacExtras.QMacPasteboardMime):
         # Todo: implement!
         return []
 
+
 class TestWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -112,10 +114,11 @@ class TestWidget(QtWidgets.QWidget):
 
     def contentsDropEvent(self, e):
         if e.mimeData().hasFormat("application/x-mycompany-VCard"):
-            s = e.mimeData().data( "application/x-mycompany-VCard" )
+            s = e.mimeData().data("application/x-mycompany-VCard")
             # s now contains text of vcard
             self.label2.setText(str(s))
             e.acceptProposedAction()
+
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)

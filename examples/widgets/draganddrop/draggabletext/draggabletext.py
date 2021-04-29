@@ -127,8 +127,8 @@ class DragWidget(QWidget):
 
             hot_spot_pos = mime.data('application/x-hotspot').split(' ')
             if len(hot_spot_pos) == 2:
-               hot_spot.setX(hot_spot_pos[0].toInt()[0])
-               hot_spot.setY(hot_spot_pos[1].toInt()[0])
+                hot_spot.setX(hot_spot_pos[0].toInt()[0])
+                hot_spot.setY(hot_spot_pos[1].toInt()[0])
 
             for piece in pieces:
                 new_label = DragLabel(piece, self)

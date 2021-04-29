@@ -70,7 +70,7 @@ class DialogOptionsWidget(QGroupBox):
 
     def add_checkbox(self, text, value):
         checkbox = QCheckBox(text)
-        self._layout.addWidget(checkbox);
+        self._layout.addWidget(checkbox)
         self._mapping[checkbox] = value
 
 
@@ -132,7 +132,7 @@ class Dialog(QDialog):
                                         QFontDialog.MonospacedFonts)
         self._font_options.add_checkbox("Show proportional fonts",
                                         QFontDialog.ProportionalFonts)
-        self._font_options.add_checkbox("No buttons", QFontDialog.NoButtons);
+        self._font_options.add_checkbox("No buttons", QFontDialog.NoButtons)
 
         self._directory_label = QLabel()
         self._directory_label.setFrameStyle(frame_style)
@@ -158,7 +158,7 @@ class Dialog(QDialog):
         self._file_options.add_checkbox("Do not resolve symlinks",
                                         QFileDialog.DontResolveSymlinks)
         self._file_options.add_checkbox("Do not confirm overwrite",
-                                        QFileDialog.DontConfirmOverwrite);
+                                        QFileDialog.DontConfirmOverwrite)
         self._file_options.add_checkbox("Readonly", QFileDialog.ReadOnly)
         self._file_options.add_checkbox("Hide name filter details",
                                         QFileDialog.HideNameFilterDetails)
@@ -230,7 +230,7 @@ class Dialog(QDialog):
         spacer = QSpacerItem(0, 0, QSizePolicy.Ignored, QSizePolicy.MinimumExpanding)
         layout.addItem(spacer, 1, 0)
         layout.addWidget(self._color_options, 2, 0, 1, 2)
-        toolbox.addItem(page, "Color Dialog");
+        toolbox.addItem(page, "Color Dialog")
 
         page = QWidget()
         layout = QGridLayout(page)
@@ -320,7 +320,7 @@ class Dialog(QDialog):
 
     def set_font(self):
         options_value = self._font_options.value()
-        options =  QFontDialog.FontDialogOptions(options_value)
+        options = QFontDialog.FontDialogOptions(options_value)
 
         description = self._font_label.text()
         default_font = QFont()

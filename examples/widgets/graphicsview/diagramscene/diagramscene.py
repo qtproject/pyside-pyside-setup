@@ -131,7 +131,6 @@ class Arrow(QGraphicsLineItem):
         if line.dy() >= 0:
             angle = (math.pi * 2.0) - angle
 
-
         arrow_head1 = QPointF(math.sin(angle + math.pi / 3.0) * arrow_size,
                               math.cos(angle + math.pi / 3) * arrow_size)
         arrow_p1 = line.p1() + arrow_head1
@@ -150,7 +149,7 @@ class Arrow(QGraphicsLineItem):
             my_line = QLineF(line)
             my_line.translate(0, 4.0)
             painter.drawLine(my_line)
-            my_line.translate(0,-8.0)
+            my_line.translate(0, -8.0)
             painter.drawLine(my_line)
 
 
@@ -259,7 +258,7 @@ class DiagramItem(QGraphicsPolygonItem):
 
 
 class DiagramScene(QGraphicsScene):
-    InsertItem, InsertLine, InsertText, MoveItem  = range(4)
+    InsertItem, InsertLine, InsertText, MoveItem = range(4)
 
     item_inserted = Signal(DiagramItem)
 

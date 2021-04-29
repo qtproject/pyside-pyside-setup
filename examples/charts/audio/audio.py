@@ -51,6 +51,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox
 sampleCount = 2000
 resolution = 4
 
+
 class MainWindow(QMainWindow):
     def __init__(self, device):
         super().__init__()
@@ -108,6 +109,7 @@ class MainWindow(QMainWindow):
             self.buffer[s].setY(value)
             dataIndex = dataIndex + resolution
         self.series.replace(self.buffer)
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

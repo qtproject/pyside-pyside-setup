@@ -47,6 +47,7 @@ from PySide6.QtGui import QColor, QFont, QPainter, QScreen
 from PySide6.QtWidgets import QApplication, QMainWindow
 from PySide6.QtCharts import QChart, QChartView, QPieSeries, QPieSlice
 
+
 class MainSlice(QPieSlice):
     def __init__(self, breakdown_series, parent=None):
         super().__init__(parent)
@@ -119,7 +120,7 @@ class DonutBreakdownChart(QChart):
         for pie_slice in slices:
             breakdown_series = pie_slice.get_breakdown_series()
             breakdown_series.setPieStartAngle(angle)
-            angle += pie_slice.percentage() * 360.0 # full pie is 360.0
+            angle += pie_slice.percentage() * 360.0  # full pie is 360.0
             breakdown_series.setPieEndAngle(angle)
 
     def update_legend_markers(self):
@@ -136,6 +137,7 @@ class DonutBreakdownChart(QChart):
                     p = marker.slice().percentage() * 100
                     marker.setLabel(f"{label} {p:.2f}%")
                     marker.setFont(QFont("Arial", 8))
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

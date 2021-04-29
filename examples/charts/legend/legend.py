@@ -47,6 +47,7 @@ from PySide6.QtWidgets import (QApplication, QDoubleSpinBox,
     QFormLayout, QGridLayout, QGroupBox, QPushButton, QWidget)
 from PySide6.QtCharts import QBarSeries, QBarSet, QChart, QChartView
 
+
 class MainWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -225,7 +226,7 @@ class MainWidget(QWidget):
     def font_size_changed(self):
         legend = self.chart.legend()
         font = legend.font()
-        font_size  = self.font_size.value()
+        font_size = self.font_size.value()
         if font_size < 1:
             font_size = 1
         font.setPointSizeF(font_size)
@@ -241,6 +242,7 @@ class MainWidget(QWidget):
         legend.setGeometry(rect)
 
         legend.update()
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

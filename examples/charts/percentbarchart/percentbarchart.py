@@ -48,6 +48,7 @@ from PySide6.QtWidgets import (QMainWindow, QApplication)
 from PySide6.QtCharts import (QBarCategoryAxis, QBarSet, QChart, QChartView,
                               QPercentBarSeries)
 
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()

@@ -48,6 +48,7 @@ from PySide6.QtWidgets import (QApplication, QComboBox, QFormLayout,
 
 from PySide6.QtTextToSpeech import QTextToSpeech
 
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -99,6 +100,7 @@ class MainWindow(QMainWindow):
     def stateChanged(self, state):
         if (state == QTextToSpeech.State.Ready):
             self.sayButton.setEnabled(True)
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

@@ -46,6 +46,7 @@ from PySide6.QtCore import QObject, QUrl, Slot
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQuick import QQuickView
 
+
 class RotateValue(QObject):
     def __init__(self):
         super().__init__()
@@ -57,6 +58,7 @@ class RotateValue(QObject):
     def val(self):
         self.r = self.r + 10
         return self.r
+
 
 if __name__ == '__main__':
     app = QGuiApplication(sys.argv)

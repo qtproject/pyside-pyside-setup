@@ -45,6 +45,7 @@ from PySide6.QtWidgets import (QWidget, QLabel, QPushButton, QVBoxLayout)
 
 from adddialogwidget import AddDialogWidget
 
+
 class NewAddressTab(QWidget):
     """ An extra tab that prompts the user to add new contacts.
         To be displayed only when there are no contacts in the model.

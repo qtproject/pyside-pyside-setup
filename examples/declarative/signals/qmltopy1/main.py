@@ -46,6 +46,7 @@ from PySide6.QtCore import QObject, QUrl, Slot
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQuick import QQuickView
 
+
 class Console(QObject):
     """Output stuff on the console."""
 

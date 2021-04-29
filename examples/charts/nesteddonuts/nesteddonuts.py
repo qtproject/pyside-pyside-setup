@@ -52,6 +52,7 @@ from PySide6.QtCharts import QChart, QChartView, QPieSeries, QPieSlice
 from random import randrange
 from functools import partial
 
+
 class Widget(QWidget):
     def __init__(self):
         super().__init__()
@@ -95,18 +96,16 @@ class Widget(QWidget):
                 slc.hovered[bool].connect(partial(self.explode_slice, slc=slc))
 
                 donut.append(slc)
-                size = (self.max_size - self.min_size)/self.donut_count
+                size = (self.max_size - self.min_size) / self.donut_count
                 donut.setHoleSize(self.min_size + i * size)
                 donut.setPieSize(self.min_size + (i + 1) * size)
 
             self.donuts.append(donut)
             self.chart_view.chart().addSeries(donut)
 
-
-
     def update_rotation(self):
         for donut in self.donuts:
-            phase_shift =  randrange(-50, 100)
+            phase_shift = randrange(-50, 100)
             donut.setPieStartAngle(donut.pieStartAngle() + phase_shift)
             donut.setPieEndAngle(donut.pieEndAngle() + phase_shift)
 
@@ -129,6 +128,7 @@ class Widget(QWidget):
             self.update_timer.start()
 
         slc.setExploded(exploded)
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

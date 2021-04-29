@@ -46,6 +46,7 @@ from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtWidgets import QApplication
 from PySide6.QtWebEngine import QtWebEngine
 
+
 def main():
     app = QApplication([])
     QtWebEngine.initialize()
@@ -54,6 +55,7 @@ def main():
     qml_url = QUrl.fromLocalFile(os.path.abspath(qml_file_path))
     engine.load(qml_url)
     app.exec_()
+
 
 if __name__ == '__main__':
     main()

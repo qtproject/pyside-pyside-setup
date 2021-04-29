@@ -168,6 +168,7 @@ class RenderArea(QWidget):
 
 id_role = Qt.UserRole
 
+
 class Window(QWidget):
     def __init__(self):
         super().__init__()

@@ -53,6 +53,7 @@ from ui_themewidget import Ui_ThemeWidgetForm as ui
 
 from random import random, uniform
 
+
 class ThemeWidget(QWidget):
     def __init__(self, parent):
         QWidget.__init__(self, parent)
@@ -112,7 +113,6 @@ class ThemeWidget(QWidget):
         qApp.setPalette(pal)
 
         self.update_ui()
-
 
     def generate_random_data(self, list_count, value_max, value_count):
         data_table = []
@@ -337,7 +337,6 @@ class ThemeWidget(QWidget):
                     set_colors(QColor(0xcee7f0), QColor(0x404044))
                 else:
                     set_colors(QColor(0xf0f0f0), QColor(0x404044))
-
 
         # Update antialiasing
         checked = self.ui.antialiasCheckBox.isChecked()

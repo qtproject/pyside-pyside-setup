@@ -52,8 +52,10 @@ from PySide6.QtDataVisualization import (Q3DBars, QBar3DSeries, QBarDataItem,
 def data_to_bar_data_row(data):
     return list(QBarDataItem(d) for d in data)
 
+
 def data_to_bar_data_array(data):
     return list(data_to_bar_data_row(row) for row in data)
+
 
 class MainWindow(QMainWindow):
 
@@ -107,6 +109,7 @@ class MainWindow(QMainWindow):
         self.container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.container.setFocusPolicy(Qt.StrongFocus)
         self.setCentralWidget(self.container)
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

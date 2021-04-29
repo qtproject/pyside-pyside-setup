@@ -41,7 +41,6 @@ class Ui_Dialog(object):
 
         self.gridLayout.addWidget(self.output, 0, 0, 1, 2)
 
-
         self.retranslateUi(Dialog)
 
         QMetaObject.connectSlotsByName(Dialog)

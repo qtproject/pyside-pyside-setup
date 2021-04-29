@@ -102,7 +102,7 @@ class MainWindow(QMainWindow):
             self.statusBar().showMessage("File saved", 2000)
 
     def about(self):
-       QMessageBox.about(self, "About DOM Bookmarks",
+        QMessageBox.about(self, "About DOM Bookmarks",
             "The <b>DOM Bookmarks</b> example demonstrates how to use Qt's "
             "DOM classes to read and write XML documents.")
 

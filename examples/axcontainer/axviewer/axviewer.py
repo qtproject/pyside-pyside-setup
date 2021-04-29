@@ -47,6 +47,7 @@ from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (QApplication, QDialog,
     QMainWindow, QMessageBox, QToolBar)
 
+
 class MainWindow(QMainWindow):
 
     def __init__(self):
@@ -73,6 +74,7 @@ class MainWindow(QMainWindow):
             clsid = axSelect.clsid()
             if not self.axWidget.setControl(clsid):
                 QMessageBox.warning(self, "AxViewer", "Unable to load " + clsid + ".")
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

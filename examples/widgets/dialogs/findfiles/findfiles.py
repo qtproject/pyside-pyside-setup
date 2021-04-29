@@ -45,7 +45,7 @@
 import sys
 
 from PySide6.QtCore import (QCoreApplication, QDir, QFile, QFileInfo,
-                            QIODevice,  QTextStream, QUrl, Qt)
+                            QIODevice, QTextStream, QUrl, Qt)
 from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import (QAbstractItemView, QApplication, QComboBox,
                                QDialog, QFileDialog, QGridLayout, QHBoxLayout,

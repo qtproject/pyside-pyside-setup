@@ -41,6 +41,7 @@
 from PySide6.QtSql import QSqlDatabase, QSqlQuery
 from datetime import date
 
+
 def add_book(q, title, year, authorId, genreId, rating):
     q.addBindValue(title)
     q.addBindValue(year)
@@ -62,6 +63,7 @@ def add_author(q, name, birthdate):
     q.exec_()
     return q.lastInsertId()
 
+
 BOOKS_SQL = """
     create table books(id integer primary key, title varchar, author integer,
                        genre integer, year integer, rating integer)
@@ -82,6 +84,7 @@ INSERT_BOOK_SQL = """
     insert into books(title, year, author, genre, rating)
                 values(?, ?, ?, ?, ?)
     """
+
 
 def init_db():
     """
@@ -109,12 +112,12 @@ def init_db():
     greeneId = add_author(q, "Graham Greene", date(1904, 10, 2))
     pratchettId = add_author(q, "Terry Pratchett", date(1948, 4, 28))
 
-    check(q.prepare,INSERT_GENRE_SQL)
+    check(q.prepare, INSERT_GENRE_SQL)
     sfiction = add_genre(q, "Science Fiction")
     fiction = add_genre(q, "Fiction")
     fantasy = add_genre(q, "Fantasy")
 
-    check(q.prepare,INSERT_BOOK_SQL)
+    check(q.prepare, INSERT_BOOK_SQL)
     add_book(q, "Foundation", 1951, asimovId, sfiction, 3)
     add_book(q, "Foundation and Empire", 1952, asimovId, sfiction, 4)
     add_book(q, "Second Foundation", 1953, asimovId, sfiction, 3)

@@ -332,7 +332,7 @@ class AddressBook(QWidget):
             self._remove_button.setEnabled(number >= 1)
             self._find_button.setEnabled(number > 2)
             self._next_button.setEnabled(number > 1)
-            self._previous_button.setEnabled(number >1 )
+            self._previous_button.setEnabled(number > 1)
 
             self._submit_button.hide()
             self._cancel_button.hide()
@@ -343,7 +343,7 @@ class AddressBook(QWidget):
             self._save_button.setEnabled(number >= 1)
 
     def save_to_file(self):
-        fileName,_ = QFileDialog.getSaveFileName(self,
+        fileName, _ = QFileDialog.getSaveFileName(self,
                 "Save Address Book", '',
                 "Address Book (*.abk);;All Files (*)")
 
@@ -361,7 +361,7 @@ class AddressBook(QWidget):
         out_file.close()
 
     def load_from_file(self):
-        fileName,_ = QFileDialog.getOpenFileName(self,
+        fileName, _ = QFileDialog.getOpenFileName(self,
                 "Open Address Book", '',
                 "Address Book (*.abk);;All Files (*)")
 

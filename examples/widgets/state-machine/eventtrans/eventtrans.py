@@ -86,6 +86,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(button)
         self.show()
 
+
 if __name__ == '__main__':
     import sys
 

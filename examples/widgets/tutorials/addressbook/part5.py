@@ -312,7 +312,7 @@ class AddressBook(QWidget):
             self._remove_button.setEnabled(number >= 1)
             self._find_button.setEnabled(number > 2)
             self._next_button.setEnabled(number > 1)
-            self._previous_button.setEnabled(number >1 )
+            self._previous_button.setEnabled(number > 1)
 
             self._submit_button.hide()
             self._cancel_button.hide()

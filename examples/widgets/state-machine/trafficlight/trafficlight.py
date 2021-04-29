@@ -51,19 +51,24 @@ class LightWidget(QWidget):
         super().__init__()
         self.color = color
         self._on_val = False
+
     def is_on(self):
         return self._on_val
+
     def set_on(self, on):
         if self._on_val == on:
             return
         self._on_val = on
         self.update()
+
     @Slot()
     def turn_off(self):
         self.set_on(False)
+
     @Slot()
     def turn_on(self):
         self.set_on(True)
+
     def paintEvent(self, e):
         if not self._on_val:
             return
@@ -73,6 +78,7 @@ class LightWidget(QWidget):
         painter.drawEllipse(0, 0, self.width(), self.height())
 
     on = Property(bool, is_on, set_on)
+
 
 class TrafficLightWidget(QWidget):
     def __init__(self):
@@ -89,6 +95,7 @@ class TrafficLightWidget(QWidget):
         self.setPalette(pal)
         self.setAutoFillBackground(True)
 
+
 def create_light_state(light, duration, parent=None):
     light_state = QState(parent)
     timer = QTimer(light_state)
@@ -102,6 +109,7 @@ def create_light_state(light, duration, parent=None):
     timing.addTransition(timer, SIGNAL('timeout()'), done)
     light_state.setInitialState(timing)
     return light_state
+
 
 class TrafficLight(QWidget):
     def __init__(self):
@@ -131,6 +139,7 @@ class TrafficLight(QWidget):
         machine.addState(yellow_going_red)
         machine.setInitialState(red_going_yellow)
         machine.start()
+
 
 if __name__ == '__main__':
     import sys

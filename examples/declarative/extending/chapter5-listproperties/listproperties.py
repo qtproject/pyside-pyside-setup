@@ -50,8 +50,9 @@ from PySide6.QtGui import QGuiApplication, QPen, QPainter, QColor
 from PySide6.QtQml import qmlRegisterType, ListProperty
 from PySide6.QtQuick import QQuickPaintedItem, QQuickView, QQuickItem
 
+
 class PieSlice (QQuickPaintedItem):
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         QQuickPaintedItem.__init__(self, parent)
         self._color = QColor()
         self._fromAngle = 0
@@ -85,10 +86,11 @@ class PieSlice (QQuickPaintedItem):
         pen = QPen(self._color, 2)
         painter.setPen(pen)
         painter.setRenderHints(QPainter.Antialiasing, True)
-        painter.drawPie(self.boundingRect().adjusted(1,1,-1,-1), self._fromAngle * 16, self._angleSpan * 16)
+        painter.drawPie(self.boundingRect().adjusted(1, 1, -1, -1), self._fromAngle * 16, self._angleSpan * 16)
+
 
 class PieChart (QQuickItem):
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         QQuickItem.__init__(self, parent)
         self._name = u''
         self._slices = []
@@ -106,6 +108,7 @@ class PieChart (QQuickItem):
         self._slices.append(_slice)
 
     slices = ListProperty(PieSlice, appendSlice)
+
 
 if __name__ == '__main__':
     app = QGuiApplication(sys.argv)

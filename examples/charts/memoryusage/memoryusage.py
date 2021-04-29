@@ -55,6 +55,7 @@ def run_process(command, arguments):
     std_output = process.readAllStandardOutput().data().decode('utf-8')
     return std_output.split('\n')
 
+
 def get_memory_usage():
     result = []
     if sys.platform == 'win32':
@@ -83,7 +84,7 @@ def get_memory_usage():
             command_column = 12
         for line in run_process('ps', ps_options):
             tokens = line.split(None)
-            if len(tokens) > command_column and "PID" not in tokens: # Percentage and command
+            if len(tokens) > command_column and "PID" not in tokens:  # Percentage and command
                 command = tokens[command_column]
                 if not command.startswith('['):
                     command = os.path.basename(command)
@@ -93,6 +94,7 @@ def get_memory_usage():
 
     result.sort(key = lambda x: x[1], reverse=True)
     return result
+
 
 class MainWindow(QMainWindow):
 
@@ -116,6 +118,7 @@ class MainWindow(QMainWindow):
         self.chart.addSeries(self.series)
         self._chart_view = QChartView(self.chart)
         self.setCentralWidget(self._chart_view)
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

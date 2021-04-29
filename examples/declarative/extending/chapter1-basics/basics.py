@@ -50,11 +50,12 @@ from PySide6.QtGui import QGuiApplication, QPen, QPainter, QColor
 from PySide6.QtQml import qmlRegisterType
 from PySide6.QtQuick import QQuickPaintedItem, QQuickView
 
+
 class PieChart (QQuickPaintedItem):
 
     nameChanged = Signal()
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         QQuickPaintedItem.__init__(self, parent)
         self._name = u''
         self._color = QColor()
@@ -63,7 +64,7 @@ class PieChart (QQuickPaintedItem):
         pen = QPen(self.color, 2)
         painter.setPen(pen)
         painter.setRenderHints(QPainter.Antialiasing, True)
-        painter.drawPie(self.boundingRect().adjusted(1,1,-1,-1), 90 * 16, 290 * 16)
+        painter.drawPie(self.boundingRect().adjusted(1, 1, -1, -1), 90 * 16, 290 * 16)
 
     @Property(QColor)
     def color(self):

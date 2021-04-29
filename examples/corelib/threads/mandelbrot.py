@@ -180,13 +180,13 @@ class RenderThread(QThread):
                     curpass = 4
                 else:
                     if not self.restart:
-                        elapsed = timer.elapsed();
+                        elapsed = timer.elapsed()
                         unit = 'ms'
                         if elapsed > 2000:
                             elapsed /= 1000
                             unit = 's'
                         text = f"Pass {curpass+1}/{NUM_PASSES}, max iterations: {max_iterations}, time: {elapsed}{unit}"
-                        image.setText(INFO_KEY, text);
+                        image.setText(INFO_KEY, text)
                         self.rendered_image.emit(image, scale_factor)
                     curpass += 1
 
@@ -229,7 +229,7 @@ class RenderThread(QThread):
         g = pow(g * s, 0.8)
         b = pow(b * s, 0.8)
 
-        return qRgb(r*255, g*255, b*255)
+        return qRgb(r * 255, g * 255, b * 255)
 
 
 class MandelbrotWidget(QWidget):

@@ -132,4 +132,5 @@ def qInitResources():
 def qCleanupResources():
     QtCore.qUnregisterResourceData(0x03, qt_resource_struct, qt_resource_name, qt_resource_data)
 
+
 qInitResources()

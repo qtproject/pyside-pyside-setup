@@ -41,7 +41,6 @@
 """PySide6 port of the Logarithmic Axis Example from Qt v5.x"""
 
 
-
 import sys
 from PySide6.QtCore import Qt, QPointF
 from PySide6.QtGui import QPainter

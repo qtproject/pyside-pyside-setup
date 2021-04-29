@@ -42,10 +42,11 @@
 """PySide6 port of the qt3d/simple-cpp example from Qt v5.x"""
 
 import sys
-from PySide6.QtCore import(Property, QObject, QPropertyAnimation, Signal)
+from PySide6.QtCore import (Property, QObject, QPropertyAnimation, Signal)
 from PySide6.QtGui import (QGuiApplication, QMatrix4x4, QQuaternion, QVector3D)
 from PySide6.Qt3DCore import (Qt3DCore)
 from PySide6.Qt3DExtras import (Qt3DExtras)
+
 
 class OrbitTransformController(QObject):
     def __init__(self, parent):
@@ -90,6 +91,7 @@ class OrbitTransformController(QObject):
     radiusChanged = Signal()
     angle = Property(float, getAngle, setAngle, notify=angleChanged)
     radius = Property(float, getRadius, setRadius, notify=radiusChanged)
+
 
 class Window(Qt3DExtras.Qt3DWindow):
     def __init__(self):
@@ -154,6 +156,7 @@ class Window(Qt3DExtras.Qt3DWindow):
         self.sphereEntity.addComponent(self.sphereMesh)
         self.sphereEntity.addComponent(self.sphereTransform)
         self.sphereEntity.addComponent(self.material)
+
 
 if __name__ == '__main__':
     app = QGuiApplication(sys.argv)

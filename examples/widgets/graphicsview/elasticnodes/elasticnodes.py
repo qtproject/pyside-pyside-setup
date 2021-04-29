@@ -359,7 +359,6 @@ class GraphWidget(QGraphicsView):
         else:
             QGraphicsView.keyPressEvent(self, event)
 
-
     def timerEvent(self, event):
         nodes = [item for item in self.scene().items() if isinstance(item, Node)]
 

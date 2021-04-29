@@ -121,11 +121,12 @@ class Window(QWidget):
         else:
             super(Window, self).keyPressEvent(event)
 
+
 class Logo():
     def __init__(self):
         self.m_count = 0
         self.i = 0
-        self.m_data = numpy.empty(2500 * 6, dtype = ctypes.c_float)
+        self.m_data = numpy.empty(2500 * 6, dtype=ctypes.c_float)
 
         x1 = +0.06
         y1 = -0.14
@@ -222,6 +223,7 @@ class Logo():
         self.m_data[self.i] = n.z()
         self.i += 1
         self.m_count += 6
+
 
 class GLWidget(QOpenGLWidget, QOpenGLFunctions):
     x_rotation_changed = Signal(int)
@@ -333,7 +335,6 @@ class GLWidget(QOpenGLWidget, QOpenGLFunctions):
                    highp vec3 col = clamp(color * 0.2 + color * 0.8 * NL, 0.0, 1.0);
                    fragColor = vec4(col, 1.0);
                 }"""
-
 
     def vertex_shader_source(self):
         return """attribute vec4 vertex;
@@ -458,6 +459,7 @@ class GLWidget(QOpenGLWidget, QOpenGLFunctions):
             self.set_zrotation(self._z_rot + 8 * dx)
 
         self._last_pos = pos
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

@@ -50,6 +50,7 @@ from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLabel,
 from PySide6.QtMultimedia import QCamera, QCameraImageCapture, QCameraInfo
 from PySide6.QtMultimediaWidgets import QCameraViewfinder
 
+
 class ImageView(QWidget):
     def __init__(self, previewImage, fileName):
         super().__init__()
@@ -82,6 +83,7 @@ class ImageView(QWidget):
 
     def launch(self):
         QDesktopServices.openUrl(QUrl.fromLocalFile(self.fileName))
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -159,6 +161,7 @@ class MainWindow(QMainWindow):
         imageView = ImageView(self.currentPreview, fileName)
         self.tabWidget.addTab(imageView, "Capture #{}".format(index))
         self.tabWidget.setCurrentIndex(index)
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

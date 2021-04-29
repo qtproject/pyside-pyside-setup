@@ -205,7 +205,7 @@ if __name__ == '__main__':
         # Figure 8.
         figure_8state.assignProperty(item, 'pos',
                 QPointF(math.sin((i / 63.0) * 6.28) * 250,
-                        math.sin(((i * 2)/63.0) * 6.28) * 250))
+                        math.sin(((i * 2) / 63.0) * 6.28) * 250))
 
         # Random.
         random_state.assignProperty(item, 'pos',

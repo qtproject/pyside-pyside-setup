@@ -60,7 +60,7 @@ class CustomTableModel(QAbstractTableModel):
         self.row_count = 15
 
         for i in range(self.row_count):
-            data_vec = [0]*self.column_count
+            data_vec = [0] * self.column_count
             for k in range(len(data_vec)):
                 if k % 2 == 0:
                     data_vec[k] = i * 50 + randrange(30)
@@ -114,7 +114,6 @@ class CustomTableModel(QAbstractTableModel):
 
     def clear_mapping(self):
         self.mapping = {}
-
 
 
 class TableWidget(QWidget):

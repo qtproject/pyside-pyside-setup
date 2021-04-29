@@ -44,6 +44,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (QDialog, QLabel, QTextEdit, QLineEdit,
                                QDialogButtonBox, QGridLayout, QVBoxLayout)
 
+
 class AddDialogWidget(QDialog):
     """ A dialog to add a new address to the addressbook. """
 

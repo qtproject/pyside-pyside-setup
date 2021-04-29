@@ -89,6 +89,7 @@ class MyWidget(QWidget):
     def magic(self):
         self.text.setText(random.choice(self.hello))
 
+
 if __name__ == "__main__":
     print("Start of hello.py      ", time.ctime())
     print("  sys.version         = {}".format(sys.version.splitlines()[0]))
@@ -100,7 +101,7 @@ if __name__ == "__main__":
     widget.resize(800, 600)
     widget.show()
     if auto_quit:
-        milliseconds = 2 * 1000 # run 2 second
+        milliseconds = 2 * 1000  # run 2 second
         QTimer.singleShot(milliseconds, app.quit)
     retcode = app.exec_()
     print("End of hello.py        ", time.ctime())

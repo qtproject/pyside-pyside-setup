@@ -181,7 +181,7 @@ class Window(QWidget):
             painter.setPen(QColor(0, 0, 255, 64))
             x_axis = self._iconSize.height() / 1.5
             y_axis = self._iconSize.width() / 3.0
-            painter.drawLine(0, x_axis, self._iconSize.width(),  x_axis)
+            painter.drawLine(0, x_axis, self._iconSize.width(), x_axis)
             painter.drawLine(y_axis, 0, y_axis, self._iconSize.height())
 
             curve_scale = self._iconSize.height() / 2.0

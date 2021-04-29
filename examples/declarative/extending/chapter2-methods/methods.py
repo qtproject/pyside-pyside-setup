@@ -50,12 +50,13 @@ from PySide6.QtGui import QGuiApplication, QPen, QPainter, QColor
 from PySide6.QtQml import qmlRegisterType
 from PySide6.QtQuick import QQuickPaintedItem, QQuickView
 
-class PieChart (QQuickPaintedItem):
+
+class PieChart(QQuickPaintedItem):
 
     chartCleared = Signal()
     nameChanged = Signal()
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         QQuickPaintedItem.__init__(self, parent)
         self._name = u''
         self._color = QColor()
@@ -64,7 +65,7 @@ class PieChart (QQuickPaintedItem):
         pen = QPen(self.color, 2)
         painter.setPen(pen)
         painter.setRenderHints(QPainter.Antialiasing, True)
-        painter.drawPie(self.boundingRect().adjusted(1,1,-1,-1), 90 * 16, 290 * 16)
+        painter.drawPie(self.boundingRect().adjusted(1, 1, -1, -1), 90 * 16, 290 * 16)
 
     @Property(QColor)
     def color(self):
@@ -82,11 +83,12 @@ class PieChart (QQuickPaintedItem):
     def name(self, value):
         self._name = value
 
-    @Slot() # This should be something like @Invokable
+    @Slot()  # This should be something like @Invokable
     def clearChart(self):
         self.color = Qt.transparent
         self.update()
         self.chartCleared.emit()
+
 
 if __name__ == '__main__':
     app = QGuiApplication(sys.argv)

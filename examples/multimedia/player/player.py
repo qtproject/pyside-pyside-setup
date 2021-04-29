@@ -49,6 +49,7 @@ from PySide6.QtWidgets import (QApplication, QDialog, QFileDialog,
 from PySide6.QtMultimedia import QMediaPlayer, QMediaPlaylist
 from PySide6.QtMultimediaWidgets import QVideoWidget
 
+
 class MainWindow(QMainWindow):
 
     def __init__(self):
@@ -123,7 +124,7 @@ class MainWindow(QMainWindow):
         fileDialog = QFileDialog(self)
         supportedMimeTypes = QMediaPlayer.supportedMimeTypes()
         if not supportedMimeTypes:
-            supportedMimeTypes.append("video/x-msvideo") # AVI
+            supportedMimeTypes.append("video/x-msvideo")  # AVI
         fileDialog.setMimeTypeFilters(supportedMimeTypes)
         moviesLocation = QStandardPaths.writableLocation(QStandardPaths.MoviesLocation)
         fileDialog.setDirectory(moviesLocation)
@@ -147,6 +148,7 @@ class MainWindow(QMainWindow):
         self.stopAction.setEnabled(state != QMediaPlayer.StoppedState)
         self.previousAction.setEnabled(self.player.position() > 0)
         self.nextAction.setEnabled(mediaCount > 1)
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

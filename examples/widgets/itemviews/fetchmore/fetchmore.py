@@ -154,7 +154,7 @@ class Window(QWidget):
     @Slot(str, int, int)
     def update_log(self, path, start, number, total):
         native_path = QDir.toNativeSeparators(path)
-        last = start + number -1
+        last = start + number - 1
         entry = f'{start}..{last}/{total} items from "{native_path}" added.'
         self._log_viewer.appendPlainText(entry)
 

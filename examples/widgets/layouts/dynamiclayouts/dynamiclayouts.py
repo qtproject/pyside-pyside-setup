@@ -48,6 +48,7 @@ from PySide6.QtWidgets import (QApplication, QDialog, QLayout, QGridLayout,
                                QProgressBar, QDial, QDialogButtonBox,
                                QComboBox, QLabel)
 
+
 class Dialog(QDialog):
     def __init__(self):
         super().__init__()
@@ -79,10 +80,9 @@ class Dialog(QDialog):
 
         self._rotable_widgets.append(self._rotable_widgets.pop(0))
 
-        for i in range(count//2):
+        for i in range(count // 2):
             self._rotable_layout.addWidget(self._rotable_widgets[count - i - 1], 0, i)
             self._rotable_layout.addWidget(self._rotable_widgets[i], 1, i)
-
 
     def buttons_orientation_changed(self, index):
         self._main_layout.setSizeConstraint(QLayout.SetNoConstraint)
@@ -125,7 +125,7 @@ class Dialog(QDialog):
         count = len(self._rotable_widgets)
         for i in range(count):
             self._rotable_widgets[i].valueChanged[int].\
-                connect(self._rotable_widgets[(i+1) % count].setValue)
+                connect(self._rotable_widgets[(i + 1) % count].setValue)
 
         self._rotable_layout = QGridLayout()
         self._rotable_group_box.setLayout(self._rotable_layout)

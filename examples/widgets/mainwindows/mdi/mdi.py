@@ -144,7 +144,7 @@ class MdiChild(QTextEdit):
     def maybe_save(self):
         if self.document().isModified():
             f = self.user_friendly_current_file()
-            message =  f"'{f}' has been modified.\nDo you want to save your changes?"
+            message = f"'{f}' has been modified.\nDo you want to save your changes?"
             ret = QMessageBox.warning(self, "MDI", message,
                     QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel)
 

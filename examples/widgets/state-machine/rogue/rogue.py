@@ -51,6 +51,7 @@ class MovementTransition(QEventTransition):
     def __init__(self, window):
         super().__init__(window, QEvent.KeyPress)
         self.window = window
+
     def eventTest(self, event):
         if event.type() == QEvent.StateMachineWrapped and \
           event.event().type() == QEvent.KeyPress:
@@ -58,6 +59,7 @@ class MovementTransition(QEventTransition):
             return key == Qt.Key_2 or key == Qt.Key_8 or \
                 key == Qt.Key_6 or key == Qt.Key_4
         return False
+
     def onTransition(self, event):
         key = event.event().key()
         if key == Qt.Key_4:
@@ -69,6 +71,7 @@ class MovementTransition(QEventTransition):
         if key == Qt.Key_2:
             self.window.move_player(self.window.down)
 
+
 class Custom(QState):
     def __init__(self, parent, mw):
         super().__init__(parent)
@@ -76,6 +79,7 @@ class Custom(QState):
 
     def onEntry(self, e):
         print(self.mw.status)
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -98,6 +102,7 @@ class MainWindow(QMainWindow):
         self.setup_map()
         self.build_machine()
         self.show()
+
     def setup_map(self):
         self.map = []
         generator = QRandomGenerator().global_()
@@ -150,6 +155,7 @@ class MainWindow(QMainWindow):
         metrics = QFontMetrics(self.font())
         return QSize(metrics.horizontalAdvance('X') * self.width,
                      metrics.height() * (self.height + 1))
+
     def paintEvent(self, event):
         metrics = QFontMetrics(self.font())
         painter = QPainter(self)
@@ -171,6 +177,7 @@ class MainWindow(QMainWindow):
                 painter.drawText(QPoint(x_pos, y_pos), self.map[x][y])
                 x_pos += font_width
         painter.drawText(QPoint(self.pX * font_width, (self.pY + 2) * font_height), '@')
+
     def move_player(self, direction):
         if direction == self.left:
             if self.map[self.pX - 1][self.pY] != '#':
@@ -185,8 +192,10 @@ class MainWindow(QMainWindow):
             if self.map[self.pX][self.pY + 1] != '#':
                 self.pY += 1
         self.repaint()
+
     def get_status(self):
         return self._status_str
+
     def set_status(self, status):
         self._status_str = status
         self.repaint()
@@ -197,6 +206,7 @@ class MainWindow(QMainWindow):
     right = 3
     width = 35
     height = 20
+
 
 if __name__ == '__main__':
     import sys

@@ -53,7 +53,7 @@ if __name__ == '__main__':
     node.setHeartbeatInterval(1000)
     view = QTreeView()
     view.setWindowTitle("RemoteView")
-    view.resize(640,480)
+    view.resize(640, 480)
     model = node.acquireModel("RemoteModel")
     view.setModel(model)
     view.show()

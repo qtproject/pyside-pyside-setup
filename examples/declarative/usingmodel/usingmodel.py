@@ -46,17 +46,18 @@ from PySide6.QtCore import QAbstractListModel, Qt, QUrl, QByteArray
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQuick import QQuickView
 
+
 class PersonModel (QAbstractListModel):
     MyRole = Qt.UserRole + 1
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         QAbstractListModel.__init__(self, parent)
         self._data = []
 
     def roleNames(self):
         roles = {
-            PersonModel.MyRole : QByteArray(b'modelData'),
-            Qt.DisplayRole : QByteArray(b'display')
+            PersonModel.MyRole: QByteArray(b'modelData'),
+            Qt.DisplayRole: QByteArray(b'display')
         }
         return roles
 
@@ -75,8 +76,9 @@ class PersonModel (QAbstractListModel):
         return None
 
     def populate(self):
-        self._data.append({'name':'Qt', 'myrole':'role1'})
-        self._data.append({'name':'PySide', 'myrole':'role2'})
+        self._data.append({'name': 'Qt', 'myrole': 'role1'})
+        self._data.append({'name': 'PySide', 'myrole': 'role2'})
+
 
 if __name__ == '__main__':
     app = QGuiApplication(sys.argv)

@@ -43,6 +43,7 @@
 
 from Universe import Icecream, Truck
 
+
 class VanillaChocolateIcecream(Icecream):
     def __init__(self, flavor=""):
         super().__init__(flavor)
@@ -52,6 +53,7 @@ class VanillaChocolateIcecream(Icecream):
 
     def getFlavor(self):
         return "vanilla sprinked with chocolate"
+
 
 class VanillaChocolateCherryIcecream(VanillaChocolateIcecream):
     def __init__(self, flavor=""):
@@ -63,6 +65,7 @@ class VanillaChocolateCherryIcecream(VanillaChocolateIcecream):
     def getFlavor(self):
         base_flavor = super(VanillaChocolateCherryIcecream, self).getFlavor()
         return base_flavor + " and a cherry"
+
 
 if __name__ == '__main__':
     leave_on_destruction = True

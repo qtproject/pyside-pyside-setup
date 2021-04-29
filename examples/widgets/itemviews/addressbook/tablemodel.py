@@ -42,6 +42,7 @@
 
 from PySide6.QtCore import (Qt, QAbstractTableModel, QModelIndex)
 
+
 class TableModel(QAbstractTableModel):
 
     def __init__(self, addresses=None, parent=None):
@@ -100,7 +101,7 @@ class TableModel(QAbstractTableModel):
         self.beginInsertRows(QModelIndex(), position, position + rows - 1)
 
         for row in range(rows):
-            self.addresses.insert(position + row, {"name":"", "address":""})
+            self.addresses.insert(position + row, {"name": "", "address": ""})
 
         self.endInsertRows()
         return True
@@ -109,7 +110,7 @@ class TableModel(QAbstractTableModel):
         """ Remove a row from the model. """
         self.beginRemoveRows(QModelIndex(), position, position + rows - 1)
 
-        del self.addresses[position:position+rows]
+        del self.addresses[position:position + rows]
 
         self.endRemoveRows()
         return True
