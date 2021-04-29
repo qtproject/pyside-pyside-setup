@@ -46,6 +46,7 @@ class MyData(QTextBlockUserData):
     def getMyNiceData(self):
         return self.data
 
+
 class TestBug652(unittest.TestCase):
     """Segfault when using QTextBlock::setUserData due to missing ownership transfer"""
     def testIt(self):
@@ -62,6 +63,7 @@ class TestBug652(unittest.TestCase):
         blk = tc.block()
         self.assertEqual(type(blk.userData()), MyData)
         self.assertEqual(blk.userData().getMyNiceData(), heyHo)
+
 
 if __name__ == "__main__":
     unittest.main()

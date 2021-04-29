@@ -42,6 +42,7 @@ from PySide6.QtWidgets import QTextEdit
 
 from helper.usesqapplication import UsesQApplication
 
+
 class DontTouchReference(UsesQApplication):
     '''Check if the QTextTable returned by QTextCursor.insertTable() is not
     referenced by the QTextCursor that returns it.'''
@@ -63,6 +64,7 @@ class DontTouchReference(UsesQApplication):
         del self.cursor
         self.assertEqual(getrefcount(self.table), 2)
         cell = self.table.cellAt(0, 0)
+
 
 if __name__ == "__main__":
     unittest.main()

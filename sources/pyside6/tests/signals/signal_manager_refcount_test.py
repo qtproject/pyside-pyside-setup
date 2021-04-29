@@ -41,6 +41,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QObject, SIGNAL
 
+
 class SignalManagerRefCount(unittest.TestCase):
     """Simple test case to check if the signal_manager is erroneously incrementing the object refcounter"""
 
@@ -54,6 +55,7 @@ class SignalManagerRefCount(unittest.TestCase):
         self.assertEqual(refcount, getrefcount(obj))
         QObject.disconnect(obj, SIGNAL('destroyed()'), callback)
         self.assertEqual(refcount, getrefcount(obj))
+
 
 if __name__ == '__main__':
     unittest.main()

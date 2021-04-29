@@ -62,6 +62,7 @@ There is much more to come.
 
 MethodDescriptorType = type(str.split)
 
+
 class FeaturesTest(unittest.TestCase):
 
     def testAllFeatureCombinations(self):

@@ -39,6 +39,7 @@ init_test_paths(True)
 
 from testbinding import PySideCPP, TestObjectWithoutNamespace
 
+
 class ModelViewTest(unittest.TestCase):
 
     def callback(self, o):
@@ -69,7 +70,6 @@ class ModelViewTest(unittest.TestCase):
         o.emitSignalWithNamespace.connect(self.callback)
         o.callSignalWithNamespace(o)
         self.assertTrue(o == self._called)
-
 
     def testWithoutNamespace1(self):
         self._called = None
@@ -122,6 +122,7 @@ class ModelViewTest(unittest.TestCase):
         o.emitSignalWithTypedef.connect(self.callback)
         o.callSignalWithTypedef(10)
         self.assertEqual(10, self._called)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -69,6 +69,7 @@ class testSignalWithCPPSlot(UsesQApplication):
         w.start()
         self.assertEqual(w.text(), "PySide")
 
+
 if __name__ == '__main__':
     unittest.main()
 

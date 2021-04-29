@@ -43,6 +43,7 @@ from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import qmlRegisterType
 from PySide6.QtQuick import QQuickView
 
+
 class MyClass (QObject):
 
     def __init__(self):
@@ -52,19 +53,20 @@ class MyClass (QObject):
     def getUrl(self):
         return self.__url
 
-    def setUrl(self,value):
+    def setUrl(self, value):
         newUrl = QUrl(value)
         if (newUrl != self.__url):
             self.__url = newUrl
             self.urlChanged.emit()
 
     urlChanged = Signal()
-    urla = Property(QUrl, getUrl, setUrl, notify = urlChanged)
+    urla = Property(QUrl, getUrl, setUrl, notify=urlChanged)
+
 
 class TestBug926 (unittest.TestCase):
     def testIt(self):
         app = QGuiApplication([])
-        qmlRegisterType(MyClass,'Example',1,0,'MyClass')
+        qmlRegisterType(MyClass,'Example', 1, 0, 'MyClass')
         view = QQuickView()
         file = Path(__file__).resolve().parent / 'bug_926.qml'
         self.assertTrue(file.is_file())
@@ -74,6 +76,7 @@ class TestBug926 (unittest.TestCase):
         view.show()
         QTimer.singleShot(0, app.quit)
         app.exec_()
+
 
 if __name__ == '__main__':
     unittest.main()

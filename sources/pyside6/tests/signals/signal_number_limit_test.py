@@ -57,6 +57,7 @@ class Emitter(QObject):
     s13 = Signal()
     s14 = Signal()
 
+
 class SignalNumberLimitTest(unittest.TestCase):
     def myCb(self):
         self._count += 1
@@ -94,6 +95,7 @@ class SignalNumberLimitTest(unittest.TestCase):
         e.s13.emit()
         e.s14.emit()
         self.assertEqual(self._count, 14)
+
 
 if __name__ == '__main__':
     unittest.main()

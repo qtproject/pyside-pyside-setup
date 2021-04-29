@@ -42,6 +42,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QLocale
 
+
 class QLocaleTestToNumber(unittest.TestCase):
     def testToNumberInt(self):
         obj = QLocale(QLocale.C)
@@ -70,6 +71,7 @@ class QLocaleTestToNumber(unittest.TestCase):
     def testToNumberULongLongNegative(self):
         obj = QLocale(QLocale.C)
         self.assertTrue(not obj.toULongLong('-37')[1])
+
 
 if __name__ == '__main__':
     unittest.main()

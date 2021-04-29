@@ -42,22 +42,24 @@ init_test_paths(False)
 
 from PySide6.QtCore import QUrlQuery
 
+
 class QUrlQueryTest(unittest.TestCase):
     def testConstructing(self):
         empty = QUrlQuery()
         self.assertTrue(empty.isEmpty())
 
-        empty.clear();
+        empty.clear()
         self.assertTrue(empty.isEmpty())
 
     def testAddRemove(self):
         query = QUrlQuery()
 
-        query.addQueryItem("a", "b");
+        query.addQueryItem("a", "b")
         self.assertTrue(not query.isEmpty())
         self.assertTrue(query.hasQueryItem("a"))
         self.assertEqual(query.queryItemValue("a"), "b")
         self.assertEqual(query.allQueryItemValues("a"), ["b"])
+
 
 if __name__ == '__main__':
     unittest.main()

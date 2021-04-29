@@ -60,6 +60,7 @@ class SignalPrimitiveTypeTest(unittest.TestCase):
         self._app.exec_()
         self.assertTrue(self.called)
 
+
 if __name__ == '__main__':
     unittest.main()
 

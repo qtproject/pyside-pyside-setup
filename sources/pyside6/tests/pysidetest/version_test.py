@@ -51,6 +51,7 @@ class CheckForVariablesTest(unittest.TestCase):
         self.assertTrue(__version_info__ >= (4, 5, 0))
         self.assertTrue(__version__)
 
+
 if __name__ == '__main__':
     unittest.main()
 

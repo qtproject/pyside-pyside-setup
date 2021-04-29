@@ -42,6 +42,7 @@ from PySide6.QtGui import QPixmap, QColor
 
 from helper.usesqapplication import UsesQApplication
 
+
 class QPixmapQDatastream(UsesQApplication):
     '''QDataStream <<>> QPixmap'''
 
@@ -62,7 +63,7 @@ class QPixmapQDatastream(UsesQApplication):
         self.read_stream >> self.output_pixmap
 
         image = self.output_pixmap.toImage()
-        pixel = image.pixel(10,10)
+        pixel = image.pixel(10, 10)
         self.assertEqual(pixel, QColor(Qt.transparent).rgba())
         self.assertEqual(self.source_pixmap.toImage(), image)
 

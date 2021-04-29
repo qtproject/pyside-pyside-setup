@@ -45,6 +45,7 @@ class Test(QGraphicsView):
         self.s = QGraphicsScene()
         self.setScene(self.s)
 
+
 a = QApplication(sys.argv)
 t = Test()
 t.show()

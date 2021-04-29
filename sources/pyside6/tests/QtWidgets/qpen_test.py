@@ -41,6 +41,7 @@ from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QPen, QPainter
 from PySide6.QtWidgets import QWidget
 
+
 class Painting(QWidget):
     def __init__(self):
         super().__init__()

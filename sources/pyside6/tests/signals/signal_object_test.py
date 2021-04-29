@@ -40,6 +40,7 @@ init_test_paths(False)
 from PySide6.QtCore import QTimer, Signal, QObject, Slot, Qt
 from helper.usesqcoreapplication import UsesQCoreApplication
 
+
 class MyObject(QTimer):
     sig1 = Signal()
     sig2 = Signal(int, name='rangeChanged')
@@ -117,6 +118,7 @@ class SignalObjectTest(UsesQCoreApplication):
         arg = QObject()
         o.sig6.emit(arg)
         self.assertEqual(arg, o._o)
+
 
 if __name__ == '__main__':
     unittest.main()

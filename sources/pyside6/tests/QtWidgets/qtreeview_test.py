@@ -41,6 +41,7 @@ from PySide6.QtWidgets import (QWidget, QTreeView, QVBoxLayout,
 from PySide6.QtCore import Qt
 from helper.usesqapplication import UsesQApplication
 
+
 class Widget(QWidget):
     def __init__(self, parent=None):
         QWidget.__init__(self, parent)
@@ -51,6 +52,7 @@ class Widget(QWidget):
         self.treeView.setModel(QStandardItemModel())
 
         self.treeView.model().setHorizontalHeaderLabels(('3', '1', '5'))
+
 
 class QWidgetTest(UsesQApplication):
 
@@ -98,6 +100,7 @@ class QWidgetTest(UsesQApplication):
         tree = QTreeView()
         tree.setHeader(QHeaderView(Qt.Horizontal))
         self.assertIsNotNone(tree.header())
+
 
 if __name__ == '__main__':
     unittest.main()

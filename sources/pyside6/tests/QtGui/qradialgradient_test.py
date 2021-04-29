@@ -38,6 +38,7 @@ init_test_paths(False)
 from PySide6.QtGui import QRadialGradient
 from PySide6.QtCore import QPointF
 
+
 class QRadialGradientConstructor(unittest.TestCase):
     def _compare(self, qptf, tpl):
         self.assertEqual((qptf.x(), qptf.y()), tpl)
@@ -59,6 +60,7 @@ class QRadialGradientConstructor(unittest.TestCase):
         grad = QRadialGradient()
         grad.setCenter(QPointF(1, 2))
         self._compare(grad.center(), (1.0, 2.0))
+
 
 if __name__ == '__main__':
     unittest.main()

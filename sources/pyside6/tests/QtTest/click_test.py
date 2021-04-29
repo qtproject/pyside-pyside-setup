@@ -43,6 +43,7 @@ from PySide6.QtTest import QTest
 
 from helper.usesqapplication import UsesQApplication
 
+
 class MouseClickTest(UsesQApplication):
 
     def testBasic(self):

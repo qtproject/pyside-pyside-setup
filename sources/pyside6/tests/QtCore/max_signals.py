@@ -37,33 +37,37 @@ init_test_paths(False)
 
 from PySide6.QtCore import QObject, SIGNAL
 
+
 class MyObject(QObject):
     pass
 
 
 class TestSignalLimitless(unittest.TestCase):
     SIGNAL_MAX = 100
+
     def test100DynamicSignals(self):
 
         self.count = 0
+
         def onSignal():
             self.count += 1
 
-        #create 100 dynamic signals
+        # create 100 dynamic signals
         o = MyObject()
         for i in range(self.SIGNAL_MAX):
-            o.connect(SIGNAL('sig%d()'%i), onSignal)
+            o.connect(SIGNAL(f'sig{i}()'), onSignal)
 
-        #chek if the signals are valid
+        # check if the signals are valid
         m = o.metaObject()
         for i in range(self.SIGNAL_MAX):
-            self.assertTrue(m.indexOfSignal('sig%d()'%i) > 0)
+            self.assertTrue(m.indexOfSignal(f'sig{i}()') > 0)
 
-        #emit all 100 signals
+        # emit all 100 signals
         for i in range(self.SIGNAL_MAX):
-            o.emit(SIGNAL('sig%d()'%i))
+            o.emit(SIGNAL(f'sig{i}()'))
 
         self.assertEqual(self.count, self.SIGNAL_MAX)
+
 
 if __name__ == '__main__':
     unittest.main()

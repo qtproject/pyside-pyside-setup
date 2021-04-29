@@ -63,6 +63,7 @@ class QStringQKeySequenceTest(UsesQApplication):
         self.assertTrue(isinstance(shortcut, QKeySequence))
         self.assertEqual(shortcut.toString(), keyseq)
 
+
 if __name__ == '__main__':
     unittest.main()
 

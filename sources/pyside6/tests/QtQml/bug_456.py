@@ -57,6 +57,7 @@ class RotateValue(QObject):
 
     rotation = Property(int, getRotation, setRotation)
 
+
 class TestConnectionWithInvalidSignature(TimedQApplication):
 
     def testSlotRetur(self):
@@ -77,6 +78,7 @@ class TestConnectionWithInvalidSignature(TimedQApplication):
         view.show()
         button.entered.emit()
         self.assertEqual(rotatevalue.rotation, 100)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -51,6 +51,7 @@ init_test_paths(True)
 
 from testbinding import PySideCPP, TestObject
 
+
 class QObjectDerivedReprTest(unittest.TestCase):
     """Test the __repr__ implementation of QObject derived classes"""
 
@@ -85,6 +86,7 @@ class QObjectDerivedReprTest(unittest.TestCase):
 
         # __repr__ should use the operator<<(QDebug,...) implementation
         self.assertEqual(str(t), "TestObject2WithNamespace(injected_repr)")
+
 
 if __name__ == '__main__':
     unittest.main()

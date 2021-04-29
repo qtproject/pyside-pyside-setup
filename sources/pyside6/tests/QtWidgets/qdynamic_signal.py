@@ -40,6 +40,7 @@ from PySide6.QtWidgets import QInputDialog
 
 from helper.usesqapplication import UsesQApplication
 
+
 class DynamicSignalTest(UsesQApplication):
 
     def cb(self, obj):

@@ -42,10 +42,11 @@ from PySide6.QtCore import QObject, QTimerEvent
 
 from helper.usesqcoreapplication import UsesQCoreApplication
 
+
 class FilterObject(QObject):
     '''Filter object for the basic test'''
     def __init__(self, obj=None, event_type=None, *args):
-        #Creates a new filter object
+        # Creates a new filter object
         QObject.__init__(self, *args)
         self.obj = obj
         self.event_type = event_type
@@ -53,7 +54,7 @@ class FilterObject(QObject):
         self.events_bypassed = 0
 
     def setTargetObject(self, obj):
-        #Sets the object that will be filtered
+        # Sets the object that will be filtered
         self.obj = obj
 
     def eventFilter(self, obj, event):
@@ -70,6 +71,7 @@ class FilterObject(QObject):
         else:
             return QObject.eventFilter(self, obj, event)
 
+
 class FilteredObject(QObject):
     '''Class that will be filtered. Quits the app after 5 timer events'''
     def __init__(self, app, *args):
@@ -78,11 +80,12 @@ class FilteredObject(QObject):
         self.times_called = 0
 
     def timerEvent(self, evt):
-        #Overriden method
+        # Overridden method
         self.times_called += 1
 
         if self.times_called == 5:
             self.app.quit()
+
 
 class TestQObjectEventFilterPython(UsesQCoreApplication):
     '''QObject.eventFilter - Reimplemented in python
@@ -90,16 +93,17 @@ class TestQObjectEventFilterPython(UsesQCoreApplication):
     timerEvent method. After 5 runs, the timerEvent method will ask
     the core application to exit'''
     def setUp(self):
-        #Acquire resources
+        # Acquire resources
         UsesQCoreApplication.setUp(self)
         self.obj_filter = FilterObject(event_type=QTimerEvent)
+
     def tearDown(self):
-        #Release resources
+        # Release resources
         del self.obj_filter
         UsesQCoreApplication.tearDown(self)
 
     def testEventFilter(self):
-        #QObject.eventFilter reimplemented in python
+        # QObject.eventFilter reimplemented in python
         filtered = FilteredObject(self.app)
         filtered.installEventFilter(self.obj_filter)
         self.obj_filter.setTargetObject(filtered)
@@ -144,6 +148,7 @@ class TestQObjectEventFilterPython(UsesQCoreApplication):
         wref = weakref.ref(obj)
         del obj
         self.assertEqual(wref(), None)
+
 
 if __name__ == '__main__':
     unittest.main()

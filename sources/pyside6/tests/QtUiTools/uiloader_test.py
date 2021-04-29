@@ -67,7 +67,6 @@ class QUiLoaderTester(UsesQApplication):
         self.assertNotEqual(child, None)
         self.assertEqual(w.findChild(QWidget, "grandson_object"), child.findChild(QWidget, "grandson_object"))
 
-
     def testLoadFileOverride(self):
         # PYSIDE-1070, override QUiLoader::createWidget() with parent=None crashes
         loader = OverridingLoader()

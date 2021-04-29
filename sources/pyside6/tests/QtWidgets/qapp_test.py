@@ -43,12 +43,14 @@ from PySide6.QtWidgets import QApplication
 class QAppPresence(unittest.TestCase):
 
     def testQApp(self):
-        #QtGui.qApp variable is instance of QApplication
+        # QtGui.qApp variable is instance of QApplication
         self.assertTrue(isinstance(qApp, QApplication))
+
 
 def main():
     app = QApplication([])
     unittest.main()
+
 
 if __name__ == '__main__':
     main()

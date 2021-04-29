@@ -47,8 +47,9 @@ class Dispatcher(QObject):
         QTimer.singleShot(0, self._finish)
 
     def _finish(self):
-        del self._me # It can't crash here!
+        del self._me  # It can't crash here!
         QTimer.singleShot(10, QCoreApplication.instance().quit)
+
 
 if __name__ == '__main__':
     app = QCoreApplication([])

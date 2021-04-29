@@ -51,8 +51,9 @@ class TestBug913 (unittest.TestCase):
         file = Path(__file__).resolve().parent / 'bug_913.ui'
         self.assertTrue(file.is_file())
         widget = loader.load(os.fspath(file))
-        widget.tabWidget.currentIndex() # direct child is available as member
-        widget.le_first.setText('foo') # child of QTabWidget must also be available!
+        widget.tabWidget.currentIndex()  # direct child is available as member
+        widget.le_first.setText('foo')  # child of QTabWidget must also be available!
+
 
 if __name__ == '__main__':
     unittest.main()

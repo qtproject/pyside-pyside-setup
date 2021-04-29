@@ -58,7 +58,7 @@ class BaseQByteArrayOperatorIAdd(object):
     def testString(self):
         '''QByteArray += bytes of size > 1'''
         s = bytearray(bytes('dummy', "UTF-8"))
-        self.obj += s # XXx iadd support abytearray
+        self.obj += s  # XXx iadd support abytearray
         self.assertEqual(self.obj, self.orig_obj + s)
         self.assertEqual(self.obj.size(), self.orig_obj.size() + len(s))
 
@@ -89,6 +89,7 @@ class ValidQByteArrayOperatorIAdd(unittest.TestCase, BaseQByteArrayOperatorIAdd)
     def setUp(self):
         self.obj = QByteArray(bytes('some byte array', "UTF-8"))
         self.orig_obj = QByteArray(bytes('some byte array', "UTF-8"))
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -46,5 +46,6 @@ class NeverDiesTest(UsesQApplication):
     def testIt(self):
         QPrintDialog()
 
+
 if __name__ == "__main__":
     unittest.main()

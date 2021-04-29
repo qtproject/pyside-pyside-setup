@@ -42,30 +42,32 @@ init_test_paths(False)
 
 from PySide6.QtCore import QByteArray
 
+
 class QByteArrayOperatorEqual(unittest.TestCase):
     '''TestCase for operator QByteArray == QByteArray'''
 
     def testDefault(self):
-        #QByteArray() == QByteArray()
+        # QByteArray() == QByteArray()
         obj1 = QByteArray()
         obj2 = QByteArray()
         self.assertEqual(obj1, obj2)
 
     def testSimple(self):
-        #QByteArray(some_string) == QByteArray(some_string)
+        # QByteArray(some_string) == QByteArray(some_string)
         string = bytes('egg snakes', "UTF-8")
         self.assertEqual(QByteArray(string), QByteArray(string))
 
     def testPyString(self):
-        #QByteArray(string) == string
+        # QByteArray(string) == string
         string = bytes('my test string', "UTF-8")
         self.assertEqual(QByteArray(string), string)
+
 
 class QByteArrayOperatorAt(unittest.TestCase):
     '''TestCase for operator QByteArray[]'''
 
     def testInRange(self):
-        #QByteArray[x] where x is a valid index
+        # QByteArray[x] where x is a valid index
         string = 'abcdefgh'
         obj = QByteArray(bytes(string, "UTF-8"))
 
@@ -73,24 +75,24 @@ class QByteArrayOperatorAt(unittest.TestCase):
             self.assertEqual(obj[i], bytes(string[i], "UTF-8"))
 
     def testInRangeReverse(self):
-        #QByteArray[x] where x is a valid index (reverse order)
+        # QByteArray[x] where x is a valid index (reverse order)
         string = 'abcdefgh'
         obj = QByteArray(bytes(string, "UTF-8"))
 
-        for i in range(len(string)-1, 0, -1):
+        for i in range(len(string) - 1, 0, -1):
             self.assertEqual(obj[i], bytes(string[i], "UTF-8"))
 
-
     def testOutOfRange(self):
-        #QByteArray[x] where x is out of index
+        # QByteArray[x] where x is out of index
         string = bytes('1234567', "UTF-8")
         obj = QByteArray(string)
-        self.assertRaises(IndexError, lambda :obj[len(string)])
+        self.assertRaises(IndexError, lambda: obj[len(string)])
 
     def testNullStrings(self):
         ba = QByteArray(bytes('\x00', "UTF-8"))
         self.assertEqual(ba.at(0), '\x00')
         self.assertEqual(ba[0], bytes('\x00', "UTF-8"))
+
 
 class QByteArrayOperatorLen(unittest.TestCase):
     '''Test case for __len__ operator of QByteArray'''

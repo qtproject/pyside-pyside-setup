@@ -40,6 +40,7 @@ init_test_paths(False)
 from PySide6.QtWidgets import QTreeWidgetItem
 from helper.usesqapplication import UsesQApplication
 
+
 class HashableTest(UsesQApplication):
 
     def testQTreeWidgetItemHash(self):
@@ -47,6 +48,7 @@ class HashableTest(UsesQApplication):
         obj = QTreeWidgetItem()
         h[obj] = 2
         self.assertTrue(h.get(obj), 2)
+
 
 if __name__ == '__main__':
     unittest.main()

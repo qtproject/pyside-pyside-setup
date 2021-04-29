@@ -230,5 +230,6 @@ class QCharTest(QFontMetricsFTest):
         retCh = self.metrics.horizontalAdvance('a')
         self.assertTrue(retCh > 0)
 
+
 if __name__ == '__main__':
     unittest.main()

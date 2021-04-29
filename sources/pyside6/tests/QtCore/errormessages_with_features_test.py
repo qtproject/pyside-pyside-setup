@@ -60,6 +60,7 @@ This test is in its own file because combining it with
 "snake_prop_feature_test" gave strange interactions with the other tests.
 """
 
+
 class ErrormessagesWithFeatures(unittest.TestCase):
     probe = "called with wrong argument types"
     probe_miss = "missing signature"

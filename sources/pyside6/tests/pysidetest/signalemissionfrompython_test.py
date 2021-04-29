@@ -42,6 +42,7 @@ from PySide6.QtCore import QObject, SIGNAL
 
 '''Tests the behaviour of signals with default values when emitted from Python.'''
 
+
 class SignalEmissionFromPython(unittest.TestCase):
 
     def setUp(self):
@@ -60,6 +61,7 @@ class SignalEmissionFromPython(unittest.TestCase):
         def callbackOne():
             self.one_called += 1
             self.obj2.signalWithDefaultValue.emit()
+
         def callbackTwo():
             self.two_called += 1
         self.obj1.signalWithDefaultValue.connect(callbackOne)
@@ -73,6 +75,7 @@ class SignalEmissionFromPython(unittest.TestCase):
         def callbackOne():
             self.one_called += 1
             self.obj2.signalWithDefaultValue.emit()
+
         def callbackTwo():
             self.two_called += 1
         QObject.connect(self.obj1, SIGNAL('signalWithDefaultValue()'), callbackOne)
@@ -86,6 +89,7 @@ class SignalEmissionFromPython(unittest.TestCase):
         def callbackOne():
             self.one_called += 1
             self.obj2.signalWithDefaultValue[bool].emit(True)
+
         def callbackTwo():
             self.two_called += 1
         self.obj1.signalWithDefaultValue.connect(callbackOne)
@@ -99,6 +103,7 @@ class SignalEmissionFromPython(unittest.TestCase):
         def callbackOne():
             self.one_called += 1
             self.obj2.signalWithDefaultValue[bool].emit(True)
+
         def callbackTwo():
             self.two_called += 1
         QObject.connect(self.obj1, SIGNAL('signalWithDefaultValue()'), callbackOne)
@@ -107,7 +112,6 @@ class SignalEmissionFromPython(unittest.TestCase):
         self.obj2.emitSignalWithDefaultValue_void()
         self.assertEqual(self.one_called, 1)
         self.assertEqual(self.two_called, 2)
-
 
 
 if __name__ == '__main__':

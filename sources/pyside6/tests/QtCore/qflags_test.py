@@ -42,6 +42,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import Qt, QTemporaryFile, QFile, QIODevice, QObject
 
+
 class QFlagTest(unittest.TestCase):
     '''Test case for usage of flags'''
 
@@ -110,11 +111,13 @@ class QFlagOperatorTest(unittest.TestCase):
         flags = Qt.NoItemFlags | Qt.ItemIsUserCheckable
         self.assertEqual(flags | Qt.ItemIsEnabled, Qt.ItemIsEnabled | flags)
 
+
 class QFlagsOnQVariant(unittest.TestCase):
     def testQFlagsOnQVariant(self):
         o = QObject()
         o.setProperty("foo", QIODevice.ReadOnly | QIODevice.WriteOnly)
         self.assertEqual(type(o.property("foo")), QIODevice.OpenMode)
+
 
 class QFlagsWrongType(unittest.TestCase):
     def testWrongType(self):

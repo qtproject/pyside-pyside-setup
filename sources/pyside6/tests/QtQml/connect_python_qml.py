@@ -74,5 +74,6 @@ class TestConnectionWithInvalidSignature(TimedQApplication):
         self.app.exec_()
         self.assertTrue(self.buttonClicked)
 
+
 if __name__ == '__main__':
     unittest.main()

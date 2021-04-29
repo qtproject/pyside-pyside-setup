@@ -45,9 +45,10 @@ from PySide6.QtQuick import QQuickView, QQuickItem, QQuickPaintedItem
 QML_IMPORT_NAME = "Charts"
 QML_IMPORT_MAJOR_VERSION = 1
 
+
 @QmlElement
 class PieSlice (QQuickPaintedItem):
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         QQuickPaintedItem.__init__(self, parent)
         self._color = QColor()
         self._fromAngle = 0
@@ -78,14 +79,15 @@ class PieSlice (QQuickPaintedItem):
     def paint(self, painter):
         global paintCalled
         pen = QPen(self._color, 2)
-        painter.setPen(pen);
-        painter.setRenderHints(QPainter.Antialiasing, True);
-        painter.drawPie(self.boundingRect(), self._fromAngle * 16, self._angleSpan * 16);
+        painter.setPen(pen)
+        painter.setRenderHints(QPainter.Antialiasing, True)
+        painter.drawPie(self.boundingRect(), self._fromAngle * 16, self._angleSpan * 16)
         paintCalled = True
+
 
 @QmlElement
 class PieChart (QQuickItem):
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         QQuickItem.__init__(self, parent)
         self._name = ''
         self._slices = []
@@ -106,8 +108,10 @@ class PieChart (QQuickItem):
 
     slices = ListProperty(PieSlice, append=appendSlice)
 
+
 appendCalled = False
 paintCalled = False
+
 
 class TestQmlSupport(unittest.TestCase):
 
@@ -124,6 +128,7 @@ class TestQmlSupport(unittest.TestCase):
         app.exec_()
         self.assertTrue(appendCalled)
         self.assertTrue(paintCalled)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -42,6 +42,7 @@ init_test_paths(False)
 from PySide6.QtCore import (QByteArray, QCborStreamReader, QCborStreamWriter,
     QCborValue)
 
+
 class TestCbor(unittest.TestCase):
     def testReader(self):
         ba = QByteArray()
@@ -62,7 +63,7 @@ class TestCbor(unittest.TestCase):
         self.assertTrue(not ba.isEmpty())
         reader = QCborStreamReader(ba)
         self.assertTrue(reader.hasNext())
-        if (reader.isByteArray()): # Python 2
+        if (reader.isByteArray()):  # Python 2
             value = reader.readByteArray()
             self.assertTrue(value)
             self.assertEqual(value.data, "hello")
@@ -76,6 +77,7 @@ class TestCbor(unittest.TestCase):
         value = QCborValue('hello')
         self.assertTrue(value.isString())
         self.assertEqual(value.toString(), 'hello')
+
 
 if __name__ == '__main__':
     unittest.main()

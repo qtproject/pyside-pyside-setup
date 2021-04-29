@@ -85,6 +85,7 @@ cache_path = os.path.dirname(test_path)
 target_path = os.path.dirname(__file__)
 start_time = time.time()
 
+
 def get_name(url):
     """
     Return the last piece of an url, including trailing slash.
@@ -96,13 +97,16 @@ def get_name(url):
         name += "/"
     return name
 
+
 def rel_url(url):
     """
     throw the top URL away
     """
     return url[len(top_url):]
 
+
 stop_all = False
+
 
 def find_all_links(text, url, ignore=()):
     """
@@ -126,6 +130,7 @@ def find_all_links(text, url, ignore=()):
     urls = list(url + name for name in names)
     return urls
 
+
 def read_url(url):
     # We intentionally let things fail, because we re-run things on failure.
     try:
@@ -140,6 +145,7 @@ def read_url(url):
         raise
     else:
         return response
+
 
 def get_timestamp(text):
     # agent:2018/06/29 15:02:15
@@ -163,6 +169,7 @@ def get_timestamp(text):
         stop_all = True
         raise
     return ts
+
 
 def write_data(name, text):
     try:
@@ -195,6 +202,7 @@ def write_data(name, text):
     with open(fn, "w") as f:
         f.write(text)
 
+
 def eval_data(force=False):
     """
     Read all found files, sort them and keep the latest version.
@@ -220,9 +228,10 @@ def eval_data(force=False):
         print("+++ generated:", name)
     return len(results)
 
+
 def handle_suburl(idx, n, url, level):
     if level == 1:
-        print(os.getpid(), "Reading", idx+1, "of", n, rel_url(url))
+        print(os.getpid(), "Reading", idx + 1, "of", n, rel_url(url))
     response = read_url(url)
     urls = find_all_links(response.text, url)
     for sub_url in urls:
@@ -249,13 +258,14 @@ def handle_suburl(idx, n, url, level):
 
 def handle_suburl_tup(idx_n_url_level):
     if stop_all:
-        return # bad solution, but it stops fast
+        return  # bad solution, but it stops fast
     idx, n, url, level = idx_n_url_level
     try:
         ret = handle_suburl(idx, n, url, level)
         return url, None
     except requests.exceptions.RequestException as e:
         return url, e
+
 
 def handle_batch(urls, level):
     n = len(urls)
@@ -278,6 +288,7 @@ def handle_batch(urls, level):
     # Return success when the remaining URLs are empty.
     print("Runs:", ", ".join(map(str, runs)))
     return not urls
+
 
 def handle_topurl(url):
     """
@@ -313,6 +324,7 @@ def handle_topurl(url):
             json.dump(urls, fp, sort_keys=True, indent=4)
     return success
 
+
 def get_test_results(starturl):
     ok = handle_topurl(starturl)
     stop_time = time.time()
@@ -327,6 +339,7 @@ def get_test_results(starturl):
         print(f"Successful scan, {found} new files.")
         if found:
             print("Please check if a git push is necessary.")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(

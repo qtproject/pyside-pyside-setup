@@ -42,6 +42,7 @@ from helper.usesqapplication import UsesQApplication
 from PySide6.QtGui import QOffscreenSurface, QOpenGLContext, QSurface, QWindow
 from PySide6.QtOpenGL import QOpenGLBuffer
 
+
 def createSurface(surfaceClass):
     if surfaceClass == QSurface.Window:
         window = QWindow()
@@ -67,6 +68,7 @@ def createSurface(surfaceClass):
         offscreenSurface.create()
         return offscreenSurface
     return 0
+
 
 class QOpenGLBufferTest(UsesQApplication):
     def testBufferCreate(self):
@@ -94,6 +96,7 @@ class QOpenGLBufferTest(UsesQApplication):
         self.assertTrue(not buf.isCreated())
 
         ctx.doneCurrent()
+
 
 if __name__ == '__main__':
     unittest.main()

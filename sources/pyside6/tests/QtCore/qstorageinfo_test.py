@@ -41,10 +41,12 @@ init_test_paths(False)
 
 from PySide6.QtCore import QStorageInfo
 
+
 class QandardPathsTest(unittest.TestCase):
     def testQStorageInfo(self):
         for v in QStorageInfo.mountedVolumes():
             print(v.name(), v.rootPath(), v.device())
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -38,11 +38,14 @@ init_test_paths()
 from PySide6.QtWidgets import QWidget
 from PySide6.QtCore import QObject
 
+
 class MyQObject(QObject):
     pass
 
+
 class MyQWidget(QWidget):
     pass
+
 
 class Sentinel():
     value = 10

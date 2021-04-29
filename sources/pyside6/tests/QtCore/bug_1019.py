@@ -47,6 +47,7 @@ class MyTimer (QTimer):
     def slotUsedToIncreaseMethodOffset(self):
         pass
 
+
 class MyTimer2 (MyTimer):
 
     @Slot()
@@ -57,6 +58,7 @@ class MyTimer2 (MyTimer):
         self.startCalled = True
         QCoreApplication.instance().quit()
 
+
 class TestBug1019 (unittest.TestCase):
     def testIt(self):
         app = QCoreApplication([])
@@ -64,6 +66,7 @@ class TestBug1019 (unittest.TestCase):
         QTimer.singleShot(0, t.start)
         app.exec_()
         self.assertTrue(t.startCalled)
+
 
 if __name__ == "__main__":
     unittest.main()

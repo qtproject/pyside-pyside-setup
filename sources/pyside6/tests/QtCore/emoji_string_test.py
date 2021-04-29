@@ -64,6 +64,7 @@ from PySide6.QtCore import QObject, Signal
 
 emoji_str = u'\U0001f632' + u' '  # "😲 "
 
+
 class TestStuff(QObject):
     testsig = Signal(str)
 
@@ -81,6 +82,7 @@ class TestStuff(QObject):
         # UCS-2 creates 2 surrogate code points. See
         # https://stackoverflow.com/questions/30775689/python-length-of-unicode-string-confusion
         assert len(emoji_str) == 2 if sys.maxunicode > 0xffff else 3
+
 
 if __name__ == "__main__":
     mything = TestStuff()

@@ -49,5 +49,6 @@ class TestBugPYSIDE42 (unittest.TestCase):
         self.assertNotEqual(hash1, hash2)
         self.assertEqual(hash1, hash(obj1))
 
+
 if __name__ == '__main__':
     unittest.main()

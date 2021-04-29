@@ -45,9 +45,10 @@ class TestQAbstractItemModelSignals(unittest.TestCase):
     def testSignals(self):
         self._called = False
         m = QStringListModel()
-        m.rowsAboutToBeInserted[QModelIndex,int,int].connect(self.sigCallback)
+        m.rowsAboutToBeInserted[QModelIndex, int, int].connect(self.sigCallback)
         m.insertRows(0, 3)
         self.assertTrue(self._called)
+
 
 if __name__ == '__main__':
     unittest.main()

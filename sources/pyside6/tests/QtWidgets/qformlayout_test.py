@@ -39,6 +39,7 @@ from PySide6.QtWidgets import QFormLayout, QWidget
 
 from helper.usesqapplication import UsesQApplication
 
+
 class QFormLayoutTest(UsesQApplication):
 
     def testGetItemPosition(self):
@@ -88,5 +89,5 @@ class QFormLayoutTest(UsesQApplication):
 
 
 if __name__ == "__main__":
-   unittest.main()
+    unittest.main()
 

@@ -43,6 +43,7 @@ class MyObject(QObject):
         super().__init__(None)
         self._o = other
 
+
 class TestDestructor(unittest.TestCase):
     def testReference(self):
         o = QObject()
@@ -50,6 +51,7 @@ class TestDestructor(unittest.TestCase):
         self.assertEqual(sys.getrefcount(o), 3)
         del m
         self.assertEqual(sys.getrefcount(o), 2)
+
 
 if __name__ == '__main__':
     unittest.main()

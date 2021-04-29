@@ -37,6 +37,7 @@ init_test_paths(False)
 
 from PySide6.QtGui import QGuiApplication
 
+
 class TestQGuiApplication(unittest.TestCase):
     def testNoArguments(self):
         app = QGuiApplication()

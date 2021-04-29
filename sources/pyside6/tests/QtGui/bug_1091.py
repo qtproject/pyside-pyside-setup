@@ -45,5 +45,6 @@ class QPainterTestCase(unittest.TestCase):
         self.assertTrue("PixmapFragment" in dir(QPainter))
         self.assertTrue("drawPixmapFragments" in dir(QPainter))
 
+
 if __name__ == "__main__":
     unittest.main()

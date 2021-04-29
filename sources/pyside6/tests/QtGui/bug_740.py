@@ -39,10 +39,12 @@ from helper.usesqapplication import UsesQApplication
 from PySide6.QtCore import QSize
 from PySide6.QtGui import QBitmap, QImage
 
+
 class TestQBitmap(UsesQApplication):
     def testFromDataMethod(self):
         dataBits = bytes('\x38\x28\x38\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\xfe\xfe\x7c\x7c\x38\x38\x10\x10', "UTF-8")
-        bim = QBitmap.fromData(QSize(8, 48), dataBits, QImage.Format_Mono) # missing function
+        bim = QBitmap.fromData(QSize(8, 48), dataBits, QImage.Format_Mono)  # missing function
+
 
 if __name__ == '__main__':
     unittest.main()

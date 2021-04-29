@@ -39,6 +39,7 @@ init_test_paths(False)
 from PySide6.QtCore import QMetaType
 from PySide6.QtSql import QSqlField
 
+
 class QVariantTypeTest(unittest.TestCase):
     def testQVariantType(self):
         f = QSqlField("name", QMetaType(QMetaType.QString))

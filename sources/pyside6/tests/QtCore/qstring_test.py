@@ -42,6 +42,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QObject
 
+
 class QStringConstructor(unittest.TestCase):
     '''Test case for QString constructors'''
 
@@ -53,6 +54,7 @@ class QStringConstructor(unittest.TestCase):
         self.assertEqual(obj.objectName(), 'áâãà')
         obj.setObjectName(None)
         self.assertEqual(obj.objectName(), '')
+
 
 if __name__ == '__main__':
     unittest.main()

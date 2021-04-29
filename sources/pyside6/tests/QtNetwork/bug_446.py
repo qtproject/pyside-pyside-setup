@@ -78,5 +78,6 @@ class HttpSignalsCase(UsesQCoreApplication):
         self.initServer()
         self.app.exec_()
 
+
 if __name__ == '__main__':
     unittest.main()

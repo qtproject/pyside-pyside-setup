@@ -44,6 +44,7 @@ from PySide6.QtWidgets import QApplication, QPushButton, QLabel
 
 from helper.usesqapplication import UsesQApplication
 
+
 class SaveReference(UsesQApplication):
     '''Test case to check if QLayout-derived classes increment the refcount
     of widgets passed to addWidget()'''
@@ -52,19 +53,19 @@ class SaveReference(UsesQApplication):
     qapplication = True
 
     def setUp(self):
-        #Acquire resources
+        # Acquire resources
         super(SaveReference, self).setUp()
         self.widget1 = QPushButton('click me')
         self.widget2 = QLabel('aaa')
 
     def tearDown(self):
-        #Release resources
+        # Release resources
         del self.widget2
         del self.widget1
         super(SaveReference, self).tearDown()
 
     def checkLayoutReference(self, layout):
-        #Checks the reference cound handling of layout.addWidget
+        # Checks the reference cound handling of layout.addWidget
         self.assertEqual(getrefcount(self.widget1), 2)
         layout.addWidget(self.widget1)
         self.assertEqual(getrefcount(self.widget1), 3)
@@ -86,31 +87,31 @@ class SaveReference(UsesQApplication):
         w.setLayout(l)
         self.assertEqual(getrefcount(self.widget1), 3)
 
-
     def testHBoxReference(self):
-        #QHBoxLayout.addWidget reference count
+        # QHBoxLayout.addWidget reference count
         w = QWidget()
         self.checkLayoutReference(QHBoxLayout(w))
 
     def testVBoxReference(self):
-        #QVBoxLayout.addWidget reference count
+        # QVBoxLayout.addWidget reference count
         w = QWidget()
         self.checkLayoutReference(QVBoxLayout(w))
 
     def testGridReference(self):
-        #QGridLayout.addWidget reference count
+        # QGridLayout.addWidget reference count
         w = QWidget()
         self.checkLayoutReference(QGridLayout(w))
 
     def testFormReference(self):
-        #QFormLayout.addWidget reference count
+        # QFormLayout.addWidget reference count
         w = QWidget()
         self.checkLayoutReference(QFormLayout(w))
 
     def testStackedReference(self):
-        #QStackedLayout.addWidget reference count
+        # QStackedLayout.addWidget reference count
         w = QWidget()
         self.checkLayoutReference(QStackedLayout(w))
+
 
 class MultipleAdd(UsesQApplication):
     '''Test case to check if refcount is incremented only once when multiple
@@ -119,21 +120,21 @@ class MultipleAdd(UsesQApplication):
     qapplication = True
 
     def setUp(self):
-        #Acquire resources
+        # Acquire resources
         super(MultipleAdd, self).setUp()
         self.widget = QPushButton('click me')
         self.win = QWidget()
         self.layout = QHBoxLayout(self.win)
 
     def tearDown(self):
-        #Release resources
+        # Release resources
         del self.widget
         del self.layout
         del self.win
         super(MultipleAdd, self).tearDown()
 
     def testRefCount(self):
-        #Multiple QLayout.addWidget calls on the same widget
+        # Multiple QLayout.addWidget calls on the same widget
         self.assertEqual(getrefcount(self.widget), 2)
         self.layout.addWidget(self.widget)
         self.assertEqual(getrefcount(self.widget), 3)
@@ -141,6 +142,7 @@ class MultipleAdd(UsesQApplication):
         self.assertEqual(getrefcount(self.widget), 3)
         self.layout.addWidget(self.widget)
         self.assertEqual(getrefcount(self.widget), 3)
+
 
 class InternalAdd(UsesQApplication):
     def testInternalRef(self):

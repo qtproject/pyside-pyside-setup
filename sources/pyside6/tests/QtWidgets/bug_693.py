@@ -49,6 +49,7 @@ class MyModel (QAbstractListModel):
     def data(self, index, role):
         return self.stupidLine
 
+
 class TestBug693(unittest.TestCase):
     def testIt(self):
         app = QApplication([])
@@ -60,7 +61,6 @@ class TestBug693(unittest.TestCase):
         # This must NOT throw the exception:
         # RuntimeError: Internal C++ object (PySide6.QtCore.QLine) already deleted.
         MyModel.stupidLine.isNull()
-
 
 
 if __name__ == "__main__":

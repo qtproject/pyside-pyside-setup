@@ -44,27 +44,33 @@ from PySide6.QtGui import QVector2D, QVector3D, QVector4D
 from PySide6.QtGui import QColor, QTransform, QKeySequence, QQuaternion
 from PySide6.QtGui import QPolygon
 
+
 class ReprCopyHelper:
     def testCopy(self):
         copy = eval(self.original.__repr__())
         self.assertTrue(copy is not self.original)
         self.assertEqual(copy, self.original)
 
+
 class QTransformReprCopy(ReprCopyHelper, unittest.TestCase):
     def setUp(self):
         self.original = QTransform(1, 2, 3, 4, 5, 6, 7, 8, 9)
+
 
 class QQuaternionReprCopy(ReprCopyHelper, unittest.TestCase):
     def setUp(self):
         self.original = QQuaternion(1, 2, 3, 4)
 
+
 class QVector2DReprCopy(ReprCopyHelper, unittest.TestCase):
     def setUp(self):
         self.original = QVector2D(1, 2)
 
+
 class QVector3DReprCopy(ReprCopyHelper, unittest.TestCase):
     def setUp(self):
         self.original = QVector3D(1, 2, 3)
+
 
 class QVector4DReprCopy(ReprCopyHelper, unittest.TestCase):
     def setUp(self):

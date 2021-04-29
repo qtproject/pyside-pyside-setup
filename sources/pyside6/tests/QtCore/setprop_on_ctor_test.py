@@ -42,8 +42,9 @@ from PySide6.QtCore import QTimer
 
 class SetPropOnCtorTest(unittest.TestCase):
     def testIt(self):
-        timer = QTimer(interval = 42)
-        self.assertEqual(timer.interval(), 42);
+        timer = QTimer(interval=42)
+        self.assertEqual(timer.interval(), 42)
+
 
 if __name__ == '__main__':
     unittest.main()

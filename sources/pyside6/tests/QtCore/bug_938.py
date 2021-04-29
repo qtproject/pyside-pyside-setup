@@ -47,5 +47,6 @@ class TestBug938 (unittest.TestCase):
         b.close()
         self.assertEqual(b.buffer().size(), 5)
 
+
 if __name__ == '__main__':
     unittest.main()

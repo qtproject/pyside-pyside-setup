@@ -52,6 +52,7 @@ class Bug575(unittest.TestCase):
         selection.cursor.setPosition(2)
         self.assertEqual(selection.cursor.position(), 2)
 
+
 if __name__ == '__main__':
     unittest.main()
 

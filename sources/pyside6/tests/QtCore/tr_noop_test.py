@@ -38,6 +38,7 @@ init_test_paths(False)
 from PySide6.QtCore import QT_TR_NOOP, QT_TR_NOOP_UTF8
 from PySide6.QtCore import QT_TRANSLATE_NOOP, QT_TRANSLATE_NOOP3, QT_TRANSLATE_NOOP_UTF8
 
+
 class QtTrNoopTest(unittest.TestCase):
 
     def setUp(self):

@@ -42,13 +42,17 @@ from PySide6.QtCore import QCoreApplication, qAddPostRoutine
 
 
 callCleanup = False
+
+
 def _cleanup():
     global callCleanup
     callCleanup = True
 
+
 def _checkCleanup():
     global callCleanup
     assert(callCleanup)
+
 
 app = QCoreApplication([])
 qAddPostRoutine(_cleanup)

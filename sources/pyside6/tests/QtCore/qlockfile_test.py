@@ -42,6 +42,7 @@ init_test_paths()
 
 from PySide6.QtCore import QDir, QLockFile, QCoreApplication
 
+
 class TestQMessageAuthenticationCode (unittest.TestCase):
 
     def setUp(self):
@@ -58,6 +59,7 @@ class TestQMessageAuthenticationCode (unittest.TestCase):
         self.assertTrue(lockFile.lock())
         self.assertTrue(lockFile.isLocked())
         lockFile.unlock()
+
 
 if __name__ == '__main__':
     unittest.main()

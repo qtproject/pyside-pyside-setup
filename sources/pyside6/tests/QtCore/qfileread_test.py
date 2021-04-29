@@ -41,11 +41,14 @@ from PySide6.QtCore import QIODevice, QTemporaryFile
 class FileChild1(QTemporaryFile):
     pass
 
+
 class FileChild2(QTemporaryFile):
     def readData(self, maxlen):
         return super(FileChild2, self).readData(maxlen)
+
     def readLineData(self, maxlen):
         return super(FileChild2, self).readLineData(maxlen)
+
 
 class readDataTest(unittest.TestCase):
     '''Test case for readData and readLineData'''
@@ -70,7 +73,6 @@ class readDataTest(unittest.TestCase):
         s1 = self.filename1.read(50)
         self.assertEqual(s1, 'Test text for testing')
 
-
     def testBug40(self):
         self.filename2.seek(0)
         s2 = self.filename2.read(50)
@@ -83,6 +85,7 @@ class readDataTest(unittest.TestCase):
         self.filename1.seek(0)
         s1 = self.filename1.read(50)
         self.assertEqual(s1, s2)
+
 
 if __name__ == '__main__':
     unittest.main()

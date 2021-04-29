@@ -43,11 +43,11 @@ from PySide6.QtWidgets import QLineEdit
 
 
 class BlankIntValidator(QIntValidator):
-    def validate(self,input,pos):
+    def validate(self, input, pos):
         if input == '':
             return QValidator.Acceptable, input, pos
         else:
-            return QIntValidator.validate(self,input,pos)
+            return QIntValidator.validate(self, input, pos)
 
 
 class Bug871Test(UsesQApplication):
@@ -74,5 +74,5 @@ class Bug871Test(UsesQApplication):
 
 
 if __name__ == "__main__":
-   unittest.main()
+    unittest.main()
 

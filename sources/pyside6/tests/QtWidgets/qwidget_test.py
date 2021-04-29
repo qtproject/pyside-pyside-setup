@@ -39,9 +39,11 @@ init_test_paths(False)
 from PySide6.QtWidgets import QWidget, QMainWindow
 from helper.usesqapplication import UsesQApplication
 
+
 class QWidgetInherit(QMainWindow):
     def __init__(self):
         QWidget.__init__(self)  # Intended: Initialize QWidget instead of base
+
 
 class NativeEventTestWidget(QWidget):
 
@@ -54,10 +56,12 @@ class NativeEventTestWidget(QWidget):
         self.nativeEventCount = self.nativeEventCount + 1
         return [False, 0]
 
+
 class QWidgetTest(UsesQApplication):
 
     def testInheritance(self):
         self.assertRaises(TypeError, QWidgetInherit)
+
 
 class QWidgetVisible(UsesQApplication):
 
@@ -76,6 +80,7 @@ class QWidgetVisible(UsesQApplication):
                 break
             self.app.processEvents()
         self.assertTrue(widget.nativeEventCount > 0)
+
 
 if __name__ == '__main__':
     unittest.main()

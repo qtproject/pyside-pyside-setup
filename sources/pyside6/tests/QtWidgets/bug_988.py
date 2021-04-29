@@ -51,5 +51,6 @@ class TestBug988 (unittest.TestCase):
         obj.currentChanged.emit(5)
         self.assertEqual(self.arg, 5)
 
+
 if __name__ == "__main__":
     unittest.main()

@@ -41,14 +41,17 @@ init_test_paths(False)
 from PySide6.QtCore import QDate, QObject, Signal
 from helper.usesqcoreapplication import UsesQCoreApplication
 
+
 class DerivedDate(QDate):
-    def __init__(self,y,m,d):
-        super().__init__(y,m,d)
+    def __init__(self, y, m, d):
+        super().__init__(y, m, d)
+
 
 class Emitter(QObject):
     dateSignal1 = Signal(QDate)
     dateSignal2 = Signal(DerivedDate)
     tupleSignal = Signal(tuple)
+
 
 class SignaltoSignalTest(UsesQCoreApplication):
     def myCb(self, dt):
@@ -56,7 +59,7 @@ class SignaltoSignalTest(UsesQCoreApplication):
 
     def testBug(self):
         e = Emitter()
-        d = DerivedDate(2010,8,24)
+        d = DerivedDate(2010, 8, 24)
         self._dt = None
         e.dateSignal1.connect(self.myCb)
         e.dateSignal1.emit(d)
@@ -72,6 +75,7 @@ class SignaltoSignalTest(UsesQCoreApplication):
         e.tupleSignal.connect(self.myCb)
         e.tupleSignal.emit(myTuple)
         self.assertEqual(myTuple, self._dt)
+
 
 if __name__ == '__main__':
     unittest.main()

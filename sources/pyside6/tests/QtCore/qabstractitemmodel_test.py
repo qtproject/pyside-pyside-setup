@@ -51,7 +51,7 @@ class TestQModelIndexInternalPointer(unittest.TestCase):
     def testInternalPointer(self):
         m = MyModel()
         foo = QObject()
-        idx = m.createIndex(0,0, foo)
+        idx = m.createIndex(0, 0, foo)
         check = m.checkIndex(idx, QAbstractItemModel.CheckIndexOption.IndexIsValid
                                   | QAbstractItemModel.CheckIndexOption.DoNotUseParent
                                   | QAbstractItemModel.CheckIndexOption.ParentIsInvalid)
@@ -72,6 +72,7 @@ class TestQModelIndexInternalPointer(unittest.TestCase):
         proxyIndex = proxyModel.mapFromSource(sourceIndex)
         proxyData = str(proxyModel.data(proxyIndex, Qt.DisplayRole))
         self.assertEqual(sourceData, proxyData)
+
 
 if __name__ == '__main__':
     unittest.main()

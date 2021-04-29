@@ -37,6 +37,7 @@ init_test_paths(False)
 
 from PySide6.QtGui import QTextDocument, QTextCursor
 
+
 class QTextDocumentTest(unittest.TestCase):
 
     def testUndoRedo(self):
@@ -59,6 +60,7 @@ class QTextDocumentTest(unittest.TestCase):
         self.assertFalse(doc.isRedoAvailable())
         self.assertTrue(doc.isUndoAvailable())
         self.assertEqual(doc.toPlainText(), text)
+
 
 if __name__ == '__main__':
     unittest.main()

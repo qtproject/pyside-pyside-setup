@@ -48,7 +48,7 @@ class HttpSignalsCase(unittest.TestCase):
     port, while receiving only the max payload size.'''
 
     def setUp(self):
-        #Acquire resources
+        # Acquire resources
         self.called = False
         self.app = QCoreApplication([])
 
@@ -58,7 +58,7 @@ class HttpSignalsCase(unittest.TestCase):
         self.server.bind(QHostAddress(QHostAddress.LocalHost), 45454)
 
     def tearDown(self):
-        #Release resources
+        # Release resources
         del self.socket
         del self.server
         del self.app
@@ -74,13 +74,14 @@ class HttpSignalsCase(unittest.TestCase):
             self.app.quit()
 
     def testDefaultArgs(self):
-        #QUdpSocket.readDatagram pythonic return
+        # QUdpSocket.readDatagram pythonic return
         # @bug 124
         QObject.connect(self.server, SIGNAL('readyRead()'), self.callback)
         self.sendPackage()
         self.app.exec_()
 
         self.assertTrue(self.called)
+
 
 if __name__ == '__main__':
     unittest.main()

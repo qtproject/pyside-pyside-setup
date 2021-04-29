@@ -39,10 +39,12 @@ from PySide6.QtHelp import QHelpEngine
 
 from helper.usesqapplication import UsesQApplication
 
+
 class QHelpEngineCreation(UsesQApplication):
 
     def testConstructor(self):
         helpEngine = QHelpEngine('mycollection.qch')
+
 
 if __name__ == '__main__':
     unittest.main()

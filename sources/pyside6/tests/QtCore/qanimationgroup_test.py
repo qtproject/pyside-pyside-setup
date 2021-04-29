@@ -53,10 +53,11 @@ class QAnimationGroupTest(unittest.TestCase):
 
         panim.clear()
 
-        self.assertRaises(RuntimeError, lambda :sanim.parent())
+        self.assertRaises(RuntimeError, lambda: sanim.parent())
 
         QTimer.singleShot(100, app.quit)
         app.exec_()
+
 
 if __name__ == '__main__':
     unittest.main()

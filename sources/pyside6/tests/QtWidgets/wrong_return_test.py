@@ -52,6 +52,7 @@ class MyWidget(QWidget):
     def sizeHint(self):
         pass
 
+
 class testCase(UsesQApplication):
 
     def testVirtualReturn(self):

@@ -67,6 +67,7 @@ class TestGrabToSharedPointerImage(TimedQApplication):
         self.assertTrue(grabResultSharedPtr)
 
         self.grabbedColor = None
+
         def onGrabReady():
             # Signal early exit.
             QTimer.singleShot(0, self.app.quit)
@@ -81,7 +82,7 @@ class TestGrabToSharedPointerImage(TimedQApplication):
         # Get the first pixel color of the grabbed image.
         self.image = grabResultSharedPtr.image()
         self.assertTrue(self.image)
-        self.grabbedColor = self.image.pixelColor(0,0)
+        self.grabbedColor = self.image.pixelColor(0, 0)
         self.assertTrue(self.grabbedColor.isValid())
 
         # Compare the grabbed color with the one we set in the rectangle.

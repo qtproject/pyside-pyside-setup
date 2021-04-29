@@ -41,10 +41,11 @@ from PySide6.QtCore import QFile, QFileInfo, QDir
 from PySide6.QtWidgets import QApplication
 from PySide6.QtSvgWidgets import QSvgWidget
 
+
 class QSvgWidgetTest(unittest.TestCase):
 
     def testLoad(self):
-        directory =  os.path.dirname(__file__)
+        directory = os.path.dirname(__file__)
         tigerPath = QDir.cleanPath(f"{directory}/../QtSvg/tiger.svg")
         self.assertTrue(QFileInfo.exists(tigerPath))
 
@@ -59,6 +60,7 @@ class QSvgWidgetTest(unittest.TestCase):
         fromContents = QSvgWidget()
         fromContents.load(tigerData)
         self.assertTrue(fromContents.renderer().isValid())
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -42,6 +42,7 @@ init_test_paths(False)
 from PySide6.QtCore import QObject, QTimer, QCoreApplication, SIGNAL
 from helper.usesqcoreapplication import UsesQCoreApplication
 
+
 class TestDeleteLater(UsesQCoreApplication):
     '''Test case for function DeleteLater'''
 
@@ -51,6 +52,7 @@ class TestDeleteLater(UsesQCoreApplication):
         del o
         QTimer.singleShot(100, self.app.quit)
         self.app.exec_()
+
 
 if __name__ == '__main__':
     unittest.main()

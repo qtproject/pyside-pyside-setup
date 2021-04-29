@@ -40,6 +40,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QObject, Signal
 
+
 class BoundAndUnboundSignalsTest(unittest.TestCase):
 
     def setUp(self):
@@ -56,6 +57,7 @@ class BoundAndUnboundSignalsTest(unittest.TestCase):
         obj = QObject()
         self.assertNotEqual(type(obj.destroyed), Signal)
         self.assertTrue(self.methods.issubset(dir(obj.destroyed)))
+
 
 if __name__ == '__main__':
     unittest.main()

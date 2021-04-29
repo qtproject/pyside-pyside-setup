@@ -42,6 +42,7 @@ from PySide6.QtCore import QRectF
 
 from helper.usesqapplication import UsesQApplication
 
+
 class GObjA(QGraphicsObject):
     def paint(self, *args):
         pass
@@ -52,12 +53,14 @@ class GObjA(QGraphicsObject):
     def itemChange(self, *args):
         return QGraphicsObject.itemChange(self, *args)
 
+
 class GObjB(QGraphicsObject):
     def paint(self, *args):
         pass
 
     def boundingRect(self):
         return QRectF()
+
 
 class QGraphicsObjectReimpl(UsesQApplication):
     '''Test case for reimplementing QGraphicsObject'''
@@ -78,6 +81,7 @@ class QGraphicsObjectReimpl(UsesQApplication):
         gobjB = GObjB()
         gobjB.setParentItem(w)
         self.assertIs(type(w), type(gobjB.parentItem()))
+
 
 if __name__ == '__main__':
     unittest.main()

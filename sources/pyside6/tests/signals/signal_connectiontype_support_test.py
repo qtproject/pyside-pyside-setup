@@ -37,10 +37,12 @@ init_test_paths(False)
 
 from PySide6.QtCore import QObject, SIGNAL, Qt
 
+
 class Dummy(QObject):
     """Dummy class used in this test."""
     def __init__(self, parent=None):
         QObject.__init__(self, parent)
+
 
 class TestConnectionTypeSupport(unittest.TestCase):
     def callback(self, *args):

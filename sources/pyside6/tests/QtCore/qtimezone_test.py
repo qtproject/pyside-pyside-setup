@@ -37,6 +37,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QTimeZone
 
+
 class TestQTimeZone (unittest.TestCase):
     def testTimeZone(self):
         id = bytes('Europe/Berlin', "UTF-8")
@@ -45,6 +46,7 @@ class TestQTimeZone (unittest.TestCase):
         self.assertEqual(timeZone.id(), id)
         name = timeZone.displayName(QTimeZone.GenericTime, QTimeZone.DefaultName)
         self.assertTrue(name)
+
 
 if __name__ == '__main__':
     unittest.main()

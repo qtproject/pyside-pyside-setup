@@ -44,6 +44,7 @@ from PySide6.QtWidgets import QApplication, QTreeWidget, QTreeWidgetItem
 
 class MyMainWindow(unittest.TestCase):
     app = QApplication(sys.argv)
+
     def testCase1(self):
         self._tree = QTreeWidget()
         self._tree.setColumnCount(2)
@@ -87,6 +88,7 @@ class MyMainWindow(unittest.TestCase):
         self.assertEqual(sys.getrefcount(self._i1), 3)
         self._i11 = QTreeWidgetItem(self._i1, ['11', ])
         self.assertEqual(sys.getrefcount(self._i11), 3)
+
 
 if __name__ == '__main__':
     unittest.main()

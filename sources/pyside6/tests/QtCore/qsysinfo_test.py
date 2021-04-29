@@ -37,6 +37,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QSysInfo
 
+
 class TestQSysInfo(unittest.TestCase):
     def testEnumEndian(self):
         self.assertEqual(QSysInfo.BigEndian, 0)
@@ -45,6 +46,7 @@ class TestQSysInfo(unittest.TestCase):
 
     def testEnumSizes(self):
         self.assertTrue(QSysInfo.WordSize > 0)
+
 
 if __name__ == '__main__':
     unittest.main()

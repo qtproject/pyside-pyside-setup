@@ -52,6 +52,7 @@ from helper.timedqapplication import TimedQApplication
 from PySide6.QtCore import QUrl, QAbstractListModel, QModelIndex, Qt
 from PySide6.QtQuick import QQuickView
 
+
 class ListModel(QAbstractListModel):
     def __init__(self):
         super().__init__()
@@ -59,13 +60,14 @@ class ListModel(QAbstractListModel):
     def roleNames(self):
         return { Qt.DisplayRole: b'pysideModelData' }
 
-    def rowCount(self, parent = QModelIndex()):
+    def rowCount(self, parent=QModelIndex()):
         return 3
 
     def data(self, index, role):
         if index.isValid() and role == Qt.DisplayRole:
             return 'blubb'
         return None
+
 
 class TestBug814(TimedQApplication):
     def testAbstractItemModelTransferToQML(self):
@@ -78,6 +80,7 @@ class TestBug814(TimedQApplication):
         root = view.rootObject()
         self.assertTrue(root, quickview_errorstring(view))
         view.show()
+
 
 if __name__ == '__main__':
     unittest.main()

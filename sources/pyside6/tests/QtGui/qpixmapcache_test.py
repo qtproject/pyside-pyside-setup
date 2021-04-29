@@ -75,6 +75,7 @@ class QPixmapCacheTest(UsesQApplication):
 
         self.assertEqual(QPixmapCache.find(key).toImage().bits(), pm3.toImage().bits())
 
+
 if __name__ == '__main__':
     unittest.main()
 

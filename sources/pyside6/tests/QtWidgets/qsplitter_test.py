@@ -39,6 +39,7 @@ from PySide6.QtWidgets import QSplitter
 
 from helper.usesqapplication import UsesQApplication
 
+
 class QSplitterTest(UsesQApplication):
 
     def testGetRange(self):
@@ -47,6 +48,7 @@ class QSplitterTest(UsesQApplication):
         self.assertTrue(isinstance(_min, int))
         self.assertTrue(isinstance(_max, int))
 
+
 if __name__ == "__main__":
-   unittest.main()
+    unittest.main()
 

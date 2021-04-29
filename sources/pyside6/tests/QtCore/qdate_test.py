@@ -66,5 +66,6 @@ class TestQDate (unittest.TestCase):
         nodate = QDate()
         self.assertFalse(nodate)
 
+
 if __name__ == '__main__':
     unittest.main()

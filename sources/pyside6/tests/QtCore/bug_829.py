@@ -69,5 +69,6 @@ class QVariantConversions(unittest.TestCase):
         if self._confFileName is not None:
             os.unlink(QDir.toNativeSeparators(self._confFileName))
 
+
 if __name__ == '__main__':
     unittest.main()

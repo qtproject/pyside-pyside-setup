@@ -54,6 +54,7 @@ from contextlib import contextmanager
 warn_name = "__warningregistry__"
 ignore_re = 'Not importing directory .*'
 
+
 @contextmanager
 def isolate_warnings():
     save_warnings = {}
@@ -71,11 +72,13 @@ def isolate_warnings():
             if warn is None:
                 delattr(mod, warn_name)
 
+
 @contextmanager
 def suppress_warnings():
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         yield
+
 
 def check_warnings():
     for name, mod in sys.modules.items():
@@ -89,6 +92,7 @@ def check_warnings():
                         continue
                     return True
     return False
+
 
 def warn(message, category=None, stacklevel=2):
     """Issue a warning with the default 'RuntimeWarning'"""
@@ -135,28 +139,36 @@ else:
 is_py3 = sys.version_info[0] == 3
 is_ci = os.environ.get("QTEST_ENVIRONMENT", "") == "ci"
 
+
 def get_script_dir():
     script_dir = os.path.normpath(os.path.dirname(__file__))
     while "sources" not in os.listdir(script_dir):
         script_dir = os.path.dirname(script_dir)
     return script_dir
 
+
 def qt_version():
     from PySide6.QtCore import __version__
     return tuple(map(int, __version__.split(".")))
 
 # Format a registry file name for version.
+
+
 def _registry_filename(version, use_ci_module):
     ext_ci = "_ci" if use_ci_module else ""
     name = f"exists_{platform_name}_{version[0]}_{version[1]}_{version[2]}{ext_ci}.py"
     return os.path.join(os.path.dirname(__file__), name)
 
 # Return the expected registry file name.
+
+
 def get_refpath(use_ci_module=is_ci):
     return _registry_filename(qt_version(), use_ci_module)
 
 # Return the registry file name, either that of the current
 # version or fall back to a previous patch release.
+
+
 def get_effective_refpath(use_ci_module=is_ci):
     refpath = get_refpath(use_ci_module)
     if os.path.exists(refpath):
@@ -171,6 +183,8 @@ def get_effective_refpath(use_ci_module=is_ci):
     return refpath
 
 # Import the CI version of the platform module
+
+
 def import_refmodule(use_ci_module=is_ci):
     refpath = get_effective_refpath(use_ci_module)
     modname = os.path.basename(os.path.splitext(refpath)[0])

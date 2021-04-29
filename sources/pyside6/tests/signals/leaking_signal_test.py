@@ -48,5 +48,6 @@ class LeakingSignal(unittest.TestCase):
 
         emitter = Emitter()
 
+
 if __name__ == '__main__':
     unittest.main()

@@ -55,6 +55,7 @@ class TestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(TestHandler.DATA)))
         self.end_headers()
 
+
 class TestSecureHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     DATA = "PySide"
     allow_reuse_address = True
@@ -78,6 +79,8 @@ class TestSecureHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.end_headers()
 
 # Workaround for the missing shutdown method in python2.5
+
+
 class CompatTCPServer(SocketServer.TCPServer):
     def __init__(self, server_address, RequestHandlerClass):
         SocketServer.TCPServer.__init__(self, server_address, RequestHandlerClass)
@@ -158,7 +161,7 @@ class TestServer(threading.Thread):
 
         while True:
             try:
-                self.httpd = CompatTCPServer((''  , self._port), handle)
+                self.httpd = CompatTCPServer(('', self._port), handle)
                 break
             except:
                 self._port = self._port + random.randint(1, 100)

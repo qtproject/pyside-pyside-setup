@@ -44,6 +44,7 @@ This is a simple slot test that was updated to use the qApp "macro".
 It is implicitly in builtins and does not need an import.
 """
 
+
 class objTest(QObject):
 
     def __init__(self, parent=None):

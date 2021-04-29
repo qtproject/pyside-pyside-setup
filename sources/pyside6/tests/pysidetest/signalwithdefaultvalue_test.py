@@ -42,6 +42,7 @@ from PySide6.QtCore import QObject, SIGNAL
 
 '''Tests the behaviour of signals with default values.'''
 
+
 class SignalWithDefaultValueTest(unittest.TestCase):
 
     def setUp(self):
@@ -57,6 +58,7 @@ class SignalWithDefaultValueTest(unittest.TestCase):
     def testConnectNewStyleEmitVoidSignal(self):
         def callbackVoid():
             self.void_called = True
+
         def callbackBool(value):
             self.bool_called = True
         self.obj.signalWithDefaultValue.connect(callbackVoid)
@@ -68,6 +70,7 @@ class SignalWithDefaultValueTest(unittest.TestCase):
     def testConnectNewStyleEmitBoolSignal(self):
         def callbackVoid():
             self.void_called = True
+
         def callbackBool(value):
             self.bool_called = True
         self.obj.signalWithDefaultValue.connect(callbackVoid)
@@ -79,6 +82,7 @@ class SignalWithDefaultValueTest(unittest.TestCase):
     def testConnectOldStyleEmitVoidSignal(self):
         def callbackVoid():
             self.void_called = True
+
         def callbackBool(value):
             self.bool_called = True
         QObject.connect(self.obj, SIGNAL('signalWithDefaultValue()'), callbackVoid)
@@ -90,6 +94,7 @@ class SignalWithDefaultValueTest(unittest.TestCase):
     def testConnectOldStyleEmitBoolSignal(self):
         def callbackVoid():
             self.void_called = True
+
         def callbackBool(value):
             self.bool_called = True
         QObject.connect(self.obj, SIGNAL('signalWithDefaultValue()'), callbackVoid)
@@ -97,6 +102,7 @@ class SignalWithDefaultValueTest(unittest.TestCase):
         self.obj.emitSignalWithDefaultValue_bool()
         self.assertTrue(self.void_called)
         self.assertTrue(self.bool_called)
+
 
 if __name__ == '__main__':
     unittest.main()

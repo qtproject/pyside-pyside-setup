@@ -48,7 +48,7 @@ class QPixmapTest(UsesQApplication):
         self.assertEqual(type(obj.property('foo')), QPixmap)
 
     def testQSizeConstructor(self):
-        pixmap = QPixmap(QSize(10,20))
+        pixmap = QPixmap(QSize(10, 20))
         self.assertTrue(pixmap.size().height(), 20)
 
     def testQStringConstructor(self):
@@ -63,7 +63,7 @@ class QPixmapTest(UsesQApplication):
         self.assertTrue(pixmap.loadFromData(data))
 
     def testQPixmapLoadFromDataWithPython(self):
-        data = open(os.path.join(os.path.dirname(__file__),'sample.png'),'rb').read()
+        data = open(os.path.join(os.path.dirname(__file__), 'sample.png'), 'rb').read()
         pixmap = QPixmap()
         self.assertTrue(pixmap.loadFromData(data))
 
@@ -73,7 +73,7 @@ class QPixmapToImage(UsesQApplication):
     def testFilledImage(self):
         '''QPixmap.fill + toImage + image.pixel'''
         pixmap = QPixmap(100, 200)
-        pixmap.fill(Qt.red) # Default Qt.white
+        pixmap.fill(Qt.red)  # Default Qt.white
 
         self.assertEqual(pixmap.height(), 200)
         self.assertEqual(pixmap.width(), 100)
@@ -83,7 +83,7 @@ class QPixmapToImage(UsesQApplication):
         self.assertEqual(image.height(), 200)
         self.assertEqual(image.width(), 100)
 
-        pixel = image.pixel(10,10)
+        pixel = image.pixel(10, 10)
         self.assertEqual(pixel, QColor(Qt.red).rgba())
 
 

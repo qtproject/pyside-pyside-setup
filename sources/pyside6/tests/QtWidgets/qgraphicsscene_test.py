@@ -50,19 +50,22 @@ from PySide6.QtWidgets import QGraphicsProxyWidget, QGraphicsView
 
 from helper.usesqapplication import UsesQApplication
 
+
 class Constructor(unittest.TestCase):
     '''QGraphicsScene constructor'''
 
     def testConstructor(self):
-        #QGraphicsScene constructor
+        # QGraphicsScene constructor
         obj = QGraphicsScene()
         self.assertTrue(isinstance(obj, QGraphicsScene))
 
 # Test for PYSIDE-868: Test whether painter.device() can be accessed
 # correctly. This was crashing when the underlying QPaintDevice was a
 # QWidget due to handling multiple inheritance incorrectly.
+
+
 class CustomScene(QGraphicsScene):
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         super().__init__(parent)
         self.dpi = 0
 
@@ -72,24 +75,25 @@ class CustomScene(QGraphicsScene):
     def drawForeground(self, painter, rect):
         self.dpi = painter.device().physicalDpiX()
 
+
 class ConstructorWithRect(unittest.TestCase):
     '''QGraphicsScene qrect constructor and related sizes'''
 
     def setUp(self):
-        #Acquire resources
+        # Acquire resources
         # PyQt4 doesn't accept a QRect as argument to constructor
         self.scene = QGraphicsScene(0, 200, 150, 175)
 
     def tearDown(self):
-        #Release resources
+        # Release resources
         del self.scene
 
     def testHeight(self):
-        #QGraphicsScene.height()
+        # QGraphicsScene.height()
         self.assertEqual(self.scene.height(), 175)
 
     def testWidth(self):
-        #QGraphicsScene.width()
+        # QGraphicsScene.width()
         self.assertEqual(self.scene.width(), 150)
 
 
@@ -99,60 +103,60 @@ class AddItem(UsesQApplication):
     qapplication = True
 
     def setUp(self):
-        #Acquire resources
+        # Acquire resources
         super(AddItem, self).setUp()
         self.scene = QGraphicsScene()
         # While the scene does not inherits from QWidget, requires
         # an application to make the internals work.
 
     def tearDown(self):
-        #Release resources
+        # Release resources
         del self.scene
         super(AddItem, self).tearDown()
 
     def testEllipse(self):
-        #QGraphicsScene.addEllipse
+        # QGraphicsScene.addEllipse
         item = self.scene.addEllipse(100, 100, 100, 100)
         self.assertTrue(isinstance(item, QGraphicsEllipseItem))
 
     def testLine(self):
-        #QGraphicsScene.addLine
+        # QGraphicsScene.addLine
         item = self.scene.addLine(100, 100, 200, 200)
         self.assertTrue(isinstance(item, QGraphicsLineItem))
 
     def testPath(self):
-        #QGraphicsScene.addPath
+        # QGraphicsScene.addPath
         item = self.scene.addPath(QPainterPath())
         self.assertTrue(isinstance(item, QGraphicsPathItem))
 
     def testPixmap(self):
-        #QGraphicsScene.addPixmap
+        # QGraphicsScene.addPixmap
         item = self.scene.addPixmap(QPixmap())
         self.assertTrue(isinstance(item, QGraphicsPixmapItem))
 
     def testPolygon(self):
-        #QGraphicsScene.addPolygon
+        # QGraphicsScene.addPolygon
         points = [QPointF(0, 0), QPointF(100, 100), QPointF(0, 100)]
         item = self.scene.addPolygon(QPolygonF(points))
         self.assertTrue(isinstance(item, QGraphicsPolygonItem))
 
     def testRect(self):
-        #QGraphicsScene.addRect
+        # QGraphicsScene.addRect
         item = self.scene.addRect(100, 100, 100, 100)
         self.assertTrue(isinstance(item, QGraphicsRectItem))
 
     def testSimpleText(self):
-        #QGraphicsScene.addSimpleText
+        # QGraphicsScene.addSimpleText
         item = self.scene.addSimpleText('Monty Python 42')
         self.assertTrue(isinstance(item, QGraphicsSimpleTextItem))
 
     def testText(self):
-        #QGraphicsScene.addText
+        # QGraphicsScene.addText
         item = self.scene.addText('Monty Python 42')
         self.assertTrue(isinstance(item, QGraphicsTextItem))
 
     def testWidget(self):
-        #QGraphicsScene.addWidget
+        # QGraphicsScene.addWidget
         # XXX: printing some X11 error when using under PyQt4
         item = self.scene.addWidget(QPushButton())
         self.assertTrue(isinstance(item, QGraphicsProxyWidget))
@@ -164,7 +168,7 @@ class ItemRetrieve(UsesQApplication):
     qapplication = True
 
     def setUp(self):
-        #Acquire resources
+        # Acquire resources
         super(ItemRetrieve, self).setUp()
         self.scene = QGraphicsScene()
 
@@ -174,28 +178,29 @@ class ItemRetrieve(UsesQApplication):
         self.bottomright = QGraphicsRectItem(100, 100, 100, 100)
 
         self.items = [self.topleft, self.topright, self.bottomleft,
-                        self.bottomright]
+                      self.bottomright]
 
         for item in self.items:
             self.scene.addItem(item)
 
     def tearDown(self):
-        #Release resources
+        # Release resources
         del self.scene
         super(ItemRetrieve, self).tearDown()
 
     def testItems(self):
-        #QGraphicsScene.items()
+        # QGraphicsScene.items()
         items = self.scene.items()
         for i in items:
             self.assertTrue(i in self.items)
 
     def testItemAt(self):
-        #QGraphicsScene.itemAt()
+        # QGraphicsScene.itemAt()
         self.assertEqual(self.scene.itemAt(50, 50, QTransform()), self.topleft)
         self.assertEqual(self.scene.itemAt(150, 50, QTransform()), self.topright)
         self.assertEqual(self.scene.itemAt(50, 150, QTransform()), self.bottomleft)
         self.assertEqual(self.scene.itemAt(150, 150, QTransform()), self.bottomright)
+
 
 class TestGraphicsGroup(UsesQApplication):
     def testIt(self):
@@ -207,17 +212,17 @@ class TestGraphicsGroup(UsesQApplication):
         i4 = QGraphicsRectItem()
         group = scene.createItemGroup((i2, i3, i4))
         scene.removeItem(i1)
-        del i1 # this shouldn't delete i2
+        del i1  # this shouldn't delete i2
         self.assertEqual(i2.scene(), scene)
         scene.destroyItemGroup(group)
         self.assertRaises(RuntimeError, group.type)
 
-    def testCustomScene(self): # For PYSIDE-868, see above
+    def testCustomScene(self):  # For PYSIDE-868, see above
         scene = CustomScene()
         view = QGraphicsView(scene)
         view.show()
         while scene.dpi == 0:
-           QApplication.instance().processEvents()
+            QApplication.processEvents()
         view.hide()
 
 

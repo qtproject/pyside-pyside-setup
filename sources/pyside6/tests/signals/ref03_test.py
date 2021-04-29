@@ -41,6 +41,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QObject
 
+
 class DisconnectSignalsTest(unittest.TestCase):
 
     def setUp(self):
@@ -59,6 +60,7 @@ class DisconnectSignalsTest(unittest.TestCase):
         self.assertEqual(getrefcount(destroyedSlot), 3)
         self.emitter.destroyed.disconnect(destroyedSlot)
         self.assertEqual(getrefcount(destroyedSlot), 2)
+
 
 if __name__ == '__main__':
     unittest.main()

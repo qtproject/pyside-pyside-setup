@@ -52,5 +52,6 @@ class TestQLineF (unittest.TestCase):
         self.assertEqual(QLineF.BoundedIntersection, value)
         self.assertEqual(QPointF(1, 0), p)
 
+
 if __name__ == '__main__':
     unittest.main()

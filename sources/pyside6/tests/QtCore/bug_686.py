@@ -53,6 +53,7 @@ class MyWriteThread(QThread):
         self.lock.unlock()
         self.canQuit = True
 
+
 class MyReadThread(QThread):
     def __init__(self, lock):
         super().__init__()
@@ -67,6 +68,7 @@ class MyReadThread(QThread):
         self.lock.unlock()
         self.canQuit = True
 
+
 class MyMutexedThread(QThread):
     def __init__(self, mutex):
         super().__init__()
@@ -80,6 +82,7 @@ class MyMutexedThread(QThread):
             pass
         self.mutex.unlock()
         self.canQuit = True
+
 
 class TestQMutex (unittest.TestCase):
 
@@ -121,6 +124,7 @@ class TestQMutex (unittest.TestCase):
 
         thread.wait(2000)
         self.assertTrue(thread.canQuit)
+
 
 if __name__ == '__main__':
     unittest.main()

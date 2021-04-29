@@ -79,5 +79,6 @@ class TestConnectionWithInvalidSignature(TimedQApplication):
         button.entered.emit()
         self.assertEqual(proxy._receivedName, "PySideObject")
 
+
 if __name__ == '__main__':
     unittest.main()

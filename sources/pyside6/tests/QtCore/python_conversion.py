@@ -43,6 +43,7 @@ import datetime
 
 from PySide6.QtCore import QTime, QDateTime, QDate
 
+
 class TestDateTimeConversions (unittest.TestCase):
     def testQDate(self):
         date = datetime.date(2010, 4, 23)
@@ -59,7 +60,7 @@ class TestDateTimeConversions (unittest.TestCase):
         self.assertEqual(time.hour, other.hour())
         self.assertEqual(time.minute, other.minute())
         self.assertEqual(time.second, other.second())
-        self.assertEqual(time.microsecond/1000, other.msec())
+        self.assertEqual(time.microsecond / 1000, other.msec())
 
         self.assertEqual(time, other.toPython())
 
@@ -76,7 +77,7 @@ class TestDateTimeConversions (unittest.TestCase):
         self.assertEqual(dateTime.hour, otherTime.hour())
         self.assertEqual(dateTime.minute, otherTime.minute())
         self.assertEqual(dateTime.second, otherTime.second())
-        self.assertEqual(dateTime.microsecond/1000, otherTime.msec())
+        self.assertEqual(dateTime.microsecond / 1000, otherTime.msec())
 
         self.assertEqual(dateTime, other.toPython())
 
@@ -93,9 +94,10 @@ class TestDateTimeConversions (unittest.TestCase):
         self.assertEqual(dateTime.hour, otherTime.hour())
         self.assertEqual(dateTime.minute, otherTime.minute())
         self.assertEqual(dateTime.second, otherTime.second())
-        self.assertEqual(dateTime.microsecond/1000, otherTime.msec())
+        self.assertEqual(dateTime.microsecond / 1000, otherTime.msec())
 
         self.assertEqual(dateTime, other.toPython())
+
 
 if __name__ == '__main__':
     unittest.main()

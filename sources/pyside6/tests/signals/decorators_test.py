@@ -39,6 +39,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QObject, Slot, SIGNAL, SLOT
 
+
 class MyObject(QObject):
     def __init__(self, parent=None):
         QObject.__init__(self, parent)
@@ -68,6 +69,7 @@ class MyObject(QObject):
     @Slot(result=QObject)
     def mySlot6(self):
         self._slotCalledCount = self._slotCalledCount + 1
+
 
 class StaticMetaObjectTest(unittest.TestCase):
 
@@ -100,6 +102,7 @@ class StaticMetaObjectTest(unittest.TestCase):
         m = mo.method(i)
         self.assertEqual(m.typeName(), "QObject*")
 
+
 class SlotWithoutArgs(unittest.TestCase):
 
     def testError(self):
@@ -107,6 +110,7 @@ class SlotWithoutArgs(unittest.TestCase):
         # arguments, as just @Slot would end up in a slot
         # accepting argument functions
         self.assertRaises(TypeError, Slot, lambda: 3)
+
 
 if __name__ == '__main__':
     unittest.main()

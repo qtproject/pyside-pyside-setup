@@ -40,6 +40,7 @@ from helper.usesqapplication import UsesQApplication
 from PySide6.QtWidgets import QWidget, QFrame, QPushButton
 from PySide6.QtUiTools import loadUiType
 
+
 class loadUiTypeTester(UsesQApplication):
     def testFunction(self):
         filePath = os.path.join(os.path.dirname(__file__), "minimal.ui")

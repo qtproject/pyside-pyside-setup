@@ -43,7 +43,9 @@ class Foo(QTableView):
     def __init__(self, parent=None):
         QTableView.__init__(self, parent)
 
+
 from helper.usesqapplication import UsesQApplication
+
 
 class TestParentType(UsesQApplication):
 
@@ -55,6 +57,7 @@ class TestParentType(UsesQApplication):
         w2 = QWidget(parent)
         self.assertTrue(isinstance(w2.parentWidget(), Foo))
         self.assertTrue(isinstance(w2.parent(), Foo))
+
 
 if __name__ == '__main__':
     unittest.main()

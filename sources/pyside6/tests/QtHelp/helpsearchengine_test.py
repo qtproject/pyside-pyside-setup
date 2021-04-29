@@ -39,6 +39,7 @@ from PySide6.QtHelp import QHelpEngineCore, QHelpSearchEngine, QHelpSearchResult
 
 from helper.usesqapplication import UsesQApplication
 
+
 class QHelpSearchEngineTest(UsesQApplication):
 
     def testQHelpSearchEngine(self):
@@ -46,6 +47,7 @@ class QHelpSearchEngineTest(UsesQApplication):
         helpSearchEngine = QHelpSearchEngine(helpEngineCore)
         helpSearchResult = helpSearchEngine.searchResults(0, 0)
         self.assertEqual(len(helpSearchResult), 0)
+
 
 if __name__ == '__main__':
     unittest.main()

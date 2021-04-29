@@ -38,6 +38,7 @@ init_test_paths(True)
 from PySide6.QtCore import QObject
 from testbinding import TestObject
 
+
 class Receiver(QObject):
 
     def __init__(self):
@@ -46,6 +47,7 @@ class Receiver(QObject):
 
     def slot(self, value):
         self.received = value
+
 
 class TypedefSignal(unittest.TestCase):
 
@@ -56,6 +58,7 @@ class TypedefSignal(unittest.TestCase):
         obj.signalWithTypedefValue.connect(receiver.slot)
         obj.emitSignalWithTypedefValue(2)
         self.assertEqual(receiver.received.value, 2)
+
 
 if __name__ == '__main__':
     unittest.main()

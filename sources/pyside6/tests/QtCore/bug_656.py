@@ -39,9 +39,10 @@ from PySide6.QtCore import QCoreApplication
 
 
 class CoreApp(QCoreApplication):
-    def __init__(self,*args):
+    def __init__(self, *args):
         super().__init__(*args)
         # It shouldn't crash after the __init__ call
+
 
 import sys
 app = CoreApp(sys.argv)

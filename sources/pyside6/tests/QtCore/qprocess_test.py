@@ -61,5 +61,6 @@ class TestQProcess (unittest.TestCase):
         else:
             print("PROCESS ALREADY DEAD :-/")
 
+
 if __name__ == '__main__':
     unittest.main()

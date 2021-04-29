@@ -51,6 +51,7 @@ except ImportError:
     print("Skipping test due to missing OpenGL module")
     sys.exit(0)
 
+
 class OpenGLWindow(QOpenGLWindow):
     def __init__(self):
         super().__init__()
@@ -72,15 +73,15 @@ class OpenGLWindow(QOpenGLWindow):
         self.m_texture = QOpenGLTexture(image)
 
     def paintGL(self):
-        GL.glMatrixMode(GL.GL_MODELVIEW);
-        GL.glLoadIdentity();
+        GL.glMatrixMode(GL.GL_MODELVIEW)
+        GL.glLoadIdentity()
 
-        GL.glMatrixMode(GL.GL_PROJECTION);
-        GL.glLoadIdentity();
-        GL.glOrtho(0, 1, 1, 0, -1, 1);
+        GL.glMatrixMode(GL.GL_PROJECTION)
+        GL.glLoadIdentity()
+        GL.glOrtho(0, 1, 1, 0, -1, 1)
 
         self.m_functions.glClear(GL.GL_COLOR_BUFFER_BIT)
-        self.m_functions.glEnable(GL.GL_TEXTURE_2D);
+        self.m_functions.glEnable(GL.GL_TEXTURE_2D)
         self.m_texture.bind()
 
         d = 0.5
@@ -99,6 +100,7 @@ class OpenGLWindow(QOpenGLWindow):
     def resizeGL(self, w, h):
         self.m_functions.glViewport(0, 0, self.width(), self.height())
 
+
 class QOpenGLWindowTest(UsesQApplication):
     # On macOS, glClear(), glViewport() are rejected due to GLbitfield/GLint not being resolved properly
     def test(self):
@@ -107,6 +109,7 @@ class QOpenGLWindowTest(UsesQApplication):
         openGlWindow.show()
         QTimer.singleShot(100, openGlWindow.close)
         self.app.exec_()
+
 
 if __name__ == '__main__':
     unittest.main()

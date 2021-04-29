@@ -43,6 +43,7 @@ from shiboken6 import Shiboken
 
 from helper.usesqapplication import UsesQApplication
 
+
 class QLabelTest(UsesQApplication):
     '''Test case for calling QLabel.setPixmap'''
 
@@ -61,7 +62,6 @@ class QLabelTest(UsesQApplication):
 
         self.label.setPixmap(p1)
         self.assertIsNotNone(self.label.pixmap())
-
 
         # PYSIDE-150:
         #   When a new QPixmap is assigned to a QLabel,
@@ -84,6 +84,7 @@ class QLabelTest(UsesQApplication):
         # using `del ret_p`
         self.assertTrue(all(Shiboken.getCppPointer(o) != ret_p_addr
                    for o in Shiboken.getAllValidWrappers()))
+
 
 if __name__ == '__main__':
     unittest.main()

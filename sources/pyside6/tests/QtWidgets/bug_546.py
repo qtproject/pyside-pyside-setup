@@ -47,5 +47,6 @@ class TestBug546(unittest.TestCase):
         completer = QCompleter(("foo", "bar"), textEdit)
         completer.setWidget(textEdit)
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     unittest.main()

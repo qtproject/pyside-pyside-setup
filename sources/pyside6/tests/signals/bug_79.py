@@ -46,6 +46,7 @@ try:
 except ImportError:
     skiptest = True
 
+
 class ConnectTest(unittest.TestCase):
 
     def callback(self, o):

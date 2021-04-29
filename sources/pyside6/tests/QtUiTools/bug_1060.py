@@ -47,6 +47,7 @@ class MyQUiLoader(QUiLoader):
     def createWidget(self, *args):
         return super(MyQUiLoader, self).createWidget(*args)
 
+
 if __name__ == "__main__":
     app = QApplication([])
 

@@ -40,6 +40,7 @@ init_test_paths(False)
 from PySide6.QtCore import QDate, QDateTime, QTime, QUrl
 from PySide6.QtCore import QLine, QPoint, QRect, QSize
 
+
 class HashTest(unittest.TestCase):
     def testInsert(self):
         myHash = {}
@@ -88,6 +89,7 @@ class HashTest(unittest.TestCase):
         self.assertFalse(l1 is l2)
         self.assertEqual(l1, l2)
         self.assertEqual(hash(l1), hash(l2))
+
 
 if __name__ == '__main__':
     unittest.main()

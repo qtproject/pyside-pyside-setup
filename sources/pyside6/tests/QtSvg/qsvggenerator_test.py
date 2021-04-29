@@ -41,6 +41,7 @@ init_test_paths(False)
 from PySide6.QtCore import QBuffer
 from PySide6.QtSvg import QSvgGenerator
 
+
 class QSvgGeneratorTest(unittest.TestCase):
 
     def testRefCountOfTOutputDevice(self):
@@ -65,6 +66,7 @@ class QSvgGeneratorTest(unittest.TestCase):
         del generator
 
         self.assertEqual(getrefcount(iodevice2), refcount2)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -46,5 +46,6 @@ class TestBug1016 (unittest.TestCase):
         self.assertEqual(obj.callMe(), None)
         self.assertTrue(obj.wasCalled())
 
+
 if __name__ == "__main__":
     unittest.main()

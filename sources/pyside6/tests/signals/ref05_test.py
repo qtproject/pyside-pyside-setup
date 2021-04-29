@@ -41,6 +41,7 @@ init_test_paths(False)
 from PySide6.QtCore import QObject, QCoreApplication, QTimeLine, Slot
 from helper.usesqcoreapplication import UsesQCoreApplication
 
+
 class ExtQObject(QObject):
 
     def __init__(self):

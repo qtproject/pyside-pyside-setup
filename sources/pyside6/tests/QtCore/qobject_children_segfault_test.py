@@ -39,11 +39,12 @@ init_test_paths(False)
 
 from PySide6.QtCore import QObject, QCoreApplication
 
+
 class ChildrenCoreApplication(unittest.TestCase):
     '''Test case for calling QObject.children after creating a QCoreApp'''
 
     def testQCoreAppChildren(self):
-        #QObject.children() after creating a QCoreApplication
+        # QObject.children() after creating a QCoreApplication
         # Minimal test:
         # 1- Create QCoreApp
         # 2- Create parent and childrens
@@ -55,7 +56,7 @@ class ChildrenCoreApplication(unittest.TestCase):
         # Uncomment the lines below to make the test pass
         # del children
         # del child2
-        del parent # XXX Segfaults here
+        del parent  # XXX Segfaults here
         self.assertTrue(True)
 
 

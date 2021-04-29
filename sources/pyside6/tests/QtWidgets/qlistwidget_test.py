@@ -48,7 +48,7 @@ class QListWidgetTest(UsesQApplication):
 
         item = QListWidgetItem("item0")
         item.setData(Qt.UserRole, o)
-        #item._data = o
+        # item._data = o
         self.assertTrue(sys.getrefcount(o), 3)
         self.assertTrue(sys.getrefcount(item), 2)
         lst.addItem(item)
@@ -79,7 +79,7 @@ class QListWidgetTest(UsesQApplication):
     def testIt(self):
         lst = QListWidget()
         lst.show()
-        slot = lambda : lst.removeItemWidget(lst.currentItem())
+        slot = lambda: lst.removeItemWidget(lst.currentItem())
         lst.addItem(QListWidgetItem("foo"))
         QTimer.singleShot(0, slot)
         QTimer.singleShot(0, lst.close)
@@ -92,6 +92,7 @@ class QListWidgetTest(UsesQApplication):
         item = lst.item(0)
         self.assertIsNone(lst.clear())
         self.assertRaises(RuntimeError, lambda: item.text())
+
 
 if __name__ == '__main__':
     unittest.main()

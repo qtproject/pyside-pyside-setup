@@ -40,6 +40,7 @@ init_test_paths(True)
 from testbinding import TestObject
 from PySide6.QtCore import QObject
 
+
 class ListConnectionTest(unittest.TestCase):
 
     def childrenChanged(self, children):
@@ -53,6 +54,7 @@ class ListConnectionTest(unittest.TestCase):
         o.childrenChanged.connect(self.childrenChanged)
         o.addChild(c)
         self.assertEqual(self._child.objectName(), "child")
+
 
 if __name__ == '__main__':
     unittest.main()

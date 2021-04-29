@@ -42,6 +42,7 @@ init_test_paths(False)
 from PySide6.QtCore import QObject, SIGNAL, Slot
 from helper.usesqcoreapplication import UsesQCoreApplication
 
+
 class MyObject(QObject):
     def __init__(self, parent=None):
         QObject.__init__(self, parent)
@@ -76,7 +77,6 @@ class StaticMetaObjectTest(UsesQCoreApplication):
         # The SIGNAL was destroyed with old objects
         self.assertEqual(o.metaObject().indexOfSignal("foo()"), -1)
 
-
     def testSharedSignalEmission(self):
         o = QObject()
         m = MyObject()
@@ -88,6 +88,7 @@ class StaticMetaObjectTest(UsesQCoreApplication):
         del o
         m.emit(SIGNAL("foo2()"))
         self.assertEqual(m._slotCalledCount, 2)
+
 
 if __name__ == '__main__':
     unittest.main()

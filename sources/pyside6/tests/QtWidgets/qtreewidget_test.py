@@ -38,6 +38,7 @@ init_test_paths(False)
 from PySide6.QtWidgets import QTreeWidget, QTreeWidgetItem, QPushButton
 from helper.usesqapplication import UsesQApplication
 
+
 class QTreeWidgetTest(UsesQApplication):
 
     # PYSIDE-73:
@@ -58,14 +59,15 @@ class QTreeWidgetTest(UsesQApplication):
             QPushButton('Push button on column 1'))
 
         # Getting the widget back
-        w = treeWidget.itemWidget(treeWidget.itemAt(0,1), 1)
+        w = treeWidget.itemWidget(treeWidget.itemAt(0, 1), 1)
         self.assertIsInstance(w, QPushButton)
 
         p = QPushButton('New independent button')
         # Adding QPushButton object from variable
         treeWidget.setItemWidget(item, 0, p)
-        w = treeWidget.itemWidget(treeWidget.itemAt(0,0), 0)
+        w = treeWidget.itemWidget(treeWidget.itemAt(0, 0), 0)
         self.assertIsInstance(w, QPushButton)
+
 
 if __name__ == '__main__':
     unittest.main()

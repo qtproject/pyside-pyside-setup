@@ -50,6 +50,7 @@ class MyDevice(QIODevice):
         self.ptr += size
         return retval
 
+
 class QIODeviceTest(unittest.TestCase):
 
     def testIt(self):
@@ -59,6 +60,7 @@ class QIODeviceTest(unittest.TestCase):
         s = QTextStream(device)
         self.assertEqual(s.readLine(), "hello world")
         self.assertEqual(s.readLine(), "hello again")
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -46,8 +46,9 @@ class TestBug653(unittest.TestCase):
         wizard = QWizard()
         page = QWizardPage()
         wizard.addPage(page)
-        page.wizard() # crash here if the bug still exists due to a circular dependency
+        page.wizard()  # crash here if the bug still exists due to a circular dependency
         wizard.show()
+
 
 if __name__ == "__main__":
     unittest.main()

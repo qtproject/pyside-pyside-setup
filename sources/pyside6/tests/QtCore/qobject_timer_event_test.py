@@ -43,6 +43,7 @@ from PySide6.QtCore import QObject, QCoreApplication
 
 from helper.usesqcoreapplication import UsesQCoreApplication
 
+
 class Dummy(QObject):
 
     def __init__(self, app):
@@ -58,23 +59,25 @@ class Dummy(QObject):
         if self.times_called == 5:
             self.app.exit(0)
 
+
 class QObjectTimerEvent(UsesQCoreApplication):
 
     def setUp(self):
-        #Acquire resources
+        # Acquire resources
         super(QObjectTimerEvent, self).setUp()
 
     def tearDown(self):
-        #Release resources
+        # Release resources
         super(QObjectTimerEvent, self).tearDown()
 
     def testTimerEvent(self):
-        #QObject.timerEvent overloading
+        # QObject.timerEvent overloading
         obj = Dummy(self.app)
         timer_id = obj.startTimer(200)
         self.app.exec_()
         obj.killTimer(timer_id)
         self.assertEqual(obj.times_called, 5)
+
 
 if __name__ == '__main__':
     unittest.main()

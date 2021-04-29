@@ -44,6 +44,7 @@ from PySide6.QtCore import QUrl, QObject, Property, Slot
 from PySide6.QtQml import QQmlEngine
 from PySide6.QtQuick import QQuickView
 
+
 class MyObject(QObject):
     def __init__(self, text, parent=None):
         QObject.__init__(self, parent)
@@ -51,7 +52,6 @@ class MyObject(QObject):
 
     def getText(self):
         return self._text
-
 
     @Slot(str)
     def qmlText(self, text):

@@ -45,6 +45,7 @@ from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlIncubationController, VolatileBool
 from PySide6.QtQuick import QQuickView
 
+
 class CustomIncubationController(QObject, QQmlIncubationController):
     def __init__(self, test):
         QObject.__init__(self)
@@ -68,6 +69,7 @@ class CustomIncubationController(QObject, QQmlIncubationController):
     def timerEvent(self, ev):
         # Incubate items for 2000 milliseconds, or until the volatile bool is set to false.
         self.incubateWhile(self.incubationShouldContinue, 2000)
+
 
 class TestBug(unittest.TestCase):
     def testIncubateWhileCall(self):
@@ -100,6 +102,7 @@ class TestBug(unittest.TestCase):
         # instances are destroyed in the correct order.
         del view
         del app
+
 
 if __name__ == '__main__':
     unittest.main()

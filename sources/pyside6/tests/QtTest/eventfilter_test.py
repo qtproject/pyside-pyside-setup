@@ -64,6 +64,7 @@ class KeyEventFilter(QObject):
 
         return False
 
+
 class EventFilterTest(UsesQApplication):
 
     def testKeyEvent(self):
@@ -75,7 +76,6 @@ class EventFilterTest(UsesQApplication):
         QTest.keyClick(widget, key)
 
         self.assertTrue(eventFilter.processed)
-
 
 
 if __name__ == '__main__':

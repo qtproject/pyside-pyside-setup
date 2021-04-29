@@ -49,6 +49,7 @@ from helper.usesqapplication import UsesQApplication
 from PySide6.QtCore import Slot, Signal, QUrl, QTimer, QCoreApplication
 from PySide6.QtQuick import QQuickView
 
+
 class View(QQuickView):
     def __init__(self):
         super().__init__()
@@ -58,6 +59,7 @@ class View(QQuickView):
     @Slot(int, int)
     def blubb(self, x, y):
         self.called.emit(x, y)
+
 
 class TestQML(UsesQApplication):
     def done(self, x, y):
@@ -88,6 +90,7 @@ class TestQML(UsesQApplication):
         QTimer.singleShot(30000, QCoreApplication.instance().quit)
         self.app.exec_()
         self.assertTrue(self._sucess)
+
 
 if __name__ == '__main__':
     unittest.main()

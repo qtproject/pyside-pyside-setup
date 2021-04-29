@@ -55,6 +55,7 @@ class MyQUiLoader(QUiLoader):
             setattr(self.baseinstance, name, widget)
             return widget
 
+
 class ButTest(UsesQApplication):
     def testCase(self):
         w = QWidget()
@@ -65,6 +66,7 @@ class ButTest(UsesQApplication):
 
         self.assertEqual(len(loader._widgets), 1)
         self.assertEqual(type(loader._widgets[0]), QFrame)
+
 
 if __name__ == '__main__':
     unittest.main()

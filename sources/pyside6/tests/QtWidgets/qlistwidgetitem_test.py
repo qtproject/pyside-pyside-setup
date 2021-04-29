@@ -59,5 +59,6 @@ class QListWidgetItemConstructor(UsesQApplication):
         # Bug 452 - QListWidgetItem() not casting NoneType to null correctly.
         item = QListWidgetItem(None, 123)
 
+
 if __name__ == '__main__':
     unittest.main()

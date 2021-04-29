@@ -37,6 +37,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QCoreApplication
 
+
 class TestQCoreApplication(unittest.TestCase):
     def testNoArguments(self):
         app = QCoreApplication()

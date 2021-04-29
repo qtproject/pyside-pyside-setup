@@ -46,6 +46,7 @@ from helper.usesqcoreapplication import UsesQCoreApplication
 
 mutex = QMutex()
 
+
 class Dummy(QThread):
     '''Dummy thread'''
     def __init__(self, *args):
@@ -53,11 +54,12 @@ class Dummy(QThread):
         self.called = False
 
     def run(self):
-        #Start-quit sequence
+        # Start-quit sequence
         self.qobj = QObject()
         mutex.lock()
         self.called = True
         mutex.unlock()
+
 
 class QThreadSimpleCase(UsesQCoreApplication):
 
@@ -69,7 +71,7 @@ class QThreadSimpleCase(UsesQCoreApplication):
         UsesQCoreApplication.tearDown(self)
 
     def testThread(self):
-        #Basic QThread test
+        # Basic QThread test
         obj = Dummy()
         obj.start()
         self.assertTrue(obj.wait(100))
@@ -78,7 +80,7 @@ class QThreadSimpleCase(UsesQCoreApplication):
 
     def cb(self, *args):
         self.called = True
-        #self.exit_app_cb()
+        # self.exit_app_cb()
 
     def abort_application(self):
         if self._thread.isRunning():
@@ -86,7 +88,7 @@ class QThreadSimpleCase(UsesQCoreApplication):
         self.app.quit()
 
     def testSignalFinished(self):
-        #QThread.finished() (signal)
+        # QThread.finished() (signal)
         obj = Dummy()
         QObject.connect(obj, SIGNAL('finished()'), self.cb)
         mutex.lock()
@@ -100,7 +102,7 @@ class QThreadSimpleCase(UsesQCoreApplication):
         self.assertTrue(self.called)
 
     def testSignalStarted(self):
-        #QThread.started() (signal)
+        # QThread.started() (signal)
         obj = Dummy()
         QObject.connect(obj, SIGNAL('started()'), self.cb)
         obj.start()
@@ -109,8 +111,9 @@ class QThreadSimpleCase(UsesQCoreApplication):
         QTimer.singleShot(1000, self.abort_application)
         self.app.exec_()
 
-        self.assertEqual(obj.qobj.thread(), obj) # test QObject.thread() method
+        self.assertEqual(obj.qobj.thread(), obj)  # test QObject.thread() method
         self.assertTrue(self.called)
+
 
 if __name__ == '__main__':
     unittest.main()

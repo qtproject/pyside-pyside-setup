@@ -53,7 +53,8 @@ class TestInputDialog(TimedQApplication):
 
     def testGetText(self):
         (text, bool) = QInputDialog.getText(None, "title", "label")
-        self.assertEqual(str(text),"")
+        self.assertEqual(str(text), "")
+
 
 if __name__ == '__main__':
     unittest.main()

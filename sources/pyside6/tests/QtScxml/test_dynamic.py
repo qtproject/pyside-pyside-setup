@@ -39,6 +39,7 @@ from helper.timedqapplication import TimedQApplication
 from PySide6.QtCore import QObject, SIGNAL
 from PySide6.QtScxml import QScxmlStateMachine
 
+
 class testDynamicStateMachine(TimedQApplication):
     def setUp(self):
         super(testDynamicStateMachine, self).setUp()
@@ -54,6 +55,7 @@ class testDynamicStateMachine(TimedQApplication):
 
     def test(self):
         self._machine.start()
+
 
 if __name__ == '__main__':
     unittest.main()

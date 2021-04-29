@@ -39,6 +39,7 @@ from helper.usesqapplication import UsesQApplication
 from PySide6.QtCore import QItemSelection
 from PySide6.QtGui import QStandardItemModel
 
+
 class QItemSelectionTest(UsesQApplication):
     def testLen(self):
         model = QStandardItemModel(2, 2)
@@ -46,8 +47,9 @@ class QItemSelectionTest(UsesQApplication):
         model.insertRow(1)
         model.insertColumn(0)
         model.insertColumn(1)
-        selection = QItemSelection(model.index(0,0), model.index(1,1))
+        selection = QItemSelection(model.index(0, 0), model.index(1, 1))
         self.assertEqual(len(selection), 1)
+
 
 if __name__ == '__main__':
     unittest.main()

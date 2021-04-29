@@ -42,6 +42,7 @@ from PySide6.QtWebEngineWidgets import QWebEngineView, QWebEngineProfile
 from PySide6.QtWebEngineCore import (QWebEngineUrlScheme,
                                      QWebEngineUrlSchemeHandler)
 
+
 class TestSchemeHandler(QWebEngineUrlSchemeHandler):
     def requestStarted(self, request):
         if request.requestUrl() == "testpy:hello":
@@ -57,7 +58,7 @@ class TestSchemeHandler(QWebEngineUrlSchemeHandler):
 class MainTest(unittest.TestCase):
     def test_SchemeHandlerRedirect(self):
         self._loaded = False
-        QApplication.setAttribute(Qt.AA_ShareOpenGLContexts);
+        QApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
         QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
         QtWebEngine.initialize()
         app = QApplication([])

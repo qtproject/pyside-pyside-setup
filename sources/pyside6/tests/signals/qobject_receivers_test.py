@@ -45,6 +45,7 @@ from PySide6.QtCore import QObject, SIGNAL, SLOT
 def cute_slot():
     pass
 
+
 class TestQObjectReceivers(unittest.TestCase):
     '''Test case for QObject::receivers'''
 
@@ -80,6 +81,7 @@ class TestQObjectReceivers(unittest.TestCase):
         self.assertEqual(sender.receivers(SIGNAL("some_dynamic_signal(  )")), 1)
         sender.connect(sender, SIGNAL("some_dynamic_signal()"), receiver, SLOT("deleteLater()"))
         self.assertEqual(sender.receivers(SIGNAL("some_dynamic_signal(  )")), 2)
+
 
 if __name__ == '__main__':
     unittest.main()

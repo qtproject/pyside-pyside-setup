@@ -46,10 +46,11 @@ class QTextDocumentWriterTest(unittest.TestCase):
         doc = QTextDocument(text)
         b = QBuffer()
         b.open(QBuffer.ReadWrite)
-        writer = QTextDocumentWriter(b, bytes("plaintext", "UTF-8"));
-        writer.write(doc);
+        writer = QTextDocumentWriter(b, bytes("plaintext", "UTF-8"))
+        writer.write(doc)
         b.close()
         self.assertEqual(b.buffer(), text)
+
 
 if __name__ == '__main__':
     unittest.main()

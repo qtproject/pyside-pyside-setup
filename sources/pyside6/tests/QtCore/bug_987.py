@@ -46,5 +46,6 @@ class TestBug987(unittest.TestCase):
         o = QObject()
         self.assertRaises(RuntimeError, o.destroyed.disconnect, self.callback)
 
+
 if __name__ == '__main__':
     unittest.main()

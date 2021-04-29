@@ -40,13 +40,16 @@ init_test_paths(False)
 from helper.usesqapplication import UsesQApplication
 from PySide6.QtWidgets import QMainWindow, QMenu, QApplication
 
+
 class MainWindow(QMainWindow):
     def __init__(self, *args):
-        self._menu = QMenu(self.dontexist) # attribute called with invalid C++ object
+        self._menu = QMenu(self.dontexist)  # attribute called with invalid C++ object
+
 
 class MainWindow2(QMainWindow):
     def __init__(self):
         self.show()
+
 
 class Bug696(UsesQApplication):
     def testContructorInitialization(self):

@@ -47,5 +47,6 @@ class QIconCtorWithNoneTest(TimedQApplication):
         pixmap = icon.pixmap(48, 48)
         self.app.exec_()
 
+
 if __name__ == '__main__':
     unittest.main()

@@ -42,29 +42,31 @@ from PySide6.QtWidgets import QToolBar, QMainWindow
 
 from helper.usesqapplication import UsesQApplication
 
+
 class AddActionText(UsesQApplication):
     '''Test case for calling QToolbar.addAction passing a text'''
 
     def setUp(self):
-        #Acquire resources
+        # Acquire resources
         super(AddActionText, self).setUp()
         self.window = QMainWindow()
         self.toolbar = QToolBar()
         self.window.addToolBar(self.toolbar)
 
     def tearDown(self):
-        #Release resources
+        # Release resources
         super(AddActionText, self).tearDown()
         del self.toolbar
         del self.window
 
     def testText(self):
-        #QToolBar.addAction(text) - add a QToolButton
+        # QToolBar.addAction(text) - add a QToolButton
         self.toolbar.addAction('aaaa')
         self.assertEqual(len(self.toolbar.actions()), 1)
         action = self.toolbar.actions()[0]
         self.assertTrue(isinstance(action, QAction))
         self.assertEqual(action.text(), 'aaaa')
+
 
 if __name__ == '__main__':
     unittest.main()

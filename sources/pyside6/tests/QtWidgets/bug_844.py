@@ -47,6 +47,7 @@ class QtKeyPressListener(QObject):
         # This used to crash here due to a misbehaviour of type discovery!
         return QObject.eventFilter(self, obj, event)
 
+
 app = QApplication([])
 key_listener = QtKeyPressListener(app)
 w = QLabel('Hello')

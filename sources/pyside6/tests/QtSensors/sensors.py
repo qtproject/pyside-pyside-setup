@@ -49,7 +49,7 @@ class QSensorTest(unittest.TestCase):
             values = []
             usedIdentifier = None
             for identifier in identifiers:
-                sensor = QSensor(sensorType, None);
+                sensor = QSensor(sensorType, None)
                 sensor.setIdentifier(identifier)
                 if sensor.connectToBackend():
                     usedIdentifier = identifier
@@ -59,6 +59,7 @@ class QSensorTest(unittest.TestCase):
                     break
             if usedIdentifier:
                 print('Sensor ', sensorType, usedIdentifier, values)
+
 
 if __name__ == '__main__':
     unittest.main()

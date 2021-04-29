@@ -47,5 +47,6 @@ class MainTest(unittest.TestCase):
         QTimer.singleShot(2000, app.quit)
         app.exec_()
 
+
 if __name__ == '__main__':
     unittest.main()

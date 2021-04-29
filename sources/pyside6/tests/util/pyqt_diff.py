@@ -32,6 +32,7 @@ import sys
 
 from color import print_colored
 
+
 def check_module_diff(module_name):
     '''Difference between PySide6 and PyQt5 versions of qt bindings.
     Returns a tuple with the members present only on PySide6 and only on PyQt5'''
@@ -57,6 +58,7 @@ def main(argv=None):
 
     print_colored('Only on SIP version')
     print(only_orig)
+
 
 if __name__ == '__main__':
     main()

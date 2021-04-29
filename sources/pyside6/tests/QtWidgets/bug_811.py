@@ -41,10 +41,12 @@ from helper.usesqapplication import UsesQApplication
 from PySide6.QtGui import QTextBlockUserData, QTextCursor
 from PySide6.QtWidgets import QTextEdit
 
+
 class TestUserData(QTextBlockUserData):
     def __init__(self, data):
         super().__init__()
         self.data = data
+
 
 class TestUserDataRefCount(UsesQApplication):
     def testRefcount(self):
@@ -62,6 +64,7 @@ class TestUserDataRefCount(UsesQApplication):
         self.udata = weakref.ref(ud, None)
         del ud, ud2
         self.assertEqual(sys.getrefcount(self.udata()), 2)
+
 
 if __name__ == '__main__':
     unittest.main()

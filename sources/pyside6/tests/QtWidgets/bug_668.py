@@ -53,6 +53,7 @@ class A(QMainWindow):
         # Test index() method (see PYSIDE-570, PYSIDE-331)
         index = a.index(0, 0, QModelIndex())
 
+
 app = QApplication([])
 m = A()
 m.show()

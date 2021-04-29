@@ -41,6 +41,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QUuid
 
+
 class QUuidTest(unittest.TestCase):
     def testFromString(self):
         uuidString = '{fc69b59e-cc34-4436-a43c-ee95d128b8c5}'
@@ -48,6 +49,7 @@ class QUuidTest(unittest.TestCase):
         uuid = QUuid.fromString(uuidString)
         self.assertTrue(not uuid.isNull())
         self.assertEqual(uuid.toString(), uuidString)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -43,12 +43,15 @@ from PySide6.QtCore import (QLibraryInfo, QtCriticalMsg, QtDebugMsg, QtWarningMs
 
 param = []
 
+
 def handler(msgt, ctx, msg):
     global param
     param = [msgt, ctx, msg.strip()]
 
+
 def handleruseless(msgt, ctx, msg):
     pass
+
 
 class QInstallMsgHandlerTest(unittest.TestCase):
 
@@ -83,6 +86,7 @@ class QInstallMsgHandlerTest(unittest.TestCase):
         qCritical("Test Critical")
         self.assertEqual(param[0], QtCriticalMsg)
         self.assertEqual(param[2], "Test Critical")
+
 
 if __name__ == '__main__':
     unittest.main()

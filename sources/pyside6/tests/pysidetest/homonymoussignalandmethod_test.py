@@ -41,6 +41,7 @@ from testbinding import TestObject
 
 '''Tests the behaviour of homonymous signals and slots.'''
 
+
 class HomonymousSignalAndMethodTest(unittest.TestCase):
 
     def setUp(self):
@@ -83,6 +84,7 @@ class HomonymousSignalAndMethodTest(unittest.TestCase):
 
     def testHomonymousSignalAndStaticMethodFromInstance(self):
         self.assertEqual(self.obj.staticMethodDouble(4), 8)
+
 
 if __name__ == '__main__':
     unittest.main()

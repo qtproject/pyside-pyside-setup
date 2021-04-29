@@ -38,6 +38,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QObject, Property
 
+
 class MyObject(QObject):
     def __init__(self):
         super().__init__()
@@ -67,6 +68,7 @@ class PropertyTest(unittest.TestCase):
         self.assertEqual(o.value, 10)
         del o
         self.assertTrue(self._obDestroyed)
+
 
 if __name__ == '__main__':
     unittest.main()

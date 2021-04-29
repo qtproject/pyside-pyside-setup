@@ -41,7 +41,8 @@ from PySide6.QtWidgets import QStyleOptionGraphicsItem
 class Bug640(unittest.TestCase):
     def testIt(self):
         option = QStyleOptionGraphicsItem()
-        a = option.state # crash!?
+        a = option.state  # crash!?
+
 
 if __name__ == "__main__":
-   unittest.main()
+    unittest.main()

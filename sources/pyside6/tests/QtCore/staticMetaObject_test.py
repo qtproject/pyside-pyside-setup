@@ -37,10 +37,12 @@ init_test_paths(False)
 
 from PySide6.QtCore import QObject, Slot, QMetaObject
 
+
 class MyObject(QObject):
     @Slot(int, str)
     def slot1(self, a, b):
         pass
+
 
 class testAttribute(unittest.TestCase):
     def testBug896(self):
@@ -53,6 +55,7 @@ class testAttribute(unittest.TestCase):
         mo = MyObject.staticMetaObject
         self.assertEqual(mo.indexOfSignal('destroyed(void)'), -1)
         self.assertTrue(mo.indexOfSignal('destroyed()') > -1)
+
 
 if __name__ == '__main__':
     unittest.main()

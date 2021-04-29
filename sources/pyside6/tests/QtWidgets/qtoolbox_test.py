@@ -40,6 +40,7 @@ from PySide6.QtWidgets import QToolBox, QWidget
 
 from helper.usesqapplication import UsesQApplication
 
+
 class OwnershipControl(UsesQApplication):
 
     def setUp(self):

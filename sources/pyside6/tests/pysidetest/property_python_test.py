@@ -49,7 +49,6 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtCore import Property, QObject
-#from PyQt5.QtCore import pyqtProperty as Property, QObject
 
 # This are the original imports.
 import sys
@@ -61,17 +60,22 @@ try:
 except ImportError:
     pass
 
+
 class PropertyBase(Exception):
     pass
+
 
 class PropertyGet(PropertyBase):
     pass
 
+
 class PropertySet(PropertyBase):
     pass
 
+
 class PropertyDel(PropertyBase):
     pass
+
 
 class BaseClass(QObject):
     def __init__(self):
@@ -92,6 +96,7 @@ class BaseClass(QObject):
     def spam(self):
         del self._spam
 
+
 class SubClass(BaseClass):
 
     @BaseClass.spam.getter
@@ -107,11 +112,14 @@ class SubClass(BaseClass):
     def spam(self):
         raise PropertyDel(self._spam)
 
+
 class PropertyDocBase(object):
     _spam = 1
+
     def _get_spam(self):
         return self._spam
     spam = Property(object, _get_spam, doc="spam spam spam")
+
 
 class PropertyDocSub(PropertyDocBase):
     @PropertyDocBase.spam.getter
@@ -119,11 +127,13 @@ class PropertyDocSub(PropertyDocBase):
         """The decorator does not use this doc string"""
         return self._spam
 
+
 class PropertySubNewGetter(BaseClass):
     @BaseClass.spam.getter
     def spam(self):
         """new docstring"""
         return 5
+
 
 class PropertyNewGetter(QObject):
     def __init__(self):
@@ -133,10 +143,12 @@ class PropertyNewGetter(QObject):
     def spam(self):
         """original docstring"""
         return 1
+
     @spam.getter
     def spam(self):
         """new docstring"""
         return 8
+
 
 class PropertyTests(unittest.TestCase):
     def test_property_decorator_baseclass(self):

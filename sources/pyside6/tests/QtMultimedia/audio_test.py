@@ -41,6 +41,7 @@ from helper.usesqguiapplication import UsesQGuiApplication
 from PySide6.QtCore import *
 from PySide6.QtMultimedia import *
 
+
 class testAudioDevices(UsesQGuiApplication):
 
     def testListDevices(self):

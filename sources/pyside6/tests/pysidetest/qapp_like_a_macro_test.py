@@ -42,6 +42,7 @@ import PySide6
 
 # Note: this test makes qapplication_singleton_test.py obsolete.
 
+
 class qAppMacroTest(unittest.TestCase):
     _test_1093_is_first = True
 
@@ -62,9 +63,11 @@ class qAppMacroTest(unittest.TestCase):
                    QtWidgets.QApplication)
         fil = sys.stderr
         for klass in classes:
-            print("CREATED", klass([]), file=fil); fil.flush()
+            print("CREATED", klass([]), file=fil)
+            fil.flush()
             qApp.shutdown()
-            print("DELETED qApp", qApp, file=fil); fil.flush()
+            print("DELETED qApp", qApp, file=fil)
+            fil.flush()
         # creating without deletion raises:
         QtCore.QCoreApplication([])
         with self.assertRaises(RuntimeError):

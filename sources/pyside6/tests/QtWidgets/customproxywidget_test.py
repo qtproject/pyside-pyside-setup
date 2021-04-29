@@ -41,9 +41,11 @@ from PySide6.QtGui import QPainter
 from PySide6.QtWidgets import QLabel
 from PySide6.QtWidgets import QGraphicsScene, QGraphicsView, QGraphicsItem, QGraphicsProxyWidget
 
+
 class CustomProxy(QGraphicsProxyWidget):
     def __init__(self, parent=None, wFlags=0):
         QGraphicsProxyWidget.__init__(self, parent, wFlags)
+
 
 class CustomProxyWidgetTest(UsesQApplication):
     def testCustomProxyWidget(self):
@@ -57,12 +59,13 @@ class CustomProxyWidgetTest(UsesQApplication):
         scene.setSceneRect(scene.itemsBoundingRect())
 
         view = QGraphicsView(scene)
-        view.setRenderHints(QPainter.Antialiasing|QPainter.SmoothPixmapTransform)
+        view.setRenderHints(QPainter.Antialiasing | QPainter.SmoothPixmapTransform)
         view.setViewportUpdateMode(QGraphicsView.BoundingRectViewportUpdate)
         view.show()
 
         timer = QTimer.singleShot(100, self.app.quit)
         self.app.exec_()
+
 
 if __name__ == '__main__':
     unittest.main()

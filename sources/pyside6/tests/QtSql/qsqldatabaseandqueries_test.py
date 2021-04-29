@@ -49,11 +49,12 @@ class Foo(QWidget):
         super().__init__()
         self.model = QSqlTableModel()
 
+
 class SqlDatabaseCreationDestructionAndQueries(unittest.TestCase):
     '''Test cases for QtSql database creation, destruction and queries'''
 
     def setUp(self):
-        #Acquire resources
+        # Acquire resources
         self.assertFalse(not QSqlDatabase.drivers(), "installed Qt has no DB drivers")
         self.assertTrue("QSQLITE" in QSqlDatabase.drivers(), "\"QSQLITE\" driver not available in this Qt version")
         self.db = QSqlDatabase.addDatabase("QSQLITE")
@@ -61,20 +62,20 @@ class SqlDatabaseCreationDestructionAndQueries(unittest.TestCase):
         self.assertTrue(self.db.open())
 
     def tearDown(self):
-        #Release resources
+        # Release resources
         self.db.close()
         QSqlDatabase.removeDatabase(":memory:")
         del self.db
 
     def testTableCreationAndDestruction(self):
-        #Test table creation and destruction
+        # Test table creation and destruction
         query = QSqlQuery()
         query.exec_("CREATE TABLE dummy(id int primary key, dummyfield varchar(20))")
         query.exec_("DROP TABLE dummy")
         query.clear()
 
     def testTableInsertionAndRetrieval(self):
-        #Test table creation, insertion and retrieval
+        # Test table creation, insertion and retrieval
         query = QSqlQuery()
         query.exec_("CREATE TABLE person(id int primary key, "
                     "firstname varchar(20), lastname varchar(20))")
@@ -100,6 +101,7 @@ class SqlDatabaseCreationDestructionAndQueries(unittest.TestCase):
         model = bar.model
         del bar
         del app
+
 
 if __name__ == '__main__':
     unittest.main()

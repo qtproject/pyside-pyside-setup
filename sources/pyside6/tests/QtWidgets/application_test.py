@@ -41,6 +41,7 @@ from testbinding import TestObject
 from PySide6.QtWidgets import QApplication
 from PySide6 import __all__ as all
 
+
 class QApplicationInstance(unittest.TestCase):
 
     def appDestroyed(self):
@@ -60,6 +61,7 @@ class QApplicationInstance(unittest.TestCase):
         #     __import__("PySide6." + all[-1])
         #     self.assertEqual(app1, qApp)
         app1.destroyed.connect(self.appDestroyed)
+
 
 if __name__ == '__main__':
     unittest.main()

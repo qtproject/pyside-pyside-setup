@@ -41,14 +41,15 @@ from PySide6.QtCore import QObject, Signal
 from PySide6.QtWidgets import QApplication
 
 
-class QBug( QObject ):
-    def __init__(self, parent = None):
+class QBug(QObject):
+    def __init__(self, parent=None):
         QObject.__init__(self, parent)
 
     def check(self):
         self.done.emit("abc")
 
     done = Signal(str)
+
 
 class Bug324(unittest.TestCase):
 
@@ -62,6 +63,7 @@ class Bug324(unittest.TestCase):
         bug.done.connect(self.on_done)
         bug.check()
         self.assertEqual(self.value, 'abc')
+
 
 if __name__ == '__main__':
     unittest.main()

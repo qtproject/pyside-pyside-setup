@@ -44,6 +44,7 @@ from helper.usesqapplication import UsesQApplication
 
 qgraphics_item_painted = False
 
+
 class RoundRectItem(QGraphicsRectItem):
 
     def __init__(self, x, y, w, h):

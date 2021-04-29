@@ -41,6 +41,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QCalendar
 
+
 class TestQCalendar (unittest.TestCase):
     def testCalendar(self):
         calendar = QCalendar(QCalendar.System.Gregorian)

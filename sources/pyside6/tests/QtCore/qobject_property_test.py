@@ -39,6 +39,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QObject, Property, Signal
 
+
 class MyObjectWithNotifyProperty(QObject):
     def __init__(self, parent=None):
         QObject.__init__(self, parent)
@@ -53,6 +54,7 @@ class MyObjectWithNotifyProperty(QObject):
 
     notifyP = Signal()
     myProperty = Property(int, readP, fset=writeP, notify=notifyP)
+
 
 class PropertyWithNotify(unittest.TestCase):
     def called(self):

@@ -38,6 +38,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QRandomGenerator
 
+
 class OverflowExceptionCollect(unittest.TestCase):
     '''Test case for OverflowError exception during garbage collection. See bug #147'''
 
@@ -47,5 +48,6 @@ class OverflowExceptionCollect(unittest.TestCase):
         # should not abort if bug #147 is fixed
         gc.collect()
 
+
 if __name__ == '__main__':
-        unittest.main()
+    unittest.main()

@@ -44,6 +44,7 @@ from PySide6.QtCore import QObject, QTranslator, QCoreApplication
 
 from helper.usesqcoreapplication import UsesQCoreApplication
 
+
 class TranslationTest(UsesQCoreApplication):
     '''Test case for Qt translation facilities.'''
 
@@ -52,7 +53,7 @@ class TranslationTest(UsesQCoreApplication):
         self.trdir = os.path.join(os.path.dirname(__file__), 'translations')
 
     def testLatin(self):
-        #Set string value to Latin
+        # Set string value to Latin
         translator = QTranslator()
         translator.load(os.path.join(self.trdir, 'trans_latin.qm'))
         self.app.installTranslator(translator)
@@ -62,7 +63,7 @@ class TranslationTest(UsesQCoreApplication):
         self.assertEqual(obj.objectName(), 'Orbis, te saluto!')
 
     def testRussian(self):
-        #Set string value to Russian
+        # Set string value to Russian
         translator = QTranslator()
         translator.load(os.path.join(self.trdir, 'trans_russian.qm'))
         self.app.installTranslator(translator)
@@ -85,6 +86,7 @@ class TranslationTest(UsesQCoreApplication):
         obj = QCoreApplication.translate('context', value, None)
         self.assertTrue(isinstance(obj, str))
         self.assertEqual(obj, value)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -38,6 +38,7 @@ init_test_paths(False)
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QToolBar, QApplication, QToolButton
 
+
 class TestLabelPixmap(unittest.TestCase):
     def testReference(self):
         toolbar = QToolBar()
@@ -50,6 +51,7 @@ class TestLabelPixmap(unittest.TestCase):
 
         for b in buttons:
             self.assertRaises(RuntimeError, b.objectName)
+
 
 if __name__ == '__main__':
     app = QApplication([])

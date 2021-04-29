@@ -39,6 +39,7 @@ from PySide6.QtGui import QRegion
 from PySide6.QtCore import QPoint
 from helper.usesqapplication import UsesQApplication
 
+
 class QRegionTest(UsesQApplication):
 
     def testFunctionUnit(self):
@@ -46,10 +47,11 @@ class QRegionTest(UsesQApplication):
         r2 = QRegion(5, 5, 10, 10)
 
         ru = r.united(r2)
-        self.assertTrue(ru.contains(QPoint(0,0)))
-        self.assertTrue(ru.contains(QPoint(5,5)))
-        self.assertTrue(ru.contains(QPoint(10,10)))
-        self.assertTrue(ru.contains(QPoint(14,14)))
+        self.assertTrue(ru.contains(QPoint(0, 0)))
+        self.assertTrue(ru.contains(QPoint(5, 5)))
+        self.assertTrue(ru.contains(QPoint(10, 10)))
+        self.assertTrue(ru.contains(QPoint(14, 14)))
+
 
 if __name__ == '__main__':
     unittest.main()

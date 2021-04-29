@@ -56,6 +56,7 @@ class Bug585(unittest.TestCase):
 
         self.assertEqual(refCount, sys.getrefcount(i1))
 
+
 if __name__ == '__main__':
     unittest.main()
 

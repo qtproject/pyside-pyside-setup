@@ -48,13 +48,16 @@ from helper.usesqapplication import UsesQApplication
 destroyedRect = False
 destroyedPol = False
 
+
 def rect_del(o):
     global destroyedRect
     destroyedRect = True
 
+
 def pol_del(o):
     global destroyedPol
     destroyedPol = True
+
 
 class ReferenceCount(UsesQApplication):
 
@@ -71,7 +74,7 @@ class ReferenceCount(UsesQApplication):
         self.assertTrue(isinstance(pol, QGraphicsPolygonItem))
         self.wrp = weakref.ref(pol, pol_del)
 
-        #refcount need be 3 because one ref for QGraphicsScene, and one to rect obj
+        # refcount need be 3 because one ref for QGraphicsScene, and one to rect obj
         self.assertEqual(sys.getrefcount(pol), 3)
 
     def testReferenceCount(self):
@@ -85,19 +88,20 @@ class ReferenceCount(UsesQApplication):
 
         self.wrr = weakref.ref(rect, rect_del)
 
-        #refcount need be 3 because one ref for QGraphicsScene, and one to rect obj
+        # refcount need be 3 because one ref for QGraphicsScene, and one to rect obj
         self.assertEqual(sys.getrefcount(rect), 3)
 
         del rect
-        #not destroyed because one ref continue in QGraphicsScene
+        # not destroyed because one ref continue in QGraphicsScene
         self.assertEqual(destroyedRect, False)
         self.assertEqual(destroyedPol, False)
 
         del self.scene
 
-        #QGraphicsScene was destroyed and this destroy internal ref to rect
+        # QGraphicsScene was destroyed and this destroy internal ref to rect
         self.assertEqual(destroyedRect, True)
         self.assertEqual(destroyedPol, True)
+
 
 if __name__ == '__main__':
     unittest.main()

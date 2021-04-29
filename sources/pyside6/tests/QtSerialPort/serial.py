@@ -42,6 +42,7 @@ init_test_paths(False)
 from PySide6.QtSerialPort import QSerialPort, QSerialPortInfo
 from PySide6.QtCore import QIODevice
 
+
 class QSerialPortTest(unittest.TestCase):
     def testDefaultConstructedPort(self):
         serialPort = QSerialPort()
@@ -91,6 +92,7 @@ class QSerialPortInfoTest(unittest.TestCase):
             portinfo.hasProductIdentifier()
             portinfo.hasVendorIdentifier()
             portinfo.isNull()
+
 
 if __name__ == '__main__':
     unittest.main()

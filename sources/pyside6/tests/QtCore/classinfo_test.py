@@ -38,6 +38,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QObject, QCoreApplication, ClassInfo
 
+
 class TestClassInfo(unittest.TestCase):
     def test_metadata(self):
         @ClassInfo(author='pyside', url='http://www.pyside.org')
@@ -48,11 +49,11 @@ class TestClassInfo(unittest.TestCase):
         mo = o.metaObject()
         self.assertEqual(mo.classInfoCount(), 2)
 
-        ci = mo.classInfo(0) #author
+        ci = mo.classInfo(0)  # author
         self.assertEqual(ci.name(), 'author')
         self.assertEqual(ci.value(), 'pyside')
 
-        ci = mo.classInfo(1) #url
+        ci = mo.classInfo(1)  # url
         self.assertEqual(ci.name(), 'url')
         self.assertEqual(ci.value(), 'http://www.pyside.org')
 
@@ -93,20 +94,26 @@ class TestClassInfo(unittest.TestCase):
         self.assertRaises(TypeError, decorator, MyObject2)
 
     def test_can_only_be_used_on_qobjects(self):
-        def test_function(): pass
+        def test_function():
+            pass
         self.assertRaises(TypeError, ClassInfo(), test_function)
 
-        class NotAQObject(object): pass
+        class NotAQObject(object):
+            pass
         self.assertRaises(TypeError, ClassInfo(), NotAQObject)
 
-        class QObjectSubclass(QObject): pass
+        class QObjectSubclass(QObject):
+            pass
         ClassInfo()(QObjectSubclass)
 
-        class SubclassOfNativeQObjectSubclass(QCoreApplication): pass
+        class SubclassOfNativeQObjectSubclass(QCoreApplication):
+            pass
         ClassInfo()(SubclassOfNativeQObjectSubclass)
 
-        class SubclassOfPythonQObjectSubclass(QObjectSubclass): pass
+        class SubclassOfPythonQObjectSubclass(QObjectSubclass):
+            pass
         ClassInfo()(SubclassOfPythonQObjectSubclass)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -40,10 +40,12 @@ init_test_paths(False)
 from helper.usesqapplication import UsesQApplication
 from PySide6.QtGui import QStyleHints
 
+
 class QStyleHintsTest(UsesQApplication):
     def test(self):
         styleHints = self.app.styleHints()
         self.assertTrue(styleHints.startDragDistance() > 0)
+
 
 if __name__ == '__main__':
     unittest.main()

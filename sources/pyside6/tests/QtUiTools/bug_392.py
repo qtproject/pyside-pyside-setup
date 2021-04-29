@@ -41,12 +41,14 @@ from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QComboBox, QWidget
 from PySide6.QtUiTools import QUiLoader
 
+
 class MyWidget(QComboBox):
     def __init__(self, parent=None):
         QComboBox.__init__(self, parent)
 
     def isPython(self):
         return True
+
 
 class BugTest(UsesQApplication):
     def testCase(self):
@@ -79,6 +81,7 @@ class BugTest(UsesQApplication):
         self.assertTrue(isinstance(result.custom, MyWidget))
         self.assertTrue(isinstance(result.custom2, MyWidget))
         self.assertTrue(result.custom.isPython())
+
 
 if __name__ == '__main__':
     unittest.main()

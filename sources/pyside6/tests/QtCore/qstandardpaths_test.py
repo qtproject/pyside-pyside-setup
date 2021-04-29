@@ -42,6 +42,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QStandardPaths
 
+
 class QStandardPathsTest(unittest.TestCase):
     def testTestModeEnabled(self):
         print("QStandardPaths.isTestModeEnabled:", QStandardPaths.isTestModeEnabled())
@@ -51,6 +52,7 @@ class QStandardPathsTest(unittest.TestCase):
         sp = False
         QStandardPaths.setTestModeEnabled(sp)
         self.assertEqual(QStandardPaths.isTestModeEnabled(), sp)
+
 
 if __name__ == '__main__':
     unittest.main()

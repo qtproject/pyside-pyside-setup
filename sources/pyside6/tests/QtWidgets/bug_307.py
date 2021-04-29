@@ -40,8 +40,8 @@ from PySide6.QtCore import SIGNAL
 from PySide6.QtWidgets import QPushButton, QApplication
 
 
-class Test (QApplication) :
-    def __init__(self, argv) :
+class Test (QApplication):
+    def __init__(self, argv):
         super().__init__(argv)
         self._called = False
 
@@ -56,6 +56,7 @@ class QApplicationSignalsTest(unittest.TestCase):
         app.connect(button, SIGNAL("clicked()"), app.called)
         button.click()
         self.assertTrue(app._called)
+
 
 if __name__ == '__main__':
     unittest.main()

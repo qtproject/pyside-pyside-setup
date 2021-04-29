@@ -49,15 +49,17 @@ class Gui_Qt(QMainWindow):
         # this used to cause a segfault because the old inject code used to destroy the parent layout
         file = Path(__file__).resolve().parent / 'bug_958.ui'
         assert(file.is_file())
-        self._cw = lLoader.load(os.fspath(file),  self)
+        self._cw = lLoader.load(os.fspath(file), self)
 
         self.setCentralWidget(self._cw)
+
 
 class BugTest(TimedQApplication):
     def testCase(self):
         lMain = Gui_Qt()
         lMain.show()
         self.app.exec_()
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -41,6 +41,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QFile
 
+
 class StaticNonStaticMethodsTest(unittest.TestCase):
     '''Test cases for overloads involving static and non-static versions of a method.'''
 

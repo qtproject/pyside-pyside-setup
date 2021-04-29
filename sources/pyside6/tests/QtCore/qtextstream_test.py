@@ -39,6 +39,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QByteArray, QTextStream, QIODevice, QFile
 
+
 class QTextStreamShiftTest(unittest.TestCase):
 
     def setUp(self):
@@ -55,6 +56,7 @@ class QTextStreamShiftTest(unittest.TestCase):
         self.assertTrue(isinstance(res, str))
         self.assertEqual(res, '4')
 
+
 class QTextStreamGetSet(unittest.TestCase):
 
     def setUp(self):
@@ -68,6 +70,7 @@ class QTextStreamGetSet(unittest.TestCase):
         self.obj.setDevice(None)
         self.assertEqual(None, self.obj.device())
 
+
 class QTextStreamInitialization(unittest.TestCase):
 
     def testConstruction(self):
@@ -79,6 +82,7 @@ class QTextStreamInitialization(unittest.TestCase):
 
         self.assertTrue(obj.atEnd())
         self.assertEqual(obj.readAll(), '')
+
 
 class QTextStreamReadLinesFromDevice(unittest.TestCase):
 
@@ -107,6 +111,7 @@ class QTextStreamReadLinesFromDevice(unittest.TestCase):
         data.append((QByteArray(bytes('ole\r\ndole\r\ndoffen', "UTF-8")), ['ole', 'dole', 'doffen']))
 
         self._check_data(data)
+
 
 if __name__ == '__main__':
     unittest.main()

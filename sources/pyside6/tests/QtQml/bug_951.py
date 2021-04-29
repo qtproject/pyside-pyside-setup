@@ -42,9 +42,11 @@ from PySide6.QtCore import QUrl
 from PySide6.QtQml import qmlRegisterType
 from PySide6.QtQuick import QQuickItem, QQuickView
 
+
 class MyItem(QQuickItem):
     COMPONENT_COMPLETE_CALLED = False
-    def __init__(self,parent=None):
+
+    def __init__(self, parent=None):
         super().__init__(parent)
         self.setObjectName("myitem")
 
@@ -52,9 +54,10 @@ class MyItem(QQuickItem):
         MyItem.COMPONENT_COMPLETE_CALLED = True
         super(MyItem, self).componentComplete()
 
+
 class TestRegisterQMLType(TimedQApplication):
     def setup(self):
-        TimedQApplication.setup(self, 100 * 3) # 3s
+        TimedQApplication.setup(self, 100 * 3)  # 3s
 
     def testSignalEmission(self):
         qmlRegisterType(MyItem, "my.item", 1, 0, "MyItem")
@@ -67,6 +70,7 @@ class TestRegisterQMLType(TimedQApplication):
 
         self.app.exec_()
         self.assertTrue(MyItem.COMPONENT_COMPLETE_CALLED)
+
 
 if __name__ == '__main__':
     unittest.main()

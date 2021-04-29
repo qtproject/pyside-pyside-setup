@@ -48,6 +48,7 @@ except ImportError:
 from helper.basicpyslotcase import BasicPySlotCase
 from helper.usesqapplication import UsesQApplication
 
+
 class MultipleSignalConnections(unittest.TestCase):
     '''Base class for multiple signal connection testing'''
 
@@ -87,7 +88,7 @@ if hasQtGui:
         def testSpinBoxValueChanged(self):
             """Multiple connections to QSpinBox.valueChanged(int)"""
             sender = QSpinBox()
-            #FIXME if number of receivers if higher than 50, segfaults
+            # FIXME if number of receivers if higher than 50, segfaults
             receivers = [BasicPySlotCase() for x in range(10)]
             self.run_many(sender, 'valueChanged(int)', sender.setValue,
                           receivers, (1,))

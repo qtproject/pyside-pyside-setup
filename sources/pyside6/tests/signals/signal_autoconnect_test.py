@@ -63,5 +63,6 @@ class AutoConnectionTest(unittest.TestCase):
         btn.click()
         self.assertTrue(win._method_called)
 
+
 if __name__ == '__main__':
     unittest.main()

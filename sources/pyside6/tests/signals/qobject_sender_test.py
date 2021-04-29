@@ -48,6 +48,7 @@ class ExtQTimer(QTimer):
     def __init__(self):
         super().__init__()
 
+
 class Receiver(QObject):
     def __init__(self):
         super().__init__()
@@ -57,6 +58,7 @@ class Receiver(QObject):
         self.the_sender = self.sender()
         if QCoreApplication.instance():
             QCoreApplication.instance().exit()
+
 
 class ObjectSenderTest(unittest.TestCase):
     '''Test case for QObject.sender() method.'''
@@ -68,6 +70,7 @@ class ObjectSenderTest(unittest.TestCase):
         sender.emit(SIGNAL('foo()'))
         self.assertEqual(sender, recv.the_sender)
 
+
 class ObjectSenderCheckOnReceiverTest(unittest.TestCase):
     '''Test case for QObject.sender() method, this one tests the equality on the Receiver object.'''
 
@@ -77,6 +80,7 @@ class ObjectSenderCheckOnReceiverTest(unittest.TestCase):
         QObject.connect(sender, SIGNAL('foo()'), recv.callback)
         sender.emit(SIGNAL('foo()'))
         self.assertEqual(sender, recv.the_sender)
+
 
 class ObjectSenderWithQAppTest(UsesQCoreApplication):
     '''Test case for QObject.sender() method with QApplication.'''
@@ -104,6 +108,7 @@ class ObjectSenderWithQAppTest(UsesQCoreApplication):
         self.app.exec_()
         self.assertEqual(sender, recv.the_sender)
 
+
 class ObjectSenderWithQAppCheckOnReceiverTest(UsesQCoreApplication):
     '''Test case for QObject.sender() method with QApplication.'''
 
@@ -123,6 +128,7 @@ class ObjectSenderWithQAppCheckOnReceiverTest(UsesQCoreApplication):
         sender.start(10)
         self.app.exec_()
         self.assertEqual(sender, recv.the_sender)
+
 
 if __name__ == '__main__':
     unittest.main()

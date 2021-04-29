@@ -42,16 +42,17 @@ init_test_paths(False)
 from PySide6.QtCore import QUrl
 from PySide6.QtCore import QUrlQuery
 
+
 class QUrlBasicConstructor(unittest.TestCase):
     '''Tests the basic constructors'''
 
     def testBasic(self):
-        #Default constructor for QUrl
+        # Default constructor for QUrl
         url = QUrl()
         self.assertEqual(url.toString(), "")
 
     def testSetAttributes(self):
-        #Construct QUrl by set* methods
+        # Construct QUrl by set* methods
         url = QUrl()
 
         url.setScheme('ftp')
@@ -75,6 +76,7 @@ class QUrlBasicConstructor(unittest.TestCase):
         self.assertEqual(url.toString(),
                         'ftp://john:abc123@www.google.com:8080/mail/view')
 
+
 class QueryItemsTest(unittest.TestCase):
     '''Test query item management'''
 
@@ -116,13 +118,15 @@ class QueryItemsTest(unittest.TestCase):
         for i, data in enumerate(valid_data):
             url.addQueryItem(key, data)
             self.assertEqual(url.allQueryItemValues(key),
-                          list(valid_data[:i+1]))
+                          list(valid_data[:i + 1]))
 
     def testPath(self):
         url = QUrl("http://qt-project.org/images/ban/pgs_front.jpg")
         self.assertEqual(url.path(), "/images/ban/pgs_front.jpg")
 
 # PYSIDE-345: No bindings for QUrlQuery
+
+
 class QueryItemsTest(unittest.TestCase):
     '''Test query item management'''
 
@@ -164,7 +168,8 @@ class QueryItemsTest(unittest.TestCase):
         for i, data in enumerate(valid_data):
             url.addQueryItem(key, data)
             self.assertEqual(url.allQueryItemValues(key),
-                             list(valid_data[:i+1]))
+                             list(valid_data[:i + 1]))
+
 
 if __name__ == '__main__':
     unittest.main()

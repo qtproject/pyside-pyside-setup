@@ -41,6 +41,7 @@ init_test_paths(False)
 from PySide6.QtCore import QCoreApplication, QTimeLine
 from helper.usesqcoreapplication import UsesQCoreApplication
 
+
 class NativeSignalsTest(UsesQCoreApplication):
 
     def setUp(self):
@@ -77,6 +78,7 @@ class NativeSignalsTest(UsesQCoreApplication):
 
         self.app.exec_()
         self.assertTrue(self.called)
+
 
 if __name__ == '__main__':
     unittest.main()

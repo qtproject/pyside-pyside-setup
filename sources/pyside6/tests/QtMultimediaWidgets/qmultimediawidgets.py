@@ -42,6 +42,7 @@ from PySide6.QtMultimediaWidgets import QGraphicsVideoItem, QVideoWidget
 from PySide6.QtWidgets import QGraphicsScene, QGraphicsView, QVBoxLayout, QWidget
 from PySide6.QtCore import QTimer
 
+
 class MyWidget(QWidget):
     def __init__(self):
         super().__init__()
@@ -54,6 +55,7 @@ class MyWidget(QWidget):
         graphicsScene.addItem(QGraphicsVideoItem())
         layout.addWidget(graphicsView)
 
+
 class QMultimediaWidgetsTest(UsesQApplication):
     def testMultimediaWidgets(self):
         w = MyWidget()
@@ -61,6 +63,7 @@ class QMultimediaWidgetsTest(UsesQApplication):
 
         timer = QTimer.singleShot(100, self.app.quit)
         self.app.exec_()
+
 
 if __name__ == '__main__':
     unittest.main()

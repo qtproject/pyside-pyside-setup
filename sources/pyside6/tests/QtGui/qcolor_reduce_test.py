@@ -38,6 +38,7 @@ init_test_paths(False)
 
 from PySide6.QtGui import QColor
 
+
 class TestQColor (unittest.TestCase):
     def reduceColor(self, c):
         p = pickle.dumps(c)
@@ -62,6 +63,7 @@ class TestQColor (unittest.TestCase):
 
     def testReduceHsv(self):
         self.reduceColor(QColor.fromHsvF(0.1, 0.2, 0.3, 0.4))
+
 
 if __name__ == "__main__":
     unittest.main()

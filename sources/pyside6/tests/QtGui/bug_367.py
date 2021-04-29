@@ -47,12 +47,13 @@ class BugTest(UsesQApplication):
         parentItem = model.invisibleRootItem()
         for i in range(10):
             item = QStandardItem()
-            rcount =  sys.getrefcount(item)
+            rcount = sys.getrefcount(item)
             parentItem.appendRow(item)
-            self.assertEqual(rcount+1, sys.getrefcount(item))
+            self.assertEqual(rcount + 1, sys.getrefcount(item))
             parentItem = item
 
         self.assertTrue(True)
+
 
 if __name__ == '__main__':
     unittest.main()

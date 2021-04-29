@@ -55,5 +55,6 @@ class QDataStreamOpOverloadTestCase(unittest.TestCase):
 
         self.assertEqual(ok, True)
 
+
 if __name__ == "__main__":
     unittest.main()

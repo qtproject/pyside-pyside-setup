@@ -38,11 +38,13 @@ init_test_paths(False)
 from PySide6.QtCore import QItemSelection
 from PySide6.QtGui import QStandardItemModel, QStandardItem
 from PySide6.QtWidgets import QApplication
+
+
 class Bug324(unittest.TestCase):
     def testOperators(self):
         model = QStandardItemModel()
         for i in range(100):
-            model.appendRow(QStandardItem("Item: %d"%i))
+            model.appendRow(QStandardItem(f"Item: {i}"))
 
         first = model.index(0, 0)
         second = model.index(10, 0)
@@ -53,12 +55,13 @@ class Bug324(unittest.TestCase):
         sel2 = QItemSelection()
         sel2.select(third, fourth)
 
-        sel3 = sel + sel2 #check operator +
+        sel3 = sel + sel2  # check operator +
         self.assertEqual(len(sel3), 2)
         sel4 = sel
-        sel4 += sel2 #check operator +=
+        sel4 += sel2  # check operator +=
         self.assertEqual(len(sel4), 2)
         self.assertEqual(sel4, sel3)
+
 
 if __name__ == "__main__":
     unittest.main()

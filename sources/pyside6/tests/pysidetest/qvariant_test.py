@@ -41,12 +41,14 @@ from PySide6.QtGui import QKeySequence
 
 from helper.usesqapplication import UsesQApplication
 
+
 class QVariantTest(UsesQApplication):
 
     def testQKeySequenceQVariantOperator(self):
         # bug #775
         ks = QKeySequence(Qt.SHIFT, Qt.CTRL, Qt.Key_P, Qt.Key_R)
         self.assertEqual(TestObject.checkType(ks), 4107)
+
 
 if __name__ == '__main__':
     unittest.main()

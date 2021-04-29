@@ -41,6 +41,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QRegularExpression, QRegularExpressionMatch, QRegularExpressionMatchIterator
 
+
 class QRegularExpressionTest(unittest.TestCase):
 
     def testMatch(self):
@@ -55,11 +56,12 @@ class QRegularExpressionTest(unittest.TestCase):
         re = QRegularExpression('(\w+)')
         self.assertTrue(re.isValid())
         count = 0
-        it = re.globalMatch('word1 word2 word3');
+        it = re.globalMatch('word1 word2 word3')
         while it.hasNext():
             it.next()
-            count = count  + 1
+            count = count + 1
         self.assertEqual(count, 3)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -41,6 +41,7 @@ from helper.timedqapplication import TimedQApplication
 from PySide6.QtQuick import QQuickView
 from PySide6.QtCore import QObject, Signal, Slot, QUrl, QTimer, Property
 
+
 class Obj(QObject):
     def __init__(self):
         super().__init__()
@@ -75,6 +76,7 @@ class TestConnectionWithQml(TimedQApplication):
         view.show()
         button.clicked.emit()
         self.assertEqual(obj.value, 42)
+
 
 if __name__ == '__main__':
     unittest.main()

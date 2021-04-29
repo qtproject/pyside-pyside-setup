@@ -41,6 +41,7 @@ from PySide6.QtCore import QFile
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtSvg import QSvgRenderer
 
+
 class QSvgRendererTest(unittest.TestCase):
 
     def testLoad(self):
@@ -55,6 +56,7 @@ class QSvgRendererTest(unittest.TestCase):
         tigerData = tigerFile.readAll()
         fromContents = QSvgRenderer(tigerData)
         self.assertTrue(fromContents.isValid())
+
 
 if __name__ == '__main__':
     unittest.main()

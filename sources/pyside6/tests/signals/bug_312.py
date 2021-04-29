@@ -43,12 +43,14 @@ from PySide6.QtCore import QObject, SIGNAL
 MAX_LOOPS = 5
 MAX_OBJECTS = 200
 
+
 class Dummy(object):
     def __init__(self, parent):
         self._parent = parent
 
     def callback(self):
         self._called = True
+
 
 class MultipleSlots(unittest.TestCase):
     def myCB(self):
@@ -77,8 +79,9 @@ class MultipleSlots(unittest.TestCase):
 
             self.assertEqual(self._count, MAX_OBJECTS)
 
-            #delete all senders will disconnect the signals
+            # delete all senders will disconnect the signals
             self._senders = []
+
 
 if __name__ == '__main__':
     unittest.main()

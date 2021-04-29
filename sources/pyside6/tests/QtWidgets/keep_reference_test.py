@@ -46,12 +46,16 @@ from PySide6.QtWidgets import QTableView
 class TestModel(QAbstractTableModel):
     def __init__(self, parent=None):
         QAbstractTableModel.__init__(self, parent)
+
     def rowCount(self, parent):
         return 0
+
     def columnCount(self, parent):
         return 0
+
     def data(self, index, role):
         return None
+
 
 class KeepReferenceTest(UsesQApplication):
 
@@ -105,6 +109,7 @@ class KeepReferenceTest(UsesQApplication):
         view = QTableView()
         createModelAndSetToView(view)
         model = view.model()
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -55,7 +55,7 @@ if hasQtGui:
     class QtGuiSigLambda(UsesQApplication):
 
         def testButton(self):
-            #Connecting a lambda to a QPushButton.clicked()
+            # Connecting a lambda to a QPushButton.clicked()
             obj = QPushButton('label')
             ctr = Control()
             func = lambda: setattr(ctr, 'arg', True)
@@ -64,9 +64,8 @@ if hasQtGui:
             self.assertTrue(ctr.arg)
             QObject.disconnect(obj, SIGNAL('clicked()'), func)
 
-
         def testSpinButton(self):
-            #Connecting a lambda to a QPushButton.clicked()
+            # Connecting a lambda to a QPushButton.clicked()
             obj = QSpinBox()
             ctr = Control()
             arg = 444

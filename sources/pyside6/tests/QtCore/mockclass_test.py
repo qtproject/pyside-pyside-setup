@@ -41,6 +41,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QCoreApplication
 
+
 class Mock(object):
     def __init__(self):
         self.called = False
@@ -57,6 +58,7 @@ class MockClassTest(unittest.TestCase):
         setattr(QCoreApplication, 'instance', mock)
         QCoreApplication.instance()
         self.assertTrue(mock.called)
+
 
 if __name__ == '__main__':
     unittest.main()

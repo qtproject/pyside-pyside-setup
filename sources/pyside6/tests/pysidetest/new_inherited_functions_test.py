@@ -182,16 +182,17 @@ class MainTest(unittest.TestCase):
         except AttributeError:
             unittest.TestCase().skipTest("this test makes only sense if QtWidgets is available.")
         try:
-            PySide6.QtWidgets.QApplication.palette(42) # raises
+            PySide6.QtWidgets.QApplication.palette(42)  # raises
         except TypeError as e:
             lines = e.args[0].splitlines()
         heading_pos = lines.index("Supported signatures:")
-        lines = lines[heading_pos+1:]
+        lines = lines[heading_pos + 1:]
         self.assertEqual(len(lines), 3)
         txt = '\n'.join(lines)
         print("Signatures found:")
         print(txt)
         self.assertTrue("palette()" in txt)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -41,15 +41,17 @@ from PySide6.QtWidgets import QApplication, QGraphicsProxyWidget
 
 
 class CustomWidget(QGraphicsProxyWidget):
-   def itemChange(self, eventType, value):
-      QGraphicsProxyWidget.itemChange(self, eventType, value)
+    def itemChange(self, eventType, value):
+        QGraphicsProxyWidget.itemChange(self, eventType, value)
+
 
 class Bug589(unittest.TestCase):
-   def testCase(self):
-      widget = QGraphicsProxyWidget()
-      custom = CustomWidget()
-      custom.setParentItem(widget)
+    def testCase(self):
+        widget = QGraphicsProxyWidget()
+        custom = CustomWidget()
+        custom.setParentItem(widget)
+
 
 if __name__ == "__main__":
-   app = QApplication(sys.argv)
-   unittest.main()
+    app = QApplication(sys.argv)
+    unittest.main()

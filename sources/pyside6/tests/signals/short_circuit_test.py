@@ -37,10 +37,12 @@ init_test_paths(False)
 
 from PySide6.QtCore import QObject, SIGNAL, SLOT
 
+
 class Dummy(QObject):
     """Dummy class used in this test."""
     def __init__(self, parent=None):
         QObject.__init__(self, parent)
+
 
 class ShortCircuitSignals(unittest.TestCase):
     def setUp(self):
@@ -79,7 +81,7 @@ class ShortCircuitSignals(unittest.TestCase):
         obj1 = Dummy()
 
         QObject.connect(obj1, SIGNAL('foo(int,int,QString)'), self.callback)
-        self.args = (42,33,'char')
+        self.args = (42, 33, 'char')
         obj1.emit(SIGNAL('foo(int,int,QString)'), *self.args)
 
         self.assertTrue(self.called)
@@ -93,6 +95,7 @@ class ShortCircuitSignals(unittest.TestCase):
         obj1.emit(SIGNAL('foo(int,QObject*)'), *self.args)
 
         self.assertTrue(self.called)
+
 
 if __name__ == '__main__':
     unittest.main()

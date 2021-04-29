@@ -37,6 +37,7 @@ init_test_paths(False)
 
 import PySide6
 
+
 class TestVersionInfo(unittest.TestCase):
     def testIt(self):
 

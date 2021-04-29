@@ -39,6 +39,7 @@ from PySide6.QtUiTools import QUiLoader
 
 from helper.usesqapplication import UsesQApplication
 
+
 class MyQUiLoader(QUiLoader):
     def __init__(self):
         super().__init__()
@@ -46,12 +47,14 @@ class MyQUiLoader(QUiLoader):
     def createWidget(self, className, parent=None, name=""):
         return None
 
+
 class BugTest(UsesQApplication):
     def testCase(self):
         loader = MyQUiLoader()
         file = Path(__file__).resolve().parent / 'bug_965.ui'
         self.assertTrue(file.is_file())
         self.assertRaises(RuntimeError, loader.load, os.fspath(file))
+
 
 if __name__ == '__main__':
     unittest.main()

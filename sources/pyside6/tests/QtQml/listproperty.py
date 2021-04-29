@@ -38,11 +38,14 @@ init_test_paths(False)
 from PySide6.QtCore import QObject
 from PySide6.QtQml import ListProperty
 
+
 class InheritsQObject(QObject):
     pass
 
+
 def dummyFunc():
     pass
+
 
 class TestListProperty(unittest.TestCase):
     def testIt(self):
@@ -83,6 +86,7 @@ class TestListProperty(unittest.TestCase):
             method_check_error = True
 
         self.assertTrue(method_check_error)
+
 
 if __name__ == '__main__':
     unittest.main()

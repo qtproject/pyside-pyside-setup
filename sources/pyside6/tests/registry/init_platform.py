@@ -56,6 +56,7 @@ from contextlib import contextmanager
 from textwrap import dedent
 from util import get_refpath, get_script_dir
 
+
 def qt_build():
     result = '<Unknown build of Qt>'
     try:
@@ -64,6 +65,7 @@ def qt_build():
     except:
         pass
     return result
+
 
 script_dir = get_script_dir()
 history_dir = os.path.join(script_dir, 'build_history')
@@ -105,6 +107,8 @@ pyside_build_dir = os.path.join(all_build_dir, "pyside6")
 shiboken_build_dir = os.path.join(all_build_dir, "shiboken6")
 
 # now we compute all paths:
+
+
 def set_ospaths(build_dir):
     ps = os.pathsep
     ospath_var = "PATH" if sys.platform == "win32" else "LD_LIBRARY_PATH"
@@ -118,6 +122,7 @@ def set_ospaths(build_dir):
                 os.path.join(build_dir, "shiboken6", "libshiboken")]
     ospath = ps.join(lib_path + old_val.split(ps))
     os.environ[ospath_var] = ospath
+
 
 set_ospaths(all_build_dir)
 

@@ -40,8 +40,9 @@ from PySide6.QtCore import Signal, QTimer
 from PySide6.QtGui import QPainter
 from PySide6.QtWidgets import QPushButton, QStyleOptionButton, QApplication, QStyle
 
+
 class MyWidget(QPushButton):
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         QPushButton.__init__(self, parent)
         self._painted = False
 
@@ -58,6 +59,7 @@ class MyWidget(QPushButton):
 
     paintReceived = Signal()
 
+
 class TestBug919(TimedQApplication):
     def setUp(self):
         TimedQApplication.setUp(self, 2000)
@@ -68,6 +70,7 @@ class TestBug919(TimedQApplication):
         w.show()
         self.app.exec_()
         self.assertTrue(w._painted)
+
 
 if __name__ == '__main__':
     unittest.main()

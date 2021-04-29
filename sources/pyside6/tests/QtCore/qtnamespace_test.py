@@ -41,11 +41,12 @@ init_test_paths(False)
 
 from PySide6.QtCore import Qt
 
+
 class QtNamespace(unittest.TestCase):
     '''Test case for accessing attributes from Qt namespace'''
 
     def testBasic(self):
-        #Access to Qt namespace
+        # Access to Qt namespace
         getattr(Qt, 'Horizontal')
         getattr(Qt, 'WindowMaximizeButtonHint')
         self.assertTrue(True)

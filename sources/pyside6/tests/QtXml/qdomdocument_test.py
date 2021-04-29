@@ -100,6 +100,7 @@ class QDomDocumentTest(unittest.TestCase):
         child = child.nextSiblingElement('value-type')
         checkAttribute(child, 'name', 'QDomElement')
 
+
 if __name__ == '__main__':
     unittest.main()
 

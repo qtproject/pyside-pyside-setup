@@ -39,6 +39,7 @@ from PySide6.QtWidgets import QWidget, QPushButton
 
 from helper.usesqapplication import UsesQApplication
 
+
 class TestBug1002 (UsesQApplication):
     def testReturnWindow(self):
         widget = QWidget()
@@ -49,6 +50,7 @@ class TestBug1002 (UsesQApplication):
         self.assertEqual(sys.getrefcount(window), 3)
 
         del widget
+
 
 if __name__ == '__main__':
     unittest.main()

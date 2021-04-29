@@ -46,6 +46,7 @@ dst = os.path.join(workdir, 'test_module.py')
 shutil.copyfile(src, dst)
 sys.path.append(workdir)
 
+
 def reload_module(moduleName):
     importlib.reload(moduleName)
 
@@ -59,6 +60,7 @@ def increment_module_value():
         import importlib.util
         cacheFile = importlib.util.cache_from_source(dst)
         os.remove(cacheFile)
+
 
 class TestModuleReloading(unittest.TestCase):
 
@@ -78,6 +80,7 @@ class TestModuleReloading(unittest.TestCase):
         increment_module_value()
         reload_module(sys.modules['test_module'])
         self.assertEqual(test_module.Sentinel.value, 12)
+
 
 if __name__ == "__main__":
     unittest.main()

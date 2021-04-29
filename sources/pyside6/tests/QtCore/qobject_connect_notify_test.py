@@ -46,6 +46,7 @@ from helper.usesqcoreapplication import UsesQCoreApplication
 def cute_slot():
     pass
 
+
 class Obj(QObject):
     def __init__(self):
         super().__init__()
@@ -63,6 +64,7 @@ class Obj(QObject):
     def reset(self):
         self.con_notified = False
         self.dis_notified = False
+
 
 class TestQObjectConnectNotify(UsesQCoreApplication):
     '''Test case for QObject::connectNotify'''
@@ -108,6 +110,7 @@ class TestQObjectConnectNotify(UsesQCoreApplication):
         self.assertTrue(sender.con_notified)
         sender.disconnect(SIGNAL("foo()"), cute_slot)
         self.assertTrue(sender.dis_notified)
+
 
 if __name__ == '__main__':
     unittest.main()

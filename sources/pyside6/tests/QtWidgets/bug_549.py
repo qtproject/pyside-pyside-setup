@@ -47,6 +47,7 @@ class TestBug549(unittest.TestCase):
         w.setWindowFrameMargins(5, 6, 7, 8)
         self.assertEqual(w.getWindowFrameMargins(), (5, 6, 7, 8))
 
+
 if __name__ == '__main__':
     unittest.main()
 

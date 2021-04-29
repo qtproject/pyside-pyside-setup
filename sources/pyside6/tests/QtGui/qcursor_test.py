@@ -42,10 +42,12 @@ init_test_paths(False)
 from PySide6.QtGui import QBitmap, QCursor, QPixmap
 from helper.usesqapplication import UsesQApplication
 
+
 class TestQCursor(UsesQApplication):
     def testQCursorConstructor(self):
         bmp = QBitmap(16, 16)
         cursor = QCursor(bmp, bmp, 16, 16)
+
 
 if __name__ == '__main__':
     unittest.main()

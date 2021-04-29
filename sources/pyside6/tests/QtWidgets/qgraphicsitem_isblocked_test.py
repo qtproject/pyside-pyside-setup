@@ -62,5 +62,6 @@ class QGraphicsViewIsBlockedTest(UsesQApplication):
         (first, second) = Item().isBlockedByModalPanel()
         self.assertFalse(first)
 
+
 if __name__ == "__main__":
     unittest.main()

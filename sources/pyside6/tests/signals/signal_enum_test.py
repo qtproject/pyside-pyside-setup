@@ -45,6 +45,7 @@ class Colors(Enum):
     green = 2
     blue = 3
 
+
 class Obj(QObject):
     enum_signal = Signal(Colors)
     object_signal = Signal(object)

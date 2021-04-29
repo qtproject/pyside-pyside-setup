@@ -40,8 +40,9 @@ init_test_paths(False)
 from helper.usesqapplication import UsesQApplication
 from PySide6.QtWidgets import QMainWindow, QApplication
 
+
 class MyWidget(QMainWindow):
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
 
 
@@ -50,6 +51,7 @@ class BugTest(UsesQApplication):
         w = MyWidget()
         widgets = QApplication.allWidgets()
         self.assertTrue(w in widgets)
+
 
 if __name__ == '__main__':
     unittest.main()

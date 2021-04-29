@@ -44,11 +44,13 @@ try:
 except ImportError:
     HAVE_Q = False
 
+
 class DeepCopyHelper:
     def testCopy(self):
         copy = deepcopy([self.original])[0]
         self.assertTrue(copy is not self.original)
         self.assertEqual(copy, self.original)
+
 
 class QByteArrayDeepCopy(DeepCopyHelper, unittest.TestCase):
     def setUp(self):
@@ -89,30 +91,37 @@ class QRectFDeepCopy(DeepCopyHelper, unittest.TestCase):
     def setUp(self):
         self.original = QRectF(100.33, 200.254, 300.321, 400.123)
 
+
 class QLineDeepCopy(DeepCopyHelper, unittest.TestCase):
     def setUp(self):
         self.original = QLine(1, 2, 3, 4)
+
 
 class QLineFDeepCopy(DeepCopyHelper, unittest.TestCase):
     def setUp(self):
         self.original = QLineF(1.1, 2.2, 3.3, 4.4)
 
+
 class QPointDeepCopy(DeepCopyHelper, unittest.TestCase):
     def setUp(self):
         self.original = QPoint(1, 2)
+
 
 class QPointFDeepCopy(DeepCopyHelper, unittest.TestCase):
     def setUp(self):
         self.original = QPointF(1.1, 2.2)
 
+
 class QDirDeepCopy(DeepCopyHelper, unittest.TestCase):
     def setUp(self):
         self.original = QDir("./")
+
 
 class QUuiCopy(DeepCopyHelper, unittest.TestCase):
     @unittest.skipUnless(HAVE_Q, "QUuid is currently not supported on this platform.")
     def setUp(self):
         self.original = QUuid("67C8770B-44F1-410A-AB9A-F9B5446F13EE")
+
 
 if __name__ == '__main__':
     unittest.main()

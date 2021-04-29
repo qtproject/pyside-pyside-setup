@@ -42,11 +42,13 @@ import PySide6
 # It is also really not recommended to use. But for testing,
 # the "__all__" variable is a great feature!
 
+
 class AllModulesImportTest(unittest.TestCase):
     def testAllModulesCanImport(self):
         # would also work: exec("from PySide6 import *")
         for name in PySide6.__all__:
             exec(f"import PySide6.{name}")
+
 
 if __name__ == '__main__':
     unittest.main()

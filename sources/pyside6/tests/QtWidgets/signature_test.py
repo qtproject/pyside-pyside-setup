@@ -89,5 +89,6 @@ class PySideSignatureTest(unittest.TestCase):
         called_default = sig.parameters["exclude"].default()
         self.assertEqual(type(called_default), PySide6.QtCore.QByteArray)
 
+
 if __name__ == "__main__":
     unittest.main()

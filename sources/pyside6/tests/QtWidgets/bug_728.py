@@ -41,6 +41,8 @@ from PySide6.QtCore import QDir, QTimer
 
 # Periodically check for the file dialog to appear and close it
 dialog = None
+
+
 def timerHandler():
     global dialog
     if dialog is not None:
@@ -48,10 +50,11 @@ def timerHandler():
     else:
         for widget in QApplication.topLevelWidgets():
             if isinstance(widget, QDialog) and widget.isVisible():
-               dialog = widget
+                dialog = widget
+
 
 app = QApplication([])
-QTimer.singleShot(30000, app.quit) # emergency
+QTimer.singleShot(30000, app.quit)  # emergency
 timer = QTimer()
 timer.setInterval(50)
 timer.timeout.connect(timerHandler)

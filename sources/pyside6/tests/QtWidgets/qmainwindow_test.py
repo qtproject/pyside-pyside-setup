@@ -52,6 +52,7 @@ class MainWindow(QMainWindow):
         pointerToolbar = self.addToolBar("Pointer type")
         pointerToolbar.addWidget(pointerButton)
 
+
 class MyButton(QPushButton):
     def __init__(self, parent=None):
         super().__init__()

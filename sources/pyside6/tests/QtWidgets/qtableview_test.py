@@ -39,12 +39,14 @@ from PySide6.QtCore import QAbstractTableModel
 from PySide6.QtWidgets import QTableWidget
 from helper.usesqapplication import UsesQApplication
 
+
 class QPenTest(UsesQApplication):
 
     def testItemModel(self):
         tv = QTableWidget()
 
         self.assertEqual(type(tv.model()), QAbstractTableModel)
+
 
 if __name__ == '__main__':
     unittest.main()

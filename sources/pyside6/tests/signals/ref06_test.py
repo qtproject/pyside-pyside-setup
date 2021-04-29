@@ -41,6 +41,7 @@ init_test_paths(False)
 from PySide6.QtCore import QObject, QCoreApplication, QTimeLine, Signal, Slot
 from helper.usesqcoreapplication import UsesQCoreApplication
 
+
 class ExtQObject(QObject):
     signalbetween = Signal('qreal')
 

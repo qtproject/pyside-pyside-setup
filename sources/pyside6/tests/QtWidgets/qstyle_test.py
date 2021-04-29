@@ -42,6 +42,7 @@ from PySide6.QtGui import QWindow
 from PySide6.QtWidgets import (QApplication, QFontComboBox, QLabel, QProxyStyle,
     QStyleFactory, QWidget)
 
+
 class ProxyStyle(QProxyStyle):
 
     def __init__(self, style):
@@ -84,7 +85,7 @@ class SetStyleTest(UsesQApplication):
         label.setStyle(proxyStyle)
         label.show()
         while not label.windowHandle().isExposed():
-           QApplication.instance().processEvents()
+            QApplication.instance().processEvents()
         self.assertTrue(proxyStyle.polished > 0)
 
     def testSetStyleOwnership(self):

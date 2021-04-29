@@ -43,32 +43,36 @@ init_test_paths(False)
 from PySide6.QtCore import QObject
 from helper.usesqcoreapplication import UsesQCoreApplication
 
+
 def MethodType(func, instance, instanceType):
     return types.MethodType(func, instance)
+
 
 class Duck(QObject):
     def __init__(self):
         super().__init__()
+
     def childEvent(self, event):
         QObject.childEvent(self, event)
+
 
 class TestDuckPunchingOnQObjectInstance(UsesQCoreApplication):
     '''Test case for duck punching new implementations of C++ virtual methods into object instances.'''
 
     def setUp(self):
-        #Acquire resources
+        # Acquire resources
         self.duck_childEvent_called = False
         UsesQCoreApplication.setUp(self)
 
     def tearDown(self):
-        #Release resources
+        # Release resources
         del self.duck_childEvent_called
         UsesQCoreApplication.tearDown(self)
 
-
     def testChildEventMonkeyPatch(self):
-        #Test if the new childEvent injected on QObject instance is called from C++
+        # Test if the new childEvent injected on QObject instance is called from C++
         parent = QObject()
+
         def childEvent(obj, event):
             self.duck_childEvent_called = True
         parent.childEvent = MethodType(childEvent, parent, QObject)
@@ -83,8 +87,9 @@ class TestDuckPunchingOnQObjectInstance(UsesQCoreApplication):
         parent.childEvent = None
 
     def testChildEventMonkeyPatchWithInheritance(self):
-        #Test if the new childEvent injected on a QObject's extension class instance is called from C++
+        # Test if the new childEvent injected on a QObject's extension class instance is called from C++
         parent = Duck()
+
         def childEvent(obj, event):
             QObject.childEvent(obj, event)
             self.duck_childEvent_called = True
@@ -100,6 +105,7 @@ class TestDuckPunchingOnQObjectInstance(UsesQCoreApplication):
         # for debug, since the BindingManager destructor has an
         # assert that checks if the wrapper mapper is empty.
         parent.childEvent = None
+
 
 if __name__ == '__main__':
     unittest.main()

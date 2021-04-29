@@ -77,5 +77,6 @@ class TestQActionLifeCycle(UsesQApplication):
         toolBar.clear()
         self.assertTrue(self._actionDestroyed)
 
+
 if __name__ == "__main__":
     unittest.main()

@@ -41,12 +41,14 @@ from PySide6.QtCore import QThread, QObject, SIGNAL, QCoreApplication
 
 thread_run = False
 
+
 class Source(QObject):
     def __init__(self, *args):
         QObject.__init__(self, *args)
 
     def emit_sig(self):
         self.emit(SIGNAL('source()'))
+
 
 class Target(QObject):
     def __init__(self, *args):
@@ -55,6 +57,7 @@ class Target(QObject):
 
     def myslot(self):
         self.called = True
+
 
 class ThreadJustConnects(QThread):
     def __init__(self, source, *args):
@@ -69,7 +72,6 @@ class ThreadJustConnects(QThread):
 
         while not self.target.called:
             pass
-
 
 
 class BasicConnection(unittest.TestCase):
@@ -93,6 +95,7 @@ class BasicConnection(unittest.TestCase):
         thread.wait()
 
         self.assertTrue(thread.target.called)
+
 
 if __name__ == '__main__':
     unittest.main()

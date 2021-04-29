@@ -50,6 +50,7 @@ class BugTest(UsesQApplication):
         result = loader.load(filePath, w)
         self.assertTrue(isinstance(result.child_object, QFrame))
 
+
 if __name__ == '__main__':
     unittest.main()
 

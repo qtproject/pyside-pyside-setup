@@ -44,11 +44,13 @@ from PySide6.QtCore import QFile, QObject, QTimer, SIGNAL
 
 
 class Foo(QFile):
-  pass
+    pass
+
 
 class DynObject(QObject):
     def slot(self):
         pass
+
 
 class qmetaobject_test(unittest.TestCase):
     """
@@ -92,6 +94,7 @@ class qmetaobject_test(unittest.TestCase):
         timer = QTimer()
         self.assertEqual(timer.metaObject().superClass().className(),
                          "QObject")
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -56,7 +56,7 @@ class VirtualList(QAbstractItemModel):
         return self.createIndex(row, column)
 
     def parent(self, index):
-         return QModelIndex()
+        return QModelIndex()
 
     def data(self, index, role):
         row = index.row()
@@ -72,6 +72,7 @@ class TestQAbstractItemModel(UsesQApplication):
         table.setModel(model)
         table.show()
         self.assertFalse(model._getItemCalled)
+
 
 if __name__ == "__main__":
     unittest.main()

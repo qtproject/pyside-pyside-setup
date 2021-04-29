@@ -40,6 +40,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QObject, SIGNAL, QFile, QSignalBlocker
 
+
 class TestSignalsBlockedBasic(unittest.TestCase):
     '''Basic test case for signalsBlocked'''
 
@@ -73,25 +74,25 @@ class TestSignalsBlocked(unittest.TestCase):
     '''Test case to check if the signals are really blocked'''
 
     def setUp(self):
-        #Set up the basic resources needed
+        # Set up the basic resources needed
         self.obj = QObject()
         self.args = tuple()
         self.called = False
 
     def tearDown(self):
-        #Delete used resources
+        # Delete used resources
         del self.obj
         del self.args
 
     def callback(self, *args):
-        #Default callback
-        if  args == self.args:
+        # Default callback
+        if args == self.args:
             self.called = True
         else:
             raise TypeError("Invalid arguments")
 
     def testShortCircuitSignals(self):
-        #Blocking of Python short-circuit signals
+        # Blocking of Python short-circuit signals
         QObject.connect(self.obj, SIGNAL('mysignal()'), self.callback)
 
         self.obj.emit(SIGNAL('mysignal()'))
@@ -103,7 +104,7 @@ class TestSignalsBlocked(unittest.TestCase):
         self.assertTrue(not self.called)
 
     def testPythonSignals(self):
-        #Blocking of Python typed signals
+        # Blocking of Python typed signals
         QObject.connect(self.obj, SIGNAL('mysignal(int,int)'), self.callback)
         self.args = (1, 3)
 
@@ -115,11 +116,12 @@ class TestSignalsBlocked(unittest.TestCase):
         self.obj.emit(SIGNAL('mysignal(int,int)'), *self.args)
         self.assertTrue(not self.called)
 
+
 class TestQFileSignalBlocking(unittest.TestCase):
     '''Test case for blocking the signal QIODevice.aboutToClose()'''
 
     def setUp(self):
-        #Set up the needed resources - A temp file and a QFile
+        # Set up the needed resources - A temp file and a QFile
         self.called = False
         handle, self.filename = mkstemp()
         os.close(handle)
@@ -127,16 +129,16 @@ class TestQFileSignalBlocking(unittest.TestCase):
         self.qfile = QFile(self.filename)
 
     def tearDown(self):
-        #Release acquired resources
+        # Release acquired resources
         os.remove(self.filename)
         del self.qfile
 
     def callback(self):
-        #Default callback
+        # Default callback
         self.called = True
 
     def testAboutToCloseBlocking(self):
-        #QIODevice.aboutToClose() blocking
+        # QIODevice.aboutToClose() blocking
 
         QObject.connect(self.qfile, SIGNAL('aboutToClose()'), self.callback)
 

@@ -274,6 +274,7 @@ xpm = [
     ". ( A ~+{+]+^+l > /+D f.c q . + . . + + . + + + + + + "
 ]
 
+
 class QStringSequenceTest(UsesQApplication):
     def testQPixmapConstructor(self):
         label = QLabel()
@@ -281,6 +282,7 @@ class QStringSequenceTest(UsesQApplication):
         self.assertFalse(pixmap1.isNull())
         self.assertEqual(pixmap1.width(), 27)
         self.assertEqual(pixmap1.height(), 22)
+
 
 if __name__ == "__main__":
     unittest.main()

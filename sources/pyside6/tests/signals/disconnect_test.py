@@ -42,6 +42,7 @@ from testbinding import TestObject
 class Foo(QObject):
     bar = Signal()
 
+
 class TestDisconnect(unittest.TestCase):
     def theSlot1(self):
         self.called1 = True
@@ -73,6 +74,7 @@ class TestDisconnect(unittest.TestCase):
 
         self.called = False
         obj = TestObject(0)
+
         def callback():
             obj.signalWithDefaultValue.disconnect(callback)
 

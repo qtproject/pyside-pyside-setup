@@ -67,6 +67,5 @@ class SelfConnect(UsesQApplication):
         self.assertTrue(not window.isVisible())
 
 
-
 if __name__ == '__main__':
     unittest.main()

@@ -41,6 +41,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QBitArray, QByteArray, QIODevice, QDataStream, QDate, QTime, QDateTime
 
+
 def create_bitarray(string):
     array = QBitArray(len(string))
     for i, char in enumerate(string):
@@ -108,6 +109,7 @@ class QDataStreamWrite(unittest.TestCase):
         self.write.writeUInt32(x)
         y = int(self.read.readUInt32())
         self.assertEqual(x, y)
+
 
 class QDataStreamShift(unittest.TestCase):
     '''Test case for << and >> operators'''
@@ -223,7 +225,6 @@ class QDataStreamShift(unittest.TestCase):
         self.assertTrue(res.isValid())
         self.assertFalse(res.isNull())
 
-
     def testQTimeNull(self):
         '''QDataStream <<>> QTime - null'''
         self.stream << QTime()
@@ -319,6 +320,7 @@ class QDataStreamRawData(unittest.TestCase):
 
         data = QDataStream(ba)
         self.assertEqual(data.readRawData(4), bytes('AB\x00C', "UTF-8"))
+
 
 if __name__ == '__main__':
     unittest.main()

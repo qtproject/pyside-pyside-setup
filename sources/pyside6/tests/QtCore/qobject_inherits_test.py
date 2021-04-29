@@ -42,19 +42,20 @@ from PySide6.QtWidgets import QApplication, QLabel, QVBoxLayout
 
 is_alive = None
 
+
 class InheritsCase(unittest.TestCase):
     '''Test case for QObject.inherits'''
 
     def testCppInheritance(self):
-        #QObject.inherits() for c++ classes
-        #An class inherits itself
+        # QObject.inherits() for c++ classes
+        # A class inherits itself
         self.assertTrue(QObject().inherits('QObject'))
 
     def testPythonInheritance(self):
-        #QObject.inherits() for python classes
+        # QObject.inherits() for python classes
 
         class Dummy(QObject):
-            #Dummy class
+            # Dummy class
             pass
 
         self.assertTrue(Dummy().inherits('QObject'))
@@ -62,15 +63,16 @@ class InheritsCase(unittest.TestCase):
         self.assertTrue(not Dummy().inherits('FooBar'))
 
     def testPythonMultiInheritance(self):
-        #QObject.inherits() for multiple inheritance
+        # QObject.inherits() for multiple inheritance
         # QObject.inherits(classname) should fail if classname isn't a
         # QObject subclass
 
         class Parent(object):
-            #Dummy parent
+            # Dummy parent
             pass
+
         class Dummy(QObject, Parent):
-            #Dummy class
+            # Dummy class
             pass
 
         self.assertTrue(Dummy().inherits('QObject'))
@@ -108,6 +110,7 @@ class InheritsCase(unittest.TestCase):
     #   is null under the pythonTypeIsValueType() method in shiboken.
     def testDeleteMultipleInheritance(self):
         app = QApplication(sys.argv)
+
         class DerivedLabel(QLabel, QObject):
             def __del__(self):
                 global is_alive

@@ -48,5 +48,6 @@ class QPositioningTestCase(unittest.TestCase):
         print(f"QtPositioning source: {name}")
         self.assertTrue(name)
 
+
 if __name__ == "__main__":
     unittest.main()

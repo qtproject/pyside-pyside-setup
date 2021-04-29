@@ -40,6 +40,7 @@ from PySide6.QtWidgets import QCheckBox
 
 from helper.usesqapplication import UsesQApplication
 
+
 class MultipleSlotTest(UsesQApplication):
     def cb_changed(self, i):
         self._changed = True
@@ -64,6 +65,7 @@ class MultipleSlotTest(UsesQApplication):
         self._changed = False
         box.setChecked(True)
         self.assertTrue(self._changed)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -47,6 +47,7 @@ from PySide6.QtWidgets import (QAbstractItemDelegate, QComboBox,
 
 id_text = 'This is me'
 
+
 class DelegateDoesntKeepReferenceToEditor(QAbstractItemDelegate):
     def createEditor(self, parent, option, index):
         comboBox = QComboBox(parent)

@@ -41,17 +41,20 @@ from PySide6.QtWidgets import QPushButton, QWidget
 
 from helper.usesqapplication import UsesQApplication
 
+
 class Dummy(QPushButton):
 
     def show(self):
         QWidget.show(self)
         self.called = True
 
+
 class GrandParentMethod(UsesQApplication):
     def testMethod(self):
         obj = Dummy()
         obj.show()
         self.assertTrue(obj.called)
+
 
 if __name__ == '__main__':
     unittest.main()

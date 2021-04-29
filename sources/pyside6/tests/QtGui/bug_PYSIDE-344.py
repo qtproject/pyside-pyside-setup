@@ -51,6 +51,7 @@ def testList():
             QVector2D(1, 1), QVector3D(1, 1, 1), QVector4D(1, 1, 1, 1),
             QQuaternion(1, 1, 1, 1)]
 
+
 class TestMulDiv(unittest.TestCase):
 
     def testMultiplication(self):
@@ -68,6 +69,7 @@ class TestMulDiv(unittest.TestCase):
             if a == div:
                 fails += ' ' + type(a).__name__
         self.assertEqual(fails, '')
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -60,6 +60,7 @@ class testQToolBar(unittest.TestCase):
         a.trigger()
         self.assertTrue(self._called)
 
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     unittest.main()

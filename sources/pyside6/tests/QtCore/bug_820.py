@@ -38,6 +38,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QObject, Slot, Signal, SIGNAL
 
+
 def log_exception():
     def log_exception_decorator(func):
         @functools.wraps(func)
@@ -63,6 +64,7 @@ def log_exception2():
         return wrapper
 
     return log_exception_decorator
+
 
 class MyObject(QObject):
 
@@ -98,6 +100,7 @@ class SlotWithDecoratorTest(unittest.TestCase):
         o.poke()
         self.assertTrue(o._mySlotcalled)
         self.assertTrue(o._mySlot2called)
+
 
 if __name__ == '__main__':
     unittest.main()

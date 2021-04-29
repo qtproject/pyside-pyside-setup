@@ -54,6 +54,7 @@ class View_1(QWidget):
         self.t = widget.tabWidget
         self.t.removeTab(0)
 
+
 app = QApplication([])
 window = View_1()
 window.show()

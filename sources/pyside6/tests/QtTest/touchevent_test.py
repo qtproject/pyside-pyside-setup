@@ -42,8 +42,9 @@ from PySide6.QtCore import QPoint, QTimer, Qt, QEvent
 from PySide6.QtGui import QTouchDevice
 from PySide6.QtTest import QTest
 
+
 class MyWidget(QWidget):
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         QWidget.__init__(self, parent)
         self._sequence = []
         # Fixme (Qt 5): The device needs to be registered (using

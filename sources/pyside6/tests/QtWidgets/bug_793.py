@@ -38,26 +38,31 @@ init_test_paths(False)
 from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QWidget, QApplication
 
+
 class TestW1(QWidget):
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         super().__init__(parent)
         TestW2(parent, self)
 
+
 class TestW2(QWidget):
-    def __init__(self, ancestor, parent = None):
+    def __init__(self, ancestor, parent=None):
         super().__init__(parent)
         self.ancestor_ref = ancestor
+
 
 class Test(QWidget):
     def __init__(self):
         super().__init__()
         TestW1(self)
 
+
 class TestQApplicationDestrcutor(unittest.TestCase):
     def testDestructor(self):
         w = Test()
         w.show()
         QTimer.singleShot(0, w.close)
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

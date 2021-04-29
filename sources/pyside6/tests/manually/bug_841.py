@@ -31,6 +31,7 @@ import sys
 from PySide6.QtGui import QStandardItem, QStandardItemModel
 from PySide6.QtWidgets import QMainWindow, QTreeView, QAbstractItemView, QApplication, QMessageBox
 
+
 class Item(QStandardItem):
     def __init__(self, text):
         super().__init__()
@@ -42,6 +43,7 @@ class Item(QStandardItem):
         ret = Item(self.text())
         return ret
 
+
 class Project(QStandardItemModel):
     def __init__(self):
         super().__init__()
@@ -50,6 +52,7 @@ class Project(QStandardItemModel):
         self.appendRow(Item("ABC"))
         self.appendRow(Item("DEF"))
         self.appendRow(Item("GHI"))
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -66,12 +69,14 @@ class MainWindow(QMainWindow):
         print(e.x(), e.y())
         return QMainWindow.mousePressEvent(self, e)
 
+
 def main():
     app = QApplication(sys.argv)
     w = MainWindow()
     w.show()
     QMessageBox.information(None, "Info", "Just drag and drop the items.")
     sys.exit(app.exec_())
+
 
 if __name__ == "__main__":
     main()

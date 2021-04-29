@@ -41,16 +41,17 @@ init_test_paths(False)
 
 from PySide6.QtCore import QSize
 
+
 class QSizeOperator(unittest.TestCase):
     def testOperatorMultiply(self):
-        #QSize operator * float
+        # QSize operator * float
         # bug 131
         a = QSize(1, 1)
         x = a * 3.4
         self.assertEqual(QSize(3, 3), x)
 
     def testOperatorRevertedMultiply(self):
-        #QSize operator * float, reverted
+        # QSize operator * float, reverted
         # bug 132
         a = QSize(1, 1)
         x = 3.4 * a

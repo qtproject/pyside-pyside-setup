@@ -54,9 +54,10 @@ class BugTest(unittest.TestCase):
         scene = QGraphicsScene()
         item = DiagramItem()
         item2 = DiagramItem()
-        #this cause segfault
+        # this cause segfault
         scene.addItem(item)
         scene.addItem(item2)
+
 
 if __name__ == "__main__":
     unittest.main()

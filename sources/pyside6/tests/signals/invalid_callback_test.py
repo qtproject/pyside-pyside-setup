@@ -39,24 +39,26 @@ init_test_paths(False)
 
 from PySide6.QtCore import QObject, SIGNAL
 
+
 class InvalidCallback(unittest.TestCase):
     '''Test case for passing an invalid callback to QObject.connect'''
 
     def setUp(self):
-        #Acquire resources
+        # Acquire resources
         self.obj = QObject()
 
     def tearDown(self):
-        #Release resources
+        # Release resources
         try:
             del self.obj
         except AttributeError:
             pass
 
     def testIntegerCb(self):
-        #Test passing an int as callback to QObject.connect
+        # Test passing an int as callback to QObject.connect
         self.assertRaises(TypeError, QObject.connect, self.obj,
                             SIGNAL('destroyed()'), 42)
+
 
 if __name__ == '__main__':
     unittest.main()

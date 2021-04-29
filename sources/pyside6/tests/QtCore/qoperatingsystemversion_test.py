@@ -37,11 +37,13 @@ init_test_paths(False)
 
 from PySide6.QtCore import QOperatingSystemVersion
 
+
 class TestQOperatingSystemVersion(unittest.TestCase):
     def test(self):
         ov = QOperatingSystemVersion.current()
         name = f"{ov.name()} v{ov.majorVersion()}.{ov.minorVersion()}.{ov.microVersion()}"
         print(name)
+
 
 if __name__ == '__main__':
     unittest.main()

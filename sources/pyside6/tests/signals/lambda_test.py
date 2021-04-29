@@ -53,7 +53,7 @@ class Dummy(QObject):
 class BasicCase(unittest.TestCase):
 
     def testSimplePythonSignalNoArgs(self):
-        #Connecting a lambda to a simple python signal without arguments
+        # Connecting a lambda to a simple python signal without arguments
         obj = Dummy()
         QObject.connect(obj, SIGNAL('foo()'),
                         lambda: setattr(obj, 'called', True))
@@ -61,7 +61,7 @@ class BasicCase(unittest.TestCase):
         self.assertTrue(obj.called)
 
     def testSimplePythonSignal(self):
-        #Connecting a lambda to a simple python signal witharguments
+        # Connecting a lambda to a simple python signal witharguments
         obj = Dummy()
         arg = 42
         QObject.connect(obj, SIGNAL('foo(int)'),

@@ -38,6 +38,7 @@ init_test_paths(False)
 from PySide6.QtGui import QTextLayout
 from helper.usesqapplication import UsesQApplication
 
+
 class QTextLineTest(UsesQApplication):
 
     def testCursorToX(self):
@@ -51,6 +52,7 @@ class QTextLineTest(UsesQApplication):
         x, cursorPos = line.cursorToX(1)
         self.assertEqual(type(x), float)
         self.assertEqual(type(cursorPos), int)
+
 
 if __name__ == '__main__':
     unittest.main()

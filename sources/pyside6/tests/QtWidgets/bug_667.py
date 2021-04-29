@@ -38,10 +38,12 @@ init_test_paths()
 from PySide6.QtCore import QTimer, QPointF
 from PySide6.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QGraphicsEllipseItem
 
+
 class Ball(QGraphicsEllipseItem):
     def __init__(self, d, parent=None):
         super().__init__(0, 0, d, d, parent)
-        self.vel = QPointF(0,0)   #commenting this out prevents the crash
+        self.vel = QPointF(0, 0)   #commenting this out prevents the crash
+
 
 class Foo(QGraphicsView):
     def __init__(self):

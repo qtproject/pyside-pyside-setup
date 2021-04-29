@@ -40,6 +40,7 @@ init_test_paths(False)
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QApplication, QHBoxLayout
 from helper.usesqapplication import UsesQApplication
 
+
 class QWidgetTest(UsesQApplication):
 
     def test_setLayout(self):
@@ -62,6 +63,7 @@ class QWidgetTest(UsesQApplication):
 
         widget = QWidget()
         widget.setLayout(layout)
+
 
 if __name__ == '__main__':
     unittest.main()

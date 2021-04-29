@@ -54,6 +54,7 @@ class Whatever(QtCore.QObject):
     def mySlot(self, v):
         pass
 
+
 class WarningTest(unittest.TestCase):
     def testSignalSlotWarning(self):
         # we create an object. This gives no warning.

@@ -50,5 +50,6 @@ class TestBug699 (unittest.TestCase):
     def testIt(self):
         self.assertRaises(TypeError, self.defClass)
 
+
 if __name__ == '__main__':
     unittest.main()

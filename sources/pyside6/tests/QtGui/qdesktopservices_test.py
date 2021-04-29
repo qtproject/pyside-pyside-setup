@@ -40,11 +40,13 @@ init_test_paths(False)
 from PySide6.QtGui import QDesktopServices
 from PySide6.QtCore import QUrl
 
+
 class QDesktopServicesTest(unittest.TestCase):
     def testOpenUrl(self):
         # At the bare minimum check that they return false for invalid url's
         url = QUrl()
         self.assertEqual(QDesktopServices.openUrl(url), False)
+
 
 if __name__ == '__main__':
     unittest.main()

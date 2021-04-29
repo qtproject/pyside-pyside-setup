@@ -32,6 +32,7 @@
 def print_colored(message):
     print(f'\033[0;31m{message}\033[m')  # red
 
+
 if __name__ == '__main__':
     print('42 - the answer')
     print_colored("But what's the question?")

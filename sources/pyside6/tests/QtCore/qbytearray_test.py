@@ -45,6 +45,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QByteArray, QSettings, QObject, QDataStream, QIODevice
 
+
 class QByteArrayTestToNumber(unittest.TestCase):
     def testToNumberInt(self):
         obj = QByteArray(bytes('37', "UTF8"))
@@ -95,9 +96,10 @@ class QByteArraySplit(unittest.TestCase):
     '''Test case for QByteArray.split'''
 
     def testPathSeparator(self):
-        #QByteArray.split('/')
+        # QByteArray.split('/')
         obj = QByteArray(bytes(unittest.__file__, "UTF8"))
         self.assertEqual(obj.split('/'), unittest.__file__.split('/'))
+
 
 class QByteArrayData(unittest.TestCase):
 
@@ -114,6 +116,7 @@ class QByteArrayData(unittest.TestCase):
         self.assertEqual(s1, s2)
         self.assertEqual(s1, ba)
 
+
 class QByteArrayOperatorAtSetter(unittest.TestCase):
     '''Test case for operator QByteArray[] - __setitem__'''
 
@@ -122,6 +125,7 @@ class QByteArrayOperatorAtSetter(unittest.TestCase):
         obj = QByteArray(bytes('123456', "UTF8"))
         obj[1] = bytes('0', "UTF8")
         self.assertEqual(obj, QByteArray(bytes('103456', "UTF8")))
+
 
 class QByteArrayOnQDataStream(unittest.TestCase):
     '''
@@ -133,6 +137,7 @@ class QByteArrayOnQDataStream(unittest.TestCase):
         b.writeUInt16(5000)
         # The __repr__ not suppose to crash anymore
         self.assertNotEqual(repr(b), None)
+
 
 class TestBug664(unittest.TestCase):
     '''
@@ -147,6 +152,7 @@ class QByteArrayOnQVariant(unittest.TestCase):
     def testQByteArrayOnQVariant(self):
         a = QSettings().value("some_prop", QByteArray())
         self.assertEqual(type(a), QByteArray)
+
 
 class TestBug567(unittest.TestCase):
     '''
@@ -171,11 +177,13 @@ class TestPickler(unittest.TestCase):
         ba2 = pickle.loads(output)
         self.assertEqual(str(ba), str(ba2))
 
+
 class QByteArrayBug720(unittest.TestCase):
     def testIt(self):
         ba = QByteArray(bytes("32\"1\x00123", "UTF8"))
         self.assertEqual(str(ba), str(bytes("32\"1\x00123", "UTF-8")))
         self.assertEqual(repr(ba), "PySide6.QtCore.QByteArray(b'32\"1\\x00123')")
+
 
 class QByteArrayImplicitConvert(unittest.TestCase):
     def testString(self):

@@ -74,6 +74,7 @@ class AddActionTest(UsesQApplication):
         action.activate(QAction.Trigger)
         self.assertTrue(widget.isChecked())
 
+
 if __name__ == '__main__':
     unittest.main()
 

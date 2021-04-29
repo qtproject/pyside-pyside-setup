@@ -75,5 +75,6 @@ class AccessManagerCase(UsesQCoreApplication):
         self.app.exec_()
         self.assertTrue(self.called)
 
+
 if __name__ == '__main__':
     unittest.main()

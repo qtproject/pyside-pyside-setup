@@ -43,17 +43,19 @@ from PySide6.QtWidgets import QApplication
 
 from helper.usesqapplication import UsesQApplication
 
+
 class Constructor(UsesQApplication):
     '''Test case for constructor of QBrush'''
 
     def testQColor(self):
-        #QBrush(QColor) constructor
+        # QBrush(QColor) constructor
         color = QColor('black')
         obj = QBrush(color)
         self.assertEqual(obj.color(), color)
 
         obj = QBrush(Qt.blue)
         self.assertEqual(obj.color(), Qt.blue)
+
 
 if __name__ == '__main__':
     unittest.main()

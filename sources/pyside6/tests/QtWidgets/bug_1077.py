@@ -47,6 +47,7 @@ class Highlighter(QSyntaxHighlighter):
         super().__init__(parent)
         self.tstamp = time.time()
 
+
 if __name__ == "__main__":
     app = QApplication([])
     python = QTextEdit()

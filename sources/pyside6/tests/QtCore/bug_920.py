@@ -39,9 +39,11 @@ init_test_paths(False)
 
 import PySide6.QtCore as QtCore
 
+
 class Signaller(QtCore.QObject):
     s1 = QtCore.Signal()
     s2 = QtCore.Signal()
+
 
 class TestBug920(unittest.TestCase):
 

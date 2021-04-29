@@ -38,6 +38,7 @@ init_test_paths(False)
 from PySide6.QtCore import QPointF
 from PySide6.QtGui import QTransform, QPolygonF, QPolygonF
 
+
 class QTransformTest(unittest.TestCase):
 
     def testMap(self):
@@ -86,7 +87,6 @@ class QTransformTest(unittest.TestCase):
 
         self.assertEqual(t1, r2)
 
-
     def testsquareToQuad(self):
         q1 = QPolygonF()
         q1.append(QPointF(10.0, 10.0))
@@ -105,5 +105,5 @@ class QTransformTest(unittest.TestCase):
 
 
 if __name__ == "__main__":
-   unittest.main()
+    unittest.main()
 

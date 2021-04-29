@@ -39,10 +39,12 @@ from PySide6.QtCore import QCoreApplication, QTimer, QEvent, Qt
 from PySide6.QtWidgets import QApplication, QSpinBox
 from PySide6.QtGui import QKeyEvent
 
+
 class MySpinBox(QSpinBox):
 
-    def validate(self,text,pos):
-        return QSpinBox.validate(self,text,pos)
+    def validate(self, text, pos):
+        return QSpinBox.validate(self, text, pos)
+
 
 class TestBug879 (unittest.TestCase):
 
@@ -60,6 +62,7 @@ class TestBug879 (unittest.TestCase):
     def sendKbdEvent(self):
         ev = QKeyEvent(QEvent.KeyPress, Qt.Key_A, Qt.NoModifier, 'a')
         QCoreApplication.sendEvent(self.box, ev)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -137,7 +137,7 @@ if hasQtGui:
             spinSend.emit(SIGNAL('valueChanged(int)'), 3)
 
             self.assertEqual(spinRec.value(), 3)
-            #Direct emission shouldn't change the value of the emitter
+            # Direct emission shouldn't change the value of the emitter
             self.assertEqual(spinSend.value(), 42)
 
             spinSend.emit(SIGNAL('valueChanged(int)'), 66)

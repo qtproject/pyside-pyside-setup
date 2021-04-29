@@ -47,8 +47,10 @@ from PySide6.QtCore import QObject, Signal, Slot
 
 class Mixin(object):
     mixinSignal = Signal()
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
 
 class MixinTwo(Mixin):
     mixinTwoSignal = Signal()
@@ -61,6 +63,7 @@ class MixinTwo(Mixin):
     def mixinTwoSlot(self):
         self.mixinTwoSlotCalled = True
 
+
 class MixinThree(object):
     mixinThreeSignal = Signal()
 
@@ -71,6 +74,7 @@ class MixinThree(object):
     @Slot()
     def mixinThreeSlot(self):
         self.mixinThreeSlotCalled = True
+
 
 class Derived(Mixin, QObject):
     derivedSignal = Signal(str)
@@ -84,6 +88,7 @@ class Derived(Mixin, QObject):
     def derivedSlot(self, theString):
         self.derivedSlotCalled = True
         self.derivedSlotString = theString
+
 
 class MultipleDerived(MixinTwo, MixinThree, Mixin, QObject):
     derivedSignal = Signal(str)
@@ -121,6 +126,7 @@ class MixinTest(unittest.TestCase):
 
         # Check derivedSignal emission after mixingSignal connection
         self.outsideSlotCalled = False
+
         @Slot()
         def outsideSlot():
             self.outsideSlotCalled = True
@@ -146,7 +152,6 @@ class MixinTest(unittest.TestCase):
             signature = m.method(i).methodSignature()
             self.assertEqual(methodIndices[signature], i)
 
-
     def testMixinSignalSlotRegistrationWithMultipleInheritance(self):
         obj = MultipleDerived()
         m = obj.metaObject()
@@ -170,6 +175,7 @@ class MixinTest(unittest.TestCase):
 
         # Check derivedSignal emission after mixinThreeSignal connection
         self.outsideSlotCalled = False
+
         @Slot()
         def outsideSlot():
             self.outsideSlotCalled = True

@@ -37,6 +37,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QCoreApplication, QEventLoop, QObject, Qt, QThread, QTimer, SIGNAL
 
+
 class Emitter(QThread):
     def __init__(self):
         super().__init__()
@@ -45,6 +46,7 @@ class Emitter(QThread):
         print("Before emit.")
         self.emit(SIGNAL("signal(int)"), 0)
         print("After emit.")
+
 
 class Receiver(QObject):
     def __init__(self, eventloop):
@@ -69,6 +71,7 @@ class TestBugPYSIDE164(unittest.TestCase):
         retval = eventloop.exec_()
         emitter.wait(2000)
         self.assertEqual(retval, 0)
+
 
 if __name__ == '__main__':
     unittest.main()

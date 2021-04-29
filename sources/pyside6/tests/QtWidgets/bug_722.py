@@ -39,6 +39,7 @@ from helper.usesqapplication import UsesQApplication
 
 from PySide6.QtWidgets import QDoubleSpinBox, QGraphicsBlurEffect
 
+
 class TestSignalConnection(UsesQApplication):
     def testFloatSignal(self):
         foo1 = QDoubleSpinBox()
@@ -51,9 +52,10 @@ class TestSignalConnection(UsesQApplication):
     def testQRealSignal(self):
         foo1 = QDoubleSpinBox()
         effect = QGraphicsBlurEffect()
-        effect.blurRadiusChanged['qreal'].connect(foo1.setValue) # check if qreal is a valid type
+        effect.blurRadiusChanged['qreal'].connect(foo1.setValue)  # check if qreal is a valid type
         effect.setBlurRadius(0.42)
         self.assertAlmostEqual(foo1.value(), effect.blurRadius())
+
 
 if __name__ == '__main__':
     unittest.main()

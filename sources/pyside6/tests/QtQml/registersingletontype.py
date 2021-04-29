@@ -44,8 +44,9 @@ from PySide6.QtQuick import QQuickView
 
 finalResult = 0
 
+
 class SingletonQObject(QObject):
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         QObject.__init__(self, parent)
         self._data = 100
 
@@ -58,13 +59,16 @@ class SingletonQObject(QObject):
 
     data = Property(int, getData, setData)
 
+
 def singletonQObjectCallback(engine):
     obj = SingletonQObject()
     obj.setData(50)
     return obj
 
+
 def singletonQJSValueCallback(engine):
     return engine.evaluate("new Object({data: 50})")
+
 
 class TestQmlSupport(unittest.TestCase):
     def testIt(self):
@@ -85,6 +89,7 @@ class TestQmlSupport(unittest.TestCase):
         QTimer.singleShot(250, view.close)
         app.exec_()
         self.assertEqual(finalResult, 200)
+
 
 if __name__ == '__main__':
     unittest.main()

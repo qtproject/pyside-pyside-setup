@@ -39,10 +39,12 @@ from PySide6.QtUiTools import QUiLoader
 
 from helper.usesqapplication import UsesQApplication
 
+
 class QUiLoaderCreation(UsesQApplication):
 
     def testConstructor(self):
         loader = QUiLoader()
+
 
 if __name__ == '__main__':
     unittest.main()

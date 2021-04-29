@@ -64,5 +64,6 @@ class QCollatorTest(unittest.TestCase):
         self.assertEqual(c.ignorePunctuation(), True)
         self.assertEqual(c.locale(), QLocale(QLocale.NorwegianBokmal))
 
+
 if __name__ == '__main__':
     unittest.main()

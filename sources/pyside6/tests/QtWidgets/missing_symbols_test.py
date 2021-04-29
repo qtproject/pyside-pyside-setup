@@ -40,26 +40,29 @@ init_test_paths(False)
 from PySide6 import QtGui
 from PySide6 import QtWidgets
 
+
 class MissingClasses(unittest.TestCase):
-    def testQDrag(self): # Bug 222
+    def testQDrag(self):  # Bug 222
         getattr(QtGui, 'QDrag')
 
-    def testQDropEvent(self): # Bug 255
+    def testQDropEvent(self):  # Bug 255
         getattr(QtGui, 'QDropEvent')
+
 
 class MissingMembers(unittest.TestCase):
 
-    def testQFontMetricsSize(self): # Bug 223
+    def testQFontMetricsSize(self):  # Bug 223
         QtGui.QFontMetrics.size
 
-    def testQLayoutSetSpacing(self): # Bug 231
+    def testQLayoutSetSpacing(self):  # Bug 231
         QtWidgets.QLayout.setSpacing
 
-    def testQImageLoad(self): # Bug 257
+    def testQImageLoad(self):  # Bug 257
         QtGui.QImage.load
 
-    def testQStandardItemModelinsertRow(self): # Bug 227
+    def testQStandardItemModelinsertRow(self):  # Bug 227
         QtGui.QStandardItemModel.insertRow
+
 
 if __name__ == '__main__':
     unittest.main()

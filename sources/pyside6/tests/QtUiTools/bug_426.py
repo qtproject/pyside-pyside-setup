@@ -50,6 +50,7 @@ class Window(object):
         self.widget.show()
         QTimer.singleShot(0, self.widget.close)
 
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     win = Window()

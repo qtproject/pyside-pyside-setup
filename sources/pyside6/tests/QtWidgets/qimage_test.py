@@ -274,6 +274,7 @@ xpm = [
     ". ( A ~+{+]+^+l > /+D f.c q . + . . + + . + + + + + + "
 ]
 
+
 class QImageTest(UsesQApplication):
     '''Test case for calling setPixel with float as argument'''
 
@@ -306,6 +307,7 @@ class QImageTest(UsesQApplication):
         self.assertFalse(img.isNull())
         self.assertEqual(img.width(), 27)
         self.assertEqual(img.height(), 22)
+
 
 if __name__ == '__main__':
     unittest.main()

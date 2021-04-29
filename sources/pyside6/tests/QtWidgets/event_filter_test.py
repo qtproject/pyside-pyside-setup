@@ -39,11 +39,12 @@ from helper.usesqapplication import UsesQApplication
 from PySide6.QtCore import QObject, QEvent
 from PySide6.QtWidgets import QWidget
 
+
 class MyFilter(QObject):
-  def eventFilter(self, obj, event):
-    if event.type() == QEvent.KeyPress:
-      pass
-    return QObject.eventFilter(self, obj, event)
+    def eventFilter(self, obj, event):
+        if event.type() == QEvent.KeyPress:
+            pass
+        return QObject.eventFilter(self, obj, event)
 
 
 class EventFilter(UsesQApplication):
@@ -68,6 +69,7 @@ class EventFilter(UsesQApplication):
         w.close()
         w = None
         self.assertTrue(True)
+
 
 if __name__ == '__main__':
     unittest.main()

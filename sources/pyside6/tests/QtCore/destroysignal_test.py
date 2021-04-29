@@ -58,6 +58,7 @@ class TestDestroySignal(unittest.TestCase):
         del p
         self.assertTrue(self._destroyed)
 
+
 if __name__ == '__main__':
     unittest.main()
 

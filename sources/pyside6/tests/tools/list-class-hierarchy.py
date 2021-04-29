@@ -48,12 +48,13 @@ ignore = ["staticMetaObject",
           "thread",
          ]
 
-def recurse_into(el,obj):
+
+def recurse_into(el, obj):
     #s = el.split('.')[-1]
     #pdb.set_trace()
     symbols = []
     for item in sorted(dir(obj)):
-        if item[0]=='_':
+        if item[0] == '_':
             continue
         mel = el + '.' + item
         try:
@@ -67,9 +68,10 @@ def recurse_into(el,obj):
             symbols.append(mel)
 
         if isclass(mobj):
-            symbols += recurse_into(mel,mobj)
+            symbols += recurse_into(mel, mobj)
 
     return symbols
+
 
 if __name__=='__main__':
     modules = [ 'QtCore',
@@ -91,15 +93,15 @@ if __name__=='__main__':
     librarySymbols = {}
     for l in libraries:
         dictionary = []
-        if l =="PyQt5":
+        if l == "PyQt5":
             import sip
-            sip.setapi('QDate',2)
-            sip.setapi('QDateTime',2)
-            sip.setapi('QString',2)
-            sip.setapi('QTextStream',2)
-            sip.setapi('QTime',2)
-            sip.setapi('QUrl',2)
-            sip.setapi('QVariant',2)
+            sip.setapi('QDate', 2)
+            sip.setapi('QDateTime', 2)
+            sip.setapi('QString', 2)
+            sip.setapi('QTextStream', 2)
+            sip.setapi('QTime', 2)
+            sip.setapi('QUrl', 2)
+            sip.setapi('QVariant', 2)
 
         for m in modules:
             exec(f"from {l} import {m}", globals(), locals())

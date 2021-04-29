@@ -40,8 +40,9 @@ from PySide6.QtWidgets import QApplication, QListView
 
 
 class ListModel(QAbstractListModel):
-    def rowCount(self, parent = QModelIndex()):
+    def rowCount(self, parent=QModelIndex()):
         return 0
+
 
 app = QApplication([])
 model = ListModel()

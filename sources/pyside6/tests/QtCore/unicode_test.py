@@ -43,6 +43,7 @@ init_test_paths(False)
 from PySide6.QtCore import QObject
 from PySide6.QtCore import QByteArray
 
+
 class UnicodeConversion(unittest.TestCase):
     '''Test case for QString to/from Python Unicode conversion'''
 
@@ -53,16 +54,17 @@ class UnicodeConversion(unittest.TestCase):
         pass
 
     def testSetRegularStringRetrieveUnicode(self):
-        #Set regular Python string retrieve unicode
+        # Set regular Python string retrieve unicode
         obj = QObject()
         obj.setObjectName('test')
         self.assertEqual(obj.objectName(), 'test')
 
     def testSetUnicodeRetrieveUnicode(self):
-        #Set Python unicode string and retrieve unicode
+        # Set Python unicode string and retrieve unicode
         obj = QObject()
         obj.setObjectName('ümlaut')
         self.assertEqual(obj.objectName(), 'ümlaut')
+
 
 if __name__ == '__main__':
     unittest.main()

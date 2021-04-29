@@ -40,9 +40,11 @@ init_test_paths(False)
 
 from PySide6.QtCore import QObject, SIGNAL, SLOT
 
+
 class Dummy(QObject):
     def dispatch(self):
         self.emit(SIGNAL('foo()'))
+
 
 class PythonSignalRefCount(unittest.TestCase):
 
@@ -64,6 +66,7 @@ class PythonSignalRefCount(unittest.TestCase):
         QObject.disconnect(self.emitter, SIGNAL('foo()'), cb)
         self.assertEqual(getrefcount(cb), 2)
 
+
 class CppSignalRefCount(unittest.TestCase):
 
     def setUp(self):
@@ -83,6 +86,7 @@ class CppSignalRefCount(unittest.TestCase):
 
         QObject.disconnect(self.emitter, SIGNAL('destroyed()'), cb)
         self.assertEqual(getrefcount(cb), 2)
+
 
 if __name__ == '__main__':
     unittest.main()

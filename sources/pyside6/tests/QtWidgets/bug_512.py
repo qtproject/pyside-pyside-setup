@@ -44,7 +44,7 @@ from PySide6.QtWidgets import QGridLayout, QLabel, QWidget
 class BugTest(UsesQApplication):
     def testCase(self):
         w = QWidget(None)
-        lbl = QLabel("Hello", w);
+        lbl = QLabel("Hello", w)
         g = QGridLayout()
         g.addWidget(lbl, 0, 0)
         w.setLayout(g)
@@ -52,7 +52,8 @@ class BugTest(UsesQApplication):
 
         t = g.getItemPosition(0)
         self.assertEqual(type(t), tuple)
-        self.assertEqual(t, (0,0,1,1))
+        self.assertEqual(t, (0, 0, 1, 1))
+
 
 if __name__ == '__main__':
     unittest.main()

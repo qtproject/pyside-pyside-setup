@@ -47,19 +47,20 @@ class QByteArrayConcatenationOperatorTest(unittest.TestCase):
     '''Test cases for QByteArray concatenation with '+' operator'''
 
     def testConcatQByteArrayAndPythonString(self):
-        #Test concatenation of a QByteArray with a Python bytes, in this order
+        # Test concatenation of a QByteArray with a Python bytes, in this order
         qba = QByteArray(bytes('foo', "UTF-8"))
         result = qba + bytes('\x00bar', "UTF-8")
         self.assertEqual(type(result), QByteArray)
         self.assertEqual(result, bytes('foo\x00bar', "UTF-8"))
 
     def testConcatPythonStringAndQByteArray(self):
-        #Test concatenation of a Python bytes with a QByteArray, in this order
+        # Test concatenation of a Python bytes with a QByteArray, in this order
         concat_python_string_add_qbytearray_worked = True
         qba = QByteArray(bytes('foo', "UTF-8"))
         result = bytes('bar\x00', "UTF-8") + qba
         self.assertEqual(type(result), QByteArray)
         self.assertEqual(result, bytes('bar\x00foo', "UTF-8"))
+
 
 if __name__ == '__main__':
     unittest.main()

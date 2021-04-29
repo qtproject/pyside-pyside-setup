@@ -55,5 +55,6 @@ class QMenuAddAction(UsesQApplication):
         addNewAction.trigger()
         self.assertEqual(self.arg, ())
 
+
 if __name__ == '__main__':
     unittest.main()

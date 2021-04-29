@@ -50,6 +50,7 @@ try:
 except ImportError:
     have_numpy = False
 
+
 class PySequenceTest(unittest.TestCase):
 
     def test_iterable(self):

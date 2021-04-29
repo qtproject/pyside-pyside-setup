@@ -40,6 +40,7 @@ from PySide6.QtGui import QKeySequence
 
 from helper.usesqapplication import UsesQApplication
 
+
 class QKeySequenceTest(UsesQApplication):
 
     def testGetItemOperator(self):

@@ -40,6 +40,7 @@ init_test_paths(False)
 from PySide6.QtCore import QCoreApplication
 from PySide6.QtNetwork import QDnsLookup
 
+
 class DnsLookupTestCase(unittest.TestCase):
     '''Test case for QDnsLookup'''
 
@@ -61,6 +62,7 @@ class DnsLookupTestCase(unittest.TestCase):
     def testLookup(self):
         self._lookup.lookup()
         self._app.exec_()
+
 
 if __name__ == '__main__':
     unittest.main()

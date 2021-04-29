@@ -38,6 +38,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QDir, QFile, QIODevice, QSaveFile, QTemporaryDir
 
+
 class GetCharTest(unittest.TestCase):
     '''Test case for QIODevice.getChar in QFile'''
 
@@ -83,6 +84,7 @@ class GetCharTest(unittest.TestCase):
         saveFile.write(bytes("Test", "UTF-8"))
         self.assertTrue(saveFile.commit())
         self.assertTrue(os.path.exists(QDir.toNativeSeparators(saveFile.fileName())))
+
 
 if __name__ == '__main__':
     unittest.main()

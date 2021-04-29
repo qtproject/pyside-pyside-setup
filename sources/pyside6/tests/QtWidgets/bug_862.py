@@ -66,17 +66,21 @@ class MyQObject(QObject):
     def __init__(self):
         super().__init__()
 
+
 class MyQWidget(QWidget):
     def __init__(self):
         super().__init__()
+
 
 class MyQGraphicsObject(QGraphicsObject):
     def __init__(self):
         super().__init__()
 
+
 class MyQGraphicsItem(QGraphicsItem):
     def __init__(self):
         super().__init__()
+
 
 class TestRepr (unittest.TestCase):
 
@@ -93,6 +97,7 @@ class TestRepr (unittest.TestCase):
         self.assertEqual("<PySide6.QtCore.QObject(0x", repr(PySide6.QtCore.QObject())[:26])
         self.assertEqual("<PySide6.QtWidgets.QWidget(0x", repr(QWidget())[:29])
         self.assertEqual("<PySide6.QtWidgets.QGraphicsWidget(0x", repr(QGraphicsWidget())[:37])
+
 
 if __name__ == "__main__":
     unittest.main()

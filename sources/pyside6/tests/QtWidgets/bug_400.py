@@ -40,6 +40,7 @@ init_test_paths(False)
 from helper.usesqapplication import UsesQApplication
 from PySide6.QtWidgets import QTreeWidgetItemIterator, QTreeWidgetItem, QTreeWidget
 
+
 class BugTest(UsesQApplication):
     def testCase(self):
         treeWidget = QTreeWidget()
@@ -48,7 +49,7 @@ class BugTest(UsesQApplication):
         for i in range(10):
             items.append(QTreeWidgetItem(None, [f"item: {i}"]))
 
-        treeWidget.insertTopLevelItems(0, items);
+        treeWidget.insertTopLevelItems(0, items)
         _iter = QTreeWidgetItemIterator(treeWidget)
         index = 0
         while(_iter.value()):

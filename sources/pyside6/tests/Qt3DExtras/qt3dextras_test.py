@@ -41,11 +41,12 @@ init_test_paths(False)
 
 from helper.usesqguiapplication import UsesQGuiApplication
 
-from PySide6.QtCore import(Property, QObject, QPropertyAnimation, QTimer, Signal, Slot)
+from PySide6.QtCore import (Property, QObject, QPropertyAnimation, QTimer, Signal, Slot)
 from PySide6.QtGui import (QGuiApplication, QMatrix4x4, QQuaternion, QVector3D, QWindow)
 from PySide6.Qt3DCore import (Qt3DCore)
 from PySide6.Qt3DRender import (Qt3DRender)
 from PySide6.Qt3DExtras import (Qt3DExtras)
+
 
 class OrbitTransformController(QObject):
     def __init__(self, parent):
@@ -80,7 +81,7 @@ class OrbitTransformController(QObject):
         return self._angle
 
     def updateMatrix(self):
-        self._matrix.setToIdentity();
+        self._matrix.setToIdentity()
         self._matrix.rotate(self._angle, QVector3D(0, 1, 0))
         self._matrix.translate(self._radius, 0, 0)
         if self._target is not None:
@@ -90,6 +91,7 @@ class OrbitTransformController(QObject):
     radiusChanged = Signal()
     angle = Property(float, getAngle, setAngle, notify=angleChanged)
     radius = Property(float, getRadius, setRadius, notify=radiusChanged)
+
 
 class Window(Qt3DExtras.Qt3DWindow):
     def __init__(self):
@@ -146,6 +148,7 @@ class Window(Qt3DExtras.Qt3DWindow):
         self.sphereEntity.addComponent(self.sphereTransform)
         self.sphereEntity.addComponent(self.material)
 
+
 class Qt3DExtrasTestCase(UsesQGuiApplication):
     '''Tests related to Q3DExtras'''
 
@@ -157,6 +160,7 @@ class Qt3DExtrasTestCase(UsesQGuiApplication):
             self.app.processEvents()
         QTimer.singleShot(2000, self.app.quit)
         self.app.exec_()
+
 
 if __name__ == '__main__':
     unittest.main()

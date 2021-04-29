@@ -38,6 +38,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QDateTime, QDate, QTime
 
+
 class TestQDate (unittest.TestCase):
     def testDateConversion(self):
         dateTime = QDateTime(QDate(2011, 5, 17), QTime(11, 1, 14, 15))
@@ -53,6 +54,7 @@ class TestQDate (unittest.TestCase):
         py = datetime.datetime.now()
         qt = QDateTime(py)
         self.assertEqual(qt, py)
+
 
 if __name__ == '__main__':
     unittest.main()

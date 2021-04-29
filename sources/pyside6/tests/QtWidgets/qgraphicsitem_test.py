@@ -42,11 +42,12 @@ from PySide6.QtWidgets import QGraphicsScene
 
 from helper.usesqapplication import UsesQApplication
 
+
 class QColorOnSetBrush(UsesQApplication):
     '''Test case for passing a QColor directly to setBrush'''
 
     def setUp(self):
-        #Acquire resources
+        # Acquire resources
         super(QColorOnSetBrush, self).setUp()
 
         self.scene = QGraphicsScene()
@@ -55,16 +56,17 @@ class QColorOnSetBrush(UsesQApplication):
         self.color = QColor('black')
 
     def tearDown(self):
-        #Release resources
+        # Release resources
         del self.color
         del self.item
         del self.scene
         super(QColorOnSetBrush, self).tearDown()
 
     def testQColor(self):
-        #QGraphicsAbstractShapeItem.setBrush(QColor)
+        # QGraphicsAbstractShapeItem.setBrush(QColor)
         self.item.setBrush(self.color)
         self.assertEqual(QBrush(self.color), self.item.brush())
+
 
 if __name__ == '__main__':
     unittest.main()

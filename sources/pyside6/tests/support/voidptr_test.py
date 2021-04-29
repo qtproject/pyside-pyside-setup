@@ -39,6 +39,7 @@ from shiboken6 import Shiboken
 from PySide6.support import VoidPtr
 from PySide6.QtCore import QByteArray
 
+
 class PySide6Support(unittest.TestCase):
 
     def testVoidPtr(self):
@@ -67,6 +68,7 @@ class PySide6Support(unittest.TestCase):
         self.assertFalse(mv.readonly)
         mv[6:11] = b'void*'
         self.assertEqual(str(ba), str(b"Hello void*"))
+
 
 if __name__ == '__main__':
     unittest.main()

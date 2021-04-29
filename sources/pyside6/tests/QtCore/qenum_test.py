@@ -142,6 +142,7 @@ class TestEnumPickling(unittest.TestCase):
 
 # PYSIDE-957: The QEnum macro
 
+
 try:
     import enum
     HAVE_ENUM = True
@@ -149,7 +150,9 @@ except ImportError:
     HAVE_ENUM = False
     QEnum = QFlag = lambda x: x
     import types
-    class Enum: pass
+
+    class Enum:
+        pass
     enum = types.ModuleType("enum")
     enum.Enum = enum.Flag = enum.IntEnum = enum.IntFlag = Enum
     Enum.__module__ = "enum"
@@ -159,10 +162,12 @@ except ImportError:
 
 HAVE_FLAG = hasattr(enum, "Flag")
 
+
 @QEnum
 class OuterEnum(enum.Enum):
     A = 1
     B = 2
+
 
 class SomeClass(QObject):
 

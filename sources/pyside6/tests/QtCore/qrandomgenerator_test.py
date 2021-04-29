@@ -37,6 +37,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QRandomGenerator, QRandomGenerator64
 
+
 class QRandomGeneratorTest(unittest.TestCase):
     '''Test case for QRandomGenerator'''
 
@@ -51,6 +52,7 @@ class QRandomGeneratorTest(unittest.TestCase):
     def testGenerator64(self):
         generator = QRandomGenerator64()
         r = generator.generate()
+
 
 if __name__ == '__main__':
     unittest.main()

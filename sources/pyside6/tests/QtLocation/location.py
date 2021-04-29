@@ -46,5 +46,6 @@ class QLocationTestCase(unittest.TestCase):
         self.assertEqual(geoServiceProvider.errorString(),
                          'The geoservices provider none is not supported.')
 
+
 if __name__ == "__main__":
     unittest.main()

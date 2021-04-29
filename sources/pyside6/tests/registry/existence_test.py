@@ -140,7 +140,7 @@ class TestSignaturesExists(unittest.TestCase):
 
         for key, value in sig_exists.sig_dict.items():
             name = key.rsplit(".", 1)[-1]
-            if name in ("next", "__next__"): # ignore problematic cases
+            if name in ("next", "__next__"):  # ignore problematic cases
                 continue
             if "<" in key:
                 # Skip over remaining crap in "<...>"

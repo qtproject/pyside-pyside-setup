@@ -64,6 +64,7 @@ class MyLayout(QLayout):
     def add(self, item):
         self._list.append(item)
 
+
 class MissingItemAtLayout(QLayout):
     def __init__(self, parent=None):
         QLayout.__init__(self, parent)
@@ -81,10 +82,11 @@ class MissingItemAtLayout(QLayout):
     def add(self, item):
         self._list.append(item)
 
-#Test if a layout implemented in python, the QWidget.setLayout works
-#fine because this implement som layout functions used in glue code of
-#QWidget, then in c++ when call a virtual function this need call the QLayout
-#function implemented in python
+# Test if a layout implemented in python, the QWidget.setLayout works
+# fine because this implement som layout functions used in glue code of
+# QWidget, then in c++ when call a virtual function this need call the QLayout
+# function implemented in python
+
 
 class QLayoutTest(UsesQApplication):
     def testOwnershipTransfer(self):
@@ -97,11 +99,10 @@ class QLayoutTest(UsesQApplication):
 
         w = QWidget()
 
-        #transfer ref
+        # transfer ref
         w.setLayout(l)
 
         self.assertEqual(sys.getrefcount(b), 3)
-
 
     def testReferenceTransfer(self):
         b = QPushButton("teste")
@@ -143,6 +144,7 @@ class QLayoutTest(UsesQApplication):
         self.app.exec_()
         del w
         self.assertRaises(RuntimeError, spacer.isEmpty)
+
 
 if __name__ == '__main__':
     unittest.main()

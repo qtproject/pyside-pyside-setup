@@ -58,6 +58,7 @@ Test the snake_case and true_property feature.
 This works now, including class properties.
 """
 
+
 class Window(QWidget):
     def __init__(self):
         super().__init__()

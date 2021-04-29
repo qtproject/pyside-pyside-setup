@@ -47,6 +47,7 @@ class Signaller(QObject):
     s2 = Signal()
     s3 = Signal()
 
+
 class Window(object):
 
     def __init__(self, s):
@@ -63,6 +64,7 @@ class Window(object):
 
     def _on_signal(self):
         self._window.setWindowTitle("Signaled!")
+
 
 class TestTimedApp(TimedQApplication):
     def testSignals(self):
@@ -82,6 +84,7 @@ class TestTimedApp(TimedQApplication):
         s.s1.emit()
         s.s2.emit()
         s.s3.emit()
+
 
 if __name__ == '__main__':
     unittest.main()

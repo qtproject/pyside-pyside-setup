@@ -37,6 +37,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QObject, SIGNAL
 
+
 class QObjectDestroyed(unittest.TestCase):
     """Very simple test case for the destroyed() signal of QObject"""
 
@@ -52,6 +53,7 @@ class QObjectDestroyed(unittest.TestCase):
         QObject.connect(obj, SIGNAL('destroyed()'), self.destroyed_cb)
         del obj
         self.assertTrue(self.called)
+
 
 if __name__ == '__main__':
     unittest.main()

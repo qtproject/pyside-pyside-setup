@@ -41,6 +41,7 @@ from PySide6.QtUiTools import QUiLoader
 
 from helper.usesqapplication import UsesQApplication
 
+
 class TestDestruction(UsesQApplication):
     def testBug909(self):
         file = Path(__file__).resolve().parent / 'bug_909.ui'
@@ -54,6 +55,7 @@ class TestDestruction(UsesQApplication):
         tw = QTabWidget(main_win)
         main_win.setCentralWidget(tw)
         main_win.show()
+
 
 if __name__ == '__main__':
     unittest.main()

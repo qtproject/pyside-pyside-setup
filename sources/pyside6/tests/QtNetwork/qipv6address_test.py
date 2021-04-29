@@ -54,5 +54,6 @@ class QIPv6AddressGetItemTest(unittest.TestCase):
         ip = QIPv6Address()
         self.assertRaises(IndexError, ip.__setitem__, 32, 16)
 
+
 if __name__ == '__main__':
     unittest.main()

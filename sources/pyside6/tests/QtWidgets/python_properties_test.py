@@ -51,5 +51,6 @@ class Properties(unittest.TestCase):
         # PSYIDE-304, can assign to a "const QWidget *" field
         p.widget = None
 
+
 if __name__ == '__main__':
     unittest.main()

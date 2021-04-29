@@ -51,10 +51,10 @@ class QStateTest(unittest.TestCase):
 
         machine = QStateMachine()
         s1 = QState()
-        s1.assignProperty(o, "text", "Rocks");
+        s1.assignProperty(o, "text", "Rocks")
 
         s2 = QFinalState()
-        t = s1.addTransition(o, SIGNAL("change()"), s2);
+        t = s1.addTransition(o, SIGNAL("change()"), s2)
         self.assertTrue(isinstance(t, QSignalTransition))
 
         machine.addState(s1)
@@ -69,6 +69,7 @@ class QStateTest(unittest.TestCase):
 
         txt = o.property("text")
         self.assertTrue(txt, "Rocks")
+
 
 if __name__ == '__main__':
     unittest.main()

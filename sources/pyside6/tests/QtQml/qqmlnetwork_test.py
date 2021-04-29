@@ -47,13 +47,15 @@ from helper.timedqapplication import TimedQApplication
 
 
 class CustomManager(QNetworkAccessManager):
-    def createRequest(self, op, req, data = None):
+    def createRequest(self, op, req, data=None):
         print(">> createRequest ", self, op, req.url(), data)
         return QNetworkAccessManager.createRequest(self, op, req, data)
 
+
 class CustomFactory(QQmlNetworkAccessManagerFactory):
-    def create(self, parent = None):
+    def create(self, parent=None):
         return CustomManager()
+
 
 class TestQQmlNetworkFactory(TimedQApplication):
     def setUp(self):
@@ -75,6 +77,7 @@ class TestQQmlNetworkFactory(TimedQApplication):
         self.assertEqual(view.status(), QQuickView.Ready)
 
         self.app.exec_()
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -41,6 +41,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QVersionNumber
 
+
 class QVersionNumberTest(unittest.TestCase):
     def testFromString(self):
         versionString = '5.9.2'
@@ -50,6 +51,7 @@ class QVersionNumberTest(unittest.TestCase):
         self.assertEqual(version.minorVersion(), 9)
         self.assertEqual(version.microVersion(), 2)
         self.assertEqual(version.toString(), versionString)
+
 
 if __name__ == '__main__':
     unittest.main()

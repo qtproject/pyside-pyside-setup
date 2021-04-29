@@ -38,6 +38,7 @@ init_test_paths(False)
 from PySide6.QtCore import QObject
 from PySide6.QtGui import QPen, QBrush
 
+
 class TestBug991 (unittest.TestCase):
     def testReprFunction(self):
         reprPen = repr(QPen())
@@ -46,6 +47,7 @@ class TestBug991 (unittest.TestCase):
         self.assertTrue(reprBrush.startswith("<PySide6.QtGui.QBrush"))
         reprObject = repr(QObject())
         self.assertTrue(reprObject.startswith("<PySide6.QtCore.QObject"))
+
 
 if __name__ == '__main__':
     unittest.main()

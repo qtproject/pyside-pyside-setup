@@ -59,15 +59,15 @@ class DoubleQObjectInheritanceTest(UsesQApplication):
 
         obj = WidgetValidator()
 
-        #QObject methods
+        # QObject methods
         obj.setObjectName('aaaa')
         self.assertEqual(obj.objectName(), 'aaaa')
 
-        #QWidget methods
+        # QWidget methods
         obj.setVisible(False)
         self.assertFalse(obj.isVisible())
 
-        #QIntValidator methods
+        # QIntValidator methods
         state, string, number = obj.validate('aaaa', 0)
         self.assertEqual(state, QValidator.Invalid)
         state, string, number = obj.validate('33', 0)

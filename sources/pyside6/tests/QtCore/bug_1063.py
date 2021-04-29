@@ -61,5 +61,6 @@ class QTextStreamTestCase(unittest.TestCase):
 
         os.unlink(self.temp_file.name)
 
+
 if __name__ == "__main__":
     unittest.main()

@@ -59,6 +59,7 @@ property_test_string = """
 test_1 = False
 test_2 = False
 
+
 class TestClass(QObject):
     @Slot()
     def methodThrows(self):
@@ -76,6 +77,7 @@ class TestClass(QObject):
             test_1 = True
         else:
             test_2 = True
+
 
 class JavaScriptExceptionsTest(UsesQApplication):
     def test_jsengine(self):
@@ -96,7 +98,7 @@ class JavaScriptExceptionsTest(UsesQApplication):
         self.assertEqual(result_2.property('name').toString(), 'TypeError')
 
     def test_qml_type(self):
-        qmlRegisterType(TestClass, 'JavaScriptExceptions', 1, 0, 'JavaScriptExceptions');
+        qmlRegisterType(TestClass, 'JavaScriptExceptions', 1, 0, 'JavaScriptExceptions')
 
         view = QQuickView()
         file = Path(__file__).resolve().parent / 'javascript_exceptions.qml'

@@ -44,14 +44,14 @@ from helper.usesqapplication import UsesQApplication
 class QStandardItemModelTest(UsesQApplication):
 
     def setUp(self):
-       super(QStandardItemModelTest, self).setUp()
-       self.window = QWidget()
-       self.model = QStandardItemModel(0, 3, self.window)
+        super(QStandardItemModelTest, self).setUp()
+        self.window = QWidget()
+        self.model = QStandardItemModel(0, 3, self.window)
 
     def tearDown(self):
-       del self.window
-       del self.model
-       super(QStandardItemModelTest, self).tearDown()
+        del self.window
+        del self.model
+        super(QStandardItemModelTest, self).tearDown()
 
     def testInsertRow(self):
         # bug #227
@@ -92,7 +92,7 @@ class QStandardItemModelRef(UsesQApplication):
                 # only rest 1 reference
                 self.assertEqual(sys.getrefcount(items[r][c]), 2)
 
-        my_i = model.item(0,0)
+        my_i = model.item(0, 0)
         # ref(my_i) + parent_ref + items list ref
         self.assertEqual(sys.getrefcount(my_i), 4)
 

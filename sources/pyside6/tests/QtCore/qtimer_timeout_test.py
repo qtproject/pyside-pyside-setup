@@ -59,25 +59,25 @@ class TestTimeoutSignal(UsesQCoreApplication):
     '''Test case to check if the signals are really being caught'''
 
     def setUp(self):
-        #Acquire resources
+        # Acquire resources
         UsesQCoreApplication.setUp(self)
         self.watchdog = WatchDog(self)
         self.timer = QTimer()
         self.called = False
 
     def tearDown(self):
-        #Release resources
+        # Release resources
         del self.watchdog
         del self.timer
         del self.called
         UsesQCoreApplication.tearDown(self)
 
     def callback(self, *args):
-        #Default callback
+        # Default callback
         self.called = True
 
     def testTimeoutSignal(self):
-        #Test the QTimer timeout() signal
+        # Test the QTimer timeout() signal
         refCount = sys.getrefcount(self.timer)
         QObject.connect(self.timer, SIGNAL('timeout()'), self.callback)
         self.timer.start(4)
@@ -87,6 +87,7 @@ class TestTimeoutSignal(UsesQCoreApplication):
 
         self.assertTrue(self.called)
         self.assertEqual(sys.getrefcount(self.timer), refCount)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -41,6 +41,7 @@ from helper.usesqapplication import UsesQApplication
 from PySide6.QtGui import QTextFrame, QTextCursor, QTextCharFormat, QFont, QTextFrameFormat
 from PySide6.QtWidgets import QTextEdit
 
+
 class BugTest(UsesQApplication):
     def testCase(self):
         editor = QTextEdit()
@@ -51,7 +52,7 @@ class BugTest(UsesQApplication):
 
         plainCharFormat = QTextCharFormat()
         boldCharFormat = QTextCharFormat()
-        boldCharFormat.setFontWeight(QFont.Bold);
+        boldCharFormat.setFontWeight(QFont.Bold)
         cursor.insertText("""
                           Text documents are represented by the
                           QTextDocument class, rather than by QString objects.
@@ -91,16 +92,15 @@ class BugTest(UsesQApplication):
                           manipulation of the document's contents.""",
                           plainCharFormat)
 
-
         frame = cursor.currentFrame()
 
         items = []
 
-        #test iterator
+        # test iterator
         for i in frame:
             items.append(i)
 
-        #test __iadd__
+        # test __iadd__
         b = frame.begin()
         i = 0
         while not b.atEnd():
@@ -109,7 +109,7 @@ class BugTest(UsesQApplication):
             b.__iadd__(1)
             i += 1
 
-        #test __isub__
+        # test __isub__
         b = frame.end()
         i = 0
         while i > 0:
@@ -117,7 +117,6 @@ class BugTest(UsesQApplication):
             self.assertTrue(b.parentFrame(), items[i].parentFrame())
             b.__isub__(1)
             i -= 1
-
 
 
 if __name__ == '__main__':

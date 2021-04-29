@@ -42,6 +42,7 @@ init_test_paths(False)
 from PySide6.QtCore import QObject, QTimer, QCoreApplication
 from helper.usesqcoreapplication import UsesQCoreApplication
 
+
 class ExtQObject(QObject):
     def __init__(self):
         super().__init__()
@@ -50,6 +51,7 @@ class ExtQObject(QObject):
     def childEvent(self, event):
         QObject.childEvent(self, event)
         self.child_event_received = True
+
 
 class ExtQTimer(QTimer):
     def __init__(self):
@@ -81,6 +83,7 @@ class TestChildEvent(UsesQCoreApplication):
         child = QObject()
         child.setParent(parent)
         self.assertTrue(parent.child_event_received)
+
 
 if __name__ == '__main__':
     unittest.main()

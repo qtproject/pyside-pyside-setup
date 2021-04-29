@@ -49,6 +49,7 @@ class BuggyWidget(QWidget):
         # this cause a segfault during the ownership transfer
         self.verticalLayout.addLayout(self.gridLayout)
 
+
 class LayoutTransferOwnerShip(unittest.TestCase):
     def testBug(self):
         app = QApplication([])
@@ -56,6 +57,7 @@ class LayoutTransferOwnerShip(unittest.TestCase):
         w.setup()
         w.show()
         self.assertTrue(True)
+
 
 if __name__ == '__main__':
     unittest.main()

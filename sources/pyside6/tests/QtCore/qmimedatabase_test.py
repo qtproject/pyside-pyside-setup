@@ -42,6 +42,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QMimeDatabase, QLocale
 
+
 class QMimeDatabaseTest(unittest.TestCase):
     def testMimeTypeForName(self):
         db = QMimeDatabase()
@@ -80,6 +81,7 @@ class QMimeDatabaseTest(unittest.TestCase):
 
         doesNotExist = db.mimeTypeForName("foobar/x-doesnot-exist")
         self.assertTrue(not doesNotExist.isValid())
+
 
 if __name__ == '__main__':
     unittest.main()

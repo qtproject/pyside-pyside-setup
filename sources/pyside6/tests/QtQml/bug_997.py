@@ -61,5 +61,6 @@ class TestBug(UsesQApplication):
         self.app.exec_()
         self.assertEqual(ownerData.value('newName'), ownerData.value('name'))
 
+
 if __name__ == '__main__':
     unittest.main()

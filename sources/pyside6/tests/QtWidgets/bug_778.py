@@ -39,6 +39,7 @@ from helper.usesqapplication import UsesQApplication
 
 from PySide6.QtWidgets import QTreeWidget, QTreeWidgetItem, QTreeWidgetItemIterator
 
+
 class QTreeWidgetItemIteratorTest(UsesQApplication):
     def testWidgetIterator(self):
         treeWidget = QTreeWidget()
@@ -52,6 +53,7 @@ class QTreeWidgetItemIteratorTest(UsesQApplication):
         for it in QTreeWidgetItemIterator(treeWidget):
             self.assertEqual(it.value().text(0), f'item: {index}')
             index += 1
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -42,6 +42,7 @@ from PySide6.QtWidgets import QKeySequenceEdit
 
 from helper.usesqapplication import UsesQApplication
 
+
 class QKeySequenceEditTest(UsesQApplication):
     def testKeySequence(self):
         keySequenceEdit = QKeySequenceEdit()
@@ -49,6 +50,7 @@ class QKeySequenceEditTest(UsesQApplication):
         QTimer.singleShot(0, keySequenceEdit.close)
         self.app.exec_()
         print(keySequenceEdit.keySequence())
+
 
 if __name__ == "__main__":
     unittest.main()

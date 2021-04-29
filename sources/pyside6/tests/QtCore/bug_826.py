@@ -41,6 +41,7 @@ import PySide6
 
 TEST_EVENT_TYPE = QEvent.Type(QEvent.registerEventType())
 
+
 class TestEvent(QEvent):
     TestEventType = QEvent.Type(QEvent.registerEventType())
 
@@ -60,6 +61,7 @@ class TestEnums(unittest.TestCase):
     def testUserTypesRepr(self):
         self.assertEqual(eval(repr(TestEvent.TestEventType)), TestEvent.TestEventType)
         self.assertEqual(eval(repr(TEST_EVENT_TYPE)), TEST_EVENT_TYPE)
+
 
 if __name__ == '__main__':
     unittest.main()

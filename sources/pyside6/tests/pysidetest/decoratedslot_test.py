@@ -40,6 +40,7 @@ init_test_paths(True)
 from PySide6.QtCore import QObject
 from testbinding import TestObject
 
+
 class Receiver(QObject):
     def __init__(self):
         super().__init__()

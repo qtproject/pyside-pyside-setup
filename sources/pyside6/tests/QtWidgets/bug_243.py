@@ -39,6 +39,7 @@ init_test_paths(False)
 
 from PySide6.QtWidgets import QApplication, QMainWindow, QLayout
 
+
 class QAppPresence(unittest.TestCase):
 
     def testBug(self):
@@ -46,6 +47,7 @@ class QAppPresence(unittest.TestCase):
         window = QMainWindow()
         l = window.layout()
         self.assertTrue(isinstance(l, QLayout))
+
 
 if __name__ == '__main__':
     unittest.main()

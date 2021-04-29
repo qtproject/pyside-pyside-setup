@@ -39,6 +39,7 @@ from helper.usesqapplication import UsesQApplication
 from PySide6.QtGui import QPageLayout, QPageSize, QPdfWriter, QTextDocument
 from PySide6.QtCore import QDir, QMarginsF, QTemporaryFile
 
+
 class QPdfWriterTest(UsesQApplication):
 
     def testWrite(self):
@@ -50,6 +51,7 @@ class QPdfWriterTest(UsesQApplication):
         doc.print_(pdfWriter)
         temporaryFile.close()
         self.assertTrue(temporaryFile.size() > 0)
+
 
 if __name__ == '__main__':
     unittest.main()

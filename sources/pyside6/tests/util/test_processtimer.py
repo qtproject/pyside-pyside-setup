@@ -34,6 +34,7 @@ import os
 from subprocess import Popen, PIPE
 from processtimer import TimeoutException, ProcessTimer
 
+
 class TimeoutTest(unittest.TestCase):
 
     def tearDown(self):
@@ -43,9 +44,10 @@ class TimeoutTest(unittest.TestCase):
             pass
 
     def testRaise(self):
-        self.proc = Popen(['python2.5', '-c', 'while True: pass' ], stdout=PIPE, stderr=PIPE)
+        self.proc = Popen(['python2.5', '-c', 'while True: pass'], stdout=PIPE, stderr=PIPE)
         timer = ProcessTimer(self.proc, 1)
         self.assertRaises(TimeoutException, timer.waitfor)
+
 
 class SimpleTest(unittest.TestCase):
 
@@ -54,10 +56,12 @@ class SimpleTest(unittest.TestCase):
             os.kill(self.proc.pid, 9)
         except OSError:
             pass
+
     def testSimple(self):
         self.proc = Popen(['python2.5', '-c', '"print"'], stdout=PIPE, stderr=PIPE)
         timer = ProcessTimer(self.proc, 10)
         timer.waitfor()
+
 
 class TestEchoOutput(unittest.TestCase):
 
@@ -72,6 +76,7 @@ class TestEchoOutput(unittest.TestCase):
         timer = ProcessTimer(self.proc, 1)
         timer.waitfor()
         self.assertEqual(self.proc.stdout.read().strip(), '1')
+
 
 class TestRetCode(unittest.TestCase):
 

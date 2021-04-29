@@ -54,5 +54,6 @@ class Bug617(unittest.TestCase):
         e = MyEvent()
         self.assertEqual(repr(e.type()), 'PySide6.QtCore.QEvent.Type(999)')
 
+
 if __name__ == "__main__":
-   unittest.main()
+    unittest.main()

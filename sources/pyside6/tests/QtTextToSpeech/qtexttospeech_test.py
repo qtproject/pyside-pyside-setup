@@ -49,6 +49,7 @@ except ImportError:
     print("Skipping test due to missing QtTextToSpeech module")
     sys.exit(0)
 
+
 class QTextToSpeechTestCase(UsesQApplication):
     '''Tests related to QTextToSpeech'''
     def testSay(self):
@@ -65,6 +66,7 @@ class QTextToSpeechTestCase(UsesQApplication):
     def _slotStateChanged(self, state):
         if (state == QTextToSpeech.State.Ready):
             self.app.quit()
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -45,6 +45,7 @@ except ImportError:
 
 from helper.usesqapplication import UsesQApplication
 
+
 class Dummy(QObject):
     """Dummy class used in this test."""
     def __init__(self, parent=None):
@@ -112,6 +113,7 @@ class PyObjectType(UsesQApplication):
         self.app.exec_()
         self.assertEqual(self.callCount, 2)
 
+
 class PythonSigSlot(unittest.TestCase):
     def setUp(self):
         self.called = False
@@ -145,7 +147,6 @@ class PythonSigSlot(unittest.TestCase):
         obj1.emit(SIGNAL('foo(int)'), *self.args)
 
         self.assertTrue(self.called)
-
 
     def testDisconnect(self):
         obj1 = Dummy()

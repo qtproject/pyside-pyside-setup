@@ -41,6 +41,7 @@ from PySide6.QtWidgets import QDialog, QLabel, QGridLayout, QHBoxLayout, QWidget
 
 from helper.timedqapplication import TimedQApplication
 
+
 class LabelWindow(QDialog):
     def __init__(self, parent):
         super().__init__(parent)
@@ -50,7 +51,6 @@ class LabelWindow(QDialog):
         self.test_layout.addWidget(label, 0, 0)
         self.setLayout(self.test_layout)
         self._destroyCalled = False
-
 
     def replace(self, unit):
         old_item = self.test_layout.itemAtPosition(0, 0)
@@ -68,6 +68,7 @@ class LabelWindow(QDialog):
 
     def _destroyed(self, obj):
         self._destroyCalled = True
+
 
 class TestBug1006 (TimedQApplication):
 
@@ -112,6 +113,7 @@ class TestBug1006 (TimedQApplication):
         layout.removeWidget(widget)
         widget.setObjectName("MyWidget")
         self.assertEqual(sys.getrefcount(widget), 3)
+
 
 if __name__ == "__main__":
     unittest.main()

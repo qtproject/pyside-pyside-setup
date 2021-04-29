@@ -37,8 +37,11 @@ init_test_paths(False)
 
 from PySide6.QtCore import QObject, Signal
 o = QObject()
+
+
 class MyObject(QObject):
     s = Signal(int)
+
 
 class CheckSignalType(unittest.TestCase):
     def testSignal(self):
@@ -51,6 +54,7 @@ class CheckSignalType(unittest.TestCase):
         self.assertTrue(isinstance(o.destroyed, Signal))
         self.assertTrue(isinstance(MyObject.s, Signal))
         self.assertFalse(isinstance(int, Signal))
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -44,6 +44,7 @@ def setValue(o):
     values = ['Name']
     o.setProperty('test1', values)
 
+
 class QQtVersionTest(unittest.TestCase):
     '''Tests for QVariant conversion of QStringList'''
 
@@ -51,7 +52,6 @@ class QQtVersionTest(unittest.TestCase):
         o = QObject()
         setValue(o)
         self.assertEqual(o.property('test1'), ['Name'])
-
 
 
 if __name__ == '__main__':

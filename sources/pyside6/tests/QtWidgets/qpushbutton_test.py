@@ -39,6 +39,7 @@ from helper.usesqapplication import UsesQApplication
 from PySide6.QtWidgets import QPushButton, QMenu, QWidget
 from PySide6.QtCore import QTimer
 
+
 class MyWidget(QWidget):
     def __init__(self):
         super().__init__()
@@ -70,6 +71,7 @@ class QPushButtonTest(UsesQApplication):
         b.toggled[bool].connect(self.buttonCb)
         b.toggle()
         self.assertTrue(self._clicked)
+
 
 if __name__ == '__main__':
     unittest.main()

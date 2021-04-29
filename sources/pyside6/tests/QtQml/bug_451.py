@@ -78,6 +78,7 @@ class PythonObject(QObject):
     arg1 = Property(int, getArg1, setArg1)
     arg2 = Property('QVariant', getArg2, setArg2)
 
+
 class TestBug(unittest.TestCase):
     def testQMLFunctionCall(self):
         app = QGuiApplication(sys.argv)

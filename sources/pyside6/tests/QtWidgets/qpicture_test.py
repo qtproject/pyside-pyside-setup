@@ -40,18 +40,20 @@ from PySide6.QtCore import QTimer
 from PySide6.QtGui import QPicture, QPainter
 from PySide6.QtWidgets import QWidget
 
+
 class MyWidget(QWidget):
     def paintEvent(self, e):
         p = QPainter(self)
         p.drawPicture(0, 0, self._picture)
         self._app.quit()
 
+
 class QPictureTest(UsesQApplication):
     def testFromData(self):
         picture = QPicture()
         painter = QPainter()
         painter.begin(picture)
-        painter.drawEllipse(10,20, 80,70)
+        painter.drawEllipse(10, 20, 80, 70)
         painter.end()
 
         data = picture.data()
@@ -66,6 +68,7 @@ class QPictureTest(UsesQApplication):
 
         QTimer.singleShot(300, w.show)
         self.app.exec_()
+
 
 if __name__ == '__main__':
     unittest.main()

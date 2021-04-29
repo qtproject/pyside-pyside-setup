@@ -41,21 +41,25 @@ from PySide6.QtWidgets import QLayout, QWidget, QGraphicsLayout, QGraphicsLayout
 
 from helper.usesqapplication import UsesQApplication
 
+
 class Layout(QLayout):
     def __init__(self):
         super().__init__()
+
 
 class GraphicsLayout(QGraphicsLayout):
     def __init__(self):
         super().__init__()
 
+
 class GraphicsLayoutItem(QGraphicsLayoutItem):
     def __init__(self):
         super().__init__()
 
+
 class ReturnsQuadruplesOfNumbers(UsesQApplication):
     def compareTuples(self, ta, tb):
-        for va,vb in zip(ta, tb):
+        for va, vb in zip(ta, tb):
             if round(va) != round(vb):
                 return False
         return True
@@ -82,5 +86,5 @@ class ReturnsQuadruplesOfNumbers(UsesQApplication):
 
 
 if __name__ == "__main__":
-   unittest.main()
+    unittest.main()
 

@@ -41,6 +41,7 @@ from PySide6.QtCore import QObject
 get_counter = 0
 set_counter = 0
 
+
 class Descriptor(object):
     def __get__(self, obj, owner):
         global get_counter
@@ -57,9 +58,11 @@ class Descriptor(object):
         set_counter += 1
         obj.var = value
 
+
 class FooBar(QObject):
     test = Descriptor()
     var = 0
+
 
 class SetAndGetTestCases(unittest.TestCase):
     def setUp(self):
@@ -96,6 +99,7 @@ class SetAndGetTestCases(unittest.TestCase):
 
         get_counter = 0
         set_counter = 0
+
 
 if __name__ == "__main__":
     unittest.main()

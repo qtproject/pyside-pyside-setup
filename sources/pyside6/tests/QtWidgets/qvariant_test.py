@@ -40,12 +40,15 @@ from PySide6.QtWidgets import (QApplication, QComboBox, QGraphicsScene,
 
 from helper.usesqapplication import UsesQApplication
 
+
 class MyDiagram(QGraphicsScene):
     pass
 
+
 class MyItem(QGraphicsRectItem):
     def itemChange(self, change, value):
-        return value;
+        return value
+
 
 class Sequence(object):
     # Having the __getitem__ method on a class transform the Python
@@ -56,6 +59,7 @@ class Sequence(object):
     # we were requiring that the PySequence was finite.
     def __getitem__(self, key):
         raise IndexError()
+
 
 class QGraphicsSceneOnQVariantTest(UsesQApplication):
     """Test storage ot QGraphicsScene into QVariants"""
@@ -79,6 +83,7 @@ class QGraphicsSceneOnQVariantTest(UsesQApplication):
         # PYSIDE-641
         self.combo.addItem("test", userData=Sequence())
         self.assertTrue(isinstance(self.combo.itemData(0), Sequence))
+
 
 if __name__ == '__main__':
     unittest.main()

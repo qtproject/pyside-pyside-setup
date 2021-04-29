@@ -39,8 +39,9 @@ from PySide6.QtCore import QAbstractListModel, QCoreApplication, QModelIndex
 
 
 class MyModel (QAbstractListModel):
-    def rowCount(self, parent = None):
+    def rowCount(self, parent=None):
         return 3
+
 
 class TestBug706(unittest.TestCase):
 
@@ -58,6 +59,7 @@ class TestBug706(unittest.TestCase):
         model.columnsAboutToBeInserted.emit(QModelIndex(), 0, 1)
         self.assertEqual(self.start, 0)
         self.assertEqual(self.end, 1)
+
 
 if __name__ == '__main__':
     unittest.main()

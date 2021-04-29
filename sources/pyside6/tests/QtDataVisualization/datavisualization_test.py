@@ -52,11 +52,13 @@ def dataToBarDataRow(data):
         result.append(QBarDataItem(d))
     return result
 
+
 def dataToBarDataArray(data):
     result = []
     for row in data:
         result.append(dataToBarDataRow(row))
     return result
+
 
 class QtDataVisualizationTestCase(UsesQGuiApplication):
     '''Tests related to QtDataVisualization'''
@@ -76,7 +78,7 @@ class QtDataVisualizationTestCase(UsesQGuiApplication):
         self.valueAxis = QValue3DAxis()
         self.valueAxis.setTitle('Values')
         self.valueAxis.setTitleVisible(True)
-        self.valueAxis.setRange(0, 5);
+        self.valueAxis.setRange(0, 5)
 
         self.bars.setRowAxis(self.rowAxis)
         self.bars.setColumnAxis(self.columnAxis)

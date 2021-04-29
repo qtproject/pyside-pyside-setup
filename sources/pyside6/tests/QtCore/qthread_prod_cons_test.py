@@ -45,36 +45,38 @@ logging.basicConfig(level=logging.WARNING)
 
 from PySide6.QtCore import QThread, QCoreApplication, QObject, SIGNAL
 
+
 class Bucket(QObject):
     '''Dummy class to hold the produced values'''
     def __init__(self, max_size=10, *args):
-        #Constructor which receives the max number of produced items
+        # Constructor which receives the max number of produced items
         super().__init__(*args)
         self.data = []
         self.max_size = 10
 
     def pop(self):
-        #Retrieves an item
+        # Retrieves an item
         return self.data.pop(0)
 
     def push(self, data):
-        #Pushes an item
+        # Pushes an item
         self.data.append(data)
+
 
 class Producer(QThread):
     '''Producer thread'''
 
     def __init__(self, bucket, *args):
-        #Constructor. Receives the bucket
+        # Constructor. Receives the bucket
         super().__init__(*args)
         self.runs = 0
         self.bucket = bucket
         self.production_list = []
 
     def run(self):
-        #Produces at most bucket.max_size items
+        # Produces at most bucket.max_size items
         while self.runs < self.bucket.max_size:
-            value = int(random()*10) % 10
+            value = int(random() * 10) % 10
             self.bucket.push(value)
             self.production_list.append(value)
             logging.debug(f'PRODUCER - pushed {value}')
@@ -82,18 +84,17 @@ class Producer(QThread):
             self.msleep(5)
 
 
-
 class Consumer(QThread):
     '''Consumer thread'''
     def __init__(self, bucket, *args):
-        #Constructor. Receives the bucket
+        # Constructor. Receives the bucket
         super().__init__(*args)
         self.runs = 0
         self.bucket = bucket
         self.consumption_list = []
 
     def run(self):
-        #Consumes at most bucket.max_size items
+        # Consumes at most bucket.max_size items
         while self.runs < self.bucket.max_size:
             try:
                 value = self.bucket.pop()
@@ -104,23 +105,24 @@ class Consumer(QThread):
                 logging.debug('CONSUMER - empty bucket')
             self.msleep(5)
 
+
 class ProducerConsumer(unittest.TestCase):
     '''Basic test case for producer-consumer QThread'''
 
     def setUp(self):
-        #Create fixtures
+        # Create fixtures
         self.app = QCoreApplication([])
 
     def tearDown(self):
-        #Destroy fixtures
+        # Destroy fixtures
         del self.app
 
     def finishCb(self):
-        #Quits the application
+        # Quits the application
         self.app.exit(0)
 
     def testProdCon(self):
-        #QThread producer-consumer example
+        # QThread producer-consumer example
         bucket = Bucket()
         prod = Producer(bucket)
         cons = Consumer(bucket)

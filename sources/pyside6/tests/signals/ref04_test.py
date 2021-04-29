@@ -40,6 +40,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QObject, Signal
 
+
 class ExtQObject(QObject):
 
     mySignal = Signal()

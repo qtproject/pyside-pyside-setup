@@ -52,9 +52,11 @@ class Listener(QObject):
         for w in words:
             self._phrase.append(w)
 
+
 class Communicate(QObject):
     # create a new signal on the fly and name it 'speak'
     speak = Signal(tuple)
+
 
 class SignaltoSignalTest(UsesQCoreApplication):
     def testBug(self):
@@ -63,9 +65,10 @@ class SignaltoSignalTest(UsesQCoreApplication):
         # connect signal and slot
         someone.speak.connect(someone2.listen)
         # emit 'speak' signal
-        talk = ("one","two","three")
+        talk = ("one", "two", "three")
         someone.speak.emit(talk)
         self.assertEqual(someone2._phrase, list(talk))
+
 
 if __name__ == '__main__':
     unittest.main()

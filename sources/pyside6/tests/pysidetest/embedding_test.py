@@ -77,5 +77,6 @@ class EmbeddingTest(unittest.TestCase):
         name = os.path.basename(dn(dn(dn(PySide6.support.signature.__file__))))
         self.assertTrue(name.startswith("embedded.") and name.endswith(".zip"))
 
+
 if __name__ == '__main__':
     unittest.main()

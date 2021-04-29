@@ -59,5 +59,6 @@ class QCommandLineParserTest(unittest.TestCase):
         self.assertEqual(parser2.values("b"), [])
         self.assertEqual(parser2.positionalArguments(), [])
 
+
 if __name__ == '__main__':
     unittest.main()

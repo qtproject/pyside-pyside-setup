@@ -86,12 +86,12 @@ class QPainterDrawText(UsesQGuiApplication):
     def testDrawOverloads(self):
         '''Calls QPainter.drawLines overloads, if something is
            wrong Exception and chaos ensues. Bug #395'''
-        self.painter.drawLines([QLine(QPoint(0,0), QPoint(1,1))])
-        self.painter.drawLines([QPoint(0,0), QPoint(1,1)])
-        self.painter.drawLines([QPointF(0,0), QPointF(1,1)])
-        self.painter.drawLines([QLineF(QPointF(0,0), QPointF(1,1))])
-        self.painter.drawPoints([QPoint(0,0), QPoint(1,1)])
-        self.painter.drawPoints([QPointF(0,0), QPointF(1,1)])
+        self.painter.drawLines([QLine(QPoint(0, 0), QPoint(1, 1))])
+        self.painter.drawLines([QPoint(0, 0), QPoint(1, 1)])
+        self.painter.drawLines([QPointF(0, 0), QPointF(1, 1)])
+        self.painter.drawLines([QLineF(QPointF(0, 0), QPointF(1, 1))])
+        self.painter.drawPoints([QPoint(0, 0), QPoint(1, 1)])
+        self.painter.drawPoints([QPointF(0, 0), QPointF(1, 1)])
         self.painter.drawConvexPolygon([QPointF(10.0, 80.0),
                                         QPointF(20.0, 10.0),
                                         QPointF(80.0, 30.0),
@@ -120,7 +120,6 @@ class QPainterDrawText(UsesQGuiApplication):
             x = np.array([10.0, 20.0, 80.0, 90.0])
             y = np.array([80.0, 10.0, 30.0, 70.0])
             self.painter.drawPointsNp(x, y)
-
 
 
 class SetBrushWithOtherArgs(UsesQGuiApplication):

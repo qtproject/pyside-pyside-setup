@@ -38,6 +38,7 @@ init_test_paths(False)
 from PySide6.QtWidgets import QMainWindow, QTabWidget, QTextEdit, QSplitter
 from helper.usesqapplication import UsesQApplication
 
+
 class TabWidgetClear(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -55,6 +56,7 @@ class TabWidgetClear(QMainWindow):
         self.tabWidget.clear()
         self.getSplitter()
 
+
 class TestTabWidgetClear(UsesQApplication):
 
     def testClear(self):
@@ -65,6 +67,7 @@ class TestTabWidgetClear(UsesQApplication):
         except RuntimeError as e:
             # This should never happened, PYSIDE-213
             raise e
+
 
 if __name__ == '__main__':
     unittest.main()

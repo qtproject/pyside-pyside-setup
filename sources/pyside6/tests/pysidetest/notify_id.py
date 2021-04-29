@@ -40,6 +40,7 @@ from PySide6.QtCore import QObject, Signal, Property, Slot
 '''Tests that the signal notify id of a property is correct, aka corresponds to the initially set
 notify method.'''
 
+
 class Foo(QObject):
     def __init__(self):
         super().__init__()
@@ -63,6 +64,7 @@ class Foo(QObject):
     propChanged = Signal()
     prop = Property(str, getProp, setProp, notify=propChanged)
 
+
 class NotifyIdSignal(unittest.TestCase):
     def setUp(self):
         self.obj = Foo()
@@ -79,6 +81,7 @@ class NotifyIdSignal(unittest.TestCase):
         signal = metaObject.method(signalIndex)
         signalName = signal.name()
         self.assertEqual(signalName, "propChanged")
+
 
 if __name__ == '__main__':
     unittest.main()

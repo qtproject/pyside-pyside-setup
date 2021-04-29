@@ -45,18 +45,19 @@ from PySide6.QtCore import QObject, SIGNAL
 def cute_slot():
     pass
 
+
 class TestSignal2SignalConnect(unittest.TestCase):
     '''Test case for signal to signal connections'''
 
     def setUp(self):
-        #Set up the basic resources needed
+        # Set up the basic resources needed
         self.sender = QObject()
         self.forwarder = QObject()
         self.args = None
         self.called = False
 
     def tearDown(self):
-        #Delete used resources
+        # Delete used resources
         try:
             del self.sender
         except:
@@ -68,23 +69,22 @@ class TestSignal2SignalConnect(unittest.TestCase):
         del self.args
 
     def callback_noargs(self):
-        #Default callback without arguments
+        # Default callback without arguments
         self.called = True
 
     def callback_args(self, *args):
-        #Default callback with arguments
+        # Default callback with arguments
         if args == self.args:
             self.called = True
         else:
             raise TypeError("Invalid arguments")
 
     def callback_qobject(self, *args):
-        #Default callback for QObject as argument
+        # Default callback for QObject as argument
         if args[0].objectName() == self.args[0]:
             self.called = True
         else:
             raise TypeError("Invalid arguments")
-
 
     def testSignalWithoutArguments(self):
         QObject.connect(self.sender, SIGNAL("destroyed()"),
@@ -93,7 +93,6 @@ class TestSignal2SignalConnect(unittest.TestCase):
                         self.callback_noargs)
         del self.sender
         self.assertTrue(self.called)
-
 
     def testSignalWithOnePrimitiveTypeArgument(self):
         QObject.connect(self.sender, SIGNAL("mysignal(int)"),
@@ -104,7 +103,6 @@ class TestSignal2SignalConnect(unittest.TestCase):
         self.sender.emit(SIGNAL('mysignal(int)'), *self.args)
         self.assertTrue(self.called)
 
-
     def testSignalWithMultiplePrimitiveTypeArguments(self):
         QObject.connect(self.sender, SIGNAL("mysignal(int,int)"),
                         self.forwarder, SIGNAL("mysignal(int,int)"))
@@ -114,7 +112,6 @@ class TestSignal2SignalConnect(unittest.TestCase):
         self.sender.emit(SIGNAL('mysignal(int,int)'), *self.args)
         self.assertTrue(self.called)
 
-
     def testSignalWithOneStringArgument(self):
         QObject.connect(self.sender, SIGNAL("mysignal(QString)"),
                         self.forwarder, SIGNAL("mysignal(QString)"))
@@ -123,7 +120,6 @@ class TestSignal2SignalConnect(unittest.TestCase):
         self.args = ('myargument',)
         self.sender.emit(SIGNAL('mysignal(QString)'), *self.args)
         self.assertTrue(self.called)
-
 
     def testSignalWithOneQObjectArgument(self):
         QObject.connect(self.sender, SIGNAL('destroyed(QObject*)'),

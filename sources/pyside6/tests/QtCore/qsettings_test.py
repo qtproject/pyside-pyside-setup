@@ -39,6 +39,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QDir, QSettings, QTemporaryDir
 
+
 class TestQSettings(unittest.TestCase):
     def testConversions(self):
         file = Path(__file__).resolve().parent / 'qsettings_test.ini'
@@ -54,7 +55,6 @@ class TestQSettings(unittest.TestCase):
 
         r = settings.value('var2', type=list)
         self.assertEqual(type(r), list)
-
 
     def testDefaultValueConversion(self):
         temp_dir = QDir.tempPath()
@@ -116,6 +116,7 @@ class TestQSettings(unittest.TestCase):
 
         r = settings.value('lala', 22, type=float)
         self.assertEqual(type(r), float)
+
 
 if __name__ == '__main__':
     unittest.main()

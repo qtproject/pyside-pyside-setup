@@ -67,7 +67,7 @@ def demo_generator():
     my_qobject = MyQObject()
     my_qobject.sig.connect(lambda: None)
     return
-    yield # to make it a generator
+    yield  # to make it a generator
 
 
 class GeneratorRaisesStopIterationTestCase(unittest.TestCase):

@@ -45,9 +45,12 @@ from helper.usesqcoreapplication import UsesQCoreApplication
 
 called = False
 name = "Old"
+
+
 class Obj(QObject):
     dummySignalArgs = Signal(str)
     numberSignal = Signal(int)
+
     def __init__(self):
         super().__init__()
         self.signal = ''
@@ -65,10 +68,14 @@ class Obj(QObject):
         global name
         name = arg
 
+
 def callback(arg=None):
     pass
+
+
 def callback_empty():
     pass
+
 
 class TestConnectNotifyWithNewStyleSignals(UsesQCoreApplication):
     '''Test case for signal signature received by QObject::connectNotify().'''
@@ -102,7 +109,6 @@ class TestConnectNotifyWithNewStyleSignals(UsesQCoreApplication):
         sender.connect(sender, SIGNAL("dummySignal()"), Obj.static_method)
         sender.emit(SIGNAL("dummySignal()"))
         self.assertTrue(called)
-
 
     def testStaticSlotArgs(self):
         global name

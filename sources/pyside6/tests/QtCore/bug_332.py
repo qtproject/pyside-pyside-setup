@@ -41,14 +41,15 @@ from PySide6.QtCore import QMutex
 
 
 class Lock(QMutex):
-    def tryLock(self,timeoutt=10):
-        return QMutex.tryLock(self,timeoutt)
+    def tryLock(self, timeout=10):
+        return QMutex.tryLock(self, timeout)
+
 
 class TestBug(unittest.TestCase):
 
     def testCase(self):
         l = Lock()
-        l.tryLock() # this cause a assertion
+        l.tryLock()  # this cause a assertion
 
 
 if __name__ == '__main__':

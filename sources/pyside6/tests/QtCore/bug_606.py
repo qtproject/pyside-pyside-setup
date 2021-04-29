@@ -40,6 +40,7 @@ from PySide6.QtCore import QPoint, QPointF
 from PySide6.QtCore import QLine, QLineF
 from PySide6.QtCore import QSize, QSizeF
 
+
 class testCases(unittest.TestCase):
     def testQPointToTuple(self):
         p = QPoint(1, 2)
@@ -64,6 +65,7 @@ class testCases(unittest.TestCase):
     def testQSizeFToTuple(self):
         s = QSizeF(1, 2)
         self.assertEqual((1, 2), s.toTuple())
+
 
 if __name__ == '__main__':
     unittest.main()

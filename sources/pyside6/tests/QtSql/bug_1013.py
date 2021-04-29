@@ -58,10 +58,11 @@ class TestBug1013 (unittest.TestCase):
         self._wasCalled = False
         model.primeInsert.connect(self.someSlot)
         model.select()
-        QTimer.singleShot(0,lambda: model.insertRow(0) and app.quit())
+        QTimer.singleShot(0, lambda: model.insertRow(0) and app.quit())
         app.exec_()
         self.assertTrue(self._wasCalled)
         self.assertEqual(model.data(model.index(0, 0)), 2)
+
 
 if __name__ == "__main__":
     unittest.main()

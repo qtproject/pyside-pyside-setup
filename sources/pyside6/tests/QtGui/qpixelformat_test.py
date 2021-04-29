@@ -41,6 +41,7 @@ from helper.usesqapplication import UsesQApplication
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QColor, QImage, QPixelFormat
 
+
 class QPixelFormatTest(UsesQApplication):
     def test(self):
         image = QImage(QSize(200, 200), QImage.Format_ARGB32)
@@ -52,6 +53,7 @@ class QPixelFormatTest(UsesQApplication):
         self.assertEqual(pixelFormat.greenSize(), 8)
         self.assertEqual(pixelFormat.blueSize(), 8)
         self.assertEqual(pixelFormat.bitsPerPixel(), 32)
+
 
 if __name__ == '__main__':
     unittest.main()

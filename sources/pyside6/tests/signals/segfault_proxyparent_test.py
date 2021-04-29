@@ -47,13 +47,16 @@ from PySide6.QtCore import QObject, SIGNAL
 # In PyQt4, the connection works fine with the same memory behavior,
 # so it looks like specific to SIP.
 
+
 class Dummy(QObject):
     def __init__(self, parent=None):
         QObject.__init__(self, parent)
 
+
 class Joe(QObject):
     def __init__(self, parent=None):
         QObject.__init__(self, parent)
+
 
 class SegfaultCase(unittest.TestCase):
     """Test case for the segfault happening when parent() is called inside

@@ -78,7 +78,8 @@ class PythonMultipleSlots(UsesQCoreApplication, MultipleSignalConnections):
 
         sender = Dummy()
         receivers = [BasicPySlotCase() for x in range(10)]
-        self.run_many(sender, 'foobar(int)', partial(sender.emit,SIGNAL('foobar(int)')), receivers, (0, ))
+        self.run_many(sender, 'foobar(int)', partial(sender.emit,
+                      SIGNAL('foobar(int)')), receivers, (0, ))
 
 
 class QProcessMultipleSlots(UsesQCoreApplication, MultipleSignalConnections):
@@ -105,6 +106,7 @@ class QProcessMultipleSlots(UsesQCoreApplication, MultipleSignalConnections):
             sender.waitForFinished()
 
         self.run_many(sender, 'finished(int)', start_proc, receivers, (0,))
+
 
 if __name__ == '__main__':
     unittest.main()

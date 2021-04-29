@@ -43,6 +43,7 @@ class Window(QMainWindow):
     def childEvent(self, event):
         super(Window, self).childEvent(event)
 
+
 app = QApplication([])
 window = Window()
 

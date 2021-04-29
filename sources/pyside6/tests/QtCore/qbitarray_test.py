@@ -41,6 +41,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QBitArray
 
+
 def bool_list_from_qbitarray(qbitarray):
     '''This function is used instead of a list comprehension because
        the QBitArray is being tested also to check if it is providing
@@ -51,11 +52,12 @@ def bool_list_from_qbitarray(qbitarray):
         qbitarray_values.append(qbitarray.at(i))
     return qbitarray_values
 
+
 class QBitArrayIsIterableTest(unittest.TestCase):
     '''Tests if QBitArray class is iterable and also '~' (__invert__) and bitwise operators'''
 
     def setUp(self):
-        #Acquire resources
+        # Acquire resources
         self.qbitarray = QBitArray(3)
         self.qbitarray_values = [True, False, False]
         # WARNING: do not pythonify the following loop
@@ -71,7 +73,7 @@ class QBitArrayIsIterableTest(unittest.TestCase):
             self.other_qbitarray.setBit(i, self.other_qbitarray_values[i])
 
     def tearDown(self):
-        #Release resources
+        # Release resources
         del self.qbitarray
         del self.other_qbitarray
         del self.qbitarray_values
@@ -79,7 +81,7 @@ class QBitArrayIsIterableTest(unittest.TestCase):
         del self.inverted_qbitarray_values
 
     def testQBitArrayIsIterable(self):
-        #Tests if QBitArray class is iterable
+        # Tests if QBitArray class is iterable
         qbitarray_is_iterable = True
         try:
             bitarray = [bit for bit in self.qbitarray]
@@ -88,7 +90,7 @@ class QBitArrayIsIterableTest(unittest.TestCase):
         self.assertTrue(qbitarray_is_iterable)
 
     def testQBitArrayInvertOperator(self):
-        #Tests QBitArray '~' (__invert__) operator
+        # Tests QBitArray '~' (__invert__) operator
         inverted_qbitarray = ~self.qbitarray
         # WARNING: do not pythonify the following loop, the
         # iterability of QBitArray class is tested in another place
@@ -96,7 +98,7 @@ class QBitArrayIsIterableTest(unittest.TestCase):
         self.assertEqual(self.inverted_qbitarray_values, inverted_qbitarray_values)
 
     def testQBitArrayOrBitwiseOperator(self):
-        #Tests QBitArray '|' (or) operator
+        # Tests QBitArray '|' (or) operator
         has_or_bitwise_operator = True
         ored_qbitarray, ored_bool_list = None, None
         try:
@@ -108,7 +110,7 @@ class QBitArrayIsIterableTest(unittest.TestCase):
         self.assertEqual(bool_list_from_qbitarray(ored_qbitarray), ored_bool_list)
 
     def testQBitArrayAndBitwiseOperator(self):
-        #Tests QBitArray '&' (and) operator
+        # Tests QBitArray '&' (and) operator
         has_and_bitwise_operator = True
         anded_qbitarray, anded_bool_list = None, None
         try:
@@ -120,7 +122,7 @@ class QBitArrayIsIterableTest(unittest.TestCase):
         self.assertEqual(bool_list_from_qbitarray(anded_qbitarray), anded_bool_list)
 
     def testQBitArrayXorBitwiseOperator(self):
-        #Tests QBitArray '^' (xor) operator
+        # Tests QBitArray '^' (xor) operator
         has_xor_bitwise_operator = True
         xored_qbitarray, xored_bool_list = None, None
         try:

@@ -40,6 +40,7 @@ from PySide6.QtWidgets import QGraphicsProxyWidget, QSizePolicy, QPushButton, QG
 
 from helper.timedqapplication import TimedQApplication
 
+
 def createItem(minimum, preferred, maximum, name):
     w = QGraphicsProxyWidget()
 
@@ -50,6 +51,7 @@ def createItem(minimum, preferred, maximum, name):
     w.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
 
     return w
+
 
 class TestBug972 (TimedQApplication):
 

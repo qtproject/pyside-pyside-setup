@@ -48,5 +48,6 @@ class QTcpSocketTestCase(unittest.TestCase):
     def testIt(self):
         self.sock.write(bytes('quit', "UTF-8"))
 
+
 if __name__ == "__main__":
     unittest.main()

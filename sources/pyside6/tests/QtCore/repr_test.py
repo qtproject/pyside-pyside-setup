@@ -44,11 +44,13 @@ try:
 except ImportError:
     HAVE_Q = False
 
+
 class ReprCopyHelper:
     def testCopy(self):
         copy = eval(self.original.__repr__())
         self.assertTrue(copy is not self.original)
         self.assertEqual(copy, self.original)
+
 
 class QByteArrayReprCopy(ReprCopyHelper, unittest.TestCase):
     def setUp(self):
@@ -79,34 +81,42 @@ class QSizeFReprCopy(ReprCopyHelper, unittest.TestCase):
     def setUp(self):
         self.original = QSizeF(42.7, 190.2)
 
+
 class QRectReprCopy(ReprCopyHelper, unittest.TestCase):
     def setUp(self):
         self.original = QRect(100, 200, 300, 400)
+
 
 class QRectFReprCopy(ReprCopyHelper, unittest.TestCase):
     def setUp(self):
         self.original = QRectF(100.33, 200.254, 300.321, 400.123)
 
+
 class QLineReprCopy(ReprCopyHelper, unittest.TestCase):
     def setUp(self):
         self.original = QLine(1, 2, 3, 4)
+
 
 class QLineFReprCopy(ReprCopyHelper, unittest.TestCase):
     def setUp(self):
         self.original = QLineF(1.1, 2.2, 3.3, 4.4)
 
+
 class QPointReprCopy(ReprCopyHelper, unittest.TestCase):
     def setUp(self):
         self.original = QPoint(1, 2)
+
 
 class QPointFReprCopy(ReprCopyHelper, unittest.TestCase):
     def setUp(self):
         self.original = QPointF(1.1, 2.2)
 
+
 class QUuiCopy(ReprCopyHelper, unittest.TestCase):
     @unittest.skipUnless(HAVE_Q, "QUuid is currently not supported on this platform.")
     def setUp(self):
         self.original = QUuid("67C8770B-44F1-410A-AB9A-F9B5446F13EE")
+
 
 if __name__ == '__main__':
     unittest.main()

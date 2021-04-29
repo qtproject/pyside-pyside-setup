@@ -42,6 +42,7 @@ from PySide6.QtCore import QObject
 
 from helper.usesqapplication import UsesQApplication
 
+
 class QMacStyleTest(UsesQApplication):
     def setUp(self):
         UsesQApplication.setUp(self)
@@ -50,6 +51,7 @@ class QMacStyleTest(UsesQApplication):
     def testWidgetStyle(self):
         w = QLabel('Hello')
         self.assertTrue(isinstance(w.style(), self.QMacStyle))
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -40,6 +40,7 @@ from PySide6.QtGui import QTextFormat, QTextCharFormat, QPyTextObject
 from PySide6.QtWidgets import QTextEdit
 from helper.usesqapplication import UsesQApplication
 
+
 class Foo(QPyTextObject):
     called = False
 
@@ -49,6 +50,7 @@ class Foo(QPyTextObject):
 
     def drawObject(self, painter, rect, doc, posInDocument, format):
         pass
+
 
 class QAbstractTextDocumentLayoutTest(UsesQApplication):
 
@@ -75,6 +77,7 @@ class QAbstractTextDocumentLayoutTest(UsesQApplication):
         self.app.exec_()
 
         self.assertTrue(Foo.called)
+
 
 if __name__ == "__main__":
     unittest.main()

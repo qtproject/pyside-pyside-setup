@@ -45,31 +45,38 @@ from PySide6.QtQuick import QQuickView, QQuickItem, QQuickPaintedItem
 
 paintCalled = False
 
+
 class MetaA(type):
     pass
+
 
 class A(object):
     __metaclass__ = MetaA
 
+
 MetaB = type(QQuickPaintedItem)
 B = QQuickPaintedItem
+
 
 class MetaC(MetaA, MetaB):
     pass
 
+
 class C(A, B):
     __metaclass__ = MetaC
 
+
 class Bug825 (C):
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         QQuickPaintedItem.__init__(self, parent)
 
     def paint(self, painter):
         global paintCalled
         pen = QPen(Qt.black, 2)
-        painter.setPen(pen);
-        painter.drawPie(self.boundingRect(), 0, 128);
+        painter.setPen(pen)
+        painter.drawPie(self.boundingRect(), 0, 128)
         paintCalled = True
+
 
 class TestBug825 (unittest.TestCase):
     def testIt(self):
@@ -87,6 +94,7 @@ class TestBug825 (unittest.TestCase):
         QTimer.singleShot(250, view.close)
         app.exec_()
         self.assertTrue(paintCalled)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -39,6 +39,7 @@ from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QWidget
 from helper.usesqapplication import UsesQApplication
 
+
 class QPainterDrawText(UsesQApplication):
 
     def _cb(self):
@@ -71,6 +72,7 @@ class SetShortcutTest(UsesQApplication):
         action.setShortcut(shortcut)
         s2 = action.shortcut()
         self.assertEqual(s2, shortcut)
+
 
 if __name__ == '__main__':
     unittest.main()

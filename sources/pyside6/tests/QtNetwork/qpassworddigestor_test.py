@@ -42,11 +42,13 @@ init_test_paths(False)
 from PySide6.QtCore import QByteArray, QCryptographicHash
 from PySide6.QtNetwork import QPasswordDigestor
 
+
 class TestPasswordDigestor(unittest.TestCase):
     def test(self):
         b = QPasswordDigestor.deriveKeyPbkdf1(QCryptographicHash.Sha1,
                                               b'test', b'saltnpep', 10, 20)
         self.assertEqual(b.size(), 20)
+
 
 if __name__ == '__main__':
     unittest.main()

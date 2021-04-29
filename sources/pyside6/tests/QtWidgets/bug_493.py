@@ -53,5 +53,6 @@ class TestBug493(unittest.TestCase):
         self.assertTrue(ev1.matches(ks))
         self.assertFalse(ev2.matches(ks))
 
+
 if __name__ == '__main__':
     unittest.main()

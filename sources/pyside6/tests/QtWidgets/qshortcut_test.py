@@ -43,6 +43,7 @@ from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import QApplication, QWidget
 
+
 class Foo(QWidget):
     def __init__(self):
         super().__init__()
@@ -55,12 +56,14 @@ class Foo(QWidget):
     def slot_of_copy(self):
         self.copy = True
 
+
 class MyShortcut(QShortcut):
     def __init__(self, keys, wdg, slot):
         QShortcut.__init__(self, keys, wdg, slot)
 
     def emit_signal(self):
         self.activated.emit()
+
 
 class QAppPresence(unittest.TestCase):
 
@@ -70,15 +73,16 @@ class QAppPresence(unittest.TestCase):
 
         self.sc = MyShortcut(QKeySequence(Qt.Key_Return), f, f.slot_of_foo)
         self.scstd = MyShortcut(QKeySequence.Copy, f, f.slot_of_copy)
-        QTimer.singleShot(0, self.init);
+        QTimer.singleShot(0, self.init)
         self.qapp.exec_()
         self.assertEqual(f.ok, True)
         self.assertEqual(f.copy, True)
 
     def init(self):
-        self.sc.emit_signal();
-        self.scstd.emit_signal();
+        self.sc.emit_signal()
+        self.scstd.emit_signal()
         self.qapp.quit()
+
 
 if __name__ == '__main__':
     unittest.main()

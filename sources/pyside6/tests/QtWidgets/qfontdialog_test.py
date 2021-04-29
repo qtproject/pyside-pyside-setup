@@ -46,11 +46,11 @@ class TestFontDialog(TimedQApplication):
         QFontDialog.getFont()
 
     def testGetFontQDialog(self):
-        QFontDialog.getFont(QFont("FreeSans",10))
+        QFontDialog.getFont(QFont("FreeSans", 10))
 
     def testGetFontQDialogQString(self):
-        QFontDialog.getFont(QFont("FreeSans",10), None, "Select font")
+        QFontDialog.getFont(QFont("FreeSans", 10), None, "Select font")
+
 
 if __name__ == '__main__':
     unittest.main()
-

@@ -39,6 +39,7 @@ import PySide6
 from PySide6.QtGui import QVector2D, QVector3D, QVector4D
 from PySide6.QtGui import QColor
 
+
 class testCases(unittest.TestCase):
     def testQVector2DToTuple(self):
         vec = QVector2D(1, 2)
@@ -56,6 +57,7 @@ class testCases(unittest.TestCase):
         c = QColor(0, 0, 255)
         c.setRgb(1, 2, 3)
         self.assertEqual((1, 2, 3, 255), c.toTuple())
+
 
 if __name__ == '__main__':
     unittest.main()

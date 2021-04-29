@@ -45,17 +45,17 @@ class ParentRefCountCase(unittest.TestCase):
     '''Test case for the refcount changes of setParent'''
 
     def setUp(self):
-        #Acquire resources
+        # Acquire resources
         self.parent = QObject()
         self.child = QObject()
 
     def tearDown(self):
-        #Release resources
+        # Release resources
         del self.child
         del self.parent
 
     def testSetParent(self):
-        #QObject.setParent() refcount changes
+        # QObject.setParent() refcount changes
         self.assertEqual(getrefcount(self.child), 2)
         self.child.setParent(self.parent)
         self.assertEqual(getrefcount(self.child), 3)
@@ -68,15 +68,16 @@ class ParentRefCountCase(unittest.TestCase):
         self.assertEqual(getrefcount(self.child), 3)
 
     def testConstructor(self):
-        #QObject(QObject) refcount changes
+        # QObject(QObject) refcount changes
         child = QObject(self.parent)
         self.assertEqual(getrefcount(child), 3)
+
 
 class ParentCase(unittest.TestCase):
     '''Small collection of tests related to parent-child relationship'''
 
     def testSetParent(self):
-        #QObject.setParent()
+        # QObject.setParent()
         parent = QObject()
         child = QObject()
         child.setParent(parent)
@@ -84,7 +85,7 @@ class ParentCase(unittest.TestCase):
         self.assertEqual(parent, child.parent())
 
     def testParentConstructor(self):
-        #QObject(parent)
+        # QObject(parent)
         parent = QObject()
         child = QObject(parent)
 
@@ -95,14 +96,14 @@ class ParentCase(unittest.TestCase):
         self.assertEqual(orig_repr, repr(parent.children()[0]))
 
     def testChildren(self):
-        #QObject.children()
+        # QObject.children()
         parent = QObject()
         children = [QObject(parent) for x in range(25)]
 
         self.assertEqual(parent.children(), children)
 
     def testFindChild(self):
-        #QObject.findChild() with all QObject
+        # QObject.findChild() with all QObject
         parent = QObject()
         children = [QObject(parent) for i in range(20)]
 
@@ -123,7 +124,7 @@ class ParentCase(unittest.TestCase):
         self.assertTrue(isinstance(child, QObject))
 
     def testFindChildren(self):
-        #QObject.findChildren() with all QObject
+        # QObject.findChildren() with all QObject
         parent = QObject()
         target_name = 'foo'
         children = [QTimer(parent) for i in range(20)]
@@ -149,7 +150,7 @@ class ParentCase(unittest.TestCase):
         self.assertEqual(res, test_children)
 
     def testParentEquality(self):
-        #QObject.parent() == parent
+        # QObject.parent() == parent
         parent = QObject()
         child = QObject(parent)
         self.assertEqual(parent, child.parent())
@@ -170,7 +171,7 @@ class TestParentOwnership(unittest.TestCase):
         self.assertEqual(getrefcount(child), 2)
 
         # this will fail because parent deleted child cpp object
-        self.assertRaises(RuntimeError, lambda :child.objectName())
+        self.assertRaises(RuntimeError, lambda: child.objectName())
 
     # test parent with multiples children
     def testMultipleChildren(self):
@@ -191,8 +192,8 @@ class TestParentOwnership(unittest.TestCase):
         self.assertEqual(getrefcount(c2), 2)
 
         # this will fail because parent deleted child cpp object
-        self.assertRaises(RuntimeError, lambda :c.objectName())
-        self.assertRaises(RuntimeError, lambda :c2.objectName())
+        self.assertRaises(RuntimeError, lambda: c.objectName())
+        self.assertRaises(RuntimeError, lambda: c2.objectName())
 
     # test recursive parent
     def testRecursiveParent(self):
@@ -213,8 +214,8 @@ class TestParentOwnership(unittest.TestCase):
         self.assertEqual(getrefcount(c2), 2)
 
         # this will fail because parent deleted child cpp object
-        self.assertRaises(RuntimeError, lambda :c.objectName())
-        self.assertRaises(RuntimeError, lambda :c2.objectName())
+        self.assertRaises(RuntimeError, lambda: c.objectName())
+        self.assertRaises(RuntimeError, lambda: c2.objectName())
 
     # test parent transfer
     def testParentTransfer(self):
@@ -237,6 +238,7 @@ class TestParentOwnership(unittest.TestCase):
 class ExtQObject(QObject):
     def __init__(self):
         super().__init__()
+
 
 class ReparentingTest(unittest.TestCase):
     '''Test cases for reparenting'''

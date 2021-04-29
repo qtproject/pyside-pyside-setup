@@ -42,11 +42,12 @@ from PySide6.QtWidgets import QApplication, QWidget
 
 from helper.usesqapplication import UsesQApplication
 
+
 class MyWidget(QWidget):
     '''Sample widget'''
 
     def __init__(self, app=None):
-        #Creates a new widget
+        # Creates a new widget
         if app is None:
             app = QApplication([])
 
@@ -57,7 +58,7 @@ class MyWidget(QWidget):
         self.paint_event_called = False
 
     def timerEvent(self, event):
-        #Timer event method
+        # Timer event method
         self.runs += 1
 
         if self.runs == self.max_runs:
@@ -67,7 +68,7 @@ class MyWidget(QWidget):
             raise TypeError('Invalid event type. Must be QTimerEvent')
 
     def paintEvent(self, event):
-        #Empty paint event method
+        # Empty paint event method
         # XXX: should be using super here, but somehow PyQt4
         # complains about paintEvent not present in super
         QWidget.paintEvent(self, event)
@@ -80,17 +81,17 @@ class PaintEventOverride(UsesQApplication):
     qapplication = True
 
     def setUp(self):
-        #Acquire resources
+        # Acquire resources
         super(PaintEventOverride, self).setUp()
         self.widget = MyWidget(self.app)
 
     def tearDown(self):
-        #Release resources
+        # Release resources
         del self.widget
         super(PaintEventOverride, self).tearDown()
 
     def testPaintEvent(self):
-        #Test QWidget.paintEvent override
+        # Test QWidget.paintEvent override
         timer_id = self.widget.startTimer(100)
         self.widget.show()
         self.app.exec_()

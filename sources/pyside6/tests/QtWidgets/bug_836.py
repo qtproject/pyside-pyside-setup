@@ -42,15 +42,19 @@ from PySide6.QtWidgets import QApplication, QFrame
 class Mixin1(object):
     pass
 
+
 class Mixin2(object):
     pass
+
 
 class Mixin3(object):
     pass
 
+
 class MainWindow(Mixin1, Mixin2, Mixin3, QFrame):
     def __init__(self):
         super().__init__()
+
 
 def main():
     app = QApplication([])
@@ -59,6 +63,7 @@ def main():
     w.show()
     QTimer.singleShot(0, w.close)
     app.exec_()
+
 
 if __name__ == "__main__":
     main()

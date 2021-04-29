@@ -42,16 +42,19 @@ init_test_paths(False)
 
 from PySide6.QtCore import QObject, Signal, Qt
 
+
 class Obj(QObject):
     signal = Signal()
+
     def empty(self):
         pass
+
 
 class ObjectNameCase(unittest.TestCase):
     '''Tests related to QObject object name'''
 
     def testSimple(self):
-        #QObject.objectName(string)
+        # QObject.objectName(string)
         name = 'object1'
         obj = QObject()
         obj.setObjectName(name)
@@ -59,7 +62,7 @@ class ObjectNameCase(unittest.TestCase):
         self.assertEqual(name, obj.objectName())
 
     def testEmpty(self):
-        #QObject.objectName('')
+        # QObject.objectName('')
         name = ''
         obj = QObject()
         obj.setObjectName(name)
@@ -67,13 +70,13 @@ class ObjectNameCase(unittest.TestCase):
         self.assertEqual(name, obj.objectName())
 
     def testDefault(self):
-        #QObject.objectName() default
+        # QObject.objectName() default
         obj = QObject()
         self.assertEqual('', obj.objectName())
 
     def testUnicode(self):
         name = 'não'
-        #FIXME Strange error on upstream when using equal(name, obj)
+        # FIXME Strange error on upstream when using equal(name, obj)
         obj = QObject()
         obj.setObjectName(name)
         self.assertEqual(obj.objectName(), name)
@@ -84,6 +87,7 @@ class ObjectNameCase(unittest.TestCase):
         # it must return False, and not a RuntimeError (PYSIDE-34)
         self.assertTrue(obj.signal.connect(obj.empty, Qt.UniqueConnection))
         self.assertFalse(obj.signal.connect(obj.empty, Qt.UniqueConnection))
+
 
 if __name__ == '__main__':
     unittest.main()

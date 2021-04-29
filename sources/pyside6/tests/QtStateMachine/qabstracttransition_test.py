@@ -49,9 +49,11 @@ def addStates(transition):
     sy = QState()
     transition.setTargetStates([sx, sy])
 
+
 def addAnimation(transition):
     animation = QParallelAnimationGroup()
     transition.addAnimation(animation)
+
 
 class QAbstractTransitionTest(unittest.TestCase):
 
@@ -190,6 +192,7 @@ class QAbstractTransitionTest(unittest.TestCase):
 
         self.assertEqual(getrefcount(state1), refcount1 - 1)
         self.assertEqual(getrefcount(state2), refcount2 - 1)
+
 
 if __name__ == '__main__':
     unittest.main()
