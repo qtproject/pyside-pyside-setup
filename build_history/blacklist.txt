@@ -46,3 +46,7 @@
     linux ci
 [QtQml::qqmlnetwork_test]
     linux ci
+[QtWidgets::bug_750]
+    darwin ci
+[QtWidgets::qpicture_test]
+    darwin ci
