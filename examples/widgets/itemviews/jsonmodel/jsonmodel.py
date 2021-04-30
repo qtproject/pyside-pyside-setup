@@ -357,4 +357,4 @@ if __name__ == "__main__":
     view.header().setSectionResizeMode(0, QHeaderView.Stretch)
     view.setAlternatingRowColors(True)
     view.resize(500, 300)
-    app.exec_()
+    app.exec()

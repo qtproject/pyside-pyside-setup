@@ -181,4 +181,4 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     w = ApplicationWindow()
     w.show()
-    app.exec_()
+    app.exec()

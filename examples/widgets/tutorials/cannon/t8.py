@@ -151,4 +151,4 @@ if __name__ == '__main__':
     widget = MyWidget()
     widget.setGeometry(100, 100, 500, 355)
     widget.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

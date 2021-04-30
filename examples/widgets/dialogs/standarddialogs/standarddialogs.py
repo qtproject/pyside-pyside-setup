@@ -412,7 +412,7 @@ class Dialog(QDialog):
                 QMessageBox.NoButton, self)
         msg_box.addButton("Save &Again", QMessageBox.AcceptRole)
         msg_box.addButton("&Continue", QMessageBox.RejectRole)
-        if msg_box.exec_() == QMessageBox.AcceptRole:
+        if msg_box.exec() == QMessageBox.AcceptRole:
             self._warning_label.setText("Save Again")
         else:
             self._warning_label.setText("Continue")
@@ -434,4 +434,4 @@ if __name__ == '__main__':
     dialog.resize(availableGeometry.width() / 3, availableGeometry.height() * 2 / 3)
     dialog.move((availableGeometry.width() - dialog.width()) / 2,
                 (availableGeometry.height() - dialog.height()) / 2)
-    sys.exit(dialog.exec_())
+    sys.exit(dialog.exec())

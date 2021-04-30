@@ -105,4 +105,4 @@ if __name__ == '__main__':
     machine.setInitialState(group)
     machine.start()
 
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

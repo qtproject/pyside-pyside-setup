@@ -50,4 +50,4 @@ if __name__ == '__main__':
     window = TicTacToe()
     window.state = "-X-XO----"
     window.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

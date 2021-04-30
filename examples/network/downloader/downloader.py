@@ -212,4 +212,4 @@ if __name__ == "__main__":
 
     w = DownloaderWidget()
     w.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

@@ -138,7 +138,7 @@ class ImageViewer(QMainWindow):
     def _open(self):
         dialog = QFileDialog(self, "Open File")
         self._initialize_image_filedialog(dialog, QFileDialog.AcceptOpen)
-        while (dialog.exec_() == QDialog.Accepted
+        while (dialog.exec() == QDialog.Accepted
                and not self.load_file(dialog.selectedFiles()[0])):
             pass
 
@@ -146,7 +146,7 @@ class ImageViewer(QMainWindow):
     def _save_as(self):
         dialog = QFileDialog(self, "Save File As")
         self._initialize_image_filedialog(dialog, QFileDialog.AcceptSave)
-        while (dialog.exec_() == QDialog.Accepted
+        while (dialog.exec() == QDialog.Accepted
                and not self._save_file(dialog.selectedFiles()[0])):
             pass
 
@@ -154,7 +154,7 @@ class ImageViewer(QMainWindow):
     def _print_(self):
         printer = QPrinter()
         dialog = QPrintDialog(printer, self)
-        if dialog.exec_() == QDialog.Accepted:
+        if dialog.exec() == QDialog.Accepted:
             painter = QPainter(printer)
             pixmap = self._image_label.pixmap()
             rect = painter.viewport()

@@ -124,7 +124,7 @@ class ColorItem(QGraphicsItem):
             drag.setPixmap(pixmap)
             drag.setHotSpot(QPoint(15, 20))
 
-        drag.exec_()
+        drag.exec()
         self.setCursor(Qt.OpenHandCursor)
 
     def mouseReleaseEvent(self, event):
@@ -290,4 +290,4 @@ if __name__== '__main__':
     view.setWindowTitle("Drag and Drop Robot")
     view.show()
 
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

@@ -394,4 +394,4 @@ if __name__ == "__main__":
     size = available_geometry.height() * 0.75
     window.setFixedSize(size, size * 0.8)
     window.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

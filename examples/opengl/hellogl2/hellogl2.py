@@ -66,7 +66,7 @@ except ImportError:
                                          "PyOpenGL must be installed to run this example.",
                                          QMessageBox.Close)
     message_box.setDetailedText("Run:\npip install PyOpenGL PyOpenGL_accelerate")
-    message_box.exec_()
+    message_box.exec()
     sys.exit(1)
 
 
@@ -485,5 +485,5 @@ if __name__ == '__main__':
     main_window.resize(main_window.sizeHint())
     main_window.show()
 
-    res = app.exec_()
+    res = app.exec()
     sys.exit(res)

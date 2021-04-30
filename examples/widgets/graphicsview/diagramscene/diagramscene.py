@@ -247,7 +247,7 @@ class DiagramItem(QGraphicsPolygonItem):
     def contextMenuEvent(self, event):
         self.scene().clearSelection()
         self.setSelected(True)
-        self._my_context_menu.exec_(event.screenPos())
+        self._my_context_menu.exec(event.screenPos())
 
     def itemChange(self, change, value):
         if change == QGraphicsItem.ItemPositionChange:
@@ -833,4 +833,4 @@ if __name__ == '__main__':
     main_window.setGeometry(100, 100, 800, 500)
     main_window.show()
 
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

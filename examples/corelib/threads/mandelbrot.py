@@ -384,6 +384,6 @@ if __name__ == '__main__':
     widget.move(geometry.topLeft() + QPoint(pos.width(), pos.height()))
 
     widget.show()
-    r = app.exec_()
+    r = app.exec()
     widget.thread.stop()
     sys.exit(r)

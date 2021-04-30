@@ -64,7 +64,7 @@ if __name__ == '__main__':
     root.buttonClicked.connect(lambda: sayThis("clicked button (QML top-level signal)"))
 
     view.show()
-    res = app.exec_()
+    res = app.exec()
     # Deleting the view before it goes out of scope is required to make sure all child QML instances
     # are destroyed in the correct order.
     del view

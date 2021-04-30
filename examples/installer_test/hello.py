@@ -103,6 +103,6 @@ if __name__ == "__main__":
     if auto_quit:
         milliseconds = 2 * 1000  # run 2 second
         QTimer.singleShot(milliseconds, app.quit)
-    retcode = app.exec_()
+    retcode = app.exec()
     print("End of hello.py        ", time.ctime())
     sys.exit(retcode)

@@ -62,7 +62,7 @@ except ImportError:
                              "PyOpenGL must be installed to run this example.",
                              QMessageBox.Close)
     message_box.setDetailedText("Run:\npip install PyOpenGL PyOpenGL_accelerate")
-    message_box.exec_()
+    message_box.exec()
     sys.exit(1)
 
 vertex_shader_source_110 = dedent("""
@@ -289,4 +289,4 @@ if __name__ == '__main__':
     main_window = MainWindow()
     main_window.show()
     main_window.update_description()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

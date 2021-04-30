@@ -69,4 +69,4 @@ if __name__ == '__main__':
     machine.start()
     button.resize(100, 50)
     button.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

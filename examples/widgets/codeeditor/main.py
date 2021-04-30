@@ -49,4 +49,4 @@ if __name__ == "__main__":
     editor = CodeEditor()
     editor.setWindowTitle("Code Editor Example")
     editor.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

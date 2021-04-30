@@ -204,7 +204,7 @@ class BrowserTabWidget(QTabWidget):
         close_tabs_to_the_right_action = context_menu.addAction("Close Tabs to the Right")
         close_tabs_to_the_right_action.setEnabled(index < tab_count - 1)
         close_tab_action = context_menu.addAction("&Close Tab")
-        chosen_action = context_menu.exec_(self.tabBar().mapToGlobal(point))
+        chosen_action = context_menu.exec(self.tabBar().mapToGlobal(point))
         if chosen_action == duplicate_tab_action:
             current_url = self.url()
             self.add_browser_tab().load(current_url)

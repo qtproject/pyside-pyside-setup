@@ -147,4 +147,4 @@ if __name__ == '__main__':
     widget = TrafficLight()
     widget.resize(110, 300)
     widget.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

@@ -290,4 +290,4 @@ if __name__ == '__main__':
     if options.file:
         main_win.load_file(options.file)
     main_win.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

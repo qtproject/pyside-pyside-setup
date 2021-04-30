@@ -59,4 +59,4 @@ if __name__ == '__main__':
     quit.clicked.connect(app.quit)
 
     quit.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

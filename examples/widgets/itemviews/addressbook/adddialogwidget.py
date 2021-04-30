@@ -96,7 +96,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     dialog = AddDialogWidget()
-    if (dialog.exec_()):
+    if (dialog.exec()):
         name = dialog.name
         address = dialog.address
         print("Name:" + name)

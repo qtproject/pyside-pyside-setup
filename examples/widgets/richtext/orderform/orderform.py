@@ -197,7 +197,7 @@ class MainWindow(QMainWindow):
     def open_dialog(self):
         dialog = DetailsDialog("Enter Customer Details", self)
 
-        if dialog.exec_() == QDialog.Accepted:
+        if dialog.exec() == QDialog.Accepted:
             self.create_letter(dialog.sender_name(), dialog.sender_address(),
                     dialog.order_items(), dialog.send_offers())
 
@@ -211,7 +211,7 @@ class MainWindow(QMainWindow):
         if editor.textCursor().hasSelection():
             dialog.addEnabledOption(QAbstractPrintDialog.PrintSelection)
 
-        if dialog.exec_() != QDialog.Accepted:
+        if dialog.exec() != QDialog.Accepted:
             return
 
         editor.print_(printer)
@@ -299,4 +299,4 @@ if __name__ == '__main__':
     window.resize(640, 480)
     window.show()
     window.create_sample()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
