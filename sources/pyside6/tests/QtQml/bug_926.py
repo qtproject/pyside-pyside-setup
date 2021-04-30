@@ -75,7 +75,7 @@ class TestBug926 (unittest.TestCase):
 
         view.show()
         QTimer.singleShot(0, app.quit)
-        app.exec_()
+        app.exec()
 
 
 if __name__ == '__main__':

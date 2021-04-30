@@ -92,7 +92,7 @@ class QtDataVisualizationTestCase(UsesQGuiApplication):
 
         self.bars.show()
         QTimer.singleShot(500, self.app.quit)
-        self.app.exec_()
+        self.app.exec()
 
     def testBarDataProxy(self):
         '''PSYSIDE-1438, crashes in QBarDataProxy.addRow()'''

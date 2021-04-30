@@ -59,7 +59,7 @@ class QPushButtonTest(UsesQApplication):
         w.show()
 
         timer = QTimer.singleShot(100, self.app.quit)
-        self.app.exec_()
+        self.app.exec()
 
     def buttonCb(self, checked):
         self._clicked = True

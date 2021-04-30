@@ -46,7 +46,7 @@ class TestTimedApp(TimedQApplication):
 
     def testFoo(self):
         # Simple test of TimedQApplication
-        self.app.exec_()
+        self.app.exec()
 
 
 def fix_for_QtGui(QtGui):

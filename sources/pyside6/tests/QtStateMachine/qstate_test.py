@@ -65,7 +65,7 @@ class QStateTest(unittest.TestCase):
         o.emit(SIGNAL("change()"))
 
         QTimer.singleShot(100, app.quit)
-        app.exec_()
+        app.exec()
 
         txt = o.property("text")
         self.assertTrue(txt, "Rocks")

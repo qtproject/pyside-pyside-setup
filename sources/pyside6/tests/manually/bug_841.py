@@ -75,7 +75,7 @@ def main():
     w = MainWindow()
     w.show()
     QMessageBox.information(None, "Info", "Just drag and drop the items.")
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
 
 if __name__ == "__main__":

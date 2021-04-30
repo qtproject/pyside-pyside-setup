@@ -74,7 +74,7 @@ class QObjectTimerEvent(UsesQCoreApplication):
         # QObject.timerEvent overloading
         obj = Dummy(self.app)
         timer_id = obj.startTimer(200)
-        self.app.exec_()
+        self.app.exec()
         obj.killTimer(timer_id)
         self.assertEqual(obj.times_called, 5)
 

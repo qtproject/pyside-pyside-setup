@@ -61,7 +61,7 @@ class DnsLookupTestCase(unittest.TestCase):
 
     def testLookup(self):
         self._lookup.lookup()
-        self._app.exec_()
+        self._app.exec()
 
 
 if __name__ == '__main__':

@@ -64,7 +64,7 @@ class NativeSignalsTest(UsesQCoreApplication):
         self.timeline.valueChanged.connect(valueChangedSlot)
         self.timeline.start()
 
-        self.app.exec_()
+        self.app.exec()
         self.assertTrue(self.called)
 
     def testSignalWithoutArguments(self):
@@ -76,7 +76,7 @@ class NativeSignalsTest(UsesQCoreApplication):
         self.timeline.finished.connect(finishedSlot)
         self.timeline.start()
 
-        self.app.exec_()
+        self.app.exec()
         self.assertTrue(self.called)
 
 

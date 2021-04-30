@@ -125,7 +125,7 @@ class TestQmlSupport(unittest.TestCase):
         self.assertTrue(view.rootObject(), quickview_errorstring(view))
         view.show()
         QTimer.singleShot(250, view.close)
-        app.exec_()
+        app.exec()
         self.assertTrue(appendCalled)
         self.assertTrue(paintCalled)
 

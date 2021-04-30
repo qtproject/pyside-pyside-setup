@@ -54,7 +54,7 @@ class TestBugPYSIDE189(UsesQApplication):
         sld.deleteLater()
 
         QTimer.singleShot(0, self.app.quit)
-        self.app.exec_()
+        self.app.exec()
 
         self.assertRaises(RuntimeError, sld.valueChanged.disconnect, onValueChanged)
 

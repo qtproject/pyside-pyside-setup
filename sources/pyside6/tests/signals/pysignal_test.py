@@ -100,7 +100,7 @@ class PyObjectType(UsesQApplication):
         o = Dummy()
         o.connect(SIGNAL("dummy2(PyObject,PyObject)"), self.mySlot2, Qt.QueuedConnection)
         o.callDummy2()
-        self.app.exec_()
+        self.app.exec()
         self.assertEqual(self.callCount, 1)
 
     def testTwice(self):
@@ -110,7 +110,7 @@ class PyObjectType(UsesQApplication):
         o.connect(SIGNAL("dummy2(PyObject,PyObject)"), self.mySlot2, Qt.QueuedConnection)
         o.callDummy2()
         o.callDummy2()
-        self.app.exec_()
+        self.app.exec()
         self.assertEqual(self.callCount, 2)
 
 

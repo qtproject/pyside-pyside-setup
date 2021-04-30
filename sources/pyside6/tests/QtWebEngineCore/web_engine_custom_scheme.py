@@ -83,7 +83,7 @@ class MainTest(unittest.TestCase):
 
         top_level_widget.show()
         view.load("testpy:hello")
-        app.exec_()
+        app.exec()
 
         self.assertTrue(self._loaded)
         self.assertEqual(view.url(), "testpy:goodbye")

@@ -64,7 +64,7 @@ class CustomProxyWidgetTest(UsesQApplication):
         view.show()
 
         timer = QTimer.singleShot(100, self.app.quit)
-        self.app.exec_()
+        self.app.exec()
 
 
 if __name__ == '__main__':

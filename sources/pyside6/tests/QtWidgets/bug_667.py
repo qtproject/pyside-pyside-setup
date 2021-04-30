@@ -59,4 +59,4 @@ if __name__ == "__main__":
     w.show()
     w.raise_()
     QTimer.singleShot(0, w.close)
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

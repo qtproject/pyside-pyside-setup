@@ -68,7 +68,7 @@ class TestBugPYSIDE164(unittest.TestCase):
         emitter.connect(emitter, SIGNAL("signal(int)"),
                         receiver.receive, Qt.BlockingQueuedConnection)
         emitter.start()
-        retval = eventloop.exec_()
+        retval = eventloop.exec()
         emitter.wait(2000)
         self.assertEqual(retval, 0)
 

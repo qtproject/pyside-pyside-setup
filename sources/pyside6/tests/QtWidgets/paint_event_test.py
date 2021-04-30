@@ -94,7 +94,7 @@ class PaintEventOverride(UsesQApplication):
         # Test QWidget.paintEvent override
         timer_id = self.widget.startTimer(100)
         self.widget.show()
-        self.app.exec_()
+        self.app.exec()
 
         self.widget.killTimer(timer_id)
 

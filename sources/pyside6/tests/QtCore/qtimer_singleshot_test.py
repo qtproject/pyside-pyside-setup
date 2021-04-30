@@ -78,7 +78,7 @@ class TestSingleShot(UsesQCoreApplication):
 
     def testSingleShot(self):
         QTimer.singleShot(100, self.callback)
-        self.app.exec_()
+        self.app.exec()
         self.assertTrue(self.called)
 
 
@@ -108,7 +108,7 @@ class TestSingleShotSignal(UsesQCoreApplication):
         emitter = SigEmitter()
         emitter.sig1.connect(self.callback)
         QTimer.singleShot(100, emitter.sig1)
-        self.app.exec_()
+        self.app.exec()
         self.assertTrue(self.called)
 
 

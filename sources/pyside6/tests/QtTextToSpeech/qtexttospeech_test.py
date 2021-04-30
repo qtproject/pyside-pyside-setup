@@ -61,7 +61,7 @@ class QTextToSpeechTestCase(UsesQApplication):
             speech.stateChanged.connect(self._slotStateChanged)
             speech.say("Hello, PySide6")
             QTimer.singleShot(5000, self.app.quit)
-            self.app.exec_()
+            self.app.exec()
 
     def _slotStateChanged(self, state):
         if (state == QTextToSpeech.State.Ready):

@@ -108,7 +108,7 @@ class QOpenGLWindowTest(UsesQApplication):
         openGlWindow.resize(640, 480)
         openGlWindow.show()
         QTimer.singleShot(100, openGlWindow.close)
-        self.app.exec_()
+        self.app.exec()
 
 
 if __name__ == '__main__':

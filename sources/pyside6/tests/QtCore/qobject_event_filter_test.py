@@ -110,7 +110,7 @@ class TestQObjectEventFilterPython(UsesQCoreApplication):
 
         filtered.startTimer(0)
 
-        self.app.exec_()
+        self.app.exec()
 
         self.assertEqual(filtered.times_called, 5)
         self.assertEqual(self.obj_filter.events_handled, 5)
