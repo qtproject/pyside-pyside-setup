@@ -187,7 +187,7 @@ class MainWindow(QMainWindow):
         if self.location_dialog is None:
             self.location_dialog = LocationDialog(self)
 
-        if self.location_dialog.exec_():
+        if self.location_dialog.exec():
             settings = QSettings(self.location_dialog.format(),
                                  self.location_dialog.scope(),
                                  self.location_dialog.organization(),
@@ -784,4 +784,4 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         main_win.load_ini_file(sys.argv[1])
     main_win.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

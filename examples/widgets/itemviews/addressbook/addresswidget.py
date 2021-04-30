@@ -78,7 +78,7 @@ class AddressWidget(QTabWidget):
         if name is None and address is None:
             add_dialog = AddDialogWidget()
 
-            if add_dialog.exec_():
+            if add_dialog.exec():
                 name = add_dialog.name
                 address = add_dialog.address
 
@@ -147,7 +147,7 @@ class AddressWidget(QTabWidget):
         add_dialog._address_text.setText(address)
 
         # If the address is different, add it to the model.
-        if add_dialog.exec_():
+        if add_dialog.exec():
             new_address = add_dialog.address
             if new_address != address:
                 ix = self._table_model.index(row, 1, QModelIndex())
@@ -246,4 +246,4 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     address_widget = AddressWidget()
     address_widget.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

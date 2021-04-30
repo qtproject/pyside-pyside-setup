@@ -428,4 +428,4 @@ if __name__ == "__main__":
     widget = GraphWidget()
     widget.show()
 
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

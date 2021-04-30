@@ -94,4 +94,4 @@ if __name__ == "__main__":
     window = rootObjects[0]
     window.setIcon(QIcon(':/qt-project.org/logos/pysidelogo.png'))
 
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

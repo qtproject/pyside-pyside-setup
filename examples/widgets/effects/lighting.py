@@ -144,4 +144,4 @@ if __name__ == '__main__':
     lighting.resize(640, 480)
     lighting.show()
 
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

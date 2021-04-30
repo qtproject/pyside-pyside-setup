@@ -49,7 +49,7 @@ except ImportError:
     messageBox = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Critical, "QtMacExtras macpasteboardmime",
                                        "This exampe only runs on macOS and QtMacExtras must be installed to run this example.",
                                        QtWidgets.QMessageBox.Close)
-    messageBox.exec_()
+    messageBox.exec()
     sys.exit(1)
 
 
@@ -125,4 +125,4 @@ if __name__ == '__main__':
     QtMacExtras.qRegisterDraggedTypes(["public.vcard"])
     wid1 = TestWidget()
     wid1.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

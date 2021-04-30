@@ -504,4 +504,4 @@ if __name__ == '__main__':
     window = TetrixWindow()
     window.show()
     random.seed(None)
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

@@ -228,7 +228,7 @@ class BookmarkWidget(QTreeView):
         current_item = self._current_item()
         open_in_new_tab_action.setEnabled(current_item is not None)
         remove_action.setEnabled(current_item is not None)
-        chosen_action = context_menu.exec_(event.globalPos())
+        chosen_action = context_menu.exec(event.globalPos())
         if chosen_action == open_in_new_tab_action:
             self.open_bookmarkInNewTab.emit(current_item.data(_url_role))
         elif chosen_action == remove_action:

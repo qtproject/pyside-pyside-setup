@@ -125,4 +125,4 @@ if __name__ == '__main__':
     size = availableGeometry.height() * 3 / 4
     mainWin.resize(size, size)
     mainWin.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

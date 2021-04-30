@@ -116,4 +116,4 @@ if __name__ == "__main__":
     model = PandasModel(df)
     view.setModel(model)
     view.show()
-    app.exec_()
+    app.exec()

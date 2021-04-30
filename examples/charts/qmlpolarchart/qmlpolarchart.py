@@ -62,4 +62,4 @@ if __name__ == '__main__':
     viewer.setResizeMode(QQuickView.SizeRootObjectToView)
     viewer.show()
 
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

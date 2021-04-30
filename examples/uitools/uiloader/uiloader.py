@@ -69,4 +69,4 @@ if __name__ == '__main__':
         print(loader.errorString())
         sys.exit(-1)
     widget.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

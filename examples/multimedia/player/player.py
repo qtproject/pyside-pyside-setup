@@ -128,7 +128,7 @@ class MainWindow(QMainWindow):
         fileDialog.setMimeTypeFilters(supportedMimeTypes)
         moviesLocation = QStandardPaths.writableLocation(QStandardPaths.MoviesLocation)
         fileDialog.setDirectory(moviesLocation)
-        if fileDialog.exec_() == QDialog.Accepted:
+        if fileDialog.exec() == QDialog.Accepted:
             self.playlist.addMedia(fileDialog.selectedUrls()[0])
             self.player.play()
 
@@ -156,4 +156,4 @@ if __name__ == '__main__':
     availableGeometry = app.desktop().availableGeometry(mainWin)
     mainWin.resize(availableGeometry.width() / 3, availableGeometry.height() / 2)
     mainWin.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

@@ -54,7 +54,7 @@ def main():
     qml_file_path = os.path.join(os.path.dirname(__file__), 'browser.qml')
     qml_url = QUrl.fromLocalFile(os.path.abspath(qml_file_path))
     engine.load(qml_url)
-    app.exec_()
+    app.exec()
 
 
 if __name__ == '__main__':

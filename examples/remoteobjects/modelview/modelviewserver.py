@@ -138,4 +138,4 @@ if __name__ == '__main__':
     QTimer.singleShot(12000, handler.remove_data)
     QTimer.singleShot(13000, handler.move_data)
 
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

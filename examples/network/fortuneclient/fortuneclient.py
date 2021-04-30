@@ -161,4 +161,4 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     client = Client()
     client.show()
-    sys.exit(client.exec_())
+    sys.exit(client.exec())

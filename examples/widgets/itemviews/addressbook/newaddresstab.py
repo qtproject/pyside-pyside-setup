@@ -72,7 +72,7 @@ class NewAddressTab(QWidget):
     def add_entry(self):
         add_dialog = AddDialogWidget()
 
-        if add_dialog.exec_():
+        if add_dialog.exec():
             name = add_dialog.name
             address = add_dialog.address
             self.send_details.emit(name, address)
@@ -91,4 +91,4 @@ if __name__ == "__main__":
     new_address_tab = NewAddressTab()
     new_address_tab.send_details.connect(print_address)
     new_address_tab.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

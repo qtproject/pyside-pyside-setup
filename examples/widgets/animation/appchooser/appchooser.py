@@ -134,4 +134,4 @@ if __name__ == '__main__':
     window.resize(300, 300)
     window.show()
 
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

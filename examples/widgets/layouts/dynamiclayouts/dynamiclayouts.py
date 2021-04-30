@@ -167,4 +167,4 @@ if __name__ == '__main__':
 
     app = QApplication(sys.argv)
     dialog = Dialog()
-    dialog.exec_()
+    dialog.exec()

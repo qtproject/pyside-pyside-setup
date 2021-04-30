@@ -191,7 +191,7 @@ class MainWindow(QMainWindow):
             QStandardPaths.writableLocation(QStandardPaths.PicturesLocation)
         )
 
-        if dialog.exec_() == QFileDialog.Accepted:
+        if dialog.exec() == QFileDialog.Accepted:
             if dialog.selectedFiles():
                 self.painter_widget.save(dialog.selectedFiles()[0])
 
@@ -207,7 +207,7 @@ class MainWindow(QMainWindow):
             QStandardPaths.writableLocation(QStandardPaths.PicturesLocation)
         )
 
-        if dialog.exec_() == QFileDialog.Accepted:
+        if dialog.exec() == QFileDialog.Accepted:
             if dialog.selectedFiles():
                 self.painter_widget.load(dialog.selectedFiles()[0])
 
@@ -235,4 +235,4 @@ if __name__ == "__main__":
 
     w = MainWindow()
     w.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

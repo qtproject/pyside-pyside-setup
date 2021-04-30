@@ -127,4 +127,4 @@ if __name__ == '__main__':
     size = available_geometry.height() * 3 / 4
     main_win.resize(size, size)
     main_win.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

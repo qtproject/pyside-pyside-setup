@@ -215,4 +215,4 @@ if __name__ == '__main__':
     timer = QTimer()
     timer.timeout.connect(scene.advance)
     timer.start(1000 / 33)
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

@@ -53,7 +53,7 @@ except ImportError:
                                        "PyOpenGL must be installed to run this example.",
                                        QtWidgets.QMessageBox.Close)
     messageBox.setDetailedText("Run:\npip install PyOpenGL PyOpenGL_accelerate")
-    messageBox.exec_()
+    messageBox.exec()
     sys.exit(1)
 
 import textures_rc
@@ -228,4 +228,4 @@ if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     window = Window()
     window.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

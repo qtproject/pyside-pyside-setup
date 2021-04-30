@@ -70,7 +70,7 @@ class MainWindow(QMainWindow):
 
     def load(self):
         axSelect = QAxSelect(self)
-        if axSelect.exec_() == QDialog.Accepted:
+        if axSelect.exec() == QDialog.Accepted:
             clsid = axSelect.clsid()
             if not self.axWidget.setControl(clsid):
                 QMessageBox.warning(self, "AxViewer", "Unable to load " + clsid + ".")
@@ -82,4 +82,4 @@ if __name__ == '__main__':
     availableGeometry = mainWin.screen().availableGeometry()
     mainWin.resize(availableGeometry.width() / 3, availableGeometry.height() / 2)
     mainWin.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

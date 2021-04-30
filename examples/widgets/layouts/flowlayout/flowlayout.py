@@ -157,4 +157,4 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     main_win = Window()
     main_win.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

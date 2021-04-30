@@ -103,4 +103,4 @@ if __name__ == "__main__":
         sys.exit(-1)
     view.show()
 
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
