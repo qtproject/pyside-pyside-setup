@@ -71,7 +71,7 @@ class QPenTest(UsesQApplication):
         w = Painting()
         w.show()
         QTimer.singleShot(1000, self.app.quit)
-        self.app.exec_()
+        self.app.exec()
         self.assertEqual(w.penFromEnum.style(), Qt.NoPen)
         self.assertEqual(w.penFromInteger.style(), Qt.SolidLine)
 

@@ -97,7 +97,7 @@ class SignalAcrossThreads(UsesQCoreApplication):
         self._worker_thread.started.connect(main_thread_receiver.slot_function)
 
         self._timer.start()
-        self.app.exec_()
+        self.app.exec()
 
         self.assertEqual(worker_thread_receiver.senderThread, self._worker_thread)
         self.assertEqual(main_thread_receiver.senderThread, main_thread)

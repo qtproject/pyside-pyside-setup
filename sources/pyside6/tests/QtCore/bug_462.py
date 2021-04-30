@@ -74,7 +74,7 @@ class CheckForEventsTypes(unittest.TestCase):
     def testTypes(self):
         o = MyBaseObject()
         o.app = QCoreApplication(sys.argv)
-        o.app.exec_()
+        o.app.exec()
         for e in o.events:
             self.assertTrue(isinstance(e, MyEvent))
         o.app = None

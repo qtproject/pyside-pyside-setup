@@ -76,7 +76,7 @@ class QGraphicsItemTest(UsesQApplication):
         rect = self.createRoundRect(scene)
         view.show()
         QTimer.singleShot(1000, self.quit_app)
-        self.app.exec_()
+        self.app.exec()
         self.assertTrue(qgraphics_item_painted)
 
 

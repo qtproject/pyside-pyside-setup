@@ -74,7 +74,7 @@ class TouchEventTest(UsesQApplication):
     def testCreateEvent(self):
         w = MyWidget()
         w.show()
-        self.app.exec_()
+        self.app.exec()
         # same values as C++
         self.assertEqual(w._sequence.count(QEvent.Type.TouchBegin), 2)
         self.assertEqual(w._sequence.count(QEvent.Type.TouchUpdate), 2)

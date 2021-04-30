@@ -89,7 +89,7 @@ class TimerEventTest(UsesQApplication):
         # QWidget.timerEvent overrinding (protected inherited)
         timer_id = self.widget.startTimer(0)
 
-        self.app.exec_()
+        self.app.exec()
 
         self.widget.killTimer(timer_id)
 
@@ -102,5 +102,5 @@ if __name__ == '__main__':
     #widget  = MySpinButton(app=app)
     #widget.startTimer(500)
     #widget.show()
-    #app.exec_()
+    #app.exec()
 

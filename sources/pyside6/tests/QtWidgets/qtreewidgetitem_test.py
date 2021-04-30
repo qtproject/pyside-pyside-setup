@@ -68,7 +68,7 @@ class QTreeWidgetItemTest(unittest.TestCase):
         self.assertTrue(item != item2)
         treewidget.show()
         QTimer.singleShot(500, app.quit)
-        app.exec_()
+        app.exec()
 
 
 if __name__ == "__main__":

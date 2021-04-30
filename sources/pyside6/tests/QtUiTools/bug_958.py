@@ -58,7 +58,7 @@ class BugTest(TimedQApplication):
     def testCase(self):
         lMain = Gui_Qt()
         lMain.show()
-        self.app.exec_()
+        self.app.exec()
 
 
 if __name__ == "__main__":

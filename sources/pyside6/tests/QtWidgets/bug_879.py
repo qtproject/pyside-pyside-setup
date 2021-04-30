@@ -55,7 +55,7 @@ class TestBug879 (unittest.TestCase):
 
         QTimer.singleShot(0, self.sendKbdEvent)
         QTimer.singleShot(100, app.quit)
-        app.exec_()
+        app.exec()
 
         self.assertEqual(self.box.text(), '0')
 

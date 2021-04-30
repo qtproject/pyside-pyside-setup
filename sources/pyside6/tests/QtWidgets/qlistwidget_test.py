@@ -83,7 +83,7 @@ class QListWidgetTest(UsesQApplication):
         lst.addItem(QListWidgetItem("foo"))
         QTimer.singleShot(0, slot)
         QTimer.singleShot(0, lst.close)
-        self.app.exec_()
+        self.app.exec()
         self.assertEqual(lst.count(), 1)
 
     def testClear(self):

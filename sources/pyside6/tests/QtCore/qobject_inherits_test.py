@@ -127,7 +127,7 @@ class InheritsCase(unittest.TestCase):
         del child
         self.assertTrue(is_alive)
         QTimer.singleShot(100, app.quit)
-        app.exec_()
+        app.exec()
         self.assertFalse(is_alive)
 
 

@@ -68,7 +68,7 @@ class TestMainWindow(UsesQApplication):
         w = MainWindow()
         w.show()
         QTimer.singleShot(1000, self.app.quit)
-        self.app.exec_()
+        self.app.exec()
 
     def objDel(self, obj):
         self.app.quit()
@@ -82,7 +82,7 @@ class TestMainWindow(UsesQApplication):
         wr = weakref.ref(c, self.objDel)
         w.setCentralWidget(None)
         c = None
-        self.app.exec_()
+        self.app.exec()
 
     def testRefCountToAnother(self):
         w = QMainWindow()
@@ -99,7 +99,7 @@ class TestMainWindow(UsesQApplication):
         w.setCentralWidget(None)
         c = None
 
-        self.app.exec_()
+        self.app.exec()
 
     def testSignalDisconect(self):
         w = QMainWindow()

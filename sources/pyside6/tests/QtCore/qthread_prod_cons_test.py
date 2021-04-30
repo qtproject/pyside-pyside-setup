@@ -133,7 +133,7 @@ class ProducerConsumer(unittest.TestCase):
         QObject.connect(prod, SIGNAL('finished()'), self.finishCb)
         QObject.connect(cons, SIGNAL('finished()'), self.finishCb)
 
-        self.app.exec_()
+        self.app.exec()
 
         prod.wait(50)
         cons.wait(50)

@@ -71,7 +71,7 @@ class TestConnectionWithInvalidSignature(TimedQApplication):
         button.entered.connect(self.onButtonClicked)
         button.entered.emit()
         view.show()
-        self.app.exec_()
+        self.app.exec()
         self.assertTrue(self.buttonClicked)
 
 

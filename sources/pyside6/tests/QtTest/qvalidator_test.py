@@ -93,7 +93,7 @@ class QValidatorTest(UsesQApplication):
         line.setText("foo")
 
         QTimer.singleShot(0, line.close)
-        self.app.exec_()
+        self.app.exec()
 
         self.assertEqual(line.text(), "fixed")
         self.assertEqual(line.cursorPosition(), 1)
@@ -105,7 +105,7 @@ class QValidatorTest(UsesQApplication):
         line.setText("foo")
 
         QTimer.singleShot(0, line.close)
-        self.app.exec_()
+        self.app.exec()
 
         self.assertEqual(line.text(), "fixed")
         self.assertEqual(line.cursorPosition(), 3)
@@ -117,7 +117,7 @@ class QValidatorTest(UsesQApplication):
         line.setText("foo")
 
         QTimer.singleShot(0, line.close)
-        self.app.exec_()
+        self.app.exec()
 
         self.assertEqual(line.text(), "foo")
         self.assertEqual(line.cursorPosition(), 3)
@@ -129,7 +129,7 @@ class QValidatorTest(UsesQApplication):
         line.setText("foo")
 
         QTimer.singleShot(0, line.close)
-        self.app.exec_()
+        self.app.exec()
 
         self.assertEqual(line.text(), "foo")
         self.assertEqual(line.cursorPosition(), 3)

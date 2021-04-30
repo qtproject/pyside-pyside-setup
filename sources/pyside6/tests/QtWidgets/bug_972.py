@@ -70,7 +70,7 @@ class TestBug972 (TimedQApplication):
 
         view = QGraphicsView(scene)
         view.show()
-        self.app.exec_()
+        self.app.exec()
 
 
 if __name__ == "__main__":

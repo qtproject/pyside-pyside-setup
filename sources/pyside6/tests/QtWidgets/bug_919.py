@@ -68,7 +68,7 @@ class TestBug919(TimedQApplication):
         w = MyWidget()
         w.paintReceived.connect(self.app.quit)
         w.show()
-        self.app.exec_()
+        self.app.exec()
         self.assertTrue(w._painted)
 
 

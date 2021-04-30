@@ -87,7 +87,7 @@ class TestBug(unittest.TestCase):
         root = view.rootObject()
         # The QML code will issue an interrupt signal after half of its items are loaded.
         root.shouldInterrupt.connect(controller.interrupter)
-        res = app.exec_()
+        res = app.exec()
 
         itemsToCreate = root.property("itemsToCreate")
         loadedItems = root.property("loadedItems")

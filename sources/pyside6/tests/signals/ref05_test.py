@@ -73,7 +73,7 @@ class UserSlotTest(UsesQCoreApplication):
         self.timeline.valueChanged.connect(self.receiver.foo)
         self.timeline.start()
 
-        self.app.exec_()
+        self.app.exec()
 
         self.assertTrue(self.receiver.counter > 1)
 
