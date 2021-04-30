@@ -58,7 +58,7 @@ class TestBug(UsesQApplication):
         self.assertTrue(view.rootObject(), quickview_errorstring(view))
         view.show()
         QTimer.singleShot(1000, self.app.quit)
-        self.app.exec_()
+        self.app.exec()
         self.assertEqual(ownerData.value('newName'), ownerData.value('name'))
 
 

@@ -56,7 +56,7 @@ class MainTest(unittest.TestCase):
         self._callback_count = 0
         layout.addWidget(self._view)
         top_level.show()
-        app.exec_()
+        app.exec()
 
     def found_callback(self, found):
         self.assertTrue(found)

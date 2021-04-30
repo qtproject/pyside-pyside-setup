@@ -97,7 +97,7 @@ class QThreadSimpleCase(UsesQCoreApplication):
 
         self._thread = obj
         QTimer.singleShot(1000, self.abort_application)
-        self.app.exec_()
+        self.app.exec()
 
         self.assertTrue(self.called)
 
@@ -109,7 +109,7 @@ class QThreadSimpleCase(UsesQCoreApplication):
 
         self._thread = obj
         QTimer.singleShot(1000, self.abort_application)
-        self.app.exec_()
+        self.app.exec()
 
         self.assertEqual(obj.qobj.thread(), obj)  # test QObject.thread() method
         self.assertTrue(self.called)

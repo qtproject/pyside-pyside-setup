@@ -71,7 +71,7 @@ class slotTest(unittest.TestCase):
         timer.start(100)
 
         QTimer.singleShot(1000, self.quit_app)
-        qApp.exec_()
+        qApp.exec()
 
         self.assertTrue(my_obj.ok)
 

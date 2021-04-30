@@ -57,7 +57,7 @@ class SignalPrimitiveTypeTest(unittest.TestCase):
         self._app = QCoreApplication([])
         tl = self.createTimeLine()
         tl.start()
-        self._app.exec_()
+        self._app.exec()
         self.assertTrue(self.called)
 
 

@@ -78,7 +78,7 @@ class HttpSignalsCase(unittest.TestCase):
         # @bug 124
         QObject.connect(self.server, SIGNAL('readyRead()'), self.callback)
         self.sendPackage()
-        self.app.exec_()
+        self.app.exec()
 
         self.assertTrue(self.called)
 

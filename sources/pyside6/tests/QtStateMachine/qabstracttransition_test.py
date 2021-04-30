@@ -89,7 +89,7 @@ class QAbstractTransitionTest(unittest.TestCase):
         machine.start()
 
         QTimer.singleShot(100, app.quit)
-        app.exec_()
+        app.exec()
 
     def testRefCountOfTargetState(self):
         transition = QEventTransition()

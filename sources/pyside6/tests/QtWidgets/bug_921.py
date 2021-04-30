@@ -78,7 +78,7 @@ class TestTimedApp(TimedQApplication):
             s.s3.connect(internalFunction)
 
         midleFunction()
-        self.app.exec_()
+        self.app.exec()
         del w
 
         s.s1.emit()

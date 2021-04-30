@@ -88,7 +88,7 @@ class TestQML(UsesQApplication):
 
         # Essentially a timeout in case method invocation fails.
         QTimer.singleShot(30000, QCoreApplication.instance().quit)
-        self.app.exec_()
+        self.app.exec()
         self.assertTrue(self._sucess)
 
 

@@ -55,7 +55,7 @@ class TestQPainter(UsesQApplication):
         w._app = self.app
         w._info = None
         QTimer.singleShot(300, w.show)
-        self.app.exec_()
+        self.app.exec()
         self.assertTrue(w._info)
 
 

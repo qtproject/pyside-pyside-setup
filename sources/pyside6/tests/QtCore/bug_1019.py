@@ -64,7 +64,7 @@ class TestBug1019 (unittest.TestCase):
         app = QCoreApplication([])
         t = MyTimer2()
         QTimer.singleShot(0, t.start)
-        app.exec_()
+        app.exec()
         self.assertTrue(t.startCalled)
 
 

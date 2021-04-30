@@ -77,7 +77,7 @@ class TestGrabToSharedPointerImage(TimedQApplication):
 
         # Wait for signal when grabbing is complete.
         grabResultSharedPtr.ready.connect(onGrabReady)
-        self.app.exec_()
+        self.app.exec()
 
         # Get the first pixel color of the grabbed image.
         self.image = grabResultSharedPtr.image()

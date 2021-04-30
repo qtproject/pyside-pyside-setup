@@ -62,7 +62,7 @@ def main():
     w = MainWindow()
     w.show()
     QTimer.singleShot(0, w.close)
-    app.exec_()
+    app.exec()
 
 
 if __name__ == "__main__":

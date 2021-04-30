@@ -159,7 +159,7 @@ class Qt3DExtrasTestCase(UsesQGuiApplication):
         while not window.isExposed():
             self.app.processEvents()
         QTimer.singleShot(2000, self.app.quit)
-        self.app.exec_()
+        self.app.exec()
 
 
 if __name__ == '__main__':

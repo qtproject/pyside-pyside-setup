@@ -65,7 +65,7 @@ class QChartsTestCase(UsesQApplication):
         chartView.resize(screenSize / 2)
         chartView.show()
         QTimer.singleShot(500, self.app.quit)
-        self.app.exec_()
+        self.app.exec()
 
 
 if __name__ == '__main__':

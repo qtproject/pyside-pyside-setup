@@ -91,7 +91,7 @@ class BasicConnection(unittest.TestCase):
 
         source.emit_sig()
 
-        app.exec_()
+        app.exec()
         thread.wait()
 
         self.assertTrue(thread.target.called)

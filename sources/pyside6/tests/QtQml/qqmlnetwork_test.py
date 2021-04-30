@@ -76,7 +76,7 @@ class TestQQmlNetworkFactory(TimedQApplication):
 
         self.assertEqual(view.status(), QQuickView.Ready)
 
-        self.app.exec_()
+        self.app.exec()
 
 
 if __name__ == '__main__':

@@ -141,7 +141,7 @@ class QLayoutTest(UsesQApplication):
         w.setLayout(formLayout)
         w.show()
         QTimer.singleShot(10, w.close)
-        self.app.exec_()
+        self.app.exec()
         del w
         self.assertRaises(RuntimeError, spacer.isEmpty)
 

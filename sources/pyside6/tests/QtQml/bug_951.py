@@ -68,7 +68,7 @@ class TestRegisterQMLType(TimedQApplication):
         view.setSource(QUrl.fromLocalFile(os.fspath(file)))
         self.assertTrue(view.rootObject(), quickview_errorstring(view))
 
-        self.app.exec_()
+        self.app.exec()
         self.assertTrue(MyItem.COMPONENT_COMPLETE_CALLED)
 
 

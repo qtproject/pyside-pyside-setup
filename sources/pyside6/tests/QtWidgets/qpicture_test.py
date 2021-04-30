@@ -67,7 +67,7 @@ class QPictureTest(UsesQApplication):
         w._app = self.app
 
         QTimer.singleShot(300, w.show)
-        self.app.exec_()
+        self.app.exec()
 
 
 if __name__ == '__main__':

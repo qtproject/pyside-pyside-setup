@@ -62,7 +62,7 @@ class QRasterWindowTest(UsesQApplication):
         rasterWindow.resize(QSize(400, 400))
         rasterWindow.show()
         QTimer.singleShot(100, self.app.quit)
-        self.app.exec_()
+        self.app.exec()
 
 
 if __name__ == '__main__':

@@ -54,4 +54,4 @@ class Window(object):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     win = Window()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

@@ -45,7 +45,7 @@ class MainTest(unittest.TestCase):
         app = QApplication([])
         QtWebEngine.initialize()
         QTimer.singleShot(2000, app.quit)
-        app.exec_()
+        app.exec()
 
 
 if __name__ == '__main__':

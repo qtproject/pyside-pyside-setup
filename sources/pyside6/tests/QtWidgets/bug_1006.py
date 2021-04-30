@@ -76,7 +76,7 @@ class TestBug1006 (TimedQApplication):
         window = LabelWindow(None)
         window.replace(self)
         self.assertTrue(window._destroyCalled)
-        self.app.exec_()
+        self.app.exec()
 
     def testParentLayout(self):
         def createLayout():

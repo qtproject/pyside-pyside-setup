@@ -95,14 +95,14 @@ class SignalObjectTest(UsesQCoreApplication):
         o = MyObject()
         o.timeout.connect(self.cb)
         o.start(100)
-        self.app.exec_()
+        self.app.exec()
         self.assertTrue(self._cb_called)
 
     def testConnectionType(self):
         o = MyObject()
         o.timeout.connect(self.cb, type=Qt.DirectConnection)
         o.start(100)
-        self.app.exec_()
+        self.app.exec()
         self.assertTrue(self._cb_called)
 
     def testSignalWithSignal(self):

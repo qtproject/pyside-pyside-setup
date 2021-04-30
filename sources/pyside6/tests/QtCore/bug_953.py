@@ -54,4 +54,4 @@ class Dispatcher(QObject):
 if __name__ == '__main__':
     app = QCoreApplication([])
     Dispatcher()
-    app.exec_()
+    app.exec()

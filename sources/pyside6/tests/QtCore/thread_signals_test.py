@@ -61,7 +61,7 @@ class TestThreadSignal(UsesQCoreApplication):
         QObject.connect(t, SIGNAL("test(const QString&)"), self._callback)
         t.start()
 
-        self.app.exec_()
+        self.app.exec()
         t.wait()
         self.assertTrue(self.__called__)
 

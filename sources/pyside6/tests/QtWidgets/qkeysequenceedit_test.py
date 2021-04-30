@@ -48,7 +48,7 @@ class QKeySequenceEditTest(UsesQApplication):
         keySequenceEdit = QKeySequenceEdit()
         keySequenceEdit.show()
         QTimer.singleShot(0, keySequenceEdit.close)
-        self.app.exec_()
+        self.app.exec()
         print(keySequenceEdit.keySequence())
 
 

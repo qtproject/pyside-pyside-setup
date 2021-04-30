@@ -70,25 +70,25 @@ class SqlDatabaseCreationDestructionAndQueries(unittest.TestCase):
     def testTableCreationAndDestruction(self):
         # Test table creation and destruction
         query = QSqlQuery()
-        query.exec_("CREATE TABLE dummy(id int primary key, dummyfield varchar(20))")
-        query.exec_("DROP TABLE dummy")
+        query.exec("CREATE TABLE dummy(id int primary key, dummyfield varchar(20))")
+        query.exec("DROP TABLE dummy")
         query.clear()
 
     def testTableInsertionAndRetrieval(self):
         # Test table creation, insertion and retrieval
         query = QSqlQuery()
-        query.exec_("CREATE TABLE person(id int primary key, "
+        query.exec("CREATE TABLE person(id int primary key, "
                     "firstname varchar(20), lastname varchar(20))")
-        query.exec_("INSERT INTO person VALUES(101, 'George', 'Harrison')")
+        query.exec("INSERT INTO person VALUES(101, 'George', 'Harrison')")
         query.prepare("INSERT INTO person (id, firstname, lastname) "
                       "VALUES (:id, :firstname, :lastname)")
         query.bindValue(":id", 102)
         query.bindValue(":firstname", "John")
         query.bindValue(":lastname", "Lennon")
-        query.exec_()
+        query.exec()
 
         lastname = ''
-        query.exec_("SELECT lastname FROM person where id=101")
+        query.exec("SELECT lastname FROM person where id=101")
         self.assertTrue(query.isActive())
         query.next()
         lastname = query.value(0)

@@ -91,13 +91,13 @@ class ObjectSenderWithQAppTest(UsesQCoreApplication):
         recv = Receiver()
         QObject.connect(sender, SIGNAL('timeout()'), recv.callback)
         sender.start(10)
-        self.app.exec_()
+        self.app.exec()
         self.assertEqual(sender, recv.the_sender)
 
     def testSenderCppSignalSingleShotTimer(self):
         recv = Receiver()
         QTimer.singleShot(10, recv.callback)
-        self.app.exec_()
+        self.app.exec()
         self.assertTrue(isinstance(recv.the_sender, QObject))
 
     def testSenderCppSignalWithPythonExtendedClass(self):
@@ -105,7 +105,7 @@ class ObjectSenderWithQAppTest(UsesQCoreApplication):
         recv = Receiver()
         QObject.connect(sender, SIGNAL('timeout()'), recv.callback)
         sender.start(10)
-        self.app.exec_()
+        self.app.exec()
         self.assertEqual(sender, recv.the_sender)
 
 
@@ -118,7 +118,7 @@ class ObjectSenderWithQAppCheckOnReceiverTest(UsesQCoreApplication):
         recv = Receiver()
         QObject.connect(sender, SIGNAL('timeout()'), recv.callback)
         sender.start(10)
-        self.app.exec_()
+        self.app.exec()
         self.assertEqual(sender, recv.the_sender)
 
     def testSenderCppSignalWithPythonExtendedClass(self):
@@ -126,7 +126,7 @@ class ObjectSenderWithQAppCheckOnReceiverTest(UsesQCoreApplication):
         recv = Receiver()
         QObject.connect(sender, SIGNAL('timeout()'), recv.callback)
         sender.start(10)
-        self.app.exec_()
+        self.app.exec()
         self.assertEqual(sender, recv.the_sender)
 
 

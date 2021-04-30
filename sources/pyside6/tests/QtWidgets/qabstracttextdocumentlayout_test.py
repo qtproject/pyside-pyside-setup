@@ -74,7 +74,7 @@ class QAbstractTextDocumentLayoutTest(UsesQApplication):
         self.textEdit.document().documentLayout().registerHandler(QAbstractTextDocumentLayoutTest.objectType, interface)
 
         QTimer.singleShot(0, self.foo)
-        self.app.exec_()
+        self.app.exec()
 
         self.assertTrue(Foo.called)
 
