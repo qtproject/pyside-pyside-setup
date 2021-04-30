@@ -135,4 +135,4 @@ class Dialog(QDialog):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     dialog = Dialog()
-    sys.exit(dialog.exec_())
+    sys.exit(dialog.exec())

@@ -48,19 +48,19 @@ def add_book(q, title, year, authorId, genreId, rating):
     q.addBindValue(authorId)
     q.addBindValue(genreId)
     q.addBindValue(rating)
-    q.exec_()
+    q.exec()
 
 
 def add_genre(q, name):
     q.addBindValue(name)
-    q.exec_()
+    q.exec()
     return q.lastInsertId()
 
 
 def add_author(q, name, birthdate):
     q.addBindValue(name)
     q.addBindValue(str(birthdate))
-    q.exec_()
+    q.exec()
     return q.lastInsertId()
 
 
@@ -103,9 +103,9 @@ def init_db():
     check(db.open)
 
     q = QSqlQuery()
-    check(q.exec_, BOOKS_SQL)
-    check(q.exec_, AUTHORS_SQL)
-    check(q.exec_, GENRES_SQL)
+    check(q.exec, BOOKS_SQL)
+    check(q.exec, AUTHORS_SQL)
+    check(q.exec, GENRES_SQL)
     check(q.prepare, INSERT_AUTHOR_SQL)
 
     asimovId = add_author(q, "Isaac Asimov", date(1920, 2, 1))

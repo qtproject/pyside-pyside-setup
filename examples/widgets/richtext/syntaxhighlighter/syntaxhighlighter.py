@@ -144,4 +144,4 @@ if __name__ == '__main__':
     window.resize(640, 512)
     window.show()
     window.open_file(os.fspath(Path(__file__).resolve()))
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

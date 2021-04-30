@@ -392,4 +392,4 @@ if __name__ == '__main__':
     board = GameBoard()
     board.setGeometry(100, 100, 500, 355)
     board.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

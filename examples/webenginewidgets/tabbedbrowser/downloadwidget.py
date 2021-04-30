@@ -134,7 +134,7 @@ class DownloadWidget(QProgressBar):
         remove_action = context_menu.addAction("Remove")
         remove_action.setEnabled(state != QWebEngineDownloadItem.DownloadInProgress)
 
-        chosen_action = context_menu.exec_(event.globalPos())
+        chosen_action = context_menu.exec(event.globalPos())
         if chosen_action == launch_action:
             self._launch()
         elif chosen_action == show_in_folder_action:

@@ -192,7 +192,7 @@ class SignalChooser(ListChooser):
     def _create_new_item(self):
         dialog = FunctionSignatureDialog('&Signal signature:', self)
         dialog.setWindowTitle('Enter Signal')
-        if dialog.exec_() != QDialog.Accepted:
+        if dialog.exec() != QDialog.Accepted:
             return ''
         return dialog.text
 
@@ -204,7 +204,7 @@ class PropertyChooser(ListChooser):
 
     def _create_new_item(self):
         dialog = PropertyDialog(self)
-        if dialog.exec_() != QDialog.Accepted:
+        if dialog.exec() != QDialog.Accepted:
             return ''
         name = dialog.text
         property_type = dialog.property_type()

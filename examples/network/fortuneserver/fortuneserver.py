@@ -117,4 +117,4 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     server = Server()
     random.seed(None)
-    sys.exit(server.exec_())
+    sys.exit(server.exec())

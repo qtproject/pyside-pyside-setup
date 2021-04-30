@@ -390,6 +390,6 @@ if __name__ == '__main__':
         initial_urls.append('http://qt.io')
     for url in initial_urls:
         main_win.load_url_in_new_tab(QUrl.fromUserInput(url))
-    exit_code = app.exec_()
+    exit_code = app.exec()
     main_win.write_bookmarks()
     sys.exit(exit_code)

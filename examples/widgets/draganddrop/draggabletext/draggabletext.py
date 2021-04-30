@@ -74,7 +74,7 @@ class DragLabel(QLabel):
         drag.setPixmap(pixmap)
         drag.setHotSpot(hot_spot)
 
-        drop_action = drag.exec_(Qt.CopyAction | Qt.MoveAction, Qt.CopyAction)
+        drop_action = drag.exec(Qt.CopyAction | Qt.MoveAction, Qt.CopyAction)
 
         if drop_action == Qt.MoveAction:
             self.close()
@@ -153,4 +153,4 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = DragWidget()
     window.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

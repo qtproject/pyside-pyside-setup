@@ -246,4 +246,4 @@ if __name__ == '__main__':
     address_book = AddressBook()
     address_book.show()
 
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

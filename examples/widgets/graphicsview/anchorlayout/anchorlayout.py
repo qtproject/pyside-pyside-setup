@@ -125,4 +125,4 @@ if __name__ == '__main__':
     view = QGraphicsView(scene)
     view.show()
 
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

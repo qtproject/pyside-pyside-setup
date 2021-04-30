@@ -110,4 +110,4 @@ if __name__ == '__main__':
     if not engine.rootObjects():
         sys.exit(-1)
 
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

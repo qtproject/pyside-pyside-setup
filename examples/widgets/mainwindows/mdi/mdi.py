@@ -465,4 +465,4 @@ if __name__ == '__main__':
     for f in options.files:
         main_win.load(f)
     main_win.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

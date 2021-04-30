@@ -239,4 +239,4 @@ if __name__ == "__main__":
     w = ApplicationWindow()
     w.setFixedSize(1280, 720)
     w.show()
-    app.exec_()
+    app.exec()

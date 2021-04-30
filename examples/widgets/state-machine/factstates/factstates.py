@@ -124,4 +124,4 @@ if __name__ == '__main__':
     machine.finished.connect(app.quit)
     machine.start()
 
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

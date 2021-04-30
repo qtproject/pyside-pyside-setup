@@ -121,7 +121,7 @@ class MainWindow(QMainWindow):
         printer = QPrinter()
 
         dlg = QPrintDialog(printer, self)
-        if dlg.exec_() != QDialog.Accepted:
+        if dlg.exec() != QDialog.Accepted:
             return
 
         document.print_(printer)
@@ -133,7 +133,7 @@ class MainWindow(QMainWindow):
         dialog.setMimeTypeFilters(['text/html'])
         dialog.setAcceptMode(QFileDialog.AcceptSave)
         dialog.setDefaultSuffix('html')
-        if dialog.exec_() != QDialog.Accepted:
+        if dialog.exec() != QDialog.Accepted:
             return
 
         filename = dialog.selectedFiles()[0]
@@ -307,4 +307,4 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     main_win = MainWindow()
     main_win.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

@@ -283,7 +283,7 @@ class AddressBook(QWidget):
     def find_contact(self):
         self.dialog.show()
 
-        if self.dialog.exec_() == QDialog.Accepted:
+        if self.dialog.exec() == QDialog.Accepted:
             contact_name = self.dialog.get_find_text()
 
             if contact_name in self.contacts:
@@ -476,4 +476,4 @@ if __name__ == '__main__':
     address_book = AddressBook()
     address_book.show()
 
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

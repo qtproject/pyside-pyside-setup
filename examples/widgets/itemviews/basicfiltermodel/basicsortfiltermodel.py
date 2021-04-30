@@ -210,4 +210,4 @@ if __name__ == '__main__':
     window = Window()
     window.set_source_model(create_mail_model(window))
     window.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

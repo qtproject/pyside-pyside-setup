@@ -95,7 +95,7 @@ class TicTacToeTaskMenu(QPyDesignerTaskMenuExtension):
     def _edit_state(self):
         dialog = TicTacToeDialog(self._ticTacToe)
         dialog.set_state(self._ticTacToe.state)
-        if dialog.exec_() == QDialog.Accepted:
+        if dialog.exec() == QDialog.Accepted:
             self._ticTacToe.state = dialog.state()
 
 
