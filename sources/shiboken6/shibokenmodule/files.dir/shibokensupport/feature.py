@@ -118,6 +118,7 @@ def feature_import(name, *args, **kwargs):
     # PYSIDE-1368: The `__name__` attribute does not need to exist in all modules.
     # PYSIDE-1398: sys._getframe(1) may not exist when embedding.
     # PYSIDE-1338: The "1" below is the redirection in loader.py .
+    # PYSIDE-1548: Ensure that features are not affected by other imports.
     calling_frame = _cf = sys._getframe(1).f_back
     importing_module = _cf.f_globals.get("__name__", "__main__") if _cf else "__main__"
     existing = pyside_feature_dict.get(importing_module, 0)
@@ -145,13 +146,10 @@ def feature_import(name, *args, **kwargs):
         sys.modules["PySide6.QtCore"].__init_feature__()
         return sys.modules["__feature__"]
 
-    if name.split(".")[0] == "PySide6":
-        # This is a module that imports PySide6.
-        flag = existing if isinstance(existing, int) else 0
-    else:
-        # This is some other module. Ignore it in switching.
-        flag = -1
-    pyside_feature_dict[importing_module] = flag
+    if importing_module not in pyside_feature_dict:
+        # Ignore new modules if not from PySide.
+        default = 0 if name.split(".")[0] == "PySide6" else -1
+        pyside_feature_dict[importing_module] = default
     # Redirect to the original import
     return None
 

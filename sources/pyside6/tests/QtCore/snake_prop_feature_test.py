@@ -91,6 +91,8 @@ class FeatureTest(unittest.TestCase):
             window.modal
 
         from __feature__ import snake_case, true_property
+        #PYSIDE-1548: Make sure that another import does not clear the features.
+        import sys
 
         self.assertTrue(isinstance(QWidget.modal, property))
         self.assertTrue(isinstance(window.modal, bool))
