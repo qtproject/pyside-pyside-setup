@@ -49,7 +49,7 @@ by producing a lot of clarity.
 
 import sys
 import types
-from shibokensupport.signature import inspect
+import inspect
 from shibokensupport.signature import get_signature as get_sig
 
 

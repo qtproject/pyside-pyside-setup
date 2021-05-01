@@ -277,7 +277,8 @@ def generate_all_pyi(outpath, options):
     # now we can import
     global PySide6, inspect, typing, HintingEnumerator, build_brace_pattern
     import PySide6
-    from PySide6.support.signature import inspect, typing
+    import inspect
+    import typing
     from PySide6.support.signature.lib.enum_sig import HintingEnumerator
     from PySide6.support.signature.lib.tool import build_brace_pattern
 
