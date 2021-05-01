@@ -436,7 +436,7 @@ static PyObject *adjustFuncName(const char *func_name)
      * Note that fget is impossible because there are no parameters.
      */
     static const char mapping_name[] = "shibokensupport.signature.mapping";
-    static PyObject *sys_modules = PySys_GetObject("modules");
+    static PyObject *sys_modules = PySys_GetObject(const_cast<char *>("modules"));
     static PyObject *mapping = PyDict_GetItemString(sys_modules, mapping_name);
     static PyObject *ns = PyModule_GetDict(mapping);
 

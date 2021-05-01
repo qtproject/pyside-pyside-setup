@@ -114,13 +114,10 @@ def _import(name, *args, **kwargs):
         sys.modules["PySide2.QtCore"].__init_feature__()
         return sys.modules["__feature__"]
 
-    if name.split(".")[0] == "PySide2":
-        # This is a module that imports PySide2.
-        flag = existing if isinstance(existing, int) else 0
-    else:
-        # This is some other module. Ignore it in switching.
-        flag = -1
-    pyside_feature_dict[importing_module] = flag
+    if importing_module not in pyside_feature_dict:
+        # Ignore new modules if not from PySide.
+        default = 0 if name.split(".")[0] == "PySide2" else -1
+        pyside_feature_dict[importing_module] = default
     return original_import(name, *args, **kwargs)
 
 _is_initialized = False
