@@ -48,7 +48,7 @@ from textwrap import dedent
 from typing import Optional, Tuple
 
 
-VERSION = 6
+VERSION = 2
 
 
 DESC = """Runs uic on a set of UI files and displays the resulting widgets."""
