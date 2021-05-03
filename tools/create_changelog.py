@@ -97,6 +97,12 @@ def parse_options() -> Namespace:
                          help="Release type: bug-fix, minor, or major",
                          default="bug-fix")
 
+    options.add_argument("-e",
+                         "--exclude",
+                         action="store_true",
+                         help="Exclude commits with a 'Pick-to' line",
+                         default=False)
+
     args = options.parse_args()
     if args.type not in ("bug-fix", "minor", "major"):
         print("Error:"
@@ -151,7 +157,24 @@ def git_get_sha1s(versions: List[str], pattern: str):
     out_sha1, err = Popen(command, stdout=PIPE, shell=True).communicate()
     if err:
         print(err, file=sys.stderr)
-    return [s.decode("utf-8") for s in out_sha1.splitlines()]
+
+    pick_to_sha1 = []
+
+    if exclude_pick_to:
+        # if '-e', we exclude all the 'Pick-to' changes
+        command = "git rev-list --reverse --grep '^Pick-to:'"
+        command += " {}..{}".format(versions[0], versions[1])
+        command += " | git cat-file --batch"
+        command += " | grep -o -E \"^[0-9a-f]{40} commit\""
+        command += " | awk '{print $1}'"
+        print("{}: {}".format(git_command.__name__, command), file=sys.stderr)
+        out_e_sha1, err = Popen(command, stdout=PIPE, shell=True).communicate()
+        if err:
+            print(err, file=sys.stderr)
+        pick_to_sha1 = out_e_sha1.splitlines()
+
+
+    return [s.decode("utf-8") for s in out_sha1.splitlines() if s not in pick_to_sha1]
 
 
 def git_command(versions: List[str], pattern: str):
@@ -242,6 +265,8 @@ if __name__ == "__main__":
     shiboken6_commits: Dict[str, Dict[str, str]] = {}
     pyside6_changelogs: List[str] = []
     shiboken6_changelogs: List[str] = []
+
+    exclude_pick_to = args.exclude
 
     # Getting commits information
     directory = args.directory if args.directory else "."
