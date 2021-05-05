@@ -878,6 +878,9 @@ class PysideBuild(_build, DistUtilsCommandMixin):
         else:
             cmake_cmd.append("-DSKIP_DOCS=1")
 
+        if OPTION["PYSIDE_NUMPY_SUPPORT"]:
+            cmake_cmd.append("-DPYSIDE_NUMPY_SUPPORT=1")
+
         if not OPTION["SKIP_CMAKE"]:
             log.info(f"Configuring module {extension} ({module_src_dir})...")
             if run_process(cmake_cmd) != 0:
