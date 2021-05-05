@@ -220,7 +220,9 @@ class DistUtilsCommandMixin(object):
         ('rpath=', None, 'RPATH'),
         ('qt-conf-prefix=', None, 'Qt configuration prefix'),
         ('qt-src-dir=', None, 'Qt source directory'),
-        ('no-qt-tools', None, 'Do not copy the Qt tools')]
+        ('no-qt-tools', None, 'Do not copy the Qt tools'),
+        ('pyside-numpy-support', None, 'libpyside: Add (experimental) numpy support')
+        ]
 
     def __init__(self):
         self.avoid_protected_hack = False
@@ -258,6 +260,7 @@ class DistUtilsCommandMixin(object):
         self.qt_conf_prefix = None
         self.qt_src_dir = None
         self.no_qt_tools = False
+        self.pyside_numpy_support = False
 
     def mixin_finalize_options(self):
         # Bail out on 2nd call to mixin_finalize_options() since that is the
@@ -309,6 +312,7 @@ class DistUtilsCommandMixin(object):
         OPTION['QT_CONF_PREFIX'] = self.qt_conf_prefix
         OPTION['QT_SRC'] = self.qt_src_dir
         OPTION['NO_QT_TOOLS'] = self.no_qt_tools
+        OPTION['PYSIDE_NUMPY_SUPPORT'] = self.pyside_numpy_support
 
     def _determine_defaults_and_check(self):
         if not self.cmake:
