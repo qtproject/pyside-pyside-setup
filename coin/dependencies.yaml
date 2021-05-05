@@ -1,0 +1,28 @@
+product_dependency:
+  ../../qt/qt5:
+    ref: "21a5643a51d3f6c4fd634f46980041f199647f00"
+dependency_source: supermodule
+dependencies: [
+      "../../qt/qt3d",
+      "../../qt/qt5compat",
+      "../../qt/qtactiveqt",
+      "../../qt/qtbase",
+      "../../qt/qtcharts",
+      "../../qt/qtdatavis3d",
+      "../../qt/qtdeclarative",
+      "../../qt/qtdoc",
+      "../../qt/qtimageformats",
+      "../../qt/qtlottie",
+      "../../qt/qtnetworkauth",
+      "../../qt/qtqa",
+      "../../qt/qtquick3d",
+      "../../qt/qtquickcontrols2",
+      "../../qt/qtquicktimeline",
+      "../../qt/qtscxml",
+      "../../qt/qtshadertools",
+      "../../qt/qtsvg",
+      "../../qt/qttools",
+      "../../qt/qttranslations",
+      "../../qt/qtvirtualkeyboard",
+      "../../qt/qtwayland"
+      ]
