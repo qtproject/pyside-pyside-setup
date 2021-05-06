@@ -177,7 +177,13 @@ python main.py
 
 It is possible that **CMake** can pick up the wrong compiler
 for a different architecture, but it can be addressed explicitly
-using the -G option:
+by setting the **CC** environment variable:
+
+```bash
+set CC=cl
+```
+
+or by using the -G option:
 
 ```bash
 cmake -H.. -B. -G "Visual Studio 14 Win64"
