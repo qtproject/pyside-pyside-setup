@@ -94,6 +94,19 @@ def designer():
     # PySide6/scripts.
     pyside_dir = Path(__file__).resolve().parents[1]
 
+    # https://www.python.org/dev/peps/pep-0384/#linkage :
+    # "On Unix systems, the ABI is typically provided by the python executable
+    # itself", that is, libshiboken does not link against any Python library
+    # and expects to get these symbols from a python executable. Since no
+    # python executable is involved when loading this plugin, pre-load python.so
+    # This should also help to work around a numpy issue, see
+    # https://stackoverflow.com/questions/49784583/numpy-import-fails-on-multiarray-extension-library-when-called-from-embedded-pyt
+    if sys.platform == 'linux':
+        # Determine library name (examples/utils/pyside_config.py)
+        version = f'{sys.version_info[0]}.{sys.version_info[1]}'
+        library_name = f'libpython{version}{sys.abiflags}.so'
+        os.environ['LD_PRELOAD'] = library_name
+
     # Add the Wiggly Widget example
     wiggly_dir = os.fspath(pyside_dir / 'examples' / 'widgetbinding')
     _append_to_path_var('PYSIDE_DESIGNER_PLUGINS', wiggly_dir)
