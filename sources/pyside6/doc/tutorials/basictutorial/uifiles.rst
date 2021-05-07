@@ -268,3 +268,16 @@ This is shown in taskmenuextension example, where a custom context menu
 is registered for the custom widget. The example is a port of the
 corresponding C++
 `Task Menu Extension Example <https://doc.qt.io/qt-6/qtdesigner-taskmenuextension-example.html>`_ .
+
+Troubleshooting the Qt Designer Plugin
+++++++++++++++++++++++++++++++++++++++
+
+- The launcher ``pyside6-designer`` must be used. The standalone
+  **Qt Designer** will not load the plugin.
+- The menu item **Help/About Plugin** brings up a dialog showing the plugins
+  found and potential load error messages.
+- Check the console or Windows Debug view for further error messages.
+- Due to the buffering of output by Python, error messages may appear
+  only after **Qt Designer** has terminated.
+- When building Qt for Python, be sure to set the ``--standalone`` option
+  for the plugin to be properly installed.
