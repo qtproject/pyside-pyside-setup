@@ -52,22 +52,26 @@ This file replaces the hard to read Python stub in 'signature.cpp', and we
 could distinguish better between bootstrap related functions and loader
 functions.
 It is embedded into 'signature.cpp' as "embed/signature_bootstrap.inc".
+
+# PYSIDE-1436: Python 3.10 had a problem with EmbeddableZipImporter because the
+imports were in the functions. Moved them outside into the globals.
 """
 
 recursion_trap = 0
 
-# We avoid real imports in phase 1 that could fail (simply removed all).
-# Python 2 is not able to import when the extension import is still active.
-# Phase 1 simply defines the functions, which will be used in Phase 2.
-# PYSIDE-1621: This can be removed after the backport but we leave it so.
+import base64
+import importlib
+import io
+import sys
+import traceback
+import zipfile
+
+from contextlib import contextmanager
+from importlib.machinery import ModuleSpec
+from pathlib import Path
+
 
 def bootstrap():
-    import sys
-    import os
-    import tempfile
-    import traceback
-    from contextlib import contextmanager
-    from pathlib import Path
 
     global recursion_trap
     if recursion_trap:
@@ -128,10 +132,6 @@ def prepare_zipfile():
     The sys.path way does not work, instead we need to use sys.meta_path .
     See https://docs.python.org/3/library/sys.html#sys.meta_path
     """
-    import base64
-    import io
-    import sys
-    import zipfile
 
     # 'zipstring_sequence' comes from signature.cpp
     zipbytes = base64.b64decode(''.join(zipstring_sequence))
@@ -150,31 +150,28 @@ class EmbeddableZipImporter(object):
             return None
 
         self.zfile = zip_file
-        self._path2mod = {_.filename : p2m(_.filename) for _ in zip_file.filelist}
-        self._mod2path = {_[1] : _[0] for _ in self._path2mod.items()}
+        self._mod2path = {p2m(_.filename) : _.filename for _ in zip_file.filelist}
 
-    def find_module(self, fullname, path):
-        return self if self._mod2path.get(fullname) else None
+    def find_spec(self, fullname, path, target=None):
+        path = self._mod2path.get(fullname)
+        return ModuleSpec(fullname, self) if path else None
 
-    def load_module(self, fullname):
-        import importlib
-        import sys
+    def create_module(self, spec):
+        return None
 
-        filename = self._mod2path.get(fullname)
-        if filename not in self._path2mod:
-            raise ImportError(fullname)
-        module_spec = importlib.machinery.ModuleSpec(fullname, None)
-        new_module = importlib.util.module_from_spec(module_spec)
+    def exec_module(self, module):
+        fullname = module.__spec__.name
+        filename = self._mod2path[fullname]
         with self.zfile.open(filename, "r") as f:   # "rb" not for zipfile
-            exec(f.read(), new_module.__dict__)
-        new_module.__file__ = filename
-        new_module.__loader__ = self
+            codeob = compile(f.read(), filename, "exec")
+            exec(codeob, module.__dict__)
+        module.__file__ = filename
+        module.__loader__ = self
         if filename.endswith("/__init__.py"):
-            new_module.__path__ = []
-            new_module.__package__ = fullname
+            module.__path__ = []
+            module.__package__ = fullname
         else:
-            new_module.__package__ = fullname.rpartition('.')[0]
-        sys.modules[fullname] = new_module
-        return new_module
+            module.__package__ = fullname.rpartition('.')[0]
+        sys.modules[fullname] = module
 
 # eof
