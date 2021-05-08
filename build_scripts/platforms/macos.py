@@ -181,12 +181,18 @@ def prepare_standalone_package_macos(self, vars):
 
     if copy_plugins:
         # <qt>/plugins/* -> <setup>/{st_package_name}/Qt/plugins
-        copydir("{qt_plugins_dir}",
-                "{st_build_dir}/{st_package_name}/Qt/plugins",
-                filter=["*.dylib"],
+        plugins_target = "{st_build_dir}/{st_package_name}/Qt/plugins"
+        filters=["*.dylib"]
+        copydir("{qt_plugins_dir}", plugins_target,
+                filter=filters,
                 recursive=True,
                 dir_filter_function=general_dir_filter,
                 file_filter_function=file_variant_filter,
+                vars=vars)
+        copydir("{install_dir}/plugins/designer",
+                f"{plugins_target}/designer",
+                filter=filters,
+                recursive=False,
                 vars=vars)
 
     if copy_qml:
