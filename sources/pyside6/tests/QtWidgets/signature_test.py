@@ -64,8 +64,9 @@ class PySideSignatureTest(unittest.TestCase):
         for thing in obj.__signature__:
             self.assertEqual(type(thing), inspect.Signature)
         sm = PySide6.QtWidgets.QApplication.__dict__["palette"]
-        self.assertFalse(callable(sm))
-        self.assertEqual(sm.__func__, obj)
+        # PYSIDE-1436: staticmethod is a callable since Python 3.10
+        # Instead of checking callable(sm), we check the type:
+        self.assertEqual(type(sm), staticmethod)
         self.assertTrue(hasattr(sm, "__signature__") and
                         sm.__signature__ is not None)
 
