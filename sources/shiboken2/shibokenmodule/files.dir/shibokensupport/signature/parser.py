@@ -25,10 +25,11 @@ import sys
 import re
 import warnings
 import types
+import typing
 import keyword
 import functools
 from shibokensupport.signature.mapping import (type_map, update_mapping,
-    namespace, typing, _NotCalled, ResultVariable, ArrayLikeVariable)
+    namespace, _NotCalled, ResultVariable, ArrayLikeVariable)
 from shibokensupport.signature.lib.tool import (SimpleNamespace,
     build_brace_pattern)
 
@@ -204,7 +205,7 @@ def _resolve_arraytype(thing, line):
 def to_string(thing):
     if isinstance(thing, str):
         return thing
-    if hasattr(thing, "__name__"):
+    if hasattr(thing, "__name__") and thing.__module__ != "typing":
         dot = "." in str(thing)
         name = get_name(thing)
         return thing.__module__ + "." + name if dot else name
@@ -219,16 +220,6 @@ def handle_matrix(arg):
     assert typstr == "float"
     result = "PySide2.QtGui.QMatrix{n}x{m}".format(**locals())
     return eval(result, namespace)
-
-
-debugging_aid = """
-from inspect import currentframe
-
-def lno(level):
-    lineno = currentframe().f_back.f_lineno
-    spaces = level * "  "
-    return "{lineno}{spaces}".format(**locals())
-"""
 
 
 def _resolve_type(thing, line, level, var_handler):

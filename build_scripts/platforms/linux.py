@@ -105,12 +105,6 @@ def prepare_standalone_package_linux(self, vars):
                 recursive=False,
                 vars=vars)
 
-        copydir("{qt_prefix_dir}/resources",
-                "{st_build_dir}/{st_package_name}/Qt/resources",
-                filter=None,
-                recursive=False,
-                vars=vars)
-
     if copy_plugins:
         # <qt>/plugins/* -> <setup>/{st_package_name}/Qt/plugins
         copydir("{qt_plugins_dir}",

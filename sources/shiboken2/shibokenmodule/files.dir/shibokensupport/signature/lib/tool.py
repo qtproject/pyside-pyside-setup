@@ -29,6 +29,7 @@ On the function with_metaclass see the answer from Martijn Pieters on
 https://stackoverflow.com/questions/18513821/python-metaclass-understanding-the-with-metaclass
 """
 
+from inspect import currentframe
 from textwrap import dedent
 
 
@@ -132,5 +133,12 @@ def with_metaclass(meta, *bases):
         def __prepare__(cls, name, this_bases):
             return meta.__prepare__(name, bases)
     return type.__new__(metaclass, 'temporary_class', (), {})
+
+
+# A handy tool that shows the current line number and indents.
+def lno(level):
+    lineno = currentframe().f_back.f_lineno
+    spaces = level * "  "
+    return "{}{}".format(lineno, spaces)
 
 # eof

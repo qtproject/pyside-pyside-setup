@@ -145,7 +145,7 @@ static PyObject *handle_doc(PyObject *ob, PyObject *old_descr)
         name = reinterpret_cast<PyTypeObject *>(ob_type_mod.object())->tp_name;
     PyObject *res{};
 
-    if (handle_doc_in_progress || name == nullptr || strncmp(name, "PySide6.", 8) != 0) {
+    if (handle_doc_in_progress || name == nullptr || strncmp(name, "PySide2.", 8) != 0) {
         res = PyObject_CallMethodObjArgs(old_descr, PyMagicName::get(), ob, nullptr);
     } else {
         handle_doc_in_progress++;
