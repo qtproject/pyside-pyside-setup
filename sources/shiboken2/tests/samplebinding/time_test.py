@@ -130,6 +130,7 @@ class TimeTest(unittest.TestCase):
         result = time.somethingCompletelyDifferent(1, 2, ImplicitConv.CtorOne)
         self.assertEqual(result, Time.ThreeArgs)
 
+    # PYSIDE-1436: These tests crash at shutdown due to `assert(Not)?Equal`.
     def testCompareWithPythonTime(self):
         time = Time(12, 32, 5)
         py = datetime.time(12, 32, 5)

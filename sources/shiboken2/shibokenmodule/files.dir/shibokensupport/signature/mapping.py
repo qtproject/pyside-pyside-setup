@@ -300,6 +300,7 @@ type_map.update({
     "zero(object)": None,
     "zero(str)": "",
     "zero(typing.Any)": None,
+    "zero(Any)": None,
     })
 
 type_map.update({
