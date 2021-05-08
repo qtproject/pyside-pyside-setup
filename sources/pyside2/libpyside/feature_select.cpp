@@ -390,6 +390,8 @@ static inline PyObject *SelectFeatureSet(PyTypeObject *type)
             if (!SelectFeatureSetSubtype(sub_type, select_id))
                 break;
         }
+        // PYSIDE-1436: Clear all caches for the type and subtypes.
+        PyType_Modified(type);
     }
     return type->tp_dict;
 }
