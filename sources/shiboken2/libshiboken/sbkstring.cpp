@@ -229,7 +229,7 @@ static void finalizeStaticStrings()
 {
     auto &set = staticStrings();
     for (PyObject *ob : set) {
-        Py_REFCNT(ob) = 1;
+        Py_SET_REFCNT(ob, 1);
         Py_DECREF(ob);
     }
     set.clear();
