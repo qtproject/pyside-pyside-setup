@@ -276,6 +276,11 @@ void ApiExtractor::setClangOptions(const QStringList &co)
     m_clangOptions = co;
 }
 
+void ApiExtractor::setUseGlobalHeader(bool h)
+{
+    AbstractMetaBuilder::setUseGlobalHeader(h);
+}
+
 #ifndef QT_NO_DEBUG_STREAM
 template <class Container>
 static void debugFormatSequence(QDebug &d, const char *key, const Container& c)

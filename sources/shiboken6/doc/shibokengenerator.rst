@@ -49,8 +49,16 @@ care of interfacing Python and the underlying C++ library.
 Handwritten inputs
 ==================
 
-Creating new bindings involves creating two pieces of "code": the typesystem and
-the inject code.
+Creating new bindings involves creating several pieces of "code": the header,
+the typesystem and, in most cases, the injected code.
+
+:header: A header with ``#include`` directives listing all the headers of the
+         desired classes. This header is not referenced by the generated code.
+         Alternatively, it is possible to pass a list of the headers of the
+         desired classes directly on the command line. In this case,
+         the command line option ``--use-global-header`` should be passed as
+         well to prevent the headers from being suppressed in the generated
+         code.
 
 :typesystem: XML files that provides the developer with a tool to customize the
              way that the generators will see the classes and functions. For
@@ -126,6 +134,9 @@ Options
     global functions and enums) to be dropped from generation. Values are
     fully qualified Python type names ('Module.Class'), but the module can
     be omitted ('Class').
+
+``--use-global-header``
+    Use the global headers passed on the command line in generated code.
 
 .. _generation-set:
 
