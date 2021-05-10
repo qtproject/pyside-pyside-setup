@@ -86,6 +86,8 @@ public:
     void setGlobalHeaders(const QFileInfoList& globalHeaders);
     void setHeaderPaths(const HeaderPaths &h);
 
+    static void setUseGlobalHeader(bool h);
+
     void setSkipDeprecated(bool value);
 
     enum TranslateTypeFlag {
