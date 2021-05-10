@@ -281,6 +281,7 @@ type_map.update({
     "uint": int,
     "ulong": int,
     "ULONG_MAX": ulong_max,
+    "UINT64_MAX": 0xffffffff,
     "unsigned char": int, # 5.9
     "unsigned char*": str,
     "unsigned int": int,
