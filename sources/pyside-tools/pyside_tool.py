@@ -101,9 +101,13 @@ def designer():
     # python executable is involved when loading this plugin, pre-load python.so
     # This should also help to work around a numpy issue, see
     # https://stackoverflow.com/questions/49784583/numpy-import-fails-on-multiarray-extension-library-when-called-from-embedded-pyt
+    major_version = sys.version_info[0]
+    minor_version = sys.version_info[1]
+    os.environ['PY_MAJOR_VERSION'] = str(major_version)
+    os.environ['PY_MINOR_VERSION'] = str(minor_version)
     if sys.platform == 'linux':
         # Determine library name (examples/utils/pyside_config.py)
-        version = f'{sys.version_info[0]}.{sys.version_info[1]}'
+        version = f'{major_version}.{minor_version}'
         library_name = f'libpython{version}{sys.abiflags}.so'
         os.environ['LD_PRELOAD'] = library_name
 
