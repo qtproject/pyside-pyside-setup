@@ -67,6 +67,8 @@ static QString stripTemplateArgs(const QString &name)
     return pos < 0 ? name : name.left(pos);
 }
 
+bool AbstractMetaBuilderPrivate::m_useGlobalHeader = false;
+
 AbstractMetaBuilderPrivate::AbstractMetaBuilderPrivate() :
     m_logDirectory(QLatin1String(".") + QDir::separator())
 {
@@ -3147,6 +3149,11 @@ void AbstractMetaBuilder::setHeaderPaths(const HeaderPaths &hp)
     }
 }
 
+void AbstractMetaBuilder::setUseGlobalHeader(bool h)
+{
+    AbstractMetaBuilderPrivate::m_useGlobalHeader = h;
+}
+
 void AbstractMetaBuilder::setSkipDeprecated(bool value)
 {
     d->m_skipDeprecated = value;
@@ -3180,9 +3187,10 @@ void AbstractMetaBuilderPrivate::setInclude(TypeEntry *te, const QString &path) 
     if (it == m_resolveIncludeHash.end()) {
         QFileInfo info(path);
         const QString fileName = info.fileName();
-        if (std::any_of(m_globalHeaders.cbegin(), m_globalHeaders.cend(),
-                        [fileName] (const QFileInfo &fi) {
-                            return fi.fileName() == fileName; })) {
+        if (!m_useGlobalHeader
+            && std::any_of(m_globalHeaders.cbegin(), m_globalHeaders.cend(),
+                           [fileName] (const QFileInfo &fi) {
+                               return fi.fileName() == fileName; })) {
             return;
         }
 

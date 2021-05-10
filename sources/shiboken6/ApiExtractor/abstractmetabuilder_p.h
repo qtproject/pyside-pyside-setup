@@ -220,6 +220,7 @@ public:
     mutable QHash<QString, Include> m_resolveIncludeHash;
     QList<TypeClassEntry> m_typeSystemTypeDefs; // look up metatype->class for type system typedefs
     bool m_skipDeprecated = false;
+    static bool m_useGlobalHeader;
 };
 
 #endif // ABSTRACTMETBUILDER_P_H

@@ -61,6 +61,7 @@ static inline QString systemIncludePathOption() { return QStringLiteral("system-
 static inline QString typesystemPathOption() { return QStringLiteral("typesystem-paths"); }
 static inline QString helpOption() { return QStringLiteral("help"); }
 static inline QString diffOption() { return QStringLiteral("diff"); }
+static inline QString useGlobalHeaderOption() { return QStringLiteral("use-global-header"); }
 static inline QString dryrunOption() { return QStringLiteral("dry-run"); }
 static inline QString skipDeprecatedOption() { return QStringLiteral("skip-deprecated"); }
 
@@ -353,6 +354,8 @@ void printUsage()
         {QLatin1String("-isystem<path>"), {} },
         {QLatin1String("system-include-paths=") + pathSyntax,
          QLatin1String("System include paths used by the C++ parser")},
+        {useGlobalHeaderOption(),
+         QLatin1String("Use the global headers in generated code.")},
         {QLatin1String("generator-set=<\"generator module\">"),
          QLatin1String("generator-set to be used. e.g. qtdoc")},
         {skipDeprecatedOption(),
@@ -485,6 +488,12 @@ int shibokenMain(int argc, char *argv[])
     if (ait != args.options.end()) {
         args.options.erase(ait);
         FileOut::setDiff(true);
+    }
+
+    ait = args.options.find(useGlobalHeaderOption());
+    if (ait != args.options.end()) {
+        args.options.erase(ait);
+        ApiExtractor::setUseGlobalHeader(true);
     }
 
     ait = args.options.find(dryrunOption());

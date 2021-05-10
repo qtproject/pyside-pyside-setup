@@ -83,6 +83,7 @@ public:
     void setLanguageLevel(LanguageLevel languageLevel);
     QStringList clangOptions() const;
     void setClangOptions(const QStringList &co);
+    static void setUseGlobalHeader(bool h);
 
     const AbstractMetaEnumList &globalEnums() const;
     const AbstractMetaFunctionCList &globalFunctions() const;
