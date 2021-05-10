@@ -162,7 +162,10 @@ static void initVirtualEnvironment()
     static const char virtualEnvVar[] = "VIRTUAL_ENV";
     // As of Python 3.8/Windows, Python is no longer able to run stand-alone in
     // a virtualenv due to missing libraries. Add the path to the modules
-    // instead.
+    // instead. macOS seems to be showing the same issues.
+
+    const auto os = QOperatingSystemVersion::currentType();
+
     bool ok;
     int majorVersion = qEnvironmentVariableIntValue("PY_MAJOR_VERSION", &ok);
     int minorVersion = qEnvironmentVariableIntValue("PY_MINOR_VERSION", &ok);
@@ -172,7 +175,7 @@ static void initVirtualEnvironment()
     }
 
     if (!qEnvironmentVariableIsSet(virtualEnvVar)
-        || QOperatingSystemVersion::currentType() != QOperatingSystemVersion::Windows
+        || (os != QOperatingSystemVersion::MacOS && os != QOperatingSystemVersion::Windows)
         || (majorVersion == 3 && minorVersion < 8)) {
         return;
     }
@@ -181,7 +184,21 @@ static void initVirtualEnvironment()
     QByteArray pythonPath = qgetenv(pythonPathVar);
     if (!pythonPath.isEmpty())
         pythonPath.append(QDir::listSeparator().toLatin1());
-    pythonPath.append(virtualEnvPath + R"(\Lib\site-packages)");
+
+    switch (os) {
+    case QOperatingSystemVersion::Windows:
+        pythonPath.append(virtualEnvPath + R"(\Lib\site-packages)");
+        break;
+    case QOperatingSystemVersion::MacOS:
+        pythonPath.append(virtualEnvPath + QByteArrayLiteral("/lib/python") +
+                          QByteArray::number(majorVersion) + '.'
+                          + QByteArray::number(minorVersion)
+                          + QByteArrayLiteral("/site-packages"));
+        break;
+    default:
+        break;
+    }
+
     qputenv(pythonPathVar, pythonPath);
 }
 
