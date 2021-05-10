@@ -163,9 +163,17 @@ static void initVirtualEnvironment()
     // As of Python 3.8/Windows, Python is no longer able to run stand-alone in
     // a virtualenv due to missing libraries. Add the path to the modules
     // instead.
+    bool ok;
+    int majorVersion = qEnvironmentVariableIntValue("PY_MAJOR_VERSION", &ok);
+    int minorVersion = qEnvironmentVariableIntValue("PY_MINOR_VERSION", &ok);
+    if (!ok) {
+        majorVersion = PY_MAJOR_VERSION;
+        minorVersion = PY_MINOR_VERSION;
+    }
+
     if (!qEnvironmentVariableIsSet(virtualEnvVar)
         || QOperatingSystemVersion::currentType() != QOperatingSystemVersion::Windows
-        || (PY_MAJOR_VERSION == 3 && PY_MINOR_VERSION < 8)) {
+        || (majorVersion == 3 && minorVersion < 8)) {
         return;
     }
 
