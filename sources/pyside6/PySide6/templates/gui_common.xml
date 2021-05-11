@@ -80,8 +80,8 @@
     </template>
 
     <template name="qimage_buffer_constructor">
-        auto ptr = reinterpret_cast&lt;uchar*&gt;(Shiboken::Buffer::getPointer(%PYARG_1));
-        %0 = new %TYPE(ptr, %ARGS);
+        auto *ptr = reinterpret_cast&lt;uchar *&gt;(Shiboken::Buffer::copyData(%PYARG_1));
+        %0 = new %TYPE(ptr, %ARGS, std::free);
     </template>
 
     <template name="qcolor_repr">

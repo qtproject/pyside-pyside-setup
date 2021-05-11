@@ -79,6 +79,14 @@ namespace Buffer
      */
     LIBSHIBOKEN_API void *getPointer(PyObject *pyObj, Py_ssize_t *size = nullptr);
 
+    /**
+     * Returns a copy of the buffer data which should be free'd.
+     *
+     * If the \p pyObj is a non-contiguous buffer a Python error is set.
+     * nullptr is returned for empty buffers.
+     */
+    LIBSHIBOKEN_API void *copyData(PyObject *pyObj, Py_ssize_t *size = nullptr);
+
 } // namespace Buffer
 } // namespace Shiboken
 
