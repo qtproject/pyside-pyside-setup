@@ -141,6 +141,10 @@ debugPyTypeObject::debugPyTypeObject(const PyTypeObject *o) : m_object(o)
 {
 }
 
+debugPyBuffer::debugPyBuffer(const Py_buffer &b) : m_buffer(b)
+{
+}
+
 std::ostream &operator<<(std::ostream &str, const debugPyTypeObject &o)
 {
     str << "PyTypeObject(";
@@ -154,6 +158,18 @@ std::ostream &operator<<(std::ostream &str, const debugPyObject &o)
     str << "PyObject(";
     formatPyObject(o.m_object, str);
     str << ')';
+    return str;
+}
+
+std::ostream &operator<<(std::ostream &str, const debugPyBuffer &b)
+{
+    str << "PyBuffer(buf=" << b.m_buffer.buf << ", len="
+        << b.m_buffer.len << ", itemsize=" << b.m_buffer.itemsize
+        << ", readonly=" << b.m_buffer.readonly << ", ndim=" << b.m_buffer.ndim;
+    if (b.m_buffer.format)
+        str << ", format=\"" << b.m_buffer.format << '"';
+    str << ", shape=" << b.m_buffer.shape << ", strides=" << b.m_buffer.strides
+        << ", suboffsets=" << b.m_buffer.suboffsets << ')';
     return str;
 }
 
