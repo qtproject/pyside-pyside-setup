@@ -56,6 +56,29 @@ void *Shiboken::Buffer::getPointer(PyObject *pyObj, Py_ssize_t *size)
     return const_cast<void *>(buffer);
 }
 
+void *Shiboken::Buffer::copyData(PyObject *pyObj, Py_ssize_t *sizeIn)
+{
+    void *result = nullptr;
+    Py_ssize_t size = 0;
+
+    Py_buffer view;
+    if (PyObject_GetBuffer(pyObj, &view, PyBUF_ND) == 0) {
+        size = view.len;
+        if (size) {
+            result = std::malloc(size);
+            if (result != nullptr)
+                std::memcpy(result, view.buf, size);
+            else
+                size = 0;
+        }
+        PyBuffer_Release(&view);
+    }
+
+    if (sizeIn != nullptr)
+        *sizeIn = size;
+    return result;
+}
+
 PyObject *Shiboken::Buffer::newObject(void *memory, Py_ssize_t size, Type type)
 {
     if (size == 0)
