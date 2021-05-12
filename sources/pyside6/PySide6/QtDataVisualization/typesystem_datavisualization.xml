@@ -188,7 +188,13 @@
   </object-type>
   <object-type name="QCustom3DItem"/>
   <object-type name="QCustom3DLabel"/>
-  <object-type name="QCustom3DVolume"/>
+  <object-type name="QCustom3DVolume">
+      <modify-function signature="setTextureData(QList&lt;uchar&gt;*)" remove="all"/>
+      <add-function signature="setTextureData(const QList&lt;uchar&gt;&amp;)">
+          <inject-code class="target" position="beginning" file="../glue/qtdatavisualization.cpp"
+                       snippet="qcustom3dvolume-settexturedata"/>
+      </add-function>
+  </object-type>
   <object-type name="QHeightMapSurfaceDataProxy"/>
   <object-type name="QItemModelBarDataProxy">
     <enum-type name="MultiMatchBehavior"/>

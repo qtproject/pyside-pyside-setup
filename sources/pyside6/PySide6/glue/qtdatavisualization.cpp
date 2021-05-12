@@ -41,6 +41,11 @@
 Shiboken::Object::releaseOwnership(%PYARG_1);
 // @snippet releaseownership
 
+// @snippet qcustom3dvolume-settexturedata
+using VectorType = decltype(%1);
+%CPPSELF.setTextureData(new VectorType(%1));
+// @snippet qcustom3dvolume-settexturedata
+
 // @snippet dataproxy-addrow
 using ListType = decltype(%1);
 %RETURN_TYPE %0 = %CPPSELF.addRow(new ListType(%1));
