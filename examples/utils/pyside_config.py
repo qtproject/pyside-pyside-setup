@@ -126,16 +126,16 @@ for i, (flag, _, _, description) in enumerate(options):
     if i < len(options) - 1:
         options_usage += '\n'
 
-usage = """
+usage = f"""
 Utility to determine include/link options of shiboken/PySide and Python for qmake/CMake projects
 that would like to embed or build custom shiboken/PySide bindings.
 
 Usage: pyside_config.py [option]
 Options:
-{}
+{options_usage}
     -a                                            Print all options and their values
     --help/-h                                     Print this help
-""".format(options_usage)
+"""
 
 option = sys.argv[1] if len(sys.argv) == 2 else '-a'
 if option == '-h' or option == '--help':
@@ -300,7 +300,7 @@ def get_package_include_path(which_package):
     if package_path is None:
         return None
 
-    includes = "{0}/include".format(package_path)
+    includes = f"{package_path}/include"
 
     return includes
 

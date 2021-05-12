@@ -118,24 +118,28 @@ def embed_into_hbox_layout(w, margin=5):
 
 def format_geometry(rect):
     """Format a geometry as a X11 geometry specification"""
-    return "{}x{}{:+d}{:+d}".format(rect.width(), rect.height(),
-                                    rect.x(), rect.y())
+    w = rect.width()
+    h = rect.height()
+    x = rect.x()
+    y = rect.y()
+    return f"{w}x{h}{x:+d}{y:+d}"
 
 
 def screen_info(widget):
     """Format information on the screens"""
     policy = QGuiApplication.highDpiScaleFactorRoundingPolicy()
     policy_string = str(policy).split('.')[-1]
-    result = "<p>High DPI scale factor rounding policy: {}</p><ol>".format(policy_string)
+    result = f"<p>High DPI scale factor rounding policy: {policy_string}</p><ol>"
     for screen in QGuiApplication.screens():
         current = screen == widget.screen()
         result += "<li>"
         if current:
             result += "<i>"
-        result += '"{}" {} {}DPI, DPR={}'.format(screen.name(),
-                                                 format_geometry(screen.geometry()),
-                                                 int(screen.logicalDotsPerInchX()),
-                                                 screen.devicePixelRatio())
+        name = screen.name()
+        geometry = format_geometry(screen.geometry)
+        dpi = int(screen.logicalDotsPerInchX())
+        dpr = screen.devicePixelRatio()
+        result += f'"{name}" {geometry} {dpi}DPI, DPR={dpr}'
         if current:
             result += "</i>"
         result += "</li>"

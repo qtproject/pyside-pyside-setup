@@ -91,8 +91,7 @@ if __name__ == '__main__':
     url = QUrl.fromLocalFile(cur_dir + "/index.html")
     QDesktopServices.openUrl(url)
 
-    message = "Initialization complete, opening browser at {}.".format(
-              url.toDisplayString())
+    message = f"Initialization complete, opening browser at {url.toDisplayString()}."
     dialog.displayMessage(message)
     dialog.show()
 

@@ -64,8 +64,8 @@ _default_bookmarks = [
 
 
 def _config_dir():
-    return '{}/QtForPythonBrowser'.format(
-        QStandardPaths.writableLocation(QStandardPaths.ConfigLocation))
+    location = QStandardPaths.writableLocation(QStandardPaths.ConfigLocation)
+    return f'{location}/QtForPythonBrowser'
 
 
 _bookmark_file = 'bookmarks.json'
@@ -118,9 +118,8 @@ def _serialize_model(model, directory):
             if not icon.isNull():
                 icon_sizes = icon.availableSizes()
                 largest_size = icon_sizes[len(icon_sizes) - 1]
-                icon_file_name = '{}/icon{:02}_{:02}_{}.png'.format(directory,
-                                                                    f, i,
-                                                                    largest_size.width())
+                w = largest_size.width()
+                icon_file_name = f'{directory}/icon{f:02}_{i:02}_{w}.png'
                 icon.pixmap(largest_size).save(icon_file_name, 'PNG')
                 entry.append(icon_file_name)
             result.append(entry)
@@ -235,7 +234,7 @@ class BookmarkWidget(QTreeView):
             self._remove_item(current_item)
 
     def _remove_item(self, item):
-        message = "Would you like to remove \"{}\"?".format(item.text())
+        message = f"Would you like to remove \"{item.text()}\"?"
         button = QMessageBox.question(self, "Remove", message,
                                       QMessageBox.Yes | QMessageBox.No)
         if button == QMessageBox.Yes:
@@ -248,14 +247,14 @@ class BookmarkWidget(QTreeView):
         native_dir_path = QDir.toNativeSeparators(dir_path)
         dir = QFileInfo(dir_path)
         if not dir.isDir():
-            print('Creating {}...'.format(native_dir_path))
+            print(f'Creating {native_dir_path}...')
             if not QDir(dir.absolutePath()).mkpath(dir.fileName()):
-                warnings.warn('Cannot create {}.'.format(native_dir_path),
+                warnings.warn(f'Cannot create {native_dir_path}.',
                               RuntimeWarning)
                 return
         serialized_model = _serialize_model(self._model, dir_path)
         bookmark_file_name = os.path.join(native_dir_path, _bookmark_file)
-        print('Writing {}...'.format(bookmark_file_name))
+        print(f'Writing {bookmark_file_name}...')
         with open(bookmark_file_name, 'w') as bookmark_file:
             json.dump(serialized_model, bookmark_file, indent=4)
 
@@ -263,7 +262,7 @@ class BookmarkWidget(QTreeView):
         bookmark_file_name = os.path.join(QDir.toNativeSeparators(_config_dir()),
                                           _bookmark_file)
         if os.path.exists(bookmark_file_name):
-            print('Reading {}...'.format(bookmark_file_name))
+            print(f'Reading {bookmark_file_name}...')
             return json.load(open(bookmark_file_name))
         return _default_bookmarks
 

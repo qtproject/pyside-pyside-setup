@@ -69,7 +69,7 @@ class MainWindow(QMainWindow):
         self.chart.setAxisX(self.axisX, self.series)
         self.chart.setAxisY(self.axisY, self.series)
         self.chart.legend().hide()
-        self.chart.setTitle("Data from the microphone ({})".format(device.deviceName()))
+        self.chart.setTitle(f"Data from the microphone ({device.deviceName()})")
 
         formatAudio = QAudioFormat()
         formatAudio.setSampleRate(8000)

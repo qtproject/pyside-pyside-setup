@@ -64,5 +64,5 @@ class Dialog(QDialog):
         if not text:
             return
         self.sendText.emit(text)
-        self.displayMessage("Sent message: {}".format(text))
+        self.displayMessage(f"Sent message: {text}")
         self._ui.input.clear()
