@@ -86,14 +86,14 @@ class ApplicationWindow(QMainWindow):
         self.slider_elev = QSlider(minimum=0, maximum=360, orientation=Qt.Horizontal)
 
         self.slider_azim_layout = QHBoxLayout()
-        self.slider_azim_layout.addWidget(QLabel("{}".format(self.slider_azim.minimum())))
+        self.slider_azim_layout.addWidget(QLabel(f"{self.slider_azim.minimum()}"))
         self.slider_azim_layout.addWidget(self.slider_azim)
-        self.slider_azim_layout.addWidget(QLabel("{}".format(self.slider_azim.maximum())))
+        self.slider_azim_layout.addWidget(QLabel(f"{self.slider_azim.maximum()))
 
         self.slider_elev_layout = QHBoxLayout()
-        self.slider_elev_layout.addWidget(QLabel("{}".format(self.slider_elev.minimum())))
+        self.slider_elev_layout.addWidget(QLabel(f"{self.slider_elev.minimum()))
         self.slider_elev_layout.addWidget(self.slider_elev)
-        self.slider_elev_layout.addWidget(QLabel("{}".format(self.slider_elev.maximum())))
+        self.slider_elev_layout.addWidget(QLabel(f"{self.slider_elev.maximum()))
 
         # Table (Right)
         self.table = QTableWidget()
@@ -147,9 +147,9 @@ class ApplicationWindow(QMainWindow):
 
     def set_table_data(self, X, Y, Z):
         for i in range(len(X)):
-            self.table.setItem(i, 0, QTableWidgetItem("{:.2f}".format(X[i])))
-            self.table.setItem(i, 1, QTableWidgetItem("{:.2f}".format(Y[i])))
-            self.table.setItem(i, 2, QTableWidgetItem("{:.2f}".format(Z[i])))
+            self.table.setItem(i, 0, QTableWidgetItem(f"{X[i]:.2f}"))
+            self.table.setItem(i, 1, QTableWidgetItem(f"{Y[i]:.2f}"))
+            self.table.setItem(i, 2, QTableWidgetItem(f"{Z[i]:.2f}"))
 
     def set_canvas_table_configuration(self, row_count, data):
         self.fig.set_canvas(self.canvas)

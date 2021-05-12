@@ -74,7 +74,7 @@ class MyWidget(QWidget):
             "Hola Mundo", "Привет мир"]
 
         self.button = QPushButton("Click me!")
-        self.text = QLabel("Hello World auto_quit={}".format(auto_quit))
+        self.text = QLabel(f"Hello World auto_quit={auto_quit}")
         self.text.setAlignment(Qt.AlignCenter)
 
         self.layout = QVBoxLayout()
@@ -91,9 +91,9 @@ class MyWidget(QWidget):
 
 
 if __name__ == "__main__":
-    print("Start of hello.py      ", time.ctime())
-    print("  sys.version         = {}".format(sys.version.splitlines()[0]))
-    print("  platform.platform() = {}".format(platform.platform()))
+    print("Start of hello.py       ", time.ctime())
+    print("  sys.version         = ", sys.version.splitlines()[0])
+    print("  platform.platform() = ", platform.platform())
 
     app = QApplication()
 

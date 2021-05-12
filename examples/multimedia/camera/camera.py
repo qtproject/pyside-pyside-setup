@@ -159,7 +159,7 @@ class MainWindow(QMainWindow):
     def imageSaved(self, id, fileName):
         index = self.tabWidget.count()
         imageView = ImageView(self.currentPreview, fileName)
-        self.tabWidget.addTab(imageView, "Capture #{}".format(index))
+        self.tabWidget.addTab(imageView, f"Capture #{index}")
         self.tabWidget.setCurrentIndex(index)
 
 

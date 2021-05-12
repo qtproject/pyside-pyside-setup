@@ -85,8 +85,7 @@ def add_child(num_children, nesting_level):
     if nesting_level == 0:
         return result
     for i in range(num_children):
-        child = QStandardItem("Child num {}, nesting Level {}".format(i + 1,
-                              nesting_level))
+        child = QStandardItem(f"Child num {i + 1}, nesting Level {nesting_level}")
         if i == 0:
             child.appendRow(add_child(num_children, nesting_level - 1))
         result.append(child)
@@ -102,15 +101,15 @@ if __name__ == '__main__':
                               "Second Column with spacing"]
     source_model.setHorizontalHeaderLabels(horizontal_header_list)
     for i in range(model_size):
-        first_item = QStandardItem("FancyTextNumber {}".format(i))
+        first_item = QStandardItem(f"FancyTextNumber {i}")
         if i == 0:
             first_item.appendRow(add_child(2, 2))
-        second_item = QStandardItem("FancyRow2TextNumber {}".format(i))
+        second_item = QStandardItem(f"FancyRow2TextNumber {i}")
         if i % 2 == 0:
             first_item.setBackground(Qt.red)
         row = [first_item, second_item]
         source_model.invisibleRootItem().appendRow(row)
-        list.append("FancyTextNumber {}".format(i))
+        list.append(f"FancyTextNumber {i}")
 
     # Needed by QMLModelViewClient
     role_names = {

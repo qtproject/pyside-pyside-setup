@@ -59,4 +59,4 @@ class Core(QObject):
 
     @Slot(str)
     def receiveText(self, text):
-        self._dialog.displayMessage("Received message: {}".format(text))
+        self._dialog.displayMessage(f"Received message: {text}")

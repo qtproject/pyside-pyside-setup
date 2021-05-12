@@ -64,9 +64,10 @@ class DownloadWidget(QProgressBar):
         description = QFileInfo(path).fileName()
         description_length = len(description)
         if description_length > 30:
-            description = '{}...{}'.format(description[0:10],
-                                           description[description_length - 10:])
-        self.setFormat('{} %p%'.format(description))
+            description_ini = description[0:10]
+            description_end = description[description_length - 10:]
+            description = f'{description_ini}...{description_end}'
+        self.setFormat(f'{description} %p%')
         self.setOrientation(Qt.Horizontal)
         self.setMinimum(0)
         self.setValue(0)
@@ -90,11 +91,12 @@ class DownloadWidget(QProgressBar):
 
     def _update_tool_tip(self):
         path = self._download_item.path()
-        tool_tip = "{}\n{}".format(self._download_item.url().toString(),
-                                   QDir.toNativeSeparators(path))
+        url_str = self._download_item.url().toString()
+        native_sep = QDir.toNativeSeparators(path)
+        tool_tip = f"{url_str}\n{native_sep}"
         total_bytes = self._download_item.totalBytes()
         if total_bytes > 0:
-            tool_tip += "\n{}K".format(total_bytes / 1024)
+            tool_tip += f"\n{total_bytes / 1024}K"
         state = self.state()
         if state == QWebEngineDownloadItem.DownloadRequested:
             tool_tip += "\n(requested)"

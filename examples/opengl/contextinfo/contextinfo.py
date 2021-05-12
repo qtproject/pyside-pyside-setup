@@ -238,13 +238,19 @@ class RenderWindow(QWindow):
         if not self.context.makeCurrent(self):
             raise Exception("makeCurrent() failed")
         functions = self.context.functions()
-        text = """Vendor: {}\nRenderer: {}\nVersion: {}\nShading language: {}
-\nContext Format: {}\n\nSurface Format: {}""".format(
-               functions.glGetString(GL.GL_VENDOR), functions.glGetString(GL.GL_RENDERER),
-               functions.glGetString(GL.GL_VERSION),
-               functions.glGetString(GL.GL_SHADING_LANGUAGE_VERSION),
-               print_surface_format(self.context.format()),
-               print_surface_format(self.format()))
+        gl_vendor = functions.glGetString(GL.GL_VENDOR)
+        gl_renderer = functions.glGetString(GL.GL_RENDERER)
+        gl_version = functions.glGetString(GL.GL_VERSION)
+        gl_lang_version = functions.glGetString(GL.GL_SHADING_LANGUAGE_VERSION)
+        context_surface_format = print_surface_format(self.context.format())
+        surface_format = print_surface_format(self.format())
+
+        text = ("Vendor: {gl_vendor}\n"
+                "Renderer: {gl_renderer}\n"
+                "Version: {gl_version}\n"
+                "Shading language: {gl_lang_version}\n"
+                "Context Format: {context_surface_format}\n\n"
+                "Surface Format: {surface_format}")
         self.context.doneCurrent()
         return text
 

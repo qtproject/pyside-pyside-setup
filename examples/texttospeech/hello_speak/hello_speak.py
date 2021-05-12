@@ -82,7 +82,7 @@ class MainWindow(QMainWindow):
             engineName = engineNames[0]
             self.engine = QTextToSpeech(engineName)
             self.engine.stateChanged.connect(self.stateChanged)
-            self.setWindowTitle('QTextToSpeech Example ({})'.format(engineName))
+            self.setWindowTitle(f'QTextToSpeech Example ({engineName})')
             self.voices = []
             for voice in self.engine.availableVoices():
                 self.voices.append(voice)

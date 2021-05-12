@@ -348,7 +348,7 @@ class MainWindow(QMainWindow):
 
     def _update_zoom_label(self):
         percent = int(self._tab_widget.zoom_factor() * 100)
-        self._zoom_label.setText("{}%".format(percent))
+        self._zoom_label.setText(f"{percent}%")
 
     def _download_requested(self, item):
         # Remove old downloads before opening a new one

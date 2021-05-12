@@ -79,7 +79,7 @@ class BrowserTabWidget(QTabWidget):
                                         self._window_factory_function)
         index = self.count()
         self._webengineviews.append(web_engine_view)
-        title = 'Tab {}'.format(index + 1)
+        title = f'Tab {index + 1}'
         self.addTab(web_engine_view, title)
         page = web_engine_view.page()
         page.titleChanged.connect(self._title_changed)
