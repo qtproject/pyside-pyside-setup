@@ -53,11 +53,11 @@ class MovementTransition(QEventTransition):
         self.window = window
 
     def eventTest(self, event):
-        if event.type() == QEvent.StateMachineWrapped and \
-          event.event().type() == QEvent.KeyPress:
+        if (event.type() == QEvent.StateMachineWrapped and
+                event.event().type() == QEvent.KeyPress):
             key = event.event().key()
-            return key == Qt.Key_2 or key == Qt.Key_8 or \
-                key == Qt.Key_6 or key == Qt.Key_4
+            return (key == Qt.Key_2 or key == Qt.Key_8 or
+                    key == Qt.Key_6 or key == Qt.Key_4)
         return False
 
     def onTransition(self, event):
@@ -109,8 +109,8 @@ class MainWindow(QMainWindow):
         for x in range(self.width):
             column = []
             for y in range(self.height):
-                if x == 0 or x == self.width - 1 or y == 0 or \
-                  y == self.height - 1 or generator.bounded(0, 40) == 0:
+                if (x == 0 or x == self.width - 1 or y == 0 or
+                        y == self.height - 1 or generator.bounded(0, 40) == 0):
                     column.append('#')
                 else:
                     column.append('.')

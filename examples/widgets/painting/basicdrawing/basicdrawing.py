@@ -59,8 +59,8 @@ class RenderArea(QWidget):
         QPoint(90, 70)
     ])
 
-    Line, Points, Polyline, Polygon, Rect, RoundedRect, Ellipse, Arc, Chord, \
-            Pie, Path, Text, Pixmap = range(13)
+    (Line, Points, Polyline, Polygon, Rect, RoundedRect, Ellipse,
+     Arc, Chord, Pie, Path, Text, Pixmap) = range(13)
 
     def __init__(self, parent=None):
         super().__init__(parent)

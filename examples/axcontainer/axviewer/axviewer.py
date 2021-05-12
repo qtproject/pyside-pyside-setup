@@ -73,7 +73,7 @@ class MainWindow(QMainWindow):
         if axSelect.exec() == QDialog.Accepted:
             clsid = axSelect.clsid()
             if not self.axWidget.setControl(clsid):
-                QMessageBox.warning(self, "AxViewer", "Unable to load " + clsid + ".")
+                QMessageBox.warning(self, "AxViewer", f"Unable to load {clsid}.")
 
 
 if __name__ == '__main__':

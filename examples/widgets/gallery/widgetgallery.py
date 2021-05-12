@@ -305,7 +305,7 @@ class WidgetGallery(QDialog):
         # Create centered/italic HTML rich text
         rich_text = "<html><head/><body><i>"
         for line in POEM.split('\n'):
-            rich_text += "<center>" + line + "</center>"
+            rich_text += f"<center>{line}</center>"
         rich_text += "</i></body></html>"
 
         text_edit = QTextEdit(rich_text)

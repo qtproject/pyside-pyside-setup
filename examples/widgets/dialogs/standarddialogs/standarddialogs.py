@@ -75,10 +75,10 @@ class DialogOptionsWidget(QGroupBox):
 
 
 class Dialog(QDialog):
-    MESSAGE = "<p>Message boxes have a caption, a text, and up to three " \
-            "buttons, each with standard or custom texts.</p>" \
-            "<p>Click a button to close the message box. Pressing the Esc " \
-            "button will activate the detected escape button (if any).</p>"
+    MESSAGE = ("<p>Message boxes have a caption, a text, and up to three "
+               "buttons, each with standard or custom texts.</p>"
+               "<p>Click a button to close the message box. Pressing the Esc "
+               "button will activate the detected escape button (if any).</p>")
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -285,7 +285,7 @@ class Dialog(QDialog):
         d, ok = QInputDialog.getDouble(self, "QInputDialog.getDouble()",
                 "Amount:", 37.56, -10000, 10000, 2)
         if ok:
-            self._double_label.setText("$%g" % d)
+            self._double_label.setText(f"${d:g}")
 
     def set_item(self):
         items = ("Spring", "Summer", "Fall", "Winter")

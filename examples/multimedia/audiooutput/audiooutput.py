@@ -69,40 +69,40 @@ class Generator(QIODevice):
         self.m_pos = 0
         self.close()
 
-    def generateData(self, format, durationUs, sampleRate):
+    def generateData(self, fmt, durationUs, sampleRate):
         pack_format = ''
 
-        if format.sampleSize() == 8:
-            if format.sampleType() == QAudioFormat.UnSignedInt:
+        if fmt.sampleSize() == 8:
+            if fmt.sampleType() == QAudioFormat.UnSignedInt:
                 scaler = lambda x: ((1.0 + x) / 2 * 255)
                 pack_format = 'B'
-            elif format.sampleType() == QAudioFormat.SignedInt:
+            elif fmt.sampleType() == QAudioFormat.SignedInt:
                 scaler = lambda x: x * 127
                 pack_format = 'b'
-        elif format.sampleSize() == 16:
-            if format.sampleType() == QAudioFormat.UnSignedInt:
+        elif fmt.sampleSize() == 16:
+            if fmt.sampleType() == QAudioFormat.UnSignedInt:
                 scaler = lambda x: (1.0 + x) / 2 * 65535
-                pack_format = '<H' if format.byteOrder() == QAudioFormat.LittleEndian else '>H'
-            elif format.sampleType() == QAudioFormat.SignedInt:
+                pack_format = '<H' if fmt.byteOrder() == QAudioFormat.LittleEndian else '>H'
+            elif fmt.sampleType() == QAudioFormat.SignedInt:
                 scaler = lambda x: x * 32767
-                pack_format = '<h' if format.byteOrder() == QAudioFormat.LittleEndian else '>h'
+                pack_format = '<h' if fmt.byteOrder() == QAudioFormat.LittleEndian else '>h'
 
         assert(pack_format != '')
 
-        channelBytes = format.sampleSize() // 8
-        sampleBytes = format.channelCount() * channelBytes
+        channelBytes = fmt.sampleSize() // 8
+        sampleBytes = fmt.channelCount() * channelBytes
 
-        length = (format.sampleRate() * format.channelCount() * (format.sampleSize() // 8)) * durationUs // 100000
+        length = (fmt.sampleRate() * fmt.channelCount() * (fmt.sampleSize() // 8)) * durationUs // 100000
 
         self.m_buffer.clear()
         sampleIndex = 0
-        factor = 2 * pi * sampleRate / format.sampleRate()
+        factor = 2 * pi * sampleRate / fmt.sampleRate()
 
         while length != 0:
-            x = sin((sampleIndex % format.sampleRate()) * factor)
+            x = sin((sampleIndex % fmt.sampleRate()) * factor)
             packed = pack(pack_format, int(scaler(x)))
 
-            for _ in range(format.channelCount()):
+            for _ in range(fmt.channelCount()):
                 self.m_buffer.append(packed)
                 length -= channelBytes
 
@@ -230,10 +230,12 @@ class AudioTest(QMainWindow):
             self.m_audioOutput.setVolume(value / 100.0)
 
     def notified(self):
-        qWarning("bytesFree = %d, elapsedUSecs = %d, processedUSecs = %d" % (
-                self.m_audioOutput.bytesFree(),
-                self.m_audioOutput.elapsedUSecs(),
-                self.m_audioOutput.processedUSecs()))
+        bytes_free = self.m_audioOutput.bytesFree()
+        elapsed = self.m_audioOutput.elapsedUSecs()
+        processed = self.m_audioOutput.processedUSecs()
+        qWarning(f"bytesFree = {bytes_free}, "
+                 f"elapsedUSecs = {elapsed}, "
+                 f"processedUSecs = {processed}")
 
     def pullTimerExpired(self):
         if self.m_audioOutput is not None and self.m_audioOutput.state() != QAudio.StoppedState:
@@ -284,7 +286,8 @@ class AudioTest(QMainWindow):
         QAudio.IdleState: "IdleState"}
 
     def handleStateChanged(self, state):
-        qWarning("state = " + self.stateMap.get(state, "Unknown"))
+        state = self.stateMap.get(state, 'Unknown')
+        qWarning(f"state = {state}")
 
 
 if __name__ == '__main__':

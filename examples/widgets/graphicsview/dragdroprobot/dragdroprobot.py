@@ -142,8 +142,8 @@ class RobotPart(QGraphicsItem):
         self.setAcceptDrops(True)
 
     def dragEnterEvent(self, event):
-        if event.mimeData().hasColor() or \
-          (isinstance(self, RobotHead) and event.mimeData().hasImage()):
+        if (event.mimeData().hasColor() or
+                (isinstance(self, RobotHead) and event.mimeData().hasImage())):
             event.setAccepted(True)
             self._drag_over = True
             self.update()

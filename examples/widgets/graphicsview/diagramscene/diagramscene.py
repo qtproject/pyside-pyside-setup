@@ -367,10 +367,10 @@ class DiagramScene(QGraphicsScene):
             self.removeItem(self.line)
             self.line = None
 
-            if len(start_items) and len(end_items) and \
-                    isinstance(start_items[0], DiagramItem) and \
-                    isinstance(end_items[0], DiagramItem) and \
-                    start_items[0] != end_items[0]:
+            if (len(start_items) and len(end_items) and
+                    isinstance(start_items[0], DiagramItem) and
+                    isinstance(end_items[0], DiagramItem) and
+                    start_items[0] != end_items[0]):
                 start_item = start_items[0]
                 end_item = end_items[0]
                 arrow = Arrow(start_item, end_item)

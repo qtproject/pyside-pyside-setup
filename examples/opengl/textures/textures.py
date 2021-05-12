@@ -110,7 +110,7 @@ class GLWidget(QtOpenGL.QGLWidget):
         if not GLWidget.sharedObject:
             self.textures = []
             for i in range(6):
-                self.textures.append(self.bindTexture(QtGui.QPixmap(":/images/side%d.png" % (i + 1))))
+                self.textures.append(self.bindTexture(QtGui.QPixmap(f":/images/side{i + 1}.png")))
             GLWidget.sharedObject = self.makeObject()
         GLWidget.refCount += 1
 

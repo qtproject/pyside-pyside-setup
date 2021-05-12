@@ -166,10 +166,10 @@ class Window(QWidget):
         # different curve types.  We do the Python equivalant (but without
         # cheating)
         curve_types = [(n, c) for n, c in QEasingCurve.__dict__.items()
-                        if isinstance(c, QEasingCurve.Type) \
-                            and c != QEasingCurve.Custom    \
-                            and c != QEasingCurve.NCurveTypes \
-                            and c != QEasingCurve.TCBSpline]
+                        if (isinstance(c, QEasingCurve.Type)
+                            and c != QEasingCurve.Custom
+                            and c != QEasingCurve.NCurveTypes
+                            and c != QEasingCurve.TCBSpline)]
         curve_types.sort(key=lambda ct: ct[1])
 
         painter.begin(pix)

@@ -64,7 +64,7 @@ class VanillaChocolateCherryIcecream(VanillaChocolateIcecream):
 
     def getFlavor(self):
         base_flavor = super(VanillaChocolateCherryIcecream, self).getFlavor()
-        return base_flavor + " and a cherry"
+        return f"{base_flavor} and a cherry"
 
 
 if __name__ == '__main__':
