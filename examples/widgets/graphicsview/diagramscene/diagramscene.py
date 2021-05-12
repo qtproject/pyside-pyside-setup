@@ -439,16 +439,16 @@ class MainWindow(QMainWindow):
         self.scene.update()
         self.view.update()
 
-    def button_group_clicked(self, id):
+    def button_group_clicked(self, idx):
         buttons = self._button_group.buttons()
         for button in buttons:
-            if self._button_group.button(id) != button:
+            if self._button_group.button(idx) != button:
                 button.setChecked(False)
 
-        if id == self.insert_text_button:
+        if idx == self.insert_text_button:
             self.scene.set_mode(DiagramScene.InsertText)
         else:
-            self.scene.set_item_type(id)
+            self.scene.set_item_type(idx)
             self.scene.set_mode(DiagramScene.InsertItem)
 
     def delete_item(self):

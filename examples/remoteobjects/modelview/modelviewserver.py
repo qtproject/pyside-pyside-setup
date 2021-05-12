@@ -95,7 +95,7 @@ def add_child(num_children, nesting_level):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     model_size = 100000
-    list = []
+    data_list = []
     source_model = QStandardItemModel()
     horizontal_header_list = ["First Column with spacing",
                               "Second Column with spacing"]
@@ -109,7 +109,7 @@ if __name__ == '__main__':
             first_item.setBackground(Qt.red)
         row = [first_item, second_item]
         source_model.invisibleRootItem().appendRow(row)
-        list.append(f"FancyTextNumber {i}")
+        data_list.append(f"FancyTextNumber {i}")
 
     # Needed by QMLModelViewClient
     role_names = {

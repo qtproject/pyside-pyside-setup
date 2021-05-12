@@ -245,10 +245,10 @@ class BookmarkWidget(QTreeView):
             return
         dir_path = _config_dir()
         native_dir_path = QDir.toNativeSeparators(dir_path)
-        dir = QFileInfo(dir_path)
-        if not dir.isDir():
+        directory = QFileInfo(dir_path)
+        if not directory.isDir():
             print(f'Creating {native_dir_path}...')
-            if not QDir(dir.absolutePath()).mkpath(dir.fileName()):
+            if not QDir(directory.absolutePath()).mkpath(directory.fileName()):
                 warnings.warn(f'Cannot create {native_dir_path}.',
                               RuntimeWarning)
                 return
