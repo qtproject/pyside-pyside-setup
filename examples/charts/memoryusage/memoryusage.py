@@ -111,9 +111,9 @@ class MainWindow(QMainWindow):
         for item in memory_usage:
             self.series.append(item[0], item[1])
 
-        slice = self.series.slices()[0]
-        slice.setExploded()
-        slice.setLabelVisible()
+        chart_slice = self.series.slices()[0]
+        chart_slice.setExploded()
+        chart_slice.setLabelVisible()
         self.chart = QChart()
         self.chart.addSeries(self.series)
         self._chart_view = QChartView(self.chart)

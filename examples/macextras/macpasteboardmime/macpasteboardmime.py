@@ -79,10 +79,10 @@ class VCardMime(QtMacExtras.QMacPasteboardMime):
             return ""
 
     def convertToMime(self, mime, data, flav):
-        all = QtCore.QByteArray()
+        data_all = QtCore.QByteArray()
         for i in data:
-            all += i
-        return all
+            data_all += i
+        return data_all
 
     def convertFromMime(mime, data, flav):
         # Todo: implement!

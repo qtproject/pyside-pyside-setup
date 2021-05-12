@@ -118,10 +118,10 @@ def print_surface_format(surface_format):
 
 
 class RenderWindow(QWindow):
-    def __init__(self, format):
+    def __init__(self, fmt):
         super().__init__()
         self.setSurfaceType(QWindow.OpenGLSurface)
-        self.setFormat(format)
+        self.setFormat(fmt)
         self.context = QOpenGLContext(self)
         self.context.setFormat(self.requestedFormat())
         if not self.context.create():
@@ -135,14 +135,14 @@ class RenderWindow(QWindow):
         self.vao = QOpenGLVertexArrayObject()
         self.vbo = QOpenGLBuffer()
 
-        format = self.context.format()
-        use_new_style_shader = format.profile() == QSurfaceFormat.CoreProfile
+        fmt = self.context.format()
+        use_new_style_shader = fmt.profile() == QSurfaceFormat.CoreProfile
         # Try to handle 3.0 & 3.1 that do not have the core/compatibility profile
         # concept 3.2+ has. This may still fail since version 150 (3.2) is
         # specified in the sources but it's worth a try.
-        if (format.renderableType() == QSurfaceFormat.OpenGL and format.majorVersion() == 3
-            and format.minorVersion() <= 1):
-            use_new_style_shader = not format.testOption(QSurfaceFormat.DeprecatedFunctions)
+        if (fmt.renderableType() == QSurfaceFormat.OpenGL and fmt.majorVersion() == 3
+            and fmt.minorVersion() <= 1):
+            use_new_style_shader = not fmt.testOption(QSurfaceFormat.DeprecatedFunctions)
 
         vertex_shader = vertex_shader_source if use_new_style_shader else vertex_shader_source_110
         fragment_shader = fragment_shader_source if use_new_style_shader else fragment_shader_source_110

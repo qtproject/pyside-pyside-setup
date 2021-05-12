@@ -113,7 +113,7 @@ class ClassWizard(QWizard):
     def nextId(self):
         """Overrides QWizard.nextId() to insert the property/signal
            page in case the class is a QObject."""
-        id = self.currentId()
+        idx = self.currentId()
         if self.currentId() == self._class_info_index:
             qobject = self.field('qobject')
             return self._qobject_index if qobject else self._output_index
@@ -371,10 +371,10 @@ class OutputFilesPage(QWizardPage):
         return self.output_dir() + '/' + self._file_line_edit.text()
 
     def _choose_output_dir(self):
-        dir = QFileDialog.getExistingDirectory(self, "Output Directory",
+        directory = QFileDialog.getExistingDirectory(self, "Output Directory",
                                                self.output_dir())
-        if dir:
-            self.set_output_dir(dir)
+        if directory:
+            self.set_output_dir(directory)
 
     def validatePage(self):
         """Ensure we do not overwrite existing files."""

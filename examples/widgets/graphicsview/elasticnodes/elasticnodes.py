@@ -58,7 +58,7 @@ def random(boundary):
 
 class Edge(QGraphicsItem):
 
-    type = QGraphicsItem.UserType + 2
+    item_type = QGraphicsItem.UserType + 2
 
     def __init__(self, sourceNode, destNode):
         super().__init__()
@@ -73,8 +73,8 @@ class Edge(QGraphicsItem):
         self.dest().add_edge(self)
         self.adjust()
 
-    def type(self):
-        return Edge.type
+    def item_type(self):
+        return Edge.item_type
 
     def source_node(self):
         return self.source()
@@ -157,7 +157,7 @@ class Edge(QGraphicsItem):
 
 
 class Node(QGraphicsItem):
-    type = QGraphicsItem.UserType + 1
+    item_type = QGraphicsItem.UserType + 1
 
     def __init__(self, graphWidget):
         super().__init__()
@@ -170,8 +170,8 @@ class Node(QGraphicsItem):
         self.setCacheMode(self.DeviceCoordinateCache)
         self.setZValue(-1)
 
-    def type(self):
-        return Node.type
+    def item_type(self):
+        return Node.item_type
 
     def add_edge(self, edge):
         self._edge_list.append(weakref.ref(edge))

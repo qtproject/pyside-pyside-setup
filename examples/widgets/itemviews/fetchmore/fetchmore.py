@@ -116,11 +116,11 @@ class FileListModel(QAbstractListModel):
     @Slot(str)
     def set_dir_path(self, path):
         self._path = path
-        dir = QDir(path)
+        directory = QDir(path)
 
         self.beginResetModel()
-        filter = QDir.AllEntries | QDir.NoDot
-        self._file_list = dir.entryInfoList(filter, QDir.Name)
+        directory_filter = QDir.AllEntries | QDir.NoDot
+        self._file_list = directory.entryInfoList(directory_filter, QDir.Name)
         self._file_count = 0
         self.endResetModel()
 
