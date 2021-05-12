@@ -170,7 +170,7 @@ class JsonModel(QAbstractItemModel):
 
         assert isinstance(
             document, (dict, list, tuple)
-        ), "`document` must be of dict, list or tuple, " "not %s" % type(document)
+        ), "`document` must be of dict, list or tuple, " f"not {type(document)}"
 
         self.beginResetModel()
 

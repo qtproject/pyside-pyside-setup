@@ -65,9 +65,9 @@ BASE_CLASSES = ['<None>', 'PySide6.QtCore.QObject',
 PYTHON_TYPES = ['int', 'list', 'str']
 
 
-INTRODUCTION = """This wizard will generate a skeleton Python class definition,\
- including a few functions. You simply need to specify the class name and set\
- a few options to produce a Python file."""
+INTRODUCTION = ("This wizard will generate a skeleton Python class definition, "
+                "including a few functions. You simply need to specify the class name and set "
+                "a few options to produce a Python file.")
 
 
 def property_accessors(property_type, name):
@@ -361,14 +361,14 @@ class OutputFilesPage(QWizardPage):
         self._file_line_edit.setText(class_name.lower() + '.py')
         self.set_output_dir(QDir.tempPath())
 
-    def set_output_dir(self, dir):
-        self._output_dir_line_edit.setText(QDir.toNativeSeparators(dir))
+    def set_output_dir(self, directory):
+        self._output_dir_line_edit.setText(QDir.toNativeSeparators(directory))
 
     def output_dir(self):
         return QDir.fromNativeSeparators(self._output_dir_line_edit.text())
 
     def file_name(self):
-        return self.output_dir() + '/' + self._file_line_edit.text()
+        return f"{self.output_dir()}/{self._file_line_edit.text()}"
 
     def _choose_output_dir(self):
         directory = QFileDialog.getExistingDirectory(self, "Output Directory",

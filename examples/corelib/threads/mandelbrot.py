@@ -67,8 +67,8 @@ NUM_PASSES = 8
 INFO_KEY = 'info'
 
 
-HELP = "Use mouse wheel or the '+' and '-' keys to zoom. Press and " \
-       "hold left mouse button to scroll."
+HELP = ("Use mouse wheel or the '+' and '-' keys to zoom. Press and "
+       "hold left mouse button to scroll.")
 
 
 class RenderThread(QThread):

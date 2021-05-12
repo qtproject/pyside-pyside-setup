@@ -99,5 +99,5 @@ if __name__ == "__main__":
     if (dialog.exec()):
         name = dialog.name
         address = dialog.address
-        print("Name:" + name)
-        print("Address:" + address)
+        print(f"Name: {name}")
+        print(f"Address: {address}")

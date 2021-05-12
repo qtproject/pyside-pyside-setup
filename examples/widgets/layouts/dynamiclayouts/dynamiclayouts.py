@@ -124,8 +124,8 @@ class Dialog(QDialog):
         self._rotable_widgets.append(QProgressBar())
         count = len(self._rotable_widgets)
         for i in range(count):
-            self._rotable_widgets[i].valueChanged[int].\
-                connect(self._rotable_widgets[(i + 1) % count].setValue)
+            element = self._rotable_widgets[(i + 1) % count]
+            self._rotable_widgets[i].valueChanged[int].connect(element.setValue)
 
         self._rotable_layout = QGridLayout()
         self._rotable_group_box.setLayout(self._rotable_layout)

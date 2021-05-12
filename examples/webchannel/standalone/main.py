@@ -61,7 +61,7 @@ if __name__ == '__main__':
         print('The example requires SSL support.')
         sys.exit(-1)
     cur_dir = os.path.dirname(os.path.abspath(__file__))
-    jsFileInfo = QFileInfo(cur_dir + "/qwebchannel.js")
+    jsFileInfo = QFileInfo(f"{cur_dir}/qwebchannel.js")
     if not jsFileInfo.exists():
         QFile.copy(":/qtwebchannel/qwebchannel.js",
                    jsFileInfo.absoluteFilePath())
@@ -88,7 +88,7 @@ if __name__ == '__main__':
     channel.registerObject("core", core)
 
     # open a browser window with the client HTML page
-    url = QUrl.fromLocalFile(cur_dir + "/index.html")
+    url = QUrl.fromLocalFile(f"{cur_dir}/index.html")
     QDesktopServices.openUrl(url)
 
     message = f"Initialization complete, opening browser at {url.toDisplayString()}."

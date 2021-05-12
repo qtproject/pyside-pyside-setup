@@ -68,7 +68,7 @@ class MdiChild(QTextEdit):
         self._is_untitled = True
         self._cur_file = f"document{MdiChild.sequence_number}.txt"
         MdiChild.sequence_number += 1
-        self.setWindowTitle(self._cur_file + '[*]')
+        self.setWindowTitle(f"{self._cur_file}[*]")
 
         self.document().contentsChanged.connect(self.document_was_modified)
 
@@ -161,7 +161,7 @@ class MdiChild(QTextEdit):
         self._is_untitled = False
         self.document().setModified(False)
         self.setWindowModified(False)
-        self.setWindowTitle(self.user_friendly_current_file() + "[*]")
+        self.setWindowTitle(f"{self.user_friendly_current_file()}[*]")
 
     def stripped_name(self, fullFileName):
         return QFileInfo(fullFileName).fileName()

@@ -127,8 +127,8 @@ class MainWindow(QMainWindow):
 
         if self.camera.status() != QCamera.UnavailableStatus:
             name = self.cameraInfo.description()
-            self.setWindowTitle("PySide6 Camera Example (" + name + ")")
-            self.statusBar().showMessage("Starting: '" + name + "'", 5000)
+            self.setWindowTitle(f"PySide6 Camera Example ({name})")
+            self.statusBar().showMessage(f"Starting: '{name}'", 5000)
             self.camera.start()
         else:
             self.setWindowTitle("PySide6 Camera Example")
@@ -138,7 +138,7 @@ class MainWindow(QMainWindow):
     def nextImageFileName(self):
         picturesLocation = QStandardPaths.writableLocation(QStandardPaths.PicturesLocation)
         dateString = QDate.currentDate().toString("yyyyMMdd")
-        pattern = picturesLocation + "/pyside6_camera_" + dateString + "_{:03d}.jpg"
+        pattern = f"{picturesLocation}/pyside6_camera_{dateString}_{:03d}.jpg"
         n = 1
         while True:
             result = pattern.format(n)

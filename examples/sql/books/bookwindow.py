@@ -114,7 +114,7 @@ class BookWindow(QMainWindow, Ui_BookWindow):
 
     def showError(err):
         QMessageBox.critical(self, "Unable to initialize Database",
-                    "Error initializing database: " + err.text())
+                    f"Error initializing database: {err.text()}")
 
     def create_menubar(self):
         file_menu = self.menuBar().addMenu(self.tr("&File"))
