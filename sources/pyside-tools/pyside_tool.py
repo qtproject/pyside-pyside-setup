@@ -42,6 +42,7 @@ import sys
 import os
 from pathlib import Path
 import subprocess
+import sysconfig
 
 from subprocess import Popen, PIPE
 import PySide6 as ref_mod
@@ -110,7 +111,11 @@ def designer():
         version = f'{major_version}.{minor_version}'
         library_name = f'libpython{version}{sys.abiflags}.so'
         os.environ['LD_PRELOAD'] = library_name
-
+    elif sys.platform == 'darwin':
+        library_name = sysconfig.get_config_var("LDLIBRARY")
+        framework_prefix = sysconfig.get_config_var("PYTHONFRAMEWORKPREFIX")
+        lib_path = os.fspath(Path(framework_prefix) / library_name)
+        os.environ['DYLD_INSERT_LIBRARIES'] = lib_path
     # Add the Wiggly Widget example
     wiggly_dir = os.fspath(pyside_dir / 'examples' / 'widgetbinding')
     _append_to_path_var('PYSIDE_DESIGNER_PLUGINS', wiggly_dir)
