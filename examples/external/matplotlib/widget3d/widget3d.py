@@ -82,18 +82,20 @@ class ApplicationWindow(QMainWindow):
         self.canvas = FigureCanvas(self.fig)
 
         # Sliders (Left)
-        self.slider_azim = QSlider(minimum=0, maximum=360, orientation=Qt.Horizontal)
-        self.slider_elev = QSlider(minimum=0, maximum=360, orientation=Qt.Horizontal)
+        min = 0
+        max = 360
+        self.slider_azim = QSlider(minimum=min, maximum=max, orientation=Qt.Horizontal)
+        self.slider_elev = QSlider(minimum=min, maximum=max, orientation=Qt.Horizontal)
 
         self.slider_azim_layout = QHBoxLayout()
-        self.slider_azim_layout.addWidget(QLabel(f"{self.slider_azim.minimum()}"))
+        self.slider_azim_layout.addWidget(QLabel(f"{min}"))
         self.slider_azim_layout.addWidget(self.slider_azim)
-        self.slider_azim_layout.addWidget(QLabel(f"{self.slider_azim.maximum()))
+        self.slider_azim_layout.addWidget(QLabel(f"{max}"))
 
         self.slider_elev_layout = QHBoxLayout()
-        self.slider_elev_layout.addWidget(QLabel(f"{self.slider_elev.minimum()))
+        self.slider_elev_layout.addWidget(QLabel(f"{min}"))
         self.slider_elev_layout.addWidget(self.slider_elev)
-        self.slider_elev_layout.addWidget(QLabel(f"{self.slider_elev.maximum()))
+        self.slider_elev_layout.addWidget(QLabel(f"{max}"))
 
         # Table (Right)
         self.table = QTableWidget()
