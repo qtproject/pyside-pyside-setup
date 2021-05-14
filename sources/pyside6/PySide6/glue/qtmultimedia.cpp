@@ -37,14 +37,6 @@
 **
 ****************************************************************************/
 
-// @snippet upcast
-%BEGIN_ALLOW_THREADS
-QObject * upcastedArg = %CONVERTTOCPP[QObject *](%PYARG_1);
-//XXX   /|\ omitting this space crashes shiboken!
-%CPPSELF.%FUNCTION_NAME(reinterpret_cast< %ARG1_TYPE >(upcastedArg));
-%END_ALLOW_THREADS
-// @snippet upcast
-
 // @snippet qvideoframe-bits
 %BEGIN_ALLOW_THREADS
 %RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME();

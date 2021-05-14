@@ -43,7 +43,7 @@
 
 import sys
 from PySide6.QtCore import QStandardPaths, Qt
-from PySide6.QtGui import QAction, QIcon, QKeySequence
+from PySide6.QtGui import QAction, QIcon, QKeySequence, QScreen
 from PySide6.QtWidgets import (QApplication, QDialog, QFileDialog,
     QMainWindow, QSlider, QStyle, QToolBar)
 from PySide6.QtMultimedia import QMediaPlayer, QMediaPlaylist
@@ -100,7 +100,7 @@ class MainWindow(QMainWindow):
         self.volumeSlider.setOrientation(Qt.Horizontal)
         self.volumeSlider.setMinimum(0)
         self.volumeSlider.setMaximum(100)
-        self.volumeSlider.setFixedWidth(app.desktop().availableGeometry(self).width() / 10)
+        self.volumeSlider.setFixedWidth(self.screen().availableGeometry().width() / 10)
         self.volumeSlider.setValue(self.player.volume())
         self.volumeSlider.setTickInterval(10)
         self.volumeSlider.setTickPosition(QSlider.TicksBelow)
@@ -153,7 +153,7 @@ class MainWindow(QMainWindow):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     mainWin = MainWindow()
-    availableGeometry = app.desktop().availableGeometry(mainWin)
+    availableGeometry = mainWin.screen().availableGeometry()
     mainWin.resize(availableGeometry.width() / 3, availableGeometry.height() / 2)
     mainWin.show()
     sys.exit(app.exec())

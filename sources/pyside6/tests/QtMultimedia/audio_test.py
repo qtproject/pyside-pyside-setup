@@ -38,42 +38,31 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from helper.usesqguiapplication import UsesQGuiApplication
-from PySide6.QtCore import *
-from PySide6.QtMultimedia import *
+from PySide6.QtMultimedia import QAudioDeviceInfo, QAudioFormat, QMediaDevices
 
 
 class testAudioDevices(UsesQGuiApplication):
 
     def testListDevices(self):
         valid = False
-        devices = QAudioDeviceInfo.availableDevices(QAudio.AudioOutput)
+        devices = QMediaDevices.audioOutputs()
         if not len(devices):
             return
 
         valid = True
-        for devInfo in devices:
-            if devInfo.deviceName() == 'null':
+        for dev_info in devices:
+            if dev_info.id() == 'null':
                 # skip the test if the only device found is a invalid device
                 if len(devices) == 1:
                     return
                 else:
                     continue
             fmt = QAudioFormat()
-            for codec in devInfo.supportedCodecs():
-                fmt.setCodec(codec)
-                for frequency in devInfo.supportedSampleRates():
-                    fmt.setSampleRate(frequency)
-                    for channels in devInfo.supportedChannelCounts():
-                        fmt.setChannelCount(channels)
-                        for sampleType in devInfo.supportedSampleTypes():
-                            fmt.setSampleType(sampleType)
-                            for sampleSize in devInfo.supportedSampleSizes():
-                                fmt.setSampleSize(sampleSize)
-                                for endian in devInfo.supportedByteOrders():
-                                    fmt.setByteOrder(endian)
-                                    if devInfo.isFormatSupported(fmt):
-                                        return
-        self.assertTrue(False)
+            for sample_format in dev_info.supportedSampleFormats():
+                fmt.setSampleFormat(sample_format)
+                fmt.setChannelCount(dev_info.maximumChannelCount())
+                fmt.setSampleRate(dev_info.maximumSampleRate())
+                self.assertTrue(dev_info.isFormatSupported(fmt))
 
 
 if __name__ == '__main__':
