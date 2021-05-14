@@ -138,7 +138,7 @@ class MainWindow(QMainWindow):
     def nextImageFileName(self):
         picturesLocation = QStandardPaths.writableLocation(QStandardPaths.PicturesLocation)
         dateString = QDate.currentDate().toString("yyyyMMdd")
-        pattern = f"{picturesLocation}/pyside6_camera_{dateString}_{:03d}.jpg"
+        pattern = f"{picturesLocation}/pyside6_camera_{dateString}_{{:03d}}.jpg"
         n = 1
         while True:
             result = pattern.format(n)
