@@ -136,7 +136,7 @@ def screen_info(widget):
         if current:
             result += "<i>"
         name = screen.name()
-        geometry = format_geometry(screen.geometry)
+        geometry = format_geometry(screen.geometry())
         dpi = int(screen.logicalDotsPerInchX())
         dpr = screen.devicePixelRatio()
         result += f'"{name}" {geometry} {dpi}DPI, DPR={dpr}'
