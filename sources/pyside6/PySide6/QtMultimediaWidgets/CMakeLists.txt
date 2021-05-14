@@ -1,10 +1,8 @@
 project(QtMultimediaWidgets)
 
 set(QtMultimediaWidgets_SRC
-${QtMultimediaWidgets_GEN_DIR}/qcameraviewfinder_wrapper.cpp
 ${QtMultimediaWidgets_GEN_DIR}/qgraphicsvideoitem_wrapper.cpp
 ${QtMultimediaWidgets_GEN_DIR}/qvideowidget_wrapper.cpp
-${QtMultimediaWidgets_GEN_DIR}/qvideowidgetcontrol_wrapper.cpp
 # module is always needed
 ${QtMultimediaWidgets_GEN_DIR}/qtmultimediawidgets_module_wrapper.cpp
 )

@@ -2,7 +2,7 @@
 <!--
 /****************************************************************************
 **
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2021 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -42,11 +42,9 @@
 <typesystem package="PySide6.QtMultimediaWidgets">
   <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
   <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
-  <load-typesystem name="QtMultimedia/typesystem_multimedia_common.xml" generate="no"/>
+  <load-typesystem name="QtMultimedia/typesystem_multimedia.xml" generate="no"/>
   <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no"/>
 
-  <object-type name="QCameraViewfinder"/>
   <object-type name="QGraphicsVideoItem"/>
   <object-type name="QVideoWidget"/>
-  <object-type name="QVideoWidgetControl"/>
 </typesystem>
