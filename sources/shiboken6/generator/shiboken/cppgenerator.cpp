@@ -2297,11 +2297,12 @@ void CppGenerator::writeMethodWrapperPreamble(TextStream &s,const OverloadData &
         initPythonArguments = minArgs != maxArgs || maxArgs > 1;
     }
 
-    if (needsArgumentErrorHandling(overloadData)) {
-        s << R"(Shiboken::AutoDecRef errInfo{};
-static const char fullName[] = ")" << fullPythonFunctionName(rfunc, true)
-            << "\";\nSBK_UNUSED(fullName)\n";
-    }
+    if (needsArgumentErrorHandling(overloadData))
+        s << "Shiboken::AutoDecRef errInfo{};\n";
+
+    s << "static const char fullName[] = \"" << fullPythonFunctionName(rfunc, true)
+        << "\";\nSBK_UNUSED(fullName)\n";
+
     if (maxArgs > 0) {
         s << "int overloadId = -1;\n"
             << PYTHON_TO_CPPCONVERSION_STRUCT << ' ' << PYTHON_TO_CPP_VAR;
@@ -2389,6 +2390,12 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
     if (overloadData.maxArgs() > 0)
         writeOverloadedFunctionDecisor(s, overloadData, errorReturn);
 
+    // Handles Python Multiple Inheritance
+    QString pre = needsMetaObject ? u"bool usesPyMI = "_s : u""_s;
+    s << "\n// PyMI support\n"
+        << pre << "Shiboken::callInheritedInit(self, args, kwds, fullName);\n"
+        << "if (PyErr_Occurred())\n" << indent << errorReturn << outdent << "\n";
+
     writeFunctionCalls(s, overloadData, classContext, errorReturn);
     s << '\n';
 
@@ -2423,7 +2430,7 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
             << "PySide::Signal::updateSourceObject(self);\n"
             << "metaObject = cptr->metaObject(); // <- init python qt properties\n"
             << "if (!errInfo.isNull() && PyDict_Check(errInfo.object())) {\n" << indent
-                << "if (!PySide::fillQtProperties(self, metaObject, errInfo))\n" << indent
+                << "if (!PySide::fillQtProperties(self, metaObject, errInfo, usesPyMI))\n" << indent
                     << "return " << returnErrorWrongArguments(overloadData, errorReturn) << ";\n"
                     << outdent << outdent
             << "};\n";

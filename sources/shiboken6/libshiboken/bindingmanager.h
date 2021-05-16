@@ -67,6 +67,9 @@ private:
     BindingManagerPrivate *m_d;
 };
 
+LIBSHIBOKEN_API bool callInheritedInit(PyObject *self, PyObject *args, PyObject *kwds,
+                                       const char *fullName);
+
 } // namespace Shiboken
 
 #endif // BINDINGMANAGER_H

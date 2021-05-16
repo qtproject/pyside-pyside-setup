@@ -379,5 +379,66 @@ void BindingManager::visitAllPyObjects(ObjectVisitor visitor, void *data)
     }
 }
 
+static bool isPythonType(PyTypeObject *type)
+{
+    // This is a type which should be called by multiple inheritance.
+    // It is either a pure Python type or a derived PySide type.
+    return !ObjectType::checkType(type) || ObjectType::isUserType(type);
+}
+
+bool callInheritedInit(PyObject *self, PyObject *args, PyObject *kwds,
+                                       const char *fullName)
+{
+    using Shiboken::AutoDecRef;
+
+    static PyObject *const _init = String::createStaticString("__init__");
+
+    // A native C++ self cannot have multiple inheritance.
+    if (!Object::isUserType(self))
+        return false;
+
+    auto *startType = Py_TYPE(self);
+    auto *mro = startType->tp_mro;
+    Py_ssize_t idx, n = PyTuple_GET_SIZE(mro);
+    auto classNameLen = std::strrchr(fullName, '.') - fullName;
+    /* No need to check the last one: it's gonna be skipped anyway.  */
+    for (idx = 0; idx + 1 < n; ++idx) {
+        auto *lookType = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
+        const char *lookName = lookType->tp_name;
+        auto lookLen = long(std::strlen(lookName));
+        if (std::strncmp(lookName, fullName, classNameLen) == 0 && lookLen == classNameLen)
+            break;
+    }
+    // We are now at the first non-Python class `QObject`.
+    // mro: ('C', 'A', 'QObject', 'Object', 'B', 'object')
+    // We want to catch class `B` and call its `__init__`.
+    for (idx += 1; idx + 1 < n; ++idx) {
+        auto *t = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
+        if (isPythonType(t))
+            break;
+    }
+    if (idx >= n)
+        return false;
+
+    auto *obSubType = PyTuple_GET_ITEM(mro, idx);
+    auto *subType = reinterpret_cast<PyTypeObject *>(obSubType);
+    if (subType == &PyBaseObject_Type)
+        return false;
+    const Py_ssize_t nargs = PyTuple_GET_SIZE(args);
+    AutoDecRef func(PyObject_GetAttr(obSubType, _init));
+    AutoDecRef newArgs(PyTuple_New(1 + nargs));
+    auto *newArgsOb = newArgs.object();
+    Py_INCREF(self);
+    PyTuple_SET_ITEM(newArgsOb, 0, self);
+    for (idx = 0; idx < nargs; ++idx) {
+        auto *ob = PyTuple_GET_ITEM(args, idx);
+        Py_INCREF(ob);
+        PyTuple_SET_ITEM(newArgsOb, 1 + idx, ob);
+    }
+    // Note: This can fail, so please always check the error status.
+    AutoDecRef result(PyObject_Call(func, newArgs, kwds));
+    return true;
+}
+
 } // namespace Shiboken
 

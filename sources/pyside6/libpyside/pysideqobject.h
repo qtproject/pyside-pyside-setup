@@ -22,7 +22,8 @@ namespace PySide
 /// \param metaObj QMetaObject of \p qObj.
 /// \param kwds key->value dictonary.
 /// \return True if everything goes well, false with a Python error set otherwise.
-PYSIDE_API bool fillQtProperties(PyObject *qObj, const QMetaObject *metaObj, PyObject *kwds);
+PYSIDE_API bool fillQtProperties(PyObject *qObj, const QMetaObject *metaObj,
+                                 PyObject *kwds, bool allowErrors);
 
 PYSIDE_API void initDynamicMetaObject(PyTypeObject *type, const QMetaObject *base,
                                       std::size_t cppObjSize);

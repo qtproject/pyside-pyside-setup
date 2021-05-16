@@ -299,7 +299,8 @@ static bool _setProperty(PyObject *qObj, PyObject *name, PyObject *value, bool *
     return true;
 }
 
-bool fillQtProperties(PyObject *qObj, const QMetaObject *metaObj, PyObject *kwds)
+bool fillQtProperties(PyObject *qObj, const QMetaObject *metaObj,
+                      PyObject *kwds, bool allowErrors)
 {
 
     PyObject *key, *value;
@@ -330,6 +331,10 @@ bool fillQtProperties(PyObject *qObj, const QMetaObject *metaObj, PyObject *kwds
                 if (!_setProperty(qObj, key, value, &accept))
                     return false;
             }
+        }
+        if (allowErrors) {
+            PyErr_Clear();
+            continue;
         }
         if (!accept) {
             PyErr_Format(PyExc_AttributeError, "'%s' is not a Qt property or a signal",

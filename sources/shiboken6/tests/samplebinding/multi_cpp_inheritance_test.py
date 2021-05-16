@@ -74,11 +74,16 @@ class MultipleCppDerivedReverseTest(unittest.TestCase):
         self.assertEqual(s.objectName(), "Hi")
 
     def testComplexInstanciation(self):
-        c = ComplexUseCaseReverse("Hi")
-        c.setObjectName(c)
-        self.assertEqual(c.objectName(), "Hi")
-        c.setX(2);
-        self.assertEqual(c, Point(2, 0))
+        # PYSIDE-1564: This test can no longer work because of this MRO:
+        # ('ComplexUseCaseReverse', 'Point', 'SimpleUseCase2', 'SimpleUseCase',
+        #  'ObjectType', 'Str', 'Object', 'object')
+        # By multiple inheritance Point would be called first but has no argument.
+        with self.assertRaises(TypeError):
+            c = ComplexUseCaseReverse("Hi")
+        # c.setObjectName(c)
+        # self.assertEqual(c.objectName(), "Hi")
+        # c.setX(2);
+        # self.assertEqual(c, Point(2, 0))
 
 if __name__ == '__main__':
     unittest.main()
