@@ -43,86 +43,87 @@
 
 import sys
 from PySide6.QtCharts import QChart, QChartView, QLineSeries, QValueAxis
-from PySide6.QtCore import QPointF
+from PySide6.QtCore import QPointF, Slot
 from PySide6.QtMultimedia import (QAudioDeviceInfo, QAudioFormat,
-        QAudioInput)
+        QAudioInput, QMediaDevices)
 from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox
 
-sampleCount = 2000
-resolution = 4
+
+SAMPLE_COUNT = 2000
+
+
+RESOLUTION = 4
 
 
 class MainWindow(QMainWindow):
     def __init__(self, device):
         super().__init__()
 
-        self.series = QLineSeries()
-        self.chart = QChart()
-        self.chart.addSeries(self.series)
-        self.axisX = QValueAxis()
-        self.axisX.setRange(0, sampleCount)
-        self.axisX.setLabelFormat("%g")
-        self.axisX.setTitleText("Samples")
-        self.axisY = QValueAxis()
-        self.axisY.setRange(-1, 1)
-        self.axisY.setTitleText("Audio level")
-        self.chart.setAxisX(self.axisX, self.series)
-        self.chart.setAxisY(self.axisY, self.series)
-        self.chart.legend().hide()
-        self.chart.setTitle(f"Data from the microphone ({device.deviceName()})")
+        self._series = QLineSeries()
+        self._chart = QChart()
+        self._chart.addSeries(self._series)
+        self._axis_x = QValueAxis()
+        self._axis_x.setRange(0, SAMPLE_COUNT)
+        self._axis_x.setLabelFormat("%g")
+        self._axis_x.setTitleText("Samples")
+        self._axis_y = QValueAxis()
+        self._axis_y.setRange(-1, 1)
+        self._axis_y.setTitleText("Audio level")
+        self._chart.setAxisX(self._axis_x, self._series)
+        self._chart.setAxisY(self._axis_y, self._series)
+        self._chart.legend().hide()
+        name = device.description()
+        self._chart.setTitle(f"Data from the microphone ({name})")
 
-        formatAudio = QAudioFormat()
-        formatAudio.setSampleRate(8000)
-        formatAudio.setChannelCount(1)
-        formatAudio.setSampleSize(8)
-        formatAudio.setCodec("audio/pcm")
-        formatAudio.setByteOrder(QAudioFormat.LittleEndian)
-        formatAudio.setSampleType(QAudioFormat.UnSignedInt)
+        format_audio = QAudioFormat()
+        format_audio.setSampleRate(8000)
+        format_audio.setChannelCount(1)
+        format_audio.setSampleFormat(QAudioFormat.UInt8)
 
-        self.audioInput = QAudioInput(device, formatAudio, self)
-        self.ioDevice = self.audioInput.start()
-        self.ioDevice.readyRead.connect(self._readyRead)
+        self._audio_input = QAudioInput(device, format_audio, self)
+        self._io_device = self._audio_input.start()
+        self._io_device.readyRead.connect(self._readyRead)
 
-        self.chartView = QChartView(self.chart)
-        self.setCentralWidget(self.chartView)
+        self._chart_view = QChartView(self._chart)
+        self.setCentralWidget(self._chart_view)
 
-        self.buffer = [QPointF(x, 0) for x in range(sampleCount)]
-        self.series.append(self.buffer)
+        self._buffer = [QPointF(x, 0) for x in range(SAMPLE_COUNT)]
+        self._series.append(self._buffer)
 
     def closeEvent(self, event):
-        if self.audioInput is not None:
-            self.audioInput.stop()
+        if self._audio_input is not None:
+            self._audio_input.stop()
         event.accept()
 
+    @Slot()
     def _readyRead(self):
-        data = self.ioDevice.readAll()
-        availableSamples = data.size() // resolution
+        data = self._io_device.readAll()
+        available_samples = data.size() // RESOLUTION
         start = 0
-        if (availableSamples < sampleCount):
-            start = sampleCount - availableSamples
+        if (available_samples < SAMPLE_COUNT):
+            start = SAMPLE_COUNT - available_samples
             for s in range(start):
-                self.buffer[s].setY(self.buffer[s + availableSamples].y())
+                self._buffer[s].setY(self._buffer[s + available_samples].y())
 
-        dataIndex = 0
-        for s in range(start, sampleCount):
-            value = (ord(data[dataIndex]) - 128) / 128
-            self.buffer[s].setY(value)
-            dataIndex = dataIndex + resolution
-        self.series.replace(self.buffer)
+        data_index = 0
+        for s in range(start, SAMPLE_COUNT):
+            value = (ord(data[data_index]) - 128) / 128
+            self._buffer[s].setY(value)
+            data_index = data_index + RESOLUTION
+        self._series.replace(self._buffer)
 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
-    inputDevice = QAudioDeviceInfo.defaultInputDevice()
-    if (inputDevice.isNull()):
+    input_devices = QMediaDevices.audioInputs()
+    if not input_devices:
         QMessageBox.warning(None, "audio", "There is no audio input device available.")
         sys.exit(-1)
-
-    mainWin = MainWindow(inputDevice)
-    mainWin.setWindowTitle("audio")
-    availableGeometry = app.desktop().availableGeometry(mainWin)
-    size = availableGeometry.height() * 3 / 4
-    mainWin.resize(size, size)
-    mainWin.show()
+    main_win = MainWindow(input_devices[0])
+    main_win.setWindowTitle("audio")
+    available_geometry = main_win.screen().availableGeometry()
+    size = available_geometry.height() * 3 / 4
+    main_win.resize(size, size)
+    main_win.show()
     sys.exit(app.exec())
