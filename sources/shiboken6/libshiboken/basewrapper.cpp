@@ -1248,7 +1248,8 @@ bool setCppPointer(SbkObject *sbkObj, PyTypeObject *desiredType, void *cptr)
 
     const bool alreadyInitialized = sbkObj->d->cptr[idx] != nullptr;
     if (alreadyInitialized)
-        PyErr_SetString(PyExc_RuntimeError, "You can't initialize an object twice!");
+        PyErr_Format(PyExc_RuntimeError, "You can't initialize an %s object in class %s twice!",
+                                         desiredType->tp_name, type->tp_name);
     else
         sbkObj->d->cptr[idx] = cptr;
 
