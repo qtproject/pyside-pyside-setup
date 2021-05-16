@@ -4,10 +4,12 @@
 '''Helper classes and functions'''
 
 import gc
+import sys
 import unittest
 
-from PySide6.QtWidgets import QApplication
-
+# This version avoids explicit import in order to adapt to the
+# import decision of the main module.
+# This should work with every compatible library.
 
 class UsesQApplication(unittest.TestCase):
     '''Helper class to provide QApplication instances'''
@@ -16,7 +18,8 @@ class UsesQApplication(unittest.TestCase):
 
     def setUp(self):
         '''Creates the QApplication instance'''
-
+        module = sys.modules[list(_ for _ in sys.modules if _.endswith(".QtWidgets"))[0]]
+        QApplication = getattr(module, "QApplication")
         # Simple way of making instance a singleton
         super(UsesQApplication, self).setUp()
         self.app = QApplication.instance() or QApplication([])
