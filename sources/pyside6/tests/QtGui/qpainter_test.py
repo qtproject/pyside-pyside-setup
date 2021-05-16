@@ -11,7 +11,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.usesqguiapplication import UsesQGuiApplication
+from helper.usesqapplication import UsesQApplication
 from PySide6.QtGui import QPainter, QLinearGradient, QImage
 from PySide6.QtCore import QLine, QLineF, QPoint, QPointF, QRect, QRectF, Qt
 
@@ -23,7 +23,7 @@ except ModuleNotFoundError:
     HAVE_NUMPY = False
 
 
-class QPainterDrawText(UsesQGuiApplication):
+class QPainterDrawText(UsesQApplication):
     def setUp(self):
         super(QPainterDrawText, self).setUp()
         self.image = QImage(32, 32, QImage.Format_ARGB32)
@@ -100,7 +100,7 @@ class QPainterDrawText(UsesQGuiApplication):
             self.painter.drawPointsNp(x, y)
 
 
-class SetBrushWithOtherArgs(UsesQGuiApplication):
+class SetBrushWithOtherArgs(UsesQApplication):
     '''Using qpainter.setBrush with args other than QBrush'''
 
     def testSetBrushGradient(self):

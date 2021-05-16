@@ -13,7 +13,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtCore import QObject, SIGNAL, QFile, QThread, QTimer, Qt
-from helper.usesqcoreapplication import UsesQCoreApplication
+from helper.usesqapplication import UsesQApplication
 
 
 class MyThread(QThread):
@@ -22,7 +22,7 @@ class MyThread(QThread):
         self.emit(SIGNAL("test(const QString&)"), "INdT - PySide")
 
 
-class TestThreadSignal(UsesQCoreApplication):
+class TestThreadSignal(UsesQApplication):
 
     __called__ = True
 

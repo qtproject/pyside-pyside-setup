@@ -14,7 +14,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtCore import QObject, QThread, QTimer, Slot
-from helper.usesqcoreapplication import UsesQCoreApplication
+from helper.usesqapplication import UsesQApplication
 
 
 class ReceiverBase(QObject):
@@ -39,9 +39,9 @@ class TestThread(QThread):
         pass
 
 
-class SignalAcrossThreads(UsesQCoreApplication):
+class SignalAcrossThreads(UsesQApplication):
     def setUp(self):
-        UsesQCoreApplication.setUp(self)
+        UsesQApplication.setUp(self)
         self._timer_tick = 0
         self._timer = QTimer()
         self._timer.setInterval(20)
@@ -49,7 +49,7 @@ class SignalAcrossThreads(UsesQCoreApplication):
         self._worker_thread = TestThread()
 
     def tearDown(self):
-        UsesQCoreApplication.tearDown(self)
+        UsesQApplication.tearDown(self)
 
     @Slot()
     def _control_test(self):

@@ -15,7 +15,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtCore import QObject, QTimer, QCoreApplication, Signal
-from helper.usesqcoreapplication import UsesQCoreApplication
+from helper.usesqapplication import UsesQApplication
 
 
 class WatchDog(QObject):
@@ -32,12 +32,12 @@ class WatchDog(QObject):
             self.watched.exit_app_cb()
 
 
-class TestSingleShot(UsesQCoreApplication):
+class TestSingleShot(UsesQApplication):
     '''Test case for QTimer.singleShot'''
 
     def setUp(self):
         # Acquire resources
-        UsesQCoreApplication.setUp(self)
+        UsesQApplication.setUp(self)
         self.watchdog = WatchDog(self)
         self.called = False
 
@@ -47,7 +47,7 @@ class TestSingleShot(UsesQCoreApplication):
         del self.called
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
-        UsesQCoreApplication.tearDown(self)
+        UsesQApplication.tearDown(self)
 
     def callback(self):
         self.called = True
@@ -64,11 +64,11 @@ class SigEmitter(QObject):
     sig1 = Signal()
 
 
-class TestSingleShotSignal(UsesQCoreApplication):
+class TestSingleShotSignal(UsesQApplication):
     '''Test case for QTimer.singleShot connecting to signals'''
 
     def setUp(self):
-        UsesQCoreApplication.setUp(self)
+        UsesQApplication.setUp(self)
         self.watchdog = WatchDog(self)
         self.called = False
 
@@ -77,7 +77,7 @@ class TestSingleShotSignal(UsesQCoreApplication):
         del self.called
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
-        UsesQCoreApplication.tearDown(self)
+        UsesQApplication.tearDown(self)
 
     def callback(self):
         self.called = True

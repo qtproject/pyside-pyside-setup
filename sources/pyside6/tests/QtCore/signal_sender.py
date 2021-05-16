@@ -10,7 +10,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.usesqcoreapplication import UsesQCoreApplication
+from helper.usesqapplication import UsesQApplication
 
 from PySide6.QtCore import QCoreApplication, QObject, QTimer, Signal, Slot
 
@@ -39,7 +39,7 @@ class DerivedReceiver(Receiver):
     pass
 
 
-class TestSignalSender(UsesQCoreApplication):
+class TestSignalSender(UsesQApplication):
     """Test PYSIDE-2144/1295, check that QObject::sender() works also if it is
        routed via GlobalReceiverV2 in case of a non-C++ slot (Python callback,
        as for derived classes)."""

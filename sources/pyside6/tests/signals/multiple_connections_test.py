@@ -14,7 +14,7 @@ init_test_paths(False)
 from PySide6.QtCore import QObject, SIGNAL, QProcess
 
 from helper.basicpyslotcase import BasicPySlotCase
-from helper.usesqcoreapplication import UsesQCoreApplication
+from helper.usesqapplication import UsesQApplication
 
 
 class MultipleSignalConnections(unittest.TestCase):
@@ -42,7 +42,7 @@ class MultipleSignalConnections(unittest.TestCase):
             self.assertTrue(rec.called)
 
 
-class PythonMultipleSlots(UsesQCoreApplication, MultipleSignalConnections):
+class PythonMultipleSlots(UsesQApplication, MultipleSignalConnections):
     '''Multiple connections to python signals'''
 
     def testPythonSignal(self):
@@ -57,7 +57,7 @@ class PythonMultipleSlots(UsesQCoreApplication, MultipleSignalConnections):
                       SIGNAL('foobar(int)')), receivers, (0, ))
 
 
-class QProcessMultipleSlots(UsesQCoreApplication, MultipleSignalConnections):
+class QProcessMultipleSlots(UsesQApplication, MultipleSignalConnections):
     '''Multiple connections to QProcess signals'''
 
     def testQProcessStarted(self):

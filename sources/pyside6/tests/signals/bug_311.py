@@ -12,7 +12,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtCore import QDate, QObject, Signal
-from helper.usesqcoreapplication import UsesQCoreApplication
+from helper.usesqapplication import UsesQApplication
 
 
 class DerivedDate(QDate):
@@ -26,7 +26,7 @@ class Emitter(QObject):
     tupleSignal = Signal(tuple)
 
 
-class SignaltoSignalTest(UsesQCoreApplication):
+class SignaltoSignalTest(UsesQApplication):
     def myCb(self, dt):
         self._dt = dt
 

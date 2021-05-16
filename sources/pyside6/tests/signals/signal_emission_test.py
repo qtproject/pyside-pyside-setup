@@ -17,10 +17,10 @@ init_test_paths(False)
 from PySide6.QtCore import QObject, SIGNAL, SLOT, QProcess, QTimeLine
 
 from helper.basicpyslotcase import BasicPySlotCase
-from helper.usesqcoreapplication import UsesQCoreApplication
+from helper.usesqapplication import UsesQApplication
 
 
-class ArgsOnEmptySignal(UsesQCoreApplication):
+class ArgsOnEmptySignal(UsesQApplication):
     '''Trying to emit a signal without arguments passing some arguments'''
 
     def testArgsToNoArgsSignal(self):
@@ -29,7 +29,7 @@ class ArgsOnEmptySignal(UsesQCoreApplication):
         self.assertRaises(TypeError, process.emit, SIGNAL('started()'), 42)
 
 
-class MoreArgsOnEmit(UsesQCoreApplication):
+class MoreArgsOnEmit(UsesQApplication):
     '''Trying to pass more args than needed to emit (signals with args)'''
 
     def testMoreArgs(self):
@@ -43,7 +43,7 @@ class Dummy(QObject):
     pass
 
 
-class PythonSignalToCppSlots(UsesQCoreApplication):
+class PythonSignalToCppSlots(UsesQApplication):
     '''Connect python signals to C++ slots'''
 
     def testWithoutArgs(self):
@@ -75,7 +75,7 @@ class PythonSignalToCppSlots(UsesQCoreApplication):
         self.assertEqual(timeline.currentTime(), current + 42)
 
 
-class CppSignalsToCppSlots(UsesQCoreApplication):
+class CppSignalsToCppSlots(UsesQApplication):
     '''Connection between C++ slots and signals'''
 
     def testWithoutArgs(self):
@@ -107,7 +107,7 @@ def someSlot(args=None):
     called = True
 
 
-class DynamicSignalsToFuncPartial(UsesQCoreApplication):
+class DynamicSignalsToFuncPartial(UsesQApplication):
 
     def testIt(self):
         global called
@@ -118,14 +118,14 @@ class DynamicSignalsToFuncPartial(UsesQCoreApplication):
         self.assertTrue(called)
 
 
-class EmitUnknownType(UsesQCoreApplication):
+class EmitUnknownType(UsesQApplication):
     def testIt(self):
         a = QObject()
         a.connect(SIGNAL('foobar(Dummy)'), lambda x: 42)  # Just connect with an unknown type
         self.assertRaises(TypeError, a.emit, SIGNAL('foobar(Dummy)'), 22)
 
 
-class EmitEnum(UsesQCoreApplication):
+class EmitEnum(UsesQApplication):
     """Test emission of enum arguments"""
 
     def slot(self, arg):

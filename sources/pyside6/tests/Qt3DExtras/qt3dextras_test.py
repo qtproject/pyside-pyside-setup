@@ -13,7 +13,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.usesqguiapplication import UsesQGuiApplication
+from helper.usesqapplication import UsesQApplication
 
 from PySide6.QtCore import (Property, QObject, QPropertyAnimation, QTimer, Signal, Slot)
 from PySide6.QtGui import (QGuiApplication, QMatrix4x4, QQuaternion, QVector3D, QWindow)
@@ -123,7 +123,7 @@ class Window(Qt3DExtras.Qt3DWindow):
         self.sphereEntity.addComponent(self.material)
 
 
-class Qt3DExtrasTestCase(UsesQGuiApplication):
+class Qt3DExtrasTestCase(UsesQApplication):
     '''Tests related to Q3DExtras'''
 
     def test3DExtras(self):

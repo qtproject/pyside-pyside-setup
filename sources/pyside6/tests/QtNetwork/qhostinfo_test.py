@@ -12,7 +12,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.usesqcoreapplication import UsesQCoreApplication
+from helper.usesqapplication import UsesQApplication
 from PySide6.QtCore import (QCoreApplication, QElapsedTimer, QObject, QThread,
                             Slot, SLOT)
 from PySide6.QtNetwork import QHostInfo
@@ -45,10 +45,10 @@ class Receiver(QObject):
         self._slot_called = True
 
 
-class QHostInfoTest(UsesQCoreApplication):
+class QHostInfoTest(UsesQApplication):
     '''Test case for QHostInfo.'''
     def setUp(self):
-        UsesQCoreApplication.setUp(self)
+        UsesQApplication.setUp(self)
         self._timer = QElapsedTimer()
 
     def testStringBasedLookup(self):

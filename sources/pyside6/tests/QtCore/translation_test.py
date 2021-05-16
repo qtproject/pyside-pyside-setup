@@ -15,10 +15,10 @@ init_test_paths(False)
 
 from PySide6.QtCore import QObject, QTranslator, QCoreApplication
 
-from helper.usesqcoreapplication import UsesQCoreApplication
+from helper.usesqapplication import UsesQApplication
 
 
-class TranslationTest(UsesQCoreApplication):
+class TranslationTest(UsesQApplication):
     '''Test case for Qt translation facilities.'''
 
     def setUp(self):

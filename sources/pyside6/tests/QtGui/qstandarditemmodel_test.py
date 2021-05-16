@@ -14,10 +14,10 @@ init_test_paths(False)
 from PySide6.QtCore import QObject
 from PySide6.QtGui import QStandardItemModel, QStandardItem
 from shiboken6 import Shiboken
-from helper.usesqguiapplication import UsesQGuiApplication
+from helper.usesqapplication import UsesQApplication
 
 
-class QStandardItemModelTest(UsesQGuiApplication):
+class QStandardItemModelTest(UsesQApplication):
 
     def setUp(self):
         super(QStandardItemModelTest, self).setUp()
@@ -43,7 +43,7 @@ class QStandardItemModelTest(UsesQGuiApplication):
         self.assertFalse(Shiboken.isValid(root))
 
 
-class QStandardItemModelRef(UsesQGuiApplication):
+class QStandardItemModelRef(UsesQApplication):
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testRefCount(self):
         model = QStandardItemModel(5, 5)

@@ -16,7 +16,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtCore import QObject
-from helper.usesqcoreapplication import UsesQCoreApplication
+from helper.usesqapplication import UsesQApplication
 
 
 def MethodType(func, instance, instanceType):
@@ -31,20 +31,20 @@ class Duck(QObject):
         QObject.childEvent(self, event)
 
 
-class TestDuckPunchingOnQObjectInstance(UsesQCoreApplication):
+class TestDuckPunchingOnQObjectInstance(UsesQApplication):
     '''Test case for duck punching new implementations of C++ virtual methods into object instances.'''
 
     def setUp(self):
         # Acquire resources
         self.duck_childEvent_called = False
-        UsesQCoreApplication.setUp(self)
+        UsesQApplication.setUp(self)
 
     def tearDown(self):
         # Release resources
         del self.duck_childEvent_called
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
-        UsesQCoreApplication.tearDown(self)
+        UsesQApplication.tearDown(self)
 
     def testChildEventMonkeyPatch(self):
         # Test if the new childEvent injected on QObject instance is called from C++

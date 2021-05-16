@@ -14,11 +14,11 @@ init_test_paths(False)
 
 from PySide6.QtCore import QUrl
 from PySide6.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest
-from helper.usesqcoreapplication import UsesQCoreApplication
+from helper.usesqapplication import UsesQApplication
 from httpd import TestServer
 
 
-class AccessManagerCase(UsesQCoreApplication):
+class AccessManagerCase(UsesQApplication):
 
     def setUp(self):
         super(AccessManagerCase, self).setUp()

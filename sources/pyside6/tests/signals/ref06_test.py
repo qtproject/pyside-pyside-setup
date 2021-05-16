@@ -13,7 +13,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtCore import QObject, QCoreApplication, QTimeLine, Signal, Slot
-from helper.usesqcoreapplication import UsesQCoreApplication
+from helper.usesqapplication import UsesQApplication
 
 
 class ExtQObject(QObject):
@@ -28,10 +28,10 @@ class ExtQObject(QObject):
         self.counter += 1
 
 
-class SignaltoSignalTest(UsesQCoreApplication):
+class SignaltoSignalTest(UsesQApplication):
 
     def setUp(self):
-        UsesQCoreApplication.setUp(self)
+        UsesQApplication.setUp(self)
         self.receiver = ExtQObject()
         self.timeline = QTimeLine(100)
 
@@ -40,7 +40,7 @@ class SignaltoSignalTest(UsesQCoreApplication):
         del self.receiver
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
-        UsesQCoreApplication.tearDown(self)
+        UsesQApplication.tearDown(self)
 
     def testSignaltoSignal(self):
         self.timeline.setUpdateInterval(10)

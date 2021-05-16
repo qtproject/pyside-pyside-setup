@@ -16,10 +16,10 @@ init_test_paths(False)
 
 from PySide6.QtGui import QFont, QFontMetrics, QFontMetricsF
 from PySide6.QtCore import QRect, QRectF, Qt, QSize, QSizeF
-from helper.usesqguiapplication import UsesQGuiApplication
+from helper.usesqapplication import UsesQApplication
 
 
-class QFontMetricsTest(UsesQGuiApplication):
+class QFontMetricsTest(UsesQApplication):
     '''Base class for QFontMetrics tests'''
 
     def setUp(self):
@@ -123,7 +123,7 @@ class SizeTest(QFontMetricsTest):
                                          'PySide by INdT', 20, ['aaaa', 'ase'])
 
 
-class QFontMetricsFTest(UsesQGuiApplication):
+class QFontMetricsFTest(UsesQApplication):
     '''Base class for QFontMetrics tests'''
 
     def setUp(self):

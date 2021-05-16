@@ -10,7 +10,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.usesqguiapplication import UsesQGuiApplication
+from helper.usesqapplication import UsesQApplication
 from PySide6.QtCore import QObject, QEvent
 from PySide6.QtGui import QWindow
 
@@ -22,7 +22,7 @@ class MyFilter(QObject):
         return QObject.eventFilter(self, obj, event)
 
 
-class EventFilter(UsesQGuiApplication):
+class EventFilter(UsesQApplication):
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testRefCount(self):
         o = QObject()

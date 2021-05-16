@@ -13,7 +13,7 @@ init_test_paths(False)
 
 from PySide6.QtGui import QPixmap
 
-from helper.usesqguiapplication import UsesQGuiApplication
+from helper.usesqapplication import UsesQApplication
 
 xpm = [
     "27 22 206 2",
@@ -248,7 +248,7 @@ xpm = [
 ]
 
 
-class QStringSequenceTest(UsesQGuiApplication):
+class QStringSequenceTest(UsesQApplication):
     def testQPixmapConstructor(self):
         pixmap1 = QPixmap(xpm)
         self.assertFalse(pixmap1.isNull())

@@ -15,7 +15,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QObject, QCoreApplication
 
-from helper.usesqcoreapplication import UsesQCoreApplication
+from helper.usesqapplication import UsesQApplication
 
 
 class Dummy(QObject):
@@ -34,7 +34,7 @@ class Dummy(QObject):
             self.app.exit(0)
 
 
-class QObjectTimerEvent(UsesQCoreApplication):
+class QObjectTimerEvent(UsesQApplication):
 
     def setUp(self):
         # Acquire resources

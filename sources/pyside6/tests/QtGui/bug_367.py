@@ -12,11 +12,11 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.usesqguiapplication import UsesQGuiApplication
+from helper.usesqapplication import UsesQApplication
 from PySide6.QtGui import QStandardItem, QStandardItemModel
 
 
-class BugTest(UsesQGuiApplication):
+class BugTest(UsesQApplication):
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testCase(self):
         model = QStandardItemModel()

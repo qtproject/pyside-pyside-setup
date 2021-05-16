@@ -14,7 +14,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QImage
-from helper.usesqguiapplication import UsesQGuiApplication
+from helper.usesqapplication import UsesQApplication
 
 
 def create_image():
@@ -23,7 +23,7 @@ def create_image():
     return result
 
 
-class QImageWinTest(UsesQGuiApplication):
+class QImageWinTest(UsesQApplication):
 
     def test_to_hbitmap(self):
         """Test conversion to/from a Windows HBITMAP."""

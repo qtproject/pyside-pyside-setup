@@ -11,7 +11,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from helper.helper import adjust_filename
-from helper.usesqguiapplication import UsesQGuiApplication
+from helper.usesqapplication import UsesQApplication
 
 from PySide6.QtCore import QUrl
 from PySide6.QtGui import QGuiApplication

@@ -10,12 +10,12 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.usesqguiapplication import UsesQGuiApplication
+from helper.usesqapplication import UsesQApplication
 from PySide6.QtGui import QColor, QPixmap
 from PySide6.QtCore import QFile, QIODevice, QObject, QSize, Qt
 
 
-class QPixmapTest(UsesQGuiApplication):
+class QPixmapTest(UsesQApplication):
     def testQVariantConstructor(self):
         obj = QObject()
         pixmap = QPixmap()
@@ -43,7 +43,7 @@ class QPixmapTest(UsesQGuiApplication):
         self.assertTrue(pixmap.loadFromData(data))
 
 
-class QPixmapToImage(UsesQGuiApplication):
+class QPixmapToImage(UsesQApplication):
 
     def testFilledImage(self):
         '''QPixmap.fill + toImage + image.pixel'''

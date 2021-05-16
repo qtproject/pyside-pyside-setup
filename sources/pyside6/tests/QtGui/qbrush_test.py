@@ -15,10 +15,10 @@ init_test_paths(False)
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QBrush
 
-from helper.usesqguiapplication import UsesQGuiApplication
+from helper.usesqapplication import UsesQApplication
 
 
-class Constructor(UsesQGuiApplication):
+class Constructor(UsesQApplication):
     '''Test case for constructor of QBrush'''
 
     def testQColor(self):

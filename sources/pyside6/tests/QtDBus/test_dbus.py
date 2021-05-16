@@ -12,7 +12,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.usesqcoreapplication import UsesQCoreApplication
+from helper.usesqapplication import UsesQApplication
 
 import sys
 from PySide6.QtCore import QCoreApplication
@@ -32,7 +32,7 @@ def service_names():
     return reply.value()
 
 
-class TestDBus(UsesQCoreApplication):
+class TestDBus(UsesQApplication):
     '''Simple Test case for QDBus'''
 
     def test_service_names(self):

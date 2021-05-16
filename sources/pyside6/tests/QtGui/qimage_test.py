@@ -13,11 +13,11 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtGui import QImage
-from helper.usesqguiapplication import UsesQGuiApplication
+from helper.usesqapplication import UsesQApplication
 from xpm_data import xpm
 
 
-class QImageTest(UsesQGuiApplication):
+class QImageTest(UsesQApplication):
     '''Test case for calling setPixel with float as argument'''
 
     def testQImageStringBuffer(self):

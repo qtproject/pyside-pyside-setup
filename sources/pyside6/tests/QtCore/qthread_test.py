@@ -16,7 +16,7 @@ init_test_paths(False)
 from PySide6.QtCore import QThread, QCoreApplication, QObject, QTimer, Slot
 from PySide6.QtCore import QEventLoop
 
-from helper.usesqcoreapplication import UsesQCoreApplication
+from helper.usesqapplication import UsesQApplication
 
 
 class Dummy(QThread):
@@ -31,10 +31,10 @@ class Dummy(QThread):
         self.called = True
 
 
-class QThreadSimpleCase(UsesQCoreApplication):
+class QThreadSimpleCase(UsesQApplication):
 
     def setUp(self):
-        UsesQCoreApplication.setUp(self)
+        UsesQApplication.setUp(self)
         self._started_called = False
         self._finished_called = False
         self.called = False

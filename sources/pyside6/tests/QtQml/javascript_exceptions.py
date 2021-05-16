@@ -11,7 +11,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from helper.helper import quickview_errorstring
-from helper.usesqguiapplication import UsesQGuiApplication
+from helper.usesqapplication import UsesQApplication
 
 from PySide6.QtCore import Slot, Property, Signal, QObject, QUrl
 from PySide6.QtQml import QJSEngine, qmlRegisterType
@@ -54,7 +54,7 @@ class TestClass(QObject):
             test_2 = True
 
 
-class JavaScriptExceptionsTest(UsesQGuiApplication):
+class JavaScriptExceptionsTest(UsesQApplication):
     def test_jsengine(self):
         engine = QJSEngine()
         test_object = TestClass()

@@ -13,13 +13,13 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtCore import QCoreApplication, QTimeLine
-from helper.usesqcoreapplication import UsesQCoreApplication
+from helper.usesqapplication import UsesQApplication
 
 
-class NativeSignalsTest(UsesQCoreApplication):
+class NativeSignalsTest(UsesQApplication):
 
     def setUp(self):
-        UsesQCoreApplication.setUp(self)
+        UsesQApplication.setUp(self)
         self.called = False
         self.timeline = QTimeLine(100)
 
@@ -28,7 +28,7 @@ class NativeSignalsTest(UsesQCoreApplication):
         del self.timeline
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
-        UsesQCoreApplication.tearDown(self)
+        UsesQApplication.tearDown(self)
 
     def testSignalWithIntArgument(self):
 

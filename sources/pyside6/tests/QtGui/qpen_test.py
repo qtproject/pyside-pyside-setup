@@ -10,7 +10,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.usesqguiapplication import UsesQGuiApplication
+from helper.usesqapplication import UsesQApplication
 
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QPen, QPainter, QRasterWindow
@@ -32,7 +32,7 @@ class Painting(QRasterWindow):
         QTimer.singleShot(20, self.close)
 
 
-class QPenTest(UsesQGuiApplication):
+class QPenTest(UsesQApplication):
 
     def testCtorWithCreatedEnums(self):
         '''A simple case of QPen creation using created enums.'''

@@ -15,10 +15,10 @@ init_test_paths(False)
 
 from PySide6.QtGui import QImage, qRgb
 
-from helper.usesqguiapplication import UsesQGuiApplication
+from helper.usesqapplication import UsesQApplication
 
 
-class SetPixelFloat(UsesQGuiApplication):
+class SetPixelFloat(UsesQApplication):
     '''Test case for calling setPixel with float as argument'''
 
     def setUp(self):

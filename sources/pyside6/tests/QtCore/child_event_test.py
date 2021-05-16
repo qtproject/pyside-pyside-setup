@@ -14,7 +14,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtCore import QObject, QTimer, QCoreApplication
-from helper.usesqcoreapplication import UsesQCoreApplication
+from helper.usesqapplication import UsesQApplication
 
 
 class ExtQObject(QObject):
@@ -37,14 +37,14 @@ class ExtQTimer(QTimer):
         self.child_event_received = True
 
 
-class TestChildEvent(UsesQCoreApplication):
+class TestChildEvent(UsesQApplication):
     '''Test case for QObject::childEvent and QTimer::childEvent'''
 
     def setUp(self):
-        UsesQCoreApplication.setUp(self)
+        UsesQApplication.setUp(self)
 
     def tearDown(self):
-        UsesQCoreApplication.tearDown(self)
+        UsesQApplication.tearDown(self)
 
     def testQObject(self):
         parent = ExtQObject()

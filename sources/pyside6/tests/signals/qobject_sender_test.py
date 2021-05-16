@@ -14,7 +14,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtCore import QCoreApplication, QObject, QTimer, SIGNAL
-from helper.usesqcoreapplication import UsesQCoreApplication
+from helper.usesqapplication import UsesQApplication
 
 
 class ExtQTimer(QTimer):
@@ -55,7 +55,7 @@ class ObjectSenderCheckOnReceiverTest(unittest.TestCase):
         self.assertEqual(sender, recv.the_sender)
 
 
-class ObjectSenderWithQAppTest(UsesQCoreApplication):
+class ObjectSenderWithQAppTest(UsesQApplication):
     '''Test case for QObject.sender() method with QApplication.'''
 
     def testSenderCppSignal(self):
@@ -82,7 +82,7 @@ class ObjectSenderWithQAppTest(UsesQCoreApplication):
         self.assertEqual(sender, recv.the_sender)
 
 
-class ObjectSenderWithQAppCheckOnReceiverTest(UsesQCoreApplication):
+class ObjectSenderWithQAppCheckOnReceiverTest(UsesQApplication):
     '''Test case for QObject.sender() method with QApplication.'''
 
     def testSenderCppSignal(self):

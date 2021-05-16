@@ -15,7 +15,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QObject, SIGNAL, QProcess
 
-from helper.usesqcoreapplication import UsesQCoreApplication
+from helper.usesqapplication import UsesQApplication
 
 
 class Dummy(QObject):
@@ -44,7 +44,7 @@ class BasicCase(unittest.TestCase):
         self.assertEqual(obj.arg, arg)
 
 
-class QtSigLambda(UsesQCoreApplication):
+class QtSigLambda(UsesQApplication):
 
     qapplication = True
 

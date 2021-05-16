@@ -17,7 +17,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QObject
 
-#from helper.usesqcoreapplication import UsesQCoreApplication
+#from helper.usesqapplication import UsesQApplication
 
 
 class QObjectTrTest(unittest.TestCase):

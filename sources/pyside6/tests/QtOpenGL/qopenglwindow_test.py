@@ -12,7 +12,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.usesqguiapplication import UsesQGuiApplication
+from helper.usesqapplication import UsesQApplication
 
 from PySide6.QtCore import QSize, QTimer, Qt
 from PySide6.QtGui import (QColor, QGuiApplication, QImage, QOpenGLContext,
@@ -77,7 +77,7 @@ class OpenGLWindow(QOpenGLWindow):
         self.m_functions.glViewport(0, 0, self.width(), self.height())
 
 
-class QOpenGLWindowTest(UsesQGuiApplication):
+class QOpenGLWindowTest(UsesQApplication):
     # On macOS, glClear(), glViewport() are rejected due to GLbitfield/GLint not being resolved properly
     def test(self):
         openGlWindow = OpenGLWindow()

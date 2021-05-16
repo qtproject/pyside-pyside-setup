@@ -13,10 +13,10 @@ init_test_paths(False)
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QKeySequence, qt_set_sequence_auto_mnemonic
 
-from helper.usesqguiapplication import UsesQGuiApplication
+from helper.usesqapplication import UsesQApplication
 
 
-class QKeySequenceTest(UsesQGuiApplication):
+class QKeySequenceTest(UsesQApplication):
 
     def testGetItemOperator(self):
         # bug #774

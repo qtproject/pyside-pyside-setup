@@ -15,10 +15,10 @@ from PySide6.QtCore import (QObject, QParallelAnimationGroup,
                             QPropertyAnimation, QTimer, SIGNAL)
 from PySide6.QtStateMachine import (QFinalState, QState, QStateMachine)
 
-from helper.usesqcoreapplication import UsesQCoreApplication
+from helper.usesqapplication import UsesQApplication
 
 
-class QStateMachineTest(UsesQCoreApplication):
+class QStateMachineTest(UsesQApplication):
 
     def cb(self, *args):
         self.assertEqual(self.machine.defaultAnimations(), [self.anim])
@@ -44,7 +44,7 @@ class QStateMachineTest(UsesQCoreApplication):
         self.app.exec()
 
 
-class QSetConverterTest(UsesQCoreApplication):
+class QSetConverterTest(UsesQApplication):
     '''Test converter of QSet toPython using QStateAnimation.configuration'''
 
     def testBasic(self):

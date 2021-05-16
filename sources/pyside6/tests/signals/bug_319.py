@@ -12,7 +12,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtCore import QObject, Signal, Slot
-from helper.usesqcoreapplication import UsesQCoreApplication
+from helper.usesqapplication import UsesQApplication
 
 
 class Listener(QObject):
@@ -31,7 +31,7 @@ class Communicate(QObject):
     speak = Signal(tuple)
 
 
-class SignaltoSignalTest(UsesQCoreApplication):
+class SignaltoSignalTest(UsesQApplication):
     def testBug(self):
         someone = Communicate()
         someone2 = Listener()

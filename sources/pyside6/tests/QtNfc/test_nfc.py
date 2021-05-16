@@ -15,10 +15,10 @@ init_test_paths(False)
 
 from PySide6.QtNfc import QNearFieldManager
 
-from helper.usesqcoreapplication import UsesQCoreApplication
+from helper.usesqapplication import UsesQApplication
 
 
-class TestNfc(UsesQCoreApplication):
+class TestNfc(UsesQApplication):
 
     def test(self):
         manager = QNearFieldManager()

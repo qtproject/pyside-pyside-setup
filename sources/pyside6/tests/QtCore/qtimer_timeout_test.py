@@ -14,7 +14,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtCore import QObject, QTimer, SIGNAL
-from helper.usesqcoreapplication import UsesQCoreApplication
+from helper.usesqapplication import UsesQApplication
 
 
 class WatchDog(QObject):
@@ -31,12 +31,12 @@ class WatchDog(QObject):
             self.watched.exit_app_cb()
 
 
-class TestTimeoutSignal(UsesQCoreApplication):
+class TestTimeoutSignal(UsesQApplication):
     '''Test case to check if the signals are really being caught'''
 
     def setUp(self):
         # Acquire resources
-        UsesQCoreApplication.setUp(self)
+        super().setUp()
         self.watchdog = WatchDog(self)
         self.timer = QTimer()
         self.called = False
@@ -48,7 +48,7 @@ class TestTimeoutSignal(UsesQCoreApplication):
         del self.called
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
-        UsesQCoreApplication.tearDown(self)
+        super().tearDown()
 
     def callback(self, *args):
         # Default callback

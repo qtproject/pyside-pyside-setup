@@ -11,10 +11,10 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtGui import QTextLayout, QTextOption
-from helper.usesqguiapplication import UsesQGuiApplication
+from helper.usesqapplication import UsesQApplication
 
 
-class QTextLineTest(UsesQGuiApplication):
+class QTextLineTest(UsesQApplication):
 
     def testCursorToX(self):
         textLayout = QTextLayout()

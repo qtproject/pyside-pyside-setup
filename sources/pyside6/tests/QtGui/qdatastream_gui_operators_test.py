@@ -13,10 +13,10 @@ init_test_paths(False)
 from PySide6.QtCore import QDataStream, QByteArray, QIODevice, Qt
 from PySide6.QtGui import QPixmap, QColor
 
-from helper.usesqguiapplication import UsesQGuiApplication
+from helper.usesqapplication import UsesQApplication
 
 
-class QPixmapQDatastream(UsesQGuiApplication):
+class QPixmapQDatastream(UsesQApplication):
     '''QDataStream <<>> QPixmap'''
 
     def setUp(self):

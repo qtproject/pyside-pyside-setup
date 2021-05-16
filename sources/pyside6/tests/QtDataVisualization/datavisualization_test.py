@@ -13,7 +13,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.usesqguiapplication import UsesQGuiApplication
+from helper.usesqapplication import UsesQApplication
 from PySide6.QtCore import QTimer
 from PySide6.QtDataVisualization import (Q3DBars, QBar3DSeries, QBarDataItem,
                                          QBarDataProxy, QCategory3DAxis,
@@ -35,7 +35,7 @@ def dataToBarDataArray(data):
     return result
 
 
-class QtDataVisualizationTestCase(UsesQGuiApplication):
+class QtDataVisualizationTestCase(UsesQApplication):
     '''Tests related to QtDataVisualization'''
 
     def testBars(self):

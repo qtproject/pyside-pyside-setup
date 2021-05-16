@@ -16,7 +16,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import QObject, QTimerEvent
 
-from helper.usesqcoreapplication import UsesQCoreApplication
+from helper.usesqapplication import UsesQApplication
 
 
 class FilterObject(QObject):
@@ -63,14 +63,14 @@ class FilteredObject(QObject):
             self.app.quit()
 
 
-class TestQObjectEventFilterPython(UsesQCoreApplication):
+class TestQObjectEventFilterPython(UsesQApplication):
     '''QObject.eventFilter - Reimplemented in python
     Filters 5 TimerEvents and then bypasses the other events to the
     timerEvent method. After 5 runs, the timerEvent method will ask
     the core application to exit'''
     def setUp(self):
         # Acquire resources
-        UsesQCoreApplication.setUp(self)
+        UsesQApplication.setUp(self)
         self.obj_filter = FilterObject(event_type=QTimerEvent)
 
     def tearDown(self):
@@ -78,7 +78,7 @@ class TestQObjectEventFilterPython(UsesQCoreApplication):
         del self.obj_filter
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
-        UsesQCoreApplication.tearDown(self)
+        UsesQApplication.tearDown(self)
 
     def testEventFilter(self):
         # QObject.eventFilter reimplemented in python
