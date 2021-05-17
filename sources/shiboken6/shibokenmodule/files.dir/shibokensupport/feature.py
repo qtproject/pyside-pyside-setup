@@ -55,6 +55,7 @@ The select id `-1` has the spectial meaning "ignore this module".
 """
 
 import sys
+from contextlib import contextmanager
 
 all_feature_names = [
     "snake_case",
@@ -128,12 +129,7 @@ def feature_import(name, *args, **kwargs):
 
         # This is an `import from` statement that corresponds to `IMPORT_NAME`.
         # The following `IMPORT_FROM` will handle errors. (Confusing, ofc.)
-        flag = 0
-        for feature in args[2]:
-            if feature in _really_all_feature_names:
-                flag |= globals()[feature]
-            else:
-                raise SyntaxError(f"PySide feature {feature} is not defined")
+        flag = get_select_id(args[2])
 
         flag |= existing & 255 if isinstance(existing, int) and existing >= 0 else 0
         pyside_feature_dict[importing_module] = flag
@@ -197,5 +193,36 @@ def _current_selection(flag):
             if (1 << idx) & flag:
                 names.append(name)
     return names
+
+
+def get_select_id(feature_names):
+    flag = 0
+    for feature in feature_names:
+        if feature in _really_all_feature_names:
+            flag |= globals()[feature]
+        else:
+            raise SyntaxError(f"PySide feature {feature} is not defined")
+    return flag
+
+
+@contextmanager
+def force_selection(select_id, mod_name):
+    """
+    This function is for generating pyi files with features.
+    The selection id is set globally after performing the unswitched
+    import.
+
+    """
+    __init__()
+    saved_feature_dict = pyside_feature_dict.copy()
+    for name in pyside_feature_dict:
+        set_selection(0, name)
+    __import__(mod_name)
+    for name in pyside_feature_dict.copy():
+        set_selection(select_id, name)
+    try:
+        yield
+    finally:
+        pyside_feature_dict.update(saved_feature_dict)
 
 #eof

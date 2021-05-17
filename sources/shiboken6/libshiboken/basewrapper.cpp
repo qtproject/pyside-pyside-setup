@@ -557,17 +557,29 @@ int SbkObjectType_GetReserved(PyTypeObject *type)
 
 void SbkObjectType_SetReserved(PyTypeObject *type, int value)
 {
-    PepType_SOTP(reinterpret_cast<SbkObjectType *>(type))->pyside_reserved_bits = value;
+    auto ptr = PepType_SOTP(reinterpret_cast<SbkObjectType *>(type));
+    // PYSIDE-1019: During import PepType_SOTP is still zero.
+    if (ptr == nullptr)
+        return;
+    ptr->pyside_reserved_bits = value;
 }
 
 const char **SbkObjectType_GetPropertyStrings(PyTypeObject *type)
 {
-    return PepType_SOTP(type)->propertyStrings;
+    auto ptr = PepType_SOTP(reinterpret_cast<SbkObjectType *>(type));
+    // PYSIDE-1019: During import PepType_SOTP is still zero.
+    if (ptr == nullptr)
+        return nullptr;
+    return ptr->propertyStrings;
 }
 
 void SbkObjectType_SetPropertyStrings(PyTypeObject *type, const char **strings)
 {
-    PepType_SOTP(reinterpret_cast<SbkObjectType *>(type))->propertyStrings = strings;
+    auto ptr = PepType_SOTP(reinterpret_cast<SbkObjectType *>(type));
+    // PYSIDE-1019: During import PepType_SOTP is still zero.
+    if (ptr == nullptr)
+        return;
+    ptr->propertyStrings = strings;
 }
 
 //

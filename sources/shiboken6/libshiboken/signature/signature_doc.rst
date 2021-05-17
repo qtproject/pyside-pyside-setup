@@ -180,7 +180,7 @@ layout.py
 
 As more applications used the signature module, different formatting of signatures
 was needed. To support that, we created the function ``create_signature``, which
-has a parameter to choose from some prefefined layouts.
+has a parameter to choose from some predefined layouts.
 
 
 *typing27.py*
@@ -326,6 +326,15 @@ not only signatures but also constants and enums of all PySide modules.
 This serves as an extra challenge that has a very positive effect on
 the completeness and correctness of signatures.
 
+The module has a ``--feature`` option to generate modified .pyi files.
+A shortcut for this command is ``pyside6-genpyi``.
+
+A useful command to change all .pyi files to use all features is
+
+.. code-block:: python
+
+    pyside6-genpyi all --feature snake_case true_property
+
 
 pyi_generator.py
 ----------------
@@ -333,6 +342,8 @@ pyi_generator.py
 ``shiboken6/shibokenmodule/files.dir/shibokensupport/signature/lib/pyi_generator.py``
 has been extracted from ``generate_pyi.py``. It allows the generation of ``.pyi``
 files from arbitrary extension modules created with shiboken.
+
+A shortcut for this command is ``shiboken6-genpyi``.
 
 
 Current Extensions

@@ -142,6 +142,7 @@ class Formatter(Writer):
     def module(self, mod_name):
         self.mod_name = mod_name
         support = "PySide6.support" if self.options._pyside_call else "shibokensupport"
+        extra = "from PySide6 import PyClassProperty" if self.options._pyside_call else ""
         txt = f"""\
             # Module `{mod_name}`
 
@@ -150,6 +151,7 @@ class Formatter(Writer):
             from shiboken6 import Shiboken
             from {support}.signature.mapping import (
                 Virtual, Missing, Invalid, Default, Instance)
+            {extra}
             """
         self.print(dedent(txt))
         # This line will be replaced by the missing imports postprocess.
@@ -170,7 +172,7 @@ class Formatter(Writer):
         yield
 
     @contextmanager
-    def function(self, func_name, signature):
+    def function(self, func_name, signature, decorator=None):
         if func_name == "__init__":
             self.print()
         key = func_name
@@ -180,14 +182,17 @@ class Formatter(Writer):
                 self.print(f'{spaces}@typing.overload')
                 self._function(func_name, sig, spaces)
         else:
-            self._function(func_name, signature, spaces)
+            self._function(func_name, signature, spaces, decorator)
         if func_name == "__init__":
             self.print()
         yield key
 
-    def _function(self, func_name, signature, spaces):
+    def _function(self, func_name, signature, spaces, decorator=None):
+        if decorator:
+            self.print(f'{spaces}@{decorator}')
         if self.is_method() and "self" not in signature.parameters:
-            self.print(f'{spaces}@staticmethod')
+            kind = "class" if "cls" in signature.parameters else "static"
+            self.print(f'{spaces}@{kind}method')
         signature = self.optional_replacer(signature)
         self.print(f'{spaces}def {func_name}{signature}: ...')
 
@@ -293,7 +298,6 @@ def generate_pyi(import_name, outpath, options):
         # Python 3.7 and up: We can check the file directly if the syntax is ok.
         if USE_PEP563:
             subprocess.check_output([sys.executable, outfilepath])
-
 
 
 if __name__ == "__main__":
