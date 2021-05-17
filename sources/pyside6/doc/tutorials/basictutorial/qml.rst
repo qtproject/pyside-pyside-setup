@@ -54,7 +54,7 @@ Let's call it `main.py`:
 
     view.setSource(url)
     view.show()
-    app.exec_()
+    app.exec()
 
 If you are already familiar with PySide6 and have followed our
 tutorials, you have already seen much of this code.

@@ -64,7 +64,7 @@ The `main` file is in the `python` directory, and its default content is::
         window = QMainWindow()
         window.resize(250, 150)
         window.show()
-        exit_code = appctxt.app.exec_()      # 2. Invoke appctxt.app.exec_()
+        exit_code = appctxt.app.exec()      # 2. Invoke appctxt.app.exec()
         sys.exit(exit_code)
 
 This example shows an empty `QMainWindow`. You can run it using the following command::

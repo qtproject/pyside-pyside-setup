@@ -75,4 +75,4 @@ if __name__ == "__main__":
     window.show()
 
     # Execute application
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

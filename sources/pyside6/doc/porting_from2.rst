@@ -89,6 +89,9 @@ accordingly. For example:
  * ``QRegExp`` has been replaced by ``QRegularExpression``.
  * ``QWidget.mapToGlobal()`` and ``QWidget.mapFromGlobal()`` now also accept
    and return ``QPointF``.
+ * Functions named ``exec_`` (classes ``QCoreApplication``, ``QDialog``,
+   ``QEventLoop``) have been renamed to ``exec`` which became possible
+   in Python 3.
 
 More information can be found in the
 `Porting to Qt 6 <https://doc.qt.io/qt-6/portingguide.html>`_ Guide

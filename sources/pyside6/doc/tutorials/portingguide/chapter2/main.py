@@ -60,4 +60,4 @@ if __name__ == "__main__":
     table.resize(800, 600)
     table.show()
 
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

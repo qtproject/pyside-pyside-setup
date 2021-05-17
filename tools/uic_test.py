@@ -96,7 +96,7 @@ def test_file(file: str, uic: bool=False) -> bool:
             widget = {klass}()
             ui.setupUi(widget)
             widget.show()
-            sys.exit(app.exec_())''')
+            sys.exit(app.exec())''')
     py_main.write_text(main_source)
     exit_code = subprocess.call([sys.executable, os.fspath(py_main)])
     py_main.unlink()

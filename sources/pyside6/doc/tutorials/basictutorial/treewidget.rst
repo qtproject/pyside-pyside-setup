@@ -69,7 +69,7 @@ information in trees. You can also create a data model and display it using a
    .. code-block:: python
 
        tree.show()
-       sys.exit(app.exec_())
+       sys.exit(app.exec())
 
 
 The final application will look like this:

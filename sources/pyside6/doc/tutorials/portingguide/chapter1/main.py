@@ -56,4 +56,4 @@ if __name__ == "__main__":
     table_view.setModel(model)
     table_view.resize(800, 600)
     table_view.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

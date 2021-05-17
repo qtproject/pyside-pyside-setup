@@ -65,7 +65,7 @@ Finally, we show the button and start the Qt main loop:
     # Show the button
     button.show()
     # Run the main Qt loop
-    app.exec_()
+    app.exec()
 
 Here is the complete code for this example:
 ::
@@ -87,4 +87,4 @@ Here is the complete code for this example:
     button.clicked.connect(say_hello)
     button.show()
     # Run the main Qt loop
-    app.exec_()
+    app.exec()

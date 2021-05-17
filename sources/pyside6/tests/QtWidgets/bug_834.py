@@ -55,4 +55,4 @@ window.tabifyDockWidget(dock1, dock2)
 
 window.show()
 QTimer.singleShot(0, window.close)
-app.exec_()
+app.exec()

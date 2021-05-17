@@ -86,5 +86,5 @@ if __name__ == "__main__":
     window = MainWindow(widget)
     window.show()
 
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
