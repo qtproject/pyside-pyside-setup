@@ -142,7 +142,6 @@ compute_config_py_values(BINDING_API_VERSION)
 include(PySideModules)
 
 # Set default values for pyside6_global.h
-set (Qt${QT_MAJOR_VERSION}X11Extras_FOUND "0")
 set (Qt${QT_MAJOR_VERSION}Test_FOUND "0")
 set (Qt${QT_MAJOR_VERSION}Widgets_FOUND "0")
 

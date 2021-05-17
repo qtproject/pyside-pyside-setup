@@ -105,11 +105,7 @@ if (FULLDOCSBUILD)
                      "    -I ${QT_INCLUDE_DIR}Qt${module}/${Qt${QT_MAJOR_VERSION}Core_VERSION} \\\n"
                      "    -I ${QT_INCLUDE_DIR}Qt${module}/${Qt${QT_MAJOR_VERSION}Core_VERSION}/Qt${module} \\\n")
 
-                if (${moduleIn} STREQUAL "X11Extras")
-                    set(globalHeader "QX11Info")
-                else()
-                    set(globalHeader "Qt${module}")
-                endif()
+                set(globalHeader "Qt${module}")
                 set(docHeaderContents "${docHeaderContents}\n#include <Qt${module}/${globalHeader}>")
                 set(typeSystemDocXmlContents "${typeSystemDocXmlContents}\n<load-typesystem name=\"Qt${module}/typesystem_${lowerModule}.xml\" generate=\"yes\"/>")
             endforeach()
