@@ -84,5 +84,5 @@ if __name__ == '__main__':
     view.show()
 
     #execute and cleanup
-    app.exec_()
+    app.exec()
     del view

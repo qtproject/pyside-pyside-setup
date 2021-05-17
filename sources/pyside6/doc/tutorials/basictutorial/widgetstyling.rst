@@ -21,7 +21,7 @@ to each component. As an example, look at the following simple snippet:
         w = QLabel("This is a placeholder text")
         w.setAlignment(Qt.AlignCenter)
         w.show()
-        sys.exit(app.exec_())
+        sys.exit(app.exec())
 
 When you execute this code, you will see a simple `QLabel` aligned at the
 center, and with a placeholder text.
@@ -53,7 +53,7 @@ so let's see how does the code look like with these changes:
             font-size: 18px;
             """)
         w.show()
-        sys.exit(app.exec_())
+        sys.exit(app.exec())
 
 Now when you run the code, notice that the `QLabel` looks different with your
 custom style:
@@ -130,7 +130,7 @@ the file and using the `QApplication.setStyleSheet(str)` function:
             _style = f.read()
             app.setStyleSheet(_style)
 
-        sys.exit(app.exec_())
+        sys.exit(app.exec())
 
 Having a general `qss` file allows you to decouple the styling aspects of
 the code, without mixing it in the middle of the general functionality, and you

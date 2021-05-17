@@ -93,7 +93,7 @@ follow the guidelines outlined in the
     app = QApplication(sys.argv)
     label = QLabel("Hello World")
     label.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
 .. note:: Qt provides classes that are meant to manage
    the application-specific requirements depending on

@@ -76,7 +76,7 @@ Now, consider the following simple script, named `hello.py`::
         widget.resize(800, 600)
         widget.show()
 
-        sys.exit(app.exec_())
+        sys.exit(app.exec())
 
 
 Using `cxfreeze` executable

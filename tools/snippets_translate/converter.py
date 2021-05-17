@@ -165,7 +165,7 @@ def snippet_translate(x):
 
     # Special case for 'return app.exec()'
     if x.strip().startswith("return app.exec"):
-        return x.replace("return app.exec()", "sys.exit(app.exec_())")
+        return x.replace("return app.exec()", "sys.exit(app.exec())")
 
     # Handle includes -> import
     if x.strip().startswith("#include"):

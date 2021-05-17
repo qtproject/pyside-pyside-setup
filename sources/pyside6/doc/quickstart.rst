@@ -110,7 +110,7 @@ guide you through the development process:
         widget.resize(800, 600)
         widget.show()
 
-        sys.exit(app.exec_())
+        sys.exit(app.exec())
 
   Run your example by writing the following command: :command:`python hello_world.py`.
 

@@ -99,7 +99,7 @@ Now, consider the following script, named `hello.py`::
         widget.resize(800, 600)
         widget.show()
 
-        sys.exit(app.exec_())
+        sys.exit(app.exec())
 
 
 Since it has a UI, you use the `--windowed` option.

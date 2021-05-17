@@ -83,4 +83,4 @@ if __name__ == "__main__":
     engine.rootContext().setContextProperty("chat_model", sql_conversation_model)
     engine.load(QUrl("chat.qml"))
 
-    app.exec_()
+    app.exec()

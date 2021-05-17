@@ -87,7 +87,7 @@ a ``QTableView``, but that is not in the scope of this tutorial.
    .. code-block:: python
 
        table.show()
-       sys.exit(app.exec_())
+       sys.exit(app.exec())
 
 
 The final application will look like this:

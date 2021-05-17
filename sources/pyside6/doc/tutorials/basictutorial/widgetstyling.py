@@ -92,4 +92,4 @@ if __name__ == "__main__":
         _style = f.read()
     app.setStyleSheet(_style)
 
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

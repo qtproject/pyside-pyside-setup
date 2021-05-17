@@ -28,7 +28,7 @@ tutorial, but you can use this stub as is if you need to:
         form = Form()
         form.show()
         # Run the main Qt loop
-        sys.exit(app.exec_())
+        sys.exit(app.exec())
 
 The imports aren't new to you, the same for the creation of the
 `QApplication` and the execution of the Qt main loop.
@@ -138,4 +138,4 @@ Here is the complete code for this tutorial:
         form = Form()
         form.show()
         # Run the main Qt loop
-        sys.exit(app.exec_())
+        sys.exit(app.exec())

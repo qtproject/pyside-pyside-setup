@@ -112,7 +112,7 @@ To understand the idea, let's take a look at the whole code:
         window = MainWindow()
         window.show()
 
-        sys.exit(app.exec_())
+        sys.exit(app.exec())
 
 What is inside the *if* statement is already known from the previous
 examples, and our new basic class contains only two new lines
@@ -177,7 +177,7 @@ The complete code of this example looks like this:
             sys.exit(-1)
         window.show()
 
-        sys.exit(app.exec_())
+        sys.exit(app.exec())
 
 Then to execute it we just need to run the following on a
 command prompt:

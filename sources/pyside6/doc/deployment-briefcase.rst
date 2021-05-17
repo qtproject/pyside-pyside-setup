@@ -116,7 +116,7 @@ Content of `__main__.py`::
         widget.resize(800, 600)
         widget.show()
 
-        sys.exit(app.exec_())
+        sys.exit(app.exec())
 
 
 Content of  `app.py`::
