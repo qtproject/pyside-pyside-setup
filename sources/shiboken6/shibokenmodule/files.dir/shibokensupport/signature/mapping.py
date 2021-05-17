@@ -232,6 +232,7 @@ type_map.update({
     "int": int,
     "List": ArrayLikeVariable,
     "long": int,
+    "nullptr": None,
     "PyCallable": typing.Callable,
     "PyObject": object,
     "PyArrayObject": ArrayLikeVariable, # numpy
@@ -386,7 +387,6 @@ def init_sample():
         "Foo.HANDLE": int,
         "HANDLE": int,
         "Null": None,
-        "nullptr": None,
         "ObjectType.Identifier": Missing("sample.ObjectType.Identifier"),
         "OddBool": bool,
         "PStr": str,

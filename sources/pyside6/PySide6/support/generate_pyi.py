@@ -84,6 +84,8 @@ def generate_all_pyi(outpath, options):
     # Perhaps this can be automated?
     PySide6.support.signature.mapping.USE_PEP563 = USE_PEP563
 
+    import __feature__ as feature
+
     outpath = Path(outpath) if outpath and os.fspath(outpath) else Path(PySide6.__file__).parent
     name_list = PySide6.__all__ if options.modules == ["all"] else options.modules
     errors = ", ".join(set(name_list) - set(PySide6.__all__))
@@ -97,7 +99,9 @@ def generate_all_pyi(outpath, options):
         name_list = [quirk1, quirk2]
     for mod_name in name_list:
         import_name = "PySide6." + mod_name
-        generate_pyi(import_name, outpath, options)
+        feature_id = feature.get_select_id(options.feature)
+        with feature.force_selection(feature_id, import_name):
+            generate_pyi(import_name, outpath, options)
 
 
 if __name__ == "__main__":
@@ -111,6 +115,8 @@ if __name__ == "__main__":
         help="the output directory (default = binary location)")
     parser.add_argument("--sys-path", nargs="+",
         help="a list of strings prepended to sys.path")
+    parser.add_argument("--feature", nargs="+", choices=["snake_case", "true_property"], default=[],
+        help="""a list of feature names. Example: `--feature snake_case true_property`""")
     options = parser.parse_args()
     if options.quiet:
         logger.setLevel(logging.WARNING)

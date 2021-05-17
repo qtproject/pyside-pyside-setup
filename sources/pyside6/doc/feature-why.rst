@@ -244,4 +244,21 @@ see the Python documentation on `Import-Hooks`_.
 If you would like to modify ``__import__`` anyway without destroying the features,
 please override just the ``__orig_import__`` function.
 
+
+IDEs and Modifying Python stub files
+------------------------------------
+
+|project| comes with pre-generated ``.pyi`` stub files in the same location as
+the binary module. For instance, in the site-packages directory, you can find
+a ``QtCore.pyi`` file next to ``QtCore.abi3.so`` or ``QtCore.pyd`` on Windows.
+
+When using ``__feature__`` often with common IDEs, you may want to provide
+a feature-aware version of ``.pyi`` files to get a correct display. The simplest
+way to change them all in-place is the command
+
+.. code-block:: python
+
+    pyside6-genpyi all --feature snake_case true_property
+
+
 .. _`Import-Hooks`:  https://docs.python.org/3/reference/import.html#import-hooks

@@ -50,7 +50,9 @@ by producing a lot of clarity.
 import inspect
 import sys
 import types
+import typing
 from shibokensupport.signature import get_signature as get_sig
+from shibokensupport.signature.layout import create_signature
 
 
 class ExactEnumerator(object):
@@ -128,6 +130,7 @@ class ExactEnumerator(object):
         subclasses = []
         functions = []
         enums = []
+        properties = []
 
         for thing_name, thing in class_members:
             if inspect.isclass(thing):
@@ -135,15 +138,19 @@ class ExactEnumerator(object):
                 subclasses.append((subclass_name, thing))
             elif inspect.isroutine(thing):
                 func_name = thing_name.split(".")[0]   # remove ".overload"
-                signature = getattr(thing, "__signature__", None)
-                if signature is not None:
-                    functions.append((func_name, thing))
+                functions.append((func_name, thing))
             elif type(type(thing)) is EnumMeta:
                 # take the real enum name, not what is in the dict
                 enums.append((thing_name, type(thing).__qualname__, thing))
+            elif isinstance(thing, property):
+                properties.append((thing_name, thing))
+
         init_signature = getattr(klass, "__signature__", None)
         enums.sort(key=lambda tup: tup[1 : 3])  # sort by class then enum value
         self.fmt.have_body = bool(subclasses or functions or enums or init_signature)
+
+        # We want to handle functions and properties together.
+        func_prop = sorted(functions + properties)
 
         with self.fmt.klass(class_name, class_str):
             self.fmt.level += 1
@@ -161,11 +168,14 @@ class ExactEnumerator(object):
             if len(subclasses):
                 self.section()
             ret.update(self.function("__init__", klass))
-            for func_name, func in functions:
+            for func_name, func in func_prop:
                 if func_name != "__init__":
-                    ret.update(self.function(func_name, func))
+                    if isinstance(func, property):
+                        ret.update(self.fproperty(func_name, func))
+                    else:
+                        ret.update(self.function(func_name, func))
             self.fmt.level -= 1
-            if len(functions):
+            if len(func_prop):
                 self.section()
         return ret
 
@@ -173,14 +183,22 @@ class ExactEnumerator(object):
     def get_signature(func):
         return func.__signature__
 
-    def function(self, func_name, func):
+    def function(self, func_name, func, decorator=None):
         self.func = func    # for is_method()
         ret = self.result_type()
-        signature = self.get_signature(func)
+        signature = self.get_signature(func, decorator)
         if signature is not None:
-            with self.fmt.function(func_name, signature) as key:
+            with self.fmt.function(func_name, signature, decorator) as key:
                 ret[key] = signature
         del self.func
+        return ret
+
+    def fproperty(self, prop_name, prop):
+        ret = self.function(prop_name, prop.fget, type(prop).__qualname__)
+        if prop.fset:
+            ret.update(self.function(prop_name, prop.fset, f"{prop_name}.setter"))
+        if prop.fdel:
+            ret.update(self.function(prop_name, prop.fdel, f"{prop_name}.deleter"))
         return ret
 
 
@@ -222,6 +240,24 @@ class HintingEnumerator(ExactEnumerator):
     hinting stubs. Only default values are replaced by "...".
     """
 
-    @staticmethod
-    def get_signature(func):
-        return get_sig(func, "hintingstub")
+    def __init__(self, *args, **kwds):
+        super().__init__(*args, **kwds)
+        # We need to provide default signatures for class properties.
+        cls_param = inspect.Parameter("cls", inspect._POSITIONAL_OR_KEYWORD)
+        set_param = inspect.Parameter("arg_1", inspect._POSITIONAL_OR_KEYWORD, annotation=object)
+        self.getter_sig = inspect.Signature([cls_param], return_annotation=object)
+        self.setter_sig = inspect.Signature([cls_param, set_param])
+        self.deleter_sig = inspect.Signature([cls_param])
+
+    def get_signature(self, func, decorator=None):
+        # Class properties don't have signature support (yet).
+        # In that case, produce a fake one.
+        sig = get_sig(func, "hintingstub")
+        if decorator and not sig:
+            if decorator.endswith(".setter"):
+                sig = self.setter_sig
+            elif decorator.endswith(".deleter"):
+                sig = self.deleter_sig
+            else:
+                sig = self.getter_sig
+        return sig
