@@ -614,6 +614,16 @@
         <define-ownership class="target" owner="default"/>
       </modify-argument>
     </modify-function>
+    <modify-function signature="currentTable()const">
+      <modify-argument index="return">
+        <define-ownership class="target" owner="default"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="currentList()const">
+      <modify-argument index="return">
+        <define-ownership class="target" owner="default"/>
+      </modify-argument>
+    </modify-function>
     <modify-function signature="insertTable(int,int,const QTextTableFormat &amp;)">
       <modify-argument index="return">
         <define-ownership class="target" owner="default"/>
@@ -1672,6 +1682,11 @@
         <replace-type modified-type="(retval, subtype)"/>
       </modify-argument>
       <inject-code class="target" position="end" file="../glue/qtgui.cpp" snippet="qclipboard-text"/>
+    </modify-function>
+    <modify-function signature="mimeData(QClipboard::Mode)const">
+      <modify-argument index="return">
+        <define-ownership class="target" owner="default"/>
+      </modify-argument>
     </modify-function>
   </object-type>
   <object-type name="QPaintEngineState">
