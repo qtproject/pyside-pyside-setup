@@ -187,27 +187,31 @@ bool operator<(const EnumLookup<EnumType, cs> &e1, const EnumLookup<EnumType, cs
 
 // Helper macros to define lookup functions that take a QStringView needle
 // and an optional default return value.
-#define ENUM_LOOKUP_BEGIN(EnumType, caseSensitivity, functionName, defaultReturnValue) \
-static EnumType functionName(QStringView needle, EnumType defaultValue = defaultReturnValue) \
+#define ENUM_LOOKUP_BEGIN(EnumType, caseSensitivity, functionName) \
+static std::optional<EnumType> functionName(QStringView needle) \
 { \
-    typedef EnumLookup<EnumType, caseSensitivity> HaystackEntry; \
+    using HaystackEntry = EnumLookup<EnumType, caseSensitivity>; \
     static const HaystackEntry haystack[] =
 
 #define ENUM_LOOKUP_LINEAR_SEARCH() \
     const auto end = haystack + sizeof(haystack) / sizeof(haystack[0]); \
-    const auto it = std::find(haystack, end, HaystackEntry{needle, defaultValue}); \
-    return it != end ? it->value : defaultValue; \
+    const auto it = std::find(haystack, end, HaystackEntry{needle, {} }); \
+    if (it != end) \
+        return it->value; \
+    return {}; \
 }
 
 #define ENUM_LOOKUP_BINARY_SEARCH() \
     const auto end = haystack + sizeof(haystack) / sizeof(haystack[0]); \
-    const HaystackEntry needleEntry{needle, defaultValue}; \
+    const HaystackEntry needleEntry{needle, {} }; \
     const auto lb = std::lower_bound(haystack, end, needleEntry); \
-    return lb != end && *lb == needleEntry ? lb->value : defaultValue; \
+    if (lb != end && *lb == needleEntry) \
+        return lb->value; \
+    return {}; \
 }
 
 ENUM_LOOKUP_BEGIN(TypeSystem::AllowThread, Qt::CaseInsensitive,
-                  allowThreadFromAttribute, TypeSystem::AllowThread::Unspecified)
+                  allowThreadFromAttribute)
     {
         {u"yes", TypeSystem::AllowThread::Allow},
         {u"true", TypeSystem::AllowThread::Allow},
@@ -218,7 +222,7 @@ ENUM_LOOKUP_BEGIN(TypeSystem::AllowThread, Qt::CaseInsensitive,
 ENUM_LOOKUP_LINEAR_SEARCH()
 
 ENUM_LOOKUP_BEGIN(TypeSystem::Language, Qt::CaseInsensitive,
-                  languageFromAttribute, TypeSystem::NoLanguage)
+                  languageFromAttribute)
     {
         {u"all", TypeSystem::All}, // sorted!
         {u"native", TypeSystem::NativeCode}, // em algum lugar do cpp
@@ -228,7 +232,7 @@ ENUM_LOOKUP_BEGIN(TypeSystem::Language, Qt::CaseInsensitive,
 ENUM_LOOKUP_BINARY_SEARCH()
 
 ENUM_LOOKUP_BEGIN(TypeSystem::Ownership, Qt::CaseInsensitive,
-                   ownershipFromFromAttribute, TypeSystem::InvalidOwnership)
+                   ownershipFromFromAttribute)
     {
         {u"target", TypeSystem::TargetLangOwnership},
         {u"c++", TypeSystem::CppOwnership},
@@ -237,7 +241,7 @@ ENUM_LOOKUP_BEGIN(TypeSystem::Ownership, Qt::CaseInsensitive,
 ENUM_LOOKUP_LINEAR_SEARCH()
 
 ENUM_LOOKUP_BEGIN(AddedFunction::Access, Qt::CaseInsensitive,
-                  addedFunctionAccessFromAttribute, AddedFunction::InvalidAccess)
+                  addedFunctionAccessFromAttribute)
     {
         {u"public", AddedFunction::Public},
         {u"protected", AddedFunction::Protected},
@@ -245,7 +249,7 @@ ENUM_LOOKUP_BEGIN(AddedFunction::Access, Qt::CaseInsensitive,
 ENUM_LOOKUP_LINEAR_SEARCH()
 
 ENUM_LOOKUP_BEGIN(FunctionModification::ModifierFlag, Qt::CaseSensitive,
-                  modifierFromAttribute, FunctionModification::InvalidModifier)
+                  modifierFromAttribute)
     {
         {u"private", FunctionModification::Private},
         {u"public", FunctionModification::Public},
@@ -258,7 +262,7 @@ ENUM_LOOKUP_BEGIN(FunctionModification::ModifierFlag, Qt::CaseSensitive,
 ENUM_LOOKUP_LINEAR_SEARCH()
 
 ENUM_LOOKUP_BEGIN(ReferenceCount::Action, Qt::CaseInsensitive,
-                  referenceCountFromAttribute, ReferenceCount::Invalid)
+                  referenceCountFromAttribute)
     {
         {u"add", ReferenceCount::Add},
         {u"add-all", ReferenceCount::AddAll},
@@ -269,7 +273,7 @@ ENUM_LOOKUP_BEGIN(ReferenceCount::Action, Qt::CaseInsensitive,
 ENUM_LOOKUP_LINEAR_SEARCH()
 
 ENUM_LOOKUP_BEGIN(ArgumentOwner::Action, Qt::CaseInsensitive,
-                  argumentOwnerActionFromAttribute, ArgumentOwner::Invalid)
+                  argumentOwnerActionFromAttribute)
     {
         {u"add", ArgumentOwner::Add},
         {u"remove", ArgumentOwner::Remove}
@@ -277,7 +281,7 @@ ENUM_LOOKUP_BEGIN(ArgumentOwner::Action, Qt::CaseInsensitive,
 ENUM_LOOKUP_LINEAR_SEARCH()
 
 ENUM_LOOKUP_BEGIN(TypeSystem::CodeSnipPosition, Qt::CaseInsensitive,
-                  codeSnipPositionFromAttribute, TypeSystem::CodeSnipPositionInvalid)
+                  codeSnipPositionFromAttribute)
     {
         {u"beginning", TypeSystem::CodeSnipPositionBeginning},
         {u"end", TypeSystem::CodeSnipPositionEnd},
@@ -286,7 +290,7 @@ ENUM_LOOKUP_BEGIN(TypeSystem::CodeSnipPosition, Qt::CaseInsensitive,
 ENUM_LOOKUP_LINEAR_SEARCH()
 
 ENUM_LOOKUP_BEGIN(Include::IncludeType, Qt::CaseInsensitive,
-                  locationFromAttribute, Include::InvalidInclude)
+                  locationFromAttribute)
     {
         {u"global", Include::IncludePath},
         {u"local", Include::LocalPath},
@@ -295,7 +299,7 @@ ENUM_LOOKUP_BEGIN(Include::IncludeType, Qt::CaseInsensitive,
 ENUM_LOOKUP_LINEAR_SEARCH()
 
 ENUM_LOOKUP_BEGIN(TypeSystem::DocModificationMode, Qt::CaseInsensitive,
-                  docModificationFromAttribute, TypeSystem::DocModificationInvalid)
+                  docModificationFromAttribute)
     {
         {u"append", TypeSystem::DocModificationAppend},
         {u"prepend", TypeSystem::DocModificationPrepend},
@@ -304,7 +308,7 @@ ENUM_LOOKUP_BEGIN(TypeSystem::DocModificationMode, Qt::CaseInsensitive,
 ENUM_LOOKUP_LINEAR_SEARCH()
 
 ENUM_LOOKUP_BEGIN(ContainerTypeEntry::ContainerKind, Qt::CaseSensitive,
-                  containerTypeFromAttribute, ContainerTypeEntry::NoContainer)
+                  containerTypeFromAttribute)
     {
         {u"list", ContainerTypeEntry::ListContainer},
         {u"string-list", ContainerTypeEntry::StringListContainer},
@@ -322,7 +326,7 @@ ENUM_LOOKUP_BEGIN(ContainerTypeEntry::ContainerKind, Qt::CaseSensitive,
 ENUM_LOOKUP_LINEAR_SEARCH()
 
 ENUM_LOOKUP_BEGIN(TypeRejection::MatchType, Qt::CaseSensitive,
-                  typeRejectionFromAttribute, TypeRejection::Invalid)
+                  typeRejectionFromAttribute)
     {
         {u"class", TypeRejection::ExcludeClass},
         {u"function-name", TypeRejection::Function},
@@ -334,7 +338,7 @@ ENUM_LOOKUP_BEGIN(TypeRejection::MatchType, Qt::CaseSensitive,
 ENUM_LOOKUP_LINEAR_SEARCH()
 
 ENUM_LOOKUP_BEGIN(TypeSystem::ExceptionHandling, Qt::CaseSensitive,
-                  exceptionHandlingFromAttribute, TypeSystem::ExceptionHandling::Unspecified)
+                  exceptionHandlingFromAttribute)
 {
     {u"no", TypeSystem::ExceptionHandling::Off},
     {u"false", TypeSystem::ExceptionHandling::Off},
@@ -346,7 +350,7 @@ ENUM_LOOKUP_BEGIN(TypeSystem::ExceptionHandling, Qt::CaseSensitive,
 ENUM_LOOKUP_LINEAR_SEARCH()
 
 ENUM_LOOKUP_BEGIN(StackElement::ElementType, Qt::CaseInsensitive,
-                  elementFromTag, StackElement::None)
+                  elementFromTag)
     {
         {u"add-conversion", StackElement::AddConversion}, // sorted!
         {u"add-function", StackElement::AddFunction},
@@ -400,7 +404,7 @@ ENUM_LOOKUP_BINARY_SEARCH()
 
 
 ENUM_LOOKUP_BEGIN(TypeSystem::SnakeCase, Qt::CaseSensitive,
-                  snakeCaseFromAttribute, TypeSystem::SnakeCase::Unspecified)
+                  snakeCaseFromAttribute)
 {
     {u"no", TypeSystem::SnakeCase::Disabled},
     {u"false", TypeSystem::SnakeCase::Disabled},
@@ -411,7 +415,7 @@ ENUM_LOOKUP_BEGIN(TypeSystem::SnakeCase, Qt::CaseSensitive,
 ENUM_LOOKUP_LINEAR_SEARCH()
 
 ENUM_LOOKUP_BEGIN(TypeSystem::Visibility, Qt::CaseSensitive,
-                  visibilityFromAttribute, TypeSystem::Visibility::Unspecified)
+                  visibilityFromAttribute)
 {
     {u"no", TypeSystem::Visibility::Invisible},
     {u"false", TypeSystem::Visibility::Invisible},
@@ -623,9 +627,14 @@ static bool addRejection(TypeDatabase *database, QXmlStreamAttributes *attribute
         return false;
 
     for (int i = attributes->size() - 1; i >= 0; --i) {
-        const auto name = attributes->at(i).qualifiedName();
-        const TypeRejection::MatchType type = typeRejectionFromAttribute(name);
-        switch (type) {
+        const auto &attribute = attributes->at(i);
+        const auto name = attribute.qualifiedName();
+        const auto typeOpt = typeRejectionFromAttribute(name);
+        if (!typeOpt.has_value()) {
+            *errorMessage = msgInvalidAttributeValue(attribute);
+            return false;
+        }
+        switch (typeOpt.value()) {
         case TypeRejection::Function:
         case TypeRejection::Field:
         case TypeRejection::Enum:
@@ -634,11 +643,11 @@ static bool addRejection(TypeDatabase *database, QXmlStreamAttributes *attribute
             const QString pattern = attributes->takeAt(i).value().toString();
             if (!setRejectionRegularExpression(pattern, &rejection.pattern, errorMessage))
                 return false;
-            rejection.matchType = type;
+            rejection.matchType = typeOpt.value();
             database->addRejection(rejection);
             return true;
         }
-        default:
+        case TypeRejection::ExcludeClass:
             break;
         }
     }
@@ -1325,12 +1334,13 @@ ContainerTypeEntry *
         return nullptr;
     }
     const auto typeName = attributes->takeAt(typeIndex).value();
-    ContainerTypeEntry::ContainerKind containerType = containerTypeFromAttribute(typeName);
-    if (containerType == ContainerTypeEntry::NoContainer) {
+    const auto containerTypeOpt = containerTypeFromAttribute(typeName);
+    if (!containerTypeOpt.has_value()) {
         m_error = QLatin1String("there is no container of type ") + typeName.toString();
         return nullptr;
     }
-    auto *type = new ContainerTypeEntry(name, containerType, since, currentParentTypeEntry());
+    auto *type = new ContainerTypeEntry(name, containerTypeOpt.value(),
+                                        since, currentParentTypeEntry());
     if (!applyCommonAttributes(reader, type, attributes))
         return nullptr;
     return type;
@@ -1411,11 +1421,12 @@ NamespaceTypeEntry *
             result->setExtends(*extendsIt);
         } else if (attributeName == visibleAttribute()) {
             const auto attribute = attributes->takeAt(i);
-            visibility = visibilityFromAttribute(attribute.value());
-            if (visibility == TypeSystem::Visibility::Unspecified) {
-                qCWarning(lcShiboken, "%s",
-                          qPrintable(msgInvalidAttributeValue(attribute)));
+            const auto visibilityOpt = visibilityFromAttribute(attribute.value());
+            if (!visibilityOpt.has_value()) {
+                m_error = msgInvalidAttributeValue(attribute);
+                return nullptr;
             }
+            visibility = visibilityOpt.value();
         } else if (attributeName == generateAttribute()) {
             if (!convertBoolean(attributes->takeAt(i).value(), generateAttribute(), true))
                 visibility = TypeSystem::Visibility::Invisible;
@@ -1469,7 +1480,13 @@ FunctionTypeEntry *
         if (name == signatureAttribute()) {
             signature = TypeDatabase::normalizedSignature(attributes->takeAt(i).value().toString());
         } else if (name == snakeCaseAttribute()) {
-            snakeCase = snakeCaseFromAttribute(attributes->takeAt(i).value());
+            const auto attribute = attributes->takeAt(i);
+            const auto snakeCaseOpt = snakeCaseFromAttribute(attribute.value());
+            if (!snakeCaseOpt.has_value()) {
+                m_error = msgInvalidAttributeValue(attribute);
+                return nullptr;
+            }
+            snakeCase = snakeCaseOpt.value();
         }
     }
 
@@ -1558,18 +1575,18 @@ void TypeSystemParser::applyComplexTypeAttributes(const QXmlStreamReader &reader
             ctype->setCopyable(v ? ComplexTypeEntry::CopyableSet : ComplexTypeEntry::NonCopyableSet);
         } else if (name == exceptionHandlingAttribute()) {
             const auto attribute = attributes->takeAt(i);
-            const auto v = exceptionHandlingFromAttribute(attribute.value());
-            if (v != TypeSystem::ExceptionHandling::Unspecified) {
-                exceptionHandling = v;
+            const auto exceptionOpt = exceptionHandlingFromAttribute(attribute.value());
+            if (exceptionOpt.has_value()) {
+                exceptionHandling = exceptionOpt.value();
             } else {
                 qCWarning(lcShiboken, "%s",
                           qPrintable(msgInvalidAttributeValue(attribute)));
             }
         } else if (name == allowThreadAttribute()) {
             const auto attribute = attributes->takeAt(i);
-            const auto v = allowThreadFromAttribute(attribute.value());
-            if (v != TypeSystem::AllowThread::Unspecified) {
-                allowThread = v;
+            const auto allowThreadOpt = allowThreadFromAttribute(attribute.value());
+            if (allowThreadOpt.has_value()) {
+                allowThread = allowThreadOpt.value();
             } else {
                 qCWarning(lcShiboken, "%s",
                           qPrintable(msgInvalidAttributeValue(attribute)));
@@ -1594,7 +1611,14 @@ void TypeSystemParser::applyComplexTypeAttributes(const QXmlStreamReader &reader
         } else if (name == QLatin1String("target-type")) {
             ctype->setTargetType(attributes->takeAt(i).value().toString());
         }  else if (name == snakeCaseAttribute()) {
-            ctype->setSnakeCase(snakeCaseFromAttribute(attributes->takeAt(i).value()));
+            const auto attribute = attributes->takeAt(i);
+            const auto snakeCaseOpt = snakeCaseFromAttribute(attribute.value());
+            if (snakeCaseOpt.has_value()) {
+                ctype->setSnakeCase(snakeCaseOpt.value());
+            } else {
+                qCWarning(lcShiboken, "%s",
+                          qPrintable(msgInvalidAttributeValue(attribute)));
+            }
         }
     }
 
@@ -1676,20 +1700,21 @@ bool TypeSystemParser::parseInjectDocumentation(const QXmlStreamReader &,
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == QLatin1String("mode")) {
-            const auto modeName = attributes->takeAt(i).value();
-            mode = docModificationFromAttribute(modeName);
-            if (mode == TypeSystem::DocModificationInvalid) {
-                m_error = QLatin1String("Unknown documentation injection mode: ");
-                m_error += modeName;
+            const auto attribute = attributes->takeAt(i);
+            const auto modeOpt = docModificationFromAttribute(attribute.value());
+            if (!modeOpt.has_value()) {
+                m_error = msgInvalidAttributeValue(attribute);
                 return false;
             }
+            mode = modeOpt.value();
         } else if (name == formatAttribute()) {
-            const auto format = attributes->takeAt(i).value();
-            lang = languageFromAttribute(format);
-            if (lang != TypeSystem::TargetLangCode && lang != TypeSystem::NativeCode) {
-                m_error = QStringLiteral("unsupported class attribute: '%1'").arg(format);
+            const auto attribute = attributes->takeAt(i);
+            const auto langOpt = languageFromAttribute(attribute.value());
+            if (!langOpt.has_value()) {
+                m_error = msgInvalidAttributeValue(attribute);
                 return false;
             }
+            lang = langOpt.value();
         }
     }
 
@@ -1741,24 +1766,31 @@ TypeSystemTypeEntry *TypeSystemParser::parseRootElement(const QXmlStreamReader &
             m_defaultSuperclass = attributes->takeAt(i).value().toString();
         } else if (name == exceptionHandlingAttribute()) {
             const auto attribute = attributes->takeAt(i);
-            const auto v = exceptionHandlingFromAttribute(attribute.value());
-            if (v != TypeSystem::ExceptionHandling::Unspecified) {
-                m_exceptionHandling = v;
+            const auto exceptionOpt = exceptionHandlingFromAttribute(attribute.value());
+            if (exceptionOpt.has_value()) {
+                m_exceptionHandling = exceptionOpt.value();
             } else {
                 qCWarning(lcShiboken, "%s",
                           qPrintable(msgInvalidAttributeValue(attribute)));
             }
         } else if (name == allowThreadAttribute()) {
             const auto attribute = attributes->takeAt(i);
-            const auto v = allowThreadFromAttribute(attribute.value());
-            if (v != TypeSystem::AllowThread::Unspecified) {
-                m_allowThread = v;
+            const auto allowThreadOpt = allowThreadFromAttribute(attribute.value());
+            if (allowThreadOpt.has_value()) {
+                m_allowThread = allowThreadOpt.value();
             } else {
                 qCWarning(lcShiboken, "%s",
                           qPrintable(msgInvalidAttributeValue(attribute)));
             }
         } else if (name == snakeCaseAttribute()) {
-            snakeCase = snakeCaseFromAttribute(attributes->takeAt(i).value());
+            const auto attribute = attributes->takeAt(i);
+            const auto snakeCaseOpt = snakeCaseFromAttribute(attribute.value());
+            if (snakeCaseOpt.has_value()) {
+                snakeCase = snakeCaseOpt.value();
+            } else {
+                qCWarning(lcShiboken, "%s",
+                          qPrintable(msgInvalidAttributeValue(attribute)));
+            }
         }
     }
 
@@ -1858,12 +1890,13 @@ bool TypeSystemParser::parseCustomConversion(const QXmlStreamReader &,
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == classAttribute()) {
-            const auto languageAttribute = attributes->takeAt(i).value();
-            lang = languageFromAttribute(languageAttribute);
-            if (lang != TypeSystem::TargetLangCode && lang != TypeSystem::NativeCode) {
-                m_error = QStringLiteral("unsupported class attribute: '%1'").arg(languageAttribute);
+            const auto languageAttribute = attributes->takeAt(i);
+            const auto langOpt = languageFromAttribute(languageAttribute.value());
+            if (!langOpt.has_value()) {
+                m_error = msgInvalidAttributeValue(languageAttribute);
                 return false;
             }
+            lang = langOpt.value();
         } else if (name == QLatin1String("file")) {
             sourceFile = attributes->takeAt(i).value().toString();
         } else if (name == snippetAttribute()) {
@@ -2053,26 +2086,33 @@ bool TypeSystemParser::parseDefineOwnership(const QXmlStreamReader &,
     }
 
     TypeSystem::Language lang = TypeSystem::TargetLangCode;
-    QString ownership;
+    std::optional<TypeSystem::Ownership> ownershipOpt;
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == classAttribute()) {
-            const auto className = attributes->takeAt(i).value();
-            lang = languageFromAttribute(className);
-            if (lang != TypeSystem::TargetLangCode && lang != TypeSystem::NativeCode) {
-                m_error = QStringLiteral("unsupported class attribute: '%1'").arg(className);
+            const auto classAttribute = attributes->takeAt(i);
+            const auto langOpt = languageFromAttribute(classAttribute.value());
+            if (!langOpt.has_value() || langOpt.value() == TypeSystem::ShellCode) {
+                m_error = msgInvalidAttributeValue(classAttribute);
                 return false;
             }
+            lang = langOpt.value();
         } else if (name == ownershipAttribute()) {
-            ownership = attributes->takeAt(i).value().toString();
+            const auto attribute = attributes->takeAt(i);
+            ownershipOpt = ownershipFromFromAttribute(attribute.value());
+            if (!ownershipOpt.has_value()) {
+                m_error = msgInvalidAttributeValue(attribute);
+                return false;
+            }
         }
     }
-    const TypeSystem::Ownership owner = ownershipFromFromAttribute(ownership);
-    if (owner == TypeSystem::InvalidOwnership) {
-        m_error = QStringLiteral("unsupported owner attribute: '%1'").arg(ownership);
+
+    if (!ownershipOpt.has_value()) {
+        m_error = QStringLiteral("unspecified ownership");
         return false;
     }
-    m_contextStack.top()->functionMods.last().argument_mods().last().insertOwnership(lang, owner);
+    auto &lastArgMod = m_contextStack.top()->functionMods.last().argument_mods().last();
+    lastArgMod.insertOwnership(lang, ownershipOpt.value());
     return true;
 }
 
@@ -2113,7 +2153,14 @@ bool TypeSystemParser::parseModifyField(const QXmlStreamReader &,
         } else if (name == renameAttribute()) {
             fm.setRenamedToName(attributes->takeAt(i).value().toString());
         } else if (name == snakeCaseAttribute()) {
-            fm.setSnakeCase(snakeCaseFromAttribute(attributes->takeAt(i).value()));
+            const auto attribute = attributes->takeAt(i);
+            const auto snakeCaseOpt = snakeCaseFromAttribute(attribute.value());
+            if (snakeCaseOpt.has_value()) {
+                fm.setSnakeCase(snakeCaseOpt.value());
+            } else {
+                qCWarning(lcShiboken, "%s",
+                          qPrintable(msgInvalidAttributeValue(attribute)));
+            }
         }
     }
     if (fm.name().isEmpty()) {
@@ -2193,12 +2240,12 @@ bool TypeSystemParser::parseAddFunction(const QXmlStreamReader &,
     m_currentSignature = signature;
 
     if (!access.isEmpty()) {
-        const AddedFunction::Access a = addedFunctionAccessFromAttribute(access);
-        if (a == AddedFunction::InvalidAccess) {
+        const auto acessOpt = addedFunctionAccessFromAttribute(access);
+        if (!acessOpt.has_value()) {
             m_error = QString::fromLatin1("Bad access type '%1'").arg(access);
             return false;
         }
-        func->setAccess(a);
+        func->setAccess(acessOpt.value());
     }
     func->setDeclaration(t == StackElement::DeclareFunction);
 
@@ -2287,15 +2334,18 @@ bool TypeSystemParser::parseModifyFunction(const QXmlStreamReader &reader,
                                       threadAttribute(), false);
         } else if (name == allowThreadAttribute()) {
             const QXmlStreamAttribute attribute = attributes->takeAt(i);
-            allowThread = allowThreadFromAttribute(attribute.value());
-            if (allowThread == TypeSystem::AllowThread::Unspecified) {
+            const auto allowThreadOpt = allowThreadFromAttribute(attribute.value());
+            if (!allowThreadOpt.has_value()) {
                 m_error = msgInvalidAttributeValue(attribute);
                 return false;
             }
+            allowThread = allowThreadOpt.value();
         } else if (name == exceptionHandlingAttribute()) {
             const auto attribute = attributes->takeAt(i);
-            exceptionHandling = exceptionHandlingFromAttribute(attribute.value());
-            if (exceptionHandling == TypeSystem::ExceptionHandling::Unspecified) {
+            const auto exceptionOpt = exceptionHandlingFromAttribute(attribute.value());
+            if (exceptionOpt.has_value()) {
+                exceptionHandling = exceptionOpt.value();
+            } else {
                 qCWarning(lcShiboken, "%s",
                           qPrintable(msgInvalidAttributeValue(attribute)));
             }
@@ -2303,7 +2353,14 @@ bool TypeSystemParser::parseModifyFunction(const QXmlStreamReader &reader,
             if (!parseOverloadNumber(attributes->takeAt(i), &overloadNumber, &m_error))
                 return false;
         } else if (name == snakeCaseAttribute()) {
-            snakeCase = snakeCaseFromAttribute(attributes->takeAt(i).value());
+            const auto attribute = attributes->takeAt(i);
+            const auto snakeCaseOpt = snakeCaseFromAttribute(attribute.value());
+            if (snakeCaseOpt.has_value()) {
+                snakeCase = snakeCaseOpt.value();
+            } else {
+                qCWarning(lcShiboken, "%s",
+                          qPrintable(msgInvalidAttributeValue(attribute)));
+            }
         } else if (name == virtualSlotAttribute()) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
@@ -2338,11 +2395,12 @@ bool TypeSystemParser::parseModifyFunction(const QXmlStreamReader &reader,
     m_currentSignature = signature;
 
     if (!access.isEmpty()) {
-        const FunctionModification::ModifierFlag m = modifierFromAttribute(access);
-        if ((m & (FunctionModification::AccessModifierMask | FunctionModification::FinalMask)) == 0) {
+        const auto modifierFlagOpt = modifierFromAttribute(access);
+        if (!modifierFlagOpt.has_value()) {
             m_error = QString::fromLatin1("Bad access type '%1'").arg(access);
             return false;
         }
+        const FunctionModification::ModifierFlag m = modifierFlagOpt.value();
         if (m == FunctionModification::Final || m == FunctionModification::NonFinal) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeValueWarning(reader,
@@ -2424,13 +2482,13 @@ bool TypeSystemParser::parseReferenceCount(const QXmlStreamReader &reader,
         const auto name = attributes->at(i).qualifiedName();
         if (name == actionAttribute()) {
             const QXmlStreamAttribute attribute = attributes->takeAt(i);
-            rc.action = referenceCountFromAttribute(attribute.value());
-            switch (rc.action) {
-            case ReferenceCount::Invalid:
-                m_error = QLatin1String("unrecognized value '");
-                m_error += attribute.value();
-                m_error += QLatin1String("' for action attribute.");
+            const auto actionOpt = referenceCountFromAttribute(attribute.value());
+            if (!actionOpt.has_value()) {
+                m_error = msgInvalidAttributeValue(attribute);
                 return false;
+            }
+            rc.action = actionOpt.value();
+            switch (rc.action) {
             case ReferenceCount::AddAll:
             case ReferenceCount::Ignore:
                 qCWarning(lcShiboken, "%s",
@@ -2464,14 +2522,13 @@ bool TypeSystemParser::parseParentOwner(const QXmlStreamReader &,
             if (!parseArgumentIndex(index, &ao.index, &m_error))
                 return false;
         } else if (name == actionAttribute()) {
-            const auto action = attributes->takeAt(i).value();
-            ao.action = argumentOwnerActionFromAttribute(action);
-            if (ao.action == ArgumentOwner::Invalid) {
-                m_error = QLatin1String("Invalid parent action '");
-                m_error += action;
-                m_error += QLatin1String("'.");
+            const auto action = attributes->takeAt(i);
+            const auto actionOpt = argumentOwnerActionFromAttribute(action.value());
+            if (!actionOpt.has_value()) {
+                m_error = msgInvalidAttributeValue(action);
                 return false;
             }
+            ao.action = actionOpt.value();
         }
     }
     m_contextStack.top()->functionMods.last().argument_mods().last().setOwner(ao);
@@ -2544,19 +2601,21 @@ bool TypeSystemParser::parseInjectCode(const QXmlStreamReader &,
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == classAttribute()) {
-            const auto className = attributes->takeAt(i).value();
-            lang = languageFromAttribute(className);
-            if (lang == TypeSystem::NoLanguage) {
-                m_error = QStringLiteral("Invalid class specifier: '%1'").arg(className);
+            const auto attribute = attributes->takeAt(i);
+            const auto langOpt = languageFromAttribute(attribute.value());
+            if (!langOpt.has_value()) {
+                m_error = msgInvalidAttributeValue(attribute);
                 return false;
             }
+            lang = langOpt.value();
         } else if (name == positionAttribute()) {
-            const auto value = attributes->takeAt(i).value();
-            position = codeSnipPositionFromAttribute(value);
-            if (position == TypeSystem::CodeSnipPositionInvalid) {
-                m_error = QStringLiteral("Invalid position: '%1'").arg(value);
+            const auto attribute = attributes->takeAt(i);
+            const auto positionOpt = codeSnipPositionFromAttribute(attribute.value());
+            if (!positionOpt.has_value()) {
+                m_error = msgInvalidAttributeValue(attribute);
                 return false;
             }
+            position = positionOpt.value();
         }
     }
 
@@ -2583,21 +2642,23 @@ bool TypeSystemParser::parseInclude(const QXmlStreamReader &,
                            TypeEntry *entry, QXmlStreamAttributes *attributes)
 {
     QString fileName;
-    QString location;
+    Include::IncludeType location = Include::IncludePath;
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == fileNameAttribute())
+        if (name == fileNameAttribute()) {
             fileName = attributes->takeAt(i).value().toString();
-        else if (name == locationAttribute())
-            location = attributes->takeAt(i).value().toString();
-    }
-    const Include::IncludeType loc = locationFromAttribute(location);
-    if (loc == Include::InvalidInclude) {
-        m_error = QStringLiteral("Location not recognized: '%1'").arg(location);
-        return false;
+        } else if (name == locationAttribute()) {
+            const auto attribute = attributes->takeAt(i);
+            const auto locationOpt = locationFromAttribute(attribute.value());
+            if (!locationOpt.has_value()) {
+                m_error = msgInvalidAttributeValue(attribute);
+                return false;
+            }
+            location = locationOpt.value();
+        }
     }
 
-    Include inc(loc, fileName);
+    Include inc(location, fileName);
     if (topElement.type
         & (StackElement::ComplexTypeEntryMask | StackElement::PrimitiveTypeEntry)) {
         entry->setInclude(inc);
@@ -2715,8 +2776,8 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
     if (tagName.compare(QLatin1String("import-file"), Qt::CaseInsensitive) == 0)
         return importFileElement(attributes);
 
-    const StackElement::ElementType elementType = elementFromTag(tagName);
-    if (elementType == StackElement::None) {
+    const auto elementTypeOpt = elementFromTag(tagName);
+    if (!elementTypeOpt.has_value()) {
         m_error = QStringLiteral("Unknown tag name: '%1'").arg(tagName);
         return false;
     }
@@ -2727,7 +2788,7 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
     }
 
     std::unique_ptr<StackElement> element(new StackElement(m_current));
-    element->type = elementType;
+    element->type = elementTypeOpt.value();
 
     if (element->type == StackElement::Root && m_generate == TypeEntry::GenerateCode)
         customConversionsForReview.clear();

@@ -46,8 +46,7 @@ public:
     enum IncludeType {
         IncludePath,
         LocalPath,
-        TargetLangImport,
-        InvalidInclude
+        TargetLangImport
     };
 
     Include() = default;

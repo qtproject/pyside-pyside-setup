@@ -607,7 +607,6 @@ class ContainerTypeEntry : public ComplexTypeEntry
     Q_GADGET
 public:
     enum ContainerKind {
-        NoContainer,
         ListContainer,
         StringListContainer,
         LinkedListContainer,

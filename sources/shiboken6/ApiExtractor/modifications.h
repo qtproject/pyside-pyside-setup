@@ -73,7 +73,6 @@ private:
 struct ReferenceCount
 {
     enum Action { // 0x01 - 0xff
-        Invalid     = 0x00,
         Add         = 0x01,
         AddAll      = 0x02,
         Remove      = 0x04,
@@ -86,7 +85,7 @@ struct ReferenceCount
     };
 
     QString varName;
-    Action action = Invalid;
+    Action action;
 };
 
 struct ArgumentOwner
@@ -250,7 +249,6 @@ public:
     ~FunctionModification();
 
     enum ModifierFlag {
-        InvalidModifier =       0x0000,
         Private =               0x0001,
         Protected =             0x0002,
         Public =                0x0003,
@@ -428,7 +426,6 @@ struct AddedFunction
 
     /// Function access types.
     enum Access {
-        InvalidAccess = 0,
         Protected = 0x1,
         Public =    0x2
     };

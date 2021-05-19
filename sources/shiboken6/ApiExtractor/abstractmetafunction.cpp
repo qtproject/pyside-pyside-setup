@@ -114,8 +114,6 @@ AbstractMetaFunction::AbstractMetaFunction(const AddedFunctionPtr &addedFunc) :
     setName(addedFunc->name());
     setOriginalName(addedFunc->name());
     switch (addedFunc->access()) {
-    case AddedFunction::InvalidAccess:
-        break;
     case AddedFunction::Protected:
         setAccess(Access::Protected);
         break;
