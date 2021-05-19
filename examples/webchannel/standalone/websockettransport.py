@@ -1,7 +1,7 @@
 #############################################################################
 ##
 ## Copyright (C) 2017 Klarälvdalens Datakonsult AB, a KDAB Group company, info@kdab.com, author Milian Wolff <milian.wolff@kdab.com>
-## Copyright (C) 2020 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -56,7 +56,7 @@ class WebSocketTransport(QWebChannelAbstractTransport):
            The socket is also set as the parent of the transport object."""
         super().__init__(socket)
         self._socket = socket
-        self._socket.textMessageReceived.connect(self.textMessageReceived)
+        self._socket.textMessageReceived.connect(self.text_message_received)
         self._socket.disconnected.connect(self._disconnected)
 
     def __del__(self):
@@ -74,7 +74,7 @@ class WebSocketTransport(QWebChannelAbstractTransport):
         self._socket.sendTextMessage(json_message)
 
     @Slot(str)
-    def textMessageReceived(self, message_data_in):
+    def text_message_received(self, message_data_in):
         """Deserialize the stringified JSON messageData and emit
            messageReceived."""
         message_data = QByteArray(bytes(message_data_in, encoding='utf8'))

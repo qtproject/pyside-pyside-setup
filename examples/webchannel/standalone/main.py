@@ -1,7 +1,7 @@
 #############################################################################
 ##
 ## Copyright (C) 2016 Klarälvdalens Datakonsult AB, a KDAB Group company, info@kdab.com, author Milian Wolff <milian.wolff@kdab.com>
-## Copyright (C) 2020 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -61,10 +61,10 @@ if __name__ == '__main__':
         print('The example requires SSL support.')
         sys.exit(-1)
     cur_dir = os.path.dirname(os.path.abspath(__file__))
-    jsFileInfo = QFileInfo(f"{cur_dir}/qwebchannel.js")
-    if not jsFileInfo.exists():
+    js_file_info = QFileInfo(f"{cur_dir}/qwebchannel.js")
+    if not js_file_info.exists():
         QFile.copy(":/qtwebchannel/qwebchannel.js",
-                   jsFileInfo.absoluteFilePath())
+                   js_file_info.absoluteFilePath())
 
     # setup the QWebSocketServer
     server = QWebSocketServer("QWebChannel Standalone Example Server",
@@ -74,11 +74,11 @@ if __name__ == '__main__':
         sys.exit(-1)
 
     # wrap WebSocket clients in QWebChannelAbstractTransport objects
-    clientWrapper = WebSocketClientWrapper(server)
+    client_wrapper = WebSocketClientWrapper(server)
 
     # setup the channel
     channel = QWebChannel()
-    clientWrapper.clientConnected.connect(channel.connectTo)
+    client_wrapper.client_connected.connect(channel.connectTo)
 
     # setup the UI
     dialog = Dialog()
@@ -91,8 +91,9 @@ if __name__ == '__main__':
     url = QUrl.fromLocalFile(f"{cur_dir}/index.html")
     QDesktopServices.openUrl(url)
 
-    message = f"Initialization complete, opening browser at {url.toDisplayString()}."
-    dialog.displayMessage(message)
+    display_url = url.toDisplayString()
+    message = f"Initialization complete, opening browser at {display_url}."
+    dialog.display_message(message)
     dialog.show()
 
     sys.exit(app.exec())

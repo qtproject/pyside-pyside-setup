@@ -1,7 +1,7 @@
 #############################################################################
 ##
 ## Copyright (C) 2017 Klarälvdalens Datakonsult AB, a KDAB Group company, info@kdab.com, author Milian Wolff <milian.wolff@kdab.com>
-## Copyright (C) 2020 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -51,7 +51,7 @@ class Core(QObject):
     def __init__(self, dialog, parent=None):
         super().__init__(parent)
         self._dialog = dialog
-        self._dialog.sendText.connect(self._emit_send_text)
+        self._dialog.send_text.connect(self._emit_send_text)
 
     @Slot(str)
     def _emit_send_text(self, text):
@@ -59,4 +59,4 @@ class Core(QObject):
 
     @Slot(str)
     def receiveText(self, text):
-        self._dialog.displayMessage(f"Received message: {text}")
+        self._dialog.display_message(f"Received message: {text}")

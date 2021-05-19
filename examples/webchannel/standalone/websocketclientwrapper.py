@@ -1,7 +1,7 @@
 #############################################################################
 ##
 ## Copyright (C) 2017 Klarälvdalens Datakonsult AB, a KDAB Group company, info@kdab.com, author Milian Wolff <milian.wolff@kdab.com>
-## Copyright (C) 2020 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -51,7 +51,7 @@ class WebSocketClientWrapper(QObject):
        the WebChannel. Any kind of remote JavaScript client that supports
        WebSockets can thus receive messages and access the published objects.
     """
-    clientConnected = Signal(WebSocketTransport)
+    client_connected = Signal(WebSocketTransport)
 
     def __init__(self, server, parent=None):
         """Construct the client wrapper with the given parent. All clients
@@ -59,14 +59,14 @@ class WebSocketClientWrapper(QObject):
            in WebSocketTransport objects."""
         super().__init__(parent)
         self._server = server
-        self._server.newConnection.connect(self.handleNewConnection)
+        self._server.newConnection.connect(self.handle_new_connection)
         self._transports = []
 
     @Slot()
-    def handleNewConnection(self):
+    def handle_new_connection(self):
         """Wrap an incoming WebSocket connection in a WebSocketTransport
            object."""
         socket = self._server.nextPendingConnection()
         transport = WebSocketTransport(socket)
         self._transports.append(transport)
-        self.clientConnected.emit(transport)
+        self.client_connected.emit(transport)
