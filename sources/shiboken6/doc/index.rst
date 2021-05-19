@@ -108,7 +108,7 @@ Documentation
           <td><a href="shibokenmodule.html"><p><strong>Shiboken Module</strong><br/>Python utility module.</p></a></td>
         </tr>
         <tr>
-          <td><a href="typesystem.html"><p><strong>Type System</strong><br/>Reference and functionallities.</p></a></td>
+          <td><a href="typesystem.html"><p><strong>Type System</strong><br/>Reference and functionality.</p></a></td>
           <td><a href="examples/index.html"><p><strong>Examples</strong><br/>Using Shiboken.</p></a></td>
           <td><a href="considerations.html"><p><strong>Considerations</strong><br/>Known issues and FAQ.</p></a></td>
         </tr>
