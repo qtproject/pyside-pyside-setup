@@ -32,7 +32,6 @@
 namespace TypeSystem
 {
 enum Language {
-    NoLanguage          = 0x0000,
     TargetLangCode      = 0x0001,
     NativeCode          = 0x0002,
     ShellCode           = 0x0004,
@@ -61,16 +60,14 @@ enum CodeSnipPosition {
     CodeSnipPositionBeginning,
     CodeSnipPositionEnd,
     CodeSnipPositionDeclaration,
-    CodeSnipPositionAny,
-    CodeSnipPositionInvalid
+    CodeSnipPositionAny
 };
 
 enum DocModificationMode {
     DocModificationAppend,
     DocModificationPrepend,
     DocModificationReplace,
-    DocModificationXPathReplace,
-    DocModificationInvalid
+    DocModificationXPathReplace
 };
 
 enum class ExceptionHandling {

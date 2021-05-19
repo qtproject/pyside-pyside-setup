@@ -1584,7 +1584,6 @@ QString ContainerTypeEntry::typeName() const
         return QLatin1String("multi-hash");
     case PairContainer:
         return QLatin1String("pair");
-    case NoContainer:
     default:
         break;
     }
