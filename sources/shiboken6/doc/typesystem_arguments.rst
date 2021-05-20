@@ -196,7 +196,7 @@ parent
 
     The parent node lets you define the argument parent which will
     take ownership of argument and will destroy the C++ child object when the
-    parent is destroyed.
+    parent is destroyed (see :ref:`ownership-parent`).
 
     .. code-block:: xml
 

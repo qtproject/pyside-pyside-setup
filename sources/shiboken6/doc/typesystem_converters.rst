@@ -29,7 +29,7 @@ C++ and vice-versa.
 
 
 For the user defined conversion code to be inserted in the proper places,
-the "<conversion-rule>" tag must be used.
+the :ref:`conversion-rule` tag must be used.
 
       .. code-block:: xml
 

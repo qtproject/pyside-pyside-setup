@@ -8,16 +8,17 @@ Modifying Functions
 modify-argument
 ^^^^^^^^^^^^^^^
 
-    The modify-argument node specifies which of the given function's arguments the
-    modification affects, and is a child of the modify-function node. Use the
-    remove-argument, replace-default-expression, remove-default-expression,
-    replace-type, reference-count and define-ownership nodes to specify the details
-    of the modification.
+    Function modifications consist of a list of ``modify-argument`` nodes
+    contained in a :ref:`modify-function` node.  Use the :ref:`remove-argument`,
+    :ref:`replace-default-expression`, :ref:`remove-default-expression`,
+    :ref:`replace-type`, :ref:`reference-count` and :ref:`define-ownership`
+    nodes to specify the details of the modification.
 
     .. code-block:: xml
 
          <modify-function>
-             <modify-argument index="return | this | 1 ..." rename="...">
+             <modify-argument index="return | this | 1 ..." rename="..."
+              invalidate-after-use = "true | false">
                  // modifications
              </modify-argument>
          </modify-function>
@@ -29,3 +30,6 @@ modify-argument
 
     The optional ``rename`` attribute is used to rename a argument and use this
     new name in the generated code.
+
+    For the optional ``invalidate-after-use`` attribute,
+    see :ref:`invalidationafteruse` .

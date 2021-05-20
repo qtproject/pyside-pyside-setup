@@ -1,8 +1,6 @@
 Specifying Types
 ----------------
 
-.. _typesystem:
-
 Including Snippets
 ^^^^^^^^^^^^^^^^^^
 
@@ -26,6 +24,8 @@ in the type system paths passed as command line argument.
 
 Note that this is not a standard externally parsed entity due to the limitations
 of the underlying parser.
+
+.. _typesystem:
 
 typesystem
 ^^^^^^^^^^
