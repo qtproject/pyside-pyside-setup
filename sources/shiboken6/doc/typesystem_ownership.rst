@@ -58,14 +58,14 @@ Invalidate after use
 
     Objects marked with *invalidate-after-use* in the type system description always are
     virtual method arguments provided by a C++ originated call. They should be
-    invalidated right after the Python function returns.
+    invalidated right after the Python function returns (see :ref:`invalidationafteruse`).
 
 .. _ownership-virt-method:
 
 Objects with virtual methods
 ----------------------------
 
-    A little bit of implementation details:
+    A little bit of implementation details (see also :ref:`codegenerationterminology`):
     virtual methods are supported by creating a C++ class, the **shell**, that inherits
     from the class with virtual methods, the native one, and override those methods to check if
     any derived class in Python also override it.
@@ -73,9 +73,11 @@ Objects with virtual methods
     If the class has a virtual destructor (and C++ classes with virtual methods should have), this
     C++ instance invalidates the wrapper only when the overridden destructor is called.
 
-    One exception to this rule is when the object is created in C++, like in a
-    factory method. This way the wrapped object is a C++ instance of the native
-    class, not the shell one, and we cannot know when it is destroyed.
+    An instance of the **shell** is created when created in Python. However,
+    when  the object is created in C++, like in a factory method or a parameter
+    to a virtual function like ``QObject::event(QEvent *)``, the wrapped object
+    is a C++ instance of the native class, not the **shell** one, and we cannot
+    know when it is destroyed.
 
 .. _ownership-parent:
 
@@ -216,6 +218,12 @@ modify-argument) will be marked as a child
 of the first argument using the `parent` tag. To remove ownership, just use "remove" in the action attribute. **Removing
 parentship also transfers the ownership back to python.**
 
+See `Object Trees and Object Ownership in Qt`_.
+
+.. _`Object Trees and Object Ownership in Qt`: http://doc.qt.io/qt-6/objecttrees.html
+
+.. _invalidationafteruse:
+
 Invalidation after use
 ----------------------
 
@@ -228,7 +236,3 @@ call returned. In this case, you should use the ``invalidate-after-use`` attribu
         <modify-argument index="2" invalidate-after-use="yes"/>
 
 In this example the second argument will be invalidated after this method call.
-
-See `Object Trees and Object Ownership`_.
-
-.. _`Object Trees and Object Ownership`: http://doc.qt.io/qt-5/objecttrees.html

@@ -7,32 +7,17 @@ Manipulating Object and Value Types
 
 inject-code
 ^^^^^^^^^^^
+
     The inject-code node inserts the given code into the generated code for the
     given type or function, and it is a child of the :ref:`object-type`, :ref:`value-type`,
     :ref:`modify-function` and :ref:`add-function` nodes.
 
-    The code can be embedded into XML (be careful to use the correct XML entities
-    for characters like '<', '>', '&'):
-
     .. code-block:: xml
 
-         <value-type>
-             <inject-code class="native | target | target-declaration"
-                 position="beginning | end" since="...">
-                 // the code
-             </inject-code>
-         </value-type>
-
-    or obtained from an external file:
-
-    .. code-block:: xml
-
-         <value-type>
-             <inject-code class="native | target | target-declaration"
-                 position="beginning | end" since="..."
-                 file="external_source.cpp"
-                 snippet="label"/>
-         </value-type>
+        <inject-code class="native | target"
+                     position="beginning | end" since="..."
+                     file="[file]"
+                     snippet="[label]"/>
 
 
     The ``class`` attribute specifies which module of the generated code that
@@ -40,20 +25,76 @@ inject-code
     (see :ref:`codegenerationterminology`). The ``class`` attribute accepts the
     following values:
 
-        * native: The c++ code
-        * target: The binding code
-        * target-declaration: The code will be injected into the generated header
-          file containing the c++ wrapper class definition.
-        * file: The file name
-        * snippet: The snippet label (optional)
+        * ``native``: The c++ code
+        * ``target``: The binding code
 
     If the ``position`` attribute is set to *beginning* (the default), the code
     is inserted at the beginning of the function. If it is set to *end*, the code
     is inserted at the end of the function.
 
-    The ``since`` attribute specify the API version where this code was injected.
+    For a detailed description of how to above attributes interact,
+    see :ref:`codeinjectionsemantics`.
 
-    If a ``snippet`` label is given, the code between annotations of the form
+    The optional ``file`` attribute specifies the file name
+    (see :ref:`external-snippets`).
+
+    The optional ``snippet`` attribute specifies the snippet label
+    (see :ref:`external-snippets`).
+
+    There are severals ways to specify the code:
+
+Embedding Code into XML
+=======================
+
+    The code can be embedded into XML (be careful to use the correct XML entities
+    for characters like '<', '>', '&'):
+
+    .. code-block:: xml
+
+         <value-type>
+             <inject-code class="native | target"
+                 position="beginning | end" since="...">
+                 // the code
+             </inject-code>
+         </value-type>
+
+
+Using a Template Specified in XML
+=================================
+
+    It is possible to create code templates for reuse in XML
+    (see :ref:`using-code-templates`). This allows for replacing of custom
+    placeholders.
+
+    .. code-block:: xml
+
+         <value-type>
+             <inject-code class="native | target" class="native | target">
+                 <insert-template name="template_name"/>
+             </inject-code>
+         </value-type>
+
+
+.. _external-snippets:
+
+Using Snippets From External Files
+==================================
+
+    Code snippets can also be retrieved from external files found in the
+    typesystem search path (see :ref:`typesystem-paths`).
+
+    .. code-block:: xml
+
+         <value-type>
+             <inject-code class="native | target"
+                 position="beginning | end" since="..."
+                 file="external_source.cpp"
+                 snippet="label"/>
+         </value-type>
+
+
+    In the external file ``external_source.cpp``, the code between annotations
+    of the form:
 
     .. code-block:: c++
 
@@ -61,9 +102,8 @@ inject-code
         ...
         // @snippet label
 
-    will be extracted.
 
-    For a detailed description, see :ref:`codeinjectionsemantics`.
+    will be extracted.
 
 modify-field
 ^^^^^^^^^^^^
@@ -100,10 +140,10 @@ modify-field
 modify-function
 ^^^^^^^^^^^^^^^
 
-    The modify-function node allows you to modify a given C++ function when mapping
-    it onto the target language, and it is a child of an :ref:`object-type` or a :ref:`value-type`
-    node. Use the :ref:`modify-argument` node to specify which argument the modification
-    affects.
+    The ``modify-function`` node allows you to modify a given C++ function when
+    mapping it onto the target language, and it is a child of an
+    :ref:`object-type` or a :ref:`value-type` node. Use the :ref:`modify-argument`
+    node to specify which argument the modification affects.
 
     .. code-block:: xml
 
