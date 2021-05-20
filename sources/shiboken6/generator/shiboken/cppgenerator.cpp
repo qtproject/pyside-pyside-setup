@@ -1102,7 +1102,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
                     << " = PyTuple_GET_ITEM(" << PYTHON_ARGS << ", "
                     << index - 1 << ")->ob_refcnt == 1;\n";
             } else if (index == 0 &&
-                       argMod.ownerships().value(TypeSystem::TargetLangCode) == TypeSystem::CppOwnership) {
+                       argMod.targetOwnerShip() == TypeSystem::CppOwnership) {
                 invalidateReturn = true;
             }
         }
@@ -1197,9 +1197,8 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
 
     for (const FunctionModification &funcMod : functionModifications) {
         for (const ArgumentModification &argMod : funcMod.argument_mods()) {
-            if (argMod.ownerships().contains(TypeSystem::NativeCode)
-                && argMod.index() == 0
-                && argMod.ownerships().value(TypeSystem::NativeCode) == TypeSystem::CppOwnership) {
+            if (argMod.index() == 0
+                && argMod.nativeOwnership() == TypeSystem::CppOwnership) {
                 s << "if (Shiboken::Object::checkType(" << PYTHON_RETURN_VAR << "))\n";
                 Indentation indent(s);
                 s << "Shiboken::Object::releaseOwnership(" << PYTHON_RETURN_VAR << ");\n";
@@ -3724,7 +3723,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
     QList<ArgumentModification> refcount_mods;
     for (const auto &func_mod : func->modifications()) {
         for (const ArgumentModification &arg_mod : func_mod.argument_mods()) {
-            if (arg_mod.ownerships().contains(TypeSystem::TargetLangCode))
+            if (arg_mod.targetOwnerShip() != TypeSystem::UnspecifiedOwnership)
                 ownership_mods.append(arg_mod);
             else if (!arg_mod.referenceCounts().isEmpty())
                 refcount_mods.append(arg_mod);
@@ -3760,8 +3759,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
 
             // The default ownership does nothing. This is useful to avoid automatic heuristically
             // based generation of code defining parenting.
-            const auto ownership =
-                arg_mod.ownerships().value(TypeSystem::TargetLangCode, TypeSystem::DefaultOwnership);
+            const auto ownership = arg_mod.targetOwnerShip();
             if (ownership == TypeSystem::DefaultOwnership)
                 continue;
 

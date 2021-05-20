@@ -289,8 +289,8 @@ public:
     QList<ReferenceCount> referenceCounts(const AbstractMetaClass *cls, int idx = -2) const;
     ArgumentOwner argumentOwner(const AbstractMetaClass *cls, int idx) const;
 
-    // Returns the ownership rules for the given argument in the given context
-    TypeSystem::Ownership ownership(const AbstractMetaClass *cls, TypeSystem::Language language, int idx) const;
+    // Returns the ownership rules for the given argument (target lang).
+    TypeSystem::Ownership argumentTargetOwnership(const AbstractMetaClass *cls, int idx) const;
 
     QString typeReplaced(int argument_index) const;
     bool isModifiedToArray(int argumentIndex) const;

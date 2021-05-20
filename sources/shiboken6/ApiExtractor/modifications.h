@@ -198,8 +198,11 @@ public:
     void setReplacedDefaultExpression(const QString &value);
 
     // The new definition of ownership for a specific argument
-    const QHash<TypeSystem::Language, TypeSystem::Ownership> &ownerships() const;
-    void insertOwnership(TypeSystem::Language l, TypeSystem::Ownership o);
+
+    TypeSystem::Ownership targetOwnerShip() const;
+    void setTargetOwnerShip(TypeSystem::Ownership o);
+    TypeSystem::Ownership nativeOwnership() const;
+    void setNativeOwnership(TypeSystem::Ownership o);
 
     // Different conversion rules
     const CodeSnipList &conversionRules() const;
