@@ -701,16 +701,16 @@ bool AbstractMetaFunction::allowThread() const
     return result;
 }
 
-TypeSystem::Ownership AbstractMetaFunction::ownership(const AbstractMetaClass *cls, TypeSystem::Language language, int key) const
+TypeSystem::Ownership AbstractMetaFunction::argumentTargetOwnership(const AbstractMetaClass *cls, int idx) const
 {
     for (const auto &modification : modifications(cls)) {
         for (const ArgumentModification &argumentModification : modification.argument_mods()) {
-            if (argumentModification.index() == key)
-                return argumentModification.ownerships().value(language, TypeSystem::InvalidOwnership);
+            if (argumentModification.index() == idx)
+                return argumentModification.targetOwnerShip();
         }
     }
 
-    return TypeSystem::InvalidOwnership;
+    return TypeSystem::UnspecifiedOwnership;
 }
 
 QString AbstractMetaFunction::typeReplaced(int key) const

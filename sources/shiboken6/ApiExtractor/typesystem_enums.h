@@ -50,7 +50,7 @@ enum class AllowThread {
 };
 
 enum Ownership {
-    InvalidOwnership,
+    UnspecifiedOwnership,
     DefaultOwnership,
     TargetLangOwnership,
     CppOwnership

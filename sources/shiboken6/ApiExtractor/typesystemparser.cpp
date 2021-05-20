@@ -2112,7 +2112,16 @@ bool TypeSystemParser::parseDefineOwnership(const QXmlStreamReader &,
         return false;
     }
     auto &lastArgMod = m_contextStack.top()->functionMods.last().argument_mods().last();
-    lastArgMod.insertOwnership(lang, ownershipOpt.value());
+    switch (lang) {
+    case TypeSystem::TargetLangCode:
+        lastArgMod.setTargetOwnerShip(ownershipOpt.value());
+        break;
+    case TypeSystem::NativeCode:
+        lastArgMod.setNativeOwnership(ownershipOpt.value());
+        break;
+    default:
+        break;
+    }
     return true;
 }
 

@@ -98,7 +98,8 @@ void TestModifyFunction::testOwnershipTransfer()
     const auto func = classB->findFunction(QLatin1String("method"));
     QVERIFY(!func.isNull());
 
-    QCOMPARE(func->ownership(func->ownerClass(), TypeSystem::TargetLangCode, 0), TypeSystem::CppOwnership);
+    QCOMPARE(func->argumentTargetOwnership(func->ownerClass(), 0),
+             TypeSystem::CppOwnership);
 }
 
 
@@ -219,10 +220,12 @@ void TestModifyFunction::testWithApiVersion()
     AbstractMetaClass* classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
     auto func = classB->findFunction(QLatin1String("method"));
 
-    QCOMPARE(func->ownership(func->ownerClass(), TypeSystem::TargetLangCode, 0), TypeSystem::CppOwnership);
+    auto returnOwnership = func->argumentTargetOwnership(func->ownerClass(), 0);
+    QCOMPARE(returnOwnership, TypeSystem::CppOwnership);
 
     func = classB->findFunction(QLatin1String("methodB"));
-    QVERIFY(func->ownership(func->ownerClass(), TypeSystem::TargetLangCode, 0) != TypeSystem::CppOwnership);
+    returnOwnership = func->argumentTargetOwnership(func->ownerClass(), 0);
+    QVERIFY(returnOwnership != TypeSystem::CppOwnership);
 }
 
 // Modifications on class/typesystem level are tested below

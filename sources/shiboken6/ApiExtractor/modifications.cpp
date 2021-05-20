@@ -507,7 +507,8 @@ public:
     QList<ReferenceCount> referenceCounts;
     QString modified_type;
     QString replacedDefaultExpression;
-    QHash<TypeSystem::Language, TypeSystem::Ownership> ownerships;
+    TypeSystem::Ownership m_targetOwnerShip = TypeSystem::UnspecifiedOwnership;
+    TypeSystem::Ownership m_nativeOwnerShip = TypeSystem::UnspecifiedOwnership;
     CodeSnipList conversion_rules;
     ArgumentOwner owner;
     QString renamed_to;
@@ -555,14 +556,26 @@ void ArgumentModification::setReplacedDefaultExpression(const QString &value)
         d->replacedDefaultExpression = value;
 }
 
-const QHash<TypeSystem::Language, TypeSystem::Ownership> &ArgumentModification::ownerships() const
+TypeSystem::Ownership ArgumentModification::targetOwnerShip() const
 {
-    return d->ownerships;
+    return d->m_targetOwnerShip;
 }
 
-void ArgumentModification::insertOwnership(TypeSystem::Language l, TypeSystem::Ownership o)
+void ArgumentModification::setTargetOwnerShip(TypeSystem::Ownership o)
 {
-    d->ownerships.insert(l, o);
+    if (o != d->m_targetOwnerShip)
+        d->m_targetOwnerShip = o;
+}
+
+TypeSystem::Ownership ArgumentModification::nativeOwnership() const
+{
+    return d->m_nativeOwnerShip;
+}
+
+void ArgumentModification::setNativeOwnership(TypeSystem::Ownership o)
+{
+    if (o != d->m_nativeOwnerShip)
+        d->m_nativeOwnerShip = o;
 }
 
 const CodeSnipList &ArgumentModification::conversionRules() const
@@ -929,8 +942,10 @@ QDebug operator<<(QDebug d, const ArgumentModification &a)
         d << ", modified_type=\"" << a.modifiedType() << '"';
     if (!a.replacedDefaultExpression().isEmpty())
         d << ", replacedDefaultExpression=\"" << a.replacedDefaultExpression() << '"';
-    if (!a.ownerships().isEmpty())
-        d << ", ownerships=" << a.ownerships();
+    if (a.targetOwnerShip() != TypeSystem::UnspecifiedOwnership)
+        d << ", target ownership=" << a.targetOwnerShip();
+    if (a.nativeOwnership() != TypeSystem::UnspecifiedOwnership)
+        d << ", native ownership=" << a.nativeOwnership();
     if (!a.renamedToName().isEmpty())
         d << ", renamed_to=\"" << a.renamedToName() << '"';
      d << ", owner=" << a.owner() << ')';
