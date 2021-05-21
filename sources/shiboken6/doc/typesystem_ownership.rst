@@ -26,12 +26,25 @@ C++ object is already deleted, or maybe the C++ object should not be freed after
 the Python wrapper go out of scope and die, because C++ is already taking care of
 the wrapped instance.
 
+This is not a concern for value types specified by :ref:`value-type`, which can
+be freely created, copied and destroyed, however object types specified by
+:ref:`object-type` pointing to C++ instances with life cycle constraints
+may require attention.
+
 In order to handle this, you should tell the
 generator whether the instance's ownership belongs to the binding or
 to the C++ Library. When belonging to the binding, we are sure that the C++ object
 won't be deleted by C++ code and we can call the C++ destructor when the refcount
 reaches 0. Otherwise, instances owned by C++ code can be destroyed arbitrarily,
 without notifying the Python wrapper of its destruction.
+
+By default, objects created in Python have ownership. A relevant case are
+return values of virtual factory methods reimplemented in Python
+(C++ Wrapper Code) which pass the bindings code. Objects obtained from C++
+(for example, ``QGuiApplication::clipoard()``) do not have ownership.
+
+The :ref:`shiboken-module` module provides the ``dump()`` utility function,
+which prints the relevant information for an object.
 
 Invalidating objects
 ====================
@@ -123,7 +136,17 @@ Return value heuristics
     When enabled, object returned as pointer in C++ will become child of the object on which the method
     was called.
 
-    To activate this heuristic, use the :ref:`--enable-return-value-heuristic <return-heuristic>`
+    To activate this heuristic, use the command line switch
+    :ref:`--enable-return-value-heuristic <return-heuristic>`.
+
+    To disable this heuristic for specific cases, specify ``default`` as
+    ownership:
+
+    .. code-block:: xml
+
+        <modify-argument index="0">
+            <define-ownership class="target" owner="default" />
+        </modify-argument>
 
 Common pitfalls
 ===============
@@ -158,11 +181,14 @@ Not saving unowned objects references
 Ownership Management in  the Typesystem
 =======================================
 
-For the possible values of the ``class`` attribute, see
-:ref:`codegenerationterminology`.
+Python Wrapper Code
+-------------------
+
+For this code, the ``class`` attribute takes the value ``target``
+(see :ref:`codegenerationterminology`).
 
 Ownership transfer from C++ to target
--------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     When an object currently owned by C++ has its ownership transferred
     back to the target language, the binding can know for sure when the object will be deleted and
@@ -175,8 +201,11 @@ Ownership transfer from C++ to target
             <define-ownership class="target" owner="target" />
         </modify-argument>
 
+    A typical use case would be returning an object allocated in C++, for
+    example from ``clone()`` or other factory methods.
+
 Ownership transfer from target to C++
--------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     In the opposite direction, when an object ownership is transferred from the target language
     to C++, the native code takes full control of the object life and you don't
@@ -195,9 +224,13 @@ Ownership transfer from target to C++
             <define-ownership class="target" owner="c++" />
         </modify-argument>
 
+    Use cases would be an returning a member object by pointer
+    or passing an object by pointer into a function where the class
+    takes ownership, for example
+    ``QNetworkAccessManager::setCookieJar(QNetworkCookieJar *)``.
 
 Parent-child relationship
--------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 One special type of relationship is the parent-child. When an object is called
 the parent of another object (the child), the former is in charge of deleting its
@@ -210,7 +243,7 @@ classes, creating "trees" of instances.
     .. code-block:: xml
 
         <modify-argument index="this">
-            <parent index="1" action="add">
+            <parent index="1" action="add"/>
         </modify-argument>
 
 In this example, the instance with the method that is being invoked (indicated by 'index="this"' on
@@ -222,14 +255,34 @@ See `Object Trees and Object Ownership in Qt`_.
 
 .. _`Object Trees and Object Ownership in Qt`: http://doc.qt.io/qt-6/objecttrees.html
 
+C++ Wrapper Code
+----------------
+
+For this code, the ``class`` attribute takes the value ``native``. The
+modifications affect code called from within C++, typically when calling
+virtual C++ methods reimplemented in Python
+(see :ref:`codegenerationterminology`).
+
+Return values of virtual functions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The ownership of C++ objects returned by pointer should be set to ``c++`` to
+prevent them from being deleted by Python, since objects created
+in Python have ownership by default.
+
+Ownership transfers specified for other arguments do not have any effect.
+
 .. _invalidationafteruse:
 
 Invalidation after use
-----------------------
+^^^^^^^^^^^^^^^^^^^^^^
 
-Sometimes an object is created as a virtual method call argument and destroyed after the
-call returned. In this case, you should use the ``invalidate-after-use`` attribute in the
-``modify-argument`` tag to mark the wrapper as invalid right after the virtual method returns.
+Sometimes an object is created in C++ and passed as a virtual method call
+argument and destroyed after the call returned
+(see :ref:`ownership-virt-method`).
+In this case, you should use the ``invalidate-after-use`` attribute in the
+:ref:`modify-argument` tag to mark the wrapper as invalid right after the
+virtual method returns.
 
     .. code-block:: xml
 
