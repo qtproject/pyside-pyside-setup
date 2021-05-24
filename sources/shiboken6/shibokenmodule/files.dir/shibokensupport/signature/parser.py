@@ -47,6 +47,7 @@ from shibokensupport.signature.mapping import (type_map, update_mapping,
     namespace, typing, _NotCalled, ResultVariable, ArrayLikeVariable)
 from shibokensupport.signature.lib.tool import (SimpleNamespace,
     build_brace_pattern)
+from shibokensupport import feature
 
 _DEBUG = False
 LIST_KEYWORDS = False
@@ -138,7 +139,48 @@ def _parse_line(line):
     return vars(ret)
 
 
+def _using_snake_case():
+    # Note that this function should stay here where we use snake_case.
+    if "PySide6.QtCore" not in sys.modules:
+        return False
+    from PySide6.QtCore import QDir
+    return hasattr(QDir, "cd_up")
+
+
+def _handle_instance_fixup(thing):
+    """
+    Default expressions using instance methods like
+        (...,device=QPointingDevice.primaryPointingDevice())
+    need extra handling for snake_case. These are:
+        QPointingDevice.primaryPointingDevice()
+        QInputDevice.primaryKeyboard()
+        QKeyCombination.fromCombined(0)
+        QSslConfiguration.defaultConfiguration()
+    """
+    match = re.search(r"\w+\(", thing)
+    if not match:
+        return thing
+    start, stop = match.start(), match.end() - 1
+    pre, func, args = thing[:start], thing[start : stop], thing[stop:]
+    if func[0].isupper() or func.startswith("gl") and func[2:3].isupper():
+        return thing
+    # Now convert this string to snake case.
+    snake_func = ""
+    for idx, char in enumerate(func):
+        if char.isupper():
+            if idx and func[idx - 1].isupper():
+                # two upper chars are forbidden
+                return things
+            snake_func += f"_{char.lower()}"
+        else:
+            snake_func += char
+    return f"{pre}{snake_func}{args}"
+
+
 def make_good_value(thing, valtype):
+    # PYSIDE-1019: Handle instance calls (which are really seldom)
+    if "(" in thing and _using_snake_case():
+        thing = _handle_instance_fixup(thing)
     try:
         if thing.endswith("()"):
             thing = f'Default("{thing[:-2]}")'
