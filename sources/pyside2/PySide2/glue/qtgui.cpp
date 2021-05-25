@@ -172,6 +172,13 @@ for (int i = 0, i_max = %CPPSELF.count(); i < i_max; ++i){
 %0 = new %TYPE(QPixmap::fromImage(%1));
 // @snippet qpixmap
 
+// @snippet qimage-decref-image-data
+static void imageDecrefDataHandler(void *data)
+{
+    Py_DECREF(reinterpret_cast<PyObject *>(data));
+}
+// @snippet qimage-decref-image-data
+
 // @snippet qimage-constbits
 %PYARG_0 = Shiboken::Buffer::newObject(%CPPSELF.%FUNCTION_NAME(), %CPPSELF.byteCount());
 // @snippet qimage-constbits

@@ -80,8 +80,9 @@
     </template>
 
     <template name="qimage_buffer_constructor">
+        Py_INCREF(%PYARG_1);
         auto ptr = reinterpret_cast&lt;uchar*&gt;(Shiboken::Buffer::getPointer(%PYARG_1));
-        %0 = new %TYPE(ptr, %ARGS);
+        %0 = new %TYPE(ptr, %ARGS, imageDecrefDataHandler, %PYARG_1);
     </template>
 
     <template name="qcolor_repr">

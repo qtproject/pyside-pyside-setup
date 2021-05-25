@@ -768,6 +768,8 @@
       <include file-name="QStringList" location="global"/>
       <include file-name="QMatrix" location="global"/>
     </extra-includes>
+    <inject-code class="native" position="beginning"
+                 file="../glue/qtgui.cpp" snippet="qimage-decref-image-data"/>
 
     <modify-function signature="load(const QString&amp;, const char*)" allow-thread="yes"/>
     <modify-function signature="load(QIODevice*,const char*)" allow-thread="yes"/>
