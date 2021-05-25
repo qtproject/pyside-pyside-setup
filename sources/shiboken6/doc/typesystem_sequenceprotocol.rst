@@ -1,8 +1,10 @@
+.. _sequence-protocol:
+
 Sequence Protocol
 -----------------
 
 Support for the sequence protocol is achieved adding functions with special
-names, this is done using the add-function tag.
+names, this is done using the :ref:`add-function` tag.
 
 The special function names are:
 
@@ -16,7 +18,7 @@ The special function names are:
     __concat__    PyObject* self, PyObject* _other                PyObject*            PySequence_Concat
     ============= =============================================== ==================== ===================
 
-You just need to inform the function name to the add-function tag, without any
+You just need to inform the function name to the :ref:`add-function` tag, without any
 parameter or return type information, when you do it, |project| will create a C
 function with parameters and return type defined by the table above.
 

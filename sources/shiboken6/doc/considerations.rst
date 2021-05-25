@@ -110,6 +110,7 @@ this you will need use the new style class:
 
 All classes used for multiple inheritance with other PySide types need to have
 'object' as base class.
+
 **************************
 Frequently Asked Questions
 **************************

@@ -1,12 +1,14 @@
 Solving compilation problems
 ----------------------------
 
+.. _suppress-warning:
+
 suppress-warning
 ^^^^^^^^^^^^^^^^
 
     The generator will generate several warnings which may be irrelevant to the
-    user. The suppress-warning node suppresses the specified warning, and it is
-    a child of the typesystem node.
+    user. The ``suppress-warning`` node suppresses the specified warning, and it is
+    a child of the :ref:`typesystem` node.
 
     .. code-block:: xml
 
@@ -18,12 +20,14 @@ suppress-warning
     wildcard (use "" to escape regular expression matching if the warning contain
     a regular "*").
 
+.. _extra-includes:
+
 extra-includes
 ^^^^^^^^^^^^^^
 
-    The extra-includes node contains declarations of additional include files,
-    and it can be a child of the interface-type, namespace-type, value-type and
-    object-type nodes.
+    The ``extra-includes`` node contains declarations of additional include files,
+    and it can be a child of the :ref:`namespace`, :ref:`value-type` and
+    :ref:`object-type` nodes.
 
     The generator automatically tries to read the global header for each type but
     sometimes it is required to include extra files in the generated C++ code to
@@ -48,9 +52,9 @@ extra-includes
 include
 ^^^^^^^
 
-    The include node specifies the name and location of a file that must be
-    included, and it is a child of the interface-type, namespace-type, value-type,
-    object-type or extra-includes nodes
+    The ``include`` node specifies the name and location of a file that must be
+    included, and it is a child of the :ref:`namespace`, :ref:`value-type`,
+    :ref:`object-type` or :ref:`extra-includes` node.
 
     The generator automatically tries to read the global header for each type. Use
     the include node to override this behavior, providing an alternative file. The

@@ -3,6 +3,8 @@
 Using Code Templates
 --------------------
 
+.. _template:
+
 template
 ^^^^^^^^
 
@@ -21,14 +23,15 @@ template
     Use the ``insert-template`` node to insert the template code (identified
     by the template's ``name`` attribute) into the generated code base.
 
+.. _insert-template:
 
 insert-template
 ^^^^^^^^^^^^^^^
 
-    The insert-template node includes the code template identified by the name
-    attribute, and it can be a child of the
-    :ref:`inject-code`, :ref:`conversion-rule`, ``template``,
-    ``custom-constructor`` and ``custom-destructor`` nodes.
+    The ``insert-template`` node includes the code template identified by the
+    name attribute, and it can be a child of the :ref:`inject-code`,
+    :ref:`conversion-rule`, :ref:`template`, ``custom-constructor``
+    or ``custom-destructor`` nodes.
 
     .. code-block:: xml
 
@@ -36,14 +39,13 @@ insert-template
              <insert-template name="my_template" />
          </inject-code>
 
-    Use the replace node to modify the template code.
-
+    Use the ``replace`` node to modify the template code.
 
 replace
 ^^^^^^^
 
     The ``replace`` node allows you to modify template code before inserting it into
-    the generated code, and it can be a child of the ``insert-template node``.
+    the generated code, and it can be a child of the :ref:`insert-template node`.
 
     .. code-block:: xml
 

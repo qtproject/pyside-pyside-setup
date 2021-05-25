@@ -60,12 +60,13 @@ the typesystem and, in most cases, the injected code.
          well to prevent the headers from being suppressed in the generated
          code.
 
-:typesystem: XML files that provides the developer with a tool to customize the
+::ref:`typesystem`: XML files that provides the developer with a tool to customize the
              way that the generators will see the classes and functions. For
              example, functions can be renamed, have its signature changed and
              many other actions.
-:inject code: allows the developer to insert handwritten code where the generated
-              code is not suitable or needs some customization.
+::ref:`inject code <codeinjectionsemantics>`: allows the developer to insert
+              handwritten code where the generated code is not suitable or
+              needs some customization.
 
 .. _command-line:
 
