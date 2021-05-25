@@ -160,6 +160,13 @@ for (Py_ssize_t i = 0; i < count; ++i){
 %0 = new %TYPE(QPixmap::fromImage(%1));
 // @snippet qpixmap
 
+// @snippet qimage-decref-image-data
+static void imageDecrefDataHandler(void *data)
+{
+    Py_DECREF(reinterpret_cast<PyObject *>(data));
+}
+// @snippet qimage-decref-image-data
+
 // @snippet qimage-constbits
 %PYARG_0 = Shiboken::Buffer::newObject(%CPPSELF.%FUNCTION_NAME(), %CPPSELF.sizeInBytes());
 // @snippet qimage-constbits
