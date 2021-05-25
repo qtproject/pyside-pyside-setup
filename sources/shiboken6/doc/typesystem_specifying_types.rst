@@ -30,8 +30,15 @@ of the underlying parser.
 typesystem
 ^^^^^^^^^^
 
-    This is the root node containing all the type system information. It can
-    have a number of attributes, described below.
+    This is the root node containing all the type system information.
+    It may contain :ref:`add-function`, :ref:`container-type`,
+    :ref:`custom-type`, :ref:`enum-type`, :ref:`function`,
+    :ref:`load-typesystem`, :ref:`namespace`, :ref:`object-type`,
+    :ref:`primitive-type`, :ref:`rejection`, :ref:`smart-pointer-type`,
+    :ref:`suppress-warning`, :ref:`template`, :ref:`system_include`,
+    :ref:`typedef-type` or :ref:`value-type` child nodes.
+
+    It can have a number of attributes, described below.
 
     .. code-block:: xml
 
@@ -64,12 +71,14 @@ typesystem
       exist (as is the case for example for ``QFileInfo::exists()``),
       the snake case name must be used.
 
+.. _load-typesystem:
+
 load-typesystem
 ^^^^^^^^^^^^^^^
 
-    The load-typesystem node specifies which type systems to load when mapping
+    The ``load-typesystem`` node specifies which type systems to load when mapping
     multiple libraries to another language or basing one library on another, and
-    it is a child of the typesystem node.
+    it is a child of the :ref:`typesystem` node.
 
     .. code-block:: xml
 
@@ -86,12 +95,13 @@ load-typesystem
     Most libraries will be based on both the QtCore and QtGui modules, in which
     case code generation for these libraries will be disabled.
 
+.. _rejection:
 
 rejection
 ^^^^^^^^^
 
-    The rejection node rejects the given class, or the specified function or
-    field, and it is a child of the typesystem node.
+    The ``rejection`` node rejects the given class, or the specified function
+    or field, and it is a child of the :ref:`typesystem` node.
 
     .. code-block:: xml
 
@@ -112,9 +122,10 @@ rejection
 primitive-type
 ^^^^^^^^^^^^^^
 
-    The primitive-type node describes how a primitive type is mapped from C++ to
-    the target language, and is a child of the typesystem node. Note that most
-    primitives are already specified in the QtCore typesystem.
+    The ``primitive-type`` node describes how a primitive type is mapped from C++ to
+    the target language, and is a child of the :ref:`typesystem` node. It may
+    contain :ref:`conversion-rule` child nodes. Note that most primitives are
+    already specified in the QtCore typesystem.
 
     .. code-block:: xml
 
@@ -170,9 +181,13 @@ primitive-type
 namespace-type
 ^^^^^^^^^^^^^^
 
-    The namespace-type node maps the given C++ namespace to the target language,
-    and it is a child of the typesystem node. Note that within namespaces, the
-    generator only supports enums (i.e., no functions or classes).
+    The ``namespace-type`` node maps the given C++ namespace to the target
+    language, and it is a child of the :ref:`typesystem` node or other
+    ``namespace-type`` nodes. It may contain :ref:`add-function`,
+    :ref:`declare-function`,  :ref:`enum-type`, :ref:`extra-includes`,
+    :ref:`modify-function`, ``namespace-type``, :ref:`object-type`,
+    :ref:`smart-pointer-type`, :ref:`typedef-type` or :ref:`value-type`
+    child nodes.
 
     .. code-block:: xml
 
@@ -213,12 +228,14 @@ namespace-type
     The **revision** attribute can be used to specify a revision for each type, easing the
     production of ABI compatible bindings.
 
+.. _enum-type:
+
 enum-type
 ^^^^^^^^^
 
-    The enum-type node maps the given enum from C++ to the target language,
-    and it is a child of the typesystem node. Use the reject-enum-value to
-    reject values.
+    The ``enum-type`` node maps the given enum from C++ to the target language,
+    and it is a child of the :ref:`typesystem node`. Use
+    :ref:`reject-enum-value` child nodes to reject values.
 
     .. code-block:: xml
 
@@ -261,12 +278,13 @@ enum-type
     The **flags-revision** attribute has the same purposes of **revision** attribute but
     is used for the QFlag related to this enum.
 
+.. _reject-enum-value:
 
 reject-enum-value
 ^^^^^^^^^^^^^^^^^
 
-    The reject-enum-value node rejects the enum value specified by the **name**
-    attribute, and it is a child of the enum-type node.
+    The ``reject-enum-value`` node rejects the enum value specified by the
+    **name** attribute, and it is a child of the :ref:`enum-type` node.
 
     .. code-block:: xml
 
@@ -282,9 +300,14 @@ reject-enum-value
 value-type
 ^^^^^^^^^^
 
-    The value-type node indicates that the given C++ type is mapped onto the target
+    The ``value-type`` node indicates that the given C++ type is mapped onto the target
     language as a value type. This means that it is an object passed by value on C++,
-    i.e. it is stored in the function call stack. It is a child of the :ref:`typesystem` node.
+    i.e. it is stored in the function call stack. It is a child of the :ref:`typesystem`
+    node or other type nodes and may contain :ref:`add-function`,
+    :ref:`declare-function`, :ref:`conversion-rule`, :ref:`enum-type`,
+    :ref:`extra-includes`, :ref:`modify-function`, :ref:`object-type`,
+    :ref:`smart-pointer-type`, :ref:`typedef-type` or further ``value-type``
+    child nodes.
 
     .. code-block:: xml
 
@@ -338,7 +361,11 @@ object-type
 
     The object-type node indicates that the given C++ type is mapped onto the target
     language as an object type. This means that it is an object passed by pointer on
-    C++ and it is stored on the heap. It is a child of the :ref:`typesystem` node.
+    C++ and it is stored on the heap. It is a child of the :ref:`typesystem` node
+    or other type nodes and may contain :ref:`add-function`,
+    :ref:`declare-function`, :ref:`enum-type`, :ref:`extra-includes`,
+    :ref:`modify-function`, ``object-type``, :ref:`smart-pointer-type`,
+    :ref:`typedef-type` or :ref:`value-type` child nodes.
 
     .. code-block:: xml
 
@@ -401,8 +428,10 @@ interface-type
 container-type
 ^^^^^^^^^^^^^^
 
-    The container-type node indicates that the given class is a container and
+    The ``container-type`` node indicates that the given class is a container and
     must be handled using one of the conversion helpers provided by attribute **type**.
+    It is a child of the :ref:`typesystem` node and may contain
+    :ref:`conversion-rule` child nodes.
 
     .. code-block:: xml
 
@@ -419,13 +448,16 @@ container-type
 
     The *optional*  **since** value is used to specify the API version of this container.
 
+.. _typedef-type:
+
 typedef-type
 ^^^^^^^^^^^^
 
-    The typedef-type allows for specifying typedefs in the typesystem. They
+    The ``typedef-type`` node allows for specifying typedefs in the typesystem. They
     are mostly equivalent to spelling out the typedef in the included header, which
     is often complicated when trying to wrap libraries whose source code cannot be
     easily extended.
+    It is a child of the :ref:`typesystem` node or other type nodes.
 
     .. code-block:: xml
 
@@ -457,10 +489,11 @@ typedef-type
 custom-type
 ^^^^^^^^^^^
 
-    The custom-type node simply makes the parser aware of the existence of a target
+    The ``custom-type`` node simply makes the parser aware of the existence of a target
     language type, thus avoiding errors when trying to find a type used in function
     signatures and other places. The proper handling of the custom type is meant to
     be done by a generator using the APIExractor.
+    It is a child of the :ref:`typesystem` node.
 
     .. code-block:: xml
 
@@ -475,11 +508,12 @@ custom-type
 smart-pointer-type
 ^^^^^^^^^^^^^^^^^^
 
-    The smart pointer type node indicates that the given class is a smart pointer
+    The ``smart pointer`` type node indicates that the given class is a smart pointer
     and requires inserting calls to **getter** to access the pointeee.
     Currently, only the **type** *shared* is supported and the usage is limited
     to function return values.
     **ref-count-method** specifies the name of the method used to do reference counting.
+    It is a child of the :ref:`typesystem` node or other type nodes.
 
     The *optional* attribute **instantiations** specifies for which instantiations
     of the smart pointer wrappers will be generated (comma-separated list).
@@ -505,8 +539,9 @@ smart-pointer-type
 function
 ^^^^^^^^
 
-    The function node indicates that the given C++ global function is mapped onto
+    The ``function`` node indicates that the given C++ global function is mapped onto
     the target language.
+    It is a child of the :ref:`typesystem` node.
 
     .. code-block:: xml
 
@@ -534,6 +569,7 @@ system-include
     parsed. Normally, include files considered to be system include
     files are skipped by the C++ code parser. Its primary use case
     is exposing classes from the STL library.
+    It is a child of the :ref:`typesystem` node.
 
     .. code-block:: xml
 

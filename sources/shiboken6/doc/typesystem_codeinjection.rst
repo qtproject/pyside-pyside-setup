@@ -22,7 +22,7 @@ This is the ``inject-code`` tag options that matters to |project|.
 inject-code tag
 ===============
 
-The following table describes the semantics of ``inject-code`` tag as used on
+The following table describes the semantics of :ref:`inject-code` tag as used on
 |project|. The ``class`` attribute specifies whether to code is injected
 into the **C++ Wrapper** or the **Python Wrapper** (see
 :ref:`codegenerationterminology`).

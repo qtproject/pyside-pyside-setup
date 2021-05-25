@@ -3,13 +3,14 @@
 Modifying Arguments
 -------------------
 
-.. _conversionrule:
+.. _conversionrule-on-arguments:
 
 conversion-rule
 ^^^^^^^^^^^^^^^
 
-    The conversion-rule node allows you to write customized code to convert
-    the given argument between the target language and C++, and it is a child of the modify-argument node:
+    The ``conversion-rule`` node allows you to write customized code to convert
+    the given argument between the target language and C++.
+    It is then a child of the :ref:`modify-argument` node:
 
     .. code-block:: xml
 
@@ -20,8 +21,8 @@ conversion-rule
         </conversion-rule>
         </modify-argument>
 
-    This node is typically used in combination with the replace-type and
-    remove-argument nodes. The given code is used instead of the generator's
+    This node is typically used in combination with the :ref:`replace-type` and
+    :ref:`remove-argument` nodes. The given code is used instead of the generator's
     conversion code.
 
     Writing %N in the code (where N is a number), will insert the name of the
@@ -35,15 +36,18 @@ conversion-rule
         bool %out = (bool) %in;
         </conversion-rule>
 
-    .. note:: You can also use the conversion-rule node to specify :ref:`a conversion code which will be used instead of the generator's conversion code everywhere for a given type <conversion-rule-on-types>`.
+    .. note::
+
+        You can also use the ``conversion-rule`` node to specify
+        :ref:`a conversion code which will be used instead of the generator's conversion code everywhere for a given type <conversion-rule-tag>`.
 
 .. _remove-argument:
 
 remove-argument
 ^^^^^^^^^^^^^^^
 
-    The remove-argument node removes the given argument from the function's
-    signature, and it is a child of the modify-argument node.
+    The ``remove-argument`` node removes the given argument from the function's
+    signature, and it is a child of the :ref:`modify-argument` node.
 
     .. code-block:: xml
 
@@ -56,7 +60,8 @@ remove-argument
 rename to
 ^^^^^^^^^
 
-    The 'rename to' node is used to rename a argument and use this new name in the generated code.
+    The ``rename to`` node is used to rename a argument and use this new name in
+    the generated code, and it is a child of the :ref:`modify-argument` node.
 
     .. code-block:: xml
 
@@ -71,8 +76,8 @@ rename to
 remove-default-expression
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    The remove-default-expression node disables the use of the default expression
-    for the given argument, and it is a child of the modify-argument node.
+    The ``remove-default-expression`` node disables the use of the default expression
+    for the given argument, and it is a child of the :ref:`modify-argument` node.
 
     .. code-block:: xml
 
@@ -85,9 +90,9 @@ remove-default-expression
 replace-default-expression
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    The replace-default-expression node replaces the specified argument with the
+    The ``replace-default-expression`` node replaces the specified argument with the
     expression specified by the ``with`` attribute, and it is a child of the
-    modify-argument node.
+    :ref:`modify-argument` node.
 
     .. code-block:: xml
 
@@ -100,9 +105,9 @@ replace-default-expression
 replace-type
 ^^^^^^^^^^^^
 
-    The replace-type node replaces the type of the given argument to the one
+    The ``replace-type`` node replaces the type of the given argument to the one
     specified by the ``modified-type`` attribute, and it is a child of the
-    modify-argument node.
+    :ref:`modify-argument` node.
 
     .. code-block:: xml
 
@@ -119,8 +124,10 @@ replace-type
 define-ownership
 ^^^^^^^^^^^^^^^^
 
-    The define-ownership tag indicates that the function changes the ownership
-    rules of the argument object. The ``class`` attribute specifies the class of
+    The ``define-ownership`` tag indicates that the function changes the ownership
+    rules of the argument object, and it is a child of the
+    :ref:`modify-argument` node.
+    The ``class`` attribute specifies the class of
     function where to inject the ownership altering code
     (see :ref:`codegenerationterminology`). The ``owner`` attribute
     specifies the new ownership of the object. It accepts the following values:
@@ -145,10 +152,11 @@ define-ownership
 reference-count
 ^^^^^^^^^^^^^^^
 
-    The reference-count tag dictates how an argument should be handled by the
+    The ``reference-count`` tag dictates how an argument should be handled by the
     target language reference counting system (if there is any), it also indicates
     the kind of relationship the class owning the function being modified has with
-    the argument. For instance, in a model/view relation a view receiving a model
+    the argument. It is a child of the :ref:`modify-argument` node.
+    For instance, in a model/view relation a view receiving a model
     as argument for a **setModel** method should increment the model's reference
     counting, since the model should be kept alive as much as the view lives.
     Remember that out hypothetical view could not become parent of the model,
@@ -194,9 +202,10 @@ replace-value
 parent
 ^^^^^^
 
-    The parent node lets you define the argument parent which will
+    The ``parent`` node lets you define the argument parent which will
     take ownership of argument and will destroy the C++ child object when the
     parent is destroyed (see :ref:`ownership-parent`).
+    It is a child of the :ref:`modify-argument` node.
 
     .. code-block:: xml
 

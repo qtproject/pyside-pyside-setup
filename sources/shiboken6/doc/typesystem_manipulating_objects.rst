@@ -8,9 +8,10 @@ Manipulating Object and Value Types
 inject-code
 ^^^^^^^^^^^
 
-    The inject-code node inserts the given code into the generated code for the
+    The ``inject-code`` node inserts the given code into the generated code for the
     given type or function, and it is a child of the :ref:`object-type`, :ref:`value-type`,
     :ref:`modify-function` and :ref:`add-function` nodes.
+    It may contain :ref:`insert-template` child nodes.
 
     .. code-block:: xml
 
@@ -108,7 +109,7 @@ Using Snippets From External Files
 modify-field
 ^^^^^^^^^^^^
 
-    The modify-field node allows you to alter the access privileges for a given
+    The ``modify-field`` node allows you to alter the access privileges for a given
     C++ field when mapping it onto the target language, and it is a child of an
     :ref:`object-type` or a :ref:`value-type` node.
 
@@ -141,9 +142,10 @@ modify-function
 ^^^^^^^^^^^^^^^
 
     The ``modify-function`` node allows you to modify a given C++ function when
-    mapping it onto the target language, and it is a child of an
-    :ref:`object-type` or a :ref:`value-type` node. Use the :ref:`modify-argument`
-    node to specify which argument the modification affects.
+    mapping it onto the target language, and it is a child of a
+    :ref:`namespace`, :ref:`object-type` or a :ref:`value-type` node.
+    Use the :ref:`modify-argument` node to specify which argument the
+    modification affects.
 
     .. code-block:: xml
 
@@ -243,8 +245,8 @@ modify-function
 add-function
 ^^^^^^^^^^^^
 
-    The add-function node allows you to add a given function onto the target language,
-    and it is a child of an :ref:`object-type` or :ref:`value-type` nodes if the
+    The ``add-function`` node allows you to add a given function onto the target
+    language, and it is a child of an :ref:`object-type` or :ref:`value-type` nodes if the
     function is supposed to be a method, or :ref:`namespace` and :ref:`typesystem` if
     the function is supposed to be a function inside a namespace or a global function.
 
@@ -268,13 +270,19 @@ add-function
 
         void foo(int @parameter1@,float)
 
+
+    See :ref:`sequence-protocol` for adding the respective functions.
+
 .. _declare-function:
 
 declare-function
 ^^^^^^^^^^^^^^^^
 
-    The declare-function node allows you to declare a function present in the
-    type.
+    The ``declare-function`` node allows you to declare a function present in
+    the type and it is a child of an :ref:`object-type` or :ref:`value-type` nodes
+    if the function is supposed to be a method, or :ref:`namespace` and
+    :ref:`typesystem` if the function is supposed to be a function inside a
+    namespace or a global function.
 
     .. code-block:: xml
 
@@ -303,30 +311,6 @@ declare-function
     This tells shiboken a public function of that signature exists and
     bindings will be created in specializations of ``QList``.
 
-.. _conversion-rule-on-types:
-
-conversion-rule
-^^^^^^^^^^^^^^^
-
-    The conversion-rule node allows you to write customized code to convert the given argument between the target
-    language and C++, and is a child of the :ref:`value-type`, :ref:`object-type`, :ref:`primitive-type` and
-    :ref:`container-type` nodes.
-
-    The code pointed by the file attribute is very tied to the generator using APIExtractor, so it don't follow any
-    rules, but the generator rules..
-
-    .. code-block:: xml
-
-        <value-type name="Foo">
-            <convertion-rule file="my_converter_implementation.h" since="..."/>
-        </value-type>
-
-    The ``since`` attribute specify the API version when this conversion rule became valid.
-
-    .. note:: You can also use the conversion-rule node to specify :ref:`how the conversion of a single function argument should be done in a function <conversion-rule>`.
-
-    The ``file`` and ``snippet`` attributes are also supported (see :ref:`inject-code` nodes).
-
 .. _property-declare:
 
 property
@@ -335,8 +319,8 @@ property
     The ``property`` element allows you to specify properties consisting of
     a type and getter and setter functions.
 
-    It may appear as a child of a complex type such as ``object-type`` or
-    ``value-type``.
+    It may appear as a child of a complex type such as :ref:`object-type` or
+    :ref:`value-type`.
 
     If the PySide6 extension is not present, code will be generated using the
     ``PyGetSetDef`` struct, similar to what is generated for fields.
