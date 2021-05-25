@@ -141,21 +141,15 @@ class Formatter(Writer):
     @contextmanager
     def module(self, mod_name):
         self.mod_name = mod_name
-        support = "PySide6.support" if self.options._pyside_call else "shibokensupport"
-        extra = "from PySide6 import PyClassProperty" if self.options._pyside_call else ""
         txt = f"""\
             # Module `{mod_name}`
 
-            import typing
-            from typing import Any, Callable, Dict, List, Optional, Tuple, Union
             from shiboken6 import Shiboken
-            from {support}.signature.mapping import (
-                Virtual, Missing, Invalid, Default, Instance)
-            {extra}
+
+            import typing
+            <<IMPORTS>>
             """
         self.print(dedent(txt))
-        # This line will be replaced by the missing imports postprocess.
-        self.print("IMPORTS")
         yield
 
     @contextmanager
@@ -214,6 +208,27 @@ def get_license_text():
 
 def find_imports(text):
     return [imp for imp in PySide6.__all__ if f"PySide6.{imp}." in text]
+
+
+FROM_IMPORTS = [
+    ("typing", "Any Callable Dict List Optional Tuple Union".split()),
+    ("PySide6", ["PyClassProperty"]),
+    ]
+
+def filter_from_imports(from_struct, text):
+    """
+    Build a reduced new `from` structure (nfs) with found entries, only
+    """
+    nfs = []
+    for mod, imports in from_struct:
+        lis = []
+        nfs.append((mod, lis))
+        for each in imports:
+            if re.search(rf"(\b|@){each}\b", text):
+                lis.append(each)
+        if not lis:
+            nfs.pop()
+    return nfs
 
 
 def find_module(import_name, outpath, from_pyside):
@@ -278,10 +293,15 @@ def generate_pyi(import_name, outpath, options):
             if not line:
                 break
             line = line.rstrip()
-            # we remove the IMPORTS marker and insert imports if needed
-            if line == "IMPORTS":
+            # we remove the "<<IMPORTS>>" marker and insert imports if needed
+            if line == "<<IMPORTS>>":
+                text = outfile.getvalue()
+                for mod, imports in filter_from_imports(FROM_IMPORTS, text):
+                    import_args = ', '.join(imports)
+                    wr.print(f"from {mod} import {import_args}")
+                wr.print()
                 if need_imports:
-                    for mod_name in find_imports(outfile.getvalue()):
+                    for mod_name in find_imports(text):
                         imp = "PySide6." + mod_name
                         if imp != import_name:
                             wr.print("import " + imp)
