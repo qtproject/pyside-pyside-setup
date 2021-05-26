@@ -8,11 +8,8 @@ ${QtMultimedia_GEN_DIR}/qaudioformat_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qaudioinput_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qaudiooutput_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qaudio_wrapper.cpp
-${QtMultimedia_GEN_DIR}/qcameraexposure_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qcameraformat_wrapper.cpp
-${QtMultimedia_GEN_DIR}/qcamerafocus_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qcameraimagecapture_wrapper.cpp
-${QtMultimedia_GEN_DIR}/qcameraimageprocessing_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qcamerainfo_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qcamera_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qimageencodersettings_wrapper.cpp

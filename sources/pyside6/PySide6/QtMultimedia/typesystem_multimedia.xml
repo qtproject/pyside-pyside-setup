@@ -90,29 +90,20 @@
 
     <object-type name="QCamera">
         <enum-type name="Error"/>
+        <enum-type name="ExposureMode" since="6.1"/>
+        <enum-type name="Feature" flags="Features" since="6.1"/>
+        <enum-type name="FlashMode" since="6.1"/>
+        <enum-type name="FocusMode" since="6.1"/>
         <enum-type name="Status"/>
-    </object-type>
-    <object-type name="QCameraExposure">
-        <enum-type name="FlashMode"/>
-        <enum-type name="ExposureMode"/>
         <enum-type name="TorchMode" since="6.1"/>
-        <modify-function signature="supportedApertures(bool*)const" remove="all"/>
-        <modify-function signature="supportedIsoSensitivities(bool*)const" remove="all"/>
-        <modify-function signature="supportedShutterSpeeds(bool*)const" remove="all"/>
+        <enum-type name="WhiteBalanceMode" since="6.1"/>
     </object-type>
     <value-type name="QCameraFormat" since="6.1"/>
-    <object-type name="QCameraFocus">
-        <enum-type name="FocusMode"/>
-    </object-type>
     <value-type name="QCameraInfo">
         <enum-type name="Position" since="6.1"/>
     </value-type>
     <object-type name="QCameraImageCapture">
         <enum-type name="Error"/>
-    </object-type>
-    <object-type name="QCameraImageProcessing">
-        <enum-type name="WhiteBalanceMode"/>
-        <enum-type name="ColorFilter"/>
     </object-type>
 
     <value-type name="QImageEncoderSettings">
