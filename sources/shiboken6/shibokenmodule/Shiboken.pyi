@@ -47,20 +47,13 @@ Shiboken, except for defaults which are replaced by "...".
 
 # Module `Shiboken`
 
-import typing
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from shiboken6 import Shiboken
-from shibokensupport.signature.mapping import (
-    Virtual, Missing, Invalid, Default, Instance)
 
-
-class Enum(object):
-
-    def __init__(self, itemValue: int = ...) -> None: ...
 
 class Object(object):
 
     def __init__(self) -> None: ...
+
 
 class VoidPtr(object): ...
 

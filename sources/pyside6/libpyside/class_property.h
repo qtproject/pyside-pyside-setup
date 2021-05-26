@@ -61,7 +61,7 @@ PYSIDE_API PyTypeObject *PyClassPropertyTypeF();
 namespace PySide {
 namespace ClassProperty {
 
-PYSIDE_API void init();
+PYSIDE_API void init(PyObject *module);
 
 } // namespace ClassProperty
 } // namespace PySide

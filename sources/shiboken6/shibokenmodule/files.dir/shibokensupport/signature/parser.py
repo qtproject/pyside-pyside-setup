@@ -113,7 +113,7 @@ def _parse_line(line):
     for idx, arg in enumerate(arglist):
         tokens = arg.split(":")
         if len(tokens) < 2:
-            if idx == 0 and tokens[0] == "self":
+            if idx == 0 and tokens[0] in ("self", "cls"):
                 tokens = 2 * tokens     # "self: self"
             else:
                 # This should never happen again (but who knows?)
