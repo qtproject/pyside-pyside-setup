@@ -2064,7 +2064,12 @@
   </value-type>
   <object-type name="QXmlStreamEntityResolver"/>
 
-  <!-- Qt5: had to move QAbstractEventDispatcher into os-specific files because of Windows -->
+  <object-type name="QAbstractEventDispatcher">
+    <modify-function signature="processEvents(QFlags&lt;QEventLoop::ProcessEventsFlag>)" allow-thread="yes"/>
+    <!-- Qt5: had to add this recursive object def. This was crucial to get rid of "pure virtual" -->
+    <value-type name="TimerInfo"/>
+  </object-type>
+
   <object-type name="QAbstractNativeEventFilter">
     <!-- see QWidget::nativeEvent(), QWindow::nativeEvent() -->
     <modify-function signature="nativeEventFilter(const QByteArray&amp;,void*,qintptr*)">
@@ -3074,5 +3079,9 @@
   <suppress-warning text="skipping field 'QSysInfo::WindowsVersion' with unmatched type 'const QSysInfo::WinVersion'"/>
   <suppress-warning text="template baseclass 'QListSpecialMethods&lt;T&gt;' of 'QList' is not known"/>
 
-
+  <suppress-warning text="skipping field 'QSysInfo::MacintoshVersion' with unmatched type 'QSysInfo::MacVersion'"/>
+  <suppress-warning text="skipping field 'QSysInfo::WindowsVersion' with unmatched type 'QSysInfo::MacVersion'"/>
+  <suppress-warning text="enum 'QSysInfo::MacVersion' does not have a type entry or is not an enum"/>
+  <suppress-warning text="enum 'QSysInfo::WinVersion' does not have a type entry or is not an enum"/>
+  <suppress-warning text="enum 'QSysInfo::Endian' is specified in typesystem, but not declared"/>
 </typesystem>
