@@ -45,17 +45,8 @@
     <!-- Qt5: XXX move this to QtGui <include file-name="QTextDocument" location="global"/> -->
   </primitive-type>
   <!-- Qt5: had to move QAbstractEventDispatcher into os-specific files because of Windows -->
-  <object-type name="QAbstractEventDispatcher">
-    <modify-function signature="processEvents(QFlags&lt;QEventLoop::ProcessEventsFlag>)" allow-thread="yes"/>
-    <!-- Qt5: had to add this recursive object def. This was crucial to get rid of "pure virtual" -->
-    <object-type name="TimerInfo"/>
-  </object-type>
   <object-type name="QSysInfo">
     <enum-type name="Endian"/>
     <enum-type name="Sizes"/>
   </object-type>
-  <suppress-warning text="skipping field 'QSysInfo::MacintoshVersion' with unmatched type 'QSysInfo::MacVersion'"/>
-  <suppress-warning text="skipping field 'QSysInfo::WindowsVersion' with unmatched type 'QSysInfo::MacVersion'"/>
-  <suppress-warning text="enum 'QSysInfo::MacVersion' does not have a type entry or is not an enum"/>
-  <suppress-warning text="enum 'QSysInfo::WinVersion' does not have a type entry or is not an enum"/>
 </typesystem>

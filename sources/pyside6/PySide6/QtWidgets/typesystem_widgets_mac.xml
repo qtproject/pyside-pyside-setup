@@ -40,16 +40,7 @@
 ****************************************************************************/
 -->
 <typesystem package="PySide6.QtWidgets">
-  <rejection class="*" function-name="qt_mac_set_cursor"/>
-  <rejection class="*" function-name="macMenu"/>
 
   <primitive-type name="Qt::HANDLE" target-lang-api-name="PyObject"/>
-  <!-- Qt5: internal
-  <object-type name="QMacStyle" >
-    <enum-type name="FocusRectPolicy"/>
-    <enum-type name="WidgetSizePolicy"/>
-  </object-type>
-  -->
-  <rejection class="QWidget" function-name="macCGHandle"/>
-  <rejection class="QWidget" function-name="macQDHandle"/>
+
 </typesystem>

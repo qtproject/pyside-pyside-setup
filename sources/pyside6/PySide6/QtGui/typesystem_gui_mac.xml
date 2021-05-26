@@ -40,11 +40,7 @@
 ****************************************************************************/
 -->
 <typesystem package="PySide6.QtGui">
-  <rejection class="*" function-name="qt_mac_set_cursor"/>
-  <rejection class="*" function-name="macMenu"/>
 
   <primitive-type name="Qt::HANDLE" target-lang-api-name="PyObject"/>
 
-  <suppress-warning text="enum 'QSysInfo::Endian' is specified in typesystem, but not declared"/>
-  <suppress-warning text="type 'QGtkStyle' is specified in typesystem, but not defined. This could potentially lead to compilation errors."/>
 </typesystem>
