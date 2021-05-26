@@ -48,9 +48,6 @@
 #include <optional>
 #include <memory>
 
-const char *TARGET_CONVERSION_RULE_FLAG = "0";
-const char *NATIVE_CONVERSION_RULE_FLAG = "1";
-
 static inline QString allowThreadAttribute() { return QStringLiteral("allow-thread"); }
 static inline QString colonColon() { return QStringLiteral("::"); }
 static inline QString copyableAttribute() { return QStringLiteral("copyable"); }
@@ -1911,20 +1908,19 @@ bool TypeSystemParser::parseCustomConversion(const QXmlStreamReader &,
         return true;
     }
 
-    if (topElement.entry->hasConversionRule() || topElement.entry->hasCustomConversion()) {
+    if (topElement.entry->hasTargetConversionRule() || topElement.entry->hasCustomConversion()) {
         m_error = QLatin1String("Types can have only one conversion rule");
         return false;
     }
 
     // The old conversion rule tag that uses a file containing the conversion
-    // will be kept temporarily for compatibility reasons.
+    // will be kept temporarily for compatibility reasons. FIXME PYSIDE7: Remove
     if (!sourceFile.isEmpty()) {
         if (m_generate != TypeEntry::GenerateForSubclass
                 && m_generate != TypeEntry::GenerateNothing) {
-
-            const char* conversionFlag = NATIVE_CONVERSION_RULE_FLAG;
-            if (lang == TypeSystem::TargetLangCode)
-                conversionFlag = TARGET_CONVERSION_RULE_FLAG;
+            qWarning(lcShiboken, "Specifying conversion rules by \"file\" is deprecated.");
+            if (lang != TypeSystem::TargetLangCode)
+                return true;
 
             QFile conversionSource(sourceFile);
             if (!conversionSource.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -1937,9 +1933,9 @@ bool TypeSystemParser::parseCustomConversion(const QXmlStreamReader &,
                 m_error = msgCannotFindSnippet(sourceFile, snippetLabel);
                 return false;
             }
-            topElement.entry->setConversionRule(QLatin1String(conversionFlag)
-                                                + conversionRuleOptional.value());
+            topElement.entry->setTargetConversionRule(conversionRuleOptional.value());
         }
+        return true;
     }
 
     auto *customConversion = new CustomConversion(m_current->entry);

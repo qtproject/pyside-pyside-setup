@@ -71,7 +71,7 @@ void TestCodeInjections::testReadFile()
     QString xmlCode = QLatin1String("\
     <typesystem package=\"Foo\">\n\
         <value-type name='A'>\n\
-            <conversion-rule ") + attribute + QLatin1String("/>\n\
+            <conversion-rule class='target' ") + attribute + QLatin1String("/>\n\
             <inject-code class='target' ") + attribute + QLatin1String("/>\n\
             <value-type name='B'/>\n\
         </value-type>\n\
@@ -83,7 +83,7 @@ void TestCodeInjections::testReadFile()
     QCOMPARE(classA->typeEntry()->codeSnips().count(), 1);
     QString code = classA->typeEntry()->codeSnips().constFirst().code();
     QVERIFY(code.indexOf(expected) != -1);
-    code = classA->typeEntry()->conversionRule();
+    code = classA->typeEntry()->targetConversionRule();
     QVERIFY(code.indexOf(expected) != -1);
 }
 

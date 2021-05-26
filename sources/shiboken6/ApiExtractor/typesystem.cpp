@@ -83,7 +83,7 @@ public:
     DocModificationList m_docModifications;
     IncludeList m_extraIncludes;
     Include m_include;
-    QString m_conversionRule;
+    QString m_targetConversionRule;
     QVersionNumber m_version;
     CustomConversion *m_customConversion = nullptr;
     SourceLocation m_sourceLocation; // XML file
@@ -182,20 +182,14 @@ void TypeEntry::setInclude(const Include &inc)
     }
 }
 
-void TypeEntry::setConversionRule(const QString &conversionRule)
+void TypeEntry::setTargetConversionRule(const QString &conversionRule)
 {
-    m_d->m_conversionRule = conversionRule;
+    m_d->m_targetConversionRule = conversionRule;
 }
 
-QString TypeEntry::conversionRule() const
+QString TypeEntry::targetConversionRule() const
 {
-    //skip conversions flag
-    return m_d->m_conversionRule.mid(1);
-}
-
-bool TypeEntry::hasConversionRule() const
-{
-    return !m_d->m_conversionRule.isEmpty();
+    return m_d->m_targetConversionRule;
 }
 
 QVersionNumber TypeEntry::version() const
@@ -203,14 +197,9 @@ QVersionNumber TypeEntry::version() const
     return m_d->m_version;
 }
 
-bool TypeEntry::hasNativeConversionRule() const
-{
-    return m_d->m_conversionRule.startsWith(QLatin1String(NATIVE_CONVERSION_RULE_FLAG));
-}
-
 bool TypeEntry::hasTargetConversionRule() const
 {
-    return m_d->m_conversionRule.startsWith(QLatin1String(TARGET_CONVERSION_RULE_FLAG));
+    return !m_d->m_targetConversionRule.isEmpty();
 }
 
 bool TypeEntry::isCppPrimitive() const
@@ -2061,7 +2050,7 @@ void TypeEntry::formatDebug(QDebug &debug) const
     FORMAT_NONEMPTY_STRING("package", m_d->m_targetLangPackage)
     FORMAT_BOOL("stream", m_d->m_stream)
     FORMAT_LIST_SIZE("codeSnips", m_d->m_codeSnips)
-    FORMAT_NONEMPTY_STRING("conversionRule", m_d->m_conversionRule)
+    FORMAT_NONEMPTY_STRING("targetConversionRule", m_d->m_targetConversionRule)
     if (m_d->m_viewOn)
        debug << ", views=" << m_d->m_viewOn->name();
     if (!m_d->m_version.isNull() && m_d->m_version > QVersionNumber(0, 0))

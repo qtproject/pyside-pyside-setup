@@ -36,6 +36,7 @@
 
 void TestConversionRuleTag::testConversionRuleTagWithFile()
 {
+    // FIXME PYSIDE7 remove
     // temp file used later
     const char conversionData[] = "Hi! I'm a conversion rule.";
     QTemporaryFile file;
@@ -47,7 +48,7 @@ void TestConversionRuleTag::testConversionRuleTagWithFile()
     QString xmlCode = QLatin1String("\
     <typesystem package='Foo'>\n\
         <value-type name='A'>\n\
-            <conversion-rule file='") + file.fileName() + QLatin1String("'/>\n\
+            <conversion-rule class='target' file='") + file.fileName() + QLatin1String("'/>\n\
         </value-type>\n\
     </typesystem>\n");
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode.toLocal8Bit().data()));
@@ -56,8 +57,8 @@ void TestConversionRuleTag::testConversionRuleTagWithFile()
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QVERIFY(classA);
     const ComplexTypeEntry* typeEntry = classA->typeEntry();
-    QVERIFY(typeEntry->hasConversionRule());
-    QCOMPARE(typeEntry->conversionRule(), QLatin1String(conversionData));
+    QVERIFY(typeEntry->hasTargetConversionRule());
+    QCOMPARE(typeEntry->targetConversionRule(), QLatin1String(conversionData));
 }
 
 void TestConversionRuleTag::testConversionRuleTagReplace()

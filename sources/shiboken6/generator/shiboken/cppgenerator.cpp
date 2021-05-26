@@ -449,7 +449,7 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
     // python conversion rules
     if (metaClass->typeEntry()->hasTargetConversionRule()) {
         s << "// Python Conversion\n";
-        s << metaClass->typeEntry()->conversionRule() << '\n';
+        s << metaClass->typeEntry()->targetConversionRule() << '\n';
     }
 
     if (classContext.useWrapper()) {
