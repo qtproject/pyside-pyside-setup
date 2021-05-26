@@ -36,10 +36,6 @@
 #include <QtCore/QStringList>
 #include <QtCore/QScopedPointer>
 
-//Used to identify the conversion rule to avoid break API
-extern const char *TARGET_CONVERSION_RULE_FLAG;
-extern const char *NATIVE_CONVERSION_RULE_FLAG;
-
 class CustomFunction;
 class CustomConversion;
 class EnumValueTypeEntry;
@@ -218,20 +214,14 @@ public:
     Include include() const;
     void setInclude(const Include &inc);
 
-    // Replace conversionRule arg to CodeSnip in future version
-    /// Set the type convertion rule
-    void setConversionRule(const QString& conversionRule);
+    // FIXME PYSIDE7: Remove
+    /// Set the target type conversion rule
+    void setTargetConversionRule(const QString& conversionRule);
 
-    /// Returns the type convertion rule
-    QString conversionRule() const;
-
-    /// Returns true if there are any conversiton rule for this type, false otherwise.
-    bool hasConversionRule() const;
+    /// Returns the target type conversion rule
+    QString targetConversionRule() const;
 
     QVersionNumber version() const;
-
-    /// TODO-CONVERTER: mark as deprecated
-    bool hasNativeConversionRule() const;
 
     /// TODO-CONVERTER: mark as deprecated
     bool hasTargetConversionRule() const;
