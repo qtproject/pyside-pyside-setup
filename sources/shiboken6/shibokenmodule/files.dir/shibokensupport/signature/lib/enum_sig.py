@@ -119,7 +119,7 @@ class ExactEnumerator(object):
         bases_list = []
         for base in klass.__bases__:
             name = base.__name__
-            if name not in ("object", "type"):
+            if name not in ("object", "property", "type"):
                 name = base.__module__ + "." + name
             bases_list.append(name)
         bases_str = ', '.join(bases_list)
@@ -147,21 +147,26 @@ class ExactEnumerator(object):
 
         init_signature = getattr(klass, "__signature__", None)
         enums.sort(key=lambda tup: tup[1 : 3])  # sort by class then enum value
-        self.fmt.have_body = bool(subclasses or functions or enums or init_signature)
 
         # We want to handle functions and properties together.
         func_prop = sorted(functions + properties, key=lambda tup: tup[0])
+
+        # find out how many functions create a signature
+        sigs = list(_ for _ in functions if hasattr(_[1], "__signature__") and _[1].__signature__)
+        self.fmt.have_body = bool(subclasses or sigs or properties or enums or init_signature)
 
         with self.fmt.klass(class_name, class_str):
             self.fmt.level += 1
             self.fmt.class_name = class_name
             if hasattr(self.fmt, "enum"):
                 # this is an optional feature
+                if len(enums):
+                    self.section()
                 for enum_name, enum_class_name, value in enums:
                     with self.fmt.enum(enum_class_name, enum_name, int(value)):
                         pass
-                if len(enums):
-                    self.section()
+            if len(subclasses):
+                self.section()
             for subclass_name, subclass in subclasses:
                 ret.update(self.klass(subclass_name, subclass))
                 self.fmt.class_name = class_name
@@ -253,11 +258,12 @@ class HintingEnumerator(ExactEnumerator):
         # Class properties don't have signature support (yet).
         # In that case, produce a fake one.
         sig = get_sig(func, "hintingstub")
-        if decorator and not sig:
-            if decorator.endswith(".setter"):
-                sig = self.setter_sig
-            elif decorator.endswith(".deleter"):
-                sig = self.deleter_sig
-            else:
-                sig = self.getter_sig
+        if not sig:
+            if decorator:
+                if decorator.endswith(".setter"):
+                    sig = self.setter_sig
+                elif decorator.endswith(".deleter"):
+                    sig = self.deleter_sig
+                else:
+                    sig = self.getter_sig
         return sig

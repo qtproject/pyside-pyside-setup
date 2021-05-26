@@ -146,7 +146,6 @@ class Formatter(Writer):
 
             from shiboken6 import Shiboken
 
-            import typing
             <<IMPORTS>>
             """
         self.print(dedent(txt))
@@ -158,7 +157,6 @@ class Formatter(Writer):
         while "." in class_name:
             class_name = class_name.split(".", 1)[-1]
             class_str = class_str.split(".", 1)[-1]
-        here = self.outfile.tell()
         if self.have_body:
             self.print(f"{spaces}class {class_str}:")
         else:
@@ -173,7 +171,7 @@ class Formatter(Writer):
         spaces = indent * self.level
         if isinstance(signature, list):
             for sig in signature:
-                self.print(f'{spaces}@typing.overload')
+                self.print(f'{spaces}@overload')
                 self._function(func_name, sig, spaces)
         else:
             self._function(func_name, signature, spaces, decorator)
@@ -183,8 +181,9 @@ class Formatter(Writer):
 
     def _function(self, func_name, signature, spaces, decorator=None):
         if decorator:
+            # In case of a PyClassProperty the classmethod decorator is not used.
             self.print(f'{spaces}@{decorator}')
-        if self.is_method() and "self" not in signature.parameters:
+        elif self.is_method() and "self" not in signature.parameters:
             kind = "class" if "cls" in signature.parameters else "static"
             self.print(f'{spaces}@{kind}method')
         signature = self.optional_replacer(signature)
@@ -211,8 +210,8 @@ def find_imports(text):
 
 
 FROM_IMPORTS = [
-    ("typing", "Any Callable Dict List Optional Tuple Union".split()),
-    ("PySide6", ["PyClassProperty"]),
+    ("typing", "Any Callable Dict List Optional overload Tuple Union".split()),
+    ("PySide6.QtCore", ["PyClassProperty"]),
     ]
 
 def filter_from_imports(from_struct, text):

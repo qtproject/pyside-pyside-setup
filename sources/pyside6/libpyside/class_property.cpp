@@ -92,7 +92,7 @@ static PyType_Slot PyClassProperty_slots[] = {
 };
 
 static PyType_Spec PyClassProperty_spec = {
-    "PySide6.PyClassProperty",
+    "PySide6.QtCore.PyClassProperty",
     sizeof(propertyobject),
     0,
     Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,
@@ -148,11 +148,30 @@ static int SbkObjectType_meta_setattro(PyObject *obj, PyObject *name, PyObject *
  */
 namespace PySide { namespace ClassProperty {
 
-void init()
+static const char *PyClassProperty_SignatureStrings[] = {
+    "PySide6.QtCore.PyClassProperty(cls,"
+        "fget:typing.Optional[typing.Callable[[typing.Any],typing.Any]]=None,"
+        "fset:typing.Optional[typing.Callable[[typing.Any,typing.Any],None]]=None,"
+        "fdel:typing.Optional[typing.Callable[[typing.Any],None]]=None,"
+        "doc:typing.Optional[str]=None)"
+        "->PySide6.QtCore.PyClassProperty",
+    "PySide6.QtCore.PyClassProperty.getter(cls,fget:typing.Callable[[typing.Any],typing.Any])->PySide6.QtCore.PyClassProperty",
+    "PySide6.QtCore.PyClassProperty.setter(cls,fset:typing.Callable[[typing.Any,typing.Any],None])->PySide6.QtCore.PyClassProperty",
+    "PySide6.QtCore.PyClassProperty.deleter(cls,fdel:typing.Callable[[typing.Any],None])->PySide6.QtCore.PyClassProperty",
+    nullptr}; // Sentinel
+
+void init(PyObject *module)
 {
     PyTypeObject *type = SbkObjectType_TypeF();
     type->tp_setattro = SbkObjectType_meta_setattro;
     Py_TYPE(PyClassPropertyTypeF()) = type;
+
+    if (InitSignatureStrings(PyClassPropertyTypeF(), PyClassProperty_SignatureStrings) < 0)
+        return;
+
+    Py_INCREF(PyClassPropertyTypeF());
+    auto classproptype = reinterpret_cast<PyObject *>(PyClassPropertyTypeF());
+    PyModule_AddObject(module, "PyClassProperty", classproptype);
 }
 
 } // namespace ClassProperty

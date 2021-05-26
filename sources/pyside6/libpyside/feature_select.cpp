@@ -465,7 +465,6 @@ void init()
         initSelectableFeature(SelectFeatureSet);
         registerCleanupFunction(finalize);
         patch_property_impl();
-        PySide::ClassProperty::init();
         is_initialized = true;
     }
     // Reset the cache. This is called at any "from __feature__ import".

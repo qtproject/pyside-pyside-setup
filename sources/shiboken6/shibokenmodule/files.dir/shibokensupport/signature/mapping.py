@@ -352,9 +352,19 @@ type_map.update({
     "QStringList*"  : ResultVariable(StringList),
     })
 
+
+type_map.update({
+    # Hack, until improving the parser:
+    "[typing.Any]"  : [typing.Any],
+    "[typing.Any,typing.Any]"  : [typing.Any, typing.Any],
+    "None" : None,
+    })
+
+
 # PYSIDE-1328: We need to handle "self" explicitly.
 type_map.update({
-    "self"  : "self",
+    "self" : "self",
+    "cls"  : "cls",
     })
 
 # PYSIDE-1538: We need to treat "std::optional" accordingly.

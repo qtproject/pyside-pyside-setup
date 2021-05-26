@@ -236,7 +236,7 @@ def create_signature(props, key):
         # parser.
         pass
     else:
-        if "self" in varnames[:1]:
+        if varnames[0] in ("self", "cls"):
             varnames = varnames[1:]
 
     # calculate the modifications
@@ -256,7 +256,7 @@ def create_signature(props, key):
         elif name.startswith("*"):
             kind = _VAR_POSITIONAL
         ann = annotations.get(name, _empty)
-        if ann == "self":
+        if ann in ("self", "cls"):
             ann = _empty
         name = name.lstrip("*")
         defpos = idx - len(varnames) + len(defaults)

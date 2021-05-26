@@ -453,15 +453,11 @@ static const char *Property_SignatureStrings[] = {
         "notify:typing.Callable=None,designable:bool=True,scriptable:bool=True,"
         "stored:bool=True,user:bool=False,constant:bool=False,final:bool=False)"
         "->PySide6.QtCore.Property",
-    "PySide6.QtCore.Property.deleter(self,func:typing.Callable)",
-    "PySide6.QtCore.Property.fdel(self)->typing.Callable",
-    "PySide6.QtCore.Property.fget(self)->typing.Callable",
-    "PySide6.QtCore.Property.freset(self)->typing.Callable",
-    "PySide6.QtCore.Property.fset(self)->typing.Callable",
-    "PySide6.QtCore.Property.getter(self,func:typing.Callable)",
-    "PySide6.QtCore.Property.read(self,func:typing.Callable)",
-    "PySide6.QtCore.Property.setter(self,func:typing.Callable)",
-    "PySide6.QtCore.Property.write(self,func:typing.Callable)",
+    "PySide6.QtCore.Property.deleter(self,fdel:typing.Callable)->PySide6.QtCore.Property",
+    "PySide6.QtCore.Property.getter(self,fget:typing.Callable)->PySide6.QtCore.Property",
+    "PySide6.QtCore.Property.read(self,fget:typing.Callable)->PySide6.QtCore.Property",
+    "PySide6.QtCore.Property.setter(self,fset:typing.Callable)->PySide6.QtCore.Property",
+    "PySide6.QtCore.Property.write(self,fset:typing.Callable)->PySide6.QtCore.Property",
     nullptr}; // Sentinel
 
 void init(PyObject *module)
