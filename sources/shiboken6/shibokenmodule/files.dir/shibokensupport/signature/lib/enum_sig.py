@@ -150,7 +150,7 @@ class ExactEnumerator(object):
         self.fmt.have_body = bool(subclasses or functions or enums or init_signature)
 
         # We want to handle functions and properties together.
-        func_prop = sorted(functions + properties)
+        func_prop = sorted(functions + properties, key=lambda tup: tup[0])
 
         with self.fmt.klass(class_name, class_str):
             self.fmt.level += 1
