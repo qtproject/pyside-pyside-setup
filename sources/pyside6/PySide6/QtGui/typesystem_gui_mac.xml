@@ -39,8 +39,4 @@
 **
 ****************************************************************************/
 -->
-<typesystem package="PySide6.QtGui">
-
-  <primitive-type name="Qt::HANDLE" target-lang-api-name="PyObject"/>
-
-</typesystem>
+<typesystem package="PySide6.QtGui"/>

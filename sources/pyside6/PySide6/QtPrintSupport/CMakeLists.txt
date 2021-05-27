@@ -13,9 +13,6 @@ ${QtPrintSupport_GEN_DIR}/qprintpreviewwidget_wrapper.cpp
 ${QtPrintSupport_GEN_DIR}/qtprintsupport_module_wrapper.cpp
 )
 
-configure_file("${QtPrintSupport_SOURCE_DIR}/typesystem_printsupport.xml.in"
-               "${QtPrintSupport_BINARY_DIR}/typesystem_printsupport.xml" @ONLY)
-
 set(QtPrintSupport_include_dirs ${QtPrintSupport_SOURCE_DIR}
                                 ${QtPrintSupport_BINARY_DIR}
                                 ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
