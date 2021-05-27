@@ -210,7 +210,7 @@ def extract_change_log(commit_message: List[str]) -> Tuple[str, List[str]]:
                     if end > 0:
                         component = log_line[1:end]
                         log_line = log_line[end + 1:]
-                result.append(' * ' + log_line.strip())
+                result.append(' - ' + log_line.strip())
                 within_changelog = True
     return (component, result)
 
