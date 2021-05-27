@@ -196,9 +196,6 @@ ${SPECIFIC_OS_FILES}
 ${QtWidgets_GEN_DIR}/qtwidgets_module_wrapper.cpp
 )
 
-configure_file("${QtWidgets_SOURCE_DIR}/typesystem_widgets.xml.in"
-               "${QtWidgets_BINARY_DIR}/typesystem_widgets.xml" @ONLY)
-
 set(QtWidgets_include_dirs  ${QtWidgets_SOURCE_DIR}
                             ${QtWidgets_BINARY_DIR}
                             ${pyside6_SOURCE_DIR}
