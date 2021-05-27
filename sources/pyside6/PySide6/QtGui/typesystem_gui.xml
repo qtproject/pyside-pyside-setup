@@ -41,6 +41,14 @@
 -->
 <typesystem package="PySide6.QtGui">
     <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
-    <load-typesystem name="QtGui/typesystem_gui_@AUTO_OS@.xml" generate="yes"/>
+    <?if windows?>
+    <load-typesystem name="QtGui/typesystem_gui_win.xml" generate="yes"/>
+    <?endif?>
+    <?if darwin?>
+    <load-typesystem name="QtGui/typesystem_gui_mac.xml" generate="yes"/>
+    <?endif?>
+    <?if unix !darwin?>
+    <load-typesystem name="QtGui/typesystem_gui_x11.xml" generate="yes"/>
+    <?endif?>
     <load-typesystem name="QtGui/typesystem_gui_common.xml" generate="yes"/>
 </typesystem>

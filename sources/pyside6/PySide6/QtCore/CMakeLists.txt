@@ -191,9 +191,6 @@ set(QtCore_glue_sources
     "${QtCore_SOURCE_DIR}/glue/qeasingcurve_glue.h"
 )
 
-configure_file("${QtCore_SOURCE_DIR}/typesystem_core.xml.in"
-               "${QtCore_BINARY_DIR}/typesystem_core.xml" @ONLY)
-
 set(QtCore_include_dirs ${QtCore_SOURCE_DIR}
                         ${QtCore_BINARY_DIR}
                         ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}

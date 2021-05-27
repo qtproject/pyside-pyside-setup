@@ -181,7 +181,6 @@ endif()
 
 # Configure OS support
 check_os()
-message(STATUS "Detected OS: ${AUTO_OS}")
 
 # Define supported Qt Version
 set(SUPPORTED_QT_VERSION "${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}")

@@ -204,6 +204,13 @@
     <include file-name="signalmanager.h" location="global"/>
   </primitive-type>
 
+  <?if windows darwin?>
+  <primitive-type name="Qt::HANDLE" target-lang-api-name="PyObject"/>
+  <?endif?>
+  <?if linux?>
+  <primitive-type name="Qt::HANDLE" target-lang-api-name="PyLong"/>
+  <?endif?>
+
   <primitive-type name="bool" target-lang-api-name="PyBool">
     <conversion-rule>
         <native-to-target file="../glue/qtcore.cpp" snippet="return-pybool"/>

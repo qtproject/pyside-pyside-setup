@@ -206,9 +206,6 @@ ${QtGui_GEN_DIR}/qwindowstatechangeevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qtgui_module_wrapper.cpp
 )
 
-configure_file("${QtGui_SOURCE_DIR}/typesystem_gui.xml.in"
-               "${QtGui_BINARY_DIR}/typesystem_gui.xml" @ONLY)
-
 configure_file("${QtGui_SOURCE_DIR}/QtGui_global.post.h.in"
                "${QtGui_BINARY_DIR}/QtGui_global.post.h" @ONLY)
 
