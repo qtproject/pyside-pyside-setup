@@ -1,0 +1,36 @@
+Qt for Python 6.1.1 is a bug-fix release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+****************************************************************************
+*                                  PySide6                                 *
+****************************************************************************
+
+ - A crash in QCustom3DVolume::setTextureData() has been fixed.
+ - Crashes in QClipboard.mimeData(), QTextCursor.currentList() and
+   QTextCursor.currentTable() have been fixed.
+ - The internal mechanism to create .pyi files was generalized into a
+   general usage tool.
+ - The Qt Designer plugin which was not working on macOS is now fixed.
+ - General improvement to examples and documentation.
+ - [PYSIDE-1019] __feature__: Support generation of modified .pyi files and fixed
+   other issues.
+ - [PYSIDE-1570] PySide6: Adapt QtMultimedia to current state
+ - [PYSIDE-1563] Fixed crashes when using the QImage(uchar *) data constructors
+
+****************************************************************************
+*                                  Shiboken6                               *
+****************************************************************************
+
+ - [PYSIDE-1338] An option to use global headers was included.
