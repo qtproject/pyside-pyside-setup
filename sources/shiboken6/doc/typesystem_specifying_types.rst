@@ -577,3 +577,27 @@ system-include
             <system-include file-name="memory"/>
             <system-include file-name="/usr/include/Qt/"/>
         </typesystem>
+
+.. _conditional_processing:
+
+Conditional Processing
+^^^^^^^^^^^^^^^^^^^^^^
+
+     Simple processing instructions are provided for including or excluding
+     sections depending on the presence of keywords. The syntax is:
+
+     .. code-block:: xml
+
+         <?if keyword !excluded_keyword ?>
+            ...
+         <?endif?>
+
+     There are predefined keywords indicating the operating system (``windows``,
+     ``unix`` and ``darwin``). The class names passed to the
+     :ref:`--drop-type-entries <drop-type-entries>` command line option
+     are also predefined, prefixed by ``no_``. This allows for example
+     for enclosing added functions referring to those classes within
+     ``<?if !no_ClassName?>``, ``<?endif?>``.
+
+     Other keywords can be specified using the
+     :ref:`--keywords <conditional_keywords>` command line option.

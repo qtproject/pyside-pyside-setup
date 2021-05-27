@@ -15,6 +15,7 @@ abstractmetafield.cpp
 abstractmetafunction.cpp
 abstractmetatype.cpp
 abstractmetalang.cpp
+conditionalstreamreader.cpp
 documentation.cpp
 enclosingclassmixin.cpp
 fileout.cpp

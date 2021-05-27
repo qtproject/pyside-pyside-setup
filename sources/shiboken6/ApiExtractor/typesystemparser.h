@@ -39,6 +39,8 @@ QT_FORWARD_DECLARE_CLASS(QVersionNumber)
 QT_FORWARD_DECLARE_CLASS(QXmlStreamAttributes)
 QT_FORWARD_DECLARE_CLASS(QXmlStreamReader)
 
+class ConditionalStreamReader;
+
 class TypeSystemEntityResolver;
 class TypeDatabase;
 class StackElement
@@ -149,15 +151,15 @@ public:
     TypeSystemParser(TypeDatabase* database, bool generate);
     ~TypeSystemParser();
 
-    bool parse(QXmlStreamReader &reader);
+    bool parse(ConditionalStreamReader &reader);
 
     QString errorString() const { return m_error; }
 
 private:
-    bool parseXml(QXmlStreamReader &reader);
+    bool parseXml(ConditionalStreamReader &reader);
     bool setupSmartPointerInstantiations();
-    bool startElement(const QXmlStreamReader &reader);
-    SmartPointerTypeEntry *parseSmartPointerEntry(const QXmlStreamReader &,
+    bool startElement(const ConditionalStreamReader &reader);
+    SmartPointerTypeEntry *parseSmartPointerEntry(const ConditionalStreamReader &,
                                                   const QString &name,
                                                   const QVersionNumber &since,
                                                   QXmlStreamAttributes *attributes);
@@ -169,90 +171,90 @@ private:
 
     const TypeEntry *currentParentTypeEntry() const;
     bool checkRootElement();
-    bool applyCommonAttributes(const QXmlStreamReader &reader, TypeEntry *type,
+    bool applyCommonAttributes(const ConditionalStreamReader &reader, TypeEntry *type,
                                QXmlStreamAttributes *attributes);
     PrimitiveTypeEntry *
-        parsePrimitiveTypeEntry(const QXmlStreamReader &, const QString &name,
+        parsePrimitiveTypeEntry(const ConditionalStreamReader &, const QString &name,
                                 const QVersionNumber &since, QXmlStreamAttributes *);
     ContainerTypeEntry *
-        parseContainerTypeEntry(const QXmlStreamReader &, const QString &name,
+        parseContainerTypeEntry(const ConditionalStreamReader &, const QString &name,
                                  const QVersionNumber &since, QXmlStreamAttributes *);
     EnumTypeEntry *
-        parseEnumTypeEntry(const QXmlStreamReader &, const QString &name,
+        parseEnumTypeEntry(const ConditionalStreamReader &, const QString &name,
                            const QVersionNumber &since, QXmlStreamAttributes *);
     FlagsTypeEntry *
-        parseFlagsEntry(const QXmlStreamReader &, EnumTypeEntry *enumEntry,
+        parseFlagsEntry(const ConditionalStreamReader &, EnumTypeEntry *enumEntry,
                         QString flagName, const QVersionNumber &since,
                         QXmlStreamAttributes *);
 
     NamespaceTypeEntry *
-        parseNamespaceTypeEntry(const QXmlStreamReader &,
+        parseNamespaceTypeEntry(const ConditionalStreamReader &,
                                 const QString &name, const QVersionNumber &since,
                                 QXmlStreamAttributes *attributes);
 
     ValueTypeEntry *
-        parseValueTypeEntry(const QXmlStreamReader &, const QString &name,
+        parseValueTypeEntry(const ConditionalStreamReader &, const QString &name,
                             const QVersionNumber &since, QXmlStreamAttributes *);
     FunctionTypeEntry *
-        parseFunctionTypeEntry(const QXmlStreamReader &, const QString &name,
+        parseFunctionTypeEntry(const ConditionalStreamReader &, const QString &name,
                                const QVersionNumber &since, QXmlStreamAttributes *);
     TypedefEntry *
-        parseTypedefEntry(const QXmlStreamReader &, const QString &name,
+        parseTypedefEntry(const ConditionalStreamReader &, const QString &name,
                           const QVersionNumber &since, QXmlStreamAttributes *);
-    void applyComplexTypeAttributes(const QXmlStreamReader &, ComplexTypeEntry *ctype,
+    void applyComplexTypeAttributes(const ConditionalStreamReader &, ComplexTypeEntry *ctype,
                                     QXmlStreamAttributes *) const;
-    bool parseRenameFunction(const QXmlStreamReader &, QString *name,
+    bool parseRenameFunction(const ConditionalStreamReader &, QString *name,
                              QXmlStreamAttributes *);
-    bool parseInjectDocumentation(const QXmlStreamReader &, QXmlStreamAttributes *);
-    bool parseModifyDocumentation(const QXmlStreamReader &, QXmlStreamAttributes *);
+    bool parseInjectDocumentation(const ConditionalStreamReader &, QXmlStreamAttributes *);
+    bool parseModifyDocumentation(const ConditionalStreamReader &, QXmlStreamAttributes *);
     TypeSystemTypeEntry *
-        parseRootElement(const QXmlStreamReader &, const QVersionNumber &since,
+        parseRootElement(const ConditionalStreamReader &, const QVersionNumber &since,
                          QXmlStreamAttributes *);
-    bool loadTypesystem(const QXmlStreamReader &, QXmlStreamAttributes *);
-    bool parseRejectEnumValue(const QXmlStreamReader &, QXmlStreamAttributes *);
-    bool parseReplaceArgumentType(const QXmlStreamReader &, const StackElement &topElement,
+    bool loadTypesystem(const ConditionalStreamReader &, QXmlStreamAttributes *);
+    bool parseRejectEnumValue(const ConditionalStreamReader &, QXmlStreamAttributes *);
+    bool parseReplaceArgumentType(const ConditionalStreamReader &, const StackElement &topElement,
                                   QXmlStreamAttributes *);
-    bool parseCustomConversion(const QXmlStreamReader &, const StackElement &topElement,
+    bool parseCustomConversion(const ConditionalStreamReader &, const StackElement &topElement,
                                QXmlStreamAttributes *);
-    bool parseAddConversion(const QXmlStreamReader &, const StackElement &topElement,
+    bool parseAddConversion(const ConditionalStreamReader &, const StackElement &topElement,
                             QXmlStreamAttributes *);
-    bool parseNativeToTarget(const QXmlStreamReader &, const StackElement &topElement,
+    bool parseNativeToTarget(const ConditionalStreamReader &, const StackElement &topElement,
                              QXmlStreamAttributes *attributes);
-    bool parseModifyArgument(const QXmlStreamReader &, const StackElement &topElement,
+    bool parseModifyArgument(const ConditionalStreamReader &, const StackElement &topElement,
                              QXmlStreamAttributes *attributes);
-    bool parseNoNullPointer(const QXmlStreamReader &, const StackElement &topElement,
+    bool parseNoNullPointer(const ConditionalStreamReader &, const StackElement &topElement,
                             QXmlStreamAttributes *attributes);
-    bool parseDefineOwnership(const QXmlStreamReader &, const StackElement &topElement,
+    bool parseDefineOwnership(const ConditionalStreamReader &, const StackElement &topElement,
                               QXmlStreamAttributes *);
-    bool parseRename(const QXmlStreamReader &, const StackElement &topElement,
+    bool parseRename(const ConditionalStreamReader &, const StackElement &topElement,
                      QXmlStreamAttributes *);
-    bool parseModifyField(const QXmlStreamReader &, QXmlStreamAttributes *);
-    bool parseAddFunction(const QXmlStreamReader &, const StackElement &topElement,
+    bool parseModifyField(const ConditionalStreamReader &, QXmlStreamAttributes *);
+    bool parseAddFunction(const ConditionalStreamReader &, const StackElement &topElement,
                           StackElement::ElementType t, QXmlStreamAttributes *);
-    bool parseProperty(const QXmlStreamReader &, const StackElement &topElement,
+    bool parseProperty(const ConditionalStreamReader &, const StackElement &topElement,
                        QXmlStreamAttributes *);
-    bool parseModifyFunction(const QXmlStreamReader &, const StackElement &topElement,
+    bool parseModifyFunction(const ConditionalStreamReader &, const StackElement &topElement,
                              QXmlStreamAttributes *);
-    bool parseReplaceDefaultExpression(const QXmlStreamReader &,
+    bool parseReplaceDefaultExpression(const ConditionalStreamReader &,
                                        const StackElement &topElement, QXmlStreamAttributes *);
     static CustomFunction *
-        parseCustomMetaConstructor(const QXmlStreamReader &,
+        parseCustomMetaConstructor(const ConditionalStreamReader &,
                                    StackElement::ElementType type,
                                    const StackElement &topElement, QXmlStreamAttributes *);
-     bool parseReferenceCount(const QXmlStreamReader &, const StackElement &topElement,
+     bool parseReferenceCount(const ConditionalStreamReader &, const StackElement &topElement,
                               QXmlStreamAttributes *);
-     bool parseParentOwner(const QXmlStreamReader &, const StackElement &topElement,
+     bool parseParentOwner(const ConditionalStreamReader &, const StackElement &topElement,
                            QXmlStreamAttributes *);
      bool readFileSnippet(QXmlStreamAttributes *attributes, CodeSnip *snip);
-     bool parseInjectCode(const QXmlStreamReader &, const StackElement &topElement,
+     bool parseInjectCode(const ConditionalStreamReader &, const StackElement &topElement,
                           StackElement* element, QXmlStreamAttributes *);
-     bool parseInclude(const QXmlStreamReader &, const StackElement &topElement,
+     bool parseInclude(const ConditionalStreamReader &, const StackElement &topElement,
                        TypeEntry *entry, QXmlStreamAttributes *);
-     bool parseSystemInclude(const QXmlStreamReader &, QXmlStreamAttributes *);
+     bool parseSystemInclude(const ConditionalStreamReader &, QXmlStreamAttributes *);
      TemplateInstance
-         *parseTemplateInstanceEnum(const QXmlStreamReader &, const StackElement &topElement,
+         *parseTemplateInstanceEnum(const ConditionalStreamReader &, const StackElement &topElement,
                                     QXmlStreamAttributes *);
-     bool parseReplace(const QXmlStreamReader &, const StackElement &topElement,
+     bool parseReplace(const ConditionalStreamReader &, const StackElement &topElement,
                        StackElement *element, QXmlStreamAttributes *);
 
     TypeDatabase* m_database;

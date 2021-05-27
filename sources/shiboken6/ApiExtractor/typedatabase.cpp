@@ -29,6 +29,7 @@
 #include "typedatabase.h"
 #include "typesystem.h"
 #include "typesystemparser.h"
+#include "conditionalstreamreader.h"
 
 #include <QtCore/QFile>
 #include <QtCore/QDebug>
@@ -136,6 +137,14 @@ void TypeDatabase::addTypesystemPath(const QString& typesystem_paths)
     const char path_splitter = ':';
     #endif
     m_typesystemPaths += typesystem_paths.split(QLatin1Char(path_splitter));
+}
+
+QStringList TypeDatabase::typesystemKeywords() const
+{
+    QStringList result = m_typesystemKeywords;
+    for (const auto &d : m_dropTypeEntries)
+        result.append(QStringLiteral("no_") + d);
+    return result;
 }
 
 IncludeList TypeDatabase::extraIncludes(const QString& className) const
@@ -634,7 +643,8 @@ bool TypeDatabase::parseFile(const QString &filename, const QString &currentPath
 
 bool TypeDatabase::parseFile(QIODevice* device, bool generate)
 {
-    QXmlStreamReader reader(device);
+    ConditionalStreamReader reader(device);
+    reader.setConditions(TypeDatabase::instance()->typesystemKeywords());
     TypeSystemParser handler(this, generate);
     const bool result = handler.parse(reader);
     if (!result)

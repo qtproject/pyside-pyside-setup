@@ -32,6 +32,7 @@
 #include <abstractmetaenum.h>
 #include <abstractmetalang.h>
 #include <typesystem.h>
+#include <conditionalstreamreader.h>
 
 static const char* cppCode ="\
     struct ValueA {};\n\
@@ -144,6 +145,77 @@ void TestDropTypeEntries::testDontDropEntryWithChildTags()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode2, xmlCode2, false));
     QVERIFY(!builder.isNull());
     QVERIFY(AbstractMetaClass::findClass(builder->classes(), QLatin1String("ValueA")));
+}
+
+void TestDropTypeEntries::testConditionalParsing_data()
+{
+    const QString xml = QStringLiteral(R"(<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <tag1>text</tag1>
+    <?if keyword1?>
+        <tag2>text</tag2>
+        <?if keyword2?>
+            <tag3>text</tag3>
+        <?endif?>
+        <?if keyword1 !keyword2?>
+            <tag4>text</tag4>
+        <?endif?>
+    <?endif?>
+    <tag5>text</tag5>
+</root>)");
+
+    const QString root = QStringLiteral("root");
+    const QString tag1 = QStringLiteral("tag1");
+    const QString tag2 = QStringLiteral("tag2");
+    const QString tag3 = QStringLiteral("tag3");
+    const QString tag4 = QStringLiteral("tag4");
+    const QString tag5 = QStringLiteral("tag5");
+    const QString keyword1 = QStringLiteral("keyword1");
+    const QString keyword2 = QStringLiteral("keyword2");
+
+    QTest::addColumn<QString>("xml");
+    QTest::addColumn<QStringList>("keywords");
+    QTest::addColumn<QStringList>("expectedTags");
+
+    QTest::newRow("no-keywords")
+        << xml << QStringList{} << QStringList{root, tag1, tag5};
+
+    QTest::newRow("skip-nested-condition")
+        << xml << QStringList{keyword1}
+        << QStringList{root, tag1, tag2, tag4, tag5};
+
+    QTest::newRow("both/check-not")
+        << xml << QStringList{keyword1, keyword2}
+        << QStringList{root, tag1, tag2, tag3, tag5};
+}
+
+// Parse XML and return a list of tags encountered
+static QStringList parseXml(const QString &xml, const QStringList &keywords)
+{
+    QStringList tags;
+    ConditionalStreamReader reader(xml);
+    reader.setConditions(keywords);
+    while (!reader.atEnd()) {
+        auto t = reader.readNext();
+        switch (t) {
+        case QXmlStreamReader::StartElement:
+            tags.append(reader.name().toString());
+            break;
+        default:
+            break;
+        }
+    }
+    return tags;
+}
+
+void TestDropTypeEntries::testConditionalParsing()
+{
+    QFETCH(QString, xml);
+    QFETCH(QStringList, keywords);
+    QFETCH(QStringList, expectedTags);
+
+    const QStringList actualTags = parseXml(xml, keywords);
+    QCOMPARE(actualTags, expectedTags);
 }
 
 QTEST_APPLESS_MAIN(TestDropTypeEntries)

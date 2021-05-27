@@ -72,6 +72,11 @@ void ApiExtractor::addTypesystemSearchPath(const QStringList& paths)
         addTypesystemSearchPath(path);
 }
 
+void ApiExtractor::setTypesystemKeywords(const QStringList &keywords)
+{
+    TypeDatabase::instance()->setTypesystemKeywords(keywords);
+}
+
 void ApiExtractor::addIncludePath(const HeaderPath& path)
 {
     m_includePaths << path;

@@ -31,6 +31,7 @@
 #include "messages.h"
 #include "reporthandler.h"
 #include "sourcelocation.h"
+#include "conditionalstreamreader.h"
 
 #include <QtCore/QDir>
 #include <QtCore/QFile>
@@ -533,13 +534,13 @@ TypeSystemParser::TypeSystemParser(TypeDatabase *database, bool generate) :
 
 TypeSystemParser::~TypeSystemParser() = default;
 
-static QString readerFileName(const QXmlStreamReader &reader)
+static QString readerFileName(const ConditionalStreamReader &reader)
 {
     const auto *file = qobject_cast<const QFile *>(reader.device());
     return file != nullptr ? file->fileName() : QString();
 }
 
-static QString msgReaderMessage(const QXmlStreamReader &reader,
+static QString msgReaderMessage(const ConditionalStreamReader &reader,
                                 const char *type,
                                 const QString &what)
 {
@@ -556,17 +557,17 @@ static QString msgReaderMessage(const QXmlStreamReader &reader,
     return message;
 }
 
-static QString msgReaderWarning(const QXmlStreamReader &reader, const QString &what)
+static QString msgReaderWarning(const ConditionalStreamReader &reader, const QString &what)
 {
     return  msgReaderMessage(reader, "Warning", what);
 }
 
-static QString msgReaderError(const QXmlStreamReader &reader, const QString &what)
+static QString msgReaderError(const ConditionalStreamReader &reader, const QString &what)
 {
     return  msgReaderMessage(reader, "Error", what);
 }
 
-static QString msgUnimplementedElementWarning(const QXmlStreamReader &reader,
+static QString msgUnimplementedElementWarning(const ConditionalStreamReader &reader,
                                               QStringView name)
 {
     QString message;
@@ -575,7 +576,7 @@ static QString msgUnimplementedElementWarning(const QXmlStreamReader &reader,
     return msgReaderMessage(reader, "Warning", message);
 }
 
-static QString msgUnimplementedAttributeWarning(const QXmlStreamReader &reader,
+static QString msgUnimplementedAttributeWarning(const ConditionalStreamReader &reader,
                                                 QStringView name)
 {
     QString message;
@@ -584,14 +585,14 @@ static QString msgUnimplementedAttributeWarning(const QXmlStreamReader &reader,
     return msgReaderMessage(reader, "Warning", message);
 }
 
-static inline QString msgUnimplementedAttributeWarning(const QXmlStreamReader &reader,
+static inline QString msgUnimplementedAttributeWarning(const ConditionalStreamReader &reader,
                                                        const QXmlStreamAttribute &attribute)
 {
     return msgUnimplementedAttributeWarning(reader, attribute.qualifiedName());
 }
 
 static QString
-    msgUnimplementedAttributeValueWarning(const QXmlStreamReader &reader,
+    msgUnimplementedAttributeValueWarning(const ConditionalStreamReader &reader,
                                           QStringView name, QStringView value)
 {
     QString message;
@@ -601,7 +602,7 @@ static QString
 }
 
 static inline
-    QString msgUnimplementedAttributeValueWarning(const QXmlStreamReader &reader,
+    QString msgUnimplementedAttributeValueWarning(const ConditionalStreamReader &reader,
                                                   const QXmlStreamAttribute &attribute)
 {
     return msgUnimplementedAttributeValueWarning(reader,
@@ -660,7 +661,7 @@ static bool addRejection(TypeDatabase *database, QXmlStreamAttributes *attribute
     return true;
 }
 
-bool TypeSystemParser::parse(QXmlStreamReader &reader)
+bool TypeSystemParser::parse(ConditionalStreamReader &reader)
 {
     m_error.clear();
     m_currentPath.clear();
@@ -671,7 +672,7 @@ bool TypeSystemParser::parse(QXmlStreamReader &reader)
     return result;
 }
 
-bool TypeSystemParser::parseXml(QXmlStreamReader &reader)
+bool TypeSystemParser::parseXml(ConditionalStreamReader &reader)
 {
     const QString fileName = readerFileName(reader);
     if (!fileName.isEmpty()) {
@@ -1153,7 +1154,7 @@ static TypeEntry *findViewedType(const QString &name)
     return nullptr;
 }
 
-bool TypeSystemParser::applyCommonAttributes(const QXmlStreamReader &reader, TypeEntry *type,
+bool TypeSystemParser::applyCommonAttributes(const ConditionalStreamReader &reader, TypeEntry *type,
                                              QXmlStreamAttributes *attributes)
 {
     type->setSourceLocation(SourceLocation(m_currentFile,
@@ -1177,7 +1178,7 @@ bool TypeSystemParser::applyCommonAttributes(const QXmlStreamReader &reader, Typ
 }
 
 FlagsTypeEntry *
-    TypeSystemParser::parseFlagsEntry(const QXmlStreamReader &reader,
+    TypeSystemParser::parseFlagsEntry(const ConditionalStreamReader &reader,
                              EnumTypeEntry *enumEntry, QString flagName,
                              const QVersionNumber &since,
                              QXmlStreamAttributes *attributes)
@@ -1225,7 +1226,7 @@ FlagsTypeEntry *
 }
 
 SmartPointerTypeEntry *
-    TypeSystemParser::parseSmartPointerEntry(const QXmlStreamReader &reader,
+    TypeSystemParser::parseSmartPointerEntry(const ConditionalStreamReader &reader,
                                     const QString &name, const QVersionNumber &since,
                                     QXmlStreamAttributes *attributes)
 {
@@ -1285,7 +1286,7 @@ SmartPointerTypeEntry *
 }
 
 PrimitiveTypeEntry *
-    TypeSystemParser::parsePrimitiveTypeEntry(const QXmlStreamReader &reader,
+    TypeSystemParser::parsePrimitiveTypeEntry(const ConditionalStreamReader &reader,
                                      const QString &name, const QVersionNumber &since,
                                      QXmlStreamAttributes *attributes)
 {
@@ -1319,7 +1320,7 @@ PrimitiveTypeEntry *
 }
 
 ContainerTypeEntry *
-    TypeSystemParser::parseContainerTypeEntry(const QXmlStreamReader &reader,
+    TypeSystemParser::parseContainerTypeEntry(const ConditionalStreamReader &reader,
                                      const QString &name, const QVersionNumber &since,
                                      QXmlStreamAttributes *attributes)
 {
@@ -1344,7 +1345,7 @@ ContainerTypeEntry *
 }
 
 EnumTypeEntry *
-    TypeSystemParser::parseEnumTypeEntry(const QXmlStreamReader &reader,
+    TypeSystemParser::parseEnumTypeEntry(const ConditionalStreamReader &reader,
                                 const QString &name, const QVersionNumber &since,
                                 QXmlStreamAttributes *attributes)
 {
@@ -1385,7 +1386,7 @@ EnumTypeEntry *
 
 
 NamespaceTypeEntry *
-    TypeSystemParser::parseNamespaceTypeEntry(const QXmlStreamReader &reader,
+    TypeSystemParser::parseNamespaceTypeEntry(const ConditionalStreamReader &reader,
                                      const QString &name, const QVersionNumber &since,
                                      QXmlStreamAttributes *attributes)
 {
@@ -1446,7 +1447,7 @@ NamespaceTypeEntry *
 }
 
 ValueTypeEntry *
-    TypeSystemParser::parseValueTypeEntry(const QXmlStreamReader &reader,
+    TypeSystemParser::parseValueTypeEntry(const ConditionalStreamReader &reader,
                                  const QString &name, const QVersionNumber &since,
                                  QXmlStreamAttributes *attributes)
 {
@@ -1462,7 +1463,7 @@ ValueTypeEntry *
 }
 
 FunctionTypeEntry *
-    TypeSystemParser::parseFunctionTypeEntry(const QXmlStreamReader &reader,
+    TypeSystemParser::parseFunctionTypeEntry(const ConditionalStreamReader &reader,
                                     const QString &name, const QVersionNumber &since,
                                     QXmlStreamAttributes *attributes)
 {
@@ -1513,7 +1514,7 @@ FunctionTypeEntry *
 }
 
 TypedefEntry *
- TypeSystemParser::parseTypedefEntry(const QXmlStreamReader &reader,
+ TypeSystemParser::parseTypedefEntry(const ConditionalStreamReader &reader,
                                      const QString &name,
                                      const QVersionNumber &since,
                                      QXmlStreamAttributes *attributes)
@@ -1536,7 +1537,7 @@ TypedefEntry *
     return result;
 }
 
-void TypeSystemParser::applyComplexTypeAttributes(const QXmlStreamReader &reader,
+void TypeSystemParser::applyComplexTypeAttributes(const ConditionalStreamReader &reader,
                                          ComplexTypeEntry *ctype,
                                          QXmlStreamAttributes *attributes) const
 {
@@ -1634,7 +1635,7 @@ void TypeSystemParser::applyComplexTypeAttributes(const QXmlStreamReader &reader
         ctype->setCodeGeneration(TypeEntry::GenerationDisabled);
 }
 
-bool TypeSystemParser::parseRenameFunction(const QXmlStreamReader &,
+bool TypeSystemParser::parseRenameFunction(const ConditionalStreamReader &,
                                   QString *name, QXmlStreamAttributes *attributes)
 {
     QString signature;
@@ -1680,7 +1681,7 @@ bool TypeSystemParser::parseRenameFunction(const QXmlStreamReader &,
     return true;
 }
 
-bool TypeSystemParser::parseInjectDocumentation(const QXmlStreamReader &,
+bool TypeSystemParser::parseInjectDocumentation(const ConditionalStreamReader &,
                                        QXmlStreamAttributes *attributes)
 {
     const int validParent = StackElement::TypeEntryMask
@@ -1723,7 +1724,7 @@ bool TypeSystemParser::parseInjectDocumentation(const QXmlStreamReader &,
     return true;
 }
 
-bool TypeSystemParser::parseModifyDocumentation(const QXmlStreamReader &,
+bool TypeSystemParser::parseModifyDocumentation(const ConditionalStreamReader &,
                                        QXmlStreamAttributes *attributes)
 {
     const int validParent = StackElement::TypeEntryMask
@@ -1749,7 +1750,7 @@ bool TypeSystemParser::parseModifyDocumentation(const QXmlStreamReader &,
 }
 
 // m_exceptionHandling
-TypeSystemTypeEntry *TypeSystemParser::parseRootElement(const QXmlStreamReader &,
+TypeSystemTypeEntry *TypeSystemParser::parseRootElement(const ConditionalStreamReader &,
                                                const QVersionNumber &since,
                                                QXmlStreamAttributes *attributes)
 {
@@ -1810,7 +1811,7 @@ TypeSystemTypeEntry *TypeSystemParser::parseRootElement(const QXmlStreamReader &
     return moduleEntry;
 }
 
-bool TypeSystemParser::loadTypesystem(const QXmlStreamReader &,
+bool TypeSystemParser::loadTypesystem(const ConditionalStreamReader &,
                              QXmlStreamAttributes *attributes)
 {
     QString typeSystemName;
@@ -1834,7 +1835,7 @@ bool TypeSystemParser::loadTypesystem(const QXmlStreamReader &,
     return result;
 }
 
-bool TypeSystemParser::parseRejectEnumValue(const QXmlStreamReader &,
+bool TypeSystemParser::parseRejectEnumValue(const ConditionalStreamReader &,
                                    QXmlStreamAttributes *attributes)
 {
     if (!m_currentEnum) {
@@ -1850,7 +1851,7 @@ bool TypeSystemParser::parseRejectEnumValue(const QXmlStreamReader &,
     return true;
 }
 
-bool TypeSystemParser::parseReplaceArgumentType(const QXmlStreamReader &,
+bool TypeSystemParser::parseReplaceArgumentType(const ConditionalStreamReader &,
                                        const StackElement &topElement,
                                        QXmlStreamAttributes *attributes)
 {
@@ -1868,7 +1869,7 @@ bool TypeSystemParser::parseReplaceArgumentType(const QXmlStreamReader &,
     return true;
 }
 
-bool TypeSystemParser::parseCustomConversion(const QXmlStreamReader &,
+bool TypeSystemParser::parseCustomConversion(const ConditionalStreamReader &,
                                     const StackElement &topElement,
                                     QXmlStreamAttributes *attributes)
 {
@@ -1943,7 +1944,7 @@ bool TypeSystemParser::parseCustomConversion(const QXmlStreamReader &,
     return true;
 }
 
-bool TypeSystemParser::parseNativeToTarget(const QXmlStreamReader &,
+bool TypeSystemParser::parseNativeToTarget(const ConditionalStreamReader &,
                                   const StackElement &topElement,
                                   QXmlStreamAttributes *attributes)
 {
@@ -1958,7 +1959,7 @@ bool TypeSystemParser::parseNativeToTarget(const QXmlStreamReader &,
     return true;
 }
 
-bool TypeSystemParser::parseAddConversion(const QXmlStreamReader &,
+bool TypeSystemParser::parseAddConversion(const ConditionalStreamReader &,
                                  const StackElement &topElement,
                                  QXmlStreamAttributes *attributes)
 {
@@ -2009,7 +2010,7 @@ static bool parseArgumentIndex(const QString &index, int *result, QString *error
     return parseIndex(index, result, errorMessage);
 }
 
-bool TypeSystemParser::parseModifyArgument(const QXmlStreamReader &,
+bool TypeSystemParser::parseModifyArgument(const ConditionalStreamReader &,
                                   const StackElement &topElement, QXmlStreamAttributes *attributes)
 {
     if (topElement.type != StackElement::ModifyFunction
@@ -2051,7 +2052,7 @@ bool TypeSystemParser::parseModifyArgument(const QXmlStreamReader &,
     return true;
 }
 
-bool TypeSystemParser::parseNoNullPointer(const QXmlStreamReader &reader,
+bool TypeSystemParser::parseNoNullPointer(const ConditionalStreamReader &reader,
                                  const StackElement &topElement, QXmlStreamAttributes *attributes)
 {
     if (topElement.type != StackElement::ModifyArgument) {
@@ -2072,7 +2073,7 @@ bool TypeSystemParser::parseNoNullPointer(const QXmlStreamReader &reader,
     return true;
 }
 
-bool TypeSystemParser::parseDefineOwnership(const QXmlStreamReader &,
+bool TypeSystemParser::parseDefineOwnership(const ConditionalStreamReader &,
                                    const StackElement &topElement,
                                    QXmlStreamAttributes *attributes)
 {
@@ -2122,7 +2123,7 @@ bool TypeSystemParser::parseDefineOwnership(const QXmlStreamReader &,
 }
 
 // ### fixme PySide7: remove (replaced by attribute).
-bool TypeSystemParser::parseRename(const QXmlStreamReader &,
+bool TypeSystemParser::parseRename(const ConditionalStreamReader &,
                           const StackElement &topElement,
                           QXmlStreamAttributes *attributes)
 {
@@ -2141,7 +2142,7 @@ bool TypeSystemParser::parseRename(const QXmlStreamReader &,
     return true;
 }
 
-bool TypeSystemParser::parseModifyField(const QXmlStreamReader &,
+bool TypeSystemParser::parseModifyField(const ConditionalStreamReader &,
                                         QXmlStreamAttributes *attributes)
 {
     FieldModification fm;
@@ -2188,7 +2189,7 @@ static bool parseOverloadNumber(const QXmlStreamAttribute &attribute, int *overl
     return true;
 }
 
-bool TypeSystemParser::parseAddFunction(const QXmlStreamReader &,
+bool TypeSystemParser::parseAddFunction(const ConditionalStreamReader &,
                                         const StackElement &topElement,
                                         StackElement::ElementType t,
                                         QXmlStreamAttributes *attributes)
@@ -2267,7 +2268,7 @@ bool TypeSystemParser::parseAddFunction(const QXmlStreamReader &,
     return true;
 }
 
-bool TypeSystemParser::parseProperty(const QXmlStreamReader &, const StackElement &topElement,
+bool TypeSystemParser::parseProperty(const ConditionalStreamReader &, const StackElement &topElement,
                                      QXmlStreamAttributes *attributes)
 {
     if ((topElement.type & StackElement::ComplexTypeEntryMask) == 0) {
@@ -2301,7 +2302,7 @@ bool TypeSystemParser::parseProperty(const QXmlStreamReader &, const StackElemen
     return true;
 }
 
-bool TypeSystemParser::parseModifyFunction(const QXmlStreamReader &reader,
+bool TypeSystemParser::parseModifyFunction(const ConditionalStreamReader &reader,
                                   const StackElement &topElement,
                                   QXmlStreamAttributes *attributes)
 {
@@ -2432,7 +2433,7 @@ bool TypeSystemParser::parseModifyFunction(const QXmlStreamReader &reader,
     return true;
 }
 
-bool TypeSystemParser::parseReplaceDefaultExpression(const QXmlStreamReader &,
+bool TypeSystemParser::parseReplaceDefaultExpression(const ConditionalStreamReader &,
                                             const StackElement &topElement,
                                             QXmlStreamAttributes *attributes)
 {
@@ -2452,7 +2453,7 @@ bool TypeSystemParser::parseReplaceDefaultExpression(const QXmlStreamReader &,
 }
 
 CustomFunction *
-    TypeSystemParser::parseCustomMetaConstructor(const QXmlStreamReader &,
+    TypeSystemParser::parseCustomMetaConstructor(const ConditionalStreamReader &,
                                         StackElement::ElementType type,
                                         const StackElement &topElement,
                                         QXmlStreamAttributes *attributes)
@@ -2473,7 +2474,7 @@ CustomFunction *
     return func;
 }
 
-bool TypeSystemParser::parseReferenceCount(const QXmlStreamReader &reader,
+bool TypeSystemParser::parseReferenceCount(const ConditionalStreamReader &reader,
                                   const StackElement &topElement,
                                   QXmlStreamAttributes *attributes)
 {
@@ -2511,7 +2512,7 @@ bool TypeSystemParser::parseReferenceCount(const QXmlStreamReader &reader,
     return true;
 }
 
-bool TypeSystemParser::parseParentOwner(const QXmlStreamReader &,
+bool TypeSystemParser::parseParentOwner(const ConditionalStreamReader &,
                                const StackElement &topElement,
                                QXmlStreamAttributes *attributes)
 {
@@ -2586,7 +2587,7 @@ bool TypeSystemParser::readFileSnippet(QXmlStreamAttributes *attributes, CodeSni
     return true;
 }
 
-bool TypeSystemParser::parseInjectCode(const QXmlStreamReader &,
+bool TypeSystemParser::parseInjectCode(const ConditionalStreamReader &,
                               const StackElement &topElement,
                               StackElement* element, QXmlStreamAttributes *attributes)
 {
@@ -2642,7 +2643,7 @@ bool TypeSystemParser::parseInjectCode(const QXmlStreamReader &,
     return true;
 }
 
-bool TypeSystemParser::parseInclude(const QXmlStreamReader &,
+bool TypeSystemParser::parseInclude(const ConditionalStreamReader &,
                            const StackElement &topElement,
                            TypeEntry *entry, QXmlStreamAttributes *attributes)
 {
@@ -2676,7 +2677,7 @@ bool TypeSystemParser::parseInclude(const QXmlStreamReader &,
     return true;
 }
 
-bool TypeSystemParser::parseSystemInclude(const QXmlStreamReader &,
+bool TypeSystemParser::parseSystemInclude(const ConditionalStreamReader &,
                                           QXmlStreamAttributes *attributes)
 {
     const int index = indexOfAttribute(*attributes, fileNameAttribute());
@@ -2689,7 +2690,7 @@ bool TypeSystemParser::parseSystemInclude(const QXmlStreamReader &,
 }
 
 TemplateInstance *
-    TypeSystemParser::parseTemplateInstanceEnum(const QXmlStreamReader &,
+    TypeSystemParser::parseTemplateInstanceEnum(const ConditionalStreamReader &,
                                        const StackElement &topElement,
                                        QXmlStreamAttributes *attributes)
 {
@@ -2712,7 +2713,7 @@ TemplateInstance *
     return new TemplateInstance(attributes->takeAt(nameIndex).value().toString());
 }
 
-bool TypeSystemParser::parseReplace(const QXmlStreamReader &,
+bool TypeSystemParser::parseReplace(const ConditionalStreamReader &,
                            const StackElement &topElement,
                            StackElement *element, QXmlStreamAttributes *attributes)
 {
@@ -2744,7 +2745,7 @@ static bool parseVersion(const QString &versionSpec, const QString &package,
     return true;
 }
 
-bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
+bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
 {
     if (m_ignoreDepth) {
         ++m_ignoreDepth;

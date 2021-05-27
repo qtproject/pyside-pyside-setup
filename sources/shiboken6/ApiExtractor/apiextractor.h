@@ -73,6 +73,7 @@ public:
     static void setSilent(bool value);
     static void addTypesystemSearchPath(const QString &path);
     static void addTypesystemSearchPath(const QStringList& paths);
+    static void setTypesystemKeywords(const QStringList& keywords);
     void addIncludePath(const HeaderPath& path);
     void addIncludePath(const HeaderPaths& paths);
     HeaderPaths includePaths() const { return m_includePaths; }

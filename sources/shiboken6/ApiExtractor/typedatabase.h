@@ -114,6 +114,9 @@ public:
 
     void addTypesystemPath(const QString &typesystem_paths);
 
+    void setTypesystemKeywords(const QStringList &keywords) { m_typesystemKeywords = keywords; }
+    QStringList typesystemKeywords() const;
+
     IncludeList extraIncludes(const QString &className) const;
 
     const QByteArrayList &systemIncludes() const { return m_systemIncludes; }
@@ -229,6 +232,7 @@ private:
     QStringList m_requiredTargetImports;
 
     QStringList m_typesystemPaths;
+    QStringList m_typesystemKeywords;
     QHash<QString, bool> m_parsedTypesystemFiles;
 
     QList<TypeRejection> m_rejections;

@@ -47,9 +47,11 @@
 #include <exception>
 
 static const QChar clangOptionsSplitter = u',';
+static const QChar keywordsSplitter = u',';
 static const QChar dropTypeEntriesSplitter = u';';
 static const QChar apiVersionSplitter = u'|';
 
+static inline QString keywordsOption() { return QStringLiteral("keywords"); }
 static inline QString clangOptionOption() { return QStringLiteral("clang-option"); }
 static inline QString clangOptionsOption() { return QStringLiteral("clang-options"); }
 static inline QString apiVersionOption() { return QStringLiteral("api-version"); }
@@ -191,6 +193,9 @@ static std::optional<CommandLineArguments>
         } else if (key == "api-version") {
             args.addToOptionsList(apiVersionOption(),
                                   value, apiVersionSplitter);
+        } else if (key == "keywords") {
+            args.addToOptionsList(keywordsOption(),
+                                  value, keywordsSplitter);
         } else if (key == "drop-type-entries") {
             args.addToOptionsList(dropTypeEntriesOption(),
                                   value, dropTypeEntriesSplitter);
@@ -263,6 +268,8 @@ static void getCommandLineArg(QString arg, int &argNum, CommandLineArguments &ar
             args.addToOptionsList(clangOptionsOption(), value);
         } else if (option == clangOptionsOption()) {
             args.addToOptionsList(clangOptionsOption(), value, clangOptionsSplitter);
+        } else if (option == keywordsOption()) {
+            args.addToOptionsList(keywordsOption(), value, keywordsSplitter);
         } else {
             args.options.insert(option, value);
         }
@@ -344,6 +351,8 @@ void printUsage()
         {QLatin1String("drop-type-entries=\"<TypeEntry0>[;TypeEntry1;...]\""),
          QLatin1String("Semicolon separated list of type system entries (classes, namespaces,\n"
                        "global functions and enums) to be dropped from generation.")},
+        {keywordsOption() + QStringLiteral("=keyword1[,keyword2,...]"),
+         QLatin1String("A comma-separated list of keywords for conditional typesystem parsing")},
         {clangOptionOption(),
          QLatin1String("Option to be passed to clang")},
         {clangOptionsOption(),
@@ -581,6 +590,12 @@ int shibokenMain(int argc, char *argv[])
     ait = args.options.find(dropTypeEntriesOption());
     if (ait != args.options.end()) {
         extractor.setDropTypeEntries(ait.value().toStringList());
+        args.options.erase(ait);
+    }
+
+    ait = args.options.find(keywordsOption());
+    if (ait != args.options.end()) {
+        extractor.setTypesystemKeywords(ait.value().toStringList());
         args.options.erase(ait);
     }
 

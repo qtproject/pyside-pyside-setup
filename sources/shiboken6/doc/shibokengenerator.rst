@@ -136,6 +136,12 @@ Options
     fully qualified Python type names ('Module.Class'), but the module can
     be omitted ('Class').
 
+.. _conditional_keywords:
+
+``-keywords=keyword1[,keyword2,...]``
+    A comma-separated list of keywords for conditional typesystem parsing
+    (see :ref:`conditional_processing`).
+
 ``--use-global-header``
     Use the global headers passed on the command line in generated code.
 
