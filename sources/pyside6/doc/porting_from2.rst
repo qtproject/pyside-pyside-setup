@@ -80,9 +80,11 @@ accordingly. For example:
    ``QGuiApplication.primaryScreen()`` or ``QGuiApplication.screens()``.
  * ``QFontMetrics.width()`` has been renamed to ``horizontalAdvance()``.
  * ``QMouseEvent.pos()`` and ``QMouseEvent.globalPos()`` returning a ``QPoint``
+   as well as ``QMouseEvent.x()`` and ``QMouseEvent.y()`` returning ``int``
    are now deprecated. ``QMouseEvent.position()`` and
    ``QMouseEvent.globalPosition()`` returning a ``QPointF`` should be used
    instead.
+ * ``Qt.MidButton`` has been renamed to ``Qt.MiddleButton``.
  * ``QOpenGLVersionFunctionsFactory.get()`` instead of
    ``QOpenGLContext.versionFunctions()`` should be used to obtain
    *Open GL* functions.
