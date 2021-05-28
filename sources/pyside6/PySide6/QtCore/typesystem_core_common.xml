@@ -3006,6 +3006,11 @@
   <object-type name="QPluginLoader"/>
   <object-type name="QStringListModel"/>
 
+  <object-type name="QSysInfo">
+    <enum-type name="Endian"/>
+    <enum-type name="Sizes"/>
+  </object-type>
+
   <suppress-warning text="Unable to decide type of property: 'QLibrary::LoadHints' in class 'QPluginLoader'"/>
   <suppress-warning text="enum '_ISalnum' does not have a type entry or is not an enum"/>
   <suppress-warning text="enum 'Qt::Initialization' does not have a type entry or is not an enum"/>
