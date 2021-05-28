@@ -81,6 +81,7 @@ class MainWindow(QMainWindow):
         open_action = QAction(icon, "&Open...", self,
                               shortcut=QKeySequence.Open, triggered=self.open)
         file_menu.addAction(open_action)
+        tool_bar.addAction(open_action)
         icon = QIcon.fromTheme("application-exit")
         exit_action = QAction(icon, "E&xit", self,
                               shortcut="Ctrl+Q", triggered=self.close)
