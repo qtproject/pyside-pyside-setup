@@ -45,8 +45,4 @@
     <!-- Qt5: XXX move this to QtGui <include file-name="QTextDocument" location="global"/> -->
   </primitive-type>
   <!-- Qt5: had to move QAbstractEventDispatcher into os-specific files because of Windows -->
-  <object-type name="QSysInfo">
-    <enum-type name="Endian"/>
-    <enum-type name="Sizes"/>
-  </object-type>
 </typesystem>
