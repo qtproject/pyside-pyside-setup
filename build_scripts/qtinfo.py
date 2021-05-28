@@ -42,6 +42,7 @@ import sys
 import re
 import subprocess
 import tempfile
+from pathlib import Path
 
 
 class QtInfo(object):
@@ -164,10 +165,11 @@ class QtInfo(object):
         def get_mkspecs_variables(self):
             return self._mkspecs_dict
 
-        def _get_qmake_output(self, args_list=[]):
+        def _get_qmake_output(self, args_list=[], cwd=None):
             assert self._qmake_command
             cmd = self._qmake_command + args_list
-            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=False)
+            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=False,
+                                    cwd=cwd)
             output = proc.communicate()[0]
             proc.wait()
             if proc.returncode != 0:
@@ -233,12 +235,20 @@ class QtInfo(object):
                 self._query_dict["BUILD_TYPE"] = build_type
 
         def _get_qmake_mkspecs_variables(self):
-            # Create empty temporary qmake project file.
-            tmp_file = tempfile.NamedTemporaryFile(suffix=".txt")
+            # Create an empty qmake project file in a temporary directory
+            # where also the .qmake.stash file will be created.
+            lines = []
+            with tempfile.TemporaryDirectory() as tempdir:
+                pro_file = Path(tempdir) / 'project.pro'
+                pro_file.write_text('')
+                # Query qmake for all of its mkspecs variables.
+                args = ["-E", os.fspath(pro_file)]
+                qmake_output = self._get_qmake_output(args, cwd=tempdir)
+                lines = [s.strip() for s in qmake_output.splitlines()]
 
-            # Query qmake for all of its mkspecs variables.
-            qmake_output = self._get_qmake_output(["-E", tmp_file.name])
-            lines = [s.strip() for s in qmake_output.splitlines()]
+            if not lines:
+                raise RuntimeError("Could not determine qmake variables")
+
             pattern = re.compile(r"^(.+?)=(.+?)$")
             for line in lines:
                 found = pattern.search(line)
@@ -246,9 +256,3 @@ class QtInfo(object):
                     key = found.group(1).strip()
                     value = found.group(2).strip()
                     self._mkspecs_dict[key] = value
-
-            # We need to clean up after qmake, which always creates a
-            # .qmake.stash file after a -E invocation.
-            qmake_stash_file = os.path.join(os.getcwd(), ".qmake.stash")
-            if os.path.exists(qmake_stash_file):
-                os.remove(qmake_stash_file)
