@@ -100,6 +100,7 @@ static inline QString staticAttribute() { return QStringLiteral("static"); }
 static inline QString threadAttribute() { return QStringLiteral("thread"); }
 static inline QString sourceAttribute() { return QStringLiteral("source"); }
 static inline QString streamAttribute() { return QStringLiteral("stream"); }
+static inline QString privateAttribute() { return QStringLiteral("private"); }
 static inline QString xPathAttribute() { return QStringLiteral("xpath"); }
 static inline QString virtualSlotAttribute() { return QStringLiteral("virtual-slot"); }
 static inline QString visibleAttribute() { return QStringLiteral("visible"); }
@@ -1551,6 +1552,9 @@ void TypeSystemParser::applyComplexTypeAttributes(const ConditionalStreamReader 
         const auto name = attributes->at(i).qualifiedName();
         if (name == streamAttribute()) {
             ctype->setStream(convertBoolean(attributes->takeAt(i).value(), streamAttribute(), false));
+        } else if (name == privateAttribute()) {
+            ctype->setPrivate(convertBoolean(attributes->takeAt(i).value(),
+                                             privateAttribute(), false));
         } else if (name == generateAttribute()) {
             generate = convertBoolean(attributes->takeAt(i).value(), generateAttribute(), true);
         } else if (name ==packageAttribute()) {

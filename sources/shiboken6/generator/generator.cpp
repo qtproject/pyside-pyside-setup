@@ -177,6 +177,7 @@ struct Generator::GeneratorPrivate
     AbstractMetaTypeList instantiatedContainers;
     AbstractMetaTypeList instantiatedSmartPointers;
     AbstractMetaClassCList m_invisibleTopNamespaces;
+    bool m_hasPrivateClasses = false;
 };
 
 Generator::Generator() : m_d(new GeneratorPrivate)
@@ -464,6 +465,8 @@ bool Generator::generate()
     for (auto cls : m_d->api.classes()) {
         if (!generateFileForContext(contextForClass(cls)))
             return false;
+        if (shouldGenerate(cls) && cls->typeEntry()->isPrivate())
+            m_d->m_hasPrivateClasses = true;
     }
 
     const auto smartPointers = m_d->api.smartPointers();
@@ -506,6 +509,11 @@ void verifyDirectoryFor(const QString &file)
 const ApiExtractorResult &Generator::api() const
 {
     return m_d->api;
+}
+
+bool Generator::hasPrivateClasses() const
+{
+    return m_d->m_hasPrivateClasses;
 }
 
 QString Generator::getFullTypeName(const TypeEntry *type)

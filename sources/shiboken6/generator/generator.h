@@ -237,6 +237,8 @@ public:
     /// Returns the API as determined by ApiExtractor
     const ApiExtractorResult &api() const;
 
+    bool hasPrivateClasses() const;
+
     /**
      *  Retrieves the name of the currently processed module.
      *  While package name is a complete package idetification, e.g. 'PySide.QtCore',

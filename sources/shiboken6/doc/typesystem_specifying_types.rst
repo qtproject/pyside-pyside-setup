@@ -318,6 +318,7 @@ value-type
              disable-wrapper="yes | no"
              exception-handling="..."
              hash-function="..."
+             private="yes | no"
              stream="yes | no"
              default-constructor="..."
              revision="..."
@@ -343,6 +344,8 @@ value-type
     very odd cases.
 
     For the *optional* **disable-wrapper** attribute, see  :ref:`object-type`.
+
+    For the *optional* **private** attribute, see :ref:`private_types`.
 
     The **revision** attribute can be used to specify a revision for each type, easing the
     production of ABI compatible bindings.
@@ -378,6 +381,7 @@ object-type
              exception-handling="..."
              force-abstract="yes | no"
              hash-function="..."
+             private="yes | no"
              stream="yes | no"
              revision="..."
              snake-case="yes | no | both" />
@@ -401,6 +405,8 @@ object-type
     its virtual methods pose some problem for the code generator (by returning
     references, or using a default value that cannot be generated for a
     parameter, or similar).
+
+    For the *optional* **private** attribute, see :ref:`private_types`.
 
     The *optional* attribute **stream** specifies whether this type will be able to
     use externally defined operators, like QDataStream << and >>. If equals to **yes**,
@@ -601,3 +607,16 @@ Conditional Processing
 
      Other keywords can be specified using the
      :ref:`--keywords <conditional_keywords>` command line option.
+
+.. _private_types:
+
+Private Types
+^^^^^^^^^^^^^
+
+Marking :ref:`object-type` or :ref:`value-type` entries as private causes a
+separate, private module header besides the public module header to be
+generated for them.
+
+This can be used for classes that are not referenced in dependent modules
+and helps to prevent the propagation of for example private C++ headers
+required for them.

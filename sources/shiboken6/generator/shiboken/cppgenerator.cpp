@@ -413,6 +413,8 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
         s << "#include <helper.h>\n#include <iostream>\n";
 
     s << "\n// module include\n" << "#include \"" << getModuleHeaderFileName() << "\"\n";
+    if (hasPrivateClasses())
+        s << "#include \"" << getPrivateModuleHeaderFileName() << "\"\n";
 
     QString headerfile = fileNameForContext(classContext);
     headerfile.replace(QLatin1String(".cpp"), QLatin1String(".h"));

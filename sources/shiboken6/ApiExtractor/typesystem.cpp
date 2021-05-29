@@ -93,6 +93,7 @@ public:
     int m_sbkIndex = 0;
     TypeEntry::Type m_type;
     bool m_stream = false;
+    bool m_private = false;
 };
 
 TypeEntryPrivate::TypeEntryPrivate(const QString &entryName, TypeEntry::Type t, const QVersionNumber &vr,
@@ -342,6 +343,16 @@ bool TypeEntry::stream() const
 void TypeEntry::setStream(bool b)
 {
     m_d->m_stream = b;
+}
+
+bool TypeEntry::isPrivate() const
+{
+    return m_d->m_private;
+}
+
+void TypeEntry::setPrivate(bool b)
+{
+    m_d->m_private = b;
 }
 
 QString TypeEntry::name() const
@@ -2061,6 +2072,8 @@ void TypeEntry::formatDebug(QDebug &debug) const
         debug << ", sbkIndex=" << m_d->m_sbkIndex;
     if (m_d->m_include.isValid())
         debug << ", include=" << m_d->m_include;
+    if (m_d->m_private)
+        debug << ", [private]";
     formatList(debug, "extraIncludes", m_d->m_extraIncludes, ", ");
 }
 

@@ -2125,9 +2125,19 @@ const AbstractMetaClass *ShibokenGenerator::getMultipleInheritingClass(const Abs
     return getMultipleInheritingClass(metaClass->baseClass());
 }
 
+QString ShibokenGenerator::getModuleHeaderFileBaseName(const QString &moduleName)
+{
+    return moduleCppPrefix(moduleName).toLower() + QStringLiteral("_python");
+}
+
 QString ShibokenGenerator::getModuleHeaderFileName(const QString &moduleName)
 {
-    return moduleCppPrefix(moduleName).toLower() + QLatin1String("_python.h");
+    return getModuleHeaderFileBaseName(moduleName) + QStringLiteral(".h");
+}
+
+QString ShibokenGenerator::getPrivateModuleHeaderFileName(const QString &moduleName)
+{
+    return getModuleHeaderFileBaseName(moduleName) + QStringLiteral("_p.h");
 }
 
 std::optional<AbstractMetaType>

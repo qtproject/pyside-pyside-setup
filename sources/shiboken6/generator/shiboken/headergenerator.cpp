@@ -404,6 +404,7 @@ bool HeaderGenerator::finishGeneration()
     // This header should be included by binding modules
     // extendind on top of this one.
     QSet<Include> includes;
+    QSet<Include> privateIncludes;
     StringStream macrosStream(TextStream::Language::Cpp);
 
     const auto snips = TypeDatabase::instance()->defaultTypeSystemType()->codeSnips();
@@ -494,6 +495,7 @@ bool HeaderGenerator::finishGeneration()
     macrosStream << "// Macros for type check\n";
 
     StringStream typeFunctions(TextStream::Language::Cpp);
+    StringStream privateTypeFunctions(TextStream::Language::Cpp);
     if (usePySideExtensions()) {
         typeFunctions << "QT_WARNING_PUSH\n";
         typeFunctions << "QT_WARNING_DISABLE_DEPRECATED\n";
@@ -512,19 +514,22 @@ bool HeaderGenerator::finishGeneration()
 
         //Includes
         const TypeEntry *classType = metaClass->typeEntry();
-        includes << classType->include();
+        const bool isPrivate = classType->isPrivate();
+        auto &includeList = isPrivate ? privateIncludes : includes;
+        includeList << classType->include();
+        auto &typeFunctionsStr = isPrivate ? privateTypeFunctions : typeFunctions;
 
         for (const AbstractMetaEnum &cppEnum : metaClass->enums()) {
             if (cppEnum.isAnonymous() || cppEnum.isPrivate())
                 continue;
             EnumTypeEntry *enumType = cppEnum.typeEntry();
-            includes << enumType->include();
+            includeList << enumType->include();
             writeProtectedEnumSurrogate(protEnumsSurrogates, cppEnum);
-            writeSbkTypeFunction(typeFunctions, cppEnum);
+            writeSbkTypeFunction(typeFunctionsStr, cppEnum);
         }
 
         if (!metaClass->isNamespace())
-            writeSbkTypeFunction(typeFunctions, metaClass);
+            writeSbkTypeFunction(typeFunctionsStr, metaClass);
     }
 
     for (const AbstractMetaType &metaType : instantiatedSmartPtrs) {
@@ -535,9 +540,9 @@ bool HeaderGenerator::finishGeneration()
     if (usePySideExtensions())
         typeFunctions << "QT_WARNING_POP\n";
 
-    QString moduleHeaderFileName(outputDirectory()
-                                 + QDir::separator() + subDirectoryForPackage(packageName())
-                                 + QDir::separator() + getModuleHeaderFileName());
+    const QString moduleHeaderDir = outputDirectory() + QLatin1Char('/')
+        + subDirectoryForPackage(packageName()) + QLatin1Char('/');
+    const QString moduleHeaderFileName(moduleHeaderDir + getModuleHeaderFileName());
 
     QString includeShield(QLatin1String("SBK_") + moduleName().toUpper() + QLatin1String("_PYTHON_H"));
 
@@ -599,7 +604,50 @@ bool HeaderGenerator::finishGeneration()
         << "} // namespace Shiboken\n\n"
         << "#endif // " << includeShield << "\n\n";
 
-    return file.done() != FileOut::Failure;
+    if (file.done() == FileOut::Failure)
+        return false;
+
+    return !hasPrivateClasses()
+        || writePrivateHeader(moduleHeaderDir, includeShield,
+                              privateIncludes, privateTypeFunctions.toString());
+}
+
+bool HeaderGenerator::writePrivateHeader(const QString &moduleHeaderDir,
+                                         const QString &publicIncludeShield,
+                                         const QSet<Include> &privateIncludes,
+                                         const QString &privateTypeFunctions)
+{
+    // Write includes and type functions of private classes
+
+    FileOut privateFile(moduleHeaderDir + getPrivateModuleHeaderFileName());
+    TextStream &ps = privateFile.stream;
+    ps.setLanguage(TextStream::Language::Cpp);
+    QString privateIncludeShield =
+        publicIncludeShield.left(publicIncludeShield.size() - 2)
+        + QStringLiteral("_P_H");
+
+    ps << licenseComment()<< "\n\n";
+
+    ps << "#ifndef " << privateIncludeShield << '\n';
+    ps << "#define " << privateIncludeShield << "\n\n";
+
+    for (const Include &include : qAsConst(privateIncludes))
+        ps << include;
+    ps << '\n';
+
+    if (usePySideExtensions())
+        ps << "QT_WARNING_PUSH\nQT_WARNING_DISABLE_DEPRECATED\n";
+
+    ps << "namespace Shiboken\n{\n\n"
+        << "// PyType functions, to get the PyObjectType for a type T\n"
+        << privateTypeFunctions << '\n'
+        << "} // namespace Shiboken\n\n";
+
+    if (usePySideExtensions())
+        ps << "QT_WARNING_POP\n";
+
+    ps << "#endif\n";
+    return privateFile.done() != FileOut::Failure;
 }
 
 void HeaderGenerator::writeProtectedEnumSurrogate(TextStream &s, const AbstractMetaEnum &cppEnum) const

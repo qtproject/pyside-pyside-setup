@@ -2302,7 +2302,7 @@
     <object-type name="MDerived5"/>
     <object-type name="SonOfMDerived1"/>
 
-    <object-type name="Bucket">
+    <object-type name="Bucket" private="true">
         <modify-function signature="lock()" allow-thread="yes" />
         <modify-function signature="virtualBlockerMethod()" allow-thread="yes"/>
         <modify-function signature="callVirtualBlockerMethodButYouDontKnowThis()" allow-thread="yes"/>
@@ -2330,7 +2330,7 @@
         <property type="RenderHints" name="renderHints" get="getRenderHints" set="setRenderHints"/>
     </value-type>
 
-    <value-type name="CtorConvRule">
+    <value-type name="CtorConvRule" private="true">
         <modify-function signature="CtorConvRule(long)">
             <modify-argument index="1">
                 <!--<replace-type modified-type="long"/>-->

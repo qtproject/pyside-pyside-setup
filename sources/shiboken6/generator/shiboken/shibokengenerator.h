@@ -313,7 +313,8 @@ protected:
     static QString getFormatUnitString(const AbstractMetaFunctionCPtr &func, bool incRef = false);
 
     /// Returns the file name for the module global header. If no module name is provided the current will be used.
-    static QString getModuleHeaderFileName(const QString &moduleName = QString()) ;
+    static QString getModuleHeaderFileName(const QString &moduleName = QString());
+    static QString getPrivateModuleHeaderFileName(const QString &moduleName = QString());
 
     OptionDescriptions options() const override;
     bool handleOption(const QString &key, const QString &value) override;
@@ -398,6 +399,7 @@ protected:
     static const QHash<QString, QString> &formatUnits();
 
 private:
+    static QString getModuleHeaderFileBaseName(const QString &moduleName = QString());
     static QString cpythonGetterFunctionName(const QString &name,
                                              const AbstractMetaClass *enclosingClass);
     static QString cpythonSetterFunctionName(const QString &name,
