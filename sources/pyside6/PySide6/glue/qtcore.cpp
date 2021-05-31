@@ -1811,19 +1811,29 @@ return PyUnicode_FromWideChar(&c, 1);
 if (!%in.isValid())
     Py_RETURN_NONE;
 
-if (qstrcmp(%in.typeName(), "QVariantList") == 0) {
-    QList<QVariant> var = %in.value<QVariantList>();
+switch (%in.typeId()) {
+case QMetaType::UnknownType:
+case QMetaType::Nullptr:
+    Py_RETURN_NONE;
+case QMetaType::VoidStar:
+    if (%in.constData() == nullptr)
+        Py_RETURN_NONE;
+    break;
+
+case QMetaType::QVariantList: {
+    const auto var = %in.value<QVariantList>();
     return %CONVERTTOPYTHON[QList<QVariant>](var);
 }
-
-if (qstrcmp(%in.typeName(), "QStringList") == 0) {
-    QStringList var = %in.value<QStringList>();
+case QMetaType::QStringList: {
+    const auto var = %in.value<QStringList>();
     return %CONVERTTOPYTHON[QList<QString>](var);
 }
-
-if (qstrcmp(%in.typeName(), "QVariantMap") == 0) {
-    QMap<QString, QVariant> var = %in.value<QVariantMap>();
+case QMetaType::QVariantMap: {
+    const auto var = %in.value<QVariantMap>();
     return %CONVERTTOPYTHON[QMap<QString, QVariant>](var);
+}
+default:
+    break;
 }
 
 Shiboken::Conversions::SpecificConverter converter(cppInRef.typeName());
