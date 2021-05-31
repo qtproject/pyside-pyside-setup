@@ -53,13 +53,11 @@
         <enum-type name="Pairing"/>
     </object-type>
     <object-type name="QBluetoothDeviceDiscoveryAgent">
-        <enum-type name="DiscoveryMethod" flags="DiscoveryMethods"/>
+        <enum-type name="DiscoveryMethod"/>
         <enum-type name="Error"/>
-        <enum-type name="InquiryType"/>
     </object-type>
     <value-type name="QBluetoothDeviceInfo">
         <enum-type name="CoreConfiguration" flags="CoreConfigurations"/>
-        <enum-type name="DataCompleteness"/>
         <enum-type name="Field" flags="Fields"/>
         <enum-type name="MajorDeviceClass"/>
         <enum-type name="MinorAudioVideoClass"/>
@@ -119,6 +117,7 @@
     <object-type name="QLowEnergyDescriptorData">
     </object-type>
     <object-type name="QLowEnergyService">
+        <enum-type name="DiscoveryMode"/>
         <enum-type name="ServiceError"/>
         <enum-type name="ServiceState"/>
         <enum-type name="ServiceType" flags="ServiceTypes"/>
