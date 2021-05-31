@@ -1402,6 +1402,11 @@ void AbstractMetaClass::fixFunctions()
             if (sf->isUserAdded() && sf->declaringClass() != this)
                 continue;
 
+            // Skip base class comparison operators declared as members (free
+            // operators are added later by traverseOperatorFunction().
+            if (sf->isComparisonOperator())
+                continue;
+
             // we generally don't care about private functions, but we have to get the ones that are
             // virtual in case they override abstract functions.
             bool add = addSuperFunction(sf);
