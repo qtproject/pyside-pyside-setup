@@ -109,6 +109,8 @@
         <enum-type name="ContentType"/>
     </object-type>
     <value-type name="QHttpPart" since="5.9"/>
+    <value-type name="QHttp2Configuration"/>
+
     <object-type name="QTcpServer">
         <modify-function signature="waitForNewConnection(int,bool*)" allow-thread="yes">
             <!-- FIXME removing default expression means user will always have to pass a value, but he wouldn't have to -->
@@ -196,6 +198,11 @@
                 <define-ownership class="target" owner="c++"/>
             </modify-argument>
         </modify-function>
+    </object-type>
+    <object-type name="QNetworkInformation">
+        <enum-type name="Reachability"/>
+        <enum-type name="Feature" flags="Features"/>
+        <enum-type name="TriState" since="6.2"/>
     </object-type>
     <object-type name="QNetworkCookieJar"/>
     <value-type name="QNetworkDatagram" since="5.8"/>
@@ -291,9 +298,7 @@
         <enum-type name="Error"/>
     </value-type>
 
-    <!-- Problems with operator==(QSslEllipticCurve,QSslEllipticCurve)
-    <object-type name="QSslEllipticCurve"/>
-    -->
+    <value-type name="QSslEllipticCurve"/>
 
     <value-type name="QSslError">
         <enum-type name="SslError"/>

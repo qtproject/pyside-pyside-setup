@@ -1472,6 +1472,8 @@
     <modify-function signature="exit(int)" allow-thread="yes"/>
   </object-type>
 
+  <value-type name="QModelRoleData"/>
+
   <object-type name="QAbstractItemModel">
     <enum-type name="CheckIndexOption" flags="CheckIndexOptions" since="5.11"/>
     <enum-type name="LayoutChangeHint"/>
@@ -2201,6 +2203,9 @@
   <value-type name="QOperatingSystemVersion" since="5.9">
       <enum-type name="OSType"/>
   </value-type>
+  <object-type name="QLibrary">
+    <enum-type name="LoadHint" flags="LoadHints"/>
+  </object-type>
   <object-type name="QLibraryInfo">
     <enum-type name="LibraryPath"/>
     <modify-function signature="build()">
@@ -3005,6 +3010,18 @@
 
   <object-type name="QPluginLoader"/>
   <object-type name="QStringListModel"/>
+
+  <object-type name="QStringConverterBase">
+    <enum-type name="Flag" flags="Flags"/>
+    <object-type name="State"/>
+  </object-type>
+  <object-type name="QStringConverter">
+     <enum-type name="Encoding"/>
+  </object-type>
+  <object-type name="QStringEncoder">
+    <modify-function signature="appendToBuffer(char*,QStringView)" remove="all"/>
+  </object-type>
+  <object-type name="QStringDecoder"/>
 
   <object-type name="QSysInfo">
     <enum-type name="Endian"/>

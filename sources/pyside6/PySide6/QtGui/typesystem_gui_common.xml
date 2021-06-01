@@ -286,6 +286,10 @@
     <include file-name="QtGui/qtransform.h" location="global"/>
   </value-type>
 
+  <value-type name="QGlyphRun">
+    <enum-type name="GlyphRunFlag" flags="GlyphRunFlags"/>
+  </value-type>
+
   <value-type name="QStaticText">
       <enum-type name="PerformanceHint"/>
   </value-type>
@@ -1038,6 +1042,8 @@
       <enum-type name="TransferFunction"/>
   </value-type>
 
+  <value-type name="QColorTransform"/>
+
   <value-type name="QFontMetricsF" >
 
     <modify-function signature="boundingRect(QChar)const" rename="boundingRectChar">
@@ -1369,6 +1375,10 @@
 
   <object-type name="QMoveEvent" copyable = "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Move"/>
   <object-type name="QNativeGestureEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::NativeGesture"/>
+  <object-type name="QPlatformSurfaceEvent" copyable="false"
+               polymorphic-id-expression="%1-&gt;type() == QEvent::PlatformSurface">
+     <enum-type name="SurfaceEventType"/>
+  </object-type>
   <object-type name="QResizeEvent" copyable = "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Resize"/>
   <object-type name="QShortcutEvent" copyable = "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Shortcut">
   </object-type>
@@ -2853,6 +2863,9 @@
       <enum-type name="Mode"/>
       <enum-type name="Orientation"/>
       <enum-type name="Unit"/>
+  </value-type>
+  <value-type name="QPageRanges">
+      <value-type name="Range"/>
   </value-type>
   <value-type name="QPageSize">
       <enum-type name="PageSizeId"/>

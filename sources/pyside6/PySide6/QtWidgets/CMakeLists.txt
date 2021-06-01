@@ -144,6 +144,7 @@ ${QtWidgets_GEN_DIR}/qstyleoptionframe_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qstyleoptiongraphicsitem_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qstyleoptiongroupbox_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qstyleoptionheader_wrapper.cpp
+${QtWidgets_GEN_DIR}/qstyleoptionheaderv2_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qstyleoptionmenuitem_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qstyleoptionprogressbar_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qstyleoptionrubberband_wrapper.cpp

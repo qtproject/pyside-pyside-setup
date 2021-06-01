@@ -17,6 +17,7 @@ ${QtNetwork_GEN_DIR}/qhostinfo_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qhstspolicy_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qhttpmultipart_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qhttppart_wrapper.cpp
+${QtNetwork_GEN_DIR}/qhttp2configuration_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qipv6address_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qlocalserver_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qlocalsocket_wrapper.cpp
@@ -27,6 +28,7 @@ ${QtNetwork_GEN_DIR}/qnetworkcookie_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qnetworkcookiejar_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qnetworkdatagram_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qnetworkdiskcache_wrapper.cpp
+${QtNetwork_GEN_DIR}/qnetworkinformation_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qnetworkinterface_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qnetworkproxy_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qnetworkproxyfactory_wrapper.cpp
@@ -37,6 +39,7 @@ ${QtNetwork_GEN_DIR}/qpassworddigestor_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qssl_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qsslcertificate_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qsslcertificateextension_wrapper.cpp
+${QtNetwork_GEN_DIR}/qsslellipticcurve_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qtcpserver_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qtcpsocket_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qudpsocket_wrapper.cpp

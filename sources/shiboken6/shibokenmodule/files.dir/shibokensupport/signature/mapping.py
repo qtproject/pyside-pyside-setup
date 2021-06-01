@@ -480,6 +480,7 @@ def init_PySide6_QtCore():
         "QModelIndexList": ModelIndexList,
         "QModelIndexList": ModelIndexList,
         "QString()": "",
+        "Flag.Default": Instance("PySide6.QtCore.QStringConverterBase.Flags"),
         "QStringList()": [],
         "QStringRef": str,
         "QStringRef": str,

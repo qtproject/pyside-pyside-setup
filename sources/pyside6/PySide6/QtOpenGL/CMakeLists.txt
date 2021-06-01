@@ -7,6 +7,7 @@ ${QtOpenGL_GEN_DIR}/qabstractopenglfunctions_wrapper.cpp
 ${QtOpenGL_GEN_DIR}/qopengldebuglogger_wrapper.cpp
 ${QtOpenGL_GEN_DIR}/qopengldebugmessage_wrapper.cpp
 ${QtOpenGL_GEN_DIR}/qopenglframebufferobjectformat_wrapper.cpp
+${QtOpenGL_GEN_DIR}/qopenglpaintdevice_wrapper.cpp
 ${QtOpenGL_GEN_DIR}/qopenglpixeltransferoptions_wrapper.cpp
 ${QtOpenGL_GEN_DIR}/qopenglshaderprogram_wrapper.cpp
 ${QtOpenGL_GEN_DIR}/qopengltexture_wrapper.cpp
