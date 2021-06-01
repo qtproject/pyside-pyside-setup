@@ -55,12 +55,6 @@ macro(create_pyside_module)
     string(TOLOWER ${module_NAME} _module)
     string(REGEX REPLACE ^qt "" _module ${_module})
 
-    if(${module_DROPPED_ENTRIES})
-        string(REPLACE ";" "\\;" dropped_entries "${${module_DROPPED_ENTRIES}}")
-    else()
-        set (dropped_entries "")
-    endif()
-
     if(${module_GLUE_SOURCES})
         set (module_GLUE_SOURCES "${${module_GLUE_SOURCES}}")
     else()
@@ -90,20 +84,17 @@ macro(create_pyside_module)
     # Remove any possible duplicates.
     list(REMOVE_DUPLICATES total_type_system_files)
 
-    # Contains include directories to pass to shiboken's preprocessor.
-    # Workaround: Added ${QT_INCLUDE_DIR}/QtCore until
-    # qtdeclarative/8d560d1bf0a747bf62f73fad6b6774095442d9d2 has reached qt5.git
-    string(REPLACE ";" ${PATH_SEP} core_includes "${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}")
-    set(shiboken_include_dirs ${pyside6_SOURCE_DIR}${PATH_SEP}${QT_INCLUDE_DIR}${PATH_SEP}${core_includes})
-    set(shiboken_framework_include_dirs_option "")
-    if(CMAKE_HOST_APPLE)
-        set(shiboken_framework_include_dirs "${QT_FRAMEWORK_INCLUDE_DIR}")
-        make_path(shiboken_framework_include_dirs ${shiboken_framework_include_dirs})
-        set(shiboken_framework_include_dirs_option "--framework-include-paths=${shiboken_framework_include_dirs}")
-    endif()
+    # Contains include directories to pass to shiboken's preprocessor (mkspec / global)
+    get_target_property(qt_platform_includes Qt${QT_MAJOR_VERSION}::Platform
+                        INTERFACE_INCLUDE_DIRECTORIES)
+    # Add QtCore since include conventions are sometimes violated for its classes
+    get_target_property(qt_core_includes Qt${QT_MAJOR_VERSION}::Core
+                        INTERFACE_INCLUDE_DIRECTORIES)
+    set(shiboken_include_dir_list ${pyside6_SOURCE_DIR} ${qt_platform_includes}
+        ${qt_core_includes})
 
     # Transform the path separators into something shiboken understands.
-    make_path(shiboken_include_dirs ${shiboken_include_dirs})
+    make_path(shiboken_include_dirs ${shiboken_include_dir_list})
 
     get_filename_component(pyside_binary_dir ${CMAKE_CURRENT_BINARY_DIR} DIRECTORY)
 
@@ -122,18 +113,30 @@ macro(create_pyside_module)
         install(FILES ${module_GLUE_SOURCES} DESTINATION share/PySide6${pyside6_SUFFIX}/typesystems/glue)
     endif()
 
+    set(shiboken_command Shiboken6::shiboken6 ${GENERATOR_EXTRA_FLAGS}
+        "--include-paths=${shiboken_include_dirs}"
+        "--typesystem-paths=${pyside_binary_dir}${PATH_SEP}${pyside6_SOURCE_DIR}${PATH_SEP}${${module_TYPESYSTEM_PATH}}"
+        --output-directory=${CMAKE_CURRENT_BINARY_DIR}
+        --license-file=${CMAKE_CURRENT_SOURCE_DIR}/../licensecomment.txt
+        --api-version=${SUPPORTED_QT_VERSION})
+
+    if(CMAKE_HOST_APPLE)
+        set(shiboken_framework_include_dir_list ${QT_FRAMEWORK_INCLUDE_DIR})
+        make_path(shiboken_framework_include_dirs ${shiboken_framework_include_dir_list})
+        list(APPEND shiboken_command "--framework-include-paths=${shiboken_framework_include_dirs}")
+    endif()
+
+    if(${module_DROPPED_ENTRIES})
+        list(JOIN ${module_DROPPED_ENTRIES} "\;" dropped_entries)
+        list(APPEND shiboken_command "\"--drop-type-entries=${dropped_entries}\"")
+    endif()
+
+    list(APPEND shiboken_command "${pyside6_BINARY_DIR}/${module_NAME}_global.h"
+         ${typesystem_path})
+
     add_custom_command( OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/mjb_rejected_classes.log"
                         BYPRODUCTS ${${module_SOURCES}}
-                        COMMAND Shiboken6::shiboken6 ${GENERATOR_EXTRA_FLAGS}
-                        "${pyside6_BINARY_DIR}/${module_NAME}_global.h"
-                        --include-paths=${shiboken_include_dirs}
-                        ${shiboken_framework_include_dirs_option}
-                        --typesystem-paths=${pyside_binary_dir}${PATH_SEP}${pyside6_SOURCE_DIR}${PATH_SEP}${${module_TYPESYSTEM_PATH}}
-                        --output-directory=${CMAKE_CURRENT_BINARY_DIR}
-                        --license-file=${CMAKE_CURRENT_SOURCE_DIR}/../licensecomment.txt
-                        ${typesystem_path}
-                        --api-version=${SUPPORTED_QT_VERSION}
-                        --drop-type-entries="${dropped_entries}"
+                        COMMAND ${shiboken_command}
                         DEPENDS ${total_type_system_files}
                                 ${module_GLUE_SOURCES}
                                 ${${module_NAME}_glue_dependency}
