@@ -420,7 +420,7 @@ class MainWindow(QMainWindow):
 
     def read_settings(self):
         settings = QSettings('QtProject', 'MDI Example')
-        geometry = settings.value('geometry', QByteArray)
+        geometry = settings.value('geometry', QByteArray())
         if geometry.size():
             self.restoreGeometry(geometry)
 
