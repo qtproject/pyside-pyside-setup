@@ -77,6 +77,7 @@ ${QtCore_GEN_DIR}/qjsondocument_wrapper.cpp
 ${QtCore_GEN_DIR}/qjsonparseerror_wrapper.cpp
 ${QtCore_GEN_DIR}/qjsonvalue_wrapper.cpp
 ${QtCore_GEN_DIR}/qkeycombination_wrapper.cpp
+${QtCore_GEN_DIR}/qlibrary_wrapper.cpp
 ${QtCore_GEN_DIR}/qlibraryinfo_wrapper.cpp
 ${QtCore_GEN_DIR}/qline_wrapper.cpp
 ${QtCore_GEN_DIR}/qlinef_wrapper.cpp
@@ -97,6 +98,7 @@ ${QtCore_GEN_DIR}/qmimedata_wrapper.cpp
 ${QtCore_GEN_DIR}/qmimedatabase_wrapper.cpp
 ${QtCore_GEN_DIR}/qmimetype_wrapper.cpp
 ${QtCore_GEN_DIR}/qmodelindex_wrapper.cpp
+${QtCore_GEN_DIR}/qmodelroledata_wrapper.cpp
 ${QtCore_GEN_DIR}/qmutex_wrapper.cpp
 ${QtCore_GEN_DIR}/qobject_wrapper.cpp
 ${QtCore_GEN_DIR}/qoperatingsystemversion_wrapper.cpp
@@ -135,6 +137,11 @@ ${QtCore_GEN_DIR}/qsocketnotifier_wrapper.cpp
 ${QtCore_GEN_DIR}/qsortfilterproxymodel_wrapper.cpp
 ${QtCore_GEN_DIR}/qstandardpaths_wrapper.cpp
 ${QtCore_GEN_DIR}/qstorageinfo_wrapper.cpp
+${QtCore_GEN_DIR}/qstringconverterbase_wrapper.cpp
+${QtCore_GEN_DIR}/qstringconverterbase_state_wrapper.cpp
+${QtCore_GEN_DIR}/qstringconverter_wrapper.cpp
+${QtCore_GEN_DIR}/qstringencoder_wrapper.cpp
+${QtCore_GEN_DIR}/qstringdecoder_wrapper.cpp
 ${QtCore_GEN_DIR}/qstringlistmodel_wrapper.cpp
 ${QtCore_GEN_DIR}/qsysinfo_wrapper.cpp
 ${QtCore_GEN_DIR}/qsystemsemaphore_wrapper.cpp

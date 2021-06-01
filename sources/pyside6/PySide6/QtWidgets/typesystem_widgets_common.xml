@@ -125,6 +125,10 @@
       <enum-type name="StyleOptionType"/>
       <enum-type name="StyleOptionVersion"/>
   </object-type>
+  <object-type name="QStyleOptionHeaderV2">
+      <enum-type name="StyleOptionType"/>
+      <enum-type name="StyleOptionVersion"/>
+  </object-type>
   <object-type name="QStyleOptionMenuItem" polymorphic-id-expression="%1-&gt;type == QStyleOptionMenuItem::Type &amp;&amp; %1-&gt;version == QStyleOptionMenuItem::Version">
       <enum-type name="CheckType"/>
       <enum-type name="MenuItemType"/>
@@ -2825,6 +2829,7 @@
   </object-type>
 
   <object-type name="QCommandLinkButton"/>
+  <!-- FIXME PYSIDE7: Move to QtGui -->
   <object-type name="QFileSystemModel" polymorphic-id-expression="qobject_cast&lt;QFileSystemModel*&gt;(%1)">
     <enum-type name="Roles"/>
     <enum-type name="Option" flags="Options" since="5.14"/>

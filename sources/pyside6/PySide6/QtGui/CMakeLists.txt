@@ -36,6 +36,7 @@ ${QtGui_GEN_DIR}/qcolor_wrapper.cpp
 ${QtGui_GEN_DIR}/qcolorspace_wrapper.cpp
 ${QtGui_GEN_DIR}/qcolorconstants_wrapper.cpp
 ${QtGui_GEN_DIR}/qcolorconstants_svg_wrapper.cpp
+${QtGui_GEN_DIR}/qcolortransform_wrapper.cpp
 ${QtGui_GEN_DIR}/qconicalgradient_wrapper.cpp
 ${QtGui_GEN_DIR}/qcontextmenuevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qcursor_wrapper.cpp
@@ -56,6 +57,7 @@ ${QtGui_GEN_DIR}/qfontdatabase_wrapper.cpp
 ${QtGui_GEN_DIR}/qfontinfo_wrapper.cpp
 ${QtGui_GEN_DIR}/qfontmetrics_wrapper.cpp
 ${QtGui_GEN_DIR}/qfontmetricsf_wrapper.cpp
+${QtGui_GEN_DIR}/qglyphrun_wrapper.cpp
 ${QtGui_GEN_DIR}/qgradient_wrapper.cpp
 ${QtGui_GEN_DIR}/qguiapplication_wrapper.cpp
 ${QtGui_GEN_DIR}/qhelpevent_wrapper.cpp
@@ -98,6 +100,8 @@ ${QtGui_GEN_DIR}/qopenglextrafunctions_wrapper.cpp
 ${QtGui_GEN_DIR}/qopenglfunctions_wrapper.cpp
 ${QtGui_GEN_DIR}/qpagedpaintdevice_wrapper.cpp
 ${QtGui_GEN_DIR}/qpagelayout_wrapper.cpp
+${QtGui_GEN_DIR}/qpageranges_wrapper.cpp
+${QtGui_GEN_DIR}/qpageranges_range_wrapper.cpp
 ${QtGui_GEN_DIR}/qpagesize_wrapper.cpp
 ${QtGui_GEN_DIR}/qpaintdevice_wrapper.cpp
 ${QtGui_GEN_DIR}/qpaintdevicewindow_wrapper.cpp
@@ -117,6 +121,7 @@ ${QtGui_GEN_DIR}/qpixmap_wrapper.cpp
 ${QtGui_GEN_DIR}/qpixmapcache_key_wrapper.cpp
 ${QtGui_GEN_DIR}/qpixmapcache_wrapper.cpp
 ${QtGui_GEN_DIR}/qpixelformat_wrapper.cpp
+${QtGui_GEN_DIR}/qplatformsurfaceevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qpointerevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qpointingdevice_wrapper.cpp
 ${QtGui_GEN_DIR}/qpointingdeviceuniqueid_wrapper.cpp
