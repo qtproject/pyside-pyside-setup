@@ -42,8 +42,8 @@
 
 """PySide2 port of the widgets/draganddrop/draggabletext example from Qt v5.x, originating from PyQt"""
 
-from PySide2.QtCore import (QFile, QFileInfo, QPoint, QSettings, QSignalMapper,
-        QSaveFile, QSize, QTextStream, Qt)
+from PySide2.QtCore import (QByteArray, QFile, QFileInfo, QPoint, QSettings,
+        QSignalMapper, QSaveFile, QSize, QTextStream, Qt)
 from PySide2.QtGui import QIcon, QKeySequence
 from PySide2.QtWidgets import (QAction, QApplication, QFileDialog, QMainWindow,
         QMdiArea, QMessageBox, QTextEdit, QWidget)
@@ -405,16 +405,14 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage("Ready")
 
     def readSettings(self):
-        settings = QSettings('Trolltech', 'MDI Example')
-        pos = settings.value('pos', QPoint(200, 200))
-        size = settings.value('size', QSize(400, 400))
-        self.move(pos)
-        self.resize(size)
+        settings = QSettings('QtProject', 'MDI Example')
+        geometry = settings.value('geometry', QByteArray())
+        if geometry.size():
+            self.restoreGeometry(geometry)
 
     def writeSettings(self):
-        settings = QSettings('Trolltech', 'MDI Example')
-        settings.setValue('pos', self.pos())
-        settings.setValue('size', self.size())
+        settings = QSettings('QtProject', 'MDI Example')
+        settings.setValue('geometry', self.saveGeometry())
 
     def activeMdiChild(self):
         activeSubWindow = self.mdiArea.activeSubWindow()
