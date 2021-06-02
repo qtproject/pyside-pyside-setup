@@ -175,7 +175,10 @@ for (int i = 0, i_max = %CPPSELF.count(); i < i_max; ++i){
 // @snippet qimage-decref-image-data
 static void imageDecrefDataHandler(void *data)
 {
+    // Avoid "Python memory allocator called without holding the GIL"
+    auto state = PyGILState_Ensure();
     Py_DECREF(reinterpret_cast<PyObject *>(data));
+    PyGILState_Release(state);
 }
 // @snippet qimage-decref-image-data
 
