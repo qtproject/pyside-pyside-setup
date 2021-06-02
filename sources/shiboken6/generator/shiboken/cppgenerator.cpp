@@ -5352,6 +5352,25 @@ void CppGenerator::writeSignatureStrings(TextStream &s,
     s << NULL_PTR << "}; // Sentinel\n" << outdent << '\n';
 }
 
+// Return the class name for which to invoke the destructor
+QString CppGenerator::destructorClassName(const AbstractMetaClass *metaClass,
+                                          const GeneratorContext &classContext) const
+{
+    if (metaClass->isNamespace() || metaClass->hasPrivateDestructor())
+        return {};
+    if (classContext.forSmartPointer())
+        return classContext.smartPointerWrapperName();
+    const bool isValue = metaClass->typeEntry()->isValue();
+    const bool hasProtectedDestructor = metaClass->hasProtectedDestructor();
+    if (((avoidProtectedHack() && hasProtectedDestructor) || isValue)
+        && classContext.useWrapper()) {
+        return classContext.wrapperName();
+    }
+    if (avoidProtectedHack() && hasProtectedDestructor)
+        return {}; // Cannot call (happens with "disable-wrapper").
+    return metaClass->qualifiedCppName();
+}
+
 void CppGenerator::writeClassRegister(TextStream &s,
                                       const AbstractMetaClass *metaClass,
                                       const GeneratorContext &classContext,
@@ -5419,19 +5438,11 @@ void CppGenerator::writeClassRegister(TextStream &s,
         s << '&' << chopType(pyTypeName) << "_spec,\n";
 
         // 5:cppObjDtor
-        if (!metaClass->isNamespace() && !metaClass->hasPrivateDestructor()) {
-            QString dtorClassName = metaClass->qualifiedCppName();
-            if (((avoidProtectedHack() && metaClass->hasProtectedDestructor()) || classTypeEntry->isValue())
-                && classContext.useWrapper()) {
-                dtorClassName = classContext.wrapperName();
-            }
-            if (classContext.forSmartPointer())
-                dtorClassName = classContext.smartPointerWrapperName();
-
+        QString dtorClassName = destructorClassName(metaClass, classContext);
+        if (dtorClassName.isEmpty())
+            s << "nullptr,\n";
+        else
             s << "&Shiboken::callCppDestructor< ::" << dtorClassName << " >,\n";
-        } else {
-            s << "0,\n";
-        }
 
         // 6:baseType: Find a type that is not disabled.
         auto base = metaClass->isNamespace()

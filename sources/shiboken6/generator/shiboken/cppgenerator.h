@@ -288,6 +288,8 @@ private:
                             const AbstractMetaClass *metaClass,
                             const GeneratorContext &classContext,
                             const QString &signatures) const;
+    QString destructorClassName(const AbstractMetaClass *metaClass,
+                                const GeneratorContext &classContext) const;
     static void writeStaticFieldInitialization(TextStream &s,
                                                const AbstractMetaClass *metaClass);
     void writeClassDefinition(TextStream &s,
