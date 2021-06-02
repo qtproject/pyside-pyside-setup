@@ -407,8 +407,9 @@ static inline void errorPrint(const QString &s)
 {
     QStringList arguments = QCoreApplication::arguments();
     arguments.pop_front();
-    std::cerr << "shiboken: " << qPrintable(s)
-        << "\nCommand line: " << qPrintable(arguments.join(QLatin1Char(' '))) << '\n';
+    std::cerr << "shiboken: " << qPrintable(s) << "\nCommand line:\n";
+    for (const auto &argument : arguments)
+        std::cerr << "    \"" << qPrintable(argument) << "\"\n";
 }
 
 static void parseIncludePathOption(const QString &option, HeaderType headerType,
