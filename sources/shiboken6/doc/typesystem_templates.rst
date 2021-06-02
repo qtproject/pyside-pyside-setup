@@ -45,7 +45,7 @@ replace
 ^^^^^^^
 
     The ``replace`` node allows you to modify template code before inserting it into
-    the generated code, and it can be a child of the :ref:`insert-template node`.
+    the generated code, and it can be a child of the :ref:`insert-template` node.
 
     .. code-block:: xml
 

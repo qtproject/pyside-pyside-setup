@@ -332,7 +332,8 @@ property
 
     .. code-block:: xml
 
-        <property name="..." type="..." get="..." set="..." " generate-getsetdef="yes | no" since="..."/>
+        <property name="..." type="..." get="..." set="..."
+                  generate-getsetdef="yes | no" since="..."/>
 
     The ``name`` attribute specifies the name of the property, the ``type``
     attribute specifies the C++ type and the ``get`` attribute specifies the

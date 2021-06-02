@@ -234,7 +234,7 @@ enum-type
 ^^^^^^^^^
 
     The ``enum-type`` node maps the given enum from C++ to the target language,
-    and it is a child of the :ref:`typesystem node`. Use
+    and it is a child of the :ref:`typesystem` node. Use
     :ref:`reject-enum-value` child nodes to reject values.
 
     .. code-block:: xml
