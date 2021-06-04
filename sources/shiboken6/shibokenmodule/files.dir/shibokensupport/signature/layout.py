@@ -55,9 +55,10 @@ used literally as strings like "signature", "existence", etc.
 
 import inspect
 import typing
+
+from types import SimpleNamespace
 from textwrap import dedent
 from shibokensupport.signature.mapping import ellipsis
-from shibokensupport.signature.lib.tool import SimpleNamespace
 
 
 class SignatureLayout(SimpleNamespace):

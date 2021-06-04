@@ -43,10 +43,11 @@ import warnings
 import types
 import keyword
 import functools
+
+from types import SimpleNamespace
 from shibokensupport.signature.mapping import (type_map, update_mapping,
     namespace, typing, _NotCalled, ResultVariable, ArrayLikeVariable)
-from shibokensupport.signature.lib.tool import (SimpleNamespace,
-    build_brace_pattern)
+from shibokensupport.signature.lib.tool import build_brace_pattern
 from shibokensupport import feature
 
 _DEBUG = False

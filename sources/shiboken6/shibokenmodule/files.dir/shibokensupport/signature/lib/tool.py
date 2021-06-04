@@ -46,26 +46,7 @@ https://stackoverflow.com/questions/18513821/python-metaclass-understanding-the-
 """
 
 from textwrap import dedent
-
-
-class SimpleNamespace(object):
-    # From types.rst, because the builtin is implemented in Python 3, only.
-    def __init__(self, **kwargs):
-        self.__dict__.update(kwargs)
-
-    def __repr__(self):
-        keys = sorted(self.__dict__)
-        items = (f"{k}={self.__dict__[k]!r}" for k in keys)
-        items_str = ', '.join(items)
-        return f"{type(self).__name__}({items_str})"
-
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
-
-try:
-    from types import SimpleNamespace
-except ImportError:
-    pass
+from types import SimpleNamespace
 
 
 def build_brace_pattern(level, separators):
