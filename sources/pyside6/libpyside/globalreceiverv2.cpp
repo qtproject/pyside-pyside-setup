@@ -142,6 +142,12 @@ GlobalReceiverKey DynamicSlotDataV2::key(PyObject *callback)
     if (PyMethod_Check(callback)) {
         // PYSIDE-1422: Avoid hash on self which might be unhashable.
         return {PyMethod_GET_SELF(callback), PyMethod_GET_FUNCTION(callback)};
+    } else if (PyObject_HasAttr(callback, PySide::PyName::im_func())
+               && PyObject_HasAttr(callback, PySide::PyName::im_self())) {
+        // PYSIDE-1589: Fix for slots in compiled functions
+        Shiboken::AutoDecRef self(PyObject_GetAttr(callback, PySide::PyName::im_self()));
+        Shiboken::AutoDecRef func(PyObject_GetAttr(callback, PySide::PyName::im_func()));
+        return {self, func};
     }
     return {nullptr, callback};
 }
