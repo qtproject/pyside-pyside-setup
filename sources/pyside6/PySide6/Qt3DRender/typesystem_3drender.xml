@@ -97,6 +97,7 @@
         <object-type name="QCullFace">
             <enum-type name="CullingMode"/>
         </object-type>
+        <object-type name="QDepthRange"/>
         <object-type name="QDepthTest">
             <enum-type name="DepthFunction"/>
         </object-type>
@@ -146,6 +147,7 @@
             <enum-type name="Buttons"/>
             <enum-type name="Modifiers"/>
         </object-type>
+        <object-type name="QPickingProxy"/>
         <object-type name="QPickLineEvent" since="5.10"/>
         <object-type name="QPickPointEvent" since="5.10"/>
         <object-type name="QPickTriangleEvent"/>
@@ -160,6 +162,10 @@
         </object-type>
         <object-type name="QPolygonOffset"/>
         <object-type name="QProximityFilter" since="5.10"/>
+        <object-type name="QRasterMode">
+            <enum-type name="RasterMode"/>
+            <enum-type name="FaceMode"/>
+        </object-type>
         <object-type name="QRayCaster" since="5.11"/>
         <value-type name="QRayCasterHit" since="5.11">
             <enum-type name="HitType"/>
@@ -223,6 +229,9 @@
             <enum-type name="StencilFaceMode"/>
             <enum-type name="StencilFunction"/>
         </object-type>
+        <object-type name="QSubtreeEnabler">
+            <enum-type name="Enablement"/>
+        </object-type>
         <object-type name="QTechnique"/>
         <object-type name="QTechniqueFilter"/>
         <object-type name="QTexture1D"/>
@@ -236,6 +245,7 @@
         <object-type name="QTextureCubeMap"/>
         <object-type name="QTextureCubeMapArray"/>
         <object-type name="QTextureData"/>
+        <value-type name="QTextureDataUpdate"/>
         <object-type name="QTextureImage">
             <enum-type name="Status"/>
         </object-type>

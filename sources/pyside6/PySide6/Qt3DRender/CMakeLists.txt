@@ -20,6 +20,7 @@ ${Qt3DRender_GEN_DIR}/qt3drender_qclipplane_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qcolormask_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qcomputecommand_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qcullface_wrapper.cpp
+${Qt3DRender_GEN_DIR}/qt3drender_qdepthrange_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qdepthtest_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qdirectionallight_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qdispatchcompute_wrapper.cpp
@@ -49,6 +50,7 @@ ${Qt3DRender_GEN_DIR}/qt3drender_qobjectpicker_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qpaintedtextureimage_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qparameter_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qpickevent_wrapper.cpp
+${Qt3DRender_GEN_DIR}/qt3drender_qpickingproxy_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qpickingsettings_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qpicklineevent_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qpickpointevent_wrapper.cpp
@@ -57,6 +59,7 @@ ${Qt3DRender_GEN_DIR}/qt3drender_qpointlight_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qpointsize_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qpolygonoffset_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qproximityfilter_wrapper.cpp
+${Qt3DRender_GEN_DIR}/qt3drender_qrastermode_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qraycaster_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qraycasterhit_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qrenderaspect_wrapper.cpp
@@ -89,6 +92,7 @@ ${Qt3DRender_GEN_DIR}/qt3drender_qstenciloperation_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qstenciloperationarguments_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qstenciltest_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qstenciltestarguments_wrapper.cpp
+${Qt3DRender_GEN_DIR}/qt3drender_qsubtreeenabler_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qtechnique_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qtechniquefilter_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qtexture1d_wrapper.cpp
@@ -102,6 +106,7 @@ ${Qt3DRender_GEN_DIR}/qt3drender_qtexturebuffer_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qtexturecubemap_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qtexturecubemaparray_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qtexturedata_wrapper.cpp
+${Qt3DRender_GEN_DIR}/qt3drender_qtexturedataupdate_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qtextureimage_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qtextureimagedata_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qtextureimagedatagenerator_wrapper.cpp

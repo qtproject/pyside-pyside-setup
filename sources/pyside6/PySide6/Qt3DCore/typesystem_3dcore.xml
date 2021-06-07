@@ -60,6 +60,7 @@
         <object-type name="QBackendNode">
             <enum-type name="Mode"/>
         </object-type>
+        <object-type name="QBackendNodeMapper"/>
         <object-type name="QAttribute">
             <enum-type name="AttributeType"/>
             <enum-type name="VertexBaseType"/>
@@ -80,6 +81,7 @@
             </modify-argument>
           </modify-function>
         </object-type>
+        <object-type name="QCoreSettings"/>
         <object-type name="QGeometry" since="6.0"/>
         <object-type name="QGeometryView" since="6.0">
             <enum-type name="PrimitiveType"/>
