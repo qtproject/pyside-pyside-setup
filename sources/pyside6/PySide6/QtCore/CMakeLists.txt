@@ -128,6 +128,7 @@ ${QtCore_GEN_DIR}/qsemaphore_wrapper.cpp
 ${QtCore_GEN_DIR}/qsemaphorereleaser_wrapper.cpp
 ${QtCore_GEN_DIR}/qsequentialanimationgroup_wrapper.cpp
 ${QtCore_GEN_DIR}/qsettings_wrapper.cpp
+${QtCore_GEN_DIR}/qsharedmemory_wrapper.cpp
 ${QtCore_GEN_DIR}/qsignalblocker_wrapper.cpp
 ${QtCore_GEN_DIR}/qsignalmapper_wrapper.cpp
 ${QtCore_GEN_DIR}/qsize_wrapper.cpp

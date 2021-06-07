@@ -1943,3 +1943,13 @@ Py_DECREF(oldResult);
 Py_DECREF(suffix);
 #endif
 // @snippet qlibraryinfo_build
+
+// @snippet qsharedmemory_data_readonly
+%PYARG_0 = Shiboken::Buffer::newObject(%CPPSELF.%FUNCTION_NAME(), %CPPSELF.size());
+// @snippet qsharedmemory_data_readonly
+
+// @snippet qsharedmemory_data_readwrite
+// FIXME: There is no way to tell whether QSharedMemory was attached read/write
+%PYARG_0 = Shiboken::Buffer::newObject(%CPPSELF.%FUNCTION_NAME(), %CPPSELF.size(),
+                                       Shiboken::Buffer::ReadWrite);
+// @snippet qsharedmemory_data_readwrite
