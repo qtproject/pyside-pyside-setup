@@ -93,6 +93,7 @@
   </object-type>
   <object-type name="QExtensionManager"/>
   <object-type name="QExtensionFactory"/>
+  <object-type name="QFormBuilder"/>
   <object-type name="QPyDesignerCustomWidgetCollection" disable-wrapper="yes">
     <extra-includes>
       <include file-name="qpydesignerextensions.h" location="global"/>
@@ -110,7 +111,6 @@
        </modify-argument>
        <inject-code class="target" position="beginning" file="../glue/qtdesigner.cpp" snippet="qtdesigner-registercustomwidget"/>
     </add-function>
-    <modify-function signature="QPyDesignerCustomWidgetCollection()" remove="all"/>
   </object-type>
   <object-type name="QPyDesignerContainerExtension">
     <extra-includes>
