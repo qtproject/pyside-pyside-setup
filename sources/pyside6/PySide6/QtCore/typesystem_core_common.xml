@@ -513,7 +513,7 @@
 
   <rejection class="*" function-name="d_func"/>
   <rejection class="*" function-name="data_ptr"/>
-  <rejection class="*" function-name="detach"/>
+  <rejection class="^(?!QSharedMemory).*$" function-name="detach"/>
   <rejection class="*" function-name="isDetached"/>
   <rejection class="*" field-name="d_ptr"/>
   <rejection class="*" field-name="d"/>
@@ -3019,6 +3019,20 @@
 
   <object-type name="QPluginLoader"/>
   <object-type name="QStringListModel"/>
+
+   <object-type name="QSharedMemory">
+       <enum-type name="AccessMode"/>
+       <enum-type name="SharedMemoryError"/>
+       <modify-function signature="data()">
+         <inject-code class="target" position="end"
+                      file="../glue/qtcore.cpp" snippet="qsharedmemory_data_readwrite"/>
+       </modify-function>
+       <modify-function signature="constData()const">
+         <inject-code class="target" position="end"
+                      file="../glue/qtcore.cpp" snippet="qsharedmemory_data_readonly"/>
+       </modify-function>
+       <modify-function signature="data()const" remove="all"/>
+   </object-type>
 
   <object-type name="QStringConverterBase">
     <enum-type name="Flag" flags="Flags"/>
