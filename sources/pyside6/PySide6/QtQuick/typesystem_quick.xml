@@ -59,6 +59,9 @@
         <object-type name="Renderer"/>
     </object-type>
 
+    <value-type name="QQuickGraphicsConfiguration"/>
+    <value-type name="QQuickGraphicsDevice"/>
+
     <object-type name="QQuickTextureFactory"/>
     <object-type name="QQuickImageProvider"/>
     <object-type name="QQuickImageResponse" since="5.6"/>
@@ -91,6 +94,7 @@
     </object-type>
 
     <object-type name="QQuickRenderControl"/>
+    <value-type name="QQuickRenderTarget"/>
 
     <object-type name="QQuickTextDocument"/>
 
@@ -110,7 +114,7 @@
     <object-type name="QSGBasicGeometryNode"/>
     <object-type name="QSGClipNode"/>
     <object-type name="QSGDynamicTexture"/>
-    <!-- <object-type name="QSGFlatColorMaterial"/> -->
+    <object-type name="QSGFlatColorMaterial"/>
     <object-type name="QSGGeometry">
         <enum-type name="DataPattern"/>
         <enum-type name="AttributeType" since="5.8"/>
@@ -124,16 +128,15 @@
     </object-type>
     <object-type name="QSGGeometryNode"/>
 
-    <!-- QSGMaterialShader doesn't compile because of const char * char * types not being recognized
-         by the C++ parser, nor the generator.
     <object-type name="QSGMaterial">
         <enum-type name="Flag" flags="Flags"/>
     </object-type>
-    <object-type name="QSGMaterialShader"/>
-    <value-type name="QSGMaterialShader::RenderState">
-        <enum-type name="DirtyState" flags="DirtyStates"/>
-    </value-type>
-    -->
+    <object-type name="QSGMaterialShader">
+        <value-type name="RenderState">
+            <enum-type name="DirtyState" flags="DirtyStates"/>
+        </value-type>
+        <modify-function signature="updateSampledImage(QSGMaterialShader::RenderState&amp;,int,QSGTexture**,QSGMaterial*,QSGMaterial*)" remove="all"/>
+    </object-type>
     <object-type name="QSGMaterialType"/>
     <object-type name="QSGNode">
         <enum-type name="DirtyStateBit" flags="DirtyState"/>
@@ -141,20 +144,34 @@
         <enum-type name="NodeType"/>
     </object-type>
     <object-type name="QSGOpacityNode"/>
-    <!-- <object-type name="QSGOpaqueTextureMaterial"/> -->
+    <object-type name="QSGOpaqueTextureMaterial"/>
     <object-type name="QSGSimpleRectNode"/>
     <object-type name="QSGSimpleTextureNode">
         <enum-type name="TextureCoordinatesTransformFlag" flags="TextureCoordinatesTransformMode"/>
+    </object-type>
+    <object-type name="QSGRectangleNode"/>
+    <object-type name="QSGRendererInterface">
+        <enum-type name="GraphicsApi"/>
+        <enum-type name="Resource"/>
+        <enum-type name="ShaderType"/>
+        <enum-type name="ShaderCompilationType" flags="ShaderCompilationTypes"/>
+        <enum-type name="ShaderSourceType" flags="ShaderSourceTypes"/>
+        <enum-type name="RenderMode"/>
+    </object-type>
+    <object-type name="QSGRenderNode">
+        <enum-type name="StateFlag" flags="StateFlags"/>
+        <enum-type name="RenderingFlag" flags="RenderingFlags"/>
+        <object-type name="RenderState"/>
     </object-type>
     <object-type name="QSGTexture">
         <enum-type name="AnisotropyLevel" since="5.9"/>
         <enum-type name="Filtering"/>
         <enum-type name="WrapMode"/>
     </object-type>
-    <!-- <object-type name="QSGTextureMaterial"/> -->
+    <object-type name="QSGTextureMaterial"/>
     <object-type name="QSGTextureProvider"/>
     <object-type name="QSGTransformNode"/>
-    <!-- <object-type name="QSGVertexColorMaterial"/> -->
+    <object-type name="QSGVertexColorMaterial"/>
 
     <!-- These currently don't work because they are template classes, and the generator chokes on
          them. Making these work properly would require fixing the parsing of template classes,

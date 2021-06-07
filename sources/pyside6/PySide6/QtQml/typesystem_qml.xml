@@ -116,6 +116,12 @@
             <inject-code class="target" position="end" file="../glue/qtqml.cpp" snippet="qjsengine-toscriptvalue"/>
         </add-function>
     </object-type>
+    <object-type name="QJSManagedValue">
+        <enum-type name="Type"/>
+    </object-type>
+    <value-type name="QJSPrimitiveValue">
+        <enum-type name="Type"/>
+    </value-type>
     <value-type name="QJSValue">
         <enum-type name="ErrorType" since="5.12"/>
         <enum-type name="SpecialValue"/>
