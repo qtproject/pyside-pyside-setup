@@ -9,9 +9,11 @@ ${Qt3DCore_GEN_DIR}/qt3dcore_qaspectengine_wrapper.cpp
 ${Qt3DCore_GEN_DIR}/qt3dcore_qaspectjob_wrapper.cpp
 ${Qt3DCore_GEN_DIR}/qt3dcore_qattribute_wrapper.cpp
 ${Qt3DCore_GEN_DIR}/qt3dcore_qbackendnode_wrapper.cpp
+${Qt3DCore_GEN_DIR}/qt3dcore_qbackendnodemapper_wrapper.cpp
 ${Qt3DCore_GEN_DIR}/qt3dcore_qboundingvolume_wrapper.cpp
 ${Qt3DCore_GEN_DIR}/qt3dcore_qbuffer_wrapper.cpp
 ${Qt3DCore_GEN_DIR}/qt3dcore_qcomponent_wrapper.cpp
+${Qt3DCore_GEN_DIR}/qt3dcore_qcoresettings_wrapper.cpp
 ${Qt3DCore_GEN_DIR}/qt3dcore_qentity_wrapper.cpp
 ${Qt3DCore_GEN_DIR}/qt3dcore_qgeometry_wrapper.cpp
 ${Qt3DCore_GEN_DIR}/qt3dcore_qgeometryview_wrapper.cpp

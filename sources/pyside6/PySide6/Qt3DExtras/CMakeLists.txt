@@ -6,10 +6,13 @@ ${Qt3DExtras_GEN_DIR}/qt3dextras_qabstractcameracontroller_inputstate_wrapper.cp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qabstractcameracontroller_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qabstractspritesheet_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qconegeometry_wrapper.cpp
+${Qt3DExtras_GEN_DIR}/qt3dextras_qconegeometryview_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qconemesh_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qcuboidgeometry_wrapper.cpp
+${Qt3DExtras_GEN_DIR}/qt3dextras_qcuboidgeometryview_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qcuboidmesh_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qcylindergeometry_wrapper.cpp
+${Qt3DExtras_GEN_DIR}/qt3dextras_qcylindergeometryview_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qcylindermesh_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qdiffusemapmaterial_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qdiffusespecularmapmaterial_wrapper.cpp
@@ -29,9 +32,11 @@ ${Qt3DExtras_GEN_DIR}/qt3dextras_qpervertexcolormaterial_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qphongmaterial_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qphongalphamaterial_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qplanegeometry_wrapper.cpp
+${Qt3DExtras_GEN_DIR}/qt3dextras_qplanegeometryview_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qplanemesh_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qskyboxentity_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qspheregeometry_wrapper.cpp
+${Qt3DExtras_GEN_DIR}/qt3dextras_qspheregeometryview_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qspheremesh_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qspritegrid_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qspritesheet_wrapper.cpp
@@ -39,6 +44,7 @@ ${Qt3DExtras_GEN_DIR}/qt3dextras_qspritesheetitem_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qtext2dentity_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qtexturematerial_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qtorusgeometry_wrapper.cpp
+${Qt3DExtras_GEN_DIR}/qt3dextras_qtorusgeometryview_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qtorusmesh_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qt3dwindow_wrapper.cpp
 # module is always needed

@@ -65,8 +65,14 @@
         <object-type name="QAnimationController"/>
         <object-type name="QAnimationGroup"/>
         <object-type name="QBlendedClipAnimator"/>
+        <!-- FIXME: Needs fix to export comparison operators
+        <value-type name="QChannel"/>
+        <value-type name="QChannelComponent"/>
+        -->
         <object-type name="QChannelMapper" since="6.1"/>
+        <object-type name="QChannelMapping"/>
         <object-type name="QClipAnimator"/>
+        <object-type name="QClipBlendValue"/>
         <object-type name="QClock"/>
         <object-type name="QKeyFrame">
             <enum-type name="InterpolationType"/>

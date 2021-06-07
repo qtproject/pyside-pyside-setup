@@ -49,9 +49,12 @@
         <object-type name="QAbstractSpriteSheet" since="5.10"/>
         <object-type name="QConeGeometry"/>
         <object-type name="QConeMesh"/>
+        <object-type name="QConeGeometryView"/>
         <object-type name="QCuboidGeometry"/>
+        <object-type name="QCuboidGeometryView"/>
         <object-type name="QCuboidMesh"/>
         <object-type name="QCylinderGeometry"/>
+        <object-type name="QCylinderGeometryView"/>
         <object-type name="QCylinderMesh"/>
         <object-type name="QDiffuseMapMaterial"/>
         <object-type name="QDiffuseSpecularMaterial" since="5.10"/>
@@ -71,9 +74,11 @@
         <object-type name="QPhongMaterial"/>
         <object-type name="QPhongAlphaMaterial"/>
         <object-type name="QPlaneGeometry"/>
+        <object-type name="QPlaneGeometryView"/>
         <object-type name="QPlaneMesh"/>
         <object-type name="QSkyboxEntity"/>
         <object-type name="QSphereGeometry"/>
+        <object-type name="QSphereGeometryView"/>
         <object-type name="QSphereMesh"/>
         <object-type name="QSpriteGrid" since="5.10"/>
         <object-type name="QSpriteSheet" since="5.10"/>
@@ -81,6 +86,7 @@
         <object-type name="QText2DEntity"/>
         <object-type name="QTextureMaterial"/>
         <object-type name="QTorusGeometry"/>
+        <object-type name="QTorusGeometryView"/>
         <object-type name="QTorusMesh"/>
         <object-type name="Qt3DWindow"/>
     </namespace-type>
