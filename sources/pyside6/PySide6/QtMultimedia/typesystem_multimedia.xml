@@ -62,7 +62,7 @@
     </value-type>
     <value-type name="QAudioDeviceInfo"/>
 
-    <object-type name="QAudioInput">
+    <object-type name="QAudioSource">
       <modify-function signature="start()">
         <modify-argument index="return">
           <define-ownership class="target" owner="c++"/>
@@ -75,7 +75,7 @@
       </modify-function>
     </object-type>
 
-    <object-type name="QAudioOutput">
+    <object-type name="QAudioSink">
       <modify-function signature="start()">
         <modify-argument index="return">
           <define-ownership class="target" owner="c++"/>

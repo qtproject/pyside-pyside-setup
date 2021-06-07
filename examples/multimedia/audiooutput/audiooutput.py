@@ -49,7 +49,7 @@ from struct import pack
 from PySide6.QtCore import (QByteArray, QIODevice, Qt, QSysInfo, QTimer,
                             qWarning, Slot)
 from PySide6.QtMultimedia import (QAudio, QAudioDeviceInfo, QAudioFormat,
-                                  QAudioOutput, QMediaDevices)
+                                  QAudioSink, QMediaDevices)
 from PySide6.QtWidgets import (QApplication, QComboBox, QHBoxLayout, QLabel,
                                QMainWindow, QPushButton, QSlider,
                                QVBoxLayout, QWidget)
@@ -211,40 +211,40 @@ class AudioTest(QMainWindow):
         self.create_audio_output()
 
     def create_audio_output(self):
-        self.m_audioOutput = QAudioOutput(self.m_device, self.m_format)
-        self.m_audioOutput.stateChanged.connect(self.handle_state_changed)
+        self.m_audioSink = QAudioSink(self.m_device, self.m_format)
+        self.m_audioSink.stateChanged.connect(self.handle_state_changed)
 
         self.m_generator.start()
-        self.m_audioOutput.start(self.m_generator)
-        self.m_volumeSlider.setValue(self.m_audioOutput.volume() * 100)
+        self.m_audioSink.start(self.m_generator)
+        self.m_volumeSlider.setValue(self.m_audioSink.volume() * 100)
 
     @Slot(int)
     def device_changed(self, index):
         self.m_pullTimer.stop()
         self.m_generator.stop()
-        self.m_audioOutput.stop()
+        self.m_audioSink.stop()
         self.m_device = self.m_deviceBox.itemData(index)
 
         self.create_audio_output()
 
     @Slot(int)
     def volume_changed(self, value):
-        if self.m_audioOutput is not None:
-            self.m_audioOutput.setVolume(value / 100.0)
+        if self.m_audioSink is not None:
+            self.m_audioSink.setVolume(value / 100.0)
 
     @Slot()
     def notified(self):
-        bytes_free = self.m_audioOutput.bytesFree()
-        elapsed = self.m_audioOutput.elapsedUSecs()
-        processed = self.m_audioOutput.processedUSecs()
+        bytes_free = self.m_audioSink.bytesFree()
+        elapsed = self.m_audioSink.elapsedUSecs()
+        processed = self.m_audioSink.processedUSecs()
         qWarning(f"bytesFree = {bytes_free}, "
                  f"elapsedUSecs = {elapsed}, "
                  f"processedUSecs = {processed}")
 
     @Slot()
     def pull_timer_expired(self):
-        if self.m_audioOutput is not None and self.m_audioOutput.state() != QAudio.StoppedState:
-            bytes_free = self.m_audioOutput.bytesFree()
+        if self.m_audioSink is not None and self.m_audioSink.state() != QAudio.StoppedState:
+            bytes_free = self.m_audioSink.bytesFree()
             data = self.m_generator.read(bytes_free)
             if data:
                 self.m_output.write(data)
@@ -252,35 +252,35 @@ class AudioTest(QMainWindow):
     @Slot()
     def toggle_mode(self):
         self.m_pullTimer.stop()
-        self.m_audioOutput.stop()
+        self.m_audioSink.stop()
 
         if self.m_pullMode:
             self.m_modeButton.setText(self.PULL_MODE_LABEL)
-            self.m_output = self.m_audioOutput.start()
+            self.m_output = self.m_audioSink.start()
             self.m_pullMode = False
             self.m_pullTimer.start(20)
         else:
             self.m_modeButton.setText(self.PUSH_MODE_LABEL)
             self.m_pullMode = True
-            self.m_audioOutput.start(self.m_generator)
+            self.m_audioSink.start(self.m_generator)
 
         self.m_suspendResumeButton.setText(self.SUSPEND_LABEL)
 
     @Slot()
     def toggle_suspend_resume(self):
-        if self.m_audioOutput.state() == QAudio.SuspendedState:
+        if self.m_audioSink.state() == QAudio.SuspendedState:
             qWarning("status: Suspended, resume()")
-            self.m_audioOutput.resume()
+            self.m_audioSink.resume()
             self.m_suspendResumeButton.setText(self.SUSPEND_LABEL)
-        elif self.m_audioOutput.state() == QAudio.ActiveState:
+        elif self.m_audioSink.state() == QAudio.ActiveState:
             qWarning("status: Active, suspend()")
-            self.m_audioOutput.suspend()
+            self.m_audioSink.suspend()
             self.m_suspendResumeButton.setText(self.RESUME_LABEL)
-        elif self.m_audioOutput.state() == QAudio.StoppedState:
+        elif self.m_audioSink.state() == QAudio.StoppedState:
             qWarning("status: Stopped, resume()")
-            self.m_audioOutput.resume()
+            self.m_audioSink.resume()
             self.m_suspendResumeButton.setText(self.SUSPEND_LABEL)
-        elif self.m_audioOutput.state() == QAudio.IdleState:
+        elif self.m_audioSink.state() == QAudio.IdleState:
             qWarning("status: IdleState")
 
     state_map = {
