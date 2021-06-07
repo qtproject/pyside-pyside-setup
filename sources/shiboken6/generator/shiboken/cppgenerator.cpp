@@ -4030,7 +4030,7 @@ void CppGenerator::writeContainerConverterInitialization(TextStream &s, const Ab
 void CppGenerator::writeSmartPointerConverterInitialization(TextStream &s, const AbstractMetaType &type) const
 {
     const QByteArray cppSignature = type.cppSignature().toUtf8();
-    auto writeConversionRegister = [this, &s](const AbstractMetaType &sourceType, const QString &targetTypeName, const QString &targetConverter)
+    auto writeConversionRegister = [&s](const AbstractMetaType &sourceType, const QString &targetTypeName, const QString &targetConverter)
     {
         const QString sourceTypeName = fixedCppTypeName(sourceType);
         const QString toCpp = pythonToCppFunctionName(sourceTypeName, targetTypeName);
