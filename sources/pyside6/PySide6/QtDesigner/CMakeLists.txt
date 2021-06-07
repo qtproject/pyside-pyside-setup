@@ -28,6 +28,7 @@ ${QtDesigner_GEN_DIR}/qdesignerwidgetboxinterface_category_wrapper.cpp
 ${QtDesigner_GEN_DIR}/qdesignerwidgetboxinterface_widget_wrapper.cpp
 ${QtDesigner_GEN_DIR}/qextensionmanager_wrapper.cpp
 ${QtDesigner_GEN_DIR}/qextensionfactory_wrapper.cpp
+${QtDesigner_GEN_DIR}/qformbuilder_wrapper.cpp
 ${QtDesigner_GEN_DIR}/qpydesignercustomwidgetcollection_wrapper.cpp
 ${QtDesigner_GEN_DIR}/qpydesignercontainerextension_wrapper.cpp
 ${QtDesigner_GEN_DIR}/qpydesignermembersheetextension_wrapper.cpp
