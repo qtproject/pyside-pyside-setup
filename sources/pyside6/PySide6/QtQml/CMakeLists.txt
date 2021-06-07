@@ -4,6 +4,8 @@ set(QtQml_registerType "${QtQml_SOURCE_DIR}/pysideqmlregistertype.cpp")
 
 set(QtQml_SRC
 ${QtQml_GEN_DIR}/qjsengine_wrapper.cpp
+${QtQml_GEN_DIR}/qjsmanagedvalue_wrapper.cpp
+${QtQml_GEN_DIR}/qjsprimitivevalue_wrapper.cpp
 ${QtQml_GEN_DIR}/qjsvalue_wrapper.cpp
 ${QtQml_GEN_DIR}/qjsvalueiterator_wrapper.cpp
 ${QtQml_GEN_DIR}/qqmlabstracturlinterceptor_wrapper.cpp
