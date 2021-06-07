@@ -5,8 +5,8 @@ ${QtMultimedia_GEN_DIR}/qaudiobuffer_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qaudiodecoder_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qaudiodeviceinfo_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qaudioformat_wrapper.cpp
-${QtMultimedia_GEN_DIR}/qaudioinput_wrapper.cpp
-${QtMultimedia_GEN_DIR}/qaudiooutput_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qaudiosink_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qaudiosource_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qaudio_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qcameraformat_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qcameraimagecapture_wrapper.cpp
