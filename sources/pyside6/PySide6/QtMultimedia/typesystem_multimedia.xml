@@ -60,7 +60,7 @@
     <value-type name="QAudioFormat">
         <enum-type name="SampleFormat" since="6.1"/>
     </value-type>
-    <value-type name="QAudioDeviceInfo"/>
+    <value-type name="QAudioDevice"/>
 
     <object-type name="QAudioSource">
       <modify-function signature="start()">
@@ -99,7 +99,7 @@
         <enum-type name="WhiteBalanceMode" since="6.1"/>
     </object-type>
     <value-type name="QCameraFormat" since="6.1"/>
-    <value-type name="QCameraInfo">
+    <value-type name="QCameraDevice">
         <enum-type name="Position" since="6.1"/>
     </value-type>
     <object-type name="QCameraImageCapture">
@@ -133,6 +133,7 @@
         <enum-type name="ConversionMode"/>
         <enum-type name="FileFormat"/>
         <enum-type name="VideoCodec"/>
+        <enum-type name="ResolveFlags"/>
     </value-type>
 
     <value-type name="QMediaMetaData" since="6.1">

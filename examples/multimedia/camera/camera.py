@@ -49,7 +49,7 @@ from PySide6.QtGui import QImage, QPixmap
 from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLabel,
     QMainWindow, QPushButton, QTabWidget, QToolBar, QVBoxLayout, QWidget)
 from PySide6.QtMultimedia import (QCamera, QCameraImageCapture,
-                                  QCameraInfo, QMediaCaptureSession,
+                                  QCameraDevice, QMediaCaptureSession,
                                   QMediaDevices)
 from PySide6.QtMultimediaWidgets import QVideoWidget
 

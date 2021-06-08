@@ -38,7 +38,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from helper.usesqguiapplication import UsesQGuiApplication
-from PySide6.QtMultimedia import QAudioDeviceInfo, QAudioFormat, QMediaDevices
+from PySide6.QtMultimedia import QAudioDevice, QAudioFormat, QMediaDevices
 
 
 class testAudioDevices(UsesQGuiApplication):
