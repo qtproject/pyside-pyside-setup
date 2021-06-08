@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2021 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the test suite of Qt for Python.
@@ -26,37 +26,36 @@
 **
 ****************************************************************************/
 
-#include "collector.h"
 
-void Collector::clear()
+#include "intwrapper.h"
+
+int IntWrapper::toInt() const
 {
-    m_items.clear();
+    return m_number;
 }
 
-Collector& Collector::operator<<(ObjectType::Identifier item)
+IntWrapper &IntWrapper::operator ++()
 {
-    m_items.push_back(item);
+    ++m_number;
     return *this;
 }
 
-Collector& Collector::operator<<(const ObjectType *obj)
+IntWrapper IntWrapper::operator++(int)
 {
-    m_items.push_back(obj->identifier());
+    IntWrapper result(*this);
+    ++m_number;
+    return result;
+}
+
+IntWrapper &IntWrapper::operator--()
+{
+    --m_number;
     return *this;
 }
 
-std::list<ObjectType::Identifier> Collector::items()
+IntWrapper IntWrapper::operator--(int)
 {
-    return m_items;
-}
-
-int Collector::size()
-{
-    return (int) m_items.size();
-}
-
-Collector &operator<<(Collector &s, const IntWrapper &w)
-{
-    s << w.toInt();
-    return s;
+    IntWrapper result(*this);
+    --m_number;
+    return result;
 }

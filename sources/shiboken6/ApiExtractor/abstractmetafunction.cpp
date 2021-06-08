@@ -1044,6 +1044,12 @@ bool AbstractMetaFunction::isComparisonOperator() const
     return d->m_functionType == ComparisonOperator;
 }
 
+bool AbstractMetaFunction::isIncDecrementOperator() const
+{
+    return d->m_functionType == IncrementOperator
+        || d->m_functionType == DecrementOperator;
+}
+
 bool AbstractMetaFunction::isLogicalOperator() const
 {
     return d->m_functionType == LogicalOperator;
@@ -1137,6 +1143,10 @@ bool AbstractMetaFunction::matches(OperatorQueryOptions query) const
         break;
     case AbstractMetaFunction::ArithmeticOperator:
         result = query.testFlag(OperatorQueryOption::ArithmeticOp);
+        break;
+    case AbstractMetaFunction::IncrementOperator:
+    case AbstractMetaFunction::DecrementOperator:
+        result = query.testFlag(OperatorQueryOption::IncDecrementOp);
         break;
     case AbstractMetaFunction::BitwiseOperator:
     case AbstractMetaFunction::ShiftOperator:

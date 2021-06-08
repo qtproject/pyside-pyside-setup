@@ -73,6 +73,8 @@ public:
         ReferenceOperator, // operator &
         ArrowOperator,
         ArithmeticOperator,
+        IncrementOperator,
+        DecrementOperator,
         BitwiseOperator,
         LogicalOperator,
         ShiftOperator,

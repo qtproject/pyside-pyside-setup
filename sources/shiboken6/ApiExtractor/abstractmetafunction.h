@@ -73,6 +73,8 @@ public:
         ReferenceOperator, // operator &
         ArrowOperator,
         ArithmeticOperator,
+        IncrementOperator,
+        DecrementOperator,
         BitwiseOperator,
         LogicalOperator,
         ShiftOperator,
@@ -204,6 +206,7 @@ public:
     bool isArithmeticOperator() const;
     bool isBitwiseOperator() const; // Includes shift operator
     bool isComparisonOperator() const;
+    bool isIncDecrementOperator() const;
     bool isLogicalOperator() const;
     bool isSubscriptOperator() const;
     bool isAssignmentOperator() const; // Assignment or move assignment

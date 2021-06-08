@@ -32,6 +32,7 @@
 #include <list>
 #include "libsamplemacros.h"
 
+#include "intwrapper.h"
 #include "objecttype.h"
 
 class LIBSAMPLE_API Collector
@@ -57,14 +58,6 @@ private:
 };
 
 /* Helper for testing external operators */
-class IntWrapper
-{
-public:
-    IntWrapper(int x=0):value(x){}
-
-    int value;
-};
-
 LIBSAMPLE_API Collector &operator<<(Collector&, const IntWrapper&);
 
 #endif // COLLECTOR_H

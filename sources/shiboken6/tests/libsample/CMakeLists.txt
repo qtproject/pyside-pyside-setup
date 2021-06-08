@@ -16,6 +16,7 @@ exceptiontest.cpp
 functions.cpp
 handle.cpp
 implicitconv.cpp
+intwrapper.cpp
 injectcode.cpp
 listuser.cpp
 modifications.cpp
