@@ -5059,15 +5059,28 @@ void CppGenerator::writeSignatureInfo(TextStream &s, const AbstractMetaFunctionC
         // Toplevel functions like `PySide6.QtCore.QEnum` are always self-less.
         if (!(f->isStatic()) && f->ownerClass())
             args << QLatin1String("self");
-        for (const AbstractMetaArgument &arg : f->arguments())
-            args.append(signatureParameter(arg));
+        const auto &arguments = f->arguments();
+        for (qsizetype i = 0, size = arguments.size(); i < size; ++i) {
+            QString t = f->typeReplaced(i + 1);
+            if (t.isEmpty()) {
+                t = signatureParameter(arguments.at(i));
+            } else {
+                t.prepend(u':');
+                t.prepend(arguments.at(i).name());
+            }
+            args.append(t);
+        }
 
         // mark the multiple signatures as such, to make it easier to generate different code
         if (multiple)
             s << idx-- << ':';
         s << funcName << '(' << args.join(QLatin1Char(',')) << ')';
-        if (!f->isVoid())
-            s << "->" << f->type().pythonSignature();
+        if (!f->isVoid()) {
+            QString t = f->typeReplaced(0);
+            if (t.isEmpty())
+                t = f->type().pythonSignature();
+            s << "->" << t;
+        }
         s << '\n';
     }
 }

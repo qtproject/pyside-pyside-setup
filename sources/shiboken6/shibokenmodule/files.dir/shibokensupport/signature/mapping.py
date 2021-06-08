@@ -235,6 +235,7 @@ type_map.update({
     "nullptr": None,
     "PyCallable": typing.Callable,
     "PyObject": object,
+    "PyObject*": object,
     "PyArrayObject": ArrayLikeVariable, # numpy
     "PySequence": typing.Iterable,  # important for numpy
     "PyTypeObject": type,
@@ -458,8 +459,10 @@ def init_PySide6_QtCore():
         "size_t": int,
         "NULL": None, # 5.6, MSVC
         "nullptr": None, # 5.9
+        "PyBuffer": bytes,
         "PyByteArray": bytearray,
         "PyBytes": bytes,
+        "PyTuple": typing.Tuple,
         "QDeadlineTimer(QDeadlineTimer.Forever)": Instance("PySide6.QtCore.QDeadlineTimer"),
         "PySide6.QtCore.QUrl.ComponentFormattingOptions":
             PySide6.QtCore.QUrl.ComponentFormattingOption, # mismatch option/enum, why???
@@ -606,8 +609,7 @@ def init_PySide6_QtOpenGL():
 
 def init_PySide6_QtQml():
     type_map.update({
-        "QJSValueList()": [],
-        "QVariantHash()": typing.Dict[str, Variant],    # from 5.9
+        "VolatileBool": PySide6.QtQml.VolatileBool,
     })
     return locals()
 
