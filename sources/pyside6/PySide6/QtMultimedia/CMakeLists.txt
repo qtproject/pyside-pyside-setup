@@ -3,14 +3,14 @@ project(QtMultimedia)
 set(QtMultimedia_SRC
 ${QtMultimedia_GEN_DIR}/qaudiobuffer_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qaudiodecoder_wrapper.cpp
-${QtMultimedia_GEN_DIR}/qaudiodeviceinfo_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qaudiodevice_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qaudioformat_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qaudiosink_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qaudiosource_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qaudio_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qcameraformat_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qcameraimagecapture_wrapper.cpp
-${QtMultimedia_GEN_DIR}/qcamerainfo_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qcameradevice_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qcamera_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qimageencodersettings_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qmediacapturesession_wrapper.cpp
