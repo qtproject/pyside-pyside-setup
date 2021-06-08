@@ -166,6 +166,7 @@ public:
     AbstractMetaFunctionCList operatorOverloads(OperatorQueryOptions query) const;
 
     bool hasArithmeticOperatorOverload() const;
+    bool hasIncDecrementOperatorOverload() const;
     bool hasBitwiseOperatorOverload() const;
     bool hasComparisonOperatorOverload() const;
     bool hasLogicalOperatorOverload() const;

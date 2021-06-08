@@ -1730,6 +1730,12 @@ static inline AbstractMetaFunction::FunctionType functionTypeFromCodeModel(CodeM
     case CodeModel::ArithmeticOperator:
         result = AbstractMetaFunction::ArithmeticOperator;
         break;
+    case CodeModel::IncrementOperator:
+        result = AbstractMetaFunction::IncrementOperator;
+        break;
+    case CodeModel::DecrementOperator:
+        result = AbstractMetaFunction::DecrementOperator;
+        break;
     case CodeModel::BitwiseOperator:
         result = AbstractMetaFunction::BitwiseOperator;
         break;

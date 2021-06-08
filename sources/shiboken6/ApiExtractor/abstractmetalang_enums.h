@@ -58,13 +58,14 @@ Q_DECLARE_FLAGS(FunctionQueryOptions, FunctionQueryOption)
 Q_DECLARE_OPERATORS_FOR_FLAGS(FunctionQueryOptions)
 
 enum class OperatorQueryOption {
-    ArithmeticOp   = 0x01, // Arithmetic: +, -, *, /, %, +=, -=, *=, /=, %=, ++, --, unary+, unary-
-    BitwiseOp      = 0x02, // Bitwise: <<, <<=, >>, >>=, ~, &, &=, |, |=, ^, ^=
-    ComparisonOp   = 0x04, // Comparison: <, <=, >, >=, !=, ==
-    LogicalOp      = 0x08, // Logical: !, &&, ||
-    ConversionOp   = 0x10, // Conversion: operator [const] TYPE()
-    SubscriptionOp = 0x20, // Subscription: []
-    AssignmentOp   = 0x40 // Assignment: =
+    ArithmeticOp   = 0x01, // Arithmetic: +, -, *, /, %, +=, -=, *=, /=, %=, unary+, unary-
+    IncDecrementOp = 0x02, // ++, --
+    BitwiseOp      = 0x04, // Bitwise: <<, <<=, >>, >>=, ~, &, &=, |, |=, ^, ^=
+    ComparisonOp   = 0x08, // Comparison: <, <=, >, >=, !=, ==
+    LogicalOp      = 0x10, // Logical: !, &&, ||
+    ConversionOp   = 0x20, // Conversion: operator [const] TYPE()
+    SubscriptionOp = 0x40, // Subscription: []
+    AssignmentOp   = 0x80  // Assignment: =
 };
 
 Q_DECLARE_FLAGS(OperatorQueryOptions, OperatorQueryOption)

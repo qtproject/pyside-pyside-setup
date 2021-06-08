@@ -1424,12 +1424,6 @@
     </extra-includes>
     <value-type name="iterator" >
       <include file-name="QTextFrame" location="global"/>
-      <!-- ### These operators where removed because they don't make sense in Python.
-           Instead iterator methods (__iter__, next) should be implemented.
-           See bug 688 -->
-      <modify-function signature="operator++()" remove="all"/>
-      <modify-function signature="operator--()" remove="all"/>
-      <!-- ### -->
       <add-function signature="__iter__()" return-type="PyObject*">
         <inject-code class="target" position="beginning">
           <insert-template name="__iter__"/>

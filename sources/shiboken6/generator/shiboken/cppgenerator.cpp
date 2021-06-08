@@ -209,21 +209,58 @@ QString CppGenerator::fileNameForContext(const GeneratorContext &context) const
     return fileNameBase + fileNameSuffix();
 }
 
+static bool isInplaceAdd(const AbstractMetaFunctionCPtr &func)
+{
+    return func->name() == u"operator+=";
+}
+
+static bool isIncrementOperator(const AbstractMetaFunctionCPtr &func)
+{
+    return func->functionType() == AbstractMetaFunction::IncrementOperator;
+}
+
+static bool isDecrementOperator(const AbstractMetaFunctionCPtr &func)
+{
+    return func->functionType() == AbstractMetaFunction::DecrementOperator;
+}
+
+// Filter predicate for operator functions
+static bool skipOperatorFunc(const AbstractMetaFunctionCPtr &func)
+{
+    if (func->isModifiedRemoved() || func->usesRValueReferences())
+        return true;
+    const auto &name = func->name();
+    return name == u"operator[]" || name == u"operator->" || name == u"operator!";
+}
+
 QList<AbstractMetaFunctionCList>
     CppGenerator::filterGroupedOperatorFunctions(const AbstractMetaClass *metaClass,
                                                  OperatorQueryOptions query)
 {
     // ( func_name, num_args ) => func_list
     QMap<QPair<QString, int>, AbstractMetaFunctionCList> results;
-    const auto &funcs = metaClass->operatorOverloads(query);
+
+    auto funcs = metaClass->operatorOverloads(query);
+    auto end = std::remove_if(funcs.begin(), funcs.end(), skipOperatorFunc);
+    funcs.erase(end, funcs.end());
+
+    // If we have operator+=, we remove the operator++/-- which would
+    // otherwise be used for emulating __iadd__, __isub__.
+    if (std::any_of(funcs.cbegin(), funcs.cend(), isInplaceAdd)) {
+        end = std::remove_if(funcs.begin(), funcs.end(),
+                             [] (const AbstractMetaFunctionCPtr &func) {
+                                 return func->isIncDecrementOperator();
+                             });
+        funcs.erase(end, funcs.end());
+    } else {
+        // If both prefix/postfix ++/-- are present, remove one
+        if (std::count_if(funcs.begin(), funcs.end(), isIncrementOperator) > 1)
+            funcs.erase(std::find_if(funcs.begin(), funcs.end(), isIncrementOperator));
+        if (std::count_if(funcs.begin(), funcs.end(), isDecrementOperator) > 1)
+            funcs.erase(std::find_if(funcs.begin(), funcs.end(), isDecrementOperator));
+    }
+
     for (const auto &func : funcs) {
-        if (func->isModifiedRemoved()
-            || func->usesRValueReferences()
-            || func->name() == QLatin1String("operator[]")
-            || func->name() == QLatin1String("operator->")
-            || func->name() == QLatin1String("operator!")) {
-            continue;
-        }
         int args;
         if (func->isComparisonOperator()) {
             args = -1;
@@ -663,6 +700,7 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
         const QList<AbstractMetaFunctionCList> opOverloads = filterGroupedOperatorFunctions(
                 metaClass,
                 OperatorQueryOption::ArithmeticOp
+                | OperatorQueryOption::IncDecrementOp
                 | OperatorQueryOption::LogicalOp
                 | OperatorQueryOption::BitwiseOp);
 
@@ -3524,9 +3562,10 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                 if (func->isReverseOperator())
                     std::swap(firstArg, secondArg);
 
+                // Emulate operator+=/-= (__iadd__, __isub__) by using ++/--
                 if (((op == QLatin1String("++")) || (op == QLatin1String("--"))) && !func->isReverseOperator())  {
                     s  << "\nfor (int i = 0; i < " << secondArg
-                        << "; ++i, " << firstArg << op << ");\n";
+                        << "; ++i, " << op << firstArg << ");\n";
                     mc << firstArg;
                 } else {
                     mc << firstArg << ' ' << op << ' ' << secondArg;
@@ -4113,6 +4152,7 @@ bool CppGenerator::supportsMappingProtocol(const AbstractMetaClass *metaClass)
 bool CppGenerator::supportsNumberProtocol(const AbstractMetaClass *metaClass) const
 {
     return metaClass->hasArithmeticOperatorOverload()
+            || metaClass->hasIncDecrementOperatorOverload()
             || metaClass->hasLogicalOperatorOverload()
             || metaClass->hasBitwiseOperatorOverload()
             || hasBoolCast(metaClass);
@@ -4495,6 +4535,7 @@ void CppGenerator::writeTypeAsNumberDefinition(TextStream &s, const AbstractMeta
     const QList<AbstractMetaFunctionCList> opOverloads =
             filterGroupedOperatorFunctions(metaClass,
                                            OperatorQueryOption::ArithmeticOp
+                                           | OperatorQueryOption::IncDecrementOp
                                            | OperatorQueryOption::LogicalOp
                                            | OperatorQueryOption::BitwiseOp);
 

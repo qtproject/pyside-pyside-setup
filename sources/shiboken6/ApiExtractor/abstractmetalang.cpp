@@ -282,6 +282,17 @@ bool AbstractMetaClass::hasArithmeticOperatorOverload() const
     return false;
 }
 
+bool AbstractMetaClass::hasIncDecrementOperatorOverload() const
+{
+    for (const auto & f: d->m_functions) {
+        if (f->ownerClass() == f->implementingClass()
+            && f->isIncDecrementOperator() && !f->isPrivate()) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool AbstractMetaClass::hasBitwiseOperatorOverload() const
 {
     for (const auto & f: d->m_functions) {
