@@ -389,6 +389,10 @@ def calculate_props(line):
             _defaults.append(default)
     defaults = tuple(_defaults)
     returntype = parsed.returntype
+    if isinstance(returntype, str) and returntype.startswith("("):
+        # PYSIDE-1588: Simplify the handling of returned tuples for now.
+        # Later we might create named tuples, instead.
+        returntype = "Tuple"
     # PYSIDE-1383: We need to handle `None` explicitly.
     annotations["return"] = (_resolve_type(returntype, line, 0, handle_retvar)
                              if returntype is not None else None)
