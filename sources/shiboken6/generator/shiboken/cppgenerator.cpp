@@ -1868,6 +1868,18 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const AbstractMetaFunc
     }
 
     if (metaClass->isAbstract()) {
+        // C++ Wrapper disabled: Abstract C++ class cannot be instantiated.
+        if (metaClass->typeEntry()->typeFlags().testFlag(ComplexTypeEntry::DisableWrapper)) {
+            s << "PyErr_SetString(PyExc_NotImplementedError,\n" << indent
+              << "\"Abstract class  '" << metaClass->qualifiedCppName()
+              << "' cannot be instantiated since the wrapper has been disabled.\");\n" << outdent
+              << returnStatement(m_currentErrorCode) << outdent
+              << "\n}\n\n";
+            return;
+        }
+
+        // Refuse to instantiate Abstract C++ class (via C++ Wrapper) unless it is
+        // a Python-derived class for which type != myType.
         s << "if (type == myType) {\n" << indent
             << "PyErr_SetString(PyExc_NotImplementedError,\n" << indent
             << "\"'" << metaClass->qualifiedCppName()

@@ -58,7 +58,6 @@
        unexposed DomUI classes, we cannot generate a wrapper. -->
   <object-type name="QDesignerDnDItemInterface" disable-wrapper="yes">
     <enum-type name="DropType"/>
-    <modify-function signature="QDesignerDnDItemInterface()" remove="all"/>
   </object-type>
   <object-type name="QDesignerDynamicPropertySheetExtension"/>
   <object-type name="QDesignerFormEditorInterface"/>
@@ -71,7 +70,6 @@
   <object-type name="QDesignerFormWindowInterface" disable-wrapper="yes">
     <enum-type name="FeatureFlag" flags="Feature"/>
     <enum-type name="ResourceFileSaveMode"/>
-    <modify-function signature="QDesignerFormWindowInterface(QWidget*,QFlags&lt;Qt::WindowType&gt;)" remove="all"/>
   </object-type>
   <object-type name="QDesignerFormWindowManagerInterface">
      <enum-type name="Action"/>
