@@ -789,6 +789,10 @@
   <object-type name="QBasicTimer"/>
   <value-type name="QByteArrayMatcher"/>
   <value-type name="QCalendar" since="5.14">
+      <!-- Avoid clashes between size_t/enum System -->
+      <modify-function signature="QCalendar(QCalendar::System)" overload-number="0"/>
+      <modify-function signature="QCalendar(QStringView)" overload-number="1"/>
+      <modify-function signature="QCalendar(size_t)" overload-number="2"/>
       <value-type name="YearMonthDay"/>
       <enum-type name="System"/>
   </value-type>
