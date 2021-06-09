@@ -106,6 +106,12 @@
       <enum-type name="FailureReportingMode"/>
   </object-type>
 
+  <object-type name="QSignalSpy"> <!-- Inherits QList<QVariantList> -->
+      <declare-function signature="count()const" return-type="qsizetype"/>
+      <declare-function signature="size()const" return-type="qsizetype"/>
+      <declare-function signature="at(qsizetype)const" return-type="QVariantList"/>
+  </object-type>
+
   <namespace-type name="QTest">
     <!-- Qt5: private <enum-type name="AttributeIndex" since="4.6"/> -->
     <enum-type name="KeyAction"/>
@@ -167,6 +173,5 @@
     </modify-function>
   </namespace-type>
 
-  <rejection class="QSignalSpy"/>
   <rejection class="QTestEventList"/>
 </typesystem>
