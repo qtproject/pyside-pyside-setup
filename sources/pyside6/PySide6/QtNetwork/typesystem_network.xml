@@ -101,6 +101,7 @@
     <object-type name="QDtls" since="5.12">
         <enum-type name="HandshakeState"/>
     </object-type>
+    <object-type name="QDtlsClientVerifier"/>
 
     <value-type name="QHstsPolicy" since="5.9">
         <enum-type name="PolicyFlag" flags="PolicyFlags"/>

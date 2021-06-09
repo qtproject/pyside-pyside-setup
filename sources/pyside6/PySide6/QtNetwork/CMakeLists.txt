@@ -71,11 +71,12 @@ else()
 endif()
 
 if("dtls" IN_LIST QtNetwork_disabled_features)
-    list(APPEND QtNetwork_DROPPED_ENTRIES QDtls)
+    list(APPEND QtNetwork_DROPPED_ENTRIES QDtls QDtlsClientVerifier)
     message(STATUS "Qt${QT_MAJOR_VERSION}Network: Dropping DTLS classes")
 else()
     list(APPEND QtNetwork_SRC
-         ${QtNetwork_GEN_DIR}/qdtls_wrapper.cpp)
+         ${QtNetwork_GEN_DIR}/qdtls_wrapper.cpp
+         ${QtNetwork_GEN_DIR}/qdtlsclientverifier_wrapper.cpp)
     message(STATUS "Qt${QT_MAJOR_VERSION}Network: Adding DTLS classes")
 endif()
 

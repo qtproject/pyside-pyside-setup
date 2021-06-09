@@ -132,6 +132,8 @@
         <enum-type name="Flag" flags="Flags"/>
     </object-type>
     <object-type name="QSGMaterialShader">
+        <enum-type name="Stage"/>
+        <enum-type name="Flag" flags="Flags"/>
         <value-type name="RenderState">
             <enum-type name="DirtyState" flags="DirtyStates"/>
         </value-type>
