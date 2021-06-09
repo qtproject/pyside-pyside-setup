@@ -1,41 +1,19 @@
 project(libpyside)
 
-if(${Qt${QT_MAJOR_VERSION}Qml_FOUND})
-    if(NOT "${Qt${QT_MAJOR_VERSION}Qml_PRIVATE_INCLUDE_DIRS}" MATCHES "/QtQml/")
-        string(REPLACE "/QtCore" "/QtQml" replaceme "${Qt${QT_MAJOR_VERSION}Core_PRIVATE_INCLUDE_DIRS}")
-        list(APPEND Qt${QT_MAJOR_VERSION}Qml_PRIVATE_INCLUDE_DIRS ${replaceme})
-        list(REMOVE_DUPLICATES Qt${QT_MAJOR_VERSION}Qml_PRIVATE_INCLUDE_DIRS)
-    endif()
-endif()
-
-if(${Qt${QT_MAJOR_VERSION}Quick_FOUND})
-    if(NOT "${Qt${QT_MAJOR_VERSION}Quick_PRIVATE_INCLUDE_DIRS}" MATCHES "/QtQuick/")
-        string(REPLACE "/QtCore" "/QtQuick" replaceme "${Qt${QT_MAJOR_VERSION}Core_PRIVATE_INCLUDE_DIRS}")
-        list(APPEND Qt${QT_MAJOR_VERSION}Quick_PRIVATE_INCLUDE_DIRS ${Qt${QT_MAJOR_VERSION}Qml_PRIVATE_INCLUDE_DIRS})
-        list(APPEND Qt${QT_MAJOR_VERSION}Quick_PRIVATE_INCLUDE_DIRS ${replaceme})
-        list(REMOVE_DUPLICATES Qt${QT_MAJOR_VERSION}Quick_PRIVATE_INCLUDE_DIRS)
-    endif()
-endif()
-
+set(QML_SUPPORT 0)
 set(QML_PRIVATE_API_SUPPORT 0)
-if(Qt${QT_MAJOR_VERSION}Qml_FOUND)
-    # Used for registering custom QQuickItem classes defined in Python code.
-    set(QML_SUPPORT 1)
-    set(QML_INCLUDES ${Qt${QT_MAJOR_VERSION}Qml_INCLUDE_DIRS})
-    set(QML_LIBRARIES ${Qt${QT_MAJOR_VERSION}Qml_LIBRARIES})
 
+set(libpyside_libraries Qt::Core Qt::CorePrivate)
+
+if(Qt${QT_MAJOR_VERSION}Qml_FOUND)
+    list(APPEND libpyside_libraries Qt::Qml)
+    set(QML_SUPPORT 1)
     if(Qt${QT_MAJOR_VERSION}Qml_PRIVATE_INCLUDE_DIRS)
-        # Used for transforming QML exceptions into Python exceptions.
+        list(APPEND libpyside_libraries Qt::QmlPrivate)
         set(QML_PRIVATE_API_SUPPORT 1)
-        set(QML_INCLUDES ${QML_INCLUDES} ${Qt${QT_MAJOR_VERSION}Qml_PRIVATE_INCLUDE_DIRS})
     else()
         message(WARNING "QML private API include files could not be found, support for catching QML exceptions inside Python code will not work.")
     endif()
-else()
-    set(QML_SUPPORT 0)
-    set(QML_PRIVATE_API_SUPPORT 0)
-    set(QML_INCLUDES "")
-    set(QML_LIBRARIES "")
 endif()
 
 set(libpyside_SRC
@@ -84,12 +62,6 @@ add_other_files(${other_files})
 add_library(pyside6 SHARED ${libpyside_SRC} ${other_files})
 add_library(PySide6::pyside6 ALIAS pyside6)
 
-target_include_directories(pyside6 PRIVATE
-    ${QML_INCLUDES}
-    ${Qt${QT_MAJOR_VERSION}Core_PRIVATE_INCLUDE_DIRS}
-    ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-)
-
 target_include_directories(pyside6 PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
   $<INSTALL_INTERFACE:include/PySide6>
@@ -106,9 +78,7 @@ else()
 endif()
 
 target_link_libraries(pyside6
-                      PRIVATE Shiboken6::libshiboken
-                      PRIVATE ${QML_LIBRARIES}
-                      PRIVATE ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES})
+                      PRIVATE Shiboken6::libshiboken ${libpyside_libraries})
 
 set_target_properties(pyside6 PROPERTIES
                       VERSION ${BINDING_API_VERSION}
@@ -116,11 +86,7 @@ set_target_properties(pyside6 PROPERTIES
                       OUTPUT_NAME "pyside6${pyside6_SUFFIX}${SHIBOKEN_PYTHON_SHARED_LIBRARY_SUFFIX}"
                       DEFINE_SYMBOL BUILD_LIBPYSIDE)
 
-if(${QT_MAJOR_VERSION} GREATER_EQUAL 6)
-    set_property(TARGET pyside6 PROPERTY CXX_STANDARD 17)
-else()
-    set_property(TARGET pyside6 PROPERTY CXX_STANDARD 11)
-endif()
+set_property(TARGET pyside6 PROPERTY CXX_STANDARD 17)
 
 if(QML_SUPPORT)
     target_compile_definitions(pyside6 PUBLIC PYSIDE_QML_SUPPORT=1)
