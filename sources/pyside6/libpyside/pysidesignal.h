@@ -72,7 +72,21 @@ extern "C"
 namespace PySide {
 namespace Signal {
 
-PYSIDE_API bool checkType(PyObject *type);
+/**
+ * This function checks for the PySideSignal type.
+ *
+ * @param   pyObj
+ * @return  whether pyObj is a PySideSignal
+ **/
+PYSIDE_API bool checkType(PyObject *pyObj);
+
+/**
+ * This function checks for the PySideSignalInstanceType type.
+ *
+ * @param   pyObj
+ * @return  Whether pyObj is a PySideSignalInstance
+ **/
+PYSIDE_API bool checkInstanceType(PyObject *pyObj);
 
 /**
  * Register all C++ signals of a QObject on Python type.

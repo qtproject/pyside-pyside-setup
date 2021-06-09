@@ -733,6 +733,12 @@ bool checkType(PyObject *pyObj)
     return false;
 }
 
+bool checkInstanceType(PyObject *pyObj)
+{
+    return pyObj != nullptr
+        && PyType_IsSubtype(Py_TYPE(pyObj), PySideSignalInstanceTypeF()) != 0;
+}
+
 void updateSourceObject(PyObject *source)
 {
     PyTypeObject *objType = reinterpret_cast<PyTypeObject *>(PyObject_Type(source));
