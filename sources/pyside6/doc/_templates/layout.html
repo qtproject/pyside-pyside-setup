@@ -1,28 +1,44 @@
 {% extends "!layout.html" %}
 
-# Invert sidebars
 {%- block sidebar1 %}{{ sidebar() }}{%- endblock %}
 {%- block sidebar2 %}{%- endblock %}
 
+{% block sidebarlogo %}
+<div class="logo">
+  <a href="http://www.pyside.org">
+    <img alt="PySide" src="{{ pathto('_static/pysidelogo.png', 1) }}"/>
+  </a>
+</div>
+{% endblock %}
+
 {%- block header %}
 <div id="container">
-<div class="header">
+  <div class="header">
     <div class="header_container">
-        <div class="logo"><a href="http://www.pyside.org"><img alt="PySide" src="{{ pathto('_static/pysidelogo.png', 1) }}"/></a></div>
-        <div class="related">
-            <ul>
-                {%- block rootrellink %}
-                <li><a href="{{ pathto( 'index' ) }}">{{ shorttitle|e }}</a></li>
-                {%- endblock %}
-                {%- for parent in parents %}
-                <li>{{ reldelim1 }} <a href="{{ parent.link|e }}" {% if loop.last %}{{ accesskey("U") }}{% endif %}>{{ parent.title }}</a></li>
-                {%- endfor %}
-                {%- block relbaritems %} {% endblock %}
-            </ul>
-        </div>
+      <div class="related">
+        <ul>
+          {%- block rootrellink %}
+          <li><a href="{{ pathto( 'index' ) }}">{{ shorttitle|e }}</a></li>
+          {%- endblock %}
+          {%- for parent in parents %}
+          <li>{{ reldelim1 }} <a href="{{ parent.link|e }}" {% if loop.last %}{{ accesskey("U") }}{% endif %}>{{ parent.title }}</a></li>
+          {%- endfor %}
+          {%- block relbaritems %} {% endblock %}
+        </ul>
+      </div>
     </div>
-</div>
+  </div>
 {%- endblock -%}
+
+{%- block document %}
+  <div class="documentwrapper">
+    <div class="bodywrapper">
+      <div class="body" role="main">
+        {% block body %} {% endblock %}
+      </div>
+    </div>
+  </div>
+{% endblock %}
 
 {%- block footer %}
     <div class="footer">
@@ -33,8 +49,5 @@
 </div>
 {%- endblock %}
 
-# No top relbar.
 {%- block relbar1 %}{%- endblock %}
-
-# No bottom relbar.
 {%- block relbar2 %}{%- endblock %}
