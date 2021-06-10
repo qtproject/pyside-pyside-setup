@@ -67,7 +67,8 @@ public:
     }
 
     QString signature() const;
-    QString minimalSignature() const;
+    QString formatMinimalSignature(const AbstractMetaFunction *q,
+                                   bool comment) const;
     QString modifiedName(const AbstractMetaFunction *q) const;
     int overloadNumber(const AbstractMetaFunction *q) const;
 
@@ -738,31 +739,46 @@ bool AbstractMetaFunction::isModifiedToArray(int argumentIndex) const
     return false;
 }
 
-QString AbstractMetaFunctionPrivate::minimalSignature() const
+// Parameter 'comment' indicates usage as a code comment of the overload decisor
+QString AbstractMetaFunctionPrivate::formatMinimalSignature(const AbstractMetaFunction *q,
+                                                            bool comment) const
 {
-    if (!m_cachedMinimalSignature.isEmpty())
-        return m_cachedMinimalSignature;
-
-    QString minimalSignature = m_originalName + QLatin1Char('(');
+    QString result = m_originalName + QLatin1Char('(');
     for (int i = 0; i < m_arguments.count(); ++i) {
-        const AbstractMetaType &t = m_arguments.at(i).type();
         if (i > 0)
-            minimalSignature += QLatin1Char(',');
-        minimalSignature += t.minimalSignature();
+            result += QLatin1Char(',');
+
+        QString typeName;
+        if (comment)
+            typeName = q->typeReplaced(i + 1);
+        if (typeName.isEmpty())
+            typeName = m_arguments.at(i).type().minimalSignature();
+        result += typeName;
     }
-    minimalSignature += QLatin1Char(')');
+    result += QLatin1Char(')');
     if (m_constant)
-        minimalSignature += QLatin1String("const");
+        result += QLatin1String("const");
+    result = TypeDatabase::normalizedSignature(result);
 
-    minimalSignature = TypeDatabase::normalizedSignature(minimalSignature);
-    m_cachedMinimalSignature = minimalSignature;
-
-    return minimalSignature;
+    if (comment && !q->isVoid()) {
+        QString typeName = q->typeReplaced(0);
+        if (typeName.isEmpty())
+            typeName = q->type().minimalSignature();
+        result += QStringLiteral("->") + typeName;
+    }
+    return result;
 }
 
 QString AbstractMetaFunction::minimalSignature() const
 {
-    return d->minimalSignature();
+    if (d->m_cachedMinimalSignature.isEmpty())
+        d->m_cachedMinimalSignature = d->formatMinimalSignature(this, false);
+    return d->m_cachedMinimalSignature;
+}
+
+QString AbstractMetaFunction::signatureComment() const
+{
+    return d->formatMinimalSignature(this, true);
 }
 
 QString AbstractMetaFunction::debugSignature() const
