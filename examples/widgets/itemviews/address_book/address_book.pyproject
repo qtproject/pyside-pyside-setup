@@ -1,0 +1,4 @@
+{
+    "files": ["tablemodel.py", "address_book.py", "adddialogwidget.py",
+              "addresswidget.py", "newaddresstab.py"]
+}
