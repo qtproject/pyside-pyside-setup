@@ -82,6 +82,8 @@
     <value-type name="QBluetoothServiceInfo">
         <enum-type name="AttributeId"/>
         <enum-type name="Protocol"/>
+        <value-type name="Alternative"/>
+        <value-type name="Sequence"/>
     </value-type>
     <object-type name="QBluetoothSocket">
         <enum-type name="SocketError"/>

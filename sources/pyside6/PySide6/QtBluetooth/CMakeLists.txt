@@ -13,8 +13,8 @@ set(QtBluetooth_SRC
     ${QtBluetooth_GEN_DIR}/qbluetoothserver_wrapper.cpp
     ${QtBluetooth_GEN_DIR}/qbluetoothservicediscoveryagent_wrapper.cpp
     ${QtBluetooth_GEN_DIR}/qbluetoothserviceinfo_wrapper.cpp
-    #    ${QtBluetooth_GEN_DIR}/qbluetoothserviceinfo_alternative_wrapper.cpp
-    #    ${QtBluetooth_GEN_DIR}/qbluetoothserviceinfo_sequence_wrapper.cpp
+    ${QtBluetooth_GEN_DIR}/qbluetoothserviceinfo_alternative_wrapper.cpp
+    ${QtBluetooth_GEN_DIR}/qbluetoothserviceinfo_sequence_wrapper.cpp
     ${QtBluetooth_GEN_DIR}/qbluetoothsocket_wrapper.cpp
     ${QtBluetooth_GEN_DIR}/qbluetoothuuid_wrapper.cpp
     ${QtBluetooth_GEN_DIR}/qlowenergyadvertisingdata_wrapper.cpp
