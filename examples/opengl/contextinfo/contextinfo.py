@@ -245,12 +245,12 @@ class RenderWindow(QWindow):
         context_surface_format = print_surface_format(self.context.format())
         surface_format = print_surface_format(self.format())
 
-        text = ("Vendor: {gl_vendor}\n"
-                "Renderer: {gl_renderer}\n"
-                "Version: {gl_version}\n"
-                "Shading language: {gl_lang_version}\n"
-                "Context Format: {context_surface_format}\n\n"
-                "Surface Format: {surface_format}")
+        text = (f"Vendor: {gl_vendor}\n"
+                f"Renderer: {gl_renderer}\n"
+                f"Version: {gl_version}\n"
+                f"Shading language: {gl_lang_version}\n"
+                f"Context Format: {context_surface_format}\n\n"
+                f"Surface Format: {surface_format}")
         self.context.doneCurrent()
         return text
 
