@@ -96,7 +96,7 @@ def get_module_gallery(examples):
     gallery = (
         ".. panels::\n"
         f"{ind(1)}:container: container-lg pb-3\n"
-        f"{ind(1)}:column: col-lg-4 col-md-4 col-sm-6 col-xs-12 p-2\n\n"
+        f"{ind(1)}:column: col-lg-3 col-md-3 col-sm-6 col-xs-12 p-2\n\n"
     )
 
     # Iteration per rows
@@ -116,7 +116,8 @@ def get_module_gallery(examples):
             gallery += f"{ind(1)}---\n"
 
         if e["img_doc"]:
-            gallery += f"{ind(1)}:img-top: {e['img_doc'].name}\n\n"
+            gallery += f"{ind(1)}:img-top: {e['img_doc'].name}\n"
+            gallery += f"{ind(1)}:img-top-cls: + d-flex align-self-center\n\n"
         else:
             gallery += "\n"
 
@@ -124,6 +125,10 @@ def get_module_gallery(examples):
         gallery += f"{ind(1)}`{name} <{url}>`_\n"
         gallery += f"{ind(1)}+++\n"
         gallery += f"{ind(1)}{underline}\n"
+        gallery += f"\n{ind(1)}.. link-button:: {url}\n"
+        gallery += f"{ind(2)}:type: url\n"
+        gallery += f"{ind(2)}:text: Go to Example\n"
+        gallery += f"{ind(2)}:classes: btn-qt btn-block stretched-link\n"
 
     return f"{gallery}\n"
 
