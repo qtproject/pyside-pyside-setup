@@ -47,18 +47,25 @@ class QSensorTest(unittest.TestCase):
         for sensorType in QSensor.sensorTypes():
             identifiers = QSensor.sensorsForType(sensorType)
             values = []
-            usedIdentifier = None
+            error = ''
             for identifier in identifiers:
                 sensor = QSensor(sensorType, None)
                 sensor.setIdentifier(identifier)
                 if sensor.connectToBackend():
                     usedIdentifier = identifier
                     reading = sensor.reading()
-                    for i in range(0, reading.valueCount()):
-                        values.append(reading.value(i))
-                    break
-            if usedIdentifier:
+                    if reading:
+                        for i in range(0, reading.valueCount()):
+                            values.append(reading.value(i))
+                        break
+                    else:
+                        error = "Unable to obtain reading"
+                else:
+                    error = "Unable to connect to backend"
+            if values:
                 print('Sensor ', sensorType, usedIdentifier, values)
+            else:
+                print(f"{sensorType}: {error}", file=sys.stderr)
 
 
 if __name__ == '__main__':
