@@ -51,6 +51,8 @@
     <custom-type name="PyTypeObject"/>
     <custom-type name="PyUnicode"/>
     <custom-type name="list of QAbstractAnimation"/>
+    <custom-type name="PySideSignalInstance"
+                 check-function="PySide::Signal::checkInstanceType"/>
 <!--
     <function signature="qChecksum(QByteArrayView data, Qt::ChecksumType)"/>
 -->
