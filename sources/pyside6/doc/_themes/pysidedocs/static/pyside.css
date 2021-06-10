@@ -1206,7 +1206,7 @@ div.multi-column div {
 .sphinxsidebar {
   position: -webkit-sticky;
   position: sticky;
-  top: 64px;
+  top: 0px;
   width: 200px;
   overflow: scroll;
   overflow-x: hidden;
