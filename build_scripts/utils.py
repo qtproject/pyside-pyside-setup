@@ -813,7 +813,36 @@ def ldd_get_paths_for_dependencies(dependencies_regex, executable_path=None, dep
     return paths
 
 
-def ldd(executable_path):
+def _ldd_ldd(executable_path):
+    """Helper for ldd():
+       Returns ldd output of shared library dependencies for given
+       `executable_path`.
+
+    Parameters
+    ----------
+    executable_path : str
+        path to executable or shared library.
+
+    Returns
+    -------
+    output : str
+        the raw output retrieved from the dynamic linker.
+    """
+
+    output = ''
+    error = ''
+    try:
+        output_lines = run_process_output(['ldd', executable_path])
+        output = '\n'.join(output_lines)
+    except Exception as e:
+        error = str(e)
+    if not output:
+        message = "ldd failed to query for dependent shared libraries of {}: {}".format(executable_path, error)
+        raise RuntimeError(message)
+    return output
+
+
+def _ldd_ldso(executable_path):
     """
     Returns ld.so output of shared library dependencies for given
     `executable_path`.
@@ -871,6 +900,32 @@ def ldd(executable_path):
     else:
         raise RuntimeError("ld.so failed to query for dependent shared "
                            "libraries of {} ".format(executable_path))
+
+
+def ldd(executable_path):
+    """
+    Returns ldd output of shared library dependencies for given `executable_path`,
+    using either ldd or ld.so depending on availability.
+
+    Parameters
+    ----------
+    executable_path : str
+        path to executable or shared library.
+
+    Returns
+    -------
+    output : str
+        the raw output retrieved from the dynamic linker.
+    """
+    result = ''
+    try:
+        result = _ldd_ldd(executable_path)
+    except RuntimeError as e:
+        message = "ldd: Falling back to ld.so ({})".format(str(e))
+        log.warn(message)
+    if not result:
+        result = _ldd_ldso(executable_path)
+    return result
 
 
 def find_files_using_glob(path, pattern):
