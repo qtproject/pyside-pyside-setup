@@ -2176,3 +2176,20 @@ div.rightside {
   border-color: #41cd52 !important;
   font-weight: bold !important;
 }
+
+.card {
+  height: 250px;
+  text-align: center;
+}
+
+.card-img-top {
+  object-fit: cover;
+  width: 50px;
+  height: 120px;
+}
+
+.card-body {
+  vertical-align: middle;
+  padding: 5px !important;
+  text-align: center;
+}
