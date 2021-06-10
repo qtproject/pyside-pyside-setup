@@ -107,9 +107,18 @@
   </object-type>
 
   <object-type name="QSignalSpy"> <!-- Inherits QList<QVariantList> -->
+      <extra-includes>
+          <include file-name="pysidesignal.h" location="global"/>
+      </extra-includes>
       <declare-function signature="count()const" return-type="qsizetype"/>
       <declare-function signature="size()const" return-type="qsizetype"/>
       <declare-function signature="at(qsizetype)const" return-type="QVariantList"/>
+      <add-function signature="QSignalSpy(PySideSignalInstance@signal@)">
+          <inject-code class="target" position="beginning" file="../glue/qttest.cpp" snippet="qsignalspy-signal"/>
+          <inject-documentation format="target" mode="append">
+          Constructs a new QSignalSpy that listens for emissions of the signal.
+          </inject-documentation>
+      </add-function>
   </object-type>
 
   <namespace-type name="QTest">

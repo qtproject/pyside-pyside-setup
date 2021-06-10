@@ -57,6 +57,11 @@ class QSignalSpyTest(UsesQApplication):
         self._model.item(0, 0).setText('text2')
         self.assertEqual(spy.count(), 1)
 
+    def testSignal(self):
+        spy = QSignalSpy(self._model.dataChanged)
+        self._model.item(0, 0).setText('text3')
+        self.assertEqual(spy.count(), 1)
+
 
 if __name__ == '__main__':
     unittest.main()
