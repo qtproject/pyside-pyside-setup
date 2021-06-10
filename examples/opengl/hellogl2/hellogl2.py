@@ -232,7 +232,7 @@ class GLWidget(QOpenGLWidget, QOpenGLFunctions):
 
     def __init__(self, transparent, parent=None):
         QOpenGLWidget.__init__(self, parent)
-        super().__init__()
+        QOpenGLFunctions.__init__(self)
 
         self._transparent = transparent
         self._core = QSurfaceFormat.defaultFormat().profile() == QSurfaceFormat.CoreProfile
