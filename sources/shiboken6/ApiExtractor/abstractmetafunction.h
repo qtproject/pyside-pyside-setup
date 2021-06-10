@@ -226,6 +226,9 @@ public:
     QString modifiedName() const;
 
     QString minimalSignature() const;
+    // Signature with replaced argument types and return type for overload
+    // decisor comment.
+    QString signatureComment() const;
     QString debugSignature() const; // including virtual/override/final, etc., for debugging only.
 
     bool isModifiedRemoved(const AbstractMetaClass *cls = nullptr) const;

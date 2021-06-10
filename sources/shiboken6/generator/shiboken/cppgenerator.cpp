@@ -2722,7 +2722,7 @@ void CppGenerator::writeOverloadedFunctionDecisor(TextStream &s, const OverloadD
             s << "static ";
         if (const auto *decl = func->declaringClass())
             s << decl->name() << "::";
-        s << func->minimalSignature() << '\n';
+        s << func->signatureComment() << '\n';
     }
     writeOverloadedFunctionDecisorEngine(s, &overloadData);
     s << '\n';
