@@ -504,10 +504,18 @@ custom-type
     .. code-block:: xml
 
         <typesystem>
-            <custom-type name="..." />
+            <custom-type name="..."
+                check-function="..." />
         </typesystem>
 
     The **name** attribute is the name of the custom type, e.g., "PyObject".
+
+    The *optional*  **check-function** attribute can be used to specify a
+    boolean check function that verifies if the PyObject is of the given type
+    in the function overload decisor. While shiboken knows common check
+    functions like ``PyLong_Check()`` or ``PyType_Check()``, it might be useful
+    to provide one for function arguments modified to be custom types
+    handled by injected code (see :ref:`replace-type`).
 
 .. _smart-pointer-type:
 

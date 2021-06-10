@@ -51,6 +51,7 @@
 
 static inline QString allowThreadAttribute() { return QStringLiteral("allow-thread"); }
 static inline QString colonColon() { return QStringLiteral("::"); }
+static inline QString checkFunctionAttribute() { return QStringLiteral("check-function"); }
 static inline QString copyableAttribute() { return QStringLiteral("copyable"); }
 static inline QString accessAttribute() { return QStringLiteral("access"); }
 static inline QString actionAttribute() { return QStringLiteral("action"); }
@@ -1176,6 +1177,22 @@ bool TypeSystemParser::applyCommonAttributes(const ConditionalStreamReader &read
         }
     }
     return true;
+}
+
+CustomTypeEntry *TypeSystemParser::parseCustomTypeEntry(const ConditionalStreamReader &,
+                                                        const QString &name,
+                                                        const QVersionNumber &since,
+                                                        QXmlStreamAttributes *attributes)
+{
+    if (!checkRootElement())
+        return nullptr;
+    auto *result = new CustomTypeEntry(name, since, m_current->entry);
+    for (int i = attributes->size() - 1; i >= 0; --i) {
+        const auto name = attributes->at(i).qualifiedName();
+        if (name == checkFunctionAttribute())
+            result->setCheckFunction(attributes->takeAt(i).value().toString());
+    }
+    return result;
 }
 
 FlagsTypeEntry *
@@ -2893,9 +2910,10 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
 
         switch (element->type) {
         case StackElement::CustomTypeEntry:
-            if (!checkRootElement())
+            element->entry =
+                parseCustomTypeEntry(reader, name, versionRange.since, &attributes);
+            if (Q_UNLIKELY(!element->entry))
                 return false;
-            element->entry = new TypeEntry(name, TypeEntry::CustomType, versionRange.since, m_current->entry);
             break;
         case StackElement::PrimitiveTypeEntry:
             element->entry = parsePrimitiveTypeEntry(reader, name, versionRange.since, &attributes);

@@ -1126,8 +1126,15 @@ ShibokenGenerator::CPythonCheckFunctionResult
 
     CPythonCheckFunctionResult result;
     result.type = buildAbstractMetaTypeFromString(type);
-    if (!result.type.has_value() || result.type->typeEntry()->isCustom())
+
+    if (!result.type.has_value()) {
         result.checkFunction = type + QLatin1String("_Check");
+    } else if (result.type->typeEntry()->isCustom()) {
+        auto ct = static_cast<const CustomTypeEntry *>(result.type->typeEntry());
+        result.checkFunction = ct->checkFunction();
+        if (result.checkFunction.isEmpty())
+            result.checkFunction = type + QLatin1String("_Check");
+    }
     return result;
 }
 
