@@ -276,6 +276,21 @@ private:
     QScopedPointer<TypeEntryPrivate> m_d;
 };
 
+class CustomTypeEntry : public TypeEntry
+{
+public:
+    explicit CustomTypeEntry(const QString &entryName, const QVersionNumber &vr,
+                             const TypeEntry *parent);
+
+    TypeEntry *clone() const override;
+
+    QString checkFunction() const;
+    void setCheckFunction(const QString &f);
+
+protected:
+    explicit CustomTypeEntry(TypeEntryPrivate *d);
+};
+
 class TypeSystemTypeEntry : public TypeEntry
 {
 public:

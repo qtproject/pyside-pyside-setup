@@ -174,6 +174,9 @@ private:
     PrimitiveTypeEntry *
         parsePrimitiveTypeEntry(const QXmlStreamReader &, const QString &name,
                                 const QVersionNumber &since, QXmlStreamAttributes *);
+    CustomTypeEntry *
+        parseCustomTypeEntry(const QXmlStreamReader &, const QString &name,
+                             const QVersionNumber &since, QXmlStreamAttributes *);
     ContainerTypeEntry *
         parseContainerTypeEntry(const QXmlStreamReader &, const QString &name,
                                  const QVersionNumber &since, QXmlStreamAttributes *);

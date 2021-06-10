@@ -627,6 +627,44 @@ void TypeEntry::useAsTypedef(const TypeEntry *source)
     m_d->m_version = source->m_d->m_version;
 }
 
+// ----------------- CustomTypeEntry
+class  CustomTypeEntryPrivate : public TypeEntryPrivate
+{
+public:
+    using TypeEntryPrivate::TypeEntryPrivate;
+
+    QString m_checkFunction;
+};
+
+CustomTypeEntry::CustomTypeEntry(const QString &entryName, const QVersionNumber &vr,
+                                 const TypeEntry *parent) :
+    TypeEntry(new CustomTypeEntryPrivate(entryName, CustomType, vr, parent))
+{
+}
+
+CustomTypeEntry::CustomTypeEntry(TypeEntryPrivate *d) :
+    TypeEntry(d)
+{
+}
+
+TypeEntry *CustomTypeEntry::clone() const
+{
+    S_D(const CustomTypeEntry);
+    return new CustomTypeEntry(new CustomTypeEntryPrivate(*d));
+}
+
+QString CustomTypeEntry::checkFunction() const
+{
+    S_D(const CustomTypeEntry);
+    return d->m_checkFunction;
+}
+
+void CustomTypeEntry::setCheckFunction(const QString &f)
+{
+    S_D(CustomTypeEntry);
+    d->m_checkFunction = f;
+}
+
 // ----------------- TypeSystemTypeEntry
 class TypeSystemTypeEntryPrivate : public TypeEntryPrivate
 {
