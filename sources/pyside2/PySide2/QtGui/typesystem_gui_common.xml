@@ -2642,9 +2642,7 @@
     <enum-type name="FramebufferRestorePolicy" since="5.7"/>
   </object-type>
   <value-type name="QOpenGLFramebufferObjectFormat"/>
-  <!-- Compile error on Windows: QOpenGLPaintDevice::QOpenGLPaintDevice(const QOpenGLPaintDevice &)': attempting to reference a deleted function
   <object-type name="QOpenGLPaintDevice" since="5.0"/>
-  -->
   <object-type name="QOpenGLExtraFunctions" since="5.6">
       <!-- Exlusions due to compile errors -->
       <modify-function signature="glEndTransformFeedback()" remove="all"/>

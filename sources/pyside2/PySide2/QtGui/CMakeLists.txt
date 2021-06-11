@@ -100,7 +100,7 @@ ${QtGui_GEN_DIR}/qopengldebugmessage_wrapper.cpp
 ${QtGui_GEN_DIR}/qopenglextrafunctions_wrapper.cpp
 ${QtGui_GEN_DIR}/qopenglframebufferobjectformat_wrapper.cpp
 ${QtGui_GEN_DIR}/qopenglfunctions_wrapper.cpp
-# Compile error on Windows: ${QtGui_GEN_DIR}/qopenglpaintdevice_wrapper.cpp
+${QtGui_GEN_DIR}/qopenglpaintdevice_wrapper.cpp
 ${QtGui_GEN_DIR}/qopenglpixeltransferoptions_wrapper.cpp
 ${QtGui_GEN_DIR}/qopenglshaderprogram_wrapper.cpp
 ${QtGui_GEN_DIR}/qopengltexture_wrapper.cpp
