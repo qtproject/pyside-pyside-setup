@@ -57,16 +57,17 @@ private:
     void writeSbkTypeFunction(TextStream &s, const AbstractMetaEnum &cppEnum) const;
     static void writeSbkTypeFunction(TextStream &s, const AbstractMetaClass *cppClass) ;
     static void writeSbkTypeFunction(TextStream &s, const AbstractMetaType &metaType) ;
-    static void writeTypeIndexValueLine(TextStream &s, const ApiExtractorResult &api,
-                                        const TypeEntry *typeEntry);
-    static void writeTypeIndexValueLines(TextStream &s, const ApiExtractorResult &api,
-                                         const AbstractMetaClass *metaClass);
+    void writeTypeIndexValueLine(TextStream &s, const ApiExtractorResult &api,
+                                 const TypeEntry *typeEntry);
+    void writeTypeIndexValueLines(TextStream &s, const ApiExtractorResult &api,
+                                  const AbstractMetaClass *metaClass);
     void writeProtectedEnumSurrogate(TextStream &s, const AbstractMetaEnum &cppEnum) const;
     void writeMemberFunctionWrapper(TextStream &s,
                                     const AbstractMetaFunctionCPtr &func,
                                     const QString &postfix = {}) const;
 
     QSet<AbstractMetaFunctionCPtr> m_inheritedOverloads;
+    AbstractMetaClassCList m_alternateTemplateIndexes;
 };
 
 #endif // HEADERGENERATOR_H
