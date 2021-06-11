@@ -2537,20 +2537,20 @@ static void appendIndexSuffix(QString *s)
     s->append(QStringLiteral("IDX"));
 }
 
-QString ShibokenGenerator::getTypeIndexVariableName(const AbstractMetaClass *metaClass,
-                                                    bool alternativeTemplateName)
+QString ShibokenGenerator::getTypeAlternateTemplateIndexVariableName(const AbstractMetaClass *metaClass)
 {
-    if (alternativeTemplateName) {
-        const AbstractMetaClass *templateBaseClass = metaClass->templateBaseClass();
-        if (!templateBaseClass)
-            return QString();
-        QString result = QLatin1String("SBK_")
-            + _fixedCppTypeName(templateBaseClass->typeEntry()->qualifiedCppName()).toUpper();
-        for (const auto &instantiation : metaClass->templateBaseClassInstantiations())
-            result += processInstantiationsVariableName(instantiation);
-        appendIndexSuffix(&result);
-        return result;
-    }
+    const AbstractMetaClass *templateBaseClass = metaClass->templateBaseClass();
+    Q_ASSERT(templateBaseClass);
+    QString result = QLatin1String("SBK_")
+        + _fixedCppTypeName(templateBaseClass->typeEntry()->qualifiedCppName()).toUpper();
+    for (const auto &instantiation : metaClass->templateBaseClassInstantiations())
+        result += processInstantiationsVariableName(instantiation);
+    appendIndexSuffix(&result);
+    return result;
+}
+
+QString ShibokenGenerator::getTypeIndexVariableName(const AbstractMetaClass *metaClass)
+{
     return getTypeIndexVariableName(metaClass->typeEntry());
 }
 QString ShibokenGenerator::getTypeIndexVariableName(const TypeEntry *type)

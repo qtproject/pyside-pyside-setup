@@ -332,6 +332,23 @@ static inline void _writeTypeIndexValueLine(TextStream &s,
     s << ",\n";
 }
 
+// Find equivalent typedefs "using Foo=QList<int>", "using Bar=QList<int>"
+static const AbstractMetaClass *
+    findEquivalentTemplateTypedef(const AbstractMetaClassCList &haystack,
+                                  const AbstractMetaClass *needle)
+{
+    auto *templateBaseClass = needle->templateBaseClass();
+    const auto &instantiations = needle->templateBaseClassInstantiations();
+    for (auto *candidate : haystack) {
+        if (candidate->isTypeDef()
+            && candidate->templateBaseClass() == templateBaseClass
+            && candidate->templateBaseClassInstantiations() == instantiations) {
+            return candidate;
+        }
+    }
+    return nullptr;
+}
+
 void HeaderGenerator::writeTypeIndexValueLine(TextStream &s, const ApiExtractorResult &api,
                                               const TypeEntry *typeEntry)
 {
@@ -341,12 +358,22 @@ void HeaderGenerator::writeTypeIndexValueLine(TextStream &s, const ApiExtractorR
     const int typeIndex = typeEntry->sbkIndex();
     _writeTypeIndexValueLine(s, getTypeIndexVariableName(typeEntry), typeIndex);
     if (typeEntry->isComplex()) {
+        // For a typedef "using Foo=QList<int>", write a type index
+        // SBK_QLIST_INT besides SBK_FOO which is then matched by function
+        // argument. Check against duplicate typedefs for the same types.
         const auto *cType = static_cast<const ComplexTypeEntry *>(typeEntry);
         if (cType->baseContainerType()) {
             auto metaClass = AbstractMetaClass::findClass(api.classes(), cType);
             Q_ASSERT(metaClass != nullptr);
-            if (metaClass->templateBaseClass())
-                _writeTypeIndexValueLine(s, getTypeIndexVariableName(metaClass, true), typeIndex);
+            if (metaClass->isTypeDef()
+                && metaClass->templateBaseClass() != nullptr
+                && findEquivalentTemplateTypedef(m_alternateTemplateIndexes,
+                                                 metaClass) == nullptr) {
+                const QString indexVariable =
+                    getTypeAlternateTemplateIndexVariableName(metaClass);
+                _writeTypeIndexValueLine(s, indexVariable, typeIndex);
+                m_alternateTemplateIndexes.append(m_alternateTemplateIndexes);
+            }
         }
     }
     if (typeEntry->isEnum()) {

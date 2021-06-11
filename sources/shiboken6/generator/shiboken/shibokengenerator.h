@@ -330,14 +330,11 @@ protected:
     static QString cppApiVariableName(const QString &moduleName = QString());
     static QString pythonModuleObjectName(const QString &moduleName = QString());
     static QString convertersVariableName(const QString &moduleName = QString());
-    /**
-     *  Returns the type index variable name for a given class. If \p alternativeTemplateName is true
-     *  and the class is a typedef for a template class instantiation, it will return an alternative name
-     *  made of the template class and the instantiation values, or an empty string if the class isn't
-     *  derived from a template class at all.
-     */
-    static QString getTypeIndexVariableName(const AbstractMetaClass *metaClass,
-                                            bool alternativeTemplateName = false);
+    /// Returns the type index variable name for a given class.
+    static QString getTypeIndexVariableName(const AbstractMetaClass *metaClass);
+    /// Returns the type index variable name for a given typedef for a template
+    /// class instantiation made of the template class and the instantiation values
+    static QString getTypeAlternateTemplateIndexVariableName(const AbstractMetaClass *metaClass);
     static QString getTypeIndexVariableName(const TypeEntry *type);
     static QString getTypeIndexVariableName(const AbstractMetaType &type) ;
 
