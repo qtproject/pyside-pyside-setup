@@ -49,13 +49,7 @@ import fnmatch
 import itertools
 import glob
 
-# There is no urllib.request in Python2
-# even if Qt for Python doesn't support python2, we need the support for calling the
-# build scipts with python2.
-try:
-    import urllib.request as urllib
-except ImportError:
-    import urllib
+import urllib.request as urllib
 
 import distutils.log as log
 from distutils.errors import DistutilsSetupError
