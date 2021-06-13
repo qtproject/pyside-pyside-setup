@@ -173,7 +173,7 @@ PyTypeObject *SbkObjectType_TypeF(void)
         //              so we can overwrite it a bit.
         type_getattro = PyType_Type.tp_getattro;
         SbkObjectType_Type_spec.basicsize =
-            PepHeapType_SIZE + sizeof(SbkObjectTypePrivate);
+            PepHeapType_SIZE + sizeof(SbkObjectTypePrivate *);
         type = reinterpret_cast<PyTypeObject *>(SbkType_FromSpec(&SbkObjectType_Type_spec));
     }
     return type;
@@ -635,7 +635,7 @@ static PyObject *SbkObjectTypeTpNew(PyTypeObject *metatype, PyObject *args, PyOb
     Shiboken::ObjectType::initPrivateData(newType);
     SbkObjectTypePrivate *sotp = PepType_SOTP(newType);
 
-    const auto bases = Shiboken::getCppBaseClasses(reinterpret_cast<PyTypeObject *>(newType));
+    const auto bases = Shiboken::getCppBaseClasses(&newType->type);
     if (bases.size() == 1) {
         SbkObjectTypePrivate *parentType = PepType_SOTP(bases.front());
         sotp->mi_offsets = parentType->mi_offsets;
@@ -654,8 +654,15 @@ static PyObject *SbkObjectTypeTpNew(PyTypeObject *metatype, PyObject *args, PyOb
         sotp->is_multicpp = 1;
         sotp->converter = nullptr;
     }
-    if (bases.size() == 1)
-        sotp->original_name = strdup(PepType_SOTP(bases.front())->original_name);
+    if (bases.size() == 1) {
+        // PYSIDE-1599 The function `initPrivateData` is called too often. Therefore,
+        // it can happen that `original_name` is NULL although it was initialized.
+        // XXX Try to remove `original_name` and improve the initialization.
+        const char *original_name = PepType_SOTP(bases.front())->original_name;
+        if (original_name == nullptr)
+            original_name = "object";
+        sotp->original_name = strdup(original_name);
+    }
     else
         sotp->original_name = strdup("object");
     sotp->user_data = nullptr;

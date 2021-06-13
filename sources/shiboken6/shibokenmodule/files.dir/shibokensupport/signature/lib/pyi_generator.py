@@ -316,7 +316,7 @@ def generate_pyi(import_name, outpath, options):
     if options and options.check or is_ci:
         # Python 3.7 and up: We can check the file directly if the syntax is ok.
         if USE_PEP563:
-            subprocess.check_output([sys.executable, outfilepath])
+            subprocess.check_output([sys.executable, os.fspath(outfilepath)])
 
 
 if __name__ == "__main__":
