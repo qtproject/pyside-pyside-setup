@@ -118,7 +118,7 @@ class ExactEnumerator(object):
             return ret
         bases_list = []
         for base in klass.__bases__:
-            name = base.__name__
+            name = base.__qualname__
             if name not in ("object", "property", "type"):
                 name = base.__module__ + "." + name
             bases_list.append(name)
