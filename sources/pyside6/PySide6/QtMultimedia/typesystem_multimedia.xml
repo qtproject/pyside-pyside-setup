@@ -47,7 +47,6 @@
     <namespace-type name="QAudio">
         <enum-type name="Error"/>
         <enum-type name="Mode"/>
-        <enum-type name="Role" since="5.6"/>
         <enum-type name="State"/>
         <enum-type name="VolumeScale" since="5.8"/>
     </namespace-type>
@@ -55,12 +54,17 @@
     <value-type name="QAudioBuffer"/>
     <object-type name="QAudioDecoder">
         <enum-type name="Error"/>
-        <enum-type name="State"/>
     </object-type>
     <value-type name="QAudioFormat">
         <enum-type name="SampleFormat" since="6.1"/>
+        <enum-type name="ChannelConfig"/>
     </value-type>
-    <value-type name="QAudioDevice"/>
+    <value-type name="QAudioDevice">
+        <enum-type name="Mode"/>
+    </value-type>
+
+    <object-type name="QAudioInput"/>
+    <object-type name="QAudioOutput"/>
 
     <object-type name="QAudioSource">
       <modify-function signature="start()">
@@ -94,7 +98,6 @@
         <enum-type name="Feature" flags="Features" since="6.1"/>
         <enum-type name="FlashMode" since="6.1"/>
         <enum-type name="FocusMode" since="6.1"/>
-        <enum-type name="Status"/>
         <enum-type name="TorchMode" since="6.1"/>
         <enum-type name="WhiteBalanceMode" since="6.1"/>
     </object-type>
@@ -102,29 +105,13 @@
     <value-type name="QCameraDevice">
         <enum-type name="Position" since="6.1"/>
     </value-type>
-    <object-type name="QCameraImageCapture">
+    <object-type name="QImageCapture">
         <enum-type name="Error"/>
+        <enum-type name="FileFormat"/>
+        <enum-type name="Quality"/>
     </object-type>
-
-    <value-type name="QImageEncoderSettings">
-        <enum-type name="FileFormat" since="6.1"/>
-        <enum-type name="Quality" since="6.1"/>
-    </value-type>
 
     <object-type name="QMediaCaptureSession" since="6.1"/>
-
-    <object-type name="QMediaEncoderBase" since="6.1">
-        <enum-type name="Error"/>
-        <enum-type name="State"/>
-        <enum-type name="Status"/>
-    </object-type>
-    <object-type name="QMediaEncoder" since="6.1"/>
-
-    <value-type name="QMediaEncoderSettings" since="6.1">
-        <enum-type name="EncodingMode"/>
-        <enum-type name="Quality"/>
-        <enum-type name="ResolveFlags"/>
-    </value-type>
 
     <object-type name="QMediaDevices" since="6.1"/>
 
@@ -144,12 +131,15 @@
         <enum-type name="PlaybackState" since="6.1"/>
         <enum-type name="Error"/>
     </object-type>
-    <object-type name="QMediaPlaylist">
-        <enum-type name="PlaybackMode"/>
-        <enum-type name="Error"/>
-    </object-type>
+    <!-- see qtmultimedia/5773f7214c7430a98dea3974c0597cb3ee0ea7f5 might reappear in 6.3
+    <object-type name="QMediaPlaylist"/>
+     -->
     <object-type name="QMediaRecorder">
-        <enum-type name="CaptureMode" since="6.1"/>
+        <enum-type name="Error" since="6.1"/>
+        <enum-type name="EncodingMode" since="6.1"/>
+        <enum-type name="RecorderState" since="6.1"/>
+        <enum-type name="Quality" since="6.1"/>
+        <enum-type name="Status" since="6.1"/>
     </object-type>
     <value-type name="QMediaTimeRange">
         <value-type name="Interval"/>
