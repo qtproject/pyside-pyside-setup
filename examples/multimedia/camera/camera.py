@@ -48,7 +48,7 @@ from PySide6.QtGui import QAction, QGuiApplication, QDesktopServices, QIcon
 from PySide6.QtGui import QImage, QPixmap
 from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLabel,
     QMainWindow, QPushButton, QTabWidget, QToolBar, QVBoxLayout, QWidget)
-from PySide6.QtMultimedia import (QCamera, QCameraImageCapture,
+from PySide6.QtMultimedia import (QCamera, QImageCapture,
                                   QCameraDevice, QMediaCaptureSession,
                                   QMediaDevices)
 from PySide6.QtMultimediaWidgets import QVideoWidget
@@ -104,7 +104,7 @@ class MainWindow(QMainWindow):
             self._camera_info = available_cameras[0]
             self._camera = QCamera(self._camera_info)
             self._camera.errorOccurred.connect(self._camera_error)
-            self._image_capture = QCameraImageCapture(self._camera)
+            self._image_capture = QImageCapture(self._camera)
             self._image_capture.imageCaptured.connect(self.image_captured)
             self._image_capture.imageSaved.connect(self.image_saved)
             self._image_capture.errorOccurred.connect(self._capture_error)
@@ -141,7 +141,7 @@ class MainWindow(QMainWindow):
         self._camera_viewfinder = QVideoWidget()
         self._tab_widget.addTab(self._camera_viewfinder, "Viewfinder")
 
-        if self._camera and self._camera.status() != QCamera.UnavailableStatus:
+        if self._camera and self._camera.error() == QCamera.NoError:
             name = self._camera_info.description()
             self.setWindowTitle(f"PySide6 Camera Example ({name})")
             self.show_status_message(f"Starting: '{name}'")
@@ -158,7 +158,7 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage(message, 5000)
 
     def closeEvent(self, event):
-        if self._camera and self._camera.status() == QCamera.ActiveStatus:
+        if self._camera and self._camera.isActive():
             self._camera.stop()
         event.accept()
 
@@ -190,7 +190,7 @@ class MainWindow(QMainWindow):
         self._tab_widget.addTab(image_view, f"Capture #{index}")
         self._tab_widget.setCurrentIndex(index)
 
-    @Slot(int, QCameraImageCapture.Error, str)
+    @Slot(int, QImageCapture.Error, str)
     def _capture_error(self, id, error, error_string):
         print(error_string, file=sys.stderr)
         self.show_status_message(error_string)

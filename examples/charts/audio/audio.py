@@ -44,8 +44,8 @@
 import sys
 from PySide6.QtCharts import QChart, QChartView, QLineSeries, QValueAxis
 from PySide6.QtCore import QPointF, Slot
-from PySide6.QtMultimedia import (QAudioDeviceInfo, QAudioFormat,
-        QAudioInput, QMediaDevices)
+from PySide6.QtMultimedia import (QAudioDevice, QAudioFormat,
+        QAudioSource, QMediaDevices)
 from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox
 
 
@@ -80,7 +80,7 @@ class MainWindow(QMainWindow):
         format_audio.setChannelCount(1)
         format_audio.setSampleFormat(QAudioFormat.UInt8)
 
-        self._audio_input = QAudioInput(device, format_audio, self)
+        self._audio_input = QAudioSource(device, format_audio, self)
         self._io_device = self._audio_input.start()
         self._io_device.readyRead.connect(self._readyRead)
 

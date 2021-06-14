@@ -48,7 +48,7 @@ from struct import pack
 
 from PySide6.QtCore import (QByteArray, QIODevice, Qt, QSysInfo, QTimer,
                             qWarning, Slot)
-from PySide6.QtMultimedia import (QAudio, QAudioDeviceInfo, QAudioFormat,
+from PySide6.QtMultimedia import (QAudio, QAudioDevice, QAudioFormat,
                                   QAudioSink, QMediaDevices)
 from PySide6.QtWidgets import (QApplication, QComboBox, QHBoxLayout, QLabel,
                                QMainWindow, QPushButton, QSlider,

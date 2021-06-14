@@ -5,23 +5,21 @@ ${QtMultimedia_GEN_DIR}/qaudiobuffer_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qaudiodecoder_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qaudiodevice_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qaudioformat_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qaudioinput_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qaudiooutput_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qaudiosink_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qaudiosource_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qaudio_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qcameraformat_wrapper.cpp
-${QtMultimedia_GEN_DIR}/qcameraimagecapture_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qcameradevice_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qcamera_wrapper.cpp
-${QtMultimedia_GEN_DIR}/qimageencodersettings_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qimagecapture_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qmediacapturesession_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qmediadevices_wrapper.cpp
-${QtMultimedia_GEN_DIR}/qmediaencoderbase_wrapper.cpp
-${QtMultimedia_GEN_DIR}/qmediaencoder_wrapper.cpp
-${QtMultimedia_GEN_DIR}/qmediaencodersettings_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qmediaformat_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qmediametadata_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qmediaplayer_wrapper.cpp
-${QtMultimedia_GEN_DIR}/qmediaplaylist_wrapper.cpp
+# ${QtMultimedia_GEN_DIR}/qmediaplaylist_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qmediarecorder_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qmediatimerange_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qmediatimerange_interval_wrapper.cpp
