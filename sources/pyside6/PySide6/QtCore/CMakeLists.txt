@@ -28,6 +28,7 @@ ${QtCore_GEN_DIR}/qbytearray_frombase64result_wrapper.cpp
 ${QtCore_GEN_DIR}/qbytearray_wrapper.cpp
 ${QtCore_GEN_DIR}/qbytearraymatcher_wrapper.cpp
 ${QtCore_GEN_DIR}/qcalendar_wrapper.cpp
+${QtCore_GEN_DIR}/qcalendar_systemid_wrapper.cpp
 ${QtCore_GEN_DIR}/qcalendar_yearmonthday_wrapper.cpp
 ${QtCore_GEN_DIR}/qcborarray_wrapper.cpp
 ${QtCore_GEN_DIR}/qcborerror_wrapper.cpp

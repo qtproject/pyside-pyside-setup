@@ -203,7 +203,6 @@
     <object-type name="QNetworkInformation">
         <enum-type name="Reachability"/>
         <enum-type name="Feature" flags="Features"/>
-        <enum-type name="TriState" since="6.2"/>
     </object-type>
     <object-type name="QNetworkCookieJar"/>
     <value-type name="QNetworkDatagram" since="5.8"/>

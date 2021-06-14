@@ -139,7 +139,6 @@
         <enum-type name="EncodingMode" since="6.1"/>
         <enum-type name="RecorderState" since="6.1"/>
         <enum-type name="Quality" since="6.1"/>
-        <enum-type name="Status" since="6.1"/>
     </object-type>
     <value-type name="QMediaTimeRange">
         <value-type name="Interval"/>
