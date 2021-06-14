@@ -2515,6 +2515,7 @@
     <modify-function signature="sendEvent(QObject*,QEvent*)" allow-thread="yes"/>
     <modify-function signature="sendPostedEvents(QObject*,int)" allow-thread="yes"/>
     <modify-function signature="instance()">
+      <modify-argument index="return" pyi-type="Optional[PySide6.QtCore.QCoreApplication]"/>
       <inject-code class="target" file="../glue/qtcore.cpp" snippet="qcoreapplication-instance"/>
     </modify-function>
 
