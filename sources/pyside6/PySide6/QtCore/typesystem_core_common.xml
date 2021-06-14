@@ -1748,7 +1748,8 @@
     </add-function>
 
     <add-function signature="tr(const char*,const char*,int)" return-type="QString">
-        <modify-argument index="2">
+        <modify-argument index="1" pyi-type="str"/>
+        <modify-argument index="2" pyi-type="str">
           <replace-default-expression with="0"/>
         </modify-argument>
         <modify-argument index="3">
