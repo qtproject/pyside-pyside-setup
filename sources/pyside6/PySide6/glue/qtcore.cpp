@@ -815,7 +815,9 @@ qRegisterMetaType<QList<int> >("QList<int>");
 // @snippet qobject-metaobject
 
 // @snippet qobject-findchild-1
-static QObject *_findChildHelper(const QObject *parent, const QString &name, PyTypeObject *desiredType)
+static QObject *_findChildHelper(const QObject *parent, const QString &name,
+                                 PyTypeObject *desiredType,
+                                 Qt::FindChildOptions options)
 {
     for (auto *child : parent->children()) {
         Shiboken::AutoDecRef pyChild(%CONVERTTOPYTHON[QObject *](child));
@@ -825,10 +827,12 @@ static QObject *_findChildHelper(const QObject *parent, const QString &name, PyT
         }
     }
 
-    for (auto *child : parent->children()) {
-        QObject *obj = _findChildHelper(child, name, desiredType);
-        if (obj)
-            return obj;
+    if (options.testFlag(Qt::FindChildrenRecursively)) {
+        for (auto *child : parent->children()) {
+            QObject *obj = _findChildHelper(child, name, desiredType, options);
+            if (obj)
+                return obj;
+        }
     }
     return nullptr;
 }
@@ -844,25 +848,28 @@ static inline bool _findChildrenComparator(const QObject *&child, const QString 
 }
 
 template<typename T>
-static void _findChildrenHelper(const QObject *parent, const T& name, PyTypeObject *desiredType, PyObject *result)
+static void _findChildrenHelper(const QObject *parent, const T& name, PyTypeObject *desiredType,
+                                Qt::FindChildOptions options,
+                                PyObject *result)
 {
     for (const auto *child : parent->children()) {
         Shiboken::AutoDecRef pyChild(%CONVERTTOPYTHON[QObject *](child));
         if (PyType_IsSubtype(Py_TYPE(pyChild), desiredType) && _findChildrenComparator(child, name))
             PyList_Append(result, pyChild);
-        _findChildrenHelper(child, name, desiredType, result);
+        if (options.testFlag(Qt::FindChildrenRecursively))
+            _findChildrenHelper(child, name, desiredType, options, result);
     }
 }
 // @snippet qobject-findchild-1
 
 // @snippet qobject-findchild-2
-QObject *child = _findChildHelper(%CPPSELF, %2, reinterpret_cast<PyTypeObject *>(%PYARG_1));
+QObject *child = _findChildHelper(%CPPSELF, %2, reinterpret_cast<PyTypeObject *>(%PYARG_1), %3);
 %PYARG_0 = %CONVERTTOPYTHON[QObject *](child);
 // @snippet qobject-findchild-2
 
 // @snippet qobject-findchildren
 %PYARG_0 = PyList_New(0);
-_findChildrenHelper(%CPPSELF, %2, reinterpret_cast<PyTypeObject *>(%PYARG_1), %PYARG_0);
+_findChildrenHelper(%CPPSELF, %2, reinterpret_cast<PyTypeObject *>(%PYARG_1), %3, %PYARG_0);
 // @snippet qobject-findchildren
 
 // @snippet qobject-tr

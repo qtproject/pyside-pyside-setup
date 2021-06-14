@@ -38,7 +38,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QObject, QRegularExpression, QTimer
+from PySide6.QtCore import QObject, QRegularExpression, QTimer, Qt
 
 
 class ParentRefCountCase(unittest.TestCase):
@@ -112,6 +112,32 @@ class ParentCase(unittest.TestCase):
 
         for i, child in enumerate(children):
             self.assertEqual(child, parent.findChild(QObject, f'object{i}'))
+
+
+    def testFindChildOptions(self):
+        parent = QObject()
+        child  = QObject(parent)
+        nested_child_name = 'nestedChild'
+        nested_child = QObject(child)
+        nested_child.setObjectName(nested_child_name)
+
+        search_result = parent.findChild(QObject, nested_child_name)
+        self.assertTrue(search_result)
+        search_result = parent.findChild(QObject, nested_child_name,
+                                         Qt.FindChildrenRecursively)
+        self.assertTrue(search_result)
+        search_result = parent.findChild(QObject, nested_child_name,
+                                         Qt.FindDirectChildrenOnly)
+        self.assertFalse(search_result)
+
+        search_results = parent.findChildren(QObject, nested_child_name)
+        self.assertEqual(len(search_results), 1)
+        search_result = parent.findChildren(QObject, nested_child_name,
+                                            Qt.FindChildrenRecursively)
+        self.assertEqual(len(search_results), 1)
+        search_results = parent.findChildren(QObject, nested_child_name,
+                                             Qt.FindDirectChildrenOnly)
+        self.assertEqual(len(search_results), 0)
 
     def testFindChildWithoutName(self):
         parent = QObject()
