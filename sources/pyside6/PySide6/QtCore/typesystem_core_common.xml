@@ -1674,7 +1674,8 @@
 
 
     <inject-code class="native" file="../glue/qtcore.cpp" snippet="qobject-findchild-1"/>
-    <add-function signature="findChild(PyTypeObject*,const QString&amp;)" return-type="PyObject*">
+    <add-function signature="findChild(PyTypeObject*@type@,const QString&amp;@name@,Qt::FindChildOptions@options@=Qt::FindChildrenRecursively)"
+                  return-type="PyObject*">
         <inject-documentation format="target" mode="append">
         To find the child of a certain QObject, the first argument of this function should be the child's type, and the second the name of the child:
 
@@ -1696,7 +1697,8 @@
           <replace-default-expression with="QString()"/>
       </modify-argument>
     </add-function>
-    <add-function signature="findChildren(PyTypeObject*,const QString&amp;)" return-type="PySequence*" >
+    <add-function signature="findChildren(PyTypeObject*@type@,const QString&amp;@name@,Qt::FindChildOptions@options@=Qt::FindChildrenRecursively)"
+                  return-type="PySequence*" >
         <inject-documentation format="target" mode="append">
         Like the method *findChild*, the first parameter should be the child's type.
         </inject-documentation>
@@ -1708,7 +1710,8 @@
             <replace-default-expression with="QString()"/>
         </modify-argument>
     </add-function>
-    <add-function signature="findChildren(PyTypeObject*,const QRegularExpression&amp;)" return-type="PySequence*" >
+    <add-function signature="findChildren(PyTypeObject*@type@,const QRegularExpression&amp;@pattern@,Qt::FindChildOptions@options@=Qt::FindChildrenRecursively)"
+                  return-type="PySequence*" >
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-findchildren"/>
         <modify-argument index="return">
             <parent index="this" action="add"/>
