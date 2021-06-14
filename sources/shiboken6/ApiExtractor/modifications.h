@@ -193,6 +193,9 @@ public:
     QString modifiedType() const;
     void setModifiedType(const QString &value);
 
+    QString pyiType() const;
+    void setPyiType(const QString &value);
+
      // The text of the new default expression of the argument
     QString replacedDefaultExpression() const;
     void setReplacedDefaultExpression(const QString &value);

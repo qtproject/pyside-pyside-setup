@@ -506,6 +506,7 @@ public:
 
     QList<ReferenceCount> referenceCounts;
     QString modified_type;
+    QString pyiType;
     QString replacedDefaultExpression;
     TypeSystem::Ownership m_targetOwnerShip = TypeSystem::UnspecifiedOwnership;
     TypeSystem::Ownership m_nativeOwnerShip = TypeSystem::UnspecifiedOwnership;
@@ -543,6 +544,17 @@ void ArgumentModification::setModifiedType(const QString &value)
 {
     if (d->modified_type != value)
         d->modified_type = value;
+}
+
+QString ArgumentModification::pyiType() const
+{
+    return d->pyiType;
+}
+
+void ArgumentModification::setPyiType(const QString &value)
+{
+    if (d->pyiType != value)
+        d->pyiType = value;
 }
 
 QString ArgumentModification::replacedDefaultExpression() const

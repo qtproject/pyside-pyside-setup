@@ -81,6 +81,7 @@ static inline QString indexAttribute() { return QStringLiteral("index"); }
 static inline QString invalidateAfterUseAttribute() { return QStringLiteral("invalidate-after-use"); }
 static inline QString locationAttribute() { return QStringLiteral("location"); }
 static inline QString modifiedTypeAttribute() { return QStringLiteral("modified-type"); }
+static inline QString pyiTypeAttribute() { return QStringLiteral("pyi-type"); }
 static inline QString overloadNumberAttribute() { return QStringLiteral("overload-number"); }
 static inline QString ownershipAttribute() { return QStringLiteral("owner"); }
 static inline QString packageAttribute() { return QStringLiteral("package"); }
@@ -2044,6 +2045,7 @@ bool TypeSystemParser::parseModifyArgument(const ConditionalStreamReader &,
 
     QString index;
     QString renameTo;
+    QString pyiType;
     bool resetAfterUse = false;
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
@@ -2054,6 +2056,8 @@ bool TypeSystemParser::parseModifyArgument(const ConditionalStreamReader &,
                                            invalidateAfterUseAttribute(), false);
         } else if (name == renameAttribute()) {
             renameTo = attributes->takeAt(i).value().toString();
+        } else if (name == pyiTypeAttribute()) {
+            pyiType = attributes->takeAt(i).value().toString();
         }
     }
 
@@ -2069,6 +2073,7 @@ bool TypeSystemParser::parseModifyArgument(const ConditionalStreamReader &,
     ArgumentModification argumentModification = ArgumentModification(idx);
     argumentModification.setResetAfterUse(resetAfterUse);
     argumentModification.setRenamedToName(renameTo);
+    argumentModification.setPyiType(pyiType);
     m_contextStack.top()->functionMods.last().argument_mods().append(argumentModification);
     return true;
 }

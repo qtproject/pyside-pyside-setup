@@ -739,6 +739,24 @@ bool AbstractMetaFunction::isModifiedToArray(int argumentIndex) const
     return false;
 }
 
+QString AbstractMetaFunction::pyiTypeReplaced(int argumentIndex) const
+{
+    for (const auto &modification : modifications(declaringClass())) {
+        for (const ArgumentModification &argumentModification : modification.argument_mods()) {
+            if (argumentModification.index() == argumentIndex) {
+                QString type = argumentModification.pyiType();
+                if (!type.isEmpty())
+                    return type;
+                type = argumentModification.modifiedType();
+                if (!type.isEmpty())
+                    return type;
+            }
+        }
+    }
+
+    return {};
+}
+
 // Parameter 'comment' indicates usage as a code comment of the overload decisor
 QString AbstractMetaFunctionPrivate::formatMinimalSignature(const AbstractMetaFunction *q,
                                                             bool comment) const

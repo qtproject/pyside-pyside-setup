@@ -5061,7 +5061,7 @@ void CppGenerator::writeSignatureInfo(TextStream &s, const AbstractMetaFunctionC
             args << QLatin1String("self");
         const auto &arguments = f->arguments();
         for (qsizetype i = 0, size = arguments.size(); i < size; ++i) {
-            QString t = f->typeReplaced(i + 1);
+            QString t = f->pyiTypeReplaced(i + 1);
             if (t.isEmpty()) {
                 t = signatureParameter(arguments.at(i));
             } else {
@@ -5076,7 +5076,7 @@ void CppGenerator::writeSignatureInfo(TextStream &s, const AbstractMetaFunctionC
             s << idx-- << ':';
         s << funcName << '(' << args.join(QLatin1Char(',')) << ')';
         if (!f->isVoid()) {
-            QString t = f->typeReplaced(0);
+            QString t = f->pyiTypeReplaced(0);
             if (t.isEmpty())
                 t = f->type().pythonSignature();
             s << "->" << t;

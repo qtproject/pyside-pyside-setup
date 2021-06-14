@@ -301,6 +301,9 @@ public:
     QString typeReplaced(int argument_index) const;
     bool isModifiedToArray(int argumentIndex) const;
 
+    /// Return the (modified) type for the signature; modified-pyi-type, modified-type
+    QString pyiTypeReplaced(int argumentIndex) const;
+
     bool argumentRemoved(int) const;
     /**
     *   Verifies if any modification to the function is an inject code.

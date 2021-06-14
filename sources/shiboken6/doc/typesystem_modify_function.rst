@@ -18,7 +18,7 @@ modify-argument
 
          <modify-function>
              <modify-argument index="return | this | 1 ..." rename="..."
-              invalidate-after-use = "true | false">
+              invalidate-after-use = "true | false" pyi-type="...">
                  // modifications
              </modify-argument>
          </modify-function>
@@ -30,6 +30,13 @@ modify-argument
 
     The optional ``rename`` attribute is used to rename a argument and use this
     new name in the generated code.
+
+    The optional ``pyi-type`` attribute specifies the type to appear in the
+    signature strings and  ``.pyi`` files. The type string is determined by
+    checking this attribute value, the :ref:`replace-type` modification and
+    the C++ type. The attribute can be used for example to enclose
+    a pointer return value within ``Optional[]`` to indicate that ``None``
+    can occur.
 
     For the optional ``invalidate-after-use`` attribute,
     see :ref:`invalidationafteruse` .
