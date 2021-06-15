@@ -33,6 +33,28 @@ accept_configuration:
         - condition: property
           property: features
           contains_value: TestOnly
+    - condition: and
+      conditions:
+        - condition: property
+          property: host.osVersion
+          equals_value: MacOS_11_00
+        - condition: property
+          property: features
+          contains_value: Packaging
+    - condition: and
+      conditions:
+        - condition: property
+          property: host.osVersion
+          equals_value: MacOS_11_00
+        - condition: property
+          property: host.arch
+          equals_value: ARM64
+        - condition: property
+          property: features
+          contains_value: TestOnly
+        - condition: property
+          property: features
+          contains_value: Packaging
 
 machine_type:
   Build:

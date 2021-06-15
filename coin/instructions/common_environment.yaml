@@ -106,6 +106,13 @@ instructions:
          equals_value: Windows
     - type: PrependToEnvironmentVariable
       variableName: PATH
+      variableValue: "/Users/qt/.local/bin/:"
+      enable_if:
+         condition: property
+         property: host.osVersion
+         equals_value: MacOS_11_00
+    - type: PrependToEnvironmentVariable
+      variableName: PATH
       variableValue: "/Users/qt/work/install/bin:"
       enable_if:
          condition: property
