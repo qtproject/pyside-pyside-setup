@@ -5,13 +5,33 @@ enable_if:
   not_contains_value: LicenseCheck
 instructions:
   - type: ExecuteCommand
+    command: "python3 -u coin_test_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=/Users/qt/work/install --targetOs={{.Env.CI_OS}} --hostArch=ARM64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}}"
+    maxTimeInSeconds: 14400
+    maxTimeBetweenOutput: 1200
+    enable_if:
+        condition: and
+        conditions:
+          - condition: property
+            property: host.osVersion
+            equals_value: MacOS_11_00
+          - condition: property
+            property: host.arch
+            equals_value: ARM64
+    userMessageOnFailure: >
+         Failed to execute test instructions on arm mac
+  - type: ExecuteCommand
     command: "python3 -u coin_test_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=/Users/qt/work/install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}}"
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 1200
     enable_if:
-        condition: property
-        property: host.os
-        equals_value: MacOS
+        condition: and
+        conditions:
+          - condition: property
+            property: host.osVersion
+            equals_value: MacOS_11_00
+          - condition: property
+            property: host.arch
+            equals_value: X86_64
     userMessageOnFailure: >
          Failed to execute test instructions on osx
   - type: ExecuteCommand
