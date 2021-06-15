@@ -67,24 +67,8 @@ class QtInfo(object):
             # Dict to cache mkspecs variables.
             self._mkspecs_dict = {}
 
-        @staticmethod
-        def _effective_qmake_command(qmake, qt_version):
-            """Check whether qmake path is a link to qtchooser and append the
-            desired Qt version in that case"""
-            result = [qmake]
-            # Looking whether qmake path is a link to qtchooser and whether the link
-            # exists
-            if os.path.islink(qmake) and os.path.lexists(qmake):
-                if not qt_version:
-                    print("--qt must be specified when using qtchooser.")
-                    sys.exit(-1)
-                # Set -qt=X here.
-                if "qtchooser" in os.readlink(qmake):
-                    result.append(f"-qt={qt_version}")
-            return result
-
-        def setup(self, qmake, qt_version):
-            self._qmake_command = self._effective_qmake_command(qmake, qt_version)
+        def setup(self, qmake):
+            self._qmake_command = qmake
 
         @property
         def qmake_command(self):
@@ -167,7 +151,8 @@ class QtInfo(object):
 
         def _get_qmake_output(self, args_list=[], cwd=None):
             assert self._qmake_command
-            cmd = self._qmake_command + args_list
+            cmd = [self._qmake_command]
+            cmd.extend(args_list)
             proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=False,
                                     cwd=cwd)
             output = proc.communicate()[0]
