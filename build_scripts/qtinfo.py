@@ -45,6 +45,24 @@ import tempfile
 from pathlib import Path
 
 
+_CMAKE_LISTS = """cmake_minimum_required(VERSION 3.18)
+project(dummy LANGUAGES CXX)
+
+find_package(Qt6 COMPONENTS Core)
+
+get_target_property(darwin_target Qt6::Core QT_DARWIN_MIN_DEPLOYMENT_TARGET)
+message(STATUS "mkspec_qt_darwin_min_deployment_target=${darwin_target}")
+
+if(QT_FEATURE_debug_and_release)
+    message(STATUS "mkspec_build_type=debug_and_release")
+elseif(QT_FEATURE_debug)
+    message(STATUS "mkspec_build_type=debug")
+else()
+    message(STATUS "mkspec_build_type=release")
+endif()
+"""
+
+
 class QtInfo(object):
     _instance = None  # singleton helpers
 
@@ -61,13 +79,13 @@ class QtInfo(object):
 
     class __QtInfo:  # Python singleton
         def __init__(self):
+            self._cmake_command = None
             self._qmake_command = None
             # Dict to cache qmake values.
             self._query_dict = {}
-            # Dict to cache mkspecs variables.
-            self._mkspecs_dict = {}
 
-        def setup(self, qmake):
+        def setup(self, cmake, qmake):
+            self._cmake_command = cmake
             self._qmake_command = qmake
 
         @property
@@ -146,9 +164,6 @@ class QtInfo(object):
                 return None
             return self._query_dict[prop_name]
 
-        def get_mkspecs_variables(self):
-            return self._mkspecs_dict
-
         def _get_qmake_output(self, args_list=[], cwd=None):
             assert self._qmake_command
             cmd = [self._qmake_command]
@@ -177,27 +192,6 @@ class QtInfo(object):
             output = self._get_qmake_output(["-query"])
             self._query_dict = self._parse_query_properties(output)
 
-        def _parse_qt_build_type(self):
-            key = "QT_CONFIG"
-            if key not in self._mkspecs_dict:
-                return None
-
-            qt_config = self._mkspecs_dict[key]
-            if "debug_and_release" in qt_config:
-                return "debug_and_release"
-
-            split = qt_config.split(" ")
-            if "release" in split and "debug" in split:
-                return "debug_and_release"
-
-            if "release" in split:
-                return "release"
-
-            if "debug" in split:
-                return "debug"
-
-            return None
-
         def _get_other_properties(self):
             # Get the src property separately, because it is not returned by
             # qmake unless explicitly specified.
@@ -206,38 +200,47 @@ class QtInfo(object):
             self._query_dict[key] = result
 
             # Get mkspecs variables and cache them.
-            self._get_qmake_mkspecs_variables()
+            # FIXME Python 3.9 self._query_dict |= other_dict
+            for key, value in self._get_cmake_mkspecs_variables().items():
+                self._query_dict[key] = value
 
-            # Get macOS minimum deployment target.
-            key = "QMAKE_MACOSX_DEPLOYMENT_TARGET"
-            if key in self._mkspecs_dict:
-                self._query_dict[key] = self._mkspecs_dict[key]
-
-            # Figure out how Qt was built:
-            #   debug mode, release mode, or both.
-            build_type = self._parse_qt_build_type()
-            if build_type:
-                self._query_dict["BUILD_TYPE"] = build_type
-
-        def _get_qmake_mkspecs_variables(self):
-            # Create an empty qmake project file in a temporary directory
-            # where also the .qmake.stash file will be created.
-            lines = []
-            with tempfile.TemporaryDirectory() as tempdir:
-                pro_file = Path(tempdir) / 'project.pro'
-                pro_file.write_text('')
-                # Query qmake for all of its mkspecs variables.
-                args = ["-E", os.fspath(pro_file)]
-                qmake_output = self._get_qmake_output(args, cwd=tempdir)
-                lines = [s.strip() for s in qmake_output.splitlines()]
-
-            if not lines:
-                raise RuntimeError("Could not determine qmake variables")
-
-            pattern = re.compile(r"^(.+?)=(.+?)$")
-            for line in lines:
-                found = pattern.search(line)
+        @staticmethod
+        def _parse_cmake_mkspecs_variables(output):
+            # Helper for _get_cmake_mkspecs_variables(). Parse the output for
+            # anything prefixed '-- mkspec_' as created by the message() calls
+            # in _CMAKE_LISTS.
+            result = {}
+            pattern = re.compile(r"^-- mkspec_(.*)=(.*)$")
+            for line in output.splitlines():
+                found = pattern.search(line.strip())
                 if found:
                     key = found.group(1).strip()
                     value = found.group(2).strip()
-                    self._mkspecs_dict[key] = value
+                    # Get macOS minimum deployment target.
+                    if key == 'qt_darwin_min_deployment_target':
+                        result['QMAKE_MACOSX_DEPLOYMENT_TARGET'] = value
+                    # Figure out how Qt was built
+                    elif key == 'build_type':
+                        result['BUILD_TYPE'] = value
+            return result
+
+        def _get_cmake_mkspecs_variables(self):
+            # Create an empty cmake project file in a temporary directory and
+            # parse the output to determine some mkspec values.
+            output = ''
+            error = ''
+            return_code = 0
+            with tempfile.TemporaryDirectory() as tempdir:
+                cmake_list_file = Path(tempdir) / 'CMakeLists.txt'
+                cmake_list_file.write_text(_CMAKE_LISTS)
+                cmd = [self._cmake_command, '-G', 'Ninja', '.']
+                # FIXME Python 3.7: Use subprocess.run()
+                proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=False,
+                                        cwd=tempdir, universal_newlines=True)
+                output, error = proc.communicate()
+                proc.wait()
+                return_code = proc.returncode
+
+            if return_code != 0:
+                raise RuntimeError(f"Could not determine cmake variables: {error}")
+            return QtInfo.__QtInfo._parse_cmake_mkspecs_variables(output)
