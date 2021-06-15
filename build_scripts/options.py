@@ -206,7 +206,8 @@ class DistUtilsCommandMixin(object):
         ('sanitize-address', None, 'Build with address sanitizer'),
         ('shorter-paths', None, 'Use shorter paths'),
         ('doc-build-online', None, 'Build online documentation'),
-        ('qmake=', None, 'Path to qmake'),
+        ('qtpaths=', None, 'Path to qtpaths'),
+        ('qmake=', None, 'Path to qmake (deprecated, use qtpaths)'),
         ('qt=', None, 'Qt version'),
         ('cmake=', None, 'Path to CMake'),
         ('openssl=', None, 'Path to OpenSSL libraries'),
@@ -245,7 +246,9 @@ class DistUtilsCommandMixin(object):
         self.snapshot_build = False
         self.shorter_paths = False
         self.doc_build_online = False
+        self.qtpaths = None
         self.qmake = None
+        self.has_qmake_option = False
         self.qt = '5'
         self.cmake = None
         self.openssl = None
@@ -294,11 +297,18 @@ class DistUtilsCommandMixin(object):
         OPTION['SANITIZE_ADDRESS'] = self.sanitize_address
         OPTION['SHORTER_PATHS'] = self.shorter_paths
         OPTION['DOC_BUILD_ONLINE'] = self.doc_build_online
+
+        qtpaths_abs_path = os.path.abspath(self.qtpaths)
+        OPTION['QTPATHS'] = qtpaths_abs_path
+        # FIXME PYSIDE7: Remove qmake handling
         # make qtinfo.py independent of relative paths.
         qmake_abs_path = os.path.abspath(self.qmake)
         OPTION['QMAKE'] = qmake_abs_path
+        OPTION['HAS_QMAKE_OPTION'] = self.has_qmake_option
         OPTION['QT_VERSION'] = self.qt
-        QtInfo().setup(self.cmake, qmake_abs_path)
+        QtInfo().setup(qtpaths_abs_path, self.cmake, qmake_abs_path,
+                       self.has_qmake_option)
+
         OPTION['CMAKE'] = os.path.abspath(self.cmake)
         OPTION['OPENSSL'] = self.openssl
         OPTION['SHIBOKEN_CONFIG_DIR'] = self.shiboken_config_dir
@@ -324,7 +334,18 @@ class DistUtilsCommandMixin(object):
             log.error(f"'{self.cmake}' does not exist.")
             return False
 
-        if not self.qmake:
+        if not self.qtpaths:
+            self.qtpaths = find_executable("qtpaths")
+        if not self.qtpaths:
+            log.error("qtpaths could not be found.")
+            return False
+        if not os.path.exists(self.qtpaths):
+            log.error(f"'{self.qtpaths}' does not exist.")
+            return False
+
+        if self.qmake:
+            self.has_qmake_option = True
+        else:
             self.qmake = find_executable("qmake")
             if not self.qmake:
                 self.qmake = find_executable("qmake-qt5")

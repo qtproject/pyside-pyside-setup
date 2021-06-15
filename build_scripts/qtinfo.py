@@ -79,14 +79,18 @@ class QtInfo(object):
 
     class __QtInfo:  # Python singleton
         def __init__(self):
+            self._qtpaths_command = None
             self._cmake_command = None
             self._qmake_command = None
+            self._force_qmake = False
             # Dict to cache qmake values.
             self._query_dict = {}
 
-        def setup(self, cmake, qmake):
+        def setup(self, qtpaths, cmake, qmake, force_qmake):
+            self._qtpaths_command = qtpaths
             self._cmake_command = cmake
             self._qmake_command = qmake
+            self._force_qmake = force_qmake
 
         @property
         def qmake_command(self):
@@ -164,6 +168,19 @@ class QtInfo(object):
                 return None
             return self._query_dict[prop_name]
 
+        def _get_qtpaths_output(self, args_list=[], cwd=None):
+            assert self._qtpaths_command
+            cmd = [self._qtpaths_command]
+            cmd.extend(args_list)
+            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=False,
+                                    cwd=cwd, universal_newlines=True)
+            output, error = proc.communicate()
+            proc.wait()
+            if proc.returncode != 0:
+                raise RuntimeError(f"Could not run {self._qtpaths_command}: {error}")
+            return output
+
+        # FIXME PYSIDE7: Remove qmake handling
         def _get_qmake_output(self, args_list=[], cwd=None):
             assert self._qmake_command
             cmd = [self._qmake_command]
@@ -189,14 +206,20 @@ class QtInfo(object):
             return props
 
         def _get_query_properties(self):
-            output = self._get_qmake_output(["-query"])
+            if self._force_qmake:
+                output = self._get_qmake_output(["-query"])
+            else:
+                output = self._get_qtpaths_output(["--qt-query"])
             self._query_dict = self._parse_query_properties(output)
 
         def _get_other_properties(self):
             # Get the src property separately, because it is not returned by
             # qmake unless explicitly specified.
             key = "QT_INSTALL_PREFIX/src"
-            result = self._get_qmake_output(["-query", key])
+            if self._force_qmake:
+                result = self._get_qmake_output(["-query", key])
+            else:
+                result = self._get_qtpaths_output(["--qt-query", key])
             self._query_dict[key] = result
 
             # Get mkspecs variables and cache them.

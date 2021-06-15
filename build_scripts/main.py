@@ -500,7 +500,9 @@ class PysideBuild(_build, DistUtilsCommandMixin):
         self.py_scripts_dir = py_scripts_dir
 
         self.qtinfo = QtInfo()
-        qt_dir = os.path.dirname(OPTION["QMAKE"])
+        qt_dir = os.path.dirname(OPTION["QTPATHS"])
+        if OPTION['HAS_QMAKE_OPTION']:
+            qt_dir = os.path.dirname(OPTION["QMAKE"])
         qt_version = get_qt_version()
 
         # Update the PATH environment variable
