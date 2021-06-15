@@ -6,7 +6,6 @@ dependencies: [
       "../../qt/qt3d",
       "../../qt/qt5compat",
       "../../qt/qtactiveqt",
-      "../../qt/qtandroidextras",
       "../../qt/qtbase",
       "../../qt/qtcharts",
       "../../qt/qtconnectivity",
