@@ -50,3 +50,8 @@
     darwin ci
 [QtWidgets::qpicture_test]
     darwin ci
+# Unsolved Refcounting leaks in debug mode
+[pysidetest::property_python_test]
+    debug
+[signals::bug_79]
+    debug
