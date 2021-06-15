@@ -598,9 +598,13 @@ def init_PySide6_QtXmlPatterns():
 
 
 def init_PySide6_QtMultimedia():
-    import PySide6.QtMultimediaWidgets
-    # Check if foreign import is valid. See mapping.py in shiboken6.
-    check_module(PySide6.QtMultimediaWidgets)
+    # PYSIDE-1599: We force pyi testing in wheel_tester. This seems to fail, sometimes.
+    try:
+        import PySide6.QtMultimediaWidgets
+        check_module(PySide6.QtMultimediaWidgets)
+    except SystemError:
+        print("Failure importing QtMultimediaWidgets")
+        return locals()
     type_map.update({
         "QGraphicsVideoItem": PySide6.QtMultimediaWidgets.QGraphicsVideoItem,
         "qint64": int,
@@ -644,7 +648,9 @@ def init_PySide6_QtScript():
 
 
 def init_PySide6_QtTest():
+    from PySide6.QtCore import SignalInstance
     type_map.update({
+        "PySideSignalInstance": SignalInstance,
         "PySide6.QtTest.QTest.PySideQTouchEventSequence": PySide6.QtTest.QTest.QTouchEventSequence,
         "PySide6.QtTest.QTouchEventSequence": PySide6.QtTest.QTest.QTouchEventSequence,
     })
@@ -670,6 +676,13 @@ def init_PySide6_QtDataVisualization():
         "QBarDataArray*": QBarDataArray,
         "QSurfaceDataArray": QSurfaceDataArray,
         "QSurfaceDataArray*": QSurfaceDataArray,
+    })
+    return locals()
+
+
+def init_PySide6_QtBluetooth():
+    type_map.update({
+        "QVariant*": object,
     })
     return locals()
 

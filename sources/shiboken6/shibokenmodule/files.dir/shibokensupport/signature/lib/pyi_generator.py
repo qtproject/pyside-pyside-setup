@@ -212,6 +212,7 @@ def find_imports(text):
 FROM_IMPORTS = [
     ("typing", "Any Callable Dict List Optional overload Tuple Union".split()),
     ("PySide6.QtCore", ["PyClassProperty"]),
+    (None, ["builtins"]),
     ]
 
 def filter_from_imports(from_struct, text):
@@ -297,7 +298,11 @@ def generate_pyi(import_name, outpath, options):
                 text = outfile.getvalue()
                 for mod, imports in filter_from_imports(FROM_IMPORTS, text):
                     import_args = ', '.join(imports)
-                    wr.print(f"from {mod} import {import_args}")
+                    if mod is None:
+                        # special case, a normal import
+                        wr.print(f"import {import_args}")
+                    else:
+                        wr.print(f"from {mod} import {import_args}")
                 wr.print()
                 if need_imports:
                     for mod_name in find_imports(text):

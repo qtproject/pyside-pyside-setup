@@ -55,6 +55,19 @@ from shibokensupport.signature import get_signature as get_sig
 from shibokensupport.signature.layout import create_signature
 
 
+"""
+PYSIDE-1599: Making sure that pyi files always are tested.
+
+A new problem popped up when supporting true properties:
+When there exists an item named "property", then we cannot use
+the builtin `property` as decorator, but need to prefix it with "builtins".
+
+We scan for such a name in a class, and if there should a property be
+declared in the same class, we use `builtins.property` in the class and
+all sub-classes. The same consideration holds for "overload".
+"""
+
+
 class ExactEnumerator(object):
     """
     ExactEnumerator enumerates all signatures in a module as they are.
@@ -77,6 +90,7 @@ class ExactEnumerator(object):
         self.result_type = result_type
         self.fmt.level = 0
         self.fmt.is_method = self.is_method
+        self.collision_candidates = {"property", "overload"}
 
     def is_method(self):
         """
@@ -100,6 +114,7 @@ class ExactEnumerator(object):
             ret = self.result_type()
             self.fmt.class_name = None
             for class_name, klass in members:
+                self.collision_track = set()
                 ret.update(self.klass(class_name, klass))
             if len(members):
                 self.section()
@@ -145,6 +160,9 @@ class ExactEnumerator(object):
             elif isinstance(thing, property):
                 properties.append((thing_name, thing))
 
+            if thing_name in self.collision_candidates:
+                self.collision_track.add(thing_name)
+
         init_signature = getattr(klass, "__signature__", None)
         enums.sort(key=lambda tup: tup[1 : 3])  # sort by class then enum value
 
@@ -168,7 +186,9 @@ class ExactEnumerator(object):
             if len(subclasses):
                 self.section()
             for subclass_name, subclass in subclasses:
+                save = self.collision_track.copy()
                 ret.update(self.klass(subclass_name, subclass))
+                self.collision_track = save
                 self.fmt.class_name = class_name
             if len(subclasses):
                 self.section()
@@ -191,6 +211,8 @@ class ExactEnumerator(object):
     def function(self, func_name, func, decorator=None):
         self.func = func    # for is_method()
         ret = self.result_type()
+        if decorator in self.collision_track:
+            decorator = f"builtins.{decorator}"
         signature = self.get_signature(func, decorator)
         if signature is not None:
             with self.fmt.function(func_name, signature, decorator) as key:

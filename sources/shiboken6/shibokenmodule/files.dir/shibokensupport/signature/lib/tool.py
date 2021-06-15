@@ -46,7 +46,6 @@ https://stackoverflow.com/questions/18513821/python-metaclass-understanding-the-
 """
 
 from textwrap import dedent
-from types import SimpleNamespace
 
 
 def build_brace_pattern(level, separators):

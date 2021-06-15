@@ -291,8 +291,8 @@ def run_compiled_script(binary_path):
     log.info("")
 
 
-def execute_script(script_path):
-    args = [sys.executable, script_path]
+def execute_script(script_path, *extra):
+    args = list(map(str, (sys.executable, script_path) + extra))
     exit_code = run_process(args)
     if exit_code:
         raise RuntimeError("Failure while executing script: {}".format(script_path))
@@ -329,8 +329,8 @@ def try_build_examples():
         run_compiled_script(os.path.join(src_path,
                             "pyinstaller", "dist", "hello_app", "hello_app"))
 
-    src_path = Path(examples_dir) / "installer_test"
     log.info("Attempting to build hello.py using Nuitka.")
+    src_path = Path(examples_dir) / "installer_test"
     # Nuitka is loaded by coin_build_instructions.py, but not when
     # testing directly this script.
     run_nuitka_test(os.fspath(src_path / "hello.py"))
@@ -355,6 +355,17 @@ def try_build_examples():
     prepare_build_folder(src_path, "qmake")
     generate_build_qmake()
     run_make()
+
+    if sys.version_info[:2] >= (3, 7):
+        log.info("Checking Python Interface Files in Python 3 with all features selected")
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            src_path = Path(tmpdirname) / "pyi_test"
+            pyi_script_dir = Path(setup_script_dir) / "sources" / "pyside6" / "PySide6" / "support"
+            execute_script(pyi_script_dir / "generate_pyi.py", "all", "--outpath", src_path,
+                                            "--feature", "snake_case", "true_property")
+            from PySide6 import __all__ as modules
+            for modname in modules:
+                execute_script(src_path / f"{modname}.pyi")
 
 
 def run_wheel_tests(install_wheels):
