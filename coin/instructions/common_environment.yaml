@@ -1,6 +1,9 @@
 type: Group
 instructions:
     - type: EnvironmentVariable
+      variableName: QTEST_ENVIRONMENT
+      variableValue: "ci"
+    - type: EnvironmentVariable
       variableName: TARGET_ARCHITECTURE
       variableValue: amd64
       enable_if:
