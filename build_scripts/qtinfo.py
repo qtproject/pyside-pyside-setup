@@ -43,22 +43,6 @@ import re
 import subprocess
 
 
-def _effective_qmake_command(qmake, qt_version):
-    """Check whether qmake path is a link to qtchooser and append the
-       desired Qt version in that case"""
-    result = [qmake]
-    # Looking whether qmake path is a link to qtchooser and whether the link
-    # exists
-    if os.path.islink(qmake) and os.path.lexists(qmake):
-        if not qt_version:
-            print('--qt must be specified when using qtchooser.')
-            sys.exit(-1)
-        # Set -qt=X here.
-        if "qtchooser" in os.readlink(qmake):
-            result.append(f"-qt={qt_version}")
-    return result
-
-
 class QtInfo(object):
     class __QtInfo:  # Python singleton
         def __init__(self):
@@ -68,14 +52,11 @@ class QtInfo(object):
             # Dict to cache mkspecs variables.
             self._mkspecs_dict = {}
 
-        def setup(self, qmake, qt_version):
-            self._qmake_command = _effective_qmake_command(qmake, qt_version)
+        def setup(self, qmake):
+            self._qmake_command = qmake
 
         def get_qmake_command(self):
-            qmake_command_string = self._qmake_command[0]
-            for entry in self._qmake_command[1:]:
-                qmake_command_string = f"{qmake_command_string} {entry}"
-            return qmake_command_string
+            return self._qmake_command
 
         def get_version(self):
             return self.get_property("QT_VERSION")
@@ -137,7 +118,8 @@ class QtInfo(object):
 
         def _get_qmake_output(self, args_list=[]):
             assert(self._qmake_command)
-            cmd = self._qmake_command + args_list
+            cmd = [self._qmake_command]
+            cmd.extend(args_list)
             proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=False)
             output = proc.communicate()[0]
             proc.wait()

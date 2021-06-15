@@ -298,7 +298,7 @@ class DistUtilsCommandMixin(object):
         qmake_abs_path = os.path.abspath(self.qmake)
         OPTION['QMAKE'] = qmake_abs_path
         OPTION['QT_VERSION'] = self.qt
-        QtInfo().setup(qmake_abs_path, self.qt)
+        QtInfo().setup(qmake_abs_path)
         OPTION['CMAKE'] = os.path.abspath(self.cmake)
         OPTION['OPENSSL'] = self.openssl
         OPTION['SHIBOKEN_CONFIG_DIR'] = self.shiboken_config_dir
