@@ -73,22 +73,27 @@ def call_testrunner(python_ver, buildnro):
     python3 = "python3"
     if sys.platform == "win32":
         python3 = os.path.join(os.getenv("PYTHON3_PATH"), "python.exe")
-    run_instruction([python3, "-m", "pip", "install", "--user", "virtualenv==20.7.2"], "Failed to pin virtualenv")    # installing to user base might not be in PATH by default.
-    # installing to user base might not be in PATH by default.
-    env_path = os.path.join(site.USER_BASE, "bin")
-    v_env = os.path.join(env_path, "virtualenv")
-    if sys.platform == "win32":
-        env_path = os.path.join(site.USER_BASE, "Scripts")
-        v_env = os.path.join(env_path, "virtualenv.exe")
-    try:
-        run_instruction([v_env, "--version"], "Using default virtualenv")
-    except Exception as e:
-        v_env = "virtualenv"
 
-    run_instruction([v_env, "-p", _pExe,  _env], "Failed to create virtualenv")
-    # When the 'python_ver' variable is empty, we are using Python 2
-    # Pip is always upgraded when CI template is provisioned, upgrading it in later phase may cause perm issue
-    run_instruction([env_pip, "install", "-r", "requirements.txt"], "Failed to install dependencies")
+    if  CI_HOST_OS == "MacOS" and CI_HOST_ARCH == "ARM64": # we shouldn't install anything to m1, while it is not virtualized
+        v_env = "virtualenv"
+        run_instruction([v_env, "-p", _pExe,  _env], "Failed to create virtualenv")
+    else:
+        run_instruction([python3, "-m", "pip", "install", "--user", "virtualenv==20.7.2"], "Failed to pin virtualenv")
+        # installing to user base might not be in PATH by default.
+        env_path = os.path.join(site.USER_BASE, "bin")
+        v_env = os.path.join(env_path, "virtualenv")
+        if sys.platform == "win32":
+            env_path = os.path.join(site.USER_BASE, "Scripts")
+            v_env = os.path.join(env_path, "virtualenv.exe")
+        try:
+            run_instruction([v_env, "--version"], "Using default virtualenv")
+        except Exception as e:
+            v_env = "virtualenv"
+        run_instruction([v_env, "-p", _pExe,  _env], "Failed to create virtualenv")
+        # When the 'python_ver' variable is empty, we are using Python 2
+        # Pip is always upgraded when CI template is provisioned, upgrading it in later phase may cause perm issue
+        run_instruction([env_pip, "install", "-r", "requirements.txt"], "Failed to install dependencies")
+
     cmd = [env_python, "testrunner.py", "test",
                   "--blacklist", "build_history/blacklist.txt",
                   "--buildno=" + buildnro]
