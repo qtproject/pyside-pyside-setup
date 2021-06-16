@@ -231,6 +231,7 @@ type_map.update({
     "float": float,
     "int": int,
     "List": ArrayLikeVariable,
+    "Optional": typing.Optional,
     "long": int,
     "nullptr": None,
     "PyCallable": typing.Callable,
