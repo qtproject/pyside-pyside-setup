@@ -1894,7 +1894,8 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const AbstractMetaFunc
     s << cpythonFunctionName(rfunc)
         << "(PyObject *self, PyObject *args, PyObject *kwds)\n{\n" << indent;
 
-    if (usePySideExtensions() && metaClass->isQObject())
+    const bool needsMetaObject = usePySideExtensions() && metaClass->isQObject();
+    if (needsMetaObject)
         s << "const QMetaObject *metaObject;\n";
 
     s << "SbkObject *sbkSelf = reinterpret_cast<SbkObject *>(self);\n";
@@ -1908,6 +1909,11 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const AbstractMetaFunc
     if (metaClass->isAbstract()) {
         // C++ Wrapper disabled: Abstract C++ class cannot be instantiated.
         if (metaClass->typeEntry()->typeFlags().testFlag(ComplexTypeEntry::DisableWrapper)) {
+            writeUnusedVariableCast(s, QStringLiteral("sbkSelf"));
+            writeUnusedVariableCast(s, QStringLiteral("type"));
+            writeUnusedVariableCast(s, QStringLiteral("myType"));
+            if (needsMetaObject)
+                writeUnusedVariableCast(s, QStringLiteral("metaObject"));
             s << "PyErr_SetString(PyExc_NotImplementedError,\n" << indent
               << "\"Abstract class  '" << metaClass->qualifiedCppName()
               << "' cannot be instantiated since the wrapper has been disabled.\");\n" << outdent
@@ -1978,7 +1984,7 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const AbstractMetaFunc
 
     // Create metaObject and register signal/slot
     bool errHandlerNeeded = overloadData.maxArgs() > 0;
-    if (metaClass->isQObject() && usePySideExtensions()) {
+    if (needsMetaObject) {
         errHandlerNeeded = true;
         s << "\n// QObject setup\n"
             << "PySide::Signal::updateSourceObject(self);\n"
