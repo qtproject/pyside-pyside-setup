@@ -81,6 +81,10 @@ def rcc():
     qt_tool_wrapper("rcc", ['-g', 'python'] + sys.argv[1:])
 
 
+def assistant():
+    qt_tool_wrapper("assistant", sys.argv[1:])
+
+
 def _append_to_path_var(var, value):
     env_value = os.environ.get(var)
     if env_value:

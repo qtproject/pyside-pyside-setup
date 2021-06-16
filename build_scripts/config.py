@@ -216,6 +216,7 @@ class Config(object):
                 'console_scripts': [
                     f'{PYSIDE}-uic = {package_name}.scripts.pyside_tool:uic',
                     f'{PYSIDE}-rcc = {package_name}.scripts.pyside_tool:rcc',
+                    f'{PYSIDE}-assistant = {package_name}.scripts.pyside_tool:assistant',
                     f'{PYSIDE}-designer= {package_name}.scripts.pyside_tool:designer',
                     f'{PYSIDE}-lupdate = {package_name}.scripts.pyside_tool:main',
                     f'{PYSIDE}-genpyi = {package_name}.scripts.pyside_tool:genpyi',

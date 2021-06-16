@@ -167,7 +167,8 @@ def prepare_packages_posix(self, vars):
                 filter=["uic", "rcc"],
                 recursive=False, vars=vars))
 
-            # Copying designer
+            # Copying assistant/designer
+            executables.extend(_copy_gui_executable('assistant', vars=vars))
             executables.extend(_copy_gui_executable('designer', vars=vars))
 
         # <install>/lib/lib* -> {st_package_name}/

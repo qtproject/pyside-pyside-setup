@@ -89,6 +89,7 @@ def prepare_standalone_package_macos(self, vars):
 
     # Patching designer to use the Qt libraries provided in the wheel
     if config.is_internal_pyside_build():
+        _macos_patch_executable('assistant', vars)
         _macos_patch_executable('designer', vars)
 
     # <qt>/lib/* -> <setup>/{st_package_name}/Qt/lib

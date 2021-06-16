@@ -90,6 +90,8 @@ def prepare_standalone_package_linux(self, vars):
 
     # Patching designer to use the Qt libraries provided in the wheel
     if config.is_internal_pyside_build():
+        assistant_path = "{st_build_dir}/{st_package_name}/assistant".format(**vars)
+        linux_patch_executable(self._patchelf_path, assistant_path)
         designer_path = "{st_build_dir}/{st_package_name}/designer".format(**vars)
         linux_patch_executable(self._patchelf_path, designer_path)
 
