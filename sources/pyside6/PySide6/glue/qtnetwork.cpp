@@ -51,6 +51,22 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QHostAddress](ha));
 PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[quint16](port));
 // @snippet qudpsocket-readdatagram
 
+// @snippet qhostinfo-lookuphost-callable
+auto *callable = %PYARG_2;
+auto cppCallback = [callable](const QHostInfo &hostInfo)
+{
+    Shiboken::GilState state;
+    Shiboken::AutoDecRef arglist(PyTuple_New(1));
+    auto *pyHostInfo = %CONVERTTOPYTHON[QHostInfo](hostInfo);
+    PyTuple_SET_ITEM(arglist.object(), 0, pyHostInfo);
+    Shiboken::AutoDecRef ret(PyObject_CallObject(callable, arglist));
+    Py_DECREF(callable);
+};
+
+Py_INCREF(callable);
+%CPPSELF.%FUNCTION_NAME(%1, cppCallback);
+// @snippet qhostinfo-lookuphost-callable
+
 // @snippet qipv6address-len
 return 16;
 // @snippet qipv6address-len
