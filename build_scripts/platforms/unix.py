@@ -51,6 +51,31 @@ from ..utils import regenerate_qt_resources
 from ..versions import PYSIDE, SHIBOKEN
 
 
+def _macos_copy_gui_executable(name, vars=None):
+    """macOS helper: Copy a GUI executable from the .app folder and return the
+       files"""
+    app_name = name[:1].upper() + name[1:] + '.app'
+    return copydir(f"{{install_dir}}/bin/{app_name}",
+                   f"{{st_build_dir}}/{{st_package_name}}/{app_name}",
+                   filter=None, recursive=True,
+                   force=False, vars=vars)
+
+
+def _unix_copy_gui_executable(name, vars=None):
+    """UNIX helper: Copy a GUI executable and return the files"""
+    return copydir("{install_dir}/bin/",
+                   "{st_build_dir}/{st_package_name}/",
+                   filter=[name],
+                   force=False, vars=vars)
+
+
+def _copy_gui_executable(name, vars=None):
+    """Copy a GUI executable and return the files"""
+    if  sys.platform == 'darwin':
+        return _macos_copy_gui_executable(name, vars)
+    return _unix_copy_gui_executable(name, vars)
+
+
 def prepare_packages_posix(self, vars):
     executables = []
 
@@ -143,18 +168,7 @@ def prepare_packages_posix(self, vars):
                 recursive=False, vars=vars))
 
             # Copying designer
-            if sys.platform == "darwin":
-                executables.extend(copydir(
-                    "{install_dir}/bin/Designer.app",
-                    "{st_build_dir}/{st_package_name}/Designer.app",
-                    filter=None, recursive=True,
-                    force=False, vars=vars))
-            else:
-                executables.extend(copydir(
-                    "{install_dir}/bin/",
-                    "{st_build_dir}/{st_package_name}/",
-                    filter=["designer"],
-                    force=False, vars=vars))
+            executables.extend(_copy_gui_executable('designer', vars=vars))
 
         # <install>/lib/lib* -> {st_package_name}/
         copydir(
