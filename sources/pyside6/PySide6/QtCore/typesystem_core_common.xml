@@ -916,19 +916,19 @@
     <enum-type name="SortFlag" flags="SortFlags"/>
 
     <!-- PYSIDE-1499: Replace QString by pathlib.Path (qdir.h) -->
-    <modify-function signature="QDir(const QString &amp;)" return-type="PyObject">
+    <modify-function signature="QDir(const QString &amp;)">
         <modify-argument index="1"><replace-type modified-type="PyPathLike"/></modify-argument>
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qfile-path-1"/>
     </modify-function>
-    <modify-function signature="QDir(const QString &amp;,const QString &amp;,SortFlags=SortFlags(Name|IgnoreCase),Filters=AllEntries)" return-type="PyObject">
+    <modify-function signature="QDir(const QString &amp;,const QString &amp;,SortFlags=SortFlags(Name|IgnoreCase),Filters=AllEntries)">
         <modify-argument index="1"><replace-type modified-type="PyPathLike"/></modify-argument>
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qfile-path-1"/>
     </modify-function>
-    <modify-function signature="setPath(const QString &amp;)" return-type="PyObject">
+    <modify-function signature="setPath(const QString &amp;)">
         <modify-argument index="1"><replace-type modified-type="PyPathLike"/></modify-argument>
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qfile-path-1"/>
     </modify-function>
-    <modify-function signature="addSearchPath(const QString &amp;,const QString &amp;)" return-type="PyObject">
+    <modify-function signature="addSearchPath(const QString &amp;,const QString &amp;)">
         <modify-argument index="2"><replace-type modified-type="PyPathLike"/></modify-argument>
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qfile-path-2"/>
     </modify-function>
@@ -1839,15 +1839,15 @@
     </extra-includes>
 
     <!-- PYSIDE-1499: Replace QString by pathlib.Path (qfileinfo.h) -->
-    <modify-function signature="QFileInfo(const QString &amp;)" return-type="PyObject">
+    <modify-function signature="QFileInfo(const QString &amp;)">
         <modify-argument index="1"><replace-type modified-type="PyPathLike"/></modify-argument>
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qfile-path-1"/>
     </modify-function>
-    <modify-function signature="QFileInfo(const QDir &amp;,const QString &amp;)" return-type="PyObject">
+    <modify-function signature="QFileInfo(const QDir &amp;,const QString &amp;)">
         <modify-argument index="2"><replace-type modified-type="PyPathLike"/></modify-argument>
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qfile-path-2"/>
     </modify-function>
-    <modify-function signature="setFile(const QString &amp;)" return-type="PyObject">
+    <modify-function signature="setFile(const QString &amp;)">
         <modify-argument index="1"><replace-type modified-type="PyPathLike"/></modify-argument>
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qfile-path-1"/>
     </modify-function>
@@ -2182,39 +2182,39 @@
 
   <object-type name="QFile">
     <!-- PYSIDE-1499: Replace QString by pathlib.Path (qfile.h) -->
-    <modify-function signature="fromFilesystemPath(const QString &amp;)" return-type="PyObject">
+    <modify-function signature="fromFilesystemPath(const QString &amp;)">
         <modify-argument index="1"><replace-type modified-type="PyPathLike"/></modify-argument>
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qfile-path-1"/>
     </modify-function>
-    <modify-function signature="QFile(const QString &amp;)" return-type="PyObject">
+    <modify-function signature="QFile(const QString &amp;)">
         <modify-argument index="1"><replace-type modified-type="PyPathLike"/></modify-argument>
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qfile-path-1"/>
     </modify-function>
-    <modify-function signature="QFile(const QString &amp;,QObject *)" return-type="PyObject">
+    <modify-function signature="QFile(const QString &amp;,QObject *)">
         <modify-argument index="1"><replace-type modified-type="PyPathLike"/></modify-argument>
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qfile-path-1"/>
     </modify-function>
-    <modify-function signature="setFileName(const QString &amp;)" return-type="PyObject">
+    <modify-function signature="setFileName(const QString &amp;)">
         <modify-argument index="1"><replace-type modified-type="PyPathLike"/></modify-argument>
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qfile-path-1"/>
     </modify-function>
-    <modify-function signature="rename(const QString &amp;)" return-type="PyObject">
+    <modify-function signature="rename(const QString &amp;)">
         <modify-argument index="1"><replace-type modified-type="PyPathLike"/></modify-argument>
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qfile-path-1"/>
     </modify-function>
-    <modify-function signature="link(const QString &amp;)" return-type="PyObject">
+    <modify-function signature="link(const QString &amp;)">
         <modify-argument index="1"><replace-type modified-type="PyPathLike"/></modify-argument>
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qfile-path-1"/>
     </modify-function>
-    <modify-function signature="copy(const QString &amp;)" return-type="PyObject">
+    <modify-function signature="copy(const QString &amp;)">
         <modify-argument index="1"><replace-type modified-type="PyPathLike"/></modify-argument>
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qfile-path-1"/>
     </modify-function>
-    <modify-function signature="permissions(const QString &amp;)" return-type="PyObject">
+    <modify-function signature="permissions(const QString &amp;)">
         <modify-argument index="1"><replace-type modified-type="PyPathLike"/></modify-argument>
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qfile-path-1"/>
     </modify-function>
-    <modify-function signature="setPermissions(const QString &amp;,Permissions)" return-type="PyObject">
+    <modify-function signature="setPermissions(const QString &amp;,Permissions)">
         <modify-argument index="1"><replace-type modified-type="PyPathLike"/></modify-argument>
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qfile-path-1"/>
     </modify-function>
