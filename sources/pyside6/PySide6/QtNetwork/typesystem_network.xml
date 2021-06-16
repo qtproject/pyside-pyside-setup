@@ -222,7 +222,11 @@
 
     <value-type name="QHostInfo">
         <enum-type name="HostInfoError"/>
-        <modify-function signature="lookupHost(QString,QObject*,const char*)" access="private"/>
+        <add-function signature="lookupHost(const QString &amp;,PyCallable)">
+            <inject-code class="target" position="beginning"
+                         file="../glue/qtnetwork.cpp"
+                         snippet="qhostinfo-lookuphost-callable"/>
+        </add-function>
     </value-type>
 
     <value-type name="QNetworkAddressEntry">
