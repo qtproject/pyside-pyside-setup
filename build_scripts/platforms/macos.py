@@ -44,6 +44,15 @@ from ..config import config
 from ..versions import PYSIDE
 
 
+def _macos_patch_executable(name, vars=None):
+    """ Patch an executable to run with the Qt libraries. """
+    upper_name = name[0:1].upper() + name[1:]
+    bundle = f"{{st_build_dir}}/{{st_package_name}}/{upper_name}.app".format(**vars)
+    binary = f"{bundle}/Contents/MacOS/{upper_name}"
+    rpath = "@loader_path/../../../Qt/lib"
+    macos_add_rpath(rpath, binary)
+
+
 def prepare_standalone_package_macos(self, vars):
     built_modules = vars['built_modules']
 
@@ -80,10 +89,7 @@ def prepare_standalone_package_macos(self, vars):
 
     # Patching designer to use the Qt libraries provided in the wheel
     if config.is_internal_pyside_build():
-        designer_bundle = "{st_build_dir}/{st_package_name}/Designer.app".format(**vars)
-        designer_binary = f"{designer_bundle}/Contents/MacOS/Designer"
-        rpath = "@loader_path/../../../Qt/lib"
-        macos_add_rpath(rpath, designer_binary)
+        _macos_patch_executable('designer', vars)
 
     # <qt>/lib/* -> <setup>/{st_package_name}/Qt/lib
     if self.qt_is_framework_build():

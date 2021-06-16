@@ -974,12 +974,7 @@ def copy_icu_libs(patchelf, destination_lib_dir):
         # Patch the QtCore library to find the copied over ICU libraries
         # (if necessary).
         log.info("Checking if QtCore library needs a new rpath to make it work with ICU libs.")
-        rpaths = linux_get_rpaths(qt_core_library_path)
-        if not rpaths or not rpaths_has_origin(rpaths):
-            log.info('Patching QtCore library to contain $ORIGIN rpath.')
-            rpaths.insert(0, '$ORIGIN')
-            new_rpaths_string = ":".join(rpaths)
-            linux_set_rpaths(patchelf, qt_core_library_path, new_rpaths_string)
+        linux_prepend_rpath(patchelf, qt_core_library_path, '$ORIGIN')
 
 
 def linux_run_read_elf(executable_path):
@@ -999,6 +994,21 @@ def linux_set_rpaths(patchelf, executable_path, rpath_string):
 
     if run_process(cmd) != 0:
         raise RuntimeError(f"Error patching rpath in {executable_path}")
+
+
+def linux_prepend_rpath(patchelf, executable_path, new_path):
+    """ Prepends a path to the rpaths of the executable unless it has ORIGIN. """
+    rpaths = linux_get_rpaths(executable_path)
+    if not rpaths or not rpaths_has_origin(rpaths):
+        rpaths.insert(0, new_path)
+        new_rpaths_string = ":".join(rpaths)
+        linux_set_rpaths(patchelf, executable_path, new_rpaths_string)
+        result = True
+
+
+def linux_patch_executable(patchelf, executable_path):
+    """ Patch an executable to run with the Qt libraries. """
+    linux_prepend_rpath(patchelf, executable_path, '$ORIGIN/../lib')
 
 
 def linux_get_dependent_libraries(executable_path):
