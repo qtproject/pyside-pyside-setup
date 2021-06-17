@@ -39,8 +39,10 @@ from helper.helper import quickview_errorstring
 
 from PySide6.QtCore import Property, QObject, QTimer, QUrl
 from PySide6.QtGui import QGuiApplication, QPen, QColor, QPainter
-from PySide6.QtQml import qmlRegisterType, ListProperty, QmlElement
+from PySide6.QtQml import (qjsEngine, qmlContext, qmlEngine, qmlRegisterType,
+                           ListProperty, QmlElement)
 from PySide6.QtQuick import QQuickView, QQuickItem, QQuickPaintedItem
+
 
 QML_IMPORT_NAME = "Charts"
 QML_IMPORT_MAJOR_VERSION = 1
@@ -122,7 +124,12 @@ class TestQmlSupport(unittest.TestCase):
         file = Path(__file__).resolve().parent / 'registertype.qml'
         self.assertTrue(file.is_file())
         view.setSource(QUrl.fromLocalFile(os.fspath(file)))
-        self.assertTrue(view.rootObject(), quickview_errorstring(view))
+        root_object = view.rootObject()
+        self.assertTrue(root_object, quickview_errorstring(view))
+        self.assertTrue(qjsEngine(root_object))
+        self.assertEqual(qmlEngine(root_object), view.engine())
+        self.assertTrue(qmlContext(root_object))
+
         view.show()
         QTimer.singleShot(250, view.close)
         app.exec()

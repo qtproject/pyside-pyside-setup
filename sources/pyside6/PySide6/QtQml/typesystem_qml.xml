@@ -101,6 +101,25 @@
         <inject-code class="target" file="../glue/qtqml.cpp" snippet="qmlelement"/>
     </add-function>
 
+    <function signature="qjsEngine(const QObject*)">
+        <modify-function>
+            <modify-argument index="return" pyi-type="Optional[PySide6.QtQml.QJSEngine]"/>
+        </modify-function>
+    </function>
+    <function signature="qmlClearTypeRegistrations()"/>
+    <function signature="qmlContext(const QObject*)">
+        <modify-function>
+            <modify-argument index="return" pyi-type="Optional[PySide6.QtQml.QQmlContext]"/>
+        </modify-function>
+    </function>
+    <function signature="qmlEngine(const QObject*)">
+        <modify-function>
+            <modify-argument index="return" pyi-type="Optional[PySide6.QtQml.QQmlEngine]"/>
+        </modify-function>
+     </function>
+    <function signature="qmlProtectModule(const char*,int)"/>
+    <function signature="qmlRegisterModule(const char*,int,int)"/>
+
     <enum-type identified-by-value="QML_HAS_ATTACHED_PROPERTIES">
         <extra-includes>
             <include file-name="QtQml" location="global"/>
