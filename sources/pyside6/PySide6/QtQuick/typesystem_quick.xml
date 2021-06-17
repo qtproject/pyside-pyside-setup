@@ -105,7 +105,6 @@
 
     <object-type name="QQuickWindow">
         <enum-type name="CreateTextureOption" flags="CreateTextureOptions"/>
-        <enum-type name="NativeObjectType" since="5.14"/>
         <enum-type name="RenderStage"/>
         <enum-type name="SceneGraphError"/>
         <enum-type name="TextRenderType" since="5.10"/>

@@ -507,8 +507,6 @@
     </extra-includes>
     <!-- ### A QList parameter, for no defined type, will generate wrong code. -->
     <modify-function signature="operator+=(QList&lt;QPointF&gt;)" remove="all"/>
-    <!-- ### See bug 776 -->
-    <modify-function signature="operator&lt;&lt;(QPointF)" remove="all"/>
     <!-- ### See bug 777 -->
     <modify-function signature="operator&lt;&lt;(QList&lt;QPointF&gt;)" remove="all"/>
     <!-- ### -->

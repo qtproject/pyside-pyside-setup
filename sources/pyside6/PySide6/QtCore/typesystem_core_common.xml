@@ -2262,7 +2262,6 @@
   </object-type>
 
   <object-type name="QMutex">
-    <modify-function signature="lock()" allow-thread="yes"/>
     <modify-function signature="tryLock(int)" allow-thread="yes"/>
   </object-type>
   <object-type name="QRecursiveMutex" since="5.14">
@@ -2926,7 +2925,6 @@
   </value-type>
 
   <value-type name="QJsonDocument">
-    <enum-type name="DataValidation"/>
     <enum-type name="JsonFormat"/>
   </value-type>
 
