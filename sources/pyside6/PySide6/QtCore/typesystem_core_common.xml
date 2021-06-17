@@ -922,7 +922,7 @@
         <modify-argument index="1"><replace-type modified-type="PyPathLike"/></modify-argument>
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qfile-path-1"/>
     </modify-function>
-    <modify-function signature="QDir(const QString &amp;,const QString &amp;,SortFlags=SortFlags(Name|IgnoreCase),Filters=AllEntries)">
+    <modify-function signature="QDir(const QString &amp;,const QString &amp;,QFlags&lt;QDir::SortFlag&gt;,QFlags&lt;QDir::Filter&gt;)">
         <modify-argument index="1"><replace-type modified-type="PyPathLike"/></modify-argument>
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qfile-path-1"/>
     </modify-function>
@@ -2184,10 +2184,6 @@
 
   <object-type name="QFile">
     <!-- PYSIDE-1499: Replace QString by pathlib.Path (qfile.h) -->
-    <modify-function signature="fromFilesystemPath(const QString &amp;)">
-        <modify-argument index="1"><replace-type modified-type="PyPathLike"/></modify-argument>
-        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qfile-path-1"/>
-    </modify-function>
     <modify-function signature="QFile(const QString &amp;)">
         <modify-argument index="1"><replace-type modified-type="PyPathLike"/></modify-argument>
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qfile-path-1"/>
@@ -2216,7 +2212,7 @@
         <modify-argument index="1"><replace-type modified-type="PyPathLike"/></modify-argument>
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qfile-path-1"/>
     </modify-function>
-    <modify-function signature="setPermissions(const QString &amp;,Permissions)">
+    <modify-function signature="setPermissions(const QString &amp;,QFlags&lt;QFileDevice::Permission&gt;)">
         <modify-argument index="1"><replace-type modified-type="PyPathLike"/></modify-argument>
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qfile-path-1"/>
     </modify-function>
