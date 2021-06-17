@@ -1,3 +1,5 @@
+.. _using_ui_files:
+
 Using `.ui` files from Designer or QtCreator with `QUiLoader` and `pyside6-uic`
 *******************************************************************************
 

@@ -99,6 +99,8 @@ You can also run a specific test (for example ``qpainter_test``) by running::
 
     ctest -R qpainter_test --verbose
 
+.. _building_documentation:
+
 Building the documentation
 --------------------------
 

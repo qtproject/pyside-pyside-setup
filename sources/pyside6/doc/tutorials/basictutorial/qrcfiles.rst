@@ -1,3 +1,5 @@
+.. _using_qrc_files:
+
 Using `.qrc` Files (`pyside6-rcc`)
 **********************************
 
