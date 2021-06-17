@@ -94,10 +94,7 @@ class QtInfo(object):
 
         @property
         def qmake_command(self):
-            qmake_command_string = self._qmake_command[0]
-            for entry in self._qmake_command[1:]:
-                qmake_command_string = f"{qmake_command_string} {entry}"
-            return qmake_command_string
+            return self._qmake_command
 
         @property
         def version(self):
