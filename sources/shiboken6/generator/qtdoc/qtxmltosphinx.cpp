@@ -779,13 +779,13 @@ void QtXmlToSphinx::handleDotsTag(QXmlStreamReader& reader)
         } else {
             m_output << "::\n\n";
         }
-        Indentation indentation(m_output);
         pushOutputBuffer();
-        int indent = reader.attributes().value(QLatin1String("indent")).toInt();
+        int indent = reader.attributes().value(QLatin1String("indent")).toInt()
+                     + m_output.indentation() * m_output.tabWidth();
         for (int i = 0; i < indent; ++i)
             m_output << ' ';
     } else if (token == QXmlStreamReader::Characters) {
-        m_output << reader.text().toString();
+        m_output << reader.text().toString().trimmed();
     } else if (token == QXmlStreamReader::EndElement) {
         m_output << disableIndent << popOutputBuffer() << "\n\n\n" << enableIndent;
     }
