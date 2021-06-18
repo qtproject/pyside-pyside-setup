@@ -234,7 +234,4 @@ QString msgPureVirtualFunctionRemoved(const AbstractMetaFunction *f);
 QString msgUnknownTypeInArgumentTypeReplacement(const QString &typeReplaced,
                                                 const AbstractMetaFunction *f);
 
-QString msgRegisterMetaTypeUnqualifiedName(const AbstractMetaClass *c,
-                                           const char *file, int line);
-
 #endif // MESSAGES_H

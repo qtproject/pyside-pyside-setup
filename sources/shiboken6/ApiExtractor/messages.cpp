@@ -811,15 +811,3 @@ QString msgUnknownTypeInArgumentTypeReplacement(const QString &typeReplaced,
         << "', the generated code may be broken.";
     return result;
 }
-
-QString msgRegisterMetaTypeUnqualifiedName(const AbstractMetaClass *c,
-                                           const char *file, int line)
-{
-    QString result;
-    QTextStream str(&result);
-    str << c->sourceLocation() << " (" << file << ':' << line << ") FIXME:\n"
-        << "    The code tried to qRegisterMetaType the unqualified name "
-        << "'iterator' (" << c->qualifiedCppName()
-        << "). This is currently fixed by a hack(ct) and needs improvement!";
-    return result;
-}
