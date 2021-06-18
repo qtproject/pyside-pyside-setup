@@ -27,6 +27,7 @@
 ****************************************************************************/
 
 #include "qtdocgenerator.h"
+#include "exception.h"
 #include "apiextractorresult.h"
 #include "qtxmltosphinx.h"
 #include "rstformat.h"
@@ -834,8 +835,11 @@ void QtDocGenerator::writeModuleDocumentation()
         // Search for extra-sections
         if (!m_extraSectionDir.isEmpty()) {
             QDir extraSectionDir(m_extraSectionDir);
-            if (!extraSectionDir.exists())
-                qCWarning(lcShibokenDoc) << m_extraSectionDir << "doesn't exist";
+            if (!extraSectionDir.exists()) {
+                const QString m = QStringLiteral("Extra sections directory ") +
+                                  m_extraSectionDir + QStringLiteral(" doesn't exist");
+                throw Exception(m);
+            }
 
             // Filter for "QtCore.Property.rst", skipping module doc "QtCore.rst"
             const QString filter = moduleName + QLatin1String(".?*.rst");
@@ -891,20 +895,18 @@ void QtDocGenerator::writeModuleDocumentation()
 static inline QString msgNonExistentAdditionalDocFile(const QString &dir,
                                                       const QString &fileName)
 {
-    const QString result = QLatin1Char('"') + fileName
-        + QLatin1String("\" does not exist in ")
-        + QDir::toNativeSeparators(dir) + QLatin1Char('.');
+    QString result;
+    QTextStream(&result) << "Additional documentation file \""
+        << fileName << "\" does not exist in "
+        << QDir::toNativeSeparators(dir) << '.';
     return result;
 }
 
 void QtDocGenerator::writeAdditionalDocumentation() const
 {
     QFile additionalDocumentationFile(m_additionalDocumentationList);
-    if (!additionalDocumentationFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qCWarning(lcShibokenDoc, "%s",
-                  qPrintable(msgCannotOpenForReading(additionalDocumentationFile)));
-        return;
-    }
+    if (!additionalDocumentationFile.open(QIODevice::ReadOnly | QIODevice::Text))
+        throw Exception(msgCannotOpenForReading(additionalDocumentationFile));
 
     QDir outDir(outputDirectory());
     const QString rstSuffix = fileNameSuffix();
@@ -927,10 +929,10 @@ void QtDocGenerator::writeAdditionalDocumentation() const
                 targetDir = outDir.absolutePath();
             } else {
                 if (!outDir.exists(dir) && !outDir.mkdir(dir)) {
-                    qCWarning(lcShibokenDoc, "Cannot create directory %s under %s",
-                              qPrintable(dir),
-                              qPrintable(QDir::toNativeSeparators(outputDirectory())));
-                    break;
+                    const QString m = QStringLiteral("Cannot create directory ")
+                                      + dir + QStringLiteral(" under ")
+                                      + QDir::toNativeSeparators(outputDirectory());
+                    throw Exception(m);
                 }
                 targetDir = outDir.absoluteFilePath(dir);
             }
@@ -951,6 +953,8 @@ void QtDocGenerator::writeAdditionalDocumentation() const
                     qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
                 }
             } else {
+                // FIXME: This should be an exception, in principle, but it
+                // requires building all modules.
                 qCWarning(lcShibokenDoc, "%s",
                           qPrintable(msgNonExistentAdditionalDocFile(m_parameters.docDataDir, line)));
             }

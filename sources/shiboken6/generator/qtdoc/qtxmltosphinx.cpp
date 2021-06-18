@@ -27,6 +27,7 @@
 ****************************************************************************/
 
 #include "qtxmltosphinx.h"
+#include "exception.h"
 #include "qtxmltosphinxinterface.h"
 #include <codesniphelpers.h>
 #include "rstformat.h"
@@ -438,7 +439,7 @@ QString QtXmlToSphinx::transform(const QString& doc)
                 << reader.errorString() << " at " << reader.lineNumber()
                 << ':' << reader.columnNumber() << '\n' << doc;
             m_output << message;
-            warn(message);
+            throw Exception(message);
             break;
         }
 
@@ -1073,7 +1074,7 @@ bool QtXmlToSphinx::copyImage(const QString &href) const
                     m_generator->loggingCategory(),
                     &errorMessage);
     if (!result)
-        warn(errorMessage);
+        throw Exception(errorMessage);
     return result;
 }
 
