@@ -31,6 +31,7 @@
 
 #include "typesystem_enums.h"
 #include "typesystem_typedefs.h"
+#include "codesniphelpers.h"
 #include "parser/typeinfo.h"
 
 #include <QtCore/QList>
@@ -120,7 +121,7 @@ private:
     TemplateInstance *m_instance = nullptr;
 };
 
-class CodeSnipAbstract
+class CodeSnipAbstract : public CodeSnipHelpers
 {
 public:
     QString code() const;
@@ -135,9 +136,6 @@ public:
 
     QList<CodeSnipFragment> codeList;
 
-    static QString fixSpaces(QString code);
-    static QString dedent(const QString &code);
-    static void prependCode(QString *code, QString firstLine);
     static QRegularExpression placeHolderRegex(int index);
 };
 

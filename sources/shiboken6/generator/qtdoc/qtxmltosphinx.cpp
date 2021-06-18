@@ -28,6 +28,7 @@
 
 #include "qtxmltosphinx.h"
 #include "qtxmltosphinxinterface.h"
+#include <codesniphelpers.h>
 #include "rstformat.h"
 
 #include <QtCore/QDebug>
@@ -520,7 +521,7 @@ QString QtXmlToSphinx::readFromLocation(const QString &location, const QString &
     if (identifier.isEmpty()) {
         while (!inputFile.atEnd())
             code += QString::fromUtf8(inputFile.readLine());
-        return code;
+        return CodeSnipHelpers::fixSpaces(code);
     }
 
     const QRegularExpression searchString(QLatin1String("//!\\s*\\[")
@@ -550,7 +551,7 @@ QString QtXmlToSphinx::readFromLocation(const QString &location, const QString &
         return QString(); // null
     }
 
-    return code;
+    return CodeSnipHelpers::fixSpaces(code);
 }
 
 void QtXmlToSphinx::handleHeadingTag(QXmlStreamReader& reader)
