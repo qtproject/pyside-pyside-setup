@@ -5690,12 +5690,6 @@ void CppGenerator::writeInitQtMetaTypeFunctionBody(TextStream &s, const Generato
 
         if (canBeValue) {
             for (const QString &name : qAsConst(nameVariants)) {
-                if (name == QLatin1String("iterator")) {
-                    qCWarning(lcShiboken, "%s",
-                              qPrintable(msgRegisterMetaTypeUnqualifiedName(context.metaClass(),
-                                                                            __FILE__, __LINE__)));
-                    continue;
-                }
                 s << "qRegisterMetaType< ::" << className << " >(\"" << name << "\");\n";
             }
         }
