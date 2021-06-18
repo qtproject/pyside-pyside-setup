@@ -142,7 +142,7 @@ modify-function
 ^^^^^^^^^^^^^^^
 
     The ``modify-function`` node allows you to modify a given C++ function when
-    mapping it onto the target language, and it is a child of a
+    mapping it onto the target language, and it is a child of a :ref:`function`,
     :ref:`namespace`, :ref:`object-type` or a :ref:`value-type` node.
     Use the :ref:`modify-argument` node to specify which argument the
     modification affects.
@@ -162,7 +162,9 @@ modify-function
          </object-type>
 
     The ``signature`` attribute is a normalized C++ signature, excluding return
-    values but including potential const declarations.
+    values but including potential const declarations. It is not required
+    when ``modify-function`` appears as a child of a :ref:`function` node to
+    modify a global function.
 
     The ``since`` attribute specify the API version when this function was modified.
 

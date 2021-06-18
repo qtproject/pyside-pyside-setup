@@ -553,9 +553,9 @@ smart-pointer-type
 function
 ^^^^^^^^
 
-    The ``function`` node indicates that the given C++ global function is mapped onto
-    the target language.
-    It is a child of the :ref:`typesystem` node.
+    The ``function`` node indicates that the given C++ global function is mapped
+    onto the target language. It is a child of the :ref:`typesystem` node
+    and may contain a :ref:`modify-function` child node.
 
     .. code-block:: xml
 
@@ -563,12 +563,13 @@ function
             <function signature="..." rename="..." since="..." snake-case="yes | no | both" />
         </typesystem>
 
-    This tag has some limitations, it doesn't support function modifications, besides you
-    can't add a function overload using :ref:`add-function` tag to an existent function.
-    These limitation will be addressed in future versions of ApiExtractor.
+    There is a limitation; you cannot add a function overload using
+    the :ref:`add-function` tag to an existent function.
 
-    The function tag has two *optional* attributes: **since**, whose value is used to specify
-    the API version of this function, and **rename**, to modify the function name.
+    The *optional* **since** attribute is used to specify the API version in which
+    the function was introduced.
+
+    The *optional* **rename** attribute is used to modify the function name.
 
     The *optional* **snake-case** attribute allows for overriding the value
     specified on the **typesystem** element.
