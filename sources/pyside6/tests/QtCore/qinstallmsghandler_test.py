@@ -37,8 +37,10 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import (QLibraryInfo, QtCriticalMsg, QtDebugMsg, QtWarningMsg,
-                            qCritical, qDebug, qInstallMessageHandler, qWarning)
+from PySide6.QtCore import (QLibraryInfo, QtCriticalMsg, QtDebugMsg, QtInfoMsg,
+                            QMessageLogContext,
+                            QtWarningMsg, qCritical, qFormatLogMessage, qDebug,
+                            qInstallMessageHandler, qWarning)
 
 
 param = []
@@ -86,6 +88,11 @@ class QInstallMsgHandlerTest(unittest.TestCase):
         qCritical("Test Critical")
         self.assertEqual(param[0], QtCriticalMsg)
         self.assertEqual(param[2], "Test Critical")
+
+    def testFormat(self):
+        ctx = QMessageLogContext()
+        s = qFormatLogMessage(QtInfoMsg, ctx, 'bla')
+        self.assertTrue(s)
 
 
 if __name__ == '__main__':

@@ -39,7 +39,7 @@ init_test_paths(False)
 
 from helper.usesqapplication import UsesQApplication
 from PySide6.QtCore import QSize, Qt
-from PySide6.QtGui import QColor, QImage, QPixelFormat
+from PySide6.QtGui import QColor, QImage, QPixelFormat, qPixelFormatRgba
 
 
 class QPixelFormatTest(UsesQApplication):
@@ -53,6 +53,12 @@ class QPixelFormatTest(UsesQApplication):
         self.assertEqual(pixelFormat.greenSize(), 8)
         self.assertEqual(pixelFormat.blueSize(), 8)
         self.assertEqual(pixelFormat.bitsPerPixel(), 32)
+
+    def testHelpers(self):
+        format = qPixelFormatRgba(8, 8, 8, 8, QPixelFormat.UsesAlpha,
+                                  QPixelFormat.AtBeginning, QPixelFormat.Premultiplied,
+                                  QPixelFormat.UnsignedByte)
+        self.assertEqual(format.redSize(), 8)
 
 
 if __name__ == '__main__':

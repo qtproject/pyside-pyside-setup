@@ -43,7 +43,7 @@ from helper.usesqguiapplication import UsesQGuiApplication
 from PySide6.QtCore import QTimer
 from PySide6.QtDataVisualization import (Q3DBars, QBar3DSeries, QBarDataItem,
                                          QBarDataProxy, QCategory3DAxis,
-                                         QValue3DAxis)
+                                         QValue3DAxis, qDefaultSurfaceFormat)
 
 
 def dataToBarDataRow(data):
@@ -105,6 +105,10 @@ class QtDataVisualizationTestCase(UsesQGuiApplication):
         data_proxy.setRow(0, items)
         data_proxy.setRow(0, items, 'bla')
         self.assertTrue(data_proxy.rowCount(), 4)
+
+    def testDefaultSurfaceFormat(self):
+         format = qDefaultSurfaceFormat(True)
+         print(format)
 
 
 if __name__ == '__main__':
