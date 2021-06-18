@@ -69,6 +69,11 @@ QString msgFallbackWarning(const QXmlStreamReader &reader, const QString &contex
     return msgTagWarning(reader, context, tag, message);
 }
 
+static bool isHttpLink(const QString &ref)
+{
+    return ref.startsWith(u"http://") || ref.startsWith(u"https://");
+}
+
 struct QtXmlToSphinx::LinkContext
 {
     enum Type
@@ -931,7 +936,9 @@ QtXmlToSphinx::LinkContext *QtXmlToSphinx::handleLinkStart(const QString &type, 
     else if (m_insideItalic)
         result->flags |= LinkContext::InsideItalic;
 
-    if (type == functionLinkType() && !m_context.isEmpty()) {
+    if (type == u"external" || isHttpLink(ref)) {
+        result->type = LinkContext::External;
+    } else if (type == functionLinkType() && !m_context.isEmpty()) {
         result->type = LinkContext::Method;
         const auto rawlinklist = QStringView{result->linkRef}.split(QLatin1Char('.'));
         if (rawlinklist.size() == 1 || rawlinklist.constFirst() == m_context) {
@@ -953,12 +960,8 @@ QtXmlToSphinx::LinkContext *QtXmlToSphinx::handleLinkStart(const QString &type, 
         // Module, external web page or reference
         if (result->linkRef == m_parameters.moduleName)
             result->type = LinkContext::Module;
-        else if (result->linkRef.startsWith(QLatin1String("http")))
-            result->type = LinkContext::External;
         else
             result->type = LinkContext::Reference;
-    } else if (type == QLatin1String("external")) {
-        result->type = LinkContext::External;
     } else {
         result->type = LinkContext::Reference;
     }
