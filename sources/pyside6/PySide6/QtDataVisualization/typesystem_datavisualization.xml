@@ -43,6 +43,9 @@
 
   <load-typesystem name="templates/datavisualization_common.xml" generate="no" />
   <load-typesystem name="QtGui/typesystem_gui.xml" generate="no" />
+
+  <function signature="qDefaultSurfaceFormat(bool)"/>
+
   <primitive-type name="QBarDataArray">
     <include file-name="qbardataproxy.h" location="global"/>
     <conversion-rule>

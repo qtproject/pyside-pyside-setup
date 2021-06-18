@@ -72,6 +72,8 @@
     <function signature="qCompress(const QByteArray&amp;,int)"/>
     <function signature="qUncompress(const uchar*,qsizetype)"/>
     <function signature="qUncompress(const QByteArray&amp;)"/>
+    <function signature="qFormatLogMessage(QtMsgType,const QMessageLogContext&amp;,const QString&amp;)"/>
+    <function signature="qSetMessagePattern(const QString&amp;)"/>
 
     <inject-code class="native" position="beginning" file="../glue/qtcore.cpp" snippet="include-pyside"/>
 

@@ -75,6 +75,19 @@
     besides the fact they are accessible by ordinary event methods.
     -->
 
+  <function signature="qDrawShadeLine(QPainter*,int,int,int,int,const QPalette&amp;,bool,int,int)"/>
+  <function signature="qDrawShadeLine(QPainter*,const QPoint,const QPoint,const QPalette&amp;,bool,int,int)"/>
+  <function signature="qDrawShadeRect(QPainter*,int,int,int,int,const QPalette&amp;,bool,int,int,const QBrush*)"/>
+  <function signature="qDrawShadeRect(QPainter*,const QRect &amp;,const QPalette&amp;,bool,int,int,const QBrush*)"/>
+  <function signature="qDrawShadePanel(QPainter*,int,int,int,int,const QPalette&amp;,bool,int,const QBrush*)"/>
+  <function signature="qDrawShadePanel(QPainter*,const QRect&amp;,const QPalette&amp;,bool,int,const QBrush*)"/>
+  <function signature="qDrawWinButton(QPainter*,int,int,int,int,const QPalette&amp;,bool,const QBrush*)"/>
+  <function signature="qDrawWinButton(QPainter*,const QRect&amp;,const QPalette&amp;,bool,const QBrush*fill)"/>
+  <function signature="qDrawWinPanel(QPainter*,int,int,int,int,const QPalette&amp;,bool,const QBrush*)"/>
+  <function signature="qDrawWinPanel(QPainter*,const QRect&amp;,const QPalette&amp;,bool,const QBrush*)"/>
+  <function signature="qDrawPlainRect(QPainter*,int,int,int,int,const QColor&amp;,int,const QBrush*)"/>
+  <function signature="qDrawPlainRect(QPainter*,const QRect&amp;,const QColor&amp;,int,const QBrush*)"/>
+
   <object-type name="QStyleOption" polymorphic-id-expression="%1-&gt;type == QStyleOption::SO_Default">
     <enum-type name="OptionType"/>
     <enum-type name="StyleOptionType"/>
