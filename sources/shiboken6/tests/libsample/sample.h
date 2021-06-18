@@ -46,6 +46,8 @@ namespace sample
 
     // shiboken must not generate richcompare for namespace sample
     LIBSAMPLE_API bool operator==(const sample&s1, const sample&s2);
+
+    const int INT_CONSTANT = 42;
 }
 
 #endif
