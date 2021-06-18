@@ -12,6 +12,7 @@ set(api_extractor_src_dir ${CMAKE_CURRENT_SOURCE_DIR}/../../ApiExtractor)
 
 set(qtxmltosphinxtest_SRC
     ${generator_src_dir}/qtdoc/qtxmltosphinx.cpp
+    ${api_extractor_src_dir}/codesniphelpers.cpp
     ${api_extractor_src_dir}/textstream.cpp
     qtxmltosphinxtest.cpp
     qtxmltosphinxtest.h)
