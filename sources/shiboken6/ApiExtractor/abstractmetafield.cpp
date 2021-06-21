@@ -188,12 +188,13 @@ void AbstractMetaField::setSetterEnabled(bool e)
 
 bool AbstractMetaField::canGenerateGetter() const
 {
-    return d->m_getterEnabled && !isStatic();
+    return d->m_getterEnabled && !isStatic() && !d->m_type.isArray();
 }
 
 bool AbstractMetaField::canGenerateSetter() const
 {
     return d->m_setterEnabled && !isStatic()
+        && !d->m_type.isArray()
         && (!d->m_type.isConstant() || d->m_type.isPointerToConst());
 }
 
