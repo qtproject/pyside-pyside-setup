@@ -39,13 +39,13 @@ init_test_paths(False)
 
 from PySide6.QtCore import QCoreApplication, QSize, QUrl, Qt
 from PySide6.QtWidgets import QApplication, QVBoxLayout, QWidget
-from PySide6.QtWebEngineWidgets import QWebEnginePage, QWebEngineView
+from PySide6.QtWebEngineCore import QWebEnginePage
+from PySide6.QtWebEngineWidgets import QWebEngineView
 
 
 class MainTest(unittest.TestCase):
 
     def test_WebEngineView_findText_exists(self):
-        QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
         app = QApplication.instance() or QApplication()
         top_level = QWidget()
         layout = QVBoxLayout(top_level)

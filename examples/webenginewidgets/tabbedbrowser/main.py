@@ -52,7 +52,7 @@ from PySide6.QtCore import Qt, QUrl
 from PySide6.QtGui import QAction, QKeySequence, QIcon
 from PySide6.QtWidgets import (QApplication, QDockWidget, QLabel,
                                QLineEdit, QMainWindow, QToolBar)
-from PySide6.QtWebEngineWidgets import QWebEngineDownloadItem, QWebEnginePage
+from PySide6.QtWebEngineCore import QWebEngineDownloadRequest, QWebEnginePage
 
 main_windows = []
 
@@ -61,7 +61,7 @@ def create_main_window():
     """Creates a MainWindow using 75% of the available screen resolution."""
     main_win = MainWindow()
     main_windows.append(main_win)
-    available_geometry = app.desktop().availableGeometry(main_win)
+    available_geometry = main_win.screen().availableGeometry()
     main_win.resize(available_geometry.width() * 2 / 3,
                     available_geometry.height() * 2 / 3)
     main_win.show()

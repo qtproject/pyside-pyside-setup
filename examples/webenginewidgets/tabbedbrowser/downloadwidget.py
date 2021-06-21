@@ -43,12 +43,12 @@ from PySide6 import QtCore
 from PySide6.QtCore import QDir, QFileInfo, QStandardPaths, Qt, QUrl
 from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import QMenu, QProgressBar, QStyleFactory
-from PySide6.QtWebEngineWidgets import QWebEngineDownloadItem
+from PySide6.QtWebEngineCore import QWebEngineDownloadRequest
 
 
 # A QProgressBar with context menu for displaying downloads in a QStatusBar.
 class DownloadWidget(QProgressBar):
-    """Lets you track progress of a QWebEngineDownloadItem."""
+    """Lets you track progress of a QWebEngineDownloadRequest."""
     finished = QtCore.Signal()
     remove_requested = QtCore.Signal()
 
@@ -98,13 +98,13 @@ class DownloadWidget(QProgressBar):
         if total_bytes > 0:
             tool_tip += f"\n{total_bytes / 1024}K"
         state = self.state()
-        if state == QWebEngineDownloadItem.DownloadRequested:
+        if state == QWebEngineDownloadRequest.DownloadRequested:
             tool_tip += "\n(requested)"
-        elif state == QWebEngineDownloadItem.DownloadInProgress:
+        elif state == QWebEngineDownloadRequest.DownloadInProgress:
             tool_tip += "\n(downloading)"
-        elif state == QWebEngineDownloadItem.DownloadCompleted:
+        elif state == QWebEngineDownloadRequest.DownloadCompleted:
             tool_tip += "\n(completed)"
-        elif state == QWebEngineDownloadItem.DownloadCancelled:
+        elif state == QWebEngineDownloadRequest.DownloadCancelled:
             tool_tip += "\n(cancelled)"
         else:
             tool_tip += "\n(interrupted)"
@@ -121,20 +121,20 @@ class DownloadWidget(QProgressBar):
         DownloadWidget.open_file(self._download_item.path())
 
     def mouseDoubleClickEvent(self, event):
-        if self.state() == QWebEngineDownloadItem.DownloadCompleted:
+        if self.state() == QWebEngineDownloadRequest.DownloadCompleted:
             self._launch()
 
     def contextMenuEvent(self, event):
         state = self.state()
         context_menu = QMenu()
         launch_action = context_menu.addAction("Launch")
-        launch_action.setEnabled(state == QWebEngineDownloadItem.DownloadCompleted)
+        launch_action.setEnabled(state == QWebEngineDownloadRequest.DownloadCompleted)
         show_in_folder_action = context_menu.addAction("Show in Folder")
-        show_in_folder_action.setEnabled(state == QWebEngineDownloadItem.DownloadCompleted)
+        show_in_folder_action.setEnabled(state == QWebEngineDownloadRequest.DownloadCompleted)
         cancel_action = context_menu.addAction("Cancel")
-        cancel_action.setEnabled(state == QWebEngineDownloadItem.DownloadInProgress)
+        cancel_action.setEnabled(state == QWebEngineDownloadRequest.DownloadInProgress)
         remove_action = context_menu.addAction("Remove")
-        remove_action.setEnabled(state != QWebEngineDownloadItem.DownloadInProgress)
+        remove_action.setEnabled(state != QWebEngineDownloadRequest.DownloadInProgress)
 
         chosen_action = context_menu.exec(event.globalPos())
         if chosen_action == launch_action:

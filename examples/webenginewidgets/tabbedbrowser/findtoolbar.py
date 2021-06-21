@@ -42,7 +42,7 @@ from PySide6 import QtCore
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon, QKeySequence
 from PySide6.QtWidgets import QCheckBox, QLineEdit, QToolBar, QToolButton
-from PySide6.QtWebEngineWidgets import QWebEnginePage
+from PySide6.QtWebEngineCore import QWebEnginePage
 
 
 # A Find tool bar (bottom area)

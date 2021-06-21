@@ -38,7 +38,8 @@
 ##
 #############################################################################
 
-from PySide6.QtWebEngineWidgets import QWebEnginePage, QWebEngineView
+from PySide6.QtWebEngineCore import QWebEnginePage
+from PySide6.QtWebEngineWidgets import QWebEngineView
 
 from PySide6 import QtCore
 

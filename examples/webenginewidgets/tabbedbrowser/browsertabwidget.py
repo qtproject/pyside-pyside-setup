@@ -46,7 +46,7 @@ from historywindow import HistoryWindow
 from PySide6 import QtCore
 from PySide6.QtCore import Qt, QUrl
 from PySide6.QtWidgets import QMenu, QTabBar, QTabWidget
-from PySide6.QtWebEngineWidgets import QWebEngineDownloadItem, QWebEnginePage
+from PySide6.QtWebEngineCore import QWebEngineDownloadRequest, QWebEnginePage
 
 
 class BrowserTabWidget(QTabWidget):
@@ -54,7 +54,7 @@ class BrowserTabWidget(QTabWidget):
 
     url_changed = QtCore.Signal(QUrl)
     enabled_changed = QtCore.Signal(QWebEnginePage.WebAction, bool)
-    download_requested = QtCore.Signal(QWebEngineDownloadItem)
+    download_requested = QtCore.Signal(QWebEngineDownloadRequest)
 
     def __init__(self, window_factory_function):
         super().__init__()

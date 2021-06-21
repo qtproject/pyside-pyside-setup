@@ -46,7 +46,8 @@ from PySide6.QtCore import QUrl
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (QApplication, QLineEdit,
     QMainWindow, QPushButton, QToolBar)
-from PySide6.QtWebEngineWidgets import QWebEnginePage, QWebEngineView
+from PySide6.QtWebEngineCore import QWebEnginePage
+from PySide6.QtWebEngineWidgets import QWebEngineView
 
 
 class MainWindow(QMainWindow):

@@ -44,87 +44,13 @@
   <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
   <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no"/>
   <load-typesystem name="QtNetwork/typesystem_network.xml" generate="no"/>
-  <load-typesystem name="QtWebChannel/typesystem_webchannel.xml" generate="no"/>
   <load-typesystem name="QtWebEngineCore/typesystem_webenginecore.xml" generate="no"/>
   <load-typesystem name="QtPrintSupport/typesystem_printsupport.xml" generate="no"/>
-
-
-  <object-type name="QWebEngineCertificateError">
-    <enum-type name="Error"/>
-  </object-type>
-
-  <object-type name="QWebEngineDownloadItem">
-    <enum-type name="DownloadInterruptReason"/>
-    <enum-type name="DownloadState"/>
-    <enum-type name="DownloadType"/>
-    <enum-type name="SavePageFormat"/>
-  </object-type>
-
-  <object-type name="QWebEngineHistory"/>
-  <value-type name="QWebEngineHistoryItem"/>
-
-  <object-type name="QWebEnginePage">
-    <enum-type name="LifecycleState"/>
-    <enum-type name="WebAction"/>
-    <enum-type name="FindFlag" flags="FindFlags"/>
-    <enum-type name="WebWindowType"/>
-    <enum-type name="PermissionPolicy"/>
-    <enum-type name="NavigationType"/>
-    <enum-type name="Feature"/>
-    <enum-type name="FileSelectionMode"/>
-    <enum-type name="JavaScriptConsoleMessageLevel"/>
-    <enum-type name="RenderProcessTerminationStatus"/>
-    <add-function signature="findText(const QString &amp;,QWebEnginePage::FindFlags,PyObject*)">
-        <inject-code class="target" position="beginning" file="../glue/qtwebenginewidgets.cpp" snippet="qwebenginepage-findtext"/>
-    </add-function>
-    <add-function signature="print(QPrinter*,PyObject*)">
-        <inject-code class="target" position="beginning" file="../glue/qtwebenginewidgets.cpp" snippet="qwebenginepage-print"/>
-    </add-function>
-    <add-function signature="toPlainText(PyObject*) const">
-        <inject-code class="target" position="beginning" file="../glue/qtwebenginewidgets.cpp" snippet="qwebenginepage-convertto"/>
-    </add-function>
-    <add-function signature="toHtml(PyObject*) const">
-        <inject-code class="target" position="beginning" file="../glue/qtwebenginewidgets.cpp" snippet="qwebenginepage-convertto"/>
-    </add-function>
-    <add-function signature="runJavaScript(const QString &amp;,quint32,PyObject*)">
-        <inject-code class="target" position="beginning" file="../glue/qtwebenginewidgets.cpp" snippet="qwebenginepage-runjavascript"/>
-    </add-function>
-    <add-function signature="printToPdf(PyObject*,const QPageLayout &amp;)">
-        <inject-code class="target" position="beginning" file="../glue/qtwebenginewidgets.cpp" snippet="qwebenginepage-printtopdf"/>
-    </add-function>
-  </object-type>
-
-  <object-type name="QWebEngineProfile">
-    <enum-type name="HttpCacheType"/>
-    <enum-type name="PersistentCookiesPolicy"/>
-  </object-type>
-
-  <value-type name="QWebEngineScript">
-    <enum-type name="InjectionPoint"/>
-    <enum-type name="ScriptWorldId"/>
-  </value-type>
-
-  <object-type name="QWebEngineScriptCollection"/>
-
-  <object-type name="QWebEngineSettings">
-    <enum-type name="FontFamily"/>
-    <enum-type name="FontSize"/>
-    <enum-type name="UnknownUrlSchemePolicy" since="5.11"/>
-    <enum-type name="WebAttribute"/>
-  </object-type>
 
   <object-type name="QWebEngineView">
       <add-function signature="findText(const QString &amp;,QWebEnginePage::FindFlags,PyObject*)">
           <inject-code class="target" position="beginning" file="../glue/qtwebenginewidgets.cpp" snippet="qwebenginepage-findtext"/>
       </add-function>
   </object-type>
-
-  <value-type name="QWebEngineContextMenuData">
-    <enum-type name="EditFlag" flags="EditFlags" since="5.11"/>
-    <enum-type name="MediaFlag" flags="MediaFlags" since="5.11"/>
-    <enum-type name="MediaType"/>
-  </value-type>
-
-  <object-type name="QWebEngineFullScreenRequest"/>
 
 </typesystem>

@@ -37,9 +37,9 @@ init_test_paths(False)
 
 from PySide6.QtCore import QBuffer, Qt, QTimer
 from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout
-from PySide6.QtWebEngine import QtWebEngine
-from PySide6.QtWebEngineWidgets import QWebEngineView, QWebEngineProfile
-from PySide6.QtWebEngineCore import (QWebEngineUrlScheme,
+from PySide6.QtWebEngineWidgets import QWebEngineView
+from PySide6.QtWebEngineCore import (QWebEngineProfile,
+                                     QWebEngineUrlScheme,
                                      QWebEngineUrlSchemeHandler)
 
 
@@ -59,8 +59,6 @@ class MainTest(unittest.TestCase):
     def test_SchemeHandlerRedirect(self):
         self._loaded = False
         QApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
-        QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
-        QtWebEngine.initialize()
         app = QApplication([])
 
         scheme_name = bytes("testpy", "UTF-8")
