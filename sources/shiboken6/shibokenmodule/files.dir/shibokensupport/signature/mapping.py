@@ -588,15 +588,6 @@ def init_PySide6_QtNetwork():
     return locals()
 
 
-def init_PySide6_QtXmlPatterns():
-    from PySide6.QtXmlPatterns import QXmlName
-    type_map.update({
-        "QXmlName.NamespaceCode": Missing("PySide6.QtXmlPatterns.QXmlName.NamespaceCode"),
-        "QXmlName.PrefixCode": Missing("PySide6.QtXmlPatterns.QXmlName.PrefixCode"),
-    })
-    return locals()
-
-
 def init_PySide6_QtMultimedia():
     # PYSIDE-1599: We force pyi testing in wheel_tester. This seems to fail, sometimes.
     try:
@@ -640,13 +631,6 @@ def init_PySide6_QtQuick():
     return locals()
 
 
-def init_PySide6_QtScript():
-    type_map.update({
-        "QScriptValueList()": [],
-    })
-    return locals()
-
-
 def init_PySide6_QtTest():
     from PySide6.QtCore import SignalInstance
     type_map.update({
@@ -656,12 +640,6 @@ def init_PySide6_QtTest():
     })
     return locals()
 
-# from 5.6, MSVC
-def init_PySide6_QtWinExtras():
-    type_map.update({
-        "QList< QWinJumpListItem* >()": [],
-    })
-    return locals()
 
 # from 5.12, macOS
 def init_PySide6_QtDataVisualization():
