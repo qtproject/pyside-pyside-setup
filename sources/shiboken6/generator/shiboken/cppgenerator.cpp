@@ -4769,17 +4769,15 @@ void CppGenerator::writeSetterFunction(TextStream &s,
 
     if (fieldType.isCppIntegralPrimitive() || fieldType.typeEntry()->isEnum()
                || fieldType.typeEntry()->isFlags()) {
-        s << getFullTypeNameWithoutModifiers(fieldType) << " cppOut_local = "
-            << cppField << ";\n"
+        s << "auto cppOut_local = " << cppField << ";\n"
             << PYTHON_TO_CPP_VAR << "(pyIn, &cppOut_local);\n"
             << cppField << " = cppOut_local";
     } else {
         if (fieldType.isPointerToConst())
             s << "const ";
-        s << getFullTypeNameWithoutModifiers(fieldType)
-            << QString::fromLatin1(" *").repeated(fieldType.indirections()) << "& cppOut_ptr = "
-            << cppField << ";\n"
-            << PYTHON_TO_CPP_VAR << "(pyIn, &cppOut_ptr)";
+        s << "auto " << QByteArray(fieldType.indirections(), '*')
+          << "&cppOut_ptr = " << cppField << ";\n"
+          << PYTHON_TO_CPP_VAR << "(pyIn, &cppOut_ptr)";
     }
     s << ";\n\n";
 
