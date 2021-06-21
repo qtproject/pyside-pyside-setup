@@ -112,12 +112,11 @@ def _parse_line(line):
     args = []
     for idx, arg in enumerate(arglist):
         tokens = arg.split(":")
-        if len(tokens) < 2:
-            if idx == 0 and tokens[0] in ("self", "cls"):
-                tokens = 2 * tokens     # "self: self"
-            else:
-                # This should never happen again (but who knows?)
-                raise SystemError(f'Invalid argument "{arg}" in "{line}".')
+        if len(tokens) < 2 and idx == 0 and tokens[0] in ("self", "cls"):
+            tokens = 2 * tokens     # "self: self"
+        if len(tokens) != 2:
+            # This should never happen again (but who knows?)
+            raise SystemError(f'Invalid argument "{arg}" in "{line}".')
         name, ann = tokens
         if name in keyword.kwlist:
             if LIST_KEYWORDS:
