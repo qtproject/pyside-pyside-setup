@@ -93,6 +93,13 @@ macro(create_pyside_module)
     set(shiboken_include_dir_list ${pyside6_SOURCE_DIR} ${qt_platform_includes}
         ${qt_core_includes})
 
+    # FIXME: Temporary hack until include convention in WebEngine is fixed
+    if("${module_NAME}" MATCHES "^QtWebEngine.*$")
+        get_target_property(qt_webengine_core_includes Qt${QT_MAJOR_VERSION}::WebEngineCore
+                            INTERFACE_INCLUDE_DIRECTORIES)
+        list(APPEND shiboken_include_dir_list ${qt_webengine_core_includes})
+    endif()
+
     # Transform the path separators into something shiboken understands.
     make_path(shiboken_include_dirs ${shiboken_include_dir_list})
 
