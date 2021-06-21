@@ -15,6 +15,7 @@ dependencies: [
       "../../qt/qtimageformats",
       "../../qt/qtlocation",
       "../../qt/qtlottie",
+      "../../qt/qtmultimedia",
       "../../qt/qtnetworkauth",
       "../../qt/qtqa",
       "../../qt/qtquick3d",
@@ -32,5 +33,7 @@ dependencies: [
       "../../qt/qtvirtualkeyboard",
       "../../qt/qtwayland",
       "../../qt/qtwebchannel",
-      "../../qt/qtwebsockets"
+      "../../qt/qtwebengine",
+      "../../qt/qtwebsockets",
+      "../../qt/qtwebview"
       ]
