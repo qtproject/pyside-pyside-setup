@@ -42,7 +42,6 @@
 <typesystem package="PySide6.QtQml">
     <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
     <load-typesystem name="QtNetwork/typesystem_network.xml" generate="no"/>
-    <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
 
     <inject-code class="target" position="declaration">
     // Volatile Bool Ptr type definition for QQmlIncubationController::incubateWhile(std::atomic&lt;bool&gt; *, int)
