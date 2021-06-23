@@ -576,27 +576,46 @@ void QtXmlToSphinx::handleHeadingTag(QXmlStreamReader& reader)
 
 void QtXmlToSphinx::handleParaTag(QXmlStreamReader& reader)
 {
-    QXmlStreamReader::TokenType token = reader.tokenType();
-    if (token == QXmlStreamReader::StartElement) {
-        pushOutputBuffer();
-    } else if (token == QXmlStreamReader::EndElement) {
-        QString result = popOutputBuffer().simplified();
-        if (result.startsWith(QLatin1String("**Warning:**")))
-            result.replace(0, 12, QLatin1String(".. warning:: "));
-        else if (result.startsWith(QLatin1String("**Note:**")))
-            result.replace(0, 9, QLatin1String(".. note:: "));
-
-        m_output << result << "\n\n";
-    } else if (token == QXmlStreamReader::Characters) {
-        const auto  text = reader.text();
-        const QChar end = m_output.lastChar();
-        if (!text.isEmpty() && m_output.indentation() == 0 && !end.isNull()) {
-            QChar start = text[0];
-            if ((end == QLatin1Char('*') || end == QLatin1Char('`')) && start != QLatin1Char(' ') && !start.isPunct())
-                m_output << '\\';
-        }
-        m_output << escape(text);
+    switch (reader.tokenType()) {
+    case QXmlStreamReader::StartElement:
+        handleParaTagStart();
+        break;
+    case QXmlStreamReader::EndElement:
+        handleParaTagEnd();
+        break;
+    case QXmlStreamReader::Characters:
+        handleParaTagText(reader);
+        break;
+    default:
+        break;
     }
+}
+
+void QtXmlToSphinx::handleParaTagStart()
+{
+      pushOutputBuffer();
+}
+
+void QtXmlToSphinx::handleParaTagText(QXmlStreamReader& reader)
+{
+    const auto text = reader.text();
+    const QChar end = m_output.lastChar();
+    if (!text.isEmpty() && m_output.indentation() == 0 && !end.isNull()) {
+        QChar start = text[0];
+        if ((end == u'*' || end == u'`') && start != u' ' && !start.isPunct())
+            m_output << '\\';
+    }
+    m_output << escape(text);
+}
+
+void QtXmlToSphinx::handleParaTagEnd()
+{
+    QString result = popOutputBuffer().simplified();
+    if (result.startsWith(u"**Warning:**"))
+        result.replace(0, 12, QStringLiteral(".. warning:: "));
+    else if (result.startsWith(u"**Note:**"))
+        result.replace(0, 9, QStringLiteral(".. note:: "));
+    m_output << result << "\n\n";
 }
 
 void QtXmlToSphinx::handleItalicTag(QXmlStreamReader& reader)
@@ -793,12 +812,16 @@ void QtXmlToSphinx::handleTableTag(QXmlStreamReader& reader)
 {
     QXmlStreamReader::TokenType token = reader.tokenType();
     if (token == QXmlStreamReader::StartElement) {
+        if (parentTag() == WebXmlTag::para)
+            handleParaTagEnd(); // End <para> to prevent the table from being rst-escaped
         m_currentTable.clear();
         m_tableHasHeader = false;
     } else if (token == QXmlStreamReader::EndElement) {
         // write the table on m_output
         formatCurrentTable();
         m_currentTable.clear();
+        if (parentTag() == WebXmlTag::para)
+            handleParaTagStart();
     }
 }
 
@@ -1006,6 +1029,12 @@ void QtXmlToSphinx::handleLinkText(LinkContext *linkContext, const QString &link
 void QtXmlToSphinx::handleLinkEnd(LinkContext *linkContext)
 {
     m_output << *linkContext;
+}
+
+WebXmlTag QtXmlToSphinx::parentTag() const
+{
+    const auto index = m_tagStack.size() - 2;
+    return index >= 0 ? m_tagStack.at(index) : WebXmlTag::Unknown;
 }
 
 // Copy images that are placed in a subdirectory "images" under the webxml files
