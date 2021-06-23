@@ -135,6 +135,9 @@ private:
 
     void handleHeadingTag(QXmlStreamReader& reader);
     void handleParaTag(QXmlStreamReader& reader);
+    void handleParaTagStart();
+    void handleParaTagText(QXmlStreamReader &reader);
+    void handleParaTagEnd();
     void handleItalicTag(QXmlStreamReader& reader);
     void handleBoldTag(QXmlStreamReader& reader);
     void handleArgumentTag(QXmlStreamReader& reader);
@@ -168,6 +171,7 @@ private:
     LinkContext *handleLinkStart(const QString &type, QString ref) const;
     static void handleLinkText(LinkContext *linkContext, const QString &linktext) ;
     void handleLinkEnd(LinkContext *linkContext);
+    WebXmlTag parentTag() const;
 
     void warn(const QString &message) const;
     void debug(const QString &message) const;
