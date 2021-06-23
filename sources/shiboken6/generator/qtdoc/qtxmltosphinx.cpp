@@ -243,9 +243,8 @@ QtXmlToSphinx::QtXmlToSphinx(const QtXmlToSphinxDocGeneratorInterface *docGenera
                              const QtXmlToSphinxParameters &parameters,
                              const QString& doc, const QString& context)
         : m_output(static_cast<QString *>(nullptr)),
-          m_tableHasHeader(false), m_context(context),
-          m_generator(docGenerator), m_parameters(parameters),
-          m_insideBold(false), m_insideItalic(false)
+          m_context(context),
+          m_generator(docGenerator), m_parameters(parameters)
 {
     m_result = transform(doc);
 }
@@ -404,19 +403,17 @@ void QtXmlToSphinx::formatCurrentTable()
 
 void QtXmlToSphinx::pushOutputBuffer()
 {
-    auto *buffer = new QString();
-    m_buffers << buffer;
-    m_output.setString(buffer);
+    m_buffers.append(StringSharedPtr(new QString{}));
+    m_output.setString(m_buffers.top().data());
 }
 
 QString QtXmlToSphinx::popOutputBuffer()
 {
     Q_ASSERT(!m_buffers.isEmpty());
-    QString* str = m_buffers.pop();
-    QString strcpy(*str);
-    delete str;
-    m_output.setString(m_buffers.isEmpty() ? 0 : m_buffers.top());
-    return strcpy;
+    QString result(*m_buffers.top().data());
+    m_buffers.pop();
+    m_output.setString(m_buffers.isEmpty() ? nullptr : m_buffers.top().data());
+    return result;
 }
 
 QString QtXmlToSphinx::transform(const QString& doc)
