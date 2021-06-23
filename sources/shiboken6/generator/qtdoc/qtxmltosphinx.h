@@ -34,6 +34,7 @@
 #include <QtCore/QHash>
 #include <QtCore/QList>
 #include <QtCore/QScopedPointer>
+#include <QtCore/QSharedPointer>
 #include <QtCore/QStack>
 #include <QtCore/QTextStream>
 
@@ -128,6 +129,8 @@ public:
     static void stripPythonQualifiers(QString *s);
 
 private:
+    using StringSharedPtr = QSharedPointer<QString>;
+
     QString transform(const QString& doc);
 
     void handleHeadingTag(QXmlStreamReader& reader);
@@ -173,17 +176,17 @@ private:
     TextStream m_output;
     QString m_result;
 
-    QStack<QString*> m_buffers;
+    QStack<StringSharedPtr> m_buffers; // Maintain address stability since it used in TextStream
 
     Table m_currentTable;
     QScopedPointer<LinkContext> m_linkContext; // for <link>
     QScopedPointer<LinkContext> m_seeAlsoContext; // for <see-also>foo()</see-also>
-    bool m_tableHasHeader;
+    bool m_tableHasHeader = false;
     QString m_context;
     const QtXmlToSphinxDocGeneratorInterface *m_generator;
     const QtXmlToSphinxParameters &m_parameters;
-    bool m_insideBold;
-    bool m_insideItalic;
+    bool m_insideBold = false;
+    bool m_insideItalic = false;
     QString m_lastTagName;
     QString m_opened_anchor;
     QList<InlineImage> m_inlineImages;
