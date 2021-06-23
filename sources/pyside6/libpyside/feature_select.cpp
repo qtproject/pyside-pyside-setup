@@ -609,6 +609,8 @@ static QStringList parseFields(const char *propstr, bool *stdwrite)
     /*
      * Break the string into subfields at ':' and add defaults.
      */
+    if (stdwrite)
+        *stdwrite = true;
     QString s = QString(QLatin1String(propstr));
     auto list = s.split(QLatin1Char(':'));
     assert(list.size() == 2 || list.size() == 3);
