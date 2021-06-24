@@ -1147,7 +1147,29 @@ const QLoggingCategory &QtDocGenerator::loggingCategory() const
     return lcShibokenDoc();
 }
 
+static bool isRelativeHtmlFile(const QString &linkRef)
+{
+    return !linkRef.startsWith(u"http")
+        && (linkRef.endsWith(u".html") || linkRef.contains(u".html#"));
+}
+
+// Resolve relative, local .html documents links to doc.qt.io as they
+// otherwise will not work and neither be found in the HTML tree.
 QtXmlToSphinxLink QtDocGenerator::resolveLink(const QtXmlToSphinxLink &link) const
 {
-    return link;
+    if (link.type != QtXmlToSphinxLink::Reference || !isRelativeHtmlFile(link.linkRef))
+        return link;
+    static const QString prefix = QStringLiteral("https://doc.qt.io/qt-")
+        + QString::number(QT_VERSION_MAJOR) + QLatin1Char('/');
+    QtXmlToSphinxLink resolved = link;
+    resolved.type = QtXmlToSphinxLink::External;
+    resolved.linkRef = prefix + link.linkRef;
+    if (resolved.linkText.isEmpty()) {
+        resolved.linkText = link.linkRef;
+        const qsizetype anchor = resolved.linkText.lastIndexOf(u'#');
+        if (anchor != -1)
+            resolved.linkText.truncate(anchor);
+    }
+    qDebug() << __FUNCTION__ << link << "->" << resolved;
+    return resolved;
 }
