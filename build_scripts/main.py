@@ -1197,6 +1197,8 @@ class PysideRstDocs(Command, DistUtilsCommandMixin):
                 "-DDOC_OUTPUT_FORMAT=html",
                 "-DFULLDOCSBUILD=0",
             ]
+            if OPTION["QUIET"]:
+                cmake_cmd.append('-DQUIET_BUILD=1')
             if run_process(cmake_cmd) != 0:
                 raise DistutilsSetupError(f"Error running CMake for {self.doc_dir}")
 
