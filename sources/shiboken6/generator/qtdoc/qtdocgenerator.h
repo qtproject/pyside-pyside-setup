@@ -66,6 +66,7 @@ public:
     QString resolveContextForMethod(const QString &context,
                                     const QString &methodName) const override;
     const QLoggingCategory &loggingCategory() const override;
+    QtXmlToSphinxLink resolveLink(const QtXmlToSphinxLink &) const override;
 
 protected:
     bool shouldGenerate(const AbstractMetaClass *) const override;

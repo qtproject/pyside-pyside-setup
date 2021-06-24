@@ -56,6 +56,11 @@ const QLoggingCategory &QtXmlToSphinxTest::loggingCategory() const
     return lcQtXmlToSphinxTest();
 }
 
+QtXmlToSphinxLink QtXmlToSphinxTest::resolveLink(const QtXmlToSphinxLink &link) const
+{
+    return link;
+}
+
 QString QtXmlToSphinxTest::transformXml(const QString &xml) const
 {
     return QtXmlToSphinx(this, m_parameters, xml).result();

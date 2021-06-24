@@ -43,6 +43,7 @@ public:
     QString resolveContextForMethod(const QString &,
                                     const QString &) const override;
     const QLoggingCategory &loggingCategory() const override;
+    QtXmlToSphinxLink resolveLink(const QtXmlToSphinxLink &link) const override;
 
 private slots:
     void testTable_data();
