@@ -1140,3 +1140,8 @@ const QLoggingCategory &QtDocGenerator::loggingCategory() const
 {
     return lcShibokenDoc();
 }
+
+QtXmlToSphinxLink QtDocGenerator::resolveLink(const QtXmlToSphinxLink &link) const
+{
+    return link;
+}

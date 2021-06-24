@@ -39,11 +39,13 @@
 #include <QtCore/QTextStream>
 
 QT_BEGIN_NAMESPACE
+class QDebug;
 class QXmlStreamReader;
 QT_END_NAMESPACE
 
 class QtXmlToSphinxDocGeneratorInterface;
 struct QtXmlToSphinxParameters;
+struct QtXmlToSphinxLink;
 
 enum class WebXmlTag;
 
@@ -51,8 +53,6 @@ class QtXmlToSphinx
 {
 public:
     Q_DISABLE_COPY_MOVE(QtXmlToSphinx)
-
-    struct LinkContext;
 
     struct InlineImage
     {
@@ -168,9 +168,9 @@ private:
     void handleAnchorTag(QXmlStreamReader& reader);
     void handleRstPassTroughTag(QXmlStreamReader& reader);
 
-    LinkContext *handleLinkStart(const QString &type, QString ref) const;
-    static void handleLinkText(LinkContext *linkContext, const QString &linktext) ;
-    void handleLinkEnd(LinkContext *linkContext);
+    QtXmlToSphinxLink *handleLinkStart(const QString &type, QString ref) const;
+    static void handleLinkText(QtXmlToSphinxLink *linkContext, const QString &linktext) ;
+    void handleLinkEnd(QtXmlToSphinxLink *linkContext);
     WebXmlTag parentTag() const;
 
     void warn(const QString &message) const;
@@ -183,8 +183,8 @@ private:
     QStack<StringSharedPtr> m_buffers; // Maintain address stability since it used in TextStream
 
     Table m_currentTable;
-    QScopedPointer<LinkContext> m_linkContext; // for <link>
-    QScopedPointer<LinkContext> m_seeAlsoContext; // for <see-also>foo()</see-also>
+    QScopedPointer<QtXmlToSphinxLink> m_linkContext; // for <link>
+    QScopedPointer<QtXmlToSphinxLink> m_seeAlsoContext; // for <see-also>foo()</see-also>
     bool m_tableHasHeader = false;
     QString m_context;
     const QtXmlToSphinxDocGeneratorInterface *m_generator;
@@ -211,5 +211,7 @@ inline TextStream& operator<<(TextStream& s, const QtXmlToSphinx& xmlToSphinx)
 {
     return s << xmlToSphinx.result();
 }
+
+QDebug operator<<(QDebug d, const QtXmlToSphinxLink &l);
 
 #endif // QTXMLTOSPHINX_H
