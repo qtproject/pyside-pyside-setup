@@ -32,7 +32,7 @@ set(QtWebEngineWidgets_libraries      pyside6
                             ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
                             ${Qt${QT_MAJOR_VERSION}PrintSupport_LIBRARIES}
                             )
-set(QtWebEngineWidgets_deps QtGui QtWidgets QtNetwork QtPrintSupport)
+set(QtWebEngineWidgets_deps QtGui QtWidgets QtNetwork QtPrintSupport QtWebEngineCore)
 create_pyside_module(NAME QtWebEngineWidgets
                      INCLUDE_DIRS QtWebEngineWidgets_include_dirs
                      LIBRARIES QtWebEngineWidgets_libraries
