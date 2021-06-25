@@ -67,7 +67,7 @@
   <function signature="qPixelFormatRgba(uchar,uchar,uchar,uchar,QPixelFormat::AlphaUsage,QPixelFormat::AlphaPosition,QPixelFormat::AlphaPremultiplied,QPixelFormat::TypeInterpretation)"/>
   <function signature="qPixelFormatGrayscale(uchar,QPixelFormat::TypeInterpretation)"/>
   <function signature="qPixelFormatAlpha(uchar,QPixelFormat::TypeInterpretation)"/>
-  <function signature="qPixelFormatCmyk(uchar,uchar,QPixelFormat::AlphaUsage,QPixelFormat::AlphaPosition position,QPixelFormat::TypeInterpretation)"/>
+  <function signature="qPixelFormatCmyk(uchar,uchar,QPixelFormat::AlphaUsage,QPixelFormat::AlphaPosition,QPixelFormat::TypeInterpretation)"/>
   <function signature="qPixelFormatHsl(uchar,uchar,QPixelFormat::AlphaUsage,QPixelFormat::AlphaPosition,QPixelFormat::TypeInterpretation)"/>
   <function signature="qPixelFormatHsv(uchar,uchar,QPixelFormat::AlphaUsage,QPixelFormat::AlphaPosition,QPixelFormat::TypeInterpretation)"/>
   <function signature="qPixelFormatYuv(QPixelFormat::YUVLayout,uchar,QPixelFormat::AlphaUsage,QPixelFormat::AlphaPosition,QPixelFormat::AlphaPremultiplied,QPixelFormat::TypeInterpretation,QPixelFormat::ByteOrder)"/>
