@@ -1,17 +1,22 @@
 Using `.ui` files from Designer or QtCreator with `QUiLoader` and `pyside6-uic`
 *******************************************************************************
 
-This page describes the use of Qt Creator to create graphical
-interfaces for your Qt for Python project.
-You will need **Qt Creator** to design and modify your interface (UI file).
+This page describes the use of
+`Qt Designer <https://doc.qt.io/qt-6/qtdesigner-manual.html>`_ to create
+graphical interfaces based on Qt Widgets for your Qt for Python project.
+**Qt Designer** is a graphical UI design tool which is available as a
+standalone binary (``pyside6-designer``) or embedded into the
+`Qt Creator IDE <https://doc.qt.io/qtcreator>`_. Its use within **Qt Creator**
+is described at
+`Using Qt Designer <http://doc.qt.io/qtcreator/creator-using-qt-designer.html>`_.
 
-If you don't know how to use Qt Creator, refer to the
-`Using Qt Designer <http://doc.qt.io/qtcreator/creator-using-qt-designer.html>`_
-documentation page.
+The designs are stored in `.ui` files, which is an XML-based format. It will
+be converted to Python or C++ code populating a widget instance at project build
+time by the `pyside6-uic <https://doc.qt.io/qt-6/uic.html>`_ tool.
 
-At Qt Creator, create a new Qt Design Form, choose "Main Window" for template.
-And save as `mainwindow.ui`.
-Add a `QPushButton` to the center of the centralwidget.
+To create a new Qt Design Form in **Qt Creator**, choose
+`File/New File Or Project` and "Main Window" for template. Save it as
+`mainwindow.ui`. Add a `QPushButton` to the center of the centralwidget.
 
 Your file ``mainwindow.ui`` should look something like this:
 
@@ -77,7 +82,7 @@ Now we are ready to decide how to use the **UI file** from Python.
 Option A: Generating a Python class
 ===================================
 
-Another option to interact with a **UI file** is to generate a Python
+The standard way to interact with a **UI file** is to generate a Python
 class from it. This is possible thanks to the `pyside6-uic` tool.
 To use this tool, you need to run the following command on a console::
 
