@@ -36,9 +36,9 @@ functionality to your applications.
 User Interface Definition File ``.ui``
 --------------------------------------
 
-When using Qt Designer, you can create interfaces with the WYSIWYG
-form editor, this interface is represented as a widget tree using XML.
-Here is an extract of the beginning of a ``.ui`` file:
+When using Qt Designer, you can create user interfaces using Qt Widgets with
+the WYSIWYG form editor, this interface is represented as a widget tree using
+XML. Here is an extract of the beginning of a ``.ui`` file:
 
 .. code-block:: xml
 
@@ -64,6 +64,8 @@ The `pyside6-uic` tool generates Python code from these `.ui` files,
 which you can import from your main files, so it is not necessary
 for you to include the `.ui` files in your deployed application.
 
+For more details, see :ref:`using_ui_files`.
+
 Resource Collection Files ``.qrc``
 ----------------------------------
 
@@ -84,6 +86,7 @@ The `pyside6-rcc` tool generates Python code from these `.qrc` files,
 so you are not required to include the listed files in your deployed
 application.
 
+For more details, see :ref:`using_qrc_files`.
 
 Qt Modeling Language File ``.qml``
 ----------------------------------

@@ -6,6 +6,10 @@ Using `.qrc` Files (`pyside6-rcc`)
 The `Qt Resource System`_ is a mechanism for storing binary files
 in an application.
 
+The files will be embedded into the application and be acessible for the
+``QFile`` class and the constructors of the ``QIcon`` and ``QPixmap``
+classes taking a file name by using a special file name starting with ``:/``.
+
 The most common uses are for custom images, icons, fonts, among others.
 
 In this tutorial you will learn how to load custom images as button icons.
