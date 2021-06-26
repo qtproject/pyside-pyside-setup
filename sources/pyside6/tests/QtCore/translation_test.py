@@ -62,6 +62,19 @@ class TranslationTest(UsesQCoreApplication):
         obj.setObjectName(obj.tr('Hello World!'))
         self.assertEqual(obj.objectName(), 'Orbis, te saluto!')
 
+    def testLatinDerived(self):
+        # PYSIDE-131: Test that derived classes work, too.
+        translator = QTranslator()
+        translator.load(os.path.join(self.trdir, 'trans_latin.qm'))
+        self.app.installTranslator(translator)
+
+        class Derived(QObject):
+            pass
+
+        obj = Derived()
+        obj.setObjectName(obj.tr('Hello World!'))
+        self.assertEqual(obj.objectName(), 'Orbis, te saluto!')
+
     def testRussian(self):
         # Set string value to Russian
         translator = QTranslator()
