@@ -872,19 +872,41 @@ QObject *child = _findChildHelper(%CPPSELF, %2, reinterpret_cast<PyTypeObject *>
 _findChildrenHelper(%CPPSELF, %2, reinterpret_cast<PyTypeObject *>(%PYARG_1), %3, %PYARG_0);
 // @snippet qobject-findchildren
 
-// @snippet qobject-tr
-QString result;
-if (QCoreApplication::instance()) {
-    PyObject *klass = PyObject_GetAttr(%PYSELF, Shiboken::PyMagicName::class_());
-    PyObject *cname = PyObject_GetAttr(klass, Shiboken::PyMagicName::name());
-    result = QString(QCoreApplication::instance()->translate(Shiboken::String::toCString(cname),
-                                                        /*   %1, %2, QCoreApplication::CodecForTr, %3)); */
-                                                             %1, %2, %3));
+//////////////////////////////////////////////////////////////////////////////
+// PYSIDE-131: Use the class name as context where the calling function is
+//             living. Derived Python classes have the wrong context.
+//
+// The original patch uses Python introspection to look up the current
+// function (from the frame stack) in the class __dict__ along the mro.
+//
+// The problem is that looking into the frame stack works for Python
+// functions, only. For including builtin function callers, the following
+// approach turned out to be much simpler:
+//
+// Walk the __mro__
+// - translate the string
+// - if the translated string is changed:
+//   - return the translation.
 
-    Py_DECREF(klass);
-    Py_DECREF(cname);
-} else {
-    result = QString(QString::fromLatin1(%1));
+// @snippet qobject-tr
+PyTypeObject *type = Py_TYPE(%PYSELF);
+PyObject *mro = type->tp_mro;
+auto len = PyTuple_GET_SIZE(mro);
+QString result = QString::fromUtf8(%1);
+QString oldResult = result;
+static auto *sbkObjectType = reinterpret_cast<PyTypeObject *>(SbkObject_TypeF());
+for (Py_ssize_t idx = 0; idx < len - 1; ++idx) {
+    // Skip the last class which is `object`.
+    auto *type = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
+    if (type == sbkObjectType)
+        continue;
+    const char *context = type->tp_name;
+    const char *dotpos = strrchr(context, '.');
+    if (dotpos != nullptr)
+        context = dotpos + 1;
+    result = QCoreApplication::translate(context, %1, %2, %3);
+    if (result != oldResult)
+        break;
 }
 %PYARG_0 = %CONVERTTOPYTHON[QString](result);
 // @snippet qobject-tr
