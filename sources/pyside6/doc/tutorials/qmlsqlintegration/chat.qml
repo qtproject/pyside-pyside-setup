@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2019 The Qt Company Ltd.
+** Copyright (C) 2021 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the examples of Qt for Python.
@@ -40,6 +40,7 @@
 import QtQuick 2.12
 import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.12
+import ChatModel 1.0
 
 ApplicationWindow {
     id: window
@@ -47,6 +48,11 @@ ApplicationWindow {
     width: 640
     height: 960
     visible: true
+
+    SqlConversationModel {
+        id: chat_model
+    }
+
     ColumnLayout {
         anchors.fill: parent
 
@@ -61,20 +67,21 @@ ApplicationWindow {
             spacing: 12
             model: chat_model
             delegate: Column {
-                readonly property bool sentByMe: model.recipient !== "Me"
-                anchors.right: sentByMe ? parent.right : undefined
+                anchors.right: sentByMe ? listView.contentItem.right : undefined
                 spacing: 6
 
+                readonly property bool sentByMe: model.recipient !== "Me"
                 Row {
                     id: messageRow
                     spacing: 6
                     anchors.right: sentByMe ? parent.right : undefined
 
                     Rectangle {
-                        width: Math.min(messageText.implicitWidth + 24, listView.width - messageRow.spacing)
+                        width: Math.min(messageText.implicitWidth + 24,
+                            listView.width - (!sentByMe ? messageRow.spacing : 0))
                         height: messageText.implicitHeight + 24
                         radius: 15
-                        color: sentByMe ? "lightgrey" : "#ff627c"
+                        color: sentByMe ? "lightgrey" : "steelblue"
 
                         Label {
                             id: messageText
@@ -117,7 +124,7 @@ ApplicationWindow {
                     text: qsTr("Send")
                     enabled: messageField.length > 0
                     onClicked: {
-                        chat_model.send_message("machine", messageField.text, "Me");
+                        listView.model.send_message("machine", messageField.text, "Me");
                         messageField.text = "";
                     }
                 }

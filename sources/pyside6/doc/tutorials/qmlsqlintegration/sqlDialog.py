@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2019 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python project.
@@ -42,8 +42,11 @@ import logging
 
 from PySide6.QtCore import Qt, Slot
 from PySide6.QtSql import QSqlDatabase, QSqlQuery, QSqlRecord, QSqlTableModel
+from PySide6.QtQml import QmlElement
 
 table_name = "Conversations"
+QML_IMPORT_NAME = "ChatModel"
+QML_IMPORT_MAJOR_VERSION = 1
 
 
 def createTable():
@@ -77,6 +80,7 @@ def createTable():
     logging.info(query)
 
 
+@QmlElement
 class SqlConversationModel(QSqlTableModel):
     def __init__(self, parent=None):
         super(SqlConversationModel, self).__init__(parent)
@@ -126,6 +130,9 @@ class SqlConversationModel(QSqlTableModel):
 
         return names
 
+    # This is a workaround because PySide doesn't provide Q_INVOKABLE
+    # So we declare this as a Slot to be able to call it  from QML
+    @Slot(str, str, str)
     def send_message(self, recipient, message, author):
         timestamp = datetime.datetime.now()
 

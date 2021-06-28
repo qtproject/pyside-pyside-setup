@@ -47,8 +47,13 @@ from helper.helper import quickview_errorstring
 from PySide6.QtCore import QObject, QUrl, Property
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQuick import QQuickView
+from PySide6.QtQml import QmlElement
 
 
+QML_IMPORT_NAME = "test.PythonObject"
+QML_IMPORT_MAJOR_VERSION = 1
+
+@QmlElement
 class PythonObject(QObject):
     def __init__(self):
         super().__init__(None)
@@ -85,8 +90,7 @@ class TestBug(unittest.TestCase):
         view = QQuickView()
 
         obj = PythonObject()
-        context = view.rootContext()
-        context.setContextProperty("python", obj)
+        view.setInitialProperties({"python": obj})
         file = Path(__file__).resolve().parent / 'bug_451.qml'
         self.assertTrue(file.is_file())
         view.setSource(QUrl.fromLocalFile(file))

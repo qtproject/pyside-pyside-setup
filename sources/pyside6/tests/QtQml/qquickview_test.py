@@ -40,12 +40,13 @@ init_test_paths(False)
 from helper.helper import quickview_errorstring
 from helper.timedqapplication import TimedQApplication
 
-from PySide6.QtCore import QUrl, QObject, Property, Slot
+from PySide6.QtCore import QUrl, QObject, Property, Slot, Signal
 from PySide6.QtQml import QQmlEngine
 from PySide6.QtQuick import QQuickView
 
 
 class MyObject(QObject):
+    titleChanged = Signal()
     def __init__(self, text, parent=None):
         QObject.__init__(self, parent)
         self._text = text
@@ -57,7 +58,7 @@ class MyObject(QObject):
     def qmlText(self, text):
         self._qmlText = text
 
-    title = Property(str, getText)
+    title = Property(str, getText, notify=titleChanged)
 
 
 class TestQQuickView(TimedQApplication):
@@ -67,8 +68,7 @@ class TestQQuickView(TimedQApplication):
 
         dataList = ["Item 1", "Item 2", "Item 3", "Item 4"]
 
-        ctxt = view.rootContext()
-        ctxt.setContextProperty("myModel", dataList)
+        view.setInitialProperties({"model": dataList})
 
         file = Path(__file__).resolve().parent / 'view.qml'
         self.assertTrue(file.is_file())
@@ -88,8 +88,7 @@ class TestQQuickView(TimedQApplication):
         view = QQuickView()
         dataList = [MyObject("Item 1"), MyObject("Item 2"), MyObject("Item 3"), MyObject("Item 4")]
 
-        ctxt = view.rootContext()
-        ctxt.setContextProperty("myModel", dataList)
+        view.setInitialProperties({"model": dataList})
 
         file = Path(__file__).resolve().parent / 'viewmodel.qml'
         self.assertTrue(file.is_file())

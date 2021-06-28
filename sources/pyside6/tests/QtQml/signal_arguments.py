@@ -40,8 +40,12 @@ from helper.timedqapplication import TimedQApplication
 
 from PySide6.QtQuick import QQuickView
 from PySide6.QtCore import QObject, Signal, Slot, QUrl, QTimer, Property
+from PySide6.QtQml import QmlElement
 
+QML_IMPORT_NAME = "test.Obj"
+QML_IMPORT_MAJOR_VERSION = 1
 
+@QmlElement
 class Obj(QObject):
     def __init__(self):
         super().__init__()
@@ -64,8 +68,7 @@ class TestConnectionWithQml(TimedQApplication):
         view = QQuickView()
         obj = Obj()
 
-        context = view.rootContext()
-        context.setContextProperty("o", obj)
+        view.setInitialProperties({"o": obj})
         file = Path(__file__).resolve().parent / 'signal_arguments.qml'
         self.assertTrue(file.is_file())
         view.setSource(QUrl.fromLocalFile(file))

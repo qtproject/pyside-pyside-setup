@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2021 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -39,12 +39,13 @@
 ****************************************************************************/
 
 import QtQuick 2.0
+import PersonModel 1.0
 
 ListView {
     width: 100
     height: 100
     anchors.fill: parent
-    model: myModel
+    model: MyModel
     delegate: Component {
         Rectangle {
             height: 25

@@ -39,8 +39,11 @@ from helper.helper import quickview_errorstring
 from helper.timedqapplication import TimedQApplication
 from PySide6.QtCore import QObject, QUrl, Slot
 from PySide6.QtQuick import QQuickView
+from PySide6.QtQml import QmlElement
 
-
+QML_IMPORT_NAME = "test.ProxyObject"
+QML_IMPORT_MAJOR_VERSION = 1
+@QmlElement
 class ProxyObject(QObject):
     def __init__(self):
         super().__init__()
@@ -67,8 +70,7 @@ class TestConnectionWithInvalidSignature(TimedQApplication):
         view = QQuickView()
         proxy = ProxyObject()
 
-        context = view.rootContext()
-        context.setContextProperty("proxy", proxy)
+        view.setInitialProperties({"proxy": proxy})
         file = Path(__file__).resolve().parent / 'bug_726.qml'
         self.assertTrue(file.is_file())
         view.setSource(QUrl.fromLocalFile(file))

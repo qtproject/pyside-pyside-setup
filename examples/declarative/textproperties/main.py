@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2018 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -39,14 +39,21 @@
 #############################################################################
 
 import sys
-from os.path import abspath, dirname, join
+from pathlib import Path
 
 from PySide6.QtCore import QObject, Slot
 from PySide6.QtGui import QGuiApplication
-from PySide6.QtQml import QQmlApplicationEngine
+from PySide6.QtQml import QQmlApplicationEngine, QmlElement
 from PySide6.QtQuickControls2 import QQuickStyle
 
 
+# To be used on the @QmlElement decorator
+# (QML_IMPORT_MINOR_VERSION is optional)
+QML_IMPORT_NAME = "io.qt.textproperties"
+QML_IMPORT_MAJOR_VERSION = 1
+
+
+@QmlElement
 class Bridge(QObject):
 
     @Slot(str, result=str)
@@ -95,17 +102,10 @@ if __name__ == '__main__':
     QQuickStyle.setStyle("Material")
     engine = QQmlApplicationEngine()
 
-    # Instance of the Python object
-    bridge = Bridge()
-
-    # Expose the Python object to QML
-    context = engine.rootContext()
-    context.setContextProperty("con", bridge)
-
     # Get the path of the current directory, and then add the name
     # of the QML file, to load it.
-    qmlFile = join(dirname(__file__), 'view.qml')
-    engine.load(abspath(qmlFile))
+    qml_file = Path(__file__).parent / 'view.qml'
+    engine.load(qml_file)
 
     if not engine.rootObjects():
         sys.exit(-1)

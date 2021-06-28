@@ -60,8 +60,8 @@ import sys
 import platform
 
 from PySide6.QtGui import QGuiApplication, QIcon
-from PySide6.QtCore import QSettings, QUrl
-from PySide6.QtQml import QQmlApplicationEngine, QQmlContext
+from PySide6.QtCore import QSettings
+from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtQuickControls2 import QQuickStyle
 
 import rc_gallery
@@ -75,7 +75,9 @@ if __name__ == "__main__":
 
     settings = QSettings()
     if not os.environ.get("QT_QUICK_CONTROLS_STYLE"):
-        QQuickStyle.setStyle(settings.value("style", str))
+        style_name = settings.value("style")
+        if style_name:
+            QQuickStyle.setStyle(style_name)
 
     engine = QQmlApplicationEngine()
 
@@ -84,7 +86,7 @@ if __name__ == "__main__":
         built_in_styles.append("macOS")
     elif platform.system() == "Windows":
         built_in_styles.append("Windows")
-    engine.rootContext().setContextProperty("builtInStyles", built_in_styles)
+    engine.setInitialProperties({"builtInStyles": built_in_styles})
 
     engine.load(":/gallery.qml")
     rootObjects = engine.rootObjects()

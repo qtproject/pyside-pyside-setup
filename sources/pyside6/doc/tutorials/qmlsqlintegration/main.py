@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2019 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python project.
@@ -37,6 +37,7 @@
 ##
 #############################################################################
 
+import sys
 import logging
 
 from PySide6.QtCore import QDir, QFile, QUrl
@@ -44,7 +45,8 @@ from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtSql import QSqlDatabase
 
-from sqlDialog import SqlConversationModel
+# We import the file just to trigger the QmlElement type registration.
+import sqlDialog
 
 logging.basicConfig(filename="chat.log", level=logging.DEBUG)
 logger = logging.getLogger("logger")
@@ -57,7 +59,7 @@ def connectToDatabase():
         if not database.isValid():
             logger.error("Cannot add database")
 
-    write_dir = QDir()
+    write_dir = QDir("")
     if not write_dir.mkpath("."):
         logger.error("Failed to create writable directory")
 
@@ -76,11 +78,11 @@ def connectToDatabase():
 if __name__ == "__main__":
     app = QGuiApplication()
     connectToDatabase()
-    sql_conversation_model = SqlConversationModel()
 
     engine = QQmlApplicationEngine()
-    # Export pertinent objects to QML
-    engine.rootContext().setContextProperty("chat_model", sql_conversation_model)
     engine.load(QUrl("chat.qml"))
+
+    if not engine.rootObjects():
+        sys.exit(-1)
 
     app.exec()

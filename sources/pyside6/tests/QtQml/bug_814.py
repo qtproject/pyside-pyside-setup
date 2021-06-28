@@ -51,8 +51,12 @@ from helper.timedqapplication import TimedQApplication
 
 from PySide6.QtCore import QUrl, QAbstractListModel, QModelIndex, Qt
 from PySide6.QtQuick import QQuickView
+from PySide6.QtQml import QmlElement
 
+QML_IMPORT_NAME = "test.ListModel"
+QML_IMPORT_MAJOR_VERSION = 1
 
+@QmlElement
 class ListModel(QAbstractListModel):
     def __init__(self):
         super().__init__()
@@ -73,7 +77,7 @@ class TestBug814(TimedQApplication):
     def testAbstractItemModelTransferToQML(self):
         view = QQuickView()
         model = ListModel()
-        view.rootContext().setContextProperty("pythonModel", model)
+        view.setInitialProperties({"pythonModel": model})
         file = Path(__file__).resolve().parent / 'bug_814.qml'
         self.assertTrue(file.is_file())
         view.setSource(QUrl.fromLocalFile(file))

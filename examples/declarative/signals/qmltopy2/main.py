@@ -1,7 +1,7 @@
 
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -45,8 +45,15 @@ import sys
 from PySide6.QtCore import QObject, QUrl, Slot
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQuick import QQuickView
+from PySide6.QtQml import QmlElement
+
+# To be used on the @QmlElement decorator
+# (QML_IMPORT_MINOR_VERSION is optional)
+QML_IMPORT_NAME = "examples.signals.qmltopy2"
+QML_IMPORT_MAJOR_VERSION = 1
 
 
+@QmlElement
 class RotateValue(QObject):
     def __init__(self):
         super().__init__()
@@ -63,10 +70,6 @@ class RotateValue(QObject):
 if __name__ == '__main__':
     app = QGuiApplication(sys.argv)
     view = QQuickView()
-
-    rotatevalue = RotateValue()
-    context = view.rootContext()
-    context.setContextProperty("rotatevalue", rotatevalue)
 
     qml_file = os.fspath(Path(__file__).resolve().parent / 'view.qml')
     view.setSource(QUrl.fromLocalFile(qml_file))

@@ -30,9 +30,11 @@
 import QtQuick 2.5
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.2
+import test.Obj 1.0
 
 Rectangle {
     visible: true
+    required property Obj o
     GridLayout {
         Button {
             id: button

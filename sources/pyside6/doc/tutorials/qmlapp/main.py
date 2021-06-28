@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2019 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -38,18 +38,13 @@
 ##
 #############################################################################
 
-#!/usr/bin/env python
-# -*- conding: utf-8 -*-
-
-import os
 import sys
 import urllib.request
 import json
 from pathlib import Path
 
-import PySide6.QtQml
 from PySide6.QtQuick import QQuickView
-from PySide6.QtCore import QStringListModel, Qt, QUrl
+from PySide6.QtCore import QStringListModel, QUrl
 from PySide6.QtGui import QGuiApplication
 
 
@@ -72,7 +67,7 @@ if __name__ == '__main__':
     #Expose the list to the Qml code
     my_model = QStringListModel()
     my_model.setStringList(data_list)
-    view.rootContext().setContextProperty("myModel", my_model)
+    view.setInitialProperties({"myModel": my_model})
 
     #Load the QML file
     qml_file = Path(__file__).parent / "view.qml"

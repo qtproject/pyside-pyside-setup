@@ -50,8 +50,7 @@ class TestBug(UsesQApplication):
         ownerData.insert('newValue', '')
 
         view = QQuickView()
-        ctxt = view.rootContext()
-        ctxt.setContextProperty('owner', ownerData)
+        view.setInitialProperties({'owner': ownerData})
         file = Path(__file__).resolve().parent / 'bug_997.qml'
         self.assertTrue(file.is_file())
         view.setSource(QUrl.fromLocalFile(file))

@@ -27,8 +27,10 @@
 ****************************************************************************/
 
 import QtQuick 2.0
+import test.ListModel 1.0
 
 ListView {
+    required property ListModel pythonModel
     width: 300; height: 300
     delegate: Text { text: pysideModelData }
     model: pythonModel

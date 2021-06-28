@@ -27,12 +27,14 @@
 ****************************************************************************/
 
 import QtQuick 2.0
+import test.RotateValue 1.0
 
 Rectangle {
     id: page
 
     width: 500; height: 200
     color: "lightgray"
+    required property RotateValue rotatevalue
 
     Rectangle {
         id: button

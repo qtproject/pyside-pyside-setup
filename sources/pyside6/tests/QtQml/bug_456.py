@@ -39,8 +39,12 @@ from helper.helper import quickview_errorstring
 from helper.timedqapplication import TimedQApplication
 from PySide6.QtCore import QObject, QTimer, QUrl, Property, Slot
 from PySide6.QtQuick import QQuickView
+from PySide6.QtQml import QmlElement
 
+QML_IMPORT_NAME = "test.RotateValue"
+QML_IMPORT_MAJOR_VERSION = 1
 
+@QmlElement
 class RotateValue(QObject):
     def __init__(self):
         super().__init__()
@@ -67,8 +71,7 @@ class TestConnectionWithInvalidSignature(TimedQApplication):
         timer = QTimer()
         timer.start(2000)
 
-        context = view.rootContext()
-        context.setContextProperty("rotatevalue", rotatevalue)
+        view.setInitialProperties({"rotatevalue": rotatevalue})
         file = Path(__file__).resolve().parent / 'bug_456.qml'
         self.assertTrue(file.is_file())
         view.setSource(QUrl.fromLocalFile(file))

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2019 The Qt Company Ltd.
+** Copyright (C) 2021 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the examples of Qt for Python.
@@ -54,6 +54,7 @@ import QtQuick.Controls 2.12
 Page {
     width: 640
     height: 480
+    required property var myModel
 
     header: Label {
         color: "#15af15"

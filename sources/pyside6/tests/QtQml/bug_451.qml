@@ -27,9 +27,11 @@
 ****************************************************************************/
 
 import QtQuick 2.0
+import test.PythonObject 1.0
 
 Rectangle {
     id: page
+    required property PythonObject python
 
     function simpleFunction() {
         python.called = "simpleFunction"

@@ -1,7 +1,7 @@
 
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -45,6 +45,7 @@ import sys
 from PySide6.QtCore import QAbstractListModel, Qt, QUrl, QByteArray
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQuick import QQuickView
+from PySide6.QtQml import qmlRegisterSingletonType
 
 
 class PersonModel (QAbstractListModel):
@@ -75,9 +76,17 @@ class PersonModel (QAbstractListModel):
             return d['myrole']
         return None
 
-    def populate(self):
-        self._data.append({'name': 'Qt', 'myrole': 'role1'})
-        self._data.append({'name': 'PySide', 'myrole': 'role2'})
+    def populate(self, data=None):
+        for item in data:
+            self._data.append(item)
+
+
+def model_callback(engine):
+    my_model = PersonModel()
+    data = [{'name': 'Qt', 'myrole': 'role1'},
+            {'name': 'PySide', 'myrole': 'role2'}]
+    my_model.populate(data)
+    return my_model
 
 
 if __name__ == '__main__':
@@ -85,17 +94,15 @@ if __name__ == '__main__':
     view = QQuickView()
     view.setResizeMode(QQuickView.SizeRootObjectToView)
 
-    myModel = PersonModel()
-    myModel.populate()
-
-    view.rootContext().setContextProperty("myModel", myModel)
+    qmlRegisterSingletonType(PersonModel, "PersonModel", 1, 0, "MyModel", model_callback)
     qml_file = os.fspath(Path(__file__).resolve().parent / 'view.qml')
     view.setSource(QUrl.fromLocalFile(qml_file))
     if view.status() == QQuickView.Error:
         sys.exit(-1)
     view.show()
 
-    app.exec()
+    r = app.exec()
     # Deleting the view before it goes out of scope is required to make sure all child QML instances
     # are destroyed in the correct order.
     del view
+    sys.exit(r)

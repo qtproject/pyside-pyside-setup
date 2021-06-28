@@ -35,6 +35,7 @@ ListView {
     model: myModel
     delegate: Component {
         Rectangle {
+            required property string modelData
             height: 25
             width: 100
             Text { text: modelData }

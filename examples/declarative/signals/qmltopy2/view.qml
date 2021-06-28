@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2021 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -40,11 +40,17 @@
 
 import QtQuick 2.0
 
+import examples.signals.qmltopy2 1.0
+
 Rectangle {
     id: page
 
     width: 500; height: 200
     color: "lightgray"
+
+    RotateValue {
+        id: rotatevalue
+    }
 
     Text {
         id: helloText

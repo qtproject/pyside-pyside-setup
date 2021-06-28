@@ -45,7 +45,7 @@ import os
 from pathlib import Path
 import sys
 
-from PySide6.QtCore import Property, Signal, Qt, QUrl
+from PySide6.QtCore import Property, Signal, QUrl
 from PySide6.QtGui import QGuiApplication, QPen, QPainter, QColor
 from PySide6.QtQml import qmlRegisterType
 from PySide6.QtQuick import QQuickPaintedItem, QQuickView

@@ -45,8 +45,16 @@ import sys
 from PySide6.QtCore import QObject, QTimer, QUrl, Signal, Slot
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQuick import QQuickView
+from PySide6.QtQml import QmlElement
 
 
+# To be used on the @QmlElement decorator
+# (QML_IMPORT_MINOR_VERSION is optional)
+QML_IMPORT_NAME = "examples.signals.pytoqml2"
+QML_IMPORT_MAJOR_VERSION = 1
+
+
+@QmlElement
 class RotateValue(QObject):
     valueChanged = Signal(int, arguments=['val'])
 
@@ -67,8 +75,7 @@ if __name__ == '__main__':
     rotatevalue = RotateValue()
     timer = QTimer()
     timer.start(2000)
-    context = view.rootContext()
-    context.setContextProperty("rotatevalue", rotatevalue)
+    view.setInitialProperties({"rotatevalue": rotatevalue})
 
     qml_file = os.fspath(Path(__file__).resolve().parent / 'view.qml')
     view.setSource(QUrl.fromLocalFile(qml_file))

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2021 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -41,11 +41,17 @@
 
 import QtQuick 2.0
 
+import examples.signals.qmltopy1 1.0
+
 Rectangle {
     id: page
 
     width: 500; height: 200
     color: "lightgray"
+
+    Console {
+        id: pyConsole
+    }
 
     Text {
         id: helloText
@@ -66,12 +72,12 @@ Rectangle {
             objectName: "buttonMouseArea"
             anchors.fill: parent
             onClicked: {
-                // once the "con" context has been declared,
+                // once the "console" context has been declared,
                 // slots can be called like functions
-                con.outputFloat(123)
-                con.outputStr("foobar")
-                con.output(helloText.x)
-                con.output(helloText.text)
+                pyConsole.outputFloat(123)
+                pyConsole.outputStr("foobar")
+                pyConsole.output(helloText.x)
+                pyConsole.output(helloText.text)
             }
         }
         Text {
