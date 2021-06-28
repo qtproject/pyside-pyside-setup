@@ -42,7 +42,8 @@
 <typesystem package="PySide6.QtQuick">
     <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
     <load-typesystem name="QtNetwork/typesystem_network.xml" generate="no"/>
-    <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
+    <!-- QQuickFramebufferObject::Renderer needs QOpenGLFramebufferObject -->
+    <load-typesystem name="QtOpenGL/typesystem_opengl.xml" generate="no"/>
     <load-typesystem name="QtQml/typesystem_qml.xml" generate="no"/>
 
     <smart-pointer-type name="QSharedPointer" type="shared" getter="data"/>
