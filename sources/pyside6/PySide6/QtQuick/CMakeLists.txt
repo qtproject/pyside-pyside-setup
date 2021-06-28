@@ -62,12 +62,14 @@ set(QtQuick_include_dirs  ${QtQuick_SOURCE_DIR}
                           ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
                           ${Qt${QT_MAJOR_VERSION}Core_PRIVATE_INCLUDE_DIRS}
                           ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
+                          ${Qt${QT_MAJOR_VERSION}OpenGL_INCLUDE_DIRS}
                           ${Qt${QT_MAJOR_VERSION}Network_INCLUDE_DIRS}
                           ${Qt${QT_MAJOR_VERSION}Qml_INCLUDE_DIRS}
                           ${Qt${QT_MAJOR_VERSION}Qml_PRIVATE_INCLUDE_DIRS}
                           ${Qt${QT_MAJOR_VERSION}Quick_INCLUDE_DIRS}
                           ${libpyside_SOURCE_DIR}
                           ${QtGui_GEN_DIR}
+                          ${QtOpenGL_GEN_DIR}
                           ${QtCore_GEN_DIR}
                           ${QtNetwork_GEN_DIR}
                           ${QtQml_GEN_DIR}
@@ -76,11 +78,12 @@ set(QtQuick_include_dirs  ${QtQuick_SOURCE_DIR}
 set(QtQuick_libraries pyside6
                       ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
                       ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
+                      ${Qt${QT_MAJOR_VERSION}OpenGL_LIBRARIES}
                       ${Qt${QT_MAJOR_VERSION}Network_LIBRARIES}
                       ${Qt${QT_MAJOR_VERSION}Qml_LIBRARIES}
                       ${Qt${QT_MAJOR_VERSION}Quick_LIBRARIES})
 
-set(QtQuick_deps QtGui QtNetwork QtQml)
+set(QtQuick_deps QtGui QtOpenGL QtNetwork QtQml)
 
 create_pyside_module(NAME QtQuick
                      INCLUDE_DIRS QtQuick_include_dirs
