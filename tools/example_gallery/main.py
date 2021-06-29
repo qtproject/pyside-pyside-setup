@@ -220,7 +220,7 @@ if __name__ == "__main__":
         rst_file = f"example_{module_name}_{extra_names}_{example_name}.rst"
 
         def check_img_ext(i):
-            EXT = (".png", ".jpg", ".jpeg")
+            EXT = (".png", ".jpg", ".jpeg", ".gif")
             if i.suffix in EXT:
                 return True
             return False
