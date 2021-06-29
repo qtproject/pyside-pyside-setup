@@ -59,6 +59,8 @@ void init();
 SbkConverter *createConverter();
 LIBSHIBOKEN_API void addVoidPtrToModule(PyObject *module);
 
+LIBSHIBOKEN_API void setSize(PyObject *voidPtr, Py_ssize_t size);
+LIBSHIBOKEN_API Py_ssize_t getSize(PyObject *voidPtr);
 }
 
 
