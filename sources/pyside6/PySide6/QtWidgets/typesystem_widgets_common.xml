@@ -82,7 +82,7 @@
   <function signature="qDrawShadePanel(QPainter*,int,int,int,int,const QPalette&amp;,bool,int,const QBrush*)"/>
   <function signature="qDrawShadePanel(QPainter*,const QRect&amp;,const QPalette&amp;,bool,int,const QBrush*)"/>
   <function signature="qDrawWinButton(QPainter*,int,int,int,int,const QPalette&amp;,bool,const QBrush*)"/>
-  <function signature="qDrawWinButton(QPainter*,const QRect&amp;,const QPalette&amp;,bool,const QBrush*fill)"/>
+  <function signature="qDrawWinButton(QPainter*,const QRect&amp;,const QPalette&amp;,bool,const QBrush*)"/>
   <function signature="qDrawWinPanel(QPainter*,int,int,int,int,const QPalette&amp;,bool,const QBrush*)"/>
   <function signature="qDrawWinPanel(QPainter*,const QRect&amp;,const QPalette&amp;,bool,const QBrush*)"/>
   <function signature="qDrawPlainRect(QPainter*,int,int,int,int,const QColor&amp;,int,const QBrush*)"/>

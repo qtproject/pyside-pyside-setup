@@ -1052,6 +1052,8 @@
 
   <value-type name="QColorTransform"/>
 
+  <value-type name="QRgba64"/>
+
   <value-type name="QFontMetricsF" >
 
     <modify-function signature="boundingRect(QChar)const" rename="boundingRectChar">
