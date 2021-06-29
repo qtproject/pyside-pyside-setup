@@ -118,6 +118,8 @@
      </function>
     <function signature="qmlProtectModule(const char*,int)"/>
     <function signature="qmlRegisterModule(const char*,int,int)"/>
+    <function signature="qmlTypeId(const char*,int,int,const char*)"/>
+    <function signature="qmlRegisterUncreatableMetaObject(const QMetaObject&amp;,const char*,int,int, const char*,const QString&amp;)"/>
 
     <enum-type identified-by-value="QML_HAS_ATTACHED_PROPERTIES">
         <extra-includes>
