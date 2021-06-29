@@ -421,7 +421,7 @@ static const char invalidatePropertyName[] = "_PySideInvalidatePtr";
 // PYSIDE-1214, when creating new wrappers for classes inheriting QObject but
 // not exposed to Python, try to find the best-matching (most-derived) Qt
 // class by walking up the meta objects.
-static const char *typeName(QObject *cppSelf)
+static const char *typeName(const QObject *cppSelf)
 {
     const char *typeName = typeid(*cppSelf).name();
     if (!Shiboken::Conversions::getConverter(typeName)) {
@@ -434,6 +434,20 @@ static const char *typeName(QObject *cppSelf)
         }
     }
     return typeName;
+}
+
+PyTypeObject *getTypeForQObject(const QObject *cppSelf)
+{
+    // First check if there are any instances of Python implementations
+    // inheriting a PySide class.
+    auto *existing = Shiboken::BindingManager::instance().retrieveWrapper(cppSelf);
+    if (existing != nullptr)
+        return reinterpret_cast<PyObject *>(existing)->ob_type;
+    // Find the best match (will return a PySide type)
+    auto *sbkObjectType = Shiboken::ObjectType::typeForTypeName(typeName(cppSelf));
+    if (sbkObjectType != nullptr)
+        return reinterpret_cast<PyTypeObject *>(sbkObjectType);
+    return nullptr;
 }
 
 PyObject *getWrapperForQObject(QObject *cppSelf, SbkObjectType *sbk_type)
