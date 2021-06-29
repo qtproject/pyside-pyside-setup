@@ -39,6 +39,16 @@ init_test_paths(False)
 
 from PySide2.QtCore import *
 
+class TestObject1(QTimer):
+    def __init(self, parent):
+        super().__init__(parent)
+
+
+class TestObject2(TestObject1):
+    def __init(self, parent):
+        super().__init__(parent)
+
+
 class ParentRefCountCase(unittest.TestCase):
     '''Test case for the refcount changes of setParent'''
 
@@ -157,6 +167,26 @@ class ParentCase(unittest.TestCase):
         parent = QObject()
         child = QObject(parent)
         self.assertEqual(parent, child.parent())
+
+    def testFindChildByType(self):
+        parent = QObject()
+        expected = TestObject2(parent)
+        actual = parent.findChild(TestObject2)
+        self.assertEqual(actual, expected)
+        actual = parent.findChild(TestObject1)
+        self.assertEqual(actual, expected)
+        actual = parent.findChild(QTimer)
+        self.assertEqual(actual, expected)
+
+    def testFindChildrenByType(self):
+        parent = QObject()
+        expected = [TestObject2(parent)]
+        actual = parent.findChildren(TestObject2)
+        self.assertEqual(actual, expected)
+        actual = parent.findChildren(TestObject1)
+        self.assertEqual(actual, expected)
+        actual = parent.findChildren(QTimer)
+        self.assertEqual(actual, expected)
 
 
 class TestParentOwnership(unittest.TestCase):
