@@ -122,6 +122,11 @@ PYSIDE_API void setNextQObjectMemoryAddr(void *addr);
 
 PYSIDE_API PyObject *getWrapperForQObject(QObject *cppSelf, SbkObjectType *sbk_type);
 
+/// Return the best-matching type for a QObject (Helper for QObject.findType())
+/// \param cppSelf QObject instance
+/// \return type object
+PYSIDE_API PyTypeObject *getTypeForQObject(const QObject *cppSelf);
+
 #ifdef PYSIDE_QML_SUPPORT
 // Used by QtQuick module to notify QtQml that custom QtQuick items can be registered.
 typedef bool (*QuickRegisterItemFunction)(PyObject *pyObj, const char *uri, int versionMajor,

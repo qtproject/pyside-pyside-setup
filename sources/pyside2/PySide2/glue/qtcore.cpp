@@ -775,12 +775,35 @@ qRegisterMetaType<QVector<int> >("QVector<int>");
 // @snippet qobject-metaobject
 
 // @snippet qobject-findchild-1
+static bool _findChildTypeMatch(const QObject *child, PyTypeObject *desiredType)
+{
+    auto *pyChildType = PySide::getTypeForQObject(child);
+    return pyChildType != nullptr && PyType_IsSubtype(pyChildType, desiredType);
+}
+
+static inline bool _findChildrenComparator(const QObject *child,
+                                           const QRegularExpression &name)
+{
+    return name.match(child->objectName()).hasMatch();
+}
+
+static inline bool _findChildrenComparator(const QObject *child,
+                                           const QString &name)
+{
+    return name.isNull() || name == child->objectName();
+}
+
+static inline bool _findChildrenComparator(const QObject *child,
+                                           const QRegExp &name)
+{
+    return name.indexIn(child->objectName()) != -1;
+}
+
 static QObject *_findChildHelper(const QObject *parent, const QString &name, PyTypeObject *desiredType)
 {
     for (auto *child : parent->children()) {
-        Shiboken::AutoDecRef pyChild(%CONVERTTOPYTHON[QObject *](child));
-        if (PyType_IsSubtype(Py_TYPE(pyChild), desiredType)
-            && (name.isNull() || name == child->objectName())) {
+        if (_findChildrenComparator(child, name)
+            && _findChildTypeMatch(child, desiredType)) {
             return child;
         }
     }
@@ -793,28 +816,15 @@ static QObject *_findChildHelper(const QObject *parent, const QString &name, PyT
     return nullptr;
 }
 
-static inline bool _findChildrenComparator(const QObject *&child, const QRegExp &name)
-{
-    return name.indexIn(child->objectName()) != -1;
-}
-
-static inline bool _findChildrenComparator(const QObject *&child, const QRegularExpression &name)
-{
-    return name.match(child->objectName()).hasMatch();
-}
-
-static inline bool _findChildrenComparator(const QObject *&child, const QString &name)
-{
-    return name.isNull() || name == child->objectName();
-}
-
-template<typename T>
+template<typename T> // QString/QRegularExpression/QRegExp
 static void _findChildrenHelper(const QObject *parent, const T& name, PyTypeObject *desiredType, PyObject *result)
 {
     for (const auto *child : parent->children()) {
-        Shiboken::AutoDecRef pyChild(%CONVERTTOPYTHON[QObject *](child));
-        if (PyType_IsSubtype(Py_TYPE(pyChild), desiredType) && _findChildrenComparator(child, name))
+        if (_findChildrenComparator(child, name)
+            && _findChildTypeMatch(child, desiredType)) {
+            Shiboken::AutoDecRef pyChild(%CONVERTTOPYTHON[QObject *](child));
             PyList_Append(result, pyChild);
+        }
         _findChildrenHelper(child, name, desiredType, result);
     }
 }
