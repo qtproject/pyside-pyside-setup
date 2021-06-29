@@ -438,4 +438,18 @@ SbkConverter *createConverter()
     return converter;
 }
 
+void setSize(PyObject *voidPtr, Py_ssize_t size)
+{
+    assert(voidPtr->ob_type == SbkVoidPtrTypeF());
+    auto *voidPtrObj = reinterpret_cast<SbkVoidPtrObject *>(voidPtr);
+    voidPtrObj->size = size;
+}
+
+Py_ssize_t getSize(PyObject *voidPtr)
+{
+    assert(voidPtr->ob_type == SbkVoidPtrTypeF());
+    auto *voidPtrObj = reinterpret_cast<SbkVoidPtrObject *>(voidPtr);
+    return voidPtrObj->size;
+}
+
 } // namespace VoidPtr
