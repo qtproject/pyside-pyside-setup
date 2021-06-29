@@ -42,6 +42,9 @@ inject-code
     The optional ``snippet`` attribute specifies the snippet label
     (see :ref:`external-snippets`).
 
+    There are a number of placeholders which are replaced when injecting
+    code (see :ref:`typesystemvariables`).
+
     There are severals ways to specify the code:
 
 Embedding Code into XML
