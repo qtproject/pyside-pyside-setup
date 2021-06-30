@@ -52,9 +52,6 @@
     </object-type>
     <object-type name="QAccelerometerFilter"/>
     <object-type name="QAccelerometerReading"/>
-    <object-type name="QAltimeter"/>
-    <object-type name="QAltimeterFilter"/>
-    <object-type name="QAltimeterReading"/>
     <object-type name="QAmbientLightFilter"/>
     <object-type name="QAmbientLightReading">
         <enum-type name="LightLevel"/>
@@ -66,15 +63,9 @@
     <object-type name="QCompass"/>
     <object-type name="QCompassFilter"/>
     <object-type name="QCompassReading"/>
-    <object-type name="QDistanceFilter"/>
-    <object-type name="QDistanceReading"/>
-    <object-type name="QDistanceSensor"/>
     <object-type name="QGyroscope"/>
     <object-type name="QGyroscopeFilter"/>
     <object-type name="QGyroscopeReading"/>
-    <object-type name="QHolsterFilter"/>
-    <object-type name="QHolsterReading"/>
-    <object-type name="QHolsterSensor"/>
     <object-type name="QHumidityFilter"/>
     <object-type name="QHumidityReading"/>
     <object-type name="QHumiditySensor"/>

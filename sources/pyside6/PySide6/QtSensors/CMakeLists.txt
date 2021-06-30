@@ -12,9 +12,6 @@ set(QtSensors_SRC
     ${QtSensors_GEN_DIR}/qaccelerometer_wrapper.cpp
     ${QtSensors_GEN_DIR}/qaccelerometerfilter_wrapper.cpp
     ${QtSensors_GEN_DIR}/qaccelerometerreading_wrapper.cpp
-    ${QtSensors_GEN_DIR}/qaltimeter_wrapper.cpp
-    ${QtSensors_GEN_DIR}/qaltimeterfilter_wrapper.cpp
-    ${QtSensors_GEN_DIR}/qaltimeterreading_wrapper.cpp
     ${QtSensors_GEN_DIR}/qambientlightfilter_wrapper.cpp
     ${QtSensors_GEN_DIR}/qambientlightreading_wrapper.cpp
     ${QtSensors_GEN_DIR}/qambientlightsensor_wrapper.cpp
@@ -24,15 +21,9 @@ set(QtSensors_SRC
     ${QtSensors_GEN_DIR}/qcompass_wrapper.cpp
     ${QtSensors_GEN_DIR}/qcompassfilter_wrapper.cpp
     ${QtSensors_GEN_DIR}/qcompassreading_wrapper.cpp
-    ${QtSensors_GEN_DIR}/qdistancefilter_wrapper.cpp
-    ${QtSensors_GEN_DIR}/qdistancereading_wrapper.cpp
-    ${QtSensors_GEN_DIR}/qdistancesensor_wrapper.cpp
     ${QtSensors_GEN_DIR}/qgyroscope_wrapper.cpp
     ${QtSensors_GEN_DIR}/qgyroscopefilter_wrapper.cpp
     ${QtSensors_GEN_DIR}/qgyroscopereading_wrapper.cpp
-    ${QtSensors_GEN_DIR}/qholsterfilter_wrapper.cpp
-    ${QtSensors_GEN_DIR}/qholsterreading_wrapper.cpp
-    ${QtSensors_GEN_DIR}/qholstersensor_wrapper.cpp
     ${QtSensors_GEN_DIR}/qhumidityfilter_wrapper.cpp
     ${QtSensors_GEN_DIR}/qhumidityreading_wrapper.cpp
     ${QtSensors_GEN_DIR}/qhumiditysensor_wrapper.cpp
