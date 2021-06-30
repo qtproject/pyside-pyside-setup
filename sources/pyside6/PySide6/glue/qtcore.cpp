@@ -1652,21 +1652,19 @@ if (PyErr_WarnEx(PyExc_DeprecationWarning,
 
 // @snippet conversion-pyunicode
 #ifndef Py_LIMITED_API
-Py_UNICODE *unicode = PyUnicode_AS_UNICODE(%in);
-#  if defined(Py_UNICODE_WIDE)
-// cast as Py_UNICODE can be a different type
-#    if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-%out = QString::fromUcs4(reinterpret_cast<const char32_t *>(unicode));
-#    else
-%out = QString::fromUcs4(reinterpret_cast<const uint *>(unicode));
-#    endif // Qt 6
-#  else // Py_UNICODE_WIDE
-#    if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-%out = QString::fromUtf16(reinterpret_cast<const char16_t *>(unicode), PepUnicode_GetLength(%in));
-#    else
-%out = QString::fromUtf16(reinterpret_cast<const ushort *>(unicode), PepUnicode_GetLength(%in));
-#    endif // Qt 6
-# endif
+void *data = PyUnicode_DATA(%in);
+Py_ssize_t len = PyUnicode_GetLength(%in);
+switch (PyUnicode_KIND(%in)) {
+    case PyUnicode_1BYTE_KIND:
+        %out = QString::fromLatin1(reinterpret_cast<const char *>(data));
+        break;
+    case PyUnicode_2BYTE_KIND:
+        %out = QString::fromUtf16(reinterpret_cast<const char16_t *>(data), len);
+        break;
+    case PyUnicode_4BYTE_KIND:
+        %out = QString::fromUcs4(reinterpret_cast<const char32_t *>(data), len);
+        break;
+}
 #else
 wchar_t *temp = PyUnicode_AsWideCharString(%in, nullptr);
 %out = QString::fromWCharArray(temp);
