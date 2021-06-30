@@ -452,4 +452,18 @@ Py_ssize_t getSize(PyObject *voidPtr)
     return voidPtrObj->size;
 }
 
+bool isWritable(PyObject *voidPtr)
+{
+    assert(voidPtr->ob_type == SbkVoidPtrTypeF());
+    auto *voidPtrObj = reinterpret_cast<SbkVoidPtrObject *>(voidPtr);
+    return voidPtrObj->isWritable;
+}
+
+void setWritable(PyObject *voidPtr, bool isWritable)
+{
+    assert(voidPtr->ob_type == SbkVoidPtrTypeF());
+    auto *voidPtrObj = reinterpret_cast<SbkVoidPtrObject *>(voidPtr);
+    voidPtrObj->isWritable = isWritable;
+}
+
 } // namespace VoidPtr
