@@ -44,6 +44,26 @@ private:
     bool m_null;
 };
 
+class LIBSAMPLE_API Brush
+{
+public:
+    enum Style { Solid, Cross };
+
+    explicit Brush(const Color &c = {});
+
+    operator bool() const;
+
+    Style style() const;
+    void setStyle(Style newStyle);
+
+    const Color &color() const;
+    void setColor(const Color &newColor);
+
+private:
+    Style m_style = Solid;
+    Color m_color;
+};
+
 class LIBSAMPLE_API Pen
 {
 public:

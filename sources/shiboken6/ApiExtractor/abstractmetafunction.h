@@ -191,6 +191,8 @@ public:
     bool isExplicit() const;
     void setExplicit(bool isExplicit);
 
+    bool returnsBool() const;
+    bool isOperatorBool() const;
     static bool isConversionOperator(const QString& funcName);
 
     ExceptionSpecification exceptionSpecification() const;
@@ -210,6 +212,9 @@ public:
     bool isLogicalOperator() const;
     bool isSubscriptOperator() const;
     bool isAssignmentOperator() const; // Assignment or move assignment
+    bool isGetter() const;
+    /// Returns whether it is a Qt-style isNull() method suitable for nb_bool
+    bool isQtIsNullMethod() const;
 
     /**
      * Informs the arity of the operator or -1 if the function is not

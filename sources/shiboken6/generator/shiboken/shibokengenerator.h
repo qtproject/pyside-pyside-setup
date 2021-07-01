@@ -325,6 +325,8 @@ protected:
     bool useReturnValueHeuristic() const;
     /// Returns true if the generator should use the result of isNull()const to compute boolean casts.
     bool useIsNullAsNbNonZero() const;
+    /// Returns true if the generator should use operator bool to compute boolean casts.
+    bool useOperatorBoolAsNbNonZero() const;
     /// Returns true if the generated code should use the "#define protected public" hack.
     bool avoidProtectedHack() const;
     static QString cppApiVariableName(const QString &moduleName = QString());
@@ -518,6 +520,7 @@ private:
     bool m_usePySideExtensions = false;
     bool m_verboseErrorMessagesDisabled = false;
     bool m_useIsNullAsNbNonZero = false;
+    bool m_useOperatorBoolAsNbNonZero = false;
     bool m_avoidProtectedHack = false;
     bool m_wrapperDiagnostics = false;
 

@@ -79,8 +79,10 @@ static inline QString generateGetSetDefAttribute() { return QStringLiteral("gene
 static inline QString genericClassAttribute() { return QStringLiteral("generic-class"); }
 static inline QString indexAttribute() { return QStringLiteral("index"); }
 static inline QString invalidateAfterUseAttribute() { return QStringLiteral("invalidate-after-use"); }
+static inline QString isNullAttribute() { return QStringLiteral("isNull"); }
 static inline QString locationAttribute() { return QStringLiteral("location"); }
 static inline QString modifiedTypeAttribute() { return QStringLiteral("modified-type"); }
+static inline QString operatorBoolAttribute() { return QStringLiteral("operator-bool"); }
 static inline QString pyiTypeAttribute() { return QStringLiteral("pyi-type"); }
 static inline QString overloadNumberAttribute() { return QStringLiteral("overload-number"); }
 static inline QString ownershipAttribute() { return QStringLiteral("owner"); }
@@ -219,6 +221,17 @@ ENUM_LOOKUP_BEGIN(TypeSystem::AllowThread, Qt::CaseInsensitive,
         {u"auto", TypeSystem::AllowThread::Auto},
         {u"no", TypeSystem::AllowThread::Disallow},
         {u"false", TypeSystem::AllowThread::Disallow},
+    };
+ENUM_LOOKUP_LINEAR_SEARCH()
+
+
+ENUM_LOOKUP_BEGIN(TypeSystem::BoolCast, Qt::CaseInsensitive,
+                  boolCastFromAttribute)
+    {
+        {u"yes", TypeSystem::BoolCast::Enabled},
+        {u"true", TypeSystem::BoolCast::Enabled},
+        {u"no", TypeSystem::BoolCast::Disabled},
+        {u"false", TypeSystem::BoolCast::Disabled},
     };
 ENUM_LOOKUP_LINEAR_SEARCH()
 
@@ -1635,6 +1648,24 @@ void TypeSystemParser::applyComplexTypeAttributes(const ConditionalStreamReader 
             const auto snakeCaseOpt = snakeCaseFromAttribute(attribute.value());
             if (snakeCaseOpt.has_value()) {
                 ctype->setSnakeCase(snakeCaseOpt.value());
+            } else {
+                qCWarning(lcShiboken, "%s",
+                          qPrintable(msgInvalidAttributeValue(attribute)));
+            }
+        }  else if (name == isNullAttribute()) {
+            const auto attribute = attributes->takeAt(i);
+            const auto boolCastOpt = boolCastFromAttribute(attribute.value());
+            if (boolCastOpt.has_value()) {
+                ctype->setIsNullMode(boolCastOpt.value());
+            } else {
+                qCWarning(lcShiboken, "%s",
+                          qPrintable(msgInvalidAttributeValue(attribute)));
+            }
+        }  else if (name == operatorBoolAttribute()) {
+            const auto attribute = attributes->takeAt(i);
+            const auto boolCastOpt = boolCastFromAttribute(attribute.value());
+            if (boolCastOpt.has_value()) {
+                ctype->setOperatorBoolMode(boolCastOpt.value());
             } else {
                 qCWarning(lcShiboken, "%s",
                           qPrintable(msgInvalidAttributeValue(attribute)));

@@ -2324,6 +2324,9 @@
     </value-type>
 
     <value-type name="Color" />
+    <value-type name="Brush" operator-bool="true">
+        <enum-type name="Style"/>
+    </value-type>
     <value-type name="Pen">
         <enum-type identified-by-value="EnumCtor"/>
         <enum-type name="RenderHints"/>

@@ -57,6 +57,7 @@ static const char RETURN_VALUE_HEURISTIC[] = "enable-return-value-heuristic";
 static const char ENABLE_PYSIDE_EXTENSIONS[] = "enable-pyside-extensions";
 static const char DISABLE_VERBOSE_ERROR_MESSAGES[] = "disable-verbose-error-messages";
 static const char USE_ISNULL_AS_NB_NONZERO[] = "use-isnull-as-nb_nonzero";
+static const char USE_OPERATOR_BOOL_AS_NB_NONZERO[] = "use-operator-bool-as-nb_nonzero";
 static const char WRAPPER_DIAGNOSTICS[] = "wrapper-diagnostics";
 
 const char *CPP_ARG = "cppArg";
@@ -2367,6 +2368,9 @@ Generator::OptionDescriptions ShibokenGenerator::options() const
         {QLatin1String(USE_ISNULL_AS_NB_NONZERO),
          QLatin1String("If a class have an isNull() const method, it will be used to compute\n"
                        "the value of boolean casts")},
+        {QLatin1String(USE_OPERATOR_BOOL_AS_NB_NONZERO),
+         QLatin1String("If a class has an operator bool, it will be used to compute\n"
+                       "the value of boolean casts")},
         {QLatin1String(WRAPPER_DIAGNOSTICS),
          QLatin1String("Generate diagnostic code around wrappers")}
     };
@@ -2384,6 +2388,8 @@ bool ShibokenGenerator::handleOption(const QString &key, const QString & /* valu
         return (m_verboseErrorMessagesDisabled = true);
     if (key == QLatin1String(USE_ISNULL_AS_NB_NONZERO))
         return (m_useIsNullAsNbNonZero = true);
+    if (key == QLatin1String(USE_OPERATOR_BOOL_AS_NB_NONZERO))
+        return (m_useOperatorBoolAsNbNonZero = true);
     if (key == QLatin1String(AVOID_PROTECTED_HACK))
         return (m_avoidProtectedHack = true);
     if (key == QLatin1String(WRAPPER_DIAGNOSTICS))
@@ -2489,6 +2495,11 @@ bool ShibokenGenerator::usePySideExtensions() const
 bool ShibokenGenerator::useIsNullAsNbNonZero() const
 {
     return m_useIsNullAsNbNonZero;
+}
+
+bool ShibokenGenerator::useOperatorBoolAsNbNonZero() const
+{
+    return m_useOperatorBoolAsNbNonZero;
 }
 
 bool ShibokenGenerator::avoidProtectedHack() const

@@ -92,6 +92,12 @@ enum Visibility { // For namespaces
     Auto
 };
 
+enum class BoolCast { // Generate nb_bool (overriding command line)
+    Unspecified,
+    Disabled,
+    Enabled
+};
+
 enum : int { OverloadNumberUnset = -1, OverloadNumberDefault = 99999 };
 
 } // namespace TypeSystem

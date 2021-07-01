@@ -513,6 +513,13 @@ public:
     TypeFlags typeFlags() const;
     void setTypeFlags(TypeFlags flags);
 
+    // Override command line options to generate nb_bool from
+    // operator bool or method isNull().
+    TypeSystem::BoolCast operatorBoolMode() const;
+    void setOperatorBoolMode(TypeSystem::BoolCast b);
+    TypeSystem::BoolCast isNullMode() const;
+    void setIsNullMode(TypeSystem::BoolCast b);
+
     FunctionModificationList functionModifications() const;
     void setFunctionModifications(const FunctionModificationList &functionModifications);
     void addFunctionModification(const FunctionModification &functionModification);

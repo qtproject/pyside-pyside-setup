@@ -1179,6 +1179,8 @@ public:
     TypeSystem::ExceptionHandling m_exceptionHandling = TypeSystem::ExceptionHandling::Unspecified;
     TypeSystem::AllowThread m_allowThread = TypeSystem::AllowThread::Unspecified;
     TypeSystem::SnakeCase m_snakeCase = TypeSystem::SnakeCase::Unspecified;
+    TypeSystem::BoolCast m_operatorBoolMode = TypeSystem::BoolCast::Unspecified;
+    TypeSystem::BoolCast m_isNullMode = TypeSystem::BoolCast::Unspecified;
 };
 
 ComplexTypeEntry::ComplexTypeEntry(const QString &entryName, TypeEntry::Type t,
@@ -1197,6 +1199,30 @@ void ComplexTypeEntry::setTypeFlags(TypeFlags flags)
 {
     S_D(ComplexTypeEntry);
     d->m_typeFlags = flags;
+}
+
+TypeSystem::BoolCast ComplexTypeEntry::operatorBoolMode() const
+{
+    S_D(const ComplexTypeEntry);
+    return d->m_operatorBoolMode;
+}
+
+void ComplexTypeEntry::setOperatorBoolMode(TypeSystem::BoolCast b)
+{
+    S_D(ComplexTypeEntry);
+    d->m_operatorBoolMode = b;
+}
+
+TypeSystem::BoolCast ComplexTypeEntry::isNullMode() const
+{
+    S_D(const ComplexTypeEntry);
+    return d->m_isNullMode;
+}
+
+void ComplexTypeEntry::setIsNullMode(TypeSystem::BoolCast b)
+{
+    S_D(ComplexTypeEntry);
+    d->m_isNullMode = b;
 }
 
 ComplexTypeEntry::TypeFlags ComplexTypeEntry::typeFlags() const

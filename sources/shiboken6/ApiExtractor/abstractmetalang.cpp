@@ -607,6 +607,28 @@ AbstractMetaFunctionCPtr AbstractMetaClass::findFunction(const QString &function
     return AbstractMetaFunction::find(d->m_functions, functionName);
 }
 
+AbstractMetaFunctionCPtr AbstractMetaClass::findOperatorBool() const
+{
+    auto it = std::find_if(d->m_functions.cbegin(), d->m_functions.cend(),
+                           [](const AbstractMetaFunctionCPtr &f) {
+                               return f->isOperatorBool();
+                           });
+    if (it == d->m_functions.cend())
+        return {};
+    return *it;
+}
+
+AbstractMetaFunctionCPtr AbstractMetaClass::findQtIsNullMethod() const
+{
+    auto it = std::find_if(d->m_functions.cbegin(), d->m_functions.cend(),
+                           [](const AbstractMetaFunctionCPtr &f) {
+                               return f->isQtIsNullMethod();
+                           });
+    if (it == d->m_functions.cend())
+        return {};
+    return *it;
+}
+
 bool AbstractMetaClass::hasProtectedFunctions() const
 {
     for (const auto &func : d->m_functions) {

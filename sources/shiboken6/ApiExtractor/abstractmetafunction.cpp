@@ -223,6 +223,23 @@ void AbstractMetaFunction::setExplicit(bool isExplicit)
     d->m_explicit = isExplicit;
 }
 
+bool AbstractMetaFunction::returnsBool() const
+{
+    if (d->m_type.typeUsagePattern() != AbstractMetaType::PrimitivePattern)
+        return false;
+    auto *pte = static_cast<const PrimitiveTypeEntry *>(d->m_type.typeEntry());
+    // Walk along typedefs
+    while (auto *referencedPte = pte->referencedTypeEntry())
+        pte =referencedPte;
+    return pte->name() == u"bool";
+}
+
+bool AbstractMetaFunction::isOperatorBool() const
+{
+    return d->m_functionType == AbstractMetaFunction::ConversionOperator
+        && d->m_constant && returnsBool();
+}
+
 AbstractMetaFunction::AbstractMetaFunction() : d(new AbstractMetaFunctionPrivate)
 {
 }
@@ -1098,6 +1115,18 @@ bool AbstractMetaFunction::isAssignmentOperator() const
 {
     return d->m_functionType == AssignmentOperatorFunction
         || d->m_functionType == MoveAssignmentOperatorFunction;
+}
+
+bool AbstractMetaFunction::isGetter() const
+{
+    return d->m_functionType == NormalFunction && !isVoid()
+        && d->m_constant && d->m_access == Access::Public
+        && d->m_arguments.isEmpty();
+}
+
+bool AbstractMetaFunction::isQtIsNullMethod() const
+{
+    return isGetter() && d->m_name == u"isNull" && returnsBool();
 }
 
 int AbstractMetaFunction::arityOfOperator() const

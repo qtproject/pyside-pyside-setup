@@ -38,14 +38,23 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from shiboken_paths import init_paths
 init_paths()
 
-from sample import *
+from sample import Color, Brush
 
 class TestNonZeroOperator(unittest.TestCase):
-    def testIt(self):
+    def testColor(self):
+        """Color has a Qt-style isNull()"""
         c = Color()
         self.assertFalse(c)
         c = Color(2)
         self.assertTrue(c)
+
+    def testBrush(self):
+        """Brush enables its operator bool in the typesystem XML"""
+        b = Brush()
+        self.assertFalse(b)
+        b = Brush(Color(2))
+        self.assertTrue(b)
+
 
 if __name__ == "__main__":
     unittest.main()

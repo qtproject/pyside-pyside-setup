@@ -279,19 +279,23 @@ QList<AbstractMetaFunctionCList>
 
 AbstractMetaFunctionCPtr CppGenerator::boolCast(const AbstractMetaClass *metaClass) const
 {
-    if (!useIsNullAsNbNonZero())
-        return {};
-    // TODO: This could be configurable someday
-    const auto func = metaClass->findFunction(QLatin1String("isNull"));
-    if (func.isNull() || func->isVoid() || !func->type().typeEntry()->isPrimitive()
-        || !func->isPublic()) {
-        return {};
+    const auto *te = metaClass->typeEntry();
+    auto mode = te->operatorBoolMode();
+    if (useOperatorBoolAsNbNonZero()
+        ? mode != TypeSystem::BoolCast::Disabled : mode == TypeSystem::BoolCast::Enabled) {
+        const auto func = metaClass->findOperatorBool();
+        if (!func.isNull())
+            return func;
     }
-    auto pte = static_cast<const PrimitiveTypeEntry *>(func->type().typeEntry());
-    while (pte->referencedTypeEntry())
-        pte = pte->referencedTypeEntry();
-    return func->isConstant() && pte->name() == QLatin1String("bool")
-            && func->arguments().isEmpty() ? func : AbstractMetaFunctionCPtr{};
+
+    mode = te->isNullMode();
+    if (useIsNullAsNbNonZero()
+        ? mode != TypeSystem::BoolCast::Disabled : mode == TypeSystem::BoolCast::Enabled) {
+        const auto func = metaClass->findQtIsNullMethod();
+        if (!func.isNull())
+            return func;
+    }
+    return {};
 }
 
 std::optional<AbstractMetaType>
@@ -686,15 +690,20 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
         s << "static int " << cpythonBaseName(metaClass) << "___nb_bool(PyObject *self)\n"
             << "{\n" << indent;
         writeCppSelfDefinition(s, classContext);
-        if (f->allowThread()) {
-            s << "int result;\n"
-                << BEGIN_ALLOW_THREADS << '\n'
-                << "result = !" << CPP_SELF_VAR << "->isNull();\n"
-                << END_ALLOW_THREADS << '\n'
-                << "return result;\n";
-        } else {
-            s << "return !" << CPP_SELF_VAR << "->isNull();\n";
-        }
+
+        const bool allowThread = f->allowThread();
+        if (allowThread)
+            s << "int result;\n" << BEGIN_ALLOW_THREADS << "\nresult = ";
+        else
+            s << "return ";
+
+        if (f->isOperatorBool())
+            s << '*' << CPP_SELF_VAR << " ? 1 : 0;\n";
+        else
+            s << CPP_SELF_VAR << "->isNull() ? 0 : 1;\n";
+
+        if (allowThread)
+            s << END_ALLOW_THREADS << "\nreturn result;\n";
         s << outdent << "}\n\n";
     }
 

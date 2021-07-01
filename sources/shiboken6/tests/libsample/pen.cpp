@@ -45,6 +45,35 @@ bool Color::isNull() const
     return m_null;
 }
 
+Brush::Brush(const Color &c) : m_color(c)
+{
+}
+
+Brush::operator bool() const
+{
+    return !m_color.isNull();
+}
+
+Brush::Style Brush::style() const
+{
+    return m_style;
+}
+
+void Brush::setStyle(Style newStyle)
+{
+    m_style = newStyle;
+}
+
+const Color &Brush::color() const
+{
+    return m_color;
+}
+
+void Brush::setColor(const Color &newColor)
+{
+    m_color = newColor;
+}
+
 Pen::Pen() : m_ctor(EmptyCtor)
 {
 }
