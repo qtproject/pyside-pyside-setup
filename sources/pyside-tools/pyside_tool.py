@@ -57,13 +57,15 @@ def main():
     sys.exit(subprocess.call(command))
 
 
-def qt_tool_wrapper(qt_tool, args):
+def qt_tool_wrapper(qt_tool, args, libexec=False):
     # Taking care of pyside6-uic, pyside6-rcc, and pyside6-designer
     # listed as an entrypoint in setup.py
-    pyside_dir = os.path.dirname(ref_mod.__file__)
-    exe = os.path.join(pyside_dir, qt_tool)
-
-    cmd = [exe] + args
+    pyside_dir = Path(ref_mod.__file__).resolve().parent
+    if libexec and sys.platform != "win32":
+        exe = pyside_dir / 'Qt' / 'libexec' / qt_tool
+    else:
+        exe = pyside_dir / qt_tool
+    cmd = [os.fspath(exe)] + args
     proc = Popen(cmd, stderr=PIPE)
     out, err = proc.communicate()
     if err:
@@ -74,11 +76,11 @@ def qt_tool_wrapper(qt_tool, args):
 
 
 def uic():
-    qt_tool_wrapper("uic", ['-g', 'python'] + sys.argv[1:])
+    qt_tool_wrapper("uic", ['-g', 'python'] + sys.argv[1:], True)
 
 
 def rcc():
-    qt_tool_wrapper("rcc", ['-g', 'python'] + sys.argv[1:])
+    qt_tool_wrapper("rcc", ['-g', 'python'] + sys.argv[1:], True)
 
 
 def assistant():

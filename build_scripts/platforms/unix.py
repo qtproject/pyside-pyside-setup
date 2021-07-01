@@ -78,6 +78,7 @@ def _copy_gui_executable(name, vars=None):
 
 def prepare_packages_posix(self, vars):
     executables = []
+    libexec_executables = []
 
     # <install>/lib/site-packages/{st_package_name}/* ->
     # <setup>/{st_package_name}
@@ -160,16 +161,24 @@ def prepare_packages_posix(self, vars):
             filter=[f"{PYSIDE}-lupdate"],
             recursive=False, vars=vars))
 
-        if not OPTION['NO_QT_TOOLS']:
-            executables.extend(copydir(
-                "{install_dir}/bin/",
-                "{st_build_dir}/{st_package_name}",
-                filter=["uic", "rcc"],
-                recursive=False, vars=vars))
 
+        lib_exec_filters = []
+        if not OPTION['NO_QT_TOOLS']:
+            lib_exec_filters.extend(['uic', 'rcc'])
             # Copying assistant/designer
             executables.extend(_copy_gui_executable('assistant', vars=vars))
             executables.extend(_copy_gui_executable('designer', vars=vars))
+
+        # Copy libexec
+        built_modules = self.get_built_pyside_config(vars)['built_modules']
+        if self.is_webengine_built(built_modules):
+            lib_exec_filters.append('QtWebEngineProcess')
+        if lib_exec_filters:
+            libexec_executables.extend(copydir("{qt_lib_execs_dir}",
+                                               "{st_build_dir}/{st_package_name}/Qt/libexec",
+                                               filter=lib_exec_filters,
+                                               recursive=False,
+                                               vars=vars))
 
         # <install>/lib/lib* -> {st_package_name}/
         copydir(
@@ -244,3 +253,5 @@ def prepare_packages_posix(self, vars):
     if sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
         rpath_path = "{st_build_dir}/{st_package_name}".format(**vars)
         self.update_rpath(rpath_path, executables)
+        if libexec_executables:
+            self.update_rpath(rpath_path, libexec_executables, libexec=True)

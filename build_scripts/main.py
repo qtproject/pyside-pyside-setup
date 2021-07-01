@@ -1085,7 +1085,10 @@ class PysideBuild(_build, DistUtilsCommandMixin):
             raise RuntimeError("Error copying libclang library "
                                f"from {clang_lib_path} to {destination_dir}. ")
 
-    def update_rpath(self, package_path, executables):
+    def update_rpath(self, package_path, executables, libexec=False):
+        ROOT = '@loader_path' if sys.platform == 'darwin' else '$ORIGIN'
+        QT_PATH = '/../lib' if libexec else '/Qt/lib'
+
         if sys.platform.startswith('linux'):
             pyside_libs = [lib for lib in os.listdir(
                 package_path) if filter_match(lib, ["*.so", "*.so.*"])]
@@ -1101,7 +1104,7 @@ class PysideBuild(_build, DistUtilsCommandMixin):
                     # installed qt lib directory.
                     final_rpath = self.qtinfo.libs_dir
                     if OPTION["STANDALONE"]:
-                        final_rpath = "$ORIGIN/Qt/lib"
+                        final_rpath = f'{ROOT}{QT_PATH}'
                 override = OPTION["STANDALONE"]
                 linux_fix_rpaths_for_library(self._patchelf_path, srcpath, final_rpath,
                                              override=override)
@@ -1118,7 +1121,7 @@ class PysideBuild(_build, DistUtilsCommandMixin):
                     final_rpath = OPTION["RPATH_VALUES"]
                 else:
                     if OPTION["STANDALONE"]:
-                        final_rpath = "@loader_path/Qt/lib"
+                        final_rpath = f'{ROOT}{QT_PATH}'
                     else:
                         final_rpath = self.qtinfo.libs_dir
                 macos_fix_rpaths_for_library(srcpath, final_rpath)

@@ -160,12 +160,6 @@ def prepare_standalone_package_macos(self, vars):
                 recursive=True, vars=vars, force_copy_symlinks=True)
 
         if self.is_webengine_built(built_modules):
-            copydir("{qt_lib_execs_dir}",
-                    "{st_build_dir}/{st_package_name}/Qt/libexec",
-                    filter=None,
-                    recursive=False,
-                    vars=vars)
-
             copydir("{qt_prefix_dir}/resources",
                     "{st_build_dir}/{st_package_name}/Qt/resources",
                     filter=None,
@@ -181,10 +175,11 @@ def prepare_standalone_package_macos(self, vars):
 
             if copy_qt_conf:
                 # Copy the qt.conf file to libexec.
+                if not os.path.isdir(qt_libexec_path):
+                     os.makedirs(qt_libexec_path)
                 copyfile(
                     f"{{build_dir}}/{PYSIDE}/{{st_package_name}}/qt.conf",
-                    "{st_build_dir}/{st_package_name}/Qt/libexec",
-                    vars=vars)
+                    qt_libexec_path, vars=vars)
 
     if copy_plugins:
         # <qt>/plugins/* -> <setup>/{st_package_name}/Qt/plugins
