@@ -403,40 +403,43 @@ static bool getReceiver(QObject *source,
     return usingGlobalReceiver;
 }
 
-static bool qobjectConnect(QObject *source, const char *signal, QObject *receiver, const char *slot, Qt::ConnectionType type)
+static QMetaObject::Connection qobjectConnect(QObject *source, const char *signal,
+                                              QObject *receiver, const char *slot,
+                                              Qt::ConnectionType type)
 {
     if (!signal || !slot)
-        return false;
+        return {};
 
     if (!PySide::Signal::checkQtSignal(signal))
-        return false;
+        return {};
     signal++;
 
     if (!PySide::SignalManager::registerMetaMethod(source, signal, QMetaMethod::Signal))
-        return false;
+        return {};
 
     bool isSignal = PySide::Signal::isQtSignal(slot);
     slot++;
     PySide::SignalManager::registerMetaMethod(receiver, slot, isSignal ? QMetaMethod::Signal : QMetaMethod::Slot);
-    bool connection;
-    connection = QObject::connect(source, signal - 1, receiver, slot - 1, type);
-    return connection;
+    return QObject::connect(source, signal - 1, receiver, slot - 1, type);
 }
 
-static bool qobjectConnect(QObject *source, QMetaMethod signal, QObject *receiver, QMetaMethod slot, Qt::ConnectionType type)
+static QMetaObject::Connection qobjectConnect(QObject *source, QMetaMethod signal,
+                                              QObject *receiver, QMetaMethod slot,
+                                              Qt::ConnectionType type)
 {
    return qobjectConnect(source, signal.methodSignature(), receiver, slot.methodSignature(), type);
 }
 
-static bool qobjectConnectCallback(QObject *source, const char *signal, PyObject *callback, Qt::ConnectionType type)
+static QMetaObject::Connection qobjectConnectCallback(QObject *source, const char *signal,
+                                                      PyObject *callback, Qt::ConnectionType type)
 {
     if (!signal || !PySide::Signal::checkQtSignal(signal))
-        return false;
+        return {};
     signal++;
 
     int signalIndex = PySide::SignalManager::registerMetaMethodGetIndex(source, signal, QMetaMethod::Signal);
     if (signalIndex == -1)
-        return false;
+        return {};
 
     PySide::SignalManager &signalManager = PySide::SignalManager::instance();
 
@@ -446,7 +449,7 @@ static bool qobjectConnectCallback(QObject *source, const char *signal, PyObject
     QByteArray callbackSig;
     bool usingGlobalReceiver = getReceiver(source, signal, callback, &receiver, &self, &callbackSig);
     if (receiver == nullptr && self == nullptr)
-        return false;
+        return {};
 
     const QMetaObject *metaObject = receiver->metaObject();
     const char *slot = callbackSig.constData();
@@ -459,7 +462,7 @@ static bool qobjectConnectCallback(QObject *source, const char *signal, PyObject
             if (usingGlobalReceiver)
                 signalManager.releaseGlobalReceiver(source, receiver);
 
-            return false;
+            return {};
         }
 
         if (usingGlobalReceiver)
@@ -471,11 +474,10 @@ static bool qobjectConnectCallback(QObject *source, const char *signal, PyObject
             if (usingGlobalReceiver)
                 signalManager.releaseGlobalReceiver(source, receiver);
 
-            return false;
+            return {};
         }
     }
-    bool connection;
-    connection = QMetaObject::connect(source, signalIndex, receiver, slotIndex, type);
+    auto connection = QMetaObject::connect(source, signalIndex, receiver, slotIndex, type);
     if (connection) {
         if (usingGlobalReceiver)
             signalManager.notifyGlobalReceiver(receiver);
@@ -493,7 +495,7 @@ static bool qobjectConnectCallback(QObject *source, const char *signal, PyObject
     if (usingGlobalReceiver)
         signalManager.releaseGlobalReceiver(source, receiver);
 
-    return false;
+    return {};
 }
 
 
@@ -542,20 +544,20 @@ static bool qobjectDisconnectCallback(QObject *source, const char *signal, PyObj
 
 // @snippet qobject-connect-1
 // %FUNCTION_NAME() - disable generation of function call.
-bool %0 = qobjectConnect(%1, %2, %CPPSELF, %3, %4);
-%PYARG_0 = %CONVERTTOPYTHON[bool](%0);
+%RETURN_TYPE %0 = qobjectConnect(%1, %2, %CPPSELF, %3, %4);
+%PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
 // @snippet qobject-connect-1
 
 // @snippet qobject-connect-2
 // %FUNCTION_NAME() - disable generation of function call.
-bool %0 = qobjectConnect(%1, %2, %3, %4, %5);
-%PYARG_0 = %CONVERTTOPYTHON[bool](%0);
+%RETURN_TYPE %0 = qobjectConnect(%1, %2, %3, %4, %5);
+%PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
 // @snippet qobject-connect-2
 
 // @snippet qobject-connect-3
 // %FUNCTION_NAME() - disable generation of function call.
-bool %0 = qobjectConnect(%1, %2, %3, %4, %5);
-%PYARG_0 = %CONVERTTOPYTHON[bool](%0);
+%RETURN_TYPE %0 = qobjectConnect(%1, %2, %3, %4, %5);
+%PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
 // @snippet qobject-connect-3
 
 // @snippet qobject-connect-4

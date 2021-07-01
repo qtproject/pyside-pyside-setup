@@ -52,8 +52,19 @@
 
 #include <algorithm>
 #include <utility>
+#include <cstring>
 
 #define QT_SIGNAL_SENTINEL '2'
+
+static bool connection_Check(PyObject *o)
+{
+    if (o == nullptr || o == Py_None)
+        return false;
+    static QByteArray typeName = QByteArrayLiteral("PySide")
+        + QByteArray::number(QT_VERSION_MAJOR)
+        + QByteArrayLiteral(".QtCore.QMetaObject.Connection");
+    return std::strcmp(o->ob_type->tp_name, typeName.constData()) == 0;
+}
 
 namespace PySide {
 namespace Signal {
@@ -494,7 +505,7 @@ static PyObject *signalInstanceConnect(PyObject *self, PyObject *args, PyObject 
             return nullptr;
         }
         PyObject *result = PyObject_CallObject(pyMethod, tupleArgs);
-        if (result == Py_True || result == Py_False)
+        if (connection_Check(result))
             return result;
         Py_XDECREF(result);
     }
@@ -590,6 +601,9 @@ static PyObject *signalInstanceDisconnect(PyObject *self, PyObject *args)
             PyList_Append(pyArgs, target_signature);
             match = true;
         }
+    } else if (connection_Check(slot)) {
+        PyList_Append(pyArgs, slot);
+        match = true;
     } else {
         //try the first signature
         PyList_Append(pyArgs, source->d->source);

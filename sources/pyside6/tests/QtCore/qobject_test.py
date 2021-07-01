@@ -40,7 +40,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QObject, Signal, Qt
+from PySide6.QtCore import QObject, Signal, Slot, Qt
 
 
 class Obj(QObject):
@@ -48,6 +48,23 @@ class Obj(QObject):
 
     def empty(self):
         pass
+
+    def emitSignal(self):
+        self.signal.emit()
+
+
+class Receiver(QObject):
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._count = 0
+
+    def count(self):
+        return self._count
+
+    @Slot()
+    def testSlot(self):
+        self._count += 1
 
 
 class ObjectNameCase(unittest.TestCase):
@@ -87,6 +104,19 @@ class ObjectNameCase(unittest.TestCase):
         # it must return False, and not a RuntimeError (PYSIDE-34)
         self.assertTrue(obj.signal.connect(obj.empty, Qt.UniqueConnection))
         self.assertFalse(obj.signal.connect(obj.empty, Qt.UniqueConnection))
+
+    def testDisconnect(self):
+        obj = Obj()
+        receiver = Receiver()
+        conn_id = obj.signal.connect(receiver.testSlot)
+        self.assertTrue(conn_id)
+
+        obj.emitSignal()
+        self.assertEqual(receiver.count(), 1)
+
+        obj.signal.disconnect(conn_id)
+        obj.emitSignal()
+        self.assertEqual(receiver.count(), 1)
 
 
 if __name__ == '__main__':
