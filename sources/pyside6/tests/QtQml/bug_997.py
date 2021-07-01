@@ -54,7 +54,7 @@ class TestBug(UsesQApplication):
         ctxt.setContextProperty('owner', ownerData)
         file = Path(__file__).resolve().parent / 'bug_997.qml'
         self.assertTrue(file.is_file())
-        view.setSource(QUrl.fromLocalFile(os.fspath(file)))
+        view.setSource(QUrl.fromLocalFile(file))
         self.assertTrue(view.rootObject(), quickview_errorstring(view))
         view.show()
         QTimer.singleShot(1000, self.app.quit)

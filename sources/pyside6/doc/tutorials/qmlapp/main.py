@@ -76,7 +76,7 @@ if __name__ == '__main__':
 
     #Load the QML file
     qml_file = Path(__file__).parent / "view.qml"
-    view.setSource(QUrl.fromLocalFile(os.fspath(qml_file.resolve())))
+    view.setSource(QUrl.fromLocalFile(qml_file.resolve()))
 
     #Show the window
     if view.status() == QQuickView.Error:

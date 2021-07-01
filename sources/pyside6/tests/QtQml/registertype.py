@@ -123,7 +123,7 @@ class TestQmlSupport(unittest.TestCase):
         view = QQuickView()
         file = Path(__file__).resolve().parent / 'registertype.qml'
         self.assertTrue(file.is_file())
-        view.setSource(QUrl.fromLocalFile(os.fspath(file)))
+        view.setSource(QUrl.fromLocalFile(file))
         root_object = view.rootObject()
         self.assertTrue(root_object, quickview_errorstring(view))
         self.assertTrue(qjsEngine(root_object))

@@ -80,7 +80,7 @@ class TestBug(unittest.TestCase):
         view.setResizeMode(QQuickView.SizeRootObjectToView)
         file = Path(__file__).resolve().parent / 'qqmlincubator_incubateWhile.qml'
         self.assertTrue(file.is_file())
-        view.setSource(QUrl.fromLocalFile(os.fspath(file)))
+        view.setSource(QUrl.fromLocalFile(file))
         self.assertTrue(view.rootObject(), quickview_errorstring(view))
         view.show()
 

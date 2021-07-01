@@ -1799,6 +1799,7 @@
     </extra-includes>
   </object-type>
   <value-type name="QUrlQuery" since="5.0"/>
+
   <value-type name="QUrl" hash-function="PySide::hash">
     <!-- Qt5: lots of changes -->
     <enum-type name="ComponentFormattingOption" flags="ComponentFormattingOptions,FormattingOptions"/>
@@ -1826,7 +1827,12 @@
             </insert-template>
         </inject-code>
     </add-function>
+    <modify-function signature="fromLocalFile(const QString &amp;)">
+        <modify-argument index="1"><replace-type modified-type="PyPathLike"/></modify-argument>
+        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qfile-path-1"/>
+    </modify-function>
   </value-type>
+
   <value-type name="QRegularExpression">
     <enum-type name="WildcardConversionOption" flags="WildcardConversionOptions" since="6.0"/>
     <enum-type name="MatchOption" flags="MatchOptions"/>

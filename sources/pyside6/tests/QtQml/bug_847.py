@@ -75,7 +75,7 @@ class TestQML(UsesQApplication):
         view.called.connect(self.done)
         file = Path(__file__).resolve().parent / 'bug_847.qml'
         self.assertTrue(file.is_file())
-        view.setSource(QUrl.fromLocalFile(os.fspath(file)))
+        view.setSource(QUrl.fromLocalFile(file))
         while view.status() == QQuickView.Loading:
             self.app.processEvents()
         self.assertEqual(view.status(), QQuickView.Ready)

@@ -63,7 +63,7 @@ class TestConnectionWithInvalidSignature(TimedQApplication):
         view = QQuickView()
         file = Path(__file__).resolve().parent / 'connect_python_qml.qml'
         self.assertTrue(file.is_file())
-        view.setSource(QUrl.fromLocalFile(os.fspath(file)))
+        view.setSource(QUrl.fromLocalFile(file))
         root = view.rootObject()
         self.assertTrue(root, quickview_errorstring(view))
         button = root.findChild(QObject, "buttonMouseArea")

@@ -72,7 +72,7 @@ class TestQQuickView(TimedQApplication):
 
         file = Path(__file__).resolve().parent / 'view.qml'
         self.assertTrue(file.is_file())
-        url = QUrl.fromLocalFile(os.fspath(file))
+        url = QUrl.fromLocalFile(file)
         view.setSource(url)
         self.assertTrue(view.rootObject(), quickview_errorstring(view))
         view.show()
@@ -93,7 +93,7 @@ class TestQQuickView(TimedQApplication):
 
         file = Path(__file__).resolve().parent / 'viewmodel.qml'
         self.assertTrue(file.is_file())
-        url = QUrl.fromLocalFile(os.fspath(file))
+        url = QUrl.fromLocalFile(file)
         view.setSource(url)
         self.assertTrue(view.rootObject(), quickview_errorstring(view))
         view.show()

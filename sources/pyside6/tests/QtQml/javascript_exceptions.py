@@ -103,7 +103,7 @@ class JavaScriptExceptionsTest(UsesQApplication):
         view = QQuickView()
         file = Path(__file__).resolve().parent / 'javascript_exceptions.qml'
         self.assertTrue(file.is_file())
-        qml_url = QUrl.fromLocalFile(os.fspath(file))
+        qml_url = QUrl.fromLocalFile(file)
 
         view.setSource(qml_url)
         self.assertTrue(view.rootObject(), quickview_errorstring(view))

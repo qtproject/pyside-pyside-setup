@@ -45,7 +45,7 @@ from PySide6.QtQuick import QQuickView
 app = QGuiApplication([])
 file = Path(__file__).resolve().parent / 'bug_995.qml'
 assert(file.is_file())
-view = QQuickView(QUrl.fromLocalFile(os.fspath(file)))
+view = QQuickView(QUrl.fromLocalFile(file))
 view.show()
 view.resize(200, 200)
 contentItem = view.contentItem()

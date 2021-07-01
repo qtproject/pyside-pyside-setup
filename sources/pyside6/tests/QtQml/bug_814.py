@@ -76,7 +76,7 @@ class TestBug814(TimedQApplication):
         view.rootContext().setContextProperty("pythonModel", model)
         file = Path(__file__).resolve().parent / 'bug_814.qml'
         self.assertTrue(file.is_file())
-        view.setSource(QUrl.fromLocalFile(os.fspath(file)))
+        view.setSource(QUrl.fromLocalFile(file))
         root = view.rootObject()
         self.assertTrue(root, quickview_errorstring(view))
         view.show()

@@ -69,7 +69,7 @@ class TestQmlSupport(unittest.TestCase):
         engine = QQmlEngine()
         file = Path(__file__).resolve().parent / 'registeruncreatable.qml'
         self.assertTrue(file.is_file())
-        component = QQmlComponent(engine, QUrl.fromLocalFile(os.fspath(file)))
+        component = QQmlComponent(engine, QUrl.fromLocalFile(file))
 
         # Check that the uncreatable item produces the correct error
         self.assertEqual(component.status(), QQmlComponent.Error)
