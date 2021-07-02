@@ -62,4 +62,4 @@ Extra options and Python caveats
    :maxdepth: 1
 
    typesystem_solving_compilation.rst
-   typesystem_sequenceprotocol.rst
+   typesystem_specialfunctions.rst

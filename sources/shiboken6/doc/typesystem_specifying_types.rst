@@ -317,6 +317,8 @@ value-type
              allow-thread="..."
              disable-wrapper="yes | no"
              exception-handling="..."
+             isNull ="yes | no"
+             operator-bool="yes | no"
              hash-function="..."
              private="yes | no"
              stream="yes | no"
@@ -357,6 +359,10 @@ value-type
     The *optional* **snake-case** attribute allows for overriding the value
     specified on the **typesystem** element.
 
+    The *optional* **isNull** and **operator-bool** attributes can be used
+    to override the command line setting for generating bool casts
+    (see :ref:`bool-cast`).
+
 .. _object-type:
 
 object-type
@@ -381,6 +387,8 @@ object-type
              exception-handling="..."
              force-abstract="yes | no"
              hash-function="..."
+             isNull ="yes | no"
+             operator-bool="yes | no"
              private="yes | no"
              stream="yes | no"
              revision="..."
@@ -423,6 +431,10 @@ object-type
 
     The *optional* **snake-case** attribute allows for overriding the value
     specified on the **typesystem** element.
+
+    The *optional* **isNull** and **operator-bool** attributes can be used
+    to override the command line setting for generating bool casts
+    (see :ref:`bool-cast`).
 
 interface-type
 ^^^^^^^^^^^^^^

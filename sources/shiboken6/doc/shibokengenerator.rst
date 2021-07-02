@@ -112,11 +112,17 @@ Options
 ``--avoid-protected-hack``
     Avoid the use of the '#define protected public' hack.
 
-.. _use-isnull-as-nb_nonzero:
+.. _use-isnull-as-nb-nonzero:
 
 ``--use-isnull-as-nb_nonzero``
-    If a class have an isNull() const method, it will be used to
-    compute the value of boolean casts
+    If a class has an isNull() const method, it will be used to
+    compute the value of boolean casts (see :ref:`bool-cast`).
+
+.. _use-operator-bool-as-nb-nonzero:
+
+``--use-operator-bool-as-nb_nonzero``
+    If a class has an operator bool, it will be used to compute
+    the value of boolean casts (see :ref:`bool-cast`).
 
 .. _api-version:
 

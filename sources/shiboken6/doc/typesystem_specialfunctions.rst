@@ -1,7 +1,12 @@
+.. _special-functions:
+
+Special functions
+-----------------
+
 .. _sequence-protocol:
 
 Sequence Protocol
------------------
+^^^^^^^^^^^^^^^^^
 
 Support for the sequence protocol is achieved adding functions with special
 names, this is done using the :ref:`add-function` tag.
@@ -29,3 +34,21 @@ function, the only way to do it is using the
 A concrete example how to add sequence protocol support to a class can be found
 on shiboken tests, more precisely in the definition of the Str class in
 ``tests/samplebinding/typesystem_sample.xml``.
+
+.. _bool-cast:
+
+Bool Cast
+^^^^^^^^^
+
+Implementing bool casts enables using values which have a concept of validity
+in boolean expressions. In C++, this is commonly implemented as
+``operator bool() const``. In Qt, relevant classes have a
+``bool isNull() const`` function.
+
+In Python, the function ``__bool__`` is used for this. shiboken can generate
+this functions depending on the command line options
+:ref:`--use-operator-bool-as-nb_nonzero <use-operator-bool-as-nb-nonzero>`
+and :ref:`--use-isnull-as-nb_nonzero <use-isnull-as-nb-nonzero>`,
+which can be overridden by specifying the boolean attributes
+**isNull** or **operator-bool** on the :ref:`value-type` or :ref:`object-type`
+elements in typesystem XML.
