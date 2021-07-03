@@ -136,8 +136,19 @@ static PyObject *classInfoTpNew(PyTypeObject *subtype, PyObject * /* args */, Py
 
 int classInfoTpInit(PyObject *self, PyObject *args, PyObject *kwds)
 {
-    if (PyTuple_Check(args) && PyTuple_Size(args) > 0) {
-        PyErr_Format(PyExc_TypeError, "ClassInfo() takes exactly 0 positional arguments (%zd given)", PyTuple_Size(args));
+    PyObject *infoDict = nullptr;
+    auto size = PyTuple_Size(args);
+    if (size == 1 && !kwds) {
+        PyObject *tmp = PyTuple_GET_ITEM(args, 0);
+        if (PyDict_Check(tmp))
+            infoDict = tmp;
+    } else if (size == 0 && kwds && PyDict_Check(kwds)) {
+        infoDict = kwds;
+    }
+
+    if (!infoDict) {
+        PyErr_Format(PyExc_TypeError, "ClassInfo() takes either keyword argument(s) or "
+                                      "a single dictionary argument");
         return -1;
     }
 
@@ -149,12 +160,13 @@ int classInfoTpInit(PyObject *self, PyObject *args, PyObject *kwds)
     Py_ssize_t pos = 0;
 
     // PyDict_Next causes a segfault if kwds is empty
-    if (kwds && PyDict_Check(kwds) && PyDict_Size(kwds) > 0) {
-        while (PyDict_Next(kwds, &pos, &key, &value)) {
+    if (PyDict_Size(infoDict) > 0) {
+        while (PyDict_Next(infoDict, &pos, &key, &value)) {
             if (Shiboken::String::check(key) && Shiboken::String::check(value)) {
                 pData->m_data[Shiboken::String::toCString(key)] = Shiboken::String::toCString(value);
             } else {
-                PyErr_SetString(PyExc_TypeError, "All keys and values provided to ClassInfo() must be strings");
+                PyErr_SetString(PyExc_TypeError, "All keys and values provided to ClassInfo() "
+                                                 "must be strings");
                 return -1;
             }
         }

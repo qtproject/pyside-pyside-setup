@@ -57,6 +57,23 @@ class TestClassInfo(unittest.TestCase):
         self.assertEqual(ci.name(), 'url')
         self.assertEqual(ci.value(), 'http://www.pyside.org')
 
+    def test_dictionary(self):
+        @ClassInfo({'author':'pyside', 'author company':'The Qt Company'})
+        class MyObject(QObject):
+            pass
+
+        o = MyObject()
+        mo = o.metaObject()
+        self.assertEqual(mo.classInfoCount(), 2)
+
+        ci = mo.classInfo(0)  # author
+        self.assertEqual(ci.name(), 'author')
+        self.assertEqual(ci.value(), 'pyside')
+
+        ci = mo.classInfo(1)  # url
+        self.assertEqual(ci.name(), 'author company')
+        self.assertEqual(ci.value(), 'The Qt Company')
+
     def test_verify_metadata_types(self):
         valid_dict = { '123': '456' }
 
@@ -94,25 +111,27 @@ class TestClassInfo(unittest.TestCase):
         self.assertRaises(TypeError, decorator, MyObject2)
 
     def test_can_only_be_used_on_qobjects(self):
+        def make_info():
+            return ClassInfo(author='pyside')
         def test_function():
             pass
-        self.assertRaises(TypeError, ClassInfo(), test_function)
+        self.assertRaises(TypeError, make_info(), test_function)
 
         class NotAQObject(object):
             pass
-        self.assertRaises(TypeError, ClassInfo(), NotAQObject)
+        self.assertRaises(TypeError, make_info(), NotAQObject)
 
         class QObjectSubclass(QObject):
             pass
-        ClassInfo()(QObjectSubclass)
+        make_info()(QObjectSubclass)
 
         class SubclassOfNativeQObjectSubclass(QCoreApplication):
             pass
-        ClassInfo()(SubclassOfNativeQObjectSubclass)
+        make_info()(SubclassOfNativeQObjectSubclass)
 
         class SubclassOfPythonQObjectSubclass(QObjectSubclass):
             pass
-        ClassInfo()(SubclassOfPythonQObjectSubclass)
+        make_info()(SubclassOfPythonQObjectSubclass)
 
 
 if __name__ == '__main__':
