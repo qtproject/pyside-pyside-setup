@@ -106,7 +106,7 @@ if __name__ == '__main__':
     # Get the path of the current directory, and then add the name
     # of the QML file, to load it.
     qmlFile = Path(__file__).parent / 'view.qml'
-    engine.load(os.fspath(qmlFile.resolve()))
+    engine.load(qmlFile.resolve())
 
     if not engine.rootObjects():
         sys.exit(-1)

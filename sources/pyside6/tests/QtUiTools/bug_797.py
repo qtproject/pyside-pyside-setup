@@ -44,7 +44,7 @@ app = QApplication([])
 loader = QUiLoader()
 file = Path(__file__).resolve().parent / 'bug_552.ui'
 assert(file.is_file())
-file = QFile(os.fspath(file))
+file = QFile(file)
 w = QWidget()
 # An exception can't be thrown
 mainWindow = loader.load(file, w)

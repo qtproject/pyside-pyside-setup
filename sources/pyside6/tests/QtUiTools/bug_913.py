@@ -50,7 +50,7 @@ class TestBug913 (unittest.TestCase):
         loader = QUiLoader()
         file = Path(__file__).resolve().parent / 'bug_913.ui'
         self.assertTrue(file.is_file())
-        widget = loader.load(os.fspath(file))
+        widget = loader.load(file)
         widget.tabWidget.currentIndex()  # direct child is available as member
         widget.le_first.setText('foo')  # child of QTabWidget must also be available!
 

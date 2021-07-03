@@ -58,7 +58,7 @@ if __name__ == '__main__':
     viewer.engine().quit.connect(viewer.close)
 
     viewer.setTitle = "QML Polar Chart"
-    viewer.setSource(QUrl.fromLocalFile(os.fspath(src_dir / 'main.qml')))
+    viewer.setSource(QUrl.fromLocalFile(src_dir / 'main.qml'))
     viewer.setResizeMode(QQuickView.SizeRootObjectToView)
     viewer.show()
 

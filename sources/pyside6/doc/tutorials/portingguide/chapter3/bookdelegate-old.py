@@ -55,7 +55,7 @@ class BookDelegate(QSqlRelationalDelegate):
     def __init__(self, star_png, parent=None):
         QSqlRelationalDelegate.__init__(self, parent)
         star_png = Path(__file__).parent / "images" / "star.png"
-        self.star = QPixmap(os.fspath(star_png))
+        self.star = QPixmap(star_png)
 
     def paint(self, painter, option, index):
         """ Paint the items in the table.

@@ -130,7 +130,7 @@
      </modify-function>
 
       <!-- Syntax sugar -->
-      <add-function signature="load(QString,QWidget*)" return-type="QWidget*">
+      <add-function signature="load(PyPathLike,QWidget*)" return-type="QWidget*">
         <modify-argument index="2">
           <replace-default-expression with="0"/>
           <rename to="parentWidget"/>

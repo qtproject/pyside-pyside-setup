@@ -46,7 +46,7 @@ class TestDestruction(UsesQApplication):
     def testBug909(self):
         file = Path(__file__).resolve().parent / 'bug_909.ui'
         self.assertTrue(file.is_file())
-        fileName = QFile(os.fspath(file))
+        fileName = QFile(file)
         loader = QUiLoader()
         main_win = loader.load(fileName)
         self.assertEqual(sys.getrefcount(main_win), 2)

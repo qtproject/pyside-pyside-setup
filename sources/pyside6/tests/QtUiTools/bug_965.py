@@ -53,7 +53,7 @@ class BugTest(UsesQApplication):
         loader = MyQUiLoader()
         file = Path(__file__).resolve().parent / 'bug_965.ui'
         self.assertTrue(file.is_file())
-        self.assertRaises(RuntimeError, loader.load, os.fspath(file))
+        self.assertRaises(RuntimeError, loader.load, file)
 
 
 if __name__ == '__main__':

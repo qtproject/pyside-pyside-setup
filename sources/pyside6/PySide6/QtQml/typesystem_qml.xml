@@ -167,13 +167,23 @@
     <object-type name="QQmlDebuggingEnabler">
         <enum-type name="StartMode"/>
     </object-type>
+
     <object-type name="QQmlEngine">
         <modify-function signature="addImageProvider(const QString&amp;,QQmlImageProviderBase*)">
           <modify-argument index="2">
             <define-ownership owner="c++"/>
           </modify-argument>
         </modify-function>
+        <modify-function signature="addImportPath(const QString &amp;)">
+            <modify-argument index="1"><replace-type modified-type="PyPathLike"/></modify-argument>
+            <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qfile-path-1"/>
+        </modify-function>
+        <modify-function signature="addPluginPath(const QString &amp;)">
+            <modify-argument index="1"><replace-type modified-type="PyPathLike"/></modify-argument>
+            <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qfile-path-1"/>
+        </modify-function>
     </object-type>
+
     <object-type name="QQmlExpression">
         <modify-function signature="evaluate(bool*)" allow-thread="yes">
             <modify-argument index="1">

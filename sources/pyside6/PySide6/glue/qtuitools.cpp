@@ -108,7 +108,8 @@ registerCustomWidget(%PYARG_1);
 
 // @snippet quiloader-load-2
 // Avoid calling the original function: %CPPSELF.%FUNCTION_NAME()
-%PYARG_0 = QUiLoaderLoadUiFromFileName(%CPPSELF, %1, %2);
+auto str = PySide::pyPathToQString(%1);
+%PYARG_0 = QUiLoaderLoadUiFromFileName(%CPPSELF, str, %2);
 // @snippet quiloader-load-2
 
 // @snippet loaduitype

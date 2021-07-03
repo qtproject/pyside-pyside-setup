@@ -533,14 +533,6 @@
   </value-type>
 
   <value-type name="QPixmap" >
-    <!--<conversion-rule>-->
-        <!--<target-to-native replace="no">-->
-            <!--<add-conversion type="QVariant" check="%CHECKTYPE[QVariant](%in)">-->
-            <!--QVariant in = %CONVERTTOCPP[QVariant](%in);-->
-            <!--%out = in.value&lt;%OUTTYPE&gt;();-->
-            <!--</add-conversion>-->
-        <!--</target-to-native>-->
-    <!--</conversion-rule>-->
     <add-function signature="QPixmap(const QImage&amp;)">
         <modify-argument index="1">
             <rename to="image"/>
@@ -555,7 +547,10 @@
             <insert-template name="load_xpm"/>
         </inject-code>
     </modify-function>
-
+    <modify-function signature="QPixmap(const QString &amp;, const char *, QFlags&lt;Qt::ImageConversionFlag&gt;)">
+        <modify-argument index="1"><replace-type modified-type="PyPathLike"/></modify-argument>
+        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qfile-path-1"/>
+    </modify-function>
     <!-- ### Operator ! doesn't make sense in Python. -->
     <modify-function signature="operator!()const" remove="all"/>
 
@@ -680,6 +675,7 @@
     </extra-includes>
   </function> -->
   <primitive-type name="QImageCleanupFunction"/>
+
   <value-type name="QImage">
     <enum-type name="Format"/>
     <enum-type name="InvertMode"/>
@@ -693,7 +689,6 @@
     <modify-function signature="load(QIODevice*,const char*)" allow-thread="yes"/>
     <modify-function signature="save(const QString&amp;,const char*,int)const" allow-thread="yes"/>
     <modify-function signature="save(QIODevice*,const char*,int)const" allow-thread="yes"/>
-
     <modify-function signature="QImage(uchar*,int,int,qsizetype,QImage::Format,QImageCleanupFunction,void*)">
         <modify-argument index="1">
             <replace-type modified-type="PyBuffer"/>
@@ -713,6 +708,11 @@
                 <replace from="%ARGS" to="%2, %3, %4"/>
             </insert-template>
         </inject-code>
+    </modify-function>
+
+    <modify-function signature="QImage(const QString&amp;, const char *)">
+        <modify-argument index="1"><replace-type modified-type="PyPathLike"/></modify-argument>
+        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qfile-path-1"/>
     </modify-function>
 
     <add-function signature="QImage(QString&amp;,int,int,int,QImage::Format)">
@@ -773,13 +773,13 @@
     -->
     <modify-function signature="bits()const" remove="all"/>
     <modify-function signature="scanLine(int)const" remove="all"/>
-
     <modify-function signature="invertPixels(QImage::InvertMode)">
       <modify-argument index="1">
         <rename to="mode"/>
       </modify-argument>
     </modify-function>
   </value-type>
+
   <value-type name="QCursor" >
     <extra-includes>
       <include file-name="QPixmap" location="global"/>

@@ -282,7 +282,7 @@ class QImageTest(UsesQApplication):
         '''Test if the QImage signatures receiving string buffers exist.'''
         file = Path(__file__).resolve().parent / 'sample.png'
         self.assertTrue(file.is_file())
-        img0 = QImage(os.fspath(file))
+        img0 = QImage(file)
 
         # btw let's test the bits() method
         img1 = QImage(img0.bits(), img0.width(), img0.height(), img0.format())
