@@ -1858,7 +1858,8 @@ void CppGenerator::writeMethodWrapperPreamble(TextStream &s, OverloadData &overl
     } else {
         if (rfunc->implementingClass() &&
             (!rfunc->implementingClass()->isNamespace() && overloadData.hasInstanceFunction())) {
-            writeCppSelfDefinition(s, rfunc, context, overloadData.hasStaticFunction());
+            writeCppSelfDefinition(s, rfunc, context, overloadData.hasStaticFunction(),
+                                                      overloadData.hasClassMethod());
         }
         if (!rfunc->isInplaceOperator() && overloadData.hasNonVoidReturnType())
             s << "PyObject *" << PYTHON_RETURN_VAR << "{};\n";
@@ -2269,6 +2270,7 @@ void CppGenerator::writeCppSelfConversion(TextStream &s, const GeneratorContext 
 void CppGenerator::writeCppSelfDefinition(TextStream &s,
                                           const GeneratorContext &context,
                                           bool hasStaticOverload,
+                                          bool hasClassMethodOverload,
                                           bool cppSelfAsReference) const
 {
     Q_ASSERT(!(cppSelfAsReference && hasStaticOverload));
@@ -2299,10 +2301,13 @@ void CppGenerator::writeCppSelfDefinition(TextStream &s,
     }
 
     if (!hasStaticOverload) {
-        s << "auto " <<  CPP_SELF_VAR << " = ";
-        writeCppSelfConversion(s, context, className, useWrapperClass);
-        s << ";\n";
-        writeUnusedVariableCast(s, QLatin1String(CPP_SELF_VAR));
+        if (!hasClassMethodOverload) {
+            // PYSIDE-131: The single case of a class method for now: tr().
+            s << "auto " <<  CPP_SELF_VAR << " = ";
+            writeCppSelfConversion(s, context, className, useWrapperClass);
+            s << ";\n";
+            writeUnusedVariableCast(s, QLatin1String(CPP_SELF_VAR));
+        }
         return;
     }
 
@@ -2322,7 +2327,8 @@ void CppGenerator::writeCppSelfDefinition(TextStream &s,
 void CppGenerator::writeCppSelfDefinition(TextStream &s,
                                           const AbstractMetaFunctionCPtr &func,
                                           const GeneratorContext &context,
-                                          bool hasStaticOverload) const
+                                          bool hasStaticOverload,
+                                          bool hasClassMethodOverload) const
 {
     if (!func->ownerClass() || func->isConstructor())
         return;
@@ -2339,7 +2345,7 @@ void CppGenerator::writeCppSelfDefinition(TextStream &s,
         s << "std::swap(self, " << PYTHON_ARG << ");\n";
     }
 
-    writeCppSelfDefinition(s, context, hasStaticOverload);
+    writeCppSelfDefinition(s, context, hasStaticOverload, hasClassMethodOverload);
 }
 
 void CppGenerator::writeErrorSection(TextStream &s, OverloadData &overloadData)
@@ -4617,7 +4623,7 @@ void CppGenerator::writeCopyFunction(TextStream &s, const GeneratorContext &cont
     const QString className = chopType(cpythonTypeName(metaClass));
     s << "static PyObject *" << className << "___copy__(PyObject *self)\n"
         << "{\n" << indent;
-    writeCppSelfDefinition(s, context, false, true);
+    writeCppSelfDefinition(s, context, false, false, true);
     QString conversionCode;
     if (!context.forSmartPointer())
         conversionCode = cpythonToPythonConversionFunction(metaClass);
@@ -4827,7 +4833,7 @@ void CppGenerator::writeRichCompareFunction(TextStream &s,
     s << "static PyObject * ";
     s << baseName << "_richcompare(PyObject *self, PyObject *" << PYTHON_ARG
         << ", int op)\n{\n" << indent;
-    writeCppSelfDefinition(s, context, false, true);
+    writeCppSelfDefinition(s, context, false, false, true);
     writeUnusedVariableCast(s, QLatin1String(CPP_SELF_VAR));
     s << "PyObject *" << PYTHON_RETURN_VAR << "{};\n"
         << "PythonToCppFunc " << PYTHON_TO_CPP_VAR << ";\n";
@@ -4975,9 +4981,11 @@ QString CppGenerator::methodDefinitionParameters(const OverloadData &overloadDat
     // invisible namespaces).
     auto ownerClass = func->ownerClass();
     if (ownerClass
-        && !invisibleTopNamespaces().contains(const_cast<AbstractMetaClass *>(ownerClass))
-        && overloadData.hasStaticFunction()) {
-        s << "|METH_STATIC";
+        && !invisibleTopNamespaces().contains(const_cast<AbstractMetaClass *>(ownerClass))) {
+        if (overloadData.hasStaticFunction())
+            s << "|METH_STATIC";
+        if (overloadData.hasClassMethod())
+            s << "|METH_CLASS";
     }
     return result;
 }

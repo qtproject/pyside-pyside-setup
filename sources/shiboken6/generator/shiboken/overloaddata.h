@@ -70,6 +70,12 @@ public:
     /// Returns true if any of the overloads passed as argument is static.
     static bool hasStaticFunction(const AbstractMetaFunctionCList &overloads);
 
+    /// Returns true if any of the overloads for the current OverloadData is classmethod.
+    bool hasClassMethod() const;
+
+    /// Returns true if any of the overloads passed as argument is classmethod.
+    static bool hasClassMethod(const AbstractMetaFunctionCList &overloads);
+
     /// Returns true if any of the overloads for the current OverloadData is not static.
     bool hasInstanceFunction() const;
 

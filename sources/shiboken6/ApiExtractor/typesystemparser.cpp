@@ -101,6 +101,7 @@ static inline QString signatureAttribute() { return QStringLiteral("signature");
 static inline QString snippetAttribute() { return QStringLiteral("snippet"); }
 static inline QString snakeCaseAttribute() { return QStringLiteral("snake-case"); }
 static inline QString staticAttribute() { return QStringLiteral("static"); }
+static inline QString classmethodAttribute() { return QStringLiteral("classmethod"); }
 static inline QString threadAttribute() { return QStringLiteral("thread"); }
 static inline QString sourceAttribute() { return QStringLiteral("source"); }
 static inline QString streamAttribute() { return QStringLiteral("stream"); }
@@ -1808,6 +1809,7 @@ TypeSystemTypeEntry *TypeSystemParser::parseRootElement(const ConditionalStreamR
                                                QXmlStreamAttributes *attributes)
 {
     TypeSystem::SnakeCase snakeCase = TypeSystem::SnakeCase::Unspecified;
+    bool classMethod = false;
 
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
@@ -1838,6 +1840,15 @@ TypeSystemTypeEntry *TypeSystemParser::parseRootElement(const ConditionalStreamR
             const auto snakeCaseOpt = snakeCaseFromAttribute(attribute.value());
             if (snakeCaseOpt.has_value()) {
                 snakeCase = snakeCaseOpt.value();
+            } else {
+                qCWarning(lcShiboken, "%s",
+                          qPrintable(msgInvalidAttributeValue(attribute)));
+            }
+        } else if (name == classmethodAttribute()) {
+            const auto attribute = attributes->takeAt(i);
+            const bool classMethodOpt = convertBoolean(attribute.value(), classmethodAttribute(), false);
+            if (classMethodOpt) {
+                classMethod = classMethodOpt;
             } else {
                 qCWarning(lcShiboken, "%s",
                           qPrintable(msgInvalidAttributeValue(attribute)));
@@ -2260,6 +2271,7 @@ bool TypeSystemParser::parseAddFunction(const ConditionalStreamReader &,
     QString originalSignature;
     QString returnType;
     bool staticFunction = false;
+    bool classMethod = false;
     QString access;
     int overloadNumber = TypeSystem::OverloadNumberUnset;
     for (int i = attributes->size() - 1; i >= 0; --i) {
@@ -2271,6 +2283,9 @@ bool TypeSystemParser::parseAddFunction(const ConditionalStreamReader &,
         } else if (name == staticAttribute()) {
             staticFunction = convertBoolean(attributes->takeAt(i).value(),
                                             staticAttribute(), false);
+        } else if (name == classmethodAttribute()) {
+            classMethod = convertBoolean(attributes->takeAt(i).value(),
+                                            classmethodAttribute(), false);
         } else if (name == accessAttribute()) {
             access = attributes->takeAt(i).value().toString();
         } else if (name == overloadNumberAttribute()) {
@@ -2298,6 +2313,7 @@ bool TypeSystemParser::parseAddFunction(const ConditionalStreamReader &,
     }
 
     func->setStatic(staticFunction);
+    func->setClassMethod(classMethod);
     if (!signature.contains(QLatin1Char('(')))
         signature += QLatin1String("()");
     m_currentSignature = signature;

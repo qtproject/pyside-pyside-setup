@@ -125,6 +125,8 @@ AbstractMetaFunction::AbstractMetaFunction(const AddedFunctionPtr &addedFunc) :
     AbstractMetaFunction::Attributes atts = AbstractMetaFunction::FinalInTargetLang;
     if (addedFunc->isStatic())
         atts |= AbstractMetaFunction::Static;
+    if (addedFunc->isClassMethod())
+        atts |= AbstractMetaFunction::ClassMethod;
     setAttributes(atts);
 }
 

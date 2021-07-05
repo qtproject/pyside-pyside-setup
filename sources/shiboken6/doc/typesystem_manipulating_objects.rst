@@ -261,12 +261,21 @@ add-function
     .. code-block:: xml
 
          <object-type>
-             <add-function signature="..." return-type="..." access="public | protected" static="yes | no" since="..."/>
+             <add-function signature="..." return-type="..." access="public | protected" static="yes | no" classmethod="yes | no" since="..."/>
          </object-type>
 
     The ``return-type`` attribute defaults to *void*, the ``access`` to *public* and the ``static`` one to *no*.
 
-    The ``since`` attribute specify the API version when this function was added.
+    The ``since`` attribute specifies the API version when this function was added.
+
+    The ``classmethod`` attribute specifies whether the function should be a Python class method.
+    It sets the METH_CLASS flag which means that ``PyTypeObject`` instead of an instance
+    ``PyObject`` is passed as self, which needs to be handled in injected code.
+
+    Note that the label "static" in Qt's class documentation almost always means that a Python
+    ``classmethod`` should be generated, because an object's class is always accessible from the
+    static C++ code, while Python needs the explicit "self" parameter that ``classmethod``
+    provides.
 
     Within the signature, names for the function parameters can be specified by
     enclosing them within the delimiter *@*:

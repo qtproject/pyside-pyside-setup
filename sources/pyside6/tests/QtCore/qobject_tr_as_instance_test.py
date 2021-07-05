@@ -64,11 +64,12 @@ class QObjectTrTest(unittest.TestCase):
         self.assertEqual((invar1, invar2), (outvar1, outvar2))
 
     def testTrAsInstanceMethod(self):
-        # Test QObject.tr as instance
+        # Test QObject.tr as instance.
+        # PYSIDE-1252: This works now as a class method!
         invar1 = 'test1'
-        outvar1 = QObject.tr(self.obj, invar1)
+        outvar1 = QObject.tr(invar1)
         invar2 = 'test2'
-        outvar2 = QObject.tr(self.obj, invar2, 'test comment')
+        outvar2 = QObject.tr(invar2, 'test comment')
         self.assertEqual((invar1, invar2), (outvar1, outvar2))
 
 
