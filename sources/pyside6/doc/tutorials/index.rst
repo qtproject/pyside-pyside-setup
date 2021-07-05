@@ -40,6 +40,7 @@ names and how they look like.
     basictutorial/treewidget.rst
     basictutorial/uifiles.rst
     basictutorial/qrcfiles.rst
+    basictutorial/translations.rst
     basictutorial/widgetstyling.rst
 
 

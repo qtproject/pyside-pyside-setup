@@ -1,0 +1,4 @@
+{
+    "files": ["main.py", "locales/example.pot",
+              "locales/de_DE/LC_MESSAGES/example.pot"]
+}
