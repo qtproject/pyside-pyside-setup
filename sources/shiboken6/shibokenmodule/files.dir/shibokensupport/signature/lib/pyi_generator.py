@@ -67,11 +67,6 @@ sourcepath = Path(__file__).resolve()
 USE_PEP563 = sys.version_info[:2] >= (3, 7)
 
 indent = " " * 4
-is_ci = os.environ.get("QTEST_ENVIRONMENT", "") == "ci"
-is_debug = is_ci or os.environ.get("QTEST_ENVIRONMENT")
-
-logging.basicConfig(level=logging.DEBUG if is_debug else logging.INFO)
-logger = logging.getLogger("pyi_generator")
 
 
 class Writer(object):
@@ -318,7 +313,7 @@ def generate_pyi(import_name, outpath, options):
                 wr.print(line)
     if not options.quiet:
         options.logger.info(f"Generated: {outfilepath}")
-    if options and options.check or is_ci:
+    if options and (options.check or options.is_ci):
         # Python 3.7 and up: We can check the file directly if the syntax is ok.
         if USE_PEP563:
             subprocess.check_output([sys.executable, os.fspath(outfilepath)])
@@ -344,10 +339,17 @@ if __name__ == "__main__":
     options = parser.parse_args()
     module = options.module
     outpath = options.outpath
+
+    qtest_env = os.environ.get("QTEST_ENVIRONMENT", "")
+    logging.basicConfig(level=logging.DEBUG if qtest_env else logging.INFO)
+    logger = logging.getLogger("pyi_generator")
+
     if outpath and not Path(outpath).exists():
         os.makedirs(outpath)
         logger.info(f"+++ Created path {outpath}")
     options._pyside_call = False
+    options.is_ci = qtest_env == "ci"
+
     options.logger = logger
     generate_pyi(module, outpath, options=options)
 
