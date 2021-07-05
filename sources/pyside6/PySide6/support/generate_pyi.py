@@ -56,12 +56,6 @@ from pathlib import Path
 # Can we use forward references?
 USE_PEP563 = sys.version_info[:2] >= (3, 7)
 
-is_ci = os.environ.get("QTEST_ENVIRONMENT", "") == "ci"
-is_debug = is_ci or os.environ.get("QTEST_ENVIRONMENT")
-
-logging.basicConfig(level=logging.DEBUG if is_debug else logging.INFO)
-logger = logging.getLogger("generate_pyi")
-
 
 def generate_all_pyi(outpath, options):
     ps = os.pathsep
@@ -118,13 +112,20 @@ if __name__ == "__main__":
     parser.add_argument("--feature", nargs="+", choices=["snake_case", "true_property"], default=[],
         help="""a list of feature names. Example: `--feature snake_case true_property`""")
     options = parser.parse_args()
+
+    qtest_env = os.environ.get("QTEST_ENVIRONMENT", "")
+    log_level = logging.DEBUG if qtest_env else logging.INFO
     if options.quiet:
-        logger.setLevel(logging.WARNING)
+        log_level = logging.WARNING
+    logging.basicConfig(level=log_level)
+    logger = logging.getLogger("generate_pyi")
+
     outpath = options.outpath
     if outpath and not Path(outpath).exists():
         os.makedirs(outpath)
         logger.info(f"+++ Created path {outpath}")
     options._pyside_call = True
     options.logger = logger
+    options.is_ci = qtest_env == "ci"
     generate_all_pyi(outpath, options=options)
 # eof
