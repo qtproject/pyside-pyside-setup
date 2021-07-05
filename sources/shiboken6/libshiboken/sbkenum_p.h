@@ -45,7 +45,6 @@
 
 struct SbkEnumTypePrivate
 {
-    SbkConverter **converterPtr;
     SbkConverter *converter;
     const char *cppName;
 };

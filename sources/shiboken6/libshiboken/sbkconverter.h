@@ -403,7 +403,6 @@ template<> inline PyTypeObject *SbkType<std::nullptr_t>() { return Py_TYPE(&_Py_
 struct PySideQFlagsType;
 struct PySideQFlagsTypePrivate
 {
-    SbkConverter **converterPtr;
     SbkConverter *converter;
 };
 

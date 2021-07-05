@@ -47,7 +47,6 @@ extern "C" {
 
     struct PySideQFlagsTypePrivate
     {
-        SbkConverter **converterPtr;
         SbkConverter *converter;
     };
     /**
@@ -186,10 +185,6 @@ namespace QFlags
         newspec.slots = SbkNewQFlagsType_spec.slots;
         PyTypeObject *type = (PyTypeObject *)SbkType_FromSpec(&newspec);
         Py_TYPE(type) = &PyType_Type;
-
-        PySideQFlagsType *flagsType = reinterpret_cast<PySideQFlagsType *>(type);
-        auto *pftp = PepType_PFTP(flagsType);
-        pftp->converterPtr = &pftp->converter;
 
         if (PyType_Ready(type) < 0)
             return nullptr;

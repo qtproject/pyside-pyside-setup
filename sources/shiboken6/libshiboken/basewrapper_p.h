@@ -140,7 +140,6 @@ struct SbkObjectTypePrivate
     /// True if this type was defined by the user.
     unsigned int is_user_type : 1;
     /// Tells is the type is a value type or an object-type, see BEHAVIOUR_ *constants.
-    // TODO-CONVERTERS: to be deprecated/removed
     unsigned int type_behaviour : 2;
     unsigned int delete_in_main_thread : 1;
     /// C++ name

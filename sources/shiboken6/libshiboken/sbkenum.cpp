@@ -692,7 +692,6 @@ newTypeWithName(const char *name,
     auto *enumType = reinterpret_cast<SbkEnumType *>(type);
     auto *setp = PepType_SETP(enumType);
     setp->cppName = cppName;
-    setp->converterPtr = &PepType_SETP(enumType)->converter;
     DeclaredEnumTypes::instance().addEnumType(type);
     return type;
 }
@@ -721,12 +720,6 @@ void setTypeConverter(PyTypeObject *type, SbkConverter *converter, bool isFlag)
         auto *enumType = reinterpret_cast<SbkEnumType *>(type);
         PepType_SETP(enumType)->converter = converter;
     }
-}
-
-SbkConverter *getTypeConverter(PyTypeObject *type)
-{
-    auto *enumType = reinterpret_cast<SbkEnumType *>(type);
-    return PepType_SETP(enumType)->converter;
 }
 
 } // namespace Enum
