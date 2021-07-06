@@ -253,5 +253,6 @@ def prepare_packages_posix(self, vars):
     if sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
         rpath_path = "{st_build_dir}/{st_package_name}".format(**vars)
         self.update_rpath(rpath_path, executables)
+        self.update_rpath(rpath_path, self.package_libraries(rpath_path))
         if libexec_executables:
             self.update_rpath(rpath_path, libexec_executables, libexec=True)

@@ -1085,14 +1085,19 @@ class PysideBuild(_build, DistUtilsCommandMixin):
             raise RuntimeError("Error copying libclang library "
                                f"from {clang_lib_path} to {destination_dir}. ")
 
+    def package_libraries(self, package_path):
+        """Returns the libraries of the Python module"""
+        UNIX_FILTERS = ["*.so", "*.so.*"]
+        DARWIN_FILTERS = ["*.so", "*.dylib"]
+        FILTERS = DARWIN_FILTERS if sys.platform == 'darwin' else UNIX_FILTERS
+        return [lib for lib in os.listdir(
+            package_path) if filter_match(lib, FILTERS)]
+
     def update_rpath(self, package_path, executables, libexec=False):
         ROOT = '@loader_path' if sys.platform == 'darwin' else '$ORIGIN'
         QT_PATH = '/../lib' if libexec else '/Qt/lib'
 
         if sys.platform.startswith('linux'):
-            pyside_libs = [lib for lib in os.listdir(
-                package_path) if filter_match(lib, ["*.so", "*.so.*"])]
-
             def rpath_cmd(srcpath):
                 final_rpath = ''
                 # Command line rpath option takes precedence over
@@ -1110,9 +1115,6 @@ class PysideBuild(_build, DistUtilsCommandMixin):
                                              override=override)
 
         elif sys.platform == 'darwin':
-            pyside_libs = [lib for lib in os.listdir(
-                package_path) if filter_match(lib, ["*.so", "*.dylib"])]
-
             def rpath_cmd(srcpath):
                 final_rpath = ''
                 # Command line rpath option takes precedence over
@@ -1129,10 +1131,8 @@ class PysideBuild(_build, DistUtilsCommandMixin):
         else:
             raise RuntimeError(f"Not configured for platform {sys.platform}")
 
-        pyside_libs.extend(executables)
-
-        # Update rpath in PySide6 libs
-        for srcname in pyside_libs:
+        # Update rpath
+        for srcname in executables:
             srcpath = os.path.join(package_path, srcname)
             if os.path.isdir(srcpath) or os.path.islink(srcpath):
                 continue
