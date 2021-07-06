@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/****************************************************************************
+**
+** Copyright (C) 2021 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt for Python.
+**
+** $QT_BEGIN_LICENSE:LGPL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPL3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 2.0 or (at your option) the GNU General
+** Public license version 3 or any later version approved by the KDE Free
+** Qt Foundation. The licenses are as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-2.0.html and
+** https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+-->
+<typesystem package="PySide6.QtDBus">
+    <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
+
+    <namespace-type name="QDBus">
+        <enum-type name="CallMode"/>
+    </namespace-type>
+
+    <object-type name="QDBusAbstractAdaptor"/>
+    <object-type name="QDBusAbstractInterfaceBase"/>
+    <object-type name="QDBusAbstractInterface">
+      <!-- Those are template argument lists (see also  callWithArgumentList() -->
+      <declare-function signature="call(const QString&amp;,const QVariant&amp;)"
+                        return-type="QDBusMessage"/>
+      <declare-function signature="call(const QString&amp;,const QVariant&amp;,const QVariant&amp;)"
+                        return-type="QDBusMessage"/>
+      <declare-function signature="call(const QString&amp;,const QVariant&amp;,const QVariant&amp;,const QVariant&amp;)"
+                        return-type="QDBusMessage"/>
+      <declare-function signature="call(const QString&amp;,const QVariant&amp;,const QVariant&amp;,const QVariant&amp;,const QVariant&amp;)"
+                        return-type="QDBusMessage"/>
+      <declare-function signature="call(QDBus::CallMode,const QString&amp;,const QVariant&amp;)"
+                        return-type="QDBusMessage"/>
+      <declare-function signature="call(QDBus::CallMode,const QString&amp;,const QVariant&amp;,const QVariant&amp;)"
+                        return-type="QDBusMessage"/>
+      <declare-function signature="call(QDBus::CallMode,const QString&amp;,const QVariant&amp;,const QVariant&amp;,const QVariant&amp;)"
+                        return-type="QDBusMessage"/>
+      <declare-function signature="call(QDBus::CallMode,const QString&amp;,const QVariant&amp;,const QVariant&amp;,const QVariant&amp;,const QVariant&amp;)"
+                        return-type="QDBusMessage"/>
+    </object-type>
+    <value-type name="QDBusArgument">
+      <enum-type name="ElementType"/>
+    </value-type>
+    <value-type name="QDBusConnection">
+      <enum-type name="BusType"/>
+      <enum-type name="ConnectionCapability" flags="ConnectionCapabilities"/>
+      <enum-type name="RegisterOption" flags="RegisterOptions"/>
+      <enum-type name="UnregisterMode"/>
+      <enum-type name="VirtualObjectRegisterOption" flags="VirtualObjectRegisterOptions"/>
+      <modify-function signature="interface()const">
+        <modify-argument index="return">
+          <define-ownership class="target" owner="default"/>
+        </modify-argument>
+      </modify-function>
+    </value-type>
+    <object-type name="QDBusConnectionInterface">
+      <enum-type name="RegisterServiceReply"/>
+      <enum-type name="ServiceQueueOptions"/>
+      <enum-type name="ServiceReplacementOptions"/>
+      <!-- Original functions are rejected since they return ::QDBusReply<T> -->
+      <declare-function signature="registeredServiceNames()const"
+                        return-type="QtDBusHelper::QDBusReply"/>
+      <declare-function signature="registerService(const QString&amp;,QDBusConnectionInterface::ServiceQueueOptions,QDBusConnectionInterface::ServiceReplacementOptions)"
+                        return-type="QtDBusHelper::QDBusReply"/>
+      <declare-function signature="activatableServiceNames()const"
+                        return-type="QtDBusHelper::QDBusReply"/>
+      <declare-function signature="serviceOwner(const QString&amp;)const"
+                        return-type="QtDBusHelper::QDBusReply"/>
+      <declare-function signature="isServiceRegistered(const QString&amp;)const"
+                        return-type="QtDBusHelper::QDBusReply"/>
+      <declare-function signature="unregisterService(const QString&amp;)"
+                        return-type="QtDBusHelper::QDBusReply"/>
+      <declare-function signature="servicePid(const QString&amp;)const"
+                        return-type="QtDBusHelper::QDBusReply"/>
+      <declare-function signature="serviceUid(const QString&amp;)const"
+                        return-type="QtDBusHelper::QDBusReply"/>
+      <declare-function signature="startService(const QString&amp;)"
+                        return-type="QtDBusHelper::QDBusReply"/>
+    </object-type>
+    <value-type name="QDBusContext"/>
+    <value-type name="QDBusError">
+      <enum-type name="ErrorType"/>
+    </value-type>
+    <object-type name="QDBusInterface"/>
+    <object-type name="QDBusMessage">
+      <enum-type name="MessageType"/>
+    </object-type>
+    <object-type name="QDBusObjectPath"/>
+    <object-type name="QDBusPendingCall"/>
+    <object-type name="QDBusPendingCallWatcher"/>
+
+    <namespace-type name="QtDBusHelper" visible="no">
+        <object-type name="QDBusReply"/>
+    </namespace-type>
+
+    <object-type name="QDBusServer"/>
+    <object-type name="QDBusServiceWatcher">
+      <enum-type name="WatchModeFlag" flags="WatchMode"/>
+    </object-type>
+    <object-type name="QDBusSignature"/>
+    <object-type name="QDBusUnixFileDescriptor"/>
+    <object-type name="QDBusVariant"/>
+    <object-type name="QDBusVirtualObject"/>
+    <suppress-warning text='^.*Unable to translate type "QDBusReply&lt;.*$'/>
+</typesystem>
