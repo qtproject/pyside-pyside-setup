@@ -3,6 +3,88 @@
 Translating Applications
 ========================
 
+Qt Linguist
+-----------
+
+`Qt Linguist <https://doc.qt.io/qt-6/qtlinguist-index.html>`_ and
+its related tools can be used to provide translations for applications.
+
+The ``examples/widgets/linguist`` example illustrates this. The example is
+very simple, it has a menu and shows a list of programming languages with
+multiselection.
+
+Translation works by passing the message strings through function calls that
+look up the translation. Each ``QObject`` instance provides a ``tr()``
+function for that purpose. There is also ``QCoreApplication.translate()``
+for adding translated texts to non-QObject classes.
+
+Qt ships its own translations containing the error messages and standard
+dialog captions.
+
+The linguist example has a number of messages enclosed in ``self.tr()``.
+The status bar message shown in response to a selection change uses
+a plural form depending on a count:
+
+    .. code-block:: python
+
+        count = len(self._list_widget.selectionModel().selectedRows())
+        message = self.tr("%n language(s) selected", "", count)
+
+The translation workflow for the example is as follows:
+The translated messages are extracted using the ``lupdate`` tool,
+producing XML-based ``.ts`` files:
+
+    .. code-block:: bash
+
+        pyside6-lupdate main.py -ts example_de.ts
+
+If ``example_de.ts`` already exists, it will be updated with the new
+messages added to the code in-between.
+
+``.ts`` files are translated using *Qt Linguist*. Once this is complete,
+the files are converted to a binary form (``.qm`` files):
+
+    .. code-block:: bash
+
+        mkdir translations
+        pyside6-lrelease example_de.ts -qm translations/example_de.qm
+
+To avoid having to ship the ``.qm`` files, it is recommend
+to put them into a Qt resource file along with icons and other
+applications resources (see :ref:`using_qrc_files`).
+The resource file ``linguist.qrc`` provides the ``example_de.qm``
+under ``:/translations``:
+
+    .. code-block:: xml
+
+        <!DOCTYPE RCC><RCC version="1.0">
+        <qresource>
+            <file>translations/example_de.qm</file>
+        </qresource>
+        </RCC>
+
+At runtime, the translations need to be loaded using the ``QTranslator`` class:
+
+    .. code-block:: python
+
+        path = QLibraryInfo.location(QLibraryInfo.TranslationsPath)
+        translator = QTranslator(app)
+        if translator.load(QLocale.system(), 'qtbase', '_', path):
+            app.installTranslator(translator)
+        translator = QTranslator(app)
+        path = ':/translations'
+        if translator.load(QLocale.system(), 'example', '_', path):
+            app.installTranslator(translator)
+
+The code first loads the translations shipped for Qt and then
+the translations of the applications loaded from resources.
+
+The example can then be run in German:
+
+    .. code-block:: bash
+
+        LANG=de python main.py
+
 GNU gettext
 -----------
 
