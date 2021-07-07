@@ -10,8 +10,13 @@ ${QtWebEngineCore_GEN_DIR}/qwebenginehistory_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginehistoryitem_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginehistorymodel_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginehttprequest_wrapper.cpp
+${QtWebEngineCore_GEN_DIR}/qwebengineloadinginfo_wrapper.cpp
+${QtWebEngineCore_GEN_DIR}/qwebenginenewwindowrequest_wrapper.cpp
+${QtWebEngineCore_GEN_DIR}/qwebenginenotification_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginepage_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebengineprofile_wrapper.cpp
+${QtWebEngineCore_GEN_DIR}/qwebenginequotarequest_wrapper.cpp
+${QtWebEngineCore_GEN_DIR}/qwebengineregisterprotocolhandlerrequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginescript_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginescriptcollection_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginesettings_wrapper.cpp

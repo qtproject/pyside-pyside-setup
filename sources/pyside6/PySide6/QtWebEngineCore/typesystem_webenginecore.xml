@@ -74,6 +74,8 @@
     <enum-type name="Roles"/>
   </object-type>
 
+  <object-type name="QWebEngineNotification"/>
+
   <object-type name="QWebEnginePage">
     <enum-type name="LifecycleState"/>
     <enum-type name="WebAction"/>
@@ -106,6 +108,10 @@
     <modify-function signature="setRequestInterceptor(QWebEngineUrlRequestInterceptor*)" remove="all"/>
   </object-type>
 
+  <object-type name="QWebEngineNewWindowRequest">
+      <enum-type name="DestinationType"/>
+  </object-type>
+
   <value-type name="QWebEngineScript">
     <enum-type name="InjectionPoint"/>
     <enum-type name="ScriptWorldId"/>
@@ -123,6 +129,15 @@
   <object-type name="QWebEngineHttpRequest">
     <enum-type name="Method"/>
   </object-type>
+
+  <value-type name="QWebEngineLoadingInfo">
+    <enum-type name="ErrorDomain"/>
+    <enum-type name="LoadStatus"/>
+  </value-type>
+
+  <object-type name="QWebEngineRegisterProtocolHandlerRequest"/>
+
+  <object-type name="QWebEngineQuotaRequest"/>
 
   <object-type name="QWebEngineUrlRequestInfo">
     <enum-type name="NavigationType"/>

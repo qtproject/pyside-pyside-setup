@@ -40,8 +40,15 @@
 ****************************************************************************/
 -->
 <typesystem package="PySide6.QtWebEngineQuick">
-    <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
+    <load-typesystem name="QtQml/typesystem_qml.xml" generate="no"/>
 
     <namespace-type name="QtWebEngineQuick"/> <!-- initialize() -->
+
+    <object-type name="QQuickWebEngineProfile">
+        <enum-type name="HttpCacheType"/>
+        <enum-type name="PersistentCookiesPolicy"/>
+    </object-type>
+
+    <object-type name="QQuickWebEngineScriptCollection"/>
 
 </typesystem>
