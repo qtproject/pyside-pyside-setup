@@ -75,6 +75,14 @@ def qt_tool_wrapper(qt_tool, args, libexec=False):
     sys.exit(proc.returncode)
 
 
+def lrelease():
+    qt_tool_wrapper("lrelease", sys.argv[1:])
+
+
+def lupdate():
+    qt_tool_wrapper("lupdate", sys.argv[1:])
+
+
 def uic():
     qt_tool_wrapper("uic", ['-g', 'python'] + sys.argv[1:], True)
 
@@ -132,6 +140,10 @@ def designer():
         qt_tool_wrapper("Designer.app/Contents/MacOS/Designer", sys.argv[1:])
     else:
         qt_tool_wrapper("designer", sys.argv[1:])
+
+
+def linguist():
+    qt_tool_wrapper("linguist", sys.argv[1:])
 
 
 def genpyi():

@@ -218,7 +218,9 @@ class Config(object):
                     f'{PYSIDE}-rcc = {package_name}.scripts.pyside_tool:rcc',
                     f'{PYSIDE}-assistant = {package_name}.scripts.pyside_tool:assistant',
                     f'{PYSIDE}-designer= {package_name}.scripts.pyside_tool:designer',
-                    f'{PYSIDE}-lupdate = {package_name}.scripts.pyside_tool:main',
+                    f'{PYSIDE}-linguist = {package_name}.scripts.pyside_tool:linguist',
+                    f'{PYSIDE}-lupdate = {package_name}.scripts.pyside_tool:lupdate',
+                    f'{PYSIDE}-lrelease = {package_name}.scripts.pyside_tool:lrelease',
                     f'{PYSIDE}-genpyi = {package_name}.scripts.pyside_tool:genpyi',
                 ]
             }

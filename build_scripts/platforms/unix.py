@@ -165,9 +165,15 @@ def prepare_packages_posix(self, vars):
         lib_exec_filters = []
         if not OPTION['NO_QT_TOOLS']:
             lib_exec_filters.extend(['uic', 'rcc'])
+            executables.extend(copydir(
+                "{install_dir}/bin/",
+                "{st_build_dir}/{st_package_name}",
+                filter=["lrelease", "lupdate"],
+                recursive=False, vars=vars))
             # Copying assistant/designer
             executables.extend(_copy_gui_executable('assistant', vars=vars))
             executables.extend(_copy_gui_executable('designer', vars=vars))
+            executables.extend(_copy_gui_executable('linguist', vars=vars))
 
         # Copy libexec
         built_modules = self.get_built_pyside_config(vars)['built_modules']
