@@ -58,7 +58,7 @@ if (kwds || numArgs > 1) {
 
 PyTypeObject *typeObj = reinterpret_cast<PyTypeObject*>(%PYARG_3);
 
-if (typeObj) {
+if (typeObj && !Shiboken::ObjectType::checkType(typeObj)) {
     if (typeObj == &PyList_Type) {
         QByteArray out_ba = out.toByteArray();
         if (!out_ba.isEmpty()) {
@@ -104,8 +104,14 @@ if (typeObj) {
             Py_INCREF(Py_False);
             %PYARG_0 = Py_False;
         }
+    } else {
+        // TODO: PyDict_Type and PyTuple_Type
+        PyErr_SetString(PyExc_TypeError,
+                        "Invalid type parameter.\n"
+                        "\tUse 'list', 'bytes', 'str', 'int', 'float', 'bool', "
+                        "or a Qt-derived type");
+        return nullptr;
     }
-    // TODO: PyDict_Type and PyTuple_Type
 }
 else {
     if (!out.isValid()) {
