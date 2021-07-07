@@ -37,7 +37,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QDir, QSettings, QTemporaryDir
+from PySide6.QtCore import QDir, QSettings, QTemporaryDir, QByteArray
 
 
 class TestQSettings(unittest.TestCase):
@@ -55,6 +55,19 @@ class TestQSettings(unittest.TestCase):
 
         r = settings.value('var2', type=list)
         self.assertEqual(type(r), list)
+
+        # Test mixed conversions
+        ba = QByteArray("hello".encode("utf-8"))
+
+        r = settings.value("test", ba, type=QByteArray)
+        self.assertEqual(type(r), QByteArray)
+
+        r = settings.value("test", ba, type=str)
+        self.assertEqual(type(r), str)
+
+        # Test invalid conversions
+        with self.assertRaises(TypeError):
+            r = settings.value("test", ba, type=dict)
 
     def testDefaultValueConversion(self):
         temp_dir = QDir.tempPath()
