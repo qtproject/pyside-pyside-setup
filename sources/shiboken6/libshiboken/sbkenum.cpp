@@ -54,6 +54,8 @@
 #define SbkEnumType_Check(o) (Py_TYPE(Py_TYPE(o)) == SbkEnumType_TypeF())
 using enum_func = PyObject *(*)(PyObject *, PyObject *);
 
+static void cleanupEnumTypes();
+
 extern "C"
 {
 
@@ -398,6 +400,7 @@ void init_enum()
     static bool is_initialized = false;
     if (!(is_initialized || enum_unpickler || _init_enum()))
         Py_FatalError("could not load enum pickling helper function");
+    Py_AtExit(cleanupEnumTypes);
     is_initialized = true;
 }
 
@@ -417,6 +420,12 @@ namespace Shiboken {
 class DeclaredEnumTypes
 {
 public:
+    struct EnumEntry
+    {
+        char *name; // full name as allocated. type->tp_name might be a substring.
+        PyTypeObject *type;
+    };
+
     DeclaredEnumTypes(const DeclaredEnumTypes &) = delete;
     DeclaredEnumTypes(DeclaredEnumTypes &&) = delete;
     DeclaredEnumTypes &operator=(const DeclaredEnumTypes &) = delete;
@@ -425,10 +434,12 @@ public:
     DeclaredEnumTypes();
     ~DeclaredEnumTypes();
     static DeclaredEnumTypes &instance();
-    void addEnumType(PyTypeObject *type);
+    void addEnumType(const EnumEntry &e) { m_enumTypes.push_back(e); }
+
+    void cleanup();
 
 private:
-    std::vector<PyTypeObject *> m_enumTypes;
+    std::vector<EnumEntry> m_enumTypes;
 };
 
 namespace Enum {
@@ -668,7 +679,8 @@ newTypeWithName(const char *name,
     // Careful: SbkType_FromSpec does not allocate the string.
     PyType_Slot newslots[99] = {};  // enough but not too big for the stack
     PyType_Spec newspec;
-    newspec.name = strdup(name);
+    DeclaredEnumTypes::EnumEntry entry{strdup(name), nullptr};
+    newspec.name = entry.name; // Note that SbkType_FromSpecWithBases might use a substring.
     newspec.basicsize = SbkNewEnum_spec.basicsize;
     newspec.itemsize = SbkNewEnum_spec.itemsize;
     newspec.flags = SbkNewEnum_spec.flags;
@@ -686,14 +698,15 @@ newTypeWithName(const char *name,
     static auto basetype = reinterpret_cast<PyObject *>(SbkEnum_TypeF());
     Py_INCREF(basetype);
     PyTuple_SetItem(bases, 0, basetype);
-    auto *type = reinterpret_cast<PyTypeObject *>(SbkType_FromSpecWithBases(&newspec, bases));
+    auto *type = SbkType_FromSpecWithBases(&newspec, bases);
+    entry.type = reinterpret_cast<PyTypeObject *>(type);
     Py_TYPE(type) = SbkEnumType_TypeF();
 
     auto *enumType = reinterpret_cast<SbkEnumType *>(type);
     auto *setp = PepType_SETP(enumType);
     setp->cppName = cppName;
-    DeclaredEnumTypes::instance().addEnumType(type);
-    return type;
+    DeclaredEnumTypes::instance().addEnumType(entry);
+    return entry.type;
 }
 
 const char *getCppName(PyTypeObject *enumType)
@@ -734,22 +747,22 @@ DeclaredEnumTypes::DeclaredEnumTypes() = default;
 
 DeclaredEnumTypes::~DeclaredEnumTypes()
 {
-        /*
-         * PYSIDE-595: This was "delete *it;" before introducing 'SbkType_FromSpec'.
-         * XXX what should I do now?
-         * Refcounts in tests are 30 or 0 at end.
-         * When I add the default tp_dealloc, we get negative refcounts!
-         * So right now I am doing nothing. Surely wrong but no crash.
-         * See also the comment in function 'createGlobalEnumItem'.
-         */
-        // for (PyTypeObject *o : m_enumTypes)
-        //     fprintf(stderr, "ttt %d %s\n", Py_REFCNT(o), o->tp_name);
+   cleanup();
+}
+
+void DeclaredEnumTypes::cleanup()
+{
+    for (const auto &e : m_enumTypes) {
+        std::free(e.name);
+        Py_DECREF(e.type);
+    }
     m_enumTypes.clear();
 }
 
-void DeclaredEnumTypes::addEnumType(PyTypeObject *type)
+} // namespace Shiboken
+
+static void cleanupEnumTypes()
 {
-    m_enumTypes.push_back(type);
+    Shiboken::DeclaredEnumTypes::instance().cleanup();
 }
 
-}
