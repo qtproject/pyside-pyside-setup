@@ -3,6 +3,9 @@
 Translating Applications
 ========================
 
+.. image:: translations.png
+   :alt: Translation Image
+
 Qt Linguist
 -----------
 

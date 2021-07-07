@@ -17,6 +17,12 @@ Here is a simple example of a Hello World application in PySide6:
     app.exec()
 
 
+When you execute it the code, the application will look like:
+
+.. image:: widgets.png
+   :alt: Simple Widget
+
+
 For a widget application using PySide6, you must always start by
 importing the appropriate class from the `PySide6.QtWidgets` module.
 
@@ -43,3 +49,4 @@ After the creation of the application object, we have created a
 Finally, we call `app.exec()` to enter the Qt main loop and start
 to execute the Qt code. In reality, it is only here where the label
 is shown, but this can be ignored for now.
+

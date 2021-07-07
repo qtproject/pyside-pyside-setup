@@ -39,9 +39,12 @@ Documentation
 .. ifconfig:: output_format == 'html'
 
     .. panels::
-        :body: align-items-center jutify-content-center
+        :body: align-items-center jutify-content-center text-center
         :container: container-lg pb-3
         :column: col-lg-4 col-md-4 col-sm-6 col-xs-12 p-2
+        :img-top-cls: d-flex align-self-center img-responsive card-img-top-main
+
+        :img-top: images/Desktop.svg
 
         Write your first Qt application.
 
@@ -52,6 +55,7 @@ Documentation
             :text: Check it out!
             :classes: btn-qt btn-block stretched-link
         ---
+        :img-top: images/Support.svg
 
         Install and build from source.
 
@@ -62,6 +66,7 @@ Documentation
             :text: Getting Started
             :classes: btn-qt btn-block stretched-link
         ---
+        :img-top: images/Dev.svg
 
         PySide API reference.
 
@@ -73,6 +78,7 @@ Documentation
             :classes: btn-qt btn-block stretched-link
 
         ---
+        :img-top: images/Tutorials.svg
 
         Learn with step-by-step guides.
 
@@ -83,6 +89,7 @@ Documentation
             :text: Tutorials
             :classes: btn-qt btn-block stretched-link
         ---
+        :img-top: images/Examples.svg
 
         Check all the available examples.
 
@@ -93,6 +100,7 @@ Documentation
             :text: Examples
             :classes: btn-qt btn-block stretched-link
         ---
+        :img-top: images/Training.svg
 
         Watch webinars, talks, and more.
 
@@ -104,6 +112,7 @@ Documentation
             :classes: btn-qt btn-block stretched-link
 
         ---
+        :img-top: images/Deployment.svg
 
         Learn to deploy your applications.
 
@@ -114,6 +123,7 @@ Documentation
             :text: Deployment
             :classes: btn-qt btn-block stretched-link
         ---
+        :img-top: images/stopwatch.svg
 
         API differences and known issues.
 
@@ -124,6 +134,7 @@ Documentation
             :text: Considerations
             :classes: btn-qt btn-block stretched-link
         ---
+        :img-top: images/cpp_python.svg
 
         Generate C++ to Python bindings.
 
@@ -172,3 +183,4 @@ We have also a `wiki page`_ where you can find how to report bugs, contribute or
    contents.rst
    gettingstarted*
    overviews/*
+   feature-why

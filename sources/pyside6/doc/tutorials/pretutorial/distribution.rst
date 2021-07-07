@@ -59,7 +59,7 @@ difficult to retrieve it.
 
 You can find a series of tutorials based on the most popular tools that
 allow Python users to freeze and distribute applications in our
-:ref:`deployment` section.
+:ref:`deployment-guides` section.
 
 Compiling Python
 ----------------

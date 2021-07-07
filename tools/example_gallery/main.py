@@ -123,6 +123,9 @@ def get_module_gallery(examples):
         gallery += f"{ind(1)}:img-top: {img_name}\n"
         gallery += f"{ind(1)}:img-top-cls: + d-flex align-self-center\n\n"
 
+        # Fix long names
+        if name.startswith("chapter"):
+            name = name.replace("chapter", "c")
 
         gallery += f"{ind(1)}`{name} <{url}>`_\n"
         gallery += f"{ind(1)}+++\n"

@@ -12,6 +12,9 @@ standalone binary (``pyside6-designer``) or embedded into the
 is described at
 `Using Qt Designer <http://doc.qt.io/qtcreator/creator-using-qt-designer.html>`_.
 
+.. image:: uifiles.png
+   :alt: Designer and the equivalent code
+
 The designs are stored in `.ui` files, which is an XML-based format. It will
 be converted to Python or C++ code populating a widget instance at project build
 time by the `pyside6-uic <https://doc.qt.io/qt-6/uic.html>`_ tool.

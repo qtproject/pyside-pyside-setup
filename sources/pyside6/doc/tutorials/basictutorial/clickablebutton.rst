@@ -88,3 +88,8 @@ Here is the complete code for this example:
     button.show()
     # Run the main Qt loop
     app.exec()
+
+After a few clicks, you will get something like this on your terminal:
+
+.. image:: clickablebutton.png
+   :alt: Clickable Button Example

@@ -139,3 +139,10 @@ Here is the complete code for this tutorial:
         form.show()
         # Run the main Qt loop
         sys.exit(app.exec())
+
+
+When you execute the code, and write down your name,
+the button will display messages on the terminal:
+
+.. image:: dialog.png
+   :alt: Simple Dialog Example
