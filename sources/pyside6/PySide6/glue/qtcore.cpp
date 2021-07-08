@@ -1714,6 +1714,11 @@ auto cppArg0 = PySide::pyPathToQString(%PYARG_1);
 auto cppArg1 = PySide::pyPathToQString(%PYARG_2);
 // @snippet qfile-path-2
 
+// @snippet qitemselection-add
+auto res = (*%CPPSELF) + cppArg0;
+%PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](res);
+// @snippet qitemselection-add
+
 // @snippet conversion-pystring-char
 char c = %CONVERTTOCPP[char](%in);
 %out = %OUTTYPE(c);

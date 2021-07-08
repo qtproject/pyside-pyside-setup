@@ -1564,12 +1564,22 @@
     <modify-function signature="beginResetModel()" allow-thread="yes"/>
     <modify-function signature="endResetModel()" allow-thread="yes"/>
   </object-type>
+
   <value-type name="QItemSelection">
     <include file-name="QList" location="global"/>
     <!-- Expose operator==, != inherited from QList, which the parser does
          not see due to the TMP expression of the return type. -->
     <add-function signature="operator==(const QItemSelection&amp;)" return-type="bool"/>
     <add-function signature="operator!=(const QItemSelection&amp;)" return-type="bool"/>
+    <!-- For some reason, the empty selection is not seen. Maybe related to the new [default]
+         tag in Qt6? -->
+    <declare-function signature="QItemSelection()" return-type="QItemSelection" />
+    <!-- The __add__ function creates a result list, instead of using the inherited type.
+         Solved for now by removing and re-adding with the correct type. -->
+    <modify-function signature="operator+(QList&lt;QItemSelectionRange&gt;)const" remove="all" />
+    <add-function signature="operator+(QItemSelection)" return-type="QItemSelection">
+        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qitemselection-add"/>
+    </add-function>
   </value-type>
 
   <object-type name="QItemSelectionModel">
