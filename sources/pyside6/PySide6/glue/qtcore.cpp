@@ -1704,6 +1704,11 @@ PyMem_Free(temp);
 %out = %OUTTYPE();
 // @snippet conversion-pynone
 
+// @snippet qitemselection-add
+auto res = (*%CPPSELF) + cppArg0;
+%PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](res);
+// @snippet qitemselection-add
+
 // @snippet conversion-pystring-char
 char c = %CONVERTTOCPP[char](%in);
 %out = %OUTTYPE(c);
