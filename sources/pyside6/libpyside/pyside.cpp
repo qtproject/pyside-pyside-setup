@@ -68,6 +68,7 @@
 #include <QtCore/QFileInfo>
 #include <QtCore/QSharedPointer>
 #include <QtCore/QStack>
+#include <QtCore/QThread>
 
 #include <algorithm>
 #include <cstring>
@@ -463,8 +464,10 @@ PyObject *getWrapperForQObject(QObject *cppSelf, SbkObjectType *sbk_type)
     // set and check if it's created after the set call
     QVariant existing = cppSelf->property(invalidatePropertyName);
     if (!existing.isValid()) {
-        QSharedPointer<any_t> shared_with_del(reinterpret_cast<any_t *>(cppSelf), invalidatePtr);
-        cppSelf->setProperty(invalidatePropertyName, QVariant::fromValue(shared_with_del));
+        if (cppSelf->thread() == QThread::currentThread()) {
+            QSharedPointer<any_t> shared_with_del(reinterpret_cast<any_t *>(cppSelf), invalidatePtr);
+            cppSelf->setProperty(invalidatePropertyName, QVariant::fromValue(shared_with_del));
+        }
         pyOut = reinterpret_cast<PyObject *>(Shiboken::BindingManager::instance().retrieveWrapper(cppSelf));
         if (pyOut) {
             Py_INCREF(pyOut);
