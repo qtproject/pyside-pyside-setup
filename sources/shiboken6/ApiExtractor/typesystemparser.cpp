@@ -1809,7 +1809,6 @@ TypeSystemTypeEntry *TypeSystemParser::parseRootElement(const ConditionalStreamR
                                                QXmlStreamAttributes *attributes)
 {
     TypeSystem::SnakeCase snakeCase = TypeSystem::SnakeCase::Unspecified;
-    bool classMethod = false;
 
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
@@ -1840,15 +1839,6 @@ TypeSystemTypeEntry *TypeSystemParser::parseRootElement(const ConditionalStreamR
             const auto snakeCaseOpt = snakeCaseFromAttribute(attribute.value());
             if (snakeCaseOpt.has_value()) {
                 snakeCase = snakeCaseOpt.value();
-            } else {
-                qCWarning(lcShiboken, "%s",
-                          qPrintable(msgInvalidAttributeValue(attribute)));
-            }
-        } else if (name == classmethodAttribute()) {
-            const auto attribute = attributes->takeAt(i);
-            const bool classMethodOpt = convertBoolean(attribute.value(), classmethodAttribute(), false);
-            if (classMethodOpt) {
-                classMethod = classMethodOpt;
             } else {
                 qCWarning(lcShiboken, "%s",
                           qPrintable(msgInvalidAttributeValue(attribute)));
