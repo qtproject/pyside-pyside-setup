@@ -24,6 +24,7 @@ set(ALL_OPTIONAL_MODULES
     OpenGLWidgets
     Positioning
     Location
+    NetworkAuth
     Qml
     Quick
     QuickControls2
