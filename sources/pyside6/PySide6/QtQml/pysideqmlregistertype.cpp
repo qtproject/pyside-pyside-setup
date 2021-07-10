@@ -302,6 +302,7 @@ static int propListTpInit(PyObject *self, PyObject *args, PyObject *kwds)
                                      &data->clear,
                                      &data->replace,
                                      &data->removeLast)) {
+        delete data;
         return -1;
     }
 
@@ -311,6 +312,7 @@ static int propListTpInit(PyObject *self, PyObject *args, PyObject *kwds)
     if (!PySequence_Contains(data->type->tp_mro, reinterpret_cast<PyObject *>(qobjectType))) {
         PyErr_Format(PyExc_TypeError, "A type inherited from %s expected, got %s.",
                      qobjectType->tp_name, data->type->tp_name);
+        delete data;
         return -1;
     }
 
@@ -321,6 +323,7 @@ static int propListTpInit(PyObject *self, PyObject *args, PyObject *kwds)
         (data->replace && data->replace != Py_None && !PyCallable_Check(data->replace)) ||
         (data->removeLast && data->removeLast != Py_None && !PyCallable_Check(data->removeLast))) {
         PyErr_Format(PyExc_TypeError, "Non-callable parameter given");
+        delete data;
         return -1;
     }
 
