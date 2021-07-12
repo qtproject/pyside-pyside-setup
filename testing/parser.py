@@ -131,7 +131,7 @@ def _parse_tests(test_log):
     for line in lines:
         match = re.match(pat, line, re.VERBOSE)
         if match:
-            idx, n, sharp, mod_name, much_stuff, code1, code2, tim = tup = match.groups()
+            idx, n, sharp, mod_name, much_stuff, code1, code2, tim = match.groups()
             # either code1 or code2 is None
             code = code1 or code2
             idx, n, sharp, code, tim = int(idx), int(n), int(sharp), code.lower(), float(tim)
@@ -144,7 +144,6 @@ def _parse_tests(test_log):
         # Use "if idx + 1 != item.idx or idx == 42:"
         if idx + 1 != item.idx:
             # The numbering is disrupted. Provoke an error in this line!
-            passed = False
             code = f"{code}, but lines are disrupted!"
             result[idx] = item._replace(passed=False,
                                         code=f"{item.code}, but lines are disrupted!",

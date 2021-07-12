@@ -43,7 +43,7 @@ import re
 import subprocess
 import inspect
 
-from textwrap import dedent, indent
+from textwrap import dedent
 from subprocess import TimeoutExpired
 
 # Get the dir path to the utils module

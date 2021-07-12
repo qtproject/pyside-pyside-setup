@@ -53,9 +53,11 @@ main = command.main
 # modify print so that it always flushes
 builtins.orig_print = builtins.print
 
+
 def print_flushed(*args, **kw):
     orig_print(*args, **kw)
     sys.stdout.flush()
+
 
 builtins.print = print_flushed
 
