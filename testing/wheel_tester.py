@@ -235,8 +235,8 @@ def test_nuitka(example):
     tmpdirname = tempfile.mkdtemp()
     try:
         os.chdir(tmpdirname)
-        cmd = [sys.executable, "-m", "nuitka", "--run", example]#, "--standalone"]
-        exit_code = run_process(cmd)
+        cmd = [sys.executable, "-m", "nuitka", "--run", example]  # , "--standalone"]
+        _ = run_process(cmd)
         result = True
     except RuntimeError as e:
         print(str(e))
@@ -314,7 +314,6 @@ def prepare_build_folder(src_path, build_folder_name):
 
 def try_build_examples():
     examples_dir = get_examples_dir()
-
 
     # Disabled PyInstaller until it supports PySide 6
     if False:
