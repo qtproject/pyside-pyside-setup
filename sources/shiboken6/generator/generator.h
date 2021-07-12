@@ -57,8 +57,6 @@ QT_END_NAMESPACE
 class PrimitiveTypeEntry;
 class ContainerTypeEntry;
 
-void verifyDirectoryFor(const QString &file);
-
 QString getClassTargetFullName(const AbstractMetaClass *metaClass, bool includePackageName = true);
 QString getClassTargetFullName(const AbstractMetaEnum &metaEnum, bool includePackageName = true);
 QString getClassTargetFullName(const AbstractMetaType &metaType, bool includePackageName = true);
