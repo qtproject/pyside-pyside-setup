@@ -65,14 +65,15 @@ class BuildLog(object):
     For simplicity and readability, the log entries are named tuples.
 
     """
+
     def __init__(self):
-        history_dir = os.path.join(script_dir, 'build_history')
+        history_dir = os.path.join(script_dir, "build_history")
         build_history = []
         for timestamp in os.listdir(history_dir):
             log_dir = os.path.join(history_dir, timestamp)
             if not os.path.isdir(log_dir):
                 continue
-            fpath = os.path.join(log_dir, 'build_dir.txt')
+            fpath = os.path.join(log_dir, "build_dir.txt")
             if not os.path.exists(fpath):
                 continue
             with open(fpath) as f:
@@ -86,10 +87,14 @@ class BuildLog(object):
                         build_dir = f_contents_split[0]
                         build_classifiers = ""
                 except IndexError:
-                    print(dedent(f"""
+                    print(
+                        dedent(
+                            f"""
                         Error: There was an issue finding the build dir and its
                         characteristics, in the following considered file: '{fpath}'
-                    """))
+                    """
+                        )
+                    )
                     sys.exit(1)
 
                 if not os.path.exists(build_dir):
@@ -120,10 +125,13 @@ class BuildLog(object):
                 continue
             lst.append(log_dir)
         if lst:
+
             def warn_problem(func, path, exc_info):
                 cls, ins, _ = exc_info
-                print(f"rmtree({func.__name__}) warning: problem with "
-                      f"{path}:\n   {cls.__name__}: {ins.args}")
+                print(
+                    f"rmtree({func.__name__}) warning: problem with "
+                    f"{path}:\n   {cls.__name__}: {ins.args}"
+                )
 
             lst.sort()
             log_dir = lst[-1]
@@ -150,20 +158,20 @@ class BuildLog(object):
     @property
     def classifiers(self):
         if not self.selected:
-            raise ValueError('+++ No build with the configuration found!')
+            raise ValueError("+++ No build with the configuration found!")
         # Python2 legacy: Correct 'linux2' to 'linux', recommended way.
-        platform = 'linux' if sys.platform.startswith('linux') else sys.platform
-        res = [platform, 'qt6']
+        platform = "linux" if sys.platform.startswith("linux") else sys.platform
+        res = [platform, "qt6"]
         if is_ci:
-            res.append('ci')
+            res.append("ci")
         if self.selected.build_classifiers:
             # Use classifier string encoded into build_dir.txt file.
-            res.extend(self.selected.build_classifiers.split('-'))
+            res.extend(self.selected.build_classifiers.split("-"))
         else:
             # the rest must be guessed from the given filename
             path = self.selected.build_dir
             base = os.path.basename(path)
-            res.extend(base.split('-'))
+            res.extend(base.split("-"))
         # add all the python and qt subkeys
         for entry in res:
             parts = entry.split(".")

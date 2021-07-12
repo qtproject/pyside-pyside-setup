@@ -62,8 +62,8 @@ class BlackList(object):
         lines = self.raw_data[:]
 
         def filtered_line(line):
-            if '#' in line:
-                line = line[line.index('#')]
+            if "#" in line:
+                line = line[line.index("#")]
             return line.split()
 
         # now put every bracketed line in a test
@@ -85,7 +85,7 @@ class BlackList(object):
             if is_test(fline):
                 break
             # we have a global section
-            name = ''
+            name = ""
             self.tests[name] = []
         for idx, line in enumerate(lines):
             fline = filtered_line(line)
