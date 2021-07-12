@@ -53,7 +53,7 @@ except NameError:
     this_file = sys.argv[0]
 this_file = os.path.abspath(this_file)
 this_dir = os.path.dirname(this_file)
-build_scripts_dir = os.path.abspath(os.path.join(this_dir, '../build_scripts'))
+build_scripts_dir = os.path.abspath(os.path.join(this_dir, "../build_scripts"))
 
 sys.path.append(build_scripts_dir)
 from utils import detect_clang
@@ -69,7 +69,7 @@ class TestRunner(object):
             self.logfile = os.path.join(log_dir, f"{project}.{index}.log")
         else:
             self.logfile = os.path.join(log_dir, f"{project}.log")
-        os.environ['CTEST_OUTPUT_ON_FAILURE'] = '1'
+        os.environ["CTEST_OUTPUT_ON_FAILURE"] = "1"
         self._setup_clang()
         self._setup()
 
@@ -78,10 +78,10 @@ class TestRunner(object):
             return
         clang_dir = detect_clang()
         if clang_dir[0]:
-            clang_bin_dir = os.path.join(clang_dir[0], 'bin')
-            path = os.environ.get('PATH')
+            clang_bin_dir = os.path.join(clang_dir[0], "bin")
+            path = os.environ.get("PATH")
             if clang_bin_dir not in path:
-                os.environ['PATH'] = clang_bin_dir + os.pathsep + path
+                os.environ["PATH"] = clang_bin_dir + os.pathsep + path
                 print(f"Adding {clang_bin_dir} as detected by {clang_dir[1]} to PATH")
 
     def _find_ctest_in_file(self, file_name):
@@ -99,11 +99,13 @@ class TestRunner(object):
                 # We have probably forgotten to build the tests.
                 # Give a nice error message with a shortened but exact path.
                 rel_path = os.path.relpath(file_name)
-                msg = dedent(f"""\n
+                msg = dedent(
+                    f"""\n
                     {'*' * 79}
                     **  ctest is not in '{rel_path}'.
                     *   Did you forget to build the tests with '--build-tests' in setup.py?
-                    """)
+                    """
+                )
                 raise RuntimeError(msg)
         # the ctest program is on the left to look_for
         assert line, f"Did not find {look_for}"
@@ -126,8 +128,9 @@ class TestRunner(object):
             path = os.path.join(self.test_dir, candidate)
             if os.path.exists(path):
                 return self._find_ctest_in_file(path)
-        raise RuntimeError("Cannot find any of the build system files "
-                           f"{', '.join(candidate_files)}.")
+        raise RuntimeError(
+            "Cannot find any of the build system files " f"{', '.join(candidate_files)}."
+        )
 
     def _setup(self):
         self.ctestCommand = self._find_ctest()
@@ -151,17 +154,20 @@ class TestRunner(object):
         # without a caret are interpreted as such which leads to weirdness.
         # Since we have all commands with explicit paths and don't use shell
         # commands, this should work fine.
-        print(dedent(f"""\
+        print(
+            dedent(
+                f"""\
             running {self.cmd}
                  in {self.test_dir}
-            """))
-        ctest_process = subprocess.Popen(self.cmd,
-                                         cwd=self.test_dir,
-                                         stdout=subprocess.PIPE,
-                                         stderr=subprocess.STDOUT)
+            """
+            )
+        )
+        ctest_process = subprocess.Popen(
+            self.cmd, cwd=self.test_dir, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+        )
 
         def py_tee(input, output, label):
-            '''
+            """
             A simple (incomplete) tee command in Python
 
             This script simply logs everything from input to output
@@ -176,7 +182,8 @@ class TestRunner(object):
 
             The special escape is for the case of an embedded file in
             the output.
-            '''
+            """
+
             def xprint(*args, **kw):
                 print(*args, file=output, **kw)
 
@@ -199,9 +206,7 @@ class TestRunner(object):
         tee_src = dedent(inspect.getsource(py_tee))
         tee_src = f"import sys\n{tee_src}\npy_tee(sys.stdin, sys.stdout, '{label}')"
         tee_cmd = (sys.executable, "-E", "-u", "-c", tee_src)
-        tee_process = subprocess.Popen(tee_cmd,
-                                       cwd=self.test_dir,
-                                       stdin=ctest_process.stdout)
+        tee_process = subprocess.Popen(tee_cmd, cwd=self.test_dir, stdin=ctest_process.stdout)
         try:
             comm = tee_process.communicate
             _ = comm(timeout=timeout)[0]

@@ -64,7 +64,7 @@ except NameError:
     this_file = sys.argv[0]
 this_file = os.path.abspath(this_file)
 this_dir = os.path.dirname(this_file)
-setup_script_dir = os.path.abspath(os.path.join(this_dir, '..'))
+setup_script_dir = os.path.abspath(os.path.join(this_dir, ".."))
 sys.path.append(setup_script_dir)
 
 from build_scripts.utils import find_files_using_glob
@@ -90,8 +90,9 @@ def find_executable(executable, command_line_value):
         paths = find_glob_in_path(executable)
         log.info(f"{executable} executables found in PATH: {paths}")
         if not paths:
-            raise RuntimeError(f"No {option_str} option was specified and no {executable} was "
-                               "found in PATH.")
+            raise RuntimeError(
+                f"No {option_str} option was specified and no {executable} was " "found in PATH."
+            )
         else:
             value = paths[0]
             log.info(f"Using {executable} found in PATH: {value}")
@@ -161,8 +162,9 @@ def try_install_wheels(wheels_dir, py_version):
         elif len(files) > 1:
             raise RuntimeError(f"More than one wheel found for specific {p} version.")
         else:
-            raise RuntimeError(f"No {p} wheels compatible with Python {py_version} found "
-                               f"for testing.")
+            raise RuntimeError(
+                f"No {p} wheels compatible with Python {py_version} found " f"for testing."
+            )
 
 
 def is_unix():
@@ -209,7 +211,7 @@ def raise_error_pyinstaller(msg):
     for line in run_process_output([sys.executable, "-m", "pip", "list"]):
         print(f"PyInstaller pip list:   {line}")
     print()
-    raise(RuntimeError(msg))
+    raise (RuntimeError(msg))
 
 
 def compile_using_pyinstaller():
@@ -324,8 +326,7 @@ def try_build_examples():
         src_path = os.path.join(examples_dir, "installer_test")
         prepare_build_folder(src_path, "pyinstaller")
         compile_using_pyinstaller()
-        run_compiled_script(os.path.join(src_path,
-                            "pyinstaller", "dist", "hello_app", "hello_app"))
+        run_compiled_script(os.path.join(src_path, "pyinstaller", "dist", "hello_app", "hello_app"))
 
     log.info("Attempting to build hello.py using Nuitka.")
     src_path = Path(examples_dir) / "installer_test"
@@ -359,9 +360,17 @@ def try_build_examples():
         with tempfile.TemporaryDirectory() as tmpdirname:
             src_path = Path(tmpdirname) / "pyi_test"
             pyi_script_dir = Path(setup_script_dir) / "sources" / "pyside6" / "PySide6" / "support"
-            execute_script(pyi_script_dir / "generate_pyi.py", "all", "--outpath", src_path,
-                                            "--feature", "snake_case", "true_property")
+            execute_script(
+                pyi_script_dir / "generate_pyi.py",
+                "all",
+                "--outpath",
+                src_path,
+                "--feature",
+                "snake_case",
+                "true_property",
+            )
             from PySide6 import __all__ as modules
+
             for modname in modules:
                 execute_script(src_path / f"{modname}.pyi")
 
@@ -381,17 +390,17 @@ def run_wheel_tests(install_wheels):
 
 
 if __name__ == "__main__":
-    parser = ArgumentParser(description="wheel_tester",
-                            formatter_class=RawTextHelpFormatter)
-    parser.add_argument('--no-install-wheels', '-n', action='store_true',
-                        help='Do not install wheels'
-                             ' (for developer builds with virtualenv)')
-    parser.add_argument("--qmake", type=str,
-                        help="Path to qmake")
-    parser.add_argument("--cmake", type=str,
-                        help="Path to cmake")
+    parser = ArgumentParser(description="wheel_tester", formatter_class=RawTextHelpFormatter)
+    parser.add_argument(
+        "--no-install-wheels",
+        "-n",
+        action="store_true",
+        help="Do not install wheels" " (for developer builds with virtualenv)",
+    )
+    parser.add_argument("--qmake", type=str, help="Path to qmake")
+    parser.add_argument("--cmake", type=str, help="Path to cmake")
     options = parser.parse_args()
-    QMAKE_PATH = find_executable('qmake', options.qmake)
-    CMAKE_PATH = find_executable('cmake', options.cmake)
+    QMAKE_PATH = find_executable("qmake", options.qmake)
+    CMAKE_PATH = find_executable("cmake", options.cmake)
 
     run_wheel_tests(not options.no_install_wheels)

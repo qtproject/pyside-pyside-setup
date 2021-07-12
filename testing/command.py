@@ -85,11 +85,10 @@ from .parser import TestParser
 
 # Should we repeat only failed tests?
 COIN_RERUN_FAILED_ONLY = True
-COIN_THRESHOLD = 3    # report error if >=
-COIN_TESTING = 5      # number of runs
+COIN_THRESHOLD = 3  # report error if >=
+COIN_TESTING = 5  # number of runs
 
-if (os.environ.get("COIN_RERUN_FAILED_ONLY", "1").lower() in
-        "0 f false n no".split()):
+if os.environ.get("COIN_RERUN_FAILED_ONLY", "1").lower() in "0 f false n no".split():
     COIN_RERUN_FAILED_ONLY = False
 
 
@@ -143,8 +142,10 @@ def test_project(project, args, blacklist, runs):
             if item.fatal:
                 fatal = item
         print()
-        print(f"Totals: {sum(r)} tests. "
-              f"{r[0]} passed, {r[1]} failed, {r[2]} skipped, {r[3]} blacklisted, {r[4]} bpassed.")
+        print(
+            f"Totals: {sum(r)} tests. "
+            f"{r[0]} passed, {r[1]} failed, {r[2]} skipped, {r[3]} blacklisted, {r[4]} bpassed."
+        )
         print()
         print(f"********* Finished testing of {project} *********")
         print()
@@ -164,38 +165,60 @@ def main():
     tested_projects_quoted = " ".join("'i'" for i in tested_projects)
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        description=dedent("""\
+        description=dedent(
+            """\
         Run the tests for some projects, default = {tested_projects_quoted}.
 
         Testing is now repeated up to {COIN_TESTING} times, and errors are
         only reported if they occur {COIN_THRESHOLD} or more times.
         The environment variable COIN_RERUN_FAILED_ONLY controls if errors
         are only repeated if there are errors. The default is "1".
-        """))
+        """
+        ),
+    )
     subparsers = parser.add_subparsers(dest="subparser_name")
 
     # create the parser for the "test" command
     parser_test = subparsers.add_parser("test")
     group = parser_test.add_mutually_exclusive_group(required=False)
-    blacklist_default = os.path.join(script_dir, 'build_history', 'blacklist.txt')
-    group.add_argument("--blacklist", "-b", type=argparse.FileType('r'),
-                       default=blacklist_default,
-                       help=f'a Qt blacklist file (default: {blacklist_default})')
-    parser_test.add_argument("--skip", action='store_true',
-                             help="skip the tests if they were run before")
-    parser_test.add_argument("--environ", nargs='+',
-                             help="use name=value ... to set environment variables")
-    parser_test.add_argument("--buildno", default=-1, type=int,
-                             help="use build number n (0-based), latest = -1 (default)")
-    parser_test.add_argument("--projects", nargs='+', type=str,
-                             default=tested_projects,
-                             choices=all_projects,
-                             help=f"use {tested_projects_quoted} (default) or other projects")
+    blacklist_default = os.path.join(script_dir, "build_history", "blacklist.txt")
+    group.add_argument(
+        "--blacklist",
+        "-b",
+        type=argparse.FileType("r"),
+        default=blacklist_default,
+        help=f"a Qt blacklist file (default: {blacklist_default})",
+    )
+    parser_test.add_argument(
+        "--skip", action="store_true", help="skip the tests if they were run before"
+    )
+    parser_test.add_argument(
+        "--environ", nargs="+", help="use name=value ... to set environment variables"
+    )
+    parser_test.add_argument(
+        "--buildno",
+        default=-1,
+        type=int,
+        help="use build number n (0-based), latest = -1 (default)",
+    )
+    parser_test.add_argument(
+        "--projects",
+        nargs="+",
+        type=str,
+        default=tested_projects,
+        choices=all_projects,
+        help=f"use {tested_projects_quoted} (default) or other projects",
+    )
     parser_getcwd = subparsers.add_parser("getcwd")
-    parser_getcwd.add_argument("filename", type=argparse.FileType('w'),
-                               help="write the build dir name into a file")
-    parser_getcwd.add_argument("--buildno", default=-1, type=int,
-                               help="use build number n (0-based), latest = -1 (default)")
+    parser_getcwd.add_argument(
+        "filename", type=argparse.FileType("w"), help="write the build dir name into a file"
+    )
+    parser_getcwd.add_argument(
+        "--buildno",
+        default=-1,
+        type=int,
+        help="use build number n (0-based), latest = -1 (default)",
+    )
     args = parser.parse_args()
 
     if hasattr(args, "buildno"):
@@ -238,14 +261,18 @@ def main():
             key, value = things
             os.environ[key] = value
 
-    print(dedent("""\
+    print(
+        dedent(
+            """\
         System:
           Platform={sys.__dict__["platform"]}
           Executable={sys.__dict__["executable"]}
           Version={sys.version.replace("\n", " ")}
           API version={sys.__dict__["api_version"]}
 
-        Environment:"""))
+        Environment:"""
+        )
+    )
     for key, value in sorted(os.environ.items()):
         print(f"  {key}={value}")
     print()
@@ -264,8 +291,10 @@ def main():
             q = list(map(lambda x, y: x + y, r, q))
 
     if len(args.projects) > 1:
-        print(f"All above projects: {sum(q)} tests. "
-              f"{q[0]} passed, {q[1]} failed, {q[2]} skipped, {q[3]} blacklisted, {q[4]} bpassed.")
+        print(
+            f"All above projects: {sum(q)} tests. "
+            f"{q[0]} passed, {q[1]} failed, {q[2]} skipped, {q[3]} blacklisted, {q[4]} bpassed."
+        )
         print()
 
     tot_res = OrderedDict()
@@ -347,11 +376,14 @@ def main():
         if fail_count == 1:
             raise ValueError(f"A test was not blacklisted and met the criterion {err_crit}")
         elif fail_count > 1:
-            raise ValueError(f"{fail_count} failures were not blacklisted "
-                             f"and met the criterion {err_crit}")
+            raise ValueError(
+                f"{fail_count} failures were not blacklisted " f"and met the criterion {err_crit}"
+            )
         print(f"No test met the error criterion {err_crit}")
     finally:
         print()
         print(f"Total time of whole Python script = {used_time:0.2f} sec")
         print()
+
+
 # eof

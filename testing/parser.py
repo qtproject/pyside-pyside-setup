@@ -80,7 +80,9 @@ _TEST_PAT_PRE = r"""
     ([0-9]+)                   #                         sharp
     :                          # colon symbol            ':'
     """
-_TEST_PAT = _TEST_PAT_PRE + r"""
+_TEST_PAT = (
+    _TEST_PAT_PRE
+    + r"""
     \s+                        # some WS
     ([\w-]+)                   #                         mod_name
     .*?                        # whatever (non greedy)
@@ -96,14 +98,16 @@ _TEST_PAT = _TEST_PAT_PRE + r"""
     \s*                        # any WS
     $                          # end
     """
+)
 
 # validation of our pattern:
 assert re.match(_TEST_PAT, _EXAMPLE.splitlines()[5], re.VERBOSE)
 assert len(re.match(_TEST_PAT, _EXAMPLE.splitlines()[5], re.VERBOSE).groups()) == 8
 assert len(re.match(_TEST_PAT, _EXAMPLE.splitlines()[7], re.VERBOSE).groups()) == 8
 
-TestResult = namedtuple("TestResult", "idx n sharp mod_name passed "
-                                      "code time fatal rich_result".split())
+TestResult = namedtuple(
+    "TestResult", "idx n sharp mod_name passed " "code time fatal rich_result".split()
+)
 
 
 def _parse_tests(test_log):
@@ -125,7 +129,7 @@ def _parse_tests(test_log):
         match = re.match(pat, line, re.VERBOSE)
         if match and line.split()[-1] != "sec":
             # don't change the number of lines
-            lines[idx:idx + 2] = [line.rstrip() + lines[idx + 1], ""]
+            lines[idx : idx + 2] = [line.rstrip() + lines[idx + 1], ""]
 
     pat = _TEST_PAT
     for line in lines:
@@ -145,9 +149,9 @@ def _parse_tests(test_log):
         if idx + 1 != item.idx:
             # The numbering is disrupted. Provoke an error in this line!
             code = f"{code}, but lines are disrupted!"
-            result[idx] = item._replace(passed=False,
-                                        code=f"{item.code}, but lines are disrupted!",
-                                        fatal=True)
+            result[idx] = item._replace(
+                passed=False, code=f"{item.code}, but lines are disrupted!", fatal=True
+            )
             break
     return result
 
