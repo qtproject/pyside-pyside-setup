@@ -316,36 +316,6 @@
     }
     </template>
 
-    <template name="cppvector_to_pylist_conversion">
-    %INTYPE::size_type vectorSize = %in.size();
-    PyObject *%out = PyList_New(Py_ssize_t(vectorSize));
-    for (%INTYPE::size_type idx = 0; idx &lt; vectorSize; ++idx) {
-        %INTYPE_0 cppItem(%in.at(idx));
-        PyList_SET_ITEM(%out, idx, %CONVERTTOPYTHON[%INTYPE_0](cppItem));
-    }
-    return %out;
-    </template>
-
-    <template name="pyseq_to_cppvector_conversion">
-    // PYSIDE-795: Turn all sequences into iterables.
-    if (PySequence_Check(%in)) {
-        int vectorSize = PySequence_Size(%in);
-        %out.reserve(vectorSize);
-    }
-    Shiboken::AutoDecRef it(PyObject_GetIter(%in));
-    PyObject *(*iternext)(PyObject *) = *Py_TYPE(it)->tp_iternext;
-    for (;;) {
-        Shiboken::AutoDecRef pyItem(iternext(it));
-        if (pyItem.isNull()) {
-            if (PyErr_Occurred() &amp;&amp; PyErr_ExceptionMatches(PyExc_StopIteration))
-                PyErr_Clear();
-            break;
-        }
-        %OUTTYPE_0 cppItem = %CONVERTTOCPP[%OUTTYPE_0](pyItem);
-        %out.push_back(cppItem);
-    }
-    </template>
-
     <template name="checkPyCapsuleOrPyCObject_func">
     static bool checkPyCapsuleOrPyCObject(PyObject* pyObj)
     {
