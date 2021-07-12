@@ -35,6 +35,8 @@
     qRegisterMetaType&lt;PySideCPP2::PySideLong>("PySideLong");
     </inject-code>
 
+    <object-type name="ContainerTest"/>
+
     <namespace-type name="PySideCPP">
         <object-type name="TestObjectWithNamespace"/>
         <object-type name="TestObject2WithNamespace">

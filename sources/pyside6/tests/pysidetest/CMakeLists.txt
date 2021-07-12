@@ -17,6 +17,7 @@ add_definitions(-DRXX_ALLOCATOR_INIT_0)
 find_package(Qt${QT_MAJOR_VERSION}Widgets)
 
 set(pysidetest_SRC
+containertest.cpp
 flagstest.cpp
 testobject.cpp
 testview.cpp
@@ -24,6 +25,7 @@ hiddenobject.cpp
 )
 
 set(testbinding_SRC
+${CMAKE_CURRENT_BINARY_DIR}/testbinding/containertest_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/testbinding/flagsnamespace_classforenum_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/testbinding/testobject_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/testbinding/intvalue_wrapper.cpp

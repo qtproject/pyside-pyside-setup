@@ -252,6 +252,7 @@ type_map.update({
     "QList": ArrayLikeVariable,
     "qlonglong": int,
     "QMap": typing.Dict,
+    "QMultiHash": typing.Dict,
     "QMultiMap": typing.Dict,
     "QPair": typing.Tuple,
     "qptrdiff": int,

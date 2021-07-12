@@ -348,6 +348,59 @@
       }
     </template>
 
+    <template name="cppmultimap_to_pymap_conversion">
+      PyObject *%out = PyDict_New();
+      for (auto it = %in.cbegin(), end = %in.cend(); it != end; ) {
+          const auto &amp;key = it.key();
+          PyObject *pyKey = %CONVERTTOPYTHON[%INTYPE_0](key);
+          %INTYPE::const_iterator keyEnd = %in.upperBound(key);
+          const auto count = Py_ssize_t(std::distance(it, keyEnd));
+          PyObject *pyValues = PyList_New(count);
+          Py_ssize_t idx = 0;
+          for ( ; it != keyEnd; ++it, ++idx) {
+              const auto &amp;cppItem = it.value();
+              PyList_SET_ITEM(pyValues, idx, %CONVERTTOPYTHON[%INTYPE_1](cppItem));
+          }
+          PyDict_SetItem(%out, pyKey, pyValues);
+          Py_DECREF(pyKey);
+      }
+      return %out;
+    </template>
+
+    <template name="cppmultihash_to_pymap_conversion">
+      PyObject *%out = PyDict_New();
+      for (auto kit = %in.keyBegin(), end = %in.keyEnd(); kit != end; ++kit) {
+          const auto &amp;key = *kit;
+          PyObject *pyKey = %CONVERTTOPYTHON[%INTYPE_0](key);
+          auto range = %in.equal_range(key);
+          const auto count = Py_ssize_t(std::distance(range.first, range.second));
+          PyObject *pyValues = PyList_New(count);
+          Py_ssize_t idx = 0;
+          for (auto it = range.first; it != range.second; ++it, ++idx) {
+              const auto &amp;cppItem = it.value();
+              PyList_SET_ITEM(pyValues, idx, %CONVERTTOPYTHON[%INTYPE_1](cppItem));
+          }
+          PyDict_SetItem(%out, pyKey, pyValues);
+          Py_DECREF(pyKey);
+      }
+      return %out;
+    </template>
+
+    <template name="pydict_to_cppmultimap_conversion">
+      PyObject *key;
+      PyObject *values;
+      Py_ssize_t pos = 0;
+      while (PyDict_Next(%in, &amp;pos, &amp;key, &amp;values)) {
+          %OUTTYPE_0 cppKey = %CONVERTTOCPP[%OUTTYPE_0](key);
+          const Py_ssize_t size = PySequence_Size(values);
+          for (Py_ssize_t i = 0; i &lt; size; ++i) {
+              Shiboken::AutoDecRef value(PySequence_GetItem(values, i));
+              %OUTTYPE_1 cppValue = %CONVERTTOCPP[%OUTTYPE_1](value);
+              %out.insert(cppKey, cppValue);
+          }
+      }
+    </template>
+
     <template name="pydatetime_importandcheck_function">
         static bool PyDateTime_ImportAndCheck(PyObject *pyIn)
         {

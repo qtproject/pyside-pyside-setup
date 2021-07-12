@@ -472,6 +472,23 @@
         </target-to-native>
     </conversion-rule>
   </container-type>
+
+  <container-type name="QMultiHash" type="multi-hash">
+    <include file-name="QMultiHash" location="global"/>
+    <!-- Include to make enum flags work. -->
+    <include file-name="pysideqflags.h" location="global"/>
+    <conversion-rule>
+        <native-to-target>
+            <insert-template name="cppmultihash_to_pymap_conversion"/>
+        </native-to-target>
+        <target-to-native>
+            <add-conversion type="PyDict">
+                <insert-template name="pydict_to_cppmultimap_conversion"/>
+            </add-conversion>
+        </target-to-native>
+    </conversion-rule>
+  </container-type>
+
   <container-type name="QMap" type="map">
     <include file-name="QMap" location="global"/>
     <conversion-rule>
@@ -489,11 +506,11 @@
     <include file-name="QMultiMap" location="global"/>
     <conversion-rule>
         <native-to-target>
-            <insert-template name="cppmap_to_pymap_conversion"/>
+            <insert-template name="cppmultimap_to_pymap_conversion"/>
         </native-to-target>
         <target-to-native>
             <add-conversion type="PyDict">
-                <insert-template name="pydict_to_cppmap_conversion"/>
+                <insert-template name="pydict_to_cppmultimap_conversion"/>
             </add-conversion>
         </target-to-native>
     </conversion-rule>

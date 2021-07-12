@@ -1054,7 +1054,15 @@ QString ShibokenGenerator::cpythonCheckFunction(AbstractMetaType metaType,
         } else if (type == ContainerTypeEntry::MapContainer
             || type == ContainerTypeEntry::MultiMapContainer
             || type == ContainerTypeEntry::PairContainer) {
-            QString pyType = (type == ContainerTypeEntry::PairContainer) ? QLatin1String("Pair") : QLatin1String("Dict");
+
+            QString pyType;
+            if (type == ContainerTypeEntry::PairContainer)
+                pyType = u"Pair"_qs;
+            else if (type == ContainerTypeEntry::MultiMapContainer)
+                pyType = u"MultiDict"_qs;
+            else
+                pyType = u"Dict"_qs;
+
             const AbstractMetaType &firstType = metaType.instantiations().constFirst();
             const AbstractMetaType &secondType = metaType.instantiations().constLast();
             if (firstType.isPointerToWrapperType() && secondType.isPointerToWrapperType()) {

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2020 The Qt Company Ltd.
+** Copyright (C) 2021 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the test suite of Qt for Python.
@@ -26,14 +26,37 @@
 **
 ****************************************************************************/
 
-#ifndef PYSIDETEST_GLOBAL_H
-#define PYSIDETEST_GLOBAL_H
-
-// PySide global.h file
 #include "containertest.h"
-#include "testobject.h"
-#include "testview.h"
-#include "flagstest.h"
-#include "hiddenobject.h"
 
-#endif // PYSIDETEST_GLOBAL_H
+ContainerTest::ContainerTest() = default;
+
+QMultiMap<int, QString> ContainerTest::createMultiMap()
+{
+    static const QMultiMap<int, QString>
+        result{{1, u"v1"_qs},
+                {2, u"v2_1"_qs}, {2, u"v2_2"_qs},
+                {3, u"v3"_qs},
+                {4, u"v4_1"_qs}, {4, u"v4_2"_qs}};
+    return result;
+}
+
+QMultiMap<int, QString> ContainerTest::passThroughMultiMap(const QMultiMap<int, QString> &in)
+{
+    return in;
+}
+
+QMultiHash<int, QString> ContainerTest::createMultiHash()
+{
+    static const QMultiHash<int, QString>
+        result{{1, u"v1"_qs},
+               {2, u"v2_1"_qs}, {2, u"v2_2"_qs},
+               {3, u"v3"_qs},
+               {4, u"v4_1"_qs}, {4, u"v4_2"_qs}};
+    return result;
+
+}
+
+QMultiHash<int, QString> ContainerTest::passThroughMultiHash(const QMultiHash<int, QString> &in)
+{
+    return in;
+}

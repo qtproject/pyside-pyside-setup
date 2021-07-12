@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2020 The Qt Company Ltd.
+** Copyright (C) 2021 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the test suite of Qt for Python.
@@ -26,14 +26,26 @@
 **
 ****************************************************************************/
 
-#ifndef PYSIDETEST_GLOBAL_H
-#define PYSIDETEST_GLOBAL_H
+#pragma once
 
-// PySide global.h file
-#include "containertest.h"
-#include "testobject.h"
-#include "testview.h"
-#include "flagstest.h"
-#include "hiddenobject.h"
+#include "pysidetest_macros.h"
 
-#endif // PYSIDETEST_GLOBAL_H
+#include <QtCore/QObject>
+#include <QtCore/QMap>
+#include <QtCore/QMultiMap>
+#include <QtCore/QMultiHash>
+#include <QtCore/QString>
+
+class PYSIDETEST_API ContainerTest
+{
+public:
+    ContainerTest();
+
+    static QMultiMap<int, QString> createMultiMap();
+
+    static QMultiMap<int, QString> passThroughMultiMap(const QMultiMap<int, QString> &in);
+
+    static QMultiHash<int, QString> createMultiHash();
+
+    static QMultiHash<int, QString> passThroughMultiHash(const QMultiHash<int, QString> &in);
+};

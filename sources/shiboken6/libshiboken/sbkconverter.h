@@ -305,10 +305,23 @@ LIBSHIBOKEN_API bool convertiblePairTypes(const SbkConverter *firstConverter, bo
 /// Returns true if a Python dictionary can be converted to a C++ hash or map.
 LIBSHIBOKEN_API bool checkDictTypes(PyTypeObject *keyType, PyTypeObject *valueType, PyObject *pyIn);
 
+/// Returns true if a Python dictionary can be converted to a C++ multi hash/map.
+/// The Python dictionary is expected to contain lists of values
+bool checkMultiDictTypes(PyTypeObject *keyType, PyTypeObject *valueType,
+                         PyObject *pyIn);
+
 /// Returns true if a Python dictionary can be converted to a C++ hash or map.
 LIBSHIBOKEN_API bool convertibleDictTypes(const SbkConverter *keyConverter, bool keyCheckExact,
                                           const SbkConverter *valueConverter, bool valueCheckExact,
                                           PyObject *pyIn);
+
+/// Returns true if a Python dictionary can be converted to a C++ multi hash/map.
+/// The Python dictionary is expected to contain lists of values
+LIBSHIBOKEN_API bool convertibleMultiDictTypes(const SbkConverter *keyConverter,
+                                               bool keyCheckExact,
+                                               const SbkConverter *valueConverter,
+                                               bool valueCheckExact,
+                                               PyObject *pyIn);
 
 /// Returns the Python type object associated with the given \p converter.
 LIBSHIBOKEN_API PyTypeObject *getPythonTypeObject(const SbkConverter *converter);
