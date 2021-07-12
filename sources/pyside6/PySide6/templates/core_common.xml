@@ -288,7 +288,7 @@
     PyObject *%out = PyList_New(Py_ssize_t(%in.size()));
     Py_ssize_t idx = 0;
     for (auto it = %in.cbegin(), end = %in.cend(); it != end; ++it, ++idx) {
-        %INTYPE_0 cppItem(*it);
+        const auto &amp;cppItem = *it;
         PyList_SET_ITEM(%out, idx, %CONVERTTOPYTHON[%INTYPE_0](cppItem));
     }
     return %out;
@@ -356,8 +356,8 @@
     <template name="cppmap_to_pymap_conversion">
       PyObject *%out = PyDict_New();
       for (auto it = %in.cbegin(), end = %in.cend(); it != end; ++it) {
-          %INTYPE_0 key = it.key();
-          %INTYPE_1 value = it.value();
+          const auto &amp;key = it.key();
+          const auto &amp;value = it.value();
           PyObject *pyKey = %CONVERTTOPYTHON[%INTYPE_0](key);
           PyObject *pyValue = %CONVERTTOPYTHON[%INTYPE_1](value);
           PyDict_SetItem(%out, pyKey, pyValue);
