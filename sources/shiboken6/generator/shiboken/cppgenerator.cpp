@@ -6083,8 +6083,6 @@ bool CppGenerator::finishGeneration()
     QString moduleFileName(outputDirectory() + QLatin1Char('/') + subDirectoryForPackage(packageName()));
     moduleFileName += QLatin1Char('/') + moduleName().toLower() + QLatin1String("_module_wrapper.cpp");
 
-
-    verifyDirectoryFor(moduleFileName);
     FileOut file(moduleFileName);
 
     TextStream &s = file.stream;

@@ -496,17 +496,6 @@ bool Generator::shouldGenerate(const AbstractMetaClass *metaClass) const
     return shouldGenerateTypeEntry(metaClass->typeEntry());
 }
 
-void verifyDirectoryFor(const QString &file)
-{
-    QDir dir = QFileInfo(file).absoluteDir();
-    if (!dir.exists()) {
-        if (!dir.mkpath(dir.absolutePath())) {
-            qCWarning(lcShiboken, "Unable to create directory '%s'",
-                      qPrintable(QDir::toNativeSeparators(dir.absolutePath())));
-        }
-    }
-}
-
 const ApiExtractorResult &Generator::api() const
 {
     return m_d->api;
