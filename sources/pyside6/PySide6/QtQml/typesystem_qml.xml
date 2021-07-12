@@ -151,7 +151,12 @@
     <object-type name="QQmlAbstractUrlInterceptor">
         <enum-type name="DataType"/>
     </object-type>
-    <object-type name="QQmlApplicationEngine"/>
+    <object-type name="QQmlApplicationEngine">
+        <modify-function signature="load(const QString &amp;)">
+            <modify-argument index="1"><replace-type modified-type="PyPathLike"/></modify-argument>
+            <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qfile-path-1"/>
+        </modify-function>
+    </object-type>
     <object-type name="QQmlComponent">
         <enum-type name="CompilationMode"/>
         <enum-type name="Status"/>
