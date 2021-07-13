@@ -38,8 +38,8 @@
 **
 ****************************************************************************/
 
-import QtQuick 2.0
-import PersonModel 1.0
+import QtQuick
+import PersonModel
 
 ListView {
     width: 100

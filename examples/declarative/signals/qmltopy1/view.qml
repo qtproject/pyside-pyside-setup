@@ -39,7 +39,7 @@
 ****************************************************************************/
 
 
-import QtQuick 2.0
+import QtQuick
 
 import examples.signals.qmltopy1 1.0
 

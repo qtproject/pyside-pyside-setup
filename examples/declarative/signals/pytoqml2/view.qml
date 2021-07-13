@@ -38,8 +38,8 @@
 **
 ****************************************************************************/
 
-import QtQuick 2.0
-import QtQml 2.0
+import QtQuick
+import QtQml
 
 import examples.signals.pytoqml2 1.0
 

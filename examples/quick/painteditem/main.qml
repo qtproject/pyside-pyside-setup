@@ -38,8 +38,8 @@
 **
 ****************************************************************************/
 
-import QtQuick 2.0
-import TextBalloonPlugin 1.0
+import QtQuick
+import TextBalloonPlugin
 
 Item {
     height: 480

@@ -45,7 +45,7 @@ import QtQuick.Controls
 import QtQuick.Window
 import QtQuick.Controls.Material
 
-import io.qt.textproperties 1.0
+import io.qt.textproperties
 
 ApplicationWindow {
     id: page
