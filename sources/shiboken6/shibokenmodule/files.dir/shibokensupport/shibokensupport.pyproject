@@ -1,0 +1,16 @@
+{
+    "files": ["__init__.py",
+              "feature.py",
+              "fix-complaints.py",
+              "signature/__init__.py",
+              "signature/errorhandler.py",
+              "signature/importhandler.py",
+              "signature/layout.py",
+              "signature/lib/__init__.py",
+              "signature/lib/enum_sig.py",
+              "signature/lib/pyi_generator.py",
+              "signature/lib/tool.py",
+              "signature/loader.py",
+              "signature/mapping.py",
+              "signature/parser.py"]
+}
