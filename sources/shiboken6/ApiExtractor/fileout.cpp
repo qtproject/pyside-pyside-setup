@@ -61,7 +61,10 @@ FileOut::FileOut(QString n) :
 
 FileOut::~FileOut()
 {
-    Q_ASSERT(m_isDone);
+    if (!m_isDone) {
+        qCWarning(lcShiboken).noquote().nospace() << __FUNCTION__
+            << " file " << m_name << " not written.";
+    }
 }
 
 static QList<int> lcsLength(const QByteArrayList &a, const QByteArrayList &b)
