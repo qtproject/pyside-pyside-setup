@@ -516,6 +516,11 @@ QString pyStringToQString(PyObject *str)
 // PySide-1499: Provide an efficient, correct PathLike interface
 QString pyPathToQString(PyObject *path)
 {
+    // For empty constructors path can be nullptr
+    // fallback to an empty QString in that case.
+    if (!path)
+        return QString();
+
     // str or bytes pass through
     if (PyUnicode_Check(path) || PyBytes_Check(path))
         return pyStringToQString(path);
