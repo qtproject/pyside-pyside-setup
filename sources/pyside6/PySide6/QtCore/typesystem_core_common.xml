@@ -405,7 +405,8 @@
   </container-type>
 
   <!-- FIXME: Which one is it going to be? -->
-  <container-type name="QList" type="list">
+  <container-type name="QList" type="list"
+                  opaque-containers="int:QIntList;QPoint:QPointList;QPointF:QPointFList">
     <include file-name="QList" location="global"/>
     <declare-function signature="append(T)" return-type="void"/>
     <declare-function signature="insert(qsizetype,T)" return-type="void"/>

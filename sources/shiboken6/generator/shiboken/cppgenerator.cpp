@@ -1218,7 +1218,8 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
                 writeConversionRule(s, func, TypeSystem::NativeCode, QLatin1String(CPP_RETURN_VAR));
             } else if (!func->injectedCodeHasReturnValueAttribution(TypeSystem::NativeCode)) {
                 writePythonToCppTypeConversion(s, func->type(), QLatin1String(PYTHON_RETURN_VAR),
-                                               QLatin1String(CPP_RETURN_VAR), func->implementingClass());
+                                               QLatin1String(CPP_RETURN_VAR), func->implementingClass(), {},
+                                               PythonToCppTypeConversionFlag::DisableOpaqueContainers);
             }
         }
     }
@@ -2578,7 +2579,8 @@ void CppGenerator::writePythonToCppTypeConversion(TextStream &s,
                                                   const QString &pyIn,
                                                   const QString &cppOut,
                                                   const AbstractMetaClass *context,
-                                                  const QString &defaultValue) const
+                                                  const QString &defaultValue,
+                                                  PythonToCppTypeConversionFlags flags) const
 {
     const TypeEntry *typeEntry = type.typeEntry();
     if (typeEntry->isCustom() || typeEntry->isVarargs())
@@ -2590,6 +2592,9 @@ void CppGenerator::writePythonToCppTypeConversion(TextStream &s,
     const bool isEnum = typeEntry->isEnum();
     const bool isFlags = typeEntry->isFlags();
     const bool treatAsPointer = type.valueTypeWithCopyConstructorOnlyPassed();
+    const bool maybeOpaqueContainer =
+        !flags.testFlag(PythonToCppTypeConversionFlag::DisableOpaqueContainers)
+        && type.generateOpaqueContainer();
     bool isPointerOrObjectType = (type.isObjectType() || type.isPointer())
         && !type.isUserPrimitive() && !type.isExtendedCppPrimitive()
         && !isEnum && !isFlags;
@@ -2603,8 +2608,9 @@ void CppGenerator::writePythonToCppTypeConversion(TextStream &s,
 
     // For implicit conversions or containers, either value or pointer conversion
     // may occur. An implicit conversion uses value conversion whereas the object
-    // itself uses pointer conversion.
-    const bool valueOrPointer = mayHaveImplicitConversion;
+    // itself uses pointer conversion. For containers, the PyList/container
+    // conversion is by value whereas opaque containers use pointer conversion.
+    const bool valueOrPointer = mayHaveImplicitConversion || maybeOpaqueContainer;
 
     const AbstractMetaTypeList &nestedArrayTypes = type.nestedArrayTypes();
     const bool isCppPrimitiveArray = !nestedArrayTypes.isEmpty()
@@ -2665,7 +2671,7 @@ void CppGenerator::writePythonToCppTypeConversion(TextStream &s,
 
     QString pythonToCppCall = pythonToCppFunc + u'(' + pyIn + u", &"_qs
                               + cppOut + u')';
-    if (!mayHaveImplicitConversion) {
+    if (!valueOrPointer) {
         // pythonToCppFunc may be 0 when less parameters are passed and
         // the defaultValue takes effect.
         if (!defaultValue.isEmpty())
@@ -3306,7 +3312,8 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s, const Abst
     for (int i = 0; i < containerType.instantiations().count(); ++i) {
         const AbstractMetaType &type = containerType.instantiations().at(i);
         QString typeName = getFullTypeName(type);
-        if (type.shouldDereferenceArgument()) {
+        // Containers of opaque containers are not handled here.
+        if (type.shouldDereferenceArgument() && !type.generateOpaqueContainer()) {
             for (int pos = 0; ; ) {
                 const QRegularExpressionMatch match = convertToCppRegEx().match(code, pos);
                 if (!match.hasMatch())
@@ -4126,7 +4133,7 @@ void CppGenerator::writeEnumConverterInitialization(TextStream &s, const TypeEnt
         writeEnumConverterInitialization(s, static_cast<const EnumTypeEntry *>(enumType)->flags());
 }
 
-void CppGenerator::writeContainerConverterInitialization(TextStream &s, const AbstractMetaType &type) const
+QString CppGenerator::writeContainerConverterInitialization(TextStream &s, const AbstractMetaType &type) const
 {
     QByteArray cppSignature = QMetaObject::normalizedSignature(type.cppSignature().toUtf8());
     s << "// Register converter for type '" << cppSignature << "'.\n";
@@ -4150,7 +4157,9 @@ void CppGenerator::writeContainerConverterInitialization(TextStream &s, const Ab
         cppSignature.remove(0, sizeof("const ") / sizeof(char) - 1);
         s << "Shiboken::Conversions::registerConverterName(" << converter << ", \"" << cppSignature << "\");\n";
     }
-    writeAddPythonToCppConversion(s, converterObject(type), toCpp, isConv);
+    const QString converterObj = converterObject(type);
+    writeAddPythonToCppConversion(s, converterObj, toCpp, isConv);
+    return converterObj;
 }
 
 void CppGenerator::writeSmartPointerConverterInitialization(TextStream &s, const AbstractMetaType &type) const
@@ -4723,6 +4732,22 @@ void CppGenerator::writeGetterFunction(TextStream &s,
             && !fieldType.isPointer();
 
     QString cppField = cppFieldAccess(metaField, context);
+
+    if (metaField.generateOpaqueContainer()
+        && fieldType.generateOpaqueContainer()) {
+        const auto *containerTypeEntry =
+            static_cast<const ContainerTypeEntry *>(fieldType.typeEntry());
+        const auto *instantiationTypeEntry =
+            fieldType.instantiations().constFirst().typeEntry();
+        const QString creationFunc =
+            u"create"_qs + containerTypeEntry->opaqueContainerName(instantiationTypeEntry->name());
+        s << "PyObject *" << creationFunc << '(' << fieldType.cppSignature() << "*);\n"
+            << "PyObject *pyOut = " << creationFunc
+            << "(&" << cppField << ");\nPy_IncRef(pyOut);\n"
+            << "return pyOut;\n" << outdent << "}\n";
+        return;
+    }
+
     if (newWrapperSameObject) {
         cppField.prepend(u"&(");
         cppField.append(u')');
@@ -6143,6 +6168,10 @@ bool CppGenerator::finishGeneration()
 #include <algorithm>
 #include <signature.h>
 )";
+
+    if (!instantiatedContainers().isEmpty())
+        s << "#include <sbkcontainer.h>\n#include <sbkstaticstrings.h>\n";
+
     if (usePySideExtensions()) {
         s << includeQDebug;
         s << R"(#include <pyside.h>
@@ -6269,12 +6298,17 @@ bool CppGenerator::finishGeneration()
         s << '\n';
     }
 
+    QHash<AbstractMetaType, OpaqueContainerData> opaqueContainers;
     const auto &containers = instantiatedContainers();
     if (!containers.isEmpty()) {
         s << "// Container Type converters.\n\n";
         for (const AbstractMetaType &container : containers) {
             s << "// C++ to Python conversion for container type '" << container.cppSignature() << "'.\n";
             writeContainerConverterFunctions(s, container);
+            if (container.generateOpaqueContainer()) {
+                opaqueContainers.insert(container,
+                                        writeOpaqueContainerConverterFunctions(s, container));
+            }
         }
         s << '\n';
     }
@@ -6358,9 +6392,23 @@ bool CppGenerator::finishGeneration()
     if (!containers.isEmpty()) {
         s << '\n';
         for (const AbstractMetaType &container : containers) {
-            writeContainerConverterInitialization(s, container);
+            const QString converterObj = writeContainerConverterInitialization(s, container);
+            const auto it = opaqueContainers.constFind(container);
+            if (it !=  opaqueContainers.constEnd()) {
+                writeSetPythonToCppPointerConversion(s, converterObj,
+                                                     it.value().pythonToConverterFunctionName,
+                                                     it.value().converterCheckFunctionName);
+            }
             s << '\n';
         }
+    }
+
+    if (!opaqueContainers.isEmpty()) {
+        s << "\n// Opaque container type registration\n"
+            << "PyObject *ob_type{};\n";
+        for (const auto &d : opaqueContainers)
+            s << d.registrationCode;
+        s << '\n';
     }
 
     if (!smartPointersList.isEmpty()) {

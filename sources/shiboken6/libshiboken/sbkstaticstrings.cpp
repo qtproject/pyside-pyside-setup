@@ -111,5 +111,6 @@ STATIC_STRING_IMPL(new_, "__new__")
 STATIC_STRING_IMPL(objclass, "__objclass__")
 STATIC_STRING_IMPL(signature, "__signature__")
 STATIC_STRING_IMPL(weakrefoffset, "__weakrefoffset__")
+STATIC_STRING_IMPL(opaque_container, "__opaque_container__")
 } // namespace PyMagicName
 } // namespace Shiboken

@@ -1150,6 +1150,11 @@ QString ShibokenGenerator::cpythonIsConvertibleFunction(AbstractMetaType metaTyp
     }
 
     QString result = QLatin1String("Shiboken::Conversions::");
+    if (metaType.generateOpaqueContainer()) {
+        result += u"pythonToCppReferenceConversion("_qs
+                  + converterObject(metaType) + u", "_qs;
+        return result;
+    }
     if (metaType.isWrapperType()) {
         if (metaType.isPointer() || metaType.isValueTypeWithCopyConstructorOnly())
             result += u"pythonToCppPointerConversion"_qs;

@@ -456,7 +456,8 @@ container-type
         <typesystem>
             <container-type name="..."
                 since="..."
-                type ="..." />
+                type ="..."
+                opaque-containers ="..." />
         </typesystem>
 
     The **name** attribute is the fully qualified C++ class name. The **type**
@@ -466,6 +467,10 @@ container-type
     Some types were deprecated in 6.2: *string-list*, *linked-list*, *vector*,
     *stack* and *queue* are equivalent to *list*. *hash* and *multi-hash*
     are equivalent to *map* and *multi-map*, respectively.
+
+    The *optional* **opaque-containers** attribute specifies a semi-colon separated
+    list of colon separated pairs of instantiation and name for
+    :ref:`opaque-containers`.
 
     The *optional*  **since** value is used to specify the API version of this container.
 

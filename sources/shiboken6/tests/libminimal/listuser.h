@@ -69,6 +69,10 @@ struct LIBMINIMAL_API ListUser
     std::list<std::list<int> > callCreateListOfIntLists(int num) { return createListOfIntLists(num); }
     virtual int sumListOfIntLists(std::list<std::list<int> > intListList);
     int callSumListOfIntLists(std::list<std::list<int> > intListList) { return sumListOfIntLists(intListList); }
+
+    void setStdIntList(const std::list<int> &l);
+
+    std::list<int> m_stdIntList;
 };
 
 #endif // LISTUSER_H

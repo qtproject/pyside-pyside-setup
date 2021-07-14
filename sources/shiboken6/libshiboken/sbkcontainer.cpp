@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2019 The Qt Company Ltd.
+** Copyright (C) 2021 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -37,52 +37,16 @@
 **
 ****************************************************************************/
 
-#ifndef SBKSTATICSTRINGS_H
-#define SBKSTATICSTRINGS_H
-
-#include "sbkpython.h"
-#include "shibokenmacros.h"
+#include "sbkcontainer.h"
+#include "sbkstaticstrings.h"
 
 namespace Shiboken
 {
-// Some often-used strings
-namespace PyName
+bool isOpaqueContainer(PyObject *o)
 {
-LIBSHIBOKEN_API PyObject *co_name();
-LIBSHIBOKEN_API PyObject *dumps();
-LIBSHIBOKEN_API PyObject *fget();
-LIBSHIBOKEN_API PyObject *fset();
-LIBSHIBOKEN_API PyObject *f_code();
-LIBSHIBOKEN_API PyObject *f_lineno();
-LIBSHIBOKEN_API PyObject *im_func();
-LIBSHIBOKEN_API PyObject *im_self();
-LIBSHIBOKEN_API PyObject *loads();
-LIBSHIBOKEN_API PyObject *multi();
-LIBSHIBOKEN_API PyObject *name();
-LIBSHIBOKEN_API PyObject *result();
-LIBSHIBOKEN_API PyObject *select_id();
-LIBSHIBOKEN_API PyObject *underscore();
-LIBSHIBOKEN_API PyObject *value();
-LIBSHIBOKEN_API PyObject *values();
-} // namespace PyName
+    return o != nullptr && o != Py_None
+        && PyDict_Contains(o->ob_type->tp_dict,
+                           Shiboken::PyMagicName::opaque_container()) == 1;
 
-namespace PyMagicName
-{
-LIBSHIBOKEN_API PyObject *class_();
-LIBSHIBOKEN_API PyObject *dict();
-LIBSHIBOKEN_API PyObject *doc();
-LIBSHIBOKEN_API PyObject *ecf();
-LIBSHIBOKEN_API PyObject *file();
-LIBSHIBOKEN_API PyObject *func();
-LIBSHIBOKEN_API PyObject *get();
-LIBSHIBOKEN_API PyObject *members();
-LIBSHIBOKEN_API PyObject *module();
-LIBSHIBOKEN_API PyObject *name();
-LIBSHIBOKEN_API PyObject *property_methods();
-LIBSHIBOKEN_API PyObject *qualname();
-LIBSHIBOKEN_API PyObject *self();
-LIBSHIBOKEN_API PyObject *opaque_container();
-} // namespace PyMagicName
-} // namespace Shiboken
-
-#endif // SBKSTATICSTRINGS_H
+}
+} // Shiboken

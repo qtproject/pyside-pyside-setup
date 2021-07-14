@@ -48,6 +48,7 @@ debugfreehook.cpp
 gilstate.cpp
 helper.cpp
 sbkarrayconverter.cpp
+sbkcontainer.cpp
 sbkconverter.cpp
 sbkenum.cpp
 sbkfeature_base.cpp
@@ -130,6 +131,7 @@ install(FILES
         gilstate.h
         helper.h
         sbkarrayconverter.h
+        sbkcontainer.h
         sbkconverter.h
         sbkenum.h
         sbkenum_p.h

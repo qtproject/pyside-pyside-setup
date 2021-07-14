@@ -247,6 +247,8 @@ public:
     /// copy constructor only is passed as value or const-ref and thus
     /// no default value can be constructed.
     bool valueTypeWithCopyConstructorOnlyPassed() const;
+    /// Returns whether to generate an opaque container for the type
+    bool generateOpaqueContainer() const;
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &debug) const;
@@ -265,6 +267,9 @@ inline bool operator==(const AbstractMetaType &t1, const AbstractMetaType &t2)
 { return t1.equals(t2); }
 inline bool operator!=(const AbstractMetaType &t1, const AbstractMetaType &t2)
 { return !t1.equals(t2); }
+
+inline size_t qHash(const AbstractMetaType &t, size_t seed)
+{ return qHash(t.typeEntry(), seed); }
 
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug d, const AbstractMetaType &at);

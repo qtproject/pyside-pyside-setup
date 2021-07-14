@@ -87,6 +87,16 @@ bool AbstractMetaField::isModifiedRemoved(int types) const
     return false;
 }
 
+bool AbstractMetaField::generateOpaqueContainer() const
+{
+    const FieldModificationList &mods = modifications();
+    for (const FieldModification &mod : mods) {
+        if (mod.isOpaqueContainer())
+            return true;
+    }
+    return false;
+}
+
 const AbstractMetaType &AbstractMetaField::type() const
 {
     return d->m_type;

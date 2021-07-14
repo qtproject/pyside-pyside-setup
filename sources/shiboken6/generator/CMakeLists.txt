@@ -3,6 +3,7 @@ project(shibokengenerator)
 set(shiboken6_SRC
 generator.cpp
 shiboken/cppgenerator.cpp
+shiboken/cppgenerator_container.cpp
 shiboken/headergenerator.cpp
 shiboken/overloaddata.cpp
 shiboken/shibokengenerator.cpp

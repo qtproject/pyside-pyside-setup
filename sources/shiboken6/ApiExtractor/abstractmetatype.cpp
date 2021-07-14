@@ -768,7 +768,8 @@ bool AbstractMetaType::shouldDereferenceArgument() const
 {
     return isWrapperPassedByReference()
         || valueTypeWithCopyConstructorOnlyPassed()
-        || isObjectTypeUsedAsValueType();
+        || isObjectTypeUsedAsValueType()
+        || generateOpaqueContainer();
 }
 
 bool AbstractMetaType::isCppIntegralPrimitive() const
@@ -848,6 +849,36 @@ AbstractMetaType AbstractMetaType::fromTypeEntry(const TypeEntry *typeEntry)
 AbstractMetaType AbstractMetaType::fromAbstractMetaClass(const AbstractMetaClass *metaClass)
 {
     return fromTypeEntry(metaClass->typeEntry());
+}
+
+bool AbstractMetaType::generateOpaqueContainer() const
+{
+    if (!isContainer())
+        return false;
+    auto *containerTypeEntry = static_cast<const ContainerTypeEntry *>(typeEntry());
+    auto kind = containerTypeEntry->containerKind();
+    if (kind != ContainerTypeEntry::ListContainer)
+        return false;
+    const auto &instantation =  d->m_instantiations.constFirst();
+    if (instantation.referenceType() != NoReference)
+        return false;
+    const QString signature = instantation.cppSignature();
+
+    bool result = false;
+    auto *instTypEntry = instantation.typeEntry();
+    switch (instTypEntry->type()) {
+    case TypeEntry::PrimitiveType:
+    case TypeEntry::FlagsType:
+    case TypeEntry::EnumType:
+    case TypeEntry::BasicValueType:
+    case TypeEntry::ObjectType:
+    case TypeEntry::CustomType:
+        result = containerTypeEntry->generateOpaqueContainer(signature);
+        break;
+    default:
+        break;
+    }
+    return result;
 }
 
 #ifndef QT_NO_DEBUG_STREAM

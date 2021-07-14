@@ -1610,6 +1610,9 @@ TypedefEntry::TypedefEntry(TypedefEntryPrivate *d) :
 class ContainerTypeEntryPrivate : public ComplexTypeEntryPrivate
 {
 public:
+    using OpaqueContainer = ContainerTypeEntry::OpaqueContainer;
+    using OpaqueContainers = ContainerTypeEntry::OpaqueContainers;
+
     ContainerTypeEntryPrivate(const QString &entryName,
                               ContainerTypeEntry::ContainerKind containerKind,
                               const QVersionNumber &vr,
@@ -1619,6 +1622,15 @@ public:
     {
     }
 
+    OpaqueContainers::const_iterator findOpaqueContainer(const QString &instantiation) const
+    {
+        return std::find_if(m_opaqueContainers.cbegin(), m_opaqueContainers.cend(),
+                            [&instantiation](const OpaqueContainer &r) {
+                                return r.instantiation == instantiation;
+                            });
+    }
+
+    OpaqueContainers m_opaqueContainers;
     ContainerTypeEntry::ContainerKind m_containerKind;
 };
 
@@ -1634,6 +1646,36 @@ ContainerTypeEntry::ContainerKind ContainerTypeEntry::containerKind() const
 {
     S_D(const ContainerTypeEntry);
     return d->m_containerKind;
+}
+
+const ContainerTypeEntry::OpaqueContainers &ContainerTypeEntry::opaqueContainers() const
+{
+    S_D(const ContainerTypeEntry);
+    return d->m_opaqueContainers;
+}
+
+void ContainerTypeEntry::addOpaqueContainer(OpaqueContainer r)
+{
+    S_D(ContainerTypeEntry);
+    // Fix to match AbstractMetaType::signature() which is used for matching
+    // "Foo*" -> "Foo *"
+    const auto asteriskPos = r.instantiation.indexOf(u'*');
+    if (asteriskPos > 0 && !r.instantiation.at(asteriskPos - 1).isSpace())
+        r.instantiation.insert(asteriskPos, u' ');
+    d->m_opaqueContainers.append(r);
+}
+
+bool ContainerTypeEntry::generateOpaqueContainer(const QString &instantiation) const
+{
+    S_D(const ContainerTypeEntry);
+    return d->findOpaqueContainer(instantiation) != d->m_opaqueContainers.cend();
+}
+
+QString ContainerTypeEntry::opaqueContainerName(const QString &instantiation) const
+{
+    S_D(const ContainerTypeEntry);
+    const auto it = d->findOpaqueContainer(instantiation);
+    return it != d->m_opaqueContainers.cend() ? it->name : QString{};
 }
 
 TypeEntry *ContainerTypeEntry::clone() const
@@ -2215,6 +2257,12 @@ void ContainerTypeEntry::formatDebug(QDebug &debug) const
 
     ComplexTypeEntry::formatDebug(debug);
     debug << ", type=" << d->m_containerKind << '"';
+    if (!d->m_opaqueContainers.isEmpty()) {
+        debug << ", opaque-containers=[";
+        for (const auto &r : d->m_opaqueContainers)
+            debug << r.instantiation << "->" << r.name << ',';
+        debug << ']';
+    }
 }
 
 void SmartPointerTypeEntry::formatDebug(QDebug &debug) const

@@ -413,6 +413,9 @@ public:
     bool isRemoved() const;
     void setRemoved(bool r);
 
+    bool isOpaqueContainer() const;
+    void setOpaqueContainer(bool r);
+
     TypeSystem::SnakeCase snakeCase() const;
     void setSnakeCase(TypeSystem::SnakeCase s);
 

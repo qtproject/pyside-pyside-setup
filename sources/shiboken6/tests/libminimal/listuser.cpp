@@ -119,3 +119,7 @@ ListUser::sumListOfIntLists(std::list<std::list<int> > intListList)
     return total;
 }
 
+void ListUser::setStdIntList(const std::list<int> &l)
+{
+    m_stdIntList = l;
+}

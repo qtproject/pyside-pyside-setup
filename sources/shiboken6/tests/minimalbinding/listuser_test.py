@@ -39,7 +39,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from shiboken_paths import init_paths
 init_paths()
 
-from minimal import ListUser, Val, Obj
+from minimal import ListUser, Val, Obj, StdIntList
 
 
 class ExtListUser(ListUser):
@@ -320,6 +320,30 @@ class ListOfIntListConversionTest(unittest.TestCase):
         lst = [range(4)] * 4
         self.assertEqual(lu.sumListOfIntLists(lst), sum([sum(line) for line in [range(4)] * 4]) * 2)
         self.assertEqual(lu.callSumListOfIntLists(lst), sum([sum(line) for line in [range(4)] * 4]) * 2)
+
+    def testOpaqueContainer(self):
+        lu = ListUser()
+
+        # Set via Python
+        python_list = [1,2]
+        lu.setStdIntList(python_list)
+        self.assertEqual(len(lu.m_stdIntList), 2)
+        self.assertEqual(lu.m_stdIntList[0], 1)
+        self.assertEqual(lu.m_stdIntList[1], 2)
+
+        # Set via C++
+        cpp_list = StdIntList()
+        cpp_list.append(3)
+        cpp_list.append(4)
+        lu.setStdIntList(cpp_list)
+        self.assertEqual(len(lu.m_stdIntList), 2)
+        self.assertEqual(lu.m_stdIntList[0], 3)
+        self.assertEqual(lu.m_stdIntList[1], 4)
+
+        # Access field directly via reference
+        lu.m_stdIntList.append(5)
+        self.assertEqual(len(lu.m_stdIntList), 3)
+        self.assertEqual(lu.m_stdIntList[2], 5)
 
 
 if __name__ == '__main__':

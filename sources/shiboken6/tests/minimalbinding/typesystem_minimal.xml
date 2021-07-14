@@ -17,7 +17,8 @@
         </conversion-rule>
     </primitive-type>
 
-    <container-type name="std::list" type="list">
+    <container-type name="std::list" type="list"
+                    opaque-containers="int:StdIntList">
         <include file-name="list" location="global"/>
         <conversion-rule>
             <native-to-target>
@@ -47,7 +48,9 @@
     <value-type name="Val">
         <enum-type name="ValEnum"/>
     </value-type>
-    <value-type name="ListUser"/>
+    <value-type name="ListUser">
+        <modify-field name="m_stdIntList" opaque-container="yes"/>
+    </value-type>
     <value-type name="MinBoolUser"/>
 
     <container-type name="std::vector" type="vector">

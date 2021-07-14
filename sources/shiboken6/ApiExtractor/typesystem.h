@@ -640,6 +640,13 @@ class ContainerTypeEntry : public ComplexTypeEntry
 {
     Q_GADGET
 public:
+    struct OpaqueContainer // Generate an opaque container for an instantiation under name
+    {
+        QString instantiation;
+        QString name;
+    };
+    using OpaqueContainers = QList<OpaqueContainer>;
+
     enum ContainerKind {
         ListContainer,
         SetContainer,
@@ -653,6 +660,11 @@ public:
                                 const QVersionNumber &vr, const TypeEntry *parent);
 
     ContainerKind containerKind() const;
+
+    const OpaqueContainers &opaqueContainers() const;
+    void addOpaqueContainer(OpaqueContainer r);
+    bool generateOpaqueContainer(const QString &instantiation) const;
+    QString opaqueContainerName(const QString &instantiation) const;
 
     TypeEntry *clone() const override;
 

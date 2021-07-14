@@ -95,6 +95,7 @@ static inline QString renameAttribute() { return QStringLiteral("rename"); }
 static inline QString readAttribute() { return QStringLiteral("read"); }
 static inline QString targetLangNameAttribute() { return QStringLiteral("target-lang-name"); }
 static inline QString writeAttribute() { return QStringLiteral("write"); }
+static inline QString opaqueContainerFieldAttribute() { return QStringLiteral("opaque-container"); }
 static inline QString replaceAttribute() { return QStringLiteral("replace"); }
 static inline QString toAttribute() { return QStringLiteral("to"); }
 static inline QString signatureAttribute() { return QStringLiteral("signature"); }
@@ -1359,6 +1360,21 @@ PrimitiveTypeEntry *
     return type;
 }
 
+// "int:QList_int;QString:QList_QString"
+static bool parseOpaqueContainers(QStringView s, ContainerTypeEntry *cte)
+{
+    const auto entries = s.split(u';');
+    for (const auto &entry : entries) {
+        const auto values = entry.split(u':');
+        if (values.size() != 2)
+            return false;
+        QString instantiation = values.at(0).trimmed().toString();
+        QString name = values.at(1).trimmed().toString();
+        cte->addOpaqueContainer({instantiation, name});
+    }
+    return true;
+}
+
 ContainerTypeEntry *
     TypeSystemParser::parseContainerTypeEntry(const ConditionalStreamReader &reader,
                                      const QString &name, const QVersionNumber &since,
@@ -1382,6 +1398,19 @@ ContainerTypeEntry *
                                         since, currentParentTypeEntry());
     if (!applyCommonAttributes(reader, type, attributes))
         return nullptr;
+
+    for (int i = attributes->size() - 1; i >= 0; --i) {
+        const auto name = attributes->at(i).qualifiedName();
+        if (name == u"opaque-containers") {
+            const auto attribute = attributes->takeAt(i);
+            if (!parseOpaqueContainers(attribute.value(), type)) {
+                m_error = u"Error parsing the opaque container attribute: \""_qs
+                          + attribute.value().toString() + u"\"."_qs;
+                return nullptr;
+            }
+        }
+    }
+
     return type;
 }
 
@@ -2219,6 +2248,9 @@ bool TypeSystemParser::parseModifyField(const ConditionalStreamReader &,
             fm.setName(attributes->takeAt(i).value().toString());
         } else if (name == removeAttribute()) {
             fm.setRemoved(convertRemovalAttribute(attributes->takeAt(i).value()));
+        } else if (name == opaqueContainerFieldAttribute()) {
+            fm.setOpaqueContainer(convertBoolean(attributes->takeAt(i).value(),
+                                                 opaqueContainerFieldAttribute(), false));
         }  else if (name == readAttribute()) {
             fm.setReadable(convertBoolean(attributes->takeAt(i).value(), readAttribute(), true));
         } else if (name == writeAttribute()) {

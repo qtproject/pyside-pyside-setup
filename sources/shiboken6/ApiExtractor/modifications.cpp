@@ -108,6 +108,7 @@ public:
     bool m_readable = true;
     bool m_writable = true;
     bool m_removed = false;
+    bool m_opaqueContainer = false;
     TypeSystem::SnakeCase snakeCase = TypeSystem::SnakeCase::Unspecified;
 };
 
@@ -179,6 +180,17 @@ void FieldModification::setRemoved(bool r)
 {
     if (d->m_removed != r)
         d->m_removed = r;
+}
+
+bool FieldModification::isOpaqueContainer() const
+{
+    return d->m_opaqueContainer;
+}
+
+void FieldModification::setOpaqueContainer(bool r)
+{
+    if (d->m_opaqueContainer != r)
+        d->m_opaqueContainer = r;
 }
 
 TypeSystem::SnakeCase FieldModification::snakeCase() const

@@ -57,6 +57,7 @@ public:
     FieldModificationList modifications() const;
 
     bool isModifiedRemoved(int types = TypeSystem::All) const;
+    bool generateOpaqueContainer() const;
 
     const AbstractMetaType &type() const;
     void setType(const AbstractMetaType &type);

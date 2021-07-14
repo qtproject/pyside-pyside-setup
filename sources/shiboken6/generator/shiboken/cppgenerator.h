@@ -32,6 +32,7 @@
 #include "shibokengenerator.h"
 #include "abstractmetalang_enums.h"
 
+#include <QtCore/QFlags>
 #include <QtCore/QSharedPointer>
 
 class OverloadDataNode;
@@ -43,6 +44,11 @@ class OverloadDataRootNode;
 class CppGenerator : public ShibokenGenerator
 {
 public:
+    enum class PythonToCppTypeConversionFlag {
+        DisableOpaqueContainers = 0x1
+    };
+    Q_DECLARE_FLAGS(PythonToCppTypeConversionFlags, PythonToCppTypeConversionFlag)
+
     CppGenerator();
 
     const char *name() const override { return "Source generator"; }
@@ -91,6 +97,19 @@ private:
 
     void writeContainerConverterFunctions(TextStream &s,
                                           const AbstractMetaType &containerType) const;
+
+    struct OpaqueContainerData
+    {
+        QString name;
+        QString checkFunctionName;
+        QString converterCheckFunctionName;
+        QString pythonToConverterFunctionName;
+        QString registrationCode;
+    };
+
+    OpaqueContainerData
+        writeOpaqueContainerConverterFunctions(TextStream &s,
+                                               const AbstractMetaType &containerType) const;
 
     void writeSmartPointerConverterFunctions(TextStream &s,
                                              const AbstractMetaType &smartPointerType) const;
@@ -176,7 +195,8 @@ private:
                                         const QString &pyIn,
                                         const QString &cppOut,
                                         const AbstractMetaClass *context = nullptr,
-                                        const QString &defaultValue = QString()) const;
+                                        const QString &defaultValue = {},
+                                        PythonToCppTypeConversionFlags = {}) const;
 
     /// Writes the conversion rule for arguments of regular and virtual methods.
     void writeConversionRule(TextStream &s, const AbstractMetaFunctionCPtr &func,
@@ -386,7 +406,7 @@ private:
                                                       const CustomConversion *customConversion);
     static void writeEnumConverterInitialization(TextStream &s, const TypeEntry *enumType);
     static void writeEnumConverterInitialization(TextStream &s, const AbstractMetaEnum &metaEnum);
-    void writeContainerConverterInitialization(TextStream &s, const AbstractMetaType &type) const;
+    QString writeContainerConverterInitialization(TextStream &s, const AbstractMetaType &type) const;
     void writeSmartPointerConverterInitialization(TextStream &s, const AbstractMetaType &ype) const;
     static void writeExtendedConverterInitialization(TextStream &s, const TypeEntry *externalType,
                                                      const AbstractMetaClassCList &conversions);
@@ -466,5 +486,7 @@ private:
         QString m_savedErrorCode;
     };
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(CppGenerator::PythonToCppTypeConversionFlags)
 
 #endif // CPPGENERATOR_H

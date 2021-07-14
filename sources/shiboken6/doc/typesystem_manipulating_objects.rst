@@ -109,6 +109,8 @@ Using Snippets From External Files
 
     will be extracted.
 
+.. _modify-field:
+
 modify-field
 ^^^^^^^^^^^^
 
@@ -123,6 +125,7 @@ modify-field
                  write="true | false"
                  read="true | false"
                  remove="true | false"
+                 opaque-container = "yes | no"
                  snake-case="yes | no | both" />
          </object-type>
 
@@ -135,6 +138,10 @@ modify-field
 
     The  *optional* ``rename`` attribute can be used to change the name of the
     given field in the generated target language API.
+
+    The *optional* ``opaque-container`` attribute specifies whether
+    an opaque container should be returned on read access
+    (see :ref:`opaque-containers`).
 
     The *optional* **snake-case** attribute allows for overriding the value
     specified on the class entry or **typesystem** element.
