@@ -3100,11 +3100,24 @@ void CppGenerator::writeCppToPythonFunction(TextStream &s, const QString &code, 
         << ensureEndl << outdent << "}\n";
 }
 
-static void replaceCppToPythonVariables(QString &code, const QString &typeName)
+static QString writeCppInRef(const QString &typeName, bool constRef)
 {
-    const QString line = QLatin1String("auto &cppInRef = *reinterpret_cast<")
-        + typeName + QLatin1String(" *>(const_cast<void *>(cppIn));");
-    CodeSnipAbstract::prependCode(&code, line);
+    QString result;
+    QTextStream str(&result);
+    if (constRef)
+        str << "const ";
+    str << "auto &cppInRef = *reinterpret_cast<";
+    if (constRef)
+        str << "const ";
+    str << typeName << " *>("
+        << (constRef ? "cppIn" : "const_cast<void *>(cppIn)") << ");";
+    return result;
+}
+
+static void replaceCppToPythonVariables(QString &code, const QString &typeName,
+                                        bool constRef = false)
+{
+    CodeSnipAbstract::prependCode(&code, writeCppInRef(typeName, constRef));
     code.replace(QLatin1String("%INTYPE"), typeName);
     code.replace(QLatin1String("%OUTTYPE"), QLatin1String("PyObject *"));
     code.replace(QLatin1String("%in"), QLatin1String("cppInRef"));
@@ -3114,7 +3127,9 @@ static void replaceCppToPythonVariables(QString &code, const QString &typeName)
 void CppGenerator::writeCppToPythonFunction(TextStream &s, const CustomConversion *customConversion) const
 {
     QString code = customConversion->nativeToTargetConversion();
-    replaceCppToPythonVariables(code, getFullTypeName(customConversion->ownerType()));
+    auto *ownerType = customConversion->ownerType();
+    const bool constRef = !ownerType->isPrimitive(); // PyCapsule needs a non-const ref
+    replaceCppToPythonVariables(code, getFullTypeName(ownerType), constRef);
     writeCppToPythonFunction(s, code, fixedCppTypeName(customConversion->ownerType()));
 }
 void CppGenerator::writeCppToPythonFunction(TextStream &s, const AbstractMetaType &containerType) const
@@ -3139,7 +3154,7 @@ void CppGenerator::writeCppToPythonFunction(TextStream &s, const AbstractMetaTyp
             typeName = QLatin1String("const ") + typeName;
         code.replace(QString::fromLatin1("%INTYPE_%1").arg(i), typeName);
     }
-    replaceCppToPythonVariables(code, getFullTypeNameWithoutModifiers(containerType));
+    replaceCppToPythonVariables(code, getFullTypeNameWithoutModifiers(containerType), true);
     processCodeSnip(code);
     writeCppToPythonFunction(s, code, fixedCppTypeName(containerType));
 }
