@@ -180,15 +180,10 @@ int PySide::qmlRegisterSingletonType(PyObject *pyObj, const char *uri, int versi
     const QMetaObject *metaObject = nullptr;
 
     if (isQObject) {
-        static PyTypeObject *qobjectType = Conversions::getPythonTypeObject("QObject*");
-        assert(qobjectType);
-
         PyTypeObject *pyObjType = reinterpret_cast<PyTypeObject *>(pyObj);
-        if (!PySequence_Contains(pyObjType->tp_mro, reinterpret_cast<PyObject *>(qobjectType))) {
-            PyErr_Format(PyExc_TypeError, "A type inherited from %s expected, got %s.",
-                         qobjectType->tp_name, pyObjType->tp_name);
+
+        if (!isQObjectDerived(pyObjType, true))
             return -1;
-        }
 
         // If we don't have a callback we'll need the pyObj to stay allocated indefinitely
         if (!hasCallback)
@@ -269,6 +264,55 @@ int PySide::qmlRegisterSingletonType(PyObject *pyObj, const char *uri, int versi
                 return *val;
             };
     }
+
+    return QQmlPrivate::qmlregister(QQmlPrivate::SingletonRegistration, &type);
+}
+
+int PySide::qmlRegisterSingletonInstance(PyObject *pyObj, const char *uri, int versionMajor,
+                                         int versionMinor, const char *qmlName,
+                                         PyObject *instanceObject)
+{
+    using namespace Shiboken;
+
+    static PyTypeObject *qobjectType = Conversions::getPythonTypeObject("QObject*");
+    assert(qobjectType);
+
+    // Check if the Python Type inherit from QObject
+    PyTypeObject *pyObjType = reinterpret_cast<PyTypeObject *>(pyObj);
+
+    if (!isQObjectDerived(pyObjType, true))
+        return -1;
+
+    // Check if the instance object derives from QObject
+    PyTypeObject *typeInstanceObject = instanceObject->ob_type;
+
+    if (!isQObjectDerived(typeInstanceObject, true))
+        return -1;
+
+    // Convert the instanceObject (PyObject) into a QObject
+    QObject *instanceQObject = reinterpret_cast<QObject*>(
+            Object::cppPointer(reinterpret_cast<SbkObject*>(instanceObject), qobjectType));
+
+    // Create Singleton Functor to pass the QObject to the Type registration step
+    // similarly to the case when we have a callback
+    QQmlPrivate::SingletonFunctor registrationFunctor;
+    registrationFunctor.m_object = instanceQObject;
+
+    const QMetaObject *metaObject = PySide::retrieveMetaObject(pyObjType);
+    Q_ASSERT(metaObject);
+
+    QQmlPrivate::RegisterSingletonType type;
+    type.structVersion = 0;
+
+    type.uri = uri;
+    type.version = QTypeRevision::fromVersion(versionMajor, versionMinor);
+    type.typeName = qmlName;
+    type.instanceMetaObject = metaObject;
+
+    // FIXME: Fix this to assign new type ids each time.
+    type.typeId = QMetaType(QMetaType::QObjectStar);
+    type.qObjectApi = registrationFunctor;
+
 
     return QQmlPrivate::qmlregister(QQmlPrivate::SingletonRegistration, &type);
 }

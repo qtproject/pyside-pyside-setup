@@ -31,6 +31,8 @@ import Singletons 1.0
 
 Item {
     Component.onCompleted: {
-        SingletonQObjectCallback.data += SingletonQObjectNoCallback.data + SingletonQJSValue.data
+        SingletonQObjectCallback.data += SingletonQObjectNoCallback.data
+            + SingletonQJSValue.data
+            + SingletonInstance.data;
     }
 }

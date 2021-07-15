@@ -105,6 +105,13 @@ PYSIDE_API void initQApp();
 /// Return the size in bytes of a type that inherits QObject.
 PYSIDE_API std::size_t getSizeOfQObject(SbkObjectType *type);
 
+/* Check if a PyTypeObject or its bases contains a QObject
+ * \param pyType is the PyTypeObject to check
+ * \param raiseError controls if a TypeError is raised when an object does not
+ *        inherits from QObject
+ */
+PYSIDE_API bool isQObjectDerived(PyTypeObject *pyType, bool raiseError);
+
 typedef void (*CleanupFunction)(void);
 
 /**

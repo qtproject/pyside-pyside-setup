@@ -656,6 +656,17 @@ bool registerInternalQtConf()
     return isRegistered;
 }
 
+bool isQObjectDerived(PyTypeObject *pyType, bool raiseError) {
+    static PyTypeObject *qobjectType = Shiboken::Conversions::getPythonTypeObject("QObject*");
+
+    if (!PyType_IsSubtype(pyType, qobjectType)) {
+        if (raiseError)
+            PyErr_Format(PyExc_TypeError, "A type inherited from %s expected, got %s.",
+                         qobjectType->tp_name, pyType->tp_name);
+        return false;
+    }
+    return true;
+}
 
 
 } //namespace PySide

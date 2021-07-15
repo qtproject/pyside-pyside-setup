@@ -47,6 +47,7 @@
 #include "pysideqenum.h"
 
 #include <shiboken.h>
+#include <pyside.h>
 
 #include <QtCore/QByteArray>
 #include <QtCore/QObject>
@@ -466,7 +467,6 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
     // existing connections.
     const PyObject *mro = type->tp_mro;
     const Py_ssize_t basesCount = PyTuple_GET_SIZE(mro);
-    PyTypeObject *qObjectType = Conversions::getPythonTypeObject("QObject*");
 
     std::vector<PyTypeObject *> basesToCheck;
     // Prepend the actual type that we are parsing.
@@ -478,7 +478,7 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
     for (Py_ssize_t i = 0; i < basesCount; ++i) {
         auto baseType = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, i));
         if (baseType != sbkObjTypeF && baseType != baseObjType
-            && PyType_IsSubtype(baseType, qObjectType) == 0) {
+            && !PySide::isQObjectDerived(baseType, false)) {
             basesToCheck.push_back(baseType);
         }
     }

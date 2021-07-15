@@ -71,7 +71,7 @@ int qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor, int vers
                     const char *qmlName, const char *noCreationReason = nullptr, bool creatable = true);
 
 /**
- * PySide implementation of qmlRegisterType<T> function.
+ * PySide implementation of qmlRegisterSingletonType<T> function.
  *
  * \param pyObj Python type to be registered.
  * \param uri QML element uri.
@@ -83,6 +83,20 @@ int qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor, int vers
  */
 int qmlRegisterSingletonType(PyObject *pyObj,const char *uri, int versionMajor, int versionMinor, const char *qmlName,
                              PyObject *callback, bool isQObject, bool hasCallback);
+
+/**
+ * PySide implementation of qmlRegisterSingletonInstance<T> function.
+ *
+ * \param pyObj Python type to be registered.
+ * \param uri QML element uri.
+ * \param versionMajor QML component major version.
+ * \param versionMinor QML component minor version.
+ * \param qmlName QML element name
+ * \param instanceObject singleton object to be registered.
+ * \return the metatype id of the registered type.
+ */
+int qmlRegisterSingletonInstance(PyObject *pyObj, const char *uri, int versionMajor,
+                                 int versionMinor, const char *qmlName, PyObject *instanceObject);
 
 
 /**

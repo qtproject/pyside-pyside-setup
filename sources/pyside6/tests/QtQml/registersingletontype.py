@@ -39,7 +39,7 @@ from helper.helper import quickview_errorstring
 
 from PySide6.QtCore import Property, Signal, QTimer, QUrl, QObject
 from PySide6.QtGui import QGuiApplication
-from PySide6.QtQml import qmlRegisterSingletonType
+from PySide6.QtQml import qmlRegisterSingletonType, qmlRegisterSingletonInstance
 from PySide6.QtQuick import QQuickView
 
 finalResult = 0
@@ -80,6 +80,16 @@ class TestQmlSupport(unittest.TestCase):
 
         qmlRegisterSingletonType('Singletons', 1, 0, 'SingletonQJSValue', singletonQJSValueCallback)
 
+        # Accepts only QObject derived types
+        l = [1, 2]
+        with self.assertRaises(TypeError):
+            qmlRegisterSingletonInstance(SingletonQObject, 'Singletons', 1, 0, 'SingletonInstance', l)
+
+        # Modify value on the instance
+        s = SingletonQObject()
+        s.setData(99)
+        qmlRegisterSingletonInstance(SingletonQObject, 'Singletons', 1, 0, 'SingletonInstance', s)
+
         view = QQuickView()
         file = Path(__file__).resolve().parent / 'registersingletontype.qml'
         self.assertTrue(file.is_file())
@@ -88,7 +98,7 @@ class TestQmlSupport(unittest.TestCase):
         view.show()
         QTimer.singleShot(250, view.close)
         app.exec()
-        self.assertEqual(finalResult, 200)
+        self.assertEqual(finalResult, 299)
 
 
 if __name__ == '__main__':
