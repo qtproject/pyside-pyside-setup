@@ -140,24 +140,10 @@ endif()
 # On Linux distros there is no standard way to check that.
 execute_process(
     COMMAND ${PYTHON_EXECUTABLE} -c "if True:
-        is_py_debug = False
         import sys
-        try:
-            sys_py_debug = sys.pydebug
-            if sys_py_debug:
-                is_py_debug = True
-        except:
-            pass
-
-        try:
-            from distutils import sysconfig
-            config_py_debug = sysconfig.get_config_var('Py_DEBUG')
-            if config_py_debug:
-                is_py_debug = True
-        except:
-            pass
-
-        print(bool(is_py_debug))
+        import sysconfig
+        config_py_debug = sysconfig.get_config_var('Py_DEBUG')
+        print(bool(config_py_debug))
         "
     OUTPUT_VARIABLE PYTHON_WITH_DEBUG
     OUTPUT_STRIP_TRAILING_WHITESPACE)

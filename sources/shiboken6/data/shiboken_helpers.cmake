@@ -142,26 +142,17 @@ macro(set_quiet_build)
 endmacro()
 
 macro(get_python_extension_suffix)
-  # Result of importlib.machinery.EXTENSION_SUFFIXES depends on the platform,
-  # but generally looks something like:
-  # ['.cpython-38-x86_64-linux-gnu.so', '.abi3.so', '.so']
-  # We pick the first most detailed one.
-
   execute_process(
     COMMAND ${PYTHON_EXECUTABLE} -c "if True:
        import re
-       try:
-           from importlib import machinery
-           first_suffix = machinery.EXTENSION_SUFFIXES[0]
-       except (AttributeError, ImportError):
-           import imp
-           first_suffix = imp.get_suffixes()[0][0]
-       res = re.search(r'^(.+)\\.', first_suffix)
+       import sysconfig
+       suffix = sysconfig.get_config_var('EXT_SUFFIX')
+       res = re.search(r'^(.+)\\.', suffix)
        if res:
-           first_suffix = res.group(1)
+           suffix = res.group(1)
        else:
-           first_suffix = ''
-       print(first_suffix)
+           suffix = ''
+       print(suffix)
        "
     OUTPUT_VARIABLE PYTHON_EXTENSION_SUFFIX
     OUTPUT_STRIP_TRAILING_WHITESPACE)
