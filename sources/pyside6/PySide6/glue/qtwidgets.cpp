@@ -106,8 +106,57 @@ PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
 PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[%ARG5_TYPE](%5));
 // @snippet qfiledialog-return
 
+// @snippet qwidget-addaction-glue
+static PyObject *connectAction(QAction *action, PyObject *callback)
+{
+    PyObject *pyAct = %CONVERTTOPYTHON[QAction *](action);
+    Shiboken::AutoDecRef result(PyObject_CallMethod(pyAct, "connect", "OsO",
+                                                    pyAct,
+                                                    SIGNAL(triggered()), callback));
+    if (result.isNull()) {
+        Py_DECREF(pyAct);
+        return nullptr;
+    }
+    return pyAct;
+}
+
+static inline PyObject *addActionWithPyObject(QWidget *self, const QString &text,
+                                              PyObject *callback)
+{
+    QAction *act = self->addAction(text);
+    return connectAction(act, callback);
+}
+
+static inline PyObject *addActionWithPyObject(QWidget *self, const QIcon &icon, const QString &text,
+                                              PyObject *callback)
+{
+    auto *act = self->addAction(icon, text);
+    return connectAction(act, callback);
+}
+
+static inline PyObject *addActionWithPyObject(QWidget *self, const QString &text,
+                                              const QKeySequence &shortcut,
+                                              PyObject *callback)
+{
+    QAction *act = self->addAction(text, shortcut);
+    return connectAction(act, callback);
+}
+
+static inline PyObject *addActionWithPyObject(QWidget *self, const QIcon &icon,
+                                              const QString &text,
+                                              const QKeySequence &shortcut,
+                                              PyObject *callback)
+{
+    QAction *act = self->addAction(icon, text, shortcut);
+    return connectAction(act, callback);
+}
+// @snippet qwidget-addaction-glue
+
+// FIXME PYSIDE7: Remove in favor of widgets methods
 // @snippet qmenu-glue
-inline PyObject *addActionWithPyObject(QMenu *self, const QIcon &icon, const QString &text, PyObject *callback, const QKeySequence &shortcut)
+inline PyObject *addMenuActionWithPyObject(QMenu *self, const QIcon &icon,
+                                           const QString &text, PyObject *callback,
+                                           const QKeySequence &shortcut)
 {
     QAction *act = self->addAction(text);
 
@@ -132,17 +181,34 @@ inline PyObject *addActionWithPyObject(QMenu *self, const QIcon &icon, const QSt
 }
 // @snippet qmenu-glue
 
+// addAction(QString,PyObject*,QKeySequence) FIXME PYSIDE7 deprecated
 // @snippet qmenu-addaction-1
-%PYARG_0 = addActionWithPyObject(%CPPSELF, QIcon(), %1, %2, %3);
+%PYARG_0 = addMenuActionWithPyObject(%CPPSELF, QIcon(), %1, %2, %3);
 // @snippet qmenu-addaction-1
 
+// addAction(QIcon,QString,PyObject*,QKeySequence) FIXME PYSIDE7 deprecated
 // @snippet qmenu-addaction-2
-%PYARG_0 = addActionWithPyObject(%CPPSELF, %1, %2, %3, %4);
+%PYARG_0 = addMenuActionWithPyObject(%CPPSELF, %1, %2, %3, %4);
 // @snippet qmenu-addaction-2
 
 // @snippet qmenu-addaction-3
 %CPPSELF.addAction(%1);
 // @snippet qmenu-addaction-3
+
+// addAction(QString,PyObject*)
+// @snippet qwidget-addaction-2
+%PYARG_0 = addActionWithPyObject(%CPPSELF, %1, %2);
+// @snippet qwidget-addaction-2
+
+// addAction(QString,QKeySequence,PyObject*) or addAction(QIcon,QString,PyObject*)
+// @snippet qwidget-addaction-3
+%PYARG_0 = addActionWithPyObject(%CPPSELF, %1, %2, %3);
+// @snippet qwidget-addaction-3
+
+// addAction(QIcon,QString,QKeySequence,PyObject*)
+// @snippet qwidget-addaction-4
+%PYARG_0 = addActionWithPyObject(%CPPSELF, %1, %2, %3, %4);
+// @snippet qwidget-addaction-4
 
 // @snippet qmenu-clear
 Shiboken::BindingManager &bm = Shiboken::BindingManager::instance();
@@ -158,30 +224,6 @@ for (auto *act : actions) {
 }
 // @snippet qmenu-clear
 
-// @snippet qmenubar-glue
-inline PyObject *
-addActionWithPyObject(QMenuBar *self, const QString &text, PyObject *callback)
-{
-    QAction *act = self->addAction(text);
-
-    self->addAction(act);
-
-    PyObject *pyAct = %CONVERTTOPYTHON[QAction *](act);
-    PyObject *result = PyObject_CallMethod(pyAct, "connect", "OsO",
-                                           pyAct,
-                                           SIGNAL(triggered(bool)), callback);
-
-    if (result == nullptr || result == Py_False) {
-        if (result)
-            Py_DECREF(result);
-        Py_DECREF(pyAct);
-        return nullptr;
-    }
-
-    return pyAct;
-}
-// @snippet qmenubar-glue
-
 // @snippet qmenubar-clear
 const auto &actions = %CPPSELF.actions();
 for (auto *act : actions) {
@@ -190,14 +232,6 @@ for (auto *act : actions) {
   Shiboken::Object::invalidate(pyAct);
 }
 // @snippet qmenubar-clear
-
-// @snippet qmenubar-addaction-1
-%PYARG_0 = addActionWithPyObject(%CPPSELF, %1, %2);
-// @snippet qmenubar-addaction-1
-
-// @snippet qmenubar-addaction-2
-%CPPSELF.addAction(%1);
-// @snippet qmenubar-addaction-2
 
 // @snippet qtoolbox-removeitem
 QWidget *_widget = %CPPSELF.widget(%1);
@@ -566,27 +600,25 @@ for (int i = 0, count = %CPPSELF.count(); i < count; ++i) {
 %CPPSELF.addAction(%1);
 // @snippet qlineedit-addaction
 
-// @snippet qtoolbar-addaction-1
+// addAction(QIcon,QString,const QObject*,const char*,Qt::ConnectionType)
+// @snippet qwidget-addaction-1
 QAction *action = %CPPSELF.addAction(%1, %2);
 %PYARG_0 = %CONVERTTOPYTHON[QAction *](action);
 Shiboken::AutoDecRef result(PyObject_CallMethod(%PYARG_0,
     "connect", "OsO",
     %PYARG_0, SIGNAL(triggered()), %PYARG_3)
 );
-// @snippet qtoolbar-addaction-1
+// @snippet qwidget-addaction-1
 
-// @snippet qtoolbar-addaction-2
+// addAction(QString,const QObject*,const char*,Qt::ConnectionType)
+// @snippet qwidget-addaction-2
 QAction *action = %CPPSELF.addAction(%1);
 %PYARG_0 = %CONVERTTOPYTHON[QAction *](action);
 Shiboken::AutoDecRef result(PyObject_CallMethod(%PYARG_0,
     "connect", "OsO",
     %PYARG_0, SIGNAL(triggered()), %PYARG_2)
 );
-// @snippet qtoolbar-addaction-2
-
-// @snippet qtoolbar-addaction-3
-%CPPSELF.addAction(%1);
-// @snippet qtoolbar-addaction-3
+// @snippet qwidget-addaction-2
 
 // @snippet qtoolbar-clear
 QList<PyObject *> lst;

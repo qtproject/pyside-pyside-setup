@@ -800,6 +800,7 @@
   </object-type>
   <object-type name="QMenu">
     <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp" snippet="qmenu-glue"/>
+    <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp" snippet="qwidget-addaction-glue"/>
     <!-- exec() -->
     <modify-function signature="exec()" allow-thread="yes"/>
     <add-function signature="exec_()" return-type="QAction*">
@@ -815,11 +816,6 @@
     <add-function signature="exec_(QList&lt;QAction*>,const QPoint&amp;,QAction* @at@ = nullptr,QWidget* @parent@ = nullptr)" return-type="QAction*">
         <inject-code file="../glue/qtwidgets.cpp" snippet="qmenu-exec-3"/>
     </add-function>
-    <modify-function signature="addAction(const QString&amp;)">
-      <modify-argument index="return">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
     <modify-function signature="addMenu(QMenu*)">
       <modify-argument index="return">
         <parent index="1" action="add"/>
@@ -859,7 +855,14 @@
     <!-- ### "setNoReplayFor(QWidget*)" is an internal method. -->
     <modify-function signature="setNoReplayFor(QWidget*)" remove="all"/>
 
-    <add-function signature="addAction(QString&amp;,PyObject*,QKeySequence&amp;)">
+    <!-- FIXME PYSIDE7: Remove in favor of widgets methods -->
+    <modify-function signature="addAction(const QString&amp;,const QObject*,const char*,const QKeySequence&amp;)">
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+
+    <add-function signature="addAction(QString&amp;@text@,PyObject*,QKeySequence&amp;@shortcut@)">
       <modify-argument index="3">
         <replace-default-expression with="0"/>
       </modify-argument>
@@ -870,7 +873,7 @@
       <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qmenu-addaction-1"/>
     </add-function>
 
-    <add-function signature="addAction(QIcon&amp;,QString&amp;,PyObject*,QKeySequence&amp;)">
+    <add-function signature="addAction(QIcon&amp;,QString&amp;@text@,PyObject*,QKeySequence&amp;@shortcut@)">
       <modify-argument index="4">
         <replace-default-expression with="0"/>
       </modify-argument>
@@ -880,10 +883,11 @@
 
       <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qmenu-addaction-2"/>
     </add-function>
-
-    <add-function signature="addAction(QAction*)">
-      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qmenu-addaction-3"/>
-    </add-function>
+    <modify-function signature="addAction(const QIcon&amp;,const QString&amp;,const QObject*,const char*,const QKeySequence&amp;)">
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
 
     <modify-function signature="clear()">
       <inject-code file="../glue/qtwidgets.cpp" snippet="qmenu-clear"/>
@@ -892,23 +896,7 @@
   </object-type>
 
   <object-type name="QMenuBar">
-    <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp" snippet="qmenubar-glue"/>
-    <modify-function signature="addAction(const QString&amp;)">
-      <modify-argument index="return">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="addAction(QString,const QObject*,const char*)">
-      <modify-argument index="return">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <add-function signature="addAction(const QString&amp;,PyObject*)">
-      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qmenubar-addaction-1"/>
-      <modify-argument index="return">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </add-function>
+    <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp" snippet="qwidget-addaction-glue"/>
     <modify-function signature="addMenu(QMenu*)">
       <modify-argument index="return">
         <parent index="1" action="add"/>
@@ -938,10 +926,6 @@
     <modify-function signature="clear()">
       <inject-code file="../glue/qtwidgets.cpp" snippet="qmenubar-clear"/>
     </modify-function>
-
-    <add-function signature="addAction(QAction*)">
-      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qmenubar-addaction-2"/>
-    </add-function>
 
   </object-type>
   <object-type name="QProgressBar">
@@ -1981,6 +1965,7 @@
 
   <object-type name="QWidget" delete-in-main-thread="true">
     <!-- see QWindow::nativeEvent(), QAbstractNativeEventFilter::nativeEventFilter() -->
+    <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp" snippet="qwidget-addaction-glue"/>
     <modify-function signature="nativeEvent(const QByteArray &amp;,void*,qintptr*)">
       <modify-argument index="3">
         <remove-argument/>
@@ -2183,6 +2168,82 @@
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
+
+    <modify-function signature="addAction(const QString&amp;)">
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addAction(const QIcon&amp;,const QString&amp;)">
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addAction(const QString&amp;,const QKeySequence&amp;)">
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addAction(const QIcon&amp;,const QString&amp;,const QKeySequence&amp;)">
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="addAction(const QString&amp;,const QObject*,const char*,Qt::ConnectionType)">
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <add-function signature="addAction(QString&amp;@text@,PyObject*@callable@)"
+                  return-type="QAction*">
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qwidget-addaction-2"/>
+    </add-function>
+
+    <modify-function signature="addAction(const QIcon&amp;,const QString&amp;,const QObject*,const char*,Qt::ConnectionType)">
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <add-function signature="addAction(QIcon&amp;@icon@,QString&amp;@text@,PyObject*@callable@)"
+                  return-type="QAction*">
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qwidget-addaction-3"/>
+    </add-function>
+
+    <modify-function signature="addAction(const QString&amp;,const QKeySequence&amp;,const QObject*,const char*,Qt::ConnectionType)">
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <add-function signature="addAction(QString&amp;@text@,QKeySequence&amp;@shortcut@,PyObject*@callable@)"
+                  return-type="QAction*">
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qwidget-addaction-3"/>
+    </add-function>
+
+    <modify-function signature="addAction(const QIcon&amp;,const QString&amp;,const QKeySequence&amp;,const QObject*,const char*,Qt::ConnectionType)">
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <add-function signature="addAction(QIcon&amp;@icon@,QString&amp;@text@,QKeySequence&amp;@shortcut@,PyObject*@callable@)"
+                  return-type="QAction*">
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qwidget-addaction-4"/>
+    </add-function>
 
     <modify-function signature="insertAction(QAction*,QAction*)">
       <modify-argument index="2">
@@ -2620,6 +2681,7 @@
   <object-type name="QDial"/>
   <object-type name="QKeySequenceEdit"/>
   <object-type name="QLineEdit">
+    <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp" snippet="qwidget-addaction-glue"/>
     <enum-type name="ActionPosition"/>
     <enum-type name="EchoMode"/>
     <modify-function signature="setCompleter(QCompleter*)">
@@ -2691,43 +2753,6 @@
     </modify-function>
   </object-type>
   <object-type name="QToolBar">
-    <modify-function signature="addAction(QIcon,QString,const QObject*,const char*)">
-      <modify-argument index="3">
-        <replace-type modified-type="PyObject"/>
-      </modify-argument>
-      <modify-argument index="4">
-        <remove-argument />
-      </modify-argument>
-      <modify-argument index="return">
-        <parent index="this" action="add"/>
-      </modify-argument>
-      <inject-code file="../glue/qtwidgets.cpp" snippet="qtoolbar-addaction-1"/>
-    </modify-function>
-    <modify-function signature="addAction(QString,const QObject*,const char*)">
-      <modify-argument index="2">
-        <replace-type modified-type="PyObject"/>
-      </modify-argument>
-      <modify-argument index="3">
-        <remove-argument />
-      </modify-argument>
-      <modify-argument index="return">
-        <parent index="this" action="add"/>
-      </modify-argument>
-      <inject-code file="../glue/qtwidgets.cpp" snippet="qtoolbar-addaction-2"/>
-    </modify-function>
-    <modify-function signature="addAction(const QString&amp;)">
-      <modify-argument index="return">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="addAction(const QIcon&amp;,const QString&amp;)">
-      <modify-argument index="return">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <add-function signature="addAction(QAction*)">
-      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qtoolbar-addaction-3"/>
-    </add-function>
     <modify-function signature="addSeparator()">
       <modify-argument index="return">
         <parent index="this" action="add"/>
