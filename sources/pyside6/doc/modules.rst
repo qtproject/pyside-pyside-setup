@@ -65,6 +65,13 @@ Qt Modules
         Provides a C++ implementation of DOM.
      - :mod:`Qt 3D Animation <PySide6.Qt3DAnimation>`
         Provides basic elements required to animate 3D objects.
+   * - :mod:`Qt WebEngine Core C++ Classes <PySide6.QtWebEngineCore>`
+        Provides public API shared by both QtWebEngine and QtWebEngineWidgets.
+     - :mod:`Qt WebEngine Widgets C++ Classes <PySide6.QtWebEngineWidgets>`
+        Provides C++ classes for rendering web content in a QWidget based application.
+   * - :mod:`Qt WebEngine QML Types <PySide6.QtWebEngineQuick>`
+        Provides QML types for rendering web content within a QML application.
+     -
    * - :mod:`Qt 3D Core <PySide6.Qt3DCore>`
         Contains functionality to support near-realtime simulation systems.
      - :mod:`Qt 3D Extras <PySide6.Qt3DExtras>`

@@ -1,3 +1,3 @@
-include(@QT_SRC_DIR@/../qtwebengine/src/webengine/doc/qtwebengine.qdocconf)
-includepaths += -I @QT_SRC_DIR@/../qtwebengine/src/webengine/doc
+include(@QT_SRC_DIR@/../qtwebengine/src/core/doc/qtwebengine.qdocconf)
+includepaths += -I @QT_SRC_DIR@/../qtwebengine/src/core/doc
 include(../pyside-config.qdocconf)
