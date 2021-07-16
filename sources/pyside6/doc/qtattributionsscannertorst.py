@@ -100,7 +100,11 @@ def readFile(fileName):
 def runScanner(directory, targetFileName):
     # qtattributionsscanner recursively searches for qt_attribution.json files
     # and outputs them in JSON with the paths of the 'LicenseFile' made absolute
-    command = f'qtattributionsscanner --output-format json {directory}'
+    libexec_b = subprocess.check_output('qtpaths -query QT_INSTALL_LIBEXECS',
+                                        shell=True)
+    libexec = libexec_b.decode('utf-8').strip()
+    scanner = os.path.join(libexec, 'qtattributionsscanner')
+    command = f'{scanner}  --output-format json {directory}'
     jsonS = subprocess.check_output(command, shell=True)
     if not jsonS:
         raise RuntimeError(f'{command} failed to produce output.')
