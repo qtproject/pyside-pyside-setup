@@ -1,4 +1,6 @@
 # This Python file uses the following encoding: utf-8
+from __future__ import print_function, absolute_import, unicode_literals
+LICENSE_TEXT = """
 #############################################################################
 ##
 ## Copyright (C) 2021 The Qt Company Ltd.
@@ -19,8 +21,7 @@
 ## $QT_END_LICENSE$
 ##
 #############################################################################
-
-from __future__ import print_function, absolute_import, unicode_literals
+"""
 
 """
 generate_pyi.py
@@ -183,14 +184,6 @@ class Formatter(Writer):
         yield
 
 
-def get_license_text():
-    with io.open(sourcepath) as f:
-        lines = f.readlines()
-        license_line = next((lno for lno, line in enumerate(lines)
-                             if "$QT_END_LICENSE$" in line))
-    return "".join(lines[:license_line + 3])
-
-
 def find_imports(text):
     return [imp for imp in PySide2.__all__ if imp + "." in text]
 
@@ -210,7 +203,7 @@ def generate_pyi(import_name, outpath, options):
 
     outfile = io.StringIO()
     fmt = Formatter(outfile)
-    fmt.print(get_license_text())  # which has encoding, already
+    fmt.print(LICENSE_TEXT.strip())
     need_imports = not USE_PEP563
     if USE_PEP563:
         fmt.print("from __future__ import annotations")
@@ -289,6 +282,8 @@ def generate_all_pyi(outpath, options):
 
 
 if __name__ == "__main__":
+    # PYSIDE-1621: Enforce embedding to ensure that it always works.
+    sys.pyside_uses_embedding = True
     parser = argparse.ArgumentParser(
         description="This script generates the .pyi file for all PySide modules.")
     parser.add_argument("modules", nargs="+",

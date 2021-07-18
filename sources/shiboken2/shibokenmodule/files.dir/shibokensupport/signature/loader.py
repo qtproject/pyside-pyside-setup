@@ -188,6 +188,7 @@ def move_into_pyside_package():
     put_into_package(PySide2.support.signature, parser)
     put_into_package(PySide2.support.signature, importhandler)
     put_into_package(PySide2.support.signature.lib, enum_sig)
+    put_into_package(PySide2.support.signature.lib, tool)
 
     put_into_package(None if orig_typing else PySide2.support.signature, typing)
     put_into_package(PySide2.support.signature, inspect)
@@ -199,6 +200,7 @@ from shibokensupport.signature import lib
 from shibokensupport.signature import parser
 from shibokensupport.signature import importhandler
 from shibokensupport.signature.lib import enum_sig
+from shibokensupport.signature.lib import tool
 
 if "PySide2" in sys.modules:
     # We publish everything under "PySide2.support.signature", again.
