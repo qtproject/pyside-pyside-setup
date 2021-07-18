@@ -116,17 +116,8 @@ def put_into_package(package, module, override=None):
     sys.modules[fullname] = module
 
 
-# Debug: used to inspect what each step loads
-def list_modules(message):
-    ext_modules = {key:value for (key, value) in sys.modules.items()
-                              if hasattr(value, "__file__")}
-    print("SYS.MODULES", message, len(sys.modules), len(ext_modules))
-    for (name, module) in sorted(ext_modules.items()):
-        print(f"  {name:23}", repr(module)[:70])
-
-import shibokensupport
-
 def move_into_pyside_package():
+    import shibokensupport
     import PySide6
     try:
         import PySide6.support

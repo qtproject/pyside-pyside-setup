@@ -59,6 +59,7 @@ recursion_trap = 0
 # We avoid real imports in phase 1 that could fail (simply removed all).
 # Python 2 is not able to import when the extension import is still active.
 # Phase 1 simply defines the functions, which will be used in Phase 2.
+# PYSIDE-1621: This can be removed after the backport but we leave it so.
 
 def bootstrap():
     import sys
@@ -76,10 +77,11 @@ def bootstrap():
     recursion_trap += 1
 
     @contextmanager
-    def ensure_shibokensupport(support_path):
+    def ensure_shibokensupport(target, support_path):
         # Make sure that we always have the shibokensupport containing package first.
         # Also remove any prior loaded module of this name, just in case.
-        sys.path.insert(0, os.fspath(support_path))
+        # PYSIDE-1621: support_path can also be a finder instance.
+        target.insert(0, support_path)
 
         sbks = "shibokensupport"
         if sbks in sys.modules:
@@ -92,14 +94,14 @@ def bootstrap():
             yield
         except Exception as e:
             print("Problem importing shibokensupport:")
-            print(e)
+            print(f"{e.__class__.__name__}: {e}")
             traceback.print_exc()
             print("sys.path:")
             for p in sys.path:
                 print("  " + p)
             sys.stdout.flush()
             sys.exit(-1)
-        sys.path.remove(os.fspath(support_path))
+        target.remove(support_path)
 
     import shiboken6 as root
     path = Path(root.__file__)
@@ -115,65 +117,95 @@ def bootstrap():
     # Here we decide if we work embedded or not.
     embedding_var = "pyside_uses_embedding"
     use_embedding = bool(getattr(sys, embedding_var, False))
-    # We keep the zip file for inspection if the sys variable has been set.
-    keep_zipfile = hasattr(sys, embedding_var)
     loader_path = rp / look_for
     files_dir = loader_path.parents[2]
     assert files_dir.name == "files.dir"
 
-    # We report in sys what we used. We could put more here as well.
     if not loader_path.exists():
         use_embedding = True
-    support_path = Path(prepare_zipfile()) if use_embedding else files_dir
     setattr(sys, embedding_var, use_embedding)
 
-    try:
-        with ensure_shibokensupport(support_path):
-            from shibokensupport.signature import loader
+    if use_embedding:
+        target, support_path = prepare_zipfile()
+    else:
+        target, support_path = sys.path, os.fspath(files_dir)
 
+    try:
+        with ensure_shibokensupport(target, support_path):
+            from shibokensupport.signature import loader
     except Exception as e:
         print('Exception:', e)
         traceback.print_exc(file=sys.stdout)
 
-    finally:
-        if use_embedding and not keep_zipfile:
-            # clear the temp zipfile
-            try:
-                os.remove(support_path)
-            except OSError as e:
-                print(e)
-                print(f"Error deleting {support_path}, ignored")
-        return loader
+    return loader
+
 
 # New functionality: Loading from a zip archive.
 # There exists the zip importer, but as it is written, only real zip files are
 # supported. Before I will start an own implementation, it is easiest to use
 # a temporary zip file.
+# PYSIDE-1621: make zip file access totally virtual
 
 def prepare_zipfile():
     """
+    Old approach:
+
     Write the zip file to a real file and return its name.
     It will be implicitly opened as such when we add the name to sys.path .
+
+    New approach (Python 3, only):
+
+    Use EmbeddableZipImporter and pass the zipfile structure directly.
+    The sys.path way does not work, instead we need to use sys.meta_path .
+    See https://docs.python.org/3/library/sys.html#sys.meta_path
     """
     import base64
-    import tempfile
-    import os
+    import io
+    import sys
     import zipfile
 
     # 'zipstring_sequence' comes from signature.cpp
     zipbytes = base64.b64decode(''.join(zipstring_sequence))
-    fd, fname = tempfile.mkstemp(prefix='embedded.', suffix='.zip')
-    os.write(fd, zipbytes)
-    os.close(fd)
-    # Let us test the zipfile if it really is one.
-    # Otherwise, zipimporter would simply ignore it without notice.
-    try:
-        z = zipfile.ZipFile(fname)
-        z.close()
-    except zipfile.BadZipFile as e:
-        print('Broken Zip File:', e)
-        traceback.print_exc(file=sys.stdout)
-    finally:
-        return fname
+    vzip = zipfile.ZipFile(io.BytesIO(zipbytes))
+    return sys.meta_path, EmbeddableZipImporter(vzip)
+
+
+class EmbeddableZipImporter(object):
+
+    def __init__(self, zip_file):
+        def p2m(filename):
+            if filename.endswith("/__init__.py"):
+                return filename[:-12].replace("/", ".")
+            if filename.endswith(".py"):
+                return filename[:-3].replace("/", ".")
+            return None
+
+        self.zfile = zip_file
+        self._path2mod = {_.filename : p2m(_.filename) for _ in zip_file.filelist}
+        self._mod2path = {_[1] : _[0] for _ in self._path2mod.items()}
+
+    def find_module(self, fullname, path):
+        return self if self._mod2path.get(fullname) else None
+
+    def load_module(self, fullname):
+        import importlib
+        import sys
+
+        filename = self._mod2path.get(fullname)
+        if filename not in self._path2mod:
+            raise ImportError(fullname)
+        module_spec = importlib.machinery.ModuleSpec(fullname, None)
+        new_module = importlib.util.module_from_spec(module_spec)
+        with self.zfile.open(filename, "r") as f:   # "rb" not for zipfile
+            exec(f.read(), new_module.__dict__)
+        new_module.__file__ = filename
+        new_module.__loader__ = self
+        if filename.endswith("/__init__.py"):
+            new_module.__path__ = []
+            new_module.__package__ = fullname
+        else:
+            new_module.__package__ = fullname.rpartition('.')[0]
+        sys.modules[fullname] = new_module
+        return new_module
 
 # eof
