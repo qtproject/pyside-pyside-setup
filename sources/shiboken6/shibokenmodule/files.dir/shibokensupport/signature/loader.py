@@ -102,25 +102,16 @@ __feature__.pyside_feature_dict = signature_bootstrap.pyside_feature_dict
 builtins.__feature_import__ = signature_bootstrap.__feature_import__
 del signature_bootstrap
 
-def _get_modname(mod):
-    return mod.__spec__.name if getattr(mod, "__spec__", None) else mod.__name__
-
-def _set_modname(mod, name):
-    if getattr(mod, "__spec__", None):
-        mod.__spec__.name = name
-    else:
-        mod.__name__ = name
-
 
 def put_into_package(package, module, override=None):
     # take the last component of the module name
-    name = (override if override else _get_modname(module)).rsplit(".", 1)[-1]
-    # allow access as {package}.typing
+    name = (override if override else module.__spec__.name).rsplit(".", 1)[-1]
+    # allow access as {package}.{name}
     if package:
         setattr(package, name, module)
     # put into sys.modules as a package to allow all import options
-    fullname = f"{_get_modname(package)}.{name}" if package else name
-    _set_modname(module, fullname)
+    fullname = f"{package.__spec__.name}.{name}" if package else name
+    module.__spec__.name = fullname
     # publish new dotted name in sys.modules
     sys.modules[fullname] = module
 
@@ -152,6 +143,7 @@ def move_into_pyside_package():
     put_into_package(PySide6.support.signature, importhandler)
     put_into_package(PySide6.support.signature.lib, enum_sig)
     put_into_package(PySide6.support.signature.lib, pyi_generator)
+    put_into_package(PySide6.support.signature.lib, tool)
 
 from shibokensupport.signature import mapping
 from shibokensupport.signature import errorhandler
@@ -161,6 +153,7 @@ from shibokensupport.signature import parser
 from shibokensupport.signature import importhandler
 from shibokensupport.signature.lib import enum_sig
 from shibokensupport.signature.lib import pyi_generator
+from shibokensupport.signature.lib import tool
 
 if "PySide6" in sys.modules:
     # We publish everything under "PySide6.support", again.

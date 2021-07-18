@@ -1,4 +1,4 @@
-# This Python file uses the following encoding: utf-8
+LICENSE_TEXT = """
 #############################################################################
 ##
 ## Copyright (C) 2021 The Qt Company Ltd.
@@ -37,6 +37,7 @@
 ## $QT_END_LICENSE$
 ##
 #############################################################################
+"""
 
 """
 pyi_generator.py
@@ -60,8 +61,6 @@ from textwrap import dedent
 from shiboken6 import Shiboken
 from shibokensupport.signature.lib.enum_sig import HintingEnumerator
 from shibokensupport.signature.lib.tool import build_brace_pattern
-
-sourcepath = Path(__file__).resolve()
 
 # Can we use forward references?
 USE_PEP563 = sys.version_info[:2] >= (3, 7)
@@ -263,7 +262,7 @@ def generate_pyi(import_name, outpath, options):
 
     outfile = io.StringIO()
     fmt = Formatter(outfile, options)
-    fmt.print(get_license_text())  # which has encoding, already
+    fmt.print(LICENSE_TEXT.strip())
     need_imports = options._pyside_call and not USE_PEP563
     if USE_PEP563:
         fmt.print("from __future__ import annotations")
