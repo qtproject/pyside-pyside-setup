@@ -95,6 +95,7 @@ public:
     void addFunction(const AbstractMetaFunctionCPtr &function);
     bool hasFunction(const QString &str) const;
     AbstractMetaFunctionCPtr findFunction(const QString& functionName) const;
+    AbstractMetaFunctionCList findFunctions(const QString& functionName) const;
     bool hasSignal(const AbstractMetaFunction *f) const;
 
     bool hasConstructors() const;
