@@ -607,6 +607,17 @@ AbstractMetaFunctionCPtr AbstractMetaClass::findFunction(const QString &function
     return AbstractMetaFunction::find(d->m_functions, functionName);
 }
 
+AbstractMetaFunctionCList AbstractMetaClass::findFunctions(const QString &functionName) const
+{
+    AbstractMetaFunctionCList result;
+    std::copy_if(d->m_functions.cbegin(), d->m_functions.cend(),
+                 std::back_inserter(result),
+                 [&functionName](const AbstractMetaFunctionCPtr &f) {
+                     return f->name() == functionName;
+                 });
+    return result;
+}
+
 AbstractMetaFunctionCPtr AbstractMetaClass::findOperatorBool() const
 {
     auto it = std::find_if(d->m_functions.cbegin(), d->m_functions.cend(),

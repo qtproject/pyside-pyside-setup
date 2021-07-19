@@ -95,6 +95,7 @@ public:
     void addFunction(const AbstractMetaFunctionCPtr &function);
     bool hasFunction(const QString &str) const;
     AbstractMetaFunctionCPtr findFunction(const QString& functionName) const;
+    AbstractMetaFunctionCList findFunctions(const QString& functionName) const;
     AbstractMetaFunctionCPtr findOperatorBool() const;
     // Find a Qt-style isNull() method suitable for nb_bool
     AbstractMetaFunctionCPtr findQtIsNullMethod() const;
