@@ -2914,7 +2914,7 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(TextStream &s,
             if (isVarargs)
                 --numArgs;
             typeChecks.prepend(QString::fromLatin1("numArgs %1 %2").arg(isVarargs ? QLatin1String(">=") : QLatin1String("==")).arg(numArgs));
-        } else if (sequenceArgCount > 1) {
+        } else if (usePyArgs && sequenceArgCount > 0) {
             typeChecks.prepend(QString::fromLatin1("numArgs >= %1").arg(startArg + sequenceArgCount));
         } else if (refFunc->isOperatorOverload() && !refFunc->isCallOperator()) {
             QString check;
