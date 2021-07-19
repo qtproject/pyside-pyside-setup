@@ -655,7 +655,7 @@ if (PyErr_WarnEx(PyExc_DeprecationWarning,
 %BEGIN_ALLOW_THREADS
 QAction *cppResult = %CPPSELF.exec();
 %END_ALLOW_THREADS
-%PYARG_0 = %CONVERTTOPYTHON[QAction](cppResult);
+%PYARG_0 = %CONVERTTOPYTHON[QAction*](cppResult);
 // @snippet qmenu-exec-1
 
 // @snippet qmenu-exec-2
@@ -668,7 +668,7 @@ if (PyErr_WarnEx(PyExc_DeprecationWarning,
 %BEGIN_ALLOW_THREADS
 QAction *cppResult = %CPPSELF.exec(%1, %2);
 %END_ALLOW_THREADS
-%PYARG_0 = %CONVERTTOPYTHON[QAction](cppResult);
+%PYARG_0 = %CONVERTTOPYTHON[QAction*](cppResult);
 // @snippet qmenu-exec-2
 
 // @snippet qmenu-exec-3
