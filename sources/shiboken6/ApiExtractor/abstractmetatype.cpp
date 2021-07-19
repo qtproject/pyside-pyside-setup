@@ -754,7 +754,7 @@ bool AbstractMetaType::isExtendedCppPrimitive() const
 void AbstractMetaType::formatDebug(QDebug &debug) const
 {
     debug << '"' << name() << '"';
-    if (debug.verbosity() > 2) {
+    if (debug.verbosity() > 2 && !isVoid()) {
         auto te = typeEntry();
         debug << ", typeEntry=";
         if (debug.verbosity() > 3)
