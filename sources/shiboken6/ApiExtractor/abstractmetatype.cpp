@@ -88,10 +88,12 @@ AbstractMetaTypeData::AbstractMetaTypeData(const TypeEntry *t) :
 
 AbstractMetaType::AbstractMetaType(const TypeEntry *t) : d(new AbstractMetaTypeData(t))
 {
+    Q_ASSERT(t);
 }
 
-AbstractMetaType::AbstractMetaType() : d(new AbstractMetaTypeData(nullptr))
+AbstractMetaType::AbstractMetaType()
 {
+    *this = AbstractMetaType::createVoid();
 }
 
 AbstractMetaType &AbstractMetaType::operator=(const AbstractMetaType &) = default;

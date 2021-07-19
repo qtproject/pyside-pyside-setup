@@ -442,7 +442,7 @@ void OverloadData::sortNextOverloads()
  */
 OverloadData::OverloadData(const AbstractMetaFunctionCList &overloads,
                            const ApiExtractorResult &api)
-    : m_minArgs(256), m_maxArgs(0), m_argPos(-1), m_argType(nullptr),
+    : m_minArgs(256), m_maxArgs(0), m_argPos(-1), m_argType(),
     m_headOverloadData(this), m_previousOverloadData(nullptr),
     m_api(api)
 {
