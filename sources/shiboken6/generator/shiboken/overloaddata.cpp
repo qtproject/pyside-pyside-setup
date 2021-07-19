@@ -1012,7 +1012,7 @@ void OverloadData::formatDebug(QDebug &d) const
      for (int i = 0; i < count; ++i) {
          if (i)
              d << '\n';
-         d << m_overloads.at(i);
+         d << m_overloads.at(i).data();
      }
      d.setVerbosity(oldVerbosity);
      d << ')';
