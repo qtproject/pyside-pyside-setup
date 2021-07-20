@@ -714,11 +714,6 @@ QString ShibokenGenerator::cpythonBaseName(const TypeEntry *type)
         const auto *ctype = static_cast<const ContainerTypeEntry *>(type);
         switch (ctype->containerKind()) {
             case ContainerTypeEntry::ListContainer:
-            case ContainerTypeEntry::StringListContainer:
-            case ContainerTypeEntry::LinkedListContainer:
-            case ContainerTypeEntry::VectorContainer:
-            case ContainerTypeEntry::StackContainer:
-            case ContainerTypeEntry::QueueContainer:
                 //baseName = "PyList";
                 //break;
             case ContainerTypeEntry::PairContainer:
@@ -730,8 +725,6 @@ QString ShibokenGenerator::cpythonBaseName(const TypeEntry *type)
                 break;
             case ContainerTypeEntry::MapContainer:
             case ContainerTypeEntry::MultiMapContainer:
-            case ContainerTypeEntry::HashContainer:
-            case ContainerTypeEntry::MultiHashContainer:
                 baseName = QLatin1String("PyDict");
                 break;
             default:
@@ -1047,12 +1040,7 @@ QString ShibokenGenerator::cpythonCheckFunction(AbstractMetaType metaType,
         ContainerTypeEntry::ContainerKind type =
             static_cast<const ContainerTypeEntry *>(typeEntry)->containerKind();
         if (type == ContainerTypeEntry::ListContainer
-            || type == ContainerTypeEntry::StringListContainer
-            || type == ContainerTypeEntry::LinkedListContainer
-            || type == ContainerTypeEntry::VectorContainer
-            || type == ContainerTypeEntry::StackContainer
-            || type == ContainerTypeEntry::SetContainer
-            || type == ContainerTypeEntry::QueueContainer) {
+            || type == ContainerTypeEntry::SetContainer) {
             const AbstractMetaType &type = metaType.instantiations().constFirst();
             if (type.isPointerToWrapperType()) {
                 typeCheck += QString::fromLatin1("checkSequenceTypes(%1, ").arg(cpythonTypeNameExt(type));
@@ -1065,8 +1053,6 @@ QString ShibokenGenerator::cpythonCheckFunction(AbstractMetaType metaType,
             }
         } else if (type == ContainerTypeEntry::MapContainer
             || type == ContainerTypeEntry::MultiMapContainer
-            || type == ContainerTypeEntry::HashContainer
-            || type == ContainerTypeEntry::MultiHashContainer
             || type == ContainerTypeEntry::PairContainer) {
             QString pyType = (type == ContainerTypeEntry::PairContainer) ? QLatin1String("Pair") : QLatin1String("Dict");
             const AbstractMetaType &firstType = metaType.instantiations().constFirst();

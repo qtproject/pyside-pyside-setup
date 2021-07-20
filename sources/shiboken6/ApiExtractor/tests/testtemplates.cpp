@@ -437,7 +437,7 @@ typedef Vector<int> IntVector;
     auto baseContainer = vector->typeEntry()->baseContainerType();
     QVERIFY(baseContainer);
     QCOMPARE(reinterpret_cast<const ContainerTypeEntry*>(baseContainer)->containerKind(),
-             ContainerTypeEntry::VectorContainer);
+             ContainerTypeEntry::ListContainer);
     QCOMPARE(vector->functions().count(), 4);
 
     const auto method = vector->findFunction(QLatin1String("method"));

@@ -623,16 +623,9 @@ class ContainerTypeEntry : public ComplexTypeEntry
 public:
     enum ContainerKind {
         ListContainer,
-        StringListContainer,
-        LinkedListContainer,
-        VectorContainer,
-        StackContainer,
-        QueueContainer,
         SetContainer,
         MapContainer,
         MultiMapContainer,
-        HashContainer,
-        MultiHashContainer,
         PairContainer,
     };
     Q_ENUM(ContainerKind)
@@ -641,9 +634,6 @@ public:
                                 const QVersionNumber &vr, const TypeEntry *parent);
 
     ContainerKind containerKind() const;
-
-    QString typeName() const;
-    QString qualifiedCppName() const override;
 
     TypeEntry *clone() const override;
 

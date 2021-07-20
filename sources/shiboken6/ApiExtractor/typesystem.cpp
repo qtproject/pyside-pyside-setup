@@ -1601,14 +1601,6 @@ ContainerTypeEntry::ContainerKind ContainerTypeEntry::containerKind() const
     return d->m_containerKind;
 }
 
-QString ContainerTypeEntry::qualifiedCppName() const
-{
-    S_D(const ContainerTypeEntry);
-    if (d->m_containerKind == StringListContainer)
-        return QLatin1String("QStringList");
-    return ComplexTypeEntry::qualifiedCppName();
-}
-
 TypeEntry *ContainerTypeEntry::clone() const
 {
     S_D(const ContainerTypeEntry);
@@ -1618,40 +1610,6 @@ TypeEntry *ContainerTypeEntry::clone() const
 ContainerTypeEntry::ContainerTypeEntry(ContainerTypeEntryPrivate *d) :
     ComplexTypeEntry(d)
 {
-}
-
-QString ContainerTypeEntry::typeName() const
-{
-    S_D(const ContainerTypeEntry);
-    switch (d->m_containerKind) {
-    case LinkedListContainer:
-        return QLatin1String("linked-list");
-    case ListContainer:
-        return QLatin1String("list");
-    case StringListContainer:
-        return QLatin1String("string-list");
-    case VectorContainer:
-        return QLatin1String("vector");
-    case StackContainer:
-        return QLatin1String("stack");
-    case QueueContainer:
-        return QLatin1String("queue");
-    case SetContainer:
-        return QLatin1String("set");
-    case MapContainer:
-        return QLatin1String("map");
-    case MultiMapContainer:
-        return QLatin1String("multi-map");
-    case HashContainer:
-        return QLatin1String("hash");
-    case MultiHashContainer:
-        return QLatin1String("multi-hash");
-    case PairContainer:
-        return QLatin1String("pair");
-    default:
-        break;
-    }
-    return QLatin1String("?");
 }
 
 // ----------------- SmartPointerTypeEntry
@@ -2207,7 +2165,7 @@ void ContainerTypeEntry::formatDebug(QDebug &debug) const
     S_D(const ContainerTypeEntry);
 
     ComplexTypeEntry::formatDebug(debug);
-    debug << ", type=" << d->m_containerKind << ",\"" << typeName() << '"';
+    debug << ", type=" << d->m_containerKind << '"';
 }
 
 void SmartPointerTypeEntry::formatDebug(QDebug &debug) const

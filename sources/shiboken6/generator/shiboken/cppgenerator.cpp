@@ -877,6 +877,8 @@ static bool allArgumentsRemoved(const AbstractMetaFunctionCPtr& func)
     return true;
 }
 
+// Return type for error messages when getting invalid types from virtual
+// methods implemented in Python in C++ wrappers
 QString CppGenerator::getVirtualFunctionReturnTypeName(const AbstractMetaFunctionCPtr &func) const
 {
     if (func->type().isVoid())
@@ -888,9 +890,22 @@ QString CppGenerator::getVirtualFunctionReturnTypeName(const AbstractMetaFunctio
     // SbkType would return null when the type is a container.
     auto typeEntry = func->type().typeEntry();
     if (typeEntry->isContainer()) {
-        return QLatin1Char('"')
-               + reinterpret_cast<const ContainerTypeEntry *>(typeEntry)->typeName()
-               + QLatin1Char('"');
+        const auto *cte = static_cast<const ContainerTypeEntry *>(typeEntry);
+        switch (cte->containerKind()) {
+        case ContainerTypeEntry::ListContainer:
+            break;
+        case ContainerTypeEntry::SetContainer:
+            return uR"("set")"_qs;
+            break;
+        case ContainerTypeEntry::MapContainer:
+        case ContainerTypeEntry::MultiMapContainer:
+            return uR"("dict")"_qs;
+            break;
+        case ContainerTypeEntry::PairContainer:
+            return uR"("tuple")"_qs;
+            break;
+        }
+        return uR"("list")"_qs;
     }
     if (typeEntry->isSmartPointer())
         return QLatin1Char('"') + typeEntry->qualifiedCppName() + QLatin1Char('"');

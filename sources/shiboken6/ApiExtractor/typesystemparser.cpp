@@ -326,16 +326,16 @@ ENUM_LOOKUP_BEGIN(ContainerTypeEntry::ContainerKind, Qt::CaseSensitive,
                   containerTypeFromAttribute)
     {
         {u"list", ContainerTypeEntry::ListContainer},
-        {u"string-list", ContainerTypeEntry::StringListContainer},
-        {u"linked-list", ContainerTypeEntry::LinkedListContainer},
-        {u"vector", ContainerTypeEntry::VectorContainer},
-        {u"stack", ContainerTypeEntry::StackContainer},
-        {u"queue", ContainerTypeEntry::QueueContainer},
+        {u"string-list", ContainerTypeEntry::ListContainer},
+        {u"linked-list", ContainerTypeEntry::ListContainer},
+        {u"vector", ContainerTypeEntry::ListContainer},
+        {u"stack", ContainerTypeEntry::ListContainer},
+        {u"queue", ContainerTypeEntry::ListContainer},
         {u"set", ContainerTypeEntry::SetContainer},
         {u"map", ContainerTypeEntry::MapContainer},
         {u"multi-map", ContainerTypeEntry::MultiMapContainer},
-        {u"hash", ContainerTypeEntry::HashContainer},
-        {u"multi-hash", ContainerTypeEntry::MultiHashContainer},
+        {u"hash", ContainerTypeEntry::MapContainer},
+        {u"multi-hash", ContainerTypeEntry::MultiMapContainer},
         {u"pair", ContainerTypeEntry::PairContainer}
     };
 ENUM_LOOKUP_LINEAR_SEARCH()

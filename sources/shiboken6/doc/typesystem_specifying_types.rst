@@ -461,8 +461,11 @@ container-type
 
     The **name** attribute is the fully qualified C++ class name. The **type**
     attribute is used to indicate what conversion rule will be applied to the
-    container. It can be: *list*, *string-list*, *linked-list*, *vector*, *stack*,
-    *queue*, *set*, *map*, *multi-map*, *hash*, *multi-hash* or *pair*.
+    container. It can be one of: *list*, *set*, *map*, *multi-map* or *pair*.
+
+    Some types were deprecated in 6.2: *string-list*, *linked-list*, *vector*,
+    *stack* and *queue* are equivalent to *list*. *hash* and *multi-hash*
+    are equivalent to *map* and *multi-map*, respectively.
 
     The *optional*  **since** value is used to specify the API version of this container.
 
