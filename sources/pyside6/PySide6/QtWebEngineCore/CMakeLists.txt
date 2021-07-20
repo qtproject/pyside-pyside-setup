@@ -20,6 +20,7 @@ ${QtWebEngineCore_GEN_DIR}/qwebengineregisterprotocolhandlerrequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginescript_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginescriptcollection_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginesettings_wrapper.cpp
+${QtWebEngineCore_GEN_DIR}/qwebenginefindtextresult_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebengineurlrequestinfo_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebengineurlrequestinterceptor_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebengineurlrequestjob_wrapper.cpp

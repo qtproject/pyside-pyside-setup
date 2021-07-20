@@ -39,7 +39,7 @@
 
 // @snippet qwebenginepage-findtext
 auto callable = %PYARG_3;
-auto callback = [callable](bool found)
+auto callback = [callable](const QWebEngineFindTextResult &result)
 {
     if (!PyCallable_Check(callable)) {
         qWarning("Argument 3 of %FUNCTION_NAME must be a callable.");
@@ -47,7 +47,7 @@ auto callback = [callable](bool found)
     }
     Shiboken::GilState state;
     Shiboken::AutoDecRef arglist(PyTuple_New(1));
-    PyTuple_SET_ITEM(arglist, 0, %CONVERTTOPYTHON[bool](found));
+    PyTuple_SET_ITEM(arglist, 0, %CONVERTTOPYTHON[QWebEngineFindTextResult](result));
     Shiboken::AutoDecRef ret(PyObject_CallObject(callable, arglist));
     Py_DECREF(callable);
 
