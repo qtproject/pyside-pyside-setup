@@ -253,6 +253,7 @@ static bool replaceClassDict(PyTypeObject *type)
     // Replace `__dict__` which usually has refcount 1 (but see cyclic_test.py)
     Py_DECREF(type->tp_dict);
     type->tp_dict = new_dict;
+    setCurrentSelectId(type, select_id.object());
     return true;
 }
 
@@ -273,6 +274,7 @@ static bool addNewDict(PyTypeObject *type, PyObject *select_id)
     setNextDict(dict, new_dict);
     setNextDict(new_dict, next_dict);
     type->tp_dict = new_dict;
+    setCurrentSelectId(type, select_id);
     return true;
 }
 
@@ -295,6 +297,7 @@ static bool moveToFeatureSet(PyTypeObject *type, PyObject *select_id)
         }
     } while (dict != initial_dict);
     type->tp_dict = initial_dict;
+    setCurrentSelectId(type, getSelectId(initial_dict));
     return false;
 }
 
