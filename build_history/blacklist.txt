@@ -93,3 +93,6 @@
 # Open GL functions failures on macOS (2/2020)
 [registry::existence_test]
     darwin
+# Incomplehensible effect with feature switching on 3.6, qApp.process_events()
+[QtCore::feature_with_uic_test]
+    py3.6

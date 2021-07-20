@@ -237,6 +237,7 @@ static bool replaceClassDict(PyTypeObject *type)
     // Replace `__dict__` which usually has refcount 1 (but see cyclic_test.py)
     Py_DECREF(type->tp_dict);
     type->tp_dict = new_dict;
+    setCurrentSelectId(type, select_id.object());
     return true;
 }
 
@@ -257,6 +258,7 @@ static bool addNewDict(PyTypeObject *type, PyObject *select_id)
     setNextDict(dict, new_dict);
     setNextDict(new_dict, next_dict);
     type->tp_dict = new_dict;
+    setCurrentSelectId(type, select_id);
     return true;
 }
 
@@ -279,6 +281,7 @@ static bool moveToFeatureSet(PyTypeObject *type, PyObject *select_id)
         }
     } while (dict != initial_dict);
     type->tp_dict = initial_dict;
+    setCurrentSelectId(type, getSelectId(initial_dict));
     return false;
 }
 
@@ -400,6 +403,13 @@ void Select(PyObject *obj)
     type->tp_dict = SelectFeatureSet(type);
 }
 
+PyObject *Select(PyTypeObject *type)
+{
+    if (featurePointer != nullptr)
+        type->tp_dict = SelectFeatureSet(type);
+    return type->tp_dict;
+}
+
 static bool feature_01_addLowerNames(PyTypeObject *type, PyObject *prev_dict, int id);
 static bool feature_02_true_property(PyTypeObject *type, PyObject *prev_dict, int id);
 static bool feature_04_addDummyNames(PyTypeObject *type, PyObject *prev_dict, int id);
@@ -428,11 +438,11 @@ void finalize()
 }
 
 static bool patch_property_impl();
+static bool is_initialized = false;
 
 void init()
 {
     // This function can be called multiple times.
-    static bool is_initialized = false;
     if (!is_initialized) {
         fast_id_array = &_fast_id_array[1];
         for (int idx = -1; idx < 256; ++idx)
@@ -446,6 +456,14 @@ void init()
     }
     // Reset the cache. This is called at any "from __feature__ import".
     cached_globals = nullptr;
+}
+
+void Enable(bool enable)
+{
+    if (!is_initialized)
+        return;
+    featurePointer = enable ? featureProcArray : nullptr;
+    initSelectableFeature(enable ? SelectFeatureSet : nullptr);
 }
 
 //////////////////////////////////////////////////////////////////////////////
