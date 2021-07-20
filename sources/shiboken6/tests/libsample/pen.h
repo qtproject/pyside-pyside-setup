@@ -35,13 +35,13 @@
 class LIBSAMPLE_API Color
 {
 public:
-    Color();
+    Color() = default;
     Color(SampleNamespace::InValue arg);
     Color(unsigned int arg);
 
     bool isNull() const;
 private:
-    bool m_null;
+    bool m_null = true;
 };
 
 class LIBSAMPLE_API Brush

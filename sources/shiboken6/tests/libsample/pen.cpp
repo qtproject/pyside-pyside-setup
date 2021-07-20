@@ -28,10 +28,6 @@
 
 #include "pen.h"
 
-Color::Color() : m_null(true)
-{
-}
-
 Color::Color(SampleNamespace::InValue arg) : m_null(false)
 {
 }
