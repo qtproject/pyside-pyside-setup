@@ -742,21 +742,38 @@ bool checkInstanceType(PyObject *pyObj)
 
 void updateSourceObject(PyObject *source)
 {
-    PyTypeObject *objType = reinterpret_cast<PyTypeObject *>(PyObject_Type(source));
+    // TODO: Provide for actual upstream exception handling.
+    //       For now we'll just return early to avoid further issues.
 
-    Py_ssize_t pos = 0;
-    PyObject *value;
-    PyObject *key;
+    if (source == nullptr)      // Bad input
+       return;
 
-    while (PyDict_Next(objType->tp_dict, &pos, &key, &value)) {
-        if (PyObject_TypeCheck(value, PySideSignalTypeF())) {
-            Shiboken::AutoDecRef signalInstance(reinterpret_cast<PyObject *>(PyObject_New(PySideSignalInstance, PySideSignalInstanceTypeF())));
-            instanceInitialize(signalInstance.cast<PySideSignalInstance *>(), key, reinterpret_cast<PySideSignal *>(value), source, 0);
-            PyObject_SetAttr(source, key, signalInstance);
+    Shiboken::AutoDecRef mroIterator(PyObject_GetIter(source->ob_type->tp_mro));
+
+    if (mroIterator.isNull())   // Not iterable
+       return;
+
+    Shiboken::AutoDecRef mroItem{};
+
+    while ((mroItem.reset(PyIter_Next(mroIterator))), mroItem.object()) {
+        Py_ssize_t pos = 0;
+        PyObject *key, *value;
+        auto *type = reinterpret_cast<PyTypeObject *>(mroItem.object());
+
+        while (PyDict_Next(type->tp_dict, &pos, &key, &value)) {
+            if (PyObject_TypeCheck(value, PySideSignalTypeF())) {
+                auto *inst = PyObject_New(PySideSignalInstance, PySideSignalInstanceTypeF());
+                Shiboken::AutoDecRef signalInstance(reinterpret_cast<PyObject *>(inst));
+                instanceInitialize(signalInstance.cast<PySideSignalInstance *>(),
+                                   key, reinterpret_cast<PySideSignal *>(value), source, 0);
+                if (PyObject_SetAttr(source, key, signalInstance) == -1)
+                    return;     // An error occurred while setting the attribute
+            }
         }
     }
 
-    Py_XDECREF(objType);
+    if (PyErr_Occurred())       // An iteration error occurred
+        return;
 }
 
 QByteArray getTypeName(PyObject *type)
