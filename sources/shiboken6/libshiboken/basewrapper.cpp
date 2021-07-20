@@ -582,6 +582,13 @@ void SbkObjectType_SetPropertyStrings(PyTypeObject *type, const char **strings)
     ptr->propertyStrings = strings;
 }
 
+// PYSIDE-1626: Enforcing a context switch without further action.
+void SbkObjectType_UpdateFeature(PyTypeObject *type)
+{
+    if (SelectFeatureSet != nullptr)
+        type->tp_dict = SelectFeatureSet(type);
+}
+
 //
 //////////////////////////////////////////////////////////////////////////////
 

@@ -291,6 +291,9 @@ PyObject *BindingManager::getOverride(const void *cptr,
     if (!wrapper || reinterpret_cast<const PyObject *>(wrapper)->ob_refcnt == 0)
         return nullptr;
 
+    // PYSIDE-1626: Touch the type to initiate switching early.
+    SbkObjectType_UpdateFeature(Py_TYPE(wrapper));
+
     int flag = currentSelectId(Py_TYPE(wrapper));
     int propFlag = isdigit(methodName[0]) ? methodName[0] - '0' : 0;
     if ((flag & 0x02) != 0 && (propFlag & 3) != 0) {
