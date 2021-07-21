@@ -280,6 +280,8 @@ public:
     void setFunctionType(FunctionType type);
 
     bool usesRValueReferences() const;
+    bool generateBinding() const;
+
     QStringList introspectionCompatibleSignatures(const QStringList &resolvedArguments = QStringList()) const;
     QString signature() const;
 

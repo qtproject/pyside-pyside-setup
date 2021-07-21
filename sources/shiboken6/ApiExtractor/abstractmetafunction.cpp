@@ -419,6 +419,22 @@ bool AbstractMetaFunction::usesRValueReferences() const
     return false;
 }
 
+bool AbstractMetaFunction::generateBinding() const
+{
+    switch (d->m_functionType) {
+    case ConversionOperator:
+    case AssignmentOperatorFunction:
+    case MoveAssignmentOperatorFunction:
+        return false;
+    default:
+        break;
+    }
+    if (isPrivate() && d->m_functionType != EmptyFunction)
+        return false;
+    return d->m_name != u"qt_metacall" && !usesRValueReferences()
+        && !isModifiedRemoved();
+}
+
 QStringList AbstractMetaFunction::introspectionCompatibleSignatures(const QStringList &resolvedArguments) const
 {
     AbstractMetaArgumentList arguments = this->arguments();
