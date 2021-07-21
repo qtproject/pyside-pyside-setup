@@ -212,6 +212,7 @@ int PySide::qmlRegisterSingletonType(PyObject *pyObj, const char *uri, int versi
 
         type.qObjectApi =
             [callback, pyObj, hasCallback](QQmlEngine *engine, QJSEngine *) -> QObject * {
+                Shiboken::GilState gil;
                 AutoDecRef args(PyTuple_New(hasCallback ? 1 : 0));
 
                 if (hasCallback) {
@@ -242,6 +243,7 @@ int PySide::qmlRegisterSingletonType(PyObject *pyObj, const char *uri, int versi
     } else {
         type.scriptApi =
             [callback](QQmlEngine *engine, QJSEngine *) -> QJSValue {
+                Shiboken::GilState gil;
                 AutoDecRef args(PyTuple_New(1));
 
                 PyTuple_SET_ITEM(args, 0, Conversions::pointerToPython(
