@@ -938,8 +938,8 @@
 
     <!-- PYSIDE-1499: Replace QString by pathlib.Path (qdir.h) -->
     <modify-function signature="QDir(const QString &amp;)">
-      <modify-argument index="1">
-        <replace-type modified-type="PyPathLike" pyi-type="Optional[PyPathLike]"/>
+      <modify-argument index="1" pyi-type="Optional[PyPathLike]">
+        <replace-type modified-type="PyPathLike"/>
         <rename to="path"/>
       </modify-argument>
       <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qfile-path-1"/>
