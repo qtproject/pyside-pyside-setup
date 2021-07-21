@@ -4281,8 +4281,8 @@ void CppGenerator::writeClassDefinition(TextStream &s,
 
     bool onlyPrivCtor = !metaClass->hasNonPrivateConstructor();
 
-    const AbstractMetaClass *qCoreApp = AbstractMetaClass::findClass(api().classes(), QLatin1String("QCoreApplication"));
-    const bool isQApp = qCoreApp != Q_NULLPTR && metaClass->inheritsFrom(qCoreApp);
+    const bool isQApp = usePySideExtensions()
+        && metaClass->inheritsFrom(u"QCoreApplication"_qs);
 
     tp_flags = QLatin1String("Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES");
     if (metaClass->isNamespace() || metaClass->hasPrivateDestructor()) {

@@ -236,14 +236,14 @@ public:
     bool isNamespace() const;
     bool isInvisibleNamespace() const;
 
-    bool isQObject() const;
-
+    bool isQObject() const { return inheritsFrom(u"QObject"_qs); }
     bool isQtNamespace() const;
 
     QString qualifiedCppName() const;
 
     bool hasSignals() const;
     bool inheritsFrom(const AbstractMetaClass *other) const;
+    bool inheritsFrom(const QString &name) const;
 
     /**
     *   Says if the class that declares or inherits a virtual function.

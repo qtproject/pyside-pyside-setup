@@ -160,24 +160,6 @@ void AbstractMetaClass::operator-=(AbstractMetaClass::Attribute attribute)
      d->m_attributes.setFlag(attribute, false);
 }
 
-/*******************************************************************************
- * Returns true if this class is a subclass of the given class
- */
-bool AbstractMetaClass::inheritsFrom(const AbstractMetaClass *cls) const
-{
-    Q_ASSERT(cls);
-
-    const AbstractMetaClass *clazz = this;
-    while (clazz) {
-        if (clazz == cls)
-            return true;
-
-        clazz = clazz->baseClass();
-    }
-
-    return false;
-}
-
 bool AbstractMetaClass::isPolymorphic() const
 {
     return d->m_isPolymorphic;
@@ -575,16 +557,6 @@ bool AbstractMetaClass::isInvisibleNamespace() const
 {
     return d->m_typeEntry->isNamespace() && d->m_typeEntry->generateCode()
         && !NamespaceTypeEntry::isVisibleScope(d->m_typeEntry);
-}
-
-static bool qObjectPredicate(const AbstractMetaClass *c)
-{
-    return c->qualifiedCppName() == QLatin1String("QObject");
-}
-
-bool AbstractMetaClass::isQObject() const
-{
-    return qObjectPredicate(this) || recurseClassHierarchy(this, qObjectPredicate) != nullptr;
 }
 
 bool AbstractMetaClass::isQtNamespace() const
@@ -1736,6 +1708,34 @@ const AbstractMetaClass *AbstractMetaClass::findClass(const AbstractMetaClassCLi
             return c;
     }
     return nullptr;
+}
+
+/// Returns true if this class is a subclass of the given class
+bool AbstractMetaClass::inheritsFrom(const AbstractMetaClass *cls) const
+{
+    Q_ASSERT(cls != nullptr);
+
+    if (this == cls || d->m_templateBaseClass == cls)
+        return true;
+
+    return recurseClassHierarchy(this, [cls](const AbstractMetaClass *c) {
+        return cls == c;
+    }) != nullptr;
+}
+
+bool AbstractMetaClass::inheritsFrom(const QString &name) const
+{
+    if (this->qualifiedCppName() == name)
+        return true;
+
+    if (d->m_templateBaseClass != nullptr
+        && d->m_templateBaseClass->qualifiedCppName() == name) {
+        return true;
+    }
+
+    return recurseClassHierarchy(this, [&name](const AbstractMetaClass *c) {
+        return c->qualifiedCppName() == name;
+    }) != nullptr;
 }
 
 const AbstractMetaClass *AbstractMetaClass::findBaseClass(const QString &qualifiedName) const
