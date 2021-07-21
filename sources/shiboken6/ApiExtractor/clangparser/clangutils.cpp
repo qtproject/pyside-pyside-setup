@@ -40,7 +40,7 @@ bool operator==(const CXCursor &c1, const CXCursor &c2)
         && std::equal(c1.data, c1.data + sizeof(c1.data) / sizeof(c1.data[0]), c2.data);
 }
 
-QtCompatHashFunctionType qHash(const CXCursor &c, QtCompatHashFunctionType seed)
+size_t qHash(const CXCursor &c, size_t seed)
 {
     return qHash(c.kind) ^ qHash(c.xdata) ^ qHash(c.data[0])
         ^ qHash(c.data[1])  ^ qHash(c.data[2]) ^ seed;
@@ -52,10 +52,10 @@ bool operator==(const CXType &t1, const CXType &t2)
         && t1.data[1] == t2.data[1];
 }
 
-QtCompatHashFunctionType qHash(const CXType &ct, QtCompatHashFunctionType seed)
+size_t qHash(const CXType &ct, size_t seed)
 {
-    return QtCompatHashFunctionType(ct.kind) ^ QtCompatHashFunctionType(0xFFFFFFFF & quintptr(ct.data[0]))
-        ^ QtCompatHashFunctionType(0xFFFFFFFF & quintptr(ct.data[1])) ^ seed;
+    return size_t(ct.kind) ^ size_t(0xFFFFFFFF & quintptr(ct.data[0]))
+        ^ size_t(0xFFFFFFFF & quintptr(ct.data[1])) ^ seed;
 }
 
 namespace clang {
