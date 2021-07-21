@@ -532,13 +532,8 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
         QSet<QString> seenSignatures;
         bool staticEncountered = false;
         for (const auto &func : it.value()) {
-            if (!func->isAssignmentOperator()
-                && !func->usesRValueReferences()
-                && !func->isConversionOperator()
-                && !func->isModifiedRemoved()
-                && (!func->isPrivate() || func->functionType() == AbstractMetaFunction::EmptyFunction)
-                && func->ownerClass() == func->implementingClass()
-                && (func->name() != QLatin1String("qt_metacall"))) {
+            if (func->ownerClass() == func->implementingClass()
+                && func->generateBinding()) {
                 // PYSIDE-331: Inheritance works correctly when there are disjoint functions.
                 // But when a function is both in a class and inherited in a subclass,
                 // then we need to search through all subclasses and collect the new signatures.

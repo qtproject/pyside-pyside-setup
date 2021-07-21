@@ -2292,7 +2292,8 @@ AbstractMetaFunctionCList
         for (; basis; basis = basis->baseClass()) {
             const auto inFunctions = basis->findFunctions(func->name());
             for (const auto &inFunc : inFunctions) {
-                if (!seen->contains(inFunc->minimalSignature())) {
+                if (inFunc->generateBinding()
+                    && !seen->contains(inFunc->minimalSignature())) {
                     seen->insert(inFunc->minimalSignature());
                     AbstractMetaFunction *newFunc = inFunc->copy();
                     newFunc->setImplementingClass(func->implementingClass());
