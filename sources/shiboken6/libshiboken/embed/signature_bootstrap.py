@@ -103,40 +103,9 @@ def bootstrap():
             sys.exit(-1)
         target.remove(support_path)
 
-    import shiboken6 as root
-    path = Path(root.__file__)
-    rp = path.parent.resolve()
-    # This can be the shiboken6 directory or the binary module, so search.
-    look_for = Path("files.dir") / "shibokensupport" / "signature" / "loader.py"
-    while not (rp / look_for).exists():
-        dir = rp.parent
-        if dir == rp:  # Hit root, '/', 'C:\', '\\server\share'
-            break
-        rp = dir
-
-    # Here we decide if we work embedded or not.
-    embedding_var = "pyside_uses_embedding"
-    use_embedding = bool(getattr(sys, embedding_var, False))
-    loader_path = rp / look_for
-    files_dir = loader_path.parents[2]
-    assert files_dir.name == "files.dir"
-
-    if not loader_path.exists():
-        use_embedding = True
-    setattr(sys, embedding_var, use_embedding)
-
-    if use_embedding:
-        target, support_path = prepare_zipfile()
-    else:
-        target, support_path = sys.path, os.fspath(files_dir)
-
-    try:
-        with ensure_shibokensupport(target, support_path):
-            from shibokensupport.signature import loader
-    except Exception as e:
-        print('Exception:', e)
-        traceback.print_exc(file=sys.stdout)
-
+    target, support_path = prepare_zipfile()
+    with ensure_shibokensupport(target, support_path):
+        from shibokensupport.signature import loader
     return loader
 
 

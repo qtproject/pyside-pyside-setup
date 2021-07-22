@@ -99,8 +99,6 @@ def generate_all_pyi(outpath, options):
 
 
 if __name__ == "__main__":
-    # PYSIDE-1621: Enforce embedding to ensure that it always works.
-    sys.pyside_uses_embedding = True
     parser = argparse.ArgumentParser(
         description="This script generates the .pyi file for all PySide modules.")
     parser.add_argument("modules", nargs="+",

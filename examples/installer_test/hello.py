@@ -62,8 +62,7 @@ from PySide6.QtWidgets import (QApplication, QLabel, QPushButton,
 from PySide6.QtCore import Slot, Qt, QTimer
 
 is_compiled = "__compiled__" in globals()   # Nuitka
-uses_embedding = sys.pyside_uses_embedding  # PyInstaller
-auto_quit = "Nuitka" if is_compiled else "PyInst" if uses_embedding else False
+auto_quit = "Nuitka" if is_compiled else "PyInst"
 
 
 class MyWidget(QWidget):

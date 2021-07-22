@@ -49,15 +49,6 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/Shiboken.pyi"
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/../Shiboken.pyi"
         DESTINATION "${PYTHON_SITE_PACKAGES}/shiboken6")
 
-# Variable from enclosing scope.
-foreach(item IN LISTS shiboken_python_files)
-    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/files.dir/shibokensupport/${item}"
-                   "${CMAKE_CURRENT_BINARY_DIR}/files.dir/shibokensupport/${item}" COPYONLY)
-endforeach()
-
-install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/files.dir"
-        DESTINATION "${PYTHON_SITE_PACKAGES}/shiboken6")
-
 # PYSIDE-1497: This `..` is the crucial trick to unify the path location of `Shiboken`.
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/../__init__.py"
        DESTINATION "${PYTHON_SITE_PACKAGES}/shiboken6")
