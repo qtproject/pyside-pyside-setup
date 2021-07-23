@@ -1545,8 +1545,7 @@
          tag in Qt6? -->
     <declare-function signature="QItemSelection()" return-type="QItemSelection" />
     <!-- The __add__ function creates a result list, instead of using the inherited type.
-         Solved for now by removing and re-adding with the correct type. -->
-    <modify-function signature="operator+(QList&lt;QItemSelectionRange&gt;)const" remove="all" />
+         Fixed by adding with the correct type. -->
     <add-function signature="operator+(QItemSelection)" return-type="QItemSelection">
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qitemselection-add"/>
     </add-function>
