@@ -474,7 +474,7 @@ const auto points = PySide::Numpy::xyDataToQPointFList(%PYARG_1, %PYARG_2);
 // @snippet qpainter-drawpointsnp-numpy-x-y
 
 // @snippet qpainter-drawpolygon
-%CPPSELF.%FUNCTION_NAME(%1.data(), %1.size(), %2);
+%CPPSELF.%FUNCTION_NAME(%1.constData(), %1.size(), %2);
 // @snippet qpainter-drawpolygon
 
 // @snippet qmatrix4x4

@@ -647,8 +647,8 @@ static void msgHandlerCallback(QtMsgType type, const QMessageLogContext &ctx, co
     PyTuple_SET_ITEM(arglist, 0, %CONVERTTOPYTHON[QtMsgType](type));
     PyTuple_SET_ITEM(arglist, 1, %CONVERTTOPYTHON[QMessageLogContext &](ctx));
     QByteArray array = msg.toUtf8();  // Python handler requires UTF-8
-    char *data = array.data();
-    PyTuple_SET_ITEM(arglist, 2, %CONVERTTOPYTHON[char *](data));
+    const char *data = array.constData();
+    PyTuple_SET_ITEM(arglist, 2, %CONVERTTOPYTHON[const char *](data));
     Shiboken::AutoDecRef ret(PyObject_CallObject(qtmsghandler, arglist));
 }
 static void QtCoreModuleExit()
@@ -1427,7 +1427,7 @@ if (result == -1) {
     Py_INCREF(Py_None);
     %PYARG_0 = Py_None;
 } else {
-    %PYARG_0 = PyBytes_FromStringAndSize(data.data(), result);
+    %PYARG_0 = PyBytes_FromStringAndSize(data.constData(), result);
 }
 // @snippet qdatastream-readrawdata
 
