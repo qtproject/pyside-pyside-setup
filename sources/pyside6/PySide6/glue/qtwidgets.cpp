@@ -211,12 +211,6 @@ if (_widget) {
 void addLayoutOwnership(QLayout *layout, QLayoutItem *item);
 void removeLayoutOwnership(QLayout *layout, QWidget *widget);
 
-inline QByteArray retrieveObjectName(PyObject *obj)
-{
-    Shiboken::AutoDecRef objName(PyObject_Str(obj));
-    return Shiboken::String::toCString(objName);
-}
-
 inline void addLayoutOwnership(QLayout *layout, QWidget *widget)
 {
     //transfer ownership to parent widget
@@ -232,7 +226,9 @@ inline void addLayoutOwnership(QLayout *layout, QWidget *widget)
     if (!lw && !pw) {
         //keep the reference while the layout is orphan
         Shiboken::AutoDecRef pyParent(%CONVERTTOPYTHON[QWidget *](layout));
-        Shiboken::Object::keepReference(reinterpret_cast<SbkObject *>(pyParent.object()), retrieveObjectName(pyParent).data(), pyChild, true);
+        Shiboken::Object::keepReference(reinterpret_cast<SbkObject *>(pyParent.object()),
+                                        retrieveObjectName(pyParent).constData(),
+                                        pyChild, true);
     } else {
         if (!lw)
             lw = pw;
@@ -250,7 +246,8 @@ inline void addLayoutOwnership(QLayout *layout, QLayout *other)
         Shiboken::AutoDecRef pyParent(%CONVERTTOPYTHON[QLayout *](layout));
         Shiboken::AutoDecRef pyChild(%CONVERTTOPYTHON[QLayout *](other));
         Shiboken::Object::keepReference(reinterpret_cast<SbkObject *>(pyParent.object()),
-                                        retrieveObjectName(pyParent).data(), pyChild, true);
+                                        retrieveObjectName(pyParent).constData(),
+                                        pyChild, true);
         return;
     }
 
@@ -295,7 +292,8 @@ static void removeWidgetFromLayout(QLayout *layout, QWidget *widget)
         Shiboken::AutoDecRef pyParent(%CONVERTTOPYTHON[QWidget *](layout));
         Shiboken::AutoDecRef pyChild(%CONVERTTOPYTHON[QWidget *](widget));
         Shiboken::Object::removeReference(reinterpret_cast<SbkObject *>(pyParent.object()),
-                                          retrieveObjectName(pyParent).data(), pyChild);
+                                          retrieveObjectName(pyParent).constData(),
+                                          pyChild);
     }
 }
 
@@ -430,13 +428,15 @@ for (int i = 0, count = %CPPSELF.count(); i < count; ++i) {
 %CPPSELF.%FUNCTION_NAME();
 // @snippet qlistwidget-clear
 
-// @snippet qwidget-glue
-static QString retrieveObjectName(PyObject *obj)
+// @snippet qwidget-retrieveobjectname
+static QByteArray retrieveObjectName(PyObject *obj)
 {
     Shiboken::AutoDecRef objName(PyObject_Str(obj));
-    return QString(Shiboken::String::toCString(objName));
+    return Shiboken::String::toCString(objName);
 }
+// @snippet qwidget-retrieveobjectname
 
+// @snippet qwidget-glue
 
 // Transfer objects ownership from layout to widget
 static inline void qwidgetReparentLayout(QWidget *parent, QLayout *layout)
@@ -464,7 +464,8 @@ static inline void qwidgetReparentLayout(QWidget *parent, QLayout *layout)
     Shiboken::Object::setParent(pyParent, pyChild);
     //remove previous references
     Shiboken::Object::keepReference(reinterpret_cast<SbkObject *>(pyChild.object()),
-                                    qPrintable(retrieveObjectName(pyChild)), Py_None);
+                                    retrieveObjectName(pyChild).constData(),
+                                    Py_None);
 }
 
 static inline void qwidgetSetLayout(QWidget *self, QLayout *layout)

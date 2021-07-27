@@ -1216,6 +1216,8 @@
   </object-type>
 
   <object-type name="QLayout">
+    <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp"
+                 snippet="qwidget-retrieveobjectname"/>
     <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp" snippet="qlayout-help-functions"/>
     <enum-type name="SizeConstraint"/>
 
@@ -1305,6 +1307,8 @@
   </object-type>
 
   <object-type name="QStackedLayout">
+    <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp"
+                 snippet="qwidget-retrieveobjectname"/>
     <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp" snippet="qlayout-help-functions"/>
     <enum-type name="StackingMode"/>
     <modify-function signature="insertWidget(int,QWidget*)" allow-thread="yes">
@@ -1316,6 +1320,8 @@
   </object-type>
 
   <object-type name="QBoxLayout">
+    <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp"
+                 snippet="qwidget-retrieveobjectname"/>
     <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp" snippet="qlayout-help-functions"/>
 
     <enum-type name="Direction"/>
@@ -1346,6 +1352,8 @@
   </object-type>
 
   <object-type name="QGridLayout">
+    <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp"
+                 snippet="qwidget-retrieveobjectname"/>
     <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp" snippet="qlayout-help-functions"/>
     <modify-function signature="itemAtPosition (int,int)const">
       <modify-argument index="return">
@@ -2000,6 +2008,8 @@
       <include file-name="QMessageBox" location="global"/>
     </extra-includes>
 
+    <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp"
+                 snippet="qwidget-retrieveobjectname"/>
     <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp" snippet="qwidget-glue"/>
 
     <enum-type name="RenderFlag" flags="RenderFlags"/>
@@ -2857,6 +2867,8 @@
     </modify-function>
   </object-type>
   <object-type name="QFormLayout">
+    <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp"
+                 snippet="qwidget-retrieveobjectname"/>
     <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp" snippet="qlayout-help-functions"/>
 
     <enum-type name="FieldGrowthPolicy"/>
