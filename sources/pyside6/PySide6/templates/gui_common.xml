@@ -172,7 +172,7 @@
     </template>
 
     <template name="qpainter_drawlist">
-        %CPPSELF.%FUNCTION_NAME(%1.data(), %1.size());
+        %CPPSELF.%FUNCTION_NAME(%1.constData(), %1.size());
     </template>
 
     <template name="inplace_add">
