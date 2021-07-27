@@ -107,6 +107,7 @@ public:
     static TypeDatabase *instance(bool newInstance = false);
 
     static QString normalizedSignature(const QString &signature);
+    static QString normalizedAddedFunctionSignature(const QString &signature);
 
     QStringList requiredTargetImports() const;
 

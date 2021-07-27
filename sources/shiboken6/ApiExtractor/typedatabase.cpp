@@ -105,8 +105,60 @@ static const IntTypeNormalizationEntries &intTypeNormalizationEntries()
     return result;
 }
 
+// Normalization helpers
+enum CharCategory { Space, Identifier, Other };
+
+static CharCategory charCategory(QChar c)
+{
+    if (c.isSpace())
+        return Space;
+    if (c.isLetterOrNumber() || c == u'_')
+        return Identifier;
+    return Other;
+}
+
+// Normalize a C++ function signature:
+// Drop space except between identifiers ("unsigned int", "const int")
+static QString normalizeCppFunctionSignature(const QString &signatureIn)
+{
+    const QString signature = signatureIn.simplified();
+    QString result;
+    result.reserve(signature.size());
+
+    CharCategory lastNonSpaceCategory = Other;
+    bool pendingSpace = false;
+    for (QChar c : signature) {
+        if (c.isSpace()) {
+            pendingSpace = true;
+        } else {
+            const auto category = charCategory(c);
+            if (pendingSpace) {
+                if (lastNonSpaceCategory == Identifier && category == Identifier)
+                    result.append(u' ');
+                pendingSpace = false;
+            }
+            lastNonSpaceCategory = category;
+            result.append(c);
+        }
+    }
+    return result;
+}
+
+// Normalize a signature for <add-function> by removing spaces
+QString TypeDatabase::normalizedAddedFunctionSignature(const QString &signature)
+{
+    return normalizeCppFunctionSignature(signature);
+}
+
+// Normalize a signature for matching by <modify-function>/<function>
+// by removing spaces and changing const-ref to value.
+// FIXME: PYSIDE7: Check whether the above simple normalization can be used
+// here as well. Note though that const-ref would then have to be spelled out
+// in typeystem XML.
 QString TypeDatabase::normalizedSignature(const QString &signature)
 {
+    // QMetaObject::normalizedSignature() changes const-ref to value and
+    // changes "unsigned int" to "uint" which is undone by the below code
     QString normalized = QLatin1String(QMetaObject::normalizedSignature(signature.toUtf8().constData()));
 
     if (instance() && signature.contains(QLatin1String("unsigned"))) {

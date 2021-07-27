@@ -1567,7 +1567,11 @@ AbstractMetaFunction *
 
     const auto &args = addedFunc->arguments();
 
-    for (int i = 0; i < args.count(); ++i) {
+    qsizetype argCount = args.count();
+    // Check "foo(void)"
+    if (argCount == 1 && args.constFirst().typeInfo.isVoid())
+        argCount = 0;
+    for (qsizetype i = 0; i < argCount; ++i) {
         const AddedFunction::Argument &arg = args.at(i);
         auto type = translateType(arg.typeInfo, metaClass, {}, errorMessage);
         if (Q_UNLIKELY(!type.has_value())) {

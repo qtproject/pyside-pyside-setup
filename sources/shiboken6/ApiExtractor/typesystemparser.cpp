@@ -2284,7 +2284,7 @@ bool TypeSystemParser::parseAddFunction(const ConditionalStreamReader &,
         }
     }
 
-    QString signature = TypeDatabase::normalizedSignature(originalSignature);
+    QString signature = TypeDatabase::normalizedAddedFunctionSignature(originalSignature);
     if (signature.isEmpty()) {
         m_error = QLatin1String("No signature for the added function");
         return false;
