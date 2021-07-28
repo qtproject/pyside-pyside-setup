@@ -261,14 +261,15 @@ def main():
             key, value = things
             os.environ[key] = value
 
+    version = sys.version.replace("\n", " ")
     print(
         dedent(
-            """\
+            f"""\
         System:
-          Platform={sys.__dict__["platform"]}
-          Executable={sys.__dict__["executable"]}
-          Version={sys.version.replace("\n", " ")}
-          API version={sys.__dict__["api_version"]}
+          Platform={sys.platform}
+          Executable={sys.executable}
+          Version={version}
+          API version={sys.api_version}
 
         Environment:"""
         )
