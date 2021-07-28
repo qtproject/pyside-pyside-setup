@@ -44,6 +44,7 @@
 #include "gilstate.h"
 #include "sbkstring.h"
 #include "sbkstaticstrings.h"
+#include "sbkfeature_base.h"
 #include "debugfreehook.h"
 
 #include <cstddef>
@@ -271,14 +272,6 @@ SbkObject *BindingManager::retrieveWrapper(const void *cptr)
     if (iter == m_d->wrapperMapper.end())
         return nullptr;
     return iter->second;
-}
-
-static inline int currentSelectId(PyTypeObject *type)
-{
-    int sel = SbkObjectType_GetReserved(type);
-    // This could theoretically be -1 if used too early.
-    assert(sel >= 0);
-    return sel;
 }
 
 PyObject *BindingManager::getOverride(const void *cptr,

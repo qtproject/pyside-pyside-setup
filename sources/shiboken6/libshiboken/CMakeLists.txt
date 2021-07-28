@@ -50,6 +50,7 @@ helper.cpp
 sbkarrayconverter.cpp
 sbkconverter.cpp
 sbkenum.cpp
+sbkfeature_base.cpp
 sbkmodule.cpp
 sbkstring.cpp
 sbkstaticstrings.cpp
@@ -101,7 +102,7 @@ shiboken_compute_python_includes()
 shiboken_compute_python_libraries()
 
 if(PYTHON_LIMITED_API)
-    target_compile_definitions(libshiboken PUBLIC "-DPy_LIMITED_API=0x03050000")
+    target_compile_definitions(libshiboken PUBLIC "-DPy_LIMITED_API=0x03060000")
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -129,6 +130,7 @@ install(FILES
         sbkarrayconverter.h
         sbkconverter.h
         sbkenum.h
+        sbkfeature_base.h
         sbkmodule.h
         sbkstring.h
         sbkstaticstrings.h
