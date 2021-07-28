@@ -50,6 +50,7 @@ helper.cpp
 sbkarrayconverter.cpp
 sbkconverter.cpp
 sbkenum.cpp
+sbkfeature_base.cpp
 sbkmodule.cpp
 sbkstring.cpp
 sbkstaticstrings.cpp
@@ -131,6 +132,7 @@ install(FILES
         sbkconverter.h
         sbkenum.h
         sbkenum_p.h
+        sbkfeature_base.h
         sbkmodule.h
         sbkstring.h
         sbkstaticstrings.h

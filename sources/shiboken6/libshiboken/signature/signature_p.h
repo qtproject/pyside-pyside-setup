@@ -93,7 +93,6 @@ PyObject *pyside_tp_get___doc__(PyObject *tp);
 
 // signature_helper.cpp
 
-PyObject *_get_qualname(PyObject *ob);
 int add_more_getsets(PyTypeObject *type, PyGetSetDef *gsp, PyObject **doc_descr);
 PyObject *name_key_to_func(PyObject *ob);
 int insert_snake_case_variants(PyObject *dict);

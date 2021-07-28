@@ -43,6 +43,7 @@
 #include "class_property.h"
 
 #include <shiboken.h>
+#include <sbkfeature_base.h>
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -128,38 +129,9 @@ typedef bool(*FeatureProc)(PyTypeObject *type, PyObject *prev_dict, int id);
 
 static FeatureProc *featurePointer = nullptr;
 
-static PyObject *cached_globals = nullptr;
-static PyObject *last_select_id = nullptr;
-
 static PyObject *_fast_id_array[1 + 256] = {};
 // this will point to element 1 to allow indexing from -1
 static PyObject **fast_id_array;
-
-static inline PyObject *getFeatureSelectId()
-{
-    static PyObject *undef = fast_id_array[-1];
-    static PyObject *feature_dict = GetFeatureDict();
-    // these things are all borrowed
-    PyObject *globals = PyEval_GetGlobals();
-    if (globals == nullptr
-        || globals == cached_globals)
-        return last_select_id;
-
-    PyObject *modname = PyDict_GetItem(globals, PyMagicName::name());
-    if (modname == nullptr)
-        return last_select_id;
-
-    PyObject *select_id = PyDict_GetItem(feature_dict, modname);
-    if (select_id == nullptr
-        || !PyInt_Check(select_id)  // int/long cheating
-        || select_id == undef)
-        return last_select_id;
-
-    cached_globals = globals;
-    last_select_id = select_id;
-    assert(PyInt_AsSsize_t(select_id) >= 0);
-    return select_id;
-}
 
 // Create a derived dict class
 static PyTypeObject *
@@ -463,7 +435,6 @@ void init()
         fast_id_array = &_fast_id_array[1];
         for (int idx = -1; idx < 256; ++idx)
             fast_id_array[idx] = PyInt_FromLong(idx);
-        last_select_id = fast_id_array[0];
         featurePointer = featureProcArray;
         initSelectableFeature(SelectFeatureSet);
         registerCleanupFunction(finalize);
@@ -471,7 +442,7 @@ void init()
         is_initialized = true;
     }
     // Reset the cache. This is called at any "from __feature__ import".
-    cached_globals = nullptr;
+    initFeatureShibokenPart();
 }
 
 void Enable(bool enable)

@@ -57,19 +57,6 @@ using namespace Shiboken;
 
 extern "C" {
 
-// Helper for __qualname__ which might not always exist in Python 2 (type).
-PyObject *_get_qualname(PyObject *ob)
-{
-    // We support __qualname__ for types, only.
-    assert(PyType_Check(ob));
-    PyObject *name = PyObject_GetAttr(ob, PyMagicName::qualname());
-    if (name == nullptr) {
-        PyErr_Clear();
-        name = PyObject_GetAttr(ob, PyMagicName::name());
-    }
-    return name;
-}
-
 static int _fixup_getset(PyTypeObject *type, const char *name, PyGetSetDef *new_gsp)
 {
     /*
