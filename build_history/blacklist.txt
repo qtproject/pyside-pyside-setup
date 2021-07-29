@@ -47,9 +47,6 @@
     darwin ci
 [QtWidgets::qpicture_test]
     darwin ci
-# Incomplehensible effect with feature switching on 3.6, qApp.process_events()
-[QtCore::feature_with_uic_test]
-    py3.6
 # Unsolved Refcounting leaks in debug mode
 [pysidetest::property_python_test]
     debug
