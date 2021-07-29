@@ -36,7 +36,7 @@ using namespace std;
 QString
 DummyGenerator::fileNameForClass(const AbstractMetaClass* metaClass) const
 {
-    return QString("%1_generated.txt").arg(metaClass->name().toLower());
+    return metaClass->name().toLower() + u"_generated.txt"_qs;
 }
 
 void

@@ -1885,7 +1885,7 @@ bool TypeSystemParser::loadTypesystem(const ConditionalStreamReader &,
         m_database->parseFile(typeSystemName, m_currentPath, generateChild
                               && m_generate == TypeEntry::GenerateCode);
     if (!result)
-        m_error = QStringLiteral("Failed to parse: '%1'").arg(typeSystemName);
+        m_error = u"Failed to parse: '"_qs + typeSystemName + u'\'';
     return result;
 }
 
@@ -2311,7 +2311,7 @@ bool TypeSystemParser::parseAddFunction(const ConditionalStreamReader &,
     if (!access.isEmpty()) {
         const auto acessOpt = addedFunctionAccessFromAttribute(access);
         if (!acessOpt.has_value()) {
-            m_error = QString::fromLatin1("Bad access type '%1'").arg(access);
+            m_error = u"Bad access type '"_qs + access + u'\'';
             return false;
         }
         func->setAccess(acessOpt.value());
@@ -2466,7 +2466,7 @@ bool TypeSystemParser::parseModifyFunction(const ConditionalStreamReader &reader
     if (!access.isEmpty()) {
         const auto modifierFlagOpt = modifierFromAttribute(access);
         if (!modifierFlagOpt.has_value()) {
-            m_error = QString::fromLatin1("Bad access type '%1'").arg(access);
+            m_error = u"Bad access type '"_qs + access + u'\'';
             return false;
         }
         const FunctionModification::ModifierFlag m = modifierFlagOpt.value();
@@ -2847,7 +2847,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
 
     const auto elementTypeOpt = elementFromTag(tagName);
     if (!elementTypeOpt.has_value()) {
-        m_error = QStringLiteral("Unknown tag name: '%1'").arg(tagName);
+        m_error = u"Unknown tag name: '"_qs + tagName.toString() + u'\'';
         return false;
     }
 
@@ -2930,7 +2930,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
             TypeEntry *tmp = m_database->findType(name);
             if (tmp && !tmp->isNamespace())
                 qCWarning(lcShiboken).noquote().nospace()
-                    << QStringLiteral("Duplicate type entry: '%1'").arg(name);
+                    << "Duplicate type entry: '" << name << '\'';
         }
 
         if (element->type == StackElement::EnumTypeEntry) {
@@ -3030,7 +3030,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
                 return false;
         } else {
             qCWarning(lcShiboken).noquote().nospace()
-                << QStringLiteral("Type: %1 was rejected by typesystem").arg(name);
+                << u"Type: "_qs + name + u" was rejected by typesystem"_qs;
         }
 
     } else if (element->type == StackElement::InjectDocumentation) {
@@ -3052,7 +3052,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
                         || element->type == StackElement::Template;
 
         if (!topLevel && m_current->type == StackElement::Root) {
-            m_error = QStringLiteral("Tag requires parent: '%1'").arg(tagName);
+            m_error = u"Tag requires parent: '"_qs + tagName.toString() + u'\'';
             return false;
         }
 

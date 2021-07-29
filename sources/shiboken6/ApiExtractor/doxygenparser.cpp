@@ -166,7 +166,7 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
                 funcQuery += QLatin1String("/../") + tag.second;
             } else {
                 funcQuery = QLatin1Char('(') + funcQuery;
-                funcQuery += QLatin1String("/../%1)[1]").arg(tag.second);
+                funcQuery += u"/../"_qs + tag.second + u")[1]"_qs;
             }
 
             QString doc = getDocumentation(xquery, funcQuery, DocModificationList());

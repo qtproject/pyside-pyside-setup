@@ -985,8 +985,8 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
 
     if (ReportHandler::isDebug(ReportHandler::MediumDebug)) {
         const QString message = type->isContainer()
-            ? QStringLiteral("container: '%1'").arg(fullClassName)
-            : QStringLiteral("class: '%1'").arg(metaClass->fullName());
+            ? u"container: '"_qs + fullClassName + u'\''
+            : u"class: '"_qs + metaClass->fullName() + u'\'';
         qCInfo(lcShiboken, "%s", qPrintable(message));
     }
 

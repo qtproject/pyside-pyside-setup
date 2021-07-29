@@ -1375,7 +1375,7 @@ void CppGenerator::writeEnumConverterFunctions(TextStream &s, const TypeEntry *e
     c << ";\n";
     writePythonToCppFunction(s, c.toString(), typeName, typeName);
 
-    QString pyTypeCheck = QStringLiteral("PyObject_TypeCheck(pyIn, %1)").arg(enumPythonType);
+    QString pyTypeCheck = u"PyObject_TypeCheck(pyIn, "_qs + enumPythonType + u')';
     writeIsPythonConvertibleToCppFunction(s, typeName, typeName, pyTypeCheck);
 
     c.clear();
@@ -1581,7 +1581,8 @@ return result;)";
         QString toCppPreConv;
         if (conv->isConversionOperator()) {
             const AbstractMetaClass *sourceClass = conv->ownerClass();
-            typeCheck = QStringLiteral("PyObject_TypeCheck(pyIn, %1)").arg(cpythonTypeNameExt(sourceClass->typeEntry()));
+            typeCheck = u"PyObject_TypeCheck(pyIn, "_qs
+                        + cpythonTypeNameExt(sourceClass->typeEntry()) + u')';
             toCppConv = QLatin1Char('*') + cpythonWrapperCPtr(sourceClass->typeEntry(), QLatin1String("pyIn"));
         } else {
             // Constructor that does implicit conversion.
@@ -1708,7 +1709,7 @@ void CppGenerator::writeConverterRegister(TextStream &s, const AbstractMetaClass
                                                Qt::SkipEmptyParts);
         while (!lst.isEmpty()) {
             QString signature = lst.join(QLatin1String("::"));
-            writeConversions(QStringLiteral("%1<%2 >").arg(smartPointerName, signature));
+            writeConversions(smartPointerName + u'<' + signature + u" >"_qs);
             lst.removeFirst();
         }
 
@@ -2229,7 +2230,7 @@ void CppGenerator::writeArgumentsInitializer(TextStream &s, OverloadData &overlo
     if (!invalidArgsLength.isEmpty()) {
         QStringList invArgsLen;
         for (int i : qAsConst(invalidArgsLength))
-            invArgsLen << QStringLiteral("numArgs == %1").arg(i);
+            invArgsLen << u"numArgs == "_qs + QString::number(i);
         if (usesNamedArguments && (!ownerClassIsQObject || minArgs > 0))
             s << " else ";
         s << "if (" << invArgsLen.join(QLatin1String(" || ")) << ")\n";
@@ -2424,18 +2425,21 @@ void CppGenerator::writeTypeCheck(TextStream &s, AbstractMetaType argType,
         typeCheck = cpythonIsConvertibleFunction(argType, argType.isEnum() ? false : isNumber);
     else
         typeCheck = customCheck;
-    typeCheck.append(QString::fromLatin1("(%1)").arg(argumentName));
+    typeCheck.append(u'(' +argumentName + u')');
 
     // TODO-CONVERTER -----------------------------------------------------------------------
     if (customCheck.isEmpty() && !argType.typeEntry()->isCustom()) {
-        typeCheck = QString::fromLatin1("(%1 = %2))").arg(pythonToCppConverterForArgumentName(argumentName), typeCheck);
-        if (!isNumber && argType.typeEntry()->isCppPrimitive())
-            typeCheck.prepend(QString::fromLatin1("%1(%2) && ").arg(cpythonCheckFunction(argType), argumentName));
+        typeCheck = u'(' + pythonToCppConverterForArgumentName(argumentName)
+                    + u" = "_qs + typeCheck + u"))"_qs;
+        if (!isNumber && argType.typeEntry()->isCppPrimitive()) {
+            typeCheck.prepend(cpythonCheckFunction(argType) + u'('
+                              + argumentName + u") && "_qs);
+        }
     }
     // TODO-CONVERTER -----------------------------------------------------------------------
 
     if (rejectNull)
-        typeCheck = QString::fromLatin1("(%1 != Py_None && %2)").arg(argumentName, typeCheck);
+        typeCheck = u'(' + argumentName +  u" != Py_None && "_qs + typeCheck + u')';
 
     s << typeCheck;
 }
@@ -2539,7 +2543,7 @@ std::optional<AbstractMetaType>
 {
     if (argPos < 0 || argPos > func->arguments().size()) {
         qCWarning(lcShiboken).noquote().nospace()
-            << QStringLiteral("Argument index for function '%1' out of range.").arg(func->signature());
+            << "Argument index for function '" << func->signature() << "' out of range.";
         return {};
     }
 
@@ -2664,7 +2668,8 @@ void CppGenerator::writePythonToCppTypeConversion(TextStream &s,
     if (!defaultValue.isEmpty())
         s << "if (" << pythonToCppFunc << ") ";
 
-    QString pythonToCppCall = QString::fromLatin1("%1(%2, &%3)").arg(pythonToCppFunc, pyIn, cppOut);
+    QString pythonToCppCall = pythonToCppFunc + u'(' + pyIn + u", &"_qs
+                              + cppOut + u')';
     if (!mayHaveImplicitConversion) {
         s << pythonToCppCall << ";\n";
         return;
@@ -2908,9 +2913,11 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(TextStream &s,
             int numArgs = args.size() - OverloadData::numberOfRemovedArguments(refFunc);
             if (isVarargs)
                 --numArgs;
-            typeChecks.prepend(QString::fromLatin1("numArgs %1 %2").arg(isVarargs ? QLatin1String(">=") : QLatin1String("==")).arg(numArgs));
+            QString check = (isVarargs ? u"numArgs >= "_qs : u"numArgs == "_qs)
+                            + QString::number(numArgs);
+            typeChecks.prepend(check);
         } else if (usePyArgs && sequenceArgCount > 0) {
-            typeChecks.prepend(QString::fromLatin1("numArgs >= %1").arg(startArg + sequenceArgCount));
+            typeChecks.prepend(u"numArgs >= "_qs + QString::number(startArg + sequenceArgCount));
         } else if (refFunc->isOperatorOverload() && !refFunc->isCallOperator()) {
             QString check;
             if (!refFunc->isReverseOperator())
@@ -3147,7 +3154,7 @@ void CppGenerator::writeCppToPythonFunction(TextStream &s, const AbstractMetaTyp
         QString typeName = getFullTypeName(type);
         if (type.isConstant())
             typeName = QLatin1String("const ") + typeName;
-        code.replace(QString::fromLatin1("%INTYPE_%1").arg(i), typeName);
+        code.replace(u"%INTYPE_"_qs + QString::number(i), typeName);
     }
     replaceCppToPythonVariables(code, getFullTypeNameWithoutModifiers(containerType), true);
     processCodeSnip(code);
@@ -3215,7 +3222,7 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s,
 
     // Python to C++ convertible check function.
     if (typeCheck.isEmpty())
-        typeCheck = QString::fromLatin1("PyObject_TypeCheck(pyIn, %1)").arg(sourcePyType);
+        typeCheck = u"PyObject_TypeCheck(pyIn, "_qs + sourcePyType + u')';
     writeIsPythonConvertibleToCppFunction(s, sourceTypeName, targetTypeName, typeCheck);
     s << '\n';
 }
@@ -3230,7 +3237,7 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s,
     if (toNative->sourceType())
         inType = cpythonTypeNameExt(toNative->sourceType());
     else
-        inType = QString::fromLatin1("(%1_TypeF())").arg(toNative->sourceTypeName());
+        inType = u'(' + toNative->sourceTypeName() + u"_TypeF())"_qs;
     code.replace(QLatin1String("%INTYPE"), inType);
     code.replace(QLatin1String("%OUTTYPE"), targetType->qualifiedCppName());
     code.replace(QLatin1String("%in"), QLatin1String("pyIn"));
@@ -3268,7 +3275,8 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s,
                 << "' must provide either an input type check function or a non primitive type entry.";
             throw Exception(m);
         }
-        typeCheck = QString::fromLatin1("PyObject_TypeCheck(%in, %1)").arg(cpythonTypeNameExt(toNative->sourceType()));
+        typeCheck = u"PyObject_TypeCheck(%in, "_qs
+                    + cpythonTypeNameExt(toNative->sourceType()) + u')';
     }
     typeCheck.replace(QLatin1String("%in"), QLatin1String("pyIn"));
     processCodeSnip(typeCheck);
@@ -3309,7 +3317,7 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s, const Abst
             }
             typeName.append(QLatin1String(" *"));
         }
-        code.replace(QString::fromLatin1("%OUTTYPE_%1").arg(i), typeName);
+        code.replace(u"%OUTTYPE_"_qs + QString::number(i), typeName);
     }
     code.replace(QLatin1String("%OUTTYPE"), cppTypeName);
     code.replace(QLatin1String("%in"), QLatin1String("pyIn"));
@@ -4155,8 +4163,8 @@ void CppGenerator::writeSmartPointerConverterInitialization(TextStream &s, const
         if (smartTargetType.has_value()) {
             s << "// Convert to SmartPointer derived class: ["
                 << smartTargetType->cppSignature() << "]\n";
-            const QString converter =
-                QLatin1String("Shiboken::Conversions::getConverter(\"%1\")").arg(smartTargetType->cppSignature());
+            const QString converter = u"Shiboken::Conversions::getConverter(\""_qs
+                                      + smartTargetType->cppSignature() + u"\")"_qs;
             writeConversionRegister(type, fixedCppTypeName(smartTargetType.value()), converter);
         } else {
             s << "// Class not found:" << type.instantiations().at(0).cppSignature();

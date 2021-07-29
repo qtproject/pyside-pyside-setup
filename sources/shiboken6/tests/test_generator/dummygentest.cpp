@@ -45,14 +45,14 @@ void DummyGenTest::initTestCase()
     headerFilePath = workDir + "/test_global.h";
     typesystemFilePath = workDir + "/test_typesystem.xml";
     projectFilePath = workDir + "/dummygentest-project.txt";
-    generatedFilePath = QString("%1/dummy/dummy_generated.txt").arg(QDir::tempPath());
+    generatedFilePath = QDir::tempPath() + u"/dummy/dummy_generated.txt"_qs;
 }
 
 void DummyGenTest::testCallGenRunnerWithFullPathToDummyGenModule()
 {
     QStringList args;
     args.append("--generator-set=" DUMMYGENERATOR_BINARY_DIR "/dummy_generator" MODULE_EXTENSION);
-    args.append(QString("--output-directory=%1").arg(QDir::tempPath()));
+    args.append(u"--output-directory="_qs + QDir::tempPath());
     args.append(headerFilePath);
     args.append(typesystemFilePath);
     int result = QProcess::execute("generatorrunner", args);
@@ -70,7 +70,7 @@ void DummyGenTest::testCallGenRunnerWithNameOfDummyGenModule()
 {
     QStringList args;
     args.append("--generator-set=dummy");
-    args.append(QString("--output-directory=%1").arg(QDir::tempPath()));
+    args.append(u"--output-directory="_qs + QDir::tempPath());
     args.append(headerFilePath);
     args.append(typesystemFilePath);
     int result = QProcess::execute("generatorrunner", args);
@@ -87,7 +87,7 @@ void DummyGenTest::testCallGenRunnerWithNameOfDummyGenModule()
 void DummyGenTest::testCallDummyGeneratorExecutable()
 {
     QStringList args;
-    args.append(QString("--output-directory=%1").arg(QDir::tempPath()));
+    args.append(u"--output-directory="_qs + QDir::tempPath());
     args.append(headerFilePath);
     args.append(typesystemFilePath);
     int result = QProcess::execute(DUMMYGENERATOR_BINARY, args);
@@ -103,7 +103,7 @@ void DummyGenTest::testCallDummyGeneratorExecutable()
 
 void DummyGenTest::testProjectFileArgumentsReading()
 {
-    QStringList args(QString("--project-file=%1/dummygentest-project.txt").arg(workDir));
+    QStringList args(u"--project-file="_qs + workDir + u"/dummygentest-project.txt"_qs);
     int result = QProcess::execute("generatorrunner", args);
     QCOMPARE(result, 0);
 
