@@ -98,7 +98,7 @@ class MainWindow(QMainWindow):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     mainWin = MainWindow()
-    availableGeometry = app.desktop().availableGeometry(mainWin)
+    availableGeometry = mainWin.screen().availableGeometry()
     mainWin.resize(availableGeometry.width() * 2 / 3, availableGeometry.height() * 2 / 3)
     mainWin.show()
     sys.exit(app.exec())
