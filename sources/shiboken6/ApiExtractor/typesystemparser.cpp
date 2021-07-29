@@ -2304,6 +2304,9 @@ bool TypeSystemParser::parseAddFunction(const ConditionalStreamReader &,
 
     func->setStatic(staticFunction);
     func->setClassMethod(classMethod);
+
+    // Create signature for matching modifications
+    signature = TypeDatabase::normalizedSignature(originalSignature);
     if (!signature.contains(QLatin1Char('(')))
         signature += QLatin1String("()");
     m_currentSignature = signature;
