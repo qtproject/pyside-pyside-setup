@@ -59,7 +59,7 @@ init_test_paths(False)
 
 from helper.usesqapplication import UsesQApplication
 
-from PySide6.QtCore import QLibraryInfo, qVersion
+from PySide6.QtCore import QCoreApplication, QLibraryInfo, qVersion
 from PySide6.QtWidgets import QApplication, QMainWindow
 
 from __feature__ import snake_case
@@ -81,7 +81,7 @@ class FeatureTest(UsesQApplication):
         window.set_window_title(qVersion())
         window.show()
         while not window.window_handle().is_exposed():
-            qApp.process_events()
+            QCoreApplication.process_events()
 
 
 if __name__ == '__main__':
