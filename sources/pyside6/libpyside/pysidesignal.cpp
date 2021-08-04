@@ -770,7 +770,7 @@ QByteArray getTypeName(PyObject *type)
         auto objType = reinterpret_cast<PyTypeObject *>(type);
         if (Shiboken::String::checkType(objType))
             return QByteArrayLiteral("QString");
-        if (objType == &PyInt_Type)
+        if (objType == &PyLong_Type)
             return QByteArrayLiteral("int");
         if (objType == &PyLong_Type)
             return QByteArrayLiteral("long");

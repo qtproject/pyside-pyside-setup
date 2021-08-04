@@ -2469,7 +2469,7 @@ void CppGenerator::writeTypeCheck(TextStream &s, const OverloadData *overloadDat
     }
 
     // This condition trusts that the OverloadData object will arrange for
-    // PyInt type to come after the more precise numeric types (e.g. float and bool)
+    // PyLong type to come after the more precise numeric types (e.g. float and bool)
     AbstractMetaType argType = overloadData->argType();
     if (auto viewOn = argType.viewOn())
         argType = *viewOn;
@@ -4242,7 +4242,7 @@ void CppGenerator::writeClassDefinition(TextStream &s,
     const AbstractMetaClass *qCoreApp = AbstractMetaClass::findClass(api().classes(), QLatin1String("QCoreApplication"));
     const bool isQApp = qCoreApp != Q_NULLPTR && metaClass->inheritsFrom(qCoreApp);
 
-    tp_flags = QLatin1String("Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES");
+    tp_flags = QLatin1String("Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE");
     if (metaClass->isNamespace() || metaClass->hasPrivateDestructor()) {
         tp_dealloc = metaClass->hasPrivateDestructor() ?
                      QLatin1String("SbkDeallocWrapperWithPrivateDtor") :
@@ -4262,7 +4262,7 @@ void CppGenerator::writeClassDefinition(TextStream &s,
         ? cpythonSetattroFunctionName(metaClass) : QString();
 
     if (metaClass->hasPrivateDestructor() || onlyPrivCtor) {
-        // tp_flags = QLatin1String("Py_TPFLAGS_DEFAULT|Py_TPFLAGS_CHECKTYPES");
+        // tp_flags = QLatin1String("Py_TPFLAGS_DEFAULT");
         // This is not generally possible, because PySide does not care about
         // privacy the same way. This worked before the heap types were used,
         // because inheritance is not really checked for static types.
@@ -5189,7 +5189,7 @@ void CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
                 s << "{\n";
                 {
                     Indentation indent(s);
-                    s << "PyObject *anonEnumItem = PyInt_FromLong(" << enumValueText << ");\n"
+                    s << "PyObject *anonEnumItem = PyLong_FromLong(" << enumValueText << ");\n"
                         << "if (PyDict_SetItemString(reinterpret_cast<PyTypeObject *>(reinterpret_cast<SbkObjectType *>("
                         << enclosingObjectVariable
                         << "))->tp_dict, \"" << mangledName << "\", anonEnumItem) < 0)\n";
@@ -5900,7 +5900,7 @@ void CppGenerator::writeGetattroFunction(TextStream &s, AttroCheck attroCheck,
                     Indentation indent(s);
                     s << "return Py_TYPE(meth)->tp_descr_get(meth, self, nullptr);\n";
                 }
-                s << "return PyFunction_Check(meth) ? SBK_PyMethod_New(meth, self)\n"
+                s << "return PyFunction_Check(meth) ? PyMethod_New(meth, self)\n"
                   << "                              : " << getattrFunc << ";\n";
             }
             s << "}\n";

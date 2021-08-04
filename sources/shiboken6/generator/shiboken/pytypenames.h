@@ -33,7 +33,7 @@
 
 static inline QString pyBoolT() { return QStringLiteral("PyBool"); }
 static inline QString pyFloatT() { return QStringLiteral("PyFloat"); }
-static inline QString pyIntT() { return QStringLiteral("PyInt"); }
+static inline QString pyIntT() { return QStringLiteral("PyLong"); }
 static inline QString pyLongT() { return QStringLiteral("PyLong"); }
 static inline QString pyObjectT() { return QStringLiteral("object"); }
 static inline QString pyStrT() { return QStringLiteral("str"); }

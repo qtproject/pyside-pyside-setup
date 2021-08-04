@@ -78,13 +78,13 @@ PyObject *getFeatureSelectId()
 
     PyObject *select_id = PyDict_GetItem(feature_dict, modname);
     if (select_id == nullptr
-        || !PyInt_Check(select_id)  // int/long cheating
+        || !PyLong_Check(select_id)  // int/long cheating
         || select_id == undef)
         return last_select_id;
 
     cached_globals = globals;
     last_select_id = select_id;
-    assert(PyInt_AsSsize_t(select_id) >= 0);
+    assert(PyLong_AsSsize_t(select_id) >= 0);
     return select_id;
 }
 

@@ -977,7 +977,7 @@ bool ShibokenGenerator::isPyInt(const TypeEntry *type)
     if (!type->isPrimitive())
         return false;
     return pythonPrimitiveTypeName(static_cast<const PrimitiveTypeEntry *>(type))
-        == QLatin1String("PyInt");
+        == QLatin1String("PyLong");
 }
 
 bool ShibokenGenerator::isPyInt(const AbstractMetaType &type)

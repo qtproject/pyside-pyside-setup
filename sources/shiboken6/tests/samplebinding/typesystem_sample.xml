@@ -48,10 +48,10 @@
         if (!PySequence_Check(pyIn) || !(PySequence_Size(pyIn) == 2))
             return false;
         Shiboken::AutoDecRef pyReal(PySequence_GetItem(pyIn, 0));
-        if (!SbkNumber_Check(pyReal))
+        if (!PyNumber_Check(pyReal))
             return false;
         Shiboken::AutoDecRef pyImag(PySequence_GetItem(pyIn, 1));
-        if (!SbkNumber_Check(pyImag))
+        if (!PyNumber_Check(pyImag))
             return false;
         return true;
     }
@@ -1374,7 +1374,7 @@
                 <replace-default-expression with="3000"/>
             </modify-argument>
             <inject-code class="native" position="beginning">
-                PyObject* new_arg0 = PyInt_FromLong(PyInt_AS_LONG(%PYARG_1) - %2);
+                PyObject* new_arg0 = PyLong_FromLong(PyLong_AS_LONG(%PYARG_1) - %2);
                 Py_DECREF(%PYARG_1);
                 %PYARG_1 = new_arg0;
             </inject-code>
@@ -1448,10 +1448,10 @@
             PyObject* _obj = %PYARG_0.object();
             if (!PySequence_Check(_obj)
                 || PySequence_Fast_GET_SIZE(_obj) != 4
-                || !SbkNumber_Check(PySequence_Fast_GET_ITEM(_obj, 0))
-                || !SbkNumber_Check(PySequence_Fast_GET_ITEM(_obj, 1))
-                || !SbkNumber_Check(PySequence_Fast_GET_ITEM(_obj, 2))
-                || !SbkNumber_Check(PySequence_Fast_GET_ITEM(_obj, 3))) {
+                || !PyNumber_Check(PySequence_Fast_GET_ITEM(_obj, 0))
+                || !PyNumber_Check(PySequence_Fast_GET_ITEM(_obj, 1))
+                || !PyNumber_Check(PySequence_Fast_GET_ITEM(_obj, 2))
+                || !PyNumber_Check(PySequence_Fast_GET_ITEM(_obj, 3))) {
                 PyErr_SetString(PyExc_TypeError, "Sequence of 4 numbers expected");
             } else {
                 *%1 = %CONVERTTOCPP[int](PySequence_Fast_GET_ITEM(_obj, 0));
@@ -2337,7 +2337,7 @@
                 <conversion-rule class="native">
                     // Does nothing really, just test the code generation
                     // of constructors whose arguments where
-                    long %out = PyInt_AS_LONG(%PYARG_1) + 1;
+                    long %out = PyLong_AS_LONG(%PYARG_1) + 1;
                 </conversion-rule>
             </modify-argument>
         </modify-function>

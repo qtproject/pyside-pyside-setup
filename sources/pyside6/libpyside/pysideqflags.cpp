@@ -156,7 +156,7 @@ namespace QFlags
         "missing QFlags name", // to be inserted later
         sizeof(PySideQFlagsObject),
         0,
-        Py_TPFLAGS_DEFAULT|Py_TPFLAGS_CHECKTYPES,
+        Py_TPFLAGS_DEFAULT,
         SbkNewQFlagsType_slots,
     };
 

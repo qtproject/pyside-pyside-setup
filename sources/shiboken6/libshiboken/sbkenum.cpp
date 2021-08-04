@@ -171,12 +171,12 @@ static PyObject *_enum_op(enum_func f, PyObject *a, PyObject *b) {
  *   versions of Python (version 2) we need to convert it to int type,
  *   respectively.
  *
- *   Thus calling PyInt_FromLong() will result in calling PyLong_FromLong in
+ *   Thus calling PyLong_FromLong() will result in calling PyLong_FromLong in
  *   Py3k.
  */
 static PyObject *enum_int(PyObject *v)
 {
-    return PyInt_FromLong(reinterpret_cast<SbkEnumObject *>(v)->ob_value);
+    return PyLong_FromLong(reinterpret_cast<SbkEnumObject *>(v)->ob_value);
 }
 
 static PyObject *enum_and(PyObject *self, PyObject *b)
@@ -280,7 +280,7 @@ static PyType_Spec SbkEnumType_Type_spec = {
     "1:Shiboken.EnumMeta",
     0,    // filled in later
     sizeof(PyMemberDef),
-    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES,
+    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,
     SbkEnumType_Type_slots,
 };
 
@@ -344,7 +344,7 @@ static PyObject *enum___reduce__(PyObject *obj)
     return Py_BuildValue("O(Ni)",
                          enum_unpickler,
                          Py_BuildValue("s", Py_TYPE(obj)->tp_name),
-                         PyInt_AS_LONG(obj));
+                         PyLong_AS_LONG(obj));
 }
 
 } // extern "C"
@@ -611,7 +611,7 @@ static PyType_Spec SbkNewEnum_spec = {
     "1:Shiboken.Enum",
     sizeof(SbkEnumObject),
     0,
-    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES,
+    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,
     SbkNewEnum_slots,
 };
 

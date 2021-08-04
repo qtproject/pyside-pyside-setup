@@ -510,8 +510,8 @@ if (PySequence_Check(_key)) {
     if (PySequence_Fast_GET_SIZE(key.object()) == 2) {
         PyObject *posx = PySequence_Fast_GET_ITEM(key.object(), 0);
         PyObject *posy = PySequence_Fast_GET_ITEM(key.object(), 1);
-        Py_ssize_t x = PyInt_AsSsize_t(posx);
-        Py_ssize_t y = PyInt_AsSsize_t(posy);
+        Py_ssize_t x = PyLong_AsSsize_t(posx);
+        Py_ssize_t y = PyLong_AsSsize_t(posy);
         float ret = (*%CPPSELF)(x,y);
         return %CONVERTTOPYTHON[float](ret);
     }

@@ -55,7 +55,7 @@ Shiboken::Object::releaseOwnership(%PYARG_0);
 // @snippet qtreewidgetitemiterator-value
 
 // @snippet qgraphicsitem
-PyObject *userTypeConstant =  PyInt_FromLong(QGraphicsItem::UserType);
+PyObject *userTypeConstant =  PyLong_FromLong(QGraphicsItem::UserType);
 PyDict_SetItemString(reinterpret_cast<PyTypeObject *>(Sbk_QGraphicsItem_TypeF())->tp_dict, "UserType", userTypeConstant);
 // @snippet qgraphicsitem
 

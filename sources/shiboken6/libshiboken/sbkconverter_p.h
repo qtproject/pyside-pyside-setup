@@ -252,7 +252,7 @@ struct IntPrimitive : TwoPrimitive<INT>
 {
     static PyObject *toPython(const void *cppIn)
     {
-        return PyInt_FromLong(*reinterpret_cast<const INT *>(cppIn));
+        return PyLong_FromLong(*reinterpret_cast<const INT *>(cppIn));
     }
     static void toCpp(PyObject *pyIn, void *cppOut)
     {
@@ -277,7 +277,7 @@ struct IntPrimitive : TwoPrimitive<INT>
     }
     static PythonToCppFunc isOtherConvertible(PyObject *pyIn)
     {
-        if (SbkNumber_Check(pyIn))
+        if (PyNumber_Check(pyIn))
             return otherToCpp;
         return nullptr;
     }
@@ -318,7 +318,7 @@ struct Primitive<PY_LONG_LONG> : OnePrimitive<PY_LONG_LONG>
     }
     static PythonToCppFunc isConvertible(PyObject *pyIn)
     {
-        if (SbkNumber_Check(pyIn))
+        if (PyNumber_Check(pyIn))
             return toCpp;
         return nullptr;
     }
@@ -345,7 +345,7 @@ struct Primitive<unsigned PY_LONG_LONG> : OnePrimitive<unsigned PY_LONG_LONG>
     }
     static PythonToCppFunc isConvertible(PyObject *pyIn)
     {
-        if (SbkNumber_Check(pyIn))
+        if (PyNumber_Check(pyIn))
             return toCpp;
         return nullptr;
     }
@@ -366,7 +366,7 @@ struct FloatPrimitive : TwoPrimitive<FLOAT>
     }
     static PythonToCppFunc isConvertible(PyObject *pyIn)
     {
-        if (PyInt_Check(pyIn) || PyLong_Check(pyIn))
+        if (PyLong_Check(pyIn) || PyLong_Check(pyIn))
             return toCpp;
         return nullptr;
     }
@@ -376,7 +376,7 @@ struct FloatPrimitive : TwoPrimitive<FLOAT>
     }
     static PythonToCppFunc isOtherConvertible(PyObject *pyIn)
     {
-        if (SbkNumber_Check(pyIn))
+        if (PyNumber_Check(pyIn))
             return otherToCpp;
         return nullptr;
     }
@@ -395,13 +395,13 @@ struct Primitive<bool> : OnePrimitive<bool>
     }
     static PythonToCppFunc isConvertible(PyObject *pyIn)
     {
-        if (SbkNumber_Check(pyIn))
+        if (PyNumber_Check(pyIn))
             return toCpp;
         return nullptr;
     }
     static void toCpp(PyObject *pyIn, void *cppOut)
     {
-        *reinterpret_cast<bool *>(cppOut) = PyInt_AS_LONG(pyIn) != 0;
+        *reinterpret_cast<bool *>(cppOut) = PyLong_AS_LONG(pyIn) != 0;
     }
 };
 
@@ -429,7 +429,7 @@ struct CharPrimitive : IntPrimitive<CHAR>
     }
     static PythonToCppFunc isOtherConvertible(PyObject *pyIn)
     {
-        if (SbkNumber_Check(pyIn))
+        if (PyNumber_Check(pyIn))
             return otherToCpp;
         return nullptr;
     }

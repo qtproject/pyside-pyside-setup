@@ -577,7 +577,7 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
             AutoDecRef member(PySequence_GetItem(item, 1));
             AutoDecRef value(PyObject_GetAttr(member, Shiboken::PyName::value()));
             auto ckey = String::toCString(key);
-            auto ivalue = PyInt_AsSsize_t(value);   // int/long cheating
+            auto ivalue = PyLong_AsSsize_t(value);
             auto thing = QPair<QByteArray, int>(ckey, int(ivalue));
             entries.push_back(thing);
         }
