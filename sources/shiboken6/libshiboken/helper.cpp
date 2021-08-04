@@ -255,12 +255,12 @@ int *sequenceToIntArray(PyObject *obj, bool zeroTerminated)
 
     for (int i = 0; i < size; i++) {
         PyObject *item = PySequence_Fast_GET_ITEM(seq.object(), i);
-        if (!PyInt_Check(item)) {
+        if (!PyLong_Check(item)) {
             PyErr_SetString(PyExc_TypeError, "Sequence of ints expected");
             delete[] array;
             return nullptr;
         }
-        array[i] = PyInt_AsLong(item);
+        array[i] = PyLong_AsLong(item);
     }
 
     if (zeroTerminated)

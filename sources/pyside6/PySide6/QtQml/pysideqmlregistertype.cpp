@@ -166,7 +166,7 @@ int PySide::qmlRegisterSingletonType(PyObject *pyObj, const char *uri, int versi
         AutoDecRef funcCode(PyObject_GetAttrString(callback, "__code__"));
         AutoDecRef argCount(PyObject_GetAttrString(funcCode, "co_argcount"));
 
-        int count = PyInt_AsLong(argCount);
+        int count = PyLong_AsLong(argCount);
 
         if (count != 1) {
             PyErr_Format(PyExc_TypeError, "Callback has a bad parameter count.");

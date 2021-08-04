@@ -86,10 +86,10 @@ Here's how to do it:
             if (!PySequence_Check(pyIn) || !(PySequence_Size(pyIn) == 2))
                 return false;
             Shiboken::AutoDecRef pyReal(PySequence_GetItem(pyIn, 0));
-            if (!SbkNumber_Check(pyReal))
+            if (!PyNumber_Check(pyReal))
                 return false;
             Shiboken::AutoDecRef pyImag(PySequence_GetItem(pyIn, 1));
-            if (!SbkNumber_Check(pyImag))
+            if (!PyNumber_Check(pyImag))
                 return false;
             return true;
         }

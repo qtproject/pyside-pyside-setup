@@ -187,7 +187,7 @@ static inline PyObject *getSelectId(PyObject *dict)
 
 static inline void setCurrentSelectId(PyTypeObject *type, PyObject *select_id)
 {
-    SbkObjectType_SetReserved(type, PyInt_AsSsize_t(select_id));    // int/long cheating
+    SbkObjectType_SetReserved(type, PyLong_AsSsize_t(select_id));    // int/long cheating
 }
 
 static inline void setCurrentSelectId(PyTypeObject *type, int id)
@@ -217,7 +217,7 @@ static bool replaceClassDict(PyTypeObject *type)
     if (new_dict == nullptr || PyDict_Update(new_dict, dict) < 0)
         return false;
     // Insert the default id. Cannot fail for small numbers.
-    AutoDecRef select_id(PyInt_FromLong(0));
+    AutoDecRef select_id(PyLong_FromLong(0));
     setSelectId(new_dict, select_id);
     // insert the dict into itself as ring
     setNextDict(new_dict, new_dict);
@@ -283,9 +283,9 @@ static bool createNewFeatureSet(PyTypeObject *type, PyObject *select_id)
      * content in `prev_dict`. It is responsible of filling `type->tp_dict`
      * with modified content.
      */
-    static auto small_1 = PyInt_FromLong(255);
+    static auto small_1 = PyLong_FromLong(255);
     Q_UNUSED(small_1);
-    static auto small_2 = PyInt_FromLong(255);
+    static auto small_2 = PyLong_FromLong(255);
     Q_UNUSED(small_2);
     // make sure that small integers are cached
     assert(small_1 != nullptr && small_1 == small_2);
@@ -299,7 +299,7 @@ static bool createNewFeatureSet(PyTypeObject *type, PyObject *select_id)
     Py_INCREF(prev_dict);   // keep the first ref unchanged
     if (!addNewDict(type, select_id))
         return false;
-    auto id = PyInt_AsSsize_t(select_id);   // int/long cheating
+    auto id = PyLong_AsSsize_t(select_id);   // int/long cheating
     if (id == -1)
         return false;
     setCurrentSelectId(type, id);
@@ -434,7 +434,7 @@ void init()
     if (!is_initialized) {
         fast_id_array = &_fast_id_array[1];
         for (int idx = -1; idx < 256; ++idx)
-            fast_id_array[idx] = PyInt_FromLong(idx);
+            fast_id_array[idx] = PyLong_FromLong(idx);
         featurePointer = featureProcArray;
         initSelectableFeature(SelectFeatureSet);
         registerCleanupFunction(finalize);

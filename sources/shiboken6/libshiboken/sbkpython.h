@@ -101,24 +101,6 @@ extern "C" {
 #  include "pep384impl.h"
 #endif
 
-#define PyInt_Type PyLong_Type
-#define PyInt_Check PyLong_Check
-#define PyInt_CheckExact PyLong_CheckExact
-#define PyInt_FromString PyLong_FromString
-#define PyInt_FromSsize_t PyLong_FromSsize_t
-#define PyInt_FromSize_t PyLong_FromSize_t
-#define PyInt_AS_LONG PyLong_AS_LONG
-#define PyInt_AsUnsignedLongLongMask PyLong_AsLongLong
-#define PyInt_FromLong PyLong_FromLong
-#define PyInt_AsLong PyLong_AsLong
-#define SbkNumber_Check PyNumber_Check
-#define Py_TPFLAGS_CHECKTYPES  0
-
-#define SBK_NB_BOOL(x) (x).nb_bool
-#define SBK_PyMethod_New PyMethod_New
-#define PyInt_AsSsize_t(x)  PyLong_AsSsize_t(x)
-#define PyString_Type PyUnicode_Type
-
 // In Python 3, Py_TPFLAGS_DEFAULT contains Py_TPFLAGS_HAVE_VERSION_TAG,
 // which will trigger the attribute cache, which is not intended in Qt for Python.
 // Use a customized Py_TPFLAGS_DEFAULT by defining Py_TPFLAGS_HAVE_VERSION_TAG = 0.

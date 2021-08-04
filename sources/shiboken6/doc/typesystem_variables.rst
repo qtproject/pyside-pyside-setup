@@ -230,14 +230,14 @@ Variables
 
       .. code-block:: c++
 
-          long a = PyInt_AS_LONG(%PYARG_1);
+          long a = PyLong_AS_LONG(%PYARG_1);
 
 
   is equivalent of
 
       .. code-block:: c++
 
-          long a = PyInt_AS_LONG(PyTuple_GET_ITEM(%PYTHON_ARGUMENTS, 0));
+          long a = PyLong_AS_LONG(PyTuple_GET_ITEM(%PYTHON_ARGUMENTS, 0));
 
 
   The generator tries to be smart with attributions, but it will work for the
@@ -248,7 +248,7 @@ Variables
       .. code-block:: c++
 
            Py_DECREF(%PYARG_1);
-           %PYARG_1 = PyInt_FromLong(10);
+           %PYARG_1 = PyLong_FromLong(10);
 
 
   is equivalent of
@@ -256,7 +256,7 @@ Variables
       .. code-block:: c++
 
           Py_DECREF(PyTuple_GET_ITEM(%PYTHON_ARGUMENTS, 0));
-          PyTuple_SET_ITEM(%PYTHON_ARGUMENTS, 0, PyInt_FromLong(10));
+          PyTuple_SET_ITEM(%PYTHON_ARGUMENTS, 0, PyLong_FromLong(10));
 
 
 .. _pyself:

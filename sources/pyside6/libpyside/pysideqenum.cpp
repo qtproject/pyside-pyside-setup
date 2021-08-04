@@ -99,7 +99,7 @@ static PyObject *analyzePyEnum(PyObject *pyenum, PyObject *container = nullptr)
         AutoDecRef value(PyObject_GetAttr(member, Shiboken::PyName::value()));
         if (value.isNull())
             return nullptr;
-        if (!PyInt_Check(value)) {  // int/long cheating
+        if (!PyLong_Check(value)) {
             PyErr_Format(PyExc_TypeError,
                 "QEnum expected an int value as '%.200s', got '%.200s'",
                 Shiboken::String::toCString(key), Py_TYPE(value)->tp_name);
@@ -113,9 +113,9 @@ static Py_ssize_t get_lineno()
 {
     PyObject *frame = reinterpret_cast<PyObject *>(PyEval_GetFrame());  // borrowed ref
     AutoDecRef ob_lineno(PyObject_GetAttr(frame, Shiboken::PyName::f_lineno()));
-    if (ob_lineno.isNull() || !PyInt_Check(ob_lineno))  // int/long cheating
+    if (ob_lineno.isNull() || !PyLong_Check(ob_lineno))
         return -1;
-    return PyInt_AsSsize_t(ob_lineno);  // int/long cheating
+    return PyLong_AsSsize_t(ob_lineno);
 }
 
 static bool is_module_code()

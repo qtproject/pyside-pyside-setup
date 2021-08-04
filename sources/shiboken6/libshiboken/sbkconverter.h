@@ -392,18 +392,18 @@ template<typename T> PyTypeObject *SbkType() { return nullptr; }
 // Below are the template specializations for C++ primitive types.
 template<> inline PyTypeObject *SbkType<PY_LONG_LONG>() { return &PyLong_Type; }
 template<> inline PyTypeObject *SbkType<bool>() { return &PyBool_Type; }
-template<> inline PyTypeObject *SbkType<char>() { return &PyInt_Type; }
+template<> inline PyTypeObject *SbkType<char>() { return &PyLong_Type; }
 template<> inline PyTypeObject *SbkType<double>() { return &PyFloat_Type; }
 template<> inline PyTypeObject *SbkType<float>() { return &PyFloat_Type; }
-template<> inline PyTypeObject *SbkType<int>() { return &PyInt_Type; }
+template<> inline PyTypeObject *SbkType<int>() { return &PyLong_Type; }
 template<> inline PyTypeObject *SbkType<long>() { return &PyLong_Type; }
-template<> inline PyTypeObject *SbkType<short>() { return &PyInt_Type; }
-template<> inline PyTypeObject *SbkType<signed char>() { return &PyInt_Type; }
+template<> inline PyTypeObject *SbkType<short>() { return &PyLong_Type; }
+template<> inline PyTypeObject *SbkType<signed char>() { return &PyLong_Type; }
 template<> inline PyTypeObject *SbkType<unsigned PY_LONG_LONG>() { return &PyLong_Type; }
-template<> inline PyTypeObject *SbkType<unsigned char>() { return &PyInt_Type; }
+template<> inline PyTypeObject *SbkType<unsigned char>() { return &PyLong_Type; }
 template<> inline PyTypeObject *SbkType<unsigned int>() { return &PyLong_Type; }
 template<> inline PyTypeObject *SbkType<unsigned long>() { return &PyLong_Type; }
-template<> inline PyTypeObject *SbkType<unsigned short>() { return &PyInt_Type; }
+template<> inline PyTypeObject *SbkType<unsigned short>() { return &PyLong_Type; }
 template<> inline PyTypeObject *SbkType<std::nullptr_t>() { return Py_TYPE(&_Py_NoneStruct); }
 
 } // namespace Shiboken
@@ -411,7 +411,7 @@ template<> inline PyTypeObject *SbkType<std::nullptr_t>() { return Py_TYPE(&_Py_
 // When the user adds a function with an argument unknown for the typesystem, the generator writes type checks as
 // TYPENAME_Check, so this macro allows users to add PyObject arguments to their added functions.
 #define PyObject_Check(X) true
-#define SbkChar_Check(X) (SbkNumber_Check(X) || Shiboken::String::checkChar(X))
+#define SbkChar_Check(X) (PyNumber_Check(X) || Shiboken::String::checkChar(X))
 
 struct PySideQFlagsType;
 struct PySideQFlagsTypePrivate

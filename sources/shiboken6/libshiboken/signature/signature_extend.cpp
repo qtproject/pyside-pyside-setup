@@ -272,7 +272,7 @@ int PySide_PatchTypes(void)
 
     if (!init_done) {
         AutoDecRef meth_descr(PyObject_GetAttrString(
-                                    reinterpret_cast<PyObject *>(&PyString_Type), "split"));
+                                    reinterpret_cast<PyObject *>(&PyUnicode_Type), "split"));
         AutoDecRef wrap_descr(PyObject_GetAttrString(
                                     reinterpret_cast<PyObject *>(Py_TYPE(Py_True)), "__add__"));
         // abbreviations for readability

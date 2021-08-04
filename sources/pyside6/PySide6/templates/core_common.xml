@@ -176,10 +176,10 @@
         PyObject* _obj = %PYARG_0.object();
         if (!PySequence_Check(_obj)
             || PySequence_Fast_GET_SIZE(_obj) != 4
-            || !SbkNumber_Check(PySequence_Fast_GET_ITEM(_obj, 0))
-            || !SbkNumber_Check(PySequence_Fast_GET_ITEM(_obj, 1))
-            || !SbkNumber_Check(PySequence_Fast_GET_ITEM(_obj, 2))
-            || !SbkNumber_Check(PySequence_Fast_GET_ITEM(_obj, 3))) {
+            || !PyNumber_Check(PySequence_Fast_GET_ITEM(_obj, 0))
+            || !PyNumber_Check(PySequence_Fast_GET_ITEM(_obj, 1))
+            || !PyNumber_Check(PySequence_Fast_GET_ITEM(_obj, 2))
+            || !PyNumber_Check(PySequence_Fast_GET_ITEM(_obj, 3))) {
             PyErr_SetString(PyExc_TypeError, "Sequence of 4 numbers expected");
         } else {
             *%1 = %CONVERTTOCPP[$TYPE](PySequence_Fast_GET_ITEM(_obj, 0));
