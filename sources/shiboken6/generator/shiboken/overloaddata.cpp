@@ -595,6 +595,24 @@ bool OverloadData::hasStaticFunction() const
     return false;
 }
 
+bool OverloadData::hasClassMethod(const AbstractMetaFunctionCList &overloads)
+{
+    for (const auto &func : overloads) {
+        if (func->isClassMethod())
+            return true;
+    }
+    return false;
+}
+
+bool OverloadData::hasClassMethod() const
+{
+    for (const auto &func : m_overloads) {
+        if (func->isClassMethod())
+            return true;
+    }
+    return false;
+}
+
 bool OverloadData::hasInstanceFunction(const AbstractMetaFunctionCList &overloads)
 {
     for (const auto &func : overloads) {

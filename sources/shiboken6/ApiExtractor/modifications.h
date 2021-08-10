@@ -491,10 +491,22 @@ struct AddedFunction
         m_isStatic = value;
     }
 
+    /// Set this method as a classmethod.
+    void setClassMethod(bool value)
+    {
+        m_isClassMethod = value;
+    }
+
     /// Returns true if this is a static method.
     bool isStatic() const
     {
         return m_isStatic;
+    }
+
+    /// Returns true if this is a class method.
+    bool isClassMethod() const
+    {
+        return m_isClassMethod;
     }
 
     bool isDeclaration() const { return m_isDeclaration; } // <declare-function>
@@ -508,6 +520,7 @@ private:
     TypeInfo m_returnType;
     Access m_access = Public;
     bool m_isConst = false;
+    bool m_isClassMethod = false;
     bool m_isStatic = false;
     bool m_isDeclaration = false;
 };

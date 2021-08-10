@@ -904,7 +904,7 @@ _findChildrenHelper(%CPPSELF, %2, reinterpret_cast<PyTypeObject *>(%PYARG_1), %3
 //   - return the translation.
 
 // @snippet qobject-tr
-PyTypeObject *type = Py_TYPE(%PYSELF);
+PyTypeObject *type = reinterpret_cast<PyTypeObject *>(%PYSELF);
 PyObject *mro = type->tp_mro;
 auto len = PyTuple_GET_SIZE(mro);
 QString result = QString::fromUtf8(%1);

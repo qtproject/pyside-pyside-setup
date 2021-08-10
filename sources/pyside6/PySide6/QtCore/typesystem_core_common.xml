@@ -1730,15 +1730,11 @@
         </modify-argument>
     </add-function>
 
-    <add-function signature="tr(const char*,const char*,int)" return-type="QString">
-        <modify-argument index="2">
-          <replace-default-expression with="0"/>
-        </modify-argument>
-        <modify-argument index="3">
-          <replace-default-expression with="-1"/>
-        </modify-argument>
-
+    <add-function signature="tr(const char *@sourceText@, const char *@disambiguation@=nullptr, int @n@=-1)" return-type="QString" classmethod="yes">
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-tr"/>
+        <modify-argument index="1" pyi-type="str"/>
+        <modify-argument index="2" pyi-type="Optional[str]">
+        </modify-argument>
     </add-function>
 
    <modify-function signature="receivers(const char*)const">

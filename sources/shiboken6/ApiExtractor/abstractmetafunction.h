@@ -109,6 +109,7 @@ public:
 
         Abstract                    = 0x00000002,
         Static                      = 0x00000004,
+        ClassMethod                 = 0x00000008,
 
         FinalInTargetLang           = 0x00000010,
 
@@ -139,6 +140,7 @@ public:
 
     bool isFinalInTargetLang() const;
     bool isAbstract() const;
+    bool isClassMethod() const;
     bool isStatic() const;
     bool isInvokable() const;
     bool isPropertyReader() const;
@@ -421,6 +423,11 @@ inline bool AbstractMetaFunction::isAbstract() const
 inline bool AbstractMetaFunction::isStatic() const
 {
     return attributes().testFlag(Static);
+}
+
+inline bool AbstractMetaFunction::isClassMethod() const
+{
+    return attributes().testFlag(ClassMethod);
 }
 
 inline bool AbstractMetaFunction::isInvokable() const

@@ -104,10 +104,12 @@ private:
     void writeCppSelfDefinition(TextStream &s,
                                 const AbstractMetaFunctionCPtr &func,
                                 const GeneratorContext &context,
-                                bool hasStaticOverload = false) const;
+                                bool hasStaticOverload = false,
+                                bool hasClassMethodOverload = false) const;
     void writeCppSelfDefinition(TextStream &s,
                                 const GeneratorContext &context,
                                 bool hasStaticOverload = false,
+                                bool hasClassMethodOverload = false,
                                 bool cppSelfAsReference = false) const;
 
     static void writeErrorSection(TextStream &s, OverloadData &overloadData) ;

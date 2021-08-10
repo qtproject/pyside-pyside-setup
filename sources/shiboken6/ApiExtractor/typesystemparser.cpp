@@ -97,6 +97,7 @@ static inline QString signatureAttribute() { return QStringLiteral("signature");
 static inline QString snippetAttribute() { return QStringLiteral("snippet"); }
 static inline QString snakeCaseAttribute() { return QStringLiteral("snake-case"); }
 static inline QString staticAttribute() { return QStringLiteral("static"); }
+static inline QString classmethodAttribute() { return QStringLiteral("classmethod"); }
 static inline QString threadAttribute() { return QStringLiteral("thread"); }
 static inline QString sourceAttribute() { return QStringLiteral("source"); }
 static inline QString streamAttribute() { return QStringLiteral("stream"); }
@@ -2219,6 +2220,7 @@ bool TypeSystemParser::parseAddFunction(const QXmlStreamReader &,
     QString originalSignature;
     QString returnType;
     bool staticFunction = false;
+    bool classMethod = false;
     QString access;
     int overloadNumber = TypeSystem::OverloadNumberUnset;
     for (int i = attributes->size() - 1; i >= 0; --i) {
@@ -2230,6 +2232,9 @@ bool TypeSystemParser::parseAddFunction(const QXmlStreamReader &,
         } else if (name == staticAttribute()) {
             staticFunction = convertBoolean(attributes->takeAt(i).value(),
                                             staticAttribute(), false);
+        } else if (name == classmethodAttribute()) {
+            classMethod = convertBoolean(attributes->takeAt(i).value(),
+                                            classmethodAttribute(), false);
         } else if (name == accessAttribute()) {
             access = attributes->takeAt(i).value().toString();
         } else if (name == overloadNumberAttribute()) {
@@ -2257,6 +2262,7 @@ bool TypeSystemParser::parseAddFunction(const QXmlStreamReader &,
     }
 
     func->setStatic(staticFunction);
+    func->setClassMethod(classMethod);
     if (!signature.contains(QLatin1Char('(')))
         signature += QLatin1String("()");
     m_currentSignature = signature;
