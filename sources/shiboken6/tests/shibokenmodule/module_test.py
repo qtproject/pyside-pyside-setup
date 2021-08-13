@@ -120,12 +120,6 @@ class TestShiboken(unittest.TestCase):
         Shiboken.delete(obj)
         self.assertFalse(obj in Shiboken.getAllValidWrappers())
 
-    # PYSIDE-1514: Check if shiboken6.shiboken6 exists for versions < 6.2
-    def testOldShibokenName(self):
-        if Shiboken.__version_info__[:2] < (6, 2):
-            import shiboken6.shiboken6
-        else:
-            self.assertRaises(ImportError, __import__, "shiboken6.shiboken6")
 
 if __name__ == '__main__':
     unittest.main()
