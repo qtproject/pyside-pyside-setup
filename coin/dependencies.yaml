@@ -19,7 +19,6 @@ dependencies: [
       "../../qt/qtnetworkauth",
       "../../qt/qtqa",
       "../../qt/qtquick3d",
-      "../../qt/qtquickcontrols2",
       "../../qt/qtquicktimeline",
       "../../qt/qtremoteobjects",
       "../../qt/qtscxml",
