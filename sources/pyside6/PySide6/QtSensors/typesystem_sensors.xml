@@ -44,9 +44,13 @@
 <!-- overrides QObject::metaObject() by private method
     <object-type name="QSensorGesture"/>
 -->
+<!-- Disabled by
+    5991224e6713eef4a456c408fcf797662fa2a66c in qt/qtsensors :
+        https://codereview.qt-project.org/c/qt/qtsensors/+/364924
     <object-type name="QSensorGestureManager"/>
     <object-type name="QSensorGesturePluginInterface"/>
     <object-type name="QSensorGestureRecognizer"/>
+-->
     <object-type name="QAccelerometer">
         <enum-type name="AccelerationMode"/>
     </object-type>

@@ -6,9 +6,9 @@ set(QtSensors_DROPPED_ENTRIES )
 set(QtSensors_SRC
 #   overrides QObject::metaObject() by private method
 #   ${QtSensors_GEN_DIR}/qsensorgesture_wrapper.cpp
-    ${QtSensors_GEN_DIR}/qsensorgesturemanager_wrapper.cpp
-    ${QtSensors_GEN_DIR}/qsensorgestureplugininterface_wrapper.cpp
-    ${QtSensors_GEN_DIR}/qsensorgesturerecognizer_wrapper.cpp
+#    ${QtSensors_GEN_DIR}/qsensorgesturemanager_wrapper.cpp
+#    ${QtSensors_GEN_DIR}/qsensorgestureplugininterface_wrapper.cpp
+#    ${QtSensors_GEN_DIR}/qsensorgesturerecognizer_wrapper.cpp
     ${QtSensors_GEN_DIR}/qaccelerometer_wrapper.cpp
     ${QtSensors_GEN_DIR}/qaccelerometerfilter_wrapper.cpp
     ${QtSensors_GEN_DIR}/qaccelerometerreading_wrapper.cpp
