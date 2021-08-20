@@ -1938,6 +1938,7 @@
                     %PYARG_0 = Py_False;
                 else
                     %PYARG_0 = Py_True;
+                Py_INCREF(%PYARG_0);
             }
           </inject-code>
         </add-function>
@@ -1955,6 +1956,7 @@
                     %PYARG_0 = Py_True;
                 else
                     %PYARG_0 = Py_False;
+                Py_INCREF(%PYARG_0);
             }
           </inject-code>
         </add-function>
