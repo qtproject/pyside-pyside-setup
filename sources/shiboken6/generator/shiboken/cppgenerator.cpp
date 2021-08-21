@@ -5395,6 +5395,10 @@ void CppGenerator::writeFlagsBinaryOperator(TextStream &s, const AbstractMetaEnu
         << ", cppArg;\n"
         << CPP_SELF_VAR << " = static_cast<::" << flagsEntry->originalName()
         << ">(int(PyLong_AsLong(self)));\n"
+        // PYSIDE-1436: Need to error check self as well because operators are used
+        //              sometimes with swapped args.
+        << "if (PyErr_Occurred())\n" << indent
+            << "return nullptr;\n" << outdent
         << "cppArg = static_cast<" << flagsEntry->originalName()
         << ">(int(PyLong_AsLong(" << PYTHON_ARG << ")));\n"
         << "if (PyErr_Occurred())\n" << indent
