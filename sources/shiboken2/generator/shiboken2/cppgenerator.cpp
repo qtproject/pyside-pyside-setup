@@ -5193,6 +5193,9 @@ void CppGenerator::writeFlagsBinaryOperator(QTextStream &s, const AbstractMetaEn
         << ">(int(PyLong_AsLong(self)));\n";
     s << INDENT << "cppArg = static_cast<" << flagsEntry->originalName() << ">(int(PyLong_AsLong("
         << PYTHON_ARG << ")));\n";
+        // PYSIDE-1436: Need to error check self as well because operators are used
+        //              sometimes with swapped args.
+    s << INDENT << "if (PyErr_Occurred())\n" << INDENT << "return nullptr;\n";
     s << "#else\n";
     s << INDENT << CPP_SELF_VAR << " = static_cast<::" << flagsEntry->originalName()
         << ">(int(PyInt_AsLong(self)));\n";
