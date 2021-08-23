@@ -1206,7 +1206,7 @@ div.multi-column div {
 .sphinxsidebar {
   position: -webkit-sticky;
   position: sticky;
-  top: 64px;
+  top: 0px;
   width: 200px;
   overflow: scroll;
   overflow-x: hidden;
@@ -2175,4 +2175,21 @@ div.rightside {
   color: #41cd52 !important;
   border-color: #41cd52 !important;
   font-weight: bold !important;
+}
+
+.card {
+  height: 250px;
+  text-align: center;
+}
+
+.card-img-top {
+  object-fit: cover;
+  width: 50px;
+  height: 120px;
+}
+
+.card-body {
+  vertical-align: middle;
+  padding: 5px !important;
+  text-align: center;
 }
