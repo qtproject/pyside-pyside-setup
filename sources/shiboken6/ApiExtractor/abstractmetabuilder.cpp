@@ -2487,6 +2487,8 @@ QString AbstractMetaBuilderPrivate::fixDefaultValue(const ArgumentModelItem &ite
     if (expr.isEmpty() || expr == u"{}")
         return expr;
 
+    expr.replace(u'\n', u' '); // breaks signature parser
+
     if (type.isPrimitive()) {
         if (type.name() == QLatin1String("boolean")) {
             if (expr != QLatin1String("false") && expr != QLatin1String("true")) {
