@@ -106,7 +106,10 @@ def _parse_line(line):
         ( -> (?P<returntype> .*) )?   # the optional return type
         $
         """
-    ret = SimpleNamespace(**re.match(line_re, line, re.VERBOSE).groupdict())
+    matches = re.match(line_re, line, re.VERBOSE)
+    if not matches:
+        raise SystemError("Error parsing line:", repr(line))
+    ret = SimpleNamespace(**matches.groupdict())
     # PYSIDE-1095: Handle arbitrary default expressions
     argstr = ret.arglist.replace("->", ".deref.")
     arglist = _parse_arglist(argstr)
