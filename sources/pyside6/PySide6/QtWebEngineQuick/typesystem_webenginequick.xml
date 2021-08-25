@@ -49,6 +49,4 @@
         <enum-type name="PersistentCookiesPolicy"/>
     </object-type>
 
-    <object-type name="QQuickWebEngineScriptCollection"/>
-
 </typesystem>
