@@ -104,6 +104,8 @@
   <rejection class="^QOpenGL.*$" argument-type="^(const )?char ?\*\*$"/>
   <rejection class="^QOpenGL.*$" argument-type="GLintptr"/>
   <rejection class="^QOpenGL.*$" argument-type="GLsizeiptr"/>
+  <rejection class="^QOpenGL.*$" argument-type="int64_t*"/>
+  <rejection class="^QOpenGL.*$" argument-type="int32_t*"/>
   <rejection class="^QOpenGL.*$" argument-type="GLsync"/>
   <rejection class="^QOpenGL.*$" argument-type="^GLubyte( const)?\*$"/>
   <rejection class="^QOpenGL.*$" argument-type="^(const )?QMatrix.x. ?\*$"/>
