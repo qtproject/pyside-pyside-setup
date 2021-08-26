@@ -196,12 +196,13 @@ def extract_change_log(commit_message: List[str]) -> Tuple[str, List[str]]:
     result = []
     component = 'pyside'
     within_changelog = False
+    task_nr = ''
     for line in commit_message:
         if within_changelog:
             if line:
                 result.append('   ' + line.strip())
             else:
-                break
+                within_changelog = False
         else:
             if line.startswith('[ChangeLog]'):
                 log_line = line[11:]
@@ -210,8 +211,16 @@ def extract_change_log(commit_message: List[str]) -> Tuple[str, List[str]]:
                     if end > 0:
                         component = log_line[1:end]
                         log_line = log_line[end + 1:]
-                result.append(' - ' + log_line.strip())
+                result.append(log_line.strip())
                 within_changelog = True
+            elif line.startswith("Fixes: ") or line.startswith("Task-number: "):
+                task_nr = line.split(":")[1].strip()
+    if result:
+        first_line = ' - '
+        if task_nr:
+            first_line += f"[{task_nr}] "
+        first_line += result[0]
+        result[0] = first_line
     return (component, result)
 
 
