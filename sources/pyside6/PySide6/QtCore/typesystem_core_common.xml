@@ -277,6 +277,13 @@
     </conversion-rule>
   </primitive-type>
 
+  <primitive-type name="QAnyStringView" target-lang-api-name="PyUnicode" view-on="QString">
+    <include file-name="QAnyStringView" location="global"/>
+    <conversion-rule>
+        <native-to-target file="../glue/qtcore.cpp" snippet="return-pyunicode-from-qanystringview"/>
+    </conversion-rule>
+  </primitive-type>
+
   <primitive-type name="QChar">
     <conversion-rule>
         <native-to-target file="../glue/qtcore.cpp" snippet="return-pyunicode-qchar"/>
