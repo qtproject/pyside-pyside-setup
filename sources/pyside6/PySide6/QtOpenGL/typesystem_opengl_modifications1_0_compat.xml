@@ -42,7 +42,7 @@
 <modify-function signature="^glColor[34][a-z]{1,2}v\(.*$">
     <modify-argument index="1"><array/></modify-argument>
 </modify-function>
-<modify-function signature="glClipPlane(unsigned int,const double *)">
+<modify-function signature="glClipPlane(&GLuint;,const double *)">
     <modify-argument index="2"><array/></modify-argument>
 </modify-function>
 <modify-function signature="^glEvalCoord\d[a-z]{1,2}v\(.*$">

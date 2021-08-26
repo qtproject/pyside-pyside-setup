@@ -41,12 +41,12 @@
 <modify-function signature="^glBindBuffersBase\(.*$">
     <modify-argument index="4"><array/></modify-argument>
 </modify-function>
-<modify-function signature="glBindBuffersRange(unsigned int, unsigned int,int,const unsigned int *,const long *,const long*)">
+<modify-function signature="glBindBuffersRange(&GLuint;, &GLuint;,&GLint;,const &GLuint; *,const long *,const long*)">
     <modify-argument index="4"><array/></modify-argument>
     <modify-argument index="5"><array/></modify-argument>
     <modify-argument index="6"><array/></modify-argument>
 </modify-function>
-<modify-function signature="glBindVertexBuffers(unsigned int,int,const unsigned int *,const long *,const int *)">
+<modify-function signature="glBindVertexBuffers(&GLuint;,&GLint;,const &GLuint; *,const long *,const &GLint; *)">
     <modify-argument index="3"><array/></modify-argument>
     <modify-argument index="4"><array/></modify-argument>
     <modify-argument index="5"><array/></modify-argument>
