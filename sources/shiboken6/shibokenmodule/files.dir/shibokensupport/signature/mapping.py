@@ -332,6 +332,13 @@ type_map.update({
     "array unsigned char*"  : bytes,
     "array unsigned int*"   : ArrayLikeVariable(int),
     "array unsigned short*" : ArrayLikeVariable(int),
+    # PYSIDE-1646: New macOS primitive types
+    "array int8_t*"         : ArrayLikeVariable(int),
+    "array uint8_t*"        : ArrayLikeVariable(int),
+    "array int16_t*"        : ArrayLikeVariable(int),
+    "array uint16_t*"       : ArrayLikeVariable(int),
+    "array int32_t*"        : ArrayLikeVariable(int),
+    "array uint32_t*"       : ArrayLikeVariable(int),
     })
 
 type_map.update({
