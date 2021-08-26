@@ -27,7 +27,8 @@ get_property(QtGui_enabled_features  TARGET Qt${QT_MAJOR_VERSION}::Gui
              PROPERTY QT_ENABLED_PUBLIC_FEATURES)
 
 if("opengles2" IN_LIST QtGui_enabled_features)
-    list(APPEND QtOpenGL_DROPPED_ENTRIES QOpenGLTimeMonitor QOpenGLTimerQuery)
+    list(APPEND QtOpenGL_DROPPED_ENTRIES QOpenGLTimeMonitor QOpenGLTimerQuery
+                QOpenGLVersionFunctionsFactory)
     list(APPEND QtOpenGL_SRC ${QtOpenGL_GEN_DIR}/qopenglfunctions_es2_wrapper.cpp)
     message(STATUS "Qt${QT_MAJOR_VERSION}Gui: Dropping Desktop OpenGL classes (GLES2)")
 else()
