@@ -437,7 +437,8 @@ PyObject *MakeQAppWrapper(PyTypeObject *type)
 
     // protecting from multiple application instances
     if (!(type == nullptr || qApp_last == Py_None)) {
-        const char *res_name = PepType_GetNameStr(Py_TYPE(qApp_last));
+        const char *res_name = qApp_last != nullptr
+            ? PepType_GetNameStr(Py_TYPE(qApp_last)) : "<Unknown>";
         const char *type_name = PepType_GetNameStr(type);
         PyErr_Format(PyExc_RuntimeError, "Please destroy the %s singleton before"
             " creating a new %s instance.", res_name, type_name);
