@@ -222,4 +222,27 @@ void TestDropTypeEntries::testConditionalParsing()
     QCOMPARE(actualTags, expectedTags);
 }
 
+void TestDropTypeEntries::testEntityParsing()
+{
+    const QString xml = QStringLiteral(R"(<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <?entity testentity word1 word2?>
+    <text>bla &testentity;</text>
+</root>)");
+
+    QString actual;
+    ConditionalStreamReader reader(xml);
+    while (!reader.atEnd()) {
+        auto t = reader.readNext();
+        switch (t) {
+        case QXmlStreamReader::Characters:
+            actual.append(reader.text());
+        default:
+            break;
+        }
+    }
+    QVERIFY2(!reader.hasError(), qPrintable(reader.errorString()));
+    QCOMPARE(actual.trimmed(), u"bla word1 word2");
+}
+
 QTEST_APPLESS_MAIN(TestDropTypeEntries)

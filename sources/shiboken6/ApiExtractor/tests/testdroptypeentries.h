@@ -41,6 +41,7 @@ class TestDropTypeEntries : public QObject
         void testDontDropEntryWithChildTags();
         void testConditionalParsing_data();
         void testConditionalParsing();
+        void testEntityParsing();
 };
 
 #endif

@@ -35,6 +35,8 @@
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 
+class ProxyEntityResolver;
+
 /// ConditionalStreamReader encapsulates QXmlStreamReader, offering the same
 /// API (except readNextStartElement() and similar conveniences) and internally
 /// uses Processing Instructions like:
@@ -43,17 +45,23 @@ QT_FORWARD_DECLARE_CLASS(QDebug)
 /// containing for example the OS.
 /// It should be possible to use it as a drop-in replacement for
 /// QXmlStreamReader for any parsing code based on readNext().
+/// It also allows for specifying entities using a Processing Instruction:
+/// <?entity name value?>
+/// which can be used in conjunction with conditional processing.
 class ConditionalStreamReader
 {
 public:
     using TokenType = QXmlStreamReader::TokenType;
-    explicit ConditionalStreamReader(QIODevice *iod) : m_reader(iod) { }
-    explicit ConditionalStreamReader(const QString &s) : m_reader(s) { }
+    explicit ConditionalStreamReader(QIODevice *iod);
+    explicit ConditionalStreamReader(const QString &s);
+    ~ConditionalStreamReader();
 
     QIODevice *device() const { return m_reader.device(); }
 
-    void setEntityResolver(QXmlStreamEntityResolver *resolver) { m_reader.setEntityResolver(resolver); }
-    QXmlStreamEntityResolver *entityResolver() const { return m_reader.entityResolver(); }
+    // Note: Caching of entity values is done internally by
+    // ConditionalStreamReader.
+    void setEntityResolver(QXmlStreamEntityResolver *resolver);
+    QXmlStreamEntityResolver *entityResolver() const;
 
     bool atEnd() const { return m_reader.atEnd(); }
     TokenType readNext();
@@ -78,20 +86,25 @@ public:
 
     bool hasError() const { return m_reader.hasError(); }
 
+    // Additional functions (not delegating to QXmlStreamReader)
+    void defineEntity(const QString &name, const QString &value);
+
     const QStringList &conditions() const { return m_conditions; }
     void setConditions(const QStringList &newConditions);
 
     static QStringList platformConditions();
 
 private:
-    enum class PiTokens { None, If, Endif };
+    enum class PiTokens { None, If, Endif, EntityDefinition };
 
     using ExtendedToken = std::pair<TokenType, PiTokens>;
     ExtendedToken readNextInternal();
-
+    void init();
     bool conditionMatches() const;
+    bool readEntityDefinitonPi();
 
     QXmlStreamReader m_reader;
+    ProxyEntityResolver *m_proxyEntityResolver = nullptr;
     QStringList m_conditions = ConditionalStreamReader::platformConditions();
 };
 

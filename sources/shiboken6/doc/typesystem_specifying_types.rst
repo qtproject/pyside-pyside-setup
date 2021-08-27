@@ -634,6 +634,19 @@ Conditional Processing
 
 .. _private_types:
 
+Defining Entities
+^^^^^^^^^^^^^^^^^
+
+It is possible to define entities using a simple processing instruction:
+
+     .. code-block:: xml
+
+         <?entity name value?>
+         <text>&name;</text>
+
+This allows for defining function signatures depending on platform
+in conjunction with :ref:`conditional_processing`.
+
 Private Types
 ^^^^^^^^^^^^^
 

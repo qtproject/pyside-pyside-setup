@@ -496,7 +496,6 @@ private:
     QString readFile(const QString &entityName, QString *errorMessage) const;
 
     const QString m_currentPath;
-    QHash<QString, QString> m_cache;
 };
 
 QString TypeSystemEntityResolver::readFile(const QString &entityName, QString *errorMessage) const
@@ -531,16 +530,13 @@ QString TypeSystemEntityResolver::readFile(const QString &entityName, QString *e
 
 QString TypeSystemEntityResolver::resolveUndeclaredEntity(const QString &name)
 {
-    auto it = m_cache.find(name);
-    if (it == m_cache.end()) {
-        QString errorMessage;
-        it = m_cache.insert(name, readFile(name, &errorMessage));
-        if (it.value().isEmpty()) { // The parser will fail and display the line number.
-            qCWarning(lcShiboken, "%s",
-                      qPrintable(msgCannotResolveEntity(name, errorMessage)));
-        }
+    QString errorMessage;
+    const QString result = readFile(name, &errorMessage);
+    if (result.isEmpty()) { // The parser will fail and display the line number.
+        qCWarning(lcShiboken, "%s",
+                  qPrintable(msgCannotResolveEntity(name, errorMessage)));
     }
-    return it.value();
+    return result;
 }
 
 TypeSystemParser::TypeSystemParser(TypeDatabase *database, bool generate) :
