@@ -357,8 +357,11 @@ AddedFunction::AddedFunctionPtr
     for (const auto &p : params) {
         TypeInfo type = p.type == QLatin1String("...")
             ? TypeInfo::varArgsType() : TypeParser::parse(p.type, errorMessage);
-        if (!errorMessage->isEmpty())
+        if (!errorMessage->isEmpty()) {
+            errorMessage->prepend(u"Unable to parse added function "_qs + signatureIn
+                                  + u": "_qs);
             return {};
+        }
         arguments.append({type, p.name, p.defaultValue});
     }
 

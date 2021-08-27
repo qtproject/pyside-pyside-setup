@@ -307,6 +307,9 @@ TypeInfo TypeParser::parse(const QString &str, QString *errorMessage)
         tok = scanner.nextToken();
     }
 
-    Q_ASSERT(!stack.isEmpty());
+    if (stack.isEmpty() || stack.constFirst().qualifiedName().isEmpty()) {
+        *errorMessage = u"Unable to parse type \""_qs + str + u"\"."_qs;
+        return {};
+    }
     return stack.constFirst();
 }
