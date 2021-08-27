@@ -57,17 +57,21 @@ QXmlStreamReader::TokenType ConditionalStreamReader::readNext()
 bool ConditionalStreamReader::conditionMatches() const
 {
     const auto keywords = m_reader.processingInstructionData().split(u' ', Qt::SkipEmptyParts);
+    if (keywords.isEmpty())
+        return false;
 
     bool matches = false;
+    bool exclusionOnly = true;
     for (const auto &keyword : keywords) {
         if (keyword.startsWith(u'!')) { // exclusion '!windows' takes preference
             if (m_conditions.contains(keyword.mid(1)))
                 return false;
         } else {
+            exclusionOnly = false;
             matches |= m_conditions.contains(keyword);
         }
     }
-    return matches;
+    return exclusionOnly || matches;
 }
 
 void ConditionalStreamReader::setConditions(const QStringList &newConditions)

@@ -162,6 +162,9 @@ void TestDropTypeEntries::testConditionalParsing_data()
         <?endif?>
     <?endif?>
     <tag5>text</tag5>
+    <?if !keyword99?> <!-- Exclusion only -->
+        <tag6>text</tag6>
+    <?endif?>
 </root>)");
 
     const QString root = QStringLiteral("root");
@@ -170,6 +173,7 @@ void TestDropTypeEntries::testConditionalParsing_data()
     const QString tag3 = QStringLiteral("tag3");
     const QString tag4 = QStringLiteral("tag4");
     const QString tag5 = QStringLiteral("tag5");
+    const QString tag6 = QStringLiteral("tag6");
     const QString keyword1 = QStringLiteral("keyword1");
     const QString keyword2 = QStringLiteral("keyword2");
 
@@ -178,15 +182,15 @@ void TestDropTypeEntries::testConditionalParsing_data()
     QTest::addColumn<QStringList>("expectedTags");
 
     QTest::newRow("no-keywords")
-        << xml << QStringList{} << QStringList{root, tag1, tag5};
+        << xml << QStringList{} << QStringList{root, tag1, tag5, tag6};
 
     QTest::newRow("skip-nested-condition")
         << xml << QStringList{keyword1}
-        << QStringList{root, tag1, tag2, tag4, tag5};
+        << QStringList{root, tag1, tag2, tag4, tag5, tag6};
 
     QTest::newRow("both/check-not")
         << xml << QStringList{keyword1, keyword2}
-        << QStringList{root, tag1, tag2, tag3, tag5};
+        << QStringList{root, tag1, tag2, tag3, tag5, tag6};
 }
 
 // Parse XML and return a list of tags encountered
