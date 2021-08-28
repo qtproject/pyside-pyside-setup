@@ -115,6 +115,7 @@ class TestQObjectEventFilterPython(UsesQCoreApplication):
         self.assertEqual(filtered.times_called, 5)
         self.assertEqual(self.obj_filter.events_handled, 5)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testInstallEventFilterRefCountAfterDelete(self):
         '''Bug 910 - installEventFilter() increments reference count on target object
         http://bugs.pyside.org/show_bug.cgi?id=910'''
@@ -131,6 +132,7 @@ class TestQObjectEventFilterPython(UsesQCoreApplication):
         del obj
         self.assertEqual(wref(), None)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testInstallEventFilterRefCountAfterRemove(self):
         # Bug 910
         obj = QObject()

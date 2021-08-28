@@ -49,6 +49,7 @@ class TestUserData(QTextBlockUserData):
 
 
 class TestUserDataRefCount(UsesQApplication):
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testRefcount(self):
         textedit = QTextEdit()
         textedit.setReadOnly(True)

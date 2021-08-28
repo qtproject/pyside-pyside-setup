@@ -75,6 +75,7 @@ class ObjectTypeTest(unittest.TestCase):
         o.setNullObject(None)
         self.assertEqual(o.callId(), 1)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testParentFromCpp(self):
         o = ObjectType()
         self.assertEqual(sys.getrefcount(o), 2)
@@ -113,6 +114,7 @@ class ObjectTypeTest(unittest.TestCase):
 
         Shiboken.invalidate(parents)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testClassDecref(self):
         # Bug was that class PyTypeObject wasn't decrefed when instance died
         before = sys.getrefcount(ObjectType)

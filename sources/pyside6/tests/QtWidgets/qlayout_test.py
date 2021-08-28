@@ -89,6 +89,7 @@ class MissingItemAtLayout(QLayout):
 
 
 class QLayoutTest(UsesQApplication):
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testOwnershipTransfer(self):
         b = QPushButton("teste")
         l = MyLayout()
@@ -104,6 +105,7 @@ class QLayoutTest(UsesQApplication):
 
         self.assertEqual(sys.getrefcount(b), 3)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testReferenceTransfer(self):
         b = QPushButton("teste")
         l = QHBoxLayout()

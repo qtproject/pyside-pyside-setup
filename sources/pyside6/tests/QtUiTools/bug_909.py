@@ -43,6 +43,7 @@ from helper.usesqapplication import UsesQApplication
 
 
 class TestDestruction(UsesQApplication):
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testBug909(self):
         file = Path(__file__).resolve().parent / 'bug_909.ui'
         self.assertTrue(file.is_file())

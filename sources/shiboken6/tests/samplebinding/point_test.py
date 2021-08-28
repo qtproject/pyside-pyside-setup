@@ -84,6 +84,7 @@ class PointTest(unittest.TestCase):
         pt2 += pt1
         self.assertFalse(pt1 == pt2)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testReturnConstPointer(self):
         '''Point returns a const pointer for itself.'''
         pt1 = Point(5.0, 2.3)

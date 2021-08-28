@@ -40,6 +40,7 @@ from PySide6.QtWidgets import QApplication, QGraphicsScene
 
 class TestBug679(unittest.TestCase):
     '''QGraphicsScene::clear() is missing'''
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testIt(self):
         app = QApplication([])
 

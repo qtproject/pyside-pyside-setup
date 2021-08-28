@@ -30,7 +30,6 @@
 
 import os
 import sys
-from sys import getrefcount
 import unittest
 
 from pathlib import Path
@@ -64,28 +63,30 @@ class SaveReference(UsesQApplication):
         del self.widget1
         super(SaveReference, self).tearDown()
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def checkLayoutReference(self, layout):
         # Checks the reference cound handling of layout.addWidget
-        self.assertEqual(getrefcount(self.widget1), 2)
+        self.assertEqual(sys.getrefcount(self.widget1), 2)
         layout.addWidget(self.widget1)
-        self.assertEqual(getrefcount(self.widget1), 3)
+        self.assertEqual(sys.getrefcount(self.widget1), 3)
 
-        self.assertEqual(getrefcount(self.widget2), 2)
+        self.assertEqual(sys.getrefcount(self.widget2), 2)
         layout.addWidget(self.widget2)
-        self.assertEqual(getrefcount(self.widget2), 3)
+        self.assertEqual(sys.getrefcount(self.widget2), 3)
 
         # Check if doesn't mess around with previous widget refcount
-        self.assertEqual(getrefcount(self.widget1), 3)
+        self.assertEqual(sys.getrefcount(self.widget1), 3)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testMoveLayout(self):
         l = QHBoxLayout()
-        self.assertEqual(getrefcount(self.widget1), 2)
+        self.assertEqual(sys.getrefcount(self.widget1), 2)
         l.addWidget(self.widget1)
-        self.assertEqual(getrefcount(self.widget1), 3)
+        self.assertEqual(sys.getrefcount(self.widget1), 3)
 
         w = QWidget()
         w.setLayout(l)
-        self.assertEqual(getrefcount(self.widget1), 3)
+        self.assertEqual(sys.getrefcount(self.widget1), 3)
 
     def testHBoxReference(self):
         # QHBoxLayout.addWidget reference count
@@ -133,18 +134,20 @@ class MultipleAdd(UsesQApplication):
         del self.win
         super(MultipleAdd, self).tearDown()
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testRefCount(self):
         # Multiple QLayout.addWidget calls on the same widget
-        self.assertEqual(getrefcount(self.widget), 2)
+        self.assertEqual(sys.getrefcount(self.widget), 2)
         self.layout.addWidget(self.widget)
-        self.assertEqual(getrefcount(self.widget), 3)
+        self.assertEqual(sys.getrefcount(self.widget), 3)
         self.layout.addWidget(self.widget)
-        self.assertEqual(getrefcount(self.widget), 3)
+        self.assertEqual(sys.getrefcount(self.widget), 3)
         self.layout.addWidget(self.widget)
-        self.assertEqual(getrefcount(self.widget), 3)
+        self.assertEqual(sys.getrefcount(self.widget), 3)
 
 
 class InternalAdd(UsesQApplication):
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testInternalRef(self):
         mw = QWidget()
         w = QWidget()
@@ -153,35 +156,35 @@ class InternalAdd(UsesQApplication):
         topLayout = QGridLayout()
 
         # unique reference
-        self.assertEqual(getrefcount(w), 2)
-        self.assertEqual(getrefcount(ow), 2)
+        self.assertEqual(sys.getrefcount(w), 2)
+        self.assertEqual(sys.getrefcount(ow), 2)
 
         topLayout.addWidget(w, 0, 0)
         topLayout.addWidget(ow, 1, 0)
 
         # layout keep the referemce
-        self.assertEqual(getrefcount(w), 3)
-        self.assertEqual(getrefcount(ow), 3)
+        self.assertEqual(sys.getrefcount(w), 3)
+        self.assertEqual(sys.getrefcount(ow), 3)
 
         mainLayout = QGridLayout()
 
         mainLayout.addLayout(topLayout, 1, 0, 1, 4)
 
         # the same reference
-        self.assertEqual(getrefcount(w), 3)
-        self.assertEqual(getrefcount(ow), 3)
+        self.assertEqual(sys.getrefcount(w), 3)
+        self.assertEqual(sys.getrefcount(ow), 3)
 
         mw.setLayout(mainLayout)
 
         # now trasfer the ownership to mw
-        self.assertEqual(getrefcount(w), 3)
-        self.assertEqual(getrefcount(ow), 3)
+        self.assertEqual(sys.getrefcount(w), 3)
+        self.assertEqual(sys.getrefcount(ow), 3)
 
         del mw
 
         # remove the ref and invalidate the widget
-        self.assertEqual(getrefcount(w), 2)
-        self.assertEqual(getrefcount(ow), 2)
+        self.assertEqual(sys.getrefcount(w), 2)
+        self.assertEqual(sys.getrefcount(ow), 2)
 
 
 if __name__ == '__main__':

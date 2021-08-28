@@ -46,6 +46,7 @@ from sample import ObjectType
 class DeleteParentTest(unittest.TestCase):
     '''Test case for deleting a parent object'''
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testParentDestructor(self):
         '''Delete parent object should invalidate child'''
         parent = ObjectType()
@@ -58,6 +59,7 @@ class DeleteParentTest(unittest.TestCase):
         self.assertRaises(RuntimeError, child.objectName)
         self.assertEqual(sys.getrefcount(child), refcount_before-1)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testParentDestructorMultipleChildren(self):
         '''Delete parent object should invalidate all children'''
         parent = ObjectType()
@@ -71,6 +73,7 @@ class DeleteParentTest(unittest.TestCase):
             self.assertRaises(RuntimeError, child.objectName)
             self.assertEqual(sys.getrefcount(child), 4)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testRecursiveParentDelete(self):
         '''Delete parent should invalidate grandchildren'''
         parent = ObjectType()

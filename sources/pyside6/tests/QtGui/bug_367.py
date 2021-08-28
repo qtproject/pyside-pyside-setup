@@ -42,6 +42,7 @@ from PySide6.QtGui import QStandardItem, QStandardItemModel
 
 
 class BugTest(UsesQApplication):
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testCase(self):
         model = QStandardItemModel()
         parentItem = model.invisibleRootItem()

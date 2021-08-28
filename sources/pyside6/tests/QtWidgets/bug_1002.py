@@ -41,6 +41,7 @@ from helper.usesqapplication import UsesQApplication
 
 
 class TestBug1002 (UsesQApplication):
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testReturnWindow(self):
         widget = QWidget()
         button = QPushButton(widget)

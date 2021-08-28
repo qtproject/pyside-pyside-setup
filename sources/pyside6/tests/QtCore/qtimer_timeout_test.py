@@ -76,6 +76,7 @@ class TestTimeoutSignal(UsesQCoreApplication):
         # Default callback
         self.called = True
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testTimeoutSignal(self):
         # Test the QTimer timeout() signal
         refCount = sys.getrefcount(self.timer)

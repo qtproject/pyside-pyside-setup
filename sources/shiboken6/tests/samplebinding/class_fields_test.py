@@ -33,7 +33,6 @@
 
 import os
 import sys
-from sys import getrefcount
 import unittest
 
 from pathlib import Path
@@ -141,34 +140,38 @@ class TestAccessingCppFields(unittest.TestCase):
         # attribution with invalid type
         self.assertRaises(TypeError, lambda : setattr(d, 'objectTypeField', 123))
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testRefCountingAccessingObjectTypeField(self):
         '''Accessing a object type field should respect the reference counting rules.'''
         d = Derived()
 
         # attributing object to instance's field should increase its reference count
         o1 = ObjectType()
-        refcount1 = getrefcount(o1)
+        refcount1 = sys.getrefcount(o1)
         d.objectTypeField = o1
         self.assertEqual(d.objectTypeField, o1)
-        self.assertEqual(getrefcount(d.objectTypeField), refcount1 + 1)
+        self.assertEqual(sys.getrefcount(d.objectTypeField), refcount1 + 1)
 
-        # attributing a new object to instance's field should decrease the previous object's reference count
+        # attributing a new object to instance's field should decrease the previous
+        # object's reference count
         o2 = ObjectType()
-        refcount2 = getrefcount(o2)
+        refcount2 = sys.getrefcount(o2)
         d.objectTypeField = o2
         self.assertEqual(d.objectTypeField, o2)
-        self.assertEqual(getrefcount(o1), refcount1)
-        self.assertEqual(getrefcount(d.objectTypeField), refcount2 + 1)
+        self.assertEqual(sys.getrefcount(o1), refcount1)
+        self.assertEqual(sys.getrefcount(d.objectTypeField), refcount2 + 1)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testRefCountingOfReferredObjectAfterDeletingReferrer(self):
-        '''Deleting the object referring to other object should decrease the reference count of the referee.'''
+        '''Deleting the object referring to other object should decrease the
+        reference count of the referee.'''
         d = Derived()
         o = ObjectType()
-        refcount = getrefcount(o)
+        refcount = sys.getrefcount(o)
         d.objectTypeField = o
-        self.assertEqual(getrefcount(o), refcount + 1)
+        self.assertEqual(sys.getrefcount(o), refcount + 1)
         del d
-        self.assertEqual(getrefcount(o), refcount)
+        self.assertEqual(sys.getrefcount(o), refcount)
 
     def testStaticField(self):
         self.assertEqual(Derived.staticPrimitiveField, 0)

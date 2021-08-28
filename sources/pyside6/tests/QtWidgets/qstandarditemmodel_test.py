@@ -66,6 +66,7 @@ class QStandardItemModelTest(UsesQApplication):
 
 
 class QStandardItemModelRef(UsesQApplication):
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testRefCount(self):
         model = QStandardItemModel(5, 5)
         items = []

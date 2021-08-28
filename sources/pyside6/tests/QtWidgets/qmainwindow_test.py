@@ -73,6 +73,7 @@ class TestMainWindow(UsesQApplication):
     def objDel(self, obj):
         self.app.quit()
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testRefCountToNull(self):
         w = QMainWindow()
         c = QWidget()
@@ -84,6 +85,7 @@ class TestMainWindow(UsesQApplication):
         c = None
         self.app.exec()
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testRefCountToAnother(self):
         w = QMainWindow()
         c = QWidget()

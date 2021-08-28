@@ -92,6 +92,7 @@ class MultipleDerivedTest(unittest.TestCase):
         self.assertTrue(issubclass(ExtMDerived1, Base1))
         self.assertTrue(issubclass(ExtMDerived1, Base2))
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testCastFromMDerived1ToBases(self):
         '''MDerived1 is casted by C++ to its parents and the binding must return the MDerived1 wrapper.'''
         a = MDerived1()
@@ -104,6 +105,7 @@ class MultipleDerivedTest(unittest.TestCase):
         self.assertEqual(a, b2)
         self.assertEqual(sys.getrefcount(a), refcnt + 2)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testCastFromExtMDerived1ToMDerived1Bases(self):
         '''Python defined class ExtMDerived1 is casted by C++ to MDerived1 parents and the binding must return the correct ExtMDerived1 instance.'''
         a = ExtMDerived1()
@@ -118,6 +120,7 @@ class MultipleDerivedTest(unittest.TestCase):
         self.assertEqual(a, b2)
         self.assertEqual(sys.getrefcount(a), refcnt + 2)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testCastFromSonOfMDerived1ToBases(self):
         '''SonOfMDerived1 is casted by C++ to its parents and the binding must return the SonOfMDerived1 wrapper.'''
         a = SonOfMDerived1()
@@ -138,6 +141,7 @@ class MultipleDerivedTest(unittest.TestCase):
         value = a.base2Method()
         self.assertTrue(value, Base2.base2Method(a) * a.multiplier)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testCastFromMDerived2ToBases(self):
         '''MDerived2 is casted by C++ to its parents and the binding must return the MDerived2 wrapper.'''
         a = MDerived2()
@@ -156,6 +160,7 @@ class MultipleDerivedTest(unittest.TestCase):
         self.assertEqual(a, b6)
         self.assertEqual(sys.getrefcount(a), refcnt + 4)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testCastFromMDerived3ToBases(self):
         '''MDerived3 is casted by C++ to its parents and the binding must return the MDerived3 wrapper.'''
         a = MDerived3()
@@ -186,6 +191,7 @@ class MultipleDerivedTest(unittest.TestCase):
         self.assertEqual(a, b6)
         self.assertEqual(sys.getrefcount(a), refcnt + 8)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testCastFromMDerived4ToBases(self):
         '''MDerived4 is casted by C++ to its parents and the binding must return the MDerived4 wrapper.'''
         a = MDerived4()
@@ -198,6 +204,7 @@ class MultipleDerivedTest(unittest.TestCase):
         self.assertEqual(a, b4)
         self.assertEqual(sys.getrefcount(a), refcnt + 2)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testCastFromMDerived5ToBases(self):
         '''MDerived5 is casted by C++ to its parents and the binding must return the MDerived5 wrapper.'''
         a = MDerived5()
@@ -210,6 +217,7 @@ class MultipleDerivedTest(unittest.TestCase):
         self.assertEqual(a, b4)
         self.assertEqual(sys.getrefcount(a), refcnt + 2)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testCastFromMDerived3ToBase3(self):
         '''MDerived3 is casted by C++ to Base3 grandparent using both the inherited and reimplement castToBase3 methods.'''
         a = MDerived3()

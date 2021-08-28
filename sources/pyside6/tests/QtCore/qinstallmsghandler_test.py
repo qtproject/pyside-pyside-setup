@@ -65,6 +65,7 @@ class QInstallMsgHandlerTest(unittest.TestCase):
         ret = qInstallMessageHandler(None)
         self.assertEqual(ret, None)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testRet(self):
         ret = qInstallMessageHandler(None)
         self.assertEqual(ret, None)

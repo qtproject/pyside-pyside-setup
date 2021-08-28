@@ -31,7 +31,6 @@
 
 import os
 import sys
-from sys import getrefcount
 import unittest
 
 from pathlib import Path
@@ -50,16 +49,17 @@ class DisconnectSignalsTest(unittest.TestCase):
     def tearDown(self):
         del self.emitter
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testConnectionRefCount(self):
 
         def destroyedSlot():
             pass
 
-        self.assertEqual(getrefcount(destroyedSlot), 2)
+        self.assertEqual(sys.getrefcount(destroyedSlot), 2)
         self.emitter.destroyed.connect(destroyedSlot)
-        self.assertEqual(getrefcount(destroyedSlot), 3)
+        self.assertEqual(sys.getrefcount(destroyedSlot), 3)
         self.emitter.destroyed.disconnect(destroyedSlot)
-        self.assertEqual(getrefcount(destroyedSlot), 2)
+        self.assertEqual(sys.getrefcount(destroyedSlot), 2)
 
 
 if __name__ == '__main__':

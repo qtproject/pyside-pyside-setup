@@ -30,7 +30,6 @@
 
 import os
 import sys
-from sys import getrefcount
 import unittest
 
 from pathlib import Path
@@ -54,17 +53,18 @@ class PythonSignalRefCount(unittest.TestCase):
     def tearDown(self):
         self.emitter
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testRefCount(self):
         def cb(*args):
             pass
 
-        self.assertEqual(getrefcount(cb), 2)
+        self.assertEqual(sys.getrefcount(cb), 2)
 
         QObject.connect(self.emitter, SIGNAL('foo()'), cb)
-        self.assertEqual(getrefcount(cb), 3)
+        self.assertEqual(sys.getrefcount(cb), 3)
 
         QObject.disconnect(self.emitter, SIGNAL('foo()'), cb)
-        self.assertEqual(getrefcount(cb), 2)
+        self.assertEqual(sys.getrefcount(cb), 2)
 
 
 class CppSignalRefCount(unittest.TestCase):
@@ -75,17 +75,18 @@ class CppSignalRefCount(unittest.TestCase):
     def tearDown(self):
         self.emitter
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testRefCount(self):
         def cb(*args):
             pass
 
-        self.assertEqual(getrefcount(cb), 2)
+        self.assertEqual(sys.getrefcount(cb), 2)
 
         self.emitter.destroyed.connect(cb)
-        self.assertEqual(getrefcount(cb), 3)
+        self.assertEqual(sys.getrefcount(cb), 3)
 
         QObject.disconnect(self.emitter, SIGNAL('destroyed()'), cb)
-        self.assertEqual(getrefcount(cb), 2)
+        self.assertEqual(sys.getrefcount(cb), 2)
 
 
 if __name__ == '__main__':

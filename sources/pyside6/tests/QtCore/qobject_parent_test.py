@@ -30,7 +30,6 @@
 
 import os
 import sys
-from sys import getrefcount
 import unittest
 
 from pathlib import Path
@@ -64,23 +63,26 @@ class ParentRefCountCase(unittest.TestCase):
         del self.child
         del self.parent
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testSetParent(self):
         # QObject.setParent() refcount changes
-        self.assertEqual(getrefcount(self.child), 2)
+        self.assertEqual(sys.getrefcount(self.child), 2)
         self.child.setParent(self.parent)
-        self.assertEqual(getrefcount(self.child), 3)
+        self.assertEqual(sys.getrefcount(self.child), 3)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testSetParentTwice(self):
-        self.assertEqual(getrefcount(self.child), 2)
+        self.assertEqual(sys.getrefcount(self.child), 2)
         self.child.setParent(self.parent)
-        self.assertEqual(getrefcount(self.child), 3)
+        self.assertEqual(sys.getrefcount(self.child), 3)
         self.child.setParent(self.parent)
-        self.assertEqual(getrefcount(self.child), 3)
+        self.assertEqual(sys.getrefcount(self.child), 3)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testConstructor(self):
         # QObject(QObject) refcount changes
         child = QObject(self.parent)
-        self.assertEqual(getrefcount(child), 3)
+        self.assertEqual(sys.getrefcount(child), 3)
 
 
 class ParentCase(unittest.TestCase):
@@ -215,77 +217,81 @@ class ParentCase(unittest.TestCase):
 class TestParentOwnership(unittest.TestCase):
     '''Test case for Parent/Child object ownership'''
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testParentDestructor(self):
         parent = QObject()
-        self.assertEqual(getrefcount(parent), 2)
+        self.assertEqual(sys.getrefcount(parent), 2)
 
         child = QObject(parent)
-        self.assertEqual(getrefcount(child), 3)
-        self.assertEqual(getrefcount(parent), 2)
+        self.assertEqual(sys.getrefcount(child), 3)
+        self.assertEqual(sys.getrefcount(parent), 2)
 
         del parent
-        self.assertEqual(getrefcount(child), 2)
+        self.assertEqual(sys.getrefcount(child), 2)
 
         # this will fail because parent deleted child cpp object
         self.assertRaises(RuntimeError, lambda: child.objectName())
 
     # test parent with multiples children
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testMultipleChildren(self):
         o = QObject()
-        self.assertEqual(getrefcount(o), 2)
+        self.assertEqual(sys.getrefcount(o), 2)
 
         c = QObject(o)
-        self.assertEqual(getrefcount(c), 3)
-        self.assertEqual(getrefcount(o), 2)
+        self.assertEqual(sys.getrefcount(c), 3)
+        self.assertEqual(sys.getrefcount(o), 2)
 
         c2 = QObject(o)
-        self.assertEqual(getrefcount(o), 2)
-        self.assertEqual(getrefcount(c), 3)
-        self.assertEqual(getrefcount(c2), 3)
+        self.assertEqual(sys.getrefcount(o), 2)
+        self.assertEqual(sys.getrefcount(c), 3)
+        self.assertEqual(sys.getrefcount(c2), 3)
 
         del o
-        self.assertEqual(getrefcount(c), 2)
-        self.assertEqual(getrefcount(c2), 2)
+        self.assertEqual(sys.getrefcount(c), 2)
+        self.assertEqual(sys.getrefcount(c2), 2)
 
         # this will fail because parent deleted child cpp object
         self.assertRaises(RuntimeError, lambda: c.objectName())
         self.assertRaises(RuntimeError, lambda: c2.objectName())
 
     # test recursive parent
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testRecursiveParent(self):
         o = QObject()
-        self.assertEqual(getrefcount(o), 2)
+        self.assertEqual(sys.getrefcount(o), 2)
 
         c = QObject(o)
-        self.assertEqual(getrefcount(c), 3)
-        self.assertEqual(getrefcount(o), 2)
+        self.assertEqual(sys.getrefcount(c), 3)
+        self.assertEqual(sys.getrefcount(o), 2)
 
         c2 = QObject(c)
-        self.assertEqual(getrefcount(o), 2)
-        self.assertEqual(getrefcount(c), 3)
-        self.assertEqual(getrefcount(c2), 3)
+        self.assertEqual(sys.getrefcount(o), 2)
+        self.assertEqual(sys.getrefcount(c), 3)
+        self.assertEqual(sys.getrefcount(c2), 3)
 
         del o
-        self.assertEqual(getrefcount(c), 2)
-        self.assertEqual(getrefcount(c2), 2)
+        self.assertEqual(sys.getrefcount(c), 2)
+        self.assertEqual(sys.getrefcount(c2), 2)
 
         # this will fail because parent deleted child cpp object
         self.assertRaises(RuntimeError, lambda: c.objectName())
         self.assertRaises(RuntimeError, lambda: c2.objectName())
 
     # test parent transfer
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testParentTransfer(self):
         o = QObject()
-        self.assertEqual(getrefcount(o), 2)
+        self.assertEqual(sys.getrefcount(o), 2)
 
         c = QObject()
-        self.assertEqual(getrefcount(c), 2)
+        self.assertEqual(sys.getrefcount(c), 2)
 
         c.setParent(o)
-        self.assertEqual(getrefcount(c), 3)
+        self.assertEqual(sys.getrefcount(c), 3)
 
         c.setParent(None)
-        self.assertEqual(getrefcount(c), 2)
+        self.assertEqual(sys.getrefcount(c), 2)
 
         del c
         del o

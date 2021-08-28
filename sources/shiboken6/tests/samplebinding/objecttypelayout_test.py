@@ -46,6 +46,7 @@ from sample import *
 class ObjectTypeLayoutTest(unittest.TestCase):
     '''Test cases for ObjectTypeLayout class.'''
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testOwnershipOverride(self):
         l = ObjectTypeLayout()
 

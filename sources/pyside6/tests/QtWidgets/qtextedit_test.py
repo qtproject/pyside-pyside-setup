@@ -30,7 +30,6 @@
 
 import os
 import sys
-from sys import getrefcount
 import unittest
 
 from pathlib import Path
@@ -53,16 +52,17 @@ class DontTouchReference(UsesQApplication):
         self.cursor = self.editor.textCursor()
         self.table = self.cursor.insertTable(1, 1)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testQTextTable(self):
         # methods which return QTextTable should not increment its reference
-        self.assertEqual(getrefcount(self.table), 2)
+        self.assertEqual(sys.getrefcount(self.table), 2)
         f = self.cursor.currentFrame()
         del f
-        self.assertEqual(getrefcount(self.table), 2)
+        self.assertEqual(sys.getrefcount(self.table), 2)
         # destroying the cursor should not raise any "RuntimeError: internal
         # C++ object already deleted." when accessing the QTextTable
         del self.cursor
-        self.assertEqual(getrefcount(self.table), 2)
+        self.assertEqual(sys.getrefcount(self.table), 2)
         cell = self.table.cellAt(0, 0)
 
 

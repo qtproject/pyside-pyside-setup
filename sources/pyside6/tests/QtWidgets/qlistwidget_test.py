@@ -42,6 +42,7 @@ from helper.usesqapplication import UsesQApplication
 
 class QListWidgetTest(UsesQApplication):
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def populateList(self, lst):
         o = QObject()
         o.setObjectName("obj")
@@ -54,10 +55,12 @@ class QListWidgetTest(UsesQApplication):
         lst.addItem(item)
         self.assertTrue(sys.getrefcount(item), 3)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def checkCurrentItem(self, lst):
         item = lst.currentItem()
         self.assertTrue(sys.getrefcount(item), 3)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def checkItemData(self, lst):
         item = lst.currentItem()
         o = item.data(Qt.UserRole)
@@ -65,6 +68,7 @@ class QListWidgetTest(UsesQApplication):
         self.assertEqual(o, item._data)
         self.assertTrue(sys.getrefcount(o), 2)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testConstructorWithParent(self):
         lst = QListWidget()
         self.populateList(lst)

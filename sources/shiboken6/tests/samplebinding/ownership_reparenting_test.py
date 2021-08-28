@@ -65,6 +65,7 @@ class ReparentingTest(unittest.TestCase):
         for child in new_parent.children():
             self.assertTrue(child in object_list)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testReparentWithTheSameParent(self):
         '''Set the same parent twice to check if the ref continue the same'''
         obj = ObjectType()

@@ -45,6 +45,7 @@ from sample import ObjectType, BlackBox
 class BlackBoxTest(unittest.TestCase):
     '''The BlackBox class has cases of ownership transference between C++ and Python.'''
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testOwnershipTransference(self):
         '''Ownership transference from Python to C++ and back again.'''
         o1 = ObjectType()
@@ -77,6 +78,7 @@ class BlackBoxTest(unittest.TestCase):
         o3 = bb.retrieveObjectType(-5)
         self.assertEqual(o3, None)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testOwnershipTransferenceCppCreated(self):
         '''Ownership transference using a C++ created object.'''
         o1 = ObjectType.create()

@@ -88,6 +88,7 @@ class SetStyleTest(UsesQApplication):
             QApplication.instance().processEvents()
         self.assertTrue(proxyStyle.polished > 0)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testSetStyleOwnership(self):
         style = QStyleFactory.create(QStyleFactory.keys()[0])
         self.assertEqual(sys.getrefcount(style), 2)

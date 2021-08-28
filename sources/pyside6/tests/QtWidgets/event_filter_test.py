@@ -48,6 +48,7 @@ class MyFilter(QObject):
 
 
 class EventFilter(UsesQApplication):
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testRefCount(self):
         o = QObject()
         filt = MyFilter()

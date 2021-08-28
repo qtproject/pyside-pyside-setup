@@ -45,6 +45,7 @@ class MyObject(QObject):
 
 
 class TestDestructor(unittest.TestCase):
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testReference(self):
         o = QObject()
         m = MyObject(o)

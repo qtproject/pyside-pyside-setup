@@ -65,6 +65,7 @@ class TestQModelIndexInternalPointer(unittest.TestCase):
         i = idx.internalPointer()
         self.assertEqual(i, "Hello")
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testReferenceCounting(self):
         # Test reference counting when retrieving data with
         # QModelIndex.internalPointer

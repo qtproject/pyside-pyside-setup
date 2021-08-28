@@ -45,6 +45,7 @@ from PySide6.QtWidgets import QApplication, QTreeWidget, QTreeWidgetItem
 class MyMainWindow(unittest.TestCase):
     app = QApplication(sys.argv)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testCase1(self):
         self._tree = QTreeWidget()
         self._tree.setColumnCount(2)
@@ -62,6 +63,7 @@ class MyMainWindow(unittest.TestCase):
         self.assertEqual(sys.getrefcount(self._i1), 3)
         self.assertEqual(sys.getrefcount(self._i11), 3)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testCase2(self):
         self._tree = QTreeWidget()
         self._tree.setColumnCount(2)
@@ -78,6 +80,7 @@ class MyMainWindow(unittest.TestCase):
         self.assertEqual(sys.getrefcount(self._i1), 3)
         self.assertEqual(sys.getrefcount(self._i11), 3)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def _updateTree(self):
         self._tree.clear()
         if self._i1 and self._i11:

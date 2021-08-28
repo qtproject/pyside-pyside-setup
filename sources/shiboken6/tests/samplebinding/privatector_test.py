@@ -67,6 +67,7 @@ class PrivateCtorTest(unittest.TestCase):
         self.assertEqual(pd2, pd1)
         self.assertEqual(pd2.instanceCalls(), calls + 1)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testPrivateCtorRefCounting(self):
         '''Test refcounting of the singleton returned by PrivateCtor.instance().'''
         pd1 = PrivateCtor.instance()

@@ -48,6 +48,7 @@ class Bug576(unittest.TestCase):
         self._destroyed = True
         self.assertTrue(isinstance(button, QPushButton))
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testWidgetParent(self):
         self._destroyed = False
         app = QApplication(sys.argv)

@@ -52,6 +52,7 @@ class TestPointerHolder(unittest.TestCase):
         ph = PointerHolder(a)
         self.assertEqual(ph.pointer(), a)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testReferenceCounting(self):
         '''Test reference counting when retrieving data with PointerHolder.pointer().'''
         a = (1, 2, 3)

@@ -31,7 +31,6 @@
 
 import os
 import sys
-from sys import getrefcount
 import unittest
 
 from pathlib import Path
@@ -45,16 +44,17 @@ from PySide6.QtCore import QObject, SIGNAL
 class SignalManagerRefCount(unittest.TestCase):
     """Simple test case to check if the signal_manager is erroneously incrementing the object refcounter"""
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testObjectRefcount(self):
         """Emission of QObject.destroyed() to a python slot"""
         def callback():
             pass
         obj = QObject()
-        refcount = getrefcount(obj)
+        refcount = sys.getrefcount(obj)
         obj.destroyed.connect(callback)
-        self.assertEqual(refcount, getrefcount(obj))
+        self.assertEqual(refcount, sys.getrefcount(obj))
         QObject.disconnect(obj, SIGNAL('destroyed()'), callback)
-        self.assertEqual(refcount, getrefcount(obj))
+        self.assertEqual(refcount, sys.getrefcount(obj))
 
 
 if __name__ == '__main__':

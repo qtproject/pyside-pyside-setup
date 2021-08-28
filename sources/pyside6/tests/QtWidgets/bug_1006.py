@@ -91,6 +91,7 @@ class TestBug1006 (TimedQApplication):
         item = layout.itemAt(0)
         self.assertTrue(isinstance(item.widget(), QWidget))
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testRemoveOrphanWidget(self):
         widget = QLabel()
         layout = QHBoxLayout()
@@ -101,6 +102,7 @@ class TestBug1006 (TimedQApplication):
         widget.setObjectName("MyWidget")
         self.assertEqual(sys.getrefcount(widget), 2)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testRemoveChildWidget(self):
         parent = QLabel()
         widget = QLabel(parent)

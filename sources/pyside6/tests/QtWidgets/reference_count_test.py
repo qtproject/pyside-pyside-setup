@@ -68,6 +68,7 @@ class ReferenceCount(UsesQApplication):
     def tearDown(self):
         super(ReferenceCount, self).tearDown()
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def beforeTest(self):
         points = [QPointF(0, 0), QPointF(100, 100), QPointF(0, 100)]
         pol = self.scene.addPolygon(QPolygonF(points))
@@ -77,6 +78,7 @@ class ReferenceCount(UsesQApplication):
         # refcount need be 3 because one ref for QGraphicsScene, and one to rect obj
         self.assertEqual(sys.getrefcount(pol), 3)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testReferenceCount(self):
         global destroyedRect
         global destroyedPol

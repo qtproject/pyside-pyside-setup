@@ -68,6 +68,7 @@ class PrivateDtorTest(unittest.TestCase):
         self.assertEqual(pd2, pd1)
         self.assertEqual(pd2.instanceCalls(), calls + 1)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testPrivateDtorRefCounting(self):
         '''Test refcounting of the singleton returned by PrivateDtor.instance().'''
         pd1 = PrivateDtor.instance()
@@ -86,6 +87,7 @@ class PrivateDtorTest(unittest.TestCase):
         self.assertEqual(pd3.instanceCalls(), calls + 2)
         self.assertEqual(sys.getrefcount(pd3), refcnt)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testClassDecref(self):
         # Bug was that class PyTypeObject wasn't decrefed when instance
         # was invalidated

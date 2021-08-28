@@ -41,6 +41,7 @@ from PySide6.QtWidgets import QApplication, QTreeWidget, QTreeWidgetItem
 
 
 class Bug585(unittest.TestCase):
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testCase(self):
         app = QApplication([])
         self._tree = QTreeWidget()
