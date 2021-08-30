@@ -42,3 +42,6 @@
     <modify-argument index="2"><array/></modify-argument>
     <modify-argument index="3"><array/></modify-argument>
 </modify-function>
+<modify-function signature="^glIndexubv\(.*$">
+    <modify-argument index="1"><array/></modify-argument>
+</modify-function>
