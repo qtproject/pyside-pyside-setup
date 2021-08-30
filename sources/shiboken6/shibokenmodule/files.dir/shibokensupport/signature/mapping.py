@@ -251,6 +251,8 @@ type_map.update({
     "int32_t": int,
     "int64_t": int,
     "int8_t": int,
+    "intptr_t": int,
+    "uintptr_t": int,
     "qintptr": int,
     "qsizetype": int,
     "QList": ArrayLikeVariable,
@@ -339,6 +341,7 @@ type_map.update({
     "array uint16_t*"       : ArrayLikeVariable(int),
     "array int32_t*"        : ArrayLikeVariable(int),
     "array uint32_t*"       : ArrayLikeVariable(int),
+    "array intptr_t*"       : ArrayLikeVariable(int),
     })
 
 type_map.update({

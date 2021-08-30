@@ -48,12 +48,20 @@
   <?entity GLint int?>
   <?entity GLuint unsigned int?>
   <?entity GLbyte unsigned char?>
+  <?entity GLboolean unsigned char?>
+  <?entity GLsizei int?>
+  <?entity GLsizeiptr long?>
+  <?entity GLintptr long?>
   <?endif?>
 
   <?if darwin?>
   <?entity GLint int32_t?>
   <?entity GLuint uint32_t?>
   <?entity GLbyte uint8_t?>
+  <?entity GLboolean uint8_t?>
+  <?entity GLsizei int32_t?>
+  <?entity GLsizeiptr intptr_t?>
+  <?entity GLintptr intptr_t?>
   <?endif?>
 
   <rejection class="^QOpenGL.*$" argument-type="^(const )?GLboolean ?\*$"/>

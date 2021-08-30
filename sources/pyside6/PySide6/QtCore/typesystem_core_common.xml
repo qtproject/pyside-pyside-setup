@@ -216,6 +216,8 @@
   <primitive-type name="uint32_t"/>
   <primitive-type name="int64_t"/>
   <primitive-type name="uint64_t"/>
+  <primitive-type name="intptr_t"/>
+  <primitive-type name="uintptr_t"/>
 
   <?if windows darwin?>
   <primitive-type name="Qt::HANDLE" target-lang-api-name="PyObject"/>
