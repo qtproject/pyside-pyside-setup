@@ -1,0 +1,49 @@
+Qt for Python 6.1.3 is a bug-fix release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+****************************************************************************
+*                                  PySide6                                 *
+****************************************************************************
+
+ - The Python Unicode API was updated to the newest
+   version when not in limited API mode, too.
+ - [PYSIDE-131] The `tr` function now works also for
+   PySide derived Python class instances with the right context, and
+   fix translation for derived types.
+ - [PYSIDE-1252] The tr() translation method of QObject
+   has been changed to be a class method. This makes it
+   possible to use tr() on a class without instantiation.
+ - [PYSIDE-1482] Add classes QChannel, QChannelComponent, QSharedMemory.
+ - [PYSIDE-1609] PySide6: Fix crashes in QObject.findChild()
+ - [PYSIDE-1614] Fix logging level being set when importing PySide6
+ - [PYSIDE-1617] Fix leak in QML ListProperty type
+ - [PYSIDE-1621] signature: make zip file access totally virtual,
+  and make embedding aware.
+ - [PYSIDE-1626] feature: fix the UIC switching problem
+ - [PYSIDE-1629] PySide6: Fix crash with qmlRegisterSingletonType() when invoked from JavaScript
+ - [PYSIDE-1636] Fix GLES builds
+ - [PYSIDE-1646] Fix the signature mapping after enabling macOS primitive types
+ - [PYSIDE-1647] Fix crash when constructing a QApplication in an embedded application
+
+****************************************************************************
+*                                  Shiboken6                               *
+****************************************************************************
+
+ - [PYSIDE-1621] Embedding of supporting Python files
+   is now completely virtual. No FS files are involved any longer.
+ - [PYSIDE-1626] Coexistence of different feature
+   selections works now, especially for UIC files and inheritance.
+ - [PYSIDE-1112] shiboken6/Documentation: Add a link from code injection to type system variables
+ - [PYSIDE-1252] ApiExtractor: add classmethod attribute to add-function for tr()
