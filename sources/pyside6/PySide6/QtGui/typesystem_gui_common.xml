@@ -187,6 +187,7 @@
       <enum-type name="TextBoundaryType"/>
   </value-type>
 
+  <object-type name="QAccessibleActionInterface"/>
   <object-type name="QAccessibleEditableTextInterface"/>
   <object-type name="QAccessibleInterface"/>
   <object-type name="QAccessibleObject"/>

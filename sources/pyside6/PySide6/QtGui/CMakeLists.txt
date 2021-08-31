@@ -10,6 +10,7 @@ ${QtGui_GEN_DIR}/qabstracttextdocumentlayout_paintcontext_wrapper.cpp
 ${QtGui_GEN_DIR}/qabstracttextdocumentlayout_selection_wrapper.cpp
 ${QtGui_GEN_DIR}/qabstracttextdocumentlayout_wrapper.cpp
 ${QtGui_GEN_DIR}/qaccessible_wrapper.cpp
+${QtGui_GEN_DIR}/qaccessibleactioninterface_wrapper.cpp
 ${QtGui_GEN_DIR}/qaccessibleeditabletextinterface_wrapper.cpp
 ${QtGui_GEN_DIR}/qaccessibleevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qaccessibleobject_wrapper.cpp
