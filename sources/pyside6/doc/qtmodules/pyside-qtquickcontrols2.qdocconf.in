@@ -1,3 +1,3 @@
-include(@QT_SRC_DIR@/../qtquickcontrols2/src/quickcontrols2/doc/qtquickcontrols.qdocconf)
+include(@QT_SRC_DIR@/../qtdeclarative/src/quickcontrols2/doc/qtquickcontrols.qdocconf)
 includepaths += -I @QT_SRC_DIR@/../qtquickcontrols2/src/quickcontrols2
 include(../pyside-config.qdocconf)
