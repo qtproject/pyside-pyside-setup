@@ -41,6 +41,101 @@
  * INJECT CODE
  ********************************************************************/
 
+// @snippet qaccessible-pysidefactory
+// Helper for QAccessible::installFactory() that forwards the calls to
+// Python callables.
+class PySideAccessibleFactory
+{
+    PySideAccessibleFactory() = default;
+public:
+    ~PySideAccessibleFactory();
+
+    static PySideAccessibleFactory *instance() { return m_instance; }
+    static PySideAccessibleFactory *ensureInstance();
+
+    static void installFactory(PyObject *f);
+    static void cleanup();
+
+    static QAccessibleInterface *factory(const QString &key, QObject *o);
+
+private:
+    QAccessibleInterface *callFactories(const QString &key, QObject *o);
+
+    static PySideAccessibleFactory *m_instance;
+
+    QList<PyObject *> m_factoryFunctions;
+    QList<PyObject *> m_objects;
+};
+
+PySideAccessibleFactory *PySideAccessibleFactory::m_instance = nullptr;
+
+PySideAccessibleFactory::~PySideAccessibleFactory()
+{
+    QAccessible::removeFactory(PySideAccessibleFactory::factory);
+    if (!m_factoryFunctions.isEmpty()) {
+        Shiboken::GilState state;
+        for (auto *f : m_factoryFunctions)
+            Py_DECREF(f);
+        for (auto *o : m_objects)
+            Py_DECREF(o);
+    }
+}
+
+PySideAccessibleFactory *PySideAccessibleFactory::ensureInstance()
+{
+    if (m_instance == nullptr) {
+        m_instance = new PySideAccessibleFactory;
+        QAccessible::installFactory(PySideAccessibleFactory::factory);
+        qAddPostRoutine(PySideAccessibleFactory::cleanup);
+    }
+    return m_instance;
+}
+
+void PySideAccessibleFactory::installFactory(PyObject *f)
+{
+    if (m_instance != nullptr) {
+        Py_INCREF(f);
+        m_instance->m_factoryFunctions.append(f);
+    }
+}
+
+void PySideAccessibleFactory::cleanup()
+{
+    delete m_instance;
+    m_instance = nullptr;
+}
+
+QAccessibleInterface *PySideAccessibleFactory::factory(const QString &key, QObject *o)
+{
+    return m_instance ? m_instance->callFactories(key, o) : nullptr;
+}
+
+QAccessibleInterface *PySideAccessibleFactory::callFactories(const QString &key, QObject *o)
+{
+    Shiboken::GilState state;
+    Shiboken::AutoDecRef arglist(PyTuple_New(2));
+    PyTuple_SET_ITEM(arglist, 0, %CONVERTTOPYTHON[QString](key));
+    PyTuple_SET_ITEM(arglist, 1, %CONVERTTOPYTHON[QObject *](o));
+
+    for (auto *f : m_factoryFunctions) {
+        if (PyObject *pyResult = PyObject_CallObject(f, arglist)) {
+            if (pyResult != Py_None) {
+                m_objects.append(pyResult);
+                QAccessibleInterface* result = %CONVERTTOCPP[QAccessibleInterface *](pyResult);
+                return result;
+            }
+            Py_DECREF(pyResult);
+        }
+    }
+
+    return nullptr;
+}
+// @snippet qaccessible-pysidefactory
+
+// @snippet qaccessible-installfactory
+PySideAccessibleFactory::ensureInstance()->installFactory(%1);
+// @snippet qaccessible-installfactory
+
 // @snippet glgetshadersource
 GLsizei bufSize = 4096;
 GLsizei length = bufSize - 1;

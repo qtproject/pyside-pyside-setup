@@ -179,6 +179,12 @@
   </object-type>
 
   <value-type name="QAccessible">
+      <extra-includes>
+        <include file-name="QtGui/QAccessibleInterface" location="global"/>
+      </extra-includes>
+      <inject-code class="native" position="beginning"
+                   file="../glue/qtgui.cpp"
+                   snippet="qaccessible-pysidefactory"/>
       <value-type name="State"/>
       <enum-type name="Event"/>
       <enum-type name="Role"/>
@@ -186,6 +192,11 @@
       <enum-type name="RelationFlag" flags="Relation"/>
       <enum-type name="InterfaceType"/>
       <enum-type name="TextBoundaryType"/>
+      <add-function signature="installFactory(PyCallable)" static="yes">
+          <inject-code class="target" position="beginning"
+                       file="../glue/qtgui.cpp"
+                       snippet="qaccessible-installfactory"/>
+      </add-function>
   </value-type>
 
   <object-type name="QAccessibleActionInterface"/>
