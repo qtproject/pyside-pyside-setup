@@ -48,15 +48,6 @@ from subprocess import Popen, PIPE
 import PySide6 as ref_mod
 
 
-def main():
-    # This will take care of "pyside6-lupdate" listed as an entrypoint
-    # in setup.py are copied to 'scripts/..'
-    cmd = os.path.join("..", os.path.basename(sys.argv[0]))
-    command = [os.path.join(os.path.dirname(os.path.realpath(__file__)), cmd)]
-    command.extend(sys.argv[1:])
-    sys.exit(subprocess.call(command))
-
-
 def qt_tool_wrapper(qt_tool, args):
     # Taking care of pyside6-uic, pyside6-rcc, and pyside6-designer
     # listed as an entrypoint in setup.py
@@ -134,7 +125,3 @@ def genpyi():
     cmd = support / "generate_pyi.py"
     command = [sys.executable, os.fspath(cmd)] + sys.argv[1:]
     sys.exit(subprocess.call(command))
-
-
-if __name__ == "__main__":
-    main()

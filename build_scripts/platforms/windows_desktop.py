@@ -314,7 +314,6 @@ def copy_qt_artifacts(self, copy_pdbs, vars):
         "designer.exe",
         "linguist.exe",
         "lrelease.exe",
-        "lupdate.exe",
         "lconvert.exe",
         "qtdiag.exe"
     ]
