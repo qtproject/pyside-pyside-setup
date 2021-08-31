@@ -128,13 +128,6 @@ def prepare_packages_posix(self, vars):
             "{st_build_dir}/{st_package_name}/scripts/pyside_tool.py",
             force=False, vars=vars)
 
-        # <install>/bin/* -> {st_package_name}/
-        executables.extend(copydir(
-            "{install_dir}/bin/",
-            "{st_build_dir}/{st_package_name}",
-            filter=[f"{PYSIDE}-lupdate"],
-            recursive=False, vars=vars))
-
         if not OPTION['NO_QT_TOOLS']:
             executables.extend(copydir(
                 "{install_dir}/bin/",

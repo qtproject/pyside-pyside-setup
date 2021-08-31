@@ -54,7 +54,7 @@ if(NOT NO_QT_TOOLS STREQUAL "yes")
 
 endif()
 
-# pyside6-rcc, pyside6-uic, pyside6-designer, shiboken and pyside6-lupdate entrypoints
+# pyside6-rcc, pyside6-uic, pyside6-designer, and shiboken entrypoints
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/pyside_tool.py
         DESTINATION bin
         PERMISSIONS
