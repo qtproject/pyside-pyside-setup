@@ -2178,7 +2178,7 @@ div.rightside {
 }
 
 .card {
-  height: 250px;
+  min-height: 120px;
   text-align: center;
 }
 
@@ -2186,10 +2186,4 @@ div.rightside {
   object-fit: cover;
   width: 50px;
   height: 120px;
-}
-
-.card-body {
-  vertical-align: middle;
-  padding: 5px !important;
-  text-align: center;
 }

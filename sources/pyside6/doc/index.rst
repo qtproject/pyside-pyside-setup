@@ -39,7 +39,7 @@ Documentation
 .. ifconfig:: output_format == 'html'
 
     .. panels::
-        :body: text-center
+        :body: align-items-center jutify-content-center
         :container: container-lg pb-3
         :column: col-lg-4 col-md-4 col-sm-6 col-xs-12 p-2
 
