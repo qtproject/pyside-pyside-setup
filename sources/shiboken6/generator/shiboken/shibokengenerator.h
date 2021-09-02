@@ -426,8 +426,8 @@ private:
      *   \param scope scope used to search for overloads.
      *   \param functionName the function name.
      */
-    AbstractMetaFunctionCList getFunctionOverloads(const AbstractMetaClass *scope,
-                                                   const QString &functionName) const;
+    AbstractMetaFunctionCList getMethodOverloads(const AbstractMetaClass *scope,
+                                                const QString &functionName) const;
     /**
      *   Write a function argument in the C++ in the text stream \p s.
      *   This function just call \code s << argumentString(); \endcode

@@ -1837,14 +1837,17 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
         // name and if any of them is of the protected visibility. This is used to replace
         // calls to %FUNCTION_NAME on user written custom code for calls to the protected
         // dispatcher.
-        bool hasProtectedOverload = false;
-        if (func->isUserAdded()) {
-            const auto &funcs = getFunctionOverloads(func->ownerClass(), func->name());
-            for (const auto &f : funcs)
-                hasProtectedOverload |= f->isProtected();
+        bool isProtected = func->isProtected();
+        auto owner = func->ownerClass();
+        if (!isProtected && func->isUserAdded() && owner != nullptr) {
+            const auto &funcs = getMethodOverloads(owner, func->name());
+            isProtected = std::any_of(funcs.cbegin(), funcs.cend(),
+                                      [](const AbstractMetaFunctionCPtr &f) {
+                                          return f->isProtected();
+                                      });
         }
 
-        if (func->isProtected() || hasProtectedOverload) {
+        if (isProtected) {
             code.replace(QLatin1String("%TYPE::%FUNCTION_NAME"),
                          QStringLiteral("%1::%2_protected")
                          .arg(wrapperName(func->ownerClass()), func->originalName()));
@@ -2337,10 +2340,11 @@ AbstractMetaFunctionCList
     return results;
 }
 
-AbstractMetaFunctionCList ShibokenGenerator::getFunctionOverloads(const AbstractMetaClass *scope,
-                                                                 const QString &functionName) const
+AbstractMetaFunctionCList ShibokenGenerator::getMethodOverloads(const AbstractMetaClass *scope,
+                                                                const QString &functionName) const
 {
-    const auto &lst = scope ? scope->functions() : api().globalFunctions();
+    Q_ASSERT(scope);
+    const auto &lst = scope->functions();
 
     AbstractMetaFunctionCList results;
     QSet<QString> seenSignatures;
