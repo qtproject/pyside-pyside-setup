@@ -51,8 +51,17 @@ import glob
 
 import urllib.request as urllib
 
-import distutils.log as log
-from distutils.errors import DistutilsSetupError
+
+try:
+    # Using the distutils implementation within setuptools
+    from setuptools._distutils import log
+    from setuptools._distutils.errors import DistutilsError
+except ModuleNotFoundError:
+    # This is motivated by our CI using an old version of setuptools
+    # so then the coin_build_instructions.py script is executed, and
+    # import from this file, it was failing.
+    from distutils import log
+    from distutils import errors
 
 try:
     WindowsError
@@ -88,10 +97,7 @@ def get_numpy_location():
 
 
 def winsdk_setenv(platform_arch, build_type):
-    from distutils.msvc9compiler import VERSION as MSVC_VERSION
-    from distutils.msvc9compiler import Reg
-    from distutils.msvc9compiler import HKEYS
-    from distutils.msvc9compiler import WINSDK_BASE
+    from setuptools._distutils import msvc9compiler as msvc9
 
     sdk_version_map = {
         "v6.0a": 9.0,
@@ -101,27 +107,27 @@ def winsdk_setenv(platform_arch, build_type):
         "v7.1": 10.0
     }
 
-    log.info(f"Searching Windows SDK with MSVC compiler version {MSVC_VERSION}")
+    log.info(f"Searching Windows SDK with MSVC compiler version {msvc9.VERSION}")
     setenv_paths = []
-    for base in HKEYS:
-        sdk_versions = Reg.read_keys(base, WINSDK_BASE)
+    for base in msvc9.HKEYS:
+        sdk_versions = msvc9.Reg.read_keys(base, msvc9.WINSDK_BASE)
         if sdk_versions:
             for sdk_version in sdk_versions:
-                installationfolder = Reg.get_value(f"{WINSDK_BASE}\\{sdk_version}",
+                installationfolder = msvc9.Reg.get_value(f"{msvc9.WINSDK_BASE}\\{sdk_version}",
                                                    "installationfolder")
-                # productversion = Reg.get_value("{}\\{}".format(WINSDK_BASE, sdk_version),
+                # productversion = msvc9.Reg.get_value("{}\\{}".format(msvc9.WINSDK_BASE, sdk_version),
                 #                                "productversion")
                 setenv_path = os.path.join(installationfolder, os.path.join('bin', 'SetEnv.cmd'))
                 if not os.path.exists(setenv_path):
                     continue
                 if sdk_version not in sdk_version_map:
                     continue
-                if sdk_version_map[sdk_version] != MSVC_VERSION:
+                if sdk_version_map[sdk_version] != msvc9.VERSION:
                     continue
                 setenv_paths.append(setenv_path)
     if len(setenv_paths) == 0:
         raise DistutilsSetupError("Failed to find the Windows SDK with MSVC compiler "
-                                  f"version {MSVC_VERSION}")
+                                  f"version {msvc9.VERSION}")
     for setenv_path in setenv_paths:
         log.info(f"Found {setenv_path}")
 
@@ -148,26 +154,25 @@ def winsdk_setenv(platform_arch, build_type):
 def find_vcdir(version):
     """
     This is the customized version of
-    distutils.msvc9compiler.find_vcvarsall method
+    setuptools._distutils.msvc9compiler.find_vcvarsall method
     """
-    from distutils.msvc9compiler import VS_BASE
-    from distutils.msvc9compiler import Reg
-    vsbase = VS_BASE % version
+    from setuptools._distutils import msvc9compiler as msvc9
+    vsbase = msvc9.VS_BASE % version
     try:
-        productdir = Reg.get_value(rf"{vsbase}\Setup\VC", "productdir")
+        productdir = msvc9.Reg.get_value(rf"{vsbase}\Setup\VC", "productdir")
     except KeyError:
         productdir = None
 
     # trying Express edition
     if productdir is None:
         try:
-            from distutils.msvc9compiler import VSEXPRESS_BASE
-        except ImportError:
+            hasattr(msvc9, VSEXPRESS_BASE)
+        except AttributeError:
             pass
         else:
             vsbase = VSEXPRESS_BASE % version
             try:
-                productdir = Reg.get_value(rf"{vsbase}\Setup\VC", "productdir")
+                productdir = msvc9.Reg.get_value(rf"{vsbase}\Setup\VC", "productdir")
             except KeyError:
                 productdir = None
                 log.debug("Unable to find productdir in registry")
@@ -191,17 +196,17 @@ def find_vcdir(version):
 
 
 def init_msvc_env(platform_arch, build_type):
-    from distutils.msvc9compiler import VERSION as MSVC_VERSION
+    from setuptools._distutils import msvc9compiler as msvc9
 
-    log.info(f"Searching MSVC compiler version {MSVC_VERSION}")
-    vcdir_path = find_vcdir(MSVC_VERSION)
+    log.info(f"Searching MSVC compiler version {msvc9.VERSION}")
+    vcdir_path = find_vcdir(msvc9.VERSION)
     if not vcdir_path:
-        raise DistutilsSetupError(f"Failed to find the MSVC compiler version {MSVC_VERSION} on "
+        raise DistutilsSetupError(f"Failed to find the MSVC compiler version {msvc9.VERSION} on "
                                   "your system.")
     else:
         log.info(f"Found {vcdir_path}")
 
-    log.info(f"Searching MSVC compiler {MSVC_VERSION} environment init script")
+    log.info(f"Searching MSVC compiler {msvc9.VERSION} environment init script")
     if platform_arch.startswith("32"):
         vcvars_path = os.path.join(vcdir_path, "bin", "vcvars32.bat")
     else:
@@ -221,7 +226,7 @@ def init_msvc_env(platform_arch, build_type):
         log.info(f"Found {vcvars_path}")
 
     # Get MSVC env
-    log.info(f"Using MSVC {MSVC_VERSION} in {vcvars_path}")
+    log.info(f"Using MSVC {msvc9.VERSION} in {vcvars_path}")
     msvc_arch = "x86" if platform_arch.startswith("32") else "amd64"
     log.info(f"Getting MSVC env for {msvc_arch} architecture")
     vcvars_cmd = [vcvars_path, msvc_arch]

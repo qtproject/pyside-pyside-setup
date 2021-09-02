@@ -37,7 +37,7 @@
 ##
 #############################################################################
 
-from distutils.version import LooseVersion
+from packaging.version import parse as parse_version
 
 import os
 import platform
@@ -52,6 +52,33 @@ from .versions import PYSIDE, PYSIDE_MODULE, SHIBOKEN
 from .wheel_utils import (get_package_version, get_qt_version,
                           get_package_timestamp, macos_plat_name,
                           macos_pyside_min_deployment_target)
+
+import setuptools  # Import setuptools before distutils
+from setuptools import Extension
+from setuptools.command.install import install as _install
+from setuptools.command.install_lib import install_lib as _install_lib
+from setuptools.command.bdist_egg import bdist_egg as _bdist_egg
+from setuptools.command.develop import develop as _develop
+from setuptools.command.build_py import build_py as _build_py
+
+from sysconfig import get_config_var
+# Use the distutils implementation within setuptools
+from setuptools._distutils.errors import DistutilsError
+from setuptools._distutils import log
+from setuptools._distutils import sysconfig as sconfig
+from setuptools._distutils.command.build import build as _build
+
+from shutil import which
+from setuptools.command.build_ext import build_ext as _build_ext
+from setuptools import Command
+
+from .qtinfo import QtInfo
+from .utils import (rmtree, detect_clang, copyfile, copydir, run_process_output, run_process,
+                    update_env_path, init_msvc_env, filter_match, macos_fix_rpaths_for_library,
+                    linux_fix_rpaths_for_library)
+from .platforms.unix import prepare_packages_posix
+from .platforms.windows_desktop import prepare_packages_win32
+from .wheel_override import wheel_module_exists, get_bdist_wheel_override
 
 
 setup_script_dir = os.getcwd()
@@ -84,15 +111,15 @@ def _get_make(platform_arch, build_type):
     if makespec == "make":
         return ("make", "Unix Makefiles")
     if makespec == "msvc":
-        nmake_path = find_executable("nmake")
+        nmake_path = which("nmake")
         if nmake_path is None or not os.path.exists(nmake_path):
             log.info("nmake not found. Trying to initialize the MSVC env...")
             init_msvc_env(platform_arch, build_type)
-            nmake_path = find_executable("nmake")
+            nmake_path = which("nmake")
             if not nmake_path or not os.path.exists(nmake_path):
                 raise DistutilsSetupError('"nmake" could not be found.')
         if not OPTION["NO_JOM"]:
-            jom_path = find_executable("jom")
+            jom_path = which("jom")
             if jom_path:
                 log.info(f"jom was found in {jom_path}")
                 return (jom_path, "NMake Makefiles JOM")
@@ -112,7 +139,7 @@ def get_make(platform_arch, build_type):
     """Retrieve the make command and CMake generator name"""
     (make_path, make_generator) = _get_make(platform_arch, build_type)
     if not os.path.isabs(make_path):
-        found_path = find_executable(make_path)
+        found_path = which(make_path)
         if not found_path or not os.path.exists(found_path):
             m = f"You need the program '{make_path}' on your system path to compile {PYSIDE_MODULE}."
             raise DistutilsSetupError(m)
@@ -208,39 +235,11 @@ def get_py_library(build_type, py_version, py_prefix, py_libdir, py_include_dir)
     return py_library
 
 
-import setuptools  # Import setuptools before distutils
-from setuptools import Extension
-from setuptools.command.install import install as _install
-from setuptools.command.install_lib import install_lib as _install_lib
-from setuptools.command.bdist_egg import bdist_egg as _bdist_egg
-from setuptools.command.develop import develop as _develop
-from setuptools.command.build_py import build_py as _build_py
-
-import distutils.log as log
-from distutils.errors import DistutilsSetupError
-from distutils.sysconfig import get_config_var
-from distutils.sysconfig import get_python_lib
-from distutils.spawn import find_executable
-from distutils.command.build import build as _build
-from distutils.command.build_ext import build_ext as _build_ext
-from distutils.cmd import Command
-
-from .qtinfo import QtInfo
-from .utils import rmtree, detect_clang, copyfile, copydir, run_process_output, run_process
-from .utils import update_env_path, init_msvc_env, filter_match
-from .utils import macos_fix_rpaths_for_library
-from .utils import linux_fix_rpaths_for_library
-from .platforms.unix import prepare_packages_posix
-from .platforms.windows_desktop import prepare_packages_win32
-from .wheel_override import wheel_module_exists, get_bdist_wheel_override
-
-
 def check_allowed_python_version():
     """
     Make sure that setup.py is run with an allowed python version.
     """
 
-    import re
     pattern = r'Programming Language :: Python :: (\d+)\.(\d+)'
     supported = []
 
@@ -463,7 +462,12 @@ class PysideBuild(_build, DistUtilsCommandMixin):
         py_version = f"{sys.version_info[0]}.{sys.version_info[1]}"
         py_include_dir = get_config_var("INCLUDEPY")
         py_libdir = get_config_var("LIBDIR")
-        py_prefix = get_config_var("prefix")
+        # distutils.sysconfig.get_config_var('prefix') returned the
+        # virtual environment base directory, but
+        # sysconfig.get_config_var returns the system's prefix.
+        # We use 'base' instead (although, platbase points to the
+        # same location)
+        py_prefix = get_config_var("base")
         if not py_prefix or not os.path.exists(py_prefix):
             py_prefix = sys.prefix
         self.py_prefix = py_prefix
@@ -485,7 +489,7 @@ class PysideBuild(_build, DistUtilsCommandMixin):
         # Add Clang to path for Windows.
         # Revisit once Clang is bundled with Qt.
         if (sys.platform == "win32"
-                and LooseVersion(self.qtinfo.version) >= LooseVersion("5.7.0")):
+                and parse_version(self.qtinfo.version) >= parse_version("5.7.0")):
             clang_dir = detect_clang()
             if clang_dir[0]:
                 clangBinDir = os.path.join(clang_dir[0], 'bin')
@@ -528,7 +532,7 @@ class PysideBuild(_build, DistUtilsCommandMixin):
                                          py_libdir, py_include_dir)
         self.py_version = py_version
         self.build_type = build_type
-        self.site_packages_dir = get_python_lib(1, 0, prefix=install_dir)
+        self.site_packages_dir = sconfig.get_python_lib(1, 0, prefix=install_dir)
         self.build_tests = OPTION["BUILDTESTS"]
 
         # Save the shiboken build dir path for clang deployment
@@ -584,7 +588,7 @@ class PysideBuild(_build, DistUtilsCommandMixin):
         if config.is_internal_shiboken_generator_build_and_part_of_top_level_all():
             return
 
-        setuptools_install_prefix = get_python_lib(1)
+        setuptools_install_prefix = sconfig.get_python_lib(1)
         if OPTION["FINAL_INSTALL_PREFIX"]:
             setuptools_install_prefix = OPTION["FINAL_INSTALL_PREFIX"]
         log.info("=" * 30)
@@ -640,7 +644,7 @@ class PysideBuild(_build, DistUtilsCommandMixin):
     def build_patchelf(self):
         if not sys.platform.startswith('linux'):
             return
-        self._patchelf_path = find_executable('patchelf')
+        self._patchelf_path = which('patchelf')
         if self._patchelf_path:
             if not os.path.isabs(self._patchelf_path):
                 self._patchelf_path = os.path.join(os.getcwd(), self._patchelf_path)
