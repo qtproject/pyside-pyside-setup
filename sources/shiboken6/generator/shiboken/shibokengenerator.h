@@ -131,7 +131,8 @@ protected:
                         TypeSystem::CodeSnipPosition position,
                         TypeSystem::Language language,
                         const AbstractMetaFunctionCPtr &func,
-                        const AbstractMetaArgument *lastArg = nullptr) const;
+                        bool usePyArgs,
+                        const AbstractMetaArgument *lastArg) const;
 
     /// Replaces variables for the user's custom code at global or class level.
     void processCodeSnip(QString &code) const;
@@ -388,6 +389,7 @@ protected:
     static QList<const CustomConversion *> getPrimitiveCustomConversions() ;
 
     /// Returns true if the Python wrapper for the received OverloadData must accept a list of arguments.
+    bool pythonFunctionWrapperUsesListOfArguments(const AbstractMetaFunctionCPtr &func) const;
 
     static const QRegularExpression &convertToCppRegEx()
     { return typeSystemConvRegExps()[TypeSystemToCppFunction]; }

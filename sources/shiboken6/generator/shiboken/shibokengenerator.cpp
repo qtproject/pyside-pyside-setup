@@ -1646,6 +1646,7 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
                                        TypeSystem::CodeSnipPosition position,
                                        TypeSystem::Language language,
                                        const AbstractMetaFunctionCPtr &func,
+                                       bool usePyArgs,
                                        const AbstractMetaArgument *lastArg) const
 {
     QString code = getCodeSnippets(codeSnips, position, language);
@@ -1658,12 +1659,6 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
         if (func->argumentRemoved(i+1))
             argsRemoved++;
     }
-
-    const auto &groups = func->implementingClass()
-        ? getFunctionGroups(func->implementingClass())
-        : getGlobalFunctionGroups();
-    OverloadData od(groups[func->name()], api());
-    const bool usePyArgs = od.pythonFunctionWrapperUsesListOfArguments();
 
     // Replace %PYARG_# variables.
     code.replace(QLatin1String("%PYARG_0"), QLatin1String(PYTHON_RETURN_VAR));
@@ -2638,6 +2633,15 @@ QString ShibokenGenerator::getTypeIndexVariableName(const AbstractMetaType &type
 bool ShibokenGenerator::verboseErrorMessagesDisabled() const
 {
     return m_verboseErrorMessagesDisabled;
+}
+
+bool ShibokenGenerator::pythonFunctionWrapperUsesListOfArguments(const AbstractMetaFunctionCPtr &func) const
+{
+    const auto &groups = func->implementingClass()
+       ? getFunctionGroups(func->implementingClass())
+       : getGlobalFunctionGroups();
+    OverloadData od(groups.value(func->name()), api());
+    return od.pythonFunctionWrapperUsesListOfArguments();
 }
 
 void ShibokenGenerator::writeMinimalConstructorExpression(TextStream &s,

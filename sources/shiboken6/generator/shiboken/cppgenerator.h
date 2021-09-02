@@ -178,7 +178,7 @@ private:
 
     /// Writes the conversion rule for arguments of regular and virtual methods.
     void writeConversionRule(TextStream &s, const AbstractMetaFunctionCPtr &func,
-                             TypeSystem::Language language) const;
+                             TypeSystem::Language language, bool usesPyArgs) const;
     /// Writes the conversion rule for the return value of a method.
     void writeConversionRule(TextStream &s, const AbstractMetaFunctionCPtr &func,
                              TypeSystem::Language language, const QString &outputVar) const;
@@ -277,7 +277,8 @@ private:
                                          const AbstractMetaClass **wrappedClass,
                                          QString *errorMessage = nullptr);
     void writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr &func,
-                         const GeneratorContext &context, int maxArgs = 0) const;
+                         const GeneratorContext &context, bool usesPyArgs,
+                         int maxArgs) const;
 
     static QString getInitFunctionName(const GeneratorContext &context) ;
     static QString getSimpleClassInitFunctionName(const AbstractMetaClass *metaClass) ;
@@ -383,9 +384,12 @@ private:
                                                      const AbstractMetaClassCList &conversions);
 
     void writeParentChildManagement(TextStream &s, const AbstractMetaFunctionCPtr &func,
+                                    bool usesPyArgs,
                                     bool userHeuristicForReturn) const;
     bool writeParentChildManagement(TextStream &s, const AbstractMetaFunctionCPtr &func,
-                                    int argIndex, bool userHeuristicPolicy) const;
+                                    int argIndex,
+                                    bool usePyArgs,
+                                    bool userHeuristicPolicy) const;
     void writeReturnValueHeuristics(TextStream &s, const AbstractMetaFunctionCPtr &func) const;
     static void writeInitQtMetaTypeFunctionBody(TextStream &s, const GeneratorContext &context);
 

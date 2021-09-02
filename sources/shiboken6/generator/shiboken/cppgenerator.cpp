@@ -816,9 +816,11 @@ void CppGenerator::writeConstructorNative(TextStream &s, const GeneratorContext 
         s << R"(std::cerr << __FUNCTION__ << ' ' << this << '\n';)" << '\n';
     const AbstractMetaArgument *lastArg = func->arguments().isEmpty() ? nullptr : &func->arguments().constLast();
     s << "resetPyMethodCache();\n";
-    writeCodeSnips(s, func->injectedCodeSnips(), TypeSystem::CodeSnipPositionBeginning, TypeSystem::NativeCode, func, lastArg);
+    writeCodeSnips(s, func->injectedCodeSnips(), TypeSystem::CodeSnipPositionBeginning,
+                   TypeSystem::NativeCode, func, false, lastArg);
     s << "// ... middle\n";
-    writeCodeSnips(s, func->injectedCodeSnips(), TypeSystem::CodeSnipPositionEnd, TypeSystem::NativeCode, func, lastArg);
+    writeCodeSnips(s, func->injectedCodeSnips(), TypeSystem::CodeSnipPositionEnd,
+                   TypeSystem::NativeCode, func, false, lastArg);
     s << outdent << "}\n\n";
 }
 
@@ -907,7 +909,7 @@ void CppGenerator::writeVirtualMethodCppCall(TextStream &s,
 {
     if (!snips.isEmpty()) {
         writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionBeginning,
-                       TypeSystem::ShellCode, func, lastArg);
+                       TypeSystem::ShellCode, func, false, lastArg);
     }
 
     if (func->isAbstract()) {
@@ -927,7 +929,7 @@ void CppGenerator::writeVirtualMethodCppCall(TextStream &s,
         return;
     if (!snips.isEmpty()) {
         writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionEnd,
-                       TypeSystem::ShellCode, func, lastArg);
+                       TypeSystem::ShellCode, func, false, lastArg);
     }
     s << "return;\n";
 }
@@ -1021,7 +1023,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
     //Write declaration/native injected code
     if (!snips.isEmpty()) {
         writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionDeclaration,
-                       TypeSystem::ShellCode, func, lastArg);
+                       TypeSystem::ShellCode, func, false, lastArg);
     }
 
     if (wrapperDiagnostics()) {
@@ -1076,7 +1078,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
                               returnStatement);
     s << outdent << "}\n\n"; //WS
 
-    writeConversionRule(s, func, TypeSystem::TargetLangCode);
+    writeConversionRule(s, func, TypeSystem::TargetLangCode, false);
 
     s << "Shiboken::AutoDecRef " << PYTHON_ARGS << "(";
 
@@ -1148,7 +1150,8 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
             s << "PyObject *pySelf = BindingManager::instance().retrieveWrapper(this);\n";
 
         const AbstractMetaArgument *lastArg = func->arguments().isEmpty() ? nullptr : &func->arguments().constLast();
-        writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionBeginning, TypeSystem::NativeCode, func, lastArg);
+        writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionBeginning,
+                       TypeSystem::NativeCode, func, false, lastArg);
     }
 
     if (!func->injectedCodeCallsPythonOverride()) {
@@ -1243,7 +1246,8 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
     if (func->hasInjectedCode()) {
         s << '\n';
         const AbstractMetaArgument *lastArg = func->arguments().isEmpty() ? nullptr : &func->arguments().constLast();
-        writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionEnd, TypeSystem::NativeCode, func, lastArg);
+        writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionEnd,
+                       TypeSystem::NativeCode, func, false, lastArg);
     }
 
     if (!func->isVoid()) {
@@ -1294,7 +1298,9 @@ void CppGenerator::writeMetaObjectMethod(TextStream &s,
         snips = func->injectedCodeSnips();
         if (func->isUserAdded()) {
             CodeSnipList snips = func->injectedCodeSnips();
-            writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionAny, TypeSystem::NativeCode, func);
+            const bool usePyArgs = pythonFunctionWrapperUsesListOfArguments(func);
+            writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionAny,
+                           TypeSystem::NativeCode, func, usePyArgs, nullptr);
         }
     }
 
@@ -2018,7 +2024,9 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const AbstractMetaFunc
                         << "{\n";
                     {
                         Indentation indent(s);
-                        writeCodeSnips(s, func->injectedCodeSnips(), TypeSystem::CodeSnipPositionEnd, TypeSystem::TargetLangCode, func);
+                        writeCodeSnips(s, func->injectedCodeSnips(), TypeSystem::CodeSnipPositionEnd,
+                                       TypeSystem::TargetLangCode, func,
+                                       true /* usesPyArgs */, nullptr);
                     }
                     s << "}\nbreak;\n";
                     break;
@@ -2693,7 +2701,7 @@ static void addConversionRuleCodeSnippet(CodeSnipList &snippetList, QString &rul
 }
 
 void CppGenerator::writeConversionRule(TextStream &s, const AbstractMetaFunctionCPtr &func,
-                                       TypeSystem::Language language) const
+                                       TypeSystem::Language language, bool usesPyArgs) const
 {
 
     CodeSnipList snippets;
@@ -2703,7 +2711,8 @@ void CppGenerator::writeConversionRule(TextStream &s, const AbstractMetaFunction
         addConversionRuleCodeSnippet(snippets, rule, language, TypeSystem::TargetLangCode,
                                      arg.name(), arg.name());
     }
-    writeCodeSnips(s, snippets, TypeSystem::CodeSnipPositionBeginning, TypeSystem::TargetLangCode, func);
+    writeCodeSnips(s, snippets, TypeSystem::CodeSnipPositionBeginning, TypeSystem::TargetLangCode,
+                   func, usesPyArgs, nullptr);
 }
 
 void CppGenerator::writeConversionRule(TextStream &s, const AbstractMetaFunctionCPtr &func,
@@ -2712,7 +2721,8 @@ void CppGenerator::writeConversionRule(TextStream &s, const AbstractMetaFunction
     CodeSnipList snippets;
     QString rule = func->conversionRule(language, 0);
     addConversionRuleCodeSnippet(snippets, rule, language, language, outputVar);
-    writeCodeSnips(s, snippets, TypeSystem::CodeSnipPositionAny, language, func);
+    writeCodeSnips(s, snippets, TypeSystem::CodeSnipPositionAny, language,
+                   func, false /* uses PyArgs */, nullptr);
 }
 
 void CppGenerator::writeNoneReturn(TextStream &s, const AbstractMetaFunctionCPtr &func,
@@ -3025,7 +3035,9 @@ void CppGenerator::writeSingleFunctionCall(TextStream &s,
     int numRemovedArgs = OverloadData::numberOfRemovedArguments(func);
 
     s << "if (!PyErr_Occurred()) {\n" << indent;
-    writeMethodCall(s, func, context, func->arguments().size() - numRemovedArgs);
+    writeMethodCall(s, func, context,
+                    overloadData.pythonFunctionWrapperUsesListOfArguments(),
+                    func->arguments().size() - numRemovedArgs);
     if (!func->isConstructor())
         writeNoneReturn(s, func, overloadData.hasNonVoidReturnType());
     s << outdent << "}\n";
@@ -3453,7 +3465,8 @@ const char defaultExceptionHandling[] = R"(} catch (const std::exception &e) {
 )";
 
 void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr &func,
-                                   const GeneratorContext &context, int maxArgs) const
+                                   const GeneratorContext &context, bool usesPyArgs,
+                                   int maxArgs) const
 {
     s << "// " << func->minimalSignature() << (func->isReverseOperator() ? " [reverse operator]": "") << '\n';
     if (func->isConstructor()) {
@@ -3501,10 +3514,11 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
             lastArg = &func->arguments().constLast();
         }
 
-        writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionBeginning, TypeSystem::TargetLangCode, func, lastArg);
+        writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionBeginning, TypeSystem::TargetLangCode, func,
+                       usesPyArgs, lastArg);
     }
 
-    writeConversionRule(s, func, TypeSystem::NativeCode);
+    writeConversionRule(s, func, TypeSystem::NativeCode, usesPyArgs);
 
     if (!func->isUserAdded()) {
         QStringList userArgs;
@@ -3797,7 +3811,8 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
     }
 
     if (func->hasInjectedCode() && !func->isConstructor())
-        writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionEnd, TypeSystem::TargetLangCode, func, lastArg);
+        writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionEnd,
+                       TypeSystem::TargetLangCode, func, usesPyArgs, lastArg);
 
     bool hasReturnPolicy = false;
 
@@ -3911,7 +3926,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                 hasReturnPolicy = true;
         }
     }
-    writeParentChildManagement(s, func, !hasReturnPolicy);
+    writeParentChildManagement(s, func, usesPyArgs, !hasReturnPolicy);
 }
 
 QStringList CppGenerator::getAncestorMultipleInheritance(const AbstractMetaClass *metaClass)
@@ -4422,7 +4437,8 @@ void CppGenerator::writeMappingMethods(TextStream &s,
 
         const AbstractMetaArgument *lastArg = func->arguments().isEmpty()
             ? nullptr : &func->arguments().constLast();
-        writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionAny, TypeSystem::TargetLangCode, func, lastArg);
+        writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionAny,
+                       TypeSystem::TargetLangCode, func, false, lastArg);
         s<< "}\n\n";
     }
 }
@@ -4447,7 +4463,8 @@ void CppGenerator::writeSequenceMethods(TextStream &s,
         writeCppSelfDefinition(s, func, context);
 
         const AbstractMetaArgument *lastArg = func->arguments().isEmpty() ? nullptr : &func->arguments().constLast();
-        writeCodeSnips(s, snips,TypeSystem::CodeSnipPositionAny, TypeSystem::TargetLangCode, func, lastArg);
+        writeCodeSnips(s, snips,TypeSystem::CodeSnipPositionAny,
+                       TypeSystem::TargetLangCode, func, false /* uses PyArgs */, lastArg);
         s<< outdent << "}\n\n";
     }
 
@@ -4906,7 +4923,7 @@ void CppGenerator::writeRichCompareFunction(TextStream &s,
                         if (!snips.isEmpty()) {
                             writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionAny,
                                            TypeSystem::TargetLangCode, func,
-                                           &func->arguments().constLast());
+                                           false /* uses PyArgs */, &func->arguments().constLast());
                             generateOperatorCode = false;
                         }
                     }
@@ -6417,16 +6434,11 @@ static ArgumentOwner getArgumentOwner(const AbstractMetaFunctionCPtr &func, int 
 }
 
 bool CppGenerator::writeParentChildManagement(TextStream &s, const AbstractMetaFunctionCPtr &func,
-                                              int argIndex, bool useHeuristicPolicy) const
+                                              int argIndex,
+                                              bool usePyArgs, bool useHeuristicPolicy) const
 {
     const int numArgs = func->arguments().count();
     bool ctorHeuristicEnabled = func->isConstructor() && useCtorHeuristic() && useHeuristicPolicy;
-
-    const auto &groups = func->implementingClass()
-        ? getFunctionGroups(func->implementingClass())
-        : getGlobalFunctionGroups();
-    OverloadData od(groups.value(func->name()), api());
-    const bool usePyArgs = od.pythonFunctionWrapperUsesListOfArguments();
 
     ArgumentOwner argOwner = getArgumentOwner(func, argIndex);
     ArgumentOwner::Action action = argOwner.action;
@@ -6478,6 +6490,7 @@ bool CppGenerator::writeParentChildManagement(TextStream &s, const AbstractMetaF
 }
 
 void CppGenerator::writeParentChildManagement(TextStream &s, const AbstractMetaFunctionCPtr &func,
+                                              bool usesPyArgs,
                                               bool useHeuristicForReturn) const
 {
     const int numArgs = func->arguments().count();
@@ -6486,7 +6499,7 @@ void CppGenerator::writeParentChildManagement(TextStream &s, const AbstractMetaF
     //  0    = self
     //  1..n = func. args.
     for (int i = -1; i <= numArgs; ++i)
-        writeParentChildManagement(s, func, i, useHeuristicForReturn);
+        writeParentChildManagement(s, func, i, usesPyArgs, useHeuristicForReturn);
 
     if (useHeuristicForReturn)
         writeReturnValueHeuristics(s, func);
