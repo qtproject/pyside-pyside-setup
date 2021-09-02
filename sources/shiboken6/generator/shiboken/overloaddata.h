@@ -120,6 +120,9 @@ public:
     void dumpGraph(const QString &filename) const;
     QString dumpGraph() const;
 
+    /// Returns true if a list of arguments is used (METH_VARARGS)
+    bool pythonFunctionWrapperUsesListOfArguments() const;
+
     bool hasArgumentTypeReplace() const;
     QString argumentTypeReplaced() const;
 

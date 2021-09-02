@@ -960,6 +960,21 @@ OverloadData::~OverloadData()
         delete m_nextOverloadData.takeLast();
 }
 
+bool OverloadData::pythonFunctionWrapperUsesListOfArguments() const
+{
+    auto referenceFunction = m_overloads.constFirst();
+    if (referenceFunction->isCallOperator())
+        return true;
+    if (referenceFunction->isOperatorOverload())
+        return false;
+    const int maxArgs = this->maxArgs();
+    const int minArgs = this->minArgs();
+    return (minArgs != maxArgs)
+           || (maxArgs > 1)
+           || referenceFunction->isConstructor()
+           || hasArgumentWithDefaultValue();
+}
+
 bool OverloadData::hasArgumentTypeReplace() const
 {
     return !m_argTypeReplaced.isEmpty();

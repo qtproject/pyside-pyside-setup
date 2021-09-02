@@ -1884,7 +1884,7 @@ static const char *fullName = ")" << fullPythonFunctionName(rfunc, true)
     if (maxArgs > 0) {
         s << "int overloadId = -1;\n"
             << "PythonToCppFunc " << PYTHON_TO_CPP_VAR;
-        if (pythonFunctionWrapperUsesListOfArguments(overloadData)) {
+        if (overloadData.pythonFunctionWrapperUsesListOfArguments()) {
             s << "[] = { " << NULL_PTR;
             for (int i = 1; i < maxArgs; ++i)
                 s << ", " << NULL_PTR;
@@ -1897,10 +1897,12 @@ static const char *fullName = ")" << fullPythonFunctionName(rfunc, true)
 
     if (initPythonArguments) {
         s << "const Py_ssize_t numArgs = ";
-        if (minArgs == 0 && maxArgs == 1 && !rfunc->isConstructor() && !pythonFunctionWrapperUsesListOfArguments(overloadData))
+        if (minArgs == 0 && maxArgs == 1 && !rfunc->isConstructor()
+            && !overloadData.pythonFunctionWrapperUsesListOfArguments()) {
             s << "(" << PYTHON_ARG << " == 0 ? 0 : 1);\n";
-        else
+        } else {
             writeArgumentsInitializer(s, overloadData);
+        }
     }
 }
 
@@ -2068,7 +2070,7 @@ void CppGenerator::writeMethodWrapper(TextStream &s, const AbstractMetaFunctionC
     s << "static PyObject *";
     s << cpythonFunctionName(rfunc) << "(PyObject *self";
     if (maxArgs > 0) {
-        s << ", PyObject *" << (pythonFunctionWrapperUsesListOfArguments(overloadData) ? "args" : PYTHON_ARG);
+        s << ", PyObject *" << (overloadData.pythonFunctionWrapperUsesListOfArguments() ? "args" : PYTHON_ARG);
         if (overloadData.hasArgumentWithDefaultValue() || rfunc->isCallOperator())
             s << ", PyObject *kwds";
     }
@@ -2364,7 +2366,7 @@ void CppGenerator::writeErrorSection(TextStream &s, OverloadData &overloadData)
     const auto rfunc = overloadData.referenceFunction();
     s  << '\n' << cpythonFunctionName(rfunc) << "_TypeError:\n";
     Indentation indentation(s);
-    QString argsVar = pythonFunctionWrapperUsesListOfArguments(overloadData)
+    QString argsVar = overloadData.pythonFunctionWrapperUsesListOfArguments()
         ? QLatin1String("args") : QLatin1String(PYTHON_ARG);
     s << "Shiboken::setErrorAboutWrongArguments(" << argsVar << ", fullName, errInfo);\n"
         << "return " << m_currentErrorCode << ";\n";
@@ -2805,7 +2807,7 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(TextStream &s,
 
     int maxArgs = parentOverloadData->maxArgs();
     // Python constructors always receive multiple arguments.
-    bool usePyArgs = pythonFunctionWrapperUsesListOfArguments(*parentOverloadData);
+    const bool usePyArgs = parentOverloadData->pythonFunctionWrapperUsesListOfArguments();
 
     // Functions without arguments are identified right away.
     if (maxArgs == 0) {
@@ -2999,7 +3001,7 @@ void CppGenerator::writeSingleFunctionCall(TextStream &s,
         return;
     }
 
-    bool usePyArgs = pythonFunctionWrapperUsesListOfArguments(overloadData);
+    const bool usePyArgs = overloadData.pythonFunctionWrapperUsesListOfArguments();
 
     // Handle named arguments.
     writeNamedArgumentResolution(s, func, usePyArgs, overloadData);
@@ -4991,7 +4993,7 @@ void CppGenerator::writeRichCompareFunction(TextStream &s,
 
 QString CppGenerator::methodDefinitionParameters(const OverloadData &overloadData) const
 {
-    bool usePyArgs = pythonFunctionWrapperUsesListOfArguments(overloadData);
+    const bool usePyArgs = overloadData.pythonFunctionWrapperUsesListOfArguments();
     const auto func = overloadData.referenceFunction();
     int min = overloadData.minArgs();
     int max = overloadData.maxArgs();
@@ -6451,7 +6453,8 @@ bool CppGenerator::writeParentChildManagement(TextStream &s, const AbstractMetaF
     const auto &groups = func->implementingClass()
         ? getFunctionGroups(func->implementingClass())
         : getGlobalFunctionGroups();
-    bool usePyArgs = pythonFunctionWrapperUsesListOfArguments(OverloadData(groups[func->name()], api()));
+    OverloadData od(groups.value(func->name()), api());
+    const bool usePyArgs = od.pythonFunctionWrapperUsesListOfArguments();
 
     ArgumentOwner argOwner = getArgumentOwner(func, argIndex);
     ArgumentOwner::Action action = argOwner.action;

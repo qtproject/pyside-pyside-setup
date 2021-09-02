@@ -1661,7 +1661,7 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
         ? getFunctionGroups(func->implementingClass())
         : getGlobalFunctionGroups();
     OverloadData od(groups[func->name()], api());
-    bool usePyArgs = pythonFunctionWrapperUsesListOfArguments(od);
+    const bool usePyArgs = od.pythonFunctionWrapperUsesListOfArguments();
 
     // Replace %PYARG_# variables.
     code.replace(QLatin1String("%PYARG_0"), QLatin1String(PYTHON_RETURN_VAR));
@@ -2609,20 +2609,6 @@ QString ShibokenGenerator::getTypeIndexVariableName(const AbstractMetaType &type
 bool ShibokenGenerator::verboseErrorMessagesDisabled() const
 {
     return m_verboseErrorMessagesDisabled;
-}
-
-bool ShibokenGenerator::pythonFunctionWrapperUsesListOfArguments(const OverloadData &overloadData)
-{
-    if (overloadData.referenceFunction()->isCallOperator())
-        return true;
-    if (overloadData.referenceFunction()->isOperatorOverload())
-        return false;
-    int maxArgs = overloadData.maxArgs();
-    int minArgs = overloadData.minArgs();
-    return (minArgs != maxArgs)
-           || (maxArgs > 1)
-           || overloadData.referenceFunction()->isConstructor()
-           || overloadData.hasArgumentWithDefaultValue();
 }
 
 void ShibokenGenerator::writeMinimalConstructorExpression(TextStream &s,

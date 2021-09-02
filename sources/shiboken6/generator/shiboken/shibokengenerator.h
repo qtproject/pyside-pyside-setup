@@ -388,7 +388,6 @@ protected:
     static QList<const CustomConversion *> getPrimitiveCustomConversions() ;
 
     /// Returns true if the Python wrapper for the received OverloadData must accept a list of arguments.
-    static bool pythonFunctionWrapperUsesListOfArguments(const OverloadData &overloadData);
 
     static const QRegularExpression &convertToCppRegEx()
     { return typeSystemConvRegExps()[TypeSystemToCppFunction]; }
