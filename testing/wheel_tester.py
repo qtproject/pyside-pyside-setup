@@ -71,7 +71,7 @@ from build_scripts.utils import find_files_using_glob
 from build_scripts.utils import find_glob_in_path
 from build_scripts.utils import run_process, run_process_output
 from build_scripts.utils import rmtree
-import distutils.log as log
+from setuptools._distutils import log
 import platform
 
 log.set_verbosity(1)

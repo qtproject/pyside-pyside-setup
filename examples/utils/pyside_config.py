@@ -38,7 +38,7 @@
 ##
 #############################################################################
 
-from distutils import sysconfig
+import sysconfig
 from enum import Enum
 import glob
 import os
@@ -237,7 +237,7 @@ def python_version():
 
 
 def get_python_include_path():
-    return sysconfig.get_python_inc()
+    return sysconfig.get_path('include')
 
 
 def python_link_flags_qmake():

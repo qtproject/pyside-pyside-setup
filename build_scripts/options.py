@@ -37,8 +37,14 @@
 ##
 #############################################################################
 
-import distutils.log as log
-from distutils.spawn import find_executable
+try:
+    from setuptools._distutils import log
+except ModuleNotFoundError:
+    # This is motivated by our CI using an old version of setuptools
+    # so then the coin_build_instructions.py script is executed, and
+    # import from this file, it was failing.
+    from distutils import log
+from shutil import which
 import sys
 import os
 import warnings
@@ -334,7 +340,7 @@ class DistUtilsCommandMixin(object):
 
     def _determine_defaults_and_check(self):
         if not self.cmake:
-            self.cmake = find_executable("cmake")
+            self.cmake = which("cmake")
         if not self.cmake:
             log.error("cmake could not be found.")
             return False
@@ -343,14 +349,14 @@ class DistUtilsCommandMixin(object):
             return False
 
         if not self.qtpaths:
-            self.qtpaths = find_executable("qtpaths")
+            self.qtpaths = which("qtpaths")
         if not self.qtpaths:
             self.qtpaths = find_executable("qtpaths6")
 
         if self.qmake:
             self.has_qmake_option = True
         else:
-            self.qmake = find_executable("qmake")
+            self.qmake = which("qmake")
             if not self.qmake:
                 self.qmake = find_executable("qmake6")
             if not self.qmake:

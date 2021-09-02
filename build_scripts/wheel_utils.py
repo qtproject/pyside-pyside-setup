@@ -40,10 +40,9 @@
 import os
 import time
 
-from distutils.errors import DistutilsSetupError
-from distutils.sysconfig import get_config_var
-from distutils.util import get_platform
-from distutils.version import LooseVersion
+from setuptools._distutils.errors import DistutilsError
+from sysconfig import get_platform, get_config_var
+from packaging.version import parse as parse_version
 
 from .options import OPTION
 from .qtinfo import QtInfo
@@ -68,7 +67,7 @@ def get_qt_version():
         raise DistutilsSetupError("Failed to query the Qt version with "
                                   f"qmake {qtinfo.qmake_command}")
 
-    if LooseVersion(qtinfo.version) < LooseVersion("5.7"):
+    if parse_version(qtinfo.version) < parse_version("5.7"):
         raise DistutilsSetupError(f"Incompatible Qt version detected: {qt_version}. "
                                   "A Qt version >= 5.7 is required.")
 

@@ -78,9 +78,19 @@ endmacro()
 macro(set_python_site_packages)
     execute_process(
         COMMAND ${PYTHON_EXECUTABLE} -c "if True:
-            from distutils import sysconfig
+            import sysconfig
             from os.path import sep
-            print(sysconfig.get_python_lib(1, 0, prefix='${CMAKE_INSTALL_PREFIX}').replace(sep, '/'))
+
+            # /home/qt/dev/env/lib/python3.9/site-packages
+            lib_path = sysconfig.get_path('purelib')
+
+            # /home/qt/dev/env
+            data_path = sysconfig.get_path('data')
+
+            # /lib/python3.9/site-packages
+            rel_path = lib_path.replace(data_path, '')
+
+            print(f'${CMAKE_INSTALL_PREFIX}{rel_path}'.replace(sep, '/'))
             "
         OUTPUT_VARIABLE PYTHON_SITE_PACKAGES
         OUTPUT_STRIP_TRAILING_WHITESPACE)

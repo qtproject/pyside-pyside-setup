@@ -42,7 +42,7 @@ import os
 import textwrap
 
 from setuptools import setup  # Import setuptools before distutils
-import distutils.log as log
+from setuptools._distutils import log
 
 from build_scripts.config import config
 from build_scripts.main import get_package_version, get_setuptools_extension_modules

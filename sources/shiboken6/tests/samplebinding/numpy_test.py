@@ -29,7 +29,7 @@
 import sys
 
 try:
-    from distutils import sysconfig
+    import sysconfig
     if bool(sysconfig.get_config_var('Py_DEBUG')):
         sys.exit(0)
     import numpy

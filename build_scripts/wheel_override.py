@@ -43,7 +43,7 @@ wheel_module_exists = False
 import os
 import sys
 from .options import DistUtilsCommandMixin, OPTION
-from distutils import log as logger
+from setuptools._distutils import log as logger
 from email.generator import Generator
 from .wheel_utils import get_package_version, get_qt_version, macos_plat_name
 

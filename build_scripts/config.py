@@ -38,7 +38,7 @@
 #############################################################################
 
 import os
-import distutils.log as log
+from setuptools._distutils import log
 from .versions import PYSIDE, PYSIDE_MODULE, SHIBOKEN
 
 
