@@ -1433,6 +1433,14 @@ void AbstractMetaClass::fixFunctions()
                 if (cmp & AbstractMetaFunction::EqualModifiedName) {
                     add = false;
                     if (cmp & AbstractMetaFunction::EqualArguments) {
+                        // Set "override" in case it was not spelled out (since it
+                        // is then not detected by clang parsing).
+                        const auto attributes = cf->attributes();
+                        if (cf->isVirtual()
+                            && !attributes.testFlag(AbstractMetaFunction::OverriddenCppMethod)
+                            && !attributes.testFlag(AbstractMetaFunction::FinalCppMethod)) {
+                            *f += AbstractMetaFunction::OverriddenCppMethod;
+                        }
                         // Same function, propegate virtual...
                         if (!(cmp & AbstractMetaFunction::EqualAttributes)) {
                             if (!f->isEmptyFunction()) {
