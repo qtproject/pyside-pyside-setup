@@ -1279,7 +1279,7 @@ ContainerTypeEntry *
         m_error = QLatin1String("no 'type' attribute specified");
         return nullptr;
     }
-    const QStringRef typeName = attributes->takeAt(typeIndex).value();
+    const QStringRef typeName = attributes->at(typeIndex).value();
     ContainerTypeEntry::ContainerKind containerType = containerTypeFromAttribute(typeName);
     if (containerType == ContainerTypeEntry::NoContainer) {
         m_error = QLatin1String("there is no container of type ") + typeName.toString();
@@ -1287,6 +1287,7 @@ ContainerTypeEntry *
     }
     auto *type = new ContainerTypeEntry(name, containerType, since, currentParentTypeEntry());
     applyCommonAttributes(reader, type, attributes);
+    attributes->removeAt(typeIndex);
     return type;
 }
 
@@ -1352,7 +1353,7 @@ NamespaceTypeEntry *
             }
             result->setFilePattern(re);
         } else if (attributeName == QLatin1String("extends")) {
-            const auto extendsPackageName = attributes->takeAt(i).value();
+            const auto extendsPackageName = attributes->at(i).value();
             auto allEntries = TypeDatabase::instance()->findNamespaceTypes(name);
             auto extendsIt = std::find_if(allEntries.cbegin(), allEntries.cend(),
                                           [extendsPackageName] (const NamespaceTypeEntry *e) {
@@ -1363,6 +1364,7 @@ NamespaceTypeEntry *
                 return nullptr;
             }
             result->setExtends(*extendsIt);
+            attributes->removeAt(i);
         } else if (attributeName == visibleAttribute()) {
             const auto attribute = attributes->takeAt(i);
             visibility = visibilityFromAttribute(attribute.value());
@@ -1614,19 +1616,21 @@ bool TypeSystemParser::parseInjectDocumentation(const QXmlStreamReader &,
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const QStringRef name = attributes->at(i).qualifiedName();
         if (name == QLatin1String("mode")) {
-            const QStringRef modeName = attributes->takeAt(i).value();
+            const QStringRef modeName = attributes->at(i).value();
             mode = docModificationFromAttribute(modeName);
             if (mode == TypeSystem::DocModificationInvalid) {
                 m_error = QLatin1String("Unknown documentation injection mode: ") + modeName;
                 return false;
             }
+            attributes->removeAt(i);
         } else if (name == formatAttribute()) {
-            const QStringRef format = attributes->takeAt(i).value();
+            const QStringRef format = attributes->at(i).value();
             lang = languageFromAttribute(format);
             if (lang != TypeSystem::TargetLangCode && lang != TypeSystem::NativeCode) {
                 m_error = QStringLiteral("unsupported class attribute: '%1'").arg(format);
                 return false;
             }
+            attributes->removeAt(i);
         }
     }
 
@@ -1790,12 +1794,13 @@ bool TypeSystemParser::parseCustomConversion(const QXmlStreamReader &,
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const QStringRef name = attributes->at(i).qualifiedName();
         if (name == classAttribute()) {
-            const QStringRef languageAttribute = attributes->takeAt(i).value();
+            const QStringRef languageAttribute = attributes->at(i).value();
             lang = languageFromAttribute(languageAttribute);
             if (lang != TypeSystem::TargetLangCode && lang != TypeSystem::NativeCode) {
                 m_error = QStringLiteral("unsupported class attribute: '%1'").arg(languageAttribute);
                 return false;
             }
+            attributes->removeAt(i);
         } else if (name == QLatin1String("file")) {
             sourceFile = attributes->takeAt(i).value().toString();
         } else if (name == snippetAttribute()) {
@@ -1992,12 +1997,13 @@ bool TypeSystemParser::parseDefineOwnership(const QXmlStreamReader &,
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const QStringRef name = attributes->at(i).qualifiedName();
         if (name == classAttribute()) {
-            const QStringRef className = attributes->takeAt(i).value();
+            const QStringRef className = attributes->at(i).value();
             lang = languageFromAttribute(className);
             if (lang != TypeSystem::TargetLangCode && lang != TypeSystem::NativeCode) {
                 m_error = QStringLiteral("unsupported class attribute: '%1'").arg(className);
                 return false;
             }
+            attributes->removeAt(i);
         } else if (name == ownershipAttribute()) {
             ownership = attributes->takeAt(i).value().toString();
         }
@@ -2060,7 +2066,7 @@ bool TypeSystemParser::parseRemoval(const QXmlStreamReader &,
     TypeSystem::Language lang = TypeSystem::All;
     const int classIndex = indexOfAttribute(*attributes, classAttribute());
     if (classIndex != -1) {
-        const QStringRef value = attributes->takeAt(classIndex).value();
+        const QStringRef value = attributes->at(classIndex).value();
         lang = languageFromAttribute(value);
         if (lang == TypeSystem::TargetLangCode) // "target" means TargetLangAndNativeCode here
             lang = TypeSystem::TargetLangAndNativeCode;
@@ -2068,6 +2074,7 @@ bool TypeSystemParser::parseRemoval(const QXmlStreamReader &,
             m_error = QStringLiteral("unsupported class attribute: '%1'").arg(value);
             return false;
         }
+        attributes->removeAt(classIndex);
     }
     m_contextStack.top()->functionMods.last().removal = lang;
     return true;
@@ -2111,7 +2118,7 @@ bool TypeSystemParser::parseRename(const QXmlStreamReader &reader,
             m_error = msgMissingAttribute(modifierAttribute());
             return false;
         }
-        const QStringRef modifier = attributes->takeAt(modifierIndex).value();
+        const QStringRef modifier = attributes->at(modifierIndex).value();
         modifierFlag = modifierFromAttribute(modifier);
         if (modifierFlag == Modification::InvalidModifier) {
             m_error = QStringLiteral("Unknown access modifier: '%1'").arg(modifier);
@@ -2121,6 +2128,7 @@ bool TypeSystemParser::parseRename(const QXmlStreamReader &reader,
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeValueWarning(reader, modifierAttribute(), modifier)));
         }
+        attributes->removeAt(modifierIndex);
     }
 
     if (mod)
@@ -2490,12 +2498,13 @@ bool TypeSystemParser::parseParentOwner(const QXmlStreamReader &,
             if (!parseArgumentIndex(index, &ao.index, &m_error))
                 return false;
         } else if (name == actionAttribute()) {
-            const QStringRef action = attributes->takeAt(i).value();
+            const QStringRef action = attributes->at(i).value();
             ao.action = argumentOwnerActionFromAttribute(action);
             if (ao.action == ArgumentOwner::Invalid) {
                 m_error = QLatin1String("Invalid parent actionr '") + action + QLatin1String("'.");
                 return false;
             }
+            attributes->removeAt(i);
         }
     }
     m_contextStack.top()->functionMods.last().argument_mods.last().owner = ao;
@@ -2562,19 +2571,21 @@ bool TypeSystemParser::parseInjectCode(const QXmlStreamReader &,
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const QStringRef name = attributes->at(i).qualifiedName();
         if (name == classAttribute()) {
-            const QStringRef className = attributes->takeAt(i).value();
+            const QStringRef className = attributes->at(i).value();
             lang = languageFromAttribute(className);
             if (lang == TypeSystem::NoLanguage) {
                 m_error = QStringLiteral("Invalid class specifier: '%1'").arg(className);
                 return false;
             }
+            attributes->removeAt(i);
         } else if (name == positionAttribute()) {
-            const QStringRef value = attributes->takeAt(i).value();
+            const QStringRef value = attributes->at(i).value();
             position = codeSnipPositionFromAttribute(value);
             if (position == TypeSystem::CodeSnipPositionInvalid) {
                 m_error = QStringLiteral("Invalid position: '%1'").arg(value);
                 return false;
             }
+            attributes->removeAt(i);
         }
     }
 
