@@ -6077,13 +6077,10 @@ bool CppGenerator::finishGeneration()
 
     const auto functionGroups = getGlobalFunctionGroups();
     for (auto it = functionGroups.cbegin(), end = functionGroups.cend(); it != end; ++it) {
-        AbstractMetaFunctionCList overloads;
-        for (const auto &func : it.value()) {
-            if (!func->isModifiedRemoved()) {
-                overloads.append(func);
+        const AbstractMetaFunctionCList &overloads = it.value();
+        for (const auto &func : overloads) {
                 if (func->typeEntry())
                     includes << func->typeEntry()->include();
-            }
         }
 
         if (overloads.isEmpty())
