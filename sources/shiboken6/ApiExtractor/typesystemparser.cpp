@@ -1360,12 +1360,13 @@ ContainerTypeEntry *
         m_error = QLatin1String("no 'type' attribute specified");
         return nullptr;
     }
-    const auto typeName = attributes->takeAt(typeIndex).value();
+    const auto typeName = attributes->at(typeIndex).value();
     const auto containerTypeOpt = containerTypeFromAttribute(typeName);
     if (!containerTypeOpt.has_value()) {
         m_error = QLatin1String("there is no container of type ") + typeName.toString();
         return nullptr;
     }
+    attributes->removeAt(typeIndex);
     auto *type = new ContainerTypeEntry(name, containerTypeOpt.value(),
                                         since, currentParentTypeEntry());
     if (!applyCommonAttributes(reader, type, attributes))
@@ -1435,7 +1436,7 @@ NamespaceTypeEntry *
             }
             result->setFilePattern(re);
         } else if (attributeName == QLatin1String("extends")) {
-            const auto extendsPackageName = attributes->takeAt(i).value();
+            const auto extendsPackageName = attributes->at(i).value();
             auto allEntries = TypeDatabase::instance()->findNamespaceTypes(name);
             auto extendsIt = std::find_if(allEntries.cbegin(), allEntries.cend(),
                                           [extendsPackageName] (const NamespaceTypeEntry *e) {
@@ -1446,6 +1447,7 @@ NamespaceTypeEntry *
                 return nullptr;
             }
             result->setExtends(*extendsIt);
+            attributes->removeAt(i);
         } else if (attributeName == visibleAttribute()) {
             const auto attribute = attributes->takeAt(i);
             const auto visibilityOpt = visibilityFromAttribute(attribute.value());
