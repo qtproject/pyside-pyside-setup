@@ -1087,6 +1087,14 @@ bool AbstractMetaClass::isUsingMember(const AbstractMetaClass *c,
     return d->isUsingMember(c, memberName, minimumAccess);
 }
 
+bool AbstractMetaClass::hasUsingMemberFor(const QString &memberName) const
+{
+    return std::any_of(d->m_usingMembers.cbegin(), d->m_usingMembers.cend(),
+                       [&memberName](const UsingMember &um) {
+                          return um.memberName == memberName;
+                       });
+}
+
 /* Goes through the list of functions and returns a list of all
    functions matching all of the criteria in \a query.
  */

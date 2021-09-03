@@ -146,6 +146,7 @@ public:
     void addUsingMember(const UsingMember &um);
     bool isUsingMember(const AbstractMetaClass *c, const QString &memberName,
                        Access minimumAccess) const;
+    bool hasUsingMemberFor(const QString &memberName) const;
 
     AbstractMetaFunctionCList queryFunctionsByName(const QString &name) const;
     static bool queryFunction(const AbstractMetaFunction *f, FunctionQueryOptions query);

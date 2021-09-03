@@ -79,21 +79,14 @@ new_functions += """
     PySide6.QtWidgets.QGestureEvent([]).setAccepted(bool)
     # PySide6.QtWidgets.QGraphicsView().render(qPaintDevice,qPoint,qRegion,renderFlags) # QPaintDevice: NotImplementedError
     PySide6.QtWidgets.QGridLayout().addWidget(qWidget)
-    PySide6.QtWidgets.QHeaderView(orientation).initStyleOption(qStyleOptionFrame)
     PySide6.QtWidgets.QInputDialog().open()
     PySide6.QtWidgets.QLineEdit().addAction(qAction)
-    PySide6.QtWidgets.QListWidget().closePersistentEditor(qModelIndex)
-    PySide6.QtWidgets.QListWidget().openPersistentEditor(qModelIndex)
     PySide6.QtWidgets.QMessageBox().open()
     PySide6.QtWidgets.QPlainTextEdit().find(findStr)
     PySide6.QtWidgets.QProgressDialog().open()
     PySide6.QtWidgets.QStackedLayout().widget()
     # PySide6.QtWidgets.QStylePainter().begin(qPaintDevice) # QPaintDevice: NotImplementedError
-    PySide6.QtWidgets.QTableWidget().closePersistentEditor(qModelIndex)
-    PySide6.QtWidgets.QTableWidget().openPersistentEditor(qModelIndex)
     PySide6.QtWidgets.QTextEdit().find(findStr)
-    PySide6.QtWidgets.QTreeWidget().closePersistentEditor(qModelIndex)
-    PySide6.QtWidgets.QTreeWidget().openPersistentEditor(qModelIndex)
     PySide6.QtWidgets.QWidget.find(quintptr)
 """ if "PySide6.QtWidgets" in sys.modules else ""
 

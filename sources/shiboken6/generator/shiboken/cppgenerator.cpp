@@ -534,32 +534,7 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
         << "extern \"C\" {\n";
     const auto &functionGroups = getFunctionGroups(metaClass);
     for (auto it = functionGroups.cbegin(), end = functionGroups.cend(); it != end; ++it) {
-        AbstractMetaFunctionCList overloads;
-        QSet<QString> seenSignatures;
-        bool staticEncountered = false;
-        for (const auto &func : it.value()) {
-            if (func->ownerClass() == func->implementingClass()
-                && func->generateBinding()) {
-                // PYSIDE-331: Inheritance works correctly when there are disjoint functions.
-                // But when a function is both in a class and inherited in a subclass,
-                // then we need to search through all subclasses and collect the new signatures.
-                overloads << getFunctionAndInheritedOverloads(func, &seenSignatures);
-                if (func->isStatic())
-                    staticEncountered = true;
-            }
-        }
-        // PYSIDE-886: If the method does not have any static overloads declared
-        // in the class in question, remove all inherited static methods as setting
-        // METH_STATIC in that case can cause crashes for the instance methods.
-        // Manifested as crash when calling QPlainTextEdit::find() (clash with
-        // static QWidget::find(WId)).
-        if (!staticEncountered) {
-            for (qsizetype i = overloads.size() - 1; i >= 0; --i) {
-                if (overloads.at(i)->isStatic())
-                    overloads.removeAt(i);
-            }
-        }
-
+        const AbstractMetaFunctionCList &overloads = it.value();
         if (overloads.isEmpty())
             continue;
 

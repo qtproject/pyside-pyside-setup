@@ -33,6 +33,8 @@
 #include <abstractmetafield.h>
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
+#include <abstractmetalang_helpers.h>
+#include <usingmember.h>
 #include <exception.h>
 #include <messages.h>
 #include <modifications.h>
@@ -1840,7 +1842,7 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
         bool isProtected = func->isProtected();
         auto owner = func->ownerClass();
         if (!isProtected && func->isUserAdded() && owner != nullptr) {
-            const auto &funcs = getMethodOverloads(owner, func->name());
+            const auto &funcs = getFunctionGroups(owner).value(func->name());
             isProtected = std::any_of(funcs.cbegin(), funcs.cend(),
                                       [](const AbstractMetaFunctionCPtr &f) {
                                           return f->isProtected();
@@ -2288,10 +2290,12 @@ ShibokenGenerator::FunctionGroups ShibokenGenerator::getFunctionGroupsImpl(const
 
     FunctionGroups results;
     for (const auto &func : lst) {
-        if (isGroupable(func)) {
+        if (isGroupable(func)
+            && func->ownerClass() == func->implementingClass()
+            && func->generateBinding()) {
             auto it = results.find(func->name());
             if (it == results.end()) {
-                results.insert(func->name(), AbstractMetaFunctionCList(1, func));
+                it = results.insert(func->name(), AbstractMetaFunctionCList(1, func));
             } else {
                 // If there are virtuals methods in the mix (PYSIDE-570,
                 // QFileSystemModel::index(QString,int) and
@@ -2303,60 +2307,85 @@ ShibokenGenerator::FunctionGroups ShibokenGenerator::getFunctionGroupsImpl(const
                 else
                     it.value().append(func);
             }
+            getInheritedOverloads(scope, &it.value());
         }
     }
     return results;
 }
 
-AbstractMetaFunctionCList
-    ShibokenGenerator::getInheritedOverloads(const AbstractMetaFunctionCPtr &func, QSet<QString> *seen)
+static bool hidesBaseClassFunctions(const AbstractMetaFunctionCPtr &f)
 {
-    AbstractMetaFunctionCList results;
-    AbstractMetaClass *basis;
-    if (func->ownerClass() && (basis = func->ownerClass()->baseClass())) {
-        for (; basis; basis = basis->baseClass()) {
-            const auto inFunctions = basis->findFunctions(func->name());
-            for (const auto &inFunc : inFunctions) {
-                if (inFunc->generateBinding()
-                    && !seen->contains(inFunc->minimalSignature())) {
-                    seen->insert(inFunc->minimalSignature());
-                    AbstractMetaFunction *newFunc = inFunc->copy();
-                    newFunc->setImplementingClass(func->implementingClass());
-                    results << AbstractMetaFunctionCPtr(newFunc);
+    return 0 == (f->attributes()
+                 & (AbstractMetaFunction::OverriddenCppMethod | AbstractMetaFunction::FinalCppMethod));
+}
+
+void ShibokenGenerator::getInheritedOverloads(const AbstractMetaClass *scope,
+                                             AbstractMetaFunctionCList *overloads)
+{
+    if (overloads->isEmpty() || scope->isNamespace() || scope->baseClasses().isEmpty())
+        return;
+
+    // PYSIDE-331: look also into base classes. Check for any non-overriding
+    // function hiding the base class functions.
+    const bool hideBaseClassFunctions =
+        std::any_of(overloads->cbegin(), overloads->cend(), hidesBaseClassFunctions);
+
+    const QString &functionName = overloads->constFirst()->name();
+    const bool hasUsingDeclarations = scope->hasUsingMemberFor(functionName);
+    if (hideBaseClassFunctions && !hasUsingDeclarations)
+        return; // No base function is visible
+
+    // Collect base candidates by name and signature
+    bool staticEncountered = false;
+    QSet<QString> seenSignatures;
+    for (const auto &func : *overloads) {
+        seenSignatures.insert(func->minimalSignature());
+        staticEncountered |= func->isStatic();
+    }
+
+    AbstractMetaFunctionCList baseCandidates;
+
+    auto basePredicate = [&functionName, &seenSignatures, &baseCandidates](const AbstractMetaClass *b) {
+        for (const auto &f : b->functions()) {
+            if (f->generateBinding() && f->name() == functionName) {
+                const QString signature = f->minimalSignature();
+                if (!seenSignatures.contains(signature)) {
+                    seenSignatures.insert(signature);
+                    baseCandidates.append(f);
                 }
             }
         }
+        return false; // Keep going
+    };
+
+    for (const auto *baseClass : scope->baseClasses())
+        recurseClassHierarchy(baseClass, basePredicate);
+
+    // Remove the ones that are not made visible with using declarations
+    if (hideBaseClassFunctions && hasUsingDeclarations) {
+        const auto pred =  [scope](const AbstractMetaFunctionCPtr &f) {
+            return !scope->isUsingMember(f->ownerClass(), f->name(), f->access());
+        };
+        auto end = std::remove_if(baseCandidates.begin(), baseCandidates.end(), pred);
+        baseCandidates.erase(end, baseCandidates.end());
     }
-    return results;
-}
 
-AbstractMetaFunctionCList
-    ShibokenGenerator::getFunctionAndInheritedOverloads(const AbstractMetaFunctionCPtr &func,
-                                                        QSet<QString> *seen)
-{
-    AbstractMetaFunctionCList results;
-    seen->insert(func->minimalSignature());
-    results << func << getInheritedOverloads(func, seen);
-    return results;
-}
-
-AbstractMetaFunctionCList ShibokenGenerator::getMethodOverloads(const AbstractMetaClass *scope,
-                                                                const QString &functionName) const
-{
-    Q_ASSERT(scope);
-    const auto &lst = scope->functions();
-
-    AbstractMetaFunctionCList results;
-    QSet<QString> seenSignatures;
-    for (const auto &func : qAsConst(lst)) {
-        if (func->name() != functionName)
-            continue;
-        if (isGroupable(func)) {
-            // PYSIDE-331: look also into base classes.
-            results << getFunctionAndInheritedOverloads(func, &seenSignatures);
-        }
+    // PYSIDE-886: If the method does not have any static overloads declared
+    // in the class in question, remove all inherited static methods as setting
+    // METH_STATIC in that case can cause crashes for the instance methods.
+    // Manifested as crash when calling QPlainTextEdit::find() (clash with
+    // static QWidget::find(WId)).
+    if (!staticEncountered) {
+        auto end =  std::remove_if(baseCandidates.begin(), baseCandidates.end(),
+                                   [](const AbstractMetaFunctionCPtr &f) { return f->isStatic(); });
+         baseCandidates.erase(end, baseCandidates.end());
     }
-    return results;
+
+    for (const auto &baseCandidate : baseCandidates) {
+        AbstractMetaFunction *newFunc = baseCandidate->copy();
+        newFunc->setImplementingClass(scope);
+        overloads->append(AbstractMetaFunctionCPtr(newFunc));
+    }
 }
 
 Generator::OptionDescriptions ShibokenGenerator::options() const
