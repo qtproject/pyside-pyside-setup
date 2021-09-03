@@ -442,16 +442,14 @@ void OverloadData::sortNextOverloads()
  */
 OverloadData::OverloadData(const AbstractMetaFunctionCList &overloads,
                            const ApiExtractorResult &api)
-    : m_minArgs(256), m_maxArgs(0), m_argPos(-1), m_argType(),
-    m_headOverloadData(this), m_previousOverloadData(nullptr),
-    m_api(api)
+    : m_argType(), m_headOverloadData(this), m_api(api)
 {
     for (const auto &func : overloads) {
         m_overloads.append(func);
         int argSize = func->arguments().size() - numberOfRemovedArguments(func);
         if (m_minArgs > argSize)
             m_minArgs = argSize;
-        else if (m_maxArgs < argSize)
+        if (m_maxArgs < argSize)
             m_maxArgs = argSize;
         OverloadData *currentOverloadData = this;
         const AbstractMetaArgumentList &arguments = func->arguments();
@@ -474,8 +472,8 @@ OverloadData::OverloadData(const AbstractMetaFunctionCList &overloads,
 OverloadData::OverloadData(OverloadData *headOverloadData, const AbstractMetaFunctionCPtr &func,
                            const AbstractMetaType &argType, int argPos,
                            const ApiExtractorResult &api) :
-      m_minArgs(256), m_maxArgs(0), m_argPos(argPos), m_argType(argType),
-      m_headOverloadData(headOverloadData), m_previousOverloadData(nullptr), m_api(api)
+      m_argType(argType), m_headOverloadData(headOverloadData), m_api(api),
+      m_argPos(argPos)
 {
     if (func)
         this->addOverload(func);

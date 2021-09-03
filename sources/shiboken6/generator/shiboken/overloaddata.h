@@ -150,17 +150,17 @@ private:
     int functionNumber(const AbstractMetaFunctionCPtr &func) const;
     OverloadDataList overloadDataOnPosition(OverloadData *overloadData, int argPos) const;
 
-    int m_minArgs;
-    int m_maxArgs;
-    int m_argPos;
     AbstractMetaType m_argType;
     QString m_argTypeReplaced;
     AbstractMetaFunctionCList m_overloads;
 
-    OverloadData *m_headOverloadData;
+    OverloadData *m_headOverloadData = nullptr;
     OverloadDataList m_nextOverloadData;
-    OverloadData *m_previousOverloadData;
+    OverloadData *m_previousOverloadData = nullptr;
     const ApiExtractorResult m_api;
+    int m_minArgs = 256;
+    int m_maxArgs = 0;
+    int m_argPos = -1;
 };
 
 #ifndef QT_NO_DEBUG_STREAM
