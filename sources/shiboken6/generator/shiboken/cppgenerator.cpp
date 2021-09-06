@@ -544,18 +544,20 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
             continue;
         }
 
+        OverloadData overloadData(overloads, api());
+
         if (rfunc->isConstructor()) {
             // @TODO: Implement constructor support for smart pointers, so that they can be
             // instantiated in python code.
             if (classContext.forSmartPointer())
                 continue;
-            writeConstructorWrapper(s, overloads, classContext);
-            writeSignatureInfo(signatureStream, overloads);
+            writeConstructorWrapper(s, overloadData, classContext);
+            writeSignatureInfo(signatureStream, overloadData);
         }
         // call operators
         else if (rfunc->name() == QLatin1String("operator()")) {
-            writeMethodWrapper(s, overloads, classContext);
-            writeSignatureInfo(signatureStream, overloads);
+            writeMethodWrapper(s, overloadData, classContext);
+            writeSignatureInfo(signatureStream, overloadData);
         }
         else if (!rfunc->isOperatorOverload()) {
 
@@ -586,8 +588,8 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
                 }
             }
 
-            writeMethodWrapper(s, overloads, classContext);
-            writeSignatureInfo(signatureStream, overloads);
+            writeMethodWrapper(s, overloadData, classContext);
+            writeSignatureInfo(signatureStream, overloadData);
             // For a mixture of static and member function overloads,
             // a separate PyMethodDef entry is written which is referenced
             // in the PyMethodDef list and later in getattro() for handling
@@ -595,10 +597,10 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
             if (OverloadData::hasStaticAndInstanceFunctions(overloads)) {
                 QString methDefName = cpythonMethodDefinitionName(rfunc);
                 smd << "static PyMethodDef " << methDefName << " = " << indent;
-                writeMethodDefinitionEntries(smd, overloads, 1);
+                writeMethodDefinitionEntries(smd, overloadData, 1);
                 smd << outdent << ";\n\n";
             }
-            writeMethodDefinition(md, overloads);
+            writeMethodDefinition(md, overloadData);
         }
     }
     const QString methodsDefinitions = md.toString();
@@ -697,8 +699,9 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
             if (overloads.isEmpty())
                 continue;
 
-            writeMethodWrapper(s, overloads, classContext);
-            writeSignatureInfo(signatureStream, overloads);
+            OverloadData overloadData(overloads, api());
+            writeMethodWrapper(s, overloadData, classContext);
+            writeSignatureInfo(signatureStream, overloadData);
         }
     }
 
@@ -1811,7 +1814,7 @@ void CppGenerator::writeSmartPointerConverterFunctions(TextStream &s,
     }
 }
 
-void CppGenerator::writeMethodWrapperPreamble(TextStream &s, OverloadData &overloadData,
+void CppGenerator::writeMethodWrapperPreamble(TextStream &s,const OverloadData &overloadData,
                                               const GeneratorContext &context) const
 {
     const auto rfunc = overloadData.referenceFunction();
@@ -1887,11 +1890,10 @@ static const char *fullName = ")" << fullPythonFunctionName(rfunc, true)
     }
 }
 
-void CppGenerator::writeConstructorWrapper(TextStream &s, const AbstractMetaFunctionCList &overloads,
+void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &overloadData,
                                            const GeneratorContext &classContext) const
 {
     ErrorCode errorCode(-1);
-    OverloadData overloadData(overloads, api());
 
     const auto rfunc = overloadData.referenceFunction();
     const AbstractMetaClass *metaClass = rfunc->ownerClass();
@@ -1976,7 +1978,7 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const AbstractMetaFunc
     // (first "1") and the flag indicating that the Python wrapper holds an C++ wrapper
     // is marked as true (the second "1"). Otherwise the default values apply:
     // Python owns it and C++ wrapper is false.
-    if (shouldGenerateCppWrapper(overloads.constFirst()->ownerClass()))
+    if (shouldGenerateCppWrapper(overloadData.referenceFunction()->ownerClass()))
         s << "Shiboken::Object::setHasCppWrapper(sbkSelf, true);\n";
     // Need to check if a wrapper for same pointer is already registered
     // Caused by bug PYSIDE-217, where deleted objects' wrappers are not released
@@ -2003,7 +2005,7 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const AbstractMetaFunc
 
     // Constructor code injections, position=end
     bool hasCodeInjectionsAtEnd = false;
-    for (const auto &func : overloads) {
+    for (const auto &func : overloadData.overloads()) {
         const CodeSnipList &injectedCodeSnips = func->injectedCodeSnips();
         for (const CodeSnip &cs : injectedCodeSnips) {
             if (cs.position == TypeSystem::CodeSnipPositionEnd) {
@@ -2015,7 +2017,7 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const AbstractMetaFunc
     if (hasCodeInjectionsAtEnd) {
         // FIXME: C++ arguments are not available in code injection on constructor when position = end.
         s <<"switch (overloadId) {\n";
-        for (const auto &func : overloads) {
+        for (const auto &func : overloadData.overloads()) {
             Indentation indent(s);
             const CodeSnipList &injectedCodeSnips = func->injectedCodeSnips();
             for (const CodeSnip &cs : injectedCodeSnips) {
@@ -2042,10 +2044,9 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const AbstractMetaFunc
     s<< outdent << "}\n\n";
 }
 
-void CppGenerator::writeMethodWrapper(TextStream &s, const AbstractMetaFunctionCList &overloads,
+void CppGenerator::writeMethodWrapper(TextStream &s, const OverloadData &overloadData,
                                       const GeneratorContext &classContext) const
 {
-    OverloadData overloadData(overloads, api());
     const auto rfunc = overloadData.referenceFunction();
 
     int maxArgs = overloadData.maxArgs();
@@ -2152,7 +2153,7 @@ void CppGenerator::writeMethodWrapper(TextStream &s, const AbstractMetaFunctionC
     s<< outdent << "}\n\n";
 }
 
-void CppGenerator::writeArgumentsInitializer(TextStream &s, OverloadData &overloadData)
+void CppGenerator::writeArgumentsInitializer(TextStream &s, const OverloadData &overloadData)
 {
     const auto rfunc = overloadData.referenceFunction();
     s << "PyTuple_GET_SIZE(args);\n";
@@ -2344,7 +2345,7 @@ void CppGenerator::writeCppSelfDefinition(TextStream &s,
     writeCppSelfDefinition(s, context, hasStaticOverload, hasClassMethodOverload);
 }
 
-void CppGenerator::writeErrorSection(TextStream &s, OverloadData &overloadData)
+void CppGenerator::writeErrorSection(TextStream &s, const OverloadData &overloadData)
 {
     const auto rfunc = overloadData.referenceFunction();
     s  << '\n' << cpythonFunctionName(rfunc) << "_TypeError:\n";
@@ -5018,11 +5019,9 @@ QString CppGenerator::methodDefinitionParameters(const OverloadData &overloadDat
 }
 
 void CppGenerator::writeMethodDefinitionEntries(TextStream &s,
-                                                const AbstractMetaFunctionCList &overloads,
+                                                const OverloadData &overloadData,
                                                 qsizetype maxEntries) const
 {
-    Q_ASSERT(!overloads.isEmpty());
-    OverloadData overloadData(overloads, api());
     const QStringList names = overloadData.referenceFunction()->definitionNames();
     const QString parameters = methodDefinitionParameters(overloadData);
     const qsizetype count = maxEntries > 0
@@ -5034,17 +5033,17 @@ void CppGenerator::writeMethodDefinitionEntries(TextStream &s,
     }
 }
 
-void CppGenerator::writeMethodDefinition(TextStream &s, const AbstractMetaFunctionCList &overloads) const
+void CppGenerator::writeMethodDefinition(TextStream &s,
+                                         const OverloadData &overloadData) const
 {
-    Q_ASSERT(!overloads.isEmpty());
-    const auto func = overloads.constFirst();
+    const auto func = overloadData.referenceFunction();
     if (m_tpFuncs.contains(func->name()))
         return;
 
-    if (OverloadData::hasStaticAndInstanceFunctions(overloads)) {
+    if (OverloadData::hasStaticAndInstanceFunctions(overloadData.overloads())) {
         s << cpythonMethodDefinitionName(func);
     } else {
-        writeMethodDefinitionEntries(s, overloads);
+        writeMethodDefinitionEntries(s, overloadData);
     }
     s << ',' << '\n';
 }
@@ -5093,16 +5092,15 @@ QString CppGenerator::signatureParameter(const AbstractMetaArgument &arg) const
     return result;
 }
 
-void CppGenerator::writeSignatureInfo(TextStream &s, const AbstractMetaFunctionCList &overloads) const
+void CppGenerator::writeSignatureInfo(TextStream &s, const OverloadData &overloadData) const
 {
-    OverloadData overloadData(overloads, api());
     const auto rfunc = overloadData.referenceFunction();
     QString funcName = fullPythonFunctionName(rfunc, false);
 
-    int idx = overloads.length() - 1;
+    int idx = overloadData.overloads().length() - 1;
     bool multiple = idx > 0;
 
-    for (const auto &f : overloads) {
+    for (const auto &f : overloadData.overloads()) {
         QStringList args;
         // PYSIDE-1328: `self`-ness cannot be computed in Python because there are mixed cases.
         // Toplevel functions like `PySide6.QtCore.QEnum` are always self-less.
@@ -6080,9 +6078,11 @@ bool CppGenerator::finishGeneration()
 
         // Dummy context to satisfy the API.
         GeneratorContext classContext;
-        writeMethodWrapper(s_globalFunctionImpl, overloads, classContext);
-        writeSignatureInfo(signatureStream, overloads);
-        writeMethodDefinition(s_globalFunctionDef, overloads);
+        OverloadData overloadData(overloads, api());
+
+        writeMethodWrapper(s_globalFunctionImpl, overloadData, classContext);
+        writeSignatureInfo(signatureStream, overloadData);
+        writeMethodDefinition(s_globalFunctionDef, overloadData);
     }
 
     AbstractMetaClassCList classesWithStaticFields;

@@ -90,13 +90,13 @@ private:
     void writeSmartPointerConverterFunctions(TextStream &s,
                                              const AbstractMetaType &smartPointerType) const;
 
-    void writeMethodWrapperPreamble(TextStream &s, OverloadData &overloadData,
+    void writeMethodWrapperPreamble(TextStream &s, const OverloadData &overloadData,
                                     const GeneratorContext &context) const;
-    void writeConstructorWrapper(TextStream &s, const AbstractMetaFunctionCList &overloads,
+    void writeConstructorWrapper(TextStream &s, const OverloadData &overloadData,
                                  const GeneratorContext &classContext) const;
-    void writeMethodWrapper(TextStream &s, const AbstractMetaFunctionCList &overloads,
+    void writeMethodWrapper(TextStream &s, const OverloadData &overloadData,
                             const GeneratorContext &classContext) const;
-    static void writeArgumentsInitializer(TextStream &s, OverloadData &overloadData) ;
+    static void writeArgumentsInitializer(TextStream &s, const OverloadData &overloadData);
     static void writeCppSelfConversion(TextStream &s,
                                        const GeneratorContext &context,
                                        const QString &className,
@@ -112,7 +112,7 @@ private:
                                 bool hasClassMethodOverload = false,
                                 bool cppSelfAsReference = false) const;
 
-    static void writeErrorSection(TextStream &s, OverloadData &overloadData) ;
+    static void writeErrorSection(TextStream &s, const OverloadData &overloadData) ;
     static void writeFunctionReturnErrorCheckSection(TextStream &s, bool hasReturnValue = true);
 
     /// Writes the check section for the validity of wrapped C++ objects.
@@ -300,10 +300,11 @@ private:
                               const GeneratorContext &classContext);
     QString methodDefinitionParameters(const OverloadData &overloadData) const;
     void writeMethodDefinitionEntries(TextStream &s,
-                                      const AbstractMetaFunctionCList &overloads,
+                                      const OverloadData &overloadData,
                                       qsizetype maxEntries = -1) const;
-    void writeMethodDefinition(TextStream &s, const AbstractMetaFunctionCList &overloads) const;
-    void writeSignatureInfo(TextStream &s, const AbstractMetaFunctionCList &overloads) const;
+    void writeMethodDefinition(TextStream &s,
+                               const OverloadData &overloadData) const;
+    void writeSignatureInfo(TextStream &s, const OverloadData &overloads) const;
     QString signatureParameter(const AbstractMetaArgument &arg) const;
     /// Writes the implementation of all methods part of python sequence protocol
     void writeSequenceMethods(TextStream &s,
