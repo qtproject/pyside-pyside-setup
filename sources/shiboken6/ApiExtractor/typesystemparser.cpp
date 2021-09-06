@@ -907,28 +907,39 @@ bool TypeSystemParser::endElement(QStringView localName)
             if (m_current->parent->parent->type == StackElement::Root) {
                 CodeSnipList snips = m_current->parent->entry->codeSnips();
                 CodeSnip snip = snips.takeLast();
-                snip.addTemplateInstance(m_current->value.templateInstance);
+                TemplateInstancePtr ti(m_current->value.templateInstance);
+                snip.addTemplateInstance(ti);
                 snips.append(snip);
                 m_current->parent->entry->setCodeSnips(snips);
                 break;
             }
             Q_FALLTHROUGH();
         case StackElement::NativeToTarget:
-        case StackElement::AddConversion:
-            m_contextStack.top()->codeSnips.last().addTemplateInstance(m_current->value.templateInstance);
+        case StackElement::AddConversion: {
+            TemplateInstancePtr ti(m_current->value.templateInstance);
+            m_contextStack.top()->codeSnips.last().addTemplateInstance(ti);
+        }
             break;
-        case StackElement::Template:
-            m_current->parent->value.templateEntry->addTemplateInstance(m_current->value.templateInstance);
+        case StackElement::Template: {
+            TemplateInstancePtr ti(m_current->value.templateInstance);
+            m_current->parent->value.templateEntry->addTemplateInstance(ti);
+        }
             break;
         case StackElement::CustomMetaConstructor:
-        case StackElement::CustomMetaDestructor:
-            m_current->parent->value.customFunction->addTemplateInstance(m_current->value.templateInstance);
+        case StackElement::CustomMetaDestructor: {
+            TemplateInstancePtr ti(m_current->value.templateInstance);
+            m_current->parent->value.customFunction->addTemplateInstance(ti);
+        }
             break;
-        case StackElement::ConversionRule:
-            m_contextStack.top()->functionMods.last().argument_mods().last().conversionRules().last().addTemplateInstance(m_current->value.templateInstance);
+        case StackElement::ConversionRule: {
+            TemplateInstancePtr ti(m_current->value.templateInstance);
+            m_contextStack.top()->functionMods.last().argument_mods().last().conversionRules().last().addTemplateInstance(ti);
+        }
             break;
-        case StackElement::InjectCodeInFunction:
-            m_contextStack.top()->functionMods.last().snips().last().addTemplateInstance(m_current->value.templateInstance);
+        case StackElement::InjectCodeInFunction: {
+            TemplateInstancePtr ti(m_current->value.templateInstance);
+            m_contextStack.top()->functionMods.last().snips().last().addTemplateInstance(ti);
+        }
             break;
         default:
             break; // nada

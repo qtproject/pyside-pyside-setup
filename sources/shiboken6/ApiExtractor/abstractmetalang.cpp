@@ -75,6 +75,11 @@ public:
     {
     }
 
+    ~AbstractMetaClassPrivate()
+    {
+        qDeleteAll(m_templateArgs);
+    }
+
     void addFunction(const AbstractMetaFunctionCPtr &function);
     void addConstructor(AbstractMetaFunction::FunctionType t,
                         Access access,

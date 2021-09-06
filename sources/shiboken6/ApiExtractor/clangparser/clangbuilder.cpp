@@ -144,6 +144,10 @@ public:
     {
        m_scopeStack.push(NamespaceModelItem(new _FileModelItem(m_model)));
     }
+    ~BuilderPrivate()
+    {
+        delete m_model;
+    }
 
     // Determine scope from top item. Note that the scope list does not necessarily
     // match the scope stack in case of forward-declared inner classes whose definition

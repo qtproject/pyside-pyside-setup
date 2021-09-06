@@ -107,18 +107,20 @@ struct ArgumentOwner
     int index = InvalidIndex;
 };
 
+using TemplateInstancePtr = QSharedPointer<TemplateInstance>;
+
 class CodeSnipFragment
 {
 public:
     CodeSnipFragment() = default;
     explicit CodeSnipFragment(const QString &code) : m_code(code) {}
-    explicit CodeSnipFragment(TemplateInstance *instance) : m_instance(instance) {}
+    explicit CodeSnipFragment(const TemplateInstancePtr &instance) : m_instance(instance) {}
 
     QString code() const;
 
 private:
     QString m_code;
-    TemplateInstance *m_instance = nullptr;
+    QSharedPointer<TemplateInstance> m_instance;
 };
 
 class CodeSnipAbstract : public CodeSnipHelpers
@@ -129,7 +131,7 @@ public:
     void addCode(const QString &code);
     void addCode(QStringView code) { addCode(code.toString()); }
 
-    void addTemplateInstance(TemplateInstance *ti)
+    void addTemplateInstance(const TemplateInstancePtr &ti)
     {
         codeList.append(CodeSnipFragment(ti));
     }
