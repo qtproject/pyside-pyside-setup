@@ -33,24 +33,112 @@
 
 #include <QtCore/QBitArray>
 #include <QtCore/QList>
+#include <QtCore/QSharedPointer>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
+QT_FORWARD_DECLARE_CLASS(QTextStream)
 
-class OverloadData;
-using OverloadDataList = QList<OverloadData *>;
+class OverloadDataNode;
+using OverloadDataNodePtr = QSharedPointer<OverloadDataNode>;
+using OverloadDataList = QList<OverloadDataNodePtr>;
 
-class OverloadData
+/// The root node of OverloadData. It contains all functions
+class OverloadDataRootNode
 {
 public:
-    OverloadData(const AbstractMetaFunctionCList &overloads,
-                 const ApiExtractorResult &api);
-    ~OverloadData();
+    virtual ~OverloadDataRootNode();
 
-    int minArgs() const { return m_headOverloadData->m_minArgs; }
-    int maxArgs() const { return m_headOverloadData->m_maxArgs; }
-    int argPos() const { return m_argPos; }
+    OverloadDataRootNode(const OverloadDataRootNode &) = delete;
+    OverloadDataRootNode &operator=(const OverloadDataRootNode &) = delete;
+    OverloadDataRootNode(OverloadDataRootNode &&) = delete;
+    OverloadDataRootNode &operator=(OverloadDataRootNode &&) = delete;
+
+    virtual int argPos() const { return -1; }
+    virtual const OverloadDataRootNode *parent() const { return nullptr; }
+
+    bool isRoot() const { return parent() == nullptr; }
+
+    AbstractMetaFunctionCPtr referenceFunction() const;
+
+    const AbstractMetaFunctionCList &overloads() const { return m_overloads; }
+    const OverloadDataList &children() const { return m_children; }
+
+    bool nextArgumentHasDefaultValue() const;
+
+    /// Returns the function that has a default value at the current OverloadData argument position, otherwise returns null.
+    AbstractMetaFunctionCPtr getFunctionWithDefaultValue() const;
+
+    /// Returns the nearest occurrence, including this instance, of an argument with a default value.
+    const OverloadDataRootNode *findNextArgWithDefault();
+    bool isFinalOccurrence(const AbstractMetaFunctionCPtr &func) const;
+
+    int functionNumber(const AbstractMetaFunctionCPtr &func) const;
+
+#ifndef QT_NO_DEBUG_STREAM
+    virtual void formatDebug(QDebug &d) const;
+#endif
+
+    OverloadDataNode *addOverloadDataNode(const AbstractMetaFunctionCPtr &func,
+                                          const AbstractMetaArgument &arg);
+
+protected:
+    OverloadDataRootNode(const AbstractMetaFunctionCList &o= {});
+
+    void dumpRootGraph(QTextStream &s, int minArgs, int maxArgs) const;
+    void sortNextOverloads(const ApiExtractorResult &api);
+
+
+#ifndef QT_NO_DEBUG_STREAM
+    void formatReferenceFunction(QDebug &d) const;
+    void formatOverloads(QDebug &d) const;
+    void formatNextOverloadData(QDebug &d) const;
+#endif
+
+    AbstractMetaFunctionCList m_overloads;
+    OverloadDataList m_children;
+};
+
+/// OverloadDataNode references an argument/type combination.
+class OverloadDataNode : public OverloadDataRootNode
+{
+public:
+    explicit OverloadDataNode(const AbstractMetaFunctionCPtr &func,
+                              OverloadDataRootNode *parent,
+                              const AbstractMetaType &argType, int argPos,
+                              const QString argTypeReplaced = {});
+    void addOverload(const AbstractMetaFunctionCPtr &func);
+
+    int argPos() const override { return m_argPos; }
+    const OverloadDataRootNode *parent() const override;
+    void dumpNodeGraph(QTextStream &s) const;
 
     const AbstractMetaType &argType() const { return m_argType; }
+
+    bool hasArgumentTypeReplace() const { return !m_argTypeReplaced.isEmpty(); }
+    const QString &argumentTypeReplaced() const { return m_argTypeReplaced; }
+
+    const AbstractMetaArgument *argument(const AbstractMetaFunctionCPtr &func) const;
+
+#ifndef QT_NO_DEBUG_STREAM
+    void formatDebug(QDebug &d) const override;
+#endif
+
+private:
+    AbstractMetaType m_argType;
+    QString m_argTypeReplaced;
+    OverloadDataRootNode *m_parent = nullptr;
+
+    int m_argPos = -1;
+};
+
+class OverloadData : public OverloadDataRootNode
+{
+public:
+    explicit OverloadData(const AbstractMetaFunctionCList &overloads,
+                          const ApiExtractorResult &api);
+
+    int minArgs() const { return m_minArgs; }
+    int maxArgs() const { return m_maxArgs; }
 
     /// Returns true if any of the overloads for the current OverloadData has a return type different from void.
     bool hasNonVoidReturnType() const;
@@ -82,27 +170,6 @@ public:
     /// Returns true if among the overloads passed as argument there are static and non-static methods altogether.
     static bool hasStaticAndInstanceFunctions(const AbstractMetaFunctionCList &overloads);
 
-    AbstractMetaFunctionCPtr referenceFunction() const;
-    const AbstractMetaArgument *argument(const AbstractMetaFunctionCPtr &func) const;
-    OverloadDataList overloadDataOnPosition(int argPos) const;
-
-    bool isHeadOverloadData() const { return this == m_headOverloadData; }
-
-    /// Returns the root OverloadData object that represents all the overloads.
-    OverloadData *headOverloadData() const { return m_headOverloadData; }
-
-    /// Returns the function that has a default value at the current OverloadData argument position, otherwise returns null.
-    AbstractMetaFunctionCPtr getFunctionWithDefaultValue() const;
-
-    bool nextArgumentHasDefaultValue() const;
-    /// Returns the nearest occurrence, including this instance, of an argument with a default value.
-    OverloadData *findNextArgWithDefault();
-    bool isFinalOccurrence(const AbstractMetaFunctionCPtr &func) const;
-
-    const AbstractMetaFunctionCList &overloads() const { return m_overloads; }
-    OverloadDataList nextOverloadData() const { return m_nextOverloadData; }
-    OverloadData *previousOverloadData() const { return m_previousOverloadData; }
-
     QList<int> invalidArgumentLengths() const;
 
     static int numberOfRemovedArguments(const AbstractMetaFunctionCPtr &func);
@@ -116,9 +183,6 @@ public:
     /// Returns true if a list of arguments is used (METH_VARARGS)
     bool pythonFunctionWrapperUsesListOfArguments() const;
 
-    bool hasArgumentTypeReplace() const;
-    QString argumentTypeReplaced() const;
-
     bool hasArgumentWithDefaultValue() const;
     static bool hasArgumentWithDefaultValue(const AbstractMetaFunctionCPtr &func);
 
@@ -126,37 +190,16 @@ public:
     static AbstractMetaArgumentList getArgumentsWithDefaultValues(const AbstractMetaFunctionCPtr &func);
 
 #ifndef QT_NO_DEBUG_STREAM
-    void formatDebug(QDebug &) const;
+    void formatDebug(QDebug &) const override;
 #endif
 
 private:
-    OverloadData(OverloadData *headOverloadData, const AbstractMetaFunctionCPtr &func,
-                 const AbstractMetaType &argType, int argPos,
-                 const ApiExtractorResult &api);
-
-    void addOverload(const AbstractMetaFunctionCPtr &func);
-    OverloadData *addOverloadData(const AbstractMetaFunctionCPtr &func, const AbstractMetaArgument &arg);
-
-    void sortNextOverloads();
-    bool sortByOverloadNumberModification();
-
-    int functionNumber(const AbstractMetaFunctionCPtr &func) const;
-
-    AbstractMetaType m_argType;
-    QString m_argTypeReplaced;
-    AbstractMetaFunctionCList m_overloads;
-
-    OverloadData *m_headOverloadData = nullptr;
-    OverloadDataList m_nextOverloadData;
-    OverloadData *m_previousOverloadData = nullptr;
-    const ApiExtractorResult m_api;
     int m_minArgs = 256;
     int m_maxArgs = 0;
-    int m_argPos = -1;
 };
 
 #ifndef QT_NO_DEBUG_STREAM
-QDebug operator<<(QDebug, const OverloadData *);
+QDebug operator<<(QDebug, const OverloadData &);
 #endif
 
 #endif // OVERLOADDATA_H

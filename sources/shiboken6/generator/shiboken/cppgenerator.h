@@ -32,6 +32,11 @@
 #include "shibokengenerator.h"
 #include "abstractmetalang_enums.h"
 
+#include <QtCore/QSharedPointer>
+
+class OverloadDataNode;
+class OverloadDataRootNode;
+
 /**
  *   The CppGenerator generate the implementations of C++ bindings classes.
  */
@@ -121,7 +126,7 @@ private:
     void writeTypeCheck(TextStream &s, AbstractMetaType argType, const QString &argumentName,
                         bool isNumber = false, const QString &customType = QString(),
                         bool rejectNull = false) const;
-    void writeTypeCheck(TextStream& s, const OverloadData *overloadData,
+    void writeTypeCheck(TextStream& s, const QSharedPointer<OverloadDataNode> &overloadData,
                         const QString &argumentName) const;
 
     static void writeTypeDiscoveryFunction(TextStream &s, const AbstractMetaClass *metaClass);
@@ -204,7 +209,8 @@ private:
     void writeOverloadedFunctionDecisor(TextStream &s, const OverloadData &overloadData) const;
     /// Recursive auxiliar method to the other writeOverloadedFunctionDecisor.
     void writeOverloadedFunctionDecisorEngine(TextStream &s,
-                                              const OverloadData *parentOverloadData) const;
+                                              const OverloadData &overloadData,
+                                              const OverloadDataRootNode *node) const;
 
     /// Writes calls to all the possible method/function overloads.
     void writeFunctionCalls(TextStream &s,

@@ -2467,15 +2467,16 @@ static void checkTypeViability(const AbstractMetaFunctionCPtr &func)
         checkTypeViability(func, func->arguments().at(i).type(), i + 1);
 }
 
-void CppGenerator::writeTypeCheck(TextStream &s, const OverloadData *overloadData,
+void CppGenerator::writeTypeCheck(TextStream &s,
+                                  const QSharedPointer<OverloadDataNode> &overloadData,
                                   const QString &argumentName) const
 {
     QSet<const TypeEntry *> numericTypes;
-    const OverloadDataList &overloads = overloadData->previousOverloadData()->nextOverloadData();
-    for (OverloadData *od : overloads) {
-        for (const auto &func : od->overloads()) {
+    const OverloadDataList &siblings = overloadData->parent()->children();
+    for (const auto &sibling : siblings) {
+        for (const auto &func : sibling->overloads()) {
             checkTypeViability(func);
-            const AbstractMetaType &argType = od->argument(func)->type();
+            const AbstractMetaType &argType = sibling->argument(func)->type();
             if (!argType.isPrimitive())
                 continue;
             if (ShibokenGenerator::isNumber(argType.typeEntry()))
@@ -2779,7 +2780,7 @@ void CppGenerator::writeOverloadedFunctionDecisor(TextStream &s, const OverloadD
             s << decl->name() << "::";
         s << func->signatureComment() << '\n';
     }
-    writeOverloadedFunctionDecisorEngine(s, &overloadData);
+    writeOverloadedFunctionDecisorEngine(s, overloadData, &overloadData);
     s << '\n';
 
     // Ensure that the direct overload that called this reverse
@@ -2800,10 +2801,11 @@ void CppGenerator::writeOverloadedFunctionDecisor(TextStream &s, const OverloadD
 }
 
 void CppGenerator::writeOverloadedFunctionDecisorEngine(TextStream &s,
-                                                        const OverloadData *parentOverloadData) const
+                                                        const OverloadData &overloadData,
+                                                        const OverloadDataRootNode *node) const
 {
-    bool hasDefaultCall = parentOverloadData->nextArgumentHasDefaultValue();
-    auto referenceFunction = parentOverloadData->referenceFunction();
+    bool hasDefaultCall = node->nextArgumentHasDefaultValue();
+    auto referenceFunction = node->referenceFunction();
 
     // If the next argument has not an argument with a default value, it is still possible
     // that one of the overloads for the current overload data has its final occurrence here.
@@ -2811,8 +2813,8 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(TextStream &s,
     // variable to be used further on this method on the conditional that identifies default
     // method calls.
     if (!hasDefaultCall) {
-        for (const auto &func : parentOverloadData->overloads()) {
-            if (parentOverloadData->isFinalOccurrence(func)) {
+        for (const auto &func : node->overloads()) {
+            if (node->isFinalOccurrence(func)) {
                 referenceFunction = func;
                 hasDefaultCall = true;
                 break;
@@ -2820,13 +2822,13 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(TextStream &s,
         }
     }
 
-    int maxArgs = parentOverloadData->maxArgs();
+    const int maxArgs = overloadData.maxArgs();
     // Python constructors always receive multiple arguments.
-    const bool usePyArgs = parentOverloadData->pythonFunctionWrapperUsesListOfArguments();
+    const bool usePyArgs = overloadData.pythonFunctionWrapperUsesListOfArguments();
 
     // Functions without arguments are identified right away.
     if (maxArgs == 0) {
-        s << "overloadId = " << parentOverloadData->headOverloadData()->overloads().indexOf(referenceFunction)
+        s << "overloadId = " << overloadData.functionNumber(referenceFunction)
             << "; // " << referenceFunction->minimalSignature() << '\n';
         return;
 
@@ -2834,15 +2836,15 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(TextStream &s,
     // To decide if a method call is possible at this point the current overload
     // data object cannot be the head, since it is just an entry point, or a root,
     // for the tree of arguments and it does not represent a valid method call.
-    if (!parentOverloadData->isHeadOverloadData()) {
-        bool isLastArgument = parentOverloadData->nextOverloadData().isEmpty();
-        bool signatureFound = parentOverloadData->overloads().size() == 1;
+    if (!node->isRoot()) {
+        const bool isLastArgument = node->children().isEmpty();
+        const bool signatureFound = node->overloads().size() == 1;
 
         // The current overload data describes the last argument of a signature,
         // so the method can be identified right now.
         if (isLastArgument || (signatureFound && !hasDefaultCall)) {
-            const auto func = parentOverloadData->referenceFunction();
-            s << "overloadId = " << parentOverloadData->headOverloadData()->overloads().indexOf(func)
+            const auto func = node->referenceFunction();
+            s << "overloadId = " << overloadData.functionNumber(func)
                 << "; // " << func->minimalSignature() << '\n';
             return;
         }
@@ -2853,40 +2855,40 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(TextStream &s,
     // If the next argument has a default value the decisor can perform a method call;
     // it just need to check if the number of arguments received from Python are equal
     // to the number of parameters preceding the argument with the default value.
-    const OverloadDataList &overloads = parentOverloadData->nextOverloadData();
+    const OverloadDataList &children = node->children();
     if (hasDefaultCall) {
         isFirst = false;
-        int numArgs = parentOverloadData->argPos() + 1;
+        int numArgs = node->argPos() + 1;
         s << "if (numArgs == " << numArgs << ") {\n";
         {
             Indentation indent(s);
             auto func = referenceFunction;
-            for (OverloadData *overloadData : overloads) {
-                const auto defValFunc = overloadData->getFunctionWithDefaultValue();
+            for (const auto &child : children) {
+                const auto defValFunc = child->getFunctionWithDefaultValue();
                 if (!defValFunc.isNull()) {
                     func = defValFunc;
                     break;
                 }
             }
-            s << "overloadId = " << parentOverloadData->headOverloadData()->overloads().indexOf(func)
+            s << "overloadId = " << overloadData.functionNumber(func)
                 << "; // " << func->minimalSignature() << '\n';
         }
         s << '}';
     }
 
-    for (OverloadData *overloadData : overloads) {
-        bool signatureFound = overloadData->overloads().size() == 1
-                                && !overloadData->getFunctionWithDefaultValue()
-                                && !overloadData->findNextArgWithDefault();
+    for (auto child : children) {
+        bool signatureFound = child->overloads().size() == 1
+                                && !child->getFunctionWithDefaultValue()
+                                && !child->findNextArgWithDefault();
 
-        const auto refFunc = overloadData->referenceFunction();
+        const auto refFunc = child->referenceFunction();
 
         QStringList typeChecks;
 
         QString pyArgName = (usePyArgs && maxArgs > 1)
-            ? pythonArgsAt(overloadData->argPos())
+            ? pythonArgsAt(child->argPos())
             : QLatin1String(PYTHON_ARG);
-        OverloadData *od = overloadData;
+        auto od = child;
         int startArg = od->argPos();
         int sequenceArgCount = 0;
         while (od && !od->argType().isVarargs()) {
@@ -2913,14 +2915,14 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(TextStream &s,
 
             sequenceArgCount++;
 
-            if (od->nextOverloadData().isEmpty()
+            if (od->children().isEmpty()
                 || od->nextArgumentHasDefaultValue()
-                || od->nextOverloadData().size() != 1
-                || od->overloads().size() != od->nextOverloadData().constFirst()->overloads().size()) {
-                overloadData = od;
+                || od->children().size() != 1
+                || od->overloads().size() != od->children().constFirst()->overloads().size()) {
+                child = od;
                 od = nullptr;
             } else {
-                od = od->nextOverloadData().constFirst();
+                od = od->children().constFirst();
             }
         }
 
@@ -2958,7 +2960,7 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(TextStream &s,
         s << ") {\n";
         {
             Indentation indent(s);
-            writeOverloadedFunctionDecisorEngine(s, overloadData);
+            writeOverloadedFunctionDecisorEngine(s, overloadData, child.data());
         }
         s << "}";
     }
@@ -4922,8 +4924,8 @@ void CppGenerator::writeRichCompareFunction(TextStream &s,
 
             bool first = true;
             OverloadData overloadData(overloads, api());
-            const OverloadDataList &nextOverloads = overloadData.nextOverloadData();
-            for (OverloadData *od : nextOverloads) {
+            const OverloadDataList &nextOverloads = overloadData.children();
+            for (const auto &od : nextOverloads) {
                 const auto func = od->referenceFunction();
                 if (func->isStatic())
                     continue;
