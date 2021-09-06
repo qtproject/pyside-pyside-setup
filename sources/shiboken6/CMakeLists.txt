@@ -133,7 +133,7 @@ endif()
 # Build with Address sanitizer enabled if requested.
 # This may break things, so use at your own risk.
 if (SANITIZE_ADDRESS AND NOT MSVC)
-    set_sanitize_address()
+    setup_sanitize_address()
 endif()
 
 # Detect if the python libs were compiled in debug mode
