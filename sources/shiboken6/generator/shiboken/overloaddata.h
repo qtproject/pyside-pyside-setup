@@ -52,17 +52,11 @@ public:
 
     const AbstractMetaType &argType() const { return m_argType; }
 
-    /// Returns a string list containing all the possible return types (including void) for the current OverloadData.
-    QStringList returnTypes() const;
-
     /// Returns true if any of the overloads for the current OverloadData has a return type different from void.
     bool hasNonVoidReturnType() const;
 
     /// Returns true if any of the overloads for the current OverloadData has a varargs argument.
     bool hasVarargs() const;
-
-    /// Returns true if any of the overloads for the current OverloadData allows threads when called.
-    bool hasAllowThread() const;
 
     /// Returns true if any of the overloads for the current OverloadData is static.
     bool hasStaticFunction() const;
@@ -146,7 +140,6 @@ private:
     bool sortByOverloadNumberModification();
 
     int functionNumber(const AbstractMetaFunctionCPtr &func) const;
-    OverloadDataList overloadDataOnPosition(OverloadData *overloadData, int argPos) const;
 
     AbstractMetaType m_argType;
     QString m_argTypeReplaced;

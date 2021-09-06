@@ -463,10 +463,6 @@ OverloadData::OverloadData(const AbstractMetaFunctionCList &overloads,
     // Sort the overload possibilities so that the overload decisor code goes for the most
     // important cases first, based on the topological order of the implicit conversions
     sortNextOverloads();
-
-    // Fix minArgs
-    if (minArgs() > maxArgs())
-        m_headOverloadData->m_minArgs = maxArgs();
 }
 
 OverloadData::OverloadData(OverloadData *headOverloadData, const AbstractMetaFunctionCPtr &func,
@@ -483,13 +479,6 @@ void OverloadData::addOverload(const AbstractMetaFunctionCPtr &func)
 {
     int origNumArgs = func->arguments().size();
     int removed = numberOfRemovedArguments(func);
-    int numArgs = origNumArgs - removed;
-
-    if (numArgs > m_headOverloadData->m_maxArgs)
-        m_headOverloadData->m_maxArgs = numArgs;
-
-    if (numArgs < m_headOverloadData->m_minArgs)
-        m_headOverloadData->m_minArgs = numArgs;
 
     for (int i = 0; m_headOverloadData->m_minArgs > 0 && i < origNumArgs; i++) {
         if (func->argumentRemoved(i + 1))
@@ -538,22 +527,19 @@ OverloadData *OverloadData::addOverloadData(const AbstractMetaFunctionCPtr &func
     return overloadData;
 }
 
-QStringList OverloadData::returnTypes() const
-{
-    QSet<QString> retTypes;
-    for (const auto &func : m_overloads) {
-        if (!func->typeReplaced(0).isEmpty())
-            retTypes << func->typeReplaced(0);
-        else if (!func->argumentRemoved(0))
-            retTypes << func->type().cppSignature();
-    }
-    return retTypes.values();
-}
-
 bool OverloadData::hasNonVoidReturnType() const
 {
-    QStringList retTypes = returnTypes();
-    return !retTypes.contains(QLatin1String("void")) || retTypes.size() > 1;
+    for (const auto &func : m_overloads) {
+        const QString typeReplaced = func->typeReplaced(0);
+        if (typeReplaced.isEmpty()) {
+            if (!func->argumentRemoved(0) && !func->type().isVoid())
+                return true;
+        } else {
+            if (typeReplaced != u"void")
+                return true;
+        }
+    }
+    return false;
 }
 
 bool OverloadData::hasVarargs() const
@@ -561,15 +547,6 @@ bool OverloadData::hasVarargs() const
     for (const auto &func : m_overloads) {
         AbstractMetaArgumentList args = func->arguments();
         if (args.size() > 1 && args.constLast().type().isVarargs())
-            return true;
-    }
-    return false;
-}
-
-bool OverloadData::hasAllowThread() const
-{
-    for (const auto &func : m_overloads) {
-        if (func->allowThread())
             return true;
     }
     return false;
@@ -659,26 +636,6 @@ const AbstractMetaArgument *OverloadData::argument(const AbstractMetaFunctionCPt
     }
 
     return &func->arguments().at(m_argPos + removed);
-}
-
-OverloadDataList OverloadData::overloadDataOnPosition(OverloadData *overloadData, int argPos) const
-{
-    OverloadDataList overloadDataList;
-    if (overloadData->argPos() == argPos) {
-        overloadDataList.append(overloadData);
-    } else if (overloadData->argPos() < argPos) {
-        const OverloadDataList &data = overloadData->nextOverloadData();
-        for (OverloadData *pd : data)
-            overloadDataList += overloadDataOnPosition(pd, argPos);
-    }
-    return overloadDataList;
-}
-
-OverloadDataList OverloadData::overloadDataOnPosition(int argPos) const
-{
-    OverloadDataList overloadDataList;
-    overloadDataList += overloadDataOnPosition(m_headOverloadData, argPos);
-    return overloadDataList;
 }
 
 bool OverloadData::nextArgumentHasDefaultValue() const
