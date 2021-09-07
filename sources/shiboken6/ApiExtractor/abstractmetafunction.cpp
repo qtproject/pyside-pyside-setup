@@ -384,6 +384,30 @@ AbstractMetaFunction::CompareResult AbstractMetaFunction::compareTo(const Abstra
     return result;
 }
 
+// Is this the const overload of another function of equivalent return type?
+bool AbstractMetaFunction::isConstOverloadOf(const AbstractMetaFunction *other) const
+{
+    const auto argumentCount = d->m_arguments.size();
+    if (!isConstant() || other->isConstant() || name() != other->name()
+        || argumentCount != other->arguments().size()) {
+        return false;
+    }
+
+    // Match "const Foo &getFoo() const" / "Foo &getFoo()" / "Foo getFoo() const"
+    const auto otherType = other->type();
+    if (d->m_type.name() != otherType.name()
+        || d->m_type.indirectionsV() != otherType.indirectionsV()) {
+        return false;
+    }
+
+    const auto &otherArguments = other->arguments();
+    for (qsizetype a = 0; a < argumentCount; ++a) {
+        if (d->m_arguments.at(a).type() != otherArguments.at(a).type())
+            return false;
+    }
+    return true;
+}
+
 AbstractMetaFunction *AbstractMetaFunction::copy() const
 {
     auto *cpy = new AbstractMetaFunction;

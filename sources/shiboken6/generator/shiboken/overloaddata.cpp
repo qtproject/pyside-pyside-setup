@@ -719,22 +719,6 @@ bool OverloadData::isFinalOccurrence(const AbstractMetaFunctionCPtr &func) const
     return true;
 }
 
-AbstractMetaFunctionCList OverloadData::overloadsWithoutRepetition() const
-{
-    AbstractMetaFunctionCList overloads = m_overloads;
-    for (const auto &func : m_overloads) {
-        if (func->minimalSignature().endsWith(QLatin1String("const")))
-            continue;
-        for (const auto &f : qAsConst(overloads)) {
-            if ((func->minimalSignature() + QLatin1String("const")) == f->minimalSignature()) {
-                overloads.removeOne(f);
-                break;
-            }
-        }
-    }
-    return overloads;
-}
-
 AbstractMetaFunctionCPtr OverloadData::getFunctionWithDefaultValue() const
 {
     for (const auto &func : m_overloads) {

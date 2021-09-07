@@ -295,6 +295,7 @@ public:
     bool isUserDeclared() const;
 
     CompareResult compareTo(const AbstractMetaFunction *other) const;
+    bool isConstOverloadOf(const AbstractMetaFunction *other) const;
 
     bool operator <(const AbstractMetaFunction &a) const;
 

@@ -2278,6 +2278,23 @@ ShibokenGenerator::FunctionGroups ShibokenGenerator::getFunctionGroups(const Abs
     return getGeneratorClassInfo(scope).functionGroups;
 }
 
+// Use non-const overloads only, for example, "foo()" and "foo()const"
+// the second is removed.
+static void removeConstOverloads(AbstractMetaFunctionCList *overloads)
+{
+    for (qsizetype i = overloads->size() - 1; i >= 0; --i) {
+        const auto &f = overloads->at(i);
+        if (f->isConstant()) {
+            for (qsizetype c = 0; c < i; ++c) {
+                if (f->isConstOverloadOf(overloads->at(c).data())) {
+                    overloads->removeAt(i);
+                    break;
+                }
+            }
+        }
+    }
+}
+
 ShibokenGenerator::FunctionGroups ShibokenGenerator::getFunctionGroupsImpl(const AbstractMetaClass *scope)
 {
     AbstractMetaFunctionCList lst = scope->functions();
@@ -2303,6 +2320,7 @@ ShibokenGenerator::FunctionGroups ShibokenGenerator::getFunctionGroupsImpl(const
                     it.value().append(func);
             }
             getInheritedOverloads(scope, &it.value());
+            removeConstOverloads(&it.value());
         }
     }
     return results;

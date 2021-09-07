@@ -105,8 +105,6 @@ public:
     OverloadData *findNextArgWithDefault();
     bool isFinalOccurrence(const AbstractMetaFunctionCPtr &func) const;
 
-    /// Returns the list of overloads removing repeated constant functions (ex.: "foo()" and "foo()const", the second is removed).
-    AbstractMetaFunctionCList overloadsWithoutRepetition() const;
     const AbstractMetaFunctionCList &overloads() const { return m_overloads; }
     OverloadDataList nextOverloadData() const { return m_nextOverloadData; }
     OverloadData *previousOverloadData() const { return m_previousOverloadData; }

@@ -2739,7 +2739,7 @@ void CppGenerator::writeOverloadedFunctionDecisor(TextStream &s, const OverloadD
 {
     s << "// Overloaded function decisor\n";
     const auto rfunc = overloadData.referenceFunction();
-    const AbstractMetaFunctionCList &functionOverloads = overloadData.overloadsWithoutRepetition();
+    const AbstractMetaFunctionCList &functionOverloads = overloadData.overloads();
     for (int i = 0; i < functionOverloads.count(); i++) {
         const auto func = functionOverloads.at(i);
         s << "// " << i << ": ";
@@ -2938,7 +2938,7 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(TextStream &s,
 void CppGenerator::writeFunctionCalls(TextStream &s, const OverloadData &overloadData,
                                       const GeneratorContext &context) const
 {
-    const AbstractMetaFunctionCList &overloads = overloadData.overloadsWithoutRepetition();
+    const AbstractMetaFunctionCList &overloads = overloadData.overloads();
     s << "// Call function/method\n"
         << (overloads.count() > 1 ? "switch (overloadId) " : "") << "{\n";
     {
