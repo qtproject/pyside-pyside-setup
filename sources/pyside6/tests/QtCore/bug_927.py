@@ -36,14 +36,12 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QTime, QRunnable, QThreadPool
+from PySide6.QtCore import QRunnable, QThread, QThreadPool
 
 
 class Task(QRunnable):
     def run(self):
-        t = QTime()
-        t.start()
-        time.sleep(2)  # Sleep 2 seconds
+        QThread.sleep(2)  # Sleep 2 seconds
 
 
 class QThreadPoolTest(unittest.TestCase):
