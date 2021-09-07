@@ -39,20 +39,36 @@ init_test_paths(False)
 from PySide6.QtCore import QRunnable, QThread, QThreadPool
 
 
+thread_function_called = False
+
+
+class thread_function():
+    global thread_function_called
+    thread_function_called = True
+
+
 class Task(QRunnable):
     def run(self):
         QThread.sleep(2)  # Sleep 2 seconds
 
 
 class QThreadPoolTest(unittest.TestCase):
-    '''This used to cause a segfault due the ownership control on globalInstance function '''
     def testSlowJobs(self):
+        '''This used to cause a segfault due the ownership control on
+           globalInstance function'''
         for i in range(3):
             task = Task()
             QThreadPool.globalInstance().start(task)
             time.sleep(1)  # Sleep 1 second
 
         QThreadPool.globalInstance().waitForDone()
+
+    def testCallable(self):
+        global thread_function_called
+        tp = QThreadPool.globalInstance()
+        tp.start(thread_function)
+        tp.waitForDone()
+        self.assertTrue(thread_function_called)
 
 
 if __name__ == '__main__':

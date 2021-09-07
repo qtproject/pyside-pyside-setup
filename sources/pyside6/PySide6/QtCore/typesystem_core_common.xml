@@ -2863,11 +2863,27 @@
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
+    <add-function signature="start(PyCallable,int @priority@=0)">
+        <inject-code class="target" position="beginning"
+                     file="../glue/qtcore.cpp"
+                     snippet="std-function-void-lambda"/>
+        <inject-code class="target" position="beginning"
+                     file="../glue/qtcore.cpp"
+                     snippet="qthreadpool-start"/>
+    </add-function>
     <modify-function signature="tryStart(QRunnable*)" allow-thread="yes">
       <modify-argument index="1">
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
+    <add-function signature="tryStart(PyCallable)" return-type="bool">
+       <inject-code class="target" position="beginning"
+                    file="../glue/qtcore.cpp"
+                    snippet="std-function-void-lambda"/>
+        <inject-code class="target" position="beginning"
+                     file="../glue/qtcore.cpp"
+                     snippet="qthreadpool-trystart"/>
+    </add-function>
     <modify-function signature="tryTake(QRunnable*)" allow-thread="yes"/>
 
     <modify-function signature="globalInstance()" >

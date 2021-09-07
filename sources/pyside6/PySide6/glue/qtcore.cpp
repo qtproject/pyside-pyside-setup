@@ -1971,3 +1971,25 @@ Py_DECREF(suffix);
 %PYARG_0 = Shiboken::Buffer::newObject(%CPPSELF.%FUNCTION_NAME(), %CPPSELF.size(),
                                        Shiboken::Buffer::ReadWrite);
 // @snippet qsharedmemory_data_readwrite
+
+// @snippet std-function-void-lambda
+auto *callable = %PYARG_1;
+auto cppCallback = [callable]()
+{
+    Shiboken::GilState state;
+    Shiboken::AutoDecRef arglist(PyTuple_New(0));
+    Shiboken::AutoDecRef ret(PyObject_CallObject(callable, arglist));
+    Py_DECREF(callable);
+};
+// @snippet std-function-void-lambda
+
+// @snippet qthreadpool-start
+Py_INCREF(callable);
+%CPPSELF.%FUNCTION_NAME(cppCallback, %2);
+// @snippet qthreadpool-start
+
+// @snippet qthreadpool-trystart
+Py_INCREF(callable);
+%RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME(cppCallback);
+%PYARG_0 = %CONVERTTOPYTHON[int](cppResult);
+// @snippet qthreadpool-trystart
