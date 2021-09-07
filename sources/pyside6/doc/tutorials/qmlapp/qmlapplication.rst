@@ -9,7 +9,7 @@ QtQml and QtQuick modules provides the necessary infrastructure for
 QML-based UIs.
 
 In this tutorial, you'll also learn how to provide data from Python
-as a QML context property, which is then consumed by the ListView
+as a QML initial property, which is then consumed by the ListView
 defined in the QML file.
 
 Before you begin, install the following prerequisites:
@@ -62,7 +62,7 @@ development process using Qt Creator:
    .. literalinclude:: main.py
       :linenos:
       :lines: 40-60
-      :emphasize-lines: 12-20
+      :emphasize-lines: 7-9,14-17
 
 #. Now, set up the application window using
    :ref:`PySide6.QtGui.QGuiApplication<qguiapplication>`, which manages the application-wide
@@ -78,13 +78,13 @@ development process using Qt Creator:
       Otherwise, the root item will retain its original size on
       resizing the window.
 
-#. You can now expose the ``data_list`` variable as a QML context
+#. You can now expose the ``data_list`` variable as a QML initial
    property, which will be consumed by the QML ListView item in ``view.qml``.
 
    .. literalinclude:: main.py
       :linenos:
       :lines: 40-70
-      :emphasize-lines: 27-30
+      :emphasize-lines: 28-31
 
 #. Load the ``view.qml`` to the ``QQuickView`` and call ``show()`` to
    display the application window.
@@ -92,14 +92,14 @@ development process using Qt Creator:
    .. literalinclude:: main.py
       :linenos:
       :lines: 40-79
-      :emphasize-lines: 33-39
+      :emphasize-lines: 33-40
 
 #. Finally, execute the application to start the event loop and clean up.
 
    .. literalinclude:: main.py
       :linenos:
       :lines: 40-
-      :emphasize-lines: 41-43
+      :emphasize-lines: 42-44
 
 #. Your application is ready to be run now. Select **Projects** mode to
    choose the Python version to run it.

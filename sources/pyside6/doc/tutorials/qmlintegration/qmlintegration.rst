@@ -1,13 +1,13 @@
-Python-based context properties
-===============================
+Python-QML integration
+======================
 
 This tutorial provides a quick walk-through of a python application that loads, and interacts with
 a QML file.  QML is a declarative language that lets you design UIs faster than a traditional
 language, such as C++.  The QtQml and QtQuick modules provides the necessary infrastructure for
 QML-based UIs.
 
-In this tutorial, you will learn how to integrate Python with a QML application through a context
-property.  This mechanism will help us to understand how to use Python as a backend for certain
+In this tutorial, you will learn how to integrate Python with a QML application.
+This mechanism will help us to understand how to use Python as a backend for certain
 signals from the UI elements in the QML interface.  Additionally, you will learn how to provide
 a modern look to your QML application using one of the features from Qt Quick Controls 2.
 
@@ -29,29 +29,47 @@ application and PySide6 integration:
 
    .. literalinclude:: main.py
       :linenos:
-      :lines: 98-108
-      :emphasize-lines: 6,9
+      :lines: 100-113
+      :emphasize-lines: 4,9
 
-   Notice that we specify the name of the context property, **con**,
-   and also we explicitly load our QML file.
+   Notice that we only need a :code:`QQmlApplicationEngine` to
+   :code:`load` the QML file.
 
-#. Define the `Bridge` class, containing all the logic for the context property:
+#. Define the `Bridge` class, containing all the logic for the element
+   that will be register in QML:
 
    .. literalinclude:: main.py
       :linenos:
       :lines: 51-91
+      :emphasize-lines: 3,4,7
+
+   Notice that the registration happens thanks to the :code:`QmlElement`
+   decorator, that underneath uses the reference to the :code:`Bridge`
+   class and the variables :code:`QML_IMPORT_NAME` and
+   :code:`QML_IMPORT_MAJOR_VERSION`.
 
 #. Now, go back to the QML file and connect the signals to the slots defined in the `Bridge` class:
 
+   .. code:: js
+
+      Bridge {
+         id: bridge
+      }
+
+   Inside the :code:`ApplicationWindow` we declare a component
+   with the same name as the Python class, and provide an :code:`id:`.
+   This :code:`id` will help you to get a reference to the element
+   that was registered from Python.
+
    .. literalinclude:: view.qml
       :linenos:
-      :lines: 85-93
-      :emphasize-lines: 5-7
+      :lines: 82-92
+      :emphasize-lines: 6-8
 
    The properties *Italic*, *Bold*, and *Underline* are mutually
    exclusive, this means only one can be active at any time.
    To achieve  this each time we select one of these options, we
-   check the three properties via the context property as you can
+   check the three properties via the QML element property as you can
    see in the above snippet.
    Only one of the three will return *True*, while the other two
    will return *False*, that is how we make sure only one is being
@@ -73,7 +91,7 @@ application and PySide6 integration:
 
    .. literalinclude:: main.py
       :linenos:
-      :lines: 64-70
+      :lines: 71-76
 
 #. Now, for changing the look of our application, you have two options:
 
@@ -96,8 +114,8 @@ application and PySide6 integration:
 
    .. literalinclude:: main.py
       :linenos:
-      :lines: 41-48
-      :emphasize-lines: 8
+      :lines: 41-49
+      :emphasize-lines: 9
 
    You can read more about this configuration file
    `here <https://doc.qt.io/qt-5/qtquickcontrols2-configuration.html>`_.

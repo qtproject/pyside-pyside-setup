@@ -37,10 +37,10 @@
 **
 ****************************************************************************/
 
-import QtQuick 2.12
-import QtQuick.Layouts 1.12
-import QtQuick.Controls 2.12
-import ChatModel 1.0
+import QtQuick
+import QtQuick.Layouts
+import QtQuick.Controls
+import ChatModel
 
 ApplicationWindow {
     id: window
@@ -54,7 +54,7 @@ ApplicationWindow {
     }
 
     ColumnLayout {
-        anchors.fill: parent
+        anchors.fill: window
 
         ListView {
             id: listView

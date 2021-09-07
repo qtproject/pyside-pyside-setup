@@ -169,13 +169,6 @@ Quick/QML: Basic tutorials
 
     basictutorial/qml.rst
     qmlintegration/qmlintegration.rst
-
-Real use-cases applications
----------------------------
-
-.. toctree::
-    :maxdepth: 1
-
     qmlapp/qmlapplication.rst
     qmlsqlintegration/qmlsqlintegration.rst
 ..
