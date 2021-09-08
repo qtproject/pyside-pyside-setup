@@ -717,19 +717,23 @@ QList<int> OverloadData::invalidArgumentLengths() const
     return invalidArgLengths;
 }
 
-int OverloadData::numberOfRemovedArguments(const AbstractMetaFunctionCPtr &func, int finalArgPos)
+int OverloadData::numberOfRemovedArguments(const AbstractMetaFunctionCPtr &func)
 {
     int removed = 0;
-    if (finalArgPos < 0) {
-        for (int i = 0; i < func->arguments().size(); i++) {
-            if (func->argumentRemoved(i + 1))
-                removed++;
-        }
-    } else {
-        for (int i = 0; i < finalArgPos + removed; i++) {
-            if (func->argumentRemoved(i + 1))
-                removed++;
-        }
+    for (int i = 0, size = int(func->arguments().size()); i < size; ++i) {
+        if (func->argumentRemoved(i + 1))
+            ++removed;
+    }
+    return removed;
+}
+
+int OverloadData::numberOfRemovedArguments(const AbstractMetaFunctionCPtr &func, int finalArgPos)
+{
+    Q_ASSERT(finalArgPos >= 0);
+    int removed = 0;
+    for (int i = 0; i < finalArgPos + removed; ++i) {
+        if (func->argumentRemoved(i + 1))
+            ++removed;
     }
     return removed;
 }

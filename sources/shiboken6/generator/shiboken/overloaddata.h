@@ -105,7 +105,8 @@ public:
 
     QList<int> invalidArgumentLengths() const;
 
-    static int numberOfRemovedArguments(const AbstractMetaFunctionCPtr &func, int finalArgPos = -1);
+    static int numberOfRemovedArguments(const AbstractMetaFunctionCPtr &func);
+    static int numberOfRemovedArguments(const AbstractMetaFunctionCPtr &func, int finalArgPos);
     /// Returns true if all overloads have no more than one argument.
     static bool isSingleArgument(const AbstractMetaFunctionCList &overloads);
 
