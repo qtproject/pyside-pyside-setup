@@ -2285,7 +2285,7 @@ static void removeConstOverloads(AbstractMetaFunctionCList *overloads)
     for (qsizetype i = overloads->size() - 1; i >= 0; --i) {
         const auto &f = overloads->at(i);
         if (f->isConstant()) {
-            for (qsizetype c = 0; c < i; ++c) {
+            for (qsizetype c = 0, size = overloads->size(); c < size; ++c) {
                 if (f->isConstOverloadOf(overloads->at(c).data())) {
                     overloads->removeAt(i);
                     break;
