@@ -2651,34 +2651,34 @@ void CppGenerator::writePythonToCppTypeConversion(TextStream &s,
 
     QString pythonToCppFunc = pythonToCppConverterForArgumentName(pyIn);
 
-    if (!defaultValue.isEmpty())
-        s << "if (" << pythonToCppFunc << ") ";
-
     QString pythonToCppCall = pythonToCppFunc + u'(' + pyIn + u", &"_qs
                               + cppOut + u')';
     if (!mayHaveImplicitConversion) {
+        // pythonToCppFunc may be 0 when less parameters are passed and
+        // the defaultValue takes effect.
+        if (!defaultValue.isEmpty())
+            s << "if (" << pythonToCppFunc << ")\n" << indent;
         s << pythonToCppCall << ";\n";
+        if (!defaultValue.isEmpty())
+            s << outdent;
         return;
     }
 
+    // pythonToCppFunc may be 0 when less parameters are passed and
+    // the defaultValue takes effect.
     if (!defaultValue.isEmpty())
-        s << "{\n";
+        s << "if (" << pythonToCppFunc << ") {\n" << indent;
 
     s << "if (Shiboken::Conversions::isImplicitConversion(reinterpret_cast<SbkObjectType *>("
-        << cpythonTypeNameExt(type) << "), " << pythonToCppFunc << "))\n";
-    {
-        Indentation indent(s);
-        s << pythonToCppFunc << '(' << pyIn << ", &" << cppOutAux << ");\n";
-    }
-    s << "else\n";
-    {
-        Indentation indent(s);
-        s << pythonToCppCall << ";\n";
-    }
+        << cpythonTypeNameExt(type) << "), " << pythonToCppFunc << "))\n"
+        << indent << pythonToCppFunc << '(' << pyIn << ", &" << cppOutAux << ");\n"
+        << outdent << "else\n" << indent
+        << pythonToCppCall << ";\n" << outdent;
 
-    if (!defaultValue.isEmpty())
-        s << '}';
-    s << '\n';
+    if (defaultValue.isEmpty())
+        s << '\n';
+    else
+        s << "}\n" << outdent;
 }
 
 static void addConversionRuleCodeSnippet(CodeSnipList &snippetList, QString &rule,
