@@ -42,6 +42,7 @@
 #include <QtCore/QTemporaryFile>
 
 #include <algorithm>
+#include <utility>
 
 static const TypeEntry *getReferencedTypeEntry(const TypeEntry *typeEntry)
 {
@@ -423,6 +424,25 @@ void OverloadData::sortNextOverloads()
     }
 }
 
+// Determine the minimum (first default argument)/maximum arguments (size)
+// of a function (taking into account the removed arguments).
+static std::pair<int, int> getMinMaxArgs(const AbstractMetaFunctionCPtr &func)
+{
+    int defaultValueIndex = -1;
+    const auto &arguments = func->arguments();
+    int argIndex = 0;
+    for (qsizetype i = 0, size = arguments.size(); i < size; ++i) {
+        if (!func->argumentRemoved(int(i + 1))) {
+            if (defaultValueIndex < 0 && arguments.at(i).hasDefaultValueExpression())
+                defaultValueIndex = argIndex;
+            ++argIndex;
+        }
+    }
+    const int maxArgs = argIndex;
+    const int minArgs = defaultValueIndex >= 0 ? defaultValueIndex : maxArgs;
+    return {minArgs, maxArgs};
+}
+
 /**
  * Root constructor for OverloadData
  *
@@ -442,15 +462,14 @@ void OverloadData::sortNextOverloads()
  */
 OverloadData::OverloadData(const AbstractMetaFunctionCList &overloads,
                            const ApiExtractorResult &api)
-    : m_argType(), m_headOverloadData(this), m_api(api)
+    : m_argType(), m_overloads(overloads), m_headOverloadData(this), m_api(api)
 {
     for (const auto &func : overloads) {
-        m_overloads.append(func);
-        int argSize = func->arguments().size() - numberOfRemovedArguments(func);
-        if (m_minArgs > argSize)
-            m_minArgs = argSize;
-        if (m_maxArgs < argSize)
-            m_maxArgs = argSize;
+        const auto minMaxArgs = getMinMaxArgs(func);
+        if (minMaxArgs.first < m_minArgs)
+            m_minArgs = minMaxArgs.first;
+        if (minMaxArgs.second > m_maxArgs)
+            m_maxArgs = minMaxArgs.second;
         OverloadData *currentOverloadData = this;
         const AbstractMetaArgumentList &arguments = func->arguments();
         for (const AbstractMetaArgument &arg : arguments) {
@@ -477,19 +496,6 @@ OverloadData::OverloadData(OverloadData *headOverloadData, const AbstractMetaFun
 
 void OverloadData::addOverload(const AbstractMetaFunctionCPtr &func)
 {
-    int origNumArgs = func->arguments().size();
-    int removed = numberOfRemovedArguments(func);
-
-    for (int i = 0; m_headOverloadData->m_minArgs > 0 && i < origNumArgs; i++) {
-        if (func->argumentRemoved(i + 1))
-            continue;
-        if (func->arguments().at(i).hasDefaultValueExpression()) {
-            int fixedArgIndex = i - removed;
-            if (fixedArgIndex < m_headOverloadData->m_minArgs)
-                m_headOverloadData->m_minArgs = fixedArgIndex;
-        }
-    }
-
     m_overloads.append(func);
 }
 
