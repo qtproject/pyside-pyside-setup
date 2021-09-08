@@ -93,6 +93,11 @@ public:
     /// Returns true if the user enabled PySide extensions.
     bool usePySideExtensions() const;
 
+    static QString minimalConstructorExpression(const ApiExtractorResult &api,
+                                                const AbstractMetaType &type);
+    static QString minimalConstructorExpression(const ApiExtractorResult &api,
+                                                const TypeEntry *type);
+
 protected:
     bool doSetup() override;
 
@@ -361,13 +366,6 @@ protected:
     /// Creates an AbstractMetaType object from an AbstractMetaClass.
     static AbstractMetaType
         buildAbstractMetaTypeFromAbstractMetaClass(const AbstractMetaClass *metaClass);
-
-    static void writeMinimalConstructorExpression(TextStream &s, const ApiExtractorResult &api,
-                                                  const AbstractMetaType &type,
-                                                  const QString &defaultCtor = QString());
-    static void writeMinimalConstructorExpression(TextStream &s, const ApiExtractorResult &api,
-                                                  const TypeEntry *type,
-                                                  const QString &defaultCtor = QString());
 
     void collectContainerTypesFromConverterMacros(const QString &code, bool toPythonMacro);
 

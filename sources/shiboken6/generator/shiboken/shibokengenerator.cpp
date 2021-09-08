@@ -1968,9 +1968,8 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
                     const QString conversionSignature = conversionType.cppSignature();
                     if (varType != QLatin1String("auto") && varType != conversionSignature)
                         throw Exception(msgConversionTypesDiffer(varType, conversionSignature));
-                    c << getFullTypeName(conversionType) << ' ' << varName;
-                    writeMinimalConstructorExpression(c, api(), conversionType);
-                    c << ";\n";
+                    c << getFullTypeName(conversionType) << ' ' << varName
+                        << minimalConstructorExpression(api(), conversionType) << ";\n";
                 }
                 c << cpythonToCppConversionFunction(conversionType);
                 QString prefix;
@@ -2662,49 +2661,36 @@ bool ShibokenGenerator::pythonFunctionWrapperUsesListOfArguments(const AbstractM
     return od.pythonFunctionWrapperUsesListOfArguments();
 }
 
-void ShibokenGenerator::writeMinimalConstructorExpression(TextStream &s,
-                                                          const ApiExtractorResult &api,
-                                                          const AbstractMetaType &type,
-                                                          const QString &defaultCtor)
+QString ShibokenGenerator::minimalConstructorExpression(const ApiExtractorResult &api,
+                                                          const AbstractMetaType &type)
 {
-    if (!defaultCtor.isEmpty()) {
-         s << " = " << defaultCtor;
-         return;
-    }
     if (type.isExtendedCppPrimitive() || type.isSmartPointer())
-        return;
+        return {};
     QString errorMessage;
     const auto ctor = minimalConstructor(api, type, &errorMessage);
-    if (ctor.has_value()) {
-        s << ctor->initialization();
-    } else {
-        const QString message =
-            msgCouldNotFindMinimalConstructor(QLatin1String(__FUNCTION__),
-                                              type.cppSignature(), errorMessage);
-        qCWarning(lcShiboken()).noquote() << message;
-        s << ";\n#error " << message << '\n';
-    }
+    if (ctor.has_value())
+        return ctor->initialization();
+
+    const QString message =
+        msgCouldNotFindMinimalConstructor(QLatin1String(__FUNCTION__),
+                                          type.cppSignature(), errorMessage);
+    qCWarning(lcShiboken()).noquote() << message;
+    return u";\n#error "_qs + message + u'\n';
 }
 
-void ShibokenGenerator::writeMinimalConstructorExpression(TextStream &s,
-                                                          const ApiExtractorResult &api,
-                                                          const TypeEntry *type,
-                                                          const QString &defaultCtor)
+QString ShibokenGenerator::minimalConstructorExpression(const ApiExtractorResult &api,
+                                                        const TypeEntry *type)
 {
-    if (!defaultCtor.isEmpty()) {
-         s << " = " << defaultCtor;
-         return;
-    }
     if (type->isExtendedCppPrimitive())
-        return;
+        return {};
     const auto ctor = minimalConstructor(api, type);
-    if (ctor.has_value()) {
-        s << ctor->initialization();
-    } else {
-        const QString message = msgCouldNotFindMinimalConstructor(QLatin1String(__FUNCTION__), type->qualifiedCppName());
-        qCWarning(lcShiboken()).noquote() << message;
-        s << ";\n#error " << message << '\n';
-    }
+    if (ctor.has_value())
+        return ctor->initialization();
+
+    const QString message = msgCouldNotFindMinimalConstructor(QLatin1String(__FUNCTION__),
+                                                              type->qualifiedCppName());
+    qCWarning(lcShiboken()).noquote() << message;
+    return u";\n#error "_qs + message + u'\n';
 }
 
 QString ShibokenGenerator::pythonArgsAt(int i)

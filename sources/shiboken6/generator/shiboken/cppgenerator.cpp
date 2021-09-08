@@ -1602,9 +1602,8 @@ return result;)";
                 || sourceType.typeEntry()->isEnum()
                 || sourceType.typeEntry()->isFlags()) {
                 StringStream pc(TextStream::Language::Cpp);
-                pc << getFullTypeNameWithoutModifiers(sourceType) << " cppIn";
-                writeMinimalConstructorExpression(pc, api(), sourceType);
-                pc << ";\n";
+                pc << getFullTypeNameWithoutModifiers(sourceType) << " cppIn"
+                    << minimalConstructorExpression(api(), sourceType) << ";\n";
                 writeToCppConversion(pc, sourceType, nullptr, QLatin1String("pyIn"), QLatin1String("cppIn"));
                 pc << ';';
                 toCppPreConv = pc.toString();
@@ -2566,6 +2565,34 @@ static inline QString arrayHandleType(const AbstractMetaTypeList &nestedArrayTyp
     return QString();
 }
 
+// Helper to write argument initialization code for a function argument
+// in case it has a default value.
+template <class Type> // AbstractMetaType/TypeEntry
+static void writeMinimalConstructorExpression(TextStream &s,
+                                              const ApiExtractorResult &api,
+                                              Type type,
+                                              bool isPrimitive,
+                                              const QString &defaultValue)
+{
+    if (defaultValue.isEmpty()) {
+        s << ShibokenGenerator::minimalConstructorExpression(api, type);
+        return;
+    }
+    // Use assignment to avoid "Most vexing parse" if it looks like
+    // a function call, or for primitives/pointers
+    const bool isDefault = defaultValue == u"{}";
+    if ((isPrimitive && !isDefault)
+        || defaultValue == u"nullptr" || defaultValue.contains(u'(')) {
+        s << " = " << defaultValue;
+        return;
+    }
+    if (isDefault) {
+        s << defaultValue;
+        return;
+    }
+    s << '(' << defaultValue << ')';
+}
+
 void CppGenerator::writePythonToCppTypeConversion(TextStream &s,
                                                   const AbstractMetaType &type,
                                                   const QString &pyIn,
@@ -2579,6 +2606,7 @@ void CppGenerator::writePythonToCppTypeConversion(TextStream &s,
 
     QString cppOutAux = cppOut + QLatin1String("_local");
 
+    const bool isPrimitive = typeEntry->isPrimitive();
     const bool isEnum = typeEntry->isEnum();
     const bool isFlags = typeEntry->isFlags();
     bool treatAsPointer = valueTypeWithCopyConstructorOnlyPassed(api(), type);
@@ -2604,7 +2632,7 @@ void CppGenerator::writePythonToCppTypeConversion(TextStream &s,
 
     if (mayHaveImplicitConversion) {
         s << typeName << ' ' << cppOutAux;
-        writeMinimalConstructorExpression(s, api(), type, defaultValue);
+        writeMinimalConstructorExpression(s, api(), type, isPrimitive, defaultValue);
         s << ";\n";
     } else if (avoidProtectedHack() && isEnum) {
         auto metaEnum = api().findAbstractMetaEnum(type.typeEntry());
@@ -2631,7 +2659,8 @@ void CppGenerator::writePythonToCppTypeConversion(TextStream &s,
             if (needsConstCast)
                 s << ')';
         }
-    } else if (type.referenceType() == LValueReference && !typeEntry->isPrimitive() && isNotContainerEnumOrFlags) {
+    } else if (type.referenceType() == LValueReference
+               && !isPrimitive && isNotContainerEnumOrFlags) {
         s << " *" << cppOut << " = &" << cppOutAux;
     } else {
         s << ' ' << cppOut;
@@ -2642,9 +2671,9 @@ void CppGenerator::writePythonToCppTypeConversion(TextStream &s,
             else
                 s << defaultValue;
         } else if (type.isUserPrimitive() || isEnum || isFlags) {
-            writeMinimalConstructorExpression(s, api(), typeEntry, defaultValue);
+            writeMinimalConstructorExpression(s, api(), typeEntry, isPrimitive, defaultValue);
         } else if (!type.isContainer() && !type.isSmartPointer()) {
-            writeMinimalConstructorExpression(s, api(), type, defaultValue);
+            writeMinimalConstructorExpression(s, api(), type, isPrimitive, defaultValue);
         }
     }
     s << ";\n";
