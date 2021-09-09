@@ -52,8 +52,9 @@
 // This avoids that we are passing '0' as defaultValue.
 // defaultValue can also be passed as positional argument,
 // not only as keyword.
+// PySide-535: Allow for empty dict instead of nullptr in PyPy
 QVariant out;
-if (kwds || numArgs > 1) {
+if ((kwds && PyDict_Size(kwds) > 0) || numArgs > 1) {
     Py_BEGIN_ALLOW_THREADS
     out = %CPPSELF.value(%1, %2);
     Py_END_ALLOW_THREADS

@@ -3374,7 +3374,8 @@ void CppGenerator::writeNamedArgumentResolution(TextStream &s, const AbstractMet
     const AbstractMetaArgumentList &args = OverloadData::getArgumentsWithDefaultValues(func);
     if (args.isEmpty()) {
         if (overloadData.hasArgumentWithDefaultValue()) {
-            s << "if (kwds) {\n";
+            // PySide-535: Allow for empty dict instead of nullptr in PyPy
+            s << "if (kwds && PyDict_Size(kwds) > 0) {\n";
             {
                 Indentation indent(s);
                 s << "errInfo.reset(kwds);\n"
@@ -3386,7 +3387,8 @@ void CppGenerator::writeNamedArgumentResolution(TextStream &s, const AbstractMet
         return;
     }
 
-    s << "if (kwds) {\n";
+    // PySide-535: Allow for empty dict instead of nullptr in PyPy
+    s << "if (kwds && PyDict_Size(kwds) > 0) {\n";
     {
         Indentation indent(s);
         s << "PyObject *value{};\n"
