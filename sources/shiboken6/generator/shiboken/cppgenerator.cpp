@@ -3356,16 +3356,32 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s, const Abst
     s << '\n';
 }
 
+static void writeSetConverterFunction(TextStream &s,
+                                      const char *function,
+                                      const QString &converterVar,
+                                      const QString &pythonToCppFunc,
+                                      const QString &isConvertibleFunc)
+{
+    s << "Shiboken::Conversions::" << function << '(' << converterVar << ',' << '\n'
+        << indent << pythonToCppFunc << ',' << '\n' << isConvertibleFunc
+        << outdent << ");\n";
+}
+
 void CppGenerator::writeAddPythonToCppConversion(TextStream &s, const QString &converterVar,
                                                  const QString &pythonToCppFunc,
                                                  const QString &isConvertibleFunc)
 {
-    s << "Shiboken::Conversions::addPythonToCppValueConversion(" << converterVar << ',' << '\n';
-    {
-        Indentation indent(s);
-        s << pythonToCppFunc << ',' << '\n' << isConvertibleFunc;
-    }
-    s << ");\n";
+    writeSetConverterFunction(s, "addPythonToCppValueConversion",
+                              converterVar, pythonToCppFunc, isConvertibleFunc);
+}
+
+void CppGenerator::writeSetPythonToCppPointerConversion(TextStream &s,
+                                                        const QString &converterVar,
+                                                        const QString &pythonToCppFunc,
+                                                        const QString &isConvertibleFunc)
+{
+    writeSetConverterFunction(s, "setPythonToCppPointerFunctions",
+                              converterVar, pythonToCppFunc, isConvertibleFunc);
 }
 
 void CppGenerator::writeNamedArgumentResolution(TextStream &s, const AbstractMetaFunctionCPtr &func,

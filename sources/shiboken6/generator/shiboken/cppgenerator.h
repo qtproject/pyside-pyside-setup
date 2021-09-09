@@ -271,8 +271,12 @@ private:
                                              const AbstractMetaType &containerType) const;
 
     static void writeAddPythonToCppConversion(TextStream &s, const QString &converterVar,
-                                       const QString &pythonToCppFunc,
-                                       const QString &isConvertibleFunc);
+                                              const QString &pythonToCppFunc,
+                                              const QString &isConvertibleFunc);
+
+    static void writeSetPythonToCppPointerConversion(TextStream &s, const QString &converterVar,
+                                              const QString &pythonToCppFunc,
+                                              const QString &isConvertibleFunc);
 
     void writeNamedArgumentResolution(TextStream &s, const AbstractMetaFunctionCPtr &func,
                                       bool usePyArgs, const OverloadData &overloadData) const;
