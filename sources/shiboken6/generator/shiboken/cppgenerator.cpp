@@ -2407,7 +2407,7 @@ void CppGenerator::writeTypeCheck(TextStream &s, AbstractMetaType argType,
     // TODO-CONVERTER: merge this with the code below.
     QString typeCheck;
     if (customCheck.isEmpty())
-        typeCheck = cpythonIsConvertibleFunction(argType, argType.isEnum() ? false : isNumber);
+        typeCheck = cpythonIsConvertibleFunction(argType);
     else
         typeCheck = customCheck;
     typeCheck.append(u'(' +argumentName + u')');

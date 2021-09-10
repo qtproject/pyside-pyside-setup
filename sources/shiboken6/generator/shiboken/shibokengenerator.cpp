@@ -1127,9 +1127,7 @@ ShibokenGenerator::CPythonCheckFunctionResult
     return result;
 }
 
-QString ShibokenGenerator::cpythonIsConvertibleFunction(const TypeEntry *type,
-                                                        bool /* genericNumberType */,
-                                                        bool /* checkExact */)
+QString ShibokenGenerator::cpythonIsConvertibleFunction(const TypeEntry *type)
 {
     if (type->isWrapperType()) {
         QString result = QLatin1String("Shiboken::Conversions::");
@@ -1148,8 +1146,7 @@ QString ShibokenGenerator::cpythonIsConvertibleFunction(const TypeEntry *type,
     return QString::fromLatin1("Shiboken::Conversions::isPythonToCppConvertible(%1, ")
               .arg(converterObject(type));
 }
-QString ShibokenGenerator::cpythonIsConvertibleFunction(AbstractMetaType metaType,
-                                                        bool /* genericNumberType */) const
+QString ShibokenGenerator::cpythonIsConvertibleFunction(AbstractMetaType metaType) const
 {
     if (metaType.typeEntry()->isCustom()) {
         auto customCheckResult = guessCPythonCheckFunction(metaType.typeEntry()->name());
@@ -1185,10 +1182,9 @@ QString ShibokenGenerator::cpythonIsConvertibleFunction(AbstractMetaType metaTyp
     return result;
 }
 
-QString ShibokenGenerator::cpythonIsConvertibleFunction(const AbstractMetaArgument &metaArg,
-                                                        bool genericNumberType) const
+QString ShibokenGenerator::cpythonIsConvertibleFunction(const AbstractMetaArgument &metaArg) const
 {
-    return cpythonIsConvertibleFunction(metaArg.type(), genericNumberType);
+    return cpythonIsConvertibleFunction(metaArg.type());
 }
 
 QString ShibokenGenerator::cpythonToCppConversionFunction(const AbstractMetaClass *metaClass)

@@ -255,13 +255,9 @@ protected:
         std::optional<AbstractMetaType> type;
     };
     static CPythonCheckFunctionResult guessCPythonCheckFunction(const QString &type);
-    static QString cpythonIsConvertibleFunction(const TypeEntry *type,
-                                                bool genericNumberType = false,
-                                                bool checkExact = false);
-    QString cpythonIsConvertibleFunction(AbstractMetaType metaType,
-                                         bool genericNumberType = false) const;
-    QString cpythonIsConvertibleFunction(const AbstractMetaArgument &metaArg,
-                                         bool genericNumberType = false) const;
+    static QString cpythonIsConvertibleFunction(const TypeEntry *type);
+    QString cpythonIsConvertibleFunction(AbstractMetaType metaType) const;
+    QString cpythonIsConvertibleFunction(const AbstractMetaArgument &metaArg) const;
 
     static QString cpythonToCppConversionFunction(const AbstractMetaClass *metaClass) ;
     static QString cpythonToCppConversionFunction(const AbstractMetaType &type,
