@@ -1266,7 +1266,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
                 s << '(' << typeCast << ')';
             }
         }
-        if (func->type().referenceType() == LValueReference && !func->type().isPointer())
+        if (func->type().shouldDereferencePointer())
             s << " *";
         s << CPP_RETURN_VAR << ";\n";
     }
@@ -2616,11 +2616,16 @@ void CppGenerator::writePythonToCppTypeConversion(TextStream &s,
         && !isEnum && !isFlags;
     const bool isNotContainerEnumOrFlags = !typeEntry->isContainer()
                                            && !isEnum && !isFlags;
-    bool mayHaveImplicitConversion = type.referenceType() == LValueReference
+    const bool mayHaveImplicitConversion = type.referenceType() == LValueReference
                                      && !type.isUserPrimitive()
                                      && !type.isExtendedCppPrimitive()
                                      && isNotContainerEnumOrFlags
                                      && !(treatAsPointer || isPointerOrObjectType);
+
+    // For implicit conversions or containers, either value or pointer conversion
+    // may occur. An implicit conversion uses value conversion whereas the object
+    // itself uses pointer conversion.
+    const bool valueOrPointer = mayHaveImplicitConversion;
 
     const AbstractMetaTypeList &nestedArrayTypes = type.nestedArrayTypes();
     const bool isCppPrimitiveArray = !nestedArrayTypes.isEmpty()
@@ -2630,12 +2635,7 @@ void CppGenerator::writePythonToCppTypeConversion(TextStream &s,
         : getFullTypeNameWithoutModifiers(type);
 
     bool isProtectedEnum = false;
-
-    if (mayHaveImplicitConversion) {
-        s << typeName << ' ' << cppOutAux;
-        writeMinimalConstructorExpression(s, api(), type, isPrimitive, defaultValue);
-        s << ";\n";
-    } else if (avoidProtectedHack() && isEnum) {
+    if (isEnum && avoidProtectedHack()) {
         auto metaEnum = api().findAbstractMetaEnum(type.typeEntry());
         if (metaEnum.has_value() && metaEnum->isProtected()) {
             typeName = wrapperName(context) + QLatin1String("::")
@@ -2647,6 +2647,12 @@ void CppGenerator::writePythonToCppTypeConversion(TextStream &s,
     s << typeName;
     if (isCppPrimitiveArray) {
         s << ' ' << cppOut;
+    } else if (valueOrPointer) {
+        // Generate either value conversion for &cppOutAux or pointer
+        // conversion for &cppOut
+        s << ' ' << cppOutAux;
+        writeMinimalConstructorExpression(s, api(), type, isPrimitive, defaultValue);
+        s << ";\n" << typeName << " *" << cppOut << " = &" << cppOutAux;
     } else if (treatAsPointer || isPointerOrObjectType) {
         s << " *" << cppOut;
         if (!defaultValue.isEmpty()) {
@@ -2660,9 +2666,6 @@ void CppGenerator::writePythonToCppTypeConversion(TextStream &s,
             if (needsConstCast)
                 s << ')';
         }
-    } else if (type.referenceType() == LValueReference
-               && !isPrimitive && isNotContainerEnumOrFlags) {
-        s << " *" << cppOut << " = &" << cppOutAux;
     } else {
         s << ' ' << cppOut;
         if (isProtectedEnum && avoidProtectedHack()) {
@@ -3590,14 +3593,13 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                     else if (!arg.defaultValueExpression().isEmpty())
                         userArgs.append(QLatin1String(CPP_ARG_REMOVED) + QString::number(i));
                 } else {
-                    int idx = arg.argumentIndex() - removedArgs;
-                    bool deRef = valueTypeWithCopyConstructorOnlyPassed(api(), arg.type())
-                                 || arg.type().isObjectTypeUsedAsValueType()
-                                 || (arg.type().referenceType() == LValueReference
-                                     && arg.type().isWrapperType() && !arg.type().isPointer());
                     if (hasConversionRule) {
                         userArgs.append(arg.name() + QLatin1String(CONV_RULE_OUT_VAR_SUFFIX));
                     } else {
+                        const int idx = arg.argumentIndex() - removedArgs;
+                        const bool deRef = valueTypeWithCopyConstructorOnlyPassed(api(), arg.type())
+                                           || arg.type().isObjectTypeUsedAsValueType()
+                                           || arg.type().shouldDereferencePointer();
                         QString argName;
                         if (deRef)
                             argName += QLatin1Char('*');

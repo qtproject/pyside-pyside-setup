@@ -1600,10 +1600,8 @@ ShibokenGenerator::ArgumentVarReplacementList
                     argValue = hasConversionRule
                                ? arg.name() + QLatin1String(CONV_RULE_OUT_VAR_SUFFIX)
                                : QLatin1String(CPP_ARG) + QString::number(argPos);
-                    if (type.isWrapperType()) {
-                        if (type.referenceType() == LValueReference && !type.isPointer())
-                            argValue.prepend(QLatin1Char('*'));
-                    }
+                    if (type.shouldDereferencePointer())
+                        argValue.prepend(u'*');
                 }
             }
         } else {
@@ -1809,7 +1807,7 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
         }
         if (type.isWrapperType()) {
             QString replacement = pair.second;
-            if (type.referenceType() == LValueReference && !type.isPointer())
+            if (type.shouldDereferencePointer())
                 replacement.remove(0, 1);
             if (type.referenceType() == LValueReference || type.isPointer())
                 code.replace(u'%' + QString::number(idx) + u'.', replacement + u"->"_qs);
