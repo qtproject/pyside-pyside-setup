@@ -348,6 +348,8 @@ public:
     bool isObjectType() const;
     bool isCopyable() const;
     bool isValueTypeWithCopyConstructorOnly() const;
+    void setValueTypeWithCopyConstructorOnly(bool v);
+    static bool determineValueTypeWithCopyConstructorOnly(const AbstractMetaClass *c);
 
     static AbstractMetaClass *findClass(const AbstractMetaClassList &classes,
                                         const QString &name);

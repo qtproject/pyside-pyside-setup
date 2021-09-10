@@ -506,6 +506,10 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
              cls->addDefaultConstructor();
         if (cls->canAddDefaultCopyConstructor())
             cls->addDefaultCopyConstructor();
+
+        const bool vco = AbstractMetaClass::determineValueTypeWithCopyConstructorOnly(cls);
+        cls->setValueTypeWithCopyConstructorOnly(vco);
+        cls->typeEntry()->setValueTypeWithCopyConstructorOnly(vco);
     }
 
     const auto &allEntries = types->entries();

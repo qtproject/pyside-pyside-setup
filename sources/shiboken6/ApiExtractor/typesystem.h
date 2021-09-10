@@ -582,6 +582,10 @@ public:
     TypeSystem::SnakeCase snakeCase() const;
     void setSnakeCase(TypeSystem::SnakeCase sc);
 
+    // Determined by AbstractMetaBuilder from the code model.
+    bool isValueTypeWithCopyConstructorOnly() const;
+    void setValueTypeWithCopyConstructorOnly(bool v);
+
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &debug) const override;
 #endif

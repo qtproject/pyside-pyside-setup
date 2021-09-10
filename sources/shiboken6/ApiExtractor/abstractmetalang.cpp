@@ -71,6 +71,7 @@ public:
           m_hasCloneOperator(false),
           m_isTypeDef(false),
           m_hasToStringCapability(false),
+          m_valueTypeWithCopyConstructorOnly(false),
           m_hasCachedWrapper(false)
     {
     }
@@ -107,6 +108,7 @@ public:
     uint m_hasCloneOperator : 1;
     uint m_isTypeDef : 1;
     uint m_hasToStringCapability : 1;
+    uint m_valueTypeWithCopyConstructorOnly : 1;
     mutable uint m_hasCachedWrapper : 1;
 
     Documentation m_doc;
@@ -1787,11 +1789,22 @@ bool AbstractMetaClass::isCopyable() const
 
 bool AbstractMetaClass::isValueTypeWithCopyConstructorOnly() const
 {
-    if (!typeEntry()->isValue())
+    return d->m_valueTypeWithCopyConstructorOnly;
+}
+
+void AbstractMetaClass::setValueTypeWithCopyConstructorOnly(bool v)
+{
+    d->m_valueTypeWithCopyConstructorOnly = v;
+}
+
+bool AbstractMetaClass::determineValueTypeWithCopyConstructorOnly(const AbstractMetaClass *c)
+{
+
+    if (!c->typeEntry()->isValue())
         return false;
-    if (attributes().testFlag(AbstractMetaClass::HasRejectedDefaultConstructor))
+    if (c->attributes().testFlag(AbstractMetaClass::HasRejectedDefaultConstructor))
         return false;
-    const auto ctors = queryFunctions(FunctionQueryOption::Constructors);
+    const auto ctors = c->queryFunctions(FunctionQueryOption::Constructors);
     bool copyConstructorFound = false;
     for (const auto &ctor : ctors) {
         switch (ctor->functionType()) {

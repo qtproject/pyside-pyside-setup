@@ -189,8 +189,7 @@ protected:
                                      const QString &outArgName);
 
     /// Returns true if the argument is a pointer that rejects nullptr values.
-    static bool shouldRejectNullPointerArgument(const ApiExtractorResult &api,
-                                                const AbstractMetaFunctionCPtr &func,
+    static bool shouldRejectNullPointerArgument(const AbstractMetaFunctionCPtr &func,
                                                 int argIndex);
 
     /// Verifies if the class should have a C++ wrapper generated for it, instead of only a Python wrapper.
@@ -226,17 +225,6 @@ protected:
     static bool isPyInt(const TypeEntry *type);
     static bool isPyInt(const AbstractMetaType &type);
 
-    /// Returns whether the underlying type is a value type with copy constructor only
-    static bool isValueTypeWithCopyConstructorOnly(const ApiExtractorResult &api,
-                                                   const TypeEntry *type);
-    static bool isValueTypeWithCopyConstructorOnly(const ApiExtractorResult &api,
-                                                   const AbstractMetaType &type);
-    /// Returns whether the type (function argument) is a value type with
-    /// copy constructor only is passed as value or const-ref and thus
-    /// no default value can be constructed.
-    static bool valueTypeWithCopyConstructorOnlyPassed(const ApiExtractorResult &api,
-                                                       const AbstractMetaType &type);
-
     static bool isNullPtr(const QString &value);
 
     static QString converterObject(const AbstractMetaType &type) ;
@@ -267,8 +255,7 @@ protected:
         std::optional<AbstractMetaType> type;
     };
     static CPythonCheckFunctionResult guessCPythonCheckFunction(const QString &type);
-    static QString cpythonIsConvertibleFunction(const ApiExtractorResult &api,
-                                                const TypeEntry *type,
+    static QString cpythonIsConvertibleFunction(const TypeEntry *type,
                                                 bool genericNumberType = false,
                                                 bool checkExact = false);
     QString cpythonIsConvertibleFunction(AbstractMetaType metaType,

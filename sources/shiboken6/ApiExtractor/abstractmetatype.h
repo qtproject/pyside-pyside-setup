@@ -222,6 +222,12 @@ public:
     /// Returns true if the type is an extended C++ primitive, a void*,
     /// a const char*, or a std::string (cf isCppPrimitive()).
     bool isExtendedCppPrimitive() const;
+    /// Returns whether the underlying type is a value type with copy constructor only
+    bool isValueTypeWithCopyConstructorOnly() const;
+    /// Returns whether the type (function argument) is a value type with
+    /// copy constructor only is passed as value or const-ref and thus
+    /// no default value can be constructed.
+    bool valueTypeWithCopyConstructorOnlyPassed() const;
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &debug) const;

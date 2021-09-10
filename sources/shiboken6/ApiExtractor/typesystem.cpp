@@ -1181,6 +1181,8 @@ public:
     TypeSystem::SnakeCase m_snakeCase = TypeSystem::SnakeCase::Unspecified;
     TypeSystem::BoolCast m_operatorBoolMode = TypeSystem::BoolCast::Unspecified;
     TypeSystem::BoolCast m_isNullMode = TypeSystem::BoolCast::Unspecified;
+    // Determined by AbstractMetaBuilder from the code model.
+    bool m_isValueTypeWithCopyConstructorOnly = false;
 };
 
 ComplexTypeEntry::ComplexTypeEntry(const QString &entryName, TypeEntry::Type t,
@@ -1469,6 +1471,18 @@ void ComplexTypeEntry::setSnakeCase(TypeSystem::SnakeCase sc)
 {
     S_D(ComplexTypeEntry);
     d->m_snakeCase = sc;
+}
+
+bool ComplexTypeEntry::isValueTypeWithCopyConstructorOnly() const
+{
+    S_D(const ComplexTypeEntry);
+    return d->m_isValueTypeWithCopyConstructorOnly;
+}
+
+void ComplexTypeEntry::setValueTypeWithCopyConstructorOnly(bool v)
+{
+    S_D(ComplexTypeEntry);
+    d->m_isValueTypeWithCopyConstructorOnly = v;
 }
 
 TypeEntry *ComplexTypeEntry::clone() const

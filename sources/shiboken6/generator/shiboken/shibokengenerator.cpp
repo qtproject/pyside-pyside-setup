@@ -612,14 +612,14 @@ void ShibokenGenerator::writeToCppConversion(TextStream &s, const AbstractMetaTy
     s << cpythonToCppConversionFunction(type, context) << inArgName << ", &" << outArgName << ')';
 }
 
-bool ShibokenGenerator::shouldRejectNullPointerArgument(const ApiExtractorResult &api,
-                                                        const AbstractMetaFunctionCPtr &func, int argIndex)
+bool ShibokenGenerator::shouldRejectNullPointerArgument(const AbstractMetaFunctionCPtr &func,
+                                                        int argIndex)
 {
     if (argIndex < 0 || argIndex >= func->arguments().count())
         return false;
 
     const AbstractMetaArgument &arg = func->arguments().at(argIndex);
-    if (isValueTypeWithCopyConstructorOnly(api, arg.type()))
+    if (arg.type().isValueTypeWithCopyConstructorOnly())
         return true;
 
     // Argument type is not a pointer, a None rejection should not be
@@ -991,29 +991,6 @@ bool ShibokenGenerator::isPyInt(const AbstractMetaType &type)
     return isPyInt(type.typeEntry());
 }
 
-bool ShibokenGenerator::isValueTypeWithCopyConstructorOnly(const ApiExtractorResult &api,
-                                                           const TypeEntry *type)
-{
-    if (!type || !type->isValue())
-        return false;
-    auto klass = AbstractMetaClass::findClass(api.classes(), type);
-    return klass != nullptr && klass->isValueTypeWithCopyConstructorOnly();
-}
-
-bool ShibokenGenerator::isValueTypeWithCopyConstructorOnly(const ApiExtractorResult &api,
-                                                           const AbstractMetaType &type)
-{
-   return type.typeEntry()->isValue()
-           && isValueTypeWithCopyConstructorOnly(api, type.typeEntry());
-}
-
-bool ShibokenGenerator::valueTypeWithCopyConstructorOnlyPassed(const ApiExtractorResult &api,
-                                                               const AbstractMetaType &type)
-{
-    return (type.passByValue() || type.passByConstRef())
-        && isValueTypeWithCopyConstructorOnly(api, type);
-}
-
 bool ShibokenGenerator::isNullPtr(const QString &value)
 {
     return value == QLatin1String("0") || value == QLatin1String("nullptr")
@@ -1104,7 +1081,7 @@ QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry *type, bool gene
     }
     QString typeCheck;
     if (type->targetLangApiName() == type->name())
-        typeCheck = cpythonIsConvertibleFunction(api(), type);
+        typeCheck = cpythonIsConvertibleFunction(type);
     else if (type->targetLangApiName() == QLatin1String("PyUnicode"))
         typeCheck = QLatin1String("Shiboken::String::check");
     else
@@ -1150,13 +1127,18 @@ ShibokenGenerator::CPythonCheckFunctionResult
     return result;
 }
 
-QString ShibokenGenerator::cpythonIsConvertibleFunction(const ApiExtractorResult &api, const TypeEntry *type,
+QString ShibokenGenerator::cpythonIsConvertibleFunction(const TypeEntry *type,
                                                         bool /* genericNumberType */,
                                                         bool /* checkExact */)
 {
     if (type->isWrapperType()) {
         QString result = QLatin1String("Shiboken::Conversions::");
-        result += (type->isValue() && !isValueTypeWithCopyConstructorOnly(api, type))
+        bool isValue = false;
+        if (type->isValue()) {
+            const auto *cte = static_cast<const ComplexTypeEntry *>(type);
+            isValue = !cte->isValueTypeWithCopyConstructorOnly();
+        }
+        result += isValue
                          ? QLatin1String("isPythonToCppValueConvertible")
                          : QLatin1String("isPythonToCppPointerConvertible");
         result += QLatin1String("(reinterpret_cast<SbkObjectType *>(")
@@ -1179,7 +1161,7 @@ QString ShibokenGenerator::cpythonIsConvertibleFunction(AbstractMetaType metaTyp
 
     QString result = QLatin1String("Shiboken::Conversions::");
     if (metaType.isWrapperType()) {
-        if (metaType.isPointer() || isValueTypeWithCopyConstructorOnly(api(), metaType))
+        if (metaType.isPointer() || metaType.isValueTypeWithCopyConstructorOnly())
             result += QLatin1String("isPythonToCppPointerConvertible");
         else if (metaType.referenceType() == LValueReference)
             result += QLatin1String("isPythonToCppReferenceConvertible");

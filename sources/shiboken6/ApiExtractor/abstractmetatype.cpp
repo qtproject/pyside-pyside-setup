@@ -752,6 +752,22 @@ bool AbstractMetaType::isExtendedCppPrimitive() const
     return d->m_typeEntry->isExtendedCppPrimitive();
 }
 
+bool AbstractMetaType::isValueTypeWithCopyConstructorOnly() const
+{
+    bool result = false;
+    if (d->m_typeEntry->isComplex()) {
+        const auto *cte = static_cast<const ComplexTypeEntry *>(d->m_typeEntry);
+        result = cte->isValueTypeWithCopyConstructorOnly();
+    }
+    return result;
+}
+
+bool AbstractMetaType::valueTypeWithCopyConstructorOnlyPassed() const
+{
+    return (passByValue() || passByConstRef())
+           && isValueTypeWithCopyConstructorOnly();
+}
+
 #ifndef QT_NO_DEBUG_STREAM
 void AbstractMetaType::formatDebug(QDebug &debug) const
 {

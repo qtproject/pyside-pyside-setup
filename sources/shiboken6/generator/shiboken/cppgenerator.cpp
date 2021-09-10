@@ -2492,7 +2492,7 @@ void CppGenerator::writeTypeCheck(TextStream &s,
     bool numberType = numericTypes.count() == 1 || ShibokenGenerator::isPyInt(argType);
     QString customType = (overloadData->hasArgumentTypeReplace() ? overloadData->argumentTypeReplaced() : QString());
     bool rejectNull =
-        shouldRejectNullPointerArgument(api(), overloadData->referenceFunction(), overloadData->argPos());
+        shouldRejectNullPointerArgument(overloadData->referenceFunction(), overloadData->argPos());
     writeTypeCheck(s, argType, argumentName, numberType, customType, rejectNull);
 }
 
@@ -2610,7 +2610,7 @@ void CppGenerator::writePythonToCppTypeConversion(TextStream &s,
     const bool isPrimitive = typeEntry->isPrimitive();
     const bool isEnum = typeEntry->isEnum();
     const bool isFlags = typeEntry->isFlags();
-    bool treatAsPointer = valueTypeWithCopyConstructorOnlyPassed(api(), type);
+    const bool treatAsPointer = type.valueTypeWithCopyConstructorOnlyPassed();
     bool isPointerOrObjectType = (type.isObjectType() || type.isPointer())
         && !type.isUserPrimitive() && !type.isExtendedCppPrimitive()
         && !isEnum && !isFlags;
@@ -3328,7 +3328,7 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s, const Abst
     for (int i = 0; i < containerType.instantiations().count(); ++i) {
         const AbstractMetaType &type = containerType.instantiations().at(i);
         QString typeName = getFullTypeName(type);
-        if (valueTypeWithCopyConstructorOnlyPassed(api(), type)) {
+        if (type.valueTypeWithCopyConstructorOnlyPassed()) {
             for (int pos = 0; ; ) {
                 const QRegularExpressionMatch match = convertToCppRegEx().match(code, pos);
                 if (!match.hasMatch())
@@ -3597,7 +3597,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                         userArgs.append(arg.name() + QLatin1String(CONV_RULE_OUT_VAR_SUFFIX));
                     } else {
                         const int idx = arg.argumentIndex() - removedArgs;
-                        const bool deRef = valueTypeWithCopyConstructorOnlyPassed(api(), arg.type())
+                        const bool deRef = arg.type().valueTypeWithCopyConstructorOnlyPassed()
                                            || arg.type().isObjectTypeUsedAsValueType()
                                            || arg.type().shouldDereferencePointer();
                         QString argName;
