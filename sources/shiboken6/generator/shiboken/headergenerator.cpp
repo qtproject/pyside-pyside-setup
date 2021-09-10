@@ -709,5 +709,5 @@ void HeaderGenerator::writeSbkTypeFunction(TextStream &s, const AbstractMetaClas
 void HeaderGenerator::writeSbkTypeFunction(TextStream &s, const AbstractMetaType &metaType)
 {
     s <<  "template<> inline PyTypeObject *SbkType< ::" << metaType.cppSignature() << " >() "
-      <<  "{ return reinterpret_cast<PyTypeObject *>(" << cpythonTypeNameExt(metaType) << "); }\n";
+      <<  "{ return " << cpythonTypeNameExt(metaType) << "; }\n";
 }

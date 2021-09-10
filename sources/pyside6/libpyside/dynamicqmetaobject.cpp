@@ -473,7 +473,7 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
     basesToCheck.reserve(1u + basesCount);
     basesToCheck.push_back(type);
 
-    auto sbkObjTypeF = reinterpret_cast<PyTypeObject *>(SbkObject_TypeF());
+    auto sbkObjTypeF = SbkObject_TypeF();
     auto baseObjType = reinterpret_cast<PyTypeObject *>(&PyBaseObject_Type);
     for (Py_ssize_t i = 0; i < basesCount; ++i) {
         auto baseType = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, i));

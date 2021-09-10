@@ -51,8 +51,6 @@
 #include <QtCore/QMetaType>
 #include <QtCore/QHash>
 
-struct SbkObjectType;
-
 namespace PySide
 {
 

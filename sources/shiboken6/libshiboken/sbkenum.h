@@ -50,7 +50,6 @@ extern "C"
 LIBSHIBOKEN_API void init_enum();
 
 extern LIBSHIBOKEN_API PyTypeObject *SbkEnumType_TypeF(void);
-struct SbkObjectType;
 struct SbkConverter;
 struct SbkEnumType;
 struct SbkEnumTypePrivate;
@@ -102,7 +101,6 @@ namespace Enum
     /// This function does the same as createGlobalEnumItem, but adds the enum to a Shiboken type or namespace.
     LIBSHIBOKEN_API bool createScopedEnumItem(PyTypeObject *enumType, PyTypeObject *scope,
                                               const char *itemName, long itemValue);
-    LIBSHIBOKEN_API bool createScopedEnumItem(PyTypeObject *enumType, SbkObjectType *scope, const char *itemName, long itemValue);
 
     LIBSHIBOKEN_API PyObject *newItem(PyTypeObject *enumType, long itemValue, const char *itemName = nullptr);
 

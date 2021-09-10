@@ -45,7 +45,6 @@
 #include "shibokenmacros.h"
 
 struct SbkObject;
-struct SbkObjectType;
 
 namespace Shiboken
 {

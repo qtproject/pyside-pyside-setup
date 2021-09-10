@@ -72,8 +72,6 @@ LIBSHIBOKEN_API void SbkDeallocWrapper(PyObject *pyObj);
 LIBSHIBOKEN_API void SbkDeallocQAppWrapper(PyObject *pyObj);
 LIBSHIBOKEN_API void SbkDeallocWrapperWithPrivateDtor(PyObject *self);
 
-struct SbkObjectType;
-
 /// Function signature for the multiple inheritance information initializers that should be provided by classes with multiple inheritance.
 typedef int *(*MultipleInheritanceInitFunction)(const void *);
 
@@ -119,10 +117,6 @@ extern LIBSHIBOKEN_API SbkObjectType *SbkObject_TypeF(void);
 
 struct SbkObjectTypePrivate;
 /// PyTypeObject extended with C++ multiple inheritance information.
-struct LIBSHIBOKEN_API SbkObjectType
-{
-    PyTypeObject type;
-};
 
 LIBSHIBOKEN_API PyObject *SbkObjectTpNew(PyTypeObject *subtype, PyObject *, PyObject *);
 

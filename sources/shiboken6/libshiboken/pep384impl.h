@@ -161,11 +161,10 @@ LIBSHIBOKEN_API PyObject *_PepType_Lookup(PyTypeObject *type, PyObject *name);
  *
  */
 
-struct SbkObjectType;
 struct SbkObjectTypePrivate;
 
-LIBSHIBOKEN_API SbkObjectTypePrivate *PepType_SOTP(SbkObjectType *type);
-LIBSHIBOKEN_API void PepType_SOTP_delete(SbkObjectType *type);
+LIBSHIBOKEN_API SbkObjectTypePrivate *PepType_SOTP(PyTypeObject *type);
+LIBSHIBOKEN_API void PepType_SOTP_delete(PyTypeObject *type);
 
 struct SbkEnumType;
 struct SbkEnumTypePrivate;

@@ -942,7 +942,7 @@ static typename T::value_type join(T t, const char *sep)
 
 static void _addSignalToWrapper(SbkObjectType *wrapperType, const char *signalName, PySideSignal *signal)
 {
-    auto typeDict = reinterpret_cast<PyTypeObject *>(wrapperType)->tp_dict;
+    auto typeDict = wrapperType->tp_dict;
     PyObject *homonymousMethod;
     if ((homonymousMethod = PyDict_GetItemString(typeDict, signalName))) {
         Py_INCREF(homonymousMethod);

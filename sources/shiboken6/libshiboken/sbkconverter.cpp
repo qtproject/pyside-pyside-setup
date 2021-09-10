@@ -134,7 +134,7 @@ SbkConverter *createConverter(SbkObjectType *type,
                               CppToPythonFunc copyToPythonFunc)
 {
     SbkConverter *converter =
-        createConverterObject(reinterpret_cast<PyTypeObject *>(type),
+        createConverterObject(type,
                               toCppPointerConvFunc, toCppPointerCheckFunc,
                               pointerToPythonFunc, copyToPythonFunc);
     PepType_SOTP(type)->converter = converter;
@@ -306,7 +306,7 @@ void *cppPointer(PyTypeObject *desiredType, SbkObject *pyIn)
     assert(pyIn);
     if (!ObjectType::checkType(desiredType))
         return pyIn;
-    auto *inType = reinterpret_cast<SbkObjectType *>(Py_TYPE(pyIn));
+    auto *inType = Py_TYPE(pyIn);
     if (ObjectType::hasCast(inType))
         return ObjectType::cast(inType, pyIn, desiredType);
     return Object::cppPointer(pyIn, desiredType);
@@ -319,7 +319,7 @@ void pythonToCppPointer(SbkObjectType *type, PyObject *pyIn, void *cppOut)
     assert(cppOut);
     *reinterpret_cast<void **>(cppOut) = pyIn == Py_None
         ? nullptr
-        : cppPointer(reinterpret_cast<PyTypeObject *>(type), reinterpret_cast<SbkObject *>(pyIn));
+        : cppPointer(type, reinterpret_cast<SbkObject *>(pyIn));
 }
 
 void pythonToCppPointer(const SbkConverter *converter, PyObject *pyIn, void *cppOut)
@@ -329,7 +329,7 @@ void pythonToCppPointer(const SbkConverter *converter, PyObject *pyIn, void *cpp
     assert(cppOut);
     *reinterpret_cast<void **>(cppOut) = pyIn == Py_None
         ? nullptr
-        : cppPointer(reinterpret_cast<PyTypeObject *>(converter->pythonType), reinterpret_cast<SbkObject *>(pyIn));
+        : cppPointer(converter->pythonType, reinterpret_cast<SbkObject *>(pyIn));
 }
 
 static void _pythonToCppCopy(const SbkConverter *converter, PyObject *pyIn, void *cppOut)

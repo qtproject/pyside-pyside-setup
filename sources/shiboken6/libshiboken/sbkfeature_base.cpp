@@ -162,26 +162,22 @@ int SbkObject_GenericSetAttr(PyObject *obj, PyObject *name, PyObject *value)
 // Caching the select Id.
 int SbkObjectType_GetReserved(PyTypeObject *type)
 {
-    auto *sbkType = reinterpret_cast<SbkObjectType *>(type);
-    return PepType_SOTP(sbkType)->pyside_reserved_bits;
+    return PepType_SOTP(type)->pyside_reserved_bits;
 }
 
 void SbkObjectType_SetReserved(PyTypeObject *type, int value)
 {
-    auto *sbkType = reinterpret_cast<SbkObjectType *>(type);
-    PepType_SOTP(sbkType)->pyside_reserved_bits = value;
+    PepType_SOTP(type)->pyside_reserved_bits = value;
 }
 
 const char **SbkObjectType_GetPropertyStrings(PyTypeObject *type)
 {
-    auto *sbkType = reinterpret_cast<SbkObjectType *>(type);
-    return PepType_SOTP(sbkType)->propertyStrings;
+    return PepType_SOTP(type)->propertyStrings;
 }
 
 void SbkObjectType_SetPropertyStrings(PyTypeObject *type, const char **strings)
 {
-    auto *sbkType = reinterpret_cast<SbkObjectType *>(type);
-    PepType_SOTP(sbkType)->propertyStrings = strings;
+    PepType_SOTP(type)->propertyStrings = strings;
 }
 
 // PYSIDE-1626: Enforcing a context switch without further action.

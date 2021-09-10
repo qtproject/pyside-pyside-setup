@@ -49,7 +49,6 @@
 #include <vector>
 
 struct SbkObject;
-struct SbkObjectType;
 struct SbkConverter;
 
 namespace Shiboken

@@ -79,10 +79,10 @@ public:
         file << "digraph D {\n";
 
         for (auto i = m_edges.begin(), end = m_edges.end(); i != end; ++i) {
-            auto node1 = reinterpret_cast<const PyTypeObject *>(i->first);
+            auto *node1 = i->first;
             const NodeList &nodeList = i->second;
             for (const SbkObjectType *o : nodeList) {
-                auto node2 = reinterpret_cast<const PyTypeObject *>(o);
+                auto *node2 = o;
                 file << '"' << node2->tp_name << "\" -> \""
                     << node1->tp_name << "\"\n";
             }
@@ -213,7 +213,7 @@ bool BindingManager::hasWrapper(const void *cptr)
 
 void BindingManager::registerWrapper(SbkObject *pyObj, void *cptr)
 {
-    auto *instanceType = reinterpret_cast<SbkObjectType *>(Py_TYPE(pyObj));
+    auto *instanceType = Py_TYPE(pyObj);
     auto *d = PepType_SOTP(instanceType);
 
     if (!d)
@@ -234,7 +234,7 @@ void BindingManager::registerWrapper(SbkObject *pyObj, void *cptr)
 
 void BindingManager::releaseWrapper(SbkObject *sbkObj)
 {
-    auto *sbkType = reinterpret_cast<SbkObjectType *>(Py_TYPE(sbkObj));
+    auto *sbkType = Py_TYPE(sbkObj);
     auto *d = PepType_SOTP(sbkType);
     int numBases = ((d && d->is_multicpp) ? getNumberOfCppBaseClasses(Py_TYPE(sbkObj)) : 1);
 

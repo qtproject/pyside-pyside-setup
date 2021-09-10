@@ -44,8 +44,6 @@
 
 #include <dynamicqmetaobject.h>
 
-struct SbkObjectType;
-
 namespace PySide
 {
 
@@ -59,7 +57,6 @@ struct TypeUserData
     std::size_t cppObjSize;
 };
 
-TypeUserData *retrieveTypeUserData(SbkObjectType *sbkTypeObj);
 TypeUserData *retrieveTypeUserData(PyTypeObject *pyTypeObj);
 TypeUserData *retrieveTypeUserData(PyObject *pyObj);
 // For QML

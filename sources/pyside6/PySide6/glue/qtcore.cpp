@@ -150,8 +150,7 @@ return %out;
 static QMetaType QVariant_resolveMetaType(PyTypeObject *type)
 {
     if (PyObject_TypeCheck(type, SbkObjectType_TypeF())) {
-        auto sbkType = reinterpret_cast<SbkObjectType *>(type);
-        const char *typeName = Shiboken::ObjectType::getOriginalName(sbkType);
+        const char *typeName = Shiboken::ObjectType::getOriginalName(type);
         if (!typeName)
             return {};
         const bool valueType = '*' != typeName[qstrlen(typeName) - 1];
@@ -1316,7 +1315,7 @@ auto *ptr = reinterpret_cast<uchar *>(Shiboken::Buffer::getPointer(%PYARG_1, &si
 // %FUNCTION_NAME() - disable generation of c++ function call
 (void) %2; // remove warning about unused variable
 Shiboken::AutoDecRef emptyTuple(PyTuple_New(0));
-auto *timerType = reinterpret_cast<PyTypeObject *>(Shiboken::SbkType<QTimer>());
+auto *timerType = Shiboken::SbkType<QTimer>();
 auto *pyTimer = timerType->tp_new(Shiboken::SbkType<QTimer>(), emptyTuple, nullptr);
 timerType->tp_init(pyTimer, emptyTuple, nullptr);
 
@@ -1339,7 +1338,7 @@ timer->start(%1);
 // @snippet qtimer-singleshot-2
 // %FUNCTION_NAME() - disable generation of c++ function call
 Shiboken::AutoDecRef emptyTuple(PyTuple_New(0));
-auto *timerType = reinterpret_cast<PyTypeObject *>(Shiboken::SbkType<QTimer>());
+auto *timerType = Shiboken::SbkType<QTimer>();
 auto *pyTimer = timerType->tp_new(Shiboken::SbkType<QTimer>(), emptyTuple, nullptr);
 timerType->tp_init(pyTimer, emptyTuple, nullptr);
 QTimer * timer = %CONVERTTOCPP[QTimer *](pyTimer);

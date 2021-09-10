@@ -240,14 +240,9 @@ void initDynamicMetaObject(SbkObjectType *type, const QMetaObject *base, std::si
                      PySide::PyName::qtStaticMetaObject(), pyMetaObject);
 }
 
-TypeUserData *retrieveTypeUserData(SbkObjectType *sbkTypeObj)
-{
-    return reinterpret_cast<TypeUserData *>(Shiboken::ObjectType::getTypeUserData(sbkTypeObj));
-}
-
 TypeUserData *retrieveTypeUserData(PyTypeObject *pyTypeObj)
 {
-    return retrieveTypeUserData(reinterpret_cast<SbkObjectType *>(pyTypeObj));
+    return reinterpret_cast<TypeUserData *>(Shiboken::ObjectType::getTypeUserData(pyTypeObj));
 }
 
 TypeUserData *retrieveTypeUserData(PyObject *pyObj)

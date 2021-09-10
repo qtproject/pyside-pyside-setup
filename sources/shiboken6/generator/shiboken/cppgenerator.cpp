@@ -1908,9 +1908,9 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
     s << "SbkObject *sbkSelf = reinterpret_cast<SbkObject *>(self);\n";
 
     if (metaClass->isAbstract() || metaClass->baseClassNames().size() > 1) {
-        s << "SbkObjectType *type = reinterpret_cast<SbkObjectType *>(self->ob_type);\n"
-            << "SbkObjectType *myType = reinterpret_cast<SbkObjectType *>("
-            << cpythonTypeNameExt(metaClass->typeEntry()) << ");\n";
+        s << "PyTypeObject *type = self->ob_type;\n"
+            << "PyTypeObject *myType = "
+            << cpythonTypeNameExt(metaClass->typeEntry()) << ";\n";
     }
 
     if (metaClass->isAbstract()) {
@@ -3846,9 +3846,9 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                 && !func->injectedCodeHasReturnValueAttribution(TypeSystem::TargetLangCode)) {
                 s << PYTHON_RETURN_VAR << " = ";
                 if (func->type().isObjectTypeUsedAsValueType()) {
-                    s << "Shiboken::Object::newObject(reinterpret_cast<SbkObjectType *>("
+                    s << "Shiboken::Object::newObject("
                         << cpythonTypeNameExt(func->type().typeEntry())
-                        << "), " << CPP_RETURN_VAR << ", true, true)";
+                        << ", " << CPP_RETURN_VAR << ", true, true)";
                 } else {
                     writeToPythonConversion(s, func->type(), func->ownerClass(), QLatin1String(CPP_RETURN_VAR));
                 }
@@ -4042,8 +4042,7 @@ void CppGenerator::writeSpecialCastFunction(TextStream &s, const AbstractMetaCla
     for (const AbstractMetaClass *baseClass : allAncestors) {
         if (!firstClass)
             s << "else ";
-        s << "if (desiredType == reinterpret_cast<SbkObjectType *>("
-             << cpythonTypeNameExt(baseClass->typeEntry()) << "))\n";
+        s << "if (desiredType == " << cpythonTypeNameExt(baseClass->typeEntry()) << ")\n";
         Indentation indent(s);
         s << "return static_cast< ::" << baseClass->qualifiedCppName() << " *>(me);\n";
         firstClass = false;
@@ -4223,9 +4222,8 @@ void CppGenerator::writeExtendedConverterInitialization(TextStream &s, const Typ
     s << "// Extended implicit conversions for " << externalType->qualifiedTargetLangName()
       << ".\n";
     for (const AbstractMetaClass *sourceClass : conversions) {
-        const QString converterVar = QLatin1String("reinterpret_cast<SbkObjectType *>(")
-            + cppApiVariableName(externalType->targetLangPackage()) + QLatin1Char('[')
-            + getTypeIndexVariableName(externalType) + QLatin1String("])");
+        const QString converterVar = cppApiVariableName(externalType->targetLangPackage()) + QLatin1Char('[')
+            + getTypeIndexVariableName(externalType) + u']';
         QString sourceTypeName = fixedCppTypeName(sourceClass->typeEntry());
         QString targetTypeName = fixedCppTypeName(externalType);
         QString toCpp = pythonToCppFunctionName(sourceTypeName, targetTypeName);
@@ -4328,7 +4326,7 @@ void CppGenerator::writeClassDefinition(TextStream &s,
     }
 
     if (!metaClass->baseClass())
-        baseClassName = QLatin1String("reinterpret_cast<PyTypeObject *>(SbkObject_TypeF())");
+        baseClassName = QLatin1String("SbkObject_TypeF()");
 
     bool onlyPrivCtor = !metaClass->hasNonPrivateConstructor();
 
@@ -4683,7 +4681,7 @@ void CppGenerator::writeTpTraverseFunction(TextStream &s, const AbstractMetaClas
     QString baseName = cpythonBaseName(metaClass);
     s << "static int " << baseName
         << "_traverse(PyObject *self, visitproc visit, void *arg)\n{\n" << indent
-        << "return reinterpret_cast<PyTypeObject *>(SbkObject_TypeF())->tp_traverse(self, visit, arg);\n"
+        << "return SbkObject_TypeF()->tp_traverse(self, visit, arg);\n"
         << outdent << "}\n";
 }
 
@@ -4769,9 +4767,9 @@ void CppGenerator::writeGetterFunction(TextStream &s,
         {
             Indentation indent(s);
             s << "pyOut = reinterpret_cast<PyObject *>(Shiboken::Object::findColocatedChild("
-                        << "reinterpret_cast<SbkObject *>(self), reinterpret_cast<SbkObjectType *>("
+                        << "reinterpret_cast<SbkObject *>(self), "
                         << cpythonTypeNameExt(fieldType)
-                        << ")));\n";
+                        << "));\n";
             s << "if (pyOut) {\n";
             {
                 Indentation indent(s);
@@ -4792,8 +4790,8 @@ void CppGenerator::writeGetterFunction(TextStream &s,
         s << "}\n";
         // Create and register new wrapper
         s << "pyOut = "
-            << "Shiboken::Object::newObject(reinterpret_cast<SbkObjectType *>(" << cpythonTypeNameExt(fieldType)
-            << "), " << cppField << ", false, true);\n"
+            << "Shiboken::Object::newObject(" << cpythonTypeNameExt(fieldType)
+            << ", " << cppField << ", false, true);\n"
             << "Shiboken::Object::setParent(self, pyOut)";
     } else {
         s << "pyOut = ";
@@ -5280,9 +5278,9 @@ void CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
                 {
                     Indentation indent(s);
                     s << "PyObject *anonEnumItem = PyLong_FromLong(" << enumValueText << ");\n"
-                        << "if (PyDict_SetItemString(reinterpret_cast<PyTypeObject *>(reinterpret_cast<SbkObjectType *>("
+                        << "if (PyDict_SetItemString(reinterpret_cast<PyTypeObject *>("
                         << enclosingObjectVariable
-                        << "))->tp_dict, \"" << mangledName << "\", anonEnumItem) < 0)\n";
+                        << ")->tp_dict, \"" << mangledName << "\", anonEnumItem) < 0)\n";
                     {
                         Indentation indent(s);
                         s << returnStatement(m_currentErrorCode) << '\n';
@@ -5624,8 +5622,7 @@ void CppGenerator::writeClassRegister(TextStream &s,
             }
         }
         if (base) {
-            s << "reinterpret_cast<SbkObjectType *>("
-                << cpythonTypeNameExt(base->typeEntry()) << "),\n";
+            s << cpythonTypeNameExt(base->typeEntry()) << ",\n";
         } else {
             s << "0,\n";
         }
@@ -5658,7 +5655,7 @@ void CppGenerator::writeClassRegister(TextStream &s,
         s << cpythonTypeNameExt(classTypeEntry) << '\n';
     else
         s << cpythonTypeNameExt(classContext.preciseType()) << '\n';
-    s << "    = reinterpret_cast<PyTypeObject *>(" << pyTypeName << ");\n\n";
+    s << "    = " << pyTypeName << ";\n\n";
 
     // Register conversions for the type.
     writeConverterRegister(s, metaClass, classContext);
@@ -5679,8 +5676,8 @@ void CppGenerator::writeClassRegister(TextStream &s,
         if (miClass == metaClass) {
             s << multipleInheritanceInitializerFunctionName(miClass) << ";\n";
         } else {
-            s << "Shiboken::ObjectType::getMultipleInheritanceFunction(reinterpret_cast<SbkObjectType *>("
-                << cpythonTypeNameExt(miClass->typeEntry()) << "));\n";
+            s << "Shiboken::ObjectType::getMultipleInheritanceFunction("
+                << cpythonTypeNameExt(miClass->typeEntry()) << ");\n";
         }
         s << "Shiboken::ObjectType::setMultipleInheritanceFunction("
             << cpythonTypeName(metaClass) << ", func);\n"
@@ -5830,8 +5827,8 @@ void CppGenerator::writeTypeDiscoveryFunction(TextStream &s, const AbstractMetaC
             if (ancestor->baseClass())
                 continue;
             if (ancestor->isPolymorphic()) {
-                s << "if (instanceType == reinterpret_cast<SbkObjectType *>(Shiboken::SbkType< ::"
-                            << ancestor->qualifiedCppName() << " >()))\n";
+                s << "if (instanceType == Shiboken::SbkType< ::"
+                            << ancestor->qualifiedCppName() << " >())\n";
                 Indentation indent(s);
                 s << "return dynamic_cast< ::" << metaClass->qualifiedCppName()
                             << " *>(reinterpret_cast< ::"<< ancestor->qualifiedCppName() << " *>(cptr));\n";

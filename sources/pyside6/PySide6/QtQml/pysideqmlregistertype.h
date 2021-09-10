@@ -42,8 +42,6 @@
 
 #include <sbkpython.h>
 
-struct SbkObjectType;
-
 namespace PySide
 {
 

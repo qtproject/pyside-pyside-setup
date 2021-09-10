@@ -494,12 +494,12 @@ PyTypeObject *createGlobalEnum(PyObject *module, const char *name, const char *f
 PyTypeObject *createScopedEnum(SbkObjectType *scope, const char *name, const char *fullName, const char *cppName, PyTypeObject *flagsType)
 {
     PyTypeObject *enumType = createEnum(fullName, cppName, flagsType);
-    if (enumType && PyDict_SetItemString(reinterpret_cast<PyTypeObject *>(scope)->tp_dict, name,
+    if (enumType && PyDict_SetItemString(scope->tp_dict, name,
             reinterpret_cast<PyObject *>(enumType)) < 0) {
         Py_DECREF(enumType);
         return nullptr;
     }
-    if (flagsType && PyDict_SetItemString(reinterpret_cast<PyTypeObject *>(scope)->tp_dict,
+    if (flagsType && PyDict_SetItemString(scope->tp_dict,
             PepType_GetNameStr(flagsType),
             reinterpret_cast<PyObject *>(flagsType)) < 0) {
         Py_DECREF(enumType);
@@ -534,14 +534,9 @@ bool createScopedEnumItem(PyTypeObject *enumType, PyTypeObject *scope,
     PyObject *enumItem = createEnumItem(enumType, itemName, itemValue);
     if (!enumItem)
         return false;
-    int ok = PyDict_SetItemString(reinterpret_cast<PyTypeObject *>(scope)->tp_dict, itemName, enumItem);
+    int ok = PyDict_SetItemString(scope->tp_dict, itemName, enumItem);
     Py_DECREF(enumItem);
     return ok >= 0;
-}
-
-bool createScopedEnumItem(PyTypeObject *enumType, SbkObjectType *scope, const char *itemName, long itemValue)
-{
-    return createScopedEnumItem(enumType, reinterpret_cast<PyTypeObject *>(scope), itemName, itemValue);
 }
 
 PyObject *

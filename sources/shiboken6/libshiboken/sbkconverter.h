@@ -50,7 +50,6 @@
 #include <string>
 
 struct SbkObject;
-struct SbkObjectType;
 
 /**
  *  This is a convenience macro identical to Python's PyObject_TypeCheck,
