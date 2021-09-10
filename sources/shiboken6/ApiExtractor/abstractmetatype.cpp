@@ -679,6 +679,28 @@ AbstractMetaType AbstractMetaType::createVoid()
     return *metaType.data();
 }
 
+void AbstractMetaType::dereference(QString *type)
+{
+    type->prepend(u"(*"_qs);
+    type->append(u')');
+}
+
+bool AbstractMetaType::stripDereference(QString *type)
+{
+    if (type->startsWith(u"(*") && type->endsWith(u')')) {
+        type->chop(1);
+        type->remove(0, 2);
+        *type = type->trimmed();
+        return true;
+    }
+    if (type->startsWith(u'*')) {
+        type->remove(0, 1);
+        *type = type->trimmed();
+        return true;
+    }
+    return false;
+}
+
 // Query functions for generators
 bool AbstractMetaType::isObjectType() const
 {

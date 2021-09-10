@@ -1579,7 +1579,7 @@ ShibokenGenerator::ArgumentVarReplacementList
                                ? arg.name() + QLatin1String(CONV_RULE_OUT_VAR_SUFFIX)
                                : QLatin1String(CPP_ARG) + QString::number(argPos);
                     if (type.shouldDereferencePointer())
-                        argValue.prepend(u'*');
+                        AbstractMetaType::dereference(&argValue);
                 }
             }
         } else {
@@ -1786,7 +1786,7 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
         if (type.isWrapperType()) {
             QString replacement = pair.second;
             if (type.shouldDereferencePointer())
-                replacement.remove(0, 1);
+                AbstractMetaType::stripDereference(&replacement);
             if (type.referenceType() == LValueReference || type.isPointer())
                 code.replace(u'%' + QString::number(idx) + u'.', replacement + u"->"_qs);
         }
@@ -1949,12 +1949,8 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
                 }
                 c << cpythonToCppConversionFunction(conversionType);
                 QString prefix;
-                if (varName.startsWith(QLatin1Char('*'))) {
-                    varName.remove(0, 1);
-                    varName = varName.trimmed();
-                } else {
+                if (!AbstractMetaType::stripDereference(&varName))
                     prefix = QLatin1Char('&');
-                }
                 QString arg = getConverterTypeSystemVariableArgument(code, match.capturedEnd());
                 conversionString += arg;
                 c << arg << ", " << prefix << '(' << varName << ')';

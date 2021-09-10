@@ -3647,8 +3647,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
             QString secondArg = QLatin1String(CPP_ARG0);
             if (!func->isUnaryOperator()
                 && func->arguments().constFirst().type().shouldDereferencePointer()) {
-                secondArg.prepend(QLatin1String("(*"));
-                secondArg.append(QLatin1Char(')'));
+                AbstractMetaType::dereference(&secondArg);
             }
 
             if (func->isUnaryOperator())

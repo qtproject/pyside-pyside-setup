@@ -194,6 +194,9 @@ public:
 
     static AbstractMetaType createVoid();
 
+    static void dereference(QString *type); // "foo" -> "(*foo)"
+    static bool stripDereference(QString *type); // "(*foo)" -> "foo"
+
     // Query functions for generators
     /// Check if type is a pointer.
     bool isPointer() const;
