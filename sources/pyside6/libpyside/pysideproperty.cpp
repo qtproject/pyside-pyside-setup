@@ -106,7 +106,7 @@ static PyType_Slot PySidePropertyType_slots[] = {
     {Py_tp_getset, PySidePropertyType_getset},
     {0, nullptr}
 };
-// Dotted modulename is crucial for SbkType_FromSpec to work. Is this name right?
+
 static PyType_Spec PySidePropertyType_spec = {
     "2:PySide6.QtCore.Property",
     sizeof(PySideProperty),

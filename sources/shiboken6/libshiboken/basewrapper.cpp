@@ -251,14 +251,12 @@ static const char *SbkObject_SignatureStrings[] = {
 
 PyTypeObject *SbkObject_TypeF(void)
 {
-    static PyTypeObject *type = nullptr;
-    if (!type) {
-        type = reinterpret_cast<PyTypeObject *>(SbkType_FromSpec(&SbkObject_Type_spec));
-        Py_TYPE(type) = SbkObjectType_TypeF();
-        Py_INCREF(Py_TYPE(type));
-        type->tp_weaklistoffset = offsetof(SbkObject, weakreflist);
-        type->tp_dictoffset = offsetof(SbkObject, ob_dict);
-    }
+    static auto *type = SbkType_FromSpec_BMDWB(&SbkObject_Type_spec,
+                                               nullptr,     // bases
+                                               SbkObjectType_TypeF(),
+                                               offsetof(SbkObject, ob_dict),
+                                               offsetof(SbkObject, weakreflist),
+                                               nullptr);    // bufferprocs
     return type;
 }
 
@@ -606,51 +604,6 @@ PyObject *SbkDummyNew(PyTypeObject *type, PyObject *, PyObject *)
     return nullptr;
 }
 
-PyTypeObject *SbkType_FromSpec(PyType_Spec *spec)
-{
-    return SbkType_FromSpecWithBases(spec, nullptr);
-}
-
-PyTypeObject *SbkType_FromSpecWithBases(PyType_Spec *spec, PyObject *bases)
-{
-    // PYSIDE-1286: Generate correct __module__ and __qualname__
-    // The name field can now be extended by an "n:" prefix which is
-    // the number of modules in the name. The default is 1.
-    //
-    // Example:
-    //    "2:mainmod.submod.mainclass.subclass"
-    // results in
-    //    __module__   : "mainmod.submod"
-    //    __qualname__ : "mainclass.subclass"
-    //    __name__     : "subclass"
-
-    PyType_Spec new_spec = *spec;
-    const char *colon = strchr(spec->name, ':');
-    assert(colon);
-    int package_level = atoi(spec->name);
-    const char *mod = new_spec.name = colon + 1;
-
-    PyObject *obType = PyType_FromSpecWithBases(&new_spec, bases);
-    if (obType == nullptr)
-        return nullptr;
-
-    const char *qual = mod;
-    for (int idx = package_level; idx > 0; --idx) {
-        const char *dot = strchr(qual, '.');
-        if (!dot)
-            break;
-        qual = dot + 1;
-    }
-    int mlen = qual - mod - 1;
-    Shiboken::AutoDecRef module(Shiboken::String::fromCString(mod, mlen));
-    Shiboken::AutoDecRef qualname(Shiboken::String::fromCString(qual));
-    if (PyObject_SetAttr(obType, Shiboken::PyMagicName::module(), module) < 0)
-        return nullptr;
-    if (PyObject_SetAttr(obType, Shiboken::PyMagicName::qualname(), qualname) < 0)
-        return nullptr;
-    return reinterpret_cast<PyTypeObject *>(obType);
-}
-
 // PYSIDE-74: Fallback used in all types now.
 PyObject *FallbackRichCompare(PyObject *self, PyObject *other, int op)
 {
@@ -930,10 +883,7 @@ introduceWrapperType(PyObject *enclosingObject,
 {
     typeSpec->slots[0].pfunc = reinterpret_cast<void *>(baseType ? baseType : SbkObject_TypeF());
 
-    auto *heaptype = SbkType_FromSpecWithBases(typeSpec, baseTypes);
-    Py_TYPE(heaptype) = SbkObjectType_TypeF();
-    Py_INCREF(Py_TYPE(heaptype));
-    auto *type = reinterpret_cast<PyTypeObject *>(heaptype);
+    auto *type = SbkType_FromSpecBasesMeta(typeSpec, baseTypes, SbkObjectType_TypeF());
     if (baseType) {
         if (baseTypes) {
             for (int i = 0; i < PySequence_Fast_GET_SIZE(baseTypes); ++i) {

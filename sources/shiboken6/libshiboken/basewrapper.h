@@ -42,6 +42,7 @@
 
 #include "sbkpython.h"
 #include "shibokenmacros.h"
+#include "sbktypefactory.h"
 
 #include <vector>
 #include <string>
@@ -130,16 +131,12 @@ LIBSHIBOKEN_API PyObject *MakeQAppWrapper(PyTypeObject *type);
  *  PYSIDE-832: Use object_dealloc instead of nullptr.
  *
  *  When moving to heaptypes, we were struck by a special default behavior of
- *  PyType_FromSpecWithBases that inserts subtype_dealloc when tp_dealloc is
+ *  PyType_FromSpec that inserts subtype_dealloc when tp_dealloc is
  *  nullptr. But the default before conversion to heaptypes was to assign
  *  object_dealloc. This seems to be a bug in the Limited API.
  */
 /// PYSIDE-939: Replaced by Sbk_object_dealloc.
 LIBSHIBOKEN_API PyObject *SbkDummyNew(PyTypeObject *type, PyObject *, PyObject *);
-
-/// PYSIDE-1286: Generate correct __module__ and __qualname__
-LIBSHIBOKEN_API PyTypeObject *SbkType_FromSpec(PyType_Spec *);
-LIBSHIBOKEN_API PyTypeObject *SbkType_FromSpecWithBases(PyType_Spec *, PyObject *);
 
 /// PYSIDE-74: Fallback used in all types now.
 LIBSHIBOKEN_API PyObject *FallbackRichCompare(PyObject *self, PyObject *other, int op);

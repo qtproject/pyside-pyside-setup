@@ -165,14 +165,7 @@ static PyType_Spec PySideSignalType_spec = {
 
 PyTypeObject *PySideSignalTypeF(void)
 {
-    static PyTypeObject *type = nullptr;
-    if (!type) {
-        type = reinterpret_cast<PyTypeObject *>(SbkType_FromSpec(&PySideSignalType_spec));
-        PyTypeObject *hold = Py_TYPE(type);
-        Py_TYPE(type) = PySideMetaSignalTypeF();
-        Py_INCREF(Py_TYPE(type));
-        Py_DECREF(hold);
-    }
+    static auto *type = SbkType_FromSpecWithMeta(&PySideSignalType_spec, PySideMetaSignalTypeF());
     return type;
 }
 

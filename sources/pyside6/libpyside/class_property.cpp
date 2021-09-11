@@ -92,7 +92,7 @@ static PyType_Slot PyClassProperty_slots[] = {
 };
 
 static PyType_Spec PyClassProperty_spec = {
-    "PySide6.QtCore.PyClassProperty",
+    "2:PySide6.QtCore.PyClassProperty",
     sizeof(propertyobject),
     0,
     Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,
@@ -105,8 +105,7 @@ PyTypeObject *PyClassPropertyTypeF()
     if (type == nullptr) {
         // Provide the same `tp_getset`, which is not inherited.
         PyClassProperty_slots[0].pfunc = PyProperty_Type.tp_getset;
-        type = reinterpret_cast<PyTypeObject *>(
-            PyType_FromSpec(&PyClassProperty_spec));
+        type = SbkType_FromSpec(&PyClassProperty_spec);
     }
     return type;
 }

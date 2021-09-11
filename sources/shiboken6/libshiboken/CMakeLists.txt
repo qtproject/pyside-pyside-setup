@@ -54,6 +54,7 @@ sbkfeature_base.cpp
 sbkmodule.cpp
 sbkstring.cpp
 sbkstaticstrings.cpp
+sbktypefactory.cpp
 bindingmanager.cpp
 threadstatesaver.cpp
 shibokenbuffer.cpp
@@ -136,6 +137,7 @@ install(FILES
         sbkmodule.h
         sbkstring.h
         sbkstaticstrings.h
+        sbktypefactory.h
         shiboken.h
         shibokenmacros.h
         threadstatesaver.h

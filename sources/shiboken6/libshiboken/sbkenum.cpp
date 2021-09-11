@@ -675,7 +675,7 @@ newTypeWithName(const char *name,
     PyType_Slot newslots[99] = {};  // enough but not too big for the stack
     PyType_Spec newspec;
     DeclaredEnumTypes::EnumEntry entry{strdup(name), nullptr};
-    newspec.name = entry.name; // Note that SbkType_FromSpecWithBases might use a substring.
+    newspec.name = entry.name; // Note that SbkType_FromSpec might use a substring.
     newspec.basicsize = SbkNewEnum_spec.basicsize;
     newspec.itemsize = SbkNewEnum_spec.itemsize;
     newspec.flags = SbkNewEnum_spec.flags;
@@ -693,9 +693,8 @@ newTypeWithName(const char *name,
     static auto basetype = reinterpret_cast<PyObject *>(SbkEnum_TypeF());
     Py_INCREF(basetype);
     PyTuple_SetItem(bases, 0, basetype);
-    auto *type = SbkType_FromSpecWithBases(&newspec, bases);
-    entry.type = reinterpret_cast<PyTypeObject *>(type);
-    Py_TYPE(type) = SbkEnumType_TypeF();
+    auto *type = SbkType_FromSpecBasesMeta(&newspec, bases, SbkEnumType_TypeF());
+    entry.type = type;
 
     auto *enumType = reinterpret_cast<SbkEnumType *>(type);
     auto *setp = PepType_SETP(enumType);
