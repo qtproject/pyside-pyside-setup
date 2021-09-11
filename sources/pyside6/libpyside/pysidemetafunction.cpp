@@ -76,8 +76,7 @@ static PyType_Spec PySideMetaFunctionType_spec = {
 
 PyTypeObject *PySideMetaFunctionTypeF(void)
 {
-    static PyTypeObject *type = reinterpret_cast<PyTypeObject *>(
-        SbkType_FromSpec(&PySideMetaFunctionType_spec));
+    static auto *type = SbkType_FromSpec(&PySideMetaFunctionType_spec);
     return type;
 }
 

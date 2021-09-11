@@ -405,12 +405,8 @@ static PyType_Spec PropertyListType_spec = {
 
 PyTypeObject *PropertyListTypeF(void)
 {
-    static PyTypeObject *type = nullptr;
-    if (!type) {
-        PyObject *bases = Py_BuildValue("(O)", PySidePropertyTypeF());
-        type = (PyTypeObject *)SbkType_FromSpecWithBases(&PropertyListType_spec, bases);
-        Py_XDECREF(bases);
-    }
+    static Shiboken::AutoDecRef bases(Py_BuildValue("(O)", PySidePropertyTypeF()));
+    static auto *type = SbkType_FromSpecWithBases(&PropertyListType_spec, bases);
     return type;
 }
 
@@ -674,8 +670,7 @@ static PyType_Spec QtQml_VolatileBoolType_spec = {
 
 PyTypeObject *QtQml_VolatileBoolTypeF(void)
 {
-    static PyTypeObject *type = reinterpret_cast<PyTypeObject *>(
-        SbkType_FromSpec(&QtQml_VolatileBoolType_spec));
+    static auto *type = SbkType_FromSpec(&QtQml_VolatileBoolType_spec);
     return type;
 }
 

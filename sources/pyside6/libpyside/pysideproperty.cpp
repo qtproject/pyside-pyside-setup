@@ -118,8 +118,7 @@ static PyType_Spec PySidePropertyType_spec = {
 
 PyTypeObject *PySidePropertyTypeF(void)
 {
-    static PyTypeObject *type = reinterpret_cast<PyTypeObject *>(
-        SbkType_FromSpec(&PySidePropertyType_spec));
+    static auto *type = SbkType_FromSpec(&PySidePropertyType_spec);
     return type;
 }
 

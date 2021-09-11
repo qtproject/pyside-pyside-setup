@@ -183,13 +183,7 @@ namespace QFlags
             SbkNewQFlagsType_slots[idx].pfunc = numberMethods[idx].pfunc;
         }
         newspec.slots = SbkNewQFlagsType_spec.slots;
-        PyTypeObject *type = (PyTypeObject *)SbkType_FromSpec(&newspec);
-        Py_TYPE(type) = &PyType_Type;
-
-        if (PyType_Ready(type) < 0)
-            return nullptr;
-
-        return type;
+        return SbkType_FromSpec(&newspec);
     }
 
     PySideQFlagsObject *newObject(long value, PyTypeObject *type)

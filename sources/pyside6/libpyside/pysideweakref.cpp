@@ -67,8 +67,7 @@ static PyType_Spec PySideCallableObjectType_spec = {
 
 static PyTypeObject *PySideCallableObjectTypeF()
 {
-    static PyTypeObject *type =
-        reinterpret_cast<PyTypeObject *>(SbkType_FromSpec(&PySideCallableObjectType_spec));
+    static auto *type = SbkType_FromSpec(&PySideCallableObjectType_spec);
     return type;
 }
 

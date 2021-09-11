@@ -282,8 +282,8 @@ static PyType_Spec SbkEnumType_Type_spec = {
 
 PyTypeObject *SbkEnumType_TypeF(void)
 {
-    static PyObject *obType = SbkType_FromSpec(&SbkEnumType_Type_spec);
-    return reinterpret_cast<PyTypeObject *>(obType);
+    static auto *type = SbkType_FromSpec(&SbkEnumType_Type_spec);
+    return type;
 }
 
 void SbkEnumTypeDealloc(PyObject *pyObj)
@@ -613,7 +613,7 @@ static PyType_Spec SbkNewEnum_spec = {
 static PyTypeObject *SbkEnum_TypeF()
 {
     static auto type = SbkType_FromSpec(&SbkNewEnum_spec);
-    return reinterpret_cast<PyTypeObject *>(type);
+    return type;
 }
 
 namespace Shiboken { namespace Enum {

@@ -162,8 +162,8 @@ static PyType_Spec SbkObjectType_Type_spec = {
 
 PyTypeObject *SbkObjectType_TypeF(void)
 {
-    static auto type = SbkType_FromSpec(&SbkObjectType_Type_spec);
-    return reinterpret_cast<PyTypeObject *>(type);
+    static auto *type = SbkType_FromSpec(&SbkObjectType_Type_spec);
+    return type;
 }
 
 static PyObject *SbkObjectGetDict(PyObject *pObj, void *)
@@ -606,12 +606,12 @@ PyObject *SbkDummyNew(PyTypeObject *type, PyObject *, PyObject *)
     return nullptr;
 }
 
-PyObject *SbkType_FromSpec(PyType_Spec *spec)
+PyTypeObject *SbkType_FromSpec(PyType_Spec *spec)
 {
     return SbkType_FromSpecWithBases(spec, nullptr);
 }
 
-PyObject *SbkType_FromSpecWithBases(PyType_Spec *spec, PyObject *bases)
+PyTypeObject *SbkType_FromSpecWithBases(PyType_Spec *spec, PyObject *bases)
 {
     // PYSIDE-1286: Generate correct __module__ and __qualname__
     // The name field can now be extended by an "n:" prefix which is
@@ -630,8 +630,8 @@ PyObject *SbkType_FromSpecWithBases(PyType_Spec *spec, PyObject *bases)
     int package_level = atoi(spec->name);
     const char *mod = new_spec.name = colon + 1;
 
-    PyObject *type = PyType_FromSpecWithBases(&new_spec, bases);
-    if (type == nullptr)
+    PyObject *obType = PyType_FromSpecWithBases(&new_spec, bases);
+    if (obType == nullptr)
         return nullptr;
 
     const char *qual = mod;
@@ -644,11 +644,11 @@ PyObject *SbkType_FromSpecWithBases(PyType_Spec *spec, PyObject *bases)
     int mlen = qual - mod - 1;
     Shiboken::AutoDecRef module(Shiboken::String::fromCString(mod, mlen));
     Shiboken::AutoDecRef qualname(Shiboken::String::fromCString(qual));
-    if (PyObject_SetAttr(type, Shiboken::PyMagicName::module(), module) < 0)
+    if (PyObject_SetAttr(obType, Shiboken::PyMagicName::module(), module) < 0)
         return nullptr;
-    if (PyObject_SetAttr(type, Shiboken::PyMagicName::qualname(), qualname) < 0)
+    if (PyObject_SetAttr(obType, Shiboken::PyMagicName::qualname(), qualname) < 0)
         return nullptr;
-    return type;
+    return reinterpret_cast<PyTypeObject *>(obType);
 }
 
 // PYSIDE-74: Fallback used in all types now.
@@ -930,7 +930,7 @@ introduceWrapperType(PyObject *enclosingObject,
 {
     typeSpec->slots[0].pfunc = reinterpret_cast<void *>(baseType ? baseType : SbkObject_TypeF());
 
-    PyObject *heaptype = SbkType_FromSpecWithBases(typeSpec, baseTypes);
+    auto *heaptype = SbkType_FromSpecWithBases(typeSpec, baseTypes);
     Py_TYPE(heaptype) = SbkObjectType_TypeF();
     Py_INCREF(Py_TYPE(heaptype));
     auto *type = reinterpret_cast<PyTypeObject *>(heaptype);
@@ -944,8 +944,6 @@ introduceWrapperType(PyObject *enclosingObject,
             BindingManager::instance().addClassInheritance(baseType, type);
         }
     }
-    if (PyType_Ready(type) < 0)
-        return nullptr;
 
     auto sotp = PepType_SOTP(type);
     if (wrapperFlags & DeleteInMainThread)

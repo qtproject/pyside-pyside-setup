@@ -129,7 +129,7 @@ static PyType_Slot PySideMetaSignalType_slots[] = {
 static PyType_Spec PySideMetaSignalType_spec = {
     "2:PySide6.QtCore.MetaSignal",
     0,
-    // sizeof(PyHeapTypeObject) is filled in by SbkType_FromSpecWithBases
+    // sizeof(PyHeapTypeObject) is filled in by SbkType_FromSpec
     // which calls PyType_Ready which calls inherit_special.
     0,
     Py_TPFLAGS_DEFAULT,
@@ -139,12 +139,7 @@ static PyType_Spec PySideMetaSignalType_spec = {
 
 static PyTypeObject *PySideMetaSignalTypeF(void)
 {
-    static PyTypeObject *type = nullptr;
-    if (!type) {
-        PyObject *bases = Py_BuildValue("(O)", &PyType_Type);
-        type = (PyTypeObject *)SbkType_FromSpecWithBases(&PySideMetaSignalType_spec, bases);
-        Py_XDECREF(bases);
-    }
+    static auto *type = SbkType_FromSpec(&PySideMetaSignalType_spec);
     return type;
 }
 
@@ -209,8 +204,7 @@ static PyType_Spec PySideSignalInstanceType_spec = {
 
 PyTypeObject *PySideSignalInstanceTypeF(void)
 {
-    static PyTypeObject *type =
-        reinterpret_cast<PyTypeObject *>(SbkType_FromSpec(&PySideSignalInstanceType_spec));
+    static auto *type = SbkType_FromSpec(&PySideSignalInstanceType_spec);
     return type;
 }
 

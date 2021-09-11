@@ -74,8 +74,7 @@ static PyType_Spec PySideClassInfoType_spec = {
 
 PyTypeObject *PySideClassInfoTypeF(void)
 {
-    static PyTypeObject *type =
-        reinterpret_cast<PyTypeObject *>(SbkType_FromSpec(&PySideClassInfoType_spec));
+    static auto *type = SbkType_FromSpec(&PySideClassInfoType_spec);
     return type;
 }
 

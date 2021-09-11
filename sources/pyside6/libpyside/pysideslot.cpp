@@ -87,8 +87,7 @@ static PyType_Spec PySideSlotType_spec = {
 
 static PyTypeObject *PySideSlotTypeF()
 {
-    static PyTypeObject *type = reinterpret_cast<PyTypeObject *>(
-        SbkType_FromSpec(&PySideSlotType_spec));
+    static auto *type = SbkType_FromSpec(&PySideSlotType_spec);
     return type;
 }
 

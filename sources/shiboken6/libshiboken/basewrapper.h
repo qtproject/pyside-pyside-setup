@@ -138,8 +138,8 @@ LIBSHIBOKEN_API PyObject *MakeQAppWrapper(PyTypeObject *type);
 LIBSHIBOKEN_API PyObject *SbkDummyNew(PyTypeObject *type, PyObject *, PyObject *);
 
 /// PYSIDE-1286: Generate correct __module__ and __qualname__
-LIBSHIBOKEN_API PyObject *SbkType_FromSpec(PyType_Spec *);
-LIBSHIBOKEN_API PyObject *SbkType_FromSpecWithBases(PyType_Spec *, PyObject *);
+LIBSHIBOKEN_API PyTypeObject *SbkType_FromSpec(PyType_Spec *);
+LIBSHIBOKEN_API PyTypeObject *SbkType_FromSpecWithBases(PyType_Spec *, PyObject *);
 
 /// PYSIDE-74: Fallback used in all types now.
 LIBSHIBOKEN_API PyObject *FallbackRichCompare(PyObject *self, PyObject *other, int op);

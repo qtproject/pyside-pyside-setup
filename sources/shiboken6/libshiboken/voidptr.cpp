@@ -320,7 +320,7 @@ PyTypeObject *SbkVoidPtrTypeF(void)
 {
     static PyTypeObject *type = nullptr;
     if (!type) {
-        type = reinterpret_cast<PyTypeObject *>(SbkType_FromSpec(&SbkVoidPtrType_spec));
+        type = SbkType_FromSpec(&SbkVoidPtrType_spec);
         PepType_AS_BUFFER(type) = &SbkVoidPtrObjectBufferProc;
     }
     return type;
