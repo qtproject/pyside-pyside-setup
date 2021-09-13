@@ -48,11 +48,9 @@
 #  else
 #    define LIBSHIBOKEN_IMPORT
 #  endif
-#  define SBK_DEPRECATED(func) __declspec(deprecated) func
 #else
 #  define LIBSHIBOKEN_EXPORT __attribute__ ((visibility("default")))
 #  define LIBSHIBOKEN_IMPORT
-#  define SBK_DEPRECATED(func) func __attribute__ ((deprecated))
 #endif
 
 #ifdef BUILD_LIBSHIBOKEN
