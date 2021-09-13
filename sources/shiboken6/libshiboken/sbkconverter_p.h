@@ -465,7 +465,7 @@ struct Primitive<const char *> : TwoPrimitive<const char *>
     }
     static void toCpp(PyObject *, void *cppOut)
     {
-        *((const char **)cppOut) = nullptr;
+        *reinterpret_cast<const char **>(cppOut) = nullptr;
     }
     static PythonToCppFunc isConvertible(PyObject *pyIn)
     {

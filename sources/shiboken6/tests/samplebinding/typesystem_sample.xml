@@ -132,7 +132,7 @@
             <target-to-native>
                 <add-conversion check="checkPyCapsuleOrPyCObject(%in)" type="PyObject">
                 void *ptr = PyCapsule_GetPointer(%in, nullptr);
-                %out = *((%OUTTYPE*)ptr);
+                %out = *reinterpret_cast&lt;%OUTTYPE*&gt;(ptr);
                 </add-conversion>
             </target-to-native>
         </conversion-rule>

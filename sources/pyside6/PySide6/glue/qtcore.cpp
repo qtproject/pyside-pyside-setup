@@ -1549,11 +1549,11 @@ QString &res = *%0;
 // @snippet return-readData
 %RETURN_TYPE %0 = 0;
 if (PyBytes_Check(%PYARG_0)) {
-    %0 = PyBytes_GET_SIZE((PyObject *)%PYARG_0);
-    memcpy(%1, PyBytes_AS_STRING((PyObject *)%PYARG_0), %0);
+    %0 = PyBytes_GET_SIZE(%PYARG_0);
+    memcpy(%1, PyBytes_AS_STRING(%PYARG_0), %0);
 } else if (Shiboken::String::check(%PYARG_0)) {
-    %0 = Shiboken::String::len((PyObject *)%PYARG_0);
-    memcpy(%1, Shiboken::String::toCString((PyObject *)%PYARG_0), %0);
+    %0 = Shiboken::String::len(%PYARG_0);
+    memcpy(%1, Shiboken::String::toCString(%PYARG_0), %0);
 }
 // @snippet return-readData
 

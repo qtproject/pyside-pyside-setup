@@ -165,7 +165,8 @@ QDataStream &operator<<(QDataStream &out, const PyObjectWrapper &myObj)
         Shiboken::AutoDecRef pickleModule(PyImport_ImportModule("pickle"));
         reduce_func = PyObject_GetAttr(pickleModule, Shiboken::PyName::dumps());
     }
-    Shiboken::AutoDecRef repr(PyObject_CallFunctionObjArgs(reduce_func, (PyObject *)myObj, NULL));
+    PyObject *pyObj = myObj;
+    Shiboken::AutoDecRef repr(PyObject_CallFunctionObjArgs(reduce_func, pyObj, nullptr));
     if (repr.object()) {
         const char *buff = nullptr;
         Py_ssize_t size  = 0;

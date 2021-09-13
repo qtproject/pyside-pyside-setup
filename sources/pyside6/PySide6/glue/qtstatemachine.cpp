@@ -43,12 +43,13 @@
 
 // @snippet qsignaltransition
 if (PyObject_TypeCheck(%1, PySideSignalInstanceTypeF())) {
-    PyObject *dataSource = PySide::Signal::getObject((PySideSignalInstance *)%PYARG_1);
+    auto *signalInstance = reinterpret_cast<PySideSignalInstance *>(%PYARG_1);
+    PyObject *dataSource = PySide::Signal::getObject(signalInstance);
     Shiboken::AutoDecRef obType(PyObject_Type(dataSource));
     QObject * sender = %CONVERTTOCPP[QObject *](dataSource);
     //XXX   /|\ omitting this space crashes shiboken!
     if (sender) {
-        const char *dataSignature = PySide::Signal::getSignature((PySideSignalInstance *)%PYARG_1);
+        const char *dataSignature = PySide::Signal::getSignature(signalInstance);
         QByteArray signature(dataSignature); // Append SIGNAL flag (2)
         signature.prepend('2');
         %0 = new QSignalTransitionWrapper(sender, signature, %2);

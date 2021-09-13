@@ -129,7 +129,7 @@ static safe_globals_struc *init_phase_1(PyMethodDef *init_meth)
          * They will be loaded later with the zipimporter.
          * Due to MSVC's limitation to 64k strings, we need to assemble pieces.
          */
-        const char **block_ptr = (const char **)PySide_CompressedSignaturePackage;
+        auto **block_ptr = reinterpret_cast<const char **>(PySide_CompressedSignaturePackage);
         int npieces = 0;
         PyObject *piece, *zipped_string_sequence = PyList_New(0);
         if (zipped_string_sequence == nullptr)
