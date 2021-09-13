@@ -91,7 +91,7 @@ PYSIDE_API bool checkInstanceType(PyObject *pyObj);
 /**
  * Register all C++ signals of a QObject on Python type.
  */
-PYSIDE_API void registerSignals(SbkObjectType *pyObj, const QMetaObject *metaObject);
+PYSIDE_API void registerSignals(PyTypeObject *pyObj, const QMetaObject *metaObject);
 
 /**
  * This function creates a Signal object which stays attached to QObject class based on a list of QMetaMethods

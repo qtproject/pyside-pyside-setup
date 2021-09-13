@@ -127,7 +127,7 @@ SbkConverter *createConverterObject(PyTypeObject *type,
     return converter;
 }
 
-SbkConverter *createConverter(SbkObjectType *type,
+SbkConverter *createConverter(PyTypeObject *type,
                               PythonToCppFunc toCppPointerConvFunc,
                               IsConvertibleToCppFunc toCppPointerCheckFunc,
                               CppToPythonFunc pointerToPythonFunc,
@@ -173,7 +173,7 @@ void addPythonToCppValueConversion(SbkConverter *converter,
     converter->toCppConversions.push_back(std::make_pair(isConvertibleToCppFunc, pythonToCppFunc));
 }
 
-void addPythonToCppValueConversion(SbkObjectType *type,
+void addPythonToCppValueConversion(PyTypeObject *type,
                                    PythonToCppFunc pythonToCppFunc,
                                    IsConvertibleToCppFunc isConvertibleToCppFunc)
 {
@@ -181,7 +181,7 @@ void addPythonToCppValueConversion(SbkObjectType *type,
     addPythonToCppValueConversion(sotp->converter, pythonToCppFunc, isConvertibleToCppFunc);
 }
 
-PyObject *pointerToPython(SbkObjectType *type, const void *cppIn)
+PyObject *pointerToPython(PyTypeObject *type, const void *cppIn)
 {
     auto *sotp = PepType_SOTP(type);
     return pointerToPython(sotp->converter, cppIn);
@@ -200,7 +200,7 @@ PyObject *pointerToPython(const SbkConverter *converter, const void *cppIn)
     return converter->pointerToPython(cppIn);
 }
 
-PyObject *referenceToPython(SbkObjectType *type, const void *cppIn)
+PyObject *referenceToPython(PyTypeObject *type, const void *cppIn)
 {
     auto *sotp = PepType_SOTP(type);
     return referenceToPython(sotp->converter, cppIn);
@@ -235,7 +235,7 @@ static inline PyObject *CopyCppToPython(const SbkConverter *converter, const voi
     return converter->copyToPython(cppIn);
 }
 
-PyObject *copyToPython(SbkObjectType *type, const void *cppIn)
+PyObject *copyToPython(PyTypeObject *type, const void *cppIn)
 {
     auto *sotp = PepType_SOTP(type);
     return CopyCppToPython(sotp->converter, cppIn);
@@ -246,7 +246,7 @@ PyObject *copyToPython(const SbkConverter *converter, const void *cppIn)
     return CopyCppToPython(converter, cppIn);
 }
 
-PythonToCppFunc isPythonToCppPointerConvertible(SbkObjectType *type, PyObject *pyIn)
+PythonToCppFunc isPythonToCppPointerConvertible(PyTypeObject *type, PyObject *pyIn)
 {
     assert(pyIn);
     auto *sotp = PepType_SOTP(type);
@@ -263,7 +263,7 @@ static inline PythonToCppFunc IsPythonToCppConvertible(const SbkConverter *conve
     return nullptr;
 }
 
-PythonToCppFunc isPythonToCppValueConvertible(SbkObjectType *type, PyObject *pyIn)
+PythonToCppFunc isPythonToCppValueConvertible(PyTypeObject *type, PyObject *pyIn)
 {
     auto *sotp = PepType_SOTP(type);
     return IsPythonToCppConvertible(sotp->converter, pyIn);
@@ -285,7 +285,7 @@ PythonToCppFunc isPythonToCppConvertible(const SbkArrayConverter *converter,
     return nullptr;
 }
 
-PythonToCppFunc isPythonToCppReferenceConvertible(SbkObjectType *type, PyObject *pyIn)
+PythonToCppFunc isPythonToCppReferenceConvertible(PyTypeObject *type, PyObject *pyIn)
 {
     if (pyIn != Py_None) {
         PythonToCppFunc toCpp = isPythonToCppPointerConvertible(type, pyIn);
@@ -312,7 +312,7 @@ void *cppPointer(PyTypeObject *desiredType, SbkObject *pyIn)
     return Object::cppPointer(pyIn, desiredType);
 }
 
-void pythonToCppPointer(SbkObjectType *type, PyObject *pyIn, void *cppOut)
+void pythonToCppPointer(PyTypeObject *type, PyObject *pyIn, void *cppOut)
 {
     assert(type);
     assert(pyIn);
@@ -342,7 +342,7 @@ static void _pythonToCppCopy(const SbkConverter *converter, PyObject *pyIn, void
         toCpp(pyIn, cppOut);
 }
 
-void pythonToCppCopy(SbkObjectType *type, PyObject *pyIn, void *cppOut)
+void pythonToCppCopy(PyTypeObject *type, PyObject *pyIn, void *cppOut)
 {
     assert(type);
     auto *sotp = PepType_SOTP(type);
@@ -354,7 +354,7 @@ void pythonToCppCopy(const SbkConverter *converter, PyObject *pyIn, void *cppOut
     _pythonToCppCopy(converter, pyIn, cppOut);
 }
 
-bool isImplicitConversion(SbkObjectType *type, PythonToCppFunc toCppFunc)
+bool isImplicitConversion(PyTypeObject *type, PythonToCppFunc toCppFunc)
 {
     auto *sotp = PepType_SOTP(type);
     // This is the Object Type or Value Type conversion that only
@@ -432,7 +432,7 @@ bool convertibleSequenceTypes(const SbkConverter *converter, PyObject *pyIn)
     }
     return true;
 }
-bool convertibleSequenceTypes(SbkObjectType *type, PyObject *pyIn)
+bool convertibleSequenceTypes(PyTypeObject *type, PyObject *pyIn)
 {
     assert(type);
     auto *sotp = PepType_SOTP(type);

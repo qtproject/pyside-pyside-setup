@@ -777,7 +777,7 @@ QByteArray getTypeName(PyObject *type)
     if (PyType_Check(type)) {
         if (PyType_IsSubtype(reinterpret_cast<PyTypeObject *>(type),
                              reinterpret_cast<PyTypeObject *>(SbkObject_TypeF()))) {
-            auto objType = reinterpret_cast<SbkObjectType *>(type);
+            auto objType = reinterpret_cast<PyTypeObject *>(type);
             return Shiboken::ObjectType::getOriginalName(objType);
         }
         // Translate python types to Qt names
@@ -940,7 +940,7 @@ static typename T::value_type join(T t, const char *sep)
     return res;
 }
 
-static void _addSignalToWrapper(SbkObjectType *wrapperType, const char *signalName, PySideSignal *signal)
+static void _addSignalToWrapper(PyTypeObject *wrapperType, const char *signalName, PySideSignal *signal)
 {
     auto typeDict = wrapperType->tp_dict;
     PyObject *homonymousMethod;
@@ -963,7 +963,7 @@ static PyObject *buildQtCompatible(const QByteArray &signature)
     return Shiboken::String::fromStringAndSize(ba, ba.size());
 }
 
-void registerSignals(SbkObjectType *pyObj, const QMetaObject *metaObject)
+void registerSignals(PyTypeObject *pyObj, const QMetaObject *metaObject)
 {
     using SignalSigMap = QHash<QByteArray, QList<SignalSignature> >;
     SignalSigMap signalsFound;

@@ -95,13 +95,13 @@ template<typename T>
 struct initQtMetaType<T, false> {
 };
 
-PYSIDE_API void initDynamicMetaObject(SbkObjectType *type, const QMetaObject *base,
+PYSIDE_API void initDynamicMetaObject(PyTypeObject *type, const QMetaObject *base,
                                       std::size_t cppObjSize);
-PYSIDE_API void initQObjectSubType(SbkObjectType *type, PyObject *args, PyObject *kwds);
+PYSIDE_API void initQObjectSubType(PyTypeObject *type, PyObject *args, PyObject *kwds);
 PYSIDE_API void initQApp();
 
 /// Return the size in bytes of a type that inherits QObject.
-PYSIDE_API std::size_t getSizeOfQObject(SbkObjectType *type);
+PYSIDE_API std::size_t getSizeOfQObject(PyTypeObject *type);
 
 /* Check if a PyTypeObject or its bases contains a QObject
  * \param pyType is the PyTypeObject to check
@@ -143,7 +143,7 @@ PYSIDE_API bool inherits(PyTypeObject *self, const char *class_name);
 PYSIDE_API void *nextQObjectMemoryAddr();
 PYSIDE_API void setNextQObjectMemoryAddr(void *addr);
 
-PYSIDE_API PyObject *getWrapperForQObject(QObject *cppSelf, SbkObjectType *sbk_type);
+PYSIDE_API PyObject *getWrapperForQObject(QObject *cppSelf, PyTypeObject *sbk_type);
 
 /// Return the best-matching type for a QObject (Helper for QObject.findType())
 /// \param cppSelf QObject instance

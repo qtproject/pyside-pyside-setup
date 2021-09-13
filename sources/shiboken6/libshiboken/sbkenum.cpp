@@ -491,7 +491,7 @@ PyTypeObject *createGlobalEnum(PyObject *module, const char *name, const char *f
     return enumType;
 }
 
-PyTypeObject *createScopedEnum(SbkObjectType *scope, const char *name, const char *fullName, const char *cppName, PyTypeObject *flagsType)
+PyTypeObject *createScopedEnum(PyTypeObject *scope, const char *name, const char *fullName, const char *cppName, PyTypeObject *flagsType)
 {
     PyTypeObject *enumType = createEnum(fullName, cppName, flagsType);
     if (enumType && PyDict_SetItemString(scope->tp_dict, name,

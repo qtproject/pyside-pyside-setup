@@ -83,7 +83,7 @@ namespace Enum
                                                    const char *cppName,
                                                    PyTypeObject *flagsType = nullptr);
     /// This function does the same as createGlobalEnum, but adds the enum to a Shiboken type or namespace.
-    LIBSHIBOKEN_API PyTypeObject *createScopedEnum(SbkObjectType *scope,
+    LIBSHIBOKEN_API PyTypeObject *createScopedEnum(PyTypeObject *scope,
                                                    const char *name,
                                                    const char *fullName,
                                                    const char *cppName,

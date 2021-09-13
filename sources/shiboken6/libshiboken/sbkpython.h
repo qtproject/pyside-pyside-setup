@@ -107,6 +107,6 @@ extern "C" {
 #undef Py_TPFLAGS_HAVE_VERSION_TAG
 #define Py_TPFLAGS_HAVE_VERSION_TAG  (0)
 
-using SbkObjectType = PyTypeObject; // FIXME PYSIDE 7 remove
+using SbkObjectType [[deprecated]] = PyTypeObject; // FIXME PYSIDE 7 remove
 
 #endif

@@ -146,7 +146,7 @@ struct SbkObjectTypePrivate
     /// Type user data
     void *user_data;
     DeleteUserDataFunc d_func;
-    void (*subtype_init)(SbkObjectType *, PyObject *, PyObject *);
+    void (*subtype_init)(PyTypeObject *, PyObject *, PyObject *);
     const char **propertyStrings;
 };
 
@@ -185,13 +185,13 @@ public:
     HierarchyVisitor();
     virtual ~HierarchyVisitor();
 
-    virtual bool visit(SbkObjectType *node) = 0; // return true to terminate
+    virtual bool visit(PyTypeObject *node) = 0; // return true to terminate
 };
 
 class BaseCountVisitor : public HierarchyVisitor
 {
 public:
-    bool visit(SbkObjectType *) override;
+    bool visit(PyTypeObject *) override;
 
     int count() const { return m_count; }
 
@@ -202,9 +202,9 @@ private:
 class BaseAccumulatorVisitor : public HierarchyVisitor
 {
 public:
-    using Result = std::vector<SbkObjectType *>;
+    using Result = std::vector<PyTypeObject *>;
 
-    bool visit(SbkObjectType *node) override;
+    bool visit(PyTypeObject *node) override;
 
     Result bases() const { return m_bases; }
 
@@ -217,7 +217,7 @@ class GetIndexVisitor : public HierarchyVisitor
 public:
     explicit GetIndexVisitor(PyTypeObject *desiredType) : m_desiredType(desiredType) {}
 
-    bool visit(SbkObjectType *node) override;
+    bool visit(PyTypeObject *node) override;
 
     int index() const { return m_index; }
 
@@ -233,7 +233,7 @@ class DtorAccumulatorVisitor : public HierarchyVisitor
 public:
     explicit DtorAccumulatorVisitor(SbkObject *pyObj) : m_pyObject(pyObj) {}
 
-    bool visit(SbkObjectType *node) override;
+    bool visit(PyTypeObject *node) override;
 
     using DestructorEntries = std::vector<DestructorEntry>;
 
@@ -266,7 +266,7 @@ inline int getNumberOfCppBaseClasses(PyTypeObject *baseType)
     return visitor.count();
 }
 
-inline std::vector<SbkObjectType *> getCppBaseClasses(PyTypeObject *baseType)
+inline std::vector<PyTypeObject *> getCppBaseClasses(PyTypeObject *baseType)
 {
     BaseAccumulatorVisitor visitor;
     walkThroughClassHierarchy(baseType, &visitor);

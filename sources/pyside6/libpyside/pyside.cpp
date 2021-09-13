@@ -218,12 +218,12 @@ void destroyQCoreApplication()
     Py_DECREF(MakeQAppWrapper(nullptr));
 }
 
-std::size_t getSizeOfQObject(SbkObjectType *type)
+std::size_t getSizeOfQObject(PyTypeObject *type)
 {
     return retrieveTypeUserData(type)->cppObjSize;
 }
 
-void initDynamicMetaObject(SbkObjectType *type, const QMetaObject *base, std::size_t cppObjSize)
+void initDynamicMetaObject(PyTypeObject *type, const QMetaObject *base, std::size_t cppObjSize)
 {
     //create DynamicMetaObject based on python type
     auto userData = new TypeUserData(reinterpret_cast<PyTypeObject *>(type), base, cppObjSize);
@@ -265,7 +265,7 @@ const QMetaObject *retrieveMetaObject(PyObject *pyObj)
     return retrieveMetaObject(pyTypeObj);
 }
 
-void initQObjectSubType(SbkObjectType *type, PyObject *args, PyObject * /* kwds */)
+void initQObjectSubType(PyTypeObject *type, PyObject *args, PyObject * /* kwds */)
 {
     PyTypeObject *qObjType = Shiboken::Conversions::getPythonTypeObject("QObject*");
     QByteArray className(Shiboken::String::toCString(PyTuple_GET_ITEM(args, 0)));
@@ -446,7 +446,7 @@ PyTypeObject *getTypeForQObject(const QObject *cppSelf)
     return nullptr;
 }
 
-PyObject *getWrapperForQObject(QObject *cppSelf, SbkObjectType *sbk_type)
+PyObject *getWrapperForQObject(QObject *cppSelf, PyTypeObject *sbk_type)
 {
     PyObject *pyOut = reinterpret_cast<PyObject *>(Shiboken::BindingManager::instance().retrieveWrapper(cppSelf));
     if (pyOut) {

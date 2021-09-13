@@ -59,14 +59,14 @@ using WrapperMap = std::unordered_map<const void *, SbkObject *>;
 class Graph
 {
 public:
-    using NodeList = std::vector<SbkObjectType *>;
-    using Edges = std::unordered_map<SbkObjectType *, NodeList>;
+    using NodeList = std::vector<PyTypeObject *>;
+    using Edges = std::unordered_map<PyTypeObject *, NodeList>;
 
     Edges m_edges;
 
     Graph() = default;
 
-    void addEdge(SbkObjectType *from, SbkObjectType *to)
+    void addEdge(PyTypeObject *from, PyTypeObject *to)
     {
         m_edges[from].push_back(to);
     }
@@ -81,7 +81,7 @@ public:
         for (auto i = m_edges.begin(), end = m_edges.end(); i != end; ++i) {
             auto *node1 = i->first;
             const NodeList &nodeList = i->second;
-            for (const SbkObjectType *o : nodeList) {
+            for (const PyTypeObject *o : nodeList) {
                 auto *node2 = o;
                 file << '"' << node2->tp_name << "\" -> \""
                     << node1->tp_name << "\"\n";
@@ -91,13 +91,13 @@ public:
     }
 #endif
 
-    SbkObjectType *identifyType(void **cptr, SbkObjectType *type, SbkObjectType *baseType) const
+    PyTypeObject *identifyType(void **cptr, PyTypeObject *type, PyTypeObject *baseType) const
     {
         auto edgesIt = m_edges.find(type);
         if (edgesIt != m_edges.end()) {
             const NodeList &adjNodes = m_edges.find(type)->second;
-            for (SbkObjectType *node : adjNodes) {
-                SbkObjectType *newType = identifyType(cptr, node, baseType);
+            for (PyTypeObject *node : adjNodes) {
+                PyTypeObject *newType = identifyType(cptr, node, baseType);
                 if (newType)
                     return newType;
             }
@@ -108,7 +108,7 @@ public:
             typeFound = sotp->type_discovery(*cptr, baseType);
         if (typeFound) {
             // This "typeFound != type" is needed for backwards compatibility with old modules using a newer version of
-            // libshiboken because old versions of type_discovery function used to return a SbkObjectType *instead of
+            // libshiboken because old versions of type_discovery function used to return a PyTypeObject *instead of
             // a possible variation of the C++ instance pointer (*cptr).
             if (typeFound != type)
                 *cptr = typeFound;
@@ -367,14 +367,14 @@ PyObject *BindingManager::getOverride(const void *cptr,
     return nullptr;
 }
 
-void BindingManager::addClassInheritance(SbkObjectType *parent, SbkObjectType *child)
+void BindingManager::addClassInheritance(PyTypeObject *parent, PyTypeObject *child)
 {
     m_d->classHierarchy.addEdge(parent, child);
 }
 
-SbkObjectType *BindingManager::resolveType(void **cptr, SbkObjectType *type)
+PyTypeObject *BindingManager::resolveType(void **cptr, PyTypeObject *type)
 {
-    SbkObjectType *identifiedType = m_d->classHierarchy.identifyType(cptr, type, type);
+    PyTypeObject *identifiedType = m_d->classHierarchy.identifyType(cptr, type, type);
     return identifiedType ? identifiedType : type;
 }
 

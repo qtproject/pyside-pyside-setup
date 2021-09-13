@@ -2702,7 +2702,7 @@ void CppGenerator::writePythonToCppTypeConversion(TextStream &s,
     if (!defaultValue.isEmpty())
         s << "if (" << pythonToCppFunc << ") {\n" << indent;
 
-    s << "if (Shiboken::Conversions::isImplicitConversion(reinterpret_cast<SbkObjectType *>("
+    s << "if (Shiboken::Conversions::isImplicitConversion(reinterpret_cast<PyTypeObject *>("
         << cpythonTypeNameExt(type) << "), " << pythonToCppFunc << "))\n"
         << indent << pythonToCppFunc << '(' << pyIn << ", &" << cppOutAux << ");\n"
         << outdent << "else\n" << indent
@@ -4035,7 +4035,7 @@ void CppGenerator::writeSpecialCastFunction(TextStream &s, const AbstractMetaCla
 {
     QString className = metaClass->qualifiedCppName();
     s << "static void * " << cpythonSpecialCastFunctionName(metaClass)
-        << "(void *obj, SbkObjectType *desiredType)\n{\n" << indent
+        << "(void *obj, PyTypeObject *desiredType)\n{\n" << indent
         << "auto me = reinterpret_cast< ::" << className << " *>(obj);\n";
     bool firstClass = true;
     const AbstractMetaClassList &allAncestors = metaClass->allTypeSystemAncestors();
@@ -4425,8 +4425,8 @@ void CppGenerator::writeClassDefinition(TextStream &s,
 
     const QString typePtr = QLatin1String("_") + className
         + QLatin1String("_Type");
-    s << "static SbkObjectType *" << typePtr << " = nullptr;\n"
-        << "static SbkObjectType *" << className << "_TypeF(void)\n"
+    s << "static PyTypeObject *" << typePtr << " = nullptr;\n"
+        << "static PyTypeObject *" << className << "_TypeF(void)\n"
         << "{\n" << indent << "return " << typePtr << ";\n" << outdent
         << "}\n\nstatic PyType_Slot " << className << "_slots[] = {\n" << indent
         << "{Py_tp_base,        nullptr}, // inserted by introduceWrapperType\n"
@@ -5809,7 +5809,7 @@ void CppGenerator::writeTypeDiscoveryFunction(TextStream &s, const AbstractMetaC
     QString polymorphicExpr = metaClass->typeEntry()->polymorphicIdValue();
 
     s << "static void *" << cpythonBaseName(metaClass)
-        << "_typeDiscovery(void *cptr, SbkObjectType *instanceType)\n{\n" << indent;
+        << "_typeDiscovery(void *cptr, PyTypeObject *instanceType)\n{\n" << indent;
 
     if (!polymorphicExpr.isEmpty()) {
         polymorphicExpr = polymorphicExpr.replace(QLatin1String("%1"),

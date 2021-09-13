@@ -825,13 +825,13 @@ init_PepRuntime()
  */
 
 /*
- * SbkObjectType extender
+ * PyTypeObject extender
  */
-static std::unordered_map<SbkObjectType *, SbkObjectTypePrivate > SOTP_extender{};
-static thread_local SbkObjectType *SOTP_key{};
+static std::unordered_map<PyTypeObject *, SbkObjectTypePrivate > SOTP_extender{};
+static thread_local PyTypeObject *SOTP_key{};
 static thread_local SbkObjectTypePrivate *SOTP_value{};
 
-SbkObjectTypePrivate *PepType_SOTP(SbkObjectType *sbkType)
+SbkObjectTypePrivate *PepType_SOTP(PyTypeObject *sbkType)
 {
     if (sbkType == SOTP_key)
         return SOTP_value;
@@ -845,7 +845,7 @@ SbkObjectTypePrivate *PepType_SOTP(SbkObjectType *sbkType)
     return SOTP_value;
 }
 
-void PepType_SOTP_delete(SbkObjectType *sbkType)
+void PepType_SOTP_delete(PyTypeObject *sbkType)
 {
     SOTP_extender.erase(sbkType);
     SOTP_key = nullptr;

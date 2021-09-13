@@ -249,7 +249,7 @@ static const char *SbkObject_SignatureStrings[] = {
     "Shiboken.Object(self)",
     nullptr}; // Sentinel
 
-SbkObjectType *SbkObject_TypeF(void)
+PyTypeObject *SbkObject_TypeF(void)
 {
     static PyTypeObject *type = nullptr;
     if (!type) {
@@ -544,7 +544,7 @@ static PyObject *SbkObjectTypeTpNew(PyTypeObject *metatype, PyObject *args, PyOb
 
     // PYSIDE-1463: Prevent feature switching while in the creation process
     auto saveFeature = initSelectableFeature(nullptr);
-    for (SbkObjectType *base : bases) {
+    for (PyTypeObject *base : bases) {
         sotp = PepType_SOTP(base);
         if (sotp->subtype_init)
             sotp->subtype_init(newType, args, kwds);
@@ -722,25 +722,25 @@ bool walkThroughClassHierarchy(PyTypeObject *currentType, HierarchyVisitor *visi
 HierarchyVisitor::HierarchyVisitor() = default;
 HierarchyVisitor::~HierarchyVisitor() = default;
 
-bool BaseCountVisitor::visit(SbkObjectType *)
+bool BaseCountVisitor::visit(PyTypeObject *)
 {
     m_count++;
     return false;
 }
 
-bool BaseAccumulatorVisitor::visit(SbkObjectType *node)
+bool BaseAccumulatorVisitor::visit(PyTypeObject *node)
 {
     m_bases.push_back(node);
     return false;
 }
 
-bool GetIndexVisitor::visit(SbkObjectType *node)
+bool GetIndexVisitor::visit(PyTypeObject *node)
 {
     m_index++;
     return PyType_IsSubtype(node, m_desiredType);
 }
 
-bool DtorAccumulatorVisitor::visit(SbkObjectType *node)
+bool DtorAccumulatorVisitor::visit(PyTypeObject *node)
 {
     auto *sotp = PepType_SOTP(node);
     m_entries.push_back(DestructorEntry{sotp->cpp_dtor,
@@ -802,7 +802,7 @@ class FindBaseTypeVisitor : public HierarchyVisitor
 public:
     explicit FindBaseTypeVisitor(PyTypeObject *typeToFind) : m_typeToFind(typeToFind) {}
 
-    bool visit(SbkObjectType *node) override
+    bool visit(PyTypeObject *node) override
     {
         return node == m_typeToFind;
     }
@@ -859,24 +859,24 @@ bool canCallConstructor(PyTypeObject *myType, PyTypeObject *ctorType)
     return true;
 }
 
-bool hasCast(SbkObjectType *type)
+bool hasCast(PyTypeObject *type)
 {
     return PepType_SOTP(type)->mi_specialcast != nullptr;
 }
 
-void *cast(SbkObjectType *sourceType, SbkObject *obj, PyTypeObject *pyTargetType)
+void *cast(PyTypeObject *sourceType, SbkObject *obj, PyTypeObject *pyTargetType)
 {
     auto *sotp = PepType_SOTP(sourceType);
     return sotp->mi_specialcast(Object::cppPointer(obj, pyTargetType), pyTargetType);
 }
 
-void setCastFunction(SbkObjectType *type, SpecialCastFunction func)
+void setCastFunction(PyTypeObject *type, SpecialCastFunction func)
 {
     auto *sotp = PepType_SOTP(type);
     sotp->mi_specialcast = func;
 }
 
-void setOriginalName(SbkObjectType *type, const char *name)
+void setOriginalName(PyTypeObject *type, const char *name)
 {
     auto *sotp = PepType_SOTP(type);
     if (sotp->original_name)
@@ -884,17 +884,17 @@ void setOriginalName(SbkObjectType *type, const char *name)
     sotp->original_name = strdup(name);
 }
 
-const char *getOriginalName(SbkObjectType *type)
+const char *getOriginalName(PyTypeObject *type)
 {
     return PepType_SOTP(type)->original_name;
 }
 
-void setTypeDiscoveryFunctionV2(SbkObjectType *type, TypeDiscoveryFuncV2 func)
+void setTypeDiscoveryFunctionV2(PyTypeObject *type, TypeDiscoveryFuncV2 func)
 {
     PepType_SOTP(type)->type_discovery = func;
 }
 
-void copyMultipleInheritance(SbkObjectType *type, SbkObjectType *other)
+void copyMultipleInheritance(PyTypeObject *type, PyTypeObject *other)
 {
     auto *sotp_type = PepType_SOTP(type);
     auto *sotp_other = PepType_SOTP(other);
@@ -903,28 +903,28 @@ void copyMultipleInheritance(SbkObjectType *type, SbkObjectType *other)
     sotp_type->mi_specialcast = sotp_other->mi_specialcast;
 }
 
-void setMultipleInheritanceFunction(SbkObjectType *type, MultipleInheritanceInitFunction function)
+void setMultipleInheritanceFunction(PyTypeObject *type, MultipleInheritanceInitFunction function)
 {
     PepType_SOTP(type)->mi_init = function;
 }
 
-MultipleInheritanceInitFunction getMultipleInheritanceFunction(SbkObjectType *type)
+MultipleInheritanceInitFunction getMultipleInheritanceFunction(PyTypeObject *type)
 {
     return PepType_SOTP(type)->mi_init;
 }
 
-void setDestructorFunction(SbkObjectType *type, ObjectDestructor func)
+void setDestructorFunction(PyTypeObject *type, ObjectDestructor func)
 {
     PepType_SOTP(type)->cpp_dtor = func;
 }
 
-SbkObjectType *
+PyTypeObject *
 introduceWrapperType(PyObject *enclosingObject,
                      const char *typeName,
                      const char *originalName,
                      PyType_Spec *typeSpec,
                      ObjectDestructor cppObjDtor,
-                     SbkObjectType *baseType,
+                     PyTypeObject *baseType,
                      PyObject *baseTypes,
                      unsigned wrapperFlags)
 {
@@ -969,17 +969,17 @@ introduceWrapperType(PyObject *enclosingObject,
     return type;
 }
 
-void setSubTypeInitHook(SbkObjectType *type, SubTypeInitHook func)
+void setSubTypeInitHook(PyTypeObject *type, SubTypeInitHook func)
 {
     PepType_SOTP(type)->subtype_init = func;
 }
 
-void *getTypeUserData(SbkObjectType *type)
+void *getTypeUserData(PyTypeObject *type)
 {
     return PepType_SOTP(type)->user_data;
 }
 
-void setTypeUserData(SbkObjectType *type, void *userData, DeleteUserDataFunc d_func)
+void setTypeUserData(PyTypeObject *type, void *userData, DeleteUserDataFunc d_func)
 {
     auto *sotp = PepType_SOTP(type);
     sotp->user_data = userData;
@@ -987,9 +987,9 @@ void setTypeUserData(SbkObjectType *type, void *userData, DeleteUserDataFunc d_f
 }
 
 // Try to find the exact type of cptr.
-SbkObjectType *typeForTypeName(const char *typeName)
+PyTypeObject *typeForTypeName(const char *typeName)
 {
-    SbkObjectType *result{};
+    PyTypeObject *result{};
     if (typeName) {
         if (PyTypeObject *pyType = Shiboken::Conversions::getPythonTypeObject(typeName))
             result = pyType;
@@ -997,7 +997,7 @@ SbkObjectType *typeForTypeName(const char *typeName)
     return result;
 }
 
-bool hasSpecialCastFunction(SbkObjectType *sbkType)
+bool hasSpecialCastFunction(PyTypeObject *sbkType)
 {
     const auto *d = PepType_SOTP(sbkType);
     return d != nullptr && d->mi_specialcast != nullptr;
@@ -1347,7 +1347,7 @@ bool isValid(PyObject *pyObj, bool throwPyError)
 }
 
 SbkObject *findColocatedChild(SbkObject *wrapper,
-                              const SbkObjectType *instanceType)
+                              const PyTypeObject *instanceType)
 {
     // Degenerate case, wrapper is the correct wrapper.
     if (reinterpret_cast<const void *>(Py_TYPE(wrapper)) == reinterpret_cast<const void *>(instanceType))
@@ -1373,7 +1373,7 @@ SbkObject *findColocatedChild(SbkObject *wrapper,
     return nullptr;
 }
 
-PyObject *newObject(SbkObjectType *instanceType,
+PyObject *newObject(PyTypeObject *instanceType,
                     void *cptr,
                     bool hasOwnership,
                     bool isExactType,
@@ -1381,7 +1381,7 @@ PyObject *newObject(SbkObjectType *instanceType,
 {
     // Try to find the exact type of cptr.
     if (!isExactType) {
-        if (SbkObjectType *exactType = ObjectType::typeForTypeName(typeName))
+        if (PyTypeObject *exactType = ObjectType::typeForTypeName(typeName))
             instanceType = exactType;
         else
             instanceType = BindingManager::instance().resolveType(&cptr, instanceType);
@@ -1683,7 +1683,7 @@ std::string info(SbkObject *self)
     std::ostringstream s;
 
     if (self->d && self->d->cptr) {
-        std::vector<SbkObjectType *> bases;
+        std::vector<PyTypeObject *> bases;
         if (ObjectType::isUserType(Py_TYPE(self)))
             bases = getCppBaseClasses(Py_TYPE(self));
         else

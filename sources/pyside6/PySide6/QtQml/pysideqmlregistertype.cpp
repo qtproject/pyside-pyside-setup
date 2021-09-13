@@ -128,7 +128,7 @@ int PySide::qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
                 QQmlPrivate::StaticCastSelector<QObject, QQmlPropertyValueInterceptor>::cast();
 
         int objectSize = static_cast<int>(PySide::getSizeOfQObject(
-                                              reinterpret_cast<SbkObjectType *>(pyObj)));
+                                              reinterpret_cast<PyTypeObject *>(pyObj)));
         type.objectSize = objectSize;
         type.create = creatable ? createInto : nullptr;
         type.noCreationReason = noCreationReason;
@@ -247,7 +247,7 @@ int PySide::qmlRegisterSingletonType(PyObject *pyObj, const char *uri, int versi
 
                 AutoDecRef retVal(PyObject_CallObject(callback, args));
 
-                SbkObjectType *qjsvalueType = SbkPySide6_QtQmlTypes[SBK_QJSVALUE_IDX];
+                PyTypeObject *qjsvalueType = SbkPySide6_QtQmlTypes[SBK_QJSVALUE_IDX];
 
                 // Make sure the callback returns something we can convert, else the entire application will crash.
                 if (retVal.isNull() ||

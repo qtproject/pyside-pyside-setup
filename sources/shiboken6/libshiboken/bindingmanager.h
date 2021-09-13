@@ -74,7 +74,7 @@ public:
     SbkObject *retrieveWrapper(const void *cptr);
     PyObject *getOverride(const void *cptr, PyObject *nameCache[], const char *methodName);
 
-    void addClassInheritance(SbkObjectType *parent, SbkObjectType *child);
+    void addClassInheritance(PyTypeObject *parent, PyTypeObject *child);
     /**
      * Try to find the correct type of *cptr knowing that it's at least of type \p type.
      * In case of multiple inheritance this function may change the contents of cptr.
@@ -82,7 +82,7 @@ public:
      * \param type type of *cptr
      * \warning This function is slow, use it only as last resort.
      */
-    SbkObjectType *resolveType(void **cptr, SbkObjectType *type);
+    PyTypeObject *resolveType(void **cptr, PyTypeObject *type);
 
     std::set<PyObject *> getAllPyObjects();
 
