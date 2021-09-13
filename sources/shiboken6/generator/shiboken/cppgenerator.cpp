@@ -59,6 +59,7 @@
 #include <cstring>
 
 static const char CPP_ARG0[] = "cppArg0";
+const char *CppGenerator::PYTHON_TO_CPPCONVERSION_STRUCT = "Shiboken::Conversions::PythonToCppConversion";
 
 static inline QString reprFunction() { return QStringLiteral("__repr__"); }
 
@@ -1171,7 +1172,8 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
 
                 s << "// Check return type\n";
                 if (func->typeReplaced(0).isEmpty()) {
-                    s << "PythonToCppFunc " << PYTHON_TO_CPP_VAR << " = "
+                    s << PYTHON_TO_CPPCONVERSION_STRUCT
+                        << ' ' << PYTHON_TO_CPP_VAR << " = "
                         << cpythonIsConvertibleFunction(func->type())
                         << PYTHON_RETURN_VAR << ");\n"
                         << "if (!" << PYTHON_TO_CPP_VAR << ") {\n";
@@ -1864,15 +1866,10 @@ static const char *fullName = ")" << fullPythonFunctionName(rfunc, true)
          << "\";\nSBK_UNUSED(fullName)\n";
     if (maxArgs > 0) {
         s << "int overloadId = -1;\n"
-            << "PythonToCppFunc " << PYTHON_TO_CPP_VAR;
-        if (overloadData.pythonFunctionWrapperUsesListOfArguments()) {
-            s << "[] = { " << NULL_PTR;
-            for (int i = 1; i < maxArgs; ++i)
-                s << ", " << NULL_PTR;
-            s << " };\n";
-        } else {
-            s << "{};\n";
-        }
+            << PYTHON_TO_CPPCONVERSION_STRUCT << ' ' << PYTHON_TO_CPP_VAR;
+        if (overloadData.pythonFunctionWrapperUsesListOfArguments())
+            s << '[' << maxArgs << ']';
+        s << ";\n";
         writeUnusedVariableCast(s, QLatin1String(PYTHON_TO_CPP_VAR));
     }
 
@@ -2684,8 +2681,7 @@ void CppGenerator::writePythonToCppTypeConversion(TextStream &s,
     if (!defaultValue.isEmpty())
         s << "if (" << pythonToCppFunc << ") {\n" << indent;
 
-    s << "if (Shiboken::Conversions::isImplicitConversion(reinterpret_cast<PyTypeObject *>("
-        << cpythonTypeNameExt(type) << "), " << pythonToCppFunc << "))\n"
+    s << "if (" << pythonToCppFunc << ".isValue())\n"
         << indent << pythonToCppFunc << '(' << pyIn << ", &" << cppOutAux << ");\n"
         << outdent << "else\n" << indent
         << pythonToCppCall << ";\n" << outdent;
@@ -4816,7 +4812,7 @@ void CppGenerator::writeSetterFunctionPreamble(TextStream &s, const QString &nam
         << "return -1;\n"
         << outdent << "}\n";
 
-    s << "PythonToCppFunc " << PYTHON_TO_CPP_VAR << "{nullptr};\n"
+    s << PYTHON_TO_CPPCONVERSION_STRUCT << ' ' << PYTHON_TO_CPP_VAR << ";\n"
         << "if (!";
     writeTypeCheck(s, type, QLatin1String("pyIn"), isNumber(type.typeEntry()));
     s << ") {\n" << indent
@@ -4892,7 +4888,7 @@ void CppGenerator::writeRichCompareFunction(TextStream &s,
     writeCppSelfDefinition(s, context, false, false, true);
     writeUnusedVariableCast(s, QLatin1String(CPP_SELF_VAR));
     s << "PyObject *" << PYTHON_RETURN_VAR << "{};\n"
-        << "PythonToCppFunc " << PYTHON_TO_CPP_VAR << ";\n";
+        << PYTHON_TO_CPPCONVERSION_STRUCT << ' ' << PYTHON_TO_CPP_VAR << ";\n";
     writeUnusedVariableCast(s, QLatin1String(PYTHON_TO_CPP_VAR));
     s << '\n';
 
@@ -6608,7 +6604,7 @@ void CppGenerator::writeDefaultSequenceMethods(TextStream &s,
     writeCppSelfDefinition(s, context);
     writeIndexError(s, QLatin1String("list assignment index out of range"));
 
-    s << "PythonToCppFunc " << PYTHON_TO_CPP_VAR << ";\n"
+    s << PYTHON_TO_CPPCONVERSION_STRUCT << ' ' << PYTHON_TO_CPP_VAR << ";\n"
         << "if (!";
     writeTypeCheck(s, itemType, QLatin1String("pyArg"), isNumber(itemType.typeEntry()));
     s << ") {\n";

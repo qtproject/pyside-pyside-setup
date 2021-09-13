@@ -446,6 +446,7 @@ private:
     QHash<QString, QString> m_tpFuncs;
 
     static QString m_currentErrorCode;
+    static const char *PYTHON_TO_CPPCONVERSION_STRUCT;
 
     /// Helper class to set and restore the current error code.
     class ErrorCode {

@@ -1152,15 +1152,15 @@ QString ShibokenGenerator::cpythonIsConvertibleFunction(AbstractMetaType metaTyp
     QString result = QLatin1String("Shiboken::Conversions::");
     if (metaType.isWrapperType()) {
         if (metaType.isPointer() || metaType.isValueTypeWithCopyConstructorOnly())
-            result += QLatin1String("isPythonToCppPointerConvertible");
+            result += u"pythonToCppPointerConversion"_qs;
         else if (metaType.referenceType() == LValueReference)
-            result += QLatin1String("isPythonToCppReferenceConvertible");
+            result += u"pythonToCppReferenceConversion"_qs;
         else
-            result += QLatin1String("isPythonToCppValueConvertible");
+            result += u"pythonToCppValueConversion"_qs;
         result += u'(' + cpythonTypeNameExt(metaType) + u", "_qs;
         return result;
     }
-    result += QLatin1String("isPythonToCppConvertible(") + converterObject(metaType);
+    result += u"pythonToCppConversion("_qs + converterObject(metaType);
     // Write out array sizes if known
     const AbstractMetaTypeList nestedArrayTypes = metaType.nestedArrayTypes();
     if (!nestedArrayTypes.isEmpty() && nestedArrayTypes.constLast().isCppPrimitive()) {

@@ -253,6 +253,15 @@ PythonToCppFunc isPythonToCppPointerConvertible(PyTypeObject *type, PyObject *py
     return sotp->converter->toCppPointerConversion.first(pyIn);
 }
 
+PythonToCppConversion pythonToCppPointerConversion(PyTypeObject *type, PyObject *pyIn)
+{
+    if (pyIn == nullptr)
+        return {};
+    if (PythonToCppFunc toCppPtr = isPythonToCppPointerConvertible(type, pyIn))
+        return {toCppPtr, PythonToCppConversion::Pointer};
+    return {};
+}
+
 static inline PythonToCppFunc IsPythonToCppConvertible(const SbkConverter *converter, PyObject *pyIn)
 {
     assert(pyIn);
@@ -269,9 +278,38 @@ PythonToCppFunc isPythonToCppValueConvertible(PyTypeObject *type, PyObject *pyIn
     return IsPythonToCppConvertible(sotp->converter, pyIn);
 }
 
+PythonToCppConversion pythonToCppValueConversion(PyTypeObject *type, PyObject *pyIn)
+{
+    if (pyIn == nullptr)
+        return {};
+    if (PythonToCppFunc toCppVal = isPythonToCppValueConvertible(type, pyIn))
+        return {toCppVal, PythonToCppConversion::Value};
+    return {};
+}
+
 PythonToCppFunc isPythonToCppConvertible(const SbkConverter *converter, PyObject *pyIn)
 {
     return IsPythonToCppConvertible(converter, pyIn);
+}
+
+PythonToCppConversion pythonToCppReferenceConversion(const SbkConverter *converter, PyObject *pyIn)
+{
+    if (converter->toCppPointerConversion.first) {
+        if (auto toCppPtr = converter->toCppPointerConversion.first(pyIn))
+            return {toCppPtr, PythonToCppConversion::Pointer};
+    }
+    for (const ToCppConversion &c : converter->toCppConversions) {
+        if (PythonToCppFunc toCppFunc = c.first(pyIn))
+            return {toCppFunc, PythonToCppConversion::Value};
+    }
+    return {};
+}
+
+PythonToCppConversion pythonToCppConversion(const SbkConverter *converter, PyObject *pyIn)
+{
+    if (auto func = IsPythonToCppConvertible(converter, pyIn))
+        return {func, PythonToCppConversion::Value};
+    return {};
 }
 
 PythonToCppFunc isPythonToCppConvertible(const SbkArrayConverter *converter,
@@ -285,6 +323,14 @@ PythonToCppFunc isPythonToCppConvertible(const SbkArrayConverter *converter,
     return nullptr;
 }
 
+LIBSHIBOKEN_API PythonToCppConversion pythonToCppConversion(const SbkArrayConverter *converter,
+                                                                int dim1, int dim2, PyObject *pyIn)
+{
+    if (auto func = isPythonToCppConvertible(converter, dim1, dim2, pyIn))
+        return {func, PythonToCppConversion::Value};
+    return {};
+}
+
 PythonToCppFunc isPythonToCppReferenceConvertible(PyTypeObject *type, PyObject *pyIn)
 {
     if (pyIn != Py_None) {
@@ -293,6 +339,19 @@ PythonToCppFunc isPythonToCppReferenceConvertible(PyTypeObject *type, PyObject *
             return toCpp;
     }
     return isPythonToCppValueConvertible(type, pyIn);
+}
+
+PythonToCppConversion pythonToCppReferenceConversion(PyTypeObject *type, PyObject *pyIn)
+{
+    if (pyIn == nullptr)
+        return {};
+    if (pyIn != Py_None) {
+        if (PythonToCppFunc toCppPtr = isPythonToCppPointerConvertible(type, pyIn))
+            return {toCppPtr, PythonToCppConversion::Pointer};
+    }
+    if (PythonToCppFunc toCppVal = isPythonToCppValueConvertible(type, pyIn))
+        return {toCppVal, PythonToCppConversion::Value};
+    return {};
 }
 
 void nonePythonToCppNullPtr(PyObject *, void *cppOut)
