@@ -1266,7 +1266,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
                 s << '(' << typeCast << ')';
             }
         }
-        if (func->type().shouldDereferencePointer())
+        if (func->type().isWrapperPassedByReference())
             s << " *";
         s << CPP_RETURN_VAR << ";\n";
     }
@@ -3328,7 +3328,7 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s, const Abst
     for (int i = 0; i < containerType.instantiations().count(); ++i) {
         const AbstractMetaType &type = containerType.instantiations().at(i);
         QString typeName = getFullTypeName(type);
-        if (type.valueTypeWithCopyConstructorOnlyPassed()) {
+        if (type.shouldDereferenceArgument()) {
             for (int pos = 0; ; ) {
                 const QRegularExpressionMatch match = convertToCppRegEx().match(code, pos);
                 if (!match.hasMatch())
@@ -3597,9 +3597,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                         userArgs.append(arg.name() + QLatin1String(CONV_RULE_OUT_VAR_SUFFIX));
                     } else {
                         const int idx = arg.argumentIndex() - removedArgs;
-                        const bool deRef = arg.type().valueTypeWithCopyConstructorOnlyPassed()
-                                           || arg.type().isObjectTypeUsedAsValueType()
-                                           || arg.type().shouldDereferencePointer();
+                        const bool deRef = arg.type().shouldDereferenceArgument();
                         QString argName;
                         if (deRef)
                             argName += QLatin1Char('*');
@@ -3646,7 +3644,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
             firstArg += QLatin1Char(')');
             QString secondArg = QLatin1String(CPP_ARG0);
             if (!func->isUnaryOperator()
-                && func->arguments().constFirst().type().shouldDereferencePointer()) {
+                && func->arguments().constFirst().type().shouldDereferenceArgument()) {
                 AbstractMetaType::dereference(&secondArg);
             }
 
@@ -4983,7 +4981,7 @@ void CppGenerator::writeRichCompareFunction(TextStream &s,
                         if (func->isPointerOperator())
                             s << '&';
                         s << CPP_SELF_VAR << ' ' << op << '(';
-                        if (argType.shouldDereferencePointer())
+                        if (argType.shouldDereferenceArgument())
                             s << '*';
                         s << CPP_ARG0 << ");\n"
                             << PYTHON_RETURN_VAR << " = ";

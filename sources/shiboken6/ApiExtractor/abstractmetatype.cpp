@@ -754,10 +754,17 @@ bool AbstractMetaType::isPointerToWrapperType() const
     return (isObjectType() && d->m_indirections.size() == 1) || isValuePointer();
 }
 
-bool AbstractMetaType::shouldDereferencePointer() const
+bool AbstractMetaType::isWrapperPassedByReference() const
 {
     return d->m_referenceType == LValueReference && isWrapperType()
         && !isPointer();
+}
+
+bool AbstractMetaType::shouldDereferenceArgument() const
+{
+    return isWrapperPassedByReference()
+        || valueTypeWithCopyConstructorOnlyPassed()
+        || isObjectTypeUsedAsValueType();
 }
 
 bool AbstractMetaType::isCppIntegralPrimitive() const

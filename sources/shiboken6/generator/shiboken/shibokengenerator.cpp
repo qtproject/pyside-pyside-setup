@@ -1576,7 +1576,7 @@ ShibokenGenerator::ArgumentVarReplacementList
                     argValue = hasConversionRule
                                ? arg.name() + QLatin1String(CONV_RULE_OUT_VAR_SUFFIX)
                                : QLatin1String(CPP_ARG) + QString::number(argPos);
-                    if (type.shouldDereferencePointer())
+                    if (type.shouldDereferenceArgument())
                         AbstractMetaType::dereference(&argValue);
                 }
             }
@@ -1783,7 +1783,7 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
         }
         if (type.isWrapperType()) {
             QString replacement = pair.second;
-            if (type.shouldDereferencePointer())
+            if (type.shouldDereferenceArgument())
                 AbstractMetaType::stripDereference(&replacement);
             if (type.referenceType() == LValueReference || type.isPointer())
                 code.replace(u'%' + QString::number(idx) + u'.', replacement + u"->"_qs);

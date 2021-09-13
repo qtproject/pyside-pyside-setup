@@ -217,8 +217,11 @@ public:
     /// Checks if the type is an Object/QObject or pointer to Value Type.
     /// In other words, tells if the type is "T*" and T has a Python wrapper.
     bool isPointerToWrapperType() const;
-    /// Checks if a meta type should be dereferenced by the Python method wrapper passing it to C++.
-    bool shouldDereferencePointer() const;
+    /// Wrapper type passed by reference
+    bool isWrapperPassedByReference() const;
+    /// Checks if the meta type of an argument should be dereferenced by the Python
+    /// method wrapper passing it to C++.
+    bool shouldDereferenceArgument() const;
     /// Returns true if the type is a C++ integral primitive,
     /// i.e. bool, char, int, long, and their unsigned counterparts.
     bool isCppIntegralPrimitive() const;
