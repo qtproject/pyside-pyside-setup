@@ -20,10 +20,14 @@
 
     <add-function signature="wrapInstance(size_t, PyType)" return-type="PyObject*">
         <inject-code>
-            if (Shiboken::ObjectType::checkType((PyTypeObject*)%2))
-                %PYARG_0 = Shiboken::Object::newObject((SbkObjectType*)%2, (void*)%1, false, true);
-            else
+            auto *pyType = reinterpret_cast&lt;PyTypeObject *&gt;(%2);
+            if (Shiboken::ObjectType::checkType(pyType)) {
+                %PYARG_0 = Shiboken::Object::newObject(pyType,
+                                                       reinterpret_cast&lt;void *&gt;(%1),
+                                                       false, true);
+            } else {
                 PyErr_SetString(PyExc_TypeError, "You need a shiboken-based type.");
+            }
         </inject-code>
     </add-function>
 

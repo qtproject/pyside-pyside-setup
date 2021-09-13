@@ -212,13 +212,13 @@ int PySide::qmlRegisterSingletonType(PyObject *pyObj, const char *uri, int versi
 
                 if (hasCallback) {
                     PyTuple_SET_ITEM(args, 0, Conversions::pointerToPython(
-                                         (SbkObjectType *)SbkPySide6_QtQmlTypes[SBK_QQMLENGINE_IDX],
-                                         engine));
+                                     SbkPySide6_QtQmlTypes[SBK_QQMLENGINE_IDX],
+                                     engine));
                 }
 
                 AutoDecRef retVal(PyObject_CallObject(hasCallback ? callback : pyObj, args));
 
-                SbkObjectType *qobjectType = (SbkObjectType *)SbkPySide6_QtCoreTypes[SBK_QOBJECT_IDX];
+                PyTypeObject *qobjectType = SbkPySide6_QtCoreTypes[SBK_QOBJECT_IDX];
 
                 // Make sure the callback returns something we can convert, else the entire application will crash.
                 if (retVal.isNull() ||
@@ -242,12 +242,12 @@ int PySide::qmlRegisterSingletonType(PyObject *pyObj, const char *uri, int versi
                 AutoDecRef args(PyTuple_New(1));
 
                 PyTuple_SET_ITEM(args, 0, Conversions::pointerToPython(
-                                     (SbkObjectType *)SbkPySide6_QtQmlTypes[SBK_QQMLENGINE_IDX],
-                                     engine));
+                                 SbkPySide6_QtQmlTypes[SBK_QQMLENGINE_IDX],
+                                 engine));
 
                 AutoDecRef retVal(PyObject_CallObject(callback, args));
 
-                SbkObjectType *qjsvalueType = (SbkObjectType *)SbkPySide6_QtQmlTypes[SBK_QJSVALUE_IDX];
+                SbkObjectType *qjsvalueType = SbkPySide6_QtQmlTypes[SBK_QJSVALUE_IDX];
 
                 // Make sure the callback returns something we can convert, else the entire application will crash.
                 if (retVal.isNull() ||
@@ -422,8 +422,11 @@ void propListAppender(QQmlListProperty<QObject> *propList, QObject *item)
     Shiboken::GilState state;
 
     Shiboken::AutoDecRef args(PyTuple_New(2));
-    PyTuple_SET_ITEM(args, 0, Shiboken::Conversions::pointerToPython((SbkObjectType *)SbkPySide6_QtCoreTypes[SBK_QOBJECT_IDX], propList->object));
-    PyTuple_SET_ITEM(args, 1, Shiboken::Conversions::pointerToPython((SbkObjectType *)SbkPySide6_QtCoreTypes[SBK_QOBJECT_IDX], item));
+    PyTypeObject *qobjectType = SbkPySide6_QtCoreTypes[SBK_QOBJECT_IDX];
+    PyTuple_SET_ITEM(args, 0,
+                     Shiboken::Conversions::pointerToPython(qobjectType, propList->object));
+    PyTuple_SET_ITEM(args, 1,
+                     Shiboken::Conversions::pointerToPython(qobjectType, item));
 
     auto data = reinterpret_cast<QmlListProperty *>(propList->data);
     Shiboken::AutoDecRef retVal(PyObject_CallObject(data->append, args));
@@ -438,7 +441,9 @@ qsizetype propListCount(QQmlListProperty<QObject> *propList)
     Shiboken::GilState state;
 
     Shiboken::AutoDecRef args(PyTuple_New(1));
-    PyTuple_SET_ITEM(args, 0, Shiboken::Conversions::pointerToPython((SbkObjectType *)SbkPySide6_QtCoreTypes[SBK_QOBJECT_IDX], propList->object));
+    PyTypeObject *qobjectType = SbkPySide6_QtCoreTypes[SBK_QOBJECT_IDX];
+    PyTuple_SET_ITEM(args, 0,
+                     Shiboken::Conversions::pointerToPython(qobjectType, propList->object));
 
     auto data = reinterpret_cast<QmlListProperty *>(propList->data);
     Shiboken::AutoDecRef retVal(PyObject_CallObject(data->count, args));
@@ -459,7 +464,9 @@ QObject *propListAt(QQmlListProperty<QObject> *propList, qsizetype index)
     Shiboken::GilState state;
 
     Shiboken::AutoDecRef args(PyTuple_New(2));
-    PyTuple_SET_ITEM(args, 0, Shiboken::Conversions::pointerToPython((SbkObjectType *)SbkPySide6_QtCoreTypes[SBK_QOBJECT_IDX], propList->object));
+    PyTypeObject *qobjectType = SbkPySide6_QtCoreTypes[SBK_QOBJECT_IDX];
+    PyTuple_SET_ITEM(args, 0,
+                     Shiboken::Conversions::pointerToPython(qobjectType, propList->object));
     PyTuple_SET_ITEM(args, 1, Shiboken::Conversions::copyToPython(Shiboken::Conversions::PrimitiveTypeConverter<qsizetype>(), &index));
 
     auto data = reinterpret_cast<QmlListProperty *>(propList->data);
@@ -469,7 +476,7 @@ QObject *propListAt(QQmlListProperty<QObject> *propList, qsizetype index)
     if (PyErr_Occurred())
         PyErr_Print();
     else if (PyType_IsSubtype(Py_TYPE(retVal), data->type))
-        Shiboken::Conversions::pythonToCppPointer((SbkObjectType *)SbkPySide6_QtCoreTypes[SBK_QOBJECT_IDX], retVal, &result);
+        Shiboken::Conversions::pythonToCppPointer(qobjectType, retVal, &result);
     return result;
 }
 
@@ -479,7 +486,9 @@ void propListClear(QQmlListProperty<QObject> * propList)
     Shiboken::GilState state;
 
     Shiboken::AutoDecRef args(PyTuple_New(1));
-    PyTuple_SET_ITEM(args, 0, Shiboken::Conversions::pointerToPython((SbkObjectType *)SbkPySide6_QtCoreTypes[SBK_QOBJECT_IDX], propList->object));
+    PyTypeObject *qobjectType = SbkPySide6_QtCoreTypes[SBK_QOBJECT_IDX];
+    PyTuple_SET_ITEM(args, 0,
+                     Shiboken::Conversions::pointerToPython(qobjectType, propList->object));
 
     auto data = reinterpret_cast<QmlListProperty *>(propList->data);
     Shiboken::AutoDecRef retVal(PyObject_CallObject(data->clear, args));
@@ -494,9 +503,12 @@ void propListReplace(QQmlListProperty<QObject> *propList, qsizetype index, QObje
     Shiboken::GilState state;
 
     Shiboken::AutoDecRef args(PyTuple_New(3));
-    PyTuple_SET_ITEM(args, 0, Shiboken::Conversions::pointerToPython((SbkObjectType *)SbkPySide6_QtCoreTypes[SBK_QOBJECT_IDX], propList->object));
+    PyTypeObject *qobjectType = SbkPySide6_QtCoreTypes[SBK_QOBJECT_IDX];
+    PyTuple_SET_ITEM(args, 0,
+                     Shiboken::Conversions::pointerToPython(qobjectType, propList->object));
     PyTuple_SET_ITEM(args, 1, Shiboken::Conversions::copyToPython(Shiboken::Conversions::PrimitiveTypeConverter<qsizetype>(), &index));
-    PyTuple_SET_ITEM(args, 2, Shiboken::Conversions::pointerToPython((SbkObjectType *)SbkPySide6_QtCoreTypes[SBK_QOBJECT_IDX], value));
+    PyTuple_SET_ITEM(args, 2,
+                     Shiboken::Conversions::pointerToPython(qobjectType, value));
 
     auto data = reinterpret_cast<QmlListProperty *>(propList->data);
     Shiboken::AutoDecRef retVal(PyObject_CallObject(data->replace, args));
@@ -511,7 +523,9 @@ void propListRemoveLast(QQmlListProperty<QObject> *propList)
     Shiboken::GilState state;
 
     Shiboken::AutoDecRef args(PyTuple_New(1));
-    PyTuple_SET_ITEM(args, 0, Shiboken::Conversions::pointerToPython((SbkObjectType *)SbkPySide6_QtCoreTypes[SBK_QOBJECT_IDX], propList->object));
+    PyTypeObject *qobjectType = SbkPySide6_QtCoreTypes[SBK_QOBJECT_IDX];
+    PyTuple_SET_ITEM(args, 0,
+                     Shiboken::Conversions::pointerToPython(qobjectType, propList->object));
 
     auto data = reinterpret_cast<QmlListProperty *>(propList->data);
     Shiboken::AutoDecRef retVal(PyObject_CallObject(data->removeLast, args));
@@ -528,7 +542,8 @@ static void propListMetaCall(PySideProperty *pp, PyObject *self, QMetaObject::Ca
 
     auto data = reinterpret_cast<QmlListProperty *>(PySide::Property::userData(pp));
     QObject *qobj;
-    Shiboken::Conversions::pythonToCppPointer((SbkObjectType *)SbkPySide6_QtCoreTypes[SBK_QOBJECT_IDX], self, &qobj);
+    PyTypeObject *qobjectType = SbkPySide6_QtCoreTypes[SBK_QOBJECT_IDX];
+    Shiboken::Conversions::pythonToCppPointer(qobjectType, self, &qobj);
     QQmlListProperty<QObject> declProp(qobj, data,
                                        data->append && data->append != Py_None ? &propListAppender : nullptr,
                                        data->count && data->count != Py_None ? &propListCount : nullptr,
