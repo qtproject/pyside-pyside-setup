@@ -1615,6 +1615,33 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
     s << "// Begin code injection\n" << code << "// End of code injection\n\n";
 }
 
+static void replacePyArg0(TypeSystem::Language language, QString *code)
+{
+    static const QString pyArg0 = u"%PYARG_0"_qs;
+    static const QString pyReturn = QLatin1String(PYTHON_RETURN_VAR);
+
+    if (!code->contains(pyArg0))
+        return;
+    if (language != TypeSystem::NativeCode) {
+        code->replace(pyArg0, pyReturn);
+        return;
+    }
+
+    // pyResult is an AutoDecRef in overridden methods of wrapper classes which
+    // has a cast operator for PyObject *. This may however not work in all
+    // situations (fex _PyVarObject_CAST(op) defined as ((PyVarObject*)(op))).
+    // Append ".object()" unless it is followed by a '.' indicating explicit
+    // AutoDecRef member invocation.
+    static const QString pyObject = pyReturn + u".object()"_qs;
+    qsizetype pos{};
+    while ( (pos = code->indexOf(pyArg0)) >= 0) {
+        const auto next = pos + pyArg0.size();
+        const bool memberInvocation = next < code->size() && code->at(next) == u'.';
+        code->replace(pos, pyArg0.size(),
+                      memberInvocation ? pyReturn : pyObject);
+    }
+}
+
 void ShibokenGenerator::writeCodeSnips(TextStream &s,
                                        const CodeSnipList &codeSnips,
                                        TypeSystem::CodeSnipPosition position,
@@ -1635,7 +1662,7 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
     }
 
     // Replace %PYARG_# variables.
-    code.replace(QLatin1String("%PYARG_0"), QLatin1String(PYTHON_RETURN_VAR));
+    replacePyArg0(language, &code);
 
     static const QRegularExpression pyArgsRegex(QStringLiteral("%PYARG_(\\d+)"));
     Q_ASSERT(pyArgsRegex.isValid());

@@ -1445,7 +1445,7 @@
         PyTuple_SET_ITEM(%PYARG_0, 3, %CONVERTTOPYTHON[int](a3));
         </template>
         <template name="fix_native_return_int*,int*,int*,int*">
-            PyObject* _obj = %PYARG_0.object();
+            PyObject* _obj = %PYARG_0;
             if (!PySequence_Check(_obj)
                 || PySequence_Fast_GET_SIZE(_obj) != 4
                 || !PyNumber_Check(PySequence_Fast_GET_ITEM(_obj, 0))
