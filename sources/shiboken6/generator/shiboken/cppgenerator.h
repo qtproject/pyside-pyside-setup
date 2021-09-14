@@ -142,9 +142,11 @@ private:
     /// Writes the check section for the validity of wrapped C++ objects.
     static void writeInvalidPyObjectCheck(TextStream &s, const QString &pyObj);
 
-    void writeTypeCheck(TextStream &s, AbstractMetaType argType, const QString &argumentName,
-                        bool isNumber = false, const QString &customType = QString(),
-                        bool rejectNull = false) const;
+    void writeTypeCheck(TextStream &s, const AbstractMetaType &argType,
+                        const QString &argumentName,
+                        bool isNumber = false, bool rejectNull = false) const;
+    void writeTypeCheck(TextStream &s, const QString &customType,
+                        const QString &argumentName) const;
     void writeTypeCheck(TextStream& s, const QSharedPointer<OverloadDataNode> &overloadData,
                         const QString &argumentName) const;
 

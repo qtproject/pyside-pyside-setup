@@ -1562,11 +1562,14 @@ void AbstractMetaClass::fixFunctions()
 
     bool hasPrivateConstructors = false;
     bool hasPublicConstructors = false;
+    // Apply modifications after the declaring class has been set
     for (const auto &func : qAsConst(funcs)) {
+        auto ncFunc = qSharedPointerConstCast<AbstractMetaFunction>(func);
         for (const auto &mod : func->modifications(this)) {
             if (mod.isRenameModifier())
-                qSharedPointerConstCast<AbstractMetaFunction>(func)->setName(mod.renamedToName());
+                ncFunc->setName(mod.renamedToName());
         }
+        ncFunc->applyTypeModifications();
 
         // Make sure class is abstract if one of the functions is
         if (func->isAbstract()) {

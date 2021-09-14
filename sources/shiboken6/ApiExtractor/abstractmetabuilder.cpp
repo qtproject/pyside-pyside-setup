@@ -506,6 +506,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
 
         metaFunc->setTypeEntry(funcEntry);
         applyFunctionModifications(metaFunc);
+        metaFunc->applyTypeModifications();
 
         setInclude(funcEntry, func->fileName());
 

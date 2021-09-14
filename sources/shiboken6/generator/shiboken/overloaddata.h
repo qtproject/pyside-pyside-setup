@@ -116,9 +116,9 @@ public:
     const AbstractMetaArgument &argument() const
     {  return m_argument; }
     const AbstractMetaType &argType() const { return m_argument.type(); }
+    const AbstractMetaType &modifiedArgType() const { return m_argument.modifiedType(); }
 
-    bool hasArgumentTypeReplace() const { return !m_argTypeReplaced.isEmpty(); }
-    const QString &argumentTypeReplaced() const { return m_argTypeReplaced; }
+    bool isTypeModified() const { return m_argument.isTypeModified(); }
 
     const AbstractMetaArgument *overloadArgument(const AbstractMetaFunctionCPtr &func) const;
 

@@ -54,6 +54,9 @@ public:
 
     const AbstractMetaType &type() const;
     void setType(const AbstractMetaType &type);
+    void setModifiedType(const AbstractMetaType &type);
+    const AbstractMetaType &modifiedType() const;
+    bool isTypeModified() const { return modifiedType() != type(); }
 
     QString name() const;
     void setName(const QString &name, bool realName = true);

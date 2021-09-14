@@ -33,6 +33,7 @@
 #include "abstractmetatype.h"
 #include <codemodel.h>
 #include "documentation.h"
+#include "exception.h"
 #include "messages.h"
 #include "modifications.h"
 #include "propertyspec.h"
@@ -75,6 +76,9 @@ public:
     const FunctionModificationList &modifications(const AbstractMetaFunction *q,
                                                   const AbstractMetaClass *implementor) const;
 
+    bool applyTypeModification(const AbstractMetaFunction *q,
+                               const QString &type, int number, QString *errorMessage);
+
     QString m_name;
     QString m_originalName;
     Documentation m_doc;
@@ -85,6 +89,7 @@ public:
     FunctionTypeEntry* m_typeEntry = nullptr;
     AbstractMetaFunction::FunctionType m_functionType = AbstractMetaFunction::NormalFunction;
     AbstractMetaType m_type;
+    QString m_modifiedTypeName;
     const AbstractMetaClass *m_class = nullptr;
     const AbstractMetaClass *m_implementingClass = nullptr;
     const AbstractMetaClass *m_declaringClass = nullptr;
@@ -421,6 +426,7 @@ AbstractMetaFunction *AbstractMetaFunction::copy() const
     cpy->setExceptionSpecification(d->m_exceptionSpecification);
     cpy->setAllowThreadModification(d->m_allowThreadModification);
     cpy->setExceptionHandlingModification(d->m_exceptionHandlingModification);
+    cpy->d->m_modifiedTypeName = d->m_modifiedTypeName;
     cpy->d->m_addedFunction = d->m_addedFunction;
     cpy->d->m_arguments = d->m_arguments;
 
@@ -770,18 +776,9 @@ TypeSystem::Ownership AbstractMetaFunction::argumentTargetOwnership(const Abstra
     return TypeSystem::UnspecifiedOwnership;
 }
 
-QString AbstractMetaFunction::typeReplaced(int key) const
+const QString &AbstractMetaFunction::modifiedTypeName() const
 {
-    for (const auto &modification : modifications(declaringClass())) {
-        for (const ArgumentModification &argumentModification : modification.argument_mods()) {
-            if (argumentModification.index() == key
-                && !argumentModification.modifiedType().isEmpty()) {
-                return argumentModification.modifiedType();
-            }
-        }
-    }
-
-    return QString();
+    return d->m_modifiedTypeName;
 }
 
 bool AbstractMetaFunction::isModifiedToArray(int argumentIndex) const
@@ -793,6 +790,48 @@ bool AbstractMetaFunction::isModifiedToArray(int argumentIndex) const
         }
     }
     return false;
+}
+
+// Note: The declaring class must be correctly set for this to work.
+bool AbstractMetaFunctionPrivate::applyTypeModification(const AbstractMetaFunction *q,
+                                                        const QString &type,
+                                                        int number, QString *errorMessage)
+{
+    if (number < 0 || number > m_arguments.size()) {
+        *errorMessage =
+            msgTypeModificationFailed(type, number, q,
+                                      msgArgumentOutOfRange(number, 0, m_arguments.size()));
+        return false;
+    }
+
+    // Modified return types may have unparseable types like Python tuples
+    if (number == 0) {
+        m_modifiedTypeName = type;
+        return true;
+    }
+
+    auto typeOpt = AbstractMetaType::fromString(type, errorMessage);
+    if (!typeOpt.has_value()) {
+        *errorMessage = msgTypeModificationFailed(type, number, q, *errorMessage);
+        return false;
+    }
+    m_arguments[number - 1].setModifiedType(typeOpt.value());
+    return true;
+}
+
+void AbstractMetaFunction::applyTypeModifications()
+{
+    QString errorMessage;
+    for (const auto &modification : modifications(declaringClass())) {
+        for (const ArgumentModification &am : modification.argument_mods()) {
+            const  int n = am.index();
+            if (am.isTypeModified()
+                && !d->applyTypeModification(this, am.modifiedType(),
+                                             n, &errorMessage)) {
+                throw Exception(errorMessage);
+            }
+        }
+    }
 }
 
 QString AbstractMetaFunction::pyiTypeReplaced(int argumentIndex) const
@@ -822,12 +861,9 @@ QString AbstractMetaFunctionPrivate::formatMinimalSignature(const AbstractMetaFu
         if (i > 0)
             result += QLatin1Char(',');
 
-        QString typeName;
-        if (comment)
-            typeName = q->typeReplaced(i + 1);
-        if (typeName.isEmpty())
-            typeName = m_arguments.at(i).type().minimalSignature();
-        result += typeName;
+        result += comment
+            ? m_arguments.at(i).modifiedType().minimalSignature()
+            : m_arguments.at(i).type().minimalSignature();
     }
     result += QLatin1Char(')');
     if (m_constant)
@@ -835,10 +871,9 @@ QString AbstractMetaFunctionPrivate::formatMinimalSignature(const AbstractMetaFu
     result = TypeDatabase::normalizedSignature(result);
 
     if (comment && !q->isVoid()) {
-        QString typeName = q->typeReplaced(0);
-        if (typeName.isEmpty())
-            typeName = q->type().minimalSignature();
-        result += QStringLiteral("->") + typeName;
+        result += u"->"_qs;
+        result += q->isTypeModified()
+                  ? q->modifiedTypeName() : q->type().minimalSignature();
     }
     return result;
 }

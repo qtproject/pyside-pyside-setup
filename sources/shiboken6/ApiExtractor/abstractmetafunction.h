@@ -308,8 +308,12 @@ public:
     // Returns the ownership rules for the given argument (target lang).
     TypeSystem::Ownership argumentTargetOwnership(const AbstractMetaClass *cls, int idx) const;
 
-    QString typeReplaced(int argument_index) const;
+    const QString &modifiedTypeName() const;
+    bool isTypeModified() const { return !modifiedTypeName().isEmpty(); }
+
     bool isModifiedToArray(int argumentIndex) const;
+
+    void applyTypeModifications();
 
     /// Return the (modified) type for the signature; modified-pyi-type, modified-type
     QString pyiTypeReplaced(int argumentIndex) const;

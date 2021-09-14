@@ -643,7 +643,7 @@ QString ShibokenGenerator::getFormatUnitString(const AbstractMetaFunctionCPtr &f
             continue;
 
         const auto &type = arg.type();
-        if (!func->typeReplaced(arg.argumentIndex() + 1).isEmpty()) {
+        if (arg.isTypeModified()) {
             result += QLatin1Char(objType);
         } else if (arg.type().isObject()
             || type.isValue()
@@ -1228,15 +1228,13 @@ QString ShibokenGenerator::argumentString(const AbstractMetaFunctionCPtr &func,
                                           const AbstractMetaArgument &argument,
                                           Options options) const
 {
-    QString modified_type;
-    if (!(options & OriginalTypeDescription))
-        modified_type = func->typeReplaced(argument.argumentIndex() + 1);
-    QString arg;
+    auto type = options.testFlag(OriginalTypeDescription)
+        ? argument.type() : argument.modifiedType();
 
-    if (modified_type.isEmpty())
-        arg = translateType(argument.type(), func->implementingClass(), options);
-    else
-        arg = modified_type.replace(QLatin1Char('$'), QLatin1Char('.'));
+    QString arg = translateType(type, func->implementingClass(), options);
+
+    if (argument.isTypeModified())
+        arg.replace(QLatin1Char('$'), QLatin1Char('.')); // Haehh?
 
     // "int a", "int a[]"
     const int arrayPos = arg.indexOf(QLatin1Char('['));
@@ -1300,9 +1298,8 @@ GeneratorContext ShibokenGenerator::contextForClass(const AbstractMetaClass *c) 
 
 QString ShibokenGenerator::functionReturnType(const AbstractMetaFunctionCPtr &func, Options options) const
 {
-    QString modifiedReturnType = QString(func->typeReplaced(0));
-    if (!modifiedReturnType.isEmpty() && !(options & OriginalTypeDescription))
-        return modifiedReturnType;
+    if (func->isTypeModified() && !options.testFlag(OriginalTypeDescription))
+        return func->modifiedTypeName();
     return translateType(func->type(), func->implementingClass(), options);
 }
 
@@ -1536,13 +1533,7 @@ ShibokenGenerator::ArgumentVarReplacementList
                 argValue = QLatin1String(CPP_ARG_REMOVED) + QString::number(i);
             if (!argRemoved && argValue.isEmpty()) {
                 int argPos = i - removed;
-                AbstractMetaType type = arg.type();
-                QString typeReplaced = func->typeReplaced(arg.argumentIndex() + 1);
-                if (!typeReplaced.isEmpty()) {
-                    auto builtType = AbstractMetaType::fromString(typeReplaced);
-                    if (builtType.has_value())
-                        type = builtType.value();
-                }
+                AbstractMetaType type = arg.modifiedType();
                 if (type.typeEntry()->isCustom()) {
                     argValue = usePyArgs
                                ? pythonArgsAt(argPos) : QLatin1String(PYTHON_ARG);
@@ -1768,13 +1759,7 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
     for (const ArgumentVarReplacementPair &pair : argReplacements) {
         const AbstractMetaArgument &arg = pair.first;
         int idx = arg.argumentIndex() + 1;
-        AbstractMetaType type = arg.type();
-        QString typeReplaced = func->typeReplaced(arg.argumentIndex() + 1);
-        if (!typeReplaced.isEmpty()) {
-            auto builtType = AbstractMetaType::fromString(typeReplaced);
-            if (builtType.has_value())
-                type = builtType.value();
-        }
+        AbstractMetaType type = arg.modifiedType();
         if (type.isWrapperType()) {
             QString replacement = pair.second;
             if (type.shouldDereferenceArgument())

@@ -481,7 +481,7 @@ ArgumentModification::ArgumentModification(ArgumentModification &&) = default;
 ArgumentModification &ArgumentModification::operator=(ArgumentModification &&) = default;
 ArgumentModification::~ArgumentModification() = default;
 
-QString ArgumentModification::modifiedType() const
+const QString &ArgumentModification::modifiedType() const
 {
     return d->modified_type;
 }
@@ -490,6 +490,11 @@ void ArgumentModification::setModifiedType(const QString &value)
 {
     if (d->modified_type != value)
         d->modified_type = value;
+}
+
+bool ArgumentModification::isTypeModified() const
+{
+    return !d->modified_type.isEmpty();
 }
 
 QString ArgumentModification::pyiType() const

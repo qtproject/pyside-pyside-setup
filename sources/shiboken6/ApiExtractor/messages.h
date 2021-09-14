@@ -66,6 +66,12 @@ QString msgNoFunctionForModification(const AbstractMetaClass *klass,
                                      const QStringList &possibleSignatures,
                                      const AbstractMetaFunctionCList &allFunctions);
 
+QString msgTypeModificationFailed(const QString &type, int n,
+                                  const AbstractMetaFunction *func,
+                                  const QString &why);
+
+QString msgArgumentOutOfRange(int number, int minValue, int maxValue);
+
 QString msgClassOfEnumNotFound(const EnumTypeEntry *entry);
 
 QString msgNoEnumTypeEntry(const EnumModelItem &enumItem,

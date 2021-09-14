@@ -860,8 +860,8 @@ QString CppGenerator::getVirtualFunctionReturnTypeName(const AbstractMetaFunctio
     if (func->type().isVoid())
         return QLatin1String("\"\"");
 
-    if (!func->typeReplaced(0).isEmpty())
-        return QLatin1Char('"') + func->typeReplaced(0) + QLatin1Char('"');
+    if (func->isTypeModified())
+        return u'"' + func->modifiedTypeName() + u'"';
 
     // SbkType would return null when the type is a container.
     auto typeEntry = func->type().typeEntry();
@@ -1168,10 +1168,10 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
             if (invalidateReturn)
                 s << "bool invalidateArg0 = " << PYTHON_RETURN_VAR << "->ob_refcnt == 1;\n";
 
-            if (func->typeReplaced(0) != cPyObjectT()) {
+            if (func->modifiedTypeName() != cPyObjectT()) {
 
                 s << "// Check return type\n";
-                if (func->typeReplaced(0).isEmpty()) {
+                if (!func->isTypeModified()) {
                     s << PYTHON_TO_CPPCONVERSION_STRUCT
                         << ' ' << PYTHON_TO_CPP_VAR << " = "
                         << cpythonIsConvertibleFunction(func->type())
@@ -1192,8 +1192,15 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
 
                     s << "// Check return type\n"
                         << "bool typeIsValid = ";
-                    writeTypeCheck(s, func->type(), QLatin1String(PYTHON_RETURN_VAR),
-                                   isNumber(func->type().typeEntry()), func->typeReplaced(0));
+                    if (func->isTypeModified()) {
+                        writeTypeCheck(s, func->modifiedTypeName(),
+                                       QLatin1String(PYTHON_RETURN_VAR));
+                    } else {
+                        const bool numberType = isNumber(func->type().typeEntry());
+                        writeTypeCheck(s, func->type(),
+                                       QLatin1String(PYTHON_RETURN_VAR), numberType);
+                    }
+
                     s << ";\n";
                     s << "if (!typeIsValid";
                     if (func->type().isPointerToWrapperType())
@@ -1570,9 +1577,10 @@ return result;)";
             toCppConv = QLatin1Char('*') + cpythonWrapperCPtr(sourceClass->typeEntry(), QLatin1String("pyIn"));
         } else {
             // Constructor that does implicit conversion.
-            if (!conv->typeReplaced(1).isEmpty() || conv->isModifiedToArray(1))
+            const auto &firstArg = conv->arguments().constFirst();
+            if (firstArg.isTypeModified() || conv->isModifiedToArray(1))
                 continue;
-            const AbstractMetaType sourceType = conv->arguments().constFirst().type();
+            const AbstractMetaType &sourceType = firstArg.type();
             typeCheck = cpythonCheckFunction(sourceType);
             bool isUserPrimitiveWithoutTargetLangName = sourceType.isUserPrimitive()
                 && !sourceType.typeEntry()->hasTargetLangApiType();
@@ -1750,9 +1758,10 @@ void CppGenerator::writeConverterRegister(TextStream &s, const AbstractMetaClass
             sourceType = AbstractMetaType::fromAbstractMetaClass(conv->ownerClass());
         } else {
             // Constructor that does implicit conversion.
-            if (!conv->typeReplaced(1).isEmpty() || conv->isModifiedToArray(1))
+            const auto &firstArg = conv->arguments().constFirst();
+            if (firstArg.isTypeModified() || conv->isModifiedToArray(1))
                 continue;
-            sourceType = conv->arguments().constFirst().type();
+            sourceType = firstArg.type();
         }
         QString toCpp = pythonToCppFunctionName(sourceType, targetType);
         QString isConv = convertibleToCppFunctionName(sourceType, targetType);
@@ -2383,18 +2392,21 @@ static QString pythonToCppConverterForArgumentName(const QString &argumentName)
     return result;
 }
 
-void CppGenerator::writeTypeCheck(TextStream &s, AbstractMetaType argType,
-                                  const QString &argumentName, bool isNumber,
-                                  const QString &customType, bool rejectNull) const
+void CppGenerator::writeTypeCheck(TextStream &s, const QString &customType,
+                                  const QString &argumentName) const
 {
-    if (!customType.isEmpty()) {
-        QString errorMessage;
-        const auto metaTypeOpt = AbstractMetaType::fromString(customType, &errorMessage);
-        if (!metaTypeOpt.has_value())
-            throw Exception(errorMessage);
-        argType = metaTypeOpt.value();
-    }
+    QString errorMessage;
+    const auto metaTypeOpt = AbstractMetaType::fromString(customType, &errorMessage);
+    if (!metaTypeOpt.has_value())
+        throw Exception(errorMessage);
+    writeTypeCheck(s, metaTypeOpt.value(), argumentName,
+                   ShibokenGenerator::isNumber(metaTypeOpt.value()));
+}
 
+void CppGenerator::writeTypeCheck(TextStream &s, const AbstractMetaType &argType,
+                                  const QString &argumentName, bool isNumber,
+                                  bool rejectNull) const
+{
     // TODO-CONVERTER: merge this with the code below.
     QString typeCheck = cpythonIsConvertibleFunction(argType);
     typeCheck.append(u'(' +argumentName + u')');
@@ -2419,13 +2431,16 @@ void CppGenerator::writeTypeCheck(TextStream &s, AbstractMetaType argType,
 static void checkTypeViability(const AbstractMetaFunctionCPtr &func,
                                const AbstractMetaType &type, int argIdx)
 {
+    const bool modified = argIdx == 0
+        ? func->isTypeModified()
+        : func->arguments().at(argIdx -1).isTypeModified();
     if (type.isVoid()
         || !type.typeEntry()->isPrimitive()
         || type.indirections() == 0
         || (type.indirections() == 1 && type.typeUsagePattern() == AbstractMetaType::NativePointerAsArrayPattern)
         || type.isCString()
         || func->argumentRemoved(argIdx)
-        || !func->typeReplaced(argIdx).isEmpty()
+        || modified
         || !func->conversionRule(TypeSystem::All, argIdx).isEmpty()
         || func->hasInjectedCode())
         return;
@@ -2473,14 +2488,13 @@ void CppGenerator::writeTypeCheck(TextStream &s,
 
     // This condition trusts that the OverloadData object will arrange for
     // PyLong type to come after the more precise numeric types (e.g. float and bool)
-    AbstractMetaType argType = overloadData->argType();
+    AbstractMetaType argType = overloadData->modifiedArgType();
     if (auto viewOn = argType.viewOn())
         argType = *viewOn;
     bool numberType = numericTypes.count() == 1 || ShibokenGenerator::isPyInt(argType);
-    QString customType = (overloadData->hasArgumentTypeReplace() ? overloadData->argumentTypeReplaced() : QString());
     bool rejectNull =
         shouldRejectNullPointerArgument(overloadData->referenceFunction(), overloadData->argPos());
-    writeTypeCheck(s, argType, argumentName, numberType, customType, rejectNull);
+    writeTypeCheck(s, argType, argumentName, numberType, rejectNull);
 }
 
 void CppGenerator::writeArgumentConversion(TextStream &s,
@@ -2508,16 +2522,8 @@ AbstractMetaType
         return {};
     }
 
-    QString typeReplaced = func->typeReplaced(index + 1);
-    if (typeReplaced.isEmpty()) {
-        auto argType = func->arguments().at(index).type();
-        return argType.viewOn() ? *argType.viewOn() : argType;
-    }
-
-    auto argType = AbstractMetaType::fromString(typeReplaced);
-    if (!argType.has_value())
-        throw Exception(msgUnknownTypeInArgumentTypeReplacement(typeReplaced, func.data()));
-    return argType.value();
+    auto argType = func->arguments().at(index).modifiedType();
+    return argType.viewOn() ? *argType.viewOn() : argType;
 }
 
 static inline QString arrayHandleType(const AbstractMetaTypeList &nestedArrayTypes)
@@ -2870,7 +2876,8 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(TextStream &s,
         int startArg = od->argPos();
         int sequenceArgCount = 0;
         while (od && !od->argType().isVarargs()) {
-            bool typeReplacedByPyObject = od->argumentTypeReplaced() == cPyObjectT();
+            const bool typeReplacedByPyObject = od->isTypeModified()
+                && od->modifiedArgType().name() == cPyObjectT();
             if (!typeReplacedByPyObject) {
                 if (usePyArgs)
                     pyArgName = pythonArgsAt(od->argPos());
@@ -3401,8 +3408,8 @@ void CppGenerator::writeNamedArgumentResolution(TextStream &s, const AbstractMet
                 {
                     Indentation indent(s);
                     s << pyArgName << " = value;\nif (!";
-                    writeTypeCheck(s, arg.type(), pyArgName, isNumber(arg.type().typeEntry()),
-                                   func->typeReplaced(arg.argumentIndex() + 1));
+                    const auto &type = arg.modifiedType();
+                    writeTypeCheck(s, type, pyArgName, isNumber(type.typeEntry()), {});
                     s << ")\n";
                     {
                         Indentation indent(s);
@@ -6565,7 +6572,7 @@ void CppGenerator::writeReturnValueHeuristics(TextStream &s, const AbstractMetaF
         || type.isVoid()
         || func->isStatic()
         || func->isConstructor()
-        || !func->typeReplaced(0).isEmpty()) {
+        || func->isTypeModified()) {
         return;
     }
 

@@ -77,6 +77,33 @@ QString msgNoFunctionForModification(const AbstractMetaClass *klass,
     return result;
 }
 
+QString msgTypeModificationFailed(const QString &type, int n,
+                                  const AbstractMetaFunction *func,
+                                  const QString &why)
+{
+    QString result;
+    QTextStream str(&result);
+    str << "Unable to modify the ";
+    if (n == 0)
+        str << "return type";
+    else
+        str << "type of argument " << n;
+
+    str << " of ";
+    if (auto *c = func->ownerClass())
+        str << c->name() << "::";
+    str << func->signature() << " to \"" << type << "\": " << why;
+    return result;
+}
+
+QString msgArgumentOutOfRange(int number, int minValue, int maxValue)
+{
+    QString result;
+    QTextStream(&result) << "Argument number " << number
+        << " out of range " << minValue << ".." << maxValue << '.';
+    return result;
+}
+
 template <class Stream>
 static void msgFormatEnumType(Stream &str,
                               const EnumModelItem &enumItem,

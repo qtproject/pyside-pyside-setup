@@ -39,6 +39,7 @@ public:
 
     QString m_name;
     AbstractMetaType m_type;
+    AbstractMetaType m_modifiedType;
     bool m_hasName = false;
     Documentation m_doc;
     QString m_expression;
@@ -68,7 +69,18 @@ const AbstractMetaType &AbstractMetaArgument::type() const
 void AbstractMetaArgument::setType(const AbstractMetaType &type)
 {
     if (d->m_type != type)
-        d->m_type = type;
+        d->m_type = d->m_modifiedType = type;
+}
+
+const AbstractMetaType &AbstractMetaArgument::modifiedType() const
+{
+    return d->m_modifiedType;
+}
+
+void AbstractMetaArgument::setModifiedType(const AbstractMetaType &type)
+{
+    if (d->m_modifiedType != type)
+        d->m_modifiedType = type;
 }
 
 QString AbstractMetaArgument::name() const

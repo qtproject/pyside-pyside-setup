@@ -64,11 +64,6 @@ static QString getTypeName(const AbstractMetaType &type)
     return typeName;
 }
 
-static QString getTypeName(const OverloadDataNodePtr &ov)
-{
-    return ov->hasArgumentTypeReplace() ? ov->argumentTypeReplaced() : getTypeName(ov->argType());
-}
-
 static bool typesAreEqual(const AbstractMetaType &typeA, const AbstractMetaType &typeB)
 {
     if (typeA.typeEntry() == typeB.typeEntry()) {
@@ -199,7 +194,7 @@ void OverloadDataRootNode::sortNextOverloads(const ApiExtractorResult &api)
 
     OverloadGraph graph;
     for (const auto &ov : qAsConst(m_children)) {
-        const QString typeName = getTypeName(ov);
+        const QString typeName = getTypeName(ov->modifiedArgType());
         auto it = typeToOverloads.find(typeName);
         if (it == typeToOverloads.end()) {
             typeToOverloads.insert(typeName, {ov});
@@ -261,7 +256,7 @@ void OverloadDataRootNode::sortNextOverloads(const ApiExtractorResult &api)
 
     for (const auto &ov : qAsConst(m_children)) {
         const AbstractMetaType &targetType = ov->argType();
-        const QString targetTypeEntryName = getTypeName(ov);
+        const QString targetTypeEntryName = getTypeName(ov->modifiedArgType());
 
         // Process implicit conversions
         const auto &functions = api.implicitConversions(targetType);
@@ -505,7 +500,6 @@ void OverloadDataNode::addOverload(const AbstractMetaFunctionCPtr &func)
 OverloadDataNode *OverloadDataRootNode::addOverloadDataNode(const AbstractMetaFunctionCPtr &func,
                                                             const AbstractMetaArgument &arg)
 {
-    const AbstractMetaType &argType = arg.type();
     OverloadDataNodePtr overloadData;
     if (!func->isOperatorOverload()) {
         for (const auto &tmp : qAsConst(m_children)) {
@@ -513,10 +507,7 @@ OverloadDataNode *OverloadDataRootNode::addOverloadDataNode(const AbstractMetaFu
 
             // If an argument have a type replacement, then we should create a new overloaddata
             // for it, unless the next argument also have a identical type replacement.
-            QString replacedArg = func->typeReplaced(tmp->argPos() + 1);
-            bool argsReplaced = !replacedArg.isEmpty() || tmp->hasArgumentTypeReplace();
-            if ((!argsReplaced && typesAreEqual(tmp->argType(), argType))
-                || (argsReplaced && replacedArg == tmp->argumentTypeReplaced())) {
+            if (typesAreEqual(tmp->modifiedArgType(), arg.modifiedType())) {
                 tmp->addOverload(func);
                 overloadData = tmp;
             }
@@ -524,10 +515,8 @@ OverloadDataNode *OverloadDataRootNode::addOverloadDataNode(const AbstractMetaFu
     }
 
     if (overloadData.isNull()) {
-        QString typeReplaced = func->typeReplaced(arg.argumentIndex() + 1);
         const int argpos = argPos() + 1;
-        overloadData.reset(new OverloadDataNode(func, this, arg, argpos,
-                                                typeReplaced));
+        overloadData.reset(new OverloadDataNode(func, this, arg, argpos));
         m_children.append(overloadData);
     }
 
@@ -537,12 +526,11 @@ OverloadDataNode *OverloadDataRootNode::addOverloadDataNode(const AbstractMetaFu
 bool OverloadData::hasNonVoidReturnType() const
 {
     for (const auto &func : m_overloads) {
-        const QString typeReplaced = func->typeReplaced(0);
-        if (typeReplaced.isEmpty()) {
-            if (!func->argumentRemoved(0) && !func->type().isVoid())
+        if (func->isTypeModified()) {
+            if (func->modifiedTypeName() != u"void")
                 return true;
         } else {
-            if (typeReplaced != u"void")
+            if (!func->argumentRemoved(0) && !func->type().isVoid())
                 return true;
         }
     }
@@ -833,11 +821,11 @@ void OverloadDataRootNode::dumpRootGraph(QTextStream &s, int minArgs, int maxArg
 
     // Shows type changes for all function signatures
     for (const auto &func : m_overloads) {
-        if (func->typeReplaced(0).isEmpty())
+        if (!func->isTypeModified())
             continue;
         s << "<tr><td bgcolor=\"gray\" align=\"right\">f" << functionNumber(func);
         s << "-type</td><td bgcolor=\"gray\" align=\"left\">";
-        s << toHtml(func->typeReplaced(0)) << "</td></tr>";
+        s << toHtml(func->modifiedTypeName()) << "</td></tr>";
     }
 
     // Minimum and maximum number of arguments
@@ -882,10 +870,10 @@ void OverloadDataNode::dumpNodeGraph(QTextStream &s) const
     s << "<font color=\"white\" point-size=\"11\">arg #" << argPos() << "</font></td></tr>";
 
     // Argument type information
-    QString type = hasArgumentTypeReplace() ? argumentTypeReplaced() : argType().cppSignature();
+    const QString type = modifiedArgType().cppSignature();
     s << "<tr><td bgcolor=\"gray\" align=\"right\">type</td><td bgcolor=\"gray\" align=\"left\">";
     s << toHtml(type) << "</td></tr>";
-    if (hasArgumentTypeReplace()) {
+    if (isTypeModified()) {
         s << "<tr><td bgcolor=\"gray\" align=\"right\">orig. type</td><td bgcolor=\"gray\" align=\"left\">";
         s << toHtml(argType().cppSignature()) << "</td></tr>";
     }
@@ -1042,8 +1030,8 @@ void OverloadDataNode::formatDebug(QDebug &d) const
     if (m_argument.argumentIndex() != m_argPos)
         d << ", argIndex=" << m_argument.argumentIndex();
     d << ", argType=\"" << m_argument.type().cppSignature() << '"';
-    if (!m_argTypeReplaced.isEmpty())
-        d << ", argTypeReplaced=\"" << m_argTypeReplaced << '"';
+    if (isTypeModified())
+        d << ", modifiedArgType=\"" << modifiedArgType().cppSignature() << '"';
     formatOverloads(d);
     formatNextOverloadData(d);
     d << ')';

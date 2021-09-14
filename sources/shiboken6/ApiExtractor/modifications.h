@@ -190,8 +190,9 @@ public:
     void addReferenceCount(const ReferenceCount &value);
 
     // The text given for the new type of the argument
-    QString modifiedType() const;
+    const QString &modifiedType() const;
     void setModifiedType(const QString &value);
+    bool isTypeModified() const;
 
     QString pyiType() const;
     void setPyiType(const QString &value);
