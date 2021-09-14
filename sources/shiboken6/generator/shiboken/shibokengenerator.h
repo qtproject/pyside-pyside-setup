@@ -332,24 +332,6 @@ protected:
     /// Returns true if the user don't want verbose error messages on the generated bindings.
     bool verboseErrorMessagesDisabled() const;
 
-    /**
-     *   Builds an AbstractMetaType object from a QString.
-     *   Returns nullptr if no type could be built from the string.
-     *   \param typeSignature The string describing the type to be built.
-     *   \return A new AbstractMetaType object that must be deleted by the caller,
-     *           or a nullptr pointer in case of failure.
-     */
-    static std::optional<AbstractMetaType>
-        buildAbstractMetaTypeFromString(QString typeSignature,
-                                        QString *errorMessage = nullptr);
-
-    /// Creates an AbstractMetaType object from a TypeEntry.
-    static AbstractMetaType
-        buildAbstractMetaTypeFromTypeEntry(const TypeEntry *typeEntry);
-    /// Creates an AbstractMetaType object from an AbstractMetaClass.
-    static AbstractMetaType
-        buildAbstractMetaTypeFromAbstractMetaClass(const AbstractMetaClass *metaClass);
-
     void collectContainerTypesFromConverterMacros(const QString &code, bool toPythonMacro);
 
     static void writeFunctionCall(TextStream &s,

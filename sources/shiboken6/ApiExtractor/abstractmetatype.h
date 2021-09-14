@@ -36,6 +36,8 @@
 #include <QtCore/QSharedDataPointer>
 #include <QtCore/QList>
 
+#include <optional>
+
 QT_FORWARD_DECLARE_CLASS(QDebug)
 
 class AbstractMetaTypeData;
@@ -193,6 +195,17 @@ public:
     void setViewOn(const AbstractMetaType &v);
 
     static AbstractMetaType createVoid();
+
+    /// Builds an AbstractMetaType object from a QString.
+    /// Returns nullopt if no type could be built from the string.
+    /// \param typeSignature The string describing the type to be built.
+    /// \return A new AbstractMetaType object or nullopt in case of failure.
+    static std::optional<AbstractMetaType>
+        fromString(QString typeSignature, QString *errorMessage = nullptr);
+    /// Creates an AbstractMetaType object from a TypeEntry.
+    static AbstractMetaType fromTypeEntry(const TypeEntry *typeEntry);
+    /// Creates an AbstractMetaType object from an AbstractMetaClass.
+    static AbstractMetaType fromAbstractMetaClass(const AbstractMetaClass *metaClass);
 
     static void dereference(QString *type); // "foo" -> "(*foo)"
     static bool stripDereference(QString *type); // "(*foo)" -> "foo"

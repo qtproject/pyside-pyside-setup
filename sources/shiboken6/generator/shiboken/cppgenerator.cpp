@@ -576,7 +576,7 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
                     // is done, so this will be fixed in bulk with all the other cases, because the
                     // ownership of the pointers is not clear at the moment.
                     auto pointerToInnerType =
-                            buildAbstractMetaTypeFromString(pointerToInnerTypeName);
+                            AbstractMetaType::fromString(pointerToInnerTypeName);
                     Q_ASSERT(pointerToInnerType.has_value());
                     auto mutableRfunc = overloads.constFirst();
                     qSharedPointerConstCast<AbstractMetaFunction>(mutableRfunc)->setType(pointerToInnerType.value());
@@ -1555,7 +1555,7 @@ return result;)";
     if (!implicitConvs.isEmpty())
         s << "// Implicit conversions.\n";
 
-    AbstractMetaType targetType = buildAbstractMetaTypeFromAbstractMetaClass(metaClass);
+    AbstractMetaType targetType = AbstractMetaType::fromAbstractMetaClass(metaClass);
     for (const auto &conv : qAsConst(implicitConvs)) {
         if (conv->isModifiedRemoved())
             continue;
@@ -1615,7 +1615,7 @@ return result;)";
             }
         }
         const AbstractMetaType sourceType = conv->isConversionOperator()
-                                            ? buildAbstractMetaTypeFromAbstractMetaClass(conv->ownerClass())
+                                            ? AbstractMetaType::fromAbstractMetaClass(conv->ownerClass())
                                             : conv->arguments().constFirst().type();
         writePythonToCppConversionFunctions(s, sourceType, targetType, typeCheck, toCppConv, toCppPreConv);
     }
@@ -1742,13 +1742,13 @@ void CppGenerator::writeConverterRegister(TextStream &s, const AbstractMetaClass
     if (!implicitConvs.isEmpty())
         s << "// Add implicit conversions to type converter.\n";
 
-    AbstractMetaType targetType = buildAbstractMetaTypeFromAbstractMetaClass(metaClass);
+    AbstractMetaType targetType = AbstractMetaType::fromAbstractMetaClass(metaClass);
     for (const auto &conv : qAsConst(implicitConvs)) {
         if (conv->isModifiedRemoved())
             continue;
         AbstractMetaType sourceType;
         if (conv->isConversionOperator()) {
-            sourceType = buildAbstractMetaTypeFromAbstractMetaClass(conv->ownerClass());
+            sourceType = AbstractMetaType::fromAbstractMetaClass(conv->ownerClass());
         } else {
             // Constructor that does implicit conversion.
             if (!conv->typeReplaced(1).isEmpty() || conv->isModifiedToArray(1))
@@ -2541,7 +2541,7 @@ std::optional<AbstractMetaType>
         return argType.viewOn() ? *argType.viewOn() : argType;
     }
 
-    auto argType = buildAbstractMetaTypeFromString(typeReplaced);
+    auto argType = AbstractMetaType::fromString(typeReplaced);
     if (!argType.has_value() && !knownPythonTypes().contains(typeReplaced)) {
         qCWarning(lcShiboken, "%s",
                   qPrintable(msgUnknownTypeInArgumentTypeReplacement(typeReplaced, func.data())));
@@ -5359,7 +5359,7 @@ void CppGenerator::writeFlagsToLong(TextStream &s, const AbstractMetaEnum &cppEn
     s << "static PyObject *" << cpythonEnumName(cppEnum) << "_long(PyObject *self)\n"
         << "{\n" << indent
         << "int val;\n";
-    AbstractMetaType flagsType = buildAbstractMetaTypeFromTypeEntry(flagsEntry);
+    AbstractMetaType flagsType = AbstractMetaType::fromTypeEntry(flagsEntry);
     s << cpythonToCppConversionFunction(flagsType) << "self, &val);\n"
         << "return Shiboken::Conversions::copyToPython(Shiboken::Conversions::PrimitiveTypeConverter<int>(), &val);\n"
         << outdent << "}\n";
@@ -5372,7 +5372,7 @@ void CppGenerator::writeFlagsNonZero(TextStream &s, const AbstractMetaEnum &cppE
         return;
     s << "static int " << cpythonEnumName(cppEnum) << "__nonzero(PyObject *self)\n";
     s << "{\n" << indent << "int val;\n";
-    AbstractMetaType flagsType = buildAbstractMetaTypeFromTypeEntry(flagsEntry);
+    AbstractMetaType flagsType = AbstractMetaType::fromTypeEntry(flagsEntry);
     s << cpythonToCppConversionFunction(flagsType) << "self, &val);\n"
         << "return val != 0;\n"
         << outdent << "}\n";
@@ -5428,7 +5428,7 @@ void CppGenerator::writeFlagsBinaryOperator(TextStream &s, const AbstractMetaEnu
     s << "PyObject *" << cpythonEnumName(cppEnum) << "___" << pyOpName
         << "__(PyObject *self, PyObject *" << PYTHON_ARG << ")\n{\n" << indent;
 
-    AbstractMetaType flagsType = buildAbstractMetaTypeFromTypeEntry(flagsEntry);
+    AbstractMetaType flagsType = AbstractMetaType::fromTypeEntry(flagsEntry);
     s << "::" << flagsEntry->originalName() << " cppResult, " << CPP_SELF_VAR
         << ", cppArg;\n"
         << CPP_SELF_VAR << " = static_cast<::" << flagsEntry->originalName()
@@ -5457,7 +5457,7 @@ void CppGenerator::writeFlagsUnaryOperator(TextStream &s, const AbstractMetaEnum
     s << "PyObject *" << cpythonEnumName(cppEnum) << "___" << pyOpName
         << "__(PyObject *self, PyObject *" << PYTHON_ARG << ")\n{\n" << indent;
 
-    AbstractMetaType flagsType = buildAbstractMetaTypeFromTypeEntry(flagsEntry);
+    AbstractMetaType flagsType = AbstractMetaType::fromTypeEntry(flagsEntry);
     s << "::" << flagsEntry->originalName() << " " << CPP_SELF_VAR << ";\n"
         << cpythonToCppConversionFunction(flagsType) << "self, &" << CPP_SELF_VAR
         << ");\n";
@@ -6276,8 +6276,8 @@ bool CppGenerator::finishGeneration()
             s << "// Extended implicit conversions for "
                 << externalType->qualifiedTargetLangName() << '.' << '\n';
             for (const AbstractMetaClass *sourceClass : it.value()) {
-                AbstractMetaType sourceType = buildAbstractMetaTypeFromAbstractMetaClass(sourceClass);
-                AbstractMetaType targetType = buildAbstractMetaTypeFromTypeEntry(externalType);
+                AbstractMetaType sourceType = AbstractMetaType::fromAbstractMetaClass(sourceClass);
+                AbstractMetaType targetType = AbstractMetaType::fromTypeEntry(externalType);
                 writePythonToCppConversionFunctions(s, sourceType, targetType);
             }
         }

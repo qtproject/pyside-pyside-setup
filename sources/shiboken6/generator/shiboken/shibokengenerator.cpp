@@ -129,10 +129,6 @@ using GeneratorClassInfoCache = QHash<const AbstractMetaClass *, GeneratorClassI
 
 Q_GLOBAL_STATIC(GeneratorClassInfoCache, generatorClassInfoCache)
 
-using AbstractMetaTypeCache = QHash<QString, AbstractMetaType>;
-
-Q_GLOBAL_STATIC(AbstractMetaTypeCache, metaTypeFromStringCache)
-
 static const char CHECKTYPE_REGEX[] = R"(%CHECKTYPE\[([^\[]*)\]\()";
 static const char ISCONVERTIBLE_REGEX[] = R"(%ISCONVERTIBLE\[([^\[]*)\]\()";
 static const char CONVERTTOPYTHON_REGEX[] = R"(%CONVERTTOPYTHON\[([^\[]*)\]\()";
@@ -1114,7 +1110,7 @@ ShibokenGenerator::CPythonCheckFunctionResult
         return {QLatin1String("Shiboken::String::checkPath"), {}};
 
     CPythonCheckFunctionResult result;
-    result.type = buildAbstractMetaTypeFromString(type);
+    result.type = AbstractMetaType::fromString(type);
 
     if (!result.type.has_value()) {
         result.checkFunction = type + QLatin1String("_Check");
@@ -1565,7 +1561,7 @@ ShibokenGenerator::ArgumentVarReplacementList
                 AbstractMetaType type = arg.type();
                 QString typeReplaced = func->typeReplaced(arg.argumentIndex() + 1);
                 if (!typeReplaced.isEmpty()) {
-                    auto builtType = buildAbstractMetaTypeFromString(typeReplaced);
+                    auto builtType = AbstractMetaType::fromString(typeReplaced);
                     if (builtType.has_value())
                         type = builtType.value();
                 }
@@ -1804,7 +1800,7 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
         AbstractMetaType type = arg.type();
         QString typeReplaced = func->typeReplaced(arg.argumentIndex() + 1);
         if (!typeReplaced.isEmpty()) {
-            auto builtType = buildAbstractMetaTypeFromString(typeReplaced);
+            auto builtType = AbstractMetaType::fromString(typeReplaced);
             if (builtType.has_value())
                 type = builtType.value();
         }
@@ -1944,7 +1940,7 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
         QString conversionString = list.constFirst();
         const QString &conversionTypeName = list.constLast();
         QString message;
-        const auto conversionTypeO = buildAbstractMetaTypeFromString(conversionTypeName, &message);
+        const auto conversionTypeO = AbstractMetaType::fromString(conversionTypeName, &message);
         if (!conversionTypeO.has_value()) {
             throw Exception(msgCannotFindType(conversionTypeName,
                                               typeSystemConvName().value(converterVariable),
@@ -2153,54 +2149,6 @@ QString ShibokenGenerator::getModuleHeaderFileName(const QString &moduleName)
 QString ShibokenGenerator::getPrivateModuleHeaderFileName(const QString &moduleName)
 {
     return getModuleHeaderFileBaseName(moduleName) + QStringLiteral("_p.h");
-}
-
-std::optional<AbstractMetaType>
-    ShibokenGenerator::buildAbstractMetaTypeFromString(QString typeSignature,
-                                                       QString *errorMessage)
-{
-    typeSignature = typeSignature.trimmed();
-    if (typeSignature.startsWith(QLatin1String("::")))
-        typeSignature.remove(0, 2);
-
-    auto &cache = *metaTypeFromStringCache();
-    auto it = cache.find(typeSignature);
-    if (it == cache.end()) {
-        auto metaType =
-              AbstractMetaBuilder::translateType(typeSignature, nullptr, {}, errorMessage);
-        if (Q_UNLIKELY(!metaType.has_value())) {
-            if (errorMessage)
-                errorMessage->prepend(msgCannotBuildMetaType(typeSignature));
-            return {};
-        }
-        it = cache.insert(typeSignature, metaType.value());
-    }
-    return it.value();
-}
-
-AbstractMetaType
-    ShibokenGenerator::buildAbstractMetaTypeFromTypeEntry(const TypeEntry *typeEntry)
-{
-    QString typeName = typeEntry->qualifiedCppName();
-    if (typeName.startsWith(QLatin1String("::")))
-        typeName.remove(0, 2);
-    auto &cache  = *metaTypeFromStringCache();
-    auto it = cache.find(typeName);
-    if (it != cache.end())
-        return it.value();
-    AbstractMetaType metaType(typeEntry);
-    metaType.clearIndirections();
-    metaType.setReferenceType(NoReference);
-    metaType.setConstant(false);
-    metaType.decideUsagePattern();
-    cache.insert(typeName, metaType);
-    return metaType;
-}
-
-AbstractMetaType
-    ShibokenGenerator::buildAbstractMetaTypeFromAbstractMetaClass(const AbstractMetaClass *metaClass)
-{
-    return ShibokenGenerator::buildAbstractMetaTypeFromTypeEntry(metaClass->typeEntry());
 }
 
 /*
@@ -2511,7 +2459,7 @@ void ShibokenGenerator::collectContainerTypesFromConverterMacros(const QString &
         start += offset;
         if (code.at(start) != QLatin1Char('%')) {
             QString typeString = code.mid(start, end - start);
-            auto type = buildAbstractMetaTypeFromString(typeString, &errorMessage);
+            auto type = AbstractMetaType::fromString(typeString, &errorMessage);
             if (type.has_value()) {
                 addInstantiatedContainersAndSmartPointers(type.value(), type->originalTypeDescription());
             } else {

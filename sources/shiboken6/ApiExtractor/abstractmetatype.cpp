@@ -27,6 +27,9 @@
 ****************************************************************************/
 
 #include "abstractmetatype.h"
+#include "abstractmetabuilder.h"
+#include "abstractmetalang.h"
+#include "messages.h"
 #include "typedatabase.h"
 #include "typesystem.h"
 #include "parser/codemodel.h"
@@ -35,6 +38,7 @@
 #  include <QtCore/QDebug>
 #endif
 
+#include <QtCore/QHash>
 #include <QtCore/QSharedData>
 #include <QtCore/QSharedPointer>
 #include <QtCore/QStack>
@@ -795,6 +799,55 @@ bool AbstractMetaType::valueTypeWithCopyConstructorOnlyPassed() const
 {
     return (passByValue() || passByConstRef())
            && isValueTypeWithCopyConstructorOnly();
+}
+
+using AbstractMetaTypeCache = QHash<QString, AbstractMetaType>;
+
+Q_GLOBAL_STATIC(AbstractMetaTypeCache, metaTypeFromStringCache)
+
+std::optional<AbstractMetaType>
+AbstractMetaType::fromString(QString typeSignature, QString *errorMessage)
+{
+    typeSignature = typeSignature.trimmed();
+    if (typeSignature.startsWith(QLatin1String("::")))
+        typeSignature.remove(0, 2);
+
+    auto &cache = *metaTypeFromStringCache();
+    auto it = cache.find(typeSignature);
+    if (it == cache.end()) {
+        auto metaType =
+            AbstractMetaBuilder::translateType(typeSignature, nullptr, {}, errorMessage);
+        if (Q_UNLIKELY(!metaType.has_value())) {
+            if (errorMessage)
+                errorMessage->prepend(msgCannotBuildMetaType(typeSignature));
+            return {};
+        }
+        it = cache.insert(typeSignature, metaType.value());
+    }
+    return it.value();
+}
+
+AbstractMetaType AbstractMetaType::fromTypeEntry(const TypeEntry *typeEntry)
+{
+    QString typeName = typeEntry->qualifiedCppName();
+    if (typeName.startsWith(QLatin1String("::")))
+        typeName.remove(0, 2);
+    auto &cache  = *metaTypeFromStringCache();
+    auto it = cache.find(typeName);
+    if (it != cache.end())
+        return it.value();
+    AbstractMetaType metaType(typeEntry);
+    metaType.clearIndirections();
+    metaType.setReferenceType(NoReference);
+    metaType.setConstant(false);
+    metaType.decideUsagePattern();
+    cache.insert(typeName, metaType);
+    return metaType;
+}
+
+AbstractMetaType AbstractMetaType::fromAbstractMetaClass(const AbstractMetaClass *metaClass)
+{
+    return fromTypeEntry(metaClass->typeEntry());
 }
 
 #ifndef QT_NO_DEBUG_STREAM
