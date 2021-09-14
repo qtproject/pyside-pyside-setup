@@ -187,7 +187,6 @@ public:
     static bool isEnum(const FileModelItem &dom, const QStringList &qualifiedName);
 
     void sortLists();
-    static AbstractMetaArgumentList reverseList(const AbstractMetaArgumentList &list);
     void setInclude(TypeEntry *te, const QString &path) const;
     static void fixArgumentNames(AbstractMetaFunction *func, const FunctionModificationList &mods);
 

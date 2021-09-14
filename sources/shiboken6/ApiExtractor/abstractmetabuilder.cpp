@@ -67,6 +67,12 @@ static QString stripTemplateArgs(const QString &name)
     return pos < 0 ? name : name.left(pos);
 }
 
+static void fixArgumentIndexes(AbstractMetaArgumentList *list)
+{
+    for (qsizetype i = 0, size = list->size(); i < size; ++i)
+        (*list)[i].setArgumentIndex(i);
+}
+
 bool AbstractMetaBuilderPrivate::m_useGlobalHeader = false;
 
 AbstractMetaBuilderPrivate::AbstractMetaBuilderPrivate() :
@@ -266,6 +272,7 @@ void AbstractMetaBuilderPrivate::traverseOperatorFunction(const FunctionModelIte
             AbstractMetaArgumentList arguments = metaFunction->arguments();
             if (firstArgumentIsSelf || unaryOperator) {
                 AbstractMetaArgument first = arguments.takeFirst();
+                fixArgumentIndexes(&arguments);
                 if (!unaryOperator && first.type().indirections())
                     metaFunction->setPointerOperator(true);
                 metaFunction->setArguments(arguments);
@@ -310,11 +317,13 @@ bool AbstractMetaBuilderPrivate::traverseStreamOperator(const FunctionModelItem 
        return false;
 
     // Strip first argument, since that is the containing object
-    AbstractMetaArgumentList arguments = streamFunction->arguments();
-    if (!streamClass->typeEntry()->generateCode())
-        arguments.takeLast();
-    else
-        arguments.takeFirst();
+   AbstractMetaArgumentList arguments = streamFunction->arguments();
+   if (!streamClass->typeEntry()->generateCode()) {
+       arguments.takeLast();
+   } else {
+       arguments.takeFirst();
+       fixArgumentIndexes(&arguments);
+   }
 
     streamFunction->setArguments(arguments);
 
@@ -324,7 +333,9 @@ bool AbstractMetaBuilderPrivate::traverseStreamOperator(const FunctionModelItem 
     AbstractMetaClass *funcClass;
 
     if (!streamClass->typeEntry()->generateCode()) {
-        AbstractMetaArgumentList reverseArgs = reverseList(streamFunction->arguments());
+        AbstractMetaArgumentList reverseArgs = streamFunction->arguments();
+        std::reverse(reverseArgs.begin(), reverseArgs.end());
+        fixArgumentIndexes(&reverseArgs);
         streamFunction->setArguments(reverseArgs);
         streamFunction->setReverseOperator(true);
         funcClass = streamedClass;
@@ -3135,21 +3146,6 @@ void AbstractMetaBuilderPrivate::pushScope(const NamespaceModelItem &item)
     } else {
         m_scopes << item;
     }
-}
-
-AbstractMetaArgumentList AbstractMetaBuilderPrivate::reverseList(const AbstractMetaArgumentList &list)
-{
-    AbstractMetaArgumentList ret;
-
-    int index = list.size();
-    for (const AbstractMetaArgument &a : list) {
-        AbstractMetaArgument arg = a;
-        arg.setArgumentIndex(index);
-        ret.prepend(arg);
-        index--;
-    }
-
-    return ret;
 }
 
 void AbstractMetaBuilder::setGlobalHeaders(const QFileInfoList &globalHeaders)
