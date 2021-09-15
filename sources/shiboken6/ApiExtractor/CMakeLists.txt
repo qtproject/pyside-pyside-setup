@@ -18,6 +18,7 @@ abstractmetalang.cpp
 codesniphelpers.cpp
 conditionalstreamreader.cpp
 documentation.cpp
+dotview.cpp
 enclosingclassmixin.cpp
 fileout.cpp
 messages.cpp

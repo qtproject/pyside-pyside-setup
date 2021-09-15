@@ -29,6 +29,7 @@
 #include <abstractmetafunction.h>
 #include <apiextractorresult.h>
 #include <abstractmetalang.h>
+#include <dotview.h>
 #include <reporthandler.h>
 #include <typesystem.h>
 #include <graph.h>
@@ -785,6 +786,11 @@ QString OverloadData::dumpGraph() const
     QTextStream s(&result);
     dumpRootGraph(s, m_minArgs, m_maxArgs);
     return result;
+}
+
+bool OverloadData::showGraph() const
+{
+    return showDotGraph(referenceFunction()->name(), dumpGraph());
 }
 
 static inline QString toHtml(QString s)

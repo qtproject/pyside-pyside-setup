@@ -29,6 +29,8 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
+#include "dotview.h"
+
 #include <QtCore/QDebug>
 #include <QtCore/QFile>
 #include <QtCore/QHash>
@@ -98,6 +100,10 @@ public:
     /// \param f function returning the name of a node
     template <class NameFunction>
     bool dumpDot(const QString& fileName, NameFunction f) const;
+    template <class NameFunction>
+    void formatDot(QTextStream &str, NameFunction f) const;
+    template <class NameFunction>
+    bool showGraph(const QString &name, NameFunction f) const;
 
     void format(QDebug &debug) const;
 
@@ -251,6 +257,15 @@ bool Graph<Node>::dumpDot(const QString& fileName,
     if (!output.open(QIODevice::WriteOnly))
         return false;
     QTextStream s(&output);
+    formatDot(s, nameFunction);
+    return true;
+}
+
+template <class Node>
+template <class NameFunction>
+void Graph<Node>::formatDot(QTextStream &s,
+                            NameFunction nameFunction) const
+{
     s << "digraph D {\n";
     for (const auto &nodeEntry : m_nodeEntries) {
         if (!nodeEntry.targets.isEmpty()) {
@@ -260,7 +275,16 @@ bool Graph<Node>::dumpDot(const QString& fileName,
         }
     }
     s << "}\n";
-    return true;
+}
+
+template <class Node>
+template <class NameFunction>
+bool Graph<Node>::showGraph(const QString &name, NameFunction f) const
+{
+    QString graph;
+    QTextStream s(&graph);
+    formatDot(s, f);
+    return showDotGraph(name, graph);
 }
 
 template <class Node>
