@@ -485,9 +485,10 @@ OverloadData::OverloadData(const AbstractMetaFunctionCList &overloads,
 
 OverloadDataNode::OverloadDataNode(const AbstractMetaFunctionCPtr &func,
                                    OverloadDataRootNode *parent,
-                                   const AbstractMetaType &argType, int argPos,
+                                   const AbstractMetaArgument &argument,
+                                   int argPos,
                                    const QString argTypeReplaced) :
-      m_argType(argType),
+      m_argument(argument),
       m_argTypeReplaced(argTypeReplaced),
       m_parent(parent),
       m_argPos(argPos)
@@ -525,7 +526,7 @@ OverloadDataNode *OverloadDataRootNode::addOverloadDataNode(const AbstractMetaFu
     if (overloadData.isNull()) {
         QString typeReplaced = func->typeReplaced(arg.argumentIndex() + 1);
         const int argpos = argPos() + 1;
-        overloadData.reset(new OverloadDataNode(func, this, argType, argpos,
+        overloadData.reset(new OverloadDataNode(func, this, arg, argpos,
                                                 typeReplaced));
         m_children.append(overloadData);
     }
@@ -634,7 +635,7 @@ AbstractMetaFunctionCPtr OverloadDataRootNode::referenceFunction() const
     return m_overloads.constFirst();
 }
 
-const AbstractMetaArgument *OverloadDataNode::argument(const AbstractMetaFunctionCPtr &func) const
+const AbstractMetaArgument *OverloadDataNode::overloadArgument(const AbstractMetaFunctionCPtr &func) const
 {
     if (isRoot() || !m_overloads.contains(func))
         return nullptr;
@@ -901,7 +902,7 @@ void OverloadDataNode::dumpNodeGraph(QTextStream &s) const
 
     // Show default values (original and modified) for various functions
     for (const auto &func : m_overloads) {
-        const AbstractMetaArgument *arg = argument(func);
+        const AbstractMetaArgument *arg = overloadArgument(func);
         if (!arg)
             continue;
         const int n = root->functionNumber(func);
@@ -1037,7 +1038,10 @@ void OverloadDataNode::formatDebug(QDebug &d) const
 {
     d << "OverloadDataNode(";
     formatReferenceFunction(d);
-    d << ", argType=" << m_argType << ", argPos=" << m_argPos;
+    d << ", argPos=" << m_argPos;
+    if (m_argument.argumentIndex() != m_argPos)
+        d << ", argIndex=" << m_argument.argumentIndex();
+    d << ", argType=\"" << m_argument.type().cppSignature() << '"';
     if (!m_argTypeReplaced.isEmpty())
         d << ", argTypeReplaced=\"" << m_argTypeReplaced << '"';
     formatOverloads(d);

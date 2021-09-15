@@ -2463,7 +2463,7 @@ void CppGenerator::writeTypeCheck(TextStream &s,
     for (const auto &sibling : siblings) {
         for (const auto &func : sibling->overloads()) {
             checkTypeViability(func);
-            const AbstractMetaType &argType = sibling->argument(func)->type();
+            const AbstractMetaType &argType = sibling->overloadArgument(func)->type();
             if (!argType.isPrimitive())
                 continue;
             if (ShibokenGenerator::isNumber(argType.typeEntry()))

@@ -30,6 +30,7 @@
 #define OVERLOADDATA_H
 
 #include <apiextractorresult.h>
+#include <abstractmetaargument.h>
 
 #include <QtCore/QBitArray>
 #include <QtCore/QList>
@@ -104,7 +105,7 @@ class OverloadDataNode : public OverloadDataRootNode
 public:
     explicit OverloadDataNode(const AbstractMetaFunctionCPtr &func,
                               OverloadDataRootNode *parent,
-                              const AbstractMetaType &argType, int argPos,
+                              const AbstractMetaArgument &arg, int argPos,
                               const QString argTypeReplaced = {});
     void addOverload(const AbstractMetaFunctionCPtr &func);
 
@@ -112,23 +113,25 @@ public:
     const OverloadDataRootNode *parent() const override;
     void dumpNodeGraph(QTextStream &s) const;
 
-    const AbstractMetaType &argType() const { return m_argType; }
+    const AbstractMetaArgument &argument() const
+    {  return m_argument; }
+    const AbstractMetaType &argType() const { return m_argument.type(); }
 
     bool hasArgumentTypeReplace() const { return !m_argTypeReplaced.isEmpty(); }
     const QString &argumentTypeReplaced() const { return m_argTypeReplaced; }
 
-    const AbstractMetaArgument *argument(const AbstractMetaFunctionCPtr &func) const;
+    const AbstractMetaArgument *overloadArgument(const AbstractMetaFunctionCPtr &func) const;
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const override;
 #endif
 
 private:
-    AbstractMetaType m_argType;
+    AbstractMetaArgument m_argument;
     QString m_argTypeReplaced;
     OverloadDataRootNode *m_parent = nullptr;
 
-    int m_argPos = -1;
+    int m_argPos = -1; // Position excluding modified/removed arguments.
 };
 
 class OverloadData : public OverloadDataRootNode
