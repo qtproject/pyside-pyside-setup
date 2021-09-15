@@ -165,14 +165,11 @@ private:
      *  If the argument type was modified in the type system, this method will
      *  try to build a new type based on the type name defined in the type system.
      *  \param  func    The function which owns the argument.
-     *  \param  argPos  Argument position in the function signature.
-     *                  Note that the position 0 represents the return value, and the function
-     *                  parameters start counting on 1.
-     *  \param  newType It is set to true if the type returned is a new object that must be deallocated.
-     *  \return The type of the argument indicated by \p argPos.
+     *  \param  index   Argument index in the function signature.
+     *  \return The type of the argument indicated by \p index.
      */
-    static std::optional<AbstractMetaType>
-        getArgumentType(const AbstractMetaFunctionCPtr &func, int argPos);
+    static AbstractMetaType
+        getArgumentType(const AbstractMetaFunctionCPtr &func, int index);
 
     void writePythonToCppTypeConversion(TextStream &s,
                                         const AbstractMetaType &type,

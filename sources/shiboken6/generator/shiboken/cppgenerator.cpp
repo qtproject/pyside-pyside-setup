@@ -2511,41 +2511,25 @@ void CppGenerator::writeArgumentConversion(TextStream &s,
         writeUnusedVariableCast(s, argName);
 }
 
-static const QStringList &knownPythonTypes()
+AbstractMetaType
+    CppGenerator::getArgumentType(const AbstractMetaFunctionCPtr &func, int index)
 {
-    static const QStringList result = {
-        pyBoolT(), pyIntT(), pyFloatT(), pyLongT(),
-        cPyObjectT(), QLatin1String("PyString"),
-        cPyBufferT(), cPySequenceT(),
-        QLatin1String("PyTuple"), cPyListT(),
-        QLatin1String("PyDict"), QLatin1String("PyObject*"),
-        QLatin1String("PyObject *"), QLatin1String("PyTupleObject*")};
-    return result;
-}
-
-std::optional<AbstractMetaType>
-    CppGenerator::getArgumentType(const AbstractMetaFunctionCPtr &func, int argPos)
-{
-    if (argPos < 0 || argPos > func->arguments().size()) {
+    if (index < 0 || index >= func->arguments().size()) {
         qCWarning(lcShiboken).noquote().nospace()
             << "Argument index for function '" << func->signature() << "' out of range.";
         return {};
     }
 
-    QString typeReplaced = func->typeReplaced(argPos);
+    QString typeReplaced = func->typeReplaced(index + 1);
     if (typeReplaced.isEmpty()) {
-        if (argPos == 0)
-            return func->type();
-        auto argType = func->arguments().at(argPos - 1).type();
+        auto argType = func->arguments().at(index).type();
         return argType.viewOn() ? *argType.viewOn() : argType;
     }
 
     auto argType = AbstractMetaType::fromString(typeReplaced);
-    if (!argType.has_value() && !knownPythonTypes().contains(typeReplaced)) {
-        qCWarning(lcShiboken, "%s",
-                  qPrintable(msgUnknownTypeInArgumentTypeReplacement(typeReplaced, func.data())));
-    }
-    return argType;
+    if (!argType.has_value())
+        throw Exception(msgUnknownTypeInArgumentTypeReplacement(typeReplaced, func.data()));
+    return argType.value();
 }
 
 static inline QString arrayHandleType(const AbstractMetaTypeList &nestedArrayTypes)
@@ -3052,14 +3036,14 @@ void CppGenerator::writeSingleFunctionCall(TextStream &s,
         }
         if (hasConversionRule)
             continue;
-        auto argType = getArgumentType(func, argIdx + 1);
-        if (!argType.has_value() || (mayHaveUnunsedArguments && !func->injectedCodeUsesArgument(argIdx)))
+        if (mayHaveUnunsedArguments && !func->injectedCodeUsesArgument(argIdx))
             continue;
+        auto argType = getArgumentType(func, argIdx);
         int argPos = argIdx - removedArgs;
         QString argName = QLatin1String(CPP_ARG) + QString::number(argPos);
         QString pyArgName = usePyArgs ? pythonArgsAt(argPos) : QLatin1String(PYTHON_ARG);
         QString defaultValue = guessScopeForDefaultValue(func, arg);
-        writeArgumentConversion(s, argType.value(), argName, pyArgName,
+        writeArgumentConversion(s, argType, argName, pyArgName,
                                 func->implementingClass(), defaultValue,
                                 func->isUserAdded());
     }
@@ -4943,10 +4927,7 @@ void CppGenerator::writeRichCompareFunction(TextStream &s,
                 const auto func = od->referenceFunction();
                 if (func->isStatic())
                     continue;
-                auto argTypeO = getArgumentType(func, 1);
-                if (!argTypeO.has_value())
-                    continue;
-                auto argType = argTypeO.value();
+                auto argType = getArgumentType(func, 0);
                 if (!first) {
                     s << " else ";
                 } else {
