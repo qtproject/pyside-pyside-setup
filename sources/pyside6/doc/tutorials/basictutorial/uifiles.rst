@@ -196,6 +196,13 @@ command prompt:
 
     python main.py
 
+.. note::
+
+    `QUiLoader` uses connect() calls taking the function signatures as string
+    arguments for signal/slot connections.
+    It is thus unable to handle Python types like `str` or `list` from
+    custom widgets written in Python since these types are internally mapped
+    to different C++ types.
 
 .. _designer_custom_widgets:
 
