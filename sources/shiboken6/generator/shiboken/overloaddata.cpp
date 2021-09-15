@@ -895,10 +895,14 @@ void OverloadDataNode::dumpNodeGraph(QTextStream &s) const
         s << toHtml(argType().cppSignature()) << "</td></tr>";
     }
 
+    const OverloadDataRootNode *root = this;
+    while (!root->isRoot())
+        root = root->parent();
+
     // Overloads for the signature to present point
     s << "<tr><td bgcolor=\"gray\" align=\"right\">overloads</td><td bgcolor=\"gray\" align=\"left\">";
     for (const auto &func : m_overloads)
-        s << 'f' << functionNumber(func) << ' ';
+        s << 'f' << root->functionNumber(func) << ' ';
     s << "</td></tr>";
 
     // Show default values (original and modified) for various functions
@@ -906,15 +910,16 @@ void OverloadDataNode::dumpNodeGraph(QTextStream &s) const
         const AbstractMetaArgument *arg = argument(func);
         if (!arg)
             continue;
+        const int n = root->functionNumber(func);
         QString argDefault = arg->defaultValueExpression();
         if (!argDefault.isEmpty() ||
             argDefault != arg->originalDefaultValueExpression()) {
-            s << "<tr><td bgcolor=\"gray\" align=\"right\">f" << functionNumber(func);
+            s << "<tr><td bgcolor=\"gray\" align=\"right\">f" << n;
             s << "-default</td><td bgcolor=\"gray\" align=\"left\">";
             s << argDefault << "</td></tr>";
         }
         if (argDefault != arg->originalDefaultValueExpression()) {
-            s << "<tr><td bgcolor=\"gray\" align=\"right\">f" << functionNumber(func);
+            s << "<tr><td bgcolor=\"gray\" align=\"right\">f" << n;
             s << "-orig-default</td><td bgcolor=\"gray\" align=\"left\">";
             s << arg->originalDefaultValueExpression() << "</td></tr>";
         }
