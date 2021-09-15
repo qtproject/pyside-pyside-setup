@@ -1008,9 +1008,8 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
     s << functionSignature(func, prefix, QString(), Generator::SkipDefaultValues|Generator::OriginalTypeDescription)
       << "\n{\n" << indent;
 
-    const FunctionModificationList &functionModifications = func->modifications();
-
-    const QString returnStatement = virtualMethodReturn(s, api(), func, functionModifications);
+    const QString returnStatement = virtualMethodReturn(s, api(), func,
+                                                        func->modifications());
 
     if (func->isAbstract() && func->isModifiedRemoved()) {
         qCWarning(lcShiboken, "%s", qPrintable(msgPureVirtualFunctionRemoved(func.data())));
@@ -1132,7 +1131,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
 
     bool invalidateReturn = false;
     QSet<int> invalidateArgs;
-    for (const FunctionModification &funcMod : functionModifications) {
+    for (const FunctionModification &funcMod : func->modifications()) {
         for (const ArgumentModification &argMod : funcMod.argument_mods()) {
             const int index = argMod.index();
             if (argMod.resetAfterUse() && !invalidateArgs.contains(index)) {
@@ -1235,7 +1234,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
     }
 
 
-    for (const FunctionModification &funcMod : functionModifications) {
+    for (const FunctionModification &funcMod : func->modifications()) {
         for (const ArgumentModification &argMod : funcMod.argument_mods()) {
             if (argMod.index() == 0
                 && argMod.nativeOwnership() == TypeSystem::CppOwnership) {
