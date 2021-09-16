@@ -45,6 +45,7 @@ public:
     QString m_expression;
     QString m_originalExpression;
     int m_argumentIndex = 0;
+    bool m_modifiedRemoved = false;
 };
 
 AbstractMetaArgument::AbstractMetaArgument() : d(new AbstractMetaArgumentData)
@@ -75,6 +76,17 @@ void AbstractMetaArgument::setType(const AbstractMetaType &type)
 const AbstractMetaType &AbstractMetaArgument::modifiedType() const
 {
     return d->m_modifiedType;
+}
+
+bool AbstractMetaArgument::isModifiedRemoved() const
+{
+    return d->m_modifiedRemoved;
+}
+
+void AbstractMetaArgument::setModifiedRemoved(bool v)
+{
+    if (d->m_modifiedRemoved != v)
+        d->m_modifiedRemoved = v;
 }
 
 void AbstractMetaArgument::setModifiedType(const AbstractMetaType &type)

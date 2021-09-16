@@ -104,6 +104,18 @@ QString msgArgumentOutOfRange(int number, int minValue, int maxValue)
     return result;
 }
 
+QString msgArgumentRemovalFailed(const AbstractMetaFunction *func, int n,
+                                 const QString &why)
+{
+    QString result;
+    QTextStream str(&result);
+    str << "Unable to remove argument " << n << " of ";
+    if (auto *c = func->ownerClass())
+        str << c->name() << "::";
+    str << func->signature() << ":  " << why;
+    return result;
+}
+
 template <class Stream>
 static void msgFormatEnumType(Stream &str,
                               const EnumModelItem &enumItem,

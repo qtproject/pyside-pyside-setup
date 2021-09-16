@@ -843,14 +843,9 @@ Shiboken::Object::destroy(wrapper, this);
 
 static bool allArgumentsRemoved(const AbstractMetaFunctionCPtr& func)
 {
-    if (func->arguments().isEmpty())
-        return false;
     const AbstractMetaArgumentList &arguments = func->arguments();
-    for (const AbstractMetaArgument &arg : arguments) {
-        if (!func->argumentRemoved(arg.argumentIndex() + 1))
-            return false;
-    }
-    return true;
+    return std::all_of(arguments.cbegin(), arguments.cend(),
+                       [](const AbstractMetaArgument &a) { return a.isModifiedRemoved(); });
 }
 
 // Return type for error messages when getting invalid types from virtual
@@ -1091,7 +1086,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
         QStringList argConversions;
         const AbstractMetaArgumentList &arguments = func->arguments();
         for (const AbstractMetaArgument &arg : arguments) {
-            if (func->argumentRemoved(arg.argumentIndex() + 1))
+            if (arg.isModifiedRemoved())
                 continue;
 
             const auto &argType = arg.type();
@@ -2434,12 +2429,15 @@ static void checkTypeViability(const AbstractMetaFunctionCPtr &func,
     const bool modified = argIdx == 0
         ? func->isTypeModified()
         : func->arguments().at(argIdx -1).isTypeModified();
+    const bool isRemoved = argIdx == 0
+        ? func->argumentRemoved(0)
+        : func->arguments().at(argIdx -1).isModifiedRemoved();
     if (type.isVoid()
         || !type.typeEntry()->isPrimitive()
         || type.indirections() == 0
         || (type.indirections() == 1 && type.typeUsagePattern() == AbstractMetaType::NativePointerAsArrayPattern)
         || type.isCString()
-        || func->argumentRemoved(argIdx)
+        || isRemoved
         || modified
         || !func->conversionRule(TypeSystem::All, argIdx).isEmpty()
         || func->hasInjectedCode())
@@ -3014,7 +3012,7 @@ void CppGenerator::writeSingleFunctionCall(TextStream &s,
     for (int argIdx = 0; argIdx < func->arguments().count(); ++argIdx) {
         bool hasConversionRule = !func->conversionRule(TypeSystem::NativeCode, argIdx + 1).isEmpty();
         const AbstractMetaArgument &arg = func->arguments().at(argIdx);
-        if (func->argumentRemoved(argIdx + 1)) {
+        if (arg.isModifiedRemoved()) {
             if (!arg.defaultValueExpression().isEmpty()) {
                 const QString cppArgRemoved = QLatin1String(CPP_ARG_REMOVED)
                     + QString::number(argIdx);
@@ -3533,8 +3531,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
         if (maxArgs > 0 && maxArgs < func->arguments().size() - OverloadData::numberOfRemovedArguments(func)) {
             int removedArgs = 0;
             for (int i = 0; i < maxArgs + removedArgs; i++) {
-                lastArg = &func->arguments().at(i);
-                if (func->argumentRemoved(i + 1))
+                if (func->arguments().at(i).isModifiedRemoved())
                     removedArgs++;
             }
         } else if (maxArgs != 0 && !func->arguments().isEmpty()) {
@@ -3555,7 +3552,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                 const AbstractMetaArgument &arg = func->arguments().at(i);
                 bool hasConversionRule = !func->conversionRule(TypeSystem::NativeCode,
                                                                arg.argumentIndex() + 1).isEmpty();
-                if (func->argumentRemoved(i + 1)) {
+                if (arg.isModifiedRemoved()) {
                     // If some argument with default value is removed from a
                     // method signature, the said value must be explicitly
                     // added to the method call.
@@ -3596,7 +3593,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                 if (argsClear && !defValModified && !hasConversionRule)
                     continue;
                 argsClear = false;
-                otherArgsModified |= defValModified || hasConversionRule || func->argumentRemoved(i + 1);
+                otherArgsModified |= defValModified || hasConversionRule || arg.isModifiedRemoved();
                 if (hasConversionRule)
                     otherArgs.prepend(arg.name() + QLatin1String(CONV_RULE_OUT_VAR_SUFFIX));
                 else

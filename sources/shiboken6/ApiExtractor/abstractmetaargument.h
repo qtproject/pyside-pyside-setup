@@ -58,6 +58,9 @@ public:
     const AbstractMetaType &modifiedType() const;
     bool isTypeModified() const { return modifiedType() != type(); }
 
+    bool isModifiedRemoved() const;
+    void setModifiedRemoved(bool v);
+
     QString name() const;
     void setName(const QString &name, bool realName = true);
     bool hasName() const;

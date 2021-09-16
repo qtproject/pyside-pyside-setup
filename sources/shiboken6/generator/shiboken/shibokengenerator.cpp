@@ -622,7 +622,7 @@ bool ShibokenGenerator::shouldRejectNullPointerArgument(const AbstractMetaFuncti
     // necessary because the type checking would handle that already.
     if (!arg.type().isPointer())
         return false;
-    if (func->argumentRemoved(argIndex + 1))
+    if (arg.isModifiedRemoved())
         return false;
     for (const auto &funcMod : func->modifications()) {
         for (const ArgumentModification &argMod : funcMod.argument_mods()) {
@@ -639,7 +639,7 @@ QString ShibokenGenerator::getFormatUnitString(const AbstractMetaFunctionCPtr &f
     const char objType = (incRef ? 'O' : 'N');
     const AbstractMetaArgumentList &arguments = func->arguments();
     for (const AbstractMetaArgument &arg : arguments) {
-        if (func->argumentRemoved(arg.argumentIndex() + 1))
+        if (arg.isModifiedRemoved())
             continue;
 
         const auto &type = arg.type();
@@ -1276,12 +1276,13 @@ void ShibokenGenerator::writeFunctionArguments(TextStream &s,
 
     int argUsed = 0;
     for (int i = 0; i < arguments.size(); ++i) {
-        if ((options & Generator::SkipRemovedArguments) && func->argumentRemoved(i+1))
+        const auto &arg = arguments.at(i);
+        if (options.testFlag(Generator::SkipRemovedArguments) && arg.isModifiedRemoved())
             continue;
 
         if (argUsed != 0)
             s << ", ";
-        writeArgument(s, func, arguments[i], options);
+        writeArgument(s, func, arg, options);
         argUsed++;
     }
 }
@@ -1342,7 +1343,7 @@ void ShibokenGenerator::writeArgumentNames(TextStream &s,
     int argCount = 0;
     for (const auto &argument : arguments) {
         const int index = argument.argumentIndex() + 1;
-        if ((options & Generator::SkipRemovedArguments) && (func->argumentRemoved(index)))
+        if (options.testFlag(Generator::SkipRemovedArguments) && argument.isModifiedRemoved())
             continue;
 
         s << ((argCount > 0) ? ", " : "") << argument.name();
@@ -1524,7 +1525,7 @@ ShibokenGenerator::ArgumentVarReplacementList
         QString argValue;
         if (language == TypeSystem::TargetLangCode) {
             bool hasConversionRule = !func->conversionRule(convLang, i+1).isEmpty();
-            const bool argRemoved = func->argumentRemoved(i+1);
+            const bool argRemoved = arg.isModifiedRemoved();
             if (argRemoved)
                 ++removed;
             if (argRemoved && hasConversionRule)

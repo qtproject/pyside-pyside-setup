@@ -533,13 +533,12 @@ bool AbstractMetaFunction::isUserDeclared() const
 
 int AbstractMetaFunction::actualMinimumArgumentCount() const
 {
-    AbstractMetaArgumentList arguments = this->arguments();
-
     int count = 0;
-    for (int i = 0; i < arguments.size(); ++i && ++count) {
-        if (argumentRemoved(i + 1))
+    for (int i = 0, size = d->m_arguments.size(); i < size; ++i && ++count) {
+        const auto &arg = d->m_arguments.at(i);
+        if (arg.isModifiedRemoved())
             --count;
-        else if (!arguments.at(i).defaultValueExpression().isEmpty())
+        else if (!arg.defaultValueExpression().isEmpty())
             break;
     }
 
@@ -829,6 +828,14 @@ void AbstractMetaFunction::applyTypeModifications()
                 && !d->applyTypeModification(this, am.modifiedType(),
                                              n, &errorMessage)) {
                 throw Exception(errorMessage);
+            } else if (am.isRemoved() && n != 0) {
+                if (n < 1 || n > d->m_arguments.size()) {
+                    errorMessage =
+                        msgArgumentRemovalFailed(this, n,
+                                                 msgArgumentOutOfRange(n, 1, d->m_arguments.size()));
+                    throw Exception(errorMessage);
+                }
+                d->m_arguments[n - 1].setModifiedRemoved(true);
             }
         }
     }

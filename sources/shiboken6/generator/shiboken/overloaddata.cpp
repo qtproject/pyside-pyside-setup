@@ -421,8 +421,9 @@ static std::pair<int, int> getMinMaxArgs(const AbstractMetaFunctionCPtr &func)
     const auto &arguments = func->arguments();
     int argIndex = 0;
     for (qsizetype i = 0, size = arguments.size(); i < size; ++i) {
-        if (!func->argumentRemoved(int(i + 1))) {
-            if (defaultValueIndex < 0 && arguments.at(i).hasDefaultValueExpression())
+        const auto &arg =  arguments.at(i);
+        if (!arg.isModifiedRemoved()) {
+            if (defaultValueIndex < 0 && arg.hasDefaultValueExpression())
                 defaultValueIndex = argIndex;
             ++argIndex;
         }
@@ -467,9 +468,8 @@ OverloadData::OverloadData(const AbstractMetaFunctionCList &overloads,
         OverloadDataRootNode *currentOverloadData = this;
         const AbstractMetaArgumentList &arguments = func->arguments();
         for (const AbstractMetaArgument &arg : arguments) {
-            if (func->argumentRemoved(arg.argumentIndex() + 1))
-                continue;
-            currentOverloadData = currentOverloadData->addOverloadDataNode(func, arg);
+            if (!arg.isModifiedRemoved())
+                currentOverloadData = currentOverloadData->addOverloadDataNode(func, arg);
         }
     }
 
@@ -631,7 +631,7 @@ const AbstractMetaArgument *OverloadDataNode::overloadArgument(const AbstractMet
     int argPos = 0;
     int removed = 0;
     for (int i = 0; argPos <= m_argPos; i++) {
-        if (func->argumentRemoved(i + 1))
+        if (func->arguments().at(i).isModifiedRemoved())
             removed++;
         else
             argPos++;
@@ -684,7 +684,7 @@ AbstractMetaFunctionCPtr OverloadDataRootNode::getFunctionWithDefaultValue() con
     for (const auto &func : m_overloads) {
         int removedArgs = 0;
         for (int i = 0; i <= argpos + removedArgs; i++) {
-            if (func->argumentRemoved(i + 1))
+            if (func->arguments().at(i).isModifiedRemoved())
                 removedArgs++;
         }
         if (func->arguments().at(argpos + removedArgs).hasDefaultValueExpression())
@@ -701,7 +701,7 @@ QList<int> OverloadData::invalidArgumentLengths() const
         const AbstractMetaArgumentList args = func->arguments();
         int offset = 0;
         for (int i = 0; i < args.size(); ++i) {
-            if (func->argumentRemoved(i+1)) {
+            if (func->arguments().at(i).isModifiedRemoved()) {
                 offset++;
             } else {
                 if (args.at(i).hasDefaultValueExpression())
@@ -722,12 +722,8 @@ QList<int> OverloadData::invalidArgumentLengths() const
 
 int OverloadData::numberOfRemovedArguments(const AbstractMetaFunctionCPtr &func)
 {
-    int removed = 0;
-    for (int i = 0, size = int(func->arguments().size()); i < size; ++i) {
-        if (func->argumentRemoved(i + 1))
-            ++removed;
-    }
-    return removed;
+    return std::count_if(func->arguments().cbegin(), func->arguments().cend(),
+                         [](const AbstractMetaArgument &a) { return a.isModifiedRemoved(); });
 }
 
 int OverloadData::numberOfRemovedArguments(const AbstractMetaFunctionCPtr &func, int finalArgPos)
@@ -736,7 +732,7 @@ int OverloadData::numberOfRemovedArguments(const AbstractMetaFunctionCPtr &func,
     int removed = 0;
     const int size = func->arguments().size();
     for (int i = 0; i < qMin(size, finalArgPos + removed); ++i) {
-        if (func->argumentRemoved(i + 1))
+        if (func->arguments().at(i).isModifiedRemoved())
             ++removed;
     }
     return removed;
@@ -951,9 +947,7 @@ bool OverloadData::hasArgumentWithDefaultValue(const AbstractMetaFunctionCPtr &f
 {
     const AbstractMetaArgumentList &arguments = func->arguments();
     for (const AbstractMetaArgument &arg : arguments) {
-        if (func->argumentRemoved(arg.argumentIndex() + 1))
-            continue;
-        if (arg.hasDefaultValueExpression())
+        if (!arg.isModifiedRemoved() && arg.hasDefaultValueExpression())
             return true;
     }
     return false;
@@ -965,7 +959,7 @@ AbstractMetaArgumentList OverloadData::getArgumentsWithDefaultValues(const Abstr
     const AbstractMetaArgumentList &arguments = func->arguments();
     for (const AbstractMetaArgument &arg : arguments) {
         if (!arg.hasDefaultValueExpression()
-            || func->argumentRemoved(arg.argumentIndex() + 1))
+            || arg.isModifiedRemoved())
             continue;
         args << arg;
     }

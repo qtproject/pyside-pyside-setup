@@ -476,7 +476,7 @@ QString QtDocGenerator::parseArgDocStyle(const AbstractMetaClass* /* cppClass */
     const AbstractMetaArgumentList &arguments = func->arguments();
     for (const AbstractMetaArgument &arg : arguments) {
 
-        if (func->argumentRemoved(arg.argumentIndex() + 1))
+        if (arg.isModifiedRemoved())
             continue;
 
         bool thisIsoptional = !arg.defaultValueExpression().isEmpty();
@@ -702,11 +702,8 @@ void QtDocGenerator::writeFunctionParametersType(TextStream &s, const AbstractMe
     s << '\n';
     const AbstractMetaArgumentList &funcArgs = func->arguments();
     for (const AbstractMetaArgument &arg : funcArgs) {
-
-        if (func->argumentRemoved(arg.argumentIndex() + 1))
-            continue;
-
-        writeParameterType(s, cppClass, arg);
+        if (!arg.isModifiedRemoved())
+            writeParameterType(s, cppClass, arg);
     }
 
     if (!func->isConstructor() && !func->isVoid()) {
