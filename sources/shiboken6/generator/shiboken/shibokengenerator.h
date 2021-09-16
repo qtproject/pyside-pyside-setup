@@ -238,22 +238,6 @@ protected:
     static QString cpythonTypeNameExt(const AbstractMetaType &type) ;
     QString cpythonCheckFunction(const TypeEntry *type) const;
     QString cpythonCheckFunction(AbstractMetaType metaType) const;
-    /**
-     *  Receives the argument \p type and tries to find the appropriate AbstractMetaType for it
-     *  or a custom type check.
-     *  \param type     A string representing the type to be discovered.
-     *  \param metaType A pointer to an AbstractMetaType pointer, to where write a new meta type object
-     *                  if one is produced from the \p type string. This object must be deallocated by
-     *                  the caller. It will set the target variable to nullptr, is \p type is a Python type.
-     *  \return A custom check if \p type is a custom type, or an empty string if \p metaType
-     *          receives an existing type object.
-     */
-    struct CPythonCheckFunctionResult
-    {
-        QString checkFunction;
-        std::optional<AbstractMetaType> type;
-    };
-    static CPythonCheckFunctionResult guessCPythonCheckFunction(const QString &type);
     static QString cpythonIsConvertibleFunction(const TypeEntry *type);
     QString cpythonIsConvertibleFunction(AbstractMetaType metaType) const;
     QString cpythonIsConvertibleFunction(const AbstractMetaArgument &metaArg) const;

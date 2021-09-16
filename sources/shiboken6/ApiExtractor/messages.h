@@ -239,4 +239,6 @@ QString msgDuplicateBuiltInTypeEntry(const QString &name);
 QString msgDuplicateTypeEntry(const QString &name);
 QString msgInvalidTargetLanguageApiName(const QString &name);
 
+QString msgUnknownCheckFunction(const TypeEntry *t);
+
 #endif // MESSAGES_H

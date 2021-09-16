@@ -2387,27 +2387,20 @@ void CppGenerator::writeTypeCheck(TextStream &s, AbstractMetaType argType,
                                   const QString &argumentName, bool isNumber,
                                   const QString &customType, bool rejectNull) const
 {
-    QString customCheck;
     if (!customType.isEmpty()) {
-        AbstractMetaType metaType;
-        // PYSIDE-795: Note: XML-Overrides are handled in this shibokengenerator function!
-        // This enables iterables for QMatrix4x4 for instance.
-        auto customCheckResult = guessCPythonCheckFunction(customType);
-        customCheck = customCheckResult.checkFunction;
-        if (customCheckResult.type.has_value())
-            argType = customCheckResult.type.value();
+        QString errorMessage;
+        const auto metaTypeOpt = AbstractMetaType::fromString(customType, &errorMessage);
+        if (!metaTypeOpt.has_value())
+            throw Exception(errorMessage);
+        argType = metaTypeOpt.value();
     }
 
     // TODO-CONVERTER: merge this with the code below.
-    QString typeCheck;
-    if (customCheck.isEmpty())
-        typeCheck = cpythonIsConvertibleFunction(argType);
-    else
-        typeCheck = customCheck;
+    QString typeCheck = cpythonIsConvertibleFunction(argType);
     typeCheck.append(u'(' +argumentName + u')');
 
     // TODO-CONVERTER -----------------------------------------------------------------------
-    if (customCheck.isEmpty() && !argType.typeEntry()->isCustom()) {
+    if (!argType.typeEntry()->isCustom()) {
         typeCheck = u'(' + pythonToCppConverterForArgumentName(argumentName)
                     + u" = "_qs + typeCheck + u"))"_qs;
         if (!isNumber && argType.typeEntry()->isCppPrimitive()) {

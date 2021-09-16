@@ -832,3 +832,9 @@ QString msgInvalidTargetLanguageApiName(const QString &name)
     return u"Invalid target language API name \""_qs
            + name + u"\"."_qs;
 }
+
+QString msgUnknownCheckFunction(const TypeEntry *t)
+{
+     return u"Unknown check function for type: '"_qs
+            + t->qualifiedCppName() + u"'."_qs;
+}

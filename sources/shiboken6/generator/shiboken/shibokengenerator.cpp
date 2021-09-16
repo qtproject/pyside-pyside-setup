@@ -1009,11 +1009,7 @@ QString ShibokenGenerator::cpythonCheckFunction(AbstractMetaType metaType) const
         const auto *cte = static_cast<const CustomTypeEntry *>(typeEntry);
         if (cte->hasCheckFunction())
             return cte->checkFunction();
-        auto customCheckResult = guessCPythonCheckFunction(typeEntry->name());
-        if (!customCheckResult.checkFunction.isEmpty())
-            return customCheckResult.checkFunction;
-        if (customCheckResult.type.has_value())
-            metaType = customCheckResult.type.value();
+        throw Exception(msgUnknownCheckFunction(typeEntry));
     }
 
     if (metaType.isExtendedCppPrimitive()) {
@@ -1077,10 +1073,7 @@ QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry *type) const
         const auto *cte = static_cast<const CustomTypeEntry *>(type);
         if (cte->hasCheckFunction())
             return cte->checkFunction();
-        auto customCheckResult = guessCPythonCheckFunction(type->name());
-        if (customCheckResult.type.has_value())
-            return cpythonCheckFunction(customCheckResult.type.value());
-        return customCheckResult.checkFunction;
+        throw Exception(msgUnknownCheckFunction(type));
     }
 
     if (type->isEnum() || type->isFlags() || type->isWrapperType())
@@ -1101,44 +1094,6 @@ QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry *type) const
     }
 
     return cpythonIsConvertibleFunction(type);
-}
-
-ShibokenGenerator::CPythonCheckFunctionResult
-    ShibokenGenerator::guessCPythonCheckFunction(const QString &type)
-{
-    // PYSIDE-795: We abuse PySequence for iterables.
-    // This part handles the overrides in the XML files.
-    if (type == cPySequenceT())
-        return {QLatin1String("Shiboken::String::checkIterable"), {}};
-
-    if (type == cPyTypeObjectT())
-        return {QLatin1String("PyType_Check"), {}};
-
-    if (type == cPyBufferT())
-        return {QLatin1String("Shiboken::Buffer::checkType"), {}};
-
-    if (type == pyStrT())
-        return {QLatin1String("Shiboken::String::check"), {}};
-
-    if (type == cPyArrayObjectT())
-         return {QLatin1String("PyArray_Check"), {}};
-
-    // PYSIDE-1499: We replace some strings by path objects.
-    if (type == pyPathLikeT())
-        return {QLatin1String("Shiboken::String::checkPath"), {}};
-
-    CPythonCheckFunctionResult result;
-    result.type = AbstractMetaType::fromString(type);
-
-    if (!result.type.has_value()) {
-        result.checkFunction = type + QLatin1String("_Check");
-    } else if (result.type->typeEntry()->isCustom()) {
-        auto ct = static_cast<const CustomTypeEntry *>(result.type->typeEntry());
-        result.checkFunction = ct->checkFunction();
-        if (result.checkFunction.isEmpty())
-            result.checkFunction = type + QLatin1String("_Check");
-    }
-    return result;
 }
 
 QString ShibokenGenerator::cpythonIsConvertibleFunction(const TypeEntry *type)
@@ -1162,15 +1117,12 @@ QString ShibokenGenerator::cpythonIsConvertibleFunction(const TypeEntry *type)
 }
 QString ShibokenGenerator::cpythonIsConvertibleFunction(AbstractMetaType metaType) const
 {
-    if (metaType.typeEntry()->isCustom()) {
-        const auto *cte = static_cast<const CustomTypeEntry *>(metaType.typeEntry());
+    const auto *typeEntry = metaType.typeEntry();
+    if (typeEntry->isCustom()) {
+        const auto *cte = static_cast<const CustomTypeEntry *>(typeEntry);
         if (cte->hasCheckFunction())
             return cte->checkFunction();
-        auto customCheckResult = guessCPythonCheckFunction(metaType.typeEntry()->name());
-        if (!customCheckResult.checkFunction.isEmpty())
-            return customCheckResult.checkFunction;
-        if (customCheckResult.type.has_value())
-            metaType = customCheckResult.type.value();
+        throw Exception(msgUnknownCheckFunction(typeEntry));
     }
 
     QString result = QLatin1String("Shiboken::Conversions::");

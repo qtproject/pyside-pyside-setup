@@ -60,7 +60,7 @@
     </inject-code>
 
     <!-- This is to inform the generator that the VolatileBool python type exists -->
-    <custom-type name="VolatileBool"/>
+    <custom-type name="VolatileBool" check-function="VolatileBool_Check"/>
     <primitive-type name="bool volatile" target-lang-api-name="VolatileBool">
         <!-- No conversion rules are specified here, because the generator does not handle
              pointer to primitive types without function adjustment.
