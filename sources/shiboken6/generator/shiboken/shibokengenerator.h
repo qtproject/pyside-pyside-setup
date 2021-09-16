@@ -237,8 +237,8 @@ protected:
     static QString cpythonTypeName(const TypeEntry *type);
     static QString cpythonTypeNameExt(const TypeEntry *type);
     static QString cpythonTypeNameExt(const AbstractMetaType &type) ;
-    QString cpythonCheckFunction(const TypeEntry *type, bool genericNumberType = false) const;
-    QString cpythonCheckFunction(AbstractMetaType metaType, bool genericNumberType = false) const;
+    QString cpythonCheckFunction(const TypeEntry *type) const;
+    QString cpythonCheckFunction(AbstractMetaType metaType) const;
     /**
      *  Receives the argument \p type and tries to find the appropriate AbstractMetaType for it
      *  or a custom type check.

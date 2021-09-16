@@ -993,8 +993,7 @@ bool ShibokenGenerator::isNullPtr(const QString &value)
         || value == QLatin1String("NULLPTR") || value == QLatin1String("{}");
 }
 
-QString ShibokenGenerator::cpythonCheckFunction(AbstractMetaType metaType,
-                                                bool genericNumberType) const
+QString ShibokenGenerator::cpythonCheckFunction(AbstractMetaType metaType) const
 {
     if (metaType.typeEntry()->isCustom()) {
         auto customCheckResult = guessCPythonCheckFunction(metaType.typeEntry()->name());
@@ -1009,7 +1008,7 @@ QString ShibokenGenerator::cpythonCheckFunction(AbstractMetaType metaType,
             return QLatin1String("Shiboken::String::check");
         if (metaType.isVoidPointer())
             return QLatin1String("PyObject_Check");
-        return cpythonCheckFunction(metaType.typeEntry(), genericNumberType);
+        return cpythonCheckFunction(metaType.typeEntry());
     }
     auto typeEntry = metaType.typeEntry();
     if (typeEntry->isContainer()) {
@@ -1056,16 +1055,16 @@ QString ShibokenGenerator::cpythonCheckFunction(AbstractMetaType metaType,
         }
         return typeCheck;
     }
-    return cpythonCheckFunction(typeEntry, genericNumberType);
+    return cpythonCheckFunction(typeEntry);
 }
 
-QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry *type, bool genericNumberType) const
+QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry *type) const
 {
     if (type->isCustom()) {
         AbstractMetaType metaType;
         auto customCheckResult = guessCPythonCheckFunction(type->name());
         if (customCheckResult.type.has_value())
-            return cpythonCheckFunction(customCheckResult.type.value(), genericNumberType);
+            return cpythonCheckFunction(customCheckResult.type.value());
         return customCheckResult.checkFunction;
     }
 
