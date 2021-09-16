@@ -995,8 +995,12 @@ bool ShibokenGenerator::isNullPtr(const QString &value)
 
 QString ShibokenGenerator::cpythonCheckFunction(AbstractMetaType metaType) const
 {
-    if (metaType.typeEntry()->isCustom()) {
-        auto customCheckResult = guessCPythonCheckFunction(metaType.typeEntry()->name());
+    const auto *typeEntry = metaType.typeEntry();
+    if (typeEntry->isCustom()) {
+        const auto *cte = static_cast<const CustomTypeEntry *>(typeEntry);
+        if (cte->hasCheckFunction())
+            return cte->checkFunction();
+        auto customCheckResult = guessCPythonCheckFunction(typeEntry->name());
         if (!customCheckResult.checkFunction.isEmpty())
             return customCheckResult.checkFunction;
         if (customCheckResult.type.has_value())
@@ -1008,9 +1012,9 @@ QString ShibokenGenerator::cpythonCheckFunction(AbstractMetaType metaType) const
             return QLatin1String("Shiboken::String::check");
         if (metaType.isVoidPointer())
             return QLatin1String("PyObject_Check");
-        return cpythonCheckFunction(metaType.typeEntry());
+        return cpythonCheckFunction(typeEntry);
     }
-    auto typeEntry = metaType.typeEntry();
+
     if (typeEntry->isContainer()) {
         QString typeCheck = QLatin1String("Shiboken::Conversions::");
         ContainerTypeEntry::ContainerKind type =
@@ -1061,7 +1065,9 @@ QString ShibokenGenerator::cpythonCheckFunction(AbstractMetaType metaType) const
 QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry *type) const
 {
     if (type->isCustom()) {
-        AbstractMetaType metaType;
+        const auto *cte = static_cast<const CustomTypeEntry *>(type);
+        if (cte->hasCheckFunction())
+            return cte->checkFunction();
         auto customCheckResult = guessCPythonCheckFunction(type->name());
         if (customCheckResult.type.has_value())
             return cpythonCheckFunction(customCheckResult.type.value());
@@ -1144,6 +1150,9 @@ QString ShibokenGenerator::cpythonIsConvertibleFunction(const TypeEntry *type)
 QString ShibokenGenerator::cpythonIsConvertibleFunction(AbstractMetaType metaType) const
 {
     if (metaType.typeEntry()->isCustom()) {
+        const auto *cte = static_cast<const CustomTypeEntry *>(metaType.typeEntry());
+        if (cte->hasCheckFunction())
+            return cte->checkFunction();
         auto customCheckResult = guessCPythonCheckFunction(metaType.typeEntry()->name());
         if (!customCheckResult.checkFunction.isEmpty())
             return customCheckResult.checkFunction;

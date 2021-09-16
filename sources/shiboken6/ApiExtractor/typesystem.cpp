@@ -664,6 +664,12 @@ TypeEntry *CustomTypeEntry::clone() const
     return new CustomTypeEntry(new CustomTypeEntryPrivate(*d));
 }
 
+bool CustomTypeEntry::hasCheckFunction() const
+{
+    S_D(const CustomTypeEntry);
+    return !d->m_checkFunction.isEmpty();
+}
+
 QString CustomTypeEntry::checkFunction() const
 {
     S_D(const CustomTypeEntry);

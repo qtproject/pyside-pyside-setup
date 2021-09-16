@@ -287,6 +287,7 @@ public:
 
     TypeEntry *clone() const override;
 
+    bool hasCheckFunction() const;
     QString checkFunction() const;
     void setCheckFunction(const QString &f);
 
