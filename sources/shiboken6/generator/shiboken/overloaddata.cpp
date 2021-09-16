@@ -752,7 +752,8 @@ int OverloadData::numberOfRemovedArguments(const AbstractMetaFunctionCPtr &func,
 {
     Q_ASSERT(finalArgPos >= 0);
     int removed = 0;
-    for (int i = 0; i < finalArgPos + removed; ++i) {
+    const int size = func->arguments().size();
+    for (int i = 0; i < qMin(size, finalArgPos + removed); ++i) {
         if (func->argumentRemoved(i + 1))
             ++removed;
     }

@@ -1650,13 +1650,6 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
     if (code.isEmpty())
         return;
 
-    // Calculate the real number of arguments.
-    int argsRemoved = 0;
-    for (int i = 0; i < func->arguments().size(); i++) {
-        if (func->argumentRemoved(i+1))
-            argsRemoved++;
-    }
-
     // Replace %PYARG_# variables.
     replacePyArg0(language, &code);
 
