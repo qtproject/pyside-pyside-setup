@@ -631,17 +631,8 @@ could remove the following version dependent re-definition of ``PyHeapTypeObject
         SbkObjectTypePrivate *sotp;
     };
 
-could be replaced by the simplified::
-
-    struct LIBSHIBOKEN_API SbkObjectType
-    {
-        PyTypeObject type;
-    };
-
-which is no longer version-dependent.
-Note that we tried to replace the above struct directly by ``PyTypeObject``,
-but that was too much. The distinction between ``SbkObjectType`` and
-``PyTypeObject`` is still needed.
+could be removed. SbkObjectType remains as a (deprecated)
+type alias to PyTypeObject.
 
 
 Appendix B: Verification Of PyTypeObject
