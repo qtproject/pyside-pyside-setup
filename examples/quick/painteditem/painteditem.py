@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2020 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -38,6 +38,7 @@
 ##
 #############################################################################
 
+from pathlib import Path
 import sys
 
 from PySide6.QtGui import QPainter, QBrush, QColor
@@ -97,7 +98,8 @@ if __name__ == "__main__":
     view = QQuickView()
     view.setResizeMode(QQuickView.SizeRootObjectToView)
     qmlRegisterType(TextBalloon, "TextBalloonPlugin", 1, 0, "TextBalloon")
-    view.setSource(QUrl.fromLocalFile("main.qml"))
+    qml_file = Path(__file__).parent / "main.qml"
+    view.setSource(QUrl.fromLocalFile(qml_file))
 
     if view.status() == QQuickView.Error:
         sys.exit(-1)
