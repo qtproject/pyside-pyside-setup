@@ -1,7 +1,5 @@
 <?xml version="1.0" ?>
 <typesystem package="Shiboken">
-    <custom-type name="PyObject" />
-    <custom-type name="PyType" />
     <primitive-type name="bool" />
     <primitive-type name="unsigned long" />
     <primitive-type name="size_t" />
@@ -18,7 +16,7 @@
         </inject-code>
     </add-function>
 
-    <add-function signature="wrapInstance(size_t, PyType)" return-type="PyObject*">
+    <add-function signature="wrapInstance(size_t, PyTypeObject)" return-type="PyObject*">
         <inject-code>
             auto *pyType = reinterpret_cast&lt;PyTypeObject *&gt;(%2);
             if (Shiboken::ObjectType::checkType(pyType)) {

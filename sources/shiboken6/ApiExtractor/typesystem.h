@@ -102,6 +102,7 @@ public:
         ArrayType,
         TypeSystemType,
         CustomType,
+        PythonType,
         FunctionType,
         SmartPointerType,
         TypedefType
@@ -297,8 +298,31 @@ public:
     QString checkFunction() const;
     void setCheckFunction(const QString &f);
 
+#ifndef QT_NO_DEBUG_STREAM
+    void formatDebug(QDebug &d) const override;
+#endif
+
 protected:
     explicit CustomTypeEntry(TypeEntryPrivate *d);
+};
+
+class PythonTypeEntry : public CustomTypeEntry
+{
+public:
+    explicit PythonTypeEntry(const QString &entryName,
+                             const QString &checkFunction,
+                             TypeSystem::CPythonType type);
+
+    TypeEntry *clone() const override;
+
+    TypeSystem::CPythonType cPythonType() const;
+
+#ifndef QT_NO_DEBUG_STREAM
+    void formatDebug(QDebug &d) const override;
+#endif
+
+protected:
+    explicit PythonTypeEntry(TypeEntryPrivate *d);
 };
 
 class TypeSystemTypeEntry : public TypeEntry

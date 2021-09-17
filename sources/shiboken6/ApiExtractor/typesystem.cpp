@@ -318,7 +318,7 @@ bool TypeEntry::isVarargs() const
 
 bool TypeEntry::isCustom() const
 {
-    return m_d->m_type == CustomType;
+    return m_d->m_type == CustomType || m_d->m_type == PythonType;
 }
 
 bool TypeEntry::isTypeSystem() const
@@ -691,6 +691,47 @@ void CustomTypeEntry::setCheckFunction(const QString &f)
 {
     S_D(CustomTypeEntry);
     d->m_checkFunction = f;
+}
+
+// ----------------- PythonTypeEntry
+class PythonTypeEntryPrivate : public CustomTypeEntryPrivate
+{
+public:
+    using CustomTypeEntryPrivate::CustomTypeEntryPrivate;
+    explicit PythonTypeEntryPrivate(const QString &entryName,
+                                    const QString &checkFunction,
+                                    TypeSystem::CPythonType type) :
+        CustomTypeEntryPrivate(entryName, TypeEntry::PythonType, {}, {}),
+        m_cPythonType(type)
+    {
+        m_checkFunction = checkFunction;
+    }
+
+    TypeSystem::CPythonType m_cPythonType;
+};
+
+PythonTypeEntry::PythonTypeEntry(const QString &entryName,
+                                 const QString &checkFunction,
+                                 TypeSystem::CPythonType type) :
+    CustomTypeEntry(new PythonTypeEntryPrivate(entryName, checkFunction, type))
+{
+}
+
+TypeEntry *PythonTypeEntry::clone() const
+{
+    S_D(const PythonTypeEntry);
+    return new PythonTypeEntry(new PythonTypeEntryPrivate(*d));
+}
+
+TypeSystem::CPythonType PythonTypeEntry::cPythonType() const
+{
+    S_D(const PythonTypeEntry);
+    return d->m_cPythonType;
+}
+
+PythonTypeEntry::PythonTypeEntry(TypeEntryPrivate *d) :
+    CustomTypeEntry(d)
+{
 }
 
 // ----------------- TypeSystemTypeEntry
@@ -2210,6 +2251,21 @@ void ComplexTypeEntry::formatDebug(QDebug &debug) const
     FORMAT_LIST_SIZE("addedFunctions", d->m_addedFunctions)
     formatList(debug, "functionMods", d->m_functionMods, ", ");
     FORMAT_LIST_SIZE("fieldMods", d->m_fieldMods)
+}
+
+void CustomTypeEntry::formatDebug(QDebug &debug) const
+{
+    S_D(const CustomTypeEntry);
+    TypeEntry::formatDebug(debug);
+    debug << ", checkFunction=" << d->m_checkFunction;
+}
+
+void PythonTypeEntry::formatDebug(QDebug &debug) const
+{
+    S_D(const PythonTypeEntry);
+
+    CustomTypeEntry::formatDebug(debug);
+    debug << ", type=" << int(d->m_cPythonType);
 }
 
 void FunctionTypeEntry::formatDebug(QDebug &debug) const

@@ -57,10 +57,53 @@ using ApiVersions = QList<ApiVersion>;
 
 Q_GLOBAL_STATIC(ApiVersions, apiVersions)
 
+struct PythonType
+{
+    QString name;
+    QString checkFunction;
+    TypeSystem::CPythonType type;
+};
+
+using PythonTypes = QList<PythonType>;
+
+static const PythonTypes &builtinPythonTypes()
+{
+    static const PythonTypes result{
+        // "Traditional" custom types
+        // numpy
+        {u"PyArrayObject"_qs, u"PyArray_Check"_qs, TypeSystem::CPythonType::Other},
+        {u"PyBuffer"_qs, u"Shiboken::Buffer::checkType"_qs, TypeSystem::CPythonType::Other},
+        {u"PyByteArray"_qs, u"PyByteArray_Check"_qs, TypeSystem::CPythonType::Other},
+        {u"PyBytes"_qs, u"PyBytes_Check"_qs, TypeSystem::CPythonType::Other},
+        {u"PyCallable"_qs, u"PyCallable_Check"_qs, TypeSystem::CPythonType::Other},
+        {u"PyDate"_qs, u"PyDate_Check"_qs, TypeSystem::CPythonType::Other},
+        {u"PyDateTime"_qs, u"PyDateTime_Check_Check"_qs, TypeSystem::CPythonType::Other},
+        {u"PyDict"_qs, u"PyDict_Check"_qs, TypeSystem::CPythonType::Other},
+        // Convenience macro in sbkconverter.h
+        {u"PyObject"_qs, u"PyObject_Check"_qs, TypeSystem::CPythonType::Other},
+        // shiboken-specific
+        {u"PyPathLike"_qs, u"Shiboken::String::checkPath"_qs, TypeSystem::CPythonType::Other},
+        {u"PySequence"_qs, u"Shiboken::String::checkIterable"_qs, TypeSystem::CPythonType::Other},
+        {u"PyUnicode"_qs, u"PyUnicode_Check"_qs, TypeSystem::CPythonType::String},
+        {u"PyTypeObject"_qs, u"PyType_Check"_qs, TypeSystem::CPythonType::Other},
+        {u"str"_qs, u"Shiboken::String::check"_qs, TypeSystem::CPythonType::String},
+        // Types used as target lang API types for primitive types
+        {u"PyBool"_qs, u"PyBool_Check"_qs, TypeSystem::CPythonType::Bool},
+        {u"PyComplex"_qs, u"PyComplex_Check"_qs, TypeSystem::CPythonType::Other},
+        {u"PyLong"_qs, u"PyLong_Check"_qs, TypeSystem::CPythonType::Integer},
+        {u"PyFloat"_qs, u"PyFloat_Check"_qs, TypeSystem::CPythonType::Float},
+        // Single character strings to match C++ char types
+        {u"SbkChar"_qs, u"SbkChar_Check"_qs, TypeSystem::CPythonType::String}
+    };
+    return result;
+}
+
 TypeDatabase::TypeDatabase()
 {
     addBuiltInType(new VoidTypeEntry());
     addBuiltInType(new VarargsTypeEntry());
+    for (const auto &pt : builtinPythonTypes())
+        addBuiltInType(new PythonTypeEntry(pt.name, pt.checkFunction, pt.type));
 }
 
 TypeDatabase::~TypeDatabase() = default;

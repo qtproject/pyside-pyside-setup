@@ -98,6 +98,15 @@ enum class BoolCast { // Generate nb_bool (overriding command line)
     Enabled
 };
 
+enum class CPythonType
+{
+    Bool,
+    Float,
+    Integer,
+    String,
+    Other
+};
+
 enum : int { OverloadNumberUnset = -1, OverloadNumberDefault = 99999 };
 
 } // namespace TypeSystem

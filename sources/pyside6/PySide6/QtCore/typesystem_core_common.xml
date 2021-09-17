@@ -42,15 +42,6 @@
 <typesystem package="PySide6.QtCore">
     <load-typesystem name="templates/core_common.xml" generate="no"/>
 
-    <custom-type name="str"/>
-    <custom-type name="PyBytes"/>
-    <custom-type name="PyByteArray"/>
-    <custom-type name="PyCallable"/>
-    <custom-type name="PyObject"/>
-    <custom-type name="PyPathLike"/>
-    <custom-type name="PySequence"/>
-    <custom-type name="PyTypeObject"/>
-    <custom-type name="PyUnicode"/>
     <custom-type name="list of QAbstractAnimation"/>
     <custom-type name="PySideSignalInstance"
                  check-function="PySide::Signal::checkInstanceType"/>
