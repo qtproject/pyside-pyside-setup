@@ -94,6 +94,7 @@ public:
     TypeEntry::Type m_type;
     bool m_stream = false;
     bool m_private = false;
+    bool m_builtin = false;
 };
 
 TypeEntryPrivate::TypeEntryPrivate(const QString &entryName, TypeEntry::Type t, const QVersionNumber &vr,
@@ -343,6 +344,16 @@ bool TypeEntry::stream() const
 void TypeEntry::setStream(bool b)
 {
     m_d->m_stream = b;
+}
+
+bool TypeEntry::isBuiltIn() const
+{
+    return m_d->m_builtin;
+}
+
+void TypeEntry::setBuiltIn(bool b)
+{
+    m_d->m_builtin = b;
 }
 
 bool TypeEntry::isPrivate() const

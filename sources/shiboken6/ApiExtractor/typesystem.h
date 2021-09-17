@@ -147,6 +147,9 @@ public:
     bool stream() const;
     void setStream(bool b);
 
+    bool isBuiltIn() const;
+    void setBuiltIn(bool b);
+
     bool isPrivate() const;
     void setPrivate(bool b);
 

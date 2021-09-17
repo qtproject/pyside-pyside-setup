@@ -2809,6 +2809,31 @@ bool TypeSystemParser::parseReplace(const ConditionalStreamReader &,
     return true;
 }
 
+// Check for a duplicated type entry and return whether to add the new one.
+// We need to be able to have duplicate primitive type entries,
+// or it's not possible to cover all primitive target language
+// types (which we need to do in order to support fake meta objects)
+bool TypeSystemParser::checkDuplicatedTypeEntry(const ConditionalStreamReader &reader,
+                                                StackElement::ElementType t,
+                                                const QString &name) const
+{
+    if (t == StackElement::PrimitiveTypeEntry || t == StackElement::FunctionTypeEntry)
+        return true;
+    const auto *duplicated = m_database->findType(name);
+    if (!duplicated || duplicated->isNamespace())
+        return true;
+    if (duplicated->isBuiltIn()) {
+        qCWarning(lcShiboken, "%s",
+                  qPrintable(msgReaderMessage(reader, "Warning",
+                                              msgDuplicateBuiltInTypeEntry(name))));
+        return false;
+    }
+    qCWarning(lcShiboken, "%s",
+              qPrintable(msgReaderMessage(reader, "Warning",
+                                          msgDuplicateTypeEntry(name))));
+    return true;
+}
+
 static bool parseVersion(const QString &versionSpec, const QString &package,
                          QVersionNumber *result, QString *errorMessage)
 {
@@ -3038,8 +3063,10 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
         }
 
         if (element->entry) {
-            if (!m_database->addType(element->entry, &m_error))
+            if (checkDuplicatedTypeEntry(reader, element->type, element->entry->name())
+                && !m_database->addType(element->entry, &m_error)) {
                 return false;
+            }
         } else {
             qCWarning(lcShiboken).noquote().nospace()
                 << u"Type: "_qs + name + u" was rejected by typesystem"_qs;

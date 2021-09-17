@@ -259,6 +259,8 @@ private:
                                     QXmlStreamAttributes *);
      bool parseReplace(const ConditionalStreamReader &, const StackElement &topElement,
                        StackElement *element, QXmlStreamAttributes *);
+     bool checkDuplicatedTypeEntry(const ConditionalStreamReader &reader,
+                                   StackElement::ElementType t, const QString &name) const;
 
     TypeDatabase* m_database;
     StackElement* m_current = nullptr;

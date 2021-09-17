@@ -59,8 +59,8 @@ Q_GLOBAL_STATIC(ApiVersions, apiVersions)
 
 TypeDatabase::TypeDatabase()
 {
-    addType(new VoidTypeEntry());
-    addType(new VarargsTypeEntry());
+    addBuiltInType(new VoidTypeEntry());
+    addBuiltInType(new VarargsTypeEntry());
 }
 
 TypeDatabase::~TypeDatabase() = default;
@@ -937,6 +937,12 @@ void TypeDatabase::formatDebug(QDebug &d) const
     d <<"\nglobalUserFunctions=" << m_globalUserFunctions << '\n';
     formatList(d, "globalFunctionMods", m_functionMods, '\n');
     d << ')';
+}
+
+void TypeDatabase::addBuiltInType(TypeEntry *e)
+{
+    e->setBuiltIn(true);
+    addType(e);
 }
 
 QDebug operator<<(QDebug d, const TypeDatabase &db)

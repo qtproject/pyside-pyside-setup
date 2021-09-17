@@ -811,3 +811,14 @@ QString msgUnknownTypeInArgumentTypeReplacement(const QString &typeReplaced,
         << "', the generated code may be broken.";
     return result;
 }
+
+QString msgDuplicateBuiltInTypeEntry(const QString &name)
+{
+    return u"A type entry duplicating the built-in type \""_qs
+           + name + u"\" was found. It is ignored."_qs;
+}
+
+QString msgDuplicateTypeEntry(const QString &name)
+{
+    return u"Duplicate type entry: '"_qs + name + u"'."_qs;
+}

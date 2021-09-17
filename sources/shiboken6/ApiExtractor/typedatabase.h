@@ -212,6 +212,7 @@ public:
     void formatDebug(QDebug &d) const;
 #endif
 private:
+    void addBuiltInType(TypeEntry *e);
     TypeEntryMultiMapConstIteratorRange findTypeRange(const QString &name) const;
     template <class Predicate>
     TypeEntries findTypesHelper(const QString &name, Predicate pred) const;

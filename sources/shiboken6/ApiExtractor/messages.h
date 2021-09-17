@@ -234,4 +234,7 @@ QString msgPureVirtualFunctionRemoved(const AbstractMetaFunction *f);
 QString msgUnknownTypeInArgumentTypeReplacement(const QString &typeReplaced,
                                                 const AbstractMetaFunction *f);
 
+QString msgDuplicateBuiltInTypeEntry(const QString &name);
+QString msgDuplicateTypeEntry(const QString &name);
+
 #endif // MESSAGES_H
