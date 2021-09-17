@@ -60,7 +60,7 @@ class TextBalloon(QQuickPaintedItem):
         return self._rightAligned
 
     @rightAligned.setter
-    def rightAlignedSet(self, value):
+    def rightAligned(self, value):
         self._rightAligned = value
         self.rightAlignedChanged.emit()
 
