@@ -62,7 +62,7 @@ Item {
         anchors.top: parent.top
         id: balloonView
         delegate: TextBalloon {
-            anchors.right: index % 2 == 0 ? undefined : parent.right
+            anchors.right: index % 2 == 0 ? undefined : balloonView.contentItem.right
             height: 60
             rightAligned: index % 2 == 0 ? false : true
             width: balloonWidth
