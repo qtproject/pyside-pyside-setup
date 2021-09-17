@@ -2076,8 +2076,12 @@ QString CustomConversion::TargetToNativeConversion::sourceTypeCheck() const
 
     if (m_d->sourceType != nullptr && m_d->sourceType->isCustom()) {
         const auto *cte = static_cast<const CustomTypeEntry *>(m_d->sourceType);
-        if (cte->hasCheckFunction())
-            return cte->checkFunction() + u"(%in)"_qs;
+        if (cte->hasCheckFunction()) {
+            QString result = cte->checkFunction();
+            if (result != u"true") // For PyObject, which is always true
+                result += u"(%in)"_qs;
+            return result;
+        }
     }
 
     return {};

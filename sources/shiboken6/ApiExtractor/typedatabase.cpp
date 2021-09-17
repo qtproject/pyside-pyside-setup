@@ -81,7 +81,7 @@ static const PythonTypes &builtinPythonTypes()
         {u"PyDateTime"_qs, u"PyDateTime_Check_Check"_qs, TypeSystem::CPythonType::Other},
         {u"PyDict"_qs, u"PyDict_Check"_qs, TypeSystem::CPythonType::Other},
         // Convenience macro in sbkconverter.h
-        {u"PyObject"_qs, u"PyObject_Check"_qs, TypeSystem::CPythonType::Other},
+        {u"PyObject"_qs, u"true"_qs, TypeSystem::CPythonType::Other},
         // shiboken-specific
         {u"PyPathLike"_qs, u"Shiboken::String::checkPath"_qs, TypeSystem::CPythonType::Other},
         {u"PySequence"_qs, u"Shiboken::String::checkIterable"_qs, TypeSystem::CPythonType::Other},

@@ -431,9 +431,6 @@ template<> inline PyTypeObject *SbkType<std::nullptr_t>() { return Py_TYPE(&_Py_
 
 } // namespace Shiboken
 
-// When the user adds a function with an argument unknown for the typesystem, the generator writes type checks as
-// TYPENAME_Check, so this macro allows users to add PyObject arguments to their added functions.
-#define PyObject_Check(X) true
 #define SbkChar_Check(X) (PyNumber_Check(X) || Shiboken::String::checkChar(X))
 
 struct PySideQFlagsType;

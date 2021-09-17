@@ -2399,7 +2399,8 @@ void CppGenerator::writeTypeCheck(TextStream &s, const AbstractMetaType &argType
 {
     // TODO-CONVERTER: merge this with the code below.
     QString typeCheck = cpythonIsConvertibleFunction(argType);
-    typeCheck.append(u'(' +argumentName + u')');
+    if (typeCheck != u"true") // For PyObject, which is always true
+        typeCheck.append(u'(' +argumentName + u')');
 
     // TODO-CONVERTER -----------------------------------------------------------------------
     if (!argType.typeEntry()->isCustom()) {

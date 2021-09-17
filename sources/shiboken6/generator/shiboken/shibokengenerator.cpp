@@ -1015,7 +1015,7 @@ QString ShibokenGenerator::cpythonCheckFunction(AbstractMetaType metaType) const
         if (metaType.isCString())
             return QLatin1String("Shiboken::String::check");
         if (metaType.isVoidPointer())
-            return QLatin1String("PyObject_Check");
+            return u"true"_qs;
         return cpythonCheckFunction(typeEntry);
     }
 
