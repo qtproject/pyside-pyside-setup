@@ -1576,7 +1576,7 @@ return result;)";
             const AbstractMetaType sourceType = conv->arguments().constFirst().type();
             typeCheck = cpythonCheckFunction(sourceType);
             bool isUserPrimitiveWithoutTargetLangName = sourceType.isUserPrimitive()
-                                                        && sourceType.typeEntry()->targetLangApiName() == sourceType.typeEntry()->name();
+                && !sourceType.typeEntry()->hasTargetLangApiType();
             if (!sourceType.isWrapperType()
                 && !isUserPrimitiveWithoutTargetLangName
                 && !sourceType.typeEntry()->isEnum()
@@ -3266,15 +3266,6 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s,
             typeCheck = QLatin1String("Shiboken::isShibokenEnum(%in)");
         else if (pyTypeName == QLatin1String("SbkObject"))
             typeCheck = QLatin1String("Shiboken::Object::checkType(%in)");
-        else if (pyTypeName == cPyTypeObjectT())
-            typeCheck = QLatin1String("PyType_Check(%in)");
-        else if (pyTypeName == cPyObjectT())
-            typeCheck = QLatin1String("PyObject_TypeCheck(%in, &PyBaseObject_Type)");
-        // PYSIDE-795: We abuse PySequence for iterables
-        else if (pyTypeName == cPySequenceT())
-            typeCheck = QLatin1String("Shiboken::String::checkIterable(%in)");
-        else if (pyTypeName.startsWith(QLatin1String("Py")))
-            typeCheck = pyTypeName + QLatin1String("_Check(%in)");
     }
     if (typeCheck.isEmpty()) {
         if (!toNative->sourceType() || toNative->sourceType()->isPrimitive()) {
@@ -4040,8 +4031,8 @@ void CppGenerator::writePrimitiveConverterInitialization(TextStream &s,
     QString converter = converterObject(type);
     s << "// Register converter for type '" << type->qualifiedTargetLangName() << "'.\n"
         << converter << " = Shiboken::Conversions::createConverter(";
-    if (type->targetLangApiName() == type->name())
-        s << '0';
+    if (!type->hasTargetLangApiType())
+        s << "nullptr";
     else if (type->targetLangApiName() == cPyObjectT())
         s << "&PyBaseObject_Type";
     else

@@ -43,6 +43,7 @@ class FlagsTypeEntry;
 class SourceLocation;
 class PrimitiveTypeEntry;
 class TypeSystemTypeEntry;
+class CustomTypeEntry;
 
 class TypeEntryPrivate;
 class TemplateArgumentEntryPrivate;
@@ -185,8 +186,10 @@ public:
     /// be a JNI name, for Python it should represent the CPython type name.
     /// \return string representing the target language API name
     /// Currently used only for PrimitiveTypeEntry (attribute "target").
+    const CustomTypeEntry *targetLangApiType() const;
+    bool hasTargetLangApiType() const;
+    void setTargetLangApiType(CustomTypeEntry *cte);
     QString targetLangApiName() const;
-    void setTargetLangApiName(const QString &t);
 
     // The type's name in TargetLang
     QString targetLangName() const; // "Foo.Bar"

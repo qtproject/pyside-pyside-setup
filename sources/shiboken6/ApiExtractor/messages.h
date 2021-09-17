@@ -237,5 +237,6 @@ QString msgUnknownTypeInArgumentTypeReplacement(const QString &typeReplaced,
 
 QString msgDuplicateBuiltInTypeEntry(const QString &name);
 QString msgDuplicateTypeEntry(const QString &name);
+QString msgInvalidTargetLanguageApiName(const QString &name);
 
 #endif // MESSAGES_H

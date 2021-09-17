@@ -695,10 +695,8 @@ QString ShibokenGenerator::cpythonBaseName(const TypeEntry *type)
         baseName = QLatin1String("Sbk_") + type->name();
     } else if (type->isPrimitive()) {
         const auto *ptype = type->asPrimitive()->basicReferencedTypeEntry();
-        if (ptype->targetLangApiName() == ptype->name())
-            baseName = pythonPrimitiveTypeName(ptype->name());
-        else
-            baseName = ptype->targetLangApiName();
+        baseName = ptype->hasTargetLangApiType()
+                   ? ptype->targetLangApiName() : pythonPrimitiveTypeName(ptype->name());
     } else if (type->isEnum()) {
         baseName = cpythonEnumName(static_cast<const EnumTypeEntry *>(type));
     } else if (type->isFlags()) {
@@ -949,12 +947,30 @@ bool ShibokenGenerator::isNumber(const QString &cpythonApiName)
        || cpythonApiName == pyBoolT();
 }
 
+static std::optional<TypeSystem::CPythonType>
+    targetLangApiCPythonType(const PrimitiveTypeEntry *t)
+{
+    if (!t->hasTargetLangApiType())
+        return {};
+    const auto *cte = t->targetLangApiType();
+    if (cte->type() != TypeEntry::PythonType)
+        return {};
+    return static_cast<const PythonTypeEntry *>(cte)->cPythonType();
+}
+
 bool ShibokenGenerator::isNumber(const TypeEntry *type)
 {
     if (!type->isPrimitive())
         return false;
     const auto *pte = type->asPrimitive()->basicReferencedTypeEntry();
-    return isNumber(pythonPrimitiveTypeName(pte->name()));
+    const auto cPythonTypeOpt = targetLangApiCPythonType(pte);
+    // FIXME PYSIDE-1660: Return false here after making primitive types built-in?
+    if (!cPythonTypeOpt.has_value())
+        return isNumber(pythonPrimitiveTypeName(pte->name()));
+    const auto cPythonType = cPythonTypeOpt.value();
+    return cPythonType == TypeSystem::CPythonType::Bool
+           || cPythonType == TypeSystem::CPythonType::Float
+           || cPythonType == TypeSystem::CPythonType::Integer;
 }
 
 bool ShibokenGenerator::isNumber(const AbstractMetaType &type)
@@ -968,6 +984,11 @@ bool ShibokenGenerator::isPyInt(const TypeEntry *type)
         return false;
     const auto *pte = type->asPrimitive()->basicReferencedTypeEntry();
     return pythonPrimitiveTypeName(pte->name()) == u"PyLong";
+    const auto cPythonTypeOpt = targetLangApiCPythonType(pte);
+    // FIXME PYSIDE-1660: Return false here after making primitive types built-in?
+    if (!cPythonTypeOpt.has_value())
+        return pythonPrimitiveTypeName(pte->name()) == pyLongT();
+    return cPythonTypeOpt.value() == TypeSystem::CPythonType::Integer;
 }
 
 bool ShibokenGenerator::isPyInt(const AbstractMetaType &type)
@@ -1064,19 +1085,22 @@ QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry *type) const
 
     if (type->isEnum() || type->isFlags() || type->isWrapperType())
         return u"SbkObject_TypeCheck("_qs + cpythonTypeNameExt(type) + u", "_qs;
+
+    if (type->isPrimitive())
+        type = type->asPrimitive()->basicReferencedTypeEntry();
+
+    if (auto *tla = type->targetLangApiType()) {
+        if (tla->hasCheckFunction())
+            return tla->checkFunction();
+    }
+
     if (type->isExtendedCppPrimitive()) {
-        const auto *pte = type->asPrimitive()->basicReferencedTypeEntry();
+        const auto *pte = type->asPrimitive();
         return pythonPrimitiveTypeName(pte->name())
                                        + QLatin1String("_Check");
     }
-    QString typeCheck;
-    if (type->targetLangApiName() == type->name())
-        typeCheck = cpythonIsConvertibleFunction(type);
-    else if (type->targetLangApiName() == QLatin1String("PyUnicode"))
-        typeCheck = QLatin1String("Shiboken::String::check");
-    else
-        typeCheck = type->targetLangApiName() + QLatin1String("_Check");
-    return typeCheck;
+
+    return cpythonIsConvertibleFunction(type);
 }
 
 ShibokenGenerator::CPythonCheckFunctionResult

@@ -1334,6 +1334,7 @@ PrimitiveTypeEntry *
     if (!checkRootElement())
         return nullptr;
     auto *type = new PrimitiveTypeEntry(name, since, currentParentTypeEntry());
+    QString targetLangApiName;
     if (!applyCommonAttributes(reader, type, attributes))
         return nullptr;
     for (int i = attributes->size() - 1; i >= 0; --i) {
@@ -1341,7 +1342,7 @@ PrimitiveTypeEntry *
         if (name == targetLangNameAttribute()) {
             type->setTargetLangName(attributes->takeAt(i).value().toString());
         } else if (name == QLatin1String("target-lang-api-name")) {
-            type->setTargetLangApiName(attributes->takeAt(i).value().toString());
+            targetLangApiName = attributes->takeAt(i).value().toString();
         } else if (name == preferredConversionAttribute()) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
@@ -1354,8 +1355,14 @@ PrimitiveTypeEntry *
         }
     }
 
-    if (type->targetLangApiName().isEmpty())
-        type->setTargetLangApiName(type->name());
+    if (!targetLangApiName.isEmpty()) {
+        auto *e = m_database->findType(targetLangApiName);
+        if (e == nullptr || !e->isCustom()) {
+               m_error = msgInvalidTargetLanguageApiName(targetLangApiName);
+               return nullptr;
+        }
+        type->setTargetLangApiType(static_cast<CustomTypeEntry *>(e));
+    }
     type->setTargetLangPackage(m_defaultPackage);
     return type;
 }

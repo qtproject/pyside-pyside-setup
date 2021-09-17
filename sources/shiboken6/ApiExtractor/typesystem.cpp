@@ -71,7 +71,6 @@ public:
 
     const TypeEntry *m_parent;
     QString m_name; // C++ fully qualified
-    QString m_targetLangApiName;
     mutable QString m_cachedShortName; // C++ excluding inline namespaces
     QString m_entryName;
     QString m_targetLangPackage;
@@ -89,6 +88,7 @@ public:
     SourceLocation m_sourceLocation; // XML file
     TypeEntry::CodeGeneration m_codeGeneration = TypeEntry::GenerateCode;
     TypeEntry *m_viewOn = nullptr;
+    CustomTypeEntry *m_targetLangApiType = nullptr;
     int m_revision = 0;
     int m_sbkIndex = 0;
     TypeEntry::Type m_type;
@@ -440,15 +440,25 @@ QString TypeEntry::qualifiedCppName() const
     return m_d->m_name;
 }
 
-QString TypeEntry::targetLangApiName() const
+const CustomTypeEntry *TypeEntry::targetLangApiType() const
 {
-    return m_d->m_targetLangApiName.isEmpty()
-        ? m_d->m_name : m_d->m_targetLangApiName;
+    return m_d->m_targetLangApiType;
 }
 
-void TypeEntry::setTargetLangApiName(const QString &t)
+bool TypeEntry::hasTargetLangApiType() const
 {
-    m_d->m_targetLangApiName = t;
+    return m_d->m_targetLangApiType != nullptr;
+}
+
+void TypeEntry::setTargetLangApiType(CustomTypeEntry *cte)
+{
+    m_d->m_targetLangApiType = cte;
+}
+
+QString TypeEntry::targetLangApiName() const
+{
+    return m_d->m_targetLangApiType != nullptr
+           ? m_d->m_targetLangApiType->name() : m_d->m_name;
 }
 
 QString TypeEntry::targetLangName() const
@@ -2067,7 +2077,16 @@ QString CustomConversion::TargetToNativeConversion::sourceTypeName() const
 
 QString CustomConversion::TargetToNativeConversion::sourceTypeCheck() const
 {
-    return m_d->sourceTypeCheck;
+    if (!m_d->sourceTypeCheck.isEmpty())
+        return m_d->sourceTypeCheck;
+
+    if (m_d->sourceType != nullptr && m_d->sourceType->isCustom()) {
+        const auto *cte = static_cast<const CustomTypeEntry *>(m_d->sourceType);
+        if (cte->hasCheckFunction())
+            return cte->checkFunction() + u"(%in)"_qs;
+    }
+
+    return {};
 }
 
 QString CustomConversion::TargetToNativeConversion::conversion() const

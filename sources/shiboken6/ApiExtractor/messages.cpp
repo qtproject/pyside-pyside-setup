@@ -826,3 +826,9 @@ QString msgDuplicateTypeEntry(const QString &name)
 {
     return u"Duplicate type entry: '"_qs + name + u"'."_qs;
 }
+
+QString msgInvalidTargetLanguageApiName(const QString &name)
+{
+    return u"Invalid target language API name \""_qs
+           + name + u"\"."_qs;
+}
