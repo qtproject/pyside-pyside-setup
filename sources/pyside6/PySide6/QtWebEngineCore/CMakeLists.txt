@@ -38,12 +38,14 @@ set(QtWebEngineCore_include_dirs
                             ${Qt${QT_MAJOR_VERSION}Widgets_INCLUDE_DIRS}
                             ${Qt${QT_MAJOR_VERSION}Network_INCLUDE_DIRS}
                             ${Qt${QT_MAJOR_VERSION}PrintSupport_INCLUDE_DIRS}
+                            ${Qt${QT_MAJOR_VERSION}WebChannel_INCLUDE_DIRS}
                             ${libpyside_SOURCE_DIR}
                             ${QtCore_GEN_DIR}
                             ${QtGui_GEN_DIR}
                             ${QtWidgets_GEN_DIR}
                             ${QtNetwork_GEN_DIR}
                             ${QtPrintSupport_GEN_DIR}
+                            ${QtWebChannel_GEN_DIR}
                             )
 set(QtWebEngineCore_libraries pyside6
                             ${Qt${QT_MAJOR_VERSION}WebEngineCore_LIBRARIES}
@@ -52,8 +54,11 @@ set(QtWebEngineCore_libraries pyside6
                             ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES}
                             ${Qt${QT_MAJOR_VERSION}Network_LIBRARIES}
                             ${Qt${QT_MAJOR_VERSION}PrintSupport_LIBRARIES}
+                            ${Qt${QT_MAJOR_VERSION}WebChannel_LIBRARIES}
                             )
-set(QtWebEngineCore_deps QtCore QtGui QtNetwork QtPrintSupport)
+
+set(QtWebEngineCore_deps QtCore QtGui QtNetwork QtPrintSupport QtWebChannel)
+
 create_pyside_module(NAME QtWebEngineCore
                      INCLUDE_DIRS QtWebEngineCore_include_dirs
                      LIBRARIES QtWebEngineCore_libraries
