@@ -1,0 +1,9 @@
+{
+    "files": ["document.py",
+              "main.py",
+              "mainwindow.py",
+              "mainwindow.ui",
+              "previewpage.py",
+              "resources/markdowneditor.qrc",
+              "ui_mainwindow.py"]
+}
