@@ -844,18 +844,11 @@ QString ShibokenGenerator::fixedCppTypeName(const TypeEntry *type, QString typeN
 
 QString ShibokenGenerator::pythonPrimitiveTypeName(const QString &cppTypeName)
 {
-    QString rv = primitiveTypesCorrespondences().value(cppTypeName, QString());
-    if (rv.isEmpty()) {
-        // activate this when some primitive types are missing,
-        // i.e. when shiboken itself fails to build.
-        // In general, this is valid while just called by isNumeric()
-        // used on Qt5, 2015-09-20
-        if (false) {
-            std::cerr << "primitive type not found: " << qPrintable(cppTypeName) << std::endl;
-            abort();
-        }
-    }
-    return rv;
+    const auto &mapping = primitiveTypesCorrespondences();
+    const auto it = mapping.constFind(cppTypeName);
+    if (it == mapping.cend())
+        throw Exception(u"Primitive type not found: "_qs + cppTypeName);
+    return it.value();
 }
 
 static const QHash<QString, QString> &pythonOperators()
@@ -964,8 +957,11 @@ bool ShibokenGenerator::isNumber(const TypeEntry *type)
     const auto *pte = type->asPrimitive()->basicReferencedTypeEntry();
     const auto cPythonTypeOpt = targetLangApiCPythonType(pte);
     // FIXME PYSIDE-1660: Return false here after making primitive types built-in?
-    if (!cPythonTypeOpt.has_value())
-        return isNumber(pythonPrimitiveTypeName(pte->name()));
+    if (!cPythonTypeOpt.has_value()) {
+        const auto &mapping = primitiveTypesCorrespondences();
+        const auto it = mapping.constFind(pte->name());
+        return it != mapping.cend() && isNumber(it.value());
+    }
     const auto cPythonType = cPythonTypeOpt.value();
     return cPythonType == TypeSystem::CPythonType::Bool
            || cPythonType == TypeSystem::CPythonType::Float
@@ -982,11 +978,13 @@ bool ShibokenGenerator::isPyInt(const TypeEntry *type)
     if (!type->isPrimitive())
         return false;
     const auto *pte = type->asPrimitive()->basicReferencedTypeEntry();
-    return pythonPrimitiveTypeName(pte->name()) == u"PyLong";
     const auto cPythonTypeOpt = targetLangApiCPythonType(pte);
     // FIXME PYSIDE-1660: Return false here after making primitive types built-in?
-    if (!cPythonTypeOpt.has_value())
-        return pythonPrimitiveTypeName(pte->name()) == pyLongT();
+    if (!cPythonTypeOpt.has_value()) {
+        const auto &mapping = primitiveTypesCorrespondences();
+        const auto it = mapping.constFind(pte->name());
+        return it != mapping.cend() && it.value() ==  pyLongT();
+    }
     return cPythonTypeOpt.value() == TypeSystem::CPythonType::Integer;
 }
 
