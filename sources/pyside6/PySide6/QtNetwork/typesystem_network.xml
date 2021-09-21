@@ -180,6 +180,7 @@
     </object-type>
     <object-type name="QLocalSocket">
         <enum-type name="LocalSocketError"/>
+        <enum-type name="SocketOption" flags="SocketOptions"/>
         <enum-type name="LocalSocketState"/>
     </object-type>
     <object-type name="QNetworkAccessManager">

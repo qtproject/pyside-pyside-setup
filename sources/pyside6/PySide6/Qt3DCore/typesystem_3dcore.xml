@@ -43,7 +43,6 @@
 <typesystem package="PySide6.Qt3DCore">
     <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
     <namespace-type name="Qt3DCore" generate-using="no">
-        <enum-type name="ChangeFlag" flags="ChangeFlags"/>
         <object-type name="QAbstractAspect"/>
         <object-type name="QAbstractFunctor" since="6.0"/>
         <object-type name="QAbstractSkeleton" since="5.10"/>

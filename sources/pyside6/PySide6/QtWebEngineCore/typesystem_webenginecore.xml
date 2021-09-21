@@ -105,8 +105,6 @@
   <object-type name="QWebEngineProfile">
     <enum-type name="HttpCacheType"/>
     <enum-type name="PersistentCookiesPolicy"/>
-    <!-- FIXME Left-over deprecated API, pending fix in qtwebengine repo -->
-    <modify-function signature="setRequestInterceptor(QWebEngineUrlRequestInterceptor*)" remove="all"/>
   </object-type>
 
   <object-type name="QWebEngineNewWindowRequest">

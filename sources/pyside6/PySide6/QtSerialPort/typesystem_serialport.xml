@@ -44,7 +44,6 @@
     <object-type name="QSerialPort">
         <enum-type name="BaudRate"/>
         <enum-type name="DataBits"/>
-        <enum-type name="DataErrorPolicy"/>
         <enum-type name="Direction" flags="Directions"/>
         <enum-type name="FlowControl"/>
         <enum-type name="Parity"/>
