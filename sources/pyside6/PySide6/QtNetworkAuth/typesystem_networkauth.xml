@@ -135,4 +135,6 @@
     <object-type name="QOAuth2AuthorizationCodeFlow"/>
     <object-type name="QOAuthHttpServerReplyHandler"/>
     <object-type name="QOAuthOobReplyHandler"/>
+
+    <suppress-warning text="^.*Typedef used on signal QAbstractOAuth.*$"/>
 </typesystem>

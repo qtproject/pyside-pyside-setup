@@ -3349,4 +3349,6 @@
   <suppress-warning text="QGraphicsSvgItem::Type' does not have a type entry or is not an enum"/>
   <suppress-warning text="QGraphicsTextItem::Type' does not have a type entry or is not an enum"/>
   <suppress-warning text="QGraphicsWidget::Type' does not have a type entry or is not an enum"/>
+  <suppress-warning text="signal 'activated' in class 'QCompleter' is overloaded."/>
+  <suppress-warning text="signal 'highlighted' in class 'QCompleter' is overloaded."/>
 </typesystem>

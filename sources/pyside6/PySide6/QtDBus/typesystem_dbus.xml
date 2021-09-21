@@ -131,4 +131,5 @@
     <object-type name="QDBusVariant"/>
     <object-type name="QDBusVirtualObject"/>
     <suppress-warning text='^.*Unable to translate type "QDBusReply&lt;.*$'/>
+    <suppress-warning text='^.*QDBusPendingCallWatcher inherits from a non polymorphic type.*$'/>
 </typesystem>

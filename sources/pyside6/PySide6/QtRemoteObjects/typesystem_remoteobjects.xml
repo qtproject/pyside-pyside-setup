@@ -72,4 +72,9 @@
     </object-type>
     <object-type name="QRemoteObjectSettingsStore"/>
     <value-type name="QRemoteObjectSourceLocationInfo"/>
+
+    <suppress-warning text="^.*Typedef used on signal QRemoteObject.*$"/>
+    <suppress-warning text="^QRemoteObjectPendingCallWatcher inherits from a non polymorphic type.*$"/>
+    <suppress-warning text="Enum 'QRemoteObjectReplica::ConstructorType' (class: QRemoteObjectReplica) does not have a type entry"/>
+    <suppress-warning text="skipping field 'QRemoteObjectReplica::d_impl' with unmatched type 'QSharedPointer'"/>
 </typesystem>

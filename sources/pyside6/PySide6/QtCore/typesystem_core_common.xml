@@ -3198,82 +3198,22 @@
     <enum-type name="Sizes"/>
   </object-type>
 
-  <suppress-warning text="Unable to decide type of property: 'QLibrary::LoadHints' in class 'QPluginLoader'"/>
-  <suppress-warning text="enum '_ISalnum' does not have a type entry or is not an enum"/>
-  <suppress-warning text="enum 'Qt::Initialization' does not have a type entry or is not an enum"/>
+  <suppress-warning text="^.*enum 'Qt::Initialization' does not have a type entry.*$"/>
+  <suppress-warning text="^Anonymous enum.*does not have a type entry.*$"/>
   <suppress-warning text="Visibility of function '*' modified in class '*'"/>
   <suppress-warning text="hiding of function '*' in class '*'"/>
-  <suppress-warning text="namespace '*' does not have a type entry"/>
-  <suppress-warning text="Shadowing: QObject::parent()const and QAbstractItemModel::parent() const"/>
-  <suppress-warning text="namespace '*' for enum 'QtMsgType' is not declared"/>
-  <suppress-warning text="horribly broken type 'imaxdiv_t'"/>
-  <suppress-warning text="horribly broken type '__off64_t'"/>
-  <suppress-warning text="horribly broken type 'div_t'"/>
-  <suppress-warning text="horribly broken type 'fd_set*'"/>
-  <suppress-warning text="horribly broken type 'ldiv_t'"/>
-  <suppress-warning text="horribly broken type 'lldiv_t'"/>
-  <suppress-warning text="signal '*' in class '*' is overloaded."/>
-  <suppress-warning text="enum 'enum_3' does not have a type entry or is not an enum"/>
-  <suppress-warning text="Shadowing: QFile::fileName() const and QTemporaryFile::fileName() const"/>
-  <suppress-warning text="unhandled enum value: ~0u in Qt::GestureType"/>
-  <suppress-warning text="unhandled enum value: (sizeof(void*)&lt;&lt;3) in QSysInfo::Sizes"/>
-  <suppress-warning text="unmatched enum ~0u"/>
-  <suppress-warning text="unmatched enum (sizeof(void*)&lt;&lt;3)"/>
-  <suppress-warning text="^signature 'setCustomType(float)' for function modification in 'QEasingCurve' not found.*$"/>
-  <suppress-warning text="enum 'enum_4' does not have a type entry or is not an enum"/>
-  <suppress-warning text="enum 'enum_5' does not have a type entry or is not an enum"/>
-  <suppress-warning text="enum 'FP_NORMAL' does not have a type entry or is not an enum"/>
   <suppress-warning text="Shadowing: *"/>
+  <suppress-warning text="namespace '*' does not have a type entry"/>
   <!-- QCborStreamReader: Suppress warnings about 32/64bit signatures not found depending on qsizetype -->
   <suppress-warning text="^signature 'readStringChunk\(char.*in 'QCborStreamReader' not found.*$"/>
-
-  <!-- this enum is defined on Qt global header but only used in QtGui module -->
-  <suppress-warning text="enum 'PM_MessageBoxHeight' does not have a type entry or is not an enum"/>
-
-  <!-- this function only exists on Windows -->
-  <suppress-warning text="^signature 'winEventFilter(MSG*,long*)' for function modification in 'QCoreApplication' not found.*"/>
-
-  <!-- this is necessary to avoid warning on other modules -->
-  <suppress-warning text="^signature 'operator*(QByteArray,const char*)' for function modification in 'QByteArray' not found.*"/>
-  <suppress-warning text="^signature 'operator+(QByteArray,QString)' for function modification in 'QByteArray' not found.*"/>
-
-  <!-- This enum is intenaly used -->
-  <suppress-warning text="enum 'PM_CbaIconHeight' does not have a type entry or is not an enum"/>
 
   <!-- TODO: this need be removed -->
   <suppress-warning text="^skipping function '.*', unmatched return type '.*$"/>
   <suppress-warning text="^skipping function '.*', unmatched type '.*$"/>
-
-  <suppress-warning text="enum 'q_static_assert_result39' does not have a type entry or is not an enum"/>
-  <suppress-warning text="horribly broken type ''"/>
-  <suppress-warning text="Pure virtual method 'QTextCodec::convertFromUnicode(const QChar*,int,QTextCodec::ConverterState*)const' must be implement but was completely removed on type system."/>
-
-  <!-- Qt5.5: No idea how to get rid of the following five enums, which are moved elsewhere since 5.5: -->
-  <suppress-warning text="enum 'QLocale::MeasurementSystem' is specified in typesystem, but not declared"/>
-  <suppress-warning text="enum 'QState::RestorePolicy' is specified in typesystem, but not declared"/>
-  <!-- <suppress-warning text="enum 'QLocale::FormatType' is specified in typesystem, but not declared"/> -->
-  <suppress-warning text="enum 'QAbstractAnimation::DeletionPolicy' is specified in typesystem, but not declared"/>
-  <!-- <suppress-warning text="enum 'QAbstractAnimation::State' is specified in typesystem, but not declared"/> -->
-  <!-- Qt5.5: we also suppress these warnings, instead of adding wrong enums -->
-  <suppress-warning text="enum 'InterfaceType' does not have a type entry or is not an enum"/>
-  <suppress-warning text="enum 'TextBoundaryType' does not have a type entry or is not an enum"/>
-  <suppress-warning text="enum 'RelationFlag' does not have a type entry or is not an enum"/>
-  <suppress-warning text="enum 'Role' does not have a type entry or is not an enum"/>
-
-  <!-- Anonymous enum in qtbase/src/corelib/global/qtypeinfo.h -->
-  <suppress-warning text="Anonymous enum (Q_COMPLEX_TYPE, ... , Q_RELOCATABLE_TYPE) does not have a type entry"/>
-
-  <!-- Another anonymous enum / value pair in in qtbase/src/corelib/kernel/qcoreapplication.h -->
-  <suppress-warning text="no matching enum 'QT_VERSION'"/>
-  <suppress-warning text="unhandled enum value: QT_VERSION in QCoreApplication::ApplicationFlags from header 'qcoreapplication.h'"/>
-  <suppress-warning text="unmatched enum QT_VERSION from header 'qcoreapplication.h'"/>
-
-  <suppress-warning text="skipping field 'QSysInfo::WindowsVersion' with unmatched type 'const QSysInfo::WinVersion'"/>
+  <suppress-warning text="skipping field 'QStringConverter::iface' with unmatched type 'QStringConverter::Interface'"/>
+  <suppress-warning text="skipping field 'Qt::Uninitialized' with unmatched type 'Qt::Initialization'"/>
+  <suppress-warning text="skipping field 'State::clearFn' with unmatched type 'void'"/>
   <suppress-warning text="template baseclass 'QListSpecialMethods&lt;T&gt;' of 'QList' is not known"/>
+  <suppress-warning text="^.*inherits from a non polymorphic type.*QIODeviceBase.*type discovery based on RTTI is impossible.*$"/>
 
-  <suppress-warning text="skipping field 'QSysInfo::MacintoshVersion' with unmatched type 'QSysInfo::MacVersion'"/>
-  <suppress-warning text="skipping field 'QSysInfo::WindowsVersion' with unmatched type 'QSysInfo::MacVersion'"/>
-  <suppress-warning text="enum 'QSysInfo::MacVersion' does not have a type entry or is not an enum"/>
-  <suppress-warning text="enum 'QSysInfo::WinVersion' does not have a type entry or is not an enum"/>
-  <suppress-warning text="enum 'QSysInfo::Endian' is specified in typesystem, but not declared"/>
 </typesystem>

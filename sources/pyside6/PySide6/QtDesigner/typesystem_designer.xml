@@ -134,4 +134,5 @@
   <!-- Suppress all QString */int * out parameters -->
   <suppress-warning text="^There's no user provided way.*handle the primitive type.*$"/>
   <suppress-warning text="^.*skipping abstract function.*QtResourceSet.*$"/>
+  <suppress-warning text="^.*skipping abstract function.*DomUI.*$"/>
 </typesystem>
