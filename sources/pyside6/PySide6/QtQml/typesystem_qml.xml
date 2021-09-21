@@ -267,4 +267,5 @@
     </object-type>
     <!-- Suppress anonymous enum warning -->
     <suppress-warning text="Anonymous enum (QmlCurrentSingletonTypeRegistrationVersion) does not have a type entry"/>
+    <suppress-warning text="Enum 'QQmlModuleImportSpecialVersions' does not have a type entry"/>
 </typesystem>
