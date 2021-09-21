@@ -1054,7 +1054,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
 
             QString argConv;
             QTextStream ac(&argConv);
-            auto argType = static_cast<const PrimitiveTypeEntry *>(arg->type()->typeEntry());
+            const auto *argType = arg->type()->typeEntry();
             bool convert = argType->isObject()
                             || argType->isValue()
                             || arg->type()->isValuePointer()
@@ -1063,11 +1063,11 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
                             || argType->isEnum()
                             || argType->isContainer()
                             || arg->type()->referenceType() == LValueReference;
-
             if (!convert && argType->isPrimitive()) {
-                if (argType->basicReferencedTypeEntry())
-                    argType = argType->basicReferencedTypeEntry();
-                convert = !m_formatUnits.contains(argType->name());
+                const auto *pte = static_cast<const PrimitiveTypeEntry *>(argType);
+                if (pte->basicReferencedTypeEntry())
+                    pte = pte->basicReferencedTypeEntry();
+                convert = !m_formatUnits.contains(pte->name());
             }
 
             Indentor nested;
