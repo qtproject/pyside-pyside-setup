@@ -1088,7 +1088,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
                 continue;
 
             const auto &argType = arg.type();
-            auto argTypeEntry = static_cast<const PrimitiveTypeEntry *>(argType.typeEntry());
+            const auto *argTypeEntry = argType.typeEntry();
             bool convert = argTypeEntry->isObject()
                             || argTypeEntry->isValue()
                             || argType.isValuePointer()
@@ -1099,9 +1099,10 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
                             || argType.referenceType() == LValueReference;
 
             if (!convert && argTypeEntry->isPrimitive()) {
-                if (argTypeEntry->basicReferencedTypeEntry())
-                    argTypeEntry = argTypeEntry->basicReferencedTypeEntry();
-                convert = !formatUnits().contains(argTypeEntry->name());
+                const auto *pte = static_cast<const PrimitiveTypeEntry *>(argTypeEntry);
+                if (pte->basicReferencedTypeEntry())
+                    pte = pte->basicReferencedTypeEntry();
+                convert = !formatUnits().contains(pte->name());
             }
 
             StringStream ac(TextStream::Language::Cpp);
