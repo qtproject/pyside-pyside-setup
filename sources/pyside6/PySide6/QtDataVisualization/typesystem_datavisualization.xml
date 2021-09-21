@@ -287,11 +287,14 @@
                      snippet="dataproxy-setrow"/>
     </add-function>
 
-    <modify-function signature="resetArray(QSurfaceDataArray*)">
+    <modify-function signature="resetArray(QSurfaceDataArray*)" remove="all"/>
+    <add-function signature="resetArray(const QSurfaceDataArray&amp;)">
+      <inject-code class="target" position="beginning" file="../glue/qtdatavisualization.cpp"
+                   snippet="dataproxy-resetarray"/>
       <modify-argument index="1">
         <parent index="this" action="add"/>
       </modify-argument>
-    </modify-function>
+    </add-function>
   </object-type>
   <object-type name="Q3DBars">
     <modify-function signature="addAxis(QAbstract3DAxis*)">
