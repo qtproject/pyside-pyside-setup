@@ -94,26 +94,19 @@
     <rejection class="QMetaObject" function-name="activate"/>
     <rejection class="QMetaObject" function-name="metacall"/>
     <rejection class="QMetaObject" function-name="static_metacall"/>
-    <!-- TODO: Support to addGuard(QObject**) -->
-    <rejection class="QMetaObject" function-name="addGuard"/>
-    <rejection class="QMetaObject" function-name="changeGuard"/>
-    <rejection class="QMetaObject" function-name="removeGuard"/>
 
     <rejection class="QAlgorithmsPrivate"/>
     <rejection class="QJsonPrivate"/>
-    <rejection class="QTextStreamFunctions"/>
     <rejection class="QtGlobalStatic"/>
     <rejection class="QtMetaTypePrivate"/>
     <rejection class="QtPrivate"/>
     <rejection class="QtSharedPointer"/>
     <rejection class="QtStringBuilder"/>
 
-  <rejection class="QByteArray" field-name="MaxSize"/>
   <rejection class="QChildEvent" field-name="c"/>
   <rejection class="QTimerEvent" field-name="id"/>
   <rejection class="QEvent" field-name="t"/>
   <rejection class="*" function-name="tr"/>
-  <rejection class="*" function-name="trUtf8"/>
   <rejection class="*" function-name="qt_metacast"/>
   <!-- From Qt4.6 -->
   <rejection class="*" field-name="d_ptr"/>
@@ -131,20 +124,10 @@
   <rejection class="*" function-name="qFreeAligned"/>
   <rejection class="QMetaMethod" enum-name="Attributes"/>
 
-  <rejection class="*" argument-type="QByteArrayDataPtr"/>
   <rejection class="*" argument-type="^qfloat16&amp;?$"/>
-  <rejection class="*" argument-type="QHashData"/>
-  <rejection class="*" argument-type="QHashData::Node*"/>
   <rejection class="*" argument-type="QLatin1String"/>
-  <rejection class="*" argument-type="QLinkedListData*"/>
-  <rejection class="*" argument-type="QListData::ArrayCompatibleLayout"/>
-  <rejection class="*" argument-type="QListData::Data*"/>
-  <rejection class="*" argument-type="QListData::NotArrayCompatibleLayout"/>
-  <rejection class="*" argument-type="QList::Node*"/>
   <rejection class="*" argument-type="QTSMFI"/>
   <rejection class="*" argument-type="QTSMFC"/>
-  <rejection class="*" argument-type="QMutexData*"/>
-  <rejection class="*" argument-type="QObjectUserData*"/>
   <rejection class="*" argument-type="QtPrivate::QSlotObjectBase*"/>
   <rejection class="*" argument-type="^Q\w+Private( const)?\&amp;$"/>
   <!-- Note: "QHelpModel(QHelpEnginePrivate*)" is needed -->
