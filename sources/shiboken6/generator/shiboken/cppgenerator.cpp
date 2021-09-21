@@ -1105,9 +1105,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
                             || argType.referenceType() == LValueReference;
 
             if (!convert && argTypeEntry->isPrimitive()) {
-                const auto *pte = static_cast<const PrimitiveTypeEntry *>(argTypeEntry);
-                if (pte->basicReferencedTypeEntry())
-                    pte = pte->basicReferencedTypeEntry();
+                const auto *pte = argTypeEntry->asPrimitive()->basicReferencedTypeEntry();
                 convert = !formatUnits().contains(pte->name());
             }
 
@@ -6392,9 +6390,9 @@ bool CppGenerator::finishGeneration()
     for (const PrimitiveTypeEntry *pte : primitiveTypeList) {
         if (!pte->generateCode() || !pte->isCppPrimitive())
             continue;
-        const TypeEntry *referencedType = pte->basicReferencedTypeEntry();
-        if (!referencedType)
+        if (!pte->referencesType())
             continue;
+        const TypeEntry *referencedType = pte->basicReferencedTypeEntry();
         QString converter = converterObject(referencedType);
         QStringList cppSignature = pte->qualifiedCppName().split(QLatin1String("::"), Qt::SkipEmptyParts);
         while (!cppSignature.isEmpty()) {

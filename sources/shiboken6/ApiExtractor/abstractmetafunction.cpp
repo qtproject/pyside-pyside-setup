@@ -229,11 +229,8 @@ bool AbstractMetaFunction::returnsBool() const
 {
     if (d->m_type.typeUsagePattern() != AbstractMetaType::PrimitivePattern)
         return false;
-    auto *pte = static_cast<const PrimitiveTypeEntry *>(d->m_type.typeEntry());
-    // Walk along typedefs
-    while (auto *referencedPte = pte->referencedTypeEntry())
-        pte =referencedPte;
-    return pte->name() == u"bool";
+    const auto *pte = d->m_type.typeEntry()->asPrimitive();
+    return pte->basicReferencedTypeEntry()->name() == u"bool";
 }
 
 bool AbstractMetaFunction::isOperatorBool() const

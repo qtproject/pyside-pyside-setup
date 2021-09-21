@@ -41,6 +41,7 @@ class CustomConversion;
 class EnumValueTypeEntry;
 class FlagsTypeEntry;
 class SourceLocation;
+class PrimitiveTypeEntry;
 class TypeSystemTypeEntry;
 
 class TypeEntryPrivate;
@@ -251,6 +252,8 @@ public:
     SourceLocation sourceLocation() const;
     void setSourceLocation(const SourceLocation &sourceLocation);
 
+    const PrimitiveTypeEntry *asPrimitive() const;
+
     // Query functions for generators
     /// Returns true if the type is a primitive but not a C++ primitive.
     bool isUserPrimitive() const;
@@ -380,24 +383,25 @@ public:
     /**
      *   The PrimitiveTypeEntry pointed by this type entry if it
      *   represents a typedef).
-     *   /return the type referenced by the typedef, or a null pointer
+     *   \return the type referenced by the typedef, or a null pointer
      *   if the current object is not an typedef
      */
     PrimitiveTypeEntry *referencedTypeEntry() const;
 
     /**
      *   Defines type referenced by this entry.
-     *   /param referencedTypeEntry type referenced by this entry
+     *   \param referencedTypeEntry type referenced by this entry
      */
     void setReferencedTypeEntry(PrimitiveTypeEntry* referencedTypeEntry);
 
-    /**
-     *   Finds the most basic primitive type that the typedef represents,
-     *   i.e. a type that is not an typedef'ed.
-     *   /return the most basic non-typedef'ed primitive type represented
-     *   by this typedef
-     */
-    PrimitiveTypeEntry* basicReferencedTypeEntry() const;
+    /// Finds the most basic primitive type that the typedef represents,
+    /// i.e. a type that is not an typedef'ed.
+    /// \return the most basic non-typedef'ed primitive type represented
+    /// by this typedef or self in case it is not a reference.
+    const PrimitiveTypeEntry* basicReferencedTypeEntry() const;
+
+    /// Returns whether this entry references another entry.
+    bool referencesType() const;
 
     bool preferredTargetLangType() const;
     void setPreferredTargetLangType(bool b);

@@ -214,7 +214,7 @@ bool TypeEntry::isCppPrimitive() const
 
     const PrimitiveTypeEntry *referencedType =
         static_cast<const PrimitiveTypeEntry *>(this)->basicReferencedTypeEntry();
-    const QString &typeName = referencedType ? referencedType->name() : m_d->m_name;
+    const QString &typeName = referencedType->name();
     return typeName.contains(QLatin1Char(' ')) || primitiveCppTypes().contains(typeName);
 }
 
@@ -500,15 +500,19 @@ void TypeEntry::setSourceLocation(const SourceLocation &sourceLocation)
     m_d->m_sourceLocation = sourceLocation;
 }
 
+const PrimitiveTypeEntry *TypeEntry::asPrimitive() const
+{
+    Q_ASSERT(m_d->m_type == PrimitiveType);
+    return static_cast<const PrimitiveTypeEntry *>(this);
+}
+
 bool TypeEntry::isUserPrimitive() const
 {
     if (!isPrimitive())
         return false;
-    const auto *trueType = static_cast<const PrimitiveTypeEntry *>(this);
-    if (trueType->basicReferencedTypeEntry())
-        trueType = trueType->basicReferencedTypeEntry();
-    return trueType->isPrimitive() && !trueType->isCppPrimitive()
-        && trueType->qualifiedCppName() != u"std::string";
+    const auto *type = asPrimitive()->basicReferencedTypeEntry();
+    return !type->isCppPrimitive()
+        && type->qualifiedCppName() != u"std::string";
 }
 
 bool TypeEntry::isWrapperType() const
@@ -520,10 +524,8 @@ bool TypeEntry::isCppIntegralPrimitive() const
 {
     if (!isCppPrimitive())
         return false;
-    const auto *trueType = static_cast<const PrimitiveTypeEntry *>(this);
-    if (trueType->basicReferencedTypeEntry())
-        trueType = trueType->basicReferencedTypeEntry();
-    QString typeName = trueType->qualifiedCppName();
+    const auto *type = asPrimitive()->basicReferencedTypeEntry();
+    QString typeName = type->qualifiedCppName();
     return !typeName.contains(u"double")
         && !typeName.contains(u"float")
         && !typeName.contains(u"wchar");
@@ -535,10 +537,8 @@ bool TypeEntry::isExtendedCppPrimitive() const
         return true;
     if (!isPrimitive())
         return false;
-    const auto *trueType = static_cast<const PrimitiveTypeEntry *>(this);
-    if (trueType->basicReferencedTypeEntry())
-        trueType = trueType->basicReferencedTypeEntry();
-    return trueType->qualifiedCppName() == u"std::string";
+    const auto *type = asPrimitive()->basicReferencedTypeEntry();
+    return type->qualifiedCppName() == u"std::string";
 }
 
 const TypeEntryPrivate *TypeEntry::d_func() const
@@ -903,14 +903,18 @@ void PrimitiveTypeEntry::setReferencedTypeEntry(PrimitiveTypeEntry *referencedTy
     d->m_referencedTypeEntry = referencedTypeEntry;
 }
 
-PrimitiveTypeEntry *PrimitiveTypeEntry::basicReferencedTypeEntry() const
+const PrimitiveTypeEntry *PrimitiveTypeEntry::basicReferencedTypeEntry() const
+{
+    auto *result = this;
+    while (auto *referenced = result->referencedTypeEntry())
+        result = referenced;
+    return result;
+}
+
+bool PrimitiveTypeEntry::referencesType() const
 {
     S_D(const PrimitiveTypeEntry);
-    if (!d->m_referencedTypeEntry)
-        return nullptr;
-
-    PrimitiveTypeEntry *baseReferencedTypeEntry = d->m_referencedTypeEntry->basicReferencedTypeEntry();
-    return baseReferencedTypeEntry ? baseReferencedTypeEntry : d->m_referencedTypeEntry;
+    return d->m_referencedTypeEntry != nullptr;
 }
 
 bool PrimitiveTypeEntry::preferredTargetLangType() const

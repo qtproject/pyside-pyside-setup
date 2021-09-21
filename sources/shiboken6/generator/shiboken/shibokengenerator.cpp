@@ -656,10 +656,7 @@ QString ShibokenGenerator::getFormatUnitString(const AbstractMetaFunctionCPtr &f
             || type.referenceType() == LValueReference) {
             result += QLatin1Char(objType);
         } else if (type.isPrimitive()) {
-            const auto *ptype =
-                static_cast<const PrimitiveTypeEntry *>(type.typeEntry());
-            if (ptype->basicReferencedTypeEntry())
-                ptype = ptype->basicReferencedTypeEntry();
+            const auto *ptype = type.typeEntry()->asPrimitive()->basicReferencedTypeEntry();
             const auto it = formatUnits().constFind(ptype->name());
             if (it != formatUnits().cend())
                 result += it.value();
@@ -697,9 +694,7 @@ QString ShibokenGenerator::cpythonBaseName(const TypeEntry *type)
     if (type->isWrapperType() || type->isNamespace()) { // && type->referenceType() == NoReference) {
         baseName = QLatin1String("Sbk_") + type->name();
     } else if (type->isPrimitive()) {
-        const auto *ptype = static_cast<const PrimitiveTypeEntry *>(type);
-        while (ptype->basicReferencedTypeEntry())
-            ptype = ptype->basicReferencedTypeEntry();
+        const auto *ptype = type->asPrimitive()->basicReferencedTypeEntry();
         if (ptype->targetLangApiName() == ptype->name())
             baseName = pythonPrimitiveTypeName(ptype->name());
         else
@@ -798,8 +793,7 @@ QString ShibokenGenerator::converterObject(const TypeEntry *type)
         qDebug() << "Warning: the Qt5 primitive type is unknown" << type->qualifiedCppName();
         return QString();
     }
-    if (pte->basicReferencedTypeEntry())
-        pte = pte->basicReferencedTypeEntry();
+    pte = pte->basicReferencedTypeEntry();
     if (pte->isPrimitive() && !pte->isCppPrimitive() && !pte->customConversion()) {
         return u"Shiboken::Conversions::PrimitiveTypeConverter<"_qs
                + pte->qualifiedCppName() + u">()"_qs;
@@ -865,13 +859,6 @@ QString ShibokenGenerator::pythonPrimitiveTypeName(const QString &cppTypeName)
         }
     }
     return rv;
-}
-
-QString ShibokenGenerator::pythonPrimitiveTypeName(const PrimitiveTypeEntry *type)
-{
-    while (type->basicReferencedTypeEntry())
-        type = type->basicReferencedTypeEntry();
-    return pythonPrimitiveTypeName(type->name());
 }
 
 static const QHash<QString, QString> &pythonOperators()
@@ -966,7 +953,8 @@ bool ShibokenGenerator::isNumber(const TypeEntry *type)
 {
     if (!type->isPrimitive())
         return false;
-    return isNumber(pythonPrimitiveTypeName(static_cast<const PrimitiveTypeEntry *>(type)));
+    const auto *pte = type->asPrimitive()->basicReferencedTypeEntry();
+    return isNumber(pythonPrimitiveTypeName(pte->name()));
 }
 
 bool ShibokenGenerator::isNumber(const AbstractMetaType &type)
@@ -978,8 +966,8 @@ bool ShibokenGenerator::isPyInt(const TypeEntry *type)
 {
     if (!type->isPrimitive())
         return false;
-    return pythonPrimitiveTypeName(static_cast<const PrimitiveTypeEntry *>(type))
-        == QLatin1String("PyLong");
+    const auto *pte = type->asPrimitive()->basicReferencedTypeEntry();
+    return pythonPrimitiveTypeName(pte->name()) == u"PyLong";
 }
 
 bool ShibokenGenerator::isPyInt(const AbstractMetaType &type)
@@ -1077,7 +1065,8 @@ QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry *type) const
     if (type->isEnum() || type->isFlags() || type->isWrapperType())
         return u"SbkObject_TypeCheck("_qs + cpythonTypeNameExt(type) + u", "_qs;
     if (type->isExtendedCppPrimitive()) {
-        return pythonPrimitiveTypeName(static_cast<const PrimitiveTypeEntry *>(type))
+        const auto *pte = type->asPrimitive()->basicReferencedTypeEntry();
+        return pythonPrimitiveTypeName(pte->name())
                                        + QLatin1String("_Check");
     }
     QString typeCheck;
@@ -2567,11 +2556,8 @@ QString ShibokenGenerator::getTypeIndexVariableName(const AbstractMetaClass *met
 }
 QString ShibokenGenerator::getTypeIndexVariableName(const TypeEntry *type)
 {
-    if (type->isCppPrimitive()) {
-        const auto *trueType = static_cast<const PrimitiveTypeEntry *>(type);
-        if (trueType->basicReferencedTypeEntry())
-            type = trueType->basicReferencedTypeEntry();
-    }
+    if (type->isCppPrimitive())
+        type = type->asPrimitive()->basicReferencedTypeEntry();
     QString result = QLatin1String("SBK_");
     // Disambiguate namespaces per module to allow for extending them.
     if (type->isNamespace()) {

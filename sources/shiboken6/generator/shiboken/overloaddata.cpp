@@ -45,25 +45,18 @@
 #include <algorithm>
 #include <utility>
 
-static const TypeEntry *getReferencedTypeEntry(const TypeEntry *typeEntry)
-{
-    if (typeEntry->isPrimitive()) {
-        auto pte = dynamic_cast<const PrimitiveTypeEntry *>(typeEntry);
-        while (pte->referencedTypeEntry())
-            pte = pte->referencedTypeEntry();
-        typeEntry = pte;
-    }
-    return typeEntry;
-}
-
 static QString getTypeName(const AbstractMetaType &type)
 {
-    const TypeEntry *typeEntry = getReferencedTypeEntry(type.typeEntry());
+    const TypeEntry *typeEntry = type.typeEntry();
+    if (typeEntry->isPrimitive())
+        typeEntry = typeEntry->asPrimitive()->basicReferencedTypeEntry();
     QString typeName = typeEntry->name();
     if (typeEntry->isContainer()) {
         QStringList types;
         for (const auto &cType : type.instantiations()) {
-            const TypeEntry *typeEntry = getReferencedTypeEntry(cType.typeEntry());
+            const TypeEntry *typeEntry = cType.typeEntry();
+            if (typeEntry->isPrimitive())
+                typeEntry = typeEntry->asPrimitive()->basicReferencedTypeEntry();
             types << typeEntry->name();
         }
         typeName += QLatin1Char('<') + types.join(QLatin1Char(',')) + QLatin1String(" >");

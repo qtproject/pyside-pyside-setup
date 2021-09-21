@@ -208,7 +208,6 @@ protected:
     static QString protectedEnumSurrogateName(const AbstractMetaEnum &metaEnum);
 
     static QString pythonPrimitiveTypeName(const QString &cppTypeName);
-    static QString pythonPrimitiveTypeName(const PrimitiveTypeEntry *type);
 
     static QString pythonOperatorFunctionName(const QString &cppOpFuncName);
     static QString pythonOperatorFunctionName(const AbstractMetaFunctionCPtr &func);

@@ -49,5 +49,4 @@ using DocModificationList = QList<DocModification>;
 using FieldModificationList = QList<FieldModification>;
 using FunctionModificationList = QList<FunctionModification>;
 using TypeEntries = QList<const TypeEntry *>;
-
 #endif // TYPESYSTEM_TYPEDEFS_H
