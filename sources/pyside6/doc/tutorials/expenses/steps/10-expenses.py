@@ -41,10 +41,10 @@
 import sys
 from PySide6.QtCore import Qt, Slot
 from PySide6.QtGui import QAction, QPainter
-from PySide6.QtWidgets import (QQApplication, QHeaderView, QHBoxLayout, QLabel, QLineEdit,
+from PySide6.QtWidgets import (QApplication, QHeaderView, QHBoxLayout, QLabel, QLineEdit,
                                QMainWindow, QPushButton, QTableWidget, QTableWidgetItem,
                                QVBoxLayout, QWidget)
-from PySide6.QtCharts import QtCharts
+from PySide6.QtCharts import QChartView, QPieSeries, QChart
 
 
 class Widget(QWidget):
@@ -64,7 +64,7 @@ class Widget(QWidget):
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
         # Chart
-        self.chart_view = QtCharts.QChartView()
+        self.chart_view = QChartView()
         self.chart_view.setRenderHint(QPainter.Antialiasing)
 
         # Right
@@ -79,7 +79,6 @@ class Widget(QWidget):
         self.add.setEnabled(False)
 
         self.right = QVBoxLayout()
-        self.right.setMargin(10)
         self.right.addWidget(QLabel("Description"))
         self.right.addWidget(self.description)
         self.right.addWidget(QLabel("Price"))
@@ -139,13 +138,13 @@ class Widget(QWidget):
     @Slot()
     def plot_data(self):
         # Get table information
-        series = QtCharts.QPieSeries()
+        series = QPieSeries()
         for i in range(self.table.rowCount()):
             text = self.table.item(i, 0).text()
             number = float(self.table.item(i, 1).text())
             series.append(text, number)
 
-        chart = QtCharts.QChart()
+        chart = QChart()
         chart.addSeries(series)
         chart.legend().setAlignment(Qt.AlignLeft)
         self.chart_view.setChart(chart)

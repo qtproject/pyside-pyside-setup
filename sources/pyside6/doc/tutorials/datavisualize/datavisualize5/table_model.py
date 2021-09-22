@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2019 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -75,7 +75,7 @@ class CustomTableModel(QAbstractTableModel):
         if role == Qt.DisplayRole:
             if column == 0:
                 date = self.input_dates[row].toPython()
-                return date[:-3]
+                return str(date)[:-3]
             elif column == 1:
                 magnitude = self.input_magnitudes[row]
                 return f"{magnitude:.2f}"

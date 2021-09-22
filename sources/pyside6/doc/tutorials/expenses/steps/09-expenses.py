@@ -44,7 +44,7 @@ from PySide6.QtGui import QAction, QPainter
 from PySide6.QtWidgets import (QApplication, QHeaderView, QHBoxLayout, QLabel, QLineEdit,
                                QMainWindow, QPushButton, QTableWidget, QTableWidgetItem,
                                QVBoxLayout, QWidget)
-from PySide6.QtCharts import QtCharts
+from PySide6.QtCharts import QChartView
 
 
 class Widget(QWidget):
@@ -64,7 +64,7 @@ class Widget(QWidget):
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
         # Chart
-        self.chart_view = QtCharts.QChartView()
+        self.chart_view = QChartView()
         self.chart_view.setRenderHint(QPainter.Antialiasing)
 
         # Right
@@ -79,7 +79,6 @@ class Widget(QWidget):
         self.add.setEnabled(False)
 
         self.right = QVBoxLayout()
-        self.right.setMargin(10)
         self.right.addWidget(QLabel("Description"))
         self.right.addWidget(self.description)
         self.right.addWidget(QLabel("Price"))

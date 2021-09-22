@@ -8,6 +8,10 @@ US Geological Survey website. You could download the
 `All earthquakes <https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.csv>`_
 open data in a CSV format for this tutorial.
 
+.. image:: images/datavisualization_app.png
+   :width: 800
+   :alt: Data Visualization Screenshot
+
 In the following chapters of this tutorial you'll learn how to
 visualize data from a CSV in a line chart.
 

@@ -119,18 +119,22 @@ class Widget(QWidget):
         des = self.description.text
         price = self.price.text
 
-        self.table.insert_row(self.items)
-        description_item = QTableWidgetItem(des)
-        price_item = QTableWidgetItem(f"{float(price):.2f}")
-        price_item.text_alignment = Qt.AlignRight
+        try:
+            price_item = QTableWidgetItem(f"{float(price):.2f}")
+            price_item.text_alignment = Qt.AlignRight
 
-        self.table.set_item(self.items, 0, description_item)
-        self.table.set_item(self.items, 1, price_item)
+            self.table.insert_row(self.items)
+            description_item = QTableWidgetItem(des)
 
-        self.description.text = ""
-        self.price.text = ""
+            self.table.set_item(self.items, 0, description_item)
+            self.table.set_item(self.items, 1, price_item)
 
-        self.items += 1
+            self.description.text = ""
+            self.price.text = ""
+
+            self.items += 1
+        except ValueError:
+            print("Wrong price", price)
 
     @Slot()
     def check_disable(self, s):

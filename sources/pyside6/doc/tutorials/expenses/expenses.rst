@@ -1,6 +1,5 @@
-######################
 Expenses Tool Tutorial
-######################
+======================
 
 In this tutorial you will learn the following concepts:
  * creating user interfaces programatically,

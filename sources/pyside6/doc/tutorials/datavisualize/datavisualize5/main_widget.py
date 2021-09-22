@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2019 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -42,7 +42,7 @@ from PySide6.QtCore import QDateTime, Qt
 from PySide6.QtGui import QPainter
 from PySide6.QtWidgets import (QWidget, QHeaderView, QHBoxLayout, QTableView,
                                QSizePolicy)
-from PySide6.QtCharts import QtCharts
+from PySide6.QtCharts import QChart, QChartView, QLineSeries, QDateTimeAxis, QValueAxis
 
 from table_model import CustomTableModel
 
@@ -66,11 +66,11 @@ class Widget(QWidget):
         self.horizontal_header.setStretchLastSection(True)
 
         # Creating QChart
-        self.chart = QtCharts.QChart()
-        self.chart.setAnimationOptions(QtCharts.QChart.AllAnimations)
+        self.chart = QChart()
+        self.chart.setAnimationOptions(QChart.AllAnimations)
 
         # Creating QChartView
-        self.chart_view = QtCharts.QChartView(self.chart)
+        self.chart_view = QChartView(self.chart)
         self.chart_view.setRenderHint(QPainter.Antialiasing)
 
         # QWidget Layout

@@ -42,7 +42,6 @@ import sys
 from PySide6.QtCore import Slot
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QApplication, QMainWindow
-from PySide6.QtCharts import QtCharts
 
 
 class MainWindow(QMainWindow):

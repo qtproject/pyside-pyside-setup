@@ -146,6 +146,7 @@ names and how they look like.
         :text: Styling the Widgets Application
         :classes: btn-link btn-block stretched-link
 
+
 .. toctree::
     :hidden:
 
@@ -160,21 +161,80 @@ names and how they look like.
     basictutorial/widgetstyling.rst
 
 
-
 Quick/QML: Basic tutorials
 --------------------------
 
+.. panels::
+    :container: container-lg pb-1
+    :column: col-lg-4 col-md-4 col-sm-6 col-xs-12 p-2
+    :img-top-cls: d-flex align-self-center
+
+    :img-top: basictutorial/greenapplication.png
+
+    .. link-button:: basictutorial/qml
+        :type: ref
+        :text: Your First QtQuick/QML Application
+        :classes: btn-link btn-block stretched-link
+    ---
+    :img-top: qmlintegration/textproperties_material.png
+
+    .. link-button:: qmlintegration/qmlintegration
+        :type: ref
+        :text: Python-QML integration
+        :classes: btn-link btn-block stretched-link
+    ---
+    :img-top: qmlapp/qmlapplication.png
+
+    .. link-button:: qmlapp/qmlapplication
+        :type: ref
+        :text: QML Application Tutorial (QtCreator)
+        :classes: btn-link btn-block stretched-link
+    ---
+    :img-top: qmlsqlintegration/example_list_view.png
+
+    .. link-button:: qmlsqlintegration/qmlsqlintegration
+        :type: ref
+        :text: QML, SQL and PySide Integration Tutorial
+        :classes: btn-link btn-block stretched-link
+
+
 .. toctree::
     :maxdepth: 1
+    :hidden:
 
     basictutorial/qml.rst
     qmlintegration/qmlintegration.rst
     qmlapp/qmlapplication.rst
     qmlsqlintegration/qmlsqlintegration.rst
-..
+
+General Applications
+--------------------
+
+.. panels::
+    :container: container-lg pb-1
+    :column: col-lg-4 col-md-4 col-sm-6 col-xs-12 p-2
+    :img-top-cls: d-flex align-self-center
+
+    :img-top: datavisualize/images/datavisualization_app.png
+
+    .. link-button:: datavisualize/index
+        :type: ref
+        :text: Data Visualization Tool
+        :classes: btn-link btn-block stretched-link
+    ---
+    :img-top: expenses/expenses_tool.png
+
+    .. link-button:: expenses/expenses
+        :type: ref
+        :text: Expenses Tool
+        :classes: btn-link btn-block stretched-link
+
+.. toctree::
+    :hidden:
+
     datavisualize/index.rst
-..
     expenses/expenses.rst
+
 
 C++ and Python
 --------------

@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2019 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -39,7 +39,7 @@
 #############################################################################
 
 from PySide6.QtCore import Slot
-from PySide6.QtGui import QAction, QKeySequence
+from PySide6.QtGui import QAction, QKeySequence, QScreen
 from PySide6.QtWidgets import QMainWindow
 
 
@@ -64,7 +64,6 @@ class MainWindow(QMainWindow):
         self.status.showMessage("Data loaded and plotted")
 
         # Window dimensions
-        geometry = qApp.desktop().availableGeometry(self)
+        geometry = self.screen().availableGeometry()
         self.setFixedSize(geometry.width() * 0.8, geometry.height() * 0.7)
         self.setCentralWidget(widget)
-

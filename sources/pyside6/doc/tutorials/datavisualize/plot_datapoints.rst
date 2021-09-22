@@ -20,6 +20,8 @@ Now, run the application to visualize the earthquake magnitudes
 data at different times.
 
 .. image:: images/datavisualization_app.png
+   :width: 600
+   :alt: Data Visualization Screenshot
 
 Try modifying the sources to get different output. For example, you could try
 to plot more data from the CSV.

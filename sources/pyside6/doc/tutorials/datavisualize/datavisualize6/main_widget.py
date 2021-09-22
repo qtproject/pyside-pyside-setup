@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2019 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -42,7 +42,7 @@ from PySide6.QtCore import QDateTime, Qt
 from PySide6.QtGui import QPainter
 from PySide6.QtWidgets import (QWidget, QHeaderView, QHBoxLayout, QTableView,
                                QSizePolicy)
-from PySide6.QtCharts import QtCharts
+from PySide6.QtCharts import QChart, QChartView, QLineSeries, QDateTimeAxis, QValueAxis
 
 from table_model import CustomTableModel
 
@@ -67,12 +67,12 @@ class Widget(QWidget):
         self.horizontal_header.setStretchLastSection(True)
 
         # Creating QChart
-        self.chart = QtCharts.QChart()
-        self.chart.setAnimationOptions(QtCharts.QChart.AllAnimations)
+        self.chart = QChart()
+        self.chart.setAnimationOptions(QChart.AllAnimations)
         self.add_series("Magnitude (Column 1)", [0, 1])
 
         # Creating QChartView
-        self.chart_view = QtCharts.QChartView(self.chart)
+        self.chart_view = QChartView(self.chart)
         self.chart_view.setRenderHint(QPainter.Antialiasing)
 
         # QWidget Layout
@@ -94,7 +94,7 @@ class Widget(QWidget):
 
     def add_series(self, name, columns):
         # Create QLineSeries
-        self.series = QtCharts.QLineSeries()
+        self.series = QLineSeries()
         self.series.setName(name)
 
         # Filling QLineSeries
@@ -112,14 +112,14 @@ class Widget(QWidget):
         self.chart.addSeries(self.series)
 
         # Setting X-axis
-        self.axis_x = QtCharts.QDateTimeAxis()
+        self.axis_x = QDateTimeAxis()
         self.axis_x.setTickCount(10)
         self.axis_x.setFormat("dd.MM (h:mm)")
         self.axis_x.setTitleText("Date")
         self.chart.addAxis(self.axis_x, Qt.AlignBottom)
         self.series.attachAxis(self.axis_x)
         # Setting Y-axis
-        self.axis_y = QtCharts.QValueAxis()
+        self.axis_y = QValueAxis()
         self.axis_y.setTickCount(10)
         self.axis_y.setLabelFormat("%.2f")
         self.axis_y.setTitleText("Magnitude")

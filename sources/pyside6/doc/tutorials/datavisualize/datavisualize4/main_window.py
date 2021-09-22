@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2019 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -64,6 +64,6 @@ class MainWindow(QMainWindow):
         self.status.showMessage("Data loaded and plotted")
 
         # Window dimensions
-        geometry = qApp.desktop().availableGeometry(self)
+        geometry = self.screen().availableGeometry()
         self.setFixedSize(geometry.width() * 0.8, geometry.height() * 0.7)
 

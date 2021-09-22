@@ -44,7 +44,7 @@ from PySide6.QtGui import QAction, QPainter
 from PySide6.QtWidgets import (QApplication, QHeaderView, QHBoxLayout, QLabel, QLineEdit,
                                QMainWindow, QPushButton, QTableWidget, QTableWidgetItem,
                                QVBoxLayout, QWidget)
-from PySide6.QtCharts import QtCharts
+from PySide6.QtCharts import QChartView, QPieSeries, QChart
 
 
 class Widget(QWidget):
@@ -64,7 +64,7 @@ class Widget(QWidget):
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
         # Chart
-        self.chart_view = QtCharts.QChartView()
+        self.chart_view = QChartView()
         self.chart_view.setRenderHint(QPainter.Antialiasing)
 
         # Right
@@ -79,7 +79,6 @@ class Widget(QWidget):
         self.add.setEnabled(False)
 
         self.right = QVBoxLayout()
-        self.right.setMargin(10)
         self.right.addWidget(QLabel("Description"))
         self.right.addWidget(self.description)
         self.right.addWidget(QLabel("Price"))
@@ -116,18 +115,23 @@ class Widget(QWidget):
         des = self.description.text()
         price = self.price.text()
 
-        self.table.insertRow(self.items)
-        description_item = QTableWidgetItem(des)
-        price_item = QTableWidgetItem(f"{float(price):.2f}")
-        price_item.setTextAlignment(Qt.AlignRight)
+        try:
+            price_item = QTableWidgetItem(f"{float(price):.2f}")
+            price_item.setTextAlignment(Qt.AlignRight)
 
-        self.table.setItem(self.items, 0, description_item)
-        self.table.setItem(self.items, 1, price_item)
+            self.table.insertRow(self.items)
+            description_item = QTableWidgetItem(des)
 
-        self.description.setText("")
-        self.price.setText("")
+            self.table.setItem(self.items, 0, description_item)
+            self.table.setItem(self.items, 1, price_item)
 
-        self.items += 1
+            self.description.setText("")
+            self.price.setText("")
+
+            self.items += 1
+        except ValueError:
+            print("Wrong price", price)
+
 
     @Slot()
     def check_disable(self, s):
@@ -139,13 +143,13 @@ class Widget(QWidget):
     @Slot()
     def plot_data(self):
         # Get table information
-        series = QtCharts.QPieSeries()
+        series = QPieSeries()
         for i in range(self.table.rowCount()):
             text = self.table.item(i, 0).text()
             number = float(self.table.item(i, 1).text())
             series.append(text, number)
 
-        chart = QtCharts.QChart()
+        chart = QChart()
         chart.addSeries(series)
         chart.legend().setAlignment(Qt.AlignLeft)
         self.chart_view.setChart(chart)
