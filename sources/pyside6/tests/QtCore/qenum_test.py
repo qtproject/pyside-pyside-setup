@@ -77,6 +77,12 @@ class TestEnum(unittest.TestCase):
         with self.assertRaises(TypeError):
             a = k * 2.0
 
+    def testInherit(self):
+        class A(Qt.Key):
+            pass
+
+        self.assertEqual(A.Key_1, Qt.Key.Key_1)
+
     @unittest.skipUnless(getattr(sys, "getobjects", None), "requires --with-trace-refs")
     @unittest.skipUnless(getattr(sys, "gettotalrefcount", None), "requires --with-pydebug")
     def testEnumNew_NoLeak(self):

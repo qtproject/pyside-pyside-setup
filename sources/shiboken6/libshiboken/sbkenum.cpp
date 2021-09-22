@@ -310,7 +310,7 @@ void SbkEnumTypeDealloc(PyObject *pyObj)
 
 PyObject *SbkEnumTypeTpNew(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
 {
-    auto type_new = reinterpret_cast<newfunc>(PyType_GetSlot(&PyType_Type, Py_tp_new));
+    auto type_new = reinterpret_cast<newfunc>(PyType_Type.tp_new);
     auto newType = reinterpret_cast<SbkEnumType *>(type_new(metatype, args, kwds));
     if (!newType)
         return nullptr;
