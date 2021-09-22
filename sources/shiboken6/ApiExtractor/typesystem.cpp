@@ -946,6 +946,16 @@ const PrimitiveTypeEntry *PrimitiveTypeEntry::basicReferencedTypeEntry() const
     return result;
 }
 
+const PrimitiveTypeEntry *PrimitiveTypeEntry::basicReferencedNonBuiltinTypeEntry() const
+{
+    auto *result = this;
+    for (;  result->referencedTypeEntry() ; result = result->referencedTypeEntry()) {
+        if (!result->isBuiltIn())
+            break;
+    }
+    return result;
+}
+
 bool PrimitiveTypeEntry::referencesType() const
 {
     S_D(const PrimitiveTypeEntry);

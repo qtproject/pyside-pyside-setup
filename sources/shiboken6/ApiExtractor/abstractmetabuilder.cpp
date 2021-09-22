@@ -903,12 +903,24 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseTypeDef(const FileModelIt
     // we store the aliased type on the alias
     // TypeEntry
     PrimitiveTypeEntry *ptype = types->findPrimitiveType(className);
+    const auto &targetNames = typeDef->type().qualifiedName();
+    PrimitiveTypeEntry *pTarget = targetNames.size() == 1
+        ? types->findPrimitiveType(targetNames.constFirst()) : nullptr;
     if (ptype) {
-        QString typeDefName = typeDef->type().qualifiedName()[0];
-        ptype->setReferencedTypeEntry(types->findPrimitiveType(typeDefName));
+        ptype->setReferencedTypeEntry(pTarget);
         return nullptr;
     }
 
+    // It is a (nested?) global typedef to a primitive type
+    // (like size_t = unsigned)? Add it to the type DB.
+    if (pTarget && pTarget->basicReferencedNonBuiltinTypeEntry()->isCppPrimitive()
+        && currentClass == nullptr) {
+        auto *pte = new PrimitiveTypeEntry(className, {}, nullptr);
+        pte->setReferencedTypeEntry(pTarget);
+        pte->setBuiltIn(true);
+        types->addType(pte);
+        return nullptr;
+    }
 
     // If we haven't specified anything for the typedef, then we don't care
     ComplexTypeEntry *type = types->findComplexType(fullClassName);
@@ -2170,11 +2182,19 @@ TypeEntries AbstractMetaBuilderPrivate::findTypeEntries(const QString &qualified
                                                         AbstractMetaBuilderPrivate *d,
                                                         QString *errorMessage)
 {
-    const TypeEntries types = findTypeEntriesHelper(qualifiedName, name, currentClass, d);
+    TypeEntries types = findTypeEntriesHelper(qualifiedName, name, currentClass, d);
     if (types.isEmpty()) {
         if (errorMessage != nullptr)
             *errorMessage = msgCannotFindTypeEntry(qualifiedName);
         return {};
+    }
+
+    // Resolve entries added by metabuilder (for example, "GLenum") to match
+    // the signatures for modifications.
+    for (qsizetype i = 0, size = types.size(); i < size; ++i) {
+        const auto *e = types.at(i);
+        if (e->isPrimitive())
+            types[i] = e->asPrimitive()->basicReferencedNonBuiltinTypeEntry();
     }
 
     if (types.size() == 1)

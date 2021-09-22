@@ -27,6 +27,7 @@
 ****************************************************************************/
 
 #include "typedatabase.h"
+#include "abstractmetatype.h"
 #include "typesystem.h"
 #include "typesystemparser.h"
 #include "conditionalstreamreader.h"
@@ -742,7 +743,9 @@ bool TypeDatabase::parseFile(QIODevice* device, bool generate)
     reader.setConditions(TypeDatabase::instance()->typesystemKeywords());
     TypeSystemParser handler(this, generate);
     const bool result = handler.parse(reader);
-    if (!result)
+    if (result)
+        addBuiltInPrimitiveTypes();
+    else
         qCWarning(lcShiboken, "%s", qPrintable(handler.errorString()));
     return result;
 }
@@ -986,6 +989,55 @@ void TypeDatabase::addBuiltInType(TypeEntry *e)
 {
     e->setBuiltIn(true);
     addType(e);
+}
+
+PrimitiveTypeEntry *
+    TypeDatabase::addBuiltInPrimitiveType(const QString &name,
+                                          const TypeSystemTypeEntry *root,
+                                          const QString &rootPackage,
+                                          CustomTypeEntry *targetLang)
+{
+    auto *result = new PrimitiveTypeEntry(name, {}, root);
+    result->setTargetLangApiType(targetLang);
+    result->setTargetLangPackage(rootPackage);
+    addBuiltInType(result);
+    return result;
+}
+
+void TypeDatabase::addBuiltInPrimitiveTypes()
+{
+    auto *root = defaultTypeSystemType();
+    const QString &rootPackage = root->name();
+
+    // C++ primitive types
+    auto *pyLongEntry = findType(u"PyLong"_qs);
+    Q_ASSERT(pyLongEntry && pyLongEntry->isCustom());
+    auto *pyLongCustomEntry = static_cast<CustomTypeEntry *>(pyLongEntry);
+    auto *pyBoolEntry = findType(u"PyBool"_qs);
+    Q_ASSERT(pyBoolEntry && pyBoolEntry->isCustom());
+    auto *sbkCharEntry = findType(u"SbkChar"_qs);
+    Q_ASSERT(sbkCharEntry && sbkCharEntry->isCustom());
+    auto *sbkCharCustomEntry = static_cast<CustomTypeEntry *>(sbkCharEntry);
+
+    auto *pyBoolCustomEntry = static_cast<CustomTypeEntry *>(pyBoolEntry);
+    for (const auto &t : AbstractMetaType::cppIntegralTypes()) {
+        if (!m_entries.contains(t)) {
+            CustomTypeEntry *targetLangApi = pyLongCustomEntry;
+            if (t == u"bool")
+                targetLangApi = pyBoolCustomEntry;
+            else if (AbstractMetaType::cppCharTypes().contains(t))
+                targetLangApi = sbkCharCustomEntry;
+            addBuiltInPrimitiveType(t, root, rootPackage, targetLangApi);
+        }
+    }
+
+    auto *pyFloatEntry = findType(u"PyFloat"_qs);
+    Q_ASSERT(pyFloatEntry && pyFloatEntry->isCustom());
+    auto *pyFloatCustomEntry = static_cast<CustomTypeEntry *>(pyFloatEntry);
+    for (const auto &t : AbstractMetaType::cppFloatTypes()) {
+        if (!m_entries.contains(t))
+            addBuiltInPrimitiveType(t, root, rootPackage, pyFloatCustomEntry);
+    }
 }
 
 QDebug operator<<(QDebug d, const TypeDatabase &db)

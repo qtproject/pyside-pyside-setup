@@ -42,6 +42,7 @@ QT_FORWARD_DECLARE_CLASS(QIODevice)
 
 class ComplexTypeEntry;
 class ContainerTypeEntry;
+class CustomTypeEntry;
 class FlagsTypeEntry;
 class FunctionTypeEntry;
 class NamespaceTypeEntry;
@@ -213,6 +214,11 @@ public:
 #endif
 private:
     void addBuiltInType(TypeEntry *e);
+    PrimitiveTypeEntry *addBuiltInPrimitiveType(const QString &name,
+                                                const TypeSystemTypeEntry *root,
+                                                const QString &rootPackage,
+                                                CustomTypeEntry *targetLang);
+    void addBuiltInPrimitiveTypes();
     TypeEntryMultiMapConstIteratorRange findTypeRange(const QString &name) const;
     template <class Predicate>
     TypeEntries findTypesHelper(const QString &name, Predicate pred) const;

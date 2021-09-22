@@ -430,6 +430,12 @@ public:
     /// by this typedef or self in case it is not a reference.
     const PrimitiveTypeEntry* basicReferencedTypeEntry() const;
 
+    /// Finds the basic primitive type that the typedef represents
+    /// and was explicitly specified in the type system.
+    /// \return the basic primitive type that was explicitly specified in
+    /// the type system.
+    const PrimitiveTypeEntry* basicReferencedNonBuiltinTypeEntry() const;
+
     /// Returns whether this entry references another entry.
     bool referencesType() const;
 
