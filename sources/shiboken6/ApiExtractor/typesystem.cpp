@@ -2114,9 +2114,13 @@ void TypeEntry::formatDebug(QDebug &debug) const
     if (m_d->m_name != cppName)
         debug << "\", cppName=\"" << cppName << '"';
     debug << ", type=" << m_d->m_type << ", codeGeneration="
-        << m_d->m_codeGeneration << ", target=\"" << targetLangName() << '"';
+          << m_d->m_codeGeneration;
+    const QString &targetName = targetLangName();
+    if (m_d->m_name != targetName)
+        debug << ", target=\"" << targetLangName() << '"';
     FORMAT_NONEMPTY_STRING("package", m_d->m_targetLangPackage)
     FORMAT_BOOL("stream", m_d->m_stream)
+    FORMAT_BOOL("built-in", m_d->m_builtin)
     FORMAT_LIST_SIZE("codeSnips", m_d->m_codeSnips)
     FORMAT_NONEMPTY_STRING("targetConversionRule", m_d->m_targetConversionRule)
     if (m_d->m_viewOn)
@@ -2132,6 +2136,16 @@ void TypeEntry::formatDebug(QDebug &debug) const
     if (m_d->m_private)
         debug << ", [private]";
     formatList(debug, "extraIncludes", m_d->m_extraIncludes, ", ");
+}
+
+void PrimitiveTypeEntry::formatDebug(QDebug &debug) const
+{
+    TypeEntry::formatDebug(debug);
+    if (auto *e = referencedTypeEntry()) {
+        debug << ", references";
+        for (; e != nullptr; e = e->referencedTypeEntry())
+            debug << ":\"" << e->qualifiedCppName() <<'"';
+    }
 }
 
 void ComplexTypeEntry::formatDebug(QDebug &debug) const

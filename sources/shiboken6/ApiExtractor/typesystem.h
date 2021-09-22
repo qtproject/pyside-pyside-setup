@@ -370,6 +370,9 @@ protected:
     QString buildTargetLangName() const override;
 };
 
+/// A PrimitiveTypeEntry is user-defined type with conversion rules, a C++
+/// primitive type for which a PrimitiveTypeConverter exists in libshiboken
+/// or a typedef to a C++ primitive type as determined by AbstractMetaBuilder.
 class PrimitiveTypeEntry : public TypeEntry
 {
 public:
@@ -407,6 +410,10 @@ public:
     void setPreferredTargetLangType(bool b);
 
     TypeEntry *clone() const override;
+
+#ifndef QT_NO_DEBUG_STREAM
+    void formatDebug(QDebug &d) const override;
+#endif
 
 protected:
     explicit PrimitiveTypeEntry(PrimitiveTypeEntryPrivate *d);
