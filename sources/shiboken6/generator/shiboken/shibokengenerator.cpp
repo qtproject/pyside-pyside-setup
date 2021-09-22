@@ -1114,7 +1114,8 @@ QString ShibokenGenerator::cpythonIsConvertibleFunction(const TypeEntry *type)
     return QString::fromLatin1("Shiboken::Conversions::isPythonToCppConvertible(%1, ")
               .arg(converterObject(type));
 }
-QString ShibokenGenerator::cpythonIsConvertibleFunction(AbstractMetaType metaType) const
+
+QString ShibokenGenerator::cpythonIsConvertibleFunction(AbstractMetaType metaType)
 {
     const auto *typeEntry = metaType.typeEntry();
     if (typeEntry->isCustom()) {
@@ -1154,7 +1155,7 @@ QString ShibokenGenerator::cpythonIsConvertibleFunction(AbstractMetaType metaTyp
     return result;
 }
 
-QString ShibokenGenerator::cpythonIsConvertibleFunction(const AbstractMetaArgument &metaArg) const
+QString ShibokenGenerator::cpythonIsConvertibleFunction(const AbstractMetaArgument &metaArg)
 {
     return cpythonIsConvertibleFunction(metaArg.type());
 }

@@ -236,8 +236,8 @@ protected:
     QString cpythonCheckFunction(const TypeEntry *type) const;
     QString cpythonCheckFunction(AbstractMetaType metaType) const;
     static QString cpythonIsConvertibleFunction(const TypeEntry *type);
-    QString cpythonIsConvertibleFunction(AbstractMetaType metaType) const;
-    QString cpythonIsConvertibleFunction(const AbstractMetaArgument &metaArg) const;
+    static QString cpythonIsConvertibleFunction(AbstractMetaType metaType);
+    static QString cpythonIsConvertibleFunction(const AbstractMetaArgument &metaArg);
 
     static QString cpythonToCppConversionFunction(const AbstractMetaClass *metaClass) ;
     static QString cpythonToCppConversionFunction(const AbstractMetaType &type,
