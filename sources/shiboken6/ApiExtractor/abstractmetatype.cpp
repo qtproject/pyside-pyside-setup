@@ -45,6 +45,84 @@
 
 using AbstractMetaTypeCPtr = QSharedPointer<const AbstractMetaType>;
 
+const QSet<QString> &AbstractMetaType::cppFloatTypes()
+{
+    static const QSet<QString> result{u"double"_qs, u"float"_qs};
+    return result;
+}
+
+const QSet<QString> &AbstractMetaType::cppSignedCharTypes()
+{
+    static const QSet<QString> result{u"char"_qs, u"signed char"_qs};
+    return result;
+}
+
+const QSet<QString> &AbstractMetaType::cppUnsignedCharTypes()
+{
+    static const QSet<QString> result{u"unsigned char"_qs};
+    return result;
+}
+
+const QSet<QString> &AbstractMetaType::cppCharTypes()
+{
+    static const QSet<QString> result = cppSignedCharTypes() | cppUnsignedCharTypes();
+    return result;
+}
+
+const QSet<QString> &AbstractMetaType::cppSignedIntTypes()
+{
+    static QSet<QString> result;
+    if (result.isEmpty()) {
+        result = {u"char"_qs, u"signed char"_qs, u"short"_qs, u"short int"_qs,
+                  u"signed short"_qs, u"signed short int"_qs,
+                  u"int"_qs, u"signed int"_qs,
+                  u"long"_qs, u"long int"_qs,
+                  u"signed long"_qs, u"signed long int"_qs,
+                  u"long long"_qs, u"long long int"_qs,
+                  u"signed long long int"_qs,
+                  u"ptrdiff_t"_qs};
+        result |= cppSignedCharTypes();
+    }
+    return result;
+}
+
+const QSet<QString> &AbstractMetaType::cppUnsignedIntTypes()
+{
+    static QSet<QString> result;
+    if (result.isEmpty()) {
+        result = {u"unsigned short"_qs, u"unsigned short int"_qs,
+                  u"unsigned"_qs, u"unsigned int"_qs,
+                  u"unsigned long"_qs, u"unsigned long int"_qs,
+                  u"unsigned long long"_qs,
+                  u"unsigned long long int"_qs,
+                  u"size_t"_qs};
+        result |= cppUnsignedCharTypes();
+    }
+    return result;
+}
+
+const QSet<QString> &AbstractMetaType::cppIntegralTypes()
+{
+    static QSet<QString> result;
+    if (result.isEmpty()) {
+        result |= cppSignedIntTypes();
+        result |= cppUnsignedIntTypes();
+        result.insert(u"bool"_qs);
+    }
+    return result;
+}
+
+const QSet<QString> &AbstractMetaType::cppPrimitiveTypes()
+{
+    static QSet<QString> result;
+    if (result.isEmpty()) {
+        result |= cppIntegralTypes();
+        result |= cppFloatTypes();
+        result.insert(u"wchar_t"_qs);
+    }
+    return result;
+}
+
 class AbstractMetaTypeData : public QSharedData
 {
 public:

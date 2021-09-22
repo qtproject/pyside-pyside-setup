@@ -35,6 +35,7 @@
 #include <QtCore/qobjectdefs.h>
 #include <QtCore/QSharedDataPointer>
 #include <QtCore/QList>
+#include <QtCore/QSet>
 
 #include <optional>
 
@@ -249,6 +250,16 @@ public:
     bool valueTypeWithCopyConstructorOnlyPassed() const;
     /// Returns whether to generate an opaque container for the type
     bool generateOpaqueContainer() const;
+
+    /// Types for which libshiboken has built-in primitive converters
+    static const QSet<QString> &cppFloatTypes();
+    static const QSet<QString> &cppSignedCharTypes();
+    static const QSet<QString> &cppUnsignedCharTypes();
+    static const QSet<QString> &cppCharTypes();
+    static const QSet<QString> &cppSignedIntTypes();
+    static const QSet<QString> &cppUnsignedIntTypes();
+    static const QSet<QString> &cppIntegralTypes();
+    static const QSet<QString> &cppPrimitiveTypes();
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &debug) const;

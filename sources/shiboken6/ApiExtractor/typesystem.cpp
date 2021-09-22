@@ -27,6 +27,7 @@
 ****************************************************************************/
 
 #include "typesystem.h"
+#include "abstractmetatype.h"
 #include "typedatabase.h"
 #include "modifications.h"
 #include "messages.h"
@@ -44,21 +45,6 @@ static QString buildName(const QString &entryName, const TypeEntry *parent)
 
 // Access private class as 'd', cf macro Q_D()
 #define S_D(Class) auto d = static_cast<Class##Private *>(d_func())
-
-static const QSet<QString> &primitiveCppTypes()
-{
-    static QSet<QString> result;
-    if (result.isEmpty()) {
-        static const char *cppTypes[] = {
-            "bool", "char", "double", "float", "int",
-            "long", "long long", "short",
-            "wchar_t"
-        };
-        for (const char *cppType : cppTypes)
-            result.insert(QLatin1String(cppType));
-    }
-    return result;
-}
 
 class TypeEntryPrivate
 {
@@ -215,7 +201,7 @@ bool TypeEntry::isCppPrimitive() const
     const PrimitiveTypeEntry *referencedType =
         static_cast<const PrimitiveTypeEntry *>(this)->basicReferencedTypeEntry();
     const QString &typeName = referencedType->name();
-    return typeName.contains(QLatin1Char(' ')) || primitiveCppTypes().contains(typeName);
+    return AbstractMetaType::cppPrimitiveTypes().contains(typeName);
 }
 
 TypeEntry::Type TypeEntry::type() const
@@ -535,10 +521,7 @@ bool TypeEntry::isCppIntegralPrimitive() const
     if (!isCppPrimitive())
         return false;
     const auto *type = asPrimitive()->basicReferencedTypeEntry();
-    QString typeName = type->qualifiedCppName();
-    return !typeName.contains(u"double")
-        && !typeName.contains(u"float")
-        && !typeName.contains(u"wchar");
+    return AbstractMetaType::cppIntegralTypes().contains(type->qualifiedCppName());
 }
 
 bool TypeEntry::isExtendedCppPrimitive() const
