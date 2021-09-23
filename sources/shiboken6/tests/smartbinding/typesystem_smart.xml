@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <typesystem package="smart">
-    <primitive-type name="int" />
-    <primitive-type name="char" />
-    <primitive-type name="float" />
-    <primitive-type name="bool" />
 
     <template name="cpplist_to_pylist_convertion">
         PyObject *%out = PyList_New(int(%in.size()));

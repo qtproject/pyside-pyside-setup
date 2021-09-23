@@ -153,36 +153,16 @@
   <primitive-type name="quint16"/>
   <primitive-type name="quint32"/>
   <primitive-type name="quint64"/>
-  <primitive-type name="double"/>
   <primitive-type name="qreal"/>
-  <primitive-type name="float"/>
   <primitive-type name="qint64"/>
-  <primitive-type name="unsigned long long"/>
-  <primitive-type name="long long"/>
   <primitive-type name="qlonglong" target-lang-api-name="PyLong"/>
   <primitive-type name="qulonglong" target-lang-api-name="PyLong"/>
   <primitive-type name="qsizetype" target-lang-api-name="PyLong"/>
   <primitive-type name="size_t" target-lang-api-name="PyLong"/>
-  <primitive-type name="short"/>
-  <primitive-type name="signed short"/>
-  <primitive-type name="signed short int"/>
   <primitive-type name="ushort" target-lang-api-name="PyLong"/>
-  <primitive-type name="unsigned short int"/>
-  <primitive-type name="unsigned short"/>
-  <primitive-type name="char"/>
-  <primitive-type name="signed char"/>
   <primitive-type name="uchar"/>
-  <primitive-type name="unsigned char"/>
-  <primitive-type name="int"/>
-  <primitive-type name="signed int"/>
   <primitive-type name="uint"/>
   <primitive-type name="ulong"/>
-  <primitive-type name="unsigned int"/>
-  <primitive-type name="signed long"/>
-  <primitive-type name="signed long int"/>
-  <primitive-type name="long"/>
-  <primitive-type name="unsigned long int"/>
-  <primitive-type name="unsigned long"/>
   <primitive-type name="int8_t"/>
   <primitive-type name="uint8_t"/>
   <primitive-type name="int16_t"/>
@@ -200,15 +180,6 @@
   <?if linux?>
   <primitive-type name="Qt::HANDLE" target-lang-api-name="PyLong"/>
   <?endif?>
-
-  <primitive-type name="bool" target-lang-api-name="PyBool">
-    <conversion-rule>
-        <native-to-target file="../glue/qtcore.cpp" snippet="return-pybool"/>
-        <target-to-native>
-            <add-conversion type="PyBool" file="../glue/qtcore.cpp" snippet="conversion-pybool"/>
-        </target-to-native>
-    </conversion-rule>
-  </primitive-type>
 
   <!-- Qt5: add the new pointer-ish types -->
   <primitive-type name="qintptr" target-lang-api-name="PyLong">
