@@ -311,12 +311,16 @@ QString msgTypeNotDefined(const TypeEntry *entry)
 }
 
 QString msgGlobalFunctionNotDefined(const FunctionTypeEntry *fte,
-                                    const QString &signature)
+                                    const QString &signature,
+                                    const QStringList &candidates)
 {
     QString result;
     QTextStream str(&result);
     str << fte->sourceLocation() << "Global function '" << signature
-        << "' is specified in typesystem, but not defined. " << msgCompilationError;
+        << "' is specified in typesystem, but not defined.";
+    if (!candidates.isEmpty())
+        str << " Candidates are: " << candidates.join(u", "_qs);
+    str << ' ' << msgCompilationError;
     return result;
 }
 

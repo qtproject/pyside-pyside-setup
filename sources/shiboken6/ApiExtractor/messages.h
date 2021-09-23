@@ -103,7 +103,8 @@ QString msgSkippingField(const VariableModelItem &field, const QString &classNam
 QString msgTypeNotDefined(const TypeEntry *entry);
 
 QString msgGlobalFunctionNotDefined(const FunctionTypeEntry *fte,
-                                    const QString &signature);
+                                    const QString &signature,
+                                    const QStringList &candidates);
 
 QString msgStrippingArgument(const FunctionModelItem &f, int i,
                              const QString &originalSignature,

@@ -417,6 +417,22 @@ FileModelItem AbstractMetaBuilderPrivate::buildDom(QByteArrayList arguments,
     return result;
 }
 
+// List of candidates for a mismatched added global function.
+static QStringList functionCandidates(const AbstractMetaFunctionCList &list,
+                                      const QString &signature)
+{
+    QString name  = signature;
+    const int parenPos = name.indexOf(u'(');
+    if (parenPos > 0)
+        name.truncate(parenPos);
+    QStringList result;
+    for (const auto &func : list) {
+        if (name == func->name())
+            result += func->minimalSignature();
+    }
+    return result;
+}
+
 void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
 {
     const TypeDatabase *types = TypeDatabase::instance();
@@ -549,8 +565,10 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
                         }
                     }
                     if (!ok) {
+                        const QStringList candidates = functionCandidates(m_globalFunctions,
+                                                                          signatures.constFirst());
                         qCWarning(lcShiboken, "%s",
-                                  qPrintable(msgGlobalFunctionNotDefined(fte, signature)));
+                                  qPrintable(msgGlobalFunctionNotDefined(fte, signature, candidates)));
                     }
                 }
             } else if (entry->isEnum() && entry->generateCode()) {
