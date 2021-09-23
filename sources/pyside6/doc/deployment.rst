@@ -104,6 +104,15 @@ The following table summarizes the platform support for those packaging tools:
           <td><p style="color: green;">yes</p></td>
           <td><p style="color: green;">yes</p></td>
         </tr>
+        <tr>
+          <td><p>Nuitka</p></td>
+          <td><p>MIT</p></td>
+          <td><p style="color: green;">yes</p></td>
+          <td><p style="color: green;">yes</p></td>
+          <td><p style="color: green;">yes</p></td>
+          <td><p style="color: green;">yes</p></td>
+          <td><p style="color: green;">yes</p></td>
+        </tr>
       </tbody>
     </table>
 
@@ -134,3 +143,4 @@ Here's a set of tutorials on how to use these tools:
     deployment-cxfreeze.rst
     deployment-briefcase.rst
     deployment-py2exe.rst
+    deployment-nuitka.rst
