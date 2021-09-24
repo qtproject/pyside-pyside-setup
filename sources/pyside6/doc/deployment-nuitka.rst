@@ -35,7 +35,7 @@ To simply compile a project, you can run::
 There are two main features:
 
  * the option to place it in a directory containing the libraries
-   (`--standalone)
+   (`--standalone`)
  * the option to package the whole project (including shared libraries) into one executable file
    (`--onefile`)
 

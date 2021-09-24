@@ -21,7 +21,7 @@ is installed as a dependency:
 That installed package is also called **Shiboken Module**, and it contains
 some utilities for PySide to properly work.
 You can find more information about it on its
-`documentation page <https://doc.qt.io/qtforpython/shiboken6/shibokenmodule.html>`_
+`documentation page (module) <https://doc.qt.io/qtforpython/shiboken6/shibokenmodule.html>`_
 
 There is a third package that does not get installed when you install PySide,
 because it is not required, and it is called **Shiboken Generator**.
@@ -39,4 +39,4 @@ but on the other hand, if you want to work with your own bindings
 or extend Qt/C++ applications with Python, you **need** it.
 
 You can find all the information related to Shiboken on its
-`documentation page <https://doc.qt.io/qtforpython/shiboken6/>`_.
+`documentation page (generator) <https://doc.qt.io/qtforpython/shiboken6/>`_.
