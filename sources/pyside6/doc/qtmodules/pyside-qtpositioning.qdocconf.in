@@ -1,3 +1,3 @@
-include(@QT_SRC_DIR@/../qtlocation/src/positioning/doc/qtpositioning.qdocconf)
-includepaths += -I @QT_SRC_DIR@/../qtlocation/src/positioning/doc
+include(@QT_SRC_DIR@/../qtpositioning/src/positioning/doc/qtpositioning.qdocconf)
+includepaths += -I @QT_SRC_DIR@/../qtpositioning/src/positioning/doc
 include(../pyside-config.qdocconf)
