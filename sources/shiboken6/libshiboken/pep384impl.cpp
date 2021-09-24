@@ -723,6 +723,12 @@ PepRun_GetResult(const char *command)
     return res;
 }
 
+PyTypeObject *PepType_Type_tp_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
+{
+    auto ret = PyType_Type.tp_new(metatype, args, kwds);
+    return reinterpret_cast<PyTypeObject *>(ret);
+}
+
 /*****************************************************************************
  *
  * Extra support for name mangling

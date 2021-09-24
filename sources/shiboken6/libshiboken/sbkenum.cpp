@@ -262,7 +262,7 @@ static PyGetSetDef SbkEnumGetSetList[] = {
 };
 
 static void SbkEnumTypeDealloc(PyObject *pyObj);
-static PyObject *SbkEnumTypeTpNew(PyTypeObject *metatype, PyObject *args, PyObject *kwds);
+static PyTypeObject *SbkEnumTypeTpNew(PyTypeObject *metatype, PyObject *args, PyObject *kwds);
 
 static PyType_Slot SbkEnumType_Type_slots[] = {
     {Py_tp_dealloc, reinterpret_cast<void *>(SbkEnumTypeDealloc)},
@@ -308,13 +308,9 @@ void SbkEnumTypeDealloc(PyObject *pyObj)
     }
 }
 
-PyObject *SbkEnumTypeTpNew(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
+PyTypeObject *SbkEnumTypeTpNew(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
 {
-    auto type_new = reinterpret_cast<newfunc>(PyType_Type.tp_new);
-    auto newType = reinterpret_cast<SbkEnumType *>(type_new(metatype, args, kwds));
-    if (!newType)
-        return nullptr;
-    return reinterpret_cast<PyObject *>(newType);
+    return PepType_Type_tp_new(metatype, args, kwds);
 }
 
 } // extern "C"

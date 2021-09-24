@@ -93,7 +93,7 @@ void Sbk_object_dealloc(PyObject *self)
 }
 
 static void SbkObjectTypeDealloc(PyTypeObject *pyType);
-static PyObject *SbkObjectTypeTpNew(PyTypeObject *metatype, PyObject *args, PyObject *kwds);
+static PyTypeObject *SbkObjectTypeTpNew(PyTypeObject *metatype, PyObject *args, PyObject *kwds);
 
 static DestroyQAppHook DestroyQApplication = nullptr;
 
@@ -460,7 +460,7 @@ PyObject *MakeQAppWrapper(PyTypeObject *type)
     return qApp_curr;
 }
 
-static PyObject *SbkObjectTypeTpNew(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
+static PyTypeObject *SbkObjectTypeTpNew(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
 {
     // Check if all bases are new style before calling type.tp_new
     // Was causing gc assert errors in test_bug704.py when
@@ -486,12 +486,9 @@ static PyObject *SbkObjectTypeTpNew(PyTypeObject *metatype, PyObject *args, PyOb
         PyObject *baseType = PyTuple_GET_ITEM(pyBases, i);
         if (reinterpret_cast<PyTypeObject *>(baseType)->tp_new == SbkDummyNew) {
             // PYSIDE-595: A base class does not allow inheritance.
-            return SbkDummyNew(metatype, args, kwds);
+            return reinterpret_cast<PyTypeObject *>(SbkDummyNew(metatype, args, kwds));
         }
     }
-
-    // The meta type creates a new type when the Python programmer extends a wrapped C++ class.
-    auto type_new = reinterpret_cast<newfunc>(PyType_Type.tp_new);
 
     // PYSIDE-939: This is a temporary patch that circumvents the problem
     // with Py_TPFLAGS_METHOD_DESCRIPTOR until this is finally solved.
@@ -501,7 +498,7 @@ static PyObject *SbkObjectTypeTpNew(PyTypeObject *metatype, PyObject *args, PyOb
         PyObject_GetAttr(reinterpret_cast<PyObject *>(&PyType_Type), Shiboken::PyName::mro()));
     auto hold = PyMethodDescr_TypePtr->tp_flags;
     PyMethodDescr_TypePtr->tp_flags &= ~Py_TPFLAGS_METHOD_DESCRIPTOR;
-    auto *newType = reinterpret_cast<PyTypeObject *>(type_new(metatype, args, kwds));
+    auto *newType = PepType_Type_tp_new(metatype, args, kwds);
     PyMethodDescr_TypePtr->tp_flags = hold;
 
     if (!newType)
@@ -548,7 +545,7 @@ static PyObject *SbkObjectTypeTpNew(PyTypeObject *metatype, PyObject *args, PyOb
             sotp->subtype_init(newType, args, kwds);
     }
     initSelectableFeature(saveFeature);
-    return reinterpret_cast<PyObject *>(newType);
+    return newType;
 }
 
 static PyObject *_setupNew(SbkObject *self, PyTypeObject *subtype)

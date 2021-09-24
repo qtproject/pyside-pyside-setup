@@ -534,6 +534,11 @@ LIBSHIBOKEN_API PyObject *PyImport_GetModule(PyObject *name);
 // Evaluate a script and return the variable `result`
 LIBSHIBOKEN_API PyObject *PepRun_GetResult(const char *command);
 
+// Call PyType_Type.tp_new returning a PyType object.
+LIBSHIBOKEN_API PyTypeObject *PepType_Type_tp_new(PyTypeObject *metatype,
+                                                  PyObject *args,
+                                                  PyObject *kwds);
+
 /*****************************************************************************
  *
  * Runtime support for Python 3.8 incompatibilities
