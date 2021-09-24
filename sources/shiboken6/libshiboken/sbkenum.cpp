@@ -272,10 +272,14 @@ static PyType_Slot SbkEnumType_Type_slots[] = {
     {Py_tp_free, reinterpret_cast<void *>(PyObject_GC_Del)},
     {0, nullptr}
 };
+
+// PYSIDE-535: The tp_itemsize field is inherited and does not need to be set.
+// In PyPy, it _must_ not be set, because it would have the meaning that a
+// `__len__` field must be defined. Not doing so creates a hard-to-find crash.
 static PyType_Spec SbkEnumType_Type_spec = {
     "1:Shiboken.EnumMeta",
     0,
-    sizeof(PyMemberDef),
+    0, // sizeof(PyMemberDef), not for PyPy without a __len__ defined
     Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,
     SbkEnumType_Type_slots,
 };

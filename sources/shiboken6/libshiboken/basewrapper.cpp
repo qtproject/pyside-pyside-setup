@@ -152,10 +152,14 @@ static PyType_Slot SbkObjectType_Type_slots[] = {
     {Py_tp_getset, reinterpret_cast<void *>(SbkObjectType_Type_getsetlist)},
     {0, nullptr}
 };
+
+// PYSIDE-535: The tp_itemsize field is inherited and does not need to be set.
+// In PyPy, it _must_ not be set, because it would have the meaning that a
+// `__len__` field must be defined. Not doing so creates a hard-to-find crash.
 static PyType_Spec SbkObjectType_Type_spec = {
     "1:Shiboken.ObjectType",
     0,
-    sizeof(PyMemberDef),
+    0, // sizeof(PyMemberDef), not for PyPy without a __len__ defined
     Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,
     SbkObjectType_Type_slots,
 };
