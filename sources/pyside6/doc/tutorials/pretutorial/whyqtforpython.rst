@@ -3,6 +3,9 @@
 Why Qt for Python?
 ==================
 
+.. image:: tiobe.png
+   :width: 0
+
 .. raw:: html
 
     <div style="float: right; padding-left: 20px; max-width: 30%;
