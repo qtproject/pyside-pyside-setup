@@ -329,7 +329,9 @@ def prepare_build():
             if install_prefix.endswith("qtbase"):
                 qt_src_dir = install_prefix
             else:  # SDK: Use 'Src' directory
-                qt_src_dir = os.path.join(os.path.dirname(install_prefix), 'Src', 'qtbase')
+                maybe_qt_src_dir = os.path.join(os.path.dirname(install_prefix), 'Src', 'qtbase')
+                if os.path.exists(maybe_qt_src_dir):
+                    qt_src_dir = maybe_qt_src_dir
 
 
 class PysideInstall(_install, DistUtilsCommandMixin):
@@ -760,7 +762,8 @@ class PysideBuild(_build, DistUtilsCommandMixin):
             cmake_cmd.append(f"-DSKIP_MODULES={skip_modules}")
         # Add source location for generating documentation
         cmake_src_dir = OPTION["QT_SRC"] if OPTION["QT_SRC"] else qt_src_dir
-        cmake_cmd.append(f"-DQT_SRC_DIR={cmake_src_dir}")
+        if cmake_src_dir:
+            cmake_cmd.append(f"-DQT_SRC_DIR={cmake_src_dir}")
         if OPTION['NO_QT_TOOLS']:
             cmake_cmd.append("-DNO_QT_TOOLS=yes")
         if OPTION['SKIP_DOCS']:
