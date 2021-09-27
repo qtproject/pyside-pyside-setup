@@ -32,7 +32,7 @@ typesystem
 
     This is the root node containing all the type system information.
     It may contain :ref:`add-function`, :ref:`container-type`,
-    :ref:`custom-type`, :ref:`enum-type`, :ref:`function`,
+    :ref:`custom-type`, :ref:`enum-type`, :ref:`extra-includes`, :ref:`function`,
     :ref:`load-typesystem`, :ref:`namespace`, :ref:`object-type`,
     :ref:`primitive-type`, :ref:`rejection`, :ref:`smart-pointer-type`,
     :ref:`suppress-warning`, :ref:`template`, :ref:`system_include`,

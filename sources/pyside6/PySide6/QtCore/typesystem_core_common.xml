@@ -48,6 +48,10 @@
 <!--
     <function signature="qChecksum(QByteArrayView data, Qt::ChecksumType)"/>
 -->
+    <extra-includes>
+        <include file-name="signalmanager.h" location="global"/>
+    </extra-includes>
+
     <function signature="qFastCos(qreal)" since="4.6"/>
     <function signature="qFastSin(qreal)" since="4.6"/>
     <function signature="qFuzzyCompare(double,double)"/>
@@ -178,10 +182,7 @@
   <primitive-type name="signed long int"/>
   <primitive-type name="long"/>
   <primitive-type name="unsigned long int"/>
-  <primitive-type name="unsigned long">
-    <!-- FIXME APIExtractor or shiboken do not support multiple includes by primitive type -->
-    <include file-name="signalmanager.h" location="global"/>
-  </primitive-type>
+  <primitive-type name="unsigned long"/>
   <primitive-type name="int8_t"/>
   <primitive-type name="uint8_t"/>
   <primitive-type name="int16_t"/>
