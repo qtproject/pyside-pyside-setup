@@ -38,7 +38,7 @@
 #############################################################################
 
 major_version = "6"
-minor_version = "0"
+minor_version = "2"
 patch_version = "0"
 
 # For example: "a", "b", "rc"
