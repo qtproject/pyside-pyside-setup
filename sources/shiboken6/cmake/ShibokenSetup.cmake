@@ -4,11 +4,22 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
 
 include(ShibokenHelpers)
 
-option(BUILD_TESTS "Build tests." TRUE)
 option(USE_PYTHON_VERSION "Use specific python version to build shiboken6." "")
 option(DISABLE_DOCSTRINGS "Disable documentation extraction." FALSE)
 
 shiboken_internal_disable_pkg_config_if_needed()
+shiboken_internal_detect_if_cross_building()
+
+if(SHIBOKEN_IS_CROSS_BUILD AND CMAKE_VERSION VERSION_LESS "3.17")
+    # TODO: We rely on FindPython shipped with CMake 3.17+ to provide the value of Python_SOABI.
+    # It might be possible to extract the Python_SOABI manually with CMake 3.16 if we reimplement
+    # the logic that FindPython does in 3.17 ourselves.
+    message(FATAL_ERROR "You need CMake version 3.17 or greater to cross-build.")
+endif()
+
+shiboken_internal_decide_parts_to_build()
+shiboken_internal_find_host_shiboken_tools()
+shiboken_internal_set_up_extra_dependency_paths()
 
 set(QT_MAJOR_VERSION 6)
 message(STATUS "Using Qt ${QT_MAJOR_VERSION}")
@@ -18,13 +29,15 @@ if(QUIET_BUILD)
     set_quiet_build()
 endif()
 
-if (USE_PYTHON_VERSION)
+if(USE_PYTHON_VERSION)
     shiboken_find_required_python(${USE_PYTHON_VERSION})
 else()
     shiboken_find_required_python()
 endif()
 
-setup_clang()
+if(SHIBOKEN_BUILD_TOOLS)
+    setup_clang()
+endif()
 
 set(shiboken6_VERSION "${shiboken_MAJOR_VERSION}.${shiboken_MINOR_VERSION}.${shiboken_MICRO_VERSION}")
 set(shiboken6_library_so_version "${shiboken_MAJOR_VERSION}.${shiboken_MINOR_VERSION}")
@@ -70,7 +83,7 @@ message(STATUS "PYTHON_SHARED_LIBRARY_SUFFIX: ${PYTHON_SHARED_LIBRARY_SUFFIX}")
 
 
 if(NOT PYTHON_SITE_PACKAGES)
-    set_python_site_packages()
+    shiboken_internal_set_python_site_packages()
 endif()
 
 set_cmake_cxx_flags()
@@ -120,20 +133,28 @@ execute_process(
 
 # Detect if python interpeter was compiled with COUNT_ALLOCS define
 # Linux distros are inconsistent in setting the sysconfig.get_config_var('COUNT_ALLOCS') value
-execute_process(
-    COMMAND ${PYTHON_EXECUTABLE} -c "if True:
-        count_allocs = False
-        import sys
-        try:
-            if sys.getcounts:
-                count_allocs = True
-        except:
-            pass
+# We can't detect it when cross-building, because we can't run the target python executable.
+# TODO: Is there another way to detect this and is it relevant for cross-built python interpreters?
+#       At the very least, upstream CPython removed COUNT_ALLOCS support in Python 3.9.
+if(SHIBOKEN_IS_CROSS_BUILD)
+    set(PYTHON_WITH_COUNT_ALLOCS 0)
+else()
+    execute_process(
+        COMMAND ${PYTHON_EXECUTABLE} -c "if True:
+            count_allocs = False
+            import sys
+            try:
+                if sys.getcounts:
+                    count_allocs = True
+            except:
+                pass
 
-        print(bool(count_allocs))
-        "
-    OUTPUT_VARIABLE PYTHON_WITH_COUNT_ALLOCS
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
+            print(bool(count_allocs))
+            "
+        OUTPUT_VARIABLE PYTHON_WITH_COUNT_ALLOCS
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+endif()
+
 
 set(SHIBOKEN_BUILD_TYPE "${CMAKE_BUILD_TYPE}")
 

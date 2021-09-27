@@ -23,13 +23,25 @@ else()
     set(embedding_option "")
 endif()
 
+if(SHIBOKEN_IS_CROSS_BUILD)
+    set(host_python_path "${QFP_PYTHON_HOST_PATH}")
+    set(use_pyc_in_embedding FALSE)
+else()
+    set(host_python_path "${PYTHON_EXECUTABLE}")
+    if(PYTHON_LIMITED_API)
+        set(use_pyc_in_embedding FALSE)
+    else()
+        set(use_pyc_in_embedding TRUE)
+    endif()
+endif()
+
 add_custom_command(
     OUTPUT  "${CMAKE_CURRENT_BINARY_DIR}/embed/signature_bootstrap_inc.h"
     OUTPUT  "${CMAKE_CURRENT_BINARY_DIR}/embed/signature_inc.h"
-    COMMAND ${PYTHON_EXECUTABLE} -E
+    COMMAND ${host_python_path} -E
             "${CMAKE_CURRENT_SOURCE_DIR}/embed/embedding_generator.py"
             --cmake-dir "${CMAKE_CURRENT_BINARY_DIR}/embed"
-            --limited-api ${PYTHON_LIMITED_API}
+            --use-pyc ${use_pyc_in_embedding}
             ${embedding_option}
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/embed/embedding_generator.py"
             "${CMAKE_CURRENT_SOURCE_DIR}/embed/signature_bootstrap.py"
@@ -96,6 +108,10 @@ if (NOT "${NUMPY_INCLUDE_DIR}" STREQUAL "")
     target_compile_definitions(libshiboken PRIVATE -DHAVE_NUMPY
                                            PRIVATE -DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
 
+endif()
+
+if(SHIBOKEN_IS_CROSS_BUILD)
+    target_compile_definitions(libshiboken PRIVATE -DSHIBOKEN_NO_EMBEDDING_PYC=1)
 endif()
 
 shiboken_compute_python_includes()

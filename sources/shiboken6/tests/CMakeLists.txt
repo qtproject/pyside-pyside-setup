@@ -39,7 +39,16 @@ list(SORT TEST_FILES)
 
 set(test_blacklist "")
 
-find_package(PythonInterp REQUIRED)
+if(SHIBOKEN_IS_CROSS_BUILD)
+    # PYTHON_EXECUTABLE will be empty when cross-building.
+    message(WARNING
+        "Running tests when cross-compiling is not supported because it would require running "
+        "a target python interpreter which might have a different architecture than the host."
+    )
+else()
+    find_package(PythonInterp REQUIRED)
+endif()
+
 if(NOT CTEST_TESTING_TIMEOUT)
     set(CTEST_TESTING_TIMEOUT 60)
 endif()
@@ -59,7 +68,10 @@ foreach(test_file ${TEST_FILES})
     endif()
 endforeach()
 
-add_subdirectory(dumpcodemodel)
+# dumpcodemodel depends on apiextractor which is not cross-built.
+if(SHIBOKEN_BUILD_TOOLS)
+    add_subdirectory(dumpcodemodel)
+endif()
 
 # FIXME Skipped until add an option to choose the generator
 # add_subdirectory(test_generator)

@@ -57,8 +57,18 @@ except:
             message(STATUS "qhelpgenerator - found")
 
             file(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/html/Shiboken.qhp QHP_FILE)
+
+            if(SHIBOKEN_IS_CROSS_BUILD)
+                set(python_executable "${QFP_PYTHON_HOST_PATH}")
+            else()
+                set(python_executable "${PYTHON_EXECUTABLE}")
+            endif()
+            if(NOT python_executable OR NOT EXISTS "${python_executable}")
+                message(FATAL_ERROR "No python executable found to build documentation.")
+            endif()
+
             add_custom_command(TARGET doc POST_BUILD
-                COMMAND ${PYTHON_EXECUTABLE} py_script.py # ${CMAKE_CURRENT_BINARY_DIR}/html/Shiboken.qhp
+                COMMAND "${python_executable}" py_script.py # ${CMAKE_CURRENT_BINARY_DIR}/html/Shiboken.qhp
                 COMMAND "${qhelpgenerator_binary}" ${QHP_FILE}
                 COMMENT "Generating shiboken documentation QCH files based on the QHP files"
                 VERBATIM)

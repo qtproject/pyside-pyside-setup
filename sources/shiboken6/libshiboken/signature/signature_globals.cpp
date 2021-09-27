@@ -89,8 +89,9 @@ static safe_globals_struc *init_phase_1(PyMethodDef *init_meth)
          * Since we now have an embedding script, we can do this without any
          * Python strings in the C code.
          */
-#ifdef Py_LIMITED_API
-        // We must work for multiple versions, so use source code.
+#if defined(Py_LIMITED_API) || defined(SHIBOKEN_NO_EMBEDDING_PYC)
+        // We must work for multiple versions or we are cross-building for a different
+        // Python version interpreter, so use source code.
 #else
         AutoDecRef marshal_module(PyImport_Import(PyName::marshal()));
         if (marshal_module.isNull())
@@ -104,7 +105,7 @@ static safe_globals_struc *init_phase_1(PyMethodDef *init_meth)
         AutoDecRef bytes(PyBytes_FromStringAndSize(bytes_cast, sizeof(PySide_SignatureLoader)));
         if (bytes.isNull())
             goto error;
-#ifdef Py_LIMITED_API
+#if defined(Py_LIMITED_API) || defined(SHIBOKEN_NO_EMBEDDING_PYC)
         PyObject *builtins = PyEval_GetBuiltins();
         PyObject *compile = PyDict_GetItem(builtins, PyName::compile());
         if (compile == nullptr)

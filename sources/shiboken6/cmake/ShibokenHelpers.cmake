@@ -75,25 +75,46 @@ endif()
 
 endmacro()
 
-macro(set_python_site_packages)
-    execute_process(
-        COMMAND ${PYTHON_EXECUTABLE} -c "if True:
-            import sysconfig
-            from os.path import sep
+macro(shiboken_internal_set_python_site_packages)
+    # When cross-building, we can't run the target python executable to find out the information,
+    # so we allow an explicit variable assignment or use a default / sensible value.
+    if(SHIBOKEN_IS_CROSS_BUILD OR PYSIDE_IS_CROSS_BUILD OR QFP_FIND_NEW_PYTHON_PACKAGE)
+        # Allow manual assignment.
+        if(QFP_PYTHON_SITE_PACKAGES)
+            set(PYTHON_SITE_PACKAGES "${QFP_PYTHON_SITE_PACKAGES}")
+        else()
+            # Assumes POSIX.
+            # Convention can be checked in cpython's source code in
+            # Lib/sysconfig.py's _INSTALL_SCHEMES
+            set(__version_major_minor
+                "${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}")
 
-            # /home/qt/dev/env/lib/python3.9/site-packages
-            lib_path = sysconfig.get_path('purelib')
+            set(PYTHON_SITE_PACKAGES_WITHOUT_PREFIX
+                "lib/python${__version_major_minor}/site-packages")
+            set(PYTHON_SITE_PACKAGES
+                "${CMAKE_INSTALL_PREFIX}/${PYTHON_SITE_PACKAGES_WITHOUT_PREFIX}")
+            unset(__version_major_minor)
+        endif()
+    else()
+        execute_process(
+            COMMAND ${PYTHON_EXECUTABLE} -c "if True:
+                import sysconfig
+                from os.path import sep
 
-            # /home/qt/dev/env
-            data_path = sysconfig.get_path('data')
+                # /home/qt/dev/env/lib/python3.9/site-packages
+                lib_path = sysconfig.get_path('purelib')
 
-            # /lib/python3.9/site-packages
-            rel_path = lib_path.replace(data_path, '')
+                # /home/qt/dev/env
+                data_path = sysconfig.get_path('data')
 
-            print(f'${CMAKE_INSTALL_PREFIX}{rel_path}'.replace(sep, '/'))
-            "
-        OUTPUT_VARIABLE PYTHON_SITE_PACKAGES
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
+                # /lib/python3.9/site-packages
+                rel_path = lib_path.replace(data_path, '')
+
+                print(f'${CMAKE_INSTALL_PREFIX}{rel_path}'.replace(sep, '/'))
+                "
+            OUTPUT_VARIABLE PYTHON_SITE_PACKAGES
+            OUTPUT_STRIP_TRAILING_WHITESPACE)
+    endif()
     if (NOT PYTHON_SITE_PACKAGES)
         message(FATAL_ERROR "Could not detect Python module installation directory.")
     elseif (APPLE)
@@ -152,21 +173,32 @@ macro(set_quiet_build)
 endmacro()
 
 macro(get_python_extension_suffix)
-  execute_process(
-    COMMAND ${PYTHON_EXECUTABLE} -c "if True:
-       import sys
-       import sysconfig
-       suffix = sysconfig.get_config_var('EXT_SUFFIX')
-       pos = suffix.rfind('.')
-       if pos > 0:
-           print(suffix[:pos])
-       else:
-           print(f'Unable to determine PYTHON_EXTENSION_SUFFIX from EXT_SUFFIX: \"{suffix}\"',
-                 file=sys.stderr)
-       "
-    OUTPUT_VARIABLE PYTHON_EXTENSION_SUFFIX
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-  message(STATUS "PYTHON_EXTENSION_SUFFIX: " ${PYTHON_EXTENSION_SUFFIX})
+    # When cross-building, we can't run the target python executable to find out the information,
+    # so we rely on Python_SOABI being set by find_package(Python).
+    # Python_SOABI is only set by CMake 3.17+
+    # TODO: Lower this to CMake 3.16 if possible.
+    if(SHIBOKEN_IS_CROSS_BUILD)
+        if(NOT Python_SOABI)
+            message(FATAL_ERROR "Python_SOABI variable is empty.")
+        endif()
+        set(PYTHON_EXTENSION_SUFFIX ".${Python_SOABI}")
+    else()
+        execute_process(
+          COMMAND ${PYTHON_EXECUTABLE} -c "if True:
+             import sys
+             import sysconfig
+             suffix = sysconfig.get_config_var('EXT_SUFFIX')
+             pos = suffix.rfind('.')
+             if pos > 0:
+                 print(suffix[:pos])
+             else:
+                 print(f'Unable to determine PYTHON_EXTENSION_SUFFIX from EXT_SUFFIX: \"{suffix}\"',
+                     file=sys.stderr)
+             "
+          OUTPUT_VARIABLE PYTHON_EXTENSION_SUFFIX
+          OUTPUT_STRIP_TRAILING_WHITESPACE)
+    endif()
+    message(STATUS "PYTHON_EXTENSION_SUFFIX: " ${PYTHON_EXTENSION_SUFFIX})
 endmacro()
 
 macro(shiboken_parse_all_arguments prefix type flags options multiopts)
@@ -177,21 +209,26 @@ macro(shiboken_parse_all_arguments prefix type flags options multiopts)
 endmacro()
 
 macro(shiboken_check_if_limited_api)
-    # On Windows, PYTHON_LIBRARIES can be a list. Example:
-    #    optimized;C:/Python36/libs/python36.lib;debug;C:/Python36/libs/python36_d.lib
-    # On other platforms, this result is not used at all.
-    execute_process(
-        COMMAND ${PYTHON_EXECUTABLE} -c "if True:
-            import os
-            for lib in '${PYTHON_LIBRARIES}'.split(';'):
-                if '/' in lib and os.path.isfile(lib):
-                    prefix, py = lib.rsplit('/', 1)
-                    if py.startswith('python3'):
-                        print(prefix + '/python3.lib')
-                        break
-            "
-        OUTPUT_VARIABLE PYTHON_LIMITED_LIBRARIES
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
+    # TODO: Figure out how to use limited API libs when cross-building to Windows, if that's ever
+    # needed. Perhaps use host python to walk the libs of the target python installation.
+
+    if(NOT SHIBOKEN_IS_CROSS_BUILD)
+        # On Windows, PYTHON_LIBRARIES can be a list. Example:
+        #    optimized;C:/Python36/libs/python36.lib;debug;C:/Python36/libs/python36_d.lib
+        # On other platforms, this result is not used at all.
+        execute_process(
+            COMMAND ${PYTHON_EXECUTABLE} -c "if True:
+                import os
+                for lib in '${PYTHON_LIBRARIES}'.split(';'):
+                    if '/' in lib and os.path.isfile(lib):
+                        prefix, py = lib.rsplit('/', 1)
+                        if py.startswith('python3'):
+                            print(prefix + '/python3.lib')
+                            break
+                "
+            OUTPUT_VARIABLE PYTHON_LIMITED_LIBRARIES
+            OUTPUT_STRIP_TRAILING_WHITESPACE)
+    endif()
 
     if(FORCE_LIMITED_API STREQUAL "yes")
         if (${PYTHON_VERSION_MAJOR} EQUAL 3 AND ${PYTHON_VERSION_MINOR} GREATER 4)
@@ -209,16 +246,72 @@ endmacro()
 
 
 macro(shiboken_find_required_python)
-    if(${ARGC} GREATER 0)
-        find_package(PythonInterp ${ARGV0} REQUIRED)
-        find_package(PythonLibs ${ARGV0} REQUIRED)
+    # This function can also be called by consumers of ShibokenConfig.cmake package like pyside,
+    # that's why we also check for PYSIDE_IS_CROSS_BUILD (which is set by pyside project)
+    # and QFP_FIND_NEW_PYTHON_PACKAGE for an explicit opt in.
+    #
+    # We have to use FindPython package instead of FindPythonInterp to get required target Python
+    # information.
+    if(SHIBOKEN_IS_CROSS_BUILD OR PYSIDE_IS_CROSS_BUILD OR QFP_FIND_NEW_PYTHON_PACKAGE)
+        set(_shiboken_find_python_version_args "")
+        if(${ARGC} GREATER 0)
+            list(APPEND _shiboken_find_python_version_args "${ARGV0}")
+        endif()
+
+        # We want FindPython to look in the sysroot for the python-config executable,
+        # but toolchain files might set CMAKE_FIND_ROOT_PATH_MODE_PROGRAM to NEVER because
+        # programs are mostly found for running and you usually can't run a target executable on
+        # a host platform. python-config can likely be ran though, because it's a shell script
+        # to be run on a host Linux.
+        set(_shiboken_backup_CMAKE_FIND_ROOT_PATH_MODE_PROGRAM
+            "${CMAKE_FIND_ROOT_PATH_MODE_PROGRAM}")
+        set(_shiboken_backup_CMAKE_FIND_ROOT_PATH
+            "${CMAKE_FIND_ROOT_PATH}")
+        set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM ONLY)
+        if(Python_ROOT_DIR)
+            list(PREPEND CMAKE_FIND_ROOT_PATH "${Python_ROOT_DIR}")
+        endif()
+
+        # We can't look for the Python interpreter because FindPython tries to execute it, which
+        # usually won't work on a host platform due to different architectures / platforms.
+        # Thus we only look for the Python include and lib directories which are part of the
+        # Development component.
+        find_package(
+            Python
+            ${_shiboken_find_python_version_args}
+            REQUIRED
+            COMPONENTS Development
+        )
+        set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM
+            "${_shiboken_backup_CMAKE_FIND_ROOT_PATH_MODE_PROGRAM}")
+        set(CMAKE_FIND_ROOT_PATH
+            "${_shiboken_backup_CMAKE_FIND_ROOT_PATH}")
+
+        # Mirror the variables that FindPythonInterp sets, instead of conditionally checking
+        # and modifying all the places where the variables are used.
+        set(PYTHON_EXECUTABLE "${Python_EXECUTABLE}")
+        set(PYTHON_VERSION "${Python_VERSION}")
+        set(PYTHON_LIBRARIES "${Python_LIBRARIES}")
+        set(PYTHON_INCLUDE_DIRS "${Python_INCLUDE_DIRS}")
+        set(PYTHONINTERP_FOUND "${Python_Interpreter_FOUND}")
+        set(PYTHONINTERP_FOUND "${Python_Interpreter_FOUND}")
+        set(PYTHONLIBS_FOUND "${Python_Development_FOUND}")
+        set(PYTHON_VERSION_MAJOR "${Python_VERSION_MAJOR}")
+        set(PYTHON_VERSION_MINOR "${Python_VERSION_MINOR}")
+        set(PYTHON_VERSION_PATCH "${Python_VERSION_PATCH}")
     else()
-        # If no version is specified, just use any interpreter that can be found (from PATH).
-        # This is useful for super-project builds, so that the default system interpeter
-        # gets picked up (e.g. /usr/bin/python and not /usr/bin/python2.7).
-        find_package(PythonInterp REQUIRED)
-        find_package(PythonLibs REQUIRED)
+        if(${ARGC} GREATER 0)
+            find_package(PythonInterp ${ARGV0} REQUIRED)
+            find_package(PythonLibs ${ARGV0} REQUIRED)
+        else()
+            # If no version is specified, just use any interpreter that can be found (from PATH).
+            # This is useful for super-project builds, so that the default system interpeter
+            # gets picked up (e.g. /usr/bin/python and not /usr/bin/python2.7).
+            find_package(PythonInterp REQUIRED)
+            find_package(PythonLibs REQUIRED)
+        endif()
     endif()
+
     shiboken_validate_python_version()
 
     set(SHIBOKEN_PYTHON_INTERPRETER "${PYTHON_EXECUTABLE}")
@@ -396,6 +489,85 @@ function(shiboken_internal_disable_pkg_config_if_needed)
     if(NOT pkg_config_enabled)
         shiboken_internal_disable_pkg_config()
     endif()
+endfunction()
+
+function(shiboken_internal_detect_if_cross_building)
+    if(CMAKE_CROSSCOMPILING OR QFP_SHIBOKEN_HOST_PATH)
+        set(is_cross_build TRUE)
+    else()
+        set(is_cross_build FALSE)
+    endif()
+    set(SHIBOKEN_IS_CROSS_BUILD "${is_cross_build}" PARENT_SCOPE)
+    message(STATUS "SHIBOKEN_IS_CROSS_BUILD: ${is_cross_build}")
+endfunction()
+
+function(shiboken_internal_decide_parts_to_build)
+    set(build_libs_default ON)
+    option(SHIBOKEN_BUILD_LIBS "Build shiboken libraries" ${build_libs_default})
+    message(STATUS "SHIBOKEN_BUILD_LIBS: ${SHIBOKEN_BUILD_LIBS}")
+
+    if(SHIBOKEN_IS_CROSS_BUILD)
+        set(build_tools_default OFF)
+    else()
+        set(build_tools_default ON)
+    endif()
+    option(SHIBOKEN_BUILD_TOOLS "Build shiboken tools" ${build_tools_default})
+    message(STATUS "SHIBOKEN_BUILD_TOOLS: ${SHIBOKEN_BUILD_TOOLS}")
+
+    if(SHIBOKEN_IS_CROSS_BUILD)
+        set(_shiboken_build_tests_default OFF)
+    elseif(SHIBOKEN_BUILD_LIBS)
+        set(_shiboken_build_tests_default ON)
+    endif()
+    option(BUILD_TESTS "Build tests." ${_shiboken_build_tests_default})
+    message(STATUS "BUILD_TESTS: ${BUILD_TESTS}")
+endfunction()
+
+function(shiboken_internal_find_host_shiboken_tools)
+    if(SHIBOKEN_IS_CROSS_BUILD)
+        set(find_package_extra_args)
+        if(QFP_SHIBOKEN_HOST_PATH)
+            list(APPEND find_package_extra_args PATHS "${QFP_SHIBOKEN_HOST_PATH}/lib/cmake")
+            list(PREPEND CMAKE_FIND_ROOT_PATH "${QFP_SHIBOKEN_HOST_PATH}")
+        endif()
+        find_package(
+            Shiboken6Tools 6 CONFIG
+            ${find_package_extra_args}
+        )
+
+        if(NOT Shiboken6Tools_DIR)
+            message(FATAL_ERROR
+                "Shiboken6Tools package was not found. "
+                "Please set QFP_SHIBOKEN_HOST_PATH to the location where the Shiboken6Tools CMake "
+                "package is installed.")
+        endif()
+    endif()
+endfunction()
+
+function(shiboken_internal_set_up_extra_dependency_paths)
+    set(extra_root_path_vars
+        QFP_QT_TARGET_PATH
+        QFP_PYTHON_TARGET_PATH
+    )
+    foreach(root_path IN LISTS extra_root_path_vars)
+        set(new_root_path_value "${${root_path}}")
+        if(new_root_path_value)
+            set(new_prefix_path "${CMAKE_PREFIX_PATH}")
+            list(PREPEND new_prefix_path "${new_root_path_value}/lib/cmake")
+            set(CMAKE_PREFIX_PATH "${new_prefix_path}")
+            set(CMAKE_PREFIX_PATH "${new_prefix_path}" PARENT_SCOPE)
+
+            # Need to adjust the prefix and root paths so that find_package(Qt) and other 3rd
+            # party packages are found successfully when they are located outside of the
+            # default sysroot (whatever that maybe for the target platform).
+            if(SHIBOKEN_IS_CROSS_BUILD)
+                set(new_root_path "${CMAKE_FIND_ROOT_PATH}")
+                list(PREPEND new_root_path "${new_root_path_value}")
+                set(CMAKE_FIND_ROOT_PATH "${new_root_path}")
+                set(CMAKE_FIND_ROOT_PATH "${new_root_path}" PARENT_SCOPE)
+            endif()
+        endif()
+    endforeach()
 endfunction()
 
 macro(compute_config_py_values
