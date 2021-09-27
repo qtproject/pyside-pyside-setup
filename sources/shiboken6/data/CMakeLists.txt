@@ -4,10 +4,6 @@ else()
     set(LIBRARY_OUTPUT_SUFFIX ${CMAKE_RELEASE_POSTFIX})
 endif()
 
-add_custom_target(data)
-add_dependencies(data shiboken6)
-get_target_property(SHIBOKEN_GENERATOR shiboken6 OUTPUT_NAME)
-
 include(CMakePackageConfigHelpers)
 
 # Build-tree / super project package config file.

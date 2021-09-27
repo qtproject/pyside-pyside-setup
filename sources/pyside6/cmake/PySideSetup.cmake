@@ -31,7 +31,8 @@ if(QUIET_BUILD AND is_pyside6_superproject_build)
     endfunction()
 endif()
 
-find_package(Shiboken6 2.0.0 REQUIRED)
+find_package(Shiboken6 6 REQUIRED)
+find_package(Shiboken6Tools 6 REQUIRED)
 
 set(BINDING_API_MAJOR_VERSION "${pyside_MAJOR_VERSION}")
 set(BINDING_API_MINOR_VERSION "${pyside_MINOR_VERSION}")

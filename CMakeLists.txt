@@ -14,11 +14,12 @@ set(is_pyside6_superproject_build 1)
 
 add_subdirectory(sources/shiboken6)
 
-# Semi-hack to include exported shiboken variables.
+# Ensure Shiboken6 and Shiboken6Tools packags are found during super-build
 list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_BINARY_DIR}/sources/shiboken6/data")
+list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_BINARY_DIR}/sources/shiboken6/generator")
 add_subdirectory(sources/pyside6)
 
 add_subdirectory(sources/pyside-tools)
 
-# Semi-hack to include exported pyside6 variables.
+# Ensure PySide package is found during super-build
 list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_BINARY_DIR}/sources/pyside6/libpyside")

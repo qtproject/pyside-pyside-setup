@@ -1,4 +1,5 @@
 project(shibokengenerator)
+set(package_name "Shiboken6Tools")
 
 if(NOT (Qt${QT_MAJOR_VERSION}Core_FOUND AND PYTHONINTERP_FOUND))
     message(WARNING "Some dependencies were not found: shiboken6 generator compilation disabled!")
@@ -35,8 +36,11 @@ endif()
 configure_file(shibokenconfig.h.in "${CMAKE_CURRENT_BINARY_DIR}/shibokenconfig.h" @ONLY)
 
 install(TARGETS shiboken6
-        EXPORT Shiboken6Targets
-        DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
+        EXPORT "${package_name}Targets"
+        DESTINATION "bin")
+install(EXPORT "${package_name}Targets"
+        NAMESPACE "Shiboken6::"
+        DESTINATION ${LIB_INSTALL_DIR}/cmake/${package_name})
 
 set(shiboken_generator_package_name "shiboken6_generator")
 
@@ -67,3 +71,25 @@ configure_file("${shiboken_version_path}"
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/_git_shiboken_generator_version.py"
         DESTINATION "${PYTHON_SITE_PACKAGES}/${shiboken_generator_package_name}")
+
+include(CMakePackageConfigHelpers)
+
+# Single build-tree and install-tree Config file. There's no need for separate ones because we
+# don't specify any PATH_VARS, so the relative path of PACKAGE_PREFIX_DIR does not really matter.
+configure_package_config_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/../data/${package_name}Config.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/${package_name}Config.cmake"
+     INSTALL_DESTINATION "${LIB_INSTALL_DIR}/cmake/${package_name}"
+)
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/${package_name}ConfigVersion.cmake"
+    VERSION "${shiboken6_VERSION}"
+    COMPATIBILITY AnyNewerVersion
+    ARCH_INDEPENDENT
+)
+
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${package_name}Config.cmake"
+        DESTINATION "${LIB_INSTALL_DIR}/cmake/${package_name}")
+
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${package_name}ConfigVersion.cmake"
+        DESTINATION "${LIB_INSTALL_DIR}/cmake/${package_name}")

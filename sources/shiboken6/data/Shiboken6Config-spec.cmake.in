@@ -12,7 +12,7 @@ set(SHIBOKEN_PYTHON_LIMITED_API "@PYTHON_LIMITED_API@")
 
 # Import targets and call variable set up functions  only when using an installed shiboken config
 # file (so not during a regular shiboken build, or during a super project build).
-if (NOT TARGET Shiboken6::shiboken6)
+if (NOT TARGET Shiboken6::libshiboken)
     include("${CMAKE_CURRENT_LIST_DIR}/Shiboken6Targets.cmake")
     include("${CMAKE_CURRENT_LIST_DIR}/ShibokenHelpers.cmake")
 
