@@ -26,8 +26,8 @@ extra-includes
 ^^^^^^^^^^^^^^
 
     The ``extra-includes`` node contains declarations of additional include files,
-    and it can be a child of the :ref:`namespace`, :ref:`value-type` and
-    :ref:`object-type` nodes.
+    and it can be a child of the :ref:`namespace`, :ref:`value-type`,
+    :ref:`object-type` and :ref:`typesystem` and nodes.
 
     The generator automatically tries to read the global header for each type but
     sometimes it is required to include extra files in the generated C++ code to
@@ -48,6 +48,10 @@ extra-includes
     *local* means that the file is in a local directory and will be included
     using #include "...".
 
+    When specified as a child of the :ref:`typesystem` node, the include
+    directives are added to the module source file which contains
+    the type converter and registration code. It can be used to specify
+    additional includes required for the converter code snippets.
 
 include
 ^^^^^^^

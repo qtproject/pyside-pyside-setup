@@ -6185,16 +6185,20 @@ bool CppGenerator::finishGeneration()
     const TypeSystemTypeEntry *moduleEntry = typeDb->defaultTypeSystemType();
     Q_ASSERT(moduleEntry);
 
-    //Extra includes
-    s  << '\n' << "// Extra includes\n";
+    s  << '\n';
+    // Extra includes
     QList<Include> extraIncludes = moduleEntry->extraIncludes();
     for (const AbstractMetaEnum &cppEnum : qAsConst(globalEnums))
         extraIncludes.append(cppEnum.typeEntry()->extraIncludes());
-    std::sort(extraIncludes.begin(), extraIncludes.end());
-    for (const Include &inc : qAsConst(extraIncludes))
-        s << inc;
-    s << '\n'
-       << "// Current module's type array.\n"
+    if (!extraIncludes.isEmpty()) {
+        s << "// Extra includes\n";
+        std::sort(extraIncludes.begin(), extraIncludes.end());
+        for (const Include &inc : qAsConst(extraIncludes))
+            s << inc;
+        s << '\n';
+    }
+
+    s << "// Current module's type array.\n"
        << "PyTypeObject **" << cppApiVariableName() << " = nullptr;\n"
        << "// Current module's PyObject pointer.\n"
        << "PyObject *" << pythonModuleObjectName() << " = nullptr;\n"
