@@ -845,15 +845,16 @@ bool BuilderPrivate::visitHeader(const char *cFileName) const
 {
     // Resolve OpenGL typedefs although the header is considered a system header.
     const char *baseName = cBaseName(cFileName);
-    if (cCompareFileName(baseName, "gl.h"))
+    if (cCompareFileName(baseName, "gl.h")
+        || cCompareFileName(baseName, "stdint.h") // Windows: int32_t, uint32_t
+        || cCompareFileName(baseName, "stddef.h")) { // size_t
         return true;
-#if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
-    if (cStringStartsWith(cFileName, "/usr/include/stdint.h"))
-        return true;
-#endif
+    }
 #ifdef Q_OS_LINUX
     if (cStringStartsWith(cFileName, "/usr/include/stdlib.h")
-        || cStringStartsWith(cFileName, "/usr/include/sys/types.h")) {
+        || cCompareFileName(baseName, "types.h")
+        || cCompareFileName(baseName, "stdint-intn.h") // int32_t
+        || cCompareFileName(baseName, "stdint-uintn.h")) { // uint32_t
         return true;
     }
 #endif // Q_OS_LINUX
