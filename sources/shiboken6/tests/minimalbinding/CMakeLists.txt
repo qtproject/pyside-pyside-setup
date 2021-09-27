@@ -18,8 +18,8 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/minimal-binding.txt.in"
 add_custom_command(
 OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/mjb_rejected_classes.log"
 BYPRODUCTS ${minimal_SRC}
-COMMAND shiboken6 --project-file=${CMAKE_CURRENT_BINARY_DIR}/minimal-binding.txt ${GENERATOR_EXTRA_FLAGS}
-DEPENDS ${minimal_TYPESYSTEM} ${CMAKE_CURRENT_SOURCE_DIR}/global.h shiboken6
+COMMAND Shiboken6::shiboken6 --project-file=${CMAKE_CURRENT_BINARY_DIR}/minimal-binding.txt ${GENERATOR_EXTRA_FLAGS}
+DEPENDS ${minimal_TYPESYSTEM} ${CMAKE_CURRENT_SOURCE_DIR}/global.h Shiboken6::shiboken6
 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 COMMENT "Running generator for 'minimal' test binding..."
 )

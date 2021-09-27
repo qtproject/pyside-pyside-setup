@@ -144,8 +144,8 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/sample-binding.txt.in"
 add_custom_command(
 OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/mjb_rejected_classes.log"
 BYPRODUCTS ${sample_SRC}
-COMMAND shiboken6 --project-file=${CMAKE_CURRENT_BINARY_DIR}/sample-binding.txt ${GENERATOR_EXTRA_FLAGS}
-DEPENDS ${sample_TYPESYSTEM} ${CMAKE_CURRENT_SOURCE_DIR}/global.h shiboken6
+COMMAND Shiboken6::shiboken6 --project-file=${CMAKE_CURRENT_BINARY_DIR}/sample-binding.txt ${GENERATOR_EXTRA_FLAGS}
+DEPENDS ${sample_TYPESYSTEM} ${CMAKE_CURRENT_SOURCE_DIR}/global.h Shiboken6::shiboken6
 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 COMMENT "Running generator for 'sample' test binding..."
 )
