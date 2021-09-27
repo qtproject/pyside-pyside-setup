@@ -1,0 +1,222 @@
+Qt for Python 6.2.0 is a minor release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+****************************************************************************
+*                                  PySide6                                 *
+****************************************************************************
+
+ - Crashes in QClipboard.mimeData(), QTextCursor.currentList() and
+   QTextCursor.currentTable() have been fixed.
+ - The Python Unicode API was updated to the newest version when not in limited
+   API mode, too.
+ - The function QUrl.fromFilePath supports now the os.PathLike structure in
+   addition to string arguments.
+ - QMultiMap and QMultiHash are now converted to a dict of key/list of values
+   (corresponding to defaultdict).
+ - QThreadPool().start(std::function) and tryStart(std::function) have been
+   added.
+
+ - [PYSIDE-131] The `tr` function now works also for PySide derived Python
+   class instances with the right context.
+ - [PYSIDE-487] Implement qmlRegisterSingletonInstance
+ - [PYSIDE-535] Tests which use reference counting need to be skipped in
+   upcoming PyPy builds.
+ - [PYSIDE-535] During replacement of type extender macros by functions,
+   a hidden enum/flags alias error was detected and fixed.
+ - [PYSIDE-1252] pyside6-lupdate and the related tools from Qt Linguist have
+   been re-added, enabling using the Qt translation system.
+ - [PYSIDE-1252] The tr() translation method of QObject has been changed to be
+   a class method. This makes it possible to use tr() on a class without
+   instantiation.
+ - [PYSIDE-1334] QObject.connect() now returns an instance of
+   QMetaObject.Connection which can be used to disconnect instead of a bool.
+ - [PYSIDE-1362] A crash in QCustom3DVolume::setTextureData() has been fixed.
+ - [PYSIDE-1378] Assistant is now shipped along with PySide.
+ - [PYSIDE-1436] Support Python 3.10
+ - [PYSIDE-1436] Feature switching needs to reset the internal type cache. This
+   was an omittion that becomes relevant in Python 3.10 .
+ - [PYSIDE-1482] A number of missing classes from the qtbase, qt3d,
+   qtdeclarative.  repository have been added.
+ - [PYSIDE-1482] A number of free functions from QtQml have been added.
+ - [PYSIDE-1482] QSharedMemory was added.
+ - [PYSIDE-1499] pathlib.Path gets additionally accepted for all function
+   arguments which have a std::filesystem::path type.
+ - [PYSIDE-1570] The QtDBus module has been added.
+ - [PYSIDE-1570] The QtNetworkAuth module has been added.
+
+ - [PYSIDE-841] examples: clean and update code, add more screenshots, remove
+   version numbers from qml imports and new examples: dynamic spline, string
+   and object list models, markdowneditor, data surface, abstract list model
+   qml, opengl under qml, richtext/textedit, linguist, qsharedmemory.
+ - [PYSIDE-841] tutorials: update datavisualization and expenses
+ - [PYSIDE-862] Allow spaces in ClassInfo keys
+ - [PYSIDE-905] PySide6: Add Qt::FindChildOptions to QObject::findChild(ren)
+ - [PYSIDE-907] PySide6: Add QKey support for the setShortcut method
+ - [PYSIDE-1019] __feature__: Support generation of modified .pyi files and fix
+   default instances.
+ - [PYSIDE-1019] pyi_generator: Optimize imports
+ - [PYSIDE-1019] feature: move getFeatureSelectId to Shiboken and refactor
+ - [PYSIDE-1019] Shiboken: Remove cheating macros
+ - [PYSIDE-1033] cmake: Fix option --sanitize-address
+ - [PYSIDE-1112] sample binding: Document how to force MSVC in case CMake
+   detects clang
+ - [PYSIDE-1112] PySide6: Update documentation on Qt Designer and resource
+   files
+ - [PYSIDE-1160] PySide6: Expose QHostInfo.lookupHost()
+ - [PYSIDE-1252] PySide6: Add entry points for the Qt Linguist tools
+ - [PYSIDE-1252] ApiExtractor: add classmethod attribute to add-function for
+   tr()
+ - [PYSIDE-1252] ApiExtractor: add classmethod attribute to add-function, fix
+ - [PYSIDE-1329] PySide6: Fix signature of QObject.tr()
+ - [PYSIDE-1334] Return QMetaObject.Connection from QObject.connect()
+ - [PYSIDE-1362] Fix crash in QCustom3DVolume::setTextureData()
+ - [PYSIDE-1370] PySide6: Add QSharedMemory
+ - [PYSIDE-1378] PySide6: Add assistant executable
+ - [PYSIDE-1378] build scripts: Extract helper functions to patch executables
+ - [PYSIDE-1378] Build scripts/UNIX: Extract helper function to copy GUI
+   executables
+ - [PYSIDE-1378] PySide6: Add some information on the tools
+ - [PYSIDE-1415] Turn generate_pyi into a general pyi_generator tool
+ - [PYSIDE-1415] Remove SimpleNamespace Python Implementation
+ - [PYSIDE-1437] Revert "Allow calling CI's build scripts with python2"
+ - [PYSIDE-1438] Fix QSurfaceDataProxy::resetArray() crash
+ - [PYSIDE-1455] Turn off numpy support in libpyside by default
+ - [PYSIDE-1455] Fix Designer plugin to load on Linux/macOS, add hints for trouble-shooting.
+ - [PYSIDE-1467] PySide6: Fix signature of CoreApplication.instance()
+ - [PYSIDE-1482] Re-add QtMultimedia/Widgets, fix examples, and missing
+   classes.
+ - [PYSIDE-1482] PySide6/signature: Add PySideSignalInstance
+ - [PYSIDE-1482] libpyside: Add type check for PySideSignalInstanceType
+ - [PYSIDE-1482] Add classes QChannel, QChannelComponent, QSignalSpy and more
+   non-template QML functions
+ - [PYSIDE-1482] PySide6/QSignalSpy: Add constructor taking a signal
+ - [PYSIDE-1482] Add further global functions
+ - [PYSIDE-1482] VoidPtr: Add setters and getters for the size, and isWritable
+ - [PYSIDE-1499] cppgenerator: remove a left-over "this" to get rid of
+   a warning
+ - [PYSIDE-1499] build support for pathlib.Path, migrating examples, and qml load functions
+ - [PYSIDE-1523] Document the usage of Nuitka
+ - [PYSIDE-1556] Fix cmake argument for standalone macOS
+ - [PYSIDE-1563] Fix crashes when using the QImage(uchar *) data constructors
+ - [PYSIDE-1563] Revert "Fix crashes when using the QImage(uchar *) data
+   constructors"
+ - [PYSIDE-1563] Fix error about not holding the GIL when releasing QImage
+   memory
+ - [PYSIDE-1566] Fix Designer plugin to load on macOS
+ - [PYSIDE-1568] CMake: Rename the ENABLE_ platform variables
+ - [PYSIDE-1568] Remove QtX11Extras, QtMacExtras and per-platform typesystem
+   files
+ - [PYSIDE-1568] Introduce conditional processing instructions to typesystem
+   XML
+ - [PYSIDE-1570] Add QtDBus module, QtNetworkAuth QtWebEngineQuick and initial
+   Support for QtBluetooth
+ - [PYSIDE-1570] Re-add QtWebEngine
+ - [PYSIDE-1570] Fix assert when retrieving wrapper from different thread
+ - [PYSIDE-1571] PySide6: Add BluetoothServiceInfo::Alternative, Sequence
+ - [PYSIDE-1583] PySide6: Extend the porting guide
+ - [PYSIDE-1584] mdi/application examples: Fix startup without settings file
+ - [PYSIDE-1585] PySide6: Refactor qvariant conversion code
+ - [PYSIDE-1588] Use replaced types in functions signatures
+ - [PYSIDE-1589] nuitka: Fix slot access for compiled functions
+ - [PYSIDE-1593] PyClassProperty: Correct the decorator and publish the class
+ - [PYSIDE-1599] testing: enforce that .pyi files are always tested
+ - [PYSIDE-1609] PySide6: Fix crashes in QObject.findChild()
+ - [PYSIDE-1609] PySide6: Add a test for QObject.findChildren() by type
+ - [PYSIDE-1611] PySide6: Add missing API of QQuickFramebufferObject.Renderer
+ - [PYSIDE-1614] Fix logging level being set when importing PySide6
+ - [PYSIDE-1617] Fix leak in QML ListProperty type
+ - [PYSIDE-1619] Add fallback case for QSettings.value
+ - [PYSIDE-1621] signature: make zip file access totally virtual
+ - [PYSIDE-1621] signature: update and make embedding aware
+ - [PYSIDE-1621] Remove signature loader completely from physical FS
+ - [PYSIDE-1623] PySide6: Add Qt Quick Controls 2 to the documentation
+ - [PYSIDE-1625] PySide6: Fix QMenu.exec_()
+ - [PYSIDE-1626] feature: fix the UIC switching problem
+ - [PYSIDE-1626] PySide6: Work around uic feature test failure
+ - [PYSIDE-1629] PySide6: Fix crash with qmlRegisterSingletonType() when
+   invoked from JavaScript
+ - [PYSIDE-1636] Fix GLES builds
+ - [PYSIDE-1639] Allow threads for QInputDialog templates, and QAbstractSocket methods.
+ - [PYSIDE-1646] Fix for OpenGL types on macOS
+ - [PYSIDE-1647] Fix crash when constructing a QApplication in an embedded
+   application
+ - [PYSIDE-1650] PySide6: Add QAccessible::installFactory()
+ - [PYSIDE-1650] PySide6: Add QAccessibleActionInterface
+ - [PYSIDE-1659] PySide6: Document QUiLoader restriction wrt signal/slot
+   connections
+ - [PYSIDE-1662] Fix Qt Quick painteditem example to work, and run from
+   a different directory
+ - [PYSIDE-1663] Add QWebEnginePage::setWebChannel(QWebChannel*,quint32)
+
+ - [QTBUG-75870] qtpaths is now used to query Qt properties.
+ - [QTBUG-75870] build scripts: Remove qtchooser handling, replace qmake mkspec
+   parsing by cmake, and introduce qtpaths as qmake replacement
+ - [QTBUG-95649] Disable gestures from QtSensors
+
+****************************************************************************
+*                                  Shiboken6                               *
+****************************************************************************
+
+ - [PYSIDE-535] Accept empty dicts as alternative to setting unused
+   keyword dicts to nullptr.
+ - [PYSIDE-535] The type extension macros are replaced by normal function
+   calls. This is not only a pre-requisite for PyPy support but also an
+   improvement of type safety.
+ - [PYSIDE-535] Type creation was completely encapsulated. The
+   implementation can now be rewritten for PyPy.
+ - [PYSIDE-535] Define SbkObjectType to be a PyTypeObject, and remove
+   SbkObjectType from the API
+ - [PYSIDE-535] SbkObjectType is now a typedef for PyTypeObject and
+   SbkType_FromSpec() has been changed to return a PyType_Object *.
+ - [PYSIDE-535] It is now possible to derive classes from enum types like
+   `QtCore.Key` in earlier Python versions.
+ - [PYSIDE-1334] operator bool can now be used for bool conversions
+   (nb_bool) besides Qt-style isNull() methods.
+ - [PYSIDE-1436] The Zip importer was rewritten for the Python 3.4 API
+   which avoids warnings in Python 3.10 .
+ - [PYSIDE-1436] The parser for .pyi files needed an update because of
+   undocumented changes in typing.py for Python 3.10 .
+ - [PYSIDE-1436] Binary flags operators did check cppArg only, but not
+   cppSelf. This is necessary when arguments are swapped. Recognized in
+   Python 3.10 due to improved error checks in debug mode.
+ - [PYSIDE-1436] A very old refcounting bug from 2012 in the sample XML
+   led to a crash in Python 3.10 . This bug was found because the refcounting
+   of Python is more exact, now.
+ - [PYSIDE-1588] It is now possible to specify a function argument type
+   to appear in the .pyi files.
+ - [PYSIDE-1605] Support for opaque C++ sequence scontainers has been added,
+   allowing to pass a wrapped C++ container directly instead of converting
+   it back and forth from Python sequences.
+ - [PYSIDE-1626] Coexistence of different feature selections works now,
+   especially for UIC files and inheritance.
+ - [PYSIDE-1621] Python support files are now always embedded. There is
+   no longer a physical copy installed in the file system.
+ - [PYSIDE-1637] The temporary alias shiboken6.shiboken6 for
+   the Shiboken module was removed. Now there is an unambiguous
+   shiboken6.Shiboken, only.
+ - [PYSIDE-1653] The handling of hidden base class member functions and
+   using declarations has been fixed.
+ - [PYSIDE-1655] stack-use-after-scope ASAN issues in the type system parser
+   have been fixed.
+ - [PYSIDE-1660] CPython types like PyObject, PySequence are now built into
+   shiboken6 and no longer need to be specified in the typesystem files.
+ - [PYSIDE-1568] Construction of abstract classes whose C++ wrapper is disabled
+   has been disabled.
+ - It is now possible to specify a check function for custom types in the
+   typesystem.
+ - A new, simpler normalization function has been introduced for signatures
+   of added functions (which means for example that const-ref is preserved).
+ - The replacement of %PYARG_0 in C++ wrapper classes (native) has been
+   improved and no longer requires adding casts to PyObject *.
