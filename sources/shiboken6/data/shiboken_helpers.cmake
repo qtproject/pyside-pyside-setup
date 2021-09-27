@@ -363,3 +363,27 @@ Detected: '${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}'")
         endif()
     endif()
 endfunction()
+
+function(shiboken_internal_disable_pkg_config)
+    # Disable pkg-config by setting an empty executable path. There's no documented way to
+    # mark the package as not found, but we can force all pkg_check_modules calls to do nothing
+    # by setting the variable to an empty value.
+    set(PKG_CONFIG_EXECUTABLE "" CACHE STRING "Disabled pkg-config usage." FORCE)
+endfunction()
+
+function(shiboken_internal_disable_pkg_config_if_needed)
+    if(SHIBOKEN_SKIP_PKG_CONFIG_ADJUSTMENT)
+        return()
+    endif()
+
+    # pkg-config should not be used by default on Darwin platforms.
+    if(APPLE)
+        set(pkg_config_enabled OFF)
+    else()
+        set(pkg_config_enabled ON)
+    endif()
+
+    if(NOT pkg_config_enabled)
+        shiboken_internal_disable_pkg_config()
+    endif()
+endfunction()

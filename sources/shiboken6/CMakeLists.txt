@@ -18,6 +18,8 @@ option(BUILD_TESTS "Build tests." TRUE)
 option(USE_PYTHON_VERSION "Use specific python version to build shiboken6." "")
 option(DISABLE_DOCSTRINGS "Disable documentation extraction." FALSE)
 
+shiboken_internal_disable_pkg_config_if_needed()
+
 set (QT_MAJOR_VERSION 6)
 message(STATUS "Using Qt ${QT_MAJOR_VERSION}")
 find_package(Qt${QT_MAJOR_VERSION} 6.0 REQUIRED COMPONENTS Core)
