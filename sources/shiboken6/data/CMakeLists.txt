@@ -53,7 +53,7 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/install/Shiboken6Config${PYTHON_CONFI
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/Shiboken6ConfigVersion.cmake"
         DESTINATION "${LIB_INSTALL_DIR}/cmake/Shiboken6-${shiboken6_VERSION}")
 
-install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/shiboken_helpers.cmake"
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/../cmake/shiboken_helpers.cmake"
         DESTINATION "${LIB_INSTALL_DIR}/cmake/Shiboken6-${shiboken6_VERSION}")
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/shiboken6${shiboken6_SUFFIX}.pc"
