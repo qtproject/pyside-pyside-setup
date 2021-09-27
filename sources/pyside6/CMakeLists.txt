@@ -11,7 +11,7 @@ set (QT_MAJOR_VERSION 6)
 project(pysidebindings)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../cmake_helpers/
-                      ${CMAKE_CURRENT_SOURCE_DIR}/../shiboken6/data/
+                      ${CMAKE_CURRENT_SOURCE_DIR}/../shiboken6/cmake/
                       ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Macros/
                       ${CMAKE_MODULE_PATH})
 include(shiboken_helpers)
