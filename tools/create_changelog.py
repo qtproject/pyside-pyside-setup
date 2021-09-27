@@ -41,6 +41,7 @@ import re
 import sys
 from argparse import ArgumentParser, Namespace, RawTextHelpFormatter
 from subprocess import check_output, Popen, PIPE
+import textwrap
 from typing import Dict, List, Tuple
 
 content_header = """Qt for Python @VERSION is a @TYPE release.
@@ -110,6 +111,12 @@ def parse_options() -> Namespace:
         sys.exit(-1)
 
     return args
+
+
+def format_text(text: str) -> str:
+    """Format an entry with a leading dash, 80 columns"""
+    return textwrap.fill(text, width=77, initial_indent=" - ",
+                         subsequent_indent="   ")
 
 
 def check_tag(tag: str) -> bool:
@@ -213,17 +220,17 @@ def create_task_log(versions: List[str]) -> None:
     git_command(versions, "Task-number: ")
 
 
-def extract_change_log(commit_message: List[str]) -> Tuple[str, List[str]]:
-    """Extract a tuple of (component, change log lines) from a commit message
-       of the form [ChangeLog][shiboken6] description..."""
-    result = []
+def extract_change_log(commit_message: List[str]) -> Tuple[str, int, str]:
+    """Extract a tuple of (component, task-number, change log paragraph)
+       from a commit message of the form [ChangeLog][shiboken6] description..."""
+    result = ''
     component = 'pyside'
     within_changelog = False
     task_nr = ''
     for line in commit_message:
         if within_changelog:
             if line:
-                result.append('   ' + line.strip())
+                result += ' ' + line.strip()
             else:
                 within_changelog = False
         else:
@@ -234,37 +241,51 @@ def extract_change_log(commit_message: List[str]) -> Tuple[str, List[str]]:
                     if end > 0:
                         component = log_line[1:end]
                         log_line = log_line[end + 1:]
-                result.append(log_line.strip())
+                result = log_line.strip()
                 within_changelog = True
             elif line.startswith("Fixes: ") or line.startswith("Task-number: "):
                 task_nr = line.split(":")[1].strip()
-    if result:
-        first_line = ' - '
-        if task_nr:
-            first_line += f"[{task_nr}] "
-        first_line += result[0]
-        result[0] = first_line
-    return (component, result)
+
+    task_nr_int = -1
+    if task_nr:
+        result = f"[{task_nr}] {result}"
+        dash = task_nr.find('-')  # "PYSIDE-627"
+        task_nr_int = int(task_nr[dash + 1:])
+
+    return (component, task_nr_int, format_text(result))
 
 
 def create_change_log(versions: List[str]) -> None:
     for sha in git_get_sha1s(versions, r"\[ChangeLog\]"):
         change_log = extract_change_log(get_commit_content(sha).splitlines())
-        if change_log[0].startswith('shiboken'):
-            shiboken6_changelogs.extend(change_log[1])
+        component, task_nr, text = change_log
+        if component.startswith('shiboken'):
+            shiboken6_changelogs.append((task_nr, text))
         else:
-            pyside6_changelogs.extend(change_log[1])
+            pyside6_changelogs.append((task_nr, text))
+
+
+def format_commit_msg(entry: Dict[str, str]) -> str:
+    task = entry["task"].replace("Fixes: ", "").replace("Task-number: ", "")
+    title = entry["title"]
+    if title.startswith("shiboken6: "):
+        title = title[11:]
+    elif title.startswith("PySide6: "):
+        title = title[9:]
+    return format_text(f"[{task}] {title}")
 
 
 def gen_list(d: Dict[str, Dict[str, str]]) -> str:
-    def clean_task(s):
-        return s.replace("Fixes: ", "").replace("Task-number: ", "")
-    return "".join(" - [{}] {}\n".format(clean_task(v["task"]), v["title"])
-                   for _, v in d.items())
+    return "\n".join(format_commit_msg(v)
+                     for _, v in d.items())
 
 
 def sort_dict(d: Dict[str, Dict[str, str]]) -> Dict[str, Dict[str, str]]:
     return dict(sorted(d.items(), key=lambda kv: kv[1]['task-number']))
+
+
+def sort_changelog(c: List[Tuple[int, str]]) -> List[Tuple[int, str]]:
+    return sorted(c, key=lambda task_text_tuple: task_text_tuple[0])
 
 
 if __name__ == "__main__":
@@ -272,8 +293,9 @@ if __name__ == "__main__":
     args = parse_options()
     pyside6_commits: Dict[str, Dict[str, str]] = {}
     shiboken6_commits: Dict[str, Dict[str, str]] = {}
-    pyside6_changelogs: List[str] = []
-    shiboken6_changelogs: List[str] = []
+    # Changelogs are tuples of task number/formatted text
+    pyside6_changelogs: List[Tuple[int, str]] = []
+    shiboken6_changelogs: List[Tuple[int, str]] = []
 
     exclude_pick_to = args.exclude
 
@@ -289,16 +311,20 @@ if __name__ == "__main__":
     # Sort commits
     pyside6_commits = sort_dict(pyside6_commits)
     shiboken6_commits = sort_dict(shiboken6_commits)
+    pyside6_changelogs = sort_changelog(pyside6_changelogs)
+    shiboken6_changelogs = sort_changelog(shiboken6_changelogs)
 
     # Generate message
     print(content_header.replace("@VERSION", args.release).
           replace("@TYPE", args.type))
-    print('\n'.join(pyside6_changelogs))
+    for c in pyside6_changelogs:
+        print(c[1])
     print(gen_list(pyside6_commits))
     if not pyside6_changelogs and not pyside6_commits:
         print(" - No changes")
     print(shiboken_header)
-    print('\n'.join(shiboken6_changelogs))
+    for c in shiboken6_changelogs:
+        print(c[1])
     print(gen_list(shiboken6_commits))
     if not shiboken6_changelogs and not shiboken6_commits:
         print(" - No changes")
