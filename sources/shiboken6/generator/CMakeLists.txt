@@ -1,5 +1,10 @@
 project(shibokengenerator)
 
+if(NOT (Qt${QT_MAJOR_VERSION}Core_FOUND AND PYTHONINTERP_FOUND))
+    message(WARNING "Some dependencies were not found: shiboken6 generator compilation disabled!")
+    return()
+endif()
+
 set(shiboken6_SRC
 generator.cpp
 shiboken/cppgenerator.cpp
