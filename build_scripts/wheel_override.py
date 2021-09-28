@@ -90,7 +90,7 @@ class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
         limited_api_enabled = (OPTION["LIMITED_API"] == 'yes'
                                and sys.version_info[0] >= 3)
         if limited_api_enabled:
-            self.py_limited_api = "cp35.cp36.cp37.cp38.cp39"
+            self.py_limited_api = "cp35.cp36.cp37.cp38.cp39.cp310"
 
         self._package_version = get_package_version()
 
