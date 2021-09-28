@@ -89,6 +89,7 @@ class ModuleTest(unittest.TestCase):
         for t1 in ["ascii", "Ümläut", "😀"]:
             expected = t1 + t1
             self.assertEqual(sample.addStdStrings(t1, t1), expected)
+            self.assertEqual(sample.addStdWStrings(t1, t1), expected)
 
 
 if __name__ == '__main__':

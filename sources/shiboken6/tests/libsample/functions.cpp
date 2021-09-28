@@ -258,3 +258,8 @@ string addStdStrings(const std::string &s1, const std::string &s2)
 {
     return s1 + s2;
 }
+
+std::wstring addStdWStrings(const std::wstring &s1, const std::wstring &s2)
+{
+    return s1 + s2;
+}

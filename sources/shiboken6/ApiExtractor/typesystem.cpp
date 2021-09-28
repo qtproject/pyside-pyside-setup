@@ -548,7 +548,8 @@ bool TypeEntry::isExtendedCppPrimitive() const
     if (!isPrimitive())
         return false;
     const auto *type = asPrimitive()->basicReferencedTypeEntry();
-    return type->qualifiedCppName() == u"std::string";
+    const QString &name = type->qualifiedCppName();
+    return name == u"std::string" || name == u"std::wstring";
 }
 
 const TypeEntryPrivate *TypeEntry::d_func() const

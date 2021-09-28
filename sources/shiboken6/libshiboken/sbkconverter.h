@@ -372,13 +372,14 @@ LIBSHIBOKEN_API bool pythonTypeIsWrapperType(const SbkConverter *converter);
 #define SBK_SHORT_IDX                   8
 #define SBK_SIGNEDCHAR_IDX              9
 #define SBK_STD_STRING_IDX             10
-#define SBK_UNSIGNEDPY_LONG_LONG_IDX   11
-#define SBK_UNSIGNEDCHAR_IDX           12
-#define SBK_UNSIGNEDINT_IDX            13
-#define SBK_UNSIGNEDLONG_IDX           14
-#define SBK_UNSIGNEDSHORT_IDX          15
-#define SBK_VOIDPTR_IDX                16
-#define SBK_NULLPTR_T_IDX              17
+#define SBK_STD_WSTRING_IDX            11
+#define SBK_UNSIGNEDPY_LONG_LONG_IDX   12
+#define SBK_UNSIGNEDCHAR_IDX           13
+#define SBK_UNSIGNEDINT_IDX            14
+#define SBK_UNSIGNEDLONG_IDX           15
+#define SBK_UNSIGNEDSHORT_IDX          16
+#define SBK_VOIDPTR_IDX                17
+#define SBK_NULLPTR_T_IDX              18
 
 template<typename T> SbkConverter *PrimitiveTypeConverter() { return nullptr; }
 template<> inline SbkConverter *PrimitiveTypeConverter<PY_LONG_LONG>() { return primitiveTypeConverter(SBK_PY_LONG_LONG_IDX); }
@@ -392,6 +393,7 @@ template<> inline SbkConverter *PrimitiveTypeConverter<long>() { return primitiv
 template<> inline SbkConverter *PrimitiveTypeConverter<short>() { return primitiveTypeConverter(SBK_SHORT_IDX); }
 template<> inline SbkConverter *PrimitiveTypeConverter<signed char>() { return primitiveTypeConverter(SBK_SIGNEDCHAR_IDX); }
 template<> inline SbkConverter *PrimitiveTypeConverter<std::string>() { return primitiveTypeConverter(SBK_STD_STRING_IDX); }
+template<> inline SbkConverter *PrimitiveTypeConverter<std::wstring>() { return primitiveTypeConverter(SBK_STD_WSTRING_IDX); }
 template<> inline SbkConverter *PrimitiveTypeConverter<unsigned PY_LONG_LONG>() { return primitiveTypeConverter(SBK_UNSIGNEDPY_LONG_LONG_IDX); }
 template<> inline SbkConverter *PrimitiveTypeConverter<unsigned char>() { return primitiveTypeConverter(SBK_UNSIGNEDCHAR_IDX); }
 template<> inline SbkConverter *PrimitiveTypeConverter<unsigned int>() { return primitiveTypeConverter(SBK_UNSIGNEDINT_IDX); }

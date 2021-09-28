@@ -53,6 +53,7 @@ sbkconverter.cpp
 sbkenum.cpp
 sbkfeature_base.cpp
 sbkmodule.cpp
+sbkcppstring.cpp
 sbkstring.cpp
 sbkstaticstrings.cpp
 sbktypefactory.cpp
@@ -138,6 +139,7 @@ install(FILES
         sbkfeature_base.h
         sbkmodule.h
         sbkstring.h
+        sbkcppstring.h
         sbkstaticstrings.h
         sbktypefactory.h
         shiboken.h

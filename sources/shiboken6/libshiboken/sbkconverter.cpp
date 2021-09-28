@@ -73,6 +73,7 @@ void init()
         Primitive<short>::createConverter(),
         Primitive<signed char>::createConverter(),
         Primitive<std::string>::createConverter(),
+        Primitive<std::wstring>::createConverter(),
         Primitive<unsigned PY_LONG_LONG>::createConverter(),
         Primitive<unsigned char>::createConverter(),
         Primitive<unsigned int>::createConverter(),
@@ -95,6 +96,7 @@ void init()
     converters["short"] = primitiveTypeConverters[SBK_SHORT_IDX];
     converters["signed char"] = primitiveTypeConverters[SBK_SIGNEDCHAR_IDX];
     converters["std::string"] = primitiveTypeConverters[SBK_STD_STRING_IDX];
+    converters["std::wstring"] = primitiveTypeConverters[SBK_STD_WSTRING_IDX];
     converters["unsigned PY_LONG_LONG"] = primitiveTypeConverters[SBK_UNSIGNEDPY_LONG_LONG_IDX];
     converters["unsigned char"] = primitiveTypeConverters[SBK_UNSIGNEDCHAR_IDX];
     converters["unsigned int"] = primitiveTypeConverters[SBK_UNSIGNEDINT_IDX];

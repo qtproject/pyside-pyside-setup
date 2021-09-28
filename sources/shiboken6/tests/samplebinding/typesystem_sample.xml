@@ -20,6 +20,7 @@
     <primitive-type name="unsigned long long"/>
     <primitive-type name="std::string"/>
     <primitive-type name="std::string_view" view-on="std::string"/>
+    <primitive-type name="std::wstring"/>
     <primitive-type name="ObjectType::Identifier"/>
 
     <primitive-type name="Foo::HANDLE" target-lang-api-name="PyLong"/>
@@ -497,6 +498,7 @@
     <function signature="overloadedFunc(double)" />
     <function signature="overloadedFunc(int)" />
     <function signature="addStdStrings(const std::string&amp;, const std::string&amp;)"/>
+    <function signature="addStdWStrings(const std::wstring&amp;, const std::wstring&amp;)"/>
 
     <value-type name="ArrayModifyTest">
         <modify-function signature="sumIntArray(int, int*)">
