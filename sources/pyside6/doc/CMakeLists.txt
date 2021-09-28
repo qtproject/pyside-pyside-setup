@@ -95,6 +95,12 @@ else()
     set(QT_ROOT_PATH "")
 endif()
 
+if(PYSIDE_IS_CROSS_BUILD)
+    set(python_executable "${QFP_PYTHON_HOST_PATH}")
+else()
+    set(python_executable "${PYTHON_EXECUTABLE}")
+endif()
+
 if (FULLDOCSBUILD)
     # Fetch and transform the snippets from Qt
     set(SNIPPETS_TOOL "${CMAKE_CURRENT_SOURCE_DIR}/../../../tools/snippets_translate/main.py")
@@ -104,7 +110,7 @@ if (FULLDOCSBUILD)
     # so we use the general SRC directory to copy all the other snippets
     add_custom_target("snippets_translate" DEPENDS "${SNIPPETS_TARGET}")
     add_custom_command(OUTPUT "${SNIPPETS_TARGET}"
-                       COMMAND ${PYTHON_EXECUTABLE} ${SNIPPETS_TOOL}
+                       COMMAND ${python_executable} ${SNIPPETS_TOOL}
                                --qt ${QT_ROOT_PATH} --target ${SNIPPETS_TARGET} -w
                        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
                        COMMENT "Fetching and converting snippets...")
@@ -120,7 +126,7 @@ set(EXAMPLE_TOOL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../tools/example_gallery
 
 add_custom_target("example_gallery" DEPENDS "${EXAMPLE_TOOL_TARGET}")
 add_custom_command(OUTPUT "${EXAMPLE_TOOL_TARGET}"
-                   COMMAND ${PYTHON_EXECUTABLE} ${EXAMPLE_TOOL_DIR} ${EXAMPLE_TOOL_OPTIONS}
+                   COMMAND ${python_executable} ${EXAMPLE_TOOL_DIR} ${EXAMPLE_TOOL_OPTIONS}
                    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
                    COMMENT "Generating example gallery...")
 
@@ -257,7 +263,7 @@ else()
 
         file(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/html/PySide.qhp QHP_FILE)
         add_custom_command(TARGET apidoc POST_BUILD
-                COMMAND ${PYTHON_EXECUTABLE} py_script.py
+                COMMAND ${python_executable} py_script.py
                 COMMAND "${qhelpgenerator_binary}" ${QHP_FILE}
                 COMMENT "Generating QCH from a QHP file..."
                 VERBATIM
@@ -300,7 +306,7 @@ add_custom_target("docrsts"
                   DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/rst/PySide6/QtCore/index.rst")
 
 add_custom_target("licensedocrsts"
-    COMMAND ${PYTHON_EXECUTABLE}
+    COMMAND ${python_executable}
             ${CMAKE_CURRENT_LIST_DIR}/qtattributionsscannertorst.py
             ${CMAKE_CURRENT_LIST_DIR}/../../..
             ${CMAKE_CURRENT_BINARY_DIR}/rst/licenses.rst

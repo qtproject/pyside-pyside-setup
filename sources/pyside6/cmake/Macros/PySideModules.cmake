@@ -199,26 +199,41 @@ macro(create_pyside_module)
             string(APPEND ld_prefix ":${env_value}")
         endif()
     endif()
-    set(generate_pyi_options ${module_NAME} --sys-path
-        "${pysidebindings_BINARY_DIR}"
-        "${SHIBOKEN_PYTHON_MODULE_DIR}/..")     # use the layer above shiboken6
-    if (QUIET_BUILD)
-        list(APPEND generate_pyi_options "--quiet")
-    endif()
+
 
     # Add target to generate pyi file, which depends on the module target.
-    add_custom_target("${module_NAME}_pyi" ALL
-                      COMMAND ${CMAKE_COMMAND} -E env ${ld_prefix}
-                      "${SHIBOKEN_PYTHON_INTERPRETER}"
-                      "${CMAKE_CURRENT_SOURCE_DIR}/../support/generate_pyi.py" ${generate_pyi_options})
-    add_dependencies("${module_NAME}_pyi" ${module_NAME})
+    # Don't generate the files when cross-building because the target python can not be executed
+    # on the host machine (usually, unless you use some userspace qemu based mechanism).
+    # TODO: Can we do something better here to still get pyi files?
+    if(NOT PYSIDE_IS_CROSS_BUILD)
+        set(generate_pyi_options ${module_NAME} --sys-path
+            "${pysidebindings_BINARY_DIR}"
+            "${SHIBOKEN_PYTHON_MODULE_DIR}/..")     # use the layer above shiboken6
+        if (QUIET_BUILD)
+            list(APPEND generate_pyi_options "--quiet")
+        endif()
+
+        add_custom_target("${module_NAME}_pyi" ALL
+                          COMMAND
+                              ${CMAKE_COMMAND} -E env ${ld_prefix}
+                              "${SHIBOKEN_PYTHON_INTERPRETER}"
+                              "${CMAKE_CURRENT_SOURCE_DIR}/../support/generate_pyi.py"
+                              ${generate_pyi_options})
+        add_dependencies("${module_NAME}_pyi" ${module_NAME})
+
+        file(GLOB hinting_stub_files
+             RELATIVE
+                 "${CMAKE_CURRENT_BINARY_DIR}/PySide6"
+                 "${CMAKE_CURRENT_BINARY_DIR}/PySide6/*.pyi")
+        install(FILES ${hinting_stub_files}
+                DESTINATION "${PYTHON_SITE_PACKAGES}/PySide6")
+    endif()
+
 
     # install
     install(TARGETS ${module_NAME} LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}/PySide6")
 
-    file(GLOB hinting_stub_files RELATIVE "${CMAKE_CURRENT_BINARY_DIR}/PySide6" "${CMAKE_CURRENT_BINARY_DIR}/PySide6/*.pyi")
-    install(FILES ${hinting_stub_files}
-            DESTINATION "${PYTHON_SITE_PACKAGES}/PySide6")
+
 
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/PySide6/${module_NAME}/pyside6_${lower_module_name}_python.h
             DESTINATION include/PySide6${pyside6_SUFFIX}/${module_NAME}/)

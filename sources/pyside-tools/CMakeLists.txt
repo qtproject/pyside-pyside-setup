@@ -1,12 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 project(pyside-tools)
 
-# Don't display "up-to-date / install" messages when installing, to reduce visual clutter.
-if (QUIET_BUILD)
-    set(CMAKE_INSTALL_MESSAGE NEVER)
-endif()
-
-find_package(Qt6 COMPONENTS Core HostInfo)
+include(cmake/PySideToolsSetup.cmake)
 
 set(files ${CMAKE_CURRENT_SOURCE_DIR}/pyside_tool.py
           ${CMAKE_CURRENT_SOURCE_DIR}/metaobjectdump.py)

@@ -1,3 +1,70 @@
+function(pyside_internal_detect_if_cross_building)
+    if(CMAKE_CROSSCOMPILING OR QFP_SHIBOKEN_HOST_PATH)
+        set(is_cross_build TRUE)
+    else()
+        set(is_cross_build FALSE)
+    endif()
+    set(PYSIDE_IS_CROSS_BUILD "${is_cross_build}" PARENT_SCOPE)
+    message(STATUS "PYSIDE_IS_CROSS_BUILD: ${PYSIDE_IS_CROSS_BUILD}")
+endfunction()
+
+function(pyside_internal_set_up_extra_dependency_paths)
+    set(extra_root_path_vars
+        QFP_QT_TARGET_PATH
+        QFP_PYTHON_TARGET_PATH
+        QFP_SHIBOKEN_TARGET_PATH
+    )
+    foreach(root_path IN LISTS extra_root_path_vars)
+        set(new_root_path_value "${${root_path}}")
+        if(new_root_path_value)
+            set(new_prefix_path "${CMAKE_PREFIX_PATH}")
+            list(PREPEND new_prefix_path "${new_root_path_value}/lib/cmake")
+            set(CMAKE_PREFIX_PATH "${new_prefix_path}")
+            set(CMAKE_PREFIX_PATH "${new_prefix_path}" PARENT_SCOPE)
+
+            # Need to adjust the prefix and root paths so that find_package(Qt) and other 3rd
+            # party packages are found successfully when they are located outside of the
+            # default sysroot (whatever that maybe for the target platform).
+            if(PYSIDE_IS_CROSS_BUILD)
+                set(new_root_path "${CMAKE_FIND_ROOT_PATH}")
+                list(PREPEND new_root_path "${new_root_path_value}")
+                set(CMAKE_FIND_ROOT_PATH "${new_root_path}")
+                set(CMAKE_FIND_ROOT_PATH "${new_root_path}" PARENT_SCOPE)
+            endif()
+        endif()
+    endforeach()
+endfunction()
+
+function(pyside_internal_find_host_shiboken_tools)
+    set(find_package_extra_args)
+    if(QFP_SHIBOKEN_HOST_PATH)
+        list(APPEND find_package_extra_args PATHS "${QFP_SHIBOKEN_HOST_PATH}/lib/cmake")
+        list(PREPEND CMAKE_FIND_ROOT_PATH "${QFP_SHIBOKEN_HOST_PATH}")
+    endif()
+
+    # When doing a regular build, immediately mark the package as required.
+    if(NOT PYSIDE_IS_CROSS_BUILD)
+        list(APPEND "REQUIRED")
+    endif()
+
+    find_package(
+        Shiboken6Tools 6 CONFIG
+        ${find_package_extra_args}
+    )
+
+    # When cross building, we show a more helpful error message that
+    # QFP_SHIBOKEN_HOST_PATH should be provided instead of CMAKE_PREFIX_PATH (specifically
+    # for the host tools package).
+    if(PYSIDE_IS_CROSS_BUILD)
+        if(NOT Shiboken6Tools_DIR)
+            message(FATAL_ERROR
+                "Shiboken6Tools package was not found. "
+                "Please set QFP_SHIBOKEN_HOST_PATH to the location where the Shiboken6Tools "
+                "CMake package is installed.")
+        endif()
+    endif()
+endfunction()
+
 macro(collect_essential_modules)
     # Collect all essential modules.
     # note: the order of this list is relevant for dependencies.

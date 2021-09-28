@@ -1,3 +1,11 @@
+if(PYSIDE_IS_CROSS_BUILD)
+    # SHIBOKEN_PYTHON_INTERPRETER will be empty when cross-building.
+    message(WARNING
+        "Running tests when cross-compiling is not supported because it would require running "
+        "a target python interpreter which might have a different architecture than the host."
+    )
+endif()
+
 if(NOT CTEST_TESTING_TIMEOUT)
     set(CTEST_TESTING_TIMEOUT 60)
 endif()

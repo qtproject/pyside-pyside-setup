@@ -31,8 +31,11 @@ if(QUIET_BUILD AND is_pyside6_superproject_build)
     endfunction()
 endif()
 
-find_package(Shiboken6 6 REQUIRED)
-find_package(Shiboken6Tools 6 REQUIRED)
+
+pyside_internal_detect_if_cross_building()
+pyside_internal_set_up_extra_dependency_paths()
+pyside_internal_find_host_shiboken_tools()
+find_package(Shiboken6 6 CONFIG REQUIRED)
 
 set(BINDING_API_MAJOR_VERSION "${pyside_MAJOR_VERSION}")
 set(BINDING_API_MINOR_VERSION "${pyside_MINOR_VERSION}")
@@ -72,7 +75,20 @@ if(SHIBOKEN_PYTHON_LIMITED_API)
     message(STATUS "******************************************************")
 endif()
 
+# Need to ensure host Tools packages are found instead of target ones when cross-compiling.
+if(QFP_QT_HOST_PATH)
+    get_filename_component(__qt_host_path_absolute "${QFP_QT_HOST_PATH}" ABSOLUTE)
+    if(EXISTS "${__qt_host_path_absolute}")
+        set(QT_HOST_PATH "${__qt_host_path_absolute}")
+
+        set(__qt_candidate_host_path_cmake_dir "${QT_HOST_PATH}/lib/cmake")
+        if(EXISTS "${__qt_candidate_host_path_cmake_dir}")
+            set(QT_HOST_PATH_CMAKE_DIR "${__qt_candidate_host_path_cmake_dir}")
+        endif()
+    endif()
+endif()
 find_package(Qt${QT_MAJOR_VERSION} 6.0 REQUIRED COMPONENTS Core)
+
 add_definitions(${Qt${QT_MAJOR_VERSION}Core_DEFINITIONS})
 
 option(BUILD_TESTS "Build tests." TRUE)
@@ -192,31 +208,7 @@ if(NOT TARGET uninstall)
                       -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
 endif()
 
-if(NOT PYTHON_SITE_PACKAGES)
-    execute_process(
-        COMMAND ${SHIBOKEN_PYTHON_INTERPRETER} -c "if True:
-            import sysconfig
-            from os.path import sep
-
-            # /home/qt/dev/env/lib/python3.9/site-packages
-            lib_path = sysconfig.get_path('purelib')
-
-            # /home/qt/dev/env
-            data_path = sysconfig.get_path('data')
-
-            # /lib/python3.9/site-packages
-            rel_path = lib_path.replace(data_path, '')
-
-            print(f'${CMAKE_INSTALL_PREFIX}{rel_path}'.replace(sep, '/'))
-            "
-        OUTPUT_VARIABLE PYTHON_SITE_PACKAGES
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
-    if(NOT PYTHON_SITE_PACKAGES)
-        message(FATAL_ERROR "Could not detect Python module installation directory.")
-    elseif(APPLE)
-        message(STATUS "!!! The generated bindings will be installed on ${PYTHON_SITE_PACKAGES}, is it right!?")
-    endif()
-endif()
+shiboken_internal_set_python_site_packages()
 
 set(GENERATOR_EXTRA_FLAGS --generator-set=shiboken
                           --enable-parent-ctor-heuristic
