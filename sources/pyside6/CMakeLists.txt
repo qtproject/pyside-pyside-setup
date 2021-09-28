@@ -36,6 +36,8 @@ if (QUIET_BUILD AND is_pyside6_superproject_build)
     endfunction()
 endif()
 
+find_package(Shiboken6 2.0.0 REQUIRED)
+
 set(PYSIDE_VERSION_FILE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/pyside_version.py")
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
   ${PYSIDE_VERSION_FILE_PATH}
@@ -62,8 +64,6 @@ if (WIN32)
 else()
     set(PATH_SEP ":")
 endif()
-
-find_package(Shiboken6 2.0.0 REQUIRED)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "${SHIBOKEN_BUILD_TYPE}" CACHE STRING "Build Type")
