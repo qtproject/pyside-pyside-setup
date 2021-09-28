@@ -22,6 +22,7 @@ Define types
    :maxdepth: 1
 
    typesystem_specifying_types.rst
+   typesystem_builtin_types.rst
 
 Code generation
 ---------------

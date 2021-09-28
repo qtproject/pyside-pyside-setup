@@ -537,6 +537,8 @@ custom-type
     to provide one for function arguments modified to be custom types
     handled by injected code (see :ref:`replace-type`).
 
+    See :ref:`cpython-types` for built-in types.
+
 .. _smart-pointer-type:
 
 smart-pointer-type
