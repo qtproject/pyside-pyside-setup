@@ -120,7 +120,7 @@ static void formatPyObject(PyObject *obj, std::ostream &str)
         else if (PyFloat_Check(obj))
             str << PyFloat_AsDouble(obj);
         else if (PyUnicode_Check(obj))
-            str << '"' << _PepUnicode_AsString(obj) << '"';
+            str << '"' << _PepUnicode_AsString(obj);
         else if (PySequence_Check(obj))
             formatPySequence(obj, str);
         else

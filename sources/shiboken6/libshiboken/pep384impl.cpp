@@ -284,6 +284,81 @@ _PepType_Lookup(PyTypeObject *type, PyObject *name)
  */
 #ifdef Py_LIMITED_API
 
+// structs and macros modelled after their equivalents in
+// cpython/Include/cpython/unicodeobject.h
+
+struct PepASCIIObject
+{
+    PyObject_HEAD
+    Py_ssize_t length;          /* Number of code points in the string */
+    Py_hash_t hash;             /* Hash value; -1 if not set */
+    struct {
+        unsigned int interned:2;
+        unsigned int kind:3;
+        unsigned int compact:1;
+        unsigned int ascii:1;
+        unsigned int ready:1;
+        unsigned int :24;
+    } state;
+    wchar_t *wstr;              /* wchar_t representation (null-terminated) */
+};
+
+struct PepCompactUnicodeObject
+{
+    PepASCIIObject _base;
+    Py_ssize_t utf8_length;
+    char *utf8;                 /* UTF-8 representation (null-terminated) */
+    Py_ssize_t wstr_length;     /* Number of code points in wstr */
+};
+
+struct PepUnicodeObject
+{
+    PepCompactUnicodeObject _base;
+    union {
+        void *any;
+        Py_UCS1 *latin1;
+        Py_UCS2 *ucs2;
+        Py_UCS4 *ucs4;
+    } data;                     /* Canonical, smallest-form Unicode buffer */
+};
+
+int _PepUnicode_KIND(PyObject *str)
+{
+    return reinterpret_cast<PepASCIIObject *>(str)->state.kind;
+}
+
+int _PepUnicode_IS_ASCII(PyObject *str)
+{
+    auto *asciiObj = reinterpret_cast<PepASCIIObject *>(str);
+    return asciiObj->state.ascii;
+}
+
+int _PepUnicode_IS_COMPACT(PyObject *str)
+{
+    auto *asciiObj = reinterpret_cast<PepASCIIObject *>(str);
+    return asciiObj->state.compact;
+}
+
+static void *_PepUnicode_COMPACT_DATA(PyObject *str)
+{
+    auto *asciiObj = reinterpret_cast<PepASCIIObject *>(str);
+    if (asciiObj->state.ascii)
+        return asciiObj + 1;
+    auto *compactObj = reinterpret_cast<PepCompactUnicodeObject *>(str);
+    return compactObj + 1;
+}
+
+static void *_PepUnicode_NONCOMPACT_DATA(PyObject *str)
+{
+    return reinterpret_cast<PepUnicodeObject *>(str)->data.any;
+}
+
+void *_PepUnicode_DATA(PyObject *str)
+{
+    return _PepUnicode_IS_COMPACT(str)
+           ? _PepUnicode_COMPACT_DATA(str) : _PepUnicode_NONCOMPACT_DATA(str);
+}
+
 char *
 _PepUnicode_AsString(PyObject *str)
 {

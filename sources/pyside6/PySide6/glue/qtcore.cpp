@@ -1682,25 +1682,19 @@ if (PyErr_WarnEx(PyExc_DeprecationWarning,
 // @snippet conversion-pylong-quintptr
 
 // @snippet conversion-pyunicode
-#ifndef Py_LIMITED_API
-void *data = PyUnicode_DATA(%in);
+void *data = _PepUnicode_DATA(%in);
 Py_ssize_t len = PyUnicode_GetLength(%in);
-switch (PyUnicode_KIND(%in)) {
-    case PyUnicode_1BYTE_KIND:
+switch (_PepUnicode_KIND(%in)) {
+    case PepUnicode_1BYTE_KIND:
         %out = QString::fromLatin1(reinterpret_cast<const char *>(data));
         break;
-    case PyUnicode_2BYTE_KIND:
+    case PepUnicode_2BYTE_KIND:
         %out = QString::fromUtf16(reinterpret_cast<const char16_t *>(data), len);
         break;
-    case PyUnicode_4BYTE_KIND:
+    case PepUnicode_4BYTE_KIND:
         %out = QString::fromUcs4(reinterpret_cast<const char32_t *>(data), len);
         break;
 }
-#else
-wchar_t *temp = PyUnicode_AsWideCharString(%in, nullptr);
-%out = QString::fromWCharArray(temp);
-PyMem_Free(temp);
-#endif
 // @snippet conversion-pyunicode
 
 // @snippet conversion-pynone

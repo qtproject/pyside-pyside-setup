@@ -242,8 +242,33 @@ LIBSHIBOKEN_API int Pep_GetVerboseFlag(void);
 
 LIBSHIBOKEN_API char *_PepUnicode_AsString(PyObject *);
 
+enum PepUnicode_Kind {
+    PepUnicode_WCHAR_KIND = 0,
+    PepUnicode_1BYTE_KIND = 1,
+    PepUnicode_2BYTE_KIND = 2,
+    PepUnicode_4BYTE_KIND = 4
+};
+
+LIBSHIBOKEN_API int _PepUnicode_KIND(PyObject *);
+LIBSHIBOKEN_API int _PepUnicode_IS_ASCII(PyObject *str);
+LIBSHIBOKEN_API int _PepUnicode_IS_COMPACT(PyObject *str);
+
+LIBSHIBOKEN_API void *_PepUnicode_DATA(PyObject *str);
+
 #else
+
+enum PepUnicode_Kind {
+    PepUnicode_WCHAR_KIND = PyUnicode_WCHAR_KIND,
+    PepUnicode_1BYTE_KIND = PyUnicode_1BYTE_KIND,
+    PepUnicode_2BYTE_KIND = PyUnicode_2BYTE_KIND,
+    PepUnicode_4BYTE_KIND =  PyUnicode_4BYTE_KIND
+};
+
 #define _PepUnicode_AsString     PyUnicode_AsUTF8
+#define _PepUnicode_KIND         PyUnicode_KIND
+#define _PepUnicode_DATA         PyUnicode_DATA
+#define _PepUnicode_IS_COMPACT   PyUnicode_IS_COMPACT
+#define _PepUnicode_IS_ASCII     PyUnicode_IS_ASCII
 #endif
 
 /*****************************************************************************
