@@ -240,7 +240,7 @@ LIBSHIBOKEN_API int Pep_GetVerboseFlag(void);
 
 #ifdef Py_LIMITED_API
 
-LIBSHIBOKEN_API char *_PepUnicode_AsString(PyObject *);
+LIBSHIBOKEN_API const char *_PepUnicode_AsString(PyObject *);
 
 enum PepUnicode_Kind {
     PepUnicode_WCHAR_KIND = 0,

@@ -359,8 +359,26 @@ void *_PepUnicode_DATA(PyObject *str)
            ? _PepUnicode_COMPACT_DATA(str) : _PepUnicode_NONCOMPACT_DATA(str);
 }
 
-char *
-_PepUnicode_AsString(PyObject *str)
+// Fast path accessing UTF8 data without doing a conversion similar
+// to _PyUnicode_AsUTF8String
+static const char *utf8FastPath(PyObject *str)
+{
+    if (PyUnicode_GetLength(str) == 0)
+        return "";
+    auto *asciiObj = reinterpret_cast<PepASCIIObject *>(str);
+    if (asciiObj->state.kind != PepUnicode_1BYTE_KIND)
+        return nullptr; // Empirical: PyCompactUnicodeObject.utf8 is only valid for 1 byte
+    if (asciiObj->state.ascii) {
+        auto *data = asciiObj + 1;
+        return reinterpret_cast<const char *>(data);
+    }
+    auto *compactObj = reinterpret_cast<PepCompactUnicodeObject *>(str);
+    if (compactObj->utf8_length)
+        return compactObj->utf8;
+    return nullptr;
+}
+
+const char *_PepUnicode_AsString(PyObject *str)
 {
     /*
      * We need to keep the string alive but cannot borrow the Python object.
@@ -372,6 +390,9 @@ _PepUnicode_AsString(PyObject *str)
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 #define AT __FILE__ ":" TOSTRING(__LINE__)
+
+    if (const auto *utf8 = utf8FastPath(str))
+        return utf8;
 
     static PyObject *cstring_dict = nullptr;
     if (cstring_dict == nullptr) {
