@@ -196,13 +196,18 @@ class PysideInstall(_install, DistUtilsCommandMixin):
     user_options = _install.user_options + DistUtilsCommandMixin.mixin_user_options
 
     def __init__(self, *args, **kwargs):
+        self.command_name = "install"
         _install.__init__(self, *args, **kwargs)
         DistUtilsCommandMixin.__init__(self)
 
     def initialize_options(self):
         _install.initialize_options(self)
 
-        if sys.platform == 'darwin':
+    def finalize_options(self):
+        DistUtilsCommandMixin.mixin_finalize_options(self)
+        _install.finalize_options(self)
+
+        if sys.platform == 'darwin' or self.is_cross_compile:
             # Because we change the plat_name to include a correct
             # deployment target on macOS distutils thinks we are
             # cross-compiling, and throws an exception when trying to
@@ -214,11 +219,10 @@ class PysideInstall(_install, DistUtilsCommandMixin):
             # target. The fix is to disable the warn_dir flag, which
             # was created for bdist_* derived classes to override, for
             # similar cases.
+            # We also do it when cross-compiling. While calling install
+            # command directly is dubious, bdist_wheel calls install
+            # internally before creating a wheel.
             self.warn_dir = False
-
-    def finalize_options(self):
-        DistUtilsCommandMixin.mixin_finalize_options(self)
-        _install.finalize_options(self)
 
     def run(self):
         _install.run(self)
@@ -257,6 +261,7 @@ class PysideBuildExt(_build_ext):
 class PysideBuildPy(_build_py):
 
     def __init__(self, *args, **kwargs):
+        self.command_name = "build_py"
         _build_py.__init__(self, *args, **kwargs)
 
 
@@ -289,6 +294,7 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
     user_options = _build.user_options + DistUtilsCommandMixin.mixin_user_options
 
     def __init__(self, *args, **kwargs):
+        self.command_name = "build"
         _build.__init__(self, *args, **kwargs)
         DistUtilsCommandMixin.__init__(self)
         BuildInfoCollectorMixin.__init__(self)
@@ -298,8 +304,14 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
         DistUtilsCommandMixin.mixin_finalize_options(self)
         BuildInfoCollectorMixin.collect_and_assign(self)
 
-        if sys.platform == 'darwin':
+        use_os_name_hack = False
+        if self.is_cross_compile:
+            use_os_name_hack = True
+        elif sys.platform == 'darwin':
             self.plat_name = macos_plat_name()
+            use_os_name_hack = True
+
+        if use_os_name_hack:
             # This is a hack to circumvent the dubious check in
             # distutils.commands.build -> finalize_options, which only
             # allows setting the plat_name for windows NT.
@@ -314,7 +326,7 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
         # Must come after _build.finalize_options
         BuildInfoCollectorMixin.post_collect_and_assign(self)
 
-        if sys.platform == 'darwin':
+        if use_os_name_hack:
             os.name = os_name_backup
 
     def initialize_options(self):
@@ -333,6 +345,7 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
         self.build_type = "Release"
         self.qtinfo = None
         self.build_tests = False
+        self.python_target_info = {}
 
     def run(self):
         prepare_build()
@@ -349,7 +362,13 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
         # Don't add Qt to PATH env var, we don't want it to interfere
         # with CMake's find_package calls which will use
         # CMAKE_PREFIX_PATH.
-        additional_paths = [self.py_scripts_dir]
+        # Don't add the Python scripts dir to PATH env when
+        # cross-compiling, it could be in the device sysroot (/usr)
+        # which can cause CMake device QtFooToolsConfig packages to be
+        # picked up instead of host QtFooToolsConfig packages.
+        additional_paths = []
+        if self.py_scripts_dir and not self.is_cross_compile:
+            additional_paths.append(self.py_scripts_dir)
 
         # Add Clang to path for Windows.
         # Revisit once Clang is bundled with Qt.
@@ -388,6 +407,13 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
         if not os.path.exists(self.install_dir):
             log.info(f"Creating install folder {self.install_dir}...")
             os.makedirs(self.install_dir)
+
+        # Write the CMake install path into a file. Is used by
+        # SetupRunner to provide a nicer UX when cross-compiling (no
+        # need to specify a host shiboken path explicitly)
+        if self.internal_cmake_install_dir_query_file_path:
+            with open(self.internal_cmake_install_dir_query_file_path, 'w') as f:
+                f.write(self.install_dir)
 
         if (not OPTION["ONLYPACKAGE"]
                 and not config.is_internal_shiboken_generator_build_and_part_of_top_level_all()):
@@ -464,7 +490,10 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
         log.info(f"Python library:    {self.py_library}")
         log.info(f"Python prefix:     {self.py_prefix}")
         log.info(f"Python scripts:    {self.py_scripts_dir}")
+        log.info(f"Python arch:       {self.py_arch}")
+
         log.info("-" * 3)
+        log.info(f"Qt prefix:  {self.qtinfo.prefix_dir}")
         log.info(f"Qt qmake:   {self.qtinfo.qmake_command}")
         log.info(f"Qt qtpaths: {self.qtinfo.qtpaths_command}")
         log.info(f"Qt version: {self.qtinfo.version}")
@@ -545,9 +574,20 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
             f"-DCMAKE_INSTALL_PREFIX={self.install_dir}",
             module_src_dir
         ]
-        cmake_cmd.append(f"-DPYTHON_EXECUTABLE={self.py_executable}")
-        cmake_cmd.append(f"-DPYTHON_INCLUDE_DIR={self.py_include_dir}")
-        cmake_cmd.append(f"-DPYTHON_LIBRARY={self.py_library}")
+
+        # When cross-compiling we set Python_ROOT_DIR to tell
+        # FindPython.cmake where to pick up the device python libs.
+        if self.is_cross_compile:
+            if self.python_target_path:
+                cmake_cmd.append(f"-DPython_ROOT_DIR={self.python_target_path}")
+
+            # Host python is needed when cross compiling to run
+            # embedding_generator.py. Pass it as a separate option.
+            cmake_cmd.append(f"-DQFP_PYTHON_HOST_PATH={sys.executable}")
+        else:
+            cmake_cmd.append(f"-DPYTHON_EXECUTABLE={self.py_executable}")
+            cmake_cmd.append(f"-DPYTHON_INCLUDE_DIR={self.py_include_dir}")
+            cmake_cmd.append(f"-DPYTHON_LIBRARY={self.py_library}")
 
         # If a custom shiboken cmake config directory path was provided, pass it to CMake.
         if OPTION["SHIBOKEN_CONFIG_DIR"] and config.is_internal_pyside_build():
@@ -597,10 +637,10 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
             cmake_cmd.append("-DAVOID_PROTECTED_HACK=1")
 
         numpy = get_numpy_location()
-        if numpy:
+        if numpy and not self.is_cross_compile:
             cmake_cmd.append(f"-DNUMPY_INCLUDE_DIR={numpy}")
 
-        if self.build_type.lower() == 'debug':
+        if self.build_type.lower() == 'debug' and not self.is_cross_compile:
             cmake_cmd.append(f"-DPYTHON_DEBUG_LIBRARY={self.py_library}")
 
         if OPTION["LIMITED_API"] == "yes":
@@ -713,7 +753,27 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
             cmake_cmd.append("-DPYSIDE_NUMPY_SUPPORT=1")
 
         target_qt_prefix_path = self.qtinfo.prefix_dir
-        cmake_cmd.append(f"-DCMAKE_PREFIX_PATH={target_qt_prefix_path}")
+        cmake_cmd.append(f"-DQFP_QT_TARGET_PATH={target_qt_prefix_path}")
+        if self.qt_host_path:
+            cmake_cmd.append(f"-DQFP_QT_HOST_PATH={self.qt_host_path}")
+
+        if self.is_cross_compile and (not OPTION["SHIBOKEN_HOST_PATH"]
+                                      or not os.path.exists(OPTION["SHIBOKEN_HOST_PATH"])):
+            raise DistutilsSetupError(
+                f"Please specify the location of host shiboken tools via --shiboken-host-path=")
+
+        if self.shiboken_host_path:
+            cmake_cmd.append(f"-DQFP_SHIBOKEN_HOST_PATH={self.shiboken_host_path}")
+
+        if self.shiboken_target_path:
+            cmake_cmd.append(f"-DQFP_SHIBOKEN_TARGET_PATH={self.shiboken_target_path}")
+        elif self.cmake_toolchain_file and not extension.lower() == SHIBOKEN:
+            # Need to tell where to find target shiboken when
+            # cross-compiling pyside.
+            cmake_cmd.append(f"-DQFP_SHIBOKEN_TARGET_PATH={self.install_dir}")
+
+        if self.cmake_toolchain_file:
+            cmake_cmd.append(f"-DCMAKE_TOOLCHAIN_FILE={self.cmake_toolchain_file}")
 
         if not OPTION["SKIP_CMAKE"]:
             log.info(f"Configuring module {extension} ({module_src_dir})...")
@@ -806,6 +866,11 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
                 "qt_prefix_dir": self.qtinfo.prefix_dir,
                 "qt_translations_dir": self.qtinfo.translations_dir,
                 "qt_qml_dir": self.qtinfo.qml_dir,
+
+                # TODO: This is currently None when cross-compiling
+                # There doesn't seem to be any place where we can query
+                # it. Fortunately it's currently only used when
+                # packaging Windows vcredist.
                 "target_arch": self.py_arch,
             }
 
@@ -936,13 +1001,42 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
             raise RuntimeError("Error copying libclang library "
                                f"from {clang_lib_path} to {destination_dir}. ")
 
+    def get_shared_library_filters(self):
+        unix_filters = ["*.so", "*.so.*"]
+        darwin_filters = ["*.so", "*.dylib"]
+        filters = []
+        if self.is_cross_compile:
+            if 'darwin' in self.plat_name or 'macos' in self.plat_name:
+                filters = darwin_filters
+            elif 'linux' in self.plat_name:
+                filters = unix_filters
+            else:
+                log.warn(f"No shared library filters found for platform {self.plat_name}. "
+                         f"The package might miss Qt libraries and plugins.")
+        else:
+            if sys.platform == 'darwin':
+                filters = darwin_filters
+            else:
+                filters = unix_filters
+        return filters
+
     def package_libraries(self, package_path):
         """Returns the libraries of the Python module"""
-        UNIX_FILTERS = ["*.so", "*.so.*"]
-        DARWIN_FILTERS = ["*.so", "*.dylib"]
-        FILTERS = DARWIN_FILTERS if sys.platform == 'darwin' else UNIX_FILTERS
+        filters = self.get_shared_library_filters()
         return [lib for lib in os.listdir(
-            package_path) if filter_match(lib, FILTERS)]
+            package_path) if filter_match(lib, filters)]
+
+    def get_shared_libraries_in_path_recursively(self, initial_path):
+        """Returns shared library plugins in given path (collected
+        recursively)"""
+        filters = self.get_shared_library_filters()
+        libraries = []
+        for dir_path, dir_names, file_names in os.walk(initial_path):
+            for name in file_names:
+                if filter_match(name, filters):
+                    library_path = os.path.join(dir_path, name)
+                    libraries.append(library_path)
+        return libraries
 
     def update_rpath(self, package_path, executables, libexec=False):
         ROOT = '@loader_path' if sys.platform == 'darwin' else '$ORIGIN'
@@ -993,13 +1087,70 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
             log.info("Patched rpath to '$ORIGIN/' (Linux) or "
                      f"updated rpath (OS/X) in {srcpath}.")
 
+    def update_rpath_for_linux_plugins(
+            self,
+            plugin_paths,
+            qt_lib_dir=None,
+            is_qml_plugin=False):
+        # If the linux sysroot (where the plugins are copied from)
+        # is from a mainline distribution, it might have a different
+        # directory layout than then one we expect to have in the
+        # wheel.
+        # We have to ensure that any plugins copied have rpath
+        # values that can find Qt libs in the newly assembled wheel
+        # dir layout.
+        if not (self.is_cross_compile and sys.platform.startswith('linux') and self.standalone):
+            return
+
+        log.info(f"Patching rpath for Qt and QML plugins.")
+        for plugin in plugin_paths:
+            if os.path.isdir(plugin) or os.path.islink(plugin):
+                continue
+            if not os.path.exists(plugin):
+                continue
+
+            if is_qml_plugin:
+                plugin_dir = os.path.dirname(plugin)
+                rel_path_from_qml_plugin_qt_lib_dir = os.path.relpath(qt_lib_dir, plugin_dir)
+                rpath_value = os.path.join("$ORIGIN", rel_path_from_qml_plugin_qt_lib_dir)
+            else:
+                rpath_value = "$ORIGIN/../../lib"
+
+            linux_fix_rpaths_for_library(self._patchelf_path, plugin, rpath_value,
+                                         override=True)
+            log.info(f"Patched rpath to '{rpath_value}' in {plugin}.")
+
+    def update_rpath_for_linux_qt_libraries(self, qt_lib_dir):
+        # Ensure that Qt libs and ICU libs have $ORIGIN in their rpath.
+        # Especially important for ICU lib, so that they don't
+        # accidentally load dependencies from the system.
+        if not (self.is_cross_compile and sys.platform.startswith('linux') and self.standalone):
+            return
+
+        rpath_value = "$ORIGIN"
+        log.info(f"Patching rpath for Qt and ICU libraries in {qt_lib_dir}.")
+        libs = self.package_libraries(qt_lib_dir)
+        lib_paths = [os.path.join(qt_lib_dir, lib) for lib in libs]
+        for library in lib_paths:
+            if os.path.isdir(library) or os.path.islink(library):
+                continue
+            if not os.path.exists(library):
+                continue
+
+            linux_fix_rpaths_for_library(self._patchelf_path, library, rpath_value, override=True)
+            log.info(f"Patched rpath to '{rpath_value}' in {library}.")
+
 
 class PysideRstDocs(Command, DistUtilsCommandMixin):
     description = "Build .rst documentation only"
     user_options = DistUtilsCommandMixin.mixin_user_options
 
-    def initialize_options(self):
+    def __init__(self, *args, **kwargs):
+        self.command_name = "build_rst_docs"
+        Command.__init__(self, *args, **kwargs)
         DistUtilsCommandMixin.__init__(self)
+
+    def initialize_options(self):
         log.info("-- This build process will not include the API documentation."
                  "API documentation requires a full build of pyside/shiboken.")
         self.skip = False

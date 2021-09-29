@@ -48,6 +48,8 @@ import subprocess
 import fnmatch
 import itertools
 import glob
+import tempfile
+from collections import defaultdict
 
 import urllib.request as urllib
 
@@ -244,12 +246,16 @@ def init_msvc_env(platform_arch, build_type):
     log.info("Done initializing MSVC env")
 
 
-def platform_cmake_options():
+def platform_cmake_options(as_tuple_list=False):
     result = []
     if sys.platform == 'win32':
         # Prevent cmake from auto-detecting clang if it is in path.
-        result.append("-DCMAKE_C_COMPILER=cl.exe")
-        result.append("-DCMAKE_CXX_COMPILER=cl.exe")
+        if as_tuple_list:
+            result.append(("CMAKE_C_COMPILER", "cl.exe"))
+            result.append(("CMAKE_CXX_COMPILER", "cl.exe"))
+        else:
+            result.append("-DCMAKE_C_COMPILER=cl.exe")
+            result.append("-DCMAKE_CXX_COMPILER=cl.exe")
     return result
 
 
@@ -1250,3 +1256,69 @@ def parse_cmake_conf_assignments_by_key(source_dir):
             d[key] = value
     return d
 
+
+def configure_cmake_project(project_path,
+                            cmake_path,
+                            build_path=None,
+                            temp_prefix_build_path=None,
+                            cmake_args=None,
+                            cmake_cache_args=None,
+                            ):
+    clean_temp_dir = False
+    if not build_path:
+        # Ensure parent dir exists.
+        if temp_prefix_build_path:
+            os.makedirs(temp_prefix_build_path, exist_ok=True)
+
+        project_name = Path(project_path).name
+        build_path = tempfile.mkdtemp(prefix=f"{project_name}_", dir=temp_prefix_build_path)
+
+        if 'QFP_SETUP_KEEP_TEMP_FILES' not in os.environ:
+            clean_temp_dir = True
+
+    cmd = [cmake_path, '-G', 'Ninja', '-S', project_path, '-B', build_path]
+
+    if cmake_args:
+        cmd.extend(cmake_args)
+
+    for arg, value in cmake_cache_args:
+        cmd.extend([f'-D{arg}={value}'])
+
+    cmd_string = ' '.join(cmd)
+    # FIXME Python 3.7: Use subprocess.run()
+    proc = subprocess.Popen(cmd,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE,
+                            shell=False,
+                            cwd=build_path,
+                            universal_newlines=True)
+    output, error = proc.communicate()
+    proc.wait()
+    return_code = proc.returncode
+
+    if return_code != 0:
+        raise RuntimeError(f"\nFailed to configure CMake project \n "
+                           f"'{project_path}' \n with error: \n {error}\n "
+                           f"Return code: {return_code}\n"
+                           f"Configure args were:\n  {cmd_string}")
+
+    if clean_temp_dir:
+        rmtree(build_path)
+
+    return output
+
+
+def parse_cmake_project_message_info(output):
+    # Parse the output for anything prefixed
+    # '-- qfp:<category>:<key>: <value>' as created by the message()
+    # calls in a given CMake project and store it in a python dict.
+    result = defaultdict(lambda: defaultdict(str))
+    pattern = re.compile(r"^-- qfp:(.+?):(.+?):(.*)$")
+    for line in output.splitlines():
+        found = pattern.search(line)
+        if found:
+            category = found.group(1).strip()
+            key = found.group(2).strip()
+            value = found.group(3).strip()
+            result[category][key] = str(value)
+    return result

@@ -43,26 +43,9 @@ import re
 import subprocess
 import tempfile
 from pathlib import Path
-
+from .utils import configure_cmake_project, parse_cmake_project_message_info
 from .utils import platform_cmake_options
 
-
-_CMAKE_LISTS = """cmake_minimum_required(VERSION 3.16)
-project(dummy LANGUAGES CXX)
-
-find_package(Qt6 COMPONENTS Core)
-
-get_target_property(darwin_target Qt6::Core QT_DARWIN_MIN_DEPLOYMENT_TARGET)
-message(STATUS "mkspec_qt_darwin_min_deployment_target=${darwin_target}")
-
-if(QT_FEATURE_debug_and_release)
-    message(STATUS "mkspec_build_type=debug_and_release")
-elseif(QT_FEATURE_debug)
-    message(STATUS "mkspec_build_type=debug")
-else()
-    message(STATUS "mkspec_build_type=release")
-endif()
-"""
 
 
 class QtInfo(object):
@@ -85,14 +68,21 @@ class QtInfo(object):
             self._cmake_command = None
             self._qmake_command = None
             self._force_qmake = False
+            self._use_cmake = False
+            self._qt_target_path = None
+            self._cmake_toolchain_file = None
             # Dict to cache qmake values.
             self._query_dict = {}
 
-        def setup(self, qtpaths, cmake, qmake, force_qmake):
+        def setup(self, qtpaths, cmake, qmake, force_qmake, use_cmake, qt_target_path,
+                  cmake_toolchain_file):
             self._qtpaths_command = qtpaths
             self._cmake_command = cmake
             self._qmake_command = qmake
             self._force_qmake = force_qmake
+            self._use_cmake = use_cmake
+            self._qt_target_path = qt_target_path
+            self._cmake_toolchain_file = cmake_toolchain_file
 
         @property
         def qmake_command(self):
@@ -213,68 +203,75 @@ class QtInfo(object):
             return props
 
         def _get_query_properties(self):
-            if self._force_qmake:
-                output = self._get_qmake_output(["-query"])
+            if self._use_cmake:
+                setup_script_dir = Path.cwd()
+                sources_dir = setup_script_dir / "sources"
+                qt_target_info_dir = sources_dir / "shiboken6" / "config.tests" / "target_qt_info"
+                qt_target_info_dir = os.fspath(qt_target_info_dir)
+                config_tests_dir = setup_script_dir / "build" / "config.tests"
+                config_tests_dir = os.fspath(config_tests_dir)
+
+                cmake_cache_args = []
+                if self._cmake_toolchain_file:
+                    cmake_cache_args.append(("CMAKE_TOOLCHAIN_FILE", self._cmake_toolchain_file))
+
+                if self._qt_target_path:
+                    cmake_cache_args.append(("QFP_QT_TARGET_PATH", self._qt_target_path))
+                qt_target_info_output = configure_cmake_project(
+                    qt_target_info_dir,
+                    self._cmake_command,
+                    temp_prefix_build_path=config_tests_dir,
+                    cmake_cache_args=cmake_cache_args)
+                qt_target_info = parse_cmake_project_message_info(qt_target_info_output)
+                self._query_dict = qt_target_info['qt_info']
             else:
-                output = self._get_qtpaths_output(["--qt-query"])
-            self._query_dict = self._parse_query_properties(output)
+                if self._force_qmake:
+                    output = self._get_qmake_output(["-query"])
+                else:
+                    output = self._get_qtpaths_output(["--qt-query"])
+                self._query_dict = self._parse_query_properties(output)
 
         def _get_other_properties(self):
             # Get the src property separately, because it is not returned by
             # qmake unless explicitly specified.
             key = "QT_INSTALL_PREFIX/src"
-            if self._force_qmake:
-                result = self._get_qmake_output(["-query", key])
-            else:
-                result = self._get_qtpaths_output(["--qt-query", key])
-            self._query_dict[key] = result
+            if not self._use_cmake:
+                if self._force_qmake:
+                    result = self._get_qmake_output(["-query", key])
+                else:
+                    result = self._get_qtpaths_output(["--qt-query", key])
+                self._query_dict[key] = result
 
             # Get mkspecs variables and cache them.
             # FIXME Python 3.9 self._query_dict |= other_dict
             for key, value in self._get_cmake_mkspecs_variables().items():
                 self._query_dict[key] = value
 
-        @staticmethod
-        def _parse_cmake_mkspecs_variables(output):
-            # Helper for _get_cmake_mkspecs_variables(). Parse the output for
-            # anything prefixed '-- mkspec_' as created by the message() calls
-            # in _CMAKE_LISTS.
-            result = {}
-            pattern = re.compile(r"^-- mkspec_(.*)=(.*)$")
-            for line in output.splitlines():
-                found = pattern.search(line.strip())
-                if found:
-                    key = found.group(1).strip()
-                    value = found.group(2).strip()
-                    # Get macOS minimum deployment target.
-                    if key == 'qt_darwin_min_deployment_target':
-                        result['QMAKE_MACOSX_DEPLOYMENT_TARGET'] = value
-                    # Figure out how Qt was built
-                    elif key == 'build_type':
-                        result['BUILD_TYPE'] = value
-            return result
-
         def _get_cmake_mkspecs_variables(self):
-            # Create an empty cmake project file in a temporary directory and
-            # parse the output to determine some mkspec values.
-            output = ''
-            error = ''
-            return_code = 0
-            with tempfile.TemporaryDirectory() as tempdir:
-                cmake_list_file = Path(tempdir) / 'CMakeLists.txt'
-                cmake_list_file.write_text(_CMAKE_LISTS)
-                cmd = [self._cmake_command, '-G', 'Ninja', '.']
-                qt_prefix = self.prefix_dir
-                cmd.extend([f'-DCMAKE_PREFIX_PATH={qt_prefix}'])
-                cmd += platform_cmake_options()
+            setup_script_dir = Path.cwd()
+            sources_dir = setup_script_dir / "sources"
+            qt_target_mkspec_dir = sources_dir / "shiboken6" / "config.tests" / "target_qt_mkspec"
+            qt_target_mkspec_dir = qt_target_mkspec_dir.as_posix()
+            config_tests_dir = setup_script_dir / "build" / "config.tests"
+            config_tests_dir = config_tests_dir.as_posix()
 
-                # FIXME Python 3.7: Use subprocess.run()
-                proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=False,
-                                        cwd=tempdir, universal_newlines=True)
-                output, error = proc.communicate()
-                proc.wait()
-                return_code = proc.returncode
+            cmake_cache_args = []
+            if self._cmake_toolchain_file:
+                cmake_cache_args.append(("CMAKE_TOOLCHAIN_FILE", self._cmake_toolchain_file))
+                if self._qt_target_path:
+                    cmake_cache_args.append(("QFP_QT_TARGET_PATH", self._qt_target_path))
+            else:
+                qt_prefix = Path(self.prefix_dir).as_posix()
+                cmake_cache_args.append(("CMAKE_PREFIX_PATH", qt_prefix))
 
-            if return_code != 0:
-                raise RuntimeError(f"Could not determine cmake variables: {error}")
-            return QtInfo.__QtInfo._parse_cmake_mkspecs_variables(output)
+            cmake_cache_args.extend(platform_cmake_options(as_tuple_list=True))
+            qt_target_mkspec_output = configure_cmake_project(
+                qt_target_mkspec_dir,
+                self._cmake_command,
+                temp_prefix_build_path=config_tests_dir,
+                cmake_cache_args=cmake_cache_args)
+
+            qt_target_mkspec_info = parse_cmake_project_message_info(qt_target_mkspec_output)
+            qt_target_mkspec_info = qt_target_mkspec_info['qt_info']
+
+            return qt_target_mkspec_info

@@ -89,6 +89,9 @@ def prepare_standalone_package_linux(self, vars):
         if not maybe_icu_libs:
             copy_icu_libs(self._patchelf_path, resolved_destination_lib_dir)
 
+    # Set RPATH for Qt libs.
+    self.update_rpath_for_linux_qt_libraries(destination_lib_dir.format(**vars))
+
     # Patching designer to use the Qt libraries provided in the wheel
     if config.is_internal_pyside_build():
         assistant_path = "{st_build_dir}/{st_package_name}/assistant".format(**vars)
@@ -116,15 +119,26 @@ def prepare_standalone_package_linux(self, vars):
                 recursive=False,
                 vars=vars)
 
+        copied_plugins = self.get_shared_libraries_in_path_recursively(
+            plugins_target.format(**vars))
+        self.update_rpath_for_linux_plugins(copied_plugins)
+
     if copy_qml:
         # <qt>/qml/* -> <setup>/{st_package_name}/Qt/qml
+        qml_plugins_target = "{st_build_dir}/{st_package_name}/Qt/qml"
         copydir("{qt_qml_dir}",
-                "{st_build_dir}/{st_package_name}/Qt/qml",
+                qml_plugins_target,
                 filter=None,
                 force=False,
                 recursive=True,
                 ignore=["*.so.debug"],
                 vars=vars)
+        copied_plugins = self.get_shared_libraries_in_path_recursively(
+            qml_plugins_target.format(**vars))
+        self.update_rpath_for_linux_plugins(
+            copied_plugins,
+            qt_lib_dir=destination_lib_dir.format(**vars),
+            is_qml_plugin=True)
 
     if copy_translations:
         # <qt>/translations/* ->

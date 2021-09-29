@@ -48,6 +48,7 @@ from setuptools._distutils import sysconfig as sconfig
 
 from .options import OPTION
 from .qtinfo import QtInfo
+from .utils import configure_cmake_project, parse_cmake_project_message_info
 from .wheel_utils import get_qt_version
 
 
@@ -166,6 +167,7 @@ class BuildInfoCollectorMixin(object):
     build_lib: str
     cmake: str
     cmake_toolchain_file: str
+    internal_cmake_install_dir_query_file_path: str
     is_cross_compile: bool
     plat_name: str
     python_target_path: str
@@ -185,43 +187,97 @@ class BuildInfoCollectorMixin(object):
 
         sources_dir = os.path.join(script_dir, "sources")
 
-        platform_arch = platform.architecture()[0]
-        log.info(f"Python architecture is {platform_arch}")
-        self.py_arch = platform_arch[:-3]
+        if self.is_cross_compile:
+            config_tests_dir = os.path.join(script_dir, build_base, "config.tests")
+            python_target_info_dir = os.path.join(sources_dir, "shiboken6", "config.tests",
+                                                  "target_python_info")
+            cmake_cache_args = []
+
+            if self.python_target_path:
+                cmake_cache_args.append(("Python_ROOT_DIR", self.python_target_path))
+
+            if self.cmake_toolchain_file:
+                cmake_cache_args.append(("CMAKE_TOOLCHAIN_FILE", self.cmake_toolchain_file))
+            python_target_info_output = configure_cmake_project(
+                python_target_info_dir,
+                self.cmake,
+                temp_prefix_build_path=config_tests_dir,
+                cmake_cache_args=cmake_cache_args)
+            python_target_info = parse_cmake_project_message_info(python_target_info_output)
+            self.python_target_info = python_target_info
 
         build_type = "Debug" if OPTION["DEBUG"] else "Release"
         if OPTION["RELWITHDEBINFO"]:
             build_type = 'RelWithDebInfo'
 
         # Prepare parameters
-        py_executable = sys.executable
-        py_version = f"{sys.version_info[0]}.{sys.version_info[1]}"
-        py_include_dir = get_config_var("INCLUDEPY")
-        py_libdir = get_config_var("LIBDIR")
-        # distutils.sysconfig.get_config_var('prefix') returned the
-        # virtual environment base directory, but
-        # sysconfig.get_config_var returns the system's prefix.
-        # We use 'base' instead (although, platbase points to the
-        # same location)
-        py_prefix = get_config_var("base")
-        if not py_prefix or not os.path.exists(py_prefix):
-            py_prefix = sys.prefix
-        self.py_prefix = py_prefix
-        if sys.platform == "win32":
-            py_scripts_dir = os.path.join(py_prefix, "Scripts")
+        if not self.is_cross_compile:
+            platform_arch = platform.architecture()[0]
+            self.py_arch = platform_arch[:-3]
+
+            py_executable = sys.executable
+            py_version = f"{sys.version_info[0]}.{sys.version_info[1]}"
+            py_include_dir = get_config_var("INCLUDEPY")
+            py_libdir = get_config_var("LIBDIR")
+            # distutils.sysconfig.get_config_var('prefix') returned the
+            # virtual environment base directory, but
+            # sysconfig.get_config_var returns the system's prefix.
+            # We use 'base' instead (although, platbase points to the
+            # same location)
+            py_prefix = get_config_var("base")
+            if not py_prefix or not os.path.exists(py_prefix):
+                py_prefix = sys.prefix
+            self.py_prefix = py_prefix
+            if sys.platform == "win32":
+                py_scripts_dir = os.path.join(py_prefix, "Scripts")
+            else:
+                py_scripts_dir = os.path.join(py_prefix, "bin")
+            self.py_scripts_dir = py_scripts_dir
         else:
-            py_scripts_dir = os.path.join(py_prefix, "bin")
-        self.py_scripts_dir = py_scripts_dir
+            # We don't look for an interpreter when cross-compiling.
+            py_executable = None
+
+            python_info = self.python_target_info['python_info']
+            py_version = python_info['version'].split('.')
+            py_version = f"{py_version[0]}.{py_version[1]}"
+            py_include_dir = python_info['include_dirs']
+            py_libdir = python_info['library_dirs']
+            py_library = python_info['libraries']
+            self.py_library = py_library
+
+            # Prefix might not be set because the project that extracts
+            # the info is using internal API to get it. It shouldn't be
+            # critical though, because we don't really use neither
+            # py_prefix nor py_scripts_dir in important places
+            # when cross-compiling.
+            if 'prefix' in python_info:
+                py_prefix = python_info['prefix']
+                self.py_prefix = py_prefix
+
+                py_scripts_dir = os.path.join(py_prefix, 'bin')
+                if os.path.exists(py_scripts_dir):
+                    self.py_scripts_dir = py_scripts_dir
+                else:
+                    self.py_scripts_dir = None
+            else:
+                py_prefix = None
+                self.py_prefix = py_prefix
+                self.py_scripts_dir = None
 
         self.qtinfo = QtInfo()
         qt_version = get_qt_version()
 
         # Used for test blacklists and registry test.
-        self.build_classifiers = (f"py{py_version}-qt{qt_version}-{platform.architecture()[0]}-"
-                                  f"{build_type.lower()}")
-        if hasattr(sys, "pypy_version_info"):
-            pypy_version = ".".join(map(str, sys.pypy_version_info[:3]))
-            self.build_classifiers += f"-pypy.{pypy_version}"
+        if self.is_cross_compile:
+            # Querying the host platform architecture makes no sense when cross-compiling.
+            build_classifiers = f"py{py_version}-qt{qt_version}-{self.plat_name}-"
+        else:
+            build_classifiers = f"py{py_version}-qt{qt_version}-{platform.architecture()[0]}-"
+            if hasattr(sys, "pypy_version_info"):
+                pypy_version = ".".join(map(str, sys.pypy_version_info[:3]))
+                build_classifiers += f"pypy.{pypy_version}-"
+        build_classifiers += f"{build_type.lower()}"
+        self.build_classifiers = build_classifiers
 
         venv_prefix, has_virtual_env = prefix()
 
@@ -229,6 +285,8 @@ class BuildInfoCollectorMixin(object):
         # and we consider it is distinct enough that we don't have to
         # append the build classifiers, thus keeping dir names shorter.
         build_name = f"{venv_prefix}"
+        if self.is_cross_compile and has_virtual_env:
+            build_name += f"-{self.plat_name}"
 
         # If short paths are requested and no virtual env is found, at
         # least append the python version for more uniqueness.
@@ -259,11 +317,18 @@ class BuildInfoCollectorMixin(object):
         self.install_dir = install_dir
         self.py_executable = py_executable
         self.py_include_dir = py_include_dir
-        self.py_library = get_py_library(build_type, py_version, py_prefix,
-                                         py_libdir, py_include_dir)
+
+        if not self.is_cross_compile:
+            self.py_library = get_py_library(build_type, py_version, py_prefix,
+                                             py_libdir, py_include_dir)
         self.py_version = py_version
         self.build_type = build_type
-        self.site_packages_dir = sconfig.get_python_lib(1, 0, prefix=install_dir)
+
+        if self.is_cross_compile:
+            site_packages_without_prefix = self.python_target_info['python_info']['site_packages_dir']
+            self.site_packages_dir = os.path.join(install_dir, site_packages_without_prefix)
+        else:
+            self.site_packages_dir = sconfig.get_python_lib(1, 0, prefix=install_dir)
 
     def post_collect_and_assign(self):
         # self.build_lib is only available after the base class

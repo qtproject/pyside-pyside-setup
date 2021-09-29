@@ -82,6 +82,13 @@ class Config(object):
         self.shiboken_generator_st_name = f"{SHIBOKEN}-generator"
         self.pyside_st_name = PYSIDE_MODULE
 
+        # Path to CMake toolchain file when intending to cross compile
+        # the project.
+        self.cmake_toolchain_file = None
+
+        # Store where host shiboken is built during a cross-build.
+        self.shiboken_host_query_path = None
+
         # Used by check_allowed_python_version to validate the
         # interpreter version.
         self.python_version_classifiers = [
@@ -96,9 +103,14 @@ class Config(object):
 
         self.setup_script_dir = None
 
-    def init_config(self, build_type=None, internal_build_type=None,
-                    cmd_class_dict=None, package_version=None,
-                    ext_modules=None, setup_script_dir=None,
+    def init_config(self,
+                    build_type=None,
+                    internal_build_type=None,
+                    cmd_class_dict=None,
+                    package_version=None,
+                    ext_modules=None,
+                    setup_script_dir=None,
+                    cmake_toolchain_file=None,
                     quiet=False):
         """
         Sets up the global singleton config which is used in many parts
@@ -121,6 +133,8 @@ class Config(object):
             self.build_type = self._build_type_all
 
         self.setup_script_dir = setup_script_dir
+
+        self.cmake_toolchain_file = cmake_toolchain_file
 
         setup_kwargs = {}
         setup_kwargs['long_description'] = self.get_long_description()
@@ -366,6 +380,11 @@ class Config(object):
 
     def is_top_level_build_pyside(self):
         return self.build_type == self.pyside_option_name
+
+    def is_cross_compile(self):
+        if not self.cmake_toolchain_file:
+            return False
+        return True
 
     def set_internal_build_type(self, internal_build_type):
         self.internal_build_type = internal_build_type
