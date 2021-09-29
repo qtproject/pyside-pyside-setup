@@ -37,7 +37,7 @@
 ##
 #############################################################################
 from build_scripts.options import has_option
-from build_scripts.options import option_value
+from build_scripts.options import option_value, log
 from build_scripts.utils import install_pip_dependencies, expand_clang_variables
 from build_scripts.utils import get_qtci_virtualEnv
 from build_scripts.utils import run_instruction
@@ -49,6 +49,8 @@ import datetime
 import calendar
 import site
 import sys
+
+log.set_verbosity(log.INFO)
 
 # Values must match COIN thrift
 CI_HOST_OS = option_value("os")
