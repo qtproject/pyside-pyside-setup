@@ -107,23 +107,33 @@ PyObject *fromCString(const char *value, int len)
     return PyUnicode_FromStringAndSize(value, len);
 }
 
-const char *toCString(PyObject *str, Py_ssize_t *len)
+const char *toCString(PyObject *str)
 {
     if (str == Py_None)
         return nullptr;
+    if (PyUnicode_Check(str))
+        return _PepUnicode_AsString(str);
+    if (PyBytes_Check(str))
+        return PyBytes_AS_STRING(str);
+    return nullptr;
+}
+
+const char *toCString(PyObject *str, Py_ssize_t *len)
+{
+    if (str == Py_None) {
+        *len = 0;
+        return nullptr;
+    }
     if (PyUnicode_Check(str)) {
-        if (len) {
-            // We need to encode the unicode string into utf8 to know the size of returned char *.
-            Shiboken::AutoDecRef uniStr(PyUnicode_AsUTF8String(str));
-            *len = PyBytes_GET_SIZE(uniStr.object());
-        }
+       // We need to encode the unicode string into utf8 to know the size of returned char *.
+       Shiboken::AutoDecRef uniStr(PyUnicode_AsUTF8String(str));
+       *len = PyBytes_GET_SIZE(uniStr.object());
         // Return unicode from str instead of uniStr, because the lifetime of the returned pointer
         // depends on the lifetime of str.
         return _PepUnicode_AsString(str);
     }
     if (PyBytes_Check(str)) {
-        if (len)
-            *len = PyBytes_GET_SIZE(str);
+        *len = PyBytes_GET_SIZE(str);
         return PyBytes_AS_STRING(str);
     }
     return nullptr;
