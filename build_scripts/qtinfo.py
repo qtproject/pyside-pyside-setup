@@ -254,6 +254,9 @@ class QtInfo(object):
                 cmake_list_file = Path(tempdir) / 'CMakeLists.txt'
                 cmake_list_file.write_text(_CMAKE_LISTS)
                 cmd = [self._cmake_command, '-G', 'Ninja', '.']
+                qt_prefix = self.prefix_dir
+                cmd.extend([f'-DCMAKE_PREFIX_PATH={qt_prefix}'])
+
                 # FIXME Python 3.7: Use subprocess.run()
                 proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=False,
                                         cwd=tempdir, universal_newlines=True)
