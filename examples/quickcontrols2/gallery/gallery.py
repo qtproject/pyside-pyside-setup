@@ -60,7 +60,7 @@ import sys
 import platform
 
 from PySide6.QtGui import QGuiApplication, QIcon
-from PySide6.QtCore import QSettings
+from PySide6.QtCore import QSettings, QUrl
 from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtQuickControls2 import QQuickStyle
 
@@ -88,7 +88,7 @@ if __name__ == "__main__":
         built_in_styles.append("Windows")
     engine.setInitialProperties({"builtInStyles": built_in_styles})
 
-    engine.load(":/gallery.qml")
+    engine.load(QUrl.fromLocalFile(":/gallery.qml"))
     rootObjects = engine.rootObjects()
     if not rootObjects:
         sys.exit(-1)
