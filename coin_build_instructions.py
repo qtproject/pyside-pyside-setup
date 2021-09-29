@@ -112,7 +112,7 @@ def call_setup(python_ver, phase):
     if phase in ["BUILD"]:
         rmtree(_env, True)
         # Pinning the virtualenv before creating one
-        run_instruction(["pip", "install", "--user", "virtualenv==20.0.25"], "Failed to pin virtualenv")
+        run_instruction(["pip", "install", "--user", "virtualenv==20.7.2"], "Failed to pin virtualenv")
         # installing to user base might not be in PATH by default.
         env_path = os.path.join(site.USER_BASE, "bin")
         v_env = os.path.join(env_path, "virtualenv")
