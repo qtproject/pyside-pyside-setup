@@ -110,6 +110,86 @@ static void formatPySequence(PyObject *obj, std::ostream &str)
     str << '>';
 }
 
+// Helper to format a 0-terminated character sequence
+template <class Char>
+static void formatCharSequence(const Char *s, std::ostream &str)
+{
+    str << '"';
+    const auto oldFillC = str.fill('0');
+    str << std::hex;
+    for (; *s; ++s) {
+        const unsigned c = *s;
+        if (c < 127)
+            str << char(c);
+        else
+            str << "0x" << std::right << std::setw(sizeof(Char) * 2) << c << std::left;
+    }
+    str << std::dec;
+    str.fill(oldFillC);
+    str << '"';
+}
+
+static void formatPyUnicode(PyObject *obj, std::ostream &str)
+{
+    // Note: The below call create the PyCompactUnicodeObject.utf8 representation
+    str << '"' << _PepUnicode_AsString(obj) << '"';
+
+    str << " (" << PyUnicode_GetLength(obj) << ')';
+    const auto kind = _PepUnicode_KIND(obj);
+    switch (kind) {
+    case PepUnicode_WCHAR_KIND:
+        str << " [wchar]";
+        break;
+    case PepUnicode_1BYTE_KIND:
+        str << " [1byte]";
+        break;
+    case PepUnicode_2BYTE_KIND:
+        str << " [2byte]";
+        break;
+    case PepUnicode_4BYTE_KIND:
+        str << " [4byte]";
+        break;
+    }
+
+    const bool ascii = _PepUnicode_IS_ASCII(obj);
+    if (ascii)
+        str << " [ascii]";
+    const bool compact = _PepUnicode_IS_COMPACT(obj);
+    if (compact)
+        str << " [compact]";
+    void *data =_PepUnicode_DATA(obj);
+    str << ", data=";
+    switch (kind) {
+    case PepUnicode_WCHAR_KIND:
+        formatCharSequence(reinterpret_cast<const wchar_t *>(data), str);
+        break;
+    case PepUnicode_1BYTE_KIND:
+        formatCharSequence(reinterpret_cast<const Py_UCS1 *>(data), str);
+        break;
+    case PepUnicode_2BYTE_KIND:
+        formatCharSequence(reinterpret_cast<const Py_UCS2 *>(data), str);
+        break;
+    case PepUnicode_4BYTE_KIND:
+        formatCharSequence(reinterpret_cast<const Py_UCS4 *>(data), str);
+        break;
+    }
+
+#ifndef Py_LIMITED_API
+    const char *utf8 = nullptr;
+    if (!ascii && compact && kind == PepUnicode_1BYTE_KIND) {
+        const auto *compactObj = reinterpret_cast<const PyCompactUnicodeObject *>(obj);
+        if (compactObj->utf8_length)
+            utf8 = compactObj->utf8;
+    }
+    if (utf8) {
+        str << ", utf8=";
+        formatCharSequence(reinterpret_cast<const Py_UCS1 *>(utf8), str);
+    } else {
+        str << ", no-utf8";
+    }
+#endif // !Py_LIMITED_API
+}
+
 static void formatPyObject(PyObject *obj, std::ostream &str)
 {
     if (obj) {
@@ -120,7 +200,7 @@ static void formatPyObject(PyObject *obj, std::ostream &str)
         else if (PyFloat_Check(obj))
             str << PyFloat_AsDouble(obj);
         else if (PyUnicode_Check(obj))
-            str << '"' << _PepUnicode_AsString(obj);
+            formatPyUnicode(obj, str);
         else if (PySequence_Check(obj))
             formatPySequence(obj, str);
         else
