@@ -496,6 +496,7 @@
     <function signature="returnCString()" />
     <function signature="overloadedFunc(double)" />
     <function signature="overloadedFunc(int)" />
+    <function signature="addStdStrings(const std::string&amp;, const std::string&amp;)"/>
 
     <value-type name="ArrayModifyTest">
         <modify-function signature="sumIntArray(int, int*)">

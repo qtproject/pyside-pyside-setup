@@ -253,3 +253,8 @@ void ClassWithFunctionPointer::doNothing(void *operand)
 {
     (void) operand;
 }
+
+string addStdStrings(const std::string &s1, const std::string &s2)
+{
+    return s1 + s2;
+}

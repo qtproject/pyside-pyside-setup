@@ -86,6 +86,8 @@ LIBSAMPLE_API double sumDoubleArray(double array[4]);
 LIBSAMPLE_API int sumIntMatrix(int m[2][3]);
 LIBSAMPLE_API double sumDoubleMatrix(double m[2][3]);
 
+LIBSAMPLE_API std::string addStdStrings(const std::string &s1, const std::string &s2);
+
 class LIBSAMPLE_API ArrayModifyTest
 {
 public:

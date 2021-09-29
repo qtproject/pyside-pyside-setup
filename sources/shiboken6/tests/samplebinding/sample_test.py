@@ -83,6 +83,13 @@ class ModuleTest(unittest.TestCase):
     def testConstant(self):
         self.assertEqual(sample.sample.INT_CONSTANT, 42)
 
+    def testStringFunctions(self):
+        # Test plain ASCII, UCS1 and UCS4 encoding which have different
+        # representations in the PyUnicode objects.
+        for t1 in ["ascii", "Ümläut", "😀"]:
+            expected = t1 + t1
+            self.assertEqual(sample.addStdStrings(t1, t1), expected)
+
 
 if __name__ == '__main__':
     unittest.main()
