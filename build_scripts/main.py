@@ -469,13 +469,12 @@ class PysideBuild(_build, DistUtilsCommandMixin):
         self.py_scripts_dir = py_scripts_dir
 
         self.qtinfo = QtInfo()
-        qt_dir = os.path.dirname(OPTION["QTPATHS"])
-        if OPTION['HAS_QMAKE_OPTION']:
-            qt_dir = os.path.dirname(OPTION["QMAKE"])
         qt_version = get_qt_version()
-
         # Update the PATH environment variable
-        additional_paths = [self.py_scripts_dir, qt_dir]
+        # Don't add Qt to PATH env var, we don't want it to interfere
+        # with CMake's find_package calls which will use
+        # CMAKE_PREFIX_PATH.
+        additional_paths = [self.py_scripts_dir]
 
         # Add Clang to path for Windows.
         # Revisit once Clang is bundled with Qt.
@@ -863,6 +862,9 @@ class PysideBuild(_build, DistUtilsCommandMixin):
 
         if OPTION["PYSIDE_NUMPY_SUPPORT"]:
             cmake_cmd.append("-DPYSIDE_NUMPY_SUPPORT=1")
+
+        target_qt_prefix_path = self.qtinfo.prefix_dir
+        cmake_cmd.append(f"-DCMAKE_PREFIX_PATH={target_qt_prefix_path}")
 
         if not OPTION["SKIP_CMAKE"]:
             log.info(f"Configuring module {extension} ({module_src_dir})...")
