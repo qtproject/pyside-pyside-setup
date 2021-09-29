@@ -191,14 +191,6 @@ class Formatter(Writer):
         yield
 
 
-def get_license_text():
-    with sourcepath.open() as f:
-        lines = f.readlines()
-    license_line = next((lno for lno, line in enumerate(lines)
-                         if "$QT_END_LICENSE$" in line))
-    return "".join(lines[:license_line + 3])
-
-
 def find_imports(text):
     return [imp for imp in PySide6.__all__ if f"PySide6.{imp}." in text]
 
