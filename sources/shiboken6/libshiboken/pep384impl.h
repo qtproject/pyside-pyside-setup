@@ -185,17 +185,6 @@ LIBSHIBOKEN_API const char *PepType_GetNameStr(PyTypeObject *type);
 
 /*****************************************************************************
  *
- * RESOLVED: longobject.h
- *
- */
-#if defined(Py_LIMITED_API) || defined(PYPY_VERSION)
-LIBSHIBOKEN_API int _PepLong_AsInt(PyObject *);
-#else
-#define _PepLong_AsInt _PyLong_AsInt
-#endif // defined(Py_LIMITED_API) || defined(PYPY_VERSION)
-
-/*****************************************************************************
- *
  * RESOLVED: pydebug.h
  *
  */
