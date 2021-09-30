@@ -255,6 +255,11 @@ for (Py_ssize_t i = 0; i < count; ++i){
 %0 = new %TYPE(QPixmap::fromImage(%1));
 // @snippet qpixmap
 
+// @snippet qicon-addpixmap
+const auto path = PySide::pyPathToQString(%PYARG_1);
+%CPPSELF->addPixmap(path);
+// @snippet qicon-addpixmap
+
 // @snippet qimage-decref-image-data
 static void imageDecrefDataHandler(void *data)
 {
