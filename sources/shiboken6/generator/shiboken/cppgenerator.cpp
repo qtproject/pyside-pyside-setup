@@ -5633,7 +5633,7 @@ void CppGenerator::writeClassRegister(TextStream &s,
         else
             s << wrapperFlags.join(" | ");
     }
-    s << ");\nauto pyType = reinterpret_cast<PyTypeObject *>(" << typePtr << ");\n"
+    s << ");\nauto *pyType = " << pyTypeName << "; // references " << typePtr << "\n"
         << "InitSignatureStrings(pyType, " << initFunctionName << "_SignatureStrings);\n";
 
     if (usePySideExtensions())
