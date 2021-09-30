@@ -218,6 +218,11 @@ private:
                                                 const TypeSystemTypeEntry *root,
                                                 const QString &rootPackage,
                                                 CustomTypeEntry *targetLang);
+    void addBuiltInCppStringPrimitiveType(const QString &name,
+                                          const QString &viewName,
+                                          const TypeSystemTypeEntry *root,
+                                          const QString &rootPackage,
+                                          CustomTypeEntry *targetLang);
     void addBuiltInPrimitiveTypes();
     TypeEntryMultiMapConstIteratorRange findTypeRange(const QString &name) const;
     template <class Predicate>

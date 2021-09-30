@@ -1004,6 +1004,20 @@ PrimitiveTypeEntry *
     return result;
 }
 
+void TypeDatabase::addBuiltInCppStringPrimitiveType(const QString &name,
+                                                    const QString &viewName,
+                                                    const TypeSystemTypeEntry *root,
+                                                    const QString &rootPackage,
+                                                    CustomTypeEntry *targetLang)
+
+{
+    auto *stringType = addBuiltInPrimitiveType(name, root, rootPackage,
+                                               targetLang);
+    auto *viewType = addBuiltInPrimitiveType(viewName, root, rootPackage,
+                                             nullptr);
+    viewType->setViewOn(stringType);
+}
+
 void TypeDatabase::addBuiltInPrimitiveTypes()
 {
     auto *root = defaultTypeSystemType();
@@ -1037,6 +1051,23 @@ void TypeDatabase::addBuiltInPrimitiveTypes()
     for (const auto &t : AbstractMetaType::cppFloatTypes()) {
         if (!m_entries.contains(t))
             addBuiltInPrimitiveType(t, root, rootPackage, pyFloatCustomEntry);
+    }
+
+    auto *pyUnicodeEntry = findType(u"PyUnicode"_qs);
+    Q_ASSERT(pyUnicodeEntry && pyUnicodeEntry->isCustom());
+    auto *pyUnicodeCustomEntry = static_cast<CustomTypeEntry *>(pyUnicodeEntry);
+
+    const QString stdString = u"std::string"_qs;
+    if (!m_entries.contains(stdString)) {
+        addBuiltInCppStringPrimitiveType(stdString, u"std::string_view"_qs,
+                                         root, rootPackage,
+                                         pyUnicodeCustomEntry);
+    }
+    const QString stdWString = u"std::wstring"_qs;
+    if (!m_entries.contains(stdWString)) {
+        addBuiltInCppStringPrimitiveType(stdWString, u"std::wstring_view"_qs,
+                                         root, rootPackage,
+                                         pyUnicodeCustomEntry);
     }
 }
 

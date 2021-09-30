@@ -3,9 +3,6 @@
     <suppress-warning text="Duplicate type entry: 'sample'" />
     <suppress-warning text="Duplicate type entry: 'SampleNamespace'" />
 
-    <primitive-type name="std::string"/>
-    <primitive-type name="std::string_view" view-on="std::string"/>
-    <primitive-type name="std::wstring"/>
     <primitive-type name="ObjectType::Identifier"/>
 
     <primitive-type name="Foo::HANDLE" target-lang-api-name="PyLong"/>
