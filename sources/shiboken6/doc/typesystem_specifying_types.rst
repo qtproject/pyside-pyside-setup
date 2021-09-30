@@ -125,7 +125,7 @@ primitive-type
     The ``primitive-type`` node describes how a primitive type is mapped from C++ to
     the target language, and is a child of the :ref:`typesystem` node. It may
     contain :ref:`conversion-rule` child nodes. Note that most primitives are
-    already specified in the QtCore typesystem.
+    already specified in the QtCore typesystem (see :ref:`primitive-cpp-types`).
 
     .. code-block:: xml
 
@@ -133,16 +133,16 @@ primitive-type
             <primitive-type name="..."
                 since="..."
                 until="..."
-                target-name="..."
+                target-lang-api-name="..."
                 default-constructor="..."
                 preferred-conversion="yes | no" />
                 view-on="..."
         </typesystem>
 
-    The **name** attribute is the name of the primitive in C++, the optional,
-    **target-name** attribute is the name of the primitive type in the target
-    language. If the later two attributes are not specified their default value
-    will be the same as the **name** attribute.
+    The **name** attribute is the name of the primitive in C++.
+
+    The optional **target-lang-api-name** attribute is the name of the
+    primitive type in the target language, defaulting to the **name** attribute.
 
     The *optional*  **since** value is used to specify the API version in which
     the type was introduced.
