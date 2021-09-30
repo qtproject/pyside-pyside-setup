@@ -92,6 +92,13 @@ names and how they look like.
         :text: Using a Simple Button
         :classes: btn-link btn-block stretched-link
     ---
+    :img-top: basictutorial/signals_slots.png
+
+    .. link-button:: basictutorial/signals_and_slots
+        :type: ref
+        :text: Signals and Slots
+        :classes: btn-link btn-block stretched-link
+    ---
     :img-top: basictutorial/dialog.png
 
     .. link-button:: basictutorial/dialog
