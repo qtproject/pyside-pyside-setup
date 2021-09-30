@@ -125,6 +125,10 @@ class SetupRunner(object):
             self.run_setuptools_setup()
             return
 
+        # Enable logging.
+        if not OPTION["QUIET"]:
+            log.set_verbosity(log.INFO)
+
         # This is a top-level invocation of setup.py, so figure out what
         # modules we will build and depending on that, call setup.py
         # multiple times with different arguments.
@@ -157,7 +161,6 @@ class SetupRunner(object):
 
         for cmd in self.invocations_list:
             cmd_as_string = " ".join(cmd)
-            log.info(f"\nRunning setup:  {cmd_as_string}\n")
             exit_code = run_process(cmd)
             if exit_code != 0:
                 msg = textwrap.dedent(f"""
