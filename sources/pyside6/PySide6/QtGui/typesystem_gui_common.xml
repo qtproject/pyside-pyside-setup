@@ -556,6 +556,10 @@
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
+    <!-- PYSIDE-1669: Replace implicit conversion by a better explicit version -->
+    <add-function signature="addPixmap(PyPathLike@path@)">
+        <inject-code file="../glue/qtgui.cpp" snippet="qicon-addpixmap"/>
+    </add-function>
   </value-type>
 
   <value-type name="QPixmap" >

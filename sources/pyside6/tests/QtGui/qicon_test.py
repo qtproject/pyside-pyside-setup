@@ -48,5 +48,25 @@ class QIconCtorWithNoneTest(TimedQApplication):
         self.app.exec()
 
 
+PIX_PATH = os.fspath(Path(__file__).resolve().parents[2]
+                     / "doc/tutorials/basictutorial/icons.png")
+
+class QIconAddPixmapTest(TimedQApplication):
+    '''PYSIDE-1669: check that addPixmap works'''
+
+    def testQIconSetPixmap(self):
+        icon = QIcon()
+        icon.addPixmap(PIX_PATH)
+        sizes = icon.availableSizes()
+        self.assertTrue(sizes)
+
+    def testQIconSetPixmapPathlike(self):
+        icon = QIcon()
+        pix_path = Path(PIX_PATH)
+        icon.addPixmap(pix_path)
+        sizes = icon.availableSizes()
+        self.assertTrue(sizes)
+
+
 if __name__ == '__main__':
     unittest.main()
