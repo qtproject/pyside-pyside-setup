@@ -45,7 +45,7 @@ import tempfile
 from pathlib import Path
 
 
-_CMAKE_LISTS = """cmake_minimum_required(VERSION 3.18)
+_CMAKE_LISTS = """cmake_minimum_required(VERSION 3.16)
 project(dummy LANGUAGES CXX)
 
 find_package(Qt6 COMPONENTS Core)
