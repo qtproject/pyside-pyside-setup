@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2020 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -26,7 +26,7 @@
 ##
 #############################################################################
 
-"""
+DESC = """
 debug_renamer.py
 ================
 
@@ -53,37 +53,19 @@ The Python output lines can be freely formatted.
 
 Any line which contains "0x.." followed by some name will be changed,
 all others are left alone.
-We name these fields `object_id` and `typename`.
-
-
-Operation
----------
-
-The script reads from <stdin> until EOF. It produces output where the
-`object_id` field is removed and some text is combined with `typename`
-to produce a unique object name.
-
-
-Example
--------
-
-You can create reference debugging output by using the modified interpreter at
-
-    https://github.com/ctismer/cpython/tree/3.9-refdebug
-
-and pipe the error output through this script.
-This is work in flux that might change quite often.
 
 
 To Do List
 ----------
 
 Names of objects which are already deleted should be monitored and
-not by chance be re-used.
+not by chance be re-used. We need to think of a way to specify deletion.
 """
 
 import re
 import sys
+
+from argparse import ArgumentParser, FileType, RawTextHelpFormatter
 from collections import OrderedDict
 
 
@@ -101,22 +83,56 @@ known_types = {}
 pattern = r"0x\w+\s+\S+"    # hex word followed by non-WS
 rex = re.compile(pattern, re.IGNORECASE)
 
-while True:
-    line = sys.stdin.readline()
-    if not line:
-        break
+def rename_hexval(line):
     if not (res := rex.search(line)):
-        print(line.rstrip())
-        continue
+        return line
     start_pos, end_pos = res.start(), res.end()
-    beg, mid, end = line[:start_pos], line[start_pos : end_pos], line[end_pos:].rstrip()
+    beg, mid, end = line[:start_pos], line[start_pos : end_pos], line[end_pos:]
     object_id, typename = mid.split()
-    if int(object_id) == 0:
-        print(f"{beg}{typename}_NULL{end}")
-        continue
+    if int(object_id, 16) == 0:
+        return(f"{beg}{typename}_NULL{end}")
     if typename not in known_types:
         known_types[typename] = OrderedDict()
     obj_store = known_types[typename]
     if object_id not in obj_store:
         obj_store[object_id] = make_name(typename, len(obj_store))
-    print(f"{beg}{obj_store[object_id]}{end}")
+    return(f"{beg}{obj_store[object_id]}{end}")
+
+
+def hide_floatval(line):
+    return re.sub(r"\d+\.\d+", "<float>", line)
+
+
+def process_all_lines(options):
+    """
+    Process all lines from fin to fout.
+    The caller is responsible of opening and closing files if at all.
+    """
+    fi, fo = options.input, options.output
+    rename = options.rename
+    float_ = options.float
+    while line := fi.readline():
+        if rename:
+            line = rename_hexval(line)
+        if float_:
+            line = hide_floatval(line)
+        fo.write(line)
+
+
+def create_argument_parser(desc):
+    parser = ArgumentParser(description=desc, formatter_class=RawTextHelpFormatter)
+    parser.add_argument("--rename", "-r", action="store_true",
+                        help="Rename hex value and following word to a readable f'{word}_{anum}'")
+    parser.add_argument("--float", "-f", action="store_true",
+                        help="Replace timing numbers by '<float>' (for comparing ctest output)")
+    parser.add_argument("--input", "-i", nargs="?", type=FileType("r"), default=sys.stdin,
+                        help="Use the specified file instead of sys.stdin")
+    parser.add_argument("--output", "-o", nargs="?", type=FileType("w"), default=sys.stdout,
+                        help="Use the specified file instead of sys.stdout")
+    return parser
+
+
+if __name__ == "__main__":
+    argument_parser = create_argument_parser(DESC)
+    options = argument_parser.parse_args()
+    process_all_lines(options)
