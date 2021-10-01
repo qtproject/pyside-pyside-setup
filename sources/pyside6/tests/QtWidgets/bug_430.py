@@ -44,9 +44,11 @@ class ListModel(QAbstractListModel):
         return 0
 
 
-app = QApplication([])
-model = ListModel()
-v = QListView()
-v.setModel(model)
-QTimer.singleShot(0, v.close)
-app.exec()
+if __name__ == '__main__':
+    app = QApplication([])
+    model = ListModel()
+    v = QListView()
+    v.setModel(model)
+    v.show()
+    QTimer.singleShot(0, v.close)
+    app.exec()
