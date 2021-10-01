@@ -689,8 +689,7 @@ int shibokenMain(int argc, char *argv[])
     extractor.setCppFileNames(cppFileNames);
     extractor.setTypeSystem(typeSystemFileName);
 
-    auto shibokenGenerator = dynamic_cast<const ShibokenGenerator *>(generators.constFirst().data());
-    const bool usePySideExtensions = shibokenGenerator && shibokenGenerator->usePySideExtensions();
+    const bool usePySideExtensions = generators.constFirst().data()->usePySideExtensions();
 
     const std::optional<ApiExtractorResult> apiOpt = extractor.run(usePySideExtensions);
 

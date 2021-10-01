@@ -90,9 +90,6 @@ public:
 
     const char *name() const override { return "Shiboken"; }
 
-    /// Returns true if the user enabled PySide extensions.
-    bool usePySideExtensions() const;
-
     static QString minimalConstructorExpression(const ApiExtractorResult &api,
                                                 const AbstractMetaType &type);
     static QString minimalConstructorExpression(const ApiExtractorResult &api,
@@ -458,7 +455,6 @@ private:
 
     bool m_useCtorHeuristic = false;
     bool m_userReturnValueHeuristic = false;
-    bool m_usePySideExtensions = false;
     bool m_verboseErrorMessagesDisabled = false;
     bool m_useIsNullAsNbNonZero = false;
     bool m_useOperatorBoolAsNbNonZero = false;

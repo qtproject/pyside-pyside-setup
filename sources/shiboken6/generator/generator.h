@@ -237,6 +237,9 @@ public:
 
     bool hasPrivateClasses() const;
 
+    /// Returns true if the user enabled PySide extensions (command line option)
+    bool usePySideExtensions() const;
+
     /**
      *  Retrieves the name of the currently processed module.
      *  While package name is a complete package idetification, e.g. 'PySide.QtCore',

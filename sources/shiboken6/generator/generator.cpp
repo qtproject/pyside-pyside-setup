@@ -47,6 +47,8 @@
 #include <QDebug>
 #include <typedatabase.h>
 
+static const char ENABLE_PYSIDE_EXTENSIONS[] = "enable-pyside-extensions";
+
 /**
  * DefaultValue is used for storing default values of types for which code is
  * generated in different contexts:
@@ -178,6 +180,7 @@ struct Generator::GeneratorPrivate
     AbstractMetaTypeList instantiatedSmartPointers;
     AbstractMetaClassCList m_invisibleTopNamespaces;
     bool m_hasPrivateClasses = false;
+    bool m_usePySideExtensions = false;
 };
 
 Generator::Generator() : m_d(new GeneratorPrivate)
@@ -350,11 +353,17 @@ AbstractMetaTypeList Generator::instantiatedSmartPointers() const
 
 Generator::OptionDescriptions Generator::options() const
 {
-    return OptionDescriptions();
+    return {
+        {QLatin1String(ENABLE_PYSIDE_EXTENSIONS),
+         u"Enable PySide extensions, such as support for signal/slots,\n"
+          "use this if you are creating a binding for a Qt-based library."_qs}
+    };
 }
 
-bool Generator::handleOption(const QString & /* key */, const QString & /* value */)
+bool Generator::handleOption(const QString & key, const QString & /* value */)
 {
+    if (key == QLatin1String(ENABLE_PYSIDE_EXTENSIONS))
+        return ( m_d->m_usePySideExtensions = true);
     return false;
 }
 
@@ -504,6 +513,11 @@ const ApiExtractorResult &Generator::api() const
 bool Generator::hasPrivateClasses() const
 {
     return m_d->m_hasPrivateClasses;
+}
+
+bool Generator::usePySideExtensions() const
+{
+    return m_d->m_usePySideExtensions;
 }
 
 QString Generator::getFullTypeName(const TypeEntry *type)

@@ -184,6 +184,7 @@ configure_file("conf.py.in" "rst/conf.py" @ONLY)
 
 add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/rst/PySide6/QtCore/index.rst"
                    COMMAND Shiboken6::shiboken6 --generator-set=qtdoc ${docHeader}
+                           --enable-pyside-extensions
                            --include-paths="${QT_INCLUDE_DIR}${PATH_SEP}${pyside6_SOURCE_DIR}${PATH_SEP}${TS_ROOT}"
                            --api-version=${SUPPORTED_QT_VERSION}
                            --typesystem-paths="${QDOC_TYPESYSTEM_PATH}"
