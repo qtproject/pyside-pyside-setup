@@ -53,13 +53,6 @@ It is questionable if it is worthwhile to continue using the buffer protocol
 or if we should try to get rid of ``Pep_buffer``, completely.
 
 
-longobject.h
-------------
-
-``_PyLong_AsInt`` is not available. We defined a ``_PepLong_AsInt`` function, instead.
-Maybe this should be replaced by ``PyLong_AsLong``.
-
-
 pydebug.h
 ---------
 

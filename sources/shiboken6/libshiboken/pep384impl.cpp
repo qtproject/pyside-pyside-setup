@@ -416,38 +416,6 @@ const char *_PepUnicode_AsString(PyObject *str)
 
 /*****************************************************************************
  *
- * Support for longobject.h
- *
- */
-#if defined(Py_LIMITED_API) || defined(PYPY_VERSION)
-
-/*
- * This is the original Python function _PyLong_AsInt() from longobject.c .
- * We define it here because we are not allowed to use the function
- * from Python with an underscore.
- */
-
-/* Get a C int from an int object or any object that has an __int__
-   method.  Return -1 and set an error if overflow occurs. */
-
-int
-_PepLong_AsInt(PyObject *obj)
-{
-    int overflow;
-    long result = PyLong_AsLongAndOverflow(obj, &overflow);
-    if (overflow || result > INT_MAX || result < INT_MIN) {
-        /* XXX: could be cute and give a different
-           message for overflow == -1 */
-        PyErr_SetString(PyExc_OverflowError,
-                        "Python int too large to convert to C int");
-        return -1;
-    }
-    return int(result);
-}
-#endif // defined(Py_LIMITED_API) || defined(PYPY_VERSION)
-
-/*****************************************************************************
- *
  * Support for pydebug.h
  *
  */
