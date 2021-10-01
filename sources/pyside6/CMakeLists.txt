@@ -3,6 +3,7 @@ include(cmake/Macros/icecc.cmake) # this must be the first line!
 cmake_minimum_required(VERSION 3.16)
 cmake_policy(VERSION 3.16)
 
+include(".cmake.conf")
 project(pysidebindings)
 
 include(cmake/PySideSetup.cmake)

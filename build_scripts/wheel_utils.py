@@ -46,7 +46,7 @@ from packaging.version import parse as parse_version
 
 from .options import OPTION
 from .qtinfo import QtInfo
-from .utils import memoize, get_python_dict
+from .utils import memoize, parse_cmake_conf_assignments_by_key
 from .versions import PYSIDE
 
 
@@ -78,12 +78,15 @@ def get_qt_version():
 def get_package_version():
     """ Returns the version string for the PySide6 package. """
     setup_script_dir = os.getcwd()
-    pyside_version_py = os.path.join(
-        setup_script_dir, "sources", PYSIDE, "pyside_version.py")
-    d = get_python_dict(pyside_version_py)
-    final_version = f"{d['major_version']}.{d['minor_version']}.{d['patch_version']}"
-    release_version_type = d['release_version_type']
-    pre_release_version = d['pre_release_version']
+    pyside_project_dir = os.path.join(setup_script_dir, "sources", PYSIDE)
+    d = parse_cmake_conf_assignments_by_key(pyside_project_dir)
+    major_version = d['pyside_MAJOR_VERSION']
+    minor_version = d['pyside_MINOR_VERSION']
+    patch_version = d['pyside_MICRO_VERSION']
+
+    final_version = f"{major_version}.{minor_version}.{patch_version}"
+    release_version_type = d['pyside_PRE_RELEASE_VERSION_TYPE']
+    pre_release_version = d['pyside_PRE_RELEASE_VERSION']
     if pre_release_version and release_version_type:
         final_version = f"{final_version}{release_version_type}{pre_release_version}"
 

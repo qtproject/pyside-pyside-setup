@@ -42,7 +42,7 @@ from build_scripts.utils import install_pip_dependencies, expand_clang_variables
 from build_scripts.utils import get_qtci_virtualEnv
 from build_scripts.utils import run_instruction
 from build_scripts.utils import rmtree
-from build_scripts.utils import get_python_dict
+from build_scripts.utils import parse_cmake_conf_assignments_by_key
 from build_scripts.utils import get_ci_qtpaths_path
 import os
 import datetime
@@ -88,7 +88,7 @@ def is_snapshot_build():
     """
     Returns True if project needs to be built with --snapshot-build
 
-    This is true if the version found in pyside_version.py is not a
+    This is true if the version found in .cmake.conf is not a
     pre-release version (no alphas, betas).
 
     This eliminates the need to remove the --snapshot-build option
@@ -96,12 +96,12 @@ def is_snapshot_build():
     for a release).
     """
     setup_script_dir = get_current_script_path()
-    pyside_version_py = os.path.join(
-        setup_script_dir, "sources", "pyside6", "pyside_version.py")
-    d = get_python_dict(pyside_version_py)
+    pyside_project_dir = os.path.join(setup_script_dir, "sources", "pyside6")
 
-    release_version_type = d['release_version_type']
-    pre_release_version = d['pre_release_version']
+    d = parse_cmake_conf_assignments_by_key(pyside_project_dir)
+
+    release_version_type = d['pyside_PRE_RELEASE_VERSION_TYPE']
+    pre_release_version = d['pyside_PRE_RELEASE_VERSION']
     if pre_release_version and release_version_type:
         return True
     return False
