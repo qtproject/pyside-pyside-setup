@@ -37,17 +37,17 @@
 ##
 #############################################################################
 
-major_version = "6"
-minor_version = "2"
-patch_version = "0"
+major_version = "@pyside_MAJOR_VERSION@"
+minor_version = "@pyside_MINOR_VERSION@"
+patch_version = "@pyside_MICRO_VERSION@"
 
 # For example: "a", "b", "rc"
 # (which means "alpha", "beta", "release candidate").
 # An empty string means the generated package will be an official release.
-release_version_type = "a"
+release_version_type = "@pyside_PRE_RELEASE_VERSION_TYPE@"
 
 # For example: "1", "2" (which means "beta1", "beta2", if type is "b").
-pre_release_version = "1"
+pre_release_version = "@pyside_PRE_RELEASE_VERSION@"
 
 if __name__ == '__main__':
     # Used by CMake.

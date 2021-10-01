@@ -1228,3 +1228,22 @@ def get_ci_qmake_path(ci_install_dir, ci_host_os):
         return f"{qmake_path}\\bin\\qmake.exe"
     else:
         return f"{qmake_path}/bin/qmake"
+
+
+def parse_cmake_conf_assignments_by_key(source_dir):
+    """
+        Parses a .cmake.conf file that contains set(foo "bar") assignments
+        and returns a dict with those assignments transformed to keys and
+        values.
+    """
+
+    d = {}
+    contents = (Path(source_dir) / ".cmake.conf").read_text()
+    matches = re.findall(r'set\((.+?) "(.*?)"\)', contents)
+    for m in matches:
+        key = m[0]
+        value = m[1]
+        if key and value:
+            d[key] = value
+    return d
+

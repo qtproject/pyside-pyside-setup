@@ -26,28 +26,6 @@ endif()
 
 setup_clang()
 
-set(SHIBOKEN_VERSION_FILE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/shiboken_version.py")
-set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
-  ${SHIBOKEN_VERSION_FILE_PATH}
-)
-execute_process(
-  COMMAND ${PYTHON_EXECUTABLE} "${SHIBOKEN_VERSION_FILE_PATH}"
-  OUTPUT_VARIABLE SHIBOKEN_VERSION_OUTPUT
-  ERROR_VARIABLE SHIBOKEN_VERSION_OUTPUT_ERROR
-  OUTPUT_STRIP_TRAILING_WHITESPACE)
-if (NOT SHIBOKEN_VERSION_OUTPUT)
-    message(FATAL_ERROR "Could not identify shiboken version. \
-                         Error: ${SHIBOKEN_VERSION_OUTPUT_ERROR}")
-endif()
-
-list(GET SHIBOKEN_VERSION_OUTPUT 0 shiboken_MAJOR_VERSION)
-list(GET SHIBOKEN_VERSION_OUTPUT 1 shiboken_MINOR_VERSION)
-list(GET SHIBOKEN_VERSION_OUTPUT 2 shiboken_MICRO_VERSION)
-# a - alpha, b - beta, rc - rc
-list(GET SHIBOKEN_VERSION_OUTPUT 3 shiboken_PRE_RELEASE_VERSION_TYPE)
-# the number of the pre release (alpha1, beta3, rc7, etc.)
-list(GET SHIBOKEN_VERSION_OUTPUT 4 shiboken_PRE_RELEASE_VERSION)
-
 set(shiboken6_VERSION "${shiboken_MAJOR_VERSION}.${shiboken_MINOR_VERSION}.${shiboken_MICRO_VERSION}")
 set(shiboken6_library_so_version "${shiboken_MAJOR_VERSION}.${shiboken_MINOR_VERSION}")
 

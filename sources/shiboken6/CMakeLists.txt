@@ -5,6 +5,7 @@ cmake_policy(VERSION 3.16)
 
 set(CMAKE_BUILD_TYPE Release CACHE STRING "Build Type")
 
+include(".cmake.conf")
 project(shiboken6)
 
 include(cmake/ShibokenSetup.cmake)
