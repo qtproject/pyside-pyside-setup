@@ -83,9 +83,6 @@ public:
     /// Returns a list of all ancestor classes for the given class.
     AbstractMetaClassList getAllAncestors(const AbstractMetaClass *metaClass) const;
 
-    /// Returns true if the user enabled PySide extensions.
-    bool usePySideExtensions() const;
-
 protected:
     bool doSetup() override;
 
@@ -557,7 +554,6 @@ private:
 
     bool m_useCtorHeuristic = false;
     bool m_userReturnValueHeuristic = false;
-    bool m_usePySideExtensions = false;
     bool m_verboseErrorMessagesDisabled = false;
     bool m_useIsNullAsNbNonZero = false;
     bool m_avoidProtectedHack = false;

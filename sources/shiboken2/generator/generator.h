@@ -237,6 +237,9 @@ public:
     /// Returns the generator's name. Used for cosmetic purposes.
     virtual const char *name() const = 0;
 
+    /// Returns true if the user enabled PySide extensions (command line option)
+    bool usePySideExtensions() const;
+
     /**
      *  Retrieves the name of the currently processed module.
      *  While package name is a complete package idetification, e.g. 'PySide.QtCore',

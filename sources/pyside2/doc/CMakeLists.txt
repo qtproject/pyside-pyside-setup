@@ -152,6 +152,7 @@ configure_file("conf.py.in" "rst/conf.py" @ONLY)
 add_custom_target("docrsts"
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/rst
     COMMAND Shiboken2::shiboken2 --generator-set=qtdoc ${docHeader}
+            --enable-pyside-extensions
             --include-paths="${QT_INCLUDE_DIR}${PATH_SEP}${pyside2_SOURCE_DIR}${PATH_SEP}${TS_ROOT}"
             --api-version=${SUPPORTED_QT_VERSION}
             --typesystem-paths="${QDOC_TYPESYSTEM_PATH}"
