@@ -1161,15 +1161,27 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
 
     if (!func->injectedCodeCallsPythonOverride()) {
         s << "Shiboken::AutoDecRef " << pyRetVar << "(PyObject_Call("
-            << PYTHON_OVERRIDE_VAR << ", " << PYTHON_ARGS << ", nullptr));\n"
-            << "if (" << pyRetVar << ".isNull()) {\n" << indent
-                << "// An error happened in python code!\n"
-                << "PyErr_Print();\n" << returnStatement << '\n' << outdent
-            << "}\n";
+            << PYTHON_OVERRIDE_VAR << ", " << PYTHON_ARGS << ", nullptr));\n";
+
+        for (int argIndex : qAsConst(invalidateArgs)) {
+            s << "if (invalidateArg" << argIndex << ")\n" << indent
+                << "Shiboken::Object::invalidate(PyTuple_GET_ITEM(" << PYTHON_ARGS
+                << ", " << (argIndex - 1) << "));\n" << outdent;
+        }
+
+        s << "if (" << pyRetVar << ".isNull()) {\n" << indent
+            << "// An error happened in python code!\n"
+            << "PyErr_Print();\n"
+            << returnStatement << "\n" << outdent
+        << "}\n";
+
+        if (invalidateReturn) {
+            s << "bool invalidateArg0 = " << pyRetVar << "->ob_refcnt == 1;\n"
+                << "if (invalidateArg0)\n" << indent
+                << "Shiboken::Object::releaseOwnership(" << pyRetVar << ".object());\n" << outdent;
+        }
 
         if (!func->isVoid()) {
-            if (invalidateReturn)
-                s << "bool invalidateArg0 = " << pyRetVar << "->ob_refcnt == 1;\n";
 
             if (func->modifiedTypeName() != cPyObjectT()) {
 
@@ -1177,10 +1189,10 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
 
                 if (!func->isTypeModified()) {
 
-                    s << PYTHON_TO_CPPCONVERSION_STRUCT
-                    << ' ' << PYTHON_TO_CPP_VAR << " = "
-                    << cpythonIsConvertibleFunction(func->type())
-                    << pyRetVar << ");\n"
+                    s << PYTHON_TO_CPPCONVERSION_STRUCT << ' '
+                    << PYTHON_TO_CPP_VAR << " =\n" << indent
+                        << cpythonIsConvertibleFunction(func->type())
+                        << pyRetVar << ");\n" << outdent
                     << "if (!" << PYTHON_TO_CPP_VAR << ") {\n" << indent
                         << "Shiboken::warning(PyExc_RuntimeWarning, 2,\n" << indent
                         << "\"Invalid return value in function %s, expected %s, got %s.\",\n"
@@ -1226,17 +1238,6 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
                     PythonToCppTypeConversionFlag::DisableOpaqueContainers);
             }
         }
-    }
-
-    if (invalidateReturn) {
-        s << "if (invalidateArg0)\n" << indent
-            << "Shiboken::Object::releaseOwnership(" << pyRetVar
-            << ".object());\n" << outdent;
-    }
-    for (int argIndex : qAsConst(invalidateArgs)) {
-        s << "if (invalidateArg" << argIndex << ")\n" << indent
-            << "Shiboken::Object::invalidate(PyTuple_GET_ITEM(" << PYTHON_ARGS
-            << ", " << (argIndex - 1) << "));\n" << outdent;
     }
 
     for (const FunctionModification &funcMod : func->modifications()) {
