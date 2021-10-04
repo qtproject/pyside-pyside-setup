@@ -4108,6 +4108,14 @@ void CppGenerator::writeEnumConverterInitialization(TextStream &s, const TypeEnt
             else
                 break;
         }
+        if (flags) {
+            // PYSIDE-1673: Also register "QFlags<Class::Option>" purely for
+            // the purpose of finding the converter by QVariant::typeName()
+            // in the QVariant conversion code.
+            s << "Shiboken::Conversions::registerConverterName(converter, \""
+                << flags->name() << "\");\n";
+        }
+
     }
     s << "}\n";
 

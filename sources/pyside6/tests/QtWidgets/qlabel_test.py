@@ -37,6 +37,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(True)
 
+from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QLabel
 from shiboken6 import Shiboken
@@ -84,6 +85,12 @@ class QLabelTest(UsesQApplication):
         # using `del ret_p`
         self.assertTrue(all(Shiboken.getCppPointer(o) != ret_p_addr
                    for o in Shiboken.getAllValidWrappers()))
+
+    # Test for PYSIDE-1673, QObject.property() returning a QFlags<> property.
+    def testQObjectProperty(self):
+        a = self.label.property("alignment")
+        self.assertEqual(type(a), Qt.Alignment)
+        print("alignment=", a)
 
 
 if __name__ == '__main__':
