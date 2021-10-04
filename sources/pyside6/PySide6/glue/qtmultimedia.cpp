@@ -39,7 +39,8 @@
 
 // @snippet qvideoframe-bits
 %BEGIN_ALLOW_THREADS
-%RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME();
+%RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME(%1);
 %END_ALLOW_THREADS
-%PYARG_0 = Shiboken::Buffer::newObject(%0, %CPPSELF.bytesPerLine() * %CPPSELF.height(), Shiboken::Buffer::ReadWrite);
+const auto size = %CPPSELF.mappedBytes(%1);
+%PYARG_0 = Shiboken::Buffer::newObject(%0, size, Shiboken::Buffer::ReadWrite);
 // @snippet qvideoframe-bits
