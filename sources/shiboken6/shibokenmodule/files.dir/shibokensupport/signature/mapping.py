@@ -288,6 +288,8 @@ type_map.update({
     "std.list": typing.List,
     "std.map": typing.Dict,
     "std.pair": typing.Tuple,
+    "std.string": str,
+    "std.wstring": str,
     "std.vector": typing.List,
     "str": str,
     "true": True,
