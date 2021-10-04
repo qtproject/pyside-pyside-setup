@@ -1569,34 +1569,27 @@ return result;)";
             const AbstractMetaClass *sourceClass = conv->ownerClass();
             typeCheck = u"PyObject_TypeCheck(pyIn, "_qs
                         + cpythonTypeNameExt(sourceClass->typeEntry()) + u')';
-            toCppConv = QLatin1Char('*') + cpythonWrapperCPtr(sourceClass->typeEntry(), QLatin1String("pyIn"));
+            toCppConv = QLatin1Char('*') + cpythonWrapperCPtr(sourceClass->typeEntry(),
+                                                              pyInVariable);
         } else {
             // Constructor that does implicit conversion.
             const auto &firstArg = conv->arguments().constFirst();
             if (firstArg.isTypeModified() || conv->isModifiedToArray(1))
                 continue;
             const AbstractMetaType &sourceType = firstArg.type();
-            typeCheck = cpythonCheckFunction(sourceType);
-            bool isUserPrimitiveWithoutTargetLangName = sourceType.isUserPrimitive()
-                && !sourceType.typeEntry()->hasTargetLangApiType();
-            if (!sourceType.isWrapperType()
-                && !isUserPrimitiveWithoutTargetLangName
-                && !sourceType.typeEntry()->isEnum()
-                && !sourceType.typeEntry()->isFlags()
-                && !sourceType.typeEntry()->isContainer()) {
-                typeCheck += QLatin1Char('(');
-            }
             if (sourceType.isWrapperType()) {
-                typeCheck += QLatin1String("pyIn)");
-                toCppConv = (sourceType.referenceType() == LValueReference
-                             || !sourceType.isPointerToWrapperType())
-                    ? QLatin1String(" *") : QString();
-                toCppConv += cpythonWrapperCPtr(sourceType.typeEntry(), QLatin1String("pyIn"));
-            } else if (typeCheck.contains(QLatin1String("%in"))) {
-                typeCheck.replace(QLatin1String("%in"), QLatin1String("pyIn"));
-                typeCheck.append(QLatin1Char(')'));
-            } else {
-                typeCheck += QLatin1String("pyIn)");
+                if (sourceType.referenceType() == LValueReference
+                    || !sourceType.isPointerToWrapperType()) {
+                    toCppConv = u" *"_qs;
+                }
+                toCppConv += cpythonWrapperCPtr(sourceType.typeEntry(), pyInVariable);
+            }
+
+            typeCheck = cpythonCheckFunction(sourceType);
+            if (typeCheck.endsWith(u", ")) {
+                typeCheck += pyInVariable + u')';
+            } else if (typeCheck != u"true" && typeCheck != u"false") {
+                typeCheck += u'(' + pyInVariable + u')';
             }
 
             if (sourceType.isUserPrimitive()
@@ -1607,13 +1600,15 @@ return result;)";
                 StringStream pc(TextStream::Language::Cpp);
                 pc << getFullTypeNameWithoutModifiers(sourceType) << " cppIn"
                     << minimalConstructorExpression(api(), sourceType) << ";\n";
-                writeToCppConversion(pc, sourceType, nullptr, QLatin1String("pyIn"), QLatin1String("cppIn"));
+                writeToCppConversion(pc, sourceType, nullptr, pyInVariable,
+                                     u"cppIn"_qs);
                 pc << ';';
                 toCppPreConv = pc.toString();
                 toCppConv.append(QLatin1String("cppIn"));
             } else if (!sourceType.isWrapperType()) {
                 StringStream tcc(TextStream::Language::Cpp);
-                writeToCppConversion(tcc, sourceType, metaClass, QLatin1String("pyIn"), QLatin1String("/*BOZO-1061*/"));
+                writeToCppConversion(tcc, sourceType, metaClass, pyInVariable,
+                                     u"/*BOZO-1061*/"_qs);
                 toCppConv = tcc.toString();
             }
         }

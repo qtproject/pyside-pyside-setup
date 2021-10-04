@@ -1027,11 +1027,11 @@ QString ShibokenGenerator::cpythonCheckFunction(AbstractMetaType metaType) const
             || type == ContainerTypeEntry::SetContainer) {
             const AbstractMetaType &type = metaType.instantiations().constFirst();
             if (type.isPointerToWrapperType()) {
-                typeCheck += u"checkSequenceTypes("_qs + cpythonTypeNameExt(type) + u", "_qs;
+                typeCheck += u"checkSequenceTypes("_qs + cpythonTypeNameExt(type)
+                             + u", "_qs;
             } else if (type.isWrapperType()) {
-                typeCheck += QLatin1String("convertibleSequenceTypes(");
-                typeCheck += cpythonTypeNameExt(type);
-                typeCheck += QLatin1String(", ");
+                typeCheck += u"convertibleSequenceTypes("_qs +
+                             cpythonTypeNameExt(type) + u", "_qs;
             } else {
                 typeCheck += u"convertibleSequenceTypes("_qs + converterObject(type)
                              + u", "_qs;
@@ -1051,14 +1051,16 @@ QString ShibokenGenerator::cpythonCheckFunction(AbstractMetaType metaType) const
             const AbstractMetaType &firstType = metaType.instantiations().constFirst();
             const AbstractMetaType &secondType = metaType.instantiations().constLast();
             if (firstType.isPointerToWrapperType() && secondType.isPointerToWrapperType()) {
-                typeCheck += QString::fromLatin1("check%1Types(%2, %3, ")
-                             .arg(pyType, cpythonTypeNameExt(firstType), cpythonTypeNameExt(secondType));
+                QTextStream(&typeCheck) << "check" << pyType << "Types("
+                    << cpythonTypeNameExt(firstType) << ", "
+                    << cpythonTypeNameExt(secondType) << ", ";
             } else {
-                typeCheck += QString::fromLatin1("convertible%1Types(%2, %3, %4, %5, ")
-                                .arg(pyType, converterObject(firstType),
-                                     firstType.isPointerToWrapperType() ? QLatin1String("true") : QLatin1String("false"),
-                                     converterObject(secondType),
-                                     secondType.isPointerToWrapperType() ? QLatin1String("true") : QLatin1String("false"));
+                QTextStream(&typeCheck) << "convertible" << pyType << "Types("
+                    << converterObject(firstType) << ", "
+                    << (firstType.isPointerToWrapperType() ? "true" : "false")
+                    << ", " << converterObject(secondType) << ", "
+                    << (secondType.isPointerToWrapperType() ? "true" :"false")
+                    << ", ";
             }
         }
         return typeCheck;
