@@ -64,15 +64,4 @@
       <include file-name="QWebSocketCorsAuthenticator" location="global"/>
     </extra-includes>
   </object-type>
-
-  <!-- TODO: Gracefully handle the lack of SSL support -->
-  <rejection class="QWebSocket" function-name="ignoreSslErrors"/>
-  <rejection class="QWebSocket" function-name="setSslConfiguration"/>
-  <rejection class="QWebSocket" function-name="sslConfiguration"/>
-  <rejection class="QWebSocket" function-name="ignoreSslErrors"/>
-  <rejection class="QWebSocket" function-name="sslErrors"/>
-  <rejection class="QWebSocketServer" function-name="setSslConfiguration"/>
-  <rejection class="QWebSocketServer" function-name="sslConfiguration"/>
-  <rejection class="QWebSocketServer" function-name="peerVerifyError"/>
-  <rejection class="QWebSocketServer" function-name="sslErrors"/>
 </typesystem>
