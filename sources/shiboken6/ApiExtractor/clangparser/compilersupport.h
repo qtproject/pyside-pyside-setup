@@ -42,6 +42,18 @@ enum class LanguageLevel {
     Cpp1Z
 };
 
+enum class Compiler {
+    Msvc,
+    Gpp,
+    Clang
+};
+
+enum class Platform {
+    Unix,
+    Windows,
+    macOS
+};
+
 namespace clang {
 QVersionNumber libClangVersion();
 
@@ -50,6 +62,9 @@ LanguageLevel emulatedCompilerLanguageLevel();
 
 const char *languageLevelOption(LanguageLevel l);
 LanguageLevel languageLevelFromOption(const char *);
+
+Compiler compiler();
+Platform platform();
 } // namespace clang
 
 #endif // COMPILERSUPPORT_H
