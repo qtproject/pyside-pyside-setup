@@ -56,6 +56,14 @@ private:
     FileNameCache m_fileNameCache;
 };
 
+enum class LocationType
+{
+    Main, // Main header parsed for bindings
+    Other, // A header parsed for bindings
+    System,  // A system header
+    Unknown  // Clang internal
+};
+
 class BaseVisitor {
     Q_DISABLE_COPY(BaseVisitor)
 public:
@@ -68,7 +76,7 @@ public:
 
     // Whether location should be visited.
     // defaults to clang_Location_isFromMainFile()
-    virtual bool visitLocation(const CXSourceLocation &location) const;
+    virtual bool visitLocation(const QString &fileName, LocationType locationType) const;
 
     virtual StartTokenResult startToken(const CXCursor &cursor) = 0;
     virtual bool endToken(const CXCursor &cursor) = 0;
@@ -84,9 +92,14 @@ public:
     void setDiagnostics(const Diagnostics &d);
     void appendDiagnostic(const Diagnostic &d);
 
+    // For usage by the parser
+    bool _handleVisitLocation( const CXSourceLocation &location);
+
 private:
     SourceFileCache m_fileCache;
     Diagnostics m_diagnostics;
+    CXFile m_currentCxFile{};
+    bool m_visitCurrent = true;
 };
 
 bool parse(const QByteArrayList  &clangArgs,

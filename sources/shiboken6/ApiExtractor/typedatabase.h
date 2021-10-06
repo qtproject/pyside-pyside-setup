@@ -121,7 +121,7 @@ public:
 
     IncludeList extraIncludes(const QString &className) const;
 
-    const QByteArrayList &systemIncludes() const { return m_systemIncludes; }
+    const QStringList &systemIncludes() const { return m_systemIncludes; }
     void addSystemInclude(const QString &name);
 
     void addInlineNamespaceLookups(const NamespaceTypeEntry *n);
@@ -251,7 +251,7 @@ private:
     QList<TypeRejection> m_rejections;
 
     QStringList m_dropTypeEntries;
-    QByteArrayList m_systemIncludes;
+    QStringList m_systemIncludes;
 };
 
 #ifndef QT_NO_DEBUG_STREAM

@@ -44,9 +44,9 @@ public:
     Builder();
     ~Builder();
 
-    void setSystemIncludes(const QByteArrayList &systemIncludes);
+    void setSystemIncludes(const QStringList &systemIncludes);
 
-    bool visitLocation(const CXSourceLocation &location) const override;
+    bool visitLocation(const QString &fileName, LocationType locationType) const override;
 
     StartTokenResult startToken(const CXCursor &cursor) override;
     bool endToken(const CXCursor &cursor) override;
