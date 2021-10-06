@@ -1,0 +1,5 @@
+{
+    "files": ["example.qml",
+              "main.py",
+              "person.py"]
+}
