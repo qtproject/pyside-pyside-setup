@@ -53,6 +53,28 @@ QVersionNumber libClangVersion()
     return QVersionNumber(CINDEX_VERSION_MAJOR, CINDEX_VERSION_MINOR);
 }
 
+static Compiler _compiler =
+#if defined (Q_CC_CLANG)
+    Compiler::Clang;
+#elif defined (Q_CC_MSVC)
+    Compiler::Msvc;
+#else
+    Compiler::Gpp;
+#endif
+
+Compiler compiler() { return _compiler; }
+
+static Platform _platform =
+#if defined (Q_OS_DARWIN)
+    Platform::macOS;
+#elif defined (Q_OS_WIN)
+    Platform::Windows;
+#else
+    Platform::Unix;
+#endif
+
+Platform platform() { return _platform; }
+
 static bool runProcess(const QString &program, const QStringList &arguments,
                        QByteArray *stdOutIn = nullptr, QByteArray *stdErrIn = nullptr)
 {
@@ -91,11 +113,8 @@ static bool runProcess(const QString &program, const QStringList &arguments,
     return true;
 }
 
-#if defined(Q_CC_GNU)
-
 static QByteArray frameworkPath() { return QByteArrayLiteral(" (framework directory)"); }
 
-#  if defined(Q_OS_MACOS)
 static void filterHomebrewHeaderPaths(HeaderPaths &headerPaths)
 {
     QByteArray homebrewPrefix = qgetenv("HOMEBREW_OPT");
@@ -123,7 +142,6 @@ static void filterHomebrewHeaderPaths(HeaderPaths &headerPaths)
         }
     }
 }
-#  endif
 
 // Determine g++'s internal include paths from the output of
 // g++ -E -x c++ - -v </dev/null
@@ -161,12 +179,11 @@ static HeaderPaths gppInternalIncludePaths(const QString &compiler)
         }
     }
 
-#  if defined(Q_OS_MACOS)
-    filterHomebrewHeaderPaths(result);
-#  endif
+    if (platform() == Platform::macOS)
+        filterHomebrewHeaderPaths(result);
+
     return result;
 }
-#endif // Q_CC_MSVC
 
 // Detect Vulkan as supported from Qt 5.10 by checking the environment variables.
 static void detectVulkan(HeaderPaths *headerPaths)
@@ -181,40 +198,6 @@ static void detectVulkan(HeaderPaths *headerPaths)
     }
 }
 
-#if defined(Q_CC_GNU)
-enum class LinuxDistribution { RedHat, CentOs, Other };
-
-static LinuxDistribution linuxDistribution()
-{
-    const QString &productType = QSysInfo::productType();
-    if (productType == QLatin1String("rhel"))
-        return LinuxDistribution::RedHat;
-    if (productType.compare(QLatin1String("centos"), Qt::CaseInsensitive) == 0)
-        return LinuxDistribution::CentOs;
-    return LinuxDistribution::Other;
-}
-
-static bool checkProductVersion(const QVersionNumber &minimum,
-                                const QVersionNumber &excludedMaximum)
-{
-    const QVersionNumber osVersion = QVersionNumber::fromString(QSysInfo::productVersion());
-    return osVersion.isNull() || (osVersion >= minimum && osVersion < excludedMaximum);
-}
-
-static inline bool needsGppInternalHeaders()
-{
-    const LinuxDistribution distro = linuxDistribution();
-    switch (distro) {
-    case LinuxDistribution::RedHat:
-    case LinuxDistribution::CentOs:
-        return checkProductVersion(QVersionNumber(6, 10), QVersionNumber(8));
-    case LinuxDistribution::Other:
-        break;
-    }
-    return false;
-}
-#endif // Q_CC_GNU
-
 // For MSVC, we set the MS compatibility version and let Clang figure out its own
 // options and include paths.
 // For the others, we pass "-nostdinc" since libclang tries to add it's own system
@@ -222,9 +205,7 @@ static inline bool needsGppInternalHeaders()
 // which causes std types not being found and construct -I/-F options from the
 // include paths of the host compiler.
 
-#ifdef Q_CC_CLANG
 static QByteArray noStandardIncludeOption() { return QByteArrayLiteral("-nostdinc"); }
-#endif
 
 // The clang builtin includes directory is used to find the definitions for
 // intrinsic functions and builtin types. It is necessary to use the clang
@@ -234,13 +215,12 @@ static QByteArray noStandardIncludeOption() { return QByteArrayLiteral("-nostdin
 
 // Besides g++/Linux, as of MSVC 19.28.29334, MSVC needs clang includes
 // due to PYSIDE-1433, LLVM-47099
-#if !defined(Q_OS_DARWIN)
-#  define NEED_CLANG_BUILTIN_INCLUDES 1
-#else
-#  define NEED_CLANG_BUILTIN_INCLUDES 0
-#endif
 
-#if NEED_CLANG_BUILTIN_INCLUDES
+static bool needsClangBuiltinIncludes()
+{
+    return platform() != Platform::macOS;
+}
+
 static QString findClangLibDir()
 {
     for (const char *envVar : {"LLVM_INSTALL_DIR", "CLANG_INSTALL_DIR"}) {
@@ -293,22 +273,18 @@ static QString findClangBuiltInIncludesDir()
     }
     return QString();
 }
-#endif // NEED_CLANG_BUILTIN_INCLUDES
 
-#if defined(Q_CC_CLANG) || defined(Q_CC_GNU)
 static QString compilerFromCMake(const QString &defaultCompiler)
 {
 // Added !defined(Q_OS_DARWIN) due to PYSIDE-1032
-#  if defined(CMAKE_CXX_COMPILER) && !defined(Q_OS_DARWIN)
-    Q_UNUSED(defaultCompiler);
-    return QString::fromLocal8Bit(CMAKE_CXX_COMPILER);
-#  else
-    return defaultCompiler;
-#  endif
+    QString result = defaultCompiler;
+    if (platform() != Platform::macOS)
+#ifdef CMAKE_CXX_COMPILER
+        result = QString::fromLocal8Bit(CMAKE_CXX_COMPILER);
+#endif
+    return result;
 }
-#endif // Q_CC_CLANG, Q_CC_GNU
 
-#if NEED_CLANG_BUILTIN_INCLUDES
 static void appendClangBuiltinIncludes(HeaderPaths *p)
 {
     const QString clangBuiltinIncludesDir =
@@ -324,54 +300,32 @@ static void appendClangBuiltinIncludes(HeaderPaths *p)
                              HeaderType::System});
     }
 }
-#endif // NEED_CLANG_BUILTIN_INCLUDES
 
 // Returns clang options needed for emulating the host compiler
 QByteArrayList emulatedCompilerOptions()
 {
-#if defined(Q_CC_GNU)
-    // Needed to silence a warning, but needsGppInternalHeaders is used below.
-    // This seems to be a compiler bug on macOS.
-    Q_UNUSED(needsGppInternalHeaders);
-#endif
     QByteArrayList result;
-#if defined(Q_CC_MSVC)
     HeaderPaths headerPaths;
-    result.append(QByteArrayLiteral("-fms-compatibility-version=19.26.28806"));
-    result.append(QByteArrayLiteral("-fdelayed-template-parsing"));
-    result.append(QByteArrayLiteral("-Wno-microsoft-enum-value"));
-    // Fix yvals_core.h:  STL1000: Unexpected compiler version, expected Clang 7 or newer (MSVC2017 update)
-    result.append(QByteArrayLiteral("-D_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH"));
-#  if NEED_CLANG_BUILTIN_INCLUDES
-    appendClangBuiltinIncludes(&headerPaths);
-#  endif // NEED_CLANG_BUILTIN_INCLUDES
-
-#elif defined(Q_CC_CLANG)
-    HeaderPaths headerPaths = gppInternalIncludePaths(compilerFromCMake(QStringLiteral("clang++")));
-    result.append(noStandardIncludeOption());
-#elif defined(Q_CC_GNU)
-    HeaderPaths headerPaths;
-
-#  if NEED_CLANG_BUILTIN_INCLUDES
-    appendClangBuiltinIncludes(&headerPaths);
-#  endif // NEED_CLANG_BUILTIN_INCLUDES
-
-    // Append the c++ include paths since Clang is unable to find <list> etc
-    // on RHEL 7 with g++ 6.3 or CentOS 7.2.
-    // A fix for this has been added to Clang 5.0, so, the code can be removed
-    // once Clang 5.0 is the minimum version.
-    if (needsGppInternalHeaders()) {
-        const HeaderPaths gppPaths = gppInternalIncludePaths(compilerFromCMake(QStringLiteral("g++")));
-        for (const HeaderPath &h : gppPaths) {
-            if (h.path.contains("c++")
-                || h.path.contains("sysroot")) { // centOS
-                headerPaths.append(h);
-            }
-        }
+    switch (compiler()) {
+    case Compiler::Msvc:
+        result.append(QByteArrayLiteral("-fms-compatibility-version=19.26.28806"));
+        result.append(QByteArrayLiteral("-fdelayed-template-parsing"));
+        result.append(QByteArrayLiteral("-Wno-microsoft-enum-value"));
+        // Fix yvals_core.h:  STL1000: Unexpected compiler version, expected Clang 7 or newer (MSVC2017 update)
+        result.append(QByteArrayLiteral("-D_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH"));
+        if (needsClangBuiltinIncludes())
+            appendClangBuiltinIncludes(&headerPaths);
+        break;
+    case Compiler::Clang:
+        headerPaths.append(gppInternalIncludePaths(compilerFromCMake(u"clang++"_qs)));
+        result.append(noStandardIncludeOption());
+        break;
+    case Compiler::Gpp:
+        if (needsClangBuiltinIncludes())
+            appendClangBuiltinIncludes(&headerPaths);
+        break;
     }
-#else
-    HeaderPaths headerPaths;
-#endif
+
     detectVulkan(&headerPaths);
     std::transform(headerPaths.cbegin(), headerPaths.cend(),
                    std::back_inserter(result), HeaderPath::includeOption);

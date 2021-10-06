@@ -827,24 +827,29 @@ bool BuilderPrivate::visitHeader(const QString &fileName) const
     const QString baseName = clang::baseName(fileName);
     if (baseName == u"gl.h")
         return true;
-#if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
-    if (fileName == u"/usr/include/stdint.h")
-        return true;
-#endif
-#ifdef Q_OS_LINUX
-    if (fileName == u"/usr/include/stdlib.h" || baseName == u"types.h")
-        return true;
-#endif // Q_OS_LINUX
-#ifdef Q_OS_MACOS
-    // Parse the following system headers to get the correct typdefs for types like
-    // int32_t, which are used in the macOS implementation of OpenGL framework.
-    if (baseName == u"gltypes.h"
-        || fileName.startsWith(u"/usr/include/_types")
-        || fileName.startsWith(u"/usr/include/_types")
-        || fileName.startsWith(u"/usr/include/sys/_types")) {
-        return true;
+
+    switch (clang::platform()) {
+    case Platform::Unix:
+        if (fileName == u"/usr/include/stdlib.h"
+            || fileName == u"/usr/include/stdint.h"
+            || baseName == u"types.h")
+            return true;
+        break;
+    case Platform::macOS:
+        // Parse the following system headers to get the correct typdefs for types like
+        // int32_t, which are used in the macOS implementation of OpenGL framework.
+        if (baseName == u"gltypes.h"
+            || fileName == u"/usr/include/stdint.h"
+            || fileName.startsWith(u"/usr/include/_types")
+            || fileName.startsWith(u"/usr/include/_types")
+            || fileName.startsWith(u"/usr/include/sys/_types")) {
+            return true;
+        }
+        break;
+    default:
+        break;
     }
-#endif // Q_OS_MACOS
+
     for (const auto &systemInclude : m_systemIncludes) {
         if (systemInclude == baseName)
             return true;
