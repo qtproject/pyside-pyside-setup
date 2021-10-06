@@ -991,9 +991,14 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
                                             const AbstractMetaFunctionCPtr &func,
                                             int cacheIndex) const
 {
-    //skip metaObject function, this will be written manually ahead
+    // abbreviations
+    const QString pyRetVar = QLatin1String(PYTHON_RETURN_VAR);
+    const QString cppRetVar = QLatin1String(CPP_RETURN_VAR);
+
+    // skip metaObject function, this will be written manually ahead
     if (usePySideExtensions() && func->ownerClass() && func->ownerClass()->isQObject() &&
-        ((func->name() == QLatin1String("metaObject")) || (func->name() == QLatin1String("qt_metacall"))))
+        ((func->name() == u"metaObject"_qs)
+            || (func->name() == QLatin1String("qt_metacall"))))
         return;
 
     const TypeEntry *retType = func->type().typeEntry();
@@ -1001,7 +1006,8 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
         ? pythonOperatorFunctionName(func) : func->definitionNames().constFirst();
 
     QString prefix = wrapperName(func->ownerClass()) + QLatin1String("::");
-    s << functionSignature(func, prefix, QString(), Generator::SkipDefaultValues|Generator::OriginalTypeDescription)
+    s << functionSignature(func, prefix, QString(), Generator::SkipDefaultValues |
+                                                    Generator::OriginalTypeDescription)
       << "\n{\n" << indent;
 
     const QString returnStatement = virtualMethodReturn(s, api(), func,
@@ -1018,7 +1024,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
     const AbstractMetaArgument *lastArg = func->arguments().isEmpty()
         ?  nullptr : &func->arguments().constLast();
 
-    //Write declaration/native injected code
+    // Write declaration/native injected code.
     if (!snips.isEmpty()) {
         writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionDeclaration,
                        TypeSystem::ShellCode, func, false, lastArg);
@@ -1033,7 +1039,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
            << cacheIndex << R"( << "]=" << m_PyMethodCache[)" << cacheIndex
            << R"(] << '\n';)" << '\n';
     }
-    // PYSIDE-803: Build a boolean cache for unused overrides.
+    // PYSIDE-803: Build a boolean cache for unused overrides
     const bool multi_line = func->isVoid() || !snips.isEmpty() || func->isAbstract();
     s << "if (m_PyMethodCache[" << cacheIndex << "])" << (multi_line ? " {\n" : "\n");
     {
@@ -1050,7 +1056,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
     s << "if (PyErr_Occurred())\n" << indent
         << returnStatement << '\n' << outdent;
 
-    //PYSIDE-1019: Add info about properties.
+    // PYSIDE-1019: Add info about properties
     int propFlag = 0;
     if (func->isPropertyReader())
         propFlag |= 1;
@@ -1106,7 +1112,8 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
             }
 
             StringStream ac(TextStream::Language::Cpp);
-            if (!func->conversionRule(TypeSystem::TargetLangCode, arg.argumentIndex() + 1).isEmpty()) {
+            if (!func->conversionRule(TypeSystem::TargetLangCode,
+                                      arg.argumentIndex() + 1).isEmpty()) {
                 // Has conversion rule.
                 ac << arg.name() + QLatin1String(CONV_RULE_OUT_VAR_SUFFIX);
             } else {
@@ -1121,7 +1128,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
         }
 
         s << "Py_BuildValue(\"(" << getFormatUnitString(func, false) << ")\",\n"
-            << argConversions.join(QLatin1String(",\n")) << "\n));\n";
+            << indent << argConversions.join(u",\n"_qs) << outdent << "\n));\n";
     }
 
     bool invalidateReturn = false;
@@ -1146,89 +1153,84 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
         if (func->injectedCodeUsesPySelf())
             s << "PyObject *pySelf = BindingManager::instance().retrieveWrapper(this);\n";
 
-        const AbstractMetaArgument *lastArg = func->arguments().isEmpty() ? nullptr : &func->arguments().constLast();
+        const AbstractMetaArgument *lastArg = func->arguments().isEmpty()
+                                            ? nullptr : &func->arguments().constLast();
         writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionBeginning,
                        TypeSystem::NativeCode, func, false, lastArg);
     }
 
     if (!func->injectedCodeCallsPythonOverride()) {
-        s << "Shiboken::AutoDecRef " << PYTHON_RETURN_VAR << "(PyObject_Call("
+        s << "Shiboken::AutoDecRef " << pyRetVar << "(PyObject_Call("
             << PYTHON_OVERRIDE_VAR << ", " << PYTHON_ARGS << ", nullptr));\n"
-            << "// An error happened in python code!\n"
-            << "if (" << PYTHON_RETURN_VAR << ".isNull()) {\n" << indent
-            << "PyErr_Print();\n" << returnStatement << '\n' << outdent
+            << "if (" << pyRetVar << ".isNull()) {\n" << indent
+                << "// An error happened in python code!\n"
+                << "PyErr_Print();\n" << returnStatement << '\n' << outdent
             << "}\n";
 
         if (!func->isVoid()) {
             if (invalidateReturn)
-                s << "bool invalidateArg0 = " << PYTHON_RETURN_VAR << "->ob_refcnt == 1;\n";
+                s << "bool invalidateArg0 = " << pyRetVar << "->ob_refcnt == 1;\n";
 
             if (func->modifiedTypeName() != cPyObjectT()) {
 
                 s << "// Check return type\n";
+
                 if (!func->isTypeModified()) {
+
                     s << PYTHON_TO_CPPCONVERSION_STRUCT
-                        << ' ' << PYTHON_TO_CPP_VAR << " = "
-                        << cpythonIsConvertibleFunction(func->type())
-                        << PYTHON_RETURN_VAR << ");\n"
-                        << "if (!" << PYTHON_TO_CPP_VAR << ") {\n";
-                    {
-                        Indentation indent(s);
-                        s << "Shiboken::warning(PyExc_RuntimeWarning, 2, "\
-                             "\"Invalid return value in function %s, expected %s, got %s.\", \""
-                            << func->ownerClass()->name() << '.' << funcName << "\", "
-                            << getVirtualFunctionReturnTypeName(func)
-                            << ", Py_TYPE(" << PYTHON_RETURN_VAR << ")->tp_name);\n"
-                            << returnStatement << '\n';
-                    }
-                    s << "}\n";
+                    << ' ' << PYTHON_TO_CPP_VAR << " = "
+                    << cpythonIsConvertibleFunction(func->type())
+                    << pyRetVar << ");\n"
+                    << "if (!" << PYTHON_TO_CPP_VAR << ") {\n" << indent
+                        << "Shiboken::warning(PyExc_RuntimeWarning, 2,\n" << indent
+                        << "\"Invalid return value in function %s, expected %s, got %s.\",\n"
+                        << "\"" << func->ownerClass()->name() << '.' << funcName << "\",\n"
+                        << getVirtualFunctionReturnTypeName(func) << ",\n"
+                        << "Py_TYPE(" << pyRetVar << ")->tp_name);\n" << outdent
+                        << returnStatement << '\n' << outdent
+                    << "}\n";
 
                 } else {
 
-                    s << "// Check return type\n"
-                        << "bool typeIsValid = ";
+                    s << "bool typeIsValid = ";
                     if (func->isTypeModified()) {
-                        writeTypeCheck(s, func->modifiedTypeName(),
-                                       QLatin1String(PYTHON_RETURN_VAR));
+                        writeTypeCheck(s, func->modifiedTypeName(), pyRetVar);
                     } else {
                         const bool numberType = isNumber(func->type().typeEntry());
-                        writeTypeCheck(s, func->type(),
-                                       QLatin1String(PYTHON_RETURN_VAR), numberType);
+                        writeTypeCheck(s, func->type(), pyRetVar, numberType);
                     }
 
                     s << ";\n";
                     s << "if (!typeIsValid";
                     if (func->type().isPointerToWrapperType())
-                        s << " && " << PYTHON_RETURN_VAR << " != Py_None";
-                    s << ") {\n";
-                    {
-                        Indentation indent(s);
-                        s << "Shiboken::warning(PyExc_RuntimeWarning, 2, "\
-                             "\"Invalid return value in function %s, expected %s, got %s.\", \""
-                            << func->ownerClass()->name() << '.' << funcName << "\", "
-                            << getVirtualFunctionReturnTypeName(func)
-                            << ", Py_TYPE(" << PYTHON_RETURN_VAR << ")->tp_name);\n"
-                            << returnStatement << '\n';
-                    }
-                    s << "}\n";
+                        s << " && " << pyRetVar << " != Py_None";
+                    s << ") {\n" << indent
+                        << "Shiboken::warning(PyExc_RuntimeWarning, 2,\n" << indent
+                        << "\"Invalid return value in function %s, expected %s, got %s.\",\n"
+                        << "\"" << func->ownerClass()->name() << '.' << funcName << "\",\n"
+                        << getVirtualFunctionReturnTypeName(func) << ",\n"
+                        << "Py_TYPE(" << pyRetVar << ")->tp_name);\n" << outdent
+                        << returnStatement << '\n' << outdent
+                    << "}\n";
 
                 }
             }
 
             if (!func->conversionRule(TypeSystem::NativeCode, 0).isEmpty()) {
                 // Has conversion rule.
-                writeConversionRule(s, func, TypeSystem::NativeCode, QLatin1String(CPP_RETURN_VAR));
+                writeConversionRule(s, func, TypeSystem::NativeCode, cppRetVar);
             } else if (!func->injectedCodeHasReturnValueAttribution(TypeSystem::NativeCode)) {
-                writePythonToCppTypeConversion(s, func->type(), QLatin1String(PYTHON_RETURN_VAR),
-                                               QLatin1String(CPP_RETURN_VAR), func->implementingClass(), {},
-                                               PythonToCppTypeConversionFlag::DisableOpaqueContainers);
+                writePythonToCppTypeConversion(
+                    s, func->type(), pyRetVar,
+                    cppRetVar, func->implementingClass(), {},
+                    PythonToCppTypeConversionFlag::DisableOpaqueContainers);
             }
         }
     }
 
     if (invalidateReturn) {
         s << "if (invalidateArg0)\n" << indent
-            << "Shiboken::Object::releaseOwnership(" << PYTHON_RETURN_VAR
+            << "Shiboken::Object::releaseOwnership(" << pyRetVar
             << ".object());\n" << outdent;
     }
     for (int argIndex : qAsConst(invalidateArgs)) {
@@ -1237,21 +1239,21 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
             << ", " << (argIndex - 1) << "));\n" << outdent;
     }
 
-
     for (const FunctionModification &funcMod : func->modifications()) {
         for (const ArgumentModification &argMod : funcMod.argument_mods()) {
             if (argMod.index() == 0
                 && argMod.nativeOwnership() == TypeSystem::CppOwnership) {
-                s << "if (Shiboken::Object::checkType(" << PYTHON_RETURN_VAR << "))\n";
-                Indentation indent(s);
-                s << "Shiboken::Object::releaseOwnership(" << PYTHON_RETURN_VAR << ");\n";
+                s << "if (Shiboken::Object::checkType(" << pyRetVar << "))\n" << indent
+                    << "Shiboken::Object::releaseOwnership(" << pyRetVar << ");\n"
+                    << outdent;
             }
         }
     }
 
     if (func->hasInjectedCode()) {
         s << '\n';
-        const AbstractMetaArgument *lastArg = func->arguments().isEmpty() ? nullptr : &func->arguments().constLast();
+        const AbstractMetaArgument *lastArg = func->arguments().isEmpty()
+                        ? nullptr : &func->arguments().constLast();
         writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionEnd,
                        TypeSystem::NativeCode, func, false, lastArg);
     }
@@ -1264,14 +1266,14 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
             if (isProtectedEnum) {
                 QString typeCast;
                 if (metaEnum->enclosingClass())
-                    typeCast += QLatin1String("::") + metaEnum->enclosingClass()->qualifiedCppName();
-                typeCast += QLatin1String("::") + metaEnum->name();
+                    typeCast += u"::"_qs + metaEnum->enclosingClass()->qualifiedCppName();
+                typeCast += u"::"_qs + metaEnum->name();
                 s << '(' << typeCast << ')';
             }
         }
         if (func->type().isWrapperPassedByReference())
             s << " *";
-        s << CPP_RETURN_VAR << ";\n";
+        s << cppRetVar << ";\n";
     }
 
     s << outdent << "}\n\n";
@@ -1289,11 +1291,13 @@ void CppGenerator::writeMetaObjectMethod(TextStream &s,
         << "SbkObject *pySelf = Shiboken::BindingManager::instance().retrieveWrapper(this);\n"
         << "if (pySelf == nullptr)\n"
         << indent << "return " << qualifiedCppName << "::metaObject();\n" << outdent
-        << "return PySide::SignalManager::retrieveMetaObject(reinterpret_cast<PyObject *>(pySelf));\n"
+        << "return PySide::SignalManager::retrieveMetaObject("
+                "reinterpret_cast<PyObject *>(pySelf));\n"
         << outdent << "}\n\n";
 
     // qt_metacall function
-    s << "int " << wrapperClassName << "::qt_metacall(QMetaObject::Call call, int id, void **args)\n";
+    s << "int " << wrapperClassName
+        << "::qt_metacall(QMetaObject::Call call, int id, void **args)\n";
     s << "{\n" << indent;
 
     const auto list = classContext.metaClass()->queryFunctionsByName(QLatin1String("qt_metacall"));
@@ -1311,7 +1315,8 @@ void CppGenerator::writeMetaObjectMethod(TextStream &s,
     }
 
     s << "int result = " << qualifiedCppName << "::qt_metacall(call, id, args);\n"
-        << "return result < 0 ? result : PySide::SignalManager::qt_metacall(this, call, id, args);\n"
+        << "return result < 0 ? result : PySide::SignalManager::qt_metacall("
+                "this, call, id, args);\n"
         << outdent << "}\n\n";
 
     // qt_metacast function
