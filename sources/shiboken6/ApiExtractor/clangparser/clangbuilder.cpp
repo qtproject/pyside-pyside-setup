@@ -206,7 +206,7 @@ public:
     template <class Item>
     void qualifyTypeDef(const CXCursor &typeRefCursor, const QSharedPointer<Item> &item) const;
 
-    bool visitHeader(const char *cFileName) const;
+    bool visitHeader(const QString &fileName) const;
 
     void setFileName(const CXCursor &cursor, _CodeModelItem *item);
 
@@ -230,8 +230,8 @@ public:
     ArgumentModelItem m_currentArgument;
     VariableModelItem m_currentField;
     TemplateTypeAliasModelItem m_currentTemplateTypeAlias;
-    QByteArrayList m_systemIncludes; // files, like "memory"
-    QByteArrayList m_systemIncludePaths; // paths, like "/usr/include/Qt/"
+    QStringList m_systemIncludes; // files, like "memory"
+    QStringList m_systemIncludePaths; // paths, like "/usr/include/Qt/"
     QString m_usingTypeRef; // Base classes in "using Base::member;"
     bool m_withinUsingDeclaration = false;
 
@@ -809,100 +809,62 @@ Builder::~Builder()
     delete d;
 }
 
-static const char *cBaseName(const char *fileName)
+static QString baseName(QString path)
 {
-    const char *lastSlash = std::strrchr(fileName, '/');
+    qsizetype lastSlash = path.lastIndexOf(u'/');
 #ifdef Q_OS_WIN
-    if (lastSlash == nullptr)
-        lastSlash = std::strrchr(fileName, '\\');
+    if (lastSlash < 0)
+        lastSlash = path.lastIndexOf(u'\\');
 #endif
-    return lastSlash != nullptr ? (lastSlash + 1) : fileName;
+    if (lastSlash > 0)
+        path.remove(0, lastSlash + 1);
+    return path;
 }
 
-static inline bool cCompareFileName(const char *f1, const char *f2)
-{
-#ifdef Q_OS_WIN
-   return _stricmp(f1, f2) == 0;
-#else
-    return std::strcmp(f1, f2) == 0;
-#endif
-}
-
-#ifdef Q_OS_UNIX
-template<size_t N>
-static bool cStringStartsWith(const char *str, const char (&prefix)[N])
-{
-    return std::strncmp(prefix, str, N - 1) == 0;
-}
-#endif
-
-static bool cStringStartsWith(const char *str, const QByteArray &prefix)
-{
-    return std::strncmp(prefix.constData(), str, int(prefix.size())) == 0;
-}
-
-bool BuilderPrivate::visitHeader(const char *cFileName) const
+bool BuilderPrivate::visitHeader(const QString &fileName) const
 {
     // Resolve OpenGL typedefs although the header is considered a system header.
-    const char *baseName = cBaseName(cFileName);
-    if (cCompareFileName(baseName, "gl.h"))
+    const QString baseName = clang::baseName(fileName);
+    if (baseName == u"gl.h")
         return true;
 #if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
-    if (cStringStartsWith(cFileName, "/usr/include/stdint.h"))
+    if (fileName == u"/usr/include/stdint.h")
         return true;
 #endif
 #ifdef Q_OS_LINUX
-    if (cStringStartsWith(cFileName, "/usr/include/stdlib.h")
-        || cStringStartsWith(cFileName, "/usr/include/sys/types.h")) {
+    if (fileName == u"/usr/include/stdlib.h" || baseName == u"types.h")
         return true;
-    }
 #endif // Q_OS_LINUX
 #ifdef Q_OS_MACOS
     // Parse the following system headers to get the correct typdefs for types like
     // int32_t, which are used in the macOS implementation of OpenGL framework.
-    if (cCompareFileName(baseName, "gltypes.h")
-        || cStringStartsWith(cFileName, "/usr/include/_types")
-        || cStringStartsWith(cFileName, "/usr/include/_types")
-        || cStringStartsWith(cFileName, "/usr/include/sys/_types")) {
+    if (baseName == u"gltypes.h"
+        || fileName.startsWith(u"/usr/include/_types")
+        || fileName.startsWith(u"/usr/include/_types")
+        || fileName.startsWith(u"/usr/include/sys/_types")) {
         return true;
     }
 #endif // Q_OS_MACOS
-    if (baseName) {
-        for (const auto &systemInclude : m_systemIncludes) {
-            if (systemInclude == baseName)
-                return true;
-        }
+    for (const auto &systemInclude : m_systemIncludes) {
+        if (systemInclude == baseName)
+            return true;
     }
     for (const auto &systemIncludePath : m_systemIncludePaths) {
-        if (cStringStartsWith(cFileName, systemIncludePath))
+        if (fileName.startsWith(systemIncludePath))
             return true;
     }
     return false;
 }
 
-bool Builder::visitLocation(const CXSourceLocation &location) const
+bool Builder::visitLocation(const QString &fileName, LocationType locationType) const
 {
-    if (clang_Location_isInSystemHeader(location) == 0)
-        return true;
-    CXFile file; // void *
-    unsigned line;
-    unsigned column;
-    unsigned offset;
-    clang_getExpansionLocation(location, &file, &line, &column, &offset);
-    const CXString cxFileName = clang_getFileName(file);
-    // Has been observed to be 0 for invalid locations
-    bool result = false;
-    if (const char *cFileName = clang_getCString(cxFileName)) {
-        result = d->visitHeader(cFileName);
-        clang_disposeString(cxFileName);
-    }
-    return result;
+    return locationType != LocationType::System || d->visitHeader(fileName);
 }
 
-void Builder::setSystemIncludes(const QByteArrayList &systemIncludes)
+void Builder::setSystemIncludes(const QStringList &systemIncludes)
 {
     for (const auto &i : systemIncludes) {
-        if (i.endsWith('/'))
+        if (i.endsWith(u'/'))
             d->m_systemIncludePaths.append(i);
         else
             d->m_systemIncludes.append(i);

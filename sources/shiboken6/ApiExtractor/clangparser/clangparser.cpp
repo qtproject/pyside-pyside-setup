@@ -108,9 +108,9 @@ std::string_view SourceFileCache::getCodeSnippet(const CXCursor &cursor,
 BaseVisitor::BaseVisitor() = default;
 BaseVisitor::~BaseVisitor() = default;
 
-bool BaseVisitor::visitLocation(const CXSourceLocation &location) const
+bool BaseVisitor::visitLocation(const QString &, LocationType locationType) const
 {
-    return clang_Location_isFromMainFile(location) != 0;
+    return locationType != LocationType::System;
 }
 
 BaseVisitor::StartTokenResult BaseVisitor::cbHandleStartToken(const CXCursor &cursor)
@@ -148,6 +148,34 @@ std::string_view BaseVisitor::getCodeSnippet(const CXCursor &cursor)
     return result;
 }
 
+bool BaseVisitor::_handleVisitLocation(const CXSourceLocation &location)
+{
+    CXFile cxFile; // void *
+    unsigned line;
+    unsigned column;
+    unsigned offset;
+    clang_getExpansionLocation(location, &cxFile, &line, &column, &offset);
+
+    if (cxFile == m_currentCxFile) // Same file?
+        return m_visitCurrent;
+
+    const QString fileName = getFileName(cxFile);
+
+    LocationType locationType = LocationType::Unknown;
+    if (!fileName.isEmpty()) {
+        if (clang_Location_isFromMainFile(location) != 0)
+            locationType = LocationType::Main;
+        else if (clang_Location_isInSystemHeader(location) != 0)
+            locationType = LocationType::System;
+        else
+            locationType = LocationType::Other;
+    }
+
+    m_currentCxFile = cxFile;
+    m_visitCurrent = visitLocation(fileName, locationType);
+    return m_visitCurrent;
+}
+
 QString BaseVisitor::getCodeSnippetString(const CXCursor &cursor)
 {
     const std::string_view result = getCodeSnippet(cursor);
@@ -162,7 +190,7 @@ static CXChildVisitResult
     auto *bv = reinterpret_cast<BaseVisitor *>(clientData);
 
     const CXSourceLocation location = clang_getCursorLocation(cursor);
-    if (!bv->visitLocation(location))
+    if (!bv->_handleVisitLocation(location))
         return CXChildVisit_Continue;
 
     const BaseVisitor::StartTokenResult startResult = bv->cbHandleStartToken(cursor);

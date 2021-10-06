@@ -250,7 +250,7 @@ IncludeList TypeDatabase::extraIncludes(const QString& className) const
 
 void TypeDatabase::addSystemInclude(const QString &name)
 {
-    m_systemIncludes.append(name.toUtf8());
+    m_systemIncludes.append(name);
 }
 
 // Add a lookup for the short name excluding inline namespaces
