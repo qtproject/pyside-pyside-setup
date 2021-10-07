@@ -1,0 +1,6 @@
+{
+    "files": ["cuberenderer.py",
+              "main.py",
+              "window_singlethreaded.py",
+              "demo.qml"]
+}
