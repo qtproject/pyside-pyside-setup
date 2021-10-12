@@ -690,6 +690,9 @@
     <extra-includes>
       <include file-name="QStringList" location="global"/>
     </extra-includes>
+    <!-- PYSIDE-1685: QFont(QString) should be checked first, else it will be interpreted as sequence -->
+    <modify-function signature="QFont(const QString&amp;,int,int, bool)" overload-number="0"/>
+    <modify-function signature="QFont(const QStringList &amp;,int,int, bool)" overload-number="1"/>
     <modify-function signature="setStyleHint(QFont::StyleHint,QFont::StyleStrategy)">
       <modify-argument index="2">
         <rename to="strategy"/>
