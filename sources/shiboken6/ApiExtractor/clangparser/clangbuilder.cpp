@@ -923,8 +923,10 @@ static QString enumType(const CXCursor &cursor)
         // PYSIDE-1228: For "typedef enum { v1, v2 } Foo;", type will return
         // "Foo" as expected. Care must be taken to exclude real anonymous enums.
         name = getTypeName(clang_getCursorType(cursor));
-        if (name.contains(QLatin1String("(anonymous")))
+        if (name.contains(u"(unnamed") // Clang 12.0.1
+            || name.contains(u"(anonymous")) { // earlier
             name.clear();
+        }
     }
     return name;
 }
