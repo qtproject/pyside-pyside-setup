@@ -124,6 +124,11 @@ Options
     If a class has an operator bool, it will be used to compute
     the value of boolean casts (see :ref:`bool-cast`).
 
+.. _no-implicit-conversions:
+
+``--no-implicit-conversions``
+    Do not generate implicit_conversions for function arguments.
+
 .. _api-version:
 
 ``--api-version=<version>``
