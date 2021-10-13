@@ -1548,17 +1548,9 @@ return result;)";
     s << '\n';
 
     // User provided implicit conversions.
-    CustomConversion *customConversion = metaClass->typeEntry()->customConversion();
-
+    auto *typeEntry = metaClass->typeEntry();
     // Implicit conversions.
-    AbstractMetaFunctionCList implicitConvs;
-    if (!customConversion || !customConversion->replaceOriginalTargetToNativeConversions()) {
-        const auto &allImplicitConvs = api().implicitConversions(metaClass->typeEntry());
-        for (const auto &func : allImplicitConvs) {
-            if (!func->isUserAdded())
-                implicitConvs << func;
-        }
-    }
+    const AbstractMetaFunctionCList implicitConvs = implicitConversions(typeEntry);
 
     if (!implicitConvs.isEmpty())
         s << "// Implicit conversions.\n";
@@ -1624,7 +1616,7 @@ return result;)";
         writePythonToCppConversionFunctions(s, sourceType, targetType, typeCheck, toCppConv, toCppPreConv);
     }
 
-    writeCustomConverterFunctions(s, customConversion);
+    writeCustomConverterFunctions(s, typeEntry->customConversion());
 }
 
 void CppGenerator::writeCustomConverterFunctions(TextStream &s,
@@ -1730,17 +1722,10 @@ void CppGenerator::writeConverterRegister(TextStream &s, const AbstractMetaClass
     writeAddPythonToCppConversion(s, QLatin1String("converter"), toCpp, isConv);
 
     // User provided implicit conversions.
-    CustomConversion *customConversion = metaClass->typeEntry()->customConversion();
+    auto *typeEntry = metaClass->typeEntry();
 
     // Add implicit conversions.
-    AbstractMetaFunctionCList implicitConvs;
-    if (!customConversion || !customConversion->replaceOriginalTargetToNativeConversions()) {
-        const auto &allImplicitConvs = api().implicitConversions(metaClass->typeEntry());
-        for (const auto &func : allImplicitConvs) {
-            if (!func->isUserAdded())
-                implicitConvs << func;
-        }
-    }
+    const AbstractMetaFunctionCList implicitConvs = implicitConversions(typeEntry);
 
     if (!implicitConvs.isEmpty())
         s << "// Add implicit conversions to type converter.\n";
@@ -1764,7 +1749,7 @@ void CppGenerator::writeConverterRegister(TextStream &s, const AbstractMetaClass
         writeAddPythonToCppConversion(s, QLatin1String("converter"), toCpp, isConv);
     }
 
-    writeCustomConverterRegister(s, customConversion, QLatin1String("converter"));
+    writeCustomConverterRegister(s, typeEntry->customConversion(), u"converter"_qs);
 }
 
 void CppGenerator::writeCustomConverterRegister(TextStream &s, const CustomConversion *customConversion,

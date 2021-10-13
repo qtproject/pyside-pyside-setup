@@ -195,6 +195,9 @@ protected:
     /// Condition to call WriteVirtualMethodNative. Was extracted because also used to count these calls.
     bool shouldWriteVirtualMethodNative(const AbstractMetaFunctionCPtr &func) const;
 
+    // Return a list of implicit conversions if generation is enabled.
+    AbstractMetaFunctionCList implicitConversions(const TypeEntry *t) const;
+
     QString wrapperName(const AbstractMetaClass *metaClass) const;
 
     static QString fullPythonClassName(const AbstractMetaClass *metaClass);
@@ -298,6 +301,8 @@ protected:
     bool useOperatorBoolAsNbNonZero() const;
     /// Returns true if the generated code should use the "#define protected public" hack.
     bool avoidProtectedHack() const;
+    /// Generate implicit conversions of function arguments
+    bool generateImplicitConversions() const;
     static QString cppApiVariableName(const QString &moduleName = QString());
     static QString pythonModuleObjectName(const QString &moduleName = QString());
     static QString convertersVariableName(const QString &moduleName = QString());
@@ -459,6 +464,8 @@ private:
     bool m_useIsNullAsNbNonZero = false;
     bool m_useOperatorBoolAsNbNonZero = false;
     bool m_avoidProtectedHack = false;
+    // FIXME PYSIDE 7 Flip generateImplicitConversions default or remove?
+    bool m_generateImplicitConversions = true;
     bool m_wrapperDiagnostics = false;
 
     /// Type system converter variable replacement names and regular expressions.

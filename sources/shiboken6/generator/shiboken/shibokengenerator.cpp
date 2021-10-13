@@ -60,6 +60,7 @@ static const char DISABLE_VERBOSE_ERROR_MESSAGES[] = "disable-verbose-error-mess
 static const char USE_ISNULL_AS_NB_NONZERO[] = "use-isnull-as-nb_nonzero";
 static const char USE_OPERATOR_BOOL_AS_NB_NONZERO[] = "use-operator-bool-as-nb_nonzero";
 static const char WRAPPER_DIAGNOSTICS[] = "wrapper-diagnostics";
+static const char NO_IMPLICIT_CONVERSIONS[] = "no-implicit-conversions";
 
 const char *CPP_ARG = "cppArg";
 const char *CPP_ARG_REMOVED = "removed_cppArg";
@@ -239,6 +240,23 @@ bool ShibokenGenerator::shouldWriteVirtualMethodNative(const AbstractMetaFunctio
     return (!avoidProtectedHack() || !metaClass->hasPrivateDestructor())
             && ((func->isVirtual() || func->isAbstract())
                  && !func->attributes().testFlag(AbstractMetaFunction::FinalCppMethod));
+}
+
+AbstractMetaFunctionCList ShibokenGenerator::implicitConversions(const TypeEntry *t) const
+{
+    if (!generateImplicitConversions())
+        return {};
+    auto *customConversion = t->customConversion();
+    if (customConversion && customConversion->replaceOriginalTargetToNativeConversions())
+        return {};
+
+    auto result = api().implicitConversions(t);
+    auto end = std::remove_if(result.begin(), result.end(),
+                              [](const AbstractMetaFunctionCPtr &f) {
+                                  return f->isUserAdded();
+                              });
+    result.erase(end, result.end());
+    return result;
 }
 
 QString ShibokenGenerator::wrapperName(const AbstractMetaClass *metaClass) const
@@ -2322,6 +2340,8 @@ Generator::OptionDescriptions ShibokenGenerator::options() const
         {QLatin1String(USE_OPERATOR_BOOL_AS_NB_NONZERO),
          QLatin1String("If a class has an operator bool, it will be used to compute\n"
                        "the value of boolean casts")},
+        {QLatin1String(NO_IMPLICIT_CONVERSIONS),
+         u"Do not generate implicit_conversions for function arguments."_qs},
         {QLatin1String(WRAPPER_DIAGNOSTICS),
          QLatin1String("Generate diagnostic code around wrappers")}
     });
@@ -2344,6 +2364,10 @@ bool ShibokenGenerator::handleOption(const QString &key, const QString &value)
         return (m_useOperatorBoolAsNbNonZero = true);
     if (key == QLatin1String(AVOID_PROTECTED_HACK))
         return (m_avoidProtectedHack = true);
+    if (key == QLatin1String(NO_IMPLICIT_CONVERSIONS)) {
+        return m_generateImplicitConversions = false;
+        return true;
+    }
     if (key == QLatin1String(WRAPPER_DIAGNOSTICS))
         return (m_wrapperDiagnostics = true);
     return false;
@@ -2452,6 +2476,11 @@ bool ShibokenGenerator::useOperatorBoolAsNbNonZero() const
 bool ShibokenGenerator::avoidProtectedHack() const
 {
     return m_avoidProtectedHack;
+}
+
+bool ShibokenGenerator::generateImplicitConversions() const
+{
+    return m_generateImplicitConversions;
 }
 
 QString ShibokenGenerator::moduleCppPrefix(const QString &moduleName)
