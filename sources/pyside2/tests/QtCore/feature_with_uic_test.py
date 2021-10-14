@@ -46,7 +46,7 @@ init_test_paths(False)
 
 from helper.usesqapplication import UsesQApplication
 
-from PySide2.QtCore import QLibraryInfo, qVersion
+from PySide2.QtCore import QCoreApplication, QLibraryInfo, qVersion
 from PySide2.QtWidgets import QApplication, QMainWindow
 
 if sys.version_info[0] >= 3:
