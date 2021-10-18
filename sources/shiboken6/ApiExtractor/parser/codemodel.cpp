@@ -514,8 +514,26 @@ void _ScopeModelItem::addTemplateTypeAlias(const TemplateTypeAliasModelItem &ite
     m_templateTypeAliases.append(item);
 }
 
+qsizetype _ScopeModelItem::indexOfEnum(const QString &name) const
+{
+    for (qsizetype i = 0, size = m_enums.size(); i < size; ++i) {
+        if (m_enums.at(i)->name() == name)
+            return i;
+    }
+    return -1;
+}
+
 void _ScopeModelItem::addEnum(const EnumModelItem &item)
 {
+    // A forward declaration of an enum ("enum class Foo;") is undistinguishable
+    // from an enum without values ("enum class QCborTag {}"), so, add all
+    // enums and replace existing ones without values by ones with values.
+    const int index = indexOfEnum(item->name());
+    if (index >= 0) {
+        if (item->hasValues() && !m_enums.at(index)->hasValues())
+            m_enums[index] = item;
+        return;
+    }
     m_enums.append(item);
 }
 
