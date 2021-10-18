@@ -145,6 +145,7 @@
   <enum-type name="QtMsgType"/>
   <enum-type name="QCborSimpleType" since="5.12"/>
   <enum-type name="QCborKnownTags" since="5.12"/>
+  <enum-type name="QCborTag"/>
 
   <primitive-type name="qint8"/>
   <primitive-type name="qint16"/>
