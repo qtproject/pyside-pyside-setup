@@ -245,6 +245,8 @@ protected:
 #endif
 
 private:
+    qsizetype indexOfEnum(const QString &name) const;
+
     ClassList m_classes;
     EnumList m_enums;
     TypeDefList m_typeDefs;

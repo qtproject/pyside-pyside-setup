@@ -1236,9 +1236,7 @@ bool Builder::endToken(const CXCursor &cursor)
         d->m_currentFunctionType = CodeModel::Normal;
         break;
     case CXCursor_EnumDecl:
-        // Add enum only if values were encountered, otherwise assume it
-        // is a forward declaration of an enum class.
-        if (!d->m_currentEnum.isNull() && d->m_currentEnum->hasValues())
+        if (!d->m_currentEnum.isNull())
             d->m_scopeStack.back()->addEnum(d->m_currentEnum);
         d->m_currentEnum.clear();
         break;
