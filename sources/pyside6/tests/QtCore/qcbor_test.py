@@ -40,7 +40,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtCore import (QByteArray, QCborStreamReader, QCborStreamWriter,
-    QCborValue)
+    QCborTag, QCborValue)
 
 
 class TestCbor(unittest.TestCase):
@@ -77,6 +77,8 @@ class TestCbor(unittest.TestCase):
         value = QCborValue('hello')
         self.assertTrue(value.isString())
         self.assertEqual(value.toString(), 'hello')
+        tag = value.tag(QCborTag(32))
+        self.assertEqual(int(tag), 32)
 
 
 if __name__ == '__main__':
