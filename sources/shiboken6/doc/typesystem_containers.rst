@@ -26,6 +26,10 @@ they are converted to Python containers on read access. By a field modification,
 (see :ref:`modify-field`), it is possible to obtain an opaque container
 which avoids the conversion and allows for direct modification of elements.
 
+Getters returning references can also be modified to return opaque containers.
+This is done by modifying the return type to the name of the opaque container
+(see :ref:`replace-type`).
+
 The table below lists the functions supported for opaque sequence containers
 besides the sequence protocol (element access via index and ``len()``). Both
 the STL and the Qt naming convention (which resembles Python's) are supported:

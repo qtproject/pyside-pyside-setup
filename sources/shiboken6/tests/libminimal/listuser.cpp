@@ -123,3 +123,8 @@ void ListUser::setStdIntList(const std::list<int> &l)
 {
     m_stdIntList = l;
 }
+
+std::list<int> &ListUser::getIntList()
+{
+    return m_stdIntList;
+}

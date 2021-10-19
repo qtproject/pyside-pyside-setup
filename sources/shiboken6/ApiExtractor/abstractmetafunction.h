@@ -310,6 +310,7 @@ public:
 
     const QString &modifiedTypeName() const;
     bool isTypeModified() const { return !modifiedTypeName().isEmpty(); }
+    bool generateOpaqueContainerReturn() const;
 
     bool isModifiedToArray(int argumentIndex) const;
 

@@ -48,6 +48,11 @@
     </value-type>
     <value-type name="ListUser">
         <modify-field name="m_stdIntList" opaque-container="yes"/>
+        <modify-function signature="getIntList()">
+            <modify-argument index="return">
+                <replace-type modified-type="StdIntList"/>
+            </modify-argument>
+        </modify-function>
     </value-type>
     <value-type name="MinBoolUser"/>
 

@@ -780,6 +780,14 @@ const QString &AbstractMetaFunction::modifiedTypeName() const
     return d->m_modifiedTypeName;
 }
 
+bool AbstractMetaFunction::generateOpaqueContainerReturn() const
+{
+    return isTypeModified()
+        && d->m_type.typeUsagePattern() == AbstractMetaType::ContainerPattern
+        && d->m_type.referenceType() == LValueReference
+        && d->m_type.generateOpaqueContainerForGetter(d->m_modifiedTypeName);
+}
+
 bool AbstractMetaFunction::isModifiedToArray(int argumentIndex) const
 {
     for (const auto &modification : modifications(declaringClass())) {

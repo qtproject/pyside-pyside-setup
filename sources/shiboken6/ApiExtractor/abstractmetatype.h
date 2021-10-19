@@ -250,6 +250,8 @@ public:
     bool valueTypeWithCopyConstructorOnlyPassed() const;
     /// Returns whether to generate an opaque container for the type
     bool generateOpaqueContainer() const;
+    /// Returns whether to generate an opaque container for a getter
+    bool generateOpaqueContainerForGetter(const QString &modifiedType) const;
 
     /// Types for which libshiboken has built-in primitive converters
     static const QSet<QString> &cppFloatTypes();

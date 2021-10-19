@@ -190,6 +190,26 @@ const ProtocolEntries &sequenceProtocols()
     return result;
 }
 
+// Return name of function to create PyObject wrapping a container
+static QString opaqueContainerCreationFunc(const AbstractMetaType &type)
+{
+    const auto *containerTypeEntry =
+        static_cast<const ContainerTypeEntry *>(type.typeEntry());
+    const auto *instantiationTypeEntry =
+        type.instantiations().constFirst().typeEntry();
+    return u"create"_qs
+           + containerTypeEntry->opaqueContainerName(instantiationTypeEntry->name());
+}
+
+// Write declaration of the function to create PyObject wrapping a container
+static void writeOpaqueContainerCreationFuncDecl(TextStream &s, const QString &name,
+                                                 AbstractMetaType type)
+{
+    type.setReferenceType(NoReference);
+    type.setConstant(false);
+    s << "PyObject *" << name << '(' << type.cppSignature() << "*);\n";
+}
+
 CppGenerator::CppGenerator() = default;
 
 QString CppGenerator::fileNameSuffix() const
@@ -3796,17 +3816,23 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
             }
 
             // Convert result
+            const auto funcType = func->type();
             if (!func->conversionRule(TypeSystem::TargetLangCode, 0).isEmpty()) {
                 writeConversionRule(s, func, TypeSystem::TargetLangCode, QLatin1String(PYTHON_RETURN_VAR));
             } else if (!isCtor && !func->isInplaceOperator() && !func->isVoid()
                 && !func->injectedCodeHasReturnValueAttribution(TypeSystem::TargetLangCode)) {
-                s << PYTHON_RETURN_VAR << " = ";
                 if (func->type().isObjectTypeUsedAsValueType()) {
-                    s << "Shiboken::Object::newObject("
+                    s << PYTHON_RETURN_VAR << " = Shiboken::Object::newObject("
                         << cpythonTypeNameExt(func->type().typeEntry())
                         << ", " << CPP_RETURN_VAR << ", true, true)";
+                } else if (func->generateOpaqueContainerReturn()) {
+                    const QString creationFunc = opaqueContainerCreationFunc(funcType);
+                    writeOpaqueContainerCreationFuncDecl(s, creationFunc, funcType);
+                    s << PYTHON_RETURN_VAR << " = " << creationFunc
+                        << "(&" << CPP_RETURN_VAR << ");\n";
                 } else {
-                    writeToPythonConversion(s, func->type(), func->ownerClass(), QLatin1String(CPP_RETURN_VAR));
+                    s << PYTHON_RETURN_VAR << " = ";
+                    writeToPythonConversion(s, funcType, func->ownerClass(), QLatin1String(CPP_RETURN_VAR));
                 }
                 s << ";\n";
             }
@@ -4716,14 +4742,9 @@ void CppGenerator::writeGetterFunction(TextStream &s,
 
     if (metaField.generateOpaqueContainer()
         && fieldType.generateOpaqueContainer()) {
-        const auto *containerTypeEntry =
-            static_cast<const ContainerTypeEntry *>(fieldType.typeEntry());
-        const auto *instantiationTypeEntry =
-            fieldType.instantiations().constFirst().typeEntry();
-        const QString creationFunc =
-            u"create"_qs + containerTypeEntry->opaqueContainerName(instantiationTypeEntry->name());
-        s << "PyObject *" << creationFunc << '(' << fieldType.cppSignature() << "*);\n"
-            << "PyObject *pyOut = " << creationFunc
+        const QString creationFunc = opaqueContainerCreationFunc(fieldType);
+        writeOpaqueContainerCreationFuncDecl(s, creationFunc, fieldType);
+        s << "PyObject *pyOut = " << creationFunc
             << "(&" << cppField << ");\nPy_IncRef(pyOut);\n"
             << "return pyOut;\n" << outdent << "}\n";
         return;
