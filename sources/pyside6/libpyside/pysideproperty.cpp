@@ -450,8 +450,7 @@ static const char *Property_SignatureStrings[] = {
     "PySide6.QtCore.Property(self,type:type,fget:typing.Callable=None,fset:typing.Callable=None,"
         "freset:typing.Callable=None,fdel:typing.Callable=None,doc:str=None,"
         "notify:typing.Callable=None,designable:bool=True,scriptable:bool=True,"
-        "stored:bool=True,user:bool=False,constant:bool=False,final:bool=False)"
-        "->PySide6.QtCore.Property",
+        "stored:bool=True,user:bool=False,constant:bool=False,final:bool=False)",
     "PySide6.QtCore.Property.deleter(self,fdel:typing.Callable)->PySide6.QtCore.Property",
     "PySide6.QtCore.Property.getter(self,fget:typing.Callable)->PySide6.QtCore.Property",
     "PySide6.QtCore.Property.read(self,fget:typing.Callable)->PySide6.QtCore.Property",

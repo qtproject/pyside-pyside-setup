@@ -152,8 +152,7 @@ static const char *PyClassProperty_SignatureStrings[] = {
         "fget:typing.Optional[typing.Callable[[typing.Any],typing.Any]]=None,"
         "fset:typing.Optional[typing.Callable[[typing.Any,typing.Any],None]]=None,"
         "fdel:typing.Optional[typing.Callable[[typing.Any],None]]=None,"
-        "doc:typing.Optional[str]=None)"
-        "->PySide6.QtCore.PyClassProperty",
+        "doc:typing.Optional[str]=None)",
     "PySide6.QtCore.PyClassProperty.getter(cls,fget:typing.Callable[[typing.Any],typing.Any])->PySide6.QtCore.PyClassProperty",
     "PySide6.QtCore.PyClassProperty.setter(cls,fset:typing.Callable[[typing.Any,typing.Any],None])->PySide6.QtCore.PyClassProperty",
     "PySide6.QtCore.PyClassProperty.deleter(cls,fdel:typing.Callable[[typing.Any],None])->PySide6.QtCore.PyClassProperty",

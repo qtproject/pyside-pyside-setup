@@ -196,7 +196,7 @@ def find_imports(text):
 
 
 FROM_IMPORTS = [
-    ("typing", "Any Callable Dict List Optional overload Tuple Union".split()),
+    ("typing", typing.__all__),
     ("PySide6.QtCore", ["PyClassProperty"]),
     (None, ["builtins"]),
     ]
@@ -287,7 +287,7 @@ def generate_pyi(import_name, outpath, options):
                     if mod is None:
                         # special case, a normal import
                         wr.print(f"import {import_args}")
-                    else:
+                    elif mod != import_name:
                         wr.print(f"from {mod} import {import_args}")
                 wr.print()
                 if need_imports:
