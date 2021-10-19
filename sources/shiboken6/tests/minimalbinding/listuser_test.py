@@ -345,6 +345,12 @@ class ListOfIntListConversionTest(unittest.TestCase):
         self.assertEqual(len(lu.m_stdIntList), 3)
         self.assertEqual(lu.m_stdIntList[2], 5)
 
+        # Access list via getter
+        l = lu.getIntList()
+        l.append(6)
+        self.assertEqual(len(lu.m_stdIntList), 4)
+        self.assertEqual(lu.m_stdIntList[3], 6)
+
 
 if __name__ == '__main__':
     unittest.main()

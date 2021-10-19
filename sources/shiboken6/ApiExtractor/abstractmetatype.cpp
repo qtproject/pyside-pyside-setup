@@ -58,6 +58,8 @@ public:
     QString formatSignature(bool minimal) const;
     QString formatPythonSignature() const;
     bool equals(const AbstractMetaTypeData &rhs) const;
+    template <class Predicate>
+    bool generateOpaqueContainer(Predicate p) const;
 
     const TypeEntry *m_typeEntry;
     AbstractMetaTypeList m_instantiations;
@@ -851,15 +853,16 @@ AbstractMetaType AbstractMetaType::fromAbstractMetaClass(const AbstractMetaClass
     return fromTypeEntry(metaClass->typeEntry());
 }
 
-bool AbstractMetaType::generateOpaqueContainer() const
+template <class Predicate> // Predicate(containerTypeEntry, signature)
+bool AbstractMetaTypeData::generateOpaqueContainer(Predicate pred) const
 {
-    if (!isContainer())
+    if (m_pattern != AbstractMetaType::ContainerPattern)
         return false;
-    auto *containerTypeEntry = static_cast<const ContainerTypeEntry *>(typeEntry());
+    auto *containerTypeEntry = static_cast<const ContainerTypeEntry *>(m_typeEntry);
     auto kind = containerTypeEntry->containerKind();
     if (kind != ContainerTypeEntry::ListContainer)
         return false;
-    const auto &instantation =  d->m_instantiations.constFirst();
+    const auto &instantation =  m_instantiations.constFirst();
     if (instantation.referenceType() != NoReference)
         return false;
     const QString signature = instantation.cppSignature();
@@ -873,12 +876,35 @@ bool AbstractMetaType::generateOpaqueContainer() const
     case TypeEntry::BasicValueType:
     case TypeEntry::ObjectType:
     case TypeEntry::CustomType:
-        result = containerTypeEntry->generateOpaqueContainer(signature);
+        result = pred(containerTypeEntry, signature);
         break;
     default:
         break;
     }
     return result;
+}
+
+// Simple predicate for checking whether an opaque container should be generated
+static bool opaqueContainerPredicate(const ContainerTypeEntry *t,
+                                     const QString &signature)
+{
+    return t->generateOpaqueContainer(signature);
+}
+
+bool AbstractMetaType::generateOpaqueContainer() const
+{
+    return d->generateOpaqueContainer(opaqueContainerPredicate);
+}
+
+// Helper for determining whether a function should return an opaque container,
+// that is, the function return type is modified accordingly
+// (cf AbstractMetaFunction::generateOpaqueContainerReturn())
+bool AbstractMetaType::generateOpaqueContainerForGetter(const QString &modifiedType) const
+{
+    auto predicate = [&modifiedType](const ContainerTypeEntry *t, const QString &signature) {
+        return t->opaqueContainerName(signature) == modifiedType;
+    };
+    return d->generateOpaqueContainer(predicate);
 }
 
 #ifndef QT_NO_DEBUG_STREAM

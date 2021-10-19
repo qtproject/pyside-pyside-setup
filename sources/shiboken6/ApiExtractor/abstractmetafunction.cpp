@@ -784,6 +784,17 @@ QString AbstractMetaFunction::typeReplaced(int key) const
     return QString();
 }
 
+bool AbstractMetaFunction::generateOpaqueContainerReturn() const
+{
+    if (d->m_type.typeUsagePattern() != AbstractMetaType::ContainerPattern
+        || d->m_type.referenceType() != LValueReference) {
+        return false;
+    }
+    const QString modifiedReturn = typeReplaced(0);
+    return !modifiedReturn.isEmpty()
+        && d->m_type.generateOpaqueContainerForGetter(modifiedReturn);
+}
+
 bool AbstractMetaFunction::isModifiedToArray(int argumentIndex) const
 {
     for (const auto &modification : modifications(declaringClass())) {

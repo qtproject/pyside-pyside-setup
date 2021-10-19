@@ -311,6 +311,8 @@ public:
     QString typeReplaced(int argument_index) const;
     bool isModifiedToArray(int argumentIndex) const;
 
+    bool generateOpaqueContainerReturn() const;
+
     /// Return the (modified) type for the signature; modified-pyi-type, modified-type
     QString pyiTypeReplaced(int argumentIndex) const;
 
