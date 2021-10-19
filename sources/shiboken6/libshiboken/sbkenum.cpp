@@ -454,6 +454,8 @@ PyObject *getEnumItemFromValue(PyTypeObject *enumType, long itemValue)
     PyObject *key, *value;
     Py_ssize_t pos = 0;
     PyObject *values = PyDict_GetItem(enumType->tp_dict, Shiboken::PyName::values());
+    if (values == nullptr)
+        return nullptr;
 
     while (PyDict_Next(values, &pos, &key, &value)) {
         auto *obj = reinterpret_cast<SbkEnumObject *>(value);
