@@ -107,14 +107,26 @@ static QString resolveScopePrefix(const AbstractMetaClass *scope, const QString 
         : QString();
 }
 
+// Check whether the value is a cast from int for an enum "Enum(-1)"
+static bool isEnumCastFromInt(const AbstractMetaEnum &metaEnum,
+                              const QString &value)
+{
+    const auto parenPos = value.indexOf(u'(');
+    if (parenPos < 0)
+        return false;
+    const auto prefix = QStringView{value}.left(parenPos);
+    return prefix.endsWith(metaEnum.name());
+}
+
 static QString resolveScopePrefix(const AbstractMetaEnum &metaEnum,
                                   const QString &value)
 {
     QStringList parts;
     if (const AbstractMetaClass *scope = metaEnum.enclosingClass())
         parts.append(splitClassScope(scope));
-    // Fully qualify the value which is required for C++ 11 enum classes.
-    if (!metaEnum.isAnonymous())
+    // Fully qualify the value which is required for C++ 11 enum classes
+    // unless it is a cast from int "Enum(-)" which already has the type name.
+    if (!metaEnum.isAnonymous() && !isEnumCastFromInt(metaEnum, value))
         parts.append(metaEnum.name());
     return resolveScopePrefix(parts, value);
 }
