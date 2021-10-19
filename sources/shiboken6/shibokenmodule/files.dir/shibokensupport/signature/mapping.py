@@ -506,6 +506,7 @@ def init_PySide6_QtCore():
             "QDir.Filters(QDir.AllEntries | QDir.NoDotAndDotDot)"),
         "QDir.SortFlags(Name | IgnoreCase)": Instance(
             "QDir.SortFlags(QDir.Name | QDir.IgnoreCase)"),
+        "QEvent.Type.None" : None,
         "QGenericArgument((0))": ellipsis, # 5.6, RHEL 6.6. Is that ok?
         "QGenericArgument()": ellipsis,
         "QGenericArgument(0)": ellipsis,
