@@ -149,10 +149,12 @@ public:
     static void setupFunctionDefaults(AbstractMetaFunction *metaFunction,
                                       AbstractMetaClass *metaClass);
 
-    static QString fixDefaultValue(const ArgumentModelItem &item,
-                                   const AbstractMetaType &type,
-                                   const AbstractMetaClass *,
-                                   int argumentIndex);
+    QString fixDefaultValue(const ArgumentModelItem &item,
+                            const AbstractMetaType &type,
+                            const AbstractMetaClass *,
+                            int argumentIndex) const;
+    QString fixEnumDefault(const AbstractMetaType &type, const QString &expr) const;
+
     std::optional<AbstractMetaType>
         translateType(const TypeInfo &type, const AbstractMetaClass *currentClass,
                       TranslateTypeFlags flags = {}, QString *errorMessage = nullptr);

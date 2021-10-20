@@ -32,6 +32,7 @@
 #include <abstractmetaenum.h>
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
+#include <abstractmetabuilder_p.h>
 #include <typesystem.h>
 #include <parser/enumvalue.h>
 
@@ -435,6 +436,160 @@ void TestEnum::testTypedefEnum()
     QCOMPARE(enumValueA1.name(), QLatin1String("A1"));
     QCOMPARE(enumValueA1.value().value(), 1);
     QCOMPARE(enumValueA1.stringValue(), QString());
+}
+
+// Helper classes and functions for testing enum default value fixing.
+// Put the AbstractMetaBuilder into test fixture struct to avoid having
+// to re-parse for each data row.
+
+struct EnumDefaultValuesFixture
+{
+    QSharedPointer<AbstractMetaBuilder> builder;
+
+    AbstractMetaType globalEnum;
+    AbstractMetaType testEnum;
+    AbstractMetaType testOptions;
+};
+
+Q_DECLARE_METATYPE(EnumDefaultValuesFixture)
+Q_DECLARE_METATYPE(AbstractMetaType)
+
+static int populateDefaultValuesFixture(EnumDefaultValuesFixture *fixture)
+{
+    static const char cppCode[] =R"(
+enum GlobalEnum { GE1, GE2 };
+namespace Test1
+{
+namespace Test2
+{
+   enum Enum1 { E1, E2 };
+   enum Option { O1, O2 };
+} // namespace Test2
+} // namespace Test1
+)";
+    static const char xmlCode[] = R"(
+<typesystem package="Foo">
+    <enum-type name='GlobalEnum'/>
+    <namespace-type name='Test1'>
+        <namespace-type name='Test2'>
+            <enum-type name='Enum1'/>
+            <enum-type name='Option' flags='Options'/>
+        </namespace-type>
+    </namespace-type>
+</typesystem>
+)";
+
+    fixture->builder.reset(TestUtil::parse(cppCode, xmlCode, false));
+    if (fixture->builder.isNull())
+        return -1;
+
+    const auto globalEnums = fixture->builder->globalEnums();
+    if (globalEnums.count() != 1)
+        return -2;
+
+    fixture->globalEnum = AbstractMetaType(globalEnums.constFirst().typeEntry());
+    fixture->globalEnum.decideUsagePattern();
+
+    const AbstractMetaClass *testNamespace = nullptr;
+    for (auto *c : fixture->builder->classes()) {
+        if (c->name() == u"Test2") {
+            testNamespace = c;
+            break;
+        }
+    }
+    if (!testNamespace)
+        return -3;
+
+    const auto namespaceEnums = testNamespace->enums();
+    if (namespaceEnums.count() != 2)
+        return -4;
+    QList<const EnumTypeEntry *> enumTypeEntries{
+        static_cast<const EnumTypeEntry *>(namespaceEnums.at(0).typeEntry()),
+        static_cast<const EnumTypeEntry *>(namespaceEnums.at(1).typeEntry())};
+    if (enumTypeEntries.constFirst()->flags())
+        std::swap(enumTypeEntries[0], enumTypeEntries[1]);
+    fixture->testEnum = AbstractMetaType(enumTypeEntries.at(0));
+    fixture->testEnum.decideUsagePattern();
+    fixture->testOptions = AbstractMetaType(enumTypeEntries.at(1)->flags());
+    fixture->testOptions.decideUsagePattern();
+    return 0;
+}
+
+void TestEnum::testEnumDefaultValues_data()
+{
+    EnumDefaultValuesFixture fixture;
+    const int setupOk = populateDefaultValuesFixture(&fixture);
+
+    QTest::addColumn<EnumDefaultValuesFixture>("fixture");
+    QTest::addColumn<int>("setupOk"); // To verify setup
+    QTest::addColumn<AbstractMetaType>("metaType"); // Type and parameters for fixup
+    QTest::addColumn<QString>("input");
+    QTest::addColumn<QString>("expected");
+
+    // Global should just remain unmodified
+    QTest::newRow("global") << fixture << setupOk
+        << fixture.globalEnum << "GE1" << "GE1";
+    QTest::newRow("global-int") << fixture << setupOk
+        << fixture.globalEnum << "42" << "42";
+    QTest::newRow("global-hex-int") << fixture << setupOk
+        << fixture.globalEnum << "0x10" << "0x10";
+    QTest::newRow("global-int-cast") << fixture << setupOk
+        << fixture.globalEnum << "GlobalEnum(-1)" << "GlobalEnum(-1)";
+
+    // Namespaced enum as number should remain unmodified
+    QTest::newRow("namespace-enum-int") << fixture << setupOk
+        << fixture.testEnum << "42" << "42";
+    QTest::newRow("namespace-enum-hex-int") << fixture << setupOk
+        << fixture.testEnum << "0x10" << "0x10";
+    // Partial qualification of namespaced enum
+    QTest::newRow("namespace-enum-qualified") << fixture << setupOk
+        << fixture.testEnum << "Enum1::E1" << "Test1::Test2::Enum1::E1";
+    // Unqualified namespaced enums
+    QTest::newRow("namespace-enum-unqualified") << fixture << setupOk
+        << fixture.testEnum << "E1" << "Test1::Test2::Enum1::E1";
+    // Namespaced enums cast from int should be qualified by scope
+    QTest::newRow("namespace-enum-int-cast") << fixture << setupOk
+        << fixture.testEnum << "Enum1(-1)" << "Test1::Test2::Enum1(-1)";
+
+    // Namespaced option as number should remain unmodified
+    QTest::newRow("namespace-option-int") << fixture << setupOk
+        << fixture.testOptions << "0x10" << "0x10";
+    QTest::newRow("namespace-option-expression") << fixture << setupOk
+        << fixture.testOptions << "0x10 | 0x20" << "0x10 | 0x20";
+    QTest::newRow("namespace-option-expression1") << fixture << setupOk
+        << fixture.testOptions << "0x10 | Test1::Test2::Option::O1"
+        << "0x10 | Test1::Test2::Option::O1";
+    QTest::newRow("namespace-option-expression2") << fixture << setupOk
+        << fixture.testOptions << "0x10 | O1" << "0x10 | Test1::Test2::Option::O1";
+    // Complicated expressions - should remain unmodified
+    QTest::newRow("namespace-option-expression-paren") << fixture << setupOk
+        << fixture.testOptions << "0x10 | (0x20 | 0x40 | O1)"
+        << "0x10 | (0x20 | 0x40 | O1)";
+
+    // Option: Cast Enum from int should be qualified
+    QTest::newRow("namespace-option-int-cast") << fixture << setupOk
+        << fixture.testOptions << "Option(0x10)" << "Test1::Test2::Option(0x10)";
+    // Option: Cast Flags from int should be qualified
+    QTest::newRow("namespace-options-int-cast") << fixture << setupOk
+        << fixture.testOptions << "Options(0x10 | 0x20)" << "Test1::Test2::Options(0x10 | 0x20)";
+    QTest::newRow("namespace-option-cast-expression1") << fixture << setupOk
+        << fixture.testOptions << "Test1::Test2::Options(0x10 | Test1::Test2::Option::O1)"
+        << "Test1::Test2::Options(0x10 | Test1::Test2::Option::O1)";
+    QTest::newRow("namespace-option-cast-expression2") << fixture << setupOk
+        << fixture.testOptions << "Options(0x10 | O1)"
+        << "Test1::Test2::Options(0x10 | Test1::Test2::Option::O1)";
+}
+
+void TestEnum::testEnumDefaultValues()
+{
+    QFETCH(EnumDefaultValuesFixture, fixture);
+    QFETCH(int, setupOk);
+    QFETCH(AbstractMetaType, metaType);
+    QFETCH(QString, input);
+    QFETCH(QString, expected);
+    QCOMPARE(setupOk, 0);
+    const QString actual = fixture.builder->fixEnumDefault(metaType,  input);
+    QCOMPARE(actual, expected);
 }
 
 QTEST_APPLESS_MAIN(TestEnum)

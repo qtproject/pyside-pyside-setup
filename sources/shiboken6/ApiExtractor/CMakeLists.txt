@@ -10,6 +10,7 @@ apiextractor.cpp
 apiextractorresult.cpp
 abstractmetaargument.cpp
 abstractmetabuilder.cpp
+abstractmetabuilder_helpers.cpp
 abstractmetaenum.cpp
 abstractmetafield.cpp
 abstractmetafunction.cpp
