@@ -72,6 +72,7 @@ struct LIBMINIMAL_API ListUser
 
     void setStdIntList(const std::list<int> &l);
     std::list<int> &getIntList();
+    const std::list<int> &getConstIntList() const;
 
     std::list<int> m_stdIntList;
 };

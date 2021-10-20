@@ -73,6 +73,35 @@ static void writeSlot(TextStream &s, const QString &privateObjType,
       << "::" << methodName << ")},\n";
 }
 
+// Write creation function from C++ reference, used by field accessors
+// and getters which are within extern "C"
+static void writeContainerCreationFunc(TextStream &s,
+                                       const QString &funcName,
+                                       const QString &typeFName,
+                                       const QString &containerSignature,
+                                       bool isConst = false)
+{
+
+    // creation function from C++ reference, used by field accessors
+    // which are within extern "C"
+    s << "extern \"C\" PyObject *" << funcName << '(';
+    if (isConst)
+        s << "const ";
+    s << containerSignature << "* ct)\n{\n" << indent
+        << "auto *container = PyObject_New(ShibokenContainer, " << typeFName << "());\n"
+        << "auto *d = new ShibokenSequenceContainerPrivate<"
+        << containerSignature << ">();\n";
+    if (isConst) {
+        s << "d->m_list = const_cast<" << containerSignature << " *>(ct);\n"
+            << "d->m_const = true;\n";
+    } else {
+        s << "d->m_list = ct;\n";
+    }
+    s << "container->d = d;\n";
+    s << "return reinterpret_cast<PyObject *>(container);\n" << outdent
+        << "}\n\n";
+}
+
 // Generate code for a type wrapping a C++ container instantiation
 CppGenerator::OpaqueContainerData
    CppGenerator::writeOpaqueContainerConverterFunctions(TextStream &s,
@@ -184,17 +213,11 @@ CppGenerator::OpaqueContainerData
         << "static PyTypeObject *type = " << typeCreationFName
         << "();\nreturn type;\n" << outdent << "}\n\n";
 
-    // creation function from C++ reference, used by field accessors
-    // which are within extern "C"
-    const QString creationFunctionName =  u"create"_qs + result.name;
-    s << "extern \"C\" PyObject *" << creationFunctionName
-        << '(' << containerType.cppSignature() << "*ct)\n{\n" << indent
-        << "auto *container = PyObject_New(ShibokenContainer, " << typeFName << "());\n"
-        << "auto *d = new ShibokenSequenceContainerPrivate<"
-        << containerType.cppSignature() << ">();\n"
-        << "d->m_list = ct;\ncontainer->d = d;\n"
-        << "return reinterpret_cast<PyObject *>(container);\n" << outdent
-        << "}\n\n";
+    // creation functions from C++ references
+    writeContainerCreationFunc(s, u"create"_qs + result.name, typeFName,
+                               containerType.cppSignature());
+    writeContainerCreationFunc(s, u"createConst"_qs + result.name, typeFName,
+                               containerType.cppSignature(), true);
 
     // Check function
     result.checkFunctionName = result.name + u"_Check"_qs;
