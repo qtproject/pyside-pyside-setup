@@ -1,0 +1,2 @@
+include(@QT_SRC_DIR@/src/dbus/doc/qtdbus.qdocconf)
+include(../pyside-config.qdocconf)

@@ -1,0 +1,2 @@
+include(@QT_SRC_DIR@/../qtnetworkauth/src/oauth/doc/qtnetworkauth.qdocconf)
+include(../pyside-config.qdocconf)
