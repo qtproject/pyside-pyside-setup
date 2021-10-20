@@ -197,8 +197,11 @@ static QString opaqueContainerCreationFunc(const AbstractMetaType &type)
         static_cast<const ContainerTypeEntry *>(type.typeEntry());
     const auto *instantiationTypeEntry =
         type.instantiations().constFirst().typeEntry();
-    return u"create"_qs
-           + containerTypeEntry->opaqueContainerName(instantiationTypeEntry->name());
+    QString result = u"create"_qs;
+    if (type.isConstant())
+        result += u"Const"_qs;
+    result += containerTypeEntry->opaqueContainerName(instantiationTypeEntry->name());
+    return result;
 }
 
 // Write declaration of the function to create PyObject wrapping a container
@@ -206,7 +209,7 @@ static void writeOpaqueContainerCreationFuncDecl(TextStream &s, const QString &n
                                                  AbstractMetaType type)
 {
     type.setReferenceType(NoReference);
-    type.setConstant(false);
+    // Maintain const
     s << "PyObject *" << name << '(' << type.cppSignature() << "*);\n";
 }
 

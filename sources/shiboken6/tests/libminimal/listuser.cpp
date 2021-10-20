@@ -128,3 +128,8 @@ std::list<int> &ListUser::getIntList()
 {
     return m_stdIntList;
 }
+
+const std::list<int> &ListUser::getConstIntList() const
+{
+    return m_stdIntList;
+}

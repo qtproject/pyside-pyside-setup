@@ -76,6 +76,9 @@ public:
 
     SequenceContainer *m_list{};
     bool m_ownsList = false;
+    bool m_const = false;
+    static constexpr const char *msgModifyConstContainer =
+        "Attempt to modify a constant container.";
 
     static PyObject *tpNew(PyTypeObject *subtype, PyObject * /* args */, PyObject * /* kwds */)
     {
@@ -137,12 +140,16 @@ public:
 
     static PyObject *push_back(PyObject *self, PyObject *pyArg)
     {
+        auto *d = get(self);
         if (!ShibokenContainerValueConverter<value_type>::checkValue(pyArg)) {
             PyErr_SetString(PyExc_TypeError, "wrong type passed to append.");
             return nullptr;
         }
+        if (d->m_const) {
+            PyErr_SetString(PyExc_TypeError, msgModifyConstContainer);
+            return nullptr;
+        }
 
-        auto *d = get(self);
         OptionalValue value = ShibokenContainerValueConverter<value_type>::convertValueToCpp(pyArg);
         if (!value.has_value())
             return nullptr;
@@ -152,12 +159,16 @@ public:
 
     static PyObject *push_front(PyObject *self, PyObject *pyArg)
     {
+        auto *d = get(self);
         if (!ShibokenContainerValueConverter<value_type>::checkValue(pyArg)) {
             PyErr_SetString(PyExc_TypeError, "wrong type passed to append.");
             return nullptr;
         }
+        if (d->m_const) {
+            PyErr_SetString(PyExc_TypeError, msgModifyConstContainer);
+            return nullptr;
+        }
 
-        auto *d = get(self);
         OptionalValue value = ShibokenContainerValueConverter<value_type>::convertValueToCpp(pyArg);
         if (!value.has_value())
             return nullptr;
@@ -168,6 +179,11 @@ public:
     static PyObject *clear(PyObject *self)
     {
         auto *d = get(self);
+        if (d->m_const) {
+            PyErr_SetString(PyExc_TypeError, msgModifyConstContainer);
+            return nullptr;
+        }
+
         d->m_list->clear();
         Py_RETURN_NONE;
     }
@@ -175,6 +191,11 @@ public:
     static PyObject *pop_back(PyObject *self)
     {
         auto *d = get(self);
+        if (d->m_const) {
+            PyErr_SetString(PyExc_TypeError, msgModifyConstContainer);
+            return nullptr;
+        }
+
         d->m_list->pop_back();
         Py_RETURN_NONE;
     }
@@ -182,6 +203,11 @@ public:
     static PyObject *pop_front(PyObject *self)
     {
         auto *d = get(self);
+        if (d->m_const) {
+            PyErr_SetString(PyExc_TypeError, msgModifyConstContainer);
+            return nullptr;
+        }
+
         d->m_list->pop_front();
         Py_RETURN_NONE;
     }
