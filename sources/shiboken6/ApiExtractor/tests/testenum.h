@@ -42,6 +42,8 @@ private slots:
     void testEnumValueFromExpression();
     void testPrivateEnum();
     void testTypedefEnum();
+    void testEnumDefaultValues_data();
+    void testEnumDefaultValues();
 };
 
 #endif

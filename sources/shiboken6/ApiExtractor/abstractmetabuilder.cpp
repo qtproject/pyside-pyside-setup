@@ -2511,10 +2511,16 @@ qint64 AbstractMetaBuilderPrivate::findOutValueFromString(const QString &stringV
     return 0;
 }
 
+QString AbstractMetaBuilder::fixEnumDefault(const AbstractMetaType &type,
+                                            const QString &expr) const
+{
+    return d->fixEnumDefault(type, expr);
+}
+
 QString AbstractMetaBuilderPrivate::fixDefaultValue(const ArgumentModelItem &item,
                                                     const AbstractMetaType &type,
                                                     const AbstractMetaClass *implementingClass,
-                                                    int /* argumentIndex */)
+                                                    int /* argumentIndex */) const
 {
     QString expr = item->defaultValueExpression();
     if (expr.isEmpty() || expr == u"{}")
@@ -2538,17 +2544,7 @@ QString AbstractMetaBuilderPrivate::fixDefaultValue(const ArgumentModelItem &ite
             // processed. This is done in figureOutEnumValues()
         }
     } else if (type.isFlags() || type.isEnum()) {
-        bool isNumber;
-        expr.toInt(&isNumber);
-        if (!isNumber && expr.indexOf(colonColon()) < 0) {
-            // Add the enum/flag scope to default value, making it usable
-            // from other contexts beside its owner class hierarchy
-            static const QRegularExpression typeRegEx(QStringLiteral("[^<]*[<]([^:]*::).*"));
-            Q_ASSERT(typeRegEx.isValid());
-            const QRegularExpressionMatch match = typeRegEx.match(type.minimalSignature());
-            if (match.hasMatch())
-                expr.prepend(match.captured(1));
-        }
+        expr = fixEnumDefault(type, expr);
     } else if (type.isContainer() && expr.contains(QLatin1Char('<'))) {
         static const QRegularExpression typeRegEx(QStringLiteral("[^<]*<(.*)>"));
         Q_ASSERT(typeRegEx.isValid());

@@ -286,9 +286,6 @@ protected:
     /// Guesses the scope to where belongs an argument's default value.
     QString guessScopeForDefaultValue(const AbstractMetaFunctionCPtr &func,
                                       const AbstractMetaArgument &arg) const;
-    QString guessScopeForDefaultFlagsValue(const AbstractMetaFunctionCPtr &func,
-                                           const AbstractMetaArgument &arg,
-                                           const QString &value) const;
 
     static QString cpythonEnumName(const EnumTypeEntry *enumEntry);
     static QString cpythonEnumName(const AbstractMetaEnum &metaEnum);

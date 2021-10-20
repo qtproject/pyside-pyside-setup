@@ -29,6 +29,7 @@
 #include "shibokengenerator.h"
 #include "apiextractorresult.h"
 #include "ctypenames.h"
+#include <abstractmetabuilder.h>
 #include <abstractmetaenum.h>
 #include <abstractmetafield.h>
 #include <abstractmetafunction.h>
@@ -78,58 +79,6 @@ const char *CONV_RULE_OUT_VAR_SUFFIX = "_out";
 const char *BEGIN_ALLOW_THREADS =
     "PyThreadState *_save = PyEval_SaveThread(); // Py_BEGIN_ALLOW_THREADS";
 const char *END_ALLOW_THREADS = "PyEval_RestoreThread(_save); // Py_END_ALLOW_THREADS";
-
-// Return a prefix to fully qualify value, eg:
-// resolveScopePrefix("Class::NestedClass::Enum::Value1", "Enum::Value1")
-//     -> "Class::NestedClass::")
-static QString resolveScopePrefix(const QStringList &scopeList, const QString &value)
-{
-    QString name;
-    for (int i = scopeList.size() - 1 ; i >= 0; --i) {
-        const QString prefix = scopeList.at(i) + QLatin1String("::");
-        if (value.startsWith(prefix))
-            name.clear();
-        else
-            name.prepend(prefix);
-    }
-    return name;
-}
-
-static inline QStringList splitClassScope(const AbstractMetaClass *scope)
-{
-    return scope->qualifiedCppName().split(QLatin1String("::"), Qt::SkipEmptyParts);
-}
-
-static QString resolveScopePrefix(const AbstractMetaClass *scope, const QString &value)
-{
-    return scope
-        ? resolveScopePrefix(splitClassScope(scope), value)
-        : QString();
-}
-
-// Check whether the value is a cast from int for an enum "Enum(-1)"
-static bool isEnumCastFromInt(const AbstractMetaEnum &metaEnum,
-                              const QString &value)
-{
-    const auto parenPos = value.indexOf(u'(');
-    if (parenPos < 0)
-        return false;
-    const auto prefix = QStringView{value}.left(parenPos);
-    return prefix.endsWith(metaEnum.name());
-}
-
-static QString resolveScopePrefix(const AbstractMetaEnum &metaEnum,
-                                  const QString &value)
-{
-    QStringList parts;
-    if (const AbstractMetaClass *scope = metaEnum.enclosingClass())
-        parts.append(splitClassScope(scope));
-    // Fully qualify the value which is required for C++ 11 enum classes
-    // unless it is a cast from int "Enum(-)" which already has the type name.
-    if (!metaEnum.isAnonymous() && !isEnumCastFromInt(metaEnum, value))
-        parts.append(metaEnum.name());
-    return resolveScopePrefix(parts, value);
-}
 
 struct GeneratorClassInfoCacheEntry
 {
@@ -415,76 +364,6 @@ static QString cpythonEnumFlagsName(const QString &moduleName,
     return result;
 }
 
-// Return the scope for fully qualifying the enumeration including trailing "::".
-static QString searchForEnumScope(const AbstractMetaClass *metaClass, const QString &value)
-{
-    if (!metaClass)
-        return QString();
-    for (const AbstractMetaEnum &metaEnum : metaClass->enums()) {
-        auto v = metaEnum.findEnumValue(value);
-        if (v.has_value())
-            return resolveScopePrefix(metaEnum, value);
-    }
-    // PYSIDE-331: We need to also search the base classes.
-    QString ret = searchForEnumScope(metaClass->enclosingClass(), value);
-    if (ret.isEmpty())
-        ret = searchForEnumScope(metaClass->baseClass(), value);
-    return ret;
-}
-
-// Handle QFlags<> for guessScopeForDefaultValue()
-QString ShibokenGenerator::guessScopeForDefaultFlagsValue(const AbstractMetaFunctionCPtr &func,
-                                                          const AbstractMetaArgument &arg,
-                                                          const QString &value) const
-{
-    // Numeric values -> "Options(42)"
-    static const QRegularExpression numberRegEx(QStringLiteral("^\\d+$")); // Numbers to flags
-    Q_ASSERT(numberRegEx.isValid());
-    if (numberRegEx.match(value).hasMatch()) {
-        QString typeName = translateTypeForWrapperMethod(arg.type(), func->implementingClass());
-        if (arg.type().isConstant())
-            typeName.remove(0, sizeof("const ") / sizeof(char) - 1);
-        switch (arg.type().referenceType()) {
-        case NoReference:
-            break;
-        case LValueReference:
-            typeName.chop(1);
-            break;
-        case RValueReference:
-            typeName.chop(2);
-            break;
-        }
-        return typeName + QLatin1Char('(') + value + QLatin1Char(')');
-    }
-
-    // "Options(Option1 | Option2)" -> "Options(Class::Enum::Option1 | Class::Enum::Option2)"
-    static const QRegularExpression enumCombinationRegEx(QStringLiteral("^([A-Za-z_][\\w:]*)\\(([^,\\(\\)]*)\\)$")); // FlagName(EnumItem|EnumItem|...)
-    Q_ASSERT(enumCombinationRegEx.isValid());
-    const QRegularExpressionMatch match = enumCombinationRegEx.match(value);
-    if (match.hasMatch()) {
-        const QString expression = match.captured(2).trimmed();
-        if (expression.isEmpty())
-            return value;
-        const QStringList enumItems = expression.split(QLatin1Char('|'));
-        const QString scope = searchForEnumScope(func->implementingClass(),
-                                                 enumItems.constFirst().trimmed());
-        if (scope.isEmpty())
-            return value;
-        QString result;
-        QTextStream str(&result);
-        str << match.captured(1) << '('; // Flag name
-        for (int i = 0, size = enumItems.size(); i < size; ++i) {
-            if (i)
-                str << '|';
-            str << scope << enumItems.at(i).trimmed();
-        }
-        str << ')';
-        return result;
-    }
-    // A single flag "Option1" -> "Class::Enum::Option1"
-    return searchForEnumScope(func->implementingClass(), value) + value;
-}
-
 /*
  * This function uses some heuristics to find out the scope for a given
  * argument default value since they must be fully qualified when used outside the class:
@@ -518,20 +397,16 @@ QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunctionC
         return value;
 
     QString prefix;
-    if (arg.type().isEnum()) {
-        auto metaEnum = api().findAbstractMetaEnum(arg.type().typeEntry());
-        if (metaEnum.has_value())
-            prefix = resolveScopePrefix(metaEnum.value(), value);
-    } else if (arg.type().isFlags()) {
-        value = guessScopeForDefaultFlagsValue(func, arg, value);
+    if (arg.type().isEnum() || arg.type().isFlags()) {
+        // handled by AbstractMetaBuilder::fixEnumDefault()
     } else if (arg.type().typeEntry()->isValue()) {
         auto metaClass = AbstractMetaClass::findClass(api().classes(),
                                                       arg.type().typeEntry());
         if (enumValueRegEx.match(value).hasMatch() && value != QLatin1String("NULL"))
-            prefix = resolveScopePrefix(metaClass, value);
+            prefix = AbstractMetaBuilder::resolveScopePrefix(metaClass, value);
     } else if (arg.type().isPrimitive() && arg.type().name() == intT()) {
         if (enumValueRegEx.match(value).hasMatch() && func->implementingClass())
-            prefix = resolveScopePrefix(func->implementingClass(), value);
+            prefix = AbstractMetaBuilder::resolveScopePrefix(func->implementingClass(), value);
     } else if (arg.type().isPrimitive()) {
         static const QRegularExpression unknowArgumentRegEx(QStringLiteral("^(?:[A-Za-z_][\\w:]*\\()?([A-Za-z_]\\w*)(?:\\))?$")); // [PrimitiveType(] DESIREDNAME [)]
         Q_ASSERT(unknowArgumentRegEx.isValid());
@@ -541,7 +416,7 @@ QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunctionC
                 if (match.captured(1).trimmed() == field.name()) {
                     QString fieldName = field.name();
                     if (field.isStatic()) {
-                        prefix = resolveScopePrefix(func->implementingClass(), value);
+                        prefix = AbstractMetaBuilder::resolveScopePrefix(func->implementingClass(), value);
                         fieldName.prepend(prefix);
                         prefix.clear();
                     } else {

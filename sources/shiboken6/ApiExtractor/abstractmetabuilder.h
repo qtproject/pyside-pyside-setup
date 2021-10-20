@@ -107,6 +107,14 @@ public:
     static QStringList definitionNames(const QString &name,
                                        TypeSystem::SnakeCase snakeCase);
 
+    static QString resolveScopePrefix(const AbstractMetaClass *scope,
+                                      QStringView value);
+    static QString searchForEnumScope(const AbstractMetaClass *metaClass,
+                                      QStringView value);
+
+    // For testing purposes
+    QString fixEnumDefault(const AbstractMetaType &type, const QString &expr) const;
+
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const;
 #endif
