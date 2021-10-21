@@ -56,3 +56,74 @@ replace
     This node will replace the attribute ``from`` with the value pointed by
     ``to``.
 
+.. _predefined_templates:
+
+Predefined Templates
+--------------------
+
+There are a number of XML templates for conversion rules for STL and Qt types
+built into shiboken.
+
+Templates for :ref:`primitive-type`:
+
+    +---------------------------------------+--------------------------------+
+    |Name                                   | Description                    |
+    +---------------------------------------+--------------------------------+
+    | ``shiboken_conversion_pylong_to_cpp`` | Convert a PyLong to a C++ type |
+    +---------------------------------------+--------------------------------+
+
+Templates for :ref:`container-type`:
+
+    +----------------------------------------------------------------------+------------------------------------------------------------------------------------+
+    | ``shiboken_conversion_pysequence_to_cpppair``                        | Convert a PySequence to a C++ pair (std::pair/QPair)                               |
+    +----------------------------------------------------------------------+------------------------------------------------------------------------------------+
+    | ``shiboken_conversion_cpppair_to_pytuple``                           | Convert a C++ pair (std::pair/QPair) to a PyTuple                                  |
+    +----------------------------------------------------------------------+------------------------------------------------------------------------------------+
+    | ``shiboken_conversion_cppsequence_to_pylist``                        | Convert a C++ sequential container to a PyList                                     |
+    +----------------------------------------------------------------------+------------------------------------------------------------------------------------+
+    | ``shiboken_conversion_cppsequence_to_pyset``                         | Convert a C++ sequential container to a PySet                                      |
+    +----------------------------------------------------------------------+------------------------------------------------------------------------------------+
+    | ``shiboken_conversion_pyiterable_to_cppsequentialcontainer``         | Convert an iterable Python type to a C++ sequential container (STL/Qt)             |
+    +----------------------------------------------------------------------+------------------------------------------------------------------------------------+
+    | ``shiboken_conversion_pyiterable_to_cppsequentialcontainer_reserve`` | Convert an iterable Python type to a C++ sequential container supporting reserve() |
+    +----------------------------------------------------------------------+------------------------------------------------------------------------------------+
+    | ``shiboken_conversion_pyiterable_to_cppsetcontainer``                | Convert a PySequence to a set-type C++ container (std::set/QSet)                   |
+    +----------------------------------------------------------------------+------------------------------------------------------------------------------------+
+    | ``shiboken_conversion_stdmap_to_pydict``                             | Convert a std::map/std::unordered_map to a PyDict                                  |
+    +----------------------------------------------------------------------+------------------------------------------------------------------------------------+
+    | ``shiboken_conversion_qmap_to_pydict``                               | Convert a QMap/QHash to a PyDict                                                   |
+    +----------------------------------------------------------------------+------------------------------------------------------------------------------------+
+    | ``shiboken_conversion_pydict_to_stdmap``                             | Convert a PyDict to a std::map/std::unordered_map                                  |
+    +----------------------------------------------------------------------+------------------------------------------------------------------------------------+
+    | ``shiboken_conversion_pydict_to_qmap``                               | Convert a PyDict to a QMap/QHash                                                   |
+    +----------------------------------------------------------------------+------------------------------------------------------------------------------------+
+    | ``shiboken_conversion_stdmultimap_to_pydict``                        | Convert a std::multimap to a PyDict of value lists                                 |
+    +----------------------------------------------------------------------+------------------------------------------------------------------------------------+
+    | ``shiboken_conversion_qmultimap_to_pydict``                          | Convert a QMultiMap to a PyDict of value lists                                     |
+    +----------------------------------------------------------------------+------------------------------------------------------------------------------------+
+    | ``shiboken_conversion_stdunorderedmultimap_to_pydict``               | Convert a std::unordered_multimap to a PyDict of value lists                       |
+    +----------------------------------------------------------------------+------------------------------------------------------------------------------------+
+    | ``shiboken_conversion_qmultihash_to_pydict``                         | Convert a QMultiHash to a PyDict of value lists                                    |
+    +----------------------------------------------------------------------+------------------------------------------------------------------------------------+
+    | ``shiboken_conversion_pydict_to_stdmultimap``                        | Convert a PyDict of value lists to std::multimap/std::unordered_multimap           |
+    +----------------------------------------------------------------------+------------------------------------------------------------------------------------+
+    | ``shiboken_conversion_pydict_to_qmultihash``                         | Convert a PyDict of value lists to QMultiMap/QMultiHash                            |
+    +----------------------------------------------------------------------+------------------------------------------------------------------------------------+
+
+An entry for the type ``std::list`` using these templates looks like:
+
+.. code-block:: xml
+
+    <container-type name="std::list" type="list">
+        <include file-name="list" location="global"/>
+        <conversion-rule>
+            <native-to-target>
+                <insert-template name="shiboken_conversion_cppsequence_to_pylist"/>
+            </native-to-target>
+            <target-to-native>
+                <add-conversion type="PySequence">
+                    <insert-template name="shiboken_conversion_pyiterable_to_cppsequentialcontainer"/>
+                </add-conversion>
+            </target-to-native>
+        </conversion-rule>
+    </container-type>

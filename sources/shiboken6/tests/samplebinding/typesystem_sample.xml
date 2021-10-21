@@ -351,20 +351,16 @@
         <include file-name="utility" location="global"/>
         <conversion-rule>
             <native-to-target>
-            PyObject* %out = PyTuple_New(2);
-            PyTuple_SET_ITEM(%out, 0, %CONVERTTOPYTHON[%INTYPE_0](%in.first));
-            PyTuple_SET_ITEM(%out, 1, %CONVERTTOPYTHON[%INTYPE_1](%in.second));
-            return %out;
+                <insert-template name="shiboken_conversion_cpppair_to_pytuple"/>
             </native-to-target>
             <target-to-native>
                 <add-conversion type="PySequence">
-                %out.first = %CONVERTTOCPP[%OUTTYPE_0](PySequence_Fast_GET_ITEM(%in, 0));
-                %out.second = %CONVERTTOCPP[%OUTTYPE_1](PySequence_Fast_GET_ITEM(%in, 1));
+                    <insert-template name="shiboken_conversion_pysequence_to_cpppair"/>
                 </add-conversion>
             </target-to-native>
         </conversion-rule>
     </container-type>
-    <template name="cpplist_to_pylist_convertion">
+    <template name="cpp_indexed_list_to_pylist_conversion">
     PyObject *%out = PyList_New(Py_ssize_t(%in.size()));
     Py_ssize_t idx = 0;
     for (auto it = %in.cbegin(), end = %in.cend(); it != end; ++it, ++idx) {
@@ -373,24 +369,15 @@
     }
     return %out;
     </template>
-    <template name="pyseq_to_cpplist_convertion">
-    Shiboken::AutoDecRef seq(PySequence_Fast(%in, 0));
-    const Py_ssize_t size = PySequence_Fast_GET_SIZE(seq.object());
-    for (Py_ssize_t i = 0; i &lt; size; ++i) {
-        PyObject* pyItem = PySequence_Fast_GET_ITEM(seq.object(), i);
-        %OUTTYPE_0 cppItem = %CONVERTTOCPP[%OUTTYPE_0](pyItem);
-        %out.push_back(cppItem);
-    }
-    </template>
     <container-type name="std::list" type="list">
         <include file-name="list" location="global"/>
         <conversion-rule>
             <native-to-target>
-                <insert-template name="cpplist_to_pylist_convertion"/>
+                <insert-template name="shiboken_conversion_cppsequence_to_pylist"/>
             </native-to-target>
             <target-to-native>
                 <add-conversion type="PySequence">
-                    <insert-template name="pyseq_to_cpplist_convertion"/>
+                    <insert-template name="shiboken_conversion_pyiterable_to_cppsequentialcontainer"/>
                 </add-conversion>
             </target-to-native>
         </conversion-rule>
@@ -399,11 +386,11 @@
         <include file-name="list" location="global"/>
         <conversion-rule>
             <native-to-target>
-                <insert-template name="cpplist_to_pylist_convertion"/>
+                <insert-template name="cpp_indexed_list_to_pylist_conversion"/>
             </native-to-target>
             <target-to-native>
                 <add-conversion type="PySequence">
-                    <insert-template name="pyseq_to_cpplist_convertion"/>
+                    <insert-template name="shiboken_conversion_pyiterable_to_cppsequentialcontainer"/>
                 </add-conversion>
             </target-to-native>
         </conversion-rule>
@@ -412,26 +399,11 @@
         <include file-name="map" location="global"/>
         <conversion-rule>
             <native-to-target>
-            PyObject* %out = PyDict_New();
-            for (auto it = %in.cbegin(), end = %in.cend(); it != end; ++it) {
-                %INTYPE_0 key = it->first;
-                %INTYPE_1 value = it->second;
-                PyDict_SetItem(%out,
-                               %CONVERTTOPYTHON[%INTYPE_0](key),
-                               %CONVERTTOPYTHON[%INTYPE_1](value));
-            }
-            return %out;
+                <insert-template name="shiboken_conversion_stdmap_to_pydict"/>
             </native-to-target>
             <target-to-native>
                 <add-conversion type="PyDict">
-                PyObject* key;
-                PyObject* value;
-                Py_ssize_t pos = 0;
-                while (PyDict_Next(%in, &amp;pos, &amp;key, &amp;value)) {
-                    %OUTTYPE_0 cppKey = %CONVERTTOCPP[%OUTTYPE_0](key);
-                    %OUTTYPE_1 cppValue = %CONVERTTOCPP[%OUTTYPE_1](value);
-                    %out.insert({cppKey, cppValue});
-                }
+                    <insert-template name="shiboken_conversion_pydict_to_stdmap"/>
                 </add-conversion>
             </target-to-native>
         </conversion-rule>

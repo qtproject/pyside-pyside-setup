@@ -172,6 +172,7 @@ public:
     TemplateEntry *findTemplate(const QString &name) const { return m_templates[name]; }
 
     void addTemplate(TemplateEntry *t);
+    void addTemplate(const QString &name, const QString &code);
 
     AddedFunctionList globalUserFunctions() const { return m_globalUserFunctions; }
 

@@ -31,6 +31,7 @@
 #include "typesystem.h"
 #include "typesystemparser.h"
 #include "conditionalstreamreader.h"
+#include "predefined_templates.h"
 
 #include <QtCore/QFile>
 #include <QtCore/QDebug>
@@ -105,6 +106,9 @@ TypeDatabase::TypeDatabase()
     addBuiltInType(new VarargsTypeEntry());
     for (const auto &pt : builtinPythonTypes())
         addBuiltInType(new PythonTypeEntry(pt.name, pt.checkFunction, pt.type));
+
+    for (const auto &p : predefinedTemplates())
+        addTemplate(p.name, p.content);
 }
 
 TypeDatabase::~TypeDatabase() = default;
@@ -590,6 +594,13 @@ void TypeDatabase::addFlagsType(FlagsTypeEntry *fte)
 void TypeDatabase::addTemplate(TemplateEntry *t)
 {
     m_templates[t->name()] = t;
+}
+
+void TypeDatabase::addTemplate(const QString &name, const QString &code)
+{
+    auto *te = new TemplateEntry(name);
+    te->addCode(code);
+    addTemplate(te);
 }
 
 void TypeDatabase::addGlobalUserFunctions(const AddedFunctionList &functions)

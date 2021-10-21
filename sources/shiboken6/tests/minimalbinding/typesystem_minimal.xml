@@ -20,23 +20,11 @@
         <include file-name="list" location="global"/>
         <conversion-rule>
             <native-to-target>
-            PyObject* %out = PyList_New(Py_ssize_t(%in.size()));
-            Py_ssize_t idx = 0;
-            for (auto it = %in.cbegin(), end = %in.cend(); it != end; ++it, ++idx) {
-                %INTYPE_0 cppItem(*it);
-                PyList_SET_ITEM(%out, idx, %CONVERTTOPYTHON[%INTYPE_0](cppItem));
-            }
-            return %out;
+                <insert-template name="shiboken_conversion_cppsequence_to_pylist"/>
             </native-to-target>
             <target-to-native>
                 <add-conversion type="PySequence">
-                Shiboken::AutoDecRef seq(PySequence_Fast(%in, 0));
-                const Py_ssize_t size = PySequence_Fast_GET_SIZE(seq.object());
-                for (Py_ssize_t i = 0; i &lt; size; ++i) {
-                    PyObject* pyItem = PySequence_Fast_GET_ITEM(seq.object(), i);
-                    %OUTTYPE_0 cppItem = %CONVERTTOCPP[%OUTTYPE_0](pyItem);
-                    %out.push_back(cppItem);
-                }
+                    <insert-template name="shiboken_conversion_pyiterable_to_cppsequentialcontainer"/>
                 </add-conversion>
             </target-to-native>
         </conversion-rule>

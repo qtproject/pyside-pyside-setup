@@ -187,7 +187,9 @@
     <conversion-rule>
         <native-to-target file="../glue/qtcore.cpp" snippet="return-pylong"/>
         <target-to-native>
-            <add-conversion type="PyLong" file="../glue/qtcore.cpp" snippet="conversion-pylong"/>
+            <add-conversion type="PyLong">
+                <insert-template name="shiboken_conversion_pylong_to_cpp"/>
+            </add-conversion>
         </target-to-native>
     </conversion-rule>
   </primitive-type>
@@ -203,7 +205,9 @@
     <conversion-rule>
         <native-to-target file="../glue/qtcore.cpp" snippet="return-pylong"/>
         <target-to-native>
-            <add-conversion type="PyLong" file="../glue/qtcore.cpp" snippet="conversion-pylong"/>
+            <add-conversion type="PyLong">
+                <insert-template name="shiboken_conversion_pylong_to_cpp"/>
+            </add-conversion>
         </target-to-native>
     </conversion-rule>
   </primitive-type>
@@ -267,13 +271,13 @@
     <include file-name="QStringList" location="global"/>
     <conversion-rule>
         <native-to-target>
-            <insert-template name="cpplist_to_pylist_conversion">
+            <insert-template name="shiboken_conversion_cppsequence_to_pylist">
                 <replace from="%INTYPE_0" to="QString"/>
             </insert-template>
         </native-to-target>
         <target-to-native>
             <add-conversion type="PySequence">
-                <insert-template name="pyseq_to_cpplist_conversion">
+                <insert-template name="shiboken_conversion_pyiterable_to_cppsequentialcontainer_reserve">
                     <replace from="%OUTTYPE_0" to="QString"/>
                 </insert-template>
             </add-conversion>
@@ -336,33 +340,16 @@
       </conversion-rule>
   </value-type>
 
-  <primitive-type name="QModelIndexList">
-    <include file-name="qabstractitemmodel.h" location="global"/>
-    <conversion-rule>
-        <native-to-target>
-            <insert-template name="cpplist_to_pylist_conversion">
-                <replace from="%INTYPE_0" to="QModelIndex"/>
-            </insert-template>
-        </native-to-target>
-        <target-to-native>
-            <add-conversion type="PySequence">
-                <insert-template name="pyseq_to_cpplist_conversion">
-                    <replace from="%OUTTYPE_0" to="QModelIndex"/>
-                </insert-template>
-            </add-conversion>
-        </target-to-native>
-    </conversion-rule>
-  </primitive-type>
-
   <container-type name="QSet" type="set">
     <include file-name="QSet" location="global"/>
     <conversion-rule>
         <native-to-target>
-            <insert-template name="cpplist_to_pylist_conversion"/>
+            <!-- FIXME PYSIDE 7: shiboken_conversion_cppsequence_to_pyset -->
+            <insert-template name="shiboken_conversion_cppsequence_to_pylist"/>
         </native-to-target>
         <target-to-native>
             <add-conversion type="PySequence">
-                <insert-template name="pyseq_to_cpplist_conversion"/>
+                <insert-template name="shiboken_conversion_pyiterable_to_cppsetcontainer"/>
             </add-conversion>
         </target-to-native>
     </conversion-rule>
@@ -382,11 +369,11 @@
     <!-- operator << needs to be declared in inheriting class -->
     <conversion-rule>
         <native-to-target>
-            <insert-template name="cpplist_to_pylist_conversion"/>
+            <insert-template name="shiboken_conversion_cppsequence_to_pylist"/>
         </native-to-target>
         <target-to-native>
             <add-conversion type="PySequence">
-                <insert-template name="pyseq_to_cpplist_conversion"/>
+                <insert-template name="shiboken_conversion_pyiterable_to_cppsequentialcontainer_reserve"/>
             </add-conversion>
         </target-to-native>
     </conversion-rule>
@@ -396,11 +383,11 @@
     <include file-name="QStack" location="global"/>
     <conversion-rule>
         <native-to-target>
-            <insert-template name="cpplist_to_pylist_conversion"/>
+            <insert-template name="shiboken_conversion_cppsequence_to_pylist"/>
         </native-to-target>
         <target-to-native>
             <add-conversion type="PySequence">
-                <insert-template name="pyseq_to_cpplist_conversion"/>
+                <insert-template name="shiboken_conversion_pyiterable_to_cppsequentialcontainer_reserve"/>
             </add-conversion>
         </target-to-native>
     </conversion-rule>
@@ -410,11 +397,11 @@
     <include file-name="QQueue" location="global"/>
     <conversion-rule>
         <native-to-target>
-            <insert-template name="cpplist_to_pylist_conversion"/>
+            <insert-template name="shiboken_conversion_cppsequence_to_pylist"/>
         </native-to-target>
         <target-to-native>
             <add-conversion type="PySequence">
-                <insert-template name="pyseq_to_cpplist_conversion"/>
+                <insert-template name="shiboken_conversion_pyiterable_to_cppsequentialcontainer_reserve"/>
             </add-conversion>
         </target-to-native>
     </conversion-rule>
@@ -426,11 +413,11 @@
     <include file-name="pysideqflags.h" location="global"/>
     <conversion-rule>
         <native-to-target>
-            <insert-template name="cppmap_to_pymap_conversion"/>
+            <insert-template name="shiboken_conversion_qmap_to_pydict"/>
         </native-to-target>
         <target-to-native>
             <add-conversion type="PyDict">
-                <insert-template name="pydict_to_cppmap_conversion"/>
+                <insert-template name="shiboken_conversion_pydict_to_qmap"/>
             </add-conversion>
         </target-to-native>
     </conversion-rule>
@@ -442,11 +429,11 @@
     <include file-name="pysideqflags.h" location="global"/>
     <conversion-rule>
         <native-to-target>
-            <insert-template name="cppmultihash_to_pymap_conversion"/>
+            <insert-template name="shiboken_conversion_qmultihash_to_pydict"/>
         </native-to-target>
         <target-to-native>
             <add-conversion type="PyDict">
-                <insert-template name="pydict_to_cppmultimap_conversion"/>
+                <insert-template name="shiboken_conversion_pydict_to_qmultihash"/>
             </add-conversion>
         </target-to-native>
     </conversion-rule>
@@ -456,11 +443,11 @@
     <include file-name="QMap" location="global"/>
     <conversion-rule>
         <native-to-target>
-            <insert-template name="cppmap_to_pymap_conversion"/>
+            <insert-template name="shiboken_conversion_qmap_to_pydict"/>
         </native-to-target>
         <target-to-native>
             <add-conversion type="PyDict">
-                <insert-template name="pydict_to_cppmap_conversion"/>
+                <insert-template name="shiboken_conversion_pydict_to_qmap"/>
             </add-conversion>
         </target-to-native>
     </conversion-rule>
@@ -469,11 +456,11 @@
     <include file-name="QMultiMap" location="global"/>
     <conversion-rule>
         <native-to-target>
-            <insert-template name="cppmultimap_to_pymap_conversion"/>
+            <insert-template name="shiboken_conversion_qmultimap_to_pydict"/>
         </native-to-target>
         <target-to-native>
             <add-conversion type="PyDict">
-                <insert-template name="pydict_to_cppmultimap_conversion"/>
+                <insert-template name="shiboken_conversion_pydict_to_qmultihash"/>
             </add-conversion>
         </target-to-native>
     </conversion-rule>
@@ -482,9 +469,13 @@
   <container-type name="QPair" type="pair">
     <include file-name="QPair" location="global"/>
     <conversion-rule>
-        <native-to-target file="../glue/qtcore.cpp" snippet="return-qpair"/>
+        <native-to-target>
+            <insert-template name="shiboken_conversion_cpppair_to_pytuple"/>
+        </native-to-target>
         <target-to-native>
-            <add-conversion type="PySequence" file="../glue/qtcore.cpp" snippet="conversion-qpair-pysequence"/>
+            <add-conversion type="PySequence">
+                <insert-template name="shiboken_conversion_pysequence_to_cpppair"/>
+            </add-conversion>
         </target-to-native>
     </conversion-rule>
   </container-type>
@@ -492,9 +483,13 @@
   <!-- QPair is implemented with std::pair since Qt 6 -->
   <container-type name="std::pair" type="pair">
     <conversion-rule>
-        <native-to-target file="../glue/qtcore.cpp" snippet="return-qpair"/>
+        <native-to-target>
+            <insert-template name="shiboken_conversion_cpppair_to_pytuple"/>
+        </native-to-target>
         <target-to-native>
-            <add-conversion type="PySequence" file="../glue/qtcore.cpp" snippet="conversion-qpair-pysequence"/>
+            <add-conversion type="PySequence">
+                <insert-template name="shiboken_conversion_pysequence_to_cpppair"/>
+            </add-conversion>
         </target-to-native>
     </conversion-rule>
   </container-type>

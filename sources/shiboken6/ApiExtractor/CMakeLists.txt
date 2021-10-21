@@ -24,6 +24,7 @@ enclosingclassmixin.cpp
 fileout.cpp
 messages.cpp
 modifications.cpp
+predefined_templates.cpp
 propertyspec.cpp
 reporthandler.cpp
 sourcelocation.cpp

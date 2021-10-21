@@ -1669,10 +1669,6 @@ if (PyErr_WarnEx(PyExc_DeprecationWarning,
 %out = %OUTTYPE(%in == Py_True);
 // @snippet conversion-pybool
 
-// @snippet conversion-pylong
-%out = %OUTTYPE(PyLong_AsLong(%in));
-// @snippet conversion-pylong
-
 // @snippet conversion-pylong-quintptr
 #if QT_POINTER_SIZE == 8
 %out = %OUTTYPE(PyLong_AsUnsignedLongLong(%in));
@@ -1781,11 +1777,6 @@ QVariant dict = QVariant_convertToVariantMap(%in);
 QJsonValue val = QJsonValue::fromVariant(dict);
 %out = val.toObject();
 // @snippet conversion-qjsonobject-pydict
-
-// @snippet conversion-qpair-pysequence
-%out.first = %CONVERTTOCPP[%OUTTYPE_0](PySequence_Fast_GET_ITEM(%in, 0));
-%out.second = %CONVERTTOCPP[%OUTTYPE_1](PySequence_Fast_GET_ITEM(%in, 1));
-// @snippet conversion-qpair-pysequence
 
 // @snippet conversion-qdate-pydate
 int day = PyDateTime_GET_DAY(%in);
@@ -1911,13 +1902,6 @@ QVariant ret = val.toVariant();
 
 return %CONVERTTOPYTHON[QVariant](ret);
 // @snippet return-qjsonobject
-
-// @snippet return-qpair
-PyObject *%out = PyTuple_New(2);
-PyTuple_SET_ITEM(%out, 0, %CONVERTTOPYTHON[%INTYPE_0](%in.first));
-PyTuple_SET_ITEM(%out, 1, %CONVERTTOPYTHON[%INTYPE_1](%in.second));
-return %out;
-// @snippet return-qpair
 
 // @snippet qthread_pthread_cleanup
 #ifdef Q_OS_UNIX

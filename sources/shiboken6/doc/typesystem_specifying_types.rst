@@ -176,6 +176,9 @@ primitive-type
     be instantiated and passed to functions using the view class
     for argument types.
 
+    See :ref:`predefined_templates` for built-in templates for standard type
+    conversion rules.
+
 .. _namespace:
 
 namespace-type
@@ -473,6 +476,9 @@ container-type
     :ref:`opaque-containers`.
 
     The *optional*  **since** value is used to specify the API version of this container.
+
+    See :ref:`predefined_templates` for built-in templates for standard type
+    conversion rules.
 
 .. _typedef-type:
 
