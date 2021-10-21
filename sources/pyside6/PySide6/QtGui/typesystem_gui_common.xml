@@ -245,17 +245,11 @@
     </modify-function>
   </object-type>
   <object-type name="QShortcut">
-    <add-function signature="QShortcut(QKeySequence&amp;,QObject*,PyCallable*,Qt::ShortcutContext)">
-      <modify-argument index="4">
-        <replace-default-expression with="Qt::WindowShortcut"/>
-      </modify-argument>
+    <add-function signature="QShortcut(QKeySequence&amp;,QObject*,PyCallable*,Qt::ShortcutContext=Qt::WindowShortcut)">
       <inject-code class="target" position="beginning" file="../glue/qtgui.cpp" snippet="qshortcut-1"/>
       <inject-code class="target" position="end" file="../glue/qtgui.cpp" snippet="qshortcut-2"/>
     </add-function>
-    <add-function signature="QShortcut(QKeySequence::StandardKey,QObject*,PyCallable*,Qt::ShortcutContext)">
-      <modify-argument index="4">
-        <replace-default-expression with="Qt::WindowShortcut"/>
-      </modify-argument>
+    <add-function signature="QShortcut(QKeySequence::StandardKey,QObject*,PyCallable*,Qt::ShortcutContext=Qt::WindowShortcut)">
       <inject-code class="target" position="beginning" file="../glue/qtgui.cpp" snippet="qshortcut-1"/>
       <inject-code class="target" position="end" file="../glue/qtgui.cpp" snippet="qshortcut-2"/>
     </add-function>
@@ -565,10 +559,7 @@
   </value-type>
 
   <value-type name="QPixmap" >
-    <add-function signature="QPixmap(const QImage&amp;)">
-        <modify-argument index="1">
-            <rename to="image"/>
-        </modify-argument>
+    <add-function signature="QPixmap(const QImage&amp;@image@)">
         <inject-code class="target" position="beginning" file="../glue/qtgui.cpp" snippet="qpixmap"/>
     </add-function>
     <modify-function signature="QPixmap(const char*const[])">
@@ -1726,9 +1717,6 @@
       </modify-argument>
     </modify-function>
     <modify-function signature="text(QString&amp;,QClipboard::Mode)const">
-      <modify-argument index="2">
-        <replace-default-expression with="QClipboard::Clipboard"/>
-      </modify-argument>
       <modify-argument index="return">
         <replace-type modified-type="(retval, subtype)"/>
       </modify-argument>
