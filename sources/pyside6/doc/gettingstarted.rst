@@ -46,11 +46,10 @@ You can refer to the following pages for platform specific instructions:
         </tr>
     </table>
 
-.. important:: The |project| does not yet support WebAssembly and the mobile operating
-      systems (Android or iOS).
+.. important:: |project| does not yet support WebAssembly and the mobile operating systems (Android or iOS).
 
-  Most Linux-based embedded OS provide PySide with their official
-  package manager (for example, `Raspbian`_ and `ArchlinuxARM`_).
+Most Linux-based embedded OS provide PySide with their official
+package manager (for example, `Raspbian`_ and `ArchlinuxARM`_).
 
 .. _Raspbian: https://www.raspbian.org/
 .. _ArchlinuxARM: https://archlinuxarm.org/
