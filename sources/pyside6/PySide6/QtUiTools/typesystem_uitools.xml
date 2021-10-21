@@ -49,10 +49,7 @@
       </extra-includes>
       <inject-code class="native" position="beginning" file="../glue/qtuitools.cpp" snippet="uitools-loadui"/>
       <inject-code file="../glue/qtuitools.cpp" snippet="quiloader"/>
-      <add-function signature="registerCustomWidget(PyObject*)" return-type="void">
-         <modify-argument index="1">
-            <rename to="customWidgetType"/>
-         </modify-argument>
+      <add-function signature="registerCustomWidget(PyObject*@customWidgetType@)" return-type="void">
          <inject-documentation format="target" mode="append">
          Registers a Python created custom widget to QUiLoader, so it can be recognized when
          loading a `.ui` file. The custom widget type is passed via the ``customWidgetType`` argument.
@@ -130,11 +127,7 @@
      </modify-function>
 
       <!-- Syntax sugar -->
-      <add-function signature="load(PyPathLike,QWidget*)" return-type="QWidget*">
-        <modify-argument index="2">
-          <replace-default-expression with="0"/>
-          <rename to="parentWidget"/>
-        </modify-argument>
+      <add-function signature="load(PyPathLike,QWidget*@parentWidget@=nullptr)" return-type="QWidget*">
         <modify-argument index="return">
           <define-ownership class="target" owner="target"/>
         </modify-argument>
