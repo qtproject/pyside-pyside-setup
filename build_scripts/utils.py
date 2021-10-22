@@ -246,7 +246,7 @@ def copyfile(src, dst, force=True, vars=None, force_copy_symlink=False,
         dst = dst.format(**vars)
 
     if not os.path.exists(src) and not force:
-        log.info(f"**Skipping copy file {src} to {dst}. Source does not exists.")
+        log.info(f"**Skipping copy file\n  {src} to\n  {dst}\n  Source does not exist")
         return
 
     if not os.path.islink(src) or force_copy_symlink:
@@ -258,7 +258,7 @@ def copyfile(src, dst, force=True, vars=None, force_copy_symlink=False,
                 log.info(f"{dst} is up to date.")
                 return dst
 
-        log.info(f"Copying file {src} to {dst}.")
+        log.info(f"Copying file\n  {src} to\n  {dst}.")
         shutil.copy2(src, dst)
         if make_writable_by_owner:
             make_file_writable_by_owner(dst)
@@ -276,13 +276,13 @@ def copyfile(src, dst, force=True, vars=None, force_copy_symlink=False,
             if os.path.exists(link_name):
                 if (os.path.islink(link_name) and
                     os.readlink(link_name) == link_target):
-                    log.info(f"Symlink {link_name} -> {link_target} already exists.")
+                    log.info(f"Symlink already exists\n  {link_name} ->\n  {link_target}")
                     return dst
                 os.remove(link_name)
-            log.info(f"Symlinking {link_name} -> {link_target} in {target_dir}.")
+            log.info(f"Symlinking\n  {link_name} ->\n  {link_target} in\n  {target_dir}")
             os.symlink(link_target, link_name)
         except OSError:
-            log.error(f"{link_name} -> {link_target}: Error creating symlink")
+            log.error(f"Error creating symlink\n  {link_name} ->\n  {link_target}")
         finally:
             os.chdir(current_directory)
     else:
@@ -323,11 +323,11 @@ def copydir(src, dst, filter=None, ignore=None, force=True, recursive=True, vars
                 ignore[i] = ignore[i].format(**vars)
 
     if not os.path.exists(src) and not force:
-        log.info(f"**Skipping copy tree {src} to {dst}. Source does not exists. "
+        log.info(f"**Skipping copy tree\n  {src} to\n  {dst}\n  Source does not exist. "
                  f"filter={filter}. ignore={ignore}.")
         return []
 
-    log.info(f"Copying tree {src} to {dst}. filter={filter}. ignore={ignore}.")
+    log.info(f"Copying tree\n  {src} to\n  {dst}. filter={filter}. ignore={ignore}.")
 
     names = os.listdir(src)
 
