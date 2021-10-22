@@ -76,6 +76,7 @@ struct DefaultValuesFixture
     AbstractMetaType intType;
     AbstractMetaType stringType;
     AbstractMetaType classType;
+    AbstractMetaType listType;
     const AbstractMetaClass *klass{};
 };
 
@@ -86,12 +87,16 @@ static int populateDefaultValuesFixture(DefaultValuesFixture *fixture)
 {
     static const char cppCode[] =R"(
 #include <string>
+#include <list>
+
 namespace Namespace {
 class Test
 {
 public:
     explicit Test(int x = INT_FIELD_1);
     explicit Test(const std::string &t = std::string(CHAR_FIELD_1));
+
+    static void listFunc(std::list<Test> list = std::list<Test>());
 
     static const int INT_FIELD_1 = 42;
     static const char *CHAR_FIELD_1;
@@ -106,6 +111,7 @@ public:
     <namespace-type name='Namespace'>
         <value-type name='Test'/>
     </namespace-type>
+    <container-type name="std::list" type="list"/>
 </typesystem>
 )";
 
@@ -138,6 +144,11 @@ public:
     if (fixture->intType.isVoid() || fixture->stringType.isVoid())
         return -3;
 
+    auto listFunc = fixture->klass->findFunction(u"listFunc"_qs);
+    if (listFunc.isNull() || listFunc->arguments().size() != 1)
+        return -3;
+    fixture->listType = listFunc->arguments().constFirst().type();
+
     return 0;
 }
 
@@ -154,6 +165,15 @@ void TestResolveType::testFixDefaultArguments_data()
 
     QTest::newRow("int") << fixture << setupOk
         << fixture.intType << "1" << "1";
+
+    // Test expansion of container types
+    QString expected = u"std::list<Namespace::Test>()"_qs;
+    QTest::newRow("list")
+        << fixture << setupOk << fixture.listType
+        << expected << expected;
+    QTest::newRow("partially qualified list")
+        << fixture << setupOk << fixture.listType
+        << "std::list<Test>()" << expected;
 }
 
 void TestResolveType::testFixDefaultArguments()

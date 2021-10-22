@@ -2511,6 +2511,17 @@ qint64 AbstractMetaBuilderPrivate::findOutValueFromString(const QString &stringV
     return 0;
 }
 
+// Return whether candidate is some underqualified specification of qualifiedType
+// ("B::C" should be qualified to "A::B::C")
+static bool isUnderQualifiedSpec(QStringView qualifiedType, QStringView candidate)
+{
+    const auto candidateSize = candidate.size();
+    const auto qualifiedTypeSize = qualifiedType.size();
+    return candidateSize < qualifiedTypeSize
+        && qualifiedType.endsWith(candidate)
+        && qualifiedType.at(qualifiedTypeSize - candidateSize - 1) == u':';
+}
+
 QString AbstractMetaBuilder::fixEnumDefault(const AbstractMetaType &type,
                                             const QString &expr) const
 {
@@ -2544,14 +2555,25 @@ QString AbstractMetaBuilderPrivate::fixDefaultValue(QString expr, const Abstract
     } else if (type.isFlags() || type.isEnum()) {
         expr = fixEnumDefault(type, expr);
     } else if (type.isContainer() && expr.contains(QLatin1Char('<'))) {
-        static const QRegularExpression typeRegEx(QStringLiteral("[^<]*<(.*)>"));
-        Q_ASSERT(typeRegEx.isValid());
-        const QRegularExpressionMatch typeMatch = typeRegEx.match(type.minimalSignature());
-        static const QRegularExpression defaultRegEx(QLatin1String("([^<]*<).*(>[^>]*)"));
-        Q_ASSERT(defaultRegEx.isValid());
-        const QRegularExpressionMatch defaultMatch = defaultRegEx.match(expr);
-        if (typeMatch.hasMatch() && defaultMatch.hasMatch())
-            expr = defaultMatch.captured(1) + typeMatch.captured(1) + defaultMatch.captured(2);
+        // Expand a container of a nested class, fex
+        // "QList<FormatRange>()" -> "QList<QTextLayout::FormatRange>()"
+        if (type.instantiations().size() != 1)
+            return expr; // Only simple types are handled, not QMap<int, int>.
+        auto *innerTypeEntry = type.instantiations().constFirst().typeEntry();
+        if (!innerTypeEntry->isComplex())
+            return expr;
+        const QString &qualifiedInnerTypeName = innerTypeEntry->qualifiedCppName();
+        if (!qualifiedInnerTypeName.contains(u"::")) // Nothing to qualify here
+            return expr;
+        const auto openPos = expr.indexOf(u'<');
+        const auto closingPos = expr.lastIndexOf(u'>');
+        if (openPos == -1 || closingPos == -1)
+            return expr;
+        const auto innerPos = openPos + 1;
+        const auto innerLen = closingPos - innerPos;
+        const auto innerType = QStringView{expr}.mid(innerPos, innerLen).trimmed();
+        if (isUnderQualifiedSpec(qualifiedInnerTypeName, innerType))
+            expr.replace(innerPos, innerLen, qualifiedInnerTypeName);
     } else {
         // Here the default value is supposed to be a constructor,
         // a class field, or a constructor receiving a class field
