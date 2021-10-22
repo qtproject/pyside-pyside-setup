@@ -86,11 +86,19 @@ static bool isQualifiedCppIdentifier(QStringView e)
                           [](QChar c) { return c.isLetterOrNumber() || c == u'_' || c == u':'; });
 }
 
-static bool isNumericConstant(const QStringView expr)
+static bool isIntegerConstant(const QStringView expr)
 {
     bool isNumber;
     auto n = expr.toInt(&isNumber, /* guess base: 0x or decimal */ 0);
     Q_UNUSED(n);
+    return isNumber;
+}
+
+static bool isFloatConstant(const QStringView expr)
+{
+    bool isNumber;
+    auto d = expr.toDouble(&isNumber);
+    Q_UNUSED(d);
     return isNumber;
 }
 
@@ -101,7 +109,7 @@ QString AbstractMetaBuilderPrivate::fixEnumDefault(const AbstractMetaType &type,
                                                    const QString &expr) const
 {
     // QFlags construct from integers, do not fix that
-    if (isNumericConstant(expr))
+    if (isIntegerConstant(expr))
         return expr;
 
     const auto *typeEntry = type.typeEntry();
@@ -144,7 +152,7 @@ QString AbstractMetaBuilderPrivate::fixEnumDefault(const AbstractMetaType &type,
         : QStringView{result};
 
     // Quick check for number "Options(0x4)"
-    if (isNumericConstant(innerExpression))
+    if (isIntegerConstant(innerExpression))
         return result;
 
     // Quick check for single enum value "Options(Option1)"
@@ -168,7 +176,7 @@ QString AbstractMetaBuilderPrivate::fixEnumDefault(const AbstractMetaType &type,
     for (const auto &tokenIn : tokens) {
         const auto token = tokenIn.trimmed();
         QString qualified = token.toString();
-        if (!isNumericConstant(token) && isQualifiedCppIdentifier(token))
+        if (!isIntegerConstant(token) && isQualifiedCppIdentifier(token))
             qualified.prepend(resolveEnumValueScopePrefix(metaEnum, token));
         qualifiedTokens.append(qualified);
     }
@@ -178,4 +186,13 @@ QString AbstractMetaBuilderPrivate::fixEnumDefault(const AbstractMetaType &type,
 
     result.replace(parenPos + 1, innerExpression.size(), qualifiedExpression);
     return result;
+}
+
+bool AbstractMetaBuilder::dontFixDefaultValue(QStringView expr)
+{
+    return expr.isEmpty() || expr == u"{}" || expr == u"nullptr"
+        || expr == u"NULL" || expr == u"true" || expr == u"false"
+        || (expr.startsWith(u'{') && expr.startsWith(u'}')) // initializer list
+        || (expr.startsWith(u'[') && expr.startsWith(u']')) // array
+        || isIntegerConstant(expr) || isFloatConstant(expr);
 }

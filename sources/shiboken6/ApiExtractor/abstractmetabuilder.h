@@ -110,6 +110,8 @@ public:
     static QString resolveScopePrefix(const AbstractMetaClass *scope,
                                       QStringView value);
 
+    static bool dontFixDefaultValue(QStringView expr);
+
     // For testing purposes
     QString fixDefaultValue(const QString &expr, const AbstractMetaType &type,
                             const AbstractMetaClass *) const;

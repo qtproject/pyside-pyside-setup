@@ -2532,27 +2532,12 @@ QString AbstractMetaBuilder::fixEnumDefault(const AbstractMetaType &type,
 QString AbstractMetaBuilderPrivate::fixDefaultValue(QString expr, const AbstractMetaType &type,
                                                     const AbstractMetaClass *implementingClass) const
 {
-    if (expr.isEmpty() || expr == u"{}" || expr == u"nullptr" || expr == u"NULL")
-        return expr;
-
     expr.replace(u'\n', u' '); // breaks signature parser
 
-    if (type.isPrimitive()) {
-        if (type.name() == QLatin1String("boolean")) {
-            if (expr != QLatin1String("false") && expr != QLatin1String("true")) {
-                bool ok = false;
-                int number = expr.toInt(&ok);
-                if (ok && number)
-                    expr = QLatin1String("true");
-                else
-                    expr = QLatin1String("false");
-            }
-        } else {
-            // This can be an enum or flag so I need to delay the
-            // translation until all namespaces are completely
-            // processed. This is done in figureOutEnumValues()
-        }
-    } else if (type.isFlags() || type.isEnum()) {
+    if (AbstractMetaBuilder::dontFixDefaultValue(expr))
+        return expr;
+
+    if (type.isFlags() || type.isEnum()) {
         expr = fixEnumDefault(type, expr);
     } else if (type.isContainer() && expr.contains(QLatin1Char('<'))) {
         // Expand a container of a nested class, fex

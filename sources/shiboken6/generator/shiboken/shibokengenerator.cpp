@@ -382,9 +382,9 @@ QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunctionC
 {
     QString value = arg.defaultValueExpression();
 
-    if (value.isEmpty() || value == u"{}" || value == u"nullptr" || value == u"NULL"
-        || arg.hasModifiedDefaultValueExpression()
-        || arg.type().isPointer()) {
+    if (arg.hasModifiedDefaultValueExpression()
+        || arg.type().isPointer()
+        || AbstractMetaBuilder::dontFixDefaultValue(value)) {
         return value;
     }
 
