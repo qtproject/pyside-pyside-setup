@@ -382,7 +382,7 @@ QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunctionC
 {
     QString value = arg.defaultValueExpression();
 
-    if (value.isEmpty() || value == QLatin1String("{}")
+    if (value.isEmpty() || value == u"{}" || value == u"nullptr" || value == u"NULL"
         || arg.hasModifiedDefaultValueExpression()
         || arg.type().isPointer()) {
         return value;
@@ -402,7 +402,7 @@ QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunctionC
     } else if (arg.type().typeEntry()->isValue()) {
         auto metaClass = AbstractMetaClass::findClass(api().classes(),
                                                       arg.type().typeEntry());
-        if (enumValueRegEx.match(value).hasMatch() && value != QLatin1String("NULL"))
+        if (enumValueRegEx.match(value).hasMatch())
             prefix = AbstractMetaBuilder::resolveScopePrefix(metaClass, value);
     } else if (arg.type().isPrimitive() && arg.type().name() == intT()) {
         if (enumValueRegEx.match(value).hasMatch() && func->implementingClass())

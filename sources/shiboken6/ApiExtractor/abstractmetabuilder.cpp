@@ -2523,7 +2523,7 @@ QString AbstractMetaBuilderPrivate::fixDefaultValue(const ArgumentModelItem &ite
                                                     int /* argumentIndex */) const
 {
     QString expr = item->defaultValueExpression();
-    if (expr.isEmpty() || expr == u"{}")
+    if (expr.isEmpty() || expr == u"{}" || expr == u"nullptr" || expr == u"NULL")
         return expr;
 
     expr.replace(u'\n', u' '); // breaks signature parser
