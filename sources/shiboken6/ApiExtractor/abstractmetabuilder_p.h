@@ -149,9 +149,15 @@ public:
     static void setupFunctionDefaults(AbstractMetaFunction *metaFunction,
                                       AbstractMetaClass *metaClass);
 
+    static bool isQualifiedCppIdentifier(QStringView e);
     QString fixDefaultValue(QString expr, const AbstractMetaType &type,
                             const AbstractMetaClass *) const;
+    QString fixSimpleDefaultValue(QStringView expr,
+                                  const AbstractMetaClass *klass) const;
+
     QString fixEnumDefault(const AbstractMetaType &type, const QString &expr) const;
+    /// Qualify a static field name for default value expressions
+    static QString qualifyStaticField(const AbstractMetaClass *c, QStringView field);
 
     std::optional<AbstractMetaType>
         translateType(const TypeInfo &type, const AbstractMetaClass *currentClass,

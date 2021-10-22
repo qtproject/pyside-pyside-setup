@@ -770,6 +770,8 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(const FileModel
         if (mjc) {
             metaClass->addInnerClass(mjc);
             mjc->setEnclosingClass(metaClass);
+            m_classToItem.insert(mjc, ni.data()); // Add for enum lookup.
+            m_itemToClass.insert(ni.data(), mjc);
         }
     }
 
@@ -2558,6 +2560,26 @@ void AbstractMetaBuilder::setCodeModelTestMode(bool b)
     AbstractMetaBuilderPrivate::m_codeModelTestMode = b;
 }
 
+// Helper to fix a simple default value (field or enum reference) in a
+// class context.
+QString AbstractMetaBuilderPrivate::fixSimpleDefaultValue(QStringView expr,
+                                                          const AbstractMetaClass *klass) const
+{
+    const QString field = qualifyStaticField(klass, expr);
+
+    if (!field.isEmpty())
+        return field;
+    const auto cit = m_classToItem.constFind(klass);
+    if (cit == m_classToItem.cend())
+        return {};
+    auto *scope = dynamic_cast<const _ScopeModelItem *>(cit.value());
+    if (!scope)
+        return {};
+    if (auto enumValue = scope->findEnumByValue(expr))
+        return enumValue.qualifiedName;
+    return {};
+}
+
 // see TestResolveType::testFixDefaultArguments()
 QString AbstractMetaBuilderPrivate::fixDefaultValue(QString expr, const AbstractMetaType &type,
                                                     const AbstractMetaClass *implementingClass) const
@@ -2590,39 +2612,53 @@ QString AbstractMetaBuilderPrivate::fixDefaultValue(QString expr, const Abstract
         if (isUnderQualifiedSpec(qualifiedInnerTypeName, innerType))
             expr.replace(innerPos, innerLen, qualifiedInnerTypeName);
     } else {
-        // Here the default value is supposed to be a constructor,
-        // a class field, or a constructor receiving a class field
-        static const QRegularExpression defaultRegEx(QStringLiteral("([^\\(]*\\(|)([^\\)]*)(\\)|)"));
-        Q_ASSERT(defaultRegEx.isValid());
-        const QRegularExpressionMatch defaultMatch = defaultRegEx.match(expr);
-        QString defaultValueCtorName = defaultMatch.hasMatch() ? defaultMatch.captured(1) : QString();
-        if (defaultValueCtorName.endsWith(QLatin1Char('(')))
-            defaultValueCtorName.chop(1);
+        // Here the default value is supposed to be a constructor, a class field,
+        // a constructor receiving a static class field or an enum. Consider
+        // class QSqlDatabase { ...
+        //     static const char *defaultConnection;
+        //     QSqlDatabase(const QString &connection = QLatin1String(defaultConnection))
+        //                  -> = QLatin1String(QSqlDatabase::defaultConnection)
+        //     static void foo(QSqlDatabase db = QSqlDatabase(defaultConnection));
+        //                     -> = QSqlDatabase(QSqlDatabase::defaultConnection)
+        //
+        // Enum values from the class as defaults of int and others types (via
+        // implicit conversion) are handled here as well:
+        // class QStyleOption { ...
+        //     enum StyleOptionType { Type = SO_Default };
+        //     QStyleOption(..., int type = SO_Default);
+        //                  ->  = QStyleOption::StyleOptionType::SO_Default
 
-        // Fix the scope for constructor using the already resolved argument
-        // type as a reference. The following regular expression extracts any
-        // use of namespaces/scopes from the type string.
-        static const QRegularExpression
-            typeRegEx(QLatin1String(R"(^(?:const[\s]+|)([\w:]*::|)([A-Za-z_]\w*)\s*[&\*]?$)"));
-        Q_ASSERT(typeRegEx.isValid());
-        const QRegularExpressionMatch typeMatch = typeRegEx.match(type.minimalSignature());
+        // Is this a single field or an enum?
+        if (isQualifiedCppIdentifier(expr)) {
+            const QString fixed = fixSimpleDefaultValue(expr, implementingClass);
+            return fixed.isEmpty() ? expr : fixed;
+        }
 
-        QString typeNamespace = typeMatch.hasMatch() ? typeMatch.captured(1) : QString();
-        QString typeCtorName  = typeMatch.hasMatch() ? typeMatch.captured(2) : QString();
-        if (!typeNamespace.isEmpty() && defaultValueCtorName == typeCtorName)
-            expr.prepend(typeNamespace);
-
-        // Fix scope if the parameter is a field of the current class
-        if (implementingClass) {
-            const AbstractMetaFieldList &fields = implementingClass->fields();
-            for (const AbstractMetaField &field : fields) {
-                if (defaultMatch.hasMatch() && defaultMatch.captured(2) == field.name()) {
-                    expr = defaultMatch.captured(1) + implementingClass->name()
-                           + colonColon() + defaultMatch.captured(2) + defaultMatch.captured(3);
-                    break;
-                }
+        // Is this sth like "QLatin1String(field)", "Class(Field)", "Class()"?
+        const auto parenPos = expr.indexOf(u'(');
+        if (parenPos == -1 || !expr.endsWith(u')'))
+            return expr;
+        // Is the term within parentheses a class field or enum?
+        const auto innerLength = expr.size() - parenPos - 2;
+        if (innerLength > 0) { // Not some function call "defaultFunc()"
+            const auto inner = QStringView{expr}.mid(parenPos + 1, innerLength);
+            if (isQualifiedCppIdentifier(inner)
+                && !AbstractMetaBuilder::dontFixDefaultValue(inner)) {
+                const QString replacement = fixSimpleDefaultValue(inner, implementingClass);
+                if (!replacement.isEmpty() && replacement != inner)
+                    expr.replace(parenPos + 1, innerLength, replacement);
             }
         }
+        // Is this a class constructor "Class(Field)"? Expand it.
+        auto *te = type.typeEntry();
+        if (!te->isComplex())
+            return expr;
+        const QString &qualifiedTypeName = te->qualifiedCppName();
+        if (!qualifiedTypeName.contains(u"::")) // Nothing to qualify here
+            return expr;
+        const auto className = QStringView{expr}.left(parenPos);
+        if (isUnderQualifiedSpec(qualifiedTypeName, className))
+            expr.replace(0, className.size(), qualifiedTypeName);
     }
 
     return expr;

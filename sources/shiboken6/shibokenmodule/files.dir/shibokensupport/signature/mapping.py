@@ -308,7 +308,6 @@ type_map.update({
     "unsigned long": int,
     "unsigned short int": int, # 5.6, RHEL 6.6
     "unsigned short": int,
-    "Unspecified": None,
     "ushort": int,
     "void": int, # be more specific?
     "WId": WId,
@@ -504,6 +503,7 @@ def init_PySide6_QtCore():
             PySide6.QtCore.QUrl.ComponentFormattingOption, # mismatch option/enum, why???
         "PyUnicode": typing.Text,
         "Q_NULLPTR": None,
+        "QCalendar.Unspecified": PySide6.QtCore.QCalendar.Unspecified,
         "QDir.Filters(AllEntries | NoDotAndDotDot)": Instance(
             "QDir.Filters(QDir.AllEntries | QDir.NoDotAndDotDot)"),
         "QDir.SortFlags(Name | IgnoreCase)": Instance(
@@ -579,12 +579,11 @@ def init_PySide6_QtWidgets():
             "QMessageBox.StandardButtons(QMessageBox.Yes | QMessageBox.No)"),
         "QWidget.RenderFlags(DrawWindowBackground | DrawChildren)": Instance(
             "QWidget.RenderFlags(QWidget.DrawWindowBackground | QWidget.DrawChildren)"),
-        "SH_Default": QStyleHintReturn.SH_Default,
-        "SO_Complex": QStyleOptionComplex.SO_Complex,
-        "SO_Default": QStyleOption.SO_Default,
         "static_cast<Qt.MatchFlags>(Qt.MatchExactly|Qt.MatchCaseSensitive)": Instance(
             "Qt.MatchFlags(Qt.MatchExactly | Qt.MatchCaseSensitive)"),
-        "Type": PySide6.QtWidgets.QListWidgetItem.Type,
+        "QListWidgetItem.ItemType.Type": PySide6.QtWidgets.QListWidgetItem.Type,
+        "QTableWidgetItem.ItemType.Type": PySide6.QtWidgets.QTableWidgetItem.Type,
+        "QTreeWidgetItem.ItemType.Type": PySide6.QtWidgets.QTreeWidgetItem.Type,
     })
     return locals()
 
@@ -592,7 +591,7 @@ def init_PySide6_QtWidgets():
 def init_PySide6_QtSql():
     from PySide6.QtSql import QSqlDatabase
     type_map.update({
-        "QLatin1String(defaultConnection)": QSqlDatabase.defaultConnection,
+        "QLatin1String(QSqlDatabase.defaultConnection)": QSqlDatabase.defaultConnection,
         "QVariant.Invalid": Invalid("Variant"), # not sure what I should create, here...
     })
     return locals()
@@ -651,7 +650,7 @@ def init_PySide6_QtQuick():
     type_map.update({
         "PySide6.QtQuick.QSharedPointer[PySide6.QtQuick.QQuickItemGrabResult]":
             PySide6.QtQuick.QQuickItemGrabResult,
-        "UnsignedShortType": int,
+        "QSGGeometry.Type.UnsignedShortType": int,
     })
     return locals()
 

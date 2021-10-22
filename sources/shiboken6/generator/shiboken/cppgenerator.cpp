@@ -3025,7 +3025,7 @@ void CppGenerator::writeSingleFunctionCall(TextStream &s,
                 const QString cppArgRemoved = QLatin1String(CPP_ARG_REMOVED)
                     + QString::number(argIdx);
                 s << getFullTypeName(arg.type()) << ' ' << cppArgRemoved;
-                s << " = " << guessScopeForDefaultValue(func, arg) << ";\n";
+                s << " = " << arg.defaultValueExpression() << ";\n";
                 writeUnusedVariableCast(s, cppArgRemoved);
             } else if (!injectCodeCallsFunc && !func->isUserAdded() && !hasConversionRule) {
                 // When an argument is removed from a method signature and no other means of calling
@@ -3047,9 +3047,8 @@ void CppGenerator::writeSingleFunctionCall(TextStream &s,
         int argPos = argIdx - removedArgs;
         QString argName = QLatin1String(CPP_ARG) + QString::number(argPos);
         QString pyArgName = usePyArgs ? pythonArgsAt(argPos) : QLatin1String(PYTHON_ARG);
-        QString defaultValue = guessScopeForDefaultValue(func, arg);
         writeArgumentConversion(s, argType, argName, pyArgName,
-                                func->implementingClass(), defaultValue,
+                                func->implementingClass(), arg.defaultValueExpression(),
                                 func->isUserAdded());
     }
 

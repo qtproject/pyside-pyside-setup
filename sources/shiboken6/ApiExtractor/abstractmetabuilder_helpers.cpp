@@ -29,6 +29,7 @@
 #include "abstractmetabuilder.h"
 #include "abstractmetabuilder_p.h"
 #include "abstractmetaenum.h"
+#include "abstractmetafield.h"
 #include "abstractmetalang.h"
 #include "typesystem.h"
 
@@ -79,7 +80,7 @@ static QString resolveEnumValueScopePrefix(const AbstractMetaEnum &metaEnum,
     return resolveScopePrefixHelper(parts, value);
 }
 
-static bool isQualifiedCppIdentifier(QStringView e)
+bool AbstractMetaBuilderPrivate::isQualifiedCppIdentifier(QStringView e)
 {
     return !e.isEmpty() && e.at(0).isLetter()
            && std::all_of(e.cbegin() + 1, e.cend(),
@@ -196,4 +197,23 @@ bool AbstractMetaBuilder::dontFixDefaultValue(QStringView expr)
         || (expr.startsWith(u'[') && expr.startsWith(u']')) // array
         || expr.startsWith(u"Qt::") // Qt namespace constant
         || isIntegerConstant(expr) || isFloatConstant(expr);
+}
+
+QString AbstractMetaBuilderPrivate::qualifyStaticField(const AbstractMetaClass *c,
+                                                       QStringView field)
+{
+    if (!c || c->fields().isEmpty())
+        return {};
+    // If there is a scope, ensure it matches the class
+    const auto lastQualifier = field.lastIndexOf(u"::");
+    if (lastQualifier != -1
+        && !c->qualifiedCppName().endsWith(field.left(lastQualifier))) {
+        return {};
+    }
+    const auto fieldName = lastQualifier != -1
+        ? field.mid(lastQualifier + 2) : field;
+    const auto fieldOpt = c->findField(fieldName);
+    if (!fieldOpt.has_value() || !fieldOpt.value().isStatic())
+        return {};
+    return AbstractMetaBuilder::resolveScopePrefix(c, field) + field.toString();
 }
