@@ -2065,7 +2065,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
         AbstractMetaArgument &metaArg = metaArguments[i];
 
         const QString originalDefaultExpression =
-            fixDefaultValue(arg, metaArg.type(), currentClass, i);
+            fixDefaultValue(arg->defaultValueExpression(), metaArg.type(), currentClass);
 
         metaArg.setOriginalDefaultValueExpression(originalDefaultExpression);
         metaArg.setDefaultValueExpression(originalDefaultExpression);
@@ -2538,12 +2538,10 @@ QString AbstractMetaBuilder::fixEnumDefault(const AbstractMetaType &type,
     return d->fixEnumDefault(type, expr);
 }
 
-QString AbstractMetaBuilderPrivate::fixDefaultValue(const ArgumentModelItem &item,
-                                                    const AbstractMetaType &type,
-                                                    const AbstractMetaClass *implementingClass,
-                                                    int /* argumentIndex */) const
+// see TestResolveType::testFixDefaultArguments()
+QString AbstractMetaBuilderPrivate::fixDefaultValue(QString expr, const AbstractMetaType &type,
+                                                    const AbstractMetaClass *implementingClass) const
 {
-    QString expr = item->defaultValueExpression();
     if (expr.isEmpty() || expr == u"{}" || expr == u"nullptr" || expr == u"NULL")
         return expr;
 
@@ -2612,6 +2610,12 @@ QString AbstractMetaBuilderPrivate::fixDefaultValue(const ArgumentModelItem &ite
     }
 
     return expr;
+}
+
+QString AbstractMetaBuilder::fixDefaultValue(const QString &expr, const AbstractMetaType &type,
+                                             const AbstractMetaClass *c) const
+{
+    return d->fixDefaultValue(expr, type, c);
 }
 
 bool AbstractMetaBuilderPrivate::isEnum(const FileModelItem &dom, const QStringList& qualified_name)

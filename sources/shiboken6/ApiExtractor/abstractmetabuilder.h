@@ -113,7 +113,10 @@ public:
                                       QStringView value);
 
     // For testing purposes
+    QString fixDefaultValue(const QString &expr, const AbstractMetaType &type,
+                            const AbstractMetaClass *) const;
     QString fixEnumDefault(const AbstractMetaType &type, const QString &expr) const;
+
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const;
