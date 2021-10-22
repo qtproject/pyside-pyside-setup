@@ -813,6 +813,7 @@
       <object-type name="SystemId"/> <!-- not default-constructible -->
       <value-type name="YearMonthDay"/>
       <enum-type name="System"/>
+      <enum-type identified-by-value="Unspecified"/>
   </value-type>
   <value-type name="QDate" hash-function="PySide::hash" >
     <inject-code class="native" position="beginning">

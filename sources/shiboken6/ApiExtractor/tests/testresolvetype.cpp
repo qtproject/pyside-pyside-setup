@@ -34,6 +34,12 @@
 #include <abstractmetatype.h>
 #include <typesystem.h>
 
+void TestResolveType::initTestCase()
+{
+    // For enum lookup in testFixDefaultArguments()
+    AbstractMetaBuilder::setCodeModelTestMode(true);
+}
+
 void TestResolveType::testResolveReturnTypeFromParentScope()
 {
     const char* cppCode = "\n\
@@ -93,6 +99,8 @@ namespace Namespace {
 class Test
 {
 public:
+    enum Enum { enumValue1, enumValue2 };
+
     explicit Test(int x = INT_FIELD_1);
     explicit Test(const std::string &t = std::string(CHAR_FIELD_1));
 
@@ -109,7 +117,9 @@ public:
     <primitive-type name='char'/>
     <primitive-type name='std::string'/>
     <namespace-type name='Namespace'>
-        <value-type name='Test'/>
+        <value-type name='Test'>
+            <enum-type name='Enum'/>
+        </value-type>
     </namespace-type>
     <container-type name="std::list" type="list"/>
 </typesystem>
@@ -165,6 +175,10 @@ void TestResolveType::testFixDefaultArguments_data()
 
     QTest::newRow("int") << fixture << setupOk
         << fixture.intType << "1" << "1";
+    QTest::newRow("int-macro") << fixture << setupOk
+        << fixture.intType << "GL_MACRO" << "GL_MACRO";
+    QTest::newRow("int-enum") << fixture << setupOk
+        << fixture.intType << "enumValue1" << "Namespace::Test::Enum::enumValue1";
 
     // Test expansion of container types
     QString expected = u"std::list<Namespace::Test>()"_qs;
@@ -174,6 +188,51 @@ void TestResolveType::testFixDefaultArguments_data()
     QTest::newRow("partially qualified list")
         << fixture << setupOk << fixture.listType
         << "std::list<Test>()" << expected;
+
+    // Test field expansion
+    expected = u"Namespace::Test::INT_FIELD_1"_qs;
+    QTest::newRow("qualified class field")
+        << fixture << setupOk << fixture.intType
+        << expected << expected;
+    QTest::newRow("partially qualified class field")
+        << fixture << setupOk << fixture.intType
+        << "Test::INT_FIELD_1" << expected;
+    QTest::newRow("unqualified class field")
+        << fixture << setupOk << fixture.intType
+        << "INT_FIELD_1" << expected;
+
+    // Test field expansion when constructing some class
+    expected = u"QLatin1String(Namespace::Test::CHAR_FIELD_1)"_qs;
+    QTest::newRow("class from qualified class field")
+        << fixture << setupOk << fixture.classType
+        << expected << expected;
+    QTest::newRow("class from partially qualified class field")
+        << fixture << setupOk << fixture.classType
+        << "QLatin1String(Test::CHAR_FIELD_1)" << expected;
+    QTest::newRow("class from unqualified class field")
+        << fixture << setupOk << fixture.classType
+        << "QLatin1String(CHAR_FIELD_1)" << expected;
+
+    // Test field expansion when constructing class itself
+    expected = u"Namespace::Test(Namespace::Test::CHAR_FIELD_1)"_qs;
+    QTest::newRow("self from qualified class field")
+        << fixture << setupOk << fixture.classType
+        << expected << expected;
+    QTest::newRow("self from partially qualified class field")
+        << fixture << setupOk << fixture.classType
+        << "Test(Test::CHAR_FIELD_1)" << expected;
+    QTest::newRow("self from unqualified class field")
+        << fixture << setupOk << fixture.classType
+        << "Test(CHAR_FIELD_1)" << expected;
+
+    // Test enum expansion when constructing class itself
+    expected = u"Namespace::Test(Namespace::Test::Enum::enumValue1)"_qs;
+    QTest::newRow("self from qualified enum")
+        << fixture << setupOk << fixture.classType
+        << expected << expected;
+    QTest::newRow("self from enum")
+        << fixture << setupOk << fixture.classType
+        << "Test(enumValue1)" << expected;
 }
 
 void TestResolveType::testFixDefaultArguments()
