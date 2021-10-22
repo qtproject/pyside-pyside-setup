@@ -36,6 +36,8 @@ class TestResolveType : public QObject
     Q_OBJECT
     private slots:
         void testResolveReturnTypeFromParentScope();
+        void testFixDefaultArguments_data();
+        void testFixDefaultArguments();
 };
 
 #endif

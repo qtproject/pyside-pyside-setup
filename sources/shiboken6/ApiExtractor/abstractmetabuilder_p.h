@@ -149,10 +149,8 @@ public:
     static void setupFunctionDefaults(AbstractMetaFunction *metaFunction,
                                       AbstractMetaClass *metaClass);
 
-    QString fixDefaultValue(const ArgumentModelItem &item,
-                            const AbstractMetaType &type,
-                            const AbstractMetaClass *,
-                            int argumentIndex) const;
+    QString fixDefaultValue(QString expr, const AbstractMetaType &type,
+                            const AbstractMetaClass *) const;
     QString fixEnumDefault(const AbstractMetaType &type, const QString &expr) const;
 
     std::optional<AbstractMetaType>
