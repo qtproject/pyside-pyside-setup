@@ -112,6 +112,8 @@ public:
     static QString searchForEnumScope(const AbstractMetaClass *metaClass,
                                       QStringView value);
 
+    static bool dontFixDefaultValue(QStringView expr);
+
     // For testing purposes
     QString fixDefaultValue(const QString &expr, const AbstractMetaType &type,
                             const AbstractMetaClass *) const;
