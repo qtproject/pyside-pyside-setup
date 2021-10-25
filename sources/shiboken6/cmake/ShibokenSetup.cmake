@@ -1,10 +1,8 @@
 include(CheckIncludeFileCXX)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../cmake_helpers")
 
-include(helpers)
-include(shiboken_helpers)
+include(ShibokenHelpers)
 
 option(BUILD_TESTS "Build tests." TRUE)
 option(USE_PYTHON_VERSION "Use specific python version to build shiboken6." "")
