@@ -3,12 +3,14 @@ cmake_policy(SET CMP0046 NEW)
 
 set(QT_MAJOR_VERSION 6)
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../cmake_helpers")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../shiboken6/cmake")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/Macros")
 
-include(helpers)
-include(shiboken_helpers)
+# TODO: Don't directly include, ShibokenHelpers but rather pick it up from the installed Shiboken
+# package. Needs to support top-level build as well (Shiboken is not yet installed in that case).
+include(ShibokenHelpers)
+include(PySideHelpers)
 
 # Don't display "up-to-date / install" messages when installing, to reduce visual clutter.
 if(QUIET_BUILD)
