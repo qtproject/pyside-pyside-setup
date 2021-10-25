@@ -3,7 +3,7 @@
 #
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -31,6 +31,7 @@
 
 '''Test cases for protected methods.'''
 
+import gc
 import os
 import sys
 import unittest
@@ -187,7 +188,11 @@ class ProtectedVirtualDtorTest(unittest.TestCase):
         dtor_called = ProtectedVirtualDestructor.dtorCalled()
         for i in range(1, 10):
             pvd = ProtectedVirtualDestructor()
+            # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+            gc.collect()
             del pvd
+            # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+            gc.collect()
             self.assertEqual(ProtectedVirtualDestructor.dtorCalled(), dtor_called + i)
 
     def testVirtualProtectedDtorOnCppCreatedObject(self):
@@ -196,6 +201,8 @@ class ProtectedVirtualDtorTest(unittest.TestCase):
         for i in range(1, 10):
             pvd = ProtectedVirtualDestructor.create()
             del pvd
+            # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+            gc.collect()
             self.assertEqual(ProtectedVirtualDestructor.dtorCalled(), dtor_called + i)
 
     def testProtectedDtorOnDerivedClass(self):
@@ -204,6 +211,8 @@ class ProtectedVirtualDtorTest(unittest.TestCase):
         for i in range(1, 10):
             pvd = ExtendedProtectedVirtualDestructor()
             del pvd
+            # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+            gc.collect()
             self.assertEqual(ExtendedProtectedVirtualDestructor.dtorCalled(), dtor_called + i)
 
 
@@ -282,6 +291,8 @@ class ProtectedPropertyTest(unittest.TestCase):
 
     def tearDown(self):
         del self.obj
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertEqual(cacheSize(), 0)
 
     def testProtectedProperty(self):
@@ -323,6 +334,8 @@ class ProtectedPropertyTest(unittest.TestCase):
         pointProperty = obj.protectedValueTypeProperty
         self.assertTrue(obj.protectedValueTypeProperty is pointProperty)
         del obj, point, pointProperty
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertEqual(cacheSize(), cache_size)
 
     def testProtectedValueTypePointerProperty(self):

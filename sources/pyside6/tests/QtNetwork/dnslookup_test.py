@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2018 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -28,6 +28,7 @@
 
 '''Test cases for QDnsLookup'''
 
+import gc
 import os
 import sys
 import unittest
@@ -51,6 +52,8 @@ class DnsLookupTestCase(unittest.TestCase):
 
     def tearDown(self):
         del self._lookup
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
     def _finished(self):
         if self._lookup.error() == QDnsLookup.NoError:

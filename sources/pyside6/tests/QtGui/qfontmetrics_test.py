@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -29,6 +29,7 @@
 '''Tests for inject codes and modifications on QFontMetrics
    and QFontMetricsF'''
 
+import gc
 import os
 import sys
 import unittest
@@ -54,6 +55,8 @@ class QFontMetricsTest(UsesQApplication):
     def tearDown(self):
         del self.metrics
         del self.font
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         super(QFontMetricsTest, self).tearDown()
 
 
@@ -156,6 +159,8 @@ class QFontMetricsFTest(UsesQApplication):
     def tearDown(self):
         del self.metrics
         del self.font
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         super(QFontMetricsFTest, self).tearDown()
 
 

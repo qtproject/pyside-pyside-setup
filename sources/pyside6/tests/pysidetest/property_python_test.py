@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2020 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -39,6 +39,7 @@ This test is to ensure maximum compatibility.
 # Test case for property
 # more tests are in test_descr
 
+import gc
 import os
 import sys
 import unittest
@@ -95,6 +96,8 @@ class BaseClass(QObject):
     @spam.deleter
     def spam(self):
         del self._spam
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
 
 class SubClass(BaseClass):

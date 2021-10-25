@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -26,6 +26,7 @@
 ##
 #############################################################################
 
+import gc
 import os
 import sys
 import unittest
@@ -62,6 +63,8 @@ class MyWidget(QWidget):
         o.press(0, QPoint(10, 10))
         o.commit()
         del o
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
         QTest.touchEvent(self, self._device).press(0, QPoint(10, 10))
         QTest.touchEvent(self, self._device).stationary(0).press(1, QPoint(40, 10))

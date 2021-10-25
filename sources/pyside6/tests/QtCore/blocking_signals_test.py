@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -28,6 +28,7 @@
 
 ''' Test case for QObject.signalsBlocked() and blockSignal()'''
 
+import gc
 import os
 import sys
 from tempfile import mkstemp
@@ -60,6 +61,8 @@ class TestSignalsBlockedBasic(unittest.TestCase):
         blocker.reblock()
         self.assertTrue(obj.signalsBlocked())
         del blocker
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertTrue(not obj.signalsBlocked())
 
     def testContext(self):
@@ -83,6 +86,8 @@ class TestSignalsBlocked(unittest.TestCase):
         # Delete used resources
         del self.obj
         del self.args
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
     def callback(self, *args):
         # Default callback
@@ -132,6 +137,8 @@ class TestQFileSignalBlocking(unittest.TestCase):
         # Release acquired resources
         os.remove(self.filename)
         del self.qfile
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
     def callback(self):
         # Default callback

@@ -2,7 +2,7 @@
 
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -30,6 +30,7 @@
 
 """Tests covering signal emission and receiving to python slots"""
 
+import gc
 import os
 import sys
 import unittest
@@ -73,6 +74,8 @@ class StaticMetaObjectTest(UsesQCoreApplication):
 
         del o
         del o2
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         o = MyObject()
         # The SIGNAL was destroyed with old objects
         self.assertEqual(o.metaObject().indexOfSignal("foo()"), -1)
@@ -86,6 +89,8 @@ class StaticMetaObjectTest(UsesQCoreApplication):
         o.emit(SIGNAL("foo2()"))
         self.assertEqual(m._slotCalledCount, 1)
         del o
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         m.emit(SIGNAL("foo2()"))
         self.assertEqual(m._slotCalledCount, 2)
 

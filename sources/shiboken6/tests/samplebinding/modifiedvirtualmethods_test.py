@@ -31,6 +31,7 @@
 
 '''Test cases for modified virtual methods.'''
 
+import gc
 import os
 import sys
 import unittest
@@ -100,6 +101,8 @@ class VirtualMethodsTest(unittest.TestCase):
     def tearDown(self):
         del self.vm
         del self.evm
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
     def testModifiedVirtualMethod0(self):
         '''Renamed virtual method.'''

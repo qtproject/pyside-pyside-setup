@@ -3,7 +3,7 @@
 #
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -31,6 +31,7 @@
 
 '''The BlackBox class has cases of ownership transference between C++ and Python.'''
 
+import gc
 import os
 import sys
 import unittest
@@ -50,6 +51,8 @@ class ReturnOfChildTest(unittest.TestCase):
         o1 = ObjectType.createWithChild()
         child = o1.children()[0]
         del o1
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertRaises(RuntimeError, child.objectName)
 
     def testKillParentKeepingChild2(self):
@@ -57,6 +60,8 @@ class ReturnOfChildTest(unittest.TestCase):
         o1 = ObjectType.createWithChild()
         child = o1.findChild("child")
         del o1
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertRaises(RuntimeError, child.objectName)
 
 if __name__ == '__main__':

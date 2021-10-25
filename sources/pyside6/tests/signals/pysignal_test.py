@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -26,6 +26,7 @@
 ##
 #############################################################################
 
+import gc
 import os
 import sys
 import unittest
@@ -123,6 +124,8 @@ class PythonSigSlot(unittest.TestCase):
             del self.args
         except:
             pass
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
     def callback(self, *args):
         if tuple(self.args) == args:
@@ -174,6 +177,8 @@ if hasQtGui:
             super(SpinBoxPySignal, self).tearDown()
             del self.obj
             del self.spin
+            # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+            gc.collect()
 
         def testValueChanged(self):
             """Emission of a python signal to QSpinBox setValue(int)"""
@@ -208,6 +213,8 @@ if hasQtGui:
             super(WidgetPySignal, self).tearDown()
             del self.obj
             del self.widget
+            # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+            gc.collect()
 
         def testShow(self):
             """Emission of a python signal to QWidget slot show()"""

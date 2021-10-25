@@ -3,7 +3,7 @@
 
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -31,6 +31,7 @@
 
 '''Unit tests for QObject's tr static methods.'''
 
+import gc
 import os
 import os
 import sys
@@ -54,6 +55,8 @@ class QObjectTrTest(unittest.TestCase):
 
     def tearDown(self):
         del self.obj
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
     def testTrCommonCase(self):
         # Test common case for QObject.tr

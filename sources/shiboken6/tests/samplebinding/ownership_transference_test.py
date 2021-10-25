@@ -3,7 +3,7 @@
 #
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -31,6 +31,7 @@
 
 '''The BlackBox class has cases of ownership transference between C++ and Python.'''
 
+import gc
 import os
 import sys
 import unittest
@@ -65,6 +66,8 @@ class BlackBoxTest(unittest.TestCase):
         o2 = bb.retrieveObjectType(o2_ticket)
         self.assertEqual(sys.getrefcount(o2), o2_refcnt)
         del bb
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertRaises(RuntimeError, o1.objectName)
         self.assertEqual(str(o2.objectName()), 'object2')
         self.assertEqual(sys.getrefcount(o2), o2_refcnt)

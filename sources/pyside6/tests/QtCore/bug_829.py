@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Copyright (C) 2011 Thomas Perl <thp.io/about>
 ## Contact: https://www.qt.io/licensing/
 ##
@@ -29,6 +29,7 @@
 
 # Test case for PySide bug 829
 
+import gc
 import os
 import sys
 import unittest
@@ -52,6 +53,8 @@ class QVariantConversions(unittest.TestCase):
         confFile.close()
         self._confFileName = confFile.fileName()
         del confFile
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         s = QSettings(self._confFileName, QSettings.IniFormat)
         self.assertEqual(s.status(), QSettings.NoError)
         # Save value
@@ -59,6 +62,8 @@ class QVariantConversions(unittest.TestCase):
         s.sync()
         self.assertEqual(s.status(), QSettings.NoError)
         del s
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
         # Restore value
         s = QSettings(self._confFileName, QSettings.IniFormat)

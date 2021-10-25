@@ -3,7 +3,7 @@
 #
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -31,6 +31,7 @@
 
 '''Test cases for virtual destructor.'''
 
+import gc
 import os
 import sys
 import unittest
@@ -58,6 +59,8 @@ class VirtualDtorTest(unittest.TestCase):
         for i in range(1, 10):
             vd = VirtualDtor()
             del vd
+            # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+            gc.collect()
             self.assertEqual(VirtualDtor.dtorCalled(), dtor_called + i)
 
     def testVirtualDtorOnCppCreatedObject(self):
@@ -66,6 +69,8 @@ class VirtualDtorTest(unittest.TestCase):
         for i in range(1, 10):
             vd = VirtualDtor.create()
             del vd
+            # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+            gc.collect()
             self.assertEqual(VirtualDtor.dtorCalled(), dtor_called + i)
 
     def testDtorOnDerivedClass(self):
@@ -74,6 +79,8 @@ class VirtualDtorTest(unittest.TestCase):
         for i in range(1, 10):
             evd = ExtendedVirtualDtor()
             del evd
+            # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+            gc.collect()
             self.assertEqual(ExtendedVirtualDtor.dtorCalled(), dtor_called + i)
 
 

@@ -3,7 +3,7 @@
 #
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -31,6 +31,7 @@
 
 '''Test weakref support'''
 
+import gc
 import os
 import sys
 import unittest
@@ -58,6 +59,8 @@ class WeakrefBasicTest(unittest.TestCase):
         obj = ObjectType()
         ref = weakref.ref(obj, self.cb)
         del obj
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertTrue(self.called)
 
     def testPrivateDtor(self):
@@ -65,6 +68,8 @@ class WeakrefBasicTest(unittest.TestCase):
         obj = PrivateDtor.instance()
         ref = weakref.ref(obj, self.cb)
         del obj
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertTrue(self.called)
 
 

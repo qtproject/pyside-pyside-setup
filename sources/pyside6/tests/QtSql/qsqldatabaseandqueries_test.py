@@ -2,7 +2,7 @@
 
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -30,7 +30,7 @@
 
 '''Test cases for QtSql database creation, destruction and queries'''
 
-import sys
+import gc
 import os
 import sys
 import unittest
@@ -66,6 +66,8 @@ class SqlDatabaseCreationDestructionAndQueries(unittest.TestCase):
         self.db.close()
         QSqlDatabase.removeDatabase(":memory:")
         del self.db
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
     def testTableCreationAndDestruction(self):
         # Test table creation and destruction
@@ -101,6 +103,8 @@ class SqlDatabaseCreationDestructionAndQueries(unittest.TestCase):
         model = bar.model
         del bar
         del app
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
 
 if __name__ == '__main__':

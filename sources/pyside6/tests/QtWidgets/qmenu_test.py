@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -26,6 +26,7 @@
 ##
 #############################################################################
 
+import gc
 import os
 import sys
 import unittest
@@ -50,6 +51,8 @@ class QMenuAddAction(UsesQApplication):
 
     def tearDown(self):
         del self.menu
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         super(QMenuAddAction, self).tearDown()
 
     def testAddActionWithoutKeySequenceCallable(self):
@@ -76,6 +79,8 @@ class QMenuAddActionWithIcon(UsesQApplication):
     def tearDown(self):
         del self.menu
         del self.icon
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         super(QMenuAddActionWithIcon, self).tearDown()
 
     def testAddActionWithoutKeySequenceCallable(self):

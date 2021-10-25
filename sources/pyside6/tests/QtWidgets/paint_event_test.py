@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -28,9 +28,12 @@
 
 '''Test paint event override in python'''
 
+import gc
 import os
 import sys
 import unittest
+
+from textwrap import dedent
 
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
@@ -88,16 +91,26 @@ class PaintEventOverride(UsesQApplication):
     def tearDown(self):
         # Release resources
         del self.widget
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         super(PaintEventOverride, self).tearDown()
 
     def testPaintEvent(self):
         # Test QWidget.paintEvent override
         timer_id = self.widget.startTimer(100)
         self.widget.show()
+        if hasattr(sys, "pypy_version_info"):
+            # PYSIDE-535: Next line gives millions of
+            orig_exc = dedent("""
+                TypeError: 'PySide6.QtWidgets.QApplication.notify' called with wrong argument types:
+                  PySide6.QtWidgets.QApplication.notify(MyWidget, QPainter)
+                Supported signatures:
+                  PySide6.QtWidgets.QApplication.notify(PySide6.QtCore.QObject, PySide6.QtCore.QEvent)
+            """)
+            raise SystemError(orig_exc)
+
         self.app.exec()
-
         self.widget.killTimer(timer_id)
-
         self.assertTrue(self.widget.paint_event_called)
         self.assertEqual(self.widget.runs, 5)
 

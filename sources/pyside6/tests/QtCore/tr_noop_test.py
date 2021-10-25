@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -26,6 +26,7 @@
 ##
 #############################################################################
 
+import gc
 import os
 import sys
 import unittest
@@ -46,6 +47,8 @@ class QtTrNoopTest(unittest.TestCase):
 
     def tearDown(self):
         del self.txt
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testQtTrNoop(self):

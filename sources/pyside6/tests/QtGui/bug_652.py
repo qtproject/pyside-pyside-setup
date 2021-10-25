@@ -26,6 +26,7 @@
 ##
 #############################################################################
 
+import gc
 import os
 import sys
 import unittest
@@ -59,6 +60,8 @@ class TestBug652(unittest.TestCase):
         self.assertEqual(tc.block().userData().getMyNiceData(), heyHo)
 
         del tc
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         tc = QTextCursor(td)
         blk = tc.block()
         self.assertEqual(type(blk.userData()), MyData)

@@ -2,7 +2,7 @@
 
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -30,6 +30,7 @@
 
 '''Tests the presence of unary operator __neg__ on the QPoint class'''
 
+import gc
 import os
 import sys
 import unittest
@@ -58,6 +59,8 @@ class NegUnaryOperatorTest(unittest.TestCase):
         del self.y
         del self.neg_x
         del self.neg_y
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
     def testNegUnaryOperator(self):
         # Test __neg__ unary operator on QPoint class

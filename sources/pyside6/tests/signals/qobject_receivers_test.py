@@ -2,7 +2,7 @@
 
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -30,6 +30,7 @@
 
 ''' Test case for QObject.receivers()'''
 
+import gc
 import os
 import sys
 import unittest
@@ -63,6 +64,8 @@ class TestQObjectReceivers(unittest.TestCase):
         del receiver2
         del receiver1
         del sender
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
     def testPySlots(self):
         sender = QObject()
@@ -73,6 +76,8 @@ class TestQObjectReceivers(unittest.TestCase):
         self.assertEqual(sender.receivers(SIGNAL("destroyed()")), 2)
         del sender
         del receiver
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
     def testPySignals(self):
         sender = QObject()

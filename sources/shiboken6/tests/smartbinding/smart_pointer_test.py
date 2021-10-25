@@ -3,7 +3,7 @@
 #
 #############################################################################
 ##
-## Copyright (C) 2017 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -99,10 +99,14 @@ class SmartPointerTests(unittest.TestCase):
         # Delete the first shared pointer, object count should not change because the second
         # one still has a reference.
         del ptrToObj
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertEqual(objCount(), 1)
 
         # Delete the second smart pointer, object should be deleted.
         del ptrToObj2
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertEqual(objCount(), 0)
         self.assertEqual(integerCount(), 0)
 
@@ -146,15 +150,21 @@ class SmartPointerTests(unittest.TestCase):
         # Delete the first shared pointer, integer count should not change because the second
         # one still has a reference.
         del ptrToInteger
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertEqual(integerCount(), 2)
 
         # Delete the second smart pointer, integer should be deleted.
         del ptrToInteger2
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertEqual(objCount(), 1)
         self.assertEqual(integerCount(), 1)
 
         # Delete the original object which was used to create the integer.
         del o
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertEqual(objCount(), 0)
         self.assertEqual(integerCount(), 0)
 
@@ -199,6 +209,8 @@ class SmartPointerTests(unittest.TestCase):
 
         # clear and delete all objects in the list
         del ptrToObjList[:]  # Python 2.7 lists have no clear method
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertEqual(len(ptrToObjList), 0)
         self.assertEqual(objCount(), 1)
 

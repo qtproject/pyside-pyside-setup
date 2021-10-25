@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -87,6 +87,8 @@ class ConstructorWithRect(unittest.TestCase):
     def tearDown(self):
         # Release resources
         del self.scene
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
     def testHeight(self):
         # QGraphicsScene.height()
@@ -112,6 +114,8 @@ class AddItem(UsesQApplication):
     def tearDown(self):
         # Release resources
         del self.scene
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         super(AddItem, self).tearDown()
 
     def testEllipse(self):
@@ -186,6 +190,8 @@ class ItemRetrieve(UsesQApplication):
     def tearDown(self):
         # Release resources
         del self.scene
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         super(ItemRetrieve, self).tearDown()
 
     def testItems(self):
@@ -213,6 +219,8 @@ class TestGraphicsGroup(UsesQApplication):
         group = scene.createItemGroup((i2, i3, i4))
         scene.removeItem(i1)
         del i1  # this shouldn't delete i2
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertEqual(i2.scene(), scene)
         scene.destroyItemGroup(group)
         self.assertRaises(RuntimeError, group.type)

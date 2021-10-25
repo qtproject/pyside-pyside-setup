@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -28,6 +28,7 @@
 
 '''Test cases for QObject methods'''
 
+import gc
 import os
 import sys
 import unittest
@@ -125,6 +126,8 @@ class InheritsCase(unittest.TestCase):
         child.deleteLater()
         self.assertTrue(is_alive)
         del child
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertTrue(is_alive)
         QTimer.singleShot(100, app.quit)
         app.exec()

@@ -3,7 +3,7 @@
 #
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -31,6 +31,7 @@
 
 '''Test cases for virtual methods.'''
 
+import gc
 import os
 import sys
 import unittest
@@ -88,6 +89,8 @@ class VirtualMethodsTest(unittest.TestCase):
 
     def tearDown(self):
         del self.prefix_from_codeinjection
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
     def testReimplementedVirtualMethod0(self):
         '''Test Python override of a virtual method with various different parameters is correctly called from C++.'''
