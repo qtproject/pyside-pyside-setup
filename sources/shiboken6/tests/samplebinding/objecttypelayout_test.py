@@ -3,7 +3,7 @@
 #
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -31,6 +31,7 @@
 
 '''Tests cases for ObjectTypeLayout class.'''
 
+import gc
 import os
 import sys
 import unittest
@@ -84,6 +85,8 @@ class ObjectTypeLayoutTest(unittest.TestCase):
 
         p1.setLayout(layout)
         del p1 # This must kill c1, c2 and c3
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
         self.assertRaises(RuntimeError, c1.objectName)
         self.assertRaises(RuntimeError, c2.objectName)
@@ -106,6 +109,8 @@ class ObjectTypeLayoutTest(unittest.TestCase):
 
         p1.setLayout(layout)
         del p1 # This must kill c1, c2 and c3
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
         self.assertRaises(RuntimeError, c1.objectName)
         self.assertRaises(RuntimeError, c2.objectName)
@@ -165,6 +170,8 @@ class ObjectTypeLayoutTest(unittest.TestCase):
         self.assertEqual(l2.parent(), l1)
 
         del p1
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
         self.assertRaises(RuntimeError, c1.objectName)
         self.assertRaises(RuntimeError, c2.objectName)
@@ -201,6 +208,8 @@ class ObjectTypeLayoutTest(unittest.TestCase):
         self.assertEqual(l2.parent(), l1)
 
         del p1
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
         self.assertRaises(RuntimeError, c1.objectName)
         self.assertRaises(RuntimeError, c2.objectName)
@@ -239,6 +248,8 @@ class ObjectTypeLayoutTest(unittest.TestCase):
 
         p2.setLayout(l1)
         del p1
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
         self.assertEqual(c1.parent(), p2)
         self.assertEqual(c2.parent(), p2)
@@ -248,6 +259,8 @@ class ObjectTypeLayoutTest(unittest.TestCase):
         self.assertEqual(l2.parent(), l1)
 
         del p2
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
         self.assertRaises(RuntimeError, c1.objectName)
         self.assertRaises(RuntimeError, c2.objectName)
@@ -287,6 +300,8 @@ class ObjectTypeLayoutTest(unittest.TestCase):
 
         p2.setLayout(l1)
         del p1
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
         self.assertEqual(c1.parent(), p2)
         self.assertEqual(c2.parent(), p2)
@@ -296,6 +311,8 @@ class ObjectTypeLayoutTest(unittest.TestCase):
         self.assertEqual(l2.parent(), l1)
 
         del p2
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
         self.assertRaises(RuntimeError, c1.objectName)
         self.assertRaises(RuntimeError, c2.objectName)

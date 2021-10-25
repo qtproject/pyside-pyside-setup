@@ -2,7 +2,7 @@
 
 #############################################################################
 ##
-## Copyright (C) 2018 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -30,6 +30,7 @@
 
 '''Test cases for QCbor'''
 
+import gc
 import os
 import sys
 import unittest
@@ -49,6 +50,8 @@ class TestCbor(unittest.TestCase):
         writer = QCborStreamWriter(ba)
         writer.append(42)
         del writer
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertTrue(not ba.isEmpty())
         reader = QCborStreamReader(ba)
         self.assertTrue(reader.hasNext())
@@ -60,6 +63,8 @@ class TestCbor(unittest.TestCase):
         writer = QCborStreamWriter(ba)
         writer.append("hello")
         del writer
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertTrue(not ba.isEmpty())
         reader = QCborStreamReader(ba)
         self.assertTrue(reader.hasNext())

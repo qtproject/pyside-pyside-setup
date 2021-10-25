@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2018 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -26,6 +26,7 @@
 ##
 #############################################################################
 
+import gc
 import os
 import sys
 import unittest
@@ -76,6 +77,8 @@ class QWidgetTest(UsesQApplication):
         # This raised the Segmentation Fault too, because manually destroying
         # the object caused a missing refrence.
         del d
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
         # Getting the delegates
         a = t.itemDelegateForColumn(0)

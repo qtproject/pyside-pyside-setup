@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -26,6 +26,7 @@
 ##
 #############################################################################
 
+import gc
 import os
 import sys
 import unittest
@@ -70,6 +71,8 @@ class SegfaultCase(unittest.TestCase):
             del self.args
         except:
             pass
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
     def callback(self, *args):
         if tuple(self.args) == args:
@@ -83,6 +86,8 @@ class SegfaultCase(unittest.TestCase):
         obj.emit(SIGNAL('bar(int)'), self.args[0])
         self.assertTrue(self.called)
         del obj
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
         obj = Joe()
         QObject.connect(obj, SIGNAL('bar(int)'), self.callback)

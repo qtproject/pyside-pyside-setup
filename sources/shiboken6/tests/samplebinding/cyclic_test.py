@@ -3,7 +3,7 @@
 #
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -29,6 +29,7 @@
 ##
 #############################################################################
 
+import gc
 import os
 import sys
 import unittest
@@ -50,8 +51,6 @@ class ObjTest(unittest.TestCase):
         only be removed by the garbage collector, and then invoke the
         garbage collector in a different thread.
         """
-        import gc
-
         class CyclicChildObject(ObjectType):
             def __init__(self, parent):
                 super(CyclicChildObject, self).__init__(parent)
@@ -74,7 +73,9 @@ class ObjTest(unittest.TestCase):
         cycle = CyclicObject()
         self.assertTrue(alive())
         del cycle
-        self.assertTrue(alive())
+        if not hasattr(sys, "pypy_version_info"):
+            # PYSIDE-535: the semantics of gc.enable/gc.disable is different for PyPy
+            self.assertTrue(alive())
         gc.collect()
         self.assertFalse(alive())
 
@@ -83,8 +84,6 @@ class ObjTest(unittest.TestCase):
         only be removed by the garbage collector, and then invoke the
         garbage collector in a different thread.
         """
-        import gc
-
         class CyclicChildObject(ObjectView):
             def __init__(self, model):
                 super(CyclicChildObject, self).__init__(None)
@@ -107,7 +106,9 @@ class ObjTest(unittest.TestCase):
         cycle = CyclicObject()
         self.assertTrue(alive())
         del cycle
-        self.assertTrue(alive())
+        if not hasattr(sys, "pypy_version_info"):
+            # PYSIDE-535: the semantics of gc.enable/gc.disable is different for PyPy
+            self.assertTrue(alive())
         gc.collect()
         self.assertFalse(alive())
 

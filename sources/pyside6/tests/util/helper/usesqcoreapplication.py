@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2020 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -28,6 +28,7 @@
 
 '''Helper classes and functions'''
 
+import gc
 import unittest
 
 from PySide6.QtCore import QCoreApplication
@@ -53,6 +54,8 @@ class UsesQCoreApplication(unittest.TestCase):
     def tearDown(self):
         '''Release resources'''
         del self.app
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
     def exit_app_cb(self):
         '''Quits the application'''

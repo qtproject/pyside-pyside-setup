@@ -2,7 +2,7 @@
 
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -30,6 +30,7 @@
 
 ''' Test case for signal to signal connections.'''
 
+import gc
 import os
 import sys
 import unittest
@@ -67,6 +68,8 @@ class TestSignal2SignalConnect(unittest.TestCase):
         except:
             pass
         del self.args
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
     def callback_noargs(self):
         # Default callback without arguments
@@ -92,6 +95,8 @@ class TestSignal2SignalConnect(unittest.TestCase):
         QObject.connect(self.forwarder, SIGNAL("forward()"),
                         self.callback_noargs)
         del self.sender
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertTrue(self.called)
 
     def testSignalWithOnePrimitiveTypeArgument(self):
@@ -131,6 +136,8 @@ class TestSignal2SignalConnect(unittest.TestCase):
         self.sender.setObjectName(obj_name)
         self.args = (obj_name, )
         del self.sender
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertTrue(self.called)
 
 

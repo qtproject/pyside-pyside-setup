@@ -3,7 +3,7 @@
 #
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -31,6 +31,7 @@
 
 '''Tests for destroying the parent'''
 
+import gc
 import os
 import sys
 import unittest
@@ -56,6 +57,8 @@ class DeleteParentTest(unittest.TestCase):
         refcount_before = sys.getrefcount(child)
 
         del parent
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertRaises(RuntimeError, child.objectName)
         self.assertEqual(sys.getrefcount(child), refcount_before-1)
 
@@ -69,6 +72,8 @@ class DeleteParentTest(unittest.TestCase):
             child.setParent(parent)
 
         del parent
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         for i, child in enumerate(children):
             self.assertRaises(RuntimeError, child.objectName)
             self.assertEqual(sys.getrefcount(child), 4)
@@ -81,6 +86,8 @@ class DeleteParentTest(unittest.TestCase):
         grandchild = ObjectType(child)
 
         del parent
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertRaises(RuntimeError, child.objectName)
         self.assertEqual(sys.getrefcount(child), 2)
         self.assertRaises(RuntimeError, grandchild.objectName)

@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -28,6 +28,7 @@
 
 '''Test cases for QToolbar'''
 
+import gc
 import os
 import sys
 import unittest
@@ -58,6 +59,8 @@ class AddActionText(UsesQApplication):
         super(AddActionText, self).tearDown()
         del self.toolbar
         del self.window
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
     def testText(self):
         # QToolBar.addAction(text) - add a QToolButton

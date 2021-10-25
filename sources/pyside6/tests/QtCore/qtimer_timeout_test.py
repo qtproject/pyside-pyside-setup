@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -28,6 +28,7 @@
 
 '''Test case for timeout() signals from QTimer object.'''
 
+import gc
 import os
 import sys
 import unittest
@@ -70,6 +71,8 @@ class TestTimeoutSignal(UsesQCoreApplication):
         del self.watchdog
         del self.timer
         del self.called
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         UsesQCoreApplication.tearDown(self)
 
     def callback(self, *args):

@@ -2,7 +2,7 @@
 
 #############################################################################
 ##
-## Copyright (C) 2020 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -164,6 +164,8 @@ except ImportError:
     Enum.__module__ = "enum"
     Enum.__members__ = {}
     del Enum
+    # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+    gc.collect()
     enum.auto = lambda: 42
 
 HAVE_FLAG = hasattr(enum, "Flag")

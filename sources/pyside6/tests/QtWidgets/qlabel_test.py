@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2018 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -28,6 +28,7 @@
 
 '''Test cases for QLabel'''
 
+import gc
 import os
 import sys
 import unittest
@@ -54,6 +55,8 @@ class QLabelTest(UsesQApplication):
 
     def tearDown(self):
         del self.label
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         super(QLabelTest, self).tearDown()
 
     def testSetPixmap(self):
@@ -77,6 +80,8 @@ class QLabelTest(UsesQApplication):
         ret_p_addr = Shiboken.getCppPointer(ret_p)
         # Remove the QPixmap
         del ret_p
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         # Set new QPixmap
         self.label.setPixmap(p2)
 

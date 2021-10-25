@@ -2,7 +2,7 @@
 
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -28,6 +28,7 @@
 ##
 #############################################################################
 
+import gc
 import os
 import sys
 import unittest
@@ -54,6 +55,8 @@ class SignalWithDefaultValueTest(unittest.TestCase):
         del self.obj
         del self.void_called
         del self.bool_called
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
     def testConnectNewStyleEmitVoidSignal(self):
         def callbackVoid():

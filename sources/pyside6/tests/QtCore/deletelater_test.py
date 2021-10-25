@@ -30,6 +30,7 @@
 
 '''Test cases for QTimer.singleShot'''
 
+import gc
 import os
 import sys
 import unittest
@@ -50,6 +51,8 @@ class TestDeleteLater(UsesQCoreApplication):
         o = QObject()
         o.deleteLater()
         del o
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         QTimer.singleShot(100, self.app.quit)
         self.app.exec()
 

@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2019 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -28,6 +28,7 @@
 
 '''Test cases for QDate'''
 
+import gc
 import os
 import sys
 import unittest
@@ -80,6 +81,8 @@ class TestQSettings(unittest.TestCase):
         settings.setValue('bool1', False)
         settings.setValue('bool2', True)
         del settings
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
         # Loading values already set
         settings = QSettings(file_name, QSettings.IniFormat)

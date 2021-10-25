@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -29,7 +29,7 @@
 """ Unittest for bug #576 """
 """ http://bugs.openbossa.org/show_bug.cgi?id=576 """
 
-import sys
+import gc
 import os
 import sys
 import unittest
@@ -64,6 +64,8 @@ class Bug576(unittest.TestCase):
         b.setParent(None)
         self.assertEqual(sys.getrefcount(b), 2)
         del b
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertTrue(self._destroyed)
 
 

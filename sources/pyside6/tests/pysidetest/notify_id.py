@@ -26,6 +26,7 @@
 ##
 #############################################################################
 
+import gc
 import os
 import sys
 import unittest
@@ -71,6 +72,8 @@ class NotifyIdSignal(unittest.TestCase):
 
     def tearDown(self):
         del self.obj
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
     def testSignalEmission(self):
         metaObject = self.obj.metaObject()

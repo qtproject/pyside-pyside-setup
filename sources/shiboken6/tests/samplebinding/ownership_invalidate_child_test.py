@@ -3,7 +3,7 @@
 #
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -31,6 +31,7 @@
 
 '''Tests for invalidating a C++ created child that was already on the care of a parent.'''
 
+import gc
 import os
 import sys
 import unittest
@@ -67,6 +68,8 @@ class InvalidateChildTest(unittest.TestCase):
         self.assertEqual(parent.children(), [])
 
         del parent
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
         self.assertEqual(child1.objectName(), 'child1')
         self.assertRaises(RuntimeError, child2.objectName)

@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -27,6 +27,7 @@
 #############################################################################
 
 import colorsys
+import gc
 import os
 import sys
 import unittest
@@ -101,6 +102,8 @@ class QColorCopy(unittest.TestCase):
         self.assertTrue(original is not copy)
         self.assertEqual(original, copy)
         del original
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertEqual(copy, QColor(0, 0, 255))
 
     def testEmptyCopy(self):
@@ -111,6 +114,8 @@ class QColorCopy(unittest.TestCase):
         self.assertTrue(original is not copy)
         self.assertEqual(original, copy)
         del original
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertEqual(copy, QColor())
 
 

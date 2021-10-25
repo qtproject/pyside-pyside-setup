@@ -3,7 +3,7 @@
 #
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -31,6 +31,7 @@
 
 '''Test cases for method modifications performed as described on type system. '''
 
+import gc
 import os
 import sys
 import unittest
@@ -64,6 +65,8 @@ class ModificationsTest(unittest.TestCase):
 
     def tearDown(self):
         del self.mods
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
     def testClassMembersAvailability(self):
         '''Test if Modified class really have the expected members.'''

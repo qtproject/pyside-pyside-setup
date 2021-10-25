@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -28,6 +28,7 @@
 
 '''Test cases for QLayout handling of child widgets references'''
 
+import gc
 import os
 import sys
 import unittest
@@ -61,6 +62,8 @@ class SaveReference(UsesQApplication):
         # Release resources
         del self.widget2
         del self.widget1
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         super(SaveReference, self).tearDown()
 
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
@@ -132,6 +135,8 @@ class MultipleAdd(UsesQApplication):
         del self.widget
         del self.layout
         del self.win
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         super(MultipleAdd, self).tearDown()
 
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")

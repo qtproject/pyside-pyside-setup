@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2020 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -26,6 +26,8 @@
 ##
 #############################################################################
 
+import gc
+
 
 class BasicPySlotCase(object):
     '''Base class that tests python slots and signal emissions.
@@ -40,6 +42,8 @@ class BasicPySlotCase(object):
             del self.args
         except:
             pass
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
     def cb(self, *args):
         '''Simple callback with arbitrary arguments.
