@@ -59,6 +59,7 @@ STATIC_STRING_IMPL(dict_ring, "dict_ring")
 STATIC_STRING_IMPL(im_func, "im_func")
 STATIC_STRING_IMPL(im_self, "im_self")
 STATIC_STRING_IMPL(name, "name")
+STATIC_STRING_IMPL(parameters, "parameters")
 STATIC_STRING_IMPL(property, "property")
 STATIC_STRING_IMPL(select_id, "select_id")
 } // namespace PyName
