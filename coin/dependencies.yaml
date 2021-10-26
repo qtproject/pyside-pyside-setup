@@ -13,7 +13,7 @@ dependencies: [
       "../../qt/qtdeclarative",
       "../../qt/qtdoc",
       "../../qt/qtimageformats",
-      "../../qt/qtlocation",
+      "../../qt/qtpositioning",
       "../../qt/qtlottie",
       "../../qt/qtmultimedia",
       "../../qt/qtnetworkauth",
