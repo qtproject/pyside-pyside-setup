@@ -76,7 +76,7 @@ PyObject *GetSignature_Function(PyObject *, PyObject *);
 PyObject *GetSignature_TypeMod(PyObject *, PyObject *);
 PyObject *GetSignature_Wrapper(PyObject *, PyObject *);
 
-PyObject *get_signature_intern(PyObject *ob, PyObject *modifier);
+LIBSHIBOKEN_API PyObject *get_signature_intern(PyObject *ob, PyObject *modifier);
 PyObject *PySide_BuildSignatureProps(PyObject *class_mod);
 PyObject *GetClassOrModOf(PyObject *ob);
 

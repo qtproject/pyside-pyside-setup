@@ -220,6 +220,36 @@ the Qt documentation, it would be easier to add all properties that
 should be properties and are obviously missing.
 
 
+Name Clashes and Solution
+-------------------------
+
+There are some rare cases where a property already exists as a function,
+either with multiple signatures or having parameters.
+This is not very nice in C++ as well, but for Python this is forbidden.
+Example:
+
+.. code-block:: python
+
+    >>> from PySide6 import *
+    >>> import pprint
+    >>> pprint.pprint(QtCore.QTimer.singleShot.__signature__)
+    [<Signature (arg__1: int, arg__2: Callable) -> None>,
+     <Signature (msec: int, receiver: PySide6.QtCore.QObject, member: bytes) -> None>,
+     <Signature (msec: int, timerType: PySide6.QtCore.Qt.TimerType,
+                            receiver: PySide6.QtCore.QObject, member: bytes) -> None>]
+
+When creating this property, we respect the existing function and use a slightly
+different name for the property by appending an underscore.
+
+.. code-block:: python
+
+    >>> from __feature__ import true_property
+    >>> QtCore.QTimer.singleShot_
+    <property object at 0x118e5f8b0>
+
+We hope that these clashes can be removed in future Qt versions.
+
+
 The __feature__ import
 ======================
 

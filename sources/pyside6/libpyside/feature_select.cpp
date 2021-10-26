@@ -44,6 +44,7 @@
 
 #include <shiboken.h>
 #include <sbkfeature_base.h>
+#include <signature_p.h>
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -613,6 +614,34 @@ static PyObject *make_snake_case(QString s, bool lower)
     return String::getSnakeCaseName(s.toLatin1().data(), lower);
 }
 
+PyObject *adjustPropertyName(PyObject *dict, PyObject *name)
+{
+    // PYSIDE-1670: If this is a function with multiple arity or with
+    // parameters, we use a mangled name for the property.
+    PyObject *existing = PyDict_GetItem(dict, name);    // borrowed
+    if (existing) {
+        Shiboken::AutoDecRef sig(get_signature_intern(existing, nullptr));
+        if (sig.object()) {
+            bool name_clash = false;
+            if (PyList_CheckExact(sig)) {
+                name_clash = true;
+            } else {
+                Shiboken::AutoDecRef params(PyObject_GetAttr(sig, PyName::parameters()));
+                // Are there parameters except self or cls?
+                if (PyObject_Size(params.object()) > 1)
+                    name_clash = true;
+            }
+            if (name_clash) {
+                // PyPy has no PyUnicode_AppendAndDel function, yet
+                Shiboken::AutoDecRef hold(name);
+                Shiboken::AutoDecRef under(Py_BuildValue("s", "_"));
+                name = PyUnicode_Concat(hold, under);
+            }
+        }
+    }
+    return name;
+}
+
 static bool feature_02_true_property(PyTypeObject *type, PyObject *prev_dict, int id)
 {
     /*
@@ -651,6 +680,9 @@ static bool feature_02_true_property(PyTypeObject *type, PyObject *prev_dict, in
                                    Py_TYPE(getter) == PepStaticMethod_TypePtr))
             continue;
         PyObject *setter = haveWrite ? PyDict_GetItem(prev_dict, write) : nullptr;
+
+        // PYSIDE-1670: If multiple arities exist as a property name, rename it.
+        name = adjustPropertyName(prop_dict, name);
 
         AutoDecRef PyProperty(createProperty(type, getter, setter));
         if (PyProperty.isNull())

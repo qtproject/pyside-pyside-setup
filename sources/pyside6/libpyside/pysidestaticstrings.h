@@ -54,6 +54,7 @@ PyObject *dict_ring();
 PyObject *im_func();
 PyObject *im_self();
 PyObject *name();
+PyObject *parameters();
 PyObject *property();
 PyObject *select_id();
 } // namespace PyName
