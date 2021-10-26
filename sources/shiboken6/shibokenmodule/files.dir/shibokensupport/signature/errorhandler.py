@@ -54,8 +54,10 @@ enough to produce a useful ValueError.
 This matter will be improved in a later version.
 """
 
+import collections.abc
 import inspect
 import sys
+import typing
 
 from shibokensupport.signature import get_signature
 from shibokensupport.signature.mapping import update_mapping, namespace
@@ -64,11 +66,21 @@ from textwrap import dedent
 
 def qt_isinstance(inst, the_type):
     if the_type == float:
-        return isinstance(inst, int) or isinstance(int, float)
+        # Qt thinks differently about int and float - simply keep it.
+        return isinstance(inst, int) or isinstance(inst, float)
+    if the_type.__module__ == "typing":
+        if the_type.__origin__ is typing.Union:
+            return any(qt_isinstance(inst, _) for _ in the_type.__args__)
+        if the_type.__origin__ in (collections.abc.Sequence,
+                                   collections.abc.Iterable):
+            try:
+                return all(qt_isinstance(_, the_type.__args__[0]) for _ in inst)
+            except TypeError:
+                return False
     try:
         return isinstance(inst, the_type)
     except TypeError as e:
-        print("FIXME", e)
+        print(f"FIXME qt_isinstance({inst}, {the_type}):", e)
         return False
 
 
@@ -82,13 +94,7 @@ def matched_type(args, sigs):
             if params[k].default is params[k].empty:
                 # this is a necessary parameter, so it fails.
                 continue
-        ok = True
-        for arg, param in zip(args, params):
-            ann = param.annotation
-            if qt_isinstance(arg, ann):
-                continue
-            ok = False
-        if ok:
+        if all(qt_isinstance(arg, param.annotation) for arg, param in zip(args, params)):
             return sig
     return None
 
