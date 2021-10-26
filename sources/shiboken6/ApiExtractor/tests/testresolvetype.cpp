@@ -123,14 +123,18 @@ public:
     fixture->classType.decideUsagePattern();
 
     for (const auto &f : fixture->klass->findFunctions(u"Test"_qs)) {
-        if (f->arguments().size() != 1)
-            return -3;
-        const auto type = f->arguments().constFirst().type();
-        if (type.name() == u"int")
-            fixture->intType = type;
-        else
-            fixture->stringType = type;
+        if (f->functionType() == AbstractMetaFunction::ConstructorFunction
+            && f->arguments().size() == 1) {
+            const auto type = f->arguments().constFirst().type();
+            if (type.name() == u"int")
+                fixture->intType = type;
+            else
+                fixture->stringType = type;
+        }
     }
+    if (fixture->intType.isVoid() || fixture->stringType.isVoid())
+        return -3;
+
     return 0;
 }
 
