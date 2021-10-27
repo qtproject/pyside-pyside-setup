@@ -95,7 +95,7 @@ public:
     TypeSystem::SnakeCase snakeCase() const;
 
     static std::optional<AbstractMetaField>
-        find(const AbstractMetaFieldList &haystack, const QString &needle);
+        find(const AbstractMetaFieldList &haystack, QStringView needle);
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const;

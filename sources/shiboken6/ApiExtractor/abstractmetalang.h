@@ -182,7 +182,7 @@ public:
     void addField(const AbstractMetaField &field);
     bool hasStaticFields() const;
 
-    std::optional<AbstractMetaField> findField(const QString &name) const;
+    std::optional<AbstractMetaField> findField(QStringView name) const;
 
     const AbstractMetaEnumList &enums() const;
     AbstractMetaEnumList &enums();

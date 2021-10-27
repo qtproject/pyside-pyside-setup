@@ -1230,7 +1230,7 @@ AbstractMetaFunctionCList AbstractMetaClass::cppSignalFunctions() const
 }
 
 std::optional<AbstractMetaField>
-    AbstractMetaClass::findField(const QString &name) const
+    AbstractMetaClass::findField(QStringView name) const
 {
     return AbstractMetaField::find(d->m_fields, name);
 }
