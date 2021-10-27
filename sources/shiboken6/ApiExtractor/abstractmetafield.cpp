@@ -64,7 +64,7 @@ AbstractMetaField::~AbstractMetaField() = default;
 
 std::optional<AbstractMetaField>
     AbstractMetaField::find(const AbstractMetaFieldList &haystack,
-                            const QString &needle)
+                            QStringView needle)
 {
     for (const auto &f : haystack) {
         if (f.name() == needle)

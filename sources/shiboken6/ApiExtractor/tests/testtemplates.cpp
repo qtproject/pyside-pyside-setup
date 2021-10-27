@@ -584,13 +584,13 @@ void TestTemplates::testTemplateTypeDefs()
     QCOMPARE(xmlValueMethod->type().cppSignature(), QLatin1String("int"));
 
     // Check whether the m_value field is of type 'int'
-    const auto valueField = optionalInt->findField(QLatin1String("m_value"));
+    const auto valueField = optionalInt->findField(u"m_value");
     QVERIFY(valueField.has_value());
     QCOMPARE(valueField->type().cppSignature(), QLatin1String("int"));
 
     // ditto for typesystem XML
     const auto xmlValueField =
-        xmlOptionalInt->findField(QLatin1String("m_value"));
+        xmlOptionalInt->findField(u"m_value");
     QVERIFY(xmlValueField.has_value());
     QCOMPARE(xmlValueField->type().cppSignature(), QLatin1String("int"));
 }
