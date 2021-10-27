@@ -230,8 +230,5 @@ if(SANITIZE_ADDRESS AND NOT MSVC)
     setup_sanitize_address()
 endif()
 
-find_program(SPHINX_BUILD sphinx-build)
-find_program(DOT_EXEC dot)
-
 find_package(Qt${QT_MAJOR_VERSION}Designer)
 
