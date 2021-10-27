@@ -98,12 +98,17 @@ extern "C" {
             return nullptr;
         }
 
-        long valA = PYSIDE_QFLAGS(self)->ob_value;
-        long valB = getNumberValue(other);
-
         if (self == other) {
-            result = 1;
+            switch (op) {
+            case Py_EQ:
+            case Py_LE:
+            case Py_GE:
+                result = 1;
+                break;
+            }
         } else  {
+            const long valA = PYSIDE_QFLAGS(self)->ob_value;
+            const long valB = getNumberValue(other);
             switch (op) {
             case Py_EQ:
                 result = (valA == valB);
