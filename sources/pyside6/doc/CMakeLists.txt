@@ -3,6 +3,72 @@ cmake_policy(VERSION 3.16)
 
 project(doc)
 
+find_program(SPHINX_BUILD sphinx-build)
+
+# graphviz dot appears to be used by sphinx and not by CMake directly. This is just found to check
+# if it exists.
+find_program(DOT_EXEC dot)
+
+# Lookup for qdoc in multiple sources: cache var, PATH or CMake package.
+set(qdoc_binary "")
+find_program(QDOC_EXECUTABLE qdoc DOC "Path to qdoc binary.")
+if(QDOC_EXECUTABLE)
+    set(qdoc_binary "${QDOC_EXECUTABLE}")
+else()
+    find_package(Qt6 QUIET COMPONENTS Tools)
+    if(TARGET Qt6::qdoc)
+        set(qdoc_binary "$<TARGET_FILE:Qt6::qdoc>")
+    endif()
+endif()
+
+# Lookup for qhelpgenerator in multiple sources: cache var, PATH or CMake package.
+set(qhelpgenerator_binary "")
+find_program(QHELPGENERATOR_EXECUTABLE qhelpgenerator DOC "Path to qhelpgenerator binary.")
+if(QHELPGENERATOR_EXECUTABLE)
+    set(qhelpgenerator_binary "${QHELPGENERATOR_EXECUTABLE}")
+else()
+    find_package(Qt6 QUIET COMPONENTS Tools)
+    if(TARGET Qt6::qhelpgenerator)
+        set(qhelpgenerator_binary "$<TARGET_FILE:Qt6::qhelpgenerator>")
+    endif()
+endif()
+
+# When the doc project is built as part of the pyside project, we show informational message
+# and return early if requirements are not met.
+if(NOT CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+    if(QT_SRC_DIR AND SPHINX_BUILD AND DOT_EXEC AND NOT SKIP_DOCS)
+        # All requirements met, proceed.
+    else()
+        set(reasons "")
+        if(NOT QT_SRC_DIR)
+            list(APPEND reasons "    QT_SRC_DIR variable not set\n")
+        endif()
+        if(NOT SPHINX_BUILD)
+            list(APPEND reasons "    sphinx-build command not found\n")
+        endif()
+        if(NOT DOT_EXEC)
+            list(APPEND reasons "    graphviz not found\n")
+        endif()
+        if(SKIP_DOCS)
+            list(APPEND reasons "    SKIP_DOCS was set to TRUE\n")
+        endif()
+        message(STATUS "apidoc generation targets disabled due to the following reasons:\n"
+                ${reasons})
+        return()
+    endif()
+else()
+    # We are building the docs as a standalone project, likely via setup.py build_rst_docs
+    # command. Perform stricter sanity checks.
+    if(NOT SPHINX_BUILD)
+        message(FATAL_ERROR "sphinx-build command not found. Please set the SPHINX_BUILD variable.")
+    endif()
+endif()
+
+# Generate html by default.
+if(NOT DOC_OUTPUT_FORMAT)
+    set(DOC_OUTPUT_FORMAT "html")
+endif()
+
 if (WIN32)
     set(PATH_SEP "\;")
 else()
@@ -36,9 +102,12 @@ if (FULLDOCSBUILD)
     execute_process(COMMAND ${PYTHON_EXECUTABLE} ${SNIPPETS_TOOL}
         --qt ${QT_SRC_DIR}/.. --pyside ${PYSIDE_ROOT} -w
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-        ERROR_VARIABLE SNIPPETS_ERROR)
-    if (SNIPPETS_ERROR)
-        message(FATAL_ERROR "The 'snippets_translate' tool failed: ${SNIPPETS_ERROR}")
+        ERROR_VARIABLE SNIPPETS_ERROR
+        RESULT_VARIABLE SNIPPETS_RESULT)
+    # SNIPPETS_ERROR might be empty and SNIPPET_RESULT might contain "permission denied"
+    if (SNIPPETS_ERROR OR SNIPPETS_RESULT)
+        message(FATAL_ERROR
+                "The 'snippets_translate' tool failed: ${SNIPPETS_ERROR} ${SNIPPET_RESULT}")
     endif()
 endif()
 
@@ -122,6 +191,13 @@ if (FULLDOCSBUILD)
 
     set(QDOC_TYPESYSTEM_PATH "${pyside6_SOURCE_DIR}${PATH_SEP}${pyside6_BINARY_DIR}")
 
+    if(NOT qdoc_binary)
+        message(FATAL_ERROR
+                "No qdoc binary was found which full documentation generation requires. "
+                "Please either add qdoc to PATH or specify the QDOC_EXECUTABLE variable."
+        )
+    endif()
+
     add_custom_target(qdoc DEPENDS "${DOC_DATA_DIR}/webxml/qtcore-index.webxml")
 
     add_custom_command(OUTPUT "${DOC_DATA_DIR}/webxml/qtcore-index.webxml"
@@ -130,7 +206,8 @@ if (FULLDOCSBUILD)
                        QT_VERSION=${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH}
                        QT_VER=${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}
                        QT_VERSION_TAG=${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH}
-                       qdoc pyside.qdocconf -single-exec -installdir ${DOC_DATA_DIR} -outputdir ${DOC_DATA_DIR}
+                       "${qdoc_binary}" pyside.qdocconf -single-exec
+                           -installdir ${DOC_DATA_DIR} -outputdir ${DOC_DATA_DIR}
                        COMMENT "Running qdoc against Qt source code...")
 endif()
 
@@ -171,12 +248,19 @@ if(DOC_OUTPUT_FORMAT STREQUAL "html")
             COMMENT "Copying Shiboken docs..."
             VERBATIM)
 else()
-    file(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/html/PySide.qhp QHP_FILE)
-    add_custom_command(TARGET apidoc POST_BUILD
-            COMMAND ${PYTHON_EXECUTABLE} py_script.py
-            COMMAND qhelpgenerator ${QHP_FILE}
-            COMMENT "Generating QCH from a QHP file..."
-            VERBATIM)
+    if(qhelpgenerator_binary)
+        message(STATUS "qhelpgenerator - found")
+
+        file(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/html/PySide.qhp QHP_FILE)
+        add_custom_command(TARGET apidoc POST_BUILD
+                COMMAND ${PYTHON_EXECUTABLE} py_script.py
+                COMMAND "${qhelpgenerator_binary}" ${QHP_FILE}
+                COMMENT "Generating QCH from a QHP file..."
+                VERBATIM
+        )
+    else()
+        message(WARNING "qhelpgenerator - not found! qch generation disabled")
+    endif()
 endif()
 
 # create conf.py based on conf.py.in
