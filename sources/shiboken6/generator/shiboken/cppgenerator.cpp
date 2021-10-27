@@ -996,10 +996,8 @@ QString CppGenerator::virtualMethodReturn(TextStream &s, const ApiExtractorResul
     QString errorMessage;
     const auto defaultReturnExpr = minimalConstructor(api, returnType, &errorMessage);
     if (!defaultReturnExpr.has_value()) {
-        QString errorMsg = QLatin1String(__FUNCTION__) + QLatin1String(": ");
-        if (const AbstractMetaClass *c = func->implementingClass())
-            errorMsg += c->qualifiedCppName() + QLatin1String("::");
-        errorMsg += func->signature();
+        QString errorMsg = QLatin1String(__FUNCTION__) + u": "_qs
+                           + func->classQualifiedSignature();
         errorMsg = msgCouldNotFindMinimalConstructor(errorMsg,
                                                      func->type().cppSignature(),
                                                      errorMessage);

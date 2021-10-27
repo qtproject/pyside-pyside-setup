@@ -37,6 +37,8 @@
 #include "ctypenames.h"
 #include "pytypenames.h"
 #include "textstream.h"
+#include "exception.h"
+#include "messages.h"
 
 #include <QtCore/QDir>
 #include <QtCore/QFile>
@@ -287,8 +289,10 @@ void OverloadDataRootNode::sortNextOverloads(const ApiExtractorResult &api)
 
         // Process inheritance relationships
         if (targetType.isValue() || targetType.isObject()) {
-            auto metaClass = AbstractMetaClass::findClass(api.classes(),
-                                                          targetType.typeEntry());
+            auto *te = targetType.typeEntry();
+            auto metaClass = AbstractMetaClass::findClass(api.classes(), te);
+            if (!metaClass)
+                throw Exception(msgArgumentClassNotFound(m_overloads.constFirst(), te));
             const AbstractMetaClassList &ancestors = metaClass->allTypeSystemAncestors();
             for (const AbstractMetaClass *ancestor : ancestors) {
                 QString ancestorTypeName = ancestor->typeEntry()->name();

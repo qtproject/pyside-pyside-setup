@@ -239,4 +239,7 @@ QString msgDuplicateBuiltInTypeEntry(const QString &name);
 QString msgDuplicateTypeEntry(const QString &name);
 QString msgInvalidTargetLanguageApiName(const QString &name);
 
+QString msgArgumentClassNotFound(const AbstractMetaFunctionCPtr &func,
+                                 const TypeEntry *t);
+
 #endif // MESSAGES_H

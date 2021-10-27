@@ -272,9 +272,8 @@ QString msgShadowingFunction(const AbstractMetaFunction *f1,
     auto f2Class = f2->implementingClass();
     QString result;
     QTextStream str(&result);
-    str << f2Class->sourceLocation() << "Shadowing: " << f1->implementingClass()->name()
-        << "::" << f1->signature() << " and " << f2Class->name() << "::"
-        << f2->signature();
+    str << f2Class->sourceLocation() << "Shadowing: " << f1->classQualifiedSignature()
+        << " and " << f2->classQualifiedSignature();
     return result;
 }
 
@@ -831,4 +830,13 @@ QString msgInvalidTargetLanguageApiName(const QString &name)
 {
     return u"Invalid target language API name \""_qs
            + name + u"\"."_qs;
+}
+
+QString msgArgumentClassNotFound(const AbstractMetaFunctionCPtr &func,
+                                 const TypeEntry *t)
+{
+    QString result;
+    QTextStream(&result) << "Internal Error: Class \"" <<  t->qualifiedCppName()
+        << "\" for \"" << func->classQualifiedSignature() << "\" not found!";
+    return result;
 }
