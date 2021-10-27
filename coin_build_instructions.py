@@ -143,6 +143,8 @@ def call_setup(python_ver, phase):
             "--verbose-build"]
     if python_ver == "3":
         cmd += ["--limited-api=yes"]
+    else:
+        cmd += ["--skip-docs"]  # Sphinx is broken in Python 2
     if is_snapshot_build():
         cmd += ["--snapshot-build"]
 
