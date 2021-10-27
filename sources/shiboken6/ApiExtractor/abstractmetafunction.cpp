@@ -511,6 +511,15 @@ QString AbstractMetaFunction::signature() const
     return d->signature();
 }
 
+QString AbstractMetaFunction::classQualifiedSignature() const
+{
+    QString result;
+    if (d->m_implementingClass)
+        result += d->m_implementingClass->qualifiedCppName() + u"::"_qs;
+    result += signature();
+    return result;
+}
+
 bool AbstractMetaFunction::isConstant() const
 {
     return d->m_constant;

@@ -284,6 +284,8 @@ public:
 
     QStringList introspectionCompatibleSignatures(const QStringList &resolvedArguments = QStringList()) const;
     QString signature() const;
+    /// Return a signature qualified by class name, for error reporting.
+    QString classQualifiedSignature() const;
 
     bool isConstant() const;
     void setConstant(bool constant);

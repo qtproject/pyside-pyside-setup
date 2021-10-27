@@ -250,4 +250,7 @@ QString msgInvalidTargetLanguageApiName(const QString &name);
 
 QString msgUnknownCheckFunction(const TypeEntry *t);
 
+QString msgArgumentClassNotFound(const AbstractMetaFunctionCPtr &func,
+                                 const TypeEntry *t);
+
 #endif // MESSAGES_H
