@@ -264,10 +264,7 @@ void AbstractMetaEnum::setSigned(bool s)
 
 static void formatMetaEnumValue(QDebug &d, const AbstractMetaEnumValue &v)
 {
-    const QString &name = v.stringValue();
-    if (!name.isEmpty())
-        d << name << '=';
-    d << v.value();
+    d << v.name() << '=' << v.value();
 }
 
 QDebug operator<<(QDebug d, const AbstractMetaEnumValue &v)
