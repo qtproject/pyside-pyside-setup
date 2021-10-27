@@ -302,7 +302,10 @@ void OverloadData::sortNextOverloads()
 
         // Process inheritance relationships
         if (targetType->isValue() || targetType->isObject()) {
-            const AbstractMetaClass *metaClass = AbstractMetaClass::findClass(m_generator->classes(), targetType->typeEntry());
+            auto *te = targetType->typeEntry();
+            const AbstractMetaClass *metaClass = AbstractMetaClass::findClass(m_generator->classes(), te);
+            if (!metaClass)
+                qFatal("%s", qPrintable(msgArgumentClassNotFound(m_overloads.constFirst(), te)));
             const AbstractMetaClassList &ancestors = m_generator->getAllAncestors(metaClass);
             for (const AbstractMetaClass *ancestor : ancestors) {
                 QString ancestorTypeName = ancestor->typeEntry()->name();

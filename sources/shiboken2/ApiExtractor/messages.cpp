@@ -671,3 +671,16 @@ QString msgFallbackWarning(const QXmlStreamReader &reader, const QString &contex
         message += QLatin1String(" [") + identifier + QLatin1Char(']');
     return msgTagWarning(reader, context, tag, message);
 }
+
+QString msgArgumentClassNotFound(const AbstractMetaFunction *func,
+                                 const TypeEntry *t)
+{
+    QString result;
+    QTextStream str(&result);
+    str << "Internal Error: Class \"" <<  t->qualifiedCppName()
+        << "\" for \"";
+    if (auto *ic = func->implementingClass())
+        str << ic->qualifiedCppName() << "::";
+    str << func->signature() << "\" not found!";
+    return result;
+}

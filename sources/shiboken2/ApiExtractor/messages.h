@@ -196,4 +196,7 @@ QString msgFallbackWarning(const QXmlStreamReader &reader, const QString &contex
                            const QString &tag, const QString &location,
                            const QString &identifier, const QString &fallback);
 
+QString msgArgumentClassNotFound(const AbstractMetaFunction *func,
+                                 const TypeEntry *t);
+
 #endif // MESSAGES_H
