@@ -377,14 +377,6 @@ void _ClassModelItem::setTemplateParameters(const TemplateParameterList &templat
     m_templateParameters = templateParameters;
 }
 
-void _ClassModelItem::addBaseClass(const QString &name, Access accessPolicy)
-{
-    _ClassModelItem::BaseClass baseClass;
-    baseClass.name = name;
-    baseClass.accessPolicy = accessPolicy;
-    m_baseClasses.append(baseClass);
-}
-
 bool _ClassModelItem::extendsClass(const QString &name) const
 {
     for (const BaseClass &bc : m_baseClasses) {

@@ -266,6 +266,7 @@ public:
     struct BaseClass
     {
         QString name;
+        ClassModelItem klass; // Might be null in case of templates
         Access accessPolicy = Access::Public;
     };
 
@@ -288,7 +289,7 @@ public:
     void addUsingMember(const QString &className, const QString &memberName,
                         Access accessPolicy);
 
-    void addBaseClass(const QString &name, Access accessPolicy);
+    void addBaseClass(const BaseClass &b) { m_baseClasses.append(b); }
 
     TemplateParameterList templateParameters() const;
     void setTemplateParameters(const TemplateParameterList &templateParameters);
