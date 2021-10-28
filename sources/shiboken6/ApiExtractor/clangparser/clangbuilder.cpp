@@ -200,7 +200,7 @@ public:
     void addField(const CXCursor &cursor);
 
     static QString cursorValueExpression(BaseVisitor *bv, const CXCursor &cursor);
-    QString getBaseClassName(CXType type) const;
+    std::pair<QString, ClassModelItem> getBaseClass(CXType type) const;
     void addBaseClass(const CXCursor &cursor);
 
     template <class Item>
@@ -702,7 +702,7 @@ static TypeDeclaration resolveType(CXType type)
 
 // Note: Return the baseclass for cursors like CXCursor_CXXBaseSpecifier,
 // where the cursor spelling has "struct baseClass".
-QString BuilderPrivate::getBaseClassName(CXType type) const
+std::pair<QString, ClassModelItem> BuilderPrivate::getBaseClass(CXType type) const
 {
     const auto decl = resolveType(type);
     // Note: spelling has "struct baseClass", use type
@@ -725,7 +725,7 @@ QString BuilderPrivate::getBaseClassName(CXType type) const
     // "class X : public std::list<...>", "template<class T> class Foo : public T"
     // and standard types like true_type, false_type.
     if (it == m_cursorClassHash.constEnd())
-        return baseClassName;
+        return {baseClassName, {}};
 
     // Completely qualify the class name by looking it up and taking its scope
     // plus the actual baseClass stripped off any scopes. Consider:
@@ -745,7 +745,7 @@ QString BuilderPrivate::getBaseClassName(CXType type) const
         baseClassName.prepend(colonColon());
         baseClassName.prepend(baseScope.join(colonColon()));
     }
-    return baseClassName;
+    return {baseClassName, it.value()};
 }
 
 // Add a base class to the current class from CXCursor_CXXBaseSpecifier
@@ -753,8 +753,8 @@ void BuilderPrivate::addBaseClass(const CXCursor &cursor)
 {
     Q_ASSERT(clang_getCursorKind(cursor) == CXCursor_CXXBaseSpecifier);
     const auto access = accessPolicy(clang_getCXXAccessSpecifier(cursor));
-    QString baseClassName = getBaseClassName(clang_getCursorType(cursor));
-    m_currentClass->addBaseClass(baseClassName, access);
+    const auto baseClass = getBaseClass(clang_getCursorType(cursor));
+    m_currentClass->addBaseClass({baseClass.first, baseClass.second, access});
 }
 
 static inline CXCursor definitionFromTypeRef(const CXCursor &typeRefCursor)
@@ -1177,7 +1177,7 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         } else if (!d->m_currentField.isNull()) {
             d->qualifyTypeDef(cursor, d->m_currentField);
         } else if (d->m_withinUsingDeclaration && d->m_usingTypeRef.isEmpty()) {
-            d->m_usingTypeRef = d->getBaseClassName(clang_getCursorType(cursor));
+            d->m_usingTypeRef = d->getBaseClass(clang_getCursorType(cursor)).first;
         }
         break;
     case CXCursor_CXXFinalAttr:
