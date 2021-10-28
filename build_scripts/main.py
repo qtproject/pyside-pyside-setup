@@ -269,7 +269,7 @@ def prefix():
     if virtual_env_name is not None:
         name = os.path.basename(virtual_env_name)
     else:
-        name = "qfp"
+        name = "pyside"
     name += str(sys.version_info[0])
     if OPTION["DEBUG"]:
         name += "d"
@@ -318,6 +318,17 @@ def prepare_sub_modules():
 
 
 def prepare_build():
+    # Clean up temp build folder.
+    for n in ["build"]:
+        d = os.path.join(setup_script_dir, n)
+        if os.path.isdir(d):
+            log.info(f"Removing {d}")
+            try:
+                rmtree(d)
+            except Exception as e:
+                log.warn(f'***** problem removing "{d}"')
+                log.warn(f'ignored error: {e}')
+
     # locate Qt sources for the documentation
     if OPTION["QT_SRC"] is None:
         install_prefix = QtInfo().prefix_dir
@@ -411,9 +422,8 @@ class PysideInstallLib(_install_lib):
 
     def install(self):
         """
-        Installs files from self.build_dir directory into final
-        site-packages/PySide6 directory when the command is 'install
-        or into build/wheel when command is 'bdist_wheel'.
+        Installs files from build/xxx directory into final
+        site-packages/PySide6 directory.
         """
 
         if os.path.isdir(self.build_dir):
@@ -539,39 +549,8 @@ class PysideBuild(_build, DistUtilsCommandMixin):
 
         script_dir = setup_script_dir
         sources_dir = os.path.join(script_dir, "sources")
-        build_base = self.build_base
-        venv_prefix = prefix()
-        build_dir = os.path.join(script_dir, build_base, venv_prefix, build_name, "build")
-        install_dir = os.path.join(script_dir, build_base, venv_prefix, build_name, "install")
-        setup_tools_build_lib_dir = self.build_lib
-
-        # If setuptools' build_lib was not specified manually (so its
-        # value was auto-computed which we check by the equality in the
-        # condition), change its location to the same directory where
-        # the cmake build and install dirs are so there's
-        # a common subdirectory for all build-related directories.
-        # Example:
-        # Replaces
-        #   build/lib.macosx-10.14-x86_64-3.7' with
-        #   build/py3_mac_qt6_2_03/package-lib.macosx-10.14-x86_64-3.7'
-        # TODO: Do the same for bdist_dir / bdist_wheel. This will
-        # require moving the options to be computed in finalize_options.
-        if self.build_lib == self.build_platlib:
-            if OPTION["SHORTER_PATHS"]:
-                # Keep it shorter without the build_platlib suffix.
-                setup_tools_build_lib_dir = os.path.join(build_base,
-                                                         venv_prefix,
-                                                         build_name,
-                                                         "package")
-            else:
-                build_platlib = self.build_platlib
-                if build_platlib.startswith(build_base):
-                    build_platlib = os.path.basename(build_platlib)
-                setup_tools_build_lib_dir = os.path.join(build_base,
-                                                         venv_prefix,
-                                                         build_name,
-                                                         f"package-{build_platlib}")
-        self.build_lib = setup_tools_build_lib_dir
+        build_dir = os.path.join(script_dir, f"{prefix()}_build", f"{build_name}")
+        install_dir = os.path.join(script_dir, f"{prefix()}_install", f"{build_name}")
 
         self.make_path = make_path
         self.make_generator = make_generator
@@ -660,14 +639,14 @@ class PysideBuild(_build, DistUtilsCommandMixin):
         log.info(dedent(f"""
         Building {config.package_name()} will create and touch directories
           in the following order:
-            make build directory ->
-            make install directory ->
-            setuptools build directory ->
+            make build directory (py*_build/*/*) ->
+            make install directory (py*_install/*/*) ->
+            setuptools build directory (build/*/*) ->
             setuptools install directory
               (usually path-installed-python/lib/python*/site-packages/*)
          """))
-        log.info(f"make build directory:         {self.build_dir}")
-        log.info(f"make install directory:       {self.install_dir}")
+        log.info(f"make build directory:   {self.build_dir}")
+        log.info(f"make install directory: {self.install_dir}")
         log.info(f"setuptools build directory:   {self.st_build_dir}")
         log.info(f"setuptools install directory: {setuptools_install_prefix}")
         log.info(dedent(f"""
@@ -1013,19 +992,6 @@ class PysideBuild(_build, DistUtilsCommandMixin):
                 vars['cmake_package_name'] = config.shiboken_module_option_name
 
             os.chdir(self.script_dir)
-
-            # Clean up the previous st_build_dir before files are copied
-            # into it again. That's the because the same dir is used
-            # when copying the files for each of the sub-projects and
-            # we don't want to accidentally install shiboken files
-            # as part of pyside-tools package.
-            if os.path.isdir(self.st_build_dir):
-                log.info(f"Removing {self.st_build_dir}")
-                try:
-                    rmtree(self.st_build_dir)
-                except Exception as e:
-                    log.warn(f'***** problem removing "{self.st_build_dir}"')
-                    log.warn(f'ignored error: {e}')
 
             if sys.platform == "win32":
                 vars['dbg_postfix'] = OPTION["DEBUG"] and "_d" or ""
