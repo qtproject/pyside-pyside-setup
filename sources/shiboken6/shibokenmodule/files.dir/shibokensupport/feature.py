@@ -159,6 +159,7 @@ def __init__():
         # Initialize all prior imported modules
         for name in sys.modules:
             pyside_feature_dict.setdefault(name, -1)
+        _is_initialized = True
 
 
 def set_selection(select_id, mod_name=None):
