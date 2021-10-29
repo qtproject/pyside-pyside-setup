@@ -499,10 +499,17 @@ static PyObject *methodWithNewName(PyTypeObject *type,
 
 static bool feature_01_addLowerNames(PyTypeObject *type, PyObject *prev_dict, int id)
 {
+    PyMethodDef *meth = type->tp_methods;
+    PyObject *lower_dict = type->tp_dict;
+
+    // PYSIDE-1702: A user-defined class in Python has no internal method list.
+    //              We are not going to change anything.
+    if (!meth)
+        return PyDict_Update(lower_dict, prev_dict) >= 0;
+
     /*
      * Add objects with lower names to `type->tp_dict` from 'prev_dict`.
      */
-    PyObject *lower_dict = type->tp_dict;
     PyObject *key, *value;
     Py_ssize_t pos = 0;
 
@@ -515,11 +522,9 @@ static bool feature_01_addLowerNames(PyTypeObject *type, PyObject *prev_dict, in
             continue;
         }
     }
+
     // Then we walk over the tp_methods to get all methods and insert
     // them with changed names.
-    PyMethodDef *meth = type->tp_methods;
-    if (!meth)
-        return true;
 
     for (; meth != nullptr && meth->ml_name != nullptr; ++meth) {
         const char *name = String::toCString(String::getSnakeCaseName(meth->ml_name, true));
@@ -648,10 +653,17 @@ static bool feature_02_true_property(PyTypeObject *type, PyObject *prev_dict, in
      * Use the property info to create true Python property objects.
      */
 
-    // The empty `tp_dict` gets populated by the previous dict.
+    PyMethodDef *meth = type->tp_methods;
     PyObject *prop_dict = type->tp_dict;
+
+    // The empty `tp_dict` gets populated by the previous dict.
     if (PyDict_Update(prop_dict, prev_dict) < 0)
         return false;
+
+    // PYSIDE-1702: A user-defined class in Python has no internal method list.
+    //              We are not going to change anything.
+    if (!meth)
+        return true;
 
     // For speed, we establish a helper dict that maps the removed property
     // method names to property name.

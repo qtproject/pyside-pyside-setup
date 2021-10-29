@@ -67,7 +67,7 @@ class Window(QWidget):
 class FeatureTest(unittest.TestCase):
     def setUp(self):
         qApp or QApplication()
-        __feature__.set_selection(0)
+        __feature__.set_selection(0x80)     # FIXME: 0 is insecure
 
     def tearDown(self):
         __feature__.set_selection(0)
@@ -121,6 +121,34 @@ class FeatureTest(unittest.TestCase):
         # make sure values are equal
         self.assertEqual(qApp.quit_on_last_window_closed,
                          QApplication.quit_on_last_window_closed)
+
+    def testUserClassNotAffected(self):
+        FunctionType = type(lambda: 42)
+        # Note: the types module does not have MethodDescriptorType in low versions.
+        MethodDescriptorType = type(str.split)
+
+        class UserClass(QWidget):
+
+            def someFunc1(self):
+                pass
+
+            @staticmethod
+            def someFunc2(a, b):
+                pass
+
+        inspect = UserClass.__dict__
+        self.assertTrue(isinstance(inspect["someFunc1"], FunctionType))
+        self.assertTrue(isinstance(inspect["someFunc2"], staticmethod))
+        self.assertTrue(isinstance(UserClass.someFunc2, FunctionType))
+        self.assertTrue(isinstance(UserClass.addAction, MethodDescriptorType))
+
+        from __feature__ import snake_case
+
+        inspect = UserClass.__dict__
+        self.assertTrue(isinstance(inspect["someFunc1"], FunctionType))
+        self.assertTrue(isinstance(inspect["someFunc2"], staticmethod))
+        self.assertTrue(isinstance(UserClass.someFunc2, FunctionType))
+        self.assertTrue(isinstance(UserClass.add_action, MethodDescriptorType))
 
 
 if __name__ == '__main__':
