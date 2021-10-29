@@ -79,25 +79,6 @@ static QString resolveEnumValueScopePrefix(const AbstractMetaEnum &metaEnum,
     return resolveScopePrefixHelper(parts, value);
 }
 
-// Return the scope for fully qualifying an enumeration value from
-// an unknown enum in the class scope including trailing "::".
-QString AbstractMetaBuilder::searchForEnumScope(const AbstractMetaClass *metaClass,
-                                                QStringView value)
-{
-    if (!metaClass)
-        return QString();
-    for (const AbstractMetaEnum &metaEnum : metaClass->enums()) {
-        auto v = metaEnum.findEnumValue(value);
-        if (v.has_value())
-            return resolveEnumValueScopePrefix(metaEnum, value);
-    }
-    // PYSIDE-331: We need to also search the base classes.
-    QString ret = searchForEnumScope(metaClass->enclosingClass(), value);
-    if (ret.isEmpty())
-        ret = searchForEnumScope(metaClass->baseClass(), value);
-    return ret;
-}
-
 static bool isQualifiedCppIdentifier(QStringView e)
 {
     return !e.isEmpty() && e.at(0).isLetter()

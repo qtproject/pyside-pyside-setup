@@ -109,8 +109,6 @@ public:
 
     static QString resolveScopePrefix(const AbstractMetaClass *scope,
                                       QStringView value);
-    static QString searchForEnumScope(const AbstractMetaClass *metaClass,
-                                      QStringView value);
 
     static bool dontFixDefaultValue(QStringView expr);
 
