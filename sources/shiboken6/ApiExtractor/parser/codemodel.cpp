@@ -700,6 +700,90 @@ EnumModelItem _ScopeModelItem::findEnum(const QString &name) const
     return findModelItem(m_enums, name);
 }
 
+_ScopeModelItem::FindEnumByValueReturn
+    _ScopeModelItem::findEnumByValueHelper(QStringView fullValue,
+                                       QStringView enumValue) const
+{
+    const bool unqualified = fullValue.size() == enumValue.size();
+    QString scopePrefix = scope().join(u"::");
+    if (!scopePrefix.isEmpty())
+        scopePrefix += u"::"_qs;
+    scopePrefix += name() + u"::"_qs;
+
+    for (const auto &e : m_enums) {
+        const auto index = e->indexOfValue(enumValue);
+        if (index != -1) {
+            QString fullyQualifiedName = scopePrefix;
+            if (e->enumKind() != AnonymousEnum)
+                fullyQualifiedName += e->name() + u"::"_qs;
+            fullyQualifiedName += e->enumerators().at(index)->name();
+            if (unqualified || fullyQualifiedName.endsWith(fullValue))
+                return {e, fullyQualifiedName};
+            // For standard enums, check the name without enum name
+            if (e->enumKind() == CEnum) {
+                const QString qualifiedName =
+                    scopePrefix + e->enumerators().at(index)->name();
+                if (qualifiedName.endsWith(fullValue))
+                    return {e, fullyQualifiedName};
+            }
+        }
+    }
+
+    return {};
+}
+
+// Helper to recursively find the scope of an enum value
+_ScopeModelItem::FindEnumByValueReturn
+    _ScopeModelItem::findEnumByValueRecursion(const _ScopeModelItem *scope,
+                                              QStringView fullValue,
+                                              QStringView enumValue,
+                                              bool searchSiblingNamespaces)
+{
+    if (const auto e = scope->findEnumByValueHelper(fullValue, enumValue))
+        return e;
+
+    if (auto *enclosingScope = scope->enclosingScope()) {
+        // The enclosing scope may have several sibling namespaces of that name.
+        if (searchSiblingNamespaces && scope->kind() == Kind_Namespace) {
+            if (auto *enclosingNamespace = dynamic_cast<const _NamespaceModelItem *>(enclosingScope)) {
+                for (const auto &sibling : enclosingNamespace->namespaces()) {
+                    if (sibling.data() != scope && sibling->name() == scope->name()) {
+                        if (const auto e = findEnumByValueRecursion(sibling.data(),
+                                                                    fullValue, enumValue, false)) {
+                            return e;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (const auto e = findEnumByValueRecursion(enclosingScope, fullValue, enumValue))
+            return e;
+    }
+
+    // PYSIDE-331: We need to also search the base classes.
+    if (auto *classItem = dynamic_cast<const _ClassModelItem *>(scope)) {
+        for (const auto &base : classItem->baseClasses()) {
+            if (!base.klass.isNull()) {
+                auto *c = base.klass.data();
+                if (const auto e = findEnumByValueRecursion(c, fullValue, enumValue))
+                    return e;
+            }
+        }
+    }
+
+    return {};
+}
+
+_ScopeModelItem::FindEnumByValueReturn
+   _ScopeModelItem::findEnumByValue(QStringView value) const
+{
+    const auto lastQualifier = value.lastIndexOf(u"::");
+    const auto enumValue = lastQualifier == -1
+                           ? value : value.mid(lastQualifier + 2);
+    return findEnumByValueRecursion(this, value, enumValue);
+}
+
 FunctionList _ScopeModelItem::findFunctions(const QString &name) const
 {
     FunctionList result;
@@ -1183,6 +1267,15 @@ EnumeratorList _EnumModelItem::enumerators() const
 void _EnumModelItem::addEnumerator(const EnumeratorModelItem &item)
 {
     m_enumerators.append(item);
+}
+
+qsizetype _EnumModelItem::indexOfValue(QStringView value) const
+{
+    for (qsizetype i = 0, size = m_enumerators.size(); i < size; ++i) {
+        if (m_enumerators.at(i)->name() == value)
+            return i;
+    }
+    return -1;
 }
 
 bool _EnumModelItem::isSigned() const

@@ -205,7 +205,7 @@ public:
     ~_ScopeModelItem();
 
     ClassList classes() const { return m_classes; }
-    EnumList enums() const { return m_enums; }
+    const EnumList &enums() const { return m_enums; }
     inline const FunctionList &functions() const { return m_functions; }
     TypeDefList typeDefs() const { return m_typeDefs; }
     TemplateTypeAliasList templateTypeAliases() const { return m_templateTypeAliases; }
@@ -220,6 +220,16 @@ public:
 
     ClassModelItem findClass(const QString &name) const;
     EnumModelItem findEnum(const QString &name) const;
+
+    struct FindEnumByValueReturn
+    {
+        operator bool() const { return !item.isNull(); }
+
+        EnumModelItem item;
+        QString qualifiedName;
+    };
+    FindEnumByValueReturn findEnumByValue(QStringView value) const;
+
     FunctionList findFunctions(const QString &name) const;
     TypeDefModelItem findTypeDef(const QString &name) const;
     TemplateTypeAliasModelItem findTemplateTypeAlias(const QString &name) const;
@@ -251,6 +261,13 @@ protected:
 
 private:
     qsizetype indexOfEnum(const QString &name) const;
+
+    FindEnumByValueReturn findEnumByValueHelper(QStringView fullValue,
+                                                QStringView value) const;
+    static FindEnumByValueReturn
+        findEnumByValueRecursion(const _ScopeModelItem *scope,
+                                 QStringView fullValue, QStringView value,
+                                 bool searchSiblingNamespaces = true);
 
     ClassList m_classes;
     EnumList m_enums;
@@ -288,7 +305,7 @@ public:
         : _ScopeModelItem(model, name, kind), m_classType(CodeModel::Class) {}
     ~_ClassModelItem();
 
-    QList<BaseClass> baseClasses() const { return m_baseClasses; }
+    const QList<BaseClass> &baseClasses() const { return m_baseClasses; }
 
     const QList<UsingMember> &usingMembers() const;
     void addUsingMember(const QString &className, const QString &memberName,
@@ -635,6 +652,8 @@ public:
 
     EnumKind enumKind() const { return m_enumKind; }
     void setEnumKind(EnumKind kind) { m_enumKind = kind; }
+
+    qsizetype indexOfValue(QStringView value) const;
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const override;
