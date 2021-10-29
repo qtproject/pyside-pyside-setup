@@ -256,6 +256,16 @@ SourceLocation _CodeModelItem::sourceLocation() const
     return SourceLocation(m_fileName, m_startLine);
 }
 
+const _ScopeModelItem *_CodeModelItem::enclosingScope() const
+{
+    return m_enclosingScope;
+}
+
+void _CodeModelItem::setEnclosingScope(const _ScopeModelItem *s)
+{
+    m_enclosingScope = s;
+}
+
 #ifndef QT_NO_DEBUG_STREAM
 template <class It>
 void formatSequence(QDebug &d, It i1, It i2, const char *separator=", ")
@@ -484,26 +494,31 @@ void _ScopeModelItem::addEnumsDeclaration(const QString &enumsDeclaration)
 void _ScopeModelItem::addClass(const ClassModelItem &item)
 {
     m_classes.append(item);
+    item->setEnclosingScope(this);
 }
 
 void _ScopeModelItem::addFunction(const FunctionModelItem &item)
 {
     m_functions.append(item);
+    item->setEnclosingScope(this);
 }
 
 void _ScopeModelItem::addVariable(const VariableModelItem &item)
 {
     m_variables.append(item);
+    item->setEnclosingScope(this);
 }
 
 void _ScopeModelItem::addTypeDef(const TypeDefModelItem &item)
 {
     m_typeDefs.append(item);
+    item->setEnclosingScope(this);
 }
 
 void _ScopeModelItem::addTemplateTypeAlias(const TemplateTypeAliasModelItem &item)
 {
     m_templateTypeAliases.append(item);
+    item->setEnclosingScope(this);
 }
 
 qsizetype _ScopeModelItem::indexOfEnum(const QString &name) const
@@ -517,6 +532,7 @@ qsizetype _ScopeModelItem::indexOfEnum(const QString &name) const
 
 void _ScopeModelItem::addEnum(const EnumModelItem &item)
 {
+    item->setEnclosingScope(this);
     // A forward declaration of an enum ("enum class Foo;") is undistinguishable
     // from an enum without values ("enum class QCborTag {}"), so, add all
     // enums and replace existing ones without values by ones with values.
@@ -701,6 +717,7 @@ _NamespaceModelItem::~_NamespaceModelItem()
 
 void _NamespaceModelItem::addNamespace(NamespaceModelItem item)
 {
+    item->setEnclosingScope(this);
     m_namespaces.append(item);
 }
 

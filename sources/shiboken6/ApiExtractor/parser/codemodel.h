@@ -42,6 +42,7 @@
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 #include <QtCore/QList>
+#include <QtCore/QWeakPointer>
 
 #include <optional>
 
@@ -167,6 +168,9 @@ public:
 
     inline CodeModel *model() const { return m_model; }
 
+    const _ScopeModelItem *enclosingScope() const;
+    void setEnclosingScope(const _ScopeModelItem *s);
+
 #ifndef QT_NO_DEBUG_STREAM
     static void formatKind(QDebug &d, int k);
     virtual void formatDebug(QDebug &d) const;
@@ -178,6 +182,7 @@ protected:
 
 private:
     CodeModel *m_model;
+    const _ScopeModelItem *m_enclosingScope = nullptr;
     int m_kind;
     int m_startLine;
     int m_startColumn;
