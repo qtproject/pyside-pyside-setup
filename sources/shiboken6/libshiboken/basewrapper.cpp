@@ -255,13 +255,12 @@ static const char *SbkObject_SignatureStrings[] = {
 
 PyTypeObject *SbkObject_TypeF(void)
 {
-    static auto *type = SbkType_FromSpec_BMDWBD(&SbkObject_Type_spec,
-                                                nullptr,     // bases
-                                                SbkObjectType_TypeF(),
-                                                offsetof(SbkObject, ob_dict),
-                                                offsetof(SbkObject, weakreflist),
-                                                nullptr,     // bufferprocs
-                                                nullptr);    // add to tp_dict
+    static auto *type = SbkType_FromSpec_BMDWB(&SbkObject_Type_spec,
+                                               nullptr,     // bases
+                                               SbkObjectType_TypeF(),
+                                               offsetof(SbkObject, ob_dict),
+                                               offsetof(SbkObject, weakreflist),
+                                               nullptr);    // bufferprocs
     return type;
 }
 

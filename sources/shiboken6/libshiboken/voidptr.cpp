@@ -318,10 +318,9 @@ static PyType_Spec SbkVoidPtrType_spec = {
 
 PyTypeObject *SbkVoidPtrTypeF(void)
 {
-    static PyTypeObject *type = SbkType_FromSpec_BMDWBD(&SbkVoidPtrType_spec,
-                                                        nullptr, nullptr, 0, 0,
-                                                        &SbkVoidPtrObjectBufferProc,
-                                                        nullptr);
+    static PyTypeObject *type = SbkType_FromSpec_BMDWB(&SbkVoidPtrType_spec,
+                                                       nullptr, nullptr, 0, 0,
+                                                       &SbkVoidPtrObjectBufferProc);
     return type;
 }
 
