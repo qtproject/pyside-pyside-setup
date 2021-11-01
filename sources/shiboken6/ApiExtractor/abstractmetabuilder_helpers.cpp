@@ -213,5 +213,6 @@ bool AbstractMetaBuilder::dontFixDefaultValue(QStringView expr)
         || expr == u"NULL" || expr == u"true" || expr == u"false"
         || (expr.startsWith(u'{') && expr.startsWith(u'}')) // initializer list
         || (expr.startsWith(u'[') && expr.startsWith(u']')) // array
+        || expr.startsWith(u"Qt::") // Qt namespace constant
         || isIntegerConstant(expr) || isFloatConstant(expr);
 }
