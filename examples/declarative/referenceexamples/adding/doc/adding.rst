@@ -1,3 +1,5 @@
+.. _qml-adding-types-example:
+
 Extending QML - Adding Types Example
 ====================================
 
