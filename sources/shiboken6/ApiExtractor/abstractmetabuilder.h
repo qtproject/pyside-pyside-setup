@@ -119,6 +119,7 @@ public:
                             const AbstractMetaClass *) const;
     QString fixEnumDefault(const AbstractMetaType &type, const QString &expr) const;
 
+    static void setCodeModelTestMode(bool b);
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const;

@@ -74,6 +74,7 @@ static void fixArgumentIndexes(AbstractMetaArgumentList *list)
 }
 
 bool AbstractMetaBuilderPrivate::m_useGlobalHeader = false;
+bool AbstractMetaBuilderPrivate::m_codeModelTestMode = false;
 
 AbstractMetaBuilderPrivate::AbstractMetaBuilderPrivate() :
     m_logDirectory(QLatin1String(".") + QDir::separator())
@@ -646,9 +647,12 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
             throw Exception(errorMessage);
     }
 
-    m_itemToClass.clear();
-    m_classToItem.clear();
-    m_typeSystemTypeDefs.clear();
+    if (!m_codeModelTestMode) {
+        m_itemToClass.clear();
+        m_classToItem.clear();
+        m_typeSystemTypeDefs.clear();
+        m_scopes.clear();
+    }
 
     ReportHandler::endProgress();
 }
@@ -2547,6 +2551,11 @@ QString AbstractMetaBuilder::fixEnumDefault(const AbstractMetaType &type,
                                             const QString &expr) const
 {
     return d->fixEnumDefault(type, expr);
+}
+
+void AbstractMetaBuilder::setCodeModelTestMode(bool b)
+{
+    AbstractMetaBuilderPrivate::m_codeModelTestMode = b;
 }
 
 // see TestResolveType::testFixDefaultArguments()

@@ -220,6 +220,7 @@ public:
     QList<TypeClassEntry> m_typeSystemTypeDefs; // look up metatype->class for type system typedefs
     bool m_skipDeprecated = false;
     static bool m_useGlobalHeader;
+    static bool m_codeModelTestMode;
 };
 
 #endif // ABSTRACTMETBUILDER_P_H
