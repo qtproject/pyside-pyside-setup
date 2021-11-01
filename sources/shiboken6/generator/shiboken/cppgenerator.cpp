@@ -3391,7 +3391,7 @@ void CppGenerator::writeNamedArgumentResolution(TextStream &s, const AbstractMet
     {
         Indentation indent(s);
         s << "PyObject *value{};\n"
-            << "PyObject *kwds_dup = PyDict_Copy(kwds);\n";
+            << "Shiboken::AutoDecRef kwds_dup(PyDict_Copy(kwds));\n";
         for (const AbstractMetaArgument &arg : args) {
             const int pyArgIndex = arg.argumentIndex()
                 - OverloadData::numberOfRemovedArguments(func, arg.argumentIndex());
@@ -3433,7 +3433,7 @@ void CppGenerator::writeNamedArgumentResolution(TextStream &s, const AbstractMet
         s << "if (PyDict_Size(kwds_dup) > 0) {\n";
         {
             Indentation indent(s);
-            s << "errInfo.reset(kwds_dup);\n";
+            s << "errInfo.reset(kwds_dup.release());\n";
             if (!(func->isConstructor() && func->ownerClass()->isQObject()))
                 s << "goto " << cpythonFunctionName(func) << "_TypeError;\n";
             else
