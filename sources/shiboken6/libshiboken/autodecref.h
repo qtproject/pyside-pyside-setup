@@ -106,6 +106,14 @@ public:
         m_pyObj = other;
         Py_XDECREF(_py_tmp);
     }
+
+    PyObject *release()
+    {
+        PyObject *result = m_pyObj;
+        m_pyObj = nullptr;
+        return result;
+    }
+
 private:
     PyObject *m_pyObj;
 };
