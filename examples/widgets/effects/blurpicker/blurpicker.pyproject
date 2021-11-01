@@ -1,0 +1,16 @@
+{
+    "files": [
+        "blurpicker.py",
+        "blureffect.py",
+        "images/accessories-calculator.png",
+        "images/accessories-text-editor.png",
+        "images/background.jpg",
+        "images/help-browser.png",
+        "images/internet-group-chat.png",
+        "images/internet-mail.png",
+        "images/internet-web-browser.png",
+        "images/office-calendar.png",
+        "images/README.txt",
+        "images/system-users.png",
+    ]
+}
