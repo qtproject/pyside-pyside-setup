@@ -48,12 +48,14 @@
 //     PyMethodDescr_Type
 //     PyCFunction_Type
 //     PyStaticMethod_Type
-//     PyType_Type
+//     (*) PyType_Type
 //     PyWrapperDescr_Type
 //
-// Their `tp_getset` fields are modified so support the `__signature__`
+// Their `tp_getset` fields are modified to support the `__signature__`
 // attribute and additions to the `__doc__` attribute.
 //
+// PYSIDE-535: PyType_Type patching is removed,
+//             Shiboken.ObjectType and Shiboken.EnumMeta have new getsets, instead.
 
 #include "autodecref.h"
 #include "sbkstring.h"
@@ -282,8 +284,6 @@ int PySide_PatchTypes(void)
         auto cf_doc = &old_cf_doc_descr;
         auto sm_gs = new_PyStaticMethod_getsets;
         auto sm_doc = &old_sm_doc_descr;
-        auto tp_gs = new_PyType_getsets;
-        auto tp_doc = &old_tp_doc_descr;
         auto wd_gs = new_PyWrapperDescr_getsets;
         auto wd_doc = &old_wd_doc_descr;
 
@@ -292,7 +292,6 @@ int PySide_PatchTypes(void)
             || add_more_getsets(PepMethodDescr_TypePtr,  md_gs, md_doc) < 0
             || add_more_getsets(&PyCFunction_Type,       cf_gs, cf_doc) < 0
             || add_more_getsets(PepStaticMethod_TypePtr, sm_gs, sm_doc) < 0
-            || add_more_getsets(&PyType_Type,            tp_gs, tp_doc) < 0
             || add_more_getsets(Py_TYPE(wrap_descr),     wd_gs, wd_doc) < 0
             )
             return -1;

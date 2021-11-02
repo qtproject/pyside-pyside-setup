@@ -264,12 +264,19 @@ static PyGetSetDef SbkEnumGetSetList[] = {
 static void SbkEnumTypeDealloc(PyObject *pyObj);
 static PyObject *SbkEnumTypeTpNew(PyTypeObject *metatype, PyObject *args, PyObject *kwds);
 
+static PyGetSetDef SbkEnumType_getsetlist[] = {
+    {const_cast<char *>("__signature__"), reinterpret_cast<getter>(Sbk_TypeGet___signature__),
+                                          nullptr, nullptr, nullptr},
+    {nullptr, nullptr, nullptr, nullptr, nullptr}  // Sentinel
+};
+
 static PyType_Slot SbkEnumType_Type_slots[] = {
     {Py_tp_dealloc, reinterpret_cast<void *>(SbkEnumTypeDealloc)},
     {Py_tp_base, reinterpret_cast<void *>(&PyType_Type)},
     {Py_tp_alloc, reinterpret_cast<void *>(PyType_GenericAlloc)},
     {Py_tp_new, reinterpret_cast<void *>(SbkEnumTypeTpNew)},
     {Py_tp_free, reinterpret_cast<void *>(PyObject_GC_Del)},
+    {Py_tp_getset, reinterpret_cast<void *>(SbkEnumType_getsetlist)},
     {0, nullptr}
 };
 static PyType_Spec SbkEnumType_Type_spec = {
@@ -614,7 +621,7 @@ static PyType_Spec SbkNewEnum_spec = {
 
 static PyTypeObject *SbkEnum_TypeF()
 {
-    static auto type = SbkType_FromSpec(&SbkNewEnum_spec);
+    static auto type = SbkType_FromSpecWithMeta(&SbkNewEnum_spec, SbkEnumType_TypeF());
     return type;
 }
 
