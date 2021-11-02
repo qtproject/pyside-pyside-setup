@@ -181,7 +181,8 @@ PyObject *slotCall(PyObject *self, PyObject *args, PyObject * /* kw */)
 namespace PySide::Slot {
 
 static const char *Slot_SignatureStrings[] = {
-    "PySide6.QtCore.Slot(self,*types:type,name:str=nullptr,result:str=nullptr)->typing.Callable[...,typing.Optional[str]]",
+    "PySide6.QtCore.Slot(self,*types:type,name:str=nullptr,result:str=nullptr)",
+    "PySide6.QtCore.Slot.__call__(self,function:typing.Callable)->typing.Any",
     nullptr}; // Sentinel
 
 void init(PyObject *module)

@@ -196,9 +196,11 @@ def find_imports(text):
 
 
 FROM_IMPORTS = [
+    (None, ["builtins"]),
+    (None, ["os"]),
+    ("enum", ["Enum"]),
     ("typing", typing.__all__),
     ("PySide6.QtCore", ["PyClassProperty"]),
-    (None, ["builtins"]),
     ]
 
 def filter_from_imports(from_struct, text):
