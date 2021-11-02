@@ -204,9 +204,11 @@ def find_imports(text):
 
 
 FROM_IMPORTS = [
-    ("typing", "Any Callable Dict List Optional overload Tuple Union".split()),
-    ("PySide6.QtCore", ["PyClassProperty"]),
     (None, ["builtins"]),
+    (None, ["os"]),
+    ("enum", ["Enum"]),
+    ("typing", typing.__all__),
+    ("PySide6.QtCore", ["PyClassProperty"]),
     ]
 
 def filter_from_imports(from_struct, text):

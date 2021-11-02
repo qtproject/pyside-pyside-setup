@@ -227,6 +227,7 @@ type_map.update({
     "char": int,
     "char*": str,
     "char*const": str,
+    "const char*": str,
     "double": float,
     "float": float,
     "int": int,
