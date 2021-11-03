@@ -218,7 +218,7 @@ static PyObject *_build_new_entry(PyObject *new_name, PyObject *value)
     PyObject *new_value = PyDict_Copy(value);
     PyObject *multi = PyDict_GetItem(value, PyName::multi());
     if (multi != nullptr && Py_TYPE(multi) == &PyList_Type) {
-        ssize_t len = PyList_Size(multi);
+        Py_ssize_t len = PyList_Size(multi);
         AutoDecRef list(PyList_New(len));
         if (list.isNull())
             return nullptr;
@@ -296,7 +296,7 @@ PyObject *_address_to_stringlist(PyObject *numkey)
      * When needed in `PySide_BuildSignatureProps`, the strings are
      * finally materialized.
      */
-    ssize_t address = PyNumber_AsSsize_t(numkey, PyExc_ValueError);
+    Py_ssize_t address = PyNumber_AsSsize_t(numkey, PyExc_ValueError);
     if (address == -1 && PyErr_Occurred())
         return nullptr;
     char **sig_strings = reinterpret_cast<char **>(address);
