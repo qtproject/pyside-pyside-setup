@@ -1166,14 +1166,14 @@
             <modify-argument index="1">
                 <remove-argument/>
                 <conversion-rule class="native">
-                int %out = PySequence_Size(%PYARG_1);
+                const auto %out = PySequence_Size(%PYARG_1);
                 </conversion-rule>
             </modify-argument>
             <modify-argument index="2">
                 <replace-type modified-type="PySequence" />
                 <conversion-rule class="native">
                 Shiboken::AutoArrayPointer&lt;Point&gt; %out(%1);
-                for (int i = 0; i &lt; %1; ++i)
+                for (Py_ssize_t i = 0; i &lt; %1; ++i)
                     %out[i] = %CONVERTTOCPP[Point](PySequence_Fast_GET_ITEM(%PYARG_1, i));
                 </conversion-rule>
             </modify-argument>
@@ -1617,15 +1617,15 @@
             <modify-argument index="1">
                 <remove-argument/>
                 <conversion-rule class="native">
-                  int %out = PySequence_Size(%PYARG_1);
+                  const auto %out = PySequence_Size(%PYARG_1);
                 </conversion-rule>
             </modify-argument>
             <modify-argument index="2">
                 <replace-type modified-type="PySequence"/>
                 <conversion-rule class="native">
-                int numItems = PySequence_Size(%PYARG_1);
+                const auto numItems = PySequence_Size(%PYARG_1);
                 Shiboken::AutoArrayPointer&lt;int&gt; %out(numItems);
-                for (int i = 0; i &lt; numItems; ++i) {
+                for (Py_ssize_t i = 0; i &lt; numItems; ++i) {
                     if (%CHECKTYPE[int](PySequence_Fast_GET_ITEM(%PYARG_1, i)))
                         %out[i] = %CONVERTTOCPP[int](PySequence_Fast_GET_ITEM(%PYARG_1, i));
                     else if (%ISCONVERTIBLE[int](PySequence_Fast_GET_ITEM(%PYARG_1, i)))
