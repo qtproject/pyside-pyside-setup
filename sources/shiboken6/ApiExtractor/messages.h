@@ -211,7 +211,8 @@ QString msgCannotFindView(const QString &viewedName, const QString &name);
 QString msgCannotFindSnippet(const QString &file, const QString &snippetLabel);
 
 QString msgCyclicDependency(const QString &funcName, const QString &graphName,
-                            const QList<const AbstractMetaFunction *> &involvedConversions);
+                            const AbstractMetaFunctionCList &cyclic,
+                            const AbstractMetaFunctionCList &involvedConversions);
 
 QString msgClassNotFound(const TypeEntry *t);
 

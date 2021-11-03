@@ -639,13 +639,16 @@ QString msgInvalidVersion(const QString &package, const QString &version)
 }
 
 QString msgCyclicDependency(const QString &funcName, const QString &graphName,
-                            const QList<const AbstractMetaFunction *> &involvedConversions)
+                            const AbstractMetaFunctionCList &cyclic,
+                            const AbstractMetaFunctionCList &involvedConversions)
 {
     QString result;
     QTextStream str(&result);
     str << "Cyclic dependency found on overloaddata for \"" << funcName
-         << "\" method! The graph boy saved the graph at \""
-         << QDir::toNativeSeparators(graphName) << "\".";
+         << "\" method! The graph boy saved the graph at \"" << QDir::toNativeSeparators(graphName)
+         << "\". Cyclic functions:";
+    for (const auto &c : cyclic)
+        str << ' ' << c->signature();
     if (const int count = involvedConversions.size()) {
         str << " Implicit conversions (" << count << "): ";
         for (int i = 0; i < count; ++i) {
