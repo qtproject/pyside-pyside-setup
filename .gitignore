@@ -71,7 +71,7 @@ __pycache__/
 .Python
 build/
 develop-eggs/
-#dist/ # we place the changelogs here
+dist/
 downloads/
 eggs/
 .eggs/
