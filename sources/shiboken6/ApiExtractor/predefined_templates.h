@@ -42,4 +42,11 @@ using PredefinedTemplates = QList<PredefinedTemplate>;
 
 const PredefinedTemplates &predefinedTemplates();
 
+// Create an XML snippet for a container type.
+QByteArray containerTypeSystemSnippet(const char *name, const char *type,
+                                      const char *include,
+                                      const char *nativeToTarget,
+                                      const char *targetToNativeType,
+                                      const char *targetToNative);
+
 #endif // PREDEFINED_TEMPLATES_H

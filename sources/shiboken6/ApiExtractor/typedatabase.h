@@ -225,6 +225,7 @@ private:
                                           const QString &rootPackage,
                                           CustomTypeEntry *targetLang);
     void addBuiltInPrimitiveTypes();
+    void addBuiltInContainerTypes();
     TypeEntryMultiMapConstIteratorRange findTypeRange(const QString &name) const;
     template <class Predicate>
     TypeEntries findTypesHelper(const QString &name, Predicate pred) const;

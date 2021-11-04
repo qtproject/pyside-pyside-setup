@@ -369,19 +369,6 @@
     }
     return %out;
     </template>
-    <container-type name="std::list" type="list">
-        <include file-name="list" location="global"/>
-        <conversion-rule>
-            <native-to-target>
-                <insert-template name="shiboken_conversion_cppsequence_to_pylist"/>
-            </native-to-target>
-            <target-to-native>
-                <add-conversion type="PySequence">
-                    <insert-template name="shiboken_conversion_pyiterable_to_cppsequentialcontainer"/>
-                </add-conversion>
-            </target-to-native>
-        </conversion-rule>
-    </container-type>
     <container-type name="List" type="list">
         <include file-name="list" location="global"/>
         <conversion-rule>
@@ -395,20 +382,6 @@
             </target-to-native>
         </conversion-rule>
     </container-type>
-    <container-type name="std::map" type="map">
-        <include file-name="map" location="global"/>
-        <conversion-rule>
-            <native-to-target>
-                <insert-template name="shiboken_conversion_stdmap_to_pydict"/>
-            </native-to-target>
-            <target-to-native>
-                <add-conversion type="PyDict">
-                    <insert-template name="shiboken_conversion_pydict_to_stdmap"/>
-                </add-conversion>
-            </target-to-native>
-        </conversion-rule>
-    </container-type>
-
     <add-function signature="cacheSize()" return-type="int">
         <inject-code class="target">
         %RETURN_TYPE %0 = Shiboken::BindingManager::instance().getAllPyObjects().size();

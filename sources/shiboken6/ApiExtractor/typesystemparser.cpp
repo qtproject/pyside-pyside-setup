@@ -1891,6 +1891,13 @@ TypeSystemTypeEntry *TypeSystemParser::parseRootElement(const ConditionalStreamR
         }
     }
 
+    if (m_defaultPackage.isEmpty()) { // Extending default, see addBuiltInContainerTypes()
+        auto *moduleEntry = const_cast<TypeSystemTypeEntry *>(m_database->defaultTypeSystemType());
+        Q_ASSERT(moduleEntry);
+        m_defaultPackage = moduleEntry->name();
+        return moduleEntry;
+    }
+
     auto *moduleEntry =
         const_cast<TypeSystemTypeEntry *>(m_database->findTypeSystemType(m_defaultPackage));
     const bool add = moduleEntry == nullptr;

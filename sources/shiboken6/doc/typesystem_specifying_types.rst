@@ -480,6 +480,10 @@ container-type
     See :ref:`predefined_templates` for built-in templates for standard type
     conversion rules.
 
+    Some common standard containers (``std::list``, ``std::vector``, ``std::pair``,
+    ``std::map`` and ``std::unordered_map``) are built-in. They only need to be
+    specified if :ref:`opaque-containers` should be generated.
+
 .. _typedef-type:
 
 typedef-type

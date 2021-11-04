@@ -28,11 +28,13 @@
 
 #include "typedatabase.h"
 #include "abstractmetatype.h"
+#include "exception.h"
 #include "typesystem.h"
 #include "typesystemparser.h"
 #include "conditionalstreamreader.h"
 #include "predefined_templates.h"
 
+#include <QtCore/QBuffer>
 #include <QtCore/QFile>
 #include <QtCore/QDebug>
 #include <QtCore/QDir>
@@ -712,6 +714,59 @@ QString TypeDatabase::modifiedTypesystemFilepath(const QString& tsFile, const QS
     return tsFile;
 }
 
+void TypeDatabase::addBuiltInContainerTypes()
+{
+    // Unless the user has added the standard containers (potentially with
+    // some opaque types), add them by default.
+    const bool hasStdPair = findType(u"std::pair"_qs) != nullptr;
+    const bool hasStdList = findType(u"std::list"_qs) != nullptr;
+    const bool hasStdVector = findType(u"std::vector"_qs) != nullptr;
+    const bool hasStdMap = findType(u"std::map"_qs) != nullptr;
+    const bool hasStdUnorderedMap = findType(u"std::unordered_map"_qs) != nullptr;
+
+    if (hasStdPair && hasStdList && hasStdVector && hasStdMap && hasStdUnorderedMap)
+        return;
+
+    QByteArray ts = R"(<?xml version="1.0" encoding="UTF-8"?><typesystem>)";
+    if (!hasStdPair) {
+        ts += containerTypeSystemSnippet(
+                  "std::pair", "pair", "utility",
+                  "shiboken_conversion_cpppair_to_pytuple",
+                  "PySequence", "shiboken_conversion_pysequence_to_cpppair");
+    }
+    if (!hasStdList) {
+        ts += containerTypeSystemSnippet(
+                  "std::list", "list", "list",
+                  "shiboken_conversion_cppsequence_to_pylist",
+                  "PySequence",
+                  "shiboken_conversion_pyiterable_to_cppsequentialcontainer");
+    }
+    if (!hasStdVector) {
+        ts += containerTypeSystemSnippet(
+                  "std::vector", "list", "vector",
+                  "shiboken_conversion_cppsequence_to_pylist",
+                  "PySequence",
+                  "shiboken_conversion_pyiterable_to_cppsequentialcontainer_reserve");
+    }
+    if (!hasStdMap) {
+        ts += containerTypeSystemSnippet(
+                  "std::map", "map", "map",
+                  "shiboken_conversion_stdmap_to_pydict",
+                  "PyDict", "shiboken_conversion_pydict_to_stdmap");
+    }
+    if (!hasStdUnorderedMap) {
+        ts += containerTypeSystemSnippet(
+                  "std::unordered_map", "map", "unordered_map",
+                  "shiboken_conversion_stdmap_to_pydict",
+                  "PyDict", "shiboken_conversion_pydict_to_stdmap");
+    }
+    ts += "</typesystem>";
+    QBuffer buffer(&ts);
+    buffer.open(QIODevice::ReadOnly);
+    const bool ok = parseFile(&buffer, true);
+    Q_ASSERT(ok);
+}
+
 bool TypeDatabase::parseFile(const QString &filename, bool generate)
 {
     return parseFile(filename, QString(), generate);
@@ -764,8 +819,10 @@ bool TypeDatabase::parseFile(QIODevice* device, bool generate)
         return false;
     }
 
-    if (depth == 0)
+    if (depth == 0) {
         addBuiltInPrimitiveTypes();
+        addBuiltInContainerTypes();
+    }
 
     return result;
 }

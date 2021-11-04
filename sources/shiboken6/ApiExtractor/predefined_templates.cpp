@@ -245,3 +245,26 @@ return %out;)"_qs},
 
     return result;
 }
+
+QByteArray containerTypeSystemSnippet(const char *name, const char *type,
+                                      const char *include,
+                                      const char *nativeToTarget,
+                                      const char *targetToNativeType,
+                                      const char *targetToNative)
+{
+    return QByteArrayLiteral("<container-type name=\"")
+            + name + QByteArrayLiteral("\" type=\"") + type + R"(">
+    <include file-name=")" + include + R"(" location="global"/>
+    <conversion-rule>
+        <native-to-target>
+            <insert-template name=")" + nativeToTarget + R"("/>
+        </native-to-target>
+        <target-to-native>
+            <add-conversion type=")" + targetToNativeType + R"(">
+                <insert-template name=")" + targetToNative + R"("/>
+            </add-conversion>
+        </target-to-native>
+    </conversion-rule>
+</container-type>
+)";
+}
