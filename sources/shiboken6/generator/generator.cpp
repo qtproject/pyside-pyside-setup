@@ -196,8 +196,12 @@ bool Generator::setup(const ApiExtractorResult &api)
 {
     m_d->api = api;
     const auto moduleEntry = TypeDatabase::instance()->defaultTypeSystemType();
-    if (!moduleEntry || !moduleEntry->generateCode()) {
-        qCWarning(lcShiboken) << "Couldn't find the package name!!";
+    if (!moduleEntry) {
+        qCWarning(lcShiboken,"Couldn't find the package name!!");
+        return false;
+    }
+    if (!moduleEntry->generateCode()) {
+        qCWarning(lcShiboken, "Code generation of root typesystem is disabled!!");
         return false;
     }
 
