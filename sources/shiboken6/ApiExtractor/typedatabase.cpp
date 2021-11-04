@@ -739,14 +739,23 @@ bool TypeDatabase::parseFile(const QString &filename, const QString &currentPath
 
 bool TypeDatabase::parseFile(QIODevice* device, bool generate)
 {
+    static int depth = 0;
+
+    ++depth;
     ConditionalStreamReader reader(device);
     reader.setConditions(TypeDatabase::instance()->typesystemKeywords());
     TypeSystemParser handler(this, generate);
     const bool result = handler.parse(reader);
-    if (result)
-        addBuiltInPrimitiveTypes();
-    else
+    --depth;
+
+    if (!result) {
         qCWarning(lcShiboken, "%s", qPrintable(handler.errorString()));
+        return false;
+    }
+
+    if (depth == 0)
+        addBuiltInPrimitiveTypes();
+
     return result;
 }
 
