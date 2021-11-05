@@ -1,4 +1,4 @@
-_qml-object-and-list-property-types-example:
+.. _qml-object-and-list-property-types-example:
 
 Extending QML - Object and List Property Types Example
 ======================================================
