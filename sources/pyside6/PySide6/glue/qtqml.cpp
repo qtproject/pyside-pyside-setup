@@ -37,6 +37,11 @@
 **
 ****************************************************************************/
 
+// @snippet qmlerrror-repr
+const QByteArray message = %CPPSELF.toString().toUtf8();
+%PYARG_0 = Shiboken::String::fromCString(message.constData());
+// @snippet qmlerrror-repr
+
 // @snippet qmlregistertype
 int %0 = PySide::qmlRegisterType(%ARGUMENT_NAMES);
 %PYARG_0 = %CONVERTTOPYTHON[int](%0);
