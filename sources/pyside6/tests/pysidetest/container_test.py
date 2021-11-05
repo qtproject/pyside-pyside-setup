@@ -45,6 +45,9 @@ EXPECTED_DICT = {1: ["v1"], 2: ["v2_1", "v2_2"],
                  4: ["v4_1", "v4_2"]}
 
 
+EXPECTED_LIST = [1, 2]
+
+
 def sort_values(m):
     """Sort value lists in dicts since passing through a QMultiMap changes the order"""
     result = {}
@@ -67,7 +70,22 @@ class ContainerTestTest(unittest.TestCase):
         m2 = ContainerTest.passThroughMultiHash(m1)
         self.assertEqual(sort_values(m2), EXPECTED_DICT)
 
+    def testList(self):
+        l1 = ContainerTest.createList();
+        self.assertEqual(l1, EXPECTED_LIST)
+        l2 = ContainerTest.passThroughList(l1)
+        self.assertEqual(l2, EXPECTED_LIST)
+
+    def testSet(self):
+        # FIXME PYSIDE 7: A PySet should be returned from QSet (currently PyList)
+        s1 = set(ContainerTest.createSet());  # Order is not predictable
+        s2 = set(ContainerTest.passThroughSet(s1))
+        self.assertEqual(sorted(list(s1)), sorted(list(s2)))
+
+        # Since lists are iterable, it should be possible to pass them to set API
+        l2 = ContainerTest.passThroughSet(EXPECTED_LIST)
+        self.assertEqual(sorted(l2), EXPECTED_LIST)
+
 
 if __name__ == '__main__':
     unittest.main()
-

@@ -309,11 +309,23 @@ LIBSHIBOKEN_API SbkConverter *primitiveTypeConverter(int index);
 /// Returns true if a Python sequence is comprised of objects of the given \p type.
 LIBSHIBOKEN_API bool checkSequenceTypes(PyTypeObject *type, PyObject *pyIn);
 
+/// Returns true if a Python type is iterable and comprised of objects of the
+/// given \p type.
+LIBSHIBOKEN_API bool checkIterableTypes(PyTypeObject *type, PyObject *pyIn);
+
 /// Returns true if a Python sequence is comprised of objects of a type convertible to the one represented by the given \p converter.
 LIBSHIBOKEN_API bool convertibleSequenceTypes(const SbkConverter *converter, PyObject *pyIn);
 
 /// Returns true if a Python sequence is comprised of objects of a type convertible to \p type.
 LIBSHIBOKEN_API bool convertibleSequenceTypes(PyTypeObject *type, PyObject *pyIn);
+
+/// Returns true if a Python type is iterable and comprised of objects of a
+/// type convertible to the one represented by the given \p converter.
+LIBSHIBOKEN_API bool convertibleIterableTypes(const SbkConverter *converter, PyObject *pyIn);
+
+/// Returns true if a Python type is iterable and comprised of objects of a
+/// type convertible to \p type.
+LIBSHIBOKEN_API bool convertibleIterableTypes(PyTypeObject *type, PyObject *pyIn);
 
 /// Returns true if a Python sequence can be converted to a C++ pair.
 LIBSHIBOKEN_API bool checkPairTypes(PyTypeObject *firstType, PyTypeObject *secondType, PyObject *pyIn);

@@ -934,16 +934,18 @@ QString ShibokenGenerator::cpythonCheckFunction(AbstractMetaType metaType) const
             static_cast<const ContainerTypeEntry *>(typeEntry)->containerKind();
         if (type == ContainerTypeEntry::ListContainer
             || type == ContainerTypeEntry::SetContainer) {
+            const QString containerType = type == ContainerTypeEntry::SetContainer
+                ? u"Iterable"_qs : u"Sequence"_qs;
             const AbstractMetaType &type = metaType.instantiations().constFirst();
             if (type.isPointerToWrapperType()) {
-                typeCheck += u"checkSequenceTypes("_qs + cpythonTypeNameExt(type) + u", "_qs;
+                typeCheck += u"check"_qs + containerType + u"Types("_qs
+                             + cpythonTypeNameExt(type) + u", "_qs;
             } else if (type.isWrapperType()) {
-                typeCheck += QLatin1String("convertibleSequenceTypes(");
-                typeCheck += cpythonTypeNameExt(type);
-                typeCheck += QLatin1String(", ");
+                typeCheck += u"convertible"_qs + containerType
+                             + u"Types("_qs + cpythonTypeNameExt(type) + u", "_qs;
             } else {
-                typeCheck += u"convertibleSequenceTypes("_qs + converterObject(type)
-                             + u", "_qs;
+                typeCheck += u"convertible"_qs + containerType
+                             + u"Types("_qs + converterObject(type) + u", "_qs;
             }
         } else if (type == ContainerTypeEntry::MapContainer
             || type == ContainerTypeEntry::MultiMapContainer

@@ -60,3 +60,23 @@ QMultiHash<int, QString> ContainerTest::passThroughMultiHash(const QMultiHash<in
 {
     return in;
 }
+
+QList<int> ContainerTest::createList()
+{
+    return {1, 2};
+}
+
+QList<int> ContainerTest::passThroughList(const QList<int> &list)
+{
+    return list;
+}
+
+QSet<int> ContainerTest::createSet()
+{
+    return {1, 2};
+}
+
+QSet<int> ContainerTest::passThroughSet(const QSet<int> &set)
+{
+    return set;
+}
