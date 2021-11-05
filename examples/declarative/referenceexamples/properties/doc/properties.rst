@@ -14,7 +14,7 @@ specified using the People QML type built in the previous example.
 
 import examples.properties.people
 
-.. code-block:: javascript:
+.. code-block:: javascript
 
     BirthdayParty {
         host: Person {
@@ -33,7 +33,7 @@ Declare the BirthdayParty
 
 The BirthdayParty class is declared like this:
 
-.. code-block:: python:
+.. code-block:: python
 
     from person import Person
 
