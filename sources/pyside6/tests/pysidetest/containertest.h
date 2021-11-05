@@ -31,9 +31,11 @@
 #include "pysidetest_macros.h"
 
 #include <QtCore/QObject>
+#include <QtCore/QList>
 #include <QtCore/QMap>
 #include <QtCore/QMultiMap>
 #include <QtCore/QMultiHash>
+#include <QtCore/QSet>
 #include <QtCore/QString>
 
 class PYSIDETEST_API ContainerTest
@@ -48,4 +50,10 @@ public:
     static QMultiHash<int, QString> createMultiHash();
 
     static QMultiHash<int, QString> passThroughMultiHash(const QMultiHash<int, QString> &in);
+
+    static QList<int> createList();
+    static QList<int> passThroughList(const QList<int> &list);
+
+    static QSet<int> createSet();
+    static QSet<int> passThroughSet(const QSet<int> &set);
 };

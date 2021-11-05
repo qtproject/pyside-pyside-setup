@@ -464,6 +464,27 @@ SbkConverter *primitiveTypeConverter(int index)
     return PrimitiveTypeConverters[index];
 }
 
+bool checkIterableTypes(PyTypeObject *type, PyObject *pyIn)
+{
+    Shiboken::AutoDecRef it(PyObject_GetIter(pyIn));
+    if (it.isNull()) {
+        PyErr_Clear();
+        return false;
+    }
+
+    while (true) {
+        Shiboken::AutoDecRef pyItem(PyIter_Next(it.object()));
+        if (pyItem.isNull()) {
+            if (PyErr_Occurred() && PyErr_ExceptionMatches(PyExc_StopIteration))
+                PyErr_Clear();
+            break;
+        }
+        if (!PyObject_TypeCheck(pyItem, type))
+            return false;
+    }
+    return true;
+}
+
 bool checkSequenceTypes(PyTypeObject *type, PyObject *pyIn)
 {
     assert(type);
@@ -480,6 +501,28 @@ bool checkSequenceTypes(PyTypeObject *type, PyObject *pyIn)
     }
     return true;
 }
+
+bool convertibleIterableTypes(const SbkConverter *converter, PyObject *pyIn)
+{
+    Shiboken::AutoDecRef it(PyObject_GetIter(pyIn));
+    if (it.isNull()) {
+        PyErr_Clear();
+        return false;
+    }
+
+    while (true) {
+        Shiboken::AutoDecRef pyItem(PyIter_Next(it.object()));
+        if (pyItem.isNull()) {
+            if (PyErr_Occurred() && PyErr_ExceptionMatches(PyExc_StopIteration))
+                PyErr_Clear();
+            break;
+        }
+        if (!isPythonToCppConvertible(converter, pyItem))
+            return false;
+    }
+    return true;
+}
+
 bool convertibleSequenceTypes(const SbkConverter *converter, PyObject *pyIn)
 {
     assert(converter);
@@ -498,6 +541,13 @@ bool convertibleSequenceTypes(PyTypeObject *type, PyObject *pyIn)
     assert(type);
     auto *sotp = PepType_SOTP(type);
     return convertibleSequenceTypes(sotp->converter, pyIn);
+}
+
+bool convertibleIterableTypes(PyTypeObject *type, PyObject *pyIn)
+{
+    assert(type);
+    auto *sotp = PepType_SOTP(type);
+    return convertibleIterableTypes(sotp->converter, pyIn);
 }
 
 bool checkPairTypes(PyTypeObject *firstType, PyTypeObject *secondType, PyObject *pyIn)
