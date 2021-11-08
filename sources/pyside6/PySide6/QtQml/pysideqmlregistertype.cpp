@@ -364,7 +364,16 @@ static int getGlobalInt(const char *name)
     return value;
 }
 
-PyObject *PySide::qmlElementMacro(PyObject *pyObj)
+enum class RegisterMode {
+    Normal,
+    Anonymous,
+    Uncreatable
+};
+
+static PyObject *qmlElementMacroHelper(PyObject *pyObj,
+                                       const char *decoratorName,
+                                       RegisterMode mode = RegisterMode::Normal,
+                                       const char *noCreationReason = nullptr)
 {
     if (!PyType_Check(pyObj)) {
         PyErr_Format(PyExc_TypeError, "This decorator can only be used on classes.");
@@ -372,8 +381,10 @@ PyObject *PySide::qmlElementMacro(PyObject *pyObj)
     }
 
     PyTypeObject *pyObjType = reinterpret_cast<PyTypeObject *>(pyObj);
+    const char *typeName = pyObjType->tp_name;
     if (!PySequence_Contains(pyObjType->tp_mro, reinterpret_cast<PyObject *>(qObjectType()))) {
-        PyErr_Format(PyExc_TypeError, "This decorator can only be used with classes inherited from QObject, got %s.", pyObjType->tp_name);
+        PyErr_Format(PyExc_TypeError, "This decorator can only be used with classes inherited from QObject, got %s.",
+                     typeName);
         return nullptr;
     }
 
@@ -382,12 +393,14 @@ PyObject *PySide::qmlElementMacro(PyObject *pyObj)
     int minorVersion = getGlobalInt("QML_IMPORT_MINOR_VERSION");
 
     if (importName.empty()) {
-        PyErr_Format(PyExc_TypeError, "You need specify QML_IMPORT_NAME in order to use QmlElement.");
+        PyErr_Format(PyExc_TypeError, "You need specify QML_IMPORT_NAME in order to use %s.",
+                     decoratorName);
         return nullptr;
     }
 
     if (majorVersion == -1) {
-       PyErr_Format(PyExc_TypeError, "You need specify QML_IMPORT_MAJOR_VERSION in order to use QmlElement.");
+       PyErr_Format(PyExc_TypeError, "You need specify QML_IMPORT_MAJOR_VERSION in order to use %s.",
+                    decoratorName);
        return nullptr;
     }
 
@@ -395,9 +408,23 @@ PyObject *PySide::qmlElementMacro(PyObject *pyObj)
     if (minorVersion == -1)
         minorVersion = 0;
 
-    if (qmlRegisterType(pyObj, importName.c_str(), majorVersion, minorVersion, pyObjType->tp_name) == -1) {
-       PyErr_Format(PyExc_TypeError, "Failed to register type %s.", pyObjType->tp_name);
+    if (PySide::qmlRegisterType(pyObj, importName.c_str(), majorVersion, minorVersion,
+                                mode != RegisterMode::Anonymous ? typeName : nullptr,
+                                noCreationReason,
+                                mode == RegisterMode::Normal) == -1) {
+       PyErr_Format(PyExc_TypeError, "Failed to register type %s.", typeName);
     }
 
     return pyObj;
+}
+
+PyObject *PySide::qmlElementMacro(PyObject *pyObj)
+{
+    return qmlElementMacroHelper(pyObj, "QmlElement");
+}
+
+PyObject *PySide::qmlAnonymousMacro(PyObject *pyObj)
+{
+    return qmlElementMacroHelper(pyObj, "QmlAnonymous",
+                                 RegisterMode::Anonymous);
 }
