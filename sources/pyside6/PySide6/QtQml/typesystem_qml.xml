@@ -57,6 +57,8 @@
 
     <inject-code class="native" position="beginning">
     #include "pysideqmlregistertype.h"
+    #include "pysideqmllistproperty.h"
+    #include "pysideqmlvolatilebool.h"
     </inject-code>
 
     <!-- This is to inform the generator that the VolatileBool python type exists -->
@@ -71,7 +73,7 @@
     <enum-type name="QQmlModuleImportSpecialVersions" since="6.0"/>
 
     <!-- expose QQmlIncubationController::incubateWhile() (see
-         QtQml_VolatileBoolTypeF/pysideqmlregistertype.h) -->
+         QtQml_VolatileBoolTypeF/pysideqmlvolatilebool.h) -->
     <namespace-type name="std" generate="no">
         <value-type name="atomic" generate="no"/>
     </namespace-type>
@@ -235,7 +237,7 @@
     </object-type>
     <object-type name="QQmlIncubationController">
         <extra-includes>
-            <include file-name="pysideqmlregistertype.h" location="local"/>
+            <include file-name="pysideqmlvolatilebool.h" location="local"/>
         </extra-includes>
         <modify-function signature="incubateWhile(std::atomic&lt;bool&gt;*,int)" allow-thread="yes">
             <modify-argument index="1">
