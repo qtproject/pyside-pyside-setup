@@ -344,8 +344,7 @@
     <include file-name="QSet" location="global"/>
     <conversion-rule>
         <native-to-target>
-            <!-- FIXME PYSIDE 7: shiboken_conversion_cppsequence_to_pyset -->
-            <insert-template name="shiboken_conversion_cppsequence_to_pylist"/>
+            <insert-template name="shiboken_conversion_cppsequence_to_pyset"/>
         </native-to-target>
         <target-to-native>
             <add-conversion type="PySequence">

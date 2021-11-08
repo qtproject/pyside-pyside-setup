@@ -77,14 +77,13 @@ class ContainerTestTest(unittest.TestCase):
         self.assertEqual(l2, EXPECTED_LIST)
 
     def testSet(self):
-        # FIXME PYSIDE 7: A PySet should be returned from QSet (currently PyList)
-        s1 = set(ContainerTest.createSet());  # Order is not predictable
-        s2 = set(ContainerTest.passThroughSet(s1))
+        s1 = ContainerTest.createSet();  # Order is not predictable
+        s2 = ContainerTest.passThroughSet(s1)
         self.assertEqual(sorted(list(s1)), sorted(list(s2)))
 
         # Since lists are iterable, it should be possible to pass them to set API
         l2 = ContainerTest.passThroughSet(EXPECTED_LIST)
-        self.assertEqual(sorted(l2), EXPECTED_LIST)
+        self.assertEqual(sorted(list(l2)), EXPECTED_LIST)
 
 
 if __name__ == '__main__':
