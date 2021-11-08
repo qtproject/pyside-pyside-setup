@@ -48,14 +48,6 @@ namespace PySide
 extern void *nextQmlElementMemoryAddr;
 
 /**
- * Init the QML support doing things like registering QtQml.ListProperty and create the necessary stuff for
- * qmlRegisterType.
- *
- * \param module QtQml python module
- */
-void initQmlSupport(PyObject *module);
-
-/**
  * PySide implementation of qmlRegisterType<T> function.
  *
  * \param pyObj Python type to be registered.
@@ -103,10 +95,6 @@ int qmlRegisterSingletonInstance(PyObject *pyObj, const char *uri, int versionMa
  * \param pyObj Python type to be registered
  */
 PyObject *qmlElementMacro(PyObject *pyObj);
-}
+} // namespace PySide
 
-PyTypeObject *QtQml_VolatileBoolTypeF(void);
-
-#define VolatileBool_Check(op) (Py_TYPE(op) == QtQml_VolatileBoolTypeF())
-
-#endif
+#endif // PYSIDEQMLREGISTERTYPE_H

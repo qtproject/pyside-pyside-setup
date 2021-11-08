@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2018 The Qt Company Ltd.
+** Copyright (C) 2021 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -37,51 +37,11 @@
 **
 ****************************************************************************/
 
-// @snippet qmlerrror-repr
-const QByteArray message = %CPPSELF.toString().toUtf8();
-%PYARG_0 = Shiboken::String::fromCString(message.constData());
-// @snippet qmlerrror-repr
+#ifndef PYSIDEQMLLISTPROPERTY_H
+#define PYSIDEQMLLISTPROPERTY_H
 
-// @snippet qmlregistertype
-int %0 = PySide::qmlRegisterType(%ARGUMENT_NAMES);
-%PYARG_0 = %CONVERTTOPYTHON[int](%0);
-// @snippet qmlregistertype
+#include <sbkpython.h>
 
-// @snippet qmlregistersingletontype_qobject_callback
-int %0 = PySide::qmlRegisterSingletonType(%ARGUMENT_NAMES, true, true);
-%PYARG_0 = %CONVERTTOPYTHON[int](%0);
-// @snippet qmlregistersingletontype_qobject_callback
+void initQtQmlListProperty(PyObject *module);
 
-// @snippet qmlregistersingletontype_qobject_nocallback
-int %0 = PySide::qmlRegisterSingletonType(%ARGUMENT_NAMES, nullptr, true, false);
-%PYARG_0 = %CONVERTTOPYTHON[int](%0);
-// @snippet qmlregistersingletontype_qobject_nocallback
-
-// @snippet qmlregistersingletontype_qjsvalue
-int %0 = PySide::qmlRegisterSingletonType(nullptr, %ARGUMENT_NAMES, false, true);
-%PYARG_0 = %CONVERTTOPYTHON[int](%0);
-// @snippet qmlregistersingletontype_qjsvalue
-
-// @snippet qmlregistersingletoninstance
-int %0 = PySide::qmlRegisterSingletonInstance(%ARGUMENT_NAMES);
-%PYARG_0 = %CONVERTTOPYTHON[int](%0);
-// @snippet qmlregistersingletoninstance
-
-// @snippet qmlregisteruncreatabletype
-int %0 = PySide::qmlRegisterType(%ARGUMENT_NAMES, false);
-%PYARG_0 = %CONVERTTOPYTHON[int](%0);
-// @snippet qmlregisteruncreatabletype
-
-// @snippet init
-initQtQmlListProperty(module);
-initQtQmlVolatileBool(module);
-// @snippet init
-
-// @snippet qjsengine-toscriptvalue
-%RETURN_TYPE retval = %CPPSELF.%FUNCTION_NAME(%1);
-return %CONVERTTOPYTHON[%RETURN_TYPE](retval);
-// @snippet qjsengine-toscriptvalue
-
-// @snippet qmlelement
-%PYARG_0 = PySide::qmlElementMacro(%ARGUMENT_NAMES);
-// @snippet qmlelement
+#endif // PYSIDEQMLLISTPROPERTY_H

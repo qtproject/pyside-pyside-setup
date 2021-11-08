@@ -38,27 +38,20 @@
 ****************************************************************************/
 
 #include "pysideqmlregistertype.h"
+#include "pysideqmlregistertype_p.h"
 
 #include <limits>
 
 // shiboken
 #include <shiboken.h>
-#include <signature.h>
+#include <sbkstring.h>
 
 // pyside
 #include <pyside.h>
 #include <pyside_p.h>
-#include <pysideproperty.h>
 
-// auto generated headers
-#include "pyside6_qtcore_python.h"
-#include "pyside6_qtqml_python.h"
-
+#include <QtCore/QMutex>
 #include <QtQml/QJSValue>
-
-// Forward declarations.
-static void propListMetaCall(PySideProperty *pp, PyObject *self, QMetaObject::Call call,
-                             void **args);
 
 // Mutex used to avoid race condition on PySide::nextQObjectMemoryAddr.
 static QMutex nextQmlElementMutex;
@@ -74,14 +67,37 @@ static void createInto(void *memory, void *type)
     PySide::setNextQObjectMemoryAddr(0);
 }
 
+PyTypeObject *qObjectType()
+{
+    static PyTypeObject *const result =
+        Shiboken::Conversions::getPythonTypeObject("QObject*");
+    assert(result);
+    return result;
+}
+
+static PyTypeObject *qQmlEngineType()
+{
+    static PyTypeObject *const result =
+        Shiboken::Conversions::getPythonTypeObject("QQmlEngine*");
+    assert(result);
+    return result;
+}
+
+static PyTypeObject *qQJSValueType()
+{
+    static PyTypeObject *const result =
+        Shiboken::Conversions::getPythonTypeObject("QJSValue*");
+    assert(result);
+    return result;
+}
+
 int PySide::qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
                             int versionMinor, const char *qmlName, const char *noCreationReason,
                             bool creatable)
 {
     using namespace Shiboken;
 
-    static PyTypeObject *qobjectType = Shiboken::Conversions::getPythonTypeObject("QObject*");
-    assert(qobjectType);
+    PyTypeObject *qobjectType = qObjectType();
 
     PyTypeObject *pyObjType = reinterpret_cast<PyTypeObject *>(pyObj);
     if (!PySequence_Contains(pyObjType->tp_mro, reinterpret_cast<PyObject *>(qobjectType))) {
@@ -212,23 +228,20 @@ int PySide::qmlRegisterSingletonType(PyObject *pyObj, const char *uri, int versi
 
                 if (hasCallback) {
                     PyTuple_SET_ITEM(args, 0, Conversions::pointerToPython(
-                                     SbkPySide6_QtQmlTypes[SBK_QQMLENGINE_IDX],
-                                     engine));
+                                     qQmlEngineType(), engine));
                 }
 
                 AutoDecRef retVal(PyObject_CallObject(hasCallback ? callback : pyObj, args));
 
-                PyTypeObject *qobjectType = SbkPySide6_QtCoreTypes[SBK_QOBJECT_IDX];
-
                 // Make sure the callback returns something we can convert, else the entire application will crash.
                 if (retVal.isNull() ||
-                    Conversions::isPythonToCppPointerConvertible(qobjectType, retVal) == nullptr) {
+                    Conversions::isPythonToCppPointerConvertible(qObjectType(), retVal) == nullptr) {
                     PyErr_Format(PyExc_TypeError, "Callback returns invalid value.");
                     return nullptr;
                 }
 
                 QObject *obj = nullptr;
-                Conversions::pythonToCppPointer(qobjectType, retVal, &obj);
+                Conversions::pythonToCppPointer(qObjectType(), retVal, &obj);
 
                 if (obj != nullptr)
                     Py_INCREF(retVal);
@@ -242,12 +255,11 @@ int PySide::qmlRegisterSingletonType(PyObject *pyObj, const char *uri, int versi
                 AutoDecRef args(PyTuple_New(1));
 
                 PyTuple_SET_ITEM(args, 0, Conversions::pointerToPython(
-                                 SbkPySide6_QtQmlTypes[SBK_QQMLENGINE_IDX],
-                                 engine));
+                                 qQmlEngineType(), engine));
 
                 AutoDecRef retVal(PyObject_CallObject(callback, args));
 
-                PyTypeObject *qjsvalueType = SbkPySide6_QtQmlTypes[SBK_QJSVALUE_IDX];
+                PyTypeObject *qjsvalueType = qQJSValueType();
 
                 // Make sure the callback returns something we can convert, else the entire application will crash.
                 if (retVal.isNull() ||
@@ -274,9 +286,6 @@ int PySide::qmlRegisterSingletonInstance(PyObject *pyObj, const char *uri, int v
 {
     using namespace Shiboken;
 
-    static PyTypeObject *qobjectType = Conversions::getPythonTypeObject("QObject*");
-    assert(qobjectType);
-
     // Check if the Python Type inherit from QObject
     PyTypeObject *pyObjType = reinterpret_cast<PyTypeObject *>(pyObj);
 
@@ -291,7 +300,7 @@ int PySide::qmlRegisterSingletonInstance(PyObject *pyObj, const char *uri, int v
 
     // Convert the instanceObject (PyObject) into a QObject
     QObject *instanceQObject = reinterpret_cast<QObject*>(
-            Object::cppPointer(reinterpret_cast<SbkObject*>(instanceObject), qobjectType));
+            Object::cppPointer(reinterpret_cast<SbkObject*>(instanceObject), qObjectType()));
 
     // Create Singleton Functor to pass the QObject to the Type registration step
     // similarly to the case when we have a callback
@@ -315,400 +324,6 @@ int PySide::qmlRegisterSingletonInstance(PyObject *pyObj, const char *uri, int v
 
 
     return QQmlPrivate::qmlregister(QQmlPrivate::SingletonRegistration, &type);
-}
-
-extern "C"
-{
-
-// This is the user data we store in the property.
-struct QmlListProperty
-{
-    PyTypeObject *type;
-    PyObject *append;
-    PyObject *count;
-    PyObject *at;
-    PyObject *clear;
-    PyObject *replace;
-    PyObject *removeLast;
-};
-
-static int propListTpInit(PyObject *self, PyObject *args, PyObject *kwds)
-{
-    static const char *kwlist[] = {"type", "append", "count", "at", "clear", "replace", "removeLast", 0};
-    PySideProperty *pySelf = reinterpret_cast<PySideProperty *>(self);
-    QmlListProperty *data = new QmlListProperty;
-    memset(data, 0, sizeof(QmlListProperty));
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwds,
-                                     "O|OOOOOO:QtQml.ListProperty", (char **) kwlist,
-                                     &data->type,
-                                     &data->append,
-                                     &data->count,
-                                     &data->at,
-                                     &data->clear,
-                                     &data->replace,
-                                     &data->removeLast)) {
-        delete data;
-        return -1;
-    }
-
-    static PyTypeObject *qobjectType = Shiboken::Conversions::getPythonTypeObject("QObject*");
-    assert(qobjectType);
-
-    if (!PySequence_Contains(data->type->tp_mro, reinterpret_cast<PyObject *>(qobjectType))) {
-        PyErr_Format(PyExc_TypeError, "A type inherited from %s expected, got %s.",
-                     qobjectType->tp_name, data->type->tp_name);
-        delete data;
-        return -1;
-    }
-
-    if ((data->append && data->append != Py_None && !PyCallable_Check(data->append)) ||
-        (data->count && data->count != Py_None && !PyCallable_Check(data->count)) ||
-        (data->at && data->at != Py_None && !PyCallable_Check(data->at)) ||
-        (data->clear && data->clear != Py_None && !PyCallable_Check(data->clear)) ||
-        (data->replace && data->replace != Py_None && !PyCallable_Check(data->replace)) ||
-        (data->removeLast && data->removeLast != Py_None && !PyCallable_Check(data->removeLast))) {
-        PyErr_Format(PyExc_TypeError, "Non-callable parameter given");
-        delete data;
-        return -1;
-    }
-
-    PySide::Property::setMetaCallHandler(pySelf, &propListMetaCall);
-    PySide::Property::setTypeName(pySelf, "QQmlListProperty<QObject>");
-    PySide::Property::setUserData(pySelf, data);
-
-    return 0;
-}
-
-void propListTpFree(void *self)
-{
-    auto pySelf = reinterpret_cast<PySideProperty *>(self);
-    delete reinterpret_cast<QmlListProperty *>(PySide::Property::userData(pySelf));
-    // calls base type constructor
-    Py_TYPE(pySelf)->tp_base->tp_free(self);
-}
-
-static PyType_Slot PropertyListType_slots[] = {
-    {Py_tp_init, reinterpret_cast<void *>(propListTpInit)},
-    {Py_tp_free, reinterpret_cast<void *>(propListTpFree)},
-    {Py_tp_dealloc, reinterpret_cast<void *>(Sbk_object_dealloc)},
-    {0, nullptr}
-};
-static PyType_Spec PropertyListType_spec = {
-    "2:PySide6.QtQml.ListProperty",
-    sizeof(PySideProperty),
-    0,
-    Py_TPFLAGS_DEFAULT,
-    PropertyListType_slots,
-};
-
-
-PyTypeObject *PropertyListTypeF(void)
-{
-    static Shiboken::AutoDecRef bases(Py_BuildValue("(O)", PySidePropertyTypeF()));
-    static auto *type = SbkType_FromSpecWithBases(&PropertyListType_spec, bases);
-    return type;
-}
-
-} // extern "C"
-
-// Implementation of QQmlListProperty<T>::AppendFunction callback
-void propListAppender(QQmlListProperty<QObject> *propList, QObject *item)
-{
-    Shiboken::GilState state;
-
-    Shiboken::AutoDecRef args(PyTuple_New(2));
-    PyTypeObject *qobjectType = SbkPySide6_QtCoreTypes[SBK_QOBJECT_IDX];
-    PyTuple_SET_ITEM(args, 0,
-                     Shiboken::Conversions::pointerToPython(qobjectType, propList->object));
-    PyTuple_SET_ITEM(args, 1,
-                     Shiboken::Conversions::pointerToPython(qobjectType, item));
-
-    auto data = reinterpret_cast<QmlListProperty *>(propList->data);
-    Shiboken::AutoDecRef retVal(PyObject_CallObject(data->append, args));
-
-    if (PyErr_Occurred())
-        PyErr_Print();
-}
-
-// Implementation of QQmlListProperty<T>::CountFunction callback
-qsizetype propListCount(QQmlListProperty<QObject> *propList)
-{
-    Shiboken::GilState state;
-
-    Shiboken::AutoDecRef args(PyTuple_New(1));
-    PyTypeObject *qobjectType = SbkPySide6_QtCoreTypes[SBK_QOBJECT_IDX];
-    PyTuple_SET_ITEM(args, 0,
-                     Shiboken::Conversions::pointerToPython(qobjectType, propList->object));
-
-    auto data = reinterpret_cast<QmlListProperty *>(propList->data);
-    Shiboken::AutoDecRef retVal(PyObject_CallObject(data->count, args));
-
-    // Check return type
-    int cppResult = 0;
-    PythonToCppFunc pythonToCpp = 0;
-    if (PyErr_Occurred())
-        PyErr_Print();
-    else if ((pythonToCpp = Shiboken::Conversions::isPythonToCppConvertible(Shiboken::Conversions::PrimitiveTypeConverter<qsizetype>(), retVal)))
-        pythonToCpp(retVal, &cppResult);
-    return cppResult;
-}
-
-// Implementation of QQmlListProperty<T>::AtFunction callback
-QObject *propListAt(QQmlListProperty<QObject> *propList, qsizetype index)
-{
-    Shiboken::GilState state;
-
-    Shiboken::AutoDecRef args(PyTuple_New(2));
-    PyTypeObject *qobjectType = SbkPySide6_QtCoreTypes[SBK_QOBJECT_IDX];
-    PyTuple_SET_ITEM(args, 0,
-                     Shiboken::Conversions::pointerToPython(qobjectType, propList->object));
-    PyTuple_SET_ITEM(args, 1, Shiboken::Conversions::copyToPython(Shiboken::Conversions::PrimitiveTypeConverter<qsizetype>(), &index));
-
-    auto data = reinterpret_cast<QmlListProperty *>(propList->data);
-    Shiboken::AutoDecRef retVal(PyObject_CallObject(data->at, args));
-
-    QObject *result = 0;
-    if (PyErr_Occurred())
-        PyErr_Print();
-    else if (PyType_IsSubtype(Py_TYPE(retVal), data->type))
-        Shiboken::Conversions::pythonToCppPointer(qobjectType, retVal, &result);
-    return result;
-}
-
-// Implementation of QQmlListProperty<T>::ClearFunction callback
-void propListClear(QQmlListProperty<QObject> * propList)
-{
-    Shiboken::GilState state;
-
-    Shiboken::AutoDecRef args(PyTuple_New(1));
-    PyTypeObject *qobjectType = SbkPySide6_QtCoreTypes[SBK_QOBJECT_IDX];
-    PyTuple_SET_ITEM(args, 0,
-                     Shiboken::Conversions::pointerToPython(qobjectType, propList->object));
-
-    auto data = reinterpret_cast<QmlListProperty *>(propList->data);
-    Shiboken::AutoDecRef retVal(PyObject_CallObject(data->clear, args));
-
-    if (PyErr_Occurred())
-        PyErr_Print();
-}
-
-// Implementation of QQmlListProperty<T>::ReplaceFunction callback
-void propListReplace(QQmlListProperty<QObject> *propList, qsizetype index, QObject *value)
-{
-    Shiboken::GilState state;
-
-    Shiboken::AutoDecRef args(PyTuple_New(3));
-    PyTypeObject *qobjectType = SbkPySide6_QtCoreTypes[SBK_QOBJECT_IDX];
-    PyTuple_SET_ITEM(args, 0,
-                     Shiboken::Conversions::pointerToPython(qobjectType, propList->object));
-    PyTuple_SET_ITEM(args, 1, Shiboken::Conversions::copyToPython(Shiboken::Conversions::PrimitiveTypeConverter<qsizetype>(), &index));
-    PyTuple_SET_ITEM(args, 2,
-                     Shiboken::Conversions::pointerToPython(qobjectType, value));
-
-    auto data = reinterpret_cast<QmlListProperty *>(propList->data);
-    Shiboken::AutoDecRef retVal(PyObject_CallObject(data->replace, args));
-
-    if (PyErr_Occurred())
-        PyErr_Print();
-}
-
-// Implementation of QQmlListProperty<T>::RemoveLastFunction callback
-void propListRemoveLast(QQmlListProperty<QObject> *propList)
-{
-    Shiboken::GilState state;
-
-    Shiboken::AutoDecRef args(PyTuple_New(1));
-    PyTypeObject *qobjectType = SbkPySide6_QtCoreTypes[SBK_QOBJECT_IDX];
-    PyTuple_SET_ITEM(args, 0,
-                     Shiboken::Conversions::pointerToPython(qobjectType, propList->object));
-
-    auto data = reinterpret_cast<QmlListProperty *>(propList->data);
-    Shiboken::AutoDecRef retVal(PyObject_CallObject(data->removeLast, args));
-
-    if (PyErr_Occurred())
-        PyErr_Print();
-}
-
-// qt_metacall specialization for ListProperties
-static void propListMetaCall(PySideProperty *pp, PyObject *self, QMetaObject::Call call, void **args)
-{
-    if (call != QMetaObject::ReadProperty)
-        return;
-
-    auto data = reinterpret_cast<QmlListProperty *>(PySide::Property::userData(pp));
-    QObject *qobj;
-    PyTypeObject *qobjectType = SbkPySide6_QtCoreTypes[SBK_QOBJECT_IDX];
-    Shiboken::Conversions::pythonToCppPointer(qobjectType, self, &qobj);
-    QQmlListProperty<QObject> declProp(qobj, data,
-                                       data->append && data->append != Py_None ? &propListAppender : nullptr,
-                                       data->count && data->count != Py_None ? &propListCount : nullptr,
-                                       data->at && data->at != Py_None ? &propListAt : nullptr,
-                                       data->clear && data->clear != Py_None ? &propListClear : nullptr,
-                                       data->replace && data->replace != Py_None ? &propListReplace : nullptr,
-                                       data->removeLast && data->removeLast != Py_None ? &propListRemoveLast : nullptr);
-
-    // Copy the data to the memory location requested by the meta call
-    void *v = args[0];
-    *reinterpret_cast<QQmlListProperty<QObject> *>(v) = declProp;
-}
-
-// VolatileBool (volatile bool) type definition.
-
-static PyObject *
-QtQml_VolatileBoolObject_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
-{
-    static const char *kwlist[] = {"x", 0};
-    PyObject *x = Py_False;
-    long ok;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|O:bool", const_cast<char **>(kwlist), &x))
-        return Q_NULLPTR;
-    ok = PyObject_IsTrue(x);
-    if (ok < 0)
-        return Q_NULLPTR;
-
-    QtQml_VolatileBoolObject *self
-            = reinterpret_cast<QtQml_VolatileBoolObject *>(type->tp_alloc(type, 0));
-
-    if (self != nullptr)
-        self->flag = new AtomicBool(ok);
-
-    return reinterpret_cast<PyObject *>(self);
-}
-
-static void QtQml_VolatileBoolObject_dealloc(PyObject *self)
-{
-    auto volatileBool = reinterpret_cast<QtQml_VolatileBoolObject *>(self);
-    delete volatileBool->flag;
-    Sbk_object_dealloc(self);
-}
-
-static PyObject *
-QtQml_VolatileBoolObject_get(QtQml_VolatileBoolObject *self)
-{
-    return *self->flag ? Py_True : Py_False;
-}
-
-static PyObject *
-QtQml_VolatileBoolObject_set(QtQml_VolatileBoolObject *self, PyObject *args)
-{
-    PyObject *value = Py_False;
-    long ok;
-
-    if (!PyArg_ParseTuple(args, "O:bool", &value)) {
-        return Q_NULLPTR;
-    }
-
-    ok = PyObject_IsTrue(value);
-    if (ok < 0) {
-        PyErr_SetString(PyExc_TypeError, "Not a boolean value.");
-        return Q_NULLPTR;
-    }
-
-    *self->flag = ok > 0;
-
-    Py_RETURN_NONE;
-}
-
-static PyMethodDef QtQml_VolatileBoolObject_methods[] = {
-    {"get", reinterpret_cast<PyCFunction>(QtQml_VolatileBoolObject_get), METH_NOARGS,
-     "B.get() -> Bool. Returns the value of the volatile boolean"
-    },
-    {"set", reinterpret_cast<PyCFunction>(QtQml_VolatileBoolObject_set), METH_VARARGS,
-     "B.set(a) -> None. Sets the value of the volatile boolean"
-    },
-    {nullptr, nullptr, 0, nullptr}  /* Sentinel */
-};
-
-static PyObject *
-QtQml_VolatileBoolObject_repr(QtQml_VolatileBoolObject *self)
-{
-    PyObject *s;
-
-    if (*self->flag)
-        s = PyBytes_FromFormat("%s(True)",
-                                Py_TYPE(self)->tp_name);
-    else
-        s = PyBytes_FromFormat("%s(False)",
-                                Py_TYPE(self)->tp_name);
-    Py_XINCREF(s);
-    return s;
-}
-
-static PyObject *
-QtQml_VolatileBoolObject_str(QtQml_VolatileBoolObject *self)
-{
-    PyObject *s;
-
-    if (*self->flag)
-        s = PyBytes_FromFormat("%s(True) -> %p",
-                                Py_TYPE(self)->tp_name, self->flag);
-    else
-        s = PyBytes_FromFormat("%s(False) -> %p",
-                                Py_TYPE(self)->tp_name, self->flag);
-    Py_XINCREF(s);
-    return s;
-}
-
-static PyType_Slot QtQml_VolatileBoolType_slots[] = {
-    {Py_tp_repr, reinterpret_cast<void *>(QtQml_VolatileBoolObject_repr)},
-    {Py_tp_str, reinterpret_cast<void *>(QtQml_VolatileBoolObject_str)},
-    {Py_tp_methods, reinterpret_cast<void *>(QtQml_VolatileBoolObject_methods)},
-    {Py_tp_new, reinterpret_cast<void *>(QtQml_VolatileBoolObject_new)},
-    {Py_tp_dealloc, reinterpret_cast<void *>(QtQml_VolatileBoolObject_dealloc)},
-    {0, 0}
-};
-static PyType_Spec QtQml_VolatileBoolType_spec = {
-    "2:PySide6.QtQml.VolatileBool",
-    sizeof(QtQml_VolatileBoolObject),
-    0,
-    Py_TPFLAGS_DEFAULT,
-    QtQml_VolatileBoolType_slots,
-};
-
-
-PyTypeObject *QtQml_VolatileBoolTypeF(void)
-{
-    static auto *type = SbkType_FromSpec(&QtQml_VolatileBoolType_spec);
-    return type;
-}
-
-static const char *PropertyList_SignatureStrings[] = {
-    "PySide6.QtQml.ListProperty(self,type:type,append:typing.Callable,"
-        "at:typing.Callable=None,clear:typing.Callable=None,count:typing.Callable=None)",
-    nullptr}; // Sentinel
-
-static const char *VolatileBool_SignatureStrings[] = {
-    "PySide6.QtQml.VolatileBool.get(self)->bool",
-    "PySide6.QtQml.VolatileBool.set(self,a:object)",
-    nullptr}; // Sentinel
-
-void PySide::initQmlSupport(PyObject *module)
-{
-    // Export QmlListProperty type
-    if (InitSignatureStrings(PropertyListTypeF(), PropertyList_SignatureStrings) < 0) {
-        PyErr_Print();
-        qWarning() << "Error initializing PropertyList type.";
-        return;
-    }
-
-    // Register QQmlListProperty metatype for use in QML
-    qRegisterMetaType<QQmlListProperty<QObject>>();
-
-    Py_INCREF(reinterpret_cast<PyObject *>(PropertyListTypeF()));
-    PyModule_AddObject(module, PepType_GetNameStr(PropertyListTypeF()),
-                       reinterpret_cast<PyObject *>(PropertyListTypeF()));
-
-    if (InitSignatureStrings(QtQml_VolatileBoolTypeF(), VolatileBool_SignatureStrings) < 0) {
-        PyErr_Print();
-        qWarning() << "Error initializing VolatileBool type.";
-        return;
-    }
-
-    Py_INCREF(QtQml_VolatileBoolTypeF());
-    PyModule_AddObject(module, PepType_GetNameStr(QtQml_VolatileBoolTypeF()),
-                       reinterpret_cast<PyObject *>(QtQml_VolatileBoolTypeF()));
 }
 
 static std::string getGlobalString(const char *name)
@@ -756,11 +371,8 @@ PyObject *PySide::qmlElementMacro(PyObject *pyObj)
         return nullptr;
     }
 
-    static PyTypeObject *qobjectType = Shiboken::Conversions::getPythonTypeObject("QObject*");
-    assert(qobjectType);
-
     PyTypeObject *pyObjType = reinterpret_cast<PyTypeObject *>(pyObj);
-    if (!PySequence_Contains(pyObjType->tp_mro, reinterpret_cast<PyObject *>(qobjectType))) {
+    if (!PySequence_Contains(pyObjType->tp_mro, reinterpret_cast<PyObject *>(qObjectType()))) {
         PyErr_Format(PyExc_TypeError, "This decorator can only be used with classes inherited from QObject, got %s.", pyObjType->tp_name);
         return nullptr;
     }

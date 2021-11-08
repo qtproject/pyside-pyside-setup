@@ -1,6 +1,8 @@
 project(QtQml)
 
-set(QtQml_registerType "${QtQml_SOURCE_DIR}/pysideqmlregistertype.cpp")
+set(QtQml_static_sources "${QtQml_SOURCE_DIR}/pysideqmlregistertype.cpp"
+                         "${QtQml_SOURCE_DIR}/pysideqmllistproperty.cpp"
+                         "${QtQml_SOURCE_DIR}/pysideqmlvolatilebool.cpp")
 
 set(QtQml_SRC
 ${QtQml_GEN_DIR}/qjsengine_wrapper.cpp
@@ -58,4 +60,4 @@ create_pyside_module(NAME QtQml
                      DEPS QtQml_deps
                      TYPESYSTEM_PATH QtQml_SOURCE_DIR
                      SOURCES QtQml_SRC
-                     STATIC_SOURCES QtQml_registerType)
+                     STATIC_SOURCES QtQml_static_sources)
