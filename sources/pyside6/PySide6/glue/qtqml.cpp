@@ -85,3 +85,7 @@ return %CONVERTTOPYTHON[%RETURN_TYPE](retval);
 // @snippet qmlelement
 %PYARG_0 = PySide::qmlElementMacro(%ARGUMENT_NAMES);
 // @snippet qmlelement
+
+// @snippet qmlanonymous
+%PYARG_0 = PySide::qmlAnonymousMacro(%ARGUMENT_NAMES);
+// @snippet qmlanonymous
