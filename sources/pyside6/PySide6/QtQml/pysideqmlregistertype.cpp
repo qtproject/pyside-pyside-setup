@@ -39,6 +39,7 @@
 
 #include "pysideqmlregistertype.h"
 #include "pysideqmlregistertype_p.h"
+#include "pysideqmluncreatable.h"
 
 #include <limits>
 
@@ -422,7 +423,10 @@ static PyObject *qmlElementMacroHelper(PyObject *pyObj,
 
 PyObject *PySide::qmlElementMacro(PyObject *pyObj)
 {
-    return qmlElementMacroHelper(pyObj, "QmlElement");
+    auto *noCreationReason = PySide::qmlNoCreationReason(pyObj);
+    const auto mode = noCreationReason != nullptr
+                      ? RegisterMode::Uncreatable : RegisterMode::Normal;
+    return qmlElementMacroHelper(pyObj, "QmlElement", mode, noCreationReason);
 }
 
 PyObject *PySide::qmlAnonymousMacro(PyObject *pyObj)

@@ -34,3 +34,5 @@ qmlRegisterUncreatableType
    Indeed, it is normal for the new library to allow QML written to
    previous versions to continue to work, even if more advanced
    versions of some of its types are available.
+
+   Alternatively, the :ref:`QmlUncreatable` decorator can be used.

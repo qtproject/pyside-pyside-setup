@@ -39,11 +39,16 @@ from helper.helper import qmlcomponent_errorstring
 
 from PySide6.QtCore import Property, QObject, QUrl
 from PySide6.QtGui import QGuiApplication
-from PySide6.QtQml import qmlRegisterUncreatableType, QQmlEngine, QQmlComponent
+from PySide6.QtQml import QmlElement, QmlUncreatable, QQmlEngine, QQmlComponent
 
 noCreationReason = 'Cannot create an item of type: Uncreatable (expected)'
 
+QML_IMPORT_NAME = "Charts"
+QML_IMPORT_MAJOR_VERSION = 1
 
+
+@QmlElement
+@QmlUncreatable(noCreationReason)
 class Uncreatable(QObject):
     def __init__(self, parent=None):
         QObject.__init__(self, parent)
@@ -62,9 +67,6 @@ class TestQmlSupport(unittest.TestCase):
 
     def testIt(self):
         app = QGuiApplication([])
-
-        self.assertTrue(qmlRegisterUncreatableType(Uncreatable, 'Charts', 1, 0,
-                                                   'Uncreatable', noCreationReason) != -1)
 
         engine = QQmlEngine()
         file = Path(__file__).resolve().parent / 'registeruncreatable.qml'

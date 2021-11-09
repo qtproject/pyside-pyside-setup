@@ -3,6 +3,7 @@ project(QtQml)
 set(QtQml_static_sources "${QtQml_SOURCE_DIR}/pysideqmlregistertype.cpp"
                          "${QtQml_SOURCE_DIR}/pysideqmlmetacallerror.cpp"
                          "${QtQml_SOURCE_DIR}/pysideqmllistproperty.cpp"
+                         "${QtQml_SOURCE_DIR}/pysideqmluncreatable.cpp"
                          "${QtQml_SOURCE_DIR}/pysideqmlvolatilebool.cpp")
 
 set(QtQml_SRC
