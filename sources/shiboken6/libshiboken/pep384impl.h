@@ -415,6 +415,15 @@ LIBSHIBOKEN_API PyObject *PyMethod_Self(PyObject *);
 #define PyMethod_GET_FUNCTION(op)   PyMethod_Function(op)
 #endif
 
+#ifdef PYPY_VERSION
+
+// PYSIDE-535: PyPy does not differentiate builtin methods and methods.
+//             But they differ because they have no __module__ attribute.
+#undef PyMethod_Check
+LIBSHIBOKEN_API int PyMethod_Check(PyObject *op);
+
+#endif
+
 /*****************************************************************************
  *
  * RESOLVED: code.h

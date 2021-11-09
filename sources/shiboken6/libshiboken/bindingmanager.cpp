@@ -318,6 +318,7 @@ PyObject *BindingManager::getOverride(const void *cptr,
     // PYSIDE-1523: PyMethod_Check is not accepting compiled methods, we do this rather
     // crude check for them.
     if (method) {
+        // PYSIDE-535: This macro is redefined in a compatible way in pep384
         if (PyMethod_Check(method)) {
             if (PyMethod_GET_SELF(method) == reinterpret_cast<PyObject *>(wrapper)) {
                 function = PyMethod_GET_FUNCTION(method);

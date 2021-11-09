@@ -637,6 +637,18 @@ PyMethod_Self(PyObject *im)
 }
 #endif // Py_LIMITED_API
 
+#ifdef PYPY_VERSION
+
+// PYSIDE-535: PyPy does not differentiate builtin methods and methods.
+//             But they differ because they have no __module__ attribute.
+int PyMethod_Check(PyObject *op)
+{
+    return PyPyMethod_Check(op) &&
+           PyObject_HasAttr(op, Shiboken::PyMagicName::module());
+}
+
+#endif
+
 /*****************************************************************************
  *
  * Support for funcobject.h

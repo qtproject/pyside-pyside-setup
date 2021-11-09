@@ -99,16 +99,6 @@ class PaintEventOverride(UsesQApplication):
         # Test QWidget.paintEvent override
         timer_id = self.widget.startTimer(100)
         self.widget.show()
-        if hasattr(sys, "pypy_version_info"):
-            # PYSIDE-535: Next line gives millions of
-            orig_exc = dedent("""
-                TypeError: 'PySide6.QtWidgets.QApplication.notify' called with wrong argument types:
-                  PySide6.QtWidgets.QApplication.notify(MyWidget, QPainter)
-                Supported signatures:
-                  PySide6.QtWidgets.QApplication.notify(PySide6.QtCore.QObject, PySide6.QtCore.QEvent)
-            """)
-            raise SystemError(orig_exc)
-
         self.app.exec()
         self.widget.killTimer(timer_id)
         self.assertTrue(self.widget.paint_event_called)
