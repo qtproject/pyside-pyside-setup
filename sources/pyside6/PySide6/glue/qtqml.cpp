@@ -74,6 +74,7 @@ int %0 = PySide::qmlRegisterType(%ARGUMENT_NAMES, false);
 
 // @snippet init
 initQtQmlListProperty(module);
+initQmlUncreatable(module);
 initQtQmlVolatileBool(module);
 // @snippet init
 

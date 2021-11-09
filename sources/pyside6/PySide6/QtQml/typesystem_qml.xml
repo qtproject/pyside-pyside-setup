@@ -58,6 +58,7 @@
     <inject-code class="native" position="beginning">
     #include "pysideqmlregistertype.h"
     #include "pysideqmllistproperty.h"
+    #include "pysideqmluncreatable.h"
     #include "pysideqmlvolatilebool.h"
     </inject-code>
 
