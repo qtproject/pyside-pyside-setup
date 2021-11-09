@@ -159,6 +159,7 @@ names and how they look like.
 
     basictutorial/widgets.rst
     basictutorial/clickablebutton.rst
+    basictutorial/signals_and_slots.rst
     basictutorial/dialog.rst
     basictutorial/tablewidget.rst
     basictutorial/treewidget.rst
