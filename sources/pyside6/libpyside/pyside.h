@@ -44,12 +44,13 @@
 
 #include <pysidemacros.h>
 
-#ifdef PYSIDE_QML_SUPPORT
-#  include <QtQml/qqml.h>
-#endif
-
 #include <QtCore/QMetaType>
 #include <QtCore/QHash>
+
+namespace QQmlPrivate
+{
+struct RegisterType;
+}
 
 namespace PySide
 {
@@ -150,7 +151,7 @@ PYSIDE_API PyObject *getWrapperForQObject(QObject *cppSelf, PyTypeObject *sbk_ty
 /// \return type object
 PYSIDE_API PyTypeObject *getTypeForQObject(const QObject *cppSelf);
 
-#ifdef PYSIDE_QML_SUPPORT
+
 // Used by QtQuick module to notify QtQml that custom QtQuick items can be registered.
 using QuickRegisterItemFunction =
     bool (*)(PyObject *pyObj, const char *uri, int versionMajor,
@@ -159,7 +160,6 @@ using QuickRegisterItemFunction =
              QQmlPrivate::RegisterType *);
 PYSIDE_API QuickRegisterItemFunction getQuickRegisterItemFunction();
 PYSIDE_API void setQuickRegisterItemFunction(QuickRegisterItemFunction function);
-#endif // PYSIDE_QML_SUPPORT
 
 /**
  * Given A PyObject repesenting ASCII or Unicode data, returns an equivalent QString.

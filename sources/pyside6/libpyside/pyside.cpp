@@ -475,7 +475,6 @@ PyObject *getWrapperForQObject(QObject *cppSelf, PyTypeObject *sbk_type)
     return pyOut;
 }
 
-#ifdef PYSIDE_QML_SUPPORT
 static QuickRegisterItemFunction quickRegisterItem;
 
 QuickRegisterItemFunction getQuickRegisterItemFunction()
@@ -487,7 +486,6 @@ void setQuickRegisterItemFunction(QuickRegisterItemFunction function)
 {
     quickRegisterItem = function;
 }
-#endif // PYSIDE_QML_SUPPORT
 
 // Inspired by Shiboken::String::toCString;
 QString pyStringToQString(PyObject *str)
