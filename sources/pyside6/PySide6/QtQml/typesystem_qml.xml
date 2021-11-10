@@ -59,6 +59,8 @@
     #include "pysideqmlregistertype.h"
     #include "pysideqmllistproperty.h"
     #include "pysideqmlvolatilebool.h"
+    #include "pysideqmlmetacallerror_p.h"
+    #include &lt;signalmanager.h&gt;
     </inject-code>
 
     <!-- This is to inform the generator that the VolatileBool python type exists -->

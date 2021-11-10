@@ -1,20 +1,6 @@
 project(libpyside)
 
-set(QML_SUPPORT 0)
-set(QML_PRIVATE_API_SUPPORT 0)
-
 set(libpyside_libraries Qt::Core Qt::CorePrivate)
-
-if(Qt${QT_MAJOR_VERSION}Qml_FOUND)
-    list(APPEND libpyside_libraries Qt::Qml)
-    set(QML_SUPPORT 1)
-    if(Qt${QT_MAJOR_VERSION}Qml_PRIVATE_INCLUDE_DIRS)
-        list(APPEND libpyside_libraries Qt::QmlPrivate)
-        set(QML_PRIVATE_API_SUPPORT 1)
-    else()
-        message(WARNING "QML private API include files could not be found, support for catching QML exceptions inside Python code will not work.")
-    endif()
-endif()
 
 set(libpyside_SRC
     class_property.cpp
@@ -87,11 +73,6 @@ set_target_properties(pyside6 PROPERTIES
                       DEFINE_SYMBOL BUILD_LIBPYSIDE)
 
 set_property(TARGET pyside6 PROPERTY CXX_STANDARD 17)
-
-if(QML_SUPPORT)
-    target_compile_definitions(pyside6 PUBLIC PYSIDE_QML_SUPPORT=1)
-endif()
-target_compile_definitions(pyside6 PRIVATE PYSIDE_QML_PRIVATE_API_SUPPORT=${QML_PRIVATE_API_SUPPORT})
 
 if(PYSIDE_QT_CONF_PREFIX)
     set_property(SOURCE pyside.cpp

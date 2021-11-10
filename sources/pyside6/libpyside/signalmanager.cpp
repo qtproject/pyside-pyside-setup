@@ -61,13 +61,6 @@
 #include <algorithm>
 #include <limits>
 
-// These private headers are needed to throw JavaScript exceptions
-#if PYSIDE_QML_PRIVATE_API_SUPPORT
-    #include <private/qv4engine_p.h>
-    #include <private/qv4context_p.h>
-    #include <private/qqmldata_p.h>
-#endif
-
 #if QSLOT_CODE != 1 || QSIGNAL_CODE != 2
 #error QSLOT_CODE and/or QSIGNAL_CODE changed! change the hardcoded stuff to the correct value!
 #endif
@@ -215,6 +208,7 @@ using namespace PySide;
 struct SignalManager::SignalManagerPrivate
 {
     GlobalReceiverV2MapPtr m_globalReceivers;
+    static SignalManager::QmlMetaCallErrorHandler m_qmlMetaCallErrorHandler;
 
     SignalManagerPrivate() : m_globalReceivers(new GlobalReceiverV2Map{})
     {
@@ -232,6 +226,9 @@ struct SignalManager::SignalManagerPrivate
         }
     }
 };
+
+SignalManager::QmlMetaCallErrorHandler
+    SignalManager::SignalManagerPrivate::m_qmlMetaCallErrorHandler = nullptr;
 
 static void clearSignalManager()
 {
@@ -291,6 +288,11 @@ SignalManager &SignalManager::instance()
 {
     static SignalManager me;
     return me;
+}
+
+void SignalManager::setQmlMetaCallErrorHandler(QmlMetaCallErrorHandler handler)
+{
+    SignalManagerPrivate::m_qmlMetaCallErrorHandler = handler;
 }
 
 QObject *SignalManager::globalReceiver(QObject *sender, PyObject *callback)
@@ -419,41 +421,16 @@ int SignalManager::qt_metacall(QObject *object, QMetaObject::Call call, int id, 
         Py_XDECREF(pp_name);
     }
 
-    // Bubbles Python exceptions up to the Javascript engine, if called from one
     {
         Shiboken::GilState gil;
 
         if (PyErr_Occurred()) {
-
-#if PYSIDE_QML_PRIVATE_API_SUPPORT
-            // This JS engine grabber based off of Qt 5.5's `qjsEngine` function
-            QQmlData *data = QQmlData::get(object, false);
-
-            if (data && !data->jsWrapper.isNullOrUndefined()) {
-                QV4::ExecutionEngine *engine = data->jsWrapper.engine();
-                if (engine->currentStackFrame != nullptr) {
-                    PyObject *errType, *errValue, *errTraceback;
-                    PyErr_Fetch(&errType, &errValue, &errTraceback);
-                    // PYSIDE-464: The error is only valid before PyErr_Restore,
-                    // PYSIDE-464: therefore we take local copies.
-                    Shiboken::AutoDecRef objStr(PyObject_Str(errValue));
-                    const QString errString = QLatin1String(Shiboken::String::toCString(objStr));
-                    const bool isSyntaxError = errType == PyExc_SyntaxError;
-                    const bool isTypeError = errType == PyExc_TypeError;
-                    PyErr_Restore(errType, errValue, errTraceback);
-
-                    PyErr_Print();    // Note: PyErr_Print clears the error.
-
-                    if (isSyntaxError) {
-                        return engine->throwSyntaxError(errString);
-                    } else if (isTypeError) {
-                        return engine->throwTypeError(errString);
-                    } else {
-                        return engine->throwError(errString);
-                    }
-                }
+            // Bubbles Python exceptions up to the Javascript engine, if called from one
+            if (SignalManagerPrivate::m_qmlMetaCallErrorHandler) {
+                auto idOpt = SignalManagerPrivate::m_qmlMetaCallErrorHandler(object);
+                if (idOpt.has_value())
+                    return idOpt.value();
             }
-#endif // PYSIDE_QML_PRIVATE_API_SUPPORT
 
             int reclimit = Py_GetRecursionLimit();
             // Inspired by Python's errors.c: PyErr_GivenExceptionMatches() function.

@@ -47,6 +47,8 @@
 
 #include <QtCore/QMetaMethod>
 
+#include <optional>
+
 QT_FORWARD_DECLARE_CLASS(QDataStream)
 
 namespace PySide
@@ -80,7 +82,11 @@ class PYSIDE_API SignalManager
 {
     Q_DISABLE_COPY(SignalManager)
 public:
+    using QmlMetaCallErrorHandler = std::optional<int>(*)(QObject *object);
+
     static SignalManager& instance();
+
+    static void setQmlMetaCallErrorHandler(QmlMetaCallErrorHandler handler);
 
     QObject* globalReceiver(QObject* sender, PyObject* callback);
     void releaseGlobalReceiver(const QObject* sender, QObject* receiver);

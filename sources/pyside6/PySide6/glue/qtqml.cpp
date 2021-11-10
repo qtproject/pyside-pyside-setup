@@ -75,6 +75,7 @@ int %0 = PySide::qmlRegisterType(%ARGUMENT_NAMES, false);
 // @snippet init
 initQtQmlListProperty(module);
 initQtQmlVolatileBool(module);
+PySide::SignalManager::setQmlMetaCallErrorHandler(PySide::qmlMetaCallErrorHandler);
 // @snippet init
 
 // @snippet qjsengine-toscriptvalue
