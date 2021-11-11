@@ -27,6 +27,7 @@ macro(collect_optional_modules)
         NetworkAuth
         Qml
         Quick
+        Quick3D
         QuickControls2
         QuickWidgets
         RemoteObjects
