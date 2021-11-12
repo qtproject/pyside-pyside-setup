@@ -40,9 +40,12 @@
 ##
 #############################################################################
 
-from PySide6.QtWidgets import *
-from PySide6.QtGui import *
-from PySide6.QtCore import *
+import sys
+
+from PySide6.QtCore import (QEvent, QPoint, QRandomGenerator, QSize, Qt,
+                            Property)
+from PySide6.QtGui import QFont, QFontMetrics, QFontDatabase, QPainter
+from PySide6.QtWidgets import QApplication, QMainWindow
 from PySide6.QtStateMachine import (QEventTransition, QFinalState,
                                     QKeyEventTransition, QState, QStateMachine)
 
@@ -209,7 +212,6 @@ class MainWindow(QMainWindow):
 
 
 if __name__ == '__main__':
-    import sys
     app = QApplication(sys.argv)
     main_win = MainWindow()
     sys.exit(app.exec())

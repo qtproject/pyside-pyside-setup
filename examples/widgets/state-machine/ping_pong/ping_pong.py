@@ -40,8 +40,9 @@
 ##
 #############################################################################
 
-from PySide6.QtWidgets import *
-from PySide6.QtCore import *
+import sys
+
+from PySide6.QtCore import QCoreApplication, QEvent
 from PySide6.QtStateMachine import QAbstractTransition, QState, QStateMachine
 
 
@@ -86,7 +87,6 @@ class PingTransition(QAbstractTransition):
 
 
 if __name__ == '__main__':
-    import sys
     app = QCoreApplication(sys.argv)
 
     machine = QStateMachine()
