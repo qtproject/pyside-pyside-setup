@@ -897,6 +897,8 @@ class PysideBuild(_build, DistUtilsCommandMixin):
         cmd_make = [self.make_path]
         if OPTION["JOBS"]:
             cmd_make.append(OPTION["JOBS"])
+        if OPTION["VERBOSE_BUILD"] and self.make_generator == "Ninja":
+            cmd_make.append("-v")
         if run_process(cmd_make) != 0:
             raise DistutilsSetupError(f"Error compiling {extension}")
 
@@ -914,7 +916,10 @@ class PysideBuild(_build, DistUtilsCommandMixin):
                     import sphinx
 
                     log.info("Generating Shiboken documentation")
-                    if run_process([self.make_path, "doc"]) != 0:
+                    make_doc_cmd = [self.make_path, "doc"]
+                    if OPTION["VERBOSE_BUILD"] and self.make_generator == "Ninja":
+                        make_doc_cmd.append("-v")
+                    if run_process(make_doc_cmd) != 0:
                         raise DistutilsSetupError("Error generating documentation "
                                                   f"for {extension}")
                 except ImportError:
