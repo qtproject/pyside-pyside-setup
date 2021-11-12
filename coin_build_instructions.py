@@ -146,7 +146,6 @@ def call_setup(python_ver, phase):
         cmd += ["bdist_wheel", "--reuse-build", "--standalone", "--skip-cmake", "--skip-make-install", "--only-package"]
 
     cmd += ["--build-tests",
-            "--parallel=4",
             "--verbose-build"]
 
     if CI_USE_SCCACHE:
