@@ -40,13 +40,13 @@
 ##
 #############################################################################
 
-from PySide6.QtWidgets import *
-from PySide6.QtCore import *
+import sys
+
+from PySide6.QtWidgets import QApplication, QPushButton
 from PySide6.QtStateMachine import QState, QStateMachine
 
 
 if __name__ == '__main__':
-    import sys
     app = QApplication(sys.argv)
     button = QPushButton()
     machine = QStateMachine()
@@ -59,8 +59,7 @@ if __name__ == '__main__':
     on.setObjectName('on')
     on.assignProperty(button, 'text', 'On')
 
-    off.addTransition(button, SIGNAL('clicked()'), on)
-    # Let's use the new style signals just for the kicks.
+    off.addTransition(button.clicked, on)
     on.addTransition(button.clicked, off)
 
     machine.addState(off)

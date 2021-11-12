@@ -40,8 +40,9 @@
 ##
 #############################################################################
 
-from PySide6.QtWidgets import *
-from PySide6.QtCore import *
+import sys
+
+from PySide6.QtCore import QCoreApplication, QObject, Qt, Property, Signal
 from PySide6.QtStateMachine import (QFinalState, QSignalTransition, QState,
                                     QStateMachine)
 
@@ -75,7 +76,7 @@ class Factorial(QObject):
 
 class FactorialLoopTransition(QSignalTransition):
     def __init__(self, fact):
-        super().__init__(fact, SIGNAL('x_changed(int)'))
+        super().__init__(fact.x_changed)
         self.fact = fact
 
     def eventTest(self, e):
@@ -92,7 +93,7 @@ class FactorialLoopTransition(QSignalTransition):
 
 class FactorialDoneTransition(QSignalTransition):
     def __init__(self, fact):
-        super().__init__(fact, SIGNAL('x_changed(int)'))
+        super().__init__(fact.x_changed)
         self.fact = fact
 
     def eventTest(self, e):
@@ -105,7 +106,6 @@ class FactorialDoneTransition(QSignalTransition):
 
 
 if __name__ == '__main__':
-    import sys
     app = QCoreApplication(sys.argv)
     factorial = Factorial()
     machine = QStateMachine()
