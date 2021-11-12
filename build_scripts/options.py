@@ -200,6 +200,7 @@ class DistUtilsCommandMixin(object):
         ('build-tests', None, 'Build tests'),
         ('use-xvfb', None, 'Use Xvfb for testing'),
         ('reuse-build', None, 'Reuse existing build'),
+        ('compiler-launcher=', None, 'Use a compiler launcher like ccache or sccache for builds'),
         ('skip-cmake', None, 'Skip CMake step'),
         ('skip-make-install', None, 'Skip install step'),
         ('skip-packaging', None, 'Skip packaging step'),
@@ -239,6 +240,7 @@ class DistUtilsCommandMixin(object):
         self.build_tests = False
         self.use_xvfb = False
         self.reuse_build = False
+        self.compiler_launcher = None
         self.skip_cmake = False
         self.skip_make_install = False
         self.skip_packaging = False
@@ -289,6 +291,7 @@ class DistUtilsCommandMixin(object):
         OPTION['NO_JOM'] = self.no_jom
         OPTION['XVFB'] = self.use_xvfb
         OPTION['REUSE_BUILD'] = self.reuse_build
+        OPTION['COMPILER_LAUNCHER'] = self.compiler_launcher
         OPTION['SKIP_CMAKE'] = self.skip_cmake
         OPTION['SKIP_MAKE_INSTALL'] = self.skip_make_install
         OPTION['SKIP_PACKAGING'] = self.skip_packaging

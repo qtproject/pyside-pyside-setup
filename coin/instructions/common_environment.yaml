@@ -49,6 +49,13 @@ instructions:
           property: features
           contains_value: Packaging
     - type: EnvironmentVariable
+      variableName: CI_USE_SCCACHE
+      variableValue: "--compiler-launcher=sccache"
+      enable_if:
+          condition: property
+          property: features
+          contains_value: Sccache
+    - type: EnvironmentVariable
       variableName: CI_OS
       variableValue: "MacOS"
       enable_if:

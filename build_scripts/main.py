@@ -805,6 +805,11 @@ class PysideBuild(_build, DistUtilsCommandMixin):
         if OPTION["VERBOSE_BUILD"]:
             cmake_cmd.append("-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON")
 
+        if OPTION['COMPILER_LAUNCHER']:
+            compiler_launcher = OPTION['COMPILER_LAUNCHER']
+            cmake_cmd.append(f"-DCMAKE_C_COMPILER_LAUNCHER={compiler_launcher}")
+            cmake_cmd.append(f"-DCMAKE_CXX_COMPILER_LAUNCHER={compiler_launcher}")
+
         if OPTION["SANITIZE_ADDRESS"]:
             # Some simple sanity checking. Only use at your own risk.
             if (sys.platform.startswith('linux')
