@@ -48,8 +48,9 @@ import time
 from .config import config
 from .utils import get_numpy_location, get_python_dict
 from .options import DistUtilsCommandMixin, OPTION
+from .build_info_collector import BuildInfoCollectorMixin
 from .versions import PYSIDE, PYSIDE_MODULE, SHIBOKEN
-from .wheel_utils import (get_package_version, get_qt_version,
+from .wheel_utils import (get_package_version,
                           get_package_timestamp, macos_plat_name,
                           macos_pyside_min_deployment_target)
 
@@ -147,85 +148,6 @@ def get_make(platform_arch, build_type):
     return (make_path, make_generator)
 
 
-def _get_py_library_win(build_type, py_version, py_prefix, py_libdir,
-                        py_include_dir):
-    """Helper for finding the Python library on Windows"""
-    if py_include_dir is None or not os.path.exists(py_include_dir):
-        py_include_dir = os.path.join(py_prefix, "include")
-    if py_libdir is None or not os.path.exists(py_libdir):
-        # For virtual environments on Windows, the py_prefix will contain a
-        # path pointing to it, instead of the system Python installation path.
-        # Since INCLUDEPY contains a path to the system location, we use the
-        # same base directory to define the py_libdir variable.
-        py_libdir = os.path.join(os.path.dirname(py_include_dir), "libs")
-        if not os.path.isdir(py_libdir):
-            raise DistutilsSetupError("Failed to locate the 'libs' directory")
-    dbg_postfix = "_d" if build_type == "Debug" else ""
-    if OPTION["MAKESPEC"] == "mingw":
-        static_lib_name = f"libpython{py_version.replace('.', '')}{dbg_postfix}.a"
-        return os.path.join(py_libdir, static_lib_name)
-    v = py_version.replace(".", "")
-    python_lib_name = f"python{v}{dbg_postfix}.lib"
-    return os.path.join(py_libdir, python_lib_name)
-
-
-def _get_py_library_unix(build_type, py_version, py_prefix, py_libdir,
-                         py_include_dir):
-    """Helper for finding the Python library on UNIX"""
-    if py_libdir is None or not os.path.exists(py_libdir):
-        py_libdir = os.path.join(py_prefix, "lib")
-    if py_include_dir is None or not os.path.exists(py_include_dir):
-        dir = f"include/python{py_version}"
-        py_include_dir = os.path.join(py_prefix, dir)
-    dbg_postfix = "_d" if build_type == "Debug" else ""
-    lib_exts = ['.so']
-    if sys.platform == 'darwin':
-        lib_exts.append('.dylib')
-    lib_suff = getattr(sys, 'abiflags', None)
-    lib_exts.append('.so.1')
-    # Suffix for OpenSuSE 13.01
-    lib_exts.append('.so.1.0')
-    # static library as last gasp
-    lib_exts.append('.a')
-
-    libs_tried = []
-    for lib_ext in lib_exts:
-        lib_name = f"libpython{py_version}{lib_suff}{lib_ext}"
-        py_library = os.path.join(py_libdir, lib_name)
-        if os.path.exists(py_library):
-            return py_library
-        libs_tried.append(py_library)
-
-    # Try to find shared libraries which have a multi arch
-    # suffix.
-    py_multiarch = get_config_var("MULTIARCH")
-    if py_multiarch:
-        try_py_libdir = os.path.join(py_libdir, py_multiarch)
-        libs_tried = []
-        for lib_ext in lib_exts:
-            lib_name = f"libpython{py_version}{lib_suff}{lib_ext}"
-            py_library = os.path.join(try_py_libdir, lib_name)
-            if os.path.exists(py_library):
-                return py_library
-            libs_tried.append(py_library)
-
-    raise DistutilsSetupError(f"Failed to locate the Python library with {', '.join(libs_tried)}")
-
-
-def get_py_library(build_type, py_version, py_prefix, py_libdir, py_include_dir):
-    """Find the Python library"""
-    if sys.platform == "win32":
-        py_library = _get_py_library_win(build_type, py_version, py_prefix,
-                                         py_libdir, py_include_dir)
-    else:
-        py_library = _get_py_library_unix(build_type, py_version, py_prefix,
-                                          py_libdir, py_include_dir)
-    if py_library.endswith('.a'):
-        # Python was compiled as a static library
-        log.error(f"Failed to locate a dynamic Python library, using {py_library}")
-    return py_library
-
-
 def check_allowed_python_version():
     """
     Make sure that setup.py is run with an allowed python version.
@@ -247,27 +169,6 @@ def check_allowed_python_version():
 
 
 qt_src_dir = ''
-
-
-def is_debug_python():
-    return getattr(sys, "gettotalrefcount", None) is not None
-
-
-# Return a prefix suitable for the _install/_build directory
-def prefix():
-    virtual_env_name = os.environ.get('VIRTUAL_ENV', None)
-    if virtual_env_name is not None:
-        name = os.path.basename(virtual_env_name)
-    else:
-        name = "pyside"
-    name += str(sys.version_info[0])
-    if OPTION["DEBUG"]:
-        name += "d"
-    if is_debug_python():
-        name += "p"
-    if OPTION["LIMITED_API"] == "yes":
-        name += "a"
-    return name
 
 
 def prepare_build():
@@ -388,17 +289,20 @@ class PysideInstallLib(_install_lib):
         return outfiles
 
 
-class PysideBuild(_build, DistUtilsCommandMixin):
+class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
 
     user_options = _build.user_options + DistUtilsCommandMixin.mixin_user_options
 
     def __init__(self, *args, **kwargs):
         _build.__init__(self, *args, **kwargs)
         DistUtilsCommandMixin.__init__(self)
+        BuildInfoCollectorMixin.__init__(self)
 
     def finalize_options(self):
         os_name_backup = os.name
         DistUtilsCommandMixin.mixin_finalize_options(self)
+        BuildInfoCollectorMixin.collect_and_assign(self)
+
         if sys.platform == 'darwin':
             self.plat_name = macos_plat_name()
             # This is a hack to circumvent the dubious check in
@@ -411,6 +315,9 @@ class PysideBuild(_build, DistUtilsCommandMixin):
             os.name = "nt"
 
         _build.finalize_options(self)
+
+        # Must come after _build.finalize_options
+        BuildInfoCollectorMixin.post_collect_and_assign(self)
 
         if sys.platform == 'darwin':
             os.name = os_name_backup
@@ -434,42 +341,15 @@ class PysideBuild(_build, DistUtilsCommandMixin):
 
     def run(self):
         prepare_build()
-        platform_arch = platform.architecture()[0]
-        log.info(f"Python architecture is {platform_arch}")
-        self.py_arch = platform_arch[:-3]
-
-        build_type = "Debug" if OPTION["DEBUG"] else "Release"
-        if OPTION["RELWITHDEBINFO"]:
-            build_type = 'RelWithDebInfo'
 
         # Check env
         make_path = None
         make_generator = None
         if not OPTION["ONLYPACKAGE"]:
-            (make_path, make_generator) = get_make(platform_arch, build_type)
-
-        # Prepare parameters
-        py_executable = sys.executable
-        py_version = f"{sys.version_info[0]}.{sys.version_info[1]}"
-        py_include_dir = get_config_var("INCLUDEPY")
-        py_libdir = get_config_var("LIBDIR")
-        # distutils.sysconfig.get_config_var('prefix') returned the
-        # virtual environment base directory, but
-        # sysconfig.get_config_var returns the system's prefix.
-        # We use 'base' instead (although, platbase points to the
-        # same location)
-        py_prefix = get_config_var("base")
-        if not py_prefix or not os.path.exists(py_prefix):
-            py_prefix = sys.prefix
-        self.py_prefix = py_prefix
-        if sys.platform == "win32":
-            py_scripts_dir = os.path.join(py_prefix, "Scripts")
-        else:
-            py_scripts_dir = os.path.join(py_prefix, "bin")
-        self.py_scripts_dir = py_scripts_dir
+            platform_arch = platform.architecture()[0]
+            (make_path, make_generator) = get_make(platform_arch, self.build_type)
 
         self.qtinfo = QtInfo()
-        qt_version = get_qt_version()
         # Update the PATH environment variable
         # Don't add Qt to PATH env var, we don't want it to interfere
         # with CMake's find_package calls which will use
@@ -492,34 +372,9 @@ class PysideBuild(_build, DistUtilsCommandMixin):
 
         update_env_path(additional_paths)
 
-        # Used for test blacklists and registry test.
-        self.build_classifiers = (f"py{py_version}-qt{qt_version}-{platform.architecture()[0]}-"
-                                  f"{build_type.lower()}")
-
-        if OPTION["SHORTER_PATHS"]:
-            build_name = f"p{py_version}"
-        else:
-            build_name = self.build_classifiers
-
-        script_dir = setup_script_dir
-        sources_dir = os.path.join(script_dir, "sources")
-        build_dir = os.path.join(script_dir, f"{prefix()}_build", f"{build_name}")
-        install_dir = os.path.join(script_dir, f"{prefix()}_install", f"{build_name}")
-
         self.make_path = make_path
         self.make_generator = make_generator
-        self.script_dir = script_dir
-        self.st_build_dir = os.path.join(self.script_dir, self.build_lib)
-        self.sources_dir = sources_dir
-        self.build_dir = build_dir
-        self.install_dir = install_dir
-        self.py_executable = py_executable
-        self.py_include_dir = py_include_dir
-        self.py_library = get_py_library(build_type, py_version, py_prefix,
-                                         py_libdir, py_include_dir)
-        self.py_version = py_version
-        self.build_type = build_type
-        self.site_packages_dir = sconfig.get_python_lib(1, 0, prefix=install_dir)
+
         self.build_tests = OPTION["BUILDTESTS"]
 
         # Save the shiboken build dir path for clang deployment
@@ -554,7 +409,7 @@ class PysideBuild(_build, DistUtilsCommandMixin):
                 os.makedirs(unique_dir)
                 fpath = os.path.join(unique_dir, 'build_dir.txt')
                 with open(fpath, 'w') as f:
-                    print(build_dir, file=f)
+                    print(self.build_dir, file=f)
                     print(self.build_classifiers, file=f)
                 log.info(f"Created {build_history}")
 
