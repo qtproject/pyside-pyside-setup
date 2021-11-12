@@ -61,6 +61,7 @@ CI_HOST_OS_VER = option_value("osVer")
 CI_ENV_INSTALL_DIR = option_value("instdir")
 CI_ENV_AGENT_DIR = option_value("agentdir")
 CI_COMPILER = option_value("compiler")
+CI_USE_SCCACHE = option_value("compiler-launcher")
 CI_INTEGRATION_ID = option_value("coinIntegrationId") or str(calendar.timegm(datetime.datetime.now().timetuple()))
 CI_FEATURES = []
 _ci_features = option_value("features")
@@ -147,6 +148,10 @@ def call_setup(python_ver, phase):
     cmd += ["--build-tests",
             "--parallel=4",
             "--verbose-build"]
+
+    if CI_USE_SCCACHE:
+        cmd += [f"--compiler-launcher={CI_USE_SCCACHE}"]
+
     if python_ver == "3":
         cmd += ["--limited-api=yes"]
     if is_snapshot_build():
