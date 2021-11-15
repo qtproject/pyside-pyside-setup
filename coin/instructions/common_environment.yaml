@@ -93,10 +93,10 @@ instructions:
     - type: PrependToEnvironmentVariable
       variableName: PATH
       variableValue: "{{.Env.PYTHON3_PATH}}/bin:"
-      disable_if:
+      enable_if:
          condition: property
          property: host.os
-         equals_value: Windows
+         equals_value: MacOS
     - type: PrependToEnvironmentVariable
       variableName: PATH
       variableValue: "{{.Env.PYTHON3_PATH}};"
