@@ -39,7 +39,8 @@ from helper.helper import quickview_errorstring
 
 from PySide6.QtCore import Property, Signal, QTimer, QUrl, QObject
 from PySide6.QtGui import QGuiApplication
-from PySide6.QtQml import qmlRegisterSingletonType, qmlRegisterSingletonInstance
+from PySide6.QtQml import (qmlRegisterSingletonType, qmlRegisterSingletonInstance,
+                           QmlElement, QmlSingleton)
 from PySide6.QtQuick import QQuickView
 
 finalResult = 0
@@ -68,6 +69,25 @@ def singletonQObjectCallback(engine):
 
 def singletonQJSValueCallback(engine):
     return engine.evaluate("new Object({data: 50})")
+
+
+QML_IMPORT_NAME = "Singletons"
+QML_IMPORT_MAJOR_VERSION = 1
+
+@QmlElement
+@QmlSingleton
+class DecoratedSingletonQObject(QObject):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._data = 200
+
+    def getData(self):
+        return self._data
+
+    def setData(self, data):
+        self._data = data
+
+    data = Property(int, getData, setData)
 
 
 class TestQmlSupport(unittest.TestCase):
@@ -99,7 +119,7 @@ class TestQmlSupport(unittest.TestCase):
         view.show()
         QTimer.singleShot(250, view.close)
         app.exec()
-        self.assertEqual(finalResult, 299)
+        self.assertEqual(finalResult, 499)
 
 
 if __name__ == '__main__':

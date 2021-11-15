@@ -15,6 +15,8 @@ qmlRegisterSingletonType
 
    This function registers a Python type as a singleton in the QML system.
 
+   Alternatively, the :ref:`QmlSingleton` decorator can be used.
+
 .. py:function:: qmlRegisterSingletonType(pytype: type, uri: str, versionMajor: int, versionMinor: int, typeName: str, callback: object) -> int
 
    :param type pytype: Python class

@@ -111,6 +111,10 @@
         <inject-code class="target" file="../glue/qtqml.cpp" snippet="qmlanonymous"/>
     </add-function>
 
+    <add-function signature="QmlSingleton(PyObject*)" return-type="PyObject*">
+        <inject-code class="target" file="../glue/qtqml.cpp" snippet="qmlsingleton"/>
+    </add-function>
+
     <function signature="qjsEngine(const QObject*)">
         <modify-function>
             <modify-argument index="return" pyi-type="Optional[PySide6.QtQml.QJSEngine]"/>

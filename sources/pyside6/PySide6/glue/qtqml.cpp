@@ -90,3 +90,7 @@ return %CONVERTTOPYTHON[%RETURN_TYPE](retval);
 // @snippet qmlanonymous
 %PYARG_0 = PySide::qmlAnonymousMacro(%ARGUMENT_NAMES);
 // @snippet qmlanonymous
+
+// @snippet qmlsingleton
+%PYARG_0 = PySide::qmlSingletonMacro(%ARGUMENT_NAMES);
+// @snippet qmlsingleton
