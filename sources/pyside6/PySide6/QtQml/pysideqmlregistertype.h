@@ -100,6 +100,10 @@ PyObject *qmlElementMacro(PyObject *pyObj);
 /// \param pyObj Python type to be registered
 PyObject *qmlAnonymousMacro(PyObject *pyObj);
 
+/// PySide implementation of the QML_SINGLETON macro
+/// \param pyObj Python type to be registered
+PyObject *qmlSingletonMacro(PyObject *pyObj);
+
 } // namespace PySide
 
 #endif // PYSIDEQMLREGISTERTYPE_H

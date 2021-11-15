@@ -33,6 +33,7 @@ Item {
     Component.onCompleted: {
         SingletonQObjectCallback.data += SingletonQObjectNoCallback.data
             + SingletonQJSValue.data
-            + SingletonInstance.data;
+            + SingletonInstance.data
+            + DecoratedSingletonQObject.data;
     }
 }
