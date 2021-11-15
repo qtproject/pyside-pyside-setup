@@ -95,6 +95,7 @@ class TestQmlSupport(unittest.TestCase):
         self.assertTrue(file.is_file())
         view.setSource(QUrl.fromLocalFile(file))
         self.assertTrue(view.rootObject(), quickview_errorstring(view))
+        view.resize(200, 200)
         view.show()
         QTimer.singleShot(250, view.close)
         app.exec()
