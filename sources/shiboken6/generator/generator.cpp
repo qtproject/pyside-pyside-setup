@@ -465,12 +465,14 @@ GeneratorContext Generator::contextForClass(const AbstractMetaClass *c) const
 }
 
 GeneratorContext Generator::contextForSmartPointer(const AbstractMetaClass *c,
-                                                   const AbstractMetaType &t)
+                                                   const AbstractMetaType &t,
+                                                   const AbstractMetaClass *pointeeClass)
 {
     GeneratorContext result;
     result.m_metaClass = c;
     result.m_preciseClassType = t;
     result.m_type = GeneratorContext::SmartPointer;
+    result.m_pointeeClass = pointeeClass;
     return result;
 }
 
@@ -493,8 +495,14 @@ bool Generator::generate()
                                                            smartPointers)));
             return false;
         }
-        if (!generateFileForContext(contextForSmartPointer(smartPointerClass, type)))
+        const AbstractMetaClass *pointeeClass = nullptr;
+        const auto *instantiatedType = type.instantiations().constFirst().typeEntry();
+        if (instantiatedType->isComplex()) // not a C++ primitive
+            pointeeClass = AbstractMetaClass::findClass(m_d->api.classes(), instantiatedType);
+        if (!generateFileForContext(contextForSmartPointer(smartPointerClass, type,
+                                                           pointeeClass))) {
             return false;
+        }
     }
     return finishGeneration();
 }

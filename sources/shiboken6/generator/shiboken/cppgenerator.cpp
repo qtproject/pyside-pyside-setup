@@ -392,6 +392,12 @@ static void writePyGetSetDefEntry(TextStream &s, const QString &name,
         << (setFunc.isEmpty() ? QLatin1String(NULL_PTR) : setFunc) << "},\n";
 }
 
+static bool generateRichComparison(const GeneratorContext &c)
+{
+    return c.forSmartPointer()
+        || (!c.metaClass()->isNamespace() && c.metaClass()->hasComparisonOperatorOverload());
+}
+
 /*!
     Function used to write the class generated binding code on the buffer
     \param s the output buffer
@@ -737,9 +743,12 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
         writeMappingMethods(s, metaClass, classContext);
     }
 
-    if (!metaClass->isNamespace() && metaClass->hasComparisonOperatorOverload()) {
+    if (generateRichComparison(classContext)) {
         s << "// Rich comparison\n";
-        writeRichCompareFunction(s, classContext);
+        if (classContext.forSmartPointer())
+            writeSmartPointerRichCompareFunction(s, classContext);
+        else
+            writeRichCompareFunction(s, classContext);
     }
 
     if (shouldGenerateGetSetList(metaClass) && !classContext.forSmartPointer()) {
@@ -4370,7 +4379,7 @@ void CppGenerator::writeClassDefinition(TextStream &s,
     tp_flags.append(QLatin1String("|Py_TPFLAGS_HAVE_GC"));
 
     QString tp_richcompare;
-    if (!metaClass->isNamespace() && metaClass->hasComparisonOperatorOverload())
+    if (generateRichComparison(classContext))
         tp_richcompare = cpythonBaseName(metaClass) + QLatin1String("_richcompare");
 
     QString tp_getset;
@@ -4904,11 +4913,10 @@ void CppGenerator::writeSetterFunction(TextStream &s, const QPropertySpec &prope
         << "return 0;\n" << outdent << "}\n\n";
 }
 
-void CppGenerator::writeRichCompareFunction(TextStream &s,
-                                            const GeneratorContext &context) const
+void CppGenerator::writeRichCompareFunctionHeader(TextStream &s,
+                                                  const QString &baseName,
+                                                  const GeneratorContext &context) const
 {
-    const AbstractMetaClass *metaClass = context.metaClass();
-    QString baseName = cpythonBaseName(metaClass);
     s << "static PyObject * ";
     s << baseName << "_richcompare(PyObject *self, PyObject *" << PYTHON_ARG
         << ", int op)\n{\n" << indent;
@@ -4918,6 +4926,17 @@ void CppGenerator::writeRichCompareFunction(TextStream &s,
         << PYTHON_TO_CPPCONVERSION_STRUCT << ' ' << PYTHON_TO_CPP_VAR << ";\n";
     writeUnusedVariableCast(s, QLatin1String(PYTHON_TO_CPP_VAR));
     s << '\n';
+}
+
+static const char richCompareComment[] =
+    "// PYSIDE-74: By default, we redirect to object's tp_richcompare (which is `==`, `!=`).\n";
+
+void CppGenerator::writeRichCompareFunction(TextStream &s,
+                                            const GeneratorContext &context) const
+{
+    const AbstractMetaClass *metaClass = context.metaClass();
+    QString baseName = cpythonBaseName(metaClass);
+    writeRichCompareFunctionHeader(s, baseName, context);
 
     s << "switch (op) {\n";
     {
@@ -5012,13 +5031,19 @@ void CppGenerator::writeRichCompareFunction(TextStream &s,
         s << "default:\n";
         {
             Indentation indent(s);
-            s << "// PYSIDE-74: By default, we redirect to object's tp_richcompare (which is `==`, `!=`).\n"
+            s << richCompareComment
                 << "return FallbackRichCompare(self, " << PYTHON_ARG << ", op);\n"
                 << "goto " << baseName << "_RichComparison_TypeError;\n";
         }
     }
     s << "}\n\n";
 
+    writeRichCompareFunctionFooter(s, baseName);
+}
+
+void CppGenerator::writeRichCompareFunctionFooter(TextStream &s,
+                                                  const QString &baseName) const
+{
     s << "if (" << PYTHON_RETURN_VAR << " && !PyErr_Occurred())\n";
     {
         Indentation indent(s);
@@ -5028,6 +5053,116 @@ void CppGenerator::writeRichCompareFunction(TextStream &s,
         << "PyErr_SetString(PyExc_NotImplementedError, \"operator not implemented.\");\n"
         << returnStatement(m_currentErrorCode)  << '\n' << '\n'
         << outdent << "}\n\n";
+}
+
+using ComparisonOperatorList = QList<AbstractMetaFunction::ComparisonOperatorType>;
+
+// Return the available comparison operators for smart pointers
+static ComparisonOperatorList smartPointeeComparisons(const GeneratorContext &context)
+{
+    Q_ASSERT(context.forSmartPointer());
+    auto *te = context.preciseType().instantiations().constFirst().typeEntry();
+    if (te->isExtendedCppPrimitive()) { // Primitive pointee types have all
+        return {AbstractMetaFunction::OperatorEqual,
+                AbstractMetaFunction::OperatorNotEqual,
+                AbstractMetaFunction::OperatorLess,
+                AbstractMetaFunction::OperatorLessEqual,
+                AbstractMetaFunction::OperatorGreater,
+                AbstractMetaFunction::OperatorGreaterEqual};
+    }
+
+    auto *pointeeClass = context.pointeeClass();
+    if (!pointeeClass)
+        return {};
+
+    ComparisonOperatorList result;
+    const auto &comparisons =
+        pointeeClass->operatorOverloads(OperatorQueryOption::SymmetricalComparisonOp);
+    for (const auto &f : comparisons) {
+        const auto ct = f->comparisonOperatorType().value();
+        if (!result.contains(ct))
+            result.append(ct);
+    }
+    return result;
+}
+
+void CppGenerator::writeSmartPointerRichCompareFunction(TextStream &s,
+                                                        const GeneratorContext &context) const
+{
+    static const char selfPointeeVar[] = "cppSelfPointee";
+    static const char cppArg0PointeeVar[] = "cppArg0Pointee";
+
+    const AbstractMetaClass *metaClass = context.metaClass();
+    QString baseName = cpythonBaseName(metaClass);
+    writeRichCompareFunctionHeader(s, baseName, context);
+
+    s << "if (";
+    writeTypeCheck(s, context.preciseType(), QLatin1String(PYTHON_ARG));
+    s << ") {\n" << indent;
+    writeArgumentConversion(s, context.preciseType(), QLatin1String(CPP_ARG0),
+                            QLatin1String(PYTHON_ARG), metaClass);
+
+    const auto *te = context.preciseType().typeEntry();
+    Q_ASSERT(te->isSmartPointer());
+    const auto *ste = static_cast<const SmartPointerTypeEntry *>(te);
+
+    s << "const auto *" << selfPointeeVar << " = " << CPP_SELF_VAR
+        << '.' << ste->getter() << "();\n";
+    s << "const auto *" << cppArg0PointeeVar << " = " << CPP_ARG0
+        << '.' << ste->getter() << "();\n";
+
+    // If we have an object without any comparisons, only generate a simple
+    // equality check by pointee address
+    auto availableOps = smartPointeeComparisons(context);
+    const bool comparePointeeAddressOnly = availableOps.isEmpty();
+    if (comparePointeeAddressOnly) {
+        availableOps << AbstractMetaFunction::OperatorEqual
+            << AbstractMetaFunction::OperatorNotEqual;
+    } else {
+        // For value types with operators, we complain about nullptr
+        s << "if (" << selfPointeeVar << " == nullptr || " << cppArg0PointeeVar
+            << " == nullptr) {\n" << indent
+            << "PyErr_SetString(PyExc_NotImplementedError, \"nullptr passed to comparison.\");\n"
+            << returnStatement(m_currentErrorCode)  << '\n' << outdent << "}\n";
+    }
+
+    s << "bool " << CPP_RETURN_VAR << "= false;\n"
+        << "switch (op) {\n";
+    for (auto op : availableOps) {
+        s << "case " << AbstractMetaFunction::pythonRichCompareOpCode(op) << ":\n"
+          << indent << CPP_RETURN_VAR << " = ";
+        if (comparePointeeAddressOnly) {
+            s << selfPointeeVar << ' ' << AbstractMetaFunction::cppComparisonOperator(op)
+              << ' ' << cppArg0PointeeVar << ";\n";
+        } else {
+            // Shortcut for equality: Check pointee address
+            if (op == AbstractMetaFunction::OperatorEqual
+                || op == AbstractMetaFunction::OperatorLessEqual
+                || op == AbstractMetaFunction::OperatorGreaterEqual) {
+                s << selfPointeeVar << " == " << cppArg0PointeeVar << " || ";
+            }
+            // Generate object's comparison
+            s << "*" << selfPointeeVar << ' '
+              << AbstractMetaFunction::cppComparisonOperator(op) << " *"
+              << cppArg0PointeeVar << ";\n";
+        }
+        s << "break;\n" << outdent;
+
+    }
+    if (availableOps.size() < 6) {
+        s << "default:\n" << indent
+            << richCompareComment
+            << "return FallbackRichCompare(self, " << PYTHON_ARG << ", op);\n" << outdent;
+    }
+    s << "}\n" << PYTHON_RETURN_VAR << " = " << CPP_RETURN_VAR
+        << " ? Py_True : Py_False;\n"
+        << "Py_INCREF(" << PYTHON_RETURN_VAR << ");\n";
+
+    s << outdent << "} else {\n" << indent
+      << "goto " << baseName << "_RichComparison_TypeError;\n"
+      << outdent << "}\n";
+
+    writeRichCompareFunctionFooter(s, baseName);
 }
 
 QString CppGenerator::methodDefinitionParameters(const OverloadData &overloadData) const

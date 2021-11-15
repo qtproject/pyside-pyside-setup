@@ -239,5 +239,39 @@ class SmartPointerTests(unittest.TestCase):
         r = o.takeSharedPtrToInteger(integer2)
         self.assertEqual(r, integer2.value())
 
+    def testSmartPointerValueComparison(self):
+        """Test a pointee class with comparison operators."""
+        four = Obj.createSharedPtrToInteger(4)
+        four2 = Obj.createSharedPtrToInteger(4)
+        five = Obj.createSharedPtrToInteger(5)
+        self.assertTrue(four == four)
+        self.assertTrue(four == four2)
+        self.assertFalse(four != four)
+        self.assertFalse(four != four2)
+        self.assertFalse(four < four)
+        self.assertTrue(four <= four)
+        self.assertFalse(four > four)
+        self.assertTrue(four >= four)
+        self.assertFalse(four == five)
+        self.assertTrue(four != five)
+        self.assertTrue(four < five)
+        self.assertTrue(four <= five)
+        self.assertFalse(four > five)
+        self.assertFalse(four >= five)
+        self.assertTrue(five > four)
+
+        self.assertRaises(NotImplementedError,
+                          lambda : Obj.createNullSharedPtrToInteger() == four)
+
+    def testSmartPointerObjectComparison(self):
+        """Test a pointee class without comparison operators."""
+        o1 = Obj.giveSharedPtrToObj()
+        o2 = Obj.giveSharedPtrToObj()
+        self.assertTrue(o1 == o1)
+        self.assertFalse(o1 != o1)
+        self.assertFalse(o1 == o2)
+        self.assertTrue(o1 != o2)
+
+
 if __name__ == '__main__':
     unittest.main()

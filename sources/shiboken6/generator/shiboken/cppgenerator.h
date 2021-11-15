@@ -376,7 +376,13 @@ private:
                              const QPropertySpec &property,
                              const GeneratorContext &context) const;
 
+    void writeRichCompareFunctionHeader(TextStream &s,
+                                        const QString &baseName,
+                                        const GeneratorContext &context) const;
+    void writeRichCompareFunctionFooter(TextStream &s,
+                                        const QString &baseName) const;
     void writeRichCompareFunction(TextStream &s, const GeneratorContext &context) const;
+    void writeSmartPointerRichCompareFunction(TextStream &s, const GeneratorContext &context) const;
 
     void writeEnumsInitialization(TextStream &s, AbstractMetaEnumList &enums) const;
     void writeEnumInitialization(TextStream &s, const AbstractMetaEnum &metaEnum) const;

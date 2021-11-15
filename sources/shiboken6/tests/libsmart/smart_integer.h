@@ -42,8 +42,40 @@ public:
     int value() const;
     void setValue(int v);
 
+    int compare(const Integer &rhs) const;
+
     int m_int; // public for testing member field access.
 };
+
+inline bool operator==(const Integer &lhs, const Integer &rhs)
+{
+    return lhs.compare(rhs) == 0;
+}
+
+inline bool operator!=(const Integer &lhs, const Integer &rhs)
+{
+    return lhs.compare(rhs) != 0;
+}
+
+inline bool operator<(const Integer &lhs, const Integer &rhs)
+{
+    return lhs.compare(rhs) < 0;
+}
+
+inline bool operator<=(const Integer &lhs, const Integer &rhs)
+{
+    return lhs.compare(rhs) <= 0;
+}
+
+inline bool operator>(const Integer &lhs, const Integer &rhs)
+{
+    return lhs.compare(rhs) > 0;
+}
+
+inline bool operator>=(const Integer &lhs, const Integer &rhs)
+{
+    return lhs.compare(rhs) >= 0;
+}
 
 namespace Smart {
 class LIB_SMART_API Integer2 : public Integer {

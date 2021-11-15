@@ -154,6 +154,7 @@ public:
 
     const AbstractMetaClass *metaClass() const { return m_metaClass; }
     const AbstractMetaType &preciseType() const { return m_preciseClassType; }
+    const AbstractMetaClass *pointeeClass() const { return m_pointeeClass; }
 
     bool forSmartPointer() const { return m_type == SmartPointer; }
     bool useWrapper() const { return m_type ==  WrappedClass; }
@@ -168,6 +169,7 @@ public:
 
 private:
     const AbstractMetaClass *m_metaClass = nullptr;
+    const AbstractMetaClass *m_pointeeClass = nullptr;
     AbstractMetaType m_preciseClassType;
     QString m_wrappername;
     Type m_type = Class;
@@ -259,7 +261,8 @@ protected:
 
     virtual GeneratorContext contextForClass(const AbstractMetaClass *c) const;
     static GeneratorContext contextForSmartPointer(const AbstractMetaClass *c,
-                                                   const AbstractMetaType &t);
+                                                   const AbstractMetaType &t,
+                                                   const AbstractMetaClass *pointeeClass = nullptr);
 
     /// Generates a file for given AbstractMetaClass or AbstractMetaType (smart pointer case).
     bool generateFileForContext(const GeneratorContext &context);

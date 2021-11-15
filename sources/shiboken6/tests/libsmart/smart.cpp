@@ -137,6 +137,18 @@ int Obj::takeSharedPtrToInteger(SharedPtr<Integer> pInt)
     return pInt->value();
 }
 
+SharedPtr<Integer> Obj::createSharedPtrToInteger(int value)
+{
+    auto *i = new Integer;
+    i->setValue(value);
+    return SharedPtr<Integer>(i);
+}
+
+SharedPtr<Integer> Obj::createNullSharedPtrToInteger()
+{
+    return {};
+}
+
 SharedPtr<const Integer> Obj::giveSharedPtrToConstInteger()
 {
     SharedPtr<const Integer> co(new Integer);
@@ -192,6 +204,13 @@ int Integer::value() const
 void Integer::setValue(int v)
 {
     m_int = v;
+}
+
+int Integer::compare(const Integer &rhs) const
+{
+    if (m_int < rhs.m_int)
+        return -1;
+    return m_int > rhs.m_int ? 1 : 0;
 }
 
 void Integer::printInteger() const

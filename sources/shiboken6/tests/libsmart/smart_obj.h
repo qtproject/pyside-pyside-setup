@@ -46,7 +46,7 @@ public:
 
     void printObj();
     Integer takeInteger(Integer val);
-    SharedPtr<Obj> giveSharedPtrToObj();
+    static SharedPtr<Obj> giveSharedPtrToObj();
     std::vector<SharedPtr<Obj> > giveSharedPtrToObjList(int size);
     virtual SharedPtr<Integer> giveSharedPtrToInteger(); // virtual for PYSIDE-1188
     SharedPtr<const Integer> giveSharedPtrToConstInteger();
@@ -54,6 +54,9 @@ public:
     SharedPtr<Smart::Integer2> giveSharedPtrToInteger2();
     int takeSharedPtrToObj(SharedPtr<Obj> pObj);
     int takeSharedPtrToInteger(SharedPtr<Integer> pInt);
+
+    static SharedPtr<Integer> createSharedPtrToInteger(int value);
+    static SharedPtr<Integer> createNullSharedPtrToInteger();
 
     int m_integer;  // public for testing member field access.
     Integer *m_internalInteger;
