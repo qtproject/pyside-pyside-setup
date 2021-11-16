@@ -711,6 +711,23 @@ void AbstractMetaFunction::setFunctionType(AbstractMetaFunction::FunctionType ty
     d->m_functionType = type;
 }
 
+std::optional<AbstractMetaFunction::ComparisonOperatorType> AbstractMetaFunction::comparisonOperatorType() const
+{
+    if (d->m_functionType != ComparisonOperator)
+        return {};
+    static const QHash<QString, ComparisonOperatorType> mapping = {
+        {u"operator=="_qs, OperatorEqual},
+        {u"operator!="_qs, OperatorNotEqual},
+        {u"operator<"_qs, OperatorLess},
+        {u"operator<="_qs, OperatorLessEqual},
+        {u"operator>"_qs, OperatorGreater},
+        {u"operator>="_qs, OperatorGreaterEqual}
+    };
+    const auto it = mapping.constFind(originalName());
+    Q_ASSERT(it != mapping.constEnd());
+    return it.value();
+}
+
 // Auto-detect whether a function should be wrapped into
 // Py_BEGIN_ALLOW_THREADS/Py_END_ALLOW_THREADS, that is, temporarily release
 // the GIL (global interpreter lock). Doing so is required for any thread-wait
@@ -1441,6 +1458,37 @@ bool AbstractMetaFunction::isVisibilityModifiedToPrivate() const
             return true;
     }
     return false;
+}
+
+struct ComparisonOperator
+{
+    const char *cppOperator;
+    const char *pythonOpCode;
+};
+
+using ComparisonOperatorMapping = QHash<AbstractMetaFunction::ComparisonOperatorType, ComparisonOperator>;
+
+static const ComparisonOperatorMapping &comparisonOperatorMapping()
+{
+    static const ComparisonOperatorMapping result = {
+        {AbstractMetaFunction::OperatorEqual, {"==", "Py_EQ"}},
+        {AbstractMetaFunction::OperatorNotEqual, {"!=", "Py_NE"}},
+        {AbstractMetaFunction::OperatorLess, {"<", "Py_LT"}},
+        {AbstractMetaFunction::OperatorLessEqual, {"<=", "Py_LE"}},
+        {AbstractMetaFunction::OperatorGreater, {">", "Py_GT"}},
+        {AbstractMetaFunction::OperatorGreaterEqual, {">=", "Py_GE"}}
+    };
+    return result;
+}
+
+const char * AbstractMetaFunction::pythonRichCompareOpCode(ComparisonOperatorType ct)
+{
+    return comparisonOperatorMapping().value(ct).pythonOpCode;
+}
+
+const char * AbstractMetaFunction::cppComparisonOperator(ComparisonOperatorType ct)
+{
+    return comparisonOperatorMapping().value(ct).cppOperator;
 }
 
 #ifndef QT_NO_DEBUG_STREAM

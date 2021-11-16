@@ -37,6 +37,8 @@
 
 #include <QtCore/QScopedPointer>
 
+#include <optional>
+
 QT_FORWARD_DECLARE_CLASS(QDebug)
 QT_FORWARD_DECLARE_CLASS(QRegularExpression)
 
@@ -83,6 +85,12 @@ public:
         LastOperator = ComparisonOperator
     };
     Q_ENUM(FunctionType)
+
+    enum ComparisonOperatorType {
+        OperatorEqual, OperatorNotEqual, OperatorLess, OperatorLessEqual,
+        OperatorGreater, OperatorGreaterEqual
+    };
+    Q_ENUM(ComparisonOperatorType)
 
     enum CompareResultFlag {
         EqualName                   = 0x00000001,
@@ -279,6 +287,8 @@ public:
     FunctionType functionType() const;
     void setFunctionType(FunctionType type);
 
+    std::optional<ComparisonOperatorType> comparisonOperatorType() const;
+
     bool usesRValueReferences() const;
     bool generateBinding() const;
 
@@ -415,6 +425,9 @@ public:
 
     SourceLocation sourceLocation() const;
     void setSourceLocation(const SourceLocation &sourceLocation);
+
+    static const char *pythonRichCompareOpCode(ComparisonOperatorType ct);
+    static const char *cppComparisonOperator(ComparisonOperatorType ct);
 
 private:
     template <class Predicate>

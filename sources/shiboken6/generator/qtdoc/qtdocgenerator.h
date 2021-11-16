@@ -113,6 +113,7 @@ private:
     static QString parseArgDocStyle(const AbstractMetaClass *cppClass,
                                     const AbstractMetaFunctionCPtr &func);
     QString translateToPythonType(const AbstractMetaType &type, const AbstractMetaClass *cppClass) const;
+    static QString getFuncName(const AbstractMetaFunctionCPtr& cppFunc);
 
     bool convertToRst(const QString &sourceFileName,
                       const QString &targetFileName,

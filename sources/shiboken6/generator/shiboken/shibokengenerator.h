@@ -209,10 +209,7 @@ protected:
 
     static QString pythonPrimitiveTypeName(const QString &cppTypeName);
 
-    static QString pythonOperatorFunctionName(const QString &cppOpFuncName);
     static QString pythonOperatorFunctionName(const AbstractMetaFunctionCPtr &func);
-    static QString pythonRichCompareOperatorId(const QString &cppOpFuncName);
-    static QString pythonRichCompareOperatorId(const AbstractMetaFunctionCPtr &func);
 
     static QString fixedCppTypeName(const CustomConversion::TargetToNativeConversion *toNative);
     static QString fixedCppTypeName(const AbstractMetaType &type);

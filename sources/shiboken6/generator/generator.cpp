@@ -805,6 +805,53 @@ QString Generator::translateType(AbstractMetaType cType,
     return s;
 }
 
+static const QHash<QString, QString> &pythonOperators()
+{
+    static const QHash<QString, QString> result = {
+        // call operator
+        {u"operator()"_qs, u"__call__"_qs},
+        // Arithmetic operators
+        {u"operator+"_qs, u"__add__"_qs},
+        {u"operator-"_qs, u"__sub__"_qs},
+        {u"operator*"_qs, u"__mul__"_qs},
+        {u"operator/"_qs, u"__div__"_qs},
+        {u"operator%"_qs, u"__mod__"_qs},
+        // Inplace arithmetic operators
+        {u"operator+="_qs, u"__iadd__"_qs},
+        {u"operator-="_qs, u"__isub__"_qs},
+        {u"operator++"_qs, u"__iadd__"_qs},
+        {u"operator--"_qs, u"__isub__"_qs},
+        {u"operator*="_qs, u"__imul__"_qs},
+        {u"operator/="_qs, u"__idiv__"_qs},
+        {u"operator%="_qs, u"__imod__"_qs},
+        // Bitwise operators
+        {u"operator&"_qs, u"__and__"_qs},
+        {u"operator^"_qs, u"__xor__"_qs},
+        {u"operator|"_qs, u"__or__"_qs},
+        {u"operator<<"_qs, u"__lshift__"_qs},
+        {u"operator>>"_qs, u"__rshift__"_qs},
+        {u"operator~"_qs, u"__invert__"_qs},
+        // Inplace bitwise operators
+        {u"operator&="_qs, u"__iand__"_qs},
+        {u"operator^="_qs, u"__ixor__"_qs},
+        {u"operator|="_qs, u"__ior__"_qs},
+        {u"operator<<="_qs, u"__ilshift__"_qs},
+        {u"operator>>="_qs, u"__irshift__"_qs},
+        // Comparison operators
+        {u"operator=="_qs, u"__eq__"_qs},
+        {u"operator!="_qs, u"__ne__"_qs},
+        {u"operator<"_qs, u"__lt__"_qs},
+        {u"operator>"_qs, u"__gt__"_qs},
+        {u"operator<="_qs, u"__le__"_qs},
+        {u"operator>="_qs, u"__ge__"_qs}
+    };
+    return result;
+}
+
+QString Generator::pythonOperatorFunctionName(const QString &cppOpFuncName)
+{
+    return pythonOperators().value(cppOpFuncName);
+}
 
 QString Generator::subDirectoryForClass(const AbstractMetaClass *clazz) const
 {

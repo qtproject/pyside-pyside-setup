@@ -686,64 +686,13 @@ QString ShibokenGenerator::pythonPrimitiveTypeName(const QString &cppTypeName)
     return it.value();
 }
 
-static const QHash<QString, QString> &pythonOperators()
-{
-    static const QHash<QString, QString> result = {
-        // call operator
-        {QLatin1String("operator()"), QLatin1String("call")},
-        // Arithmetic operators
-        {QLatin1String("operator+"), QLatin1String("add")},
-        {QLatin1String("operator-"), QLatin1String("sub")},
-        {QLatin1String("operator*"), QLatin1String("mul")},
-        {QLatin1String("operator/"), QLatin1String("div")},
-        {QLatin1String("operator%"), QLatin1String("mod")},
-        // Inplace arithmetic operators
-        {QLatin1String("operator+="), QLatin1String("iadd")},
-        {QLatin1String("operator-="), QLatin1String("isub")},
-        {QLatin1String("operator++"), QLatin1String("iadd")},
-        {QLatin1String("operator--"), QLatin1String("isub")},
-        {QLatin1String("operator*="), QLatin1String("imul")},
-        {QLatin1String("operator/="), QLatin1String("idiv")},
-        {QLatin1String("operator%="), QLatin1String("imod")},
-        // Bitwise operators
-        {QLatin1String("operator&"), QLatin1String("and")},
-        {QLatin1String("operator^"), QLatin1String("xor")},
-        {QLatin1String("operator|"), QLatin1String("or")},
-        {QLatin1String("operator<<"), QLatin1String("lshift")},
-        {QLatin1String("operator>>"), QLatin1String("rshift")},
-        {QLatin1String("operator~"), QLatin1String("invert")},
-        // Inplace bitwise operators
-        {QLatin1String("operator&="), QLatin1String("iand")},
-        {QLatin1String("operator^="), QLatin1String("ixor")},
-        {QLatin1String("operator|="), QLatin1String("ior")},
-        {QLatin1String("operator<<="), QLatin1String("ilshift")},
-        {QLatin1String("operator>>="), QLatin1String("irshift")},
-        // Comparison operators
-        {QLatin1String("operator=="), QLatin1String("eq")},
-        {QLatin1String("operator!="), QLatin1String("ne")},
-        {QLatin1String("operator<"), QLatin1String("lt")},
-        {QLatin1String("operator>"), QLatin1String("gt")},
-        {QLatin1String("operator<="), QLatin1String("le")},
-        {QLatin1String("operator>="), QLatin1String("ge")},
-    };
-    return result;
-}
-
-QString ShibokenGenerator::pythonOperatorFunctionName(const QString &cppOpFuncName)
-{
-    QString value = pythonOperators().value(cppOpFuncName);
-    if (value.isEmpty())
-        return unknownOperator();
-    value.prepend(QLatin1String("__"));
-    value.append(QLatin1String("__"));
-    return value;
-}
-
 QString ShibokenGenerator::pythonOperatorFunctionName(const AbstractMetaFunctionCPtr &func)
 {
-    QString op = pythonOperatorFunctionName(func->originalName());
-    if (op == unknownOperator())
+    QString op = Generator::pythonOperatorFunctionName(func->originalName());
+    if (op.isEmpty()) {
         qCWarning(lcShiboken).noquote().nospace() << msgUnknownOperator(func.data());
+        return unknownOperator();
+    }
     if (func->arguments().isEmpty()) {
         if (op == QLatin1String("__sub__"))
             op = QLatin1String("__neg__");
@@ -755,16 +704,6 @@ QString ShibokenGenerator::pythonOperatorFunctionName(const AbstractMetaFunction
         op = op.insert(2, QLatin1Char('r'));
     }
     return op;
-}
-
-QString ShibokenGenerator::pythonRichCompareOperatorId(const QString &cppOpFuncName)
-{
-    return QLatin1String("Py_") + pythonOperators().value(cppOpFuncName).toUpper();
-}
-
-QString ShibokenGenerator::pythonRichCompareOperatorId(const AbstractMetaFunctionCPtr &func)
-{
-    return pythonRichCompareOperatorId(func->originalName());
 }
 
 bool ShibokenGenerator::isNumber(const QString &cpythonApiName)

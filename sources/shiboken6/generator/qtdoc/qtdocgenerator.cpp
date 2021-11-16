@@ -108,47 +108,6 @@ static inline QVersionNumber versionOf(const TypeEntry *te)
     return QVersionNumber();
 }
 
-static const QHash<QString, QString> &operatorMapping()
-{
-    static const QHash<QString, QString> result = {
-        {QLatin1String("operator+"), QLatin1String("__add__")},
-        {QLatin1String("operator+="), QLatin1String("__iadd__")},
-        {QLatin1String("operator-"), QLatin1String("__sub__")},
-        {QLatin1String("operator-="), QLatin1String("__isub__")},
-        {QLatin1String("operator*"), QLatin1String("__mul__")},
-        {QLatin1String("operator*="), QLatin1String("__imul__")},
-        {QLatin1String("operator/"), QLatin1String("__div__")},
-        {QLatin1String("operator/="), QLatin1String("__idiv__")},
-        {QLatin1String("operator%"), QLatin1String("__mod__")},
-        {QLatin1String("operator%="), QLatin1String("__imod__")},
-        {QLatin1String("operator<<"), QLatin1String("__lshift__")},
-        {QLatin1String("operator<<="), QLatin1String("__ilshift__")},
-        {QLatin1String("operator>>"), QLatin1String("__rshift__")},
-        {QLatin1String("operator>>="), QLatin1String("__irshift__")},
-        {QLatin1String("operator&"), QLatin1String("__and__")},
-        {QLatin1String("operator&="), QLatin1String("__iand__")},
-        {QLatin1String("operator|"), QLatin1String("__or__")},
-        {QLatin1String("operator|="), QLatin1String("__ior__")},
-        {QLatin1String("operator^"), QLatin1String("__xor__")},
-        {QLatin1String("operator^="), QLatin1String("__ixor__")},
-        {QLatin1String("operator=="), QLatin1String("__eq__")},
-        {QLatin1String("operator!="), QLatin1String("__ne__")},
-        {QLatin1String("operator<"), QLatin1String("__lt__")},
-        {QLatin1String("operator<="), QLatin1String("__le__")},
-        {QLatin1String("operator>"), QLatin1String("__gt__")},
-        {QLatin1String("operator>="), QLatin1String("__ge__")},
-    };
-    return result;
-}
-
-static QString getFuncName(const AbstractMetaFunctionCPtr& cppFunc)
-{
-    const auto it = operatorMapping().constFind(cppFunc->name());
-    QString result = it != operatorMapping().cend() ? it.value() : cppFunc->name();
-    result.replace(QLatin1String("::"), QLatin1String("."));
-    return result;
-}
-
 QtDocGenerator::QtDocGenerator()
 {
     m_parameters.snippetComparison =
@@ -687,6 +646,18 @@ QString QtDocGenerator::translateToPythonType(const AbstractMetaType &type,
         strType = QStringLiteral(":any:`") + strType + QLatin1Char('`');
     }
     return strType;
+}
+
+QString QtDocGenerator::getFuncName(const AbstractMetaFunctionCPtr& cppFunc)
+{
+    QString result = cppFunc->name();
+    if (cppFunc->isOperatorOverload()) {
+        const QString pythonOperator = Generator::pythonOperatorFunctionName(result);
+        if (!pythonOperator.isEmpty())
+            return pythonOperator;
+    }
+    result.replace(u"::"_qs, u"."_qs);
+    return result;
 }
 
 void QtDocGenerator::writeParameterType(TextStream& s, const AbstractMetaClass* cppClass,

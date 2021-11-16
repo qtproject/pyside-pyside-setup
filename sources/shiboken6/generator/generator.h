@@ -288,6 +288,8 @@ protected:
                           const AbstractMetaClass *context,
                           Options options = NoOption) const;
 
+    static QString pythonOperatorFunctionName(const QString &cppOpFuncName);
+
     /**
      *   Returns the package name.
      */

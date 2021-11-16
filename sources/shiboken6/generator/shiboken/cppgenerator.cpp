@@ -4927,13 +4927,10 @@ void CppGenerator::writeRichCompareFunction(TextStream &s,
         for (const AbstractMetaFunctionCList &overloads : groupedFuncs) {
             const auto rfunc = overloads[0];
 
-            QString operatorId = ShibokenGenerator::pythonRichCompareOperatorId(rfunc);
-            s << "case " << operatorId << ':' << '\n';
+            const auto op = rfunc->comparisonOperatorType().value();
+            s << "case " << AbstractMetaFunction::pythonRichCompareOpCode(op) << ':' << '\n';
 
             Indentation indent(s);
-
-            QString op = rfunc->originalName();
-            op = op.right(op.size() - QLatin1String("operator").size());
 
             int alternativeNumericTypes = 0;
             for (const auto &func : overloads) {
@@ -4982,7 +4979,8 @@ void CppGenerator::writeRichCompareFunction(TextStream &s,
                         // expression
                         if (func->isPointerOperator())
                             s << '&';
-                        s << CPP_SELF_VAR << ' ' << op << '(';
+                        s << CPP_SELF_VAR << ' '
+                            << AbstractMetaFunction::cppComparisonOperator(op) << " (";
                         if (argType.shouldDereferenceArgument())
                             s << '*';
                         s << CPP_ARG0 << ");\n"
@@ -4998,10 +4996,10 @@ void CppGenerator::writeRichCompareFunction(TextStream &s,
             }
 
             s << " else {\n";
-            if (operatorId == QLatin1String("Py_EQ") || operatorId == QLatin1String("Py_NE")) {
+            if (op == AbstractMetaFunction::OperatorEqual || op == AbstractMetaFunction::OperatorNotEqual) {
                 Indentation indent(s);
                 s << PYTHON_RETURN_VAR << " = "
-                    << (operatorId == QLatin1String("Py_EQ") ? "Py_False" : "Py_True") << ";\n"
+                    << (op == AbstractMetaFunction::OperatorEqual ? "Py_False" : "Py_True") << ";\n"
                     << "Py_INCREF(" << PYTHON_RETURN_VAR << ");\n";
             } else {
                 Indentation indent(s);
