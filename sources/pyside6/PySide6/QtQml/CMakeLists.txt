@@ -42,6 +42,7 @@ ${QtQml_GEN_DIR}/qtqml_module_wrapper.cpp
 
 set(QtQml_include_dirs  ${QtQml_SOURCE_DIR}
                         ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
+                        ${Qt${QT_MAJOR_VERSION}Core_PRIVATE_INCLUDE_DIRS}
                         ${Qt${QT_MAJOR_VERSION}Network_INCLUDE_DIRS}
                         ${Qt${QT_MAJOR_VERSION}Qml_INCLUDE_DIRS}
                         ${Qt${QT_MAJOR_VERSION}Qml_PRIVATE_INCLUDE_DIRS}
