@@ -172,17 +172,6 @@ qt_src_dir = ''
 
 
 def prepare_build():
-    # Clean up temp build folder.
-    for n in ["build"]:
-        d = os.path.join(setup_script_dir, n)
-        if os.path.isdir(d):
-            log.info(f"Removing {d}")
-            try:
-                rmtree(d)
-            except Exception as e:
-                log.warn(f'***** problem removing "{d}"')
-                log.warn(f'ignored error: {e}')
-
     # locate Qt sources for the documentation
     if OPTION["QT_SRC"] is None:
         install_prefix = QtInfo().prefix_dir
@@ -276,8 +265,9 @@ class PysideInstallLib(_install_lib):
 
     def install(self):
         """
-        Installs files from build/xxx directory into final
-        site-packages/PySide6 directory.
+        Installs files from self.build_dir directory into final
+        site-packages/PySide6 directory when the command is 'install'
+        or into build/wheel when command is 'bdist_wheel'.
         """
 
         if os.path.isdir(self.build_dir):
@@ -448,14 +438,14 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
         log.info(dedent(f"""
         Building {config.package_name()} will create and touch directories
           in the following order:
-            make build directory (py*_build/*/*) ->
-            make install directory (py*_install/*/*) ->
-            setuptools build directory (build/*/*) ->
+            make build directory ->
+            make install directory ->
+            setuptools build directory ->
             setuptools install directory
               (usually path-installed-python/lib/python*/site-packages/*)
          """))
-        log.info(f"make build directory:   {self.build_dir}")
-        log.info(f"make install directory: {self.install_dir}")
+        log.info(f"make build directory:         {self.build_dir}")
+        log.info(f"make install directory:       {self.install_dir}")
         log.info(f"setuptools build directory:   {self.st_build_dir}")
         log.info(f"setuptools install directory: {setuptools_install_prefix}")
         log.info(dedent(f"""
@@ -822,6 +812,19 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
                 vars['cmake_package_name'] = config.shiboken_module_option_name
 
             os.chdir(self.script_dir)
+
+            # Clean up the previous st_build_dir before files are copied
+            # into it again. That's the because the same dir is used
+            # when copying the files for each of the sub-projects and
+            # we don't want to accidentally install shiboken files
+            # as part of pyside-tools package.
+            if os.path.isdir(self.st_build_dir):
+                log.info(f"Removing {self.st_build_dir}")
+                try:
+                    rmtree(self.st_build_dir)
+                except Exception as e:
+                    log.warn(f'***** problem removing "{self.st_build_dir}"')
+                    log.warn(f'ignored error: {e}')
 
             if sys.platform == "win32":
                 vars['dbg_postfix'] = OPTION["DEBUG"] and "_d" or ""
