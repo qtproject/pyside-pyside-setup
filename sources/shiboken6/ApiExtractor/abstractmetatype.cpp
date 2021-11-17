@@ -135,7 +135,9 @@ public:
     bool hasTemplateChildren() const;
     QString formatSignature(bool minimal) const;
     QString formatPythonSignature() const;
+    bool isEquivalent(const AbstractMetaTypeData &rhs) const;
     bool equals(const AbstractMetaTypeData &rhs) const;
+
     template <class Predicate>
     bool generateOpaqueContainer(Predicate p) const;
 
@@ -711,16 +713,11 @@ static bool equalsCPtr(const AbstractMetaTypeCPtr &t1, const AbstractMetaTypeCPt
     return t1.isNull() || *t1 == *t2;
 }
 
-bool AbstractMetaTypeData::equals(const AbstractMetaTypeData &rhs) const
+bool AbstractMetaTypeData::isEquivalent(const AbstractMetaTypeData &rhs) const
 {
     if (m_typeEntry != rhs.m_typeEntry
         || m_indirections != rhs.m_indirections
         || m_arrayElementCount != rhs.m_arrayElementCount) {
-        return false;
-    }
-
-    if (m_constant != rhs.m_constant || m_volatile != rhs.m_volatile
-        || m_referenceType != rhs.m_referenceType) {
         return false;
     }
 
@@ -735,9 +732,20 @@ bool AbstractMetaTypeData::equals(const AbstractMetaTypeData &rhs) const
     return true;
 }
 
+bool AbstractMetaTypeData::equals(const AbstractMetaTypeData &rhs) const
+{
+    return m_constant == rhs.m_constant && m_volatile == rhs.m_volatile
+        && m_referenceType == rhs.m_referenceType && isEquivalent(rhs);
+}
+
 bool AbstractMetaType::equals(const AbstractMetaType &rhs) const
 {
     return d->equals(*rhs.d);
+}
+
+bool AbstractMetaType::isEquivalent(const AbstractMetaType &rhs) const
+{
+    return  d->isEquivalent(*rhs.d);
 }
 
 const AbstractMetaType *AbstractMetaType::viewOn() const

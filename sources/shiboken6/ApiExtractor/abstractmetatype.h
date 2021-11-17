@@ -188,6 +188,8 @@ public:
     bool hasTemplateChildren() const;
 
     bool equals(const AbstractMetaType &rhs) const;
+    /// Is equivalent from the POV of argument passing (differ by const ref)
+    bool isEquivalent(const AbstractMetaType &rhs) const;
 
     // View on: Type to use for function argument conversion, fex
     // std::string_view -> std::string for foo(std::string_view);

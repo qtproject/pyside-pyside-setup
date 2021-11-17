@@ -1210,6 +1210,17 @@ bool AbstractMetaFunction::isComparisonOperator() const
     return d->m_functionType == ComparisonOperator;
 }
 
+bool AbstractMetaFunction::isSymmetricalComparisonOperator() const
+{
+    if (d->m_functionType != ComparisonOperator || d->m_class == nullptr)
+        return false;
+    AbstractMetaType classType(d->m_class->typeEntry());
+    classType.decideUsagePattern();
+    return std::all_of(d->m_arguments.constBegin(), d->m_arguments.constEnd(),
+                       [classType](const AbstractMetaArgument &a) {
+                           return a.type().isEquivalent(classType);});
+}
+
 bool AbstractMetaFunction::isIncDecrementOperator() const
 {
     return d->m_functionType == IncrementOperator
@@ -1338,6 +1349,8 @@ bool AbstractMetaFunction::matches(OperatorQueryOptions query) const
         break;
     case AbstractMetaFunction::ComparisonOperator:
         result = query.testFlag(OperatorQueryOption::ComparisonOp);
+        if (!result && query.testFlag(OperatorQueryOption::SymmetricalComparisonOp))
+            result = isSymmetricalComparisonOperator();
         break;
     default:
         break;

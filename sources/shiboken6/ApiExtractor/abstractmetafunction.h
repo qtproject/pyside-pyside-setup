@@ -218,6 +218,9 @@ public:
     bool isArithmeticOperator() const;
     bool isBitwiseOperator() const; // Includes shift operator
     bool isComparisonOperator() const;
+    /// Returns whether this is a comparison accepting owner class
+    /// (bool operator==(QByteArray,QByteArray) but not bool operator==(QByteArray,const char *)
+    bool isSymmetricalComparisonOperator() const;
     bool isIncDecrementOperator() const;
     bool isLogicalOperator() const;
     bool isSubscriptOperator() const;

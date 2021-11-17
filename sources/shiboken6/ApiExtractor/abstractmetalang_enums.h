@@ -58,14 +58,17 @@ Q_DECLARE_FLAGS(FunctionQueryOptions, FunctionQueryOption)
 Q_DECLARE_OPERATORS_FOR_FLAGS(FunctionQueryOptions)
 
 enum class OperatorQueryOption {
-    ArithmeticOp   = 0x01, // Arithmetic: +, -, *, /, %, +=, -=, *=, /=, %=, unary+, unary-
-    IncDecrementOp = 0x02, // ++, --
-    BitwiseOp      = 0x04, // Bitwise: <<, <<=, >>, >>=, ~, &, &=, |, |=, ^, ^=
-    ComparisonOp   = 0x08, // Comparison: <, <=, >, >=, !=, ==
-    LogicalOp      = 0x10, // Logical: !, &&, ||
-    ConversionOp   = 0x20, // Conversion: operator [const] TYPE()
-    SubscriptionOp = 0x40, // Subscription: []
-    AssignmentOp   = 0x80  // Assignment: =
+    ArithmeticOp            = 0x01, // Arithmetic: +, -, *, /, %, +=, -=, *=, /=, %=, unary+, unary-
+    IncDecrementOp          = 0x02, // ++, --
+    BitwiseOp               = 0x04, // Bitwise: <<, <<=, >>, >>=, ~, &, &=, |, |=, ^, ^=
+    ComparisonOp            = 0x08, // Comparison: <, <=, >, >=, !=, ==
+    // Comparing to instances of owner class: <, <=, >, >=, !=, ==
+    // (bool operator==(QByteArray,QByteArray) but not bool operator==(QByteArray,const char *)
+    SymmetricalComparisonOp = 0x10,
+    LogicalOp               = 0x20, // Logical: !, &&, ||
+    ConversionOp            = 0x40, // Conversion: operator [const] TYPE()
+    SubscriptionOp          = 0x80, // Subscription: []
+    AssignmentOp            = 0x100  // Assignment: =
 };
 
 Q_DECLARE_FLAGS(OperatorQueryOptions, OperatorQueryOption)
