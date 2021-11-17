@@ -49,6 +49,13 @@ public:
     };
     Q_DECLARE_FLAGS(PythonToCppTypeConversionFlags, PythonToCppTypeConversionFlag)
 
+    enum class ErrorReturn {
+        Default, // "{}"
+        Zero,
+        MinusOne,
+        Void
+    };
+
     CppGenerator();
 
     const char *name() const override { return "Source generator"; }
@@ -115,12 +122,14 @@ private:
                                              const AbstractMetaType &smartPointerType) const;
 
     void writeMethodWrapperPreamble(TextStream &s, const OverloadData &overloadData,
-                                    const GeneratorContext &context) const;
+                                    const GeneratorContext &context,
+                                    ErrorReturn errorReturn = ErrorReturn::Default) const;
     void writeConstructorWrapper(TextStream &s, const OverloadData &overloadData,
                                  const GeneratorContext &classContext) const;
     void writeMethodWrapper(TextStream &s, const OverloadData &overloadData,
                             const GeneratorContext &classContext) const;
-    static void writeArgumentsInitializer(TextStream &s, const OverloadData &overloadData);
+    static void writeArgumentsInitializer(TextStream &s, const OverloadData &overloadData,
+                                          ErrorReturn errorReturn = ErrorReturn::Default);
     static void writeCppSelfConversion(TextStream &s,
                                        const GeneratorContext &context,
                                        const QString &className,
@@ -128,19 +137,25 @@ private:
     void writeCppSelfDefinition(TextStream &s,
                                 const AbstractMetaFunctionCPtr &func,
                                 const GeneratorContext &context,
+                                ErrorReturn errorReturn,
                                 bool hasStaticOverload = false,
                                 bool hasClassMethodOverload = false) const;
     void writeCppSelfDefinition(TextStream &s,
                                 const GeneratorContext &context,
+                                ErrorReturn errorReturn = ErrorReturn::Default,
                                 bool hasStaticOverload = false,
                                 bool hasClassMethodOverload = false,
                                 bool cppSelfAsReference = false) const;
 
-    static void writeErrorSection(TextStream &s, const OverloadData &overloadData) ;
-    static void writeFunctionReturnErrorCheckSection(TextStream &s, bool hasReturnValue = true);
+    static void writeErrorSection(TextStream &s, const OverloadData &overloadData,
+                                  ErrorReturn errorReturn);
+    static void writeFunctionReturnErrorCheckSection(TextStream &s,
+                                                     ErrorReturn errorReturn,
+                                                     bool hasReturnValue = true);
 
     /// Writes the check section for the validity of wrapped C++ objects.
-    static void writeInvalidPyObjectCheck(TextStream &s, const QString &pyObj);
+    static void writeInvalidPyObjectCheck(TextStream &s, const QString &pyObj,
+                                          ErrorReturn errorReturn);
 
     void writeTypeCheck(TextStream &s, const AbstractMetaType &argType,
                         const QString &argumentName,
@@ -177,6 +192,7 @@ private:
      */
     void writeArgumentConversion(TextStream &s, const AbstractMetaType &argType,
                                  const QString &argName, const QString &pyArgName,
+                                 ErrorReturn errorReturn,
                                  const AbstractMetaClass *context = nullptr,
                                  const QString &defaultValue = QString(),
                                  bool castArgumentAsUnused = false) const;
@@ -234,13 +250,15 @@ private:
     /// Writes calls to all the possible method/function overloads.
     void writeFunctionCalls(TextStream &s,
                             const OverloadData &overloadData,
-                            const GeneratorContext &context) const;
+                            const GeneratorContext &context,
+                            ErrorReturn errorReturn) const;
 
     /// Writes the call to a single function usually from a collection of overloads.
     void writeSingleFunctionCall(TextStream &s,
                                  const OverloadData &overloadData,
                                  const AbstractMetaFunctionCPtr &func,
-                                 const GeneratorContext &context) const;
+                                 const GeneratorContext &context,
+                                 ErrorReturn errorReturn) const;
 
     /// Returns the name of a C++ to Python conversion function.
     static QString cppToPythonFunctionName(const QString &sourceTypeName, QString targetTypeName = QString());
@@ -307,7 +325,7 @@ private:
                                          QString *errorMessage = nullptr);
     void writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr &func,
                          const GeneratorContext &context, bool usesPyArgs,
-                         int maxArgs) const;
+                         int maxArgs, ErrorReturn errorReturn) const;
 
     static QString getInitFunctionName(const GeneratorContext &context) ;
     static QString getSimpleClassInitFunctionName(const AbstractMetaClass *metaClass) ;
@@ -384,8 +402,10 @@ private:
     void writeRichCompareFunction(TextStream &s, const GeneratorContext &context) const;
     void writeSmartPointerRichCompareFunction(TextStream &s, const GeneratorContext &context) const;
 
-    void writeEnumsInitialization(TextStream &s, AbstractMetaEnumList &enums) const;
-    void writeEnumInitialization(TextStream &s, const AbstractMetaEnum &metaEnum) const;
+    void writeEnumsInitialization(TextStream &s, AbstractMetaEnumList &enums,
+                                  ErrorReturn errorReturn) const;
+    void writeEnumInitialization(TextStream &s, const AbstractMetaEnum &metaEnum,
+                                 ErrorReturn errorReturn) const;
 
     static void writeSignalInitialization(TextStream &s, const AbstractMetaClass *metaClass);
 
@@ -457,7 +477,8 @@ private:
     /// Write default implementations for sequence protocol
     void writeDefaultSequenceMethods(TextStream &s, const GeneratorContext &context) const;
     /// Helper function for writeStdListWrapperMethods.
-    static void writeIndexError(TextStream &s, const QString &errorMsg);
+    static void writeIndexError(TextStream &s, const QString &errorMsg,
+                                ErrorReturn errorReturn);
 
     QString writeReprFunction(TextStream &s, const GeneratorContext &context,
                               uint indirections) const;
@@ -473,26 +494,7 @@ private:
 
     QHash<QString, QString> m_tpFuncs;
 
-    static QString m_currentErrorCode;
     static const char *PYTHON_TO_CPPCONVERSION_STRUCT;
-
-    /// Helper class to set and restore the current error code.
-    class ErrorCode {
-    public:
-        explicit ErrorCode(QString errorCode) {
-            m_savedErrorCode = CppGenerator::m_currentErrorCode;
-            CppGenerator::m_currentErrorCode = errorCode;
-        }
-        explicit ErrorCode(int errorCode) {
-            m_savedErrorCode = CppGenerator::m_currentErrorCode;
-            CppGenerator::m_currentErrorCode = QString::number(errorCode);
-        }
-        ~ErrorCode() {
-            CppGenerator::m_currentErrorCode = m_savedErrorCode;
-        }
-    private:
-        QString m_savedErrorCode;
-    };
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(CppGenerator::PythonToCppTypeConversionFlags)
