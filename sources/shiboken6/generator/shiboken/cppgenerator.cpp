@@ -5032,7 +5032,8 @@ void CppGenerator::writeRichCompareFunction(TextStream &s,
             }
 
             s << " else {\n";
-            if (op == AbstractMetaFunction::OperatorEqual || op == AbstractMetaFunction::OperatorNotEqual) {
+            if (op == AbstractMetaFunction::OperatorEqual ||
+                    op == AbstractMetaFunction::OperatorNotEqual) {
                 Indentation indent(s);
                 s << PYTHON_RETURN_VAR << " = "
                     << (op == AbstractMetaFunction::OperatorEqual ? "Py_False" : "Py_True") << ";\n"

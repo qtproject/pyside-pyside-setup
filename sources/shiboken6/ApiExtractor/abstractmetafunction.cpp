@@ -711,7 +711,8 @@ void AbstractMetaFunction::setFunctionType(AbstractMetaFunction::FunctionType ty
     d->m_functionType = type;
 }
 
-std::optional<AbstractMetaFunction::ComparisonOperatorType> AbstractMetaFunction::comparisonOperatorType() const
+std::optional<AbstractMetaFunction::ComparisonOperatorType>
+AbstractMetaFunction::comparisonOperatorType() const
 {
     if (d->m_functionType != ComparisonOperator)
         return {};
@@ -1479,7 +1480,8 @@ struct ComparisonOperator
     const char *pythonOpCode;
 };
 
-using ComparisonOperatorMapping = QHash<AbstractMetaFunction::ComparisonOperatorType, ComparisonOperator>;
+using ComparisonOperatorMapping =
+    QHash<AbstractMetaFunction::ComparisonOperatorType, ComparisonOperator>;
 
 static const ComparisonOperatorMapping &comparisonOperatorMapping()
 {
