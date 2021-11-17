@@ -54,18 +54,19 @@ from .wheel_utils import get_qt_version
 # Return a prefix suitable for the _install/_build directory
 def prefix():
     virtual_env_name = os.environ.get('VIRTUAL_ENV', None)
+    has_virtual_env = False
     if virtual_env_name is not None:
         name = os.path.basename(virtual_env_name)
+        has_virtual_env = True
     else:
-        name = "pyside"
-    name += str(sys.version_info[0])
+        name = "qfp"
     if OPTION["DEBUG"]:
         name += "d"
     if is_debug_python():
         name += "p"
     if OPTION["LIMITED_API"] == "yes":
         name += "a"
-    return name
+    return name, has_virtual_env
 
 
 def is_debug_python():
@@ -222,13 +223,35 @@ class BuildInfoCollectorMixin(object):
             pypy_version = ".".join(map(str, sys.pypy_version_info[:3]))
             self.build_classifiers += f"-pypy.{pypy_version}"
 
-        if OPTION["SHORTER_PATHS"]:
-            build_name = f"p{py_version}"
-        else:
-            build_name = self.build_classifiers
+        venv_prefix, has_virtual_env = prefix()
 
-        build_dir = os.path.join(script_dir, f"{prefix()}_build", f"{build_name}")
-        install_dir = os.path.join(script_dir, f"{prefix()}_install", f"{build_name}")
+        # The virtualenv name serves as the base of the build dir
+        # and we consider it is distinct enough that we don't have to
+        # append the build classifiers, thus keeping dir names shorter.
+        build_name = f"{venv_prefix}"
+
+        # If short paths are requested and no virtual env is found, at
+        # least append the python version for more uniqueness.
+        if OPTION["SHORTER_PATHS"] and not has_virtual_env:
+            build_name += f"-p{py_version}"
+        # If no virtual env is found, use build classifiers for
+        # uniqueness.
+        elif not has_virtual_env:
+            build_name += f"-{self.build_classifiers}"
+
+        common_prefix_dir = os.path.join(script_dir, build_base)
+        build_dir = os.path.join(common_prefix_dir, build_name, "build")
+        install_dir = os.path.join(common_prefix_dir, build_name, "install")
+
+        # Change the setuptools build_lib dir to be under the same
+        # directory where the cmake build and install dirs are so
+        # there's a common subdirectory for all build-related dirs.
+        # Example:
+        # Replaces
+        #   build/lib.macosx-10.14-x86_64-3.7' with
+        #   build/{venv_prefix}/package'
+        setup_tools_build_lib_dir = os.path.join(common_prefix_dir, build_name, "package")
+        self.build_lib = setup_tools_build_lib_dir
 
         self.script_dir = script_dir
         self.sources_dir = sources_dir
