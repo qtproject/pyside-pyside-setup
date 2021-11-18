@@ -150,7 +150,7 @@ int PySide::qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
                                               reinterpret_cast<PyTypeObject *>(pyObj)));
         type.objectSize = objectSize;
         type.create = creatable ? createInto : nullptr;
-        type.noCreationReason = noCreationReason;
+        type.noCreationReason = QString::fromUtf8(noCreationReason);
         type.userdata = pyObj;
         type.uri = uri;
         type.version = QTypeRevision::fromVersion(versionMajor, versionMinor);
