@@ -68,7 +68,10 @@
     extern "C" PyObject *PyInit_AppLib();
 #else
     extern "C" void initAppLib();
+# define PyInit_AppLib initAppLib
 #endif
+
+static const char moduleName[] = "AppLib";
 
 // This variable stores all Python types exported by this module.
 extern PyTypeObject **SbkAppLibTypes;
@@ -112,6 +115,11 @@ State init()
 
     if (qEnvironmentVariableIsSet(virtualEnvVar))
         initVirtualEnvironment();
+
+    if (PyImport_AppendInittab(moduleName, PyInit_AppLib) == -1) {
+        qWarning("Failed to add the module '%s' to the table of built-in modules.", moduleName);
+        return state;
+    }
 
     Py_Initialize();
     qAddPostRoutine(cleanup);

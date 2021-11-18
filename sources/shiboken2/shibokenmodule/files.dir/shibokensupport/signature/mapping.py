@@ -39,6 +39,12 @@ from shibokensupport.signature import typing
 from shibokensupport.signature.typing import TypeVar, Generic
 from shibokensupport.signature.lib.tool import with_metaclass
 
+if sys.version_info[0] == 3:
+    # Avoid a deprecation warning
+    from _imp import is_builtin
+else:
+    from imp import is_builtin
+
 class ellipsis(object):
     def __repr__(self):
         return "..."
@@ -163,7 +169,8 @@ class Reloader(object):
         if getattr(mod, "__file__", None) and not os.path.isdir(mod.__file__):
             ending = os.path.splitext(mod.__file__)[-1]
             return ending not in (".py", ".pyc", ".pyo", ".pyi")
-        return False
+        # Python 2 leaves lots of empty crap in sys.modules
+        return bool(hasattr(mod, "__name__") and is_builtin(mod.__name__))
 
     def update(self):
         """

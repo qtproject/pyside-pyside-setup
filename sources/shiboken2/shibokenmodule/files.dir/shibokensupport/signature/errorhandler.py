@@ -78,12 +78,11 @@ def matched_type(args, sigs):
 
 
 def seterror_argument(args, func_name, info):
-    func = None
     try:
         func = eval(func_name, namespace)
     except Exception as e:
-        msg = "Internal error evaluating {func_name}: {e}".format(**locals())
-        return TypeError, msg
+        msg = "Error evaluating `{func_name}`: {e}".format(**locals())
+        return type(e), msg
     if info and type(info) is str:
         err = TypeError
         if info == "<":
