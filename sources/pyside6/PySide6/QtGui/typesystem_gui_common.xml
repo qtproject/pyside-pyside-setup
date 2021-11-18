@@ -444,6 +444,12 @@
   </value-type>
   <value-type name="QRegion" >
     <enum-type name="RegionType"/>
+    <add-function signature="__len__">
+        <inject-code class="target" position="beginning" file="../glue/qtgui.cpp" snippet="qregion-len"/>
+    </add-function>
+    <add-function signature="__getitem__">
+        <inject-code class="target" position="beginning" file="../glue/qtgui.cpp" snippet="qregion-getitem"/>
+    </add-function>
     <!-- ### This operator does not make sense in Python. -->
     <modify-function signature="operator&amp;=(QRegion)" remove="all"/>
     <modify-function signature="operator&amp;=(QRect)" remove="all"/>

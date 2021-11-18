@@ -718,6 +718,20 @@ else
 %PYARG_0 = %CONVERTTOPYTHON[int](cppResult);
 // @snippet qdrag-exec-arg2
 
+// @snippet qregion-len
+return %CPPSELF.rectCount();
+// @snippet qregion-len
+
+// @snippet qregion-getitem
+if (_i < 0 || _i >= %CPPSELF.rectCount()) {
+    PyErr_SetString(PyExc_IndexError, "index out of bounds");
+    return nullptr;
+}
+
+const QRect cppResult = *(%CPPSELF.cbegin() + _i);
+return %CONVERTTOPYTHON[QRect](cppResult);
+// @snippet qregion-getitem
+
 /*********************************************************************
  * CONVERSIONS
  ********************************************************************/
