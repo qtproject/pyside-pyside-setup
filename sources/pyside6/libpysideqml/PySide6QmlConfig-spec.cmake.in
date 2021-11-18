@@ -1,0 +1,7 @@
+@PACKAGE_INIT@
+
+# Import targets only when using an installed PySide6 config file (so not during a regular
+# PySide6 build, or during a super project build).
+if (NOT TARGET PySide6::pyside6qml)
+    include("${CMAKE_CURRENT_LIST_DIR}/PySide6QmlTargets.cmake")
+endif()

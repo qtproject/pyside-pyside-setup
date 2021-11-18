@@ -37,7 +37,7 @@
 **
 ****************************************************************************/
 
-#include "pysideqmllistproperty.h"
+#include "pysideqmllistproperty_p.h"
 #include "pysideqmlregistertype_p.h"
 
 #include <shiboken.h>

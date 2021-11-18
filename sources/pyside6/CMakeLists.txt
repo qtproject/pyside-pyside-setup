@@ -9,6 +9,11 @@ project(pysidebindings)
 include(cmake/PySideSetup.cmake)
 
 add_subdirectory(libpyside)
+
+if(Qt${QT_MAJOR_VERSION}Qml_FOUND)
+    add_subdirectory(libpysideqml)
+endif()
+
 find_package(Qt${QT_MAJOR_VERSION}Designer)
 if(Qt${QT_MAJOR_VERSION}UiTools_FOUND AND Qt${QT_MAJOR_VERSION}Designer_FOUND)
     add_subdirectory(plugins/uitools)

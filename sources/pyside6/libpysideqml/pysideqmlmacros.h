@@ -37,60 +37,18 @@
 **
 ****************************************************************************/
 
-#include "pysideqmlmetacallerror_p.h"
+#ifndef PYSIDEQMLMACROS_H
+#define PYSIDEQMLMACROS_H
 
-#include <sbkpython.h>
-#include <sbkstring.h>
-#include <autodecref.h>
+#include <shibokenmacros.h>
 
-#include <QtCore/QObject>
-#include <QtCore/QString>
+#define PYSIDEQML_EXPORT LIBSHIBOKEN_EXPORT
+#define PYSIDEQML_IMPORT LIBSHIBOKEN_IMPORT
 
-#include <QtQml/QQmlEngine>
-#include <QtQml/QQmlListProperty>
-
-#if __has_include (<private/qv4engine_p.h>)
-#  define QML_PRIVATE_API_SUPPORT
-#  include <private/qv4engine_p.h>
-#  include <private/qv4context_p.h>
-#  include <private/qqmldata_p.h>
+#ifdef BUILD_LIBPYSIDEQML
+#  define PYSIDEQML_API PYSIDEQML_EXPORT
+#else
+#  define PYSIDEQML_API PYSIDEQML_IMPORT
 #endif
 
-namespace PySide {
-
-std::optional<int> qmlMetaCallErrorHandler(QObject *object)
-{
-#ifdef QML_PRIVATE_API_SUPPORT
-    // This JS engine grabber based off of Qt 5.5's `qjsEngine` function
-    QQmlData *data = QQmlData::get(object, false);
-    if (!data || data->jsWrapper.isNullOrUndefined())
-        return {};
-
-    QV4::ExecutionEngine *engine = data->jsWrapper.engine();
-    if (engine->currentStackFrame == nullptr)
-        return {};
-
-    PyObject *errType, *errValue, *errTraceback;
-    PyErr_Fetch(&errType, &errValue, &errTraceback);
-    // PYSIDE-464: The error is only valid before PyErr_Restore,
-    // PYSIDE-464: therefore we take local copies.
-    Shiboken::AutoDecRef objStr(PyObject_Str(errValue));
-    const QString errString = QLatin1String(Shiboken::String::toCString(objStr));
-    const bool isSyntaxError = errType == PyExc_SyntaxError;
-    const bool isTypeError = errType == PyExc_TypeError;
-    PyErr_Restore(errType, errValue, errTraceback);
-
-    PyErr_Print();    // Note: PyErr_Print clears the error.
-
-    if (isSyntaxError)
-        return engine->throwSyntaxError(errString);
-    if (isTypeError)
-        return engine->throwTypeError(errString);
-    return engine->throwError(errString);
-#else
-    Q_UNUSED(object);
-    return {};
-#endif //  QML_PRIVATE_API_SUPPORT
-}
-
-} // namespace PySide
+#endif // PYSIDEQMLMACROS_H

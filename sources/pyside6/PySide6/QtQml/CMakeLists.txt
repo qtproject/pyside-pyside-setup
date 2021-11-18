@@ -1,10 +1,6 @@
 project(QtQml)
 
-set(QtQml_static_sources "${QtQml_SOURCE_DIR}/pysideqmlregistertype.cpp"
-                         "${QtQml_SOURCE_DIR}/pysideqmlmetacallerror.cpp"
-                         "${QtQml_SOURCE_DIR}/pysideqmllistproperty.cpp"
-                         "${QtQml_SOURCE_DIR}/pysideqmluncreatable.cpp"
-                         "${QtQml_SOURCE_DIR}/pysideqmlvolatilebool.cpp")
+set(QtQml_static_sources "${QtQml_SOURCE_DIR}/pysideqmlvolatilebool.cpp")
 
 set(QtQml_SRC
 ${QtQml_GEN_DIR}/qjsengine_wrapper.cpp
@@ -47,11 +43,12 @@ set(QtQml_include_dirs  ${QtQml_SOURCE_DIR}
                         ${Qt${QT_MAJOR_VERSION}Qml_INCLUDE_DIRS}
                         ${Qt${QT_MAJOR_VERSION}Qml_PRIVATE_INCLUDE_DIRS}
                         ${libpyside_SOURCE_DIR}
+                        ${libpysideqml_SOURCE_DIR}
                         ${QtCore_GEN_DIR}
                         ${QtNetwork_GEN_DIR}
                         ${QtQml_GEN_DIR})
 
-set(QtQml_libraries pyside6
+set(QtQml_libraries pyside6 pyside6qml
                     ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
                     ${Qt${QT_MAJOR_VERSION}Network_LIBRARIES}
                     ${Qt${QT_MAJOR_VERSION}Qml_LIBRARIES})

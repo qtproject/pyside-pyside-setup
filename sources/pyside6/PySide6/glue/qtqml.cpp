@@ -73,10 +73,8 @@ int %0 = PySide::qmlRegisterType(%ARGUMENT_NAMES, false);
 // @snippet qmlregisteruncreatabletype
 
 // @snippet init
-initQtQmlListProperty(module);
-initQmlUncreatable(module);
+PySide::Qml::init(module);
 initQtQmlVolatileBool(module);
-PySide::SignalManager::setQmlMetaCallErrorHandler(PySide::qmlMetaCallErrorHandler);
 // @snippet init
 
 // @snippet qjsengine-toscriptvalue

@@ -75,7 +75,8 @@ def _init_test_paths(shiboken_tests=False, testbindings_module=False):
 
     pyside_build_dir = os.path.join(get_build_dir(), 'pyside6')
     python_dirs.append(pyside_build_dir)   # for PySide6
-    lib_dirs = [os.path.join(pyside_build_dir, 'libpyside')]
+    lib_dirs = [os.path.join(pyside_build_dir, 'libpyside'),
+                os.path.join(pyside_build_dir, 'libpysideqml')]
 
     if testbindings_module:
         python_dirs.append(os.path.join(pyside_build_dir,
