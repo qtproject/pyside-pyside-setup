@@ -43,10 +43,7 @@
 #include <pyside_p.h>
 #include <shiboken.h>
 
-// TODO: Remove this ifdef once 6.1.0 is released
-#if (QT_VERSION >= QT_VERSION_CHECK(6, 2, 0))
 #include <QtQml/private/qqmlmetatype_p.h>
-#endif
 
 // Auto generated headers.
 #include "qquickitem_wrapper.h"
@@ -85,8 +82,6 @@ bool pyTypeObjectInheritsFromClass(PyTypeObject *pyObjType, QByteArray className
     return isDerived;
 }
 
-// TODO: Remove this ifdef once 6.1.0 is released
-#if (QT_VERSION >= QT_VERSION_CHECK(6, 2, 0))
 template <typename T>
 struct QPysideQmlMetaTypeInterface : public QQmlMetaTypeInterface
 {
@@ -102,49 +97,6 @@ struct QPysideQmlMetaTypeInterface : public QQmlMetaTypeInterface
         metaObjectFn = metaObjectFun;
     }
 };
-#else
-// TODO: Remove this case once 6.1.0 is released!
-template <typename T>
-struct QPysideQmlMetaTypeInterface : QtPrivate::QMetaTypeInterface
-{
-    const QByteArray name;
-    const QMetaObject *metaObject;
-
-    static const QMetaObject *metaObjectFn(const QMetaTypeInterface *mti)
-    {
-        return static_cast<const QPysideQmlMetaTypeInterface *>(mti)->metaObject;
-    }
-
-    QPysideQmlMetaTypeInterface(const QByteArray &name, const QMetaObject *metaObjectIn = nullptr)
-        : QMetaTypeInterface {
-            /*.revision=*/ 0,
-            /*.alignment=*/ alignof(T),
-            /*.size=*/ sizeof(T),
-            /*.flags=*/ QtPrivate::QMetaTypeTypeFlags<T>::Flags,
-            /*.typeId=*/ 0,
-            /*.metaObjectFn=*/ metaObjectFn,
-            /*.name=*/ name.constData(),
-            /*.defaultCtr=*/ [](const QMetaTypeInterface *, void *addr) { new (addr) T(); },
-            /*.copyCtr=*/ [](const QMetaTypeInterface *, void *addr, const void *other) {
-                new (addr) T(*reinterpret_cast<const T *>(other));
-            },
-            /*.moveCtr=*/ [](const QMetaTypeInterface *, void *addr, void *other) {
-                new (addr) T(std::move(*reinterpret_cast<T *>(other)));
-            },
-            /*.dtor=*/ [](const QMetaTypeInterface *, void *addr) {
-                reinterpret_cast<T *>(addr)->~T();
-            },
-            /*.equals=*/ nullptr,
-            /*.lessThan=*/ nullptr,
-            /*.debugStream=*/ nullptr,
-            /*.dataStreamOut=*/ nullptr,
-            /*.dataStreamIn=*/ nullptr,
-            /*.legacyRegisterOp=*/ nullptr
-        }
-        , name(name), metaObject(metaObjectIn) {}
-};
-
-#endif
 
 template <class WrapperClass>
 void registerTypeIfInheritsFromClass(
@@ -161,12 +113,7 @@ void registerTypeIfInheritsFromClass(
 
         QMetaType ptrType(new QPysideQmlMetaTypeInterface<WrapperClass *>(typePointerName, typeMetaObject));
 
-    // TODO: Remove this ifdef once 6.1.0 is released
-#if (QT_VERSION >= QT_VERSION_CHECK(6, 2, 0))
         QMetaType lstType(new QQmlListMetaTypeInterface(typeListName, static_cast<QQmlListProperty<WrapperClass>*>(nullptr), ptrType.iface()));
-#else
-        QMetaType lstType(new QPysideQmlMetaTypeInterface<QQmlListProperty<WrapperClass>>(typeListName));
-#endif
 
         type->typeId = std::move(ptrType);
         type->listId = std::move(lstType);
