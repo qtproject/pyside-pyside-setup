@@ -43,15 +43,12 @@
 #include <pyside_p.h>
 #include <shiboken.h>
 
+#include <QtQuick/QQuickPaintedItem>
+#include <QtQuick/QQuickFramebufferObject>
+
 #include <QtQml/private/qqmlmetatype_p.h>
 
-// Auto generated headers.
-#include "qquickitem_wrapper.h"
-#include "qquickpainteditem_wrapper.h"
-#include "qquickframebufferobject_wrapper.h"
-#include "pyside6_qtcore_python.h"
-#include "pyside6_qtquick_python.h"
-#include "pyside6_qtqml_python.h"
+#include <QtCore/QMutex>
 
 // Mutex used to avoid race condition on PySide::nextQObjectMemoryAddr.
 static QMutex nextQmlElementMutex;
@@ -66,12 +63,6 @@ static void createQuickItem(void *memory, void *type)
         PyErr_Print();
     PySide::setNextQObjectMemoryAddr(0);
 }
-
-#define PY_REGISTER_IF_INHERITS_FROM(className, typeToRegister,typePointerName, \
-                                     typeListName, typeMetaObject, type, registered) \
-        registerTypeIfInheritsFromClass<className##Wrapper>(#className, typeToRegister, \
-                                                            typePointerName, typeListName, \
-                                                            typeMetaObject, type, registered)
 
 bool pyTypeObjectInheritsFromClass(PyTypeObject *pyObjType, QByteArray className)
 {
@@ -98,9 +89,9 @@ struct QPysideQmlMetaTypeInterface : public QQmlMetaTypeInterface
     }
 };
 
-template <class WrapperClass>
+template <class WrappedClass>
 void registerTypeIfInheritsFromClass(
-        QByteArray className,
+        const QByteArray &className,
         PyTypeObject *typeToRegister,
         const QByteArray &typePointerName,
         const QByteArray &typeListName,
@@ -111,22 +102,24 @@ void registerTypeIfInheritsFromClass(
     bool shouldRegister = !registered && pyTypeObjectInheritsFromClass(typeToRegister, className);
     if (shouldRegister) {
 
-        QMetaType ptrType(new QPysideQmlMetaTypeInterface<WrapperClass *>(typePointerName, typeMetaObject));
+        QMetaType ptrType(new QPysideQmlMetaTypeInterface<WrappedClass *>(typePointerName, typeMetaObject));
 
-        QMetaType lstType(new QQmlListMetaTypeInterface(typeListName, static_cast<QQmlListProperty<WrapperClass>*>(nullptr), ptrType.iface()));
+        QMetaType lstType(new QQmlListMetaTypeInterface(typeListName, static_cast<QQmlListProperty<WrappedClass>*>(nullptr), ptrType.iface()));
 
         type->typeId = std::move(ptrType);
         type->listId = std::move(lstType);
-        type->attachedPropertiesFunction = QQmlPrivate::attachedPropertiesFunc<WrapperClass>();
+        type->attachedPropertiesFunction = QQmlPrivate::attachedPropertiesFunc<WrappedClass>();
         type->attachedPropertiesMetaObject =
-                QQmlPrivate::attachedPropertiesMetaObject<WrapperClass>();
+                QQmlPrivate::attachedPropertiesMetaObject<WrappedClass>();
         type->parserStatusCast =
-                QQmlPrivate::StaticCastSelector<WrapperClass, QQmlParserStatus>::cast();
+                QQmlPrivate::StaticCastSelector<WrappedClass, QQmlParserStatus>::cast();
         type->valueSourceCast =
-                QQmlPrivate::StaticCastSelector<WrapperClass, QQmlPropertyValueSource>::cast();
+                QQmlPrivate::StaticCastSelector<WrappedClass, QQmlPropertyValueSource>::cast();
         type->valueInterceptorCast =
-                QQmlPrivate::StaticCastSelector<WrapperClass, QQmlPropertyValueInterceptor>::cast();
-        type->objectSize = sizeof(WrapperClass);
+                QQmlPrivate::StaticCastSelector<WrappedClass, QQmlPropertyValueInterceptor>::cast();
+        // Pass the size of the generated wrapper class (larger than the plain
+        // Qt class due to virtual method cache) since that is what is instantiated.
+        type->objectSize = int(PySide::getSizeOfQObject(typeToRegister));
         registered = true;
     }
 }
@@ -163,12 +156,16 @@ bool quickRegisterType(PyObject *pyObj, const char *uri, int versionMajor, int v
     listName.append('>');
 
     bool registered = false;
-    PY_REGISTER_IF_INHERITS_FROM(QQuickPaintedItem, pyObjType, pointerName, listName, metaObject,
-                                 type, registered);
-    PY_REGISTER_IF_INHERITS_FROM(QQuickFramebufferObject, pyObjType, pointerName, listName,
-                                 metaObject, type, registered);
-    PY_REGISTER_IF_INHERITS_FROM(QQuickItem, pyObjType, pointerName, listName, metaObject,
-                                 type, registered);
+    // Pass the size of the generated wrapper class since that is what is instantiated.
+    registerTypeIfInheritsFromClass<QQuickPaintedItem>(
+        "QQuickPaintedItem", pyObjType, pointerName, listName,
+        metaObject, type, registered);
+    registerTypeIfInheritsFromClass<QQuickFramebufferObject>(
+        "QQuickFramebufferObject", pyObjType, pointerName, listName,
+        metaObject, type, registered);
+    registerTypeIfInheritsFromClass<QQuickItem>(
+        "QQuickItem", pyObjType, pointerName, listName,
+        metaObject, type, registered);
     if (!registered)
         return false;
 
