@@ -1,0 +1,9 @@
+{
+    "files": [
+        "main.py",
+        "gradienttexture.py",
+        "ProceduralTextureModule/qmldir",
+        "ProceduralTextureModule/Main.qml",
+        "ProceduralTextureModule/app.qrc"
+    ]
+}
