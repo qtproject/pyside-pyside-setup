@@ -273,8 +273,10 @@ void GlobalReceiverV2::notify()
 #endif
     Py_BEGIN_ALLOW_THREADS
     for (const QObject *o : objSet) {
-        QMetaObject::disconnect(o, DESTROY_SIGNAL_ID, this, DESTROY_SLOT_ID);
-        QMetaObject::connect(o, DESTROY_SIGNAL_ID, this, DESTROY_SLOT_ID);
+        if (o) {
+            QMetaObject::disconnect(o, DESTROY_SIGNAL_ID, this, DESTROY_SLOT_ID);
+            QMetaObject::connect(o, DESTROY_SIGNAL_ID, this, DESTROY_SLOT_ID);
+        }
     }
     Py_END_ALLOW_THREADS
 }
