@@ -262,7 +262,7 @@ void GlobalReceiverV2::incRef(const QObject *link)
 
 void GlobalReceiverV2::decRef(const QObject *link)
 {
-    if (m_refs.empty())
+    if (m_refs.isEmpty())
         return;
 
 
@@ -279,7 +279,7 @@ void GlobalReceiverV2::decRef(const QObject *link)
         }
     }
 
-    if (m_refs.empty())
+    if (m_refs.isEmpty())
         Py_BEGIN_ALLOW_THREADS
         delete this;
         Py_END_ALLOW_THREADS
@@ -339,7 +339,7 @@ int GlobalReceiverV2::qt_metacall(QMetaObject::Call call, int id, void **args)
     }
 
     if (id == DESTROY_SLOT_ID) {
-        if (m_refs.empty())
+        if (m_refs.isEmpty())
             return -1;
         auto obj = *reinterpret_cast<QObject **>(args[1]);
         incRef(); //keep the object live (safe ref)
