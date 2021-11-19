@@ -104,8 +104,8 @@ def seterror_argument(args, func_name, info):
     try:
         func = eval(func_name, namespace)
     except Exception as e:
-        msg = f"Internal error evaluating {func_name}: " + str(e)
-        return TypeError, msg
+        msg = f"Error evaluating `{func_name}`: {e}"
+        return type(e), msg
     if info and type(info) is str:
         err = TypeError
         if info == "<":

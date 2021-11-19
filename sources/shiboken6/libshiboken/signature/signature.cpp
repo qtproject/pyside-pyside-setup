@@ -512,9 +512,10 @@ static PyObject *adjustFuncName(const char *func_name)
         return nullptr;
 
     // Run `eval` on the type string to get the object.
+    // PYSIDE-1710: If the eval does not work, return the given string.
     AutoDecRef obtype(PyRun_String(_path, Py_eval_input, ns, ns));
     if (obtype.isNull())
-        return nullptr;
+        return String::fromCString(func_name);
 
     if (PyModule_Check(obtype.object())) {
         // This is a plain function. Return the unmangled name.
