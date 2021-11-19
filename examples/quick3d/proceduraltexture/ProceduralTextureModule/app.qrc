@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/qt/qml/ProceduralTextureModule">
+        <file>qmldir</file>
+        <file>Main.qml</file>
+    </qresource>
+</RCC>
