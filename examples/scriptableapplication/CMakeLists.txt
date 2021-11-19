@@ -18,7 +18,7 @@ find_package(Qt6 COMPONENTS Widgets)
 
 # Use provided python interpreter if given.
 if(NOT python_interpreter)
-    find_program(python_interpreter "python")
+    find_program(python_interpreter NAMES python3 python)
 endif()
 message(STATUS "Using python interpreter: ${python_interpreter}")
 
