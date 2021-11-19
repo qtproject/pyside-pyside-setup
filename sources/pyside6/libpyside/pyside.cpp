@@ -360,7 +360,7 @@ PyObject *getMetaDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *nam
                     }
                 }
             }
-            if (!signalList.empty()) {
+            if (!signalList.isEmpty()) {
                 PyObject *pySignal = reinterpret_cast<PyObject *>(Signal::newObjectFromMethod(self, signalList));
                 PyObject_SetAttr(self, name, pySignal);
                 return pySignal;
