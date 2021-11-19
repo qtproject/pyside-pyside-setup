@@ -955,6 +955,7 @@ class PysideBuild(_build, DistUtilsCommandMixin):
                 "py_version": self.py_version,
                 "qt_version": self.qtinfo.version,
                 "qt_bin_dir": self.qtinfo.bins_dir,
+                "qt_data_dir": self.qtinfo.data_dir,
                 "qt_doc_dir": self.qtinfo.docs_dir,
                 "qt_lib_dir": self.qtinfo.libs_dir,
                 "qt_lib_execs_dir": self.qtinfo.lib_execs_dir,

@@ -160,7 +160,7 @@ def prepare_standalone_package_macos(self, vars):
                 recursive=True, vars=vars, force_copy_symlinks=True)
 
         if self.is_webengine_built(built_modules):
-            copydir("{qt_prefix_dir}/resources",
+            copydir("{qt_data_dir}/resources",
                     "{st_build_dir}/{st_package_name}/Qt/resources",
                     filter=None,
                     recursive=False,

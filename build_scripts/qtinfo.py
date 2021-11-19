@@ -105,6 +105,10 @@ class QtInfo(object):
             return self.get_property("QT_INSTALL_BINS")
 
         @property
+        def data_dir(self):
+            return self.get_property("QT_INSTALL_DATA")
+
+        @property
         def libs_dir(self):
             return self.get_property("QT_INSTALL_LIBS")
 
