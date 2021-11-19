@@ -54,7 +54,7 @@ import typing
 
 from pathlib import Path
 from typing import TypeVar, Generic
-from shibokensupport.signature.lib.tool import with_metaclass
+from _imp import is_builtin
 
 class ellipsis(object):
     def __repr__(self):
@@ -179,7 +179,7 @@ class Reloader(object):
         if getattr(mod, "__file__", None) and not Path(mod.__file__).is_dir():
             ending = Path(mod.__file__).suffix
             return ending not in (".py", ".pyc", ".pyo", ".pyi")
-        return False
+        return bool(is_builtin(mod.__name__))
 
     def update(self):
         """
