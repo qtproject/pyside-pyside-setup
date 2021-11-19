@@ -1,7 +1,7 @@
 Signals and Slots
 =================
 
-Due to the nature of Qt, ``QObject``s require a way to communicate, and that's
+Due to the nature of Qt, ``QObject``\s require a way to communicate, and that's
 the reason for this mechanism to be a **central feature of Qt**.
 
 In simple terms, you can understand **Signal and Slots** in the same way you

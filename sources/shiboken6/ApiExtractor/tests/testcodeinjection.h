@@ -42,6 +42,7 @@ private slots:
     void testInjectWithValidApiVersion();
     void testInjectWithInvalidApiVersion();
     void testTextStream();
+    void testTextStreamRst();
 };
 
 #endif

@@ -75,6 +75,12 @@ qint64 TextStream::pos() const
     return m_str.pos();
 }
 
+void TextStream::setString(QString *string, QIODeviceBase::OpenMode openMode)
+{
+    m_str.setString(string, openMode);
+    m_rstFormattingEnd = false;
+}
+
 void TextStream::putRepetitiveChars(char c, int count)
 {
     if (count > 0) {
@@ -85,6 +91,11 @@ void TextStream::putRepetitiveChars(char c, int count)
             m_str.setFieldWidth(ofw);
         }
     }
+}
+
+void TextStream::_setRstFormattingEnd()
+{
+    m_rstFormattingEnd = true;
 }
 
 void TextStream::setLastCharClass(CharClass c)
@@ -110,6 +121,11 @@ static TextStream::CharClass charClassHelper(Char c)
         return TextStream::CharClass::NewLine;
     case '#':
         return TextStream::CharClass::Hash;
+    case ' ':
+    case '\t':
+        return TextStream::CharClass::Space;
+    case '\\':
+        return TextStream::CharClass::BackSlash;
     default:
         break;
     }
@@ -124,6 +140,13 @@ static inline TextStream::CharClass charClass(QChar c)
 
 void TextStream::checkIndent(CharClass upComingCharClass)
 {
+    if (m_rstFormattingEnd) {
+        if (upComingCharClass != CharClass::Space && upComingCharClass != CharClass::NewLine
+            && upComingCharClass != CharClass::BackSlash) {
+            m_str << '\\';
+        }
+        m_rstFormattingEnd = false;
+    }
     if (m_indentationEnabled && m_lastCharClass == CharClass::NewLine
         && (upComingCharClass != CharClass::NewLine
             && (m_language != Language::Cpp || upComingCharClass != CharClass::Hash))) {
@@ -135,7 +158,8 @@ void TextStream::checkIndent(CharClass upComingCharClass)
 template <class Char>
 void TextStream::putCharHelper(Char c)
 {
-    checkIndent(charClass(c));
+    const auto klass = charClass(c);
+    checkIndent(klass);
     m_str << c;
 }
 
@@ -150,7 +174,8 @@ void TextStream::putString(QStringView v)
         // If there is no newline, write as a blob. This is important to make
         // field formatting (alignment/width) working, else each char will be
         // considered a field.
-        checkIndent(charClass(*v.cbegin()));
+        const auto klass = charClass(*v.cbegin());
+        checkIndent(klass);
         m_str << v;
         m_lastCharClass = CharClass::Other;
     }
@@ -227,4 +252,37 @@ void ensureEndl(TextStream &s)
 {
     if (s.lastChar() != QLatin1Char('\n'))
         s << '\n';
+}
+
+void rstBold(TextStream &s)
+{
+    s.putRawString("**");
+}
+
+void rstBoldOff(TextStream &s)
+{
+    s.putRawString("**");
+    s._setRstFormattingEnd();
+}
+
+void rstItalic(TextStream &s)
+{
+    s.putRawChar('*');
+}
+
+void rstItalicOff(TextStream &s)
+{
+    s.putRawChar('*');
+    s._setRstFormattingEnd();
+}
+
+void rstCode(TextStream &s)
+{
+    s.putRawString("``");
+}
+
+void rstCodeOff(TextStream &s)
+{
+    s.putRawString("``");
+    s._setRstFormattingEnd();
 }

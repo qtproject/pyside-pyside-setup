@@ -46,7 +46,7 @@ public:
 
     enum class CharClass
     {
-        Other, NewLine, Hash
+        Other, NewLine, Space, Hash, BackSlash
     };
 
     explicit TextStream(QIODevice *device, Language l = Language::None);
@@ -79,8 +79,7 @@ public:
     { return m_str.fieldAlignment();  }
     void setFieldAlignment(QTextStream::FieldAlignment al)
     { m_str.setFieldAlignment(al); }
-    void setString(QString *string, QIODeviceBase::OpenMode openMode = QIODeviceBase::ReadWrite)
-    { m_str.setString(string, openMode); }
+    void setString(QString *string, QIODeviceBase::OpenMode openMode = QIODeviceBase::ReadWrite);
     QString *string() const { return m_str.string(); }
     void flush() { m_str.flush(); }
     void setDevice(QIODevice *device) { m_str.setDevice(device); }
@@ -98,6 +97,9 @@ public:
     void putInt(int t);
     void putSizeType(qsizetype t);
 
+    void putRawString(const char *s) { m_str << s; }
+    void putRawChar(char c) { m_str << c; }
+
     TextStream &operator<<(QStringView v) { putString(v); return *this; }
     TextStream &operator<<(QChar c) { putChar(c); return *this; }
     TextStream &operator<<(const char *s) { putString(s); return *this; }
@@ -111,6 +113,8 @@ public:
     inline TextStream &operator<<(ManipulatorFunc f) { f(*this); return *this; }
 
     void putRepetitiveChars(char c, int count);
+
+    void _setRstFormattingEnd();
 
 protected:
     void setLastCharClass(CharClass c);
@@ -126,6 +130,7 @@ private:
     int m_tabWidth = 4;
     int m_indentation = 0;
     bool m_indentationEnabled = true;
+    bool m_rstFormattingEnd = false; // just past some **bla** where '\' needs to be enforced
     Language m_language;
 };
 
@@ -151,6 +156,13 @@ void enableIndent(TextStream &s);
 void disableIndent(TextStream &s);
 // Works only for streams on strings
 void ensureEndl(TextStream &s);
+
+void rstBold(TextStream &s);
+void rstBoldOff(TextStream &s);
+void rstCode(TextStream &s);
+void rstCodeOff(TextStream &s);
+void rstItalic(TextStream &s);
+void rstItalicOff(TextStream &s);
 
 /// Format an aligned field
 template <class T>

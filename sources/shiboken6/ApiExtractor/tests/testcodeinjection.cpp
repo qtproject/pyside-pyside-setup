@@ -165,4 +165,19 @@ static const char expected[] = R"(void foo(int a, int b) {
     QCOMPARE(str.toString(), QLatin1String(expected));
 }
 
+void TestCodeInjections::testTextStreamRst()
+{
+    // Test that sphinx error: "Inline strong start-string without end-string."
+    // is avoided, that is, characters following a formatting end are escaped.
+
+    StringStream str;
+    str << rstBold << "QObject" << rstBoldOff << "'s properties..."
+        << rstItalic << "some italic" << rstItalicOff << " followed by space.";
+
+    static const char16_t expected[] =
+        uR"(**QObject**\'s properties...*some italic* followed by space.)";
+
+    QCOMPARE(str.toString(), expected);
+}
+
 QTEST_APPLESS_MAIN(TestCodeInjections)
