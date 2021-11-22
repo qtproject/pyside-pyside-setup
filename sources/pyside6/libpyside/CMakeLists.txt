@@ -19,6 +19,7 @@ set(libpyside_SRC
     pyside.cpp
     pyside_numpy.cpp
     pysidestaticstrings.cpp
+    qobjectconnect.cpp
 )
 
 qt6_add_resources(libpyside_SRC libpyside.qrc)
@@ -100,6 +101,7 @@ set(libpyside_HEADERS
     pysideproperty.h
     pysideqflags.h
     pysideweakref.h
+    qobjectconnect.h
 )
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")

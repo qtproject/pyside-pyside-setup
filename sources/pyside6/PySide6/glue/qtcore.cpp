@@ -323,265 +323,42 @@ PyModule_AddStringConstant(module, "__version__", qVersion());
 // @snippet qt-version
 
 // @snippet qobject-connect
-static bool isMethodDecorator(PyObject *method, bool is_pymethod, PyObject *self)
-{
-    Shiboken::AutoDecRef methodName(PyObject_GetAttr(method, Shiboken::PyMagicName::name()));
-    if (!PyObject_HasAttr(self, methodName))
-        return true;
-    Shiboken::AutoDecRef otherMethod(PyObject_GetAttr(self, methodName));
-
-    PyObject *function1, *function2;
-
-    // PYSIDE-1523: Each could be a compiled method or a normal method here, for the
-    // compiled ones we can use the attributes.
-    if (PyMethod_Check(otherMethod.object())) {
-        function1 = PyMethod_GET_FUNCTION(otherMethod.object());
-    } else {
-        function1 = PyObject_GetAttr(otherMethod.object(), Shiboken::PyName::im_func());
-        Py_DECREF(function1);
-        // Not retaining a reference inline with what PyMethod_GET_FUNCTION does.
-    }
-
-    if (is_pymethod) {
-        function2 = PyMethod_GET_FUNCTION(method);
-    } else {
-        function2 = PyObject_GetAttr(method, Shiboken::PyName::im_func());
-        Py_DECREF(function2);
-        // Not retaining a reference inline with what PyMethod_GET_FUNCTION does.
-    }
-
-    return function1 != function2;
-}
-
-static bool getReceiver(QObject *source,
-                        const char *signal,
-                        PyObject *callback,
-                        QObject **receiver,
-                        PyObject **self,
-                        QByteArray *callbackSig)
-{
-    bool forceGlobalReceiver = false;
-    if (PyMethod_Check(callback)) {
-        *self = PyMethod_GET_SELF(callback);
-        if (%CHECKTYPE[QObject *](*self))
-            *receiver = %CONVERTTOCPP[QObject *](*self);
-        forceGlobalReceiver = isMethodDecorator(callback, true, *self);
-    } else if (PyCFunction_Check(callback)) {
-        *self = PyCFunction_GET_SELF(callback);
-        if (*self && %CHECKTYPE[QObject *](*self))
-            *receiver = %CONVERTTOCPP[QObject *](*self);
-    } else if (PyObject_HasAttr(callback, Shiboken::PyName::im_func())
-               && PyObject_HasAttr(callback, Shiboken::PyName::im_self())) {
-        *self = PyObject_GetAttr(callback, Shiboken::PyName::im_self());
-        Py_DECREF(*self);
-
-        if (%CHECKTYPE[QObject *](*self))
-            *receiver = %CONVERTTOCPP[QObject *](*self);
-        forceGlobalReceiver = isMethodDecorator(callback, false, *self);
-    } else if (PyCallable_Check(callback)) {
-        // Ok, just a callable object
-        *receiver = nullptr;
-        *self = nullptr;
-    }
-
-    bool usingGlobalReceiver = !*receiver || forceGlobalReceiver;
-
-    // Check if this callback is a overwrite of a non-virtual Qt slot.
-    if (!usingGlobalReceiver && receiver && self) {
-        *callbackSig = PySide::Signal::getCallbackSignature(signal, *receiver, callback, usingGlobalReceiver).toLatin1();
-        const QMetaObject *metaObject = (*receiver)->metaObject();
-        int slotIndex = metaObject->indexOfSlot(callbackSig->constData());
-        if (slotIndex != -1 && slotIndex < metaObject->methodOffset() && PyMethod_Check(callback))
-            usingGlobalReceiver = true;
-    }
-
-    const auto receiverThread = *receiver ? (*receiver)->thread() : nullptr;
-
-    if (usingGlobalReceiver) {
-        PySide::SignalManager &signalManager = PySide::SignalManager::instance();
-        *receiver = signalManager.globalReceiver(source, callback);
-        // PYSIDE-1354: Move the global receiver to the original receivers's thread
-        // so that autoconnections work correctly.
-        if (receiverThread && receiverThread != (*receiver)->thread())
-            (*receiver)->moveToThread(receiverThread);
-        *callbackSig = PySide::Signal::getCallbackSignature(signal, *receiver, callback, usingGlobalReceiver).toLatin1();
-    }
-
-    return usingGlobalReceiver;
-}
-
-static QMetaObject::Connection qobjectConnect(QObject *source, const char *signal,
-                                              QObject *receiver, const char *slot,
-                                              Qt::ConnectionType type)
-{
-    if (!signal || !slot)
-        return {};
-
-    if (!PySide::Signal::checkQtSignal(signal))
-        return {};
-    signal++;
-
-    if (!PySide::SignalManager::registerMetaMethod(source, signal, QMetaMethod::Signal))
-        return {};
-
-    bool isSignal = PySide::Signal::isQtSignal(slot);
-    slot++;
-    PySide::SignalManager::registerMetaMethod(receiver, slot, isSignal ? QMetaMethod::Signal : QMetaMethod::Slot);
-    return QObject::connect(source, signal - 1, receiver, slot - 1, type);
-}
-
-static QMetaObject::Connection qobjectConnect(QObject *source, QMetaMethod signal,
-                                              QObject *receiver, QMetaMethod slot,
-                                              Qt::ConnectionType type)
-{
-   return qobjectConnect(source, signal.methodSignature(), receiver, slot.methodSignature(), type);
-}
-
-static QMetaObject::Connection qobjectConnectCallback(QObject *source, const char *signal,
-                                                      PyObject *callback, Qt::ConnectionType type)
-{
-    if (!signal || !PySide::Signal::checkQtSignal(signal))
-        return {};
-    signal++;
-
-    int signalIndex = PySide::SignalManager::registerMetaMethodGetIndex(source, signal, QMetaMethod::Signal);
-    if (signalIndex == -1)
-        return {};
-
-    PySide::SignalManager &signalManager = PySide::SignalManager::instance();
-
-    // Extract receiver from callback
-    QObject *receiver = nullptr;
-    PyObject *self = nullptr;
-    QByteArray callbackSig;
-    bool usingGlobalReceiver = getReceiver(source, signal, callback, &receiver, &self, &callbackSig);
-    if (receiver == nullptr && self == nullptr)
-        return {};
-
-    const QMetaObject *metaObject = receiver->metaObject();
-    const char *slot = callbackSig.constData();
-    int slotIndex = metaObject->indexOfSlot(slot);
-    QMetaMethod signalMethod = metaObject->method(signalIndex);
-
-    if (slotIndex == -1) {
-        if (!usingGlobalReceiver && self && !Shiboken::Object::hasCppWrapper(reinterpret_cast<SbkObject *>(self))) {
-            qWarning("You can't add dynamic slots on an object originated from C++.");
-            if (usingGlobalReceiver)
-                signalManager.releaseGlobalReceiver(source, receiver);
-
-            return {};
-        }
-
-        if (usingGlobalReceiver)
-            slotIndex = signalManager.globalReceiverSlotIndex(receiver, slot);
-        else
-            slotIndex = PySide::SignalManager::registerMetaMethodGetIndex(receiver, slot, QMetaMethod::Slot);
-
-        if (slotIndex == -1) {
-            if (usingGlobalReceiver)
-                signalManager.releaseGlobalReceiver(source, receiver);
-
-            return {};
-        }
-    }
-    auto connection = QMetaObject::connect(source, signalIndex, receiver, slotIndex, type);
-    if (connection) {
-        if (usingGlobalReceiver)
-            signalManager.notifyGlobalReceiver(receiver);
-        #ifndef AVOID_PROTECTED_HACK
-            source->connectNotify(signalMethod); //Qt5: QMetaMethod instead of char *
-        #else
-            // Need to cast to QObjectWrapper * and call the public version of
-            // connectNotify when avoiding the protected hack.
-            reinterpret_cast<QObjectWrapper *>(source)->connectNotify(signalMethod); //Qt5: QMetaMethod instead of char *
-        #endif
-
-        return connection;
-    }
-
-    if (usingGlobalReceiver)
-        signalManager.releaseGlobalReceiver(source, receiver);
-
-    return {};
-}
-
-
-static bool qobjectDisconnectCallback(QObject *source, const char *signal, PyObject *callback)
-{
-    if (!PySide::Signal::checkQtSignal(signal))
-        return false;
-
-    PySide::SignalManager &signalManager = PySide::SignalManager::instance();
-
-    // Extract receiver from callback
-    QObject *receiver = nullptr;
-    PyObject *self = nullptr;
-    QByteArray callbackSig;
-    QMetaMethod slotMethod;
-    bool usingGlobalReceiver = getReceiver(nullptr, signal, callback, &receiver, &self, &callbackSig);
-    if (receiver == nullptr && self == nullptr)
-        return false;
-
-    const QMetaObject *metaObject = receiver->metaObject();
-    int signalIndex = source->metaObject()->indexOfSignal(++signal);
-    int slotIndex = -1;
-
-    slotIndex = metaObject->indexOfSlot(callbackSig);
-    slotMethod = metaObject->method(slotIndex);
-
-    bool disconnected;
-    disconnected = QMetaObject::disconnectOne(source, signalIndex, receiver, slotIndex);
-
-    if (disconnected) {
-        if (usingGlobalReceiver)
-            signalManager.releaseGlobalReceiver(source, receiver);
-
-        #ifndef AVOID_PROTECTED_HACK
-            source->disconnectNotify(slotMethod); //Qt5: QMetaMethod instead of char *
-        #else
-            // Need to cast to QObjectWrapper * and call the public version of
-            // connectNotify when avoiding the protected hack.
-            reinterpret_cast<QObjectWrapper *>(source)->disconnectNotify(slotMethod); //Qt5: QMetaMethod instead of char *
-        #endif
-        return true;
-    }
-    return false;
-}
+#include <qobjectconnect.h>
 // @snippet qobject-connect
 
 // @snippet qobject-connect-1
 // %FUNCTION_NAME() - disable generation of function call.
-%RETURN_TYPE %0 = qobjectConnect(%1, %2, %CPPSELF, %3, %4);
+%RETURN_TYPE %0 = PySide::qobjectConnect(%1, %2, %CPPSELF, %3, %4);
 %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
 // @snippet qobject-connect-1
 
 // @snippet qobject-connect-2
 // %FUNCTION_NAME() - disable generation of function call.
-%RETURN_TYPE %0 = qobjectConnect(%1, %2, %3, %4, %5);
+%RETURN_TYPE %0 = PySide::qobjectConnect(%1, %2, %3, %4, %5);
 %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
 // @snippet qobject-connect-2
 
 // @snippet qobject-connect-3
 // %FUNCTION_NAME() - disable generation of function call.
-%RETURN_TYPE %0 = qobjectConnect(%1, %2, %3, %4, %5);
+%RETURN_TYPE %0 = PySide::qobjectConnect(%1, %2, %3, %4, %5);
 %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
 // @snippet qobject-connect-3
 
 // @snippet qobject-connect-4
 // %FUNCTION_NAME() - disable generation of function call.
-%RETURN_TYPE %0 = qobjectConnectCallback(%1, %2, %PYARG_3, %4);
+%RETURN_TYPE %0 = PySide::qobjectConnectCallback(%1, %2, %PYARG_3, %4);
 %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
 // @snippet qobject-connect-4
 
 // @snippet qobject-connect-5
 // %FUNCTION_NAME() - disable generation of function call.
-%RETURN_TYPE %0 = qobjectConnectCallback(%CPPSELF, %1, %PYARG_2, %3);
+%RETURN_TYPE %0 = PySide::qobjectConnectCallback(%CPPSELF, %1, %PYARG_2, %3);
 %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
 // @snippet qobject-connect-5
 
 // @snippet qobject-connect-6
 // %FUNCTION_NAME() - disable generation of function call.
-%RETURN_TYPE %0 = qobjectConnect(%CPPSELF, %1, %2, %3, %4);
+%RETURN_TYPE %0 = PySide::qobjectConnect(%CPPSELF, %1, %2, %3, %4);
 %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
 // @snippet qobject-connect-6
 
@@ -592,13 +369,13 @@ static bool qobjectDisconnectCallback(QObject *source, const char *signal, PyObj
 
 // @snippet qobject-disconnect-1
 // %FUNCTION_NAME() - disable generation of function call.
-%RETURN_TYPE %0 = qobjectDisconnectCallback(%CPPSELF, %1, %2);
+%RETURN_TYPE %0 = PySide::qobjectDisconnectCallback(%CPPSELF, %1, %2);
 %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
 // @snippet qobject-disconnect-1
 
 // @snippet qobject-disconnect-2
 // %FUNCTION_NAME() - disable generation of function call.
-%RETURN_TYPE %0 = qobjectDisconnectCallback(%1, %2, %3);
+%RETURN_TYPE %0 = PySide::qobjectDisconnectCallback(%1, %2, %3);
 %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
 // @snippet qobject-disconnect-2
 
