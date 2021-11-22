@@ -51,7 +51,7 @@ from squircle import Squircle
 if __name__ == "__main__":
     app = QGuiApplication(sys.argv)
 
-    QQuickWindow.setGraphicsApi(QSGRendererInterface.OpenGLRhi)
+    QQuickWindow.setGraphicsApi(QSGRendererInterface.OpenGL)
     qmlRegisterType(Squircle, "OpenGLUnderQML", 1, 0, "Squircle")
 
     view = QQuickView()

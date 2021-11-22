@@ -80,8 +80,6 @@ class SquircleRenderer(QOpenGLFunctions):
         self._t = 0.0
         self._program = None
         self._window = QQuickWindow()
-        self.profile = QOpenGLVersionProfile()
-        self.gl = None
 
     def setT(self, t):
         self._t = t
@@ -96,10 +94,7 @@ class SquircleRenderer(QOpenGLFunctions):
     def init(self):
         if not self._program:
             rif = self._window.rendererInterface()
-            assert (
-                rif.graphicsApi() == QSGRendererInterface.OpenGL
-                or rif.graphicsApi() == QSGRendererInterface.OpenGLRhy
-            )
+            assert (rif.graphicsApi() == QSGRendererInterface.OpenGL)
             self.initializeOpenGLFunctions()
             self._program = QOpenGLShaderProgram()
             self._program.addCacheableShaderFromSourceCode(QOpenGLShader.Vertex, VERTEX_SHADER)

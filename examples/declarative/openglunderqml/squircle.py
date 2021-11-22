@@ -82,21 +82,23 @@ class Squircle(QQuickItem):
             win.setColor(Qt.black)
             self.sync()
 
+    @Slot()
     def cleanup(self):
         del self._renderer
         self._renderer = None
 
     @Slot()
     def sync(self):
+        window = self.window()
         if not self._renderer:
             self._renderer = SquircleRenderer()
-            self.window().beforeRendering.connect(self._renderer.init, Qt.DirectConnection)
-            self.window().beforeRenderPassRecording.connect(
+            window.beforeRendering.connect(self._renderer.init, Qt.DirectConnection)
+            window.beforeRenderPassRecording.connect(
                 self._renderer.paint, Qt.DirectConnection
             )
-        self._renderer.setViewportSize(self.window().size() * self.window().devicePixelRatio())
+        self._renderer.setViewportSize(window.size() * window.devicePixelRatio())
         self._renderer.setT(self._t)
-        self._renderer.setWindow(self.window())
+        self._renderer.setWindow(window)
 
     def releaseResources(self):
         self.window().scheduleRenderJob(
