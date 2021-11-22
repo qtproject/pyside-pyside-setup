@@ -295,15 +295,10 @@ int PySide::qmlRegisterSingletonInstance(PyObject *pyObj, const char *uri, int v
     if (!isQObjectDerived(pyObjType, true))
         return -1;
 
-    // Check if the instance object derives from QObject
-    PyTypeObject *typeInstanceObject = instanceObject->ob_type;
-
-    if (!isQObjectDerived(typeInstanceObject, true))
-        return -1;
-
     // Convert the instanceObject (PyObject) into a QObject
-    QObject *instanceQObject = reinterpret_cast<QObject*>(
-            Object::cppPointer(reinterpret_cast<SbkObject*>(instanceObject), qObjectType()));
+    QObject *instanceQObject = PySide::convertToQObject(instanceObject, true);
+    if (instanceQObject == nullptr)
+        return -1;
 
     // Create Singleton Functor to pass the QObject to the Type registration step
     // similarly to the case when we have a callback

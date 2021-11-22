@@ -111,6 +111,9 @@ PYSIDE_API std::size_t getSizeOfQObject(PyTypeObject *type);
  */
 PYSIDE_API bool isQObjectDerived(PyTypeObject *pyType, bool raiseError);
 
+/// Convenience to convert a PyObject to QObject
+PYSIDE_API QObject *convertToQObject(PyObject *object, bool raiseError);
+
 typedef void (*CleanupFunction)(void);
 
 /**

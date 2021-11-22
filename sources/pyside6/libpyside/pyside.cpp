@@ -654,18 +654,44 @@ bool registerInternalQtConf()
     return isRegistered;
 }
 
-bool isQObjectDerived(PyTypeObject *pyType, bool raiseError) {
-    static PyTypeObject *qobjectType = Shiboken::Conversions::getPythonTypeObject("QObject*");
-
-    if (!PyType_IsSubtype(pyType, qobjectType)) {
-        if (raiseError)
-            PyErr_Format(PyExc_TypeError, "A type inherited from %s expected, got %s.",
-                         qobjectType->tp_name, pyType->tp_name);
-        return false;
-    }
-    return true;
+static PyTypeObject *qobjectType()
+{
+    static PyTypeObject * const result = Shiboken::Conversions::getPythonTypeObject("QObject*");
+    return result;
 }
 
+bool isQObjectDerived(PyTypeObject *pyType, bool raiseError)
+{
+    const bool result = PyType_IsSubtype(pyType, qobjectType());
+    if (!result && raiseError) {
+        PyErr_Format(PyExc_TypeError, "A type inherited from %s expected, got %s.",
+                     qobjectType()->tp_name, pyType->tp_name);
+    }
+    return result;
+}
+
+QObject *convertToQObject(PyObject *object, bool raiseError)
+{
+    if (object == nullptr) {
+        if (raiseError)
+            PyErr_Format(PyExc_TypeError, "None passed for QObject");
+        return nullptr;
+    }
+
+    if (!isQObjectDerived(Py_TYPE(object), raiseError))
+        return nullptr;
+
+    auto *sbkObject = reinterpret_cast<SbkObject*>(object);
+    auto *ptr = Shiboken::Object::cppPointer(sbkObject, qobjectType());
+    if (ptr == nullptr) {
+        if (raiseError) {
+            PyErr_Format(PyExc_TypeError, "Conversion of %s to QObject failed.",
+                         Py_TYPE(object)->tp_name);
+        }
+        return nullptr;
+    }
+    return reinterpret_cast<QObject*>(ptr);
+}
 
 } //namespace PySide
 
