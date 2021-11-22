@@ -67,6 +67,12 @@ declared in the same class, we use `builtins.property` in the class and
 all sub-classes. The same consideration holds for "overload".
 """
 
+_normal_functions = (types.BuiltinFunctionType, types.FunctionType)
+if hasattr(sys, "pypy_version_info"):
+    # In PyPy, there are more types because our builtin functions
+    # are created differently in C++ and not in PyPy.
+    _normal_functions += (type(get_sig),)
+
 
 class ExactEnumerator(object):
     """
@@ -98,7 +104,7 @@ class ExactEnumerator(object):
         We check if it is a simple function.
         """
         tp = type(self.func)
-        return tp not in (types.BuiltinFunctionType, types.FunctionType)
+        return tp not in _normal_functions
 
     def section(self):
         if hasattr(self.fmt, "section"):
@@ -170,7 +176,7 @@ class ExactEnumerator(object):
         func_prop = sorted(functions + properties, key=lambda tup: tup[0])
 
         # find out how many functions create a signature
-        sigs = list(_ for _ in functions if hasattr(_[1], "__signature__") and _[1].__signature__)
+        sigs = list(_ for _ in functions if get_sig(_[1]))
         self.fmt.have_body = bool(subclasses or sigs or properties or enums or init_signature)
 
         with self.fmt.klass(class_name, class_str):
@@ -206,7 +212,7 @@ class ExactEnumerator(object):
 
     @staticmethod
     def get_signature(func):
-        return func.__signature__
+        return get_sig(func)
 
     def function(self, func_name, func, decorator=None):
         self.func = func    # for is_method()
