@@ -220,7 +220,7 @@ def filter_from_imports(from_struct, text):
         lis = []
         nfs.append((mod, lis))
         for each in imports:
-            if re.search(rf"(\b|@){each}\b", text):
+            if re.search(rf"(\b|@){each}\b([^\s\(:]|\n)", text):
                 lis.append(each)
         if not lis:
             nfs.pop()
