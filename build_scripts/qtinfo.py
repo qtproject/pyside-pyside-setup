@@ -97,6 +97,10 @@ class QtInfo(object):
             return self._qmake_command
 
         @property
+        def qtpaths_command(self):
+            return self._qtpaths_command
+
+        @property
         def version(self):
             return self.get_property("QT_VERSION")
 

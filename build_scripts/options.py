@@ -308,13 +308,13 @@ class DistUtilsCommandMixin(object):
         OPTION['SHORTER_PATHS'] = self.shorter_paths
         OPTION['DOC_BUILD_ONLINE'] = self.doc_build_online
 
-        qtpaths_abs_path = ''
+        qtpaths_abs_path = None
         if self.qtpaths:
             qtpaths_abs_path = os.path.abspath(self.qtpaths)
             OPTION['QTPATHS'] = qtpaths_abs_path
         # FIXME PYSIDE7: Remove qmake handling
         # make qtinfo.py independent of relative paths.
-        qmake_abs_path = ''
+        qmake_abs_path = None
         if self.qmake:
             qmake_abs_path = os.path.abspath(self.qmake)
             OPTION['QMAKE'] = qmake_abs_path
@@ -338,6 +338,12 @@ class DistUtilsCommandMixin(object):
         OPTION['NO_QT_TOOLS'] = self.no_qt_tools
         OPTION['PYSIDE_NUMPY_SUPPORT'] = self.pyside_numpy_support
 
+    def _find_qtpaths_in_path(self):
+        if not self.qtpaths:
+            self.qtpaths = which("qtpaths")
+        if not self.qtpaths:
+            self.qtpaths = which("qtpaths6")
+
     def _determine_defaults_and_check(self):
         if not self.cmake:
             self.cmake = which("cmake")
@@ -348,45 +354,28 @@ class DistUtilsCommandMixin(object):
             log.error(f"'{self.cmake}' does not exist.")
             return False
 
-        if not self.qtpaths:
-            self.qtpaths = which("qtpaths")
-        if not self.qtpaths:
-            self.qtpaths = find_executable("qtpaths6")
-
+        # Enforce usage of qmake in QtInfo if it was given explicitly.
         if self.qmake:
             self.has_qmake_option = True
-        else:
-            self.qmake = which("qmake")
-            if not self.qmake:
-                self.qmake = find_executable("qmake6")
-            if not self.qmake:
-                self.qmake = find_executable("qmake-qt5")
 
+        # If no option was given explicitly, prefer to find qtpaths
+        # in PATH.
+        if not self.qmake and not self.qtpaths:
+            self._find_qtpaths_in_path()
+
+        # If no tool was specified and qtpaths was not found in PATH,
+        # ask to provide a path to qtpaths.
         if not self.qtpaths and not self.qmake:
             log.error("No value provided to --qtpaths option. Please provide one to find Qt.")
             return False
 
-        # Derive tool path from the option that is not empty.
-        if not self.qmake:
-            base_dir = Path(self.qtpaths).parent
-            self.qmake = os.fspath(base_dir / "qmake")
-            if not os.path.exists(self.qmake):
-                self.qmake = os.fspath(base_dir / "qmake6")
-            if not os.path.exists(self.qmake):
-                self.qmake = os.fspath(base_dir / "qmake-qt5")
-
-        if not self.qtpaths:
-            base_dir = Path(self.qmake).parent
-            self.qtpaths = os.fspath(base_dir / "qtpaths")
-            if not os.path.exists(self.qtpaths):
-                self.qtpaths = os.fspath(base_dir / "qtpaths6")
-
-        if not os.path.exists(self.qtpaths):
-            log.error(f"Provided '{self.qtpaths}' path does not exist.")
+        # Validate that the given tool path exists.
+        if self.qtpaths and not os.path.exists(self.qtpaths):
+            log.error(f"The specified qtpaths path '{self.qtpaths}' does not exist.")
             return False
 
-        if not os.path.exists(self.qmake):
-            log.error(f"Provided '{self.qmake}' path does not exist.")
+        if self.qmake and not os.path.exists(self.qmake):
+            log.error(f"The specified qmake path '{self.qmake}' does not exist.")
             return False
 
         if not self.make_spec:
