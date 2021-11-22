@@ -40,6 +40,7 @@ ${QtQuick_GEN_DIR}/qsgopacitynode_wrapper.cpp
 #${QtQuick_GEN_DIR}/qsgopaquetexturematerial_wrapper.cpp
 #${QtQuick_GEN_DIR}/qsgsimplematerial_wrapper.cpp
 #${QtQuick_GEN_DIR}/qsgsimplematerialshader_wrapper.cpp
+${QtQuick_GEN_DIR}/qsgrendererinterface_wrapper.cpp
 ${QtQuick_GEN_DIR}/qsgsimplerectnode_wrapper.cpp
 ${QtQuick_GEN_DIR}/qsgsimpletexturenode_wrapper.cpp
 ${QtQuick_GEN_DIR}/qsgtexture_wrapper.cpp
