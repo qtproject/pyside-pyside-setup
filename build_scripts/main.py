@@ -616,6 +616,7 @@ class PysideBuild(_build, DistUtilsCommandMixin):
         log.info(f"Python scripts:    {self.py_scripts_dir}")
         log.info("-" * 3)
         log.info(f"Qt qmake:   {self.qtinfo.qmake_command}")
+        log.info(f"Qt qtpaths: {self.qtinfo.qtpaths_command}")
         log.info(f"Qt version: {self.qtinfo.version}")
         log.info(f"Qt bins:    {self.qtinfo.bins_dir}")
         log.info(f"Qt docs:    {self.qtinfo.docs_dir}")
