@@ -694,12 +694,16 @@ void QtXmlToSphinx::handleItalicTag(QXmlStreamReader& reader)
 {
     switch (reader.tokenType()) {
     case QXmlStreamReader::StartElement:
-        m_insideItalic = true;
-        m_output << rstItalic;
+        if (m_formattingDepth++ == 0) {
+            m_insideItalic = true;
+            m_output << rstItalic;
+        }
         break;
     case QXmlStreamReader::EndElement:
-        m_insideItalic = false;
-        m_output << rstItalicOff;
+        if (--m_formattingDepth == 0) {
+            m_insideItalic = false;
+            m_output << rstItalicOff;
+        }
         break;
     case QXmlStreamReader::Characters:
         m_output << escape(reader.text().trimmed());
@@ -713,12 +717,16 @@ void QtXmlToSphinx::handleBoldTag(QXmlStreamReader& reader)
 {
     switch (reader.tokenType()) {
     case QXmlStreamReader::StartElement:
-        m_insideBold = true;
-        m_output << rstBold;
+        if (m_formattingDepth++ == 0) {
+            m_insideBold = true;
+            m_output << rstBold;
+        }
         break;
     case QXmlStreamReader::EndElement:
-        m_insideBold = false;
-        m_output << rstBoldOff;
+        if (--m_formattingDepth == 0) {
+            m_insideBold = false;
+            m_output << rstBoldOff;
+        }
         break;
     case QXmlStreamReader::Characters:
         m_output << escape(reader.text().trimmed());
@@ -732,10 +740,12 @@ void QtXmlToSphinx::handleArgumentTag(QXmlStreamReader& reader)
 {
     switch (reader.tokenType()) {
     case QXmlStreamReader::StartElement:
-        m_output << rstCode;
+        if (m_formattingDepth++ == 0)
+            m_output << rstCode;
         break;
     case QXmlStreamReader::EndElement:
-        m_output << rstCodeOff;
+        if (--m_formattingDepth == 0)
+            m_output << rstCodeOff;
         break;
     case QXmlStreamReader::Characters:
         m_output << reader.text().trimmed();
