@@ -615,6 +615,12 @@ QString msgCannotFindSmartPointer(const QString &instantiationType,
     return result;
 }
 
+QString msgMethodNotFound(const AbstractMetaClass *klass, const QString &name)
+{
+     return u"Method \""_qs + name + u"\" not found in class "_qs
+            + klass->name() + u'.';
+}
+
 // main.cpp
 
 QString msgLeftOverArguments(const QVariantMap &remainingArgs)
