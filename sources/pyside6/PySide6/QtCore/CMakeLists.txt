@@ -1,6 +1,9 @@
 project(QtCore)
 
-set(QtCore_gluecode "${QtCore_SOURCE_DIR}/glue/qeasingcurve_glue.cpp")
+set(QtCore_static_sources
+    "${QtCore_SOURCE_DIR}/glue/qeasingcurve_glue.cpp"
+    "${QtCore_SOURCE_DIR}/glue/core_snippets.cpp"
+)
 
 if(ENABLE_WIN)
     set(SPECIFIC_OS_FILES
@@ -208,7 +211,7 @@ create_pyside_module(NAME QtCore
                      LIBRARIES QtCore_libraries
                      TYPESYSTEM_PATH QtCore_SOURCE_DIR
                      SOURCES QtCore_SRC
-                     STATIC_SOURCES QtCore_gluecode
+                     STATIC_SOURCES QtCore_static_sources
                      TYPESYSTEM_NAME ${QtCore_BINARY_DIR}/typesystem_core.xml
                      GLUE_SOURCES QtCore_glue_sources
                      )

@@ -629,7 +629,6 @@
     <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qt-qabs"/>
   </add-function>
 
-  <inject-code class="native" position="beginning" file="../glue/qtcore.cpp" snippet="qt-postroutine"/>
   <add-function signature="qAddPostRoutine(PyObject*)">
     <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qt-addpostroutine"/>
   </add-function>
@@ -1567,6 +1566,7 @@
       <include file-name="QThread" location="global"/>
       <include file-name="QCoreApplication" location="global"/>
       <include file-name="signalmanager.h" location="local"/>
+      <include file-name="glue/core_snippets_p.h" location="local"/>
     </extra-includes>
     <modify-function signature="metaObject()const">
       <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-metaobject"/>
@@ -1655,7 +1655,6 @@
     </add-function>
 
 
-    <inject-code class="native" file="../glue/qtcore.cpp" snippet="qobject-findchild-1"/>
     <add-function signature="findChild(PyTypeObject*@type@,const QString&amp;@name@={},Qt::FindChildOptions@options@=Qt::FindChildrenRecursively)"
                   return-type="PyObject*">
         <inject-documentation format="target" mode="append">
