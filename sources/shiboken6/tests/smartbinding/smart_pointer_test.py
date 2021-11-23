@@ -239,5 +239,12 @@ class SmartPointerTests(unittest.TestCase):
         r = o.takeSharedPtrToInteger(integer2)
         self.assertEqual(r, integer2.value())
 
+    def testOperatorNbBool(self):
+        null_ptr = Obj.createNullSharedPtrToInteger()
+        self.assertFalse(null_ptr)
+        zero = Obj.createSharedPtrToInteger(0)
+        self.assertTrue(zero)
+
+
 if __name__ == '__main__':
     unittest.main()

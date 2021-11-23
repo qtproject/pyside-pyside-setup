@@ -153,6 +153,18 @@ Integer Obj::takeInteger(Integer val)
     return val;
 }
 
+SharedPtr<Integer> Obj::createSharedPtrToInteger(int value)
+{
+    auto *i = new Integer;
+    i->setValue(value);
+    return SharedPtr<Integer>(i);
+}
+
+SharedPtr<Integer> Obj::createNullSharedPtrToInteger()
+{
+    return {};
+}
+
 Integer::Integer() : m_int(456)
 {
     Registry::getInstance()->add(this);

@@ -55,6 +55,9 @@ public:
     int takeSharedPtrToObj(SharedPtr<Obj> pObj);
     int takeSharedPtrToInteger(SharedPtr<Integer> pInt);
 
+    static SharedPtr<Integer> createSharedPtrToInteger(int value);
+    static SharedPtr<Integer> createNullSharedPtrToInteger();
+
     int m_integer;  // public for testing member field access.
     Integer *m_internalInteger;
 };
