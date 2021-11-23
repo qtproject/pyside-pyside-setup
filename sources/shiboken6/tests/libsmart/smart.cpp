@@ -133,6 +133,20 @@ int Obj::takeSharedPtrToObj(SharedPtr<Obj> pObj)
 
 int Obj::takeSharedPtrToInteger(SharedPtr<Integer> pInt)
 {
+    if (pInt.isNull()) {
+        std::cout << "SharedPtr<Integer>(nullptr) passed!\n";
+        return -1;
+    }
+    pInt->printInteger();
+    return pInt->value();
+}
+
+int Obj::takeSharedPtrToIntegerByConstRef(const SharedPtr<Integer> &pInt)
+{
+    if (pInt.isNull()) {
+        std::cout << "SharedPtr<Integer>(nullptr) passed!\n";
+        return -1;
+    }
     pInt->printInteger();
     return pInt->value();
 }
