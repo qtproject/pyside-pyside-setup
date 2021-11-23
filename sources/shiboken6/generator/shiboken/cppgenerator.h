@@ -178,6 +178,10 @@ private:
                                const GeneratorContext &context) const;
     QString qObjectGetAttroFunction() const;
 
+    void writeNbBoolFunction(const GeneratorContext &context,
+                             const AbstractMetaFunctionCPtr &f,
+                             TextStream &s) const;
+
     /**
      *   Writes Python to C++ conversions for arguments on Python wrappers.
      *   If implicit conversions, and thus new object allocation, are needed,

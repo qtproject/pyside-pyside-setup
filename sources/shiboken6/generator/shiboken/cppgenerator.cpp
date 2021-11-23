@@ -695,27 +695,8 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
             writeSetattroFunction(s, attroCheck, classContext);
     }
 
-    const auto f = boolCast(metaClass);
-    if (!f.isNull()) {
-        s << "static int " << cpythonBaseName(metaClass) << "___nb_bool(PyObject *self)\n"
-            << "{\n" << indent;
-        writeCppSelfDefinition(s, classContext, ErrorReturn::MinusOne);
-
-        const bool allowThread = f->allowThread();
-        if (allowThread)
-            s << "int result;\n" << BEGIN_ALLOW_THREADS << "\nresult = ";
-        else
-            s << "return ";
-
-        if (f->isOperatorBool())
-            s << '*' << CPP_SELF_VAR << " ? 1 : 0;\n";
-        else
-            s << CPP_SELF_VAR << "->isNull() ? 0 : 1;\n";
-
-        if (allowThread)
-            s << END_ALLOW_THREADS << "\nreturn result;\n";
-        s << outdent << "}\n\n";
-    }
+    if (const auto f = boolCast(metaClass) ; !f.isNull())
+        writeNbBoolFunction(classContext, f, s);
 
     if (supportsNumberProtocol(metaClass) && !metaClass->typeEntry()->isSmartPointer()) {
         const QList<AbstractMetaFunctionCList> opOverloads = filterGroupedOperatorFunctions(
@@ -6215,6 +6196,30 @@ PyErr_Format(PyExc_AttributeError,
     }
     s << "}\n"
         << "return tmp;\n" << outdent << "}\n\n";
+}
+
+void CppGenerator::writeNbBoolFunction(const GeneratorContext &context,
+                                       const AbstractMetaFunctionCPtr &f,
+                                       TextStream &s) const
+{
+    s << "static int " << cpythonBaseName(context.metaClass()) << "___nb_bool(PyObject *self)\n"
+      << "{\n" << indent;
+    writeCppSelfDefinition(s, context, ErrorReturn::MinusOne);
+
+    const bool allowThread = f->allowThread();
+    if (allowThread)
+        s << "int result;\n" << BEGIN_ALLOW_THREADS << "\nresult = ";
+    else
+        s << "return ";
+
+    if (f->isOperatorBool())
+        s << '*' << CPP_SELF_VAR << " ? 1 : 0;\n";
+    else
+        s << CPP_SELF_VAR << "->isNull() ? 0 : 1;\n";
+
+    if (allowThread)
+        s << END_ALLOW_THREADS << "\nreturn result;\n";
+    s << outdent << "}\n\n";
 }
 
 // Write declaration and invocation of the init function for the module init
