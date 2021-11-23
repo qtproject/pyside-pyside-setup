@@ -1,5 +1,6 @@
 {
     "files": [
+        "main.py",
         "blurpicker.py",
         "blureffect.py",
         "images/accessories-calculator.png",
