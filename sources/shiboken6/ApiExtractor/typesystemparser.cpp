@@ -1276,6 +1276,8 @@ SmartPointerTypeEntry *
     QString smartPointerType;
     QString getter;
     QString refCountMethodName;
+    QString nullCheckMethod;
+    QString resetMethod;
     QString instantiations;
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
@@ -1287,6 +1289,10 @@ SmartPointerTypeEntry *
             refCountMethodName = attributes->takeAt(i).value().toString();
         } else if (name == QLatin1String("instantiations")) {
             instantiations = attributes->takeAt(i).value().toString();
+        } else if (name == u"null-check-method") {
+            nullCheckMethod = attributes->takeAt(i).value().toString();
+        } else if (name == u"reset-method") {
+            resetMethod =  attributes->takeAt(i).value().toString();
         }
     }
 
@@ -1322,6 +1328,8 @@ SmartPointerTypeEntry *
                                            refCountMethodName, since, currentParentTypeEntry());
     if (!applyCommonAttributes(reader, type, attributes))
         return nullptr;
+    type->setNullCheckMethod(nullCheckMethod);
+    type->setResetMethod(resetMethod);
     m_smartPointerInstantiations.insert(type, instantiations);
     return type;
 }

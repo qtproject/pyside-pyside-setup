@@ -577,8 +577,16 @@ smart-pointer-type
                 type="..."
                 getter="..."
                 ref-count-method="..."
+                null-check-method="..."
+                reset-method="..."
                 instantiations="..."/>
             </typesystem>
+
+    The *optional* attribute **null-check-method** specifies a method
+    that can be used to check for ``nullptr``.
+
+    The *optional* attribute **reset-method** specifies a method
+    that can be used to clear the pointer.
 
 .. _function:
 

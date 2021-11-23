@@ -41,6 +41,7 @@
          won't work.
     -->
     <smart-pointer-type name="SharedPtr" type="shared" getter="data" ref-count-method="useCount"
+                        null-check-method="isNull"
                         instantiations="Integer,Smart::Integer2,Obj"/>
 
     <object-type name="Obj" />

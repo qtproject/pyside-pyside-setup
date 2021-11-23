@@ -300,6 +300,17 @@ QList<AbstractMetaFunctionCList>
 AbstractMetaFunctionCPtr CppGenerator::boolCast(const AbstractMetaClass *metaClass) const
 {
     const auto *te = metaClass->typeEntry();
+    if (te->isSmartPointer()) {
+        auto *ste = static_cast<const SmartPointerTypeEntry *>(te);
+        auto nullCheckMethod = ste->nullCheckMethod();
+        if (!nullCheckMethod.isEmpty()) {
+            const auto func = metaClass->findFunction(nullCheckMethod);
+            if (func.isNull())
+                throw Exception(msgMethodNotFound(metaClass, nullCheckMethod));
+            return func;
+        }
+    }
+
     auto mode = te->operatorBoolMode();
     if (useOperatorBoolAsNbNonZero()
         ? mode != TypeSystem::BoolCast::Disabled : mode == TypeSystem::BoolCast::Enabled) {

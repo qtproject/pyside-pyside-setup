@@ -724,6 +724,11 @@ public:
 
     QString refCountMethodName() const;
 
+    QString nullCheckMethod() const;
+    void setNullCheckMethod(const QString &);
+    QString resetMethod() const;
+    void setResetMethod(const QString &);
+
     TypeEntry *clone() const override;
 
     Instantiations instantiations() const;
