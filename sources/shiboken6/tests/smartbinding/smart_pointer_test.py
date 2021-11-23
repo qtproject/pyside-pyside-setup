@@ -245,6 +245,14 @@ class SmartPointerTests(unittest.TestCase):
         zero = Obj.createSharedPtrToInteger(0)
         self.assertTrue(zero)
 
+    def testParameterNone(self):
+        o = Obj()
+        null_ptr = Obj.createNullSharedPtrToInteger()
+        o.takeSharedPtrToInteger(null_ptr)
+        o.takeSharedPtrToIntegerByConstRef(null_ptr)
+        o.takeSharedPtrToInteger(None)
+        o.takeSharedPtrToIntegerByConstRef(None)
+
 
 if __name__ == '__main__':
     unittest.main()

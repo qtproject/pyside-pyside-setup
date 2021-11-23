@@ -1567,18 +1567,31 @@ return result;)";
     c.clear();
 
     QString pyInVariable = QLatin1String("pyIn");
-    QString wrappedCPtrExpression;
-    if (!classContext.forSmartPointer())
-        wrappedCPtrExpression = cpythonWrapperCPtr(metaClass->typeEntry(), pyInVariable);
-    else
-        wrappedCPtrExpression = cpythonWrapperCPtr(classContext.preciseType(), pyInVariable);
+    const QString outPtr = u"reinterpret_cast<"_qs + typeName + u" *>(cppOut)"_qs;
+    if (!classContext.forSmartPointer()) {
+        c << '*' << outPtr << " = *"
+            << cpythonWrapperCPtr(metaClass->typeEntry(), pyInVariable) << ';';
+    } else {
+        auto *ste = static_cast<const SmartPointerTypeEntry *>(metaClass->typeEntry());
+        const QString resetMethod = ste->resetMethod();
+        c << "auto *ptr = " << outPtr << ";\n";
+        c << "if (" << pyInVariable << " == Py_None)\n" << indent;
+        if (resetMethod.isEmpty())
+            c << "*ptr = {};\n";
+        else
+            c << "ptr->" << resetMethod << "();\n";
+        c << outdent << "else\n" << indent
+            << "*ptr = *"
+            << cpythonWrapperCPtr(classContext.preciseType(), pyInVariable) << ';';
+    }
 
-    c << "*reinterpret_cast<" << typeName << " *>(cppOut) = *"
-        << wrappedCPtrExpression << ';';
     writePythonToCppFunction(s, c.toString(), sourceTypeName, targetTypeName);
 
     // "Is convertible" function for the Python object to C++ value copy conversion.
-    writeIsPythonConvertibleToCppFunction(s, sourceTypeName, targetTypeName, pyTypeCheck);
+    QString copyTypeCheck = pyTypeCheck;
+    if (classContext.forSmartPointer())
+        copyTypeCheck.prepend(pyInVariable + u" == Py_None || "_qs);
+    writeIsPythonConvertibleToCppFunction(s, sourceTypeName, targetTypeName, copyTypeCheck);
     s << '\n';
 
     // User provided implicit conversions.

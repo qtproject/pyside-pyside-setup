@@ -54,6 +54,7 @@ public:
     SharedPtr<Smart::Integer2> giveSharedPtrToInteger2();
     int takeSharedPtrToObj(SharedPtr<Obj> pObj);
     int takeSharedPtrToInteger(SharedPtr<Integer> pInt);
+    int takeSharedPtrToIntegerByConstRef(const SharedPtr<Integer> &pInt);
 
     static SharedPtr<Integer> createSharedPtrToInteger(int value);
     static SharedPtr<Integer> createNullSharedPtrToInteger();
