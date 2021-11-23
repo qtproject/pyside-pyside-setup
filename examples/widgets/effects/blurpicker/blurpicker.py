@@ -57,35 +57,38 @@ from blureffect import BlurEffect
 class BlurPicker(QGraphicsView):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.m_index = 0
-        self.m_animation = QPropertyAnimation(self, b"index")
-        self.path = Path(__file__).resolve().parent
+        self._index = 0
+        self._animation = QPropertyAnimation(self, b"index")
+        self._path = Path(__file__).resolve().parent
 
-        self.setBackgroundBrush(QPixmap(self.path / "images" / "background.jpg"))
+        self._background = QPixmap(self._path / "images" / "background.jpg")
+        self.setBackgroundBrush(self._background)
         self.setScene(QGraphicsScene(self))
 
-        self.m_icons = []
+        self._icons = []
 
         self.setup_scene()
-        self.set_index(0)
+        self.index = 0
 
-        self.m_animation.setDuration(400)
-        self.m_animation.setEasingCurve(QEasingCurve.InOutSine)
+        self._animation.setDuration(400)
+        self._animation.setEasingCurve(QEasingCurve.InOutSine)
 
         self.setRenderHint(QPainter.Antialiasing, True)
         self.setFrameStyle(QFrame.NoFrame)
 
-    def read_index(self) -> float:
-        return self.m_index
+    @Property(float)
+    def index(self) -> float:
+        return self._index
 
-    def set_index(self, index: float):
-        self.m_index = index
+    @index.setter
+    def index(self, index: float):
+        self._index = index
 
         base_line = 0.0
-        iconAngle = 2 * pi / len(self.m_icons)
+        iconAngle = 2 * pi / len(self._icons)
 
-        for i, icon in enumerate(self.m_icons):
-            a = (i + self.m_index) * iconAngle
+        for i, icon in enumerate(self._icons):
+            a = (i + self._index) * iconAngle
             xs = 170 * sin(a)
             ys = 100 * cos(a)
             pos = QPointF(xs, ys)
@@ -101,27 +104,19 @@ class BlurPicker(QGraphicsView):
     def setup_scene(self):
         self.scene().setSceneRect(-200, -120, 400, 240)
 
-        names = [
-            self.path / "images" / "accessories-calculator.png",
-            self.path / "images" / "accessories-text-editor.png",
-            self.path / "images" / "help-browser.png",
-            self.path / "images" / "internet-group-chat.png",
-            self.path / "images" / "internet-mail.png",
-            self.path / "images" / "internet-web-browser.png",
-            self.path / "images" / "office-calendar.png",
-            self.path / "images" / "system-users.png",
-        ]
+        names = ["accessories-calculator.png", "accessories-text-editor.png",
+                 "help-browser.png", "internet-group-chat.png",
+                 "internet-mail.png", "internet-web-browser.png", "office-calendar.png",
+                 "system-users.png"]
 
         for name in names:
-            pixmap = QPixmap(name)
+            pixmap = QPixmap(self._path / "images" / name)
             icon: QGraphicsPixmapItem = self.scene().addPixmap(pixmap)
             icon.setZValue(1)
             icon.setGraphicsEffect(BlurEffect(icon))
-            self.m_icons.append(icon)
+            self._icons.append(icon)
 
-        bg: QGraphicsPixmapItem = self.scene().addPixmap(
-            QPixmap(self.path / "images" / "background.jpg")
-        )
+        bg: QGraphicsPixmapItem = self.scene().addPixmap(self._background)
         bg.setZValue(0)
         bg.setPos(-200, -150)
 
@@ -132,20 +127,16 @@ class BlurPicker(QGraphicsView):
         elif event.key() == Qt.Key_Right:
             delta = 1
 
-        if self.m_animation.state() == QAbstractAnimation.Stopped and delta:
-            self.m_animation.setEndValue(self.m_index + delta)
-            self.m_animation.start()
+        if self._animation.state() == QAbstractAnimation.Stopped and delta:
+            self._animation.setEndValue(self._index + delta)
+            self._animation.start()
             event.accept()
 
     def mousePressEvent(self, event):
-        if event.position().x() > (self.width() / 2):
-            delta = 1
-        else:
-            delta = -1
+        right = event.position().x() > (self.width() / 2)
+        delta = 1 if right else -1
 
-        if self.m_animation.state() == QAbstractAnimation.Stopped:
-            self.m_animation.setEndValue(self.m_index + delta)
-            self.m_animation.start()
+        if self._animation.state() == QAbstractAnimation.Stopped:
+            self._animation.setEndValue(self._index + delta)
+            self._animation.start()
             event.accept()
-
-    index = Property(float, read_index, set_index)
