@@ -189,6 +189,7 @@ private:
     QString m_context;
     const QtXmlToSphinxDocGeneratorInterface *m_generator;
     const QtXmlToSphinxParameters &m_parameters;
+    int m_formattingDepth = 0;
     bool m_insideBold = false;
     bool m_insideItalic = false;
     QString m_lastTagName;
