@@ -152,7 +152,7 @@ def get_code_tabs(files, project_file):
 
     for i, project_file in enumerate(files):
         pfile = Path(project_file)
-        if pfile.suffix in (".png", ".pyc"):
+        if pfile.suffix in (".jpg", ".png", ".pyc"):
             continue
 
         content += f".. tabbed:: {project_file}\n\n"
@@ -163,8 +163,12 @@ def get_code_tabs(files, project_file):
 
         _path = f_path.resolve().parents[0] / project_file
         _file_content = ""
-        with open(_path, "r") as _f:
-            _file_content = remove_licenses(_f.read())
+        try:
+            with open(_path, "r") as _f:
+                _file_content = remove_licenses(_f.read())
+        except UnicodeDecodeError as e:
+            print(f"example_gallery: error decoding {_path}:{e}")
+            raise
 
         content += add_indent(_file_content, 2)
         content += "\n\n"
@@ -259,8 +263,12 @@ if __name__ == "__main__":
         )
 
         pyproject = ""
-        with open(str(f_path), "r") as pyf:
-            pyproject = json.load(pyf)
+        try:
+            with open(str(f_path), "r") as pyf:
+                pyproject = json.load(pyf)
+        except json.JSONDecodeError as e:
+            print(f"example_gallery: error reading {f_path}: {e}")
+            raise
 
         if pyproject:
             rst_file_full = EXAMPLES_DOC / rst_file
