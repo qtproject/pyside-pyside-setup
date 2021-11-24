@@ -75,7 +75,7 @@ set(QtQuick_include_dirs  ${QtQuick_SOURCE_DIR}
                           ${QtQml_GEN_DIR}
                           ${QtQuick_GEN_DIR})
 
-set(QtQuick_libraries pyside6
+set(QtQuick_libraries pyside6 pyside6qml
                       ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
                       ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
                       ${Qt${QT_MAJOR_VERSION}OpenGL_LIBRARIES}

@@ -62,6 +62,8 @@
 // Mutex used to avoid race condition on PySide::nextQObjectMemoryAddr.
 static QMutex nextQmlElementMutex;
 
+static PySide::Qml::QuickRegisterItemFunction quickRegisterItemFunction = nullptr;
+
 static void createInto(void *memory, void *type)
 {
     QMutexLocker locker(&nextQmlElementMutex);
@@ -121,7 +123,6 @@ int qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
 
     // Allow registering Qt Quick items.
     bool registered = false;
-    QuickRegisterItemFunction quickRegisterItemFunction = getQuickRegisterItemFunction();
     if (quickRegisterItemFunction) {
         registered =
             quickRegisterItemFunction(pyObj, uri, versionMajor, versionMinor,
@@ -458,6 +459,16 @@ PyObject *qmlSingletonMacro(PyObject *pyObj)
     decoratedSingletons.append(pyObj);
     Py_INCREF(pyObj);
     return pyObj;
+}
+
+QuickRegisterItemFunction getQuickRegisterItemFunction()
+{
+    return quickRegisterItemFunction;
+}
+
+void setQuickRegisterItemFunction(QuickRegisterItemFunction function)
+{
+    quickRegisterItemFunction = function;
 }
 
 } // namespace PySide::Qml

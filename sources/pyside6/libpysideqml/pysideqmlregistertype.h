@@ -44,6 +44,11 @@
 
 #include <sbkpython.h>
 
+namespace QQmlPrivate
+{
+struct RegisterType;
+}
+
 namespace PySide::Qml
 {
 
@@ -106,6 +111,17 @@ PYSIDEQML_API PyObject *qmlAnonymousMacro(PyObject *pyObj);
 /// PySide implementation of the QML_SINGLETON macro
 /// \param pyObj Python type to be registered
 PYSIDEQML_API PyObject *qmlSingletonMacro(PyObject *pyObj);
+
+
+// Used by QtQuick module to notify QtQml that custom QtQuick items can be registered.
+using QuickRegisterItemFunction =
+    bool (*)(PyObject *pyObj, const char *uri, int versionMajor,
+             int versionMinor, const char *qmlName,
+             bool creatable, const char *noCreationReason,
+             QQmlPrivate::RegisterType *);
+
+PYSIDEQML_API QuickRegisterItemFunction getQuickRegisterItemFunction();
+PYSIDEQML_API void setQuickRegisterItemFunction(QuickRegisterItemFunction function);
 
 } // namespace PySide::Qml
 

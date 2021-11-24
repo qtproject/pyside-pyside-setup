@@ -49,23 +49,4 @@
 #include "pysideqobject.h"
 #include "pysideutils.h"
 
-namespace QQmlPrivate
-{
-struct RegisterType;
-}
-
-namespace PySide
-{
-
-// Used by QtQuick module to notify QtQml that custom QtQuick items can be registered.
-using QuickRegisterItemFunction =
-    bool (*)(PyObject *pyObj, const char *uri, int versionMajor,
-             int versionMinor, const char *qmlName,
-             bool creatable, const char *noCreationReason,
-             QQmlPrivate::RegisterType *);
-PYSIDE_API QuickRegisterItemFunction getQuickRegisterItemFunction();
-PYSIDE_API void setQuickRegisterItemFunction(QuickRegisterItemFunction function);
-
-} //namespace PySide
-
 #endif // PYSIDE_H

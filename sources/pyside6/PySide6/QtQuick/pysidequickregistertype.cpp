@@ -40,6 +40,7 @@
 #include "pysidequickregistertype.h"
 
 #include <pyside.h>
+#include <pysideqmlregistertype.h>
 #include <pyside_p.h>
 #include <shiboken.h>
 
@@ -193,5 +194,5 @@ void PySide::initQuickSupport(PyObject *module)
     qRegisterMetaType<QQuickFramebufferObject*>("QQuickFramebufferObject*");
     qRegisterMetaType<QQuickItem*>("QQuickItem*");
 
-    setQuickRegisterItemFunction(quickRegisterType);
+    Qml::setQuickRegisterItemFunction(quickRegisterType);
 }
