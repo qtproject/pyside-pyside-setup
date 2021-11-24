@@ -97,9 +97,11 @@ static PyTypeObject *qQJSValueType()
     return result;
 }
 
-int PySide::qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
-                            int versionMinor, const char *qmlName, const char *noCreationReason,
-                            bool creatable)
+namespace PySide::Qml {
+
+int qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
+                    int versionMinor, const char *qmlName, const char *noCreationReason,
+                    bool creatable)
 {
     using namespace Shiboken;
 
@@ -171,9 +173,9 @@ int PySide::qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
     return qmlTypeId;
 }
 
-int PySide::qmlRegisterSingletonType(PyObject *pyObj, const char *uri, int versionMajor,
-                                     int versionMinor, const char *qmlName, PyObject *callback,
-                                     bool isQObject, bool hasCallback)
+int qmlRegisterSingletonType(PyObject *pyObj, const char *uri, int versionMajor,
+                             int versionMinor, const char *qmlName, PyObject *callback,
+                             bool isQObject, bool hasCallback)
 {
     using namespace Shiboken;
 
@@ -284,9 +286,9 @@ int PySide::qmlRegisterSingletonType(PyObject *pyObj, const char *uri, int versi
     return QQmlPrivate::qmlregister(QQmlPrivate::SingletonRegistration, &type);
 }
 
-int PySide::qmlRegisterSingletonInstance(PyObject *pyObj, const char *uri, int versionMajor,
-                                         int versionMinor, const char *qmlName,
-                                         PyObject *instanceObject)
+int qmlRegisterSingletonInstance(PyObject *pyObj, const char *uri, int versionMajor,
+                                 int versionMinor, const char *qmlName,
+                                 PyObject *instanceObject)
 {
     using namespace Shiboken;
 
@@ -324,6 +326,8 @@ int PySide::qmlRegisterSingletonInstance(PyObject *pyObj, const char *uri, int v
 
     return QQmlPrivate::qmlregister(QQmlPrivate::SingletonRegistration, &type);
 }
+
+} // namespace PySide::Qml
 
 static std::string getGlobalString(const char *name)
 {
@@ -410,14 +414,14 @@ static PyObject *qmlElementMacroHelper(PyObject *pyObj,
 
     const char *uri = importName.c_str();
     const int result = mode == RegisterMode::Singleton
-        ? PySide::qmlRegisterSingletonType(pyObj, uri, majorVersion, minorVersion,
-                                          typeName, nullptr,
-                                          PySide::isQObjectDerived(pyObjType, false),
-                                          false)
-        : PySide::qmlRegisterType(pyObj, uri, majorVersion, minorVersion,
-                                  mode != RegisterMode::Anonymous ? typeName : nullptr,
-                                  noCreationReason,
-                                  mode == RegisterMode::Normal);
+        ? PySide::Qml::qmlRegisterSingletonType(pyObj, uri, majorVersion, minorVersion,
+                                                typeName, nullptr,
+                                                PySide::isQObjectDerived(pyObjType, false),
+                                                false)
+        : PySide::Qml::qmlRegisterType(pyObj, uri, majorVersion, minorVersion,
+                                       mode != RegisterMode::Anonymous ? typeName : nullptr,
+                                       noCreationReason,
+                                       mode == RegisterMode::Normal);
 
     if (result == -1) {
         PyErr_Format(PyExc_TypeError, "%s: Failed to register type %s.",
@@ -430,26 +434,30 @@ static PyObject *qmlElementMacroHelper(PyObject *pyObj,
 // FIXME: Store this in PySide::TypeUserData once it is moved to libpyside?
 static QList<PyObject *> decoratedSingletons;
 
-PyObject *PySide::qmlElementMacro(PyObject *pyObj)
+namespace PySide::Qml {
+
+PyObject *qmlElementMacro(PyObject *pyObj)
 {
     const char *noCreationReason = nullptr;
     RegisterMode mode = RegisterMode::Normal;
     if (decoratedSingletons.contains(pyObj))
         mode = RegisterMode::Singleton;
-    else if ((noCreationReason = PySide::qmlNoCreationReason(pyObj)))
+    else if ((noCreationReason = qmlNoCreationReason(pyObj)))
         mode = RegisterMode::Uncreatable;
     return qmlElementMacroHelper(pyObj, "QmlElement", mode, noCreationReason);
 }
 
-PyObject *PySide::qmlAnonymousMacro(PyObject *pyObj)
+PyObject *qmlAnonymousMacro(PyObject *pyObj)
 {
     return qmlElementMacroHelper(pyObj, "QmlAnonymous",
                                  RegisterMode::Anonymous);
 }
 
-PyObject *PySide::qmlSingletonMacro(PyObject *pyObj)
+PyObject *qmlSingletonMacro(PyObject *pyObj)
 {
     decoratedSingletons.append(pyObj);
     Py_INCREF(pyObj);
     return pyObj;
 }
+
+} // namespace PySide::Qml

@@ -46,12 +46,12 @@
 
 QT_FORWARD_DECLARE_CLASS(QObject)
 
-namespace PySide {
+namespace PySide::Qml {
 
 // Helper for SignalManager::qt_metacall():
 // Bubbles Python exceptions up to the Javascript engine, if called from one
 std::optional<int> qmlMetaCallErrorHandler(QObject *object);
 
-} // namespace PySide
+} // namespace PySide::Qml
 
 #endif // PYSIDEQMLMETACALLERROR_P_H

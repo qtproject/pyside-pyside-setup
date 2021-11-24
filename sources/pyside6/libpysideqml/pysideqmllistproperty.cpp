@@ -301,6 +301,8 @@ static const char *PropertyList_SignatureStrings[] = {
     nullptr // Sentinel
 };
 
+namespace PySide::Qml {
+
 void initQtQmlListProperty(PyObject *module)
 {
     // Export QmlListProperty type
@@ -317,3 +319,5 @@ void initQtQmlListProperty(PyObject *module)
     PyModule_AddObject(module, PepType_GetNameStr(PropertyListTypeF()),
                        reinterpret_cast<PyObject *>(PropertyListTypeF()));
 }
+
+} // namespace PySide::Qml

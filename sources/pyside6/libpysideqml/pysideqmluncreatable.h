@@ -60,10 +60,10 @@ extern "C"
 
 void initQmlUncreatable(PyObject *module);
 
-namespace PySide
+namespace PySide::Qml
 {
     // Return the reason if a type is not creatable.
     const char *qmlNoCreationReason(PyObject *type);
-} // PySide
+} // namespace PySide::Qml
 
 #endif // PYSIDEQMLUNCREATABLE_H

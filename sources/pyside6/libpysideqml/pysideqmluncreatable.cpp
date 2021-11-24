@@ -184,7 +184,7 @@ void initQmlUncreatable(PyObject *module)
                        reinterpret_cast<PyObject *>(PySideQmlUncreatableTypeF()));
 }
 
-namespace PySide
+namespace PySide::Qml
 {
 const char *qmlNoCreationReason(PyObject *type)
 {
@@ -193,4 +193,4 @@ const char *qmlNoCreationReason(PyObject *type)
     return it != map.cend() ? it->second.c_str() : nullptr;
 }
 
-} // PySide
+} // namespace PySide::Qml

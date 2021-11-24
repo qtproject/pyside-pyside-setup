@@ -56,7 +56,7 @@
 #  include <private/qqmldata_p.h>
 #endif
 
-namespace PySide {
+namespace PySide::Qml {
 
 std::optional<int> qmlMetaCallErrorHandler(QObject *object)
 {
@@ -94,4 +94,4 @@ std::optional<int> qmlMetaCallErrorHandler(QObject *object)
 #endif //  QML_PRIVATE_API_SUPPORT
 }
 
-} // namespace PySide
+} // namespace PySide::Qml

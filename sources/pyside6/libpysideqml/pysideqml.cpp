@@ -52,7 +52,7 @@ void init(PyObject *module)
 {
     initQtQmlListProperty(module);
     initQmlUncreatable(module);
-    PySide::SignalManager::setQmlMetaCallErrorHandler(PySide::qmlMetaCallErrorHandler);
+    PySide::SignalManager::setQmlMetaCallErrorHandler(PySide::Qml::qmlMetaCallErrorHandler);
 }
 
 } //namespace PySide::Qml

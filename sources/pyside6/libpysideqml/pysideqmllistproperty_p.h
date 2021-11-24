@@ -42,6 +42,8 @@
 
 #include <sbkpython.h>
 
+namespace PySide::Qml {
 void initQtQmlListProperty(PyObject *module);
+}
 
 #endif // PYSIDEQMLLISTPROPERTY_H

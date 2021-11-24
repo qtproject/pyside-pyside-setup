@@ -44,7 +44,7 @@
 
 #include <sbkpython.h>
 
-namespace PySide
+namespace PySide::Qml
 {
 
 /**
@@ -107,6 +107,6 @@ PYSIDEQML_API PyObject *qmlAnonymousMacro(PyObject *pyObj);
 /// \param pyObj Python type to be registered
 PYSIDEQML_API PyObject *qmlSingletonMacro(PyObject *pyObj);
 
-} // namespace PySide
+} // namespace PySide::Qml
 
 #endif // PYSIDEQMLREGISTERTYPE_H
