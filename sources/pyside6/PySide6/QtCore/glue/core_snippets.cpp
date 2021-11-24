@@ -38,7 +38,7 @@
 ****************************************************************************/
 
 #include "core_snippets_p.h"
-#include "pyside.h"
+#include "pysideqobject.h"
 
 #include "shiboken.h"
 #include "basewrapper.h"

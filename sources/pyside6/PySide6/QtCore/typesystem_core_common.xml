@@ -668,6 +668,9 @@
     </extra-includes>
   </object-type>
   <value-type name="QLine" hash-function="PySide::hash">
+    <extra-includes>
+      <include file-name="pysideqhash.h" location="global"/>
+    </extra-includes>
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code">
@@ -769,6 +772,9 @@
       <enum-type identified-by-value="Unspecified"/>
   </value-type>
   <value-type name="QDate" hash-function="PySide::hash" >
+    <extra-includes>
+      <include file-name="pysideqhash.h" location="global"/>
+    </extra-includes>
     <inject-code class="native" position="beginning">
         <insert-template name="pydatetime_importandcheck_function">
             <replace from="$DATETIMETYPE" to="PyDate"/>
@@ -829,6 +835,9 @@
     </modify-function>
   </value-type>
   <value-type name="QDateTime" hash-function="PySide::hash">
+    <extra-includes>
+      <include file-name="pysideqhash.h" location="global"/>
+    </extra-includes>
     <enum-type name="YearRange" since="5.14"/>
     <inject-code class="native" position="beginning">
         <insert-template name="pydatetime_importandcheck_function">
@@ -909,6 +918,9 @@
   </value-type>
 
   <value-type name="QPoint" hash-function="PySide::hash">
+    <extra-includes>
+      <include file-name="pysideqhash.h" location="global"/>
+    </extra-includes>
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code">
@@ -976,6 +988,9 @@
     <!--### -->
   </value-type>
   <value-type name="QRect" hash-function="PySide::hash">
+    <extra-includes>
+      <include file-name="pysideqhash.h" location="global"/>
+    </extra-includes>
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code">
@@ -1107,6 +1122,9 @@
     </modify-function>
   </value-type>
   <value-type name="QSize" hash-function="PySide::hash">
+    <extra-includes>
+      <include file-name="pysideqhash.h" location="global"/>
+    </extra-includes>
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code">
@@ -1175,6 +1193,9 @@
   </value-type>
 
   <value-type name="QTime" hash-function="PySide::hash">
+    <extra-includes>
+      <include file-name="pysideqhash.h" location="global"/>
+    </extra-includes>
     <inject-code class="native" position="beginning">
         <insert-template name="pydatetime_importandcheck_function">
             <replace from="$DATETIMETYPE" to="PyTime"/>
@@ -1749,6 +1770,7 @@
     <enum-type name="ParsingMode"/>
     <extra-includes>
       <include file-name="QStringList" location="global"/>
+      <include file-name="pysideqhash.h" location="global"/>
     </extra-includes>
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
@@ -2424,6 +2446,8 @@
     <extra-includes>
       <include file-name="QStringList" location="global"/>
       <include file-name="QTranslator" location="global"/>
+      <include file-name="pysidecleanup.h" location="global"/>
+      <include file-name="pysideqapp.h" location="global"/>
     </extra-includes>
     <!-- constructor documentation -->
     <inject-documentation format="target" mode="append">

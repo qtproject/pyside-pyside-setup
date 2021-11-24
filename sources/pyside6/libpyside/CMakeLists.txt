@@ -91,13 +91,20 @@ set(libpyside_HEADERS
     dynamicqmetaobject.h
     feature_select.h
     pysideclassinfo.h
+    pysidecleanup.h
+    pysideinit.h
+    pysideqapp.h
     pysideqenum.h
+    pysideqhash.h
+    pysideqmetatype.h
+    pysideqobject.h
     pysidemacros.h
     signalmanager.h
     pyside.h
     pysidestaticstrings.h
     pysidemetafunction.h
     pysidesignal.h
+    pysideutils.h
     pysideproperty.h
     pysideqflags.h
     pysideweakref.h

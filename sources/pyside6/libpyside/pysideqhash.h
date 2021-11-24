@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2021 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -37,35 +37,24 @@
 **
 ****************************************************************************/
 
-#ifndef PYSIDE_H
-#define PYSIDE_H
+#ifndef PYSIDEQHASH_H
+#define PYSIDEQHASH_H
 
 #include <sbkpython.h>
 
-#include <pysidemacros.h>
-
-#include "pysideinit.h"
-#include "pysideqapp.h"
-#include "pysideqobject.h"
-#include "pysideutils.h"
-
-namespace QQmlPrivate
-{
-struct RegisterType;
-}
+#include <QtCore/QHash>
 
 namespace PySide
 {
 
-// Used by QtQuick module to notify QtQml that custom QtQuick items can be registered.
-using QuickRegisterItemFunction =
-    bool (*)(PyObject *pyObj, const char *uri, int versionMajor,
-             int versionMinor, const char *qmlName,
-             bool creatable, const char *noCreationReason,
-             QQmlPrivate::RegisterType *);
-PYSIDE_API QuickRegisterItemFunction getQuickRegisterItemFunction();
-PYSIDE_API void setQuickRegisterItemFunction(QuickRegisterItemFunction function);
+/// Hash function used to enable hash on objects not supported by the native Qt
+/// library which have a toString() function.
+template<class T>
+inline Py_ssize_t hash(const T& value)
+{
+    return qHash(value.toString());
+}
 
 } //namespace PySide
 
-#endif // PYSIDE_H
+#endif // PYSIDEQHASH_H

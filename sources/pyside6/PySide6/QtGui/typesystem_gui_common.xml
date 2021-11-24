@@ -2552,6 +2552,8 @@
       <include file-name="QPalette" location="global"/>
       <include file-name="QIcon" location="global"/>
       <include file-name="QLocale" location="global"/>
+      <include file-name="pysideqapp.h" location="global"/>
+      <include file-name="pysidecleanup.h" location="global"/>
     </extra-includes>
     <modify-function signature="QGuiApplication(int&amp;,char**,int)" access="private"/>
     <add-function signature="QGuiApplication(QStringList)">

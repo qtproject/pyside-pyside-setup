@@ -37,10 +37,9 @@
 **
 ****************************************************************************/
 
-#include "pyside.h"
+#include "class_property.h"
 #include "pysidestaticstrings.h"
 #include "feature_select.h"
-#include "class_property.h"
 
 #include <shiboken.h>
 #include <sbkstaticstrings.h>

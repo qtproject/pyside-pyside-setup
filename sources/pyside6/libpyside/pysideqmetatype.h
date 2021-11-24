@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2021 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -37,35 +37,35 @@
 **
 ****************************************************************************/
 
-#ifndef PYSIDE_H
-#define PYSIDE_H
+#ifndef PYSIDEQMETATYPE_H
+#define PYSIDEQMETATYPE_H
 
-#include <sbkpython.h>
-
-#include <pysidemacros.h>
-
-#include "pysideinit.h"
-#include "pysideqapp.h"
-#include "pysideqobject.h"
-#include "pysideutils.h"
-
-namespace QQmlPrivate
-{
-struct RegisterType;
-}
+#include <QtCore/QMetaType>
 
 namespace PySide
 {
 
-// Used by QtQuick module to notify QtQml that custom QtQuick items can be registered.
-using QuickRegisterItemFunction =
-    bool (*)(PyObject *pyObj, const char *uri, int versionMajor,
-             int versionMinor, const char *qmlName,
-             bool creatable, const char *noCreationReason,
-             QQmlPrivate::RegisterType *);
-PYSIDE_API QuickRegisterItemFunction getQuickRegisterItemFunction();
-PYSIDE_API void setQuickRegisterItemFunction(QuickRegisterItemFunction function);
+/// If the type \p T was registered on Qt meta type system with Q_DECLARE_METATYPE macro,
+/// this class will initialize the meta type.
+///
+/// Initialize a meta type means register it on Qt meta type system, Qt itself only do this
+/// on the first call of qMetaTypeId, and this is exactly what we do to init it. If we don't
+/// do that, calls to QMetaType::type("QMatrix2x2") could return zero, causing QVariant to
+/// not recognize some C++ types, like QMatrix2x2.
+
+template<typename T, bool OK = QMetaTypeId<T>::Defined >
+struct initQtMetaType {
+    initQtMetaType()
+    {
+        qMetaTypeId<T>();
+    }
+};
+
+// Template specialization to do nothing when the type wasn't registered on Qt meta type system.
+template<typename T>
+struct initQtMetaType<T, false> {
+};
 
 } //namespace PySide
 
-#endif // PYSIDE_H
+#endif // PYSIDEQMETATYPE_H

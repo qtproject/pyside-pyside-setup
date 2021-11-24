@@ -353,7 +353,7 @@ static const char includeQDebug[] =
 "#ifndef QT_NO_VERSION_TAGGING\n"
 "#  define QT_NO_VERSION_TAGGING\n"
 "#endif\n"
-"#include <QDebug>\n";
+"#include <QtCore/QDebug>\n";
 
 static QString chopType(QString s)
 {
@@ -428,19 +428,21 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
     s << "#include <shiboken.h>\n";
     if (usePySideExtensions()) {
         s << includeQDebug;
-        s << "#include <pysidesignal.h>\n"
-            << "#include <pysideproperty.h>\n"
-            << "#include <pyside.h>\n"
-            << "#include <pysideqenum.h>\n"
+        if (metaClass->isQObject()) {
+            s << "#include <pysideqobject.h>\n"
+                << "#include <pysidesignal.h>\n"
+                << "#include <pysideproperty.h>\n"
+                << "#include <signalmanager.h>\n"
+                << "#include <pysidemetafunction.h>\n";
+        }
+        s << "#include <pysideqenum.h>\n"
+            << "#include <pysideqmetatype.h>\n"
+            << "#include <pysideutils.h>\n"
             << "#include <feature_select.h>\n"
             << "QT_WARNING_DISABLE_DEPRECATED\n\n";
      }
 
     s << "#include <typeinfo>\n";
-    if (usePySideExtensions() && metaClass->isQObject()) {
-        s << "#include <signalmanager.h>\n";
-        s << "#include <pysidemetafunction.h>\n";
-    }
 
     // The multiple inheritance initialization function
     // needs the 'set' class from C++ STL.
@@ -6313,7 +6315,7 @@ bool CppGenerator::finishGeneration()
 
     if (usePySideExtensions()) {
         s << includeQDebug;
-        s << R"(#include <pyside.h>
+        s << R"(#include <pysidecleanup.h>
 #include <pysideqenum.h>
 #include <feature_select.h>
 )";

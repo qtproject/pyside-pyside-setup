@@ -42,7 +42,7 @@
  ********************************************************************/
 
 // @snippet include-pyside
-#include <pyside.h>
+#include <pysideinit.h>
 #include <limits>
 #include "glue/core_snippets_p.h"
 // @snippet include-pyside

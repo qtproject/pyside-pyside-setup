@@ -38,13 +38,16 @@
 ****************************************************************************/
 
 #include "feature_select.h"
-#include "pyside.h"
+#include "pysidecleanup.h"
+#include "pysideqobject.h"
 #include "pysidestaticstrings.h"
 #include "class_property.h"
 
 #include <shiboken.h>
 #include <sbkfeature_base.h>
 #include <signature_p.h>
+
+#include <QtCore/QStringList>
 
 //////////////////////////////////////////////////////////////////////////////
 //

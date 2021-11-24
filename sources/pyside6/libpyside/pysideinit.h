@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2021 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -37,35 +37,24 @@
 **
 ****************************************************************************/
 
-#ifndef PYSIDE_H
-#define PYSIDE_H
+#ifndef PYSIDEINIT_H
+#define PYSIDEINIT_H
 
 #include <sbkpython.h>
 
 #include <pysidemacros.h>
 
-#include "pysideinit.h"
-#include "pysideqapp.h"
-#include "pysideqobject.h"
-#include "pysideutils.h"
-
-namespace QQmlPrivate
-{
-struct RegisterType;
-}
-
 namespace PySide
 {
 
-// Used by QtQuick module to notify QtQml that custom QtQuick items can be registered.
-using QuickRegisterItemFunction =
-    bool (*)(PyObject *pyObj, const char *uri, int versionMajor,
-             int versionMinor, const char *qmlName,
-             bool creatable, const char *noCreationReason,
-             QQmlPrivate::RegisterType *);
-PYSIDE_API QuickRegisterItemFunction getQuickRegisterItemFunction();
-PYSIDE_API void setQuickRegisterItemFunction(QuickRegisterItemFunction function);
+PYSIDE_API void init(PyObject *module);
+
+/// Registers a dynamic "qt.conf" file with the Qt resource system.
+///
+/// This is used in a standalone build, to inform QLibraryInfo of the Qt prefix
+/// (where Qt libraries are installed) so that plugins can be successfully loaded.
+PYSIDE_API bool registerInternalQtConf();
 
 } //namespace PySide
 
-#endif // PYSIDE_H
+#endif // PYSIDEINIT_H

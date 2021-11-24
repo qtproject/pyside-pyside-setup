@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2021 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -37,35 +37,32 @@
 **
 ****************************************************************************/
 
-#ifndef PYSIDE_H
-#define PYSIDE_H
+#ifndef PYSIDEUTILS_H
+#define PYSIDEUTILS_H
 
 #include <sbkpython.h>
 
 #include <pysidemacros.h>
 
-#include "pysideinit.h"
-#include "pysideqapp.h"
-#include "pysideqobject.h"
-#include "pysideutils.h"
+#include <QtCore/QtGlobal>
 
-namespace QQmlPrivate
-{
-struct RegisterType;
-}
+QT_FORWARD_DECLARE_CLASS(QString)
 
 namespace PySide
 {
 
-// Used by QtQuick module to notify QtQml that custom QtQuick items can be registered.
-using QuickRegisterItemFunction =
-    bool (*)(PyObject *pyObj, const char *uri, int versionMajor,
-             int versionMinor, const char *qmlName,
-             bool creatable, const char *noCreationReason,
-             QQmlPrivate::RegisterType *);
-PYSIDE_API QuickRegisterItemFunction getQuickRegisterItemFunction();
-PYSIDE_API void setQuickRegisterItemFunction(QuickRegisterItemFunction function);
+/// Check if self inherits from class_name
+/// \param self Python object
+/// \param class_name strict with the class name
+/// \return Returns true if self object inherits from class_name, otherwise returns false
+PYSIDE_API bool inherits(PyTypeObject *self, const char *class_name);
+
+/// Given A PyObject repesenting ASCII or Unicode data, returns an equivalent QString.
+PYSIDE_API QString pyStringToQString(PyObject *str);
+
+/// Provide an efficient, correct PathLike interface.
+PYSIDE_API QString pyPathToQString(PyObject *path);
 
 } //namespace PySide
 
-#endif // PYSIDE_H
+#endif // PYSIDESTRING_H

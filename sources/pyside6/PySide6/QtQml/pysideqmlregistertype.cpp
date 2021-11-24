@@ -49,6 +49,7 @@
 
 // pyside
 #include <pyside.h>
+#include <pysideqobject.h>
 #include <pyside_p.h>
 
 #include <QtCore/QMutex>

@@ -42,7 +42,7 @@
 #include "pysidesignal.h"
 #include "pysideproperty.h"
 #include "pysideproperty_p.h"
-#include "pyside.h"
+#include "pysidecleanup.h"
 #include "pyside_p.h"
 #include "dynamicqmetaobject.h"
 #include "pysidemetafunction_p.h"

@@ -38,6 +38,11 @@
 ****************************************************************************/
 
 #include "pyside.h"
+#include "pysideinit.h"
+#include "pysidecleanup.h"
+#include "pysideqapp.h"
+#include "pysideqobject.h"
+#include "pysideutils.h"
 #include "pyside_numpy.h"
 #include "pyside_p.h"
 #include "signalmanager.h"

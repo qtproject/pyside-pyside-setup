@@ -39,6 +39,7 @@
 
 #include "dynamicqmetaobject.h"
 #include "dynamicqmetaobject_p.h"
+#include "pysideqobject.h"
 #include "pysidesignal.h"
 #include "pysidesignal_p.h"
 #include "pysideproperty.h"
@@ -47,7 +48,6 @@
 #include "pysideqenum.h"
 
 #include <shiboken.h>
-#include <pyside.h>
 
 #include <QtCore/QByteArray>
 #include <QtCore/QObject>

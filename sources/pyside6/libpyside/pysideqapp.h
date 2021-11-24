@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2021 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -37,35 +37,19 @@
 **
 ****************************************************************************/
 
-#ifndef PYSIDE_H
-#define PYSIDE_H
-
-#include <sbkpython.h>
+#ifndef PYSIDEQAPP_H
+#define PYSIDEQAPP_H
 
 #include <pysidemacros.h>
-
-#include "pysideinit.h"
-#include "pysideqapp.h"
-#include "pysideqobject.h"
-#include "pysideutils.h"
-
-namespace QQmlPrivate
-{
-struct RegisterType;
-}
 
 namespace PySide
 {
 
-// Used by QtQuick module to notify QtQml that custom QtQuick items can be registered.
-using QuickRegisterItemFunction =
-    bool (*)(PyObject *pyObj, const char *uri, int versionMajor,
-             int versionMinor, const char *qmlName,
-             bool creatable, const char *noCreationReason,
-             QQmlPrivate::RegisterType *);
-PYSIDE_API QuickRegisterItemFunction getQuickRegisterItemFunction();
-PYSIDE_API void setQuickRegisterItemFunction(QuickRegisterItemFunction function);
+PYSIDE_API void initQApp();
+
+/// Destroy a QCoreApplication taking care of destroy all instances of QObject first.
+PYSIDE_API void destroyQCoreApplication();
 
 } //namespace PySide
 
-#endif // PYSIDE_H
+#endif // PYSIDEQPP_H

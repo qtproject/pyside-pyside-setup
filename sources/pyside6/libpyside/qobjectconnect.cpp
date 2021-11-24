@@ -38,7 +38,7 @@
 ****************************************************************************/
 
 #include "qobjectconnect.h"
-#include "pyside.h"
+#include "pysideqobject.h"
 #include "pysidesignal.h"
 #include "signalmanager.h"
 
