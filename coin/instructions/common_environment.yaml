@@ -163,3 +163,12 @@ instructions:
     - type: EnvironmentVariable
       variableName: LLVM_INSTALL_DIR
       variableValue: "{{.Env.LLVM_DYNAMIC_LIBS_100}}"
+      disable_if:
+        condition: and
+        conditions:
+          - condition: property
+            property: target.arch
+            equals_value: X86_64-ARM64 # When target arch is universal binary, we can use the default libclang
+          - condition: property
+            property: host.os
+            equals_value: MacOS
