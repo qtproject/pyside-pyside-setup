@@ -37,7 +37,7 @@
 ##
 ###############
 
-"""
+EPILOG = """
 This is a troubleshooting script that assists finding out which DLLs or
 which symbols in a DLL are missing when executing a PySide6 python
 script.
@@ -71,27 +71,24 @@ from os import path
 from textwrap import dedent
 
 is_win = sys.platform == "win32"
-is_py_3 = sys.version_info[0] == 3
 if is_win:
-    if is_py_3:
-        import winreg
-    else:
-        import _winreg as winreg
-        import exceptions
+    import winreg
 
 
 def get_parser_args():
     desc_msg = "Run an executable under cdb with loader snaps set."
     help_msg = "Pass the executable and the arguments passed to it as a list."
-    parser = argparse.ArgumentParser(description=desc_msg)
+    parser = argparse.ArgumentParser(description=desc_msg,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter,
+                                     epilog=EPILOG)
     parser.add_argument('args', nargs='*', help=help_msg)
     # Prepend -- so that python options like '-c' are ignored by
     # argparse.
-    massaged_args = ['--'] + sys.argv[1:]
-    return parser.parse_args(massaged_args)
+    help_requested = '-h' in sys.argv or '--help' in sys.argv
+    massaged_args = ['--'] + sys.argv[1:] if not help_requested else sys.argv
+    return parser, parser.parse_args(massaged_args)
 
 
-parser_args = get_parser_args()
 verbose_log_file_name = path.join(path.dirname(path.abspath(__file__)),
                                   'log_debug_windows.txt')
 
@@ -342,7 +339,7 @@ print(">>>>>>>>>>>>>>>>>>>>>>> QtCore object instance: {}".format(PySide6.QtCore
     call_command_under_cdb_with_gflags(sys.executable, ["-c", python_code])
 
 
-def handle_args():
+def handle_args(parser_args):
     if not parser_args.args:
         test_run_import_qt_core_under_cdb_with_gflags()
     else:
@@ -355,9 +352,12 @@ if __name__ == '__main__':
         log.error("This script only works on Windows.")
         exit(1)
 
+    parser, parser_args = get_parser_args()
+
     if is_admin():
-        handle_args()
+        handle_args(parser_args)
     else:
         log.error("Please rerun the script with administrator privileges. "
                   "It is required for gflags.exe to work. ")
+        parser.print_help()
         exit(1)
