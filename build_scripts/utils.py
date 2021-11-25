@@ -47,6 +47,7 @@ import subprocess
 import fnmatch
 import itertools
 import glob
+from os.path import expanduser
 
 # There is no urllib.request in Python2
 try:
@@ -1157,7 +1158,7 @@ def install_pip_dependencies(env_pip, packages, upgrade=True):
 
 
 def get_qtci_virtualEnv(python_ver, host, hostArch, targetArch):
-    _pExe = "python"
+    _pExe = "python2"
     _env = "env{}".format(str(python_ver))
     env_python = _env + "/bin/python"
     env_pip = _env + "/bin/pip"
@@ -1229,3 +1230,16 @@ def get_ci_qmake_path(ci_install_dir, ci_host_os):
         return qmake_path + "\\bin\\qmake.exe"
     else:
         return qmake_path + "/bin/qmake"
+
+
+def provisioning():
+    home = expanduser("~")
+    file = "https://download.qt.io/development_releases/prebuilt/libclang/libclang-release_100-based-dyn-mac-universal.7z"
+    target = os.path.join(home, "libclang-dynlibs-10.0-universal")
+    try:
+        download_and_extract_7z(file, target)
+    except RuntimeError as e:
+        print("debug: Exception error: {}".format(e))
+        file = file.replace("s://download","://master")
+        print("New url: {}".format(file))
+        download_and_extract_7z(file, target)

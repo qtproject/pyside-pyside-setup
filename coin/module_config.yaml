@@ -18,10 +18,20 @@ accept_configuration:
             not_contains_value: -no-gui
           - condition: property   # Following configs are not supported
             property: target.osVersion
-            not_in_values: [OPENSUSE_13_01, QEMU, WebAssembly, Ubuntu_18_04, SLES_12, SLES_15, MacOS_10_15, MacOS_11_00]
+            not_in_values: [openSUSE_15_1, OPENSUSE_13_01, QEMU, WebAssembly, Ubuntu_18_04, SLES_12, SLES_15, MacOS_10_15, MacOS_11_00, Windows_11_21H2]
           - condition: property  # MibnGW and msvc2015 are not supported
             property: target.compiler
             not_in_values: [Mingw, MSVC2015]
+
+      - condition: and
+        conditions:
+          - condition: property
+            property: target.osVersion
+            equals_value: Windows_11_21H2
+          - condition: property
+            property: features
+            contains_value: Packaging
+
       - condition: and
         conditions:
           - condition: property
