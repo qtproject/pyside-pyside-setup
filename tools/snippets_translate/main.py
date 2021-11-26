@@ -277,7 +277,8 @@ def translate_file(file_path, final_path, debug, write):
 
         if write:
             # Open the final file
-            target_file = final_path.with_suffix(".py")
+            new_suffix = ".h.py" if final_path.name.endswith(".h") else ".py"
+            target_file = final_path.with_suffix(new_suffix)
 
             # Directory where the file will be placed, if it does not exists
             # we create it. The option 'parents=True' will create the parents
@@ -338,13 +339,9 @@ def copy_file(file_path, py_path, category, category_path, write=False, debug=Fa
         else:
             log.info(f"{status_msg:10s} {final_path}")
 
-    # Change .cpp to .py
-    # TODO:
-    # - What do we do with .h in case both .cpp and .h exists with
-    #   the same name?
-
+    # Change .cpp to .py, .h to .h.py
     # Translate C++ code into Python code
-    if final_path.name.endswith(".cpp"):
+    if final_path.name.endswith(".cpp") or final_path.name.endswith(".h"):
         translate_file(file_path, final_path, debug, write)
 
     return status
