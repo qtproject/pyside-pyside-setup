@@ -116,6 +116,18 @@ class SetupRunner(object):
                            setup_script_dir=self.setup_script_dir,
                            quiet=OPTION["QUIET"])
 
+        # Enable logging for both the top-level invocation of setup.py
+        # as well as for child invocations. We we now use
+        # setuptools._distutils.log instead of distutils.log, and this
+        # new log object does not have its verbosity set by default
+        # when setuptools instantiates a distutils Distribution object,
+        # which calls
+        # dist.parse_command_line() -> log.set_verbosity(self.verbose)
+        # on the old distutils log object.
+        # So we do it explicitly here.
+        if not OPTION["QUIET"]:
+            log.set_verbosity(log.INFO)
+
         # This is an internal invocation of setup.py, so start actual
         # build.
         if config.is_internal_invocation():
@@ -124,10 +136,6 @@ class SetupRunner(object):
                                    "--internal-build-type. ")
             self.run_setuptools_setup()
             return
-
-        # Enable logging.
-        if not OPTION["QUIET"]:
-            log.set_verbosity(log.INFO)
 
         # This is a top-level invocation of setup.py, so figure out what
         # modules we will build and depending on that, call setup.py
