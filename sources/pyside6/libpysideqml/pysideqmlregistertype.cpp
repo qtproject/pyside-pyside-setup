@@ -59,20 +59,17 @@
 #include <QtQml/QJSValue>
 #include <QtQml/QQmlListProperty>
 
-// Mutex used to avoid race condition on PySide::nextQObjectMemoryAddr.
-static QMutex nextQmlElementMutex;
-
 static PySide::Qml::QuickRegisterItemFunction quickRegisterItemFunction = nullptr;
 
 static void createInto(void *memory, void *type)
 {
-    QMutexLocker locker(&nextQmlElementMutex);
+    QMutexLocker locker(&PySide::nextQObjectMemoryAddrMutex());
     PySide::setNextQObjectMemoryAddr(memory);
     Shiboken::GilState state;
     PyObject *obj = PyObject_CallObject(reinterpret_cast<PyObject *>(type), 0);
     if (!obj || PyErr_Occurred())
         PyErr_Print();
-    PySide::setNextQObjectMemoryAddr(0);
+    PySide::setNextQObjectMemoryAddr(nullptr);
 }
 
 PyTypeObject *qObjectType()

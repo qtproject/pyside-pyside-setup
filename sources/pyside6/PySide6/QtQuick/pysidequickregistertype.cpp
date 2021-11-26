@@ -51,18 +51,15 @@
 
 #include <QtCore/QMutex>
 
-// Mutex used to avoid race condition on PySide::nextQObjectMemoryAddr.
-static QMutex nextQmlElementMutex;
-
 static void createQuickItem(void *memory, void *type)
 {
-    QMutexLocker locker(&nextQmlElementMutex);
+    QMutexLocker locker(&PySide::nextQObjectMemoryAddrMutex());
     PySide::setNextQObjectMemoryAddr(memory);
     Shiboken::GilState state;
     PyObject *obj = PyObject_CallObject(reinterpret_cast<PyObject *>(type), 0);
     if (!obj || PyErr_Occurred())
         PyErr_Print();
-    PySide::setNextQObjectMemoryAddr(0);
+    PySide::setNextQObjectMemoryAddr(nullptr);
 }
 
 bool pyTypeObjectInheritsFromClass(PyTypeObject *pyObjType, QByteArray className)

@@ -48,6 +48,7 @@
 
 QT_FORWARD_DECLARE_CLASS(QObject)
 QT_FORWARD_DECLARE_STRUCT(QMetaObject)
+QT_FORWARD_DECLARE_CLASS(QMutex)
 
 namespace PySide
 {
@@ -83,7 +84,10 @@ PYSIDE_API QObject *convertToQObject(PyObject *object, bool raiseError);
 /// attribute related with name
 PYSIDE_API PyObject *getMetaDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *name);
 
+/// Mutex for accessing QObject memory helpers from multiple threads
+PYSIDE_API QMutex &nextQObjectMemoryAddrMutex();
 PYSIDE_API void *nextQObjectMemoryAddr();
+/// Set the address where to allocate the next QObject (for QML)
 PYSIDE_API void setNextQObjectMemoryAddr(void *addr);
 
 PYSIDE_API PyObject *getWrapperForQObject(QObject *cppSelf, PyTypeObject *sbk_type);

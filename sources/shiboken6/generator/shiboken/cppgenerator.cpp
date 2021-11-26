@@ -3679,7 +3679,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                             Indentation indent(uva);
 
                             uva << "cptr = new (addr) ::" << ctorCall << ";\n"
-                                << "PySide::setNextQObjectMemoryAddr(0);"
+                                << "PySide::setNextQObjectMemoryAddr(nullptr);"
                                 << '\n';
                         }
                         uva << "} else {\n";

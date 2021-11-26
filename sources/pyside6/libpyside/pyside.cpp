@@ -71,6 +71,7 @@
 #include <QtCore/QCoreApplication>
 #include <QtCore/QDir>
 #include <QtCore/QFileInfo>
+#include <QtCore/QMutex>
 #include <QtCore/QSharedPointer>
 #include <QtCore/QStack>
 #include <QtCore/QThread>
@@ -385,6 +386,12 @@ bool inherits(PyTypeObject *objType, const char *class_name)
         return false;
 
     return inherits(base, class_name);
+}
+
+QMutex &nextQObjectMemoryAddrMutex()
+{
+    static QMutex mutex;
+    return mutex;
 }
 
 void *nextQObjectMemoryAddr()
