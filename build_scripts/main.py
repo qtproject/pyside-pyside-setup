@@ -63,7 +63,7 @@ from setuptools.command.build_py import build_py as _build_py
 
 from sysconfig import get_config_var
 # Use the distutils implementation within setuptools
-from setuptools._distutils.errors import DistutilsError
+from setuptools._distutils.errors import DistutilsSetupError
 from setuptools._distutils import log
 from setuptools._distutils import sysconfig as sconfig
 from setuptools._distutils.command.build import build as _build
