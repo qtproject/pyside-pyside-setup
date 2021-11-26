@@ -277,7 +277,18 @@ def translate_file(file_path, final_path, debug, write):
 
         if write:
             # Open the final file
-            with open(str(final_path), "w") as out_f:
+            target_file = final_path.with_suffix(".py")
+
+            # Directory where the file will be placed, if it does not exists
+            # we create it. The option 'parents=True' will create the parents
+            # directories if they don't exist, and if some of them exists,
+            # the option 'exist_ok=True' will ignore them.
+            if not target_file.parent.is_dir():
+                if not opt_quiet:
+                    log.info(f"Creating directories for {target_file.parent}")
+                target_file.parent.mkdir(parents=True, exist_ok=True)
+
+            with target_file.open("w") as out_f:
                 out_f.write(license_header)
                 out_f.write("\n\n")
 
@@ -285,8 +296,6 @@ def translate_file(file_path, final_path, debug, write):
                     out_f.write(s)
                     out_f.write("\n")
 
-            # Rename to .py
-            written_file = shutil.move(str(final_path), str(final_path.with_suffix(".py")))
             if not opt_quiet:
                 log.info(f"Written: {written_file}")
     else:
@@ -328,15 +337,6 @@ def copy_file(file_path, py_path, category, category_path, write=False, debug=Fa
             log.info(f"{status_msg} {final_path}", extra={"markup": True})
         else:
             log.info(f"{status_msg:10s} {final_path}")
-
-    # Directory where the file will be placed, if it does not exists
-    # we create it. The option 'parents=True' will create the parents
-    # directories if they don't exist, and if some of them exists,
-    # the option 'exist_ok=True' will ignore them.
-    if write and not final_path.parent.is_dir():
-        if not opt_quiet:
-            log.info(f"Creating directories for {final_path.parent}")
-        final_path.parent.mkdir(parents=True, exist_ok=True)
 
     # Change .cpp to .py
     # TODO:
