@@ -572,6 +572,9 @@
   <rejection class="Qt" function-name="qt_getEnumName"/>
 
   <namespace-type name="Qt">
+    <extra-includes>
+      <include file-name="QtCore/QProperty" location="global"/>
+    </extra-includes>
     <enum-type name="AlignmentFlag" flags="Alignment"/>
     <enum-type name="AnchorPoint" since="4.6"/>
     <enum-type name="ApplicationAttribute"/>
