@@ -1220,6 +1220,16 @@ def acceptCITestConfiguration(hostOS, hostOSVer, targetArch, compiler):
     return True
 
 
+def get_ci_qtpaths_path(ci_install_dir, ci_host_os):
+    qtpaths_path = f"--qtpaths={ci_install_dir}"
+    if ci_host_os == "MacOS":
+        return f"{qtpaths_path}/bin/qtpaths"
+    elif ci_host_os == "Windows":
+        return f"{qtpaths_path}\\bin\\qtpaths.exe"
+    else:
+        return f"{qtpaths_path}/bin/qtpaths"
+
+
 def get_ci_qmake_path(ci_install_dir, ci_host_os):
     qmake_path = f"--qmake={ci_install_dir}"
     if ci_host_os == "MacOS":

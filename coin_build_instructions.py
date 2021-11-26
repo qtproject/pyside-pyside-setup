@@ -43,7 +43,7 @@ from build_scripts.utils import get_qtci_virtualEnv
 from build_scripts.utils import run_instruction
 from build_scripts.utils import rmtree
 from build_scripts.utils import get_python_dict
-from build_scripts.utils import get_ci_qmake_path
+from build_scripts.utils import get_ci_qtpaths_path
 import os
 import datetime
 import calendar
@@ -159,8 +159,8 @@ def call_setup(python_ver, phase):
     if is_snapshot_build():
         cmd += ["--snapshot-build"]
 
-    qmake_path = get_ci_qmake_path(CI_ENV_INSTALL_DIR, CI_HOST_OS)
-    cmd.append(qmake_path)
+    qtpaths_path = get_ci_qtpaths_path(CI_ENV_INSTALL_DIR, CI_HOST_OS)
+    cmd.append(qtpaths_path)
 
     # Due to certain older CMake versions generating very long paths
     # (at least with CMake 3.6.2) when using the export() function,

@@ -357,6 +357,7 @@ class DistUtilsCommandMixin(object):
         # Enforce usage of qmake in QtInfo if it was given explicitly.
         if self.qmake:
             self.has_qmake_option = True
+            _warn_deprecated_option('qmake', 'qtpaths')
 
         # If no option was given explicitly, prefer to find qtpaths
         # in PATH.
