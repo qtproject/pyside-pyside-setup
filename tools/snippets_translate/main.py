@@ -75,7 +75,7 @@ SKIP_END = (".pro", ".pri", ".cmake", ".qdoc", ".yaml", ".frag", ".qsb", ".vert"
 SKIP_BEGIN = ("changes-", ".")
 OUT_MAIN = Path("sources/pyside6/doc/codesnippets/")
 OUT_SNIPPETS = OUT_MAIN / "doc/src/snippets/"
-OUT_EXAMPLES = OUT_MAIN / "doc/codesnippets/examples/"
+OUT_EXAMPLES = OUT_MAIN / "examples/"
 SNIPPET_PATTERN = re.compile(r"//! \[([^]]+)\]")
 
 
