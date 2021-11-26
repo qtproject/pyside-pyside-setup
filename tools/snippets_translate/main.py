@@ -76,6 +76,7 @@ SKIP_BEGIN = ("changes-", ".")
 OUT_MAIN = Path("sources/pyside6/doc/codesnippets/")
 OUT_SNIPPETS = OUT_MAIN / "doc/src/snippets/"
 OUT_EXAMPLES = OUT_MAIN / "doc/codesnippets/examples/"
+SNIPPET_PATTERN = re.compile(r"//! \[([^]]+)\]")
 
 
 class FileStatus(Enum):
@@ -191,24 +192,29 @@ def is_valid_file(x):
     return True
 
 
+def get_snippet_ids(line):
+    """Extract the snippet ids for a line '//! [1] //! [2]'"""
+    result = []
+    for m in SNIPPET_PATTERN.finditer(line):
+        result.append(m.group(1))
+    return result
+
+
 def get_snippets(data):
-    snippet_lines = ""
-    is_snippet = False
+    """Extract (potentially overlapping) snippets from a C++ file indicated by //! [1]"""
+    current_snippets = []  # Active ids
     snippets = []
     for line in data:
-        if not is_snippet and line.startswith("//! ["):
-            snippet_lines = line
-            is_snippet = True
-        elif is_snippet:
-            snippet_lines = f"{snippet_lines}\n{line}"
-            if line.startswith("//! ["):
-                is_snippet = False
-                snippets.append(snippet_lines)
-                # Special case when a snippet line is:
-                # //! [1] //! [2]
-                if line.count("//!") > 1:
-                    snippet_lines = ""
-                    is_snippet = True
+        new_ids = get_snippet_ids(line)
+        for id in new_ids:
+            if id in current_snippets:  # id encountered 2nd time: Snippet ends
+                current_snippets.remove(id)
+            else:
+                current_snippets.append(id)
+
+        if new_ids or current_snippets:
+            snippets.append(line)
+
     return snippets
 
 
@@ -250,39 +256,34 @@ def translate_file(file_path, final_path, debug, write):
                 table.add_column("C++")
                 table.add_column("Python")
 
-        file_snippets = []
-        for snippet in snippets:
-            lines = snippet.split("\n")
-            translated_lines = []
-            for line in lines:
-                if not line:
-                    continue
-                translated_line = snippet_translate(line)
-                translated_lines.append(translated_line)
+        translated_lines = []
+        for line in snippets:
+            if not line:
+                continue
+            translated_line = snippet_translate(line)
+            translated_lines.append(translated_line)
 
-                # logging
-                if debug:
-                    if have_rich:
-                        table.add_row(line, translated_line)
-                    else:
-                        if not opt_quiet:
-                            print(line, translated_line)
+            # logging
+            if debug:
+                if have_rich:
+                    table.add_row(line, translated_line)
+                else:
+                    if not opt_quiet:
+                        print(line, translated_line)
 
-            if debug and have_rich:
-                if not opt_quiet:
-                    console.print(table)
-
-            file_snippets.append("\n".join(translated_lines))
+        if debug and have_rich:
+            if not opt_quiet:
+                console.print(table)
 
         if write:
             # Open the final file
             with open(str(final_path), "w") as out_f:
                 out_f.write(license_header)
-                out_f.write("\n")
+                out_f.write("\n\n")
 
-                for s in file_snippets:
+                for s in translated_lines:
                     out_f.write(s)
-                    out_f.write("\n\n")
+                    out_f.write("\n")
 
             # Rename to .py
             written_file = shutil.move(str(final_path), str(final_path.with_suffix(".py")))
