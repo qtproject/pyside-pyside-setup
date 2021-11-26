@@ -489,10 +489,12 @@ QString QtXmlToSphinx::readFromLocations(const QStringList &locations, const QSt
                                          const QString &identifier, QString *errorMessage)
 {
     QString resolvedPath;
-    if (path.endsWith(QLatin1String(".cpp"))) {
-        const QString pySnippet = path.left(path.size() - 3) + QLatin1String("py");
-        resolvedPath = resolveFile(locations, pySnippet);
-    }
+    // Try Python snippets first.
+    if (path.endsWith(u".cpp"))
+        resolvedPath = resolveFile(locations, path.left(path.size() - 3) + u"py"_qs);
+    else if (path.endsWith(u".h"))
+        resolvedPath = resolveFile(locations, path + u".py"_qs);
+
     if (resolvedPath.isEmpty())
         resolvedPath = resolveFile(locations, path);
     if (resolvedPath.isEmpty()) {
