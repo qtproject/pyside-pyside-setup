@@ -298,7 +298,7 @@ def translate_file(file_path, final_path, debug, write):
                     out_f.write("\n")
 
             if not opt_quiet:
-                log.info(f"Written: {written_file}")
+                log.info(f"Written: {target_file}")
     else:
         if not opt_quiet:
             log.warning("No snippets were found")
