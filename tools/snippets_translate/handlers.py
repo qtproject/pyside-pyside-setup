@@ -42,6 +42,11 @@ import sys
 
 from parse_utils import get_indent, dstrip, remove_ref, parse_arguments, replace_main_commas, get_qt_module_class
 
+IF_PATTERN = re.compile(r'^if\s*\(')
+ELSE_IF_PATTERN = re.compile(r'^}?\s*else if\s*\(')
+WHILE_PATTERN = re.compile(r'^while\s*\(')
+
+
 def handle_condition(x, name):
     # Make sure it's not a multi line condition
     x = x.replace("}", "")
@@ -57,8 +62,13 @@ def handle_condition(x, name):
             x = x.replace(f"//{comment_content[-1]}", "")
 
         re_par = re.compile(r"\((.+)\)")
-        condition = re_par.search(x).group(1)
-        return f"{get_indent(x)}{name} {condition.strip()}:{comment}"
+        match = re_par.search(x)
+        if match:
+            condition = re_par.search(x).group(1)
+            return f"{get_indent(x)}{name} {condition.strip()}:{comment}"
+        else:
+            print(f'snippets_translate: Warning "{x}" does not match condition pattern',
+                  file=sys.stderr)
     return x
 
 
@@ -138,11 +148,11 @@ def handle_include(x):
 
 def handle_conditions(x):
     x_strip = x.strip()
-    if x_strip.startswith("while") and "(" in x:
+    if WHILE_PATTERN.match(x):
         x = handle_condition(x, "while")
-    elif x_strip.startswith("if") and "(" in x:
+    elif IF_PATTERN.match(x):
         x = handle_condition(x, "if")
-    elif x_strip.startswith(("else if", "} else if")):
+    elif ELSE_IF_PATTERN.match(x):
         x = handle_condition(x, "else if")
         x = x.replace("else if", "elif")
     x = x.replace("::", ".")
@@ -187,7 +197,7 @@ def handle_for(x):
                     # Malformed for-loop:
                     #   for (; pixel1 > start; pixel1 -= stride)
                     # We return the same line
-                    if not start.strip():
+                    if not start.strip() or not "=" in start:
                         return f"{get_indent(x)}{dstrip(x)}"
                     raw_var, value = start.split("=")
                 raw_var = raw_var.strip()
@@ -333,9 +343,14 @@ def handle_constructor_default_values(x):
         elif arg:
             var_name = arg.split("(")[0]
             re_par = re.compile(r"\((.+)\)")
-            content = re_par.search(arg).group(1)
-            return f"    self.{var_name} = {content}"
-
+            match = re_par.search(arg)
+            if match:
+                content = match.group(1)
+                return f"    self.{var_name} = {content}"
+            else:
+                print(f'snippets_translate: Warning "{arg}" does not match pattern',
+                      file=sys.stderr)
+                return ""
     return return_values.rstrip()
 
 
@@ -409,6 +424,7 @@ def handle_void_functions(x):
         method_name = class_method.strip()
 
     # if the arguments are in the same line:
+    arguments = None
     if ")" in x:
         re_content = re.compile(r"\((.*)\)")
         parenthesis = re_content.search(x).group(1)
