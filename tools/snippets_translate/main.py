@@ -397,9 +397,6 @@ def process(options):
     else:
         for i in qt_path.iterdir():
             module_name = i.name
-            # FIXME: remove this, since it's just for testing.
-            if i.name != "qtbase":
-                continue
 
             # Filter only Qt modules
             if not module_name.startswith("qt"):

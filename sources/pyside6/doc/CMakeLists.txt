@@ -102,10 +102,8 @@ if (FULLDOCSBUILD)
     execute_process(COMMAND ${PYTHON_EXECUTABLE} ${SNIPPETS_TOOL}
         --qt ${QT_SRC_DIR}/.. --pyside ${PYSIDE_ROOT} -w
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-        ERROR_VARIABLE SNIPPETS_ERROR
         RESULT_VARIABLE SNIPPETS_RESULT)
-    # SNIPPETS_ERROR might be empty and SNIPPET_RESULT might contain "permission denied"
-    if (SNIPPETS_ERROR OR SNIPPETS_RESULT)
+    if (SNIPPETS_RESULT)
         message(FATAL_ERROR
                 "The 'snippets_translate' tool failed: ${SNIPPETS_ERROR} ${SNIPPET_RESULT}")
     endif()
