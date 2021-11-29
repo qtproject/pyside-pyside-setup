@@ -262,15 +262,16 @@ if __name__ == "__main__":
             }
         )
 
-        pyproject = ""
+        files = []
         try:
             with open(str(f_path), "r") as pyf:
                 pyproject = json.load(pyf)
-        except json.JSONDecodeError as e:
+                files = pyproject["files"]
+        except (json.JSONDecodeError, KeyError) as e:
             print(f"example_gallery: error reading {f_path}: {e}")
             raise
 
-        if pyproject:
+        if files:
             rst_file_full = EXAMPLES_DOC / rst_file
 
             with open(rst_file_full, "w") as out_f:
@@ -295,7 +296,7 @@ if __name__ == "__main__":
                             print("Written resource:", resource_written)
                 else:
                     content_f = get_header_title(f_path)
-                content_f += get_code_tabs(pyproject["files"], out_f)
+                content_f += get_code_tabs(files, out_f)
                 out_f.write(content_f)
 
             if not opt_quiet:
