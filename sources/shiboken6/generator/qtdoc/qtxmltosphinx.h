@@ -196,8 +196,23 @@ private:
     QString m_opened_anchor;
     QList<InlineImage> m_inlineImages;
 
-    QString readFromLocations(const QStringList &locations, const QString &path,
-                              const QString &identifier, QString *errorMessage);
+    struct Snippet
+    {
+        enum Result {
+            Converted, // C++ converted to Python
+            Resolved, // Otherwise resolved in snippet paths
+            Fallback, // Fallback from  XML
+            Error
+        };
+
+        QString code;
+        Result result;
+    };
+
+    Snippet readSnippetFromLocations(const QString &path,
+                                     const QString &identifier,
+                                     const QString &fallbackPath,
+                                     QString *errorMessage) const;
     static QString readFromLocation(const QString &location, const QString &identifier,
                              QString *errorMessage);
     void pushOutputBuffer();

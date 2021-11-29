@@ -59,16 +59,23 @@ QString msgTagWarning(const QXmlStreamReader &reader, const QString &context,
     return result;
 }
 
-QString msgFallbackWarning(const QXmlStreamReader &reader, const QString &context,
-                           const QString &tag, const QString &location,
-                           const QString &identifier, const QString &fallback)
+QString msgFallbackWarning(const QString &location, const QString &identifier,
+                           const QString &fallback)
 {
     QString message = QLatin1String("Falling back to \"")
         + QDir::toNativeSeparators(fallback) + QLatin1String("\" for \"")
         + location + QLatin1Char('"');
     if (!identifier.isEmpty())
         message += QLatin1String(" [") + identifier + QLatin1Char(']');
-    return msgTagWarning(reader, context, tag, message);
+    return message;
+}
+
+QString msgSnippetsResolveError(const QString &path, const QStringList &locations)
+{
+    QString result;
+    QTextStream(&result) << "Could not resolve \"" << path << R"(" in ")"
+        << locations.join(uR"(", ")"_qs);
+    return result;
 }
 
 static bool isHttpLink(const QString &ref)
@@ -485,27 +492,76 @@ static QString resolveFile(const QStringList &locations, const QString &path)
     return QString();
 }
 
-QString QtXmlToSphinx::readFromLocations(const QStringList &locations, const QString &path,
-                                         const QString &identifier, QString *errorMessage)
+enum class SnippetType
 {
-    QString resolvedPath;
-    // Try Python snippets first.
-    if (path.endsWith(u".cpp"))
-        resolvedPath = resolveFile(locations, path.left(path.size() - 3) + u"py"_qs);
-    else if (path.endsWith(u".h"))
-        resolvedPath = resolveFile(locations, path + u".py"_qs);
+    Other, // .qdoc, .qml,...
+    CppSource, CppHeader // Potentially converted to Python
+};
 
-    if (resolvedPath.isEmpty())
-        resolvedPath = resolveFile(locations, path);
-    if (resolvedPath.isEmpty()) {
-        QTextStream(errorMessage) << "Could not resolve \"" << path << "\" in \""
-           << locations.join(QLatin1String("\", \""));
-        return QString(); // null
+SnippetType snippetType(const QString &path)
+{
+    if (path.endsWith(u".cpp"))
+        return SnippetType::CppSource;
+    if (path.endsWith(u".h"))
+        return SnippetType::CppHeader;
+    return SnippetType::Other;
+}
+
+// Return the name of a .cpp/.h snippet converted to Python by snippets-translate
+static QString pySnippetName(const QString &path, SnippetType type)
+{
+    switch (type) {
+    case SnippetType::CppSource:
+        return path.left(path.size() - 3) + u"py"_qs;
+        break;
+    case SnippetType::CppHeader:
+        return path + u".py"_qs;
+        break;
+    default:
+        break;
     }
-    qCDebug(m_generator->loggingCategory()).noquote().nospace()
-        << "snippet file " << path
-        << " [" << identifier << ']' << " resolved to " << resolvedPath;
-    return readFromLocation(resolvedPath, identifier, errorMessage);
+    return {};
+}
+
+QtXmlToSphinx::Snippet QtXmlToSphinx::readSnippetFromLocations(const QString &path,
+                                                const QString &identifier,
+                                                const QString &fallbackPath,
+                                                QString *errorMessage) const
+{
+    // For anything else but C++ header/sources (no conversion to Python),
+    // use existing fallback paths first.
+    const auto type = snippetType(path);
+    if (type == SnippetType::Other && !fallbackPath.isEmpty()) {
+        const QString code = readFromLocation(fallbackPath, identifier, errorMessage);
+        return {code, code.isNull() ? Snippet::Error : Snippet::Fallback};
+    }
+
+    // For C++ header/sources, try snippets converted to Python first.
+    QString resolvedPath;
+    const auto &locations = m_parameters.codeSnippetDirs;
+
+    if (type != SnippetType::Other) {
+        resolvedPath = resolveFile(locations, pySnippetName(path, type));
+        if (!resolvedPath.isEmpty()) {
+            const QString code = readFromLocation(resolvedPath, identifier, errorMessage);
+            return {code, code.isNull() ? Snippet::Error : Snippet::Converted};
+        }
+    }
+
+    resolvedPath =resolveFile(locations, path);
+    if (!resolvedPath.isEmpty()) {
+        const QString code = readFromLocation(resolvedPath, identifier, errorMessage);
+        return {code, code.isNull() ? Snippet::Error : Snippet::Resolved};
+    }
+
+    if (!fallbackPath.isEmpty()) {
+        *errorMessage = msgFallbackWarning(path, identifier, fallbackPath);
+        const QString code = readFromLocation(fallbackPath, identifier, errorMessage);
+        return {code, code.isNull() ? Snippet::Error : Snippet::Fallback};
+    }
+
+    *errorMessage = msgSnippetsResolveError(path, locations);
+    return {{}, Snippet::Error};
 }
 
 QString QtXmlToSphinx::readFromLocation(const QString &location, const QString &identifier,
@@ -788,38 +844,29 @@ void QtXmlToSphinx::handleSnippetTag(QXmlStreamReader& reader)
         }
         QString location = reader.attributes().value(QLatin1String("location")).toString();
         QString identifier = reader.attributes().value(QLatin1String("identifier")).toString();
+        QString fallbackPath;
+        if (reader.attributes().hasAttribute(fallbackPathAttribute()))
+            fallbackPath = reader.attributes().value(fallbackPathAttribute()).toString();
         QString errorMessage;
-        const QString pythonCode =
-            readFromLocations(m_parameters.codeSnippetDirs, location, identifier, &errorMessage);
+        const Snippet snippet = readSnippetFromLocations(location, identifier,
+                                                         fallbackPath, &errorMessage);
         if (!errorMessage.isEmpty())
             warn(msgTagWarning(reader, m_context, m_lastTagName, errorMessage));
-        // Fall back to C++ snippet when "path" attribute is present.
-        // Also read fallback snippet when comparison is desired.
-        QString fallbackCode;
-        if ((pythonCode.isEmpty() || m_parameters.snippetComparison)
-            && reader.attributes().hasAttribute(fallbackPathAttribute())) {
-            const QString fallback = reader.attributes().value(fallbackPathAttribute()).toString();
-            if (QFileInfo::exists(fallback)) {
-                if (pythonCode.isEmpty())
-                    warn(msgFallbackWarning(reader, m_context, m_lastTagName, location, identifier, fallback));
-                fallbackCode = readFromLocation(fallback, identifier, &errorMessage);
-                if (!errorMessage.isEmpty())
-                    warn(msgTagWarning(reader, m_context, m_lastTagName, errorMessage));
-            }
-        }
 
-        if (!pythonCode.isEmpty() && !fallbackCode.isEmpty() && m_parameters.snippetComparison)
-            debug(msgSnippetComparison(location, identifier, pythonCode, fallbackCode));
+        if (m_parameters.snippetComparison && snippet.result == Snippet::Converted
+            && !fallbackPath.isEmpty()) {
+            const QString fallbackCode = readFromLocation(fallbackPath, identifier, &errorMessage);
+            debug(msgSnippetComparison(location, identifier, snippet.code, fallbackCode));
+        }
 
         if (!consecutiveSnippet)
             m_output << "::\n\n";
 
         Indentation indentation(m_output);
-        const QString code = pythonCode.isEmpty() ? fallbackCode : pythonCode;
-        if (code.isEmpty())
+        if (snippet.result == Snippet::Error)
             m_output << "<Code snippet \"" << location << ':' << identifier << "\" not found>\n";
         else
-            m_output << code << ensureEndl;
+            m_output << snippet.code << ensureEndl;
         m_output << '\n';
     }
 }
