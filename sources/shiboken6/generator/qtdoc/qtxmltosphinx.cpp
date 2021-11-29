@@ -541,6 +541,17 @@ QtXmlToSphinx::Snippet QtXmlToSphinx::readSnippetFromLocations(const QString &pa
     const auto &locations = m_parameters.codeSnippetDirs;
 
     if (type != SnippetType::Other) {
+        if (!fallbackPath.isEmpty() && !m_parameters.codeSnippetRewriteOld.isEmpty()) {
+            // Try looking up Python converted snippets by rewriting snippets paths
+            QString rewrittenPath = pySnippetName(fallbackPath, type);
+            if (!rewrittenPath.isEmpty()) {
+                rewrittenPath.replace(m_parameters.codeSnippetRewriteOld,
+                                      m_parameters.codeSnippetRewriteNew);
+                const QString code = readFromLocation(rewrittenPath, identifier, errorMessage);
+                return {code, code.isNull() ? Snippet::Error : Snippet::Converted};
+            }
+        }
+
         resolvedPath = resolveFile(locations, pySnippetName(path, type));
         if (!resolvedPath.isEmpty()) {
             const QString code = readFromLocation(resolvedPath, identifier, errorMessage);

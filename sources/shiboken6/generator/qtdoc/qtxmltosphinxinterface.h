@@ -40,6 +40,8 @@ struct QtXmlToSphinxParameters
     QString outputDirectory;
     QString libSourceDir;
     QStringList codeSnippetDirs;
+    QString codeSnippetRewriteOld;
+    QString codeSnippetRewriteNew;
     bool snippetComparison = false;
 };
 

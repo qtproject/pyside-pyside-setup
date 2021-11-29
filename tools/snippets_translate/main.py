@@ -74,8 +74,6 @@ log = logging.getLogger("snippets_translate")
 SKIP_END = (".pro", ".pri", ".cmake", ".qdoc", ".yaml", ".frag", ".qsb", ".vert", "CMakeLists.txt")
 SKIP_BEGIN = ("changes-", ".")
 OUT_MAIN = Path("sources/pyside6/doc/codesnippets/")
-OUT_SNIPPETS = OUT_MAIN / "doc/src/snippets/"
-OUT_EXAMPLES = OUT_MAIN / "examples/"
 SNIPPET_PATTERN = re.compile(r"//! \[([^]]+)\]")
 
 
@@ -305,17 +303,11 @@ def translate_file(file_path, final_path, debug, write):
 
 
 
-def copy_file(file_path, py_path, category, category_path, write=False, debug=False):
+def copy_file(file_path, qt_path, out_path, write=False, debug=False):
 
-    if not category:
-        translate_file(file_path, Path("_translated.py"), debug, write)
-        return
-    # Get path after the directory "snippets" or "examples"
-    # and we add +1 to avoid the same directory
-    idx = file_path.parts.index(category) + 1
-    rel_path = Path().joinpath(*file_path.parts[idx:])
-
-    final_path = py_path / category_path / rel_path
+    # Replicate the Qt path including module under the PySide snippets directory
+    qt_path_count = len(qt_path.parts)
+    final_path = out_path.joinpath(*file_path.parts[qt_path_count:])
 
     # Check if file exists.
     if final_path.exists():
@@ -350,49 +342,21 @@ def copy_file(file_path, py_path, category, category_path, write=False, debug=Fa
 def process(options):
     qt_path = Path(options.qt_dir)
     py_path = Path(options.pyside_dir)
+    out_path = py_path / OUT_MAIN
 
     # (new, exists)
     valid_new, valid_exists = 0, 0
 
     # Creating directories in case they don't exist
-    if not OUT_SNIPPETS.is_dir():
-        OUT_SNIPPETS.mkdir(parents=True)
-
-    if not OUT_EXAMPLES.is_dir():
-        OUT_EXAMPLES.mkdir(parents=True)
+    if not out_path.is_dir():
+        out_path.mkdir(parents=True)
 
     if options.single_snippet:
         f = Path(options.single_snippet)
         if is_valid_file(f):
-            if "snippets" in f.parts:
-                status = copy_file(
-                    f,
-                    py_path,
-                    "snippets",
-                    OUT_SNIPPETS,
-                    write=options.write_files,
-                    debug=options.debug,
-                )
-            elif "examples" in f.parts:
-                status = copy_file(
-                    f,
-                    py_path,
-                    "examples",
-                    OUT_EXAMPLES,
-                    write=options.write_files,
-                    debug=options.debug,
-                )
-        else:
-            log.warning("Path did not contain 'snippets' nor 'examples'."
-                        "File will not be copied over, just generated locally.")
-            status = copy_file(
-                f,
-                py_path,
-                None,
-                None,
-                write=options.write_files,
-                debug=options.debug,
-            )
+            status = copy_file(f, qt_path, out_path,
+                               write=options.write_files,
+                               debug=options.debug)
 
     else:
         for i in qt_path.iterdir():
@@ -411,24 +375,9 @@ def process(options):
                         # Proceed only if the full path contain the filter string
                         if options.filter_snippet not in str(f.absolute()):
                             continue
-                    if "snippets" in f.parts:
-                        status = copy_file(
-                            f,
-                            py_path,
-                            "snippets",
-                            OUT_SNIPPETS,
-                            write=options.write_files,
-                            debug=options.debug,
-                        )
-                    elif "examples" in f.parts:
-                        status = copy_file(
-                            f,
-                            py_path,
-                            "examples",
-                            OUT_EXAMPLES,
-                            write=options.write_files,
-                            debug=options.debug,
-                        )
+                    status = copy_file(f, qt_path, out_path,
+                                       write=options.write_files,
+                                       debug=options.debug)
 
                     # Stats
                     if status == FileStatus.New:

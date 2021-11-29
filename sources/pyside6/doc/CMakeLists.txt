@@ -89,18 +89,25 @@ if (NOT FULLDOCSBUILD)
     set(PYTHON_EXECUTABLE ${Python_EXECUTABLE})
 endif()
 
+if (QT_SRC_DIR)
+    file(REAL_PATH ${QT_SRC_DIR}/.. QT_ROOT_PATH)
+else()
+    set(QT_ROOT_PATH "")
+endif()
+
 if (FULLDOCSBUILD)
     # Fetch and transform the snippets from Qt
     message(STATUS "Fetching and converting snippets")
-    if ("${QT_SRC_DIR}" STREQUAL "")
+    if ("${QT_ROOT_PATH}" STREQUAL "")
         message(FATAL_ERROR "There is no value set on QT_SRC_DIR, the snippet conversion will fail")
     endif()
     set(PYSIDE_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../../../")
     set(SNIPPETS_TOOL "${CMAKE_CURRENT_SOURCE_DIR}/../../../tools/snippets_translate/main.py")
+
     # Note QT_SRC_DIR points to 'qtbase',
     # so we use the general SRC directory to copy all the other snippets
     execute_process(COMMAND ${PYTHON_EXECUTABLE} ${SNIPPETS_TOOL}
-        --qt ${QT_SRC_DIR}/.. --pyside ${PYSIDE_ROOT} -w
+        --qt ${QT_ROOT_PATH} --pyside ${PYSIDE_ROOT} -w
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
         RESULT_VARIABLE SNIPPETS_RESULT)
     if (SNIPPETS_RESULT)
@@ -264,6 +271,8 @@ endif()
 # create conf.py based on conf.py.in
 configure_file("conf.py.in" "rst/conf.py" @ONLY)
 
+set(CODE_SNIPPET_ROOT "${CMAKE_CURRENT_BINARY_DIR}/rst/codesnippets")
+
 add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/rst/PySide6/QtCore/index.rst"
                    COMMAND Shiboken6::shiboken6 --generator-set=qtdoc ${docHeader}
                            --enable-pyside-extensions
@@ -273,7 +282,8 @@ add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/rst/PySide6/QtCore/index.
                            --library-source-dir=${QT_SRC_DIR}
                            --documentation-data-dir=${DOC_DATA_DIR}/webxml
                            --output-directory=${CMAKE_CURRENT_BINARY_DIR}/rst
-                           --documentation-code-snippets-dir=${CMAKE_CURRENT_BINARY_DIR}/rst/codesnippets/doc/src/snippets${PATH_SEP}${CMAKE_CURRENT_BINARY_DIR}/rst/codesnippets/examples
+                           --documentation-code-snippets-dir=${CODE_SNIPPET_ROOT}
+                           --snippets-path-rewrite=${QT_ROOT_PATH}:${CODE_SNIPPET_ROOT}
                            --documentation-extra-sections-dir=${CMAKE_CURRENT_BINARY_DIR}/rst/extras
                            --additional-documentation=${CMAKE_CURRENT_BINARY_DIR}/rst/additionaldocs.lst
                            ${CMAKE_CURRENT_BINARY_DIR}/typesystem_doc.xml
