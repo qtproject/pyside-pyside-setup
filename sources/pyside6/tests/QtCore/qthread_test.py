@@ -39,12 +39,10 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QThread, QCoreApplication, QObject, SIGNAL, QMutex, QTimer
+from PySide6.QtCore import QThread, QCoreApplication, QObject, QTimer, Slot
 from PySide6.QtCore import QEventLoop
 
 from helper.usesqcoreapplication import UsesQCoreApplication
-
-mutex = QMutex()
 
 
 class Dummy(QThread):
@@ -56,19 +54,16 @@ class Dummy(QThread):
     def run(self):
         # Start-quit sequence
         self.qobj = QObject()
-        mutex.lock()
         self.called = True
-        mutex.unlock()
 
 
 class QThreadSimpleCase(UsesQCoreApplication):
 
     def setUp(self):
         UsesQCoreApplication.setUp(self)
+        self._started_called = False
+        self._finished_called = False
         self.called = False
-
-    def tearDown(self):
-        UsesQCoreApplication.tearDown(self)
 
     def testThread(self):
         # Basic QThread test
@@ -78,41 +73,37 @@ class QThreadSimpleCase(UsesQCoreApplication):
 
         self.assertTrue(obj.called)
 
-    def cb(self, *args):
-        self.called = True
-        # self.exit_app_cb()
-
+    @Slot()
     def abort_application(self):
         if self._thread.isRunning():
+            print("Warning: terminating thread", file=sys.stderr)
             self._thread.terminate()
         self.app.quit()
 
-    def testSignalFinished(self):
+    @Slot()
+    def finished(self):
+        self._finished_called = True
+
+    @Slot()
+    def started(self):
+        self._started_called = True
+
+    def testSignals(self):
         # QThread.finished() (signal)
-        obj = Dummy()
-        obj.finished.connect(self.cb)
-        mutex.lock()
-        obj.start()
-        mutex.unlock()
+        self._thread = Dummy()
+        self._thread.started.connect(self.started)
+        self._thread.finished.connect(self.finished)
+        self._thread.finished.connect(self.app.quit)
 
-        self._thread = obj
+        QTimer.singleShot(50, self._thread.start)
         QTimer.singleShot(1000, self.abort_application)
+
         self.app.exec()
+        if self._thread.isRunning():
+            self._thread.wait(100)
 
-        self.assertTrue(self.called)
-
-    def testSignalStarted(self):
-        # QThread.started() (signal)
-        obj = Dummy()
-        obj.started.connect(self.cb)
-        obj.start()
-
-        self._thread = obj
-        QTimer.singleShot(1000, self.abort_application)
-        self.app.exec()
-
-        self.assertEqual(obj.qobj.thread(), obj)  # test QObject.thread() method
-        self.assertTrue(self.called)
+        self.assertTrue(self._started_called)
+        self.assertTrue(self._finished_called)
 
 
 if __name__ == '__main__':
