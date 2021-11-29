@@ -41,7 +41,7 @@ set(QtQuick3D_libraries pyside6
                       ${Qt${QT_MAJOR_VERSION}Quick_LIBRARIES}
                       ${Qt${QT_MAJOR_VERSION}Quick3D_LIBRARIES})
 
-set(QtQuick3D_deps QtGui QtOpenGL QtNetwork QtQml)
+set(QtQuick3D_deps QtGui QtOpenGL QtNetwork QtQml QtQuick)
 
 create_pyside_module(NAME QtQuick3D
     INCLUDE_DIRS QtQuick3D_include_dirs
