@@ -1,0 +1,76 @@
+Qt for Python 6.2.2 is a bug-fix release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+****************************************************************************
+*                                  PySide6                                 *
+****************************************************************************
+
+ - pyside.h no longer includes QML headers.
+ - [PYSIDE-1666] sets are now supported for functions taking a QSet.
+ - [PYSIDE-1670] When a property would override an existing function with
+   multiple arity or parameters, append an underscore to the property name.
+ - [PYSIDE-1675] Error message are more correct now when indexed generic
+   types are involved like Union, Sequence and Iterable.
+ - [PYSIDE-535] PyPySide: fix tests and improvements.
+ - [PYSIDE-802] coin: Don't prepend /bin: to PATH on Linux hosts
+ - [PYSIDE-803] Allow threads in QtGui.QTextDocument.print_
+ - [PYSIDE-841] Add new QML examples: 'properties', 'coercion', 'methods', 'default'
+ - [PYSIDE-841] Add new widgets examples: 'blurpicker', and 'dragable icons'
+ - [PYSIDE-1033] setup.py: Don't add the Qt prefix dir to PATH env var before
+   building
+ - [PYSIDE-1431] Fix equality test for inherited signals
+ - [PYSIDE-1520] mypy-support: Improve handling of slots, enum and PathLike
+ - [PYSIDE-1547] Use legacy OpenGL option to build on linux
+ - [PYSIDE-1669] Fix QIcon.addPixmap() to accept a PyPathLike argument
+ - [PYSIDE-1670] __feature__: handle properties with function overloads
+ - [PYSIDE-1675] Signature: re-implement error messages for generic types
+ - [PYSIDE-1675] signature: avoid false positives in .pyi import
+ - [PYSIDE-1696] Fix QFlags comparison to self
+ - [PYSIDE-1701] Fix invalid drawing of horizontal lines in the Qt Designer
+   taskmenu example
+ - [PYSIDE-1703] Fix build with MSVC 19.29.30136
+ - [PYSIDE-1708] Add QtQuick3D module
+ - [PYSIDE-1709] Add a QmlUncreatable and QmlSingleton decorators
+ - [PYSIDE-1710] signature: improve error handling for embedded applications
+ - [PYSIDE-1714] Add a sequence protocol for QRegion
+ - [PYSIDE-1715] Fix crash when connecting slot after disconnecting non-
+   existent connection to same slot
+
+****************************************************************************
+*                                  Shiboken6                               *
+****************************************************************************
+
+ - [PYSIDE-454] Add further methods to smart pointers: reset() and null-check,
+   tests for operator nb_bool, and handling None parameter.
+ - [PYSIDE-535] Remove type patching of PyType_Type and fix the meta type of
+   enum.
+ - [PYSIDE-1499] The implicit conversion of icon.addPixmap(str) was replaced
+   by an explicit version which takes PyPathLike.
+ - [PYSIDE-1675] The .pyi file generation was improved to have correct
+   slot(), PathLike and better enum handling.
+ - [PYSIDE-1691] When qualifying function argument default values for the
+   generated code, shiboken no longer considers each identifier it cannot
+   otherwise find as an enum value and no longer adds the class scope to it.
+   This may require manually adding some replace-default-expression
+   modifications.
+ - [PYSIDE-1710] Error handling was improved for embedded applications and
+   builtin modules are trusted as valid modules.
+ - [PYSIDE-1666] Handle PySets as function parameters
+ - [PYSIDE-1684] Do not crash when class cannot be found in the overload
+   sorter
+ - [PYSIDE-1691] Added CborTag: improvements were included in shiboken
+   to support this class.
+ - [PYSIDE-1697] Fix a leak in keyword arguments handling
+ - [PYSIDE-1703] Fix some integer types in test type systems
