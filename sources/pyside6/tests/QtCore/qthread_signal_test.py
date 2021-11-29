@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -37,41 +37,40 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QThread, QObject, SIGNAL, QCoreApplication
-
-thread_run = False
+from PySide6.QtCore import QThread, QTimer, QObject, Signal, Slot, QCoreApplication
 
 
 class Source(QObject):
-    def __init__(self, *args):
-        QObject.__init__(self, *args)
+    source = Signal()
 
+    def __init__(self, *args):
+        super().__init__(*args)
+
+    @Slot()
     def emit_sig(self):
-        self.emit(SIGNAL('source()'))
+        self.source.emit()
 
 
 class Target(QObject):
     def __init__(self, *args):
-        QObject.__init__(self, *args)
+        super().__init__(*args)
         self.called = False
 
+    @Slot()
     def myslot(self):
         self.called = True
 
 
 class ThreadJustConnects(QThread):
     def __init__(self, source, *args):
-        QThread.__init__(self, *args)
+        super().__init__(*args)
         self.source = source
         self.target = Target()
 
     def run(self):
-        global thread_run
-        thread_run = True
-        QObject.connect(self.source, SIGNAL('source()'), self.target.myslot)
-
-        while not self.target.called:
-            pass
+        self.source.source.connect(self.target.myslot)
+        self.source.source.connect(self.quit)
+        self.exec()
 
 
 class BasicConnection(unittest.TestCase):
@@ -83,14 +82,10 @@ class BasicConnection(unittest.TestCase):
         source = Source()
         thread = ThreadJustConnects(source)
 
-        QObject.connect(thread, SIGNAL('finished()'), lambda: app.exit(0))
+        thread.finished.connect(QCoreApplication.quit)
         thread.start()
 
-        while not thread_run:
-            pass
-
-        source.emit_sig()
-
+        QTimer.singleShot(50, source.emit_sig)
         app.exec()
         thread.wait()
 
