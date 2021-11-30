@@ -120,26 +120,20 @@ class ProducerConsumer(unittest.TestCase):
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
 
-    def finishCb(self):
-        # Quits the application
-        self.app.exit(0)
-
     def testProdCon(self):
         # QThread producer-consumer example
         bucket = Bucket()
         prod = Producer(bucket)
         cons = Consumer(bucket)
 
+        cons.finished.connect(QCoreApplication.quit)
         prod.start()
         cons.start()
 
-        prod.finished.connect(self.finishCb)
-        cons.finished.connect(self.finishCb)
-
         self.app.exec()
 
-        prod.wait(50)
-        cons.wait(50)
+        self.assertTrue(prod.wait(1000))
+        self.assertTrue(cons.wait(1000))
 
         self.assertEqual(prod.production_list, cons.consumption_list)
 
