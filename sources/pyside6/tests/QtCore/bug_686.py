@@ -50,8 +50,8 @@ class MyWriteThread(QThread):
         self.started = True
         while not self.lock.tryLockForWrite():
             pass
-        self.lock.unlock()
         self.canQuit = True
+        self.lock.unlock()
 
 
 class MyReadThread(QThread):
@@ -65,8 +65,8 @@ class MyReadThread(QThread):
         self.started = True
         while not self.lock.tryLockForRead():
             pass
-        self.lock.unlock()
         self.canQuit = True
+        self.lock.unlock()
 
 
 class MyMutexedThread(QThread):
@@ -93,10 +93,10 @@ class TestQMutex (unittest.TestCase):
         with QReadLocker(lock):
             thread.start()
             while not thread.started:
-                pass
+                QThread.msleep(10)
             self.assertFalse(thread.canQuit)
 
-        thread.wait(2000)
+        self.assertTrue(thread.wait(2000))
         self.assertTrue(thread.canQuit)
 
     def testWriteLocker(self):
@@ -106,10 +106,10 @@ class TestQMutex (unittest.TestCase):
         with QWriteLocker(lock):
             thread.start()
             while not thread.started:
-                pass
+                QThread.msleep(10)
             self.assertFalse(thread.canQuit)
 
-        thread.wait(2000)
+        self.assertTrue(thread.wait(2000))
         self.assertTrue(thread.canQuit)
 
     def testMutexLocker(self):
@@ -119,10 +119,10 @@ class TestQMutex (unittest.TestCase):
         with QMutexLocker(mutex):
             thread.start()
             while not thread.started:
-                pass
+                QThread.msleep(10)
             self.assertFalse(thread.canQuit)
 
-        thread.wait(2000)
+        self.assertTrue(thread.wait(2000))
         self.assertTrue(thread.canQuit)
 
 
