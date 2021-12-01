@@ -168,9 +168,9 @@ if (FULLDOCSBUILD)
                 string(TOLOWER "${module}" lowerModule)
                 # -- @TODO fix this for macOS frameworks.
                 file(APPEND "${CMAKE_CURRENT_LIST_DIR}/pyside-config.qdocconf"
-                     "    -I ${QT_INCLUDE_DIR}Qt${module} \\\n"
-                     "    -I ${QT_INCLUDE_DIR}Qt${module}/${Qt${QT_MAJOR_VERSION}Core_VERSION} \\\n"
-                     "    -I ${QT_INCLUDE_DIR}Qt${module}/${Qt${QT_MAJOR_VERSION}Core_VERSION}/Qt${module} \\\n")
+                     "    -I${QT_INCLUDE_DIR}/Qt${module} \\\n"
+                     "    -I${QT_INCLUDE_DIR}/Qt${module}/${Qt${QT_MAJOR_VERSION}Core_VERSION} \\\n"
+                     "    -I${QT_INCLUDE_DIR}/Qt${module}/${Qt${QT_MAJOR_VERSION}Core_VERSION}/Qt${module} \\\n")
 
                 set(globalHeader "Qt${module}")
                 set(docHeaderContents "${docHeaderContents}\n#include <Qt${module}/${globalHeader}>")
