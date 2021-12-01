@@ -36,7 +36,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from helper.helper import quickview_errorstring
-from helper.timedqapplication import TimedQApplication
+from helper.timedqguiapplication import TimedQGuiApplication
 from PySide6.QtCore import QObject, QUrl, Slot
 from PySide6.QtQuick import QQuickView
 from PySide6.QtQml import QmlElement
@@ -64,7 +64,7 @@ class ProxyObject(QObject):
         self._receivedName = name
 
 
-class TestConnectionWithInvalidSignature(TimedQApplication):
+class TestConnectionWithInvalidSignature(TimedQGuiApplication):
 
     def testSlotRetur(self):
         view = QQuickView()

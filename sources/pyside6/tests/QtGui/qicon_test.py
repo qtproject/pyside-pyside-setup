@@ -35,11 +35,11 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.timedqapplication import TimedQApplication
+from helper.timedqguiapplication import TimedQGuiApplication
 from PySide6.QtGui import QIcon
 
 
-class QIconCtorWithNoneTest(TimedQApplication):
+class QIconCtorWithNoneTest(TimedQGuiApplication):
     '''Test made by seblin, see Bug #944: http://bugs.pyside.org/show_bug.cgi?id=944'''
 
     def testQIconCtorWithNone(self):
@@ -51,7 +51,7 @@ class QIconCtorWithNoneTest(TimedQApplication):
 PIX_PATH = os.fspath(Path(__file__).resolve().parents[2]
                      / "doc/tutorials/basictutorial/icons.png")
 
-class QIconAddPixmapTest(TimedQApplication):
+class QIconAddPixmapTest(TimedQGuiApplication):
     '''PYSIDE-1669: check that addPixmap works'''
 
     def testQIconSetPixmap(self):

@@ -38,12 +38,12 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.timedqapplication import TimedQApplication
+from helper.timedqguiapplication import TimedQGuiApplication
 
 from PySide6.QtQuick import QQuickView, QQuickItem
 
 
-class TestBug915(TimedQApplication):
+class TestBug915(TimedQGuiApplication):
     def testReturnPolicy(self):
         view = QQuickView()
 

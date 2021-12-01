@@ -36,7 +36,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from helper.helper import quickview_errorstring
-from helper.timedqapplication import TimedQApplication
+from helper.timedqguiapplication import TimedQGuiApplication
 
 from PySide6.QtQuick import QQuickView
 from PySide6.QtCore import QObject, Signal, Slot, QUrl, QTimer, Property
@@ -62,7 +62,7 @@ class Obj(QObject):
         self.value = int(s)
 
 
-class TestConnectionWithQml(TimedQApplication):
+class TestConnectionWithQml(TimedQGuiApplication):
 
     def testSignalArguments(self):
         view = QQuickView()

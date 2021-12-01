@@ -43,7 +43,7 @@ from PySide6.QtQml import QQmlNetworkAccessManagerFactory
 from PySide6.QtNetwork import QNetworkAccessManager
 
 from helper.helper import quickview_errorstring
-from helper.timedqapplication import TimedQApplication
+from helper.timedqguiapplication import TimedQGuiApplication
 
 
 class CustomManager(QNetworkAccessManager):
@@ -57,9 +57,9 @@ class CustomFactory(QQmlNetworkAccessManagerFactory):
         return CustomManager()
 
 
-class TestQQmlNetworkFactory(TimedQApplication):
+class TestQQmlNetworkFactory(TimedQGuiApplication):
     def setUp(self):
-        TimedQApplication.setUp(self, timeout=1000)
+        super().setUp(timeout=1000)
 
     def testQQuickNetworkFactory(self):
         view = QQuickView()
