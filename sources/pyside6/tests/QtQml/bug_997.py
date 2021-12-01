@@ -37,26 +37,36 @@ init_test_paths(False)
 
 from helper.helper import quickview_errorstring
 from helper.usesqapplication import UsesQApplication
-from PySide6.QtCore import QTimer, QUrl
+from PySide6.QtCore import QCoreApplication, QTimer, QUrl, Slot
 from PySide6.QtQml import QQmlPropertyMap
 from PySide6.QtQuick import QQuickView
 
 
 class TestBug(UsesQApplication):
+
+    @Slot()
+    def check_complete(self):
+        if (self._view.rootObject().isComponentComplete()):
+            self._view.close()
+
     def testQMLFunctionCall(self):
         ownerData = QQmlPropertyMap()
         ownerData.insert('name', 'John Smith')
         ownerData.insert('phone', '555-5555')
         ownerData.insert('newValue', '')
 
-        view = QQuickView()
-        view.setInitialProperties({'owner': ownerData})
+        self._view = QQuickView()
+        self._view.setInitialProperties({'owner': ownerData})
         file = Path(__file__).resolve().parent / 'bug_997.qml'
         self.assertTrue(file.is_file())
-        view.setSource(QUrl.fromLocalFile(file))
-        self.assertTrue(view.rootObject(), quickview_errorstring(view))
-        view.show()
-        QTimer.singleShot(1000, self.app.quit)
+        self._view.setSource(QUrl.fromLocalFile(file))
+        self.assertTrue(self._view.rootObject(), quickview_errorstring(self._view))
+        self._view.show()
+        while not self._view.isExposed():
+            QCoreApplication.processEvents()
+        timer = QTimer()
+        timer.timeout.connect(self.check_complete)
+        timer.start(20)
         self.app.exec()
         self.assertEqual(ownerData.value('newName'), ownerData.value('name'))
 
