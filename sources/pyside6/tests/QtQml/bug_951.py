@@ -36,7 +36,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from helper.helper import quickview_errorstring
-from helper.timedqapplication import TimedQApplication
+from helper.timedqguiapplication import TimedQGuiApplication
 
 from PySide6.QtCore import QUrl
 from PySide6.QtQml import qmlRegisterType
@@ -55,9 +55,9 @@ class MyItem(QQuickItem):
         super(MyItem, self).componentComplete()
 
 
-class TestRegisterQMLType(TimedQApplication):
+class TestRegisterQMLType(TimedQGuiApplication):
     def setup(self):
-        TimedQApplication.setup(self, 100 * 3)  # 3s
+        super.setup(100 * 3)  # 3s
 
     def testSignalEmission(self):
         qmlRegisterType(MyItem, "my.item", 1, 0, "MyItem")

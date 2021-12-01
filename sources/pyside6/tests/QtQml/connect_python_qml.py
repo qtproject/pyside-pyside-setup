@@ -43,13 +43,13 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from helper.helper import quickview_errorstring
-from helper.timedqapplication import TimedQApplication
+from helper.timedqguiapplication import TimedQGuiApplication
 from PySide6.QtCore import QObject, QUrl, SIGNAL
 from PySide6.QtGui import QColor
 from PySide6.QtQuick import QQuickItem, QQuickView
 
 
-class TestConnectionWithInvalidSignature(TimedQApplication):
+class TestConnectionWithInvalidSignature(TimedQGuiApplication):
     def onButtonClicked(self):
         self.buttonClicked = True
         self.app.quit()

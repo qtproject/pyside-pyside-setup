@@ -47,7 +47,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from helper.helper import quickview_errorstring
-from helper.timedqapplication import TimedQApplication
+from helper.timedqguiapplication import TimedQGuiApplication
 
 from PySide6.QtCore import QUrl, QAbstractListModel, QModelIndex, Qt
 from PySide6.QtQuick import QQuickView
@@ -73,7 +73,7 @@ class ListModel(QAbstractListModel):
         return None
 
 
-class TestBug814(TimedQApplication):
+class TestBug814(TimedQGuiApplication):
     def testAbstractItemModelTransferToQML(self):
         view = QQuickView()
         model = ListModel()

@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -26,44 +26,27 @@
 ##
 #############################################################################
 
-import os
-import sys
+'''Helper classes and functions'''
+
+import gc
 import unittest
 
-from pathlib import Path
-sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
-from init_paths import init_test_paths
-init_test_paths(False)
-
-from helper.timedqguiapplication import TimedQGuiApplication
-from PySide6.support import deprecated
-from PySide6.support.signature import importhandler
-from PySide6 import QtGui
+from PySide6.QtCore import QTimer
+from PySide6.QtGui import QGuiApplication
 
 
-class TestTimedApp(TimedQGuiApplication):
-    '''Simple test case for TimedQGuiApplication'''
+class TimedQGuiApplication(unittest.TestCase):
+    '''Helper class with timed QGuiApplication exec loop'''
 
-    def testFoo(self):
-        # Simple test of TimedQGuiApplication
-        self.app.exec()
+    def setUp(self, timeout=100):
+        '''Sets up this Application.
 
+        timeout - timeout in millisseconds'''
+        self.app = QGuiApplication.instance() or QGuiApplication([])
+        QTimer.singleShot(timeout, self.app.quit)
 
-def fix_for_QtGui(QtGui):
-    QtGui.something = 42
-
-
-class TestPatchingFramework(unittest.TestCase):
-    """Simple test that verifies that deprecated.py works"""
-
-    deprecated.fix_for_QtGui = fix_for_QtGui
-
-    def test_patch_works(self):
-        something = "something"
-        self.assertFalse(hasattr(QtGui, something))
-        importhandler.finish_import(QtGui)
-        self.assertTrue(hasattr(QtGui, something))
-
-
-if __name__ == '__main__':
-    unittest.main()
+    def tearDown(self):
+        '''Delete resources'''
+        del self.app
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
