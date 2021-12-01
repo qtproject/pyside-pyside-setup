@@ -53,6 +53,8 @@ class RoundRectItem(QGraphicsRectItem):
     def paint(self, painter, qstyleoptiongraphicsitem, qwidget):
         global qgraphics_item_painted
         qgraphics_item_painted = True
+        view = self.scene().views()[0]
+        QTimer.singleShot(20, view.close)
 
 
 class QGraphicsItemTest(UsesQApplication):
@@ -72,10 +74,10 @@ class QGraphicsItemTest(UsesQApplication):
         scene = QGraphicsScene()
         scene.addText("test")
         view = QGraphicsView(scene)
+        view.setWindowTitle("virtual_pure_override_test")
 
         rect = self.createRoundRect(scene)
         view.show()
-        QTimer.singleShot(1000, self.quit_app)
         self.app.exec()
         self.assertTrue(qgraphics_item_painted)
 

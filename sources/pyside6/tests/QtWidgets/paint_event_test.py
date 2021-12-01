@@ -40,7 +40,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QTimerEvent
+from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QApplication, QWidget
 
 from helper.usesqapplication import UsesQApplication
@@ -49,33 +49,19 @@ from helper.usesqapplication import UsesQApplication
 class MyWidget(QWidget):
     '''Sample widget'''
 
-    def __init__(self, app=None):
+    def __init__(self, app):
         # Creates a new widget
-        if app is None:
-            app = QApplication([])
+        assert(app)
 
         super().__init__()
         self.app = app
-        self.runs = 0
-        self.max_runs = 5
         self.paint_event_called = False
-
-    def timerEvent(self, event):
-        # Timer event method
-        self.runs += 1
-
-        if self.runs == self.max_runs:
-            self.app.quit()
-
-        if not isinstance(event, QTimerEvent):
-            raise TypeError('Invalid event type. Must be QTimerEvent')
 
     def paintEvent(self, event):
         # Empty paint event method
-        # XXX: should be using super here, but somehow PyQt4
-        # complains about paintEvent not present in super
-        QWidget.paintEvent(self, event)
+        super().paintEvent(event)
         self.paint_event_called = True
+        QTimer.singleShot(20, self.close)
 
 
 class PaintEventOverride(UsesQApplication):
@@ -97,22 +83,10 @@ class PaintEventOverride(UsesQApplication):
 
     def testPaintEvent(self):
         # Test QWidget.paintEvent override
-        timer_id = self.widget.startTimer(100)
         self.widget.show()
-        if hasattr(sys, "pypy_version_info"):
-            # PYSIDE-535: Next line gives millions of
-            orig_exc = dedent("""
-                TypeError: 'PySide6.QtWidgets.QApplication.notify' called with wrong argument types:
-                  PySide6.QtWidgets.QApplication.notify(MyWidget, QPainter)
-                Supported signatures:
-                  PySide6.QtWidgets.QApplication.notify(PySide6.QtCore.QObject, PySide6.QtCore.QEvent)
-            """)
-            raise SystemError(orig_exc)
-
+        self.widget.setWindowTitle("paint_event_test")
         self.app.exec()
-        self.widget.killTimer(timer_id)
         self.assertTrue(self.widget.paint_event_called)
-        self.assertEqual(self.widget.runs, 5)
 
 
 if __name__ == '__main__':
