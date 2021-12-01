@@ -66,9 +66,6 @@ class QTreeWidgetItemTest(unittest.TestCase):
         self.assertTrue(item not in dummy_list)
         self.assertFalse(item == item2)
         self.assertTrue(item != item2)
-        treewidget.show()
-        QTimer.singleShot(500, app.quit)
-        app.exec()
 
 
 if __name__ == "__main__":
