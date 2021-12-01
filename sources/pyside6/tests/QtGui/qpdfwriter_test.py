@@ -35,12 +35,12 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.usesqapplication import UsesQApplication
+from helper.usesqguiapplication import UsesQGuiApplication
 from PySide6.QtGui import QPageLayout, QPageSize, QPdfWriter, QTextDocument
 from PySide6.QtCore import QDir, QMarginsF, QTemporaryFile
 
 
-class QPdfWriterTest(UsesQApplication):
+class QPdfWriterTest(UsesQGuiApplication):
 
     def testWrite(self):
         temporaryFile = QTemporaryFile(QDir.tempPath() + "/pdfwriter_test_XXXXXX.pdf")

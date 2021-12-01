@@ -37,7 +37,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.usesqapplication import UsesQApplication
+from helper.usesqguiapplication import UsesQGuiApplication
 from PySide6.QtCore import QEvent, QPoint, QRect, QSize, QTimer, Qt
 from PySide6.QtGui import QColor, QBackingStore, QPaintDevice, QPainter, QWindow, QPaintDeviceWindow, QRasterWindow, QRegion, QStaticText
 
@@ -55,7 +55,7 @@ class TestRasterWindow(QRasterWindow):
         painter.drawStaticText(QPoint(10, 10), self.text)
 
 
-class QRasterWindowTest(UsesQApplication):
+class QRasterWindowTest(UsesQGuiApplication):
     def test(self):
         rasterWindow = TestRasterWindow()
         rasterWindow.setFramePosition(QPoint(100, 100))

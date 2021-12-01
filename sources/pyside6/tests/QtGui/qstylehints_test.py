@@ -37,11 +37,11 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.usesqapplication import UsesQApplication
+from helper.usesqguiapplication import UsesQGuiApplication
 from PySide6.QtGui import QStyleHints
 
 
-class QStyleHintsTest(UsesQApplication):
+class QStyleHintsTest(UsesQGuiApplication):
     def test(self):
         styleHints = self.app.styleHints()
         self.assertTrue(styleHints.startDragDistance() > 0)

@@ -38,10 +38,10 @@ init_test_paths(False)
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QKeySequence
 
-from helper.usesqapplication import UsesQApplication
+from helper.usesqguiapplication import UsesQGuiApplication
 
 
-class QKeySequenceTest(UsesQApplication):
+class QKeySequenceTest(UsesQGuiApplication):
 
     def testGetItemOperator(self):
         # bug #774

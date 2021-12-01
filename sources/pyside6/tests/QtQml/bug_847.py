@@ -44,7 +44,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from helper.helper import quickview_errorstring
-from helper.usesqapplication import UsesQApplication
+from helper.usesqguiapplication import UsesQGuiApplication
 
 from PySide6.QtCore import Slot, Signal, QUrl, QTimer, QCoreApplication
 from PySide6.QtQuick import QQuickView
@@ -61,7 +61,7 @@ class View(QQuickView):
         self.called.emit(x, y)
 
 
-class TestQML(UsesQApplication):
+class TestQML(UsesQGuiApplication):
     def done(self, x, y):
         self._sucess = True
         self.app.quit()

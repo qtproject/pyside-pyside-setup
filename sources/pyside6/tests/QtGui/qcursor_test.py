@@ -40,10 +40,10 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtGui import QBitmap, QCursor, QPixmap
-from helper.usesqapplication import UsesQApplication
+from helper.usesqguiapplication import UsesQGuiApplication
 
 
-class TestQCursor(UsesQApplication):
+class TestQCursor(UsesQGuiApplication):
     def testQCursorConstructor(self):
         bmp = QBitmap(16, 16)
         cursor = QCursor(bmp, bmp, 16, 16)
