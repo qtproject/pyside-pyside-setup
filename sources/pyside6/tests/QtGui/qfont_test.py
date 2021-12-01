@@ -36,10 +36,10 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtGui import QFont
-from helper.usesqapplication import UsesQApplication
+from helper.usesqguiapplication import UsesQGuiApplication
 
 
-class QFontTest(UsesQApplication):
+class QFontTest(UsesQGuiApplication):
 
     def testStringConstruction(self):
         """PYSIDE-1685: Test that passing str to QFont works after addding

@@ -37,10 +37,10 @@ init_test_paths(False)
 
 from PySide6.QtGui import QRegion
 from PySide6.QtCore import QPoint, QRect, QSize
-from helper.usesqapplication import UsesQApplication
+from helper.usesqguiapplication import UsesQGuiApplication
 
 
-class QRegionTest(UsesQApplication):
+class QRegionTest(UsesQGuiApplication):
 
     def testFunctionUnit(self):
         r = QRegion(0, 0, 10, 10)

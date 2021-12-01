@@ -36,13 +36,13 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from helper.helper import quickview_errorstring
-from helper.usesqapplication import UsesQApplication
+from helper.usesqguiapplication import UsesQGuiApplication
 from PySide6.QtCore import QCoreApplication, QTimer, QUrl, Slot
 from PySide6.QtQml import QQmlPropertyMap
 from PySide6.QtQuick import QQuickView
 
 
-class TestBug(UsesQApplication):
+class TestBug(UsesQGuiApplication):
 
     @Slot()
     def check_complete(self):

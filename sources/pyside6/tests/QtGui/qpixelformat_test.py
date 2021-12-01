@@ -37,12 +37,12 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.usesqapplication import UsesQApplication
+from helper.usesqguiapplication import UsesQGuiApplication
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QColor, QImage, QPixelFormat, qPixelFormatRgba
 
 
-class QPixelFormatTest(UsesQApplication):
+class QPixelFormatTest(UsesQGuiApplication):
     def test(self):
         image = QImage(QSize(200, 200), QImage.Format_ARGB32)
         image.fill(QColor(Qt.red))
