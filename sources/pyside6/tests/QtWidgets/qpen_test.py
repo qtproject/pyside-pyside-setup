@@ -54,6 +54,7 @@ class Painting(QWidget):
         self.penFromEnum = painter.pen()
         painter.setPen(int(Qt.NoPen))
         self.penFromInteger = painter.pen()
+        QTimer.singleShot(20, self.close)
 
 
 class QPenTest(UsesQApplication):
@@ -70,7 +71,7 @@ class QPenTest(UsesQApplication):
         '''Calls QPainter.setPen with both enum and integer. Bug #511.'''
         w = Painting()
         w.show()
-        QTimer.singleShot(1000, self.app.quit)
+        w.setWindowTitle("qpen_test")
         self.app.exec()
         self.assertEqual(w.penFromEnum.style(), Qt.NoPen)
         self.assertEqual(w.penFromInteger.style(), Qt.SolidLine)
