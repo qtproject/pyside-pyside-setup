@@ -207,7 +207,7 @@ class InheritanceGraph(object):
     }
 
     def _format_node_attrs(self, attrs):
-        return ','.join(['%s=%s' % x for x in attrs.items()])
+        return ','.join([f'{x[0]}={x[1]}' for x in attrs.items()])
 
     def _format_graph_attrs(self, attrs):
         return ''.join([f"{x[0]}={x[1]};\n" for x in attrs.items()])
@@ -237,7 +237,7 @@ class InheritanceGraph(object):
             e_attrs.update(env.config.inheritance_edge_attrs)
 
         res = []
-        res.append('digraph %s {\n' % name)
+        res.append(f'digraph {name} {{\n')
         res.append(self._format_graph_attrs(g_attrs))
 
         for name, fullname, bases in self.class_info:
@@ -245,15 +245,14 @@ class InheritanceGraph(object):
             this_node_attrs = n_attrs.copy()
             url = urls.get(fullname)
             if url is not None:
-                this_node_attrs['URL'] = '"%s"' % url
-            res.append('  "%s" [%s];\n' %
-                       (name, self._format_node_attrs(this_node_attrs)))
+                this_node_attrs['URL'] = f'"{url}"'
+            attribute = self._format_node_attrs(this_node_attrs)
+            res.append(f'  "{name}" [{attribute}];\n')
 
             # Write the edges
             for base_name in bases:
-                res.append('  "%s" -> "%s" [%s];\n' %
-                           (base_name, name,
-                            self._format_node_attrs(e_attrs)))
+                attribute = self._format_node_attrs(e_attrs)
+                res.append(f'  "{base_name}" -> "{name}" [{attribute}];\n')
         res.append('}\n')
         return ''.join(res)
 
@@ -301,8 +300,8 @@ class InheritanceDiagram(Directive):
         # references to real URLs later.  These nodes will eventually be
         # removed from the doctree after we're done with them.
         for name in graph.get_all_class_names():
-            refnodes, x = class_role(
-                'class', ':class:`%s`' % name, name, 0, self.state)
+            refnodes, x = class_role('class', f':class:`{name}`', name,
+                                     0, self.state)
             node.extend(refnodes)
         # Store the graph object so we can use it to generate the
         # dot file later
@@ -323,7 +322,7 @@ def html_visit_inheritance_diagram(self, node):
     graph = node['graph']
 
     graph_hash = get_graph_hash(node)
-    name = 'inheritance%s' % graph_hash
+    name = f'inheritance{graph_hash}'
 
     # Create a mapping from fully-qualified class names to URLs.
     urls = {}
@@ -346,7 +345,7 @@ def latex_visit_inheritance_diagram(self, node):
     graph = node['graph']
 
     graph_hash = get_graph_hash(node)
-    name = 'inheritance%s' % graph_hash
+    name = f'inheritance{graph_hash}'
 
     dotcode = graph.generate_dot(name, env=self.builder.env,
                                  graph_attrs={'size': '"6.0,6.0"'})
