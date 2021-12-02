@@ -2250,9 +2250,9 @@
         <inject-code class="native" position="end" file="../glue/qtcore.cpp" snippet="return-readData"/>
     </modify-function>
   </object-type>
-  <value-type name="QIODeviceBase" since="6.0">
+  <object-type name="QIODeviceBase" since="6.0">
       <enum-type name="OpenModeFlag" flags="OpenMode"/>
-  </value-type>
+  </object-type>
   <object-type name="QCryptographicHash">
     <enum-type name="Algorithm"/>
     <modify-function signature="addData(const char*,qsizetype)">
@@ -2262,6 +2262,9 @@
         <inject-code file="../glue/qtcore.cpp" snippet="qcryptographichash-adddata"/>
     </modify-function>
   </object-type>
+  <value-type name="QOperatingSystemVersionBase" since="6.3">
+      <enum-type name="OSType"/>
+  </value-type>
   <value-type name="QOperatingSystemVersion" since="5.9">
       <enum-type name="OSType"/>
   </value-type>
@@ -2853,6 +2856,7 @@
 
   <object-type name="QFutureInterfaceBase">
       <enum-type name="State"/>
+      <enum-type name="CancelMode" since="6.3"/>
   </object-type>
   <value-type name="QFuture" generate="no">
       <include file-name="QtCore/qfuture.h" location="global"/>
@@ -3022,7 +3026,9 @@
 
   <object-type name="QPauseAnimation" since="4.6"/>
 
-  <value-type name="QProcessEnvironment" since="4.6"/>
+  <value-type name="QProcessEnvironment" since="4.6">
+      <enum-type name="Initialization" since="6.3"/>
+  </value-type>
 
   <object-type name="QPropertyAnimation" since="4.6"/>
 
@@ -3120,6 +3126,8 @@
   </object-type>
 
   <suppress-warning text="^.*enum 'Qt::Initialization' does not have a type entry.*$"/>
+  <suppress-warning text="^.*Enum 'QRandomGenerator::System'.*does not have a type entry.*$"/>
+
   <suppress-warning text="^Anonymous enum.*does not have a type entry.*$"/>
   <suppress-warning text="Visibility of function '*' modified in class '*'"/>
   <suppress-warning text="hiding of function '*' in class '*'"/>

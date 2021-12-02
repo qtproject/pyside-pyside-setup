@@ -188,6 +188,11 @@ ${SPECIFIC_OS_FILES}
 ${QtCore_GEN_DIR}/qtcore_module_wrapper.cpp
 )
 
+if (Qt${QT_MAJOR_VERSION}Core_VERSION VERSION_EQUAL 6.3.0 OR Qt${QT_MAJOR_VERSION}Core_VERSION VERSION_GREATER 6.3.0)
+    list(APPEND QtCore_SRC
+         ${QtCore_GEN_DIR}/qoperatingsystemversionbase_wrapper.cpp)
+endif()
+
 configure_file("${QtCore_SOURCE_DIR}/QtCore_global.post.h.in"
                "${QtCore_BINARY_DIR}/QtCore_global.post.h" @ONLY)
 
