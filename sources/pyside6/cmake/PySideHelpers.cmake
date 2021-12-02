@@ -23,7 +23,6 @@ macro(collect_optional_modules)
         OpenGL
         OpenGLWidgets
         Positioning
-        Location
         NetworkAuth
         Qml
         Quick
