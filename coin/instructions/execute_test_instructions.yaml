@@ -27,8 +27,8 @@ instructions:
         condition: and
         conditions:
           - condition: property
-            property: host.osVersion
-            equals_value: MacOS_11_00
+            property: host.os
+            equals_value: MacOS
           - condition: property
             property: host.arch
             equals_value: X86_64
