@@ -54,6 +54,8 @@ source_suffix = '.rst'
 # The encoding of source files.
 source_encoding = 'utf-8'
 
+graphviz_output_format = 'svg'  # Enable URLs in inheritance diagrams
+
 # The master toctree document.
 master_doc = 'index'
 
