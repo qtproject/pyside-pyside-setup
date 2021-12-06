@@ -52,3 +52,8 @@
     debug
 [signals::bug_79]
     debug
+# PYSIDE-535: This one error is left as a place holder for 7 errors.
+#             It will be fixed in PyPy, but we should not forget about it.
+#             Fixing: Search for "def AssertRaises".
+[sample::implicitconv_numerical]
+    pypy

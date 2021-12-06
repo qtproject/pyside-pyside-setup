@@ -57,6 +57,11 @@ if is64bitArchitecture and sys.platform != 'win32':
 class NumericTester(unittest.TestCase):
     '''Helper class for numeric comparison testing'''
 
+    def assertRaises(self, *args, **kwds):
+        if not hasattr(sys, "pypy_version_info"):
+            # PYSIDE-535: PyPy complains "Fatal RPython error: NotImplementedError"
+            return super().assertRaises(*args, **kwds)
+
     def check_value(self, source, expected, callback, desired_type=None):
         result = callback(source)
         self.assertEqual(result, expected)

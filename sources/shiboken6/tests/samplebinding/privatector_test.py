@@ -47,6 +47,11 @@ from sample import PrivateCtor
 class PrivateCtorTest(unittest.TestCase):
     '''Test case for PrivateCtor class'''
 
+    def assertRaises(self, *args, **kwds):
+        if not hasattr(sys, "pypy_version_info"):
+            # PYSIDE-535: PyPy complains "Fatal RPython error: NotImplementedError"
+            return super().assertRaises(*args, **kwds)
+
     def testPrivateCtorInstanciation(self):
         '''Test if instanciation of class with a private constructor raises an exception.'''
         self.assertRaises(TypeError, PrivateCtor)

@@ -48,6 +48,11 @@ from sample import PrivateDtor
 class PrivateDtorTest(unittest.TestCase):
     '''Test case for PrivateDtor class'''
 
+    def assertRaises(self, *args, **kwds):
+        if not hasattr(sys, "pypy_version_info"):
+            # PYSIDE-535: PyPy complains "Fatal RPython error: NotImplementedError"
+            return super().assertRaises(*args, **kwds)
+
     def testPrivateDtorInstanciation(self):
         '''Test if instanciation of class with a private destructor raises an exception.'''
         self.assertRaises(TypeError, PrivateDtor)

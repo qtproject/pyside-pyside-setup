@@ -41,6 +41,11 @@ from PySide6.QtWidgets import QApplication, QLCDNumber
 class QLCDNumberOverflow(unittest.TestCase):
     '''Test case for unhandled overflow on QLCDNumber() numDigits argument (see bug #215).'''
 
+    def assertRaises(self, *args, **kwds):
+        if not hasattr(sys, "pypy_version_info"):
+            # PYSIDE-535: PyPy complains "Fatal RPython error: NotImplementedError"
+            return super().assertRaises(*args, **kwds)
+
     def setUp(self):
         self.app = QApplication([])
 
