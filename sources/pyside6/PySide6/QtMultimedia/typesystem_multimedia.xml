@@ -58,6 +58,14 @@
     <value-type name="QAudioFormat">
         <enum-type name="SampleFormat" since="6.1"/>
         <enum-type name="ChannelConfig"/>
+        <modify-function signature="normalizedSampleValue(const void*)const">
+            <modify-argument index="1">
+              <replace-type modified-type="PyBuffer"/>
+              <conversion-rule class="native">
+                  <insert-template name="pybuffer_const_char"/>
+              </conversion-rule>
+            </modify-argument>
+        </modify-function>
     </value-type>
     <value-type name="QAudioDevice">
         <enum-type name="Mode"/>
