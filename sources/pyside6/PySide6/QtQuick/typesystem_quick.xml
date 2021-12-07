@@ -61,7 +61,12 @@
     </object-type>
 
     <value-type name="QQuickGraphicsConfiguration"/>
-    <value-type name="QQuickGraphicsDevice"/>
+    <value-type name="QQuickGraphicsDevice">
+        <!-- PYSIDE-1726, after qtbase/696d94b132b2f352b5e6b889ad91c2437417fae8,
+             the functions are defined with dummy types when Vulkan is not present. -->
+        <modify-function signature="^fromPhysicalDevice\(.*$" remove="all"/>
+        <modify-function signature="^fromDeviceObjects\(.*$" remove="all"/>
+    </value-type>
 
     <object-type name="QQuickTextureFactory"/>
     <object-type name="QQuickImageProvider"/>
@@ -95,7 +100,11 @@
     </object-type>
 
     <object-type name="QQuickRenderControl"/>
-    <value-type name="QQuickRenderTarget"/>
+    <value-type name="QQuickRenderTarget">
+        <!-- PYSIDE-1726, after qtbase/696d94b132b2f352b5e6b889ad91c2437417fae8,
+             the function is defined with dummy types when Vulkan is not present. -->
+        <modify-function signature="^fromVulkanImage\(.*$" remove="all"/>
+    </value-type>
 
     <object-type name="QQuickTextDocument"/>
 
@@ -183,5 +192,9 @@
     <object-type name="QSGSimpleMaterial"/>
     <object-type name="QSGSimpleMaterialShader"/>
     -->
+
+    <suppress-warning text="^signature.*fromVulkanImage.*not found.*$"/>
+    <suppress-warning text="^signature.*fromPhysicalDevice.*not found.*$"/>
+    <suppress-warning text="^signature.*fromDeviceObjects.*not found.*$"/>
 
 </typesystem>
