@@ -73,7 +73,7 @@ log = logging.getLogger("snippets_translate")
 # Filter and paths configuration
 SKIP_END = (".pro", ".pri", ".cmake", ".qdoc", ".yaml", ".frag", ".qsb", ".vert", "CMakeLists.txt")
 SKIP_BEGIN = ("changes-", ".")
-SNIPPET_PATTERN = re.compile(r"//! \[([^]]+)\]")
+SNIPPET_PATTERN = re.compile(r"//! ?\[([^]]+)\]")
 
 
 class FileStatus(Enum):
