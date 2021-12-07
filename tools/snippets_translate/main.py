@@ -73,7 +73,6 @@ log = logging.getLogger("snippets_translate")
 # Filter and paths configuration
 SKIP_END = (".pro", ".pri", ".cmake", ".qdoc", ".yaml", ".frag", ".qsb", ".vert", "CMakeLists.txt")
 SKIP_BEGIN = ("changes-", ".")
-OUT_MAIN = Path("sources/pyside6/doc/codesnippets/")
 SNIPPET_PATTERN = re.compile(r"//! \[([^]]+)\]")
 
 
@@ -94,11 +93,11 @@ def get_parser():
     )
 
     parser.add_argument(
-        "--pyside",
+        "--target",
         action="store",
-        dest="pyside_dir",
+        dest="target_dir",
         required=True,
-        help="Path to the pyside-setup directory",
+        help="Directory into which to generate the snippets",
     )
 
     parser.add_argument(
@@ -155,7 +154,7 @@ def check_arguments(options):
     if options.write_files:
         if not opt_quiet:
             log.warning(
-                f"Files will be copied from '{options.qt_dir}':\n" f"\tto '{options.pyside_dir}'"
+                f"Files will be copied from '{options.qt_dir}':\n" f"\tto '{options.target_dir}'"
             )
     else:
         msg = "This is a listing only, files are not being copied"
@@ -164,11 +163,8 @@ def check_arguments(options):
         if not opt_quiet:
             log.info(msg, extra=extra)
 
-    # Check 'qt_dir' and 'pyside_dir'
-    if is_directory(options.qt_dir) and is_directory(options.pyside_dir):
-        return True
-
-    return False
+    # Check 'qt_dir'
+    return is_directory(options.qt_dir)
 
 
 def is_valid_file(x):
@@ -341,8 +337,7 @@ def copy_file(file_path, qt_path, out_path, write=False, debug=False):
 
 def process(options):
     qt_path = Path(options.qt_dir)
-    py_path = Path(options.pyside_dir)
-    out_path = py_path / OUT_MAIN
+    out_path = Path(options.target_dir)
 
     # (new, exists)
     valid_new, valid_exists = 0, 0
