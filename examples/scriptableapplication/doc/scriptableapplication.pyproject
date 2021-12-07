@@ -1,0 +1,9 @@
+{
+    "files": ["../main.cpp",
+              "../mainwindow.cpp",
+              "../mainwindow.h",
+              "../pythonutils.cpp",
+              "../pythonutils.h",
+              "../wrappedclasses.h",
+              "../CMakeLists.txt"]
+}
