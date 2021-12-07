@@ -153,10 +153,8 @@ static PyObject *handle_doc(PyObject *ob, PyObject *old_descr)
                         pyside_globals->make_helptext_func,
                         const_cast<char *>("(O)"), ob);
     handle_doc_in_progress--;
-    if (res == nullptr) {
-        PyErr_Print();
-        Py_FatalError("handle_doc did not receive a result");
-    }
+    if (res == nullptr)
+        PyErr_Format(PyExc_AttributeError, "%R object has no `__doc__` attribute", ob);
     return res;
 }
 
