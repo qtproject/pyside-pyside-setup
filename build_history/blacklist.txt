@@ -14,14 +14,6 @@
 [QtWebEngineWidgets::pyside-474-qtwebengineview]
     py2
     py3
-[QtCore::thread_signals_test]
-    win32
-    linux
-    darwin
-[QtCore::qthread_prod_cons_test]
-    win32
-    linux
-    darwin
 # PYSIDE-754
 [QtWebEngineCore::web_engine_custom_scheme]
     win32
@@ -37,10 +29,6 @@
 # Open GL functions failures on macOS (2/2020)
 [registry::existence_test]
     darwin
-[QtCore::bug_686]
-    linux ci
-[QtCore::qthread_signal_test]
-    linux ci
 [QtQml::qqmlnetwork_test]
     linux ci
 [QtWidgets::bug_750]
