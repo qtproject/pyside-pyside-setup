@@ -290,6 +290,13 @@ add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/rst/PySide6/QtCore/index.
                    WORKING_DIRECTORY ${${module}_SOURCE_DIR}
                    COMMENT "Running generator to generate documentation...")
 
+add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/rst/extras"
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/rst
+                   COMMENT "Copying docs...")
+
+add_custom_target("doc_copy"
+                  DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/rst/extras")
+
 add_custom_target("docrsts"
                   DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/rst/PySide6/QtCore/index.rst")
 
@@ -304,6 +311,7 @@ add_custom_target("licensedocrsts"
 if (FULLDOCSBUILD)
     add_dependencies(apidoc docrsts licensedocrsts)
     add_dependencies(licensedocrsts docrsts)
+    add_dependencies(docrsts doc_copy qdoc)
 endif()
 
 #install files
