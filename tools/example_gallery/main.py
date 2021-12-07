@@ -58,6 +58,9 @@ from textwrap import dedent
 
 opt_quiet = False
 suffixes = {
+    ".h": "cpp",
+    ".cpp": "cpp",
+    ".md": "markdown",
     ".py": "py",
     ".qml": "js",
     ".conf": "ini",
@@ -71,7 +74,10 @@ def ind(x):
     return " " * 4 * x
 
 
-def get_lexer(suffix):
+def get_lexer(path):
+    if path.name == "CMakeLists.txt":
+        return "cmake"
+    suffix = path.suffix
     if suffix in suffixes:
         return suffixes[suffix]
     return "text"
@@ -157,7 +163,7 @@ def get_code_tabs(files, project_file):
 
         content += f".. tabbed:: {project_file}\n\n"
 
-        lexer = get_lexer(pfile.suffix)
+        lexer = get_lexer(pfile)
         content += add_indent(f".. code-block:: {lexer}", 1)
         content += "\n"
 
