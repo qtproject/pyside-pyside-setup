@@ -46,8 +46,11 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
+from PySide6 import QtCore
 from PySide6.QtWidgets import QApplication, QLabel
 from PySide6.support import __feature__
+
+import inspect
 
 """
 errormessages_with_features_test.py
@@ -121,6 +124,13 @@ class ErrormessagesWithFeatures(unittest.TestCase):
         with self.assertRaises(TypeError) as cm:
             qApp.quit_on_last_window_closed = object
         self.assertTrue(self.probe_miss in cm.exception.args[0])
+
+    def testDocIsWorking(self):
+        """
+        make sure that it does not crash when touched
+        """
+        inspect.getdoc(QApplication)
+        inspect.getdoc(QtCore)
 
 
 if __name__ == '__main__':
