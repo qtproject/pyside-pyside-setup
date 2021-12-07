@@ -1,0 +1,10 @@
+{
+    "files": ["../bindings.h",
+              "../icecream.cpp",
+              "../icecream.h",
+              "../macros.h",
+              "../main.py",
+              "../truck.cpp",
+              "../truck.h",
+              "../CMakeLists.txt"]
+}
