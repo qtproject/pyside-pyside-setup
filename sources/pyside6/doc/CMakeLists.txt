@@ -118,8 +118,9 @@ endif()
 
 # Generate example gallery
 message(STATUS "Generating example gallery")
+set(EXAMPLE_TOOL_OPTIONS --target "${CMAKE_CURRENT_BINARY_DIR}/rst/examples")
 if (QUIET_BUILD)
-    set (EXAMPLE_TOOL_OPTIONS "-q")
+    list(APPEND EXAMPLE_TOOL_OPTIONS "-q")
 endif()
 set(EXAMPLE_TOOL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../tools/example_gallery/main.py")
 execute_process(COMMAND ${PYTHON_EXECUTABLE} ${EXAMPLE_TOOL_DIR} ${EXAMPLE_TOOL_OPTIONS}
