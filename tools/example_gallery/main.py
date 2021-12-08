@@ -204,9 +204,13 @@ if __name__ == "__main__":
     gallery = ""
 
     parser = ArgumentParser(description=__doc__, formatter_class=RawTextHelpFormatter)
+    TARGET_HELP = f"Directory into which to generate RST files (default: {str(EXAMPLES_DOC)})"
+    parser.add_argument("--target", "-t", action="store", dest="target_dir", help=TARGET_HELP)
     parser.add_argument("--quiet", "-q", action="store_true", help="Quiet")
     options = parser.parse_args()
     opt_quiet = options.quiet
+    if options.target_dir:
+        EXAMPLES_DOC = Path(options.target_dir)
 
     # This main loop will be in charge of:
     #   * Getting all the .pyproject files,
