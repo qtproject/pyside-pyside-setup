@@ -97,34 +97,32 @@ endif()
 
 if (FULLDOCSBUILD)
     # Fetch and transform the snippets from Qt
-    message(STATUS "Fetching and converting snippets")
-    if ("${QT_ROOT_PATH}" STREQUAL "")
-        message(FATAL_ERROR "There is no value set on QT_SRC_DIR, the snippet conversion will fail")
-    endif()
-    set(PYSIDE_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../../../")
     set(SNIPPETS_TOOL "${CMAKE_CURRENT_SOURCE_DIR}/../../../tools/snippets_translate/main.py")
+    set(SNIPPETS_TARGET ${CMAKE_CURRENT_BINARY_DIR}/rst/codesnippets)
 
     # Note QT_SRC_DIR points to 'qtbase',
     # so we use the general SRC directory to copy all the other snippets
-    execute_process(COMMAND ${PYTHON_EXECUTABLE} ${SNIPPETS_TOOL}
-        --qt ${QT_ROOT_PATH} --target ${CMAKE_CURRENT_BINARY_DIR}/rst/codesnippets -w
-        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-        RESULT_VARIABLE SNIPPETS_RESULT)
-    if (SNIPPETS_RESULT)
-        message(FATAL_ERROR
-                "The 'snippets_translate' tool failed: ${SNIPPETS_ERROR} ${SNIPPET_RESULT}")
-    endif()
+    add_custom_target("snippets_translate" DEPENDS "${SNIPPETS_TARGET}")
+    add_custom_command(OUTPUT "${SNIPPETS_TARGET}"
+                       COMMAND ${PYTHON_EXECUTABLE} ${SNIPPETS_TOOL}
+                               --qt ${QT_ROOT_PATH} --target ${SNIPPETS_TARGET} -w
+                       WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+                       COMMENT "Fetching and converting snippets...")
 endif()
 
 # Generate example gallery
-message(STATUS "Generating example gallery")
-set(EXAMPLE_TOOL_OPTIONS --target "${CMAKE_CURRENT_BINARY_DIR}/rst/examples")
+set(EXAMPLE_TOOL_TARGET "${CMAKE_CURRENT_BINARY_DIR}/rst/examples")
+set(EXAMPLE_TOOL_OPTIONS --target "${EXAMPLE_TOOL_TARGET}")
 if (QUIET_BUILD)
     list(APPEND EXAMPLE_TOOL_OPTIONS "-q")
 endif()
 set(EXAMPLE_TOOL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../tools/example_gallery/main.py")
-execute_process(COMMAND ${PYTHON_EXECUTABLE} ${EXAMPLE_TOOL_DIR} ${EXAMPLE_TOOL_OPTIONS}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
+
+add_custom_target("example_gallery" DEPENDS "${EXAMPLE_TOOL_TARGET}")
+add_custom_command(OUTPUT "${EXAMPLE_TOOL_TARGET}"
+                   COMMAND ${PYTHON_EXECUTABLE} ${EXAMPLE_TOOL_DIR} ${EXAMPLE_TOOL_OPTIONS}
+                   WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+                   COMMENT "Generating example gallery...")
 
 set(SHIBOKEN_INTERSPHINX_FILE "${ROOT}/pyside6/shiboken6/objects.inv")
 set(HAS_WEBENGINE_WIDGETS 0)
@@ -309,10 +307,12 @@ add_custom_target("licensedocrsts"
     COMMENT "Creating 3rdparty license documentation..."
 )
 
+add_dependencies(docrsts example_gallery)
+
 if (FULLDOCSBUILD)
     add_dependencies(apidoc docrsts licensedocrsts)
     add_dependencies(licensedocrsts docrsts)
-    add_dependencies(docrsts doc_copy qdoc)
+    add_dependencies(docrsts doc_copy qdoc snippets_translate)
 endif()
 
 #install files
