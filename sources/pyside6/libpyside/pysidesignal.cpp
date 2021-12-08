@@ -651,14 +651,9 @@ static PyObject *signalCall(PyObject *self, PyObject *args, PyObject *kw)
     // method in C++ land.
     Shiboken::AutoDecRef homonymousMethod(getDescriptor(signal->homonymousMethod,
                                                         nullptr, nullptr));
-    if (PyCFunction_Check(homonymousMethod)
-            && (PyCFunction_GET_FLAGS(homonymousMethod.object()) & METH_STATIC)) {
-#if PY_VERSION_HEX >=  0x03090000
+    if (PyCFunction_Check(homonymousMethod.object())
+            && (PyCFunction_GET_FLAGS(homonymousMethod.object()) & METH_STATIC))
         return PyObject_Call(homonymousMethod, args, kw);
-#else
-        return PyCFunction_Call(homonymousMethod, args, kw);
-#endif
-    }
 
     // Assumes homonymousMethod is not a static method.
     ternaryfunc callFunc = Py_TYPE(signal->homonymousMethod)->tp_call;
@@ -676,11 +671,7 @@ static PyObject *signalInstanceCall(PyObject *self, PyObject *args, PyObject *kw
     descrgetfunc getDescriptor = Py_TYPE(PySideSignal->d->homonymousMethod)->tp_descr_get;
     Shiboken::AutoDecRef homonymousMethod(getDescriptor(PySideSignal->d->homonymousMethod,
                                                         PySideSignal->d->source, nullptr));
-#if PY_VERSION_HEX >=  0x03090000
-        return PyObject_Call(homonymousMethod, args, kw);
-#else
-    return PyCFunction_Call(homonymousMethod, args, kw);
-#endif
+    return PyObject_Call(homonymousMethod, args, kw);
 }
 
 static PyObject *metaSignalCheck(PyObject * /* klass */, PyObject *arg)
