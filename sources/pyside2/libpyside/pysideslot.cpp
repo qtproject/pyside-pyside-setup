@@ -116,11 +116,13 @@ int slotTpInit(PyObject *self, PyObject *args, PyObject *kw)
 PyObject *slotCall(PyObject *self, PyObject *args, PyObject * /* kw */)
 {
     static PyObject *pySlotName = nullptr;
-    PyObject *callback;
-    callback = PyTuple_GetItem(args, 0);
+    PyObject *callback = nullptr;
+
+    if (!PyArg_UnpackTuple(args, "Slot.__call__", 1, 1, &callback))
+        return nullptr;
     Py_INCREF(callback);
 
-    if (Py_TYPE(callback)->tp_call != nullptr) {
+    if (PyCallable_Check(callback)) {
         PySideSlot *data = reinterpret_cast<PySideSlot *>(self);
 
         if (!data->slotData)
@@ -129,7 +131,7 @@ PyObject *slotCall(PyObject *self, PyObject *args, PyObject * /* kw */)
         if (data->slotData->name.isEmpty()) {
             // PYSIDE-198: Use PyObject_GetAttr instead of PepFunction_GetName to support Nuitka.
             AutoDecRef funcName(PyObject_GetAttr(callback, PyMagicName::name()));
-            data->slotData->name = String::toCString(funcName);
+            data->slotData->name = funcName.isNull() ? "<no name>" : String::toCString(funcName);
         }
         const QByteArray returnType = QMetaObject::normalizedType(data->slotData->resultType);
         const QByteArray signature =
@@ -139,7 +141,7 @@ PyObject *slotCall(PyObject *self, PyObject *args, PyObject * /* kw */)
             pySlotName = String::fromCString(PYSIDE_SLOT_LIST_ATTR);
 
         PyObject *pySignature = String::fromCString(signature);
-        PyObject *signatureList = 0;
+        PyObject *signatureList = nullptr;
         if (PyObject_HasAttr(callback, pySlotName)) {
             signatureList = PyObject_GetAttr(callback, pySlotName);
         } else {
@@ -154,7 +156,6 @@ PyObject *slotCall(PyObject *self, PyObject *args, PyObject * /* kw */)
         //clear data
         delete data->slotData;
         data->slotData = nullptr;
-        return callback;
     }
     return callback;
 }
