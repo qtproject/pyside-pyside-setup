@@ -122,6 +122,7 @@ def run_test_instructions():
     if CI_HOST_OS == "Windows":
         call_testrunner("3.6.1", str(testRun))
         call_testrunner("3.8.1", str(testRun))
+        call_testrunner("3.10.0", str(testRun))
     else:
         call_testrunner("3", str(testRun))
 
