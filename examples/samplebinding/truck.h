@@ -61,6 +61,9 @@ public:
     Truck(bool leaveOnDestruction = false);
     Truck(const Truck &other);
     Truck& operator=(const Truck &other);
+    Truck(Truck &&other);
+    Truck& operator=(Truck &&other);
+
     ~Truck();
 
     void addIcecreamFlavor(Icecream *icecream);

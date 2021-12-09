@@ -35,8 +35,9 @@ In contrast ``Truck`` does not define virtual methods and is treated as
 a *value type* (copy semantics).
 
 Because ``Truck`` is a value type and it stores a vector of ``Icecream``
-pointers, the rule of three has to be taken into account (implement the
-copy constructor, assignment operator, destructor).
+pointers, the rule of five has to be taken into account (implement the
+copy constructor, assignment operator, move constructor, move assignment
+operator and destructor).
 
 And due to ``Icecream`` objects being copyable, the type has to define an
 implementation of the ``clone()`` method, to avoid type slicing issues.
@@ -144,7 +145,7 @@ The following requirements need to be met:
 * A PySide package is installed into the current active Python
   environment (system or virtualenv)
 
-* A new enough version of CMake (3.1+).
+* A new enough version of CMake (3.16+).
 
 * ninja
 
@@ -183,8 +184,6 @@ On Windows:
 
     mkdir build
     cd build
-    mkdir build
-    cd build
     cmake -H.. -B. -G Ninja -DCMAKE_BUILD_TYPE=Release
     ninja
     ninja install
@@ -207,6 +206,12 @@ by setting the ``CC`` environment variable:
 
     set CC=cl
 
+passing the compiler on the command line:
+
+.. code-block:: bash
+
+    cmake -H.. -B. -DCMAKE_C_COMPILER=cl.exe -DCMAKE_CXX_COMPILER=cl.exe
+
 or by using the -G option:
 
 .. code-block:: bash
@@ -215,7 +220,7 @@ or by using the -G option:
 
 If the ``-G "Visual Studio 14 Win64"`` option is used, a ``sln`` file
 will be generated, and can be used with ``MSBuild``
-instead of ``nmake/jom``.
+instead of ``ninja``.
 The easiest way to both build and install in this case, is to use
 the cmake executable:
 
@@ -223,7 +228,7 @@ the cmake executable:
 
     cmake --build . --target install --config Release
 
-Note that using the ``"NMake Makefiles JOM"`` generator is preferred to
+Note that using the ``"Ninja"`` generator is preferred to
 the MSBuild one, because the MSBuild one generates configs for both
 Debug and Release, and this might lead to building errors if you
 accidentally build the wrong config at least once.
@@ -258,12 +263,12 @@ In practice this means the only supported configurations are:
 
 #. release config build of the bindings +
    PySide ``setup.py`` without ``--debug`` flag + ``python.exe`` for the
-   PySide build process + ``python36.dll`` for the linked in shared
+   PySide build process + ``python39.dll`` for the linked in shared
    library.
 
 #. debug config build of the application +
    PySide ``setup.py`` *with* ``--debug`` flag + ``python_d.exe`` for the
-   PySide build process + ``python36_d.dll`` for the linked in shared
+   PySide build process + ``python39_d.dll`` for the linked in shared
    library.
 
 This is necessary because all the shared libraries in question have to
