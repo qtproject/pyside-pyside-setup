@@ -44,6 +44,8 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+from .utils import platform_cmake_options
+
 
 _CMAKE_LISTS = """cmake_minimum_required(VERSION 3.16)
 project(dummy LANGUAGES CXX)
@@ -264,6 +266,7 @@ class QtInfo(object):
                 cmd = [self._cmake_command, '-G', 'Ninja', '.']
                 qt_prefix = self.prefix_dir
                 cmd.extend([f'-DCMAKE_PREFIX_PATH={qt_prefix}'])
+                cmd += platform_cmake_options()
 
                 # FIXME Python 3.7: Use subprocess.run()
                 proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=False,

@@ -244,6 +244,15 @@ def init_msvc_env(platform_arch, build_type):
     log.info("Done initializing MSVC env")
 
 
+def platform_cmake_options():
+    result = []
+    if sys.platform == 'win32':
+        # Prevent cmake from auto-detecting clang if it is in path.
+        result.append("-DCMAKE_C_COMPILER=cl.exe")
+        result.append("-DCMAKE_CXX_COMPILER=cl.exe")
+    return result
+
+
 def copyfile(src, dst, force=True, vars=None, force_copy_symlink=False,
              make_writable_by_owner=False):
     if vars is not None:

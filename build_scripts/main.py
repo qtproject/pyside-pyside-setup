@@ -76,7 +76,7 @@ from setuptools import Command
 from .qtinfo import QtInfo
 from .utils import (rmtree, detect_clang, copyfile, copydir, run_process_output, run_process,
                     update_env_path, init_msvc_env, filter_match, macos_fix_rpaths_for_library,
-                    linux_fix_rpaths_for_library)
+                    linux_fix_rpaths_for_library, platform_cmake_options)
 from .platforms.unix import prepare_packages_posix
 from .platforms.windows_desktop import prepare_packages_win32
 from .wheel_override import wheel_module_exists, get_bdist_wheel_override
@@ -652,6 +652,8 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
             cmake_cmd.append("-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=yes")
             cmake_cmd.append("-DUSE_PYTHON_VERSION=3.6")
 
+        cmake_cmd += platform_cmake_options()
+
         if sys.platform == 'darwin':
             if OPTION["MACOS_ARCH"]:
                 # also tell cmake which architecture to use
@@ -688,10 +690,6 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
             deployment_target = macos_pyside_min_deployment_target()
             cmake_cmd.append(f"-DCMAKE_OSX_DEPLOYMENT_TARGET={deployment_target}")
             os.environ['MACOSX_DEPLOYMENT_TARGET'] = deployment_target
-        elif sys.platform == 'win32':
-            # Prevent cmake from auto-detecting clang if it is in path.
-            cmake_cmd.append("-DCMAKE_C_COMPILER=cl.exe")
-            cmake_cmd.append("-DCMAKE_CXX_COMPILER=cl.exe")
 
         if not OPTION["SKIP_DOCS"]:
             # Build the whole documentation (rst + API) by default
