@@ -73,6 +73,10 @@ Truck &Truck::operator=(const Truck &other)
     return *this;
 }
 
+Truck::Truck(Truck &&other) = default;
+
+Truck& Truck::operator=(Truck &&other) = default;
+
 Truck::~Truck()
 {
     if (m_leaveOnDestruction)

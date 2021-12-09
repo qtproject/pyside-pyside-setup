@@ -51,10 +51,8 @@ For Windows you will also need:
 * Make sure that your Qt + Python + PySide package + app build configuration
   is the same (all Release, which is more likely, or all Debug).
 
-* Make sure that your Qt + Python + PySide package + app are built with the
-  same version of MSVC, to avoid mixing of C++ runtime libraries.
-  In principle this means that if you use the python.org provided Python
-  interpreters, you need to use MSVC2015 for Python 3 projects.
+* Make sure that your Qt + Python + PySide package + app are built with a
+  compatible version of MSVC, to avoid mixing of C++ runtime libraries.
 
 Both build options will use the ``pyside_config.py`` file to configure the project
 using the current PySide/Shiboken installation (for qmake via ``pyside.pri``,
@@ -64,7 +62,7 @@ and for CMake via the project ``CMakeLists.txt``).
 Using CMake
 +++++++++++
 
-To build this example with CMake you will need a recent version of CMake (3.1+).
+To build this example with CMake you will need a recent version of CMake (3.16+).
 
 You can build this example by executing the following commands
 (slightly adapted to your file system layout) in a terminal:
@@ -112,14 +110,26 @@ Windows troubleshooting
 Using ``qmake`` should work out of the box, there was a known issue
 with directories and white spaces that is solved by using the
 "~1" character, so the path will change from:
-``c:\Program Files\Python34\libs``
+``c:\Program Files\Python39\libs``
 to
-``c:\Progra~1\Python34\libs``
+``c:\Progra~1\Python39\libs``
 this will avoid the issues when the Makefiles are generated.
 
 It is possible when using ``CMake`` to pick up the wrong compiler
 for a different architecture, but it can be addressed explicitly
-using the -G option:
+by setting the ``CC`` environment variable:
+
+.. code-block:: bash
+
+    set CC=cl
+
+passing the compiler on the command line:
+
+.. code-block:: bash
+
+    cmake -H.. -B. -DCMAKE_C_COMPILER=cl.exe -DCMAKE_CXX_COMPILER=cl.exe
+
+or using the -G option:
 
 .. code-block:: bash
 
@@ -128,13 +138,13 @@ using the -G option:
 
 If the ``-G "Visual Studio 14 Win64"`` option is used, a ``sln`` file
 will be generated, and can be used with ``MSBuild``
-instead of ``nmake/jom``.
+instead of ``ninja``.
 
 .. code-block:: bash
 
     MSBuild scriptableapplication.sln "/p:Configuration=Release"
 
-Note that using the "NMake Makefiles JOM" generator is preferred to
+Note that using the "Ninja" generator is preferred to
 the MSBuild one, because in the latter case the executable is placed
 into a directory other than the one that contains the dependency
 dlls (shiboken, pyside). This leads to execution problems if the
@@ -171,11 +181,11 @@ In practice this means the only supported configurations are:
 
 #. release config build of the application +
    PySide ``setup.py`` without ``--debug`` flag + ``python.exe`` for the
-   PySide build process + ``python36.dll`` for the linked in shared
+   PySide build process + ``python39.dll`` for the linked in shared
    library + release build of Qt.
 #. debug config build of the application +
    PySide ``setup.py`` *with* ``--debug`` flag + ``python_d.exe`` for the
-   PySide build process + ``python36_d.dll`` for the linked in shared
+   PySide build process + ``python39_d.dll`` for the linked in shared
    library + debug build of Qt.
 
 This is necessary because all the shared libraries in question have to
