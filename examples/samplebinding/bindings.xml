@@ -2,7 +2,7 @@
 <!--
 /****************************************************************************
 **
-** Copyright (C) 2018 The Qt Company Ltd.
+** Copyright (C) 2021 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -51,9 +51,6 @@
 ****************************************************************************/
 -->
 <typesystem package="Universe">
-
-    <primitive-type name="bool"/>
-    <primitive-type name="std::string"/>
 
     <object-type name="Icecream">
         <!-- By default the ownership of an object created in Python is tied

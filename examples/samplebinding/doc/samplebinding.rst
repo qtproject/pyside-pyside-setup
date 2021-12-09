@@ -54,8 +54,6 @@ done by specifying a special XML file called a typesystem file.
 
 In the typesystem file you specify things like:
 
- * which C++ primitive types should have bindings (int, bool, float)
-
  * which C++ classes should have bindings (Icecream) and what kind of
    semantics (value / object)
 
@@ -66,11 +64,10 @@ In the typesystem file you specify things like:
 
  * Package name (name of package as imported from Python)
 
-In this example we declare ``bool`` and ``std::string`` as primitive types,
-``Icecream`` as an object type, ``Truck`` as a value type,
-and the ``clone()`` and ``addIcecreamFlavor(Icecream*)`` need additional
-info about who owns the parameter objects when passing them across
-language boundaries (in this case C++ will delete the objects).
+In this example we declare ``Icecream`` as an object type and ``Truck``
+as a value type. The ``clone()`` and ``addIcecreamFlavor(Icecream*)``
+need additional info about who owns the parameter objects when passing
+them across language boundaries (in this case C++ will delete the objects).
 
 The ``Truck`` has getters and setters for the string ``arrivalMessage``.
 In the type system file, we declare this to be a property in Python:
