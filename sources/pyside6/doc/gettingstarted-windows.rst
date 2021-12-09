@@ -35,8 +35,13 @@ will create and use a new virtual environment, which is indicated by the command
 Setting up CLANG
 ~~~~~~~~~~~~~~~~
 
-If you don't have libclang already in your system, you can download from the Qt servers,
-for example, ``libclang-release_100-based-windows-vs2019_64.7z``.
+libclang can be downloaded from the
+`Qt servers <https://download.qt.io/development_releases/prebuilt/libclang>`_.
+for example, ``libclang-release_130-based-windows-vs2019_64.7z``.
+
+Note that from version 12 onwards, the prebuilt Windows binaries from
+`LLVM <https://www.llvm.org>`_ no longer contain CMake configuration files; so
+they can no longer be used.
 
 Extract the files, and leave it on any desired path, for example, ``c:``, and then set these two
 required environment variables::
