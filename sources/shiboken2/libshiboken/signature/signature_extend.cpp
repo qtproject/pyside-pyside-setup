@@ -139,23 +139,25 @@ static PyObject *handle_doc(PyObject *ob, PyObject *old_descr)
     init_module_2();
     AutoDecRef ob_type_mod(GetClassOrModOf(ob));
     const char *name;
-    if (PyModule_Check(ob_type_mod))
-        name = PyModule_GetName(ob_type_mod);
+    if (PyModule_Check(ob_type_mod.object()))
+        name = PyModule_GetName(ob_type_mod.object());
     else
         name = reinterpret_cast<PyTypeObject *>(ob_type_mod.object())->tp_name;
-    if (handle_doc_in_progress || name == nullptr
-        || strncmp(name, "PySide2.", 8) != 0)
-        return PyObject_CallMethodObjArgs(old_descr,
-                                          PyMagicName::get(),
-                                          ob, nullptr);
-    handle_doc_in_progress++;
-    PyObject *res = PyObject_CallFunction(
-                        pyside_globals->make_helptext_func,
-                        const_cast<char *>("(O)"), ob);
-    handle_doc_in_progress--;
-    if (res == nullptr)
-        PyErr_Format(PyExc_AttributeError, "%R object has no `__doc__` attribute", ob);
-    return res;
+    PyObject *res{};
+
+    if (handle_doc_in_progress || name == nullptr || strncmp(name, "PySide6.", 8) != 0) {
+        res = PyObject_CallMethodObjArgs(old_descr, PyMagicName::get(), ob, nullptr);
+    } else {
+        handle_doc_in_progress++;
+        res = PyObject_CallFunction(pyside_globals->make_helptext_func, "(O)", ob);
+        handle_doc_in_progress--;
+    }
+
+    if (res)
+        return res;
+
+    PyErr_Clear();
+    Py_RETURN_NONE;
 }
 
 static PyObject *pyside_cf_get___doc__(PyObject *cf)
