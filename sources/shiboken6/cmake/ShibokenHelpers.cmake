@@ -154,15 +154,15 @@ endmacro()
 macro(get_python_extension_suffix)
   execute_process(
     COMMAND ${PYTHON_EXECUTABLE} -c "if True:
-       import re
+       import sys
        import sysconfig
        suffix = sysconfig.get_config_var('EXT_SUFFIX')
-       res = re.search(r'^(.+)\\.', suffix)
-       if res:
-           suffix = res.group(1)
+       pos = suffix.rfind('.')
+       if pos > 0:
+           print(suffix[:pos])
        else:
-           suffix = ''
-       print(suffix)
+           print(f'Unable to determine PYTHON_EXTENSION_SUFFIX from EXT_SUFFIX: \"{suffix}\"',
+                 file=sys.stderr)
        "
     OUTPUT_VARIABLE PYTHON_EXTENSION_SUFFIX
     OUTPUT_STRIP_TRAILING_WHITESPACE)
