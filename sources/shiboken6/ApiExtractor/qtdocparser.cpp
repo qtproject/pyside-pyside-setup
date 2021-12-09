@@ -54,11 +54,9 @@ Documentation QtDocParser::retrieveModuleDocumentation()
     return retrieveModuleDocumentation(packageName());
 }
 
-static void formatFunctionArgTypeQuery(QTextStream &str, const AbstractMetaArgument &arg)
+static void formatFunctionUnqualifiedArgTypeQuery(QTextStream &str,
+                                                  const AbstractMetaType &metaType)
 {
-    const AbstractMetaType &metaType = arg.type();
-    if (metaType.isConstant())
-        str << "const " ;
     switch (metaType.typeUsagePattern()) {
     case AbstractMetaType::FlagsPattern: {
         // Modify qualified name "QFlags<Qt::AlignmentFlag>" with name "Alignment"
@@ -92,6 +90,14 @@ static void formatFunctionArgTypeQuery(QTextStream &str, const AbstractMetaArgum
         str << metaType.typeEntry()->qualifiedCppName();
         break;
     }
+}
+
+static void formatFunctionArgTypeQuery(QTextStream &str, const AbstractMetaType &metaType)
+{
+    if (metaType.isConstant())
+        str << "const " ;
+
+    formatFunctionUnqualifiedArgTypeQuery(str, metaType);
 
     if (metaType.referenceType() == LValueReference)
         str << " &";
@@ -99,6 +105,31 @@ static void formatFunctionArgTypeQuery(QTextStream &str, const AbstractMetaArgum
         str << " &&";
     else if (metaType.indirections())
         str << ' ' << QByteArray(metaType.indirections(), '*');
+}
+
+static void formatFunctionArgTypeQuery(QTextStream &str, qsizetype n,
+                                       const AbstractMetaArgument &arg)
+{
+    // Fixme: Use arguments.at(i)->type()->originalTypeDescription()
+    //        instead to get unresolved typedefs?
+    const AbstractMetaType &metaType = arg.type();
+    str << "/parameter[" << (n + 1) << "][";
+
+    // If there is any qualifier like '*', '&', we search by the type as a
+    // contained word to avoid space mismatches and apparently an issue in
+    // libxml/xslt that does not match '&amp;' in attributes.
+    // This should be "matches(type, "^(.*\W)?<type>(\W.*)?$")"), but
+    // libxslt only supports XPath 1.0. Also note, "\b" is not supported
+    if (metaType.referenceType() != NoReference || metaType.indirections() != 0) {
+        str << "contains(@type, \"";
+        formatFunctionUnqualifiedArgTypeQuery(str, metaType);
+        str << " \")"; // ending with space
+    } else {
+        str << "@type=\"";
+        formatFunctionArgTypeQuery(str, metaType);
+        str << "\"";
+    }
+    str << "]/..";
 }
 
 enum FunctionMatchFlags
@@ -122,13 +153,8 @@ static QString functionXQuery(const QString &classQuery,
         str << " and count(parameter)=" << arguments.size();
     str << ']';
     if (!arguments.isEmpty() && (matchFlags & MatchArgumentType)) {
-        for (int i = 0, size = arguments.size(); i < size; ++i) {
-            str << "/parameter[" << (i + 1) << "][@type=\"";
-            // Fixme: Use arguments.at(i)->type()->originalTypeDescription()
-            //        instead to get unresolved typedefs?
-            formatFunctionArgTypeQuery(str, arguments.at(i));
-            str << "\"]/..";
-        }
+        for (qsizetype i = 0, size = arguments.size(); i < size; ++i)
+            formatFunctionArgTypeQuery(str, i, arguments.at(i));
     }
     if (matchFlags & DescriptionOnly)
         str << "/description";
