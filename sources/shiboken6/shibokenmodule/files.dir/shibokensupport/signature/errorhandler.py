@@ -156,7 +156,7 @@ def check_string_type(s):
 
 
 def make_helptext(func):
-    existing_doc = func.__doc__ if hasattr(func, "__doc__") else None
+    existing_doc = func.__doc__
     sigs = get_signature(func)
     if not sigs:
         return existing_doc
