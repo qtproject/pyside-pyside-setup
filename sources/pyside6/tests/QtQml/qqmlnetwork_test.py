@@ -37,7 +37,8 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QUrl
+from PySide6.QtCore import QUrl, QTimer
+from PySide6.QtGui import QGuiApplication, QWindow
 from PySide6.QtQuick import QQuickView
 from PySide6.QtQml import QQmlNetworkAccessManagerFactory
 from PySide6.QtNetwork import QNetworkAccessManager
@@ -54,12 +55,14 @@ class CustomManager(QNetworkAccessManager):
 
 class CustomFactory(QQmlNetworkAccessManagerFactory):
     def create(self, parent=None):
+        w = QGuiApplication.topLevelWindows()[0]
+        QTimer.singleShot(50, w.close)
         return CustomManager()
 
 
 class TestQQmlNetworkFactory(TimedQGuiApplication):
     def setUp(self):
-        super().setUp(timeout=1000)
+        super().setUp(timeout=2000)
 
     def testQQuickNetworkFactory(self):
         view = QQuickView()
