@@ -540,14 +540,31 @@ QString msgCannotFindDocumentation(const QString &fileName,
     return result;
 }
 
+QString msgFallbackForDocumentation(const QString &fileName,
+                                    const char *what, const QString &name,
+                                    const QString &query)
+{
+    QString result;
+    QTextStream(&result) << "Fallback used while trying to find documentation for " << what
+        << ' ' << name << " in:\n    " << QDir::toNativeSeparators(fileName)
+        << "\n  using query:\n    " << query;
+    return result;
+}
+
 QString msgCannotFindDocumentation(const QString &fileName,
-                                   const AbstractMetaClass *metaClass,
                                    const AbstractMetaFunction *function,
                                    const QString &query)
 {
-    const QString name = metaClass->name() + QLatin1String("::")
-        + function->minimalSignature();
-    return msgCannotFindDocumentation(fileName, "function", name, query);
+    return msgCannotFindDocumentation(fileName, "function",
+                                      function->classQualifiedSignature(), query);
+}
+
+QString msgFallbackForDocumentation(const QString &fileName,
+                                    const AbstractMetaFunction *function,
+                                    const QString &query)
+{
+    return msgFallbackForDocumentation(fileName, "function",
+                                       function->classQualifiedSignature(), query);
 }
 
 QString msgCannotFindDocumentation(const QString &fileName,

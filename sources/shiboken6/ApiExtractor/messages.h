@@ -169,10 +169,17 @@ QString msgCannotFindDocumentation(const QString &fileName,
                                    const char *what, const QString &name,
                                    const QString &query);
 
+QString msgFallbackForDocumentation(const QString &fileName,
+                                    const char *what, const QString &name,
+                                    const QString &query);
+
 QString msgCannotFindDocumentation(const QString &fileName,
-                                   const AbstractMetaClass *metaClass,
                                    const AbstractMetaFunction *function,
                                    const QString &query);
+
+QString msgFallbackForDocumentation(const QString &fileName,
+                                    const AbstractMetaFunction *function,
+                                    const QString &query);
 
 QString msgCannotFindDocumentation(const QString &fileName,
                                    const AbstractMetaClass *metaClass,
