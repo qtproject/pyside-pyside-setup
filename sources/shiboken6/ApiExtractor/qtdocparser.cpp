@@ -54,6 +54,30 @@ Documentation QtDocParser::retrieveModuleDocumentation()
     return retrieveModuleDocumentation(packageName());
 }
 
+enum FunctionMatchFlags
+{
+    MatchArgumentCount = 0x1,
+    MatchArgumentType = 0x2,
+    MatchArgumentFuzzyType = 0x4, // Match a "const &" using contains()
+    DescriptionOnly = 0x8
+};
+
+static void formatPreQualifications(QTextStream &str, const AbstractMetaType &type)
+{
+    if (type.isConstant())
+        str << "const " ;
+}
+
+static void formatPostQualifications(QTextStream &str, const AbstractMetaType &type)
+{
+    if (type.referenceType() == LValueReference)
+        str << " &";
+    else if (type.referenceType() == RValueReference)
+        str << " &&";
+    else if (type.indirections())
+        str << ' ' << QByteArray(type.indirections(), '*');
+}
+
 static void formatFunctionUnqualifiedArgTypeQuery(QTextStream &str,
                                                   const AbstractMetaType &metaType)
 {
@@ -81,7 +105,10 @@ static void formatFunctionUnqualifiedArgTypeQuery(QTextStream &str,
         for (int i = 0, size = instantiations.size(); i < size; ++i) {
             if (i)
                 str << ", ";
-            str << instantiations.at(i).typeEntry()->qualifiedCppName();
+            const auto &instantiation = instantiations.at(i);
+            formatPreQualifications(str, instantiation);
+            str << instantiation.typeEntry()->qualifiedCppName();
+            formatPostQualifications(str, instantiation);
         }
         str << '>';
     }
@@ -92,52 +119,45 @@ static void formatFunctionUnqualifiedArgTypeQuery(QTextStream &str,
     }
 }
 
-static void formatFunctionArgTypeQuery(QTextStream &str, const AbstractMetaType &metaType)
+static inline void formatFunctionArgTypeQuery(QTextStream &str, const AbstractMetaType &metaType)
 {
-    if (metaType.isConstant())
-        str << "const " ;
-
+    formatPreQualifications(str, metaType);
     formatFunctionUnqualifiedArgTypeQuery(str, metaType);
-
-    if (metaType.referenceType() == LValueReference)
-        str << " &";
-    else if (metaType.referenceType() == RValueReference)
-        str << " &&";
-    else if (metaType.indirections())
-        str << ' ' << QByteArray(metaType.indirections(), '*');
+    formatPostQualifications(str, metaType);
 }
 
 static void formatFunctionArgTypeQuery(QTextStream &str, qsizetype n,
-                                       const AbstractMetaArgument &arg)
+                                       const AbstractMetaType &metaType)
 {
     // Fixme: Use arguments.at(i)->type()->originalTypeDescription()
     //        instead to get unresolved typedefs?
-    const AbstractMetaType &metaType = arg.type();
-    str << "/parameter[" << (n + 1) << "][";
-
-    // If there is any qualifier like '*', '&', we search by the type as a
-    // contained word to avoid space mismatches and apparently an issue in
-    // libxml/xslt that does not match '&amp;' in attributes.
-    // This should be "matches(type, "^(.*\W)?<type>(\W.*)?$")"), but
-    // libxslt only supports XPath 1.0. Also note, "\b" is not supported
-    if (metaType.referenceType() != NoReference || metaType.indirections() != 0) {
-        str << "contains(@type, \"";
-        formatFunctionUnqualifiedArgTypeQuery(str, metaType);
-        str << " \")"; // ending with space
-    } else {
-        str << "@type=\"";
-        formatFunctionArgTypeQuery(str, metaType);
-        str << "\"";
-    }
-    str << "]/..";
+    str << "/parameter[" << (n + 1) << "][@type=\"";
+    formatFunctionArgTypeQuery(str, metaType);
+    str << "\"]/..";
 }
 
-enum FunctionMatchFlags
+// If there is any qualifier like '*', '&', we search by the type as a
+// contained word to avoid space mismatches and apparently an issue in
+// libxml/xslt that does not match '&amp;' in attributes.
+// This should be "matches(type, "^(.*\W)?<type>(\W.*)?$")"), but
+// libxslt only supports XPath 1.0. Also note,  "\b" is not supported
+static void formatFunctionFuzzyArgTypeQuery(QTextStream &str, qsizetype n,
+                                            const AbstractMetaType &metaType)
 {
-    MatchArgumentCount = 0x1,
-    MatchArgumentType = 0x2,
-    DescriptionOnly = 0x4
-};
+    str << "/parameter[" << (n + 1) << "][contains(@type, \"";
+    formatFunctionUnqualifiedArgTypeQuery(str, metaType);
+    str << " \")]/.."; // ending with space
+}
+
+static bool tryFuzzyMatching(const AbstractMetaType &metaType)
+{
+    return metaType.referenceType() != NoReference || metaType.indirections() != 0;
+}
+
+static bool tryFuzzyArgumentMatching(const AbstractMetaArgument &arg)
+{
+    return tryFuzzyMatching(arg.type());
+}
 
 static QString functionXQuery(const QString &classQuery,
                               const AbstractMetaFunctionCPtr &func,
@@ -152,9 +172,15 @@ static QString functionXQuery(const QString &classQuery,
     if (matchFlags & MatchArgumentCount)
         str << " and count(parameter)=" << arguments.size();
     str << ']';
-    if (!arguments.isEmpty() && (matchFlags & MatchArgumentType)) {
-        for (qsizetype i = 0, size = arguments.size(); i < size; ++i)
-            formatFunctionArgTypeQuery(str, i, arguments.at(i));
+    if (!arguments.isEmpty()
+        && (matchFlags & (MatchArgumentType | MatchArgumentFuzzyType)) != 0) {
+        for (qsizetype i = 0, size = arguments.size(); i < size; ++i) {
+            const auto &type = arguments.at(i).type();
+            if ((matchFlags & MatchArgumentFuzzyType) != 0 && tryFuzzyMatching(type))
+                formatFunctionFuzzyArgTypeQuery(str, i, type);
+            else
+                formatFunctionArgTypeQuery(str, i, type);
+        }
     }
     if (matchFlags & DescriptionOnly)
         str << "/description";
@@ -178,17 +204,30 @@ static QStringList signaturesFromWebXml(QString w)
     return result;
 }
 
-static QString msgArgumentCountMatch(const AbstractMetaFunction *func,
-                                     const QStringList &matches)
+static QString msgArgumentMatch(const QString &query, const QStringList &matches)
 {
     QString result;
     QTextStream str(&result);
-    str << "\n  Note: Querying for the argument count=="
-        << func->arguments().size() << " only yields " << matches.size()
-        << " matches";
+    str << "\n  Note: Querying for " << query << " yields ";
+    if (matches.isEmpty())
+        str << "no";
+    else
+        str << matches.size();
+    str << " matches";
     if (!matches.isEmpty())
         str << ": \"" << matches.join(QLatin1String("\", \"")) << '"';
     return result;
+}
+
+static inline QString msgArgumentFuzzyTypeMatch(const QStringList &matches)
+{
+    return msgArgumentMatch(u"arguments using fuzzy types"_qs, matches);
+}
+
+static inline QString msgArgumentCountMatch(const AbstractMetaArgumentList &args,
+                                            const QStringList &matches)
+{
+    return msgArgumentMatch(u"the argument count=="_qs + QString::number(args.size()), matches);
 }
 
 QString QtDocParser::queryFunctionDocumentation(const QString &sourceFileName,
@@ -199,6 +238,8 @@ QString QtDocParser::queryFunctionDocumentation(const QString &sourceFileName,
                                                 const XQueryPtr &xquery,
                                                 QString *errorMessage)
 {
+    errorMessage->clear();
+
     DocModificationList funcModifs;
     for (const DocModification &funcModif : signedModifs) {
         if (funcModif.signature() == func->minimalSignature())
@@ -213,8 +254,7 @@ QString QtDocParser::queryFunctionDocumentation(const QString &sourceFileName,
         const QString properyDocumentation = getDocumentation(xquery, propertyQuery, funcModifs);
         if (properyDocumentation.isEmpty()) {
             *errorMessage =
-                msgCannotFindDocumentation(sourceFileName, metaClass, func.data(),
-                                           propertyQuery);
+                msgCannotFindDocumentation(sourceFileName, func.data(), propertyQuery);
         }
         return properyDocumentation;
     }
@@ -224,11 +264,41 @@ QString QtDocParser::queryFunctionDocumentation(const QString &sourceFileName,
     const QString result = getDocumentation(xquery, fullQuery, funcModifs);
     if (!result.isEmpty())
         return result;
-    *errorMessage = msgCannotFindDocumentation(sourceFileName, metaClass, func.data(), fullQuery);
-    if (func->arguments().isEmpty()) // No arguments, can't be helped
+    const auto &arguments = func->arguments();
+    if (arguments.isEmpty()) { // No arguments, can't be helped
+        *errorMessage = msgCannotFindDocumentation(sourceFileName, func.data(), fullQuery);
         return result;
-    // Test whether some mismatch in argument types occurred by checking for
-    // the argument count only. Include the outer <function> element.
+    }
+
+    // If there are any "const &" or similar parameters, try fuzzy matching.
+    // Include the outer <function> element for checking.
+    if (std::any_of(arguments.cbegin(), arguments.cend(), tryFuzzyArgumentMatching)) {
+        const unsigned flags = MatchArgumentCount | MatchArgumentFuzzyType;
+        QString fuzzyArgumentQuery = functionXQuery(classQuery, func, flags);
+        QStringList signatures =
+            signaturesFromWebXml(getDocumentation(xquery, fuzzyArgumentQuery, funcModifs));
+        if (signatures.size() == 1) {
+            // One match was found. Repeat the query restricted to the <description>
+            // element and use the result with a warning.
+            errorMessage->prepend(msgFallbackForDocumentation(sourceFileName, func.data(),
+                                                              fullQuery));
+            errorMessage->append(u"\n  Falling back to \""_qs + signatures.constFirst()
+                                 + u"\" obtained by matching fuzzy argument types."_qs);
+            fuzzyArgumentQuery = functionXQuery(classQuery, func, flags | DescriptionOnly);
+            return getDocumentation(xquery, fuzzyArgumentQuery, funcModifs);
+        }
+
+        *errorMessage += msgArgumentFuzzyTypeMatch(signatures);
+
+        if (signatures.size() > 1) { // Ambiguous, no point in trying argument count
+            errorMessage->prepend(msgCannotFindDocumentation(sourceFileName, func.data(),
+                                                             fullQuery));
+            return result;
+        }
+    }
+
+    // Finally, test whether some mismatch in argument types occurred by checking for
+    // the argument count only.
     QString countOnlyQuery = functionXQuery(classQuery, func, MatchArgumentCount);
     QStringList signatures =
             signaturesFromWebXml(getDocumentation(xquery, countOnlyQuery, funcModifs));
@@ -236,11 +306,14 @@ QString QtDocParser::queryFunctionDocumentation(const QString &sourceFileName,
         // One match was found. Repeat the query restricted to the <description>
         // element and use the result with a warning.
         countOnlyQuery = functionXQuery(classQuery, func, MatchArgumentCount | DescriptionOnly);
+        errorMessage->prepend(msgFallbackForDocumentation(sourceFileName, func.data(), fullQuery));
         errorMessage->append(QLatin1String("\n  Falling back to \"") + signatures.constFirst()
                              + QLatin1String("\" obtained by matching the argument count only."));
         return getDocumentation(xquery, countOnlyQuery, funcModifs);
     }
-    *errorMessage += msgArgumentCountMatch(func.data(), signatures);
+
+    errorMessage->prepend(msgCannotFindDocumentation(sourceFileName, func.data(), fullQuery));
+    *errorMessage += msgArgumentCountMatch(arguments, signatures);
     return result;
 }
 
