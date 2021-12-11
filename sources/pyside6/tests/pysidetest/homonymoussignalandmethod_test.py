@@ -39,6 +39,7 @@ from init_paths import init_test_paths
 init_test_paths(True)
 
 from testbinding import TestObject
+from PySide6.QtCore import QObject, Signal, SignalInstance
 
 '''Tests the behaviour of homonymous signals and slots.'''
 
@@ -87,6 +88,46 @@ class HomonymousSignalAndMethodTest(unittest.TestCase):
 
     def testHomonymousSignalAndStaticMethodFromInstance(self):
         self.assertEqual(self.obj.staticMethodDouble(4), 8)
+
+
+# PYSIDE-1730: Homonymous Methods with multiple inheritance
+
+class Q(QObject):
+    signal = Signal()
+
+    def method(self):
+        msg = 'Q::method'
+        print(msg)
+        return msg
+
+
+class M:
+
+    def signal(self):
+        msg = 'M::signal'
+        print(msg)
+        return msg
+
+    def method(self):
+        msg = 'M::method'
+        print(msg)
+        return msg
+
+
+class C(M, Q):
+
+    def __init__(self):
+        Q.__init__(self)
+        M.__init__(self)
+
+
+class HomonymousMultipleInheritanceTest(unittest.TestCase):
+
+    def testHomonymousMultipleInheritance(self):
+        c = C()
+        self.assertEqual(c.method(), "M::method") # okay
+        self.assertEqual(c.signal(), "M::signal") # problem on PySide6 6.2.2
+        self.assertEqual(type(c.signal), SignalInstance)
 
 
 if __name__ == '__main__':

@@ -660,17 +660,60 @@ static PyObject *signalCall(PyObject *self, PyObject *args, PyObject *kw)
     return callFunc(homonymousMethod, args, kw);
 }
 
+// This function returns a borrowed reference.
+static inline PyObject *_getRealCallable(PyObject *func)
+{
+    static const auto *SignalType = PySideSignalTypeF();
+    static const auto *SignalInstanceType = PySideSignalInstanceTypeF();
+
+    // If it is a signal, use the (maybe empty) homonymous method.
+    if (Py_TYPE(func) == SignalType) {
+        auto *signal = reinterpret_cast<PySideSignal *>(func);
+        return signal->homonymousMethod;
+    }
+    // If it is a signal instance, use the (maybe empty) homonymous method.
+    if (Py_TYPE(func) == SignalInstanceType) {
+        auto *signalInstance = reinterpret_cast<PySideSignalInstance *>(func);
+        return signalInstance->d->homonymousMethod;
+    }
+    return func;
+}
+
+// This function returns a borrowed reference.
+static PyObject *_getHomonymousMethod(PySideSignalInstance *inst)
+{
+    if (inst->d->homonymousMethod)
+        return inst->d->homonymousMethod;
+
+    // PYSIDE-1730: We are searching methods with the same name not only at the same place,
+    // but walk through the whole mro to find a hidden method with the same name.
+    auto signalName = inst->d->signalName;
+    Shiboken::AutoDecRef name(Shiboken::String::fromCString(signalName));
+    auto *mro = Py_TYPE(inst->d->source)->tp_mro;
+    Py_ssize_t idx, n = PyTuple_GET_SIZE(mro);
+
+    for (idx = 0; idx < n; idx++) {
+        auto *sub_type = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
+        auto *hom = PyDict_GetItem(sub_type->tp_dict, name);
+        PyObject *realFunc{};
+        if (hom && PyCallable_Check(hom) && (realFunc = _getRealCallable(hom)))
+            return realFunc;
+    }
+    return nullptr;
+}
+
 static PyObject *signalInstanceCall(PyObject *self, PyObject *args, PyObject *kw)
 {
-    auto PySideSignal = reinterpret_cast<PySideSignalInstance *>(self);
-    if (!PySideSignal->d->homonymousMethod) {
-        PyErr_SetString(PyExc_TypeError, "native Qt signal is not callable");
-        return 0;
+    auto *PySideSignal = reinterpret_cast<PySideSignalInstance *>(self);
+    auto *hom = _getHomonymousMethod(PySideSignal);
+    if (!hom) {
+        PyErr_Format(PyExc_TypeError, "native Qt signal instance '%s' is not callable",
+                     PySideSignal->d->signalName.constData());
+        return nullptr;
     }
 
-    descrgetfunc getDescriptor = Py_TYPE(PySideSignal->d->homonymousMethod)->tp_descr_get;
-    Shiboken::AutoDecRef homonymousMethod(getDescriptor(PySideSignal->d->homonymousMethod,
-                                                        PySideSignal->d->source, nullptr));
+    descrgetfunc getDescriptor = Py_TYPE(hom)->tp_descr_get;
+    Shiboken::AutoDecRef homonymousMethod(getDescriptor(hom, PySideSignal->d->source, nullptr));
     return PyObject_Call(homonymousMethod, args, kw);
 }
 

@@ -46,7 +46,7 @@ class D(C):
     pass
 
 
-class TestVersionInfo(unittest.TestCase):
+class TestSignalInstance(unittest.TestCase):
     def test_signal_instances_are_equal(self):
         o = QTimer()
         self.assertTrue(o.timeout == o.timeout)
