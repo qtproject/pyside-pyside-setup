@@ -251,3 +251,11 @@ C++ and Python
     :maxdepth: 1
 
     portingguide/index.rst
+
+Debug a PySide6 Application
+---------------------------
+.. toctree::
+    :maxdepth: 1
+
+    debugging/mixed_debugging.rst
+
