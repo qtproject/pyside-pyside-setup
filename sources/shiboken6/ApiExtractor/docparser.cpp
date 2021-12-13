@@ -73,6 +73,11 @@ QString DocParser::execXQuery(const XQueryPtr &xquery, const QString& query)
     return result;
 }
 
+static bool usesRValueReference(const AbstractMetaArgument &a)
+{
+    return a.type().referenceType() == RValueReference;
+}
+
 bool DocParser::skipForQuery(const AbstractMetaFunctionCPtr &func)
 {
     // Skip private functions and copies created by AbstractMetaClass::fixFunctions()
@@ -91,7 +96,9 @@ bool DocParser::skipForQuery(const AbstractMetaFunctionCPtr &func)
     default:
         break;
     }
-    return false;
+
+    return std::any_of(func->arguments().cbegin(), func->arguments().cend(),
+                       usesRValueReference);
 }
 
 AbstractMetaFunctionCList DocParser::documentableFunctions(const AbstractMetaClass *metaClass)
