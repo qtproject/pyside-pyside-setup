@@ -534,9 +534,11 @@ QString msgCannotFindDocumentation(const QString &fileName,
                                    const QString &query)
 {
     QString result;
-    QTextStream(&result) << "Cannot find documentation for " << what
-        << ' ' << name << " in:\n    " << QDir::toNativeSeparators(fileName)
-        << "\n  using query:\n    " << query;
+    QTextStream str(&result);
+    str << "Cannot find documentation for " << what
+        << ' ' << name << " in:\n    " << QDir::toNativeSeparators(fileName);
+    if (!query.isEmpty())
+        str << "\n  using query:\n    " << query;
     return result;
 }
 
@@ -545,9 +547,21 @@ QString msgFallbackForDocumentation(const QString &fileName,
                                     const QString &query)
 {
     QString result;
-    QTextStream(&result) << "Fallback used while trying to find documentation for " << what
-        << ' ' << name << " in:\n    " << QDir::toNativeSeparators(fileName)
-        << "\n  using query:\n    " << query;
+    QTextStream str(&result);
+    str << "Fallback used while trying to find documentation for " << what
+        << ' ' << name << " in:\n    " << QDir::toNativeSeparators(fileName);
+    if (!query.isEmpty())
+        str << "\n  using query:\n    " << query;
+    return result;
+}
+
+static QString functionDescription(const AbstractMetaFunction *function)
+{
+    QString result = u'"' + function->classQualifiedSignature() + u'"';
+    if (function->flags().testFlag(AbstractMetaFunction::Flag::HiddenFriend))
+        result += u" (hidden friend)"_qs;
+    if (function->flags().testFlag(AbstractMetaFunction::Flag::InheritedFromTemplate))
+        result += u" (inherited from template)"_qs;
     return result;
 }
 
@@ -556,7 +570,7 @@ QString msgCannotFindDocumentation(const QString &fileName,
                                    const QString &query)
 {
     return msgCannotFindDocumentation(fileName, "function",
-                                      function->classQualifiedSignature(), query);
+                                      functionDescription(function), query);
 }
 
 QString msgFallbackForDocumentation(const QString &fileName,
@@ -564,7 +578,7 @@ QString msgFallbackForDocumentation(const QString &fileName,
                                     const QString &query)
 {
     return msgFallbackForDocumentation(fileName, "function",
-                                       function->classQualifiedSignature(), query);
+                                       functionDescription(function), query);
 }
 
 QString msgCannotFindDocumentation(const QString &fileName,

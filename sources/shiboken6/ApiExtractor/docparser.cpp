@@ -26,6 +26,7 @@
 **
 ****************************************************************************/
 #include "docparser.h"
+#include "classdocumentation.h"
 #include "abstractmetaenum.h"
 #include "abstractmetafield.h"
 #include "abstractmetafunction.h"
@@ -81,6 +82,8 @@ static bool usesRValueReference(const AbstractMetaArgument &a)
 bool DocParser::skipForQuery(const AbstractMetaFunctionCPtr &func)
 {
     // Skip private functions and copies created by AbstractMetaClass::fixFunctions()
+    // Note: Functions inherited from templates will cause warnings about missing
+    // documentation, but they should at least be listed.
     if (!func || func->isPrivate()
         || func->attributes().testFlag(AbstractMetaFunction::AddedMethod)
         || func->isModifiedRemoved()

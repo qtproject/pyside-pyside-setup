@@ -27,6 +27,7 @@
 ****************************************************************************/
 
 #include "qtdocparser.h"
+#include "classdocumentation.h"
 #include "abstractmetaenum.h"
 #include "abstractmetafield.h"
 #include "abstractmetafunction.h"
@@ -37,14 +38,12 @@
 #include "propertyspec.h"
 #include "reporthandler.h"
 #include "typesystem.h"
-#include "xmlutils.h"
 
 #include <QtCore/QDir>
 #include <QtCore/QFile>
-#include <QtCore/QTextStream>
-#include <QtCore/QXmlStreamAttributes>
-#include <QtCore/QXmlStreamReader>
 #include <QUrl>
+
+enum { debugFunctionSearch = 0 };
 
 static inline QString briefStartElement() { return QStringLiteral("<brief>"); }
 static inline QString briefEndElement() { return QStringLiteral("</brief>"); }
@@ -53,14 +52,6 @@ Documentation QtDocParser::retrieveModuleDocumentation()
 {
     return retrieveModuleDocumentation(packageName());
 }
-
-enum FunctionMatchFlags
-{
-    MatchArgumentCount = 0x1,
-    MatchArgumentType = 0x2,
-    MatchArgumentFuzzyType = 0x4, // Match a "const &" using contains()
-    DescriptionOnly = 0x8
-};
 
 static void formatPreQualifications(QTextStream &str, const AbstractMetaType &type)
 {
@@ -119,123 +110,20 @@ static void formatFunctionUnqualifiedArgTypeQuery(QTextStream &str,
     }
 }
 
-static inline void formatFunctionArgTypeQuery(QTextStream &str, const AbstractMetaType &metaType)
+static QString formatFunctionArgTypeQuery(const AbstractMetaType &metaType)
 {
-    formatPreQualifications(str, metaType);
+    QString result;
+    QTextStream str(&result);formatPreQualifications(str, metaType);
     formatFunctionUnqualifiedArgTypeQuery(str, metaType);
     formatPostQualifications(str, metaType);
-}
-
-static void formatFunctionArgTypeQuery(QTextStream &str, qsizetype n,
-                                       const AbstractMetaType &metaType)
-{
-    // Fixme: Use arguments.at(i)->type()->originalTypeDescription()
-    //        instead to get unresolved typedefs?
-    str << "/parameter[" << (n + 1) << "][@type=\"";
-    formatFunctionArgTypeQuery(str, metaType);
-    str << "\"]/..";
-}
-
-// If there is any qualifier like '*', '&', we search by the type as a
-// contained word to avoid space mismatches and apparently an issue in
-// libxml/xslt that does not match '&amp;' in attributes.
-// This should be "matches(type, "^(.*\W)?<type>(\W.*)?$")"), but
-// libxslt only supports XPath 1.0. Also note,  "\b" is not supported
-static void formatFunctionFuzzyArgTypeQuery(QTextStream &str, qsizetype n,
-                                            const AbstractMetaType &metaType)
-{
-    str << "/parameter[" << (n + 1) << "][contains(@type, \"";
-    formatFunctionUnqualifiedArgTypeQuery(str, metaType);
-    str << " \")]/.."; // ending with space
-}
-
-static bool tryFuzzyMatching(const AbstractMetaType &metaType)
-{
-    return metaType.referenceType() != NoReference || metaType.indirections() != 0;
-}
-
-static bool tryFuzzyArgumentMatching(const AbstractMetaArgument &arg)
-{
-    return tryFuzzyMatching(arg.type());
-}
-
-static QString functionXQuery(const QString &classQuery,
-                              const AbstractMetaFunctionCPtr &func,
-                              unsigned matchFlags = MatchArgumentCount | MatchArgumentType
-                                                    | DescriptionOnly)
-{
-    QString result;
-    QTextStream str(&result);
-    const AbstractMetaArgumentList &arguments = func->arguments();
-    str << classQuery << "/function[@name=\"" << func->originalName()
-        << "\" and @const=\"" << (func->isConstant() ? "true" : "false") << '"';
-    if (matchFlags & MatchArgumentCount)
-        str << " and count(parameter)=" << arguments.size();
-    str << ']';
-    if (!arguments.isEmpty()
-        && (matchFlags & (MatchArgumentType | MatchArgumentFuzzyType)) != 0) {
-        for (qsizetype i = 0, size = arguments.size(); i < size; ++i) {
-            const auto &type = arguments.at(i).type();
-            if ((matchFlags & MatchArgumentFuzzyType) != 0 && tryFuzzyMatching(type))
-                formatFunctionFuzzyArgTypeQuery(str, i, type);
-            else
-                formatFunctionArgTypeQuery(str, i, type);
-        }
-    }
-    if (matchFlags & DescriptionOnly)
-        str << "/description";
     return result;
-}
-
-static QStringList signaturesFromWebXml(QString w)
-{
-    QStringList result;
-    if (w.isEmpty())
-        return result;
-    w.prepend(QLatin1String("<root>")); // Fake root element
-    w.append(QLatin1String("</root>"));
-    QXmlStreamReader reader(w);
-    while (!reader.atEnd()) {
-        if (reader.readNext() == QXmlStreamReader::StartElement
-            && reader.name() == QLatin1String("function")) {
-            result.append(reader.attributes().value(QStringLiteral("signature")).toString());
-        }
-    }
-    return result;
-}
-
-static QString msgArgumentMatch(const QString &query, const QStringList &matches)
-{
-    QString result;
-    QTextStream str(&result);
-    str << "\n  Note: Querying for " << query << " yields ";
-    if (matches.isEmpty())
-        str << "no";
-    else
-        str << matches.size();
-    str << " matches";
-    if (!matches.isEmpty())
-        str << ": \"" << matches.join(QLatin1String("\", \"")) << '"';
-    return result;
-}
-
-static inline QString msgArgumentFuzzyTypeMatch(const QStringList &matches)
-{
-    return msgArgumentMatch(u"arguments using fuzzy types"_qs, matches);
-}
-
-static inline QString msgArgumentCountMatch(const AbstractMetaArgumentList &args,
-                                            const QStringList &matches)
-{
-    return msgArgumentMatch(u"the argument count=="_qs + QString::number(args.size()), matches);
 }
 
 QString QtDocParser::queryFunctionDocumentation(const QString &sourceFileName,
+                                                const ClassDocumentation &classDocumentation,
                                                 const AbstractMetaClass* metaClass,
-                                                const QString &classQuery,
                                                 const AbstractMetaFunctionCPtr &func,
                                                 const DocModificationList &signedModifs,
-                                                const XQueryPtr &xquery,
                                                 QString *errorMessage)
 {
     errorMessage->clear();
@@ -246,75 +134,89 @@ QString QtDocParser::queryFunctionDocumentation(const QString &sourceFileName,
             funcModifs.append(funcModif);
     }
 
+    const QString docString =
+        queryFunctionDocumentation(sourceFileName, classDocumentation, metaClass,
+                                   func, errorMessage);
+
+    return docString.isEmpty() || funcModifs.isEmpty()
+        ? docString : applyDocModifications(funcModifs, docString);
+}
+
+QString QtDocParser::queryFunctionDocumentation(const QString &sourceFileName,
+                                                const ClassDocumentation &classDocumentation,
+                                                const AbstractMetaClass* metaClass,
+                                                const AbstractMetaFunctionCPtr &func,
+                                                QString *errorMessage)
+{
     // Properties
     if (func->isPropertyReader() || func->isPropertyWriter() || func->isPropertyResetter()) {
-        const auto prop = metaClass->propertySpecs().at(func->propertySpecIndex());
-        const QString propertyQuery = classQuery + QLatin1String("/property[@name=\"")
-            + prop.name() + QLatin1String("\"]/description");
-        const QString properyDocumentation = getDocumentation(xquery, propertyQuery, funcModifs);
-        if (properyDocumentation.isEmpty()) {
-            *errorMessage =
-                msgCannotFindDocumentation(sourceFileName, func.data(), propertyQuery);
+        const QPropertySpec &prop = metaClass->propertySpecs().at(func->propertySpecIndex());
+        const auto index = classDocumentation.indexOfProperty(prop.name());
+        if (index == -1) {
+            *errorMessage = msgCannotFindDocumentation(sourceFileName, func.data());
+            return {};
         }
-        return properyDocumentation;
+        return classDocumentation.properties.at(index).description;
     }
 
-    // Query with full match of argument types
-    const QString fullQuery = functionXQuery(classQuery, func);
-    const QString result = getDocumentation(xquery, fullQuery, funcModifs);
-    if (!result.isEmpty())
-        return result;
-    const auto &arguments = func->arguments();
-    if (arguments.isEmpty()) { // No arguments, can't be helped
-        *errorMessage = msgCannotFindDocumentation(sourceFileName, func.data(), fullQuery);
-        return result;
+    // Search candidates by name and const-ness
+    FunctionDocumentationList candidates =
+        classDocumentation.findFunctionCandidates(func->name(), func->isConstant());
+    if (candidates.isEmpty()) {
+        *errorMessage = msgCannotFindDocumentation(sourceFileName, func.data())
+                        + u" (no matches)"_qs;
+        return {};
     }
 
-    // If there are any "const &" or similar parameters, try fuzzy matching.
-    // Include the outer <function> element for checking.
-    if (std::any_of(arguments.cbegin(), arguments.cend(), tryFuzzyArgumentMatching)) {
-        const unsigned flags = MatchArgumentCount | MatchArgumentFuzzyType;
-        QString fuzzyArgumentQuery = functionXQuery(classQuery, func, flags);
-        QStringList signatures =
-            signaturesFromWebXml(getDocumentation(xquery, fuzzyArgumentQuery, funcModifs));
-        if (signatures.size() == 1) {
-            // One match was found. Repeat the query restricted to the <description>
-            // element and use the result with a warning.
-            errorMessage->prepend(msgFallbackForDocumentation(sourceFileName, func.data(),
-                                                              fullQuery));
-            errorMessage->append(u"\n  Falling back to \""_qs + signatures.constFirst()
-                                 + u"\" obtained by matching fuzzy argument types."_qs);
-            fuzzyArgumentQuery = functionXQuery(classQuery, func, flags | DescriptionOnly);
-            return getDocumentation(xquery, fuzzyArgumentQuery, funcModifs);
+    // Try an exact query
+    FunctionDocumentationQuery fq;
+    fq.name = func->name();
+    fq.constant = func->isConstant();
+    for (const auto &arg : func->arguments())
+        fq.parameters.append(formatFunctionArgTypeQuery(arg.type()));
+
+    const auto funcFlags = func->flags();
+    // Re-add arguments removed by the metabuilder to binary operator functions
+    if (funcFlags.testFlag(AbstractMetaFunction::Flag::OperatorLeadingClassArgumentRemoved)
+        || funcFlags.testFlag(AbstractMetaFunction::Flag::OperatorTrailingClassArgumentRemoved)) {
+        QString classType = metaClass->qualifiedCppName();
+        if (!funcFlags.testFlag(AbstractMetaFunction::Flag::OperatorClassArgumentByValue)) {
+            classType.prepend(u"const "_qs);
+            classType.append(u" &"_qs);
         }
-
-        *errorMessage += msgArgumentFuzzyTypeMatch(signatures);
-
-        if (signatures.size() > 1) { // Ambiguous, no point in trying argument count
-            errorMessage->prepend(msgCannotFindDocumentation(sourceFileName, func.data(),
-                                                             fullQuery));
-            return result;
-        }
+        if (funcFlags.testFlag(AbstractMetaFunction::Flag::OperatorLeadingClassArgumentRemoved))
+            fq.parameters.prepend(classType);
+        else
+            fq.parameters.append(classType);
     }
 
-    // Finally, test whether some mismatch in argument types occurred by checking for
-    // the argument count only.
-    QString countOnlyQuery = functionXQuery(classQuery, func, MatchArgumentCount);
-    QStringList signatures =
-            signaturesFromWebXml(getDocumentation(xquery, countOnlyQuery, funcModifs));
-    if (signatures.size() == 1) {
-        // One match was found. Repeat the query restricted to the <description>
-        // element and use the result with a warning.
-        countOnlyQuery = functionXQuery(classQuery, func, MatchArgumentCount | DescriptionOnly);
-        errorMessage->prepend(msgFallbackForDocumentation(sourceFileName, func.data(), fullQuery));
-        errorMessage->append(QLatin1String("\n  Falling back to \"") + signatures.constFirst()
-                             + QLatin1String("\" obtained by matching the argument count only."));
-        return getDocumentation(xquery, countOnlyQuery, funcModifs);
+    const qsizetype index = ClassDocumentation::indexOfFunction(candidates, fq);
+
+    if (debugFunctionSearch) {
+        qDebug() << __FUNCTION__ << metaClass->name() << fq << funcFlags << "returns"
+            << index << "\n  " << candidates.value(index) << "\n  " << candidates;
     }
 
-    errorMessage->prepend(msgCannotFindDocumentation(sourceFileName, func.data(), fullQuery));
-    *errorMessage += msgArgumentCountMatch(arguments, signatures);
-    return result;
+    if (index != -1)
+        return candidates.at(index).description;
+
+    // Fallback: Try matching by argument count
+    const auto parameterCount = func->arguments().size();
+    auto pend = std::remove_if(candidates.begin(), candidates.end(),
+                               [parameterCount](const FunctionDocumentation &fd) {
+                                   return fd.parameters.size() != parameterCount; });
+    candidates.erase(pend, candidates.end());
+    if (candidates.size() == 1) {
+        const auto &match = candidates.constFirst();
+        QTextStream(errorMessage) << msgFallbackForDocumentation(sourceFileName, func.data())
+            << "\n  Falling back to \"" << match.signature
+            << "\" obtained by matching the argument count only.";
+        return candidates.constFirst().description;
+    }
+
+    QTextStream(errorMessage) << msgCannotFindDocumentation(sourceFileName, func.data())
+        << " (" << candidates.size() << " candidates matching the argument count)";
+    return {};
 }
 
 // Extract the <brief> section from a WebXML (class) documentation and remove it
@@ -364,19 +266,12 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
 
     const QString sourceFileName = sourceFile.absoluteFilePath();
     QString errorMessage;
-    XQueryPtr xquery = XQuery::create(sourceFileName, &errorMessage);
-    if (xquery.isNull()) {
+
+    ClassDocumentation classDocumentation = parseWebXml(sourceFileName, &errorMessage);
+    if (!classDocumentation) {
         qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
         return;
     }
-
-    QString className = metaClass->name();
-
-    // Class/Namespace documentation
-    const QString classQuery = QLatin1String("/WebXML/document/")
-         + (metaClass->isNamespace() ? QLatin1String("namespace") : QLatin1String("class"))
-         + QLatin1String("[@name=\"") + className + QLatin1String("\"]");
-    QString query = classQuery + QLatin1String("/description");
 
     DocModificationList signedModifs, classModifs;
     const DocModificationList &mods = metaClass->typeEntry()->docModifications();
@@ -387,10 +282,12 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
             signedModifs.append(docModif);
     }
 
-    QString docString = getDocumentation(xquery, query, classModifs);
+    QString docString = applyDocModifications(mods, classDocumentation.description);
+
     if (docString.isEmpty()) {
+        QString className = metaClass->name();
         qCWarning(lcShibokenDoc, "%s",
-                  qPrintable(msgCannotFindDocumentation(sourceFileName, "class", className, query)));
+                  qPrintable(msgCannotFindDocumentation(sourceFileName, "class", className, {})));
     }
     const QString brief = extractBrief(&docString);
 
@@ -404,8 +301,8 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
     const auto &funcs = DocParser::documentableFunctions(metaClass);
     for (const auto &func : funcs) {
         const QString detailed =
-            queryFunctionDocumentation(sourceFileName, metaClass, classQuery,
-                                       func, signedModifs, xquery, &errorMessage);
+            queryFunctionDocumentation(sourceFileName, classDocumentation,
+                                       metaClass, func, signedModifs, &errorMessage);
         if (!errorMessage.isEmpty())
             qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
         const Documentation documentation(detailed, {});
@@ -425,15 +322,15 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
 #endif
     // Enums
     for (AbstractMetaEnum &meta_enum : metaClass->enums()) {
-        query.clear();
-        QTextStream(&query) << classQuery << "/enum[@name=\""
-            << meta_enum.name() << "\"]/description";
-        doc.setValue(getDocumentation(xquery, query, DocModificationList()));
-        if (doc.isEmpty()) {
+        Documentation enumDoc;
+        const auto index = classDocumentation.indexOfEnum(meta_enum.name());
+        if (index != -1) {
+            enumDoc.setValue(classDocumentation.enums.at(index).description);
+            meta_enum.setDocumentation(enumDoc);
+        } else {
             qCWarning(lcShibokenDoc, "%s",
-                      qPrintable(msgCannotFindDocumentation(sourceFileName, metaClass, meta_enum, query)));
+                      qPrintable(msgCannotFindDocumentation(sourceFileName, metaClass, meta_enum, {})));
         }
-        meta_enum.setDocumentation(doc);
     }
 }
 
@@ -467,19 +364,16 @@ Documentation QtDocParser::retrieveModuleDocumentation(const QString& name)
     }
 
     QString errorMessage;
-    XQueryPtr xquery = XQuery::create(sourceFile, &errorMessage);
-    if (xquery.isNull()) {
+    QString docString = webXmlModuleDescription(sourceFile, &errorMessage);
+    if (!errorMessage.isEmpty()) {
         qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
         return {};
     }
 
-    // Module documentation
-    QString query = QLatin1String("/WebXML/document/module[@name=\"")
-        + moduleName + QLatin1String("\"]/description");
-    const QString detailed = getDocumentation(xquery, query, DocModificationList());
-    Documentation doc(detailed, {});
+    Documentation doc(docString, {});
     if (doc.isEmpty()) {
-        qCWarning(lcShibokenDoc, "%s", qPrintable(msgCannotFindDocumentation(sourceFile, "module", name, query)));
+        qCWarning(lcShibokenDoc, "%s",
+                  qPrintable(msgCannotFindDocumentation(sourceFile, "module", name)));
         return doc;
     }
 

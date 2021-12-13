@@ -167,24 +167,24 @@ QString msgUsingMemberClassNotFound(const AbstractMetaClass *c,
 
 QString msgCannotFindDocumentation(const QString &fileName,
                                    const char *what, const QString &name,
-                                   const QString &query);
+                                   const QString &query = {});
 
 QString msgFallbackForDocumentation(const QString &fileName,
                                     const char *what, const QString &name,
-                                    const QString &query);
+                                    const QString &query = {});
 
 QString msgCannotFindDocumentation(const QString &fileName,
                                    const AbstractMetaFunction *function,
-                                   const QString &query);
+                                   const QString &query = {});
 
 QString msgFallbackForDocumentation(const QString &fileName,
                                     const AbstractMetaFunction *function,
-                                    const QString &query);
+                                    const QString &query = {});
 
 QString msgCannotFindDocumentation(const QString &fileName,
                                    const AbstractMetaClass *metaClass,
                                    const AbstractMetaEnum &e,
-                                   const QString &query);
+                                   const QString &query = {});
 
 QString msgCannotFindDocumentation(const QString &fileName,
                                    const AbstractMetaClass *metaClass,

@@ -40,6 +40,8 @@ class Documentation;
 
 class XQuery;
 
+struct FunctionDocumentation;
+
 class DocParser
 {
 public:
@@ -121,13 +123,14 @@ protected:
 
     static AbstractMetaFunctionCList documentableFunctions(const AbstractMetaClass *metaClass);
 
+    static QString applyDocModifications(const DocModificationList &mods, const QString &xml);
+
 private:
     QString m_packageName;
     QString m_docDataDir;
     QString m_libSourceDir;
 
     static QString execXQuery(const XQueryPtr &xquery, const QString &query) ;
-    static QString applyDocModifications(const DocModificationList &mods, const QString &xml) ;
 };
 
 #endif // DOCPARSER_H
