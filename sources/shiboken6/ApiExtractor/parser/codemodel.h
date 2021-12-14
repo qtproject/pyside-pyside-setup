@@ -526,6 +526,9 @@ public:
     bool isExplicit() const;
     void setExplicit(bool isExplicit);
 
+    bool isHiddenFriend() const;
+    void setHiddenFriend(bool f);
+
     bool isInvokable() const; // Qt
     void setInvokable(bool isInvokable); // Qt
 
@@ -569,6 +572,7 @@ private:
             uint m_isAbstract: 1;
             uint m_isExplicit: 1;
             uint m_isVariadics: 1;
+            uint m_isHiddenFriend: 1;
             uint m_isInvokable : 1; // Qt
         };
         uint m_flags;

@@ -1068,6 +1068,7 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
                 }
             }
             d->m_currentFunction = d->createFunction(cursor, CodeModel::Normal, false);
+            d->m_currentFunction->setHiddenFriend(d->m_withinFriendDecl);
             d->m_scopeStack.at(scope)->addFunction(d->m_currentFunction);
         }
         break;

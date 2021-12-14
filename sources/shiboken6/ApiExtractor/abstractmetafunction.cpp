@@ -99,6 +99,7 @@ public:
     AddedFunctionPtr m_addedFunction;
     SourceLocation m_sourceLocation;
     AbstractMetaFunction::Attributes m_attributes;
+    AbstractMetaFunction::Flags m_flags;
     uint m_constant                 : 1;
     uint m_reverse                  : 1;
     uint m_explicit                 : 1;
@@ -270,6 +271,16 @@ void AbstractMetaFunction::operator-=(AbstractMetaFunction::Attribute attribute)
     d->m_attributes.setFlag(attribute, false);
 }
 
+AbstractMetaFunction::Flags AbstractMetaFunction::flags() const
+{
+    return d->m_flags;
+}
+
+void AbstractMetaFunction::setFlags(Flags f)
+{
+    d->m_flags = f;
+}
+
 /*******************************************************************************
  * Indicates that this function has a modification that removes it
  */
@@ -414,6 +425,7 @@ AbstractMetaFunction *AbstractMetaFunction::copy() const
 {
     auto *cpy = new AbstractMetaFunction;
     cpy->setAttributes(attributes());
+    cpy->setFlags(flags());
     cpy->setAccess(access());
     cpy->setName(name());
     cpy->setOriginalName(originalName());

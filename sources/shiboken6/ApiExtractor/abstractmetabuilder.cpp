@@ -269,6 +269,7 @@ void AbstractMetaBuilderPrivate::traverseOperatorFunction(const FunctionModelIte
     if (baseoperandClass) {
         AbstractMetaFunction *metaFunction = traverseFunction(item, baseoperandClass);
         if (metaFunction) {
+            auto flags = metaFunction->flags();
             // Strip away first argument, since that is the containing object
             AbstractMetaArgumentList arguments = metaFunction->arguments();
             if (firstArgumentIsSelf || unaryOperator) {
@@ -277,6 +278,9 @@ void AbstractMetaBuilderPrivate::traverseOperatorFunction(const FunctionModelIte
                 if (!unaryOperator && first.type().indirections())
                     metaFunction->setPointerOperator(true);
                 metaFunction->setArguments(arguments);
+                flags.setFlag(AbstractMetaFunction::Flag::OperatorLeadingClassArgumentRemoved);
+                if (first.type().passByValue())
+                    flags.setFlag(AbstractMetaFunction::Flag::OperatorClassArgumentByValue);
             } else {
                 // If the operator method is not unary and the first operator is
                 // not of the same type of its owning class we suppose that it
@@ -289,7 +293,12 @@ void AbstractMetaBuilderPrivate::traverseOperatorFunction(const FunctionModelIte
 
                 metaFunction->setArguments(arguments);
                 metaFunction->setReverseOperator(true);
+                flags.setFlag(AbstractMetaFunction::Flag::OperatorTrailingClassArgumentRemoved);
+                if (last.type().passByValue())
+                    flags.setFlag(AbstractMetaFunction::Flag::OperatorClassArgumentByValue);
             }
+
+            metaFunction->setFlags(flags);
             metaFunction->setAccess(Access::Public);
             setupFunctionDefaults(metaFunction, baseoperandClass);
             baseoperandClass->addFunction(AbstractMetaFunctionCPtr(metaFunction));
@@ -1923,6 +1932,8 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
     }
 
     auto *metaFunction = new AbstractMetaFunction;
+    if (functionItem->isHiddenFriend())
+        metaFunction->setFlags(AbstractMetaFunction::Flag::HiddenFriend);
     metaFunction->setSourceLocation(functionItem->sourceLocation());
     if (deprecated)
         *metaFunction += AbstractMetaFunction::Deprecated;
@@ -2880,6 +2891,7 @@ void AbstractMetaBuilderPrivate::inheritTemplateFunctions(AbstractMetaClass *sub
 
         std::unique_ptr<AbstractMetaFunction> f(function->copy());
         f->setArguments(AbstractMetaArgumentList());
+        f->setFlags(f->flags() | AbstractMetaFunction::Flag::InheritedFromTemplate);
 
         if (!function->isVoid()) {
             auto returnType = inheritTemplateType(templateTypes, function->type());

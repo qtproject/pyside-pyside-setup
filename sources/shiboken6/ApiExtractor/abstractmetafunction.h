@@ -146,6 +146,19 @@ public:
     void operator+=(Attribute attribute);
     void operator-=(Attribute attribute);
 
+    enum class Flag { // Internal flags not relevant for comparing functions
+        // Binary operator whose leading/trailing argument was removed by metabuilder
+        OperatorLeadingClassArgumentRemoved = 0x1,
+        OperatorTrailingClassArgumentRemoved = 0x2,
+        OperatorClassArgumentByValue = 0x4, // The removed class argument was passed by value
+        InheritedFromTemplate = 0x8, // Inherited from a template in metabuilder
+        HiddenFriend = 0x10
+    };
+    Q_DECLARE_FLAGS(Flags, Flag)
+
+    Flags flags() const;
+    void setFlags(Flags f);
+
     bool isFinalInTargetLang() const;
     bool isAbstract() const;
     bool isClassMethod() const;
@@ -490,6 +503,8 @@ inline bool AbstractMetaFunction::isFriendly() const
 Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaFunction::CompareResult)
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaFunction::Attributes);
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaFunction::Flags);
 
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug debug, const AbstractMetaFunction *af);

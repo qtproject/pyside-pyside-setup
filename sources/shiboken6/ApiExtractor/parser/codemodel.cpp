@@ -1021,6 +1021,16 @@ void _FunctionModelItem::setExplicit(bool isExplicit)
     m_isExplicit = isExplicit;
 }
 
+bool _FunctionModelItem::isHiddenFriend() const
+{
+    return m_isHiddenFriend;
+}
+
+void _FunctionModelItem::setHiddenFriend(bool f)
+{
+    m_isHiddenFriend = f;
+}
+
 bool _FunctionModelItem::isAbstract() const
 {
     return m_isAbstract;
