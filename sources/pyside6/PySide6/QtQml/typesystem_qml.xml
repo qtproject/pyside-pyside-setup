@@ -172,11 +172,13 @@
          allow-thread in case there is a message handler installed
          (qInstallMessageHandler) -->
         <modify-function signature="^QQmlApplicationEngine\(.*\)$" allow-thread="yes"/>
-        <modify-function signature="load(const QString &amp;)" allow-thread="yes">
+        <!-- PYSIDE-1736 In the presence of load(QString)/load(QUrl), check for Path/string
+             first to avoid an implicit conversion from string to QUrl. -->
+        <modify-function signature="load(const QString &amp;)" allow-thread="yes" overload-number="1">
             <modify-argument index="1"><replace-type modified-type="PyPathLike"/></modify-argument>
             <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qfile-path-1"/>
         </modify-function>
-        <modify-function signature="load(const QUrl &amp;)" allow-thread="yes"/>
+        <modify-function signature="load(const QUrl &amp;)" allow-thread="yes" overload-number="2"/>
     </object-type>
     <object-type name="QQmlComponent">
         <enum-type name="CompilationMode"/>
