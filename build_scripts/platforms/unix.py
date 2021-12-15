@@ -47,7 +47,6 @@ from ..config import config
 from ..options import OPTION
 from ..qtinfo import QtInfo
 from ..utils import copydir, copyfile, makefile
-from ..utils import regenerate_qt_resources
 from ..versions import PYSIDE, SHIBOKEN
 
 
@@ -234,13 +233,6 @@ def prepare_packages_posix(self, vars):
             copydir(os.path.join(self.script_dir, "examples"),
                     "{st_build_dir}/{st_package_name}/examples",
                     force=False, vars=vars, dir_filter_function=pycache_dir_filter)
-            # Re-generate examples Qt resource files for Python 3
-            # compatibility
-            examples_path = "{st_build_dir}/{st_package_name}/examples".format(**vars)
-            lib_execs_dir = QtInfo().lib_execs_dir
-            pyside_rcc_path = f"{lib_execs_dir}/rcc"
-            pyside_rcc_options = ['-g', 'python']
-            regenerate_qt_resources(examples_path, pyside_rcc_path, pyside_rcc_options)
 
     # Copy Qt libs to package
     if OPTION["STANDALONE"]:
