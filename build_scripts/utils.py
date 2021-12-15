@@ -488,21 +488,6 @@ def get_environment_from_batch_command(env_cmd, initial=None):
     return result
 
 
-def regenerate_qt_resources(src, pyside_rcc_path, pyside_rcc_options):
-    names = os.listdir(src)
-    for name in names:
-        srcname = os.path.join(src, name)
-        if os.path.isdir(srcname):
-            regenerate_qt_resources(srcname, pyside_rcc_path, pyside_rcc_options)
-        elif srcname.endswith('.qrc'):
-            # Replace last occurence of '.qrc' in srcname
-            srcname_split = srcname.rsplit('.qrc', 1)
-            dstname = '_rc.py'.join(srcname_split)
-            if os.path.exists(dstname):
-                log.info(f"Regenerating {dstname} from {os.path.basename(srcname)}")
-                run_process([pyside_rcc_path] + pyside_rcc_options + [srcname, '-o', dstname])
-
-
 def back_tick(cmd, ret_err=False):
     """
     Run command `cmd`, return stdout, or stdout, stderr,
