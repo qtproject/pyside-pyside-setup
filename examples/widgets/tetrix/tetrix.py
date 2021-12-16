@@ -334,7 +334,7 @@ class TetrixBoard(QFrame):
 
             self.timer.start(500, self)
             self._is_waiting_after_line = True
-            self._cur_piece.setShape(Piece.NoShape)
+            self._cur_piece.set_shape(Piece.NoShape)
             self.update()
 
     def new_piece(self):
@@ -345,7 +345,7 @@ class TetrixBoard(QFrame):
         self._cur_y = TetrixBoard.board_height - 1 + self._cur_piece.min_y()
 
         if not self.try_move(self._cur_piece, self._cur_x, self._cur_y):
-            self._cur_piece.setShape(Piece.NoShape)
+            self._cur_piece.set_shape(Piece.NoShape)
             self.timer.stop()
             self._is_started = False
 
