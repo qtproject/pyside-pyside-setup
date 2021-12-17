@@ -8,7 +8,8 @@ endif()
 
 find_package(Qt6 COMPONENTS Core HostInfo)
 
-set(files ${CMAKE_CURRENT_SOURCE_DIR}/pyside_tool.py)
+set(files ${CMAKE_CURRENT_SOURCE_DIR}/pyside_tool.py
+          ${CMAKE_CURRENT_SOURCE_DIR}/metaobjectdump.py)
 set(directories)
 
 if(NOT NO_QT_TOOLS STREQUAL "yes")

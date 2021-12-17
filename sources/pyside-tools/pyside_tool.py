@@ -75,6 +75,13 @@ def qt_tool_wrapper(qt_tool, args, libexec=False):
     sys.exit(proc.returncode)
 
 
+def pyside_script_wrapper(script_name):
+    """Launch a script shipped with PySide."""
+    script = Path(__file__).resolve().parent / script_name
+    command = [sys.executable, os.fspath(script)] + sys.argv[1:]
+    sys.exit(subprocess.call(command))
+
+
 def lrelease():
     qt_tool_wrapper("lrelease", sys.argv[1:])
 
@@ -160,6 +167,10 @@ def genpyi():
     cmd = support / "generate_pyi.py"
     command = [sys.executable, os.fspath(cmd)] + sys.argv[1:]
     sys.exit(subprocess.call(command))
+
+
+def metaobjectdump():
+    pyside_script_wrapper("metaobjectdump.py")
 
 
 if __name__ == "__main__":

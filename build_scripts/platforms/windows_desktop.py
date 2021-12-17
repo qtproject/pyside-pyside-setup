@@ -152,10 +152,10 @@ def prepare_packages_win32(self, vars):
             vars=vars)
 
         # For setting up setuptools entry points
-        copyfile(
-            "{install_dir}/bin/pyside_tool.py",
-            "{st_build_dir}/{st_package_name}/scripts/pyside_tool.py",
-            force=False, vars=vars)
+        for script in ("pyside_tool.py", "metaobjectdump.py"):
+            src = f"{{install_dir}}/bin/{script}"
+            target = f"{{st_build_dir}}/{{st_package_name}}/scripts/{script}"
+            copyfile(src, target, force=False, vars=vars)
 
         # <install>/bin/*.exe,*.dll -> {st_package_name}/
         filters = ["pyside*.exe", "pyside*.dll"]
