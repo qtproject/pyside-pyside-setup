@@ -107,6 +107,10 @@ class SetupRunner(object):
             will run setuptools.setup().
         """
 
+        # PYSIDE-1746: We prevent the generation of .pyc/.pyo files during installation.
+        #              These files are generated anyway on their import.
+        sys.dont_write_bytecode = True
+
         # Prepare initial config.
         config.init_config(build_type=OPTION["BUILD_TYPE"],
                            internal_build_type=OPTION["INTERNAL_BUILD_TYPE"],
