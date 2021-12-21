@@ -163,11 +163,11 @@ def prepare_packages_posix(self, vars):
 
         lib_exec_filters = []
         if not OPTION['NO_QT_TOOLS']:
-            lib_exec_filters.extend(['uic', 'rcc'])
+            lib_exec_filters.extend(['uic', 'rcc', 'qmltyperegistrar'])
             executables.extend(copydir(
                 "{install_dir}/bin/",
                 "{st_build_dir}/{st_package_name}",
-                filter=["lrelease", "lupdate"],
+                filter=["lrelease", "lupdate", "qmllint"],
                 recursive=False, vars=vars))
             # Copying assistant/designer
             executables.extend(_copy_gui_executable('assistant', vars=vars))

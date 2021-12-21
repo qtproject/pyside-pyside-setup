@@ -223,6 +223,9 @@ class Config(object):
                     f'{PYSIDE}-lupdate = {package_name}.scripts.pyside_tool:lupdate',
                     f'{PYSIDE}-lrelease = {package_name}.scripts.pyside_tool:lrelease',
                     f'{PYSIDE}-genpyi = {package_name}.scripts.pyside_tool:genpyi',
+                    f'{PYSIDE}-moc = {package_name}.scripts.pyside_tool:moc',
+                    f'{PYSIDE}-qmltyperegistrar = {package_name}.scripts.pyside_tool:qmltyperegistrar',
+                    f'{PYSIDE}-qmllint = {package_name}.scripts.pyside_tool:qmllint'
                 ]
             }
         self.setup_kwargs = setup_kwargs

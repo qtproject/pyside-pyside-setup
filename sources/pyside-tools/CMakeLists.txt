@@ -17,8 +17,10 @@ if(NOT NO_QT_TOOLS STREQUAL "yes")
 
     list(APPEND files "${LIBEXEC_PATH}/uic${CMAKE_EXECUTABLE_SUFFIX}"
                       "${LIBEXEC_PATH}/rcc${CMAKE_EXECUTABLE_SUFFIX}"
+                      "${LIBEXEC_PATH}/qmltyperegistrar${CMAKE_EXECUTABLE_SUFFIX}"
                       "${TOOLS_PATH}/lrelease${CMAKE_EXECUTABLE_SUFFIX}"
-                      "${TOOLS_PATH}/lupdate${CMAKE_EXECUTABLE_SUFFIX}")
+                      "${TOOLS_PATH}/lupdate${CMAKE_EXECUTABLE_SUFFIX}"
+                      "${TOOLS_PATH}/qmllint${CMAKE_EXECUTABLE_SUFFIX}")
 
     if (APPLE)
         list(APPEND directories "${TOOLS_PATH}/Assistant.app"

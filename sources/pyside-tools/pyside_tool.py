@@ -91,6 +91,14 @@ def rcc():
     qt_tool_wrapper("rcc", ['-g', 'python'] + sys.argv[1:], True)
 
 
+def qmltyperegistrar():
+    qt_tool_wrapper("qmltyperegistrar", sys.argv[1:], True)
+
+
+def qmllint():
+    qt_tool_wrapper("qmllint", sys.argv[1:])
+
+
 def assistant():
     qt_tool_wrapper("assistant", sys.argv[1:])
 
