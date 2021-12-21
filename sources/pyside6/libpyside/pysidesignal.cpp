@@ -823,8 +823,6 @@ QByteArray getTypeName(PyObject *obType)
             return QByteArrayLiteral("QString");
         if (type == &PyLong_Type)
             return QByteArrayLiteral("int");
-        if (type == &PyLong_Type)
-            return QByteArrayLiteral("long");
         if (type == &PyFloat_Type)
             return QByteArrayLiteral("double");
         if (type == &PyBool_Type)
@@ -902,6 +900,15 @@ static void instanceInitialize(PySideSignalInstance *self, PyObject *name, PySid
 
 PySideSignalInstance *initialize(PySideSignal *self, PyObject *name, PyObject *object)
 {
+    static PyTypeObject *pyQObjectType = Shiboken::Conversions::getPythonTypeObject("QObject*");
+    assert(pyQObjectType);
+
+    if (!PyObject_TypeCheck(object, pyQObjectType)) {
+        PyErr_Format(PyExc_TypeError, "%s cannot be converted to %s",
+                                      Py_TYPE(object)->tp_name, pyQObjectType->tp_name);
+        return nullptr;
+    }
+
     PySideSignalInstance *instance = PyObject_New(PySideSignalInstance,
                                                   PySideSignalInstanceTypeF());
     instanceInitialize(instance, name, self, object, 0);
