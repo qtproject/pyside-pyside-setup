@@ -543,7 +543,7 @@ static PyObject *signalInstanceEmit(PyObject *self, PyObject *args)
                                                    PySide::PyName::qtEmit()));
 
     Shiboken::AutoDecRef tupleArgs(PyList_AsTuple(pyArgs));
-    return PyObject_CallObject(pyMethod, tupleArgs);
+    return PyObject_CallObject(pyMethod.object(), tupleArgs);
 }
 
 static PyObject *signalInstanceGetItem(PyObject *self, PyObject *key)
@@ -651,14 +651,9 @@ static PyObject *signalCall(PyObject *self, PyObject *args, PyObject *kw)
     // method in C++ land.
     Shiboken::AutoDecRef homonymousMethod(getDescriptor(signal->homonymousMethod,
                                                         nullptr, nullptr));
-    if (PyCFunction_Check(homonymousMethod)
-            && (PyCFunction_GET_FLAGS(homonymousMethod.object()) & METH_STATIC)) {
-#if PY_VERSION_HEX >=  0x03090000
+    if (PyCFunction_Check(homonymousMethod.object())
+            && (PyCFunction_GET_FLAGS(homonymousMethod.object()) & METH_STATIC))
         return PyObject_Call(homonymousMethod, args, kw);
-#else
-        return PyCFunction_Call(homonymousMethod, args, kw);
-#endif
-    }
 
     // Assumes homonymousMethod is not a static method.
     ternaryfunc callFunc = Py_TYPE(signal->homonymousMethod)->tp_call;
@@ -817,36 +812,31 @@ void updateSourceObject(PyObject *source)
         return;
 }
 
-QByteArray getTypeName(PyObject *type)
+QByteArray getTypeName(PyObject *obType)
 {
-    if (PyType_Check(type)) {
-        if (PyType_IsSubtype(reinterpret_cast<PyTypeObject *>(type),
-                             reinterpret_cast<PyTypeObject *>(SbkObject_TypeF()))) {
-            auto objType = reinterpret_cast<PyTypeObject *>(type);
-            return Shiboken::ObjectType::getOriginalName(objType);
-        }
-        // Translate python types to Qt names
-        auto objType = reinterpret_cast<PyTypeObject *>(type);
-        if (Shiboken::String::checkType(objType))
+    if (PyType_Check(obType)) {
+        auto *type = reinterpret_cast<PyTypeObject *>(obType);
+        if (PyType_IsSubtype(type, SbkObject_TypeF()))
+            return Shiboken::ObjectType::getOriginalName(type);
+        // Translate Python types to Qt names
+        if (Shiboken::String::checkType(type))
             return QByteArrayLiteral("QString");
-        if (objType == &PyLong_Type)
+        if (type == &PyLong_Type)
             return QByteArrayLiteral("int");
-        if (objType == &PyLong_Type)
-            return QByteArrayLiteral("long");
-        if (objType == &PyFloat_Type)
+        if (type == &PyFloat_Type)
             return QByteArrayLiteral("double");
-        if (objType == &PyBool_Type)
+        if (type == &PyBool_Type)
             return QByteArrayLiteral("bool");
-        if (objType == &PyList_Type)
+        if (type == &PyList_Type)
             return QByteArrayLiteral("QVariantList");
-        if (Py_TYPE(objType) == SbkEnumType_TypeF())
-            return Shiboken::Enum::getCppName(objType);
+        if (Py_TYPE(type) == SbkEnumType_TypeF())
+            return Shiboken::Enum::getCppName(type);
         return QByteArrayLiteral("PyObject");
     }
-    if (type == Py_None) // Must be checked before as Shiboken::String::check accepts Py_None
+    if (obType == Py_None) // Must be checked before as Shiboken::String::check accepts Py_None
         return voidType();
-    if (Shiboken::String::check(type)) {
-        QByteArray result = Shiboken::String::toCString(type);
+    if (Shiboken::String::check(obType)) {
+        QByteArray result = Shiboken::String::toCString(obType);
         if (result == "qreal")
             result = sizeof(qreal) == sizeof(double) ? "double" : "float";
         return result;
@@ -910,6 +900,15 @@ static void instanceInitialize(PySideSignalInstance *self, PyObject *name, PySid
 
 PySideSignalInstance *initialize(PySideSignal *self, PyObject *name, PyObject *object)
 {
+    static PyTypeObject *pyQObjectType = Shiboken::Conversions::getPythonTypeObject("QObject*");
+    assert(pyQObjectType);
+
+    if (!PyObject_TypeCheck(object, pyQObjectType)) {
+        PyErr_Format(PyExc_TypeError, "%s cannot be converted to %s",
+                                      Py_TYPE(object)->tp_name, pyQObjectType->tp_name);
+        return nullptr;
+    }
+
     PySideSignalInstance *instance = PyObject_New(PySideSignalInstance,
                                                   PySideSignalInstanceTypeF());
     instanceInitialize(instance, name, self, object, 0);
