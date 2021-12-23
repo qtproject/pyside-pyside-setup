@@ -304,7 +304,7 @@ PyObject *BindingManager::getOverride(const void *cptr,
     }
 
     auto *obWrapper = reinterpret_cast<PyObject *>(wrapper);
-    auto *wrapper_dict = SbkObject_GetDict(obWrapper);
+    auto *wrapper_dict = SbkObject_GetDict_NoRef(obWrapper);
     if (PyObject *method = PyDict_GetItem(wrapper_dict, pyMethodName)) {
         Py_INCREF(method);
         return method;

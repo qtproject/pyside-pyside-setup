@@ -6084,8 +6084,8 @@ void CppGenerator::writeGetattroFunction(TextStream &s, AttroCheck attroCheck,
 
     if (attroCheck.testFlag(AttroCheckFlag::GetattroOverloads)) {
         s << "// Search the method in the instance dict\n"
-            << "auto ob_dict = SbkObject_GetDict(self);\n";
-        s << "if (auto meth = PyDict_GetItem(ob_dict, name)) {\n";
+            << "auto *ob_dict = SbkObject_GetDict_NoRef(self);\n";
+        s << "if (auto *meth = PyDict_GetItem(ob_dict, name)) {\n";
         {
             Indentation indent(s);
             s << "Py_INCREF(meth);\n"
@@ -6098,7 +6098,7 @@ void CppGenerator::writeGetattroFunction(TextStream &s, AttroCheck attroCheck,
             Indentation indent(s);
             // PYSIDE-772: Perform optimized name mangling.
             s << "Shiboken::AutoDecRef tmp(_Pep_PrivateMangle(self, name));\n"
-               << "if (auto meth = PyDict_GetItem(Py_TYPE(self)->tp_dict, tmp)) {\n";
+               << "if (auto *meth = PyDict_GetItem(Py_TYPE(self)->tp_dict, tmp)) {\n";
             {
                 Indentation indent(s);
                 // PYSIDE-1523: PyFunction_Check is not accepting compiled functions.

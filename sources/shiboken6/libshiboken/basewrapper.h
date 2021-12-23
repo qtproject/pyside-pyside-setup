@@ -113,7 +113,7 @@ typedef void(*DestroyQAppHook)();
 LIBSHIBOKEN_API void setDestroyQApplication(DestroyQAppHook func);
 
 /// PYSIDE-535: Use the C API in PyPy instead of `op->ob_dict`, directly (borrowed ref)
-LIBSHIBOKEN_API PyObject *SbkObject_GetDict(PyObject *op);
+LIBSHIBOKEN_API PyObject *SbkObject_GetDict_NoRef(PyObject *op);
 
 extern LIBSHIBOKEN_API PyTypeObject *SbkObjectType_TypeF(void);
 extern LIBSHIBOKEN_API PyTypeObject *SbkObject_TypeF(void);

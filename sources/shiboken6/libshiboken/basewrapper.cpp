@@ -104,7 +104,7 @@ void setDestroyQApplication(DestroyQAppHook func)
 }
 
 // PYSIDE-535: Use the C API in PyPy instead of `op->ob_dict`, directly
-LIBSHIBOKEN_API PyObject *SbkObject_GetDict(PyObject *op)
+LIBSHIBOKEN_API PyObject *SbkObject_GetDict_NoRef(PyObject *op)
 {
 #ifdef PYPY_VERSION
     auto *ret = PyObject_GenericGetDict(op, nullptr);
@@ -187,13 +187,9 @@ PyTypeObject *SbkObjectType_TypeF(void)
 
 static PyObject *SbkObjectGetDict(PyObject *pObj, void *)
 {
-    auto *obj = reinterpret_cast<SbkObject *>(pObj);
-    if (!obj->ob_dict)
-        obj->ob_dict = PyDict_New();
-    if (!obj->ob_dict)
-        return nullptr;
-    Py_INCREF(obj->ob_dict);
-    return obj->ob_dict;
+    auto ret = SbkObject_GetDict_NoRef(pObj);
+    Py_XINCREF(ret);
+    return ret;
 }
 
 static PyGetSetDef SbkObjectGetSetList[] = {

@@ -526,7 +526,7 @@ int SignalManager::registerMetaMethodGetIndex(QObject *source, const char *signa
             return -1;
         }
         auto *pySelf = reinterpret_cast<PyObject *>(self);
-        auto *dict = SbkObject_GetDict(pySelf);
+        auto *dict = SbkObject_GetDict_NoRef(pySelf);
         MetaObjectBuilder *dmo = metaBuilderFromDict(dict);
 
         // Create a instance meta object
@@ -555,7 +555,7 @@ const QMetaObject *SignalManager::retrieveMetaObject(PyObject *self)
     // m_dirty flag is set.
     Q_ASSERT(self);
 
-    auto *ob_dict = SbkObject_GetDict(self);
+    auto *ob_dict = SbkObject_GetDict_NoRef(self);
     MetaObjectBuilder *builder = metaBuilderFromDict(ob_dict);
     if (!builder)
         builder = &(retrieveTypeUserData(self)->mo);
