@@ -62,6 +62,11 @@ from setuptools.command.bdist_egg import bdist_egg as _bdist_egg
 from setuptools.command.develop import develop as _develop
 from setuptools.command.build_py import build_py as _build_py
 
+# PYSIDE-1760: Although not used here, pre-load this module early to avoid
+#              a racing condition with the import order. Note that this problem
+#              happens only with custom builds of Python without virtual environment.
+import setuptools.command.install_scripts
+
 from sysconfig import get_config_var
 # Use the distutils implementation within setuptools
 from setuptools._distutils.errors import DistutilsSetupError
