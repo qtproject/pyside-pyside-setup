@@ -542,7 +542,7 @@ static PyObject *adjustFuncName(const char *func_name)
 
     // Compute all needed info.
     PyObject *name = String::getSnakeCaseName(_name, lower);
-    PyObject *prop_name;
+    PyObject *prop_name{};
     if (is_prop) {
         PyObject *prop_methods = PyDict_GetItem(dict, PyMagicName::property_methods());
         prop_name = PyDict_GetItem(prop_methods, name);
@@ -554,7 +554,7 @@ static PyObject *adjustFuncName(const char *func_name)
 
     // Finally, generate the correct path expression.
     char _buf[250 + 1] = {};
-    if (is_prop) {
+    if (prop_name) {
         auto _prop_name = String::toCString(prop_name);
         if (is_class_prop)
             sprintf(_buf, "%s.__dict__['%s'].fset", _path, _prop_name);
