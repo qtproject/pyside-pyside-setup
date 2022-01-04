@@ -8,6 +8,8 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/__init__.py.in"
                "${CMAKE_CURRENT_BINARY_DIR}/__init__.py" @ONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/_config.py.in"
                "${CMAKE_CURRENT_BINARY_DIR}/_config.py" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/__feature__.pyi.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/__feature__.pyi" @ONLY)
 # typing support for mypy
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/py.typed.in"
                "${CMAKE_CURRENT_BINARY_DIR}/py.typed" @ONLY)
