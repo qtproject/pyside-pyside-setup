@@ -344,6 +344,14 @@ QByteArrayList emulatedCompilerOptions()
     case Compiler::Gpp:
         if (needsClangBuiltinIncludes())
             appendClangBuiltinIncludes(&headerPaths);
+
+        // Append the c++ include paths since Clang is unable to find
+        // <type_traits> etc (g++ 11.3).
+        const HeaderPaths gppPaths = gppInternalIncludePaths(compilerFromCMake(u"g++"_qs));
+        for (const HeaderPath &h : gppPaths) {
+            if (h.path.contains("c++") || h.path.contains("sysroot"))
+                headerPaths.append(h);
+        }
         break;
     }
 
