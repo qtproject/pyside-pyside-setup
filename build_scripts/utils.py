@@ -405,13 +405,12 @@ def rmtree(dirname, ignore=False):
 def run_process_output(args, initial_env=None):
     if initial_env is None:
         initial_env = os.environ
-    std_out = subprocess.Popen(args, env=initial_env, universal_newlines=1,
-                               stdout=subprocess.PIPE).stdout
     result = []
-    for raw_line in std_out.readlines():
-        line = raw_line
-        result.append(line.rstrip())
-    std_out.close()
+    with subprocess.Popen(args, env=initial_env, universal_newlines=1,
+                          stdout=subprocess.PIPE) as p:
+        for raw_line in p.stdout.readlines():
+            result.append(raw_line.rstrip())
+        p.stdout.close()
     return result
 
 
