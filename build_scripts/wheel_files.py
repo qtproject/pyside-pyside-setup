@@ -225,6 +225,7 @@ def wheel_files_pyside_addons() -> List[ModuleData]:
 def module_QtCore() -> ModuleData:
     # QtCore
     data = ModuleData("Core", examples=["corelib"])
+    data.typesystems.append("common.xml")
     data.typesystems.append("core_common.xml")
     data.typesystems.append("typesystem_core_common.xml")
     data.typesystems.append("typesystem_core_win.xml")

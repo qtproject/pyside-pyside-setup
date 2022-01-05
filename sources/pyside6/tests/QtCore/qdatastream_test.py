@@ -35,8 +35,10 @@ import sys
 import unittest
 
 from pathlib import Path
+
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
+
 init_test_paths(False)
 
 from PySide6.QtCore import QBitArray, QByteArray, QIODevice, QDataStream, QDate, QTime, QDateTime
@@ -275,7 +277,6 @@ class QDataStreamShift(unittest.TestCase):
 
 
 class QDataStreamShiftBitArray(unittest.TestCase):
-
     def _check_bitarray(self, data_set):
         '''Check the >> operator for the given data set'''
 
@@ -308,7 +309,7 @@ class QDataStreamShiftBitArray(unittest.TestCase):
         self._check_bitarray([(serialized, QDataStream.ReadPastEnd, QBitArray())])
 
 
-class QDataStreamRawData(unittest.TestCase):
+class QDataStreamBuffer(unittest.TestCase):
     def testRawData(self):
         data = QDataStream()
         self.assertEqual(data.readRawData(4), None)
@@ -321,7 +322,21 @@ class QDataStreamRawData(unittest.TestCase):
         data = QDataStream(ba)
         self.assertEqual(data.readRawData(4), bytes('AB\x00C', "UTF-8"))
 
+    def testBytes(self):
+        dataOne = QDataStream()
+        self.assertEqual(dataOne.readBytes(4), None)
+
+        ba = QByteArray()
+        data = QDataStream(ba, QIODevice.WriteOnly)
+        # writeBytes() writes a quint32 containing the length of the data,
+        # followed by the data.
+        data.writeBytes(bytes('AB\x00C', 'UTF-8'))
+        self.assertEqual(ba.data(), bytes('\x00\x00\x00\x04AB\x00C', 'UTF-8'))
+
+        data = QDataStream(ba)
+        buffer = data.readBytes(4)
+        self.assertEqual(buffer, bytes('AB\x00C', 'UTF-8'))
+
 
 if __name__ == '__main__':
     unittest.main()
-

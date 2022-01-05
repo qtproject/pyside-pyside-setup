@@ -40,6 +40,7 @@
 ****************************************************************************/
 -->
 <typesystem package="PySide6.QtCore">
+    <load-typesystem name="templates/common.xml" generate="no"/>
     <load-typesystem name="templates/core_common.xml" generate="no"/>
 
     <custom-type name="list of QAbstractAnimation"/>
@@ -2729,10 +2730,30 @@
     <add-function signature="writeString(QString)">
         <inject-code class="target" position="end" file="../glue/qtcore.cpp" snippet="stream-write-method"/>
     </add-function>
+    <modify-function signature="readBytes(char*&amp;,uint&amp;)">
+        <modify-argument index="return">
+            <replace-type modified-type="PyTuple"/>
+        </modify-argument>
+        <modify-argument index="1">
+            <remove-argument />
+        </modify-argument>
+        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qdatastream-read-bytes"/>
+    </modify-function>
 
-    <!-- ### deprecated method -->
-    <modify-function signature="readBytes(char*&amp;,uint&amp;)" remove="all"/>
-    <modify-function signature="writeBytes(const char*,uint)" remove="all"/>
+    <modify-function signature="writeBytes(const char*,uint)">
+        <modify-argument index="1">
+            <replace-type modified-type="PyBuffer"/>
+            <conversion-rule class="native">
+                <insert-template name="pybuffer_const_char"/>
+            </conversion-rule>
+        </modify-argument>
+        <modify-argument index="2">
+            <remove-argument/>
+            <conversion-rule class="native">
+                <insert-template name="uint_remove"/>
+            </conversion-rule>
+        </modify-argument>
+    </modify-function>
   </object-type>
 
   <value-type name="QTextStreamManipulator" default-constructor="QTextStreamManipulator(0, 0)">

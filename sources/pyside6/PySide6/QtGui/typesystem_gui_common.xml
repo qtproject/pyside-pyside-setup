@@ -41,6 +41,7 @@
 -->
 <typesystem package="PySide6.QtGui">
   <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
+  <load-typesystem name="templates/common.xml" generate="no"/>
   <load-typesystem name="templates/core_common.xml" generate="no"/>
   <load-typesystem name="templates/gui_common.xml" generate="no"/>
   <load-typesystem name="templates/opengl_common.xml" generate="no"/>

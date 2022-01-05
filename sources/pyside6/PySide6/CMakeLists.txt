@@ -90,6 +90,8 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/_config.py"
         DESTINATION "${PYTHON_SITE_PACKAGES}/${BINDING_NAME}${pyside6_SUFFIX}")
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/_git_pyside_version.py"
         DESTINATION "${PYTHON_SITE_PACKAGES}/${BINDING_NAME}${pyside6_SUFFIX}")
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/templates/common.xml
+        DESTINATION share/PySide6${pyside_SUFFIX}/typesystems)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/templates/core_common.xml
         DESTINATION share/PySide6${pyside_SUFFIX}/typesystems)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/templates/gui_common.xml
