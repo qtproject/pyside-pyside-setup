@@ -160,6 +160,12 @@ def prepare_standalone_package_macos(self, vars):
                     recursive=False,
                     vars=vars)
 
+            copydir("{qt_prefix_dir}/resources",
+                    "{st_build_dir}/{st_package_name}/Qt/resources",
+                    filter=None,
+                    recursive=False,
+                    vars=vars)
+
             # Fix rpath for WebEngine process executable.
             qt_libexec_path = "{st_build_dir}/{st_package_name}/Qt/libexec".format(**vars)
             binary = "QtWebEngineProcess"
