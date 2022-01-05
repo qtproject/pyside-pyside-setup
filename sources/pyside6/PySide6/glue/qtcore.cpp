@@ -2016,3 +2016,18 @@ if (Shiboken::Enum::check(%PYARG_2)) {
     cppArg1 = QVariant(in);
 }
 // @snippet qmetaproperty_write_enum
+
+// @snippet qdatastream-read-bytes
+QByteArray data;
+data.resize(%2);
+auto dataChar = data.data();
+cppSelf->readBytes(dataChar, %2);
+const char *constDataChar = dataChar;
+if (dataChar == nullptr) {
+    Py_INCREF(Py_None);
+    %PYARG_0 = Py_None;
+} else {
+    %PYARG_0 = PyBytes_FromStringAndSize(constDataChar, %2);
+}
+// @snippet qdatastream-read-bytes
+
