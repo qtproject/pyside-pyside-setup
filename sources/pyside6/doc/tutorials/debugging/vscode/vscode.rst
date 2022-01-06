@@ -18,7 +18,7 @@ Run -> Add Configuration -> Python -> Python File
 
 This should create a launch.json file which looks like this:
 
-.. code-block:: json
+.. code-block:: javascript
 
     {
         // Use IntelliSense to learn about possible attributes.
@@ -44,7 +44,7 @@ interpreter inside the virtual environment.
 Now, we need to add a configuration to attach the GDB debugger to the Python
 process that is already running in debug mode. Let's call it "(gdb) Attach"
 
-.. code-block:: json
+.. code-block:: javascript
 
     {
         // Use IntelliSense to learn about possible attributes.
