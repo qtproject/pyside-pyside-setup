@@ -175,6 +175,8 @@ CppGenerator::OpaqueContainerData
         writeNoArgsMethod(s, privateObjType, "pop_front");
         writeMethod(s, privateObjType, "pop_front", "removeFirst"); // Qt convention
     }
+    writeMethod(s, privateObjType, "reserve");
+    writeNoArgsMethod(s, privateObjType, "capacity");
     s << "{nullptr, nullptr, 0, nullptr} // Sentinel\n"
         << outdent << "};\n\n";
 
