@@ -67,6 +67,21 @@ struct ShibokenContainerValueConverter
     static std::optional<Value> convertValueToCpp(PyObject pyArg);
 };
 
+// SFINAE test for the presence of reserve() in a sequence container (std::vector/QList)
+template <typename T>
+class ShibokenContainerHasReserve
+{
+private:
+    using YesType = char[1];
+    using NoType = char[2];
+
+    template <typename C> static YesType& test( decltype(&C::reserve) ) ;
+    template <typename C> static NoType& test(...);
+
+public:
+    enum { value = sizeof(test<T>(nullptr)) == sizeof(YesType) };
+};
+
 template <class SequenceContainer>
 class ShibokenSequenceContainerPrivate // Helper for sequence type containers
 {
@@ -210,6 +225,40 @@ public:
 
         d->m_list->pop_front();
         Py_RETURN_NONE;
+    }
+
+    // Support for containers with reserve/capacity
+    static PyObject *reserve(PyObject *self, PyObject *pyArg)
+    {
+        auto *d = get(self);
+        if (PyLong_Check(pyArg) == 0) {
+            PyErr_SetString(PyExc_TypeError, "wrong type passed to reserve().");
+            return nullptr;
+        }
+        if (d->m_const) {
+            PyErr_SetString(PyExc_TypeError, msgModifyConstContainer);
+            return nullptr;
+        }
+
+        if constexpr (ShibokenContainerHasReserve<SequenceContainer>::value) {
+            const Py_ssize_t size = PyLong_AsSsize_t(pyArg);
+            d->m_list->reserve(size);
+        } else {
+            PyErr_SetString(PyExc_TypeError, "Container does not support reserve().");
+            return nullptr;
+        }
+
+        Py_RETURN_NONE;
+    }
+
+    static PyObject *capacity(PyObject *self)
+    {
+        Py_ssize_t result = -1;
+        if constexpr (ShibokenContainerHasReserve<SequenceContainer>::value) {
+            const auto *d = get(self);
+            result = d->m_list->capacity();
+        }
+        return PyLong_FromSsize_t(result);
     }
 
     static ShibokenSequenceContainerPrivate *get(PyObject *self)

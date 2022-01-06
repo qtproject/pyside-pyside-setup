@@ -63,6 +63,7 @@ class PlotWidget(QWidget):
         self._timer.timeout.connect(self.shift)
 
         self._points = QPointList()
+        self._points.reserve(WIDTH)
         self._x = 0
         self._delta_x = 0.05
         self._half_height = HEIGHT / 2

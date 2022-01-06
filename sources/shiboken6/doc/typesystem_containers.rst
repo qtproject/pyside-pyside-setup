@@ -47,3 +47,15 @@ the STL and the Qt naming convention (which resembles Python's) are supported:
     +-------------------------------------------+-----------------------------------+
     | ``pop_front()``, ``removeFirst()``        | Removes the first element.        |
     +-------------------------------------------+-----------------------------------+
+    | ``reserve(size)``                         | For containers that support it    |
+    |                                           | (``std::vector``, ``QList``),     |
+    |                                           | allocate memory for at least      |
+    |                                           | ``size`` elements, preventing     |
+    |                                           | reallocations.                    |
+    +-------------------------------------------+-----------------------------------+
+    | ``capacity()``                            | For containers that support it    |
+    |                                           | (``std::vector``, ``QList``),     |
+    |                                           | return the number of elements     |
+    |                                           | that can be stored without        |
+    |                                           | reallocation.                     |
+    +-------------------------------------------+-----------------------------------+
