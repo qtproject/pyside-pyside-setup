@@ -863,6 +863,11 @@ QByteArray ba(1 + qsizetype(%2), char(0));
 %CPPSELF.%FUNCTION_NAME(Shiboken::String::toCString(%PYARG_1), Shiboken::String::len(%PYARG_1));
 // @snippet qcryptographichash-adddata
 
+// @snippet qmetaobject-repr
+const QByteArray repr = PySide::MetaObjectBuilder::formatMetaObject(%CPPSELF).toUtf8();
+%PYARG_0 = PyUnicode_FromString(repr.constData());
+// @snippet qmetaobject-repr
+
 // @snippet qsocketdescriptor
 #ifdef WIN32
 using DescriptorType = Qt::HANDLE;

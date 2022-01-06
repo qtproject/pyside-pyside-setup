@@ -41,6 +41,7 @@
 #define DYNAMICQMETAOBJECT_H
 
 #include <sbkpython.h>
+#include <pysidemacros.h>
 
 #include <QtCore/QMetaObject>
 #include <QtCore/QMetaMethod>
@@ -76,6 +77,8 @@ public:
     void removeProperty(int index);
 
     const QMetaObject *update();
+
+    PYSIDE_API static QString formatMetaObject(const QMetaObject *metaObject);
 
 private:
     MetaObjectBuilderPrivate *m_d;

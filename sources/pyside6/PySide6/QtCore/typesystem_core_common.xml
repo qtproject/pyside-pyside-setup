@@ -2894,6 +2894,7 @@
   <object-type name="QMetaObject">
     <enum-type name="Call"/>
     <include file-name="qobjectdefs.h" location="global"/>
+    <include file-name="dynamicqmetaobject.h" location="global"/>
     <!-- This isn't part of Qt public API -->
     <modify-function signature="connect(const QObject*,int,const QObject*,int,int,int*)" remove="all"/>
       <value-type name="Connection" operator-bool="true">
@@ -2902,6 +2903,9 @@
         <declare-function signature="operator bool() const" return-type="bool"/>
       </value-type>
     <modify-function signature="^invokeMethod\(" allow-thread="yes"/>
+    <add-function signature="__repr__" return-type="PyObject*">
+        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qmetaobject-repr"/>
+    </add-function>
   </object-type>
   <value-type name="QMetaProperty" >
     <!-- This isn't part of Qt public API -->

@@ -456,6 +456,107 @@ const QMetaObject *MetaObjectBuilder::update()
     return m_d->update();
 }
 
+static void formatEnum(QTextStream &str, const QMetaEnum &e)
+{
+    str << '"' << e.name() << "\" {";
+    for (int k = 0, cnt = e.keyCount(); k < cnt; ++k) {
+        if (k)
+            str << ", ";
+        str << e.key(k);
+    }
+    str << "}";
+}
+
+static void formatProperty(QTextStream &str, const QMetaProperty &p)
+{
+    str << '"' << p.name() << "\", " << p.typeName();
+    if (p.isWritable())
+        str << " [writeable]";
+    if (p.isResettable())
+        str << " [resettable]";
+    if (p.isConstant())
+        str << " [constant]";
+    if (p.isFinal())
+        str << " [final]";
+    if (p.isDesignable())
+        str << " [designable]";
+    auto sig = p.notifySignal();
+    if (sig.isValid())
+        str << ", notify=" << sig.name();
+}
+
+static void formatMethod(QTextStream &str, const QMetaMethod &m)
+{
+    str << "type=";
+    switch (m.methodType()) {
+    case QMetaMethod::Method:
+        str << "Method";
+        break;
+    case QMetaMethod::Signal:
+        str << "Signal";
+        break;
+    case QMetaMethod::Slot:
+        str << "Slot";
+        break;
+    case QMetaMethod::Constructor:
+        str << "Constructor";
+        break;
+    }
+
+    str << ", signature="
+      << m.methodSignature();
+    const QByteArrayList parms = m.parameterTypes();
+    if (!parms.isEmpty())
+        str << ", parameters=" << parms.join(", ");
+}
+
+QString MetaObjectBuilder::formatMetaObject(const QMetaObject *metaObject)
+{
+    QString result;
+    QTextStream str(&result);
+    str << "PySide" << QT_VERSION_MAJOR << ".QtCore.QMetaObject(\""
+        << metaObject->className() << '"';
+    if (auto *s = metaObject->superClass())
+        str << " inherits \"" << s->className() << '"';
+    str << ":\n";
+
+    int offset = metaObject->enumeratorOffset();
+    int count = metaObject->enumeratorCount();
+    if (offset < count) {
+        str << "Enumerators:\n";
+        for (int e = offset; e < count; ++e) {
+            str << "  #" << e << ' ';
+            formatEnum(str, metaObject->enumerator(e));
+            str << '\n';
+        }
+    }
+
+    offset = metaObject->propertyOffset();
+    count = metaObject->propertyCount();
+    if (offset < count) {
+        str << "Properties:\n";
+        for (int p = offset; p < count; ++p) {
+            str << "  #" << p << ' ';
+            formatProperty(str, metaObject->property(p));
+            str << '\n';
+        }
+    }
+
+    offset = metaObject->methodOffset();
+    count = metaObject->methodCount();
+    if (offset < count) {
+        str << "Methods:\n";
+        for (int m = offset; m < count; ++m) {
+            str << "  #" << m << ' ';
+            formatMethod(str, metaObject->method(m));
+            str << '\n';
+        }
+    }
+
+    str << ')';
+    return result;
+}
+
 using namespace Shiboken;
 
 void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
