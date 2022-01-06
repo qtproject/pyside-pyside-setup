@@ -1,5 +1,5 @@
 Debugging PySide with Qt Creator (Linux)
-***************************************
+****************************************
 
 As opposed to VSCode, presently Qt Creator does not support mixed mode debugging.
 However, we can debug the C++ implementation of the corresponding Python PySide
@@ -18,7 +18,7 @@ Here are the steps:
         :alt: creation of custom executable
         :align: center
 
-3. Click on Custom Executable and `Create' a new configuration. Feed in the
+3. Click on Custom Executable and `Create` a new configuration. Feed in the
 details like shown below.
 
     .. image:: custom_executable_run_config.png
