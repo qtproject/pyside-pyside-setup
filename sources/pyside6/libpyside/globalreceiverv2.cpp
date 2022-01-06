@@ -38,7 +38,6 @@
 ****************************************************************************/
 
 #include "globalreceiverv2.h"
-#include "dynamicqmetaobject_p.h"
 #include "pysideweakref.h"
 #include "pysidestaticstrings.h"
 #include "signalmanager.h"

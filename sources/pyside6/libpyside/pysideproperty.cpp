@@ -40,7 +40,6 @@
 #include <sbkpython.h>
 #include "pysideproperty.h"
 #include "pysideproperty_p.h"
-#include "dynamicqmetaobject_p.h"
 #include "pysidesignal.h"
 #include "pysidesignal_p.h"
 

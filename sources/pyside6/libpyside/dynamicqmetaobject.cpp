@@ -38,7 +38,6 @@
 ****************************************************************************/
 
 #include "dynamicqmetaobject.h"
-#include "dynamicqmetaobject_p.h"
 #include "pysideqobject.h"
 #include "pysidesignal.h"
 #include "pysidesignal_p.h"
