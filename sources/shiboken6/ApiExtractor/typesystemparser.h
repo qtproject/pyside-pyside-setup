@@ -43,10 +43,11 @@ class ConditionalStreamReader;
 
 class TypeSystemEntityResolver;
 class TypeDatabase;
+
 class StackElement
 {
     public:
-        enum ElementType {
+        enum ElementType : uint64_t {
             None = 0x0,
 
             // Type tags (0x1, ... , 0xff)
@@ -77,8 +78,6 @@ class StackElement
             ModifyFunction              = 0x0300,
             ModifyField                 = 0x0400,
             Root                        = 0x0500,
-            CustomMetaConstructor       = 0x0600,
-            CustomMetaDestructor        = 0x0700,
             SuppressedWarning           = 0x0900,
             Rejection                   = 0x0a00,
             LoadTypesystem              = 0x0b00,
@@ -117,7 +116,9 @@ class StackElement
             ReferenceCount              = 0x80000000,
             ParentOwner                 = 0x90000000,
             Array                       = 0xA0000000,
-            ArgumentModifiers           = 0xff000000
+            ArgumentModifiers           = 0xff000000,
+
+            Unimplemented              = 0x100000000
         };
 
         StackElement(StackElement *p) : entry(nullptr), type(None), parent(p) { }
@@ -126,11 +127,8 @@ class StackElement
         ElementType type;
         StackElement *parent;
 
-        union {
-            TemplateInstance* templateInstance;
-            TemplateEntry* templateEntry;
-            CustomFunction* customFunction;
-        } value;
+        TemplateInstance *templateInstance = nullptr;
+        TemplateEntry *templateEntry = nullptr;
 };
 
 struct StackElementContext
@@ -240,10 +238,6 @@ private:
                              QXmlStreamAttributes *);
     bool parseReplaceDefaultExpression(const ConditionalStreamReader &,
                                        const StackElement &topElement, QXmlStreamAttributes *);
-    static CustomFunction *
-        parseCustomMetaConstructor(const ConditionalStreamReader &,
-                                   StackElement::ElementType type,
-                                   const StackElement &topElement, QXmlStreamAttributes *);
      bool parseReferenceCount(const ConditionalStreamReader &, const StackElement &topElement,
                               QXmlStreamAttributes *);
      bool parseParentOwner(const ConditionalStreamReader &, const StackElement &topElement,

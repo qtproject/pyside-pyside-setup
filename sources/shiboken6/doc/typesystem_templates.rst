@@ -30,8 +30,7 @@ insert-template
 
     The ``insert-template`` node includes the code template identified by the
     name attribute, and it can be a child of the :ref:`inject-code`,
-    :ref:`conversion-rule`, :ref:`template`, ``custom-constructor``
-    or ``custom-destructor`` nodes.
+    :ref:`conversion-rule` or :ref:`template` nodes.
 
     .. code-block:: xml
 

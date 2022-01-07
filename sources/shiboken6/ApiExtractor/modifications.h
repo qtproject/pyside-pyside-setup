@@ -141,15 +141,6 @@ public:
     static QRegularExpression placeHolderRegex(int index);
 };
 
-class CustomFunction : public CodeSnipAbstract
-{
-public:
-    explicit CustomFunction(const QString &n = QString()) : name(n) {}
-
-    QString name;
-    QString paramName;
-};
-
 class TemplateEntry : public CodeSnipAbstract
 {
 public:

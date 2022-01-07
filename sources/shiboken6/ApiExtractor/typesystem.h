@@ -202,12 +202,6 @@ public:
 
     QString qualifiedTargetLangName() const;
 
-    void setCustomConstructor(const CustomFunction &func);
-    CustomFunction customConstructor() const;
-
-    void setCustomDestructor(const CustomFunction &func);
-    CustomFunction customDestructor() const;
-
     virtual bool isValue() const;
     virtual bool isComplex() const;
 
