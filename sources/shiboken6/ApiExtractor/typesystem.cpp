@@ -76,8 +76,6 @@ public:
     QString m_targetLangPackage;
     mutable QString m_cachedTargetLangName; // "Foo.Bar"
     mutable QString m_cachedTargetLangEntryName; // "Bar"
-    CustomFunction m_customConstructor;
-    CustomFunction m_customDestructor;
     CodeSnipList m_codeSnips;
     DocModificationList m_docModifications;
     IncludeList m_extraIncludes;
@@ -585,26 +583,6 @@ void TypeEntry::setTargetLangPackage(const QString &p)
 QString TypeEntry::qualifiedTargetLangName() const
 {
     return targetLangPackage() + QLatin1Char('.') + targetLangName();
-}
-
-void TypeEntry::setCustomConstructor(const CustomFunction &func)
-{
-    m_d->m_customConstructor = func;
-}
-
-CustomFunction TypeEntry::customConstructor() const
-{
-    return m_d->m_customConstructor;
-}
-
-void TypeEntry::setCustomDestructor(const CustomFunction &func)
-{
-    m_d->m_customDestructor = func;
-}
-
-CustomFunction TypeEntry::customDestructor() const
-{
-    return m_d->m_customDestructor;
 }
 
 bool TypeEntry::isValue() const

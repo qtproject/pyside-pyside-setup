@@ -373,8 +373,8 @@ ENUM_LOOKUP_BEGIN(StackElement::ElementType, Qt::CaseInsensitive,
         {u"array", StackElement::Array},
         {u"container-type", StackElement::ContainerTypeEntry},
         {u"conversion-rule", StackElement::ConversionRule},
-        {u"custom-constructor", StackElement::CustomMetaConstructor},
-        {u"custom-destructor", StackElement::CustomMetaDestructor},
+        {u"custom-constructor", StackElement::Unimplemented},
+        {u"custom-destructor", StackElement::Unimplemented},
         {u"custom-type", StackElement::CustomTypeEntry},
         {u"declare-function", StackElement::DeclareFunction},
         {u"define-ownership", StackElement::DefineOwnership},
@@ -816,6 +816,8 @@ bool TypeSystemParser::endElement(QStringView localName)
         return true;
 
     switch (m_current->type) {
+    case StackElement::Unimplemented:
+        return true;
     case StackElement::Root:
         if (m_generate == TypeEntry::GenerateCode) {
             TypeDatabase::instance()->addGlobalUserFunctions(m_contextStack.top()->addedFunctions);
@@ -884,23 +886,13 @@ bool TypeSystemParser::endElement(QStringView localName)
         }
     }
     break;
-    case StackElement::CustomMetaConstructor: {
-        m_current->entry->setCustomConstructor(*m_current->value.customFunction);
-        delete m_current->value.customFunction;
-    }
-    break;
-    case StackElement::CustomMetaDestructor: {
-        m_current->entry->setCustomDestructor(*m_current->value.customFunction);
-        delete m_current->value.customFunction;
-    }
-    break;
     case StackElement::EnumTypeEntry:
         m_current->entry->setDocModification(m_contextStack.top()->docModifications);
         m_contextStack.top()->docModifications = DocModificationList();
         m_currentEnum = nullptr;
         break;
     case StackElement::Template:
-        m_database->addTemplate(m_current->value.templateEntry);
+        m_database->addTemplate(m_current->templateEntry);
         break;
     case StackElement::TemplateInstanceEnum:
         switch (m_current->parent->type) {
@@ -908,7 +900,7 @@ bool TypeSystemParser::endElement(QStringView localName)
             if (m_current->parent->parent->type == StackElement::Root) {
                 CodeSnipList snips = m_current->parent->entry->codeSnips();
                 CodeSnip snip = snips.takeLast();
-                TemplateInstancePtr ti(m_current->value.templateInstance);
+                TemplateInstancePtr ti(m_current->templateInstance);
                 snip.addTemplateInstance(ti);
                 snips.append(snip);
                 m_current->parent->entry->setCodeSnips(snips);
@@ -917,28 +909,22 @@ bool TypeSystemParser::endElement(QStringView localName)
             Q_FALLTHROUGH();
         case StackElement::NativeToTarget:
         case StackElement::AddConversion: {
-            TemplateInstancePtr ti(m_current->value.templateInstance);
+            TemplateInstancePtr ti(m_current->templateInstance);
             m_contextStack.top()->codeSnips.last().addTemplateInstance(ti);
         }
             break;
         case StackElement::Template: {
-            TemplateInstancePtr ti(m_current->value.templateInstance);
-            m_current->parent->value.templateEntry->addTemplateInstance(ti);
-        }
-            break;
-        case StackElement::CustomMetaConstructor:
-        case StackElement::CustomMetaDestructor: {
-            TemplateInstancePtr ti(m_current->value.templateInstance);
-            m_current->parent->value.customFunction->addTemplateInstance(ti);
+            TemplateInstancePtr ti(m_current->templateInstance);
+            m_current->parent->templateEntry->addTemplateInstance(ti);
         }
             break;
         case StackElement::ConversionRule: {
-            TemplateInstancePtr ti(m_current->value.templateInstance);
+            TemplateInstancePtr ti(m_current->templateInstance);
             m_contextStack.top()->functionMods.last().argument_mods().last().conversionRules().last().addTemplateInstance(ti);
         }
             break;
         case StackElement::InjectCodeInFunction: {
-            TemplateInstancePtr ti(m_current->value.templateInstance);
+            TemplateInstancePtr ti(m_current->templateInstance);
             m_contextStack.top()->functionMods.last().snips().last().addTemplateInstance(ti);
         }
             break;
@@ -975,16 +961,11 @@ bool TypeSystemParser::endElement(QStringView localName)
 template <class String> // QString/QStringRef
 bool TypeSystemParser::characters(const String &ch)
 {
-    if (m_currentDroppedEntry || m_ignoreDepth)
+    if (m_currentDroppedEntry || m_ignoreDepth || m_current->type == StackElement::Unimplemented)
         return true;
 
     if (m_current->type == StackElement::Template) {
-        m_current->value.templateEntry->addCode(ch);
-        return true;
-    }
-
-    if (m_current->type == StackElement::CustomMetaConstructor || m_current->type == StackElement::CustomMetaDestructor) {
-        m_current->value.customFunction->addCode(ch);
+        m_current->templateEntry->addCode(ch);
         return true;
     }
 
@@ -1791,7 +1772,7 @@ bool TypeSystemParser::parseRenameFunction(const ConditionalStreamReader &,
 bool TypeSystemParser::parseInjectDocumentation(const ConditionalStreamReader &,
                                        QXmlStreamAttributes *attributes)
 {
-    const int validParent = StackElement::TypeEntryMask
+    const auto validParent = StackElement::TypeEntryMask
                             | StackElement::ModifyFunction
                             | StackElement::ModifyField;
     if (!m_current->parent || (m_current->parent->type & validParent) == 0) {
@@ -1834,7 +1815,7 @@ bool TypeSystemParser::parseInjectDocumentation(const ConditionalStreamReader &,
 bool TypeSystemParser::parseModifyDocumentation(const ConditionalStreamReader &,
                                        QXmlStreamAttributes *attributes)
 {
-    const int validParent = StackElement::TypeEntryMask
+    const auto validParent = StackElement::TypeEntryMask
                             | StackElement::ModifyFunction
                             | StackElement::ModifyField;
     if (!m_current->parent || (m_current->parent->type & validParent) == 0) {
@@ -2574,28 +2555,6 @@ bool TypeSystemParser::parseReplaceDefaultExpression(const ConditionalStreamRead
     return true;
 }
 
-CustomFunction *
-    TypeSystemParser::parseCustomMetaConstructor(const ConditionalStreamReader &,
-                                        StackElement::ElementType type,
-                                        const StackElement &topElement,
-                                        QXmlStreamAttributes *attributes)
-{
-    QString functionName = topElement.entry->name().toLower()
-        + (type == StackElement::CustomMetaConstructor
-           ? QLatin1String("_create") : QLatin1String("_delete"));
-    QString paramName = QLatin1String("copy");
-    for (int i = attributes->size() - 1; i >= 0; --i) {
-        const auto name = attributes->at(i).qualifiedName();
-        if (name == nameAttribute())
-            functionName = attributes->takeAt(i).value().toString();
-        else if (name == QLatin1String("param-name"))
-            paramName = attributes->takeAt(i).value().toString();
-    }
-    auto *func = new CustomFunction(functionName);
-    func->paramName = paramName;
-    return func;
-}
-
 bool TypeSystemParser::parseReferenceCount(const ConditionalStreamReader &reader,
                                   const StackElement &topElement,
                                   QXmlStreamAttributes *attributes)
@@ -2818,13 +2777,11 @@ TemplateInstance *
 {
     if (!(topElement.type & StackElement::CodeSnipMask) &&
         (topElement.type != StackElement::Template) &&
-        (topElement.type != StackElement::CustomMetaConstructor) &&
-        (topElement.type != StackElement::CustomMetaDestructor) &&
         (topElement.type != StackElement::NativeToTarget) &&
         (topElement.type != StackElement::AddConversion) &&
         (topElement.type != StackElement::ConversionRule)) {
-        m_error = QLatin1String("Can only insert templates into code snippets, templates, custom-constructors, "\
-                                "custom-destructors, conversion-rule, native-to-target or add-conversion tags.");
+        m_error = QLatin1String("Can only insert templates into code snippets, templates, "\
+                                "conversion-rule, native-to-target or add-conversion tags.");
         return nullptr;
     }
     const int nameIndex = indexOfAttribute(*attributes, nameAttribute());
@@ -2852,7 +2809,7 @@ bool TypeSystemParser::parseReplace(const ConditionalStreamReader &,
         else if (name == toAttribute())
             to = attributes->takeAt(i).value().toString();
     }
-    element->parent->value.templateInstance->addReplaceRule(from, to);
+    element->parent->templateInstance->addReplaceRule(from, to);
     return true;
 }
 
@@ -2946,10 +2903,10 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
     if (element->type == StackElement::Root && m_generate == TypeEntry::GenerateCode)
         customConversionsForReview.clear();
 
-    if (element->type == StackElement::CustomMetaConstructor
-        || element->type == StackElement::CustomMetaDestructor) {
+    if (element->type == StackElement::Unimplemented) {
         qCWarning(lcShiboken, "%s",
                   qPrintable(msgUnimplementedElementWarning(reader, tagName)));
+        return true;
     }
 
     switch (element->type) {
@@ -3247,11 +3204,6 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
         case StackElement::RemoveDefaultExpression:
             m_contextStack.top()->functionMods.last().argument_mods().last().setRemovedDefaultExpression(true);
             break;
-        case StackElement::CustomMetaConstructor:
-        case StackElement::CustomMetaDestructor:
-            element->value.customFunction =
-                parseCustomMetaConstructor(reader, element->type, topElement, &attributes);
-            break;
         case StackElement::ReferenceCount:
             if (!parseReferenceCount(reader, topElement, &attributes))
                 return false;
@@ -3289,14 +3241,14 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
                 m_error = msgMissingAttribute(nameAttribute());
                 return false;
             }
-            element->value.templateEntry =
+            element->templateEntry =
                 new TemplateEntry(attributes.takeAt(nameIndex).value().toString());
         }
             break;
         case StackElement::TemplateInstanceEnum:
-            element->value.templateInstance =
+            element->templateInstance =
                 parseTemplateInstanceEnum(reader, topElement, &attributes);
-            if (!element->value.templateInstance)
+            if (!element->templateInstance)
                 return false;
             break;
         case StackElement::Replace:
