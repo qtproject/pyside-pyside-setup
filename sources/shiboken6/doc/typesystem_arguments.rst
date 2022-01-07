@@ -21,6 +21,17 @@ conversion-rule
         </conversion-rule>
         </modify-argument>
 
+    The ``class`` attribute accepts one of the following values to define the
+    conversion direction to be either ``target-to-native`` or ``native-to-target``:
+
+        * ``native``: Defines the conversion direction to be ``target-to-native``.
+                      It is similar to the existing ``<target-to-native>`` element.
+                      See :ref:`Conversion Rule Tag <conversion-rule-tag>` for more information.
+
+        * ``target``: Defines the conversion direction to be ``native-to-target``.
+                      It is similar to the existing ``<native-to-target>`` element.
+                      See :ref:`Conversion Rule Tag <conversion-rule-tag>` for more information.
+
     This node is typically used in combination with the :ref:`replace-type` and
     :ref:`remove-argument` nodes. The given code is used instead of the generator's
     conversion code.
