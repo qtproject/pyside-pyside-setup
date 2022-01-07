@@ -790,7 +790,9 @@ void updateSourceObject(PyObject *source)
        return;
 
     Shiboken::AutoDecRef mroItem{};
+    auto *dict = SbkObject_GetDict_NoRef(source);
 
+    // PYSIDE-1431: Walk the mro and update. But see PYSIDE-1751 below.
     while ((mroItem.reset(PyIter_Next(mroIterator))), mroItem.object()) {
         Py_ssize_t pos = 0;
         PyObject *key, *value;
@@ -798,12 +800,17 @@ void updateSourceObject(PyObject *source)
 
         while (PyDict_Next(type->tp_dict, &pos, &key, &value)) {
             if (PyObject_TypeCheck(value, PySideSignalTypeF())) {
-                auto *inst = PyObject_New(PySideSignalInstance, PySideSignalInstanceTypeF());
-                Shiboken::AutoDecRef signalInstance(reinterpret_cast<PyObject *>(inst));
-                instanceInitialize(signalInstance.cast<PySideSignalInstance *>(),
-                                   key, reinterpret_cast<PySideSignal *>(value), source, 0);
-                if (PyObject_SetAttr(source, key, signalInstance) == -1)
-                    return;     // An error occurred while setting the attribute
+                // PYSIDE-1751: We only insert an instance into the instance dict, if a signal
+                //              of the same name is in the mro. This is the equivalent action
+                //              as PyObject_SetAttr, but filtered by existing signal names.
+                if (!PyDict_GetItem(dict, key)) {
+                    auto *inst = PyObject_New(PySideSignalInstance, PySideSignalInstanceTypeF());
+                    Shiboken::AutoDecRef signalInstance(reinterpret_cast<PyObject *>(inst));
+                    instanceInitialize(signalInstance.cast<PySideSignalInstance *>(),
+                                       key, reinterpret_cast<PySideSignal *>(value), source, 0);
+                    if (PyDict_SetItem(dict, key, signalInstance) == -1)
+                        return;     // An error occurred while setting the attribute
+                }
             }
         }
     }
