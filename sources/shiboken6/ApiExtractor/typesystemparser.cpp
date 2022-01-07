@@ -384,7 +384,7 @@ ENUM_LOOKUP_BEGIN(StackElement::ElementType, Qt::CaseInsensitive,
         {u"include", StackElement::Include},
         {u"inject-code", StackElement::InjectCode},
         {u"inject-documentation", StackElement::InjectDocumentation},
-        {u"insert-template", StackElement::TemplateInstanceEnum},
+        {u"insert-template", StackElement::InsertTemplate},
         {u"interface-type", StackElement::InterfaceTypeEntry},
         {u"load-typesystem", StackElement::LoadTypesystem},
         {u"modify-argument", StackElement::ModifyArgument},
@@ -894,7 +894,7 @@ bool TypeSystemParser::endElement(QStringView localName)
     case StackElement::Template:
         m_database->addTemplate(m_current->templateEntry);
         break;
-    case StackElement::TemplateInstanceEnum:
+    case StackElement::InsertTemplate:
         switch (m_current->parent->type) {
         case StackElement::InjectCode:
             if (m_current->parent->parent->type == StackElement::Root) {
@@ -2771,9 +2771,9 @@ bool TypeSystemParser::parseSystemInclude(const ConditionalStreamReader &,
 }
 
 TemplateInstance *
-    TypeSystemParser::parseTemplateInstanceEnum(const ConditionalStreamReader &,
-                                       const StackElement &topElement,
-                                       QXmlStreamAttributes *attributes)
+    TypeSystemParser::parseInsertTemplate(const ConditionalStreamReader &,
+                                          const StackElement &topElement,
+                                          QXmlStreamAttributes *attributes)
 {
     if (!(topElement.type & StackElement::CodeSnipMask) &&
         (topElement.type != StackElement::Template) &&
@@ -2796,7 +2796,7 @@ bool TypeSystemParser::parseReplace(const ConditionalStreamReader &,
                            const StackElement &topElement,
                            StackElement *element, QXmlStreamAttributes *attributes)
 {
-    if (topElement.type != StackElement::TemplateInstanceEnum) {
+    if (topElement.type != StackElement::InsertTemplate) {
         m_error = QLatin1String("Can only insert replace rules into insert-template.");
         return false;
     }
@@ -3245,9 +3245,9 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
                 new TemplateEntry(attributes.takeAt(nameIndex).value().toString());
         }
             break;
-        case StackElement::TemplateInstanceEnum:
+        case StackElement::InsertTemplate:
             element->templateInstance =
-                parseTemplateInstanceEnum(reader, topElement, &attributes);
+                parseInsertTemplate(reader, topElement, &attributes);
             if (!element->templateInstance)
                 return false;
             break;

@@ -83,7 +83,7 @@ class StackElement
             LoadTypesystem              = 0x0b00,
             RejectEnumValue             = 0x0c00,
             Template                    = 0x0d00,
-            TemplateInstanceEnum        = 0x0e00,
+            InsertTemplate              = 0x0e00,
             Replace                     = 0x0f00,
             AddFunction                 = 0x1000,
             DeclareFunction             = 0x1100,
@@ -249,8 +249,8 @@ private:
                        TypeEntry *entry, QXmlStreamAttributes *);
      bool parseSystemInclude(const ConditionalStreamReader &, QXmlStreamAttributes *);
      TemplateInstance
-         *parseTemplateInstanceEnum(const ConditionalStreamReader &, const StackElement &topElement,
-                                    QXmlStreamAttributes *);
+         *parseInsertTemplate(const ConditionalStreamReader &, const StackElement &topElement,
+                              QXmlStreamAttributes *);
      bool parseReplace(const ConditionalStreamReader &, const StackElement &topElement,
                        StackElement *element, QXmlStreamAttributes *);
      bool checkDuplicatedTypeEntry(const ConditionalStreamReader &reader,
