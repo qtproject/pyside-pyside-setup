@@ -892,7 +892,8 @@ bool TypeSystemParser::endElement(QStringView localName)
         m_currentEnum = nullptr;
         break;
     case StackElement::Template:
-        m_database->addTemplate(m_current->templateEntry);
+        m_database->addTemplate(m_templateEntry);
+        m_templateEntry = nullptr;
         break;
     case StackElement::InsertTemplate:
         switch (m_current->parent->type) {
@@ -900,37 +901,29 @@ bool TypeSystemParser::endElement(QStringView localName)
             if (m_current->parent->parent->type == StackElement::Root) {
                 CodeSnipList snips = m_current->parent->entry->codeSnips();
                 CodeSnip snip = snips.takeLast();
-                TemplateInstancePtr ti(m_current->templateInstance);
-                snip.addTemplateInstance(ti);
+                snip.addTemplateInstance(m_templateInstance);
                 snips.append(snip);
                 m_current->parent->entry->setCodeSnips(snips);
                 break;
             }
             Q_FALLTHROUGH();
         case StackElement::NativeToTarget:
-        case StackElement::AddConversion: {
-            TemplateInstancePtr ti(m_current->templateInstance);
-            m_contextStack.top()->codeSnips.last().addTemplateInstance(ti);
-        }
+        case StackElement::AddConversion:
+            m_contextStack.top()->codeSnips.last().addTemplateInstance(m_templateInstance);
             break;
-        case StackElement::Template: {
-            TemplateInstancePtr ti(m_current->templateInstance);
-            m_current->parent->templateEntry->addTemplateInstance(ti);
-        }
+        case StackElement::Template:
+            m_templateEntry->addTemplateInstance(m_templateInstance);
             break;
-        case StackElement::ConversionRule: {
-            TemplateInstancePtr ti(m_current->templateInstance);
-            m_contextStack.top()->functionMods.last().argument_mods().last().conversionRules().last().addTemplateInstance(ti);
-        }
+        case StackElement::ConversionRule:
+            m_contextStack.top()->functionMods.last().argument_mods().last().conversionRules().last().addTemplateInstance(m_templateInstance);
             break;
-        case StackElement::InjectCodeInFunction: {
-            TemplateInstancePtr ti(m_current->templateInstance);
-            m_contextStack.top()->functionMods.last().snips().last().addTemplateInstance(ti);
-        }
+        case StackElement::InjectCodeInFunction:
+            m_contextStack.top()->functionMods.last().snips().last().addTemplateInstance(m_templateInstance);
             break;
         default:
             break; // nada
         }
+        m_templateInstance.reset();
         break;
     default:
         break;
@@ -965,7 +958,7 @@ bool TypeSystemParser::characters(const String &ch)
         return true;
 
     if (m_current->type == StackElement::Template) {
-        m_current->templateEntry->addCode(ch);
+        m_templateEntry->addCode(ch);
         return true;
     }
 
@@ -2801,7 +2794,7 @@ TemplateInstance *
 
 bool TypeSystemParser::parseReplace(const ConditionalStreamReader &,
                            const StackElement &topElement,
-                           StackElement *element, QXmlStreamAttributes *attributes)
+                           StackElement *, QXmlStreamAttributes *attributes)
 {
     if (topElement.type != StackElement::InsertTemplate) {
         m_error = QLatin1String("Can only insert replace rules into insert-template.");
@@ -2816,7 +2809,7 @@ bool TypeSystemParser::parseReplace(const ConditionalStreamReader &,
         else if (name == toAttribute())
             to = attributes->takeAt(i).value().toString();
     }
-    element->parent->templateInstance->addReplaceRule(from, to);
+    m_templateInstance->addReplaceRule(from, to);
     return true;
 }
 
@@ -3248,14 +3241,13 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
                 m_error = msgMissingAttribute(nameAttribute());
                 return false;
             }
-            element->templateEntry =
+            m_templateEntry =
                 new TemplateEntry(attributes.takeAt(nameIndex).value().toString());
         }
             break;
         case StackElement::InsertTemplate:
-            element->templateInstance =
-                parseInsertTemplate(reader, topElement, &attributes);
-            if (!element->templateInstance)
+            m_templateInstance.reset(parseInsertTemplate(reader, topElement, &attributes));
+            if (m_templateInstance.isNull())
                 return false;
             break;
         case StackElement::Replace:
