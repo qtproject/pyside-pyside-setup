@@ -126,9 +126,6 @@ class StackElement
         TypeEntry* entry;
         ElementType type;
         StackElement *parent;
-
-        TemplateInstance *templateInstance = nullptr;
-        TemplateEntry *templateEntry = nullptr;
 };
 
 struct StackElementContext
@@ -269,6 +266,8 @@ private:
     const TypeEntry::CodeGeneration m_generate;
 
     EnumTypeEntry* m_currentEnum = nullptr;
+    TemplateInstancePtr m_templateInstance;
+    TemplateEntry *m_templateEntry = nullptr;
     QStack<StackElementContext*> m_contextStack;
 
     QString m_currentSignature;
