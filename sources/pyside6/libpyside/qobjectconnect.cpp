@@ -115,8 +115,7 @@ static GetReceiverResult getReceiver(QObject *source, const char *signal,
     } else if (PyCFunction_Check(callback)) {
         result.self = PyCFunction_GET_SELF(callback);
         result.receiver = PySide::convertToQObject(result.self, false);
-    } else if (PyObject_HasAttr(callback, Shiboken::PyName::im_func())
-               && PyObject_HasAttr(callback, Shiboken::PyName::im_self())) {
+    } else if (PySide::isCompiledMethod(callback)) {
         result.self = PyObject_GetAttr(callback, Shiboken::PyName::im_self());
         Py_DECREF(result.self);
         result.receiver = PySide::convertToQObject(result.self, false);

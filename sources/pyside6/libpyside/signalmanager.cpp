@@ -46,6 +46,7 @@
 #include "pyside_p.h"
 #include "dynamicqmetaobject.h"
 #include "pysidemetafunction_p.h"
+#include "pysidestaticstrings.h"
 
 #include <autodecref.h>
 #include <basewrapper.h>
@@ -88,6 +89,12 @@ namespace {
 
 namespace PySide {
 
+bool isCompiledMethod(PyObject *callback)
+{
+    return PyObject_HasAttr(callback, PySide::PyName::im_func())
+            && PyObject_HasAttr(callback, PySide::PyName::im_self())
+            && PyObject_HasAttr(callback, PySide::PyMagicName::code());
+}
 
 PyObjectWrapper::PyObjectWrapper()
     :m_me(Py_None)

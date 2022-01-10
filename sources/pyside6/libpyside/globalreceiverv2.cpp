@@ -114,8 +114,7 @@ DynamicSlotDataV2::DynamicSlotDataV2(PyObject *callback, GlobalReceiverV2 *paren
 
         //monitor class from method lifetime
         m_weakRef = WeakRef::create(m_pythonSelf, DynamicSlotDataV2::onCallbackDestroyed, this);
-    } else if (PyObject_HasAttr(callback, PySide::PyName::im_func())
-               && PyObject_HasAttr(callback, PySide::PyName::im_self())) {
+    } else if (PySide::isCompiledMethod(callback)) {
         // PYSIDE-1523: PyMethod_Check is not accepting compiled form, we just go by attributes.
         m_isMethod = true;
 
@@ -141,8 +140,7 @@ GlobalReceiverKey DynamicSlotDataV2::key(PyObject *callback)
     if (PyMethod_Check(callback)) {
         // PYSIDE-1422: Avoid hash on self which might be unhashable.
         return {PyMethod_GET_SELF(callback), PyMethod_GET_FUNCTION(callback)};
-    } else if (PyObject_HasAttr(callback, PySide::PyName::im_func())
-               && PyObject_HasAttr(callback, PySide::PyName::im_self())) {
+    } else if (PySide::isCompiledMethod(callback)) {
         // PYSIDE-1589: Fix for slots in compiled functions
         Shiboken::AutoDecRef self(PyObject_GetAttr(callback, PySide::PyName::im_self()));
         Shiboken::AutoDecRef func(PyObject_GetAttr(callback, PySide::PyName::im_func()));
