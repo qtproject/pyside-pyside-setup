@@ -270,6 +270,7 @@
        typecheck macros causes:
        FIXME Subscripted generics cannot be used with class and instance checks -->
   <object-type name="QXYSeries">
+      <enum-type name="PointConfiguration"/>
       <include file-name="pyside_numpy.h" location="global"/>
       <add-function signature="appendNp(PyArrayObject *@x@, PyArrayObject *@y@)">
           <inject-code file="../glue/qtcharts.cpp" snippet="qxyseries-appendnp-numpy-x-y"/>
