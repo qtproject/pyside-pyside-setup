@@ -96,12 +96,12 @@ STATIC_STRING_IMPL(property_methods, "__property_methods__")
 STATIC_STRING_IMPL(qualname, "__qualname__")
 STATIC_STRING_IMPL(self, "__self__")
 STATIC_STRING_IMPL(select_i, "__self__")
+STATIC_STRING_IMPL(code, "__code__")
 
 // Internal:
 STATIC_STRING_IMPL(base, "__base__")
 STATIC_STRING_IMPL(bases, "__bases__")
 STATIC_STRING_IMPL(builtins, "__builtins__")
-STATIC_STRING_IMPL(code, "__code__")
 STATIC_STRING_IMPL(dictoffset, "__dictoffset__")
 STATIC_STRING_IMPL(func, "__func__")
 STATIC_STRING_IMPL(func_kind, "__func_kind__")

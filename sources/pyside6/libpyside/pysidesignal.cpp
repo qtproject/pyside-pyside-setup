@@ -40,6 +40,7 @@
 #include <sbkpython.h>
 #include "pysidesignal.h"
 #include "pysidesignal_p.h"
+#include "pyside_p.h"
 #include "pysidestaticstrings.h"
 #include "signalmanager.h"
 
@@ -330,7 +331,7 @@ static void extractFunctionArgumentsFromSlot(PyObject *slot,
         if (functionName != nullptr) {
             *functionName = Shiboken::String::toCString(PepFunction_GetName(function));
         }
-    } else if (PyObject_HasAttr(slot, PySide::PyName::im_func())) {
+    } else if (PySide::_isCompiledMethod(slot)) {
         // PYSIDE-1523: PyFunction_Check and PyMethod_Check are not accepting compiled forms, we
         // just go by attributes.
         isMethod = true;
@@ -381,6 +382,7 @@ static void extractFunctionArgumentsFromSlot(PyObject *slot,
             function = nullptr;
         }
     }
+    // any other callback
 }
 
 static PyObject *signalInstanceConnect(PyObject *self, PyObject *args, PyObject *kwds)
@@ -1165,8 +1167,7 @@ QString codeCallbackName(PyObject *callback, const QString &funcName)
         return funcName + QString::number(quint64(self), 16) + QString::number(quint64(func), 16);
     }
     // PYSIDE-1523: Handle the compiled case.
-    if (PyObject_HasAttr(callback, PySide::PyName::im_func())
-        && PyObject_HasAttr(callback, PySide::PyName::im_self())) {
+    if (PySide::_isCompiledMethod(callback)) {
         // Not retaining references inline with what PyMethod_GET_(SELF|FUNC) does.
         Shiboken::AutoDecRef self(PyObject_GetAttr(callback, PySide::PyName::im_self()));
         Shiboken::AutoDecRef func(PyObject_GetAttr(callback, PySide::PyName::im_func()));

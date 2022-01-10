@@ -82,6 +82,7 @@ LIBSHIBOKEN_API PyObject *property_methods();
 LIBSHIBOKEN_API PyObject *qualname();
 LIBSHIBOKEN_API PyObject *self();
 LIBSHIBOKEN_API PyObject *opaque_container();
+LIBSHIBOKEN_API PyObject *code();
 } // namespace PyMagicName
 } // namespace Shiboken
 

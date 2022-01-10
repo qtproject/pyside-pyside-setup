@@ -47,6 +47,8 @@
 namespace PySide
 {
 
+bool _isCompiledMethod(PyObject *callback);
+
 // Struct associated with QObject's via Shiboken::Object::getTypeUserData()
 struct TypeUserData
 {

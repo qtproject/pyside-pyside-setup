@@ -371,7 +371,8 @@ static bool getReceiver(QObject *source,
         if (*self && %CHECKTYPE[QObject *](*self))
             *receiver = %CONVERTTOCPP[QObject *](*self);
     } else if (PyObject_HasAttr(callback, Shiboken::PyName::im_func())
-               && PyObject_HasAttr(callback, Shiboken::PyName::im_self())) {
+                && PyObject_HasAttr(callback, Shiboken::PyName::im_self())
+                && PyObject_HasAttr(callback, Shiboken::PyMagicName::code())) {
         *self = PyObject_GetAttr(callback, Shiboken::PyName::im_self());
         Py_DECREF(*self);
 

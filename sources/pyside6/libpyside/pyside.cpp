@@ -86,6 +86,13 @@ QT_END_NAMESPACE
 namespace PySide
 {
 
+bool _isCompiledMethod(PyObject *callback)
+{
+    return PyObject_HasAttr(callback, PySide::PyName::im_func())
+            && PyObject_HasAttr(callback, PySide::PyName::im_self())
+            && PyObject_HasAttr(callback, PySide::PyMagicName::code());
+}
+
 void init(PyObject *module)
 {
     qobjectNextAddr = nullptr;
