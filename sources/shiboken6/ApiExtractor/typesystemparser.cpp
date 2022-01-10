@@ -365,7 +365,7 @@ ENUM_LOOKUP_BEGIN(TypeSystem::ExceptionHandling, Qt::CaseSensitive,
 };
 ENUM_LOOKUP_LINEAR_SEARCH()
 
-ENUM_LOOKUP_BEGIN(StackElement::ElementType, Qt::CaseInsensitive,
+ENUM_LOOKUP_BEGIN(StackElement, Qt::CaseInsensitive,
                   elementFromTag)
     {
         {u"add-conversion", StackElement::AddConversion}, // sorted!
@@ -381,6 +381,7 @@ ENUM_LOOKUP_BEGIN(StackElement::ElementType, Qt::CaseInsensitive,
         {u"enum-type", StackElement::EnumTypeEntry},
         {u"extra-includes", StackElement::ExtraIncludes},
         {u"function", StackElement::FunctionTypeEntry},
+        {u"import-file", StackElement::ImportFile},
         {u"include", StackElement::Include},
         {u"inject-code", StackElement::InjectCode},
         {u"inject-documentation", StackElement::InjectDocumentation},
@@ -703,18 +704,25 @@ bool TypeSystemParser::parseXml(ConditionalStreamReader &reader)
         case QXmlStreamReader::Invalid:
             m_error = msgReaderError(reader, reader.errorString());
             return false;
-        case QXmlStreamReader::StartElement:
-            if (!startElement(reader)) {
+        case QXmlStreamReader::StartElement: {
+            const auto elementTypeOpt = elementFromTag(reader.name());
+            if (!elementTypeOpt.has_value()) {
+                m_error = u"Unknown tag name: '"_qs + reader.name().toString() + u'\'';
+                return false;
+            }
+            m_stack.push(elementTypeOpt.value());
+            if (!startElement(reader, m_stack.top())) {
                 m_error = msgReaderError(reader, m_error);
                 return false;
             }
-
+        }
             break;
         case QXmlStreamReader::EndElement:
-            if (!endElement(reader.name())) {
+            if (!endElement(m_stack.top())) {
                 m_error = msgReaderError(reader, m_error);
                 return false;
             }
+            m_stack.pop();
             break;
         case QXmlStreamReader::Characters:
             if (!characters(reader.text())) {
@@ -790,7 +798,7 @@ bool TypeSystemParser::setupSmartPointerInstantiations()
     return true;
 }
 
-bool TypeSystemParser::endElement(QStringView localName)
+bool TypeSystemParser::endElement(StackElement element)
 {
     if (m_ignoreDepth) {
         --m_ignoreDepth;
@@ -802,7 +810,7 @@ bool TypeSystemParser::endElement(QStringView localName)
         return true;
     }
 
-    if (!localName.compare(QLatin1String("import-file"), Qt::CaseInsensitive))
+    if (element == StackElement::ImportFile)
         return true;
 
     if (m_contextStack.isEmpty())
@@ -810,7 +818,7 @@ bool TypeSystemParser::endElement(QStringView localName)
 
     const auto &top = m_contextStack.top();
 
-    switch (m_current->type) {
+    switch (element) {
     case StackElement::Unimplemented:
         return true;
     case StackElement::Root:
@@ -872,7 +880,7 @@ bool TypeSystemParser::endElement(QStringView localName)
         }
 
         QString code = top->codeSnips.takeLast().code();
-        if (m_current->type == StackElement::AddConversion) {
+        if (element == StackElement::AddConversion) {
             if (customConversion->targetToNativeConversions().isEmpty()) {
                 m_error = QLatin1String("CustomConversion's target to native conversions missing.");
                 return false;
@@ -893,9 +901,9 @@ bool TypeSystemParser::endElement(QStringView localName)
         m_templateEntry = nullptr;
         break;
     case StackElement::InsertTemplate:
-        switch (m_current->parent->type) {
+        switch (m_stack.at(m_stack.size() - 2)) {
         case StackElement::InjectCode:
-            if (m_current->parent->parent->type == StackElement::Root) {
+            if (m_stack.at(m_stack.size() - 3) == StackElement::Root) {
                 CodeSnipList snips = top->entry->codeSnips();
                 CodeSnip snip = snips.takeLast();
                 snip.addTemplateInstance(m_templateInstance);
@@ -926,14 +934,10 @@ bool TypeSystemParser::endElement(QStringView localName)
         break;
     }
 
-    if ((m_current->type & StackElement::TypeEntryMask) != 0
-        || m_current->type == StackElement::Root) {
+    if ((element & StackElement::TypeEntryMask) != 0
+        || element == StackElement::Root) {
         m_contextStack.pop();
     }
-
-    StackElement *child = m_current;
-    m_current = m_current->parent;
-    delete(child);
 
     return true;
 }
@@ -941,12 +945,15 @@ bool TypeSystemParser::endElement(QStringView localName)
 template <class String> // QString/QStringRef
 bool TypeSystemParser::characters(const String &ch)
 {
+    const auto stackSize = m_stack.size();
     if (m_currentDroppedEntryDepth != 0 || m_ignoreDepth != 0
-        || m_current->type == StackElement::Unimplemented) {
+        || stackSize == 0 || m_stack.top() == StackElement::Unimplemented) {
         return true;
     }
 
-    if (m_current->type == StackElement::Template) {
+    const StackElement type =  m_stack.top();
+
+    if (type == StackElement::Template) {
         m_templateEntry->addCode(ch);
         return true;
     }
@@ -958,45 +965,43 @@ bool TypeSystemParser::characters(const String &ch)
 
     const auto &top = m_contextStack.top();
 
-    if (m_current->type == StackElement::ConversionRule
-        && m_current->parent->type == StackElement::ModifyArgument) {
+    if (type == StackElement::ConversionRule && stackSize > 1
+        && m_stack.at(stackSize - 2) == StackElement::ModifyArgument) {
         top->functionMods.last().argument_mods().last().conversionRules().last().addCode(ch);
         return true;
     }
 
-    if (m_current->type == StackElement::NativeToTarget || m_current->type == StackElement::AddConversion) {
+    if (type == StackElement::NativeToTarget || type == StackElement::AddConversion) {
        top->codeSnips.last().addCode(ch);
        return true;
     }
 
-    if (m_current->parent) {
-        if ((m_current->type & StackElement::CodeSnipMask)) {
-            CodeSnipList snips;
-            switch (m_current->parent->type) {
-            case StackElement::Root:
-                snips = top->entry->codeSnips();
-                snips.last().addCode(ch);
-                top->entry->setCodeSnips(snips);
-                break;
-            case StackElement::ModifyFunction:
-            case StackElement::AddFunction:
-                top->functionMods.last().snips().last().addCode(ch);
-                top->functionMods.last().setModifierFlag(FunctionModification::CodeInjection);
-                break;
-            case StackElement::NamespaceTypeEntry:
-            case StackElement::ObjectTypeEntry:
-            case StackElement::ValueTypeEntry:
-            case StackElement::InterfaceTypeEntry:
-                top->codeSnips.last().addCode(ch);
-                break;
-            default:
-                Q_ASSERT(false);
-            }
-            return true;
+    if ((type & StackElement::CodeSnipMask) != 0 && stackSize > 1) {
+        CodeSnipList snips;
+        switch (m_stack.at(stackSize - 2)) {
+        case StackElement::Root:
+            snips = top->entry->codeSnips();
+            snips.last().addCode(ch);
+            top->entry->setCodeSnips(snips);
+            break;
+        case StackElement::ModifyFunction:
+        case StackElement::AddFunction:
+            top->functionMods.last().snips().last().addCode(ch);
+            top->functionMods.last().setModifierFlag(FunctionModification::CodeInjection);
+            break;
+        case StackElement::NamespaceTypeEntry:
+        case StackElement::ObjectTypeEntry:
+        case StackElement::ValueTypeEntry:
+        case StackElement::InterfaceTypeEntry:
+            top->codeSnips.last().addCode(ch);
+            break;
+        default:
+            Q_ASSERT(false);
         }
+        return true;
     }
 
-    if (m_current->type & StackElement::DocumentationMask)
+    if ((type & StackElement::DocumentationMask) != 0)
         top->docModifications.last().setCode(ch);
 
     return true;
@@ -1575,14 +1580,14 @@ FunctionTypeEntry *
 
 TypedefEntry *
  TypeSystemParser::parseTypedefEntry(const ConditionalStreamReader &reader,
-                                     const QString &name,
+                                     const QString &name, StackElement topElement,
                                      const QVersionNumber &since,
                                      QXmlStreamAttributes *attributes)
 {
     if (!checkRootElement())
         return nullptr;
-    if (m_current && m_current->type != StackElement::Root
-        && m_current->type != StackElement::NamespaceTypeEntry) {
+    if (topElement != StackElement::Root
+        && topElement != StackElement::NamespaceTypeEntry) {
         m_error = QLatin1String("typedef entries must be nested in namespaces or type system.");
         return nullptr;
     }
@@ -1762,15 +1767,16 @@ bool TypeSystemParser::parseRenameFunction(const ConditionalStreamReader &,
     return true;
 }
 
-bool TypeSystemParser::parseInjectDocumentation(const ConditionalStreamReader &,
+bool TypeSystemParser::parseInjectDocumentation(const ConditionalStreamReader &, StackElement topElement,
                                        QXmlStreamAttributes *attributes)
 {
     const auto validParent = StackElement::TypeEntryMask
                             | StackElement::ModifyFunction
-                            | StackElement::ModifyField;
-    if (!m_current->parent || (m_current->parent->type & validParent) == 0) {
-        m_error = QLatin1String("inject-documentation must be inside modify-function, "
-                                "modify-field or other tags that creates a type");
+                            | StackElement::ModifyField
+                            | StackElement::AddFunction;
+    if ((topElement & validParent) == 0) {
+        m_error = u"inject-documentation must be inside modify-function, add-function"
+                   "modify-field or other tags that creates a type"_qs;
         return false;
     }
 
@@ -1797,7 +1803,7 @@ bool TypeSystemParser::parseInjectDocumentation(const ConditionalStreamReader &,
         }
     }
 
-    QString signature = m_current->type & StackElement::TypeEntryMask
+    QString signature = topElement & StackElement::TypeEntryMask
         ? QString() : m_currentSignature;
     DocModification mod(mode, signature);
     mod.setFormat(lang);
@@ -1806,12 +1812,13 @@ bool TypeSystemParser::parseInjectDocumentation(const ConditionalStreamReader &,
 }
 
 bool TypeSystemParser::parseModifyDocumentation(const ConditionalStreamReader &,
+                                       StackElement topElement,
                                        QXmlStreamAttributes *attributes)
 {
     const auto validParent = StackElement::TypeEntryMask
                             | StackElement::ModifyFunction
                             | StackElement::ModifyField;
-    if (!m_current->parent || (m_current->parent->type & validParent) == 0) {
+    if ((topElement & validParent) == 0) {
         m_error = QLatin1String("modify-documentation must be inside modify-function, "
                                 "modify-field or other tags that creates a type");
         return false;
@@ -1824,7 +1831,7 @@ bool TypeSystemParser::parseModifyDocumentation(const ConditionalStreamReader &,
     }
 
     const QString xpath = attributes->takeAt(xpathIndex).value().toString();
-    QString signature = (m_current->type & StackElement::TypeEntryMask) ? QString() : m_currentSignature;
+    QString signature = (topElement & StackElement::TypeEntryMask) ? QString() : m_currentSignature;
     m_contextStack.top()->docModifications
         << DocModification(xpath, signature);
     return true;
@@ -1933,10 +1940,10 @@ bool TypeSystemParser::parseRejectEnumValue(const ConditionalStreamReader &,
 }
 
 bool TypeSystemParser::parseReplaceArgumentType(const ConditionalStreamReader &,
-                                       const StackElement &topElement,
+                                       StackElement topElement,
                                        QXmlStreamAttributes *attributes)
 {
-    if (topElement.type != StackElement::ModifyArgument) {
+    if (topElement != StackElement::ModifyArgument) {
         m_error = QLatin1String("Type replacement can only be specified for argument modifications");
         return false;
     }
@@ -1951,13 +1958,13 @@ bool TypeSystemParser::parseReplaceArgumentType(const ConditionalStreamReader &,
 }
 
 bool TypeSystemParser::parseCustomConversion(const ConditionalStreamReader &,
-                                    const StackElement &topElement,
+                                    StackElement topElement,
                                     QXmlStreamAttributes *attributes)
 {
-    if (topElement.type != StackElement::ModifyArgument
-        && topElement.type != StackElement::ValueTypeEntry
-        && topElement.type != StackElement::PrimitiveTypeEntry
-        && topElement.type != StackElement::ContainerTypeEntry) {
+    if (topElement != StackElement::ModifyArgument
+        && topElement != StackElement::ValueTypeEntry
+        && topElement != StackElement::PrimitiveTypeEntry
+        && topElement != StackElement::ContainerTypeEntry) {
         m_error = QLatin1String("Conversion rules can only be specified for argument modification, "
                                 "value-type, primitive-type or container-type conversion.");
         return false;
@@ -1984,7 +1991,7 @@ bool TypeSystemParser::parseCustomConversion(const ConditionalStreamReader &,
     }
 
     const auto &top = m_contextStack.top();
-    if (topElement.type == StackElement::ModifyArgument) {
+    if (topElement == StackElement::ModifyArgument) {
         CodeSnip snip;
         snip.language = lang;
         top->functionMods.last().argument_mods().last().conversionRules().append(snip);
@@ -2027,10 +2034,10 @@ bool TypeSystemParser::parseCustomConversion(const ConditionalStreamReader &,
 }
 
 bool TypeSystemParser::parseNativeToTarget(const ConditionalStreamReader &,
-                                  const StackElement &topElement,
+                                  StackElement topElement,
                                   QXmlStreamAttributes *attributes)
 {
-    if (topElement.type != StackElement::ConversionRule) {
+    if (topElement != StackElement::ConversionRule) {
         m_error = QLatin1String("Native to Target conversion code can only be specified for custom conversion rules.");
         return false;
     }
@@ -2042,10 +2049,10 @@ bool TypeSystemParser::parseNativeToTarget(const ConditionalStreamReader &,
 }
 
 bool TypeSystemParser::parseAddConversion(const ConditionalStreamReader &,
-                                 const StackElement &topElement,
+                                 StackElement topElement,
                                  QXmlStreamAttributes *attributes)
 {
-    if (topElement.type != StackElement::TargetToNative) {
+    if (topElement != StackElement::TargetToNative) {
         m_error = QLatin1String("Target to Native conversions can only be added inside 'target-to-native' tags.");
         return false;
     }
@@ -2094,13 +2101,13 @@ static bool parseArgumentIndex(const QString &index, int *result, QString *error
 }
 
 bool TypeSystemParser::parseModifyArgument(const ConditionalStreamReader &,
-                                  const StackElement &topElement, QXmlStreamAttributes *attributes)
+                                  StackElement topElement, QXmlStreamAttributes *attributes)
 {
-    if (topElement.type != StackElement::ModifyFunction
-            && topElement.type != StackElement::AddFunction) {
+    if (topElement != StackElement::ModifyFunction
+            && topElement != StackElement::AddFunction) {
         m_error = QString::fromLatin1("argument modification requires function"
                                       " modification as parent, was %1")
-                                      .arg(topElement.type, 0, 16);
+                                      .arg(uint64_t(topElement), 0, 16);
         return false;
     }
 
@@ -2140,9 +2147,9 @@ bool TypeSystemParser::parseModifyArgument(const ConditionalStreamReader &,
 }
 
 bool TypeSystemParser::parseNoNullPointer(const ConditionalStreamReader &reader,
-                                 const StackElement &topElement, QXmlStreamAttributes *attributes)
+                                 StackElement topElement, QXmlStreamAttributes *attributes)
 {
-    if (topElement.type != StackElement::ModifyArgument) {
+    if (topElement != StackElement::ModifyArgument) {
         m_error = QLatin1String("no-null-pointer requires argument modification as parent");
         return false;
     }
@@ -2161,10 +2168,10 @@ bool TypeSystemParser::parseNoNullPointer(const ConditionalStreamReader &reader,
 }
 
 bool TypeSystemParser::parseDefineOwnership(const ConditionalStreamReader &,
-                                   const StackElement &topElement,
+                                   StackElement topElement,
                                    QXmlStreamAttributes *attributes)
 {
-    if (topElement.type != StackElement::ModifyArgument) {
+    if (topElement != StackElement::ModifyArgument) {
         m_error = QLatin1String("define-ownership requires argument modification as parent");
         return false;
     }
@@ -2211,10 +2218,10 @@ bool TypeSystemParser::parseDefineOwnership(const ConditionalStreamReader &,
 
 // ### fixme PySide7: remove (replaced by attribute).
 bool TypeSystemParser::parseRename(const ConditionalStreamReader &,
-                          const StackElement &topElement,
+                          StackElement topElement,
                           QXmlStreamAttributes *attributes)
 {
-    if (topElement.type != StackElement::ModifyArgument) {
+    if (topElement != StackElement::ModifyArgument) {
         m_error = QLatin1String("Argument modification parent required");
         return false;
     }
@@ -2280,14 +2287,14 @@ static bool parseOverloadNumber(const QXmlStreamAttribute &attribute, int *overl
 }
 
 bool TypeSystemParser::parseAddFunction(const ConditionalStreamReader &,
-                                        const StackElement &topElement,
-                                        StackElement::ElementType t,
+                                        StackElement topElement,
+                                        StackElement t,
                                         QXmlStreamAttributes *attributes)
 {
-    if (!(topElement.type
+    if (!(topElement
           & (StackElement::ComplexTypeEntryMask | StackElement::Root | StackElement::ContainerTypeEntry))) {
         m_error = QString::fromLatin1("Add/Declare function requires a complex/container type or a root tag as parent"
-                                      ", was=%1").arg(topElement.type, 0, 16);
+                                      ", was=%1").arg(uint64_t(topElement), 0, 16);
         return false;
     }
     QString originalSignature;
@@ -2366,12 +2373,12 @@ bool TypeSystemParser::parseAddFunction(const ConditionalStreamReader &,
     return true;
 }
 
-bool TypeSystemParser::parseProperty(const ConditionalStreamReader &, const StackElement &topElement,
+bool TypeSystemParser::parseProperty(const ConditionalStreamReader &, StackElement topElement,
                                      QXmlStreamAttributes *attributes)
 {
-    if ((topElement.type & StackElement::ComplexTypeEntryMask) == 0) {
+    if ((topElement & StackElement::ComplexTypeEntryMask) == 0) {
         m_error = QString::fromLatin1("Add property requires a complex type as parent"
-                                      ", was=%1").arg(topElement.type, 0, 16);
+                                      ", was=%1").arg(uint64_t(topElement), 0, 16);
         return false;
     }
 
@@ -2401,12 +2408,12 @@ bool TypeSystemParser::parseProperty(const ConditionalStreamReader &, const Stac
 }
 
 bool TypeSystemParser::parseModifyFunction(const ConditionalStreamReader &reader,
-                                  const StackElement &topElement,
+                                  StackElement topElement,
                                   QXmlStreamAttributes *attributes)
 {
-    if (!(topElement.type & StackElement::ComplexTypeEntryMask)) {
+    if (!(topElement & StackElement::ComplexTypeEntryMask)) {
         m_error = QString::fromLatin1("Modify function requires complex type as parent"
-                                      ", was=%1").arg(topElement.type, 0, 16);
+                                      ", was=%1").arg(uint64_t(topElement), 0, 16);
         return false;
     }
 
@@ -2533,10 +2540,10 @@ bool TypeSystemParser::parseModifyFunction(const ConditionalStreamReader &reader
 }
 
 bool TypeSystemParser::parseReplaceDefaultExpression(const ConditionalStreamReader &,
-                                            const StackElement &topElement,
+                                            StackElement topElement,
                                             QXmlStreamAttributes *attributes)
 {
-    if (!(topElement.type & StackElement::ModifyArgument)) {
+    if (!(topElement & StackElement::ModifyArgument)) {
         m_error = QLatin1String("Replace default expression only allowed as child of argument modification");
         return false;
     }
@@ -2552,10 +2559,10 @@ bool TypeSystemParser::parseReplaceDefaultExpression(const ConditionalStreamRead
 }
 
 bool TypeSystemParser::parseReferenceCount(const ConditionalStreamReader &reader,
-                                  const StackElement &topElement,
+                                  StackElement topElement,
                                   QXmlStreamAttributes *attributes)
 {
-    if (topElement.type != StackElement::ModifyArgument) {
+    if (topElement != StackElement::ModifyArgument) {
         m_error = QLatin1String("reference-count must be child of modify-argument");
         return false;
     }
@@ -2590,10 +2597,10 @@ bool TypeSystemParser::parseReferenceCount(const ConditionalStreamReader &reader
 }
 
 bool TypeSystemParser::parseParentOwner(const ConditionalStreamReader &,
-                               const StackElement &topElement,
+                               StackElement topElement,
                                QXmlStreamAttributes *attributes)
 {
-    if (topElement.type != StackElement::ModifyArgument) {
+    if (topElement != StackElement::ModifyArgument) {
         m_error = QLatin1String("parent-policy must be child of modify-argument");
         return false;
     }
@@ -2665,13 +2672,13 @@ bool TypeSystemParser::readFileSnippet(QXmlStreamAttributes *attributes, CodeSni
 }
 
 bool TypeSystemParser::parseInjectCode(const ConditionalStreamReader &,
-                              const StackElement &topElement,
-                              StackElement* element, QXmlStreamAttributes *attributes)
+                              StackElement topElement,
+                              QXmlStreamAttributes *attributes)
 {
-    if (!(topElement.type & StackElement::ComplexTypeEntryMask)
-        && (topElement.type != StackElement::AddFunction)
-        && (topElement.type != StackElement::ModifyFunction)
-        && (topElement.type != StackElement::Root)) {
+    if (!(topElement & StackElement::ComplexTypeEntryMask)
+        && (topElement != StackElement::AddFunction)
+        && (topElement != StackElement::ModifyFunction)
+        && (topElement != StackElement::Root)) {
         m_error = QLatin1String("wrong parent type for code injection");
         return false;
     }
@@ -2705,23 +2712,23 @@ bool TypeSystemParser::parseInjectCode(const ConditionalStreamReader &,
     snip.position = position;
     snip.language = lang;
 
-    if (topElement.type == StackElement::ModifyFunction
-        || topElement.type == StackElement::AddFunction) {
+    if (topElement == StackElement::ModifyFunction
+        || topElement == StackElement::AddFunction) {
         FunctionModification &mod = m_contextStack.top()->functionMods.last();
         mod.appendSnip(snip);
         if (!snip.code().isEmpty())
             mod.setModifierFlag(FunctionModification::CodeInjection);
-        element->type = StackElement::InjectCodeInFunction;
-    } else if (topElement.type == StackElement::Root) {
+        m_stack.top() = StackElement::InjectCodeInFunction;
+    } else if (topElement == StackElement::Root) {
         m_contextStack.top()->entry->addCodeSnip(snip);
-    } else if (topElement.type != StackElement::Root) {
+    } else if (topElement != StackElement::Root) {
         m_contextStack.top()->codeSnips << snip;
     }
     return true;
 }
 
 bool TypeSystemParser::parseInclude(const ConditionalStreamReader &,
-                           const StackElement &topElement,
+                           StackElement topElement,
                            TypeEntry *entry, QXmlStreamAttributes *attributes)
 {
     QString fileName;
@@ -2742,10 +2749,10 @@ bool TypeSystemParser::parseInclude(const ConditionalStreamReader &,
     }
 
     Include inc(location, fileName);
-    if (topElement.type
+    if (topElement
         & (StackElement::ComplexTypeEntryMask | StackElement::PrimitiveTypeEntry)) {
         entry->setInclude(inc);
-    } else if (topElement.type == StackElement::ExtraIncludes) {
+    } else if (topElement == StackElement::ExtraIncludes) {
         entry->addExtraInclude(inc);
     } else {
         m_error = QLatin1String("Only supported parent tags are primitive-type, complex types or extra-includes");
@@ -2768,14 +2775,14 @@ bool TypeSystemParser::parseSystemInclude(const ConditionalStreamReader &,
 
 TemplateInstance *
     TypeSystemParser::parseInsertTemplate(const ConditionalStreamReader &,
-                                          const StackElement &topElement,
+                                          StackElement topElement,
                                           QXmlStreamAttributes *attributes)
 {
-    if (!(topElement.type & StackElement::CodeSnipMask) &&
-        (topElement.type != StackElement::Template) &&
-        (topElement.type != StackElement::NativeToTarget) &&
-        (topElement.type != StackElement::AddConversion) &&
-        (topElement.type != StackElement::ConversionRule)) {
+    if (!(topElement & StackElement::CodeSnipMask) &&
+        (topElement != StackElement::Template) &&
+        (topElement != StackElement::NativeToTarget) &&
+        (topElement != StackElement::AddConversion) &&
+        (topElement != StackElement::ConversionRule)) {
         m_error = QLatin1String("Can only insert templates into code snippets, templates, "\
                                 "conversion-rule, native-to-target or add-conversion tags.");
         return nullptr;
@@ -2789,10 +2796,9 @@ TemplateInstance *
 }
 
 bool TypeSystemParser::parseReplace(const ConditionalStreamReader &,
-                           const StackElement &topElement,
-                           StackElement *, QXmlStreamAttributes *attributes)
+                           StackElement topElement, QXmlStreamAttributes *attributes)
 {
-    if (topElement.type != StackElement::InsertTemplate) {
+    if (topElement != StackElement::InsertTemplate) {
         m_error = QLatin1String("Can only insert replace rules into insert-template.");
         return false;
     }
@@ -2814,7 +2820,7 @@ bool TypeSystemParser::parseReplace(const ConditionalStreamReader &,
 // or it's not possible to cover all primitive target language
 // types (which we need to do in order to support fake meta objects)
 bool TypeSystemParser::checkDuplicatedTypeEntry(const ConditionalStreamReader &reader,
-                                                StackElement::ElementType t,
+                                                StackElement t,
                                                 const QString &name) const
 {
     if (t == StackElement::PrimitiveTypeEntry || t == StackElement::FunctionTypeEntry)
@@ -2845,7 +2851,7 @@ static bool parseVersion(const QString &versionSpec, const QString &package,
     return true;
 }
 
-bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
+bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, StackElement element)
 {
     if (m_ignoreDepth) {
         ++m_ignoreDepth;
@@ -2879,34 +2885,25 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
         }
     }
 
-    if (tagName.compare(QLatin1String("import-file"), Qt::CaseInsensitive) == 0)
+    if (element == StackElement::ImportFile)
         return importFileElement(attributes);
-
-    const auto elementTypeOpt = elementFromTag(tagName);
-    if (!elementTypeOpt.has_value()) {
-        m_error = u"Unknown tag name: '"_qs + tagName.toString() + u'\'';
-        return false;
-    }
 
     if (m_currentDroppedEntryDepth) {
         ++m_currentDroppedEntryDepth;
         return true;
     }
 
-    std::unique_ptr<StackElement> element(new StackElement(m_current));
-    element->type = elementTypeOpt.value();
-
-    if (element->type == StackElement::Root && m_generate == TypeEntry::GenerateCode)
+    if (element == StackElement::Root && m_generate == TypeEntry::GenerateCode)
         customConversionsForReview.clear();
 
-    if (element->type == StackElement::Unimplemented) {
+    if (element == StackElement::Unimplemented) {
         qCWarning(lcShiboken, "%s",
                   qPrintable(msgUnimplementedElementWarning(reader, tagName)));
         return true;
     }
 
-    if ((element->type & StackElement::TypeEntryMask) != 0
-        || element->type == StackElement::Root) {
+    if ((element & StackElement::TypeEntryMask) != 0
+        || element == StackElement::Root) {
         m_contextStack.push(StackElementContextPtr(new StackElementContext()));
     }
 
@@ -2916,27 +2913,28 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
     }
 
     const auto &top = m_contextStack.top();
+    const StackElement topElement = m_stack.value(m_stack.size() - 2, StackElement::None);
 
-    if (element->type & StackElement::TypeEntryMask) {
+    if (element & StackElement::TypeEntryMask) {
         QString name;
-        if (element->type != StackElement::FunctionTypeEntry) {
+        if (element != StackElement::FunctionTypeEntry) {
             const int nameIndex = indexOfAttribute(attributes, nameAttribute());
             if (nameIndex != -1) {
                 name = attributes.takeAt(nameIndex).value().toString();
-            } else if (element->type != StackElement::EnumTypeEntry) { // anonymous enum?
+            } else if (element != StackElement::EnumTypeEntry) { // anonymous enum?
                 m_error = msgMissingAttribute(nameAttribute());
                 return false;
             }
         }
         // Allow for primitive and/or std:: types only, else require proper nesting.
-        if (element->type != StackElement::PrimitiveTypeEntry && name.contains(QLatin1Char(':'))
+        if (element != StackElement::PrimitiveTypeEntry && name.contains(QLatin1Char(':'))
             && !name.contains(QLatin1String("std::"))) {
             m_error = msgIncorrectlyNestedName(name);
             return false;
         }
 
         if (m_database->hasDroppedTypeEntries()) {
-            const QString identifier = element->type == StackElement::FunctionTypeEntry
+            const QString identifier = element == StackElement::FunctionTypeEntry
                 ? attributes.value(signatureAttribute()).toString() : name;
             if (shouldDropTypeEntry(m_database, m_contextStack, identifier)) {
                 m_currentDroppedEntryDepth = 1;
@@ -2951,7 +2949,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
 
         // The top level tag 'function' has only the 'signature' tag
         // and we should extract the 'name' value from it.
-        if (element->type == StackElement::FunctionTypeEntry
+        if (element == StackElement::FunctionTypeEntry
             && !parseRenameFunction(reader, &name, &attributes)) {
                 return false;
         }
@@ -2959,15 +2957,15 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
         // We need to be able to have duplicate primitive type entries,
         // or it's not possible to cover all primitive target language
         // types (which we need to do in order to support fake meta objects)
-        if (element->type != StackElement::PrimitiveTypeEntry
-            && element->type != StackElement::FunctionTypeEntry) {
+        if (element != StackElement::PrimitiveTypeEntry
+            && element != StackElement::FunctionTypeEntry) {
             TypeEntry *tmp = m_database->findType(name);
             if (tmp && !tmp->isNamespace())
                 qCWarning(lcShiboken).noquote().nospace()
                     << "Duplicate type entry: '" << name << '\'';
         }
 
-        if (element->type == StackElement::EnumTypeEntry) {
+        if (element == StackElement::EnumTypeEntry) {
             const int enumIdentifiedByIndex = indexOfAttribute(attributes, enumIdentifiedByValueAttribute());
             const QString identifiedByValue = enumIdentifiedByIndex != -1
                 ? attributes.takeAt(enumIdentifiedByIndex).value().toString() : QString();
@@ -2984,7 +2982,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
             return false;
         }
 
-        switch (element->type) {
+        switch (element) {
         case StackElement::CustomTypeEntry:
             top->entry = parseCustomTypeEntry(reader, name, versionRange.since, &attributes);
             if (Q_UNLIKELY(!top->entry))
@@ -3049,7 +3047,8 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
                 return false;
             break;
         case StackElement::TypedefTypeEntry:
-            if (TypedefEntry *te = parseTypedefEntry(reader, name, versionRange.since, &attributes)) {
+            if (TypedefEntry *te = parseTypedefEntry(reader, name, topElement,
+                                                     versionRange.since, &attributes)) {
                 applyComplexTypeAttributes(reader, te, &attributes);
                 top->entry = te;
             } else {
@@ -3061,7 +3060,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
         }
 
         if (top->entry) {
-            if (checkDuplicatedTypeEntry(reader, element->type, top->entry->name())
+            if (checkDuplicatedTypeEntry(reader, element, top->entry->name())
                 && !m_database->addType(top->entry, &m_error)) {
                 return false;
             }
@@ -3070,35 +3069,32 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
                 << u"Type: "_qs + name + u" was rejected by typesystem"_qs;
         }
 
-    } else if (element->type == StackElement::InjectDocumentation) {
-        if (!parseInjectDocumentation(reader, &attributes))
+    } else if (element == StackElement::InjectDocumentation) {
+        if (!parseInjectDocumentation(reader, topElement, &attributes))
             return false;
-    } else if (element->type == StackElement::ModifyDocumentation) {
-        if (!parseModifyDocumentation(reader, &attributes))
+    } else if (element == StackElement::ModifyDocumentation) {
+        if (!parseModifyDocumentation(reader, topElement, &attributes))
             return false;
-    } else if (element->type != StackElement::None) {
-        bool topLevel = element->type == StackElement::Root
-                        || element->type == StackElement::SuppressedWarning
-                        || element->type == StackElement::Rejection
-                        || element->type == StackElement::LoadTypesystem
-                        || element->type == StackElement::InjectCode
-                        || element->type == StackElement::ExtraIncludes
-                        || element->type == StackElement::SystemInclude
-                        || element->type == StackElement::ConversionRule
-                        || element->type == StackElement::AddFunction
-                        || element->type == StackElement::Template;
+    } else if (element != StackElement::None) {
+        bool topLevel = element == StackElement::Root
+                        || element == StackElement::SuppressedWarning
+                        || element == StackElement::Rejection
+                        || element == StackElement::LoadTypesystem
+                        || element == StackElement::InjectCode
+                        || element == StackElement::ExtraIncludes
+                        || element == StackElement::SystemInclude
+                        || element == StackElement::ConversionRule
+                        || element == StackElement::AddFunction
+                        || element == StackElement::Template;
 
-        if (!topLevel && m_current->type == StackElement::Root) {
+        if (!topLevel && m_stack.at(m_stack.size() - 2) == StackElement::Root) {
             m_error = u"Tag requires parent: '"_qs + tagName.toString() + u'\'';
             return false;
         }
 
-        StackElement topElement = !m_current ? StackElement(nullptr) : *m_current;
-
-        switch (element->type) {
+        switch (element) {
         case StackElement::Root:
             top->entry = parseRootElement(reader, versionRange.since, &attributes);
-            element->type = StackElement::Root;
             break;
         case StackElement::LoadTypesystem:
             if (!loadTypesystem(reader, &attributes))
@@ -3121,7 +3117,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
                 return false;
             break;
         case StackElement::TargetToNative: {
-            if (topElement.type != StackElement::ConversionRule) {
+            if (topElement != StackElement::ConversionRule) {
                 m_error = QLatin1String("Target to Native conversions can only be specified for custom conversion rules.");
                 return false;
             }
@@ -3165,7 +3161,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
                  return false;
              break;
         case StackElement::RemoveArgument:
-            if (topElement.type != StackElement::ModifyArgument) {
+            if (topElement != StackElement::ModifyArgument) {
                 m_error = QLatin1String("Removing argument requires argument modification as parent");
                 return false;
             }
@@ -3179,7 +3175,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
             break;
         case StackElement::DeclareFunction:
         case StackElement::AddFunction:
-            if (!parseAddFunction(reader, topElement, element->type, &attributes))
+            if (!parseAddFunction(reader, topElement, element, &attributes))
                 return false;
             break;
         case StackElement::Property:
@@ -3206,14 +3202,14 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
                 return false;
             break;
         case StackElement::Array:
-            if (topElement.type != StackElement::ModifyArgument) {
+            if (topElement != StackElement::ModifyArgument) {
                 m_error = QLatin1String("array must be child of modify-argument");
                 return false;
             }
             top->functionMods.last().argument_mods().last().setArray(true);
             break;
         case StackElement::InjectCode:
-            if (!parseInjectCode(reader, topElement, element.get(), &attributes))
+            if (!parseInjectCode(reader, topElement, &attributes))
                 return false;
             break;
         case StackElement::Include:
@@ -3244,7 +3240,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
                 return false;
             break;
         case StackElement::Replace:
-            if (!parseReplace(reader, topElement, element.get(), &attributes))
+            if (!parseReplace(reader, topElement, &attributes))
                 return false;
             break;
         default:
@@ -3257,6 +3253,5 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
         qCWarning(lcShiboken, "%s", qPrintable(msgReaderWarning(reader, message)));
     }
 
-    m_current = element.release();
     return true;
 }
