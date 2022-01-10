@@ -259,7 +259,6 @@ private:
 
     TypeDatabase* m_database;
     StackElement* m_current = nullptr;
-    StackElement* m_currentDroppedEntry = nullptr;
     int m_currentDroppedEntryDepth = 0;
     int m_ignoreDepth = 0;
     QString m_defaultPackage;
