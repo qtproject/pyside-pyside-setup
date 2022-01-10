@@ -797,15 +797,8 @@ bool TypeSystemParser::endElement(QStringView localName)
         return true;
     }
 
-    if (m_currentDroppedEntry) {
-        if (m_currentDroppedEntryDepth == 1) {
-            m_current = m_currentDroppedEntry->parent;
-            delete m_currentDroppedEntry;
-            m_currentDroppedEntry = nullptr;
-            m_currentDroppedEntryDepth = 0;
-        } else {
-            --m_currentDroppedEntryDepth;
-        }
+    if (m_currentDroppedEntryDepth != 0) {
+        --m_currentDroppedEntryDepth;
         return true;
     }
 
@@ -948,8 +941,10 @@ bool TypeSystemParser::endElement(QStringView localName)
 template <class String> // QString/QStringRef
 bool TypeSystemParser::characters(const String &ch)
 {
-    if (m_currentDroppedEntry || m_ignoreDepth || m_current->type == StackElement::Unimplemented)
+    if (m_currentDroppedEntryDepth != 0 || m_ignoreDepth != 0
+        || m_current->type == StackElement::Unimplemented) {
         return true;
+    }
 
     if (m_current->type == StackElement::Template) {
         m_templateEntry->addCode(ch);
@@ -2900,7 +2895,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
         return false;
     }
 
-    if (m_currentDroppedEntry) {
+    if (m_currentDroppedEntryDepth) {
         ++m_currentDroppedEntryDepth;
         return true;
     }
@@ -2951,7 +2946,6 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
             const QString identifier = element->type == StackElement::FunctionTypeEntry
                 ? attributes.value(signatureAttribute()).toString() : name;
             if (shouldDropTypeEntry(m_database, m_contextStack, identifier)) {
-                m_currentDroppedEntry = element.release();
                 m_currentDroppedEntryDepth = 1;
                 if (ReportHandler::isDebug(ReportHandler::SparseDebug)) {
                     qCInfo(lcShiboken, "Type system entry '%s' was intentionally dropped from generation.",
