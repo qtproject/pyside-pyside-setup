@@ -812,16 +812,18 @@ bool TypeSystemParser::endElement(QStringView localName)
     if (!localName.compare(QLatin1String("import-file"), Qt::CaseInsensitive))
         return true;
 
-    if (!m_current)
+    if (m_contextStack.isEmpty())
         return true;
+
+    const auto &top = m_contextStack.top();
 
     switch (m_current->type) {
     case StackElement::Unimplemented:
         return true;
     case StackElement::Root:
         if (m_generate == TypeEntry::GenerateCode) {
-            TypeDatabase::instance()->addGlobalUserFunctions(m_contextStack.top()->addedFunctions);
-            TypeDatabase::instance()->addGlobalUserFunctionModifications(m_contextStack.top()->functionMods);
+            TypeDatabase::instance()->addGlobalUserFunctions(top->addedFunctions);
+            TypeDatabase::instance()->addGlobalUserFunctionModifications(top->functionMods);
             for (CustomConversion *customConversion : qAsConst(customConversionsForReview)) {
                 const CustomConversion::TargetToNativeConversions &toNatives = customConversion->targetToNativeConversions();
                 for (CustomConversion::TargetToNativeConversion *toNative : toNatives)
@@ -829,13 +831,17 @@ bool TypeSystemParser::endElement(QStringView localName)
             }
         }
         break;
+    case StackElement::FunctionTypeEntry:
+        TypeDatabase::instance()->addGlobalUserFunctionModifications(top->functionMods);
+        break;
     case StackElement::ObjectTypeEntry:
     case StackElement::ValueTypeEntry:
     case StackElement::InterfaceTypeEntry:
     case StackElement::ContainerTypeEntry:
     case StackElement::NamespaceTypeEntry: {
-        auto *centry = static_cast<ComplexTypeEntry *>(m_current->entry);
-        auto top = m_contextStack.top();
+        Q_ASSERT(top->entry);
+        Q_ASSERT(top->entry->isComplex());
+        auto *centry = static_cast<ComplexTypeEntry *>(top->entry);
         centry->setAddedFunctions(top->addedFunctions);
         centry->setFunctionModifications(top->functionMods);
         centry->setFieldModifications(top->fieldMods);
@@ -845,8 +851,7 @@ bool TypeSystemParser::endElement(QStringView localName)
     break;
 
     case StackElement::TypedefTypeEntry: {
-        auto *centry = static_cast<TypedefEntry *>(m_current->entry)->target();
-        auto top = m_contextStack.top();
+        auto *centry = static_cast<TypedefEntry *>(top->entry)->target();
         centry->setAddedFunctions(centry->addedFunctions() + top->addedFunctions);
         centry->setFunctionModifications(centry->functionModifications() + top->functionMods);
         centry->setFieldModifications(centry->fieldModifications() + top->fieldMods);
@@ -857,7 +862,6 @@ bool TypeSystemParser::endElement(QStringView localName)
 
     case StackElement::AddFunction: {
         // Leaving add-function: Assign all modifications to the added function
-        StackElementContext *top = m_contextStack.top();
         const int modIndex = top->addedFunctionModificationIndex;
         top->addedFunctionModificationIndex = -1;
         Q_ASSERT(modIndex >= 0);
@@ -868,13 +872,13 @@ bool TypeSystemParser::endElement(QStringView localName)
         break;
     case StackElement::NativeToTarget:
     case StackElement::AddConversion: {
-        CustomConversion* customConversion = static_cast<TypeEntry*>(m_current->entry)->customConversion();
+        auto *customConversion = top->entry->customConversion();
         if (!customConversion) {
             m_error = QLatin1String("CustomConversion object is missing.");
             return false;
         }
 
-        QString code = m_contextStack.top()->codeSnips.takeLast().code();
+        QString code = top->codeSnips.takeLast().code();
         if (m_current->type == StackElement::AddConversion) {
             if (customConversion->targetToNativeConversions().isEmpty()) {
                 m_error = QLatin1String("CustomConversion's target to native conversions missing.");
@@ -887,8 +891,8 @@ bool TypeSystemParser::endElement(QStringView localName)
     }
     break;
     case StackElement::EnumTypeEntry:
-        m_current->entry->setDocModification(m_contextStack.top()->docModifications);
-        m_contextStack.top()->docModifications = DocModificationList();
+        top->entry->setDocModification(top->docModifications);
+        top->docModifications = DocModificationList();
         m_currentEnum = nullptr;
         break;
     case StackElement::Template:
@@ -899,26 +903,26 @@ bool TypeSystemParser::endElement(QStringView localName)
         switch (m_current->parent->type) {
         case StackElement::InjectCode:
             if (m_current->parent->parent->type == StackElement::Root) {
-                CodeSnipList snips = m_current->parent->entry->codeSnips();
+                CodeSnipList snips = top->entry->codeSnips();
                 CodeSnip snip = snips.takeLast();
                 snip.addTemplateInstance(m_templateInstance);
                 snips.append(snip);
-                m_current->parent->entry->setCodeSnips(snips);
+                top->entry->setCodeSnips(snips);
                 break;
             }
             Q_FALLTHROUGH();
         case StackElement::NativeToTarget:
         case StackElement::AddConversion:
-            m_contextStack.top()->codeSnips.last().addTemplateInstance(m_templateInstance);
+            top->codeSnips.last().addTemplateInstance(m_templateInstance);
             break;
         case StackElement::Template:
             m_templateEntry->addTemplateInstance(m_templateInstance);
             break;
         case StackElement::ConversionRule:
-            m_contextStack.top()->functionMods.last().argument_mods().last().conversionRules().last().addTemplateInstance(m_templateInstance);
+            top->functionMods.last().argument_mods().last().conversionRules().last().addTemplateInstance(m_templateInstance);
             break;
         case StackElement::InjectCodeInFunction:
-            m_contextStack.top()->functionMods.last().snips().last().addTemplateInstance(m_templateInstance);
+            top->functionMods.last().snips().last().addTemplateInstance(m_templateInstance);
             break;
         default:
             break; // nada
@@ -929,19 +933,9 @@ bool TypeSystemParser::endElement(QStringView localName)
         break;
     }
 
-    switch (m_current->type) {
-    case StackElement::Root:
-    case StackElement::NamespaceTypeEntry:
-    case StackElement::InterfaceTypeEntry:
-    case StackElement::ObjectTypeEntry:
-    case StackElement::ValueTypeEntry:
-    case StackElement::PrimitiveTypeEntry:
-    case StackElement::TypedefTypeEntry:
-    case StackElement::ContainerTypeEntry:
-        delete m_contextStack.pop();
-        break;
-    default:
-        break;
+    if ((m_current->type & StackElement::TypeEntryMask) != 0
+        || m_current->type == StackElement::Root) {
+        m_contextStack.pop();
     }
 
     StackElement *child = m_current;
@@ -962,14 +956,21 @@ bool TypeSystemParser::characters(const String &ch)
         return true;
     }
 
+    if (m_contextStack.isEmpty()) {
+        m_error = msgNoRootTypeSystemEntry();
+        return false;
+    }
+
+    const auto &top = m_contextStack.top();
+
     if (m_current->type == StackElement::ConversionRule
         && m_current->parent->type == StackElement::ModifyArgument) {
-        m_contextStack.top()->functionMods.last().argument_mods().last().conversionRules().last().addCode(ch);
+        top->functionMods.last().argument_mods().last().conversionRules().last().addCode(ch);
         return true;
     }
 
     if (m_current->type == StackElement::NativeToTarget || m_current->type == StackElement::AddConversion) {
-       m_contextStack.top()->codeSnips.last().addCode(ch);
+       top->codeSnips.last().addCode(ch);
        return true;
     }
 
@@ -978,20 +979,20 @@ bool TypeSystemParser::characters(const String &ch)
             CodeSnipList snips;
             switch (m_current->parent->type) {
             case StackElement::Root:
-                snips = m_current->parent->entry->codeSnips();
+                snips = top->entry->codeSnips();
                 snips.last().addCode(ch);
-                m_current->parent->entry->setCodeSnips(snips);
+                top->entry->setCodeSnips(snips);
                 break;
             case StackElement::ModifyFunction:
             case StackElement::AddFunction:
-                m_contextStack.top()->functionMods.last().snips().last().addCode(ch);
-                m_contextStack.top()->functionMods.last().setModifierFlag(FunctionModification::CodeInjection);
+                top->functionMods.last().snips().last().addCode(ch);
+                top->functionMods.last().setModifierFlag(FunctionModification::CodeInjection);
                 break;
             case StackElement::NamespaceTypeEntry:
             case StackElement::ObjectTypeEntry:
             case StackElement::ValueTypeEntry:
             case StackElement::InterfaceTypeEntry:
-                m_contextStack.top()->codeSnips.last().addCode(ch);
+                top->codeSnips.last().addCode(ch);
                 break;
             default:
                 Q_ASSERT(false);
@@ -1001,7 +1002,7 @@ bool TypeSystemParser::characters(const String &ch)
     }
 
     if (m_current->type & StackElement::DocumentationMask)
-        m_contextStack.top()->docModifications.last().setCode(ch);
+        top->docModifications.last().setCode(ch);
 
     return true;
 }
@@ -1092,17 +1093,17 @@ static bool convertRemovalAttribute(QStringView value)
 // Check whether an entry should be dropped, allowing for dropping the module
 // name (match 'Class' and 'Module.Class').
 static bool shouldDropTypeEntry(const TypeDatabase *db,
-                                const StackElement *element,
+                                const TypeSystemParser::ContextStack &stack                                ,
                                 QString name)
 {
-    for (auto e = element->parent; e ; e = e->parent) {
-        if (e->entry) {
-            if (e->entry->type() == TypeEntry::TypeSystemType) {
+    for (auto i = stack.size() - 1; i >= 0; --i) {
+        if (auto *entry = stack.at(i)->entry) {
+            if (entry->type() == TypeEntry::TypeSystemType) {
                 if (db->shouldDropTypeEntry(name)) // Unqualified
                     return true;
             }
             name.prepend(QLatin1Char('.'));
-            name.prepend(e->entry->name());
+            name.prepend(entry->name());
         }
     }
     return db->shouldDropTypeEntry(name);
@@ -1125,15 +1126,19 @@ static QString checkSignatureError(const QString& signature, const QString& tag)
 
 inline const TypeEntry *TypeSystemParser::currentParentTypeEntry() const
 {
-    return m_current ? m_current->entry : nullptr;
+    const auto size = m_contextStack.size();
+    return size > 1 ? m_contextStack.at(size - 2)->entry : nullptr;
 }
 
 bool TypeSystemParser::checkRootElement()
 {
-    const bool ok = currentParentTypeEntry() != nullptr;
-    if (!ok)
-        m_error = msgNoRootTypeSystemEntry();
-    return ok;
+    for (auto i = m_contextStack.size() - 1; i >= 0; --i) {
+        auto *e = m_contextStack.at(i)->entry;
+        if (e && e->isTypeSystem())
+            return true;
+    }
+    m_error = msgNoRootTypeSystemEntry();
+    return false;
 }
 
 static TypeEntry *findViewedType(const QString &name)
@@ -1183,7 +1188,7 @@ CustomTypeEntry *TypeSystemParser::parseCustomTypeEntry(const ConditionalStreamR
 {
     if (!checkRootElement())
         return nullptr;
-    auto *result = new CustomTypeEntry(name, since, m_current->entry);
+    auto *result = new CustomTypeEntry(name, since, m_contextStack.top()->entry);
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == checkFunctionAttribute())
@@ -1990,14 +1995,15 @@ bool TypeSystemParser::parseCustomConversion(const ConditionalStreamReader &,
         }
     }
 
+    const auto &top = m_contextStack.top();
     if (topElement.type == StackElement::ModifyArgument) {
         CodeSnip snip;
         snip.language = lang;
-        m_contextStack.top()->functionMods.last().argument_mods().last().conversionRules().append(snip);
+        top->functionMods.last().argument_mods().last().conversionRules().append(snip);
         return true;
     }
 
-    if (topElement.entry->hasTargetConversionRule() || topElement.entry->hasCustomConversion()) {
+    if (top->entry->hasTargetConversionRule() || top->entry->hasCustomConversion()) {
         m_error = QLatin1String("Types can have only one conversion rule");
         return false;
     }
@@ -2022,12 +2028,12 @@ bool TypeSystemParser::parseCustomConversion(const ConditionalStreamReader &,
                 m_error = msgCannotFindSnippet(sourceFile, snippetLabel);
                 return false;
             }
-            topElement.entry->setTargetConversionRule(conversionRuleOptional.value());
+            top->entry->setTargetConversionRule(conversionRuleOptional.value());
         }
         return true;
     }
 
-    auto *customConversion = new CustomConversion(m_current->entry);
+    auto *customConversion = new CustomConversion(top->entry);
     customConversionsForReview.append(customConversion);
     return true;
 }
@@ -2071,8 +2077,9 @@ bool TypeSystemParser::parseAddConversion(const ConditionalStreamReader &,
         m_error = QLatin1String("Target to Native conversions must specify the input type with the 'type' attribute.");
         return false;
     }
-    m_current->entry->customConversion()->addTargetToNativeConversion(sourceTypeName, typeCheck);
-    m_contextStack.top()->codeSnips.append(snip);
+    const auto &top = m_contextStack.top();
+    top->entry->customConversion()->addTargetToNativeConversion(sourceTypeName, typeCheck);
+    top->codeSnips.append(snip);
     return true;
 }
 
@@ -2401,7 +2408,7 @@ bool TypeSystemParser::parseProperty(const ConditionalStreamReader &, const Stac
         m_error = QLatin1String("<property> element is missing required attibutes (name/type/get).");
         return false;
     }
-    static_cast<ComplexTypeEntry *>(topElement.entry)->addProperty(property);
+    static_cast<ComplexTypeEntry *>(m_contextStack.top()->entry)->addProperty(property);
     return true;
 }
 
@@ -2477,8 +2484,9 @@ bool TypeSystemParser::parseModifyFunction(const ConditionalStreamReader &reader
     }
 
     // Child of global <function>
-    if (originalSignature.isEmpty() && topElement.entry->isFunction()) {
-        auto f = static_cast<const FunctionTypeEntry *>(topElement.entry);
+    const auto &top = m_contextStack.top();
+    if (originalSignature.isEmpty() && top->entry->isFunction()) {
+        auto f = static_cast<const FunctionTypeEntry *>(top->entry);
         originalSignature = f->signatures().value(0);
     }
 
@@ -2532,7 +2540,7 @@ bool TypeSystemParser::parseModifyFunction(const ConditionalStreamReader &reader
     if (allowThread != TypeSystem::AllowThread::Unspecified)
         mod.setAllowThread(allowThread);
 
-    m_contextStack.top()->functionMods << mod;
+    top->functionMods << mod;
     return true;
 }
 
@@ -2717,7 +2725,7 @@ bool TypeSystemParser::parseInjectCode(const ConditionalStreamReader &,
             mod.setModifierFlag(FunctionModification::CodeInjection);
         element->type = StackElement::InjectCodeInFunction;
     } else if (topElement.type == StackElement::Root) {
-        element->entry->addCodeSnip(snip);
+        m_contextStack.top()->entry->addCodeSnip(snip);
     } else if (topElement.type != StackElement::Root) {
         m_contextStack.top()->codeSnips << snip;
     }
@@ -2909,20 +2917,17 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
         return true;
     }
 
-    switch (element->type) {
-    case StackElement::Root:
-    case StackElement::NamespaceTypeEntry:
-    case StackElement::InterfaceTypeEntry:
-    case StackElement::ObjectTypeEntry:
-    case StackElement::ValueTypeEntry:
-    case StackElement::PrimitiveTypeEntry:
-    case StackElement::TypedefTypeEntry:
-    case StackElement::ContainerTypeEntry:
-        m_contextStack.push(new StackElementContext());
-        break;
-    default:
-        break;
+    if ((element->type & StackElement::TypeEntryMask) != 0
+        || element->type == StackElement::Root) {
+        m_contextStack.push(StackElementContextPtr(new StackElementContext()));
     }
+
+    if (m_contextStack.isEmpty()) {
+        m_error = msgNoRootTypeSystemEntry();
+        return false;
+    }
+
+    const auto &top = m_contextStack.top();
 
     if (element->type & StackElement::TypeEntryMask) {
         QString name;
@@ -2945,13 +2950,14 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
         if (m_database->hasDroppedTypeEntries()) {
             const QString identifier = element->type == StackElement::FunctionTypeEntry
                 ? attributes.value(signatureAttribute()).toString() : name;
-            if (shouldDropTypeEntry(m_database, element.get(), identifier)) {
+            if (shouldDropTypeEntry(m_database, m_contextStack, identifier)) {
                 m_currentDroppedEntry = element.release();
                 m_currentDroppedEntryDepth = 1;
                 if (ReportHandler::isDebug(ReportHandler::SparseDebug)) {
                     qCInfo(lcShiboken, "Type system entry '%s' was intentionally dropped from generation.",
                            qPrintable(identifier));
                 }
+                 m_contextStack.pop();
                 return true;
             }
         }
@@ -2993,20 +2999,19 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
 
         switch (element->type) {
         case StackElement::CustomTypeEntry:
-            element->entry =
-                parseCustomTypeEntry(reader, name, versionRange.since, &attributes);
-            if (Q_UNLIKELY(!element->entry))
+            top->entry = parseCustomTypeEntry(reader, name, versionRange.since, &attributes);
+            if (Q_UNLIKELY(!top->entry))
                 return false;
             break;
         case StackElement::PrimitiveTypeEntry:
-            element->entry = parsePrimitiveTypeEntry(reader, name, versionRange.since, &attributes);
-            if (Q_UNLIKELY(!element->entry))
+            top->entry = parsePrimitiveTypeEntry(reader, name, versionRange.since, &attributes);
+            if (Q_UNLIKELY(!top->entry))
                 return false;
             break;
         case StackElement::ContainerTypeEntry:
             if (ContainerTypeEntry *ce = parseContainerTypeEntry(reader, name, versionRange.since, &attributes)) {
                 applyComplexTypeAttributes(reader, ce, &attributes);
-                element->entry = ce;
+                top->entry = ce;
             } else {
                 return false;
             }
@@ -3015,7 +3020,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
         case StackElement::SmartPointerTypeEntry:
             if (SmartPointerTypeEntry *se = parseSmartPointerEntry(reader, name, versionRange.since, &attributes)) {
                 applyComplexTypeAttributes(reader, se, &attributes);
-                element->entry = se;
+                top->entry = se;
             } else {
                 return false;
             }
@@ -3024,40 +3029,42 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
             m_currentEnum = parseEnumTypeEntry(reader, name, versionRange.since, &attributes);
             if (Q_UNLIKELY(!m_currentEnum))
                 return false;
-            element->entry = m_currentEnum;
+            top->entry = m_currentEnum;
             break;
 
         case StackElement::ValueTypeEntry:
            if (ValueTypeEntry *ve = parseValueTypeEntry(reader, name, versionRange.since, &attributes)) {
                applyComplexTypeAttributes(reader, ve, &attributes);
-               element->entry = ve;
+               top->entry = ve;
            } else {
                return false;
            }
            break;
         case StackElement::NamespaceTypeEntry:
             if (auto entry = parseNamespaceTypeEntry(reader, name, versionRange.since, &attributes))
-                element->entry = entry;
+                top->entry = entry;
             else
                 return false;
             break;
         case StackElement::ObjectTypeEntry:
-        case StackElement::InterfaceTypeEntry:
+        case StackElement::InterfaceTypeEntry: {
             if (!checkRootElement())
                 return false;
-            element->entry = new ObjectTypeEntry(name, versionRange.since, currentParentTypeEntry());
-            applyCommonAttributes(reader, element->entry, &attributes);
-            applyComplexTypeAttributes(reader, static_cast<ComplexTypeEntry *>(element->entry), &attributes);
+            auto *ce  = new ObjectTypeEntry(name, versionRange.since, currentParentTypeEntry());
+            top->entry = ce;
+            applyCommonAttributes(reader, top->entry, &attributes);
+            applyComplexTypeAttributes(reader, ce, &attributes);
+        }
             break;
         case StackElement::FunctionTypeEntry:
-            element->entry = parseFunctionTypeEntry(reader, name, versionRange.since, &attributes);
-            if (Q_UNLIKELY(!element->entry))
+            top->entry = parseFunctionTypeEntry(reader, name, versionRange.since, &attributes);
+            if (Q_UNLIKELY(!top->entry))
                 return false;
             break;
         case StackElement::TypedefTypeEntry:
             if (TypedefEntry *te = parseTypedefEntry(reader, name, versionRange.since, &attributes)) {
                 applyComplexTypeAttributes(reader, te, &attributes);
-                element->entry = te;
+                top->entry = te;
             } else {
                 return false;
             }
@@ -3066,9 +3073,9 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
             Q_ASSERT(false);
         }
 
-        if (element->entry) {
-            if (checkDuplicatedTypeEntry(reader, element->type, element->entry->name())
-                && !m_database->addType(element->entry, &m_error)) {
+        if (top->entry) {
+            if (checkDuplicatedTypeEntry(reader, element->type, top->entry->name())
+                && !m_database->addType(top->entry, &m_error)) {
                 return false;
             }
         } else {
@@ -3100,11 +3107,10 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
         }
 
         StackElement topElement = !m_current ? StackElement(nullptr) : *m_current;
-        element->entry = topElement.entry;
 
         switch (element->type) {
         case StackElement::Root:
-            element->entry = parseRootElement(reader, versionRange.since, &attributes);
+            top->entry = parseRootElement(reader, versionRange.since, &attributes);
             element->type = StackElement::Root;
             break;
         case StackElement::LoadTypesystem:
@@ -3136,7 +3142,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
             const bool replace = replaceIndex == -1
                 || convertBoolean(attributes.takeAt(replaceIndex).value(),
                                   replaceAttribute(), true);
-            m_current->entry->customConversion()->setReplaceOriginalTargetToNativeConversions(replace);
+            top->entry->customConversion()->setReplaceOriginalTargetToNativeConversions(replace);
         }
         break;
         case StackElement::AddConversion:
@@ -3177,7 +3183,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
                 return false;
             }
 
-            m_contextStack.top()->functionMods.last().argument_mods().last().setRemoved(true);
+            top->functionMods.last().argument_mods().last().setRemoved(true);
             break;
 
         case StackElement::ModifyField:
@@ -3202,7 +3208,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
                 return false;
             break;
         case StackElement::RemoveDefaultExpression:
-            m_contextStack.top()->functionMods.last().argument_mods().last().setRemovedDefaultExpression(true);
+            top->functionMods.last().argument_mods().last().setRemovedDefaultExpression(true);
             break;
         case StackElement::ReferenceCount:
             if (!parseReferenceCount(reader, topElement, &attributes))
@@ -3217,14 +3223,14 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader)
                 m_error = QLatin1String("array must be child of modify-argument");
                 return false;
             }
-            m_contextStack.top()->functionMods.last().argument_mods().last().setArray(true);
+            top->functionMods.last().argument_mods().last().setArray(true);
             break;
         case StackElement::InjectCode:
             if (!parseInjectCode(reader, topElement, element.get(), &attributes))
                 return false;
             break;
         case StackElement::Include:
-            if (!parseInclude(reader, topElement, element->entry, &attributes))
+            if (!parseInclude(reader, topElement, top->entry, &attributes))
                 return false;
             break;
         case StackElement::Rejection:
