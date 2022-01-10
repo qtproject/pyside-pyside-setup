@@ -48,9 +48,9 @@
 
   <object-type name="QWebEngineCookieStore"/>
 
-  <object-type name="QWebEngineCertificateError">
+  <value-type name="QWebEngineCertificateError">
     <enum-type name="Type"/>
-  </object-type>
+  </value-type>
 
   <object-type name="QWebEngineContextMenuRequest">
     <enum-type name="EditFlag" flags="EditFlags"/>
@@ -64,7 +64,7 @@
     <enum-type name="SavePageFormat"/>
   </object-type>
 
-  <object-type name="QWebEngineFullScreenRequest"/>
+  <value-type name="QWebEngineFullScreenRequest"/>
 
   <object-type name="QWebEngineHistory"/>
   <value-type name="QWebEngineHistoryItem">
