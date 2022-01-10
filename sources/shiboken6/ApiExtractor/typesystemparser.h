@@ -34,6 +34,7 @@
 #include <QtCore/QStack>
 #include <QtCore/QHash>
 #include <QtCore/QScopedPointer>
+#include <QtCore/QSharedPointer>
 
 QT_FORWARD_DECLARE_CLASS(QVersionNumber)
 QT_FORWARD_DECLARE_CLASS(QXmlStreamAttributes)
@@ -121,9 +122,8 @@ class StackElement
             Unimplemented              = 0x100000000
         };
 
-        StackElement(StackElement *p) : entry(nullptr), type(None), parent(p) { }
+        StackElement(StackElement *p) : type(None), parent(p) { }
 
-        TypeEntry* entry;
         ElementType type;
         StackElement *parent;
 };
@@ -135,6 +135,7 @@ struct StackElementContext
     FunctionModificationList functionMods;
     FieldModificationList fieldMods;
     DocModificationList docModifications;
+    TypeEntry* entry = nullptr;
     int addedFunctionModificationIndex = -1;
 };
 
@@ -142,6 +143,9 @@ class TypeSystemParser
 {
 public:
     Q_DISABLE_COPY(TypeSystemParser)
+
+    using StackElementContextPtr = QSharedPointer<StackElementContext>;
+    using ContextStack = QStack<StackElementContextPtr>;
 
     TypeSystemParser(TypeDatabase* database, bool generate);
     ~TypeSystemParser();
@@ -268,7 +272,7 @@ private:
     EnumTypeEntry* m_currentEnum = nullptr;
     TemplateInstancePtr m_templateInstance;
     TemplateEntry *m_templateEntry = nullptr;
-    QStack<StackElementContext*> m_contextStack;
+    ContextStack m_contextStack;
 
     QString m_currentSignature;
     QString m_currentPath;
