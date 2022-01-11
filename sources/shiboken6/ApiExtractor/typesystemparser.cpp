@@ -541,6 +541,19 @@ QString TypeSystemEntityResolver::resolveUndeclaredEntity(const QString &name)
     return result;
 }
 
+// State depending on element stack
+enum class ParserState
+{
+    None,
+    PrimitiveTypeNativeToTargetConversion,
+    PrimitiveTypeTargetToNativeConversion,
+    ArgumentConversion, // Argument conversion rule with class attribute
+    FunctionCodeInjection,
+    TypeEntryCodeInjection,
+    TypeSystemCodeInjection,
+    Template
+};
+
 TypeSystemParser::TypeSystemParser(TypeDatabase *database, bool generate) :
     m_database(database),
     m_generate(generate ? TypeEntry::GenerateCode : TypeEntry::GenerateForSubclass)
@@ -846,7 +859,6 @@ bool TypeSystemParser::endElement(StackElement element)
         centry->setAddedFunctions(top->addedFunctions);
         centry->setFunctionModifications(top->functionMods);
         centry->setFieldModifications(top->fieldMods);
-        centry->setCodeSnips(top->codeSnips);
         centry->setDocModification(top->docModifications);
     }
     break;
@@ -856,7 +868,7 @@ bool TypeSystemParser::endElement(StackElement element)
         centry->setAddedFunctions(centry->addedFunctions() + top->addedFunctions);
         centry->setFunctionModifications(centry->functionModifications() + top->functionMods);
         centry->setFieldModifications(centry->fieldModifications() + top->fieldMods);
-        centry->setCodeSnips(centry->codeSnips() + top->codeSnips);
+        centry->setCodeSnips(centry->codeSnips() + top->entry->codeSnips());
         centry->setDocModification(centry->docModifications() + top->docModifications);
     }
     break;
@@ -879,7 +891,7 @@ bool TypeSystemParser::endElement(StackElement element)
             return false;
         }
 
-        QString code = top->codeSnips.takeLast().code();
+        QString code = top->conversionCodeSnips.takeLast().code();
         if (element == StackElement::AddConversion) {
             if (customConversion->targetToNativeConversions().isEmpty()) {
                 m_error = QLatin1String("CustomConversion's target to native conversions missing.");
@@ -901,29 +913,8 @@ bool TypeSystemParser::endElement(StackElement element)
         m_templateEntry = nullptr;
         break;
     case StackElement::InsertTemplate:
-        switch (m_stack.at(m_stack.size() - 2)) {
-        case StackElement::InjectCode:
-            if (m_stack.at(m_stack.size() - 3) == StackElement::Root) {
-                top->entry->codeSnips().last().addTemplateInstance(m_templateInstance);
-                break;
-            }
-            Q_FALLTHROUGH();
-        case StackElement::NativeToTarget:
-        case StackElement::AddConversion:
-            top->codeSnips.last().addTemplateInstance(m_templateInstance);
-            break;
-        case StackElement::Template:
-            m_templateEntry->addTemplateInstance(m_templateInstance);
-            break;
-        case StackElement::ConversionRule:
-            top->functionMods.last().argument_mods().last().conversionRules().last().addTemplateInstance(m_templateInstance);
-            break;
-        case StackElement::InjectCodeInFunction:
-            top->functionMods.last().snips().last().addTemplateInstance(m_templateInstance);
-            break;
-        default:
-            break; // nada
-        }
+        if (auto *snip = injectCodeTarget(1))
+            snip->addTemplateInstance(m_templateInstance);
         m_templateInstance.reset();
         break;
     default:
@@ -936,6 +927,85 @@ bool TypeSystemParser::endElement(StackElement element)
     }
 
     return true;
+}
+
+ParserState TypeSystemParser::parserState(qsizetype offset) const
+{
+    const auto stackSize = m_stack.size() - offset;
+    if (stackSize <= 0 || m_contextStack.isEmpty())
+        return ParserState::None;
+
+    const auto last = stackSize - 1;
+
+    switch (m_stack.at(last)) {
+        // Primitive entry with conversion rule
+    case StackElement::NativeToTarget: // <conversion-rule><native-to-target>
+        return ParserState::PrimitiveTypeNativeToTargetConversion;
+
+    case StackElement::AddConversion: // <conversion-rule><target-to-native><add-conversion>
+        return ParserState::PrimitiveTypeTargetToNativeConversion;
+
+    case StackElement::ConversionRule:
+        if (stackSize > 1 && m_stack.at(last - 1) == StackElement::ModifyArgument)
+            return ParserState::ArgumentConversion;
+        break;
+
+    case StackElement::InjectCode:
+        switch (m_stack.value(last - 1, StackElement::None)) {
+        case StackElement::Root:
+            return ParserState::TypeSystemCodeInjection;
+        case StackElement::ModifyFunction:
+        case StackElement::AddFunction:
+            return ParserState::FunctionCodeInjection;
+        case StackElement::NamespaceTypeEntry:
+        case StackElement::ObjectTypeEntry:
+        case StackElement::ValueTypeEntry:
+        case StackElement::InterfaceTypeEntry:
+            return ParserState::TypeEntryCodeInjection;
+        default:
+            break;
+        }
+        break;
+
+    case StackElement::Template:
+        return ParserState::Template;
+
+    default:
+        break;
+    }
+
+    return ParserState::None;
+}
+
+// Return where to add injected code depending on elements.
+CodeSnipAbstract *TypeSystemParser::injectCodeTarget(qsizetype offset) const
+{
+    const auto state = parserState(offset);
+    if (state == ParserState::None)
+        return nullptr;
+
+    const auto &top = m_contextStack.top();
+    switch (state) {
+    case ParserState::PrimitiveTypeNativeToTargetConversion:
+    case ParserState::PrimitiveTypeTargetToNativeConversion:
+        return &top->conversionCodeSnips.last();
+    case ParserState::ArgumentConversion:
+        return &top->functionMods.last().argument_mods().last().conversionRules().last();
+    case ParserState::FunctionCodeInjection: {
+        auto &funcMod = top->functionMods.last();
+        funcMod.setModifierFlag(FunctionModification::CodeInjection);
+        return &funcMod.snips().last();
+    }
+    case ParserState::TypeEntryCodeInjection:
+    case ParserState::TypeSystemCodeInjection:
+        return &top->entry->codeSnips().last();
+    case ParserState::Template:
+        return m_templateEntry;
+    default:
+        break;
+    }
+
+    return nullptr;
 }
 
 template <class String> // QString/QStringRef
@@ -959,43 +1029,13 @@ bool TypeSystemParser::characters(const String &ch)
         return false;
     }
 
-    const auto &top = m_contextStack.top();
-
-    if (type == StackElement::ConversionRule && stackSize > 1
-        && m_stack.at(stackSize - 2) == StackElement::ModifyArgument) {
-        top->functionMods.last().argument_mods().last().conversionRules().last().addCode(ch);
-        return true;
-    }
-
-    if (type == StackElement::NativeToTarget || type == StackElement::AddConversion) {
-       top->codeSnips.last().addCode(ch);
-       return true;
-    }
-
-    if ((type & StackElement::CodeSnipMask) != 0 && stackSize > 1) {
-        switch (m_stack.at(stackSize - 2)) {
-        case StackElement::Root:
-            top->entry->codeSnips().last().addCode(ch);
-            break;
-        case StackElement::ModifyFunction:
-        case StackElement::AddFunction:
-            top->functionMods.last().snips().last().addCode(ch);
-            top->functionMods.last().setModifierFlag(FunctionModification::CodeInjection);
-            break;
-        case StackElement::NamespaceTypeEntry:
-        case StackElement::ObjectTypeEntry:
-        case StackElement::ValueTypeEntry:
-        case StackElement::InterfaceTypeEntry:
-            top->codeSnips.last().addCode(ch);
-            break;
-        default:
-            Q_ASSERT(false);
-        }
+    if (auto *snip = injectCodeTarget()) {
+        snip->addCode(ch);
         return true;
     }
 
     if ((type & StackElement::DocumentationMask) != 0)
-        top->docModifications.last().setCode(ch);
+        m_contextStack.top()->docModifications.last().setCode(ch);
 
     return true;
 }
@@ -2044,7 +2084,7 @@ bool TypeSystemParser::parseNativeToTarget(const ConditionalStreamReader &,
     CodeSnip snip;
     if (!readFileSnippet(attributes, &snip))
         return false;
-    m_contextStack.top()->codeSnips.append(snip);
+    m_contextStack.top()->conversionCodeSnips.append(snip);
     return true;
 }
 
@@ -2074,7 +2114,7 @@ bool TypeSystemParser::parseAddConversion(const ConditionalStreamReader &,
     }
     const auto &top = m_contextStack.top();
     top->entry->customConversion()->addTargetToNativeConversion(sourceTypeName, typeCheck);
-    top->codeSnips.append(snip);
+    top->conversionCodeSnips.append(snip);
     return true;
 }
 
@@ -2718,11 +2758,8 @@ bool TypeSystemParser::parseInjectCode(const ConditionalStreamReader &,
         mod.appendSnip(snip);
         if (!snip.code().isEmpty())
             mod.setModifierFlag(FunctionModification::CodeInjection);
-        m_stack.top() = StackElement::InjectCodeInFunction;
-    } else if (topElement == StackElement::Root) {
+    } else {
         m_contextStack.top()->entry->addCodeSnip(snip);
-    } else if (topElement != StackElement::Root) {
-        m_contextStack.top()->codeSnips << snip;
     }
     return true;
 }
@@ -2778,7 +2815,7 @@ TemplateInstance *
                                           StackElement topElement,
                                           QXmlStreamAttributes *attributes)
 {
-    if (!(topElement & StackElement::CodeSnipMask) &&
+    if ((topElement != StackElement::InjectCode) &&
         (topElement != StackElement::Template) &&
         (topElement != StackElement::NativeToTarget) &&
         (topElement != StackElement::AddConversion) &&
