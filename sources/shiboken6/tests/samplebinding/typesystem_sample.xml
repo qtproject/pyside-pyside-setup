@@ -486,8 +486,12 @@
         <modify-function signature="doSomethingWithArray(const unsigned char*, unsigned int, const char*)">
             <modify-argument index="1">
                 <replace-type modified-type="const char*"/>
-                <conversion-rule class="native">
-                    const unsigned char* %out = reinterpret_cast&lt;const unsigned char*>(Shiboken::String::toCString(%PYARG_1));
+                <conversion-rule>
+                    <target-to-native>
+                        <add-conversion>
+                            const unsigned char* %out = reinterpret_cast&lt;const unsigned char*>(Shiboken::String::toCString(%PYARG_1));
+                        </add-conversion>
+                    </target-to-native>
                 </conversion-rule>
             </modify-argument>
             <modify-argument index="2">
@@ -1161,14 +1165,18 @@
             </modify-argument>
             <modify-argument index="return">
                 <replace-type modified-type="PySequence"/>
-                <conversion-rule class="native">
-                Shiboken::AutoDecRef _py_ok_(PySequence_GetItem(%PYARG_0, 0));
-                Shiboken::AutoDecRef _py_ret_(PySequence_GetItem(%PYARG_0, 1));
-                *%2 = %CONVERTTOCPP[bool](_py_ok_);
-                %RETURN_TYPE %out = %CONVERTTOCPP[%RETURN_TYPE](_py_ret_);
-                </conversion-rule>
-                <conversion-rule class="target">
-                    <insert-template name="differenceOfPointCoordinates_returnTarget"/>
+                <conversion-rule>
+                    <target-to-native>
+                        <add-conversion>
+                        Shiboken::AutoDecRef _py_ok_(PySequence_GetItem(%PYARG_0, 0));
+                        Shiboken::AutoDecRef _py_ret_(PySequence_GetItem(%PYARG_0, 1));
+                        *%2 = %CONVERTTOCPP[bool](_py_ok_);
+                        %RETURN_TYPE %out = %CONVERTTOCPP[%RETURN_TYPE](_py_ret_);
+                        </add-conversion>
+                    </target-to-native>
+                    <native-to-target>
+                        <insert-template name="differenceOfPointCoordinates_returnTarget"/>
+                   </native-to-target>
                 </conversion-rule>
             </modify-argument>
         </modify-function>

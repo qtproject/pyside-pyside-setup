@@ -548,6 +548,8 @@ enum class ParserState
     PrimitiveTypeNativeToTargetConversion,
     PrimitiveTypeTargetToNativeConversion,
     ArgumentConversion, // Argument conversion rule with class attribute
+    ArgumentNativeToTargetConversion,
+    ArgumentTargetToNativeConversion,
     FunctionCodeInjection,
     TypeEntryCodeInjection,
     TypeSystemCodeInjection,
@@ -884,27 +886,47 @@ bool TypeSystemParser::endElement(StackElement element)
         while (modIndex < top->functionMods.size())
             top->addedFunctions.last()->modifications.append(top->functionMods.takeAt(modIndex));
     }
-        break;
+    break;
     case StackElement::NativeToTarget:
-    case StackElement::AddConversion: {
-        auto *customConversion = top->entry->customConversion();
-        if (!customConversion) {
-            m_error = QLatin1String("CustomConversion object is missing.");
-            return false;
-        }
-
-        QString code = top->conversionCodeSnips.takeLast().code();
-        if (element == StackElement::AddConversion) {
-            if (customConversion->targetToNativeConversions().isEmpty()) {
-                m_error = QLatin1String("CustomConversion's target to native conversions missing.");
+    case StackElement::AddConversion:
+        switch (parserState()) {
+        case ParserState::PrimitiveTypeNativeToTargetConversion:
+        case ParserState::PrimitiveTypeTargetToNativeConversion:
+            if (auto *customConversion = top->entry->customConversion()) {
+                QString code = top->conversionCodeSnips.constLast().code();
+                if (element == StackElement::AddConversion) {
+                    if (customConversion->targetToNativeConversions().isEmpty()) {
+                        m_error = u"CustomConversion's target to native conversions missing."_qs;
+                        return false;
+                    }
+                    customConversion->targetToNativeConversions().last()->setConversion(code);
+                } else {
+                    customConversion->setNativeToTargetConversion(code);
+                }
+            } else {
+                m_error = QLatin1String("CustomConversion object is missing.");
                 return false;
             }
-            customConversion->targetToNativeConversions().last()->setConversion(code);
-        } else {
-            customConversion->setNativeToTargetConversion(code);
+            break;
+
+        case ParserState::ArgumentNativeToTargetConversion: {
+            top->conversionCodeSnips.last().language = TypeSystem::TargetLangCode;
+            auto &lastArgMod = m_contextStack.top()->functionMods.last().argument_mods().last();
+            lastArgMod.conversionRules().append(top->conversionCodeSnips.constLast());
         }
-    }
-    break;
+            break;
+        case ParserState::ArgumentTargetToNativeConversion: {
+            top->conversionCodeSnips.last().language = TypeSystem::NativeCode;
+            auto &lastArgMod = m_contextStack.top()->functionMods.last().argument_mods().last();
+            lastArgMod.conversionRules().append(top->conversionCodeSnips.constLast());
+        }
+            break;
+        default:
+            break;
+        }
+        top->conversionCodeSnips.clear();
+        break;
+
     case StackElement::EnumTypeEntry:
         top->entry->setDocModification(top->docModifications);
         top->docModifications = DocModificationList();
@@ -947,9 +969,13 @@ ParserState TypeSystemParser::parserState(qsizetype offset) const
     switch (m_stack.at(last)) {
         // Primitive entry with conversion rule
     case StackElement::NativeToTarget: // <conversion-rule><native-to-target>
+        if (stackSize > 2 && m_stack.at(last - 2) == StackElement::ModifyArgument)
+            return ParserState::ArgumentNativeToTargetConversion;
         return ParserState::PrimitiveTypeNativeToTargetConversion;
 
     case StackElement::AddConversion: // <conversion-rule><target-to-native><add-conversion>
+        if (stackSize > 3 && m_stack.at(last - 3) == StackElement::ModifyArgument)
+            return ParserState::ArgumentTargetToNativeConversion;
         return ParserState::PrimitiveTypeTargetToNativeConversion;
 
     case StackElement::ConversionRule:
@@ -995,6 +1021,8 @@ CodeSnipAbstract *TypeSystemParser::injectCodeTarget(qsizetype offset) const
     switch (state) {
     case ParserState::PrimitiveTypeNativeToTargetConversion:
     case ParserState::PrimitiveTypeTargetToNativeConversion:
+    case ParserState::ArgumentNativeToTargetConversion:
+    case ParserState::ArgumentTargetToNativeConversion:
         return &top->conversionCodeSnips.last();
     case ParserState::ArgumentConversion:
         return &top->functionMods.last().argument_mods().last().conversionRules().last();
@@ -2108,6 +2136,13 @@ bool TypeSystemParser::parseAddConversion(const ConditionalStreamReader &,
     CodeSnip snip;
     if (!readFileSnippet(attributes, &snip))
         return false;
+
+    const auto &top = m_contextStack.top();
+    top->conversionCodeSnips.append(snip);
+
+    if (parserState() == ParserState::ArgumentTargetToNativeConversion)
+        return true;
+
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == QLatin1String("type"))
@@ -2115,13 +2150,12 @@ bool TypeSystemParser::parseAddConversion(const ConditionalStreamReader &,
         else if (name == QLatin1String("check"))
            typeCheck = attributes->takeAt(i).value().toString();
     }
+
     if (sourceTypeName.isEmpty()) {
         m_error = QLatin1String("Target to Native conversions must specify the input type with the 'type' attribute.");
         return false;
     }
-    const auto &top = m_contextStack.top();
     top->entry->customConversion()->addTargetToNativeConversion(sourceTypeName, typeCheck);
-    top->conversionCodeSnips.append(snip);
     return true;
 }
 
@@ -3165,11 +3199,15 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
                 m_error = QLatin1String("Target to Native conversions can only be specified for custom conversion rules.");
                 return false;
             }
-            const int replaceIndex = indexOfAttribute(attributes, replaceAttribute());
-            const bool replace = replaceIndex == -1
-                || convertBoolean(attributes.takeAt(replaceIndex).value(),
-                                  replaceAttribute(), true);
-            top->entry->customConversion()->setReplaceOriginalTargetToNativeConversions(replace);
+
+            const auto topParent = m_stack.value(m_stack.size() - 3, StackElement::None);
+            if ((topParent & StackElement::TypeEntryMask) != 0) {
+                const int replaceIndex = indexOfAttribute(attributes, replaceAttribute());
+                const bool replace = replaceIndex == -1
+                    || convertBoolean(attributes.takeAt(replaceIndex).value(),
+                                      replaceAttribute(), true);
+                top->entry->customConversion()->setReplaceOriginalTargetToNativeConversions(replace);
+            }
         }
         break;
         case StackElement::AddConversion:
