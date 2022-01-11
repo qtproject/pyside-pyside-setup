@@ -904,11 +904,7 @@ bool TypeSystemParser::endElement(StackElement element)
         switch (m_stack.at(m_stack.size() - 2)) {
         case StackElement::InjectCode:
             if (m_stack.at(m_stack.size() - 3) == StackElement::Root) {
-                CodeSnipList snips = top->entry->codeSnips();
-                CodeSnip snip = snips.takeLast();
-                snip.addTemplateInstance(m_templateInstance);
-                snips.append(snip);
-                top->entry->setCodeSnips(snips);
+                top->entry->codeSnips().last().addTemplateInstance(m_templateInstance);
                 break;
             }
             Q_FALLTHROUGH();
@@ -977,12 +973,9 @@ bool TypeSystemParser::characters(const String &ch)
     }
 
     if ((type & StackElement::CodeSnipMask) != 0 && stackSize > 1) {
-        CodeSnipList snips;
         switch (m_stack.at(stackSize - 2)) {
         case StackElement::Root:
-            snips = top->entry->codeSnips();
-            snips.last().addCode(ch);
-            top->entry->setCodeSnips(snips);
+            top->entry->codeSnips().last().addCode(ch);
             break;
         case StackElement::ModifyFunction:
         case StackElement::AddFunction:

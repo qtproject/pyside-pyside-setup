@@ -122,7 +122,12 @@ TypeEntry::TypeEntry(TypeEntryPrivate *d) : m_d(d)
 
 TypeEntry::~TypeEntry() = default;
 
-CodeSnipList TypeEntry::codeSnips() const
+const CodeSnipList &TypeEntry::codeSnips() const
+{
+    return m_d->m_codeSnips;
+}
+
+CodeSnipList &TypeEntry::codeSnips()
 {
     return m_d->m_codeSnips;
 }

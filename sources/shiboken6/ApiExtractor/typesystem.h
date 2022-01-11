@@ -205,7 +205,8 @@ public:
     virtual bool isValue() const;
     virtual bool isComplex() const;
 
-    CodeSnipList codeSnips() const;
+    const CodeSnipList &codeSnips() const;
+    CodeSnipList &codeSnips();
     void setCodeSnips(const CodeSnipList &codeSnips);
     void addCodeSnip(const CodeSnip &codeSnip);
 
