@@ -44,6 +44,7 @@ class ConditionalStreamReader;
 
 class TypeSystemEntityResolver;
 class TypeDatabase;
+enum class ParserState;
 
 enum class StackElement : uint64_t {
             None = 0x0,
@@ -94,8 +95,6 @@ enum class StackElement : uint64_t {
 
             // Code snip tags (0x1000, 0x2000, ... , 0xf000)
             InjectCode                  = 0x4000,
-            InjectCodeInFunction        = 0x8000,
-            CodeSnipMask                = 0xc000,
 
             // Function modifier tags (0x010000, 0x020000, ... , 0xf00000)
             Rename                      = 0x040000, // (modify-argument)
@@ -132,7 +131,7 @@ inline StackElement operator|(StackElement s1, StackElement s2)
 
 struct StackElementContext
 {
-    CodeSnipList codeSnips;
+    CodeSnipList conversionCodeSnips;
     AddedFunctionList addedFunctions;
     FunctionModificationList functionMods;
     FieldModificationList fieldMods;
@@ -260,6 +259,8 @@ private:
                        QXmlStreamAttributes *);
      bool checkDuplicatedTypeEntry(const ConditionalStreamReader &reader,
                                    StackElement t, const QString &name) const;
+     ParserState parserState(qsizetype offset = 0) const;
+     CodeSnipAbstract *injectCodeTarget(qsizetype offset = 0) const;
 
     TypeDatabase* m_database;
     QStack<StackElement> m_stack;
