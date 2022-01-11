@@ -23,7 +23,7 @@ def _additional_dll_directories(package_dir):
     # is executed in the build directory. We need libpyside and Qt in addition.
     shiboken6 = Path(root).parent / 'shiboken6' / 'libshiboken'
     if not shiboken6.is_dir():
-        raise ImportError(shiboken6 + ' does not exist')
+        raise ImportError(str(shiboken6) + ' does not exist')
     result = [shiboken6, root / 'libpyside']
     for path in os.environ.get('PATH').split(';'):
         if path:
