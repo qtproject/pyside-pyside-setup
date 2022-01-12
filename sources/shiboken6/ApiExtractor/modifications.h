@@ -118,6 +118,8 @@ public:
 
     QString code() const;
 
+    TemplateInstancePtr instance() const { return m_instance; }
+
 private:
     QString m_code;
     QSharedPointer<TemplateInstance> m_instance;
@@ -374,6 +376,7 @@ Q_DECLARE_OPERATORS_FOR_FLAGS(FunctionModification::Modifiers)
 
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug d, const ReferenceCount &);
+QDebug operator<<(QDebug d, const CodeSnip &s);
 QDebug operator<<(QDebug d, const ArgumentOwner &a);
 QDebug operator<<(QDebug d, const ArgumentModification &a);
 QDebug operator<<(QDebug d, const FunctionModification &fm);
