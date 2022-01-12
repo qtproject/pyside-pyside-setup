@@ -428,17 +428,29 @@ QDebug operator<<(QDebug d, const CodeSnip &s)
     QDebugStateSaver saver(d);
     d.noquote();
     d.nospace();
-    d << "CodeSnip(language=" << s.language << ", position=" << s.position << ", \"";
-    for (const auto &f : s.codeList) {
-        const QString &code = f.code();
-        const auto lines = QStringView{code}.split(QLatin1Char('\n'));
-        for (int i = 0, size = lines.size(); i < size; ++i) {
-            if (i)
-                d << "\\n";
-            d << lines.at(i).trimmed();
+    const auto size = s.codeList.size();
+    d << "CodeSnip(language=" << s.language << ", position=" << s.position
+        << ", fragments[" << size << "]=";
+    for (qsizetype i = 0; i < size; ++i) {
+        const auto &f = s.codeList.at(i);
+        if (i)
+            d << ", ";
+        d << '#' << i << ' ';
+        if (f.instance().isNull()) {
+            d << '"';
+            const QString &code = f.code();
+            const auto lines = QStringView{code}.split(QLatin1Char('\n'));
+            for (int i = 0, size = lines.size(); i < size; ++i) {
+                if (i)
+                    d << "\\n";
+                d << lines.at(i).trimmed();
+            }
+            d << '"';
+        } else {
+            d << "template=\"" << f.instance()->name() << '"';
         }
     }
-    d << "\")";
+    d << ')';
     return d;
 }
 
@@ -906,6 +918,9 @@ QDebug operator<<(QDebug d, const ArgumentModification &a)
         d << ", native ownership=" << a.nativeOwnership();
     if (!a.renamedToName().isEmpty())
         d << ", renamed_to=\"" << a.renamedToName() << '"';
+    const auto &rules = a.conversionRules();
+    if (!rules.isEmpty())
+        d << ", conversionRules[" << rules.size() << "]=" << rules;
      d << ", owner=" << a.owner() << ')';
     return  d;
 }
