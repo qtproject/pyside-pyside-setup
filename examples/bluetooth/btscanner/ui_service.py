@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'service.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.2.1
+## Created by: Qt User Interface Compiler version 6.2.3
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -17,7 +17,7 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QAbstractButton, QApplication, QDialog, QDialogButtonBox,
     QLabel, QListWidget, QListWidgetItem, QSizePolicy,
-    QVBoxLayout)
+    QVBoxLayout, QWidget)
 
 class Ui_ServiceDiscovery(object):
     def setupUi(self, ServiceDiscovery):
@@ -54,3 +54,4 @@ class Ui_ServiceDiscovery(object):
         ServiceDiscovery.setWindowTitle(QCoreApplication.translate("ServiceDiscovery", u"Available Services", None))
         self.status.setText(QCoreApplication.translate("ServiceDiscovery", u"Querying...", None))
     # retranslateUi
+

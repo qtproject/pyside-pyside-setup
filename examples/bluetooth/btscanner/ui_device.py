@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'device.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.2.0
+## Created by: Qt User Interface Compiler version 6.2.3
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -17,7 +17,7 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QCheckBox, QDialog, QGroupBox,
     QHBoxLayout, QListWidget, QListWidgetItem, QPushButton,
-    QSizePolicy, QVBoxLayout)
+    QSizePolicy, QVBoxLayout, QWidget)
 
 class Ui_DeviceDiscovery(object):
     def setupUi(self, DeviceDiscovery):
@@ -87,3 +87,4 @@ class Ui_DeviceDiscovery(object):
         self.clear.setText(QCoreApplication.translate("DeviceDiscovery", u"Clear", None))
         self.quit.setText(QCoreApplication.translate("DeviceDiscovery", u"Quit", None))
     # retranslateUi
+
