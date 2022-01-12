@@ -844,6 +844,7 @@ bool TypeSystemParser::endElement(StackElement element)
                     toNative->setSourceType(m_database->findType(toNative->sourceTypeName()));
             }
         }
+        purgeEmptyCodeSnips(&top->entry->codeSnips());
         break;
     case StackElement::FunctionTypeEntry:
         TypeDatabase::instance()->addGlobalUserFunctionModifications(top->functionMods);
@@ -856,6 +857,7 @@ bool TypeSystemParser::endElement(StackElement element)
         Q_ASSERT(top->entry);
         Q_ASSERT(top->entry->isComplex());
         auto *centry = static_cast<ComplexTypeEntry *>(top->entry);
+        purgeEmptyCodeSnips(&centry->codeSnips());
         centry->setAddedFunctions(top->addedFunctions);
         centry->setFunctionModifications(top->functionMods);
         centry->setFieldModifications(top->fieldMods);
@@ -917,6 +919,11 @@ bool TypeSystemParser::endElement(StackElement element)
             snip->addTemplateInstance(m_templateInstance);
         m_templateInstance.reset();
         break;
+
+    case StackElement::ModifyArgument:
+        purgeEmptyCodeSnips(&top->functionMods.last().argument_mods().last().conversionRules());
+        break;
+
     default:
         break;
     }

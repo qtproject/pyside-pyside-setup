@@ -116,6 +116,8 @@ public:
     explicit CodeSnipFragment(const QString &code) : m_code(code) {}
     explicit CodeSnipFragment(const TemplateInstancePtr &instance) : m_instance(instance) {}
 
+    bool isEmpty() const { return m_code.isEmpty() && m_instance.isNull(); }
+
     QString code() const;
 
     TemplateInstancePtr instance() const { return m_instance; }
@@ -137,6 +139,9 @@ public:
     {
         codeList.append(CodeSnipFragment(ti));
     }
+
+    bool isEmpty() const { return codeList.isEmpty(); }
+    void purgeEmptyFragments();
 
     QList<CodeSnipFragment> codeList;
 
@@ -166,6 +171,10 @@ public:
     TypeSystem::Language language = TypeSystem::TargetLangCode;
     TypeSystem::CodeSnipPosition position = TypeSystem::CodeSnipPositionAny;
 };
+
+/// Purge empty fragments and snippets caused by new line characters in
+/// conjunction with <insert-template>.
+void purgeEmptyCodeSnips(QList<CodeSnip> *list);
 
 class ArgumentModification
 {

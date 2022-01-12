@@ -83,9 +83,27 @@ void CodeSnipAbstract::addCode(const QString &code)
     codeList.append(CodeSnipFragment(fixSpaces(code)));
 }
 
+void CodeSnipAbstract::purgeEmptyFragments()
+{
+    auto end = std::remove_if(codeList.begin(), codeList.end(),
+                              [](const CodeSnipFragment &f) { return f.isEmpty(); });
+    codeList.erase(end, codeList.end());
+}
+
 QRegularExpression CodeSnipAbstract::placeHolderRegex(int index)
 {
     return QRegularExpression(QLatin1Char('%') + QString::number(index) + QStringLiteral("\\b"));
+}
+
+void purgeEmptyCodeSnips(QList<CodeSnip> *list)
+{
+    for (auto it = list->begin(); it != list->end(); ) {
+        it->purgeEmptyFragments();
+        if (it->isEmpty())
+            it = list->erase(it);
+        else
+            ++it;
+    }
 }
 
 // ---------------------- Modification
