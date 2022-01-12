@@ -33,6 +33,7 @@
 #include "sourcelocation.h"
 #include "conditionalstreamreader.h"
 
+#include <QtCore/QDebug>
 #include <QtCore/QDir>
 #include <QtCore/QFile>
 #include <QtCore/QFileInfo>
@@ -365,10 +366,30 @@ ENUM_LOOKUP_BEGIN(TypeSystem::ExceptionHandling, Qt::CaseSensitive,
 };
 ENUM_LOOKUP_LINEAR_SEARCH()
 
-ENUM_LOOKUP_BEGIN(StackElement, Qt::CaseInsensitive,
-                  elementFromTag)
-    {
-        {u"add-conversion", StackElement::AddConversion}, // sorted!
+template <class EnumType>
+static std::optional<EnumType>
+    lookupHashElement(const QHash<QStringView, EnumType> &hash,
+                      QStringView needle, Qt::CaseSensitivity cs = Qt::CaseSensitive)
+{
+    auto end = hash.cend();
+    auto it = hash.constFind(needle);
+    if (it != end)
+        return it.value();
+    if (cs == Qt::CaseInsensitive) { // brute force search for the unlikely case mismatch
+        for (it = hash.cbegin(); it != end; ++it) {
+            if (it.key().compare(needle, cs) == 0)
+                return it.value();
+        }
+    }
+    return std::nullopt;
+}
+
+using StackElementHash = QHash<QStringView, StackElement>;
+
+static const StackElementHash &stackElementHash()
+{
+    static const StackElementHash result{
+        {u"add-conversion", StackElement::AddConversion},
         {u"add-function", StackElement::AddFunction},
         {u"array", StackElement::Array},
         {u"container-type", StackElement::ContainerTypeEntry},
@@ -417,8 +438,30 @@ ENUM_LOOKUP_BEGIN(StackElement, Qt::CaseInsensitive,
         {u"typesystem", StackElement::Root},
         {u"value-type", StackElement::ValueTypeEntry},
     };
-ENUM_LOOKUP_BINARY_SEARCH()
+    return result;
+}
 
+static std::optional<StackElement> elementFromTag(QStringView needle)
+{
+     return lookupHashElement(stackElementHash(), needle,
+                              Qt::CaseInsensitive); // FIXME PYSIDE-7: case sensitive
+}
+
+static QStringView tagFromElement(StackElement st)
+{
+    return stackElementHash().key(st);
+}
+
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, StackElement st)
+{
+    QDebugStateSaver saver(d);
+    d.noquote();
+    d.nospace();
+    d << tagFromElement(st);
+    return d;
+}
+#endif // QT_NO_DEBUG_STREAM
 
 ENUM_LOOKUP_BEGIN(TypeSystem::SnakeCase, Qt::CaseSensitive,
                   snakeCaseFromAttribute)
@@ -2188,7 +2231,7 @@ bool TypeSystemParser::parseModifyArgument(const ConditionalStreamReader &,
             && topElement != StackElement::AddFunction) {
         m_error = QString::fromLatin1("argument modification requires function"
                                       " modification as parent, was %1")
-                                      .arg(uint64_t(topElement), 0, 16);
+                                      .arg(tagFromElement(topElement));
         return false;
     }
 
@@ -2375,7 +2418,7 @@ bool TypeSystemParser::parseAddFunction(const ConditionalStreamReader &,
     if (!(topElement
           & (StackElement::ComplexTypeEntryMask | StackElement::Root | StackElement::ContainerTypeEntry))) {
         m_error = QString::fromLatin1("Add/Declare function requires a complex/container type or a root tag as parent"
-                                      ", was=%1").arg(uint64_t(topElement), 0, 16);
+                                      ", was=%1").arg(tagFromElement(topElement));
         return false;
     }
     QString originalSignature;
@@ -2459,7 +2502,7 @@ bool TypeSystemParser::parseProperty(const ConditionalStreamReader &, StackEleme
 {
     if ((topElement & StackElement::ComplexTypeEntryMask) == 0) {
         m_error = QString::fromLatin1("Add property requires a complex type as parent"
-                                      ", was=%1").arg(uint64_t(topElement), 0, 16);
+                                      ", was=%1").arg(tagFromElement(topElement));
         return false;
     }
 
@@ -2494,7 +2537,7 @@ bool TypeSystemParser::parseModifyFunction(const ConditionalStreamReader &reader
 {
     if (!(topElement & StackElement::ComplexTypeEntryMask)) {
         m_error = QString::fromLatin1("Modify function requires complex type as parent"
-                                      ", was=%1").arg(uint64_t(topElement), 0, 16);
+                                      ", was=%1").arg(tagFromElement(topElement));
         return false;
     }
 
