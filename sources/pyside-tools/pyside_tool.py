@@ -178,5 +178,9 @@ def metaobjectdump():
     pyside_script_wrapper("metaobjectdump.py")
 
 
+def project():
+    pyside_script_wrapper("project.py")
+
+
 if __name__ == "__main__":
     main()

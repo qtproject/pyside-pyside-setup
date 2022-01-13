@@ -238,6 +238,7 @@ class Config(object):
                     f'{PYSIDE}-lrelease = {package_name}.scripts.pyside_tool:lrelease',
                     f'{PYSIDE}-genpyi = {package_name}.scripts.pyside_tool:genpyi',
                     f'{PYSIDE}-metaobjectdump = {package_name}.scripts.pyside_tool:metaobjectdump',
+                    f'{PYSIDE}-project = {package_name}.scripts.pyside_tool:project',
                     f'{PYSIDE}-qmltyperegistrar = {package_name}.scripts.pyside_tool:qmltyperegistrar',
                     f'{PYSIDE}-qmllint = {package_name}.scripts.pyside_tool:qmllint'
                 ]

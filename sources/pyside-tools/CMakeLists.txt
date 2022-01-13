@@ -4,7 +4,8 @@ project(pyside-tools)
 include(cmake/PySideToolsSetup.cmake)
 
 set(files ${CMAKE_CURRENT_SOURCE_DIR}/pyside_tool.py
-          ${CMAKE_CURRENT_SOURCE_DIR}/metaobjectdump.py)
+          ${CMAKE_CURRENT_SOURCE_DIR}/metaobjectdump.py
+          ${CMAKE_CURRENT_SOURCE_DIR}/project.py)
 set(directories)
 
 if(NOT NO_QT_TOOLS STREQUAL "yes")
