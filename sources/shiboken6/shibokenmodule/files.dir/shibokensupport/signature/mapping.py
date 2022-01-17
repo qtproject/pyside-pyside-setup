@@ -503,6 +503,7 @@ def init_PySide6_QtCore():
         "PySide6.QtCore.QUrl.ComponentFormattingOptions":
             PySide6.QtCore.QUrl.ComponentFormattingOption, # mismatch option/enum, why???
         "PyUnicode": typing.Text,
+        "QByteArrayView": QByteArray,
         "Q_NULLPTR": None,
         "QCalendar.Unspecified": PySide6.QtCore.QCalendar.Unspecified,
         "QDir.Filters(AllEntries | NoDotAndDotDot)": Instance(
