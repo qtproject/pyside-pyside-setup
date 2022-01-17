@@ -171,7 +171,7 @@ static void addPySideExtensions(QByteArrayList *a)
     a->append(QByteArrayLiteral("-DQSIMD_H"));
 }
 
-bool ApiExtractor::runHelper(bool usePySideExtensions)
+bool ApiExtractor::runHelper(ApiExtractorFlags flags)
 {
     if (m_builder)
         return false;
@@ -229,10 +229,11 @@ bool ApiExtractor::runHelper(bool usePySideExtensions)
             << "\nclang arguments: " << arguments;
     }
 
-    if (usePySideExtensions)
+    if (flags.testFlag(ApiExtractorFlag::UsePySideExtensions))
         addPySideExtensions(&arguments);
 
-    const bool result = m_builder->build(arguments, addCompilerSupportArguments, m_languageLevel);
+    const bool result = m_builder->build(arguments, flags, addCompilerSupportArguments,
+                                         m_languageLevel);
     if (!result)
         autoRemove = false;
     if (!autoRemove) {
@@ -248,9 +249,9 @@ static inline void classListToCList(const AbstractMetaClassList &list, AbstractM
     std::copy(list.cbegin(), list.cend(), std::back_inserter(*target));
 }
 
-std::optional<ApiExtractorResult> ApiExtractor::run(bool usePySideExtensions)
+std::optional<ApiExtractorResult> ApiExtractor::run(ApiExtractorFlags flags)
 {
-    if (!runHelper(usePySideExtensions))
+    if (!runHelper(flags))
         return {};
     ApiExtractorResult result;
     classListToCList(m_builder->classes(), &result.m_metaClasses);

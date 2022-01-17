@@ -54,7 +54,6 @@
 #include <limits>
 #include <memory>
 
-static const char AVOID_PROTECTED_HACK[] = "avoid-protected-hack";
 static const char PARENT_CTOR_HEURISTIC[] = "enable-parent-ctor-heuristic";
 static const char RETURN_VALUE_HEURISTIC[] = "enable-return-value-heuristic";
 static const char DISABLE_VERBOSE_ERROR_MESSAGES[] = "disable-verbose-error-messages";
@@ -2082,8 +2081,6 @@ Generator::OptionDescriptions ShibokenGenerator::options() const
 {
     auto result = Generator::options();
     result.append({
-        {QLatin1String(AVOID_PROTECTED_HACK),
-         QLatin1String("Avoid the use of the '#define protected public' hack.")},
         {QLatin1String(DISABLE_VERBOSE_ERROR_MESSAGES),
          QLatin1String("Disable verbose error messages. Turn the python code hard to debug\n"
                        "but safe few kB on the generated bindings.")},
@@ -2120,8 +2117,6 @@ bool ShibokenGenerator::handleOption(const QString &key, const QString &value)
         return (m_useIsNullAsNbNonZero = true);
     if (key == QLatin1String(USE_OPERATOR_BOOL_AS_NB_NONZERO))
         return (m_useOperatorBoolAsNbNonZero = true);
-    if (key == QLatin1String(AVOID_PROTECTED_HACK))
-        return (m_avoidProtectedHack = true);
     if (key == QLatin1String(NO_IMPLICIT_CONVERSIONS)) {
         return m_generateImplicitConversions = false;
         return true;
@@ -2229,11 +2224,6 @@ bool ShibokenGenerator::useIsNullAsNbNonZero() const
 bool ShibokenGenerator::useOperatorBoolAsNbNonZero() const
 {
     return m_useOperatorBoolAsNbNonZero;
-}
-
-bool ShibokenGenerator::avoidProtectedHack() const
-{
-    return m_avoidProtectedHack;
 }
 
 bool ShibokenGenerator::generateImplicitConversions() const

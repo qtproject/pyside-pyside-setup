@@ -30,6 +30,7 @@
 #define ABSTRACTMETABUILDER_H
 
 #include "abstractmetalang_typedefs.h"
+#include "apiextractorflags.h"
 #include "header_paths.h"
 #include "typesystem_enums.h"
 
@@ -73,6 +74,7 @@ public:
     const QHash<const TypeEntry *, AbstractMetaEnum> &typeEntryToEnumsHash() const;
 
     bool build(const QByteArrayList &arguments,
+               ApiExtractorFlags apiExtractorFlags = {},
                bool addCompilerSupportArguments = true,
                LanguageLevel level = LanguageLevel::Default,
                unsigned clangFlags = 0);

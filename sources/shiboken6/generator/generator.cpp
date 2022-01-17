@@ -48,6 +48,7 @@
 #include <typedatabase.h>
 
 static const char ENABLE_PYSIDE_EXTENSIONS[] = "enable-pyside-extensions";
+static const char AVOID_PROTECTED_HACK[] = "avoid-protected-hack";
 
 /**
  * DefaultValue is used for storing default values of types for which code is
@@ -181,6 +182,7 @@ struct Generator::GeneratorPrivate
     AbstractMetaClassCList m_invisibleTopNamespaces;
     bool m_hasPrivateClasses = false;
     bool m_usePySideExtensions = false;
+    bool m_avoidProtectedHack = false;
 };
 
 Generator::Generator() : m_d(new GeneratorPrivate)
@@ -358,6 +360,8 @@ AbstractMetaTypeList Generator::instantiatedSmartPointers() const
 Generator::OptionDescriptions Generator::options() const
 {
     return {
+        {QLatin1String(AVOID_PROTECTED_HACK),
+         u"Avoid the use of the '#define protected public' hack."_qs},
         {QLatin1String(ENABLE_PYSIDE_EXTENSIONS),
          u"Enable PySide extensions, such as support for signal/slots,\n"
           "use this if you are creating a binding for a Qt-based library."_qs}
@@ -368,6 +372,8 @@ bool Generator::handleOption(const QString & key, const QString & /* value */)
 {
     if (key == QLatin1String(ENABLE_PYSIDE_EXTENSIONS))
         return ( m_d->m_usePySideExtensions = true);
+    if (key == QLatin1String(AVOID_PROTECTED_HACK))
+        return (m_d->m_avoidProtectedHack = true);
     return false;
 }
 
@@ -530,6 +536,11 @@ bool Generator::hasPrivateClasses() const
 bool Generator::usePySideExtensions() const
 {
     return m_d->m_usePySideExtensions;
+}
+
+bool Generator::avoidProtectedHack() const
+{
+    return m_d->m_avoidProtectedHack;
 }
 
 QString Generator::getFullTypeName(const TypeEntry *type)
