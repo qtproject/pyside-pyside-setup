@@ -223,7 +223,7 @@ std::vector<PyObject *> resolveDelayedQEnums(PyTypeObject *containerType)
 {
     /*
      * This is the internal interface of 'QEnum'.
-     * It is called at the end of the meta class call 'SbkObjectTypeTpNew' via
+     * It is called at the end of the meta class call 'SbkObjectType_tp_new' via
      * MetaObjectBuilderPrivate::parsePythonType and resolves the collected
      * Python Enum arguments. The result is then registered.
      */

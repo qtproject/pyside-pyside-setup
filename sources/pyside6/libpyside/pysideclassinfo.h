@@ -49,7 +49,7 @@
 
 extern "C"
 {
-    extern PYSIDE_API PyTypeObject *PySideClassInfoTypeF(void);
+    extern PYSIDE_API PyTypeObject *PySideClassInfo_TypeF(void);
 
     struct PySideClassInfoPrivate;
     struct PYSIDE_API PySideClassInfo

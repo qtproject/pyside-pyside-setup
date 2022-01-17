@@ -65,7 +65,7 @@ static PyType_Spec PySideCallableObjectType_spec = {
 };
 
 
-static PyTypeObject *PySideCallableObjectTypeF()
+static PyTypeObject *PySideCallableObject_TypeF()
 {
     static auto *type = SbkType_FromSpec(&PySideCallableObjectType_spec);
     return type;
@@ -87,12 +87,12 @@ PyObject *create(PyObject *obj, PySideWeakRefFunction func, void *userData)
     if (obj == Py_None)
         return nullptr;
 
-    if (Py_TYPE(PySideCallableObjectTypeF()) == nullptr) {
-        Py_TYPE(PySideCallableObjectTypeF()) = &PyType_Type;
-        PyType_Ready(PySideCallableObjectTypeF());
+    if (Py_TYPE(PySideCallableObject_TypeF()) == nullptr) {
+        Py_TYPE(PySideCallableObject_TypeF()) = &PyType_Type;
+        PyType_Ready(PySideCallableObject_TypeF());
     }
 
-    PyTypeObject *type = PySideCallableObjectTypeF();
+    PyTypeObject *type = PySideCallableObject_TypeF();
     PySideCallableObject *callable = PyObject_New(PySideCallableObject, type);
     if (!callable || PyErr_Occurred())
         return nullptr;

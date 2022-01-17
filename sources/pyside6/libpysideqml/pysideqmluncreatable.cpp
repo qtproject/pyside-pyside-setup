@@ -58,8 +58,8 @@ extern "C"
 {
 
 // The call operator is passed the class type and registers the reason
-// in QmlTypeInfo.
-static PyObject *classCall(PyObject *self, PyObject *args, PyObject * /* kw */)
+// in the uncreatableReasonMap()
+static PyObject *classInfo_tp_call(PyObject *self, PyObject *args, PyObject * /* kw */)
 {
     if (!PyTuple_Check(args) || PyTuple_Size(args) != 1) {
         PyErr_Format(PyExc_TypeError,
@@ -138,7 +138,7 @@ static void qmlUncreatableFree(void *self)
 }
 
 static PyType_Slot PySideQmlUncreatableType_slots[] = {
-    {Py_tp_call, reinterpret_cast<void *>(classCall)},
+    {Py_tp_call, reinterpret_cast<void *>(classInfo_tp_call)},
     {Py_tp_init, reinterpret_cast<void *>(qmlUncreatableTpInit)},
     {Py_tp_new, reinterpret_cast<void *>(qmlUncreatableTpNew)},
     {Py_tp_free, reinterpret_cast<void *>(qmlUncreatableFree)},
@@ -154,7 +154,7 @@ static PyType_Spec PySideQmlUncreatableType_spec = {
     PySideQmlUncreatableType_slots,
 };
 
-PyTypeObject *PySideQmlUncreatableTypeF(void)
+PyTypeObject *PySideQmlUncreatable_TypeF(void)
 {
     static auto *type = SbkType_FromSpec(&PySideQmlUncreatableType_spec);
     return type;
@@ -169,10 +169,10 @@ static const char *qmlUncreatable_SignatureStrings[] = {
 
 void initQmlUncreatable(PyObject *module)
 {
-    if (InitSignatureStrings(PySideQmlUncreatableTypeF(), qmlUncreatable_SignatureStrings) < 0)
+    if (InitSignatureStrings(PySideQmlUncreatable_TypeF(), qmlUncreatable_SignatureStrings) < 0)
         return;
 
-    Py_INCREF(PySideQmlUncreatableTypeF());
+    Py_INCREF(PySideQmlUncreatable_TypeF());
     PyModule_AddObject(module, "QmlUncreatable",
-                       reinterpret_cast<PyObject *>(PySideQmlUncreatableTypeF()));
+                       reinterpret_cast<PyObject *>(PySideQmlUncreatable_TypeF()));
 }

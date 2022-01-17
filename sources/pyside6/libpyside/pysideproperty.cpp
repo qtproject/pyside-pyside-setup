@@ -115,7 +115,7 @@ static PyType_Spec PySidePropertyType_spec = {
 };
 
 
-PyTypeObject *PySidePropertyTypeF(void)
+PyTypeObject *PySideProperty_TypeF(void)
 {
     static auto *type = SbkType_FromSpec(&PySidePropertyType_spec);
     return type;
@@ -358,7 +358,7 @@ static PyObject *qPropertyDocGet(PyObject *self, void *)
         if (!get_doc.isNull()) {
             pData->doc = String::toCString(get_doc);
             pData->getter_doc = true;
-            if (Py_TYPE(self) == PySidePropertyTypeF())
+            if (Py_TYPE(self) == PySideProperty_TypeF())
                 return qPropertyDocGet(self, nullptr);
             /*
              * If this is a property subclass, put __doc__ in dict of the
@@ -459,17 +459,17 @@ static const char *Property_SignatureStrings[] = {
 
 void init(PyObject *module)
 {
-    if (InitSignatureStrings(PySidePropertyTypeF(), Property_SignatureStrings) < 0)
+    if (InitSignatureStrings(PySideProperty_TypeF(), Property_SignatureStrings) < 0)
         return;
 
-    Py_INCREF(PySidePropertyTypeF());
-    PyModule_AddObject(module, "Property", reinterpret_cast<PyObject *>(PySidePropertyTypeF()));
+    Py_INCREF(PySideProperty_TypeF());
+    PyModule_AddObject(module, "Property", reinterpret_cast<PyObject *>(PySideProperty_TypeF()));
 }
 
 bool checkType(PyObject *pyObj)
 {
     if (pyObj) {
-        return PyType_IsSubtype(Py_TYPE(pyObj), PySidePropertyTypeF());
+        return PyType_IsSubtype(Py_TYPE(pyObj), PySideProperty_TypeF());
     }
     return false;
 }

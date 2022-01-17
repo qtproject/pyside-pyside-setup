@@ -92,8 +92,8 @@ void Sbk_object_dealloc(PyObject *self)
     Py_TYPE(self)->tp_free(self);
 }
 
-static void SbkObjectTypeDealloc(PyTypeObject *pyType);
-static PyTypeObject *SbkObjectTypeTpNew(PyTypeObject *metatype, PyObject *args, PyObject *kwds);
+static void SbkObjectType_tp_dealloc(PyTypeObject *pyType);
+static PyTypeObject *SbkObjectType_tp_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds);
 
 static DestroyQAppHook DestroyQApplication = nullptr;
 
@@ -147,7 +147,7 @@ type_set_doc(PyTypeObject *type, PyObject *value, void *context)
 // PYSIDE-908: The function PyType_Modified does not work in PySide, so we need to
 // explicitly pass __doc__. For __signature__ it _did_ actually work, because
 // it was not existing before. We add them both for clarity.
-static PyGetSetDef SbkObjectType_Type_getsetlist[] = {
+static PyGetSetDef SbkObjectType_tp_getset[] = {
     {const_cast<char *>("__signature__"), reinterpret_cast<getter>(Sbk_TypeGet___signature__),
                                           nullptr, nullptr, nullptr},
     {const_cast<char *>("__doc__"),       reinterpret_cast<getter>(Sbk_TypeGet___doc__),
@@ -158,13 +158,13 @@ static PyGetSetDef SbkObjectType_Type_getsetlist[] = {
 };
 
 static PyType_Slot SbkObjectType_Type_slots[] = {
-    {Py_tp_dealloc, reinterpret_cast<void *>(SbkObjectTypeDealloc)},
+    {Py_tp_dealloc, reinterpret_cast<void *>(SbkObjectType_tp_dealloc)},
     {Py_tp_getattro, reinterpret_cast<void *>(mangled_type_getattro)},
     {Py_tp_base, static_cast<void *>(&PyType_Type)},
     {Py_tp_alloc, reinterpret_cast<void *>(PyType_GenericAlloc)},
-    {Py_tp_new, reinterpret_cast<void *>(SbkObjectTypeTpNew)},
+    {Py_tp_new, reinterpret_cast<void *>(SbkObjectType_tp_new)},
     {Py_tp_free, reinterpret_cast<void *>(PyObject_GC_Del)},
-    {Py_tp_getset, reinterpret_cast<void *>(SbkObjectType_Type_getsetlist)},
+    {Py_tp_getset, reinterpret_cast<void *>(SbkObjectType_tp_getset)},
     {0, nullptr}
 };
 
@@ -192,12 +192,12 @@ static PyObject *SbkObjectGetDict(PyObject *pObj, void *)
     return ret;
 }
 
-static PyGetSetDef SbkObjectGetSetList[] = {
+static PyGetSetDef SbkObject_tp_getset[] = {
     {const_cast<char *>("__dict__"), SbkObjectGetDict, nullptr, nullptr, nullptr},
     {nullptr, nullptr, nullptr, nullptr, nullptr} // Sentinel
 };
 
-static int SbkObject_traverse(PyObject *self, visitproc visit, void *arg)
+static int SbkObject_tp_traverse(PyObject *self, visitproc visit, void *arg)
 {
     auto *sbkSelf = reinterpret_cast<SbkObject *>(self);
 
@@ -225,7 +225,7 @@ static int SbkObject_traverse(PyObject *self, visitproc visit, void *arg)
     return 0;
 }
 
-static int SbkObject_clear(PyObject *self)
+static int SbkObject_tp_clear(PyObject *self)
 {
     auto *sbkSelf = reinterpret_cast<SbkObject *>(self);
 
@@ -245,10 +245,10 @@ static PyType_Slot SbkObject_Type_slots[] = {
     {Py_tp_getattro, reinterpret_cast<void *>(SbkObject_GenericGetAttr)},
     {Py_tp_setattro, reinterpret_cast<void *>(SbkObject_GenericSetAttr)},
     {Py_tp_dealloc, reinterpret_cast<void *>(SbkDeallocWrapperWithPrivateDtor)},
-    {Py_tp_traverse, reinterpret_cast<void *>(SbkObject_traverse)},
-    {Py_tp_clear, reinterpret_cast<void *>(SbkObject_clear)},
+    {Py_tp_traverse, reinterpret_cast<void *>(SbkObject_tp_traverse)},
+    {Py_tp_clear, reinterpret_cast<void *>(SbkObject_tp_clear)},
     // unsupported: {Py_tp_weaklistoffset, (void *)offsetof(SbkObject, weakreflist)},
-    {Py_tp_getset, reinterpret_cast<void *>(SbkObjectGetSetList)},
+    {Py_tp_getset, reinterpret_cast<void *>(SbkObject_tp_getset)},
     // unsupported: {Py_tp_dictoffset, (void *)offsetof(SbkObject, ob_dict)},
     {0, nullptr}
 };
@@ -403,7 +403,7 @@ void SbkDeallocWrapperWithPrivateDtor(PyObject *self)
     SbkDeallocWrapperCommon(self, false);
 }
 
-void SbkObjectTypeDealloc(PyTypeObject *sbkType)
+void SbkObjectType_tp_dealloc(PyTypeObject *sbkType)
 {
     SbkObjectTypePrivate *sotp = PepType_SOTP(sbkType);
     auto pyObj = reinterpret_cast<PyObject *>(sbkType);
@@ -475,7 +475,7 @@ PyObject *MakeQAppWrapper(PyTypeObject *type)
     return qApp_curr;
 }
 
-static PyTypeObject *SbkObjectTypeTpNew(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
+static PyTypeObject *SbkObjectType_tp_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
 {
     // Check if all bases are new style before calling type.tp_new
     // Was causing gc assert errors in test_bug704.py when
@@ -590,13 +590,13 @@ static PyObject *_setupNew(SbkObject *self, PyTypeObject *subtype)
     return obSelf;
 }
 
-PyObject *SbkObjectTpNew(PyTypeObject *subtype, PyObject *, PyObject *)
+PyObject *SbkObject_tp_new(PyTypeObject *subtype, PyObject *, PyObject *)
 {
     SbkObject *self = PyObject_GC_New(SbkObject, subtype);
     return _setupNew(self, subtype);
 }
 
-PyObject *SbkQAppTpNew(PyTypeObject *subtype, PyObject *, PyObject *)
+PyObject *SbkQApp_tp_new(PyTypeObject *subtype, PyObject *, PyObject *)
 {
     auto self = reinterpret_cast<SbkObject *>(MakeQAppWrapper(subtype));
     if (self == nullptr)
@@ -1373,7 +1373,7 @@ PyObject *newObject(PyTypeObject *instanceType,
     }
 
     if (shouldCreate) {
-        self = reinterpret_cast<SbkObject *>(SbkObjectTpNew(instanceType, nullptr, nullptr));
+        self = reinterpret_cast<SbkObject *>(SbkObject_tp_new(instanceType, nullptr, nullptr));
         self->d->cptr[0] = cptr;
         self->d->hasOwnership = hasOwnership;
         self->d->validCppObject = 1;

@@ -74,7 +74,7 @@ static PyType_Spec PySideMetaFunctionType_spec = {
 };
 
 
-PyTypeObject *PySideMetaFunctionTypeF(void)
+PyTypeObject *PySideMetaFunction_TypeF(void)
 {
     static auto *type = SbkType_FromSpec(&PySideMetaFunctionType_spec);
     return type;
@@ -106,11 +106,11 @@ static const char *MetaFunction_SignatureStrings[] = {
 
 void init(PyObject *module)
 {
-    if (InitSignatureStrings(PySideMetaFunctionTypeF(), MetaFunction_SignatureStrings) < 0)
+    if (InitSignatureStrings(PySideMetaFunction_TypeF(), MetaFunction_SignatureStrings) < 0)
         return;
 
-    Py_INCREF(PySideMetaFunctionTypeF());
-    PyModule_AddObject(module, "MetaFunction", reinterpret_cast<PyObject *>(PySideMetaFunctionTypeF()));
+    Py_INCREF(PySideMetaFunction_TypeF());
+    PyModule_AddObject(module, "MetaFunction", reinterpret_cast<PyObject *>(PySideMetaFunction_TypeF()));
 }
 
 PySideMetaFunction *newObject(QObject *source, int methodIndex)
@@ -121,7 +121,7 @@ PySideMetaFunction *newObject(QObject *source, int methodIndex)
     QMetaMethod method = source->metaObject()->method(methodIndex);
     if ((method.methodType() == QMetaMethod::Slot) ||
         (method.methodType() == QMetaMethod::Method)) {
-        PySideMetaFunction *function = PyObject_New(PySideMetaFunction, PySideMetaFunctionTypeF());
+        PySideMetaFunction *function = PyObject_New(PySideMetaFunction, PySideMetaFunction_TypeF());
         function->d = new PySideMetaFunctionPrivate();
         function->d->qobject = source;
         function->d->methodIndex = methodIndex;

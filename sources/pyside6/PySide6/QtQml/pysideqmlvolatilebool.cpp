@@ -165,7 +165,7 @@ static PyType_Spec QtQml_VolatileBoolType_spec = {
     QtQml_VolatileBoolType_slots,
 };
 
-PyTypeObject *QtQml_VolatileBoolTypeF(void)
+PyTypeObject *QtQml_VolatileBool_TypeF(void)
 {
     static auto *type = SbkType_FromSpec(&QtQml_VolatileBoolType_spec);
     return type;
@@ -178,13 +178,13 @@ static const char *VolatileBool_SignatureStrings[] = {
 
 void initQtQmlVolatileBool(PyObject *module)
 {
-    if (InitSignatureStrings(QtQml_VolatileBoolTypeF(), VolatileBool_SignatureStrings) < 0) {
+    if (InitSignatureStrings(QtQml_VolatileBool_TypeF(), VolatileBool_SignatureStrings) < 0) {
         PyErr_Print();
         qWarning() << "Error initializing VolatileBool type.";
         return;
     }
 
-    Py_INCREF(QtQml_VolatileBoolTypeF());
-    PyModule_AddObject(module, PepType_GetNameStr(QtQml_VolatileBoolTypeF()),
-                       reinterpret_cast<PyObject *>(QtQml_VolatileBoolTypeF()));
+    Py_INCREF(QtQml_VolatileBool_TypeF());
+    PyModule_AddObject(module, PepType_GetNameStr(QtQml_VolatileBool_TypeF()),
+                       reinterpret_cast<PyObject *>(QtQml_VolatileBool_TypeF()));
 }

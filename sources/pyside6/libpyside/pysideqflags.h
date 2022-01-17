@@ -51,8 +51,8 @@ extern "C"
         long ob_value;
     };
 
-    PYSIDE_API PyObject* PySideQFlagsNew(PyTypeObject *type, PyObject *args, PyObject *kwds);
-    PYSIDE_API PyObject* PySideQFlagsRichCompare(PyObject *self, PyObject *other, int op);
+    PYSIDE_API PyObject* PySideQFlags_tp_new(PyTypeObject *type, PyObject *args, PyObject *kwds);
+    PYSIDE_API PyObject* PySideQFlags_tp_richcompare(PyObject *self, PyObject *other, int op);
 }
 
 

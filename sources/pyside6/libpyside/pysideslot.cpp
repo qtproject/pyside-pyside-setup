@@ -84,7 +84,7 @@ static PyType_Spec PySideSlotType_spec = {
 };
 
 
-static PyTypeObject *PySideSlotTypeF()
+static PyTypeObject *PySideSlot_TypeF()
 {
     static auto *type = SbkType_FromSpec(&PySideSlotType_spec);
     return type;
@@ -187,11 +187,11 @@ static const char *Slot_SignatureStrings[] = {
 
 void init(PyObject *module)
 {
-    if (InitSignatureStrings(PySideSlotTypeF(), Slot_SignatureStrings) < 0)
+    if (InitSignatureStrings(PySideSlot_TypeF(), Slot_SignatureStrings) < 0)
         return;
 
-    Py_INCREF(PySideSlotTypeF());
-    PyModule_AddObject(module, "Slot", reinterpret_cast<PyObject *>(PySideSlotTypeF()));
+    Py_INCREF(PySideSlot_TypeF());
+    PyModule_AddObject(module, "Slot", reinterpret_cast<PyObject *>(PySideSlot_TypeF()));
 }
 
 } // namespace PySide::Slot

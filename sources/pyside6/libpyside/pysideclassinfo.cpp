@@ -50,16 +50,16 @@
 extern "C"
 {
 
-static PyObject *classInfoTpNew(PyTypeObject *subtype, PyObject *args, PyObject *kwds);
-static int classInfoTpInit(PyObject *, PyObject *, PyObject *);
-static void classInfoFree(void *);
-static PyObject *classCall(PyObject *, PyObject *, PyObject *);
+static PyObject *classInfo_tp_new(PyTypeObject *subtype, PyObject *args, PyObject *kwds);
+static int classInfo_tp_init(PyObject *, PyObject *, PyObject *);
+static void classInfo_tp_free(void *);
+static PyObject *classInfo_tp_call(PyObject *, PyObject *, PyObject *);
 
 static PyType_Slot PySideClassInfoType_slots[] = {
-    {Py_tp_call, reinterpret_cast<void *>(classCall)},
-    {Py_tp_init, reinterpret_cast<void *>(classInfoTpInit)},
-    {Py_tp_new, reinterpret_cast<void *>(classInfoTpNew)},
-    {Py_tp_free, reinterpret_cast<void *>(classInfoFree)},
+    {Py_tp_call, reinterpret_cast<void *>(classInfo_tp_call)},
+    {Py_tp_init, reinterpret_cast<void *>(classInfo_tp_init)},
+    {Py_tp_new, reinterpret_cast<void *>(classInfo_tp_new)},
+    {Py_tp_free, reinterpret_cast<void *>(classInfo_tp_free)},
     {Py_tp_dealloc, reinterpret_cast<void *>(Sbk_object_dealloc)},
     {0, nullptr}
 };
@@ -72,13 +72,13 @@ static PyType_Spec PySideClassInfoType_spec = {
 };
 
 
-PyTypeObject *PySideClassInfoTypeF(void)
+PyTypeObject *PySideClassInfo_TypeF(void)
 {
     static auto *type = SbkType_FromSpec(&PySideClassInfoType_spec);
     return type;
 }
 
-PyObject *classCall(PyObject *self, PyObject *args, PyObject * /* kw */)
+PyObject *classInfo_tp_call(PyObject *self, PyObject *args, PyObject * /* kw */)
 {
     if (!PyTuple_Check(args) || PyTuple_Size(args) != 1) {
         PyErr_Format(PyExc_TypeError,
@@ -123,7 +123,7 @@ PyObject *classCall(PyObject *self, PyObject *args, PyObject * /* kw */)
     return klass;
 }
 
-static PyObject *classInfoTpNew(PyTypeObject *subtype, PyObject * /* args */, PyObject * /* kwds */)
+static PyObject *classInfo_tp_new(PyTypeObject *subtype, PyObject * /* args */, PyObject * /* kwds */)
 {
     PySideClassInfo *me = reinterpret_cast<PySideClassInfo *>(subtype->tp_alloc(subtype, 0));
     me->d = new PySideClassInfoPrivate;
@@ -133,7 +133,7 @@ static PyObject *classInfoTpNew(PyTypeObject *subtype, PyObject * /* args */, Py
     return reinterpret_cast<PyObject *>(me);
 }
 
-int classInfoTpInit(PyObject *self, PyObject *args, PyObject *kwds)
+int classInfo_tp_init(PyObject *self, PyObject *args, PyObject *kwds)
 {
     PyObject *infoDict = nullptr;
     auto size = PyTuple_Size(args);
@@ -174,7 +174,7 @@ int classInfoTpInit(PyObject *self, PyObject *args, PyObject *kwds)
     return PyErr_Occurred() ? -1 : 0;
 }
 
-void classInfoFree(void *self)
+void classInfo_tp_free(void *self)
 {
     auto pySelf = reinterpret_cast<PyObject *>(self);
     auto data = reinterpret_cast<PySideClassInfo *>(self);
@@ -195,17 +195,17 @@ static const char *ClassInfo_SignatureStrings[] = {
 
 void init(PyObject *module)
 {
-    if (InitSignatureStrings(PySideClassInfoTypeF(), ClassInfo_SignatureStrings) < 0)
+    if (InitSignatureStrings(PySideClassInfo_TypeF(), ClassInfo_SignatureStrings) < 0)
         return;
 
-    Py_INCREF(PySideClassInfoTypeF());
-    PyModule_AddObject(module, "ClassInfo", reinterpret_cast<PyObject *>(PySideClassInfoTypeF()));
+    Py_INCREF(PySideClassInfo_TypeF());
+    PyModule_AddObject(module, "ClassInfo", reinterpret_cast<PyObject *>(PySideClassInfo_TypeF()));
 }
 
 bool checkType(PyObject *pyObj)
 {
     if (pyObj)
-        return PyType_IsSubtype(Py_TYPE(pyObj), PySideClassInfoTypeF());
+        return PyType_IsSubtype(Py_TYPE(pyObj), PySideClassInfo_TypeF());
     return false;
 }
 

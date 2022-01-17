@@ -72,7 +72,7 @@ PyObject *SbkVoidPtrObject_new(PyTypeObject *type, PyObject *args, PyObject *kwd
     return reinterpret_cast<PyObject *>(self);
 }
 
-#define SbkVoidPtr_Check(op) (Py_TYPE(op) == SbkVoidPtrTypeF())
+#define SbkVoidPtr_Check(op) (Py_TYPE(op) == SbkVoidPtr_TypeF())
 
 
 int SbkVoidPtrObject_init(PyObject *self, PyObject *args, PyObject *kwds)
@@ -316,7 +316,7 @@ static PyType_Spec SbkVoidPtrType_spec = {
 
 }
 
-PyTypeObject *SbkVoidPtrTypeF(void)
+PyTypeObject *SbkVoidPtr_TypeF(void)
 {
     static PyTypeObject *type = SbkType_FromSpec_BMDWB(&SbkVoidPtrType_spec,
                                                        nullptr, nullptr, 0, 0,
@@ -330,7 +330,7 @@ static int voidPointerInitialized = false;
 
 void init()
 {
-    if (PyType_Ready(SbkVoidPtrTypeF()) < 0)
+    if (PyType_Ready(SbkVoidPtr_TypeF()) < 0)
         Py_FatalError("[libshiboken] Failed to initialize Shiboken.VoidPtr type.");
     else
         voidPointerInitialized = true;
@@ -339,9 +339,9 @@ void init()
 void addVoidPtrToModule(PyObject *module)
 {
     if (voidPointerInitialized) {
-        Py_INCREF(SbkVoidPtrTypeF());
-        PyModule_AddObject(module, PepType_GetNameStr(SbkVoidPtrTypeF()),
-                           reinterpret_cast<PyObject *>(SbkVoidPtrTypeF()));
+        Py_INCREF(SbkVoidPtr_TypeF());
+        PyModule_AddObject(module, PepType_GetNameStr(SbkVoidPtr_TypeF()),
+                           reinterpret_cast<PyObject *>(SbkVoidPtr_TypeF()));
     }
 }
 
@@ -350,7 +350,7 @@ static PyObject *createVoidPtr(void *cppIn, Py_ssize_t size = 0, bool isWritable
     if (!cppIn)
         Py_RETURN_NONE;
 
-    SbkVoidPtrObject *result = PyObject_New(SbkVoidPtrObject, SbkVoidPtrTypeF());
+    SbkVoidPtrObject *result = PyObject_New(SbkVoidPtrObject, SbkVoidPtr_TypeF());
     if (!result)
         Py_RETURN_NONE;
 
@@ -423,7 +423,7 @@ static PythonToCppFunc PythonBufferToCppIsConvertible(PyObject *pyIn)
 
 SbkConverter *createConverter()
 {
-    SbkConverter *converter = Shiboken::Conversions::createConverter(SbkVoidPtrTypeF(), toPython);
+    SbkConverter *converter = Shiboken::Conversions::createConverter(SbkVoidPtr_TypeF(), toPython);
     Shiboken::Conversions::addPythonToCppValueConversion(converter,
                                                          VoidPtrToCpp,
                                                          VoidPtrToCppIsConvertible);
@@ -438,28 +438,28 @@ SbkConverter *createConverter()
 
 void setSize(PyObject *voidPtr, Py_ssize_t size)
 {
-    assert(voidPtr->ob_type == SbkVoidPtrTypeF());
+    assert(voidPtr->ob_type == SbkVoidPtr_TypeF());
     auto *voidPtrObj = reinterpret_cast<SbkVoidPtrObject *>(voidPtr);
     voidPtrObj->size = size;
 }
 
 Py_ssize_t getSize(PyObject *voidPtr)
 {
-    assert(voidPtr->ob_type == SbkVoidPtrTypeF());
+    assert(voidPtr->ob_type == SbkVoidPtr_TypeF());
     auto *voidPtrObj = reinterpret_cast<SbkVoidPtrObject *>(voidPtr);
     return voidPtrObj->size;
 }
 
 bool isWritable(PyObject *voidPtr)
 {
-    assert(voidPtr->ob_type == SbkVoidPtrTypeF());
+    assert(voidPtr->ob_type == SbkVoidPtr_TypeF());
     auto *voidPtrObj = reinterpret_cast<SbkVoidPtrObject *>(voidPtr);
     return voidPtrObj->isWritable;
 }
 
 void setWritable(PyObject *voidPtr, bool isWritable)
 {
-    assert(voidPtr->ob_type == SbkVoidPtrTypeF());
+    assert(voidPtr->ob_type == SbkVoidPtr_TypeF());
     auto *voidPtrObj = reinterpret_cast<SbkVoidPtrObject *>(voidPtr);
     voidPtrObj->isWritable = isWritable;
 }

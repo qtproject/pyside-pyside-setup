@@ -55,8 +55,8 @@ QT_END_NAMESPACE
 
 extern "C"
 {
-    extern PYSIDE_API PyTypeObject *PySideSignalTypeF(void);
-    extern PYSIDE_API PyTypeObject *PySideSignalInstanceTypeF(void);
+    extern PYSIDE_API PyTypeObject *PySideSignal_TypeF(void);
+    extern PYSIDE_API PyTypeObject *PySideSignalInstance_TypeF(void);
 
     // Internal object
     struct PYSIDE_API PySideSignal;

@@ -4363,12 +4363,12 @@ void CppGenerator::writeClassDefinition(TextStream &s,
         // This is not generally possible, because PySide does not care about
         // privacy the same way. This worked before the heap types were used,
         // because inheritance is not really checked for static types.
-        // Instead, we check this at runtime, see SbkObjectTypeTpNew.
+        // Instead, we check this at runtime, see SbkObjectType_tp_new.
         if (metaClass->fullName().startsWith(QLatin1String("PySide6.Qt"))) {
             // PYSIDE-595: No idea how to do non-inheritance correctly.
             // Since that is only relevant in shiboken, I used a shortcut for
             // PySide.
-            tp_new = QLatin1String("SbkObjectTpNew");
+            tp_new = u"SbkObject_tp_new"_qs;
         }
         else {
             tp_new = QLatin1String("SbkDummyNew /* PYSIDE-595: Prevent replacement "
@@ -4376,10 +4376,10 @@ void CppGenerator::writeClassDefinition(TextStream &s,
         }
     }
     else if (isQApp) {
-        tp_new = QLatin1String("SbkQAppTpNew"); // PYSIDE-571: need singleton app
+        tp_new = u"SbkQApp_tp_new"_qs; // PYSIDE-571: need singleton app
     }
     else {
-        tp_new = QLatin1String("SbkObjectTpNew");
+        tp_new = u"SbkObject_tp_new"_qs;
     }
     tp_flags.append(QLatin1String("|Py_TPFLAGS_HAVE_GC"));
 

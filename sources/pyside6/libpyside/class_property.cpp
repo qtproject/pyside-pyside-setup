@@ -57,13 +57,13 @@ extern "C" {
  */
 
 // `class_property.__get__()`: Always pass the class instead of the instance.
-static PyObject *PyClassProperty_get(PyObject *self, PyObject * /*ob*/, PyObject *cls)
+static PyObject *PyClassProperty_descr_get(PyObject *self, PyObject * /*ob*/, PyObject *cls)
 {
     return PyProperty_Type.tp_descr_get(self, cls, cls);
 }
 
 // `class_property.__set__()`: Just like the above `__get__()`.
-static int PyClassProperty_set(PyObject *self, PyObject *obj, PyObject *value)
+static int PyClassProperty_descr_set(PyObject *self, PyObject *obj, PyObject *value)
 {
     PyObject *cls = PyType_Check(obj) ? obj : reinterpret_cast<PyObject *>(Py_TYPE(obj));
     return PyProperty_Type.tp_descr_set(self, cls, value);
@@ -72,7 +72,7 @@ static int PyClassProperty_set(PyObject *self, PyObject *obj, PyObject *value)
 // The property `__doc__` default does not work for class properties
 // because PyProperty_Type.tp_init thinks this is a subclass which needs PyObject_SetAttr.
 // We call `__init__` while pretending to be a PyProperty_Type instance.
-static int PyClassProperty_init(PyObject *self, PyObject *args, PyObject *kwargs)
+static int PyClassProperty_tp_init(PyObject *self, PyObject *args, PyObject *kwargs)
 {
     auto hold = Py_TYPE(self);
     Py_TYPE(self) = &PyProperty_Type;
@@ -84,9 +84,9 @@ static int PyClassProperty_init(PyObject *self, PyObject *args, PyObject *kwargs
 static PyType_Slot PyClassProperty_slots[] = {
     {Py_tp_getset,      nullptr},    // will be set below
     {Py_tp_base,        reinterpret_cast<void *>(&PyProperty_Type)},
-    {Py_tp_descr_get,   reinterpret_cast<void *>(PyClassProperty_get)},
-    {Py_tp_descr_set,   reinterpret_cast<void *>(PyClassProperty_set)},
-    {Py_tp_init,        reinterpret_cast<void *>(PyClassProperty_init)},
+    {Py_tp_descr_get,   reinterpret_cast<void *>(PyClassProperty_descr_get)},
+    {Py_tp_descr_set,   reinterpret_cast<void *>(PyClassProperty_descr_set)},
+    {Py_tp_init,        reinterpret_cast<void *>(PyClassProperty_tp_init)},
     {0, 0}
 };
 
@@ -98,7 +98,7 @@ static PyType_Spec PyClassProperty_spec = {
     PyClassProperty_slots,
 };
 
-PyTypeObject *PyClassPropertyTypeF()
+PyTypeObject *PyClassProperty_TypeF()
 {
     static PyTypeObject *type = nullptr;
     if (type == nullptr) {
@@ -127,7 +127,7 @@ static int SbkObjectType_meta_setattro(PyObject *obj, PyObject *name, PyObject *
     //   1. `Type.class_prop = value`              --> descr_set: `Type.class_prop.__set__(value)`
     //   2. `Type.class_prop = other_class_prop`   --> setattro:  replace existing `class_prop`
     //   3. `Type.regular_attribute = value`       --> setattro:  regular attribute assignment
-    const auto class_prop = reinterpret_cast<PyObject *>(PyClassPropertyTypeF());
+    const auto class_prop = reinterpret_cast<PyObject *>(PyClassProperty_TypeF());
     const auto call_descr_set = descr && PyObject_IsInstance(descr, class_prop)
                                 && !PyObject_IsInstance(value, class_prop);
     if (call_descr_set) {
@@ -161,13 +161,13 @@ void init(PyObject *module)
 {
     PyTypeObject *type = SbkObjectType_TypeF();
     type->tp_setattro = SbkObjectType_meta_setattro;
-    Py_TYPE(PyClassPropertyTypeF()) = type;
+    Py_TYPE(PyClassProperty_TypeF()) = type;
 
-    if (InitSignatureStrings(PyClassPropertyTypeF(), PyClassProperty_SignatureStrings) < 0)
+    if (InitSignatureStrings(PyClassProperty_TypeF(), PyClassProperty_SignatureStrings) < 0)
         return;
 
-    Py_INCREF(PyClassPropertyTypeF());
-    auto classproptype = reinterpret_cast<PyObject *>(PyClassPropertyTypeF());
+    Py_INCREF(PyClassProperty_TypeF());
+    auto classproptype = reinterpret_cast<PyObject *>(PyClassProperty_TypeF());
     PyModule_AddObject(module, "PyClassProperty", classproptype);
 }
 

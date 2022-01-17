@@ -932,7 +932,7 @@ timerType->tp_init(pyTimer, emptyTuple, nullptr);
 QTimer * timer = %CONVERTTOCPP[QTimer *](pyTimer);
 timer->setSingleShot(true);
 
-if (PyObject_TypeCheck(%2, PySideSignalInstanceTypeF())) {
+if (PyObject_TypeCheck(%2, PySideSignalInstance_TypeF())) {
     PySideSignalInstance *signalInstance = reinterpret_cast<PySideSignalInstance *>(%2);
     Shiboken::AutoDecRef signalSignature(Shiboken::String::fromFormat("2%s", PySide::Signal::getSignature(signalInstance)));
     Shiboken::AutoDecRef result(

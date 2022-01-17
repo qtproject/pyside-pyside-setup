@@ -60,7 +60,7 @@ struct PySideSignalData
 
 extern "C"
 {
-    extern PyTypeObject *PySideSignalTypeF(void);
+    extern PyTypeObject *PySideSignal_TypeF(void);
 
     struct PySideSignal {
         PyObject_HEAD

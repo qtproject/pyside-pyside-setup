@@ -42,7 +42,7 @@
  ********************************************************************/
 
 // @snippet qsignaltransition
-if (PyObject_TypeCheck(%1, PySideSignalInstanceTypeF())) {
+if (PyObject_TypeCheck(%1, PySideSignalInstance_TypeF())) {
     auto *signalInstance = reinterpret_cast<PySideSignalInstance *>(%PYARG_1);
     PyObject *dataSource = PySide::Signal::getObject(signalInstance);
     Shiboken::AutoDecRef obType(PyObject_Type(dataSource));
@@ -75,7 +75,7 @@ if (PySide::SignalManager::registerMetaMethod(%1, signalName.constData(),
 // since it refers to a name very tied to the generator implementation.
 // Check bug #362 for more information on this
 // http://bugs.openbossa.org/show_bug.cgi?id=362
-if (!PyObject_TypeCheck(%1, PySideSignalInstanceTypeF()))
+if (!PyObject_TypeCheck(%1, PySideSignalInstance_TypeF()))
     goto Sbk_%TYPEFunc_%FUNCTION_NAME_TypeError;
 PySideSignalInstance *signalInstance = reinterpret_cast<PySideSignalInstance *>(%1);
 auto sender = %CONVERTTOCPP[QObject *](PySide::Signal::getObject(signalInstance));

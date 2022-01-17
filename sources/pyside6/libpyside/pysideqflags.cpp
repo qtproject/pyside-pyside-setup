@@ -59,7 +59,7 @@ extern "C" {
 
     #define PYSIDE_QFLAGS(X) reinterpret_cast<PySideQFlagsObject *>(X)
 
-    PyObject *PySideQFlagsNew(PyTypeObject *type, PyObject *args, PyObject * /* kwds */)
+    PyObject *PySideQFlags_tp_new(PyTypeObject *type, PyObject *args, PyObject * /* kwds */)
     {
         long val = 0;
         if (PyTuple_GET_SIZE(args)) {
@@ -85,12 +85,12 @@ extern "C" {
         return PyLong_AsLong(number);
     }
 
-    static PyObject *qflag_int(PyObject *self)
+    static PyObject *qflag_nb_int(PyObject *self)
     {
         return PyLong_FromLong(reinterpret_cast<PySideQFlagsObject*>(self)->ob_value);
     }
 
-    PyObject *PySideQFlagsRichCompare(PyObject *self, PyObject *other, int op)
+    PyObject *PySideQFlags_tp_richcompare(PyObject *self, PyObject *other, int op)
     {
         int result = 0;
         if (!PyNumber_Check(other)) {
@@ -138,7 +138,7 @@ extern "C" {
         Py_RETURN_FALSE;
     }
 
-    static void PySideQFlagsDealloc(PyObject *self)
+    static void PySideQFlags_tp_dealloc(PyObject *self)
     {
         auto *flagsType = reinterpret_cast<PySideQFlagsType *>(self);
         PepType_PFTP_delete(flagsType);
@@ -156,11 +156,11 @@ namespace QFlags
         {Py_nb_and, nullptr},
         {Py_nb_xor, nullptr},
         {Py_nb_or, nullptr},
-        {Py_nb_int, reinterpret_cast<void*>(qflag_int)},
-        {Py_nb_index, reinterpret_cast<void*>(qflag_int)},
-        {Py_tp_new, reinterpret_cast<void *>(PySideQFlagsNew)},
-        {Py_tp_richcompare, reinterpret_cast<void *>(PySideQFlagsRichCompare)},
-        {Py_tp_dealloc, reinterpret_cast<void *>(PySideQFlagsDealloc)},
+        {Py_nb_int, reinterpret_cast<void*>(qflag_nb_int)},
+        {Py_nb_index, reinterpret_cast<void*>(qflag_nb_int)},   // same as nb_int
+        {Py_tp_new, reinterpret_cast<void *>(PySideQFlags_tp_new)},
+        {Py_tp_richcompare, reinterpret_cast<void *>(PySideQFlags_tp_richcompare)},
+        {Py_tp_dealloc, reinterpret_cast<void *>(PySideQFlags_tp_dealloc)},
         {0, nullptr}
     };
     static PyType_Spec SbkNewQFlagsType_spec = {

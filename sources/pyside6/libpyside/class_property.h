@@ -54,7 +54,7 @@ typedef struct {
     int getter_doc;
 } propertyobject;
 
-PYSIDE_API PyTypeObject *PyClassPropertyTypeF();
+PYSIDE_API PyTypeObject *PyClassProperty_TypeF();
 
 } // extern "C"
 

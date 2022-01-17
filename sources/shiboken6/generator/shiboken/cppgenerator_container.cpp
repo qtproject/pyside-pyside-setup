@@ -212,7 +212,7 @@ CppGenerator::OpaqueContainerData
            "Shiboken::PyMagicName::opaque_container(), Py_True);\n"
         << "return result;\n" << outdent << "}\n\n";
 
-    // typeF() function
+    // _TypeF() function
     const QString typeFName =  result.name + u"_TypeF"_qs;
     s << "static PyTypeObject *" << typeFName << "()\n{\n" << indent
         << "static PyTypeObject *type = " << typeCreationFName

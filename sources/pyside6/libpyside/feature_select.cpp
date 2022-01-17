@@ -574,7 +574,7 @@ static PyObject *createProperty(PyTypeObject *type, PyObject *getter, PyObject *
         setter = Py_None;
     auto ptype = &PyProperty_Type;
     if (Py_TYPE(getter) == PepStaticMethod_TypePtr) {
-        ptype = PyClassPropertyTypeF();
+        ptype = PyClassProperty_TypeF();
         getter = modifyStaticToClassMethod(type, getter);
         if (setter != Py_None)
             setter = modifyStaticToClassMethod(type, setter);

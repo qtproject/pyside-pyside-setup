@@ -42,9 +42,9 @@
 
 #include <sbkpython.h>
 
-PyTypeObject *QtQml_VolatileBoolTypeF(void);
+PyTypeObject *QtQml_VolatileBool_TypeF(void);
 
-#define VolatileBool_Check(op) (Py_TYPE(op) == QtQml_VolatileBoolTypeF())
+#define VolatileBool_Check(op) (Py_TYPE(op) == QtQml_VolatileBool_TypeF())
 
 void initQtQmlVolatileBool(PyObject *module);
 

@@ -122,10 +122,10 @@ extern LIBSHIBOKEN_API PyTypeObject *SbkObject_TypeF(void);
 struct SbkObjectTypePrivate;
 /// PyTypeObject extended with C++ multiple inheritance information.
 
-LIBSHIBOKEN_API PyObject *SbkObjectTpNew(PyTypeObject *subtype, PyObject *, PyObject *);
+LIBSHIBOKEN_API PyObject *SbkObject_tp_new(PyTypeObject *subtype, PyObject *, PyObject *);
 
 /// The special case of a switchable singleton Q*Application.
-LIBSHIBOKEN_API PyObject *SbkQAppTpNew(PyTypeObject *subtype, PyObject *, PyObject *);
+LIBSHIBOKEN_API PyObject *SbkQApp_tp_new(PyTypeObject *subtype, PyObject *, PyObject *);
 
 /// Create a new Q*Application wrapper and monitor it.
 LIBSHIBOKEN_API PyObject *MakeQAppWrapper(PyTypeObject *type);

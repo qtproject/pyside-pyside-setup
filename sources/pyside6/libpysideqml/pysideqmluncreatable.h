@@ -47,7 +47,7 @@
 // QmlElement.
 extern "C"
 {
-    extern PyTypeObject *PySideQmlUncreatableTypeF(void);
+    extern PyTypeObject *PySideQmlUncreatable_TypeF(void);
 
     struct PySideQmlUncreatablePrivate;
     struct PySideQmlUncreatable

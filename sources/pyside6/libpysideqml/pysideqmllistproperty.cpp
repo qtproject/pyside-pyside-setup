@@ -137,9 +137,9 @@ static PyType_Spec PropertyListType_spec = {
 };
 
 
-PyTypeObject *PropertyListTypeF(void)
+PyTypeObject *PropertyList_TypeF(void)
 {
-    static Shiboken::AutoDecRef bases(Py_BuildValue("(O)", PySidePropertyTypeF()));
+    static Shiboken::AutoDecRef bases(Py_BuildValue("(O)", PySideProperty_TypeF()));
     static auto *type = SbkType_FromSpecWithBases(&PropertyListType_spec, bases);
     return type;
 }
@@ -306,7 +306,7 @@ namespace PySide::Qml {
 void initQtQmlListProperty(PyObject *module)
 {
     // Export QmlListProperty type
-    if (InitSignatureStrings(PropertyListTypeF(), PropertyList_SignatureStrings) < 0) {
+    if (InitSignatureStrings(PropertyList_TypeF(), PropertyList_SignatureStrings) < 0) {
         PyErr_Print();
         qWarning() << "Error initializing PropertyList type.";
         return;
@@ -315,9 +315,9 @@ void initQtQmlListProperty(PyObject *module)
     // Register QQmlListProperty metatype for use in QML
     qRegisterMetaType<QQmlListProperty<QObject>>();
 
-    Py_INCREF(reinterpret_cast<PyObject *>(PropertyListTypeF()));
-    PyModule_AddObject(module, PepType_GetNameStr(PropertyListTypeF()),
-                       reinterpret_cast<PyObject *>(PropertyListTypeF()));
+    Py_INCREF(reinterpret_cast<PyObject *>(PropertyList_TypeF()));
+    PyModule_AddObject(module, PepType_GetNameStr(PropertyList_TypeF()),
+                       reinterpret_cast<PyObject *>(PropertyList_TypeF()));
 }
 
 } // namespace PySide::Qml
