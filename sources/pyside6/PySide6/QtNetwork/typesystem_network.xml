@@ -206,6 +206,7 @@
     <object-type name="QNetworkInformation">
         <enum-type name="Reachability"/>
         <enum-type name="Feature" flags="Features"/>
+        <enum-type name="TransportMedium" since="6.3"/>
     </object-type>
     <object-type name="QNetworkCookieJar"/>
     <value-type name="QNetworkDatagram" since="5.8"/>

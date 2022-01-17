@@ -1768,6 +1768,7 @@
     <enum-type name="UrlFormattingOption"/>
     <enum-type name="UserInputResolutionOption" flags="UserInputResolutionOptions"/>
     <enum-type name="ParsingMode"/>
+    <enum-type name="AceProcessingOption" flags="AceProcessingOptions" since="6.3"/>
     <extra-includes>
       <include file-name="QStringList" location="global"/>
       <include file-name="pysideqhash.h" location="global"/>
