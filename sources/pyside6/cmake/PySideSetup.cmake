@@ -177,7 +177,7 @@ endif()
 check_os()
 
 # Define supported Qt Version
-set(SUPPORTED_QT_VERSION "${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}")
+set(SUPPORTED_QT_VERSION "${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH}")
 
 
 # uninstall target
