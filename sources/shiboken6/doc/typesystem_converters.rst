@@ -175,6 +175,13 @@ defined (or automatically generated) for the containers.
               </conversion-rule>
             </container-type>
 
+.. note:: From version 6.3, we do not have to explicitly specify the
+          `<container-type/>` for C++ containers ``std::list``\, ``std::vector``\,
+          ``std::pair``\, ``std::map`` and ``std::unordered_map``\. They are
+          now built-in. However, they still have to be added for opaque
+          containers or when modifying the built-in behavior.
+          For this case, a number of pre-defined conversion templates
+          are provided (see :ref:`predefined_templates`).
 
 .. _variables_and_functions:
 

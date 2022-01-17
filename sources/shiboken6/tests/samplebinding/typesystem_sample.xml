@@ -347,19 +347,6 @@
         </inject-code>
     </add-function>
 
-    <container-type name="std::pair" type="pair">
-        <include file-name="utility" location="global"/>
-        <conversion-rule>
-            <native-to-target>
-                <insert-template name="shiboken_conversion_cpppair_to_pytuple"/>
-            </native-to-target>
-            <target-to-native>
-                <add-conversion type="PySequence">
-                    <insert-template name="shiboken_conversion_pysequence_to_cpppair"/>
-                </add-conversion>
-            </target-to-native>
-        </conversion-rule>
-    </container-type>
     <template name="cpp_indexed_list_to_pylist_conversion">
     PyObject *%out = PyList_New(Py_ssize_t(%in.size()));
     Py_ssize_t idx = 0;

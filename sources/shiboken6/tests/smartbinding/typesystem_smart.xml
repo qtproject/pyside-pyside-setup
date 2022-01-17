@@ -16,19 +16,6 @@
             %out.push_back(cppItem);
         }
     </template>
-    <container-type name="std::vector" type="list">
-        <include file-name="list" location="global"/>
-        <conversion-rule>
-            <native-to-target>
-                <insert-template name="cpplist_to_pylist_convertion"/>
-            </native-to-target>
-            <target-to-native>
-                <add-conversion type="PySequence">
-                    <insert-template name="pyseq_to_cpplist_convertion"/>
-                </add-conversion>
-            </target-to-native>
-        </conversion-rule>
-    </container-type>
 
     <custom-type name="std::shared_ptr" />
 

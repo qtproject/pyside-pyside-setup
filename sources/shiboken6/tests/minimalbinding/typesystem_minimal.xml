@@ -49,32 +49,6 @@
     </value-type>
     <value-type name="MinBoolUser"/>
 
-    <container-type name="std::vector" type="vector">
-        <include file-name="vector" location="global"/>
-        <conversion-rule>
-            <native-to-target>
-            %INTYPE::size_type vectorSize = %in.size();
-            PyObject* %out = PyList_New(Py_ssize_t(vectorSize));
-            for (%INTYPE::size_type idx = 0; idx &lt; vectorSize; ++idx) {
-                %INTYPE_0 cppItem(%in[idx]);
-                PyList_SET_ITEM(%out, idx, %CONVERTTOPYTHON[%INTYPE_0](cppItem));
-            }
-            return %out;
-            </native-to-target>
-            <target-to-native>
-                <add-conversion type="PySequence">
-                Shiboken::AutoDecRef seq(PySequence_Fast(%in, 0));
-                const Py_ssize_t vectorSize = PySequence_Fast_GET_SIZE(seq.object());
-                %out.reserve(vectorSize);
-                for (Py_ssize_t idx = 0; idx &lt; vectorSize; ++idx ) {
-                    PyObject* pyItem = PySequence_Fast_GET_ITEM(seq.object(), idx);
-                    %OUTTYPE_0 cppItem = %CONVERTTOCPP[%OUTTYPE_0](pyItem);
-                    %out.push_back(cppItem);
-                }
-                </add-conversion>
-            </target-to-native>
-        </conversion-rule>
-    </container-type>
     <!-- Test wrapping of a typedef -->
     <function signature="arrayFuncInt(std::vector&lt;int&gt;)" />
     <!-- Note manual expansion of the typedef -->
