@@ -1797,7 +1797,8 @@ void AbstractMetaClass::setValueTypeWithCopyConstructorOnly(bool v)
     d->m_valueTypeWithCopyConstructorOnly = v;
 }
 
-bool AbstractMetaClass::determineValueTypeWithCopyConstructorOnly(const AbstractMetaClass *c)
+bool AbstractMetaClass::determineValueTypeWithCopyConstructorOnly(const AbstractMetaClass *c,
+                                                                  bool avoidProtectedHack)
 {
 
     if (!c->typeEntry()->isValue())
@@ -1809,7 +1810,8 @@ bool AbstractMetaClass::determineValueTypeWithCopyConstructorOnly(const Abstract
     for (const auto &ctor : ctors) {
         switch (ctor->functionType()) {
         case AbstractMetaFunction::ConstructorFunction:
-            return false;
+            if (!ctor->isPrivate() && (ctor->isPublic() || !avoidProtectedHack))
+                return false;
         case AbstractMetaFunction::CopyConstructorFunction:
             copyConstructorFound = true;
             break;

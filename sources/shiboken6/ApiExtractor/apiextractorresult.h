@@ -30,6 +30,7 @@
 #define APIEXTRACTORRESULT_H
 
 #include "abstractmetalang.h"
+#include "apiextractorflags.h"
 #include "abstractmetaenum.h"
 #include "abstractmetatype.h"
 #include "typesystem_typedefs.h"
@@ -63,6 +64,9 @@ public:
     AbstractMetaFunctionCList implicitConversions(const TypeEntry *type) const;
     AbstractMetaFunctionCList implicitConversions(const AbstractMetaType &metaType) const;
 
+    ApiExtractorFlags flags() const { return m_flags; }
+    void setFlags(ApiExtractorFlags f) { m_flags = f; }
+
 private:
     AbstractMetaClassCList m_metaClasses;
     AbstractMetaClassCList m_smartPointers;
@@ -70,6 +74,8 @@ private:
     AbstractMetaEnumList m_globalEnums;
 
     QHash<const TypeEntry *, AbstractMetaEnum> m_enums;
+
+    ApiExtractorFlags m_flags;
 };
 
 #endif // APIEXTRACTORRESULT_H

@@ -259,6 +259,7 @@ std::optional<ApiExtractorResult> ApiExtractor::run(ApiExtractorFlags flags)
     result.m_globalFunctions = m_builder->globalFunctions();
     result.m_globalEnums = m_builder->globalEnums();
     result.m_enums = m_builder->typeEntryToEnumsHash();
+    result.m_flags = flags;
     return result;
 }
 

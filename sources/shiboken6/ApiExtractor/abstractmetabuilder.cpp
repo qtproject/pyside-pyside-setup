@@ -536,7 +536,9 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom,
         if (cls->canAddDefaultCopyConstructor())
             cls->addDefaultCopyConstructor();
 
-        const bool vco = AbstractMetaClass::determineValueTypeWithCopyConstructorOnly(cls);
+        const bool avoidProtectedHack = flags.testFlag(ApiExtractorFlag::AvoidProtectedHack);
+        const bool vco =
+            AbstractMetaClass::determineValueTypeWithCopyConstructorOnly(cls, avoidProtectedHack);
         cls->setValueTypeWithCopyConstructorOnly(vco);
         cls->typeEntry()->setValueTypeWithCopyConstructorOnly(vco);
     }
