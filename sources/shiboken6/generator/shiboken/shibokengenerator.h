@@ -308,8 +308,6 @@ protected:
     bool useIsNullAsNbNonZero() const;
     /// Returns true if the generator should use operator bool to compute boolean casts.
     bool useOperatorBoolAsNbNonZero() const;
-    /// Returns true if the generated code should use the "#define protected public" hack.
-    bool avoidProtectedHack() const;
     /// Generate implicit conversions of function arguments
     bool generateImplicitConversions() const;
     static QString cppApiVariableName(const QString &moduleName = QString());
@@ -472,7 +470,6 @@ private:
     bool m_verboseErrorMessagesDisabled = false;
     bool m_useIsNullAsNbNonZero = false;
     bool m_useOperatorBoolAsNbNonZero = false;
-    bool m_avoidProtectedHack = false;
     // FIXME PYSIDE 7 Flip generateImplicitConversions default or remove?
     bool m_generateImplicitConversions = true;
     bool m_wrapperDiagnostics = false;

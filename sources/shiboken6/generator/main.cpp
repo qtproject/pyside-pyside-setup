@@ -689,9 +689,12 @@ int shibokenMain(int argc, char *argv[])
     extractor.setCppFileNames(cppFileNames);
     extractor.setTypeSystem(typeSystemFileName);
 
-    const bool usePySideExtensions = generators.constFirst().data()->usePySideExtensions();
-
-    const std::optional<ApiExtractorResult> apiOpt = extractor.run(usePySideExtensions);
+    ApiExtractorFlags apiExtractorFlags;
+    if (generators.constFirst()->usePySideExtensions())
+        apiExtractorFlags.setFlag(ApiExtractorFlag::UsePySideExtensions);
+    if (generators.constFirst()->avoidProtectedHack())
+        apiExtractorFlags.setFlag(ApiExtractorFlag::AvoidProtectedHack);
+    const std::optional<ApiExtractorResult> apiOpt = extractor.run(apiExtractorFlags);
 
     if (!apiOpt.has_value()) {
         errorPrint(QLatin1String("Error running ApiExtractor."));

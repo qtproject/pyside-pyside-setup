@@ -239,6 +239,9 @@ public:
 
     /// Returns true if the user enabled PySide extensions (command line option)
     bool usePySideExtensions() const;
+    /// Returns true if the generated code should not use the
+    /// "#define protected public" hack.
+    bool avoidProtectedHack() const;
 
     /**
      *  Retrieves the name of the currently processed module.

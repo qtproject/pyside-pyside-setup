@@ -30,6 +30,7 @@
 #define APIEXTRACTOR_H
 
 #include "abstractmetalang_typedefs.h"
+#include "apiextractorflags.h"
 #include "header_paths.h"
 #include "typedatabase_typedefs.h"
 #include "typesystem_typedefs.h"
@@ -91,10 +92,10 @@ public:
     const AbstractMetaClassList &classes() const;
     const AbstractMetaClassList &smartPointers() const;
 
-    std::optional<ApiExtractorResult> run(bool usePySideExtensions);
+    std::optional<ApiExtractorResult> run(ApiExtractorFlags flags);
 
 private:
-    bool runHelper(bool usePySideExtensions);
+    bool runHelper(ApiExtractorFlags flags);
 
     QString m_typeSystemFileName;
     QFileInfoList m_cppFileNames;

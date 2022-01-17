@@ -434,7 +434,8 @@ static QStringList functionCandidates(const AbstractMetaFunctionCList &list,
     return result;
 }
 
-void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
+void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom,
+                                             ApiExtractorFlags flags)
 {
     const TypeDatabase *types = TypeDatabase::instance();
 
@@ -657,6 +658,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
 }
 
 bool AbstractMetaBuilder::build(const QByteArrayList &arguments,
+                                ApiExtractorFlags apiExtractorFlags,
                                 bool addCompilerSupportArguments,
                                 LanguageLevel level,
                                 unsigned clangFlags)
@@ -667,7 +669,7 @@ bool AbstractMetaBuilder::build(const QByteArrayList &arguments,
         return false;
     if (ReportHandler::isDebug(ReportHandler::MediumDebug))
         qCDebug(lcShiboken) << dom.data();
-    d->traverseDom(dom);
+    d->traverseDom(dom, apiExtractorFlags);
 
     return true;
 }

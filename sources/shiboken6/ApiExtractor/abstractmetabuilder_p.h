@@ -66,7 +66,7 @@ public:
                                   bool addCompilerSupportArguments,
                                   LanguageLevel level,
                                   unsigned clangFlags);
-    void traverseDom(const FileModelItem &dom);
+    void traverseDom(const FileModelItem &dom, ApiExtractorFlags flags);
 
     void dumpLog() const;
     static AbstractMetaClassList classesTopologicalSorted(const AbstractMetaClassList &classList,
