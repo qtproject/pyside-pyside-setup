@@ -349,7 +349,8 @@ public:
     bool isCopyable() const;
     bool isValueTypeWithCopyConstructorOnly() const;
     void setValueTypeWithCopyConstructorOnly(bool v);
-    static bool determineValueTypeWithCopyConstructorOnly(const AbstractMetaClass *c);
+    static bool determineValueTypeWithCopyConstructorOnly(const AbstractMetaClass *c,
+                                                          bool avoidProtectedHack);
 
     static AbstractMetaClass *findClass(const AbstractMetaClassList &classes,
                                         const QString &name);
