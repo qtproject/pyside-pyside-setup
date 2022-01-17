@@ -2262,9 +2262,9 @@
         <inject-code file="../glue/qtcore.cpp" snippet="qcryptographichash-adddata"/>
     </modify-function>
   </object-type>
-  <object-type name="QOperatingSystemVersionBase" since="6.3">
+  <value-type name="QOperatingSystemVersionBase" since="6.3">
       <enum-type name="OSType"/>
-  </object-type>
+  </value-type>
   <value-type name="QOperatingSystemVersion" since="5.9">
       <enum-type name="OSType"/>
       <modify-function signature="QOperatingSystemVersion(const QOperatingSystemVersionBase&amp;)" remove="all"/>
