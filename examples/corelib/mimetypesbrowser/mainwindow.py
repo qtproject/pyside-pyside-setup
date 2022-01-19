@@ -129,7 +129,7 @@ class MainWindow(QMainWindow):
         )
 
         if index.isValid():
-            self.statusBar().showMessage(f'\{fi.fileName()}" is of type "{mime_type.name()}"')
+            self.statusBar().showMessage(f'{fi.fileName()}" is of type "{mime_type.name()}"')
             self._select_and_goto(index)
         else:
             QMessageBox.information(
