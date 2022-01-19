@@ -771,7 +771,7 @@ class VariantDelegate(QItemDelegate):
             h = value.height()
             return f'({w},{h})'
         if isinstance(value, list):
-            return ','.join(value)
+            return ','.join(map(repr, value))
         if value is None:
             return '<Invalid>'
 
