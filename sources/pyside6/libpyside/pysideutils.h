@@ -63,6 +63,8 @@ PYSIDE_API QString pyStringToQString(PyObject *str);
 /// Provide an efficient, correct PathLike interface.
 PYSIDE_API QString pyPathToQString(PyObject *path);
 
+PYSIDE_API bool isCompiledMethod(PyObject *callback);
+
 } //namespace PySide
 
 #endif // PYSIDESTRING_H

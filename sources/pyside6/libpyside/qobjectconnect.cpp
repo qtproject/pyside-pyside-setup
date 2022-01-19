@@ -40,6 +40,7 @@
 #include "qobjectconnect.h"
 #include "pysideqobject.h"
 #include "pysidesignal.h"
+#include "pysideutils.h"
 #include "signalmanager.h"
 
 #include "shiboken.h"

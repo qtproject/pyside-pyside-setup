@@ -54,8 +54,6 @@ QT_FORWARD_DECLARE_CLASS(QDataStream)
 namespace PySide
 {
 
-PYSIDE_API bool isCompiledMethod(PyObject *callback);
-
 /// Thin wrapper for PyObject which increases the reference count at the constructor but *NOT* at destructor.
 class PYSIDE_API PyObjectWrapper
 {

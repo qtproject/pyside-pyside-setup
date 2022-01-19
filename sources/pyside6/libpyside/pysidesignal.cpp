@@ -40,6 +40,7 @@
 #include <sbkpython.h>
 #include "pysidesignal.h"
 #include "pysidesignal_p.h"
+#include "pysideutils.h"
 #include "pysidestaticstrings.h"
 #include "signalmanager.h"
 

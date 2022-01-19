@@ -40,6 +40,7 @@
 #include "globalreceiverv2.h"
 #include "pysideweakref.h"
 #include "pysidestaticstrings.h"
+#include "pysideutils.h"
 #include "signalmanager.h"
 
 #include <autodecref.h>

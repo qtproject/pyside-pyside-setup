@@ -525,6 +525,13 @@ QString pyPathToQString(PyObject *path)
     return QDir::fromNativeSeparators(pyStringToQString(strPath));
 }
 
+bool isCompiledMethod(PyObject *callback)
+{
+    return PyObject_HasAttr(callback, PySide::PyName::im_func())
+           && PyObject_HasAttr(callback, PySide::PyName::im_self())
+           && PyObject_HasAttr(callback, PySide::PyMagicName::code());
+}
+
 static const unsigned char qt_resource_name[] = {
   // qt
   0x0,0x2,
