@@ -174,6 +174,12 @@ def prepare_packages_posix(self, vars):
             executables.extend(_copy_gui_executable('designer', vars=vars))
             executables.extend(_copy_gui_executable('linguist', vars=vars))
 
+        # <qt>/lib/metatypes/* -> <setup>/{st_package_name}/Qt/lib/metatypes
+        destination_lib_dir = "{st_build_dir}/{st_package_name}/Qt/lib"
+        copydir("{qt_lib_dir}/metatypes", f"{destination_lib_dir}/metatypes",
+                filter=["*.json"],
+                recursive=False, vars=vars, force_copy_symlinks=True)
+
         # Copy libexec
         built_modules = self.get_built_pyside_config(vars)['built_modules']
         if self.is_webengine_built(built_modules):

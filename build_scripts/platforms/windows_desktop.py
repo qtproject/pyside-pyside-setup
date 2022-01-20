@@ -170,6 +170,12 @@ def prepare_packages_win32(self, vars):
             filter=filters,
             recursive=False, vars=vars)
 
+        # <qt>/lib/metatypes/* -> <setup>/{st_package_name}/lib/metatypes
+        destination_lib_dir = "{st_build_dir}/{st_package_name}/lib"
+        copydir("{qt_lib_dir}/metatypes", f"{destination_lib_dir}/metatypes",
+               filter=["*.json"],
+               recursive=False, vars=vars)
+
         # <install>/lib/*.lib -> {st_package_name}/
         copydir(
             "{install_dir}/lib/",
