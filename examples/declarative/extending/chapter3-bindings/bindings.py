@@ -47,10 +47,16 @@ import sys
 
 from PySide6.QtCore import Property, Signal, Slot, QUrl, Qt
 from PySide6.QtGui import QGuiApplication, QPen, QPainter, QColor
-from PySide6.QtQml import qmlRegisterType
+from PySide6.QtQml import QmlElement
 from PySide6.QtQuick import QQuickPaintedItem, QQuickView
 
+# To be used on the @QmlElement decorator
+# (QML_IMPORT_MINOR_VERSION is optional)
+QML_IMPORT_NAME = "Charts"
+QML_IMPORT_MAJOR_VERSION = 1
 
+
+@QmlElement
 class PieChart (QQuickPaintedItem):
 
     chartCleared = Signal()
@@ -96,8 +102,6 @@ class PieChart (QQuickPaintedItem):
 
 if __name__ == '__main__':
     app = QGuiApplication(sys.argv)
-
-    qmlRegisterType(PieChart, 'Charts', 1, 0, 'PieChart')
 
     view = QQuickView()
     view.setResizeMode(QQuickView.SizeRootObjectToView)

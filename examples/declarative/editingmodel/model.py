@@ -42,8 +42,15 @@
 from PySide6.QtCore import (QAbstractListModel, QByteArray, QModelIndex, Qt,
                             Slot)
 from PySide6.QtGui import QColor
+from PySide6.QtQml import QmlElement
+
+# To be used on the @QmlElement decorator
+# (QML_IMPORT_MINOR_VERSION is optional)
+QML_IMPORT_NAME = "BaseModel"
+QML_IMPORT_MAJOR_VERSION = 1
 
 
+@QmlElement
 class BaseModel(QAbstractListModel):
 
     RatioRole = Qt.UserRole + 1
