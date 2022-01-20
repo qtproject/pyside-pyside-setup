@@ -43,7 +43,6 @@ from pathlib import Path
 
 from PySide6.QtCore import QUrl
 from PySide6.QtGui import QGuiApplication
-from PySide6.QtQml import qmlRegisterType
 from PySide6.QtQuick import QQuickView, QQuickWindow, QSGRendererInterface
 
 from squircle import Squircle
@@ -52,7 +51,6 @@ if __name__ == "__main__":
     app = QGuiApplication(sys.argv)
 
     QQuickWindow.setGraphicsApi(QSGRendererInterface.OpenGL)
-    qmlRegisterType(Squircle, "OpenGLUnderQML", 1, 0, "Squircle")
 
     view = QQuickView()
     view.setResizeMode(QQuickView.SizeRootObjectToView)

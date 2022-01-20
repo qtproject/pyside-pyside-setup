@@ -47,10 +47,16 @@ import sys
 
 from PySide6.QtCore import Property, QUrl
 from PySide6.QtGui import QGuiApplication, QPen, QPainter, QColor
-from PySide6.QtQml import qmlRegisterType, ListProperty
+from PySide6.QtQml import QmlElement, ListProperty
 from PySide6.QtQuick import QQuickPaintedItem, QQuickView, QQuickItem
 
+# To be used on the @QmlElement decorator
+# (QML_IMPORT_MINOR_VERSION is optional)
+QML_IMPORT_NAME = "Charts"
+QML_IMPORT_MAJOR_VERSION = 1
 
+
+@QmlElement
 class PieSlice (QQuickPaintedItem):
     def __init__(self, parent=None):
         QQuickPaintedItem.__init__(self, parent)
@@ -89,6 +95,7 @@ class PieSlice (QQuickPaintedItem):
         painter.drawPie(self.boundingRect().adjusted(1, 1, -1, -1), self._fromAngle * 16, self._angleSpan * 16)
 
 
+@QmlElement
 class PieChart (QQuickItem):
     def __init__(self, parent=None):
         QQuickItem.__init__(self, parent)
@@ -112,9 +119,6 @@ class PieChart (QQuickItem):
 
 if __name__ == '__main__':
     app = QGuiApplication(sys.argv)
-
-    qmlRegisterType(PieChart, 'Charts', 1, 0, 'PieChart')
-    qmlRegisterType(PieSlice, "Charts", 1, 0, "PieSlice")
 
     view = QQuickView()
     view.setResizeMode(QQuickView.SizeRootObjectToView)

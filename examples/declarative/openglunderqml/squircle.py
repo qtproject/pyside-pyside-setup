@@ -39,9 +39,15 @@
 #############################################################################
 
 from PySide6.QtCore import Property, QRunnable, Qt, Signal, Slot
+from PySide6.QtQml import QmlElement
 from PySide6.QtQuick import QQuickItem, QQuickWindow
 
 from squirclerenderer import SquircleRenderer
+
+# To be used on the @QmlElement decorator
+# (QML_IMPORT_MINOR_VERSION is optional)
+QML_IMPORT_NAME = "OpenGLUnderQML"
+QML_IMPORT_MAJOR_VERSION = 1
 
 
 class CleanupJob(QRunnable):
@@ -53,6 +59,7 @@ class CleanupJob(QRunnable):
         del self._renderer
 
 
+@QmlElement
 class Squircle(QQuickItem):
 
     tChanged = Signal()
