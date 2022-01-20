@@ -148,7 +148,8 @@ class Screenshot(QWidget):
 
     def shoot_screen(self):
         screen = QGuiApplication.primaryScreen()
-        if window := self.windowHandle():
+        window = self.windowHandle()
+        if window:
             screen = window.screen()
         if not screen:
             return
