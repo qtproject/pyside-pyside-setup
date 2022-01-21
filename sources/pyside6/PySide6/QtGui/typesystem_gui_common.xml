@@ -1390,20 +1390,49 @@
   <value-type name="QEventPoint" since="6.0">
       <enum-type name="State"/>
   </value-type>
-  <object-type name="QDragEnterEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::DragEnter"/>
-  <object-type name="QDragLeaveEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::DragLeave"/>
-  <object-type name="QDragMoveEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::DragMove"/>
+  <object-type name="QDragEnterEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::DragEnter">
+      <add-function signature="__repr__" return-type="PyObject">
+          <inject-code class="target" position="beginning">
+              <insert-template name="repr_qdebug_gui"/>
+          </inject-code>
+      </add-function>
+  </object-type>
+  <object-type name="QDragLeaveEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::DragLeave">
+      <add-function signature="__repr__" return-type="PyObject">
+          <inject-code class="target" position="beginning">
+              <insert-template name="repr_qdebug_gui"/>
+          </inject-code>
+      </add-function>
+  </object-type>
+  <object-type name="QDragMoveEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::DragMove">
+      <add-function signature="__repr__" return-type="PyObject">
+          <inject-code class="target" position="beginning">
+              <insert-template name="repr_qdebug_gui"/>
+          </inject-code>
+      </add-function>
+  </object-type>
   <object-type name="QDropEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::Drop">
     <modify-function signature="source()const">
       <modify-argument index="return">
         <define-ownership class="target" owner="default"/>
       </modify-argument>
     </modify-function>
+    <add-function signature="__repr__" return-type="PyObject">
+        <inject-code class="target" position="beginning">
+            <insert-template name="repr_qdebug_gui"/>
+        </inject-code>
+    </add-function>
   </object-type>
   <object-type name="QEnterEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::Enter"/>
   <object-type name="QExposeEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::Expose"/>
   <object-type name="QFileOpenEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::FileOpen"/>
-  <object-type name="QFocusEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::FocusIn || %1-&gt;type() == QEvent::FocusOut"/>
+  <object-type name="QFocusEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::FocusIn || %1-&gt;type() == QEvent::FocusOut">
+      <add-function signature="__repr__" return-type="PyObject">
+          <inject-code class="target" position="beginning">
+              <insert-template name="repr_qdebug_gui"/>
+          </inject-code>
+      </add-function>
+  </object-type>
   <object-type name="QHelpEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::ToolTip || %1-&gt;type() == QEvent::WhatsThis"/>
   <object-type name="QHideEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::Hide"/>
   <object-type name="QHoverEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::HoverEnter || %1-&gt;type() == QEvent::HoverLeave || %1-&gt;type() == QEvent::HoverMove"/>
@@ -1415,34 +1444,74 @@
     <value-type name="Attribute">
       <include file-name="QInputMethodEvent" location="global"/>
     </value-type>
+    <add-function signature="__repr__" return-type="PyObject">
+        <inject-code class="target" position="beginning">
+            <insert-template name="repr_qdebug_gui"/>
+        </inject-code>
+    </add-function>
     <!-- endif ndef QT_NO_INPUTMETHOD -->
   </object-type>
   <object-type name="QInputMethodQueryEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::InputMethodQuery"/>
 
-  <object-type name="QMoveEvent" copyable = "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Move"/>
+  <object-type name="QMoveEvent" copyable = "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Move">
+      <add-function signature="__repr__" return-type="PyObject">
+          <inject-code class="target" position="beginning">
+              <insert-template name="repr_qdebug_gui"/>
+          </inject-code>
+      </add-function>
+  </object-type>
   <object-type name="QNativeGestureEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::NativeGesture"/>
   <object-type name="QPlatformSurfaceEvent" copyable="false"
                polymorphic-id-expression="%1-&gt;type() == QEvent::PlatformSurface">
      <enum-type name="SurfaceEventType"/>
   </object-type>
-  <object-type name="QResizeEvent" copyable = "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Resize"/>
+  <object-type name="QResizeEvent" copyable = "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Resize">
+      <add-function signature="__repr__" return-type="PyObject">
+          <inject-code class="target" position="beginning">
+              <insert-template name="repr_qdebug_gui"/>
+          </inject-code>
+      </add-function>
+  </object-type>
   <object-type name="QShortcutEvent" copyable = "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Shortcut">
   </object-type>
   <object-type name="QShowEvent" copyable= "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Show"/>
   <object-type name="QSinglePointEvent" copyable="false" since="6.0"/>
   <object-type name="QStatusTipEvent" copyable= "false" polymorphic-id-expression="%1-&gt;type() == QEvent::StatusTip"/>
-  <object-type name="QTabletEvent" copyable= "false" polymorphic-id-expression="%1-&gt;type() == QEvent::TabletMove || %1-&gt;type() == QEvent::TabletPress || %1-&gt;type() == QEvent::TabletRelease"/>
+  <object-type name="QTabletEvent" copyable= "false" polymorphic-id-expression="%1-&gt;type() == QEvent::TabletMove || %1-&gt;type() == QEvent::TabletPress || %1-&gt;type() == QEvent::TabletRelease">
+      <add-function signature="__repr__" return-type="PyObject">
+          <inject-code class="target" position="beginning">
+              <insert-template name="repr_qdebug_gui"/>
+          </inject-code>
+      </add-function>
+  </object-type>
   <object-type name="QToolBarChangeEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::ToolBarChange"/>
   <object-type name="QWhatsThisClickedEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::WhatsThisClicked"/>
-  <object-type name="QWheelEvent" copyable= "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Wheel"/>
+  <object-type name="QWheelEvent" copyable= "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Wheel">
+      <add-function signature="__repr__" return-type="PyObject">
+          <inject-code class="target" position="beginning">
+              <insert-template name="repr_qdebug_gui"/>
+          </inject-code>
+      </add-function>
+  </object-type>
   <!-- Qt5.5: suppress this nameless enum -->
   <suppress-warning text="enum 'QWheelEvent::DefaultDeltasPerStep' does not have a type entry or is not an enum"/>
 
-  <object-type name="QWindowStateChangeEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::WindowStateChange"/>
+  <object-type name="QWindowStateChangeEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::WindowStateChange">
+      <add-function signature="__repr__" return-type="PyObject">
+          <inject-code class="target" position="beginning">
+              <insert-template name="repr_qdebug_gui"/>
+          </inject-code>
+      </add-function>
+  </object-type>
   <object-type name="QInputEvent" copyable="false"/>
   <object-type name="QKeyEvent" copyable= "false" polymorphic-id-expression="%1-&gt;type() == QEvent::KeyPress || %1-&gt;type() == QEvent::KeyRelease || %1-&gt;type() == QEvent::ShortcutOverride">
       <add-function signature="operator!=(QKeySequence::StandardKey)">
           <inject-code class="target" file="../glue/qtgui.cpp" snippet="qkeyevent-operatornotequal"/>
+      </add-function>
+      <add-function signature="__repr__" return-type="PyObject">
+          <inject-code class="target" position="beginning">
+              <insert-template name="repr_qdebug_gui"/>
+          </inject-code>
       </add-function>
   </object-type>
   <object-type name="QMouseEvent" copyable= "false"
@@ -1456,12 +1525,23 @@
       <modify-function signature="y() const" deprecated="yes"/>
       <modify-function signature="globalX() const" deprecated="yes"/>
       <modify-function signature="globalY() const" deprecated="yes"/>
+      <add-function signature="__repr__" return-type="PyObject">
+          <inject-code class="target" position="beginning">
+              <insert-template name="repr_qdebug_gui"/>
+          </inject-code>
+      </add-function>
   </object-type>
   <object-type name="QPaintEvent" copyable= "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Paint"/>
   <object-type name="QScrollEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::Scroll">
       <enum-type name="ScrollState"/>
   </object-type>
-  <object-type name="QPointerEvent" copyable= "false" since="6.0"/>
+  <object-type name="QPointerEvent" copyable= "false" since="6.0">
+      <add-function signature="__repr__" return-type="PyObject">
+          <inject-code class="target" position="beginning">
+              <insert-template name="repr_qdebug_gui"/>
+          </inject-code>
+      </add-function>
+  </object-type>
   <object-type name="QScrollPrepareEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::ScrollPrepare"/>
 
   <object-type name="QTextFrame" >
@@ -2366,7 +2446,13 @@
     <modify-function signature="getEulerAngles(float*,float*,float*)const" since="5.5" remove="all"/>
   </value-type>
 
-  <object-type name="QTouchEvent" since="4.6"/>
+  <object-type name="QTouchEvent" since="4.6">
+      <add-function signature="__repr__" return-type="PyObject">
+          <inject-code class="target" position="beginning">
+              <insert-template name="repr_qdebug_gui"/>
+          </inject-code>
+      </add-function>
+  </object-type>
 
   <object-type name="QInputDevice">
     <enum-type name="Capability" flags="Capabilities"/>

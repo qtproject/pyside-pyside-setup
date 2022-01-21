@@ -1560,3 +1560,9 @@ Py_INCREF(callable);
 %RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME(cppCallback);
 %PYARG_0 = %CONVERTTOPYTHON[int](cppResult);
 // @snippet qthreadpool-trystart
+
+// @snippet repr-qevent
+QString result;
+QDebug(&result).nospace() << "<PySide6.QtCore.QEvent(" << %CPPSELF->type() << ")>";
+%PYARG_0 = Shiboken::String::fromCString(qPrintable(result));
+// @snippet repr-qevent
