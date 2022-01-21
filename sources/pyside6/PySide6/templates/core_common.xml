@@ -249,6 +249,18 @@
         %PYARG_0 = Shiboken::String::fromCString(qPrintable(format));
     </template>
 
+    <template name="repr_qdebug">
+        QString result;
+        QDebug(&amp;result).nospace() &lt;&lt; "&lt;PySide6.MODULE." &lt;&lt; %CPPSELF &lt;&lt; '>';
+        %PYARG_0 = Shiboken::String::fromCString(qPrintable(result));
+    </template>
+
+   <template name="repr_qdebug_gui">
+       <insert-template name="repr_qdebug">
+           <replace from="MODULE" to="QtGui"/>
+       </insert-template>
+   </template>
+
     <template name="return_internal_pointer">
         %PYARG_0 = reinterpret_cast&lt;PyObject*>(%CPPSELF.%FUNCTION_NAME());
         if (!%PYARG_0)
