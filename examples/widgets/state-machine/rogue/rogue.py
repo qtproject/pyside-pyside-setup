@@ -98,7 +98,7 @@ class MainWindow(QMainWindow):
             font = QFont('Monospace', 12)
         else:
             for family in QFontDatabase.families():
-                if database.isFixedPitch(family):
+                if QFontDatabase.isFixedPitch(family):
                     font = QFont(family, 12)
         self.setFont(font)
 
