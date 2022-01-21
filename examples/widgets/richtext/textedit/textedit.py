@@ -41,11 +41,11 @@
 import sys
 from PySide6.QtCore import (QCoreApplication, QDir, QFile, QFileInfo, QMimeData,
                             QMimeDatabase, QUrl, Qt, Slot)
-from PySide6.QtGui import (QAction, QActionGroup, QGuiApplication, QClipboard,
+from PySide6.QtGui import (QAction, QActionGroup, QColor, QGuiApplication, QClipboard,
                            QCloseEvent, QFont, QFontDatabase, QFontInfo, QIcon,
-                           QKeySequence, QPixmap, QTextBlockFormat,
+                           QKeySequence, QPalette, QPixmap, QTextBlockFormat,
                            QTextCharFormat, QTextCursor, QTextDocumentWriter,
-                           QTextList, QTextListFormat)
+                           QTextFormat, QTextList, QTextListFormat)
 from PySide6.QtWidgets import (QApplication, QMainWindow, QColorDialog, QComboBox,
                                QDialog, QFileDialog, QFontComboBox, QStatusBar,
                                QTextEdit, QToolBar, QMenu, QMenuBar, QMessageBox)
@@ -77,7 +77,7 @@ class TextEdit(QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
         if sys.platform == 'darwin':
-            setUnifiedTitleAndToolBarOnMac(True)
+            self.setUnifiedTitleAndToolBarOnMac(True)
         self.setWindowTitle(QCoreApplication.applicationName())
 
         self._text_edit = QTextEdit(self)
