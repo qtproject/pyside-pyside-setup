@@ -284,13 +284,23 @@ add-function
     static C++ code, while Python needs the explicit "self" parameter that ``classmethod``
     provides.
 
-    Within the signature, names for the function parameters can be specified by
-    enclosing them within the delimiter *@*:
+    In order to create keyword argument supporting function parameters, enclose the specific
+    function parameter with a *@* in the `signature` field.
 
-    .. code-block::
+    .. code-block:: xml
 
-        void foo(int @parameter1@,float)
+        <add-function signature="foo(int @parameter1@,float @parameter2@)">
+            ...
+        </add-function>
 
+    With keyword arguments, ``add-function`` makes it easy to specify a default argument
+    within the `signature` field
+
+    .. code-block:: xml
+
+        <add-function signature="foo(int @parameter1@=1,float @parameter2@=2)">
+            ...
+        </add-function>
 
     See :ref:`sequence-protocol` for adding the respective functions.
 

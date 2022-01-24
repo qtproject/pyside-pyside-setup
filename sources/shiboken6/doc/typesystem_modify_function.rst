@@ -29,7 +29,8 @@ modify-argument
     respectively.
 
     The optional ``rename`` attribute is used to rename a argument and use this
-    new name in the generated code.
+    new name in the generated code. This attribute can be used to enable the usage
+    of ``keyword arguments``.
 
     The optional ``pyi-type`` attribute specifies the type to appear in the
     signature strings and  ``.pyi`` files. The type string is determined by
