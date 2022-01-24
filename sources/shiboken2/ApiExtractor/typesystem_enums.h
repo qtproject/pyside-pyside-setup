@@ -37,10 +37,10 @@ enum Language {
 };
 
 enum class AllowThread {
+    Unspecified,
     Allow,
     Disallow,
-    Auto,
-    Unspecified
+    Auto
 };
 
 enum Ownership {
