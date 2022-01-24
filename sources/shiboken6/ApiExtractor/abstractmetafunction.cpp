@@ -882,6 +882,8 @@ QString AbstractMetaFunction::debugSignature() const
     const bool isFinal = attributes() & AbstractMetaFunction::FinalCppMethod;
     if (!isOverride && !isFinal && (attributes() & AbstractMetaFunction::VirtualCppMethod))
         result += QLatin1String("virtual ");
+    if (d->m_implementingClass)
+        result += d->m_implementingClass->qualifiedCppName() + u"::"_qs;
     result += minimalSignature();
     if (isOverride)
         result += QLatin1String(" override");
