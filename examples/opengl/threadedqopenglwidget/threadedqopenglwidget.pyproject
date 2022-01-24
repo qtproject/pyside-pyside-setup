@@ -1,0 +1,3 @@
+{
+    "files": ["main.py", "glwidget.py", "mainwindow.py", "renderer.py"]
+}
