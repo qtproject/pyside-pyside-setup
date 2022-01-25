@@ -4315,7 +4315,6 @@ void CppGenerator::writeClassDefinition(TextStream &s,
                                         const AbstractMetaClass *metaClass,
                                         const GeneratorContext &classContext)
 {
-    QString tp_flags;
     QString tp_init;
     QString tp_new;
     QString tp_dealloc;
@@ -4338,7 +4337,9 @@ void CppGenerator::writeClassDefinition(TextStream &s,
     const bool isQApp = usePySideExtensions()
         && metaClass->inheritsFrom(u"QCoreApplication"_qs);
 
-    tp_flags = QLatin1String("Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE");
+    QString tp_flags = u"Py_TPFLAGS_DEFAULT"_qs;
+    if (!metaClass->attributes().testFlag(AbstractMetaClass::FinalCppClass))
+        tp_flags += u"|Py_TPFLAGS_BASETYPE"_qs;
     if (metaClass->isNamespace() || metaClass->hasPrivateDestructor()) {
         tp_dealloc = metaClass->hasPrivateDestructor() ?
                      QLatin1String("SbkDeallocWrapperWithPrivateDtor") :
