@@ -54,6 +54,8 @@ class Painting(QWidget):
         self.penFromEnum = painter.pen()
         painter.setPen(int(Qt.NoPen))
         self.penFromInteger = painter.pen()
+        # PYSIDE-535: PyPy needs an explicit end() or a context manager.
+        painter.end()
         QTimer.singleShot(20, self.close)
 
 
