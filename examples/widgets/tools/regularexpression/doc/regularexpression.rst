@@ -2,8 +2,7 @@ QRegularExpression Example
 ==========================
 
 A Python application that demonstrates the analogous example in C++
-`QRegularExpression Example
-https://doc.qt.io/qt-6/qtwidgets-tools-regularexpression-example.html`_
+`QRegularExpression Example <https://doc.qt.io/qt-6/qtwidgets-tools-regularexpression-example.html>`_
 
 
 .. image:: regularexpression.png
