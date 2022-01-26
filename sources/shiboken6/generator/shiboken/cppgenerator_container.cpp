@@ -177,6 +177,8 @@ CppGenerator::OpaqueContainerData
     }
     writeMethod(s, privateObjType, "reserve");
     writeNoArgsMethod(s, privateObjType, "capacity");
+    writeNoArgsMethod(s, privateObjType, "data");
+    writeNoArgsMethod(s, privateObjType, "constData");
     s << "{nullptr, nullptr, 0, nullptr} // Sentinel\n"
         << outdent << "};\n\n";
 

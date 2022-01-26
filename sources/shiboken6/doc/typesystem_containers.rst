@@ -59,6 +59,16 @@ the STL and the Qt naming convention (which resembles Python's) are supported:
     |                                           | that can be stored without        |
     |                                           | reallocation.                     |
     +-------------------------------------------+-----------------------------------+
+    | ``data()``                                | For containers that support it    |
+    |                                           | (``std::vector``, ``QList``),     |
+    |                                           | return a buffer viewing the       |
+    |                                           | memory.                           |
+    +-------------------------------------------+-----------------------------------+
+    | ``constData()``                           | For containers that support it    |
+    |                                           | (``std::vector``, ``QList``),     |
+    |                                           | return a read-only buffer viewing |
+    |                                           | the memory.                       |
+    +-------------------------------------------+-----------------------------------+
 
 Following is an example on creating an opaque container named ``IntVector``
 from `std::vector<int>`, and using it in Python.

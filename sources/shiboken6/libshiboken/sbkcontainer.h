@@ -42,10 +42,12 @@
 
 #include "sbkpython.h"
 #include "shibokenmacros.h"
+#include "shibokenbuffer.h"
 
 #include <algorithm>
 #include <iterator>
 #include <optional>
+#include <utility>
 
 extern "C"
 {
@@ -259,6 +261,34 @@ public:
             result = d->m_list->capacity();
         }
         return PyLong_FromSsize_t(result);
+    }
+
+    static PyObject *data(PyObject *self)
+    {
+        PyObject *result = nullptr;
+        if constexpr (ShibokenContainerHasReserve<SequenceContainer>::value) {
+            const auto *d = get(self);
+            auto *data = d->m_list->data();
+            const Py_ssize_t size = sizeof(value_type) * d->m_list->size();
+            result = Shiboken::Buffer::newObject(data, size, Shiboken::Buffer::ReadWrite);
+        } else  {
+            PyErr_SetString(PyExc_TypeError, "Container does not support data().");
+        }
+        return result;
+    }
+
+    static PyObject *constData(PyObject *self)
+    {
+        PyObject *result = nullptr;
+        if constexpr (ShibokenContainerHasReserve<SequenceContainer>::value) {
+            const auto *d = get(self);
+            const auto *data = std::as_const(d->m_list)->data();
+            const Py_ssize_t size = sizeof(value_type) * d->m_list->size();
+            result = Shiboken::Buffer::newObject(data, size);
+        } else  {
+            PyErr_SetString(PyExc_TypeError, "Container does not support constData().");
+        }
+        return result;
     }
 
     static ShibokenSequenceContainerPrivate *get(PyObject *self)
