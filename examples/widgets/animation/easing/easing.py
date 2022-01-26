@@ -154,7 +154,6 @@ class Window(QWidget):
 
     def create_curve_icons(self):
         pix = QPixmap(self._iconSize)
-        painter = QPainter()
 
         gradient = QLinearGradient(0, 0, 0, self._iconSize.height())
         gradient.setColorAt(0.0, QColor(240, 240, 240))
@@ -172,54 +171,51 @@ class Window(QWidget):
                             and c != QEasingCurve.TCBSpline)]
         curve_types.sort(key=lambda ct: ct[1])
 
-        painter.begin(pix)
+        with QPainter(pix) as painter:
 
-        for curve_name, curve_type in curve_types:
-            painter.fillRect(QRect(QPoint(0, 0), self._iconSize), brush)
-            curve = QEasingCurve(curve_type)
+            for curve_name, curve_type in curve_types:
+                painter.fillRect(QRect(QPoint(0, 0), self._iconSize), brush)
+                curve = QEasingCurve(curve_type)
 
-            painter.setPen(QColor(0, 0, 255, 64))
-            x_axis = self._iconSize.height() / 1.5
-            y_axis = self._iconSize.width() / 3.0
-            painter.drawLine(0, x_axis, self._iconSize.width(), x_axis)
-            painter.drawLine(y_axis, 0, y_axis, self._iconSize.height())
+                painter.setPen(QColor(0, 0, 255, 64))
+                x_axis = self._iconSize.height() / 1.5
+                y_axis = self._iconSize.width() / 3.0
+                painter.drawLine(0, x_axis, self._iconSize.width(), x_axis)
+                painter.drawLine(y_axis, 0, y_axis, self._iconSize.height())
 
-            curve_scale = self._iconSize.height() / 2.0
+                curve_scale = self._iconSize.height() / 2.0
 
-            painter.setPen(Qt.NoPen)
+                painter.setPen(Qt.NoPen)
 
-            # Start point.
-            painter.setBrush(Qt.red)
-            start = QPoint(y_axis,
-                    x_axis - curve_scale * curve.valueForProgress(0))
-            painter.drawRect(start.x() - 1, start.y() - 1, 3, 3)
+                # Start point.
+                painter.setBrush(Qt.red)
+                start = QPoint(y_axis,
+                        x_axis - curve_scale * curve.valueForProgress(0))
+                painter.drawRect(start.x() - 1, start.y() - 1, 3, 3)
 
-            # End point.
-            painter.setBrush(Qt.blue)
-            end = QPoint(y_axis + curve_scale,
-                    x_axis - curve_scale * curve.valueForProgress(1))
-            painter.drawRect(end.x() - 1, end.y() - 1, 3, 3)
+                # End point.
+                painter.setBrush(Qt.blue)
+                end = QPoint(y_axis + curve_scale,
+                        x_axis - curve_scale * curve.valueForProgress(1))
+                painter.drawRect(end.x() - 1, end.y() - 1, 3, 3)
 
-            curve_path = QPainterPath()
-            curve_path.moveTo(QPointF(start))
-            t = 0.0
-            while t <= 1.0:
-                to = QPointF(y_axis + curve_scale * t,
-                        x_axis - curve_scale * curve.valueForProgress(t))
-                curve_path.lineTo(to)
-                t += 1.0 / curve_scale
+                curve_path = QPainterPath()
+                curve_path.moveTo(QPointF(start))
+                t = 0.0
+                while t <= 1.0:
+                    to = QPointF(y_axis + curve_scale * t,
+                            x_axis - curve_scale * curve.valueForProgress(t))
+                    curve_path.lineTo(to)
+                    t += 1.0 / curve_scale
 
-            painter.setRenderHint(QPainter.Antialiasing, True)
-            painter.strokePath(curve_path, QColor(32, 32, 32))
-            painter.setRenderHint(QPainter.Antialiasing, False)
+                painter.setRenderHint(QPainter.Antialiasing, True)
+                painter.strokePath(curve_path, QColor(32, 32, 32))
+                painter.setRenderHint(QPainter.Antialiasing, False)
 
-            item = QListWidgetItem()
-            item.setIcon(QIcon(pix))
-            item.setText(curve_name)
-            self._ui.easingCurvePicker.addItem(item)
-
-        # QPainter needs an explicit end() in PyPy. This will become a context manager in 6.3.
-        painter.end()
+                item = QListWidgetItem()
+                item.setIcon(QIcon(pix))
+                item.setText(curve_name)
+                self._ui.easingCurvePicker.addItem(item)
 
     def start_animation(self):
         self._anim.setStartValue(QPointF(0, 0))

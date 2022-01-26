@@ -89,18 +89,15 @@ class WigglyWidget(QWidget):
         y = (self.height() + metrics.ascent() - metrics.descent()) / 2
         color = QColor()
 
-        painter = QPainter(self)
-        for i in range(len(self.text)):
-            index = (self._step + i) % 16
-            color.setHsv((15 - index) * 16, 255, 191)
-            painter.setPen(color)
-            dy = (sineTable[index] * metrics.height()) / 400
-            c = self._text[i]
-            painter.drawText(x, y - dy, str(c))
-            x += metrics.horizontalAdvance(c)
-
-        # QPainter needs an explicit end() in PyPy. This will become a context manager in 6.3.
-        painter.end()
+        with QPainter(self) as painter:
+            for i in range(len(self.text)):
+                index = (self._step + i) % 16
+                color.setHsv((15 - index) * 16, 255, 191)
+                painter.setPen(color)
+                dy = (sineTable[index] * metrics.height()) / 400
+                c = self._text[i]
+                painter.drawText(x, y - dy, str(c))
+                x += metrics.horizontalAdvance(c)
 
     def timerEvent(self, event):
         if event.timerId() == self._timer.timerId():

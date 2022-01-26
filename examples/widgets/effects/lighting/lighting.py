@@ -89,11 +89,10 @@ class Lighting(QGraphicsView):
         pixmap = QPixmap(60, 60)
         pixmap.fill(Qt.transparent)
 
-        painter = QPainter(pixmap)
-        painter.setPen(Qt.NoPen)
-        painter.setBrush(radial_grad)
-        painter.drawEllipse(0, 0, 60, 60)
-        painter.end()
+        with QPainter(pixmap) as painter:
+            painter.setPen(Qt.NoPen)
+            painter.setBrush(radial_grad)
+            painter.drawEllipse(0, 0, 60, 60)
 
         self.m_lightSource = self.m_scene.addPixmap(pixmap)
         self.m_lightSource.setZValue(2)

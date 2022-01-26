@@ -50,11 +50,10 @@ class TestRasterWindow(QRasterWindow):
 
     def paintEvent(self, event):
         clientRect = QRect(QPoint(0, 0), self.size())
-        painter = QPainter(self)
-        painter.fillRect(clientRect, QColor(Qt.red))
-        painter.drawStaticText(QPoint(10, 10), self.text)
-        # PYSIDE-535: PyPy needs an explicit end() or a context manager.
-        painter.end()
+        with QPainter(self) as painter:
+            painter.fillRect(clientRect, QColor(Qt.red))
+            painter.drawStaticText(QPoint(10, 10), self.text)
+
 
 class QRasterWindowTest(UsesQGuiApplication):
     def test(self):

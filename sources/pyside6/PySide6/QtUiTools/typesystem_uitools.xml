@@ -67,10 +67,10 @@
 
             class Circle(QWidget):
                 def paintEvent(self, event):
-                    painter = QPainter(self)
-                    painter.setPen(self.pen)
-                    painter.setBrush(QBrush(self.color))
-                    painter.drawEllipse(event.rect().center(), 20, 20)
+                    with QPainter(self) as painter:
+                        painter.setPen(self.pen)
+                        painter.setBrush(QBrush(self.color))
+                        painter.drawEllipse(event.rect().center(), 20, 20)
 
             # ...
 

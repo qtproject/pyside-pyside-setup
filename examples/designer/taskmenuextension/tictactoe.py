@@ -99,59 +99,56 @@ class TicTacToe(QWidget):
                     self.update()
 
     def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
+        with QPainter(self) as painter:
+            painter.setRenderHint(QPainter.Antialiasing)
 
-        painter.setPen(QPen(Qt.darkGreen, 1))
-        painter.drawLine(self._cell_width(), 0,
-                         self._cell_width(), self.height())
-        painter.drawLine(2 * self._cell_width(), 0,
-                         2 * self._cell_width(), self.height())
-        painter.drawLine(0, self._cell_height(),
-                         self.width(), self._cell_height())
-        painter.drawLine(0, 2 * self._cell_height(),
-                         self.width(), 2 * self._cell_height())
+            painter.setPen(QPen(Qt.darkGreen, 1))
+            painter.drawLine(self._cell_width(), 0,
+                             self._cell_width(), self.height())
+            painter.drawLine(2 * self._cell_width(), 0,
+                             2 * self._cell_width(), self.height())
+            painter.drawLine(0, self._cell_height(),
+                             self.width(), self._cell_height())
+            painter.drawLine(0, 2 * self._cell_height(),
+                             self.width(), 2 * self._cell_height())
 
-        painter.setPen(QPen(Qt.darkBlue, 2))
+            painter.setPen(QPen(Qt.darkBlue, 2))
 
-        for position in range(9):
-            cell = self._cell_rect(position)
-            if self._state[position] == CROSS:
-                painter.drawLine(cell.topLeft(), cell.bottomRight())
-                painter.drawLine(cell.topRight(), cell.bottomLeft())
-            elif self._state[position] == NOUGHT:
-                painter.drawEllipse(cell)
+            for position in range(9):
+                cell = self._cell_rect(position)
+                if self._state[position] == CROSS:
+                    painter.drawLine(cell.topLeft(), cell.bottomRight())
+                    painter.drawLine(cell.topRight(), cell.bottomLeft())
+                elif self._state[position] == NOUGHT:
+                    painter.drawEllipse(cell)
 
-        painter.setPen(QPen(Qt.yellow, 3))
+            painter.setPen(QPen(Qt.yellow, 3))
 
-        for position in range(0, 8, 3):
-            if (self._state[position] != EMPTY
-                and self._state[position + 1] == self._state[position]
-                and self._state[position + 2] == self._state[position]):
-                y = self._cell_rect(position).center().y()
-                painter.drawLine(0, y, self.width(), y)
+            for position in range(0, 8, 3):
+                if (self._state[position] != EMPTY
+                    and self._state[position + 1] == self._state[position]
+                    and self._state[position + 2] == self._state[position]):
+                    y = self._cell_rect(position).center().y()
+                    painter.drawLine(0, y, self.width(), y)
+                    self._turn_number = 9
+
+            for position in range(3):
+                if (self._state[position] != EMPTY
+                    and self._state[position + 3] == self._state[position]
+                    and self._state[position + 6] == self._state[position]):
+                    x = self._cell_rect(position).center().x()
+                    painter.drawLine(x, 0, x, self.height())
+                    self._turn_number = 9
+
+            if (self._state[0] != EMPTY and self._state[4] == self._state[0]
+                and self._state[8] == self._state[0]):
+                painter.drawLine(0, 0, self.width(), self.height())
                 self._turn_number = 9
 
-        for position in range(3):
-            if (self._state[position] != EMPTY
-                and self._state[position + 3] == self._state[position]
-                and self._state[position + 6] == self._state[position]):
-                x = self._cell_rect(position).center().x()
-                painter.drawLine(x, 0, x, self.height())
+            if (self._state[2] != EMPTY and self._state[4] == self._state[2]
+                and self._state[6] == self._state[2]):
+                painter.drawLine(0, self.height(), self.width(), 0)
                 self._turn_number = 9
-
-        if (self._state[0] != EMPTY and self._state[4] == self._state[0]
-            and self._state[8] == self._state[0]):
-            painter.drawLine(0, 0, self.width(), self.height())
-            self._turn_number = 9
-
-        if (self._state[2] != EMPTY and self._state[4] == self._state[2]
-            and self._state[6] == self._state[2]):
-            painter.drawLine(0, self.height(), self.width(), 0)
-            self._turn_number = 9
-
-        # QPainter needs an explicit end() in PyPy. This will become a context manager in 6.3.
-        painter.end()
 
     def _cell_rect(self, position):
         h_margin = self.width() / 30

@@ -212,32 +212,30 @@ class TetrixBoard(QFrame):
     def paintEvent(self, event):
         super(TetrixBoard, self).paintEvent(event)
 
-        painter = QPainter(self)
-        rect = self.contentsRect()
+        with QPainter(self) as painter:
+            rect = self.contentsRect()
 
-        if self._is_paused:
-            painter.drawText(rect, Qt.AlignCenter, "Pause")
-            return
+            if self._is_paused:
+                painter.drawText(rect, Qt.AlignCenter, "Pause")
+                return
 
-        board_top = rect.bottom() - TetrixBoard.board_height * self.square_height()
+            board_top = rect.bottom() - TetrixBoard.board_height * self.square_height()
 
-        for i in range(TetrixBoard.board_height):
-            for j in range(TetrixBoard.board_width):
-                shape = self.shape_at(j, TetrixBoard.board_height - i - 1)
-                if shape != Piece.NoShape:
-                    self.draw_square(painter,
-                            rect.left() + j * self.square_width(),
-                            board_top + i * self.square_height(), shape)
+            for i in range(TetrixBoard.board_height):
+                for j in range(TetrixBoard.board_width):
+                    shape = self.shape_at(j, TetrixBoard.board_height - i - 1)
+                    if shape != Piece.NoShape:
+                        self.draw_square(painter,
+                                rect.left() + j * self.square_width(),
+                                board_top + i * self.square_height(), shape)
 
-        if self._cur_piece.shape() != Piece.NoShape:
-            for i in range(4):
-                x = self._cur_x + self._cur_piece.x(i)
-                y = self._cur_y - self._cur_piece.y(i)
-                self.draw_square(painter, rect.left() + x * self.square_width(),
-                        board_top + (TetrixBoard.board_height - y - 1) * self.square_height(),
-                        self._cur_piece.shape())
-        # QPainter needs an explicit end() in PyPy. This will become a context manager in 6.3.
-        painter.end()
+            if self._cur_piece.shape() != Piece.NoShape:
+                for i in range(4):
+                    x = self._cur_x + self._cur_piece.x(i)
+                    y = self._cur_y - self._cur_piece.y(i)
+                    self.draw_square(painter, rect.left() + x * self.square_width(),
+                            board_top + (TetrixBoard.board_height - y - 1) * self.square_height(),
+                            self._cur_piece.shape())
 
     def keyPressEvent(self, event):
         if not self._is_started or self._is_paused or self._cur_piece.shape() == Piece.NoShape:
@@ -359,10 +357,8 @@ class TetrixBoard(QFrame):
         dy = self._next_piece.max_y() - self._next_piece.min_y() + 1
 
         pixmap = QPixmap(dx * self.square_width(), dy * self.square_height())
-        painter = QPainter(pixmap)
-        painter.fillRect(pixmap.rect(), self.nextPieceLabel.palette().background())
-        # QPainter needs an explicit end() in PyPy. This will become a context manager in 6.3.
-        painter.end()
+        with QPainter(pixmap) as painter:
+            painter.fillRect(pixmap.rect(), self.nextPieceLabel.palette().background())
 
         for int in range(4):
             x = self._next_piece.x(i) - self._next_piece.min_x()

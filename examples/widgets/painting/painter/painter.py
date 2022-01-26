@@ -88,10 +88,8 @@ class PainterWidget(QWidget):
         Paint the Pixmap into the widget
 
         """
-        painter = QPainter()
-        painter.begin(self)
-        painter.drawPixmap(0, 0, self.pixmap)
-        painter.end()
+        with QPainter(self) as painter:
+            painter.drawPixmap(0, 0, self.pixmap)
 
     def mousePressEvent(self, event: QMouseEvent):
         """Override from QWidget

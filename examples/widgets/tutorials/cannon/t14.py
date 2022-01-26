@@ -243,21 +243,18 @@ class CannonField(QWidget):
             self._barrel_pressed = False
 
     def paintEvent(self, event):
-        painter = QPainter(self)
+        with QPainter(self) as painter:
+            if self._game_ended:
+                painter.setPen(Qt.black)
+                painter.setFont(QFont("Courier", 48, QFont.Bold))
+                painter.drawText(self.rect(), Qt.AlignCenter, "Game Over")
 
-        if self._game_ended:
-            painter.setPen(Qt.black)
-            painter.setFont(QFont("Courier", 48, QFont.Bold))
-            painter.drawText(self.rect(), Qt.AlignCenter, "Game Over")
-
-        self.paint_cannon(painter)
-        self.paint_barrier(painter)
-        if self.is_shooting():
-            self.paint_shot(painter)
-        if not self._game_ended:
-            self.paint_target(painter)
-        # QPainter needs an explicit end() in PyPy. This will become a context manager in 6.3.
-        painter.end()
+            self.paint_cannon(painter)
+            self.paint_barrier(painter)
+            if self.is_shooting():
+                self.paint_shot(painter)
+            if not self._game_ended:
+                self.paint_target(painter)
 
     def paint_shot(self, painter):
         painter.setPen(Qt.NoPen)

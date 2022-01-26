@@ -155,15 +155,14 @@ class ImageViewer(QMainWindow):
         printer = QPrinter()
         dialog = QPrintDialog(printer, self)
         if dialog.exec() == QDialog.Accepted:
-            painter = QPainter(printer)
-            pixmap = self._image_label.pixmap()
-            rect = painter.viewport()
-            size = pixmap.size()
-            size.scale(rect.size(), Qt.KeepAspectRatio)
-            painter.setViewport(rect.x(), rect.y(), size.width(), size.height())
-            painter.setWindow(pixmap.rect())
-            painter.drawPixmap(0, 0, pixmap)
-            painter.end()
+            with QPainter(printer) as painter:
+                pixmap = self._image_label.pixmap()
+                rect = painter.viewport()
+                size = pixmap.size()
+                size.scale(rect.size(), Qt.KeepAspectRatio)
+                painter.setViewport(rect.x(), rect.y(), size.width(), size.height())
+                painter.setWindow(pixmap.rect())
+                painter.drawPixmap(0, 0, pixmap)
 
     @Slot()
     def _copy(self):

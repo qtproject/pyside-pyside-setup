@@ -238,12 +238,10 @@ class DiagramItem(QGraphicsPolygonItem):
     def image(self):
         pixmap = QPixmap(250, 250)
         pixmap.fill(Qt.transparent)
-        painter = QPainter(pixmap)
-        painter.setPen(QPen(Qt.black, 8))
-        painter.translate(125, 125)
-        painter.drawPolyline(self._my_polygon)
-        # QPainter needs an explicit end() in PyPy. This will become a context manager in 6.3.
-        painter.end()
+        with QPainter(pixmap) as painter:
+            painter.setPen(QPen(Qt.black, 8))
+            painter.translate(125, 125)
+            painter.drawPolyline(self._my_polygon)
         return pixmap
 
     def contextMenuEvent(self, event):
@@ -808,22 +806,22 @@ class MainWindow(QMainWindow):
     def create_color_tool_button_icon(self, imageFile, color):
         pixmap = QPixmap(50, 80)
         pixmap.fill(Qt.transparent)
-        painter = QPainter(pixmap)
-        image = QPixmap(imageFile)
-        target = QRect(0, 0, 50, 60)
-        source = QRect(0, 0, 42, 42)
-        painter.fillRect(QRect(0, 60, 50, 80), color)
-        painter.drawPixmap(target, image, source)
-        painter.end()
+
+        with QPainter(pixmap) as painter:
+            image = QPixmap(imageFile)
+            target = QRect(0, 0, 50, 60)
+            source = QRect(0, 0, 42, 42)
+            painter.fillRect(QRect(0, 60, 50, 80), color)
+            painter.drawPixmap(target, image, source)
 
         return QIcon(pixmap)
 
     def create_color_icon(self, color):
         pixmap = QPixmap(20, 20)
-        painter = QPainter(pixmap)
-        painter.setPen(Qt.NoPen)
-        painter.fillRect(QRect(0, 0, 20, 20), color)
-        painter.end()
+
+        with QPainter(pixmap) as painter:
+            painter.setPen(Qt.NoPen)
+            painter.fillRect(QRect(0, 0, 20, 20), color)
 
         return QIcon(pixmap)
 

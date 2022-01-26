@@ -253,49 +253,45 @@ class MandelbrotWidget(QWidget):
         self._info = ''
 
     def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.fillRect(self.rect(), Qt.black)
+        with QPainter(self) as painter:
+            painter.fillRect(self.rect(), Qt.black)
 
-        if self.pixmap.isNull():
+            if self.pixmap.isNull():
+                painter.setPen(Qt.white)
+                painter.drawText(self.rect(), Qt.AlignCenter,
+                        "Rendering initial image, please wait...")
+                return
+
+            if self._cur_scale == self._pixmap_scale:
+                painter.drawPixmap(self._pixmap_offset, self.pixmap)
+            else:
+                scale_factor = self._pixmap_scale / self._cur_scale
+                new_width = int(self.pixmap.width() * scale_factor)
+                new_height = int(self.pixmap.height() * scale_factor)
+                new_x = self._pixmap_offset.x() + (self.pixmap.width() - new_width) / 2
+                new_y = self._pixmap_offset.y() + (self.pixmap.height() - new_height) / 2
+
+                painter.save()
+                painter.translate(new_x, new_y)
+                painter.scale(scale_factor, scale_factor)
+                exposed, _ = painter.transform().inverted()
+                exposed = exposed.mapRect(self.rect()).adjusted(-1, -1, 1, 1)
+                painter.drawPixmap(exposed, self.pixmap, exposed)
+                painter.restore()
+
+            text = HELP
+            if self._info:
+                text += ' ' + self._info
+            metrics = painter.fontMetrics()
+            text_width = metrics.horizontalAdvance(text)
+
+            painter.setPen(Qt.NoPen)
+            painter.setBrush(QColor(0, 0, 0, 127))
+            painter.drawRect((self.width() - text_width) / 2 - 5, 0, text_width + 10,
+                    metrics.lineSpacing() + 5)
             painter.setPen(Qt.white)
-            painter.drawText(self.rect(), Qt.AlignCenter,
-                    "Rendering initial image, please wait...")
-            # QPainter needs an explicit end() in PyPy. This will become a context manager in 6.3.
-            painter.end()
-            return
-
-        if self._cur_scale == self._pixmap_scale:
-            painter.drawPixmap(self._pixmap_offset, self.pixmap)
-        else:
-            scale_factor = self._pixmap_scale / self._cur_scale
-            new_width = int(self.pixmap.width() * scale_factor)
-            new_height = int(self.pixmap.height() * scale_factor)
-            new_x = self._pixmap_offset.x() + (self.pixmap.width() - new_width) / 2
-            new_y = self._pixmap_offset.y() + (self.pixmap.height() - new_height) / 2
-
-            painter.save()
-            painter.translate(new_x, new_y)
-            painter.scale(scale_factor, scale_factor)
-            exposed, _ = painter.transform().inverted()
-            exposed = exposed.mapRect(self.rect()).adjusted(-1, -1, 1, 1)
-            painter.drawPixmap(exposed, self.pixmap, exposed)
-            painter.restore()
-
-        text = HELP
-        if self._info:
-            text += ' ' + self._info
-        metrics = painter.fontMetrics()
-        text_width = metrics.horizontalAdvance(text)
-
-        painter.setPen(Qt.NoPen)
-        painter.setBrush(QColor(0, 0, 0, 127))
-        painter.drawRect((self.width() - text_width) / 2 - 5, 0, text_width + 10,
-                metrics.lineSpacing() + 5)
-        painter.setPen(Qt.white)
-        painter.drawText((self.width() - text_width) / 2,
-                metrics.leading() + metrics.ascent(), text)
-        # QPainter needs an explicit end() in PyPy. This will become a context manager in 6.3.
-        painter.end()
+            painter.drawText((self.width() - text_width) / 2,
+                    metrics.leading() + metrics.ascent(), text)
 
     def resizeEvent(self, event):
         self.thread.render(self._center_x, self._center_y, self._cur_scale, self.size())

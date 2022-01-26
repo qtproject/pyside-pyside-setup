@@ -112,23 +112,19 @@ class RenderArea(QWidget):
         self.update()
 
     def paintEvent(self, event: PySide6.QtGui.QPaintEvent) -> None:
-        painter = QPainter(self)
-        painter.setPen(Qt.black)
-        frame = painter.viewport() - QMargins(10, 10, 10, 10)
+        with QPainter(self) as painter:
+            painter.setPen(Qt.black)
+            frame = painter.viewport() - QMargins(10, 10, 10, 10)
 
-        painter.drawRect(frame)
+            painter.drawRect(frame)
 
-        if self.m_level == 0.0:
-            # QPainter needs an explicit end() in PyPy. This will become a context manager in 6.3.
-            painter.end()
-            return
+            if self.m_level == 0.0:
+                return
 
-        pos: int = round((frame.width() - 1) * self.m_level)
-        painter.fillRect(
-            frame.left() + 1, frame.top() + 1, pos, frame.height() - 1, Qt.red
-        )
-        # QPainter needs an explicit end() in PyPy. This will become a context manager in 6.3.
-        painter.end()
+            pos: int = round((frame.width() - 1) * self.m_level)
+            painter.fillRect(
+                frame.left() + 1, frame.top() + 1, pos, frame.height() - 1, Qt.red
+            )
 
 
 class InputTest(QWidget):

@@ -88,13 +88,11 @@ class PlotWidget(QWidget):
         self.update()
 
     def paintEvent(self, event):
-        painter = QPainter()
-        painter.begin(self)
-        rect = QRect(QPoint(0, 0), self.size())
-        painter.fillRect(rect, Qt.white)
-        painter.translate(-self._points[0].x(), 0)
-        painter.drawPolyline(self._points)
-        painter.end()
+        with QPainter(self) as painter:
+            rect = QRect(QPoint(0, 0), self.size())
+            painter.fillRect(rect, Qt.white)
+            painter.translate(-self._points[0].x(), 0)
+            painter.drawPolyline(self._points)
 
 
 if __name__ == "__main__":

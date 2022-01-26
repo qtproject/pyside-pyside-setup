@@ -115,10 +115,8 @@ class CannonField(QWidget):
         self.angle_changed.emit(self._current_angle)
 
     def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.drawText(200, 200, f"Angle = {self._current_angle}")
-        # QPainter needs an explicit end() in PyPy. This will become a context manager in 6.3.
-        painter.end()
+        with QPainter(self) as painter:
+            painter.drawText(200, 200, f"Angle = {self._current_angle}")
 
 
 class MyWidget(QWidget):

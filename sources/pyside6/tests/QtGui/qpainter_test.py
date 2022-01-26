@@ -131,10 +131,9 @@ class SetBrushWithOtherArgs(UsesQGuiApplication):
 
     def testSetBrushGradient(self):
         image = QImage(32, 32, QImage.Format_ARGB32)
-        painter = QPainter(image)
-        gradient = QLinearGradient(0, 0, 0, 0)
-        painter.setBrush(gradient)
-        painter.end()
+        with QPainter(image) as painter:
+            gradient = QLinearGradient(0, 0, 0, 0)
+            painter.setBrush(gradient)
 
 
 if __name__ == '__main__':

@@ -113,11 +113,10 @@ class ColorItem(QGraphicsItem):
             pixmap = QPixmap(34, 34)
             pixmap.fill(Qt.white)
 
-            painter = QPainter(pixmap)
-            painter.translate(15, 15)
-            painter.setRenderHint(QPainter.Antialiasing)
-            self.paint(painter, None, None)
-            painter.end()
+            with QPainter(pixmap) as painter:
+                painter.translate(15, 15)
+                painter.setRenderHint(QPainter.Antialiasing)
+                self.paint(painter, None, None)
 
             pixmap.setMask(pixmap.createHeuristicMask())
 

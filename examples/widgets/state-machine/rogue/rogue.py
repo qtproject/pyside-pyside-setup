@@ -161,27 +161,25 @@ class MainWindow(QMainWindow):
 
     def paintEvent(self, event):
         metrics = QFontMetrics(self.font())
-        painter = QPainter(self)
-        font_height = metrics.height()
-        font_width = metrics.horizontalAdvance('X')
+        with QPainter(self) as painter:
+            font_height = metrics.height()
+            font_width = metrics.horizontalAdvance('X')
 
-        painter.fillRect(self.rect(), Qt.black)
-        painter.setPen(Qt.white)
+            painter.fillRect(self.rect(), Qt.black)
+            painter.setPen(Qt.white)
 
-        y_pos = font_height
-        painter.drawText(QPoint(0, y_pos), self.status)
-        for y in range(self.height):
-            y_pos += font_height
-            x_pos = 0
-            for x in range(self.width):
-                if y == self.pY and x == self.pX:
+            y_pos = font_height
+            painter.drawText(QPoint(0, y_pos), self.status)
+            for y in range(self.height):
+                y_pos += font_height
+                x_pos = 0
+                for x in range(self.width):
+                    if y == self.pY and x == self.pX:
+                        x_pos += font_width
+                        continue
+                    painter.drawText(QPoint(x_pos, y_pos), self.map[x][y])
                     x_pos += font_width
-                    continue
-                painter.drawText(QPoint(x_pos, y_pos), self.map[x][y])
-                x_pos += font_width
-        painter.drawText(QPoint(self.pX * font_width, (self.pY + 2) * font_height), '@')
-        # QPainter needs an explicit end() in PyPy. This will become a context manager in 6.3.
-        painter.end()
+            painter.drawText(QPoint(self.pX * font_width, (self.pY + 2) * font_height), '@')
 
     def move_player(self, direction):
         if direction == self.left:

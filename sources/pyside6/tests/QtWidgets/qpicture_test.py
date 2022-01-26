@@ -51,10 +51,8 @@ class MyWidget(QWidget):
 class QPictureTest(UsesQApplication):
     def testFromData(self):
         picture = QPicture()
-        painter = QPainter()
-        painter.begin(picture)
-        painter.drawEllipse(10, 20, 80, 70)
-        painter.end()
+        with QPainter(picture) as painter:
+            painter.drawEllipse(10, 20, 80, 70)
 
         data = picture.data()
         picture2 = QPicture()

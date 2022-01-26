@@ -115,17 +115,14 @@ class CannonField(QWidget):
         self.angle_changed.emit(self._current_angle)
 
     def paintEvent(self, event):
-        painter = QPainter(self)
+        with QPainter(self) as painter:
+            painter.setPen(Qt.NoPen)
+            painter.setBrush(Qt.blue)
 
-        painter.setPen(Qt.NoPen)
-        painter.setBrush(Qt.blue)
-
-        painter.translate(0, self.rect().height())
-        painter.drawPie(QRect(-35, -35, 70, 70), 0, 90 * 16)
-        painter.rotate(-self._current_angle)
-        painter.drawRect(QRect(33, -4, 15, 8))
-        # QPainter needs an explicit end() in PyPy. This will become a context manager in 6.3.
-        painter.end()
+            painter.translate(0, self.rect().height())
+            painter.drawPie(QRect(-35, -35, 70, 70), 0, 90 * 16)
+            painter.rotate(-self._current_angle)
+            painter.drawRect(QRect(33, -4, 15, 8))
 
 
 class MyWidget(QWidget):

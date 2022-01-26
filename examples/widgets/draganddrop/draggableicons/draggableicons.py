@@ -139,10 +139,8 @@ class DragWidget(QFrame):
 
         # .copy() is important: python is different than c++ in this case
         temp_pixmap = pixmap.copy()
-        painter = QPainter()
-        painter.begin(temp_pixmap)
-        painter.fillRect(pixmap.rect(), QColor(127, 127, 127, 127))
-        painter.end()
+        with QPainter(temp_pixmap) as painter:
+            painter.fillRect(pixmap.rect(), QColor(127, 127, 127, 127))
 
         child.setPixmap(temp_pixmap)
 
@@ -151,9 +149,6 @@ class DragWidget(QFrame):
         else:
             child.show()
             child.setPixmap(pixmap)
-
-        # QPainter needs an explicit end() in PyPy. This will become a context manager in 6.3.
-        painter.end()
 
 
 if __name__ == "__main__":

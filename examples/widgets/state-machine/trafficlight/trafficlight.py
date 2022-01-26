@@ -74,12 +74,10 @@ class LightWidget(QWidget):
     def paintEvent(self, e):
         if not self._on_val:
             return
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
-        painter.setBrush(self.color)
-        painter.drawEllipse(0, 0, self.width(), self.height())
-        # QPainter needs an explicit end() in PyPy. This will become a context manager in 6.3.
-        painter.end()
+        with QPainter(self) as painter:
+            painter.setRenderHint(QPainter.Antialiasing)
+            painter.setBrush(self.color)
+            painter.drawEllipse(0, 0, self.width(), self.height())
 
     on = Property(bool, is_on, set_on)
 
