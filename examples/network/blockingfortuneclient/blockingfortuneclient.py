@@ -73,13 +73,13 @@ class FortuneThread(QThread):
         self.wait()
 
     def request_new_fortune(self, hostname, port):
-        locker = QMutexLocker(self.mutex)
-        self._host_name = hostname
-        self.port = port
-        if not self.isRunning():
-            self.start()
-        else:
-            self.cond.wakeOne()
+        with QMutexLocker(self.mutex):
+            self._host_name = hostname
+            self.port = port
+            if not self.isRunning():
+                self.start()
+            else:
+                self.cond.wakeOne()
 
     def run(self):
         self.mutex.lock()

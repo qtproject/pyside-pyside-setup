@@ -125,6 +125,19 @@ class TestQMutex (unittest.TestCase):
         self.assertTrue(thread.wait(2000))
         self.assertTrue(thread.canQuit)
 
+    def testWithAsLocker(self):
+        lock = QReadWriteLock()
+        with QReadLocker(lock) as locker:
+            self.assertTrue(isinstance(locker, QReadLocker))
+        with QWriteLocker(lock) as locker:
+            self.assertTrue(isinstance(locker, QWriteLocker))
+        mutex = QMutex()
+        with QMutexLocker(mutex) as locker:
+            self.assertTrue(isinstance(locker, QMutexLocker))
+        with self.assertRaises(TypeError):
+            with QMutexLocker(lock) as locker:
+                pass
+
 
 if __name__ == '__main__':
     unittest.main()

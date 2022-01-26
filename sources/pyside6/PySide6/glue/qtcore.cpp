@@ -802,6 +802,11 @@ Py_XDECREF(result);
 return !result ? -1 : 0;
 // @snippet qbitarray-setitem
 
+// @snippet default-enter
+Py_INCREF(%PYSELF);
+pyResult = %PYSELF;
+// @snippet default-enter
+
 // @snippet qsignalblocker-unblock
 %CPPSELF.unblock();
 // @snippet qsignalblocker-unblock
