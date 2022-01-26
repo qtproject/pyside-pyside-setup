@@ -374,6 +374,7 @@ private:
     void collectInstantiatedContainersAndSmartPointers(const AbstractMetaFunctionCPtr &func);
     void collectInstantiatedContainersAndSmartPointers(const AbstractMetaClass *metaClass);
     void collectInstantiatedContainersAndSmartPointers();
+    void collectInstantiatedOpqaqueContainers();
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(Generator::Options)

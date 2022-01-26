@@ -341,10 +341,42 @@ void Generator::collectInstantiatedContainersAndSmartPointers(const AbstractMeta
 
 void Generator::collectInstantiatedContainersAndSmartPointers()
 {
+    collectInstantiatedOpqaqueContainers();
     for (const auto &func : m_d->api.globalFunctions())
         collectInstantiatedContainersAndSmartPointers(func);
     for (auto metaClass : m_d->api.classes())
         collectInstantiatedContainersAndSmartPointers(metaClass);
+}
+
+// Whether to generate an opaque container: If the instantiation type is in
+// the current package or, for primitive types, if the container is in the
+// current package.
+static bool generateOpaqueContainer(const AbstractMetaType &type,
+                                    const TypeSystemTypeEntry *moduleEntry)
+{
+    auto *te = type.instantiations().constFirst().typeEntry();
+    auto *typeModuleEntry = te->typeSystemTypeEntry();
+    return typeModuleEntry == moduleEntry
+           || (te->isPrimitive() && type.typeEntry()->typeSystemTypeEntry() == moduleEntry);
+}
+
+void Generator::collectInstantiatedOpqaqueContainers()
+{
+    // Add all instantiations of opaque containers for types from the current
+    // module.
+    auto *td = TypeDatabase::instance();
+    const auto *moduleEntry = TypeDatabase::instance()->defaultTypeSystemType();
+    const auto &containers = td->containerTypes();
+    for (const auto *container : containers) {
+        for (const auto &oc : container->opaqueContainers()) {
+            QString errorMessage;
+            const QString typeName = container->qualifiedCppName() + u'<'
+                                     + oc.instantiation + u'>';
+            auto typeOpt = AbstractMetaType::fromString(typeName, &errorMessage);
+            if (typeOpt.has_value() && generateOpaqueContainer(typeOpt.value(), moduleEntry))
+                addInstantiatedContainersAndSmartPointers(typeOpt.value(), u"opaque containers"_qs);
+        }
+    }
 }
 
 AbstractMetaTypeList Generator::instantiatedContainers() const
