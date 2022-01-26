@@ -2,7 +2,7 @@
 ############################################################################
 ##
 ## Copyright (C) 2013 Riverbank Computing Limited.
-## Copyright (C) 2021 The Qt Company Ltd.
+## Copyright (C) 2022 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -45,11 +45,10 @@
 from argparse import ArgumentParser, RawTextHelpFormatter
 import ctypes
 import math
-import numpy
 import sys
 from PySide6.QtCore import QCoreApplication, Signal, SIGNAL, SLOT, Qt, QSize, QPointF
 from PySide6.QtGui import (QVector3D, QOpenGLFunctions,
-    QMatrix4x4, QOpenGLContext, QSurfaceFormat)
+    QMatrix4x4, QOpenGLContext, QSurfaceFormat, QVector3DList)
 from PySide6.QtOpenGL import (QOpenGLVertexArrayObject, QOpenGLBuffer,
     QOpenGLShaderProgram, QOpenGLShader)
 from PySide6.QtWidgets import (QApplication, QWidget, QMessageBox, QHBoxLayout,
@@ -124,9 +123,8 @@ class Window(QWidget):
 
 class Logo():
     def __init__(self):
-        self.m_count = 0
-        self.i = 0
-        self.m_data = numpy.empty(2500 * 6, dtype=ctypes.c_float)
+        self.m_data = QVector3DList()
+        self.m_data.reserve(5000)
 
         x1 = +0.06
         y1 = -0.14
@@ -169,13 +167,13 @@ class Logo():
             self.extrude(x8, y8, x5, y5)
 
     def const_data(self):
-        return self.m_data.tobytes()
+        return self.m_data.constData()
 
     def count(self):
-        return self.m_count
+        return len(self.m_data) * 3
 
     def vertex_count(self):
-        return self.m_count / 6
+        return self.count() / 6
 
     def quad(self, x1, y1, x2, y2, x3, y3, x4, y4):
         n = QVector3D.normal(QVector3D(x4 - x1, y4 - y1, 0), QVector3D(x2 - x1, y2 - y1, 0))
@@ -210,19 +208,8 @@ class Logo():
         self.add(QVector3D(x1, y1, -0.05), n)
 
     def add(self, v, n):
-        self.m_data[self.i] = v.x()
-        self.i += 1
-        self.m_data[self.i] = v.y()
-        self.i += 1
-        self.m_data[self.i] = v.z()
-        self.i += 1
-        self.m_data[self.i] = n.x()
-        self.i += 1
-        self.m_data[self.i] = n.y()
-        self.i += 1
-        self.m_data[self.i] = n.z()
-        self.i += 1
-        self.m_count += 6
+        self.m_data.append(v)
+        self.m_data.append(n)
 
 
 class GLWidget(QOpenGLWidget, QOpenGLFunctions):

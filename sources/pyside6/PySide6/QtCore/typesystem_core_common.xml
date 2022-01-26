@@ -356,7 +356,7 @@
 
   <!-- FIXME: Which one is it going to be? -->
   <container-type name="QList" type="list"
-                  opaque-containers="int:QIntList;QPoint:QPointList;QPointF:QPointFList">
+                  opaque-containers="int:QIntList;QPoint:QPointList;QPointF:QPointFList;QVector2D:QVector2DList;QVector3D:QVector3DList;QVector4D:QVector4DList">
     <include file-name="QList" location="global"/>
     <declare-function signature="append(T)" return-type="void"/>
     <declare-function signature="insert(qsizetype,T)" return-type="void"/>
