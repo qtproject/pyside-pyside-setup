@@ -577,6 +577,15 @@ const auto points = PySide::Numpy::xyDataToQPointFList(%PYARG_1, %PYARG_2);
 %CPPSELF.%FUNCTION_NAME(%1.constData(), %1.size(), %2);
 // @snippet qpainter-drawpolygon
 
+// @snippet qpainter-enter
+Py_INCREF(%PYSELF);
+pyResult = %PYSELF;
+// @snippet qpainter-enter
+
+// @snippet qpainter-exit
+%CPPSELF.end();
+// @snippet qpainter-exit
+
 // @snippet qmatrix4x4
 // PYSIDE-795: All PySequences can be made iterable with PySequence_Fast.
 Shiboken::AutoDecRef seq(PySequence_Fast(%PYARG_1, "Can't turn into sequence"));

@@ -43,8 +43,8 @@ from PySide6.QtWidgets import QWidget
 
 class MyWidget(QWidget):
     def paintEvent(self, e):
-        p = QPainter(self)
-        p.drawPicture(0, 0, self._picture)
+        with QPainter(self) as p:
+            p.drawPicture(0, 0, self._picture)
         self._app.quit()
 
 

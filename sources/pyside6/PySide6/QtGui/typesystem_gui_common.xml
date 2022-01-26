@@ -1892,6 +1892,7 @@
     <!-- ### "setPaintDevice(QPaintDevice*)" is an internal method. -->
     <modify-function signature="setPaintDevice(QPaintDevice*)" remove="all"/>
   </object-type>
+
   <object-type name="QPainter">
     <extra-includes>
       <include file-name="QPainterPath" location="global"/>
@@ -2028,6 +2029,12 @@
         <insert-template name="fix_args,QRect*"/>
       </inject-code>
     </modify-function>
+    <add-function signature="__enter__()" return-type="QPainter">
+        <inject-code file="../glue/qtgui.cpp" snippet="qpainter-enter"/>
+    </add-function>
+    <add-function signature="__exit__(PyObject*,PyObject*,PyObject*)">
+        <inject-code file="../glue/qtgui.cpp" snippet="qpainter-exit"/>
+    </add-function>
   </object-type>
 
   <value-type name="QGenericMatrix" generate="no"/>
