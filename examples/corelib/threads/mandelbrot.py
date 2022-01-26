@@ -102,18 +102,17 @@ class RenderThread(QThread):
         self.wait(2000)
 
     def render(self, centerX, centerY, scale_factor, resultSize):
-        locker = QMutexLocker(self.mutex)
+        with QMutexLocker(self.mutex):
+            self._center_x = centerX
+            self._center_y = centerY
+            self._scale_factor = scale_factor
+            self._result_size = resultSize
 
-        self._center_x = centerX
-        self._center_y = centerY
-        self._scale_factor = scale_factor
-        self._result_size = resultSize
-
-        if not self.isRunning():
-            self.start(QThread.LowPriority)
-        else:
-            self.restart = True
-            self.condition.wakeOne()
+            if not self.isRunning():
+                self.start(QThread.LowPriority)
+            else:
+                self.restart = True
+                self.condition.wakeOne()
 
     def run(self):
         timer = QElapsedTimer()
@@ -185,7 +184,8 @@ class RenderThread(QThread):
                         if elapsed > 2000:
                             elapsed /= 1000
                             unit = 's'
-                        text = f"Pass {curpass+1}/{NUM_PASSES}, max iterations: {max_iterations}, time: {elapsed}{unit}"
+                        text = (f"Pass {curpass + 1}/{NUM_PASSES}, "
+                                f"max iterations: {max_iterations}, time: {elapsed}{unit}")
                         image.setText(INFO_KEY, text)
                         self.rendered_image.emit(image, scale_factor)
                     curpass += 1

@@ -1422,7 +1422,9 @@
   </object-type>
   <object-type name="QMessageAuthenticationCode"/>
   <object-type name="QSignalBlocker">
-      <add-function signature="__enter__()"/>
+      <add-function signature="__enter__()" return-type="QSignalBlocker">
+          <inject-code file="../glue/qtcore.cpp" snippet="default-enter"/>
+      </add-function>
       <add-function signature="__exit__(PyObject*,PyObject*,PyObject*)">
           <inject-code file="../glue/qtcore.cpp" snippet="qsignalblocker-unblock"/>
       </add-function>
@@ -1443,7 +1445,9 @@
         </modify-argument>
     </modify-function>
     <modify-function signature="relock()" allow-thread="yes"/>
-    <add-function signature="__enter__()"/>
+    <add-function signature="__enter__()" return-type="QReadLocker">
+        <inject-code file="../glue/qtcore.cpp" snippet="default-enter"/>
+    </add-function>
     <add-function signature="__exit__(PyObject*,PyObject*,PyObject*)">
         <inject-code file="../glue/qtcore.cpp" snippet="unlock"/>
     </add-function>
@@ -1455,7 +1459,9 @@
         </modify-argument>
     </modify-function>
     <modify-function signature="relock()" allow-thread="yes"/>
-    <add-function signature="__enter__()"/>
+    <add-function signature="__enter__()" return-type="QWriteLocker">
+        <inject-code file="../glue/qtcore.cpp" snippet="default-enter"/>
+    </add-function>
     <add-function signature="__exit__(PyObject*,PyObject*,PyObject*)">
         <inject-code file="../glue/qtcore.cpp" snippet="unlock"/>
     </add-function>
@@ -2309,7 +2315,9 @@
           <reference-count action="set"/>
         </modify-argument>
       </modify-function>
-      <add-function signature="__enter__()"/>
+      <add-function signature="__enter__()" return-type="QMutexLocker">
+          <inject-code file="../glue/qtcore.cpp" snippet="default-enter"/>
+      </add-function>
       <add-function signature="__exit__(PyObject*,PyObject*,PyObject*)">
           <inject-code file="../glue/qtcore.cpp" snippet="unlock"/>
       </add-function>

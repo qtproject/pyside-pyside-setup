@@ -72,6 +72,14 @@ class TestSignalsBlockedBasic(unittest.TestCase):
             self.assertTrue(obj.signalsBlocked())
         self.assertTrue(not obj.signalsBlocked())
 
+    def testContextWithAs(self):
+        obj = QObject()
+        self.assertTrue(not obj.signalsBlocked())
+        with QSignalBlocker(obj) as blocker:
+            self.assertTrue(obj.signalsBlocked())
+            self.assertEqual(type(blocker), QSignalBlocker)
+        self.assertTrue(not obj.signalsBlocked())
+
 
 class TestSignalsBlocked(unittest.TestCase):
     '''Test case to check if the signals are really blocked'''
