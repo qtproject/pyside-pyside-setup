@@ -317,7 +317,7 @@ class QObjectPage(QWizardPage):
         self.setTitle("QObject parameters")
         self.setSubTitle("Specify the signals, slots and properties.")
         self.setPixmap(QWizard.LogoPixmap,
-                       ':/qt-project.org/logos/pysidelogo.png')
+                       QPixmap(':/qt-project.org/logos/pysidelogo.png'))
         layout = QVBoxLayout(self)
         self._properties_chooser = PropertyChooser()
         self.registerField('properties', self._properties_chooser, 'items')
