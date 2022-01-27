@@ -1,0 +1,56 @@
+Qt for Python 6.2.3 is a bug-fix release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+****************************************************************************
+*                                  PySide6                                 *
+****************************************************************************
+
+ - __repr__ functions for QEvent-derived classes were added.
+ - audio source, mimetype browser, borderlayout, threadedqopenglwidget and
+   regular expression examples were added.
+ - A debugging tutorial was added.
+ - [PYSIDE-1318] The MyPy display of `Signal` was corrected so that the
+                 relationship of `Signal` and `SignalInstance` is reflected.
+ - [PYSIDE-1431] Signal instances allow pass-through of methods with the same
+                 name, explicitly and with multiple inheritance.
+ - [PYSIDE-1675] A crash when inserting a signal into a non-QObject was fixed.
+ - [PYSIDE-1675] A bug fix in Slot.__call__ was fixed.
+ - [PYSIDE-1675] A segfault when a signal is applied to a non-QObject was
+                 fixed.
+ - [PYSIDE-1725] Documentation: classes in inheritance diagrams are now
+                 clickable (within one module).
+ - [PYSIDE-1726] The build for the case when no Vulkan is installed was fixed.
+ - [PYSIDE-1727] The signature and __doc__ attribute of classes issue was
+                 fixed.
+ - [PYSIDE-1730] A pass-through for signals in case of multiple inheritance
+                 was added.
+ - [PYSIDE-1736  QQmlApplicationEngine.load(str) was fixed.
+ - [PYSIDE-1755] __code__ inspection on slot connections was fixed.
+ - [PYSIDE-1757] The error handling of true_property was improved.
+ - [PYSIDE-1769] A crash in WebEngine signal emissions was fixed.
+ - [PYSIDE-1770] Enum QXYSeries.PointConfiguration was added.
+ - [PYSIDE-1792] allow threads was added to QFileDialog's static functions
+                 (getSaveFileName(), etc.).
+ - [QTBUG-95010] New Multimedia functions were added
+
+****************************************************************************
+*                                  Shiboken6                               *
+****************************************************************************
+
+ - [PYSIDE-1605] Bindings for reserve()/capacity() were added to contiguous
+   opaque containers.
+ - [PYSIDE-1766] The documentation on the conversion-rule tag was updated
+   and native-to-target/target-to-native can now be used in argument
+   conversion rules.
