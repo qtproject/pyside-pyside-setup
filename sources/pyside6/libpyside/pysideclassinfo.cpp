@@ -50,68 +50,56 @@
 extern "C"
 {
 
-static PyObject *classInfo_tp_new(PyTypeObject *subtype, PyObject *args, PyObject *kwds);
-static int classInfo_tp_init(PyObject *, PyObject *, PyObject *);
-static void classInfo_tp_free(void *);
-static PyObject *classInfo_tp_call(PyObject *, PyObject *, PyObject *);
+static PyTypeObject *createClassInfoType(void)
+{
+    auto typeSlots =
+        PySide::ClassDecorator::Methods<PySide::ClassInfo::ClassInfoPrivate>::typeSlots();
 
-static PyType_Slot PySideClassInfoType_slots[] = {
-    {Py_tp_call, reinterpret_cast<void *>(classInfo_tp_call)},
-    {Py_tp_init, reinterpret_cast<void *>(classInfo_tp_init)},
-    {Py_tp_new, reinterpret_cast<void *>(classInfo_tp_new)},
-    {Py_tp_free, reinterpret_cast<void *>(classInfo_tp_free)},
-    {Py_tp_dealloc, reinterpret_cast<void *>(Sbk_object_dealloc)},
-    {0, nullptr}
+    PyType_Spec PySideClassInfoType_spec = {
+        "2:PySide6.QtCore.ClassInfo",
+        sizeof(PySideClassDecorator),
+        0,
+        Py_TPFLAGS_DEFAULT,
+        typeSlots.data()};
+    return SbkType_FromSpec(&PySideClassInfoType_spec);
 };
-static PyType_Spec PySideClassInfoType_spec = {
-    "2:PySide6.QtCore.ClassInfo",
-    sizeof(PySideClassInfo),
-    0,
-    Py_TPFLAGS_DEFAULT,
-    PySideClassInfoType_slots,
-};
-
 
 PyTypeObject *PySideClassInfo_TypeF(void)
 {
-    static auto *type = SbkType_FromSpec(&PySideClassInfoType_spec);
+    static auto *type = createClassInfoType();
     return type;
 }
 
-PyObject *classInfo_tp_call(PyObject *self, PyObject *args, PyObject * /* kw */)
-{
-    if (!PyTuple_Check(args) || PyTuple_Size(args) != 1) {
-        PyErr_Format(PyExc_TypeError,
-                     "The ClassInfo decorator takes exactly 1 positional argument (%zd given)",
-                     PyTuple_Size(args));
-        return nullptr;
-    }
+}  // extern "C"
 
-    PySideClassInfo *data = reinterpret_cast<PySideClassInfo *>(self);
-    PySideClassInfoPrivate *pData = data->d;
+namespace PySide { namespace ClassInfo {
+
+const char *ClassInfoPrivate::name() const
+{
+    return "ClassInfo";
+}
+
+PyObject *ClassInfoPrivate::tp_call(PyObject *self, PyObject *args, PyObject * /* kw */)
+{
+    PyObject *klass = tp_call_check(args, CheckMode::QObjectType);
+    if (klass == nullptr)
+        return nullptr;
+
+    auto *pData = DecoratorPrivate::get<ClassInfoPrivate>(self);
 
     if (pData->m_alreadyWrapped) {
         PyErr_SetString(PyExc_TypeError, "This instance of ClassInfo() was already used to wrap an object");
         return nullptr;
     }
 
-    PyObject *klass = PyTuple_GetItem(args, 0);
     bool validClass = false;
 
-    // This will sometimes segfault if you mistakenly use it on a function declaration
-    if (!PyType_Check(klass)) {
-        PyErr_SetString(PyExc_TypeError, "This decorator can only be used on class declarations");
-        return nullptr;
-    }
-
     PyTypeObject *klassType = reinterpret_cast<PyTypeObject *>(klass);
-    if (Shiboken::ObjectType::checkType(klassType)) {
-        if (auto userData = PySide::retrieveTypeUserData(klassType)) {
-            PySide::MetaObjectBuilder &mo = userData->mo;
-            mo.addInfo(PySide::ClassInfo::getMap(data));
-            pData->m_alreadyWrapped = true;
-            validClass = true;
-        }
+    if (auto userData = PySide::retrieveTypeUserData(klassType)) {
+        PySide::MetaObjectBuilder &mo = userData->mo;
+        mo.addInfo(pData->m_data);
+        pData->m_alreadyWrapped = true;
+        validClass = true;
     }
 
     if (!validClass) {
@@ -123,17 +111,7 @@ PyObject *classInfo_tp_call(PyObject *self, PyObject *args, PyObject * /* kw */)
     return klass;
 }
 
-static PyObject *classInfo_tp_new(PyTypeObject *subtype, PyObject * /* args */, PyObject * /* kwds */)
-{
-    PySideClassInfo *me = reinterpret_cast<PySideClassInfo *>(subtype->tp_alloc(subtype, 0));
-    me->d = new PySideClassInfoPrivate;
-
-    me->d->m_alreadyWrapped = false;
-
-    return reinterpret_cast<PyObject *>(me);
-}
-
-int classInfo_tp_init(PyObject *self, PyObject *args, PyObject *kwds)
+int ClassInfoPrivate::tp_init(PyObject *self, PyObject *args, PyObject *kwds)
 {
     PyObject *infoDict = nullptr;
     auto size = PyTuple_Size(args);
@@ -151,8 +129,7 @@ int classInfo_tp_init(PyObject *self, PyObject *args, PyObject *kwds)
         return -1;
     }
 
-    PySideClassInfo *data = reinterpret_cast<PySideClassInfo *>(self);
-    PySideClassInfoPrivate *pData = data->d;
+    auto *pData = DecoratorPrivate::get<ClassInfoPrivate>(self);
 
     PyObject *key;
     PyObject *value;
@@ -174,21 +151,6 @@ int classInfo_tp_init(PyObject *self, PyObject *args, PyObject *kwds)
     return PyErr_Occurred() ? -1 : 0;
 }
 
-void classInfo_tp_free(void *self)
-{
-    auto pySelf = reinterpret_cast<PyObject *>(self);
-    auto data = reinterpret_cast<PySideClassInfo *>(self);
-
-    delete data->d;
-    Py_TYPE(pySelf)->tp_base->tp_free(self);
-}
-
-
-} // extern "C"
-
-
-namespace PySide { namespace ClassInfo {
-
 static const char *ClassInfo_SignatureStrings[] = {
     "PySide6.QtCore.ClassInfo(self,**info:typing.Dict[str,str])",
     nullptr}; // Sentinel
@@ -209,9 +171,10 @@ bool checkType(PyObject *pyObj)
     return false;
 }
 
-QMap<QByteArray, QByteArray> getMap(PySideClassInfo *obj)
+QMap<QByteArray, QByteArray> getMap(PyObject *obj)
 {
-    return obj->d->m_data;
+    auto *pData = PySide::ClassDecorator::DecoratorPrivate::get<ClassInfoPrivate>(obj);
+    return pData->m_data;
 }
 
 } //namespace Property

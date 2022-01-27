@@ -39,6 +39,7 @@
 
 #include "pysideqmluncreatable.h"
 #include "pysideqmltypeinfo_p.h"
+#include <pysideclassdecorator_p.h>
 
 #include <shiboken.h>
 #include <signature.h>
@@ -49,114 +50,78 @@
 
 #include <QtCore/QtGlobal>
 
-struct PySideQmlUncreatablePrivate
+class PySideQmlUncreatablePrivate : public PySide::ClassDecorator::StringDecoratorPrivate
 {
-    std::string reason;
+public:
+    PyObject *tp_call(PyObject *self, PyObject *args, PyObject * /* kw */) override;
+    int tp_init(PyObject *self, PyObject *args, PyObject *kwds) override;
+    const char *name() const override;
 };
 
-extern "C"
+const char *PySideQmlUncreatablePrivate::name() const
 {
+    return "QmlUncreatable";
+}
 
 // The call operator is passed the class type and registers the reason
 // in the uncreatableReasonMap()
-static PyObject *classInfo_tp_call(PyObject *self, PyObject *args, PyObject * /* kw */)
+PyObject *PySideQmlUncreatablePrivate::tp_call(PyObject *self, PyObject *args, PyObject * /* kw */)
 {
-    if (!PyTuple_Check(args) || PyTuple_Size(args) != 1) {
-        PyErr_Format(PyExc_TypeError,
-                     "The QmlUncreatable decorator takes exactly 1 positional argument (%zd given)",
-                     PyTuple_Size(args));
+    PyObject *klass = tp_call_check(args, CheckMode::WrappedType);
+    if (klass== nullptr)
         return nullptr;
-    }
 
-    PyObject *klass = PyTuple_GetItem(args, 0);
-    // This will sometimes segfault if you mistakenly use it on a function declaration
-    if (!PyType_Check(klass)) {
-        PyErr_SetString(PyExc_TypeError,
-                        "This decorator can only be used on class declarations");
-        return nullptr;
-    }
+    auto *data = DecoratorPrivate::get<PySideQmlUncreatablePrivate>(self);
 
-    PyTypeObject *klassType = reinterpret_cast<PyTypeObject *>(klass);
-    if (!Shiboken::ObjectType::checkType(klassType)) {
-        PyErr_SetString(PyExc_TypeError,
-                        "This decorator can only be used on classes that are subclasses of QObject");
-        return nullptr;
-    }
-
-    auto data = reinterpret_cast<PySideQmlUncreatable *>(self);
     auto &info = PySide::Qml::ensureQmlTypeInfo(klass);
     info.flags.setFlag(PySide::Qml::QmlTypeFlag::Uncreatable);
-    info.noCreationReason = data->d->reason;
+    info.noCreationReason = data->string();
 
     Py_INCREF(klass);
     return klass;
 }
 
-static PyObject *qmlUncreatableTpNew(PyTypeObject *subtype, PyObject * /* args */,
-                                     PyObject * /* kwds */)
+int PySideQmlUncreatablePrivate::tp_init(PyObject *self, PyObject *args, PyObject * /* kwds */)
 {
-    auto *me = reinterpret_cast<PySideQmlUncreatable *>(subtype->tp_alloc(subtype, 0));
-    me->d = new PySideQmlUncreatablePrivate;
-    return reinterpret_cast<PyObject *>(me);
-}
-
-static int qmlUncreatableTpInit(PyObject *self, PyObject *args, PyObject * /* kwds */)
-{
-    PySideQmlUncreatable *data = reinterpret_cast<PySideQmlUncreatable *>(self);
-    PySideQmlUncreatablePrivate *pData = data->d;
-
-    bool ok = false;
+    int result = -1;
     const auto argsCount = PyTuple_Size(args);
     if (argsCount == 0) {
-        ok = true; // QML-generated reason
+        result = 0; // QML-generated reason
     } else if (argsCount == 1) {
         PyObject *arg = PyTuple_GET_ITEM(args, 0);
-        if (arg == Py_None) {
-            ok = true; // QML-generated reason
-        } else if (PyUnicode_Check(arg)) {
-            ok = true;
-            Shiboken::String::toCppString(arg, &(pData->reason));
-        }
+        result = arg == Py_None
+            ? 0 // QML-generated reason
+            : convertToString(self, args);
     }
 
-    if (!ok) {
+    if (result != 0) {
         PyErr_Format(PyExc_TypeError,
                      "QmlUncreatable() takes a single string argument or no argument");
-        return -1;
     }
 
-    return 0;
+    return result;
 }
 
-static void qmlUncreatableFree(void *self)
+extern "C" {
+
+PyTypeObject *createPySideQmlUncreatableType(void)
 {
-    auto pySelf = reinterpret_cast<PyObject *>(self);
-    auto data = reinterpret_cast<PySideQmlUncreatable *>(self);
+    auto typeSlots =
+        PySide::ClassDecorator::Methods<PySideQmlUncreatablePrivate>::typeSlots();
 
-    delete data->d;
-    Py_TYPE(pySelf)->tp_base->tp_free(self);
+    PyType_Spec PySideQmlUncreatableType_spec = {
+        "2:PySide6.QtCore.qmlUncreatable",
+        sizeof(PySideClassDecorator),
+        0,
+        Py_TPFLAGS_DEFAULT,
+        typeSlots.data()
+    };
+    return SbkType_FromSpec(&PySideQmlUncreatableType_spec);
 }
-
-static PyType_Slot PySideQmlUncreatableType_slots[] = {
-    {Py_tp_call, reinterpret_cast<void *>(classInfo_tp_call)},
-    {Py_tp_init, reinterpret_cast<void *>(qmlUncreatableTpInit)},
-    {Py_tp_new, reinterpret_cast<void *>(qmlUncreatableTpNew)},
-    {Py_tp_free, reinterpret_cast<void *>(qmlUncreatableFree)},
-    {Py_tp_dealloc, reinterpret_cast<void *>(Sbk_object_dealloc)},
-    {0, nullptr}
-};
-
-static PyType_Spec PySideQmlUncreatableType_spec = {
-    "2:PySide6.QtCore.qmlUncreatable",
-    sizeof(PySideQmlUncreatable),
-    0,
-    Py_TPFLAGS_DEFAULT,
-    PySideQmlUncreatableType_slots,
-};
 
 PyTypeObject *PySideQmlUncreatable_TypeF(void)
 {
-    static auto *type = SbkType_FromSpec(&PySideQmlUncreatableType_spec);
+    static auto *type = createPySideQmlUncreatableType();
     return type;
 }
 

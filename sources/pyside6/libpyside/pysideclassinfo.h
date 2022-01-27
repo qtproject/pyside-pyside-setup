@@ -47,22 +47,10 @@
 #include <QtCore/QMap>
 #include <QtCore/QByteArray>
 
-extern "C"
-{
-    extern PYSIDE_API PyTypeObject *PySideClassInfo_TypeF(void);
-
-    struct PySideClassInfoPrivate;
-    struct PYSIDE_API PySideClassInfo
-    {
-        PyObject_HEAD
-        PySideClassInfoPrivate* d;
-    };
-};
-
 namespace PySide { namespace ClassInfo {
 
 PYSIDE_API bool checkType(PyObject* pyObj);
-PYSIDE_API QMap<QByteArray, QByteArray> getMap(PySideClassInfo* obj);
+PYSIDE_API QMap<QByteArray, QByteArray> getMap(PyObject *obj);
 
 } //namespace ClassInfo
 } //namespace PySide

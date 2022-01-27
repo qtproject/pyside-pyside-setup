@@ -42,21 +42,30 @@
 
 #include <sbkpython.h>
 #include <QMetaObject>
+#include "pysideclassdecorator_p.h"
+#include "pysideclassinfo.h"
 #include "pysideclassinfo.h"
 
 struct PySideClassInfo;
 
 extern "C"
 {
-
-struct PySideClassInfoPrivate {
-    QMap<QByteArray, QByteArray> m_data;
-    bool m_alreadyWrapped;
-};
+extern PYSIDE_API PyTypeObject *PySideClassInfo_TypeF(void);
 
 } // extern "C"
 
 namespace PySide { namespace ClassInfo {
+
+class ClassInfoPrivate : public PySide::ClassDecorator::DecoratorPrivate
+{
+public:
+    PyObject *tp_call(PyObject *self, PyObject *args, PyObject * /* kw */) override;
+    int tp_init(PyObject *self, PyObject *args, PyObject *kwds) override;
+    const char *name() const override;
+
+    QMap<QByteArray, QByteArray> m_data;
+    bool m_alreadyWrapped = false;
+};
 
 /**
  * Init PySide QProperty support system

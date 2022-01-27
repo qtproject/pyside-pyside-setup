@@ -8,6 +8,7 @@ set(libpyside_SRC
     feature_select.cpp
     signalmanager.cpp
     globalreceiverv2.cpp
+    pysideclassdecorator.cpp
     pysideclassinfo.cpp
     pysideqenum.cpp
     pysidemetafunction.cpp

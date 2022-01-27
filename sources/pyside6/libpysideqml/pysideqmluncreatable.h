@@ -48,15 +48,7 @@
 extern "C"
 {
     extern PyTypeObject *PySideQmlUncreatable_TypeF(void);
-
-    struct PySideQmlUncreatablePrivate;
-    struct PySideQmlUncreatable
-    {
-        PyObject_HEAD
-        PySideQmlUncreatablePrivate* d;
-    };
-
-} // extern "C"
+}
 
 void initQmlUncreatable(PyObject *module);
 
