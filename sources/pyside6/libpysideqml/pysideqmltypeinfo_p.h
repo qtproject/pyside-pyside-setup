@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2021 The Qt Company Ltd.
+** Copyright (C) 2022 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -37,27 +37,42 @@
 **
 ****************************************************************************/
 
-#ifndef PYSIDEQMLUNCREATABLE_H
-#define PYSIDEQMLUNCREATABLE_H
+#ifndef PYSIDEQMLTYPEINFO_P_H
+#define PYSIDEQMLTYPEINFO_P_H
 
 #include <sbkpython.h>
 
-// The QmlUncreatable decorator modifies QmlElement to register an uncreatable
-// type. Due to the (reverse) execution order of decorators, it needs to follow
-// QmlElement.
-extern "C"
+#include <QtCore/QFlags>
+
+#include <string>
+
+QT_FORWARD_DECLARE_CLASS(QDebug)
+
+namespace PySide::Qml {
+
+enum class QmlTypeFlag
 {
-    extern PyTypeObject *PySideQmlUncreatableTypeF(void);
+    Singleton = 0x1,
+    Uncreatable = 0x2
+};
 
-    struct PySideQmlUncreatablePrivate;
-    struct PySideQmlUncreatable
-    {
-        PyObject_HEAD
-        PySideQmlUncreatablePrivate* d;
-    };
+Q_DECLARE_FLAGS(QmlTypeFlags, QmlTypeFlag)
+Q_DECLARE_OPERATORS_FOR_FLAGS(QmlTypeFlags)
 
-} // extern "C"
+// Type information associated with QML type objects
+struct QmlTypeInfo
+{
+    QmlTypeFlags flags;
+    std::string noCreationReason;
+};
 
-void initQmlUncreatable(PyObject *module);
+QmlTypeInfo &ensureQmlTypeInfo(const PyObject *o);
+QmlTypeInfo qmlTypeInfo(const PyObject *o);
 
-#endif // PYSIDEQMLUNCREATABLE_H
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, const QmlTypeInfo &);
+#endif
+
+} // namespace PySide::Qml
+
+#endif // PYSIDEQMLTYPEINFO_P_H

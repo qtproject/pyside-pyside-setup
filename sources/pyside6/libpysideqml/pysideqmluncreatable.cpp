@@ -38,6 +38,7 @@
 ****************************************************************************/
 
 #include "pysideqmluncreatable.h"
+#include "pysideqmltypeinfo_p.h"
 
 #include <shiboken.h>
 #include <signature.h>
@@ -53,21 +54,11 @@ struct PySideQmlUncreatablePrivate
     std::string reason;
 };
 
-using UncreatableReasonMap = std::unordered_map<PyObject *, std::string>;
-
-// Types and their nocreationReason. FIXME: Store this in PySide::TypeUserData
-// once it is moved to libpyside?
-UncreatableReasonMap &uncreatableReasonMap()
-{
-    static UncreatableReasonMap result;
-    return result;
-}
-
 extern "C"
 {
 
 // The call operator is passed the class type and registers the reason
-// in the uncreatableReasonMap()
+// in QmlTypeInfo.
 static PyObject *classCall(PyObject *self, PyObject *args, PyObject * /* kw */)
 {
     if (!PyTuple_Check(args) || PyTuple_Size(args) != 1) {
@@ -93,7 +84,9 @@ static PyObject *classCall(PyObject *self, PyObject *args, PyObject * /* kw */)
     }
 
     auto data = reinterpret_cast<PySideQmlUncreatable *>(self);
-    uncreatableReasonMap().insert({klass, data->d->reason});
+    auto &info = PySide::Qml::ensureQmlTypeInfo(klass);
+    info.flags.setFlag(PySide::Qml::QmlTypeFlag::Uncreatable);
+    info.noCreationReason = data->d->reason;
 
     Py_INCREF(klass);
     return klass;
@@ -183,14 +176,3 @@ void initQmlUncreatable(PyObject *module)
     PyModule_AddObject(module, "QmlUncreatable",
                        reinterpret_cast<PyObject *>(PySideQmlUncreatableTypeF()));
 }
-
-namespace PySide::Qml
-{
-const char *qmlNoCreationReason(PyObject *type)
-{
-    const auto &map = uncreatableReasonMap();
-    auto it = map.find(type);
-    return it != map.cend() ? it->second.c_str() : nullptr;
-}
-
-} // namespace PySide::Qml

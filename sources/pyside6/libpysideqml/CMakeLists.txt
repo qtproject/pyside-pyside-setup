@@ -6,6 +6,7 @@ set(libpysideqml_SRC
     pysideqmlmetacallerror.cpp
     pysideqmllistproperty.cpp
     pysideqmluncreatable.cpp
+    pysideqmltypeinfo.cpp
 )
 
 add_library(pyside6qml SHARED ${libpysideqml_SRC} ${other_files})

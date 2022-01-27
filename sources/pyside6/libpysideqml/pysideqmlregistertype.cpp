@@ -39,7 +39,7 @@
 
 #include "pysideqmlregistertype.h"
 #include "pysideqmlregistertype_p.h"
-#include "pysideqmluncreatable.h"
+#include "pysideqmltypeinfo_p.h"
 
 #include <limits>
 
@@ -429,20 +429,18 @@ static PyObject *qmlElementMacroHelper(PyObject *pyObj,
     return pyObj;
 }
 
-// FIXME: Store this in PySide::TypeUserData once it is moved to libpyside?
-static QList<PyObject *> decoratedSingletons;
-
 namespace PySide::Qml {
 
 PyObject *qmlElementMacro(PyObject *pyObj)
 {
-    const char *noCreationReason = nullptr;
     RegisterMode mode = RegisterMode::Normal;
-    if (decoratedSingletons.contains(pyObj))
+    const auto &info = PySide::Qml::qmlTypeInfo(pyObj);
+    if (info.flags.testFlag(PySide::Qml::QmlTypeFlag::Singleton))
         mode = RegisterMode::Singleton;
-    else if ((noCreationReason = qmlNoCreationReason(pyObj)))
+    else if (info.flags.testFlag(PySide::Qml::QmlTypeFlag::Uncreatable))
         mode = RegisterMode::Uncreatable;
-    return qmlElementMacroHelper(pyObj, "QmlElement", mode, noCreationReason);
+    return qmlElementMacroHelper(pyObj, "QmlElement", mode,
+                                 info.noCreationReason.c_str());
 }
 
 PyObject *qmlAnonymousMacro(PyObject *pyObj)
@@ -453,7 +451,7 @@ PyObject *qmlAnonymousMacro(PyObject *pyObj)
 
 PyObject *qmlSingletonMacro(PyObject *pyObj)
 {
-    decoratedSingletons.append(pyObj);
+    PySide::Qml::ensureQmlTypeInfo(pyObj).flags.setFlag(PySide::Qml::QmlTypeFlag::Singleton);
     Py_INCREF(pyObj);
     return pyObj;
 }

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2021 The Qt Company Ltd.
+** Copyright (C) 2022 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -37,27 +37,45 @@
 **
 ****************************************************************************/
 
-#ifndef PYSIDEQMLUNCREATABLE_H
-#define PYSIDEQMLUNCREATABLE_H
+#include "pysideqmltypeinfo_p.h"
 
-#include <sbkpython.h>
+#include <QtCore/QDebug>
+#include <QtCore/QHash>
 
-// The QmlUncreatable decorator modifies QmlElement to register an uncreatable
-// type. Due to the (reverse) execution order of decorators, it needs to follow
-// QmlElement.
-extern "C"
+namespace PySide::Qml {
+
+using QmlTypeInfoHash = QHash<const PyObject *, QmlTypeInfo>;
+
+Q_GLOBAL_STATIC(QmlTypeInfoHash, qmlTypeInfoHashStatic);
+
+QmlTypeInfo &ensureQmlTypeInfo(const PyObject *o)
 {
-    extern PyTypeObject *PySideQmlUncreatableTypeF(void);
+    auto *hash = qmlTypeInfoHashStatic();
+    auto it = hash->find(o);
+    if (it == hash->end())
+        it = hash->insert(o, {});
+    return it.value();
+}
 
-    struct PySideQmlUncreatablePrivate;
-    struct PySideQmlUncreatable
-    {
-        PyObject_HEAD
-        PySideQmlUncreatablePrivate* d;
-    };
+QmlTypeInfo qmlTypeInfo(const PyObject *o)
+{
+    auto *hash = qmlTypeInfoHashStatic();
+    auto it = hash->constFind(o);
+    return it != hash->cend() ? it.value() : QmlTypeInfo{};
+}
 
-} // extern "C"
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, const QmlTypeInfo &i)
+{
+    QDebugStateSaver saver(d);
+    d.noquote();
+    d.nospace();
+    d << "QmlTypeInfo(" << i.flags;
+    if (!i.noCreationReason.empty())
+        d << ", noCreationReason=\"" << i.noCreationReason.c_str() << '"';
+    d << ')';
+    return d;
+}
+#endif // QT_NO_DEBUG_STREAM
 
-void initQmlUncreatable(PyObject *module);
-
-#endif // PYSIDEQMLUNCREATABLE_H
+} // namespace PySide::Qml
