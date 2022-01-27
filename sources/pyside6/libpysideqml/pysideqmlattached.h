@@ -37,72 +37,28 @@
 **
 ****************************************************************************/
 
-#include "pysideqmltypeinfo_p.h"
+#ifndef PYSIDEQMLATTACHED_H
+#define PYSIDEQMLATTACHED_H
 
-#include <QtCore/QDebug>
-#include <QtCore/QHash>
+#include <sbkpython.h>
 
-#include <algorithm>
+#include "pysideqmlmacros.h"
 
-namespace PySide::Qml {
+#include <QtCore/QtGlobal>
 
-using QmlTypeInfoHash = QHash<const PyObject *, QmlTypeInfoPtr>;
+QT_FORWARD_DECLARE_CLASS(QObject)
 
-Q_GLOBAL_STATIC(QmlTypeInfoHash, qmlTypeInfoHashStatic);
-
-QmlTypeInfoPtr ensureQmlTypeInfo(const PyObject *o)
+namespace PySide::Qml
 {
-    auto *hash = qmlTypeInfoHashStatic();
-    auto it = hash->find(o);
-    if (it == hash->end())
-        it = hash->insert(o, QmlTypeInfoPtr(new QmlTypeInfo));
-    return it.value();
-}
 
-void insertQmlTypeInfoAlias(const PyObject *o, const QmlTypeInfoPtr &value)
-{
-    qmlTypeInfoHashStatic()->insert(o, value);
-}
-
-QmlTypeInfoPtr qmlTypeInfo(const PyObject *o)
-{
-    auto *hash = qmlTypeInfoHashStatic();
-    auto it = hash->constFind(o);
-    return it != hash->cend() ? it.value() : QmlTypeInfoPtr{};
-}
-
-#ifndef QT_NO_DEBUG_STREAM
-QDebug operator<<(QDebug d, const QmlTypeInfo &i)
-{
-    QDebugStateSaver saver(d);
-    d.noquote();
-    d.nospace();
-    d << "QmlTypeInfo(" << i.flags;
-    if (!i.noCreationReason.empty())
-        d << ", noCreationReason=\"" << i.noCreationReason.c_str() << '"';
-    if (i.foreignType)
-        d << ", foreignType=" << i.foreignType->tp_name;
-    if (i.attachedType)
-        d << ", attachedType=" << i.attachedType->tp_name;
-    if (i.extensionType)
-        d << ", extensionType=" << i.extensionType->tp_name;
-    d << ')';
-    return d;
-}
-
-QDebug operator<<(QDebug d, const QmlExtensionInfo &e)
-{
-    QDebugStateSaver saver(d);
-    d.noquote();
-    d.nospace();
-    d << "QmlExtensionInfo(";
-    if (e.factory  != nullptr && e.metaObject != nullptr)
-        d << '"' << e.metaObject->className() << "\", factory="
-          << reinterpret_cast<const void *>(e.factory);
-    d << ')';
-    return d;
-}
-
-#endif // QT_NO_DEBUG_STREAM
+/// PySide implementation of qmlAttachedPropertiesObject<T> function.
+/// \param typeObject attaching type
+/// \param obj        attachee
+/// \param create     Whether to create the Attachment object
+/// \return           Attachment object instance
+PYSIDEQML_API QObject *qmlAttachedPropertiesObject(PyObject *typeObject, QObject *obj,
+                                                   bool create = true);
 
 } // namespace PySide::Qml
+
+#endif // PYSIDEQMLATTACHED_H

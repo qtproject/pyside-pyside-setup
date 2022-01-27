@@ -42,6 +42,11 @@ const QByteArray message = %CPPSELF.toString().toUtf8();
 %PYARG_0 = Shiboken::String::fromCString(message.constData());
 // @snippet qmlerrror-repr
 
+// @snippet qmlattachedpropertiesobject
+auto *%0 = PySide::Qml::qmlAttachedPropertiesObject(%ARGUMENT_NAMES);
+%PYARG_0 = %CONVERTTOPYTHON[QObject*](%0);
+// @snippet qmlattachedpropertiesobject
+
 // @snippet qmlregistertype
 int %0 = PySide::Qml::qmlRegisterType(%ARGUMENT_NAMES);
 %PYARG_0 = %CONVERTTOPYTHON[int](%0);

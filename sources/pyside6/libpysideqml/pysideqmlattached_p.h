@@ -37,72 +37,21 @@
 **
 ****************************************************************************/
 
-#include "pysideqmltypeinfo_p.h"
+#ifndef PYSIDEQMLATTACHED_P_H
+#define PYSIDEQMLATTACHED_P_H
 
-#include <QtCore/QDebug>
-#include <QtCore/QHash>
+#include <sbkpython.h>
 
-#include <algorithm>
+#include <QSharedPointer>
 
 namespace PySide::Qml {
+struct QmlExtensionInfo;
+struct QmlTypeInfo;
 
-using QmlTypeInfoHash = QHash<const PyObject *, QmlTypeInfoPtr>;
+void initQmlAttached(PyObject *module);
 
-Q_GLOBAL_STATIC(QmlTypeInfoHash, qmlTypeInfoHashStatic);
-
-QmlTypeInfoPtr ensureQmlTypeInfo(const PyObject *o)
-{
-    auto *hash = qmlTypeInfoHashStatic();
-    auto it = hash->find(o);
-    if (it == hash->end())
-        it = hash->insert(o, QmlTypeInfoPtr(new QmlTypeInfo));
-    return it.value();
-}
-
-void insertQmlTypeInfoAlias(const PyObject *o, const QmlTypeInfoPtr &value)
-{
-    qmlTypeInfoHashStatic()->insert(o, value);
-}
-
-QmlTypeInfoPtr qmlTypeInfo(const PyObject *o)
-{
-    auto *hash = qmlTypeInfoHashStatic();
-    auto it = hash->constFind(o);
-    return it != hash->cend() ? it.value() : QmlTypeInfoPtr{};
-}
-
-#ifndef QT_NO_DEBUG_STREAM
-QDebug operator<<(QDebug d, const QmlTypeInfo &i)
-{
-    QDebugStateSaver saver(d);
-    d.noquote();
-    d.nospace();
-    d << "QmlTypeInfo(" << i.flags;
-    if (!i.noCreationReason.empty())
-        d << ", noCreationReason=\"" << i.noCreationReason.c_str() << '"';
-    if (i.foreignType)
-        d << ", foreignType=" << i.foreignType->tp_name;
-    if (i.attachedType)
-        d << ", attachedType=" << i.attachedType->tp_name;
-    if (i.extensionType)
-        d << ", extensionType=" << i.extensionType->tp_name;
-    d << ')';
-    return d;
-}
-
-QDebug operator<<(QDebug d, const QmlExtensionInfo &e)
-{
-    QDebugStateSaver saver(d);
-    d.noquote();
-    d.nospace();
-    d << "QmlExtensionInfo(";
-    if (e.factory  != nullptr && e.metaObject != nullptr)
-        d << '"' << e.metaObject->className() << "\", factory="
-          << reinterpret_cast<const void *>(e.factory);
-    d << ')';
-    return d;
-}
-
-#endif // QT_NO_DEBUG_STREAM
-
+PySide::Qml::QmlExtensionInfo qmlAttachedInfo(PyTypeObject *t,
+                                              const QSharedPointer<QmlTypeInfo> &info);
 } // namespace PySide::Qml
+
+#endif // PYSIDEQMLATTACHED_P_H

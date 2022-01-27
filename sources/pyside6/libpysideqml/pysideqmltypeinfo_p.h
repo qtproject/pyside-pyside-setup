@@ -68,6 +68,7 @@ struct QmlTypeInfo
     QmlTypeFlags flags;
     std::string noCreationReason;
     PyTypeObject *foreignType = nullptr;
+    PyTypeObject *attachedType = nullptr;
     PyTypeObject *extensionType = nullptr;
 };
 

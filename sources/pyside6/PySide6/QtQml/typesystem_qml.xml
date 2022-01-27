@@ -58,6 +58,7 @@
     <inject-code class="native" position="beginning">
     #include &lt;pysideqml.h&gt;
     #include &lt;pysideqmlregistertype.h&gt;
+    #include &lt;pysideqmlattached.h&gt;
     #include "pysideqmlvolatilebool.h"
     </inject-code>
 
@@ -77,6 +78,11 @@
     <namespace-type name="std" generate="no">
         <value-type name="atomic" generate="no"/>
     </namespace-type>
+
+    <add-function signature="qmlAttachedPropertiesObject(PyTypeObject*,QObject*,bool=true)"
+                  return-type="QObject*">
+        <inject-code class="target" file="../glue/qtqml.cpp" snippet="qmlattachedpropertiesobject"/>
+    </add-function>
 
     <add-function signature="qmlRegisterType(PyTypeObject,const char*,int,int,const char*)" return-type="int">
         <inject-code class="target" file="../glue/qtqml.cpp" snippet="qmlregistertype"/>

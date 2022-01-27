@@ -2,6 +2,7 @@ set(libpysideqml_libraries Qt::Core Qt::CorePrivate Qt::Qml Qt::QmlPrivate)
 
 set(libpysideqml_SRC
     pysideqml.cpp
+    pysideqmlattached.cpp
     pysideqmlforeign.cpp
     pysideqmlextended.cpp
     pysideqmlregistertype.cpp

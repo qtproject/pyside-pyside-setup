@@ -245,6 +245,9 @@ class MetaObjectDumpVisitor(ast.NodeVisitor):
                     if isinstance(reason, str):
                         d = _decorator("QML.UncreatableReason", reason)
                         class_decorators.append(d)
+            elif name == "QmlAttached" and len(node.args) == 1:
+                d = _decorator("QML.Attached", node.args[0].id)
+                class_decorators.append(d)
             elif name == "QmlExtended" and len(node.args) == 1:
                 d = _decorator("QML.Extended", node.args[0].id)
                 class_decorators.append(d)

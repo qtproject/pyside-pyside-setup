@@ -39,6 +39,7 @@
 
 #include "pysideqml.h"
 #include "pysideqmllistproperty_p.h"
+#include "pysideqmlattached_p.h"
 #include "pysideqmlextended_p.h"
 #include "pysideqmlforeign_p.h"
 #include "pysideqmlnamedelement_p.h"
@@ -53,6 +54,7 @@ namespace PySide::Qml
 void init(PyObject *module)
 {
     initQtQmlListProperty(module);
+    initQmlAttached(module);
     initQmlForeign(module);
     initQmlExtended(module);
     initQmlNamedElement(module);
