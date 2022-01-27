@@ -439,6 +439,7 @@ int SignalManager::qt_metacall(QObject *object, QMetaObject::Call call, int id, 
         case QMetaObject::CreateInstance:
         case QMetaObject::IndexOfMethod:
         case QMetaObject::RegisterMethodArgumentMetaType:
+        case QMetaObject::CustomCall:
             id -= object->metaObject()->methodCount();
             break;
     }

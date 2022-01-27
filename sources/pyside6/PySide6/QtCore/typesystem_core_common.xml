@@ -2534,7 +2534,7 @@
     </extra-includes>
     <!-- PYSIDE-1010:
     We remove the original implementation of value() to include the optional parameter -->
-    <modify-function signature="value(const QString&amp;,const QVariant&amp;)const" remove="all"/>
+    <modify-function signature="value(QAnyStringView,const QVariant&amp;)const" remove="all"/>
     <add-function signature="value(const QString&amp;, const QVariant&amp; @defaultValue@ = 0, PyObject* @type@ = 0)" return-type="PyObject*">
       <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qsettings-value"/>
       <inject-documentation mode="append" format="target">
@@ -3121,7 +3121,7 @@
   <object-type name="QVariantAnimation" since="4.6"/>
 
   <value-type name="QVersionNumber" since="5.6">
-    <modify-function signature="fromString(const QString &amp;,int*)">
+    <modify-function signature="fromString(QAnyStringView,qsizetype*)">
       <modify-argument index="2">
         <remove-argument/>
       </modify-argument>

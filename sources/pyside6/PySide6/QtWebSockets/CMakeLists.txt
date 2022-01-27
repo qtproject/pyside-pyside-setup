@@ -10,6 +10,11 @@ ${QtWebSockets_GEN_DIR}/qwebsocketserver_wrapper.cpp
 ${QtWebSockets_GEN_DIR}/qtwebsockets_module_wrapper.cpp
 )
 
+if (Qt${QT_MAJOR_VERSION}WebSockets_VERSION VERSION_GREATER_EQUAL 6.4.0)
+    list(APPEND QtWebSockets_SRC
+         ${QtWebSockets_GEN_DIR}/qwebsockethandshakeoptions_wrapper.cpp)
+endif()
+
 set(QtWebSockets_include_dirs ${QtWebSockets_SOURCE_DIR}
                         ${QtWebSockets_BINARY_DIR}
                         ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}

@@ -111,7 +111,6 @@ int qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
     const bool isQuickType = quickRegisterItemFunction && quickRegisterItemFunction(pyObj, &type);
 
     // Register as simple QObject rather than Qt Quick item.
-    using QObjectQmlList = QQmlListProperty<QObject>;
     // Incref the type object, don't worry about decref'ing it because
     // there's no way to unregister a QML type.
     Py_INCREF(pyObj);
@@ -122,9 +121,8 @@ int qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
     QByteArray ptrType = typeName + '*';
     QByteArray listType = QByteArrayLiteral("QQmlListProperty<") + typeName + '>';
 
-    type.typeId = QMetaType(new QQmlMetaTypeInterface(ptrType, static_cast<QObject **>(nullptr)));
+    type.typeId = QMetaType(new QQmlMetaTypeInterface(ptrType));
     type.listId = QMetaType(new QQmlListMetaTypeInterface(listType,
-                                                          static_cast<QObjectQmlList*>(nullptr),
                                                           type.typeId.iface()));
     const auto typeInfo = qmlTypeInfo(pyObj);
     auto info = qmlAttachedInfo(pyObjType, typeInfo);

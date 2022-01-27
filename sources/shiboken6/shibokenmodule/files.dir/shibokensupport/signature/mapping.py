@@ -330,6 +330,7 @@ type_map.update({
     "qint32*"       : ResultVariable(int),
     "qint64*"       : ResultVariable(int),
     "qreal*"        : ResultVariable(float),
+    "qsizetype*"    : ResultVariable(int),
     "QString*"      : ResultVariable(str),
     "qintptr*"      : ResultVariable(int),
     "quintptr*"     : ResultVariable(int),
@@ -574,7 +575,7 @@ def init_PySide6_QtWidgets():
 def init_PySide6_QtSql():
     from PySide6.QtSql import QSqlDatabase
     type_map.update({
-        "QLatin1String(QSqlDatabase.defaultConnection)": QSqlDatabase.defaultConnection,
+        "QLatin1StringView(QSqlDatabase.defaultConnection)": QSqlDatabase.defaultConnection,
         "QVariant.Invalid": Invalid("Variant"), # not sure what I should create, here...
     })
     return locals()

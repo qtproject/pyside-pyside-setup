@@ -286,6 +286,8 @@
 
     <value-type name="QSslPreSharedKeyAuthenticator"/>
 
+    <object-type name="QSslServer" since="6.4"/>
+
     <!-- The above entries may be present in the system or not. Keep this section organized. -->
 </typesystem>
 

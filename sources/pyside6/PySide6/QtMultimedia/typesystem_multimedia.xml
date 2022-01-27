@@ -12,7 +12,7 @@
         <enum-type name="Error"/>
         <enum-type name="Mode"/>
         <enum-type name="State"/>
-        <enum-type name="VolumeScale" since="5.8"/>
+        <enum-type name="VolumeScale"/>
     </namespace-type>
 
     <value-type name="QAudioBuffer">
@@ -140,6 +140,9 @@
         <modify-function signature="bits(int)const" remove="all"/>
     </value-type>
     <value-type name="QVideoFrameFormat" since="6.1">
+        <enum-type name="ColorSpace" since="6.4"/>
+        <enum-type name="ColorTransfer" since="6.4"/>
+        <enum-type name="ColorRange" since="6.4"/>
         <enum-type name="Direction"/>
         <enum-type name="PixelFormat"/>
         <enum-type name="YCbCrColorSpace"/>
