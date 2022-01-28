@@ -258,7 +258,7 @@
             <add-conversion type="QByteArray" file="../glue/qtcore.cpp" snippet="conversion-qbytearray"/>
             <add-conversion type="PyFloat" check="PyFloat_CheckExact(%in)" file="../glue/qtcore.cpp" snippet="conversion-pyfloat"/>
             <add-conversion type="PyLong" check="PyLong_CheckExact(%in)"  file="../glue/qtcore.cpp" snippet="conversion-qlonglong"/>
-            <add-conversion type="SbkEnumType" file="../glue/qtcore.cpp" snippet="conversion-pyint"/>
+            <add-conversion type="SbkEnumType" file="../glue/qtcore.cpp" snippet="conversion-sbkobject"/>
             <add-conversion type="SbkObject" file="../glue/qtcore.cpp" snippet="conversion-sbkobject"/>
             <add-conversion type="PyDict" check="PyDict_CheckExact(%in)" file="../glue/qtcore.cpp" snippet="conversion-pydict"/>
             <add-conversion type="PyList" check="PyList_Check(%in)" file="../glue/qtcore.cpp" snippet="conversion-pylist"/>
