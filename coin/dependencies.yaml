@@ -1,6 +1,6 @@
 product_dependency:
   ../../qt/qt5:
-    ref: "6.2"
+    ref: "119192afa207e2e559ff75daccbba1ae673ea75e"
 dependency_source: supermodule
 dependencies: [
       "../../qt/qt3d",
