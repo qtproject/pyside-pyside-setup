@@ -1284,6 +1284,7 @@
     <enum-type name="FloatingPointPrecisionOption" since="5.7"/>
     <enum-type name="FormatType"/>
     <enum-type name="Language"/>
+    <enum-type name="LanguageCodeType" since="6.3"/>
     <enum-type name="MeasurementSystem"/>
     <enum-type name="NumberOption" flags="NumberOptions"/>
     <enum-type name="Script" since="4.8" revision="4800"/>
