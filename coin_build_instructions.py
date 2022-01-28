@@ -99,9 +99,8 @@ def is_snapshot_build():
     pyside_project_dir = os.path.join(setup_script_dir, "sources", "pyside6")
 
     d = parse_cmake_conf_assignments_by_key(pyside_project_dir)
-
-    release_version_type = d['pyside_PRE_RELEASE_VERSION_TYPE']
-    pre_release_version = d['pyside_PRE_RELEASE_VERSION']
+    release_version_type = d.get('pyside_PRE_RELEASE_VERSION_TYPE')
+    pre_release_version = d.get('pyside_PRE_RELEASE_VERSION')
     if pre_release_version and release_version_type:
         return True
     return False

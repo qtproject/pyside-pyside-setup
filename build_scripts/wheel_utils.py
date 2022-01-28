@@ -85,13 +85,14 @@ def get_package_version():
     patch_version = d['pyside_MICRO_VERSION']
 
     final_version = f"{major_version}.{minor_version}.{patch_version}"
-    release_version_type = d['pyside_PRE_RELEASE_VERSION_TYPE']
-    pre_release_version = d['pyside_PRE_RELEASE_VERSION']
+    release_version_type = d.get('pyside_PRE_RELEASE_VERSION_TYPE')
+    pre_release_version = d.get('pyside_PRE_RELEASE_VERSION')
+
     if pre_release_version and release_version_type:
         final_version = f"{final_version}{release_version_type}{pre_release_version}"
 
-    if release_version_type.startswith("comm"):
-        final_version = f"{final_version}.{release_version_type}"
+        if release_version_type.startswith("comm"):
+            final_version = f"{final_version}.{release_version_type}"
 
     # Add the current timestamp to the version number, to suggest it
     # is a development snapshot build.
