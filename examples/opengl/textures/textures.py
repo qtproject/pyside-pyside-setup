@@ -2,7 +2,7 @@
 ############################################################################
 ##
 ## Copyright (C) 2013 Riverbank Computing Limited.
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2022 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -40,18 +40,24 @@
 ##
 ############################################################################
 
-"""PySide6 port of the opengl/textures example from Qt v5.x"""
+"""PySide6 port of the opengl/textures example from Qt v6.x showing the use
+   of legacy OpenGL functions with QOpenGLVersionFunctionsFactory."""
 
 import sys
-from PySide6 import QtCore, QtGui, QtWidgets, QtOpenGL
+from PySide6.QtCore import QPoint, QSize, Qt, QTimer, Signal
+from PySide6.QtGui import QColor, QImage, QSurfaceFormat
+from PySide6.QtWidgets import QApplication, QGridLayout, QMessageBox, QWidget
+from PySide6.QtOpenGL import (QOpenGLTexture, QOpenGLVersionFunctionsFactory,
+                              QOpenGLVersionProfile)
+from PySide6.QtOpenGLWidgets import QOpenGLWidget
 
 try:
-    from OpenGL.GL import *
+    from OpenGL import GL
 except ImportError:
-    app = QtWidgets.QApplication(sys.argv)
-    messageBox = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Critical, "OpenGL textures",
-                                       "PyOpenGL must be installed to run this example.",
-                                       QtWidgets.QMessageBox.Close)
+    app = QApplication(sys.argv)
+    messageBox = QMessageBox(QMessageBox.Critical, "OpenGL textures",
+                             "PyOpenGL must be installed to run this example.",
+                             QMessageBox.Close)
     messageBox.setDetailedText("Run:\npip install PyOpenGL PyOpenGL_accelerate")
     messageBox.exec()
     sys.exit(1)
@@ -59,7 +65,7 @@ except ImportError:
 import textures_rc
 
 
-class GLWidget(QtOpenGL.QGLWidget):
+class GLWidget(QOpenGLWidget):
     sharedObject = 0
     refCount = 0
 
@@ -72,118 +78,131 @@ class GLWidget(QtOpenGL.QGLWidget):
         ( ( -1, -1, +1 ), ( +1, -1, +1 ), ( +1, +1, +1 ), ( -1, +1, +1 ) )
     )
 
-    clicked = QtCore.Signal()
+    clicked = Signal()
 
-    def __init__(self, parent, shareWidget):
-        QtOpenGL.QGLWidget.__init__(self, parent, shareWidget)
+    def __init__(self, parent):
+        super().__init__(parent)
 
-        self.clearColor = QtCore.Qt.black
+        self.clearColor = Qt.black
         self.xRot = 0
         self.yRot = 0
         self.zRot = 0
-        self.clearColor = QtGui.QColor()
-        self.lastPos = QtCore.QPoint()
+        self.clearColor = QColor()
+        self.lastPos = QPoint()
+        self.funcs = None
 
     def freeGLResources(self):
         GLWidget.refCount -= 1
         if GLWidget.refCount == 0:
             self.makeCurrent()
-            glDeleteLists(self.__class__.sharedObject, 1)
+            self.funcs.glDeleteLists(self.__class__.sharedObject, 1)
 
     def minimumSizeHint(self):
-        return QtCore.QSize(50, 50)
+        return QSize(50, 50)
 
     def sizeHint(self):
-        return QtCore.QSize(200, 200)
+        return QSize(200, 200)
 
     def rotateBy(self, xAngle, yAngle, zAngle):
         self.xRot = (self.xRot + xAngle) % 5760
         self.yRot = (self.yRot + yAngle) % 5760
         self.zRot = (self.zRot + zAngle) % 5760
-        self.updateGL()
+        self.update()
 
     def setClearColor(self, color):
         self.clearColor = color
-        self.updateGL()
+        self.update()
 
     def initializeGL(self):
+        profile = QOpenGLVersionProfile()
+        profile.setVersion(3, 2)
+        profile.setProfile(QSurfaceFormat.CompatibilityProfile)
+        self.funcs = QOpenGLVersionFunctionsFactory.get(profile)
+        self.funcs.initializeOpenGLFunctions()
+
         if not GLWidget.sharedObject:
             self.textures = []
             for i in range(6):
-                self.textures.append(self.bindTexture(QtGui.QPixmap(f":/images/side{i + 1}.png")))
+                image = QImage(f":/images/side{i + 1}.png")
+                self.textures.append(QOpenGLTexture(image))
             GLWidget.sharedObject = self.makeObject()
         GLWidget.refCount += 1
 
-        glEnable(GL_DEPTH_TEST)
-        glEnable(GL_CULL_FACE)
-        glEnable(GL_TEXTURE_2D)
+        self.funcs.glEnable(GL.GL_DEPTH_TEST)
+        self.funcs.glEnable(GL.GL_CULL_FACE)
+        self.funcs.glEnable(GL.GL_TEXTURE_2D)
 
     def paintGL(self):
-        self.qglClearColor(self.clearColor)
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        glLoadIdentity()
-        glTranslated(0.0, 0.0, -10.0)
-        glRotated(self.xRot / 16.0, 1.0, 0.0, 0.0)
-        glRotated(self.yRot / 16.0, 0.0, 1.0, 0.0)
-        glRotated(self.zRot / 16.0, 0.0, 0.0, 1.0)
-        glCallList(GLWidget.sharedObject)
+        self.funcs.glClearColor(self.clearColor.red(), self.clearColor.green(),
+                                self.clearColor.blue(), 1)
+        self.funcs.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
+        self.funcs.glLoadIdentity()
+        self.funcs.glTranslated(0.0, 0.0, -10.0)
+        self.funcs.glRotated(self.xRot / 16.0, 1.0, 0.0, 0.0)
+        self.funcs.glRotated(self.yRot / 16.0, 0.0, 1.0, 0.0)
+        self.funcs.glRotated(self.zRot / 16.0, 0.0, 0.0, 1.0)
+        self.funcs.glCallList(GLWidget.sharedObject)
 
     def resizeGL(self, width, height):
         side = min(width, height)
-        glViewport(int((width - side) / 2), int((height - side) / 2), side, side)
+        x = int((width - side) / 2)
+        y = int((height - side) / 2)
+        self.funcs.glViewport(x, y, side, side)
 
-        glMatrixMode(GL_PROJECTION)
-        glLoadIdentity()
-        glOrtho(-0.5, +0.5, +0.5, -0.5, 4.0, 15.0)
-        glMatrixMode(GL_MODELVIEW)
+        self.funcs.glMatrixMode(GL.GL_PROJECTION)
+        self.funcs.glLoadIdentity()
+        self.funcs.glOrtho(-0.5, +0.5, +0.5, -0.5, 4.0, 15.0)
+        self.funcs.glMatrixMode(GL.GL_MODELVIEW)
 
     def mousePressEvent(self, event):
-        self.lastPos = QtCore.QPoint(event.pos())
+        self.lastPos = event.position().toPoint()
 
     def mouseMoveEvent(self, event):
-        dx = event.x() - self.lastPos.x()
-        dy = event.y() - self.lastPos.y()
+        pos = event.position().toPoint()
+        dx = pos.x() - self.lastPos.x()
+        dy = pos.y() - self.lastPos.y()
 
-        if event.buttons() & QtCore.Qt.LeftButton:
+        if event.buttons() & Qt.LeftButton:
             self.rotateBy(8 * dy, 8 * dx, 0)
-        elif event.buttons() & QtCore.Qt.RightButton:
+        elif event.buttons() & Qt.RightButton:
             self.rotateBy(8 * dy, 0, 8 * dx)
 
-        self.lastPos = QtCore.QPoint(event.pos())
+        self.lastPos = pos
 
     def mouseReleaseEvent(self, event):
         self.clicked.emit()
 
     def makeObject(self):
-        dlist = glGenLists(1)
-        glNewList(dlist, GL_COMPILE)
+        dlist = self.funcs.glGenLists(1)
+        self.funcs.glNewList(dlist, GL.GL_COMPILE)
 
         for i in range(6):
-            glBindTexture(GL_TEXTURE_2D, self.textures[i])
+            self.textures[i].bind()
 
-            glBegin(GL_QUADS)
+            self.funcs.glBegin(GL.GL_QUADS)
             for j in range(4):
                 tx = {False: 0, True: 1}[j == 0 or j == 3]
                 ty = {False: 0, True: 1}[j == 0 or j == 1]
-                glTexCoord2d(tx, ty)
-                glVertex3d(0.2 * GLWidget.coords[i][j][0],
-                           0.2 * GLWidget.coords[i][j][1],
-                           0.2 * GLWidget.coords[i][j][2])
+                self.funcs.glTexCoord2d(tx, ty)
+                x = 0.2 * GLWidget.coords[i][j][0]
+                y = 0.2 * GLWidget.coords[i][j][1]
+                z = 0.2 * GLWidget.coords[i][j][2]
+                self.funcs.glVertex3d(x, y, z)
 
-            glEnd()
+            self.funcs.glEnd()
 
-        glEndList()
+        self.funcs.glEndList()
         return dlist
 
 
-class Window(QtWidgets.QWidget):
+class Window(QWidget):
     NumRows = 2
     NumColumns = 3
 
     def __init__(self, parent=None):
-        QtWidgets.QWidget.__init__(self, parent)
+        QWidget.__init__(self, parent)
 
-        mainLayout = QtWidgets.QGridLayout()
+        mainLayout = QGridLayout(self)
         self.glWidgets = []
 
         for i in range(Window.NumRows):
@@ -191,26 +210,25 @@ class Window(QtWidgets.QWidget):
             for j in range(Window.NumColumns):
                 self.glWidgets[i].append(None)
 
+        hue_div = (Window.NumRows * Window.NumColumns - 1)
         for i in range(Window.NumRows):
             for j in range(Window.NumColumns):
-                clearColor = QtGui.QColor()
-                clearColor.setHsv(((i * Window.NumColumns) + j) * 255
-                                  / (Window.NumRows * Window.NumColumns - 1),
-                                  255, 63)
+                clearColor = QColor()
+                hue = ((i * Window.NumColumns) + j) * 255 / hue_div
+                clearColor.setHsv(hue, 255, 63)
 
-                self.glWidgets[i][j] = GLWidget(self, self.glWidgets[0][0])
-                self.glWidgets[i][j].setClearColor(clearColor)
-                self.glWidgets[i][j].rotateBy(+42 * 16, +42 * 16, -21 * 16)
-                mainLayout.addWidget(self.glWidgets[i][j], i, j)
+                glw = GLWidget(self)
+                self.glWidgets[i][j] = glw
+                glw.setClearColor(clearColor)
+                glw.rotateBy(+42 * 16, +42 * 16, -21 * 16)
+                mainLayout.addWidget(glw, i, j)
 
-                self.glWidgets[i][j].clicked.connect(self.setCurrentGlWidget)
-                qApp.lastWindowClosed.connect(self.glWidgets[i][j].freeGLResources)
-
-        self.setLayout(mainLayout)
+                glw.clicked.connect(self.setCurrentGlWidget)
+                qApp.lastWindowClosed.connect(glw.freeGLResources)
 
         self.currentGlWidget = self.glWidgets[0][0]
 
-        timer = QtCore.QTimer(self)
+        timer = QTimer(self)
         timer.timeout.connect(self.rotateOneStep)
         timer.start(20)
 
@@ -225,7 +243,7 @@ class Window(QtWidgets.QWidget):
 
 
 if __name__ == "__main__":
-    app = QtWidgets.QApplication(sys.argv)
+    app = QApplication(sys.argv)
     window = Window()
     window.show()
     sys.exit(app.exec())
