@@ -36,8 +36,9 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtWidgets import (QApplication, QComboBox, QGraphicsScene,
-    QGraphicsRectItem)
+from PySide6.QtCore import Qt, QObject
+from PySide6.QtWidgets import (QComboBox, QGraphicsScene,
+    QGraphicsRectItem, QComboBox)
 
 from helper.usesqapplication import UsesQApplication
 
@@ -86,6 +87,73 @@ class QGraphicsSceneOnQVariantTest(UsesQApplication):
         # PYSIDE-641
         self.combo.addItem("test", userData=Sequence())
         self.assertTrue(isinstance(self.combo.itemData(0), Sequence))
+
+
+class QVariantConversionTest(UsesQApplication):
+    """
+    Tests conversion from QVariant to supported type held by QVariant
+    """
+    def setUp(self):
+        super(QVariantConversionTest, self).setUp()
+        self.obj = QObject()
+
+    def tearDown(self):
+        del self.obj
+        super(QVariantConversionTest, self).tearDown()
+
+    def testEnum(self):
+        """
+        PYSIDE-1798: Test enum is obtained correctly when return through QVariant
+        """
+        self.obj.setProperty("test", Qt.SolidLine)
+        self.assertTrue(isinstance(self.obj.property("test"), Qt.PenStyle))
+        self.assertEqual(self.obj.property("test"), Qt.SolidLine)
+
+    def testString(self):
+        self.obj.setProperty("test", "test")
+        self.assertEqual(self.obj.property("test"), "test")
+        self.assertTrue(isinstance(self.obj.property("test"), str))
+
+    def testBytes(self):
+        byte_message = bytes("test", 'utf-8')
+        self.obj.setProperty("test", byte_message)
+        self.assertEqual(self.obj.property("test"), byte_message)
+        self.assertTrue(isinstance(self.obj.property("test"), bytes))
+
+    def testBasicTypes(self):
+        #bool
+        self.obj.setProperty("test", True)
+        self.assertEqual(self.obj.property("test"), True)
+        self.assertTrue(isinstance(self.obj.property("test"), bool))
+        #long
+        self.obj.setProperty("test", 2)
+        self.assertEqual(self.obj.property("test"), 2)
+        self.assertTrue(isinstance(self.obj.property("test"), int))
+        #float
+        self.obj.setProperty("test", 2.5)
+        self.assertEqual(self.obj.property("test"), 2.5)
+        self.assertTrue(isinstance(self.obj.property("test"), float))
+        #None
+        self.obj.setProperty("test", None)
+        self.assertEqual(self.obj.property("test"), None)
+
+    def testContainerTypes(self):
+        #list
+        self.obj.setProperty("test", [1,2,3])
+        self.assertEqual(self.obj.property("test"), [1,2,3])
+        self.assertTrue(isinstance(self.obj.property("test"), list))
+        #dict
+        self.obj.setProperty("test", {1: "one"})
+        self.assertEqual(self.obj.property("test"), {1: "one"})
+        self.assertTrue(isinstance(self.obj.property("test"), dict))
+
+    def testPyObject(self):
+        class Test:
+            pass
+        test = Test()
+        self.obj.setProperty("test", test)
+        self.assertEqual(self.obj.property("test"), test)
+        self.assertTrue(isinstance(self.obj.property("test"), Test))
 
 
 if __name__ == '__main__':
