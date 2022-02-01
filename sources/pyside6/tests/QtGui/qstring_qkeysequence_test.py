@@ -1,3 +1,6 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 #############################################################################
 ##
 ## Copyright (C) 2016 The Qt Company Ltd.
@@ -26,6 +29,8 @@
 ##
 #############################################################################
 
+'''Tests conversions of QString to and from QKeySequence.'''
+
 import os
 import sys
 import unittest
@@ -35,46 +40,28 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.usesqapplication import UsesQApplication
+from helper.usesqguiapplication import UsesQGuiApplication
 
-from PySide6.QtCore import Qt, QTimer
-from PySide6.QtGui import QPen, QPainter
-from PySide6.QtWidgets import QWidget
+from PySide6.QtGui import QAction, QKeySequence
 
 
-class Painting(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.penFromEnum = None
-        self.penFromInteger = None
+class QStringQKeySequenceTest(UsesQGuiApplication):
+    '''Tests conversions of QString to and from QKeySequence.'''
 
-    def paintEvent(self, event):
-        with QPainter(self) as painter:
-            painter.setPen(Qt.NoPen)
-            self.penFromEnum = painter.pen()
-            painter.setPen(int(Qt.NoPen))
-            self.penFromInteger = painter.pen()
-        QTimer.singleShot(20, self.close)
+    def testQStringFromQKeySequence(self):
+        '''Creates a QString from a QKeySequence.'''
+        keyseq = 'Ctrl+A'
+        a = QKeySequence(keyseq)
+        self.assertEqual(a, keyseq)
 
-
-class QPenTest(UsesQApplication):
-
-    def testCtorWithCreatedEnums(self):
-        '''A simple case of QPen creation using created enums.'''
-        width = 0
-        style = Qt.PenStyle(0)
-        cap = Qt.PenCapStyle(0)
-        join = Qt.PenJoinStyle(0)
-        pen = QPen(Qt.blue, width, style, cap, join)
-
-    def testSetPenWithPenStyleEnum(self):
-        '''Calls QPainter.setPen with both enum and integer. Bug #511.'''
-        w = Painting()
-        w.show()
-        w.setWindowTitle("qpen_test")
-        self.app.exec()
-        self.assertEqual(w.penFromEnum.style(), Qt.NoPen)
-        self.assertEqual(w.penFromInteger.style(), Qt.SolidLine)
+    def testPythonStringAsQKeySequence(self):
+        '''Passes a Python string to an argument expecting a QKeySequence.'''
+        keyseq = 'Ctrl+A'
+        action = QAction(None)
+        action.setShortcut(keyseq)
+        shortcut = action.shortcut()
+        self.assertTrue(isinstance(shortcut, QKeySequence))
+        self.assertEqual(shortcut.toString(), keyseq)
 
 
 if __name__ == '__main__':

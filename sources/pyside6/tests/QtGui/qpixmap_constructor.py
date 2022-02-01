@@ -38,9 +38,8 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtGui import QPixmap
-from PySide6.QtWidgets import QLabel
 
-from helper.usesqapplication import UsesQApplication
+from helper.usesqguiapplication import UsesQGuiApplication
 
 xpm = [
     "27 22 206 2",
@@ -275,9 +274,8 @@ xpm = [
 ]
 
 
-class QStringSequenceTest(UsesQApplication):
+class QStringSequenceTest(UsesQGuiApplication):
     def testQPixmapConstructor(self):
-        label = QLabel()
         pixmap1 = QPixmap(xpm)
         self.assertFalse(pixmap1.isNull())
         self.assertEqual(pixmap1.width(), 27)

@@ -1,6 +1,3 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-
 #############################################################################
 ##
 ## Copyright (C) 2016 The Qt Company Ltd.
@@ -29,8 +26,6 @@
 ##
 #############################################################################
 
-'''Tests conversions of QString to and from QKeySequence.'''
-
 import os
 import sys
 import unittest
@@ -40,30 +35,42 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.usesqapplication import UsesQApplication
+from helper.usesqguiapplication import UsesQGuiApplication
+from PySide6.QtCore import QObject, QEvent
+from PySide6.QtGui import QWindow
 
-from PySide6.QtGui import QAction, QKeySequence
+
+class MyFilter(QObject):
+    def eventFilter(self, obj, event):
+        if event.type() == QEvent.KeyPress:
+            pass
+        return QObject.eventFilter(self, obj, event)
 
 
-class QStringQKeySequenceTest(UsesQApplication):
-    '''Tests conversions of QString to and from QKeySequence.'''
+class EventFilter(UsesQGuiApplication):
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
+    def testRefCount(self):
+        o = QObject()
+        filt = MyFilter()
+        o.installEventFilter(filt)
+        self.assertEqual(sys.getrefcount(o), 2)
 
-    def testQStringFromQKeySequence(self):
-        '''Creates a QString from a QKeySequence.'''
-        keyseq = 'Ctrl+A'
-        a = QKeySequence(keyseq)
-        self.assertEqual(a, keyseq)
+        o.installEventFilter(filt)
+        self.assertEqual(sys.getrefcount(o), 2)
 
-    def testPythonStringAsQKeySequence(self):
-        '''Passes a Python string to an argument expecting a QKeySequence.'''
-        keyseq = 'Ctrl+A'
-        action = QAction(None)
-        action.setShortcut(keyseq)
-        shortcut = action.shortcut()
-        self.assertTrue(isinstance(shortcut, QKeySequence))
-        self.assertEqual(shortcut.toString(), keyseq)
+        o.removeEventFilter(filt)
+        self.assertEqual(sys.getrefcount(o), 2)
+
+    def testObjectDestructorOrder(self):
+        w = QWindow()
+        filt = MyFilter()
+        filt.app = self.app
+        w.installEventFilter(filt)
+        w.show()
+        w.close()
+        w = None
+        self.assertTrue(True)
 
 
 if __name__ == '__main__':
     unittest.main()
-

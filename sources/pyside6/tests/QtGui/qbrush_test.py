@@ -26,6 +26,8 @@
 ##
 #############################################################################
 
+'''Test cases for QBrush'''
+
 import os
 import sys
 import unittest
@@ -35,33 +37,24 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QItemSelection
-from PySide6.QtGui import QStandardItemModel, QStandardItem
-from PySide6.QtWidgets import QApplication
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QColor, QBrush
+
+from helper.usesqguiapplication import UsesQGuiApplication
 
 
-class Bug324(unittest.TestCase):
-    def testOperators(self):
-        model = QStandardItemModel()
-        for i in range(100):
-            model.appendRow(QStandardItem(f"Item: {i}"))
+class Constructor(UsesQGuiApplication):
+    '''Test case for constructor of QBrush'''
 
-        first = model.index(0, 0)
-        second = model.index(10, 0)
-        third = model.index(20, 0)
-        fourth = model.index(30, 0)
+    def testQColor(self):
+        # QBrush(QColor) constructor
+        color = QColor('black')
+        obj = QBrush(color)
+        self.assertEqual(obj.color(), color)
 
-        sel = QItemSelection(first, second)
-        sel2 = QItemSelection()
-        sel2.select(third, fourth)
-
-        sel3 = sel + sel2  # check operator +
-        self.assertEqual(len(sel3), 2)
-        sel4 = sel
-        sel4 += sel2  # check operator +=
-        self.assertEqual(len(sel4), 2)
-        self.assertEqual(sel4, sel3)
+        obj = QBrush(Qt.blue)
+        self.assertEqual(obj.color(), Qt.blue)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

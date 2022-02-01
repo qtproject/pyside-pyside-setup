@@ -35,24 +35,47 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import Qt, QEvent
-from PySide6.QtGui import QKeyEvent, QKeySequence
-from PySide6.QtWidgets import QApplication
+from helper.usesqguiapplication import UsesQGuiApplication
+
+from PySide6.QtCore import Qt, QTimer
+from PySide6.QtGui import QPen, QPainter, QRasterWindow
 
 
-class TestBug493(unittest.TestCase):
+class Painting(QRasterWindow):
+    def __init__(self):
+        super().__init__()
+        self.penFromEnum = None
+        self.penFromInteger = None
 
-    def testIt(self):
-        # We need a qapp otherwise Qt will crash when trying to detect the
-        # current platform
-        app = QApplication([])
-        ev1 = QKeyEvent(QEvent.KeyRelease, Qt.Key_Delete, Qt.NoModifier)
-        ev2 = QKeyEvent(QEvent.KeyRelease, Qt.Key_Copy, Qt.NoModifier)
-        ks = QKeySequence.Delete
+    def paintEvent(self, event):
+        with QPainter(self) as painter:
+            painter.setPen(Qt.NoPen)
+            self.penFromEnum = painter.pen()
+            painter.setPen(int(Qt.NoPen))
+            self.penFromInteger = painter.pen()
+        QTimer.singleShot(20, self.close)
 
-        self.assertTrue(ev1.matches(ks))
-        self.assertFalse(ev2.matches(ks))
+
+class QPenTest(UsesQGuiApplication):
+
+    def testCtorWithCreatedEnums(self):
+        '''A simple case of QPen creation using created enums.'''
+        width = 0
+        style = Qt.PenStyle(0)
+        cap = Qt.PenCapStyle(0)
+        join = Qt.PenJoinStyle(0)
+        pen = QPen(Qt.blue, width, style, cap, join)
+
+    def testSetPenWithPenStyleEnum(self):
+        '''Calls QPainter.setPen with both enum and integer. Bug #511.'''
+        w = Painting()
+        w.show()
+        w.setTitle("qpen_test")
+        self.app.exec()
+        self.assertEqual(w.penFromEnum.style(), Qt.NoPen)
+        self.assertEqual(w.penFromInteger.style(), Qt.SolidLine)
 
 
 if __name__ == '__main__':
     unittest.main()
+
