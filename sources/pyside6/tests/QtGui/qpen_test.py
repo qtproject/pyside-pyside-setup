@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 #############################################################################
 ##
 ## Copyright (C) 2016 The Qt Company Ltd.
@@ -28,8 +26,6 @@
 ##
 #############################################################################
 
-''' Test the QShortcut constructor'''
-
 import os
 import sys
 import unittest
@@ -39,50 +35,49 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
+from helper.usesqguiapplication import UsesQGuiApplication
+
 from PySide6.QtCore import Qt, QTimer
-from PySide6.QtGui import QKeySequence, QShortcut
-from PySide6.QtWidgets import QApplication, QWidget
+from PySide6.QtGui import QPen, QPainter, QRasterWindow
 
 
-class Foo(QWidget):
+class Painting(QRasterWindow):
     def __init__(self):
         super().__init__()
-        self.ok = False
-        self.copy = False
+        self.penFromEnum = None
+        self.penFromInteger = None
 
-    def slot_of_foo(self):
-        self.ok = True
-
-    def slot_of_copy(self):
-        self.copy = True
-
-
-class MyShortcut(QShortcut):
-    def __init__(self, keys, wdg, slot):
-        QShortcut.__init__(self, keys, wdg, slot)
-
-    def emit_signal(self):
-        self.activated.emit()
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setPen(Qt.NoPen)
+        self.penFromEnum = painter.pen()
+        painter.setPen(int(Qt.NoPen))
+        self.penFromInteger = painter.pen()
+        # PYSIDE-535: PyPy needs an explicit end() or a context manager.
+        painter.end()
+        QTimer.singleShot(20, self.close)
 
 
-class QAppPresence(unittest.TestCase):
+class QPenTest(UsesQGuiApplication):
 
-    def testQShortcut(self):
-        self.qapp = QApplication([])
-        f = Foo()
+    def testCtorWithCreatedEnums(self):
+        '''A simple case of QPen creation using created enums.'''
+        width = 0
+        style = Qt.PenStyle(0)
+        cap = Qt.PenCapStyle(0)
+        join = Qt.PenJoinStyle(0)
+        pen = QPen(Qt.blue, width, style, cap, join)
 
-        self.sc = MyShortcut(QKeySequence(Qt.Key_Return), f, f.slot_of_foo)
-        self.scstd = MyShortcut(QKeySequence.Copy, f, f.slot_of_copy)
-        QTimer.singleShot(0, self.init)
-        self.qapp.exec()
-        self.assertEqual(f.ok, True)
-        self.assertEqual(f.copy, True)
-
-    def init(self):
-        self.sc.emit_signal()
-        self.scstd.emit_signal()
-        self.qapp.quit()
+    def testSetPenWithPenStyleEnum(self):
+        '''Calls QPainter.setPen with both enum and integer. Bug #511.'''
+        w = Painting()
+        w.show()
+        w.setTitle("qpen_test")
+        self.app.exec()
+        self.assertEqual(w.penFromEnum.style(), Qt.NoPen)
+        self.assertEqual(w.penFromInteger.style(), Qt.SolidLine)
 
 
 if __name__ == '__main__':
     unittest.main()
+

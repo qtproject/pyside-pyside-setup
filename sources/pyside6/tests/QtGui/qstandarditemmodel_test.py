@@ -36,21 +36,21 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
+from PySide6.QtCore import QObject
 from PySide6.QtGui import QStandardItemModel, QStandardItem
-from PySide6.QtWidgets import QWidget
 from shiboken6 import Shiboken
-from helper.usesqapplication import UsesQApplication
+from helper.usesqguiapplication import UsesQGuiApplication
 
 
-class QStandardItemModelTest(UsesQApplication):
+class QStandardItemModelTest(UsesQGuiApplication):
 
     def setUp(self):
         super(QStandardItemModelTest, self).setUp()
-        self.window = QWidget()
-        self.model = QStandardItemModel(0, 3, self.window)
+        self.parent = QObject()
+        self.model = QStandardItemModel(0, 3, self.parent)
 
     def tearDown(self):
-        del self.window
+        del self.parent
         del self.model
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
@@ -68,7 +68,7 @@ class QStandardItemModelTest(UsesQApplication):
         self.assertFalse(Shiboken.isValid(root))
 
 
-class QStandardItemModelRef(UsesQApplication):
+class QStandardItemModelRef(UsesQGuiApplication):
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testRefCount(self):
         model = QStandardItemModel(5, 5)

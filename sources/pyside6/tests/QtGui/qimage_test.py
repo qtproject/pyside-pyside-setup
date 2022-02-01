@@ -38,8 +38,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtGui import QImage
-from PySide6.QtWidgets import QLabel
-from helper.usesqapplication import UsesQApplication
+from helper.usesqguiapplication import UsesQGuiApplication
 
 
 xpm = [
@@ -275,7 +274,7 @@ xpm = [
 ]
 
 
-class QImageTest(UsesQApplication):
+class QImageTest(UsesQGuiApplication):
     '''Test case for calling setPixel with float as argument'''
 
     def testQImageStringBuffer(self):
@@ -302,7 +301,6 @@ class QImageTest(UsesQApplication):
         img = QImage(bytes('', "UTF-8"), 100, 100, QImage.Format_ARGB32)
 
     def testXpmConstructor(self):
-        label = QLabel()
         img = QImage(xpm)
         self.assertFalse(img.isNull())
         self.assertEqual(img.width(), 27)

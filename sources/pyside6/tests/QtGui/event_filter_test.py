@@ -35,23 +35,41 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import Qt, QEvent
-from PySide6.QtGui import QKeyEvent, QKeySequence
-from PySide6.QtWidgets import QApplication
+from helper.usesqguiapplication import UsesQGuiApplication
+from PySide6.QtCore import QObject, QEvent
+from PySide6.QtGui import QWindow
 
 
-class TestBug493(unittest.TestCase):
+class MyFilter(QObject):
+    def eventFilter(self, obj, event):
+        if event.type() == QEvent.KeyPress:
+            pass
+        return QObject.eventFilter(self, obj, event)
 
-    def testIt(self):
-        # We need a qapp otherwise Qt will crash when trying to detect the
-        # current platform
-        app = QApplication([])
-        ev1 = QKeyEvent(QEvent.KeyRelease, Qt.Key_Delete, Qt.NoModifier)
-        ev2 = QKeyEvent(QEvent.KeyRelease, Qt.Key_Copy, Qt.NoModifier)
-        ks = QKeySequence.Delete
 
-        self.assertTrue(ev1.matches(ks))
-        self.assertFalse(ev2.matches(ks))
+class EventFilter(UsesQGuiApplication):
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
+    def testRefCount(self):
+        o = QObject()
+        filt = MyFilter()
+        o.installEventFilter(filt)
+        self.assertEqual(sys.getrefcount(o), 2)
+
+        o.installEventFilter(filt)
+        self.assertEqual(sys.getrefcount(o), 2)
+
+        o.removeEventFilter(filt)
+        self.assertEqual(sys.getrefcount(o), 2)
+
+    def testObjectDestructorOrder(self):
+        w = QWindow()
+        filt = MyFilter()
+        filt.app = self.app
+        w.installEventFilter(filt)
+        w.show()
+        w.close()
+        w = None
+        self.assertTrue(True)
 
 
 if __name__ == '__main__':

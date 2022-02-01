@@ -40,13 +40,12 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtWidgets import QApplication
-from PySide6.QtCore import QSocketNotifier
+from PySide6.QtCore import QCoreApplication, QSocketNotifier
 
 
 class QSocketNotifierTest(unittest.TestCase):
     def testClass(self):
-        app = QApplication([])
+        app = QCoreApplication([])
         # socketpair is not available on Windows
         if os.name != "nt":
             w_sock, r_sock = socket.socketpair(socket.AF_UNIX, socket.SOCK_STREAM)

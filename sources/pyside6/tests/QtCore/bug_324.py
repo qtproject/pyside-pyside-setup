@@ -26,6 +26,8 @@
 ##
 #############################################################################
 
+''' Test bug 324: http://bugs.openbossa.org/show_bug.cgi?id=324'''
+
 import os
 import sys
 import unittest
@@ -35,41 +37,31 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from helper.usesqapplication import UsesQApplication
-from PySide6.QtCore import QObject, QEvent
-from PySide6.QtWidgets import QWidget
+from PySide6.QtCore import QCoreApplication, QObject, Signal
 
 
-class MyFilter(QObject):
-    def eventFilter(self, obj, event):
-        if event.type() == QEvent.KeyPress:
-            pass
-        return QObject.eventFilter(self, obj, event)
+class QBug(QObject):
+    def __init__(self, parent=None):
+        QObject.__init__(self, parent)
+
+    def check(self):
+        self.done.emit("abc")
+
+    done = Signal(str)
 
 
-class EventFilter(UsesQApplication):
-    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
-    def testRefCount(self):
-        o = QObject()
-        filt = MyFilter()
-        o.installEventFilter(filt)
-        self.assertEqual(sys.getrefcount(o), 2)
+class Bug324(unittest.TestCase):
 
-        o.installEventFilter(filt)
-        self.assertEqual(sys.getrefcount(o), 2)
+    def on_done(self, val):
+        self.value = val
 
-        o.removeEventFilter(filt)
-        self.assertEqual(sys.getrefcount(o), 2)
-
-    def testObjectDestructorOrder(self):
-        w = QWidget()
-        filt = MyFilter()
-        filt.app = self.app
-        w.installEventFilter(filt)
-        w.show()
-        w.close()
-        w = None
-        self.assertTrue(True)
+    def testBug(self):
+        app = QCoreApplication([])
+        bug = QBug()
+        self.value = ''
+        bug.done.connect(self.on_done)
+        bug.check()
+        self.assertEqual(self.value, 'abc')
 
 
 if __name__ == '__main__':
