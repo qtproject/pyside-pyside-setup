@@ -946,8 +946,7 @@ if (ret > 0 && ((strcmp(%1, SIGNAL(destroyed())) == 0) || (strcmp(%1, SIGNAL(des
 
 // @snippet qbytearray-mgetitem
 if (PyIndex_Check(_key)) {
-    Py_ssize_t _i;
-    _i = PyNumber_AsSsize_t(_key, PyExc_IndexError);
+    const Py_ssize_t _i = PyNumber_AsSsize_t(_key, PyExc_IndexError);
     if (_i < 0 || _i >= %CPPSELF.size()) {
         PyErr_SetString(PyExc_IndexError, "index out of bounds");
         return 0;
@@ -958,10 +957,9 @@ if (PyIndex_Check(_key)) {
         return PyBytes_FromStringAndSize(res, 1);
     }
 } else if (PySlice_Check(_key)) {
-    Py_ssize_t start, stop, step, slicelength, cur;
-    if (PySlice_GetIndicesEx(_key, %CPPSELF.count(), &start, &stop, &step, &slicelength) < 0) {
+    Py_ssize_t start, stop, step, slicelength;
+    if (PySlice_GetIndicesEx(_key, %CPPSELF.count(), &start, &stop, &step, &slicelength) < 0)
         return nullptr;
-    }
 
     QByteArray ba;
     if (slicelength <= 0) {
@@ -970,15 +968,12 @@ if (PyIndex_Check(_key)) {
         Py_ssize_t max = %CPPSELF.count();
         start = qBound(Py_ssize_t(0), start, max);
         stop = qBound(Py_ssize_t(0), stop, max);
-        QByteArray ba;
         if (start < stop)
             ba = %CPPSELF.mid(start, stop - start);
         return %CONVERTTOPYTHON[QByteArray](ba);
     } else {
-        QByteArray ba;
-        for (cur = start; slicelength > 0; cur += static_cast<size_t>(step), slicelength--) {
+        for (Py_ssize_t cur = start; slicelength > 0; cur += step, --slicelength)
             ba.append(%CPPSELF.at(cur));
-        }
         return %CONVERTTOPYTHON[QByteArray](ba);
     }
 } else {
@@ -1014,7 +1009,7 @@ if (PyIndex_Check(_key)) {
             PyErr_SetString(PyExc_ValueError, "bytearray must be of size 1");
             return -1;
         }
-    } else if (reinterpret_cast<PyTypeObject *>(Py_TYPE(_value)) == reinterpret_cast<PyTypeObject *>(SbkPySide6_QtCoreTypes[SBK_QBYTEARRAY_IDX])) {
+    } else if (Py_TYPE(_value) == reinterpret_cast<PyTypeObject *>(SbkPySide6_QtCoreTypes[SBK_QBYTEARRAY_IDX])) {
         if (PyObject_Length(_value) != 1) {
             PyErr_SetString(PyExc_ValueError, "QByteArray must be of size 1");
             return -1;
@@ -1030,26 +1025,24 @@ if (PyIndex_Check(_key)) {
     PyObject *result = Sbk_QByteArrayFunc_insert(self, args);
     Py_DECREF(args);
     Py_XDECREF(result);
-    return !result ? -1 : 0;
+    return result != nullptr ? 0: -1;
 } else if (PySlice_Check(_key)) {
-    Py_ssize_t start, stop, step, slicelength, value_length;
-    if (PySlice_GetIndicesEx(_key, %CPPSELF.count(), &start, &stop, &step, &slicelength) < 0) {
+    Py_ssize_t start, stop, step, slicelength;
+    if (PySlice_GetIndicesEx(_key, %CPPSELF.count(), &start, &stop, &step, &slicelength) < 0)
         return -1;
-    }
     // The parameter candidates are: bytes/str, bytearray, QByteArray itself.
-    // Not support iterable which contains ints between 0~255
+    // Not supported are iterables containing ints between 0~255
 
     // case 1: value is nullpre, means delete the items within the range
-    // case 2: step is 1, means shrink or expanse
+    // case 2: step is 1, means shrink or expand
     // case 3: step is not 1, then the number of slots have to equal the number of items in _value
-    QByteArray ba;
-    if (_value == nullptr || _value == Py_None) {
-        ba = QByteArray();
-        value_length = 0;
-    } else if (!(PyBytes_Check(_value) || PyByteArray_Check(_value) || reinterpret_cast<PyTypeObject *>(Py_TYPE(_value)) == reinterpret_cast<PyTypeObject *>(SbkPySide6_QtCoreTypes[SBK_QBYTEARRAY_IDX]))) {
-        PyErr_Format(PyExc_TypeError, "bytes, bytearray or QByteArray is required, not %.200s", Py_TYPE(_value)->tp_name);
-        return -1;
-    } else {
+    Py_ssize_t value_length = 0;
+    if (_value != nullptr && _value != Py_None) {
+        if (!(PyBytes_Check(_value) || PyByteArray_Check(_value)
+              || Py_TYPE(_value) == reinterpret_cast<PyTypeObject *>(SbkPySide6_QtCoreTypes[SBK_QBYTEARRAY_IDX]))) {
+               PyErr_Format(PyExc_TypeError, "bytes, bytearray or QByteArray is required, not %.200s", Py_TYPE(_value)->tp_name);
+               return -1;
+        }
         value_length = PyObject_Length(_value);
     }
 
@@ -1060,9 +1053,9 @@ if (PyIndex_Check(_key)) {
     }
 
     if (step != 1) {
-        int i = start;
-        for (int j = 0; j < slicelength; j++) {
-            PyObject *item = PyObject_GetItem(_value, PyLong_FromLong(j));
+        Py_ssize_t i = start;
+        for (Py_ssize_t j = 0; j < slicelength; ++j) {
+            PyObject *item = PyObject_GetItem(_value, PyLong_FromSsize_t(j));
             QByteArray temp;
             if (PyLong_Check(item)) {
                 int overflow;
@@ -1078,7 +1071,7 @@ if (PyIndex_Check(_key)) {
         }
         return 0;
     } else {
-        ba = %CONVERTTOCPP[QByteArray](_value);
+        QByteArray ba = %CONVERTTOCPP[QByteArray](_value);
         %CPPSELF.replace(start, slicelength, ba);
         return 0;
     }
