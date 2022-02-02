@@ -643,9 +643,10 @@ if (PyIndex_Check(_key)) {
             QByteArray temp;
             if (PyLong_Check(item)) {
                 int overflow;
-                long ival = PyLong_AsLongAndOverflow(item, &overflow);
-                // Not suppose to bigger than 255 because only bytes, bytearray, QByteArray were accept
-                temp = QByteArray(reinterpret_cast<const char *>(&ival));
+                const long ival = PyLong_AsLongAndOverflow(item, &overflow);
+                // Not supposed to be bigger than 255 because only bytes,
+                // bytearray, QByteArray were accepted
+                temp.append(char(ival));
             } else {
                 temp = %CONVERTTOCPP[QByteArray](item);
             }
