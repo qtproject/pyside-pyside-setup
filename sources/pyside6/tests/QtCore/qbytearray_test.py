@@ -233,7 +233,7 @@ class QByteArraySliceAssignment(unittest.TestCase):
         # shrink
         b[2:8] = QByteArray(bytes('aaa', "UTF8"))
         self.assertEqual(b, bytes('01aaa89', "UTF8"))
-        # expanse
+        # expand
         b[2:5] = QByteArray(bytes('uvwxyz', "UTF8"))
         self.assertEqual(b, bytes('01uvwxyz89', "UTF8"))
         # Delete behavior
@@ -241,7 +241,7 @@ class QByteArraySliceAssignment(unittest.TestCase):
         self.assertEqual(b, bytes('0189', "UTF8"))
 
         b = QByteArray(bytes('0123456789', "UTF8"))
-        # reverse assginment
+        # reverse assignment
         b[5:2:-1] = QByteArray(bytes('ABC', "UTF8"))
         self.assertEqual(b, bytes('012CBA6789', "UTF8"))
         # step is not 1
@@ -259,7 +259,7 @@ class QByteArraySliceAssignment(unittest.TestCase):
         # shrink
         b[2:8] = bytearray(bytes('aaa', "UTF8"))
         self.assertEqual(b, bytes('01aaa89', "UTF8"))
-        # expanse
+        # expand
         b[2:5] = bytearray(bytes('uvwxyz', "UTF8"))
         self.assertEqual(b, bytes('01uvwxyz89', "UTF8"))
         # Delete behavior
@@ -267,7 +267,7 @@ class QByteArraySliceAssignment(unittest.TestCase):
         self.assertEqual(b, bytes('0189', "UTF8"))
 
         b = QByteArray(bytes('0123456789', "UTF8"))
-        # reverse assginment
+        # reverse assignment
         b[5:2:-1] = bytearray(bytes('ABC', "UTF8"))
         self.assertEqual(b, bytes('012CBA6789', "UTF8"))
         # step is not 1
