@@ -38,6 +38,7 @@
 ****************************************************************************/
 
 #include "helper.h"
+#include "basewrapper_p.h"
 #include "sbkstring.h"
 #include "sbkstaticstrings.h"
 
@@ -190,30 +191,38 @@ static void formatPyUnicode(PyObject *obj, std::ostream &str)
 #endif // !Py_LIMITED_API
 }
 
+static void formatPyObjectHelper(PyObject *obj, std::ostream &str)
+{
+    str << ", refs=" << obj->ob_refcnt << ", ";
+    formatPyTypeObject(obj->ob_type, str);
+    str << ", ";
+    if (PyLong_Check(obj))
+        str << PyLong_AsLong(obj);
+    else if (PyFloat_Check(obj))
+        str << PyFloat_AsDouble(obj);
+    else if (PyUnicode_Check(obj))
+        formatPyUnicode(obj, str);
+    else if (PySequence_Check(obj))
+        formatPySequence(obj, str);
+    else
+        str << "<unknown>";
+}
+
 static void formatPyObject(PyObject *obj, std::ostream &str)
 {
-    if (obj) {
-        formatPyTypeObject(obj->ob_type, str);
-        str << ", ";
-        if (PyLong_Check(obj))
-            str << PyLong_AsLong(obj);
-        else if (PyFloat_Check(obj))
-            str << PyFloat_AsDouble(obj);
-        else if (PyUnicode_Check(obj))
-            formatPyUnicode(obj, str);
-        else if (PySequence_Check(obj))
-            formatPySequence(obj, str);
-        else
-            str << "<unknown>";
-    } else {
-        str << '0';
-    }
+    str << obj;
+    if (obj)
+        formatPyObjectHelper(obj, str);
 }
 
 namespace Shiboken
 {
 
 debugPyObject::debugPyObject(PyObject *o) : m_object(o)
+{
+}
+
+debugSbkObject::debugSbkObject(SbkObject *o) : m_object(o)
 {
 }
 
@@ -229,6 +238,17 @@ std::ostream &operator<<(std::ostream &str, const debugPyTypeObject &o)
 {
     str << "PyTypeObject(";
     formatPyTypeObject(o.m_object, str);
+    str << ')';
+    return str;
+}
+
+std::ostream &operator<<(std::ostream &str, const debugSbkObject &o)
+{
+    str << "SbkObject(" << o.m_object;
+    if (o.m_object) {
+        Shiboken::Object::_debugFormat(str, o.m_object);
+        formatPyObjectHelper(reinterpret_cast<PyObject *>(o.m_object), str);
+    }
     str << ')';
     return str;
 }

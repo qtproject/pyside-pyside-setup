@@ -109,6 +109,13 @@ struct LIBSHIBOKEN_API debugPyObject
     PyObject *m_object;
 };
 
+struct LIBSHIBOKEN_API debugSbkObject
+{
+    explicit debugSbkObject(SbkObject *o);
+
+    SbkObject *m_object;
+};
+
 struct LIBSHIBOKEN_API debugPyTypeObject
 {
     explicit debugPyTypeObject(const PyTypeObject *o);
@@ -124,6 +131,7 @@ struct LIBSHIBOKEN_API debugPyBuffer
 };
 
 LIBSHIBOKEN_API std::ostream &operator<<(std::ostream &str, const debugPyObject &o);
+LIBSHIBOKEN_API std::ostream &operator<<(std::ostream &str, const debugSbkObject &o);
 LIBSHIBOKEN_API std::ostream &operator<<(std::ostream &str, const debugPyTypeObject &o);
 LIBSHIBOKEN_API std::ostream &operator<<(std::ostream &str, const debugPyBuffer &b);
 

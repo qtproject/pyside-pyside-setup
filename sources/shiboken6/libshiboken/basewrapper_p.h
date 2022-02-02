@@ -47,6 +47,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <iosfwd>
 
 struct SbkObject;
 struct SbkConverter;
@@ -286,6 +287,8 @@ void clearReferences(SbkObject *self);
  **/
 void deallocData(SbkObject *self, bool doCleanup);
 
+
+void _debugFormat(std::ostream &str, SbkObject *self);
 } // namespace Object
 
 } // namespace Shiboken

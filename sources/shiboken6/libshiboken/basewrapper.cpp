@@ -1635,16 +1635,54 @@ void clearReferences(SbkObject *self)
     self->d->referredObjects->clear();
 }
 
+// Helpers for debug / info formatting
+
+static std::vector<PyTypeObject *> getBases(SbkObject *self)
+{
+    return ObjectType::isUserType(Py_TYPE(self))
+        ? getCppBaseClasses(Py_TYPE(self))
+        : std::vector<PyTypeObject *>(1, Py_TYPE(self));
+}
+
+void _debugFormat(std::ostream &s, SbkObject *self)
+{
+    assert(self);
+    auto *d = self->d;
+    if (!d) {
+        s  << "[Invalid]";
+        return;
+    }
+    if (d->cptr) {
+        const std::vector<PyTypeObject *> bases = getBases(self);
+        for (size_t i = 0, size = bases.size(); i < size; ++i)
+            s << ", C++: " << bases[i]->tp_name << '/' << self->d->cptr[i];
+    } else {
+         s << " [Deleted]";
+    }
+    if (d->hasOwnership)
+        s << " [hasOwnership]";
+    if (d->containsCppWrapper)
+        s << " [containsCppWrapper]";
+    if (d->validCppObject)
+        s << " [validCppObject]";
+    if (d->cppObjectCreated)
+        s << " [wasCreatedByPython]";
+    if (d->parentInfo) {
+        if (auto *parent = d->parentInfo->parent)
+            s << ", parent=" << parent->ob_base.ob_type->tp_name << '/' << parent;
+        if (!d->parentInfo->children.empty())
+            s << ", " << d->parentInfo->children.size() << " child(ren)";
+    }
+    if (d->referredObjects && !d->referredObjects->empty())
+        s << ", " << d->referredObjects->size() << " referred object(s)";
+}
+
 std::string info(SbkObject *self)
 {
     std::ostringstream s;
 
     if (self->d && self->d->cptr) {
-        std::vector<PyTypeObject *> bases;
-        if (ObjectType::isUserType(Py_TYPE(self)))
-            bases = getCppBaseClasses(Py_TYPE(self));
-        else
-            bases.push_back(Py_TYPE(self));
+        const std::vector<PyTypeObject *> bases = getBases(self);
 
         s << "C++ address....... ";
         for (size_t i = 0, size = bases.size(); i < size; ++i)
