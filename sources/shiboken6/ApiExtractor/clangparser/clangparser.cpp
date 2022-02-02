@@ -271,7 +271,9 @@ static CXTranslationUnit createTranslationUnit(CXIndex index,
         "-Wno-expansion-to-defined", // Workaround for warnings in Darwin stdlib, see
                                      // https://github.com/darlinghq/darling/issues/204
 #endif
-        "-Wno-constant-logical-operand"
+        "-Wno-constant-logical-operand",
+        "-x",
+        "c++" // Treat .h as C++, not C
     };
 
     QByteArrayList clangArgs;
