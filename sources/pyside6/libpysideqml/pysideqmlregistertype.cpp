@@ -303,7 +303,7 @@ int qmlRegisterSingletonInstance(PyObject *pyObj, const char *uri, int versionMa
 
     // Create Singleton Functor to pass the QObject to the Type registration step
     // similarly to the case when we have a callback
-    QQmlPrivate::SingletonFunctor registrationFunctor;
+    QQmlPrivate::SingletonInstanceFunctor registrationFunctor;
     registrationFunctor.m_object = instanceQObject;
 
     const QMetaObject *metaObject = PySide::retrieveMetaObject(pyObjType);
