@@ -1669,7 +1669,8 @@ void _debugFormat(std::ostream &s, SbkObject *self)
         s << " [wasCreatedByPython]";
     if (d->parentInfo) {
         if (auto *parent = d->parentInfo->parent)
-            s << ", parent=" << parent->ob_base.ob_type->tp_name << '/' << parent;
+            s << ", parent=" << reinterpret_cast<PyObject *>(parent)->ob_type->tp_name
+                << '/' << parent;
         if (!d->parentInfo->children.empty())
             s << ", " << d->parentInfo->children.size() << " child(ren)";
     }
