@@ -149,6 +149,11 @@ macro(setup_clang)
     endif()
 
     find_package(Clang CONFIG REQUIRED)
+    # Need to explicitly handle the version check, because the Clang package doesn't.
+    if (LLVM_PACKAGE_VERSION AND LLVM_PACKAGE_VERSION VERSION_LESS "9.0")
+        message(FATAL_ERROR "You need LLVM version 9.0 or greater to build.")
+    endif()
+
     # CLANG_LIBRARY is read out from the cmake cache to deploy libclang
     get_target_property(CLANG_BUILD_TYPE libclang IMPORTED_CONFIGURATIONS)
     get_target_property(CLANG_LIBRARY_NAME libclang IMPORTED_LOCATION_${CLANG_BUILD_TYPE})
