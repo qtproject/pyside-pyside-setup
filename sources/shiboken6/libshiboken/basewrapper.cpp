@@ -467,11 +467,10 @@ PyObject *MakeQAppWrapper(PyTypeObject *type)
     // exactly the needed reference that keeps qApp alive from alone!
     Py_INCREF(qApp_curr);
     // PYSIDE-1470: As a side effect, the interactive "_" variable tends to
-    // create reference cycles. It was found when using gc.collect(). But using
-    // PyGC_collect() inside the C code had no effect in the interactive shell.
-    // The cycle exists only in the eval loop of the interpreter!
-    if (PyDict_GetItem(builtins, Shiboken::PyName::underscore()))
-        PyDict_SetItem(builtins, Shiboken::PyName::underscore(), Py_None);
+    //              create reference cycles. This is disturbing when trying
+    //              to remove qApp with del.
+    // PYSIDE-1758: Since we moved to an explicit qApp.shutdown() call, we
+    //              no longer initialize "_" with Py_None.
     return qApp_curr;
 }
 
