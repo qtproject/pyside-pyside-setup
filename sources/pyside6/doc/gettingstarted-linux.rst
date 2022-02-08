@@ -56,19 +56,19 @@ Checking out the version that we want to build, for example 6.0::
 Building PySide
 ~~~~~~~~~~~~~~~
 
-Check your Qt installation path, to specifically use that version of qmake to build PySide.
-for example, :command:`/opt/Qt/6.0.0/gcc_64/bin/qmake`.
+Check your Qt installation path, to specifically use that version of qtpaths to build PySide.
+for example, :command:`/opt/Qt/6.0.0/gcc_64/bin/qtpaths`.
 
 Build can take a few minutes, so it is recommended to use more than one CPU core::
 
-    python setup.py build --qmake=/opt/Qt/6.0.0/gcc_64/bin/qmake --build-tests --ignore-git --parallel=8
+    python setup.py build --qtpaths=/opt/Qt/6.0.0/gcc_64/bin/qtpaths --build-tests --ignore-git --parallel=8
 
 Installing PySide
 ~~~~~~~~~~~~~~~~~
 
 To install on the current directory, just run::
 
-    python setup.py install --qmake=/opt/Qt/6.0.0/gcc_64/bin/qmake --build-tests --ignore-git --parallel=8
+    python setup.py install --qtpaths=/opt/Qt/6.0.0/gcc_64/bin/qtpaths --build-tests --ignore-git --parallel=8
 
 Test installation
 ~~~~~~~~~~~~~~~~~

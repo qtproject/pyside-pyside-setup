@@ -25,13 +25,13 @@ Simple build
 If you need only Shiboken Generator, a simple build run would look like this::
 
     # For the required libraries (this will also build the shiboken6 python module)
-    python setup.py install --qmake=/path/to/qmake \
+    python setup.py install --qtpaths=/path/to/qtpaths \
                             --build-tests \
                             --verbose-build \
                             --internal-build-type=shiboken6
 
     # For the executable
-    python setup.py install --qmake=/path/to/qmake \
+    python setup.py install --qtpaths=/path/to/qtpaths \
                             --build-tests \
                             --verbose-build \
                             --internal-build-type=shiboken6-generator
@@ -62,11 +62,13 @@ via ``pip``::
 The ``whl`` package cannot automatically discover in your system the location for:
 
 * Clang installation,
-* ``qmake`` location with the same version as the one described in the wheel,
+* Qt location (indicated by the path of the ``qtpaths`` tool) with the same
+  version/build as the one described in the wheel,
 * Qt libraries with the same package version.
 
 So using this process requires you to manually modify the variables:
 
 * ``CLANG_INSTALL_DIR`` must be set to where the libraries are,
-* ``PATH`` must include the location for a ``qmake`` with the same Qt version as the package,
+* ``PATH`` must include the location for the ``qtpaths`` tool with the same Qt
+    version as the package,
 * ``LD_LIBRARY_PATH`` including the Qt libraries and Clang libraries paths.

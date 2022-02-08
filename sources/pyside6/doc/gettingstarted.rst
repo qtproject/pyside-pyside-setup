@@ -56,7 +56,7 @@ package manager (for example, `Raspbian`_ and `ArchlinuxARM`_).
 
 A normal building command will look like this::
 
-    python setup.py install --qmake=/path/to/qmake \
+    python setup.py install --qtpaths=/path/to/qtpaths \
                             --ignore-git \
                             --debug \
                             --build-tests \
@@ -91,7 +91,7 @@ Using the ``--build-tests`` option will enable us to run all the auto tests insi
 
   python testrunner.py test > testlog.txt
 
-.. note:: On Windows, don't forget to have qmake in your path
+.. note:: On Windows, don't forget to have qtpaths in your path
    (:command:`set PATH=E:\\\Path\\\to\\\Qt\\\6.0.0\\\msvc2019_64\\\bin;%PATH%`)
 
 You can also run a specific test (for example ``qpainter_test``) by running::
@@ -146,8 +146,8 @@ The system required ``libxml2`` and ``libxslt``, also on the Python environment,
 After installing ``graphviz``, the ``dot`` command needs to be in PATH, otherwise,
 the process will fail. Installing ``graphviz`` system-wide is also an option.
 
-Since the process rely on a Qt installation, you need to specify where the ``qtbase`` directory
-you will use with your ``qmake`` is located::
+Since the process relies on a Qt installation, you need to specify where the
+``qtbase`` directory is located::
 
     export QT_SRC_DIR=/path/to/qtbase
 

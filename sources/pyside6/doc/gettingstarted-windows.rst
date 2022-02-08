@@ -65,19 +65,19 @@ Checking out the version that we want to build, for example,  6.0::
 Building PySide
 ~~~~~~~~~~~~~~~
 
-Check your Qt installation path, to specifically use that version of qmake to build PySide.
-for example, ``E:\Qt\6.0.0\msvc2019_64\bin\qmake.exe``.
+Check your Qt installation path, to specifically use that version of qtpaths to build PySide.
+for example, ``E:\Qt\6.0.0\msvc2019_64\bin\qtpaths.exe``.
 
 Build can take a few minutes, so it is recommended to use more than one CPU core::
 
-    python setup.py build --qmake=c:\path\to\qmake.exe --openssl=c:\path\to\openssl\bin --build-tests --ignore-git --parallel=8
+    python setup.py build --qtpaths=c:\path\to\qtpaths.exe --openssl=c:\path\to\openssl\bin --build-tests --ignore-git --parallel=8
 
 Installing PySide
 ~~~~~~~~~~~~~~~~~
 
 To install on the current directory, just run::
 
-    python setup.py install --qmake=c:\path\to\qmake.exe  --openssl=c:\path\to\openssl\bin --build-tests --ignore-git --parallel=8
+    python setup.py install --qtpaths=c:\path\to\qtpaths.exe  --openssl=c:\path\to\openssl\bin --build-tests --ignore-git --parallel=8
 
 Test installation
 ~~~~~~~~~~~~~~~~~
