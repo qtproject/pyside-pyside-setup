@@ -60,7 +60,7 @@ endif()
 if(NOT HAS_LIBXSLT)
     set(DISABLE_DOCSTRINGS TRUE)
     message(WARNING
-            "Documentation will not be built due to missing dependency (no Qt5XmlPatterns found).")
+            "Documentation will not be built due to missing dependency (libxslt not found).")
 endif()
 
 # Export to parent scope so that generator/CMakeLists.txt gets it
