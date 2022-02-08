@@ -374,6 +374,7 @@ enum class RegisterMode {
 
 static PyObject *qmlElementMacroHelper(PyObject *pyObj,
                                        const char *decoratorName,
+                                       const char *typeName = nullptr,
                                        RegisterMode mode = RegisterMode::Normal,
                                        const char *noCreationReason = nullptr)
 {
@@ -383,7 +384,8 @@ static PyObject *qmlElementMacroHelper(PyObject *pyObj,
     }
 
     PyTypeObject *pyObjType = reinterpret_cast<PyTypeObject *>(pyObj);
-    const char *typeName = pyObjType->tp_name;
+    if (typeName == nullptr)
+        typeName = pyObjType->tp_name;
     if (!PySequence_Contains(pyObjType->tp_mro, reinterpret_cast<PyObject *>(qObjectType()))) {
         PyErr_Format(PyExc_TypeError, "This decorator can only be used with classes inherited from QObject, got %s.",
                      typeName);
@@ -431,7 +433,8 @@ static PyObject *qmlElementMacroHelper(PyObject *pyObj,
 
 namespace PySide::Qml {
 
-PyObject *qmlElementMacro(PyObject *pyObj)
+PyObject *qmlElementMacro(PyObject *pyObj, const char *decoratorName,
+                          const char *typeName = nullptr)
 {
     RegisterMode mode = RegisterMode::Normal;
     const auto &info = PySide::Qml::qmlTypeInfo(pyObj);
@@ -439,13 +442,23 @@ PyObject *qmlElementMacro(PyObject *pyObj)
         mode = RegisterMode::Singleton;
     else if (info.flags.testFlag(PySide::Qml::QmlTypeFlag::Uncreatable))
         mode = RegisterMode::Uncreatable;
-    return qmlElementMacroHelper(pyObj, "QmlElement", mode,
+    return qmlElementMacroHelper(pyObj, decoratorName, typeName, mode,
                                  info.noCreationReason.c_str());
+}
+
+PyObject *qmlElementMacro(PyObject *pyObj)
+{
+    return qmlElementMacro(pyObj, "QmlElement");
+}
+
+PyObject *qmlNamedElementMacro(PyObject *pyObj, const char *typeName)
+{
+    return qmlElementMacro(pyObj, "QmlNamedElement", qstrdup(typeName));
 }
 
 PyObject *qmlAnonymousMacro(PyObject *pyObj)
 {
-    return qmlElementMacroHelper(pyObj, "QmlAnonymous",
+    return qmlElementMacroHelper(pyObj, "QmlAnonymous", nullptr,
                                  RegisterMode::Anonymous);
 }
 

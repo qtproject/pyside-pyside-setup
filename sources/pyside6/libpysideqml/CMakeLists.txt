@@ -5,6 +5,7 @@ set(libpysideqml_SRC
     pysideqmlregistertype.cpp
     pysideqmlmetacallerror.cpp
     pysideqmllistproperty.cpp
+    pysideqmlnamedelement.cpp
     pysideqmluncreatable.cpp
     pysideqmltypeinfo.cpp
 )

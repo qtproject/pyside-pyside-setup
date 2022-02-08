@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2021 The Qt Company Ltd.
+** Copyright (C) 2022 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -37,18 +37,11 @@
 **
 ****************************************************************************/
 
-#ifndef PYSIDEQMLREGISTERTYPE_P_H
-#define PYSIDEQMLREGISTERTYPE_P_H
+#ifndef PYSIDEQMLNAMEDELEMENT_P_H
+#define PYSIDEQMLNAMEDELEMENT_P_H
 
 #include <sbkpython.h>
 
-PyTypeObject *qObjectType();
+void initQmlNamedElement(PyObject *module);
 
-
-namespace PySide::Qml {
-
-PyObject *qmlNamedElementMacro(PyObject *pyObj, const char *typeName);
-
-}
-
-#endif // PYSIDEQMLREGISTERTYPE_P_H
+#endif // PYSIDEQMLNAMEDELEMENT_P_H

@@ -40,7 +40,7 @@ from helper.helper import quickview_errorstring
 from PySide6.QtCore import Property, QObject, QTimer, QUrl
 from PySide6.QtGui import QGuiApplication, QPen, QColor, QPainter
 from PySide6.QtQml import (qjsEngine, qmlContext, qmlEngine, qmlRegisterType,
-                           ListProperty, QmlElement)
+                           ListProperty, QmlElement, QmlNamedElement)
 from PySide6.QtQuick import QQuickView, QQuickItem, QQuickPaintedItem
 
 
@@ -87,8 +87,8 @@ class PieSlice (QQuickPaintedItem):
         paintCalled = True
 
 
-@QmlElement
-class PieChart (QQuickItem):
+@QmlNamedElement("PieChart")
+class PieChartOriginalName(QQuickItem):
     def __init__(self, parent=None):
         QQuickItem.__init__(self, parent)
         self._name = ''
