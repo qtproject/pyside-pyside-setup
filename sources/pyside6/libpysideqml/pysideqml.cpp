@@ -39,6 +39,7 @@
 
 #include "pysideqml.h"
 #include "pysideqmllistproperty_p.h"
+#include "pysideqmlextended_p.h"
 #include "pysideqmlforeign_p.h"
 #include "pysideqmlnamedelement_p.h"
 #include "pysideqmluncreatable.h"
@@ -53,6 +54,7 @@ void init(PyObject *module)
 {
     initQtQmlListProperty(module);
     initQmlForeign(module);
+    initQmlExtended(module);
     initQmlNamedElement(module);
     initQmlUncreatable(module);
     PySide::SignalManager::setQmlMetaCallErrorHandler(PySide::Qml::qmlMetaCallErrorHandler);

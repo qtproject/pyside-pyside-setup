@@ -37,60 +37,21 @@
 **
 ****************************************************************************/
 
-#ifndef PYSIDEQMLTYPEINFO_P_H
-#define PYSIDEQMLTYPEINFO_P_H
+#ifndef PYSIDEQMLEXTENDED_P_H
+#define PYSIDEQMLEXTENDED_P_H
 
 #include <sbkpython.h>
 
-#include <QtCore/QFlags>
 #include <QtCore/QSharedPointer>
 
-#include <string>
-
-QT_FORWARD_DECLARE_CLASS(QDebug)
-QT_FORWARD_DECLARE_CLASS(QObject)
-QT_FORWARD_DECLARE_STRUCT(QMetaObject)
-
 namespace PySide::Qml {
+struct QmlExtensionInfo;
+struct QmlTypeInfo;
 
-enum class QmlTypeFlag
-{
-    Singleton = 0x1,
-    Uncreatable = 0x2
-};
+void initQmlExtended(PyObject *module);
 
-Q_DECLARE_FLAGS(QmlTypeFlags, QmlTypeFlag)
-Q_DECLARE_OPERATORS_FOR_FLAGS(QmlTypeFlags)
-
-// Type information associated with QML type objects
-struct QmlTypeInfo
-{
-    QmlTypeFlags flags;
-    std::string noCreationReason;
-    PyTypeObject *foreignType = nullptr;
-    PyTypeObject *extensionType = nullptr;
-};
-
-using QmlTypeInfoPtr = QSharedPointer<QmlTypeInfo>;
-
-QmlTypeInfoPtr ensureQmlTypeInfo(const PyObject *o);
-void insertQmlTypeInfoAlias(const PyObject *o, const QmlTypeInfoPtr &value);
-QmlTypeInfoPtr qmlTypeInfo(const PyObject *o);
-
-// Meta Object and factory function for QmlExtended/QmlAttached
-struct QmlExtensionInfo
-{
-    using Factory = QObject *(*)(QObject *);
-
-    Factory factory;
-    const QMetaObject *metaObject;
-};
-
-#ifndef QT_NO_DEBUG_STREAM
-QDebug operator<<(QDebug d, const QmlTypeInfo &);
-QDebug operator<<(QDebug d, const QmlExtensionInfo &);
-#endif
-
+PySide::Qml::QmlExtensionInfo qmlExtendedInfo(PyObject *t,
+                                              const QSharedPointer<QmlTypeInfo> &info);
 } // namespace PySide::Qml
 
-#endif // PYSIDEQMLTYPEINFO_P_H
+#endif // PYSIDEQMLEXTENDED_P_H

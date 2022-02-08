@@ -40,6 +40,7 @@
 #include "pysideqmlregistertype.h"
 #include "pysideqmlregistertype_p.h"
 #include "pysideqmltypeinfo_p.h"
+#include "pysideqmlextended_p.h"
 
 #include <limits>
 
@@ -137,6 +138,7 @@ int qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
         // FIXME: Fix this to assign new type ids each time.
         type.typeId = QMetaType(QMetaType::QObjectStar);
         type.listId = QMetaType::fromType<QQmlListProperty<QObject> >();
+        const auto typeInfo = qmlTypeInfo(pyObj);
         type.attachedPropertiesFunction = QQmlPrivate::attachedPropertiesFunc<QObject>();
         type.attachedPropertiesMetaObject = QQmlPrivate::attachedPropertiesMetaObject<QObject>();
 
@@ -157,8 +159,9 @@ int qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
         type.version = QTypeRevision::fromVersion(versionMajor, versionMinor);
         type.elementName = qmlName;
 
-        type.extensionObjectCreate = 0;
-        type.extensionMetaObject = 0;
+        auto info = qmlExtendedInfo(pyObj, typeInfo);
+        type.extensionObjectCreate = info.factory;
+        type.extensionMetaObject = info.metaObject;
         type.customParser = 0;
     }
     type.metaObject = metaObject; // Snapshot may have changed.

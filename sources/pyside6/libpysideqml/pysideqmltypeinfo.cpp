@@ -82,9 +82,25 @@ QDebug operator<<(QDebug d, const QmlTypeInfo &i)
         d << ", noCreationReason=\"" << i.noCreationReason.c_str() << '"';
     if (i.foreignType)
         d << ", foreignType=" << i.foreignType->tp_name;
+    if (i.extensionType)
+        d << ", extensionType=" << i.extensionType->tp_name;
     d << ')';
     return d;
 }
+
+QDebug operator<<(QDebug d, const QmlExtensionInfo &e)
+{
+    QDebugStateSaver saver(d);
+    d.noquote();
+    d.nospace();
+    d << "QmlExtensionInfo(";
+    if (e.factory  != nullptr && e.metaObject != nullptr)
+        d << '"' << e.metaObject->className() << "\", factory="
+          << reinterpret_cast<const void *>(e.factory);
+    d << ')';
+    return d;
+}
+
 #endif // QT_NO_DEBUG_STREAM
 
 } // namespace PySide::Qml
