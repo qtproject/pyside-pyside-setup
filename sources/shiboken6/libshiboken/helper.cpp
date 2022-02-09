@@ -111,6 +111,37 @@ static void formatPySequence(PyObject *obj, std::ostream &str)
     str << '>';
 }
 
+static void formatPyTuple(PyObject *obj, std::ostream &str)
+{
+
+    const Py_ssize_t size = PyTuple_Size(obj);
+    str << size << " <";
+    for (Py_ssize_t i = 0; i < size; ++i) {
+        if (i)
+            str << ", ";
+        str << '(';
+        PyObject *item = PyTuple_GetItem(obj, i);
+        formatPyObject(item, str);
+        str << ')';
+        Py_XDECREF(item);
+    }
+    str << '>';
+}
+
+static void formatPyDict(PyObject *obj, std::ostream &str)
+{
+    PyObject *key;
+    PyObject *value;
+    Py_ssize_t pos = 0;
+    str << '{';
+    while (PyDict_Next(obj, &pos, &key, &value) != 0) {
+        if (pos)
+            str << ", ";
+        str << Shiboken::debugPyObject(key) << '=' << Shiboken::debugPyObject(value);
+    }
+    str << '}';
+}
+
 // Helper to format a 0-terminated character sequence
 template <class Char>
 static void formatCharSequence(const Char *s, std::ostream &str)
@@ -204,6 +235,10 @@ static void formatPyObjectHelper(PyObject *obj, std::ostream &str)
         formatPyUnicode(obj, str);
     else if (PySequence_Check(obj))
         formatPySequence(obj, str);
+    else if (PyDict_Check(obj))
+        formatPyDict(obj, str);
+    else if (PyTuple_CheckExact(obj))
+        formatPyTuple(obj, str);
     else
         str << "<unknown>";
 }
