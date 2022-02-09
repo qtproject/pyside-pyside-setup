@@ -42,6 +42,8 @@
 #include <QtCore/QDebug>
 #include <QtCore/QHash>
 
+#include <algorithm>
+
 namespace PySide::Qml {
 
 using QmlTypeInfoHash = QHash<const PyObject *, QmlTypeInfoPtr>;
@@ -55,6 +57,11 @@ QmlTypeInfoPtr ensureQmlTypeInfo(const PyObject *o)
     if (it == hash->end())
         it = hash->insert(o, QmlTypeInfoPtr(new QmlTypeInfo));
     return it.value();
+}
+
+void insertQmlTypeInfoAlias(const PyObject *o, const QmlTypeInfoPtr &value)
+{
+    qmlTypeInfoHashStatic()->insert(o, value);
 }
 
 QmlTypeInfoPtr qmlTypeInfo(const PyObject *o)
@@ -73,6 +80,8 @@ QDebug operator<<(QDebug d, const QmlTypeInfo &i)
     d << "QmlTypeInfo(" << i.flags;
     if (!i.noCreationReason.empty())
         d << ", noCreationReason=\"" << i.noCreationReason.c_str() << '"';
+    if (i.foreignType)
+        d << ", foreignType=" << i.foreignType->tp_name;
     d << ')';
     return d;
 }

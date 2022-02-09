@@ -65,11 +65,13 @@ struct QmlTypeInfo
 {
     QmlTypeFlags flags;
     std::string noCreationReason;
+    PyTypeObject *foreignType = nullptr;
 };
 
 using QmlTypeInfoPtr = QSharedPointer<QmlTypeInfo>;
 
 QmlTypeInfoPtr ensureQmlTypeInfo(const PyObject *o);
+void insertQmlTypeInfoAlias(const PyObject *o, const QmlTypeInfoPtr &value);
 QmlTypeInfoPtr qmlTypeInfo(const PyObject *o);
 
 #ifndef QT_NO_DEBUG_STREAM

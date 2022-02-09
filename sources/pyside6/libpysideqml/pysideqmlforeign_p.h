@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2021 The Qt Company Ltd.
+** Copyright (C) 2022 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -37,25 +37,17 @@
 **
 ****************************************************************************/
 
-#include "pysideqml.h"
-#include "pysideqmllistproperty_p.h"
-#include "pysideqmlforeign_p.h"
-#include "pysideqmlnamedelement_p.h"
-#include "pysideqmluncreatable.h"
-#include "pysideqmlmetacallerror_p.h"
+#ifndef PYSIDEQMLFOREIGN_P_H
+#define PYSIDEQMLFOREIGN_P_H
 
-#include <signalmanager.h>
+#include <sbkpython.h>
 
-namespace PySide::Qml
-{
+namespace PySide::Qml {
+struct QmlExtensionInfo;
+struct QmlTypeInfo;
 
-void init(PyObject *module)
-{
-    initQtQmlListProperty(module);
-    initQmlForeign(module);
-    initQmlNamedElement(module);
-    initQmlUncreatable(module);
-    PySide::SignalManager::setQmlMetaCallErrorHandler(PySide::Qml::qmlMetaCallErrorHandler);
-}
+void initQmlForeign(PyObject *module);
 
-} //namespace PySide::Qml
+} // namespace PySide::Qml
+
+#endif // PYSIDEQMLFOREIGN_P_H

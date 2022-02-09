@@ -439,16 +439,19 @@ PyObject *qmlElementMacro(PyObject *pyObj, const char *decoratorName,
     RegisterMode mode = RegisterMode::Normal;
     const char *noCreationReason = nullptr;
     const auto info = PySide::Qml::qmlTypeInfo(pyObj);
+    auto *registerObject = pyObj;
     if (!info.isNull()) {
         if (info->flags.testFlag(PySide::Qml::QmlTypeFlag::Singleton))
             mode = RegisterMode::Singleton;
         else if (info->flags.testFlag(PySide::Qml::QmlTypeFlag::Uncreatable))
             mode = RegisterMode::Uncreatable;
         noCreationReason = info->noCreationReason.c_str();
-
+        if (info->foreignType)
+            registerObject = reinterpret_cast<PyObject *>(info->foreignType);
     }
-    return qmlElementMacroHelper(pyObj, decoratorName, typeName, mode,
-                                 noCreationReason);
+    if (!qmlElementMacroHelper(registerObject, decoratorName, typeName, mode, noCreationReason))
+        return nullptr;
+    return pyObj;
 }
 
 PyObject *qmlElementMacro(PyObject *pyObj)
