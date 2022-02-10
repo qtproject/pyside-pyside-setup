@@ -43,6 +43,7 @@
 #include <sbkpython.h>
 
 #include <QtCore/QFlags>
+#include <QtCore/QSharedPointer>
 
 #include <string>
 
@@ -66,8 +67,10 @@ struct QmlTypeInfo
     std::string noCreationReason;
 };
 
-QmlTypeInfo &ensureQmlTypeInfo(const PyObject *o);
-QmlTypeInfo qmlTypeInfo(const PyObject *o);
+using QmlTypeInfoPtr = QSharedPointer<QmlTypeInfo>;
+
+QmlTypeInfoPtr ensureQmlTypeInfo(const PyObject *o);
+QmlTypeInfoPtr qmlTypeInfo(const PyObject *o);
 
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug d, const QmlTypeInfo &);

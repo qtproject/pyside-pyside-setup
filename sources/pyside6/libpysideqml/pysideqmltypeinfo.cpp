@@ -44,24 +44,24 @@
 
 namespace PySide::Qml {
 
-using QmlTypeInfoHash = QHash<const PyObject *, QmlTypeInfo>;
+using QmlTypeInfoHash = QHash<const PyObject *, QmlTypeInfoPtr>;
 
 Q_GLOBAL_STATIC(QmlTypeInfoHash, qmlTypeInfoHashStatic);
 
-QmlTypeInfo &ensureQmlTypeInfo(const PyObject *o)
+QmlTypeInfoPtr ensureQmlTypeInfo(const PyObject *o)
 {
     auto *hash = qmlTypeInfoHashStatic();
     auto it = hash->find(o);
     if (it == hash->end())
-        it = hash->insert(o, {});
+        it = hash->insert(o, QmlTypeInfoPtr(new QmlTypeInfo));
     return it.value();
 }
 
-QmlTypeInfo qmlTypeInfo(const PyObject *o)
+QmlTypeInfoPtr qmlTypeInfo(const PyObject *o)
 {
     auto *hash = qmlTypeInfoHashStatic();
     auto it = hash->constFind(o);
-    return it != hash->cend() ? it.value() : QmlTypeInfo{};
+    return it != hash->cend() ? it.value() : QmlTypeInfoPtr{};
 }
 
 #ifndef QT_NO_DEBUG_STREAM

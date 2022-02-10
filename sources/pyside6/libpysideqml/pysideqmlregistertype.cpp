@@ -437,13 +437,18 @@ PyObject *qmlElementMacro(PyObject *pyObj, const char *decoratorName,
                           const char *typeName = nullptr)
 {
     RegisterMode mode = RegisterMode::Normal;
-    const auto &info = PySide::Qml::qmlTypeInfo(pyObj);
-    if (info.flags.testFlag(PySide::Qml::QmlTypeFlag::Singleton))
-        mode = RegisterMode::Singleton;
-    else if (info.flags.testFlag(PySide::Qml::QmlTypeFlag::Uncreatable))
-        mode = RegisterMode::Uncreatable;
+    const char *noCreationReason = nullptr;
+    const auto info = PySide::Qml::qmlTypeInfo(pyObj);
+    if (!info.isNull()) {
+        if (info->flags.testFlag(PySide::Qml::QmlTypeFlag::Singleton))
+            mode = RegisterMode::Singleton;
+        else if (info->flags.testFlag(PySide::Qml::QmlTypeFlag::Uncreatable))
+            mode = RegisterMode::Uncreatable;
+        noCreationReason = info->noCreationReason.c_str();
+
+    }
     return qmlElementMacroHelper(pyObj, decoratorName, typeName, mode,
-                                 info.noCreationReason.c_str());
+                                 noCreationReason);
 }
 
 PyObject *qmlElementMacro(PyObject *pyObj)
@@ -464,7 +469,7 @@ PyObject *qmlAnonymousMacro(PyObject *pyObj)
 
 PyObject *qmlSingletonMacro(PyObject *pyObj)
 {
-    PySide::Qml::ensureQmlTypeInfo(pyObj).flags.setFlag(PySide::Qml::QmlTypeFlag::Singleton);
+    PySide::Qml::ensureQmlTypeInfo(pyObj)->flags.setFlag(PySide::Qml::QmlTypeFlag::Singleton);
     Py_INCREF(pyObj);
     return pyObj;
 }

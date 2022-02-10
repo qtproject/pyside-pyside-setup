@@ -73,9 +73,9 @@ PyObject *PySideQmlUncreatablePrivate::tp_call(PyObject *self, PyObject *args, P
 
     auto *data = DecoratorPrivate::get<PySideQmlUncreatablePrivate>(self);
 
-    auto &info = PySide::Qml::ensureQmlTypeInfo(klass);
-    info.flags.setFlag(PySide::Qml::QmlTypeFlag::Uncreatable);
-    info.noCreationReason = data->string();
+    const auto info = PySide::Qml::ensureQmlTypeInfo(klass);
+    info->flags.setFlag(PySide::Qml::QmlTypeFlag::Uncreatable);
+    info->noCreationReason = data->string();
 
     Py_INCREF(klass);
     return klass;
