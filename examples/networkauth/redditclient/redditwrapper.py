@@ -56,7 +56,6 @@ NEW_URL = "https://oauth.reddit.com/new"
 HOT_URL = "https://oauth.reddit.com/hot"
 LIVE_THREADS_URL = "https://oauth.reddit.com/live/XXXX/about.json"
 
-
 class RedditWrapper(QObject):
 
     authenticated = Signal()
@@ -66,14 +65,24 @@ class RedditWrapper(QObject):
         super().__init__(parent)
 
         self._oauth2 = QOAuth2AuthorizationCodeFlow()
-        self._oauth2.statusChanged.connect(self.status_changed)
-        self._oauth2.authorizeWithBrowser.connect(QDesktopServices.openUrl)
         self._oauth2.setClientIdentifier(clientIdentifier)
         self._reply_handler = QOAuthHttpServerReplyHandler(1337, self)
         self._oauth2.setReplyHandler(self._reply_handler)
         self._oauth2.setAuthorizationUrl(QUrl(AUTHORIZATION_URL))
         self._oauth2.setAccessTokenUrl(QUrl(ACCESSTOKEN_URL))
         self._oauth2.setScope("identity read")
+        self._permanent = True
+
+        # connect to slots
+        self._oauth2.statusChanged.connect(self.status_changed)
+        self._oauth2.authorizeWithBrowser.connect(QDesktopServices.openUrl)
+
+        def modify_parameters_function(stage, parameters):
+            if stage == QAbstractOAuth.Stage.RequestingAuthorization and self.permanent:
+                parameters["duration"] = "permanent"
+            return parameters
+
+        self._oauth2.setModifyParametersFunction(modify_parameters_function)
 
     @Slot()
     def status_changed(self, status):
@@ -83,6 +92,14 @@ class RedditWrapper(QObject):
     def request_hot_threads(self):
         print("Getting hot threads...")
         return self._oauth2.get(QUrl(HOT_URL))
+
+    @property
+    def permanent(self):
+        return self._permanent
+
+    @permanent.setter
+    def permanent(self, value: bool):
+        self._permanent = value
 
     def grant(self):
         self._oauth2.grant()

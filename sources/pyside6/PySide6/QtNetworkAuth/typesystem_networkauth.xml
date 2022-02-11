@@ -52,6 +52,9 @@
                 <define-ownership class="target" owner="c++"/>
             </modify-argument>
         </modify-function>
+        <add-function signature="setModifyParametersFunction(PyObject* @modifyParametersFunction@)">
+            <inject-code class="target" position="beginning" file="../glue/qtnetworkauth.cpp" snippet="qabstractoauth-setmodifyparametersfunction"/>
+        </add-function>
     </object-type>
     <object-type name="QAbstractOAuth2">
         <modify-function signature="head(const QUrl&amp;,const QMap&lt;QString,QVariant&gt;&amp;)">
