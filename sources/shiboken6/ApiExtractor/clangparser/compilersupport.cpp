@@ -186,16 +186,18 @@ static HeaderPaths gppInternalIncludePaths(const QString &compiler)
 }
 
 // Detect Vulkan as supported from Qt 5.10 by checking the environment variables.
-static void detectVulkan(HeaderPaths *headerPaths)
+QByteArrayList detectVulkan()
 {
     static const char *vulkanVariables[] = {"VULKAN_SDK", "VK_SDK_PATH"};
     for (const char *vulkanVariable : vulkanVariables) {
         if (qEnvironmentVariableIsSet(vulkanVariable)) {
-            const QByteArray path = qgetenv(vulkanVariable) + QByteArrayLiteral("/include");
-            headerPaths->append(HeaderPath{path, HeaderType::System});
-            break;
+            const auto option = QByteArrayLiteral("-isystem")
+                                + qgetenv(vulkanVariable)
+                                + QByteArrayLiteral("/include");
+            return {option};
         }
     }
+    return {};
 }
 
 // For MSVC, we set the MS compatibility version and let Clang figure out its own
@@ -326,7 +328,6 @@ QByteArrayList emulatedCompilerOptions()
         break;
     }
 
-    detectVulkan(&headerPaths);
     std::transform(headerPaths.cbegin(), headerPaths.cend(),
                    std::back_inserter(result), HeaderPath::includeOption);
     return result;

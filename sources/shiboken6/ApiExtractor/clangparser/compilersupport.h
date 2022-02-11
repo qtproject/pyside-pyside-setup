@@ -63,6 +63,8 @@ LanguageLevel emulatedCompilerLanguageLevel();
 const char *languageLevelOption(LanguageLevel l);
 LanguageLevel languageLevelFromOption(const char *);
 
+QByteArrayList detectVulkan();
+
 Compiler compiler();
 Platform platform();
 } // namespace clang

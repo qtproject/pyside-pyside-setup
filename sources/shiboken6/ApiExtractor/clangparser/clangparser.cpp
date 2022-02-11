@@ -281,6 +281,7 @@ static CXTranslationUnit createTranslationUnit(CXIndex index,
         clangArgs += emulatedCompilerOptions();
         clangArgs += defaultArgs;
     }
+    clangArgs += detectVulkan();
     clangArgs += args;
     QScopedArrayPointer<const char *> argv(byteArrayListToFlatArgV(clangArgs));
     qDebug().noquote().nospace() << msgCreateTranslationUnit(clangArgs, flags);
