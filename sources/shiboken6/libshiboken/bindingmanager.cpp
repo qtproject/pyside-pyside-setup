@@ -289,11 +289,6 @@ PyObject *BindingManager::getOverride(const void *cptr,
 
     int flag = currentSelectId(Py_TYPE(wrapper));
     int propFlag = isdigit(methodName[0]) ? methodName[0] - '0' : 0;
-    if ((flag & 0x02) != 0 && (propFlag & 3) != 0) {
-        // PYSIDE-1019: Handle overriding with properties.
-        // They cannot be overridden (make that sure by the metaclass).
-        return nullptr;
-    }
     bool is_snake = flag & 0x01;
     PyObject *pyMethodName = nameCache[is_snake];  // borrowed
     if (pyMethodName == nullptr) {

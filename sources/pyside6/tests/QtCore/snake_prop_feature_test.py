@@ -46,7 +46,8 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtWidgets import QApplication, QWidget
+from PySide6.QtCore import Property, QSize
+from PySide6.QtWidgets import QApplication, QMainWindow, QWidget
 from PySide6.support import __feature__
 
 """
@@ -149,6 +150,25 @@ class FeatureTest(unittest.TestCase):
         self.assertTrue(isinstance(inspect["someFunc2"], staticmethod))
         self.assertTrue(isinstance(UserClass.someFunc2, FunctionType))
         self.assertTrue(isinstance(UserClass.add_action, MethodDescriptorType))
+
+    def testTrueProperyCanOverride(self):
+        from __feature__ import true_property
+
+        class CustomWidget(QWidget):
+            global prop_result
+            prop_result = None
+
+            @Property(QSize)
+            def minimumSizeHint(self):
+                global prop_result
+                print("called")
+                prop_result = super().minimumSizeHint
+                return prop_result
+
+        window = QMainWindow()
+        window.setCentralWidget(CustomWidget(window))
+        window.show()
+        self.assertTrue(isinstance(prop_result, QSize))
 
 
 if __name__ == '__main__':
