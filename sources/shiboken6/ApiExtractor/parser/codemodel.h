@@ -514,6 +514,7 @@ public:
     void setVariadics(bool isVariadics);
 
     bool isDefaultConstructor() const;
+    bool isSpaceshipOperator() const;
 
     bool isSimilar(const FunctionModelItem &other) const;
 

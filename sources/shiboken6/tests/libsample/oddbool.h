@@ -8,6 +8,10 @@
 
 #include <type_traits>
 
+#if __cplusplus >= 202002 || (defined(_MSVC_LANG) && _MSVC_LANG >= 202002)
+#  include <compare>
+#endif
+
 class OddBool
 {
 
@@ -79,5 +83,22 @@ inline std::enable_if<std::is_assignable<ComparisonTester, int>::value, bool>::t
 inline std::enable_if<std::is_assignable<ComparisonTester, int>::value, bool>::type
     operator!=(const ComparisonTester &c1, const ComparisonTester &c2)
 { return c1.compare(c2) != 0; }
+
+class LIBSAMPLE_API SpaceshipComparisonTester
+{
+public:
+    explicit SpaceshipComparisonTester(int v);
+
+#if __cplusplus >= 202002 || (defined(_MSVC_LANG) && _MSVC_LANG >= 202002)
+    auto operator<=>(const SpaceshipComparisonTester &rhs) const = default;
+
+    enum Enabled { HasSpaceshipOperator = 1 };
+#else
+    enum Enabled { HasSpaceshipOperator = 0 };
+#endif // C++ 20
+
+private:
+    int m_value;
+};
 
 #endif // ODDBOOL_H

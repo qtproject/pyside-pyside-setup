@@ -11,6 +11,7 @@ class TestReverseOperators : public QObject
 private slots:
     void testReverseSum();
     void testReverseSumWithAmbiguity();
+    void testSpaceshipOperator();
 };
 
 #endif

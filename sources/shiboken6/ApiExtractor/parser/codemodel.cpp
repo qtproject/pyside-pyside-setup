@@ -908,7 +908,13 @@ void _FunctionModelItem::setVariadics(bool isVariadics)
 bool _FunctionModelItem::isDefaultConstructor() const
 {
     return m_functionType == CodeModel::Constructor
-        && (m_arguments.isEmpty() || m_arguments.constFirst()->defaultValue());
+           && (m_arguments.isEmpty() || m_arguments.constFirst()->defaultValue());
+}
+
+bool _FunctionModelItem::isSpaceshipOperator() const
+{
+    return m_functionType == CodeModel::ComparisonOperator
+        && name() == u"operator<=>";
 }
 
 bool _FunctionModelItem::isNoExcept() const
@@ -1101,6 +1107,7 @@ static const NameFunctionTypeHash &nameToOperatorFunction()
         {u"operator>=",  CodeModel::ComparisonOperator},
         {u"operator==",  CodeModel::ComparisonOperator},
         {u"operator!=",  CodeModel::ComparisonOperator},
+        {u"operator<=>", CodeModel::ComparisonOperator},
         {u"operator!",   CodeModel::LogicalOperator},
         {u"operator&&",  CodeModel::LogicalOperator},
         {u"operator||",  CodeModel::LogicalOperator},

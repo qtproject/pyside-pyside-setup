@@ -17,9 +17,13 @@
 #include "namespacetypeentry.h"
 #include "usingmember.h"
 
+#include "qtcompat.h"
+
 #include <QtCore/QDebug>
 
 #include <algorithm>
+
+using namespace Qt::StringLiterals;
 
 bool function_sorter(const AbstractMetaFunctionCPtr &a, const AbstractMetaFunctionCPtr &b)
 {
@@ -817,6 +821,42 @@ AbstractMetaFunction *
     f->setAccess(access);
     f->setImplementingClass(q);
     return f;
+}
+
+static AbstractMetaType boolType()
+{
+    auto *boolType = TypeDatabase::instance()->findType(u"bool"_s);
+    Q_ASSERT(boolType);
+    AbstractMetaType result(boolType);
+    result.decideUsagePattern();
+    return result;
+}
+
+// Helper to synthesize comparison operators from a spaceship operator. Since
+// shiboken also generates code for comparing to different types, this fits
+// better than of handling it in the generator code.
+void AbstractMetaClass::addSynthesizedComparisonOperators()
+{
+    static const auto returnType = boolType();
+
+    AbstractMetaType selfType(typeEntry());
+    selfType.setConstant(true);
+    selfType.setReferenceType(LValueReference);
+    selfType.decideUsagePattern();
+    AbstractMetaArgument selfArgument;
+    selfArgument.setType(selfType);
+    selfArgument.setName(u"rhs"_qs);
+    AbstractMetaArgumentList arguments(1, selfArgument);
+
+    static const char *operators[]
+        = {"operator==", "operator!=", "operator<", "operator<=", "operator>", "operator>="};
+    for (auto *op : operators) {
+        auto *f = AbstractMetaClassPrivate::createFunction(QLatin1StringView(op),
+                                                           AbstractMetaFunction::ComparisonOperator,
+                                                           Access::Public, arguments,
+                                                           returnType, this);
+        d->addFunction(AbstractMetaFunctionCPtr(f));
+    }
 }
 
 bool AbstractMetaClass::hasNonPrivateConstructor() const

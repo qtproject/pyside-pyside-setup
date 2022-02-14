@@ -152,6 +152,9 @@
         <add-function signature="operator==(const ComparisonTester&amp;)" return-type="bool"/>
         <add-function signature="operator!=(const ComparisonTester&amp;)" return-type="bool"/>
     </value-type>
+    <value-type name="SpaceshipComparisonTester">
+        <enum-type name="Enabled"/>
+    </value-type>
 
     <primitive-type name="PStr">
         <include file-name="str.h" location="global"/>

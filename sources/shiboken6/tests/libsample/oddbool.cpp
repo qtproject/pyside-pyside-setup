@@ -21,3 +21,7 @@ int ComparisonTester::compare(const ComparisonTester &rhs) const
         return 1;
     return 0;
 }
+
+SpaceshipComparisonTester::SpaceshipComparisonTester(int v) : m_value(v)
+{
+}

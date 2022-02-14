@@ -117,6 +117,8 @@ public:
     const TypeEntry *parentManagementEntry() const;
     bool hasParentManagement() const { return parentManagementEntry() != nullptr; }
 
+    void addSynthesizedComparisonOperators();
+
     bool generateExceptionHandling() const;
 
     CppWrapper cppWrapper() const;

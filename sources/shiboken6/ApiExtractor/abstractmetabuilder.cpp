@@ -282,6 +282,11 @@ void AbstractMetaBuilderPrivate::traverseOperatorFunction(const FunctionModelIte
     if (baseoperandClass == nullptr)
         return;
 
+    if (item->isSpaceshipOperator() && !item->isDeleted()) {
+        baseoperandClass->addSynthesizedComparisonOperators();
+        return;
+    }
+
     AbstractMetaFunction *metaFunction = traverseFunction(item, baseoperandClass);
     if (metaFunction == nullptr)
         return;
@@ -1304,6 +1309,9 @@ AbstractMetaFunctionRawPtrList
     for (const FunctionModelItem &function : scopeFunctionList) {
         if (isNamespace && function->isOperator()) {
             traverseOperatorFunction(function, currentClass);
+        } else if (function->isSpaceshipOperator() && !function->isDeleted()) {
+            if (currentClass)
+                currentClass->addSynthesizedComparisonOperators();
         } else if (auto *metaFunction = traverseFunction(function, currentClass)) {
             result.append(metaFunction);
         } else if (function->functionType() == CodeModel::Constructor) {

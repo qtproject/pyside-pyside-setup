@@ -7,6 +7,9 @@
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
 #include <typesystem.h>
+#include <clangparser/compilersupport.h>
+
+#include <algorithm>
 
 void TestReverseOperators::testReverseSum()
 {
@@ -93,7 +96,33 @@ void TestReverseOperators::testReverseSumWithAmbiguity()
     QCOMPARE(reverseOp->minimalSignature(), u"operator+(A,B)");
 }
 
-
+void  TestReverseOperators::testSpaceshipOperator()
+{
+    const char cppCode[] = R"(
+    class Test {
+        public:
+        explicit Test(int v);
+        int operator<=>(const Test &rhs) const = default;
+    };)";
+    const char xmlCode[] = R"(
+        <typesystem package="Foo">
+            <value-type name='Test'/>
+        </typesystem>)";
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false,
+                                                                {}, {}, LanguageLevel::Cpp20));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
+    QCOMPARE(classes.size(), 1);
+    const AbstractMetaClass *testClass = AbstractMetaClass::findClass(classes, u"Test");
+    QVERIFY(testClass);
+    const auto &functions = testClass->functions();
+    // 6 operators should be synthesized
+    const auto count = std::count_if(functions.cbegin(), functions.cend(),
+                                     [](const AbstractMetaFunctionCPtr &f) {
+                                         return f->isComparisonOperator();
+                                     });
+    QCOMPARE(count, 6);
+}
 
 QTEST_APPLESS_MAIN(TestReverseOperators)
 
