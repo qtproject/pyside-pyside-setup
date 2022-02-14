@@ -33,6 +33,7 @@
 #include "typesystemparser.h"
 #include "conditionalstreamreader.h"
 #include "predefined_templates.h"
+#include "clangparser/compilersupport.h"
 
 #include <QtCore/QBuffer>
 #include <QtCore/QFile>
@@ -246,6 +247,23 @@ QStringList TypeDatabase::typesystemKeywords() const
     QStringList result = m_typesystemKeywords;
     for (const auto &d : m_dropTypeEntries)
         result.append(QStringLiteral("no_") + d);
+
+    switch (clang::emulatedCompilerLanguageLevel()) {
+    case LanguageLevel::Cpp11:
+        result.append(u"c++11"_qs);
+        break;
+    case LanguageLevel::Cpp14:
+        result.append(u"c++14"_qs);
+        break;
+    case LanguageLevel::Cpp17:
+        result.append(u"c++17"_qs);
+        break;
+    case LanguageLevel::Cpp20:
+        result.append(u"c++20"_qs);
+        break;
+    default:
+        break;
+    }
     return result;
 }
 

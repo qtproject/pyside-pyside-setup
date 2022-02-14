@@ -648,7 +648,12 @@ Conditional Processing
          <?endif?>
 
      There are predefined keywords indicating the operating system (``windows``,
-     ``unix`` and ``darwin``). The class names passed to the
+     ``unix`` and ``darwin``).
+
+     The language level passed to the ``language-level`` command line option
+     is reflected as ``c++11``, ``c++14``, ``c++17`` or ``c++20``.
+
+     The class names passed to the
      :ref:`--drop-type-entries <drop-type-entries>` command line option
      are also predefined, prefixed by ``no_``. This allows for example
      for enclosing added functions referring to those classes within
