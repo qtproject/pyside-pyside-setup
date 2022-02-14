@@ -45,11 +45,6 @@ public:
     inline double calculateArea() const { return m_width * m_height; }
 
     // Comparison Operators
-    inline bool operator==(const Size& other)
-    {
-        return m_width == other.m_width && m_height == other.m_height;
-    }
-
     inline bool operator<(const Size& other)
     {
         return calculateArea() < other.calculateArea();
@@ -117,6 +112,7 @@ public:
     // TODO: add ++size, size++, --size, size--
 
     // External operators
+    friend inline bool operator==(const Size&, const Size&);
     friend inline bool operator!=(const Size&, const Size&);
     friend inline const Size operator+(const Size&, const Size&);
     friend inline const Size operator-(const Size&, const Size&);
@@ -140,6 +136,11 @@ private:
 inline bool operator!=(const Size& s1, const Size& s2)
 {
     return s1.m_width != s2.m_width || s1.m_height != s2.m_height;
+}
+
+inline bool operator==(const Size& s1, const Size& s2)
+{
+    return s1.m_width == s2.m_width && s1.m_height == s2.m_height;
 }
 
 inline bool operator<(double area, const Size& s)
