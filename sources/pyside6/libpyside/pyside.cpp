@@ -320,6 +320,34 @@ void initQApp()
     setDestroyQApplication(destroyQCoreApplication);
 }
 
+static QByteArray _sigWithMangledName(const QByteArray &signature, bool mangle)
+{
+    if (!mangle)
+        return signature;
+    auto bracePos = signature.indexOf('(');
+    auto limit = bracePos >= 0 ? bracePos : signature.size();
+    if (limit < 3)
+        return signature;
+    QByteArray result;
+    result.reserve(signature.size() + 4);
+    for (auto i = 0; i < limit; ++i) {
+        const char c = signature.at(i);
+        if (std::isupper(c)) {
+            if (i > 0) {
+                if (std::isupper(signature.at(i - 1)))
+                    return signature; // Give up at consecutive upper chars
+                 result.append('_');
+            }
+            result.append(std::tolower(c));
+        } else {
+            result.append(c);
+        }
+    }
+    // Copy the rest after the opening brace (if any)
+    result.append(signature.mid(limit));
+    return result;
+}
+
 PyObject *getMetaDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *name)
 {
     PyObject *attr = PyObject_GenericGetAttr(self, name);
@@ -334,27 +362,38 @@ PyObject *getMetaDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *nam
         attr = value;
     }
 
-    //mutate native signals to signal instance type
+    // Mutate native signals to signal instance type
     if (attr && PyObject_TypeCheck(attr, PySideSignalTypeF())) {
-        PyObject *signal = reinterpret_cast<PyObject *>(Signal::initialize(reinterpret_cast<PySideSignal *>(attr), name, self));
-        PyObject_SetAttr(self, name, reinterpret_cast<PyObject *>(signal));
-        return signal;
+        auto *inst = Signal::initialize(reinterpret_cast<PySideSignal *>(attr), name, self);
+        PyObject *signalInst = reinterpret_cast<PyObject *>(inst);
+        PyObject_SetAttr(self, name, signalInst);
+        return signalInst;
     }
 
-    //search on metaobject (avoid internal attributes started with '__')
+    // Search on metaobject (avoid internal attributes started with '__')
     if (!attr) {
+        PyObject *type, *value, *traceback;
+        PyErr_Fetch(&type, &value, &traceback);     // This was omitted for a loong time.
+
         const char *cname = Shiboken::String::toCString(name);
+        int flags = SbkObjectType_GetReserved(Py_TYPE(self));
+        int snake_flag = flags & 0x01;
         uint cnameLen = qstrlen(cname);
         if (std::strncmp("__", cname, 2)) {
             const QMetaObject *metaObject = cppSelf->metaObject();
-            //signal
             QList<QMetaMethod> signalList;
-            for(int i=0, i_max = metaObject->methodCount(); i < i_max; i++) {
+            for (int i=0, imax = metaObject->methodCount(); i < imax; i++) {
                 QMetaMethod method = metaObject->method(i);
-                const QByteArray methSig_ = method.methodSignature();
+                // PYSIDE-1753: Snake case names must be renamed here too, or they will be
+                // found unexpectedly when forgetting to rename them.
+                auto origSignature = method.methodSignature();
+                // Currently, we rename only methods but no signals. This might change.
+                bool use_lower = snake_flag and method.methodType() != QMetaMethod::Signal;
+                const QByteArray methSig_ = _sigWithMangledName(origSignature, use_lower);
                 const char *methSig = methSig_.constData();
-                bool methMacth = !std::strncmp(cname, methSig, cnameLen) && methSig[cnameLen] == '(';
-                if (methMacth) {
+                bool methMatch = std::strncmp(cname, methSig, cnameLen) == 0
+                                 && methSig[cnameLen] == '(';
+                if (methMatch) {
                     if (method.methodType() == QMetaMethod::Signal) {
                         signalList.append(method);
                     } else {
@@ -368,11 +407,13 @@ PyObject *getMetaDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *nam
                 }
             }
             if (!signalList.isEmpty()) {
-                PyObject *pySignal = reinterpret_cast<PyObject *>(Signal::newObjectFromMethod(self, signalList));
+                PyObject *pySignal = reinterpret_cast<PyObject *>(
+                    Signal::newObjectFromMethod(self, signalList));
                 PyObject_SetAttr(self, name, pySignal);
                 return pySignal;
             }
         }
+        PyErr_Restore(type, value, traceback);
     }
     return attr;
 }
