@@ -241,22 +241,22 @@ void AbstractMetaBuilderPrivate::traverseOperatorFunction(const FunctionModelIte
     if (item->accessPolicy() != Access::Public)
         return;
 
-    ArgumentList arguments = item->arguments();
+    const ArgumentList &itemArguments = item->arguments();
     bool firstArgumentIsSelf = true;
     bool unaryOperator = false;
 
-    auto baseoperandClass = argumentToClass(arguments.at(0), currentClass);
+    auto baseoperandClass = argumentToClass(itemArguments.at(0), currentClass);
 
-    if (arguments.size() == 1) {
+    if (itemArguments.size() == 1) {
         unaryOperator = true;
     } else if (!baseoperandClass
                || !baseoperandClass->typeEntry()->generateCode()) {
-        baseoperandClass = argumentToClass(arguments.at(1), currentClass);
+        baseoperandClass = argumentToClass(itemArguments.at(1), currentClass);
         firstArgumentIsSelf = false;
     } else {
         auto type = translateType(item->type(), currentClass);
         const TypeEntry *retType = type.has_value() ? type->typeEntry() : nullptr;
-        AbstractMetaClass *otherArgClass = argumentToClass(arguments.at(1), currentClass);
+        AbstractMetaClass *otherArgClass = argumentToClass(itemArguments.at(1), currentClass);
         if (otherArgClass && retType
             && (retType->isValue() || retType->isObject())
             && retType != baseoperandClass->typeEntry()
@@ -265,48 +265,45 @@ void AbstractMetaBuilderPrivate::traverseOperatorFunction(const FunctionModelIte
             firstArgumentIsSelf = false;
         }
     }
+    if (baseoperandClass == nullptr)
+        return;
 
-    if (baseoperandClass) {
-        AbstractMetaFunction *metaFunction = traverseFunction(item, baseoperandClass);
-        if (metaFunction) {
-            auto flags = metaFunction->flags();
-            // Strip away first argument, since that is the containing object
-            AbstractMetaArgumentList arguments = metaFunction->arguments();
-            if (firstArgumentIsSelf || unaryOperator) {
-                AbstractMetaArgument first = arguments.takeFirst();
-                fixArgumentIndexes(&arguments);
-                if (!unaryOperator && first.type().indirections())
-                    metaFunction->setPointerOperator(true);
-                metaFunction->setArguments(arguments);
-                flags.setFlag(AbstractMetaFunction::Flag::OperatorLeadingClassArgumentRemoved);
-                if (first.type().passByValue())
-                    flags.setFlag(AbstractMetaFunction::Flag::OperatorClassArgumentByValue);
-            } else {
-                // If the operator method is not unary and the first operator is
-                // not of the same type of its owning class we suppose that it
-                // must be an reverse operator (e.g. CLASS::operator(TYPE, CLASS)).
-                // All operator overloads that operate over a class are already
-                // being added as member functions of that class by the API Extractor.
-                AbstractMetaArgument last = arguments.takeLast();
-                if (last.type().indirections())
-                    metaFunction->setPointerOperator(true);
+    AbstractMetaFunction *metaFunction = traverseFunction(item, baseoperandClass);
+    if (metaFunction == nullptr)
+        return;
 
-                metaFunction->setArguments(arguments);
-                metaFunction->setReverseOperator(true);
-                flags.setFlag(AbstractMetaFunction::Flag::OperatorTrailingClassArgumentRemoved);
-                if (last.type().passByValue())
-                    flags.setFlag(AbstractMetaFunction::Flag::OperatorClassArgumentByValue);
-            }
-
-            metaFunction->setFlags(flags);
-            metaFunction->setAccess(Access::Public);
-            setupFunctionDefaults(metaFunction, baseoperandClass);
-            baseoperandClass->addFunction(AbstractMetaFunctionCPtr(metaFunction));
-            Q_ASSERT(!metaFunction->wasPrivate());
-        } else {
-            delete metaFunction;
-        }
+    auto flags = metaFunction->flags();
+    // Strip away first argument, since that is the containing object
+    AbstractMetaArgumentList arguments = metaFunction->arguments();
+    if (firstArgumentIsSelf || unaryOperator) {
+        AbstractMetaArgument first = arguments.takeFirst();
+        fixArgumentIndexes(&arguments);
+        if (!unaryOperator && first.type().indirections())
+            metaFunction->setPointerOperator(true);
+        metaFunction->setArguments(arguments);
+        flags.setFlag(AbstractMetaFunction::Flag::OperatorLeadingClassArgumentRemoved);
+        if (first.type().passByValue())
+            flags.setFlag(AbstractMetaFunction::Flag::OperatorClassArgumentByValue);
+    } else {
+        // If the operator method is not unary and the first operator is
+        // not of the same type of its owning class we suppose that it
+        // must be an reverse operator (e.g. CLASS::operator(TYPE, CLASS)).
+        // All operator overloads that operate over a class are already
+        // being added as member functions of that class by the API Extractor.
+        AbstractMetaArgument last = arguments.takeLast();
+        if (last.type().indirections())
+            metaFunction->setPointerOperator(true);
+        metaFunction->setArguments(arguments);
+        metaFunction->setReverseOperator(true);
+        flags.setFlag(AbstractMetaFunction::Flag::OperatorTrailingClassArgumentRemoved);
+        if (last.type().passByValue())
+            flags.setFlag(AbstractMetaFunction::Flag::OperatorClassArgumentByValue);
     }
+    metaFunction->setFlags(flags);
+    metaFunction->setAccess(Access::Public);
+    setupFunctionDefaults(metaFunction, baseoperandClass);
+    baseoperandClass->addFunction(AbstractMetaFunctionCPtr(metaFunction));
+    Q_ASSERT(!metaFunction->wasPrivate());
 }
 
 bool AbstractMetaBuilderPrivate::traverseStreamOperator(const FunctionModelItem &item,
