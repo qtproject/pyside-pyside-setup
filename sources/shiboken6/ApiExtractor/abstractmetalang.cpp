@@ -82,6 +82,10 @@ public:
     }
 
     void addFunction(const AbstractMetaFunctionCPtr &function);
+    static AbstractMetaFunction *
+        createFunction(const QString &name, AbstractMetaFunction::FunctionType t,
+                       Access access, const AbstractMetaArgumentList &arguments,
+                       const AbstractMetaType &returnType, AbstractMetaClass *q);
     void addConstructor(AbstractMetaFunction::FunctionType t,
                         Access access,
                         const AbstractMetaArgumentList &arguments,
@@ -824,21 +828,11 @@ void AbstractMetaClassPrivate::addConstructor(AbstractMetaFunction::FunctionType
                                               const AbstractMetaArgumentList &arguments,
                                               AbstractMetaClass *q)
 {
-    auto *f = new AbstractMetaFunction;
-    f->setType(AbstractMetaType::createVoid());
-    f->setOriginalName(q->name());
-    f->setName(q->name());
-    f->setOwnerClass(q);
-    f->setFunctionType(t);
-    f->setArguments(arguments);
-    f->setDeclaringClass(q);
-    f->setAccess(access);
+    auto *f = createFunction(q->name(), t, access, arguments, AbstractMetaType::createVoid(), q);
     if (access != Access::Private)
          m_hasNonPrivateConstructor = true;
     f->setAttributes(AbstractMetaFunction::FinalInTargetLang
                      | AbstractMetaFunction::AddedMethod);
-    f->setImplementingClass(q);
-
     addFunction(AbstractMetaFunctionCPtr(f));
 }
 
@@ -861,6 +855,27 @@ void AbstractMetaClass::addDefaultCopyConstructor()
 
     d->addConstructor(AbstractMetaFunction::CopyConstructorFunction,
                       Access::Public, {arg}, this);
+}
+
+AbstractMetaFunction *
+    AbstractMetaClassPrivate::createFunction(const QString &name,
+                                            AbstractMetaFunction::FunctionType t,
+                                            Access access,
+                                            const AbstractMetaArgumentList &arguments,
+                                            const AbstractMetaType &returnType,
+                                            AbstractMetaClass *q)
+{
+    auto *f = new AbstractMetaFunction;
+    f->setType(returnType);
+    f->setOriginalName(name);
+    f->setName(name);
+    f->setOwnerClass(q);
+    f->setFunctionType(t);
+    f->setArguments(arguments);
+    f->setDeclaringClass(q);
+    f->setAccess(access);
+    f->setImplementingClass(q);
+    return f;
 }
 
 bool AbstractMetaClass::hasNonPrivateConstructor() const
