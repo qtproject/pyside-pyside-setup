@@ -50,21 +50,75 @@ from helper.usesqapplication import UsesQApplication
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QAction
 from PySide6.QtWidgets import QApplication, QLabel, QFrame
+from PySide6.support import __feature__
 
 
-class ConstructorPropertiesTest(UsesQApplication):
+class ConstructorPropertiesTest(unittest.TestCase):
+
+    def setUp(self):
+        qApp or QApplication()
+        __feature__.set_selection(0x80)     # FIXME: 0 is insecure
+
+    def tearDown(self):
+        __feature__.set_selection(0)
+        qApp.shutdown()
 
     # PYSIDE-1019: First property extension was support by the constructor.
     def testCallConstructor(self):
         label = QLabel(
-            frameStyle=QFrame.Panel | QFrame.Sunken,
-            text="first line\nsecond line",
-            alignment=Qt.AlignBottom | Qt.AlignRight
+            frameStyle=QFrame.Panel | QFrame.Sunken,    # QFrame attr, no property
+            lineWidth = 2,                              # QFrame property
+            text="first line\nsecond line",             # QLabel property
+            alignment=Qt.AlignBottom | Qt.AlignRight    # QLabel property
         )
+        self.assertEqual(label.lineWidth(), 2)
         self.assertRaises(AttributeError, lambda: QLabel(
             somethingelse=42,
-            text="first line\nsecond line",
-            alignment=Qt.AlignBottom | Qt.AlignRight
+        ))
+
+    # PYSIDE-1705: The same with snake_case
+    def testCallConstructor_snake(self):
+        from __feature__ import snake_case
+
+        label = QLabel(
+            frame_style=QFrame.Panel | QFrame.Sunken,   # QFrame attr, no property
+            line_width = 2,                             # QFrame property
+            text="first line\nsecond line",             # QLabel property
+            alignment=Qt.AlignBottom | Qt.AlignRight    # QLabel property
+        )
+        self.assertEqual(label.line_width(), 2)
+        self.assertRaises(AttributeError, lambda: QLabel(
+            lineWidth = 2,                              # QFrame property
+        ))
+
+    # PYSIDE-1705: The same with true_property
+    def testCallConstructor_prop(self):
+        from __feature__ import true_property
+
+        label = QLabel(
+            frameStyle=QFrame.Panel | QFrame.Sunken,    # QFrame attr, no property
+            lineWidth = 2,                              # QFrame property
+            text="first line\nsecond line",             # QLabel property
+            alignment=Qt.AlignBottom | Qt.AlignRight    # QLabel property
+        )
+        self.assertEqual(label.lineWidth, 2)
+        self.assertRaises(AttributeError, lambda: QLabel(
+            line_width = 2,                             # QFrame property
+        ))
+
+    # PYSIDE-1705: The same with snake_case and true_property
+    def testCallConstructor_prop_snake(self):
+        from __feature__ import snake_case, true_property
+
+        label = QLabel(
+            frame_style=QFrame.Panel | QFrame.Sunken,   # QFrame attr, no property
+            line_width = 2,                             # QFrame property
+            text="first line\nsecond line",             # QLabel property
+            alignment=Qt.AlignBottom | Qt.AlignRight    # QLabel property
+        )
+        self.assertEqual(label.line_width, 2)
+        self.assertRaises(AttributeError, lambda: QLabel(
+            lineWidth = 2,                              # QFrame property
         ))
 
 
