@@ -85,6 +85,26 @@ static void formatPyTypeObject(const PyTypeObject *obj, std::ostream &str)
             str << " [type]";
         if (obj->tp_flags & Py_TPFLAGS_IS_ABSTRACT)
             str << " [abstract]";
+#if PY_VERSION_HEX >= 0x03080000
+        if (obj->tp_flags & Py_TPFLAGS_METHOD_DESCRIPTOR)
+            str << " [method_descriptor]";
+#  if PY_VERSION_HEX >= 0x03090000
+#    ifndef Py_LIMITED_API
+        if (obj->tp_flags & Py_TPFLAGS_HAVE_VECTORCALL)
+            str << " [vectorcall]";
+#    endif // !Py_LIMITED_API
+#    if PY_VERSION_HEX >= 0x030A0000
+        if (obj->tp_flags & Py_TPFLAGS_IMMUTABLETYPE)
+            str << " [immutabletype]";
+        if (obj->tp_flags & Py_TPFLAGS_DISALLOW_INSTANTIATION)
+            str << " [disallow_instantiation]";
+        if (obj->tp_flags & Py_TPFLAGS_MAPPING)
+            str << " [mapping]";
+        if (obj->tp_flags & Py_TPFLAGS_SEQUENCE)
+            str << " [sequence]";
+#    endif // 3.10
+#  endif // 3.9
+#endif // 3.8
     } else {
         str << '0';
     }
