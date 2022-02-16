@@ -81,9 +81,9 @@ protected:
 
     /// Helper for checking the arguments of the call operator
     /// \param args Arguments
-    /// \param name Decorator name
     /// \param checkMode Type check mode
-    /// \return The type object if the argument is a matching type
+    /// \return The type object extracted from args tuple (borrowed reference)
+    ///         if the argument is a matching type
     PyObject *tp_call_check(PyObject *args,
                             CheckMode checkMode = CheckMode::QObjectType) const;
 };
