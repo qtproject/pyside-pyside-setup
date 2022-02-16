@@ -108,25 +108,223 @@ void init(PyObject *module)
     initQApp();
 }
 
+static const QByteArray _sigWithMangledName(const QByteArray &signature, bool mangle)
+{
+    if (!mangle)
+        return signature;
+    auto bracePos = signature.indexOf('(');
+    auto limit = bracePos >= 0 ? bracePos : signature.size();
+    if (limit < 3)
+        return signature;
+    QByteArray result;
+    result.reserve(signature.size() + 4);
+    for (auto i = 0; i < limit; ++i) {
+        const char c = signature.at(i);
+        if (std::isupper(c)) {
+            if (i > 0) {
+                if (std::isupper(signature.at(i - 1)))
+                    return signature; // Give up at consecutive upper chars
+                 result.append('_');
+            }
+            result.append(std::tolower(c));
+        } else {
+            result.append(c);
+        }
+    }
+    // Copy the rest after the opening brace (if any)
+    result.append(signature.mid(limit));
+    return result;
+}
+
+static const QByteArray _sigWithOrigName(const QByteArray &signature, bool mangle)
+{
+    if (!mangle)
+        return signature;
+    auto bracePos = signature.indexOf('(');
+    auto limit = bracePos >= 0 ? bracePos : signature.size();
+    QByteArray result;
+    result.reserve(signature.size());
+    for (auto i = 0; i < limit; ++i) {
+        const char c = signature.at(i);
+        if (std::isupper(c)) {
+            if (i > 0) {
+                if (std::isupper(signature.at(i - 1)))
+                    return signature;       // Give up at consecutive upper chars
+                return QByteArray{};        // Error, this was not converted!
+            }
+        }
+        if (std::islower(c) && i > 0 && signature.at(i - 1) == '_') {
+            result.chop(1);
+            result.append(std::toupper(c));
+        } else {
+            result.append(c);
+        }
+    }
+    // Copy the rest after the opening brace (if any)
+    result.append(signature.mid(limit));
+    return result;
+}
+
+/*****************************************************************************
+ *
+ * How do we find a property?
+ * --------------------------
+ *
+ * There are methods which are truly parts of properties, and there are
+ * other property-like methods which are not. True properties can be
+ * found by inspecting `SbkObjectType_GetPropertyStrings(type)`.
+ *
+ * Pseudo-properties have only a getter and a setter, and we must assume that
+ * the name of the getter is the property name, and the name of the setter
+ * is the uppercase of the getter with "set" prepended.
+ *
+ * We first walk the mro and search the property name and get the setter
+ * name. If that doesn't work, we use the heuristics for the setter.
+ * We then do the final mro lookup.
+ *
+ * Note that the true property lists have the original names, while the
+ * dict entries in the mro are already mangled.
+ */
+
+static const QByteArrayList parseFields(const char *propstr, int flags, bool *stdwrite)
+{
+    /*
+     * Break the string into subfields at ':' and add defaults.
+     */
+    if (stdwrite)
+        *stdwrite = true;
+    QByteArray s = QByteArray(propstr);
+    auto list = s.split(':');
+    assert(list.size() == 2 || list.size() == 3);
+    auto name = list[0];
+    auto read = list[1];
+    if (read.isEmpty())
+        list[1] = name;
+    if (list.size() == 2)
+        return list;
+    auto write = list[2];
+    if (stdwrite)
+        *stdwrite = write.isEmpty();
+    if (write.isEmpty()) {
+        auto snake_flag = flags & 0x01;
+        if (snake_flag) {
+            list[2] = ("set_") + name;
+        } else {
+            list[2] = QByteArray("set") + name;
+            list[2][3] = std::toupper(list[2][3]);
+        }
+    }
+    return list;
+}
+
+static QByteArrayList _SbkType_LookupProperty(PyTypeObject *type,
+                                              const QByteArray &name, int flags)
+{
+    /*
+     * Looks up a property and returns all fields.
+     */
+    int snake_flag = flags & 0x01;
+    QByteArray origName(_sigWithOrigName(name, snake_flag));
+    if (origName.isEmpty())
+        return QByteArrayList{};
+    PyObject *mro = type->tp_mro;
+    auto n = PyTuple_GET_SIZE(mro);
+    auto len = std::strlen(origName);
+    for (Py_ssize_t idx = 0; idx < n; idx++) {
+        PyTypeObject *base = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
+        auto props = SbkObjectType_GetPropertyStrings(base);
+        if (props == nullptr || *props == nullptr)
+            continue;
+        for (; *props != nullptr; ++props) {
+            QByteArray propstr(*props);
+            if (std::strncmp(propstr, origName, len) == 0) {
+                if (propstr[len] != ':')
+                    continue;
+                // We found the property. Return the parsed fields.
+                propstr = _sigWithMangledName(propstr, snake_flag);
+                return parseFields(propstr, flags, nullptr);
+            }
+        }
+    }
+    return QByteArrayList{};
+}
+
+static QByteArrayList _SbkType_FakeProperty(const QByteArray &name, int flags)
+{
+    /*
+     * Handle a pseudo.property and return all fields.
+     */
+    int snake_flag = flags & 0x01;
+    QByteArray propstr(name);
+    propstr += "::";
+    propstr = _sigWithMangledName(propstr, snake_flag);
+    return parseFields(propstr, snake_flag, nullptr);
+}
+
 static bool _setProperty(PyObject *qObj, PyObject *name, PyObject *value, bool *accept)
 {
-    QByteArray propName(Shiboken::String::toCString(name));
-    propName[0] = std::toupper(propName[0]);
-    propName.prepend("set");
+    using Shiboken::AutoDecRef;
 
-    Shiboken::AutoDecRef propSetter(PyObject_GetAttrString(qObj, propName.constData()));
-    if (!propSetter.isNull()) {
+    QByteArray propName(Shiboken::String::toCString(name));
+    auto type = Py_TYPE(qObj);
+    int flags = SbkObjectType_GetReserved(type);
+    int prop_flag = flags & 0x02;
+    auto found = false;
+    QByteArray getterName{}, setterName{};
+
+    auto fields = _SbkType_LookupProperty(type, propName, flags);
+    if (!fields.isEmpty()) {
+        found = true;
+        bool haveWrite = fields.size() == 3;
+        if (!haveWrite)
+            return false;
+    } else {
+        fields = _SbkType_FakeProperty(propName, flags);
+    }
+
+    propName = fields[0];
+    getterName = fields[1];
+    setterName = fields[2];
+
+    // PYSIDE-1702: We do not use getattr, since that could trigger an action
+    //              if we have a true property. Better to look inside the mro.
+    //              That should return a descriptor or a property.
+    PyObject *look{};
+
+    if (found && prop_flag) {
+        // We have a property, and true_property is active.
+        // There must be a property object and we use it's fset.
+        AutoDecRef pyPropName(Shiboken::String::fromCString(propName.constData()));
+        look = _PepType_Lookup(Py_TYPE(qObj), pyPropName);
+    } else {
+        // We have a pseudo property or true_property is off, looking for a setter.
+        AutoDecRef pySetterName(Shiboken::String::fromCString(setterName.constData()));
+        look = _PepType_Lookup(Py_TYPE(qObj), pySetterName);
+    }
+
+    if (look) {
+        AutoDecRef propSetter{};
+        static PyObject *magicGet = PyMagicName::get();
+        if (found && prop_flag) {
+            // the indirection of the setter descriptor in a true property
+            AutoDecRef descr(PyObject_GetAttr(look, PyName::fset()));
+            propSetter.reset(PyObject_CallMethodObjArgs(descr, magicGet, qObj, nullptr));
+        } else {
+            // look is already the descriptor
+            propSetter.reset(PyObject_CallMethodObjArgs(look, magicGet, qObj, nullptr));
+        }
         *accept = true;
-        Shiboken::AutoDecRef args(PyTuple_Pack(1, value));
-        Shiboken::AutoDecRef retval(PyObject_CallObject(propSetter, args));
+        AutoDecRef args(PyTuple_Pack(1, value));
+        AutoDecRef retval(PyObject_CallObject(propSetter, args));
         if (retval.isNull())
             return false;
     } else {
         PyErr_Clear();
-        Shiboken::AutoDecRef attr(PyObject_GenericGetAttr(qObj, name));
+        AutoDecRef attr(PyObject_GenericGetAttr(qObj, name));
         if (PySide::Property::checkType(attr)) {
             *accept = true;
-            if (PySide::Property::setValue(reinterpret_cast<PySideProperty *>(attr.object()), qObj, value) < 0)
+            if (PySide::Property::setValue(reinterpret_cast<PySideProperty *>(
+                    attr.object()), qObj, value) < 0)
                 return false;
         }
     }
@@ -138,26 +336,32 @@ bool fillQtProperties(PyObject *qObj, const QMetaObject *metaObj, PyObject *kwds
 
     PyObject *key, *value;
     Py_ssize_t pos = 0;
+    int flags = SbkObjectType_GetReserved(Py_TYPE(qObj));
+    int snake_flag = flags & 0x01;
 
     while (PyDict_Next(kwds, &pos, &key, &value)) {
         QByteArray propName(Shiboken::String::toCString(key));
+        QByteArray unmangledName = _sigWithOrigName(propName, snake_flag);
         bool accept = false;
-        if (metaObj->indexOfProperty(propName) != -1) {
-            if (!_setProperty(qObj, key, value, &accept))
-                return false;
-        } else {
-            propName.append("()");
-            if (metaObj->indexOfSignal(propName) != -1) {
-                accept = true;
-                propName.prepend('2');
-                if (!PySide::Signal::connect(qObj, propName, value))
+        // PYSIDE-1705: Make sure that un-mangled names are not recognized in snake_case mode.
+        if (!unmangledName.isEmpty()) {
+            if (metaObj->indexOfProperty(unmangledName) != -1) {
+                if (!_setProperty(qObj, key, value, &accept))
+                    return false;
+            } else {
+                propName.append("()");
+                if (metaObj->indexOfSignal(propName) != -1) {
+                    accept = true;
+                    propName.prepend('2');
+                    if (!PySide::Signal::connect(qObj, propName, value))
+                        return false;
+                }
+            }
+            if (!accept) {
+                // PYSIDE-1019: Allow any existing attribute in the constructor.
+                if (!_setProperty(qObj, key, value, &accept))
                     return false;
             }
-        }
-        if (!accept) {
-            // PYSIDE-1019: Allow any existing attribute in the constructor.
-            if (!_setProperty(qObj, key, value, &accept))
-                return false;
         }
         if (!accept) {
             PyErr_Format(PyExc_AttributeError, "'%s' is not a Qt property or a signal",
@@ -318,34 +522,6 @@ void initQApp()
 
     // PYSIDE-1470: Register a function to destroy an application from shiboken.
     setDestroyQApplication(destroyQCoreApplication);
-}
-
-static QByteArray _sigWithMangledName(const QByteArray &signature, bool mangle)
-{
-    if (!mangle)
-        return signature;
-    auto bracePos = signature.indexOf('(');
-    auto limit = bracePos >= 0 ? bracePos : signature.size();
-    if (limit < 3)
-        return signature;
-    QByteArray result;
-    result.reserve(signature.size() + 4);
-    for (auto i = 0; i < limit; ++i) {
-        const char c = signature.at(i);
-        if (std::isupper(c)) {
-            if (i > 0) {
-                if (std::isupper(signature.at(i - 1)))
-                    return signature; // Give up at consecutive upper chars
-                 result.append('_');
-            }
-            result.append(std::tolower(c));
-        } else {
-            result.append(c);
-        }
-    }
-    // Copy the rest after the opening brace (if any)
-    result.append(signature.mid(limit));
-    return result;
 }
 
 PyObject *getMetaDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *name)

@@ -51,6 +51,7 @@ PyObject *qtConnect();
 PyObject *qtDisconnect();
 PyObject *qtEmit();
 PyObject *dict_ring();
+PyObject *fset();
 PyObject *im_func();
 PyObject *im_self();
 PyObject *name();
@@ -63,6 +64,7 @@ namespace PyMagicName
 PyObject *code();
 PyObject *doc();
 PyObject *func();
+PyObject *get();
 PyObject *name();
 PyObject *property_methods();
 } // namespace PyMagicName
