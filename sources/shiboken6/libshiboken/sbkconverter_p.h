@@ -542,7 +542,7 @@ struct Primitive<std::wstring> : TwoPrimitive<std::wstring>
 
 // nullptr_t
 template <>
-struct Primitive<std::nullptr_t> : TwoPrimitive<std::nullptr_t>
+struct Primitive<std::nullptr_t> : OnePrimitive<std::nullptr_t>
 {
     static PyObject *toPython(const void * /* cppIn */)
     {
@@ -556,16 +556,6 @@ struct Primitive<std::nullptr_t> : TwoPrimitive<std::nullptr_t>
     {
         if (pyIn == Py_None)
             return toCpp;
-        return nullptr;
-    }
-    static void otherToCpp(PyObject * /* pyIn */, void *cppOut)
-    {
-        *reinterpret_cast<std::nullptr_t *>(cppOut) = nullptr;
-    }
-    static PythonToCppFunc isOtherConvertible(PyObject *pyIn)
-    {
-        if (pyIn == nullptr)
-            return otherToCpp;
         return nullptr;
     }
 };
