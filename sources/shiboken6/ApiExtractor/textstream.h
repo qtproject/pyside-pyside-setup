@@ -30,6 +30,7 @@
 #define TEXTSTREAM_H
 
 #include <QtCore/QTextStream>
+#include <QtCore/QString>
 
 /// A text stream based on QTextStream with built-in indent.
 class TextStream
