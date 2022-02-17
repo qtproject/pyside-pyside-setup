@@ -98,7 +98,7 @@ The following table summarizes the platform support for those packaging tools:
         <tr>
           <td><p>briefcase</p></td>
           <td><p>BSD3</p></td>
-          <td><p style="color: red;">no</p></td>
+          <td><p style="color: green;">partial</p></td>
           <td><p style="color: green;">yes</p></td>
           <td><p style="color: green;">yes</p></td>
           <td><p style="color: green;">yes</p></td>
