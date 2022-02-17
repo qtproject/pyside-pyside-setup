@@ -103,10 +103,10 @@
         <enum-type name="FilterPolicy"/>
         <enum-type name="Mode"/>
     </value-type>
-    <object-type name="QLowEnergyCharacteristic">
+    <value-type name="QLowEnergyCharacteristic">
         <enum-type name="PropertyType" flags="PropertyTypes"/>
-    </object-type>
-    <object-type name="QLowEnergyCharacteristicData"/>
+    </value-type>
+    <value-type name="QLowEnergyCharacteristicData"/>
     <value-type name="QLowEnergyConnectionParameters"/>
     <object-type name="QLowEnergyController">
         <enum-type name="ControllerState"/>
@@ -114,10 +114,8 @@
         <enum-type name="RemoteAddressType"/>
         <enum-type name="Role"/>
     </object-type>
-    <object-type name="QLowEnergyDescriptor">
-    </object-type>
-    <object-type name="QLowEnergyDescriptorData">
-    </object-type>
+    <value-type name="QLowEnergyDescriptor"/>
+    <value-type name="QLowEnergyDescriptorData"/>
     <object-type name="QLowEnergyService">
         <enum-type name="DiscoveryMode"/>
         <enum-type name="ServiceError"/>
