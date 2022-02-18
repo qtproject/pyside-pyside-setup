@@ -3320,7 +3320,7 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s, const Abst
         const AbstractMetaType &type = containerType.instantiations().at(i);
         QString typeName = getFullTypeName(type);
         // Containers of opaque containers are not handled here.
-        if (type.shouldDereferenceArgument() && !type.generateOpaqueContainer()) {
+        if (type.shouldDereferenceArgument() > 0 && !type.generateOpaqueContainer()) {
             for (int pos = 0; ; ) {
                 const QRegularExpressionMatch match = convertToCppRegEx().match(code, pos);
                 if (!match.hasMatch())
@@ -3588,10 +3588,10 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                         userArgs.append(arg.name() + QLatin1String(CONV_RULE_OUT_VAR_SUFFIX));
                     } else {
                         const int idx = arg.argumentIndex() - removedArgs;
-                        const bool deRef = arg.type().shouldDereferenceArgument();
+                        const auto deRef = arg.type().shouldDereferenceArgument();
                         QString argName;
-                        if (deRef)
-                            argName += QLatin1Char('*');
+                        if (deRef > 0)
+                            argName += QString(deRef, QLatin1Char('*'));
                         argName += QLatin1String(CPP_ARG) + QString::number(idx);
                         userArgs.append(argName);
                     }
@@ -3634,9 +3634,9 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
             firstArg += QLatin1String(CPP_SELF_VAR);
             firstArg += QLatin1Char(')');
             QString secondArg = QLatin1String(CPP_ARG0);
-            if (!func->isUnaryOperator()
-                && func->arguments().constFirst().type().shouldDereferenceArgument()) {
-                AbstractMetaType::dereference(&secondArg);
+            if (!func->isUnaryOperator()) {
+                auto deRef = func->arguments().constFirst().type().shouldDereferenceArgument();
+                AbstractMetaType::applyDereference(&secondArg, deRef);
             }
 
             if (func->isUnaryOperator())
@@ -5001,8 +5001,8 @@ void CppGenerator::writeRichCompareFunction(TextStream &s,
                             s << '&';
                         s << CPP_SELF_VAR << ' '
                             << AbstractMetaFunction::cppComparisonOperator(op) << " (";
-                        if (argType.shouldDereferenceArgument())
-                            s << '*';
+                        if (auto deRef = argType.shouldDereferenceArgument(); deRef > 0)
+                            s << QByteArray(deRef, '*');
                         s << CPP_ARG0 << ");\n"
                             << PYTHON_RETURN_VAR << " = ";
                         if (!func->isVoid())
