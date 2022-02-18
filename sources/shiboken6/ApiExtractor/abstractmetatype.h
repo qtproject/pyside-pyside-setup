@@ -29,6 +29,7 @@
 #ifndef ABSTRACTMETATYPE_H
 #define ABSTRACTMETATYPE_H
 
+#include "abstractmetalang_enums.h"
 #include "abstractmetalang_typedefs.h"
 #include "parser/codemodel_enums.h"
 
@@ -208,6 +209,8 @@ public:
     static AbstractMetaType fromAbstractMetaClass(const AbstractMetaClass *metaClass);
 
     static void dereference(QString *type); // "foo" -> "(*foo)"
+    /// Apply the result of shouldDereferenceArgument()
+    static void applyDereference(QString *type, qsizetype n);
     static bool stripDereference(QString *type); // "(*foo)" -> "foo"
 
     // Query functions for generators
@@ -234,7 +237,8 @@ public:
     bool isWrapperPassedByReference() const;
     /// Checks if the meta type of an argument should be dereferenced by the Python
     /// method wrapper passing it to C++.
-    bool shouldDereferenceArgument() const;
+    /// \return positive numbers for dereferencing, negative for referencing
+    qsizetype shouldDereferenceArgument() const;
     /// Returns true if the type is a C++ integral primitive,
     /// i.e. bool, char, int, long, and their unsigned counterparts.
     bool isCppIntegralPrimitive() const;

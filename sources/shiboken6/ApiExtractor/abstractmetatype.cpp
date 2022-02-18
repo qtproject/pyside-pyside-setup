@@ -691,6 +691,17 @@ void AbstractMetaType::dereference(QString *type)
     type->append(u')');
 }
 
+void AbstractMetaType::applyDereference(QString *type, qsizetype n)
+{
+    if (n == 0)
+        return;
+
+    const char c = n > 0 ? '*' : '&';
+    type->prepend(QString(qAbs(n), QLatin1Char(c)));
+    type->prepend(u'(');
+    type->append(u')');
+}
+
 bool AbstractMetaType::stripDereference(QString *type)
 {
     if (type->startsWith(u"(*") && type->endsWith(u')')) {
@@ -763,15 +774,26 @@ bool AbstractMetaType::isPointerToWrapperType() const
 bool AbstractMetaType::isWrapperPassedByReference() const
 {
     return d->m_referenceType == LValueReference && isWrapperType()
-        && !isPointer();
+           && !isPointer();
 }
 
-bool AbstractMetaType::shouldDereferenceArgument() const
+qsizetype AbstractMetaType::shouldDereferenceArgument() const
 {
-    return isWrapperPassedByReference()
-        || valueTypeWithCopyConstructorOnlyPassed()
-        || isObjectTypeUsedAsValueType()
-        || generateOpaqueContainer();
+    if (isWrapperPassedByReference() || valueTypeWithCopyConstructorOnlyPassed()
+        || isObjectTypeUsedAsValueType()) {
+        return 1;
+    }
+
+    if (!d->m_typeEntry->isContainer())
+        return 0;
+
+    qsizetype result = -d->m_indirections.size();
+
+    // For opaque containers, the cppArg in the generated code is a pointer
+    if (generateOpaqueContainer())
+        ++result;
+
+    return result;
 }
 
 bool AbstractMetaType::isCppIntegralPrimitive() const
