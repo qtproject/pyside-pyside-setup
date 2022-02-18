@@ -145,9 +145,8 @@ class MainWindow(QMainWindow):
             return
 
         out = QTextStream(file)
-        QApplication.setOverrideCursor(Qt.WaitCursor)
-        out << self._text_edit.toHtml()
-        QApplication.restoreOverrideCursor()
+        with QApplication.setOverrideCursor(Qt.WaitCursor):
+            out << self._text_edit.toHtml()
 
         self.statusBar().showMessage(f"Saved '{filename}'", 2000)
 

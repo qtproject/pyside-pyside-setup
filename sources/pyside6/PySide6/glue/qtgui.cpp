@@ -654,6 +654,12 @@ if (!PyTuple_SetItem(empty, 0, PyList_New(0))) {
 }
 // @snippet qguiapplication-2
 
+// @snippet qguiapplication-setoverridecursor
+auto *cppResult = new QtGuiHelper::QOverrideCursorGuard();
+%PYARG_0 = %CONVERTTOPYTHON[QtGuiHelper::QOverrideCursorGuard*](cppResult);
+Shiboken::Object::getOwnership(%PYARG_0); // Ensure the guard is removed
+// @snippet qguiapplication-setoverridecursor
+
 // @snippet qscreen-grabWindow
 WId id = %1;
 %RETURN_TYPE retval = %CPPSELF.%FUNCTION_NAME(id, %2, %3, %4, %5);

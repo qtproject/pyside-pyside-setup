@@ -81,9 +81,8 @@ class MdiChild(QTextEdit):
             return False
 
         instr = QTextStream(file)
-        QApplication.setOverrideCursor(Qt.WaitCursor)
-        self.setPlainText(instr.readAll())
-        QApplication.restoreOverrideCursor()
+        with QApplication.setOverrideCursor(Qt.WaitCursor):
+            self.setPlainText(instr.readAll())
 
         self.set_current_file(fileName)
 
@@ -106,18 +105,17 @@ class MdiChild(QTextEdit):
 
     def save_file(self, fileName):
         error = None
-        QApplication.setOverrideCursor(Qt.WaitCursor)
-        file = QSaveFile(fileName)
-        if file.open(QFile.WriteOnly | QFile.Text):
-            outstr = QTextStream(file)
-            outstr << self.toPlainText()
-            if not file.commit():
+        with QApplication.setOverrideCursor(Qt.WaitCursor):
+            file = QSaveFile(fileName)
+            if file.open(QFile.WriteOnly | QFile.Text):
+                outstr = QTextStream(file)
+                outstr << self.toPlainText()
+                if not file.commit():
+                    reason = file.errorString()
+                    error = f"Cannot write file {fileName}:\n{reason}."
+            else:
                 reason = file.errorString()
-                error = f"Cannot write file {fileName}:\n{reason}."
-        else:
-            reason = file.errorString()
-            error = f"Cannot open file {fileName}:\n{reason}."
-        QApplication.restoreOverrideCursor()
+                error = f"Cannot open file {fileName}:\n{reason}."
 
         if error:
             QMessageBox.warning(self, "MDI", error)

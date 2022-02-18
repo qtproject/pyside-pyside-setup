@@ -232,27 +232,25 @@ class MainWindow(QMainWindow):
             return
 
         inf = QTextStream(file)
-        QApplication.setOverrideCursor(Qt.WaitCursor)
-        self._text_edit.setPlainText(inf.readAll())
-        QApplication.restoreOverrideCursor()
+        with QApplication.setOverrideCursor(Qt.WaitCursor):
+            self._text_edit.setPlainText(inf.readAll())
 
         self.set_current_file(fileName)
         self.statusBar().showMessage("File loaded", 2000)
 
     def save_file(self, fileName):
         error = None
-        QApplication.setOverrideCursor(Qt.WaitCursor)
-        file = QSaveFile(fileName)
-        if file.open(QFile.WriteOnly | QFile.Text):
-            outf = QTextStream(file)
-            outf << self._text_edit.toPlainText()
-            if not file.commit():
+        with QApplication.setOverrideCursor(Qt.WaitCursor):
+            file = QSaveFile(fileName)
+            if file.open(QFile.WriteOnly | QFile.Text):
+                outf = QTextStream(file)
+                outf << self._text_edit.toPlainText()
+                if not file.commit():
+                    reason = file.errorString()
+                    error = f"Cannot write file {fileName}:\n{reason}."
+            else:
                 reason = file.errorString()
-                error = f"Cannot write file {fileName}:\n{reason}."
-        else:
-            reason = file.errorString()
-            error = f"Cannot open file {fileName}:\n{reason}."
-        QApplication.restoreOverrideCursor()
+                error = f"Cannot open file {fileName}:\n{reason}."
 
         if error:
             QMessageBox.warning(self, "Application", error)

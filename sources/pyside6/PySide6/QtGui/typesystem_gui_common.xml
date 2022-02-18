@@ -2666,7 +2666,13 @@
     <add-function signature="exec_()" return-type="int">
         <inject-code file="../glue/qtgui.cpp" snippet="qguiapplication-exec"/>
     </add-function>
-
+    <modify-function signature="setOverrideCursor(const QCursor&amp;)">
+        <modify-argument index="return">
+            <replace-type modified-type="QtGuiHelper::QOverrideCursorGuard*"/>
+        </modify-argument>
+        <inject-code class="target" position="end" file="../glue/qtgui.cpp"
+                     snippet="qguiapplication-setoverridecursor"/>
+    </modify-function>
   </object-type>
 
   <object-type name="QOpenGLContext">
@@ -3098,4 +3104,16 @@
       </modify-argument>
     </modify-function>
   </object-type>
+
+  <namespace-type name="QtGuiHelper" visible="no">
+      <object-type name="QOverrideCursorGuard" copyable="no">
+      <add-function signature="__enter__()" return-type="QOverrideCursorGuard">
+          <inject-code file="../glue/qtcore.cpp" snippet="default-enter"/>
+      </add-function>
+      <add-function signature="__exit__(PyObject*,PyObject*,PyObject*)">
+          <inject-code>%CPPSELF.restoreOverrideCursor();</inject-code>
+      </add-function>
+      </object-type>
+  </namespace-type>
+
 </typesystem>

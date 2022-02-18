@@ -189,6 +189,7 @@ ${QtGui_GEN_DIR}/qtexttable_wrapper.cpp
 ${QtGui_GEN_DIR}/qtexttablecell_wrapper.cpp
 ${QtGui_GEN_DIR}/qtexttablecellformat_wrapper.cpp
 ${QtGui_GEN_DIR}/qtexttableformat_wrapper.cpp
+${QtGui_GEN_DIR}/qtguihelper_qoverridecursorguard_wrapper.cpp
 ${QtGui_GEN_DIR}/qtoolbarchangeevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qtouchevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qtransform_wrapper.cpp
@@ -233,5 +234,7 @@ create_pyside_module(NAME QtGui
                      TYPESYSTEM_NAME ${QtGui_BINARY_DIR}/typesystem_gui.xml
                      DROPPED_ENTRIES QtGui_DROPPED_ENTRIES)
 
-install(FILES ${pyside6_SOURCE_DIR}/qpytextobject.h DESTINATION include/PySide6/QtGui/)
+install(FILES ${pyside6_SOURCE_DIR}/qpytextobject.h
+              ${pyside6_SOURCE_DIR}/qtguihelper.h
+        DESTINATION include/PySide6/QtGui/)
 
