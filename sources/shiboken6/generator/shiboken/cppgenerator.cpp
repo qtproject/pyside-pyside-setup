@@ -5805,10 +5805,14 @@ void CppGenerator::writeInitQtMetaTypeFunctionBody(TextStream &s, const Generato
     else
         className = context.preciseType().cppSignature();
 
+    // Register meta types for signal/slot connections to work
     if (!metaClass->isNamespace() && !metaClass->isAbstract())  {
         // Qt metatypes are registered only on their first use, so we do this now.
         bool canBeValue = false;
-        if (!metaClass->isObjectType()) {
+        if (metaClass->isObjectType()) {
+            if (!metaClass->isQObject())
+                s << "qRegisterMetaType< ::" << className << " *>();\n";
+        } else {
             // check if there's a empty ctor
             for (const auto &func : metaClass->functions()) {
                 if (func->isConstructor() && !func->arguments().count()) {
