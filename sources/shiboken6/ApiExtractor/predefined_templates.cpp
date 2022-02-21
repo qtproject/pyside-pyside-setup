@@ -104,7 +104,7 @@ while (PyDict_Next(%in, &pos, &key, &value)) {
 static QString cppMultiMapToPyDict(bool isQMultiMap)
 {
     return uR"(PyObject *%out = PyDict_New();
-    for (auto it = %in.cbegin(), end = %in.cend(); it != end; ++it) {
+    for (auto it = %in.cbegin(), end = %in.cend(); it != end; ) {
         const auto &key = it)"_qs
         +  QLatin1String(isQMultiMap ? qtMapKeyAccessor : stlMapKeyAccessor)
         + uR"(;
@@ -130,7 +130,7 @@ static QString cppMultiMapToPyDict(bool isQMultiMap)
 static QString cppMultiHashToPyDict(bool isQMultiHash)
 {
     return uR"(PyObject *%out = PyDict_New();
-    for (auto it = %in.cbegin(), end = %in.cend(); it != end; ++it) {
+    for (auto it = %in.cbegin(), end = %in.cend(); it != end; ) {
         const auto &key = it)"_qs
            +  QLatin1String(isQMultiHash ? qtMapKeyAccessor : stlMapKeyAccessor)
            + uR"(;

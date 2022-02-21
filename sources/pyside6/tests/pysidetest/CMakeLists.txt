@@ -132,6 +132,7 @@ add_dependencies(testbinding pyside6 QtCore QtGui QtWidgets pysidetest)
 create_generator_target(testbinding)
 
 PYSIDE_TEST(constructor_properties_test.py)
+PYSIDE_TEST(container_test.py)
 PYSIDE_TEST(decoratedslot_test.py)
 PYSIDE_TEST(delegatecreateseditor_test.py)
 PYSIDE_TEST(all_modules_load_test.py)
