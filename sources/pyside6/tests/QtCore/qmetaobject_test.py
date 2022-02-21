@@ -40,7 +40,8 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QFile, QObject, QTimer, SIGNAL
+from PySide6.QtCore import (QCoreApplication, QFile, QObject, QTimer,
+                            QSemaphore, Qt, Signal, Slot, SIGNAL)
 
 
 class Foo(QFile):
@@ -50,6 +51,28 @@ class Foo(QFile):
 class DynObject(QObject):
     def slot(self):
         pass
+
+
+class SemaphoreSender(QObject):
+    signal = Signal(QSemaphore)
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.semaphore = QSemaphore()
+
+    def emitSignal(self):
+        self.signal.emit(self.semaphore)
+
+
+class SemaphoreReceiver(QObject):
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.semaphore = None
+
+    @Slot(QSemaphore)
+    def receiverSlot(self, semaphore):
+        self.semaphore = semaphore
 
 
 class qmetaobject_test(unittest.TestCase):
@@ -94,6 +117,18 @@ class qmetaobject_test(unittest.TestCase):
         timer = QTimer()
         self.assertEqual(timer.metaObject().superClass().className(),
                          "QObject")
+
+    # PYSIDE-1827, slots with non-QObject object types should work
+    # (metatypes are registered)
+    def test_ObjectSlotSignal(self):
+        app = QCoreApplication()
+        sender = SemaphoreSender()
+        receiver = SemaphoreReceiver()
+        sender.signal.connect(receiver.receiverSlot, Qt.QueuedConnection)
+        sender.emitSignal()
+        while not receiver.semaphore:
+            QCoreApplication.processEvents()
+        self.assertEqual(sender.semaphore, receiver.semaphore)
 
 
 if __name__ == '__main__':
