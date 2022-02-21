@@ -54,7 +54,13 @@
 
     <inject-code class="target" position="end" file="../glue/qtquick.cpp" snippet="qtquick"/>
 
-    <object-type name="QQuickAsyncImageProvider" since="5.6"/>
+    <object-type name="QQuickAsyncImageProvider" since="5.6">
+        <modify-function signature="requestImageResponse(const QString&amp;,const QSize&amp;)">
+            <modify-argument index="return">
+                <define-ownership class="native" owner="c++"/>
+            </modify-argument>
+        </modify-function>
+    </object-type>
 
     <object-type name="QQuickFramebufferObject">
         <object-type name="Renderer"/>
