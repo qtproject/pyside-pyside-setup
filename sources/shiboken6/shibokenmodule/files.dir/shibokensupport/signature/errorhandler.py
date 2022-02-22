@@ -69,6 +69,8 @@ def qt_isinstance(inst, the_type):
         # Qt thinks differently about int and float - simply keep it.
         return isinstance(inst, int) or isinstance(inst, float)
     if the_type.__module__ == "typing":
+        if the_type is typing.Any:
+            return True
         if the_type.__origin__ is typing.Union:
             return any(qt_isinstance(inst, _) for _ in the_type.__args__)
         if the_type.__origin__ in (collections.abc.Sequence,

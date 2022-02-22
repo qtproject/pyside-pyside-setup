@@ -282,12 +282,18 @@ def handle_matrix(arg):
     result = f"PySide6.QtGui.QMatrix{n}x{m}"
     return eval(result, namespace)
 
+def _resolve_type(thing, line, level, var_handler, func_name=None):
+    # manual set of 'str' instead of 'bytes'
+    if func_name:
+        new_thing = (func_name, thing)
+        if new_thing in type_map:
+            return type_map[new_thing]
 
-def _resolve_type(thing, line, level, var_handler):
     # Capture total replacements, first. Happens in
     # "PySide6.QtCore.QCborStreamReader.StringResult[PySide6.QtCore.QByteArray]"
     if thing in type_map:
         return type_map[thing]
+
     # Now the nested structures are handled.
     if "[" in thing:
         # handle primitive arrays
@@ -376,7 +382,7 @@ def calculate_props(line):
             ann = 'nullptr'     # maps to None
             tup = name, ann
             arglist[idx] = tup
-        annotations[name] = _resolve_type(ann, line, 0, handle_argvar)
+        annotations[name] = _resolve_type(ann, line, 0, handle_argvar, parsed.funcname)
         if len(tup) == 3:
             default = _resolve_value(tup[2], ann, line)
             _defaults.append(default)

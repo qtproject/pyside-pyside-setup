@@ -536,6 +536,12 @@ def init_PySide6_QtCore():
     except AttributeError:
         # this does not exist on 5.9 ATM.
         pass
+
+    # special case - char* can either be 'bytes' or 'str'. The default is 'bytes'.
+    # Here we manually set it to map to 'str'.
+    type_map.update({("PySide6.QtCore.QObject.setProperty", "char*"): str})
+    type_map.update({("PySide6.QtCore.QObject.property", "char*"): str})
+
     return locals()
 
 
