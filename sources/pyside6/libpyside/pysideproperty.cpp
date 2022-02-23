@@ -129,7 +129,6 @@ static void qpropertyMetaCall(PySideProperty *pp, PyObject *self, QMetaObject::C
     switch(call) {
         case QMetaObject::ReadProperty:
         {
-            Shiboken::GilState gil;
             PyObject *value = PySide::Property::getValue(pp, self);
             if (value) {
                 converter.toCpp(value, args[0]);
@@ -140,7 +139,6 @@ static void qpropertyMetaCall(PySideProperty *pp, PyObject *self, QMetaObject::C
 
         case QMetaObject::WriteProperty:
         {
-            Shiboken::GilState gil;
             Shiboken::AutoDecRef value(converter.toPython(args[0]));
             PySide::Property::setValue(pp, self, value);
             break;
@@ -148,7 +146,6 @@ static void qpropertyMetaCall(PySideProperty *pp, PyObject *self, QMetaObject::C
 
         case QMetaObject::ResetProperty:
         {
-            Shiboken::GilState gil;
             PySide::Property::reset(pp, self);
             break;
         }

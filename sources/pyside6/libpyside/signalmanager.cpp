@@ -61,6 +61,7 @@
 
 #include <algorithm>
 #include <limits>
+#include <memory>
 
 #if QSLOT_CODE != 1 || QSIGNAL_CODE != 2
 #error QSLOT_CODE and/or QSIGNAL_CODE changed! change the hardcoded stuff to the correct value!
@@ -72,7 +73,6 @@
 namespace {
     static PyObject *metaObjectAttr = nullptr;
 
-    static int callMethod(QObject *object, int id, void **args);
     static PyObject *parseArguments(const QList< QByteArray >& paramTypes, void **args);
     static bool emitShortCircuitSignal(QObject *source, int signalIndex, PyObject *args);
 
@@ -225,6 +225,11 @@ struct SignalManager::SignalManagerPrivate
             Q_ASSERT(m_globalReceivers->isEmpty());
         }
     }
+
+    static void handleMetaCallError(QObject *object, int *result);
+    static int qtPropertyMetacall(QObject *object, QMetaObject::Call call,
+                                  int id, void **args);
+    static int qtMethodMetacall(QObject *object, int id, void **args);
 };
 
 SignalManager::QmlMetaCallErrorHandler
@@ -362,87 +367,113 @@ bool SignalManager::emitSignal(QObject *source, const char *signal, PyObject *ar
     return false;
 }
 
-int SignalManager::qt_metacall(QObject *object, QMetaObject::Call call, int id, void **args)
+// Handle errors from meta calls. Requires GIL and PyErr_Occurred()
+void SignalManager::SignalManagerPrivate::handleMetaCallError(QObject *object, int *result)
+{
+    // Bubbles Python exceptions up to the Javascript engine, if called from one
+    if (m_qmlMetaCallErrorHandler) {
+        auto idOpt = m_qmlMetaCallErrorHandler(object);
+        if (idOpt.has_value())
+            *result = idOpt.value();
+    }
+
+    const int reclimit = Py_GetRecursionLimit();
+    // Inspired by Python's errors.c: PyErr_GivenExceptionMatches() function.
+    // Temporarily bump the recursion limit, so that PyErr_Print will not raise a recursion
+    // error again. Don't do it when the limit is already insanely high, to avoid overflow.
+    if (reclimit < (1 << 30))
+        Py_SetRecursionLimit(reclimit + 5);
+    PyErr_Print();
+    Py_SetRecursionLimit(reclimit);
+}
+
+// Handler for QMetaObject::ReadProperty/WriteProperty/ResetProperty:
+int SignalManager::SignalManagerPrivate::qtPropertyMetacall(QObject *object,
+                                                            QMetaObject::Call call,
+                                                            int id, void **args)
 {
     const QMetaObject *metaObject = object->metaObject();
-    PySideProperty *pp = nullptr;
-    PyObject *pp_name = nullptr;
-    QMetaProperty mp;
-    PyObject *pySelf = nullptr;
-    int methodCount = metaObject->methodCount();
-    int propertyCount = metaObject->propertyCount();
+    int result = id - metaObject->propertyCount();
 
-    if (call != QMetaObject::InvokeMetaMethod) {
-        mp = metaObject->property(id);
-        if (!mp.isValid()) {
-            return id - methodCount;
-        }
+    const QMetaProperty mp = metaObject->property(id);
+    if (!mp.isValid())
+        return result;
 
-        Shiboken::GilState gil;
-        pySelf = reinterpret_cast<PyObject *>(Shiboken::BindingManager::instance().retrieveWrapper(object));
-        Q_ASSERT(pySelf);
-        pp_name = Shiboken::String::fromCString(mp.name());
-        pp = Property::getObject(pySelf, pp_name);
-        if (!pp) {
-            qWarning("Invalid property: %s.", mp.name());
-            Py_XDECREF(pp_name);
-            return id - methodCount;
-        }
+    Shiboken::GilState gil;
+    auto *pySbkSelf = Shiboken::BindingManager::instance().retrieveWrapper(object);
+    Q_ASSERT(pySbkSelf);
+    auto *pySelf = reinterpret_cast<PyObject *>(pySbkSelf);
+    Q_ASSERT(pySelf);
+    Shiboken::AutoDecRef pp_name(Shiboken::String::fromCString(mp.name()));
+    PySideProperty *pp = Property::getObject(pySelf, pp_name);
+    if (!pp) {
+        qWarning("Invalid property: %s.", mp.name());
+        return false;
     }
+    pp->d->metaCallHandler(pp, pySelf, call, args);
+    Py_XDECREF(pp);
 
-    switch(call) {
-#ifndef QT_NO_PROPERTIES
-        case QMetaObject::ReadProperty:
-        case QMetaObject::WriteProperty:
-        case QMetaObject::ResetProperty:
-            pp->d->metaCallHandler(pp, pySelf, call, args);
-            break;
-#endif
-        case QMetaObject::InvokeMetaMethod:
-            id = callMethod(object, id, args);
-            break;
+    if (PyErr_Occurred())
+        handleMetaCallError(object, &result);
+    return result;
+}
 
-        default:
-            qWarning("Unsupported meta invocation type.");
+// Handler for QMetaObject::InvokeMetaMethod
+int SignalManager::SignalManagerPrivate::qtMethodMetacall(QObject *object,
+                                                          int id, void **args)
+{
+    const QMetaObject *metaObject = object->metaObject();
+    const QMetaMethod method = metaObject->method(id);
+    int result = id - metaObject->methodCount();
+
+    std::unique_ptr<Shiboken::GilState> gil;
+
+    if (method.methodType() == QMetaMethod::Signal) {
+        // emit python signal
+        QMetaObject::activate(object, id, args);
+    } else {
+        gil.reset(new Shiboken::GilState);
+        auto *pySbkSelf = Shiboken::BindingManager::instance().retrieveWrapper(object);
+        Q_ASSERT(pySbkSelf);
+        auto *pySelf = reinterpret_cast<PyObject *>(pySbkSelf);
+        QByteArray methodName = method.methodSignature();
+        methodName.truncate(methodName.indexOf('('));
+        Shiboken::AutoDecRef pyMethod(PyObject_GetAttrString(pySelf, methodName));
+        SignalManager::callPythonMetaMethod(method, args, pyMethod, false);
     }
-
     // WARNING Isn't safe to call any metaObject and/or object methods beyond this point
     //         because the object can be deleted inside the called slot.
 
-    if (call == QMetaObject::InvokeMetaMethod) {
-        id = id - methodCount;
-    } else {
-        id = id - propertyCount;
+    if (gil.get() == nullptr)
+        gil.reset(new Shiboken::GilState);
+
+    if (PyErr_Occurred())
+        handleMetaCallError(object, &result);
+
+    return result;
+}
+
+int SignalManager::qt_metacall(QObject *object, QMetaObject::Call call, int id, void **args)
+{
+    switch (call) {
+        case QMetaObject::ReadProperty:
+        case QMetaObject::WriteProperty:
+        case QMetaObject::ResetProperty:
+            id = SignalManagerPrivate::qtPropertyMetacall(object, call, id, args);
+            break;
+        case QMetaObject::RegisterPropertyMetaType:
+        case QMetaObject::BindableProperty:
+            id -= object->metaObject()->propertyCount();
+            break;
+        case QMetaObject::InvokeMetaMethod:
+            id = SignalManagerPrivate::qtMethodMetacall(object, id, args);
+            break;
+        case QMetaObject::CreateInstance:
+        case QMetaObject::IndexOfMethod:
+        case QMetaObject::RegisterMethodArgumentMetaType:
+            id -= object->metaObject()->methodCount();
+            break;
     }
-
-    if (pp || pp_name) {
-        Shiboken::GilState gil;
-        Py_XDECREF(pp);
-        Py_XDECREF(pp_name);
-    }
-
-    {
-        Shiboken::GilState gil;
-
-        if (PyErr_Occurred()) {
-            // Bubbles Python exceptions up to the Javascript engine, if called from one
-            if (SignalManagerPrivate::m_qmlMetaCallErrorHandler) {
-                auto idOpt = SignalManagerPrivate::m_qmlMetaCallErrorHandler(object);
-                if (idOpt.has_value())
-                    return idOpt.value();
-            }
-
-            int reclimit = Py_GetRecursionLimit();
-            // Inspired by Python's errors.c: PyErr_GivenExceptionMatches() function.
-            // Temporarily bump the recursion limit, so that PyErr_Print will not raise a recursion
-            // error again. Don't do it when the limit is already insanely high, to avoid overflow.
-            if (reclimit < (1 << 30))
-                Py_SetRecursionLimit(reclimit + 5);
-            PyErr_Print();
-            Py_SetRecursionLimit(reclimit);
-        }
-    }
-
     return id;
 }
 
@@ -564,26 +595,6 @@ const QMetaObject *SignalManager::retrieveMetaObject(PyObject *self)
 }
 
 namespace {
-
-static int callMethod(QObject *object, int id, void **args)
-{
-    const QMetaObject *metaObject = object->metaObject();
-    QMetaMethod method = metaObject->method(id);
-
-    if (method.methodType() == QMetaMethod::Signal) {
-        // emit python signal
-        QMetaObject::activate(object, id, args);
-    } else {
-        Shiboken::GilState gil;
-        auto self = reinterpret_cast<PyObject *>(Shiboken::BindingManager::instance().retrieveWrapper(object));
-        QByteArray methodName = method.methodSignature();
-        methodName.truncate(methodName.indexOf('('));
-        Shiboken::AutoDecRef pyMethod(PyObject_GetAttrString(self, methodName));
-        return SignalManager::callPythonMetaMethod(method, args, pyMethod, false);
-    }
-    return -1;
-}
-
 
 static PyObject *parseArguments(const QList<QByteArray>& paramTypes, void **args)
 {
