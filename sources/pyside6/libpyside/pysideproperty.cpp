@@ -121,46 +121,82 @@ PyTypeObject *PySideProperty_TypeF(void)
     return type;
 }
 
-static void qpropertyMetaCall(PySideProperty *pp, PyObject *self, QMetaObject::Call call, void **args)
+PySidePropertyPrivate::~PySidePropertyPrivate() = default;
+
+PyObject *PySidePropertyPrivate::getValue(PyObject *source)
 {
-    Shiboken::Conversions::SpecificConverter converter(pp->d->typeName);
-    Q_ASSERT(converter);
-
-    switch(call) {
-        case QMetaObject::ReadProperty:
-        {
-            PyObject *value = PySide::Property::getValue(pp, self);
-            if (value) {
-                converter.toCpp(value, args[0]);
-                Py_DECREF(value);
-            }
-            break;
-        }
-
-        case QMetaObject::WriteProperty:
-        {
-            Shiboken::AutoDecRef value(converter.toPython(args[0]));
-            PySide::Property::setValue(pp, self, value);
-            break;
-        }
-
-        case QMetaObject::ResetProperty:
-        {
-            PySide::Property::reset(pp, self);
-            break;
-        }
-
-        // just to avoid gcc warnings
-        case QMetaObject::BindableProperty:
-        case QMetaObject::InvokeMetaMethod:
-        case QMetaObject::CreateInstance:
-        case QMetaObject::IndexOfMethod:
-        case QMetaObject::RegisterPropertyMetaType:
-        case QMetaObject::RegisterMethodArgumentMetaType:
-            break;
+    if (fget) {
+        Shiboken::AutoDecRef args(PyTuple_New(1));
+        Py_INCREF(source);
+        PyTuple_SET_ITEM(args, 0, source);
+        return  PyObject_CallObject(fget, args);
     }
+    return nullptr;
 }
 
+int PySidePropertyPrivate::setValue(PyObject *source, PyObject *value)
+{
+    if (fset && value) {
+        Shiboken::AutoDecRef args(PyTuple_New(2));
+        PyTuple_SET_ITEM(args, 0, source);
+        PyTuple_SET_ITEM(args, 1, value);
+        Py_INCREF(source);
+        Py_INCREF(value);
+        Shiboken::AutoDecRef result(PyObject_CallObject(fset, args));
+        return (result.isNull() ? -1 : 0);
+    }
+    if (fdel) {
+        Shiboken::AutoDecRef args(PyTuple_New(1));
+        PyTuple_SET_ITEM(args, 0, source);
+        Py_INCREF(source);
+        Shiboken::AutoDecRef result(PyObject_CallObject(fdel, args));
+        return (result.isNull() ? -1 : 0);
+    }
+    PyErr_SetString(PyExc_AttributeError, "Attribute is read only");
+    return -1;
+}
+
+int PySidePropertyPrivate::reset(PyObject *source)
+{
+    if (freset) {
+        Shiboken::AutoDecRef args(PyTuple_New(1));
+        Py_INCREF(source);
+        PyTuple_SET_ITEM(args, 0, source);
+        Shiboken::AutoDecRef result(PyObject_CallObject(freset, args));
+        return (result.isNull() ? -1 : 0);
+    }
+    return -1;
+}
+
+void PySidePropertyPrivate::metaCall(PyObject *source, QMetaObject::Call call, void **args)
+{
+    switch (call) {
+    case QMetaObject::ReadProperty: {
+        Shiboken::Conversions::SpecificConverter converter(typeName);
+        Q_ASSERT(converter);
+        if (PyObject *value = getValue(source)) {
+            converter.toCpp(value, args[0]);
+            Py_DECREF(value);
+        }
+    }
+        break;
+
+    case QMetaObject::WriteProperty: {
+        Shiboken::Conversions::SpecificConverter converter(typeName);
+        Q_ASSERT(converter);
+        Shiboken::AutoDecRef value(converter.toPython(args[0]));
+        setValue(source, value);
+    }
+        break;
+
+    case QMetaObject::ResetProperty:
+        reset(source);
+        break;
+
+    default:
+        break;
+    }
+}
 
 static PyObject *qpropertyTpNew(PyTypeObject *subtype, PyObject * /* args */, PyObject * /* kwds */)
 {
@@ -174,7 +210,6 @@ static int qpropertyTpInit(PyObject *self, PyObject *args, PyObject *kwds)
     PyObject *type = nullptr;
     auto data = reinterpret_cast<PySideProperty *>(self);
     PySidePropertyPrivate *pData = data->d;
-    pData->metaCallHandler = &qpropertyMetaCall;
 
     static const char *kwlist[] = {"type", "fget", "fset", "freset", "fdel", "doc", "notify",
                                    "designable", "scriptable", "stored",
@@ -471,53 +506,19 @@ bool checkType(PyObject *pyObj)
     return false;
 }
 
-int setValue(PySideProperty *self, PyObject *source, PyObject *value)
-{
-    PyObject *fset = self->d->fset;
-    if (fset && value) {
-        Shiboken::AutoDecRef args(PyTuple_New(2));
-        PyTuple_SET_ITEM(args, 0, source);
-        PyTuple_SET_ITEM(args, 1, value);
-        Py_INCREF(source);
-        Py_INCREF(value);
-        Shiboken::AutoDecRef result(PyObject_CallObject(fset, args));
-        return (result.isNull() ? -1 : 0);
-    }
-    PyObject *fdel = self->d->fdel;
-    if (fdel) {
-        Shiboken::AutoDecRef args(PyTuple_New(1));
-        PyTuple_SET_ITEM(args, 0, source);
-        Py_INCREF(source);
-        Shiboken::AutoDecRef result(PyObject_CallObject(fdel, args));
-        return (result.isNull() ? -1 : 0);
-    }
-    PyErr_SetString(PyExc_AttributeError, "Attibute read only");
-    return -1;
-}
-
 PyObject *getValue(PySideProperty *self, PyObject *source)
 {
-    PyObject *fget = self->d->fget;
-    if (fget) {
-        Shiboken::AutoDecRef args(PyTuple_New(1));
-        Py_INCREF(source);
-        PyTuple_SET_ITEM(args, 0, source);
-        return  PyObject_CallObject(fget, args);
-    }
-    return nullptr;
+    return self->d->getValue(source);
+}
+
+int setValue(PySideProperty *self, PyObject *source, PyObject *value)
+{
+    return self->d->setValue(source, value);
 }
 
 int reset(PySideProperty *self, PyObject *source)
 {
-    PyObject *freset = self->d->freset;
-    if (freset) {
-        Shiboken::AutoDecRef args(PyTuple_New(1));
-        Py_INCREF(source);
-        PyTuple_SET_ITEM(args, 0, source);
-        Shiboken::AutoDecRef result(PyObject_CallObject(freset, args));
-        return (result.isNull() ? -1 : 0);
-    }
-    return -1;
+    return self->d->reset(source);
 }
 
 const char *getTypeName(const PySideProperty *self)
@@ -598,24 +599,9 @@ const char *getNotifyName(PySideProperty *self)
         ? nullptr : self->d->notifySignature.constData();
 }
 
-void setMetaCallHandler(PySideProperty *self, MetaCallHandler handler)
-{
-    self->d->metaCallHandler = handler;
-}
-
 void setTypeName(PySideProperty *self, const char *typeName)
 {
     self->d->typeName = typeName;
-}
-
-void setUserData(PySideProperty *self, void *data)
-{
-    self->d->userData = data;
-}
-
-void *userData(PySideProperty *self)
-{
-    return self->d->userData;
 }
 
 } //namespace Property

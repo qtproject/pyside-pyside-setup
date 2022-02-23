@@ -410,7 +410,7 @@ int SignalManager::SignalManagerPrivate::qtPropertyMetacall(QObject *object,
         qWarning("Invalid property: %s.", mp.name());
         return false;
     }
-    pp->d->metaCallHandler(pp, pySelf, call, args);
+    pp->d->metaCall(pySelf, call, args);
     Py_XDECREF(pp);
 
     if (PyErr_Occurred())

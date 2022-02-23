@@ -44,13 +44,22 @@
 #include <QtCore/QByteArray>
 #include <QMetaObject>
 #include "pysideproperty.h"
+#include <pysidemacros.h>
 
 struct PySideProperty;
 
-struct PySidePropertyPrivate
+class PYSIDE_API PySidePropertyPrivate
 {
+public:
+    virtual ~PySidePropertyPrivate();
+
+    virtual void metaCall(PyObject *source, QMetaObject::Call call, void **args);
+
+    PyObject *getValue(PyObject *source);
+    int setValue(PyObject *source, PyObject *value);
+    int reset(PyObject *source);
+
     QByteArray typeName;
-    PySide::Property::MetaCallHandler metaCallHandler = nullptr;
     PyObject *fget = nullptr;
     PyObject *fset = nullptr;
     PyObject *freset = nullptr;
@@ -65,7 +74,6 @@ struct PySidePropertyPrivate
     bool user = false;
     bool constant = false;
     bool final = false;
-    void *userData = nullptr;
 };
 
 namespace PySide { namespace Property {

@@ -46,11 +46,12 @@
 
 #include <QtCore/QMetaObject>
 
+class PySidePropertyPrivate;
+
 extern "C"
 {
     extern PYSIDE_API PyTypeObject *PySideProperty_TypeF(void);
 
-    struct PySidePropertyPrivate;
     struct PYSIDE_API PySideProperty
     {
         PyObject_HEAD
@@ -59,8 +60,6 @@ extern "C"
 };
 
 namespace PySide { namespace Property {
-
-typedef void (*MetaCallHandler)(PySideProperty*,PyObject*,QMetaObject::Call, void**);
 
 PYSIDE_API bool checkType(PyObject *pyObj);
 
@@ -103,12 +102,7 @@ PYSIDE_API const char *getNotifyName(PySideProperty *self);
  **/
 PYSIDE_API PySideProperty *getObject(PyObject *source, PyObject *name);
 
-PYSIDE_API void setMetaCallHandler(PySideProperty *self, MetaCallHandler handler);
-
 PYSIDE_API void setTypeName(PySideProperty *self, const char *typeName);
-
-PYSIDE_API void setUserData(PySideProperty *self, void *data);
-PYSIDE_API void* userData(PySideProperty *self);
 
 } //namespace Property
 } //namespace PySide
