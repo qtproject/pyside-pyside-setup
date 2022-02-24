@@ -52,7 +52,7 @@ def _setupQtDirectories():
 
     if sys.platform == 'win32' and sys.version_info[0] == 3 and sys.version_info[1] >= 8:
         for dir in _additional_dll_directories(pyside_package_dir):
-            os.add_dll_directory(dir)
+            os.add_dll_directory(os.fspath(dir))
 
     try:
         # PYSIDE-1497: we use the build dir or install dir or site-packages, whatever the path
