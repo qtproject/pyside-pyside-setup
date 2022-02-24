@@ -45,6 +45,7 @@ import sys
 from enum import Enum
 from pathlib import Path
 from textwrap import dedent
+from typing import List
 
 from converter import snippet_translate
 
@@ -185,28 +186,44 @@ def is_valid_file(x):
     return True
 
 
-def get_snippet_ids(line):
-    """Extract the snippet ids for a line '//! [1] //! [2]'"""
+def get_snippet_ids(line: str) -> List[str]:
+    # Extract the snippet ids for a line '//! [1] //! [2]'
     result = []
     for m in SNIPPET_PATTERN.finditer(line):
         result.append(m.group(1))
     return result
 
 
-def get_snippets(data):
-    """Extract (potentially overlapping) snippets from a C++ file indicated by //! [1]"""
-    current_snippets = []  # Active ids
-    snippets = []
-    for line in data:
-        new_ids = get_snippet_ids(line)
-        for id in new_ids:
-            if id in current_snippets:  # id encountered 2nd time: Snippet ends
-                current_snippets.remove(id)
-            else:
-                current_snippets.append(id)
+def get_snippets(lines: List[str]) -> List[List[str]]:
+    # Extract (potentially overlapping) snippets from a C++ file indicated by //! [1]
+    snippets: List[List[str]] = []
+    snippet: List[str]
 
-        if new_ids or current_snippets:
-            snippets.append(line)
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        i += 1
+
+        start_ids = get_snippet_ids(line)
+        while start_ids:
+            # Start of a snippet
+            start_id = start_ids.pop(0)
+            snippet = [line]  # The snippet starts with his id
+
+            # Find the end of the snippet
+            j = i
+            while j < len(lines):
+                l = lines[j]
+                j += 1
+
+                # Add the line to the snippet
+                snippet.append(l)
+
+                # Check if the snippet is complete
+                if start_id in get_snippet_ids(l):
+                    # End of snippet
+                    snippets.append(snippet)
+                    break
 
     return snippets
 
