@@ -97,10 +97,12 @@ static void formatPyTypeObject(const PyTypeObject *obj, std::ostream &str)
             str << " [immutabletype]";
         if (obj->tp_flags & Py_TPFLAGS_DISALLOW_INSTANTIATION)
             str << " [disallow_instantiation]";
+#      ifndef Py_LIMITED_API
         if (obj->tp_flags & Py_TPFLAGS_MAPPING)
             str << " [mapping]";
         if (obj->tp_flags & Py_TPFLAGS_SEQUENCE)
             str << " [sequence]";
+#       endif // !Py_LIMITED_API
 #    endif // 3.10
 #  endif // 3.9
 #endif // 3.8
