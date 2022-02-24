@@ -355,9 +355,11 @@ def test_ternary_operator():
         == "if not game.saveGame(json if Game.Json else Game.Binary):"
     )
 
+
 def test_useless_qt_classes():
     assert st('result += QLatin1String("; ");') == 'result += "; "'
     assert st("<< QLatin1Char('\0') << endl;") == "print('\0')"
+
 
 def test_special_cases():
     assert (
