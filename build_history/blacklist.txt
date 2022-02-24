@@ -22,6 +22,8 @@
     win32
     linux
     darwin
+[QtCore::qthread_test]
+    linux py3.6
 # PYSIDE-754
 [QtWebEngineCore::web_engine_custom_scheme]
     win32
