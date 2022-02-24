@@ -82,6 +82,14 @@ def pyside_script_wrapper(script_name):
     sys.exit(subprocess.call(command))
 
 
+def ui_tool_binary(binary):
+    """Return the binary of a UI tool (App bundle on macOS)."""
+    if sys.platform != "darwin":
+        return binary
+    name = binary[0:1].upper() + binary[1:]
+    return f"{name}.app/Contents/MacOS/{name}"
+
+
 def lrelease():
     qt_tool_wrapper("lrelease", sys.argv[1:])
 
@@ -107,7 +115,7 @@ def qmllint():
 
 
 def assistant():
-    qt_tool_wrapper("assistant", sys.argv[1:])
+    qt_tool_wrapper(ui_tool_binary("assistant"), sys.argv[1:])
 
 
 def _append_to_path_var(var, value):
@@ -151,14 +159,11 @@ def designer():
     taskmenu_dir = os.fspath(pyside_dir / 'examples' / 'designer' / 'taskmenuextension')
     _append_to_path_var('PYSIDE_DESIGNER_PLUGINS', taskmenu_dir)
 
-    if sys.platform == "darwin":
-        qt_tool_wrapper("Designer.app/Contents/MacOS/Designer", sys.argv[1:])
-    else:
-        qt_tool_wrapper("designer", sys.argv[1:])
+    qt_tool_wrapper(ui_tool_binary("designer"), sys.argv[1:])
 
 
 def linguist():
-    qt_tool_wrapper("linguist", sys.argv[1:])
+    qt_tool_wrapper(ui_tool_binary("linguist"), sys.argv[1:])
 
 
 def genpyi():
