@@ -1734,7 +1734,25 @@ Py_END_ALLOW_THREADS
 // @snippet conversion-pylong-quintptr
 
 // @snippet conversion-pyunicode
-#ifndef Py_LIMITED_API
+#if defined(Py_LIMITED_API)
+    wchar_t *temp = PyUnicode_AsWideCharString(%in, NULL);
+    %out = QString::fromWCharArray(temp);
+    PyMem_Free(temp);
+#elif defined(IS_PY3K)
+    void *data = PyUnicode_DATA(%in);
+    Py_ssize_t len = PyUnicode_GetLength(%in);
+    switch (PyUnicode_KIND(%in)) {
+        case PyUnicode_1BYTE_KIND:
+            %out = QString::fromLatin1(reinterpret_cast<const char *>(data));
+            break;
+        case PyUnicode_2BYTE_KIND:
+            %out = QString::fromUtf16(reinterpret_cast<const char16_t *>(data), len);
+            break;
+        case PyUnicode_4BYTE_KIND:
+            %out = QString::fromUcs4(reinterpret_cast<const char32_t *>(data), len);
+            break;
+    }
+#else // IS_PY3K
 Py_UNICODE *unicode = PyUnicode_AS_UNICODE(%in);
 #  if defined(Py_UNICODE_WIDE)
 // cast as Py_UNICODE can be a different type
@@ -1750,11 +1768,7 @@ Py_UNICODE *unicode = PyUnicode_AS_UNICODE(%in);
 %out = QString::fromUtf16(reinterpret_cast<const ushort *>(unicode), PepUnicode_GetLength(%in));
 #    endif // Qt 6
 # endif
-#else
-wchar_t *temp = PyUnicode_AsWideCharString(%in, NULL);
-%out = QString::fromWCharArray(temp);
-PyMem_Free(temp);
-#endif
+#endif // !IS_PY3K
 // @snippet conversion-pyunicode
 
 // @snippet conversion-pystring
