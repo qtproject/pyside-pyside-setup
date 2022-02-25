@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <typesystem package="minimal">
     <primitive-type name="bool"/>
+    <primitive-type name="double"/>
     <primitive-type name="int"/>
 
     <primitive-type name="MinBool" target-lang-api-name="PyBool" default-constructor="MinBool(false)">

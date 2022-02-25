@@ -878,7 +878,10 @@ AbstractMetaType AbstractMetaType::fromAbstractMetaClass(const AbstractMetaClass
 template <class Predicate> // Predicate(containerTypeEntry, signature)
 bool AbstractMetaTypeData::generateOpaqueContainer(Predicate pred) const
 {
-    if (m_pattern != AbstractMetaType::ContainerPattern)
+    // Allow for passing containers by pointer as well.
+    if (!m_typeEntry->isContainer())
+        return false;
+    if (m_indirections.size() > 1)
         return false;
     auto *containerTypeEntry = static_cast<const ContainerTypeEntry *>(m_typeEntry);
     auto kind = containerTypeEntry->containerKind();

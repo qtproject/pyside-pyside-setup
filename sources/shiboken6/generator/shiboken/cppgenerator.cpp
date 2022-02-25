@@ -1196,6 +1196,8 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
                        TypeSystem::NativeCode, func, false, lastArg);
     }
 
+    qsizetype returnIndirections = 0;
+
     if (!func->injectedCodeCallsPythonOverride()) {
         s << "Shiboken::AutoDecRef " << pyRetVar << "(PyObject_Call("
             << PYTHON_OVERRIDE_VAR << ", " << PYTHON_ARGS << ", nullptr));\n";
@@ -1265,10 +1267,9 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
                 // Has conversion rule.
                 writeConversionRule(s, func, TypeSystem::NativeCode, cppRetVar);
             } else if (!func->injectedCodeHasReturnValueAttribution(TypeSystem::NativeCode)) {
-                writePythonToCppTypeConversion(
+                returnIndirections = writePythonToCppTypeConversion(
                     s, func->type(), pyRetVar,
-                    cppRetVar, func->implementingClass(), {},
-                    PythonToCppTypeConversionFlag::DisableOpaqueContainers);
+                    cppRetVar, func->implementingClass(), {});
             }
         }
     }
@@ -1305,8 +1306,9 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
                 s << '(' << typeCast << ')';
             }
         }
-        if (func->type().isWrapperPassedByReference())
-            s << " *";
+
+        if (returnIndirections > 0)
+            s << QByteArray(returnIndirections, '*');
         s << cppRetVar << ";\n";
     }
 
@@ -2613,17 +2615,18 @@ static void writeMinimalConstructorExpression(TextStream &s,
     s << '(' << defaultValue << ')';
 }
 
-void CppGenerator::writePythonToCppTypeConversion(TextStream &s,
+qsizetype CppGenerator::writePythonToCppTypeConversion(TextStream &s,
                                                   const AbstractMetaType &type,
                                                   const QString &pyIn,
                                                   const QString &cppOut,
                                                   const AbstractMetaClass *context,
-                                                  const QString &defaultValue,
-                                                  PythonToCppTypeConversionFlags flags) const
+                                                  const QString &defaultValue) const
 {
     const TypeEntry *typeEntry = type.typeEntry();
     if (typeEntry->isCustom() || typeEntry->isVarargs())
-        return;
+        return 0;
+
+    qsizetype indirections = -type.indirectionsV().size();
 
     QString cppOutAux = cppOut + QLatin1String("_local");
 
@@ -2631,13 +2634,11 @@ void CppGenerator::writePythonToCppTypeConversion(TextStream &s,
     const bool isEnum = typeEntry->isEnum();
     const bool isFlags = typeEntry->isFlags();
     const bool treatAsPointer = type.valueTypeWithCopyConstructorOnlyPassed();
-    const bool maybeOpaqueContainer =
-        !flags.testFlag(PythonToCppTypeConversionFlag::DisableOpaqueContainers)
-        && type.generateOpaqueContainer();
+    const bool isContainer = typeEntry->isContainer();
     bool isPointerOrObjectType = (type.isObjectType() || type.isPointer())
         && !type.isUserPrimitive() && !type.isExtendedCppPrimitive()
         && !isEnum && !isFlags;
-    const bool isNotContainerEnumOrFlags = !typeEntry->isContainer()
+    const bool isNotContainerEnumOrFlags = !isContainer
                                            && !isEnum && !isFlags;
     const bool mayHaveImplicitConversion = type.referenceType() == LValueReference
                                      && !type.isUserPrimitive()
@@ -2649,7 +2650,10 @@ void CppGenerator::writePythonToCppTypeConversion(TextStream &s,
     // may occur. An implicit conversion uses value conversion whereas the object
     // itself uses pointer conversion. For containers, the PyList/container
     // conversion is by value whereas opaque containers use pointer conversion.
-    const bool valueOrPointer = mayHaveImplicitConversion || maybeOpaqueContainer;
+    // For a container passed by pointer, a local variable is also needed.
+    const bool valueOrPointer = mayHaveImplicitConversion
+       || type.generateOpaqueContainer()
+       || (isContainer && indirections != 0);
 
     const AbstractMetaTypeList &nestedArrayTypes = type.nestedArrayTypes();
     const bool isCppPrimitiveArray = !nestedArrayTypes.isEmpty()
@@ -2672,12 +2676,16 @@ void CppGenerator::writePythonToCppTypeConversion(TextStream &s,
     if (isCppPrimitiveArray) {
         s << ' ' << cppOut;
     } else if (valueOrPointer) {
+        ++indirections;
         // Generate either value conversion for &cppOutAux or pointer
         // conversion for &cppOut
         s << ' ' << cppOutAux;
-        writeMinimalConstructorExpression(s, api(), type, isPrimitive, defaultValue);
+        // No default value for containers which can also be passed by pointer.
+        if (!isContainer)
+            writeMinimalConstructorExpression(s, api(), type, isPrimitive, defaultValue);
         s << ";\n" << typeName << " *" << cppOut << " = &" << cppOutAux;
     } else if (treatAsPointer || isPointerOrObjectType) {
+        ++indirections;
         s << " *" << cppOut;
         if (!defaultValue.isEmpty()) {
             const bool needsConstCast = !isNullPtr(defaultValue)
@@ -2718,7 +2726,7 @@ void CppGenerator::writePythonToCppTypeConversion(TextStream &s,
         s << pythonToCppCall << ";\n";
         if (!defaultValue.isEmpty())
             s << outdent;
-        return;
+        return indirections;
     }
 
     // pythonToCppFunc may be 0 when less parameters are passed and
@@ -2735,6 +2743,8 @@ void CppGenerator::writePythonToCppTypeConversion(TextStream &s,
         s << '\n';
     else
         s << "}\n" << outdent;
+
+    return indirections;
 }
 
 static void addConversionRuleCodeSnippet(CodeSnipList &snippetList, QString &rule,

@@ -74,6 +74,14 @@ struct LIBMINIMAL_API ListUser
     std::list<int> &getIntList();
     const std::list<int> &getConstIntList() const;
 
+    int modifyIntListPtr(std::list<int> *list) const;
+
+    virtual std::list<int> *returnIntListByPtr() const;
+
+    int callReturnIntListByPtr() const;
+
+    int modifyDoubleListPtr(std::list<double> *list) const;
+
     std::list<int> m_stdIntList;
 };
 
