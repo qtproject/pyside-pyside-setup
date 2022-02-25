@@ -182,6 +182,7 @@ def prepare_standalone_package_macos(self, vars):
                     qt_libexec_path, vars=vars)
 
     if copy_plugins:
+        is_pypy = "pypy" in self.build_classifiers
         # <qt>/plugins/* -> <setup>/{st_package_name}/Qt/plugins
         plugins_target = "{st_build_dir}/{st_package_name}/Qt/plugins"
         filters=["*.dylib"]
@@ -191,11 +192,12 @@ def prepare_standalone_package_macos(self, vars):
                 dir_filter_function=general_dir_filter,
                 file_filter_function=file_variant_filter,
                 vars=vars)
-        copydir("{install_dir}/plugins/designer",
-                f"{plugins_target}/designer",
-                filter=filters,
-                recursive=False,
-                vars=vars)
+        if not is_pypy:
+            copydir("{install_dir}/plugins/designer",
+                    f"{plugins_target}/designer",
+                    filter=filters,
+                    recursive=False,
+                    vars=vars)
 
     if copy_qml:
         # <qt>/qml/* -> <setup>/{st_package_name}/Qt/qml

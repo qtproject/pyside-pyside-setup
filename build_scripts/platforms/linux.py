@@ -107,17 +107,19 @@ def prepare_standalone_package_linux(self, vars):
                 vars=vars)
 
     if copy_plugins:
+        is_pypy = "pypy" in self.build_classifiers
         # <qt>/plugins/* -> <setup>/{st_package_name}/Qt/plugins
         plugins_target = "{st_build_dir}/{st_package_name}/Qt/plugins"
         copydir("{qt_plugins_dir}", plugins_target,
                 filter=["*.so"],
                 recursive=True,
                 vars=vars)
-        copydir("{install_dir}/plugins/designer",
-                f"{plugins_target}/designer",
-                filter=["*.so"],
-                recursive=False,
-                vars=vars)
+        if not is_pypy:
+            copydir("{install_dir}/plugins/designer",
+                    f"{plugins_target}/designer",
+                    filter=["*.so"],
+                    recursive=False,
+                    vars=vars)
 
         copied_plugins = self.get_shared_libraries_in_path_recursively(
             plugins_target.format(**vars))

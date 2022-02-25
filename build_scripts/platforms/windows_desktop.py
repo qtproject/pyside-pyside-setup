@@ -420,6 +420,7 @@ def copy_qt_artifacts(self, copy_pdbs, vars):
             recursive=False, vars=vars)
 
     if copy_plugins:
+        is_pypy = "pypy" in self.build_classifiers
         # <qt>/plugins/* -> <setup>/{st_package_name}/plugins
         plugins_target = "{st_build_dir}/{st_package_name}/plugins"
         plugin_dll_patterns = ["*{}.dll"]
@@ -430,11 +431,12 @@ def copy_qt_artifacts(self, copy_pdbs, vars):
         copydir("{qt_plugins_dir}", plugins_target,
                 file_filter_function=plugin_dll_filter,
                 vars=vars)
-        copydir("{install_dir}/plugins/designer",
-                f"{plugins_target}/designer",
-                filter=["*.dll"],
-                recursive=False,
-                vars=vars)
+        if not is_pypy:
+            copydir("{install_dir}/plugins/designer",
+                    f"{plugins_target}/designer",
+                    filter=["*.dll"],
+                    recursive=False,
+                    vars=vars)
 
     if copy_translations:
         # <qt>/translations/* -> <setup>/{st_package_name}/translations
