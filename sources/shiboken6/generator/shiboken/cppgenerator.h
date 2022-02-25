@@ -44,11 +44,6 @@ class OverloadDataRootNode;
 class CppGenerator : public ShibokenGenerator
 {
 public:
-    enum class PythonToCppTypeConversionFlag {
-        DisableOpaqueContainers = 0x1
-    };
-    Q_DECLARE_FLAGS(PythonToCppTypeConversionFlags, PythonToCppTypeConversionFlag)
-
     enum class ErrorReturn {
         Default, // "{}"
         Zero,
@@ -212,13 +207,15 @@ private:
     static AbstractMetaType
         getArgumentType(const AbstractMetaFunctionCPtr &func, int index);
 
-    void writePythonToCppTypeConversion(TextStream &s,
+    /// Writes the Python to C++ Conversion for function arguments and return
+    /// values of virtual methods for wrappers.
+    /// \return The number of indirections in case of return types
+    qsizetype writePythonToCppTypeConversion(TextStream &s,
                                         const AbstractMetaType &type,
                                         const QString &pyIn,
                                         const QString &cppOut,
                                         const AbstractMetaClass *context = nullptr,
-                                        const QString &defaultValue = {},
-                                        PythonToCppTypeConversionFlags = {}) const;
+                                        const QString &defaultValue = {}) const;
 
     /// Writes the conversion rule for arguments of regular and virtual methods.
     void writeConversionRule(TextStream &s, const AbstractMetaFunctionCPtr &func,
@@ -500,7 +497,5 @@ private:
 
     static const char *PYTHON_TO_CPPCONVERSION_STRUCT;
 };
-
-Q_DECLARE_OPERATORS_FOR_FLAGS(CppGenerator::PythonToCppTypeConversionFlags)
 
 #endif // CPPGENERATOR_H

@@ -133,3 +133,28 @@ const std::list<int> &ListUser::getConstIntList() const
 {
     return m_stdIntList;
 }
+
+int ListUser::modifyIntListPtr(std::list<int> *list) const
+{
+    const int oldSize = int(list->size());
+    list->push_back(42);
+    return oldSize;
+}
+
+std::list<int> *ListUser::returnIntListByPtr() const
+{
+    return nullptr;
+}
+
+int ListUser::callReturnIntListByPtr() const
+{
+    auto *list = returnIntListByPtr();
+    return list != nullptr ? int(list->size()) : 0;
+}
+
+int ListUser::modifyDoubleListPtr(std::list<double> *list) const
+{
+    const int oldSize = int(list->size());
+    list->push_back(42);
+    return oldSize;
+}

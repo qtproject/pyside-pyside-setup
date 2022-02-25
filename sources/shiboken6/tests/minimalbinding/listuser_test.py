@@ -44,7 +44,10 @@ from minimal import ListUser, Val, Obj, StdIntList
 
 class ExtListUser(ListUser):
     def __init__(self):
-        ListUser.__init__(self)
+        super().__init__()
+        self._stdIntList = StdIntList()
+        self._stdIntList.append(1)
+        self._stdIntList.append(2)
 
     def createIntList(self, num):
         return list(range(0, num * 2, 2))
@@ -77,6 +80,9 @@ class ExtListUser(ListUser):
 
     def sumListOfIntLists(self, intListList):
         return sum([sum(line) for line in intListList]) * 2
+
+    def returnIntListByPtr(self):
+        return self._stdIntList
 
 
 class IntListConversionTest(unittest.TestCase):
@@ -356,7 +362,34 @@ class ListOfIntListConversionTest(unittest.TestCase):
         self.assertEqual(len(const_l), 4)
         self.assertRaises(TypeError, const_l.append, 6)
 
+    def testListByPtrOpaque(self):
+        """Test a function taking C++ list by pointer for which an opaque
+           container exists."""
+        lu = ListUser()
+        python_list = [1, 2]
+        self.assertEqual(lu.modifyIntListPtr(python_list), 2)
+
+        # Pass an opaque container and verify whether it is modified by C++
+        cpp_list = StdIntList()
+        cpp_list.append(1)
+        cpp_list.append(2)
+        self.assertEqual(lu.modifyIntListPtr(cpp_list), 2)
+        self.assertEqual(len(cpp_list), 3)
+
+    def testListByPtr(self):
+        """Test a function taking C++ list by pointer for which no opaque
+           container exists."""
+        lu = ListUser()
+        python_list = [1.1, 22.2]
+        self.assertEqual(lu.modifyDoubleListPtr(python_list), 2)
+
+    def testReturnListByPtr(self):
+        """Test that a virtual function returning a list by pointer can be
+           reimplemented by a Python function returning an opaque container."""
+        lu = ExtListUser()
+        size = lu.callReturnIntListByPtr()  # Call virtual from C++
+        self.assertEqual(size, 2)
+
 
 if __name__ == '__main__':
     unittest.main()
-
