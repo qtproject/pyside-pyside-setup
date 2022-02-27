@@ -1521,6 +1521,9 @@
       <modify-argument index="1">
         <rename to="priority"/>
       </modify-argument>
+      <!-- PYSIDE-535: PyPy 7.3.8 needs this call, which is actually a no-op in Python 3.10 -->
+      <inject-code file="../glue/qtcore.cpp" class="target" position="beginning"
+                   snippet="qthread_init_pypy"/>
     </modify-function>
     <modify-function signature="exit(int)" allow-thread="yes"/>
   </object-type>
