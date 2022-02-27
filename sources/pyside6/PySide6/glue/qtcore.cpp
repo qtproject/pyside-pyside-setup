@@ -1175,7 +1175,16 @@ Py_END_ALLOW_THREADS
     }
 }
 // @snippet qt-module-shutdown
-//
+
+// @snippet qthread_init_pypy
+#ifdef PYPY_VERSION
+// PYSIDE-535: PyPy 7.3.8 needs this call, which is actually a no-op in Python 3.9
+//             This function should be replaced by a `Py_Initialize` call, but
+//             that is still undefined. So we don't rely yet on any PyPy version.
+PyEval_InitThreads();
+#endif
+// @snippet qthread_init_pypy
+
 // @snippet qthread_exec_
 if (PyErr_WarnEx(PyExc_DeprecationWarning,
                  "'exec_' will be removed in the future. "
