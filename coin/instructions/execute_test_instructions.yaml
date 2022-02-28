@@ -5,7 +5,7 @@ enable_if:
   not_contains_value: LicenseCheck
 instructions:
   - type: ExecuteCommand
-    command: "python3 -u coin_test_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=/Users/qt/work/install --targetOs={{.Env.CI_OS}} --hostArch=ARM64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}}"
+    command: "echo not supported"
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 1200
     enable_if:
@@ -20,7 +20,7 @@ instructions:
     userMessageOnFailure: >
          Failed to execute test instructions on arm mac
   - type: ExecuteCommand
-    command: "python3 -u coin_test_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=/Users/qt/work/install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}}"
+    command: "python3 -u coin_test_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=/Users/qt/work/install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}} --pypy"
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 1200
     enable_if:
@@ -35,7 +35,7 @@ instructions:
     userMessageOnFailure: >
          Failed to execute test instructions on osx
   - type: ExecuteCommand
-    command: "python3 -u coin_test_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=/home/qt/work/install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}}"
+    command: "python3 -u coin_test_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=/home/qt/work/install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}} --pypy"
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 600
     enable_if:
@@ -45,7 +45,7 @@ instructions:
     userMessageOnFailure: >
          Failed to execute test instructions on Linux
   - type: ExecuteCommand
-    command: "c:\\users\\qt\\MSVC.bat {{.Env.PYTHON3_PATH}}\\python.exe -u coin_test_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=\\Users\\qt\\work\\install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}}"
+    command: "c:\\users\\qt\\MSVC.bat {{.Env.PYTHON3_PATH}}\\python.exe -u coin_test_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=\\Users\\qt\\work\\install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}} --pypy"
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 600
     enable_if:
