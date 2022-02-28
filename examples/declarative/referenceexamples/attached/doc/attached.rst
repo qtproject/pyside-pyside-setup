@@ -1,4 +1,4 @@
-.. _qml-attached-properties-example
+.. _qml-attached-properties-example:
 
 Extending QML - Attached Properties Example
 ===========================================
