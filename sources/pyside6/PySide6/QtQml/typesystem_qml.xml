@@ -282,6 +282,7 @@
     </value-type>
     <object-type name="QQmlPropertyMap"/>
     <object-type name="QQmlPropertyValueSource"/>
+    <object-type name="QPyQmlPropertyValueSource"/>
     <value-type name="QQmlScriptString">
         <modify-function signature="numberLiteral(bool*)const" allow-thread="yes">
             <modify-argument index="1">

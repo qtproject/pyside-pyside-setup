@@ -98,6 +98,16 @@ static PyTypeObject *qQJSValueType()
     return result;
 }
 
+// Check if o inherits from QPyQmlPropertyValueSource.
+static bool isQmlPropertyValueSource(const QMetaObject *o)
+{
+    for (auto *base = o->superClass(); base ; base = base->superClass()) {
+        if (qstrcmp(base->className(), "QPyQmlPropertyValueSource") == 0)
+            return true;
+    }
+    return false;
+}
+
 namespace PySide::Qml {
 
 int qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
@@ -146,8 +156,13 @@ int qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
 
         type.parserStatusCast =
                 QQmlPrivate::StaticCastSelector<QObject, QQmlParserStatus>::cast();
-        type.valueSourceCast =
-                QQmlPrivate::StaticCastSelector<QObject, QQmlPropertyValueSource>::cast();
+        // QPyQmlPropertyValueSource inherits QObject, QmlPropertyValueSource, so,
+        // it is found behind the QObject. The size of a plain QObject is
+        // the wrapper size - 8 bools from the method cache array.
+        const int qObjectSize = int(PySide::getSizeOfQObject(qobjectType)) - 8;
+        type.valueSourceCast = isQmlPropertyValueSource(metaObject)
+            ? qObjectSize
+            : QQmlPrivate::StaticCastSelector<QObject, QQmlPropertyValueSource>::cast();
         type.valueInterceptorCast =
                 QQmlPrivate::StaticCastSelector<QObject, QQmlPropertyValueInterceptor>::cast();
 

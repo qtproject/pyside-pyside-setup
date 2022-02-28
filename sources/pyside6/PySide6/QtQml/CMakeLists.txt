@@ -1,6 +1,9 @@
 project(QtQml)
 
-set(QtQml_static_sources "${QtQml_SOURCE_DIR}/pysideqmlvolatilebool.cpp")
+qt_wrap_cpp(QPYQMLPROPERTYVALUESOURCE_MOC "${pyside6_SOURCE_DIR}/qpyqmlpropertyvaluesource.h")
+
+set(QtQml_static_sources "${QtQml_SOURCE_DIR}/pysideqmlvolatilebool.cpp"
+                         "${QPYQMLPROPERTYVALUESOURCE_MOC}")
 
 set(QtQml_SRC
 ${QtQml_GEN_DIR}/qjsengine_wrapper.cpp
@@ -8,6 +11,7 @@ ${QtQml_GEN_DIR}/qjsmanagedvalue_wrapper.cpp
 ${QtQml_GEN_DIR}/qjsprimitivevalue_wrapper.cpp
 ${QtQml_GEN_DIR}/qjsvalue_wrapper.cpp
 ${QtQml_GEN_DIR}/qjsvalueiterator_wrapper.cpp
+${QtQml_GEN_DIR}/qpyqmlpropertyvaluesource_wrapper.cpp
 ${QtQml_GEN_DIR}/qqmlabstracturlinterceptor_wrapper.cpp
 ${QtQml_GEN_DIR}/qqmlapplicationengine_wrapper.cpp
 ${QtQml_GEN_DIR}/qqmlcomponent_wrapper.cpp
@@ -35,6 +39,9 @@ ${QtQml_GEN_DIR}/qqmlnetworkaccessmanagerfactory_wrapper.cpp
 # module is always needed
 ${QtQml_GEN_DIR}/qtqml_module_wrapper.cpp
 )
+
+configure_file("${QtQml_SOURCE_DIR}/QtQml_global.post.h.in"
+               "${QtQml_BINARY_DIR}/QtQml_global.post.h" @ONLY)
 
 set(QtQml_include_dirs  ${QtQml_SOURCE_DIR}
                         ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
