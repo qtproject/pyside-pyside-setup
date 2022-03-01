@@ -47,10 +47,13 @@ The full options for ``QtCore.Property`` can be found with ``QtCore.Property.__d
             fset: Optional[Callable] = None,
             freset: Optional[Callable] = None,
             fdel: Optional[Callable] = None,
-            doc: str = '', notify: Optional[Callable] = None,
-            designable: bool = True, scriptable: bool = True,
+            doc: str = '',
+            notify: Optional[Callable] = None,
+            designable: bool = True,
+            scriptable: bool = True,
             stored: bool = True, user: bool = False,
-            constant: bool = False, final: bool = False) -> PySide6.QtCore.Property
+            constant: bool = False,
+            final: bool = False) -> PySide6.QtCore.Property
 
 Normally, only ``type``, ``fget``and ``fset`` are used.
 
