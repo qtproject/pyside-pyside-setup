@@ -69,6 +69,13 @@ shiboken_header = """***********************************************************
 ****************************************************************************
 """
 
+description = """
+PySide6 changelog tool
+
+Example usage:
+tools/create_changelog.py -v v6.2.3..HEAD -r 6.2.4
+"""
+
 
 def parse_options() -> Namespace:
     tag_msg = ("Tags, branches, or SHA to compare\n"
@@ -76,7 +83,7 @@ def parse_options() -> Namespace:
                "      v5.12.0..v5.12.1\n"
                "      cebc32a5..5.12")
 
-    options = ArgumentParser(description="PySide6 changelog tool",
+    options = ArgumentParser(description=description,
                              formatter_class=RawTextHelpFormatter)
     options.add_argument("-d",
                          "--directory",
