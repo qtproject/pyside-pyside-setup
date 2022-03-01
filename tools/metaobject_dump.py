@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2020 The Qt Company Ltd.
+## Copyright (C) 2022 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python project.
@@ -62,6 +62,6 @@ if __name__ == '__main__':
     type_name = sys.argv[1]
     type_instance = eval(type_name)
     if not type_instance:
-        print('Invalid type {}'.format(type_name))
+        print(f'Invalid type {type_name}')
         sys.exit(1)
     dump_metaobject(type_instance.staticMetaObject)
