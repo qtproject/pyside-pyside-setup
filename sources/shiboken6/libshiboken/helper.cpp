@@ -135,6 +135,11 @@ static void formatPySequence(PyObject *obj, std::ostream &str)
 static void formatPyObject(PyObject *obj, std::ostream &str)
 {
     if (obj) {
+        if (PyType_Check(obj)) {
+            str << "type: ";
+            formatPyTypeObject(reinterpret_cast<PyTypeObject *>(obj), str);
+            return;
+        }
         formatPyTypeObject(obj->ob_type, str);
         str << ", ";
         if (PyLong_Check(obj))
