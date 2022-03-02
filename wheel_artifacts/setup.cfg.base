@@ -1,0 +1,52 @@
+[metadata]
+name = {name}
+version = {version}
+description = {description}
+url = https://www.pyside.org
+download_url = https://download.qt.io/official_releases/QtForPython
+license = LGPL
+keywords = Qt
+author = Qt for Python Team
+author_email = pyside@qt-project.org
+long_description = file: {long_description}
+long_description_content_type = text/markdown
+ext_modules = None
+projects_urls =
+    Bug Tracker = https://bugreports.qt.io
+classifiers =
+    Development Status :: 5 - Production/Stable
+    Environment :: Console
+    Environment :: MacOS X
+    Environment :: X11 Applications :: Qt
+    Environment :: Win32 (MS Windows)
+    Intended Audience :: Developers
+    License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)
+    License :: Other/Proprietary License
+    Operating System :: MacOS :: MacOS X
+    Operating System :: POSIX
+    Operating System :: POSIX :: Linux
+    Operating System :: Microsoft
+    Operating System :: Microsoft :: Windows
+    Programming Language :: C++
+    Programming Language :: Python
+    Programming Language :: Python :: 3
+    Programming Language :: Python :: 3.6
+    Programming Language :: Python :: 3.7
+    Programming Language :: Python :: 3.8
+    Programming Language :: Python :: 3.9
+    Programming Language :: Python :: 3.10
+    Topic :: Database
+    Topic :: Software Development
+    Topic :: Software Development :: Code Generators
+    Topic :: Software Development :: Libraries :: Application Frameworks
+    Topic :: Software Development :: User Interfaces
+    Topic :: Software Development :: Widget Sets
+
+[options]
+packages = find:
+python_requires = >=3.6, <3.11
+include_package_data = True
+
+[bdist_wheel]
+py_limited_api = cp36
+plat_name = {tag}

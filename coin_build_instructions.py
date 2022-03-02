@@ -140,7 +140,7 @@ def call_setup(python_ver, phase):
 
     cmd = [env_python, "-u", "setup.py"]
     if phase in ["BUILD"]:
-        cmd += ["build", "--standalone", "--skip-packaging"]
+        cmd += ["build", "--standalone"]
     elif phase in ["WHEEL"] or CI_RELEASE_CONF:
         cmd += ["bdist_wheel", "--reuse-build", "--standalone", "--skip-cmake", "--skip-make-install", "--only-package"]
 
@@ -153,8 +153,8 @@ def call_setup(python_ver, phase):
     if CI_USE_SCCACHE:
         cmd += [f"--compiler-launcher={CI_USE_SCCACHE}"]
 
-    if python_ver == "3":
-        cmd += ["--limited-api=yes"]
+    cmd += ["--limited-api=yes"]
+
     if is_snapshot_build():
         cmd += ["--snapshot-build"]
 
@@ -172,6 +172,10 @@ def call_setup(python_ver, phase):
 
     env = os.environ
     run_instruction(cmd, "Failed to run setup.py for build", initial_env=env)
+
+    if phase in ["WHEEL"] or CI_RELEASE_CONF:
+        cmd = [env_python, "create_wheels.py"]
+        run_instruction(cmd, "Failed to create new wheels", initial_env=env)
 
 if __name__ == "__main__":
 

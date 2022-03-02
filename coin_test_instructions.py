@@ -106,8 +106,17 @@ def call_testrunner(python_ver, buildnro):
     # Try to install built wheels, and build some buildable examples.
     if CI_RELEASE_CONF:
         wheel_tester_path = os.path.join("testing", "wheel_tester.py")
+        # Run the test for the old set of wheels
         cmd = [env_python, wheel_tester_path, qmake_path]
-        run_instruction(cmd, "Error while running wheel_tester.py")
+        run_instruction(cmd, "Error while running wheel_tester.py on old wheels")
+
+        # Uninstalling the other wheels
+        run_instruction([env_pip, "uninstall", "shiboken6", "shiboken6_generator", "pyside6", "-y"],
+                        "Failed to uninstall old wheels")
+
+        # Run the test for the new set of wheels
+        cmd = [env_python, wheel_tester_path, qmake_path, "--wheels-dir=dist_new", "--new"]
+        run_instruction(cmd, "Error while running wheel_tester.py on new wheels")
 
 def run_test_instructions():
     # Remove some environment variables that impact cmake

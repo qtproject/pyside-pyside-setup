@@ -1,4 +1,5 @@
 setuptools>=48.0
+build==0.7
 sphinx
 sphinx-panels
 six
@@ -6,3 +7,4 @@ wheel>=0.35
 PyOpenGL
 pyinstaller==3.6
 nuitka
+dataclasses; python_version < '3.7'

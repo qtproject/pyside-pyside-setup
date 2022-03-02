@@ -44,6 +44,7 @@ import platform
 import re
 import sys
 import importlib
+from pathlib import Path
 from textwrap import dedent
 import time
 from .config import config
@@ -443,6 +444,23 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
 
             # Build packages
             _build.run(self)
+
+            # Keep packaged directories for wheel construction
+            # This is to take advantage of the packaging step
+            # to keep the data in the proper structure to create
+            # a wheel.
+            _path = Path(self.st_build_dir)
+            _wheel_path = _path.parent / "package_for_wheels"
+            if not _wheel_path.exists():
+                _wheel_path.mkdir()
+            _package_name = os.listdir(_path)[0]
+            _src = Path(_path / _package_name)
+            _dst = Path(_wheel_path / _package_name)
+            try:
+                Path(_path / _package_name).rename(_wheel_path / _package_name)
+            except Exception as e:
+                log.warn(f'***** problem renaming "{self.st_build_dir}"')
+                log.warn(f'ignored error: {type(e).__name__}: {e}')
         else:
             log.info("Skipped preparing and building packages.")
         log.info(f"--- Build completed ({elapsed()}s)")

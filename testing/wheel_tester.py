@@ -76,6 +76,7 @@ import platform
 
 log.set_verbosity(1)
 
+NEW_WHEELS = False
 
 def find_executable(executable, command_line_value):
     value = command_line_value
@@ -104,8 +105,8 @@ QMAKE_PATH = None
 CMAKE_PATH = None
 
 
-def get_wheels_dir():
-    return os.path.join(setup_script_dir, "dist")
+def get_wheels_dir(dir_name):
+    return os.path.join(setup_script_dir, dir_name)
 
 
 def get_examples_dir():
@@ -115,7 +116,10 @@ def get_examples_dir():
 def package_prefix_names():
     # Note: shiboken6_generator is not needed for compile_using_nuitka,
     # but building modules with cmake needs it.
-    return ["shiboken6", "shiboken6_generator", "PySide6"]
+    if NEW_WHEELS:
+        return ["shiboken6", "shiboken6_generator", "PySide6_Essentials", "PySide6_Addons", "PySide6"]
+    else:
+        return ["shiboken6", "shiboken6_generator", "PySide6"]
 
 
 def clean_egg_info():
@@ -334,8 +338,8 @@ def try_build_examples():
                 execute_script(src_path / f"{modname}.pyi")
 
 
-def run_wheel_tests(install_wheels):
-    wheels_dir = get_wheels_dir()
+def run_wheel_tests(install_wheels, wheels_dir_name):
+    wheels_dir = get_wheels_dir(wheels_dir_name)
     py_version = f"{sys.version_info.major}.{sys.version_info.minor}"
 
     if install_wheels:
@@ -358,8 +362,11 @@ if __name__ == "__main__":
     )
     parser.add_argument("--qmake", type=str, help="Path to qmake")
     parser.add_argument("--cmake", type=str, help="Path to cmake")
+    parser.add_argument("--wheels-dir", type=str, help="Path to where the wheels are", default="dist")
+    parser.add_argument("--new", action="store_true", help="Option to test new wheels")
     options = parser.parse_args()
     QMAKE_PATH = find_executable("qmake", options.qmake)
     CMAKE_PATH = find_executable("cmake", options.cmake)
+    NEW_WHEELS = options.new
 
-    run_wheel_tests(not options.no_install_wheels)
+    run_wheel_tests(not options.no_install_wheels, options.wheels_dir)

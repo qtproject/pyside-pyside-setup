@@ -1,0 +1,29 @@
+import setuptools
+from setuptools import setup, Extension
+from setuptools._distutils import cmd
+
+# This class and Extension file is intended only to force setuptools
+# to understand we are using extension modules, but because we don't
+# include the source files in the 'Extension' object, it gets wrongly
+# lost.
+class build_ext(cmd.Command):
+    def initialize_options(self):
+        pass
+    def finalize_options(self):
+        pass
+    def run(self):
+        pass
+    def get_source_files(self):
+        return []
+    def get_requires_for_build_wheel(self):
+        pass
+
+setup_args = dict(
+    include_package_data=True,
+    packages = ["{name}"],
+    entry_points = {console_scripts},
+    ext_modules = [Extension("{fake_ext}", [], py_limited_api=True)],
+    install_requires={install},
+    cmdclass=dict([("build_ext", build_ext)]),
+)
+setup(**setup_args)

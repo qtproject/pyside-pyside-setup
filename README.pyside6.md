@@ -23,10 +23,15 @@ and [PyPi](https://pypi.org/project/PySide6/):
 pip install PySide6
 ```
 
+> Please note: this wheel is an alias to other two wheels
+> [PySide6_Essentials](https://pypi.org/project/PySide6_Essentials) and
+> [PySide6_Addons](https://pypi.org/project/PySide6_Addons), which contains
+> a predefined list of Qt Modules.
+
 #### Dependencies
 
 PySide6 versions following 6.0 use a C++ parser based on
-[Clang](http://clang.org/). The Clang library (C-bindings), version 10.0 or
+[Clang](http://clang.org/). The Clang library (C-bindings), version 13.0 or
 higher is required for building. Prebuilt versions of it can be downloaded from
 [download.qt.io](http://download.qt.io/development_releases/prebuilt/libclang/).
 
