@@ -60,6 +60,9 @@ public:
     int reset(PyObject *source);
 
     QByteArray typeName;
+    // Type object: A real PyTypeObject ("@Property(int)") or a string
+    // "@Property('QVariant')".
+    PyObject *pyTypeObject = nullptr;
     PyObject *fget = nullptr;
     PyObject *fset = nullptr;
     PyObject *freset = nullptr;
@@ -183,6 +186,12 @@ bool isConstant(const PySideProperty* self);
  * @return  Return a boolean value
  **/
 bool isFinal(const PySideProperty* self);
+
+/// This function returns the type object of the property. It is either a real
+/// PyTypeObject ("@Property(int)") or a string "@Property('QVariant')".
+/// @param  self The property object
+/// @return type object
+PyObject *getTypeObject(const PySideProperty* self);
 
 } // namespace Property
 } // namespace PySide

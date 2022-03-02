@@ -237,6 +237,8 @@ static int qpropertyTpInit(PyObject *self, PyObject *args, PyObject *kwds)
     else
         pData->doc.clear();
 
+    pData->pyTypeObject = type;
+    Py_XINCREF(pData->pyTypeObject);
     pData->typeName = PySide::Signal::getTypeName(type);
 
     if (pData->typeName.isEmpty())
@@ -310,9 +312,8 @@ _property_copy(PyObject *old, PyObject *get, PyObject *set, PyObject *reset, PyO
 
     auto notify = pData->notify ? pData->notify : Py_None;
 
-    PyObject *typeName = String::fromCString(pData->typeName);
     PyObject *obNew = PyObject_CallFunction(type, const_cast<char *>("OOOOOsO" "bbb" "bbb"),
-        typeName, get, set, reset, del, doc.data(), notify,
+        pData->pyTypeObject, get, set, reset, del, doc.data(), notify,
         pData->designable, pData->scriptable, pData->stored,
         pData->user, pData->constant, pData->final);
 
@@ -447,7 +448,7 @@ static int qpropertyClear(PyObject *self)
     Py_CLEAR(data->freset);
     Py_CLEAR(data->fdel);
     Py_CLEAR(data->notify);
-
+    Py_XDECREF(data->pyTypeObject);
 
     delete data;
     reinterpret_cast<PySideProperty *>(self)->d = nullptr;
@@ -605,6 +606,11 @@ const char *getNotifyName(PySideProperty *self)
 void setTypeName(PySideProperty *self, const char *typeName)
 {
     self->d->typeName = typeName;
+}
+
+PyObject *getTypeObject(const PySideProperty *self)
+{
+    return self->d->pyTypeObject;
 }
 
 } //namespace Property
