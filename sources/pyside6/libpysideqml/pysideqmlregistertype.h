@@ -113,12 +113,10 @@ PYSIDEQML_API PyObject *qmlAnonymousMacro(PyObject *pyObj);
 PYSIDEQML_API PyObject *qmlSingletonMacro(PyObject *pyObj);
 
 
-// Used by QtQuick module to notify QtQml that custom QtQuick items can be registered.
+// Used by QtQuick module to fill the QQmlPrivate::RegisterType::parserStatusCast,
+// valueSourceCast and valueInterceptorCast fields with the correct values.
 using QuickRegisterItemFunction =
-    bool (*)(PyObject *pyObj, const char *uri, int versionMajor,
-             int versionMinor, const char *qmlName,
-             bool creatable, const char *noCreationReason,
-             QQmlPrivate::RegisterType *);
+    bool (*)(PyObject *pyObj, QQmlPrivate::RegisterType *);
 
 PYSIDEQML_API QuickRegisterItemFunction getQuickRegisterItemFunction();
 PYSIDEQML_API void setQuickRegisterItemFunction(QuickRegisterItemFunction function);

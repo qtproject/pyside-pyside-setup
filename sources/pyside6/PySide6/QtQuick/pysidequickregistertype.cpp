@@ -47,83 +47,31 @@
 #include <QtQuick/QQuickPaintedItem>
 #include <QtQuick/QQuickFramebufferObject>
 
-#include <QtQml/private/qqmlmetatype_p.h>
-
-#include <QtCore/QMutex>
-
-static void createQuickItem(void *memory, void *type)
+bool pyTypeObjectInheritsFromClass(PyTypeObject *pyObjType, const char *classPtrName)
 {
-    QMutexLocker locker(&PySide::nextQObjectMemoryAddrMutex());
-    PySide::setNextQObjectMemoryAddr(memory);
-    Shiboken::GilState state;
-    PyObject *obj = PyObject_CallObject(reinterpret_cast<PyObject *>(type), 0);
-    if (!obj || PyErr_Occurred())
-        PyErr_Print();
-    PySide::setNextQObjectMemoryAddr(nullptr);
-}
-
-bool pyTypeObjectInheritsFromClass(PyTypeObject *pyObjType, QByteArray className)
-{
-    className.append('*');
-    PyTypeObject *classPyType = Shiboken::Conversions::getPythonTypeObject(className.constData());
+    PyTypeObject *classPyType = Shiboken::Conversions::getPythonTypeObject(classPtrName);
     bool isDerived = PySequence_Contains(pyObjType->tp_mro,
                                          reinterpret_cast<PyObject *>(classPyType));
     return isDerived;
 }
 
-template <typename T>
-struct QPysideQmlMetaTypeInterface : public QQmlMetaTypeInterface
-{
-    const QMetaObject *metaObject;
-
-    static const QMetaObject *metaObjectFun(const QMetaTypeInterface *mti)
-    {
-        return static_cast<const QPysideQmlMetaTypeInterface *>(mti)->metaObject;
-    }
-
-    QPysideQmlMetaTypeInterface(const QByteArray &name, const QMetaObject *metaObjectIn = nullptr)
-        : QQmlMetaTypeInterface(name, static_cast<T*>(nullptr)), metaObject(metaObjectIn) {
-        metaObjectFn = metaObjectFun;
-    }
-};
-
 template <class WrappedClass>
-void registerTypeIfInheritsFromClass(
-        const QByteArray &className,
-        PyTypeObject *typeToRegister,
-        const QByteArray &typePointerName,
-        const QByteArray &typeListName,
-        const QMetaObject *typeMetaObject,
-        QQmlPrivate::RegisterType *type,
-        bool &registered)
+bool registerTypeIfInheritsFromClass(const char *classPtrName,
+                                     PyTypeObject *typeToRegister,
+                                     QQmlPrivate::RegisterType *type)
 {
-    bool shouldRegister = !registered && pyTypeObjectInheritsFromClass(typeToRegister, className);
-    if (shouldRegister) {
-
-        QMetaType ptrType(new QPysideQmlMetaTypeInterface<WrappedClass *>(typePointerName, typeMetaObject));
-
-        QMetaType lstType(new QQmlListMetaTypeInterface(typeListName, static_cast<QQmlListProperty<WrappedClass>*>(nullptr), ptrType.iface()));
-
-        type->typeId = std::move(ptrType);
-        type->listId = std::move(lstType);
-        type->attachedPropertiesFunction = QQmlPrivate::attachedPropertiesFunc<WrappedClass>();
-        type->attachedPropertiesMetaObject =
-                QQmlPrivate::attachedPropertiesMetaObject<WrappedClass>();
-        type->parserStatusCast =
-                QQmlPrivate::StaticCastSelector<WrappedClass, QQmlParserStatus>::cast();
-        type->valueSourceCast =
-                QQmlPrivate::StaticCastSelector<WrappedClass, QQmlPropertyValueSource>::cast();
-        type->valueInterceptorCast =
-                QQmlPrivate::StaticCastSelector<WrappedClass, QQmlPropertyValueInterceptor>::cast();
-        // Pass the size of the generated wrapper class (larger than the plain
-        // Qt class due to virtual method cache) since that is what is instantiated.
-        type->objectSize = int(PySide::getSizeOfQObject(typeToRegister));
-        registered = true;
-    }
+    if (!pyTypeObjectInheritsFromClass(typeToRegister, classPtrName))
+        return false;
+    type->parserStatusCast =
+            QQmlPrivate::StaticCastSelector<WrappedClass, QQmlParserStatus>::cast();
+    type->valueSourceCast =
+            QQmlPrivate::StaticCastSelector<WrappedClass, QQmlPropertyValueSource>::cast();
+    type->valueInterceptorCast =
+            QQmlPrivate::StaticCastSelector<WrappedClass, QQmlPropertyValueInterceptor>::cast();
+    return true;
 }
 
-bool quickRegisterType(PyObject *pyObj, const char *uri, int versionMajor, int versionMinor,
-                       const char *qmlName, bool creatable, const char *noCreationReason, QQmlPrivate::RegisterType *type)
+bool quickRegisterType(PyObject *pyObj, QQmlPrivate::RegisterType *type)
 {
     using namespace Shiboken;
 
@@ -137,50 +85,12 @@ bool quickRegisterType(PyObject *pyObj, const char *uri, int versionMajor, int v
     if (!isQuickItem)
         return false;
 
-    // Used inside macros to register the type.
-    const QMetaObject *metaObject = PySide::retrieveMetaObject(pyObj);
-    Q_ASSERT(metaObject);
-
-
-    // Incref the type object, don't worry about decref'ing it because
-    // there's no way to unregister a QML type.
-    Py_INCREF(pyObj);
-
-    // Used in macro registration.
-    QByteArray pointerName(qmlName);
-    pointerName.append('*');
-    QByteArray listName(qmlName);
-    listName.prepend("QQmlListProperty<");
-    listName.append('>');
-
-    bool registered = false;
-    // Pass the size of the generated wrapper class since that is what is instantiated.
-    registerTypeIfInheritsFromClass<QQuickPaintedItem>(
-        "QQuickPaintedItem", pyObjType, pointerName, listName,
-        metaObject, type, registered);
-    registerTypeIfInheritsFromClass<QQuickFramebufferObject>(
-        "QQuickFramebufferObject", pyObjType, pointerName, listName,
-        metaObject, type, registered);
-    registerTypeIfInheritsFromClass<QQuickItem>(
-        "QQuickItem", pyObjType, pointerName, listName,
-        metaObject, type, registered);
-    if (!registered)
-        return false;
-
-    type->structVersion = 0;
-    type->create = creatable ? createQuickItem : nullptr;
-    type->noCreationReason = noCreationReason;
-    type->userdata = pyObj;
-    type->uri = uri;
-    type->version = QTypeRevision::fromVersion(versionMajor, versionMinor);
-    type->elementName = qmlName;
-    type->metaObject = metaObject;
-
-    type->extensionObjectCreate = 0;
-    type->extensionMetaObject = 0;
-    type->customParser = 0;
-
-    return true;
+    return registerTypeIfInheritsFromClass<QQuickPaintedItem>("QQuickPaintedItem*",
+                                                              pyObjType, type)
+        || registerTypeIfInheritsFromClass<QQuickFramebufferObject>("QQuickFramebufferObject*",
+                                                                    pyObjType, type)
+        || registerTypeIfInheritsFromClass<QQuickItem>("QQuickItem*",
+                                                       pyObjType, type);
 }
 
 void PySide::initQuickSupport(PyObject *module)

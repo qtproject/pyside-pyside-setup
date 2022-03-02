@@ -132,35 +132,30 @@ int qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
     QQmlPrivate::RegisterType type;
 
     // Allow registering Qt Quick items.
-    bool registered = false;
-    if (quickRegisterItemFunction) {
-        registered =
-            quickRegisterItemFunction(pyObj, uri, versionMajor, versionMinor,
-                                      qmlName, creatable, noCreationReason, &type);
-    }
+    const bool isQuickType = quickRegisterItemFunction && quickRegisterItemFunction(pyObj, &type);
 
     // Register as simple QObject rather than Qt Quick item.
-    if (!registered) {
-        using QObjectQmlList = QQmlListProperty<QObject>;
-        // Incref the type object, don't worry about decref'ing it because
-        // there's no way to unregister a QML type.
-        Py_INCREF(pyObj);
+    using QObjectQmlList = QQmlListProperty<QObject>;
+    // Incref the type object, don't worry about decref'ing it because
+    // there's no way to unregister a QML type.
+    Py_INCREF(pyObj);
 
-        type.structVersion = 0;
+    type.structVersion = 0;
 
-        const QByteArray typeName(pyObjType->tp_name);
-        QByteArray ptrType = typeName + '*';
-        QByteArray listType = QByteArrayLiteral("QQmlListProperty<") + typeName + '>';
+    const QByteArray typeName(pyObjType->tp_name);
+    QByteArray ptrType = typeName + '*';
+    QByteArray listType = QByteArrayLiteral("QQmlListProperty<") + typeName + '>';
 
-        type.typeId = QMetaType(new QQmlMetaTypeInterface(ptrType, static_cast<QObject **>(nullptr)));
-        type.listId = QMetaType(new QQmlListMetaTypeInterface(listType,
-                                                              static_cast<QObjectQmlList*>(nullptr),
-                                                              type.typeId.iface()));
-        const auto typeInfo = qmlTypeInfo(pyObj);
-        auto info = qmlAttachedInfo(pyObjType, typeInfo);
-        type.attachedPropertiesFunction = info.factory;
-        type.attachedPropertiesMetaObject = info.metaObject;
+    type.typeId = QMetaType(new QQmlMetaTypeInterface(ptrType, static_cast<QObject **>(nullptr)));
+    type.listId = QMetaType(new QQmlListMetaTypeInterface(listType,
+                                                          static_cast<QObjectQmlList*>(nullptr),
+                                                          type.typeId.iface()));
+    const auto typeInfo = qmlTypeInfo(pyObj);
+    auto info = qmlAttachedInfo(pyObjType, typeInfo);
+    type.attachedPropertiesFunction = info.factory;
+    type.attachedPropertiesMetaObject = info.metaObject;
 
+    if (!isQuickType) { // values filled by the Quick registration
         type.parserStatusCast =
                 QQmlPrivate::StaticCastSelector<QObject, QQmlParserStatus>::cast();
         // QPyQmlPropertyValueSource inherits QObject, QmlPropertyValueSource, so,
@@ -172,22 +167,22 @@ int qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
             : QQmlPrivate::StaticCastSelector<QObject, QQmlPropertyValueSource>::cast();
         type.valueInterceptorCast =
                 QQmlPrivate::StaticCastSelector<QObject, QQmlPropertyValueInterceptor>::cast();
-
-        int objectSize = static_cast<int>(PySide::getSizeOfQObject(
-                                              reinterpret_cast<PyTypeObject *>(pyObj)));
-        type.objectSize = objectSize;
-        type.create = creatable ? createInto : nullptr;
-        type.noCreationReason = QString::fromUtf8(noCreationReason);
-        type.userdata = pyObj;
-        type.uri = uri;
-        type.version = QTypeRevision::fromVersion(versionMajor, versionMinor);
-        type.elementName = qmlName;
-
-        info = qmlExtendedInfo(pyObj, typeInfo);
-        type.extensionObjectCreate = info.factory;
-        type.extensionMetaObject = info.metaObject;
-        type.customParser = 0;
     }
+
+    int objectSize = static_cast<int>(PySide::getSizeOfQObject(
+                                      reinterpret_cast<PyTypeObject *>(pyObj)));
+    type.objectSize = objectSize;
+    type.create = creatable ? createInto : nullptr;
+    type.noCreationReason = QString::fromUtf8(noCreationReason);
+    type.userdata = pyObj;
+    type.uri = uri;
+    type.version = QTypeRevision::fromVersion(versionMajor, versionMinor);
+    type.elementName = qmlName;
+
+    info = qmlExtendedInfo(pyObj, typeInfo);
+    type.extensionObjectCreate = info.factory;
+    type.extensionMetaObject = info.metaObject;
+    type.customParser = 0;
     type.metaObject = metaObject; // Snapshot may have changed.
 
     int qmlTypeId = QQmlPrivate::qmlregister(QQmlPrivate::TypeRegistration, &type);
