@@ -247,6 +247,11 @@ static void formatPyUnicode(PyObject *obj, std::ostream &str)
 static void formatPyObjectHelper(PyObject *obj, std::ostream &str)
 {
     str << ", refs=" << obj->ob_refcnt << ", ";
+    if (PyType_Check(obj)) {
+        str << "type: ";
+        formatPyTypeObject(reinterpret_cast<PyTypeObject *>(obj), str);
+        return;
+    }
     formatPyTypeObject(obj->ob_type, str);
     str << ", ";
     if (PyLong_Check(obj))
