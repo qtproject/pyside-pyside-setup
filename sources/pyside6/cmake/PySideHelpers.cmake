@@ -91,6 +91,7 @@ macro(collect_optional_modules)
         OpenGLWidgets
         Positioning
         NetworkAuth
+        Nfc
         Qml
         Quick
         Quick3D
