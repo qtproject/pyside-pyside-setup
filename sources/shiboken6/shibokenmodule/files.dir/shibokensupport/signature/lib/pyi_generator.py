@@ -138,8 +138,6 @@ class Formatter(Writer):
         txt = f"""\
             # Module `{mod_name}`
 
-            from shiboken6 import Shiboken
-
             <<IMPORTS>>
             """
         self.print(dedent(txt))
@@ -209,6 +207,7 @@ FROM_IMPORTS = [
     ("enum", ["Enum"]),
     ("typing", typing.__all__),
     ("PySide6.QtCore", ["PyClassProperty"]),
+    ("shiboken6", ["Shiboken"]),
     ]
 
 def filter_from_imports(from_struct, text):
@@ -305,9 +304,7 @@ def generate_pyi(import_name, outpath, options):
                         imp = "PySide6." + mod_name
                         if imp != import_name:
                             wr.print("import " + imp)
-                # Do not import Shiboken which is handled already.
-                if import_name != "Shiboken":
-                    wr.print("import " + import_name)
+                wr.print("import " + import_name)
                 wr.print()
                 wr.print()
             else:
