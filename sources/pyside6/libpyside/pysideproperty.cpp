@@ -272,6 +272,9 @@ static void qpropertyDeAlloc(PyObject *self)
     Py_TYPE(self)->tp_free(self);
 }
 
+// Create a copy of the property to prevent the @property.setter from modifying
+// the property in place and avoid strange side effects in derived classes
+// (cf https://bugs.python.org/issue1620).
 static PyObject *
 _property_copy(PyObject *old, PyObject *get, PyObject *set, PyObject *reset, PyObject *del)
 {
