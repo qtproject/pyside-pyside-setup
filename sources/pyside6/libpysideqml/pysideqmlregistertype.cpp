@@ -60,6 +60,7 @@
 #include <QtQml/qqml.h>
 #include <QtQml/QJSValue>
 #include <QtQml/QQmlListProperty>
+#include <private/qqmlmetatype_p.h>
 
 static PySide::Qml::QuickRegisterItemFunction quickRegisterItemFunction = nullptr;
 
@@ -140,15 +141,21 @@ int qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
 
     // Register as simple QObject rather than Qt Quick item.
     if (!registered) {
+        using QObjectQmlList = QQmlListProperty<QObject>;
         // Incref the type object, don't worry about decref'ing it because
         // there's no way to unregister a QML type.
         Py_INCREF(pyObj);
 
         type.structVersion = 0;
 
-        // FIXME: Fix this to assign new type ids each time.
-        type.typeId = QMetaType(QMetaType::QObjectStar);
-        type.listId = QMetaType::fromType<QQmlListProperty<QObject> >();
+        const QByteArray typeName(pyObjType->tp_name);
+        QByteArray ptrType = typeName + '*';
+        QByteArray listType = QByteArrayLiteral("QQmlListProperty<") + typeName + '>';
+
+        type.typeId = QMetaType(new QQmlMetaTypeInterface(ptrType, static_cast<QObject **>(nullptr)));
+        type.listId = QMetaType(new QQmlListMetaTypeInterface(listType,
+                                                              static_cast<QObjectQmlList*>(nullptr),
+                                                              type.typeId.iface()));
         const auto typeInfo = qmlTypeInfo(pyObj);
         auto info = qmlAttachedInfo(pyObjType, typeInfo);
         type.attachedPropertiesFunction = info.factory;

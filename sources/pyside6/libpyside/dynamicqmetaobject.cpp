@@ -45,6 +45,7 @@
 #include "pysideproperty_p.h"
 #include "pysideslot_p.h"
 #include "pysideqenum.h"
+#include "pyside_p.h"
 
 #include <shiboken.h>
 
@@ -102,6 +103,10 @@ public:
     const QMetaObject *m_baseObject = nullptr;
     MetaObjects m_cachedMetaObjects;
     bool m_dirty = true;
+
+private:
+    QMetaPropertyBuilder
+        createProperty(PySideProperty *property, const QByteArray &propertyName);
 };
 
 QMetaObjectBuilder *MetaObjectBuilderPrivate::ensureBuilder()
@@ -300,6 +305,35 @@ int MetaObjectBuilderPrivate::getPropertyNotifyId(PySideProperty *property) cons
     return notifyId;
 }
 
+QMetaPropertyBuilder
+    MetaObjectBuilderPrivate::createProperty(PySideProperty *property,
+                                             const QByteArray &propertyName)
+{
+    int propertyNotifyId = getPropertyNotifyId(property);
+    if (propertyNotifyId >= 0)
+        propertyNotifyId -= m_baseObject->methodCount();
+
+    // For QObject-derived Python types, retrieve the meta type registered
+    // by name from the qmlRegisterType, if there is one. This is required for
+    // grouped QML properties to work.
+    auto *builder = ensureBuilder();
+    auto *typeObject = Property::getTypeObject(property);
+    if (typeObject != nullptr && PyType_Check(typeObject)) {
+        auto *pyTypeObject = reinterpret_cast<PyTypeObject *>(typeObject);
+        if (qstrncmp(pyTypeObject->tp_name, "PySide", 6) != 0
+            && PySide::isQObjectDerived(pyTypeObject, false)) {
+            const QByteArray pyType(pyTypeObject->tp_name);
+            const auto metaType = QMetaType::fromName(pyType + '*');
+            if (metaType.isValid()) {
+                return builder->addProperty(propertyName, pyType,
+                                            metaType, propertyNotifyId);
+            }
+        }
+    }
+    return builder->addProperty(propertyName, property->d->typeName,
+                                propertyNotifyId);
+}
+
 int MetaObjectBuilderPrivate::addProperty(const QByteArray &propertyName,
                                           PyObject *data)
 {
@@ -307,13 +341,9 @@ int MetaObjectBuilderPrivate::addProperty(const QByteArray &propertyName,
     if (index != -1)
         return index;
 
-    PySideProperty *property = reinterpret_cast<PySideProperty *>(data);
-    int propertyNotifyId = getPropertyNotifyId(property);
-    if (propertyNotifyId >= 0)
-        propertyNotifyId -= m_baseObject->methodCount();
-    auto newProperty =
-        ensureBuilder()->addProperty(propertyName, property->d->typeName,
-                                     propertyNotifyId);
+    auto *property = reinterpret_cast<PySideProperty *>(data);
+    auto newProperty = createProperty(property, propertyName);
+
     // Adding property attributes
     newProperty.setReadable(PySide::Property::isReadable(property));
     newProperty.setWritable(PySide::Property::isWritable(property));
