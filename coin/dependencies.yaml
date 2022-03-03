@@ -4,7 +4,6 @@ product_dependency:
 dependency_source: supermodule
 dependencies: [
       "../../qt/qt3d",
-      "../../qt/qt5compat",
       "../../qt/qtactiveqt",
       "../../qt/qtbase",
       "../../qt/qtcharts",
@@ -14,7 +13,6 @@ dependencies: [
       "../../qt/qtdoc",
       "../../qt/qtimageformats",
       "../../qt/qtpositioning",
-      "../../qt/qtlottie",
       "../../qt/qtmultimedia",
       "../../qt/qtnetworkauth",
       "../../qt/qtqa",
@@ -33,6 +31,5 @@ dependencies: [
       "../../qt/qtwayland",
       "../../qt/qtwebchannel",
       "../../qt/qtwebengine",
-      "../../qt/qtwebsockets",
-      "../../qt/qtwebview"
+      "../../qt/qtwebsockets"
       ]
