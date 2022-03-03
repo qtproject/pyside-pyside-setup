@@ -123,7 +123,7 @@ def prepare_standalone_package_linux(self, vars):
                 filter=None,
                 force=False,
                 recursive=True,
-                ignore=["*.so.debug"],
+                ignore=["*.debug"],
                 vars=vars)
 
     if copy_translations:
