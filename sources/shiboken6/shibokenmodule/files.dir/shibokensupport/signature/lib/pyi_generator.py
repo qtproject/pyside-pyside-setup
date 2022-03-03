@@ -283,20 +283,19 @@ def generate_pyi(import_name, outpath, options):
             # we remove the "<<IMPORTS>>" marker and insert imports if needed
             if line == "<<IMPORTS>>":
                 text = outfile.getvalue()
+                wr.print("import " + import_name)
+                for mod_name in find_imports(text):
+                    imp = "PySide6." + mod_name
+                    if imp != import_name:
+                        wr.print("import " + imp)
+                wr.print()
                 for mod, imports in filter_from_imports(FROM_IMPORTS, text):
                     import_args = ', '.join(imports)
                     if mod is None:
                         # special case, a normal import
                         wr.print(f"import {import_args}")
-                    elif mod != import_name:
+                    else:
                         wr.print(f"from {mod} import {import_args}")
-                wr.print()
-                if need_imports:
-                    for mod_name in find_imports(text):
-                        imp = "PySide6." + mod_name
-                        if imp != import_name:
-                            wr.print("import " + imp)
-                wr.print("import " + import_name)
                 wr.print()
                 wr.print()
             else:
