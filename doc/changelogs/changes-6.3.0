@@ -1,0 +1,214 @@
+Qt for Python 6.3 is a minor release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+****************************************************************************
+*                                  PySide6                                 *
+****************************************************************************
+
+ - The PySide wheels have been split. There is now a PySide6-Essentials
+   and a PySide6-Addons wheel. The PySide6 wheel has been kept as a convenience
+   to install all modules.
+ - The QtNfc module has been added.
+ - New QML tools have been added: pyside6-metaobjectdump, pyside6-qmltyperegistrar
+   and pyside6-qmllint.
+ - Several class decorators have been added for QML: QmlAttached,
+   QmlExtended, QmlForeign, QmlNamedElement, QmlSingleton and QmlUncreatable.
+ - class QPyQmlPropertyValueSource for implementing QML value
+   property sources has been added.
+ - QML code has been split out from libpyside into a new library libpysideqml.
+   libpyside thus no longer depends on QtQml and pyside.h no longer includes QML
+   headers. pyside.h has been split into smaller headers.
+ - The setup.py --qmake option is deprecated starting with Qt 6.3. Use the
+   --qtpaths option instead.
+ - Build directories are now created inside the root ./build directory,
+   rather than directly under the root of the project.
+ - A context manager for override cursors has been added. It is now possible
+   to write code like: with QApplication.setOverrideCursor(Qt.WaitCursor):...
+ - A completely new development was done to support the fast PyPy implementation.
+   A listing of all the necessary steps can be found in the extra documentation
+   for PyPy with PySide in ./doc/pypyside.rst .
+
+ - [PYSIDE-535]  Support for PyPy was added. Examples were fixed and adapted to
+                 use context managers, for example for QPainter, to ensure
+                 proper deletion.
+ - [PYSIDE-535]  QPainter has become a context manager. Using a with statement
+                 saves the need to call painter.end() .
+ - [PYSIDE-610]  The SSL methods of QWebSockets were enabled.
+ - [PYSIDE-802]  Support for cross-building was added.
+ - [PYSIDE-841]  New tutorials were added: Debugging Tutorial and Signals
+                 and slots.
+ - [PYSIDE-841]  New examples were added: areachart, audiosource, barchart,
+                 blurpicker, borderlayout, btscanner, dragable icons,
+                 mimetypebrowser, relational table model, rendercontrol_opengl,
+                 screenshot, tab dialog and threadedqopenglwidget.
+ - [PYSIDE-841]  Further QML reference examples were added: binding, coercion,
+                 default, extended, grouped, methods, properties and
+                 valuesource.
+ - [PYSIDE-1318] The MyPy display of `Signal` was corrected so that the
+                 relationship of `Signal` and `SignalInstance` is reflected.
+ - [PYSIDE-1431] Signal instances allow pass-through of methods with the same
+                 name, explicitly and with multiple inheritance.
+ - [PYSIDE-1431] Signal initialization now respects the order of subclasses
+                 in the mro().
+ - [PYSIDE-1670] When a property overrides an existing function with
+                 multiple arity or parameters, an underscore is appended to
+                 the property name.
+ - [PYSIDE-1675] Error message are more correct now when indexed generic
+                 types are involved like Union, Sequence and Iterable.
+ - [PYSIDE-1675] A crash when inserting a signal into a non-QObject was
+                 fixed.
+ - [PYSIDE-1702] snake_case handling now does explicitly not touch user
+                 defined classes.
+ - [PYSIDE-1705] Properties are now usable in constructors of classes in any
+                 combination of snake_case and true_property.
+ - [PYSIDE-1746] The byte-compiling of example files is now suppressed to
+                 reduce wheel size.
+ - [PYSIDE-1758] A left-over replacement of the interactive underscore
+                 variable when QApplication is created was removed.
+ - [PYSIDE-1760] A race condition caused by the move from distutils to
+                 setuptools with certain Python builds was fixed.
+ - [PYSIDE-1765] true_property overriding was enabled.
+ - [PYSIDE-1765] The snake_case feature is now more complete since it renames
+                 hidden methods, too.
+ - [PYSIDE-1788] __repr__ functions for some QEvent-derived classes were
+                 added.
+ - [PYSIDE-1252] Entry points for UI tools on macOS were fixed.
+ - [PYSIDE-1318] mypy-support: The handling of `Signal` was improved.
+ - [PYSIDE-1431] The equality test for inherited signals was fixed.
+ - [PYSIDE-1499] The implicit conversion of icon.addPixmap(str) was replaced
+                 by an explicit version which takes PyPathLike.
+ - [PYSIDE-1520] mypy-support: The handling of slots, enum and PathLike
+                 was improved.
+ - [PYSIDE-1547] The legacy OpenGL option is now used to build on linux,
+                 removing a dependency to vendor-specific OpenGL libraries.
+ - [PYSIDE-1605] An opaque container are now used for OpenGL in the
+                 hellogl2 example.
+ - [PYSIDE-1631] The qmlRegisterType() overload taking a library URL was
+                 added.
+ - [PYSIDE-1673] QObject.property() was fixed for QFlag types.
+ - [PYSIDE-1674] QVideoFrame::bits(int) was added.
+ - [PYSIDE-1675] MyPy support has been improved.
+ - [PYSIDE-1675] A bug in Slot.__call__ was fixed.
+ - [PYSIDE-1675] A segfault when signal was applied to non-QObject was fixed.
+ - [PYSIDE-1681] A hang in QQmlApplicationEngine functions with message
+                 handlers was fixed.
+ - [PYSIDE-1685] Constructing a QFont from a family string was fixed.
+ - [PYSIDE-1691] Class QCborTag was added.
+ - [PYSIDE-1696] QFlags comparison to self was fixed.
+ - [PYSIDE-1701] A bug in the TicTacToe Qt Designer taskmenu example was fixed.
+ - [PYSIDE-1702] __feature__: snake_case handling on user defined classes was
+                 fixed.
+ - [PYSIDE-1703] The build with MSVC 19.29.30136 was fixed.
+ - [PYSIDE-1708] The QtQuick3D module was added.
+ - [PYSIDE-1709] A __repr__ function for QMetaObject was added.
+ - [PYSIDE-1709] The QML metatype json files of Qt are now shipped for usage
+                 by pyside6-qmllint.
+ - [PYSIDE-1714] The sequence protocol has been implemented for QRegion.
+ - [PYSIDE-1715] A crash when connecting a slot after disconnecting non-
+                 existent connection to same slot was fixed.
+ - [PYSIDE-1721] The documentation generation process has been
+                 streamlined and the snippets conversion tool has been improved.
+ - [PYSIDE-1725] URLs in class inheritance diagrams have been made clickable
+                 (within same module).
+ - [PYSIDE-1726] The build in case Vulkan is not installed was fixed.
+ - [PYSIDE-1727] Signature: The __doc__ attribute of classes was fixed.
+ - [PYSIDE-1730] Name clashes of signals and inherited methods were fixed.
+ - [PYSIDE-1736] QQmlApplicationEngine.load(str) was fixed.
+ - [PYSIDE-1755] Nuitka compiled methods are now safely distinguished.
+ - [PYSIDE-1757] __feature__: A bug in true_property was fixed.
+ - [PYSIDE-1758] QApplication no longer touches the underscore variable.
+ - [PYSIDE-1769] Crashes in WebEngine signal emissions were fixed.
+ - [PYSIDE-1770] Enum QXYSeries.PointConfiguration enum was added.
+ - [PYSIDE-1798] QVariant can now be converted to enum types.
+ - [PYSIDE-1804] QByteArray::__msetitem__() was fixed for big endian
+                 architectures.
+ - [PYSIDE-1815] QAbstractOAuth.setModifyParametersFunction was added.
+ - [PYSIDE-1824] QLowEnergyServiceData.characteristics() was fixed.
+ - [PYSIDE-1826] A crash when implementing
+                 QQuickAsyncImageProvider.requestImageResponse() was fixed.
+ - [PYSIDE-1827] Signals/slots with non-QObject object type parameters were
+                 fixed.
+ - [PYSIDE-1840] The qFuzzyCompare() overloads for the classes in QtGui were
+                 added.
+ - [PYSIDE-1845] Properties of type QQmlPropertyMap * were fixed.
+ - [PYSIDE-1876] Class QPyQmlParserStatus for handling QML parser status
+                 changes has been added.
+ - [QTBUG-95010] The new Multimedia-API was adopted.
+
+****************************************************************************
+*                                  Shiboken6                               *
+****************************************************************************
+
+ - A fast path for converting Python strings to UTF-8 has been added to the
+   limited API.
+ - [PYSIDE-454]  Attributes for reset() and null-check of smart pointers have
+                 been added.
+ - [PYSIDE-454]  None is now accepted as a shared pointer parameter
+                 and nb_bool was added to shared pointers.
+  - [PYSIDE-454] Using std::shared_ptr has been simplified; it no longer
+                 requires specifying all implementation headers for the class
+                 declaration to be fully visible.
+ - [PYSIDE-535]  The generated code can now be used with PyPy.
+ - [PYSIDE-656]  The error state is now correctly handled in overridden virtual
+                 methods.
+ - [PYSIDE-1605] Getters returning containers by reference can now be
+                 modified to return an opaque container by modifying the
+                 return type accordingly.
+ - [PYSIDE-1605] Bindings for reserve()/capacity() were added to contiguous
+                 opaque containers.
+ - [PYSIDE-1605] Code generation for functions taking a pointer to a container
+                 has been fixed.
+ - [PYSIDE-1660] Primitive types are now built-in
+                 unless they are present in type system file.
+ - [PYSIDE-1660] The macro PyObject_Check() has been removed from libshiboken.
+ - [PYSIDE-1666] Support for std::wstring has been added.
+ - [PYSIDE-1666] Pre-defined XML templates for standard container type
+                 conversion have been added.
+ - [PYSIDE-1666] Common standard containers (std::list, std::vector,
+                 std::pair, std::map, std::unordered_map) are now built-in
+                 unless they were present in type system file.
+ - [PYSIDE-1666] Predefined templates for standard container types have been
+                 added.
+ - [PYSIDE-1666] sets are now supported for functions taking C++ sets.
+                 On return, C++ set instances will be converted to PySets
+                 instead of PyLists.
+ - [PYSIDE-1669] An option to disable implicit conversions has been added.
+ - [PYSIDE-1675] The .pyi file generation was improved to have correct
+                 slot(), PathLike and better enum handling.
+ - [PYSIDE-1691] When qualifying function argument default values for the
+                 generated code, shiboken no longer considers each identifier
+                 it cannot otherwise find as an enum value and no longer adds
+                 the class scope to it. This may require manually adding some
+                 replace-default-expression modifications.
+ - [PYSIDE-1691] Determining the scoped of enum default values of function
+                 arguments has been improved. nullptr is now handled correctly.
+ - [PYSIDE-1684] A crash when a class cannot be found in the overload
+                 sorter has been fixed.
+ - [PYSIDE-1697] A memory leak in generated code for keyword arguments was fixed.
+                 supported in argument conversion rules.
+ - [PYSIDE-1710] Error handling was improved for embedded applications and
+                 builtin modules are trusted as valid modules.
+ - [PYSIDE-1711] Comparison operators for pointees of smart pointers are now
+                 generated.
+ - [PYSIDE-1766] XML elements native-to-target and target-to-native are now
+ - [PYSIDE-1790] Classes marked as final in C++ are now created as final
+                 Python classes.
+ - [PYSIDE-1790] Bindings for data()/constData() were added to contiguous
+                 opaque containers.
+ - [PYSIDE-1790] Opaque containers are now always generated for
+                 the specified types regardless of whether instantiations
+                 exist.
+ - [PYSIDE-1802] The code model parser was adapted to consider .h files as C++.
+ - [PYSIDE-1806] A configure check for the clang version was added.
