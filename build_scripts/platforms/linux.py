@@ -133,7 +133,7 @@ def prepare_standalone_package_linux(self, vars):
                 filter=None,
                 force=False,
                 recursive=True,
-                ignore=["*.so.debug"],
+                ignore=["*.debug"],
                 vars=vars)
         copied_plugins = self.get_shared_libraries_in_path_recursively(
             qml_plugins_target.format(**vars))
