@@ -159,11 +159,9 @@ int qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
         type.parserStatusCast =
                 QQmlPrivate::StaticCastSelector<QObject, QQmlParserStatus>::cast();
         // QPyQmlPropertyValueSource inherits QObject, QmlPropertyValueSource, so,
-        // it is found behind the QObject. The size of a plain QObject is
-        // the wrapper size - 8 bools from the method cache array.
-        const int qObjectSize = int(PySide::getSizeOfQObject(qobjectType)) - 8;
+        // it is found behind the QObject.
         type.valueSourceCast = isQmlPropertyValueSource(metaObject)
-            ? qObjectSize
+            ? int(sizeof(QObject))
             : QQmlPrivate::StaticCastSelector<QObject, QQmlPropertyValueSource>::cast();
         type.valueInterceptorCast =
                 QQmlPrivate::StaticCastSelector<QObject, QQmlPropertyValueInterceptor>::cast();
