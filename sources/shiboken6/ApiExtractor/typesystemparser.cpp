@@ -3206,6 +3206,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
                         || element == StackElement::SystemInclude
                         || element == StackElement::ConversionRule
                         || element == StackElement::AddFunction
+                        || element == StackElement::DeclareFunction
                         || element == StackElement::Template;
 
         if (!topLevel && m_stack.at(m_stack.size() - 2) == StackElement::Root) {
