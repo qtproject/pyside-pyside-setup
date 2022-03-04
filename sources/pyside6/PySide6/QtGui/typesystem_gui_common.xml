@@ -75,12 +75,18 @@
   <function signature="qRed(uint)"/>
   <function signature="qRgb(int,int,int)"/>
   <function signature="qRgba(int,int,int,int)"/>
-  <function signature="qFuzzyCompare(QMatrix,QMatrix)"/>
+  <!-- qFuzzyCompare() are declared as friend functions of the respective classes only. -->
+  <declare-function signature="qFuzzyCompare(QTransform,QTransform)" return-type="bool"/>
   <function signature="qFuzzyCompare(QTransform,QTransform)"/>
+  <declare-function signature="qFuzzyCompare(QQuaternion,QQuaternion)" return-type="bool"/>
   <function signature="qFuzzyCompare(QQuaternion,QQuaternion)"/>
+  <declare-function signature="qFuzzyCompare(QMatrix4x4,QMatrix4x4)" return-type="bool"/>
   <function signature="qFuzzyCompare(QMatrix4x4,QMatrix4x4)"/>
+  <declare-function signature="qFuzzyCompare(QVector2D,QVector2D)" return-type="bool"/>
   <function signature="qFuzzyCompare(QVector2D,QVector2D)"/>
+  <declare-function signature="qFuzzyCompare(QVector3D,QVector3D)" return-type="bool"/>
   <function signature="qFuzzyCompare(QVector3D,QVector3D)"/>
+  <declare-function signature="qFuzzyCompare(QVector4D,QVector4D)" return-type="bool"/>
   <function signature="qFuzzyCompare(QVector4D,QVector4D)"/>
   <function signature="qPixelFormatRgba(uchar,uchar,uchar,uchar,QPixelFormat::AlphaUsage,QPixelFormat::AlphaPosition,QPixelFormat::AlphaPremultiplied,QPixelFormat::TypeInterpretation)"/>
   <function signature="qPixelFormatGrayscale(uchar,QPixelFormat::TypeInterpretation)"/>
