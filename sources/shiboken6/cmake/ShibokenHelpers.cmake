@@ -188,11 +188,16 @@ macro(get_python_extension_suffix)
         endif()
         set(PYTHON_EXTENSION_SUFFIX ".${Python_SOABI}")
     else()
+        # See PYSIDE-1841 / https://bugs.python.org/issue39825 for distutils vs sysconfig
         execute_process(
           COMMAND ${PYTHON_EXECUTABLE} -c "if True:
              import sys
-             import sysconfig
-             suffix = sysconfig.get_config_var('EXT_SUFFIX')
+             if sys.version_info >= (3, 8, 2):
+                 import sysconfig
+                 suffix = sysconfig.get_config_var('EXT_SUFFIX')
+             else:
+                 from distutils import sysconfig
+                 suffix = sysconfig.get_config_var('EXT_SUFFIX')
              pos = suffix.rfind('.')
              if pos > 0:
                  print(suffix[:pos])
