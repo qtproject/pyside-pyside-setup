@@ -357,12 +357,16 @@ class ProtectedPropertyTest(unittest.TestCase):
         self.assertEqual(self.obj.protectedValueTypePointerProperty, pt2)
         self.assertTrue(self.obj.protectedValueTypePointerProperty is pt1)
         self.assertFalse(self.obj.protectedValueTypePointerProperty is pt2)
+        # PYSIDE-535: Need to assign None to break the cycle
+        self.obj.protectedValueTypePointerProperty = None
 
     def testProtectedObjectTypeProperty(self):
         '''Writes and reads a protected object type property.'''
         obj = ObjectType()
         self.obj.protectedObjectTypeProperty = obj
         self.assertEqual(self.obj.protectedObjectTypeProperty, obj)
+        # PYSIDE-535: Need to assign None to break the cycle
+        self.obj.protectedObjectTypeProperty = None
 
 
 class PrivateDtorProtectedMethodTest(unittest.TestCase):
