@@ -83,6 +83,8 @@ class ProtectedNonPolymorphicTest(unittest.TestCase):
     '''Test cases for protected method in a class without virtual methods.'''
 
     def tearDown(self):
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertEqual(cacheSize(), 0)
 
     def testProtectedCall(self):
@@ -110,6 +112,8 @@ class ProtectedPolymorphicTest(unittest.TestCase):
     '''Test cases for protected method in a class with virtual methods.'''
 
     def tearDown(self):
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertEqual(cacheSize(), 0)
 
     def testProtectedCall(self):
@@ -157,6 +161,8 @@ class ProtectedPolymorphicGrandDaugherTest(unittest.TestCase):
     another with protected virtual methods.'''
 
     def tearDown(self):
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertEqual(cacheSize(), 0)
 
     def testProtectedCallWithInstanceCreatedOnCpp(self):
@@ -181,6 +187,8 @@ class ProtectedVirtualDtorTest(unittest.TestCase):
         ProtectedVirtualDestructor.resetDtorCounter()
 
     def tearDown(self):
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertEqual(cacheSize(), 0)
 
     def testVirtualProtectedDtor(self):
@@ -232,6 +240,8 @@ class ProtectedEnumTest(unittest.TestCase):
     '''Test cases for protected enum.'''
 
     def tearDown(self):
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertEqual(cacheSize(), 0)
 
     def testProtectedMethodWithProtectedEnumArgument(self):
@@ -359,6 +369,8 @@ class PrivateDtorProtectedMethodTest(unittest.TestCase):
     '''Test cases for classes with private destructors and protected methods.'''
 
     def tearDown(self):
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertEqual(cacheSize(), 0)
 
     def testProtectedMethod(self):

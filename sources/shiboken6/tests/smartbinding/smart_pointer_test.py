@@ -54,6 +54,8 @@ class SmartPointerTests(unittest.TestCase):
 
         # Create Obj.
         o = Obj()
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertEqual(objCount(), 1)
 
         # Create a shared pointer to an Obj together with an Obj.
@@ -62,6 +64,8 @@ class SmartPointerTests(unittest.TestCase):
 
         # Delete the old Obj.
         o = None
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertEqual(objCount(), 1)
 
         # Get a wrapper to the Obj inside of the shared pointer, object count should not change.
@@ -116,6 +120,8 @@ class SmartPointerTests(unittest.TestCase):
 
         # Create Obj.
         o = Obj()
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertEqual(objCount(), 1)
 
         # Create a shared pointer to an Integer together with an Integer.
@@ -183,6 +189,8 @@ class SmartPointerTests(unittest.TestCase):
     def testSmartPointersWithNamespace(self):
         # Create the main object
         o = Obj()
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertEqual(objCount(), 1)
 
         # Create a shared pointer to an Integer together with an Integer.
@@ -200,11 +208,15 @@ class SmartPointerTests(unittest.TestCase):
         # Create a list of shared objects
         ptrToObjList = o.giveSharedPtrToObjList(10)
         self.assertEqual(len(ptrToObjList), 10)
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertEqual(objCount(), 11)
 
         # Remove one from the list
         ptrToObjList.pop()
         self.assertEqual(len(ptrToObjList), 9)
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertEqual(objCount(), 10)
 
         # clear and delete all objects in the list
@@ -228,6 +240,8 @@ class SmartPointerTests(unittest.TestCase):
     def testSmartPointerConversions(self):
         # Create Obj.
         o = Obj()
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertEqual(objCount(), 1)
         self.assertEqual(integerCount(), 1)
 

@@ -26,6 +26,7 @@
 ##
 #############################################################################
 
+import gc
 import os
 import sys
 import unittest
@@ -53,6 +54,8 @@ class TestQActionLifeCycle(UsesQApplication):
         act = None
         self.assertFalse(self._actionDestroyed)
         menu.clear()
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertTrue(self._actionDestroyed)
 
     def testMenuBar(self):
@@ -62,8 +65,12 @@ class TestQActionLifeCycle(UsesQApplication):
         act = menuBar.addAction("MENU")
         _ref = weakref.ref(act, self.actionDestroyed)
         act = None
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertFalse(self._actionDestroyed)
         menuBar.clear()
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertTrue(self._actionDestroyed)
 
     def testToolBar(self):
@@ -73,8 +80,12 @@ class TestQActionLifeCycle(UsesQApplication):
         act = toolBar.addAction("MENU")
         _ref = weakref.ref(act, self.actionDestroyed)
         act = None
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertFalse(self._actionDestroyed)
         toolBar.clear()
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertTrue(self._actionDestroyed)
 
 
