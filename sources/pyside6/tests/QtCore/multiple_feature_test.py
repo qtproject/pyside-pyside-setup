@@ -47,7 +47,11 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtCore import QCborArray, QObject
-from PySide6.support import __feature__
+
+is_pypy = hasattr(sys, "pypy_version_info")
+if not is_pypy:
+    from PySide6.support import __feature__
+
 from textwrap import dedent
 
 """
@@ -63,8 +67,7 @@ There is much more to come.
 MethodDescriptorType = type(str.split)
 
 
-@unittest.skipIf(hasattr(sys, "pypy_version_info"),
-                 "__feature__ cannot yet be used with PyPy")
+@unittest.skipIf(is_pypy, "__feature__ cannot yet be used with PyPy")
 class FeaturesTest(unittest.TestCase):
 
     def testAllFeatureCombinations(self):

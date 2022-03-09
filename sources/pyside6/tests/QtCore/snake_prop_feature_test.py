@@ -48,7 +48,10 @@ init_test_paths(False)
 
 from PySide6.QtCore import Property, QSize
 from PySide6.QtWidgets import QApplication, QMainWindow, QWidget
-from PySide6.support import __feature__
+
+is_pypy = hasattr(sys, "pypy_version_info")
+if not is_pypy:
+    from PySide6.support import __feature__
 
 """
 snake_prop_feature_test.py
@@ -65,8 +68,7 @@ class Window(QWidget):
         super().__init__()
 
 
-@unittest.skipIf(hasattr(sys, "pypy_version_info"),
-                 "__feature__ cannot yet be used with PyPy")
+@unittest.skipIf(is_pypy, "__feature__ cannot yet be used with PyPy")
 class FeatureTest(unittest.TestCase):
     def setUp(self):
         qApp or QApplication()

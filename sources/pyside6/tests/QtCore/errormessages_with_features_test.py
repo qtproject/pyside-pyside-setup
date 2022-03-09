@@ -48,7 +48,10 @@ init_test_paths(False)
 
 from PySide6 import QtCore
 from PySide6.QtWidgets import QApplication, QLabel
-from PySide6.support import __feature__
+
+is_pypy = hasattr(sys, "pypy_version_info")
+if not is_pypy:
+    from PySide6.support import __feature__
 
 import inspect
 
@@ -64,8 +67,7 @@ This test is in its own file because combining it with
 """
 
 
-@unittest.skipIf(hasattr(sys, "pypy_version_info"),
-                 "__feature__ cannot yet be used with PyPy")
+@unittest.skipIf(is_pypy, "__feature__ cannot yet be used with PyPy")
 class ErrormessagesWithFeatures(unittest.TestCase):
     probe = "called with wrong argument types"
     probe_miss = "missing signature"

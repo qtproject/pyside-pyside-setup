@@ -50,17 +50,22 @@ from helper.usesqapplication import UsesQApplication
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QAction
 from PySide6.QtWidgets import QApplication, QLabel, QFrame
-from PySide6.support import __feature__
+
+is_pypy = hasattr(sys, "pypy_version_info")
+if not is_pypy:
+    from PySide6.support import __feature__
 
 
 class ConstructorPropertiesTest(unittest.TestCase):
 
     def setUp(self):
         qApp or QApplication()
-        __feature__.set_selection(0x80)     # FIXME: 0 is insecure
+        if not is_pypy:
+            __feature__.set_selection(0x80)     # FIXME: 0 is insecure
 
     def tearDown(self):
-        __feature__.set_selection(0)
+        if not is_pypy:
+            __feature__.set_selection(0)
         qApp.shutdown()
 
     # PYSIDE-1019: First property extension was support by the constructor.
@@ -77,6 +82,7 @@ class ConstructorPropertiesTest(unittest.TestCase):
         ))
 
     # PYSIDE-1705: The same with snake_case
+    @unittest.skipIf(is_pypy, "feature switching is not yet possible in PyPy")
     def testCallConstructor_snake(self):
         from __feature__ import snake_case
 
@@ -92,6 +98,7 @@ class ConstructorPropertiesTest(unittest.TestCase):
         ))
 
     # PYSIDE-1705: The same with true_property
+    @unittest.skipIf(is_pypy, "feature switching is not yet possible in PyPy")
     def testCallConstructor_prop(self):
         from __feature__ import true_property
 
@@ -107,6 +114,7 @@ class ConstructorPropertiesTest(unittest.TestCase):
         ))
 
     # PYSIDE-1705: The same with snake_case and true_property
+    @unittest.skipIf(is_pypy, "feature switching is not yet possible in PyPy")
     def testCallConstructor_prop_snake(self):
         from __feature__ import snake_case, true_property
 

@@ -102,6 +102,8 @@ __feature__.pyside_feature_dict = signature_bootstrap.pyside_feature_dict
 builtins.__feature_import__ = signature_bootstrap.__feature_import__
 del signature_bootstrap
 
+is_pypy = hasattr(sys, "pypy_version_info")
+
 
 def put_into_package(package, module, override=None):
     # take the last component of the module name
@@ -124,7 +126,8 @@ def move_into_pyside_package():
     except ModuleNotFoundError:
         # This can happen in the embedding case.
         put_into_package(PySide6, shibokensupport, "support")
-    put_into_package(PySide6.support, __feature__, "__feature__")
+    if not is_pypy:
+        put_into_package(PySide6.support, __feature__, "__feature__")
     put_into_package(PySide6.support, signature)
     put_into_package(PySide6.support.signature, mapping)
     put_into_package(PySide6.support.signature, errorhandler)
@@ -158,7 +161,7 @@ if "PySide6" in sys.modules:
         raise
     # PYSIDE-1019: Modify `__import__` to be `__feature__` aware.
     # __feature__ is already in sys.modules, so this is actually no import
-    if not hasattr(sys, "pypy_version_info"):
+    if not is_pypy:
         # PYSIDE-535: Cannot enable __feature__ for various reasons.
         import PySide6.support.__feature__
         sys.modules["__feature__"] = PySide6.support.__feature__
