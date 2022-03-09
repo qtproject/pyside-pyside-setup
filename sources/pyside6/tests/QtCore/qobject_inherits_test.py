@@ -131,6 +131,8 @@ class InheritsCase(unittest.TestCase):
         self.assertTrue(is_alive)
         QTimer.singleShot(100, app.quit)
         app.exec()
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
         self.assertFalse(is_alive)
 
 

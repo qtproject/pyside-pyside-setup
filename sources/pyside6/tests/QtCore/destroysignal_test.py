@@ -51,6 +51,8 @@ class TestDestroySignal(unittest.TestCase):
         del t
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
+        # PYSIDE-535: Why do I need to do it twice, here?
+        gc.collect()
         self.assertTrue(self._destroyed)
 
     def testWithParent(self):
@@ -60,6 +62,8 @@ class TestDestroySignal(unittest.TestCase):
         t.destroyed[QObject].connect(self.onObjectDestroyed)
         del p
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
+        # PYSIDE-535: Why do I need to do it twice, here?
         gc.collect()
         self.assertTrue(self._destroyed)
 

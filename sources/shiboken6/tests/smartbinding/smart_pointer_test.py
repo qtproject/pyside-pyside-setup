@@ -217,6 +217,8 @@ class SmartPointerTests(unittest.TestCase):
         self.assertEqual(len(ptrToObjList), 9)
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
+        # PYSIDE-535: Why do I need to do it twice, here?
+        gc.collect()
         self.assertEqual(objCount(), 10)
 
         # clear and delete all objects in the list

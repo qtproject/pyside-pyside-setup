@@ -70,6 +70,8 @@ class PropertyTest(unittest.TestCase):
         del o
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
+        # PYSIDE-535: Why do I need to do it twice, here?
+        gc.collect()
         self.assertTrue(self._obDestroyed)
 
 

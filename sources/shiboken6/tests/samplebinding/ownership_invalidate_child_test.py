@@ -70,6 +70,8 @@ class InvalidateChildTest(unittest.TestCase):
         del parent
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
+        # PYSIDE-535: Why do I need to do it twice, here?
+        gc.collect()
 
         self.assertEqual(child1.objectName(), 'child1')
         self.assertRaises(RuntimeError, child2.objectName)

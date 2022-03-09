@@ -29,6 +29,7 @@
 import os
 import sys
 import unittest
+import gc
 
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
@@ -58,6 +59,8 @@ class TestQEasingCurve(unittest.TestCase):
             ec.setCustomType(myFunction)
             self.assertEqual(ec.valueForProgress(1.0), 100.0)
             self.assertEqual(ec.valueForProgress(0.5), -100.0)
+            # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+            gc.collect()
 
 
 if __name__ == '__main__':

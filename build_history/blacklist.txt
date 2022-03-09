@@ -46,8 +46,6 @@
 # PYSIDE-535: These errors are still present. Please try to remove one :)
 [sample::mixed_mi]
     pypy
-[sample::ownership_invalidate_child]
-    pypy
 [sample::renaming]
     pypy
 [sample::sample]
@@ -56,15 +54,9 @@
     pypy
 [sample::typedealloc]
     pypy
-[smart::smart_pointer]
-    pypy
-[pysidetest::constructor_properties_test]
-    pypy
 [pysidetest::homonymoussignalandmethod_test]
     pypy
 [pysidetest::mixin_signal_slots_test]
-    pypy
-[signals::qobject_destroyed_test]
     pypy
 [signals::qobject_receivers_test]
     pypy
@@ -72,23 +64,11 @@
     pypy
 [QtCore::classinfo_test]
     pypy
-[QtCore::destroysignal_test]
-    pypy
 [QtCore::qbytearray_test]
-    pypy
-[QtCore::qeasingcurve_test]
-    pypy
-[QtCore::qobject_inherits_test]
-    pypy
-[QtCore::qproperty_decorator]
-    pypy
-[QtWidgets::action_clear]
     pypy
 [QtWidgets::bug_836]
     pypy
 [QtWidgets::bug_860]
-    pypy
-[QtWidgets::qlayout_test]
     pypy
 [QtWidgets::signature_test]
     pypy
