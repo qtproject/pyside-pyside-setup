@@ -32,7 +32,7 @@
 [registry::existence_test]
     darwin
 [QtQml::qqmlnetwork_test]
-    linux ci
+    linux ci    # extended, see PyPy section
 [QtWidgets::bug_750]
     darwin ci
 [QtWidgets::qpicture_test]
@@ -42,8 +42,61 @@
     debug
 [signals::bug_79]
     debug
-# PYSIDE-535: This one error is left as a place holder for 7 errors.
-#             It will be fixed in PyPy, but we should not forget about it.
-#             Fixing: Search for "def AssertRaises".
-[sample::implicitconv_numerical]
+
+# PYSIDE-535: These errors are still present. Please try to remove one :)
+[sample::mixed_mi]
     pypy
+[sample::ownership_invalidate_child]
+    pypy
+[sample::renaming]
+    pypy
+[sample::sample]
+    pypy
+[sample::str]
+    pypy
+[sample::typedealloc]
+    pypy
+[smart::smart_pointer]
+    pypy
+[pysidetest::constructor_properties_test]
+    pypy
+[pysidetest::homonymoussignalandmethod_test]
+    pypy
+[pysidetest::mixin_signal_slots_test]
+    pypy
+[signals::qobject_destroyed_test]
+    pypy
+[signals::qobject_receivers_test]
+    pypy
+[signals::qobject_sender_test]
+    pypy
+[QtCore::classinfo_test]
+    pypy
+[QtCore::destroysignal_test]
+    pypy
+[QtCore::qbytearray_test]
+    pypy
+[QtCore::qeasingcurve_test]
+    pypy
+[QtCore::qobject_inherits_test]
+    pypy
+[QtCore::qproperty_decorator]
+    pypy
+[QtWidgets::action_clear]
+    pypy
+[QtWidgets::bug_836]
+    pypy
+[QtWidgets::bug_860]
+    pypy
+[QtWidgets::qlayout_test]
+    pypy
+[QtWidgets::signature_test]
+    pypy
+[QtQml::bug_825]
+    pypy
+[QtQml::qqmlnetwork_test]
+    pypy
+    linux ci    # from above
+[QtQml::javascript_exceptions]
+    pypy
+# 2022-03-04 PyPy: Currently 27 of 657 tests fail
