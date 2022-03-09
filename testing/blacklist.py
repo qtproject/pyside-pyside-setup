@@ -63,7 +63,7 @@ class BlackList(object):
 
         def filtered_line(line):
             if "#" in line:
-                line = line[line.index("#")]
+                line = line[ : line.index("#")]
             return line.split()
 
         # now put every bracketed line in a test
