@@ -32,7 +32,7 @@
 [registry::existence_test]
     darwin
 [QtQml::qqmlnetwork_test]
-    linux ci    # extended, see PyPy section
+    linux ci    # extended, see PyPy section below
 [QtWidgets::bug_750]
     darwin ci
 [QtWidgets::qpicture_test]
@@ -75,8 +75,9 @@
 [QtQml::bug_825]
     pypy
 [QtQml::qqmlnetwork_test]
-    pypy
-    linux ci    # from above
+    pypy        # This is added to the same entry above
 [QtQml::javascript_exceptions]
     pypy
-# 2022-03-04 PyPy: Currently 27 of 657 tests fail
+[QtQml::qqmlincubator_incubateWhile]
+    pypy        # gives timeout on macOS if I run video converter while testing
+# 2022-03-04 PyPy: Currently 28 of 657 tests fail

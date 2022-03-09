@@ -77,7 +77,6 @@ class BlackList(object):
             # nothing supplied
             return
 
-        self.index = {}
         for idx, line in enumerate(lines):
             fline = filtered_line(line)
             if not fline:
@@ -92,8 +91,8 @@ class BlackList(object):
             if is_test(fline):
                 # a new name
                 name = decorate(fline[0][1:-1])
-                self.tests[name] = []
-                self.index[name] = idx
+                # Allow for repeated sections
+                self.tests.setdefault(name, [])
             elif fline:
                 # a known name with a new entry
                 self.tests[name].append(fline)
