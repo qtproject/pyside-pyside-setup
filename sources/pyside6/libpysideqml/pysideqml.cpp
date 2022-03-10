@@ -46,6 +46,8 @@
 #include "pysideqmluncreatable.h"
 #include "pysideqmlmetacallerror_p.h"
 
+#include <QtQml/QQmlPropertyMap>
+
 #include <signalmanager.h>
 
 namespace PySide::Qml
@@ -60,6 +62,8 @@ void init(PyObject *module)
     initQmlNamedElement(module);
     initQmlUncreatable(module);
     PySide::SignalManager::setQmlMetaCallErrorHandler(PySide::Qml::qmlMetaCallErrorHandler);
+
+    qRegisterMetaType<QQmlPropertyMap *>(); // PYSIDE-1845, QQmlPropertyMap * properties
 }
 
 } //namespace PySide::Qml
