@@ -47,6 +47,7 @@ class TestBug(UsesQGuiApplication):
     @Slot()
     def check_complete(self):
         if (self._view.rootObject().isComponentComplete()):
+            self._timer.stop()
             self._view.close()
 
     def testQMLFunctionCall(self):
@@ -64,9 +65,9 @@ class TestBug(UsesQGuiApplication):
         self._view.show()
         while not self._view.isExposed():
             QCoreApplication.processEvents()
-        timer = QTimer()
-        timer.timeout.connect(self.check_complete)
-        timer.start(20)
+        self._timer = QTimer()
+        self._timer.timeout.connect(self.check_complete)
+        self._timer.start(20)
         self.app.exec()
         self.assertEqual(ownerData.value('newName'), ownerData.value('name'))
 

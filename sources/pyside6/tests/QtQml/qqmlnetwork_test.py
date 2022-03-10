@@ -47,16 +47,28 @@ from helper.helper import quickview_errorstring
 from helper.timedqguiapplication import TimedQGuiApplication
 
 
+request_created = False
+
+
+def check_done():
+    global request_created
+    if request_created:
+        windows = QGuiApplication.topLevelWindows()
+        if windows:
+            windows[0].close()
+
+
 class CustomManager(QNetworkAccessManager):
+    """CustomManager (running in a different thread)"""
     def createRequest(self, op, req, data=None):
+        global request_created
         print(">> createRequest ", self, op, req.url(), data)
+        request_created = True
         return QNetworkAccessManager.createRequest(self, op, req, data)
 
 
 class CustomFactory(QQmlNetworkAccessManagerFactory):
     def create(self, parent=None):
-        w = QGuiApplication.topLevelWindows()[0]
-        QTimer.singleShot(50, w.close)
         return CustomManager()
 
 
@@ -79,6 +91,9 @@ class TestQQmlNetworkFactory(TimedQGuiApplication):
 
         self.assertEqual(view.status(), QQuickView.Ready)
 
+        timer = QTimer()
+        timer.timeout.connect(check_done)
+        timer.start(50)
         self.app.exec()
 
 

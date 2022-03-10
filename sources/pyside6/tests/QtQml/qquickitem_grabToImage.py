@@ -70,7 +70,7 @@ class TestGrabToSharedPointerImage(TimedQGuiApplication):
 
         def onGrabReady():
             # Signal early exit.
-            QTimer.singleShot(0, self.app.quit)
+            QTimer.singleShot(50, self.app.quit)
 
             # Show the grabbed image in the QML Image item.
             imageContainer.setProperty("source", grabResultSharedPtr.url())
