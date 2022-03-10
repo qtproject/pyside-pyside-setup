@@ -1,3 +1,5 @@
+[testmodifydocumentation]
+    darwin arm
 [signals::signal_signature_test]
     linux
     darwin

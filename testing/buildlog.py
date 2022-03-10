@@ -46,6 +46,7 @@ BuildLog.classifiers finds the set of classifier strings.
 """
 
 import os
+import platform
 import sys
 import shutil
 from collections import namedtuple
@@ -160,8 +161,8 @@ class BuildLog(object):
         if not self.selected:
             raise ValueError("+++ No build with the configuration found!")
         # Python2 legacy: Correct 'linux2' to 'linux', recommended way.
-        platform = "linux" if sys.platform.startswith("linux") else sys.platform
-        res = [platform, "qt6"]
+        plat_name = "linux" if sys.platform.startswith("linux") else sys.platform
+        res = [plat_name, "qt6"]
         if is_ci:
             res.append("ci")
         if self.selected.build_classifiers:
@@ -179,6 +180,9 @@ class BuildLog(object):
                 key = ".".join(parts[:idx])
                 if key not in res:
                     res.append(key)
+        # Allow to check the processor.
+        # This gives "i386" or "arm" on macOS.
+        res.append(platform.processor())
         return res
 
 
