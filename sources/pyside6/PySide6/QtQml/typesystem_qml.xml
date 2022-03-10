@@ -60,6 +60,7 @@
     #include "pysideqmllistproperty.h"
     #include "pysideqmluncreatable.h"
     #include "pysideqmlvolatilebool.h"
+    #include &lt;QtQml/QQmlPropertyMap&gt;
     </inject-code>
 
     <!-- This is to inform the generator that the VolatileBool python type exists -->

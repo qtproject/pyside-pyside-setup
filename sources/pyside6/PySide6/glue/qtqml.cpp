@@ -76,6 +76,8 @@ int %0 = PySide::qmlRegisterType(%ARGUMENT_NAMES, false);
 initQtQmlListProperty(module);
 initQmlUncreatable(module);
 initQtQmlVolatileBool(module);
+
+qRegisterMetaType<QQmlPropertyMap *>(); // PYSIDE-1845, QQmlPropertyMap * properties
 // @snippet init
 
 // @snippet qjsengine-toscriptvalue
