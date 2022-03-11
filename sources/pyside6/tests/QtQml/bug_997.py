@@ -44,11 +44,14 @@ from PySide6.QtQuick import QQuickView
 
 class TestBug(UsesQGuiApplication):
 
+    def setUp(self):
+        super().setUp()
+        self._complete = False
+
     @Slot()
-    def check_complete(self):
-        if (self._view.rootObject().isComponentComplete()):
-            self._timer.stop()
-            self._view.close()
+    def complete(self):
+        self._complete = True
+        self.app.quit()
 
     def testQMLFunctionCall(self):
         ownerData = QQmlPropertyMap()
@@ -57,18 +60,15 @@ class TestBug(UsesQGuiApplication):
         ownerData.insert('newValue', '')
 
         self._view = QQuickView()
+        self._view.engine().quit.connect(self.complete)
         self._view.setInitialProperties({'owner': ownerData})
         file = Path(__file__).resolve().parent / 'bug_997.qml'
         self.assertTrue(file.is_file())
         self._view.setSource(QUrl.fromLocalFile(file))
         self.assertTrue(self._view.rootObject(), quickview_errorstring(self._view))
         self._view.show()
-        while not self._view.isExposed():
-            QCoreApplication.processEvents()
-        self._timer = QTimer()
-        self._timer.timeout.connect(self.check_complete)
-        self._timer.start(20)
-        self.app.exec()
+        if not self._complete:
+            self.app.exec()
         self.assertEqual(ownerData.value('newName'), ownerData.value('name'))
 
 

@@ -31,5 +31,8 @@ import QtQuick 2.0
 Text {
     required property var owner
     text: owner.name + " " + owner.phone
-    Component.onCompleted: { owner.newName = owner.name }
+    Component.onCompleted: {
+        owner.newName = owner.name
+        Qt.quit()
+    }
 }
