@@ -75,6 +75,17 @@ endif()
 
 endmacro()
 
+function(qfp_strip_library target)
+    # Strip unless macOS (/strip: error: symbols referenced by indirect symbol
+    # table entries that can't be stripped).
+    if (CMAKE_STRIP AND UNIX AND NOT APPLE AND NOT QFP_NO_STRIP
+        AND NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(post_command COMMAND ${CMAKE_STRIP} $<TARGET_FILE:${target}>)
+        add_custom_command(TARGET ${target} POST_BUILD ${post_command})
+    endif()
+
+endfunction()
+
 macro(shiboken_internal_set_python_site_packages)
     # When cross-building, we can't run the target python executable to find out the information,
     # so we allow an explicit variable assignment or use a default / sensible value.

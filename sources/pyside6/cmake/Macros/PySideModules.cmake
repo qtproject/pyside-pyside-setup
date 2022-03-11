@@ -200,6 +200,7 @@ macro(create_pyside_module)
         endif()
     endif()
 
+    qfp_strip_library("${module_NAME}")
 
     # Add target to generate pyi file, which depends on the module target.
     # Don't generate the files when cross-building because the target python can not be executed

@@ -640,9 +640,12 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
         if numpy and not self.is_cross_compile:
             cmake_cmd.append(f"-DNUMPY_INCLUDE_DIR={numpy}")
 
-        if self.build_type.lower() == 'debug' and not self.is_cross_compile:
-            cmake_cmd.append(f"-DPYTHON_DEBUG_LIBRARY={self.py_library}")
-
+        if self.build_type.lower() == 'debug':
+            if not self.is_cross_compile:
+                cmake_cmd.append(f"-DPYTHON_DEBUG_LIBRARY={self.py_library}")
+        else:
+            if OPTION['NO_STRIP']:
+                cmake_cmd.append("-DQFP_NO_STRIP=1")
         if OPTION["LIMITED_API"] == "yes":
             cmake_cmd.append("-DFORCE_LIMITED_API=yes")
         elif OPTION["LIMITED_API"] == "no":

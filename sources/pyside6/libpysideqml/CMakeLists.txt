@@ -57,6 +57,8 @@ endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D QT_NO_CAST_FROM_ASCII -D QT_NO_CAST_TO_ASCII")
 
+qfp_strip_library("pyside6qml")
+
 # Install-tree / relocatable package config file.
 configure_package_config_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/PySide6QmlConfig-spec.cmake.in"

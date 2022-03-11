@@ -208,6 +208,7 @@ class DistUtilsCommandMixin(object):
         ('debug', None, 'Build with debug information'),
         ('relwithdebinfo', None, 'Build in release mode with debug information'),
         ('only-package', None, 'Package only'),
+        ('no-strip', None, 'Do not strip package libraries (release mode)'),
         ('standalone', None, 'Standalone build'),
         ('ignore-git', None, 'Do update subrepositories'),
         ('skip-docs', None, 'Skip documentation build'),
@@ -260,6 +261,7 @@ class DistUtilsCommandMixin(object):
         self.avoid_protected_hack = False
         self.debug = False
         self.relwithdebinfo = False
+        self.no_strip = False
         self.only_package = False
         self.standalone = False
         self.ignore_git = False
@@ -365,6 +367,7 @@ class DistUtilsCommandMixin(object):
         OPTION['AVOID_PROTECTED_HACK'] = self.avoid_protected_hack
         OPTION['DEBUG'] = self.debug
         OPTION['RELWITHDEBINFO'] = self.relwithdebinfo
+        OPTION['NO_STRIP'] = self.no_strip
         OPTION['ONLYPACKAGE'] = self.only_package
         OPTION['STANDALONE'] = self.standalone
         OPTION['IGNOREGIT'] = self.ignore_git

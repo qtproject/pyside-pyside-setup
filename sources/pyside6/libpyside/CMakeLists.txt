@@ -120,6 +120,8 @@ endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D QT_NO_CAST_FROM_ASCII -D QT_NO_CAST_TO_ASCII")
 
+qfp_strip_library("pyside6")
+
 # create pkg-config file
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/pyside6.pc.in"
                "${CMAKE_CURRENT_BINARY_DIR}/pyside6${pyside6_SUFFIX}.pc" @ONLY)

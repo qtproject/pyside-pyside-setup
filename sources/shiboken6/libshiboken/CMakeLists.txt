@@ -140,6 +140,8 @@ set_target_properties(libshiboken PROPERTIES OUTPUT_NAME "shiboken6${shiboken6_S
                                              SOVERSION ${libshiboken_SOVERSION}
                                              DEFINE_SYMBOL BUILD_LIBSHIBOKEN)
 
+qfp_strip_library("libshiboken")
+
 install(FILES
         autodecref.h
         basewrapper.h

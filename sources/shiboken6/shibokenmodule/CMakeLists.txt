@@ -34,6 +34,8 @@ target_link_libraries(shibokenmodule PUBLIC libshiboken)
 
 create_generator_target(shibokenmodule)
 
+qfp_strip_library("shibokenmodule")
+
 install(TARGETS shibokenmodule DESTINATION ${PYTHON_SITE_PACKAGES}/shiboken6)
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/_config.py.in"
