@@ -113,6 +113,12 @@ static GetReceiverResult getReceiver(QObject *source, const char *signal,
         result.self = PyMethod_GET_SELF(callback);
         result.receiver = PySide::convertToQObject(result.self, false);
         forceGlobalReceiver = isMethodDecorator(callback, true, result.self);
+#ifdef PYPY_VERSION
+    } else if (Py_TYPE(callback) == PepBuiltinMethod_TypePtr) {
+        result.self = PyObject_GetAttrString(callback, "__self__");
+        Py_DECREF(result.self);
+        result.receiver = PySide::convertToQObject(result.self, false);
+#endif
     } else if (PyCFunction_Check(callback)) {
         result.self = PyCFunction_GET_SELF(callback);
         result.receiver = PySide::convertToQObject(result.self, false);

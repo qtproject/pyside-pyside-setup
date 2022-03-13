@@ -1098,6 +1098,28 @@ QString getCallbackSignature(const char *signal, QObject *receiver, PyObject *ca
 
     if (function != nullptr) {
         numArgs = PepCode_GET_FLAGS(objCode) & CO_VARARGS ? -1 : PepCode_GET_ARGCOUNT(objCode);
+#ifdef PYPY_VERSION
+    } else if (Py_TYPE(callback) == PepBuiltinMethod_TypePtr) {
+        // PYSIDE-535: PyPy has a special builtin method that acts almost like PyCFunction.
+        Shiboken::AutoDecRef temp(PyObject_GetAttr(callback, Shiboken::PyMagicName::name()));
+        functionName = Shiboken::String::toCString(temp);
+        useSelf = true;
+
+        if (receiver) {
+            // Search for signature on metaobject
+            const QMetaObject *mo = receiver->metaObject();
+            QByteArray prefix(functionName);
+            prefix += '(';
+            for (int i = 0; i < mo->methodCount(); i++) {
+                QMetaMethod me = mo->method(i);
+                if ((strncmp(me.methodSignature(), prefix, prefix.size()) == 0) &&
+                    QMetaObject::checkConnectArgs(signal, me.methodSignature())) {
+                    numArgs = me.parameterTypes().size() + useSelf;
+                    break;
+                }
+           }
+        }
+#endif
     } else if (PyCFunction_Check(callback)) {
         const PyCFunctionObject *funcObj = reinterpret_cast<const PyCFunctionObject *>(callback);
         functionName = PepCFunction_GET_NAMESTR(funcObj);
@@ -1105,7 +1127,7 @@ QString getCallbackSignature(const char *signal, QObject *receiver, PyObject *ca
         const int flags = PyCFunction_GET_FLAGS(funcObj);
 
         if (receiver) {
-            //Search for signature on metaobject
+            // Search for signature on metaobject
             const QMetaObject *mo = receiver->metaObject();
             QByteArray prefix(functionName);
             prefix += '(';
