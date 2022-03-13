@@ -91,6 +91,14 @@ static PyObject *_get_written_signature(signaturefunc sf, PyObject *ob, PyObject
     return ret;
 }
 
+#ifdef PYPY_VERSION
+PyObject *pyside_bm_get___signature__(PyObject *func, PyObject *modifier)
+{
+    init_module_2();
+    return _get_written_signature(GetSignature_Method, func, modifier);
+}
+#endif
+
 PyObject *pyside_cf_get___signature__(PyObject *func, PyObject *modifier)
 {
     init_module_2();

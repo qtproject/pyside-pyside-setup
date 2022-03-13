@@ -81,7 +81,6 @@ PyObject *PySide_BuildSignatureProps(PyObject *class_mod);
 PyObject *GetClassOrModOf(PyObject *ob);
 
 // signature_extend.cpp
-
 PyObject *pyside_cf_get___signature__(PyObject *func, PyObject *modifier);
 PyObject *pyside_sm_get___signature__(PyObject *sm, PyObject *modifier);
 PyObject *pyside_md_get___signature__(PyObject *ob_md, PyObject *modifier);
@@ -101,6 +100,13 @@ PyObject *_get_class_of_sm(PyObject *ob_sm);
 PyObject *_get_class_of_descr(PyObject *ob);
 PyObject *_address_to_stringlist(PyObject *numkey);
 int _finish_nested_classes(PyObject *dict);
+
+#ifdef PYPY_VERSION
+// PyPy has a special builtin method.
+PyObject *GetSignature_Method(PyObject *, PyObject *);
+PyObject *pyside_bm_get___signature__(PyObject *func, PyObject *modifier);
+PyObject *_get_class_of_bm(PyObject *ob_cf);
+#endif
 
 } // extern "C"
 

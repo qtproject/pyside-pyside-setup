@@ -306,7 +306,7 @@ static PyType_Slot SbkVoidPtrType_slots[] = {
     {0, nullptr}
 };
 static PyType_Spec SbkVoidPtrType_spec = {
-    "2:shiboken6.shiboken6.VoidPtr",
+    "2:shiboken6.Shiboken.VoidPtr",
     sizeof(SbkVoidPtrObject),
     0,
     Py_TPFLAGS_DEFAULT,

@@ -46,6 +46,7 @@
 #include "sbkenum.h"
 #include "sbkenum_p.h"
 #include "sbkconverter.h"
+#include "voidptr.h"
 
 #include <cstdlib>
 #include <cstring>
@@ -712,6 +713,29 @@ PyStaticMethod_New(PyObject *callable)
 }
 #endif // Py_LIMITED_API
 
+#ifdef PYPY_VERSION
+PyTypeObject *PepBuiltinMethod_TypePtr = nullptr;
+
+static PyTypeObject *
+getBuiltinMethodType(void)
+{
+    // PYSIDE-535: PyPy has a special builtin method that acts almost like PyCFunction.
+    //
+    // There is no public declaration for the "builtin method" type.
+    // We also cannot grep it with a Python script since the import is too early.
+    // Pick a demo "builtin method" by using the VoidPtr type.
+    // Create the equivalent of
+    // "from shiboken6.Shiboken import VoidPtr\n"
+    // "result = type(VoidPtr(0).toBytes)\n";
+    auto *pyVoidP = reinterpret_cast<PyObject *>(SbkVoidPtr_TypeF());
+    Shiboken::AutoDecRef arg(Py_BuildValue("i", 0));
+    Shiboken::AutoDecRef inst(PyObject_CallFunctionObjArgs(pyVoidP, arg.object(), nullptr));
+    Shiboken::AutoDecRef meth(PyObject_GetAttrString(inst, "toBytes"));
+    auto *result = reinterpret_cast<PyTypeObject *>(PyObject_Type(meth));
+    return result;
+}
+#endif
+
 /*****************************************************************************
  *
  * Common newly needed functions
@@ -1052,6 +1076,9 @@ Pep384_Init()
     PepFunction_TypePtr = getFunctionType();
     PepStaticMethod_TypePtr = getStaticMethodType();
 #endif // Py_LIMITED_API
+#ifdef PYPY_VERSION
+    PepBuiltinMethod_TypePtr = getBuiltinMethodType();
+#endif
 }
 
 } // extern "C"

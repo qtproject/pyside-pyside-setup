@@ -259,6 +259,15 @@ int insert_snake_case_variants(PyObject *dict)
     return PyDict_Merge(dict, snake_dict, 0);
 }
 
+#ifdef PYPY_VERSION
+PyObject *_get_class_of_bm(PyObject *ob_bm)
+{
+    AutoDecRef self(PyObject_GetAttr(ob_bm, PyMagicName::self()));
+    auto *klass = PyObject_GetAttr(self, PyMagicName::class_());
+    return klass;
+}
+#endif
+
 PyObject *_get_class_of_cf(PyObject *ob_cf)
 {
     PyObject *selftype = PyCFunction_GET_SELF(ob_cf);

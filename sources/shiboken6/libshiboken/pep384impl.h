@@ -532,6 +532,10 @@ LIBSHIBOKEN_API PyObject *PyStaticMethod_New(PyObject *callable);
 #define PepStaticMethod_TypePtr &PyStaticMethod_Type
 #endif
 
+#ifdef PYPY_VERSION
+extern LIBSHIBOKEN_API PyTypeObject *PepBuiltinMethod_TypePtr;
+#endif
+
 // Although not PEP specific, we resolve this similar issue, here:
 #define PepMethodDescr_TypePtr &PyMethodDescr_Type
 

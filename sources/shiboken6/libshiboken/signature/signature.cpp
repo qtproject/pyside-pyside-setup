@@ -86,6 +86,11 @@ PyObject *GetClassOrModOf(PyObject *ob)
         Py_INCREF(ob);
         return ob;
     }
+#ifdef PYPY_VERSION
+    // PYSIDE-535: PyPy has a special builtin method that acts almost like PyCFunction.
+    if (Py_TYPE(ob) == PepBuiltinMethod_TypePtr)
+        return _get_class_of_bm(ob);
+#endif
     if (PyType_IsSubtype(Py_TYPE(ob), &PyCFunction_Type))
         return _get_class_of_cf(ob);
     if (Py_TYPE(ob) == PepStaticMethod_TypePtr)
@@ -167,6 +172,24 @@ static PyObject *_GetSignature_Cached(PyObject *props, PyObject *func_kind, PyOb
     return Py_INCREF(value), value;
 }
 
+#ifdef PYPY_VERSION
+PyObject *GetSignature_Method(PyObject *obfunc, PyObject *modifier)
+{
+    AutoDecRef obtype_mod(GetClassOrModOf(obfunc));
+    AutoDecRef type_key(GetTypeKey(obtype_mod));
+    if (type_key.isNull())
+        Py_RETURN_NONE;
+    PyObject *dict = TypeKey_to_PropsDict(type_key, obtype_mod);
+    if (dict == nullptr)
+        return nullptr;
+    AutoDecRef func_name(PyObject_GetAttr(obfunc, PyMagicName::name()));
+    PyObject *props = !func_name.isNull() ? PyDict_GetItem(dict, func_name) : nullptr;
+    if (props == nullptr)
+        Py_RETURN_NONE;
+    return _GetSignature_Cached(props, PyName::method(), modifier);
+}
+#endif
+
 PyObject *GetSignature_Function(PyObject *obfunc, PyObject *modifier)
 {
     // make sure that we look into PyCFunction, only...
@@ -243,6 +266,12 @@ PyObject *GetSignature_TypeMod(PyObject *ob, PyObject *modifier)
 
 PyObject *get_signature_intern(PyObject *ob, PyObject *modifier)
 {
+#ifdef PYPY_VERSION
+    // PYSIDE-535: PyPy has a special builtin method that acts almost like PyCFunction.
+    if (Py_TYPE(ob) == PepBuiltinMethod_TypePtr) {
+        return pyside_bm_get___signature__(ob, modifier);
+    }
+#endif
     if (PyType_IsSubtype(Py_TYPE(ob), &PyCFunction_Type))
         return pyside_cf_get___signature__(ob, modifier);
     if (Py_TYPE(ob) == PepStaticMethod_TypePtr)

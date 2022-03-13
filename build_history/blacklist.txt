@@ -48,8 +48,6 @@
 # PYSIDE-535: These errors are still present. Please try to remove one :)
 [sample::mixed_mi]
     pypy
-[sample::renaming]
-    pypy
 [sample::sample]
     pypy
 [sample::str]
@@ -72,12 +70,8 @@
     pypy
 [QtWidgets::bug_860]
     pypy
-[QtWidgets::signature_test]
-    pypy
 [QtQml::bug_825]
     pypy
-[QtQml::qqmlnetwork_test]
-    pypy        # This is added to the same entry above
 [QtQml::javascript_exceptions]
     pypy
 [QtQml::qqmlincubator_incubateWhile]
