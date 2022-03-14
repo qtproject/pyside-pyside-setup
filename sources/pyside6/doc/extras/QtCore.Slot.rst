@@ -22,6 +22,18 @@ Detailed Description
     QtCore   pyqtSlot                 Slot
     =======  =======================  =============
 
+    .. class:: PySide6.QtCore.Slot([type1 [, type2...]] [, name="" [, result=None]])
+
+            :param name: str
+            :param result: type
+
+    ``Slot`` takes a list of Python types of the arguments.
+
+    The optional named argument ``name`` defines the slot name. If nothing is
+    passed, the slot name will be the decorated function name.
+
+    The optional named argument ``result`` specifies the return type.
+
 Q_INVOKABLE
 -----------
 

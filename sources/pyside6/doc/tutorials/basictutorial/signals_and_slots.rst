@@ -158,6 +158,8 @@ nothing is passed as name then the new slot will have the same name as the
 function that is being decorated.
 
 
+.. _overloading-signals-and-slots:
+
 Overloading Signals and Slots with Different Types
 --------------------------------------------------
 
