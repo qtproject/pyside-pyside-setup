@@ -338,8 +338,8 @@ static QString qmlReferenceLink(const QFileInfo &qmlModuleFi)
 {
     QString result;
     QTextStream(&result) << "<para>The module also provides <link"
-        << " type=\"page\""
-        << " page=\"http://doc.qt.io/qt-5/" << qmlModuleFi.baseName() << ".html\""
+        << R"( type="page" page="http://doc.qt.io/qt-)" << QT_VERSION_MAJOR
+        << '/' << qmlModuleFi.baseName() << R"(.html")"
         << ">QML types</link>.</para>";
     return result;
 }
@@ -350,12 +350,12 @@ Documentation QtDocParser::retrieveModuleDocumentation(const QString& name)
     // dots as module separators in package names. Improve this.
     QString moduleName = name;
     moduleName.remove(0, name.lastIndexOf(QLatin1Char('.')) + 1);
+    if (moduleName == u"QtQuickControls2")
+        moduleName.chop(1);
     const QString prefix = documentationDataDirectory() + QLatin1Char('/')
         + moduleName.toLower();
-    QString sourceFile = prefix + QLatin1String(".xml");
 
-    if (!QFile::exists(sourceFile))
-        sourceFile = prefix + QLatin1String("-module.webxml");
+    const QString sourceFile = prefix + u"-index.webxml"_qs;
     if (!QFile::exists(sourceFile)) {
         qCWarning(lcShibokenDoc).noquote().nospace()
             << "Can't find qdoc file for module " <<  name << ", tried: "
