@@ -495,21 +495,19 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
         while (PyDict_Next(attrs, &pos, &key, &value)) {
             if (Signal::checkType(value)) {
                 // Register signals.
-                auto data = reinterpret_cast<PySideSignal *>(value);
-                if (data->data->signalName.isEmpty())
-                    data->data->signalName = String::toCString(key);
-                for (const auto &s : data->data->signatures) {
-                    const auto sig = data->data->signalName + '(' + s.signature + ')';
+                auto *data = reinterpret_cast<PySideSignal *>(value)->data;
+                if (data->signalName.isEmpty())
+                    data->signalName = String::toCString(key);
+                for (const auto &s : data->signatures) {
+                    const auto sig = data->signalName + '(' + s.signature + ')';
                     if (m_baseObject->indexOfSignal(sig) == -1) {
                         // Registering the parameterNames to the QMetaObject (PYSIDE-634)
                         // from:
                         //     Signal(..., arguments=['...', ...]
                         // the arguments are now on data-data->signalArguments
-                        if (!data->data->signalArguments->isEmpty()) {
-                            m_builder->addSignal(sig).setParameterNames(*data->data->signalArguments);
-                        } else {
-                            m_builder->addSignal(sig);
-                        }
+                        auto builder = m_builder->addSignal(sig);
+                        if (data->signalArguments && !data->signalArguments->isEmpty())
+                            builder.setParameterNames(*data->signalArguments);
                     }
                 }
             }
