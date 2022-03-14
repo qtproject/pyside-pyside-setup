@@ -202,6 +202,8 @@ bool ShibokenGenerator::shouldGenerateCppWrapper(const AbstractMetaClass *metaCl
 bool ShibokenGenerator::shouldWriteVirtualMethodNative(const AbstractMetaFunctionCPtr &func) const
 {
     // PYSIDE-803: Extracted this because it is used multiple times.
+    if (!func->isWhiteListed())
+        return false;
     const AbstractMetaClass *metaClass = func->ownerClass();
     return (!avoidProtectedHack() || !metaClass->hasPrivateDestructor())
             && ((func->isVirtual() || func->isAbstract())

@@ -306,6 +306,9 @@ public:
 
     bool usesRValueReferences() const;
     bool generateBinding() const;
+    // Returns whether the function is contained in the positive list of the
+    // type entry if one is specified.
+    bool isWhiteListed() const;
 
     QString signature() const;
     /// Return a signature qualified by class name, for error reporting.

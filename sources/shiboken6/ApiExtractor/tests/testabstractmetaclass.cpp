@@ -766,4 +766,37 @@ void TestAbstractMetaClass::testUsingTemplateMembers()
     QCOMPARE(valueList->queryFunctionsByName(u"append"_s).size(), 2);
 }
 
+void TestAbstractMetaClass::testGenerateFunctions()
+{
+    const char cppCode[] = R"CPP(
+class TestClass {
+public:
+    TestClass();
+
+    void alpha(int);
+    void beta(int);
+    void beta(double);
+    void gamma(int);
+};
+)CPP";
+
+    const char xmlCode[] = R"XML(
+<typesystem package='Foo'>
+    <object-type name='TestClass' generate-functions='beta(double);gamma'/>
+</typesystem>
+)XML";
+
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
+    auto *tc = AbstractMetaClass::findClass(classes, u"TestClass");
+    // Verify that the constructor and 2 functions are generated.
+    const auto &functions = tc->functions();
+    QCOMPARE(functions.size(), 5);
+    const auto generateCount =
+        std::count_if(functions.cbegin(), functions.cend(),
+                      [](const auto &af) { return af->generateBinding(); });
+    QCOMPARE(generateCount, 3);
+}
+
 QTEST_APPLESS_MAIN(TestAbstractMetaClass)

@@ -35,6 +35,7 @@
 
 #include <QtCore/QStringList>
 #include <QtCore/QScopedPointer>
+#include <QtCore/QSet>
 
 class AbstractMetaType;
 class CustomFunction;
@@ -579,6 +580,10 @@ public:
     AddedFunctionList addedFunctions() const;
     void setAddedFunctions(const AddedFunctionList &addedFunctions);
     void addNewFunction(const AddedFunctionPtr &addedFunction);
+
+    // Functions specified in the "generate-functions" attribute
+    const QSet<QString> &generateFunctions() const;
+    void setGenerateFunctions(const QSet<QString> &f);
 
     void setFieldModifications(const FieldModificationList &mods);
     FieldModificationList fieldModifications() const;

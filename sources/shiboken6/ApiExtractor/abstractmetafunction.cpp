@@ -472,14 +472,35 @@ bool AbstractMetaFunction::generateBinding() const
     case ConversionOperator:
     case AssignmentOperatorFunction:
     case MoveAssignmentOperatorFunction:
+    case AbstractMetaFunction::MoveConstructorFunction:
         return false;
     default:
+        if (!isWhiteListed())
+            return false;
         break;
     }
     if (isPrivate() && d->m_functionType != EmptyFunction)
         return false;
     return d->m_name != u"qt_metacall" && !usesRValueReferences()
-        && !isModifiedRemoved();
+           && !isModifiedRemoved();
+}
+
+bool AbstractMetaFunction::isWhiteListed() const
+{
+    switch (d->m_functionType) {
+    case NormalFunction:
+    case SignalFunction:
+    case SlotFunction:
+        if (auto *dc = declaringClass()) {
+            const QSet<QString> &whiteList = dc->typeEntry()->generateFunctions();
+            return whiteList.isEmpty() || whiteList.contains(d->m_name)
+                   || whiteList.contains(minimalSignature());
+        }
+        break;
+    default:
+        break;
+    }
+    return true;
 }
 
 QString AbstractMetaFunctionPrivate::signature() const

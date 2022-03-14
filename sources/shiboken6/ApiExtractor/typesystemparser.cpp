@@ -78,6 +78,7 @@ static inline QString forceAbstractAttribute() { return QStringLiteral("force-ab
 static inline QString forceIntegerAttribute() { return QStringLiteral("force-integer"); }
 static inline QString formatAttribute() { return QStringLiteral("format"); }
 static inline QString generateUsingAttribute() { return QStringLiteral("generate-using"); }
+static inline QString generateFunctionsAttribute() { return QStringLiteral("generate-functions"); }
 static inline QString classAttribute() { return QStringLiteral("class"); }
 static inline QString generateAttribute() { return QStringLiteral("generate"); }
 static inline QString generateGetSetDefAttribute() { return QStringLiteral("generate-getsetdef"); }
@@ -1770,6 +1771,13 @@ void TypeSystemParser::applyComplexTypeAttributes(const ConditionalStreamReader 
         } else if (name == deleteInMainThreadAttribute()) {
             if (convertBoolean(attributes->takeAt(i).value(), deleteInMainThreadAttribute(), false))
                 ctype->setDeleteInMainThread(true);
+        } else if (name == generateFunctionsAttribute()) {
+            const auto names = attributes->takeAt(i).value();
+            const auto nameList = names.split(u';', Qt::SkipEmptyParts);
+            QSet<QString> nameSet;
+            for (const auto &name : nameList)
+                nameSet.insert(name.trimmed().toString());
+            ctype->setGenerateFunctions(nameSet);
         } else if (name == u"target-type") {
             ctype->setTargetType(attributes->takeAt(i).value().toString());
         }  else if (name == snakeCaseAttribute()) {

@@ -320,6 +320,7 @@ value-type
              allow-thread="..."
              disable-wrapper="yes | no"
              exception-handling="..."
+             generate-functions="..."
              isNull ="yes | no"
              operator-bool="yes | no"
              hash-function="..."
@@ -349,7 +350,8 @@ value-type
     on its constructor signatures, thus **default-constructor** is used only in
     very odd cases.
 
-    For the *optional* **disable-wrapper** attribute, see  :ref:`object-type`.
+    For the *optional* **disable-wrapper** and **generate-functions**
+    attributes, see :ref:`object-type`.
 
     For the *optional* **private** attribute, see :ref:`private_types`.
 
@@ -397,6 +399,7 @@ object-type
              allow-thread="..."
              disable-wrapper="yes | no"
              exception-handling="..."
+             generate-functions="..."
              force-abstract="yes | no"
              hash-function="..."
              isNull ="yes | no"
@@ -451,6 +454,15 @@ object-type
     The *optional* attributes **allow-thread** and **exception-handling**
     specify the default handling for the corresponding function modification
     (see :ref:`modify-function`).
+
+    The *optional* **generate-functions** specifies a semicolon-separated
+    list of function names or minimal signatures to be generated.
+    This allows for restricting the functions for which bindings are generated.
+    This also applies to virtual functions; so, all abstract functions
+    need to be listed to prevent non-compiling code to be generated.
+    If nothing is specified, bindings for all suitable functions are
+    generated. Note that special functions (constructors, etc),
+    cannot be specified.
 
     The *optional* **snake-case** attribute allows for overriding the value
     specified on the **typesystem** element.

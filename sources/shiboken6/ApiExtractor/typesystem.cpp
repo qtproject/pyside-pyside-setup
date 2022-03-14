@@ -1231,6 +1231,7 @@ public:
 
     AddedFunctionList m_addedFunctions;
     FunctionModificationList m_functionMods;
+    QSet<QString> m_generateFunctions;
     FieldModificationList m_fieldMods;
     QList<TypeSystemProperty> m_properties;
     QString m_defaultConstructor;
@@ -1354,6 +1355,18 @@ void ComplexTypeEntry::addNewFunction(const AddedFunctionPtr &addedFunction)
 {
     S_D(ComplexTypeEntry);
     d->m_addedFunctions << addedFunction;
+}
+
+const QSet<QString> &ComplexTypeEntry::generateFunctions() const
+{
+    S_D(const ComplexTypeEntry);
+    return d->m_generateFunctions;
+}
+
+void ComplexTypeEntry::setGenerateFunctions(const QSet<QString> &f)
+{
+    S_D(ComplexTypeEntry);
+    d->m_generateFunctions = f;
 }
 
 void ComplexTypeEntry::setFieldModifications(const FieldModificationList &mods)
