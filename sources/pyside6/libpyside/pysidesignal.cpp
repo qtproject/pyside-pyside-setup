@@ -204,13 +204,10 @@ PyTypeObject *PySideSignalInstance_TypeF(void)
 
 static int signalTpInit(PyObject *self, PyObject *args, PyObject *kwds)
 {
-    static PyObject *emptyTuple = nullptr;
+    static PyObject * const emptyTuple = PyTuple_New(0);
     static const char *kwlist[] = {"name", "arguments", nullptr};
     char *argName = nullptr;
     PyObject *argArguments = nullptr;
-
-    if (emptyTuple == nullptr)
-        emptyTuple = PyTuple_New(0);
 
     if (!PyArg_ParseTupleAndKeywords(emptyTuple, kwds,
         "|sO:QtCore.Signal", const_cast<char **>(kwlist), &argName, &argArguments))
@@ -223,16 +220,16 @@ static int signalTpInit(PyObject *self, PyObject *args, PyObject *kwds)
     if (argName)
         data->data->signalName = argName;
 
-    data->data->signalArguments = new QByteArrayList();
-    if (argArguments && PySequence_Check(argArguments)) {
-        Py_ssize_t argument_size = PySequence_Size(argArguments);
+    const Py_ssize_t argument_size =
+        argArguments != nullptr && PySequence_Check(argArguments)
+        ? PySequence_Size(argArguments) : 0;
+    if (argument_size > 0) {
+        data->data->signalArguments = new QByteArrayList();
+        data->data->signalArguments->reserve(argument_size);
         for (Py_ssize_t i = 0; i < argument_size; ++i) {
-            PyObject *item = PySequence_GetItem(argArguments, i);
-            PyObject *strObj = PyUnicode_AsUTF8String(item);
-            char *s = PyBytes_AsString(strObj);
-            Py_DECREF(strObj);
-            Py_DECREF(item);
-            if (s != nullptr)
+            Shiboken::AutoDecRef item(PySequence_GetItem(argArguments, i));
+            Shiboken::AutoDecRef strObj(PyUnicode_AsUTF8String(item));
+            if (char *s = PyBytes_AsString(strObj))
                 data->data->signalArguments->append(QByteArray(s));
         }
     }
@@ -262,6 +259,7 @@ static void signalFree(void *self)
 {
     auto pySelf = reinterpret_cast<PyObject *>(self);
     auto data = reinterpret_cast<PySideSignal *>(self);
+    delete data->data->signalArguments;
     delete data->data;
     data->data = nullptr;
     Py_XDECREF(data->homonymousMethod);
