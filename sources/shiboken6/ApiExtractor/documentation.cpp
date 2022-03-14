@@ -28,6 +28,8 @@
 
 #include "documentation.h"
 
+#include <QtCore/QDebug>
+
 Documentation::Documentation(const QString &detailed,
                              const QString &brief,
                              Format fmt) :
@@ -73,3 +75,22 @@ void Documentation::setBrief(const QString &brief)
 {
     m_brief = brief.trimmed();
 }
+
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug debug, const Documentation &d)
+{
+    QDebugStateSaver saver(debug);
+    debug.noquote();
+    debug.nospace();
+    debug << "Documentation(";
+    if (!d.isEmpty()) {
+        debug << "format=" << d.format();
+        if (!d.brief().isEmpty())
+            debug << ", brief=\"" << d.brief() << '"';
+        if (!d.detailed().isEmpty())
+            debug << ", detailed=\"" << d.detailed() << '"';
+    }
+    debug << ')';
+    return debug;
+}
+#endif // QT_NO_DEBUG_STREAM

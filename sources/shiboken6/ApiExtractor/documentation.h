@@ -31,6 +31,8 @@
 
 #include <QtCore/QString>
 
+QT_FORWARD_DECLARE_CLASS(QDebug)
+
 class Documentation
 {
 public:
@@ -76,5 +78,9 @@ inline bool operator==(const Documentation &d1, const Documentation &d2)
 { return d1.equals(d2); }
 inline bool operator!=(const Documentation &d1, const Documentation &d2)
 { return !d1.equals(d2); }
+
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug debug, const Documentation &);
+#endif
 
 #endif // DOCUMENTATION_H
