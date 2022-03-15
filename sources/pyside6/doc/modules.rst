@@ -86,6 +86,13 @@ Qt Modules
 
     ---
 
+    :mod:`QtNfc <PySide6.QtNfc>`
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    The NFC API provides connectivity between NFC enabled devices.
+
+    ---
+
     :mod:`QtNetworkAuth <PySide6.QtNetworkAuth>`
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
