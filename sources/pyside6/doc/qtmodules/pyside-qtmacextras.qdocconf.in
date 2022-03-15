@@ -1,2 +1,0 @@
-include(@QT_SRC_DIR@/../qtmacextras/src/macextras/doc/qtmacextras.qdocconf)
-include(../pyside-config.qdocconf)
