@@ -10,3 +10,25 @@ specific information like build instructions should be removed.
 
 The descriptions may link to tutorials which can be added to additionaldocs.lst
 for webxml extraction.
+
+# Maintaining additionaldocs.lst
+
+The file is a list of additional documentation files. These are basically Qt
+tutorials referenced by the documentation. They will receive some Python
+adaption by shiboken/sphinx.
+
+The list can be created by the below script and some hand-editing. It will find
+almost all documents. Quite a number of them might be unreferenced, but there
+is no good way of filtering for this.
+
+    for F in *.webxml
+    do
+        echo "$F" | egrep '(-index)|(-module)|(-qmlmodule)\.webxml$' > /dev/null
+        if [ $? -ne 0 ]
+        then
+            if fgrep '<para>' "$F" > /dev/null # Exclude reference only
+            then
+                egrep "(<class )|(<namespace )" $F > /dev/null || echo $F
+            fi
+        fi
+    done
