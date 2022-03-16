@@ -106,6 +106,29 @@ QDebug operator<<(QDebug d, const QtXmlToSphinxLink &l)
     return d;
 }
 
+QDebug operator<<(QDebug debug, const QtXmlToSphinx::TableCell &c)
+{
+    QDebugStateSaver saver(debug);
+    debug.noquote();
+    debug.nospace();
+    debug << "Cell(\"" << c.data << '"';
+    if (c.colSpan != 0)
+        debug << ", colSpan=" << c.colSpan;
+    if (c.rowSpan != 0)
+        debug << ", rowSpan=" << c.rowSpan;
+    debug << ')';
+    return debug;
+}
+
+QDebug operator<<(QDebug debug, const QtXmlToSphinx::Table &t)
+{
+    QDebugStateSaver saver(debug);
+    debug.noquote();
+    debug.nospace();
+    t.formatDebug(debug);
+    return debug;
+}
+
 static const char *linkKeyWord(QtXmlToSphinxLink::Type type)
 {
     switch (type) {
@@ -1496,6 +1519,28 @@ void QtXmlToSphinx::Table::format(TextStream& s) const
         }
     }
     s << horizontalLine << "\n\n";
+}
+
+void QtXmlToSphinx::Table::formatDebug(QDebug &debug) const
+{
+    const auto rowCount = m_rows.size();
+    debug << "Table(" <<rowCount << " rows";
+    if (m_hasHeader)
+        debug << ", [header]";
+    if (m_normalized)
+        debug << ", [normalized]";
+    for (qsizetype r = 0; r < rowCount; ++r) {
+        const auto &row = m_rows.at(r);
+        const auto &colCount = row.size();
+        debug << ", row " << r << " [" << colCount << "]={";
+        for (qsizetype c = 0; c < colCount; ++c) {
+            if (c > 0)
+                debug << ", ";
+            debug << row.at(c);
+        }
+        debug << '}';
+    }
+    debug << ')';
 }
 
 void QtXmlToSphinx::stripPythonQualifiers(QString *s)

@@ -108,6 +108,7 @@ public:
             TableRow &last() { return m_rows.last(); }
 
             void format(TextStream& s) const;
+            void formatDebug(QDebug &debug) const;
 
         private:
             QList<TableRow> m_rows;
@@ -229,5 +230,7 @@ inline TextStream& operator<<(TextStream& s, const QtXmlToSphinx& xmlToSphinx)
 }
 
 QDebug operator<<(QDebug d, const QtXmlToSphinxLink &l);
+QDebug operator<<(QDebug debug, const QtXmlToSphinx::Table &t);
+QDebug operator<<(QDebug debug, const QtXmlToSphinx::TableCell &c);
 
 #endif // QTXMLTOSPHINX_H
