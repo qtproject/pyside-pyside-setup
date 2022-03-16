@@ -105,7 +105,7 @@ void QtXmlToSphinxTest::testTable_data()
     const char *expected = "\n\
     +--------+--------+\n\
     |Header 1|Header 2|\n\
-    +--------+--------+\n\
+    +========+========+\n\
     |1 1     |1 2     |\n\
     +--------+--------+\n\
     |2 1     |2 2     |\n\
@@ -144,7 +144,7 @@ void QtXmlToSphinxTest::testTable_data()
     expected = "\n\
     +---------------+--------+\n\
     |Header 1       |Header 2|\n\
-    +---------------+--------+\n\
+    +===============+========+\n\
     |I'm a big text!         |\n\
     +---------------+--------+\n\
     |2 1            |2 2     |\n\
@@ -183,7 +183,7 @@ void QtXmlToSphinxTest::testTable_data()
     expected = "\n\
     +--------+--------+\n\
     |Header 1|Header 2|\n\
-    +--------+--------+\n\
+    +========+========+\n\
     |1.1     |1.2     |\n\
     +        +--------+\n\
     |        |2 2     |\n\
@@ -228,7 +228,7 @@ void QtXmlToSphinxTest::testTable_data()
     expected = "\n\
     +--------+--------+--------+\n\
     |Header 1|Header 2|Header 3|\n\
-    +--------+--------+--------+\n\
+    +========+========+========+\n\
     |1.1     |1.2              |\n\
     +        +--------+--------+\n\
     |        |2 2     |2 3     |\n\
@@ -278,7 +278,7 @@ void QtXmlToSphinxTest::testTable_data()
     expected = "\n\
     +--+--+--+--+\n\
     |h1|h2|h3|h4|\n\
-    +--+--+--+--+\n\
+    +==+==+==+==+\n\
     |A |B |C |D |\n\
     +  +  +--+--+\n\
     |  |  |E |F |\n\
@@ -345,7 +345,7 @@ void QtXmlToSphinxTest::testTable_data()
     expected = "\n\
     +--------+------------+\n\
     |Header 1|Header 2    |\n\
-    +--------+------------+\n\
+    +========+============+\n\
     |1.1     |1.2         |\n\
     +--------+------------+\n\
     |2 2       2 3 2 4 2 5|\n\

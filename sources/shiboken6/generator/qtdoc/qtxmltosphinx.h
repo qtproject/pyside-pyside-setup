@@ -159,6 +159,7 @@ private:
     // table tagsvoid QtXmlToSphinx::handleValueTag(QXmlStreamReader& reader)
 
     void handleTableTag(QXmlStreamReader& reader);
+    void handleHeaderTag(QXmlStreamReader& reader);
     void handleRowTag(QXmlStreamReader& reader);
     void handleItemTag(QXmlStreamReader& reader);
     void handleRawTag(QXmlStreamReader& reader);
@@ -189,7 +190,6 @@ private:
     Table m_currentTable;
     QScopedPointer<QtXmlToSphinxLink> m_linkContext; // for <link>
     QScopedPointer<QtXmlToSphinxLink> m_seeAlsoContext; // for <see-also>foo()</see-also>
-    bool m_tableHasHeader = false;
     QString m_context;
     const QtXmlToSphinxDocGeneratorInterface *m_generator;
     const QtXmlToSphinxParameters &m_parameters;
