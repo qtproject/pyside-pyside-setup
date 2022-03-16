@@ -315,7 +315,7 @@ void QtXmlToSphinx::callHandler(WebXmlTag t, QXmlStreamReader &r)
         handleTableTag(r);
         break;
     case WebXmlTag::header:
-        handleRowTag(r);
+        handleHeaderTag(r);
         break;
     case WebXmlTag::row:
         handleRowTag(r);
@@ -429,7 +429,6 @@ void QtXmlToSphinx::formatCurrentTable()
 {
     if (m_currentTable.isEmpty())
         return;
-    m_currentTable.setHeaderEnabled(m_tableHasHeader);
     m_currentTable.normalize();
     m_output << '\n';
     m_currentTable.format(m_output);
@@ -935,7 +934,6 @@ void QtXmlToSphinx::handleTableTag(QXmlStreamReader& reader)
         if (parentTag() == WebXmlTag::para)
             handleParaTagEnd(); // End <para> to prevent the table from being rst-escaped
         m_currentTable.clear();
-        m_tableHasHeader = false;
     } else if (token == QXmlStreamReader::EndElement) {
         // write the table on m_output
         formatCurrentTable();
@@ -982,13 +980,21 @@ void QtXmlToSphinx::handleItemTag(QXmlStreamReader& reader)
     }
 }
 
-void QtXmlToSphinx::handleRowTag(QXmlStreamReader& reader)
+void QtXmlToSphinx::handleHeaderTag(QXmlStreamReader &reader)
 {
-    QXmlStreamReader::TokenType token = reader.tokenType();
-    if (token == QXmlStreamReader::StartElement) {
-        m_tableHasHeader = reader.name() == QLatin1String("header");
+    // <header> in WebXML is either a table header or a description of a
+    // C++ header with "name"/"href" attributes.
+    if (reader.tokenType() == QXmlStreamReader::StartElement
+        && !reader.attributes().hasAttribute(u"name"_qs)) {
+        m_currentTable.setHeaderEnabled(true);
         m_currentTable.appendRow({});
     }
+}
+
+void QtXmlToSphinx::handleRowTag(QXmlStreamReader& reader)
+{
+    if (reader.tokenType() == QXmlStreamReader::StartElement)
+        m_currentTable.appendRow({});
 }
 
 enum ListType { BulletList, OrderedList, EnumeratedList };
@@ -1012,7 +1018,7 @@ void QtXmlToSphinx::handleListTag(QXmlStreamReader& reader)
         if (listType == EnumeratedList) {
             m_currentTable.appendRow(TableRow{TableCell(QLatin1String("Constant")),
                                               TableCell(QLatin1String("Description"))});
-            m_tableHasHeader = true;
+            m_currentTable.setHeaderEnabled(true);
         }
         m_output.indent();
     } else if (token == QXmlStreamReader::EndElement) {
