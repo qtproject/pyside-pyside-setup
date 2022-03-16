@@ -60,10 +60,10 @@ void TestConversionOperator::testConversionOperator()
     QVERIFY(classA);
     QVERIFY(classB);
     QVERIFY(classC);
-    QCOMPARE(classA->functions().count(), 2);
-    QCOMPARE(classB->functions().count(), 3);
-    QCOMPARE(classC->functions().count(), 3);
-    QCOMPARE(classA->externalConversionOperators().count(), 2);
+    QCOMPARE(classA->functions().size(), 2);
+    QCOMPARE(classB->functions().size(), 3);
+    QCOMPARE(classC->functions().size(), 3);
+    QCOMPARE(classA->externalConversionOperators().size(), 2);
 
     AbstractMetaFunctionCPtr convOp;
     for (const auto &func : classB->functions()) {
@@ -94,7 +94,7 @@ void TestConversionOperator::testConversionOperatorOfDiscardedClass()
     AbstractMetaClassList classes = builder->classes();
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QVERIFY(classA);
-    QCOMPARE(classA->externalConversionOperators().count(), 0);
+    QCOMPARE(classA->externalConversionOperators().size(), 0);
 }
 
 void TestConversionOperator::testRemovedConversionOperator()
@@ -120,10 +120,10 @@ void TestConversionOperator::testRemovedConversionOperator()
     const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
     QVERIFY(classA);
     QVERIFY(classB);
-    QCOMPARE(classA->functions().count(), 2);
-    QCOMPARE(classB->functions().count(), 3);
-    QCOMPARE(classA->externalConversionOperators().count(), 0);
-    QCOMPARE(classA->implicitConversions().count(), 0);
+    QCOMPARE(classA->functions().size(), 2);
+    QCOMPARE(classB->functions().size(), 3);
+    QCOMPARE(classA->externalConversionOperators().size(), 0);
+    QCOMPARE(classA->implicitConversions().size(), 0);
 }
 
 void TestConversionOperator::testConversionOperatorReturningReference()
@@ -146,14 +146,14 @@ void TestConversionOperator::testConversionOperatorReturningReference()
     const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
     QVERIFY(classA);
     QVERIFY(classB);
-    QCOMPARE(classA->functions().count(), 2);
-    QCOMPARE(classB->functions().count(), 3);
-    QCOMPARE(classA->externalConversionOperators().count(), 1);
+    QCOMPARE(classA->functions().size(), 2);
+    QCOMPARE(classB->functions().size(), 3);
+    QCOMPARE(classA->externalConversionOperators().size(), 1);
     QCOMPARE(classA->externalConversionOperators().constFirst()->type().cppSignature(),
              QLatin1String("A"));
     QCOMPARE(classA->externalConversionOperators().constFirst()->ownerClass()->name(),
              QLatin1String("B"));
-    QCOMPARE(classA->implicitConversions().count(), 1);
+    QCOMPARE(classA->implicitConversions().size(), 1);
     QCOMPARE(classA->implicitConversions().constFirst()->type().cppSignature(),
              QLatin1String("A"));
     QCOMPARE(classA->implicitConversions().constFirst()->ownerClass()->name(),
@@ -180,14 +180,14 @@ void TestConversionOperator::testConversionOperatorReturningConstReference()
     const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
     QVERIFY(classA);
     QVERIFY(classB);
-    QCOMPARE(classA->functions().count(), 2);
-    QCOMPARE(classB->functions().count(), 3);
-    QCOMPARE(classA->externalConversionOperators().count(), 1);
+    QCOMPARE(classA->functions().size(), 2);
+    QCOMPARE(classB->functions().size(), 3);
+    QCOMPARE(classA->externalConversionOperators().size(), 1);
     QCOMPARE(classA->externalConversionOperators().constFirst()->type().cppSignature(),
              QLatin1String("A"));
     QCOMPARE(classA->externalConversionOperators().constFirst()->ownerClass()->name(),
              QLatin1String("B"));
-    QCOMPARE(classA->implicitConversions().count(), 1);
+    QCOMPARE(classA->implicitConversions().size(), 1);
     QCOMPARE(classA->implicitConversions().constFirst()->type().cppSignature(),
              QLatin1String("A"));
     QCOMPARE(classA->implicitConversions().constFirst()->ownerClass()->name(),

@@ -54,12 +54,12 @@ void TestImplicitConversions::testWithPrivateCtors()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    QCOMPARE(classes.count(), 3);
+    QCOMPARE(classes.size(), 3);
 
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     const AbstractMetaClass *classC = AbstractMetaClass::findClass(classes, QLatin1String("C"));
     const auto implicitConvs = classA->implicitConversions();
-    QCOMPARE(implicitConvs.count(), 1);
+    QCOMPARE(implicitConvs.size(), 1);
     QCOMPARE(implicitConvs.constFirst()->arguments().constFirst().type().typeEntry(),
              classC->typeEntry());
 }
@@ -84,11 +84,11 @@ void TestImplicitConversions::testWithModifiedVisibility()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    QCOMPARE(classes.count(), 2);
+    QCOMPARE(classes.size(), 2);
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
     const auto implicitConvs = classA->implicitConversions();
-    QCOMPARE(implicitConvs.count(), 1);
+    QCOMPARE(implicitConvs.size(), 1);
     QCOMPARE(implicitConvs.constFirst()->arguments().constFirst().type().typeEntry(),
              classB->typeEntry());
 }
@@ -118,16 +118,16 @@ void TestImplicitConversions::testWithAddedCtor()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    QCOMPARE(classes.count(), 3);
+    QCOMPARE(classes.size(), 3);
 
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     auto implicitConvs = classA->implicitConversions();
-    QCOMPARE(implicitConvs.count(), 2);
+    QCOMPARE(implicitConvs.size(), 2);
 
     // Added constructors with custom types should never result in implicit converters.
     const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
     implicitConvs = classB->implicitConversions();
-    QCOMPARE(implicitConvs.count(), 0);
+    QCOMPARE(implicitConvs.size(), 0);
 }
 
 void TestImplicitConversions::testWithExternalConversionOperator()
@@ -145,13 +145,13 @@ void TestImplicitConversions::testWithExternalConversionOperator()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    QCOMPARE(classes.count(), 2);
+    QCOMPARE(classes.size(), 2);
     AbstractMetaClass* classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     AbstractMetaClass* classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
     const auto implicitConvs = classA->implicitConversions();
-    QCOMPARE(implicitConvs.count(), 1);
+    QCOMPARE(implicitConvs.size(), 1);
     const auto &externalConvOps = classA->externalConversionOperators();
-    QCOMPARE(externalConvOps.count(), 1);
+    QCOMPARE(externalConvOps.size(), 1);
 
     AbstractMetaFunctionCPtr convOp;
     for (const auto &func : classB->functions()) {

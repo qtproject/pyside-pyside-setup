@@ -54,7 +54,7 @@ void TestContainer::testContainerType()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, true));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    QCOMPARE(classes.count(), 2);
+    QCOMPARE(classes.size(), 2);
     //search for class A
     AbstractMetaClass* classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QVERIFY(classA);
@@ -87,11 +87,11 @@ void TestContainer::testListOfValueType()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, true));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    QCOMPARE(classes.count(), 3);
+    QCOMPARE(classes.size(), 3);
 
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QVERIFY(classA);
-    QCOMPARE(classA->templateBaseClassInstantiations().count(), 1);
+    QCOMPARE(classA->templateBaseClassInstantiations().size(), 1);
     const AbstractMetaType templateInstanceType =
         classA->templateBaseClassInstantiations().constFirst();
 

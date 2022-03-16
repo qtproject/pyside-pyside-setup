@@ -51,7 +51,7 @@ void TestExtraInclude::testClassExtraInclude()
     QVERIFY(classA);
 
     QList<Include> includes = classA->typeEntry()->extraIncludes();
-    QCOMPARE(includes.count(), 1);
+    QCOMPARE(includes.size(), 1);
     QCOMPARE(includes.constFirst().name(), QLatin1String("header.h"));
 }
 
@@ -78,7 +78,7 @@ void TestExtraInclude::testGlobalExtraIncludes()
     QCOMPARE(module->name(), QLatin1String("Foo"));
 
     QList<Include> includes = module->extraIncludes();
-    QCOMPARE(includes.count(), 2);
+    QCOMPARE(includes.size(), 2);
     QCOMPARE(includes.constFirst().name(), QLatin1String("header1.h"));
     QCOMPARE(includes.constLast().name(), QLatin1String("header2.h"));
 }

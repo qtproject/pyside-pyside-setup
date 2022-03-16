@@ -1304,8 +1304,7 @@ FunctionModificationList ComplexTypeEntry::functionModifications(const QString &
 {
     S_D(const ComplexTypeEntry);
     FunctionModificationList lst;
-    for (int i = 0; i < d->m_functionMods.count(); ++i) {
-        const FunctionModification &mod = d->m_functionMods.at(i);
+    for (const auto &mod : std::as_const(d->m_functionMods)) {
         if (mod.matches(signature))
             lst << mod;
     }

@@ -426,7 +426,7 @@ QString TypeInfo::toString() const
 
     if (isFunctionPointer()) {
         tmp += QLatin1String(" (*)(");
-        for (int i = 0; i < d->m_arguments.count(); ++i) {
+        for (qsizetype i = 0; i < d->m_arguments.size(); ++i) {
             if (i != 0)
                 tmp += QLatin1String(", ");
 
@@ -446,11 +446,11 @@ QString TypeInfo::toString() const
 
 bool TypeInfoData::equals(const TypeInfoData &other) const
 {
-    if (m_arrayElements.count() != other.m_arrayElements.count())
+    if (m_arrayElements.size() != other.m_arrayElements.size())
         return false;
 
 #if defined (RXX_CHECK_ARRAY_ELEMENTS) // ### it'll break
-    for (int i = 0; i < arrayElements().count(); ++i) {
+    for (qsizetype i = 0; i < arrayElements().size(); ++i) {
         QString elt1 = arrayElements().at(i).trimmed();
         QString elt2 = other.arrayElements().at(i).trimmed();
 

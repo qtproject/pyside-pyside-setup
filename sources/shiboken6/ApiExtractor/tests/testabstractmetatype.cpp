@@ -205,10 +205,10 @@ void TestAbstractMetaType::testTypedefWithTemplates()
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
     const auto functions = builder->globalFunctions();
-    QCOMPARE(functions.count(), 1);
+    QCOMPARE(functions.size(), 1);
     const auto function = functions.constFirst();
     AbstractMetaArgumentList args = function->arguments();
-    QCOMPARE(args.count(), 1);
+    QCOMPARE(args.size(), 1);
     const AbstractMetaArgument &arg = args.constFirst();
     AbstractMetaType metaType = arg.type();
     QCOMPARE(metaType.cppSignature(), QLatin1String("A<B >"));
@@ -232,11 +232,11 @@ void TestAbstractMetaType::testObjectTypeUsedAsValue()
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QVERIFY(classA);
     const auto overloads = classA->queryFunctionsByName(QLatin1String("method"));
-    QCOMPARE(overloads.count(), 1);
+    QCOMPARE(overloads.size(), 1);
     const auto method = overloads.constFirst();
     QVERIFY(method);
     AbstractMetaArgumentList args = method->arguments();
-    QCOMPARE(args.count(), 1);
+    QCOMPARE(args.size(), 1);
     const AbstractMetaArgument &arg = args.constFirst();
     AbstractMetaType metaType = arg.type();
     QCOMPARE(metaType.cppSignature(), QLatin1String("A"));

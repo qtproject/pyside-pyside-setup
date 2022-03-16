@@ -444,7 +444,7 @@ void ShibokenGenerator::writeToCppConversion(TextStream &s, const AbstractMetaTy
 bool ShibokenGenerator::shouldRejectNullPointerArgument(const AbstractMetaFunctionCPtr &func,
                                                         int argIndex)
 {
-    if (argIndex < 0 || argIndex >= func->arguments().count())
+    if (argIndex < 0 || argIndex >= func->arguments().size())
         return false;
 
     const AbstractMetaArgument &arg = func->arguments().at(argIndex);
@@ -1615,7 +1615,7 @@ static QString miniNormalizer(const QString &varType)
         normalized.remove(0, 2);
     QString suffix;
     while (normalized.endsWith(QLatin1Char('*')) || normalized.endsWith(QLatin1Char('&'))) {
-        suffix.prepend(normalized.at(normalized.count() - 1));
+        suffix.prepend(normalized.at(normalized.size() - 1));
         normalized.chop(1);
         normalized = normalized.trimmed();
     }
@@ -1630,7 +1630,7 @@ static QString getConverterTypeSystemVariableArgument(const QString &code, int p
     QString arg;
     int parenthesisDepth = 0;
     int count = 0;
-    while (pos + count < code.count()) {
+    while (pos + count < code.size()) {
         char c = code.at(pos+count).toLatin1(); // toAscii is gone
         if (c == '(') {
             ++parenthesisDepth;

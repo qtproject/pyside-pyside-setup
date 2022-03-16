@@ -75,12 +75,12 @@ static bool shouldSkip(const AbstractMetaFunctionCPtr &func)
         if (f != func
             && f->isConstant()
             && f->name() == func->name()
-            && f->arguments().count() == funcArgs.count()) {
+            && f->arguments().size() == funcArgs.size()) {
             // Compare each argument
             bool cloneFound = true;
 
             const AbstractMetaArgumentList fargs = f->arguments();
-            for (int i = 0, max = funcArgs.count(); i < max; ++i) {
+            for (qsizetype i = 0, max = funcArgs.size(); i < max; ++i) {
                 if (funcArgs.at(i).type().typeEntry() != fargs.at(i).type().typeEntry()) {
                     cloneFound = false;
                     break;
@@ -218,7 +218,7 @@ void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classC
     s << ".. currentmodule:: " << metaClass->package() << "\n\n\n";
 
     s << className << '\n';
-    s << Pad('*', className.count()) << "\n\n";
+    s << Pad('*', className.size()) << "\n\n";
 
     auto documentation = metaClass->documentation();
     if (documentation.hasBrief())

@@ -47,7 +47,7 @@ void TestVoidArg::testVoidParsedFunction()
     QVERIFY(classA);
     const auto addedFunc = classA->findFunction(QLatin1String("a"));
     QVERIFY(!addedFunc.isNull());
-    QCOMPARE(addedFunc->arguments().count(), 0);
+    QCOMPARE(addedFunc->arguments().size(), 0);
 }
 
 void TestVoidArg::testVoidAddedFunction()
@@ -66,7 +66,7 @@ void TestVoidArg::testVoidAddedFunction()
     QVERIFY(classA);
     const auto addedFunc = classA->findFunction(QLatin1String("a"));
     QVERIFY(!addedFunc.isNull());
-    QCOMPARE(addedFunc->arguments().count(), 0);
+    QCOMPARE(addedFunc->arguments().size(), 0);
 
 }
 
@@ -84,7 +84,7 @@ void TestVoidArg::testVoidPointerParsedFunction()
     QVERIFY(classA);
     const auto addedFunc = classA->findFunction(QLatin1String("a"));
     QVERIFY(!addedFunc.isNull());
-    QCOMPARE(addedFunc->arguments().count(), 1);
+    QCOMPARE(addedFunc->arguments().size(), 1);
 
 }
 

@@ -1088,7 +1088,7 @@ QStringList getArgsFromSignature(const char *signature, bool *isShortCircuit)
 QString getCallbackSignature(const char *signal, QObject *receiver, PyObject *callback, bool encodeName)
 {
     QByteArray functionName;
-    int numArgs = -1;
+    qsizetype numArgs = -1;
 
     PyObject *function = nullptr;
     PepCodeObject *objCode = nullptr;
@@ -1140,10 +1140,9 @@ QString getCallbackSignature(const char *signal, QObject *receiver, PyObject *ca
     if (!isShortCircuit) {
         signature.append(QLatin1Char('('));
         if (numArgs == -1)
-            numArgs = std::numeric_limits<int>::max();
-        while (args.count() && (args.count() > (numArgs - useSelf))) {
+            numArgs = std::numeric_limits<qsizetype>::max();
+        while (!args.isEmpty() && (args.size() > (numArgs - useSelf)))
             args.removeLast();
-        }
         signature.append(args.join(QLatin1Char(',')));
         signature.append(QLatin1Char(')'));
     }

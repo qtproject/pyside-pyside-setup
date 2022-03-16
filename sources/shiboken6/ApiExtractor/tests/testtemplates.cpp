@@ -120,15 +120,15 @@ namespace Namespace {
     const auto func = classB->findFunction(QLatin1String("foo"));
     QVERIFY(!func.isNull());
     AbstractMetaType argType = func->arguments().constFirst().type();
-    QCOMPARE(argType.instantiations().count(), 1);
+    QCOMPARE(argType.instantiations().size(), 1);
     QCOMPARE(argType.typeEntry()->qualifiedCppName(), QLatin1String("QList"));
 
     const AbstractMetaType &instance1 = argType.instantiations().constFirst();
-    QCOMPARE(instance1.instantiations().count(), 1);
+    QCOMPARE(instance1.instantiations().size(), 1);
     QCOMPARE(instance1.typeEntry()->qualifiedCppName(), QLatin1String("Namespace::A"));
 
     const AbstractMetaType &instance2 = instance1.instantiations().constFirst();
-    QCOMPARE(instance2.instantiations().count(), 0);
+    QCOMPARE(instance2.instantiations().size(), 0);
     QCOMPARE(instance2.typeEntry()->qualifiedCppName(), QLatin1String("Namespace::E1"));
 }
 
@@ -149,7 +149,7 @@ void func(List<int> arg) {}
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
     const auto globalFuncs = builder->globalFunctions();
-    QCOMPARE(globalFuncs.count(), 1);
+    QCOMPARE(globalFuncs.size(), 1);
 
     const auto func = globalFuncs.constFirst();
     QCOMPARE(func->minimalSignature(), QLatin1String("func(List<int>)"));
@@ -174,7 +174,7 @@ void func(List<int>* arg) {}
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
     AbstractMetaFunctionCList globalFuncs = builder->globalFunctions();
-    QCOMPARE(globalFuncs.count(), 1);
+    QCOMPARE(globalFuncs.size(), 1);
 
     const auto func = globalFuncs.constFirst();
     QCOMPARE(func->minimalSignature(), QLatin1String("func(List<int>*)"));
@@ -199,7 +199,7 @@ void func(List<int>& arg) {}
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
     const auto globalFuncs = builder->globalFunctions();
-    QCOMPARE(globalFuncs.count(), 1);
+    QCOMPARE(globalFuncs.size(), 1);
 
     const auto func = globalFuncs.constFirst();
     QCOMPARE(func->minimalSignature(), QLatin1String("func(List<int>&)"));
@@ -229,7 +229,7 @@ struct List {
     QVERIFY(!builder.isNull());
     const AbstractMetaClassList templates = builder->templates();
 
-    QCOMPARE(templates.count(), 1);
+    QCOMPARE(templates.size(), 1);
     const AbstractMetaClass *list = templates.constFirst();
     // Verify that the parameter of "void append(List l)" gets fixed to "List<T >"
     const auto append = list->findFunction(QStringLiteral("append"));
@@ -270,14 +270,14 @@ struct FooBars : public ListContainer<FooBar> {};
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     AbstractMetaClassList templates = builder->templates();
-    QCOMPARE(classes.count(), 2);
-    QCOMPARE(templates.count(), 1);
+    QCOMPARE(classes.size(), 2);
+    QCOMPARE(templates.size(), 1);
 
     const AbstractMetaClass* foobars = AbstractMetaClass::findClass(classes, QLatin1String("FooBars"));
-    QCOMPARE(foobars->functions().count(), 4);
+    QCOMPARE(foobars->functions().size(), 4);
 
     const AbstractMetaClass *lc = templates.constFirst();
-    QCOMPARE(lc->functions().count(), 2);
+    QCOMPARE(lc->functions().size(), 2);
 }
 
 void TestTemplates::testTemplateInheritanceMixedWithForwardDeclaration()
@@ -312,7 +312,7 @@ template<SomeEnum type> struct Future {};
     QVERIFY(!classB->baseClass());
     QVERIFY(classB->baseClassName().isEmpty());
     // 3 functions: simple constructor, copy constructor and "method()".
-    QCOMPARE(classB->functions().count(), 3);
+    QCOMPARE(classB->functions().size(), 3);
 }
 
 void TestTemplates::testTemplateInheritanceMixedWithNamespaceAndForwardDeclaration()
@@ -351,7 +351,7 @@ template<SomeEnum type> struct Future {};
     QVERIFY(!classB->baseClass());
     QVERIFY(classB->baseClassName().isEmpty());
     // 3 functions: simple constructor, copy constructor and "method()".
-    QCOMPARE(classB->functions().count(), 3);
+    QCOMPARE(classB->functions().size(), 3);
 }
 
 void TestTemplates::testTypedefOfInstantiationOfTemplateClass()
@@ -381,14 +381,14 @@ typedef BaseTemplateClass<TypeOne> TypeOneClass;
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    QCOMPARE(classes.count(), 3);
+    QCOMPARE(classes.size(), 3);
 
     const AbstractMetaClass* base = AbstractMetaClass::findClass(classes, QLatin1String("BaseTemplateClass"));
     QVERIFY(base);
     const AbstractMetaClass* one = AbstractMetaClass::findClass(classes, QLatin1String("TypeOneClass"));
     QVERIFY(one);
     QCOMPARE(one->templateBaseClass(), base);
-    QCOMPARE(one->functions().count(), base->functions().count());
+    QCOMPARE(one->functions().size(), base->functions().size());
     QVERIFY(one->isTypeDef());
     const ComplexTypeEntry* oneType = one->typeEntry();
     const ComplexTypeEntry* baseType = base->typeEntry();
@@ -397,7 +397,7 @@ typedef BaseTemplateClass<TypeOne> TypeOneClass;
 
     QVERIFY(one->hasTemplateBaseClassInstantiations());
     AbstractMetaTypeList instantiations = one->templateBaseClassInstantiations();
-    QCOMPARE(instantiations.count(), 1);
+    QCOMPARE(instantiations.size(), 1);
     const AbstractMetaType &inst = instantiations.constFirst();
     QVERIFY(!inst.isEnum());
     QVERIFY(!inst.typeEntry()->isEnum());
@@ -430,7 +430,7 @@ typedef Vector<int> IntVector;
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, true));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    QCOMPARE(classes.count(), 1);
+    QCOMPARE(classes.size(), 1);
 
     AbstractMetaClass* vector = AbstractMetaClass::findClass(classes, QLatin1String("IntVector"));
     QVERIFY(vector);
@@ -438,7 +438,7 @@ typedef Vector<int> IntVector;
     QVERIFY(baseContainer);
     QCOMPARE(reinterpret_cast<const ContainerTypeEntry*>(baseContainer)->containerKind(),
              ContainerTypeEntry::ListContainer);
-    QCOMPARE(vector->functions().count(), 4);
+    QCOMPARE(vector->functions().size(), 4);
 
     const auto method = vector->findFunction(QLatin1String("method"));
     QVERIFY(!method.isNull());
@@ -474,7 +474,7 @@ Array<int, 2> foo();
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, true));
     QVERIFY(!builder.isNull());
     auto functions = builder->globalFunctions();
-    QCOMPARE(functions.count(), 1);
+    QCOMPARE(functions.size(), 1);
     auto foo = functions.constFirst();
     QCOMPARE(foo->name(), QLatin1String("foo"));
     QCOMPARE(foo->type().name(), QLatin1String("Array"));
@@ -633,7 +633,7 @@ public:
     QVERIFY(testClass);
 
     auto fields = testClass->fields();
-    QCOMPARE(fields.count(), 1);
+    QCOMPARE(fields.size(), 1);
     auto fieldType = testClass->fields().at(0).type();
     QCOMPARE(fieldType.name(), QLatin1String("Container1"));
     QCOMPARE(fieldType.instantiations().size(), 1);

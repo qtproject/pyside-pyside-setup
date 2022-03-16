@@ -40,7 +40,7 @@ void TestDtorInformation::testDtorIsPrivate()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    QCOMPARE(classes.count(), 2);
+    QCOMPARE(classes.size(), 2);
     QCOMPARE(AbstractMetaClass::findClass(classes, QLatin1String("Control"))->hasPrivateDestructor(), false);
     QCOMPARE(AbstractMetaClass::findClass(classes, QLatin1String("Subject"))->hasPrivateDestructor(), true);
 }
@@ -52,7 +52,7 @@ void TestDtorInformation::testDtorIsProtected()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    QCOMPARE(classes.count(), 2);
+    QCOMPARE(classes.size(), 2);
     QCOMPARE(AbstractMetaClass::findClass(classes, QLatin1String("Control"))->hasProtectedDestructor(), false);
     QCOMPARE(AbstractMetaClass::findClass(classes, QLatin1String("Subject"))->hasProtectedDestructor(), true);
 }
@@ -64,7 +64,7 @@ void TestDtorInformation::testDtorIsVirtual()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    QCOMPARE(classes.count(), 2);
+    QCOMPARE(classes.size(), 2);
     QCOMPARE(AbstractMetaClass::findClass(classes, QLatin1String("Control"))->hasVirtualDestructor(), false);
     QCOMPARE(AbstractMetaClass::findClass(classes, QLatin1String("Subject"))->hasVirtualDestructor(), true);
 }
@@ -85,7 +85,7 @@ class Subject : public SubjectBase {};
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    QCOMPARE(classes.count(), 4);
+    QCOMPARE(classes.size(), 4);
 
     auto klass = AbstractMetaClass::findClass(classes, QLatin1String("ControlBase"));
     QVERIFY(klass);
@@ -109,7 +109,7 @@ void TestDtorInformation::testClassWithVirtualDtorIsPolymorphic()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    QCOMPARE(classes.count(), 2);
+    QCOMPARE(classes.size(), 2);
     QCOMPARE(AbstractMetaClass::findClass(classes, QLatin1String("Control"))->isPolymorphic(), true);
     QCOMPARE(AbstractMetaClass::findClass(classes, QLatin1String("Subject"))->isPolymorphic(), true);
 }

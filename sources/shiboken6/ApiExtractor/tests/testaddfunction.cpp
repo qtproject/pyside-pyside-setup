@@ -44,7 +44,7 @@ void TestAddFunction::testParsingFuncNameAndConstness()
                                                  &errorMessage);
     QVERIFY2(!f1.isNull(), qPrintable(errorMessage));
     QCOMPARE(f1->name(), QLatin1String("func"));
-    QCOMPARE(f1->arguments().count(), 3);
+    QCOMPARE(f1->arguments().size(), 3);
     TypeInfo retval = f1->returnType();
     QCOMPARE(retval.qualifiedName(), QStringList{QLatin1String("void")});
     QCOMPARE(retval.indirections(), 0);
@@ -59,7 +59,7 @@ void TestAddFunction::testParsingFuncNameAndConstness()
     QVERIFY2(!f2.isNull(), qPrintable(errorMessage));
     QCOMPARE(f2->name(), QLatin1String("_fu__nc_"));
     const auto &args = f2->arguments();
-    QCOMPARE(args.count(), 4);
+    QCOMPARE(args.size(), 4);
     retval = f2->returnType();
     QCOMPARE(retval.qualifiedName(), QStringList{QLatin1String("Abc")});
     QCOMPARE(retval.instantiations().size(), 2);
@@ -87,7 +87,7 @@ void TestAddFunction::testParsingFuncNameAndConstness()
                                                  &errorMessage);
     QVERIFY2(!f3.isNull(), qPrintable(errorMessage));
     QCOMPARE(f3->name(), QLatin1String("func"));
-    QCOMPARE(f3->arguments().count(), 0);
+    QCOMPARE(f3->arguments().size(), 0);
 
     // const call operator
     const char sig4[] = "operator()(int)const";
@@ -95,7 +95,7 @@ void TestAddFunction::testParsingFuncNameAndConstness()
                                                  &errorMessage);
     QVERIFY2(!f4.isNull(), qPrintable(errorMessage));
     QCOMPARE(f4->name(), QLatin1String("operator()"));
-    QCOMPARE(f4->arguments().count(), 1);
+    QCOMPARE(f4->arguments().size(), 1);
     QVERIFY(f4->isConstant());
 }
 
@@ -123,7 +123,8 @@ struct A {
     AbstractMetaClassList classes = builder->classes();
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QVERIFY(classA);
-    QCOMPARE(classA->functions().count(), 5); // default ctor, default copy ctor, func a() and the added functions
+    // default ctor, default copy ctor, func a() and the added functions
+    QCOMPARE(classA->functions().size(), 5);
 
     auto addedFunc = classA->findFunction(QLatin1String("b"));
     QVERIFY(addedFunc);
@@ -141,7 +142,7 @@ struct A {
     AbstractMetaType returnType = addedFunc->type();
     QCOMPARE(returnType.typeEntry(), typeDb->findPrimitiveType(QLatin1String("int")));
     const AbstractMetaArgumentList &args = addedFunc->arguments();
-    QCOMPARE(args.count(), 3);
+    QCOMPARE(args.size(), 3);
     QCOMPARE(args.at(0).type().typeEntry(), returnType.typeEntry());
     QCOMPARE(args.at(1).defaultValueExpression(), QLatin1String("4.6"));
     QCOMPARE(args.at(2).type().typeEntry(), typeDb->findType(QLatin1String("B")));
@@ -165,7 +166,7 @@ void TestAddFunction::testAddFunctionConstructor()
     AbstractMetaClassList classes = builder->classes();
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QVERIFY(classA);
-    QCOMPARE(classA->functions().count(), 3); // default and added ctors
+    QCOMPARE(classA->functions().size(), 3); // default and added ctors
     const auto addedFunc = classA->functions().constLast();
     QCOMPARE(addedFunc->access(), Access::Public);
     QCOMPARE(addedFunc->functionType(), AbstractMetaFunction::ConstructorFunction);
@@ -188,7 +189,8 @@ void TestAddFunction::testAddFunctionTagDefaultValues()
     AbstractMetaClassList classes = builder->classes();
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QVERIFY(classA);
-    QCOMPARE(classA->functions().count(), 3); // default ctor, default copy ctor and the added function
+    // default ctor, default copy ctor and the added function
+    QCOMPARE(classA->functions().size(), 3);
     const auto addedFunc = classA->functions().constLast();
     QCOMPARE(addedFunc->access(), Access::Public);
     QCOMPARE(addedFunc->functionType(), AbstractMetaFunction::NormalFunction);
@@ -225,7 +227,7 @@ void TestAddFunction::testAddFunctionWithoutParenteses()
                                                  &errorMessage);
     QVERIFY2(!f1.isNull(), qPrintable(errorMessage));
     QCOMPARE(f1->name(), QLatin1String("func"));
-    QCOMPARE(f1->arguments().count(), 0);
+    QCOMPARE(f1->arguments().size(), 0);
     QCOMPARE(f1->isConstant(), false);
 
     const char cppCode[] = "struct A {};\n";
@@ -246,7 +248,9 @@ void TestAddFunction::testAddFunctionWithoutParenteses()
     const auto addedFunc = classA->findFunction(QLatin1String("func"));
     QVERIFY(!addedFunc.isNull());
     QVERIFY(addedFunc->hasInjectedCode());
-    QCOMPARE(addedFunc->injectedCodeSnips(TypeSystem::CodeSnipPositionAny, TypeSystem::TargetLangCode).count(), 1);
+    const auto snips = addedFunc->injectedCodeSnips(TypeSystem::CodeSnipPositionAny,
+                                                    TypeSystem::TargetLangCode);
+    QCOMPARE(snips.size(), 1);
 }
 
 void TestAddFunction::testAddFunctionWithDefaultArgs()
@@ -257,7 +261,7 @@ void TestAddFunction::testAddFunctionWithDefaultArgs()
                                                  &errorMessage);
     QVERIFY2(!f1.isNull(), qPrintable(errorMessage));
     QCOMPARE(f1->name(), QLatin1String("func"));
-    QCOMPARE(f1->arguments().count(), 0);
+    QCOMPARE(f1->arguments().size(), 0);
     QCOMPARE(f1->isConstant(), false);
 
     const char cppCode[] = "struct A { };\n";
@@ -324,7 +328,7 @@ void TestAddFunction::testAddFunctionWithVarargs()
                                                  &errorMessage);
     QVERIFY2(!f1.isNull(), qPrintable(errorMessage));
     QCOMPARE(f1->name(), QLatin1String("func"));
-    QCOMPARE(f1->arguments().count(), 3);
+    QCOMPARE(f1->arguments().size(), 3);
     QVERIFY(!f1->isConstant());
 
     const char cppCode[] = "struct A {};\n";
@@ -389,7 +393,7 @@ void TestAddFunction::testAddGlobalFunction()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     const auto globalFuncs = builder->globalFunctions();
-    QCOMPARE(globalFuncs.count(), 2);
+    QCOMPARE(globalFuncs.size(), 2);
     const AbstractMetaClass *classB = AbstractMetaClass::findClass(builder->classes(), QLatin1String("B"));
     QVERIFY(classB);
     QVERIFY(!classB->findFunction(QLatin1String("globalFunc")));
@@ -415,7 +419,7 @@ void TestAddFunction::testAddFunctionWithApiVersion()
                                                                 true, QLatin1String("0.1")));
     QVERIFY(!builder.isNull());
     const auto globalFuncs = builder->globalFunctions();
-    QCOMPARE(globalFuncs.count(), 1);
+    QCOMPARE(globalFuncs.size(), 1);
 }
 
 void TestAddFunction::testModifyAddedFunction()
@@ -493,7 +497,7 @@ void TestAddFunction::testAddFunctionWithTemplateArg()
     QCOMPARE(builder->globalFunctions().size(), 1);
     const auto func = builder->globalFunctions().constFirst();
     const AbstractMetaArgument &arg = func->arguments().constFirst();
-    QCOMPARE(arg.type().instantiations().count(), 1);
+    QCOMPARE(arg.type().instantiations().size(), 1);
 }
 
 // Test splitting of <add-function> parameter lists.
