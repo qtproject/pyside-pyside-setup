@@ -578,7 +578,7 @@ int shibokenMain(int argc, char *argv[])
             QStringList parts = fullVersion.split(QLatin1Char(','));
             QString package;
             QString version;
-            package = parts.count() == 1 ? QLatin1String("*") : parts.constFirst();
+            package = parts.size() == 1 ? u"*"_qs : parts.constFirst();
             version = parts.constLast();
             if (!extractor.setApiVersion(package, version)) {
                 errorPrint(msgInvalidVersion(package, version));

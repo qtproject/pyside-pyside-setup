@@ -609,10 +609,10 @@ static int callMethod(QObject *object, int id, void **args)
 
 static PyObject *parseArguments(const QList<QByteArray>& paramTypes, void **args)
 {
-    int argsSize = paramTypes.count();
+    const qsizetype argsSize = paramTypes.size();
     PyObject *preparedArgs = PyTuple_New(argsSize);
 
-    for (int i = 0, max = argsSize; i < max; ++i) {
+    for (qsizetype i = 0; i < argsSize; ++i) {
         void *data = args[i+1];
         const char *dataType = paramTypes[i].constData();
         Shiboken::Conversions::SpecificConverter converter(dataType);

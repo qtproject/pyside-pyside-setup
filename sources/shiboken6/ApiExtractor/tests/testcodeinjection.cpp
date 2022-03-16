@@ -80,7 +80,7 @@ void TestCodeInjections::testReadFile()
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
-    QCOMPARE(classA->typeEntry()->codeSnips().count(), 1);
+    QCOMPARE(classA->typeEntry()->codeSnips().size(), 1);
     QString code = classA->typeEntry()->codeSnips().constFirst().code();
     QVERIFY(code.indexOf(expected) != -1);
     code = classA->typeEntry()->targetConversionRule();
@@ -104,7 +104,7 @@ void TestCodeInjections::testInjectWithValidApiVersion()
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     AbstractMetaClass* classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
-    QCOMPARE(classA->typeEntry()->codeSnips().count(), 1);
+    QCOMPARE(classA->typeEntry()->codeSnips().size(), 1);
 }
 
 void TestCodeInjections::testInjectWithInvalidApiVersion()
@@ -125,7 +125,7 @@ void TestCodeInjections::testInjectWithInvalidApiVersion()
 
     AbstractMetaClassList classes = builder->classes();
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
-    QCOMPARE(classA->typeEntry()->codeSnips().count(), 0);
+    QCOMPARE(classA->typeEntry()->codeSnips().size(), 0);
 }
 
 void TestCodeInjections::testTextStream()

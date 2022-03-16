@@ -884,12 +884,12 @@ bool _FunctionModelItem::isSimilar(const FunctionModelItem &other) const
     if (isVariadics() != other->isVariadics())
         return false;
 
-    if (arguments().count() != other->arguments().count())
+    if (arguments().size() != other->arguments().size())
         return false;
 
     // ### check the template parameters
 
-    for (int i = 0; i < arguments().count(); ++i) {
+    for (qsizetype i = 0; i < arguments().size(); ++i) {
         ArgumentModelItem arg1 = arguments().at(i);
         ArgumentModelItem arg2 = other->arguments().at(i);
 

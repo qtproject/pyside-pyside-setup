@@ -88,7 +88,7 @@ void TestDropTypeEntries::testDropEntries()
     QVERIFY(!AbstractMetaClass::findClass(classes, QLatin1String("NamespaceB")));
 
     AbstractMetaEnumList globalEnums = builder->globalEnums();
-    QCOMPARE(globalEnums.count(), 1);
+    QCOMPARE(globalEnums.size(), 1);
     QCOMPARE(globalEnums.constFirst().name(), QLatin1String("EnumA"));
 
     TypeDatabase* td = TypeDatabase::instance();

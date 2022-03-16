@@ -50,7 +50,7 @@ void TestReverseOperators::testReverseSum()
     AbstractMetaClassList classes = builder->classes();
     AbstractMetaClass* classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QVERIFY(classA);
-    QCOMPARE(classA->functions().count(), 4);
+    QCOMPARE(classA->functions().size(), 4);
 
     AbstractMetaFunctionCPtr reverseOp;
     AbstractMetaFunctionCPtr normalOp;
@@ -65,10 +65,10 @@ void TestReverseOperators::testReverseSum()
 
     QVERIFY(!normalOp.isNull());
     QVERIFY(!normalOp->isReverseOperator());
-    QCOMPARE(normalOp->arguments().count(), 1);
+    QCOMPARE(normalOp->arguments().size(), 1);
     QVERIFY(!reverseOp.isNull());
     QVERIFY(reverseOp->isReverseOperator());
-    QCOMPARE(reverseOp->arguments().count(), 1);
+    QCOMPARE(reverseOp->arguments().size(), 1);
 }
 
 void TestReverseOperators::testReverseSumWithAmbiguity()
@@ -92,11 +92,11 @@ void TestReverseOperators::testReverseSumWithAmbiguity()
     AbstractMetaClassList classes = builder->classes();
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QVERIFY(classA);
-    QCOMPARE(classA->functions().count(), 4);
+    QCOMPARE(classA->functions().size(), 4);
 
     const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
     QVERIFY(classB);
-    QCOMPARE(classB->functions().count(), 4);
+    QCOMPARE(classB->functions().size(), 4);
 
     AbstractMetaFunctionCPtr reverseOp;
     AbstractMetaFunctionCPtr normalOp;
@@ -110,11 +110,11 @@ void TestReverseOperators::testReverseSumWithAmbiguity()
     }
     QVERIFY(!normalOp.isNull());
     QVERIFY(!normalOp->isReverseOperator());
-    QCOMPARE(normalOp->arguments().count(), 1);
+    QCOMPARE(normalOp->arguments().size(), 1);
     QCOMPARE(normalOp->minimalSignature(), QLatin1String("operator+(B,A)"));
     QVERIFY(!reverseOp.isNull());
     QVERIFY(reverseOp->isReverseOperator());
-    QCOMPARE(reverseOp->arguments().count(), 1);
+    QCOMPARE(reverseOp->arguments().size(), 1);
     QCOMPARE(reverseOp->minimalSignature(), QLatin1String("operator+(A,B)"));
 }
 

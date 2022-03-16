@@ -619,8 +619,7 @@ QString TypeDatabase::globalNamespaceClassName(const TypeEntry * /*entry*/)
 FunctionModificationList TypeDatabase::functionModifications(const QString& signature) const
 {
     FunctionModificationList lst;
-    for (int i = 0; i < m_functionMods.count(); ++i) {
-        const FunctionModification& mod = m_functionMods.at(i);
+    for (const auto &mod : m_functionMods) {
         if (mod.matches(signature))
             lst << mod;
     }

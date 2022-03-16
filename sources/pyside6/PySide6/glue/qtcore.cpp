@@ -958,14 +958,14 @@ if (PyIndex_Check(_key)) {
     }
 } else if (PySlice_Check(_key)) {
     Py_ssize_t start, stop, step, slicelength;
-    if (PySlice_GetIndicesEx(_key, %CPPSELF.count(), &start, &stop, &step, &slicelength) < 0)
+    if (PySlice_GetIndicesEx(_key, %CPPSELF.size(), &start, &stop, &step, &slicelength) < 0)
         return nullptr;
 
     QByteArray ba;
     if (slicelength <= 0) {
         return %CONVERTTOPYTHON[QByteArray](ba);
     } else if (step == 1) {
-        Py_ssize_t max = %CPPSELF.count();
+        Py_ssize_t max = %CPPSELF.size();
         start = qBound(Py_ssize_t(0), start, max);
         stop = qBound(Py_ssize_t(0), stop, max);
         if (start < stop)
@@ -991,7 +991,7 @@ if (PyIndex_Check(_key)) {
         return -1;
 
     if (_i < 0)
-        _i += %CPPSELF.count();
+        _i += %CPPSELF.size();
 
     if (_i < 0 || _i >= %CPPSELF.size()) {
         PyErr_SetString(PyExc_IndexError, "QByteArray index out of range");
@@ -1028,7 +1028,7 @@ if (PyIndex_Check(_key)) {
     return result != nullptr ? 0: -1;
 } else if (PySlice_Check(_key)) {
     Py_ssize_t start, stop, step, slicelength;
-    if (PySlice_GetIndicesEx(_key, %CPPSELF.count(), &start, &stop, &step, &slicelength) < 0)
+    if (PySlice_GetIndicesEx(_key, %CPPSELF.size(), &start, &stop, &step, &slicelength) < 0)
         return -1;
     // The parameter candidates are: bytes/str, bytearray, QByteArray itself.
     // Not supported are iterables containing ints between 0~255
@@ -1236,7 +1236,7 @@ Py_DECREF(aux);
 // @snippet qbytearray-str
 
 // @snippet qbytearray-len
-return %CPPSELF.count();
+return %CPPSELF.size();
 // @snippet qbytearray-len
 
 // @snippet qbytearray-getitem

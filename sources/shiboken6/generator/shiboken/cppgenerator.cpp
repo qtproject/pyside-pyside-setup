@@ -992,7 +992,7 @@ QString CppGenerator::virtualMethodReturn(TextStream &s, const ApiExtractorResul
                     if (!match.hasMatch())
                         break;
                     const int argId = match.capturedView(1).toInt() - 1;
-                    if (argId < 0 || argId > func->arguments().count()) {
+                    if (argId < 0 || argId > func->arguments().size()) {
                         qCWarning(lcShiboken, "The expression used in return value contains an invalid index.");
                         break;
                     }
@@ -2504,8 +2504,8 @@ static void checkTypeViability(const AbstractMetaFunctionCPtr &func)
     if (func->isUserAdded())
         return;
     checkTypeViability(func, func->type(), 0);
-    for (int i = 0; i < func->arguments().count(); ++i)
-        checkTypeViability(func, func->arguments().at(i).type(), i + 1);
+    for (qsizetype i = 0; i < func->arguments().size(); ++i)
+        checkTypeViability(func, func->arguments().at(i).type(), int(i + 1));
 }
 
 void CppGenerator::writeTypeCheck(TextStream &s,
@@ -2530,7 +2530,7 @@ void CppGenerator::writeTypeCheck(TextStream &s,
     AbstractMetaType argType = overloadData->argType();
     if (auto viewOn = argType.viewOn())
         argType = *viewOn;
-    bool numberType = numericTypes.count() == 1 || ShibokenGenerator::isPyInt(argType);
+    const bool numberType = numericTypes.size() == 1 || ShibokenGenerator::isPyInt(argType);
     QString customType = (overloadData->hasArgumentTypeReplace() ? overloadData->argumentTypeReplaced() : QString());
     bool rejectNull =
         shouldRejectNullPointerArgument(overloadData->referenceFunction(), overloadData->argPos());
@@ -2811,7 +2811,7 @@ void CppGenerator::writeOverloadedFunctionDecisor(TextStream &s, const OverloadD
     s << "// Overloaded function decisor\n";
     const auto rfunc = overloadData.referenceFunction();
     const AbstractMetaFunctionCList &functionOverloads = overloadData.overloads();
-    for (int i = 0; i < functionOverloads.count(); i++) {
+    for (qsizetype i = 0; i < functionOverloads.size(); ++i) {
         const auto func = functionOverloads.at(i);
         s << "// " << i << ": ";
         if (func->isStatic())
@@ -2939,7 +2939,7 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(TextStream &s,
                 StringStream tck(TextStream::Language::Cpp);
                 auto func = od->referenceFunction();
 
-                if (func->isConstructor() && func->arguments().count() == 1) {
+                if (func->isConstructor() && func->arguments().size() == 1) {
                     const AbstractMetaClass *ownerClass = func->ownerClass();
                     const ComplexTypeEntry *baseContainerType = ownerClass->typeEntry()->baseContainerType();
                     if (baseContainerType && baseContainerType == func->arguments().constFirst().type().typeEntry()
@@ -3012,13 +3012,13 @@ void CppGenerator::writeFunctionCalls(TextStream &s, const OverloadData &overloa
 {
     const AbstractMetaFunctionCList &overloads = overloadData.overloads();
     s << "// Call function/method\n"
-        << (overloads.count() > 1 ? "switch (overloadId) " : "") << "{\n";
+        << (overloads.size() > 1 ? "switch (overloadId) " : "") << "{\n";
     {
         Indentation indent(s);
-        if (overloads.count() == 1) {
+        if (overloads.size() == 1) {
             writeSingleFunctionCall(s, overloadData, overloads.constFirst(), context);
         } else {
-            for (int i = 0; i < overloads.count(); i++) {
+            for (qsizetype i = 0; i < overloads.size(); ++i) {
                 const auto func = overloads.at(i);
                 s << "case " << i << ": // " << func->signature() << "\n{\n";
                 {
@@ -3066,8 +3066,9 @@ void CppGenerator::writeSingleFunctionCall(TextStream &s,
     bool injectCodeCallsFunc = injectedCodeCallsCppFunction(context, func);
     bool mayHaveUnunsedArguments = !func->isUserAdded() && func->hasInjectedCode() && injectCodeCallsFunc;
     int removedArgs = 0;
-    for (int argIdx = 0; argIdx < func->arguments().count(); ++argIdx) {
-        bool hasConversionRule = !func->conversionRule(TypeSystem::NativeCode, argIdx + 1).isEmpty();
+    for (qsizetype argIdx = 0; argIdx < func->arguments().size(); ++argIdx) {
+        bool hasConversionRule =
+            !func->conversionRule(TypeSystem::NativeCode, int(argIdx + 1)).isEmpty();
         const AbstractMetaArgument &arg = func->arguments().at(argIdx);
         if (func->argumentRemoved(argIdx + 1)) {
             if (!arg.defaultValueExpression().isEmpty()) {
@@ -3209,7 +3210,7 @@ void CppGenerator::writeCppToPythonFunction(TextStream &s, const AbstractMetaTyp
         return;
     }
     QString code = customConversion->nativeToTargetConversion();
-    for (int i = 0; i < containerType.instantiations().count(); ++i) {
+    for (qsizetype i = 0; i < containerType.instantiations().size(); ++i) {
         const AbstractMetaType &type = containerType.instantiations().at(i);
         QString typeName = getFullTypeName(type);
         if (type.isConstant())
@@ -3352,7 +3353,7 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s, const Abst
     const QString line = QLatin1String("auto &cppOutRef = *reinterpret_cast<")
         + cppTypeName + QLatin1String(" *>(cppOut);");
     CodeSnipAbstract::prependCode(&code, line);
-    for (int i = 0; i < containerType.instantiations().count(); ++i) {
+    for (qsizetype i = 0; i < containerType.instantiations().size(); ++i) {
         const AbstractMetaType &type = containerType.instantiations().at(i);
         QString typeName = getFullTypeName(type);
         // Containers of opaque containers are not handled here.
@@ -5832,7 +5833,7 @@ void CppGenerator::writeInitQtMetaTypeFunctionBody(TextStream &s, const Generato
         } else {
             // check if there's a empty ctor
             for (const auto &func : metaClass->functions()) {
-                if (func->isConstructor() && !func->arguments().count()) {
+                if (func->isConstructor() && func->arguments().isEmpty()) {
                     canBeValue = true;
                     break;
                 }
@@ -6568,7 +6569,7 @@ bool CppGenerator::writeParentChildManagement(TextStream &s, const AbstractMetaF
                                               int argIndex,
                                               bool usePyArgs, bool useHeuristicPolicy) const
 {
-    const int numArgs = func->arguments().count();
+    const int numArgs = func->arguments().size();
     bool ctorHeuristicEnabled = func->isConstructor() && useCtorHeuristic() && useHeuristicPolicy;
 
     ArgumentOwner argOwner = getArgumentOwner(func, argIndex);
@@ -6624,7 +6625,7 @@ void CppGenerator::writeParentChildManagement(TextStream &s, const AbstractMetaF
                                               bool usesPyArgs,
                                               bool useHeuristicForReturn) const
 {
-    const int numArgs = func->arguments().count();
+    const int numArgs = func->arguments().size();
 
     // -1    = return value
     //  0    = self

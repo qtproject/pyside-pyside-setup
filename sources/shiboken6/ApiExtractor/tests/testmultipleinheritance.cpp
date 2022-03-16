@@ -58,7 +58,7 @@ void TestMultipleInheritance::testVirtualClass()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    QCOMPARE(classes.count(), 4);
+    QCOMPARE(classes.size(), 4);
 
     const AbstractMetaClass *classD = AbstractMetaClass::findClass(classes, QLatin1String("D"));
     bool functionFound = false;

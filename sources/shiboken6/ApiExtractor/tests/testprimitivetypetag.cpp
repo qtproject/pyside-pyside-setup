@@ -46,7 +46,7 @@ void TestPrimitiveTypeTag::testPrimitiveTypeDefaultConstructor()
     QVERIFY(!builder.isNull());
 
     AbstractMetaClassList classes = builder->classes();
-    QCOMPARE(classes.count(), 1);
+    QCOMPARE(classes.size(), 1);
     const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
     QVERIFY(classB);
 

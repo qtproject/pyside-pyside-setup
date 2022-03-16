@@ -50,10 +50,10 @@ void TestInsertTemplate::testInsertTemplateOnClassInjectCode()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    QCOMPARE(classes.count(), 1);
+    QCOMPARE(classes.size(), 1);
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QVERIFY(classA);
-    QCOMPARE(classA->typeEntry()->codeSnips().count(), 1);
+    QCOMPARE(classA->typeEntry()->codeSnips().size(), 1);
     QString code = classA->typeEntry()->codeSnips().constFirst().code();
     QVERIFY(code.contains(QLatin1String("code template content")));
 }
@@ -79,7 +79,7 @@ void TestInsertTemplate::testInsertTemplateOnModuleInjectCode()
     QVERIFY(module);
     QCOMPARE(module->name(), QLatin1String("Foo"));
     QVERIFY(module);
-    QCOMPARE(module->codeSnips().count(), 1);
+    QCOMPARE(module->codeSnips().size(), 1);
     QString code = module->codeSnips().constFirst().code().trimmed();
     QVERIFY(code.contains(QLatin1String("code template content")));
 }

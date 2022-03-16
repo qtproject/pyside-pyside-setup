@@ -482,7 +482,7 @@ QString AbstractMetaFunctionPrivate::signature() const
 
         m_cachedSignature += QLatin1Char('(');
 
-        for (int i = 0; i < m_arguments.count(); ++i) {
+        for (qsizetype i = 0; i < m_arguments.size(); ++i) {
             const AbstractMetaArgument &a = m_arguments.at(i);
             const AbstractMetaType &t = a.type();
             if (i > 0)
@@ -838,7 +838,7 @@ QString AbstractMetaFunctionPrivate::formatMinimalSignature(const AbstractMetaFu
                                                             bool comment) const
 {
     QString result = m_originalName + QLatin1Char('(');
-    for (int i = 0; i < m_arguments.count(); ++i) {
+    for (qsizetype i = 0; i < m_arguments.size(); ++i) {
         if (i > 0)
             result += QLatin1Char(',');
 

@@ -1033,7 +1033,7 @@ void QtXmlToSphinx::handleListTag(QXmlStreamReader& reader)
                 for (const TableCell &cell : m_currentTable.constFirst()) {
                     const auto itemLines = QStringView{cell.data}.split(QLatin1Char('\n'));
                     m_output << separator << itemLines.constFirst() << '\n';
-                    for (int i = 1, max = itemLines.count(); i < max; ++i)
+                    for (qsizetype i = 1, max = itemLines.size(); i < max; ++i)
                         m_output << indentLine << itemLines[i] << '\n';
                 }
                 m_output << '\n';
@@ -1425,24 +1425,23 @@ void QtXmlToSphinx::Table::normalize()
 
     //QDoc3 generates tables with wrong number of columns. We have to
     //check and if necessary, merge the last columns.
-    int maxCols = -1;
+    qsizetype maxCols = -1;
     for (const auto &row : qAsConst(m_rows)) {
-        if (row.count() > maxCols)
-            maxCols = row.count();
+        if (row.size() > maxCols)
+            maxCols = row.size();
     }
     if (maxCols <= 0)
         return;
     // add col spans
-    for (int row = 0; row < m_rows.count(); ++row) {
-        for (int col = 0; col < m_rows.at(row).count(); ++col) {
+    for (qsizetype row = 0; row < m_rows.size(); ++row) {
+        for (qsizetype col = 0; col < m_rows.at(row).size(); ++col) {
             QtXmlToSphinx::TableCell& cell = m_rows[row][col];
             bool mergeCols = (col >= maxCols);
             if (cell.colSpan > 0) {
                 QtXmlToSphinx::TableCell newCell;
                 newCell.colSpan = -1;
-                for (int i = 0, max = cell.colSpan-1; i < max; ++i) {
+                for (int i = 0, max = cell.colSpan-1; i < max; ++i)
                     m_rows[row].insert(col + 1, newCell);
-                }
                 cell.colSpan = 0;
                 col++;
             } else if (mergeCols) {
@@ -1452,17 +1451,17 @@ void QtXmlToSphinx::Table::normalize()
     }
 
     // row spans
-    const int numCols = m_rows.constFirst().count();
-    for (int col = 0; col < numCols; ++col) {
-        for (int row = 0; row < m_rows.count(); ++row) {
-            if (col < m_rows[row].count()) {
+    const qsizetype numCols = m_rows.constFirst().size();
+    for (qsizetype col = 0; col < numCols; ++col) {
+        for (qsizetype row = 0; row < m_rows.size(); ++row) {
+            if (col < m_rows[row].size()) {
                 QtXmlToSphinx::TableCell& cell = m_rows[row][col];
                 if (cell.rowSpan > 0) {
                     QtXmlToSphinx::TableCell newCell;
                     newCell.rowSpan = -1;
-                    int targetRow = row + 1;
-                    const int targetEndRow =
-                        std::min(targetRow + cell.rowSpan - 1, int(m_rows.count()));
+                    qsizetype targetRow = row + 1;
+                    const qsizetype targetEndRow =
+                        std::min(targetRow + cell.rowSpan - 1, m_rows.size());
                     cell.rowSpan = 0;
                     for ( ; targetRow < targetEndRow; ++targetRow)
                         m_rows[targetRow].insert(col, newCell);
@@ -1482,16 +1481,16 @@ void QtXmlToSphinx::Table::format(TextStream& s) const
     Q_ASSERT(isNormalized());
 
     // calc width and height of each column and row
-    const int headerColumnCount = m_rows.constFirst().count();
-    QList<int> colWidths(headerColumnCount, 0);
-    QList<int> rowHeights(m_rows.count(), 0);
-    for (int i = 0, maxI = m_rows.count(); i < maxI; ++i) {
+    const qsizetype headerColumnCount = m_rows.constFirst().size();
+    QList<qsizetype> colWidths(headerColumnCount, 0);
+    QList<qsizetype> rowHeights(m_rows.size(), 0);
+    for (qsizetype i = 0, maxI = m_rows.size(); i < maxI; ++i) {
         const QtXmlToSphinx::TableRow& row = m_rows.at(i);
-        for (int j = 0, maxJ = std::min(row.count(), colWidths.size()); j < maxJ; ++j) {
+        for (qsizetype j = 0, maxJ = std::min(row.size(), colWidths.size()); j < maxJ; ++j) {
             const auto rowLines = QStringView{row[j].data}.split(QLatin1Char('\n')); // cache this would be a good idea
             for (const auto &str : rowLines)
-                colWidths[j] = std::max(colWidths[j], int(str.size()));
-            rowHeights[i] = std::max(rowHeights[i], int(rowLines.size()));
+                colWidths[j] = std::max(colWidths[j], str.size());
+            rowHeights[i] = std::max(rowHeights[i], rowLines.size());
         }
     }
 
@@ -1500,20 +1499,20 @@ void QtXmlToSphinx::Table::format(TextStream& s) const
 
     // create a horizontal line to be used later.
     QString horizontalLine = QLatin1String("+");
-    for (int i = 0, max = colWidths.count(); i < max; ++i) {
-        horizontalLine += QString(colWidths.at(i), QLatin1Char('-'));
+    for (auto colWidth : colWidths) {
+        horizontalLine += QString(colWidth, QLatin1Char('-'));
         horizontalLine += QLatin1Char('+');
     }
 
     // write table rows
-    for (int i = 0, maxI = m_rows.count(); i < maxI; ++i) { // for each row
+    for (qsizetype i = 0, maxI = m_rows.size(); i < maxI; ++i) { // for each row
         const QtXmlToSphinx::TableRow& row = m_rows.at(i);
 
         // print line
         s << '+';
-        for (int col = 0; col < headerColumnCount; ++col) {
+        for (qsizetype col = 0; col < headerColumnCount; ++col) {
             char c;
-            if (col >= row.length() || row[col].rowSpan == -1)
+            if (col >= row.size() || row[col].rowSpan == -1)
                 c = ' ';
             else if (i == 1 && hasHeader())
                 c = '=';
@@ -1525,9 +1524,9 @@ void QtXmlToSphinx::Table::format(TextStream& s) const
 
 
         // Print the table cells
-        for (int rowLine = 0; rowLine < rowHeights[i]; ++rowLine) { // for each line in a row
-            int j = 0;
-            for (int maxJ = std::min(int(row.count()), headerColumnCount); j < maxJ; ++j) { // for each column
+        for (qsizetype rowLine = 0; rowLine < rowHeights.at(i); ++rowLine) { // for each line in a row
+            qsizetype j = 0;
+            for (qsizetype maxJ = std::min(row.size(), headerColumnCount); j < maxJ; ++j) { // for each column
                 const QtXmlToSphinx::TableCell& cell = row[j];
                 const auto rowLines = QStringView{cell.data}.split(QLatin1Char('\n')); // FIXME: Cache this!!!
 
@@ -1535,8 +1534,8 @@ void QtXmlToSphinx::Table::format(TextStream& s) const
                     s << '|';
                 else
                     s << ' ';
-                const int width = colWidths.at(j);
-                if (rowLine < rowLines.count())
+                const auto width = int(colWidths.at(j));
+                if (rowLine < rowLines.size())
                     s << AlignedField(rowLines.at(rowLine), width);
                 else
                     s << Pad(' ', width);

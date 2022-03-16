@@ -58,29 +58,29 @@ void TestEnum::testEnumCppSignature()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    QCOMPARE(classes.count(), 1);
+    QCOMPARE(classes.size(), 1);
 
     AbstractMetaEnumList globalEnums = builder->globalEnums();
-    QCOMPARE(globalEnums.count(), 1);
+    QCOMPARE(globalEnums.size(), 1);
     QCOMPARE(globalEnums.constFirst().name(), QLatin1String("GlobalEnum"));
 
     // enum as parameter of a function
     const auto functions = builder->globalFunctions();
-    QCOMPARE(functions.count(), 1);
-    QCOMPARE(functions.constFirst()->arguments().count(), 1);
+    QCOMPARE(functions.size(), 1);
+    QCOMPARE(functions.constFirst()->arguments().size(), 1);
     QCOMPARE(functions.constFirst()->arguments().constFirst().type().cppSignature(),
              QLatin1String("A::ClassEnum"));
 
     // enum as parameter of a method
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
-    QCOMPARE(classA->enums().count(), 1);
+    QCOMPARE(classA->enums().size(), 1);
     const auto funcs = classA->queryFunctionsByName(QLatin1String("method"));
     QVERIFY(!funcs.isEmpty());
     const auto method = funcs.constFirst();
     AbstractMetaArgument arg = method->arguments().constFirst();
     QCOMPARE(arg.type().name(), QLatin1String("ClassEnum"));
     QCOMPARE(arg.type().cppSignature(), QLatin1String("A::ClassEnum"));
-    QCOMPARE(functions.constFirst()->arguments().count(), 1);
+    QCOMPARE(functions.constFirst()->arguments().size(), 1);
     arg = functions.constFirst()->arguments().constFirst();
     QCOMPARE(arg.type().name(), QLatin1String("ClassEnum"));
     QCOMPARE(arg.type().cppSignature(), QLatin1String("A::ClassEnum"));
@@ -113,8 +113,8 @@ void TestEnum::testEnumWithApiVersion()
                                                                 true, QLatin1String("0.1")));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    QCOMPARE(classes.count(), 1);
-    QCOMPARE(classes[0]->enums().count(), 1);
+    QCOMPARE(classes.size(), 1);
+    QCOMPARE(classes[0]->enums().size(), 1);
 }
 
 void TestEnum::testAnonymousEnum()
@@ -140,14 +140,14 @@ void TestEnum::testAnonymousEnum()
     QVERIFY(!builder.isNull());
 
     AbstractMetaEnumList globalEnums = builder->globalEnums();
-    QCOMPARE(globalEnums.count(), 1);
+    QCOMPARE(globalEnums.size(), 1);
     QCOMPARE(globalEnums.constFirst().typeEntry()->qualifiedCppName(),
              QLatin1String("Global0"));
     QVERIFY(globalEnums.constFirst().isAnonymous());
 
     AbstractMetaClassList classes = builder->classes();
-    QCOMPARE(classes.count(), 1);
-    QCOMPARE(classes[0]->enums().count(), 2);
+    QCOMPARE(classes.size(), 1);
+    QCOMPARE(classes[0]->enums().size(), 2);
 
     auto anonEnumA1 = classes[0]->findEnum(QLatin1String("A1"));
     QVERIFY(anonEnumA1.has_value());
@@ -195,7 +195,7 @@ void TestEnum::testGlobalEnums()
     QVERIFY(!builder.isNull());
 
     AbstractMetaEnumList globalEnums = builder->globalEnums();
-    QCOMPARE(globalEnums.count(), 2);
+    QCOMPARE(globalEnums.size(), 2);
 
     AbstractMetaEnum enumA = globalEnums.constFirst();
     QCOMPARE(enumA.typeEntry()->qualifiedCppName(), QLatin1String("EnumA"));
@@ -243,8 +243,8 @@ void TestEnum::testEnumValueFromNeighbourEnum()
     QVERIFY(!builder.isNull());
 
     AbstractMetaClassList classes = builder->classes();
-    QCOMPARE(classes.count(), 1);
-    QCOMPARE(classes[0]->enums().count(), 2);
+    QCOMPARE(classes.size(), 1);
+    QCOMPARE(classes[0]->enums().size(), 2);
 
     auto enumA = classes[0]->findEnum(QLatin1String("EnumA"));
     QVERIFY(enumA.has_value());
@@ -384,7 +384,7 @@ void TestEnum::testPrivateEnum()
 
     AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), QLatin1String("A"));
     QVERIFY(classA);
-    QCOMPARE(classA->enums().count(), 2);
+    QCOMPARE(classA->enums().size(), 2);
 
     auto privateEnum = classA->findEnum(QLatin1String("PrivateEnum"));
     QVERIFY(privateEnum.has_value());
@@ -422,7 +422,7 @@ void TestEnum::testTypedefEnum()
     QVERIFY(!builder.isNull());
 
     AbstractMetaEnumList globalEnums = builder->globalEnums();
-    QCOMPARE(globalEnums.count(), 1);
+    QCOMPARE(globalEnums.size(), 1);
 
     AbstractMetaEnum enumA = globalEnums.constFirst();
     QCOMPARE(enumA.typeEntry()->qualifiedCppName(), QLatin1String("EnumA"));
@@ -484,7 +484,7 @@ namespace Test2
         return -1;
 
     const auto globalEnums = fixture->builder->globalEnums();
-    if (globalEnums.count() != 1)
+    if (globalEnums.size() != 1)
         return -2;
 
     fixture->globalEnum = AbstractMetaType(globalEnums.constFirst().typeEntry());
@@ -501,7 +501,7 @@ namespace Test2
         return -3;
 
     const auto namespaceEnums = testNamespace->enums();
-    if (namespaceEnums.count() != 2)
+    if (namespaceEnums.size() != 2)
         return -4;
     QList<const EnumTypeEntry *> enumTypeEntries{
         static_cast<const EnumTypeEntry *>(namespaceEnums.at(0).typeEntry()),

@@ -57,7 +57,7 @@ R"(<typesystem package="Foo">
     AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), QLatin1String("A"));
     QVERIFY(classA);
     DocModificationList docMods = classA->typeEntry()->docModifications();
-    QCOMPARE(docMods.count(), 2);
+    QCOMPARE(docMods.size(), 2);
     QCOMPARE(docMods[0].code().trimmed(), QLatin1String("<brief>Modified Brief</brief>"));
     QCOMPARE(docMods[0].signature(), QString());
     QCOMPARE(docMods[1].code().trimmed(), QLatin1String("<para>Some changed contents here</para>"));

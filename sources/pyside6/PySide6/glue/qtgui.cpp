@@ -235,7 +235,7 @@ if (doc) {
 // @snippet qtextblock-userdata
 
 // @snippet qpolygon-reduce
-const Py_ssize_t count = %CPPSELF.count();
+const Py_ssize_t count = %CPPSELF.size();
 PyObject *points = PyList_New(count);
 for (Py_ssize_t i = 0; i < count; ++i){
     int x, y;

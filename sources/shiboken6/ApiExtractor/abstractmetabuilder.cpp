@@ -1610,7 +1610,7 @@ AbstractMetaFunction *
 
     const auto &args = addedFunc->arguments();
 
-    qsizetype argCount = args.count();
+    qsizetype argCount = args.size();
     // Check "foo(void)"
     if (argCount == 1 && args.constFirst().typeInfo.isVoid())
         argCount = 0;
@@ -2755,7 +2755,7 @@ std::optional<AbstractMetaType>
 
     if (returned.hasInstantiations()) {
         AbstractMetaTypeList instantiations = returned.instantiations();
-        for (int i = 0; i < instantiations.count(); ++i) {
+        for (qsizetype i = 0; i < instantiations.size(); ++i) {
             auto ins = inheritTemplateType(templateTypes, instantiations.at(i));
             if (!ins.has_value())
                 return {};
