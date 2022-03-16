@@ -1390,9 +1390,31 @@ void QtXmlToSphinx::handleQuoteFileTag(QXmlStreamReader& reader)
     }
 }
 
+bool QtXmlToSphinx::Table::hasEmptyLeadingRow() const
+{
+    return !m_rows.isEmpty() && m_rows.constFirst().isEmpty();
+}
+
+bool QtXmlToSphinx::Table::hasEmptyTrailingRow() const
+{
+    return !m_rows.isEmpty() && m_rows.constLast().isEmpty();
+}
+
 void QtXmlToSphinx::Table::normalize()
 {
-    if (m_normalized || isEmpty())
+    if (m_normalized)
+        return;
+
+    // Empty leading/trailing rows have been observed with nested tables
+    if (hasEmptyLeadingRow() || hasEmptyLeadingRow()) {
+        qWarning() << "QtXmlToSphinx: Table with leading/trailing empty columns found: " << *this;
+        while (hasEmptyTrailingRow())
+            m_rows.pop_back();
+        while (hasEmptyLeadingRow())
+            m_rows.pop_front();
+    }
+
+    if (isEmpty())
         return;
 
     //QDoc3 generates tables with wrong number of columns. We have to

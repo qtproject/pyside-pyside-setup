@@ -111,6 +111,9 @@ public:
             void formatDebug(QDebug &debug) const;
 
         private:
+            bool hasEmptyLeadingRow() const;
+            bool hasEmptyTrailingRow() const;
+
             QList<TableRow> m_rows;
             bool m_hasHeader = false;
             bool m_normalized = false;
