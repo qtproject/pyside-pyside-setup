@@ -456,8 +456,8 @@ private:
     { return !boolCast(metaClass).isNull(); }
 
     std::optional<AbstractMetaType>
-        findSmartPointerInstantiation(const TypeEntry *entry) const;
-
+        findSmartPointerInstantiation(const SmartPointerTypeEntry *pointer,
+                                      const TypeEntry *pointee) const;
     void clearTpFuncs();
 
     QHash<QString, QString> m_tpFuncs;
