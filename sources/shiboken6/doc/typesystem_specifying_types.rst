@@ -588,6 +588,32 @@ smart-pointer-type
     The *optional* attribute **reset-method** specifies a method
     that can be used to clear the pointer.
 
+    The example below shows an entry for a ``std::shared_ptr`` found in
+    the standard library of ``g++`` version 9:
+
+    .. code-block:: xml
+
+        <system-include file-name="memory"/>
+        <system-include file-name="shared_ptr.h"/>
+
+        <namespace-type name="std">
+            <include file-name="memory" location="global"/>
+            <custom-type name="__shared_ptr"/>
+            <smart-pointer-type name="shared_ptr" type="shared" getter="get"
+                                ref-count-method="use_count"
+                                instantiations="Integer">
+                <include file-name="memory" location="global"/>
+            </smart-pointer-type>
+        </namespace-type>
+
+    First, shiboken is told to actually parse the system include files
+    containing the class definition using the :ref:`system_include`
+    element. For the ``namespace-type`` and ``smart-pointer-type``, the
+    standard include files are given to override the internal implementation
+    header ``shared_ptr.h``.
+    This creates some wrapper sources which need to be added to the
+    ``CMakeLists.txt`` of the module.
+
 .. _function:
 
 function
