@@ -2,6 +2,7 @@ project(libsmart)
 
 set(libsmart_SRC
 smart.cpp
+stdsharedptrtestbench.cpp
 )
 
 add_library(libsmart SHARED ${libsmart_SRC})

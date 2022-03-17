@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2019 The Qt Company Ltd.
+** Copyright (C) 2022 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the test suite of Qt for Python.
@@ -26,13 +26,32 @@
 **
 ****************************************************************************/
 
-#ifndef SMART_H
-#define SMART_H
-
-#include "smart_sharedptr.h"
-#include "smart_integer.h"
-#include "smart_obj.h"
-#include "smart_registry.h"
 #include "stdsharedptrtestbench.h"
+#include "smart_integer.h"
 
-#endif // SMART_H
+#include <iostream>
+
+StdSharedPtrTestBench::StdSharedPtrTestBench() = default;
+StdSharedPtrTestBench::~StdSharedPtrTestBench() = default;
+
+std::shared_ptr<Integer> StdSharedPtrTestBench::createInteger(int v)
+{
+    auto result = std::make_shared<Integer>();
+    result->setValue(v);
+    return result;
+}
+
+std::shared_ptr<Integer> StdSharedPtrTestBench::createNullInteger()
+{
+    return {};
+}
+
+void StdSharedPtrTestBench::printInteger(const std::shared_ptr<Integer> &p)
+{
+    std::cerr << __FUNCTION__ << ' ';
+    if (p.get())
+        std::cerr << p->value();
+    else
+        std::cerr << "nullptr";
+    std::cerr << '\n';
+}

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <typesystem package="smart">
+    <rejection class="*" argument-type="^std::nullptr_t&amp;?$"/>
 
     <template name="cpplist_to_pylist_convertion">
         PyObject *%out = PyList_New(int(%in.size()));
@@ -16,8 +17,6 @@
             %out.push_back(cppItem);
         }
     </template>
-
-    <custom-type name="std::shared_ptr" />
 
     <!-- Used in tests to check what C++ objects are allocated. -->
     <object-type name="Registry" />
@@ -38,4 +37,19 @@
     </namespace-type>
     <!-- Just used to silence the warnings that shiboken doens't know what to do with this type -->
     <custom-type name="RefData" />
+
+    <system-include file-name="memory"/>
+
+    <namespace-type name="std">
+        <include file-name="memory" location="global"/>
+        <modify-function signature="^.*$" remove="all"/>
+        <enum-type name="pointer_safety"/>
+        <smart-pointer-type name="shared_ptr" type="shared" getter="get"
+                            ref-count-method="use_count"
+                            instantiations="Integer">
+            <include file-name="memory" location="global"/>
+        </smart-pointer-type>
+    </namespace-type>
+    <object-type name="StdSharedPtrTestBench"/>
+
 </typesystem>

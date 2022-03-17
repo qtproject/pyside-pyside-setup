@@ -13,6 +13,9 @@ ${CMAKE_CURRENT_BINARY_DIR}/smart/sharedptr_integer_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/smart/registry_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/smart/smart_integer2_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/smart/sharedptr_integer2_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/smart/stdsharedptrtestbench_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/smart/std_shared_ptr_integer_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/smart/std_wrapper.cpp
 )
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/smart-binding.txt.in"
