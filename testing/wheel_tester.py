@@ -342,12 +342,11 @@ def try_build_examples():
     run_make_install()
     execute_script(os.path.join(src_path, "main.py"))
 
-    log.info("*** Defunct: build scriptableapplication using cmake.")
-    # log.info("Attempting to build scriptableapplication using cmake.")
-    # src_path = os.path.join(examples_dir, "scriptableapplication")
-    # prepare_build_folder(src_path, "cmake")
-    # generate_build_cmake()
-    # run_make()
+    log.info("Attempting to build scriptableapplication using cmake.")
+    src_path = os.path.join(examples_dir, "scriptableapplication")
+    prepare_build_folder(src_path, "cmake")
+    generate_build_cmake()
+    run_make()
 
     log.info("Attempting to build scriptableapplication using qmake.")
     src_path = os.path.join(examples_dir, "scriptableapplication")
