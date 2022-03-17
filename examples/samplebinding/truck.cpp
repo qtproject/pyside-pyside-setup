@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2018 The Qt Company Ltd.
+** Copyright (C) 2022 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -57,18 +57,14 @@ Truck::Truck(bool leaveOnDestruction) : m_leaveOnDestruction(leaveOnDestruction)
 
 Truck::Truck(const Truck &other)
 {
-    for (size_t i = 0; i < other.m_flavors.size(); ++i) {
-        addIcecreamFlavor(other.m_flavors[i]->clone());
-    }
+    assign(other);
 }
 
 Truck &Truck::operator=(const Truck &other)
 {
     if (this != &other) {
-        clearFlavors();
-        for (size_t i = 0; i < other.m_flavors.size(); ++i) {
-            addIcecreamFlavor(other.m_flavors[i]->clone());
-        }
+        m_flavors.clear();
+        assign(other);
     }
     return *this;
 }
@@ -81,20 +77,18 @@ Truck::~Truck()
 {
     if (m_leaveOnDestruction)
         leave();
-    clearFlavors();
 }
 
 void Truck::addIcecreamFlavor(Icecream *icecream)
 {
-    m_flavors.push_back(icecream);
+    m_flavors.push_back(IcecreamPtr(icecream));
 }
 
 void Truck::printAvailableFlavors() const
 {
     std::cout << "It sells the following flavors: \n";
-    for (size_t i = 0; i < m_flavors.size(); ++ i) {
-        std::cout << "  * "  << m_flavors[i]->getFlavor() << '\n';
-    }
+    for (const auto &flavor : m_flavors)
+        std::cout << "  * "  << *flavor << '\n';
     std::cout << '\n';
 }
 
@@ -123,6 +117,13 @@ std::string Truck::getArrivalMessage() const
     return m_arrivalMessage;
 }
 
+void Truck::assign(const Truck &other)
+{
+    m_flavors.reserve(other.m_flavors.size());
+    for (const auto &f : other.m_flavors)
+        m_flavors.push_back(IcecreamPtr(f->clone()));
+}
+
 bool Truck::deliver() const
 {
     std::random_device rd;
@@ -136,12 +137,4 @@ bool Truck::deliver() const
         result = true;
 
     return result;
-}
-
-void Truck::clearFlavors()
-{
-    for (size_t i = 0; i < m_flavors.size(); ++i) {
-        delete m_flavors[i];
-    }
-    m_flavors.clear();
 }

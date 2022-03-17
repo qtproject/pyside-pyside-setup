@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2018 The Qt Company Ltd.
+** Copyright (C) 2022 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -51,21 +51,23 @@
 #ifndef ICECREAM_H
 #define ICECREAM_H
 
-#include <string>
-
 #include "macros.h"
+
+#include <iosfwd>
+#include <string>
 
 class BINDINGS_API Icecream
 {
 public:
-    Icecream(const std::string &flavor);
+    explicit Icecream(const std::string &flavor);
     virtual Icecream *clone();
     virtual ~Icecream();
-    virtual const std::string getFlavor();
+    virtual std::string getFlavor() const;
 
 private:
     std::string m_flavor;
 };
 
+std::ostream &operator<<(std::ostream &str, const Icecream &i);
 
 #endif // ICECREAM_H

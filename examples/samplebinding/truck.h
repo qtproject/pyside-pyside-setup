@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2018 The Qt Company Ltd.
+** Copyright (C) 2022 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -51,14 +51,16 @@
 #ifndef TRUCK_H
 #define TRUCK_H
 
-#include <vector>
-
 #include "icecream.h"
 #include "macros.h"
 
-class BINDINGS_API Truck {
+#include <memory>
+#include <vector>
+
+class BINDINGS_API Truck
+{
 public:
-    Truck(bool leaveOnDestruction = false);
+    explicit Truck(bool leaveOnDestruction = false);
     Truck(const Truck &other);
     Truck& operator=(const Truck &other);
     Truck(Truck &&other);
@@ -79,11 +81,13 @@ public:
     std::string getArrivalMessage() const;
 
 private:
-    void clearFlavors();
+    using IcecreamPtr = std::shared_ptr<Icecream>;
+
+    void assign(const Truck &other);
 
     bool m_leaveOnDestruction = false;
     std::string m_arrivalMessage = "A new icecream truck has arrived!\n";
-    std::vector<Icecream *> m_flavors;
+    std::vector<IcecreamPtr> m_flavors;
 };
 
 #endif // TRUCK_H

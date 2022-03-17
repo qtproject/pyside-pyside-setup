@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2018 The Qt Company Ltd.
+** Copyright (C) 2022 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -50,11 +50,13 @@
 
 #include "icecream.h"
 
+#include <iostream>
+
 Icecream::Icecream(const std::string &flavor) : m_flavor(flavor) {}
 
-Icecream::~Icecream() {}
+Icecream::~Icecream() = default;
 
-const std::string Icecream::getFlavor()
+std::string Icecream::getFlavor() const
 {
     return m_flavor;
 }
@@ -62,4 +64,10 @@ const std::string Icecream::getFlavor()
 Icecream *Icecream::clone()
 {
     return new Icecream(*this);
+}
+
+std::ostream &operator<<(std::ostream &str, const Icecream &i)
+{
+    str << i.getFlavor();
+    return str;
 }
