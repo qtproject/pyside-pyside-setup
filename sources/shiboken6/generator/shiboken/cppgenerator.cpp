@@ -330,10 +330,11 @@ AbstractMetaFunctionCPtr CppGenerator::boolCast(const AbstractMetaClass *metaCla
 }
 
 std::optional<AbstractMetaType>
-    CppGenerator::findSmartPointerInstantiation(const TypeEntry *entry) const
+    CppGenerator::findSmartPointerInstantiation(const SmartPointerTypeEntry *pointer,
+                                                const TypeEntry *pointee) const
 {
     for (const auto &i : instantiatedSmartPointers()) {
-        if (i.instantiations().at(0).typeEntry() == entry)
+        if (i.typeEntry() == pointer && i.instantiations().at(0).typeEntry() == pointee)
             return i;
     }
     return {};
@@ -1824,12 +1825,15 @@ void CppGenerator::writeSmartPointerConverterFunctions(TextStream &s,
 
         s << "// Register smartpointer conversion for all derived classes\n";
         const auto classes = targetClass->typeSystemBaseClasses();
-        for (auto k : classes) {
-            if (smartPointerTypeEntry->matchesInstantiation(k->typeEntry())) {
-                if (auto smartTargetType = findSmartPointerInstantiation(k->typeEntry())) {
+        for (auto base : classes) {
+            auto *baseTe = base->typeEntry();
+            if (smartPointerTypeEntry->matchesInstantiation(baseTe)) {
+                if (auto opt = findSmartPointerInstantiation(smartPointerTypeEntry, baseTe)) {
+                    const auto smartTargetType = opt.value();
                     s << "// SmartPointer derived class: "
-                        << smartTargetType->cppSignature() << "\n";
-                    writePythonToCppConversionFunctions(s, smartPointerType, smartTargetType.value(), {}, {}, {});
+                        << smartTargetType.cppSignature() << "\n";
+                    writePythonToCppConversionFunctions(s, smartPointerType,
+                                                        smartTargetType, {}, {}, {});
                 }
             }
         }
@@ -4213,17 +4217,20 @@ void CppGenerator::writeSmartPointerConverterInitialization(TextStream &s, const
     if (classes.isEmpty())
         return;
 
+    auto *smartPointerTypeEntry = static_cast<const SmartPointerTypeEntry *>(type.typeEntry());
+
     s << "// Register SmartPointer converter for type '" << cppSignature << "'." << '\n'
        << "///////////////////////////////////////////////////////////////////////////////////////\n\n";
 
-    for (auto k : classes) {
-        auto smartTargetType = findSmartPointerInstantiation(k->typeEntry());
-        if (smartTargetType.has_value()) {
+    for (auto *base : classes) {
+        auto *baseTe = base->typeEntry();
+        if (auto opt = findSmartPointerInstantiation(smartPointerTypeEntry, baseTe)) {
+            const auto smartTargetType = opt.value();
             s << "// Convert to SmartPointer derived class: ["
-                << smartTargetType->cppSignature() << "]\n";
+                << smartTargetType.cppSignature() << "]\n";
             const QString converter = u"Shiboken::Conversions::getConverter(\""_qs
-                                      + smartTargetType->cppSignature() + u"\")"_qs;
-            writeConversionRegister(type, fixedCppTypeName(smartTargetType.value()), converter);
+                                      + smartTargetType.cppSignature() + u"\")"_qs;
+            writeConversionRegister(type, fixedCppTypeName(smartTargetType), converter);
         } else {
             s << "// Class not found:" << type.instantiations().at(0).cppSignature();
         }
