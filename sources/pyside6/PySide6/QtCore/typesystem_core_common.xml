@@ -615,6 +615,14 @@
     <enum-type name="WindowType" flags="WindowFlags"/>
     <enum-type name="CursorMoveStyle" since="4.8" revision="4800"/>
 
+    <modify-function signature="^operator.\(Qt::AlignmentFlag,Qt::TextFlag\)$"
+                     remove="all"/>
+    <modify-function signature="^operator.\(Qt::TextFlag,Qt::AlignmentFlag\)$"
+                     remove="all"/>
+    <modify-function signature="^operator.\(Qt::TextElideMode,Qt::TextFlag\)$"
+                     remove="all"/>
+    <modify-function signature="^operator.\(Qt::TextFlag,Qt::TextElideMode\)$"
+                     remove="all"/>
   </namespace-type>
 
   <add-function signature="QEnum(PyObject*)" return-type="PyObject*">
