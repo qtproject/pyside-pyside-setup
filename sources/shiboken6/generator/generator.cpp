@@ -493,8 +493,9 @@ bool Generator::generateFileForContext(const GeneratorContext &context)
     if (fileName.isEmpty())
         return true;
 
-    QString filePath = outputDirectory() + QLatin1Char('/') + subDirectoryForClass(cls)
-            + QLatin1Char('/') + fileName;
+    QString filePath = outputDirectory() + QLatin1Char('/')
+        + subDirectoryForPackage(typeEntry->targetLangPackage())
+        + QLatin1Char('/') + fileName;
     FileOut fileOut(filePath);
 
     generateClass(fileOut.stream, context);
@@ -919,11 +920,6 @@ static const QHash<QString, QString> &pythonOperators()
 QString Generator::pythonOperatorFunctionName(const QString &cppOpFuncName)
 {
     return pythonOperators().value(cppOpFuncName);
-}
-
-QString Generator::subDirectoryForClass(const AbstractMetaClass *clazz) const
-{
-    return subDirectoryForPackage(clazz->package());
 }
 
 QString Generator::subDirectoryForPackage(QString packageNameIn) const

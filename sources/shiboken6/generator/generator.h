@@ -281,9 +281,6 @@ protected:
     /// Returns true if the generator should generate any code for the AbstractMetaClass.
     virtual bool shouldGenerate(const TypeEntry *t) const;
 
-    /// Returns the subdirectory used to write the binding code of an AbstractMetaClass.
-    virtual QString subDirectoryForClass(const AbstractMetaClass *clazz) const;
-
     /**
     *   Translate metatypes to binding source format.
     *   \param metatype a pointer to metatype
