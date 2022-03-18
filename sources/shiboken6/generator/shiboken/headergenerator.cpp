@@ -529,11 +529,11 @@ bool HeaderGenerator::finishGeneration()
 
     StringStream protEnumsSurrogates(TextStream::Language::Cpp);
     for (auto metaClass : classList) {
-        if (!shouldGenerate(metaClass))
+        const TypeEntry *classType = metaClass->typeEntry();
+        if (!shouldGenerate(classType))
             continue;
 
         //Includes
-        const TypeEntry *classType = metaClass->typeEntry();
         const bool isPrivate = classType->isPrivate();
         auto &includeList = isPrivate ? privateIncludes : includes;
         includeList << classType->include();

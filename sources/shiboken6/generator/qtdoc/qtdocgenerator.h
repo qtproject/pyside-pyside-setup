@@ -69,7 +69,7 @@ public:
     QtXmlToSphinxLink resolveLink(const QtXmlToSphinxLink &) const override;
 
 protected:
-    bool shouldGenerate(const AbstractMetaClass *) const override;
+    bool shouldGenerate(const TypeEntry *) const override;
     static QString fileNameSuffix();
     QString fileNameForContext(const GeneratorContext &context) const override;
     void generateClass(TextStream &ts, const GeneratorContext &classContext) override;

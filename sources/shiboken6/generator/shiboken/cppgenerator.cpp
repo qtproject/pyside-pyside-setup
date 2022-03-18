@@ -454,8 +454,9 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
     s  << '\n' << "// inner classes\n";
     const AbstractMetaClassList &innerClasses = metaClass->innerClasses();
     for (AbstractMetaClass *innerClass : innerClasses) {
-        GeneratorContext innerClassContext = contextForClass(innerClass);
-        if (shouldGenerate(innerClass) && !innerClass->typeEntry()->isSmartPointer()) {
+        auto *innerTypeEntry = innerClass->typeEntry();
+        if (shouldGenerate(innerTypeEntry) && !innerTypeEntry->isSmartPointer()) {
+            GeneratorContext innerClassContext = contextForClass(innerClass);
             s << "#include \""
                 << HeaderGenerator::headerFileNameForContext(innerClassContext) << "\"\n";
         }
@@ -6283,10 +6284,11 @@ bool CppGenerator::finishGeneration()
 
     AbstractMetaClassCList classesWithStaticFields;
     for (auto cls : api().classes()){
-        if (shouldGenerate(cls)) {
+        auto *te = cls->typeEntry();
+        if (shouldGenerate(te)) {
             writeInitFunc(s_classInitDecl, s_classPythonDefines,
                           getSimpleClassInitFunctionName(cls),
-                          cls->typeEntry()->targetLangEnclosingEntry());
+                          te->targetLangEnclosingEntry());
             if (cls->hasStaticFields()) {
                 s_classInitDecl << "void "
                     << getSimpleClassStaticFieldsInitFunctionName(cls) << "();\n";

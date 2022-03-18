@@ -278,11 +278,8 @@ protected:
     /// Returns the file base name for a smart pointer.
     static QString getFileNameBaseForSmartPointer(const AbstractMetaType &smartPointerType);
 
-    /// Returns true if the generator should generate any code for the TypeEntry.
-    static bool shouldGenerateTypeEntry(const TypeEntry *) ;
-
     /// Returns true if the generator should generate any code for the AbstractMetaClass.
-    virtual bool shouldGenerate(const AbstractMetaClass *) const;
+    virtual bool shouldGenerate(const TypeEntry *t) const;
 
     /// Returns the subdirectory used to write the binding code of an AbstractMetaClass.
     virtual QString subDirectoryForClass(const AbstractMetaClass *clazz) const;

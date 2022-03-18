@@ -414,6 +414,11 @@ bool TypeEntry::generateCode() const
     return m_d->m_codeGeneration == GenerateCode;
 }
 
+bool TypeEntry::shouldGenerate() const
+{
+    return generateCode() && NamespaceTypeEntry::isVisibleScope(this);
+}
+
 int TypeEntry::revision() const
 {
     return m_d->m_revision;

@@ -1186,7 +1186,7 @@ ShibokenGenerator::ExtendedConverterData ShibokenGenerator::getExtendedConverter
     ExtendedConverterData extConvs;
     for (auto metaClass : api().classes()) {
         // Use only the classes for the current module.
-        if (!shouldGenerate(metaClass))
+        if (!shouldGenerate(metaClass->typeEntry()))
             continue;
         const auto &overloads = metaClass->operatorOverloads(OperatorQueryOption::ConversionOp);
         for (const auto &convOp : overloads) {
@@ -1207,7 +1207,7 @@ QList<const CustomConversion *> ShibokenGenerator::getPrimitiveCustomConversions
     QList<const CustomConversion *> conversions;
     const PrimitiveTypeEntryList &primitiveTypeList = primitiveTypes();
     for (const PrimitiveTypeEntry *type : primitiveTypeList) {
-        if (!shouldGenerateTypeEntry(type) || !type->isUserPrimitive() || !type->customConversion())
+        if (!type->shouldGenerate() || !type->isUserPrimitive() || !type->customConversion())
             continue;
 
         conversions << type->customConversion();

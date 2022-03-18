@@ -484,8 +484,9 @@ void Generator::setOutputDirectory(const QString &outDir)
 bool Generator::generateFileForContext(const GeneratorContext &context)
 {
     const AbstractMetaClass *cls = context.metaClass();
+    auto *typeEntry = cls->typeEntry();
 
-    if (!shouldGenerate(cls))
+    if (!shouldGenerate(typeEntry))
         return true;
 
     const QString fileName = fileNameForContext(context);
@@ -538,7 +539,8 @@ bool Generator::generate()
     for (auto cls : m_d->api.classes()) {
         if (!generateFileForContext(contextForClass(cls)))
             return false;
-        if (shouldGenerate(cls) && cls->typeEntry()->isPrivate())
+        auto *te = cls->typeEntry();
+        if (shouldGenerate(te) && te->isPrivate())
             m_d->m_hasPrivateClasses = true;
     }
 
@@ -564,14 +566,9 @@ bool Generator::generate()
     return finishGeneration();
 }
 
-bool Generator::shouldGenerateTypeEntry(const TypeEntry *type)
+bool Generator::shouldGenerate(const TypeEntry *typeEntry) const
 {
-    return type->generateCode() && NamespaceTypeEntry::isVisibleScope(type);
-}
-
-bool Generator::shouldGenerate(const AbstractMetaClass *metaClass) const
-{
-    return shouldGenerateTypeEntry(metaClass->typeEntry());
+    return typeEntry->shouldGenerate();
 }
 
 const ApiExtractorResult &Generator::api() const

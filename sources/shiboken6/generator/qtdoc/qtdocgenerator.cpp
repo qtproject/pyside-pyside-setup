@@ -121,10 +121,10 @@ QString QtDocGenerator::fileNameSuffix()
     return u".rst"_qs;
 }
 
-bool QtDocGenerator::shouldGenerate(const AbstractMetaClass *cls) const
+bool QtDocGenerator::shouldGenerate(const TypeEntry *te) const
 {
-    return Generator::shouldGenerate(cls)
-        && cls->typeEntry()->type() != TypeEntry::SmartPointerType;
+    return Generator::shouldGenerate(te)
+        && te->type() != TypeEntry::SmartPointerType;
 }
 
 QString QtDocGenerator::fileNameForContext(const GeneratorContext &context) const

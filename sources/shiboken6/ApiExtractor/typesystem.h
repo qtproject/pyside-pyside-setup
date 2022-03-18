@@ -173,6 +173,9 @@ public:
     //       on 'load-typesystem' tag
     bool generateCode() const;
 
+    /// Returns whether the C++ generators should generate this entry
+    bool shouldGenerate() const;
+
     int revision() const;
     void setRevision(int r); // see typedatabase.cpp
     int sbkIndex() const; // see typedatabase.cpp
