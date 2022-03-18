@@ -104,7 +104,6 @@ def _get_py_library_unix(build_type, py_version, py_prefix, py_libdir,
     if py_include_dir is None or not os.path.exists(py_include_dir):
         dir = f"include/python{py_version}"
         py_include_dir = os.path.join(py_prefix, dir)
-    dbg_postfix = "_d" if build_type == "Debug" else ""
     lib_exts = ['.so']
     if sys.platform == 'darwin':
         lib_exts.append('.dylib')
@@ -145,7 +144,8 @@ def _get_py_library_unix(build_type, py_version, py_prefix, py_libdir,
             if os.path.exists(pypy_library):
                 return pypy_library
             libs_tried.append(pypy_library)
-    raise DistutilsSetupError(f"Failed to locate the Python library with {', '.join(libs_tried)}")
+    _libs_tried = ', '.join(libs_tried)
+    raise DistutilsSetupError(f"Failed to locate the Python library with {_libs_tried}")
 
 
 def get_py_library(build_type, py_version, py_prefix, py_libdir, py_include_dir):

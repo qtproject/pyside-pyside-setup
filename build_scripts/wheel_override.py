@@ -59,7 +59,7 @@ try:
 except Exception as e:
     _bdist_wheel, wheel_version = type, ""  # dummy to make class statement happy
     logger.warn(f"***** Exception while trying to prepare bdist_wheel override class: {e}. "
-          "Skipping wheel overriding.")
+                "Skipping wheel overriding.")
 
 
 def get_bdist_wheel_override():
@@ -153,8 +153,8 @@ class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
         linux_prefix = "linux_"
         if old_plat_name.startswith(linux_prefix):
             # Extract the arch suffix like -armv7l or -aarch64
-            plat_name_arch_suffix = \
-                old_plat_name[old_plat_name.index(linux_prefix) + len(linux_prefix):]
+            _index = old_plat_name.index(linux_prefix) + len(linux_prefix)
+            plat_name_arch_suffix = old_plat_name[_index:]
 
             new_plat_name = f"{many_linux_prefix}_{plat_name_arch_suffix}"
 
@@ -268,7 +268,7 @@ class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
 
     # Copy of get_tag from bdist_wheel.py, to write a triplet Tag
     # only once for the limited_api case.
-    def write_wheelfile(self, wheelfile_base, generator='bdist_wheel (' + wheel_version + ')'):
+    def write_wheelfile(self, wheelfile_base, generator=f'bdist_wheel ({wheel_version})'):
         from email.message import Message
         msg = Message()
         msg['Wheel-Version'] = '1.0'  # of the spec
@@ -293,7 +293,7 @@ class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
                 writeTag(impl)
 
         wheelfile_path = os.path.join(wheelfile_base, 'WHEEL')
-        logger.info('creating %s', wheelfile_path)
+        logger.info(f'creating {wheelfile_path}')
         with open(wheelfile_path, 'w') as f:
             Generator(f, maxheaderlen=0).flatten(msg)
 

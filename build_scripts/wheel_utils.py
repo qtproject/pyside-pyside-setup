@@ -40,7 +40,7 @@
 import os
 import time
 
-from setuptools._distutils.errors import DistutilsError
+from setuptools._distutils.errors import DistutilsSetupError
 from sysconfig import get_platform, get_config_var
 from packaging.version import parse as parse_version
 

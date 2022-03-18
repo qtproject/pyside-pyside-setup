@@ -43,6 +43,7 @@ import os
 import platform
 import re
 import sys
+import importlib
 from textwrap import dedent
 import time
 from .config import config
@@ -67,7 +68,6 @@ from setuptools.command.build_py import build_py as _build_py
 #              happens only with custom builds of Python without virtual environment.
 import setuptools.command.install_scripts
 
-from sysconfig import get_config_var
 # Use the distutils implementation within setuptools
 from setuptools._distutils.errors import DistutilsSetupError
 from setuptools._distutils import log
@@ -763,7 +763,7 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
         if self.is_cross_compile and (not OPTION["SHIBOKEN_HOST_PATH"]
                                       or not os.path.exists(OPTION["SHIBOKEN_HOST_PATH"])):
             raise DistutilsSetupError(
-                f"Please specify the location of host shiboken tools via --shiboken-host-path=")
+                "Please specify the location of host shiboken tools via --shiboken-host-path=")
 
         if self.shiboken_host_path:
             cmake_cmd.append(f"-DQFP_SHIBOKEN_HOST_PATH={self.shiboken_host_path}")
@@ -803,10 +803,8 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
 
         if not OPTION["SKIP_DOCS"]:
             if extension.lower() == SHIBOKEN:
-                try:
-                    # Check if sphinx is installed to proceed.
-                    import sphinx
-
+                found = importlib.util.find_spec("sphinx")
+                if found:
                     log.info("Generating Shiboken documentation")
                     make_doc_cmd = [self.make_path, "doc"]
                     if OPTION["VERBOSE_BUILD"] and self.make_generator == "Ninja":
@@ -814,7 +812,7 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
                     if run_process(make_doc_cmd) != 0:
                         raise DistutilsSetupError("Error generating documentation "
                                                   f"for {extension}")
-                except ImportError:
+                else:
                     log.info("Sphinx not found, skipping documentation build")
         else:
             log.info("Skipped documentation generation")
@@ -1105,7 +1103,7 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
         if not (self.is_cross_compile and sys.platform.startswith('linux') and self.standalone):
             return
 
-        log.info(f"Patching rpath for Qt and QML plugins.")
+        log.info("Patching rpath for Qt and QML plugins.")
         for plugin in plugin_paths:
             if os.path.isdir(plugin) or os.path.islink(plugin):
                 continue
@@ -1164,16 +1162,16 @@ class PysideRstDocs(Command, DistUtilsCommandMixin):
             self.doc_dir = os.path.join(config.setup_script_dir, "sources")
             self.doc_dir = os.path.join(self.doc_dir, self.name)
             self.doc_dir = os.path.join(self.doc_dir, "doc")
-            try:
-                # Check if sphinx is installed to proceed.
-                import sphinx
+            # Check if sphinx is installed to proceed.
+            found = importlib.util.find_spec("sphinx")
+            if found:
                 if self.name == SHIBOKEN:
                     log.info("-- Generating Shiboken documentation")
                     log.info(f"-- Documentation directory: 'html/{PYSIDE}/{SHIBOKEN}/'")
                 elif self.name == PYSIDE:
                     log.info("-- Generating PySide documentation")
                     log.info(f"-- Documentation directory: 'html/{PYSIDE}/'")
-            except ImportError:
+            else:
                 raise DistutilsSetupError("Sphinx not found - aborting")
             self.html_dir = "html"
 
@@ -1198,8 +1196,8 @@ class PysideRstDocs(Command, DistUtilsCommandMixin):
 
     def run(self):
         if not self.skip:
-            cmake_cmd = [OPTION["CMAKE"]]
-            cmake_cmd += [
+            cmake_cmd = [
+                OPTION["CMAKE"],
                 "-S", self.doc_dir,
                 "-B", self.out_dir,
                 "-DDOC_OUTPUT_FORMAT=html",

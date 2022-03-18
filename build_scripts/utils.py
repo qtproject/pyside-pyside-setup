@@ -57,7 +57,7 @@ import urllib.request as urllib
 try:
     # Using the distutils implementation within setuptools
     from setuptools._distutils import log
-    from setuptools._distutils.errors import DistutilsError
+    from setuptools._distutils.errors import DistutilsSetupError
 except ModuleNotFoundError:
     # This is motivated by our CI using an old version of setuptools
     # so then the coin_build_instructions.py script is executed, and
@@ -94,7 +94,7 @@ def get_numpy_location():
         if 'site-' in p:
             numpy = Path(p).resolve() / 'numpy'
             if numpy.is_dir():
-               return os.fspath(numpy / 'core' / 'include')
+                return os.fspath(numpy / 'core' / 'include')
     return None
 
 
@@ -116,7 +116,7 @@ def winsdk_setenv(platform_arch, build_type):
         if sdk_versions:
             for sdk_version in sdk_versions:
                 installationfolder = msvc9.Reg.get_value(f"{msvc9.WINSDK_BASE}\\{sdk_version}",
-                                                   "installationfolder")
+                                                         "installationfolder")
                 # productversion = msvc9.Reg.get_value("{}\\{}".format(msvc9.WINSDK_BASE, sdk_version),
                 #                                "productversion")
                 setenv_path = os.path.join(installationfolder, os.path.join('bin', 'SetEnv.cmd'))
@@ -273,8 +273,8 @@ def copyfile(src, dst, force=True, vars=None, force_copy_symlink=False,
         if os.path.isfile(dst):
             src_stat = os.stat(src)
             dst_stat = os.stat(dst)
-            if (src_stat.st_size == dst_stat.st_size and
-                src_stat.st_mtime <= dst_stat.st_mtime):
+            if (src_stat.st_size == dst_stat.st_size
+                    and src_stat.st_mtime <= dst_stat.st_mtime):
                 log.info(f"{dst} is up to date.")
                 return dst
 
@@ -294,8 +294,8 @@ def copyfile(src, dst, force=True, vars=None, force_copy_symlink=False,
             target_dir = dst if os.path.isdir(dst) else os.path.dirname(dst)
             os.chdir(target_dir)
             if os.path.exists(link_name):
-                if (os.path.islink(link_name) and
-                    os.readlink(link_name) == link_target):
+                if (os.path.islink(link_name)
+                        and os.readlink(link_name) == link_target):
                     log.info(f"Symlink already exists\n  {link_name} ->\n  {link_target}")
                     return dst
                 os.remove(link_name)
@@ -352,7 +352,7 @@ def copydir(src, dst, filter=None, ignore=None, force=True, recursive=True, vars
     names = os.listdir(src)
 
     results = []
-    errors = []
+    copy_errors = []
     for name in names:
         srcname = os.path.join(src, name)
         dstname = os.path.join(dst, name)
@@ -375,9 +375,9 @@ def copydir(src, dst, filter=None, ignore=None, force=True, recursive=True, vars
         # catch the Error from the recursive copytree so that we can
         # continue with other files
         except shutil.Error as err:
-            errors.extend(err.args[0])
+            copy_errors.extend(err.args[0])
         except EnvironmentError as why:
-            errors.append((srcname, dstname, str(why)))
+            copy_errors.append((srcname, dstname, str(why)))
     try:
         if os.path.exists(dst):
             shutil.copystat(src, dst)
@@ -386,9 +386,9 @@ def copydir(src, dst, filter=None, ignore=None, force=True, recursive=True, vars
             # Copying file access times may fail on Windows
             pass
         else:
-            errors.extend((src, dst, str(why)))
-    if errors:
-        raise EnvironmentError(errors)
+            copy_errors.extend((src, dst, str(why)))
+    if copy_errors:
+        raise EnvironmentError(copy_errors)
     return results
 
 
@@ -450,11 +450,8 @@ def get_environment_from_batch_command(env_cmd, initial=None):
     """
 
     def validate_pair(ob):
-        try:
-            if not (len(ob) == 2):
-                log.error(f"Unexpected result: {ob}")
-                raise ValueError
-        except:
+        if len(ob) != 2:
+            log.error(f"Unexpected result: {ob}")
             return False
         return True
 
@@ -945,7 +942,7 @@ def copy_icu_libs(patchelf, destination_lib_dir):
 
     if not qt_core_library_path or not os.path.exists(qt_core_library_path):
         raise RuntimeError(f"QtCore library does not exist at path: {qt_core_library_path}. "
-                            "Failed to copy ICU libraries.")
+                           "Failed to copy ICU libraries.")
 
     dependencies = ldd_get_dependencies(qt_core_library_path)
 
@@ -1007,7 +1004,6 @@ def linux_prepend_rpath(patchelf, executable_path, new_path):
         rpaths.insert(0, new_path)
         new_rpaths_string = ":".join(rpaths)
         linux_set_rpaths(patchelf, executable_path, new_rpaths_string)
-        result = True
 
 
 def linux_patch_executable(patchelf, executable_path):

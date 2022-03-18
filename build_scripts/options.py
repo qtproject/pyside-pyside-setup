@@ -255,7 +255,7 @@ class DistUtilsCommandMixin(object):
         # We redeclare plat-name as an option so it's recognized by the
         # install command and doesn't throw an error.
         ('plat-name=', None, 'The platform name for which we are cross-compiling'),
-        ]
+    ]
 
     def __init__(self):
         self.avoid_protected_hack = False
@@ -336,7 +336,6 @@ class DistUtilsCommandMixin(object):
         for (name, _, _) in DistUtilsCommandMixin.mixin_user_options:
             keys.add(name.rstrip("=").replace("-", "_"))
         return keys
-
 
     def mixin_finalize_options(self):
         # The very first we finalize options, record that.
@@ -473,7 +472,7 @@ class DistUtilsCommandMixin(object):
 
     def _extra_checks(self):
         if self.is_cross_compile and not self.plat_name:
-            log.error(f"No value provided to --plat-name while cross-compiling.")
+            log.error("No value provided to --plat-name while cross-compiling.")
             return False
         return True
 

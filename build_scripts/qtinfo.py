@@ -38,14 +38,10 @@
 #############################################################################
 
 import os
-import sys
-import re
 import subprocess
-import tempfile
 from pathlib import Path
 from .utils import configure_cmake_project, parse_cmake_project_message_info
 from .utils import platform_cmake_options
-
 
 
 class QtInfo(object):
