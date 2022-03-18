@@ -403,6 +403,7 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
 {
     s.setLanguage(TextStream::Language::Cpp);
     const AbstractMetaClass *metaClass = classContext.metaClass();
+    const auto *typeEntry = metaClass->typeEntry();
 
     // write license comment
     s << licenseComment() << '\n';
@@ -468,7 +469,7 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
     //Extra includes
     QList<Include> includes;
     if (!classContext.useWrapper())
-        includes += metaClass->typeEntry()->extraIncludes();
+        includes += typeEntry->extraIncludes();
     for (const AbstractMetaEnum &cppEnum : qAsConst(classEnums))
         includes.append(cppEnum.typeEntry()->extraIncludes());
     if (!includes.isEmpty()) {
@@ -481,7 +482,7 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
 
     s << "\n#include <cctype>\n#include <cstring>\n";
 
-    if (metaClass->typeEntry()->typeFlags() & ComplexTypeEntry::Deprecated)
+    if (typeEntry->typeFlags().testFlag(ComplexTypeEntry::Deprecated))
         s << "#Deprecated\n";
 
     // Use class base namespace
@@ -509,17 +510,17 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
     }
 
     // class inject-code native/beginning
-    if (!metaClass->typeEntry()->codeSnips().isEmpty()) {
-        writeClassCodeSnips(s, metaClass->typeEntry()->codeSnips(),
+    if (!typeEntry->codeSnips().isEmpty()) {
+        writeClassCodeSnips(s, typeEntry->codeSnips(),
                             TypeSystem::CodeSnipPositionBeginning, TypeSystem::NativeCode,
                             classContext);
         s << '\n';
     }
 
     // python conversion rules
-    if (metaClass->typeEntry()->hasTargetConversionRule()) {
+    if (typeEntry->hasTargetConversionRule()) {
         s << "// Python Conversion\n";
-        s << metaClass->typeEntry()->targetConversionRule() << '\n';
+        s << typeEntry->targetConversionRule() << '\n';
     }
 
     if (classContext.useWrapper()) {
@@ -635,7 +636,7 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
 
     const QString className = chopType(cpythonTypeName(metaClass));
 
-    if (metaClass->typeEntry()->isValue() || metaClass->typeEntry()->isSmartPointer()) {
+    if (typeEntry->isValue() || typeEntry->isSmartPointer()) {
         writeCopyFunction(s, classContext);
         signatureStream << fullPythonClassName(metaClass) << ".__copy__()\n";
     }
@@ -664,7 +665,7 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
     // Write methods definition
     s << "static PyMethodDef " << className << "_methods[] = {\n" << indent
         << methodsDefinitions << '\n';
-    if (metaClass->typeEntry()->isValue() || metaClass->typeEntry()->isSmartPointer()) {
+    if (typeEntry->isValue() || typeEntry->isSmartPointer()) {
         s << "{\"__copy__\", reinterpret_cast<PyCFunction>(" << className << "___copy__)"
             << ", METH_NOARGS},\n";
     }
@@ -686,7 +687,7 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
     if (const auto f = boolCast(metaClass) ; !f.isNull())
         writeNbBoolFunction(classContext, f, s);
 
-    if (supportsNumberProtocol(metaClass) && !metaClass->typeEntry()->isSmartPointer()) {
+    if (supportsNumberProtocol(metaClass) && !typeEntry->isSmartPointer()) {
         const QList<AbstractMetaFunctionCList> opOverloads = filterGroupedOperatorFunctions(
                 metaClass,
                 OperatorQueryOption::ArithmeticOp
@@ -777,7 +778,7 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
 
     s << "} // extern \"C\"\n\n";
 
-    if (!metaClass->typeEntry()->hashFunction().isEmpty())
+    if (!typeEntry->hashFunction().isEmpty())
         writeHashFunction(s, classContext);
 
     // Write tp_traverse and tp_clear functions.
@@ -800,8 +801,8 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
         writeStaticFieldInitialization(s, metaClass);
 
     // class inject-code native/end
-    if (!metaClass->typeEntry()->codeSnips().isEmpty()) {
-        writeClassCodeSnips(s, metaClass->typeEntry()->codeSnips(),
+    if (!typeEntry->codeSnips().isEmpty()) {
+        writeClassCodeSnips(s, typeEntry->codeSnips(),
                             TypeSystem::CodeSnipPositionEnd, TypeSystem::NativeCode,
                             classContext);
         s << '\n';
@@ -1437,6 +1438,7 @@ void CppGenerator::writeConverterFunctions(TextStream &s, const AbstractMetaClas
     s << "// Type conversion functions.\n\n";
 
     AbstractMetaEnumList classEnums = metaClass->enums();
+    auto *typeEntry = metaClass->typeEntry();
     metaClass->getEnumsFromInvisibleNamespacesToBeGenerated(&classEnums);
     if (!classEnums.isEmpty())
         s << "// Python to C++ enum conversion.\n";
@@ -1501,7 +1503,7 @@ return result;)";
     writeCppToPythonFunction(s, c.toString(), sourceTypeName, targetTypeName);
 
     // The conversions for an Object Type end here.
-    if (!metaClass->typeEntry()->isValue() && !metaClass->typeEntry()->isSmartPointer()) {
+    if (!typeEntry->isValue() && !typeEntry->isSmartPointer()) {
         s << '\n';
         return;
     }
@@ -1545,9 +1547,9 @@ return result;)";
     const QString outPtr = u"reinterpret_cast<"_qs + typeName + u" *>(cppOut)"_qs;
     if (!classContext.forSmartPointer()) {
         c << '*' << outPtr << " = *"
-            << cpythonWrapperCPtr(metaClass->typeEntry(), pyInVariable) << ';';
+            << cpythonWrapperCPtr(typeEntry, pyInVariable) << ';';
     } else {
-        auto *ste = static_cast<const SmartPointerTypeEntry *>(metaClass->typeEntry());
+        auto *ste = static_cast<const SmartPointerTypeEntry *>(typeEntry);
         const QString resetMethod = ste->resetMethod();
         c << "auto *ptr = " << outPtr << ";\n";
         c << "if (" << pyInVariable << " == Py_None)\n" << indent;
@@ -1570,7 +1572,6 @@ return result;)";
     s << '\n';
 
     // User provided implicit conversions.
-    auto *typeEntry = metaClass->typeEntry();
     // Implicit conversions.
     const AbstractMetaFunctionCList implicitConvs = implicitConversions(typeEntry);
 
@@ -1658,7 +1659,8 @@ void CppGenerator::writeCustomConverterFunctions(TextStream &s,
 void CppGenerator::writeConverterRegister(TextStream &s, const AbstractMetaClass *metaClass,
                                           const GeneratorContext &classContext) const
 {
-    if (metaClass->isNamespace())
+    const auto *typeEntry = metaClass->typeEntry();
+    if (typeEntry->isNamespace())
         return;
     s << "// Register Converter\n"
         << "SbkConverter *converter = Shiboken::Conversions::createConverter(pyType,\n";
@@ -1670,7 +1672,7 @@ void CppGenerator::writeConverterRegister(TextStream &s, const AbstractMetaClass
             << convertibleToCppFunctionName(sourceTypeName, targetTypeName) << ',' << '\n';
         std::swap(targetTypeName, sourceTypeName);
         s << cppToPythonFunctionName(sourceTypeName, targetTypeName);
-        if (metaClass->typeEntry()->isValue() || metaClass->typeEntry()->isSmartPointer()) {
+        if (typeEntry->isValue() || typeEntry->isSmartPointer()) {
             s << ',' << '\n';
             sourceTypeName = metaClass->name() + QLatin1String("_COPY");
             s << cppToPythonFunctionName(sourceTypeName, targetTypeName);
@@ -1732,7 +1734,7 @@ void CppGenerator::writeConverterRegister(TextStream &s, const AbstractMetaClass
 
     s << '\n';
 
-    if (!metaClass->typeEntry()->isValue() && !metaClass->typeEntry()->isSmartPointer())
+    if (!typeEntry->isValue() && !typeEntry->isSmartPointer())
         return;
 
     // Python to C++ copy (value, not pointer neither reference) conversion.
@@ -1744,7 +1746,6 @@ void CppGenerator::writeConverterRegister(TextStream &s, const AbstractMetaClass
     writeAddPythonToCppConversion(s, QLatin1String("converter"), toCpp, isConv);
 
     // User provided implicit conversions.
-    auto *typeEntry = metaClass->typeEntry();
 
     // Add implicit conversions.
     const AbstractMetaFunctionCList implicitConvs = implicitConversions(typeEntry);
@@ -6770,14 +6771,15 @@ void CppGenerator::writeDefaultSequenceMethods(TextStream &s,
     ErrorReturn errorReturn = ErrorReturn::Zero;
 
     // __len__
-    s << "Py_ssize_t " << cpythonBaseName(metaClass->typeEntry())
+    const QString namePrefix = cpythonBaseName(metaClass->typeEntry());
+    s << "Py_ssize_t " << namePrefix
         << "__len__(PyObject *self)\n{\n" << indent;
     writeCppSelfDefinition(s, context, errorReturn);
     s << "return " << CPP_SELF_VAR << "->size();\n"
         << outdent << "}\n";
 
     // __getitem__
-    s << "PyObject *" << cpythonBaseName(metaClass->typeEntry())
+    s << "PyObject *" << namePrefix
         << "__getitem__(PyObject *self, Py_ssize_t _i)\n{\n" << indent;
     writeCppSelfDefinition(s, context, errorReturn);
     writeIndexError(s, u"index out of bounds"_qs, errorReturn);
@@ -6801,7 +6803,7 @@ void CppGenerator::writeDefaultSequenceMethods(TextStream &s,
     s << ";\n" << outdent << "}\n";
 
     // __setitem__
-    s << "int " << cpythonBaseName(metaClass->typeEntry())
+    s << "int " << namePrefix
         << "__setitem__(PyObject *self, Py_ssize_t _i, PyObject *pyArg)\n{\n"
         << indent;
     errorReturn = ErrorReturn::MinusOne;

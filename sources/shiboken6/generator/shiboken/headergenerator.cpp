@@ -164,7 +164,7 @@ void HeaderGenerator::generateClass(TextStream &s, const GeneratorContext &class
             s << '~' << wrapperName << "();\n";
         }
 
-        writeClassCodeSnips(s, metaClass->typeEntry()->codeSnips(),
+        writeClassCodeSnips(s, typeEntry->codeSnips(),
                             TypeSystem::CodeSnipPositionDeclaration, TypeSystem::NativeCode,
                             classContext);
 
@@ -388,7 +388,7 @@ void HeaderGenerator::writeTypeIndexValueLines(TextStream &s, const ApiExtractor
             writeTypeIndexValueLine(s, api, metaEnum.typeEntry());
     }
     if (NamespaceTypeEntry::isVisibleScope(typeEntry))
-        writeTypeIndexValueLine(s, api, metaClass->typeEntry());
+        writeTypeIndexValueLine(s, api, typeEntry);
 }
 
 // Format the typedefs for the typedef entries to be generated
