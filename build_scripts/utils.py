@@ -63,12 +63,15 @@ except ModuleNotFoundError:
     # so then the coin_build_instructions.py script is executed, and
     # import from this file, it was failing.
     from distutils import log
-    from distutils import errors
 
 try:
     WindowsError
 except NameError:
     WindowsError = None
+
+
+def is_64bit():
+    return sys.maxsize > 2147483647
 
 
 def filter_match(name, patterns):

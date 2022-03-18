@@ -38,14 +38,17 @@
 #############################################################################
 
 
-wheel_module_exists = False
-
 import os
 import sys
+import platform
 from .options import DistUtilsCommandMixin, OPTION
 from setuptools._distutils import log as logger
 from email.generator import Generator
 from .wheel_utils import get_package_version, get_qt_version, macos_plat_name
+from .utils import is_64bit
+
+wheel_module_exists = False
+
 
 try:
 
@@ -86,10 +89,11 @@ class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
             self.plat_name = macos_plat_name()
 
         # When limited API is requested, notify bdist_wheel to
-        # create a properly named package.
+        # create a properly named package, which will contain
+        # the initial cpython version we support.
         limited_api_enabled = OPTION["LIMITED_API"] == 'yes'
         if limited_api_enabled:
-            self.py_limited_api = "cp36.cp37.cp38.cp39.cp310"
+            self.py_limited_api = "cp36"
 
         self._package_version = get_package_version()
 
@@ -100,9 +104,9 @@ class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
         # Slightly modified version of wheel's wheel_dist_name
         # method, to add the Qt version as well.
         # Example:
-        #   PySide6-5.6-5.6.4-cp27-cp27m-macosx_10_10_intel.whl
-        # The PySide6 version is "5.6".
-        # The Qt version built against is "5.6.4".
+        #   PySide6-6.3-6.3.2-cp36-abi3-macosx_10_10_intel.whl
+        # The PySide6 version is "6.3".
+        # The Qt version built against is "6.3.2".
         wheel_version = f"{self._package_version}-{get_qt_version()}"
         components = (_safer_name(self.distribution.get_name()), wheel_version)
         if self.build_number:
@@ -135,7 +139,8 @@ class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
             impl_name = tags.INTERPRETER_SHORT_NAMES.get(interpreter_name) or interpreter_name
             impl_ver = f"{py_version_major}{py_version_minor}"
             impl = impl_name + impl_ver
-            abi = 'cp' + so_abi.split('-')[1]
+            cp_version = so_abi.split("-")[1]
+            abi = f'cp{cp_version}'
         tag_tuple = (impl, abi, plat_name)
         return tag_tuple
 
@@ -170,20 +175,18 @@ class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
         if self.is_cross_compile:
             tag = self.get_cross_compiling_tag_tuple(old_tag)
 
-        # Get new tag for manylinux builds.
-        # To allow uploading to pypi, we need the wheel name
-        # to contain 'manylinux1'.
-        # The wheel which will be uploaded to pypi will be
-        # built on RHEL_8_2, so it doesn't completely qualify for
-        # manylinux1 support, but it's the minimum requirement
-        # for building Qt. We only enable this for x64 limited
-        # api builds (which are the only ones uploaded to pypi).
+        # Use PEP600 for manylinux wheel name
+        # For Qt6 we know RHEL 8.4 is the base linux platform,
+        # and has GLIBC 2.28.
+        # This will generate a name that contains:
+        #     manylinux_2_28
         # TODO: Add actual distro detection, instead of
-        # relying on limited_api option if possible.
+        # relying on limited_api option.
         if (old_plat_name in ('linux-x86_64', 'linux_x86_64')
-                and sys.maxsize > 2147483647
+                and is_64bit()
                 and self.py_limited_api):
-            tag = (old_impl, old_abi_tag, 'manylinux1_x86_64')
+            glibc = platform.libc_ver()[1].replace(".", "_")
+            tag = (old_impl, old_abi_tag, f"manylinux_{glibc}_x86_64")
 
         # Set manylinux tag for cross-compiled builds when targeting
         # limited api.
@@ -198,12 +201,6 @@ class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
             impl = self.py_limited_api
             abi_tag = 'abi3'
             tag = (impl, abi_tag, adjusted_plat_name)
-
-        # Adjust abi name on Windows for limited api. It needs to be
-        # 'none' instead of 'abi3' because pip does not yet support
-        # the "abi3" tag on Windows, leading to a installation failure.
-        if self.py_limited_api and old_impl.startswith('cp3') and sys.platform == 'win32':
-            tag = (old_impl, 'none', old_plat_name)
 
         # If building for limited API or we created a new tag, add it
         # to the list of supported tags.
@@ -236,14 +233,14 @@ class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
                 # modules, use the default platform name.
                 plat_name = get_platform(self.bdist_dir)
 
-            if plat_name in ('linux-x86_64', 'linux_x86_64') and sys.maxsize == 2147483647:
+            if plat_name in ('linux-x86_64', 'linux_x86_64') and not is_64bit():
                 plat_name = 'linux_i686'
 
         plat_name = plat_name.lower().replace('-', '_').replace('.', '_')
 
         if self.root_is_pure:
             if self.universal:
-                impl = 'py2.py3'
+                impl = 'py3'
             else:
                 impl = self.python_tag
             tag = (impl, 'none', plat_name)
