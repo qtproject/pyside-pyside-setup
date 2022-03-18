@@ -48,7 +48,6 @@ from shutil import which
 import sys
 import os
 import warnings
-from pathlib import Path
 
 from .qtinfo import QtInfo
 
@@ -231,7 +230,7 @@ class DistUtilsCommandMixin(object):
         ('qt-src-dir=', None, 'Qt source directory'),
         ('no-qt-tools', None, 'Do not copy the Qt tools'),
         ('pyside-numpy-support', None, 'libpyside: Add (experimental) numpy support')
-        ]
+    ]
 
     def __init__(self):
         self.avoid_protected_hack = False

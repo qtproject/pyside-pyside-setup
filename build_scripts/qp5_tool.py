@@ -287,6 +287,7 @@ def read_config_python_binary():
 
 
 def get_config_file(base_name):
+    global user
     home = os.getenv('HOME')
     if IS_WINDOWS:
         # Set a HOME variable on Windows such that scp. etc.

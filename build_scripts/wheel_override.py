@@ -38,14 +38,15 @@
 #############################################################################
 
 
-wheel_module_exists = False
-
 import os
 import sys
 from .options import DistUtilsCommandMixin, OPTION
 from setuptools._distutils import log as logger
 from email.generator import Generator
 from .wheel_utils import get_package_version, get_qt_version, macos_plat_name
+
+wheel_module_exists = False
+
 
 try:
 
@@ -59,7 +60,7 @@ try:
 except Exception as e:
     _bdist_wheel, wheel_version = type, ""  # dummy to make class statement happy
     logger.warn(f"***** Exception while trying to prepare bdist_wheel override class: {e}. "
-          "Skipping wheel overriding.")
+                "Skipping wheel overriding.")
 
 
 def get_bdist_wheel_override():
@@ -180,7 +181,7 @@ class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
 
     # Copy of get_tag from bdist_wheel.py, to write a triplet Tag
     # only once for the limited_api case.
-    def write_wheelfile(self, wheelfile_base, generator='bdist_wheel (' + wheel_version + ')'):
+    def write_wheelfile(self, wheelfile_base, generator=f'bdist_wheel ({wheel_version})'):
         from email.message import Message
         msg = Message()
         msg['Wheel-Version'] = '1.0'  # of the spec
@@ -205,7 +206,7 @@ class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
                 writeTag(impl)
 
         wheelfile_path = os.path.join(wheelfile_base, 'WHEEL')
-        logger.info('creating %s', wheelfile_path)
+        logger.info(f'creating {wheelfile_path}')
         with open(wheelfile_path, 'w') as f:
             Generator(f, maxheaderlen=0).flatten(msg)
 
