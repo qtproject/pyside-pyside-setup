@@ -256,6 +256,11 @@ public:
     static QString moduleName();
 
 protected:
+    /// Helper for determining the file name
+    static QString fileNameForContextHelper(const GeneratorContext &context,
+                                            const QString &suffix,
+                                            bool useQualifiedName = true);
+
     /// Returns all primitive types found by APIExtractor
     static PrimitiveTypeEntryList primitiveTypes();
 
@@ -271,8 +276,7 @@ protected:
     bool generateFileForContext(const GeneratorContext &context);
 
     /// Returns the file base name for a smart pointer.
-    static QString getFileNameBaseForSmartPointer(const AbstractMetaType &smartPointerType,
-                                                  const AbstractMetaClass *smartPointer);
+    static QString getFileNameBaseForSmartPointer(const AbstractMetaType &smartPointerType);
 
     /// Returns true if the generator should generate any code for the TypeEntry.
     static bool shouldGenerateTypeEntry(const TypeEntry *) ;
@@ -335,7 +339,6 @@ protected:
      *   for which the file name must be returned
      *   \return the file name used to write the binding code for the class
      */
-    virtual QString fileNameSuffix() const = 0;
     virtual QString fileNameForContext(const GeneratorContext &context) const = 0;
 
 

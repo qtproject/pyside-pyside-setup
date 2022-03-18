@@ -47,21 +47,14 @@
 #include <QtCore/QVariant>
 #include <QtCore/QDebug>
 
-QString HeaderGenerator::fileNameSuffix() const
+QString HeaderGenerator::headerFileNameForContext(const GeneratorContext &context)
 {
-    return QLatin1String("_wrapper.h");
+    return fileNameForContextHelper(context, u"_wrapper.h"_qs, true /* qualified */);
 }
 
 QString HeaderGenerator::fileNameForContext(const GeneratorContext &context) const
 {
-    const AbstractMetaClass *metaClass = context.metaClass();
-    if (!context.forSmartPointer()) {
-        QString fileNameBase = metaClass->qualifiedCppName().toLower();
-        fileNameBase.replace(QLatin1String("::"), QLatin1String("_"));
-        return fileNameBase + fileNameSuffix();
-    }
-    QString fileNameBase = getFileNameBaseForSmartPointer(context.preciseType(), metaClass);
-    return fileNameBase + fileNameSuffix();
+    return headerFileNameForContext(context);
 }
 
 void HeaderGenerator::writeCopyCtor(TextStream &s, const AbstractMetaClass *metaClass) const

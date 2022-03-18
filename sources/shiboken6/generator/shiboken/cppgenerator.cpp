@@ -29,6 +29,7 @@
 #include <memory>
 
 #include "cppgenerator.h"
+#include "headergenerator.h"
 #include "apiextractorresult.h"
 #include "ctypenames.h"
 #include <exception.h>
@@ -211,22 +212,9 @@ static void writeOpaqueContainerCreationFuncDecl(TextStream &s, const QString &n
 
 CppGenerator::CppGenerator() = default;
 
-QString CppGenerator::fileNameSuffix() const
-{
-    return QLatin1String("_wrapper.cpp");
-}
-
 QString CppGenerator::fileNameForContext(const GeneratorContext &context) const
 {
-    const AbstractMetaClass *metaClass = context.metaClass();
-    if (!context.forSmartPointer()) {
-        QString fileNameBase = metaClass->qualifiedCppName().toLower();
-        fileNameBase.replace(QLatin1String("::"), QLatin1String("_"));
-        return fileNameBase + fileNameSuffix();
-    }
-    const AbstractMetaType &smartPointerType = context.preciseType();
-    QString fileNameBase = getFileNameBaseForSmartPointer(smartPointerType, metaClass);
-    return fileNameBase + fileNameSuffix();
+    return fileNameForContextHelper(context, u"_wrapper.cpp"_qs, true /* qualified */);
 }
 
 static bool isInplaceAdd(const AbstractMetaFunctionCPtr &func)
@@ -460,18 +448,16 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
     if (hasPrivateClasses())
         s << "#include \"" << getPrivateModuleHeaderFileName() << "\"\n";
 
-    QString headerfile = fileNameForContext(classContext);
-    headerfile.replace(QLatin1String(".cpp"), QLatin1String(".h"));
-    s << "\n// main header\n" << "#include \"" << headerfile << "\"\n";
+    s << "\n// main header\n" << "#include \""
+      << HeaderGenerator::headerFileNameForContext(classContext) << "\"\n";
 
     s  << '\n' << "// inner classes\n";
     const AbstractMetaClassList &innerClasses = metaClass->innerClasses();
     for (AbstractMetaClass *innerClass : innerClasses) {
         GeneratorContext innerClassContext = contextForClass(innerClass);
         if (shouldGenerate(innerClass) && !innerClass->typeEntry()->isSmartPointer()) {
-            QString headerfile = fileNameForContext(innerClassContext);
-            headerfile.replace(QLatin1String(".cpp"), QLatin1String(".h"));
-            s << "#include \"" << headerfile << "\"\n";
+            s << "#include \""
+                << HeaderGenerator::headerFileNameForContext(innerClassContext) << "\"\n";
         }
     }
 

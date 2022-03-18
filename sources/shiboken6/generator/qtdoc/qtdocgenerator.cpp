@@ -116,9 +116,9 @@ QtDocGenerator::QtDocGenerator()
 
 QtDocGenerator::~QtDocGenerator() = default;
 
-QString QtDocGenerator::fileNameSuffix() const
+QString QtDocGenerator::fileNameSuffix()
 {
-    return QLatin1String(".rst");
+    return u".rst"_qs;
 }
 
 bool QtDocGenerator::shouldGenerate(const AbstractMetaClass *cls) const
@@ -129,13 +129,8 @@ bool QtDocGenerator::shouldGenerate(const AbstractMetaClass *cls) const
 
 QString QtDocGenerator::fileNameForContext(const GeneratorContext &context) const
 {
-    const AbstractMetaClass *metaClass = context.metaClass();
-    if (!context.forSmartPointer()) {
-        return metaClass->name() + fileNameSuffix();
-    }
-    const AbstractMetaType &smartPointerType = context.preciseType();
-    QString fileNameBase = getFileNameBaseForSmartPointer(smartPointerType, metaClass);
-    return fileNameBase + fileNameSuffix();
+    return fileNameForContextHelper(context, fileNameSuffix(),
+                                    false /* qualified */);
 }
 
 void QtDocGenerator::writeFormattedBriefText(TextStream &s, const Documentation &doc,

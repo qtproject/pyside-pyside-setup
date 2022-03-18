@@ -409,6 +409,25 @@ bool Generator::handleOption(const QString & key, const QString & /* value */)
     return false;
 }
 
+QString Generator::fileNameForContextHelper(const GeneratorContext &context,
+                                            const QString &suffix,
+                                            bool useQualifiedName)
+
+{
+    if (!context.forSmartPointer()) {
+        const AbstractMetaClass *metaClass = context.metaClass();
+        QString fileNameBase = useQualifiedName
+            ? metaClass->qualifiedCppName().toLower()
+            : metaClass->name().toLower();
+        fileNameBase.replace(u"::"_qs, u"_"_qs);
+        return fileNameBase + suffix;
+    }
+
+    const AbstractMetaType &smartPointerType = context.preciseType();
+    QString fileNameBase = getFileNameBaseForSmartPointer(smartPointerType);
+    return fileNameBase + suffix;
+}
+
 const AbstractMetaClassCList &Generator::invisibleTopNamespaces() const
 {
     return m_d->m_invisibleTopNamespaces;
@@ -483,11 +502,11 @@ bool Generator::generateFileForContext(const GeneratorContext &context)
     return true;
 }
 
-QString Generator::getFileNameBaseForSmartPointer(const AbstractMetaType &smartPointerType,
-                                                  const AbstractMetaClass *smartPointerClass)
+QString Generator::getFileNameBaseForSmartPointer(const AbstractMetaType &smartPointerType)
 {
     const AbstractMetaType innerType = smartPointerType.getSmartPointerInnerType();
-    QString fileName = smartPointerClass->qualifiedCppName().toLower();
+    smartPointerType.typeEntry()->qualifiedCppName();
+    QString fileName = smartPointerType.typeEntry()->qualifiedCppName().toLower();
     fileName.replace(QLatin1String("::"), QLatin1String("_"));
     fileName.append(QLatin1String("_"));
     fileName.append(innerType.name().toLower());

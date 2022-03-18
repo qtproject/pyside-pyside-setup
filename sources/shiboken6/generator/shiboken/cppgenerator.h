@@ -56,7 +56,6 @@ public:
     const char *name() const override { return "Source generator"; }
 
 protected:
-    QString fileNameSuffix() const override;
     QString fileNameForContext(const GeneratorContext &context) const override;
     static QList<AbstractMetaFunctionCList>
         filterGroupedOperatorFunctions(const AbstractMetaClass *metaClass,

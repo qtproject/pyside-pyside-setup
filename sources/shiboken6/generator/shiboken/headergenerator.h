@@ -45,8 +45,9 @@ public:
 
     const char *name() const override { return "Header generator"; }
 
+    static QString headerFileNameForContext(const GeneratorContext &context);
+
 protected:
-    QString fileNameSuffix() const override;
     QString fileNameForContext(const GeneratorContext &context) const override;
     void generateClass(TextStream &s, const GeneratorContext &classContext) override;
     bool finishGeneration() override;
