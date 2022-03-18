@@ -38,14 +38,17 @@
 #############################################################################
 
 
-wheel_module_exists = False
-
 import os
 import sys
+import platform
 from .options import DistUtilsCommandMixin, OPTION
 from distutils import log as logger
 from email.generator import Generator
 from .wheel_utils import get_package_version, get_qt_version, macos_plat_name
+from .utils import is_64bit
+
+wheel_module_exists = False
+
 
 try:
 
@@ -86,11 +89,11 @@ class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
             self.plat_name = macos_plat_name()
 
         # When limited API is requested, notify bdist_wheel to
-        # create a properly named package.
-        limited_api_enabled = (OPTION["LIMITED_API"] == 'yes'
-                               and sys.version_info[0] >= 3)
+        # create a properly named package, which will contain
+        # the initial cpython version we support.
+        limited_api_enabled = OPTION["LIMITED_API"] == 'yes'
         if limited_api_enabled:
-            self.py_limited_api = "cp35.cp36.cp37.cp38.cp39.cp310"
+            self.py_limited_api = "cp36"
 
         self._package_version = get_package_version()
 
@@ -101,9 +104,9 @@ class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
         # Slightly modified version of wheel's wheel_dist_name
         # method, to add the Qt version as well.
         # Example:
-        #   PySide2-5.6-5.6.4-cp27-cp27m-macosx_10_10_intel.whl
-        # The PySide2 version is "5.6".
-        # The Qt version built against is "5.6.4".
+        #   PySide6-6.3-6.3.2-cp36-abi3-macosx_10_10_intel.whl
+        # The PySide6 version is "6.3".
+        # The Qt version built against is "6.3.2".
         wheel_version = "{}-{}".format(self._package_version, get_qt_version())
         components = (_safer_name(self.distribution.get_name()), wheel_version)
         if self.build_number:
@@ -113,9 +116,7 @@ class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
     # Copy of get_tag from bdist_wheel.py, to allow setting a
     # multi-python impl tag, by removing an assert. Otherwise we
     # would have to rename wheels manually for limited api
-    # packages. Also we set "none" abi tag on Windows, because
-    # pip does not yet support "abi3" tag, leading to
-    # installation failure when tried.
+    # packages.
     def get_tag(self):
         # bdist sets self.plat_name if unset, we should only use it for purepy
         # wheels if the user supplied it.
@@ -136,7 +137,7 @@ class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
                 # modules, use the default platform name.
                 plat_name = get_platform(self.bdist_dir)
 
-            if plat_name in ('linux-x86_64', 'linux_x86_64') and sys.maxsize == 2147483647:
+            if plat_name in ('linux-x86_64', 'linux_x86_64') and not is_64bit():
                 plat_name = 'linux_i686'
 
             # To allow uploading to pypi, we need the wheel name
@@ -157,7 +158,7 @@ class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
 
         if self.root_is_pure:
             if self.universal:
-                impl = 'py2.py3'
+                impl = 'py3'
             else:
                 impl = self.python_tag
             tag = (impl, 'none', plat_name)
@@ -168,7 +169,7 @@ class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
             # We don't work on CPython 3.1, 3.0.
             if self.py_limited_api and (impl_name + impl_ver).startswith('cp3'):
                 impl = self.py_limited_api
-                abi_tag = "abi3" if sys.platform != "win32" else "none"
+                abi_tag = "abi3"
             else:
                 abi_tag = str(get_abi_tag()).lower()
             tag = (impl, abi_tag, plat_name)
