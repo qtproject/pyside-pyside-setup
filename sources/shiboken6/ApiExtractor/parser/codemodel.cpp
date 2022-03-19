@@ -941,6 +941,31 @@ bool _FunctionModelItem::isNoExcept() const
     return m_exceptionSpecification == ExceptionSpecification::NoExcept;
 }
 
+bool _FunctionModelItem::isOperator() const
+{
+    bool result = false;
+    switch (m_functionType) {
+    case CodeModel::CallOperator:
+    case CodeModel::ConversionOperator:
+    case CodeModel::DereferenceOperator:
+    case CodeModel::ReferenceOperator:
+    case CodeModel::ArrowOperator:
+    case CodeModel::ArithmeticOperator:
+    case CodeModel::IncrementOperator:
+    case CodeModel::DecrementOperator:
+    case CodeModel::BitwiseOperator:
+    case CodeModel::LogicalOperator:
+    case CodeModel::ShiftOperator:
+    case CodeModel::SubscriptOperator:
+    case CodeModel::ComparisonOperator:
+        result = true;
+        break;
+    default:
+        break;
+    }
+    return result;
+}
+
 ExceptionSpecification _FunctionModelItem::exceptionSpecification() const
 {
     return m_exceptionSpecification;

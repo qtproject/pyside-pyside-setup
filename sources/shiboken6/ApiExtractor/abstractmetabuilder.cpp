@@ -1301,8 +1301,11 @@ AbstractMetaFunctionRawPtrList
     AbstractMetaFunctionRawPtrList result;
     const FunctionList &scopeFunctionList = scopeItem->functions();
     result.reserve(scopeFunctionList.size());
+    const bool isNamespace = currentClass->isNamespace();
     for (const FunctionModelItem &function : scopeFunctionList) {
-        if (AbstractMetaFunction *metaFunction = traverseFunction(function, currentClass)) {
+        if (isNamespace && function->isOperator()) {
+            traverseOperatorFunction(function, currentClass);
+        } else if (auto *metaFunction = traverseFunction(function, currentClass)) {
             result.append(metaFunction);
         } else if (function->functionType() == CodeModel::Constructor) {
             auto arguments = function->arguments();

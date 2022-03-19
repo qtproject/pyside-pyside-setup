@@ -544,6 +544,8 @@ public:
 
     bool isNoExcept() const;
 
+    bool isOperator() const;
+
     ExceptionSpecification exceptionSpecification() const;
     void setExceptionSpecification(ExceptionSpecification e);
 

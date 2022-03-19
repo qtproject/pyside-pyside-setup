@@ -118,6 +118,11 @@
         <object-type name="QGraphicsApiFilter">
             <enum-type name="Api"/>
             <enum-type name="OpenGLProfile"/>
+            <!-- only Q_AUTOTEST_EXPORT -->
+            <modify-function signature="operator==(Qt3DRender::QGraphicsApiFilter,Qt3DRender::QGraphicsApiFilter)"
+                             remove="all"/>
+            <modify-function signature="operator!=(Qt3DRender::QGraphicsApiFilter,Qt3DRender::QGraphicsApiFilter)"
+                             remove="all"/>
         </object-type>
         <object-type name="QLayer"/>
         <object-type name="QLayerFilter">
