@@ -80,6 +80,11 @@ class ModuleTest(unittest.TestCase):
         self.assertEqual(sample.countVarargs(1, 2), 1)
         self.assertEqual(sample.countVarargs(1, 2, 3, 'a', 'b', 4, (5, 6)), 6)
 
+    def testSampleComparisonOpInNamespace(self):
+        s1 = sample.sample.sample(10)
+        s2 = sample.sample.sample(10)
+        self.assertEqual(s1, s2)
+
     def testConstant(self):
         self.assertEqual(sample.sample.INT_CONSTANT, 42)
 
