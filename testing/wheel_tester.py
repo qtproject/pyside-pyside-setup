@@ -167,37 +167,16 @@ def try_install_wheels(wheels_dir, py_version):
             )
 
 
-def is_unix():
-    if sys.platform.startswith("linux") or sys.platform == "darwin":
-        return True
-    return False
-
-
 def generate_build_cmake():
-    args = [CMAKE_PATH]
-    if is_unix():
-        args.extend(["-G", "Unix Makefiles"])
-    else:
-        args.extend(["-G", "NMake Makefiles"])
-    args.append("-DCMAKE_BUILD_TYPE=Release")
-    args.append(f"-Dpython_interpreter={sys.executable}")
-
-    # Specify prefix path so find_package(Qt5) works.
-    qmake_dir = os.path.abspath(os.path.join(os.path.dirname(QMAKE_PATH), ".."))
-    args.append(f"-DCMAKE_PREFIX_PATH={qmake_dir}")
-
-    args.append("..")
-
+    # Specify prefix path so find_package(Qt6) works.
+    qmake_dir = Path(QMAKE_PATH).resolve().parent.parent
+    args = [CMAKE_PATH, "-G", "Ninja", "-DCMAKE_BUILD_TYPE=Release",
+                        f"-Dpython_interpreter={sys.executable}",
+                        f"-DCMAKE_PREFIX_PATH={qmake_dir}",
+                        ".."]
     exit_code = run_process(args)
     if exit_code:
         raise RuntimeError("Failure while running cmake.")
-    log.info("")
-
-
-def generate_build_qmake():
-    exit_code = run_process([QMAKE_PATH, "..", f"python_interpreter={sys.executable}"])
-    if exit_code:
-        raise RuntimeError("Failure while running qmake.")
     log.info("")
 
 
@@ -255,29 +234,16 @@ def run_nuitka_test(example):
         raise RuntimeError(f"Failure running {example} with Nuitka.")
 
 
-def run_make():
-    args = []
-    if is_unix():
-        executable = "make"
-    else:
-        executable = "nmake"
-    args.append(executable)
-
+def run_ninja():
+    args = ["ninja"]
     exit_code = run_process(args)
     if exit_code:
         raise RuntimeError(f"Failure while running {executable}.")
     log.info("")
 
 
-def run_make_install():
-    args = []
-    if is_unix():
-        executable = "make"
-    else:
-        executable = "nmake"
-    args.append(executable)
-    args.append("install")
-
+def run_ninja_install():
+    args = ["ninja", "install"]
     exit_code = run_process(args)
     if exit_code:
         raise RuntimeError(f"Failed while running {executable} install.")
@@ -338,21 +304,15 @@ def try_build_examples():
     src_path = os.path.join(examples_dir, "samplebinding")
     prepare_build_folder(src_path, "cmake")
     generate_build_cmake()
-    run_make()
-    run_make_install()
+    run_ninja()
+    run_ninja_install()
     execute_script(os.path.join(src_path, "main.py"))
 
     log.info("Attempting to build scriptableapplication using cmake.")
     src_path = os.path.join(examples_dir, "scriptableapplication")
     prepare_build_folder(src_path, "cmake")
     generate_build_cmake()
-    run_make()
-
-    log.info("Attempting to build scriptableapplication using qmake.")
-    src_path = os.path.join(examples_dir, "scriptableapplication")
-    prepare_build_folder(src_path, "qmake")
-    generate_build_qmake()
-    run_make()
+    run_ninja()
 
     if sys.version_info[:2] >= (3, 7):
         log.info("Checking Python Interface Files in Python 3 with all features selected")
