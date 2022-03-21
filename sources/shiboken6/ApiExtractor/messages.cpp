@@ -685,6 +685,18 @@ QString msgCannotFindSmartPointer(const QString &instantiationType,
     return result;
 }
 
+QString msgCannotFindSmartPointerGetter(const SmartPointerTypeEntry *te)
+{
+     return u"Getter \""_qs + te->getter() +  u"()\" of smart pointer \""_qs
+         + te->name() + u"\" not found."_qs;
+}
+
+QString msgCannotFindSmartPointerRefCount(const SmartPointerTypeEntry *te)
+{
+    return u"Ref count method \""_qs + te->refCountMethodName()
+           +  u"()\" of smart pointer \""_qs + te->name() + u"\" not found."_qs;
+}
+
 QString msgMethodNotFound(const AbstractMetaClass *klass, const QString &name)
 {
      return u"Method \""_qs + name + u"\" not found in class "_qs

@@ -394,21 +394,18 @@ static bool generateRichComparison(const GeneratorContext &c)
         || (!c.metaClass()->isNamespace() && c.metaClass()->hasComparisonOperatorOverload());
 }
 
-/*!
-    Function used to write the class generated binding code on the buffer
-    \param s the output buffer
-    \param metaClass the pointer to metaclass information
-*/
-void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classContext)
+void CppGenerator::generateIncludes(TextStream &s, const GeneratorContext &classContext,
+                                    QList<Include> includes,
+                                    const AbstractMetaClassList &innerClasses) const
 {
-    s.setLanguage(TextStream::Language::Cpp);
     const AbstractMetaClass *metaClass = classContext.metaClass();
-    const auto *typeEntry = metaClass->typeEntry();
 
     // write license comment
     s << licenseComment() << '\n';
 
-    if (!avoidProtectedHack() && !metaClass->isNamespace() && !metaClass->hasPrivateDestructor()) {
+    const bool normalClass = !classContext.forSmartPointer();
+    if (normalClass && !avoidProtectedHack() && !metaClass->isNamespace()
+        && !metaClass->hasPrivateDestructor()) {
         s << "//workaround to access protected functions\n";
         s << "#define protected public\n\n";
     }
@@ -416,7 +413,7 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
     // headers
     s << "// default includes\n";
     s << "#include <shiboken.h>\n";
-    if (usePySideExtensions()) {
+    if (normalClass && usePySideExtensions()) {
         s << includeQDebug;
         if (metaClass->isQObject()) {
             s << "#include <pysideqobject.h>\n"
@@ -436,9 +433,9 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
 
     // The multiple inheritance initialization function
     // needs the 'set' class from C++ STL.
-    if (getMultipleInheritingClass(metaClass) != nullptr)
+    if (normalClass && getMultipleInheritingClass(metaClass) != nullptr)
         s << "#include <algorithm>\n#include <set>\n";
-    if (metaClass->generateExceptionHandling())
+    if (normalClass && metaClass->generateExceptionHandling())
         s << "#include <exception>\n";
     s << "#include <iterator>\n"; // For containers
 
@@ -452,15 +449,69 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
     s << "\n// main header\n" << "#include \""
       << HeaderGenerator::headerFileNameForContext(classContext) << "\"\n";
 
-    s  << '\n' << "// inner classes\n";
-    const AbstractMetaClassList &innerClasses = metaClass->innerClasses();
-    for (AbstractMetaClass *innerClass : innerClasses) {
-        auto *innerTypeEntry = innerClass->typeEntry();
-        if (shouldGenerate(innerTypeEntry) && !innerTypeEntry->isSmartPointer()) {
+    if (!innerClasses.isEmpty()) {
+        s  << "\n// inner classes\n";
+        for (const AbstractMetaClass *innerClass : innerClasses) {
             GeneratorContext innerClassContext = contextForClass(innerClass);
             s << "#include \""
                 << HeaderGenerator::headerFileNameForContext(innerClassContext) << "\"\n";
         }
+    }
+
+    if (!includes.isEmpty()) {
+        s << "\n// Extra includes\n";
+        std::sort(includes.begin(), includes.end());
+        for (const Include &inc : qAsConst(includes))
+            s << inc.toString() << '\n';
+        s << '\n';
+    }
+
+    s << "\n#include <cctype>\n#include <cstring>\n";
+}
+
+static const char openTargetExternC[] =  R"(
+// Target ---------------------------------------------------------
+
+extern "C" {
+)";
+
+static const char closeExternC[] =  "} // extern \"C\"\n\n";
+
+// Write methods definition
+static void writePyMethodDefs(TextStream &s, const QString &className,
+                              const QString &methodsDefinitions, bool generateCopy)
+{
+    s << "static PyMethodDef " << className << "_methods[] = {\n" << indent
+        << methodsDefinitions << '\n';
+    if (generateCopy) {
+        s << "{\"__copy__\", reinterpret_cast<PyCFunction>(" << className << "___copy__)"
+          << ", METH_NOARGS},\n";
+    }
+    s  << '{' << NULL_PTR << ", " << NULL_PTR << "} // Sentinel\n" << outdent
+        << "};\n\n";
+}
+
+/// Function used to write the class generated binding code on the buffer
+/// \param s the output buffer
+/// \param classContext the pointer to metaclass information
+void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classContext)
+{
+    if (classContext.forSmartPointer()) {
+        generateSmartPointerClass(s, classContext);
+        return;
+    }
+
+    s.setLanguage(TextStream::Language::Cpp);
+    const AbstractMetaClass *metaClass = classContext.metaClass();
+    const auto *typeEntry = metaClass->typeEntry();
+
+    AbstractMetaClassList innerClasses = metaClass->innerClasses();
+    for (auto it = innerClasses.begin(); it != innerClasses.end(); ) {
+        auto *innerTypeEntry = (*it)->typeEntry();
+        if (shouldGenerate(innerTypeEntry) && !innerTypeEntry->isSmartPointer())
+            ++it;
+        else
+            it = innerClasses.erase(it);
     }
 
     AbstractMetaEnumList classEnums = metaClass->enums();
@@ -472,15 +523,8 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
         includes += typeEntry->extraIncludes();
     for (const AbstractMetaEnum &cppEnum : qAsConst(classEnums))
         includes.append(cppEnum.typeEntry()->extraIncludes());
-    if (!includes.isEmpty()) {
-        s << "\n// Extra includes\n";
-        std::sort(includes.begin(), includes.end());
-        for (const Include &inc : qAsConst(includes))
-            s << inc.toString() << '\n';
-        s << '\n';
-    }
 
-    s << "\n#include <cctype>\n#include <cstring>\n";
+    generateIncludes(s, classContext, includes, innerClasses);
 
     if (typeEntry->typeFlags().testFlag(ComplexTypeEntry::Deprecated))
         s << "#Deprecated\n";
@@ -499,15 +543,6 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
     }
 
     s  << "\n\n" << typeNameFunc << '\n';
-
-    // Create string literal for smart pointer getter method.
-    if (classContext.forSmartPointer()) {
-        const auto *typeEntry =
-                static_cast<const SmartPointerTypeEntry *>(classContext.preciseType()
-                                                           .typeEntry());
-        QString rawGetter = typeEntry->getter();
-        s << "static const char * " << SMART_POINTER_GETTER << " = \"" << rawGetter << "\";";
-    }
 
     // class inject-code native/beginning
     if (!typeEntry->codeSnips().isEmpty()) {
@@ -558,27 +593,20 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
     StringStream md(TextStream::Language::Cpp);
     StringStream signatureStream(TextStream::Language::Cpp);
 
-    s << "\n// Target ---------------------------------------------------------\n\n"
-        << "extern \"C\" {\n";
+    s << openTargetExternC;
+
     const auto &functionGroups = getFunctionGroups(metaClass);
     for (auto it = functionGroups.cbegin(), end = functionGroups.cend(); it != end; ++it) {
+        if (contains(sequenceProtocols(), it.key()) || contains(mappingProtocols(), it.key()))
+            continue;
         const AbstractMetaFunctionCList &overloads = it.value();
         if (overloads.isEmpty())
             continue;
 
         const auto rfunc = overloads.constFirst();
-        if (contains(sequenceProtocols(), rfunc->name())
-            || contains(mappingProtocols(), rfunc->name())) {
-            continue;
-        }
-
         OverloadData overloadData(overloads, api());
 
         if (rfunc->isConstructor()) {
-            // @TODO: Implement constructor support for smart pointers, so that they can be
-            // instantiated in python code.
-            if (classContext.forSmartPointer())
-                continue;
             writeConstructorWrapper(s, overloadData, classContext);
             writeSignatureInfo(signatureStream, overloadData);
         }
@@ -588,34 +616,6 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
             writeSignatureInfo(signatureStream, overloadData);
         }
         else if (!rfunc->isOperatorOverload()) {
-
-            if (classContext.forSmartPointer()) {
-                const auto *smartPointerTypeEntry =
-                        static_cast<const SmartPointerTypeEntry *>(
-                            classContext.preciseType().typeEntry());
-
-                if (smartPointerTypeEntry->getter() == rfunc->name()) {
-                    // Replace the return type of the raw pointer getter method with the actual
-                    // return type.
-                    QString innerTypeName =
-                            classContext.preciseType().getSmartPointerInnerType().cppSignature();
-                    QString pointerToInnerTypeName = innerTypeName + QLatin1Char('*');
-                    // @TODO: This possibly leaks, but there are a bunch of other places where this
-                    // is done, so this will be fixed in bulk with all the other cases, because the
-                    // ownership of the pointers is not clear at the moment.
-                    auto pointerToInnerType =
-                            AbstractMetaType::fromString(pointerToInnerTypeName);
-                    Q_ASSERT(pointerToInnerType.has_value());
-                    auto mutableRfunc = overloads.constFirst();
-                    qSharedPointerConstCast<AbstractMetaFunction>(mutableRfunc)->setType(pointerToInnerType.value());
-                } else if (smartPointerTypeEntry->refCountMethodName().isEmpty()
-                           || smartPointerTypeEntry->refCountMethodName() != rfunc->name()) {
-                    // Skip all public methods of the smart pointer except for the raw getter and
-                    // the ref count method.
-                    continue;
-                }
-            }
-
             writeMethodWrapper(s, overloadData, classContext);
             writeSignatureInfo(signatureStream, overloadData);
             // For a mixture of static and member function overloads,
@@ -636,7 +636,7 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
 
     const QString className = chopType(cpythonTypeName(metaClass));
 
-    if (typeEntry->isValue() || typeEntry->isSmartPointer()) {
+    if (typeEntry->isValue()) {
         writeCopyFunction(s, classContext);
         signatureStream << fullPythonClassName(metaClass) << ".__copy__()\n";
     }
@@ -663,31 +663,19 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
     }
 
     // Write methods definition
-    s << "static PyMethodDef " << className << "_methods[] = {\n" << indent
-        << methodsDefinitions << '\n';
-    if (typeEntry->isValue() || typeEntry->isSmartPointer()) {
-        s << "{\"__copy__\", reinterpret_cast<PyCFunction>(" << className << "___copy__)"
-            << ", METH_NOARGS},\n";
-    }
-    s << '{' << NULL_PTR << ", " << NULL_PTR << "} // Sentinel\n" << outdent
-        << "};\n\n";
+    writePyMethodDefs(s, className, methodsDefinitions, typeEntry->isValue());
 
     // Write tp_s/getattro function
     const AttroCheck attroCheck = checkAttroFunctionNeeds(metaClass);
-    if (attroCheck.testFlag(AttroCheckFlag::GetattroSmartPointer)) {
-        writeSmartPointerGetattroFunction(s, classContext);
-        writeSmartPointerSetattroFunction(s, classContext);
-    } else {
-        if ((attroCheck & AttroCheckFlag::GetattroMask) != 0)
-            writeGetattroFunction(s, attroCheck, classContext);
-        if ((attroCheck & AttroCheckFlag::SetattroMask) != 0)
-            writeSetattroFunction(s, attroCheck, classContext);
-    }
+    if ((attroCheck & AttroCheckFlag::GetattroMask) != 0)
+        writeGetattroFunction(s, attroCheck, classContext);
+    if ((attroCheck & AttroCheckFlag::SetattroMask) != 0)
+        writeSetattroFunction(s, attroCheck, classContext);
 
     if (const auto f = boolCast(metaClass) ; !f.isNull())
         writeNbBoolFunction(classContext, f, s);
 
-    if (supportsNumberProtocol(metaClass) && !typeEntry->isSmartPointer()) {
+    if (supportsNumberProtocol(metaClass)) {
         const QList<AbstractMetaFunctionCList> opOverloads = filterGroupedOperatorFunctions(
                 metaClass,
                 OperatorQueryOption::ArithmeticOp
@@ -723,13 +711,10 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
 
     if (generateRichComparison(classContext)) {
         s << "// Rich comparison\n";
-        if (classContext.forSmartPointer())
-            writeSmartPointerRichCompareFunction(s, classContext);
-        else
-            writeRichCompareFunction(s, classContext);
+        writeRichCompareFunction(s, classContext);
     }
 
-    if (shouldGenerateGetSetList(metaClass) && !classContext.forSmartPointer()) {
+    if (shouldGenerateGetSetList(metaClass)) {
         const AbstractMetaFieldList &fields = metaClass->fields();
         for (const AbstractMetaField &metaField : fields) {
             if (metaField.canGenerateGetter())
@@ -776,7 +761,7 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
             << outdent << "};\n\n";
     }
 
-    s << "} // extern \"C\"\n\n";
+    s << closeExternC;
 
     if (!typeEntry->hashFunction().isEmpty())
         writeHashFunction(s, classContext);
@@ -807,6 +792,130 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
                             classContext);
         s << '\n';
     }
+}
+
+void CppGenerator::generateSmartPointerClass(TextStream &s, const GeneratorContext &classContext)
+{
+    s.setLanguage(TextStream::Language::Cpp);
+    const AbstractMetaClass *metaClass = classContext.metaClass();
+    const auto *typeEntry = static_cast<const SmartPointerTypeEntry *>(metaClass->typeEntry());
+
+    generateIncludes(s, classContext, typeEntry->extraIncludes());
+
+    s  << "\n\n" << typeNameFunc << '\n';
+
+    // Create string literal for smart pointer getter method.
+    QString rawGetter = typeEntry->getter();
+    s << "static const char * " << SMART_POINTER_GETTER << " = \"" << rawGetter << "\";";
+
+    // class inject-code native/beginning
+    if (!typeEntry->codeSnips().isEmpty()) {
+        writeClassCodeSnips(s, typeEntry->codeSnips(),
+                            TypeSystem::CodeSnipPositionBeginning, TypeSystem::NativeCode,
+                            classContext);
+        s << '\n';
+    }
+
+    StringStream smd(TextStream::Language::Cpp);
+    StringStream md(TextStream::Language::Cpp);
+    StringStream signatureStream(TextStream::Language::Cpp);
+
+    s << openTargetExternC;
+
+    const auto &functionGroups = getFunctionGroups(metaClass);
+
+    // @TODO: Implement constructor support for smart pointers, so that they can be
+    // instantiated in python code.
+
+    // Skip all public methods of the smart pointer except for the raw getter and
+    // the ref count method instantiated in python code.
+    auto it = functionGroups.constFind(rawGetter);
+    if (it == functionGroups.cend() || it.value().size() != 1)
+        throw Exception(msgCannotFindSmartPointerGetter(typeEntry));
+
+    {
+          const AbstractMetaFunctionCList &overloads = it.value();
+          // Replace the return type of the raw pointer getter method with the actual
+          // return type.
+          QString innerTypeName =
+              classContext.preciseType().getSmartPointerInnerType().cppSignature();
+          QString pointerToInnerTypeName = innerTypeName + QLatin1Char('*');
+          QString errorMessage;
+          auto opt = AbstractMetaType::fromString(pointerToInnerTypeName, &errorMessage);
+          if (!opt.has_value())
+              throw Exception(u"Cannot translate smart pointer inner type: "_qs + errorMessage);
+          auto pointerToInnerType = opt.value();
+          auto mutableRfunc = overloads.constFirst();
+          qSharedPointerConstCast<AbstractMetaFunction>(mutableRfunc)->setType(pointerToInnerType);
+
+          writeMethodWrapper(s, md, signatureStream, overloads, classContext);
+    }
+
+    const QString refCountMethodName = typeEntry->refCountMethodName();
+    if (!refCountMethodName.isEmpty()) { // optional
+        auto it = functionGroups.constFind(refCountMethodName);
+        if (it == functionGroups.cend() || it.value().size() != 1)
+            throw Exception(msgCannotFindSmartPointerRefCount(typeEntry));
+        writeMethodWrapper(s, md, signatureStream, it.value(), classContext);
+    }
+
+    const QString methodsDefinitions = md.toString();
+    const QString singleMethodDefinitions = smd.toString();
+
+    const QString className = chopType(cpythonTypeName(typeEntry));
+
+    writeCopyFunction(s, classContext);
+    signatureStream << fullPythonClassName(metaClass) << ".__copy__()\n";
+
+    // Write single method definitions
+    s << singleMethodDefinitions;
+
+    // Write methods definition
+    writePyMethodDefs(s, className, methodsDefinitions, true /* ___copy__ */);
+
+    // Write tp_s/getattro function
+    writeSmartPointerGetattroFunction(s, classContext);
+    writeSmartPointerSetattroFunction(s, classContext);
+
+    if (const auto f = boolCast(metaClass) ; !f.isNull())
+        writeNbBoolFunction(classContext, f, s);
+
+    writeSmartPointerRichCompareFunction(s, classContext);
+
+    s << closeExternC;
+
+    if (!typeEntry->hashFunction().isEmpty())
+        writeHashFunction(s, classContext);
+
+    // Write tp_traverse and tp_clear functions.
+    writeTpTraverseFunction(s, metaClass);
+    writeTpClearFunction(s, metaClass);
+
+    writeClassDefinition(s, metaClass, classContext);
+
+    s << '\n';
+
+    writeConverterFunctions(s, metaClass, classContext);
+    writeClassRegister(s, metaClass, classContext, signatureStream);
+
+    // class inject-code native/end
+    if (!typeEntry->codeSnips().isEmpty()) {
+        writeClassCodeSnips(s, typeEntry->codeSnips(),
+                            TypeSystem::CodeSnipPositionEnd, TypeSystem::NativeCode,
+                            classContext);
+        s << '\n';
+    }
+}
+
+void CppGenerator::writeMethodWrapper(TextStream &s, TextStream &definitionStream,
+                                      TextStream &signatureStream,
+                                      const AbstractMetaFunctionCList &overloads,
+                                      const GeneratorContext &classContext) const
+{
+    OverloadData overloadData(overloads, api());
+    writeMethodWrapper(s, overloadData, classContext);
+    writeSignatureInfo(signatureStream, overloadData);
+    writeMethodDefinition(definitionStream, overloadData);
 }
 
 void CppGenerator::writeCacheResetNative(TextStream &s, const GeneratorContext &classContext)
@@ -5777,7 +5886,7 @@ void CppGenerator::writeClassRegister(TextStream &s,
     s << ");\nauto *pyType = " << pyTypeName << "; // references " << typePtr << "\n"
         << "InitSignatureStrings(pyType, " << initFunctionName << "_SignatureStrings);\n";
 
-    if (usePySideExtensions())
+    if (usePySideExtensions() && !classContext.forSmartPointer())
         s << "SbkObjectType_SetPropertyStrings(pyType, "
                     << chopType(pyTypeName) << "_PropertyStrings);\n";
 

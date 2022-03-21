@@ -64,6 +64,10 @@ protected:
     bool finishGeneration() override;
 
 private:
+    void generateSmartPointerClass(TextStream &s, const GeneratorContext &classContext);
+    void generateIncludes(TextStream &s, const GeneratorContext &classContext,
+                          QList<Include> includes = {},
+                          const AbstractMetaClassList &innerClasses = {}) const;
     static void writeInitFunc(TextStream &declStr, TextStream &callStr,
                               const QString &initFunctionName,
                               const TypeEntry *enclosingEntry = nullptr);
@@ -121,6 +125,10 @@ private:
     void writeConstructorWrapper(TextStream &s, const OverloadData &overloadData,
                                  const GeneratorContext &classContext) const;
     void writeMethodWrapper(TextStream &s, const OverloadData &overloadData,
+                            const GeneratorContext &classContext) const;
+    void writeMethodWrapper(TextStream &s, TextStream &definitionStream,
+                            TextStream &signatureStream,
+                            const AbstractMetaFunctionCList &overloads,
                             const GeneratorContext &classContext) const;
     static void writeArgumentsInitializer(TextStream &s, const OverloadData &overloadData,
                                           ErrorReturn errorReturn = ErrorReturn::Default);

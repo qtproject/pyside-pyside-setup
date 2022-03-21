@@ -39,6 +39,7 @@
 
 class EnumTypeEntry;
 class FunctionTypeEntry;
+class SmartPointerTypeEntry;
 class TypeEntry;
 class TypeInfo;
 struct TypeRejection;
@@ -206,6 +207,10 @@ QString msgConversionTypesDiffer(const QString &varType, const QString &conversi
 
 QString msgCannotFindSmartPointer(const QString &instantiationType,
                                   const AbstractMetaClassCList &pointers);
+
+QString msgCannotFindSmartPointerGetter(const SmartPointerTypeEntry *);
+
+QString msgCannotFindSmartPointerRefCount(const SmartPointerTypeEntry *);
 
 QString msgMethodNotFound(const AbstractMetaClass *klass, const QString &name);
 
