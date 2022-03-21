@@ -285,8 +285,10 @@ class QImageTest(UsesQGuiApplication):
 
         # btw let's test the bits() method
         img1 = QImage(img0.bits(), img0.width(), img0.height(), img0.format())
+        img1.setColorSpace(img0.colorSpace())
         self.assertEqual(img0, img1)
         img2 = QImage(img0.bits(), img0.width(), img0.height(), img0.bytesPerLine(), img0.format())
+        img2.setColorSpace(img0.colorSpace())
         self.assertEqual(img0, img2)
 
         ## test scanLine method
