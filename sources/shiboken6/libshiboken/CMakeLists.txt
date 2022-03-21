@@ -151,7 +151,7 @@ install(FILES
         "${CMAKE_CURRENT_BINARY_DIR}/sbkversion.h"
 
         signature.h
-        signature/signature_p.h
+        signature_p.h
 
         DESTINATION include/shiboken6${shiboken6_SUFFIX})
 install(TARGETS libshiboken EXPORT Shiboken6Targets
