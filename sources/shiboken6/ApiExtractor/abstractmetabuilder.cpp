@@ -2854,10 +2854,115 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
     return true;
 }
 
-static bool inheritTemplateFunction(const AbstractMetaFunctionCPtr &function,
-                                    const AbstractMetaFunctionCList &existingSubclassFuncs,
-                                    const AbstractMetaClass *subclass,
-                                    const AbstractMetaClass *templateBaseClass)
+AbstractMetaFunctionPtr
+    AbstractMetaBuilderPrivate::inheritTemplateFunction(const AbstractMetaFunctionCPtr &function,
+                                                        const AbstractMetaTypeList &templateTypes)
+{
+    AbstractMetaFunctionPtr f(function->copy());
+    f->setArguments(AbstractMetaArgumentList());
+    f->setFlags(f->flags() | AbstractMetaFunction::Flag::InheritedFromTemplate);
+
+    if (!function->isVoid()) {
+        auto returnType = inheritTemplateType(templateTypes, function->type());
+        if (!returnType.has_value())
+            return {};
+        f->setType(returnType.value());
+    }
+
+    const AbstractMetaArgumentList &arguments = function->arguments();
+    for (const AbstractMetaArgument &argument : arguments) {
+        auto argType = inheritTemplateType(templateTypes, argument.type());
+        if (!argType.has_value())
+            return {};
+        AbstractMetaArgument arg = argument;
+        arg.setType(argType.value());
+        f->addArgument(arg);
+    }
+
+    return f;
+}
+
+AbstractMetaFunctionPtr
+    AbstractMetaBuilder::inheritTemplateFunction(const AbstractMetaFunctionCPtr &function,
+                                                 const AbstractMetaTypeList &templateTypes)
+{
+    return AbstractMetaBuilderPrivate::inheritTemplateFunction(function, templateTypes);
+}
+
+AbstractMetaFunctionPtr
+    AbstractMetaBuilderPrivate::inheritTemplateMember(const AbstractMetaFunctionCPtr &function,
+                                                      const AbstractMetaTypeList &templateTypes,
+                                                      const AbstractMetaClass *templateClass,
+                                                      AbstractMetaClass *subclass)
+{
+    AbstractMetaFunctionPtr f = inheritTemplateFunction(function, templateTypes);
+    if (f.isNull())
+        return {};
+
+    // There is no base class in the target language to inherit from here, so
+    // the template instantiation is the class that implements the function.
+    f->setImplementingClass(subclass);
+
+    // We also set it as the declaring class, since the superclass is
+    // supposed to disappear. This allows us to make certain function modifications
+    // on the inherited functions.
+    f->setDeclaringClass(subclass);
+
+    if (f->isConstructor()) {
+        if (!subclass->isTypeDef())
+            return {};
+        f->setName(subclass->name());
+        f->setOriginalName(subclass->name());
+    }
+
+    ComplexTypeEntry *te = subclass->typeEntry();
+    FunctionModificationList mods = function->modifications(templateClass);
+    for (int i = 0; i < mods.size(); ++i) {
+        FunctionModification mod = mods.at(i);
+        mod.setSignature(f->minimalSignature());
+
+// If we ever need it... Below is the code to do
+// substitution of the template instantation type inside
+// injected code..
+#if 0
+    if (mod.modifiers & Modification::CodeInjection) {
+        for (int j = 0; j < template_types.size(); ++j) {
+            CodeSnip &snip = mod.snips.last();
+            QString code = snip.code();
+            code.replace(QString::fromLatin1("$$QT_TEMPLATE_%1$$").arg(j),
+                         template_types.at(j)->typeEntry()->qualifiedCppName());
+            snip.codeList.clear();
+            snip.addCode(code);
+        }
+    }
+#endif
+        te->addFunctionModification(mod);
+    }
+
+    QString errorMessage;
+    if (!applyArrayArgumentModifications(f->modifications(subclass), f.get(),
+                                         &errorMessage)) {
+        qCWarning(lcShiboken, "While specializing %s (%s): %s",
+                  qPrintable(subclass->name()), qPrintable(templateClass->name()),
+                  qPrintable(errorMessage));
+    }
+    return f;
+}
+
+AbstractMetaFunctionPtr
+    AbstractMetaBuilder::inheritTemplateMember(const AbstractMetaFunctionCPtr &function,
+                                               const AbstractMetaTypeList &templateTypes,
+                                               const AbstractMetaClass *templateClass,
+                                               AbstractMetaClass *subclass)
+{
+    return AbstractMetaBuilderPrivate::inheritTemplateMember(function, templateTypes,
+                                                             templateClass, subclass);
+}
+
+static bool doInheritTemplateFunction(const AbstractMetaFunctionCPtr &function,
+                                      const AbstractMetaFunctionCList &existingSubclassFuncs,
+                                      const AbstractMetaClass *templateBaseClass,
+                                      const AbstractMetaClass *subclass)
 {
     // If the function is modified or the instantiation has an equally named
     // function we are shadowing, so we need to skip it (unless the subclass
@@ -2870,7 +2975,6 @@ static bool inheritTemplateFunction(const AbstractMetaFunctionCPtr &function,
 
 void AbstractMetaBuilderPrivate::inheritTemplateFunctions(AbstractMetaClass *subclass)
 {
-    QString errorMessage;
     auto templateClass = subclass->templateBaseClass();
 
     if (subclass->isTypeDef()) {
@@ -2888,83 +2992,13 @@ void AbstractMetaBuilderPrivate::inheritTemplateFunctions(AbstractMetaClass *sub
         subclass->functions(); // Take copy
     const auto &templateClassFunctions = templateClass->functions();
     for (const auto &function : templateClassFunctions) {
-        if (!inheritTemplateFunction(function, existingSubclassFuncs,
-                                     subclass, templateClass)) {
-            continue;
+        if (doInheritTemplateFunction(function, existingSubclassFuncs,
+                                      templateClass, subclass)) {
+            AbstractMetaFunctionCPtr f = inheritTemplateMember(function, templateTypes,
+                                                               templateClass, subclass);
+            if (!f.isNull())
+                subclass->addFunction(f);
         }
-
-        std::unique_ptr<AbstractMetaFunction> f(function->copy());
-        f->setArguments(AbstractMetaArgumentList());
-        f->setFlags(f->flags() | AbstractMetaFunction::Flag::InheritedFromTemplate);
-
-        if (!function->isVoid()) {
-            auto returnType = inheritTemplateType(templateTypes, function->type());
-            if (!returnType.has_value())
-                continue;
-            f->setType(returnType.value());
-        }
-
-        const AbstractMetaArgumentList &arguments = function->arguments();
-        for (const AbstractMetaArgument &argument : arguments) {
-            auto argType = inheritTemplateType(templateTypes, argument.type());
-            if (!argType.has_value())
-                break;
-            AbstractMetaArgument arg = argument;
-            arg.setType(argType.value());
-            f->addArgument(arg);
-        }
-
-        if (f->arguments().size() < function->arguments().size())
-            continue;
-
-        // There is no base class in the target language to inherit from here, so
-        // the template instantiation is the class that implements the function.
-        f->setImplementingClass(subclass);
-
-        // We also set it as the declaring class, since the superclass is
-        // supposed to disappear. This allows us to make certain function modifications
-        // on the inherited functions.
-        f->setDeclaringClass(subclass);
-
-        if (f->isConstructor()) {
-            if (!subclass->isTypeDef())
-                continue;
-            f->setName(subclass->name());
-            f->setOriginalName(subclass->name());
-        }
-
-        ComplexTypeEntry* te = subclass->typeEntry();
-        FunctionModificationList mods = function->modifications(templateClass);
-        for (int i = 0; i < mods.size(); ++i) {
-            FunctionModification mod = mods.at(i);
-            mod.setSignature(f->minimalSignature());
-
-            // If we ever need it... Below is the code to do
-            // substitution of the template instantation type inside
-            // injected code..
-#if 0
-            if (mod.modifiers & Modification::CodeInjection) {
-                for (int j = 0; j < template_types.size(); ++j) {
-                    CodeSnip &snip = mod.snips.last();
-                    QString code = snip.code();
-                    code.replace(QString::fromLatin1("$$QT_TEMPLATE_%1$$").arg(j),
-                                 template_types.at(j)->typeEntry()->qualifiedCppName());
-                    snip.codeList.clear();
-                    snip.addCode(code);
-                }
-            }
-#endif
-            te->addFunctionModification(mod);
-        }
-
-
-        if (!applyArrayArgumentModifications(f->modifications(subclass), f.get(),
-                                             &errorMessage)) {
-            qCWarning(lcShiboken, "While specializing %s (%s): %s",
-                      qPrintable(subclass->name()), qPrintable(templateClass->name()),
-                      qPrintable(errorMessage));
-        }
-        subclass->addFunction(AbstractMetaFunctionCPtr(f.release()));
     }
 
      // Take copy

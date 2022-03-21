@@ -94,6 +94,18 @@ public:
 
     std::optional<ApiExtractorResult> run(ApiExtractorFlags flags);
 
+    /// Forwards to AbstractMetaBuilder::inheritTemplateFunction()
+    static AbstractMetaFunctionPtr
+        inheritTemplateFunction(const AbstractMetaFunctionCPtr &function,
+                                const AbstractMetaTypeList &templateTypes);
+
+    /// Forwards to AbstractMetaBuilder::inheritTemplateMember()
+    static AbstractMetaFunctionPtr
+        inheritTemplateMember(const AbstractMetaFunctionCPtr &function,
+                              const AbstractMetaTypeList &templateTypes,
+                              const AbstractMetaClass *templateClass,
+                              AbstractMetaClass *subclass);
+
 private:
     bool runHelper(ApiExtractorFlags flags);
 

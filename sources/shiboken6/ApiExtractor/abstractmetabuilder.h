@@ -104,6 +104,26 @@ public:
         translateType(const QString &t, AbstractMetaClass *currentClass = nullptr,
                       TranslateTypeFlags flags = {}, QString *errorMessage = nullptr);
 
+    /// Performs a template specialization of the function.
+    /// \param function Function
+    /// \param templateTypes Instantiation types
+    /// \return Specialized copy of the function
+    static AbstractMetaFunctionPtr
+        inheritTemplateFunction(const AbstractMetaFunctionCPtr &function,
+                                const AbstractMetaTypeList &templateTypes);
+
+    /// Performs a template specialization of the member function.
+    /// \param function Member function
+    /// \param templateTypes Instantiation types
+    /// \param templateClass Template class
+    /// \param subclass Specialized class
+    /// \return Specialized copy of the function
+    static AbstractMetaFunctionPtr
+        inheritTemplateMember(const AbstractMetaFunctionCPtr &function,
+                              const AbstractMetaTypeList &templateTypes,
+                              const AbstractMetaClass *templateClass,
+                              AbstractMetaClass *subclass);
+
     static QString getSnakeCaseName(const QString &name);
     // Names under which an item will be registered to Python depending on snakeCase
     static QStringList definitionNames(const QString &name,

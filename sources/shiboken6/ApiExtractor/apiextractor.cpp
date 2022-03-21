@@ -288,6 +288,23 @@ void ApiExtractor::setUseGlobalHeader(bool h)
     AbstractMetaBuilder::setUseGlobalHeader(h);
 }
 
+AbstractMetaFunctionPtr
+    ApiExtractor::inheritTemplateFunction(const AbstractMetaFunctionCPtr &function,
+                                          const AbstractMetaTypeList &templateTypes)
+{
+    return AbstractMetaBuilder::inheritTemplateFunction(function, templateTypes);
+}
+
+AbstractMetaFunctionPtr
+    ApiExtractor::inheritTemplateMember(const AbstractMetaFunctionCPtr &function,
+                                        const AbstractMetaTypeList &templateTypes,
+                                        const AbstractMetaClass *templateClass,
+                                        AbstractMetaClass *subclass)
+{
+    return AbstractMetaBuilder::inheritTemplateMember(function, templateTypes,
+                                                      templateClass, subclass);
+}
+
 #ifndef QT_NO_DEBUG_STREAM
 template <class Container>
 static void debugFormatSequence(QDebug &d, const char *key, const Container& c)

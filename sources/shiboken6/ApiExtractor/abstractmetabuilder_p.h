@@ -184,8 +184,19 @@ public:
     static bool inheritTemplate(AbstractMetaClass *subclass,
                                 const AbstractMetaClass *templateClass,
                                 const TypeInfo &info);
-    void inheritTemplateFunctions(AbstractMetaClass *subclass);
-    std::optional<AbstractMetaType>
+
+    static AbstractMetaFunctionPtr
+        inheritTemplateFunction(const AbstractMetaFunctionCPtr &function,
+                                const AbstractMetaTypeList &templateTypes);
+
+    static AbstractMetaFunctionPtr
+        inheritTemplateMember(const AbstractMetaFunctionCPtr &function,
+                              const AbstractMetaTypeList &templateTypes,
+                              const AbstractMetaClass *templateClass,
+                              AbstractMetaClass *subclass);
+
+    static void inheritTemplateFunctions(AbstractMetaClass *subclass);
+    static std::optional<AbstractMetaType>
         inheritTemplateType(const AbstractMetaTypeList &templateTypes,
                             const AbstractMetaType &metaType);
 

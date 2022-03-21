@@ -30,6 +30,7 @@
 
 #include "cppgenerator.h"
 #include "headergenerator.h"
+#include "apiextractor.h"
 #include "apiextractorresult.h"
 #include "ctypenames.h"
 #include <exception.h>
@@ -834,21 +835,16 @@ void CppGenerator::generateSmartPointerClass(TextStream &s, const GeneratorConte
         throw Exception(msgCannotFindSmartPointerGetter(typeEntry));
 
     {
-          const AbstractMetaFunctionCList &overloads = it.value();
           // Replace the return type of the raw pointer getter method with the actual
           // return type.
-          QString innerTypeName =
-              classContext.preciseType().getSmartPointerInnerType().cppSignature();
-          QString pointerToInnerTypeName = innerTypeName + QLatin1Char('*');
-          QString errorMessage;
-          auto opt = AbstractMetaType::fromString(pointerToInnerTypeName, &errorMessage);
-          if (!opt.has_value())
-              throw Exception(u"Cannot translate smart pointer inner type: "_qs + errorMessage);
-          auto pointerToInnerType = opt.value();
-          auto mutableRfunc = overloads.constFirst();
-          qSharedPointerConstCast<AbstractMetaFunction>(mutableRfunc)->setType(pointerToInnerType);
-
-          writeMethodWrapper(s, md, signatureStream, overloads, classContext);
+          auto innerType = classContext.preciseType().getSmartPointerInnerType();
+          auto getter = ApiExtractor::inheritTemplateFunction(it.value().constFirst(),
+                                                              {innerType});
+          if (getter.isNull())
+              throw Exception(u"Cannot inherit smart pointer inner type "_qs + innerType.name());
+          getter->setOwnerClass(metaClass);
+          getter->setImplementingClass(metaClass);
+          writeMethodWrapper(s, md, signatureStream, {getter}, classContext);
     }
 
     const QString refCountMethodName = typeEntry->refCountMethodName();
