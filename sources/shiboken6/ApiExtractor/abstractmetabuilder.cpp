@@ -642,6 +642,8 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom,
         cls->setInnerClasses(classesTopologicalSorted(cls->innerClasses()));
     }
 
+    fixSmartPointers();
+
     dumpLog();
 
     sortLists();
@@ -2233,6 +2235,80 @@ const AbstractMetaClass *AbstractMetaBuilderPrivate::resolveTypeSystemTypeDef(co
             return it->klass;
     }
     return nullptr;
+}
+
+// The below helpers and AbstractMetaBuilderPrivate::fixSmartPointers()
+// synthesize missing smart pointer functions and classes. For example for
+// std::shared_ptr, the full class declaration or base classes from
+// internal, compiler-dependent STL implementation headers might not be exposed
+// to the parser unless those headers are specified as <system-include>.
+
+// Add the relevant missing smart pointer functions.
+static void fixSmartPointerClass(AbstractMetaClass *s, const SmartPointerTypeEntry *ste)
+{
+    const QString getterName = ste->getter();
+    if (s->findFunction(getterName).isNull()) {
+        AbstractMetaFunctionPtr getter(new AbstractMetaFunction(getterName));
+        AbstractMetaType type(s->templateArguments().constFirst());
+        type.addIndirection();
+        type.decideUsagePattern();
+        getter->setType(type);
+        s->addFunction(getter);
+        qCWarning(lcShiboken, "Synthesizing \"%s\"...",
+                  qPrintable(getter->classQualifiedSignature()));
+    }
+
+    const QString refCountName = ste->refCountMethodName();
+    if (!refCountName.isEmpty() && s->findFunction(refCountName).isNull()) {
+        AbstractMetaFunctionPtr refCount(new AbstractMetaFunction(refCountName));
+        auto *intTypeEntry = TypeDatabase::instance()->findPrimitiveType(u"int"_qs);
+        Q_ASSERT(intTypeEntry);
+        AbstractMetaType intType(intTypeEntry);
+        intType.decideUsagePattern();
+        refCount->setType(intType);
+        s->addFunction(refCount);
+        qCWarning(lcShiboken, "Synthesizing \"%s\"...",
+                  qPrintable(refCount->classQualifiedSignature()));
+    }
+}
+
+// Create a missing smart pointer class
+static AbstractMetaClass *createSmartPointerClass(const SmartPointerTypeEntry *ste,
+                                                  const AbstractMetaClassList &allClasses)
+{
+    auto *result = new AbstractMetaClass();
+    result->setTypeEntry(const_cast<SmartPointerTypeEntry *>(ste));
+    auto *templateArg = new TemplateArgumentEntry(u"T"_qs, ste->version(),
+                                                  ste->typeSystemTypeEntry());
+    result->setTemplateArguments({templateArg});
+    fixSmartPointerClass(result, ste);
+    auto *enclosingTe = ste->parent();
+    if (!enclosingTe->isTypeSystem()) {
+        auto *enclosing = AbstractMetaClass::findClass(allClasses, enclosingTe);
+        if (enclosing == nullptr)
+            throw Exception(msgEnclosingClassNotFound(ste));
+        result->setEnclosingClass(enclosing);
+        auto inner = enclosing->innerClasses();
+        inner.append(result);
+        enclosing->setInnerClasses(inner);
+    }
+    return result;
+}
+
+void AbstractMetaBuilderPrivate::fixSmartPointers()
+{
+    const auto smartPointerTypes = TypeDatabase::instance()->smartPointerTypes();
+    for (auto *ste : smartPointerTypes) {
+        const AbstractMetaClass *smartPointerClass =
+            AbstractMetaClass::findClass(m_smartPointers, ste);
+        if (smartPointerClass) {
+            fixSmartPointerClass(const_cast<AbstractMetaClass *>(smartPointerClass), ste);
+        } else {
+            qCWarning(lcShiboken, "Synthesizing smart pointer \"%s\"...",
+                      qPrintable(ste->qualifiedCppName()));
+            m_smartPointers.append(createSmartPointerClass(ste, m_metaClasses));
+        }
+    }
 }
 
 std::optional<AbstractMetaType>

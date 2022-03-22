@@ -205,9 +205,6 @@ QString msgCannotUseEnumAsInt(const QString &name);
 
 QString msgConversionTypesDiffer(const QString &varType, const QString &conversionType);
 
-QString msgCannotFindSmartPointer(const QString &instantiationType,
-                                  const AbstractMetaClassCList &pointers);
-
 QString msgCannotFindSmartPointerGetter(const SmartPointerTypeEntry *);
 
 QString msgCannotFindSmartPointerRefCount(const SmartPointerTypeEntry *);
@@ -238,6 +235,8 @@ QString msgCyclicDependency(const QString &funcName, const QString &graphName,
                             const AbstractMetaFunctionCList &involvedConversions);
 
 QString msgClassNotFound(const TypeEntry *t);
+
+QString msgEnclosingClassNotFound(const TypeEntry *t);
 
 QString msgUnknownOperator(const AbstractMetaFunction* func);
 

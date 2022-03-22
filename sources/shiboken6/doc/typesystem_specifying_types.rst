@@ -588,17 +588,29 @@ smart-pointer-type
     The *optional* attribute **reset-method** specifies a method
     that can be used to clear the pointer.
 
-    The example below shows an entry for a ``std::shared_ptr`` found in
-    the standard library of ``g++`` version 9:
+    The example below shows an entry for a ``std::shared_ptr``:
 
     .. code-block:: xml
 
         <system-include file-name="memory"/>
-        <system-include file-name="shared_ptr.h"/>
 
         <namespace-type name="std">
             <include file-name="memory" location="global"/>
-            <custom-type name="__shared_ptr"/>
+            <modify-function signature="^.*$" remove="all"/>
+            <enum-type name="pointer_safety"/>
+            <smart-pointer-type name="shared_ptr" type="shared" getter="get"
+                                ref-count-method="use_count"
+                                instantiations="Integer">
+                <include file-name="memory" location="global"/>
+            </smart-pointer-type>
+        </namespace-type>
+
+    If the smart pointer is the only relevant class from namespace ``std``,
+    it can also be hidden:
+
+    .. code-block:: xml
+
+        <namespace-type name="std" visible="no">
             <smart-pointer-type name="shared_ptr" type="shared" getter="get"
                                 ref-count-method="use_count"
                                 instantiations="Integer">

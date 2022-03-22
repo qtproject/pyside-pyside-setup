@@ -549,12 +549,7 @@ bool Generator::generate()
     for (const AbstractMetaType &type : qAsConst(m_d->instantiatedSmartPointers)) {
         const AbstractMetaClass *smartPointerClass =
             AbstractMetaClass::findClass(smartPointers, type.typeEntry());
-        if (!smartPointerClass) {
-            qCWarning(lcShiboken, "%s",
-                      qPrintable(msgCannotFindSmartPointer(type.cppSignature(),
-                                                           smartPointers)));
-            return false;
-        }
+        Q_ASSERT(smartPointerClass);
         const AbstractMetaClass *pointeeClass = nullptr;
         const auto *instantiatedType = type.instantiations().constFirst().typeEntry();
         if (instantiatedType->isComplex()) // not a C++ primitive

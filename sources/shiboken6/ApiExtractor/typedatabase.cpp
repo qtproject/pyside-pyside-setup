@@ -369,6 +369,17 @@ TypeEntries TypeDatabase::findTypesHelper(const QString &name, Predicate pred) c
     return result;
 }
 
+template<class Type, class Predicate>
+QList<const Type *> TypeDatabase::findTypesByTypeHelper(Predicate pred) const
+{
+    QList<const Type *> result;
+    for (auto *entry : m_entries) {
+        if (pred(entry))
+            result.append(static_cast<const Type *>(entry));
+    }
+    return result;
+}
+
 TypeEntries TypeDatabase::findTypes(const QString &name) const
 {
     return findTypesHelper(name, useType);
@@ -411,24 +422,20 @@ TypeEntryMultiMapConstIteratorRange TypeDatabase::findTypeRange(const QString &n
 
 PrimitiveTypeEntryList TypeDatabase::primitiveTypes() const
 {
-    PrimitiveTypeEntryList returned;
-    for (auto it = m_entries.cbegin(), end = m_entries.cend(); it != end; ++it) {
-        TypeEntry *typeEntry = it.value();
-        if (typeEntry->isPrimitive())
-            returned.append(static_cast<PrimitiveTypeEntry *>(typeEntry));
-    }
-    return returned;
+    auto pred = [](const TypeEntry *t) { return t->isPrimitive(); };
+    return findTypesByTypeHelper<PrimitiveTypeEntry>(pred);
 }
 
 ContainerTypeEntryList TypeDatabase::containerTypes() const
 {
-    ContainerTypeEntryList returned;
-    for (auto it = m_entries.cbegin(), end = m_entries.cend(); it != end; ++it) {
-        TypeEntry *typeEntry = it.value();
-        if (typeEntry->isContainer())
-            returned.append(static_cast<ContainerTypeEntry *>(typeEntry));
-    }
-    return returned;
+    auto pred = [](const TypeEntry *t) { return t->isContainer(); };
+    return findTypesByTypeHelper<ContainerTypeEntry>(pred);
+}
+
+SmartPointerTypeEntryList TypeDatabase::smartPointerTypes() const
+{
+    auto pred = [](const TypeEntry *t) { return t->isSmartPointer(); };
+    return findTypesByTypeHelper<SmartPointerTypeEntry>(pred);
 }
 
 #ifndef QT_NO_DEBUG_STREAM

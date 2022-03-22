@@ -671,20 +671,6 @@ QString msgConversionTypesDiffer(const QString &varType, const QString &conversi
     return result;
 }
 
-QString msgCannotFindSmartPointer(const QString &instantiationType,
-                                  const AbstractMetaClassCList &pointers)
-{
-    QString result;
-    QTextStream str(&result);
-    str << "Unable to find smart pointer type for " << instantiationType << " (known types:";
-    for (auto t : pointers) {
-        auto typeEntry = t->typeEntry();
-        str << ' ' << typeEntry->targetLangName() << '/' << typeEntry->qualifiedCppName();
-    }
-    str << ").";
-    return result;
-}
-
 QString msgCannotFindSmartPointerGetter(const SmartPointerTypeEntry *te)
 {
      return u"Getter \""_qs + te->getter() +  u"()\" of smart pointer \""_qs
@@ -757,6 +743,15 @@ QString msgClassNotFound(const TypeEntry *t)
     return QLatin1String("Could not find class \"")
            + t->qualifiedCppName()
            + QLatin1String("\" in the code model. Maybe it is forward declared?");
+}
+
+QString msgEnclosingClassNotFound(const TypeEntry *t)
+{
+    QString result;
+    QTextStream str(&result);
+    str << "Warning: Enclosing class \"" << t->parent()->name()
+        << "\" of class \"" << t->name() << "\" not found.";
+    return result;
 }
 
 QString msgUnknownOperator(const AbstractMetaFunction* func)

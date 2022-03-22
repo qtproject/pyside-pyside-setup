@@ -148,6 +148,8 @@ public:
 
     ContainerTypeEntryList containerTypes() const;
 
+    SmartPointerTypeEntryList smartPointerTypes() const;
+
     void addRejection(const TypeRejection &);
     bool isClassRejected(const QString &className, QString *reason = nullptr) const;
     bool isFunctionRejected(const QString &className, const QString &functionName,
@@ -229,6 +231,8 @@ private:
     TypeEntryMultiMapConstIteratorRange findTypeRange(const QString &name) const;
     template <class Predicate>
     TypeEntries findTypesHelper(const QString &name, Predicate pred) const;
+    template <class Type, class Predicate>
+    QList<const Type *> findTypesByTypeHelper(Predicate pred) const;
     TypeEntry *resolveTypeDefEntry(TypedefEntry *typedefEntry, QString *errorMessage);
     template <class String>
     bool isSuppressedWarningHelper(const String &s) const;

@@ -209,6 +209,8 @@ public:
     void fillAddedFunctions(AbstractMetaClass *metaClass);
     const AbstractMetaClass *resolveTypeSystemTypeDef(const AbstractMetaType &t) const;
 
+    void fixSmartPointers();
+
     AbstractMetaBuilder *q;
     AbstractMetaClassList m_metaClasses;
     AbstractMetaClassList m_templates;

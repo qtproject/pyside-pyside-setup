@@ -37,6 +37,7 @@ class ConstantValueTypeEntry;
 class ContainerTypeEntry;
 class NamespaceTypeEntry;
 class PrimitiveTypeEntry;
+class SmartPointerTypeEntry;
 class TemplateEntry;
 class TypeEntry;
 class TypedefEntry;
@@ -65,5 +66,6 @@ using TypedefEntryMap = QMap<QString, TypedefEntry *>;
 using ContainerTypeEntryList = QList<const ContainerTypeEntry *>;
 using NamespaceTypeEntryList = QList<NamespaceTypeEntry *>;
 using PrimitiveTypeEntryList = QList<const PrimitiveTypeEntry *>;
+using SmartPointerTypeEntryList = QList<const SmartPointerTypeEntry *>;
 
 #endif // TYPEDATABASE_TYPEDEFS_H
