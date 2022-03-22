@@ -38,9 +38,10 @@
 #include "modifications.h"
 #include "typeparser.h"
 
-#include <QSet>
-#include <QFileInfo>
-#include <QList>
+#include <QtCore/QFileInfo>
+#include <QtCore/QList>
+#include <QtCore/QMap>
+#include <QtCore/QSet>
 
 #include <optional>
 
