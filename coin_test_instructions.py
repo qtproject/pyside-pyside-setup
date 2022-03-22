@@ -93,6 +93,8 @@ def call_testrunner(python_ver, buildnro):
         # When the 'python_ver' variable is empty, we are using Python 2
         # Pip is always upgraded when CI template is provisioned, upgrading it in later phase may cause perm issue
         run_instruction([env_pip, "install", "-r", "requirements.txt"], "Failed to install dependencies")
+        # Install distro to replace missing platform.linux_distribution() in python3.8
+        run_instruction([env_pip, "install", "distro"], "Failed to install distro")
 
     cmd = [env_python, "testrunner.py", "test",
                   "--blacklist", "build_history/blacklist.txt",
@@ -123,6 +125,8 @@ def run_test_instructions():
         call_testrunner("3.6.1", str(testRun))
         call_testrunner("3.8.1", str(testRun))
         call_testrunner("3.10.0", str(testRun))
+    elif CI_HOST_OS == "Linux":
+        call_testrunner("3.8", str(testRun))
     else:
         call_testrunner("3", str(testRun))
 

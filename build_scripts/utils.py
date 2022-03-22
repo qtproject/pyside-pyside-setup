@@ -1187,7 +1187,11 @@ def get_qtci_virtualEnv(python_ver, host, hostArch, targetArch):
         env_python = f"{_env}\\Scripts\\python.exe"
         env_pip = f"{_env}\\Scripts\\pip.exe"
     else:
-        if python_ver == "3":
+        _pExe = f"python{python_ver}"
+        try:
+            run_instruction([_pExe, "--version"], f"Failed to guess python version {_pExe}")
+        except Exception as e:
+            print("Exception {type(e).__name__}: {e}")
             _pExe = "python3"
     return(_pExe, _env, env_pip, env_python)
 
