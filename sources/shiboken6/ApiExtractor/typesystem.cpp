@@ -35,6 +35,7 @@
 #include <QtCore/QDebug>
 #include <QtCore/QRegularExpression>
 #include <QtCore/QSet>
+#include <QtCore/QVarLengthArray>
 
 static QString buildName(const QString &entryName, const TypeEntry *parent)
 {
