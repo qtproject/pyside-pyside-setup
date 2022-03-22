@@ -34,6 +34,8 @@ Detailed Description
 
     The optional named argument ``result`` specifies the return type.
 
+    .. seealso:: :ref:`signals-and-slots`
+
 Q_INVOKABLE
 -----------
 
