@@ -170,6 +170,7 @@ public:
     bool isFriendly() const;
 
     AbstractMetaFunction();
+    explicit AbstractMetaFunction(const QString &name);
     explicit AbstractMetaFunction(const AddedFunctionPtr &addedFunc);
     ~AbstractMetaFunction();
 

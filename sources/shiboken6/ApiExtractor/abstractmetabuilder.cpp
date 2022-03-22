@@ -1871,7 +1871,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
         }
         return nullptr;
     }
-    QString functionName = functionItem->name();
+    const QString &functionName = functionItem->name();
     QString className;
     if (currentClass) {
         // Clang: Skip qt_metacast(), qt_metacall(), expanded from Q_OBJECT
@@ -1916,7 +1916,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
         return nullptr;
     }
 
-    auto *metaFunction = new AbstractMetaFunction;
+    auto *metaFunction = new AbstractMetaFunction(functionName);
     if (functionItem->isHiddenFriend())
         metaFunction->setFlags(AbstractMetaFunction::Flag::HiddenFriend);
     metaFunction->setSourceLocation(functionItem->sourceLocation());
@@ -1927,9 +1927,6 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
     metaFunction->setFunctionType(functionTypeFromCodeModel(functionItem->functionType()));
     metaFunction->setConstant(functionItem->isConstant());
     metaFunction->setExceptionSpecification(functionItem->exceptionSpecification());
-
-    metaFunction->setName(functionName);
-    metaFunction->setOriginalName(functionItem->name());
 
     if (functionItem->isAbstract())
         *metaFunction += AbstractMetaFunction::Abstract;

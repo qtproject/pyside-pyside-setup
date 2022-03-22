@@ -875,10 +875,8 @@ AbstractMetaFunction *
                                             const AbstractMetaType &returnType,
                                             AbstractMetaClass *q)
 {
-    auto *f = new AbstractMetaFunction;
+    auto *f = new AbstractMetaFunction(name);
     f->setType(returnType);
-    f->setOriginalName(name);
-    f->setName(name);
     f->setOwnerClass(q);
     f->setFunctionType(t);
     f->setArguments(arguments);

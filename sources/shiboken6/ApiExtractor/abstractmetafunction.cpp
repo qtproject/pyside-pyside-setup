@@ -113,13 +113,17 @@ public:
     TypeSystem::ExceptionHandling m_exceptionHandlingModification = TypeSystem::ExceptionHandling::Unspecified;
 };
 
-AbstractMetaFunction::AbstractMetaFunction(const AddedFunctionPtr &addedFunc) :
+AbstractMetaFunction::AbstractMetaFunction(const QString &name) :
     AbstractMetaFunction()
+{
+    d->m_originalName = d->m_name = name;
+}
+
+AbstractMetaFunction::AbstractMetaFunction(const AddedFunctionPtr &addedFunc) :
+    AbstractMetaFunction(addedFunc->name())
 {
     d->m_addedFunction = addedFunc;
     setConstant(addedFunc->isConstant());
-    setName(addedFunc->name());
-    setOriginalName(addedFunc->name());
     switch (addedFunc->access()) {
     case AddedFunction::Protected:
         setAccess(Access::Protected);
