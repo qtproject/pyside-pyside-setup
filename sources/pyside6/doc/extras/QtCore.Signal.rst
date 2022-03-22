@@ -58,3 +58,4 @@ may refer to the emitted values by name.
 
     `args` is the arguments to pass to any connected slots, if any.
 
+.. seealso:: :ref:`signals-and-slots`
