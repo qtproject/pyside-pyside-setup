@@ -58,6 +58,8 @@ target_include_directories(pyside6 PUBLIC
   $<INSTALL_INTERFACE:include/PySide6>
 )
 
+target_compile_definitions(pyside6 PRIVATE -DQT_LEAN_HEADERS=1)
+
 target_link_libraries(pyside6
                       PRIVATE Shiboken6::libshiboken ${libpyside_libraries})
 

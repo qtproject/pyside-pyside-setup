@@ -162,6 +162,8 @@ macro(create_pyside_module)
 
     append_size_optimization_flags(${module_NAME})
 
+    target_compile_definitions(${module_NAME} PRIVATE -DQT_LEAN_HEADERS=1)
+
     set_target_properties(${module_NAME} PROPERTIES
                           PREFIX ""
                           OUTPUT_NAME "${module_NAME}${SHIBOKEN_PYTHON_EXTENSION_SUFFIX}"

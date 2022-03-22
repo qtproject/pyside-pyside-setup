@@ -91,7 +91,9 @@ if (NOT DISABLE_DOCSTRINGS)
                                         qtdocparser.cpp)
 endif()
 
-target_compile_definitions(apiextractor PRIVATE CMAKE_CXX_COMPILER="${CMAKE_CXX_COMPILER}")
+target_compile_definitions(apiextractor
+                           PRIVATE CMAKE_CXX_COMPILER="${CMAKE_CXX_COMPILER}"
+                           PRIVATE QT_LEAN_HEADERS=1)
 
 set(LIB_INSTALL_DIR "lib${LIB_SUFFIX}" CACHE PATH "The subdirectory relative to the install prefix where libraries will be installed (default is /lib${LIB_SUFFIX})" FORCE)
 

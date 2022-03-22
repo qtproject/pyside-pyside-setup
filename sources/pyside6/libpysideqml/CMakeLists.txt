@@ -30,6 +30,8 @@ set_target_properties(pyside6qml PROPERTIES
                       OUTPUT_NAME "pyside6qml${pyside6_SUFFIX}${SHIBOKEN_PYTHON_SHARED_LIBRARY_SUFFIX}"
                       DEFINE_SYMBOL BUILD_LIBPYSIDEQML)
 
+target_compile_definitions(pyside6qml PRIVATE -DQT_LEAN_HEADERS=1)
+
 set_property(TARGET pyside6 PROPERTY CXX_STANDARD 17)
 
 if(PYSIDE_QT_CONF_PREFIX)
