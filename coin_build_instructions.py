@@ -181,9 +181,6 @@ if __name__ == "__main__":
     for env_var in ['CC', 'CXX']:
         if os.environ.get(env_var):
             del os.environ[env_var]
-    python_ver= "3"
-    if CI_TARGET_OS in["Linux"]:
-        python_ver = "3.8"
 
     if CI_TEST_PHASE in ["ALL", "BUILD"]:
         call_setup("3","BUILD")
