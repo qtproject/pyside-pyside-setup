@@ -429,7 +429,17 @@ void AbstractMetaClassPrivate::addFunction(const AbstractMetaFunctionCPtr &funct
 
 void AbstractMetaClass::addFunction(const AbstractMetaFunctionCPtr &function)
 {
-    qSharedPointerConstCast<AbstractMetaFunction>(function)->setOwnerClass(this);
+    auto nonConstF = qSharedPointerConstCast<AbstractMetaFunction>(function);
+    nonConstF->setOwnerClass(this);
+
+    // Set the default value of the declaring class. This may be changed
+    // in fixFunctions later on
+    nonConstF->setDeclaringClass(this);
+
+    // Some of the queries below depend on the implementing class being set
+    // to function properly. Such as function modifications
+    nonConstF->setImplementingClass(this);
+
     d->addFunction(function);
 }
 

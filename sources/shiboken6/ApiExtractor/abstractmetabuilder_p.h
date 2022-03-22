@@ -146,8 +146,6 @@ public:
     void setupComparable(AbstractMetaClass *metaClass);
     static void setupClonable(AbstractMetaClass *cls);
     void setupExternalConversion(AbstractMetaClass *cls);
-    static void setupFunctionDefaults(AbstractMetaFunction *metaFunction,
-                                      AbstractMetaClass *metaClass);
 
     static bool isQualifiedCppIdentifier(QStringView e);
     QString fixDefaultValue(QString expr, const AbstractMetaType &type,

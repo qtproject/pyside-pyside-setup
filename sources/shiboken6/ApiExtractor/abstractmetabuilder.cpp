@@ -301,7 +301,6 @@ void AbstractMetaBuilderPrivate::traverseOperatorFunction(const FunctionModelIte
     }
     metaFunction->setFlags(flags);
     metaFunction->setAccess(Access::Public);
-    setupFunctionDefaults(metaFunction, baseoperandClass);
     baseoperandClass->addFunction(AbstractMetaFunctionCPtr(metaFunction));
     Q_ASSERT(!metaFunction->wasPrivate());
 }
@@ -350,7 +349,6 @@ bool AbstractMetaBuilderPrivate::traverseStreamOperator(const FunctionModelItem 
         funcClass = streamClass;
     }
 
-    setupFunctionDefaults(streamFunction, funcClass);
     funcClass->addFunction(AbstractMetaFunctionCPtr(streamFunction));
     if (funcClass == streamClass)
         funcClass->typeEntry()->addExtraInclude(streamedClass->typeEntry()->include());
@@ -1253,21 +1251,6 @@ void AbstractMetaBuilderPrivate::traverseFields(const ScopeModelItem &scope_item
     }
 }
 
-void AbstractMetaBuilderPrivate::setupFunctionDefaults(AbstractMetaFunction *metaFunction,
-                                                       AbstractMetaClass *metaClass)
-{
-    // Set the default value of the declaring class. This may be changed
-    // in fixFunctions later on
-    metaFunction->setDeclaringClass(metaClass);
-
-    // Some of the queries below depend on the implementing class being set
-    // to function properly. Such as function modifications
-    metaFunction->setImplementingClass(metaClass);
-
-    if (metaFunction->name() == QLatin1String("operator_equal"))
-        metaClass->setHasEqualsOperator(true);
-}
-
 void AbstractMetaBuilderPrivate::fixReturnTypeOfConversionOperator(AbstractMetaFunction *metaFunction)
 {
     if (!metaFunction->isConversionOperator())
@@ -1378,8 +1361,6 @@ void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
 
         if (!metaFunction->isDestructor()
             && !(metaFunction->isPrivate() && metaFunction->functionType() == AbstractMetaFunction::ConstructorFunction)) {
-
-            setupFunctionDefaults(metaFunction, metaClass);
 
             if (metaFunction->isSignal() && metaClass->hasSignal(metaFunction))
                 qCWarning(lcShiboken, "%s", qPrintable(msgSignalOverloaded(metaClass, metaFunction)));
