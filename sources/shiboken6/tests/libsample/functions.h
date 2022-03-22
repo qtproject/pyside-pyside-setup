@@ -89,6 +89,8 @@ LIBSAMPLE_API double sumDoubleMatrix(double m[2][3]);
 LIBSAMPLE_API std::string addStdStrings(const std::string &s1, const std::string &s2);
 LIBSAMPLE_API std::wstring addStdWStrings(const std::wstring &s1, const std::wstring &s2);
 
+LIBSAMPLE_API void testNullPtrT(std::nullptr_t);
+
 class LIBSAMPLE_API ArrayModifyTest
 {
 public:

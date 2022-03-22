@@ -96,6 +96,10 @@ class ModuleTest(unittest.TestCase):
             self.assertEqual(sample.addStdStrings(t1, t1), expected)
             self.assertEqual(sample.addStdWStrings(t1, t1), expected)
 
+    def testNullPtrT(self):
+        sample.testNullPtrT(None)
+        self.assertRaises(TypeError, sample.testNullPtrT, 42)
+
 
 if __name__ == '__main__':
     unittest.main()

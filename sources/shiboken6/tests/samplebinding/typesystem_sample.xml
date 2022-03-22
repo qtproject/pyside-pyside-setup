@@ -4,6 +4,7 @@
     <suppress-warning text="Duplicate type entry: 'SampleNamespace'" />
 
     <primitive-type name="ObjectType::Identifier"/>
+    <primitive-type name="std::nullptr_t"/>
 
     <primitive-type name="Foo::HANDLE" target-lang-api-name="PyLong"/>
 
@@ -413,6 +414,7 @@
     <function signature="overloadedFunc(int)" />
     <function signature="addStdStrings(const std::string&amp;, const std::string&amp;)"/>
     <function signature="addStdWStrings(const std::wstring&amp;, const std::wstring&amp;)"/>
+    <function signature="testNullPtrT(std::nullptr_t)"/>
 
     <value-type name="ArrayModifyTest">
         <modify-function signature="sumIntArray(int, int*)">
