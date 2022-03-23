@@ -50,6 +50,9 @@ add_other_files(${other_files})
 add_library(pyside6 SHARED ${libpyside_SRC} ${other_files})
 add_library(PySide6::pyside6 ALIAS pyside6)
 
+#does nothing if QFP_NO_OVERRIDE_OPTIMIZATION_FLAGS (no-size-optimization) flag is not set
+append_size_optimization_flags(pyside6)
+
 target_include_directories(pyside6 PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
   $<INSTALL_INTERFACE:include/PySide6>

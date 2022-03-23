@@ -12,6 +12,9 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/Macros")
 include(ShibokenHelpers)
 include(PySideHelpers)
 
+#does nothing if QFP_NO_OVERRIDE_OPTIMIZATION_FLAGS (no-size-optimization) flag is not set
+override_release_flags_for_size_optimization()
+
 # Don't display "up-to-date / install" messages when installing, to reduce visual clutter.
 if(QUIET_BUILD)
     set(CMAKE_INSTALL_MESSAGE NEVER)

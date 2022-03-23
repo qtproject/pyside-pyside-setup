@@ -249,6 +249,7 @@ class DistUtilsCommandMixin(object):
         ('qt-conf-prefix=', None, 'Qt configuration prefix'),
         ('qt-src-dir=', None, 'Qt source directory'),
         ('no-qt-tools', None, 'Do not copy the Qt tools'),
+        ('no-size-optimization', None, 'Turn off size optimization for PySide6 binaries'),
         ('pyside-numpy-support', None, 'libpyside: Add (experimental) numpy support'),
         ('internal-cmake-install-dir-query-file-path=', None,
          'Path to file where the CMake install path of the project will be saved'),
@@ -307,6 +308,7 @@ class DistUtilsCommandMixin(object):
         self.qt_conf_prefix = None
         self.qt_src_dir = None
         self.no_qt_tools = False
+        self.no_size_optimization = False
         self.pyside_numpy_support = False
         self.plat_name = None
         self.internal_cmake_install_dir_query_file_path = None
@@ -468,6 +470,7 @@ class DistUtilsCommandMixin(object):
         OPTION['QT_CONF_PREFIX'] = self.qt_conf_prefix
         OPTION['QT_SRC'] = self.qt_src_dir
         OPTION['NO_QT_TOOLS'] = self.no_qt_tools
+        OPTION['NO_OVERRIDE_OPTIMIZATION_FLAGS'] = self.no_size_optimization
         OPTION['PYSIDE_NUMPY_SUPPORT'] = self.pyside_numpy_support
 
         if not self._extra_checks():

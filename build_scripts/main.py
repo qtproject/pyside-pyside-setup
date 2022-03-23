@@ -667,6 +667,9 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
         else:
             if OPTION['NO_STRIP']:
                 cmake_cmd.append("-DQFP_NO_STRIP=1")
+            if OPTION['NO_OVERRIDE_OPTIMIZATION_FLAGS']:
+                cmake_cmd.append("-DQFP_NO_OVERRIDE_OPTIMIZATION_FLAGS=1")
+
         if OPTION["LIMITED_API"] == "yes":
             cmake_cmd.append("-DFORCE_LIMITED_API=yes")
         elif OPTION["LIMITED_API"] == "no":
