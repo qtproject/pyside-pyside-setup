@@ -57,6 +57,11 @@
 
     <object-type name="QQuickFramebufferObject">
         <object-type name="Renderer"/>
+        <modify-function signature="createRenderer()const">
+            <modify-argument index="return">
+                <define-ownership class="native" owner="c++"/>
+            </modify-argument>
+        </modify-function>
     </object-type>
 
     <object-type name="QQuickTextureFactory"/>
