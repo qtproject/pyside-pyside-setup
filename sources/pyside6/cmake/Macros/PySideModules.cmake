@@ -18,6 +18,19 @@ macro(unmake_path varname)
    string(REPLACE "${PATH_SEP}" ";" ${varname} "${ARGN}")
 endmacro()
 
+# set size optimization flags for pyside6
+macro(append_size_optimization_flags _module_name)
+    if(NOT QFP_NO_OVERRIDE_OPTIMIZATION_FLAGS)
+        if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+            target_compile_options(${_module_name} PRIVATE /Gy /Gw /EHsc)
+            target_link_options(${_module_name} PRIVATE LINKER:/OPT:REF)
+        elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU|CLANG")
+            target_compile_options(${_module_name} PRIVATE -ffunction-sections -fdata-sections -fno-exceptions)
+            target_link_options(${_module_name} PRIVATE LINKER:--gc-sections)
+        endif()
+    endif()
+endmacro()
+
 # Sample usage
 # create_pyside_module(NAME QtGui
 #                      INCLUDE_DIRS QtGui_include_dirs
@@ -146,6 +159,9 @@ macro(create_pyside_module)
     include_directories(${module_NAME} ${${module_INCLUDE_DIRS}} ${pyside6_SOURCE_DIR})
     add_library(${module_NAME} MODULE ${${module_SOURCES}}
                                       ${${module_STATIC_SOURCES}})
+
+    append_size_optimization_flags(${module_NAME})
+
     set_target_properties(${module_NAME} PROPERTIES
                           PREFIX ""
                           OUTPUT_NAME "${module_NAME}${SHIBOKEN_PYTHON_EXTENSION_SUFFIX}"
