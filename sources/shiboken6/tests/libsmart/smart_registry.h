@@ -53,8 +53,8 @@ public:
     void remove(Integer *p);
     int countObjects() const;
     int countIntegers() const;
-    bool shouldPrint() const;
-    void setShouldPrint(bool flag);
+    bool verbose() const;
+    void setVerbose(bool flag);
 
 protected:
     Registry();
@@ -62,7 +62,7 @@ protected:
 private:
     std::vector<Obj *> m_objects;
     std::vector<Integer *> m_integers;
-    bool m_printStuff = false;
+    bool m_verbose = false;
 };
 
 #endif // SMART_REGISTRY_H

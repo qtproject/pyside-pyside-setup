@@ -31,20 +31,20 @@
 #include <algorithm>
 #include <iostream>
 
-static inline bool shouldPrint()
+static inline bool verbose()
 {
-    return Registry::getInstance()->shouldPrint();
+    return Registry::getInstance()->verbose();
 }
 
 void SharedPtrBase::logDefaultConstructor(const void *t)
 {
-    if (shouldPrint())
+    if (verbose())
         std::cout << "shared_ptr default constructor " << t << '\n';
 }
 
 void SharedPtrBase::logConstructor(const void *t, const void *pointee)
 {
-    if (shouldPrint()) {
+    if (verbose()) {
         std::cout << "shared_ptr constructor " << t << " with pointer "
             << pointee << '\n';
     }
@@ -52,7 +52,7 @@ void SharedPtrBase::logConstructor(const void *t, const void *pointee)
 
 void SharedPtrBase::logCopyConstructor(const void *t, const void *refData)
 {
-    if (shouldPrint()) {
+    if (verbose()) {
         std::cout << "shared_ptr copy constructor " << t << " with pointer "
             << refData << '\n';
     }
@@ -60,7 +60,7 @@ void SharedPtrBase::logCopyConstructor(const void *t, const void *refData)
 
 void SharedPtrBase::logAssignment(const void *t, const void *refData)
 {
-    if (shouldPrint()) {
+    if (verbose()) {
         std::cout << "shared_ptr assignment operator " << t << " with pointer "
             << refData << "\n";
     }
@@ -68,7 +68,7 @@ void SharedPtrBase::logAssignment(const void *t, const void *refData)
 
 void SharedPtrBase::logDestructor(const void *t, int remainingRefCount)
 {
-    if (shouldPrint()) {
+    if (verbose()) {
         std::cout << "shared_ptr destructor " << t << " remaining refcount "
             << remainingRefCount << '\n';
     }
@@ -77,7 +77,7 @@ void SharedPtrBase::logDestructor(const void *t, int remainingRefCount)
 Obj::Obj() : m_integer(123), m_internalInteger(new Integer)
 {
     Registry::getInstance()->add(this);
-    if (shouldPrint())
+    if (verbose())
         std::cout << "Object constructor " << this << '\n';
 }
 
@@ -85,41 +85,41 @@ Obj::~Obj()
 {
     Registry::getInstance()->remove(this);
     delete m_internalInteger;
-    if (shouldPrint())
+    if (verbose())
         std::cout << "Object destructor " << this << '\n';
 }
 
 
 void Obj::printObj() {
-    if (shouldPrint()) {
+    if (verbose()) {
         std::cout << "integer value: " << m_integer
                   << " internal integer value: " << m_internalInteger->value() << '\n';
     }
 }
 
 
-SharedPtr<Obj> Obj::giveSharedPtrToObj()
+SharedPtr<Obj> Obj::createSharedPtrObj()
 {
     SharedPtr<Obj> o(new Obj);
     return o;
 }
 
-std::vector<SharedPtr<Obj> > Obj::giveSharedPtrToObjList(int size)
+std::vector<SharedPtr<Obj> > Obj::createSharedPtrObjList(int size)
 {
     std::vector<SharedPtr<Obj> > r;
     for (int i=0; i < size; i++)
-        r.push_back(giveSharedPtrToObj());
+        r.push_back(createSharedPtrObj());
     return r;
 }
 
 
-SharedPtr<Integer> Obj::giveSharedPtrToInteger()
+SharedPtr<Integer> Obj::createSharedPtrInteger()
 {
     SharedPtr<Integer> o(new Integer);
     return o;
 }
 
-SharedPtr<Smart::Integer2> Obj::giveSharedPtrToInteger2()
+SharedPtr<Smart::Integer2> Obj::createSharedPtrInteger2()
 {
     SharedPtr<Smart::Integer2> o(new Smart::Integer2);
     return o;
@@ -151,19 +151,19 @@ int Obj::takeSharedPtrToIntegerByConstRef(const SharedPtr<Integer> &pInt)
     return pInt->value();
 }
 
-SharedPtr<Integer> Obj::createSharedPtrToInteger(int value)
+SharedPtr<Integer> Obj::createSharedPtrInteger(int value)
 {
     auto *i = new Integer;
     i->setValue(value);
     return SharedPtr<Integer>(i);
 }
 
-SharedPtr<Integer> Obj::createNullSharedPtrToInteger()
+SharedPtr<Integer> Obj::createNullSharedPtrInteger()
 {
     return {};
 }
 
-SharedPtr<const Integer> Obj::giveSharedPtrToConstInteger()
+SharedPtr<const Integer> Obj::createSharedPtrConstInteger()
 {
     SharedPtr<const Integer> co(new Integer);
     return co;
@@ -182,14 +182,14 @@ Integer Obj::takeInteger(Integer val)
 Integer::Integer() : m_int(456)
 {
     Registry::getInstance()->add(this);
-    if (shouldPrint())
+    if (verbose())
         std::cout << "Integer constructor " << this << '\n';
 }
 
 Integer::Integer(const Integer &other)
 {
     Registry::getInstance()->add(this);
-    if (shouldPrint())
+    if (verbose())
         std::cout << "Integer copy constructor " << this << '\n';
     m_int = other.m_int;
 }
@@ -197,7 +197,7 @@ Integer::Integer(const Integer &other)
 Integer &Integer::operator=(const Integer &other)
 {
     Registry::getInstance()->add(this);
-    if (shouldPrint())
+    if (verbose())
         std::cout << "Integer operator= " << this << '\n';
     m_int = other.m_int;
     return *this;
@@ -206,7 +206,7 @@ Integer &Integer::operator=(const Integer &other)
 Integer::~Integer()
 {
     Registry::getInstance()->remove(this);
-    if (shouldPrint())
+    if (verbose())
         std::cout << "Integer destructor " << this << '\n';
 }
 
@@ -229,7 +229,7 @@ int Integer::compare(const Integer &rhs) const
 
 void Integer::printInteger() const
 {
-    if (shouldPrint())
+    if (verbose())
         std::cout << "Integer value for object " << this << " is " << m_int << '\n';
 }
 
@@ -273,14 +273,14 @@ int Registry::countIntegers() const
     return static_cast<int>(m_integers.size());
 }
 
-bool Registry::shouldPrint() const
+bool Registry::verbose() const
 {
-    return m_printStuff;
+    return m_verbose;
 }
 
-void Registry::setShouldPrint(bool flag)
+void Registry::setVerbose(bool flag)
 {
-    m_printStuff = flag;
+    m_verbose = flag;
 }
 
 Smart::Integer2::Integer2()

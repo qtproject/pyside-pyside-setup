@@ -55,7 +55,7 @@ class SmartPointerTests(unittest.TestCase):
     def setUp(self):
         super().setUp()
         if os.environ.get("VERBOSE"):
-            Registry.getInstance().setShouldPrint(True)
+            Registry.getInstance().setVerbose(True)
 
     def testObjSmartPointer(self):
         # Create Obj.
@@ -65,7 +65,7 @@ class SmartPointerTests(unittest.TestCase):
         self.assertEqual(objCount(), 1)
 
         # Create a shared pointer to an Obj together with an Obj.
-        ptrToObj = o.giveSharedPtrToObj()
+        ptrToObj = o.createSharedPtrObj()
         self.assertEqual(objCount(), 2)
 
         # Delete the old Obj.
@@ -131,7 +131,7 @@ class SmartPointerTests(unittest.TestCase):
         self.assertEqual(objCount(), 1)
 
         # Create a shared pointer to an Integer together with an Integer.
-        ptrToInteger = o.giveSharedPtrToInteger()
+        ptrToInteger = o.createSharedPtrInteger()
         self.assertEqual(objCount(), 1)
         self.assertEqual(integerCount(), 2)
 
@@ -183,7 +183,7 @@ class SmartPointerTests(unittest.TestCase):
     def testConstIntegerSmartPointer(self):
         # Create Obj.
         o = Obj()
-        ptrToConstInteger = o.giveSharedPtrToConstInteger()
+        ptrToConstInteger = o.createSharedPtrConstInteger()
         self.assertEqual(ptrToConstInteger.m_int, 456)
         result = o.takeSharedPtrToConstInteger(ptrToConstInteger)
         self.assertEqual(result, 456)
@@ -197,7 +197,7 @@ class SmartPointerTests(unittest.TestCase):
         self.assertEqual(objCount(), 1)
 
         # Create a shared pointer to an Integer together with an Integer.
-        ptrToInteger = o.giveSharedPtrToInteger2()
+        ptrToInteger = o.createSharedPtrInteger2()
         self.assertEqual(objCount(), 1)
         self.assertEqual(integerCount(), 2)
 
@@ -209,7 +209,7 @@ class SmartPointerTests(unittest.TestCase):
         o = Obj()
 
         # Create a list of shared objects
-        ptrToObjList = o.giveSharedPtrToObjList(10)
+        ptrToObjList = o.createSharedPtrObjList(10)
         self.assertEqual(len(ptrToObjList), 10)
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
@@ -235,7 +235,7 @@ class SmartPointerTests(unittest.TestCase):
         # Create Obj.
         o = Obj()
         # Create a shared pointer to an Obj together with an Obj.
-        ptrToObj = o.giveSharedPtrToObj()
+        ptrToObj = o.createSharedPtrObj()
         try:
             ptrToObj.typo
             self.assertFail()
@@ -251,7 +251,7 @@ class SmartPointerTests(unittest.TestCase):
         self.assertEqual(integerCount(), 1)
 
         # Create a shared pointer to an Integer2
-        integer2 = o.giveSharedPtrToInteger2()
+        integer2 = o.createSharedPtrInteger2()
         self.assertEqual(integer2.value(), 456)
 
         # pass Smart<Integer2> to a function that accepts Smart<Integer>
@@ -260,9 +260,9 @@ class SmartPointerTests(unittest.TestCase):
 
     def testSmartPointerValueComparison(self):
         """Test a pointee class with comparison operators."""
-        four = Obj.createSharedPtrToInteger(4)
-        four2 = Obj.createSharedPtrToInteger(4)
-        five = Obj.createSharedPtrToInteger(5)
+        four = Obj.createSharedPtrInteger(4)
+        four2 = Obj.createSharedPtrInteger(4)
+        five = Obj.createSharedPtrInteger(5)
         self.assertTrue(four == four)
         self.assertTrue(four == four2)
         self.assertFalse(four != four)
@@ -280,26 +280,26 @@ class SmartPointerTests(unittest.TestCase):
         self.assertTrue(five > four)
 
         self.assertRaises(NotImplementedError,
-                          lambda : Obj.createNullSharedPtrToInteger() == four)
+                          lambda : Obj.createNullSharedPtrInteger() == four)
 
     def testSmartPointerObjectComparison(self):
         """Test a pointee class without comparison operators."""
-        o1 = Obj.giveSharedPtrToObj()
-        o2 = Obj.giveSharedPtrToObj()
+        o1 = Obj.createSharedPtrObj()
+        o2 = Obj.createSharedPtrObj()
         self.assertTrue(o1 == o1)
         self.assertFalse(o1 != o1)
         self.assertFalse(o1 == o2)
         self.assertTrue(o1 != o2)
 
     def testOperatorNbBool(self):
-        null_ptr = Obj.createNullSharedPtrToInteger()
+        null_ptr = Obj.createNullSharedPtrInteger()
         self.assertFalse(null_ptr)
-        zero = Obj.createSharedPtrToInteger(0)
+        zero = Obj.createSharedPtrInteger(0)
         self.assertTrue(zero)
 
     def testParameterNone(self):
         o = Obj()
-        null_ptr = Obj.createNullSharedPtrToInteger()
+        null_ptr = Obj.createNullSharedPtrInteger()
         o.takeSharedPtrToInteger(null_ptr)
         o.takeSharedPtrToIntegerByConstRef(null_ptr)
         o.takeSharedPtrToInteger(None)
