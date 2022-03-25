@@ -3,7 +3,7 @@
 #
 #############################################################################
 ##
-## Copyright (C) 2021 The Qt Company Ltd.
+## Copyright (C) 2022 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -41,17 +41,23 @@ init_paths()
 from copy import copy
 from smart import Obj, Registry, Integer
 
+
 def objCount():
     return Registry.getInstance().countObjects()
+
 
 def integerCount():
     return Registry.getInstance().countIntegers()
 
-class SmartPointerTests(unittest.TestCase):
-    def testObjSmartPointer(self):
-        # Uncomment to see more debug info about creation of objects and ref counts.
-        # Registry.getInstance().setShouldPrint(True)
 
+class SmartPointerTests(unittest.TestCase):
+
+    def setUp(self):
+        super().setUp()
+        if os.environ.get("VERBOSE"):
+            Registry.getInstance().setShouldPrint(True)
+
+    def testObjSmartPointer(self):
         # Create Obj.
         o = Obj()
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
@@ -68,7 +74,8 @@ class SmartPointerTests(unittest.TestCase):
         gc.collect()
         self.assertEqual(objCount(), 1)
 
-        # Get a wrapper to the Obj inside of the shared pointer, object count should not change.
+        # Get a wrapper to the Obj inside of the shared pointer, object count
+        # should not change.
         obj = ptrToObj.data()
         self.assertEqual(objCount(), 1)
         obj.m_integer = 50
@@ -78,12 +85,13 @@ class SmartPointerTests(unittest.TestCase):
         ptrToObj.m_integer = 100
         self.assertEqual(ptrToObj.m_integer, 100)
 
-        # Get inner PyObject via shared pointer (like operator->) and set value in it.
+        # Get inner PyObject via shared pointer (like operator->) and set
+        # value in it.
         ptrToObj.m_internalInteger.m_int = 200
         self.assertEqual(ptrToObj.m_internalInteger.m_int, 200)
 
-        # Pass smart pointer as argument to a method, return value is the value of m_integer of
-        # passed Obj inside the smart pointer.
+        # Pass smart pointer as argument to a method, return value is the value
+        # of m_integer of passed Obj inside the smart pointer.
         result = ptrToObj.takeSharedPtrToObj(ptrToObj)
         self.assertEqual(result, 100)
 
@@ -93,15 +101,16 @@ class SmartPointerTests(unittest.TestCase):
         result = None
         if integerCount() > 1:
             gc.collect()
-            print('Running garbage collector for reference test', file=sys.stderr)
+            print('Running garbage collector for reference test',
+                  file=sys.stderr)
         self.assertEqual(integerCount(), 1)
 
         # Make a copy of the shared pointer, object count should not change.
         ptrToObj2 = copy(ptrToObj)
         self.assertEqual(objCount(), 1)
 
-        # Delete the first shared pointer, object count should not change because the second
-        # one still has a reference.
+        # Delete the first shared pointer, object count should not change
+        # because the second one still has a reference.
         del ptrToObj
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
@@ -115,9 +124,6 @@ class SmartPointerTests(unittest.TestCase):
         self.assertEqual(integerCount(), 0)
 
     def testIntegerSmartPointer(self):
-        # Uncomment to see more debug info about creation of objects and ref counts.
-        # Registry.getInstance().setShouldPrint(True)
-
         # Create Obj.
         o = Obj()
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
@@ -129,8 +135,8 @@ class SmartPointerTests(unittest.TestCase):
         self.assertEqual(objCount(), 1)
         self.assertEqual(integerCount(), 2)
 
-        # Get a wrapper to the Integer inside of the shared pointer, integer count should not
-        # change.
+        # Get a wrapper to the Integer inside of the shared pointer, integer
+        # count should not change.
         integer = ptrToInteger.data()
         self.assertEqual(integerCount(), 2)
         integer.m_int = 50
@@ -144,8 +150,8 @@ class SmartPointerTests(unittest.TestCase):
         ptrToInteger.m_int = 100
         self.assertEqual(ptrToInteger.m_int, 100)
 
-        # Pass smart pointer as argument to a method, return value is the value of m_int of
-        # passed Integer inside the smart pointer.
+        # Pass smart pointer as argument to a method, return value is the
+        # value of m_int of passed Integer inside the smart pointer.
         result = o.takeSharedPtrToInteger(ptrToInteger)
         self.assertEqual(result, 100)
 
@@ -153,8 +159,8 @@ class SmartPointerTests(unittest.TestCase):
         ptrToInteger2 = copy(ptrToInteger)
         self.assertEqual(integerCount(), 2)
 
-        # Delete the first shared pointer, integer count should not change because the second
-        # one still has a reference.
+        # Delete the first shared pointer, integer count should not change
+        # because the second one still has a reference.
         del ptrToInteger
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
@@ -175,9 +181,6 @@ class SmartPointerTests(unittest.TestCase):
         self.assertEqual(integerCount(), 0)
 
     def testConstIntegerSmartPointer(self):
-        # Uncomment to see more debug info about creation of objects and ref counts.
-        # Registry.getInstance().setShouldPrint(True)
-
         # Create Obj.
         o = Obj()
         ptrToConstInteger = o.giveSharedPtrToConstInteger()
