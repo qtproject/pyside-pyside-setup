@@ -36,40 +36,43 @@ static inline bool verbose()
     return Registry::getInstance()->verbose();
 }
 
-void SharedPtrBase::logDefaultConstructor(const void *t)
+void SharedPtrBase::logDefaultConstructor(const char *instantiation, const void *t)
 {
     if (verbose())
-        std::cout << "shared_ptr default constructor " << t << '\n';
+        std::cout << "SharedPtr<" << instantiation << "> default constructor " << t << '\n';
 }
 
-void SharedPtrBase::logConstructor(const void *t, const void *pointee)
+void SharedPtrBase::logConstructor(const char *instantiation, const void *t,
+                                   const void *pointee)
 {
     if (verbose()) {
-        std::cout << "shared_ptr constructor " << t << " with pointer "
-            << pointee << '\n';
+        std::cout << "SharedPtr<" << instantiation << "> constructor "
+            << t << " with pointer " << pointee << '\n';
     }
 }
 
-void SharedPtrBase::logCopyConstructor(const void *t, const void *refData)
+void SharedPtrBase::logCopyConstructor(const char *instantiation, const void *t,
+                                       const void *refData)
 {
     if (verbose()) {
-        std::cout << "shared_ptr copy constructor " << t << " with pointer "
-            << refData << '\n';
+        std::cout << "SharedPtr<" << instantiation << ">) copy constructor "
+            << t << " with pointer " << refData << '\n';
     }
 }
 
-void SharedPtrBase::logAssignment(const void *t, const void *refData)
+void SharedPtrBase::logAssignment(const char *instantiation, const void *t, const void *refData)
 {
     if (verbose()) {
-        std::cout << "shared_ptr assignment operator " << t << " with pointer "
-            << refData << "\n";
+        std::cout << "SharedPtr<" << instantiation << ">::operator= " << t
+            << " with pointer " << refData << "\n";
     }
 }
 
-void SharedPtrBase::logDestructor(const void *t, int remainingRefCount)
+void SharedPtrBase::logDestructor(const char *instantiation, const void *t,
+                                  int remainingRefCount)
 {
     if (verbose()) {
-        std::cout << "shared_ptr destructor " << t << " remaining refcount "
+        std::cout << "~SharedPtr<" << instantiation << "> " << t << ", remaining refcount "
             << remainingRefCount << '\n';
     }
 }
@@ -78,7 +81,7 @@ Obj::Obj() : m_integer(123), m_internalInteger(new Integer)
 {
     Registry::getInstance()->add(this);
     if (verbose())
-        std::cout << "Object constructor " << this << '\n';
+        std::cout << "Obj constructor " << this << '\n';
 }
 
 Obj::~Obj()
@@ -86,13 +89,13 @@ Obj::~Obj()
     Registry::getInstance()->remove(this);
     delete m_internalInteger;
     if (verbose())
-        std::cout << "Object destructor " << this << '\n';
+        std::cout << "~Obj " << this << '\n';
 }
 
 
 void Obj::printObj() {
     if (verbose()) {
-        std::cout << "integer value: " << m_integer
+        std::cout << "Obj::printObj(): integer value: " << m_integer
                   << " internal integer value: " << m_internalInteger->value() << '\n';
     }
 }
@@ -207,7 +210,7 @@ Integer::~Integer()
 {
     Registry::getInstance()->remove(this);
     if (verbose())
-        std::cout << "Integer destructor " << this << '\n';
+        std::cout << "~Integer " << this << " (" << m_int << ")\n";
 }
 
 int Integer::value() const
@@ -218,6 +221,8 @@ int Integer::value() const
 void Integer::setValue(int v)
 {
     m_int = v;
+    if (verbose())
+        std::cout << "Integer::setValue(" << v << ") " << this << '\n';
 }
 
 int Integer::compare(const Integer &rhs) const
