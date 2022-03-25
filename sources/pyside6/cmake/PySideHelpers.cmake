@@ -51,7 +51,7 @@ macro(collect_optional_modules)
     endif()
     list(APPEND ALL_OPTIONAL_MODULES WebChannel WebEngineCore WebEngineWidgets
          WebEngineQuick WebSockets)
-    if(NOT WIN32 AND NOT APPLE)
+    if(NOT WIN32)
         list(APPEND ALL_OPTIONAL_MODULES DBus)
     endif()
     if (Qt${QT_MAJOR_VERSION}Core_VERSION VERSION_GREATER 6.0.2)
