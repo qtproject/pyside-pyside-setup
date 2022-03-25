@@ -38,7 +38,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import Qt, QObject
 from PySide6.QtWidgets import (QComboBox, QGraphicsScene,
-    QGraphicsRectItem, QComboBox)
+    QGraphicsRectItem)
 
 from helper.usesqapplication import UsesQApplication
 
@@ -154,6 +154,13 @@ class QVariantConversionTest(UsesQApplication):
         self.obj.setProperty("test", test)
         self.assertEqual(self.obj.property("test"), test)
         self.assertTrue(isinstance(self.obj.property("test"), Test))
+
+    def testQMetaPropertyWrite(self):
+        combo_box = QComboBox()
+        meta_obj = combo_box.metaObject()
+        i = meta_obj.indexOfProperty("sizeAdjustPolicy")
+        success = meta_obj.property(i).write(combo_box, QComboBox.SizeAdjustPolicy.AdjustToContents)
+        self.assertTrue(success)
 
 
 if __name__ == '__main__':

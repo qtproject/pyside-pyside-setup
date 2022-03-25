@@ -2009,3 +2009,10 @@ QString result;
 QDebug(&result).nospace() << "<PySide6.QtCore.QEvent(" << %CPPSELF->type() << ")>";
 %PYARG_0 = Shiboken::String::fromCString(qPrintable(result));
 // @snippet repr-qevent
+
+// @snippet qmetaproperty_write_enum
+if (Shiboken::Enum::check(%PYARG_2)) {
+    int in = %CONVERTTOCPP[int](%PYARG_2);
+    cppArg1 = QVariant(in);
+}
+// @snippet qmetaproperty_write_enum

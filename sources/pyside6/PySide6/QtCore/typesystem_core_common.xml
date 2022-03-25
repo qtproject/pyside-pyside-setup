@@ -2943,6 +2943,9 @@
   <value-type name="QMetaProperty" >
     <!-- This isn't part of Qt public API -->
     <modify-function signature="enclosingMetaObject()const" remove="all"/>
+    <modify-function signature="write(QObject*,const QVariant &amp;)const">
+      <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qmetaproperty_write_enum"/>
+    </modify-function>
   </value-type>
   <value-type name="QMetaClassInfo">
     <!-- This isn't part of Qt public API -->
