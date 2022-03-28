@@ -106,6 +106,7 @@ add_function_parentheses = True
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
+pygments_dark_style = "monokai"
 
 # A list of ignored prefixes for module index sorting.
 #modindex_common_prefix = []
@@ -115,13 +116,26 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  Major themes that come with
 # Sphinx are currently 'default' and 'sphinxdoc'.
-html_theme = 'pysidedocs'
+html_theme = 'furo'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-#html_theme_options = {
-#}
+html_theme_options = {
+    "dark_css_variables": {
+        "color-brand-primary": "#66689d",
+        "color-brand-content": "#66689d",
+        "color-admonition-title--important": "#41cd52",
+        "color-admonition-title-background--important": "#474b53",
+        "font-stack": "'Titillium Web', sans-serif",
+    },
+    "light_css_variables": {
+        "color-brand-primary": "#66689d",
+        "color-brand-content": "#41cd52",
+        "color-admonition-title--important": "#41cd52",
+        "font-stack": "'Titillium Web', sans-serif",
+    },
+}
 
 # Add any paths that contain custom themes here, relative to this directory.
 html_theme_path = ['@CMAKE_CURRENT_SOURCE_DIR@/_themes']
@@ -135,7 +149,7 @@ html_title = u'Qt for Python'
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-#html_logo = None
+html_logo = "@CMAKE_CURRENT_SOURCE_DIR@/_static/qtforpython.png"
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -145,8 +159,12 @@ html_title = u'Qt for Python'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-#html_static_path = ['@CMAKE_CURRENT_SOURCE_DIR@/_static']
+html_static_path = ['@CMAKE_CURRENT_SOURCE_DIR@/_static']
 
+html_css_files = [
+    'css/qt_font.css',
+    'css/qt_style.css',
+]
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
 #html_last_updated_fmt = '%b %d, %Y'

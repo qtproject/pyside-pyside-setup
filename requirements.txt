@@ -8,3 +8,6 @@ PyOpenGL
 pyinstaller==3.6
 nuitka
 dataclasses; python_version < '3.7'
+furo
+sphinx-copybutton
+
