@@ -1933,6 +1933,18 @@ void CppGenerator::writeSmartPointerConverterFunctions(TextStream &s,
     }
 }
 
+bool CppGenerator::needsArgumentErrorHandling(const OverloadData &overloadData) const
+{
+    if (overloadData.maxArgs() > 0)
+        return true;
+    // QObject constructors need error handling when passing properties as kwarg.
+    if (!usePySideExtensions())
+        return false;
+    auto rfunc = overloadData.referenceFunction();
+    return rfunc->functionType() == AbstractMetaFunction::ConstructorFunction
+        && rfunc->ownerClass()->isQObject();
+}
+
 void CppGenerator::writeMethodWrapperPreamble(TextStream &s,const OverloadData &overloadData,
                                               const GeneratorContext &context,
                                               ErrorReturn errorReturn) const
@@ -1981,9 +1993,11 @@ void CppGenerator::writeMethodWrapperPreamble(TextStream &s,const OverloadData &
         initPythonArguments = minArgs != maxArgs || maxArgs > 1;
     }
 
-    s << R"(Shiboken::AutoDecRef errInfo{};
-static const char *fullName = ")" << fullPythonFunctionName(rfunc, true)
-         << "\";\nSBK_UNUSED(fullName)\n";
+    if (needsArgumentErrorHandling(overloadData)) {
+        s << R"(Shiboken::AutoDecRef errInfo{};
+static const char fullName[] = ")" << fullPythonFunctionName(rfunc, true)
+            << "\";\nSBK_UNUSED(fullName)\n";
+    }
     if (maxArgs > 0) {
         s << "int overloadId = -1;\n"
             << PYTHON_TO_CPPCONVERSION_STRUCT << ' ' << PYTHON_TO_CPP_VAR;
@@ -2101,9 +2115,7 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
     s << "}\nShiboken::BindingManager::instance().registerWrapper(sbkSelf, cptr);\n";
 
     // Create metaObject and register signal/slot
-    bool errHandlerNeeded = overloadData.maxArgs() > 0;
     if (needsMetaObject) {
-        errHandlerNeeded = true;
         s << "\n// QObject setup\n"
             << "PySide::Signal::updateSourceObject(self);\n"
             << "metaObject = cptr->metaObject(); // <- init python qt properties\n"
@@ -2149,7 +2161,7 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
     }
 
     s << "\n\nreturn 1;\n";
-    if (errHandlerNeeded)
+    if (needsArgumentErrorHandling(overloadData))
         writeErrorSection(s, overloadData, errorReturn);
     s<< outdent << "}\n\n";
 }
@@ -2258,7 +2270,7 @@ void CppGenerator::writeMethodWrapper(TextStream &s, const OverloadData &overloa
         s << "Py_RETURN_NONE;\n";
     }
 
-    if (maxArgs > 0)
+    if (needsArgumentErrorHandling(overloadData))
         writeErrorSection(s, overloadData, ErrorReturn::Default);
 
     s<< outdent << "}\n\n";

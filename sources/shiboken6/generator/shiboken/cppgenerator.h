@@ -119,6 +119,7 @@ private:
     void writeSmartPointerConverterFunctions(TextStream &s,
                                              const AbstractMetaType &smartPointerType) const;
 
+    bool needsArgumentErrorHandling(const OverloadData &overloadData) const;
     void writeMethodWrapperPreamble(TextStream &s, const OverloadData &overloadData,
                                     const GeneratorContext &context,
                                     ErrorReturn errorReturn = ErrorReturn::Default) const;
