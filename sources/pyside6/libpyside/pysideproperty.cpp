@@ -359,7 +359,7 @@ static PyObject *qPropertyDocGet(PyObject *self, void *)
     if (pData->fget != nullptr) {
         // PYSIDE-1019: Fetch the default `__doc__` from fget. We do it late.
         AutoDecRef get_doc(PyObject_GetAttr(pData->fget, PyMagicName::doc()));
-        if (!get_doc.isNull()) {
+        if (!get_doc.isNull() && get_doc.object() != Py_None) {
             pData->doc = String::toCString(get_doc);
             pData->getter_doc = true;
             if (Py_TYPE(self) == PySidePropertyTypeF())
