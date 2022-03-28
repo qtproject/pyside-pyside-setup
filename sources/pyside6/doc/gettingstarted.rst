@@ -98,6 +98,258 @@ You can also run a specific test (for example ``qpainter_test``) by running::
 
     ctest -R qpainter_test --verbose
 
+.. _cross_compilation:
+
+Cross Compilation
+-----------------
+
+Starting from 6.3, it is possible to cross-compile Shiboken (module), and
+PySide.  This functionality is still in Technical Preview, which means it could
+change in the future releases.
+
+.. important:: The only supported configuration is using a host Linux
+   machine to cross-compile to a Linux target platform.
+
+Cross compiling software is a valid use case that many projects rely on,
+however, it is a complicated process that might fail due to many reasons.
+
+Before starting with the process, it is important to understand the details of
+the build system, and the goal of cross compilation.
+
+In the build process, a ``Host`` is the computer you are currently using to
+compile, and a ``Target`` is your embedded device that you are compiling for.
+
+Qt for Python is being built using setuptools, and relies on a ``setup.py`` file
+that is called recursively to build Shiboken (module),
+Shiboken (generator), and PySide. As the generator is creating
+the wrappers for the bindings, it's not cross compiled
+for the target.
+Only the Shiboken (module) and PySide are cross compiled.
+
+The building process requires a Qt installation, and a Python interpreter
+on both the host, and the target. The used Qt versions on both platforms
+should have the same minor version. That is, Qt 6.3 (host)
+cannot be used with a Qt 6.2 (target), or the other way around.
+
+
+Prerequisites
+~~~~~~~~~~~~~
+
+First and foremost, you need to have access to the target device because you
+need to copy several system files (sysroot).  We recommend a Linux OS that has
+the latest Qt versions, like `Manjaro ARM`_ or `Archlinux ARM`_.
+
+* (target) Install Qt 6.3+ on the system using the package manager.
+* (host) Install Qt 6.3+ on the system using the package manager or Qt
+  Installer.
+* (target, host) Install the library and development packages that provide
+  C++ headers, linkers, libraries, and compilers.
+* (target, host) Install Python interpreter v3.7 or later
+* (target, host) Install CMake 3.17+
+
+After installing these prerequisites, copy the ``target`` sysroot to your
+``host`` computer. This process is tricky, because copying system files from
+another computer might cause problems with the symbolic links.  Here you
+have two options to achieve that.
+
+Option A: Copying the files
+***************************
+
+Create a directory to copy the sysroot of your target device,
+for example ``rpi-sysroot``, and perform the copy on your host computer:
+
+.. code-block:: bash
+
+    rsync -vR --progress -rl --delete-after --safe-links \
+        USERNAME@TARGET_IP:/{lib,usr,opt/vc/lib} rpi-sysroot/
+
+Ensure to replace ``USERNAME`` and ``TARGET_IP`` with your system appropriate
+values.
+
+Option B: Packaging the file system
+***********************************
+
+Create a package for your sysroot in your target:
+
+.. code-block:: bash
+
+    tar cfJ ~/sysroot.tar.xz /lib /usr /opt/vc/lib
+
+Copy the package from the target to your host:
+
+.. code-block:: bash
+
+    rsync -vR --progress USERNAME@TARGET_IP:sysroot.tar.xz .
+
+Once you have the tar file, unpack it inside a ``rpi-sysroot`` directory.
+
+It is recommended to run the following script to fix
+most of the issues you would find with symbolic links:
+
+.. code-block:: python
+
+    import sys
+    from pathlib import Path
+    import os
+
+    # Take a sysroot directory and turn all the absolute symlinks and turn them into
+    # relative ones such that the sysroot is usable within another system.
+
+    if len(sys.argv) != 2:
+        print(f"Usage is {sys.argv[0]} <sysroot-directory>")
+        sys.exit(-1)
+
+    topdir = Path(sys.argv[1]).absolute()
+
+    def handlelink(filep, subdir):
+        link = filep.readlink()
+        if str(link)[0] != "/":
+            return
+        if link.startswith(topdir):
+            return
+        relpath = os.path.relpath((topdir / link).resolve(), subdir)
+        os.unlink(filep)
+        os.symlink(relpath, filep)
+
+    for f in topdir.glob("**/*"):
+        if f.is_file() and f.is_symlink():
+            handlelink(f, f.parent)
+
+Setting up the toolchain
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+To perform the cross compilation, you need a special set of compilers,
+libraries, and headers, which runs on the host architecture, but generates
+(binaries/executables) for a target architecture.
+For example, from x86_64 to aarch64.
+
+It is recommended to use the official 10.2 `ARM Developer cross compilers`_,
+which you can find on their official website. For this tutorial, we choose
+``aarch64`` target architecture and we will assume that you downloaded the
+`gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu.tar.xz`_ file,
+and unpacked it.
+
+With those compilers, now you need a CMake toolchain file. This is
+a configuration file to set the compilers and sysroot information, together
+with extra options like compilation flags, and other details.  You can use the
+following file as an example, but keep in mind they might vary:
+
+.. code-block:: cmake
+
+    # toolchain-aarch64.cmake
+    cmake_minimum_required(VERSION 3.18)
+    include_guard(GLOBAL)
+
+    set(CMAKE_SYSTEM_NAME Linux)
+    set(CMAKE_SYSTEM_PROCESSOR aarch64)
+
+    set(TARGET_SYSROOT /path/to/your/target/sysroot)
+    set(CROSS_COMPILER /path/to/your/crosscompiling/compilers/)
+
+    set(CMAKE_SYSROOT ${TARGET_SYSROOT})
+
+    set(ENV{PKG_CONFIG_PATH} "")
+    set(ENV{PKG_CONFIG_LIBDIR} ${CMAKE_SYSROOT}/usr/lib/pkgconfig:${CMAKE_SYSROOT}/usr/share/pkgconfig)
+    set(ENV{PKG_CONFIG_SYSROOT_DIR} ${CMAKE_SYSROOT})
+
+    set(CMAKE_C_COMPILER ${CROSS_COMPILER}/aarch64-none-linux-gnu-gcc)
+    set(CMAKE_CXX_COMPILER ${CROSS_COMPILER}/aarch64-none-linux-gnu-g++)
+
+    set(QT_COMPILER_FLAGS "-march=armv8-a")
+    set(QT_COMPILER_FLAGS_RELEASE "-O2 -pipe")
+    set(QT_LINKER_FLAGS "-Wl,-O1 -Wl,--hash-style=gnu -Wl,--as-needed")
+
+    set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+    set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+    set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+    set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
+
+    include(CMakeInitializeConfigs)
+
+    function(cmake_initialize_per_config_variable _PREFIX _DOCSTRING)
+      if (_PREFIX MATCHES "CMAKE_(C|CXX|ASM)_FLAGS")
+        set(CMAKE_${CMAKE_MATCH_1}_FLAGS_INIT "${QT_COMPILER_FLAGS}")
+
+        foreach (config DEBUG RELEASE MINSIZEREL RELWITHDEBINFO)
+          if (DEFINED QT_COMPILER_FLAGS_${config})
+            set(CMAKE_${CMAKE_MATCH_1}_FLAGS_${config}_INIT "${QT_COMPILER_FLAGS_${config}}")
+          endif()
+        endforeach()
+      endif()
+
+      if (_PREFIX MATCHES "CMAKE_(SHARED|MODULE|EXE)_LINKER_FLAGS")
+        foreach (config SHARED MODULE EXE)
+          set(CMAKE_${config}_LINKER_FLAGS_INIT "${QT_LINKER_FLAGS}")
+        endforeach()
+      endif()
+
+      _cmake_initialize_per_config_variable(${ARGV})
+    endfunction()
+
+You need to adjust the paths in these two lines::
+
+    set(TARGET_SYSROOT /path/to/your/target/sysroot)
+    set(CROSS_COMPILER /path/to/your/crosscompiling/compilers/)
+
+and replace them with the sysroot directory (the one we called ``rpi-sysroot``),
+and the compilers (the ``gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin`` directory).
+
+
+Cross compiling PySide
+~~~~~~~~~~~~~~~~~~~~~~
+
+After you have installed the prerequisites and copied the necessary files, you
+should have the following:
+
+* The compilers to cross compile (``gcc-argm-10.2-...``),
+* The target sysroot (``rpi-sysroot``),
+* The toolchain cmake file (``toolchain-aarch64.cmake``),
+* The ``pyside-setup`` repository,
+
+An example of the ``setup.py`` invocation might look like the following:
+
+.. code-block:: bash
+
+    python setup.py bdist_wheel \
+        --parallel=8 --ignore-git --reuse-build --standalone --limited-api=yes \
+        --cmake-toolchain-file=/opt/toolchain-aarch64.cmake \
+        --qt-host-path=/opt/Qt/6.3.0/gcc_64 \
+        --plat-name=linux_aarch64 \
+
+Depending on the target platform, you could use ``linux_armv7``,
+``linux_aarch64``, etc.
+
+If the process succeeds, you will find the target wheels in your ``dist/``
+directory, for example:
+
+.. code-block:: bash
+
+    PySide6-6.3.0-6.3.0-cp36-abi3-manylinux2014_aarch64.whl
+    shiboken6-6.3.0-6.3.0-cp36-abi3-manylinux2014_aarch64.whl
+
+
+Troubleshooting
+***************
+
+* If the auto-detection mechanism fails to find the Python or Qt installations
+  you have in your target device, you can use two additional options::
+
+      --python-target-path=...
+
+  and::
+
+      --qt-target-path=...
+
+* In case the automatic build of the host Shiboken (generator) fails,
+  you can specify the custom path using::
+
+      --shiboken-host-path=...
+
+.. _`Manjaro ARM`: https://manjaro.org/download/#ARM
+.. _`Archlinux ARM`: https://archlinuxarm.org
+.. _`ARM Developer Cross Compilers`: https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads
+.. _`gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu.tar.xz`: https://developer.arm.com/-/media/Files/downloads/gnu-a/10.2-2020.11/binrel/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu.tar.xz
+
 .. _building_documentation:
 
 Building the documentation
