@@ -5820,7 +5820,7 @@ void CppGenerator::writeClassRegister(TextStream &s,
         if (!classContext.forSmartPointer())
             typeName = metaClass->name();
         else
-            typeName = classContext.preciseType().cppSignature();
+            typeName = getClassTargetFullName(classContext.preciseType(), false);
 
         // 2:typeName
         s << "\"" << typeName << "\",\n";
