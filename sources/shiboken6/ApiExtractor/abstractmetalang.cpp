@@ -425,6 +425,8 @@ void AbstractMetaClassPrivate::addFunction(const AbstractMetaFunctionCPtr &funct
     m_hasVirtuals |= function->isVirtual();
     m_isPolymorphic |= m_hasVirtuals;
     m_hasNonpublic |= !function->isPublic();
+    m_hasNonPrivateConstructor |= !function->isPrivate()
+        && function->functionType() == AbstractMetaFunction::ConstructorFunction;
 }
 
 void AbstractMetaClass::addFunction(const AbstractMetaFunctionCPtr &function)
