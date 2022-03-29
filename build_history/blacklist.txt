@@ -58,8 +58,6 @@
     pypy
 [pysidetest::mixin_signal_slots_test]
     pypy
-[signals::qobject_receivers_test]
-    pypy
 [signals::qobject_sender_test]
     pypy
 [QtCore::classinfo_test]
@@ -67,8 +65,6 @@
 [QtCore::qbytearray_test]
     pypy
 [QtWidgets::bug_836]
-    pypy
-[QtWidgets::bug_860]
     pypy
 [QtQml::bug_825]
     pypy
