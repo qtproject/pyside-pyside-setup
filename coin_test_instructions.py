@@ -36,16 +36,13 @@
 ## $QT_END_LICENSE$
 ##
 #############################################################################
-from build_scripts.options import has_option
-from build_scripts.options import option_value, log
-from build_scripts.utils import install_pip_dependencies, expand_clang_variables
-from build_scripts.utils import get_qtci_virtualEnv
-from build_scripts.utils import run_instruction
-from build_scripts.utils import rmtree
-from build_scripts.utils import get_ci_qmake_path
 import os
 import site
 import sys
+
+from build_scripts.options import has_option, log, option_value
+from build_scripts.utils import (expand_clang_variables, get_ci_qmake_path,
+                                 get_qtci_virtualEnv, rmtree, run_instruction)
 
 log.set_verbosity(log.INFO)
 
@@ -65,6 +62,7 @@ if _ci_features is not None:
         CI_FEATURES.append(f)
 CI_RELEASE_CONF = has_option("packaging")
 
+
 def call_testrunner(python_ver, buildnro):
     _pExe, _env, env_pip, env_python = get_qtci_virtualEnv(python_ver, CI_HOST_OS, CI_HOST_ARCH, CI_TARGET_ARCH)
     rmtree(_env, True)
@@ -74,9 +72,10 @@ def call_testrunner(python_ver, buildnro):
     if sys.platform == "win32":
         python3 = os.path.join(os.getenv("PYTHON3_PATH"), "python.exe")
 
-    if  CI_HOST_OS == "MacOS" and CI_HOST_ARCH == "ARM64": # we shouldn't install anything to m1, while it is not virtualized
+    # we shouldn't install anything to m1, while it is not virtualized
+    if CI_HOST_OS == "MacOS" and CI_HOST_ARCH == "ARM64":
         v_env = "virtualenv"
-        run_instruction([v_env, "-p", _pExe,  _env], "Failed to create virtualenv")
+        run_instruction([v_env, "-p", _pExe, _env], "Failed to create virtualenv")
     else:
         run_instruction([python3, "-m", "pip", "install", "--user", "virtualenv==20.7.2"], "Failed to pin virtualenv")
         # installing to user base might not be in PATH by default.
@@ -88,17 +87,18 @@ def call_testrunner(python_ver, buildnro):
         try:
             run_instruction([v_env, "--version"], "Using default virtualenv")
         except Exception as e:
+            log.info("Failed to use the default virtualenv")
+            log.info(f"{type(e).__name__}: {e}")
             v_env = "virtualenv"
-        run_instruction([v_env, "-p", _pExe,  _env], "Failed to create virtualenv")
+        run_instruction([v_env, "-p", _pExe, _env], "Failed to create virtualenv")
         # When the 'python_ver' variable is empty, we are using Python 2
         # Pip is always upgraded when CI template is provisioned, upgrading it in later phase may cause perm issue
         run_instruction([env_pip, "install", "-r", "requirements.txt"], "Failed to install dependencies")
         # Install distro to replace missing platform.linux_distribution() in python3.8
         run_instruction([env_pip, "install", "distro"], "Failed to install distro")
 
-    cmd = [env_python, "testrunner.py", "test",
-                  "--blacklist", "build_history/blacklist.txt",
-                  "--buildno=" + buildnro]
+    cmd = [env_python, "testrunner.py", "test", "--blacklist", "build_history/blacklist.txt",
+           f"--buildno={buildnro}"]
     run_instruction(cmd, "Failed to run testrunner.py")
 
     qmake_path = get_ci_qmake_path(CI_ENV_INSTALL_DIR, CI_HOST_OS)
@@ -117,6 +117,7 @@ def call_testrunner(python_ver, buildnro):
         # Run the test for the new set of wheels
         cmd = [env_python, wheel_tester_path, qmake_path, "--wheels-dir=dist_new", "--new"]
         run_instruction(cmd, "Error while running wheel_tester.py on new wheels")
+
 
 def run_test_instructions():
     # Remove some environment variables that impact cmake
@@ -138,6 +139,7 @@ def run_test_instructions():
         call_testrunner("3.8", str(testRun))
     else:
         call_testrunner("3", str(testRun))
+
 
 if __name__ == "__main__":
     run_test_instructions()

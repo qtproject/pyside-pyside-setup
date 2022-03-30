@@ -36,19 +36,17 @@
 ## $QT_END_LICENSE$
 ##
 #############################################################################
-from build_scripts.options import has_option
-from build_scripts.options import option_value, log
-from build_scripts.utils import install_pip_dependencies, expand_clang_variables
-from build_scripts.utils import get_qtci_virtualEnv
-from build_scripts.utils import run_instruction
-from build_scripts.utils import rmtree
-from build_scripts.utils import parse_cmake_conf_assignments_by_key
-from build_scripts.utils import get_ci_qtpaths_path
-import os
-import datetime
 import calendar
+import datetime
+import os
 import site
 import sys
+
+from build_scripts.options import has_option, log, option_value
+from build_scripts.utils import (expand_clang_variables, get_ci_qtpaths_path,
+                                 get_qtci_virtualEnv,
+                                 parse_cmake_conf_assignments_by_key, rmtree,
+                                 run_instruction)
 
 log.set_verbosity(log.INFO)
 
@@ -74,7 +72,6 @@ if CI_TEST_PHASE not in ["ALL", "BUILD", "WHEEL"]:
     CI_TEST_PHASE = "ALL"
 
 
-
 def get_current_script_path():
     """ Returns the absolute path containing this script. """
     try:
@@ -83,6 +80,7 @@ def get_current_script_path():
         this_file = sys.argv[0]
     this_file = os.path.abspath(this_file)
     return os.path.dirname(this_file)
+
 
 def is_snapshot_build():
     """
@@ -104,6 +102,7 @@ def is_snapshot_build():
     if pre_release_version and release_version_type:
         return True
     return False
+
 
 def call_setup(python_ver, phase):
     print("call_setup")
@@ -128,8 +127,10 @@ def call_setup(python_ver, phase):
         try:
             run_instruction([v_env, "--version"], "Using default virtualenv")
         except Exception as e:
+            log.info("Failed to use the default virtualenv")
+            log.info(f"{type(e).__name__}: {e}")
             v_env = "virtualenv"
-        run_instruction([v_env, "-p", _pExe,  _env], "Failed to create virtualenv")
+        run_instruction([v_env, "-p", _pExe, _env], "Failed to create virtualenv")
         # When the 'python_ver' variable is empty, we are using Python 2
         # Pip is always upgraded when CI template is provisioned, upgrading it in later phase may cause perm issue
         run_instruction([env_pip, "install", "-r", "requirements.txt"], "Failed to install dependencies")
@@ -177,6 +178,7 @@ def call_setup(python_ver, phase):
         cmd = [env_python, "create_wheels.py"]
         run_instruction(cmd, "Failed to create new wheels", initial_env=env)
 
+
 if __name__ == "__main__":
 
     # Remove some environment variables that impact cmake
@@ -186,7 +188,7 @@ if __name__ == "__main__":
         if os.environ.get(env_var):
             del os.environ[env_var]
     python_ver = "3"
-    if CI_TARGET_OS in["Linux"]:
+    if CI_TARGET_OS in ["Linux"]:
         python_ver = "3.8"
 
     if CI_TEST_PHASE in ["ALL", "BUILD"]:
