@@ -38,10 +38,12 @@
 #############################################################################
 
 import os
-from ..utils import (copydir, copyfile, copy_icu_libs, find_files_using_glob,
-                     linux_patch_executable)
+
 from ..config import config
+from ..utils import (copy_icu_libs, copydir, copyfile, find_files_using_glob,
+                     linux_patch_executable)
 from ..versions import PYSIDE
+
 
 def prepare_standalone_package_linux(self, vars):
     built_modules = vars['built_modules']

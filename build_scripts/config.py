@@ -38,7 +38,9 @@
 #############################################################################
 
 import os
+
 from setuptools._distutils import log
+
 from .versions import PYSIDE, PYSIDE_MODULE, SHIBOKEN
 
 
@@ -215,7 +217,9 @@ class Config(object):
         elif self.internal_build_type == self.shiboken_generator_option_name:
             setup_kwargs['name'] = self.shiboken_generator_st_name
             setup_kwargs['description'] = "Python / C++ bindings generator"
-            setup_kwargs['install_requires'] = [f"{self.shiboken_module_st_name}=={package_version}"]
+            setup_kwargs['install_requires'] = [
+                f"{self.shiboken_module_st_name}=={package_version}"
+            ]
             setup_kwargs['entry_points'] = {
                 'console_scripts': [
                     f'{SHIBOKEN} = {package_name}.scripts.shiboken_tool:main',
@@ -225,23 +229,17 @@ class Config(object):
 
         elif self.internal_build_type == self.pyside_option_name:
             setup_kwargs['name'] = self.pyside_st_name
-            setup_kwargs['description'] = "Python bindings for the Qt cross-platform application and UI framework"
-            setup_kwargs['install_requires'] = [f"{self.shiboken_module_st_name}=={package_version}"]
+            setup_kwargs['description'] = ("Python bindings for the Qt cross-platform application "
+                                           "and UI framework")
+            setup_kwargs['install_requires'] = [
+                f"{self.shiboken_module_st_name}=={package_version}"
+            ]
+            _pyside_tools = ["uic", "rcc", "asistant", "designer", "linguist", "lupdate",
+                             "lrelease", "genpyi", "metaobjectdump", "project", "qmltyperegistrar",
+                             "qmllink"]
             setup_kwargs['entry_points'] = {
-                'console_scripts': [
-                    f'{PYSIDE}-uic = {package_name}.scripts.pyside_tool:uic',
-                    f'{PYSIDE}-rcc = {package_name}.scripts.pyside_tool:rcc',
-                    f'{PYSIDE}-assistant = {package_name}.scripts.pyside_tool:assistant',
-                    f'{PYSIDE}-designer= {package_name}.scripts.pyside_tool:designer',
-                    f'{PYSIDE}-linguist = {package_name}.scripts.pyside_tool:linguist',
-                    f'{PYSIDE}-lupdate = {package_name}.scripts.pyside_tool:lupdate',
-                    f'{PYSIDE}-lrelease = {package_name}.scripts.pyside_tool:lrelease',
-                    f'{PYSIDE}-genpyi = {package_name}.scripts.pyside_tool:genpyi',
-                    f'{PYSIDE}-metaobjectdump = {package_name}.scripts.pyside_tool:metaobjectdump',
-                    f'{PYSIDE}-project = {package_name}.scripts.pyside_tool:project',
-                    f'{PYSIDE}-qmltyperegistrar = {package_name}.scripts.pyside_tool:qmltyperegistrar',
-                    f'{PYSIDE}-qmllint = {package_name}.scripts.pyside_tool:qmllint'
-                ]
+                'console_scripts': [f'{PYSIDE}-{tool} = {package_name}.scripts.pyside_tool:{tool}'
+                                    for tool in _pyside_tools]
             }
         self.setup_kwargs = setup_kwargs
 

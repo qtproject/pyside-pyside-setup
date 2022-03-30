@@ -40,11 +40,11 @@
 import os
 import platform
 import sys
+from sysconfig import get_config_var
 
 from setuptools._distutils import log
-from setuptools._distutils.errors import DistutilsSetupError
-from sysconfig import get_config_var
 from setuptools._distutils import sysconfig as sconfig
+from setuptools._distutils.errors import DistutilsSetupError
 
 from .options import OPTION
 from .qtinfo import QtInfo
@@ -327,8 +327,8 @@ class BuildInfoCollectorMixin(object):
         self.build_type = build_type
 
         if self.is_cross_compile:
-            site_packages_without_prefix = self.python_target_info['python_info']['site_packages_dir']
-            self.site_packages_dir = os.path.join(install_dir, site_packages_without_prefix)
+            site_packages_no_prefix = self.python_target_info['python_info']['site_packages_dir']
+            self.site_packages_dir = os.path.join(install_dir, site_packages_no_prefix)
         else:
             self.site_packages_dir = sconfig.get_python_lib(1, 0, prefix=install_dir)
 

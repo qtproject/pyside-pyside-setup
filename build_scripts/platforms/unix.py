@@ -37,17 +37,16 @@
 ##
 #############################################################################
 
+import fnmatch
 import os
 import sys
-import fnmatch
-from .linux import prepare_standalone_package_linux
-from .macos import prepare_standalone_package_macos
 
 from ..config import config
 from ..options import OPTION
-from ..qtinfo import QtInfo
 from ..utils import copydir, copyfile, makefile
 from ..versions import PYSIDE, SHIBOKEN
+from .linux import prepare_standalone_package_linux
+from .macos import prepare_standalone_package_macos
 
 
 def _macos_copy_gui_executable(name, vars=None):
@@ -70,7 +69,7 @@ def _unix_copy_gui_executable(name, vars=None):
 
 def _copy_gui_executable(name, vars=None):
     """Copy a GUI executable and return the files"""
-    if  sys.platform == 'darwin':
+    if sys.platform == 'darwin':
         return _macos_copy_gui_executable(name, vars)
     return _unix_copy_gui_executable(name, vars)
 
@@ -159,7 +158,6 @@ def prepare_packages_posix(self, vars):
             "{st_build_dir}/{st_package_name}",
             filter=[f"{PYSIDE}-lupdate"],
             recursive=False, vars=vars))
-
 
         lib_exec_filters = []
         if not OPTION['NO_QT_TOOLS']:

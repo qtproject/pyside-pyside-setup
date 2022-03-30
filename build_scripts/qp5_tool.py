@@ -37,16 +37,15 @@
 ##
 #############################################################################
 
-from argparse import ArgumentParser, RawTextHelpFormatter
 import datetime
-from enum import Enum
 import os
 import re
 import subprocess
 import sys
 import time
 import warnings
-
+from argparse import ArgumentParser, RawTextHelpFormatter
+from enum import Enum
 
 DESC = """
 Utility script for working with Qt for Python.

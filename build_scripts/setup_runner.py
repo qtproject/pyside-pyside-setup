@@ -37,8 +37,8 @@
 ##
 #############################################################################
 
-import sys
 import os
+import sys
 import tempfile
 import textwrap
 
@@ -46,8 +46,8 @@ from setuptools import setup  # Import setuptools before distutils
 from setuptools._distutils import log
 
 from build_scripts.config import config
-from build_scripts.main import get_package_version, get_setuptools_extension_modules
-from build_scripts.main import cmd_class_dict
+from build_scripts.main import (cmd_class_dict, get_package_version,
+                                get_setuptools_extension_modules)
 from build_scripts.options import ADDITIONAL_OPTIONS, OPTION
 from build_scripts.utils import run_process
 

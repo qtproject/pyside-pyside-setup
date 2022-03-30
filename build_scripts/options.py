@@ -38,23 +38,23 @@
 #############################################################################
 
 try:
-    from setuptools._distutils import log
     from setuptools import Command
+    from setuptools._distutils import log
 except ModuleNotFoundError:
     # This is motivated by our CI using an old version of setuptools
     # so then the coin_build_instructions.py script is executed, and
     # import from this file, it was failing.
     from distutils import log
     from distutils.cmd import Command
-from shutil import which
-import sys
+
 import os
+import sys
 import warnings
 from pathlib import Path
+from shutil import which
 
 from .qtinfo import QtInfo
 from .utils import memoize
-
 
 _AVAILABLE_MKSPECS = ["ninja", "msvc", "mingw"] if sys.platform == "win32" else ["ninja", "make"]
 
@@ -533,7 +533,8 @@ class DistUtilsCommandMixin(object):
             # Check for existence, but don't require if it's not set. A
             # check later will be done to see if it's needed.
             if self.qt_target_path and not os.path.exists(self.qt_target_path):
-                log.error(f"Provided --qt-target-path='{self.qt_target_path}' path does not exist.")
+                log.error(f"Provided --qt-target-path='{self.qt_target_path}' "
+                          "path does not exist.")
                 return False
 
         if not self.make_spec:

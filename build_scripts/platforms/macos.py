@@ -39,8 +39,10 @@
 
 import fnmatch
 import os
-from ..utils import copydir, copyfile, macos_fix_rpaths_for_library, macos_add_rpath
+
 from ..config import config
+from ..utils import (copydir, copyfile, macos_add_rpath,
+                     macos_fix_rpaths_for_library)
 from ..versions import PYSIDE
 
 
@@ -177,7 +179,7 @@ def prepare_standalone_package_macos(self, vars):
             if copy_qt_conf:
                 # Copy the qt.conf file to libexec.
                 if not os.path.isdir(qt_libexec_path):
-                     os.makedirs(qt_libexec_path)
+                    os.makedirs(qt_libexec_path)
                 copyfile(
                     f"{{build_dir}}/{PYSIDE}/{{st_package_name}}/qt.conf",
                     qt_libexec_path, vars=vars)
@@ -186,7 +188,7 @@ def prepare_standalone_package_macos(self, vars):
         is_pypy = "pypy" in self.build_classifiers
         # <qt>/plugins/* -> <setup>/{st_package_name}/Qt/plugins
         plugins_target = "{st_build_dir}/{st_package_name}/Qt/plugins"
-        filters=["*.dylib"]
+        filters = ["*.dylib"]
         copydir("{qt_plugins_dir}", plugins_target,
                 filter=filters,
                 recursive=True,
