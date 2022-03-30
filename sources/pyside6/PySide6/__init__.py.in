@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 from textwrap import dedent
 
+# __all__ is also corrected below.
 __all__ = list("Qt" + body for body in
     "@all_module_shortnames@"
     .split(";"))
@@ -108,4 +109,32 @@ def _setupQtDirectories():
             finally:
                 os.environ['PATH'] = path
 
+
+def _find_all_qt_modules():
+    # Since the wheel split, the __all__ variable cannot be computed statically,
+    # because we don't know all modules in advance.
+
+    # Instead, we look into the file system and quickly build a list of all
+    # existing .pyi files, because importing is not desired and also impossible during import.
+    # By using the initially created list, we can keep some order intact.
+    location = Path(__file__).resolve().parent
+
+    # Note: We should _not_ call this function while still building, but use the existing value!
+    in_build = location.parents[1].name == "build"
+    if in_build:
+        return __all__
+
+    files = os.listdir(location)
+    unordered = set(name[:-4] for name in files if name.startswith("Qt") and name.endswith(".pyi"))
+    ordered_part = __all__
+    result = []
+    for name in ordered_part:
+        if name in unordered:
+            result.append(name)
+            unordered.remove(name)
+    result.extend(unordered)
+    return result
+
+
+__all__ = _find_all_qt_modules()
 _setupQtDirectories()
