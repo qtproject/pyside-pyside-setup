@@ -53,10 +53,12 @@ def main():
 
 
 def genpyi():
-    shiboken_dir = Path(__file__).resolve().parents[2] / "shiboken6"
-    support = shiboken_dir / "files.dir" / "shibokensupport"
-    cmd = support / "signature" / "lib" / "pyi_generator.py"
-    command = [sys.executable, os.fspath(cmd)] + sys.argv[1:]
+    # After we changed the shibokensupport module to be totally virtual,
+    # it is no longer possible to call the pyi generator from the file system.
+    command = [sys.executable, "-c",
+               "import shiboken6;"
+               "from shibokensupport.signature.lib.pyi_generator import main;"
+               "main()"] + sys.argv[1:]
     sys.exit(subprocess.call(command))
 
 
