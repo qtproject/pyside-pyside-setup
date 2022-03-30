@@ -1,7 +1,7 @@
 # PySide6 Addons
 
 PySide6 is the official Python module from the
-[Qt for Python project](http://wiki.qt.io/Qt_for_Python),
+[Qt for Python project](https://wiki.qt.io/Qt_for_Python),
 which provides access to the complete Qt 6.0+ framework.
 
 The Qt for Python project is developed in the open, with all facilities you'd expect
@@ -52,7 +52,7 @@ our [guidelines](https://wiki.qt.io/Qt_for_Python/Reporting_Bugs).
 ### Community
 
 Check *#qt-pyside*, our official IRC channel on FreeNode, or contact us via our
-[mailing list](http://lists.qt-project.org/mailman/listinfo/pyside).
+[mailing list](https://lists.qt-project.org/mailman/listinfo/pyside).
 
 ### Licensing
 

@@ -5,7 +5,7 @@
 **Important:** for Qt5 compatibility, check [PySide2](https://pypi.org/project/PySide2)
 
 PySide6 is the official Python module from the
-[Qt for Python project](http://wiki.qt.io/Qt_for_Python),
+[Qt for Python project](https://wiki.qt.io/Qt_for_Python),
 which provides access to the complete Qt 6.0+ framework.
 
 The Qt for Python project is developed in the open, with all facilities you'd expect
@@ -33,7 +33,7 @@ pip install PySide6
 PySide6 versions following 6.0 use a C++ parser based on
 [Clang](http://clang.org/). The Clang library (C-bindings), version 13.0 or
 higher is required for building. Prebuilt versions of it can be downloaded from
-[download.qt.io](http://download.qt.io/development_releases/prebuilt/libclang/).
+[download.qt.io](https://download.qt.io/development_releases/prebuilt/libclang/).
 
 After unpacking the archive, set the environment variable *LLVM_INSTALL_DIR* to
 point to the folder containing the *include* and *lib* directories of Clang:
@@ -84,7 +84,7 @@ our [guidelines](https://wiki.qt.io/Qt_for_Python/Reporting_Bugs).
 ### Community
 
 Check *#qt-pyside*, our official IRC channel on FreeNode, or contact us via our
-[mailing list](http://lists.qt-project.org/mailman/listinfo/pyside).
+[mailing list](https://lists.qt-project.org/mailman/listinfo/pyside).
 
 ### Licensing
 

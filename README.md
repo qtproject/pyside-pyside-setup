@@ -1,6 +1,6 @@
 # Qt For Python
 
-Qt For Python is the [Python Qt bindings project](http://wiki.qt.io/PySide6),
+Qt For Python is the [Python Qt bindings project](https://wiki.qt.io/PySide6),
 providing access to the complete Qt framework as well as to generator tools for
 rapidly generating bindings for any C++ libraries.
 
@@ -152,7 +152,7 @@ platforms.
 
 Please note that official Windows packages do not ship the OpenSSL libraries
 due to import/export restrictions as described in
-http://doc.qt.io/qt-6/ssl.html#import-and-export-restrictions
+https://doc.qt.io/qt-6/ssl.html#import-and-export-restrictions
 
 You can specify the location of the OpenSSL DLLs with the following option:
 `--openssl=</path/to/openssl/bin-directory>`.
