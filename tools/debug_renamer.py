@@ -26,6 +26,11 @@
 ##
 #############################################################################
 
+import re
+import sys
+from argparse import ArgumentParser, FileType, RawTextHelpFormatter
+from collections import OrderedDict
+
 DESC = """
 debug_renamer.py
 ================
@@ -62,12 +67,6 @@ Names of objects which are already deleted should be monitored and
 not by chance be re-used. We need to think of a way to specify deletion.
 """
 
-import re
-import sys
-
-from argparse import ArgumentParser, FileType, RawTextHelpFormatter
-from collections import OrderedDict
-
 
 def make_name(typename, name_pos):
     """
@@ -83,11 +82,12 @@ known_types = {}
 pattern = r"0x\w+\s+\S+"    # hex word followed by non-WS
 rex = re.compile(pattern, re.IGNORECASE)
 
+
 def rename_hexval(line):
     if not (res := rex.search(line)):
         return line
     start_pos, end_pos = res.start(), res.end()
-    beg, mid, end = line[:start_pos], line[start_pos : end_pos], line[end_pos:]
+    beg, mid, end = line[:start_pos], line[start_pos:end_pos], line[end_pos:]
     object_id, typename = mid.split()
     if int(object_id, 16) == 0:
         return(f"{beg}{typename}_NULL{end}")

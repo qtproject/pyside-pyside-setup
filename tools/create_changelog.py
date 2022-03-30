@@ -39,9 +39,9 @@
 
 import re
 import sys
-from argparse import ArgumentParser, Namespace, RawTextHelpFormatter
-from subprocess import check_output, Popen, PIPE
 import textwrap
+from argparse import ArgumentParser, Namespace, RawTextHelpFormatter
+from subprocess import PIPE, Popen, check_output
 from typing import Dict, List, Tuple
 
 content_header = """Qt for Python @VERSION is a @TYPE release.
@@ -160,6 +160,7 @@ def get_commit_content(sha: str) -> str:
         print(err, file=sys.stderr)
     return out.decode("utf-8")
 
+
 def git_get_sha1s(versions: List[str], pattern: str):
     """Return a list of SHA1s matching a pattern"""
     command = "git rev-list --reverse --grep '^{}'".format(pattern)
@@ -186,7 +187,6 @@ def git_get_sha1s(versions: List[str], pattern: str):
         if err:
             print(err, file=sys.stderr)
         pick_to_sha1 = out_e_sha1.splitlines()
-
 
     return [s.decode("utf-8") for s in out_sha1.splitlines() if s not in pick_to_sha1]
 

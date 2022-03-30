@@ -44,12 +44,9 @@ import sys
 import tokenize
 import warnings
 
-from .formatter import (CppFormatter, format_for_loop,
-                        format_function_def_arguments, format_inheritance,
-                        format_literal, format_reference,
-                        format_start_function_call,
+from .formatter import (CppFormatter, format_for_loop, format_literal,
+                        format_reference, format_start_function_call,
                         write_import, write_import_from)
-
 from .nodedump import debug_format_node
 
 

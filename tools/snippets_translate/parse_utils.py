@@ -38,6 +38,7 @@
 #############################################################################
 
 import re
+
 from module_classes import module_classes
 
 
@@ -67,6 +68,7 @@ def get_qt_module_class(x):
 
 def get_indent(x):
     return " " * (len(x) - len(x.lstrip()))
+
 
 # Remove more than one whitespace from the code, but not considering
 # the indentation. Also removes '&', '*', and ';' from arguments.
@@ -141,4 +143,3 @@ def replace_main_commas(v):
         new_v += c
 
     return new_v
-

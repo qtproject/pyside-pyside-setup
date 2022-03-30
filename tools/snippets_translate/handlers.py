@@ -40,7 +40,8 @@
 import re
 import sys
 
-from parse_utils import get_indent, dstrip, remove_ref, parse_arguments, replace_main_commas, get_qt_module_class
+from parse_utils import (dstrip, get_indent, get_qt_module_class,
+                         parse_arguments, remove_ref, replace_main_commas)
 
 IF_PATTERN = re.compile(r'^if\s*\(')
 ELSE_IF_PATTERN = re.compile(r'^}?\s*else if\s*\(')
@@ -92,7 +93,6 @@ def handle_inc_dec(x, operator):
 
 
 def handle_casts(x):
-    cast = None
     re_type = re.compile(r"<(.*)>")
     re_data = re.compile(r"_cast<.*>\((.*)\)")
     type_name = re_type.search(x)
@@ -147,7 +147,6 @@ def handle_include(x):
 
 
 def handle_conditions(x):
-    x_strip = x.strip()
     if WHILE_PATTERN.match(x):
         x = handle_condition(x, "while")
     elif IF_PATTERN.match(x):
@@ -197,7 +196,7 @@ def handle_for(x):
                     # Malformed for-loop:
                     #   for (; pixel1 > start; pixel1 -= stride)
                     # We return the same line
-                    if not start.strip() or not "=" in start:
+                    if not start.strip() or "=" not in start:
                         return f"{get_indent(x)}{dstrip(x)}"
                     raw_var, value = start.split("=")
                 raw_var = raw_var.strip()
@@ -490,6 +489,7 @@ def handle_class(x):
     else:
         return x
 
+
 def handle_array_declarations(x):
     re_varname = re.compile(r"^[a-zA-Z0-9\<\>]+ ([\w\*]+) *\[?\]?")
     content = re_varname.search(x.strip())
@@ -498,6 +498,7 @@ def handle_array_declarations(x):
         rest_line = "".join(x.split("{")[1:])
         x = f"{get_indent(x)}{var_name} = {{{rest_line}"
     return x
+
 
 def handle_methods_return_type(x):
     re_capture = re.compile(r"^ *[a-zA-Z0-9]+ [\w]+::([\w\*\&]+\(.*\)$)")
@@ -531,6 +532,7 @@ def handle_functions(x):
                 arguments = arguments[:-1]
         x = f"{get_indent(x)}def {function_name}({dstrip(arguments)}):"
     return x
+
 
 def handle_useless_qt_classes(x):
     _classes = ("QLatin1String", "QLatin1Char")

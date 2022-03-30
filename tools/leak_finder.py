@@ -90,11 +90,10 @@ These objects are real leaks if their number is growing with the probe
 size. For analysis, the number of new objects per type is counted.
 """
 
-import sys
-import gc
 import array
+import gc
+import sys
 import unittest
-
 # this comes from Python, too
 from test import support
 

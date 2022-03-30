@@ -37,6 +37,20 @@
 ##
 ###############
 
+import argparse
+import ctypes
+import logging
+import re
+import subprocess
+import sys
+from os import path
+from textwrap import dedent
+
+is_win = sys.platform == "win32"
+if is_win:
+    import winreg
+
+
 EPILOG = """
 This is a troubleshooting script that assists finding out which DLLs or
 which symbols in a DLL are missing when executing a PySide6 python
@@ -60,19 +74,6 @@ installed together with the Windows Kit found at:
 https://developer.microsoft.com/en-us/windows/downloads/windows-10-sdk
 
 """
-
-import sys
-import re
-import subprocess
-import ctypes
-import logging
-import argparse
-from os import path
-from textwrap import dedent
-
-is_win = sys.platform == "win32"
-if is_win:
-    import winreg
 
 
 def get_parser_args():
@@ -184,10 +185,10 @@ def get_appropriate_kit(kits):
     log.info("Found Windows kits are: {}".format(kits))
     chosen_kit = {'version': "0", 'value': None}
     for kit in kits:
-        if (kit['version'] > chosen_kit['version'] and
+        if (kit['version'] > chosen_kit['version']
                 # version 8.1 is actually '81', so consider everything
                 # above version 20, as '2.0', etc.
-                kit['version'] < "20"):
+                and kit['version'] < "20"):
             chosen_kit = kit
     first_kit = kits[0]
     return first_kit
@@ -200,7 +201,8 @@ def get_cdb_and_gflags_path(kits):
     bits = 'x64' if (sys.maxsize > 2 ** 32) else 'x32'
     debuggers_path = path.join(first_path_path, 'Debuggers', bits)
     cdb_path = path.join(debuggers_path, 'cdb.exe')
-    if not path.exists(cdb_path): # Try for older "Debugging Tools" packages
+    # Try for older "Debugging Tools" packages
+    if not path.exists(cdb_path):
         debuggers_path = "C:\\Program Files\\Debugging Tools for Windows (x64)"
         cdb_path = path.join(debuggers_path, 'cdb.exe')
 
@@ -229,7 +231,7 @@ def toggle_loader_snaps(executable_name, gflags_path, enable=True):
         output = subprocess.check_output(gflags_args, stderr=subprocess.STDOUT,
                                          universal_newlines=True)
         log.info(output)
-    except exceptions.WindowsError as e:
+    except WindowsError as e:
         log.error("\nRunning {} exited with exception: "
                   "\n{}".format(gflags_args, e))
         exit(1)
@@ -244,7 +246,7 @@ def find_error_like_snippets(content):
     lines = content.splitlines()
     context_lines = 4
 
-    def error_predicate(l):
+    def error_predicate(line):
         # A list of mostly false positives are filtered out.
         # For deeper inspection, the full log exists.
         errors = {'errorhandling',
@@ -262,8 +264,8 @@ def find_error_like_snippets(content):
                   'ERR_get_error',
                   ('ERROR: Module load completed but symbols could '
                    'not be loaded')}
-        return (re.search('error', l, re.IGNORECASE)
-                and all(e not in l for e in errors))
+        return (re.search('error', line, re.IGNORECASE)
+                and all(e not in line for e in errors))
 
     for i in range(1, len(lines)):
         line = lines[i]

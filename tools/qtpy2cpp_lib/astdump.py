@@ -40,12 +40,10 @@
 """Tool to dump a Python AST"""
 
 
-from argparse import ArgumentParser, RawTextHelpFormatter
 import ast
-from enum import Enum
-import sys
 import tokenize
-
+from argparse import ArgumentParser, RawTextHelpFormatter
+from enum import Enum
 
 from nodedump import debug_format_node
 

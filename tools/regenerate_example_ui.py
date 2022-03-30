@@ -49,7 +49,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 UIC_COMMAND = "pyside6-uic"
 
 

@@ -49,7 +49,12 @@
 #
 #
 
-import subprocess, sys, re, os.path, optparse, collections
+import collections
+import optparse
+import os.path
+import re
+import subprocess
+import sys
 from pprint import pprint
 
 

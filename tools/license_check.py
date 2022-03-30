@@ -38,10 +38,9 @@
 #############################################################################
 
 import os
-from pathlib import Path
 import subprocess
 import sys
-
+from pathlib import Path
 
 """Tool to run a license check
 

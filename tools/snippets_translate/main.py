@@ -41,7 +41,6 @@ import argparse
 import logging
 import os
 import re
-import shutil
 import sys
 from enum import Enum
 from pathlib import Path
@@ -237,6 +236,7 @@ def get_license_from_file(filename):
     else:
         return ""
 
+
 def translate_file(file_path, final_path, debug, write):
     with open(str(file_path)) as f:
         snippets = get_snippets(f.read().splitlines())
@@ -296,7 +296,6 @@ def translate_file(file_path, final_path, debug, write):
     else:
         if not opt_quiet:
             log.warning("No snippets were found")
-
 
 
 def copy_file(file_path, qt_path, out_path, write=False, debug=False):

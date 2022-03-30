@@ -38,11 +38,10 @@
 #############################################################################
 
 import sys
-from dump_metaobject import dump_metaobject
 
+from dump_metaobject import dump_metaobject
 # Import all widget classes to enable instantiating them by type name
 from PySide6.QtWidgets import *
-
 
 DESC = """
 metaobject_dump.py <class_name>

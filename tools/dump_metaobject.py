@@ -39,8 +39,7 @@
 
 """Helper functions for formatting information on QMetaObject"""
 
-from PySide6.QtCore import (QMetaEnum, QMetaMethod,
-                            QMetaProperty, QMetaObject, QObject)
+from PySide6.QtCore import QMetaMethod
 
 
 def _qbytearray_to_string(b):

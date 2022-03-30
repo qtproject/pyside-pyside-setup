@@ -40,65 +40,65 @@
 
 modules_to_test = {
     # 6.0
-    'QtCore':  'qtcore-module.html',
-    'QtGui':  'qtgui-module.html',
-    'QtNetwork':  'qtnetwork-module.html',
-    'QtQml':  'qtqml-module.html',
-    'QtQuick':  'qtquick-module.html',
-    'QtQuickWidgets':  'qtquickwidgets-module.html',
-    'QtQuickControls2':  'qtquickcontrols2-module.html',
-    #QtQuick3D - no python bindings
-    'QtSql':  'qtsql-module.html',
-    'QtWidgets':  'qtwidgets-module.html',
-    'QtConcurrent':  'qtconcurrent-module.html',
-    #QtDBUS - no python bindings
-    'QtHelp':  'qthelp-module.html',
-    'QtOpenGL':  'qtopengl-module.html',
-    'QtPrintSupport':  'qtprintsupport-module.html',
-    'QtSvg':  'qtsvg-module.html',
-    'QtUiTools':  'qtuitools-module.html',
-    'QtXml':  'qtxml-module.html',
-    'QtTest':  'qttest-module.html',
-    #'QtXmlPatterns':  'qtxmlpatterns-module.html',  # in Qt5 compat
-    'Qt3DCore':  'qt3dcore-module.html',
-    'Qt3DInput':  'qt3dinput-module.html',
-    'Qt3DLogic':  'qt3dlogic-module.html',
-    'Qt3DRender':  'qt3drender-module.html',
-    'Qt3DAnimation':  'qt3danimation-module.html',
-    'Qt3DExtras':  'qt3dextras-module.html',
-    #'QtNetworkAuth':  'qtnetworkauth-module.html',  # no python bindings
-    #'QtCoAp' -- TODO
-    #'QtMqtt' -- TODO
-    #'QtOpcUA' -- TODO
+    'QtCore': 'qtcore-module.html',
+    'QtGui': 'qtgui-module.html',
+    'QtNetwork': 'qtnetwork-module.html',
+    'QtQml': 'qtqml-module.html',
+    'QtQuick': 'qtquick-module.html',
+    'QtQuickWidgets': 'qtquickwidgets-module.html',
+    'QtQuickControls2': 'qtquickcontrols2-module.html',
+    # QtQuick3D - no python bindings
+    'QtSql': 'qtsql-module.html',
+    'QtWidgets': 'qtwidgets-module.html',
+    'QtConcurrent': 'qtconcurrent-module.html',
+    # QtDBUS - no python bindings
+    'QtHelp': 'qthelp-module.html',
+    'QtOpenGL': 'qtopengl-module.html',
+    'QtPrintSupport': 'qtprintsupport-module.html',
+    'QtSvg': 'qtsvg-module.html',
+    'QtUiTools': 'qtuitools-module.html',
+    'QtXml': 'qtxml-module.html',
+    'QtTest': 'qttest-module.html',
+    # 'QtXmlPatterns':  'qtxmlpatterns-module.html',  # in Qt5 compat
+    'Qt3DCore': 'qt3dcore-module.html',
+    'Qt3DInput': 'qt3dinput-module.html',
+    'Qt3DLogic': 'qt3dlogic-module.html',
+    'Qt3DRender': 'qt3drender-module.html',
+    'Qt3DAnimation': 'qt3danimation-module.html',
+    'Qt3DExtras': 'qt3dextras-module.html',
+    # 'QtNetworkAuth':  'qtnetworkauth-module.html',  # no python bindings
+    # 'QtCoAp' -- TODO
+    # 'QtMqtt' -- TODO
+    # 'QtOpcUA' -- TODO
 
     # 6.1
-    #'QtScxml':  'qtscxml-module.html',
-    #'QtCharts':  'qtcharts-module.html',
-    #'QtDataVisualization':  'qtdatavisualization-module.html',
+    # 'QtScxml':  'qtscxml-module.html',
+    # 'QtCharts':  'qtcharts-module.html',
+    # 'QtDataVisualization':  'qtdatavisualization-module.html',
 
     # 6.2
     'QtBluetooth': 'qtbluetooth-module.html',
-    #'QtPositioning':  'qtpositioning-module.html',
-    #'QtMultimedia':  'qtmultimedia-module.html',
-    #'QtRemoteObjects':  'qtremoteobjects-module.html',
-    #'QtSensors':  'qtsensors-module.html',
-    #'QtSerialPort':  'qtserialport-module.html',
-    #'QtWebChannel':  'qtwebchannel-module.html',
-    #'QtWebEngine':  'qtwebengine-module.html',
-    #'QtWebEngineCore':  'qtwebenginecore-module.html',
-    #'QtWebEngineWidgets':  'qtwebenginewidgets-module.html',
-    #'QtWebSockets':  'qtwebsockets-module.html',
+    # 'QtPositioning':  'qtpositioning-module.html',
+    # 'QtMultimedia':  'qtmultimedia-module.html',
+    # 'QtRemoteObjects':  'qtremoteobjects-module.html',
+    # 'QtSensors':  'qtsensors-module.html',
+    # 'QtSerialPort':  'qtserialport-module.html',
+    # 'QtWebChannel':  'qtwebchannel-module.html',
+    # 'QtWebEngine':  'qtwebengine-module.html',
+    # 'QtWebEngineCore':  'qtwebenginecore-module.html',
+    # 'QtWebEngineWidgets':  'qtwebenginewidgets-module.html',
+    # 'QtWebSockets':  'qtwebsockets-module.html',
 
-    # 6.x
-    #'QtSpeech':  'qtspeech-module.html',
-    #'QtMultimediaWidgets':  'qtmultimediawidgets-module.html',
-    #'QtLocation':  'qtlocation-module.html',
+    #  6.x
+    # 'QtSpeech':  'qtspeech-module.html',
+    # 'QtMultimediaWidgets':  'qtmultimediawidgets-module.html',
+    # 'QtLocation':  'qtlocation-module.html',
 
-    # Not in 6
-    #'QtScriptTools':  'qtscripttools-module.html',
-    #'QtMacExtras':  'qtmacextras-module.html',
-    #'QtX11Extras':  'qtx11extras-module.html',
-    #'QtWinExtras':  'qtwinextras-module.html',
+    #  Not in 6
+    # 'QtScriptTools':  'qtscripttools-module.html',
+    # 'QtMacExtras':  'qtmacextras-module.html',
+    # 'QtX11Extras':  'qtx11extras-module.html',
+    # 'QtWinExtras':  'qtwinextras-module.html',
 }
 
 types_to_ignore = {

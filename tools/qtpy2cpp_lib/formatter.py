@@ -41,8 +41,6 @@
 
 
 import ast
-import sys
-
 
 CLOSING = {"{": "}", "(": ")", "[": "]"}  # Closing parenthesis for C++
 

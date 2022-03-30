@@ -39,17 +39,15 @@
 
 import re
 
-
-from handlers import (handle_casts, handle_class, handle_condition,
+from handlers import (handle_array_declarations, handle_casts, handle_class,
                       handle_conditions, handle_constructor_default_values,
                       handle_constructors, handle_cout_endl, handle_emit,
-                      handle_for, handle_foreach, handle_inc_dec,
-                      handle_include, handle_keywords, handle_negate,
-                      handle_type_var_declaration, handle_void_functions,
-                      handle_methods_return_type, handle_functions,
-                      handle_array_declarations, handle_useless_qt_classes,)
-
-from parse_utils import get_indent, dstrip, remove_ref
+                      handle_for, handle_foreach, handle_functions,
+                      handle_inc_dec, handle_include, handle_keywords,
+                      handle_methods_return_type, handle_negate,
+                      handle_type_var_declaration, handle_useless_qt_classes,
+                      handle_void_functions)
+from parse_utils import dstrip, get_indent, remove_ref
 
 
 def snippet_translate(x):
@@ -260,8 +258,8 @@ def snippet_translate(x):
     #   QSome thing = b(...)
     #   float v = 0.1
     #   QSome *thing = ...
-    if (re.search(r"^[a-zA-Z0-9]+(<.*?>)? [\w\*]+ *= *[\w\.\"\']*(\(.*?\))?", x.strip()) and
-            ("{" not in x and "}" not in x)):
+    if (re.search(r"^[a-zA-Z0-9]+(<.*?>)? [\w\*]+ *= *[\w\.\"\']*(\(.*?\))?", x.strip())
+            and ("{" not in x and "}" not in x)):
         left, right = x.split("=", 1)
         var_name = " ".join(left.strip().split()[1:])
         x = f"{get_indent(x)}{remove_ref(var_name)} = {right.strip()}"
@@ -295,7 +293,7 @@ def snippet_translate(x):
     # Arrays declarations with the form:
     #   type var_name[] = {...
     #   type var_name {...
-    #if re.search(r"^[a-zA-Z0-9]+(<.*?>)? [\w\*]+\[\] * = *\{", x.strip()):
+    # if re.search(r"^[a-zA-Z0-9]+(<.*?>)? [\w\*]+\[\] * = *\{", x.strip()):
     if re.search(r"^[a-zA-Z0-9]+(<.*?>)? [\w\*]+\[?\]? * =? *\{", x.strip()):
         x = handle_array_declarations(x)
 

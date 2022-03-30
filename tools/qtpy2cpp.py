@@ -37,12 +37,12 @@
 ##
 #############################################################################
 
-from argparse import ArgumentParser, RawTextHelpFormatter
 import logging
 import os
 import sys
-from qtpy2cpp_lib.visitor import ConvertVisitor
+from argparse import ArgumentParser, RawTextHelpFormatter
 
+from qtpy2cpp_lib.visitor import ConvertVisitor
 
 DESCRIPTION = "Tool to convert Python to C++"
 

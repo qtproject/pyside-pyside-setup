@@ -61,7 +61,6 @@ from time import gmtime, strftime
 from urllib import request
 
 from bs4 import BeautifulSoup
-
 from config import modules_to_test, types_to_ignore
 
 qt_documentation_website_prefixes = {
@@ -271,7 +270,9 @@ if __name__ == "__main__":
 
                 pyside_qualified_type += qt_type
                 eval(pyside_qualified_type)
-            except:
+            except Exception as e:
+                print("Failed eval-in pyside qualified types")
+                print(f"{type(e).__name__}: {e}")
                 missing_type = qt_type
                 missing_types_count += 1
                 total_missing_types_count += 1
@@ -291,8 +292,8 @@ if __name__ == "__main__":
                     missing_types_compared_to_pyqt += 1
                     total_missing_types_count_compared_to_pyqt += 1
                     is_present_in_pyqt = True
-                except:
-                    pass
+                except Exception as e:
+                    print(f"{type(e).__name__}: {e}")
 
                 if args.which_missing == "all":
                     missing_types.append(missing_type)

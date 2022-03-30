@@ -49,7 +49,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 RCC_COMMAND = "pyside6-rcc"
 LRELEASE_COMMAND = "lrelease"
 

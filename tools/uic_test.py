@@ -47,7 +47,6 @@ from pathlib import Path
 from textwrap import dedent
 from typing import Optional, Tuple
 
-
 VERSION = 6
 
 
@@ -59,15 +58,15 @@ TEMP_DIR = Path(tempfile.gettempdir())
 
 def get_class_name(file: Path) -> Tuple[Optional[str], Optional[str]]:
     """Return class name and widget name of UI file."""
-    pattern = re.compile('^\s*<widget class="(\w+)" name="(\w+)"\s*>.*$')
-    for l in Path(file).read_text().splitlines():
-        match = pattern.match(l)
+    pattern = re.compile(r'^\s*<widget class="(\w+)" name="(\w+)"\s*>.*$')
+    for line in Path(file).read_text().splitlines():
+        match = pattern.match(line)
         if match:
             return (match.group(1), match.group(2))
     return (None, None)
 
 
-def test_file(file: str, uic: bool=False) -> bool:
+def test_file(file: str, uic: bool = False) -> bool:
     """Run uic on a UI file and show the resulting UI."""
     path = Path(file)
     (klass, name) = get_class_name(path)
