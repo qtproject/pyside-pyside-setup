@@ -316,7 +316,7 @@ def generate_pyi(import_name, outpath, options):
             subprocess.check_output([sys.executable, os.fspath(outfilepath)])
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=dedent("""\
@@ -350,4 +350,6 @@ if __name__ == "__main__":
     options.logger = logger
     generate_pyi(module, outpath, options=options)
 
+if __name__ == "__main__":
+    main()
 # eof
