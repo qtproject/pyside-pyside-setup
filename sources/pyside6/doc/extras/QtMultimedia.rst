@@ -29,7 +29,7 @@ directive:
 
     import PySide6.QtMultimedia
 
-The module also provides `QML types <http://doc.qt.io/qt-6/qtmultimedia-qmlmodule.html>`_ .
+The module also provides `QML types <https://doc.qt.io/qt-6/qtmultimedia-qmlmodule.html>`_ .
 
 Overviews and Important Topics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

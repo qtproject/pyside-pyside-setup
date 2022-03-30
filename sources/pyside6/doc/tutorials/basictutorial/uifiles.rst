@@ -10,7 +10,7 @@ graphical interfaces based on Qt Widgets for your Qt for Python project.
 standalone binary (``pyside6-designer``) or embedded into the
 `Qt Creator IDE <https://doc.qt.io/qtcreator>`_. Its use within **Qt Creator**
 is described at
-`Using Qt Designer <http://doc.qt.io/qtcreator/creator-using-qt-designer.html>`_.
+`Using Qt Designer <https://doc.qt.io/qtcreator/creator-using-qt-designer.html>`_.
 
 .. image:: uifiles.png
    :alt: Designer and the equivalent code

@@ -24,7 +24,7 @@ website.
  * **libclang:** The libclang library, recommended: version 10 for 6.0+.
    Prebuilt versions for each OS can be `downloaded here`_.
 
-.. _downloaded here: http://download.qt.io/development_releases/prebuilt/libclang/
+.. _downloaded here: https://download.qt.io/development_releases/prebuilt/libclang/
 
 Guides per platform
 -------------------

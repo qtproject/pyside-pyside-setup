@@ -75,7 +75,7 @@ Third-party Licenses
 
 The licenses for the third-party sources used by Qt itself are listed
 in
-`Qt documentation <http://doc.qt.io/qt-5/licenses-used-in-qt.html>`_.
+`Qt documentation <https://doc.qt.io/qt-5/licenses-used-in-qt.html>`_.
 The following table lists parts of Qt for Python that incorporates
 code licensed under third-party opensource licenses:
 

@@ -19,7 +19,7 @@ directive:
 
     import PySide6.QtDataVisualization
 
-The module also provides `QML types <http://doc.qt.io/qt-6/qtdatavisualization-qmlmodule.html>`_ .
+The module also provides `QML types <https://doc.qt.io/qt-6/qtdatavisualization-qmlmodule.html>`_ .
 
 Articles and Guides
 ^^^^^^^^^^^^^^^^^^^

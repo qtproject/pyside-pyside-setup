@@ -253,7 +253,7 @@ parentship also transfers the ownership back to python.**
 
 See `Object Trees and Object Ownership in Qt`_.
 
-.. _`Object Trees and Object Ownership in Qt`: http://doc.qt.io/qt-6/objecttrees.html
+.. _`Object Trees and Object Ownership in Qt`: https://doc.qt.io/qt-6/objecttrees.html
 
 C++ Wrapper Code
 ----------------

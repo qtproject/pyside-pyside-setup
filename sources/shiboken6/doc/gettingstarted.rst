@@ -17,7 +17,7 @@ General Requirements
    Prebuilt versions of it can be `downloaded here`_.
  * **CMake:** 3.1+ is needed.
 
-.. _downloaded here: http://download.qt.io/development_releases/prebuilt/libclang/
+.. _downloaded here: https://download.qt.io/development_releases/prebuilt/libclang/
 
 Simple build
 ^^^^^^^^^^^^
@@ -54,7 +54,7 @@ You can get the ``shiboken6_generator`` wheels from Qt servers, and you can stil
 via ``pip``::
 
     pip install \
-        --index-url=http://download.qt.io/official_releases/QtForPython/ \
+        --index-url=https://download.qt.io/official_releases/QtForPython/ \
         --trusted-host download.qt.io \
         shiboken6 pyside6 shiboken6_generator
 

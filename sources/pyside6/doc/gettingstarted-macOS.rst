@@ -33,7 +33,7 @@ Setting up CLANG
 
 If you don't have libclang already in your system, you can download from the Qt servers::
 
-    wget http://download.qt.io/development_releases/prebuilt/libclang/libclang-release_100-based-mac.7z
+    wget https://download.qt.io/development_releases/prebuilt/libclang/libclang-release_100-based-mac.7z
 
 Extract the files, and leave it on any desired path, and then set these two required
 environment variables::

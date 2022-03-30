@@ -23,7 +23,7 @@ directive:
 
     import PySide6.QtPositioning
 
-The module also provides `QML types <http://doc.qt.io/qt-6/qtpositioning-qmlmodule.html>`_ .
+The module also provides `QML types <https://doc.qt.io/qt-6/qtpositioning-qmlmodule.html>`_ .
 
 To load the Qt Positioning module, add the following statement to your .qml files
 

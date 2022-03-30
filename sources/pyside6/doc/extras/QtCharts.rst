@@ -14,4 +14,4 @@ directive:
 
         from PySide6 import QtCharts
 
-The module also provides `QML types <http://doc.qt.io/qt-6/qtcharts-qmlmodule.html>`_ .
+The module also provides `QML types <https://doc.qt.io/qt-6/qtcharts-qmlmodule.html>`_ .

@@ -181,4 +181,4 @@ What is 'inject code'?
 That's how we call customized code that will be *injected* into the
 generated at specific locations. They are specified inside the typesystem.
 
-.. _`Mailing list`:  http://lists.qt-project.org/mailman/listinfo/pyside
+.. _`Mailing list`:  https://lists.qt-project.org/mailman/listinfo/pyside

@@ -19,7 +19,7 @@ you can use a QAbstractTableModel instance.
    However, it's less flexible than a QTableView, as QTableWidget cannot be
    used with just any data. For more insight about Qt's model-view framework,
    refer to the
-   `Model View Programming <http://doc.qt.io/qt-5/model-view-programming.html>`
+   `Model View Programming <https://doc.qt.io/qt-5/model-view-programming.html>`
    documentation.
 
 Implementing the model for your QTableView, allows you to:

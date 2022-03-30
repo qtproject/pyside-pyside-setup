@@ -26,7 +26,7 @@ directive:
 
     import PySide6.QtQml
 
-The module also provides `QML types <http://doc.qt.io/qt-6/qtqml-qmlmodule.html>`_ .
+The module also provides `QML types <https://doc.qt.io/qt-6/qtqml-qmlmodule.html>`_ .
 
 QML and QML Types
 ^^^^^^^^^^^^^^^^^

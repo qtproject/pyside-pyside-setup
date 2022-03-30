@@ -38,7 +38,7 @@ Installation
   * It is also possible to install a specific snapshot from our servers.
     To do so, you can use the following command::
 
-      pip install --index-url=http://download.qt.io/snapshots/ci/pyside/6.0.0/latest pyside6 --trusted-host download.qt.io
+      pip install --index-url=https://download.qt.io/snapshots/ci/pyside/6.0.0/latest pyside6 --trusted-host download.qt.io
 
 * **Test your installation**
 
