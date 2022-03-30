@@ -2,36 +2,8 @@ cmake_minimum_required(VERSION 3.16)
 cmake_policy(VERSION 3.16)
 
 project(doc)
-
-find_program(SPHINX_BUILD sphinx-build)
-
-# graphviz dot appears to be used by sphinx and not by CMake directly. This is just found to check
-# if it exists.
-find_program(DOT_EXEC dot)
-
-# Lookup for qdoc in multiple sources: cache var, PATH or CMake package.
-set(qdoc_binary "")
-find_program(QDOC_EXECUTABLE qdoc DOC "Path to qdoc binary.")
-if(QDOC_EXECUTABLE)
-    set(qdoc_binary "${QDOC_EXECUTABLE}")
-else()
-    find_package(Qt6 QUIET COMPONENTS Tools)
-    if(TARGET Qt6::qdoc)
-        set(qdoc_binary "$<TARGET_FILE:Qt6::qdoc>")
-    endif()
-endif()
-
-# Lookup for qhelpgenerator in multiple sources: cache var, PATH or CMake package.
-set(qhelpgenerator_binary "")
-find_program(QHELPGENERATOR_EXECUTABLE qhelpgenerator DOC "Path to qhelpgenerator binary.")
-if(QHELPGENERATOR_EXECUTABLE)
-    set(qhelpgenerator_binary "${QHELPGENERATOR_EXECUTABLE}")
-else()
-    find_package(Qt6 QUIET COMPONENTS Tools)
-    if(TARGET Qt6::qhelpgenerator)
-        set(qhelpgenerator_binary "$<TARGET_FILE:Qt6::qhelpgenerator>")
-    endif()
-endif()
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../shiboken6/cmake")
+include(FindDocTools)
 
 # When the doc project is built as part of the pyside project, we show informational message
 # and return early if requirements are not met.
@@ -221,27 +193,6 @@ if (FULLDOCSBUILD)
                        COMMENT "Running qdoc against Qt source code...")
 endif()
 
-# conditional tag for sphinx build
-#string(JOIN "_" SPHINX_TAG ${DOC_OUTPUT_FORMAT} "format")
-# Python script to replace the virtualFolder string in the QHP
-set(py_cmd "
-import fileinput
-import re
-try:
-\tfor line in fileinput.input('html/PySide.qhp',inplace=True,backup='.bak'):
-\t\tline_copy=line.strip()
-\t\tif not line_copy: # check for empty line
-\t\t\tcontinue
-\t\tmatch=re.match('(^.*virtualFolder.)doc(.*$)',line)
-\t\tif match:
-\t\t\trepl=''.join([match.group(1),'pyside6',match.group(2)])
-\t\t\tprint(line.replace(match.group(0),repl),end='')
-\t\telse:
-\t\t\tprint(line)
-except:
-\tpass\n")
-file(GENERATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/py_script.py CONTENT ${py_cmd})
-
 add_custom_target(apidoc
                   COMMAND ${SHIBOKEN_PYTHON_INTERPRETER} ${SPHINX_BUILD} -b ${DOC_OUTPUT_FORMAT} ${CMAKE_CURRENT_BINARY_DIR}/rst html
                   COMMENT "Generating PySide htmls..."
@@ -260,10 +211,11 @@ if(DOC_OUTPUT_FORMAT STREQUAL "html")
 else()
     if(qhelpgenerator_binary)
         message(STATUS "qhelpgenerator - found")
-
+        # Python script that will be called to update the QHP
+        set(PATCH_QHP_SCRIPT "${CMAKE_CURRENT_LIST_DIR}/../../shiboken6/doc/scripts/patch_qhp.py")
         file(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/html/PySide.qhp QHP_FILE)
         add_custom_command(TARGET apidoc POST_BUILD
-                COMMAND ${python_executable} py_script.py
+                COMMAND ${python_executable} ${PATCH_QHP_SCRIPT} -f ${QHP_FILE} -v pyside6
                 COMMAND "${qhelpgenerator_binary}" ${QHP_FILE}
                 COMMENT "Generating QCH from a QHP file..."
                 VERBATIM

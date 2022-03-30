@@ -3,59 +3,32 @@ cmake_minimum_required(VERSION 3.16)
 if(FULLDOCSBUILD EQUAL 0)
     project(shiboken6_doc)
 endif()
-find_program(SPHINX sphinx-build DOC "Path to sphinx-build binary.")
 
-# Lookup for qhelpgenerator in multiple sources: cache var, PATH or CMake package.
-set(qhelpgenerator_binary "")
-find_program(QHELPGENERATOR_EXECUTABLE qhelpgenerator DOC "Path to qhelpgenerator binary.")
-if(QHELPGENERATOR_EXECUTABLE)
-    set(qhelpgenerator_binary "${QHELPGENERATOR_EXECUTABLE}")
-else()
-    find_package(Qt6 QUIET COMPONENTS Tools)
-    if(TARGET Qt6::qhelpgenerator)
-        set(qhelpgenerator_binary "$<TARGET_FILE:Qt6::qhelpgenerator>")
-    endif()
-endif()
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../cmake")
+include(FindDocTools)
 
 # Generate html by default.
 if(NOT DOC_OUTPUT_FORMAT)
     set(DOC_OUTPUT_FORMAT "html")
 endif()
 
-if(SPHINX)
+if(SPHINX_BUILD)
     message(STATUS "sphinx-build - found")
     configure_file(conf.py.in conf.py @ONLY)
     # conditional tag for sphinx build
     #string(JOIN "_" SPHINX_TAG ${DOC_OUTPUT_FORMAT} "format")
     add_custom_target(doc
-        COMMAND ${SPHINX} -b ${DOC_OUTPUT_FORMAT} -c . ${CMAKE_CURRENT_SOURCE_DIR} html
+        COMMAND ${SPHINX_BUILD} -b ${DOC_OUTPUT_FORMAT} -c . ${CMAKE_CURRENT_SOURCE_DIR} html
         COMMENT "Generating shiboken documentation HTML files"
         VERBATIM)
-    # Python script that will be called to update the QHP
-    set(py_cmd "
-import fileinput
-import re
-try:
-\tfor line in fileinput.input('html/Shiboken.qhp',inplace=True,backup='.bak'):
-\t\tline_copy=line.strip()
-\t\tif not line_copy: # check for empty line
-\t\t\tcontinue
-\t\tmatch=re.match('(^.*virtualFolder.)doc(.*$)',line)
-\t\tif match:
-\t\t\trepl=''.join([match.group(1),'shiboken6',match.group(2)])
-\t\t\tprint(line.replace(match.group(0),repl),end=' ')
-\t\telse:
-\t\t\tprint(line)
-except:
-\tpass\n")
-    file(GENERATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/py_script.py
-        CONTENT ${py_cmd})
 
     # Attach a POST_BUILD step to the 'doc' custom target to generate a QCH file.
     if(DOC_OUTPUT_FORMAT STREQUAL "qthelp")
         if(qhelpgenerator_binary)
             message(STATUS "qhelpgenerator - found")
 
+            # Python script that will be called to update the QHP
+            set(PATCH_QHP_SCRIPT "${CMAKE_CURRENT_LIST_DIR}/../../shiboken6/doc/scripts/patch_qhp.py")
             file(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/html/Shiboken.qhp QHP_FILE)
 
             if(SHIBOKEN_IS_CROSS_BUILD)
@@ -68,7 +41,7 @@ except:
             endif()
 
             add_custom_command(TARGET doc POST_BUILD
-                COMMAND "${python_executable}" py_script.py # ${CMAKE_CURRENT_BINARY_DIR}/html/Shiboken.qhp
+                COMMAND "${python_executable}" ${PATCH_QHP_SCRIPT} -f ${QHP_FILE} -v shiboken6
                 COMMAND "${qhelpgenerator_binary}" ${QHP_FILE}
                 COMMENT "Generating shiboken documentation QCH files based on the QHP files"
                 VERBATIM)
@@ -77,7 +50,7 @@ except:
         endif()
     endif()
 else()
-    if(NOT SPHINX)
+    if(NOT SPHINX_BUILD)
         message(WARNING "sphinx-build - not found! doc target disabled")
     endif()
     if (WIN32)
