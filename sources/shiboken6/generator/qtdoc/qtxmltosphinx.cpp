@@ -1118,7 +1118,7 @@ QtXmlToSphinxLink *QtXmlToSphinx::handleLinkStart(const QString &type, QString r
 
 // <link raw="Model/View Classes" href="model-view-programming.html#model-view-classes"
 //  type="page" page="Model/View Programming">Model/View Classes</link>
-// <link type="page" page="http://doc.qt.io/qt-5/class.html">QML types</link>
+// <link type="page" page="https://doc.qt.io/qt-5/class.html">QML types</link>
 // <link raw="Qt Quick" href="qtquick-index.html" type="page" page="Qt Quick">Qt Quick</link>
 // <link raw="QObject" href="qobject.html" type="class">QObject</link>
 // <link raw="Qt::Window" href="qt.html#WindowType-enum" type="enum" enum="Qt::WindowType">Qt::Window</link>

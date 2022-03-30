@@ -65,8 +65,8 @@ from bs4 import BeautifulSoup
 from config import modules_to_test, types_to_ignore
 
 qt_documentation_website_prefixes = {
-    "6.0": "http://doc.qt.io/qt-6/",
-    "dev": "http://doc-snapshots.qt.io/qt5-dev/",
+    "6.0": "https://doc.qt.io/qt-6/",
+    "dev": "https://doc-snapshots.qt.io/qt5-dev/",
 }
 
 

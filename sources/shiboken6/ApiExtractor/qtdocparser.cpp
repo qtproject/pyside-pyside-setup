@@ -338,7 +338,7 @@ static QString qmlReferenceLink(const QFileInfo &qmlModuleFi)
 {
     QString result;
     QTextStream(&result) << "<para>The module also provides <link"
-        << R"( type="page" page="http://doc.qt.io/qt-)" << QT_VERSION_MAJOR
+        << R"( type="page" page="https://doc.qt.io/qt-)" << QT_VERSION_MAJOR
         << '/' << qmlModuleFi.baseName() << R"(.html")"
         << ">QML types</link>.</para>";
     return result;
