@@ -46,6 +46,7 @@ testing/__init__.py
 
 import builtins
 import sys
+
 from . import command
 
 main = command.main

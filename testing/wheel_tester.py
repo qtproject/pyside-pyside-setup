@@ -52,11 +52,12 @@ Make sure that some generated wheels already exist in the dist/
 directory (e.g. setup.py bdist_wheel was already executed).
 """
 
-from argparse import ArgumentParser, RawTextHelpFormatter
-from pathlib import Path
 import os
+import platform
 import sys
 import tempfile
+from argparse import ArgumentParser, RawTextHelpFormatter
+from pathlib import Path
 
 try:
     this_file = __file__
@@ -67,16 +68,15 @@ this_dir = os.path.dirname(this_file)
 setup_script_dir = os.path.abspath(os.path.join(this_dir, ".."))
 sys.path.append(setup_script_dir)
 
-from build_scripts.utils import find_files_using_glob
-from build_scripts.utils import find_glob_in_path
-from build_scripts.utils import run_process, run_process_output
-from build_scripts.utils import rmtree
 from setuptools._distutils import log
-import platform
+
+from build_scripts.utils import (find_files_using_glob, find_glob_in_path,
+                                 rmtree, run_process, run_process_output)
 
 log.set_verbosity(1)
 
 NEW_WHEELS = False
+
 
 def find_executable(executable, command_line_value):
     value = command_line_value
@@ -242,7 +242,7 @@ def run_ninja():
     args = ["ninja"]
     exit_code = run_process(args)
     if exit_code:
-        raise RuntimeError(f"Failure while running {executable}.")
+        raise RuntimeError(f"Failure while running {' '.join(args)}.")
     log.info("")
 
 
@@ -250,7 +250,7 @@ def run_ninja_install():
     args = ["ninja", "install"]
     exit_code = run_process(args)
     if exit_code:
-        raise RuntimeError(f"Failed while running {executable} install.")
+        raise RuntimeError(f"Failed while running {' '.join(args)} install.")
     log.info("")
 
 

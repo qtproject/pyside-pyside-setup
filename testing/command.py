@@ -70,18 +70,18 @@ The full mode can be tested locally by setting
     export COIN_RERUN_FAILED_ONLY=0
 """
 
+import argparse
 import os
 import sys
-import argparse
-from textwrap import dedent
 from collections import OrderedDict
+from textwrap import dedent
 from timeit import default_timer as timer
 
-from .helper import script_dir, decorate
-from .buildlog import builds
 from .blacklist import BlackList
-from .runner import TestRunner
+from .buildlog import builds
+from .helper import decorate, script_dir
 from .parser import TestParser
+from .runner import TestRunner
 
 # Should we repeat only failed tests?
 COIN_RERUN_FAILED_ONLY = True

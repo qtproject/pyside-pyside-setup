@@ -44,8 +44,7 @@ Run ctest on the last build.
 See the notes in testing/command.py .
 """
 
-import sys
 import testing
-import testing.blacklist # just to be sure it's us...
+import testing.blacklist  # just to be sure it's us...
 
 testing.main()

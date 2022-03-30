@@ -47,8 +47,8 @@ BuildLog.classifiers finds the set of classifier strings.
 
 import os
 import platform
-import sys
 import shutil
+import sys
 from collections import namedtuple
 from textwrap import dedent
 

@@ -45,7 +45,6 @@ Some tools that do not fit elsewhere.
 
 import os
 
-
 script_dir = os.path.dirname(os.path.dirname(__file__))
 
 

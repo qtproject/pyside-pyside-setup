@@ -129,7 +129,7 @@ def _parse_tests(test_log):
         match = re.match(pat, line, re.VERBOSE)
         if match and line.split()[-1] != "sec":
             # don't change the number of lines
-            lines[idx : idx + 2] = [line.rstrip() + lines[idx + 1], ""]
+            lines[idx:idx + 2] = [line.rstrip() + lines[idx + 1], ""]
 
     pat = _TEST_PAT
     for line in lines:

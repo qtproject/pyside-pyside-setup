@@ -37,14 +37,13 @@
 ##
 #############################################################################
 
+import inspect
 import os
-import sys
 import re
 import subprocess
-import inspect
-
-from textwrap import dedent
+import sys
 from subprocess import TimeoutExpired
+from textwrap import dedent
 
 # Get the dir path to the utils module
 try:

@@ -46,8 +46,9 @@ find_matching_line() adds info using classifiers.
 """
 
 from io import StringIO
-from .helper import decorate
+
 from .buildlog import builds
+from .helper import decorate
 
 
 class BlackList(object):
@@ -63,7 +64,7 @@ class BlackList(object):
 
         def filtered_line(line):
             if "#" in line:
-                line = line[ : line.index("#")]
+                line = line[:line.index("#")]
             return line.split()
 
         # now put every bracketed line in a test
