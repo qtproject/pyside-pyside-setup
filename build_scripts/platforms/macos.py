@@ -91,6 +91,7 @@ def prepare_standalone_package_macos(self, vars):
     if config.is_internal_pyside_build():
         _macos_patch_executable('assistant', vars)
         _macos_patch_executable('designer', vars)
+        _macos_patch_executable('linguist', vars)
 
     # <qt>/lib/* -> <setup>/{st_package_name}/Qt/lib
     if self.qt_is_framework_build():
