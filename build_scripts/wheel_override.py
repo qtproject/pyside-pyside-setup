@@ -39,24 +39,26 @@
 
 
 import os
-import sys
 import platform
-from .options import DistUtilsCommandMixin, OPTION
-from setuptools._distutils import log as logger
+import sys
 from email.generator import Generator
-from .wheel_utils import get_package_version, get_qt_version, macos_plat_name
+
+from setuptools._distutils import log as logger
+
+from .options import OPTION, DistUtilsCommandMixin
 from .utils import is_64bit
+from .wheel_utils import get_package_version, get_qt_version, macos_plat_name
 
 wheel_module_exists = False
 
 
 try:
 
-    from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
-    from wheel.bdist_wheel import safer_name as _safer_name
-    from wheel.bdist_wheel import get_abi_tag, get_platform
     from packaging import tags
     from wheel import __version__ as wheel_version
+    from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
+    from wheel.bdist_wheel import get_abi_tag, get_platform
+    from wheel.bdist_wheel import safer_name as _safer_name
 
     wheel_module_exists = True
 except Exception as e:

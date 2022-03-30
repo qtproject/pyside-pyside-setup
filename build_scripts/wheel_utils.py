@@ -39,10 +39,10 @@
 
 import os
 import time
+from sysconfig import get_config_var, get_platform
 
-from setuptools._distutils.errors import DistutilsSetupError
-from sysconfig import get_platform, get_config_var
 from packaging.version import parse as parse_version
+from setuptools._distutils.errors import DistutilsSetupError
 
 from .options import OPTION
 from .qtinfo import QtInfo

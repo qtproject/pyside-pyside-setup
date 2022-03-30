@@ -37,15 +37,14 @@
 ##
 #############################################################################
 
+import fnmatch
 import functools
 import os
-import fnmatch
 
 from ..config import config
 from ..options import OPTION
-from ..utils import copydir, copyfile, makefile
-from ..utils import filter_match
-from ..utils import download_and_extract_7z
+from ..utils import (copydir, copyfile, download_and_extract_7z, filter_match,
+                     makefile)
 from ..versions import PYSIDE, SHIBOKEN
 
 
@@ -173,8 +172,8 @@ def prepare_packages_win32(self, vars):
         # <qt>/lib/metatypes/* -> <setup>/{st_package_name}/lib/metatypes
         destination_lib_dir = "{st_build_dir}/{st_package_name}/lib"
         copydir("{qt_lib_dir}/metatypes", f"{destination_lib_dir}/metatypes",
-               filter=["*.json"],
-               recursive=False, vars=vars)
+                filter=["*.json"],
+                recursive=False, vars=vars)
 
         # <install>/lib/*.lib -> {st_package_name}/
         copydir(
@@ -275,7 +274,8 @@ def copy_msvc_redist_files(vars, redist_target_path):
             zip_file = "pyside_qt_deps_32_2019.7z"
         try:
             download_and_extract_7z(redist_url + zip_file, redist_target_path)
-        except:
+        except Exception as e:
+            print(f"Download failed: {type(e).__name__}: {e}")
             print("download.qt.io is down, try with mirror")
             redist_url = "https://master.qt.io/development_releases/prebuilt/vcredist/"
             download_and_extract_7z(redist_url + zip_file, redist_target_path)

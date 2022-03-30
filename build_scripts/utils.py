@@ -37,22 +37,20 @@
 ##
 #############################################################################
 
-import sys
-from pathlib import Path
+import errno
+import fnmatch
+import glob
+import itertools
 import os
 import re
-import stat
-import errno
 import shutil
+import stat
 import subprocess
-import fnmatch
-import itertools
-import glob
+import sys
 import tempfile
-from collections import defaultdict
-
 import urllib.request as urllib
-
+from collections import defaultdict
+from pathlib import Path
 
 try:
     # Using the distutils implementation within setuptools
@@ -63,6 +61,7 @@ except ModuleNotFoundError:
     # so then the coin_build_instructions.py script is executed, and
     # import from this file, it was failing.
     from distutils import log
+    from distutils.errors import DistutilsSetupError
 
 try:
     WindowsError
@@ -120,8 +119,9 @@ def winsdk_setenv(platform_arch, build_type):
             for sdk_version in sdk_versions:
                 installationfolder = msvc9.Reg.get_value(f"{msvc9.WINSDK_BASE}\\{sdk_version}",
                                                          "installationfolder")
-                # productversion = msvc9.Reg.get_value("{}\\{}".format(msvc9.WINSDK_BASE, sdk_version),
-                #                                "productversion")
+                # productversion = msvc9.Reg.get_value(
+                #                      "{}\\{}".format(msvc9.WINSDK_BASE, sdk_version),
+                #                      "productversion")
                 setenv_path = os.path.join(installationfolder, os.path.join('bin', 'SetEnv.cmd'))
                 if not os.path.exists(setenv_path):
                     continue
@@ -143,7 +143,8 @@ def winsdk_setenv(platform_arch, build_type):
     build_type = "/Debug" if build_type.lower() == "debug" else "/Release"
     setenv_cmd = [setenv_path, build_arch, build_type]
     setenv_env = get_environment_from_batch_command(setenv_cmd)
-    setenv_env_paths = os.pathsep.join([setenv_env[k] for k in setenv_env if k.upper() == 'PATH']).split(os.pathsep)
+    _setenv_paths = [setenv_env[k] for k in setenv_env if k.upper() == 'PATH']
+    setenv_env_paths = os.pathsep.join(_setenv_paths).split(os.pathsep)
     setenv_env_without_paths = dict([(k, setenv_env[k]) for k in setenv_env if k.upper() != 'PATH'])
 
     # Extend os.environ with SDK env
@@ -236,7 +237,8 @@ def init_msvc_env(platform_arch, build_type):
     log.info(f"Getting MSVC env for {msvc_arch} architecture")
     vcvars_cmd = [vcvars_path, msvc_arch]
     msvc_env = get_environment_from_batch_command(vcvars_cmd)
-    msvc_env_paths = os.pathsep.join([msvc_env[k] for k in msvc_env if k.upper() == 'PATH']).split(os.pathsep)
+    _msvc_paths = [msvc_env[k] for k in msvc_env if k.upper() == 'PATH']
+    msvc_env_paths = os.pathsep.join(_msvc_paths).split(os.pathsep)
     msvc_env_without_paths = dict([(k, msvc_env[k]) for k in msvc_env if k.upper() != 'PATH'])
 
     # Extend os.environ with MSVC env
@@ -824,7 +826,8 @@ def _ldd_ldd(executable_path):
     except Exception as e:
         error = str(e)
     if not output:
-        message = f"ldd failed to query for dependent shared libraries of {executable_path}: {error}"
+        message = (f"ldd failed to query for dependent shared libraries of {executable_path}: "
+                   f"{error}")
         raise RuntimeError(message)
     return output
 
@@ -1190,7 +1193,7 @@ def get_qtci_virtualEnv(python_ver, host, hostArch, targetArch):
         try:
             run_instruction([_pExe, "--version"], f"Failed to guess python version {_pExe}")
         except Exception as e:
-            print("Exception {type(e).__name__}: {e}")
+            print(f"Exception {type(e).__name__}: {e}")
             _pExe = "python3"
     return(_pExe, _env, env_pip, env_python)
 

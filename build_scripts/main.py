@@ -37,56 +37,50 @@
 ##
 #############################################################################
 
-from packaging.version import parse as parse_version
-
+import importlib
 import os
 import platform
 import re
 import sys
-import importlib
-from pathlib import Path
-from textwrap import dedent
 import time
-from .config import config
-from .utils import get_numpy_location, get_python_dict
-from .options import DistUtilsCommandMixin, OPTION
-from .build_info_collector import BuildInfoCollectorMixin
-from .versions import PYSIDE, PYSIDE_MODULE, SHIBOKEN
-from .wheel_utils import (get_package_version,
-                          get_package_timestamp, macos_plat_name,
-                          macos_pyside_min_deployment_target)
+from pathlib import Path
+from shutil import which
+from textwrap import dedent
 
 import setuptools  # Import setuptools before distutils
-from setuptools import Extension
-from setuptools.command.install import install as _install
-from setuptools.command.install_lib import install_lib as _install_lib
-from setuptools.command.bdist_egg import bdist_egg as _bdist_egg
-from setuptools.command.develop import develop as _develop
-from setuptools.command.build_py import build_py as _build_py
-
 # PYSIDE-1760: Although not used here, pre-load this module early to avoid
 #              a racing condition with the import order. Note that this problem
 #              happens only with custom builds of Python without virtual environment.
 import setuptools.command.install_scripts
-
-# Use the distutils implementation within setuptools
-from setuptools._distutils.errors import DistutilsSetupError
+from packaging.version import parse as parse_version
+from setuptools import Command, Extension
 from setuptools._distutils import log
 from setuptools._distutils import sysconfig as sconfig
 from setuptools._distutils.command.build import build as _build
-
-from shutil import which
+# Use the distutils implementation within setuptools
+from setuptools._distutils.errors import DistutilsSetupError
+from setuptools.command.bdist_egg import bdist_egg as _bdist_egg
 from setuptools.command.build_ext import build_ext as _build_ext
-from setuptools import Command
+from setuptools.command.build_py import build_py as _build_py
+from setuptools.command.develop import develop as _develop
+from setuptools.command.install import install as _install
+from setuptools.command.install_lib import install_lib as _install_lib
 
-from .qtinfo import QtInfo
-from .utils import (rmtree, detect_clang, copyfile, copydir, run_process_output, run_process,
-                    update_env_path, init_msvc_env, filter_match, macos_fix_rpaths_for_library,
-                    linux_fix_rpaths_for_library, platform_cmake_options)
+from .build_info_collector import BuildInfoCollectorMixin
+from .config import config
+from .options import OPTION, DistUtilsCommandMixin
 from .platforms.unix import prepare_packages_posix
 from .platforms.windows_desktop import prepare_packages_win32
-from .wheel_override import wheel_module_exists, get_bdist_wheel_override
-
+from .qtinfo import QtInfo
+from .utils import (copydir, copyfile, detect_clang, filter_match,
+                    get_numpy_location, get_python_dict, init_msvc_env,
+                    linux_fix_rpaths_for_library, macos_fix_rpaths_for_library,
+                    platform_cmake_options, rmtree, run_process,
+                    run_process_output, update_env_path)
+from .versions import PYSIDE, PYSIDE_MODULE, SHIBOKEN
+from .wheel_override import get_bdist_wheel_override, wheel_module_exists
+from .wheel_utils import (get_package_timestamp, get_package_version,
+                          macos_plat_name, macos_pyside_min_deployment_target)
 
 setup_script_dir = os.getcwd()
 build_scripts_dir = os.path.join(setup_script_dir, 'build_scripts')
@@ -148,7 +142,8 @@ def get_make(platform_arch, build_type):
     if not os.path.isabs(make_path):
         found_path = which(make_path)
         if not found_path or not os.path.exists(found_path):
-            m = f"You need the program '{make_path}' on your system path to compile {PYSIDE_MODULE}."
+            m = (f"You need the program '{make_path}' on your system path to "
+                 f"compile {PYSIDE_MODULE}.")
             raise DistutilsSetupError(m)
         make_path = found_path
     return (make_path, make_generator)
@@ -457,7 +452,7 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
             _src = Path(_path / _package_name)
             _dst = Path(_wheel_path / _package_name)
             try:
-                Path(_path / _package_name).rename(_wheel_path / _package_name)
+                _src.rename(_dst)
             except Exception as e:
                 log.warn(f'***** problem renaming "{self.st_build_dir}"')
                 log.warn(f'ignored error: {type(e).__name__}: {e}')
@@ -615,7 +610,8 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
                 cmake_cmd.append(f"-DShiboken6_DIR={config_dir}")
             else:
 
-                log.info(f"Custom provided {SHIBOKEN} installation not found. Path given: {config_dir}")
+                log.info(f"Custom provided {SHIBOKEN} installation not found. "
+                         f"Path given: {config_dir}")
 
         if OPTION["MODULE_SUBSET"]:
             module_sub_set = ''

@@ -40,7 +40,7 @@
 
 import sys
 from dataclasses import Field, dataclass, field
-from typing import Any, Dict, List
+from typing import Dict, List
 
 
 # This dataclass is in charge of holding the file information
@@ -208,7 +208,7 @@ def wheel_files_pyside_addons() -> List[ModuleData]:
         module_QtSerialPort(),
         module_QtStateMachine(),
         # Not available in 6.3
-        #module_QtTextToSpeech(),
+        # module_QtTextToSpeech(),
         module_QtVirtualKeyboard(),
         module_QtWebChannel(),
         module_QtWebEngineCore(),
