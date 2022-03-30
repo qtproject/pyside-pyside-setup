@@ -20,7 +20,7 @@
         </folder>
         <folder folded="yes">
             <title>Community Resources</title>
-            <bookmark href="http://www.qtforum.org/">
+            <bookmark href="https://www.qtforum.org/">
                 <title>QtForum.org</title>
             </bookmark>
             <bookmark href="http://www.digitalfanatics.org/projects/qt_tutorial/">
@@ -29,7 +29,7 @@
             <bookmark href="http://prog.qt.free.fr/">
                 <title>French PROG.Qt</title>
             </bookmark>
-            <bookmark href="http://www.qtforum.de/">
+            <bookmark href="https://www.qtforum.de/">
                 <title>German Qt Forum</title>
             </bookmark>
             <bookmark href="http://www.korone.net/">
@@ -41,7 +41,7 @@
             <bookmark href="http://qt4.digitalfanatics.org/">
                 <title>Digitalfanatics: The QT 4 Resource Center</title>
             </bookmark>
-            <bookmark href="http://www.qtquestions.org/">
+            <bookmark href="https://www.qtquestions.org/">
                 <title>QtQuestions</title>
             </bookmark>
         </folder>

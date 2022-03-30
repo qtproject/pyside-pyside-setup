@@ -3,7 +3,7 @@
 ##
 ## Copyright (C) 2011 Arun Srinivasan <rulfzid@gmail.com>
 ## Copyright (C) 2016 The Qt Company Ltd.
-## Contact: http://www.qt.io/licensing/
+## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
 ##
@@ -201,7 +201,7 @@ class AddressWidget(QTabWidget):
             proxy_model.setFilterKeyColumn(0)  # Filter on the "name" column
             proxy_model.sort(0, Qt.AscendingOrder)
 
-            # This prevents an application crash (see: http://www.qtcentre.org/threads/58874-QListView-SelectionModel-selectionChanged-Crash)
+            # This prevents an application crash (see: https://www.qtcentre.org/threads/58874-QListView-SelectionModel-selectionChanged-Crash)
             viewselectionmodel = table_view.selectionModel()
             table_view.selectionModel().selectionChanged.connect(self.selection_changed)
 

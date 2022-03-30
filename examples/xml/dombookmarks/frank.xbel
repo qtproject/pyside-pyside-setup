@@ -101,7 +101,7 @@
             <bookmark href="http://www.cs.princeton.edu/~benjasik/gdb/gdbtut.html">
                 <title>GDB Tutorial</title>
             </bookmark>
-            <bookmark href="http://www.gnu.org/manual/gdb-4.17/html_mono/gdb.html">
+            <bookmark href="https://www.gnu.org/manual/gdb-4.17/html_mono/gdb.html">
                 <title>Debugging with GDB</title>
             </bookmark>
             <bookmark href="http://www.cs.washington.edu/orgs/acm/tutorials/dev-in-unix/gdb-refcard.pdf">
