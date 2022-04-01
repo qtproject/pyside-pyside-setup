@@ -601,8 +601,7 @@ smart-pointer-type
 
     The ``smart pointer`` type node indicates that the given class is a smart pointer
     and requires inserting calls to **getter** to access the pointeee.
-    Currently, only the **type** *shared* is supported and the usage is limited
-    to function return values.
+    Currently, the usage is limited to function return values.
     **ref-count-method** specifies the name of the method used to do reference counting.
     It is a child of the :ref:`typesystem` node or other type nodes.
 
@@ -619,7 +618,7 @@ smart-pointer-type
         <typesystem>
             <smart-pointer-type name="..."
                 since="..."
-                type="..."
+                type="shared | handle | value-handle"
                 getter="..."
                 ref-count-method="..."
                 value-check-method="..."
@@ -637,6 +636,18 @@ smart-pointer-type
 
     The *optional* attribute **reset-method** specifies a method
     that can be used to clear the pointer.
+
+    The *optional* attribute **type** specifies the type:
+
+    *shared*
+       A standard shared pointer.
+    *handle*
+       A basic pointer handle which has a getter function and an
+       ``operator->``.
+    *value-handle*
+       A handle which has a getter function returning a value
+       (``T`` instead of ``T *`` as for the other types).
+       It can be used for ``std::optional``.
 
     The example below shows an entry for a ``std::shared_ptr``:
 

@@ -729,10 +729,12 @@ public:
 
     explicit SmartPointerTypeEntry(const QString &entryName,
                                    const QString &getterName,
-                                   const QString &smartPointerType,
+                                   TypeSystem::SmartPointerType type,
                                    const QString &refCountMethodName,
                                    const QVersionNumber &vr,
                                    const TypeEntry *parent);
+
+    TypeSystem::SmartPointerType smartPointerType() const;
 
     QString getter() const;
 

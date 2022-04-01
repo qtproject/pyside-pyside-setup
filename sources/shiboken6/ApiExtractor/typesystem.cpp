@@ -1786,33 +1786,39 @@ class SmartPointerTypeEntryPrivate : public ComplexTypeEntryPrivate
 public:
     SmartPointerTypeEntryPrivate(const QString &entryName,
                                  const QString &getterName,
-                                 const QString &smartPointerType,
+                                 TypeSystem::SmartPointerType type,
                                  const QString &refCountMethodName,
                                  const QVersionNumber &vr, const TypeEntry *parent) :
         ComplexTypeEntryPrivate(entryName, TypeEntry::SmartPointerType, vr, parent),
         m_getterName(getterName),
-        m_smartPointerType(smartPointerType),
-        m_refCountMethodName(refCountMethodName)
+        m_refCountMethodName(refCountMethodName),
+        m_smartPointerType(type)
     {
     }
 
     QString m_getterName;
-    QString m_smartPointerType;
     QString m_refCountMethodName;
     QString m_valueCheckMethod;
     QString m_nullCheckMethod;
     QString m_resetMethod;
     SmartPointerTypeEntry::Instantiations m_instantiations;
+    TypeSystem::SmartPointerType m_smartPointerType;
 };
 
 SmartPointerTypeEntry::SmartPointerTypeEntry(const QString &entryName,
                                              const QString &getterName,
-                                             const QString &smartPointerType,
+                                             TypeSystem::SmartPointerType smartPointerType,
                                              const QString &refCountMethodName,
                                              const QVersionNumber &vr, const TypeEntry *parent) :
     ComplexTypeEntry(new SmartPointerTypeEntryPrivate(entryName, getterName, smartPointerType,
                                                       refCountMethodName, vr, parent))
 {
+}
+
+TypeSystem::SmartPointerType SmartPointerTypeEntry::smartPointerType() const
+{
+    S_D(const SmartPointerTypeEntry);
+    return d->m_smartPointerType;
 }
 
 QString SmartPointerTypeEntry::getter() const

@@ -391,8 +391,13 @@ static void writePyGetSetDefEntry(TextStream &s, const QString &name,
 
 static bool generateRichComparison(const GeneratorContext &c)
 {
-    return c.forSmartPointer()
-        || (!c.metaClass()->isNamespace() && c.metaClass()->hasComparisonOperatorOverload());
+    auto *metaClass = c.metaClass();
+    if (c.forSmartPointer()) {
+        auto *te = static_cast<const SmartPointerTypeEntry *>(metaClass->typeEntry());
+        return te->smartPointerType() == TypeSystem::SmartPointerType::Shared;
+    }
+
+    return !metaClass->isNamespace() && metaClass->hasComparisonOperatorOverload();
 }
 
 void CppGenerator::generateIncludes(TextStream &s, const GeneratorContext &classContext,
@@ -821,6 +826,8 @@ void CppGenerator::generateSmartPointerClass(TextStream &s, const GeneratorConte
     const AbstractMetaClass *metaClass = classContext.metaClass();
     const auto *typeEntry = static_cast<const SmartPointerTypeEntry *>(metaClass->typeEntry());
     const bool hasPointeeClass = classContext.pointeeClass() != nullptr;
+    const auto smartPointerType = typeEntry->smartPointerType();
+    const bool isValueHandle = smartPointerType ==TypeSystem::SmartPointerType::ValueHandle;
 
     IncludeGroup includes{u"Extra includes"_s, typeEntry->extraIncludes()};
     generateIncludes(s, classContext, {includes});
@@ -851,7 +858,7 @@ void CppGenerator::generateSmartPointerClass(TextStream &s, const GeneratorConte
     // methods declared in the type entry.
 
     auto ctors = metaClass->queryFunctions(FunctionQueryOption::Constructors);
-    if (!hasPointeeClass) { // Cannot generate "int*"
+    if (!hasPointeeClass && !isValueHandle) { // Cannot generate "int*"
         auto end = std::remove_if(ctors.begin(), ctors.end(), hasParameterPredicate);
         ctors.erase(end, ctors.end());
     }
@@ -867,7 +874,7 @@ void CppGenerator::generateSmartPointerClass(TextStream &s, const GeneratorConte
         if (it == functionGroups.cend())
             throw Exception(msgCannotFindSmartPointerMethod(typeEntry, typeEntry->resetMethod()));
         AbstractMetaFunctionCList resets = it.value();
-        if (!hasPointeeClass) { // Cannot generate "int*"
+        if (!hasPointeeClass && !isValueHandle) { // Cannot generate "int*"
             auto end = std::remove_if(resets.begin(), resets.end(), hasParameterPredicate);
             resets.erase(end, resets.end());
         }
@@ -919,7 +926,8 @@ void CppGenerator::generateSmartPointerClass(TextStream &s, const GeneratorConte
     if (boolCastOpt.has_value())
         writeNbBoolFunction(classContext, boolCastOpt.value(), s);
 
-    writeSmartPointerRichCompareFunction(s, classContext);
+    if (smartPointerType == TypeSystem::SmartPointerType::Shared)
+        writeSmartPointerRichCompareFunction(s, classContext);
 
     s << closeExternC;
 

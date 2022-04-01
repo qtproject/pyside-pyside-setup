@@ -2301,10 +2301,11 @@ static AbstractMetaFunctionPtr
 
 // Create the instantiation type of a smart pointer
 static AbstractMetaType instantiationType(const AbstractMetaClass *s,
-                                          const SmartPointerTypeEntry *)
+                                          const SmartPointerTypeEntry *ste)
 {
     AbstractMetaType type(s->templateArguments().constFirst());
-    type.addIndirection();
+    if (ste->smartPointerType() != TypeSystem::SmartPointerType::ValueHandle)
+        type.addIndirection();
     type.decideUsagePattern();
     return type;
 }

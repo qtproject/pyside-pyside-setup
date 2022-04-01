@@ -398,6 +398,15 @@ ENUM_LOOKUP_BEGIN(TypeSystem::ExceptionHandling, Qt::CaseSensitive,
 };
 ENUM_LOOKUP_LINEAR_SEARCH()
 
+ENUM_LOOKUP_BEGIN(TypeSystem::SmartPointerType, Qt::CaseSensitive,
+                  smartPointerTypeFromAttribute)
+{
+    {u"handle", TypeSystem::SmartPointerType::Handle},
+    {u"value-handle", TypeSystem::SmartPointerType::ValueHandle},
+    {u"shared", TypeSystem::SmartPointerType::Shared}
+};
+ENUM_LOOKUP_LINEAR_SEARCH()
+
 template <class EnumType>
 static std::optional<EnumType>
     lookupHashElement(const QHash<QStringView, EnumType> &hash,
@@ -1337,7 +1346,7 @@ SmartPointerTypeEntry *
 {
     if (!checkRootElement())
         return nullptr;
-    QString smartPointerType;
+    TypeSystem::SmartPointerType smartPointerType = TypeSystem::SmartPointerType::Shared;
     QString getter;
     QString refCountMethodName;
     QString valueCheckMethod;
@@ -1347,7 +1356,13 @@ SmartPointerTypeEntry *
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == u"type") {
-             smartPointerType = attributes->takeAt(i).value().toString();
+            const auto attribute = attributes->takeAt(i);
+            const auto typeOpt = smartPointerTypeFromAttribute(attribute.value());
+            if (!typeOpt.has_value()) {
+                m_error = msgInvalidAttributeValue(attribute);
+                return nullptr;
+            }
+            smartPointerType = typeOpt.value();
         } else if (name == u"getter") {
             getter = attributes->takeAt(i).value().toString();
         } else if (name == u"ref-count-method") {
@@ -1361,15 +1376,6 @@ SmartPointerTypeEntry *
         } else if (name == u"reset-method") {
             resetMethod =  attributes->takeAt(i).value().toString();
         }
-    }
-
-    if (smartPointerType.isEmpty()) {
-        m_error = u"No type specified for the smart pointer. Currently supported types: 'shared',"_s;
-        return nullptr;
-    }
-    if (smartPointerType != u"shared") {
-        m_error = u"Currently only the 'shared' type is supported."_s;
-        return nullptr;
     }
 
     if (getter.isEmpty()) {

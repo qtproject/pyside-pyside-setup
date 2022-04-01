@@ -115,6 +115,12 @@ enum class QtMetaTypeRegistration
     Disabled
 };
 
+enum class SmartPointerType {
+    Shared,
+    Handle,
+    ValueHandle
+};
+
 enum : int { OverloadNumberUnset = -1, OverloadNumberDefault = 99999 };
 
 } // namespace TypeSystem
