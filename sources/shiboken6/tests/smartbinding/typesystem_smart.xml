@@ -38,6 +38,8 @@
     <!-- Just used to silence the warnings that shiboken doens't know what to do with this type -->
     <custom-type name="RefData" />
 
+    <value-type name="StdOptionalTestBench"/>
+
     <system-include file-name="memory"/>
 
     <namespace-type name="std">
@@ -51,6 +53,13 @@
                             instantiations="Integer,int">
             <include file-name="memory" location="global"/>
         </smart-pointer-type>
+
+        <smart-pointer-type name="optional" type="value-handle" getter="value"
+                            value-check-method="has_value"
+                            instantiations="Integer,int">
+            <include file-name="optional" location="global"/>
+        </smart-pointer-type>
+
     </namespace-type>
     <object-type name="StdSharedPtrTestBench"/>
 

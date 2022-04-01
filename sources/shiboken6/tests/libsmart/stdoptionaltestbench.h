@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2019 The Qt Company Ltd.
+** Copyright (C) 2022 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the test suite of Qt for Python.
@@ -26,14 +26,30 @@
 **
 ****************************************************************************/
 
-#ifndef SMART_H
-#define SMART_H
+#ifndef OPTIONALTEST_H
+#define OPTIONALTEST_H
 
-#include "smart_sharedptr.h"
+#include "libsmartmacros.h"
 #include "smart_integer.h"
-#include "smart_obj.h"
-#include "smart_registry.h"
-#include "stdsharedptrtestbench.h"
-#include "stdoptionaltestbench.h"
 
-#endif // SMART_H
+#include <optional>
+
+class LIB_SMART_API StdOptionalTestBench
+{
+public:
+    StdOptionalTestBench();
+
+    std::optional<int> optionalInt() const;
+    void setOptionalInt(const std::optional<int> &i);
+    void setOptionalIntValue(int i);
+
+    std::optional<Integer> optionalInteger() const;
+    void setOptionalInteger(const std::optional<Integer> &s);
+    void setOptionalIntegerValue(Integer &s);
+
+private:
+    std::optional<int> m_optionalInt;
+    std::optional<Integer> m_optionalInteger;
+};
+
+#endif // OPTIONALTEST_H

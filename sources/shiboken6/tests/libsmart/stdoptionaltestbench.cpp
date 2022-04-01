@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2019 The Qt Company Ltd.
+** Copyright (C) 2022 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the test suite of Qt for Python.
@@ -26,14 +26,58 @@
 **
 ****************************************************************************/
 
-#ifndef SMART_H
-#define SMART_H
-
-#include "smart_sharedptr.h"
-#include "smart_integer.h"
-#include "smart_obj.h"
-#include "smart_registry.h"
-#include "stdsharedptrtestbench.h"
 #include "stdoptionaltestbench.h"
 
-#endif // SMART_H
+#include <iostream>
+
+std::ostream &operator<<(std::ostream &str, const Integer &i)
+{
+    str << i.value();
+    return str;
+}
+
+template <class T>
+std::ostream &operator<<(std::ostream &str, const std::optional<T> &o)
+{
+    if (o.has_value())
+        str << o.value();
+    else
+        str << "nullopt";
+    return str;
+}
+
+StdOptionalTestBench::StdOptionalTestBench() = default;
+
+std::optional<int> StdOptionalTestBench::optionalInt() const
+{
+    return m_optionalInt;
+}
+
+void StdOptionalTestBench::setOptionalInt(const std::optional<int> &i)
+{
+    std::cout << __FUNCTION__ << ' ' << i << '\n';
+    m_optionalInt = i;
+}
+
+void StdOptionalTestBench::setOptionalIntValue(int i)
+{
+    std::cout << __FUNCTION__ << ' ' << i << '\n';
+    m_optionalInt.emplace(i);
+}
+
+std::optional<Integer> StdOptionalTestBench::optionalInteger() const
+{
+    return m_optionalInteger;
+}
+
+void StdOptionalTestBench::setOptionalInteger(const std::optional<Integer> &s)
+{
+    std::cout << __FUNCTION__ << ' ' << s << '\n';
+    m_optionalInteger = s;
+}
+
+void StdOptionalTestBench::setOptionalIntegerValue(Integer &s)
+{
+    std::cout << __FUNCTION__ << ' ' << s << '\n';
+    m_optionalInteger.emplace(s);
+}
