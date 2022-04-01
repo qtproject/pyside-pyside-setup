@@ -1418,6 +1418,7 @@ SmartPointerTypeEntry *
                                            refCountMethodName, since, currentParentTypeEntry());
     if (!applyCommonAttributes(reader, type, attributes))
         return nullptr;
+    applyComplexTypeAttributes(reader, type, attributes);
     type->setNullCheckMethod(nullCheckMethod);
     type->setResetMethod(resetMethod);
     m_smartPointerInstantiations.insert(type, instantiations);
@@ -1503,6 +1504,7 @@ ContainerTypeEntry *
                                         since, currentParentTypeEntry());
     if (!applyCommonAttributes(reader, type, attributes))
         return nullptr;
+    applyComplexTypeAttributes(reader, type, attributes);
 
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
@@ -1630,7 +1632,9 @@ ValueTypeEntry *
     if (!checkRootElement())
         return nullptr;
     auto *typeEntry = new ValueTypeEntry(name, since, currentParentTypeEntry());
-    applyCommonAttributes(reader, typeEntry, attributes);
+    if (!applyCommonAttributes(reader, typeEntry, attributes))
+        return nullptr;
+    applyComplexTypeAttributes(reader, typeEntry, attributes);
     const int defaultCtIndex =
         indexOfAttribute(*attributes, u"default-constructor");
     if (defaultCtIndex != -1)
@@ -1709,7 +1713,9 @@ TypedefEntry *
     }
     const QString sourceType = attributes->takeAt(sourceIndex).value().toString();
     auto result = new TypedefEntry(name, sourceType, since, currentParentTypeEntry());
-    applyCommonAttributes(reader, result, attributes);
+    if (!applyCommonAttributes(reader, result, attributes))
+        return nullptr;
+    applyComplexTypeAttributes(reader, result, attributes);
     return result;
 }
 
@@ -3115,21 +3121,15 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
                 return false;
             break;
         case StackElement::ContainerTypeEntry:
-            if (ContainerTypeEntry *ce = parseContainerTypeEntry(reader, name, versionRange.since, &attributes)) {
-                applyComplexTypeAttributes(reader, ce, &attributes);
-                top->entry = ce;
-            } else {
+            top->entry = parseContainerTypeEntry(reader, name, versionRange.since, &attributes);
+            if (top->entry == nullptr)
                 return false;
-            }
             break;
 
         case StackElement::SmartPointerTypeEntry:
-            if (SmartPointerTypeEntry *se = parseSmartPointerEntry(reader, name, versionRange.since, &attributes)) {
-                applyComplexTypeAttributes(reader, se, &attributes);
-                top->entry = se;
-            } else {
+            top->entry = parseSmartPointerEntry(reader, name, versionRange.since, &attributes);
+            if (top->entry == nullptr)
                 return false;
-            }
             break;
         case StackElement::EnumTypeEntry:
             m_currentEnum = parseEnumTypeEntry(reader, name, versionRange.since, &attributes);
@@ -3139,17 +3139,13 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
             break;
 
         case StackElement::ValueTypeEntry:
-           if (ValueTypeEntry *ve = parseValueTypeEntry(reader, name, versionRange.since, &attributes)) {
-               applyComplexTypeAttributes(reader, ve, &attributes);
-               top->entry = ve;
-           } else {
+           top->entry = parseValueTypeEntry(reader, name, versionRange.since, &attributes);
+           if (top->entry == nullptr)
                return false;
-           }
            break;
         case StackElement::NamespaceTypeEntry:
-            if (auto entry = parseNamespaceTypeEntry(reader, name, versionRange.since, &attributes))
-                top->entry = entry;
-            else
+            top->entry = parseNamespaceTypeEntry(reader, name, versionRange.since, &attributes);
+            if (top->entry == nullptr)
                 return false;
             break;
         case StackElement::ObjectTypeEntry:
@@ -3168,13 +3164,10 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
                 return false;
             break;
         case StackElement::TypedefTypeEntry:
-            if (TypedefEntry *te = parseTypedefEntry(reader, name, topElement,
-                                                     versionRange.since, &attributes)) {
-                applyComplexTypeAttributes(reader, te, &attributes);
-                top->entry = te;
-            } else {
+            top->entry = parseTypedefEntry(reader, name, topElement,
+                                           versionRange.since, &attributes);
+            if (top->entry == nullptr)
                 return false;
-            }
             break;
         default:
             Q_ASSERT(false);
