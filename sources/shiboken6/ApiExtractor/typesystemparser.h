@@ -46,77 +46,77 @@ class TypeSystemEntityResolver;
 class TypeDatabase;
 enum class ParserState;
 
-enum class StackElement : uint64_t {
-            None = 0x0,
+enum class StackElement {
+            None,
 
-            // Type tags (0x1, ... , 0xff)
-            ObjectTypeEntry             = 0x1,
-            ValueTypeEntry              = 0x2,
-            InterfaceTypeEntry          = 0x3,
-            NamespaceTypeEntry          = 0x4,
-            ComplexTypeEntryMask        = 0x7,
+            // Type tags
+            ObjectTypeEntry,
+            FirstTypeEntry = ObjectTypeEntry,
+            ValueTypeEntry,
+            InterfaceTypeEntry,
+            NamespaceTypeEntry,
+            LastComplexTypeEntry = NamespaceTypeEntry,
 
-            // Non-complex type tags (0x8, 0x9, ... , 0xf)
-            PrimitiveTypeEntry          = 0x8,
-            EnumTypeEntry               = 0x9,
-            ContainerTypeEntry          = 0xa,
-            FunctionTypeEntry           = 0xb,
-            CustomTypeEntry             = 0xc,
-            SmartPointerTypeEntry       = 0xd,
-            TypedefTypeEntry            = 0xe,
-            TypeEntryMask               = 0xf,
+            // Non-complex type tags
+            PrimitiveTypeEntry,
+            EnumTypeEntry,
+            ContainerTypeEntry,
+            FunctionTypeEntry,
+            CustomTypeEntry,
+            SmartPointerTypeEntry,
+            TypedefTypeEntry,
+            LastTypeEntry = TypedefTypeEntry,
 
             // Documentation tags
-            InjectDocumentation         = 0x10,
-            ModifyDocumentation         = 0x20,
-            DocumentationMask           = 0xf0,
+            InjectDocumentation,
+            FirstDocumentation = InjectDocumentation,
+            ModifyDocumentation,
+            LastDocumentation = ModifyDocumentation,
 
-            // Simple tags (0x100, 0x200, ... , 0xf00)
-            ExtraIncludes               = 0x0100,
-            Include                     = 0x0200,
-            ModifyFunction              = 0x0300,
-            ModifyField                 = 0x0400,
-            Root                        = 0x0500,
-            SuppressedWarning           = 0x0900,
-            Rejection                   = 0x0a00,
-            LoadTypesystem              = 0x0b00,
-            RejectEnumValue             = 0x0c00,
-            Template                    = 0x0d00,
-            InsertTemplate              = 0x0e00,
-            Replace                     = 0x0f00,
-            AddFunction                 = 0x1000,
-            DeclareFunction             = 0x1100,
-            NativeToTarget              = 0x1200,
-            TargetToNative              = 0x1300,
-            AddConversion               = 0x1400,
-            SystemInclude               = 0x1500,
-            Property                    = 0x1600,
-            SimpleMask                  = 0x3f00,
+            // Simple tags
+            ExtraIncludes,
+            Include,
+            ModifyFunction,
+            ModifyField,
+            Root,
+            SuppressedWarning,
+            Rejection,
+            LoadTypesystem,
+            RejectEnumValue,
+            Template,
+            InsertTemplate,
+            Replace,
+            AddFunction,
+            DeclareFunction,
+            NativeToTarget,
+            TargetToNative,
+            AddConversion,
+            SystemInclude,
+            Property,
 
-            // Code snip tags (0x1000, 0x2000, ... , 0xf000)
-            InjectCode                  = 0x4000,
+            // Code snip tags
+            InjectCode,
 
-            // Function modifier tags (0x010000, 0x020000, ... , 0xf00000)
-            Rename                      = 0x040000, // (modify-argument)
-            ModifyArgument              = 0x080000,
-            Thread                      = 0x100000,
-            FunctionModifiers           = 0xff0000,
+            // Function modifier tags
+            Rename, // (modify-argument)
+            ModifyArgument,
+            Thread,
 
-            // Argument modifier tags (0x01000000 ... 0xf0000000)
-            ConversionRule              = 0x01000000,
-            ReplaceType                 = 0x02000000,
-            ReplaceDefaultExpression    = 0x04000000,
-            RemoveArgument              = 0x08000000,
-            DefineOwnership             = 0x10000000,
-            RemoveDefaultExpression     = 0x20000000,
-            NoNullPointers              = 0x40000000,
-            ReferenceCount              = 0x80000000,
-            ParentOwner                 = 0x90000000,
-            Array                       = 0xA0000000,
-            ArgumentModifiers           = 0xff000000,
+            // Argument modifier tags
+            ConversionRule,
+            ReplaceType,
+            ReplaceDefaultExpression,
+            RemoveArgument,
+            DefineOwnership,
+            RemoveDefaultExpression,
+            NoNullPointers,
+            ReferenceCount,
+            ParentOwner,
+            Array,
+            ArgumentModifiers,
 
-            ImportFile                 = 0x100000000,
-            Unimplemented              = 0x200000000
+            ImportFile,
+            Unimplemented
 };
 
 inline uint64_t operator&(StackElement s1, StackElement s2)
