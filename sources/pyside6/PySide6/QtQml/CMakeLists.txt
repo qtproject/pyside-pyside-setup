@@ -1,8 +1,10 @@
 project(QtQml)
 
+qt_wrap_cpp(QPYQMLPARSERSTATUS_MOC "${pyside6_SOURCE_DIR}/qpyqmlparserstatus.h")
 qt_wrap_cpp(QPYQMLPROPERTYVALUESOURCE_MOC "${pyside6_SOURCE_DIR}/qpyqmlpropertyvaluesource.h")
 
 set(QtQml_static_sources "${QtQml_SOURCE_DIR}/pysideqmlvolatilebool.cpp"
+                         "${QPYQMLPARSERSTATUS_MOC}"
                          "${QPYQMLPROPERTYVALUESOURCE_MOC}")
 
 set(QtQml_SRC
@@ -11,6 +13,7 @@ ${QtQml_GEN_DIR}/qjsmanagedvalue_wrapper.cpp
 ${QtQml_GEN_DIR}/qjsprimitivevalue_wrapper.cpp
 ${QtQml_GEN_DIR}/qjsvalue_wrapper.cpp
 ${QtQml_GEN_DIR}/qjsvalueiterator_wrapper.cpp
+${QtQml_GEN_DIR}/qpyqmlparserstatus_wrapper.cpp
 ${QtQml_GEN_DIR}/qpyqmlpropertyvaluesource_wrapper.cpp
 ${QtQml_GEN_DIR}/qqmlabstracturlinterceptor_wrapper.cpp
 ${QtQml_GEN_DIR}/qqmlapplicationengine_wrapper.cpp

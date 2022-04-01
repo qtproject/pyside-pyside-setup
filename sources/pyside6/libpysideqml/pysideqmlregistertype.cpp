@@ -99,14 +99,26 @@ static PyTypeObject *qQJSValueType()
     return result;
 }
 
-// Check if o inherits from QPyQmlPropertyValueSource.
-static bool isQmlPropertyValueSource(const QMetaObject *o)
+// Check if o inherits from baseClass
+static bool inheritsFrom(const QMetaObject *o, const char *baseClass)
 {
     for (auto *base = o->superClass(); base ; base = base->superClass()) {
-        if (qstrcmp(base->className(), "QPyQmlPropertyValueSource") == 0)
+        if (qstrcmp(base->className(), baseClass) == 0)
             return true;
     }
     return false;
+}
+
+// Check if o inherits from QPyQmlPropertyValueSource.
+static inline bool isQmlPropertyValueSource(const QMetaObject *o)
+{
+    return inheritsFrom(o, "QPyQmlPropertyValueSource");
+}
+
+// Check if o inherits from QQmlParserStatus.
+static inline bool isQmlParserStatus(const QMetaObject *o)
+{
+    return inheritsFrom(o, "QPyQmlParserStatus");
 }
 
 namespace PySide::Qml {
@@ -156,10 +168,12 @@ int qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
     type.attachedPropertiesMetaObject = info.metaObject;
 
     if (!isQuickType) { // values filled by the Quick registration
-        type.parserStatusCast =
-                QQmlPrivate::StaticCastSelector<QObject, QQmlParserStatus>::cast();
-        // QPyQmlPropertyValueSource inherits QObject, QmlPropertyValueSource, so,
+        // QPyQmlParserStatus inherits QObject, QQmlParserStatus, so,
         // it is found behind the QObject.
+        type.parserStatusCast = isQmlParserStatus(metaObject)
+            ? int(sizeof(QObject))
+            : QQmlPrivate::StaticCastSelector<QObject, QQmlParserStatus>::cast();
+        // Similar for QPyQmlPropertyValueSource
         type.valueSourceCast = isQmlPropertyValueSource(metaObject)
             ? int(sizeof(QObject))
             : QQmlPrivate::StaticCastSelector<QObject, QQmlPropertyValueSource>::cast();

@@ -1,1 +1,2 @@
+#include "qpyqmlparserstatus.h"
 #include "qpyqmlpropertyvaluesource.h"

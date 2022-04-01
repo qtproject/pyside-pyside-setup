@@ -275,7 +275,8 @@
     for the QML parts.
     <value-type name="QQmlListProperty"/>-->
     <value-type name="QQmlListReference"/>
-    <interface-type name="QQmlParserStatus"/>
+    <object-type name="QQmlParserStatus"/>
+    <object-type name="QPyQmlParserStatus"/>
     <value-type name="QQmlProperty">
         <enum-type name="PropertyTypeCategory"/>
         <enum-type name="Type"/>
