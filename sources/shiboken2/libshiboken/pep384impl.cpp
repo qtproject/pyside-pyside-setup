@@ -733,7 +733,7 @@ _Pep_PrivateMangle(PyObject *self, PyObject *name)
 #endif // IS_PY2
     Shiboken::AutoDecRef privateobj(PyObject_GetAttr(
         reinterpret_cast<PyObject *>(Py_TYPE(self)), Shiboken::PyMagicName::name()));
-#ifndef Py_LIMITED_API
+#ifdef IS_PY2
     return _Py_Mangle(privateobj, name);
 #else
     // PYSIDE-1436: _Py_Mangle is no longer exposed; implement it always.
@@ -771,7 +771,7 @@ _Pep_PrivateMangle(PyObject *self, PyObject *name)
     if (amount > big_stack)
         free(resbuf);
     return result;
-#endif // else Py_LIMITED_API
+#endif // else IS_PY2
 }
 
 /*****************************************************************************
