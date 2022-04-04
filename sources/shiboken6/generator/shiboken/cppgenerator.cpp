@@ -1985,9 +1985,12 @@ void CppGenerator::writeMethodWrapperPreamble(TextStream &s,const OverloadData &
     } else {
         if (rfunc->implementingClass() &&
             (!rfunc->implementingClass()->isNamespace() && overloadData.hasInstanceFunction())) {
-            writeCppSelfDefinition(s, rfunc, context, errorReturn,
-                                   overloadData.hasStaticFunction(),
-                                   overloadData.hasClassMethod());
+            CppSelfDefinitionFlags flags;
+            if (overloadData.hasStaticFunction())
+                flags.setFlag(CppSelfDefinitionFlag::HasStaticOverload);
+            if (overloadData.hasClassMethod())
+                flags.setFlag(CppSelfDefinitionFlag::HasClassMethodOverload);
+            writeCppSelfDefinition(s, rfunc, context, errorReturn, flags);
         }
         if (!rfunc->isInplaceOperator() && overloadData.hasNonVoidReturnType())
             s << "PyObject *" << PYTHON_RETURN_VAR << "{};\n";
@@ -2374,25 +2377,57 @@ void CppGenerator::writeArgumentsInitializer(TextStream &s, const OverloadData &
 void CppGenerator::writeCppSelfConversion(TextStream &s, const GeneratorContext &context,
                                           const QString &className, bool useWrapperClass)
 {
+    if (context.forSmartPointer()) {
+        writeSmartPointerCppSelfConversion(s, context);
+        return;
+    }
+
     static const QString pythonSelfVar = QLatin1String("self");
     if (useWrapperClass)
         s << "static_cast<" << className << " *>(";
-    if (!context.forSmartPointer())
-       s << cpythonWrapperCPtr(context.metaClass(), pythonSelfVar);
-    else
-       s << cpythonWrapperCPtr(context.preciseType(), pythonSelfVar);
+    s << cpythonWrapperCPtr(context.metaClass(), pythonSelfVar);
     if (useWrapperClass)
         s << ')';
+}
+
+void CppGenerator::writeSmartPointerCppSelfConversion(TextStream &s,
+                                                      const GeneratorContext &context)
+{
+    Q_ASSERT(context.forSmartPointer());
+    s << cpythonWrapperCPtr(context.preciseType(), u"self"_qs);
+}
+
+static inline void writeCppSelfVarDef(TextStream &s,
+                                      CppGenerator::CppSelfDefinitionFlags flags = {})
+{
+    if (flags.testFlag(CppGenerator::CppSelfAsReference))
+        s << "auto &" <<  CPP_SELF_VAR << " = *";
+    else
+        s << "auto *" << CPP_SELF_VAR << " = ";
+}
+
+void CppGenerator::writeSmartPointerCppSelfDefinition(TextStream &s,
+                                                      const GeneratorContext &context,
+                                                      ErrorReturn errorReturn,
+                                                      CppSelfDefinitionFlags flags)
+{
+    Q_ASSERT(context.forSmartPointer());
+    writeInvalidPyObjectCheck(s, u"self"_qs, errorReturn);
+    writeCppSelfVarDef(s, flags);
+    writeSmartPointerCppSelfConversion(s, context);
+    s << ";\n";
 }
 
 void CppGenerator::writeCppSelfDefinition(TextStream &s,
                                           const GeneratorContext &context,
                                           ErrorReturn errorReturn,
-                                          bool hasStaticOverload,
-                                          bool hasClassMethodOverload,
-                                          bool cppSelfAsReference) const
+                                          CppSelfDefinitionFlags flags) const
 {
-    Q_ASSERT(!(cppSelfAsReference && hasStaticOverload));
+    Q_ASSERT(!(flags.testFlag(CppSelfAsReference) && flags.testFlag(HasStaticOverload)));
+    if (context.forSmartPointer()) {
+        writeSmartPointerCppSelfDefinition(s, context, errorReturn, flags);
+        return;
+    }
 
     const AbstractMetaClass *metaClass = context.metaClass();
     const auto cppWrapper = context.metaClass()->cppWrapper();
@@ -2401,28 +2436,23 @@ void CppGenerator::writeCppSelfDefinition(TextStream &s,
     const bool useWrapperClass = avoidProtectedHack()
         && cppWrapper.testFlag(AbstractMetaClass::CppProtectedHackWrapper);
     Q_ASSERT(!useWrapperClass || context.useWrapper());
-    QString className;
-    if (!context.forSmartPointer()) {
-        className = useWrapperClass
-            ? context.wrapperName()
-            : (QLatin1String("::") + metaClass->qualifiedCppName());
-    } else {
-        className = context.smartPointerWrapperName();
-    }
+    const QString className = useWrapperClass
+        ? context.wrapperName()
+        : (QLatin1String("::") + metaClass->qualifiedCppName());
 
     writeInvalidPyObjectCheck(s, u"self"_qs, errorReturn);
 
-    if (cppSelfAsReference) {
-         s << "auto &" <<  CPP_SELF_VAR << " = *";
+    if (flags.testFlag(CppSelfAsReference)) {
+         writeCppSelfVarDef(s, flags);
          writeCppSelfConversion(s, context, className, useWrapperClass);
          s << ";\n";
          return;
     }
 
-    if (!hasStaticOverload) {
-        if (!hasClassMethodOverload) {
+    if (!flags.testFlag(HasStaticOverload)) {
+        if (!flags.testFlag(HasClassMethodOverload)) {
             // PYSIDE-131: The single case of a class method for now: tr().
-            s << "auto " <<  CPP_SELF_VAR << " = ";
+            writeCppSelfVarDef(s, flags);
             writeCppSelfConversion(s, context, className, useWrapperClass);
             s << ";\n";
             writeUnusedVariableCast(s, QLatin1String(CPP_SELF_VAR));
@@ -2447,8 +2477,7 @@ void CppGenerator::writeCppSelfDefinition(TextStream &s,
                                           const AbstractMetaFunctionCPtr &func,
                                           const GeneratorContext &context,
                                           ErrorReturn errorReturn,
-                                          bool hasStaticOverload,
-                                          bool hasClassMethodOverload) const
+                                          CppSelfDefinitionFlags flags) const
 {
     if (!func->ownerClass() || func->isConstructor())
         return;
@@ -2465,8 +2494,7 @@ void CppGenerator::writeCppSelfDefinition(TextStream &s,
         s << "std::swap(self, " << PYTHON_ARG << ");\n";
     }
 
-    writeCppSelfDefinition(s, context, errorReturn,
-                           hasStaticOverload, hasClassMethodOverload);
+    writeCppSelfDefinition(s, context, errorReturn, flags);
 }
 
 void CppGenerator::writeErrorSection(TextStream &s, const OverloadData &overloadData,
@@ -4830,7 +4858,7 @@ void CppGenerator::writeCopyFunction(TextStream &s, const GeneratorContext &cont
     const QString className = chopType(cpythonTypeName(metaClass));
     s << "static PyObject *" << className << "___copy__(PyObject *self)\n"
         << "{\n" << indent;
-    writeCppSelfDefinition(s, context, ErrorReturn::Default, false, false, true);
+    writeCppSelfDefinition(s, context, ErrorReturn::Default, CppSelfDefinitionFlag::CppSelfAsReference);
     QString conversionCode;
     if (!context.forSmartPointer())
         conversionCode = cpythonToPythonConversionFunction(metaClass);
@@ -5045,7 +5073,7 @@ void CppGenerator::writeRichCompareFunctionHeader(TextStream &s,
     s << "static PyObject * ";
     s << baseName << "_richcompare(PyObject *self, PyObject *" << PYTHON_ARG
         << ", int op)\n{\n" << indent;
-    writeCppSelfDefinition(s, context, ErrorReturn::Default, false, false, true);
+    writeCppSelfDefinition(s, context, ErrorReturn::Default, CppSelfDefinitionFlag::CppSelfAsReference);
     writeUnusedVariableCast(s, QLatin1String(CPP_SELF_VAR));
     s << "PyObject *" << PYTHON_RETURN_VAR << "{};\n"
         << PYTHON_TO_CPPCONVERSION_STRUCT << ' ' << PYTHON_TO_CPP_VAR << ";\n";

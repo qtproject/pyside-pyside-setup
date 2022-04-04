@@ -51,6 +51,13 @@ public:
         Void
     };
 
+    enum CppSelfDefinitionFlag {
+        HasStaticOverload = 0x1,
+        HasClassMethodOverload = 0x2,
+        CppSelfAsReference = 0x4
+    };
+    Q_DECLARE_FLAGS(CppSelfDefinitionFlags, CppSelfDefinitionFlag)
+
     CppGenerator();
 
     const char *name() const override { return "Source generator"; }
@@ -144,18 +151,21 @@ private:
                                        const GeneratorContext &context,
                                        const QString &className,
                                        bool useWrapperClass);
+    static void writeSmartPointerCppSelfConversion(TextStream &s,
+                                                   const GeneratorContext &context);
+    static void writeSmartPointerCppSelfDefinition(TextStream &s,
+                                                   const GeneratorContext &,
+                                                   ErrorReturn errorReturn = ErrorReturn::Default,
+                                                   CppSelfDefinitionFlags flags = {});
     void writeCppSelfDefinition(TextStream &s,
                                 const AbstractMetaFunctionCPtr &func,
                                 const GeneratorContext &context,
-                                ErrorReturn errorReturn,
-                                bool hasStaticOverload = false,
-                                bool hasClassMethodOverload = false) const;
+                                ErrorReturn errorReturn = ErrorReturn::Default,
+                                CppSelfDefinitionFlags flags = {}) const;
     void writeCppSelfDefinition(TextStream &s,
                                 const GeneratorContext &context,
                                 ErrorReturn errorReturn = ErrorReturn::Default,
-                                bool hasStaticOverload = false,
-                                bool hasClassMethodOverload = false,
-                                bool cppSelfAsReference = false) const;
+                                CppSelfDefinitionFlags flags = {}) const;
 
     static void writeErrorSection(TextStream &s, const OverloadData &overloadData,
                                   ErrorReturn errorReturn);
@@ -514,5 +524,7 @@ private:
 
     static const char *PYTHON_TO_CPPCONVERSION_STRUCT;
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(CppGenerator::CppSelfDefinitionFlags)
 
 #endif // CPPGENERATOR_H
