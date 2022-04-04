@@ -58,6 +58,13 @@ protected:
     bool finishGeneration() override;
 
 private:
+    struct BoolCastFunction
+    {
+        AbstractMetaFunctionCPtr function;
+        bool invert = false; // Function is isNull() (invert result).
+    };
+    using BoolCastFunctionOptional = std::optional<BoolCastFunction>;
+
     static void writeInitFunc(TextStream &declStr, TextStream &callStr,
                               const QString &initFunctionName,
                               const TypeEntry *enclosingEntry = nullptr);
@@ -158,8 +165,10 @@ private:
     QString qObjectGetAttroFunction() const;
 
     void writeNbBoolFunction(const GeneratorContext &context,
-                             const AbstractMetaFunctionCPtr &f,
+                             const BoolCastFunction &f,
                              TextStream &s) const;
+    static void writeNbBoolExpression(TextStream &s, const BoolCastFunction &f,
+                                      bool invert = false);
 
     /**
      *   Writes Python to C++ conversions for arguments on Python wrappers.
@@ -456,9 +465,9 @@ private:
     QString writeReprFunction(TextStream &s, const GeneratorContext &context,
                               uint indirections) const;
 
-    AbstractMetaFunctionCPtr boolCast(const AbstractMetaClass *metaClass) const;
+    BoolCastFunctionOptional boolCast(const AbstractMetaClass *metaClass) const;
     bool hasBoolCast(const AbstractMetaClass *metaClass) const
-    { return !boolCast(metaClass).isNull(); }
+    { return boolCast(metaClass).has_value(); }
 
     std::optional<AbstractMetaType>
         findSmartPointerInstantiation(const SmartPointerTypeEntry *pointer,
