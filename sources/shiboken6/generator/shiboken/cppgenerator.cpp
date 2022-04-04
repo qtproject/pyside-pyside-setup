@@ -286,7 +286,8 @@ QList<AbstractMetaFunctionCList>
     return result;
 }
 
-AbstractMetaFunctionCPtr CppGenerator::boolCast(const AbstractMetaClass *metaClass) const
+CppGenerator::BoolCastFunctionOptional
+    CppGenerator::boolCast(const AbstractMetaClass *metaClass) const
 {
     const auto *te = metaClass->typeEntry();
     if (te->isSmartPointer()) {
@@ -296,7 +297,7 @@ AbstractMetaFunctionCPtr CppGenerator::boolCast(const AbstractMetaClass *metaCla
             const auto func = metaClass->findFunction(nullCheckMethod);
             if (func.isNull())
                 throw Exception(msgMethodNotFound(metaClass, nullCheckMethod));
-            return func;
+            return BoolCastFunction{func, true};
         }
     }
 
@@ -305,7 +306,7 @@ AbstractMetaFunctionCPtr CppGenerator::boolCast(const AbstractMetaClass *metaCla
         ? mode != TypeSystem::BoolCast::Disabled : mode == TypeSystem::BoolCast::Enabled) {
         const auto func = metaClass->findOperatorBool();
         if (!func.isNull())
-            return func;
+            return BoolCastFunction{func, false};
     }
 
     mode = te->isNullMode();
@@ -313,9 +314,9 @@ AbstractMetaFunctionCPtr CppGenerator::boolCast(const AbstractMetaClass *metaCla
         ? mode != TypeSystem::BoolCast::Disabled : mode == TypeSystem::BoolCast::Enabled) {
         const auto func = metaClass->findQtIsNullMethod();
         if (!func.isNull())
-            return func;
+            return BoolCastFunction{func, true};
     }
-    return {};
+    return std::nullopt;
 }
 
 std::optional<AbstractMetaType>
@@ -673,8 +674,8 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
     if ((attroCheck & AttroCheckFlag::SetattroMask) != 0)
         writeSetattroFunction(s, attroCheck, classContext);
 
-    if (const auto f = boolCast(metaClass) ; !f.isNull())
-        writeNbBoolFunction(classContext, f, s);
+    if (const auto f = boolCast(metaClass) ; f.has_value())
+        writeNbBoolFunction(classContext, f.value(), s);
 
     if (supportsNumberProtocol(metaClass)) {
         const QList<AbstractMetaFunctionCList> opOverloads = filterGroupedOperatorFunctions(
@@ -870,11 +871,12 @@ void CppGenerator::generateSmartPointerClass(TextStream &s, const GeneratorConte
     writePyMethodDefs(s, className, methodsDefinitions, true /* ___copy__ */);
 
     // Write tp_s/getattro function
+    const auto boolCastOpt = boolCast(metaClass);
     writeSmartPointerGetattroFunction(s, classContext);
     writeSmartPointerSetattroFunction(s, classContext);
 
-    if (const auto f = boolCast(metaClass) ; !f.isNull())
-        writeNbBoolFunction(classContext, f, s);
+    if (boolCastOpt.has_value())
+        writeNbBoolFunction(classContext, boolCastOpt.value(), s);
 
     writeSmartPointerRichCompareFunction(s, classContext);
 
@@ -6305,24 +6307,36 @@ PyErr_Format(PyExc_AttributeError,
         << "return tmp;\n" << outdent << "}\n\n";
 }
 
+void CppGenerator::writeNbBoolExpression(TextStream &s, const BoolCastFunction &f,
+                                         bool invert)
+{
+    if (f.function->isOperatorBool()) {
+        if (invert)
+            s << '!';
+        s << '*' << CPP_SELF_VAR;
+        return;
+    }
+    if (invert != f.invert)
+        s << '!';
+    s << CPP_SELF_VAR << "->" << f.function->name() << "()";
+}
+
 void CppGenerator::writeNbBoolFunction(const GeneratorContext &context,
-                                       const AbstractMetaFunctionCPtr &f,
+                                       const BoolCastFunction &f,
                                        TextStream &s) const
 {
     s << "static int " << cpythonBaseName(context.metaClass()) << "___nb_bool(PyObject *self)\n"
       << "{\n" << indent;
     writeCppSelfDefinition(s, context, ErrorReturn::MinusOne);
 
-    const bool allowThread = f->allowThread();
+    const bool allowThread = f.function->allowThread();
     if (allowThread)
         s << "int result;\n" << BEGIN_ALLOW_THREADS << "\nresult = ";
     else
         s << "return ";
 
-    if (f->isOperatorBool())
-        s << '*' << CPP_SELF_VAR << " ? 1 : 0;\n";
-    else
-        s << CPP_SELF_VAR << "->isNull() ? 0 : 1;\n";
+    writeNbBoolExpression(s, f);
+    s << " ? 1 : 0;\n";
 
     if (allowThread)
         s << END_ALLOW_THREADS << "\nreturn result;\n";
