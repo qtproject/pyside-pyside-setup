@@ -682,9 +682,10 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
         << "};\n\n";
 
     // Write tp_s/getattro function
+    const auto boolCastOpt = boolCast(metaClass);
     const AttroCheck attroCheck = checkAttroFunctionNeeds(metaClass);
     if (attroCheck.testFlag(AttroCheckFlag::GetattroSmartPointer)) {
-        writeSmartPointerGetattroFunction(s, classContext);
+        writeSmartPointerGetattroFunction(s, classContext, boolCastOpt);
         writeSmartPointerSetattroFunction(s, classContext);
     } else {
         if ((attroCheck & AttroCheckFlag::GetattroMask) != 0)
@@ -693,8 +694,8 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
             writeSetattroFunction(s, attroCheck, classContext);
     }
 
-    if (const auto f = boolCast(metaClass) ; f.has_value())
-        writeNbBoolFunction(classContext, f.value(), s);
+    if (boolCastOpt.has_value())
+        writeNbBoolFunction(classContext, boolCastOpt.value(), s);
 
     if (supportsNumberProtocol(metaClass) && !metaClass->typeEntry()->isSmartPointer()) {
         const QList<AbstractMetaFunctionCList> opOverloads = filterGroupedOperatorFunctions(
@@ -6113,7 +6114,9 @@ void CppGenerator::writeGetattroFunction(TextStream &s, AttroCheck attroCheck,
     s << "return " << getattrFunc << ";\n" << outdent << "}\n\n";
 }
 
-void CppGenerator::writeSmartPointerGetattroFunction(TextStream &s, const GeneratorContext &context)
+void CppGenerator::writeSmartPointerGetattroFunction(TextStream &s,
+                                                     const GeneratorContext &context,
+                                                     const BoolCastFunctionOptional &boolCast)
 {
     Q_ASSERT(context.forSmartPointer());
     const AbstractMetaClass *metaClass = context.metaClass();
@@ -6123,6 +6126,18 @@ void CppGenerator::writeSmartPointerGetattroFunction(TextStream &s, const Genera
         << "if (PyErr_ExceptionMatches(PyExc_AttributeError) == 0)\n"
         << indent << "return nullptr;\n" << outdent
         << "PyErr_Clear();\n";
+
+    if (boolCast.has_value()) {
+        writeSmartPointerCppSelfDefinition(s, context);
+        s << "if (";
+        writeNbBoolExpression(s, boolCast.value(), true /* invert */);
+        s << ") {\n" << indent
+          << R"(PyTypeObject *tp = Py_TYPE(self);
+PyErr_Format(PyExc_AttributeError, "Attempt to retrieve '%s' from null object '%s'.",
+             Shiboken::String::toCString(name), tp->tp_name);
+return nullptr;
+)" << outdent << "}\n";
+    }
 
     // This generates the code which dispatches access to member functions
     // and fields from the smart pointer to its pointee.

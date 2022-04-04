@@ -164,11 +164,14 @@ private:
 
     void writeSetattroDefinition(TextStream &s, const AbstractMetaClass *metaClass) const;
     static void writeSetattroDefaultReturn(TextStream &s);
-    void writeSmartPointerSetattroFunction(TextStream &s, const GeneratorContext &context) const;
+    void writeSmartPointerSetattroFunction(TextStream &s,
+                                           const GeneratorContext &context) const;
     void writeSetattroFunction(TextStream &s, AttroCheck attroCheck,
                                const GeneratorContext &context) const;
     static void writeGetattroDefinition(TextStream &s, const AbstractMetaClass *metaClass);
-    static void writeSmartPointerGetattroFunction(TextStream &s, const GeneratorContext &context);
+    static void writeSmartPointerGetattroFunction(TextStream &s,
+                                                  const GeneratorContext &context,
+                                                  const BoolCastFunctionOptional &boolCast);
     void writeGetattroFunction(TextStream &s, AttroCheck attroCheck,
                                const GeneratorContext &context) const;
     QString qObjectGetAttroFunction() const;
