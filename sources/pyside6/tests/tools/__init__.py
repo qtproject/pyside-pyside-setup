@@ -1,0 +1,1 @@
+from init_paths import init_test_paths

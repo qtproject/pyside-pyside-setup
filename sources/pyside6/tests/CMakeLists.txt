@@ -49,6 +49,7 @@ add_subdirectory(registry)
 add_subdirectory(signals)
 add_subdirectory(support)
 add_subdirectory(tools/metaobjectdump)
+add_subdirectory(tools/pyside6-qml)
 
 foreach(shortname IN LISTS all_module_shortnames)
     message(STATUS "preparing tests for module 'Qt${shortname}'")

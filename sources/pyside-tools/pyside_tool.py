@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+
 import sys
 import os
 from pathlib import Path
@@ -143,6 +144,10 @@ def metaobjectdump():
 
 def project():
     pyside_script_wrapper("project.py")
+
+
+def qml():
+    pyside_script_wrapper("qml.py")
 
 
 if __name__ == "__main__":

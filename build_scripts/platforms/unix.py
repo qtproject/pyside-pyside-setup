@@ -111,7 +111,7 @@ def prepare_packages_posix(self, vars):
             vars=vars)
 
         # For setting up setuptools entry points
-        for script in ("pyside_tool.py", "metaobjectdump.py", "project.py"):
+        for script in ("pyside_tool.py", "metaobjectdump.py", "project.py", "qml.py"):
             src = f"{{install_dir}}/bin/{script}"
             target = f"{{st_build_dir}}/{{st_package_name}}/scripts/{script}"
             copyfile(src, target, force=False, vars=vars)
