@@ -5978,26 +5978,22 @@ void CppGenerator::writeSetattroFunction(TextStream &s, AttroCheck attroCheck,
     writeSetattroDefaultReturn(s);
 }
 
+static const char smartPtrComment[] =
+   "// Try to find the 'name' attribute, by retrieving the PyObject for "
+   "the corresponding C++ object held by the smart pointer.\n";
+
 void CppGenerator::writeSmartPointerSetattroFunction(TextStream &s,
                                                      const GeneratorContext &context) const
 {
     Q_ASSERT(context.forSmartPointer());
     writeSetattroDefinition(s, context.metaClass());
-    s << "// Try to find the 'name' attribute, by retrieving the PyObject for the corresponding C++ object held by the smart pointer.\n"
-         << "PyObject *rawObj = PyObject_CallMethod(self, "
-         << SMART_POINTER_GETTER << ", 0);\n";
-    s << "if (rawObj) {\n";
-    {
-        Indentation indent(s);
-        s << "int hasAttribute = PyObject_HasAttr(rawObj, name);\n"
-            << "if (hasAttribute) {\n";
-        {
-            Indentation indent(s);
-            s << "return PyObject_GenericSetAttr(rawObj, name, value);\n";
-        }
-        s << "}\nPy_DECREF(rawObj);\n";
-    }
-    s << "}\n";
+    s << smartPtrComment
+        << "if (auto *rawObj = PyObject_CallMethod(self, " << SMART_POINTER_GETTER
+        << ", 0)) {\n" << indent
+        << "if (PyObject_HasAttr(rawObj, name) != 0)\n" << indent
+        << "return PyObject_GenericSetAttr(rawObj, name, value);\n" << outdent
+        << "Py_DECREF(rawObj);\n" << outdent
+        << "}\n";
     writeSetattroDefaultReturn(s);
 }
 
@@ -6113,44 +6109,27 @@ void CppGenerator::writeSmartPointerGetattroFunction(TextStream &s, const Genera
     const AbstractMetaClass *metaClass = context.metaClass();
     writeGetattroDefinition(s, metaClass);
     s << "PyObject *tmp = PyObject_GenericGetAttr(self, name);\n"
-        << "if (tmp)\n";
-    {
-        Indentation indent(s);
-        s << "return tmp;\n";
-    }
-    s << "if (!PyErr_ExceptionMatches(PyExc_AttributeError))\n";
-    {
-        Indentation indent(s);
-        s << "return nullptr;\n";
-    }
-    s << "PyErr_Clear();\n";
+        << "if (tmp)\n" << indent << "return tmp;\n" << outdent
+        << "if (PyErr_ExceptionMatches(PyExc_AttributeError) == 0)\n"
+        << indent << "return nullptr;\n" << outdent
+        << "PyErr_Clear();\n";
 
     // This generates the code which dispatches access to member functions
     // and fields from the smart pointer to its pointee.
-    s << "// Try to find the 'name' attribute, by retrieving the PyObject for "
-                   "the corresponding C++ object held by the smart pointer.\n"
-        << "if (auto rawObj = PyObject_CallMethod(self, "
-        << SMART_POINTER_GETTER << ", 0)) {\n";
-    {
-        Indentation indent(s);
-        s << "if (auto attribute = PyObject_GetAttr(rawObj, name))\n";
-        {
-            Indentation indent(s);
-            s << "tmp = attribute;\n";
-        }
-        s << "Py_DECREF(rawObj);\n";
-    }
-    s << "}\n"
-        << "if (!tmp) {\n";
-    {
-        Indentation indent(s);
-        s << R"(PyTypeObject *tp = Py_TYPE(self);
+    s << smartPtrComment
+        << "if (auto *rawObj = PyObject_CallMethod(self, "
+        << SMART_POINTER_GETTER << ", 0)) {\n" << indent
+        << "if (auto *attribute = PyObject_GetAttr(rawObj, name))\n"
+        << indent << "tmp = attribute;\n" << outdent
+        << "Py_DECREF(rawObj);\n" << outdent
+        << "}\n"
+        << "if (!tmp) {\n" << indent
+        << R"(PyTypeObject *tp = Py_TYPE(self);
 PyErr_Format(PyExc_AttributeError,
              "'%.50s' object has no attribute '%.400s'",
              tp->tp_name, Shiboken::String::toCString(name));
-)";
-    }
-    s << "}\n"
+)" << outdent
+        << "}\n"
         << "return tmp;\n" << outdent << "}\n\n";
 }
 
