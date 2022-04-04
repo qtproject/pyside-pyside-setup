@@ -46,7 +46,8 @@
     <load-typesystem name="QtOpenGL/typesystem_opengl.xml" generate="no"/>
     <load-typesystem name="QtQml/typesystem_qml.xml" generate="no"/>
 
-    <smart-pointer-type name="QSharedPointer" type="shared" getter="data"/>
+    <smart-pointer-type name="QSharedPointer" type="shared" getter="data"
+                        reset-method="reset"/>
 
     <extra-includes>
         <include file-name="pysidequickregistertype.h" location="local"/>

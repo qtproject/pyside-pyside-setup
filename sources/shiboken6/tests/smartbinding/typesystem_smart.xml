@@ -47,6 +47,7 @@
         <smart-pointer-type name="shared_ptr" type="shared" getter="get"
                             value-check-method="operator bool"
                             ref-count-method="use_count"
+                            reset-method="reset"
                             instantiations="Integer,int">
             <include file-name="memory" location="global"/>
         </smart-pointer-type>

@@ -485,6 +485,31 @@ ApiExtractorPrivate::addInstantiatedContainersAndSmartPointers(InstantiationColl
         addInstantiatedSmartPointer(context, type);
 }
 
+// Create a modification that invalidates the pointee argument of a smart
+// pointer constructor or reset().
+static FunctionModification invalidateArgMod(const AbstractMetaFunctionCPtr &f, int index = 1)
+{
+    ArgumentModification argMod;
+    argMod.setTargetOwnerShip(TypeSystem::CppOwnership);
+    argMod.setIndex(index);
+    FunctionModification funcMod;
+    funcMod.setSignature(f->minimalSignature());
+    funcMod.setArgument_mods({argMod});
+    return funcMod;
+}
+
+static void addOwnerModification(const AbstractMetaFunctionCList &functions,
+                                 ComplexTypeEntry *typeEntry)
+{
+    for (const auto &f : functions) {
+        if (!f->arguments().isEmpty()
+            && f->arguments().constFirst().type().indirections() > 0) {
+            qSharedPointerConstCast<AbstractMetaFunction>(f)->clearModificationsCache();
+            typeEntry->addFunctionModification(invalidateArgMod(f));
+        }
+    }
+}
+
 void ApiExtractorPrivate::addInstantiatedSmartPointer(InstantiationCollectContext &context,
                                                       const AbstractMetaType &type)
 {
@@ -505,6 +530,15 @@ void ApiExtractorPrivate::addInstantiatedSmartPointer(InstantiationCollectContex
                                                          {instantiatedType},
                                                          InheritTemplateFlag::SetEnclosingClass);
     Q_ASSERT(smp.specialized);
+
+    if (instantiationEntry->isComplex()) {
+        addOwnerModification(smp.specialized->queryFunctions(FunctionQueryOption::Constructors),
+                             instantiationEntry);
+        if (!ste->resetMethod().isEmpty()) {
+            addOwnerModification(smp.specialized->findFunctions(ste->resetMethod()),
+                                 instantiationEntry);
+        }
+    }
 
     context.instantiatedSmartPointers.append(smp);
     m_synthesizedClasses.append(smp.specialized);

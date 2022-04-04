@@ -39,7 +39,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from shiboken_paths import init_paths
 init_paths()
 from copy import copy
-from smart import Obj, Registry, Integer
+from smart import (Obj, Registry, Integer, SharedPtr_Integer, std)
 
 
 def objCount():
@@ -48,6 +48,12 @@ def objCount():
 
 def integerCount():
     return Registry.getInstance().countIntegers()
+
+
+def integerFromValue(v):
+    result = Integer()
+    result.setValue(v)
+    return result
 
 
 class SmartPointerTests(unittest.TestCase):
@@ -304,6 +310,16 @@ class SmartPointerTests(unittest.TestCase):
         o.takeSharedPtrToIntegerByConstRef(null_ptr)
         o.takeSharedPtrToInteger(None)
         o.takeSharedPtrToIntegerByConstRef(None)
+
+    def testConstruction(self):
+        p1 = SharedPtr_Integer(integerFromValue(42))
+        self.assertEqual(p1.value(), 42)
+
+        p2 = std.shared_ptr_Integer(integerFromValue(42))
+        self.assertEqual(p2.value(), 42)
+        p2.reset(integerFromValue(43))
+        self.assertEqual(p2.value(), 43)
+        gc.collect()
 
 
 if __name__ == '__main__':

@@ -795,11 +795,17 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
     }
 }
 
+static bool hasParameterPredicate(const AbstractMetaFunctionCPtr &f)
+{
+    return !f->arguments().isEmpty();
+}
+
 void CppGenerator::generateSmartPointerClass(TextStream &s, const GeneratorContext &classContext)
 {
     s.setLanguage(TextStream::Language::Cpp);
     const AbstractMetaClass *metaClass = classContext.metaClass();
     const auto *typeEntry = static_cast<const SmartPointerTypeEntry *>(metaClass->typeEntry());
+    const bool hasPointeeClass = classContext.pointeeClass() != nullptr;
 
     generateIncludes(s, classContext, typeEntry->extraIncludes());
 
@@ -825,11 +831,34 @@ void CppGenerator::generateSmartPointerClass(TextStream &s, const GeneratorConte
 
     const auto &functionGroups = getFunctionGroups(metaClass);
 
-    // @TODO: Implement constructor support for smart pointers, so that they can be
-    // instantiated in python code.
+    // Skip all public methods of the smart pointer except for the special
+    // methods declared in the type entry.
 
-    // Skip all public methods of the smart pointer except for the raw getter and
-    // the ref count method instantiated in python code.
+    auto ctors = metaClass->queryFunctions(FunctionQueryOption::Constructors);
+    if (!hasPointeeClass) { // Cannot generate "int*"
+        auto end = std::remove_if(ctors.begin(), ctors.end(), hasParameterPredicate);
+        ctors.erase(end, ctors.end());
+    }
+
+    if (!ctors.isEmpty()) {
+        OverloadData overloadData(ctors, api());
+        writeConstructorWrapper(s, overloadData, classContext);
+        writeSignatureInfo(signatureStream, overloadData);
+    }
+
+    if (!typeEntry->resetMethod().isEmpty()) {
+        auto it = functionGroups.constFind(typeEntry->resetMethod());
+        if (it == functionGroups.cend())
+            throw Exception(msgCannotFindSmartPointerMethod(typeEntry, typeEntry->resetMethod()));
+        AbstractMetaFunctionCList resets = it.value();
+        if (!hasPointeeClass) { // Cannot generate "int*"
+            auto end = std::remove_if(resets.begin(), resets.end(), hasParameterPredicate);
+            resets.erase(end, resets.end());
+        }
+        if (!resets.isEmpty())
+            writeMethodWrapper(s, md, signatureStream, resets, classContext);
+    }
+
     auto it = functionGroups.constFind(rawGetter);
     if (it == functionGroups.cend() || it.value().size() != 1)
         throw Exception(msgCannotFindSmartPointerGetter(typeEntry));
@@ -2072,7 +2101,7 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
     }
 
     // PYSIDE-1478: Switching must also happen at object creation time.
-    if (usePySideExtensions())
+    if (usePySideExtensions() && !classContext.forSmartPointer())
         s << "PySide::Feature::Select(self);\n";
 
     writeMethodWrapperPreamble(s, overloadData, classContext, errorReturn);
@@ -2085,8 +2114,10 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
     writeFunctionCalls(s, overloadData, classContext, errorReturn);
     s << '\n';
 
+    const QString typeName = classContext.forSmartPointer()
+        ? classContext.preciseType().cppSignature() : metaClass->qualifiedCppName();
     s << "if (PyErr_Occurred() || !Shiboken::Object::setCppPointer(sbkSelf, Shiboken::SbkType< ::"
-        << metaClass->qualifiedCppName() << " >(), cptr)) {\n"
+        << typeName << " >(), cptr)) {\n"
         <<  indent << "delete cptr;\n" << errorReturn << outdent
         << "}\n";
     if (overloadData.maxArgs() > 0)
@@ -3198,6 +3229,7 @@ void CppGenerator::writeSingleFunctionCall(TextStream &s,
     writeMethodCall(s, func, context,
                     overloadData.pythonFunctionWrapperUsesListOfArguments(),
                     func->arguments().size() - numRemovedArgs, errorReturn);
+
     if (!func->isConstructor())
         writeNoneReturn(s, func, overloadData.hasNonVoidReturnType());
     s << outdent << "}\n";
@@ -3793,9 +3825,13 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                 isCtor = true;
                 const auto owner = func->ownerClass();
                 Q_ASSERT(owner == context.metaClass());
-                QString className = context.useWrapper()
-                    ? context.wrapperName() : owner->qualifiedCppName();
-
+                QString className;
+                if (context.useWrapper())
+                    className = context.wrapperName();
+                else if (context.forSmartPointer())
+                    className = context.preciseType().cppSignature();
+                else
+                    className = owner->qualifiedCppName();
                 if (func->functionType() == AbstractMetaFunction::CopyConstructorFunction && maxArgs == 1) {
                     mc << "new ::" << className << "(*" << CPP_ARG0 << ')';
                 } else {
@@ -4421,7 +4457,7 @@ void CppGenerator::writeClassDefinition(TextStream &s,
     AbstractMetaFunctionCList ctors;
     const auto &allCtors = metaClass->queryFunctions(FunctionQueryOption::AnyConstructor);
     for (const auto &f : allCtors) {
-        if (!f->isPrivate() && !f->isModifiedRemoved() && !classContext.forSmartPointer())
+        if (!f->isPrivate() && !f->isModifiedRemoved())
             ctors.append(f);
     }
 

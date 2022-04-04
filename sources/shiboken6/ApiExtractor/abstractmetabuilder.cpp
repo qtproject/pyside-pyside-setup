@@ -2243,6 +2243,12 @@ const AbstractMetaClass *AbstractMetaBuilderPrivate::resolveTypeSystemTypeDef(co
 // internal, compiler-dependent STL implementation headers might not be exposed
 // to the parser unless those headers are specified as <system-include>.
 
+static void synthesizeWarning(const AbstractMetaFunctionCPtr &f)
+{
+    qCWarning(lcShiboken, "Synthesizing \"%s\"...",
+              qPrintable(f->classQualifiedSignature()));
+}
+
 static AbstractMetaFunctionPtr
     addMethod(AbstractMetaClass *s, const AbstractMetaType &returnType,
               const QString &name, bool isConst = true)
@@ -2251,8 +2257,7 @@ static AbstractMetaFunctionPtr
     function->setType(returnType);
     s->addFunction(function);
     function->setConstant(isConst);
-    qCWarning(lcShiboken, "Synthesizing \"%s\"...",
-              qPrintable(function->classQualifiedSignature()));
+    synthesizeWarning(function);
     return function;
 }
 
@@ -2267,16 +2272,95 @@ static AbstractMetaFunctionPtr
     return addMethod(s, returnType, name, isConst);
 }
 
+// Create the instantiation type of a smart pointer
+static AbstractMetaType instantiationType(const AbstractMetaClass *s,
+                                          const SmartPointerTypeEntry *)
+{
+    AbstractMetaType type(s->templateArguments().constFirst());
+    type.addIndirection();
+    type.decideUsagePattern();
+    return type;
+}
+
+// Create the pointee argument of a smart pointer constructor or reset()
+static AbstractMetaArgument pointeeArgument(const AbstractMetaClass *s,
+                                            const SmartPointerTypeEntry *ste)
+{
+    AbstractMetaArgument pointee;
+    pointee.setType(instantiationType(s, ste));
+    pointee.setName(u"pointee"_qs);
+    return pointee;
+}
+
+// Add the smart pointer constructors. For MSVC, (when not specifying
+// <system-header>), clang only sees the default constructor.
+static void fixSmartPointerConstructors(AbstractMetaClass *s, const SmartPointerTypeEntry *ste)
+{
+    const auto ctors = s->queryFunctions(FunctionQueryOption::Constructors);
+    bool seenDefaultConstructor = false;
+    bool seenParameter = false;
+    for (const auto &ctor : ctors) {
+        if (ctor->arguments().isEmpty())
+            seenDefaultConstructor = true;
+        else
+            seenParameter = true;
+    }
+
+    if (!seenParameter) {
+        AbstractMetaFunctionPtr constructor(new AbstractMetaFunction(s->name()));
+        constructor->setFunctionType(AbstractMetaFunction::ConstructorFunction);
+        constructor->addArgument(pointeeArgument(s, ste));
+        s->addFunction(constructor);
+        synthesizeWarning(constructor);
+    }
+
+    if (!seenDefaultConstructor) {
+        AbstractMetaFunctionPtr constructor(new AbstractMetaFunction(s->name()));
+        constructor->setFunctionType(AbstractMetaFunction::ConstructorFunction);
+        s->addFunction(constructor);
+        synthesizeWarning(constructor);
+    }
+}
+
+// Similarly, add the smart pointer reset() functions
+static void fixSmartPointerReset(AbstractMetaClass *s, const SmartPointerTypeEntry *ste)
+{
+    const QString resetMethodName = ste->resetMethod();
+    const auto functions = s->findFunctions(resetMethodName);
+    bool seenParameterLess = false;
+    bool seenParameter = false;
+    for (const auto &function : functions) {
+        if (function->arguments().isEmpty())
+            seenParameterLess = true;
+        else
+            seenParameter = true;
+    }
+
+    if (!seenParameter) {
+        AbstractMetaFunctionPtr f(new AbstractMetaFunction(resetMethodName));
+        f->addArgument(pointeeArgument(s, ste));
+        s->addFunction(f);
+        synthesizeWarning(f);
+    }
+
+    if (!seenParameterLess) {
+        AbstractMetaFunctionPtr f(new AbstractMetaFunction(resetMethodName));
+        s->addFunction(f);
+        synthesizeWarning(f);
+    }
+}
+
 // Add the relevant missing smart pointer functions.
 static void fixSmartPointerClass(AbstractMetaClass *s, const SmartPointerTypeEntry *ste)
 {
+    fixSmartPointerConstructors(s, ste);
+
+    if (!ste->resetMethod().isEmpty())
+        fixSmartPointerReset(s, ste);
+
     const QString getterName = ste->getter();
-    if (s->findFunction(getterName).isNull()) {
-        AbstractMetaType type(s->templateArguments().constFirst());
-        type.addIndirection();
-        type.decideUsagePattern();
-        addMethod(s, type, getterName);
-    }
+    if (s->findFunction(getterName).isNull())
+        addMethod(s, instantiationType(s, ste), getterName);
 
     const QString refCountName = ste->refCountMethodName();
     if (!refCountName.isEmpty() && s->findFunction(refCountName).isNull())

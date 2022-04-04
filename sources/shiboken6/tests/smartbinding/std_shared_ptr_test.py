@@ -38,7 +38,7 @@ from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from shiboken_paths import init_paths
 init_paths()
-from smart import StdSharedPtrTestBench
+from smart import Integer, StdSharedPtrTestBench, std
 
 
 def call_func_on_ptr(ptr):
@@ -56,6 +56,11 @@ class StdSharedPtrTests(unittest.TestCase):
         StdSharedPtrTestBench.printInteger(np)
         self.assertFalse(np)
         self.assertRaises(AttributeError, call_func_on_ptr, np)
+
+        iv = Integer()
+        iv.setValue(42)
+        np = std.shared_ptr_Integer(iv)
+        self.assertEqual(np.value(), 42)
 
     def testInt(self):
         np = StdSharedPtrTestBench.createNullInt()
