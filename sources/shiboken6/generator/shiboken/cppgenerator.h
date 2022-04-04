@@ -44,6 +44,13 @@ class OverloadDataRootNode;
 class CppGenerator : public ShibokenGenerator
 {
 public:
+    enum CppSelfDefinitionFlag {
+        HasStaticOverload = 0x1,
+        HasClassMethodOverload = 0x2,
+        CppSelfAsReference = 0x4
+    };
+    Q_DECLARE_FLAGS(CppSelfDefinitionFlags, CppSelfDefinitionFlag)
+
     CppGenerator();
 
     const char *name() const override { return "Source generator"; }
@@ -128,16 +135,18 @@ private:
                                        const GeneratorContext &context,
                                        const QString &className,
                                        bool useWrapperClass);
+    static void writeSmartPointerCppSelfConversion(TextStream &s,
+                                                   const GeneratorContext &context);
+    static void writeSmartPointerCppSelfDefinition(TextStream &s,
+                                                   const GeneratorContext &,
+                                                   CppSelfDefinitionFlags flags = {});
     void writeCppSelfDefinition(TextStream &s,
                                 const AbstractMetaFunctionCPtr &func,
                                 const GeneratorContext &context,
-                                bool hasStaticOverload = false,
-                                bool hasClassMethodOverload = false) const;
+                                CppSelfDefinitionFlags flags = {}) const;
     void writeCppSelfDefinition(TextStream &s,
                                 const GeneratorContext &context,
-                                bool hasStaticOverload = false,
-                                bool hasClassMethodOverload = false,
-                                bool cppSelfAsReference = false) const;
+                                CppSelfDefinitionFlags flags = {}) const;
 
     static void writeErrorSection(TextStream &s, const OverloadData &overloadData) ;
     static void writeFunctionReturnErrorCheckSection(TextStream &s, bool hasReturnValue = true);
@@ -497,5 +506,7 @@ private:
         QString m_savedErrorCode;
     };
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(CppGenerator::CppSelfDefinitionFlags)
 
 #endif // CPPGENERATOR_H
