@@ -1741,6 +1741,7 @@ public:
     QString m_getterName;
     QString m_smartPointerType;
     QString m_refCountMethodName;
+    QString m_valueCheckMethod;
     QString m_nullCheckMethod;
     QString m_resetMethod;
     SmartPointerTypeEntry::Instantiations m_instantiations;
@@ -1766,6 +1767,18 @@ QString SmartPointerTypeEntry::refCountMethodName() const
 {
     S_D(const SmartPointerTypeEntry);
     return d->m_refCountMethodName;
+}
+
+QString SmartPointerTypeEntry::valueCheckMethod() const
+{
+    S_D(const SmartPointerTypeEntry);
+    return d->m_valueCheckMethod;
+}
+
+void SmartPointerTypeEntry::setValueCheckMethod(const QString &m)
+{
+    S_D(SmartPointerTypeEntry);
+    d->m_valueCheckMethod = m;
 }
 
 QString SmartPointerTypeEntry::nullCheckMethod() const

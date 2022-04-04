@@ -577,10 +577,15 @@ smart-pointer-type
                 type="..."
                 getter="..."
                 ref-count-method="..."
+                value-check-method="..."
                 null-check-method="..."
                 reset-method="..."
                 instantiations="..."/>
             </typesystem>
+
+
+    The *optional* attribute **value-check-method** specifies a method
+    that can be used to check whether the pointer has a value.
 
     The *optional* attribute **null-check-method** specifies a method
     that can be used to check for ``nullptr``.

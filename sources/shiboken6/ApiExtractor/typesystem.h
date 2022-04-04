@@ -722,6 +722,8 @@ public:
 
     QString refCountMethodName() const;
 
+    QString valueCheckMethod() const;
+    void setValueCheckMethod(const QString &);
     QString nullCheckMethod() const;
     void setNullCheckMethod(const QString &);
     QString resetMethod() const;

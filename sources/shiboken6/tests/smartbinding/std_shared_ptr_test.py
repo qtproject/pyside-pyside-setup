@@ -41,12 +41,21 @@ init_paths()
 from smart import StdSharedPtrTestBench
 
 
+def call_func_on_ptr(ptr):
+    ptr.printInteger()
+
+
 class StdSharedPtrTests(unittest.TestCase):
     def testIt(self):
         p = StdSharedPtrTestBench.createInteger()
         StdSharedPtrTestBench.printInteger(p)
+        self.assertTrue(p)
+        call_func_on_ptr(p)
+
         np = StdSharedPtrTestBench.createNullInteger()
         StdSharedPtrTestBench.printInteger(np)
+        self.assertFalse(np)
+        self.assertRaises(AttributeError, call_func_on_ptr, np)
 
 
 if __name__ == '__main__':

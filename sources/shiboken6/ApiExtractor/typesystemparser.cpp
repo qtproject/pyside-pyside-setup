@@ -1366,6 +1366,7 @@ SmartPointerTypeEntry *
     QString smartPointerType;
     QString getter;
     QString refCountMethodName;
+    QString valueCheckMethod;
     QString nullCheckMethod;
     QString resetMethod;
     QString instantiations;
@@ -1379,6 +1380,8 @@ SmartPointerTypeEntry *
             refCountMethodName = attributes->takeAt(i).value().toString();
         } else if (name == QLatin1String("instantiations")) {
             instantiations = attributes->takeAt(i).value().toString();
+        } else if (name == u"value-check-method") {
+            valueCheckMethod = attributes->takeAt(i).value().toString();
         } else if (name == u"null-check-method") {
             nullCheckMethod = attributes->takeAt(i).value().toString();
         } else if (name == u"reset-method") {
@@ -1420,6 +1423,7 @@ SmartPointerTypeEntry *
         return nullptr;
     applyComplexTypeAttributes(reader, type, attributes);
     type->setNullCheckMethod(nullCheckMethod);
+    type->setValueCheckMethod(valueCheckMethod);
     type->setResetMethod(resetMethod);
     m_smartPointerInstantiations.insert(type, instantiations);
     return type;

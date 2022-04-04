@@ -45,6 +45,7 @@
         <modify-function signature="^.*$" remove="all"/>
         <enum-type name="pointer_safety"/>
         <smart-pointer-type name="shared_ptr" type="shared" getter="get"
+                            value-check-method="operator bool"
                             ref-count-method="use_count"
                             instantiations="Integer">
             <include file-name="memory" location="global"/>

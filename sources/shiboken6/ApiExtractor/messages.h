@@ -207,7 +207,7 @@ QString msgConversionTypesDiffer(const QString &varType, const QString &conversi
 
 QString msgCannotFindSmartPointerGetter(const SmartPointerTypeEntry *);
 
-QString msgCannotFindSmartPointerRefCount(const SmartPointerTypeEntry *);
+QString msgCannotFindSmartPointerMethod(const SmartPointerTypeEntry *te, const QString &m);
 
 QString msgMethodNotFound(const AbstractMetaClass *klass, const QString &name);
 

@@ -2243,33 +2243,55 @@ const AbstractMetaClass *AbstractMetaBuilderPrivate::resolveTypeSystemTypeDef(co
 // internal, compiler-dependent STL implementation headers might not be exposed
 // to the parser unless those headers are specified as <system-include>.
 
+static AbstractMetaFunctionPtr
+    addMethod(AbstractMetaClass *s, const AbstractMetaType &returnType,
+              const QString &name, bool isConst = true)
+{
+    AbstractMetaFunctionPtr function(new AbstractMetaFunction(name));
+    function->setType(returnType);
+    s->addFunction(function);
+    function->setConstant(isConst);
+    qCWarning(lcShiboken, "Synthesizing \"%s\"...",
+              qPrintable(function->classQualifiedSignature()));
+    return function;
+}
+
+static AbstractMetaFunctionPtr
+    addMethod(AbstractMetaClass *s, const QString &returnTypeName,
+              const QString &name, bool isConst = true)
+{
+    auto *typeEntry = TypeDatabase::instance()->findPrimitiveType(returnTypeName);
+    Q_ASSERT(typeEntry);
+    AbstractMetaType returnType(typeEntry);
+    returnType.decideUsagePattern();
+    return addMethod(s, returnType, name, isConst);
+}
+
 // Add the relevant missing smart pointer functions.
 static void fixSmartPointerClass(AbstractMetaClass *s, const SmartPointerTypeEntry *ste)
 {
     const QString getterName = ste->getter();
     if (s->findFunction(getterName).isNull()) {
-        AbstractMetaFunctionPtr getter(new AbstractMetaFunction(getterName));
         AbstractMetaType type(s->templateArguments().constFirst());
         type.addIndirection();
         type.decideUsagePattern();
-        getter->setType(type);
-        s->addFunction(getter);
-        qCWarning(lcShiboken, "Synthesizing \"%s\"...",
-                  qPrintable(getter->classQualifiedSignature()));
+        addMethod(s, type, getterName);
     }
 
     const QString refCountName = ste->refCountMethodName();
-    if (!refCountName.isEmpty() && s->findFunction(refCountName).isNull()) {
-        AbstractMetaFunctionPtr refCount(new AbstractMetaFunction(refCountName));
-        auto *intTypeEntry = TypeDatabase::instance()->findPrimitiveType(u"int"_qs);
-        Q_ASSERT(intTypeEntry);
-        AbstractMetaType intType(intTypeEntry);
-        intType.decideUsagePattern();
-        refCount->setType(intType);
-        s->addFunction(refCount);
-        qCWarning(lcShiboken, "Synthesizing \"%s\"...",
-                  qPrintable(refCount->classQualifiedSignature()));
+    if (!refCountName.isEmpty() && s->findFunction(refCountName).isNull())
+        addMethod(s, u"int"_qs, refCountName);
+
+    const QString valueCheckMethod = ste->valueCheckMethod();
+    if (!valueCheckMethod.isEmpty() && s->findFunction(valueCheckMethod).isNull()) {
+        auto f = addMethod(s, u"bool"_qs, valueCheckMethod);
+        if (valueCheckMethod == u"operator bool")
+            f->setFunctionType(AbstractMetaFunction::ConversionOperator);
     }
+
+    const QString nullCheckMethod = ste->nullCheckMethod();
+    if (!nullCheckMethod.isEmpty() && s->findFunction(nullCheckMethod).isNull())
+        addMethod(s, u"bool"_qs, nullCheckMethod);
 }
 
 // Create a missing smart pointer class

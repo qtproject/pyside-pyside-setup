@@ -292,6 +292,15 @@ CppGenerator::BoolCastFunctionOptional
     const auto *te = metaClass->typeEntry();
     if (te->isSmartPointer()) {
         auto *ste = static_cast<const SmartPointerTypeEntry *>(te);
+
+        auto valueCheckMethod = ste->valueCheckMethod();
+        if (!valueCheckMethod.isEmpty()) {
+            const auto func = metaClass->findFunction(valueCheckMethod);
+            if (func.isNull())
+                throw Exception(msgMethodNotFound(metaClass, valueCheckMethod));
+            return BoolCastFunction{func, false};
+        }
+
         auto nullCheckMethod = ste->nullCheckMethod();
         if (!nullCheckMethod.isEmpty()) {
             const auto func = metaClass->findFunction(nullCheckMethod);
@@ -848,11 +857,19 @@ void CppGenerator::generateSmartPointerClass(TextStream &s, const GeneratorConte
           writeMethodWrapper(s, md, signatureStream, {getter}, classContext);
     }
 
-    const QString refCountMethodName = typeEntry->refCountMethodName();
-    if (!refCountMethodName.isEmpty()) { // optional
-        auto it = functionGroups.constFind(refCountMethodName);
+    QStringList optionalMethods;
+    if (!typeEntry->refCountMethodName().isEmpty())
+        optionalMethods.append(typeEntry->refCountMethodName());
+    const QString valueCheckMethod = typeEntry->valueCheckMethod();
+    if (!valueCheckMethod.isEmpty() && !valueCheckMethod.startsWith(u"operator"))
+        optionalMethods.append(valueCheckMethod);
+    if (!typeEntry->nullCheckMethod().isEmpty())
+        optionalMethods.append(typeEntry->nullCheckMethod());
+
+    for (const QString &optionalMethod : optionalMethods) {
+        auto it = functionGroups.constFind(optionalMethod);
         if (it == functionGroups.cend() || it.value().size() != 1)
-            throw Exception(msgCannotFindSmartPointerRefCount(typeEntry));
+            throw Exception(msgCannotFindSmartPointerMethod(typeEntry, optionalMethod));
         writeMethodWrapper(s, md, signatureStream, it.value(), classContext);
     }
 
