@@ -439,7 +439,12 @@ int SignalManager::SignalManagerPrivate::qtMethodMetacall(QObject *object,
         QByteArray methodName = method.methodSignature();
         methodName.truncate(methodName.indexOf('('));
         Shiboken::AutoDecRef pyMethod(PyObject_GetAttrString(pySelf, methodName));
-        SignalManager::callPythonMetaMethod(method, args, pyMethod, false);
+        if (pyMethod.isNull()) {
+            PyErr_Format(PyExc_AttributeError, "Slot '%s::%s' not found.",
+                         metaObject->className(), method.methodSignature().constData());
+        } else {
+            SignalManager::callPythonMetaMethod(method, args, pyMethod, false);
+        }
     }
     // WARNING Isn't safe to call any metaObject and/or object methods beyond this point
     //         because the object can be deleted inside the called slot.
