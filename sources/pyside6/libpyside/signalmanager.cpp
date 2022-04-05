@@ -601,6 +601,11 @@ static int callMethod(QObject *object, int id, void **args)
         QByteArray methodName = method.methodSignature();
         methodName.truncate(methodName.indexOf('('));
         Shiboken::AutoDecRef pyMethod(PyObject_GetAttrString(self, methodName));
+        if (pyMethod.isNull()) {
+            PyErr_Format(PyExc_AttributeError, "Slot '%s::%s' not found.",
+                         metaObject->className(), method.methodSignature().constData());
+            return -1;
+        }
         return SignalManager::callPythonMetaMethod(method, args, pyMethod, false);
     }
     return -1;
