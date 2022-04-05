@@ -2329,47 +2329,32 @@ void CppGenerator::writeArgumentsInitializer(TextStream &s, const OverloadData &
     bool usesNamedArguments = overloadData.hasArgumentWithDefaultValue();
 
     s << "// invalid argument lengths\n";
-    bool ownerClassIsQObject = rfunc->ownerClass() && rfunc->ownerClass()->isQObject() && rfunc->isConstructor();
-    if (usesNamedArguments) {
-        if (!ownerClassIsQObject) {
-            s << "if (numArgs > " << maxArgs << ") {\n";
-            {
-                Indentation indent(s);
-                s << "static PyObject *const too_many = "
-                     "Shiboken::String::createStaticString(\">\");\n"
-                    << "errInfo.reset(too_many);\n"
-                    << "Py_INCREF(errInfo.object());\n"
-                    << "goto " << cpythonFunctionName(rfunc) << "_TypeError;\n";
-            }
-            s << '}';
-        }
-        if (minArgs > 0) {
-            if (!ownerClassIsQObject)
-                s << " else ";
-            s << "if (numArgs < " << minArgs << ") {\n";
-            {
-                Indentation indent(s);
-                s << "static PyObject *const too_few = "
-                     "Shiboken::String::createStaticString(\"<\");\n"
-                    << "errInfo.reset(too_few);\n"
-                    << "Py_INCREF(errInfo.object());\n"
-                    << "goto " << cpythonFunctionName(rfunc) << "_TypeError;\n";
-            }
-            s << '}';
-        }
+
+    // Disable argument count checks for QObject constructors to allow for
+    // passing properties as KW args.
+    auto *owner = rfunc->ownerClass();
+    bool isQObjectConstructor = owner != nullptr && owner->isQObject()
+        && rfunc->functionType() == AbstractMetaFunction::ConstructorFunction;
+
+    if (usesNamedArguments && !isQObjectConstructor) {
+        s << "errInfo.reset(Shiboken::checkInvalidArgumentCount(numArgs, "
+            <<  minArgs << ", " << maxArgs << "));\n"
+            << "if (!errInfo.isNull())\n" << indent
+            << "goto " << cpythonFunctionName(rfunc) << "_TypeError;\n" << outdent;
     }
+
     const QList<int> invalidArgsLength = overloadData.invalidArgumentLengths();
     if (!invalidArgsLength.isEmpty()) {
-        QStringList invArgsLen;
-        for (int i : qAsConst(invalidArgsLength))
-            invArgsLen << u"numArgs == "_qs + QString::number(i);
-        if (usesNamedArguments && (!ownerClassIsQObject || minArgs > 0))
-            s << " else ";
-        s << "if (" << invArgsLen.join(QLatin1String(" || ")) << ")\n";
-        Indentation indent(s);
-        s << "goto " << cpythonFunctionName(rfunc) << "_TypeError;";
+        s << "if (";
+        for (qsizetype i = 0, size = invalidArgsLength.size(); i < size; ++i) {
+            if (i)
+                s << " || ";
+            s << "numArgs == " << invalidArgsLength.at(i);
+        }
+        s << ")\n" << indent
+            << "goto " << cpythonFunctionName(rfunc) << "_TypeError;\n" << outdent;
     }
-    s  << "\n\n";
+    s  << '\n';
 
     QString funcName;
     if (rfunc->isOperatorOverload())

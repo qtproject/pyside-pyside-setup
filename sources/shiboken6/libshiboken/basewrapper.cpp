@@ -761,6 +761,22 @@ void setErrorAboutWrongArguments(PyObject *args, const char *funcName, PyObject 
     SetError_Argument(args, funcName, info);
 }
 
+PyObject *checkInvalidArgumentCount(Py_ssize_t numArgs, Py_ssize_t minArgs, Py_ssize_t maxArgs)
+{
+    PyObject *result = nullptr;
+    // for seterror_argument(), signature/errorhandler.py
+    if (numArgs > maxArgs) {
+        static PyObject *const tooMany = Shiboken::String::createStaticString(">");
+        result = tooMany;
+        Py_INCREF(result);
+    } else if (numArgs < minArgs) {
+        static PyObject *const tooFew = Shiboken::String::createStaticString("<");
+        result = tooFew;
+        Py_INCREF(result);
+    }
+    return result;
+}
+
 class FindBaseTypeVisitor : public HierarchyVisitor
 {
 public:

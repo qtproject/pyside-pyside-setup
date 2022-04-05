@@ -169,6 +169,11 @@ void callCppDestructor(void *cptr)
 LIBSHIBOKEN_API void setErrorAboutWrongArguments(PyObject *args, const char *funcName,
                                                  PyObject *info);
 
+// Return error information object if the argument count is wrong
+LIBSHIBOKEN_API PyObject *checkInvalidArgumentCount(Py_ssize_t numArgs,
+                                                    Py_ssize_t minArgs,
+                                                    Py_ssize_t maxArgs);
+
 namespace ObjectType {
 
 /**
