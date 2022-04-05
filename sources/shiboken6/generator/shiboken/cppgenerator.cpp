@@ -3541,12 +3541,14 @@ QString CppGenerator::argumentNameFromIndex(const ApiExtractorResult &api,
         *wrappedClass = AbstractMetaClass::findClass(api.classes(), argType.typeEntry());
         if (*wrappedClass == nullptr && errorMessage != nullptr)
             *errorMessage = msgClassNotFound(argType.typeEntry());
-        if (argIndex == 1
-            && !func->isConstructor()
-            && OverloadData::isSingleArgument(getFunctionGroups(func->implementingClass()).value(func->name())))
-            pyArgName = QLatin1String(PYTHON_ARG);
-        else
+        if (argIndex != 1) {
             pyArgName = pythonArgsAt(argIndex - 1);
+        } else {
+            OverloadData data(getFunctionGroups(func->implementingClass()).value(func->name()),
+                              api);
+            pyArgName = data.pythonFunctionWrapperUsesListOfArguments()
+                ? pythonArgsAt(argIndex - 1) : QLatin1String(PYTHON_ARG);
+        }
     }
     return pyArgName;
 }
