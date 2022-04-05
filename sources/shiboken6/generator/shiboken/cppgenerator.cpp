@@ -91,17 +91,6 @@ static const char *typeNameOf(const T &t)
 }
 )CPP";
 
-// utility functions
-inline AbstractMetaType getTypeWithoutContainer(const AbstractMetaType &arg)
-{
-    if (arg.typeEntry()->isContainer()) {
-        // only support containers with 1 type
-        if (arg.instantiations().size() == 1)
-            return arg.instantiations().constFirst();
-    }
-    return arg;
-}
-
 // A helper for writing C++ return statements for either void ("return;")
 // or some return value ("return value;")
 class returnStatement
@@ -3517,51 +3506,52 @@ void CppGenerator::writeNamedArgumentResolution(TextStream &s, const AbstractMet
 }
 
 QString CppGenerator::argumentNameFromIndex(const ApiExtractorResult &api,
-                                            const AbstractMetaFunctionCPtr &func, int argIndex,
-                                            const AbstractMetaClass **wrappedClass,
-                                            QString *errorMessage)
+                                            const AbstractMetaFunctionCPtr &func, int argIndex)
 {
-    if (errorMessage != nullptr)
-        errorMessage->clear();
-    *wrappedClass = nullptr;
-    QString pyArgName;
-    if (argIndex == -1) {
-        pyArgName = QLatin1String("self");
-        *wrappedClass = func->implementingClass();
-    } else if (argIndex == 0) {
-        const auto funcType = func->type();
-        AbstractMetaType returnType = getTypeWithoutContainer(funcType);
-        if (!returnType.isVoid()) {
-            pyArgName = QLatin1String(PYTHON_RETURN_VAR);
-            *wrappedClass = AbstractMetaClass::findClass(api.classes(), returnType.typeEntry());
-            if (*wrappedClass == nullptr && errorMessage != nullptr)
-                *errorMessage = msgClassNotFound(returnType.typeEntry());
-        } else {
-            if (errorMessage != nullptr) {
-                QTextStream str(errorMessage);
-                str << "Invalid Argument index (0, return value) on function modification: "
-                    <<  funcType.name() << ' ';
-                if (const AbstractMetaClass *declaringClass = func->declaringClass())
-                   str << declaringClass->name() << "::";
-                 str << func->name() << "()";
-            }
-        }
-    } else {
-        int realIndex = argIndex - 1 - OverloadData::numberOfRemovedArguments(func, argIndex - 1);
-        AbstractMetaType argType = getTypeWithoutContainer(func->arguments().at(realIndex).type());
-        *wrappedClass = AbstractMetaClass::findClass(api.classes(), argType.typeEntry());
-        if (*wrappedClass == nullptr && errorMessage != nullptr)
-            *errorMessage = msgClassNotFound(argType.typeEntry());
-        if (argIndex != 1) {
-            pyArgName = pythonArgsAt(argIndex - 1);
-        } else {
-            OverloadData data(getFunctionGroups(func->implementingClass()).value(func->name()),
-                              api);
-            pyArgName = data.pythonFunctionWrapperUsesListOfArguments()
-                ? pythonArgsAt(argIndex - 1) : QLatin1String(PYTHON_ARG);
-        }
+    switch (argIndex) {
+    case -1:
+        return u"self"_qs;
+    case 0:
+        return QLatin1String(PYTHON_RETURN_VAR);
+    case 1: { // Single argument?
+        OverloadData data(getFunctionGroups(func->implementingClass()).value(func->name()), api);
+        if (!data.pythonFunctionWrapperUsesListOfArguments())
+            return QLatin1String(PYTHON_ARG);
+        break;
     }
-    return pyArgName;
+    }
+    return pythonArgsAt(argIndex - 1);
+}
+
+const AbstractMetaClass *
+CppGenerator::argumentClassFromIndex(const ApiExtractorResult &api,
+                                     const AbstractMetaFunctionCPtr &func, int argIndex)
+{
+    if (argIndex == -1)
+        return func->implementingClass();
+
+    AbstractMetaType type;
+    if (argIndex == 0) {
+        type = func->type();
+    } else {
+        const int arg = argIndex - 1;
+        const int realIndex = arg - OverloadData::numberOfRemovedArguments(func, arg);
+        type = func->arguments().at(realIndex).type();
+    }
+
+    if (type.typeEntry()->isContainer()) {
+        // only support containers with 1 type
+        if (type.instantiations().size() == 1)
+            type = type.instantiations().constFirst();
+    }
+
+    auto *te = type.typeEntry();
+    if (type.isVoid() || !te->isComplex())
+        throw Exception(msgInvalidArgumentModification(func, argIndex));
+    auto *result = AbstractMetaClass::findClass(api.classes(), te);
+    if (!result)
+        throw Exception(msgClassNotFound(te));
+    return result;
 }
 
 const char defaultExceptionHandling[] = R"(} catch (const std::exception &e) {
@@ -3945,24 +3935,10 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
     if (!ownership_mods.isEmpty()) {
         s  << '\n' << "// Ownership transferences.\n";
         for (const ArgumentModification &arg_mod : qAsConst(ownership_mods)) {
-            const AbstractMetaClass *wrappedClass = nullptr;
-            QString errorMessage;
-            QString pyArgName = argumentNameFromIndex(api(), func, arg_mod.index(),
-                                                      &wrappedClass, &errorMessage);
-            if (!wrappedClass) {
-                QString message;
-                QTextStream str(&message);
-                str << "Invalid ownership modification for argument " << arg_mod.index()
-                    << " (" << pyArgName << ") of ";
-                if (const AbstractMetaClass *declaringClass = func->declaringClass())
-                    str << declaringClass->name() << "::";
-                str << func->name() << "(): " << errorMessage;
-                qCWarning(lcShiboken, "%s", qPrintable(message));
-                s << "#error " << message << '\n';
-                break;
-            }
+            const int argIndex = arg_mod.index();
+            const QString pyArgName = argumentNameFromIndex(api(), func, argIndex);
 
-            if (arg_mod.index() == 0 || arg_mod.owner().index == 0)
+            if (argIndex == 0 || arg_mod.owner().index == 0)
                 hasReturnPolicy = true;
 
             // The default ownership does nothing. This is useful to avoid automatic heuristically
@@ -3974,11 +3950,9 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
             s << "Shiboken::Object::";
             if (ownership == TypeSystem::TargetLangOwnership) {
                 s << "getOwnership(" << pyArgName << ");";
-            } else if (wrappedClass->hasVirtualDestructor()) {
-                if (arg_mod.index() == 0)
-                    s << "releaseOwnership(" << PYTHON_RETURN_VAR << ");";
-                else
-                    s << "releaseOwnership(" << pyArgName << ");";
+            } else if (auto *ac = argumentClassFromIndex(api(), func, argIndex);
+                       ac->hasVirtualDestructor()) {
+                s << "releaseOwnership(" << pyArgName << ");";
             } else {
                 s << "invalidate(" << pyArgName << ");";
             }
@@ -3994,28 +3968,9 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                 qCWarning(lcShiboken) << "\"set\", \"add\" and \"remove\" are the only values supported by Shiboken for action attribute of reference-count tag.";
                 continue;
             }
-            const AbstractMetaClass *wrappedClass = nullptr;
-
-            QString pyArgName;
-            if (refCount.action == ReferenceCount::Remove) {
-                pyArgName = QLatin1String("Py_None");
-            } else {
-                QString errorMessage;
-                pyArgName = argumentNameFromIndex(api(), func, arg_mod.index(),
-                                                  &wrappedClass, &errorMessage);
-                if (pyArgName.isEmpty()) {
-                    QString message;
-                    QTextStream str(&message);
-                    str << "Invalid reference count modification for argument "
-                        << arg_mod.index() << " of ";
-                    if (const AbstractMetaClass *declaringClass = func->declaringClass())
-                        str << declaringClass->name() << "::";
-                    str << func->name() << "(): " << errorMessage;
-                    qCWarning(lcShiboken, "%s", qPrintable(message));
-                    s << "#error " << message << "\n\n";
-                    break;
-                }
-            }
+            const int argIndex = arg_mod.index();
+            const QString pyArgName = refCount.action == ReferenceCount::Remove
+                ? u"Py_None"_qs : argumentNameFromIndex(api(), func, argIndex);
 
             if (refCount.action == ReferenceCount::Add || refCount.action == ReferenceCount::Set)
                 s << "Shiboken::Object::keepReference(";
@@ -4025,13 +3980,13 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
             s << "reinterpret_cast<SbkObject *>(self), \"";
             QString varName = arg_mod.referenceCounts().constFirst().varName;
             if (varName.isEmpty())
-                varName = func->minimalSignature() + QString::number(arg_mod.index());
+                varName = func->minimalSignature() + QString::number(argIndex);
 
             s << varName << "\", " << pyArgName
               << (refCount.action == ReferenceCount::Add ? ", true" : "")
               << ");\n";
 
-            if (arg_mod.index() == 0)
+            if (argIndex == 0)
                 hasReturnPolicy = true;
         }
     }

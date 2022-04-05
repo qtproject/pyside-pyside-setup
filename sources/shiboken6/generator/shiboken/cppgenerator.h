@@ -323,9 +323,13 @@ private:
 
     /// Returns a string containing the name of an argument for the given function and argument index.
     static QString argumentNameFromIndex(const ApiExtractorResult &api,
-                                         const AbstractMetaFunctionCPtr &func, int argIndex,
-                                         const AbstractMetaClass **wrappedClass,
-                                         QString *errorMessage = nullptr);
+                                         const AbstractMetaFunctionCPtr &func, int argIndex);
+    /// Returns the class for an ownership modification of the argument.
+    /// Throws if the argument is not a class or cannot be found.
+    static const AbstractMetaClass *
+        argumentClassFromIndex(const ApiExtractorResult &api,
+                               const AbstractMetaFunctionCPtr &func, int argIndex);
+
     void writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr &func,
                          const GeneratorContext &context, bool usesPyArgs,
                          int maxArgs) const;
