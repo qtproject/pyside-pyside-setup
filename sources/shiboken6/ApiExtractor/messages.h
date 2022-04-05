@@ -71,6 +71,9 @@ QString msgTypeModificationFailed(const QString &type, int n,
                                   const AbstractMetaFunction *func,
                                   const QString &why);
 
+QString msgInvalidArgumentModification(const AbstractMetaFunctionCPtr &func,
+                                       int argIndex);
+
 QString msgArgumentOutOfRange(int number, int minValue, int maxValue);
 
 QString msgArgumentRemovalFailed(const AbstractMetaFunction *func, int n,

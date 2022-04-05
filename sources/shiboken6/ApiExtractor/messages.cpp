@@ -96,6 +96,20 @@ QString msgTypeModificationFailed(const QString &type, int n,
     return result;
 }
 
+QString msgInvalidArgumentModification(const AbstractMetaFunctionCPtr &func,
+                                       int argIndex)
+{
+    QString result;
+    QTextStream str(&result);
+    str << "Invalid ";
+    if (argIndex == 0)
+        str << "return type modification";
+    else
+        str << "modification of argument " << argIndex;
+    str << " for " << func->classQualifiedSignature();
+    return result;
+}
+
 QString msgArgumentOutOfRange(int number, int minValue, int maxValue)
 {
     QString result;
