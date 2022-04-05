@@ -718,18 +718,6 @@ int OverloadData::numberOfRemovedArguments(const AbstractMetaFunctionCPtr &func,
     return removed;
 }
 
-bool OverloadData::isSingleArgument(const AbstractMetaFunctionCList &overloads)
-{
-    bool singleArgument = true;
-    for (const auto &func : overloads) {
-        if (func->arguments().size() - numberOfRemovedArguments(func) != 1) {
-            singleArgument = false;
-            break;
-        }
-    }
-    return singleArgument;
-}
-
 void OverloadData::dumpGraph(const QString &filename) const
 {
     QFile file(filename);

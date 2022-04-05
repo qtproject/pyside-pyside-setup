@@ -177,8 +177,6 @@ public:
 
     static int numberOfRemovedArguments(const AbstractMetaFunctionCPtr &func);
     static int numberOfRemovedArguments(const AbstractMetaFunctionCPtr &func, int finalArgPos);
-    /// Returns true if all overloads have no more than one argument.
-    static bool isSingleArgument(const AbstractMetaFunctionCList &overloads);
 
     void dumpGraph(const QString &filename) const;
     QString dumpGraph() const;
