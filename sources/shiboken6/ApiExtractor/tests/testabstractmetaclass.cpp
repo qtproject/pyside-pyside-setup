@@ -566,14 +566,14 @@ void TestAbstractMetaClass::testIsPolymorphic()
     {\n\
     public:\n\
         A();\n\
-        inline bool abc() const {}\n\
+        inline bool abc() const { return false; }\n\
     };\n\
     \n\
     class B : public A\n\
     {\n\
     public:\n\
         B();\n\
-        inline bool abc() const {}\n\
+        inline bool abc() const { return false; }\n\
     };\n";
     const char* xmlCode = "\
     <typesystem package='Foo'>\n\

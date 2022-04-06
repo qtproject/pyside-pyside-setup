@@ -363,7 +363,7 @@ enum ClassType {
 };
 template<ClassType CLASS_TYPE>
 struct BaseTemplateClass {
-    inline ClassType getClassType() const { CLASS_TYPE; }
+    inline ClassType getClassType() const { return CLASS_TYPE; }
 };
 typedef BaseTemplateClass<TypeOne> TypeOneClass;
 }
