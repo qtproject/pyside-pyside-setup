@@ -457,8 +457,6 @@ void TestAddFunction::testAddFunctionOnTypedef()
     const char cppCode[] = "template<class T> class Foo { }; typedef Foo<int> FooInt;\n";
     const char xmlCode[] = "\
     <typesystem package='Package'>\n\
-        <custom-type name='PySequence'/>\n\
-        <primitive-type name='int'/>\n\
         <value-type name='FooInt'>\n\
             <add-function signature='FooInt(PySequence)'>\n\
                 <inject-code class='target' position='beginning'>custom_code();</inject-code>\n\
