@@ -49,7 +49,7 @@
 
 QString HeaderGenerator::headerFileNameForContext(const GeneratorContext &context)
 {
-    return fileNameForContextHelper(context, u"_wrapper.h"_qs, true /* qualified */);
+    return fileNameForContextHelper(context, u"_wrapper.h"_qs);
 }
 
 QString HeaderGenerator::fileNameForContext(const GeneratorContext &context) const

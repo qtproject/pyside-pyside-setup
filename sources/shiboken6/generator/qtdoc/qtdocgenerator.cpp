@@ -130,7 +130,8 @@ bool QtDocGenerator::shouldGenerate(const TypeEntry *te) const
 QString QtDocGenerator::fileNameForContext(const GeneratorContext &context) const
 {
     return fileNameForContextHelper(context, fileNameSuffix(),
-                                    false /* qualified */);
+                                    FileNameFlag::UnqualifiedName
+                                    | FileNameFlag::KeepCase);
 }
 
 void QtDocGenerator::writeFormattedBriefText(TextStream &s, const Documentation &doc,
@@ -752,7 +753,7 @@ static void writeFancyToc(TextStream& s, const QStringList& items)
             const QString entry = QLatin1String("* :doc:`") + item + QLatin1Char('`');
             row << QtXmlToSphinx::TableCell(entry);
         }
-        if (!row.isEmpty())
+        if (row.size() > 1)
             table.appendRow(row);
     }
 

@@ -200,6 +200,12 @@ public:
     };
     Q_DECLARE_FLAGS(Options, Option)
 
+    enum FileNameFlag {
+        UnqualifiedName = 0x1,
+        KeepCase = 0x2
+    };
+    Q_DECLARE_FLAGS(FileNameFlags, FileNameFlag)
+
     Generator();
     virtual ~Generator();
 
@@ -259,7 +265,7 @@ protected:
     /// Helper for determining the file name
     static QString fileNameForContextHelper(const GeneratorContext &context,
                                             const QString &suffix,
-                                            bool useQualifiedName = true);
+                                            FileNameFlags flags = {});
 
     /// Returns all primitive types found by APIExtractor
     static PrimitiveTypeEntryList primitiveTypes();
@@ -375,6 +381,8 @@ private:
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(Generator::Options)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Generator::FileNameFlags)
+
 using GeneratorPtr = QSharedPointer<Generator>;
 using Generators = QList<GeneratorPtr>;
 

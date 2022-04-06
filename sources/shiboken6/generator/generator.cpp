@@ -411,14 +411,15 @@ bool Generator::handleOption(const QString & key, const QString & /* value */)
 
 QString Generator::fileNameForContextHelper(const GeneratorContext &context,
                                             const QString &suffix,
-                                            bool useQualifiedName)
+                                            FileNameFlags flags)
 
 {
     if (!context.forSmartPointer()) {
         const AbstractMetaClass *metaClass = context.metaClass();
-        QString fileNameBase = useQualifiedName
-            ? metaClass->qualifiedCppName().toLower()
-            : metaClass->name().toLower();
+        QString fileNameBase = flags.testFlag(FileNameFlag::UnqualifiedName)
+            ? metaClass->name() : metaClass->qualifiedCppName();
+        if (!flags.testFlag(FileNameFlag::KeepCase))
+            fileNameBase = fileNameBase.toLower();
         fileNameBase.replace(u"::"_qs, u"_"_qs);
         return fileNameBase + suffix;
     }

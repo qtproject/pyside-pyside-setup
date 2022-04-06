@@ -215,7 +215,7 @@ CppGenerator::CppGenerator() = default;
 
 QString CppGenerator::fileNameForContext(const GeneratorContext &context) const
 {
-    return fileNameForContextHelper(context, u"_wrapper.cpp"_qs, true /* qualified */);
+    return fileNameForContextHelper(context, u"_wrapper.cpp"_qs);
 }
 
 static bool isInplaceAdd(const AbstractMetaFunctionCPtr &func)
