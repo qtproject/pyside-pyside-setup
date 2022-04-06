@@ -206,7 +206,7 @@ AbstractMetaFunctionCList AbstractMetaClass::functionsInTargetLang() const
         public_flags |= FunctionQueryOption::WasPublic;
 
     // Constructors
-    AbstractMetaFunctionCList returned = queryFunctions(FunctionQueryOption::Constructors
+    AbstractMetaFunctionCList returned = queryFunctions(FunctionQueryOption::AnyConstructor
                                                         | default_flags | public_flags);
 
     // Final functions
@@ -243,7 +243,6 @@ AbstractMetaFunctionCList AbstractMetaClass::implicitConversions() const
     for (const auto &f : list) {
         if ((f->actualMinimumArgumentCount() == 1 || f->arguments().size() == 1 || f->isConversionOperator())
             && !f->isExplicit()
-            && f->functionType() != AbstractMetaFunction::CopyConstructorFunction
             && !f->usesRValueReferences()
             && !f->isModifiedRemoved()
             && f->wasPublic()) {
@@ -807,7 +806,7 @@ bool AbstractMetaClass::deleteInMainThread() const
 bool AbstractMetaClassPrivate::hasConstructors() const
 {
     return AbstractMetaClass::queryFirstFunction(m_functions,
-                                                 FunctionQueryOption::Constructors) != nullptr;
+                                                 FunctionQueryOption::AnyConstructor) != nullptr;
 }
 
 bool AbstractMetaClass::hasConstructors() const
@@ -1167,8 +1166,14 @@ bool AbstractMetaClass::queryFunction(const AbstractMetaFunction *f, FunctionQue
     if (query.testFlag(FunctionQueryOption::Signals) && (!f->isSignal()))
         return false;
 
-    if (query.testFlag(FunctionQueryOption::Constructors)
+    if (query.testFlag(FunctionQueryOption::AnyConstructor)
          && (!f->isConstructor() || f->ownerClass() != f->implementingClass())) {
+        return false;
+    }
+
+    if (query.testFlag(FunctionQueryOption::Constructors)
+         && (f->functionType() != AbstractMetaFunction::ConstructorFunction
+             || f->ownerClass() != f->implementingClass())) {
         return false;
     }
 
@@ -1402,8 +1407,7 @@ void AbstractMetaClassPrivate::addUsingConstructors(AbstractMetaClass *q)
             // Add to derived class with parameter lists.
             const auto ctors = superClass->queryFunctions(FunctionQueryOption::Constructors);
             for (const auto &ctor : ctors) {
-                if (ctor->functionType() == AbstractMetaFunction::ConstructorFunction
-                    && !ctor->isPrivate()) {
+                if (!ctor->isPrivate()) {
                     addConstructor(AbstractMetaFunction::ConstructorFunction,
                                    ctor->access(), ctor->arguments(), q);
                 }
@@ -1833,7 +1837,7 @@ bool AbstractMetaClass::determineValueTypeWithCopyConstructorOnly(const Abstract
         return false;
     if (c->attributes().testFlag(AbstractMetaClass::HasRejectedDefaultConstructor))
         return false;
-    const auto ctors = c->queryFunctions(FunctionQueryOption::Constructors);
+    const auto ctors = c->queryFunctions(FunctionQueryOption::AnyConstructor);
     bool copyConstructorFound = false;
     for (const auto &ctor : ctors) {
         switch (ctor->functionType()) {

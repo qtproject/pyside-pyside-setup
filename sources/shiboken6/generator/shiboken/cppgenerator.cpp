@@ -4480,7 +4480,7 @@ void CppGenerator::writeClassDefinition(TextStream &s,
     const QString className = chopType(cpythonTypeName(metaClass));
     QString baseClassName;
     AbstractMetaFunctionCList ctors;
-    const auto &allCtors = metaClass->queryFunctions(FunctionQueryOption::Constructors);
+    const auto &allCtors = metaClass->queryFunctions(FunctionQueryOption::AnyConstructor);
     for (const auto &f : allCtors) {
         if (!f->isPrivate() && !f->isModifiedRemoved() && !classContext.forSmartPointer())
             ctors.append(f);
