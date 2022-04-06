@@ -22,6 +22,7 @@ flagstest.cpp
 testobject.cpp
 testview.cpp
 hiddenobject.cpp
+sharedpointertestbench.cpp
 )
 
 set(testbinding_SRC
@@ -33,6 +34,9 @@ ${CMAKE_CURRENT_BINARY_DIR}/testbinding/pysidecpp_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/testbinding/pysidecpp_testobjectwithnamespace_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/testbinding/pysidecpp_testobject2withnamespace_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/testbinding/pysidecpp2_testobjectwithoutnamespace_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/testbinding/qsharedpointer_qobject_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/testbinding/qsharedpointer_int_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/testbinding/sharedpointertestbench_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/testbinding/testview_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/testbinding/testbinding_module_wrapper.cpp
 )
@@ -150,6 +154,7 @@ PYSIDE_TEST(property_python_test.py)
 PYSIDE_TEST(qapp_like_a_macro_test.py)
 PYSIDE_TEST(qvariant_test.py)
 PYSIDE_TEST(repr_test.py)
+PYSIDE_TEST(shared_pointer_test.py)
 PYSIDE_TEST(signal_tp_descr_get_test.py)
 PYSIDE_TEST(signal_slot_warning.py)
 PYSIDE_TEST(signalandnamespace_test.py)
