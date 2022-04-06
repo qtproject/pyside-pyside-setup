@@ -416,7 +416,8 @@ void QtDocGenerator::writeConstructors(TextStream& s, const AbstractMetaClass* c
 {
     static const QString sectionTitle = QLatin1String(".. class:: ");
 
-    auto lst = cppClass->queryFunctions(FunctionQueryOption::Constructors | FunctionQueryOption::Visible);
+    auto lst = cppClass->queryFunctions(FunctionQueryOption::AnyConstructor
+                                        | FunctionQueryOption::Visible);
     for (int i = lst.size() - 1; i >= 0; --i) {
         if (lst.at(i)->isModifiedRemoved() || lst.at(i)->functionType() == AbstractMetaFunction::MoveConstructorFunction)
             lst.removeAt(i);

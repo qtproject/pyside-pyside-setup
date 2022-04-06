@@ -32,8 +32,9 @@
 #include <QtCore/QFlags>
 
 enum class FunctionQueryOption {
-    Constructors                 = 0x0000001, // Only constructors
-    CopyConstructor              = 0x0000002, // Only copy constructors
+    AnyConstructor               = 0x0000001, // Any constructor (copy/move)
+    Constructors                 = 0x0000002, // Constructors except copy/move
+    CopyConstructor              = 0x0000004, // Only copy constructors
     //Destructors                  = 0x0000002, // Only destructors. Not included in class.
     FinalInTargetLangFunctions   = 0x0000008, // Only functions that are non-virtual in TargetLang
     ClassImplements              = 0x0000020, // Only functions implemented by the current class

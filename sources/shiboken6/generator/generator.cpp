@@ -747,8 +747,7 @@ std::optional<DefaultValue>
     const auto &constructors = metaClass->queryFunctions(FunctionQueryOption::Constructors);
     for (const auto &ctor : constructors) {
         if (!ctor->isUserAdded() && !ctor->isPrivate()
-            && (ctor->isPublic() || !api.flags().testFlag(ApiExtractorFlag::AvoidProtectedHack))
-            && ctor->functionType() == AbstractMetaFunction::ConstructorFunction) {
+            && (ctor->isPublic() || !api.flags().testFlag(ApiExtractorFlag::AvoidProtectedHack))) {
             // No arguments: Default constructible
             const auto &arguments = ctor->arguments();
             if (arguments.isEmpty()) {
