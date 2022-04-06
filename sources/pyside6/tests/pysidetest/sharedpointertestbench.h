@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2020 The Qt Company Ltd.
+** Copyright (C) 2022 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the test suite of Qt for Python.
@@ -26,15 +26,25 @@
 **
 ****************************************************************************/
 
-#ifndef PYSIDETEST_GLOBAL_H
-#define PYSIDETEST_GLOBAL_H
+#ifndef SHAREDPOINTERTESTBENCH_H
+#define SHAREDPOINTERTESTBENCH_H
 
-// PySide global.h file
-#include "containertest.h"
-#include "testobject.h"
-#include "testview.h"
-#include "flagstest.h"
-#include "hiddenobject.h"
-#include "sharedpointertestbench.h"
+#include "pysidetest_macros.h"
 
-#endif // PYSIDETEST_GLOBAL_H
+#include <QtCore/QSharedPointer>
+
+QT_FORWARD_DECLARE_CLASS(QObject)
+
+class PYSIDETEST_API SharedPointerTestbench
+{
+public:
+    SharedPointerTestbench();
+
+    static QSharedPointer<int> createSharedPointerInt(int v);
+    static void printSharedPointerInt(const QSharedPointer<int> &p);
+
+    static QSharedPointer<QObject> createSharedPointerQObject();
+    static void printSharedPointerQObject(const QSharedPointer<QObject> &p);
+};
+
+#endif // SHAREDPOINTERTESTBENCH_H

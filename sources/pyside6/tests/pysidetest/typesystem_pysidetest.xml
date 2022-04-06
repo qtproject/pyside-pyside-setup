@@ -68,6 +68,11 @@
         <object-type name="ClassForEnum" />
     </namespace-type>
 
+    <object-type name="SharedPointerTestbench"/>
+
+    <smart-pointer-type name="QSharedPointer" type="shared" getter="data"
+                        reset-method="reset"/>
+
     <suppress-warning text="type 'QPyTextObject' is specified in typesystem, but not defined. This could potentially lead to compilation errors." />
     <!-- Qt5: I never really understood this warning. Probably it is because there
         is no way to instantiate the class. Anyway, why must this class emit this warning?
