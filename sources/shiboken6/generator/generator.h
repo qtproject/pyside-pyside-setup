@@ -175,6 +175,10 @@ private:
     Type m_type = Class;
 };
 
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug debug, const GeneratorContext &c);
+#endif
+
 /**
  *   Base class for all generators. The default implementations does nothing,
  *   you must subclass this to create your own generators.

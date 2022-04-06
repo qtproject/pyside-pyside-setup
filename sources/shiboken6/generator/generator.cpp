@@ -162,6 +162,23 @@ QDebug operator<<(QDebug debug, const DefaultValue &v)
     debug << "DefaultValue(" <<  v.type() << ", \"" << v.value() << "\")";
     return debug;
 }
+
+QDebug operator<<(QDebug debug, const GeneratorContext &c)
+{
+    QDebugStateSaver saver(debug);
+    debug.noquote();
+    debug.nospace();
+    debug << "GeneratorContext(\"" << c.metaClass()->name() << "\" ";
+    if (c.useWrapper())
+        debug << "[wrapper]";
+    else if (c.forSmartPointer())
+        debug << "[smart pointer] \"" << c.preciseType().cppSignature() << '"';
+    else
+        debug << "[class]";
+    debug << ')';
+    return debug;
+}
+
 #endif // !QT_NO_DEBUG_STREAM
 
 QString GeneratorContext::smartPointerWrapperName() const
