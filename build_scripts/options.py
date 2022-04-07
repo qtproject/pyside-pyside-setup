@@ -211,7 +211,8 @@ class DistUtilsCommandMixin(object):
         ('no-strip', None, 'Do not strip package libraries (release mode)'),
         ('standalone', None, 'Standalone build'),
         ('ignore-git', None, 'Do update subrepositories'),
-        ('skip-docs', None, 'Skip documentation build'),
+        ('skip-docs', None, 'Skip documentation build (deprecated)'),
+        ('build-docs', None, 'Build the API documentation'),
         ('no-examples', None, 'Do not build examples'),
         ('no-jom', None, 'Do not use jom (MSVC)'),
         ('build-tests', None, 'Build tests'),
@@ -266,6 +267,7 @@ class DistUtilsCommandMixin(object):
         self.standalone = False
         self.ignore_git = False
         self.skip_docs = False
+        self.build_docs = False
         self.no_examples = False
         self.no_jom = False
         self.build_tests = False
@@ -371,6 +373,7 @@ class DistUtilsCommandMixin(object):
         OPTION['STANDALONE'] = self.standalone
         OPTION['IGNOREGIT'] = self.ignore_git
         OPTION['SKIP_DOCS'] = self.skip_docs
+        OPTION['BUILD_DOCS'] = self.build_docs
         OPTION['NOEXAMPLES'] = self.no_examples
         OPTION['BUILDTESTS'] = self.build_tests
         OPTION['NO_JOM'] = self.no_jom

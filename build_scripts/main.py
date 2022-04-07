@@ -642,7 +642,10 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
         if OPTION['NO_QT_TOOLS']:
             cmake_cmd.append("-DNO_QT_TOOLS=yes")
         if OPTION['SKIP_DOCS']:
-            cmake_cmd.append("-DSKIP_DOCS=yes")
+            log.info(f"Warning: '--skip-docs' is deprecated and will be removed. "
+                     "The documentation is not built by default")
+        if OPTION['BUILD_DOCS']:
+            cmake_cmd.append("-DBUILD_DOCS=yes")
         log.info(f"Qt Source dir: {cmake_src_dir}")
 
         # Use Legacy OpenGL to avoid issues on systems like Ubuntu 20.04
@@ -757,7 +760,7 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
             cmake_cmd.append(f"-DCMAKE_OSX_DEPLOYMENT_TARGET={deployment_target}")
             os.environ['MACOSX_DEPLOYMENT_TARGET'] = deployment_target
 
-        if not OPTION["SKIP_DOCS"]:
+        if OPTION["BUILD_DOCS"]:
             # Build the whole documentation (rst + API) by default
             cmake_cmd.append("-DFULLDOCSBUILD=1")
 
@@ -768,7 +771,11 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
                 log.info("Output format will be qthelp")
                 cmake_cmd.append("-DDOC_OUTPUT_FORMAT=qthelp")
         else:
-            cmake_cmd.append("-DSKIP_DOCS=1")
+            cmake_cmd.append("-DBUILD_DOCS=no")
+            if OPTION["DOC_BUILD_ONLINE"]:
+                log.info("Warning: Documentation build is disabled, "
+                         "however --doc-build-online was passed. "
+                         "Use '--build-docs' to enable the documentation build")
 
         if OPTION["PYSIDE_NUMPY_SUPPORT"]:
             cmake_cmd.append("-DPYSIDE_NUMPY_SUPPORT=1")
@@ -819,7 +826,7 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
             if "UTF-8" not in os.environ.get("LC_ALL", ""):
                 os.environ["LC_ALL"] = "en_US.UTF-8"
 
-        if not OPTION["SKIP_DOCS"]:
+        if OPTION["BUILD_DOCS"]:
             if extension.lower() == SHIBOKEN:
                 found = importlib.util.find_spec("sphinx")
                 if found:
@@ -833,8 +840,8 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
                 else:
                     log.info("Sphinx not found, skipping documentation build")
         else:
-            log.info("Skipped documentation generation")
-            cmake_cmd.append("-DSKIP_DOCS=1")
+            log.info("-- Skipped documentation generation. Enable with '--build-docs'")
+            cmake_cmd.append("-DBUILD_DOCS=no")
 
         if not OPTION["SKIP_MAKE_INSTALL"]:
             log.info(f"Installing module {extension}...")

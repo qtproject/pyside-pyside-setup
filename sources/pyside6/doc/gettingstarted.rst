@@ -75,7 +75,9 @@ Other important options to consider are:
  * ``--openssl=/path/to/openssl/bin``, to use a different path for OpenSSL,
  * ``--standalone``, to copy over the Qt libraries into the final package to make it work on other
    machines,
- * ``--doc-build-online``, to build documentation using the online template.
+ * ``--build-docs``, to enable the documentation build.
+ * ``--doc-build-online``, to build documentation using the online template (by
+   default it uses the offline)
 
 Testing the installation
 ------------------------
@@ -355,6 +357,10 @@ Troubleshooting
 Building the documentation
 --------------------------
 
+Starting from 6.3, the documentation is not being built by default.
+When using the second option described in this section, make sure to use the
+``--build-docs`` option.
+
 Starting from 5.15, there are two options to build the documentation:
 
 1. Building rst-only documentation (no API)
@@ -403,7 +409,8 @@ Since the process relies on a Qt installation, you need to specify where the
 
     export QT_SRC_DIR=/path/to/qtbase
 
-Once the build process finishes, you can go to the generated ``*_build/*_release/pyside6``
+Once the common ``setup.py`` build process finishes (remember to use ``--build-docs`` to enable
+the documentation build), you can go to the generated ``*_build/*_release/pyside6``
 directory, and run::
 
     ninja apidoc

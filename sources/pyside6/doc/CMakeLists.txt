@@ -8,7 +8,7 @@ include(FindDocTools)
 # When the doc project is built as part of the pyside project, we show informational message
 # and return early if requirements are not met.
 if(NOT CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
-    if(QT_SRC_DIR AND SPHINX_BUILD AND DOT_EXEC AND NOT SKIP_DOCS)
+    if(QT_SRC_DIR AND SPHINX_BUILD AND DOT_EXEC AND BUILD_DOCS)
         # All requirements met, proceed.
     else()
         set(reasons "")
@@ -21,8 +21,8 @@ if(NOT CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
         if(NOT DOT_EXEC)
             list(APPEND reasons "    graphviz not found\n")
         endif()
-        if(SKIP_DOCS)
-            list(APPEND reasons "    SKIP_DOCS was set to TRUE\n")
+        if(NOT BUILD_DOCS)
+            list(APPEND reasons "    BUILD_DOCS was set to FALSE (default)\n")
         endif()
         message(STATUS "apidoc generation targets disabled due to the following reasons:\n"
                 ${reasons})
