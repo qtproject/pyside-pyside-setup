@@ -973,18 +973,35 @@ QString getClassTargetFullName(const AbstractMetaEnum &metaEnum, bool includePac
     return getClassTargetFullName_(&metaEnum, includePackageName);
 }
 
-QString getClassTargetFullName(const AbstractMetaType &metaType, bool includePackageName)
+static QString fixSmartPointerName(QString name)
+{
+    name.replace(u"::"_qs, u"_"_qs);
+    name.replace(u'<', u'_');
+    name.remove(u'>');
+    name.remove(u' ');
+    return name;
+}
+
+QString getSmartpointerTargetFullName(const AbstractMetaType &metaType,
+                                      bool includePackageName)
+{
+    QString result;
+    if (includePackageName)
+        result += metaType.package() + u'.';
+    result += fixSmartPointerName(metaType.cppSignature());
+    return result;
+}
+
+QString getSmartpointerTargetName(const AbstractMetaType &metaType)
 {
     QString name = metaType.cppSignature();
-    name.replace(QLatin1String("::"), QLatin1String("_"));
-    name.replace(QLatin1Char('<'), QLatin1Char('_'));
-    name.remove(QLatin1Char('>'));
-    name.remove(QLatin1Char(' '));
-    if (includePackageName) {
-        name.prepend(QLatin1Char('.'));
-        name.prepend(metaType.package());
+    const auto templatePos = name.indexOf(u'<');
+    if (templatePos != -1) { // "std::shared_ptr<A::B>" -> "shared_ptr<A::B>"
+        const auto colonPos = name.lastIndexOf(u"::"_qs, templatePos);
+        if (colonPos != -1)
+            name.remove(0, colonPos + 2);
     }
-    return name;
+    return fixSmartPointerName(name);
 }
 
 QString getFilteredCppSignatureString(QString signature)
