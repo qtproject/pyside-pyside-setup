@@ -9,7 +9,7 @@ import sys
 import time
 from packaging.version import parse as parse_version
 from pathlib import Path
-from shutil import which, copytree
+from shutil import which, copytree, rmtree
 from textwrap import dedent
 
 # PYSIDE-1760: Pre-load setuptools modules early to avoid racing conditions.
@@ -424,18 +424,35 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
             # a wheel.
             _path = Path(self.st_build_dir)
             _wheel_path = _path.parent / "package_for_wheels"
-            if not _wheel_path.exists():
-                _wheel_path.mkdir()
-            _package_name = os.listdir(_path)[0]
-            _src = Path(_path / _package_name)
-            _dst = Path(_wheel_path / _package_name)
-            try:
-                # This should be copied because the package directory
-                # is used when using the 'install' setup.py instruction.
-                copytree(_src, _dst)
-            except Exception as e:
-                log.warn(f'***** problem renaming "{self.st_build_dir}"')
-                log.warn(f'ignored error: {type(e).__name__}: {e}')
+
+            _project = None
+
+            if config.is_internal_shiboken_module_build():
+                _project = "shiboken6"
+            elif config.is_internal_shiboken_generator_build():
+                _project = "shiboken6_generator"
+            elif config.is_internal_pyside_build():
+                _project = "PySide6"
+
+            if _project is not None:
+                if not _wheel_path.exists():
+                    _wheel_path.mkdir()
+                _src = Path(_path / _project)
+                _dst = Path(_wheel_path / _project)
+                # Remove the directory in case it exists.
+                # This applies to 'shiboken6', 'shiboken6_generator',
+                # and 'pyside6' inside the 'package_for_wheels' directory.
+                if _dst.exists():
+                    log.warn(f'***** Found directory "{_dst}", removing it first.')
+                    rmtree(_dst)
+
+                try:
+                    # This should be copied because the package directory
+                    # is used when using the 'install' setup.py instruction.
+                    copytree(_src, _dst)
+                except Exception as e:
+                    log.warn(f'***** problem renaming "{self.st_build_dir}"')
+                    log.warn(f'ignored error: {type(e).__name__}: {e}')
         else:
             log.info("Skipped preparing and building packages.")
         log.info(f"--- Build completed ({elapsed()}s)")
