@@ -570,6 +570,7 @@ static PyObject *_setupNew(SbkObject *self, PyTypeObject *subtype)
     d->parentInfo = nullptr;
     d->referredObjects = nullptr;
     d->cppObjectCreated = 0;
+    d->isQAppSingleton = 0;
     self->ob_dict = nullptr;
     self->weakreflist = nullptr;
     self->d = d;
