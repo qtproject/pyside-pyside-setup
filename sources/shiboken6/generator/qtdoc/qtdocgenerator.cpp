@@ -825,8 +825,6 @@ void QtDocGenerator::writeModuleDocumentation()
             }
         }
 
-        writeFancyToc(s, it.value());
-
         s << ".. container:: hide\n\n" << indent
             << ".. toctree::\n" << indent
             << ":maxdepth: 1\n\n";
@@ -853,6 +851,11 @@ void QtDocGenerator::writeModuleDocumentation()
                 s << moduleDoc.detailed();
             }
         }
+
+        s << "List of Classes\n";
+        s << "---------------\n\n";
+        writeFancyToc(s, it.value());
+
         output.done();
     }
 }
