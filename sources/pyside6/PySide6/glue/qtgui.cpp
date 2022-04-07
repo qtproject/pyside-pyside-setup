@@ -136,6 +136,12 @@ QAccessibleInterface *PySideAccessibleFactory::callFactories(const QString &key,
 PySideAccessibleFactory::ensureInstance()->installFactory(%1);
 // @snippet qaccessible-installfactory
 
+// @snippet qaction-menu
+// %CPPSELF->menu(); // pretend it was called.
+QObject *object = %CPPSELF->menu<QObject *>();
+%PYARG_0 = %CONVERTTOPYTHON[QObject*](object);
+// @snippet qaction-menu
+
 // @snippet glgetshadersource
 GLsizei bufSize = 4096;
 GLsizei length = bufSize - 1;

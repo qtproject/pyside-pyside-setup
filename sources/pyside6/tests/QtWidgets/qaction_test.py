@@ -36,7 +36,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtGui import QAction
-from PySide6.QtWidgets import QWidget
+from PySide6.QtWidgets import QWidget, QMenu
 from helper.usesqapplication import UsesQApplication
 
 
@@ -72,6 +72,17 @@ class SetShortcutTest(UsesQApplication):
         action.setShortcut(shortcut)
         s2 = action.shortcut()
         self.assertEqual(s2, shortcut)
+
+    def testMenu(self):
+        # Test the setMenu()/menu() old functionality removed in Qt6
+        # that was added via helper functions.
+        menu = QMenu("menu")
+        action = QAction("action")
+
+        # Using QAction::setMenu(QObject*)
+        action.setMenu(menu)
+
+        self.assertEqual(action.menu(), menu)
 
 
 if __name__ == '__main__':

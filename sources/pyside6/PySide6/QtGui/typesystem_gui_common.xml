@@ -227,11 +227,15 @@
     <enum-type name="ActionEvent"/>
     <enum-type name="MenuRole"/>
     <enum-type name="Priority" since="4.6"/>
-    <modify-function signature="setMenu(QMenu*)">
+    <!-- PYSIDE-1627 QAction::menu()/setMenu() are templates -->
+    <add-function signature="menu()const" return-type="QObject*">
+        <inject-code file="../glue/qtgui.cpp" snippet="qaction-menu"/>
+    </add-function>
+    <declare-function signature="setMenu(QObject*)">
       <modify-argument index="1">
         <parent index="this" action="add"/>
       </modify-argument>
-    </modify-function>
+    </declare-function>
     <modify-function signature="triggered(bool)" allow-thread="yes"/>
     <add-function signature="setShortcut(Qt::Key)">
         <inject-code file="../glue/qtgui.cpp" snippet="set-qtkey-shortcut"/>
