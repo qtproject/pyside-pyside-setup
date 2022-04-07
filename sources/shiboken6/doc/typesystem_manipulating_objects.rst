@@ -261,6 +261,7 @@ add-function
     language, and it is a child of an :ref:`object-type` or :ref:`value-type` nodes if the
     function is supposed to be a method, or :ref:`namespace` and :ref:`typesystem` if
     the function is supposed to be a function inside a namespace or a global function.
+    It may contain :ref:`modify-argument` nodes.
 
     Typically when adding a function some code must be injected to provide the function
     logic. This can be done using the :ref:`inject-code` node.
@@ -313,7 +314,7 @@ declare-function
     the type and it is a child of an :ref:`object-type` or :ref:`value-type` nodes
     if the function is supposed to be a method, or :ref:`namespace` and
     :ref:`typesystem` if the function is supposed to be a function inside a
-    namespace or a global function.
+    namespace or a global function. It may contain :ref:`modify-argument` nodes.
 
     .. code-block:: xml
 
