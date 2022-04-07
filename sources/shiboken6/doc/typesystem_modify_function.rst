@@ -9,7 +9,8 @@ modify-argument
 ^^^^^^^^^^^^^^^
 
     Function modifications consist of a list of ``modify-argument`` nodes
-    contained in a :ref:`modify-function` node.  Use the :ref:`remove-argument`,
+    contained in :ref:`modify-function`, :ref:`add-function` or
+    :ref:`declare-function` nodes. Use the :ref:`remove-argument`,
     :ref:`replace-default-expression`, :ref:`remove-default-expression`,
     :ref:`replace-type`, :ref:`reference-count` and :ref:`define-ownership`
     nodes to specify the details of the modification.

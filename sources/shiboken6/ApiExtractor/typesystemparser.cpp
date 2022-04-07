@@ -920,7 +920,8 @@ bool TypeSystemParser::endElement(StackElement element)
     }
     break;
 
-    case StackElement::AddFunction: {
+    case StackElement::AddFunction:
+    case StackElement::DeclareFunction: {
         // Leaving add-function: Assign all modifications to the added function
         const int modIndex = top->addedFunctionModificationIndex;
         top->addedFunctionModificationIndex = -1;
@@ -2221,10 +2222,11 @@ bool TypeSystemParser::parseModifyArgument(const ConditionalStreamReader &,
                                   StackElement topElement, QXmlStreamAttributes *attributes)
 {
     if (topElement != StackElement::ModifyFunction
-            && topElement != StackElement::AddFunction) {
-        m_error = QString::fromLatin1("argument modification requires function"
-                                      " modification as parent, was %1")
-                                      .arg(tagFromElement(topElement));
+        && topElement != StackElement::AddFunction
+        && topElement != StackElement::DeclareFunction) {
+        m_error = u"Argument modification requires <modify-function>,"
+                  " <add-function> or <declare-function> as parent, was "_qs
+                  + tagFromElement(topElement).toString();
         return false;
     }
 
