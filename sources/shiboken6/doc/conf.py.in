@@ -184,6 +184,3 @@ html_show_sourcelink = False
 
 # -- Options for qthelp output --------------------------------------------------
 qthelp_theme = 'pysidedocs_qthelp'
-
-# copybutton config
-copybutton_copy_empty_lines = False

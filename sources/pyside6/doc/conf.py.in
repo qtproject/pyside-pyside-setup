@@ -32,8 +32,7 @@ extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.ifconfig',
     'sphinx.ext.coverage', 'sphinx.ext.intersphinx', 'sphinx.ext.todo',
     'sphinx.ext.graphviz', 'inheritance_diagram', 'pysideinclude',
     'sphinx.ext.viewcode',
-    'sphinx_panels',
-    ]
+    'sphinx_panels', 'sphinx_copybutton']
 
 output_format='@DOC_OUTPUT_FORMAT@'
 
@@ -213,4 +212,3 @@ if @SKIP_SPHINX_WARNINGS@:
 
 # -- Options for qthelp output ---------------------------------------------------
 qthelp_theme = 'pysidedocs_qthelp'
-
