@@ -2835,6 +2835,8 @@ static bool inheritTemplateFunction(const AbstractMetaFunctionCPtr &function,
     // declares it via "using").
     if (function->isModifiedRemoved())
         return false;
+    if (function->isConstructor() && !subclass->isTypeDef())
+        return false;
     return AbstractMetaFunction::find(existingSubclassFuncs, function->name()) == nullptr
         || subclass->isUsingMember(templateBaseClass, function->name(), Access::Protected);
 }
@@ -2897,8 +2899,6 @@ void AbstractMetaBuilderPrivate::inheritTemplateFunctions(AbstractMetaClass *sub
         f->setDeclaringClass(subclass);
 
         if (f->isConstructor()) {
-            if (!subclass->isTypeDef())
-                continue;
             f->setName(subclass->name());
             f->setOriginalName(subclass->name());
         }
