@@ -33,6 +33,9 @@ accept_configuration:
         - condition: property
           property: features
           contains_value: TestOnly
+        - condition: property
+          property: features
+          contains_value: Packaging
     - condition: and
       conditions:
         - condition: property
