@@ -40,4 +40,12 @@ enum class ApiExtractorFlag
 Q_DECLARE_FLAGS(ApiExtractorFlags, ApiExtractorFlag)
 Q_DECLARE_OPERATORS_FOR_FLAGS(ApiExtractorFlags)
 
+enum class InheritTemplateFlag
+{
+    SetEnclosingClass = 0x1
+};
+
+Q_DECLARE_FLAGS(InheritTemplateFlags, InheritTemplateFlag)
+Q_DECLARE_OPERATORS_FOR_FLAGS(InheritTemplateFlags)
+
 #endif // APIEXTRACTORFLAGS_H

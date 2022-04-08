@@ -2875,6 +2875,24 @@ std::optional<AbstractMetaType>
     return returned;
 }
 
+AbstractMetaClass *
+    AbstractMetaBuilder::inheritTemplateClass(ComplexTypeEntry *te,
+                                              const AbstractMetaClass *templateClass,
+                                              const AbstractMetaTypeList &templateTypes,
+                                              InheritTemplateFlags flags)
+{
+    auto result = std::make_unique<AbstractMetaClass>();
+    result->setTypeDef(true);
+
+    result->setTypeEntry(te);
+    if (!AbstractMetaBuilderPrivate::inheritTemplate(result.get(), templateClass,
+                                                     templateTypes, flags)) {
+        return nullptr;
+    }
+    AbstractMetaBuilderPrivate::inheritTemplateFunctions(result.get());
+    return result.release();
+}
+
 bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
                                                  const AbstractMetaClass *templateClass,
                                                  const TypeInfo &info)
@@ -2923,8 +2941,17 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
                 << info.toString() << ". The corresponding type was not found in the typesystem.";
         }
     }
+    return inheritTemplate(subclass, templateClass, templateTypes);
+}
 
+bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
+                                                 const AbstractMetaClass *templateClass,
+                                                 const AbstractMetaTypeList &templateTypes,
+                                                 InheritTemplateFlags flags)
+{
     subclass->setTemplateBaseClass(templateClass);
+    if (flags.testFlag(InheritTemplateFlag::SetEnclosingClass))
+        subclass->setEnclosingClass(templateClass->enclosingClass());
     subclass->setTemplateBaseClassInstantiations(templateTypes);
     subclass->setBaseClass(templateClass->baseClass());
     return true;

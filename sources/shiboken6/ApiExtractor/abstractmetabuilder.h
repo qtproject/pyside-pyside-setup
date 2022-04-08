@@ -46,6 +46,7 @@ class AbstractMetaBuilderPrivate;
 class AbstractMetaClass;
 class AbstractMetaType;
 class AbstractMetaEnumValue;
+class ComplexTypeEntry;
 class TypeInfo;
 class TypeEntry;
 
@@ -111,6 +112,12 @@ public:
     static AbstractMetaFunctionPtr
         inheritTemplateFunction(const AbstractMetaFunctionCPtr &function,
                                 const AbstractMetaTypeList &templateTypes);
+
+    static AbstractMetaClass *
+        inheritTemplateClass(ComplexTypeEntry *te,
+                             const AbstractMetaClass *templateClass,
+                             const AbstractMetaTypeList &templateTypes,
+                             InheritTemplateFlags flags = {});
 
     /// Performs a template specialization of the member function.
     /// \param function Member function

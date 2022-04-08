@@ -371,6 +371,15 @@ AbstractMetaFunctionPtr
                                                       templateClass, subclass);
 }
 
+AbstractMetaClass *ApiExtractor::inheritTemplateClass(ComplexTypeEntry *te,
+                                                      const AbstractMetaClass *templateClass,
+                                                      const AbstractMetaTypeList &templateTypes,
+                                                      InheritTemplateFlags flags)
+{
+    return AbstractMetaBuilder::inheritTemplateClass(te, templateClass,
+                                                     templateTypes, flags);
+}
+
 QString ApiExtractorPrivate::getSimplifiedContainerTypeName(const AbstractMetaType &type)
 {
     const QString signature = type.cppSignature();

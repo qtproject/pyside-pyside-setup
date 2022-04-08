@@ -43,6 +43,7 @@ class ApiExtractorResult;
 class AbstractMetaClass;
 class AbstractMetaEnum;
 class AbstractMetaFunction;
+class ComplexTypeEntry;
 
 QT_BEGIN_NAMESPACE
 class QDebug;
@@ -99,6 +100,13 @@ public:
                               const AbstractMetaTypeList &templateTypes,
                               const AbstractMetaClass *templateClass,
                               AbstractMetaClass *subclass);
+
+    /// Forwards to AbstractMetaBuilder::inheritTemplateClass()
+    static AbstractMetaClass *
+        inheritTemplateClass(ComplexTypeEntry *te,
+                             const AbstractMetaClass *templateClass,
+                             const AbstractMetaTypeList &templateTypes,
+                             InheritTemplateFlags flags = {});
 
 private:
     ApiExtractorPrivate *d;

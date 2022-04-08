@@ -183,6 +183,10 @@ public:
     static bool inheritTemplate(AbstractMetaClass *subclass,
                                 const AbstractMetaClass *templateClass,
                                 const TypeInfo &info);
+    static bool inheritTemplate(AbstractMetaClass *subclass,
+                                const AbstractMetaClass *templateClass,
+                                const AbstractMetaTypeList &templateTypes,
+                                InheritTemplateFlags flags = {});
 
     static AbstractMetaFunctionPtr
         inheritTemplateFunction(const AbstractMetaFunctionCPtr &function,
