@@ -3301,11 +3301,6 @@ void CppGenerator::writeNamedArgumentResolution(QTextStream &s, const AbstractMe
             else
                 s << INDENT << "// fall through to handle extra keyword signals and properties\n";
         }
-        s << INDENT << "} else {\n";
-        {
-            Indentation indent(INDENT);
-            s << INDENT << "Py_DECREF(kwds_dup);\n";
-        }
         s << INDENT << "}\n";
     }
     s << INDENT << "}\n";
