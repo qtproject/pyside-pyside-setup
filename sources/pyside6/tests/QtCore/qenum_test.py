@@ -59,6 +59,7 @@ class TestEnum(unittest.TestCase):
     def testToIntInFunction(self):
         self.assertEqual(str(int(QIODevice.WriteOnly)), "2")
 
+    @unittest.skipIf(sys.pyside63_option_python_enum, "makes no sense for tested Python enums")
     def testOperations(self):
         k = Qt.Key.Key_1
 
@@ -77,6 +78,7 @@ class TestEnum(unittest.TestCase):
         with self.assertRaises(TypeError):
             a = k * 2.0
 
+    @unittest.skipIf(sys.pyside63_option_python_enum, "inheritance forbidden for Python enums")
     def testInherit(self):
         class A(Qt.Key):
             pass

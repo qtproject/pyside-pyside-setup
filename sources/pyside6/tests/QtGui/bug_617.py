@@ -41,7 +41,12 @@ from PySide6.QtGui import QColor
 
 class MyEvent(QEvent):
     def __init__(self):
-        QEvent.__init__(self, QEvent.Type(999))
+        if sys.pyside63_option_python_enum:
+            # PYSIDE-1735: Python Enum: We cannot assign arbitrary numbers.
+            #              They must exist as constants in the type.
+            QEvent.__init__(self, QEvent.Type(1000))
+        else:
+            QEvent.__init__(self, QEvent.Type(999))
 
 
 class Bug617(unittest.TestCase):
@@ -52,7 +57,8 @@ class Bug617(unittest.TestCase):
 
     def testOutOfBounds(self):
         e = MyEvent()
-        self.assertEqual(repr(e.type()), 'PySide6.QtCore.QEvent.Type(999)')
+        self.assertEqual(repr(e.type()), "<Type.User: 1000>"
+            if sys.pyside63_option_python_enum else "PySide6.QtCore.QEvent.Type(999)")
 
 
 if __name__ == "__main__":
