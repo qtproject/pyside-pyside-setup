@@ -184,3 +184,8 @@ html_show_sourcelink = False
 
 # -- Options for qthelp output --------------------------------------------------
 qthelp_theme = 'pysidedocs_qthelp'
+
+# Sphinx Panels color for inactive tab
+panels_css_variables = {
+    "tabs-color-label-inactive": "rgba(116, 116, 116, 1.0)",
+}
