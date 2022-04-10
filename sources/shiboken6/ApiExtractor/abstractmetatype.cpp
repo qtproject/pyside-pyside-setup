@@ -668,8 +668,16 @@ QString AbstractMetaTypeData::formatPythonSignature() const
             result += TypeInfo::indirectionKeyword(i);
     // If it is a flags type, we replace it with the full name:
     // "PySide6.QtCore.Qt.ItemFlags" instead of "PySide6.QtCore.QFlags<Qt.ItemFlag>"
-    if (m_typeEntry->isFlags())
-        result = m_typeEntry->qualifiedTargetLangName();
+    if (m_typeEntry->isFlags()) {
+        // PYSIDE-1735: We need to provide both the flags type and the original enum type
+        //              as a choice at runtime.
+        auto flagsTypeEntry = static_cast<const FlagsTypeEntry *>(m_typeEntry);
+        auto enumTypeEntry = flagsTypeEntry->originator();
+        result = m_typeEntry->targetLangPackage() + u".^^"_s
+               + flagsTypeEntry->targetLangName() + u"^^"_s
+               + enumTypeEntry->targetLangName() + u"^^"_s;
+    }
+
     result.replace(u"::"_s, u"."_s);
     return result;
 }

@@ -37,13 +37,15 @@
 ##
 #############################################################################
 
-import sys
+import enum
+import functools
+import keyword
+import os
 import re
-import warnings
+import sys
 import types
 import typing
-import keyword
-import functools
+import warnings
 
 from types import SimpleNamespace
 from shibokensupport.signature.mapping import (type_map, update_mapping,
@@ -73,6 +75,36 @@ guesses, we provide an entry in 'type_map' that resolves it.
 
 In effect, 'type_map' maps text to real Python objects.
 """
+
+def _get_flag_enum_option():
+    flag = False    # XXX get default out of version number?
+    envname = "PYSIDE63_OPTION_PYTHON_ENUM"
+    sysname = envname.lower()
+    opt = os.environ.get(envname)
+    if opt:
+        opt = opt.lower()
+        if opt in ("yes", "on", "true"):
+            flag = True
+        elif opt in ("no", "off", "false"):
+            flag = False
+        elif opt.isnumeric():
+            flag = bool(int(opt))
+    elif hasattr(sys, sysname):
+        flag = bool(getattr(sys, sysname))
+    # modify the sys attribute to bool
+    setattr(sys, sysname, flag)
+    # modify the env attribute to "0" or "1"
+    os.environ[envname] = str(int(flag))
+    return flag
+
+
+class EnumSelect(enum.Enum):
+    # PYSIDE-1735: Here we could save object.value expressions by using IntEnum.
+    #              But it is nice to use just an Enum for selecting Enum version.
+    OLD = 1
+    NEW = 2
+    SELECTION = NEW if _get_flag_enum_option() else OLD
+
 
 def dprint(*args, **kw):
     if _DEBUG:
@@ -189,10 +221,11 @@ def make_good_value(thing, valtype):
         if thing.endswith("()"):
             thing = f'Default("{thing[:-2]}")'
         else:
-            ret = eval(thing, namespace)
+            # PYSIDE-1735: Use explicit globals and locals because of a bug in VsCode
+            ret = eval(thing, globals(), namespace)
             if valtype and repr(ret).startswith("<"):
                 thing = f'Instance("{thing}")'
-        return eval(thing, namespace)
+        return eval(thing, globals(), namespace)
     except Exception:
         pass
 
@@ -264,12 +297,18 @@ def _resolve_arraytype(thing, line):
 
 
 def to_string(thing):
+    # This function returns a string that creates the same object.
+    # It is absolutely crucial that str(eval(thing)) == str(thing),
+    # i.e. it must be an idempotent mapping.
     if isinstance(thing, str):
         return thing
     if hasattr(thing, "__name__") and thing.__module__ != "typing":
-        dot = "." in str(thing)
+        m = thing.__module__
+        dot = "." in str(thing) or m not in (thing.__qualname__, "builtins")
         name = get_name(thing)
-        return thing.__module__ + "." + name if dot else name
+        ret = m + "." + name if dot else name
+        assert(eval(ret, globals(), namespace))
+        return ret
     # Note: This captures things from the typing module:
     return str(thing)
 
@@ -280,7 +319,8 @@ def handle_matrix(arg):
     n, m, typstr = tuple(map(lambda x:x.strip(), arg.split(",")))
     assert typstr == "float"
     result = f"PySide6.QtGui.QMatrix{n}x{m}"
-    return eval(result, namespace)
+    return eval(result, globals(), namespace)
+
 
 def _resolve_type(thing, line, level, var_handler, func_name=None):
     # manual set of 'str' instead of 'bytes'
@@ -319,7 +359,7 @@ def _resolve_type(thing, line, level, var_handler, func_name=None):
         result = f"{contr}[{thing}]"
         # PYSIDE-1538: Make sure that the eval does not crash.
         try:
-            return eval(result, namespace)
+            return eval(result, globals(), namespace)
         except Exception as e:
             warnings.warn(f"""pyside_type_init:_resolve_type
 
@@ -370,6 +410,18 @@ def handle_retvar(obj):
 
 
 def calculate_props(line):
+    # PYSIDE-1735: QFlag is now divided into fields for future Python Enums, like
+    #              "PySide.QtCore.^^Qt.ItemFlags^^Qt.ItemFlag^^"
+    #              Resolve that until Enum is finally settled.
+    while "^^" in line:
+        parts = line.split("^^", 3)
+        selected = EnumSelect.SELECTION
+        line = parts[0] + parts[selected.value] + parts[3]
+        if selected is EnumSelect.NEW:
+            _old, _new = EnumSelect.OLD.value, EnumSelect.NEW.value
+            line = re.sub(rf"\b{parts[_old]}\b", parts[_new], line)
+            type_map[parts[_old]] = parts[_new]
+
     parsed = SimpleNamespace(**_parse_line(line.strip()))
     arglist = parsed.arglist
     annotations = {}
@@ -378,7 +430,7 @@ def calculate_props(line):
         name, ann = tup[:2]
         if ann == "...":
             name = "*args" if name.startswith("arg_") else "*" + name
-            # copy the pathed fields back
+            # copy the patched fields back
             ann = 'nullptr'     # maps to None
             tup = name, ann
             arglist[idx] = tup
@@ -455,7 +507,7 @@ def fix_variables(props, line):
         else:
             retvars_str = ", ".join(map(to_string, retvars))
             typestr = f"typing.Tuple[{retvars_str}]"
-            returntype = eval(typestr, namespace)
+            returntype = eval(typestr, globals(), namespace)
         props.annotations["return"] = returntype
     props.varnames = tuple(varnames)
     props.defaults = tuple(defaults)

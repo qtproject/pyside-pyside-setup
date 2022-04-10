@@ -4193,7 +4193,7 @@ void CppGenerator::writeEnumConverterInitialization(TextStream &s, const TypeEnt
     if (!enumType)
         return;
     QString enumFlagName = enumType->isFlags() ? u"flag"_s : u"enum"_s;
-    QString enumPythonType = cpythonTypeNameExt(enumType);
+    QString enumPythonVar = enumType->isFlags() ? u"FType"_s : u"EType"_s;
 
     const FlagsTypeEntry *flags = nullptr;
     if (enumType->isFlags())
@@ -4205,7 +4205,7 @@ void CppGenerator::writeEnumConverterInitialization(TextStream &s, const TypeEnt
         Indentation indent(s);
         QString typeName = fixedCppTypeName(enumType);
         s << "SbkConverter *converter = Shiboken::Conversions::createConverter("
-            << enumPythonType << ',' << '\n';
+            << enumPythonVar << ',' << '\n';
         {
             Indentation indent(s);
             s << cppToPythonFunctionName(typeName, typeName) << ");\n";
@@ -4228,7 +4228,7 @@ void CppGenerator::writeEnumConverterInitialization(TextStream &s, const TypeEnt
             writeAddPythonToCppConversion(s, u"converter"_s, toCpp, isConv);
         }
 
-        s << "Shiboken::Enum::setTypeConverter(" << enumPythonType
+        s << "Shiboken::Enum::setTypeConverter(" << enumPythonVar
             << ", converter, " << (enumType->isFlags() ? "true" : "false") << ");\n";
 
         QString signature = enumType->qualifiedCppName();
@@ -5417,10 +5417,21 @@ void CppGenerator::writeEnumsInitialization(TextStream &s, AbstractMetaEnumList 
 {
     if (enums.isEmpty())
         return;
-    s << "// Initialization of enums.\n\n";
+    bool preambleWrittenE = false;
+    bool preambleWrittenF = false;
     for (const AbstractMetaEnum &cppEnum : qAsConst(enums)) {
         if (cppEnum.isPrivate())
             continue;
+        if (!preambleWrittenE) {
+            s << "// Initialization of enums.\n"
+                << "PyTypeObject *EType{};\n\n";
+            preambleWrittenE = true;
+        }
+        if (!preambleWrittenF && cppEnum.typeEntry()->flags()) {
+            s << "// Initialization of enums, flags part.\n"
+                << "PyTypeObject *FType{};\n\n";
+            preambleWrittenF = true;
+        }
         writeEnumInitialization(s, cppEnum, errorReturn);
     }
 }
@@ -5436,7 +5447,8 @@ void CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
                                            ErrorReturn errorReturn) const
 {
     const AbstractMetaClass *enclosingClass = cppEnum.targetLangEnclosingClass();
-    bool hasUpperEnclosingClass = enclosingClass && enclosingClass->targetLangEnclosingClass() != nullptr;
+    bool hasUpperEnclosingClass = enclosingClass
+                                  && enclosingClass->targetLangEnclosingClass() != nullptr;
     const EnumTypeEntry *enumTypeEntry = cppEnum.typeEntry();
     QString enclosingObjectVariable;
     if (enclosingClass)
@@ -5450,7 +5462,7 @@ void CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
     s << (cppEnum.isAnonymous() ? "anonymous enum identified by enum value" : "enum");
     s << " '" << cppEnum.name() << "'.\n";
 
-    QString enumVarTypeObj;
+    QString enumVarTypeObj = cpythonTypeNameExt(enumTypeEntry);
     if (!cppEnum.isAnonymous()) {
         int packageLevel = packageName().count(u'.') + 1;
         FlagsTypeEntry *flags = enumTypeEntry->flags();
@@ -5459,15 +5471,15 @@ void CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
             // We need 'flags->flagsName()' with the full module/class path.
             QString fullPath = getClassTargetFullName(cppEnum);
             fullPath.truncate(fullPath.lastIndexOf(u'.') + 1);
-            s << cpythonTypeNameExt(flags) << " = PySide::QFlags::create(\""
-                << packageLevel << ':' << fullPath << flags->flagsName() << "\", "
-                << cpythonEnumName(cppEnum) << "_number_slots);\n";
+            s << "FType = PySide::QFlags::create(\""
+                << packageLevel << ':' << fullPath << flags->flagsName() << "\", \n" << indent
+                << cpythonEnumName(cppEnum) << "_number_slots);\n" << outdent
+                << cpythonTypeNameExt(flags) << " = FType;\n";
         }
 
-        enumVarTypeObj = cpythonTypeNameExt(enumTypeEntry);
-
-        s << enumVarTypeObj << " = Shiboken::Enum::"
-            << ((enclosingClass || hasUpperEnclosingClass) ? "createScopedEnum" : "createGlobalEnum")
+        s << "EType = Shiboken::Enum::"
+            << ((enclosingClass
+                || hasUpperEnclosingClass) ? "createScopedEnum" : "createGlobalEnum")
             << '(' << enclosingObjectVariable << ',' << '\n';
         {
             Indentation indent(s);
@@ -5475,10 +5487,10 @@ void CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
                 << '"' << packageLevel << ':' << getClassTargetFullName(cppEnum) << "\",\n"
                 << '"' << cppEnum.qualifiedCppName() << '"';
             if (flags)
-                s << ",\n" << cpythonTypeNameExt(flags);
+                s << ",\nFType";
             s << ");\n";
         }
-        s << "if (!" << cpythonTypeNameExt(cppEnum.typeEntry()) << ")\n"
+        s << "if (!EType)\n"
             << indent << errorReturn << outdent << '\n';
     }
 
@@ -5521,8 +5533,9 @@ void CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
             break;
         case CEnum: {
             s << "if (!Shiboken::Enum::";
-            s << ((enclosingClass || hasUpperEnclosingClass) ? "createScopedEnumItem" : "createGlobalEnumItem");
-            s << '(' << enumVarTypeObj << ',' << '\n';
+            s << ((enclosingClass || hasUpperEnclosingClass) ? "createScopedEnumItem"
+                                                             : "createGlobalEnumItem");
+            s << '(' << "EType" << ',' << '\n';
             Indentation indent(s);
             s << enclosingObjectVariable << ", \"" << mangledName << "\", "
                 << enumValueText << "))\n" << errorReturn;
@@ -5530,15 +5543,22 @@ void CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
             break;
         case EnumClass: {
             s << "if (!Shiboken::Enum::createScopedEnumItem("
-                << enumVarTypeObj << ',' << '\n';
+                << "EType" << ",\n";
             Indentation indentation(s);
-            s << enumVarTypeObj<< ", \"" << mangledName << "\", "
+            s << "EType" << ", \"" << mangledName << "\", "
                << enumValueText << "))\n" << errorReturn;
         }
             break;
         }
     }
-
+    s << "// PYSIDE-1735: Resolving the whole enum class at the end for API compatibility.\n"
+        << "EType = morphLastEnumToPython();\n"
+        << enumVarTypeObj << " = EType;\n";
+    if (cppEnum.typeEntry()->flags()) {
+        s << "// PYSIDE-1735: Mapping the flags class to the same enum class.\n"
+            << cpythonTypeNameExt(cppEnum.typeEntry()->flags()) << " =\n"
+            << indent << "mapFlagsToSameEnum(FType, EType);\n" << outdent;
+    }
     writeEnumConverterInitialization(s, cppEnum);
 
     s << "// End of '" << cppEnum.name() << "' enum";
