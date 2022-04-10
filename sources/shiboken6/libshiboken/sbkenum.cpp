@@ -50,11 +50,12 @@
 
 #include <cstring>
 #include <vector>
+#include <sstream>
 
 #define SbkEnumType_Check(o) (Py_TYPE(Py_TYPE(o)) == SbkEnumType_TypeF())
 using enum_func = PyObject *(*)(PyObject *, PyObject *);
 
-static void cleanupEnumTypes();
+using namespace Shiboken;
 
 extern "C"
 {
@@ -65,8 +66,6 @@ struct lastEnumCreated;
 // forward
 static PyTypeObject *recordCurrentEnum(PyObject *scopeOrModule,
                                        const char *name,
-                                       const char *fullName,
-                                       const char *cppName,
                                        PyTypeObject *enumType,
                                        PyTypeObject *flagsType);
 
@@ -74,6 +73,8 @@ struct SbkEnumType
 {
     PyTypeObject type;
 };
+
+static void cleanupEnumTypes();
 
 struct SbkEnumObject
 {
@@ -89,10 +90,9 @@ static PyObject *SbkEnumObject_repr(PyObject *self)
     const SbkEnumObject *enumObj = reinterpret_cast<SbkEnumObject *>(self);
     auto name = Py_TYPE(self)->tp_name;
     if (enumObj->ob_name) {
-        return Shiboken::String::fromFormat("%s.%s", name,
-                                            PyBytes_AS_STRING(enumObj->ob_name));
+        return String::fromFormat("%s.%s", name, PyBytes_AS_STRING(enumObj->ob_name));
     }
-    return Shiboken::String::fromFormat("%s(%ld)", name, enumObj->ob_value);
+    return String::fromFormat("%s(%ld)", name, enumObj->ob_value);
 }
 
 static PyObject *SbkEnumObject_name(PyObject *self, void *)
@@ -121,7 +121,7 @@ static PyObject *SbkEnum_tp_new(PyTypeObject *type, PyObject *args, PyObject *)
     if (!self)
         return nullptr;
     self->ob_value = itemValue;
-    Shiboken::AutoDecRef item(Shiboken::Enum::getEnumItemFromValue(type, itemValue));
+    AutoDecRef item(Enum::getEnumItemFromValue(type, itemValue));
     self->ob_name = item.object() ? SbkEnumObject_name(item, nullptr) : nullptr;
     return reinterpret_cast<PyObject *>(self);
 }
@@ -308,7 +308,7 @@ PyTypeObject *SbkEnumType_TypeF(void)
     return type;
 }
 
-void SbkEnumTypeDealloc(PyObject *pyObj)
+static void SbkEnumTypeDealloc(PyObject *pyObj)
 {
     auto *enumType = reinterpret_cast<SbkEnumType *>(pyObj);
     auto *setp = PepType_SETP(enumType);
@@ -318,7 +318,7 @@ void SbkEnumTypeDealloc(PyObject *pyObj)
     Py_TRASHCAN_SAFE_BEGIN(pyObj);
 #endif
     if (setp->converter)
-        Shiboken::Conversions::deleteConverter(setp->converter);
+        Conversions::deleteConverter(setp->converter);
     PepType_SETP_delete(enumType);
 #ifndef Py_LIMITED_API
     Py_TRASHCAN_SAFE_END(pyObj);
@@ -332,6 +332,7 @@ void SbkEnumTypeDealloc(PyObject *pyObj)
 
 PyTypeObject *SbkEnumTypeTpNew(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
 {
+    init_enum();
     return PepType_Type_tp_new(metatype, args, kwds);
 }
 
@@ -363,7 +364,7 @@ namespace Shiboken { namespace Enum {
 // Unpickling: rebuild the Qt Enum object
 PyObject *unpickleEnum(PyObject *enum_class_name, PyObject *value)
 {
-    Shiboken::AutoDecRef parts(PyObject_CallMethod(enum_class_name,
+    AutoDecRef parts(PyObject_CallMethod(enum_class_name,
                                "split", "s", "."));
     if (parts.isNull())
         return nullptr;
@@ -373,17 +374,17 @@ PyObject *unpickleEnum(PyObject *enum_class_name, PyObject *value)
     PyObject *module = PyImport_GetModule(top_name);
     if (module == nullptr) {
         PyErr_Format(PyExc_ImportError, "could not import module %.200s",
-            Shiboken::String::toCString(top_name));
+            String::toCString(top_name));
         return nullptr;
     }
-    Shiboken::AutoDecRef cur_thing(module);
+    AutoDecRef cur_thing(module);
     int len = PyList_Size(parts);
     for (int idx = 1; idx < len; ++idx) {
         PyObject *name = PyList_GetItem(parts, idx); // borrowed ref
         PyObject *thing = PyObject_GetAttr(cur_thing, name);
         if (thing == nullptr) {
             PyErr_Format(PyExc_ImportError, "could not import Qt Enum type %.200s",
-                Shiboken::String::toCString(enum_class_name));
+                String::toCString(enum_class_name));
             return nullptr;
         }
         cur_thing.reset(thing);
@@ -400,7 +401,7 @@ extern "C" {
 // Initialization
 static bool _init_enum()
 {
-    Shiboken::AutoDecRef shibo(PyImport_ImportModule("shiboken6.Shiboken"));
+    AutoDecRef shibo(PyImport_ImportModule("shiboken6.Shiboken"));
     auto mod = shibo.object();
     // publish Shiboken.Enum so that the signature gets initialized
     if (PyObject_SetAttrString(mod, "Enum", reinterpret_cast<PyObject *>(SbkEnum_TypeF())) < 0)
@@ -413,20 +414,63 @@ static bool _init_enum()
     return true;
 }
 
-void init_enum()
-{
-    static bool is_initialized = false;
-    if (!(is_initialized || enum_unpickler || _init_enum()))
-        Py_FatalError("could not load enum pickling helper function");
-    Py_AtExit(cleanupEnumTypes);
-    is_initialized = true;
-}
+static int useOldEnum = -1;
 
 static PyMethodDef SbkEnumObject_Methods[] = {
     {"__reduce__", reinterpret_cast<PyCFunction>(enum___reduce__),
         METH_NOARGS, nullptr},
     {nullptr, nullptr, 0, nullptr} // Sentinel
 };
+
+static PyObject *PyEnumMeta{};
+static PyObject *PyEnum{};
+static PyObject *PyIntEnum{};
+static PyObject *PyFlag{};
+static PyObject *PyIntFlag{};
+
+PyTypeObject *getPyEnumMeta()
+{
+    if (PyEnumMeta)
+        return reinterpret_cast<PyTypeObject *>(PyEnumMeta);
+
+    static auto *mod = PyImport_ImportModule("enum");
+    if (mod) {
+        PyEnumMeta = PyObject_GetAttrString(mod, "EnumMeta");
+        if (PyEnumMeta && PyType_Check(PyEnumMeta))
+            PyEnum = PyObject_GetAttrString(mod, "Enum");
+        if (PyEnum && PyType_Check(PyEnum))
+            PyIntEnum = PyObject_GetAttrString(mod, "IntEnum");
+        if (PyIntEnum && PyType_Check(PyIntEnum))
+            PyFlag = PyObject_GetAttrString(mod, "Flag");
+        if (PyFlag && PyType_Check(PyFlag))
+            PyIntFlag = PyObject_GetAttrString(mod, "IntFlag");
+        if (PyIntFlag && PyType_Check(PyIntFlag))
+            return reinterpret_cast<PyTypeObject *>(PyEnumMeta);
+    }
+    Py_FatalError("Python module 'enum' not found");
+    return nullptr;
+}
+
+void init_enum()
+{
+    static bool is_initialized = false;
+    if (is_initialized)
+        return;
+    if (!(is_initialized || enum_unpickler || _init_enum()))
+        Py_FatalError("could not load enum pickling helper function");
+    Py_AtExit(cleanupEnumTypes);
+
+    // PYSIDE-1735: Determine whether we should use the old or the new enum implementation.
+    static const char *envname = "PYSIDE63_OPTION_PYTHON_ENUM";
+    const char *envsetting = getenv(envname);
+    // I tried to use the save version getenv_s instead, but this function does not
+    // exist on macOS. But this does no harm:
+    // This variable has been set already by parser.py initialization.
+    assert(envsetting);
+    useOldEnum = strncmp(envsetting, "0", 10) == 0;
+    getPyEnumMeta();
+    is_initialized = true;
+}
 
 } // extern "C"
 
@@ -462,16 +506,31 @@ private:
 
 namespace Enum {
 
+// forward
+static PyObject *newItemOld(PyTypeObject *enumType, long itemValue, const char *itemName);
+
+// forward
+static PyTypeObject * newTypeWithNameOld(const char *name,
+                                         const char *cppName,
+                                         PyTypeObject *numbers_fromFlag);
+
 bool check(PyObject *pyObj)
 {
-    return Py_TYPE(Py_TYPE(pyObj)) == SbkEnumType_TypeF();
+    init_enum();
+
+    // PYSIDE-1735: Decide dynamically if new or old enums will be used.
+    if (useOldEnum)
+        return Py_TYPE(Py_TYPE(pyObj)) == SbkEnumType_TypeF();
+
+    static PyTypeObject *meta = getPyEnumMeta();
+    return Py_TYPE(Py_TYPE(pyObj)) == reinterpret_cast<PyTypeObject *>(meta);
 }
 
-PyObject *getEnumItemFromValue(PyTypeObject *enumType, long itemValue)
+static PyObject *getEnumItemFromValueOld(PyTypeObject *enumType, long itemValue)
 {
     PyObject *key, *value;
     Py_ssize_t pos = 0;
-    PyObject *values = PyDict_GetItem(enumType->tp_dict, Shiboken::PyName::values());
+    PyObject *values = PyDict_GetItem(enumType->tp_dict, PyName::values());
     if (values == nullptr)
         return nullptr;
 
@@ -485,10 +544,30 @@ PyObject *getEnumItemFromValue(PyTypeObject *enumType, long itemValue)
     return nullptr;
 }
 
+PyObject *getEnumItemFromValue(PyTypeObject *enumType, long itemValue)
+{
+    init_enum();
+    // PYSIDE-1735: Decide dynamically if new or old enums will be used.
+    if (useOldEnum)
+        return getEnumItemFromValueOld(enumType, itemValue);
+
+    auto *obEnumType = reinterpret_cast<PyObject *>(enumType);
+    AutoDecRef val2members(PyObject_GetAttrString(obEnumType, "_value2member_map_"));
+    if (val2members.isNull()) {
+        PyErr_Clear();
+        return nullptr;
+    }
+    AutoDecRef ob_value(PyLong_FromLong(itemValue));
+    auto *result = PyDict_GetItem(val2members, ob_value);
+    Py_XINCREF(result);
+    return result;
+}
+
 static PyTypeObject *createEnum(const char *fullName, const char *cppName,
                                 PyTypeObject *flagsType)
 {
-    PyTypeObject *enumType = newTypeWithName(fullName, cppName, flagsType);
+    init_enum();
+    PyTypeObject *enumType = newTypeWithNameOld(fullName, cppName, flagsType);
     if (PyType_Ready(enumType) < 0) {
         Py_XDECREF(enumType);
         return nullptr;
@@ -504,7 +583,7 @@ PyTypeObject *createGlobalEnum(PyObject *module, const char *name, const char *f
         Py_DECREF(enumType);
         return nullptr;
     }
-    flagsType = recordCurrentEnum(module, name, fullName, cppName, enumType, flagsType);
+    flagsType = recordCurrentEnum(module, name, enumType, flagsType);
     if (flagsType && PyModule_AddObject(module, PepType_GetNameStr(flagsType),
             reinterpret_cast<PyObject *>(flagsType)) < 0) {
         Py_DECREF(enumType);
@@ -523,7 +602,7 @@ PyTypeObject *createScopedEnum(PyTypeObject *scope, const char *name, const char
         return nullptr;
     }
     auto *obScope = reinterpret_cast<PyObject *>(scope);
-    flagsType = recordCurrentEnum(obScope, name, fullName, cppName, enumType, flagsType);
+    flagsType = recordCurrentEnum(obScope, name, enumType, flagsType);
     if (flagsType && PyDict_SetItemString(scope->tp_dict,
             PepType_GetNameStr(flagsType),
             reinterpret_cast<PyObject *>(flagsType)) < 0) {
@@ -532,9 +611,11 @@ PyTypeObject *createScopedEnum(PyTypeObject *scope, const char *name, const char
     }
     return enumType;
 }
+
 static PyObject *createEnumItem(PyTypeObject *enumType, const char *itemName, long itemValue)
 {
-    PyObject *enumItem = newItem(enumType, itemValue, itemName);
+    init_enum();
+    PyObject *enumItem = newItemOld(enumType, itemValue, itemName);
     if (PyDict_SetItemString(enumType->tp_dict, itemName, enumItem) < 0) {
         Py_DECREF(enumItem);
         return nullptr;
@@ -563,8 +644,10 @@ bool createScopedEnumItem(PyTypeObject *enumType, PyTypeObject *scope,
     return ok >= 0;
 }
 
-PyObject *
-newItem(PyTypeObject *enumType, long itemValue, const char *itemName)
+// This exists temporary as the old way to create an enum item.
+// For the public interface, we use a new function
+static PyObject *
+newItemOld(PyTypeObject *enumType, long itemValue, const char *itemName)
 {
     bool newValue = true;
     SbkEnumObject *enumObj;
@@ -586,20 +669,37 @@ newItem(PyTypeObject *enumType, long itemValue, const char *itemName)
 
     if (newValue) {
         auto dict = enumType->tp_dict;  // Note: 'values' is borrowed
-        PyObject *values = PyDict_GetItemWithError(dict, Shiboken::PyName::values());
+        PyObject *values = PyDict_GetItemWithError(dict, PyName::values());
         if (values == nullptr) {
             if (PyErr_Occurred())
                 return nullptr;
-            Shiboken::AutoDecRef new_values(values = PyDict_New());
+            AutoDecRef new_values(values = PyDict_New());
             if (values == nullptr)
                 return nullptr;
-            if (PyDict_SetItem(dict, Shiboken::PyName::values(), values) < 0)
+            if (PyDict_SetItem(dict, PyName::values(), values) < 0)
                 return nullptr;
         }
         PyDict_SetItemString(values, itemName, reinterpret_cast<PyObject *>(enumObj));
     }
 
     return reinterpret_cast<PyObject *>(enumObj);
+}
+
+PyObject *
+newItem(PyTypeObject *enumType, long itemValue, const char *itemName)
+{
+    init_enum();
+    // PYSIDE-1735: Decide dynamically if new or old enums will be used.
+    if (useOldEnum)
+        return newItemOld(enumType, itemValue, itemName);
+
+    if (!itemName) {
+        //PyObject *enumObj = getEnumItemFromValue(enumType, itemValue);
+        PyObject *enumObj = PyObject_CallFunction(reinterpret_cast<PyObject *>(enumType), "i", itemValue);
+        //if (enumObj)
+            return enumObj;
+    }
+    return PyObject_GetAttrString(reinterpret_cast<PyObject *>(enumType), itemName);
 }
 
 } // namespace Shiboken
@@ -690,12 +790,9 @@ copyNumberMethods(PyTypeObject *flagsType,
     *pidx = idx;
 }
 
-// PySIDE-1735: This function is in the API. Support it with the new enums.
-//
-PyTypeObject *
-newTypeWithName(const char *name,
-                const char *cppName,
-                PyTypeObject *numbers_fromFlag)
+static PyTypeObject * newTypeWithNameOld(const char *name,
+                                         const char *cppName,
+                                         PyTypeObject *numbers_fromFlag)
 {
     // Careful: SbkType_FromSpec does not allocate the string.
     PyType_Slot newslots[99] = {};  // enough but not too big for the stack
@@ -715,7 +812,7 @@ newTypeWithName(const char *name,
     if (numbers_fromFlag)
         copyNumberMethods(numbers_fromFlag, newslots, &idx);
     newspec.slots = newslots;
-    Shiboken::AutoDecRef bases(PyTuple_New(1));
+    AutoDecRef bases(PyTuple_New(1));
     static auto basetype = reinterpret_cast<PyObject *>(SbkEnum_TypeF());
     Py_INCREF(basetype);
     PyTuple_SetItem(bases, 0, basetype);
@@ -729,6 +826,18 @@ newTypeWithName(const char *name,
     return entry.type;
 }
 
+// PySIDE-1735: This function is in the API and should be removed in 6.4 .
+//              Python enums are created differently.
+PyTypeObject *newTypeWithName(const char *name,
+                              const char *cppName,
+                              PyTypeObject *numbers_fromFlag)
+{
+    if (!useOldEnum)
+        PyErr_Format(PyExc_RuntimeError, "function `%s` can no longer be used when the Python "
+            "Enum's have been selected", __FUNCTION__);
+    return newTypeWithNameOld(name, cppName, numbers_fromFlag);
+}
+
 const char *getCppName(PyTypeObject *enumType)
 {
     assert(Py_TYPE(enumType) == SbkEnumType_TypeF());
@@ -739,8 +848,16 @@ const char *getCppName(PyTypeObject *enumType)
 
 long int getValue(PyObject *enumItem)
 {
-    assert(Shiboken::Enum::check(enumItem));
-    return reinterpret_cast<SbkEnumObject *>(enumItem)->ob_value;
+    init_enum();
+
+    assert(Enum::check(enumItem));
+
+    // PYSIDE-1735: Decide dynamically if new or old enums will be used.
+    if (useOldEnum)
+        return reinterpret_cast<SbkEnumObject *>(enumItem)->ob_value;
+
+    AutoDecRef pyValue(PyObject_GetAttrString(enumItem, "value"));
+    return PyLong_AsLong(pyValue);
 }
 
 void setTypeConverter(PyTypeObject *type, SbkConverter *converter, bool isFlag)
@@ -772,18 +889,22 @@ DeclaredEnumTypes::~DeclaredEnumTypes()
 
 void DeclaredEnumTypes::cleanup()
 {
+    static bool was_called = false;
+    if (was_called)
+        return;
+
     for (const auto &e : m_enumTypes) {
         std::free(e.name);
-        Py_DECREF(e.type);
     }
     m_enumTypes.clear();
+    was_called = true;
 }
 
 } // namespace Shiboken
 
 static void cleanupEnumTypes()
 {
-    Shiboken::DeclaredEnumTypes::instance().cleanup();
+    DeclaredEnumTypes::instance().cleanup();
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -811,8 +932,6 @@ extern "C" {
 struct lastEnumCreated {
     PyObject *scopeOrModule;
     const char *name;
-    const char *fullName;
-    const char *cppName;
     PyTypeObject *enumType;
     PyTypeObject *flagsType;
 };
@@ -821,31 +940,87 @@ static lastEnumCreated lec{};
 
 static PyTypeObject *recordCurrentEnum(PyObject *scopeOrModule,
                                        const char *name,
-                                       const char *fullName,
-                                       const char *cppName,
                                        PyTypeObject *enumType,
                                        PyTypeObject *flagsType)
 {
     lec.scopeOrModule = scopeOrModule;
     lec.name = name;
-    lec.fullName = fullName;
-    lec.cppName = cppName;
     lec.enumType = enumType;
     lec.flagsType = flagsType;
-    // We later return nullptr as flagsType to disable flag creation.
-    return flagsType;
+
+    // PYSIDE-1735: Decide dynamically if new or old enums will be used.
+    if (useOldEnum)
+        return flagsType;
+
+    // We return nullptr as flagsType to disable flag creation.
+    return nullptr;
 }
 
 PyTypeObject *morphLastEnumToPython()
 {
-    // to be implemented...
-    return lec.enumType;
+    /// The Python Enum internal structure is way too complicated.
+    /// It is much easier to generate Python code and execute it.
+
+    // Pick up the last generated Enum and convert it into a PyEnum
+    auto *enumType = lec.enumType;
+    // This is temporary; SbkEnumType will be removed, soon.
+
+    // PYSIDE-1735: Decide dynamically if new or old enums will be used.
+    if (useOldEnum)
+        return enumType;
+
+    auto *setp = PepType_SETP(reinterpret_cast<SbkEnumType *>(enumType));
+    if (setp->replacementType) {
+        // For some (yet to fix) reason, initialization of the enums can happen twice.
+        // If that happens, use the existing new type to keep type checks correct.
+        return setp->replacementType;
+    }
+    PyObject *key, *value;
+    Py_ssize_t pos = 0;
+    PyObject *values = PyDict_GetItem(enumType->tp_dict, PyName::values());
+    if (!values)
+        return nullptr;
+
+    // Walk the values dict and create a Python enum type.
+    auto *PyEnumType = lec.flagsType ? PyIntFlag : PyIntEnum;
+    AutoDecRef name(PyUnicode_FromString(lec.name));
+    AutoDecRef args(PyList_New(0));
+    auto *pyName = name.object();
+    auto *pyArgs = args.object();
+    while (PyDict_Next(values, &pos, &key, &value)) {
+        auto *key_value = PyTuple_New(2);
+        PyTuple_SET_ITEM(key_value, 0, key);
+        Py_INCREF(key);
+        auto *obj = reinterpret_cast<SbkEnumObject *>(value);
+        auto *num = PyLong_FromLong(obj->ob_value);
+        PyTuple_SET_ITEM(key_value, 1, num);
+        PyList_Append(pyArgs, key_value);
+    }
+    auto *obNewType = PyObject_CallFunctionObjArgs(PyEnumType, pyName, pyArgs, nullptr);
+    if (!obNewType || PyObject_SetAttr(lec.scopeOrModule, pyName, obNewType) < 0)
+            return nullptr;
+    auto *newType = reinterpret_cast<PyTypeObject *>(obNewType);
+    auto *obEnumType = reinterpret_cast<PyObject *>(enumType);
+    AutoDecRef qual_name(PyObject_GetAttr(obEnumType, PyMagicName::qualname()));
+    PyObject_SetAttr(obNewType, PyMagicName::qualname(), qual_name);
+    AutoDecRef module(PyObject_GetAttr(obEnumType, PyMagicName::module()));
+    PyObject_SetAttr(obNewType, PyMagicName::module(), module);
+    // As a last step, fix the item entries in the enclosing object.
+    pos = 0;
+    while (PyDict_Next(values, &pos, &key, &value)) {
+        AutoDecRef entry(PyObject_GetAttr(obNewType, key));
+        if (PyObject_SetAttr(lec.scopeOrModule, key, entry) < 0)
+            return nullptr;
+    }
+    // Protect against double initialization
+    setp->replacementType = newType;
+    return newType;
 }
 
 PyTypeObject *mapFlagsToSameEnum(PyTypeObject *FType, PyTypeObject *EType)
 {
     // this will be switchable...
-    return FType;
+    return useOldEnum ? FType : EType;
 }
 
 } // extern "C"

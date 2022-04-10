@@ -77,7 +77,11 @@ In effect, 'type_map' maps text to real Python objects.
 """
 
 def _get_flag_enum_option():
-    flag = False    # XXX get default out of version number?
+    from shiboken6 import __version_info__ as ver
+    # PYSIDE-1735: Use the new Enums per default if version is >= 6.4
+    #              This decides between delivered vs. dev versions.
+    #              When 6.4 is out, the switching mode will be gone.
+    flag = ver[:2] >= (6, 4)
     envname = "PYSIDE63_OPTION_PYTHON_ENUM"
     sysname = envname.lower()
     opt = os.environ.get(envname)
@@ -91,6 +95,12 @@ def _get_flag_enum_option():
             flag = bool(int(opt))
     elif hasattr(sys, sysname):
         flag = bool(getattr(sys, sysname))
+    sysver = sys.version_info[:2]
+    if flag and sysver < (3, 7):
+        import warnings
+        warnings.warn(f"Enums with functional API are not supported in "
+                      f"Python {'.'.join(map(str, sysver))}")
+        flag = False
     # modify the sys attribute to bool
     setattr(sys, sysname, flag)
     # modify the env attribute to "0" or "1"

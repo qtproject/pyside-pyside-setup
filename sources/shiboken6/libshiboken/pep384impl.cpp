@@ -981,6 +981,13 @@ static thread_local PySideQFlagsTypePrivate *PFTP_value{};
 
 PySideQFlagsTypePrivate *PepType_PFTP(PySideQFlagsType *flagsType)
 {
+    static PyTypeObject *enumMeta = getPyEnumMeta();
+    auto *mappedType = reinterpret_cast<PyTypeObject *>(flagsType);
+    auto *metaType = Py_TYPE(mappedType);
+    if (metaType == enumMeta) {
+        return reinterpret_cast<PySideQFlagsTypePrivate *>(
+            PepType_SETP(reinterpret_cast<SbkEnumType *>(flagsType)));
+    }
     if (flagsType == PFTP_key)
         return PFTP_value;
     auto it = PFTP_extender.find(flagsType);

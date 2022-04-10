@@ -302,10 +302,9 @@ def generate_pyi(import_name, outpath, options):
                 wr.print(line)
     if not options.quiet:
         options.logger.info(f"Generated: {outfilepath}")
-    if options and (options.check or options.is_ci):
-        # Python 3.7 and up: We can check the file directly if the syntax is ok.
-        if USE_PEP563:
-            subprocess.check_output([sys.executable, os.fspath(outfilepath)])
+    # PYSIDE-1735: .pyi files are no longer compatible with Python, because
+    #              enum classes contain ellipsis which a Python enum forbids.
+    #              We will implement tests with Mypy, instead.
 
 
 def main():
