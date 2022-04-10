@@ -41,6 +41,7 @@
 
 #include <autodecref.h>
 #include <sbkenum.h>
+#include <sbkenum_p.h>
 
 extern "C" {
     struct SbkConverter;

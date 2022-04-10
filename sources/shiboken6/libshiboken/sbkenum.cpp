@@ -59,6 +59,17 @@ static void cleanupEnumTypes();
 extern "C"
 {
 
+// forward
+struct lastEnumCreated;
+
+// forward
+static PyTypeObject *recordCurrentEnum(PyObject *scopeOrModule,
+                                       const char *name,
+                                       const char *fullName,
+                                       const char *cppName,
+                                       PyTypeObject *enumType,
+                                       PyTypeObject *flagsType);
+
 struct SbkEnumType
 {
     PyTypeObject type;
@@ -119,7 +130,7 @@ static const char *SbkEnum_SignatureStrings[] = {
     "Shiboken.Enum(self,itemValue:int=0)",
     nullptr}; // Sentinel
 
-void enum_object_dealloc(PyObject *ob)
+static void enum_object_dealloc(PyObject *ob)
 {
     auto *self = reinterpret_cast<SbkEnumObject *>(ob);
     Py_XDECREF(self->ob_name);
@@ -485,13 +496,15 @@ static PyTypeObject *createEnum(const char *fullName, const char *cppName,
     return enumType;
 }
 
-PyTypeObject *createGlobalEnum(PyObject *module, const char *name, const char *fullName, const char *cppName, PyTypeObject *flagsType)
+PyTypeObject *createGlobalEnum(PyObject *module, const char *name, const char *fullName,
+                               const char *cppName, PyTypeObject *flagsType)
 {
     PyTypeObject *enumType = createEnum(fullName, cppName, flagsType);
     if (enumType && PyModule_AddObject(module, name, reinterpret_cast<PyObject *>(enumType)) < 0) {
         Py_DECREF(enumType);
         return nullptr;
     }
+    flagsType = recordCurrentEnum(module, name, fullName, cppName, enumType, flagsType);
     if (flagsType && PyModule_AddObject(module, PepType_GetNameStr(flagsType),
             reinterpret_cast<PyObject *>(flagsType)) < 0) {
         Py_DECREF(enumType);
@@ -500,7 +513,8 @@ PyTypeObject *createGlobalEnum(PyObject *module, const char *name, const char *f
     return enumType;
 }
 
-PyTypeObject *createScopedEnum(PyTypeObject *scope, const char *name, const char *fullName, const char *cppName, PyTypeObject *flagsType)
+PyTypeObject *createScopedEnum(PyTypeObject *scope, const char *name, const char *fullName,
+                               const char *cppName, PyTypeObject *flagsType)
 {
     PyTypeObject *enumType = createEnum(fullName, cppName, flagsType);
     if (enumType && PyDict_SetItemString(scope->tp_dict, name,
@@ -508,6 +522,8 @@ PyTypeObject *createScopedEnum(PyTypeObject *scope, const char *name, const char
         Py_DECREF(enumType);
         return nullptr;
     }
+    auto *obScope = reinterpret_cast<PyObject *>(scope);
+    flagsType = recordCurrentEnum(obScope, name, fullName, cppName, enumType, flagsType);
     if (flagsType && PyDict_SetItemString(scope->tp_dict,
             PepType_GetNameStr(flagsType),
             reinterpret_cast<PyObject *>(flagsType)) < 0) {
@@ -516,7 +532,6 @@ PyTypeObject *createScopedEnum(PyTypeObject *scope, const char *name, const char
     }
     return enumType;
 }
-
 static PyObject *createEnumItem(PyTypeObject *enumType, const char *itemName, long itemValue)
 {
     PyObject *enumItem = newItem(enumType, itemValue, itemName);
@@ -675,6 +690,8 @@ copyNumberMethods(PyTypeObject *flagsType,
     *pidx = idx;
 }
 
+// PySIDE-1735: This function is in the API. Support it with the new enums.
+//
 PyTypeObject *
 newTypeWithName(const char *name,
                 const char *cppName,
@@ -769,3 +786,66 @@ static void cleanupEnumTypes()
     Shiboken::DeclaredEnumTypes::instance().cleanup();
 }
 
+///////////////////////////////////////////////////////////////////////
+//
+// PYSIDE-1735: Re-implementation of Enums using Python
+// ====================================================
+//
+// This is a very simple, first implementation of a replacement
+// for the Qt-like Enums using the Python Enum module.
+//
+// The basic idea:
+// ---------------
+// * We create the Enums as always
+// * After creation of each enum, a special function is called that
+//   * grabs the last generated enum
+//   * reads all Enum items
+//   * generates a class statement for the Python Enum
+//   * creates a new Python Enum class
+//   * replaces the already inserted Enum with the new one.
+//
+// There are lots of ways to optimize that. Will be added later.
+//
+extern "C" {
+
+struct lastEnumCreated {
+    PyObject *scopeOrModule;
+    const char *name;
+    const char *fullName;
+    const char *cppName;
+    PyTypeObject *enumType;
+    PyTypeObject *flagsType;
+};
+
+static lastEnumCreated lec{};
+
+static PyTypeObject *recordCurrentEnum(PyObject *scopeOrModule,
+                                       const char *name,
+                                       const char *fullName,
+                                       const char *cppName,
+                                       PyTypeObject *enumType,
+                                       PyTypeObject *flagsType)
+{
+    lec.scopeOrModule = scopeOrModule;
+    lec.name = name;
+    lec.fullName = fullName;
+    lec.cppName = cppName;
+    lec.enumType = enumType;
+    lec.flagsType = flagsType;
+    // We later return nullptr as flagsType to disable flag creation.
+    return flagsType;
+}
+
+PyTypeObject *morphLastEnumToPython()
+{
+    // to be implemented...
+    return lec.enumType;
+}
+
+PyTypeObject *mapFlagsToSameEnum(PyTypeObject *FType, PyTypeObject *EType)
+{
+    // this will be switchable...
+    return FType;
+}
+
+} // extern "C"
