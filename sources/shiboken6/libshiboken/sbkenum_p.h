@@ -56,6 +56,9 @@ extern "C" {
 LIBSHIBOKEN_API PyTypeObject *morphLastEnumToPython();
 LIBSHIBOKEN_API PyTypeObject *mapFlagsToSameEnum(PyTypeObject *FType, PyTypeObject *EType);
 
+/// PYSIDE-1735: Make sure that we can import the Python enum implementation.
+LIBSHIBOKEN_API PyTypeObject *getPyEnumMeta();
+
 }
 
 #endif // SKB_PYENUM_P_H

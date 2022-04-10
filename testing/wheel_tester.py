@@ -335,7 +335,9 @@ def try_build_examples():
             from PySide6 import __all__ as modules
 
             for modname in modules:
-                execute_script(src_path / f"{modname}.pyi")
+                # PYSIDE-1735: pyi files are no longer compatible with Python.
+                # XXX Maybe add a test with Mypy here?
+                pass # execute_script(src_path / f"{modname}.pyi")
 
 
 def run_wheel_tests(install_wheels, wheels_dir_name):

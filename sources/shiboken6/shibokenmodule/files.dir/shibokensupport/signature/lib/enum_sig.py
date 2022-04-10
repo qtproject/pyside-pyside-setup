@@ -132,6 +132,10 @@ class ExactEnumerator(object):
 
     def klass(self, class_name, klass):
         ret = self.result_type()
+        if ("._") in class_name:
+            # This happens when introspecting enum.Enum etc. Python 3.8.8 does not
+            # like this, but we want to remove that, anyway.
+            return ret
         if "<" in class_name:
             # This is happening in QtQuick for some reason:
             ## class QSharedPointer<QQuickItemGrabResult >:

@@ -49,6 +49,11 @@ extern "C" {
     struct PySideQFlagsTypePrivate
     {
         SbkConverter *converter;
+        // PYSIDE-1735: These fields are just there for comatibility with the enumstructure.
+        //              We need to switch between flags and enum at runtine.
+        //              This will vanish completely when we no longer support two implementations.
+        const char *_cppName;
+        PyTypeObject *_replacementType;
     };
     /**
      * Type of all QFlags
@@ -145,6 +150,19 @@ extern "C" {
         PepType_PFTP_delete(flagsType);
         Sbk_object_dealloc(self);
     }
+
+    /// PYSIDE-1735: Support for redirection to the new Python enum.Flag .
+    static PyTypeObject *getEnumMeta()
+    {
+        static auto *mod = PyImport_ImportModule("enum");
+        if (mod) {
+            static auto *EnumMeta = PyObject_GetAttrString(mod, "EnumMeta");
+            if (EnumMeta)
+                return reinterpret_cast<PyTypeObject *>(EnumMeta);
+        }
+        Py_FatalError("Python module 'enum' not found");
+        return nullptr;
+    }
 }
 
 namespace PySide
@@ -194,6 +212,14 @@ namespace QFlags
 
     PySideQFlagsObject *newObject(long value, PyTypeObject *type)
     {
+        // PYSIDE-1735: In case of a new Python enum, we must redirect to the
+        //              enum.Flag implementation.
+        static PyTypeObject *enumMeta = getEnumMeta();
+        if (Py_TYPE(type) == enumMeta) {
+            // We are cheating: This is an enum type.
+            auto *flag_enum = PyObject_CallFunction(reinterpret_cast<PyObject *>(type), "i", value);
+            return reinterpret_cast<PySideQFlagsObject *>(flag_enum);
+        }
         PySideQFlagsObject *qflags = PyObject_New(PySideQFlagsObject, type);
         qflags->ob_value = value;
         return qflags;

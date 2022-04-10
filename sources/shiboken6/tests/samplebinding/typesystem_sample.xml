@@ -1941,6 +1941,9 @@
                         }
                     }
                 }
+                // PySIDE-1735: Enums are now implemented in Python, so we need to avoid asserts.
+                if (PyErr_Occurred())
+                    break;
                 const char** %out = 0;
                 </conversion-rule>
             </modify-argument>
