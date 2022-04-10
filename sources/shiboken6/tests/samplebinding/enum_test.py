@@ -53,6 +53,7 @@ def createTempFile():
 class EnumTest(unittest.TestCase):
     '''Test case for Python representation of C++ enums.'''
 
+    @unittest.skipIf(sys.pyside63_option_python_enum, "test not suitable for Python enum")
     def testEnumRepr(self):
         enum = SampleNamespace.Option(1)
         self.assertEqual(eval(repr(enum)), enum)
@@ -66,7 +67,8 @@ class EnumTest(unittest.TestCase):
 
     def testEnumValuesInsideEnum(self):
         '''Enum values should be accessible inside the enum as well as outside.'''
-        for value_name in SampleNamespace.Option.values:
+        for value_name in (SampleNamespace.Option.__members__ if sys.pyside63_option_python_enum
+                      else SampleNamespace.Option.values):
             enum_item1 = getattr(SampleNamespace.Option, value_name)
             enum_item2 = getattr(SampleNamespace, value_name)
             self.assertEqual(enum_item1, enum_item2)
@@ -79,11 +81,13 @@ class EnumTest(unittest.TestCase):
         '''Tries to build the proper enum using an integer.'''
         SampleNamespace.getNumber(SampleNamespace.Option(1))
 
+    @unittest.skipIf(sys.pyside63_option_python_enum, "test not suitable for Python enum")
     def testBuildingEnumWithDefaultValue(self):
         '''Enum constructor with default value'''
         enum = SampleNamespace.Option()
         self.assertEqual(enum, SampleNamespace.None_)
 
+    @unittest.skipIf(sys.pyside63_option_python_enum, "test not suitable for Python enum")
     def testEnumConversionToAndFromPython(self):
         '''Conversion of enum objects from Python to C++ back again.'''
         enumout = SampleNamespace.enumInEnumOut(SampleNamespace.TwoIn)
@@ -96,7 +100,7 @@ class EnumTest(unittest.TestCase):
 
     def testEnumConstructorWithNonNumberParameter(self):
         '''Calling the constructor of non-extensible enum with a string.'''
-        self.assertRaises(TypeError, SampleNamespace.InValue, '1')
+        self.assertRaises((TypeError, ValueError), SampleNamespace.InValue, '1')
 
     def testEnumItemAsDefaultValueToIntArgument(self):
         '''Calls function with an enum item as default value to an int argument.'''
@@ -127,6 +131,7 @@ class EnumTest(unittest.TestCase):
         event.setEventTypeByConstRef(Event.SOME_EVENT)
         self.assertEqual(event.eventType(), Event.SOME_EVENT)
 
+    @unittest.skipIf(sys.pyside63_option_python_enum, "test not suitable for Python enum")
     def testEnumTpPrintImplementation(self):
         '''Without SbkEnum.tp_print 'print' returns the enum represented as an int.'''
         tmpfile = createTempFile()
@@ -142,12 +147,14 @@ class EnumTest(unittest.TestCase):
         self.assertEqual(SampleNamespace.enumArgumentWithDefaultValue(), SampleNamespace.UnixTime)
         self.assertEqual(SampleNamespace.enumArgumentWithDefaultValue(SampleNamespace.RandomNumber), SampleNamespace.RandomNumber)
 
+    @unittest.skipIf(sys.pyside63_option_python_enum, "test not suitable for Python enum")
     def testSignature(self):
         enum = SampleNamespace.Option(1)
         types = type(enum).mro()
         klass = types[0]
         base = types[1]
         # The class has an empty signature.
+
         self.assertEqual(klass.__signature__, None)
         # The base class must be Enum
         self.assertNotEqual(base.__signature__, None)
@@ -158,17 +165,21 @@ class EnumTest(unittest.TestCase):
 
 class MyEvent(Event):
     def __init__(self):
-        Event.__init__(self, Event.EventType(999))
+        Event.__init__(self, Event.EventType(3 if sys.pyside63_option_python_enum else 999))
+
 
 class OutOfBoundsTest(unittest.TestCase):
     def testValue(self):
         e = MyEvent()
-        self.assertEqual(repr(e.eventType()), 'sample.Event.EventType(999)')
+        self.assertEqual(repr(e.eventType()), "<EventType.ANY_EVENT: 3>"
+            if sys.pyside63_option_python_enum else 'sample.Event.EventType(999)')
 
+    @unittest.skipIf(sys.pyside63_option_python_enum, "test not suitable for Python enum")
     def testNoneName(self):
         e = MyEvent()
         t = e.eventType()
         self.assertEqual(t.name, None)
+
 
 class EnumOverloadTest(unittest.TestCase):
     '''Test case for overloads involving enums'''
@@ -179,6 +190,7 @@ class EnumOverloadTest(unittest.TestCase):
 
         self.assertEqual(o.callWithEnum('', Event.ANY_EVENT, 9), 81)
         self.assertEqual(o.callWithEnum('', 9), 9)
+
 
 class EnumOperators(unittest.TestCase):
     '''Test case for operations on enums'''
