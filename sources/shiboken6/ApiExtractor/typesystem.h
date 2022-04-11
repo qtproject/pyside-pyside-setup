@@ -36,6 +36,7 @@
 #include <QtCore/QStringList>
 #include <QtCore/QScopedPointer>
 
+class AbstractMetaType;
 class CustomFunction;
 class CustomConversion;
 class EnumValueTypeEntry;
@@ -734,6 +735,10 @@ public:
     Instantiations instantiations() const;
     void setInstantiations(const Instantiations &i);
     bool matchesInstantiation(const TypeEntry *e) const;
+
+    static QString getTargetFullName(const AbstractMetaType &metaType,
+                                     bool includePackageName = true);
+    static QString getTargetName(const AbstractMetaType &metaType);
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const override;

@@ -4540,7 +4540,7 @@ void CppGenerator::writeClassDefinition(TextStream &s,
     if (!classContext.forSmartPointer())
         computedClassTargetFullName = getClassTargetFullName(metaClass);
     else
-        computedClassTargetFullName = getSmartpointerTargetFullName(classContext.preciseType());
+        computedClassTargetFullName = SmartPointerTypeEntry::getTargetFullName(classContext.preciseType());
 
     const QString typePtr = QLatin1String("_") + className
         + QLatin1String("_Type");
@@ -5822,7 +5822,7 @@ void CppGenerator::writeClassRegister(TextStream &s,
         if (!classContext.forSmartPointer())
             typeName = metaClass->name();
         else
-            typeName = getSmartpointerTargetName(classContext.preciseType());
+            typeName = SmartPointerTypeEntry::getTargetName(classContext.preciseType());
 
         // 2:typeName
         s << "\"" << typeName << "\",\n";
