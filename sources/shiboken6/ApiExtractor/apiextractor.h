@@ -30,6 +30,7 @@
 #define APIEXTRACTOR_H
 
 #include "abstractmetalang_typedefs.h"
+#include "abstractmetatype.h"
 #include "apiextractorflags.h"
 #include "header_paths.h"
 #include "clangparser/compilersupport.h"
@@ -42,7 +43,6 @@ class ApiExtractorResult;
 class AbstractMetaClass;
 class AbstractMetaEnum;
 class AbstractMetaFunction;
-class AbstractMetaType;
 
 QT_BEGIN_NAMESPACE
 class QDebug;

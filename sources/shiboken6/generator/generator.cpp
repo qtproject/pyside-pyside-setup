@@ -29,8 +29,6 @@
 #include "generator.h"
 #include "apiextractorresult.h"
 #include "ctypenames.h"
-#include "abstractmetaenum.h"
-#include "abstractmetafield.h"
 #include "abstractmetafunction.h"
 #include "abstractmetalang.h"
 #include "parser/codemodel.h"
@@ -193,9 +191,6 @@ struct Generator::GeneratorPrivate
     QString outDir;
     // License comment
     QString licenseComment;
-    QStringList instantiatedContainersNames;
-    AbstractMetaTypeList instantiatedContainers;
-    AbstractMetaTypeList instantiatedSmartPointers;
     AbstractMetaClassCList m_invisibleTopNamespaces;
     bool m_hasPrivateClasses = false;
     bool m_usePySideExtensions = false;
@@ -224,8 +219,6 @@ bool Generator::setup(const ApiExtractorResult &api)
         return false;
     }
 
-    collectInstantiatedContainersAndSmartPointers();
-
     for (auto c : api.classes()) {
         if (c->enclosingClass() == nullptr && c->isInvisibleNamespace()) {
             m_d->m_invisibleTopNamespaces.append(c);
@@ -236,174 +229,6 @@ bool Generator::setup(const ApiExtractorResult &api)
     }
 
     return doSetup();
-}
-
-QString Generator::getSimplifiedContainerTypeName(const AbstractMetaType &type)
-{
-    const QString signature = type.cppSignature();
-    if (!type.typeEntry()->isContainer() && !type.typeEntry()->isSmartPointer())
-        return signature;
-    QString typeName = signature;
-    if (type.isConstant())
-        typeName.remove(0, sizeof("const ") / sizeof(char) - 1);
-    switch (type.referenceType()) {
-    case NoReference:
-        break;
-    case LValueReference:
-        typeName.chop(1);
-        break;
-    case RValueReference:
-        typeName.chop(2);
-        break;
-    }
-    while (typeName.endsWith(QLatin1Char('*')) || typeName.endsWith(QLatin1Char(' ')))
-        typeName.chop(1);
-    return typeName;
-}
-
-// Strip a "const QSharedPtr<const Foo> &" or similar to "QSharedPtr<Foo>" (PYSIDE-1016/454)
-AbstractMetaType canonicalSmartPtrInstantiation(const AbstractMetaType &type)
-{
-    const AbstractMetaTypeList &instantiations = type.instantiations();
-    Q_ASSERT(instantiations.size() == 1);
-    const bool needsFix = type.isConstant() || type.referenceType() != NoReference;
-    const bool pointeeNeedsFix = instantiations.constFirst().isConstant();
-    if (!needsFix && !pointeeNeedsFix)
-        return type;
-    auto fixedType = type;
-    fixedType.setReferenceType(NoReference);
-    fixedType.setConstant(false);
-    if (pointeeNeedsFix) {
-        auto fixedPointeeType = instantiations.constFirst();
-        fixedPointeeType.setConstant(false);
-        fixedType.setInstantiations(AbstractMetaTypeList(1, fixedPointeeType));
-    }
-    return fixedType;
-}
-
-static inline const TypeEntry *pointeeTypeEntry(const AbstractMetaType &smartPtrType)
-{
-    return smartPtrType.instantiations().constFirst().typeEntry();
-}
-
-void Generator::addInstantiatedContainersAndSmartPointers(const AbstractMetaType &type,
-                                                          const QString &context)
-{
-    for (const auto &t : type.instantiations())
-        addInstantiatedContainersAndSmartPointers(t, context);
-    const auto typeEntry = type.typeEntry();
-    const bool isContainer = typeEntry->isContainer();
-    if (!isContainer
-        && !(typeEntry->isSmartPointer() && typeEntry->generateCode())) {
-        return;
-    }
-    if (type.hasTemplateChildren()) {
-        QString piece = isContainer ? QStringLiteral("container") : QStringLiteral("smart pointer");
-        QString warning =
-                QString::fromLatin1("Skipping instantiation of %1 '%2' because it has template"
-                               " arguments.").arg(piece, type.originalTypeDescription());
-        if (!context.isEmpty())
-            warning.append(QStringLiteral(" Calling context: ") + context);
-
-        qCWarning(lcShiboken).noquote().nospace() << warning;
-        return;
-
-    }
-    if (isContainer) {
-        const QString typeName = getSimplifiedContainerTypeName(type);
-        if (!m_d->instantiatedContainersNames.contains(typeName)) {
-            m_d->instantiatedContainersNames.append(typeName);
-            auto simplifiedType = type;
-            simplifiedType.setIndirections(0);
-            simplifiedType.setConstant(false);
-            simplifiedType.setReferenceType(NoReference);
-            simplifiedType.decideUsagePattern();
-            m_d->instantiatedContainers.append(simplifiedType);
-        }
-        return;
-    }
-
-    // Is smart pointer. Check if the (const?) pointee is already known for the given
-    // smart pointer type entry.
-    auto pt = pointeeTypeEntry(type);
-    const bool present =
-        std::any_of(m_d->instantiatedSmartPointers.cbegin(), m_d->instantiatedSmartPointers.cend(),
-                    [typeEntry, pt] (const AbstractMetaType &t) {
-                        return t.typeEntry() == typeEntry && pointeeTypeEntry(t) == pt;
-                    });
-    if (!present)
-        m_d->instantiatedSmartPointers.append(canonicalSmartPtrInstantiation(type));
-}
-
-void Generator::collectInstantiatedContainersAndSmartPointers(const AbstractMetaFunctionCPtr &func)
-{
-    addInstantiatedContainersAndSmartPointers(func->type(), func->signature());
-    const AbstractMetaArgumentList &arguments = func->arguments();
-    for (const AbstractMetaArgument &arg : arguments)
-        addInstantiatedContainersAndSmartPointers(arg.type(), func->signature());
-}
-
-void Generator::collectInstantiatedContainersAndSmartPointers(const AbstractMetaClass *metaClass)
-{
-    if (!metaClass->typeEntry()->generateCode())
-        return;
-    for (const auto &func : metaClass->functions())
-        collectInstantiatedContainersAndSmartPointers(func);
-    for (const AbstractMetaField &field : metaClass->fields())
-        addInstantiatedContainersAndSmartPointers(field.type(), field.name());
-    const AbstractMetaClassList &innerClasses = metaClass->innerClasses();
-    for (AbstractMetaClass *innerClass : innerClasses)
-        collectInstantiatedContainersAndSmartPointers(innerClass);
-}
-
-void Generator::collectInstantiatedContainersAndSmartPointers()
-{
-    collectInstantiatedOpqaqueContainers();
-    for (const auto &func : m_d->api.globalFunctions())
-        collectInstantiatedContainersAndSmartPointers(func);
-    for (auto metaClass : m_d->api.classes())
-        collectInstantiatedContainersAndSmartPointers(metaClass);
-}
-
-// Whether to generate an opaque container: If the instantiation type is in
-// the current package or, for primitive types, if the container is in the
-// current package.
-static bool generateOpaqueContainer(const AbstractMetaType &type,
-                                    const TypeSystemTypeEntry *moduleEntry)
-{
-    auto *te = type.instantiations().constFirst().typeEntry();
-    auto *typeModuleEntry = te->typeSystemTypeEntry();
-    return typeModuleEntry == moduleEntry
-           || (te->isPrimitive() && type.typeEntry()->typeSystemTypeEntry() == moduleEntry);
-}
-
-void Generator::collectInstantiatedOpqaqueContainers()
-{
-    // Add all instantiations of opaque containers for types from the current
-    // module.
-    auto *td = TypeDatabase::instance();
-    const auto *moduleEntry = TypeDatabase::instance()->defaultTypeSystemType();
-    const auto &containers = td->containerTypes();
-    for (const auto *container : containers) {
-        for (const auto &oc : container->opaqueContainers()) {
-            QString errorMessage;
-            const QString typeName = container->qualifiedCppName() + u'<'
-                                     + oc.instantiation + u'>';
-            auto typeOpt = AbstractMetaType::fromString(typeName, &errorMessage);
-            if (typeOpt.has_value() && generateOpaqueContainer(typeOpt.value(), moduleEntry))
-                addInstantiatedContainersAndSmartPointers(typeOpt.value(), u"opaque containers"_qs);
-        }
-    }
-}
-
-AbstractMetaTypeList Generator::instantiatedContainers() const
-{
-    return m_d->instantiatedContainers;
-}
-
-AbstractMetaTypeList Generator::instantiatedSmartPointers() const
-{
-    return m_d->instantiatedSmartPointers;
 }
 
 Generator::OptionDescriptions Generator::options() const
@@ -563,16 +388,12 @@ bool Generator::generate()
             m_d->m_hasPrivateClasses = true;
     }
 
-    const auto smartPointers = m_d->api.smartPointers();
-    for (const AbstractMetaType &type : qAsConst(m_d->instantiatedSmartPointers)) {
-        const AbstractMetaClass *smartPointerClass =
-            AbstractMetaClass::findClass(smartPointers, type.typeEntry());
-        Q_ASSERT(smartPointerClass);
+    for (const auto &smp: m_d->api.instantiatedSmartPointers()) {
         const AbstractMetaClass *pointeeClass = nullptr;
-        const auto *instantiatedType = type.instantiations().constFirst().typeEntry();
+        const auto *instantiatedType = smp.type.instantiations().constFirst().typeEntry();
         if (instantiatedType->isComplex()) // not a C++ primitive
             pointeeClass = AbstractMetaClass::findClass(m_d->api.classes(), instantiatedType);
-        if (!generateFileForContext(contextForSmartPointer(smartPointerClass, type,
+        if (!generateFileForContext(contextForSmartPointer(smp.smartPointer, smp.type,
                                                            pointeeClass))) {
             return false;
         }

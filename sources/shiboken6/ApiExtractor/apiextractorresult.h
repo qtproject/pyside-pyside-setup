@@ -39,6 +39,14 @@
 
 #include <optional>
 
+struct InstantiatedSmartPointer
+{
+    const AbstractMetaClass *smartPointer = nullptr;
+    AbstractMetaType type;
+};
+
+using InstantiatedSmartPointers = QList<InstantiatedSmartPointer>;
+
 /// Result of an ApiExtractor run.
 /// Note: The class lists in here are flat, non-owning lists, currently
 /// (pending introduction of QSharedPointer for AbstractMetaClass); the
@@ -52,6 +60,10 @@ public:
     const AbstractMetaFunctionCList &globalFunctions() const { return m_globalFunctions; }
     const AbstractMetaClassCList &classes() const { return m_metaClasses; }
     const AbstractMetaClassCList &smartPointers() const { return m_smartPointers; }
+
+    const AbstractMetaTypeList &instantiatedContainers() const { return m_instantiatedContainers; }
+    const InstantiatedSmartPointers &instantiatedSmartPointers() const
+    { return m_instantiatedSmartPointers; }
 
     // Query functions for the generators
     std::optional<AbstractMetaEnum> findAbstractMetaEnum(const TypeEntry* typeEntry) const;
@@ -72,6 +84,8 @@ private:
     AbstractMetaClassCList m_smartPointers;
     AbstractMetaFunctionCList m_globalFunctions;
     AbstractMetaEnumList m_globalEnums;
+    AbstractMetaTypeList m_instantiatedContainers;
+    InstantiatedSmartPointers m_instantiatedSmartPointers;
 
     QHash<const TypeEntry *, AbstractMetaEnum> m_enums;
 

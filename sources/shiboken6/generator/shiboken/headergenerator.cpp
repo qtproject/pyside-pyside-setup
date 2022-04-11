@@ -449,13 +449,12 @@ bool HeaderGenerator::finishGeneration()
     // Write the smart pointer define indexes.
     int smartPointerCountIndex = getMaxTypeIndex();
     int smartPointerCount = 0;
-    const AbstractMetaTypeList &instantiatedSmartPtrs = instantiatedSmartPointers();
-    for (const AbstractMetaType &metaType : instantiatedSmartPtrs) {
-        QString indexName = getTypeIndexVariableName(metaType);
+    for (const auto &smp : api().instantiatedSmartPointers()) {
+        QString indexName = getTypeIndexVariableName(smp.type);
         _writeTypeIndexValue(macrosStream, indexName, smartPointerCountIndex);
-        macrosStream << ", // " << metaType.cppSignature() << '\n';
+        macrosStream << ", // " << smp.type.cppSignature() << '\n';
         // Add a the same value for const pointees (shared_ptr<const Foo>).
-        const auto ptrName = metaType.typeEntry()->entryName();
+        const auto ptrName = smp.type.typeEntry()->entryName();
         int pos = indexName.indexOf(ptrName, 0, Qt::CaseInsensitive);
         if (pos >= 0) {
             indexName.insert(pos + ptrName.size() + 1, QLatin1String("CONST"));
@@ -494,8 +493,7 @@ bool HeaderGenerator::finishGeneration()
         _writeTypeIndexValueLine(macrosStream, getTypeIndexVariableName(ptype), pCount++);
     }
 
-    const AbstractMetaTypeList &containers = instantiatedContainers();
-    for (const AbstractMetaType &container : containers) {
+    for (const AbstractMetaType &container : api().instantiatedContainers()) {
         _writeTypeIndexValue(macrosStream, getTypeIndexVariableName(container), pCount);
         macrosStream << ", // " << container.cppSignature() << '\n';
         pCount++;
@@ -552,10 +550,10 @@ bool HeaderGenerator::finishGeneration()
             writeSbkTypeFunction(typeFunctionsStr, metaClass);
     }
 
-    for (const AbstractMetaType &metaType : instantiatedSmartPtrs) {
-        const TypeEntry *classType = metaType.typeEntry();
+    for (const auto &smp : api().instantiatedSmartPointers()) {
+        const TypeEntry *classType = smp.type.typeEntry();
         includes << classType->include();
-        writeSbkTypeFunction(typeFunctions, metaType);
+        writeSbkTypeFunction(typeFunctions, smp.type);
     }
     if (usePySideExtensions())
         typeFunctions << "QT_WARNING_POP\n";
