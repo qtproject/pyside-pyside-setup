@@ -266,6 +266,9 @@ QString Generator::fileNameForContextHelper(const GeneratorContext &context,
         return fileNameBase + suffix;
     }
 
+    // FIXME: PYSIDE7: Use the above code path for all types. Note the file
+    // names will then change to reflect the namespaces of the pointee
+    // (smart/integer2).
     const AbstractMetaType &smartPointerType = context.preciseType();
     QString fileNameBase = getFileNameBaseForSmartPointer(smartPointerType);
     return fileNameBase + suffix;
@@ -393,7 +396,7 @@ bool Generator::generate()
         const auto *instantiatedType = smp.type.instantiations().constFirst().typeEntry();
         if (instantiatedType->isComplex()) // not a C++ primitive
             pointeeClass = AbstractMetaClass::findClass(m_d->api.classes(), instantiatedType);
-        if (!generateFileForContext(contextForSmartPointer(smp.smartPointer, smp.type,
+        if (!generateFileForContext(contextForSmartPointer(smp.specialized, smp.type,
                                                            pointeeClass))) {
             return false;
         }

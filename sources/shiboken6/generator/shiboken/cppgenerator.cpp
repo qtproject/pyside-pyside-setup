@@ -834,18 +834,7 @@ void CppGenerator::generateSmartPointerClass(TextStream &s, const GeneratorConte
     if (it == functionGroups.cend() || it.value().size() != 1)
         throw Exception(msgCannotFindSmartPointerGetter(typeEntry));
 
-    {
-          // Replace the return type of the raw pointer getter method with the actual
-          // return type.
-          auto innerType = classContext.preciseType().getSmartPointerInnerType();
-          auto getter = ApiExtractor::inheritTemplateFunction(it.value().constFirst(),
-                                                              {innerType});
-          if (getter.isNull())
-              throw Exception(u"Cannot inherit smart pointer inner type "_qs + innerType.name());
-          getter->setOwnerClass(metaClass);
-          getter->setImplementingClass(metaClass);
-          writeMethodWrapper(s, md, signatureStream, {getter}, classContext);
-    }
+    writeMethodWrapper(s, md, signatureStream, it.value(), classContext);
 
     QStringList optionalMethods;
     if (!typeEntry->refCountMethodName().isEmpty())
@@ -1624,10 +1613,7 @@ return result;)";
 
     // Always copies C++ value (not pointer, and not reference) to a new Python wrapper.
     s  << '\n' << "// C++ to Python copy conversion.\n";
-    if (!classContext.forSmartPointer())
-        targetTypeName = metaClass->name();
-    else
-        targetTypeName = classContext.preciseType().name();
+    targetTypeName = metaClass->name();
 
     sourceTypeName = targetTypeName + QLatin1String("_COPY");
 
@@ -1649,10 +1635,7 @@ return result;)";
 
     // Python to C++ copy conversion.
     s << "// Python to C++ copy conversion.\n";
-    if (!classContext.forSmartPointer())
-        sourceTypeName = metaClass->name();
-    else
-        sourceTypeName = classContext.preciseType().name();
+    sourceTypeName = metaClass->name();
 
     targetTypeName = sourceTypeName + QStringLiteral("_COPY");
     c.clear();
@@ -4536,12 +4519,6 @@ void CppGenerator::writeClassDefinition(TextStream &s,
     if (!callOp.isNull() && !callOp->isModifiedRemoved())
         tp_call = QLatin1Char('&') + cpythonFunctionName(callOp);
 
-    QString computedClassTargetFullName;
-    if (!classContext.forSmartPointer())
-        computedClassTargetFullName = getClassTargetFullName(metaClass);
-    else
-        computedClassTargetFullName = SmartPointerTypeEntry::getTargetFullName(classContext.preciseType());
-
     const QString typePtr = QLatin1String("_") + className
         + QLatin1String("_Type");
     s << "static PyTypeObject *" << typePtr << " = nullptr;\n"
@@ -4582,7 +4559,7 @@ void CppGenerator::writeClassDefinition(TextStream &s,
 
     int packageLevel = packageName().count(QLatin1Char('.')) + 1;
     s << "static PyType_Spec " << className << "_spec = {\n" << indent
-        << '"' << packageLevel << ':' << computedClassTargetFullName << "\",\n"
+        << '"' << packageLevel << ':' << getClassTargetFullName(metaClass) << "\",\n"
         << "sizeof(SbkObject),\n0,\n" << tp_flags << ",\n"
         << className << "_slots\n" << outdent
         << "};\n\n} //extern \"C\"\n";
@@ -5732,9 +5709,7 @@ QString CppGenerator::getSimpleClassStaticFieldsInitFunctionName(const AbstractM
 
 QString CppGenerator::getInitFunctionName(const GeneratorContext &context)
 {
-    return !context.forSmartPointer()
-        ? getSimpleClassInitFunctionName(context.metaClass())
-        : getFilteredCppSignatureString(context.preciseType().cppSignature());
+    return getSimpleClassInitFunctionName(context.metaClass());
 }
 
 void CppGenerator::writeSignatureStrings(TextStream &s,
@@ -5818,14 +5793,9 @@ void CppGenerator::writeClassRegister(TextStream &s,
         Indentation indent(s);
         // 1:enclosingObject
         s << enclosingObjectVariable << ",\n";
-        QString typeName;
-        if (!classContext.forSmartPointer())
-            typeName = metaClass->name();
-        else
-            typeName = SmartPointerTypeEntry::getTargetName(classContext.preciseType());
 
         // 2:typeName
-        s << "\"" << typeName << "\",\n";
+        s << "\"" << metaClass->name() << "\",\n";
 
         // 3:originalName
         s << "\"";
@@ -6412,7 +6382,7 @@ bool CppGenerator::finishGeneration()
 
     // Initialize smart pointer types.
     for (const auto &smp : api().instantiatedSmartPointers()) {
-        GeneratorContext context = contextForSmartPointer(nullptr, smp.type);
+        GeneratorContext context = contextForSmartPointer(smp.specialized, smp.type);
         writeInitFunc(s_classInitDecl, s_classPythonDefines,
                       getInitFunctionName(context),
                       smp.type.typeEntry()->targetLangEnclosingEntry());

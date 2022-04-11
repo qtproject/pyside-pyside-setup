@@ -628,6 +628,8 @@ void TypeEntry::useAsTypedef(const TypeEntry *source)
     m_d->m_entryName = source->m_d->m_entryName;
     m_d->m_name = source->m_d->m_name;
     m_d->m_targetLangPackage = source->m_d->m_targetLangPackage;
+    m_d->m_cachedTargetLangName.clear(); // Clear cached names.
+    m_d->m_cachedTargetLangEntryName.clear();
     m_d->m_codeGeneration = source->m_d->m_codeGeneration;
     m_d->m_version = source->m_d->m_version;
 }

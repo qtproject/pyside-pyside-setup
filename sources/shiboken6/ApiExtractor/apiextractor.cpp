@@ -88,6 +88,8 @@ struct ApiExtractorPrivate
     QStringList m_clangOptions;
     AbstractMetaBuilder* m_builder = nullptr;
     QString m_logDirectory;
+    AbstractMetaClassCList m_synthesizedClasses;
+    QList<const TypeEntry *> m_synthesizedTypeEntries;
     LanguageLevel m_languageLevel = LanguageLevel::Default;
     bool m_skipDeprecated = false;
 };
@@ -103,6 +105,8 @@ ApiExtractor::ApiExtractor() :
 
 ApiExtractor::~ApiExtractor()
 {
+    qDeleteAll(d->m_synthesizedClasses);
+    qDeleteAll(d->m_synthesizedTypeEntries);
     delete d->m_builder;
     delete d;
 }
@@ -489,7 +493,23 @@ void ApiExtractorPrivate::addInstantiatedSmartPointer(InstantiationCollectContex
     smp.smartPointer = AbstractMetaClass::findClass(m_builder->smartPointers(),
                                                     type.typeEntry());
     Q_ASSERT(smp.smartPointer);
+
+    const auto &instantiatedType = type.instantiations().constFirst();
+    auto *ste = static_cast<const SmartPointerTypeEntry *>(smp.smartPointer->typeEntry());
+    auto *typedefEntry = new TypedefEntry(SmartPointerTypeEntry::getTargetName(type),
+                                          ste->name(), ste->version(), ste->parent());
+    typedefEntry->setTargetLangPackage(ste->targetLangPackage());
+    auto *instantiationEntry = TypeDatabase::initializeTypeDefEntry(typedefEntry, ste);
+
+    smp.specialized = ApiExtractor::inheritTemplateClass(instantiationEntry, smp.smartPointer,
+                                                         {instantiatedType},
+                                                         InheritTemplateFlag::SetEnclosingClass);
+    Q_ASSERT(smp.specialized);
+
     context.instantiatedSmartPointers.append(smp);
+    m_synthesizedClasses.append(smp.specialized);
+    m_synthesizedTypeEntries.append(typedefEntry);
+    m_synthesizedTypeEntries.append(instantiationEntry);
 }
 
 void
