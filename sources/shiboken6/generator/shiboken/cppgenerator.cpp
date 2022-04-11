@@ -321,7 +321,8 @@ std::optional<AbstractMetaType>
     CppGenerator::findSmartPointerInstantiation(const SmartPointerTypeEntry *pointer,
                                                 const TypeEntry *pointee) const
 {
-    for (const auto &i : instantiatedSmartPointers()) {
+    for (const auto &smp : api().instantiatedSmartPointers()) {
+        const auto &i = smp.type;
         if (i.typeEntry() == pointer && i.instantiations().at(0).typeEntry() == pointee)
             return i;
     }
@@ -6410,12 +6411,11 @@ bool CppGenerator::finishGeneration()
     }
 
     // Initialize smart pointer types.
-    const auto &smartPtrs = instantiatedSmartPointers();
-    for (const AbstractMetaType &metaType : smartPtrs) {
-        GeneratorContext context = contextForSmartPointer(nullptr, metaType);
+    for (const auto &smp : api().instantiatedSmartPointers()) {
+        GeneratorContext context = contextForSmartPointer(nullptr, smp.type);
         writeInitFunc(s_classInitDecl, s_classPythonDefines,
                       getInitFunctionName(context),
-                      metaType.typeEntry()->targetLangEnclosingEntry());
+                      smp.type.typeEntry()->targetLangEnclosingEntry());
     }
 
     QString moduleFileName(outputDirectory() + QLatin1Char('/') + subDirectoryForPackage(packageName()));
@@ -6434,7 +6434,7 @@ bool CppGenerator::finishGeneration()
 #include <signature.h>
 )";
 
-    if (!instantiatedContainers().isEmpty())
+    if (!api().instantiatedContainers().isEmpty())
         s << "#include <sbkcontainer.h>\n#include <sbkstaticstrings.h>\n";
 
     if (usePySideExtensions()) {
@@ -6568,7 +6568,7 @@ bool CppGenerator::finishGeneration()
     }
 
     QHash<AbstractMetaType, OpaqueContainerData> opaqueContainers;
-    const auto &containers = instantiatedContainers();
+    const auto &containers = api().instantiatedContainers();
     if (!containers.isEmpty()) {
         s << "// Container Type converters.\n\n";
         for (const AbstractMetaType &container : containers) {
@@ -6583,12 +6583,13 @@ bool CppGenerator::finishGeneration()
     }
 
     // Implicit smart pointers conversions
-    const auto smartPointersList = instantiatedSmartPointers();
+    const auto &smartPointersList = api().instantiatedSmartPointers();
     if (!smartPointersList.isEmpty()) {
         s << "// SmartPointers converters.\n\n";
-        for (const AbstractMetaType &smartPointer : smartPointersList) {
-            s << "// C++ to Python conversion for smart pointer type '" << smartPointer.cppSignature() << "'.\n";
-            writeSmartPointerConverterFunctions(s, smartPointer);
+        for (const auto &smp : smartPointersList) {
+            s << "// C++ to Python conversion for smart pointer type '"
+                << smp.type.cppSignature() << "'.\n";
+            writeSmartPointerConverterFunctions(s, smp.type);
         }
         s << '\n';
     }
@@ -6631,7 +6632,7 @@ bool CppGenerator::finishGeneration()
              << "}\n\n";
     }
 
-    int maxTypeIndex = getMaxTypeIndex() + instantiatedSmartPointers().size();
+    int maxTypeIndex = getMaxTypeIndex() + api().instantiatedSmartPointers().size();
     if (maxTypeIndex) {
         s << "// Create an array of wrapper types for the current module.\n"
            << "static PyTypeObject *cppApi[SBK_" << moduleName() << "_IDX_COUNT];\n"
@@ -6681,8 +6682,8 @@ bool CppGenerator::finishGeneration()
 
     if (!smartPointersList.isEmpty()) {
         s << '\n';
-        for (const AbstractMetaType &smartPointer : smartPointersList) {
-            writeSmartPointerConverterInitialization(s, smartPointer);
+        for (const auto &smp : smartPointersList) {
+            writeSmartPointerConverterInitialization(s, smp.type);
             s << '\n';
         }
     }

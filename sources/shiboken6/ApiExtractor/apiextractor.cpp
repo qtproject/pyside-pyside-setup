@@ -28,7 +28,13 @@
 
 #include "apiextractor.h"
 #include "apiextractorresult.h"
+#include "abstractmetaargument.h"
+#include "abstractmetafield.h"
+#include "abstractmetafunction.h"
 #include "abstractmetalang.h"
+#include "modifications.h"
+
+#include "exception.h"
 
 #include <QDir>
 #include <QDebug>
@@ -48,9 +54,33 @@
 #include <algorithm>
 #include <iterator>
 
+struct InstantiationCollectContext
+{
+    AbstractMetaTypeList instantiatedContainers;
+    InstantiatedSmartPointers instantiatedSmartPointers;
+    QStringList instantiatedContainersNames;
+};
+
 struct ApiExtractorPrivate
 {
     bool runHelper(ApiExtractorFlags flags);
+
+    static QString getSimplifiedContainerTypeName(const AbstractMetaType &type);
+    void addInstantiatedContainersAndSmartPointers(InstantiationCollectContext &context,
+                                                   const AbstractMetaType &type,
+                                                   const QString &contextName);
+    void collectInstantiatedContainersAndSmartPointers(InstantiationCollectContext &context,
+                                                       const AbstractMetaFunctionCPtr &func);
+    void collectInstantiatedContainersAndSmartPointers(InstantiationCollectContext &context,
+                                                       const AbstractMetaClass *metaClass);
+    void collectInstantiatedContainersAndSmartPointers(InstantiationCollectContext &context);
+    void collectInstantiatedOpqaqueContainers(InstantiationCollectContext &context);
+    void collectContainerTypesFromSnippets(InstantiationCollectContext &context);
+    void collectContainerTypesFromConverterMacros(InstantiationCollectContext &context,
+                                                  const QString &code,
+                                                  bool toPythonMacro);
+    void addInstantiatedSmartPointer(InstantiationCollectContext &context,
+                                     const AbstractMetaType &type);
 
     QString m_typeSystemFileName;
     QFileInfoList m_cppFileNames;
@@ -284,6 +314,9 @@ std::optional<ApiExtractorResult> ApiExtractor::run(ApiExtractorFlags flags)
 {
     if (!d->runHelper(flags))
         return {};
+    InstantiationCollectContext collectContext;
+    d->collectInstantiatedContainersAndSmartPointers(collectContext);
+
     ApiExtractorResult result;
     classListToCList(d->m_builder->classes(), &result.m_metaClasses);
     classListToCList(d->m_builder->smartPointers(), &result.m_smartPointers);
@@ -291,6 +324,8 @@ std::optional<ApiExtractorResult> ApiExtractor::run(ApiExtractorFlags flags)
     result.m_globalEnums = d->m_builder->globalEnums();
     result.m_enums = d->m_builder->typeEntryToEnumsHash();
     result.m_flags = flags;
+    result.m_instantiatedContainers = collectContext.instantiatedContainers;
+    result.m_instantiatedSmartPointers = collectContext.instantiatedSmartPointers;
     return result;
 }
 
@@ -334,6 +369,267 @@ AbstractMetaFunctionPtr
 {
     return AbstractMetaBuilder::inheritTemplateMember(function, templateTypes,
                                                       templateClass, subclass);
+}
+
+QString ApiExtractorPrivate::getSimplifiedContainerTypeName(const AbstractMetaType &type)
+{
+    const QString signature = type.cppSignature();
+    if (!type.typeEntry()->isContainer() && !type.typeEntry()->isSmartPointer())
+        return signature;
+    QString typeName = signature;
+    if (type.isConstant())
+        typeName.remove(0, sizeof("const ") / sizeof(char) - 1);
+    switch (type.referenceType()) {
+    case NoReference:
+        break;
+    case LValueReference:
+        typeName.chop(1);
+        break;
+    case RValueReference:
+        typeName.chop(2);
+        break;
+    }
+    while (typeName.endsWith(QLatin1Char('*')) || typeName.endsWith(QLatin1Char(' ')))
+        typeName.chop(1);
+    return typeName;
+}
+
+// Strip a "const QSharedPtr<const Foo> &" or similar to "QSharedPtr<Foo>" (PYSIDE-1016/454)
+AbstractMetaType canonicalSmartPtrInstantiation(const AbstractMetaType &type)
+{
+    const AbstractMetaTypeList &instantiations = type.instantiations();
+    Q_ASSERT(instantiations.size() == 1);
+    const bool needsFix = type.isConstant() || type.referenceType() != NoReference;
+    const bool pointeeNeedsFix = instantiations.constFirst().isConstant();
+    if (!needsFix && !pointeeNeedsFix)
+        return type;
+    auto fixedType = type;
+    fixedType.setReferenceType(NoReference);
+    fixedType.setConstant(false);
+    if (pointeeNeedsFix) {
+        auto fixedPointeeType = instantiations.constFirst();
+        fixedPointeeType.setConstant(false);
+        fixedType.setInstantiations(AbstractMetaTypeList(1, fixedPointeeType));
+    }
+    return fixedType;
+}
+
+static inline const TypeEntry *pointeeTypeEntry(const AbstractMetaType &smartPtrType)
+{
+    return smartPtrType.instantiations().constFirst().typeEntry();
+}
+
+void
+ApiExtractorPrivate::addInstantiatedContainersAndSmartPointers(InstantiationCollectContext &context,
+                                                               const AbstractMetaType &type,
+                                                               const QString &contextName)
+{
+    for (const auto &t : type.instantiations())
+        addInstantiatedContainersAndSmartPointers(context, t, contextName);
+    const auto typeEntry = type.typeEntry();
+    const bool isContainer = typeEntry->isContainer();
+    if (!isContainer
+        && !(typeEntry->isSmartPointer() && typeEntry->generateCode())) {
+        return;
+    }
+    if (type.hasTemplateChildren()) {
+        QString piece = isContainer ? QStringLiteral("container") : QStringLiteral("smart pointer");
+        QString warning =
+            QString::fromLatin1("Skipping instantiation of %1 '%2' because it has template"
+                                " arguments.").arg(piece, type.originalTypeDescription());
+        if (!contextName.isEmpty())
+            warning.append(QStringLiteral(" Calling context: ") + contextName);
+
+        qCWarning(lcShiboken).noquote().nospace() << warning;
+        return;
+
+    }
+    if (isContainer) {
+        const QString typeName = getSimplifiedContainerTypeName(type);
+        if (!context.instantiatedContainersNames.contains(typeName)) {
+            context.instantiatedContainersNames.append(typeName);
+            auto simplifiedType = type;
+            simplifiedType.setIndirections(0);
+            simplifiedType.setConstant(false);
+            simplifiedType.setReferenceType(NoReference);
+            simplifiedType.decideUsagePattern();
+            context.instantiatedContainers.append(simplifiedType);
+        }
+        return;
+    }
+
+    // Is smart pointer. Check if the (const?) pointee is already known for the given
+    // smart pointer type entry.
+    auto pt = pointeeTypeEntry(type);
+    const bool present =
+        std::any_of(context.instantiatedSmartPointers.cbegin(),
+                    context.instantiatedSmartPointers.cend(),
+                    [typeEntry, pt] (const InstantiatedSmartPointer &smp) {
+                        return smp.type.typeEntry() == typeEntry
+                            && pointeeTypeEntry(smp.type) == pt;
+                    });
+    if (!present)
+        addInstantiatedSmartPointer(context, type);
+}
+
+void ApiExtractorPrivate::addInstantiatedSmartPointer(InstantiationCollectContext &context,
+                                                      const AbstractMetaType &type)
+{
+    InstantiatedSmartPointer smp;
+    smp.type = type;
+    smp.smartPointer = AbstractMetaClass::findClass(m_builder->smartPointers(),
+                                                    type.typeEntry());
+    Q_ASSERT(smp.smartPointer);
+    context.instantiatedSmartPointers.append(smp);
+}
+
+void
+ApiExtractorPrivate::collectInstantiatedContainersAndSmartPointers(InstantiationCollectContext &context,
+                                                                   const AbstractMetaFunctionCPtr &func)
+{
+    addInstantiatedContainersAndSmartPointers(context, func->type(), func->signature());
+    for (const AbstractMetaArgument &arg : func->arguments())
+        addInstantiatedContainersAndSmartPointers(context, arg.type(), func->signature());
+}
+
+void
+ApiExtractorPrivate::collectInstantiatedContainersAndSmartPointers(InstantiationCollectContext &context,
+                                                                   const AbstractMetaClass *metaClass)
+{
+    if (!metaClass->typeEntry()->generateCode())
+        return;
+    for (const auto &func : metaClass->functions())
+        collectInstantiatedContainersAndSmartPointers(context, func);
+    for (const AbstractMetaField &field : metaClass->fields())
+        addInstantiatedContainersAndSmartPointers(context, field.type(), field.name());
+    const AbstractMetaClassList &innerClasses = metaClass->innerClasses();
+    for (AbstractMetaClass *innerClass : innerClasses)
+        collectInstantiatedContainersAndSmartPointers(context, innerClass);
+}
+
+void
+ApiExtractorPrivate::collectInstantiatedContainersAndSmartPointers(InstantiationCollectContext &context)
+{
+    collectInstantiatedOpqaqueContainers(context);
+    for (const auto &func : m_builder->globalFunctions())
+        collectInstantiatedContainersAndSmartPointers(context, func);
+    for (auto metaClass : m_builder->classes())
+        collectInstantiatedContainersAndSmartPointers(context, metaClass);
+    collectContainerTypesFromSnippets(context);
+}
+
+// Whether to generate an opaque container: If the instantiation type is in
+// the current package or, for primitive types, if the container is in the
+// current package.
+static bool generateOpaqueContainer(const AbstractMetaType &type,
+                                    const TypeSystemTypeEntry *moduleEntry)
+{
+    auto *te = type.instantiations().constFirst().typeEntry();
+    auto *typeModuleEntry = te->typeSystemTypeEntry();
+    return typeModuleEntry == moduleEntry
+           || (te->isPrimitive() && type.typeEntry()->typeSystemTypeEntry() == moduleEntry);
+}
+
+void ApiExtractorPrivate::collectInstantiatedOpqaqueContainers(InstantiationCollectContext &context)
+{
+    // Add all instantiations of opaque containers for types from the current
+    // module.
+    auto *td = TypeDatabase::instance();
+    const auto *moduleEntry = TypeDatabase::instance()->defaultTypeSystemType();
+    const auto &containers = td->containerTypes();
+    for (const auto *container : containers) {
+        for (const auto &oc : container->opaqueContainers()) {
+            QString errorMessage;
+            const QString typeName = container->qualifiedCppName() + u'<'
+                                     + oc.instantiation + u'>';
+            auto typeOpt = AbstractMetaType::fromString(typeName, &errorMessage);
+            if (typeOpt.has_value()
+                && generateOpaqueContainer(typeOpt.value(), moduleEntry)) {
+                addInstantiatedContainersAndSmartPointers(context, typeOpt.value(),
+                                                          u"opaque containers"_qs);
+            }
+        }
+    }
+}
+
+static void getCode(QStringList &code, const CodeSnipList &codeSnips)
+{
+    for (const CodeSnip &snip : qAsConst(codeSnips))
+        code.append(snip.code());
+}
+
+static void getCode(QStringList &code, const TypeEntry *type)
+{
+    getCode(code, type->codeSnips());
+
+    CustomConversion *customConversion = type->customConversion();
+    if (!customConversion)
+        return;
+
+    if (!customConversion->nativeToTargetConversion().isEmpty())
+        code.append(customConversion->nativeToTargetConversion());
+
+    const auto &toCppConversions = customConversion->targetToNativeConversions();
+    if (toCppConversions.isEmpty())
+        return;
+
+    for (CustomConversion::TargetToNativeConversion *toNative : qAsConst(toCppConversions))
+        code.append(toNative->conversion());
+}
+
+void ApiExtractorPrivate::collectContainerTypesFromSnippets(InstantiationCollectContext &context)
+{
+    QStringList snips;
+    auto *td = TypeDatabase::instance();
+    const PrimitiveTypeEntryList &primitiveTypeList = td->primitiveTypes();
+    for (const PrimitiveTypeEntry *type : primitiveTypeList)
+        getCode(snips, type);
+    const ContainerTypeEntryList &containerTypeList = td->containerTypes();
+    for (const ContainerTypeEntry *type : containerTypeList)
+        getCode(snips, type);
+    for (auto metaClass : m_builder->classes())
+        getCode(snips, metaClass->typeEntry());
+
+    const TypeSystemTypeEntry *moduleEntry = td->defaultTypeSystemType();
+    Q_ASSERT(moduleEntry);
+    getCode(snips, moduleEntry);
+
+    for (const auto &func : m_builder->globalFunctions())
+        getCode(snips, func->injectedCodeSnips());
+
+    for (const QString &code : qAsConst(snips)) {
+        collectContainerTypesFromConverterMacros(context, code, true);
+        collectContainerTypesFromConverterMacros(context, code, false);
+    }
+}
+
+void
+ApiExtractorPrivate::collectContainerTypesFromConverterMacros(InstantiationCollectContext &context,
+                                                              const QString &code,
+                                                              bool toPythonMacro)
+{
+    QString convMacro = toPythonMacro ? QLatin1String("%CONVERTTOPYTHON[") : QLatin1String("%CONVERTTOCPP[");
+    int offset = toPythonMacro ? sizeof("%CONVERTTOPYTHON") : sizeof("%CONVERTTOCPP");
+    int start = 0;
+    QString errorMessage;
+    while ((start = code.indexOf(convMacro, start)) != -1) {
+        int end = code.indexOf(QLatin1Char(']'), start);
+        start += offset;
+        if (code.at(start) != QLatin1Char('%')) {
+            QString typeString = code.mid(start, end - start);
+            auto type = AbstractMetaType::fromString(typeString, &errorMessage);
+            if (type.has_value()) {
+                const QString &d = type->originalTypeDescription();
+                addInstantiatedContainersAndSmartPointers(context, type.value(), d);
+            } else {
+                QString m;
+                QTextStream(&m) << __FUNCTION__ << ": Cannot translate type \""
+                                << typeString << "\": " << errorMessage;
+                throw Exception(m);
+            }
+        }
+        start = end;
+    }
 }
 
 #ifndef QT_NO_DEBUG_STREAM

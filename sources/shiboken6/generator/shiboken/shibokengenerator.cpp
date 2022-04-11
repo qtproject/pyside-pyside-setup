@@ -2126,84 +2126,9 @@ bool ShibokenGenerator::handleOption(const QString &key, const QString &value)
     return false;
 }
 
-static void getCode(QStringList &code, const CodeSnipList &codeSnips)
-{
-    for (const CodeSnip &snip : qAsConst(codeSnips))
-        code.append(snip.code());
-}
-
-static void getCode(QStringList &code, const TypeEntry *type)
-{
-    getCode(code, type->codeSnips());
-
-    CustomConversion *customConversion = type->customConversion();
-    if (!customConversion)
-        return;
-
-    if (!customConversion->nativeToTargetConversion().isEmpty())
-        code.append(customConversion->nativeToTargetConversion());
-
-    const CustomConversion::TargetToNativeConversions &toCppConversions = customConversion->targetToNativeConversions();
-    if (toCppConversions.isEmpty())
-        return;
-
-    for (CustomConversion::TargetToNativeConversion *toNative : qAsConst(toCppConversions))
-        code.append(toNative->conversion());
-}
-
 bool ShibokenGenerator::doSetup()
 {
-    QStringList snips;
-    const PrimitiveTypeEntryList &primitiveTypeList = primitiveTypes();
-    for (const PrimitiveTypeEntry *type : primitiveTypeList)
-        getCode(snips, type);
-    const ContainerTypeEntryList &containerTypeList = containerTypes();
-    for (const ContainerTypeEntry *type : containerTypeList)
-        getCode(snips, type);
-    for (auto metaClass : api().classes())
-        getCode(snips, metaClass->typeEntry());
-
-    const TypeSystemTypeEntry *moduleEntry = TypeDatabase::instance()->defaultTypeSystemType();
-    Q_ASSERT(moduleEntry);
-    getCode(snips, moduleEntry);
-
-    const auto &functionGroups = getGlobalFunctionGroups();
-    for (auto it = functionGroups.cbegin(), end = functionGroups.cend(); it != end; ++it) {
-        for (const auto &func : it.value())
-            getCode(snips, func->injectedCodeSnips());
-    }
-
-    for (const QString &code : qAsConst(snips)) {
-        collectContainerTypesFromConverterMacros(code, true);
-        collectContainerTypesFromConverterMacros(code, false);
-    }
-
     return true;
-}
-
-void ShibokenGenerator::collectContainerTypesFromConverterMacros(const QString &code, bool toPythonMacro)
-{
-    QString convMacro = toPythonMacro ? QLatin1String("%CONVERTTOPYTHON[") : QLatin1String("%CONVERTTOCPP[");
-    int offset = toPythonMacro ? sizeof("%CONVERTTOPYTHON") : sizeof("%CONVERTTOCPP");
-    int start = 0;
-    QString errorMessage;
-    while ((start = code.indexOf(convMacro, start)) != -1) {
-        int end = code.indexOf(QLatin1Char(']'), start);
-        start += offset;
-        if (code.at(start) != QLatin1Char('%')) {
-            QString typeString = code.mid(start, end - start);
-            auto type = AbstractMetaType::fromString(typeString, &errorMessage);
-            if (type.has_value()) {
-                addInstantiatedContainersAndSmartPointers(type.value(), type->originalTypeDescription());
-            } else {
-                QString m;
-                QTextStream(&m) << __FUNCTION__ << ": Cannot translate type \""
-                    << typeString << "\": " << errorMessage;
-                throw Exception(m);
-            }
-        }
-        start = end;
-    }
 }
 
 bool ShibokenGenerator::useCtorHeuristic() const
