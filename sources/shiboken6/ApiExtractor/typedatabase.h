@@ -169,6 +169,10 @@ public:
                                                       const TypeEntry *parent);
     void addTypeSystemType(const TypeSystemTypeEntry *e);
 
+    static ComplexTypeEntry *
+        initializeTypeDefEntry(TypedefEntry *typedefEntry,
+                               const ComplexTypeEntry *source);
+
     FlagsTypeEntry *findFlagsType(const QString &name) const;
     void addFlagsType(FlagsTypeEntry *fte);
 

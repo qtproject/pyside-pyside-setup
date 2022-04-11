@@ -1582,7 +1582,7 @@ public:
     }
 
     QString m_sourceType;
-    ComplexTypeEntry *m_source = nullptr;
+    const ComplexTypeEntry *m_source = nullptr;
     ComplexTypeEntry *m_target = nullptr;
 };
 
@@ -1610,13 +1610,13 @@ TypeEntry *TypedefEntry::clone() const
     return new TypedefEntry(new TypedefEntryPrivate(*d));
 }
 
-ComplexTypeEntry *TypedefEntry::source() const
+const ComplexTypeEntry *TypedefEntry::source() const
 {
     S_D(const TypedefEntry);
     return d->m_source;
 }
 
-void TypedefEntry::setSource(ComplexTypeEntry *source)
+void TypedefEntry::setSource(const ComplexTypeEntry *source)
 {
     S_D(TypedefEntry);
     d->m_source = source;

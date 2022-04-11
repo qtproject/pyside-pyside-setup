@@ -623,11 +623,18 @@ TypeEntry *TypeDatabasePrivate::resolveTypeDefEntry(TypedefEntry *typedefEntry,
         return nullptr;
     }
 
+    m_typedefEntries.insert(typedefEntry->qualifiedCppName(), typedefEntry);
+    return TypeDatabase::initializeTypeDefEntry(typedefEntry, source);
+}
+
+ComplexTypeEntry *
+    TypeDatabase::initializeTypeDefEntry(TypedefEntry *typedefEntry,
+                                         const ComplexTypeEntry *source)
+{
     auto *result = static_cast<ComplexTypeEntry *>(source->clone());
     result->useAsTypedef(typedefEntry);
     typedefEntry->setSource(source);
     typedefEntry->setTarget(result);
-    m_typedefEntries.insert(typedefEntry->qualifiedCppName(), typedefEntry);
     return result;
 }
 

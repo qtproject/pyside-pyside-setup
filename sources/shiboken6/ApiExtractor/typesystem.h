@@ -654,8 +654,8 @@ public:
 
     TypeEntry *clone() const override;
 
-    ComplexTypeEntry *source() const;
-    void setSource(ComplexTypeEntry *source);
+    const ComplexTypeEntry *source() const;
+    void setSource(const ComplexTypeEntry *source);
 
     ComplexTypeEntry *target() const;
     void setTarget(ComplexTypeEntry *target);
