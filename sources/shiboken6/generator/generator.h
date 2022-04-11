@@ -59,9 +59,6 @@ class ContainerTypeEntry;
 
 QString getClassTargetFullName(const AbstractMetaClass *metaClass, bool includePackageName = true);
 QString getClassTargetFullName(const AbstractMetaEnum &metaEnum, bool includePackageName = true);
-QString getSmartpointerTargetFullName(const AbstractMetaType &metaType,
-                                      bool includePackageName = true);
-QString getSmartpointerTargetName(const AbstractMetaType &metaType);
 QString getFilteredCppSignatureString(QString signature);
 
 /**
