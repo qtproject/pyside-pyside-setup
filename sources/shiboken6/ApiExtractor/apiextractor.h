@@ -32,8 +32,6 @@
 #include "abstractmetalang_typedefs.h"
 #include "apiextractorflags.h"
 #include "header_paths.h"
-#include "typedatabase_typedefs.h"
-#include "typesystem_typedefs.h"
 #include "clangparser/compilersupport.h"
 #include <QFileInfoList>
 #include <QStringList>
@@ -41,34 +39,30 @@
 #include <optional>
 
 class ApiExtractorResult;
-class AbstractMetaBuilder;
 class AbstractMetaClass;
 class AbstractMetaEnum;
 class AbstractMetaFunction;
 class AbstractMetaType;
-class ContainerTypeEntry;
-class EnumTypeEntry;
-class FlagsTypeEntry;
-class PrimitiveTypeEntry;
-class TypeEntry;
 
 QT_BEGIN_NAMESPACE
 class QDebug;
 class QIODevice;
 QT_END_NAMESPACE
 
+struct ApiExtractorPrivate;
+
 class ApiExtractor
 {
 public:
-    Q_DISABLE_COPY(ApiExtractor)
+    Q_DISABLE_COPY_MOVE(ApiExtractor)
 
     ApiExtractor();
     ~ApiExtractor();
 
     void setTypeSystem(const QString& typeSystemFileName);
-    QString typeSystem() const { return m_typeSystemFileName; }
+    QString typeSystem() const;
     void setCppFileNames(const QFileInfoList &cppFileNames);
-    QFileInfoList cppFileNames() const { return m_cppFileNames; }
+    QFileInfoList cppFileNames() const;
     void setSkipDeprecated(bool value);
     static void setSuppressWarnings(bool value);
     static void setSilent(bool value);
@@ -77,7 +71,7 @@ public:
     static void setTypesystemKeywords(const QStringList& keywords);
     void addIncludePath(const HeaderPath& path);
     void addIncludePath(const HeaderPaths& paths);
-    HeaderPaths includePaths() const { return m_includePaths; }
+    HeaderPaths includePaths() const;
     void setLogDirectory(const QString& logDir);
     static bool setApiVersion(const QString &package, const QString &version);
     static void setDropTypeEntries(const QStringList &dropEntries);
@@ -107,16 +101,7 @@ public:
                               AbstractMetaClass *subclass);
 
 private:
-    bool runHelper(ApiExtractorFlags flags);
-
-    QString m_typeSystemFileName;
-    QFileInfoList m_cppFileNames;
-    HeaderPaths m_includePaths;
-    QStringList m_clangOptions;
-    AbstractMetaBuilder* m_builder = nullptr;
-    QString m_logDirectory;
-    LanguageLevel m_languageLevel = LanguageLevel::Default;
-    bool m_skipDeprecated = false;
+    ApiExtractorPrivate *d;
 
 #ifndef QT_NO_DEBUG_STREAM
     friend QDebug operator<<(QDebug d, const ApiExtractor &ae);

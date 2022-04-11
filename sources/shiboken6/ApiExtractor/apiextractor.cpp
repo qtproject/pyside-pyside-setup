@@ -48,7 +48,22 @@
 #include <algorithm>
 #include <iterator>
 
-ApiExtractor::ApiExtractor()
+struct ApiExtractorPrivate
+{
+    bool runHelper(ApiExtractorFlags flags);
+
+    QString m_typeSystemFileName;
+    QFileInfoList m_cppFileNames;
+    HeaderPaths m_includePaths;
+    QStringList m_clangOptions;
+    AbstractMetaBuilder* m_builder = nullptr;
+    QString m_logDirectory;
+    LanguageLevel m_languageLevel = LanguageLevel::Default;
+    bool m_skipDeprecated = false;
+};
+
+ApiExtractor::ApiExtractor() :
+      d(new ApiExtractorPrivate)
 {
     // Environment TYPESYSTEMPATH
     QString envTypesystemPaths = QFile::decodeName(qgetenv("TYPESYSTEMPATH"));
@@ -58,7 +73,8 @@ ApiExtractor::ApiExtractor()
 
 ApiExtractor::~ApiExtractor()
 {
-    delete m_builder;
+    delete d->m_builder;
+    delete d;
 }
 
 void ApiExtractor::addTypesystemSearchPath (const QString& path)
@@ -79,34 +95,49 @@ void ApiExtractor::setTypesystemKeywords(const QStringList &keywords)
 
 void ApiExtractor::addIncludePath(const HeaderPath& path)
 {
-    m_includePaths << path;
+    d->m_includePaths << path;
 }
 
 void ApiExtractor::addIncludePath(const HeaderPaths& paths)
 {
-    m_includePaths << paths;
+    d->m_includePaths << paths;
+}
+
+HeaderPaths ApiExtractor::includePaths() const
+{
+    return d->m_includePaths;
 }
 
 void ApiExtractor::setLogDirectory(const QString& logDir)
 {
-    m_logDirectory = logDir;
+    d->m_logDirectory = logDir;
 }
 
 void ApiExtractor::setCppFileNames(const QFileInfoList &cppFileName)
 {
-    m_cppFileNames = cppFileName;
+    d->m_cppFileNames = cppFileName;
+}
+
+QFileInfoList ApiExtractor::cppFileNames() const
+{
+    return d->m_cppFileNames;
 }
 
 void ApiExtractor::setTypeSystem(const QString& typeSystemFileName)
 {
-    m_typeSystemFileName = typeSystemFileName;
+    d->m_typeSystemFileName = typeSystemFileName;
+}
+
+QString ApiExtractor::typeSystem() const
+{
+    return d->m_typeSystemFileName;
 }
 
 void ApiExtractor::setSkipDeprecated(bool value)
 {
-    m_skipDeprecated = value;
-    if (m_builder)
-        m_builder->setSkipDeprecated(m_skipDeprecated);
+    d->m_skipDeprecated = value;
+    if (d->m_builder)
+        d->m_builder->setSkipDeprecated(d->m_skipDeprecated);
 }
 
 void ApiExtractor::setSuppressWarnings ( bool value )
@@ -131,26 +162,26 @@ void ApiExtractor::setDropTypeEntries(const QStringList &dropEntries)
 
 const AbstractMetaEnumList &ApiExtractor::globalEnums() const
 {
-    Q_ASSERT(m_builder);
-    return m_builder->globalEnums();
+    Q_ASSERT(d->m_builder);
+    return d->m_builder->globalEnums();
 }
 
 const AbstractMetaFunctionCList &ApiExtractor::globalFunctions() const
 {
-    Q_ASSERT(m_builder);
-    return m_builder->globalFunctions();
+    Q_ASSERT(d->m_builder);
+    return d->m_builder->globalFunctions();
 }
 
 const AbstractMetaClassList &ApiExtractor::classes() const
 {
-    Q_ASSERT(m_builder);
-    return m_builder->classes();
+    Q_ASSERT(d->m_builder);
+    return d->m_builder->classes();
 }
 
 const AbstractMetaClassList &ApiExtractor::smartPointers() const
 {
-    Q_ASSERT(m_builder);
-    return m_builder->smartPointers();
+    Q_ASSERT(d->m_builder);
+    return d->m_builder->smartPointers();
 }
 
 // Add defines required for parsing Qt code headers
@@ -171,7 +202,7 @@ static void addPySideExtensions(QByteArrayList *a)
     a->append(QByteArrayLiteral("-DQSIMD_H"));
 }
 
-bool ApiExtractor::runHelper(ApiExtractorFlags flags)
+bool ApiExtractorPrivate::runHelper(ApiExtractorFlags flags)
 {
     if (m_builder)
         return false;
@@ -251,36 +282,36 @@ static inline void classListToCList(const AbstractMetaClassList &list, AbstractM
 
 std::optional<ApiExtractorResult> ApiExtractor::run(ApiExtractorFlags flags)
 {
-    if (!runHelper(flags))
+    if (!d->runHelper(flags))
         return {};
     ApiExtractorResult result;
-    classListToCList(m_builder->classes(), &result.m_metaClasses);
-    classListToCList(m_builder->smartPointers(), &result.m_smartPointers);
-    result.m_globalFunctions = m_builder->globalFunctions();
-    result.m_globalEnums = m_builder->globalEnums();
-    result.m_enums = m_builder->typeEntryToEnumsHash();
+    classListToCList(d->m_builder->classes(), &result.m_metaClasses);
+    classListToCList(d->m_builder->smartPointers(), &result.m_smartPointers);
+    result.m_globalFunctions = d->m_builder->globalFunctions();
+    result.m_globalEnums = d->m_builder->globalEnums();
+    result.m_enums = d->m_builder->typeEntryToEnumsHash();
     result.m_flags = flags;
     return result;
 }
 
 LanguageLevel ApiExtractor::languageLevel() const
 {
-    return m_languageLevel;
+    return d->m_languageLevel;
 }
 
 void ApiExtractor::setLanguageLevel(LanguageLevel languageLevel)
 {
-    m_languageLevel = languageLevel;
+    d->m_languageLevel = languageLevel;
 }
 
 QStringList ApiExtractor::clangOptions() const
 {
-    return m_clangOptions;
+    return d->m_clangOptions;
 }
 
 void ApiExtractor::setClangOptions(const QStringList &co)
 {
-    m_clangOptions = co;
+    d->m_clangOptions = co;
 }
 
 void ApiExtractor::setUseGlobalHeader(bool h)
@@ -330,7 +361,7 @@ QDebug operator<<(QDebug d, const ApiExtractor &ae)
         d.setVerbosity(3); // Trigger verbose output of AbstractMetaClass
     d << "ApiExtractor(typeSystem=\"" << ae.typeSystem() << "\", cppFileNames=\""
       << ae.cppFileNames() << ", ";
-    ae.m_builder->formatDebug(d);
+    ae.d->m_builder->formatDebug(d);
     d << ')';
     return d;
 }
