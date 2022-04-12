@@ -137,9 +137,11 @@ def _get_py_library_unix(build_type, py_version, py_prefix, py_libdir,
 
     # PYSIDE-535: See if this is PyPy.
     if hasattr(sys, "pypy_version_info"):
+        vi = sys.version_info[:2]
+        version_quirk = ".".join(map(str, vi)) if vi >= (3, 9) else "3"
         pypy_libdir = os.path.join(os.path.dirname(py_libdir), "bin")
         for lib_ext in lib_exts:
-            lib_name = f"libpypy3-c{lib_ext}"
+            lib_name = f"libpypy{version_quirk}-c{lib_ext}"
             pypy_library = os.path.join(pypy_libdir, lib_name)
             if os.path.exists(pypy_library):
                 return pypy_library
