@@ -55,3 +55,23 @@ void StdSharedPtrTestBench::printInteger(const std::shared_ptr<Integer> &p)
         std::cerr << "nullptr";
     std::cerr << '\n';
 }
+
+std::shared_ptr<int> StdSharedPtrTestBench::createInt(int v)
+{
+    return std::make_shared<int>(v);
+}
+
+std::shared_ptr<int> StdSharedPtrTestBench::createNullInt()
+{
+    return {};
+}
+
+void StdSharedPtrTestBench::printInt(const std::shared_ptr<int> &p)
+{
+    std::cerr << __FUNCTION__ << ' ';
+    if (p.get())
+        std::cerr << *p;
+    else
+        std::cerr << "nullptr";
+    std::cerr << '\n';
+}

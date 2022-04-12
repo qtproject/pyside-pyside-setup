@@ -2,6 +2,8 @@
 <typesystem package="smart">
     <rejection class="*" argument-type="^std::nullptr_t&amp;?$"/>
 
+    <primitive-type name="int"/>
+
     <template name="cpplist_to_pylist_convertion">
         PyObject *%out = PyList_New(int(%in.size()));
         int idx  = 0;
@@ -47,7 +49,7 @@
         <smart-pointer-type name="shared_ptr" type="shared" getter="get"
                             value-check-method="operator bool"
                             ref-count-method="use_count"
-                            instantiations="Integer">
+                            instantiations="Integer,int">
             <include file-name="memory" location="global"/>
         </smart-pointer-type>
     </namespace-type>

@@ -46,7 +46,7 @@ def call_func_on_ptr(ptr):
 
 
 class StdSharedPtrTests(unittest.TestCase):
-    def testIt(self):
+    def testInteger(self):
         p = StdSharedPtrTestBench.createInteger()
         StdSharedPtrTestBench.printInteger(p)
         self.assertTrue(p)
@@ -56,6 +56,13 @@ class StdSharedPtrTests(unittest.TestCase):
         StdSharedPtrTestBench.printInteger(np)
         self.assertFalse(np)
         self.assertRaises(AttributeError, call_func_on_ptr, np)
+
+    def testInt(self):
+        np = StdSharedPtrTestBench.createNullInt()
+        StdSharedPtrTestBench.printInt(np)
+        self.assertFalse(np)
+        p = StdSharedPtrTestBench.createInt()
+        StdSharedPtrTestBench.printInt(p)
 
 
 if __name__ == '__main__':

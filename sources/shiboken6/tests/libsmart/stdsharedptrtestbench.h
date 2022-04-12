@@ -44,6 +44,10 @@ public:
     static std::shared_ptr<Integer> createInteger(int v = 42);
     static std::shared_ptr<Integer> createNullInteger();
     static void printInteger(const std::shared_ptr<Integer> &);
+
+    static std::shared_ptr<int> createInt(int v = 42);
+    static std::shared_ptr<int> createNullInt();
+    static void printInt(const std::shared_ptr<int> &);
 };
 
 #endif // STDSHAREDPTRTESTBENCH_H
