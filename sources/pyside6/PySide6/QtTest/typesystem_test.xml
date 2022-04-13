@@ -53,9 +53,7 @@
   <rejection class="QTest" function-name="qCompare"/>
   <rejection class="QTest" function-name="qInit"/>
   <rejection class="QTest" function-name="qVerify"/>
-  <rejection class="QTest" function-name="qSleep"/>
   <rejection class="QTest" function-name="toHexRepresentation"/>
-  <rejection class="QTest" function-name="qWait"/>
   <rejection class="QTest" function-name="qFail"/>
   <rejection class="QTest" function-name="qInit"/>
   <rejection class="QTest" function-name="qExec"/>
