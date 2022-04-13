@@ -42,7 +42,6 @@ QT_FORWARD_DECLARE_CLASS(QIODevice)
 
 class ComplexTypeEntry;
 class ContainerTypeEntry;
-class CustomTypeEntry;
 class FlagsTypeEntry;
 class FunctionTypeEntry;
 class NamespaceTypeEntry;
@@ -50,7 +49,7 @@ class ObjectTypeEntry;
 class TemplateEntry;
 class TypeEntry;
 
-struct TypeRejection;
+struct TypeDatabasePrivate;
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 
@@ -116,12 +115,12 @@ public:
 
     void addTypesystemPath(const QString &typesystem_paths);
 
-    void setTypesystemKeywords(const QStringList &keywords) { m_typesystemKeywords = keywords; }
+    void setTypesystemKeywords(const QStringList &keywords);
     QStringList typesystemKeywords() const;
 
     IncludeList extraIncludes(const QString &className) const;
 
-    const QStringList &systemIncludes() const { return m_systemIncludes; }
+    const QStringList &systemIncludes() const;
     void addSystemInclude(const QString &name);
 
     void addInlineNamespaceLookups(const NamespaceTypeEntry *n);
@@ -141,8 +140,8 @@ public:
     TypeEntries findTypes(const QString &name) const;
     TypeEntries findCppTypes(const QString &name) const;
 
-    const TypeEntryMultiMap &entries() const { return m_entries; }
-    const TypedefEntryMap  &typedefEntries() const { return m_typedefEntries; }
+    const TypeEntryMultiMap &entries() const;
+    const TypedefEntryMap  &typedefEntries() const;
 
     PrimitiveTypeEntryList primitiveTypes() const;
 
@@ -171,12 +170,12 @@ public:
     FlagsTypeEntry *findFlagsType(const QString &name) const;
     void addFlagsType(FlagsTypeEntry *fte);
 
-    TemplateEntry *findTemplate(const QString &name) const { return m_templates[name]; }
+    TemplateEntry *findTemplate(const QString &name) const;
 
     void addTemplate(TemplateEntry *t);
     void addTemplate(const QString &name, const QString &code);
 
-    AddedFunctionList globalUserFunctions() const { return m_globalUserFunctions; }
+    AddedFunctionList globalUserFunctions() const;
 
     void addGlobalUserFunctions(const AddedFunctionList &functions);
 
@@ -186,7 +185,7 @@ public:
 
     FunctionModificationList functionModifications(const QString &signature) const;
 
-    void setSuppressWarnings(bool on) { m_suppressWarnings = on; }
+    void setSuppressWarnings(bool on);
 
     bool addSuppressedWarning(const QString &warning, QString *errorMessage);
 
@@ -204,7 +203,7 @@ public:
 
     static bool checkApiVersion(const QString &package, const VersionRange &vr);
 
-    bool hasDroppedTypeEntries() const { return !m_dropTypeEntries.isEmpty(); }
+    bool hasDroppedTypeEntries() const;
 
     bool shouldDropTypeEntry(const QString &fullTypeName) const;
 
@@ -215,49 +214,9 @@ public:
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const;
 #endif
+
 private:
-    void addBuiltInType(TypeEntry *e);
-    PrimitiveTypeEntry *addBuiltInPrimitiveType(const QString &name,
-                                                const TypeSystemTypeEntry *root,
-                                                const QString &rootPackage,
-                                                CustomTypeEntry *targetLang);
-    void addBuiltInCppStringPrimitiveType(const QString &name,
-                                          const QString &viewName,
-                                          const TypeSystemTypeEntry *root,
-                                          const QString &rootPackage,
-                                          CustomTypeEntry *targetLang);
-    void addBuiltInPrimitiveTypes();
-    void addBuiltInContainerTypes();
-    TypeEntryMultiMapConstIteratorRange findTypeRange(const QString &name) const;
-    template <class Predicate>
-    TypeEntries findTypesHelper(const QString &name, Predicate pred) const;
-    template <class Type, class Predicate>
-    QList<const Type *> findTypesByTypeHelper(Predicate pred) const;
-    TypeEntry *resolveTypeDefEntry(TypedefEntry *typedefEntry, QString *errorMessage);
-    template <class String>
-    bool isSuppressedWarningHelper(const String &s) const;
-
-    bool m_suppressWarnings = true;
-    TypeEntryMultiMap m_entries; // Contains duplicate entries (cf addInlineNamespaceLookups).
-    TypeEntryMap m_flagsEntries;
-    TypedefEntryMap m_typedefEntries;
-    TemplateEntryMap m_templates;
-    QList<QRegularExpression> m_suppressedWarnings;
-    QList<const TypeSystemTypeEntry *> m_typeSystemEntries; // maintain order, default is first.
-
-    AddedFunctionList m_globalUserFunctions;
-    FunctionModificationList m_functionMods;
-
-    QStringList m_requiredTargetImports;
-
-    QStringList m_typesystemPaths;
-    QStringList m_typesystemKeywords;
-    QHash<QString, bool> m_parsedTypesystemFiles;
-
-    QList<TypeRejection> m_rejections;
-
-    QStringList m_dropTypeEntries;
-    QStringList m_systemIncludes;
+    TypeDatabasePrivate *d;
 };
 
 #ifndef QT_NO_DEBUG_STREAM
