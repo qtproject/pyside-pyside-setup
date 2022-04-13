@@ -285,7 +285,6 @@ private:
     QString m_currentPath;
     QString m_currentFile;
     QScopedPointer<TypeSystemEntityResolver> m_entityResolver;
-    QHash<SmartPointerTypeEntry *, QString> m_smartPointerInstantiations;
 };
 
 #endif // TYPESYSTEMPARSER_H

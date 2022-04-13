@@ -143,6 +143,7 @@ struct TypeDatabasePrivate
     TypeEntry *resolveTypeDefEntry(TypedefEntry *typedefEntry, QString *errorMessage);
     template <class String>
     bool isSuppressedWarningHelper(const String &s) const;
+    bool resolveSmartPointerInstantiations(const TypeDatabaseParserContextPtr &context);
     void formatDebug(QDebug &d) const;
 
     bool m_suppressWarnings = true;
@@ -970,7 +971,7 @@ bool TypeDatabasePrivate::parseFile(QIODevice* device, TypeDatabase *db, bool ge
 
     addBuiltInPrimitiveTypes();
     addBuiltInContainerTypes(context);
-    return true;
+    return resolveSmartPointerInstantiations(context);
 }
 
 bool TypeDatabase::parseFile(const TypeDatabaseParserContextPtr &context,
@@ -991,6 +992,63 @@ bool TypeDatabasePrivate::parseFile(const TypeDatabaseParserContextPtr &context,
         return false;
     }
     return result;
+}
+
+// Split a type list potentially with template types
+// "A<B,C>,D" -> ("A<B,C>", "D")
+static QStringList splitTypeList(const QString &s)
+{
+    QStringList result;
+    int templateDepth = 0;
+    int lastPos = 0;
+    const int size = s.size();
+    for (int i = 0; i < size; ++i) {
+        switch (s.at(i).toLatin1()) {
+        case '<':
+            ++templateDepth;
+            break;
+        case '>':
+            --templateDepth;
+            break;
+        case ',':
+            if (templateDepth == 0) {
+                result.append(s.mid(lastPos, i - lastPos).trimmed());
+                lastPos = i + 1;
+            }
+            break;
+        }
+    }
+    if (lastPos < size)
+        result.append(s.mid(lastPos, size - lastPos).trimmed());
+    return result;
+}
+
+bool TypeDatabasePrivate::resolveSmartPointerInstantiations(const TypeDatabaseParserContextPtr &context)
+{
+    const auto &instantiations = context->smartPointerInstantiations;
+    for (auto it = instantiations.cbegin(), end = instantiations.cend(); it != end; ++it) {
+        auto smartPointerEntry = it.key();
+        const auto instantiationNames = splitTypeList(it.value());
+        SmartPointerTypeEntry::Instantiations instantiations;
+        instantiations.reserve(instantiationNames.size());
+        for (const auto &instantiationName : instantiationNames) {
+            const auto types = findCppTypes(instantiationName);
+            if (types.isEmpty()) {
+                const QString m = msgCannotFindTypeEntryForSmartPointer(instantiationName,
+                                                                        smartPointerEntry->name());
+                qCWarning(lcShiboken, "%s", qPrintable(m));
+                return false;
+            }
+            if (types.size() > 1) {
+                const QString m = msgAmbiguousTypesFound(instantiationName, types);
+                qCWarning(lcShiboken, "%s", qPrintable(m));
+                return false;
+            }
+            instantiations.append(types.constFirst());
+        }
+        smartPointerEntry->setInstantiations(instantiations);
+    }
+    return true;
 }
 
 PrimitiveTypeEntry *TypeDatabase::findPrimitiveType(const QString& name) const
