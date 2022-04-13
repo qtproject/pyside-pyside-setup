@@ -2,8 +2,6 @@
 <typesystem package="smart">
     <rejection class="*" argument-type="^std::nullptr_t&amp;?$"/>
 
-    <primitive-type name="int"/>
-
     <template name="cpplist_to_pylist_convertion">
         PyObject *%out = PyList_New(int(%in.size()));
         int idx  = 0;

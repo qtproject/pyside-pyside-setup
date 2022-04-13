@@ -755,10 +755,7 @@ bool TypeSystemParser::parse(ConditionalStreamReader &reader)
     m_error.clear();
     m_currentPath.clear();
     m_currentFile.clear();
-    m_smartPointerInstantiations.clear();
-    const bool result = parseXml(reader) && setupSmartPointerInstantiations();
-    m_smartPointerInstantiations.clear();
-    return result;
+    return parseXml(reader);
 }
 
 bool TypeSystemParser::parseXml(ConditionalStreamReader &reader)
@@ -812,62 +809,6 @@ bool TypeSystemParser::parseXml(ConditionalStreamReader &reader)
         case QXmlStreamReader::ProcessingInstruction:
             break;
         }
-    }
-    return true;
-}
-
-// Split a type list potentially with template types
-// "A<B,C>,D" -> ("A<B,C>", "D")
-static QStringList splitTypeList(const QString &s)
-{
-    QStringList result;
-    int templateDepth = 0;
-    int lastPos = 0;
-    const int size = s.size();
-    for (int i = 0; i < size; ++i) {
-        switch (s.at(i).toLatin1()) {
-        case '<':
-            ++templateDepth;
-            break;
-        case '>':
-            --templateDepth;
-            break;
-        case ',':
-            if (templateDepth == 0) {
-                result.append(s.mid(lastPos, i - lastPos).trimmed());
-                lastPos = i + 1;
-            }
-            break;
-        }
-    }
-    if (lastPos < size)
-        result.append(s.mid(lastPos, size - lastPos).trimmed());
-    return result;
-}
-
-bool TypeSystemParser::setupSmartPointerInstantiations()
-{
-    for (auto it = m_smartPointerInstantiations.cbegin(),
-         end = m_smartPointerInstantiations.cend(); it != end; ++it) {
-        auto smartPointerEntry = it.key();
-        const auto instantiationNames = splitTypeList(it.value());
-        SmartPointerTypeEntry::Instantiations instantiations;
-        instantiations.reserve(instantiationNames.size());
-        for (const auto &instantiationName : instantiationNames) {
-            const auto types = m_context->db->findCppTypes(instantiationName);
-            if (types.isEmpty()) {
-                m_error =
-                    msgCannotFindTypeEntryForSmartPointer(instantiationName,
-                                                          smartPointerEntry->name());
-                return false;
-            }
-            if (types.size() > 1) {
-                m_error = msgAmbiguousTypesFound(instantiationName, types);
-                return false;
-            }
-            instantiations.append(types.constFirst());
-        }
-        smartPointerEntry->setInstantiations(instantiations);
     }
     return true;
 }
@@ -1440,7 +1381,7 @@ SmartPointerTypeEntry *
     type->setNullCheckMethod(nullCheckMethod);
     type->setValueCheckMethod(valueCheckMethod);
     type->setResetMethod(resetMethod);
-    m_smartPointerInstantiations.insert(type, instantiations);
+    m_context->smartPointerInstantiations.insert(type, instantiations);
     return type;
 }
 
