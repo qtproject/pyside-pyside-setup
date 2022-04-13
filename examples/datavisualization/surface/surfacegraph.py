@@ -39,6 +39,7 @@
 #############################################################################
 
 import math
+from pathlib import Path
 
 from PySide6.QtCore import QObject, Qt, Slot
 from PySide6.QtDataVisualization import (Q3DTheme, QAbstract3DGraph,
@@ -69,7 +70,8 @@ class SurfaceGraph(QObject):
         self.m_sqrtSinSeries = QSurface3DSeries(self.m_sqrtSinProxy)
         self.fillSqrtSinProxy()
 
-        heightMapImage = QImage("mountain.png")
+        imageFile = Path(__file__).parent / "mountain.png"
+        heightMapImage = QImage(imageFile)
         self.m_heightMapProxy = QHeightMapSurfaceDataProxy(heightMapImage)
         self.m_heightMapSeries = QSurface3DSeries(self.m_heightMapProxy)
         self.m_heightMapSeries.setItemLabelFormat("(@xLabel, @zLabel): @yLabel")
