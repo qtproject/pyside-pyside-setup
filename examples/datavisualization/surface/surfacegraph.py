@@ -59,7 +59,7 @@ sampleMax = 8.0
 
 class SurfaceGraph(QObject):
     def __init__(self, surface, parent=None):
-        QObject.__init__(self, parent)
+        super().__init__(parent)
 
         self.m_graph = surface
         self.m_graph.setAxisX(QValue3DAxis())
@@ -234,8 +234,9 @@ class SurfaceGraph(QObject):
         gr.setColorAt(0.67, Qt.red)
         gr.setColorAt(1.0, Qt.yellow)
 
-        self.m_graph.seriesList()[0].setBaseGradient(gr)
-        self.m_graph.seriesList()[0].setColorStyle(Q3DTheme.ColorStyleRangeGradient)
+        series = self.m_graph.seriesList()[0]
+        series.setBaseGradient(gr)
+        series.setColorStyle(Q3DTheme.ColorStyleRangeGradient)
 
     def setGreenToRedGradient(self):
         gr = QLinearGradient()

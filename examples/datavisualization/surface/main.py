@@ -49,7 +49,8 @@ from PySide6.QtWidgets import (QApplication, QComboBox, QGroupBox, QHBoxLayout,
 
 from surfacegraph import SurfaceGraph
 
-THEMES = ["Qt", "Primary Colors", "Digia", "Stone Moss", "Army Blue", "Retro", "Ebony", "Isabelle"]
+THEMES = ["Qt", "Primary Colors", "Digia", "Stone Moss", "Army Blue", "Retro",
+          "Ebony", "Isabelle"]
 
 
 if __name__ == "__main__":
@@ -64,7 +65,8 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     screenSize = graph.screen().size()
-    container.setMinimumSize(QSize(screenSize.width() / 2, screenSize.height() / 1.6))
+    container.setMinimumSize(QSize(screenSize.width() / 2,
+                                   screenSize.height() / 1.6))
     container.setMaximumSize(screenSize)
     container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
     container.setFocusPolicy(Qt.StrongFocus)
