@@ -29,8 +29,9 @@
 #include "typedatabase.h"
 #include "abstractmetatype.h"
 #include "exception.h"
+#include "messages.h"
 #include "typesystem.h"
-#include "typesystemparser.h"
+#include "typesystemparser_p.h"
 #include "conditionalstreamreader.h"
 #include "predefined_templates.h"
 #include "clangparser/compilersupport.h"
@@ -47,6 +48,9 @@
 #include "reporthandler.h"
 // #include <tr1/tuple>
 #include <algorithm>
+
+
+using TypeDatabaseParserContextPtr = QSharedPointer<TypeDatabaseParserContext>;
 
 // package -> api-version
 
@@ -110,8 +114,13 @@ struct TypeDatabasePrivate
     TypeEntries findCppTypes(const QString &name) const;
     bool addType(TypeEntry *e, QString *errorMessage = nullptr);
     bool parseFile(QIODevice *device, TypeDatabase *db, bool generate = true);
-    bool parseFile(TypeDatabase *db, const QString &filename,
-                   const QString &currentPath, bool generate);
+    bool parseFile(const TypeDatabaseParserContextPtr &context,
+                   QIODevice *device, bool generate = true);
+    bool parseFile(const TypeDatabaseParserContextPtr &context,
+                   const QString &filename, const QString &currentPath, bool generate);
+    bool prepareParsing(QFile &file, const QString &origFileName,
+                        const QString &currentPath = {});
+
     QString modifiedTypesystemFilepath(const QString& tsFile,
                                        const QString &currentPath) const;
     void addBuiltInType(TypeEntry *e);
@@ -125,7 +134,7 @@ struct TypeDatabasePrivate
                                           const QString &rootPackage,
                                           CustomTypeEntry *targetLang);
     void addBuiltInPrimitiveTypes();
-    void addBuiltInContainerTypes(TypeDatabase *db);
+    void addBuiltInContainerTypes(const TypeDatabaseParserContextPtr &context);
     TypeEntryMultiMapConstIteratorRange findTypeRange(const QString &name) const;
     template <class Predicate>
     TypeEntries findTypesHelper(const QString &name, Predicate pred) const;
@@ -549,28 +558,6 @@ void TypeDatabase::addRejection(const TypeRejection &r)
     d->m_rejections << r;
 }
 
-static inline QString msgRejectReason(const TypeRejection &r, const QString &needle = QString())
-{
-    QString result;
-    QTextStream str(&result);
-    switch (r.matchType) {
-    case TypeRejection::ExcludeClass:
-        str << " matches class exclusion \"" << r.className.pattern() << '"';
-        break;
-    case TypeRejection::Function:
-    case TypeRejection::Field:
-    case TypeRejection::Enum:
-        str << " matches class \"" << r.className.pattern() << "\" and \"" << r.pattern.pattern() << '"';
-        break;
-    case TypeRejection::ArgumentType:
-    case TypeRejection::ReturnType:
-        str << " matches class \"" << r.className.pattern() << "\" and \"" << needle
-            << "\" matches \"" << r.pattern.pattern() << '"';
-        break;
-    }
-    return result;
-}
-
 // Match class name only
 bool TypeDatabase::isClassRejected(const QString& className, QString *reason) const
 {
@@ -859,7 +846,7 @@ QString TypeDatabasePrivate::modifiedTypesystemFilepath(const QString& tsFile,
     return tsFile;
 }
 
-void TypeDatabasePrivate::addBuiltInContainerTypes(TypeDatabase *db)
+void TypeDatabasePrivate::addBuiltInContainerTypes(const TypeDatabaseParserContextPtr &context)
 {
     // Unless the user has added the standard containers (potentially with
     // some opaque types), add them by default.
@@ -908,47 +895,62 @@ void TypeDatabasePrivate::addBuiltInContainerTypes(TypeDatabase *db)
     ts += "</typesystem>";
     QBuffer buffer(&ts);
     buffer.open(QIODevice::ReadOnly);
-    const bool ok = parseFile(&buffer, db, true);
+    const bool ok = parseFile(context, &buffer, true);
     Q_ASSERT(ok);
 }
 
 bool TypeDatabase::parseFile(const QString &filename, bool generate)
 {
-    return d->parseFile(this, filename, {}, generate);
-}
-
-bool TypeDatabase::parseFile(const QString &filename, const QString &currentPath, bool generate)
-{
-    return d->parseFile(this, filename, currentPath, generate);
-}
-
-bool TypeDatabasePrivate::parseFile(TypeDatabase *db, const QString &filename,
-                                    const QString &currentPath, bool generate)
-{
-    QString filepath = modifiedTypesystemFilepath(filename, currentPath);
-    if (m_parsedTypesystemFiles.contains(filepath))
-        return m_parsedTypesystemFiles[filepath];
-
-    m_parsedTypesystemFiles[filepath] = true; // Prevent recursion when including self.
-
+    QString filepath = modifiedTypesystemFilepath(filename, {});
     QFile file(filepath);
+    return d->prepareParsing(file, filename) && d->parseFile(&file, this, generate);
+}
+
+bool TypeDatabase::parseFile(const TypeDatabaseParserContextPtr &context,
+                             const QString &filename, const QString &currentPath,
+                             bool generate)
+{
+    return d->parseFile(context, filename, currentPath, generate);
+}
+
+bool TypeDatabasePrivate::prepareParsing(QFile &file, const QString &origFileName,
+                                         const QString &currentPath)
+{
+    const QString &filepath = file.fileName();
     if (!file.exists()) {
         m_parsedTypesystemFiles[filepath] = false;
-        QString message = QLatin1String("Can't find ") + filename;
+        QString message = u"Can't find "_qs + origFileName;
         if (!currentPath.isEmpty())
             message += QLatin1String(", current path: ") + currentPath;
-        message += QLatin1String(", typesystem paths: ") + m_typesystemPaths.join(QLatin1String(", "));
-        qCWarning(lcShiboken).noquote().nospace() << message;
+        message += u", typesystem paths: "_qs + m_typesystemPaths.join(u", "_qs);
+        qCWarning(lcShiboken, "%s", qPrintable(message));
         return false;
     }
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         m_parsedTypesystemFiles[filepath] = false;
-        qCWarning(lcShiboken).noquote().nospace()
-            << "Can't open " << QDir::toNativeSeparators(filename) << ": " << file.errorString();
+        qCWarning(lcShiboken, "%s", qPrintable(msgCannotOpenForReading(file)));
         return false;
     }
 
-    bool ok = parseFile(&file, db, generate);
+    m_parsedTypesystemFiles[filepath] = true;
+    return true;
+}
+
+bool TypeDatabasePrivate::parseFile(const TypeDatabaseParserContextPtr &context,
+                                    const QString &filename, const QString &currentPath,
+                                    bool generate)
+{
+    // Prevent recursion when including self.
+    QString filepath = modifiedTypesystemFilepath(filename, currentPath);
+    const auto it = m_parsedTypesystemFiles.constFind(filepath);
+    if (it != m_parsedTypesystemFiles.cend())
+        return it.value();
+
+    QFile file(filepath);
+    if (!prepareParsing(file, filename, currentPath))
+        return false;
+
+    const bool ok = parseFile(context, &file, generate);
     m_parsedTypesystemFiles[filepath] = ok;
     return ok;
 }
@@ -960,25 +962,34 @@ bool TypeDatabase::parseFile(QIODevice* device, bool generate)
 
 bool TypeDatabasePrivate::parseFile(QIODevice* device, TypeDatabase *db, bool generate)
 {
-    static int depth = 0;
+    const TypeDatabaseParserContextPtr context(new TypeDatabaseParserContext);
+    context->db = db;
 
-    ++depth;
+    if (!parseFile(context, device, generate))
+        return false;
+
+    addBuiltInPrimitiveTypes();
+    addBuiltInContainerTypes(context);
+    return true;
+}
+
+bool TypeDatabase::parseFile(const TypeDatabaseParserContextPtr &context,
+                             QIODevice *device, bool generate)
+{
+    return d->parseFile(context, device, generate);
+}
+
+bool TypeDatabasePrivate::parseFile(const TypeDatabaseParserContextPtr &context,
+                                    QIODevice *device, bool generate)
+{
     ConditionalStreamReader reader(device);
-    reader.setConditions(TypeDatabase::instance()->typesystemKeywords());
-    TypeSystemParser handler(db, generate);
+    reader.setConditions(context->db->typesystemKeywords());
+    TypeSystemParser handler(context, generate);
     const bool result = handler.parse(reader);
-    --depth;
-
     if (!result) {
         qCWarning(lcShiboken, "%s", qPrintable(handler.errorString()));
         return false;
     }
-
-    if (depth == 0) {
-        addBuiltInPrimitiveTypes();
-        addBuiltInContainerTypes(db);
-    }
-
     return result;
 }
 

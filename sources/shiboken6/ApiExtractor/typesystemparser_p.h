@@ -29,6 +29,8 @@
 #define TYPESYSTEMPARSER_H
 
 #include "typesystem.h"
+#include "typedatabase.h"
+#include "typedatabase_p.h"
 #include "modifications.h"
 
 #include <QtCore/QStack>
@@ -148,7 +150,8 @@ public:
     using StackElementContextPtr = QSharedPointer<StackElementContext>;
     using ContextStack = QStack<StackElementContextPtr>;
 
-    TypeSystemParser(TypeDatabase* database, bool generate);
+    explicit TypeSystemParser(const QSharedPointer<TypeDatabaseParserContext> &context,
+                              bool generate);
     ~TypeSystemParser();
 
     bool parse(ConditionalStreamReader &reader);
@@ -262,7 +265,7 @@ private:
      ParserState parserState(qsizetype offset = 0) const;
      CodeSnipAbstract *injectCodeTarget(qsizetype offset = 0) const;
 
-    TypeDatabase* m_database;
+    QSharedPointer<TypeDatabaseParserContext> m_context;
     QStack<StackElement> m_stack;
     int m_currentDroppedEntryDepth = 0;
     int m_ignoreDepth = 0;

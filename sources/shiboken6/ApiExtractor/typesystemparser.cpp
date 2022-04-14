@@ -26,7 +26,7 @@
 **
 ****************************************************************************/
 
-#include "typesystemparser.h"
+#include "typesystemparser_p.h"
 #include "typedatabase.h"
 #include "messages.h"
 #include "reporthandler.h"
@@ -614,8 +614,9 @@ enum class ParserState
     Template
 };
 
-TypeSystemParser::TypeSystemParser(TypeDatabase *database, bool generate) :
-    m_database(database),
+TypeSystemParser::TypeSystemParser(const QSharedPointer<TypeDatabaseParserContext> &context,
+                                   bool generate) :
+    m_context(context),
     m_generate(generate ? TypeEntry::GenerateCode : TypeEntry::GenerateForSubclass)
 {
 }
@@ -853,7 +854,7 @@ bool TypeSystemParser::setupSmartPointerInstantiations()
         SmartPointerTypeEntry::Instantiations instantiations;
         instantiations.reserve(instantiationNames.size());
         for (const auto &instantiationName : instantiationNames) {
-            const auto types = m_database->findCppTypes(instantiationName);
+            const auto types = m_context->db->findCppTypes(instantiationName);
             if (types.isEmpty()) {
                 m_error =
                     msgCannotFindTypeEntryForSmartPointer(instantiationName,
@@ -901,7 +902,7 @@ bool TypeSystemParser::endElement(StackElement element)
             for (CustomConversion *customConversion : qAsConst(customConversionsForReview)) {
                 const CustomConversion::TargetToNativeConversions &toNatives = customConversion->targetToNativeConversions();
                 for (CustomConversion::TargetToNativeConversion *toNative : toNatives)
-                    toNative->setSourceType(m_database->findType(toNative->sourceTypeName()));
+                    toNative->setSourceType(m_context->db->findType(toNative->sourceTypeName()));
             }
         }
         purgeEmptyCodeSnips(&top->entry->codeSnips());
@@ -992,7 +993,7 @@ bool TypeSystemParser::endElement(StackElement element)
         m_currentEnum = nullptr;
         break;
     case StackElement::Template:
-        m_database->addTemplate(m_templateEntry);
+        m_context->db->addTemplate(m_templateEntry);
         m_templateEntry = nullptr;
         break;
     case StackElement::InsertTemplate:
@@ -1359,8 +1360,8 @@ FlagsTypeEntry *
     ftype->setFlagsName(lst.constLast());
     enumEntry->setFlags(ftype);
 
-    m_database->addFlagsType(ftype);
-    m_database->addType(ftype);
+    m_context->db->addFlagsType(ftype);
+    m_context->db->addType(ftype);
 
     const int revisionIndex =
         indexOfAttribute(*attributes, u"flags-revision");
@@ -1473,7 +1474,7 @@ PrimitiveTypeEntry *
     }
 
     if (!targetLangApiName.isEmpty()) {
-        auto *e = m_database->findType(targetLangApiName);
+        auto *e = m_context->db->findType(targetLangApiName);
         if (e == nullptr || !e->isCustom()) {
                m_error = msgInvalidTargetLanguageApiName(targetLangApiName);
                return nullptr;
@@ -1691,7 +1692,7 @@ FunctionTypeEntry *
         return nullptr;
     }
 
-    TypeEntry *existingType = m_database->findType(name);
+    TypeEntry *existingType = m_context->db->findType(name);
 
     if (!existingType) {
         auto *result = new FunctionTypeEntry(name, signature, since, currentParentTypeEntry());
@@ -2015,14 +2016,14 @@ TypeSystemTypeEntry *TypeSystemParser::parseRootElement(const ConditionalStreamR
     }
 
     if (m_defaultPackage.isEmpty()) { // Extending default, see addBuiltInContainerTypes()
-        auto *moduleEntry = const_cast<TypeSystemTypeEntry *>(m_database->defaultTypeSystemType());
+        auto *moduleEntry = const_cast<TypeSystemTypeEntry *>(m_context->db->defaultTypeSystemType());
         Q_ASSERT(moduleEntry);
         m_defaultPackage = moduleEntry->name();
         return moduleEntry;
     }
 
     auto *moduleEntry =
-        const_cast<TypeSystemTypeEntry *>(m_database->findTypeSystemType(m_defaultPackage));
+        const_cast<TypeSystemTypeEntry *>(m_context->db->findTypeSystemType(m_defaultPackage));
     const bool add = moduleEntry == nullptr;
     if (add) {
         moduleEntry = new TypeSystemTypeEntry(m_defaultPackage, since,
@@ -2036,7 +2037,7 @@ TypeSystemTypeEntry *TypeSystemParser::parseRootElement(const ConditionalStreamR
         TypeDatabase::instance()->addRequiredTargetImport(m_defaultPackage);
 
     if (add)
-        m_database->addTypeSystemType(moduleEntry);
+        m_context->db->addTypeSystemType(moduleEntry);
     return moduleEntry;
 }
 
@@ -2057,8 +2058,8 @@ bool TypeSystemParser::loadTypesystem(const ConditionalStreamReader &,
             return false;
     }
     const bool result =
-        m_database->parseFile(typeSystemName, m_currentPath, generateChild
-                              && m_generate == TypeEntry::GenerateCode);
+        m_context->db->parseFile(m_context, typeSystemName, m_currentPath,
+                                 generateChild && m_generate == TypeEntry::GenerateCode);
     if (!result)
         m_error = u"Failed to parse: '"_qs + typeSystemName + u'\'';
     return result;
@@ -2792,7 +2793,7 @@ bool TypeSystemParser::readFileSnippet(QXmlStreamAttributes *attributes, CodeSni
     }
     if (fileName.isEmpty())
         return true;
-    const QString resolved = m_database->modifiedTypesystemFilepath(fileName, m_currentPath);
+    const QString resolved = m_context->db->modifiedTypesystemFilepath(fileName, m_currentPath);
     if (!QFile::exists(resolved)) {
         m_error = QLatin1String("File for inject code not exist: ")
             + QDir::toNativeSeparators(fileName);
@@ -2978,7 +2979,7 @@ bool TypeSystemParser::checkDuplicatedTypeEntry(const ConditionalStreamReader &r
 {
     if (t == StackElement::PrimitiveTypeEntry || t == StackElement::FunctionTypeEntry)
         return true;
-    const auto *duplicated = m_database->findType(name);
+    const auto *duplicated = m_context->db->findType(name);
     if (!duplicated || duplicated->isNamespace())
         return true;
     if (duplicated->isBuiltIn()) {
@@ -3084,10 +3085,10 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
             return false;
         }
 
-        if (m_database->hasDroppedTypeEntries()) {
+        if (m_context->db->hasDroppedTypeEntries()) {
             const QString identifier = element == StackElement::FunctionTypeEntry
                 ? attributes.value(signatureAttribute()).toString() : name;
-            if (shouldDropTypeEntry(m_database, m_contextStack, identifier)) {
+            if (shouldDropTypeEntry(m_context->db, m_contextStack, identifier)) {
                 m_currentDroppedEntryDepth = 1;
                 if (ReportHandler::isDebug(ReportHandler::SparseDebug)) {
                     qCInfo(lcShiboken, "Type system entry '%s' was intentionally dropped from generation.",
@@ -3110,7 +3111,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
         // types (which we need to do in order to support fake meta objects)
         if (element != StackElement::PrimitiveTypeEntry
             && element != StackElement::FunctionTypeEntry) {
-            TypeEntry *tmp = m_database->findType(name);
+            TypeEntry *tmp = m_context->db->findType(name);
             if (tmp && !tmp->isNamespace())
                 qCWarning(lcShiboken).noquote().nospace()
                     << "Duplicate type entry: '" << name << '\'';
@@ -3199,7 +3200,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
 
         if (top->entry) {
             if (checkDuplicatedTypeEntry(reader, element, top->entry->name())
-                && !m_database->addType(top->entry, &m_error)) {
+                && !m_context->db->addType(top->entry, &m_error)) {
                 return false;
             }
         } else {
@@ -3294,7 +3295,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
             } else {
                 const QString suppressedWarning =
                     attributes.takeAt(textIndex).value().toString();
-                if (!m_database->addSuppressedWarning(suppressedWarning, &m_error))
+                if (!m_context->db->addSuppressedWarning(suppressedWarning, &m_error))
                     return false;
             }
         }
@@ -3360,7 +3361,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
                 return false;
             break;
         case StackElement::Rejection:
-            if (!addRejection(m_database, &attributes, &m_error))
+            if (!addRejection(m_context->db, &attributes, &m_error))
                 return false;
             break;
         case StackElement::SystemInclude:
