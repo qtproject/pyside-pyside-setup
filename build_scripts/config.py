@@ -234,9 +234,9 @@ class Config(object):
             setup_kwargs['install_requires'] = [
                 f"{self.shiboken_module_st_name}=={package_version}"
             ]
-            _pyside_tools = ["uic", "rcc", "asistant", "designer", "linguist", "lupdate",
-                             "lrelease", "genpyi", "metaobjectdump", "project", "qmltyperegistrar",
-                             "qmllink"]
+            _pyside_tools = ["uic", "rcc", "assistant", "designer", "linguist",
+                             "lupdate", "lrelease", "genpyi", "metaobjectdump",
+                             "project", "qmltyperegistrar", "qmllint"]
             setup_kwargs['entry_points'] = {
                 'console_scripts': [f'{PYSIDE}-{tool} = {package_name}.scripts.pyside_tool:{tool}'
                                     for tool in _pyside_tools]
