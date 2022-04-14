@@ -37,6 +37,7 @@
 #include <QtCore/QRegularExpression>
 #include <QtCore/QStringList>
 #include <QtCore/QVersionNumber>
+#include <QtCore/QSharedPointer>
 
 QT_FORWARD_DECLARE_CLASS(QIODevice)
 
@@ -50,6 +51,7 @@ class TemplateEntry;
 class TypeEntry;
 
 struct TypeDatabasePrivate;
+struct TypeDatabaseParserContext;
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 
@@ -193,10 +195,15 @@ public:
 
     static QString globalNamespaceClassName(const TypeEntry *te);
 
+    // Top level file parsing
     bool parseFile(const QString &filename, bool generate = true);
-    bool parseFile(const QString &filename, const QString &currentPath, bool generate);
+    bool parseFile(const QSharedPointer<TypeDatabaseParserContext> &context,
+                   const QString &filename, const QString &currentPath, bool generate);
 
+    // Top level QIODevice parsing for tests.
     bool parseFile(QIODevice *device, bool generate = true);
+    bool parseFile(const QSharedPointer<TypeDatabaseParserContext> &context,
+                   QIODevice *device, bool generate = true);
 
     static bool setApiVersion(const QString &package, const QString &version);
     static void clearApiVersions();
