@@ -209,18 +209,18 @@ public:
 
     QString baseClassName() const;
 
-    AbstractMetaClass *defaultSuperclass() const; // Attribute "default-superclass"
+    const AbstractMetaClass *defaultSuperclass() const; // Attribute "default-superclass"
     void setDefaultSuperclass(AbstractMetaClass *s);
 
-    AbstractMetaClass *baseClass() const;
-    const AbstractMetaClassList &baseClasses() const;
+    const AbstractMetaClass *baseClass() const;
+    const AbstractMetaClassCList &baseClasses() const;
     // base classes including defaultSuperclass
-    AbstractMetaClassList typeSystemBaseClasses() const;
+    AbstractMetaClassCList typeSystemBaseClasses() const;
     // Recursive list of all base classes including defaultSuperclass
-    AbstractMetaClassList allTypeSystemAncestors() const;
+    AbstractMetaClassCList allTypeSystemAncestors() const;
 
-    void addBaseClass(AbstractMetaClass *base_class);
-    void setBaseClass(AbstractMetaClass *base_class);
+    void addBaseClass(const AbstractMetaClass *base_class);
+    void setBaseClass(const AbstractMetaClass *base_class);
 
     /**
      *   \return the namespace from another package which this namespace extends.
@@ -228,9 +228,9 @@ public:
     const AbstractMetaClass *extendedNamespace() const;
     void setExtendedNamespace(const AbstractMetaClass *e);
 
-    const AbstractMetaClassList &innerClasses() const;
+    const AbstractMetaClassCList &innerClasses() const;
     void addInnerClass(AbstractMetaClass* cl);
-    void setInnerClasses(const AbstractMetaClassList &innerClasses);
+    void setInnerClasses(const AbstractMetaClassCList &innerClasses);
 
     QString package() const;
 

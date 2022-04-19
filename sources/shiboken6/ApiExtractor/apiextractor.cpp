@@ -502,8 +502,7 @@ ApiExtractorPrivate::collectInstantiatedContainersAndSmartPointers(Instantiation
         collectInstantiatedContainersAndSmartPointers(context, func);
     for (const AbstractMetaField &field : metaClass->fields())
         addInstantiatedContainersAndSmartPointers(context, field.type(), field.name());
-    const AbstractMetaClassList &innerClasses = metaClass->innerClasses();
-    for (AbstractMetaClass *innerClass : innerClasses)
+    for (auto *innerClass : metaClass->innerClasses())
         collectInstantiatedContainersAndSmartPointers(context, innerClass);
 }
 

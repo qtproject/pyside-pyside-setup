@@ -222,7 +222,7 @@ bool Generator::setup(const ApiExtractorResult &api)
     for (auto c : api.classes()) {
         if (c->enclosingClass() == nullptr && c->isInvisibleNamespace()) {
             m_d->m_invisibleTopNamespaces.append(c);
-            c->invisibleNamespaceRecursion([&](AbstractMetaClass *ic) {
+            c->invisibleNamespaceRecursion([&](const AbstractMetaClass *ic) {
                 m_d->m_invisibleTopNamespaces.append(ic);
             });
         }

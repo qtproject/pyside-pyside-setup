@@ -2141,7 +2141,7 @@ TypeEntries AbstractMetaBuilderPrivate::findTypeEntriesHelper(const QString &qua
 
         // 5.1.1 - Try using the class parents' scopes
         if (d && !currentClass->baseClassNames().isEmpty()) {
-            const AbstractMetaClassList &baseClasses = d->getBaseClasses(currentClass);
+            const auto &baseClasses = d->getBaseClasses(currentClass);
             for (const AbstractMetaClass *cls : baseClasses) {
                 if (auto type = findTypeEntryUsingContext(cls, qualifiedName))
                     return {type};
@@ -2812,12 +2812,13 @@ AbstractMetaClass* AbstractMetaBuilderPrivate::findTemplateClass(const QString &
     return nullptr;
 }
 
-AbstractMetaClassList AbstractMetaBuilderPrivate::getBaseClasses(const AbstractMetaClass *metaClass) const
+AbstractMetaClassCList
+    AbstractMetaBuilderPrivate::getBaseClasses(const AbstractMetaClass *metaClass) const
 {
     // Shortcut if inheritance has already been set up
     if (metaClass->inheritanceDone() || !metaClass->needsInheritanceSetup())
         return metaClass->baseClasses();
-    AbstractMetaClassList baseClasses;
+    AbstractMetaClassCList baseClasses;
     const QStringList &baseClassNames = metaClass->baseClassNames();
     for (const QString& parent : baseClassNames) {
         AbstractMetaClass *cls = nullptr;
@@ -3137,7 +3138,7 @@ void AbstractMetaBuilderPrivate::parseQ_Properties(AbstractMetaClass *metaClass,
     }
 }
 
-void AbstractMetaBuilderPrivate::setupExternalConversion(AbstractMetaClass *cls)
+void AbstractMetaBuilderPrivate::setupExternalConversion(const AbstractMetaClass *cls)
 {
     const auto &convOps = cls->operatorOverloads(OperatorQueryOption::ConversionOp);
     for (const auto &func : convOps) {
@@ -3148,8 +3149,7 @@ void AbstractMetaBuilderPrivate::setupExternalConversion(AbstractMetaClass *cls)
             continue;
         metaClass->addExternalConversionOperator(func);
     }
-    const AbstractMetaClassList &innerClasses = cls->innerClasses();
-    for (AbstractMetaClass *innerClass : innerClasses)
+    for (auto *innerClass : cls->innerClasses())
         setupExternalConversion(innerClass);
 }
 
