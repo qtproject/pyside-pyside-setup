@@ -434,11 +434,12 @@ bool HeaderGenerator::finishGeneration()
     }
 
     macrosStream << "// Type indices\nenum : int {\n";
-    AbstractMetaClassCList classList = api().classes();
+    auto classList = api().classes();
 
-    std::sort(classList.begin(), classList.end(), [](const AbstractMetaClass *a, const AbstractMetaClass *b) {
-        return a->typeEntry()->sbkIndex() < b->typeEntry()->sbkIndex();
-    });
+    std::sort(classList.begin(), classList.end(),
+              [](const AbstractMetaClass *a, const AbstractMetaClass *b) {
+                  return a->typeEntry()->sbkIndex() < b->typeEntry()->sbkIndex();
+              });
 
     for (const AbstractMetaClass *metaClass : classList)
         writeTypeIndexValueLines(macrosStream, api(), metaClass);

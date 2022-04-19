@@ -151,7 +151,7 @@ public:
     void parseQ_Properties(AbstractMetaClass *metaClass, const QStringList &declarations);
     void setupEquals(AbstractMetaClass *metaClass);
     void setupComparable(AbstractMetaClass *metaClass);
-    void setupExternalConversion(AbstractMetaClass *cls);
+    void setupExternalConversion(const AbstractMetaClass *cls);
 
     static bool isQualifiedCppIdentifier(QStringView e);
     QString fixDefaultValue(QString expr, const AbstractMetaType &type,
@@ -183,7 +183,7 @@ public:
     AbstractMetaClass *findTemplateClass(const QString& name, const AbstractMetaClass *context,
                                          TypeInfo *info = Q_NULLPTR,
                                          ComplexTypeEntry **baseContainerType = Q_NULLPTR) const;
-    AbstractMetaClassList getBaseClasses(const AbstractMetaClass *metaClass) const;
+    AbstractMetaClassCList getBaseClasses(const AbstractMetaClass *metaClass) const;
 
     static bool inheritTemplate(AbstractMetaClass *subclass,
                                 const AbstractMetaClass *templateClass,

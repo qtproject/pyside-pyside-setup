@@ -114,8 +114,8 @@ public:
     Documentation m_doc;
 
     const AbstractMetaClass *m_enclosingClass = nullptr;
-    AbstractMetaClass *m_defaultSuperclass = nullptr;
-    AbstractMetaClassList m_baseClasses; // Real base classes after setting up inheritance
+    const AbstractMetaClass *m_defaultSuperclass = nullptr;
+    AbstractMetaClassCList m_baseClasses; // Real base classes after setting up inheritance
     AbstractMetaTypeList m_baseTemplateInstantiations;
     const AbstractMetaClass *m_extendedNamespace = nullptr;
 
@@ -124,7 +124,7 @@ public:
     AbstractMetaFieldList m_fields;
     AbstractMetaEnumList m_enums;
     QList<QPropertySpec> m_propertySpecs;
-    AbstractMetaClassList m_innerClasses;
+    AbstractMetaClassCList m_innerClasses;
 
     AbstractMetaFunctionCList m_externalConversionOperators;
 
@@ -445,7 +445,7 @@ QString AbstractMetaClass::baseClassName() const
 }
 
 // Attribute "default-superclass"
-AbstractMetaClass *AbstractMetaClass::defaultSuperclass() const
+const AbstractMetaClass *AbstractMetaClass::defaultSuperclass() const
 {
     return d->m_defaultSuperclass;
 }
@@ -455,21 +455,21 @@ void AbstractMetaClass::setDefaultSuperclass(AbstractMetaClass *s)
     d->m_defaultSuperclass = s;
 }
 
-AbstractMetaClass *AbstractMetaClass::baseClass() const
+const AbstractMetaClass *AbstractMetaClass::baseClass() const
 {
     return d->m_baseClasses.value(0, nullptr);
 }
 
-const AbstractMetaClassList &AbstractMetaClass::baseClasses() const
+const AbstractMetaClassCList &AbstractMetaClass::baseClasses() const
 {
     Q_ASSERT(inheritanceDone() || !needsInheritanceSetup());
     return d->m_baseClasses;
 }
 
 // base classes including "defaultSuperclass".
-AbstractMetaClassList AbstractMetaClass::typeSystemBaseClasses() const
+AbstractMetaClassCList AbstractMetaClass::typeSystemBaseClasses() const
 {
-    AbstractMetaClassList result = d->m_baseClasses;
+    AbstractMetaClassCList result = d->m_baseClasses;
     if (d->m_defaultSuperclass != nullptr) {
         result.removeAll(d->m_defaultSuperclass);
         result.prepend(d->m_defaultSuperclass);
@@ -478,25 +478,25 @@ AbstractMetaClassList AbstractMetaClass::typeSystemBaseClasses() const
 }
 
 // Recursive list of all base classes including defaultSuperclass
-AbstractMetaClassList AbstractMetaClass::allTypeSystemAncestors() const
+AbstractMetaClassCList AbstractMetaClass::allTypeSystemAncestors() const
 {
-    AbstractMetaClassList result;
-    const AbstractMetaClassList baseClasses = typeSystemBaseClasses();
-    for (AbstractMetaClass *base : baseClasses) {
+    AbstractMetaClassCList result;
+    const auto baseClasses = typeSystemBaseClasses();
+    for (auto *base : baseClasses) {
         result.append(base);
         result.append(base->allTypeSystemAncestors());
     }
     return result;
 }
 
-void AbstractMetaClass::addBaseClass(AbstractMetaClass *baseClass)
+void AbstractMetaClass::addBaseClass(const AbstractMetaClass *baseClass)
 {
     Q_ASSERT(baseClass);
     d->m_baseClasses.append(baseClass);
     d->m_isPolymorphic |= baseClass->isPolymorphic();
 }
 
-void AbstractMetaClass::setBaseClass(AbstractMetaClass *baseClass)
+void AbstractMetaClass::setBaseClass(const AbstractMetaClass *baseClass)
 {
     if (baseClass) {
         d->m_baseClasses.prepend(baseClass);
@@ -514,7 +514,7 @@ void AbstractMetaClass::setExtendedNamespace(const AbstractMetaClass *e)
     d->m_extendedNamespace = e;
 }
 
-const AbstractMetaClassList &AbstractMetaClass::innerClasses() const
+const AbstractMetaClassCList &AbstractMetaClass::innerClasses() const
 {
     return d->m_innerClasses;
 }
@@ -524,7 +524,7 @@ void AbstractMetaClass::addInnerClass(AbstractMetaClass *cl)
     d->m_innerClasses << cl;
 }
 
-void AbstractMetaClass::setInnerClasses(const AbstractMetaClassList &innerClasses)
+void AbstractMetaClass::setInnerClasses(const AbstractMetaClassCList &innerClasses)
 {
     d->m_innerClasses = innerClasses;
 }
@@ -1275,7 +1275,7 @@ void AbstractMetaClass::getEnumsToBeGenerated(AbstractMetaEnumList *enumList) co
 void AbstractMetaClass::getEnumsFromInvisibleNamespacesToBeGenerated(AbstractMetaEnumList *enumList) const
 {
     if (isNamespace()) {
-        invisibleNamespaceRecursion([enumList](AbstractMetaClass *c) {
+        invisibleNamespaceRecursion([enumList](const AbstractMetaClass *c) {
             c->getEnumsToBeGenerated(enumList);
         });
     }
@@ -1284,7 +1284,7 @@ void AbstractMetaClass::getEnumsFromInvisibleNamespacesToBeGenerated(AbstractMet
 void AbstractMetaClass::getFunctionsFromInvisibleNamespacesToBeGenerated(AbstractMetaFunctionCList *funcList) const
 {
     if (isNamespace()) {
-        invisibleNamespaceRecursion([funcList](AbstractMetaClass *c) {
+        invisibleNamespaceRecursion([funcList](const AbstractMetaClass *c) {
             funcList->append(c->functions());
         });
     }
@@ -1389,7 +1389,8 @@ void AbstractMetaClass::fixFunctions()
             nonRemovedFuncs.append(f);
     }
 
-    for (auto superClass : d->m_baseClasses) {
+    for (auto *superClassC : d->m_baseClasses) {
+        auto *superClass = const_cast<AbstractMetaClass *>(superClassC);
         superClass->fixFunctions();
         // Since we always traverse the complete hierarchy we are only
         // interrested in what each super class implements, not what
