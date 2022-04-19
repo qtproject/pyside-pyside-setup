@@ -3288,13 +3288,14 @@ void AbstractMetaBuilderPrivate::dumpLog() const
     writeRejectLogFile(m_logDirectory + QLatin1String("mjb_rejected_fields.log"), m_rejectedFields);
 }
 
-using ClassGraph = Graph<AbstractMetaClass *>;
-
-// Add a dependency of the class associated with typeEntry on clazz
-static bool addClassDependency(const AbstractMetaClassList &classList,
+// Topological sorting of classes. Templates for use with
+// AbstractMetaClassList/AbstractMetaClassCList.
+// Add a dependency of the class associated with typeEntry on clazz.
+template <class MetaClass>
+static bool addClassDependency(const QList<MetaClass *> &classList,
                                const TypeEntry *typeEntry,
-                               AbstractMetaClass *clazz,
-                               ClassGraph *graph)
+                               MetaClass *clazz,
+                               Graph<MetaClass *> *graph)
 {
     if (!typeEntry->isComplex() || typeEntry == clazz->typeEntry())
         return false;
@@ -3304,10 +3305,11 @@ static bool addClassDependency(const AbstractMetaClassList &classList,
     return graph->addEdge(c, clazz);
 }
 
-AbstractMetaClassList AbstractMetaBuilderPrivate::classesTopologicalSorted(const AbstractMetaClassList &classList,
-                                                                           const Dependencies &additionalDependencies)
+template <class MetaClass>
+static QList<MetaClass *> topologicalSortHelper(const QList<MetaClass *> &classList,
+                                                const Dependencies &additionalDependencies)
 {
-    ClassGraph graph(classList.cbegin(), classList.cend());
+    Graph<MetaClass *> graph(classList.cbegin(), classList.cend());
 
     for (const auto &dep : additionalDependencies) {
         if (!graph.addEdge(dep.parent, dep.child)) {
@@ -3317,14 +3319,14 @@ AbstractMetaClassList AbstractMetaBuilderPrivate::classesTopologicalSorted(const
         }
     }
 
-    for (AbstractMetaClass *clazz : classList) {
+    for (auto *clazz : classList) {
         if (auto enclosingC = clazz->enclosingClass()) {
             auto enclosing = const_cast<AbstractMetaClass *>(enclosingC);
             graph.addEdge(enclosing, clazz);
         }
 
         for (auto baseClass : clazz->baseClasses())
-            graph.addEdge(baseClass, clazz);
+            graph.addEdge(const_cast<MetaClass *>(baseClass), clazz);
 
         for (const auto &func : clazz->functions()) {
             const AbstractMetaArgumentList &arguments = func->arguments();
@@ -3366,6 +3368,20 @@ AbstractMetaClassList AbstractMetaBuilderPrivate::classesTopologicalSorted(const
     }
 
     return result.result;
+}
+
+AbstractMetaClassList
+   AbstractMetaBuilderPrivate::classesTopologicalSorted(const AbstractMetaClassList &classList,
+                                                        const Dependencies &additionalDependencies)
+{
+    return topologicalSortHelper(classList, additionalDependencies);
+}
+
+AbstractMetaClassCList
+    AbstractMetaBuilderPrivate::classesTopologicalSorted(const AbstractMetaClassCList &classList,
+                                                         const Dependencies &additionalDependencies)
+{
+    return topologicalSortHelper(classList, additionalDependencies);
 }
 
 void AbstractMetaBuilderPrivate::pushScope(const NamespaceModelItem &item)
