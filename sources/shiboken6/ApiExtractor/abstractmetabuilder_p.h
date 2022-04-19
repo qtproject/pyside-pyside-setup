@@ -70,8 +70,14 @@ public:
     void traverseDom(const FileModelItem &dom, ApiExtractorFlags flags);
 
     void dumpLog() const;
-    static AbstractMetaClassList classesTopologicalSorted(const AbstractMetaClassList &classList,
-                                                          const Dependencies &additionalDependencies = {});
+
+    static AbstractMetaClassList
+        classesTopologicalSorted(const AbstractMetaClassList &classList,
+                                 const Dependencies &additionalDependencies = {});
+    static AbstractMetaClassCList
+        classesTopologicalSorted(const AbstractMetaClassCList &classList,
+                                 const Dependencies &additionalDependencies = {});
+
     NamespaceModelItem popScope() { return m_scopes.takeLast(); }
 
     void pushScope(const NamespaceModelItem &item);
