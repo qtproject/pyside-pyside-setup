@@ -39,4 +39,32 @@
 **
 ****************************************************************************/
 -->
-<typesystem package="PySide6.QtGui"/>
+<typesystem package="PySide6.QtGui">
+    <primitive-type name="HBITMAP" target-lang-api-name="PyLong">
+        <conversion-rule>
+            <native-to-target file="../glue/qtgui.cpp" snippet="return-pylong-voidptr"/>
+            <target-to-native>
+                <add-conversion type="PyLong" file="../glue/qtgui.cpp"
+                                snippet="conversion-pylong"/>
+            </target-to-native>
+        </conversion-rule>
+    </primitive-type>
+    <primitive-type name="HICON" target-lang-api-name="PyLong">
+        <conversion-rule>
+            <native-to-target file="../glue/qtgui.cpp" snippet="return-pylong-voidptr"/>
+            <target-to-native>
+                <add-conversion type="PyLong" file="../glue/qtgui.cpp"
+                                snippet="conversion-pylong"/>
+            </target-to-native>
+        </conversion-rule>
+    </primitive-type>
+    <primitive-type name="HRGN" target-lang-api-name="PyLong">
+        <conversion-rule>
+            <native-to-target file="../glue/qtgui.cpp" snippet="return-pylong-voidptr"/>
+            <target-to-native>
+                <add-conversion type="PyLong" file="../glue/qtgui.cpp"
+                                snippet="conversion-pylong"/>
+            </target-to-native>
+        </conversion-rule>
+    </primitive-type>
+</typesystem>

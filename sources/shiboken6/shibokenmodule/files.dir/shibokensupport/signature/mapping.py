@@ -568,6 +568,9 @@ def init_PySide6_QtGui():
         "GL_COLOR_BUFFER_BIT": GL_COLOR_BUFFER_BIT,
         "GL_NEAREST": GL_NEAREST,
         "int32_t": int,
+        "HBITMAP": int,
+        "HICON": int,
+        "HRGN": int,
         "QPixmap()": Default("PySide6.QtGui.QPixmap"), # can't create without qApp
         "QPlatformSurface*": int, # a handle
         "QVector< QTextLayout.FormatRange >()": [], # do we need more structure?
