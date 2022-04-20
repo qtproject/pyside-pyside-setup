@@ -167,7 +167,6 @@ public:
     bool isPropertyReader() const;
     bool isPropertyWriter() const;
     bool isPropertyResetter() const;
-    bool isFriendly() const;
 
     AbstractMetaFunction();
     explicit AbstractMetaFunction(const QString &name);
@@ -494,11 +493,6 @@ inline bool AbstractMetaFunction::isPropertyWriter() const
 inline bool AbstractMetaFunction::isPropertyResetter() const
 {
     return attributes().testFlag(PropertyResetter);
-}
-
-inline bool AbstractMetaFunction::isFriendly() const
-{
-    return attributes().testFlag(Friendly);
 }
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaFunction::CompareResult)

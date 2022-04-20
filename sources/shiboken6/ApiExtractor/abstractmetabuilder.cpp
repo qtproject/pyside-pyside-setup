@@ -3164,7 +3164,6 @@ void AbstractMetaBuilderPrivate::inheritTemplateFunctions(AbstractMetaClass *sub
     auto templateClass = subclass->templateBaseClass();
 
     if (subclass->isTypeDef()) {
-        subclass->setHasEqualsOperator(templateClass->hasEqualsOperator());
         subclass->setHasHashFunction(templateClass->hasHashFunction());
         subclass->setHasNonPrivateConstructor(templateClass->hasNonPrivateConstructor());
         subclass->setHasPrivateDestructor(templateClass->hasPrivateDestructor());
