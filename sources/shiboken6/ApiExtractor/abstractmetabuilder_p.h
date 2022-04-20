@@ -151,7 +151,6 @@ public:
     void parseQ_Properties(AbstractMetaClass *metaClass, const QStringList &declarations);
     void setupEquals(AbstractMetaClass *metaClass);
     void setupComparable(AbstractMetaClass *metaClass);
-    static void setupClonable(AbstractMetaClass *cls);
     void setupExternalConversion(AbstractMetaClass *cls);
 
     static bool isQualifiedCppIdentifier(QStringView e);

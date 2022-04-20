@@ -291,9 +291,6 @@ public:
     bool hasEqualsOperator() const;
     void setHasEqualsOperator(bool on);
 
-    bool hasCloneOperator() const;
-    void setHasCloneOperator(bool on);
-
     const QList<QPropertySpec> &propertySpecs() const;
     void addPropertySpec(const QPropertySpec &spec);
 
