@@ -253,22 +253,10 @@ public:
     bool isPolymorphic() const;
 
     /**
-     * Tells if this class has one or more functions that are protected.
-     * \return true if the class has protected functions.
-     */
-    bool hasProtectedFunctions() const;
-
-    /**
      * Tells if this class has one or more fields (member variables) that are protected.
      * \return true if the class has protected fields.
      */
     bool hasProtectedFields() const;
-
-    /**
-     * Tells if this class has one or more members (functions or fields) that are protected.
-     * \return true if the class has protected members.
-     */
-    bool hasProtectedMembers() const;
 
 
     const TypeEntries &templateArguments() const;
@@ -284,12 +272,9 @@ public:
 
     void setHasHashFunction(bool on);
 
+    /// Returns whether the class has a qHash() overload. Currently unused,
+    /// specified in type system.
     bool hasHashFunction() const;
-
-    bool hasDefaultToStringFunction() const;
-
-    bool hasEqualsOperator() const;
-    void setHasEqualsOperator(bool on);
 
     const QList<QPropertySpec> &propertySpecs() const;
     void addPropertySpec(const QPropertySpec &spec);
@@ -361,8 +346,6 @@ public:
 
     static std::optional<AbstractMetaEnumValue> findEnumValue(const AbstractMetaClassList &classes,
                                                               const QString &string);
-    static  std::optional<AbstractMetaEnum> findEnum(const AbstractMetaClassList &classes,
-                                                     const EnumTypeEntry *entry);
 
     SourceLocation sourceLocation() const;
     void setSourceLocation(const SourceLocation &sourceLocation);

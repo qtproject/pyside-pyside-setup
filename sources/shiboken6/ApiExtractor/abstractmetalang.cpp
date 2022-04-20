@@ -67,7 +67,6 @@ public:
           m_hasProtectedDestructor(false),
           m_hasVirtualDestructor(false),
           m_hasHashFunction(false),
-          m_hasEqualsOperator(false),
           m_isTypeDef(false),
           m_hasToStringCapability(false),
           m_valueTypeWithCopyConstructorOnly(false),
@@ -107,7 +106,6 @@ public:
     uint m_hasProtectedDestructor : 1;
     uint m_hasVirtualDestructor : 1;
     uint m_hasHashFunction : 1;
-    uint m_hasEqualsOperator : 1;
     uint m_isTypeDef : 1;
     uint m_hasToStringCapability : 1;
     uint m_valueTypeWithCopyConstructorOnly : 1;
@@ -370,26 +368,6 @@ void AbstractMetaClass::setFunctions(const AbstractMetaFunctionCList &functions)
     }
 }
 
-bool AbstractMetaClass::hasDefaultToStringFunction() const
-{
-    const auto &funcs = queryFunctionsByName(QLatin1String("toString"));
-    for (const auto &f : funcs) {
-        if (!f->actualMinimumArgumentCount())
-            return true;
-    }
-    return false;
-}
-
-bool AbstractMetaClass::hasEqualsOperator() const
-{
-    return d->m_hasEqualsOperator;
-}
-
-void AbstractMetaClass::setHasEqualsOperator(bool on)
-{
-    d->m_hasEqualsOperator = on;
-}
-
 const QList<QPropertySpec> &AbstractMetaClass::propertySpecs() const
 {
     return d->m_propertySpecs;
@@ -622,15 +600,6 @@ AbstractMetaFunctionCPtr AbstractMetaClass::findQtIsNullMethod() const
     return *it;
 }
 
-bool AbstractMetaClass::hasProtectedFunctions() const
-{
-    for (const auto &func : d->m_functions) {
-        if (func->isProtected())
-            return true;
-    }
-    return false;
-}
-
 bool AbstractMetaClass::hasProtectedFields() const
 {
     for (const AbstractMetaField &field : d->m_fields) {
@@ -638,11 +607,6 @@ bool AbstractMetaClass::hasProtectedFields() const
             return true;
     }
     return false;
-}
-
-bool AbstractMetaClass::hasProtectedMembers() const
-{
-    return hasProtectedFields() || hasProtectedFunctions();
 }
 
 const TypeEntries &AbstractMetaClass::templateArguments() const
@@ -1643,26 +1607,6 @@ bool AbstractMetaClass::inheritanceDone() const
 /*******************************************************************************
  * Other stuff...
  */
-
-
-std::optional<AbstractMetaEnum>
-    AbstractMetaClass::findEnum(const AbstractMetaClassList &classes,
-                                const EnumTypeEntry *entry)
-{
-    Q_ASSERT(entry->isEnum());
-
-    auto scopeEntry = entry->parent();
-    AbstractMetaClass *metaClass = AbstractMetaClass::findClass(classes, scopeEntry);
-    if (!metaClass) {
-        qCWarning(lcShiboken, "%s", qPrintable(msgClassOfEnumNotFound(entry)));
-        return {};
-    }
-
-    QString qualifiedName = entry->qualifiedCppName();
-    const int pos = qualifiedName.lastIndexOf(QLatin1String("::"));
-    const QString enumName = pos > 0 ? qualifiedName.mid(pos + 2) : qualifiedName;
-    return metaClass->findEnum(enumName);
-}
 
 std::optional<AbstractMetaEnumValue>
     AbstractMetaClass::findEnumValue(const AbstractMetaClassList &classes,
