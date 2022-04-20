@@ -1,4 +1,6 @@
-setuptools>=48.0
+# > 60 introduces ImportError: cannot import name 'build_py' from 'setuptools._distutils.command'
+# FIXME: Check if fixed in later versions?
+setuptools>=59.5,<60
 build==0.7
 sphinx
 sphinx-panels
