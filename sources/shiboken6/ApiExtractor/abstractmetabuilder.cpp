@@ -632,7 +632,6 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom,
     for (AbstractMetaClass *cls : qAsConst(m_metaClasses)) {
 //         setupEquals(cls);
 //         setupComparable(cls);
-        setupClonable(cls);
         setupExternalConversion(cls);
 
         // sort all inner classes topologically
@@ -3054,7 +3053,6 @@ void AbstractMetaBuilderPrivate::inheritTemplateFunctions(AbstractMetaClass *sub
     auto templateClass = subclass->templateBaseClass();
 
     if (subclass->isTypeDef()) {
-        subclass->setHasCloneOperator(templateClass->hasCloneOperator());
         subclass->setHasEqualsOperator(templateClass->hasEqualsOperator());
         subclass->setHasHashFunction(templateClass->hasHashFunction());
         subclass->setHasNonPrivateConstructor(templateClass->hasNonPrivateConstructor());
@@ -3137,44 +3135,6 @@ void AbstractMetaBuilderPrivate::parseQ_Properties(AbstractMetaClass *metaClass,
             qCWarning(lcShiboken, "%s", qPrintable(message));
         }
     }
-}
-
-static AbstractMetaFunctionCPtr findCopyCtor(AbstractMetaClass* cls)
-{
-    for (const auto &f : cls->functions()) {
-        const AbstractMetaFunction::FunctionType t = f->functionType();
-        if (t == AbstractMetaFunction::CopyConstructorFunction || t == AbstractMetaFunction::AssignmentOperatorFunction)
-            return f;
-    }
-    return {};
-}
-
-void AbstractMetaBuilderPrivate::setupClonable(AbstractMetaClass *cls)
-{
-    bool result = true;
-
-    // find copy ctor for the current class
-    auto copyCtor = findCopyCtor(cls);
-    if (!copyCtor.isNull()) { // if exists a copy ctor in this class
-        result = copyCtor->isPublic();
-    } else { // else... lets find one in the parent class
-        QQueue<AbstractMetaClass*> baseClasses;
-        if (cls->baseClass())
-            baseClasses.enqueue(cls->baseClass());
-
-        while (!baseClasses.isEmpty()) {
-            AbstractMetaClass* currentClass = baseClasses.dequeue();
-            if (currentClass->baseClass())
-                baseClasses.enqueue(currentClass->baseClass());
-
-            copyCtor = findCopyCtor(currentClass);
-            if (copyCtor) {
-                result = copyCtor->isPublic();
-                break;
-            }
-        }
-    }
-    cls->setHasCloneOperator(result);
 }
 
 void AbstractMetaBuilderPrivate::setupExternalConversion(AbstractMetaClass *cls)

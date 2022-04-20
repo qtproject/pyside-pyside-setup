@@ -82,8 +82,7 @@ void TestAbstractMetaClass::testClassNameUnderNamespace()
     QCOMPARE(ctors[1]->minimalSignature(), QLatin1String("ClassName(Namespace::ClassName)"));
 
     QVERIFY(!classes[0]->hasPrivateDestructor());
-    QVERIFY(classes[0]->hasCloneOperator()); // implicit default copy ctor
-    QVERIFY(!classes[0]->hasHashFunction());
+    QVERIFY(classes[0]->isCopyConstructible()); // implicit default copy ctor
 
     // This method is buggy and nobody wants to fix it or needs it fixed :-/
     // QVERIFY(classes[0]->hasNonPrivateConstructor());

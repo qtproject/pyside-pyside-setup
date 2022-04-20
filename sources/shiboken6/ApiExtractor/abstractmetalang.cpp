@@ -68,7 +68,6 @@ public:
           m_hasVirtualDestructor(false),
           m_hasHashFunction(false),
           m_hasEqualsOperator(false),
-          m_hasCloneOperator(false),
           m_isTypeDef(false),
           m_hasToStringCapability(false),
           m_valueTypeWithCopyConstructorOnly(false),
@@ -109,7 +108,6 @@ public:
     uint m_hasVirtualDestructor : 1;
     uint m_hasHashFunction : 1;
     uint m_hasEqualsOperator : 1;
-    uint m_hasCloneOperator : 1;
     uint m_isTypeDef : 1;
     uint m_hasToStringCapability : 1;
     uint m_valueTypeWithCopyConstructorOnly : 1;
@@ -231,7 +229,7 @@ AbstractMetaFunctionCList AbstractMetaClass::functionsInTargetLang() const
 
 AbstractMetaFunctionCList AbstractMetaClass::implicitConversions() const
 {
-    if (!hasCloneOperator() && !hasExternalConversionOperators())
+    if (!isCopyConstructible() && !hasExternalConversionOperators())
         return {};
 
     AbstractMetaFunctionCList returned;
@@ -390,16 +388,6 @@ bool AbstractMetaClass::hasEqualsOperator() const
 void AbstractMetaClass::setHasEqualsOperator(bool on)
 {
     d->m_hasEqualsOperator = on;
-}
-
-bool AbstractMetaClass::hasCloneOperator() const
-{
-    return d->m_hasCloneOperator;
-}
-
-void AbstractMetaClass::setHasCloneOperator(bool on)
-{
-    d->m_hasCloneOperator = on;
 }
 
 const QList<QPropertySpec> &AbstractMetaClass::propertySpecs() const
@@ -1816,7 +1804,7 @@ bool AbstractMetaClass::isCopyable() const
         return false;
     auto copyable = d->m_typeEntry->copyable();
     return copyable == ComplexTypeEntry::CopyableSet
-        || (copyable == ComplexTypeEntry::Unknown && hasCloneOperator());
+        || (copyable == ComplexTypeEntry::Unknown && isCopyConstructible());
 }
 
 bool AbstractMetaClass::isValueTypeWithCopyConstructorOnly() const
