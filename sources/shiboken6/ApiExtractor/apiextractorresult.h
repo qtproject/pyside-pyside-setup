@@ -36,8 +36,11 @@
 #include "typesystem_typedefs.h"
 
 #include <QtCore/QHash>
+#include <QtCore/QExplicitlySharedDataPointer>
 
 #include <optional>
+
+class ApiExtractorResultData;
 
 struct InstantiatedSmartPointer
 {
@@ -48,22 +51,24 @@ struct InstantiatedSmartPointer
 using InstantiatedSmartPointers = QList<InstantiatedSmartPointer>;
 
 /// Result of an ApiExtractor run.
-/// Note: The class lists in here are flat, non-owning lists, currently
-/// (pending introduction of QSharedPointer for AbstractMetaClass); the
-/// ApiExtractor/AbstractMetaBuilder must be kept alive during the
-/// generator run since it owns the classes.
 class ApiExtractorResult
 {
-    friend class ApiExtractor;
 public:
-    const AbstractMetaEnumList &globalEnums() const { return m_globalEnums; }
-    const AbstractMetaFunctionCList &globalFunctions() const { return m_globalFunctions; }
-    const AbstractMetaClassCList &classes() const { return m_metaClasses; }
-    const AbstractMetaClassCList &smartPointers() const { return m_smartPointers; }
+    ApiExtractorResult();
+    explicit ApiExtractorResult(ApiExtractorResultData *data);
+    ApiExtractorResult(const ApiExtractorResult &);
+    ApiExtractorResult &operator=(const ApiExtractorResult &);
+    ApiExtractorResult(ApiExtractorResult &&);
+    ApiExtractorResult &operator=(ApiExtractorResult &&);
+    ~ApiExtractorResult();
 
-    const AbstractMetaTypeList &instantiatedContainers() const { return m_instantiatedContainers; }
-    const InstantiatedSmartPointers &instantiatedSmartPointers() const
-    { return m_instantiatedSmartPointers; }
+    const AbstractMetaEnumList &globalEnums() const;
+    const AbstractMetaFunctionCList &globalFunctions() const;
+    const AbstractMetaClassCList &classes() const;
+    const AbstractMetaClassCList &smartPointers() const;
+
+    const AbstractMetaTypeList &instantiatedContainers() const;
+    const InstantiatedSmartPointers &instantiatedSmartPointers() const;
 
     // Query functions for the generators
     std::optional<AbstractMetaEnum> findAbstractMetaEnum(const TypeEntry* typeEntry) const;
@@ -76,20 +81,11 @@ public:
     AbstractMetaFunctionCList implicitConversions(const TypeEntry *type) const;
     AbstractMetaFunctionCList implicitConversions(const AbstractMetaType &metaType) const;
 
-    ApiExtractorFlags flags() const { return m_flags; }
-    void setFlags(ApiExtractorFlags f) { m_flags = f; }
+    ApiExtractorFlags flags() const;
+    void setFlags(ApiExtractorFlags f);
 
 private:
-    AbstractMetaClassCList m_metaClasses;
-    AbstractMetaClassCList m_smartPointers;
-    AbstractMetaFunctionCList m_globalFunctions;
-    AbstractMetaEnumList m_globalEnums;
-    AbstractMetaTypeList m_instantiatedContainers;
-    InstantiatedSmartPointers m_instantiatedSmartPointers;
-
-    QHash<const TypeEntry *, AbstractMetaEnum> m_enums;
-
-    ApiExtractorFlags m_flags;
+    QExplicitlySharedDataPointer<ApiExtractorResultData> d;
 };
 
 #endif // APIEXTRACTORRESULT_H

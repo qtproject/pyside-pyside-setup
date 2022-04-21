@@ -67,8 +67,11 @@ public:
     virtual ~AbstractMetaBuilder();
 
     const AbstractMetaClassList &classes() const;
+    AbstractMetaClassList takeClasses();
     const AbstractMetaClassList &templates() const;
+    AbstractMetaClassList takeTemplates();
     const AbstractMetaClassList &smartPointers() const;
+    AbstractMetaClassList takeSmartPointers();
     const AbstractMetaFunctionCList &globalFunctions() const;
     const AbstractMetaEnumList &globalEnums() const;
     const QHash<const TypeEntry *, AbstractMetaEnum> &typeEntryToEnumsHash() const;
