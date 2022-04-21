@@ -114,8 +114,8 @@ struct TypeDatabasePrivate
     TypeEntries findCppTypes(const QString &name) const;
     bool addType(TypeEntry *e, QString *errorMessage = nullptr);
     bool parseFile(QIODevice *device, TypeDatabase *db, bool generate = true);
-    bool parseFile(const TypeDatabaseParserContextPtr &context,
-                   QIODevice *device, bool generate = true);
+    static bool parseFile(const TypeDatabaseParserContextPtr &context,
+                          QIODevice *device, bool generate = true);
     bool parseFile(const TypeDatabaseParserContextPtr &context,
                    const QString &filename, const QString &currentPath, bool generate);
     bool prepareParsing(QFile &file, const QString &origFileName,

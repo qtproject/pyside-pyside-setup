@@ -177,13 +177,13 @@ private:
     static void writeInvalidPyObjectCheck(TextStream &s, const QString &pyObj,
                                           ErrorReturn errorReturn);
 
-    void writeTypeCheck(TextStream &s, const AbstractMetaType &argType,
-                        const QString &argumentName,
-                        bool isNumber = false, bool rejectNull = false) const;
-    void writeTypeCheck(TextStream &s, const QString &customType,
-                        const QString &argumentName) const;
-    void writeTypeCheck(TextStream& s, const QSharedPointer<OverloadDataNode> &overloadData,
-                        const QString &argumentName) const;
+    static void writeTypeCheck(TextStream &s, const AbstractMetaType &argType,
+                               const QString &argumentName,
+                               bool isNumber = false, bool rejectNull = false);
+    static void writeTypeCheck(TextStream &s, const QString &customType,
+                        const QString &argumentName);
+    static void writeTypeCheck(TextStream& s, const QSharedPointer<OverloadDataNode> &overloadData,
+                        const QString &argumentName);
 
     static void writeTypeDiscoveryFunction(TextStream &s, const AbstractMetaClass *metaClass);
 
@@ -346,8 +346,8 @@ private:
                                               const QString &pythonToCppFunc,
                                               const QString &isConvertibleFunc);
 
-    void writeNamedArgumentResolution(TextStream &s, const AbstractMetaFunctionCPtr &func,
-                                      bool usePyArgs, const OverloadData &overloadData) const;
+    static void writeNamedArgumentResolution(TextStream &s, const AbstractMetaFunctionCPtr &func,
+                                             bool usePyArgs, const OverloadData &overloadData);
 
     /// Returns a string containing the name of an argument for the given function and argument index.
     static QString argumentNameFromIndex(const ApiExtractorResult &api,
@@ -432,8 +432,8 @@ private:
     void writeRichCompareFunctionHeader(TextStream &s,
                                         const QString &baseName,
                                         const GeneratorContext &context) const;
-    void writeRichCompareFunctionFooter(TextStream &s,
-                                        const QString &baseName) const;
+    static void writeRichCompareFunctionFooter(TextStream &s,
+                                               const QString &baseName);
     void writeRichCompareFunction(TextStream &s, const GeneratorContext &context) const;
     void writeSmartPointerRichCompareFunction(TextStream &s, const GeneratorContext &context) const;
 
