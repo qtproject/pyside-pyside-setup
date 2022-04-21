@@ -2538,7 +2538,7 @@ static QString pythonToCppConverterForArgumentName(const QString &argumentName)
 }
 
 void CppGenerator::writeTypeCheck(TextStream &s, const QString &customType,
-                                  const QString &argumentName) const
+                                  const QString &argumentName)
 {
     QString errorMessage;
     const auto metaTypeOpt = AbstractMetaType::fromString(customType, &errorMessage);
@@ -2550,7 +2550,7 @@ void CppGenerator::writeTypeCheck(TextStream &s, const QString &customType,
 
 void CppGenerator::writeTypeCheck(TextStream &s, const AbstractMetaType &argType,
                                   const QString &argumentName, bool isNumber,
-                                  bool rejectNull) const
+                                  bool rejectNull)
 {
     // TODO-CONVERTER: merge this with the code below.
     QString typeCheck = cpythonIsConvertibleFunction(argType);
@@ -2620,7 +2620,7 @@ static void checkTypeViability(const AbstractMetaFunctionCPtr &func)
 
 void CppGenerator::writeTypeCheck(TextStream &s,
                                   const QSharedPointer<OverloadDataNode> &overloadData,
-                                  const QString &argumentName) const
+                                  const QString &argumentName)
 {
     QSet<const TypeEntry *> numericTypes;
     const OverloadDataList &siblings = overloadData->parent()->children();
@@ -3523,7 +3523,7 @@ void CppGenerator::writeSetPythonToCppPointerConversion(TextStream &s,
 }
 
 void CppGenerator::writeNamedArgumentResolution(TextStream &s, const AbstractMetaFunctionCPtr &func,
-                                                bool usePyArgs, const OverloadData &overloadData) const
+                                                bool usePyArgs, const OverloadData &overloadData)
 {
     const AbstractMetaArgumentList &args = OverloadData::getArgumentsWithDefaultValues(func);
     if (args.isEmpty()) {
@@ -5152,7 +5152,7 @@ void CppGenerator::writeRichCompareFunction(TextStream &s,
 }
 
 void CppGenerator::writeRichCompareFunctionFooter(TextStream &s,
-                                                  const QString &baseName) const
+                                                  const QString &baseName)
 {
     s << "if (" << PYTHON_RETURN_VAR << " && !PyErr_Occurred())\n";
     {

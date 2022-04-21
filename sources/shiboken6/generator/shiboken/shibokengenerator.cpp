@@ -772,7 +772,7 @@ bool ShibokenGenerator::isNullPtr(const QString &value)
         || value == QLatin1String("NULLPTR") || value == QLatin1String("{}");
 }
 
-QString ShibokenGenerator::cpythonCheckFunction(AbstractMetaType metaType) const
+QString ShibokenGenerator::cpythonCheckFunction(AbstractMetaType metaType)
 {
     const auto *typeEntry = metaType.typeEntry();
     if (typeEntry->isCustom()) {
@@ -841,7 +841,7 @@ QString ShibokenGenerator::cpythonCheckFunction(AbstractMetaType metaType) const
     return cpythonCheckFunction(typeEntry);
 }
 
-QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry *type) const
+QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry *type)
 {
     if (type->isCustom()) {
         const auto *cte = static_cast<const CustomTypeEntry *>(type);
