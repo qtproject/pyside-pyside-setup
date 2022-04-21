@@ -1777,6 +1777,7 @@ bool AbstractMetaClass::determineValueTypeWithCopyConstructorOnly(const Abstract
         case AbstractMetaFunction::ConstructorFunction:
             if (!ctor->isPrivate() && (ctor->isPublic() || !avoidProtectedHack))
                 return false;
+            break;
         case AbstractMetaFunction::CopyConstructorFunction:
             copyConstructorFound = true;
             break;
