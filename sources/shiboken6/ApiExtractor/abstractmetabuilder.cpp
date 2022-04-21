@@ -107,14 +107,35 @@ const AbstractMetaClassList &AbstractMetaBuilder::classes() const
     return d->m_metaClasses;
 }
 
+AbstractMetaClassList AbstractMetaBuilder::takeClasses()
+{
+    AbstractMetaClassList result;
+    qSwap(result, d->m_metaClasses);
+    return result;
+}
+
 const AbstractMetaClassList &AbstractMetaBuilder::templates() const
 {
     return d->m_templates;
 }
 
+AbstractMetaClassList AbstractMetaBuilder::takeTemplates()
+{
+    AbstractMetaClassList result;
+    qSwap(result, d->m_templates);
+    return result;
+}
+
 const AbstractMetaClassList &AbstractMetaBuilder::smartPointers() const
 {
     return d->m_smartPointers;
+}
+
+AbstractMetaClassList AbstractMetaBuilder::takeSmartPointers()
+{
+    AbstractMetaClassList result;
+    qSwap(result, d->m_smartPointers);
+    return result;
 }
 
 const AbstractMetaFunctionCList &AbstractMetaBuilder::globalFunctions() const

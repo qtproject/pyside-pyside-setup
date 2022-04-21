@@ -28,6 +28,7 @@
 
 #include "apiextractor.h"
 #include "apiextractorresult.h"
+#include "apiextractorresultdata_p.h"
 #include "abstractmetaargument.h"
 #include "abstractmetabuilder.h"
 #include "abstractmetaenum.h"
@@ -58,6 +59,7 @@ struct InstantiationCollectContext
     AbstractMetaTypeList instantiatedContainers;
     InstantiatedSmartPointers instantiatedSmartPointers;
     QStringList instantiatedContainersNames;
+    QList<const TypeEntry *> m_synthesizedTypeEntries;
 };
 
 struct ApiExtractorPrivate
@@ -87,8 +89,6 @@ struct ApiExtractorPrivate
     QStringList m_clangOptions;
     AbstractMetaBuilder* m_builder = nullptr;
     QString m_logDirectory;
-    AbstractMetaClassCList m_synthesizedClasses;
-    QList<const TypeEntry *> m_synthesizedTypeEntries;
     LanguageLevel m_languageLevel = LanguageLevel::Default;
     bool m_skipDeprecated = false;
 };
@@ -104,8 +104,6 @@ ApiExtractor::ApiExtractor() :
 
 ApiExtractor::~ApiExtractor()
 {
-    qDeleteAll(d->m_synthesizedClasses);
-    qDeleteAll(d->m_synthesizedTypeEntries);
     delete d->m_builder;
     delete d;
 }
@@ -320,16 +318,19 @@ std::optional<ApiExtractorResult> ApiExtractor::run(ApiExtractorFlags flags)
     InstantiationCollectContext collectContext;
     d->collectInstantiatedContainersAndSmartPointers(collectContext);
 
-    ApiExtractorResult result;
-    classListToCList(d->m_builder->classes(), &result.m_metaClasses);
-    classListToCList(d->m_builder->smartPointers(), &result.m_smartPointers);
-    result.m_globalFunctions = d->m_builder->globalFunctions();
-    result.m_globalEnums = d->m_builder->globalEnums();
-    result.m_enums = d->m_builder->typeEntryToEnumsHash();
-    result.m_flags = flags;
-    result.m_instantiatedContainers = collectContext.instantiatedContainers;
-    result.m_instantiatedSmartPointers = collectContext.instantiatedSmartPointers;
-    return result;
+    auto *data = new ApiExtractorResultData;
+
+    classListToCList(d->m_builder->takeClasses(), &data->m_metaClasses);
+    classListToCList(d->m_builder->takeTemplates(), &data->m_templates);
+    classListToCList(d->m_builder->takeSmartPointers(), &data->m_smartPointers);
+    data->m_globalFunctions = d->m_builder->globalFunctions();
+    data->m_globalEnums = d->m_builder->globalEnums();
+    data->m_enums = d->m_builder->typeEntryToEnumsHash();
+    data->m_flags = flags;
+    qSwap(data->m_instantiatedContainers, collectContext.instantiatedContainers);
+    qSwap(data->m_instantiatedSmartPointers, collectContext.instantiatedSmartPointers);
+    qSwap(data->m_synthesizedTypeEntries, collectContext.m_synthesizedTypeEntries);
+    return ApiExtractorResult(data);
 }
 
 LanguageLevel ApiExtractor::languageLevel() const
@@ -540,9 +541,8 @@ void ApiExtractorPrivate::addInstantiatedSmartPointer(InstantiationCollectContex
     }
 
     context.instantiatedSmartPointers.append(smp);
-    m_synthesizedClasses.append(smp.specialized);
-    m_synthesizedTypeEntries.append(typedefEntry);
-    m_synthesizedTypeEntries.append(instantiationEntry);
+    context.m_synthesizedTypeEntries.append(typedefEntry);
+    context.m_synthesizedTypeEntries.append(instantiationEntry);
 }
 
 void
