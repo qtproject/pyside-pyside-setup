@@ -1263,8 +1263,7 @@ void ShibokenGenerator::processClassCodeSnip(QString &code, const GeneratorConte
     // for the class context in which the variable is used.
     code.replace(QLatin1String("%PYTHONTYPEOBJECT"),
                  u"(*"_qs + cpythonTypeName(metaClass) + u')');
-    const QString className = context.useWrapper()
-        ? context.wrapperName() : metaClass->qualifiedCppName();
+    const QString className = context.effectiveClassName();
     code.replace(QLatin1String("%TYPE"), className);
     code.replace(QLatin1String("%CPPTYPE"), metaClass->name());
 
@@ -1767,9 +1766,7 @@ bool ShibokenGenerator::injectedCodeCallsCppFunction(const GeneratorContext &con
      const auto owner = func->ownerClass();
      if (!owner->isPolymorphic())
          return false;
-    const QString className = context.useWrapper()
-        ? context.wrapperName() : owner->qualifiedCppName();
-    const QString wrappedCtorCall = QLatin1String("new ") + className + QLatin1Char('(');
+    const QString wrappedCtorCall = u"new "_qs + context.effectiveClassName() + u'(';
     return func->injectedCodeContains(wrappedCtorCall);
 }
 
