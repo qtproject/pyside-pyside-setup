@@ -1648,17 +1648,9 @@ return result;)";
 
     c.clear();
 
-    QString computedWrapperName;
-    if (!classContext.forSmartPointer()) {
-        computedWrapperName = classContext.useWrapper()
-            ? classContext.wrapperName() : metaClass->qualifiedCppName();
-    } else {
-        computedWrapperName = classContext.smartPointerWrapperName();
-    }
-
     c << "return Shiboken::Object::newObject(" << cpythonType
-        << ", new ::" << computedWrapperName << "(*reinterpret_cast<const "
-        << typeName << " *>(cppIn)), true, true);";
+        << ", new ::" << classContext.effectiveClassName()
+        << "(*reinterpret_cast<const " << typeName << " *>(cppIn)), true, true);";
     writeCppToPythonFunction(s, c.toString(), sourceTypeName, targetTypeName);
     s << '\n';
 
@@ -1991,13 +1983,7 @@ void CppGenerator::writeMethodWrapperPreamble(TextStream &s,const OverloadData &
             s << qualifiedCppName << " >()))\n" << indent << errorReturn << outdent << '\n';
         }
         // Declare pointer for the underlying C++ object.
-        s << "::";
-        if (!context.forSmartPointer()) {
-            s << (context.useWrapper() ? context.wrapperName() : ownerClass->qualifiedCppName());
-        } else {
-            s << context.smartPointerWrapperName();
-        }
-        s << " *cptr{};\n";
+        s << "::" << context.effectiveClassName() << " *cptr{};\n";
 
         initPythonArguments = maxArgs > 0;
 
@@ -3825,17 +3811,13 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                 isCtor = true;
                 const auto owner = func->ownerClass();
                 Q_ASSERT(owner == context.metaClass());
-                QString className;
-                if (context.useWrapper())
-                    className = context.wrapperName();
-                else if (context.forSmartPointer())
-                    className = context.preciseType().cppSignature();
-                else
-                    className = owner->qualifiedCppName();
-                if (func->functionType() == AbstractMetaFunction::CopyConstructorFunction && maxArgs == 1) {
-                    mc << "new ::" << className << "(*" << CPP_ARG0 << ')';
+                if (func->functionType() == AbstractMetaFunction::CopyConstructorFunction
+                    && maxArgs == 1) {
+                    mc << "new ::" << context.effectiveClassName()
+                        << "(*" << CPP_ARG0 << ')';
                 } else {
-                    QString ctorCall = className + QLatin1Char('(') + userArgs.join(QLatin1String(", ")) + QLatin1Char(')');
+                    const QString ctorCall = context.effectiveClassName() + u'('
+                                             + userArgs.join(u", "_qs) + u')';
                     if (usePySideExtensions() && owner->isQObject()) {
                         s << "void *addr = PySide::nextQObjectMemoryAddr();\n";
                         uva << "if (addr) {\n";
@@ -5774,7 +5756,7 @@ QString CppGenerator::destructorClassName(const AbstractMetaClass *metaClass,
     if (metaClass->isNamespace() || metaClass->hasPrivateDestructor())
         return {};
     if (classContext.forSmartPointer())
-        return classContext.smartPointerWrapperName();
+        return classContext.effectiveClassName();
     const bool isValue = metaClass->typeEntry()->isValue();
     const bool hasProtectedDestructor = metaClass->hasProtectedDestructor();
     if (((avoidProtectedHack() && hasProtectedDestructor) || isValue)

@@ -158,13 +158,10 @@ public:
     bool forSmartPointer() const { return m_type == SmartPointer; }
     bool useWrapper() const { return m_type ==  WrappedClass; }
 
-    QString wrapperName() const
-    {
-        Q_ASSERT(m_type == WrappedClass);
-        return m_wrappername;
-    }
-
-    QString smartPointerWrapperName() const;
+    QString wrapperName() const;
+    /// Returns the wrapper name in case of useWrapper(), the qualified class
+    /// name or the smart pointer specialization.
+    QString effectiveClassName() const;
 
 private:
     const AbstractMetaClass *m_metaClass = nullptr;

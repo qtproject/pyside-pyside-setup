@@ -179,10 +179,17 @@ QDebug operator<<(QDebug debug, const GeneratorContext &c)
 
 #endif // !QT_NO_DEBUG_STREAM
 
-QString GeneratorContext::smartPointerWrapperName() const
+QString GeneratorContext::wrapperName() const
 {
-    Q_ASSERT(m_type == SmartPointer);
-    return m_preciseClassType.cppSignature();
+    Q_ASSERT(m_type == WrappedClass);
+    return m_wrappername;
+}
+
+QString GeneratorContext::effectiveClassName() const
+{
+    if (m_type == SmartPointer)
+        return m_preciseClassType.cppSignature();
+    return m_type == WrappedClass ? m_wrappername : m_metaClass->qualifiedCppName();
 }
 
 struct Generator::GeneratorPrivate

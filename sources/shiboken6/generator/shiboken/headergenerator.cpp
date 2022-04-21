@@ -81,13 +81,7 @@ void HeaderGenerator::generateClass(TextStream &s, const GeneratorContext &class
     // write license comment
     s << licenseComment();
 
-    QString wrapperName;
-    if (!classContext.forSmartPointer()) {
-        wrapperName = classContext.useWrapper()
-            ? classContext.wrapperName() : metaClass->qualifiedCppName();
-    } else {
-        wrapperName = classContext.smartPointerWrapperName();
-    }
+    QString wrapperName = classContext.effectiveClassName();
     QString outerHeaderGuard = getFilteredCppSignatureString(wrapperName).toUpper();
     QString innerHeaderGuard;
 
@@ -201,12 +195,7 @@ void *qt_metacast(const char *_clname) override;
         if (!metaClass || !avoidProtectedHack())
             break;
         classContext = contextForClass(metaClass);
-        if (!classContext.forSmartPointer()) {
-            wrapperName = classContext.useWrapper()
-                ? classContext.wrapperName() : metaClass->qualifiedCppName();
-        } else {
-            wrapperName = classContext.smartPointerWrapperName();
-        }
+        wrapperName =  classContext.effectiveClassName();
         innerHeaderGuard = getFilteredCppSignatureString(wrapperName).toUpper();
     }
 
