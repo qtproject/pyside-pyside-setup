@@ -29,8 +29,8 @@
 #ifndef REPORTHANDLER_H
 #define REPORTHANDLER_H
 
-#include <QLoggingCategory>
-#include <QString>
+#include <QtCore/QLoggingCategory>
+#include <QtCore/QString>
 
 Q_DECLARE_LOGGING_CATEGORY(lcShiboken)
 Q_DECLARE_LOGGING_CATEGORY(lcShibokenDoc)

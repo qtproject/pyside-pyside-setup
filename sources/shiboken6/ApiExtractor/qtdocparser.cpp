@@ -41,7 +41,7 @@
 
 #include <QtCore/QDir>
 #include <QtCore/QFile>
-#include <QUrl>
+#include <QtCore/QUrl>
 
 enum { debugFunctionSearch = 0 };
 

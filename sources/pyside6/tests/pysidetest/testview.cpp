@@ -28,10 +28,10 @@
 
 #include "testview.h"
 
-#include <QDebug>
-#include <QWidget>
-#include <QAbstractListModel>
-#include <QAbstractItemDelegate>
+#include <QtCore/QDebug>
+#include <QtCore/QAbstractListModel>
+#include <QtWidgets/QAbstractItemDelegate>
+#include <QtWidgets/QWidget>
 
 QVariant
 TestView::getData()

@@ -41,10 +41,12 @@
 #define PYSIDE_QPROPERTY_P_H
 
 #include <sbkpython.h>
-#include <QtCore/QByteArray>
-#include <QMetaObject>
+
 #include "pysideproperty.h"
 #include <pysidemacros.h>
+
+#include <QtCore/QByteArray>
+#include <QtCore/QMetaObject>
 
 struct PySideProperty;
 

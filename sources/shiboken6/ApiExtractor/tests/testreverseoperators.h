@@ -28,7 +28,7 @@
 
 #ifndef TESTREVERSEOPERATORS_H
 #define TESTREVERSEOPERATORS_H
-#include <QObject>
+#include <QtCore/QObject>
 
 class TestReverseOperators : public QObject
 {

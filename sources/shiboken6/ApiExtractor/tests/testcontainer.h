@@ -28,7 +28,7 @@
 
 #ifndef TESTCONTAINER_H
 #define TESTCONTAINER_H
-#include <QObject>
+#include <QtCore/QObject>
 
 class TestContainer : public QObject
 {

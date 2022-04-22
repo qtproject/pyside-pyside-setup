@@ -27,16 +27,16 @@
 ****************************************************************************/
 
 #include "testmodifydocumentation.h"
-
-#include <QCoreApplication>
-#include <QtCore/QTemporaryDir>
-#include <QtTest/QTest>
 #include "testutil.h"
 #include <abstractmetalang.h>
 #include <documentation.h>
 #include <modifications.h>
 #include <typesystem.h>
 #include <qtdocparser.h>
+
+#include <QtCore/QCoreApplication>
+#include <QtCore/QTemporaryDir>
+#include <QtTest/QTest>
 
 void TestModifyDocumentation::testModifyDocumentation()
 {

@@ -36,10 +36,11 @@
 #include "reporthandler.h"
 #include "typesystem.h"
 #include "xmlutils.h"
+
+#include <QtCore/QBuffer>
 #include <QtCore/QDebug>
 #include <QtCore/QDir>
 #include <QtCore/QTextStream>
-#include <QBuffer>
 
 #include <cstdlib>
 #ifdef HAVE_LIBXSLT

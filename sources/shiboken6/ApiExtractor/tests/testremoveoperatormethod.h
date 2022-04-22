@@ -29,7 +29,7 @@
 #ifndef TESTREMOVEOPERATORMETHOD_H
 #define TESTREMOVEOPERATORMETHOD_H
 
-#include <QObject>
+#include <QtCore/QObject>
 
 class TestRemoveOperatorMethod : public QObject
 {

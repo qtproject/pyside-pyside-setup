@@ -29,7 +29,7 @@
 #ifndef TESTRESOLVETYPE_H
 #define TESTRESOLVETYPE_H
 
-#include <QObject>
+#include <QtCore/QObject>
 
 class TestResolveType : public QObject
 {

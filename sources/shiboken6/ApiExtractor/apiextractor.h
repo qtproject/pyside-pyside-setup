@@ -34,8 +34,9 @@
 #include "apiextractorflags.h"
 #include "header_paths.h"
 #include "clangparser/compilersupport.h"
-#include <QFileInfoList>
-#include <QStringList>
+
+#include <QtCore/QFileInfoList>
+#include <QtCore/QStringList>
 
 #include <optional>
 

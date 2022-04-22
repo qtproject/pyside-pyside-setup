@@ -29,7 +29,7 @@
 #ifndef EXCEPTION_H
 #define EXCEPTION_H
 
-#include <QString>
+#include <QtCore/QString>
 
 #include <string>
 #include <exception>

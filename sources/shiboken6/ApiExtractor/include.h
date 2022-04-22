@@ -29,8 +29,8 @@
 #ifndef INCLUDE_H
 #define INCLUDE_H
 
-#include <QString>
-#include <QList>
+#include <QtCore/QString>
+#include <QtCore/QList>
 
 QT_BEGIN_NAMESPACE
 class QTextStream;
