@@ -45,8 +45,8 @@ our [guidelines](https://wiki.qt.io/Qt_for_Python/Reporting_Bugs).
 
 ### Community
 
-Check *#qt-pyside*, our official IRC channel on FreeNode, or contact us via our
-[mailing list](https://lists.qt-project.org/mailman/listinfo/pyside).
+Check our channels on IRC (Libera), Telegram, Gitter, Matrix, and mailing list,
+and [join our community](https://wiki.qt.io/Qt_for_Python#Community)!
 
 ### Licensing
 
