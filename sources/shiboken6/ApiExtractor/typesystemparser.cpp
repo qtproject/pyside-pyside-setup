@@ -143,12 +143,12 @@ static bool setRejectionRegularExpression(const QString &patternIn,
                                           QString *errorMessage)
 {
     QString pattern;
-    if (patternIn.startsWith(QLatin1Char('^')) && patternIn.endsWith(QLatin1Char('$')))
+    if (patternIn.startsWith(u'^') && patternIn.endsWith(u'$'))
         pattern = patternIn;
     else if (patternIn == QLatin1String("*"))
         pattern = QStringLiteral("^.*$");
     else
-        pattern = QLatin1Char('^') + QRegularExpression::escape(patternIn) + QLatin1Char('$');
+        pattern = u'^' + QRegularExpression::escape(patternIn) + u'$';
     re->setPattern(pattern);
     if (!re->isValid()) {
         *errorMessage = msgInvalidRegularExpression(patternIn, re->errorString());
@@ -172,7 +172,7 @@ std::optional<QString>
     bool useLine = false;
     bool foundLabel = false;
     QString result;
-    const auto lines = QStringView{code}.split(QLatin1Char('\n'));
+    const auto lines = QStringView{code}.split(u'\n');
     for (const auto &line : lines) {
         if (snippetRe.match(line).hasMatch()) {
             foundLabel = true;
@@ -180,7 +180,7 @@ std::optional<QString>
             if (!useLine)
                 break; // End of snippet reached
         } else if (useLine)
-            result += line.toString() + QLatin1Char('\n');
+            result += line.toString() + u'\n';
     }
     if (!foundLabel)
         return {};
@@ -561,7 +561,7 @@ private:
 QString TypeSystemEntityResolver::readFile(const QString &entityName, QString *errorMessage) const
 {
     QString fileName = entityName;
-    if (!fileName.contains(QLatin1Char('.')))
+    if (!fileName.contains(u'.'))
         fileName += QLatin1String(".xml");
     QString path = TypeDatabase::instance()->modifiedTypesystemFilepath(fileName, m_currentPath);
     if (!QFileInfo::exists(path)) // PySide6-specific hack
@@ -1108,7 +1108,7 @@ bool TypeSystemParser::importFileElement(const QXmlStreamAttributes &atts)
             break;
         }
         if (from && to)
-            characters(line + QLatin1Char('\n'));
+            characters(line + u'\n');
         if (!from && line.contains(quoteFrom)) {
             from = true;
             foundFromOk = true;
@@ -1125,7 +1125,7 @@ bool TypeSystemParser::importFileElement(const QXmlStreamAttributes &atts)
         if (!foundFromOk)
             m_error = fromError;
         if (!foundFromOk && !foundToOk)
-            m_error = fromError + QLatin1Char(' ') + toError;
+            m_error = fromError + u' ' + toError;
         return false;
     }
 
@@ -1169,7 +1169,7 @@ static bool shouldDropTypeEntry(const TypeDatabase *db,
                 if (db->shouldDropTypeEntry(name)) // Unqualified
                     return true;
             }
-            name.prepend(QLatin1Char('.'));
+            name.prepend(u'.');
             name.prepend(entry->name());
         }
     }
@@ -1179,7 +1179,7 @@ static bool shouldDropTypeEntry(const TypeDatabase *db,
 // Returns empty string if there's no error.
 static QString checkSignatureError(const QString& signature, const QString& tag)
 {
-    QString funcName = signature.left(signature.indexOf(QLatin1Char('('))).trimmed();
+    QString funcName = signature.left(signature.indexOf(u'(')).trimmed();
     static const QRegularExpression whiteSpace(QStringLiteral("\\s"));
     Q_ASSERT(whiteSpace.isValid());
     if (!funcName.startsWith(QLatin1String("operator ")) && funcName.contains(whiteSpace)) {
@@ -1273,7 +1273,7 @@ FlagsTypeEntry *
 {
     if (!checkRootElement())
         return nullptr;
-    auto ftype = new FlagsTypeEntry(QLatin1String("QFlags<") + enumEntry->name() + QLatin1Char('>'),
+    auto ftype = new FlagsTypeEntry(QLatin1String("QFlags<") + enumEntry->name() + u'>',
                                     since,
                                     currentParentTypeEntry()->typeSystemTypeEntry());
     ftype->setOriginator(enumEntry);
@@ -1290,15 +1290,16 @@ FlagsTypeEntry *
         return nullptr;
 
     QStringList lst = flagName.split(colonColon());
-    const QString targetLangFlagName = QStringList(lst.mid(0, lst.size() - 1)).join(QLatin1Char('.'));
+    const QString name = lst.takeLast();
+    const QString targetLangFlagName = lst.join(u'.');
     const QString &targetLangQualifier = enumEntry->targetLangQualifier();
     if (targetLangFlagName != targetLangQualifier) {
         qCWarning(lcShiboken).noquote().nospace()
             << QStringLiteral("enum %1 and flags %2 (%3) differ in qualifiers")
-                              .arg(targetLangQualifier, lst.constFirst(), targetLangFlagName);
+                              .arg(targetLangQualifier, lst.value(0), targetLangFlagName);
     }
 
-    ftype->setFlagsName(lst.constLast());
+    ftype->setFlagsName(name);
     enumEntry->setFlags(ftype);
 
     m_context->db->addFlagsType(ftype);
@@ -1514,7 +1515,7 @@ EnumTypeEntry *
 
     // put in the flags parallel...
     if (!flagNames.isEmpty()) {
-        const QStringList &flagNameList = flagNames.split(QLatin1Char(','));
+        const QStringList &flagNameList = flagNames.split(u',');
         for (const QString &flagName : flagNameList)
             parseFlagsEntry(reader, entry, flagName.trimmed(), since, attributes);
     }
@@ -1818,7 +1819,7 @@ bool TypeSystemParser::parseRenameFunction(const ConditionalStreamReader &,
         return false;
     }
 
-    *name = signature.left(signature.indexOf(QLatin1Char('('))).trimmed();
+    *name = signature.left(signature.indexOf(u'(')).trimmed();
 
     QString errorString = checkSignatureError(signature, QLatin1String("function"));
     if (!errorString.isEmpty()) {
@@ -2438,7 +2439,7 @@ bool TypeSystemParser::parseAddFunction(const ConditionalStreamReader &,
 
     // Create signature for matching modifications
     signature = TypeDatabase::normalizedSignature(originalSignature);
-    if (!signature.contains(QLatin1Char('(')))
+    if (!signature.contains(u'('))
         signature += QLatin1String("()");
     m_currentSignature = signature;
 
@@ -2754,7 +2755,7 @@ bool TypeSystemParser::readFileSnippet(QXmlStreamAttributes *attributes, CodeSni
 
     QString source = fileName;
     if (!snippetLabel.isEmpty())
-        source += QLatin1String(" (") + snippetLabel + QLatin1Char(')');
+        source += QLatin1String(" (") + snippetLabel + u')';
     QString content;
     QTextStream str(&content);
     str << "// ========================================================================\n"
@@ -3020,7 +3021,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
             }
         }
         // Allow for primitive and/or std:: types only, else require proper nesting.
-        if (element != StackElement::PrimitiveTypeEntry && name.contains(QLatin1Char(':'))
+        if (element != StackElement::PrimitiveTypeEntry && name.contains(u':')
             && !name.contains(QLatin1String("std::"))) {
             m_error = msgIncorrectlyNestedName(name);
             return false;

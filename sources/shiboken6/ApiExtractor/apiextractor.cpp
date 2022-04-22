@@ -237,7 +237,7 @@ bool ApiExtractorPrivate::runHelper(ApiExtractorFlags flags)
         return false;
     }
 
-    const QString pattern = QDir::tempPath() + QLatin1Char('/')
+    const QString pattern = QDir::tempPath() + u'/'
         + m_cppFileNames.constFirst().baseName()
         + QStringLiteral("_XXXXXX.hpp");
     QTemporaryFile ppFile(pattern);
@@ -384,7 +384,7 @@ QString ApiExtractorPrivate::getSimplifiedContainerTypeName(const AbstractMetaTy
         typeName.chop(2);
         break;
     }
-    while (typeName.endsWith(QLatin1Char('*')) || typeName.endsWith(QLatin1Char(' ')))
+    while (typeName.endsWith(u'*') || typeName.endsWith(u' '))
         typeName.chop(1);
     return typeName;
 }
@@ -607,9 +607,9 @@ ApiExtractorPrivate::collectContainerTypesFromConverterMacros(InstantiationColle
     int start = 0;
     QString errorMessage;
     while ((start = code.indexOf(convMacro, start)) != -1) {
-        int end = code.indexOf(QLatin1Char(']'), start);
+        int end = code.indexOf(u']', start);
         start += offset;
-        if (code.at(start) != QLatin1Char('%')) {
+        if (code.at(start) != u'%') {
             QString typeString = code.mid(start, end - start);
             auto type = AbstractMetaType::fromString(typeString, &errorMessage);
             if (type.has_value()) {

@@ -208,7 +208,7 @@ QString AbstractMetaEnum::package() const
 
 QString AbstractMetaEnum::fullName() const
 {
-    return package() + QLatin1Char('.') + qualifier()  + QLatin1Char('.') + name();
+    return package() + u'.' + qualifier()  + u'.' + name();
 }
 
 EnumKind AbstractMetaEnum::enumKind() const

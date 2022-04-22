@@ -500,7 +500,7 @@ QString msgNamespaceToBeExtendedNotFound(const QString &namespaceName, const QSt
 {
     return QLatin1String("The namespace '") + namespaceName
         + QLatin1String("' to be extended cannot be found in package ")
-        + packageName + QLatin1Char('.');
+        + packageName + u'.';
 }
 
 QString msgPropertyTypeParsingFailed(const QString &name, const QString &typeName,
@@ -716,14 +716,14 @@ QString msgLeftOverArguments(const QVariantMap &remainingArgs)
         if (!value.isEmpty())
             str << ' ' << value;
     }
-    str << "\nCommand line: " << QCoreApplication::arguments().join(QLatin1Char(' '));
+    str << "\nCommand line: " << QCoreApplication::arguments().join(u' ');
     return message;
 }
 
 QString msgInvalidVersion(const QString &package, const QString &version)
 {
     return QLatin1String("Invalid version \"") + version
-        + QLatin1String("\" specified for package ") + package + QLatin1Char('.');
+        + QLatin1String("\" specified for package ") + package + u'.';
 }
 
 QString msgCyclicDependency(const QString &funcName, const QString &graphName,
@@ -771,7 +771,7 @@ QString msgEnclosingClassNotFound(const TypeEntry *t)
 QString msgUnknownOperator(const AbstractMetaFunction* func)
 {
     QString result = QLatin1String("Unknown operator: \"") + func->originalName()
-                     + QLatin1Char('"');
+                     + u'"';
     if (const AbstractMetaClass *c = func->implementingClass())
         result += QLatin1String(" in class: ") + c->name();
     return result;

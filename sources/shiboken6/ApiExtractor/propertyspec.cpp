@@ -200,7 +200,7 @@ TypeSystemProperty QPropertySpec::typeSystemPropertyFromQ_Property(const QString
     // Q_PROPERTY(QString objectName READ objectName WRITE setObjectName NOTIFY objectNameChanged)
 
     const QString declaration = declarationIn.simplified();
-    auto propertyTokens = declaration.split(QLatin1Char(' '), Qt::SkipEmptyParts);
+    auto propertyTokens = declaration.split(u' ', Qt::SkipEmptyParts);
 
     // To properly parse complicated type declarations like
     // "Q_PROPERTY(const QList<QString > *objectName READ objectName ..."
@@ -243,7 +243,7 @@ TypeSystemProperty QPropertySpec::typeSystemPropertyFromQ_Property(const QString
 
     result.type = propertyTokens.constFirst();
     for (int pos = 1; pos < namePos; ++pos)
-        result.type += QLatin1Char(' ') + propertyTokens.at(pos);
+        result.type += u' ' + propertyTokens.at(pos);
 
     // Fix errors like "Q_PROPERTY(QXYSeries *series .." to be of type "QXYSeries*"
     while (!result.name.isEmpty() && !result.name.at(0).isLetter()) {

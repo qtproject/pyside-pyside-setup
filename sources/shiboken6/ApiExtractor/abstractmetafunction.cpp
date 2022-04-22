@@ -483,7 +483,7 @@ QString AbstractMetaFunctionPrivate::signature() const
     if (m_cachedSignature.isEmpty()) {
         m_cachedSignature = m_originalName;
 
-        m_cachedSignature += QLatin1Char('(');
+        m_cachedSignature += u'(';
 
         for (qsizetype i = 0; i < m_arguments.size(); ++i) {
             const AbstractMetaArgument &a = m_arguments.at(i);
@@ -492,10 +492,10 @@ QString AbstractMetaFunctionPrivate::signature() const
                 m_cachedSignature += QLatin1String(", ");
             m_cachedSignature += t.cppSignature();
             // We need to have the argument names in the qdoc files
-            m_cachedSignature += QLatin1Char(' ');
+            m_cachedSignature += u' ';
             m_cachedSignature += a.name();
         }
-        m_cachedSignature += QLatin1Char(')');
+        m_cachedSignature += u')';
 
         if (m_constant)
             m_cachedSignature += QLatin1String(" const");
@@ -895,16 +895,16 @@ QString AbstractMetaFunction::pyiTypeReplaced(int argumentIndex) const
 QString AbstractMetaFunctionPrivate::formatMinimalSignature(const AbstractMetaFunction *q,
                                                             bool comment) const
 {
-    QString result = m_originalName + QLatin1Char('(');
+    QString result = m_originalName + u'(';
     for (qsizetype i = 0; i < m_arguments.size(); ++i) {
         if (i > 0)
-            result += QLatin1Char(',');
+            result += u',';
 
         result += comment
             ? m_arguments.at(i).modifiedType().minimalSignature()
             : m_arguments.at(i).type().minimalSignature();
     }
-    result += QLatin1Char(')');
+    result += u')';
     if (m_constant)
         result += QLatin1String("const");
     result = TypeDatabase::normalizedSignature(result);

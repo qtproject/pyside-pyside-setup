@@ -143,7 +143,7 @@ R"(<xsl:template match="/">
     for (const DocModification &mod : mods) {
         if (isXpathDocModification(mod)) {
             QString xpath = mod.xpath();
-            xpath.replace(QLatin1Char('"'), QLatin1String("&quot;"));
+            xpath.replace(u'"', QLatin1String("&quot;"));
             xsl += QLatin1String("<xsl:template match=\"")
                    + xpath + QLatin1String("\">")
                    + mod.code() + QLatin1String("</xsl:template>\n");
@@ -157,7 +157,7 @@ R"(<xsl:template match="/">
                   qPrintable(msgXpathDocModificationError(mods, errorMessage)));
     if (result == xml) {
         const QString message = QLatin1String("Query did not result in any modifications to \"")
-            + xml + QLatin1Char('"');
+            + xml + u'"';
         qCWarning(lcShibokenDoc, "%s",
                   qPrintable(msgXpathDocModificationError(mods, message)));
     }

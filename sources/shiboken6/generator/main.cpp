@@ -130,14 +130,14 @@ static void printOptions(QTextStream &s, const OptionDescriptions &options)
 {
     s.setFieldAlignment(QTextStream::AlignLeft);
     for (const auto &od : options) {
-        if (!od.first.startsWith(QLatin1Char('-')))
+        if (!od.first.startsWith(u'-'))
             s << "--";
         s << od.first;
         if (od.second.isEmpty()) {
             s << ", ";
         } else {
             s << Qt::endl;
-            const auto lines = QStringView{od.second}.split(QLatin1Char('\n'));
+            const auto lines = QStringView{od.second}.split(u'\n');
             for (const auto &line : lines)
                 s << "        " << line << Qt::endl;
             s << Qt::endl;
@@ -222,7 +222,7 @@ static std::optional<CommandLineArguments> getProjectFileArguments()
     QString projectFileName;
     for (const QString &arg : qAsConst(arguments)) {
         if (arg.startsWith(QLatin1String("--project-file"))) {
-            int split = arg.indexOf(QLatin1Char('='));
+            int split = arg.indexOf(u'=');
             if (split > 0)
                 projectFileName = arg.mid(split + 1).trimmed();
             break;
@@ -252,7 +252,7 @@ static void getCommandLineArg(QString arg, int &argNum, CommandLineArguments &ar
 {
     if (arg.startsWith(QLatin1String("--"))) {
         arg.remove(0, 2);
-        const int split = arg.indexOf(QLatin1Char('='));
+        const int split = arg.indexOf(u'=');
         if (split < 0) {
             args.options.insert(arg, QString());
             return;
@@ -277,15 +277,15 @@ static void getCommandLineArg(QString arg, int &argNum, CommandLineArguments &ar
         }
         return;
     }
-    if (arg.startsWith(QLatin1Char('-'))) {
+    if (arg.startsWith(u'-')) {
         arg.remove(0, 1);
-        if (arg.startsWith(QLatin1Char('I'))) // Shorthand path arguments -I/usr/include...
+        if (arg.startsWith(u'I')) // Shorthand path arguments -I/usr/include...
             args.addToOptionsPathList(includePathOption(), arg.mid(1));
-        else if (arg.startsWith(QLatin1Char('F')))
+        else if (arg.startsWith(u'F'))
             args.addToOptionsPathList(frameworkIncludePathOption(), arg.mid(1));
         else if (arg.startsWith(QLatin1String("isystem")))
             args.addToOptionsPathList(systemIncludePathOption(), arg.mid(7));
-        else if (arg.startsWith(QLatin1Char('T')))
+        else if (arg.startsWith(u'T'))
             args.addToOptionsPathList(typesystemPathOption(), arg.mid(1));
         else if (arg == QLatin1String("h"))
             args.options.insert(helpOption(), QString());
@@ -330,7 +330,7 @@ static inline QString languageLevelDescription()
 {
     return QLatin1String("C++ Language level (c++11..c++17, default=")
         + QLatin1String(clang::languageLevelOption(clang::emulatedCompilerLanguageLevel()))
-        + QLatin1Char(')');
+        + u')';
 }
 
 void printUsage()
@@ -447,7 +447,7 @@ int shibokenMain(int argc, char *argv[])
     QCoreApplication app(argc, argv);
     ReportHandler::install();
     if (ReportHandler::isDebug(ReportHandler::SparseDebug))
-        qCInfo(lcShiboken()).noquote().nospace() << QCoreApplication::arguments().join(QLatin1Char(' '));
+        qCInfo(lcShiboken()).noquote().nospace() << QCoreApplication::arguments().join(u' ');
 
     // Store command arguments in a map
     const auto projectFileArgumentsOptional = getProjectFileArguments();
@@ -577,7 +577,7 @@ int shibokenMain(int argc, char *argv[])
         const QStringList &versions = ait.value().toStringList();
         args.options.erase(ait);
         for (const QString &fullVersion : versions) {
-            QStringList parts = fullVersion.split(QLatin1Char(','));
+            QStringList parts = fullVersion.split(u',');
             QString package;
             QString version;
             package = parts.size() == 1 ? u"*"_qs : parts.constFirst();
@@ -631,13 +631,13 @@ int shibokenMain(int argc, char *argv[])
     QString messagePrefix = QFileInfo(typeSystemFileName).baseName();
     if (messagePrefix.startsWith(QLatin1String("typesystem_")))
         messagePrefix.remove(0, 11);
-    ReportHandler::setPrefix(QLatin1Char('(') + messagePrefix + QLatin1Char(')'));
+    ReportHandler::setPrefix(u'(' + messagePrefix + u')');
 
     QFileInfoList cppFileNames;
     for (const QString &cppFileName : qAsConst(args.positionalArguments)) {
         const QFileInfo cppFileNameFi(cppFileName);
         if (!cppFileNameFi.isFile() && !cppFileNameFi.isSymLink()) {
-            errorPrint(QLatin1Char('"') + cppFileName + QLatin1String("\" does not exist."));
+            errorPrint(u'"' + cppFileName + QLatin1String("\" does not exist."));
             return EXIT_FAILURE;
         }
         cppFileNames.append(cppFileNameFi);
@@ -720,7 +720,7 @@ int shibokenMain(int argc, char *argv[])
         ReportHandler::endProgress();
          if (!ok) {
              errorPrint(QLatin1String("Error running generator: ")
-                        + QLatin1String(g->name()) + QLatin1Char('.'));
+                        + QLatin1String(g->name()) + u'.');
              return EXIT_FAILURE;
          }
     }

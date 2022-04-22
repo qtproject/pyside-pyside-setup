@@ -65,9 +65,9 @@ void TestCodeInjections::testReadFile()
     char *argv[] = {nullptr};
     QCoreApplication app(argc, argv);
 
-    QString attribute = QLatin1String("file='") + filePath + QLatin1Char('\'');
+    QString attribute = QLatin1String("file='") + filePath + u'\'';
     if (!snippet.isEmpty())
-        attribute += QLatin1String(" snippet='") + snippet + QLatin1Char('\'');
+        attribute += QLatin1String(" snippet='") + snippet + u'\'';
 
     QString xmlCode = QLatin1String("\
     <typesystem package=\"Foo\">\n\

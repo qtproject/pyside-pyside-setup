@@ -115,7 +115,8 @@ MainWindow::MainWindow()
 
 void MainWindow::slotRunScript()
 {
-    const QStringList script = m_scriptEdit->toPlainText().trimmed().split(QLatin1Char('\n'), Qt::SkipEmptyParts);
+    const QString text = m_scriptEdit->toPlainText().trimmed();
+    const QStringList script = text.split(u'\n', Qt::SkipEmptyParts);
     if (!script.isEmpty())
         runScript(script);
 }

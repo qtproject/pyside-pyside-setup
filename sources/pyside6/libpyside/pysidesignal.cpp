@@ -1069,15 +1069,15 @@ QStringList getArgsFromSignature(const char *signature, bool *isShortCircuit)
     QStringList result;
 
     if (isShortCircuit)
-        *isShortCircuit = !qsignature.contains(QLatin1Char('('));
+        *isShortCircuit = !qsignature.contains(u'(');
     if (qsignature.contains(QLatin1String("()")) || qsignature.contains(QLatin1String("(void)")))
         return result;
-    if (qsignature.endsWith(QLatin1Char(')'))) {
-        const int paren = qsignature.indexOf(QLatin1Char('('));
+    if (qsignature.endsWith(u')')) {
+        const int paren = qsignature.indexOf(u'(');
         if (paren >= 0) {
             qsignature.chop(1);
             qsignature.remove(0, paren + 1);
-            result = qsignature.split(QLatin1Char(','));
+            result = qsignature.split(u',');
             for (QString &type : result)
                 type = type.trimmed();
         }
@@ -1160,13 +1160,13 @@ QString getCallbackSignature(const char *signal, QObject *receiver, PyObject *ca
     QStringList args = getArgsFromSignature(signal, &isShortCircuit);
 
     if (!isShortCircuit) {
-        signature.append(QLatin1Char('('));
+        signature.append(u'(');
         if (numArgs == -1)
             numArgs = std::numeric_limits<qsizetype>::max();
         while (!args.isEmpty() && (args.size() > (numArgs - useSelf)))
             args.removeLast();
-        signature.append(args.join(QLatin1Char(',')));
-        signature.append(QLatin1Char(')'));
+        signature.append(args.join(u','));
+        signature.append(u')');
     }
     return signature;
 }

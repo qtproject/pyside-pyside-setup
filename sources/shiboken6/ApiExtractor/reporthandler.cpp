@@ -142,12 +142,12 @@ void ReportHandler::messageOutput(QtMsgType type, const QMessageLogContext &cont
     }
     QString message = m_prefix;
     if (!message.isEmpty())
-        message.append(QLatin1Char(' '));
+        message.append(u' ');
     const int prefixLength = message.size();
     message.append(text);
     // Replace file location tab by space
     if (fileLocationPos >= 0)
-        message[prefixLength + fileLocationPos + 1] = QLatin1Char(' ');
+        message[prefixLength + fileLocationPos + 1] = u' ';
     fprintf(stderr, "%s\n", qPrintable(qFormatLogMessage(type, context, message)));
 }
 

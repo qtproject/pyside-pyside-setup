@@ -51,9 +51,9 @@ QString CodeSnipHelpers::dedent(const QString &code)
     if (code.isEmpty())
         return code;
     // Right trim if indent=0, or trim if single line
-    if (!code.at(0).isSpace() || !code.contains(QLatin1Char('\n')))
+    if (!code.at(0).isSpace() || !code.contains(u'\n'))
         return code.trimmed();
-    const auto lines = QStringView{code}.split(QLatin1Char('\n'));
+    const auto lines = QStringView{code}.split(u'\n');
     int spacesToRemove = std::numeric_limits<int>::max();
     for (const auto &line : lines) {
         if (!isEmpty(line)) {
@@ -68,35 +68,35 @@ QString CodeSnipHelpers::dedent(const QString &code)
     for (const auto &line : lines) {
         if (!isEmpty(line) && spacesToRemove < line.size())
             result += line.mid(spacesToRemove).toString();
-        result += QLatin1Char('\n');
+        result += u'\n';
     }
     return result;
 }
 
 QString CodeSnipHelpers::fixSpaces(QString code)
 {
-    code.remove(QLatin1Char('\r'));
+    code.remove(u'\r');
     // Check for XML <tag>\n<space>bla...
     if (code.startsWith(QLatin1String("\n ")))
         code.remove(0, 1);
     while (!code.isEmpty() && code.back().isSpace())
         code.chop(1);
     code = dedent(code);
-    if (!code.isEmpty() && !code.endsWith(QLatin1Char('\n')))
-        code.append(QLatin1Char('\n'));
+    if (!code.isEmpty() && !code.endsWith(u'\n'))
+        code.append(u'\n');
     return code;
 }
 
 // Prepend a line to the code, observing indentation
 void CodeSnipHelpers::prependCode(QString *code, QString firstLine)
 {
-    while (!code->isEmpty() && code->front() == QLatin1Char('\n'))
+    while (!code->isEmpty() && code->front() == u'\n')
         code->remove(0, 1);
     if (!code->isEmpty() && code->front().isSpace()) {
         const int indent = firstNonBlank(*code);
-        firstLine.prepend(QString(indent, QLatin1Char(' ')));
+        firstLine.prepend(QString(indent, u' '));
     }
-    if (!firstLine.endsWith(QLatin1Char('\n')))
-        firstLine += QLatin1Char('\n');
+    if (!firstLine.endsWith(u'\n'))
+        firstLine += u'\n';
     code->prepend(firstLine);
 }
