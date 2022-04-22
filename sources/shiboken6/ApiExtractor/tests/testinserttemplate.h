@@ -29,7 +29,7 @@
 #ifndef TESTINSERTTEMPLATE_H
 #define TESTINSERTTEMPLATE_H
 
-#include <QObject>
+#include <QtCore/QObject>
 
 class TestInsertTemplate : public QObject
 {

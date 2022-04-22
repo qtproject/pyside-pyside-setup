@@ -29,7 +29,7 @@
 #ifndef TESTREMOVEFIELD_H
 #define TESTREMOVEFIELD_H
 
-#include <QObject>
+#include <QtCore/QObject>
 
 class TestRemoveField : public QObject
 {

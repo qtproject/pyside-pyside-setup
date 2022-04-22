@@ -26,8 +26,6 @@
 **
 ****************************************************************************/
 
-#include <memory>
-
 #include "cppgenerator.h"
 #include "headergenerator.h"
 #include "apiextractor.h"
@@ -50,15 +48,16 @@
 #include <typedatabase.h>
 #include <parser/enumvalue.h>
 
+#include <QtCore/QDebug>
 #include <QtCore/QDir>
 #include <QtCore/QMetaObject>
+#include <QtCore/QMetaType>
 #include <QtCore/QRegularExpression>
 #include <QtCore/QTextStream>
-#include <QtCore/QDebug>
-#include <QMetaType>
 
 #include <algorithm>
 #include <cstring>
+#include <memory>
 
 static const char CPP_ARG0[] = "cppArg0";
 const char *CppGenerator::PYTHON_TO_CPPCONVERSION_STRUCT = "Shiboken::Conversions::PythonToCppConversion";

@@ -42,7 +42,7 @@
 
 #include <sbkpython.h>
 
-#include <QSharedPointer>
+#include <QtCore/QSharedPointer>
 
 namespace PySide::Qml {
 struct QmlExtensionInfo;

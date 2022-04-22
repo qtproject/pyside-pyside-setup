@@ -29,7 +29,7 @@
 #ifndef TESTVALUETYPEDEFAULTCTORTAG_H
 #define TESTVALUETYPEDEFAULTCTORTAG_H
 
-#include <QObject>
+#include <QtCore/QObject>
 
 class TestValueTypeDefaultCtorTag : public QObject
 {

@@ -28,7 +28,7 @@
 
 #ifndef TESTADDFUNCTION_H
 #define TESTADDFUNCTION_H
-#include <QObject>
+#include <QtCore/QObject>
 
 class TestAddFunction : public QObject
 {

@@ -28,7 +28,7 @@
 
 #ifndef TESTCONVERSIONOPERATOR_H
 #define TESTCONVERSIONOPERATOR_H
-#include <QObject>
+#include <QtCore/QObject>
 
 class TestConversionOperator : public QObject
 {

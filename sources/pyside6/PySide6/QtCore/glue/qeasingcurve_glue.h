@@ -41,7 +41,7 @@
 #define __QEASINGCURVE_GLUE__
 
 #include <sbkpython.h>
-#include <QEasingCurve>
+#include <QtCore/QEasingCurve>
 
 class PySideEasingCurveFunctor
 {

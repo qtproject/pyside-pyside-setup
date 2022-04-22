@@ -36,7 +36,7 @@
 
 #include "clangparser/compilersupport.h"
 
-#include <QFileInfoList>
+#include <QtCore/QFileInfoList>
 
 #include <optional>
 

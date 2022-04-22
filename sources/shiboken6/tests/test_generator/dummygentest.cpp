@@ -29,9 +29,10 @@
 #include "dummygentest.h"
 #include "dummygenerator.h"
 #include "dummygentestconfig.h"
-#include <QTemporaryFile>
+
+#include <QtCore/QProcess>
+#include <QtCore/QTemporaryFile>
 #include <QtTest/QTest>
-#include <QProcess>
 
 #define GENERATED_CONTENTS  "// Generated code for class: Dummy"
 

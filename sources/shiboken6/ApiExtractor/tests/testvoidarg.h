@@ -28,7 +28,7 @@
 
 #ifndef TESTVOIDARG_H
 #define TESTVOIDARG_H
-#include <QObject>
+#include <QtCore/QObject>
 
 class TestVoidArg : public QObject
 {
