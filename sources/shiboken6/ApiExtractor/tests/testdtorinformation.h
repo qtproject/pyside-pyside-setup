@@ -29,7 +29,7 @@
 #ifndef TESTDTORINFORMATION_H
 #define TESTDTORINFORMATION_H
 
-#include <QObject>
+#include <QtCore/QObject>
 
 class AbstractMetaBuilder;
 

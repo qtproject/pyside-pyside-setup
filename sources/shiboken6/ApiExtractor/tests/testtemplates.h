@@ -29,7 +29,7 @@
 #ifndef TESTTEMPLATES_H
 #define TESTTEMPLATES_H
 
-#include <QObject>
+#include <QtCore/QObject>
 
 class TestTemplates : public QObject
 {

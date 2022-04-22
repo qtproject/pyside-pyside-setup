@@ -35,8 +35,9 @@
 #include "typedatabase_typedefs.h"
 #include "typesystem_typedefs.h"
 #include "clangparser/compilersupport.h"
-#include <QFileInfoList>
-#include <QStringList>
+
+#include <QtCore/QFileInfoList>
+#include <QtCore/QStringList>
 
 #include <optional>
 

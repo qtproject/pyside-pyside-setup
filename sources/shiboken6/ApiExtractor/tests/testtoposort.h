@@ -29,7 +29,7 @@
 #ifndef TESTTOPOSORT_H
 #define TESTTOPOSORT_H
 
-#include <QObject>
+#include <QtCore/QObject>
 
 class TestTopoSort : public QObject
 {

@@ -41,8 +41,10 @@
 #define PYSIDE_CLASSINFO_P_H
 
 #include <sbkpython.h>
-#include <QMetaObject>
+
 #include "pysideclassinfo.h"
+
+#include <QtCore/QMetaObject>
 
 struct PySideClassInfo;
 

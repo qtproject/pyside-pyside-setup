@@ -29,7 +29,7 @@
 #ifndef TESTCODEINJECTIONS_H
 #define TESTCODEINJECTIONS_H
 
-#include <QObject>
+#include <QtCore/QObject>
 
 class AbstractMetaBuilder;
 

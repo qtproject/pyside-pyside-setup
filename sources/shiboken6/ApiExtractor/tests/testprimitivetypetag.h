@@ -29,7 +29,7 @@
 #ifndef TESTPRIMITIVETYPETAG_H
 #define TESTPRIMITIVETYPETAG_H
 
-#include <QObject>
+#include <QtCore/QObject>
 
 class TestPrimitiveTypeTag : public QObject
 {

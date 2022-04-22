@@ -28,10 +28,11 @@
 
 #include "include.h"
 #include "textstream.h"
-#include <QDebug>
-#include <QDir>
-#include <QTextStream>
-#include <QHash>
+
+#include <QtCore/QDebug>
+#include <QtCore/QDir>
+#include <QtCore/QHash>
+#include <QtCore/QTextStream>
 
 QString Include::toString() const
 {

@@ -26,25 +26,27 @@
 **
 ****************************************************************************/
 
-#include <QCoreApplication>
-#include <QLibrary>
-#include <QtCore/QFile>
-#include <QtCore/QDir>
-#include <QtCore/QVariant>
-#include <iostream>
-#include <apiextractor.h>
-#include <apiextractorresult.h>
-#include <fileout.h>
-#include <reporthandler.h>
-#include <typedatabase.h>
-#include <messages.h>
-#include "generator.h"
 #include "shibokenconfig.h"
 #include "cppgenerator.h"
+#include "generator.h"
 #include "headergenerator.h"
 #include "qtdocgenerator.h"
 
+#include <apiextractor.h>
+#include <apiextractorresult.h>
+#include <fileout.h>
+#include <messages.h>
+#include <reporthandler.h>
+#include <typedatabase.h>
+
+#include <QtCore/QCoreApplication>
+#include <QtCore/QDir>
+#include <QtCore/QFile>
+#include <QtCore/QLibrary>
+#include <QtCore/QVariant>
+
 #include <exception>
+#include <iostream>
 
 static const QChar clangOptionsSplitter = u',';
 static const QChar keywordsSplitter = u',';

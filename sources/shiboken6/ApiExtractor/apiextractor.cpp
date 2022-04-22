@@ -28,24 +28,25 @@
 
 #include "apiextractor.h"
 #include "apiextractorresult.h"
-#include "abstractmetalang.h"
-
-#include <QDir>
-#include <QDebug>
-#include <QTemporaryFile>
-#include <algorithm>
-#include <iostream>
-#include <iterator>
-
-#include "reporthandler.h"
-#include "typesystem.h"
-#include "fileout.h"
+#include "abstractmetaargument.h"
 #include "abstractmetabuilder.h"
 #include "abstractmetaenum.h"
+#include "abstractmetafield.h"
+#include "abstractmetafunction.h"
+#include "abstractmetalang.h"
+#include "exception.h"
+#include "fileout.h"
+#include "modifications.h"
+#include "reporthandler.h"
 #include "typedatabase.h"
 #include "typesystem.h"
 
+#include <QtCore/QDir>
+#include <QtCore/QDebug>
+#include <QtCore/QTemporaryFile>
+
 #include <algorithm>
+#include <iostream>
 #include <iterator>
 
 ApiExtractor::ApiExtractor()

@@ -39,13 +39,13 @@
 #include "fileout.h"
 #include "apiextractor.h"
 #include "typesystem.h"
+#include <typedatabase.h>
 
+#include <QtCore/QDebug>
 #include <QtCore/QDir>
 #include <QtCore/QFile>
 #include <QtCore/QFileInfo>
 #include <QtCore/QRegularExpression>
-#include <QDebug>
-#include <typedatabase.h>
 
 static const char ENABLE_PYSIDE_EXTENSIONS[] = "enable-pyside-extensions";
 static const char AVOID_PROTECTED_HACK[] = "avoid-protected-hack";

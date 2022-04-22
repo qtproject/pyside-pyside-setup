@@ -29,7 +29,7 @@
 #ifndef TESTABSTRACTMETACLASS_H
 #define TESTABSTRACTMETACLASS_H
 
-#include <QObject>
+#include <QtCore/QObject>
 
 class TestModifyFunction : public QObject
 {

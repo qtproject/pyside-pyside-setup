@@ -40,7 +40,8 @@
 #include <sbkpython.h>
 #include <shiboken.h>
 #include <pysideweakref.h>
-#include <QEasingCurve>
+
+#include <QtCore/QEasingCurve>
 
 #include "glue/qeasingcurve_glue.h"
 

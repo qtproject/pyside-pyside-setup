@@ -27,14 +27,15 @@
 ****************************************************************************/
 
 #include "testcodeinjection.h"
-#include <QFileInfo>
-#include <QDir>
-#include <QtTest/QTest>
 #include "testutil.h"
 #include <abstractmetalang.h>
 #include <modifications.h>
 #include <textstream.h>
 #include <typesystem.h>
+
+#include <QtCore/QDir>
+#include <QtCore/QFileInfo>
+#include <QtTest/QTest>
 
 void TestCodeInjections::testReadFile_data()
 {

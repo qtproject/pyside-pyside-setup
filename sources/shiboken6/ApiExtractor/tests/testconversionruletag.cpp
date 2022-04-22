@@ -27,12 +27,13 @@
 ****************************************************************************/
 
 #include "testconversionruletag.h"
-#include <QtTest/QTest>
 #include "testutil.h"
 #include <abstractmetalang.h>
 #include <typesystem.h>
-#include <QFile>
-#include <QTemporaryFile>
+
+#include <QtCore/QFile>
+#include <QtCore/QTemporaryFile>
+#include <QtTest/QTest>
 
 void TestConversionRuleTag::testConversionRuleTagWithFile()
 {

@@ -44,7 +44,7 @@
 #include <QtCore/QTextStream>
 #include <QtCore/QXmlStreamAttributes>
 #include <QtCore/QXmlStreamReader>
-#include <QUrl>
+#include <QtCore/QUrl>
 
 static inline QString briefStartElement() { return QStringLiteral("<brief>"); }
 static inline QString briefEndElement() { return QStringLiteral("</brief>"); }

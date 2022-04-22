@@ -29,7 +29,7 @@
 #ifndef TESTDROPTYPEENTRIES_H
 #define TESTDROPTYPEENTRIES_H
 
-#include <QObject>
+#include <QtCore/QObject>
 
 class TestDropTypeEntries : public QObject
 {
