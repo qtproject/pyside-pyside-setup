@@ -37,8 +37,8 @@ XQuery::~XQuery() = default;
 QString XQuery::evaluate(QString xPathExpression, QString *errorMessage)
 {
     // XQuery can't have invalid XML characters
-    xPathExpression.replace(QLatin1Char('&'), QLatin1String("&amp;"));
-    xPathExpression.replace(QLatin1Char('<'), QLatin1String("&lt;"));
+    xPathExpression.replace(u'&', QLatin1String("&amp;"));
+    xPathExpression.replace(u'<', QLatin1String("&lt;"));
     return doEvaluate(xPathExpression, errorMessage);
 }
 

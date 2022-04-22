@@ -87,8 +87,8 @@ static void formatFunctionUnqualifiedArgTypeQuery(QTextStream &str,
         // to "Qt::Alignment" as seen by qdoc.
         const auto *flagsEntry = static_cast<const FlagsTypeEntry *>(metaType.typeEntry());
         QString name = flagsEntry->qualifiedCppName();
-        if (name.endsWith(QLatin1Char('>')) && name.startsWith(QLatin1String("QFlags<"))) {
-            const int lastColon = name.lastIndexOf(QLatin1Char(':'));
+        if (name.endsWith(u'>') && name.startsWith(QLatin1String("QFlags<"))) {
+            const int lastColon = name.lastIndexOf(u':');
             if (lastColon != -1) {
                 name.replace(lastColon + 1, name.size() - lastColon - 1, metaType.name());
                 name.remove(0, 7);
@@ -348,7 +348,7 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
         context = context->enclosingClass();
     }
 
-    QString sourceFileRoot = documentationDataDirectory() + QLatin1Char('/')
+    QString sourceFileRoot = documentationDataDirectory() + u'/'
         + metaClass->qualifiedCppName().toLower();
     sourceFileRoot.replace(QLatin1String("::"), QLatin1String("-"));
 
@@ -452,8 +452,8 @@ Documentation QtDocParser::retrieveModuleDocumentation(const QString& name)
     // TODO: This method of acquiring the module name supposes that the target language uses
     // dots as module separators in package names. Improve this.
     QString moduleName = name;
-    moduleName.remove(0, name.lastIndexOf(QLatin1Char('.')) + 1);
-    const QString prefix = documentationDataDirectory() + QLatin1Char('/')
+    moduleName.remove(0, name.lastIndexOf(u'.') + 1);
+    const QString prefix = documentationDataDirectory() + u'/'
         + moduleName.toLower();
     QString sourceFile = prefix + QLatin1String(".xml");
 

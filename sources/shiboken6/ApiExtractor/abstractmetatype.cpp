@@ -475,10 +475,10 @@ bool AbstractMetaType::hasTemplateChildren() const
 static inline QString formatArraySize(int e)
 {
     QString result;
-    result += QLatin1Char('[');
+    result += u'[';
     if (e >= 0)
         result += QString::number(e);
-    result += QLatin1Char(']');
+    result += u']';
     return result;
 }
 
@@ -492,7 +492,7 @@ QString AbstractMetaTypeData::formatSignature(bool minimal) const
     if (m_pattern == AbstractMetaType::ArrayPattern) {
         // Build nested array dimensions a[2][3] in correct order
         result += m_arrayElementType->minimalSignature();
-        const int arrayPos = result.indexOf(QLatin1Char('['));
+        const int arrayPos = result.indexOf(u'[');
         if (arrayPos != -1)
             result.insert(arrayPos, formatArraySize(m_arrayElementCount));
         else
@@ -501,26 +501,26 @@ QString AbstractMetaTypeData::formatSignature(bool minimal) const
         result += m_typeEntry->qualifiedCppName();
     }
     if (!m_instantiations.isEmpty()) {
-        result += QLatin1Char('<');
+        result += u'<';
         if (minimal)
-            result += QLatin1Char(' ');
+            result += u' ';
         for (int i = 0, size = m_instantiations.size(); i < size; ++i) {
             if (i > 0)
-                result += QLatin1Char(',');
+                result += u',';
             result += m_instantiations.at(i).minimalSignature();
         }
         result += QLatin1String(" >");
     }
 
     if (!minimal && (!m_indirections.isEmpty() || m_referenceType != NoReference))
-        result += QLatin1Char(' ');
+        result += u' ';
     for (Indirection i : m_indirections)
         result += TypeInfo::indirectionKeyword(i);
     switch (m_referenceType) {
     case NoReference:
         break;
     case LValueReference:
-        result += QLatin1Char('&');
+        result += u'&';
         break;
     case RValueReference:
         result += QLatin1String("&&");
@@ -557,12 +557,12 @@ QString AbstractMetaTypeData::formatPythonSignature() const
     if (!m_typeEntry->isPrimitive() && !m_typeEntry->isSmartPointer()) {
         const QString package = m_typeEntry->targetLangPackage();
         if (!package.isEmpty())
-            result += package + QLatin1Char('.');
+            result += package + u'.';
     }
     if (m_pattern == AbstractMetaType::ArrayPattern) {
         // Build nested array dimensions a[2][3] in correct order
         result += m_arrayElementType->formatPythonSignature();
-        const int arrayPos = result.indexOf(QLatin1Char('['));
+        const int arrayPos = result.indexOf(u'[');
         if (arrayPos != -1)
             result.insert(arrayPos, formatArraySize(m_arrayElementCount));
         else
@@ -571,13 +571,13 @@ QString AbstractMetaTypeData::formatPythonSignature() const
         result += m_typeEntry->targetLangName();
     }
     if (!m_instantiations.isEmpty()) {
-        result += QLatin1Char('[');
+        result += u'[';
         for (int i = 0, size = m_instantiations.size(); i < size; ++i) {
             if (i > 0)
                 result += QLatin1String(", ");
             result += m_instantiations.at(i).formatPythonSignature();
         }
-        result += QLatin1Char(']');
+        result += u']';
     }
     if (m_typeEntry->isPrimitive())
         for (Indirection i : m_indirections)

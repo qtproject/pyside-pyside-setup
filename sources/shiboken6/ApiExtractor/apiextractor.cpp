@@ -182,7 +182,7 @@ bool ApiExtractor::runHelper(ApiExtractorFlags flags)
         return false;
     }
 
-    const QString pattern = QDir::tempPath() + QLatin1Char('/')
+    const QString pattern = QDir::tempPath() + u'/'
         + m_cppFileNames.constFirst().baseName()
         + QStringLiteral("_XXXXXX.hpp");
     QTemporaryFile ppFile(pattern);

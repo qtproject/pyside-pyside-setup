@@ -47,8 +47,8 @@
 
 static QString wildcardToRegExp(QString w)
 {
-    w.replace(QLatin1Char('?'), QLatin1Char('.'));
-    w.replace(QLatin1Char('*'), QStringLiteral(".*"));
+    w.replace(u'?', u'.');
+    w.replace(u'*', QStringLiteral(".*"));
     return w;
 }
 
@@ -136,7 +136,7 @@ static const IntTypeNormalizationEntries &intTypeNormalizationEntries()
         firstTime = false;
         for (auto t : {"char", "short", "int", "long"}) {
             const QString intType = QLatin1String(t);
-            if (!TypeDatabase::instance()->findType(QLatin1Char('u') + intType)) {
+            if (!TypeDatabase::instance()->findType(u'u' + intType)) {
                 IntTypeNormalizationEntry entry;
                 entry.replacement = QStringLiteral("unsigned ") + intType;
                 entry.regex.setPattern(QStringLiteral("\\bu") + intType + QStringLiteral("\\b"));
@@ -271,7 +271,7 @@ ContainerTypeEntry* TypeDatabase::findContainerType(const QString &name) const
 {
     QString template_name = name;
 
-    int pos = name.indexOf(QLatin1Char('<'));
+    int pos = name.indexOf(u'<');
     if (pos > 0)
         template_name = name.left(pos);
 
@@ -485,7 +485,7 @@ TypeEntry *TypeDatabase::resolveTypeDefEntry(TypedefEntry *typedefEntry,
                                              QString *errorMessage)
 {
     QString sourceName = typedefEntry->sourceType();
-    const int lessThanPos = sourceName.indexOf(QLatin1Char('<'));
+    const int lessThanPos = sourceName.indexOf(u'<');
     if (lessThanPos != -1)
         sourceName.truncate(lessThanPos);
     ComplexTypeEntry *source = nullptr;
@@ -505,7 +505,7 @@ TypeEntry *TypeDatabase::resolveTypeDefEntry(TypedefEntry *typedefEntry,
     if (!source) {
         if (errorMessage)
             *errorMessage = QLatin1String("Unable to resolve typedef \"")
-                            + typedefEntry->sourceType() + QLatin1Char('"');
+                            + typedefEntry->sourceType() + u'"';
         return nullptr;
     }
 
@@ -630,21 +630,21 @@ FunctionModificationList TypeDatabase::functionModifications(const QString& sign
 bool TypeDatabase::addSuppressedWarning(const QString &warning, QString *errorMessage)
 {
     QString pattern;
-    if (warning.startsWith(QLatin1Char('^')) && warning.endsWith(QLatin1Char('$'))) {
+    if (warning.startsWith(u'^') && warning.endsWith(u'$')) {
         pattern = warning;
     } else {
         // Legacy syntax: Use wildcards '*' (unless escaped by '\')
         QList<int> asteriskPositions;
         const int warningSize = warning.size();
         for (int i = 0; i < warningSize; ++i) {
-            if (warning.at(i) == QLatin1Char('\\'))
+            if (warning.at(i) == u'\\')
                 ++i;
-            else if (warning.at(i) == QLatin1Char('*'))
+            else if (warning.at(i) == u'*')
                 asteriskPositions.append(i);
         }
         asteriskPositions.append(warningSize);
 
-        pattern.append(QLatin1Char('^'));
+        pattern.append(u'^');
         int lastPos = 0;
         for (int a = 0, aSize = asteriskPositions.size(); a < aSize; ++a) {
             if (a)
@@ -654,7 +654,7 @@ bool TypeDatabase::addSuppressedWarning(const QString &warning, QString *errorMe
                 pattern.append(QRegularExpression::escape(warning.mid(lastPos, nextPos - lastPos)));
             lastPos = nextPos + 1;
         }
-        pattern.append(QLatin1Char('$'));
+        pattern.append(u'$');
     }
 
     QRegularExpression expression(pattern);
@@ -687,12 +687,12 @@ QString TypeDatabase::modifiedTypesystemFilepath(const QString& tsFile, const QS
     if (tsFi.isFile()) // Make path absolute
         return tsFi.absoluteFilePath();
     if (!currentPath.isEmpty()) {
-        const QFileInfo fi(currentPath + QLatin1Char('/') + tsFile);
+        const QFileInfo fi(currentPath + u'/' + tsFile);
         if (fi.isFile())
             return fi.absoluteFilePath();
     }
     for (const QString &path : m_typesystemPaths) {
-        const QFileInfo fi(path + QLatin1Char('/') + tsFile);
+        const QFileInfo fi(path + u'/' + tsFile);
         if (fi.isFile())
             return fi.absoluteFilePath();
     }

@@ -116,14 +116,14 @@ inline TextStream &operator<<(TextStream &str, const escape &e)
 // RST anchor string: Anything else but letters, numbers, '_' or '.' replaced by '-'
 inline bool isValidRstLabelChar(QChar c)
 {
-    return c.isLetterOrNumber() || c == QLatin1Char('_') || c == QLatin1Char('.');
+    return c.isLetterOrNumber() || c == u'_' || c == u'.';
 }
 
 inline QString toRstLabel(QString s)
 {
     for (int i = 0, size = s.size(); i < size; ++i) {
         if (!isValidRstLabelChar(s.at(i)))
-            s[i] = QLatin1Char('-');
+            s[i] = u'-';
     }
     return s;
 }

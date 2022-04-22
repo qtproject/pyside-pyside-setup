@@ -145,7 +145,7 @@ QString LibXmlXQuery::doEvaluate(const QString &xPathExpression, QString *errorM
     XmlPathObjectUniquePtr xPathObject(xmlXPathEvalExpression(xPathExpressionX, m_xpathContext.get()));
     if (!xPathObject) {
          *errorMessage = QLatin1String("xmlXPathEvalExpression() failed for \"") + xPathExpression
-                         + QLatin1Char('"');
+                         + u'"';
         return QString();
     }
     QString result;

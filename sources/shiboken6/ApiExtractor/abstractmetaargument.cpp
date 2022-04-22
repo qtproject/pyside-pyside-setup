@@ -144,7 +144,7 @@ bool AbstractMetaArgument::hasModifiedDefaultValueExpression() const
 
 QString AbstractMetaArgumentData::toString() const
 {
-    QString result = m_type.name() + QLatin1Char(' ') + m_name;
+    QString result = m_type.name() + u' ' + m_name;
     if (!m_expression.isEmpty())
         result += QLatin1String(" = ") + m_expression;
     return result;

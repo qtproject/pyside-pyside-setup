@@ -55,8 +55,8 @@ QString TemplateInstance::expandCode() const
     while (!code.isEmpty() && code.at(code.size() - 1).isSpace())
         code.chop(1);
     QString result = QLatin1String("// TEMPLATE - ") + m_name + QLatin1String(" - START");
-    if (!code.startsWith(QLatin1Char('\n')))
-        result += QLatin1Char('\n');
+    if (!code.startsWith(u'\n'))
+        result += u'\n';
     result += code;
     result += QLatin1String("\n// TEMPLATE - ") + m_name + QLatin1String(" - END\n");
     return result;
@@ -92,7 +92,7 @@ void CodeSnipAbstract::purgeEmptyFragments()
 
 QRegularExpression CodeSnipAbstract::placeHolderRegex(int index)
 {
-    return QRegularExpression(QLatin1Char('%') + QString::number(index) + QStringLiteral("\\b"));
+    return QRegularExpression(u'%' + QString::number(index) + QStringLiteral("\\b"));
 }
 
 void purgeEmptyCodeSnips(QList<CodeSnip> *list)
@@ -300,7 +300,7 @@ Arguments splitParameters(QStringView paramString, QString *errorMessage)
     for (const auto &t : tokens) {
         Argument argument;
         // Check defaultValue, "int @b@=5"
-        const int equalPos = t.lastIndexOf(QLatin1Char('='));
+        const int equalPos = t.lastIndexOf(u'=');
         if (equalPos != -1) {
             const int defaultValuePos = equalPos + 1;
             argument.defaultValue =
@@ -308,14 +308,14 @@ Arguments splitParameters(QStringView paramString, QString *errorMessage)
         }
         QString typeString = (equalPos != -1 ? t.left(equalPos) : t).trimmed().toString();
         // Check @name@
-        const int atPos = typeString.indexOf(QLatin1Char('@'));
+        const int atPos = typeString.indexOf(u'@');
         if (atPos != -1) {
             const int namePos = atPos + 1;
-            const int nameEndPos = typeString.indexOf(QLatin1Char('@'), namePos);
+            const int nameEndPos = typeString.indexOf(u'@', namePos);
             if (nameEndPos == -1) {
                 if (errorMessage != nullptr) {
                     *errorMessage = QLatin1String("Mismatched @ in \"")
-                                    + paramString.toString() + QLatin1Char('"');
+                                    + paramString.toString() + u'"';
                 }
                 return {};
             }
@@ -358,14 +358,14 @@ AddedFunction::AddedFunctionPtr
     // Skip past "operator()(...)"
     const int parenSearchStartPos = signature.startsWith(callOperator())
         ? callOperator().size() : 0;
-    const int openParenPos = signature.indexOf(QLatin1Char('('), parenSearchStartPos);
+    const int openParenPos = signature.indexOf(u'(', parenSearchStartPos);
     if (openParenPos < 0) {
         return AddedFunctionPtr(new AddedFunction(signature.toString(),
                                                   arguments, returnType));
     }
 
     const QString name = signature.left(openParenPos).trimmed().toString();
-    const int closingParenPos = signature.lastIndexOf(QLatin1Char(')'));
+    const int closingParenPos = signature.lastIndexOf(u')');
     if (closingParenPos < 0) {
         *errorMessage = QLatin1String("Missing closing parenthesis");
         return {};
@@ -457,7 +457,7 @@ QDebug operator<<(QDebug d, const CodeSnip &s)
         if (f.instance().isNull()) {
             d << '"';
             const QString &code = f.code();
-            const auto lines = QStringView{code}.split(QLatin1Char('\n'));
+            const auto lines = QStringView{code}.split(u'\n');
             for (int i = 0, size = lines.size(); i < size; ++i) {
                 if (i)
                     d << "\\n";
@@ -849,7 +849,7 @@ bool FunctionModification::matches(const QString &functionSignature) const
 
 bool FunctionModification::setSignature(const QString &s, QString *errorMessage)
 {
-    if (s.startsWith(QLatin1Char('^'))) {
+    if (s.startsWith(u'^')) {
         d->m_signaturePattern.setPattern(s);
         if (!d->m_signaturePattern.isValid()) {
             if (errorMessage) {

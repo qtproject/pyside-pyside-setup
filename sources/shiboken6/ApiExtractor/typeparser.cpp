@@ -82,7 +82,7 @@ Scanner::Token Scanner::nextToken(QString *errorMessage)
     Token tok = NoToken;
 
     // remove whitespace
-    while (m_pos < m_length && m_chars[m_pos] == QLatin1Char(' '))
+    while (m_pos < m_length && m_chars[m_pos] == u' ')
         ++m_pos;
 
     m_tokenStart = m_pos;
@@ -108,7 +108,7 @@ Scanner::Token Scanner::nextToken(QString *errorMessage)
                 ++m_pos;
                 break;
             default:
-                if (c.isLetterOrNumber() || c == QLatin1Char('_')) {
+                if (c.isLetterOrNumber() || c == u'_') {
                     tok = Identifier;
                 } else {
                     QString message;
@@ -131,7 +131,7 @@ Scanner::Token Scanner::nextToken(QString *errorMessage)
         }
 
         if (tok == Identifier) {
-            if (c.isLetterOrNumber() || c == QLatin1Char('_'))
+            if (c.isLetterOrNumber() || c == u'_')
                 ++m_pos;
             else
                 break;
@@ -141,23 +141,23 @@ Scanner::Token Scanner::nextToken(QString *errorMessage)
     if (tok == Identifier) {
         switch (m_pos - m_tokenStart) {
         case 5:
-            if (m_chars[m_tokenStart] == QLatin1Char('c')
-                && m_chars[m_tokenStart + 1] == QLatin1Char('o')
-                && m_chars[m_tokenStart + 2] == QLatin1Char('n')
-                && m_chars[m_tokenStart + 3] == QLatin1Char('s')
-                && m_chars[m_tokenStart + 4] == QLatin1Char('t')) {
+            if (m_chars[m_tokenStart] == u'c'
+                && m_chars[m_tokenStart + 1] == u'o'
+                && m_chars[m_tokenStart + 2] == u'n'
+                && m_chars[m_tokenStart + 3] == u's'
+                && m_chars[m_tokenStart + 4] == u't') {
                 tok = ConstToken;
             }
                 break;
         case 8:
-            if (m_chars[m_tokenStart] == QLatin1Char('v')
-                && m_chars[m_tokenStart + 1] == QLatin1Char('o')
-                && m_chars[m_tokenStart + 2] == QLatin1Char('l')
-                && m_chars[m_tokenStart + 3] == QLatin1Char('a')
-                && m_chars[m_tokenStart + 4] == QLatin1Char('t')
-                && m_chars[m_tokenStart + 5] == QLatin1Char('i')
-                && m_chars[m_tokenStart + 6] == QLatin1Char('l')
-                && m_chars[m_tokenStart + 7] == QLatin1Char('e')) {
+            if (m_chars[m_tokenStart] == u'v'
+                && m_chars[m_tokenStart + 1] == u'o'
+                && m_chars[m_tokenStart + 2] == u'l'
+                && m_chars[m_tokenStart + 3] == u'a'
+                && m_chars[m_tokenStart + 4] == u't'
+                && m_chars[m_tokenStart + 5] == u'i'
+                && m_chars[m_tokenStart + 6] == u'l'
+                && m_chars[m_tokenStart + 7] == u'e') {
                 tok = VolatileToken;
             }
             break;
@@ -285,7 +285,7 @@ TypeInfo TypeParser::parse(const QString &str, QString *errorMessage)
                 colon_prefix = false;
             } else {
                 QStringList qualifiedName = stack.top().qualifiedName();
-                qualifiedName.last().append(QLatin1Char(' ') + scanner.identifier());
+                qualifiedName.last().append(u' ' + scanner.identifier());
                 stack.top().setQualifiedName(qualifiedName);
             }
             break;

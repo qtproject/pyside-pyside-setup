@@ -567,8 +567,8 @@ bool HeaderGenerator::finishGeneration()
     if (usePySideExtensions())
         typeFunctions << "QT_WARNING_POP\n";
 
-    const QString moduleHeaderDir = outputDirectory() + QLatin1Char('/')
-        + subDirectoryForPackage(packageName()) + QLatin1Char('/');
+    const QString moduleHeaderDir = outputDirectory() + u'/'
+        + subDirectoryForPackage(packageName()) + u'/';
     const QString moduleHeaderFileName(moduleHeaderDir + getModuleHeaderFileName());
 
     QString includeShield(QLatin1String("SBK_") + moduleName().toUpper() + QLatin1String("_PYTHON_H"));

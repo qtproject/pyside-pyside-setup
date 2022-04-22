@@ -64,9 +64,9 @@ QString msgFallbackWarning(const QString &location, const QString &identifier,
 {
     QString message = QLatin1String("Falling back to \"")
         + QDir::toNativeSeparators(fallback) + QLatin1String("\" for \"")
-        + location + QLatin1Char('"');
+        + location + u'"';
     if (!identifier.isEmpty())
-        message += QLatin1String(" [") + identifier + QLatin1Char(']');
+        message += QLatin1String(" [") + identifier + u']';
     return message;
 }
 
@@ -163,7 +163,7 @@ TextStream &operator<<(TextStream &str, const QtXmlToSphinxLink &linkContext)
     const bool isExternal = linkContext.type == QtXmlToSphinxLink::External;
     if (!linkContext.linkText.isEmpty()) {
         writeEscapedRstText(str, linkContext.linkText);
-        if (isExternal && !linkContext.linkText.endsWith(QLatin1Char(' ')))
+        if (isExternal && !linkContext.linkText.endsWith(u' '))
             str << ' ';
         str << '<';
     }
@@ -506,7 +506,7 @@ QString QtXmlToSphinx::transform(const QString& doc)
 static QString resolveFile(const QStringList &locations, const QString &path)
 {
     for (QString location : locations) {
-        location.append(QLatin1Char('/'));
+        location.append(u'/');
         location.append(path);
         if (QFileInfo::exists(location))
             return location;
@@ -843,7 +843,7 @@ static inline QString fallbackPathAttribute() { return QStringLiteral("path"); }
 template <class Indent> // const char*/class Indentor
 void formatSnippet(TextStream &str, Indent indent, const QString &snippet)
 {
-    const auto lines = QStringView{snippet}.split(QLatin1Char('\n'));
+    const auto lines = QStringView{snippet}.split(u'\n');
     for (const auto &line : lines) {
         if (!line.trimmed().isEmpty())
             str << indent << line;
@@ -1031,7 +1031,7 @@ void QtXmlToSphinx::handleListTag(QXmlStreamReader& reader)
                 const char *separator = listType == BulletList ? "* " : "#. ";
                 const char *indentLine = listType == BulletList ? "  " : "   ";
                 for (const TableCell &cell : m_currentTable.constFirst()) {
-                    const auto itemLines = QStringView{cell.data}.split(QLatin1Char('\n'));
+                    const auto itemLines = QStringView{cell.data}.split(u'\n');
                     m_output << separator << itemLines.constFirst() << '\n';
                     for (qsizetype i = 1, max = itemLines.size(); i < max; ++i)
                         m_output << indentLine << itemLines[i] << '\n';
@@ -1088,12 +1088,12 @@ QtXmlToSphinxLink *QtXmlToSphinx::handleLinkStart(const QString &type, QString r
         result->type = QtXmlToSphinxLink::External;
     } else if (type == functionLinkType() && !m_context.isEmpty()) {
         result->type = QtXmlToSphinxLink::Method;
-        const auto rawlinklist = QStringView{result->linkRef}.split(QLatin1Char('.'));
+        const auto rawlinklist = QStringView{result->linkRef}.split(u'.');
         if (rawlinklist.size() == 1 || rawlinklist.constFirst() == m_context) {
             const auto lastRawLink = rawlinklist.constLast().toString();
             QString context = m_generator->resolveContextForMethod(m_context, lastRawLink);
             if (!result->linkRef.startsWith(context))
-                result->linkRef.prepend(context + QLatin1Char('.'));
+                result->linkRef.prepend(context + u'.');
         } else {
             result->linkRef = m_generator->expandFunction(result->linkRef);
         }
@@ -1169,7 +1169,7 @@ static bool copyImage(const QString &href, const QString &docDataDir,
                       const QString &context, const QString &outputDir,
                       const QLoggingCategory &lc, QString *errorMessage)
 {
-    const QChar slash = QLatin1Char('/');
+    const QChar slash = u'/';
     const int lastSlash = href.lastIndexOf(slash);
     const QString imagePath = lastSlash != -1 ? href.left(lastSlash) : QString();
     const QString imageFileName = lastSlash != -1 ? href.right(href.size() - lastSlash - 1) : href;
@@ -1183,10 +1183,10 @@ static bool copyImage(const QString &href, const QString &docDataDir,
     // FIXME: Not perfect yet, should have knowledge about namespaces (DataVis3D) or
     // nested classes "Pyside2.QtGui.QTouchEvent.QTouchPoint".
     QString relativeTargetDir = context;
-    const int lastDot = relativeTargetDir.lastIndexOf(QLatin1Char('.'));
+    const int lastDot = relativeTargetDir.lastIndexOf(u'.');
     if (lastDot != -1)
         relativeTargetDir.truncate(lastDot);
-    relativeTargetDir.replace(QLatin1Char('.'), slash);
+    relativeTargetDir.replace(u'.', slash);
     if (!imagePath.isEmpty())
         relativeTargetDir += slash + imagePath;
 
@@ -1250,10 +1250,10 @@ void QtXmlToSphinx::handleInlineImageTag(QXmlStreamReader& reader)
     // enclosed by '|' and define it further down. Determine tag from the base
     //file name with number.
     QString tag = href;
-    int pos = tag.lastIndexOf(QLatin1Char('/'));
+    int pos = tag.lastIndexOf(u'/');
     if (pos != -1)
         tag.remove(0, pos + 1);
-    pos = tag.indexOf(QLatin1Char('.'));
+    pos = tag.indexOf(u'.');
     if (pos != -1)
         tag.truncate(pos);
     tag += QString::number(m_inlineImages.size() + 1);
@@ -1362,7 +1362,7 @@ void QtXmlToSphinx::handleAnchorTag(QXmlStreamReader& reader)
         if (!anchor.isEmpty() && m_opened_anchor != anchor) {
             m_opened_anchor = anchor;
             if (!m_context.isEmpty())
-                anchor.prepend(m_context + QLatin1Char('_'));
+                anchor.prepend(m_context + u'_');
             m_output << rstLabel(anchor);
         }
    } else if (token == QXmlStreamReader::EndElement) {
@@ -1381,7 +1381,7 @@ void QtXmlToSphinx::handleQuoteFileTag(QXmlStreamReader& reader)
     QXmlStreamReader::TokenType token = reader.tokenType();
     if (token == QXmlStreamReader::Characters) {
         QString location = reader.text().toString();
-        location.prepend(m_parameters.libSourceDir + QLatin1Char('/'));
+        location.prepend(m_parameters.libSourceDir + u'/');
         QString errorMessage;
         QString code = readFromLocation(location, QString(), &errorMessage);
         if (!errorMessage.isEmpty())
@@ -1445,7 +1445,7 @@ void QtXmlToSphinx::Table::normalize()
                 cell.colSpan = 0;
                 col++;
             } else if (mergeCols) {
-                m_rows[row][maxCols - 1].data += QLatin1Char(' ') + cell.data;
+                m_rows[row][maxCols - 1].data += u' ' + cell.data;
             }
         }
     }
@@ -1487,7 +1487,8 @@ void QtXmlToSphinx::Table::format(TextStream& s) const
     for (qsizetype i = 0, maxI = m_rows.size(); i < maxI; ++i) {
         const QtXmlToSphinx::TableRow& row = m_rows.at(i);
         for (qsizetype j = 0, maxJ = std::min(row.size(), colWidths.size()); j < maxJ; ++j) {
-            const auto rowLines = QStringView{row[j].data}.split(QLatin1Char('\n')); // cache this would be a good idea
+            // cache this would be a good idea
+            const auto rowLines = QStringView{row[j].data}.split(u'\n');
             for (const auto &str : rowLines)
                 colWidths[j] = std::max(colWidths[j], str.size());
             rowHeights[i] = std::max(rowHeights[i], rowLines.size());
@@ -1499,10 +1500,8 @@ void QtXmlToSphinx::Table::format(TextStream& s) const
 
     // create a horizontal line to be used later.
     QString horizontalLine = QLatin1String("+");
-    for (auto colWidth : colWidths) {
-        horizontalLine += QString(colWidth, QLatin1Char('-'));
-        horizontalLine += QLatin1Char('+');
-    }
+    for (auto colWidth : colWidths)
+        horizontalLine += QString(colWidth, u'-') + u'+';
 
     // write table rows
     for (qsizetype i = 0, maxI = m_rows.size(); i < maxI; ++i) { // for each row
@@ -1528,7 +1527,8 @@ void QtXmlToSphinx::Table::format(TextStream& s) const
             qsizetype j = 0;
             for (qsizetype maxJ = std::min(row.size(), headerColumnCount); j < maxJ; ++j) { // for each column
                 const QtXmlToSphinx::TableCell& cell = row[j];
-                const auto rowLines = QStringView{cell.data}.split(QLatin1Char('\n')); // FIXME: Cache this!!!
+                // FIXME: Cache this!!!
+                const auto rowLines = QStringView{cell.data}.split(u'\n');
 
                 if (!j || !cell.colSpan)
                     s << '|';
@@ -1572,7 +1572,7 @@ void QtXmlToSphinx::Table::formatDebug(QDebug &debug) const
 
 void QtXmlToSphinx::stripPythonQualifiers(QString *s)
 {
-    const int lastSep = s->lastIndexOf(QLatin1Char('.'));
+    const int lastSep = s->lastIndexOf(u'.');
     if (lastSep != -1)
         s->remove(0, lastSep + 1);
 }

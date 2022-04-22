@@ -483,7 +483,7 @@ QString TypeEntry::buildTargetLangName() const
     for (auto p = parent(); p && p->type() != TypeEntry::TypeSystemType; p = p->parent()) {
         if (NamespaceTypeEntry::isVisibleScope(p)) {
             if (!result.isEmpty())
-                result.prepend(QLatin1Char('.'));
+                result.prepend(u'.');
             QString n = p->m_d->m_entryName;
             n.replace(QLatin1String("::"), QLatin1String(".")); // Primitive types may have "std::"
             result.prepend(n);
@@ -569,7 +569,7 @@ QString TypeEntry::targetLangEntryName() const
 {
     if (m_d->m_cachedTargetLangEntryName.isEmpty()) {
         m_d->m_cachedTargetLangEntryName = targetLangName();
-        const int lastDot = m_d->m_cachedTargetLangEntryName.lastIndexOf(QLatin1Char('.'));
+        const int lastDot = m_d->m_cachedTargetLangEntryName.lastIndexOf(u'.');
         if (lastDot != -1)
             m_d->m_cachedTargetLangEntryName.remove(0, lastDot + 1);
     }
@@ -588,7 +588,7 @@ void TypeEntry::setTargetLangPackage(const QString &p)
 
 QString TypeEntry::qualifiedTargetLangName() const
 {
-    return targetLangPackage() + QLatin1Char('.') + targetLangName();
+    return targetLangPackage() + u'.' + targetLangName();
 }
 
 bool TypeEntry::isValue() const

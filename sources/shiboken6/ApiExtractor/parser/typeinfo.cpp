@@ -399,15 +399,15 @@ QString TypeInfo::toString() const
     tmp += d->m_qualifiedName.join(QLatin1String("::"));
 
     if (const int instantiationCount = d->m_instantiations.size()) {
-        tmp += QLatin1Char('<');
+        tmp += u'<';
         for (int i = 0; i < instantiationCount; ++i) {
             if (i)
                 tmp += QLatin1String(", ");
             tmp += d->m_instantiations.at(i).toString();
         }
-        if (tmp.endsWith(QLatin1Char('>')))
-            tmp += QLatin1Char(' ');
-        tmp += QLatin1Char('>');
+        if (tmp.endsWith(u'>'))
+            tmp += u' ';
+        tmp += u'>';
     }
 
     for (Indirection i : d->m_indirections)
@@ -417,7 +417,7 @@ QString TypeInfo::toString() const
     case NoReference:
         break;
     case LValueReference:
-        tmp += QLatin1Char('&');
+        tmp += u'&';
         break;
     case RValueReference:
         tmp += QLatin1String("&&");
@@ -432,14 +432,11 @@ QString TypeInfo::toString() const
 
             tmp += d->m_arguments.at(i).toString();
         }
-        tmp += QLatin1Char(')');
+        tmp += u')';
     }
 
-    for (const QString &elt : d->m_arrayElements) {
-        tmp += QLatin1Char('[');
-        tmp += elt;
-        tmp += QLatin1Char(']');
-    }
+    for (const QString &elt : d->m_arrayElements)
+        tmp += u'[' + elt + u']';
 
     return tmp;
 }
@@ -508,10 +505,8 @@ void TypeInfo::stripQualifiers(QString *s)
 {
     stripLeadingConst(s);
     stripLeadingVolatile(s);
-    while (s->endsWith(QLatin1Char('&')) || s->endsWith(QLatin1Char('*'))
-        || s->endsWith(QLatin1Char(' '))) {
+    while (s->endsWith(u'&') || s->endsWith(u'*') || s->endsWith(u' '))
         s->chop(1);
-    }
 }
 
 // Helper functionality to simplify a raw standard type as returned by

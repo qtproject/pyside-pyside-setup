@@ -204,7 +204,7 @@ void QtDocGenerator::writeFormattedText(TextStream &s, const QString &doc,
         QtXmlToSphinx x(this, m_parameters, doc, metaClassName);
         s << x;
     } else {
-        const auto lines = QStringView{doc}.split(QLatin1Char('\n'));
+        const auto lines = QStringView{doc}.split(u'\n');
         int typesystemIndentation = std::numeric_limits<int>::max();
         // check how many spaces must be removed from the beginning of each line
         for (const auto &line : lines) {
@@ -240,7 +240,7 @@ static void writeInheritedByList(TextStream& s, const AbstractMetaClass* metaCla
     s << "**Inherited by:** ";
     QStringList classes;
     for (auto c : qAsConst(res))
-        classes << QLatin1String(":ref:`") + c->name() + QLatin1Char('`');
+        classes << QLatin1String(":ref:`") + c->name() + u'`';
     s << classes.join(QLatin1String(", ")) << "\n\n";
 }
 
@@ -331,21 +331,21 @@ void QtDocGenerator::writeFunctionList(TextStream& s, const AbstractMetaClass* c
 
         QString className;
         if (!func->isConstructor())
-            className = cppClass->fullName() + QLatin1Char('.');
+            className = cppClass->fullName() + u'.';
         else if (func->implementingClass() && func->implementingClass()->enclosingClass())
-            className = func->implementingClass()->enclosingClass()->fullName() + QLatin1Char('.');
+            className = func->implementingClass()->enclosingClass()->fullName() + u'.';
         QString funcName = getFuncName(func);
 
         QString str = QLatin1String("def :meth:`");
 
         str += funcName;
-        str += QLatin1Char('<');
+        str += u'<';
         if (!funcName.startsWith(className))
             str += className;
         str += funcName;
         str += QLatin1String(">` (");
         str += parseArgDocStyle(cppClass, func);
-        str += QLatin1Char(')');
+        str += u')';
 
         if (func->isStatic())
             staticFunctionList << str;
@@ -482,7 +482,7 @@ QString QtDocGenerator::parseArgDocStyle(const AbstractMetaClass* /* cppClass */
 
         bool thisIsoptional = !arg.defaultValueExpression().isEmpty();
         if (optArgs || thisIsoptional) {
-            ret += QLatin1Char('[');
+            ret += u'[';
             optArgs++;
         }
 
@@ -508,11 +508,11 @@ QString QtDocGenerator::parseArgDocStyle(const AbstractMetaClass* /* cppClass */
                 else if (defValue == QLatin1String("0") && arg.type().isObject())
                     defValue = none();
             }
-            ret += QLatin1Char('=') + defValue;
+            ret += u'=' + defValue;
         }
     }
 
-    ret += QString(optArgs, QLatin1Char(']'));
+    ret += QString(optArgs, u']');
     return ret;
 }
 
@@ -542,7 +542,7 @@ void QtDocGenerator::writeDocSnips(TextStream &s,
                 break;
 
             QString codeBlock = code.mid(startBlock, endBlock - startBlock);
-            const QStringList rows = codeBlock.split(QLatin1Char('\n'));
+            const QStringList rows = codeBlock.split(u'\n');
             int currentRow = 0;
             int offset = 0;
 
@@ -559,9 +559,9 @@ void QtDocGenerator::writeDocSnips(TextStream &s,
                 if (currentRow == 0) {
                     //find offset
                     for (auto c : row) {
-                        if (c == QLatin1Char(' '))
+                        if (c == u' ')
                             offset++;
-                        else if (c == QLatin1Char('\n'))
+                        else if (c == u'\n')
                             offset = 0;
                         else
                             break;
@@ -625,10 +625,10 @@ QString QtDocGenerator::functionSignature(const AbstractMetaClass* cppClass,
 
     funcName = cppClass->fullName();
     if (!func->isConstructor())
-        funcName += QLatin1Char('.') + getFuncName(func);
+        funcName += u'.' + getFuncName(func);
 
-    return funcName + QLatin1Char('(') + parseArgDocStyle(cppClass, func)
-        + QLatin1Char(')');
+    return funcName + u'(' + parseArgDocStyle(cppClass, func)
+        + u')';
 }
 
 QString QtDocGenerator::translateToPythonType(const AbstractMetaType &type,
@@ -668,9 +668,9 @@ QString QtDocGenerator::translateToPythonType(const AbstractMetaType &type,
         strType = intT();
     } else if (type.isContainer()) {
         QString strType = translateType(type, cppClass, Options(ExcludeConst) | ExcludeReference);
-        strType.remove(QLatin1Char('*'));
-        strType.remove(QLatin1Char('>'));
-        strType.remove(QLatin1Char('<'));
+        strType.remove(u'*');
+        strType.remove(u'>');
+        strType.remove(u'<');
         strType.replace(QLatin1String("::"), QLatin1String("."));
         if (strType.contains(QLatin1String("QList")) || strType.contains(QLatin1String("QVector"))) {
             strType.replace(QLatin1String("QList"), QLatin1String("list of "));
@@ -678,14 +678,14 @@ QString QtDocGenerator::translateToPythonType(const AbstractMetaType &type,
         } else if (strType.contains(QLatin1String("QHash")) || strType.contains(QLatin1String("QMap"))) {
             strType.remove(QLatin1String("QHash"));
             strType.remove(QLatin1String("QMap"));
-            QStringList types = strType.split(QLatin1Char(','));
+            QStringList types = strType.split(u',');
             strType = QString::fromLatin1("Dictionary with keys of type %1 and values of type %2.")
                                          .arg(types[0], types[1]);
         }
     } else {
         auto k = AbstractMetaClass::findClass(api().classes(), type.typeEntry());
         strType = k ? k->fullName() : type.name();
-        strType = QStringLiteral(":any:`") + strType + QLatin1Char('`');
+        strType = QStringLiteral(":any:`") + strType + u'`';
     }
     return strType;
 }
@@ -759,15 +759,14 @@ static void writeFancyToc(TextStream& s, const QStringList& items)
 {
     using TocMap = QMap<QChar, QStringList>;
     TocMap tocMap;
-    QChar Q = QLatin1Char('Q');
     QChar idx;
     for (QString item : items) {
         if (item.isEmpty())
             continue;
         item.chop(4); // Remove the .rst extension
         // skip namespace if necessary
-        const QString className = item.split(QLatin1Char('.')).last();
-        if (className.startsWith(Q) && className.length() > 1)
+        const QString className = item.split(u'.').last();
+        if (className.startsWith(u'Q') && className.length() > 1)
             idx = className[1];
         else
             idx = className[0];
@@ -787,7 +786,7 @@ static void writeFancyToc(TextStream& s, const QStringList& items)
                 row.clear();
                 row << QtXmlToSphinx::TableCell(QString{});
             }
-            const QString entry = QLatin1String("* :doc:`") + item + QLatin1Char('`');
+            const QString entry = QLatin1String("* :doc:`") + item + u'`';
             row << QtXmlToSphinx::TableCell(entry);
         }
         if (!row.isEmpty())
@@ -815,8 +814,8 @@ void QtDocGenerator::writeModuleDocumentation()
         std::sort(it.value().begin(), it.value().end());
 
         QString key = it.key();
-        key.replace(QLatin1Char('.'), QLatin1Char('/'));
-        QString outputDir = outputDirectory() + QLatin1Char('/') + key;
+        key.replace(u'.', u'/');
+        QString outputDir = outputDirectory() + u'/' + key;
         FileOut output(outputDir + QLatin1String("/index.rst"));
         TextStream& s = output.stream;
 
@@ -829,7 +828,7 @@ void QtDocGenerator::writeModuleDocumentation()
         // information when neeeded. For example, the RST files in the extras directory
         // doesn't include the PySide# prefix in their names.
         QString moduleName = it.key();
-        const int lastIndex = moduleName.lastIndexOf(QLatin1Char('.'));
+        const int lastIndex = moduleName.lastIndexOf(u'.');
         if (lastIndex >= 0)
             moduleName.remove(0, lastIndex + 1);
 
@@ -850,7 +849,7 @@ void QtDocGenerator::writeModuleDocumentation()
                 // Strip to "Property.rst" in output directory
                 const QString newFileName = fi.fileName().mid(moduleName.size() + 1);
                 it.value().append(newFileName);
-                const QString newFilePath = outputDir + QLatin1Char('/') + newFileName;
+                const QString newFilePath = outputDir + u'/' + newFileName;
                 if (QFile::exists(newFilePath))
                     QFile::remove(newFilePath);
                 if (!QFile::copy(fi.absoluteFilePath(), newFilePath)) {
@@ -872,7 +871,7 @@ void QtDocGenerator::writeModuleDocumentation()
             << "Detailed Description\n--------------------\n\n";
 
         // module doc is always wrong and C++istic, so go straight to the extra directory!
-        QFile moduleDoc(m_extraSectionDir + QLatin1Char('/') + moduleName
+        QFile moduleDoc(m_extraSectionDir + u'/' + moduleName
                         + QLatin1String(".rst"));
         if (moduleDoc.open(QIODevice::ReadOnly | QIODevice::Text)) {
             s << moduleDoc.readAll();
@@ -924,7 +923,7 @@ void QtDocGenerator::writeAdditionalDocumentation() const
             continue;
         const QString line = QFile::decodeName(lineBA);
         // Parse "[directory]" specification
-        if (line.size() > 2 && line.startsWith(QLatin1Char('[')) && line.endsWith(QLatin1Char(']'))) {
+        if (line.size() > 2 && line.startsWith(u'[') && line.endsWith(u']')) {
             const QString dir = line.mid(1, line.size() - 2);
             if (dir.isEmpty() || dir == QLatin1String(".")) {
                 targetDir = outDir.absolutePath();
@@ -939,11 +938,11 @@ void QtDocGenerator::writeAdditionalDocumentation() const
             }
         } else {
             // Normal file entry
-            QFileInfo fi(m_parameters.docDataDir + QLatin1Char('/') + line);
+            QFileInfo fi(m_parameters.docDataDir + u'/' + line);
             if (fi.isFile()) {
                 const QString rstFileName = fi.baseName() + rstSuffix;
-                const QString rstFile = targetDir + QLatin1Char('/') + rstFileName;
-                const QString context = targetDir.mid(targetDir.lastIndexOf(QLatin1Char('/')) + 1);
+                const QString rstFile = targetDir + u'/' + rstFileName;
+                const QString context = targetDir.mid(targetDir.lastIndexOf(u'/') + 1);
                 if (convertToRst(fi.absoluteFilePath(),
                                  rstFile, context, &errorMessage)) {
                     ++successCount;
@@ -1089,7 +1088,7 @@ bool QtDocGenerator::convertToRst(const QString &sourceFileName,
 // QtXmlToSphinxDocGeneratorInterface
 QString QtDocGenerator::expandFunction(const QString &function) const
 {
-    const int firstDot = function.indexOf(QLatin1Char('.'));
+    const int firstDot = function.indexOf(u'.');
     const AbstractMetaClass *metaClass = nullptr;
     if (firstDot != -1) {
         const auto className = QStringView{function}.left(firstDot);
@@ -1114,12 +1113,11 @@ QString QtDocGenerator::expandClass(const QString &context,
         return typeEntry->qualifiedTargetLangName();
     // fall back to the old heuristic if the type wasn't found.
     QString result = name;
-    const auto rawlinklist = QStringView{name}.split(QLatin1Char('.'));
-    QStringList splittedContext = context.split(QLatin1Char('.'));
+    const auto rawlinklist = QStringView{name}.split(u'.');
+    QStringList splittedContext = context.split(u'.');
     if (rawlinklist.size() == 1 || rawlinklist.constFirst() == splittedContext.constLast()) {
         splittedContext.removeLast();
-        result.prepend(QLatin1Char('~') + splittedContext.join(QLatin1Char('.'))
-                       + QLatin1Char('.'));
+        result.prepend(u'~' + splittedContext.join(u'.') + u'.');
     }
     return result;
 }
@@ -1127,7 +1125,7 @@ QString QtDocGenerator::expandClass(const QString &context,
 QString QtDocGenerator::resolveContextForMethod(const QString &context,
                                                 const QString &methodName) const
 {
-    const auto currentClass = QStringView{context}.split(QLatin1Char('.')).constLast();
+    const auto currentClass = QStringView{context}.split(u'.').constLast();
 
     const AbstractMetaClass *metaClass = nullptr;
     for (auto cls : api().classes()) {
@@ -1156,7 +1154,7 @@ QString QtDocGenerator::resolveContextForMethod(const QString &context,
             return implementingClass->typeEntry()->qualifiedTargetLangName();
     }
 
-    return QLatin1Char('~') + context;
+    return u'~' + context;
 }
 
 const QLoggingCategory &QtDocGenerator::loggingCategory() const
@@ -1177,7 +1175,7 @@ QtXmlToSphinxLink QtDocGenerator::resolveLink(const QtXmlToSphinxLink &link) con
     if (link.type != QtXmlToSphinxLink::Reference || !isRelativeHtmlFile(link.linkRef))
         return link;
     static const QString prefix = QStringLiteral("https://doc.qt.io/qt-")
-        + QString::number(QT_VERSION_MAJOR) + QLatin1Char('/');
+        + QString::number(QT_VERSION_MAJOR) + u'/';
     QtXmlToSphinxLink resolved = link;
     resolved.type = QtXmlToSphinxLink::External;
     resolved.linkRef = prefix + link.linkRef;

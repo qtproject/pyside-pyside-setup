@@ -195,7 +195,7 @@ QPair<int, int> parseTemplateArgumentList(const QString &l,
                                           const TemplateArgumentHandler &handler,
                                           int from)
 {
-    const int ltPos = l.indexOf(QLatin1Char('<'), from);
+    const int ltPos = l.indexOf(u'<', from);
     if (ltPos == - 1)
         return qMakePair(-1, -1);
     int startPos = ltPos + 1;
@@ -211,7 +211,7 @@ QPair<int, int> parseTemplateArgumentList(const QString &l,
                 if (--level == 0)
                     return qMakePair(ltPos, p);
                 // Skip over next ',': "a<b<c,d>,e>"
-                for (; p < end && (l.at(p).isSpace() || l.at(p) == QLatin1Char(',')); ++p) {}
+                for (; p < end && (l.at(p).isSpace() || l.at(p) == u','); ++p) {}
             }
             startPos = p;
             break;

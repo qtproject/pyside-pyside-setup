@@ -250,7 +250,7 @@ void disableIndent(TextStream &s)
 
 void ensureEndl(TextStream &s)
 {
-    if (s.lastChar() != QLatin1Char('\n'))
+    if (s.lastChar() != u'\n')
         s << '\n';
 }
 

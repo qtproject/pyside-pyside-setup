@@ -594,7 +594,7 @@ static QStringList parseFields(const char *propstr, bool *stdwrite)
     if (stdwrite)
         *stdwrite = true;
     QString s = QString(QLatin1String(propstr));
-    auto list = s.split(QLatin1Char(':'));
+    auto list = s.split(u':');
     assert(list.size() == 2 || list.size() == 3);
     auto name = list[0];
     auto read = list[1];
