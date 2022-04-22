@@ -1070,7 +1070,7 @@ QStringList getArgsFromSignature(const char *signature, bool *isShortCircuit)
 
     if (isShortCircuit)
         *isShortCircuit = !qsignature.contains(u'(');
-    if (qsignature.contains(QLatin1String("()")) || qsignature.contains(QLatin1String("(void)")))
+    if (qsignature.contains(u"()") || qsignature.contains(u"(void)"))
         return result;
     if (qsignature.endsWith(u')')) {
         const int paren = qsignature.indexOf(u'(');

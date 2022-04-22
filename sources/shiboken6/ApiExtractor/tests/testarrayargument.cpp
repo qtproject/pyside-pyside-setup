@@ -58,7 +58,7 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByInteger()
     const AbstractMetaArgument &arg = classA->functions().constLast()->arguments().constFirst();
     QVERIFY(arg.type().isArray());
     QCOMPARE(arg.type().arrayElementCount(), 3);
-    QCOMPARE(arg.type().arrayElementType()->name(), QLatin1String("double"));
+    QCOMPARE(arg.type().arrayElementType()->name(), u"double");
 }
 
 static QString functionMinimalSignature(const AbstractMetaClass *c, const QString &name)
@@ -92,21 +92,21 @@ void TestArrayArgument::testArraySignature()
     QVERIFY(!builder.isNull());
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), QLatin1String("A"));
     QCOMPARE(functionMinimalSignature(classA, QLatin1String("mi1")),
-             QLatin1String("mi1(int[5])"));
+             u"mi1(int[5])");
     QCOMPARE(functionMinimalSignature(classA, QLatin1String("mi1c")),
-             QLatin1String("mi1c(const int[5])"));
+             u"mi1c(const int[5])");
     QCOMPARE(functionMinimalSignature(classA, QLatin1String("mi1cu")),
-             QLatin1String("mi1cu(const int[])"));
+             u"mi1cu(const int[])");
     QCOMPARE(functionMinimalSignature(classA, QLatin1String("mc1cu")),
-             QLatin1String("mc1cu(const char*)"));
+             u"mc1cu(const char*)");
     QCOMPARE(functionMinimalSignature(classA, QLatin1String("mc1cup")),
-             QLatin1String("mc1cup(const char*[])"));
+             u"mc1cup(const char*[])");
     QCOMPARE(functionMinimalSignature(classA, QLatin1String("muc2")),
-             QLatin1String("muc2(unsigned char*[2][3])"));
+             u"muc2(unsigned char*[2][3])");
     QCOMPARE(functionMinimalSignature(classA, QLatin1String("mc2c")),
-             QLatin1String("mc2c(const char*[5][6])"));
+             u"mc2c(const char*[5][6])");
     QCOMPARE(functionMinimalSignature(classA, QLatin1String("mc2cu")),
-             QLatin1String("mc2cu(const char[][2])"));
+             u"mc2cu(const char[][2])");
 }
 
 void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValue()
@@ -137,7 +137,7 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValue()
     const AbstractMetaArgument &arg = classA->functions().constLast()->arguments().constFirst();
     QVERIFY(arg.type().isArray());
     QCOMPARE(arg.type().arrayElementCount(), nvalues->value().value());
-    QCOMPARE(arg.type().arrayElementType()->name(), QLatin1String("double"));
+    QCOMPARE(arg.type().arrayElementType()->name(), u"double");
 };
 
 void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValueFromGlobalEnum()
@@ -167,7 +167,7 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValueFromGlobalEnu
     const AbstractMetaArgument &arg = classA->functions().constLast()->arguments().constFirst();
     QVERIFY(arg.type().isArray());
     QCOMPARE(arg.type().arrayElementCount(), nvalues->value().value());
-    QCOMPARE(arg.type().arrayElementType()->name(), QLatin1String("double"));
+    QCOMPARE(arg.type().arrayElementType()->name(), u"double");
 };
 
 QTEST_APPLESS_MAIN(TestArrayArgument)

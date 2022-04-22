@@ -88,11 +88,11 @@ void TestFunctionTag::testRenameGlobalFunction()
     QCOMPARE(metaFunc->modifications().size(), 1);
     QVERIFY(metaFunc->modifications().constFirst().isRenameModifier());
     QCOMPARE(metaFunc->modifications().constFirst().renamedToName(),
-             QLatin1String("smooth"));
+             u"smooth");
 
-    QCOMPARE(metaFunc->name(), QLatin1String("smooth"));
-    QCOMPARE(metaFunc->originalName(), QLatin1String("global_function_with_ugly_name"));
-    QCOMPARE(metaFunc->minimalSignature(), QLatin1String("global_function_with_ugly_name()"));
+    QCOMPARE(metaFunc->name(), u"smooth");
+    QCOMPARE(metaFunc->originalName(), u"global_function_with_ugly_name");
+    QCOMPARE(metaFunc->minimalSignature(), u"global_function_with_ugly_name()");
 }
 
 QTEST_APPLESS_MAIN(TestFunctionTag)

@@ -55,7 +55,7 @@ void TestReverseOperators::testReverseSum()
     AbstractMetaFunctionCPtr reverseOp;
     AbstractMetaFunctionCPtr normalOp;
     for (const auto &func : classA->functions()) {
-        if (func->name() == QLatin1String("operator+")) {
+        if (func->name() == u"operator+") {
             if (func->isReverseOperator())
                 reverseOp = func;
             else
@@ -101,7 +101,7 @@ void TestReverseOperators::testReverseSumWithAmbiguity()
     AbstractMetaFunctionCPtr reverseOp;
     AbstractMetaFunctionCPtr normalOp;
     for (const auto &func : classB->functions()) {
-        if (func->name() == QLatin1String("operator+")) {
+        if (func->name() == u"operator+") {
             if (func->isReverseOperator())
                 reverseOp = func;
             else
@@ -111,11 +111,11 @@ void TestReverseOperators::testReverseSumWithAmbiguity()
     QVERIFY(!normalOp.isNull());
     QVERIFY(!normalOp->isReverseOperator());
     QCOMPARE(normalOp->arguments().size(), 1);
-    QCOMPARE(normalOp->minimalSignature(), QLatin1String("operator+(B,A)"));
+    QCOMPARE(normalOp->minimalSignature(), u"operator+(B,A)");
     QVERIFY(!reverseOp.isNull());
     QVERIFY(reverseOp->isReverseOperator());
     QCOMPARE(reverseOp->arguments().size(), 1);
-    QCOMPARE(reverseOp->minimalSignature(), QLatin1String("operator+(A,B)"));
+    QCOMPARE(reverseOp->minimalSignature(), u"operator+(A,B)");
 }
 
 

@@ -376,7 +376,7 @@ AddedFunction::AddedFunctionPtr
     const int signatureLength = signature.length();
     const int qualifierLength = signatureLength - closingParenPos - 1;
     if (qualifierLength >= 5
-        && signature.right(qualifierLength).contains(QLatin1String("const"))) {
+        && signature.right(qualifierLength).contains(u"const")) {
         isConst = true;
     }
 
@@ -385,7 +385,7 @@ AddedFunction::AddedFunctionPtr
     if (params.isEmpty() && !errorMessage->isEmpty())
         return {};
     for (const auto &p : params) {
-        TypeInfo type = p.type == QLatin1String("...")
+        TypeInfo type = p.type == u"..."
             ? TypeInfo::varArgsType() : TypeParser::parse(p.type, errorMessage);
         if (!errorMessage->isEmpty()) {
             errorMessage->prepend(u"Unable to parse added function "_qs + signatureIn

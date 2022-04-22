@@ -84,11 +84,11 @@ void ReportHandler::setDebugLevel(ReportHandler::DebugLevel level)
 bool ReportHandler::setDebugLevelFromArg(const QString &level)
 {
     bool result = true;
-    if (level == QLatin1String("sparse"))
+    if (level == u"sparse")
         ReportHandler::setDebugLevel(ReportHandler::SparseDebug);
-    else if (level == QLatin1String("medium"))
+    else if (level == u"medium")
         ReportHandler::setDebugLevel(ReportHandler::MediumDebug);
-    else if (level == QLatin1String("full"))
+    else if (level == u"full")
         ReportHandler::setDebugLevel(ReportHandler::FullDebug);
     else
         result = false;
@@ -123,7 +123,7 @@ void ReportHandler::setPrefix(const QString &p)
 void ReportHandler::messageOutput(QtMsgType type, const QMessageLogContext &context, const QString &text)
 {
     // Check for file location separator added by SourceLocation
-    int fileLocationPos = text.indexOf(QLatin1String(":\t"));
+    int fileLocationPos = text.indexOf(u":\t");
     if (type == QtWarningMsg) {
         if (m_silent || m_reportedWarnings.contains(text))
             return;

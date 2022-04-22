@@ -826,14 +826,14 @@ bool AbstractMetaType::isCString() const
 {
     return isNativePointer()
         && d->m_indirections.size() == 1
-        && name() == QLatin1String("char");
+        && name() == u"char";
 }
 
 bool AbstractMetaType::isVoidPointer() const
 {
     return isNativePointer()
         && d->m_indirections.size() == 1
-        && name() == QLatin1String("void");
+        && name() == u"void";
 }
 
 bool AbstractMetaType::isUserPrimitive() const
@@ -920,7 +920,7 @@ std::optional<AbstractMetaType>
 AbstractMetaType::fromString(QString typeSignature, QString *errorMessage)
 {
     typeSignature = typeSignature.trimmed();
-    if (typeSignature.startsWith(QLatin1String("::")))
+    if (typeSignature.startsWith(u"::"))
         typeSignature.remove(0, 2);
 
     auto &cache = *metaTypeFromStringCache();
@@ -941,7 +941,7 @@ AbstractMetaType::fromString(QString typeSignature, QString *errorMessage)
 AbstractMetaType AbstractMetaType::fromTypeEntry(const TypeEntry *typeEntry)
 {
     QString typeName = typeEntry->qualifiedCppName();
-    if (typeName.startsWith(QLatin1String("::")))
+    if (typeName.startsWith(u"::"))
         typeName.remove(0, 2);
     auto &cache  = *metaTypeFromStringCache();
     auto it = cache.find(typeName);

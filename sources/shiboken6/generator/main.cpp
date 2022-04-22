@@ -221,7 +221,7 @@ static std::optional<CommandLineArguments> getProjectFileArguments()
 
     QString projectFileName;
     for (const QString &arg : qAsConst(arguments)) {
-        if (arg.startsWith(QLatin1String("--project-file"))) {
+        if (arg.startsWith(u"--project-file")) {
             int split = arg.indexOf(u'=');
             if (split > 0)
                 projectFileName = arg.mid(split + 1).trimmed();
@@ -250,7 +250,7 @@ static std::optional<CommandLineArguments> getProjectFileArguments()
 
 static void getCommandLineArg(QString arg, int &argNum, CommandLineArguments &args)
 {
-    if (arg.startsWith(QLatin1String("--"))) {
+    if (arg.startsWith(u"--")) {
         arg.remove(0, 2);
         const int split = arg.indexOf(u'=');
         if (split < 0) {
@@ -283,13 +283,13 @@ static void getCommandLineArg(QString arg, int &argNum, CommandLineArguments &ar
             args.addToOptionsPathList(includePathOption(), arg.mid(1));
         else if (arg.startsWith(u'F'))
             args.addToOptionsPathList(frameworkIncludePathOption(), arg.mid(1));
-        else if (arg.startsWith(QLatin1String("isystem")))
+        else if (arg.startsWith(u"isystem"))
             args.addToOptionsPathList(systemIncludePathOption(), arg.mid(7));
         else if (arg.startsWith(u'T'))
             args.addToOptionsPathList(typesystemPathOption(), arg.mid(1));
-        else if (arg == QLatin1String("h"))
+        else if (arg == u"h")
             args.options.insert(helpOption(), QString());
-        else if (arg.startsWith(QLatin1String("std=")))
+        else if (arg.startsWith(u"std="))
             args.options.insert(languageLevelOption(), arg.mid(4));
         else
             args.options.insert(arg, QString());
@@ -476,13 +476,13 @@ int shibokenMain(int argc, char *argv[])
     }
 
     // Pre-defined generator sets.
-    if (generatorSet == QLatin1String("qtdoc")) {
+    if (generatorSet == u"qtdoc") {
         generators = docGenerators();
         if (generators.isEmpty()) {
             errorPrint(QLatin1String("Doc strings extractions was not enabled in this shiboken build."));
             return EXIT_FAILURE;
         }
-    } else if (generatorSet.isEmpty() || generatorSet == QLatin1String("shiboken")) {
+    } else if (generatorSet.isEmpty() || generatorSet == u"shiboken") {
         generators = shibokenGenerators();
     } else {
         errorPrint(QLatin1String("Unknown generator set, try \"shiboken\" or \"qtdoc\"."));
@@ -629,7 +629,7 @@ int shibokenMain(int argc, char *argv[])
 
     const QString typeSystemFileName = args.positionalArguments.takeLast();
     QString messagePrefix = QFileInfo(typeSystemFileName).baseName();
-    if (messagePrefix.startsWith(QLatin1String("typesystem_")))
+    if (messagePrefix.startsWith(u"typesystem_"))
         messagePrefix.remove(0, 11);
     ReportHandler::setPrefix(u'(' + messagePrefix + u')');
 

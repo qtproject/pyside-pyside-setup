@@ -171,7 +171,7 @@ static void formatXmlNamespaceMembers(QXmlStreamWriter &writer, const NamespaceM
 
     for (const auto &func : nsp->functions()) {
         const QString signature = func->typeSystemSignature();
-        if (!signature.contains(QLatin1String("operator"))) { // Skip free operators
+        if (!signature.contains(u"operator")) { // Skip free operators
             writer.writeStartElement(QStringLiteral("function"));
             writer.writeAttribute(QStringLiteral("signature"), signature);
             writer.writeEndElement();

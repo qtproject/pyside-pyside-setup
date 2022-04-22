@@ -784,9 +784,9 @@ static inline QString fixLinkType(QStringView type)
 {
     // TODO: create a flag PROPERTY-AS-FUNCTION to ask if the properties
     // are recognized as such or not in the binding
-    if (type == QLatin1String("property"))
+    if (type == u"property")
         return functionLinkType();
-    if (type == QLatin1String("typedef"))
+    if (type == u"typedef")
         return classLinkType();
     return type.toString();
 }
@@ -795,7 +795,7 @@ static inline QString linkSourceAttribute(const QString &type)
 {
     if (type == functionLinkType() || type == classLinkType())
         return QLatin1String("raw");
-    return type == QLatin1String("enum") || type == QLatin1String("page")
+    return type == u"enum" || type == u"page"
         ? type : QLatin1String("href");
 }
 
@@ -818,7 +818,7 @@ void QtXmlToSphinx::handleSeeAlsoTag(QXmlStreamReader& reader)
         if (!textR.isEmpty()) {
             const QString text = textR.toString();
             if (m_seeAlsoContext.isNull()) {
-                const QString type = text.endsWith(QLatin1String("()"))
+                const QString type = text.endsWith(u"()")
                     ? functionLinkType() : classLinkType();
                 m_seeAlsoContext.reset(handleLinkStart(type, text));
             }
@@ -869,8 +869,8 @@ void QtXmlToSphinx::handleSnippetTag(QXmlStreamReader& reader)
 {
     QXmlStreamReader::TokenType token = reader.tokenType();
     if (token == QXmlStreamReader::StartElement) {
-        const bool consecutiveSnippet = m_lastTagName == QLatin1String("snippet")
-            || m_lastTagName == QLatin1String("dots") || m_lastTagName == QLatin1String("codeline");
+        const bool consecutiveSnippet = m_lastTagName == u"snippet"
+            || m_lastTagName == u"dots" || m_lastTagName == u"codeline";
         if (consecutiveSnippet) {
             m_output.flush();
             m_output.string()->chop(2);
@@ -907,8 +907,8 @@ void QtXmlToSphinx::handleDotsTag(QXmlStreamReader& reader)
 {
     QXmlStreamReader::TokenType token = reader.tokenType();
     if (token == QXmlStreamReader::StartElement) {
-        const bool consecutiveSnippet = m_lastTagName == QLatin1String("snippet")
-            || m_lastTagName == QLatin1String("dots") || m_lastTagName == QLatin1String("codeline");
+        const bool consecutiveSnippet = m_lastTagName == u"snippet"
+            || m_lastTagName == u"dots" || m_lastTagName == u"codeline";
         if (consecutiveSnippet) {
             m_output.flush();
             m_output.string()->chop(2);
@@ -1001,9 +1001,9 @@ enum ListType { BulletList, OrderedList, EnumeratedList };
 
 static inline ListType webXmlListType(QStringView t)
 {
-    if (t == QLatin1String("enum"))
+    if (t == u"enum")
         return EnumeratedList;
-    if (t == QLatin1String("ordered"))
+    if (t == u"ordered")
         return OrderedList;
     return BulletList;
 }
@@ -1102,9 +1102,9 @@ QtXmlToSphinxLink *QtXmlToSphinx::handleLinkStart(const QString &type, QString r
     } else if (type == classLinkType()) {
         result->type = QtXmlToSphinxLink::Class;
         result->linkRef = m_generator->expandClass(m_context, result->linkRef);
-    } else if (type == QLatin1String("enum")) {
+    } else if (type == u"enum") {
         result->type = QtXmlToSphinxLink::Attribute;
-    } else if (type == QLatin1String("page")) {
+    } else if (type == u"page") {
         // Module, external web page or reference
         if (result->linkRef == m_parameters.moduleName)
             result->type = QtXmlToSphinxLink::Module;
@@ -1133,7 +1133,7 @@ static QString fixLinkText(const QtXmlToSphinxLink *linkContext,
     }
     // For the language reference documentation, strip the module name.
     // Clear the link text if that matches the function/class/enumeration name.
-    const int lastSep = linktext.lastIndexOf(QLatin1String("::"));
+    const int lastSep = linktext.lastIndexOf(u"::");
     if (lastSep != -1)
         linktext.remove(0, lastSep + 2);
     else

@@ -89,7 +89,7 @@ void TestDropTypeEntries::testDropEntries()
 
     AbstractMetaEnumList globalEnums = builder->globalEnums();
     QCOMPARE(globalEnums.size(), 1);
-    QCOMPARE(globalEnums.constFirst().name(), QLatin1String("EnumA"));
+    QCOMPARE(globalEnums.constFirst().name(), u"EnumA");
 
     TypeDatabase* td = TypeDatabase::instance();
     QVERIFY(td->findType(QLatin1String("funcA")));

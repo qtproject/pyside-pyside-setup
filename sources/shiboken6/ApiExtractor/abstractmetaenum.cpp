@@ -154,7 +154,7 @@ std::optional<AbstractMetaEnumValue>
 {
     if (isAnonymous())
         return findMatchingEnumValue(d->m_enumValues, value);
-    const int sepPos = value.indexOf(QLatin1String("::"));
+    const int sepPos = value.indexOf(u"::");
     if (sepPos == -1)
         return findMatchingEnumValue(d->m_enumValues, value);
     if (name() == value.left(sepPos))

@@ -145,7 +145,7 @@ static bool setRejectionRegularExpression(const QString &patternIn,
     QString pattern;
     if (patternIn.startsWith(u'^') && patternIn.endsWith(u'$'))
         pattern = patternIn;
-    else if (patternIn == QLatin1String("*"))
+    else if (patternIn == u"*")
         pattern = QStringLiteral("^.*$");
     else
         pattern = u'^' + QRegularExpression::escape(patternIn) + u'$';
@@ -578,8 +578,8 @@ QString TypeSystemEntityResolver::readFile(const QString &entityName, QString *e
     }
     QString result = QString::fromUtf8(file.readAll()).trimmed();
     // Remove license header comments on which QXmlStreamReader chokes
-    if (result.startsWith(QLatin1String("<!--"))) {
-        const int commentEnd = result.indexOf(QLatin1String("-->"));
+    if (result.startsWith(u"<!--")) {
+        const int commentEnd = result.indexOf(u"-->");
         if (commentEnd != -1) {
             result.remove(0, commentEnd + 3);
             result = result.trimmed();
@@ -740,7 +740,7 @@ static bool addRejection(TypeDatabase *database, QXmlStreamAttributes *attribute
     }
 
     // Special case: When all fields except class are empty, completely exclude class
-    if (className == QLatin1String("*")) {
+    if (className == u"*") {
         *errorMessage = QLatin1String("bad reject entry, neither 'class', 'function-name'"
                                       " nor 'field' specified");
         return false;
@@ -1182,7 +1182,7 @@ static QString checkSignatureError(const QString& signature, const QString& tag)
     QString funcName = signature.left(signature.indexOf(u'(')).trimmed();
     static const QRegularExpression whiteSpace(QStringLiteral("\\s"));
     Q_ASSERT(whiteSpace.isValid());
-    if (!funcName.startsWith(QLatin1String("operator ")) && funcName.contains(whiteSpace)) {
+    if (!funcName.startsWith(u"operator ") && funcName.contains(whiteSpace)) {
         return QString::fromLatin1("Error in <%1> tag signature attribute '%2'.\n"
                                    "White spaces aren't allowed in function names, "
                                    "and return types should not be part of the signature.")
@@ -1329,13 +1329,13 @@ SmartPointerTypeEntry *
     QString instantiations;
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == QLatin1String("type")) {
+        if (name == u"type") {
              smartPointerType = attributes->takeAt(i).value().toString();
-        } else if (name == QLatin1String("getter")) {
+        } else if (name == u"getter") {
             getter = attributes->takeAt(i).value().toString();
-        } else if (name == QLatin1String("ref-count-method")) {
+        } else if (name == u"ref-count-method") {
             refCountMethodName = attributes->takeAt(i).value().toString();
-        } else if (name == QLatin1String("instantiations")) {
+        } else if (name == u"instantiations") {
             instantiations = attributes->takeAt(i).value().toString();
         } else if (name == u"value-check-method") {
             valueCheckMethod = attributes->takeAt(i).value().toString();
@@ -1350,7 +1350,7 @@ SmartPointerTypeEntry *
         m_error = QLatin1String("No type specified for the smart pointer. Currently supported types: 'shared',");
         return nullptr;
     }
-    if (smartPointerType != QLatin1String("shared")) {
+    if (smartPointerType != u"shared") {
         m_error = QLatin1String("Currently only the 'shared' type is supported.");
         return nullptr;
     }
@@ -1401,7 +1401,7 @@ PrimitiveTypeEntry *
         const auto name = attributes->at(i).qualifiedName();
         if (name == targetLangNameAttribute()) {
             type->setTargetLangName(attributes->takeAt(i).value().toString());
-        } else if (name == QLatin1String("target-lang-api-name")) {
+        } else if (name == u"target-lang-api-name") {
             targetLangApiName = attributes->takeAt(i).value().toString();
         } else if (name == preferredConversionAttribute()) {
             qCWarning(lcShiboken, "%s",
@@ -1410,7 +1410,7 @@ PrimitiveTypeEntry *
             const bool v = convertBoolean(attributes->takeAt(i).value(),
                                           preferredTargetLangTypeAttribute(), true);
             type->setPreferredTargetLangType(v);
-        } else if (name == QLatin1String("default-constructor")) {
+        } else if (name == u"default-constructor") {
              type->setDefaultConstructor(attributes->takeAt(i).value().toString());
         }
     }
@@ -1496,10 +1496,10 @@ EnumTypeEntry *
     QString flagNames;
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == QLatin1String("upper-bound")) {
+        if (name == u"upper-bound") {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
-        } else if (name == QLatin1String("lower-bound")) {
+        } else if (name == u"lower-bound") {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
         } else if (name == forceIntegerAttribute()) {
@@ -1535,7 +1535,7 @@ NamespaceTypeEntry *
     applyCommonAttributes(reader, result.get(), attributes);
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const auto attributeName = attributes->at(i).qualifiedName();
-        if (attributeName == QLatin1String("files")) {
+        if (attributeName == u"files") {
             const QString pattern = attributes->takeAt(i).value().toString();
             QRegularExpression re(pattern);
             if (!re.isValid()) {
@@ -1543,7 +1543,7 @@ NamespaceTypeEntry *
                 return nullptr;
             }
             result->setFilePattern(re);
-        } else if (attributeName == QLatin1String("extends")) {
+        } else if (attributeName == u"extends") {
             const auto extendsPackageName = attributes->at(i).value();
             auto allEntries = TypeDatabase::instance()->findNamespaceTypes(name);
             auto extendsIt = std::find_if(allEntries.cbegin(), allEntries.cend(),
@@ -1710,9 +1710,9 @@ void TypeSystemParser::applyComplexTypeAttributes(const ConditionalStreamReader 
             ctype->setGenericClass(v);
         } else if (name == targetLangNameAttribute()) {
             ctype->setTargetLangName(attributes->takeAt(i).value().toString());
-        } else if (name == QLatin1String("polymorphic-base")) {
+        } else if (name == u"polymorphic-base") {
             ctype->setPolymorphicIdValue(attributes->takeAt(i).value().toString());
-        } else if (name == QLatin1String("polymorphic-id-expression")) {
+        } else if (name == u"polymorphic-id-expression") {
             ctype->setPolymorphicIdValue(attributes->takeAt(i).value().toString());
         } else if (name == copyableAttribute()) {
             const bool v = convertBoolean(attributes->takeAt(i).value(), copyableAttribute(), false);
@@ -1735,10 +1735,10 @@ void TypeSystemParser::applyComplexTypeAttributes(const ConditionalStreamReader 
                 qCWarning(lcShiboken, "%s",
                           qPrintable(msgInvalidAttributeValue(attribute)));
             }
-        } else if (name == QLatin1String("held-type")) {
+        } else if (name == u"held-type") {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
-        } else if (name == QLatin1String("hash-function")) {
+        } else if (name == u"hash-function") {
             ctype->setHashFunction(attributes->takeAt(i).value().toString());
         } else if (name == forceAbstractAttribute()) {
             if (convertBoolean(attributes->takeAt(i).value(), forceAbstractAttribute(), false))
@@ -1752,7 +1752,7 @@ void TypeSystemParser::applyComplexTypeAttributes(const ConditionalStreamReader 
         } else if (name == deleteInMainThreadAttribute()) {
             if (convertBoolean(attributes->takeAt(i).value(), deleteInMainThreadAttribute(), false))
                 ctype->setDeleteInMainThread(true);
-        } else if (name == QLatin1String("target-type")) {
+        } else if (name == u"target-type") {
             ctype->setTargetType(attributes->takeAt(i).value().toString());
         }  else if (name == snakeCaseAttribute()) {
             const auto attribute = attributes->takeAt(i);
@@ -1862,7 +1862,7 @@ bool TypeSystemParser::parseInjectDocumentation(const ConditionalStreamReader &,
     TypeSystem::Language lang = TypeSystem::NativeCode;
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == QLatin1String("mode")) {
+        if (name == u"mode") {
             const auto attribute = attributes->takeAt(i);
             const auto modeOpt = docModificationFromAttribute(attribute.value());
             if (!modeOpt.has_value()) {
@@ -2067,7 +2067,7 @@ bool TypeSystemParser::parseCustomConversion(const ConditionalStreamReader &,
                 return false;
             }
             lang = langOpt.value();
-        } else if (name == QLatin1String("file")) {
+        } else if (name == u"file") {
             sourceFile = attributes->takeAt(i).value().toString();
         } else if (name == snippetAttribute()) {
             snippetLabel = attributes->takeAt(i).value().toString();
@@ -2154,9 +2154,9 @@ bool TypeSystemParser::parseAddConversion(const ConditionalStreamReader &,
 
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == QLatin1String("type"))
+        if (name == u"type")
              sourceTypeName = attributes->takeAt(i).value().toString();
-        else if (name == QLatin1String("check"))
+        else if (name == u"check")
            typeCheck = attributes->takeAt(i).value().toString();
     }
 
@@ -2179,11 +2179,11 @@ static bool parseIndex(const QString &index, int *result, QString *errorMessage)
 
 static bool parseArgumentIndex(const QString &index, int *result, QString *errorMessage)
 {
-    if (index == QLatin1String("return")) {
+    if (index == u"return") {
         *result = 0;
         return true;
     }
-    if (index == QLatin1String("this")) {
+    if (index == u"this") {
         *result = -1;
         return true;
     }
@@ -2398,9 +2398,9 @@ bool TypeSystemParser::parseAddFunction(const ConditionalStreamReader &,
     int overloadNumber = TypeSystem::OverloadNumberUnset;
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == QLatin1String("signature")) {
+        if (name == u"signature") {
             originalSignature = attributes->takeAt(i).value().toString();
-        } else if (name == QLatin1String("return-type")) {
+        } else if (name == u"return-type") {
             returnType = attributes->takeAt(i).value().toString();
         } else if (name == staticAttribute()) {
             staticFunction = convertBoolean(attributes->takeAt(i).value(),
@@ -2480,11 +2480,11 @@ bool TypeSystemParser::parseProperty(const ConditionalStreamReader &, StackEleme
         const auto name = attributes->at(i).qualifiedName();
         if (name == nameAttribute()) {
             property.name = attributes->takeAt(i).value().toString();
-        } else if (name == QLatin1String("get")) {
+        } else if (name == u"get") {
             property.read = attributes->takeAt(i).value().toString();
-        } else if (name == QLatin1String("type")) {
+        } else if (name == u"type") {
             property.type = attributes->takeAt(i).value().toString();
-        } else if (name == QLatin1String("set")) {
+        } else if (name == u"set") {
             property.write = attributes->takeAt(i).value().toString();
         } else if (name == generateGetSetDefAttribute()) {
             property.generateGetSetDef =
@@ -2525,7 +2525,7 @@ bool TypeSystemParser::parseModifyFunction(const ConditionalStreamReader &reader
     TypeSystem::SnakeCase snakeCase = TypeSystem::SnakeCase::Unspecified;
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == QLatin1String("signature")) {
+        if (name == u"signature") {
             originalSignature = attributes->takeAt(i).value().toString();
         } else if (name == accessAttribute()) {
             access = attributes->takeAt(i).value().toString();
@@ -2683,7 +2683,7 @@ bool TypeSystemParser::parseReferenceCount(const ConditionalStreamReader &reader
             default:
                 break;
             }
-        } else if (name == QLatin1String("variable-name")) {
+        } else if (name == u"variable-name") {
             rc.varName = attributes->takeAt(i).value().toString();
         }
     }
@@ -2727,7 +2727,7 @@ bool TypeSystemParser::readFileSnippet(QXmlStreamAttributes *attributes, CodeSni
     QString snippetLabel;
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == QLatin1String("file")) {
+        if (name == u"file") {
             fileName = attributes->takeAt(i).value().toString();
         } else if (name == snippetAttribute()) {
             snippetLabel = attributes->takeAt(i).value().toString();
@@ -2902,7 +2902,7 @@ bool TypeSystemParser::parseReplace(const ConditionalStreamReader &,
     QString to;
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == QLatin1String("from"))
+        if (name == u"from")
             from = attributes->takeAt(i).value().toString();
         else if (name == toAttribute())
             to = attributes->takeAt(i).value().toString();
@@ -3022,7 +3022,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
         }
         // Allow for primitive and/or std:: types only, else require proper nesting.
         if (element != StackElement::PrimitiveTypeEntry && name.contains(u':')
-            && !name.contains(QLatin1String("std::"))) {
+            && !name.contains(u"std::")) {
             m_error = msgIncorrectlyNestedName(name);
             return false;
         }
