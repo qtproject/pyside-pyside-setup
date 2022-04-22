@@ -27,12 +27,17 @@
 ****************************************************************************/
 
 #include "testresolvetype.h"
-#include <QtTest/QTest>
 #include "testutil.h"
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
 #include <abstractmetatype.h>
 #include <typesystem.h>
+
+#include <qtcompat.h>
+
+#include <QtTest/QTest>
+
+using namespace Qt::StringLiterals;
 
 void TestResolveType::initTestCase()
 {
@@ -138,7 +143,7 @@ public:
     fixture->classType = AbstractMetaType(fixture->klass->typeEntry());
     fixture->classType.decideUsagePattern();
 
-    for (const auto &f : fixture->klass->findFunctions(u"Test"_qs)) {
+    for (const auto &f : fixture->klass->findFunctions(u"Test"_s)) {
         if (f->functionType() == AbstractMetaFunction::ConstructorFunction
             && f->arguments().size() == 1) {
             const auto type = f->arguments().constFirst().type();
@@ -151,7 +156,7 @@ public:
     if (fixture->intType.isVoid() || fixture->stringType.isVoid())
         return -3;
 
-    auto listFunc = fixture->klass->findFunction(u"listFunc"_qs);
+    auto listFunc = fixture->klass->findFunction(u"listFunc"_s);
     if (listFunc.isNull() || listFunc->arguments().size() != 1)
         return -3;
     fixture->listType = listFunc->arguments().constFirst().type();
@@ -178,7 +183,7 @@ void TestResolveType::testFixDefaultArguments_data()
         << fixture.intType << "enumValue1" << "Namespace::Test::Enum::enumValue1";
 
     // Test expansion of container types
-    QString expected = u"std::list<Namespace::Test>()"_qs;
+    QString expected = u"std::list<Namespace::Test>()"_s;
     QTest::newRow("list")
         << fixture << setupOk << fixture.listType
         << expected << expected;
@@ -187,7 +192,7 @@ void TestResolveType::testFixDefaultArguments_data()
         << "std::list<Test>()" << expected;
 
     // Test field expansion
-    expected = u"Namespace::Test::INT_FIELD_1"_qs;
+    expected = u"Namespace::Test::INT_FIELD_1"_s;
     QTest::newRow("qualified class field")
         << fixture << setupOk << fixture.intType
         << expected << expected;
@@ -199,7 +204,7 @@ void TestResolveType::testFixDefaultArguments_data()
         << "INT_FIELD_1" << expected;
 
     // Test field expansion when constructing some class
-    expected = u"QLatin1String(Namespace::Test::CHAR_FIELD_1)"_qs;
+    expected = u"QLatin1String(Namespace::Test::CHAR_FIELD_1)"_s;
     QTest::newRow("class from qualified class field")
         << fixture << setupOk << fixture.classType
         << expected << expected;
@@ -211,7 +216,7 @@ void TestResolveType::testFixDefaultArguments_data()
         << "QLatin1String(CHAR_FIELD_1)" << expected;
 
     // Test field expansion when constructing class itself
-    expected = u"Namespace::Test(Namespace::Test::CHAR_FIELD_1)"_qs;
+    expected = u"Namespace::Test(Namespace::Test::CHAR_FIELD_1)"_s;
     QTest::newRow("self from qualified class field")
         << fixture << setupOk << fixture.classType
         << expected << expected;
@@ -223,7 +228,7 @@ void TestResolveType::testFixDefaultArguments_data()
         << "Test(CHAR_FIELD_1)" << expected;
 
     // Test enum expansion when constructing class itself
-    expected = u"Namespace::Test(Namespace::Test::Enum::enumValue1)"_qs;
+    expected = u"Namespace::Test(Namespace::Test::Enum::enumValue1)"_s;
     QTest::newRow("self from qualified enum")
         << fixture << setupOk << fixture.classType
         << expected << expected;

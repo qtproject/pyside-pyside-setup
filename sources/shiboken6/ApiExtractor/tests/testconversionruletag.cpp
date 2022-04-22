@@ -31,9 +31,13 @@
 #include <abstractmetalang.h>
 #include <typesystem.h>
 
+#include <qtcompat.h>
+
 #include <QtCore/QFile>
 #include <QtCore/QTemporaryFile>
 #include <QtTest/QTest>
+
+using namespace Qt::StringLiterals;
 
 void TestConversionRuleTag::testConversionRuleTagWithFile()
 {
@@ -46,12 +50,12 @@ void TestConversionRuleTag::testConversionRuleTagWithFile()
     file.close();
 
     const char cppCode[] = "struct A {};\n";
-    QString xmlCode = QLatin1String("\
+    QString xmlCode = u"\
     <typesystem package='Foo'>\n\
         <value-type name='A'>\n\
-            <conversion-rule class='target' file='") + file.fileName() + QLatin1String("'/>\n\
+            <conversion-rule class='target' file='"_s + file.fileName() + u"'/>\n\
         </value-type>\n\
-    </typesystem>\n");
+    </typesystem>\n"_s;
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode.toLocal8Bit().data()));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
@@ -103,7 +107,7 @@ void TestConversionRuleTag::testConversionRuleTagReplace()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     TypeDatabase* typeDb = TypeDatabase::instance();
-    PrimitiveTypeEntry* typeA = typeDb->findPrimitiveType(QLatin1String("A"));
+    PrimitiveTypeEntry* typeA = typeDb->findPrimitiveType(u"A"_s);
     QVERIFY(typeA);
 
     CustomConversion* conversion = typeA->customConversion();
@@ -130,7 +134,7 @@ void TestConversionRuleTag::testConversionRuleTagReplace()
     QVERIFY(toNative);
     QCOMPARE(toNative->sourceTypeName(), u"B");
     QVERIFY(!toNative->isCustomType());
-    TypeEntry* typeB = typeDb->findType(QLatin1String("B"));
+    TypeEntry* typeB = typeDb->findType(u"B"_s);
     QVERIFY(typeB);
     QCOMPARE(toNative->sourceType(), typeB);
     QCOMPARE(toNative->sourceTypeCheck(), u"CheckIfInputObjectIsB(%IN)");
@@ -232,7 +236,7 @@ void TestConversionRuleTag::testConversionRuleTagWithInsertTemplate()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     TypeDatabase* typeDb = TypeDatabase::instance();
-    PrimitiveTypeEntry* typeA = typeDb->findPrimitiveType(QLatin1String("A"));
+    PrimitiveTypeEntry* typeA = typeDb->findPrimitiveType(u"A"_s);
     QVERIFY(typeA);
 
     CustomConversion* conversion = typeA->customConversion();
@@ -240,7 +244,7 @@ void TestConversionRuleTag::testConversionRuleTagWithInsertTemplate()
 
     QCOMPARE(typeA, conversion->ownerType());
     QCOMPARE(conversion->nativeToTargetConversion().trimmed(),
-             QLatin1String(nativeToTargetExpected));
+             QLatin1StringView(nativeToTargetExpected));
 
     QVERIFY(conversion->hasTargetToNativeConversions());
     QCOMPARE(conversion->targetToNativeConversions().size(), 1);
@@ -248,7 +252,7 @@ void TestConversionRuleTag::testConversionRuleTagWithInsertTemplate()
     CustomConversion::TargetToNativeConversion* toNative = conversion->targetToNativeConversions().constFirst();
     QVERIFY(toNative);
     QCOMPARE(toNative->conversion().trimmed(),
-             QLatin1String(targetToNativeExpected));
+             QLatin1StringView(targetToNativeExpected));
 }
 
 QTEST_APPLESS_MAIN(TestConversionRuleTag)

@@ -27,10 +27,15 @@
 ****************************************************************************/
 
 #include "testprimitivetypetag.h"
-#include <QtTest/QTest>
 #include "testutil.h"
 #include <abstractmetalang.h>
 #include <typesystem.h>
+
+#include <qtcompat.h>
+
+#include <QtTest/QTest>
+
+using namespace Qt::StringLiterals;
 
 void TestPrimitiveTypeTag::testPrimitiveTypeDefaultConstructor()
 {
@@ -50,7 +55,7 @@ void TestPrimitiveTypeTag::testPrimitiveTypeDefaultConstructor()
     const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, u"B");
     QVERIFY(classB);
 
-    PrimitiveTypeEntry* typeEntry = TypeDatabase::instance()->findPrimitiveType(QLatin1String("A"));
+    PrimitiveTypeEntry* typeEntry = TypeDatabase::instance()->findPrimitiveType(u"A"_s);
     QVERIFY(typeEntry);
     QVERIFY(typeEntry->hasDefaultConstructor());
     QCOMPARE(typeEntry->defaultConstructor(), u"A()");

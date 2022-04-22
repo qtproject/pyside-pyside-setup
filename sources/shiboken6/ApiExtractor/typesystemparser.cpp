@@ -33,6 +33,8 @@
 #include "sourcelocation.h"
 #include "conditionalstreamreader.h"
 
+#include "qtcompat.h"
+
 #include <QtCore/QDebug>
 #include <QtCore/QDir>
 #include <QtCore/QFile>
@@ -49,6 +51,8 @@
 #include <algorithm>
 #include <optional>
 #include <memory>
+
+using namespace Qt::StringLiterals;
 
 static inline QString allowThreadAttribute() { return QStringLiteral("allow-thread"); }
 static inline QString colonColon() { return QStringLiteral("::"); }
@@ -512,8 +516,8 @@ static int indexOfAttribute(const QXmlStreamAttributes &atts,
 
 static QString msgMissingAttribute(const QString &a)
 {
-    return QLatin1String("Required attribute '") + a
-        + QLatin1String("' missing.");
+    return u"Required attribute '"_s + a
+        + u"' missing."_s;
 }
 
 QTextStream &operator<<(QTextStream &str, const QXmlStreamAttribute &attribute)
@@ -562,13 +566,13 @@ QString TypeSystemEntityResolver::readFile(const QString &entityName, QString *e
 {
     QString fileName = entityName;
     if (!fileName.contains(u'.'))
-        fileName += QLatin1String(".xml");
+        fileName += u".xml"_s;
     QString path = TypeDatabase::instance()->modifiedTypesystemFilepath(fileName, m_currentPath);
     if (!QFileInfo::exists(path)) // PySide6-specific hack
-        fileName.prepend(QLatin1String("typesystem_"));
+        fileName.prepend(u"typesystem_"_s);
     path = TypeDatabase::instance()->modifiedTypesystemFilepath(fileName, m_currentPath);
     if (!QFileInfo::exists(path)) {
-        *errorMessage = QLatin1String("Unable to resolve: ") + entityName;
+        *errorMessage = u"Unable to resolve: "_s + entityName;
         return QString();
     }
     QFile file(path);
@@ -741,8 +745,8 @@ static bool addRejection(TypeDatabase *database, QXmlStreamAttributes *attribute
 
     // Special case: When all fields except class are empty, completely exclude class
     if (className == u"*") {
-        *errorMessage = QLatin1String("bad reject entry, neither 'class', 'function-name'"
-                                      " nor 'field' specified");
+        *errorMessage = u"bad reject entry, neither 'class', 'function-name'"
+                         " nor 'field' specified"_s;
         return false;
     }
     rejection.matchType = TypeRejection::ExcludeClass;
@@ -778,7 +782,7 @@ bool TypeSystemParser::parseXml(ConditionalStreamReader &reader)
         case QXmlStreamReader::StartElement: {
             const auto elementTypeOpt = elementFromTag(reader.name());
             if (!elementTypeOpt.has_value()) {
-                m_error = u"Unknown tag name: '"_qs + reader.name().toString() + u'\'';
+                m_error = u"Unknown tag name: '"_s + reader.name().toString() + u'\'';
                 return false;
             }
             m_stack.push(elementTypeOpt.value());
@@ -897,7 +901,7 @@ bool TypeSystemParser::endElement(StackElement element)
                 QString code = top->conversionCodeSnips.constLast().code();
                 if (element == StackElement::AddConversion) {
                     if (customConversion->targetToNativeConversions().isEmpty()) {
-                        m_error = u"CustomConversion's target to native conversions missing."_qs;
+                        m_error = u"CustomConversion's target to native conversions missing."_s;
                         return false;
                     }
                     customConversion->targetToNativeConversions().last()->setConversion(code);
@@ -905,7 +909,7 @@ bool TypeSystemParser::endElement(StackElement element)
                     customConversion->setNativeToTargetConversion(code);
                 }
             } else {
-                m_error = QLatin1String("CustomConversion object is missing.");
+                m_error = u"CustomConversion object is missing."_s;
                 return false;
             }
             break;
@@ -1078,13 +1082,13 @@ bool TypeSystemParser::importFileElement(const QXmlStreamAttributes &atts)
 {
     const QString fileName = atts.value(nameAttribute()).toString();
     if (fileName.isEmpty()) {
-        m_error = QLatin1String("Required attribute 'name' missing for include-file tag.");
+        m_error = u"Required attribute 'name' missing for include-file tag."_s;
         return false;
     }
 
     QFile file(fileName);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        file.setFileName(QLatin1String(":/trolltech/generator/") + fileName);
+        file.setFileName(u":/trolltech/generator/"_s + fileName);
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
             m_error = msgCannotOpenForReading(file);
             return false;
@@ -1273,7 +1277,7 @@ FlagsTypeEntry *
 {
     if (!checkRootElement())
         return nullptr;
-    auto ftype = new FlagsTypeEntry(QLatin1String("QFlags<") + enumEntry->name() + u'>',
+    auto ftype = new FlagsTypeEntry(u"QFlags<"_s + enumEntry->name() + u'>',
                                     since,
                                     currentParentTypeEntry()->typeSystemTypeEntry());
     ftype->setOriginator(enumEntry);
@@ -1347,28 +1351,28 @@ SmartPointerTypeEntry *
     }
 
     if (smartPointerType.isEmpty()) {
-        m_error = QLatin1String("No type specified for the smart pointer. Currently supported types: 'shared',");
+        m_error = u"No type specified for the smart pointer. Currently supported types: 'shared',"_s;
         return nullptr;
     }
     if (smartPointerType != u"shared") {
-        m_error = QLatin1String("Currently only the 'shared' type is supported.");
+        m_error = u"Currently only the 'shared' type is supported."_s;
         return nullptr;
     }
 
     if (getter.isEmpty()) {
-        m_error = QLatin1String("No function getter name specified for getting the raw pointer held by the smart pointer.");
+        m_error = u"No function getter name specified for getting the raw pointer held by the smart pointer."_s;
         return nullptr;
     }
 
-    QString signature = getter + QLatin1String("()");
+    QString signature = getter + u"()"_s;
     signature = TypeDatabase::normalizedSignature(signature);
     if (signature.isEmpty()) {
-        m_error = QLatin1String("No signature for the smart pointer getter found.");
+        m_error = u"No signature for the smart pointer getter found."_s;
         return nullptr;
     }
 
     QString errorString = checkSignatureError(signature,
-                                              QLatin1String("smart-pointer-type"));
+                                              u"smart-pointer-type"_s);
     if (!errorString.isEmpty()) {
         m_error = errorString;
         return nullptr;
@@ -1451,13 +1455,13 @@ ContainerTypeEntry *
         return nullptr;
     const int typeIndex = indexOfAttribute(*attributes, u"type");
     if (typeIndex == -1) {
-        m_error = QLatin1String("no 'type' attribute specified");
+        m_error = u"no 'type' attribute specified"_s;
         return nullptr;
     }
     const auto typeName = attributes->at(typeIndex).value();
     const auto containerTypeOpt = containerTypeFromAttribute(typeName);
     if (!containerTypeOpt.has_value()) {
-        m_error = QLatin1String("there is no container of type ") + typeName.toString();
+        m_error = u"there is no container of type "_s + typeName.toString();
         return nullptr;
     }
     attributes->removeAt(typeIndex);
@@ -1472,8 +1476,8 @@ ContainerTypeEntry *
         if (name == u"opaque-containers") {
             const auto attribute = attributes->takeAt(i);
             if (!parseOpaqueContainers(attribute.value(), type)) {
-                m_error = u"Error parsing the opaque container attribute: \""_qs
-                          + attribute.value().toString() + u"\"."_qs;
+                m_error = u"Error parsing the opaque container attribute: \""_s
+                          + attribute.value().toString() + u"\"."_s;
                 return nullptr;
             }
         }
@@ -1664,7 +1668,7 @@ TypedefEntry *
         return nullptr;
     if (topElement != StackElement::Root
         && topElement != StackElement::NamespaceTypeEntry) {
-        m_error = QLatin1String("typedef entries must be nested in namespaces or type system.");
+        m_error = u"typedef entries must be nested in namespaces or type system."_s;
         return nullptr;
     }
     const int sourceIndex = indexOfAttribute(*attributes, sourceAttribute());
@@ -1821,18 +1825,18 @@ bool TypeSystemParser::parseRenameFunction(const ConditionalStreamReader &,
 
     *name = signature.left(signature.indexOf(u'(')).trimmed();
 
-    QString errorString = checkSignatureError(signature, QLatin1String("function"));
+    QString errorString = checkSignatureError(signature, u"function"_s);
     if (!errorString.isEmpty()) {
         m_error = errorString;
         return false;
     }
 
     if (!rename.isEmpty()) {
-        static const QRegularExpression functionNameRegExp(QLatin1String("^[a-zA-Z_][a-zA-Z0-9_]*$"));
+        static const QRegularExpression functionNameRegExp(u"^[a-zA-Z_][a-zA-Z0-9_]*$"_s);
         Q_ASSERT(functionNameRegExp.isValid());
         if (!functionNameRegExp.match(rename).hasMatch()) {
-            m_error = QLatin1String("can not rename '") + signature + QLatin1String("', '")
-                      + rename + QLatin1String("' is not a valid function name");
+            m_error = u"can not rename '"_s + signature + u"', '"_s
+                      + rename + u"' is not a valid function name"_s;
             return false;
         }
         FunctionModification mod;
@@ -1854,7 +1858,7 @@ bool TypeSystemParser::parseInjectDocumentation(const ConditionalStreamReader &,
         || topElement == StackElement::AddFunction;
     if (!validParent) {
         m_error = u"inject-documentation must be inside modify-function, add-function"
-                   "modify-field or other tags that creates a type"_qs;
+                   "modify-field or other tags that creates a type"_s;
         return false;
     }
 
@@ -1896,8 +1900,8 @@ bool TypeSystemParser::parseModifyDocumentation(const ConditionalStreamReader &,
         || topElement == StackElement::ModifyFunction
         || topElement == StackElement::ModifyField;
     if (!validParent) {
-        m_error = QLatin1String("modify-documentation must be inside modify-function, "
-                                "modify-field or other tags that creates a type");
+        m_error = u"modify-documentation must be inside modify-function, "
+                   "modify-field or other tags that creates a type"_qs;
         return false;
     }
 
@@ -1996,14 +2000,14 @@ bool TypeSystemParser::loadTypesystem(const ConditionalStreamReader &,
            generateChild = convertBoolean(attributes->takeAt(i).value(), generateAttribute(), true);
     }
     if (typeSystemName.isEmpty()) {
-            m_error = QLatin1String("No typesystem name specified");
+            m_error = u"No typesystem name specified"_s;
             return false;
     }
     const bool result =
         m_context->db->parseFile(m_context, typeSystemName, m_currentPath,
                                  generateChild && m_generate == TypeEntry::GenerateCode);
     if (!result)
-        m_error = u"Failed to parse: '"_qs + typeSystemName + u'\'';
+        m_error = u"Failed to parse: '"_s + typeSystemName + u'\'';
     return result;
 }
 
@@ -2011,7 +2015,7 @@ bool TypeSystemParser::parseRejectEnumValue(const ConditionalStreamReader &,
                                    QXmlStreamAttributes *attributes)
 {
     if (!m_currentEnum) {
-        m_error = QLatin1String("<reject-enum-value> node must be used inside a <enum-type> node");
+        m_error = u"<reject-enum-value> node must be used inside a <enum-type> node"_s;
         return false;
     }
     const int nameIndex = indexOfAttribute(*attributes, nameAttribute());
@@ -2028,12 +2032,12 @@ bool TypeSystemParser::parseReplaceArgumentType(const ConditionalStreamReader &,
                                        QXmlStreamAttributes *attributes)
 {
     if (topElement != StackElement::ModifyArgument) {
-        m_error = QLatin1String("Type replacement can only be specified for argument modifications");
+        m_error = u"Type replacement can only be specified for argument modifications"_s;
         return false;
     }
     const int modifiedTypeIndex = indexOfAttribute(*attributes, modifiedTypeAttribute());
     if (modifiedTypeIndex == -1) {
-        m_error = QLatin1String("Type replacement requires 'modified-type' attribute");
+        m_error = u"Type replacement requires 'modified-type' attribute"_s;
         return false;
     }
     m_contextStack.top()->functionMods.last().argument_mods().last().setModifiedType(
@@ -2049,8 +2053,8 @@ bool TypeSystemParser::parseCustomConversion(const ConditionalStreamReader &,
         && topElement != StackElement::ValueTypeEntry
         && topElement != StackElement::PrimitiveTypeEntry
         && topElement != StackElement::ContainerTypeEntry) {
-        m_error = QLatin1String("Conversion rules can only be specified for argument modification, "
-                                "value-type, primitive-type or container-type conversion.");
+        m_error = u"Conversion rules can only be specified for argument modification, "
+                   "value-type, primitive-type or container-type conversion."_s;
         return false;
     }
 
@@ -2083,7 +2087,7 @@ bool TypeSystemParser::parseCustomConversion(const ConditionalStreamReader &,
     }
 
     if (top->entry->hasTargetConversionRule() || top->entry->hasCustomConversion()) {
-        m_error = QLatin1String("Types can have only one conversion rule");
+        m_error = u"Types can have only one conversion rule"_s;
         return false;
     }
 
@@ -2122,7 +2126,7 @@ bool TypeSystemParser::parseNativeToTarget(const ConditionalStreamReader &,
                                   QXmlStreamAttributes *attributes)
 {
     if (topElement != StackElement::ConversionRule) {
-        m_error = QLatin1String("Native to Target conversion code can only be specified for custom conversion rules.");
+        m_error = u"Native to Target conversion code can only be specified for custom conversion rules."_s;
         return false;
     }
     CodeSnip snip;
@@ -2137,7 +2141,7 @@ bool TypeSystemParser::parseAddConversion(const ConditionalStreamReader &,
                                  QXmlStreamAttributes *attributes)
 {
     if (topElement != StackElement::TargetToNative) {
-        m_error = QLatin1String("Target to Native conversions can only be added inside 'target-to-native' tags.");
+        m_error = u"Target to Native conversions can only be added inside 'target-to-native' tags."_s;
         return false;
     }
     QString sourceTypeName;
@@ -2161,7 +2165,7 @@ bool TypeSystemParser::parseAddConversion(const ConditionalStreamReader &,
     }
 
     if (sourceTypeName.isEmpty()) {
-        m_error = QLatin1String("Target to Native conversions must specify the input type with the 'type' attribute.");
+        m_error = u"Target to Native conversions must specify the input type with the 'type' attribute."_s;
         return false;
     }
     top->entry->customConversion()->addTargetToNativeConversion(sourceTypeName, typeCheck);
@@ -2197,7 +2201,7 @@ bool TypeSystemParser::parseModifyArgument(const ConditionalStreamReader &,
         && topElement != StackElement::AddFunction
         && topElement != StackElement::DeclareFunction) {
         m_error = u"Argument modification requires <modify-function>,"
-                  " <add-function> or <declare-function> as parent, was "_qs
+                  " <add-function> or <declare-function> as parent, was "_s
                   + tagFromElement(topElement).toString();
         return false;
     }
@@ -2241,7 +2245,7 @@ bool TypeSystemParser::parseNoNullPointer(const ConditionalStreamReader &reader,
                                  StackElement topElement, QXmlStreamAttributes *attributes)
 {
     if (topElement != StackElement::ModifyArgument) {
-        m_error = QLatin1String("no-null-pointer requires argument modification as parent");
+        m_error = u"no-null-pointer requires argument modification as parent"_s;
         return false;
     }
 
@@ -2263,7 +2267,7 @@ bool TypeSystemParser::parseDefineOwnership(const ConditionalStreamReader &,
                                    QXmlStreamAttributes *attributes)
 {
     if (topElement != StackElement::ModifyArgument) {
-        m_error = QLatin1String("define-ownership requires argument modification as parent");
+        m_error = u"define-ownership requires argument modification as parent"_s;
         return false;
     }
 
@@ -2313,7 +2317,7 @@ bool TypeSystemParser::parseRename(const ConditionalStreamReader &,
                           QXmlStreamAttributes *attributes)
 {
     if (topElement != StackElement::ModifyArgument) {
-        m_error = QLatin1String("Argument modification parent required");
+        m_error = u"Argument modification parent required"_s;
         return false;
     }
 
@@ -2418,11 +2422,11 @@ bool TypeSystemParser::parseAddFunction(const ConditionalStreamReader &,
 
     QString signature = TypeDatabase::normalizedAddedFunctionSignature(originalSignature);
     if (signature.isEmpty()) {
-        m_error = QLatin1String("No signature for the added function");
+        m_error = u"No signature for the added function"_s;
         return false;
     }
 
-    QString errorString = checkSignatureError(signature, QLatin1String("add-function"));
+    QString errorString = checkSignatureError(signature, u"add-function"_s);
     if (!errorString.isEmpty()) {
         m_error = errorString;
         return false;
@@ -2440,13 +2444,13 @@ bool TypeSystemParser::parseAddFunction(const ConditionalStreamReader &,
     // Create signature for matching modifications
     signature = TypeDatabase::normalizedSignature(originalSignature);
     if (!signature.contains(u'('))
-        signature += QLatin1String("()");
+        signature += u"()"_s;
     m_currentSignature = signature;
 
     if (!access.isEmpty()) {
         const auto acessOpt = addedFunctionAccessFromAttribute(access);
         if (!acessOpt.has_value()) {
-            m_error = u"Bad access type '"_qs + access + u'\'';
+            m_error = u"Bad access type '"_s + access + u'\'';
             return false;
         }
         func->setAccess(acessOpt.value());
@@ -2493,7 +2497,7 @@ bool TypeSystemParser::parseProperty(const ConditionalStreamReader &, StackEleme
         }
     }
     if (!property.isValid()) {
-        m_error = QLatin1String("<property> element is missing required attibutes (name/type/get).");
+        m_error = u"<property> element is missing required attibutes (name/type/get)."_s;
         return false;
     }
     static_cast<ComplexTypeEntry *>(m_contextStack.top()->entry)->addProperty(property);
@@ -2583,11 +2587,11 @@ bool TypeSystemParser::parseModifyFunction(const ConditionalStreamReader &reader
 
     const QString signature = TypeDatabase::normalizedSignature(originalSignature);
     if (signature.isEmpty()) {
-        m_error = QLatin1String("No signature for modified function");
+        m_error = u"No signature for modified function"_s;
         return false;
     }
 
-    QString errorString = checkSignatureError(signature, QLatin1String("modify-function"));
+    QString errorString = checkSignatureError(signature, u"modify-function"_s);
     if (!errorString.isEmpty()) {
         m_error = errorString;
         return false;
@@ -2605,7 +2609,7 @@ bool TypeSystemParser::parseModifyFunction(const ConditionalStreamReader &reader
     if (!access.isEmpty()) {
         const auto modifierFlagOpt = modifierFromAttribute(access);
         if (!modifierFlagOpt.has_value()) {
-            m_error = u"Bad access type '"_qs + access + u'\'';
+            m_error = u"Bad access type '"_s + access + u'\'';
             return false;
         }
         const FunctionModification::ModifierFlag m = modifierFlagOpt.value();
@@ -2640,12 +2644,12 @@ bool TypeSystemParser::parseReplaceDefaultExpression(const ConditionalStreamRead
                                             QXmlStreamAttributes *attributes)
 {
     if (!(topElement & StackElement::ModifyArgument)) {
-        m_error = QLatin1String("Replace default expression only allowed as child of argument modification");
+        m_error = u"Replace default expression only allowed as child of argument modification"_s;
         return false;
     }
     const int withIndex = indexOfAttribute(*attributes, u"with");
     if (withIndex == -1 || attributes->at(withIndex).value().isEmpty()) {
-        m_error = QLatin1String("Default expression replaced with empty string. Use remove-default-expression instead.");
+        m_error = u"Default expression replaced with empty string. Use remove-default-expression instead."_s;
         return false;
     }
 
@@ -2659,7 +2663,7 @@ bool TypeSystemParser::parseReferenceCount(const ConditionalStreamReader &reader
                                   QXmlStreamAttributes *attributes)
 {
     if (topElement != StackElement::ModifyArgument) {
-        m_error = QLatin1String("reference-count must be child of modify-argument");
+        m_error = u"reference-count must be child of modify-argument"_s;
         return false;
     }
 
@@ -2697,7 +2701,7 @@ bool TypeSystemParser::parseParentOwner(const ConditionalStreamReader &,
                                QXmlStreamAttributes *attributes)
 {
     if (topElement != StackElement::ModifyArgument) {
-        m_error = QLatin1String("parent-policy must be child of modify-argument");
+        m_error = u"parent-policy must be child of modify-argument"_s;
         return false;
     }
     ArgumentOwner ao;
@@ -2737,7 +2741,7 @@ bool TypeSystemParser::readFileSnippet(QXmlStreamAttributes *attributes, CodeSni
         return true;
     const QString resolved = m_context->db->modifiedTypesystemFilepath(fileName, m_currentPath);
     if (!QFile::exists(resolved)) {
-        m_error = QLatin1String("File for inject code not exist: ")
+        m_error = u"File for inject code not exist: "_s
             + QDir::toNativeSeparators(fileName);
         return false;
     }
@@ -2755,7 +2759,7 @@ bool TypeSystemParser::readFileSnippet(QXmlStreamAttributes *attributes, CodeSni
 
     QString source = fileName;
     if (!snippetLabel.isEmpty())
-        source += QLatin1String(" (") + snippetLabel + u')';
+        source += u" ("_s + snippetLabel + u')';
     QString content;
     QTextStream str(&content);
     str << "// ========================================================================\n"
@@ -2775,7 +2779,7 @@ bool TypeSystemParser::parseInjectCode(const ConditionalStreamReader &,
         && (topElement != StackElement::AddFunction)
         && (topElement != StackElement::ModifyFunction)
         && (topElement != StackElement::Root)) {
-        m_error = QLatin1String("wrong parent type for code injection");
+        m_error = u"wrong parent type for code injection"_s;
         return false;
     }
 
@@ -2851,7 +2855,7 @@ bool TypeSystemParser::parseInclude(const ConditionalStreamReader &,
     } else if (topElement == StackElement::ExtraIncludes) {
         entry->addExtraInclude(inc);
     } else {
-        m_error = QLatin1String("Only supported parent tags are primitive-type, complex types or extra-includes");
+        m_error = u"Only supported parent tags are primitive-type, complex types or extra-includes"_s;
         return false;
     }
     return true;
@@ -2879,8 +2883,8 @@ TemplateInstance *
         (topElement != StackElement::NativeToTarget) &&
         (topElement != StackElement::AddConversion) &&
         (topElement != StackElement::ConversionRule)) {
-        m_error = QLatin1String("Can only insert templates into code snippets, templates, "\
-                                "conversion-rule, native-to-target or add-conversion tags.");
+        m_error = u"Can only insert templates into code snippets, templates, "\
+                   "conversion-rule, native-to-target or add-conversion tags."_s;
         return nullptr;
     }
     const int nameIndex = indexOfAttribute(*attributes, nameAttribute());
@@ -2895,7 +2899,7 @@ bool TypeSystemParser::parseReplace(const ConditionalStreamReader &,
                            StackElement topElement, QXmlStreamAttributes *attributes)
 {
     if (topElement != StackElement::InsertTemplate) {
-        m_error = QLatin1String("Can only insert replace rules into insert-template.");
+        m_error = u"Can only insert replace rules into insert-template."_s;
         return false;
     }
     QString from;
@@ -3066,13 +3070,13 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
             if (name.isEmpty()) {
                 name = identifiedByValue;
             } else if (!identifiedByValue.isEmpty()) {
-                m_error = QLatin1String("can't specify both 'name' and 'identified-by-value' attributes");
+                m_error = u"can't specify both 'name' and 'identified-by-value' attributes"_s;
                 return false;
             }
         }
 
         if (name.isEmpty()) {
-            m_error = QLatin1String("no 'name' attribute specified");
+            m_error = u"no 'name' attribute specified"_s;
             return false;
         }
 
@@ -3147,7 +3151,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
             }
         } else {
             qCWarning(lcShiboken).noquote().nospace()
-                << u"Type: "_qs + name + u" was rejected by typesystem"_qs;
+                << u"Type: "_s + name + u" was rejected by typesystem"_s;
         }
 
     } else if (element == StackElement::InjectDocumentation) {
@@ -3170,7 +3174,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
                         || element == StackElement::Template;
 
         if (!topLevel && m_stack.at(m_stack.size() - 2) == StackElement::Root) {
-            m_error = u"Tag requires parent: '"_qs + tagName.toString() + u'\'';
+            m_error = u"Tag requires parent: '"_s + tagName.toString() + u'\'';
             return false;
         }
 
@@ -3200,7 +3204,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
             break;
         case StackElement::TargetToNative: {
             if (topElement != StackElement::ConversionRule) {
-                m_error = QLatin1String("Target to Native conversions can only be specified for custom conversion rules.");
+                m_error = u"Target to Native conversions can only be specified for custom conversion rules."_s;
                 return false;
             }
 
@@ -3248,7 +3252,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
              break;
         case StackElement::RemoveArgument:
             if (topElement != StackElement::ModifyArgument) {
-                m_error = QLatin1String("Removing argument requires argument modification as parent");
+                m_error = u"Removing argument requires argument modification as parent"_s;
                 return false;
             }
 
@@ -3289,7 +3293,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
             break;
         case StackElement::Array:
             if (topElement != StackElement::ModifyArgument) {
-                m_error = QLatin1String("array must be child of modify-argument");
+                m_error = u"array must be child of modify-argument"_s;
                 return false;
             }
             top->functionMods.last().argument_mods().last().setArray(true);

@@ -27,7 +27,6 @@
 ****************************************************************************/
 
 #include "testenum.h"
-#include <QtTest/QTest>
 #include "testutil.h"
 #include <abstractmetaenum.h>
 #include <abstractmetafunction.h>
@@ -35,6 +34,12 @@
 #include <abstractmetabuilder_p.h>
 #include <typesystem.h>
 #include <parser/enumvalue.h>
+
+#include <qtcompat.h>
+
+#include <QtTest/QTest>
+
+using namespace Qt::StringLiterals;
 
 void TestEnum::testEnumCppSignature()
 {
@@ -74,7 +79,7 @@ void TestEnum::testEnumCppSignature()
     // enum as parameter of a method
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, u"A");
     QCOMPARE(classA->enums().size(), 1);
-    const auto funcs = classA->queryFunctionsByName(QLatin1String("method"));
+    const auto funcs = classA->queryFunctionsByName(u"method"_s);
     QVERIFY(!funcs.isEmpty());
     const auto method = funcs.constFirst();
     AbstractMetaArgument arg = method->arguments().constFirst();
@@ -88,9 +93,9 @@ void TestEnum::testEnumCppSignature()
     AbstractMetaEnumList classEnums = classA->enums();
     QVERIFY(!classEnums.isEmpty());
     QCOMPARE(classEnums.constFirst().name(), u"ClassEnum");
-    auto e = AbstractMetaClass::findEnumValue(classes, QLatin1String("CA"));
+    auto e = AbstractMetaClass::findEnumValue(classes, u"CA"_s);
     QVERIFY(e.has_value());
-    e = AbstractMetaClass::findEnumValue(classes, QLatin1String("ClassEnum::CA"));
+    e = AbstractMetaClass::findEnumValue(classes, u"ClassEnum::CA"_s);
     QVERIFY(e.has_value());
 }
 
@@ -110,7 +115,7 @@ void TestEnum::testEnumWithApiVersion()
     </typesystem>\n";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode,
-                                                                true, QLatin1String("0.1")));
+                                                                true, u"0.1"_s));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
@@ -149,7 +154,7 @@ void TestEnum::testAnonymousEnum()
     QCOMPARE(classes.size(), 1);
     QCOMPARE(classes[0]->enums().size(), 2);
 
-    auto anonEnumA1 = classes[0]->findEnum(QLatin1String("A1"));
+    auto anonEnumA1 = classes[0]->findEnum(u"A1"_s);
     QVERIFY(anonEnumA1.has_value());
     QVERIFY(anonEnumA1->isAnonymous());
     QCOMPARE(anonEnumA1->typeEntry()->qualifiedCppName(), u"A::A1");
@@ -164,7 +169,7 @@ void TestEnum::testAnonymousEnum()
     QCOMPARE(enumValueA1.value().value(), 1);
     QCOMPARE(enumValueA1.stringValue(), QString());
 
-    auto anonEnumIsThis = classes[0]->findEnum(QLatin1String("isThis"));
+    auto anonEnumIsThis = classes[0]->findEnum(u"isThis"_s);
     QVERIFY(anonEnumIsThis.has_value());
     QVERIFY(anonEnumIsThis->isAnonymous());
     QCOMPARE(anonEnumIsThis->typeEntry()->qualifiedCppName(), u"A::isThis");
@@ -246,7 +251,7 @@ void TestEnum::testEnumValueFromNeighbourEnum()
     QCOMPARE(classes.size(), 1);
     QCOMPARE(classes[0]->enums().size(), 2);
 
-    auto enumA = classes[0]->findEnum(QLatin1String("EnumA"));
+    auto enumA = classes[0]->findEnum(u"EnumA"_s);
     QVERIFY(enumA.has_value());
     QCOMPARE(enumA->typeEntry()->qualifiedCppName(), u"A::EnumA");
 
@@ -260,7 +265,7 @@ void TestEnum::testEnumValueFromNeighbourEnum()
     QCOMPARE(enumValueA1.value().value(), 1);
     QCOMPARE(enumValueA1.stringValue(), QString());
 
-    auto enumB = classes[0]->findEnum(QLatin1String("EnumB"));
+    auto enumB = classes[0]->findEnum(u"EnumB"_s);
     QVERIFY(enumB.has_value());
     QCOMPARE(enumB->typeEntry()->qualifiedCppName(), u"A::EnumB");
 
@@ -307,7 +312,7 @@ void TestEnum::testEnumValueFromExpression()
     AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), u"A");
     QVERIFY(classA);
 
-    auto enumA = classA->findEnum(QLatin1String("EnumA"));
+    auto enumA = classA->findEnum(u"EnumA"_s);
     QVERIFY(enumA.has_value());
     QVERIFY(!enumA->isSigned());
     QCOMPARE(enumA->typeEntry()->qualifiedCppName(), u"A::EnumA");
@@ -352,7 +357,7 @@ void TestEnum::testEnumValueFromExpression()
     QCOMPARE(valueA7.stringValue(), u"ValueA3 << 1");
     QCOMPARE(valueA7.value().unsignedValue(), 0xf0u << 1);
 
-   const auto enumB = classA->findEnum(QLatin1String("EnumB"));
+   const auto enumB = classA->findEnum(u"EnumB"_s);
    QVERIFY(enumB.has_value());
    QVERIFY(enumB->isSigned());
    QCOMPARE(enumB->typeEntry()->qualifiedCppName(), u"A::EnumB");
@@ -386,12 +391,12 @@ void TestEnum::testPrivateEnum()
     QVERIFY(classA);
     QCOMPARE(classA->enums().size(), 2);
 
-    auto privateEnum = classA->findEnum(QLatin1String("PrivateEnum"));
+    auto privateEnum = classA->findEnum(u"PrivateEnum"_s);
     QVERIFY(privateEnum.has_value());
     QVERIFY(privateEnum->isPrivate());
     QCOMPARE(privateEnum->typeEntry()->qualifiedCppName(), u"A::PrivateEnum");
 
-    auto publicEnum = classA->findEnum(QLatin1String("PublicEnum"));
+    auto publicEnum = classA->findEnum(u"PublicEnum"_s);
     QVERIFY(publicEnum.has_value());
     QCOMPARE(publicEnum->typeEntry()->qualifiedCppName(), u"A::PublicEnum");
 

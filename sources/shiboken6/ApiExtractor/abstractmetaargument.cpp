@@ -29,8 +29,12 @@
 #include "abstractmetaargument.h"
 #include "documentation.h"
 
+#include "qtcompat.h"
+
 #include <QtCore/QDebug>
 #include <QtCore/QSharedData>
+
+using namespace Qt::StringLiterals;
 
 class AbstractMetaArgumentData : public QSharedData
 {
@@ -170,7 +174,7 @@ QString AbstractMetaArgumentData::toString() const
 {
     QString result = m_type.name() + u' ' + m_name;
     if (!m_expression.isEmpty())
-        result += QLatin1String(" = ") + m_expression;
+        result += u" = "_s + m_expression;
     return result;
 }
 

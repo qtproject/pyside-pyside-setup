@@ -28,12 +28,17 @@
 
 #include "testabstractmetaclass.h"
 #include "abstractmetabuilder.h"
-#include <QtTest/QTest>
 #include "testutil.h"
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
 #include <usingmember.h>
 #include <typesystem.h>
+
+#include <qtcompat.h>
+
+#include <QtTest/QTest>
+
+using namespace Qt::StringLiterals;
 
 void TestAbstractMetaClass::testClassName()
 {
@@ -241,7 +246,7 @@ void TestAbstractMetaClass::testDefaultValues()
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
     AbstractMetaClass* classA = AbstractMetaClass::findClass(classes, u"A");
-    const auto candidates = classA->queryFunctionsByName(u"method"_qs);
+    const auto candidates = classA->queryFunctionsByName(u"method"_s);
     QCOMPARE(candidates.size(), 1);
     const auto &method = candidates.constFirst();
     const AbstractMetaArgument &arg = method->arguments().constFirst();
@@ -271,7 +276,7 @@ void TestAbstractMetaClass::testModifiedDefaultValues()
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
     AbstractMetaClass* classA = AbstractMetaClass::findClass(classes, u"A");
-    const auto methodMatches = classA->queryFunctionsByName(QLatin1String("method"));
+    const auto methodMatches = classA->queryFunctionsByName(u"method"_s);
     QCOMPARE(methodMatches.size(), 1);
     const auto method = methodMatches.constFirst();
     const AbstractMetaArgument &arg = method->arguments().constFirst();
@@ -362,7 +367,7 @@ void TestAbstractMetaClass::testSpecialFunctions()
     QCOMPARE(ctors.size(), 2);
     QCOMPARE(ctors.constFirst()->functionType(), AbstractMetaFunction::ConstructorFunction);
     QCOMPARE(ctors.at(1)->functionType(), AbstractMetaFunction::CopyConstructorFunction);
-    auto assigmentOps = classA->queryFunctionsByName(QLatin1String("operator="));
+    auto assigmentOps = classA->queryFunctionsByName(u"operator="_s);
     QCOMPARE(assigmentOps.size(), 1);
     QCOMPARE(assigmentOps.constFirst()->functionType(),
              AbstractMetaFunction::AssignmentOperatorFunction);
@@ -373,7 +378,7 @@ void TestAbstractMetaClass::testSpecialFunctions()
     QCOMPARE(ctors.size(), 2);
     QCOMPARE(ctors.constFirst()->functionType(), AbstractMetaFunction::ConstructorFunction);
     QCOMPARE(ctors.at(1)->functionType(), AbstractMetaFunction::CopyConstructorFunction);
-    assigmentOps = classA->queryFunctionsByName(QLatin1String("operator="));
+    assigmentOps = classA->queryFunctionsByName(u"operator="_s);
     QCOMPARE(assigmentOps.size(), 1);
     QCOMPARE(assigmentOps.constFirst()->functionType(), AbstractMetaFunction::AssignmentOperatorFunction);
 }
@@ -757,8 +762,8 @@ void TestAbstractMetaClass::testUsingTemplateMembers()
     auto valueList = AbstractMetaClass::findClass(classes, u"ValueList");
     QVERIFY(valueList);
     auto list = valueList->templateBaseClass();
-    QVERIFY(valueList->isUsingMember(list, QLatin1String("append"), Access::Public));
-    QCOMPARE(valueList->queryFunctionsByName(QLatin1String("append")).size(), 2);
+    QVERIFY(valueList->isUsingMember(list, u"append"_s, Access::Public));
+    QCOMPARE(valueList->queryFunctionsByName(u"append"_s).size(), 2);
 }
 
 QTEST_APPLESS_MAIN(TestAbstractMetaClass)

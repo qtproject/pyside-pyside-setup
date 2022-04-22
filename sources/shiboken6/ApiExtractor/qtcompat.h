@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2019 The Qt Company Ltd.
+** Copyright (C) 2022 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -26,42 +26,37 @@
 **
 ****************************************************************************/
 
-#include "xmlutils.h"
+#ifndef QTCOMPAT_H
+#define QTCOMPAT_H
 
-#include "xmlutils_libxslt.h"
+#include <QtCore/QtGlobal>
 
-#include "qtcompat.h"
+#if QT_VERSION < 0x060400
 
-using namespace Qt::StringLiterals;
+// QTBUG-98434, provide literals of Qt 6.4 for compatibility.
 
-XQuery::XQuery() = default;
+#  include <QtCore/QString>
 
-XQuery::~XQuery() = default;
+# define QLatin1StringView QLatin1String
 
-QString XQuery::evaluate(QString xPathExpression, QString *errorMessage)
+namespace Qt {
+inline namespace Literals {
+inline namespace StringLiterals {
+
+constexpr inline QLatin1String operator"" _L1(const char *str, size_t size) noexcept
 {
-    // XQuery can't have invalid XML characters
-    xPathExpression.replace(u'&', u"&amp;"_s);
-    xPathExpression.replace(u'<', u"&lt;"_s);
-    return doEvaluate(xPathExpression, errorMessage);
+    return QLatin1String(str, qsizetype(size));
 }
 
-QSharedPointer<XQuery> XQuery::create(const QString &focus, QString *errorMessage)
+inline QString operator"" _s(const char16_t *str, size_t size) noexcept
 {
-#if defined(HAVE_LIBXSLT)
-    return libXml_createXQuery(focus, errorMessage);
-#else
-    *errorMessage = QLatin1StringView(__FUNCTION__) + u" is not implemented."_s;
-    return QSharedPointer<XQuery>();
-#endif
+    return QString(QStringPrivate(nullptr, const_cast<char16_t *>(str), qsizetype(size)));
 }
 
-QString xsl_transform(const QString &xml, const QString &xsl, QString *errorMessage)
-{
-#if defined(HAVE_LIBXSLT)
-    return libXslt_transform(xml, xsl, errorMessage);
-#else
-    *errorMessage = QLatin1StringView(__FUNCTION__) + u" is not implemented."_s;
-    return xml;
-#endif
-}
+} // StringLiterals
+} // Literals
+} // Qt
+
+#endif // < 6.4
+
+#endif // QTCOMPAT_H

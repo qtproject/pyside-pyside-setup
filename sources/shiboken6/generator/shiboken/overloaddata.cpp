@@ -41,12 +41,16 @@
 #include "exception.h"
 #include "messages.h"
 
+#include "qtcompat.h"
+
 #include <QtCore/QDir>
 #include <QtCore/QFile>
 #include <QtCore/QTemporaryFile>
 
 #include <algorithm>
 #include <utility>
+
+using namespace Qt::StringLiterals;
 
 static QString getTypeName(const AbstractMetaType &type)
 {
@@ -62,7 +66,7 @@ static QString getTypeName(const AbstractMetaType &type)
                 typeEntry = typeEntry->asPrimitive()->basicReferencedTypeEntry();
             types << typeEntry->name();
         }
-        typeName += u'<' + types.join(u',') + QLatin1String(" >");
+        typeName += u'<' + types.join(u',') + u" >"_s;
     }
     return typeName;
 }
@@ -109,7 +113,7 @@ static QString getImplicitConversionTypeName(const AbstractMetaType &containerTy
         types << (otherType == instantiation ? impConv : getTypeName(otherType));
 
     return containerType.typeEntry()->qualifiedCppName() + u'<'
-           + types.join(QLatin1String(", ")) + QLatin1String(" >");
+           + types.join(u", "_s) + u" >"_s;
 }
 
 static inline int overloadNumber(const OverloadDataNodePtr &o)
@@ -372,7 +376,7 @@ void OverloadDataRootNode::sortNextOverloads(const ApiExtractorResult &api)
             funcName.prepend(owner->name() + u'.');
 
         // Dump overload graph
-        QString graphName = QDir::tempPath() + u'/' + funcName + QLatin1String(".dot");
+        QString graphName = QDir::tempPath() + u'/' + funcName + u".dot"_s;
         graph.dumpDot(graphName, [] (const QString &n) { return n; });
         AbstractMetaFunctionCList cyclic;
         for (const auto &typeName : unmappedResult.cyclic) {
@@ -742,9 +746,9 @@ bool OverloadData::showGraph() const
 
 static inline QString toHtml(QString s)
 {
-    s.replace(u'<', QLatin1String("&lt;"));
-    s.replace(u'>', QLatin1String("&gt;"));
-    s.replace(u'&', QLatin1String("&amp;"));
+    s.replace(u'<', u"&lt;"_s);
+    s.replace(u'>', u"&gt;"_s);
+    s.replace(u'&', u"&amp;"_s);
     return s;
 }
 
@@ -823,7 +827,7 @@ void OverloadDataRootNode::dumpRootGraph(QTextStream &s, int minArgs, int maxArg
 
 void OverloadDataNode::dumpNodeGraph(QTextStream &s) const
 {
-    QString argId = QLatin1String("arg_") + QString::number(quintptr(this));
+    QString argId = u"arg_"_s + QString::number(quintptr(this));
     s << argId << ";\n";
 
     s << "    \"" << argId << "\" [shape=\"plaintext\" style=\"filled,bold\" margin=\"0\" fontname=\"freemono\" fillcolor=\"white\" penwidth=1 ";

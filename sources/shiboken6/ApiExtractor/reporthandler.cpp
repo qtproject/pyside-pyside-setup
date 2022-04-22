@@ -29,11 +29,16 @@
 #include "reporthandler.h"
 #include "typesystem.h"
 #include "typedatabase.h"
+
+#include "qtcompat.h"
+
 #include <QtCore/QElapsedTimer>
 #include <QtCore/QSet>
 #include <cstring>
 #include <cstdarg>
 #include <cstdio>
+
+using namespace Qt::StringLiterals;
 
 #if defined(_WINDOWS) || defined(NOCOLOR)
     #define COLOR_END ""

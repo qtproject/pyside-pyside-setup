@@ -33,9 +33,13 @@
 #include <abstractmetalang.h>
 #include <typesystem.h>
 
+#include <qtcompat.h>
+
 #include <QtCore/QTemporaryFile>
 #include <QtCore/QTextStream>
 #include <QtTest/QTest>
+
+using namespace Qt::StringLiterals;
 
 void TestTemplates::testTemplateWithNamespace()
 {
@@ -394,7 +398,7 @@ typedef BaseTemplateClass<TypeOne> TypeOneClass;
     const ComplexTypeEntry* oneType = one->typeEntry();
     const ComplexTypeEntry* baseType = base->typeEntry();
     QCOMPARE(oneType->baseContainerType(), baseType);
-    QCOMPARE(one->baseClassNames(), QStringList(QLatin1String("BaseTemplateClass<TypeOne>")));
+    QCOMPARE(one->baseClassNames(), QStringList(u"BaseTemplateClass<TypeOne>"_s));
 
     QVERIFY(one->hasTemplateBaseClassInstantiations());
     AbstractMetaTypeList instantiations = one->templateBaseClassInstantiations();

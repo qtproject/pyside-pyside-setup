@@ -39,11 +39,14 @@
 #include "typesystem.h"
 #include <typedatabase.h>
 
-#include <QtCore/QDebug>
+#include "qtcompat.h"
+
 #include <QtCore/QDir>
 #include <QtCore/QFile>
 #include <QtCore/QFileInfo>
 #include <QtCore/QRegularExpression>
+
+using namespace Qt::StringLiterals;
 
 static const char ENABLE_PYSIDE_EXTENSIONS[] = "enable-pyside-extensions";
 static const char AVOID_PROTECTED_HACK[] = "avoid-protected-hack";
@@ -79,37 +82,37 @@ QString DefaultValue::returnValue() const
 {
     switch (m_type) {
     case DefaultValue::Boolean:
-        return QLatin1String("false");
+        return u"false"_s;
     case DefaultValue::CppScalar:
-        return QLatin1String("0");
+        return u"0"_s;
     case DefaultValue::Custom:
     case DefaultValue::Enum:
         return m_value;
     case DefaultValue::Pointer:
-        return QLatin1String("nullptr");
+        return u"nullptr"_s;
     case DefaultValue::Void:
         return QString();
     case DefaultValue::DefaultConstructorWithDefaultValues:
-        return m_value + QLatin1String("()");
+        return m_value + u"()"_s;
     case DefaultValue::DefaultConstructor:
         break;
     }
-    return QLatin1String("{}");
+    return u"{}"_s;
 }
 
 QString DefaultValue::initialization() const
 {
     switch (m_type) {
     case DefaultValue::Boolean:
-        return QLatin1String("{false}");
+        return u"{false}"_s;
     case DefaultValue::CppScalar:
-        return QLatin1String("{0}");
+        return u"{0}"_s;
     case DefaultValue::Custom:
-        return QLatin1String(" = ") + m_value;
+        return u" = "_s + m_value;
     case DefaultValue::Enum:
         return u'{' + m_value + u'}';
     case DefaultValue::Pointer:
-        return QLatin1String("{nullptr}");
+        return u"{nullptr}"_s;
     case DefaultValue::Void:
         Q_ASSERT(false);
         break;
@@ -124,13 +127,13 @@ QString DefaultValue::constructorParameter() const
 {
     switch (m_type) {
     case DefaultValue::Boolean:
-        return QLatin1String("false");
+        return u"false"_s;
     case DefaultValue::CppScalar: {
         // PYSIDE-846: Use static_cast in case of "unsigned long" and similar
         const QString cast = m_value.contains(u' ')
-            ? QLatin1String("static_cast<") + m_value + u'>'
+            ? u"static_cast<"_s + m_value + u'>'
             : m_value;
-        return cast + QLatin1String("(0)");
+        return cast + u"(0)"_s;
     }
     case DefaultValue::Custom:
     case DefaultValue::Enum:
@@ -140,7 +143,7 @@ QString DefaultValue::constructorParameter() const
         // taking different pointer types, cf
         // QTreeWidgetItemIterator(QTreeWidget *) and
         // QTreeWidgetItemIterator(QTreeWidgetItemIterator *).
-        return QLatin1String("static_cast<") + m_value + QLatin1String("*>(nullptr)");
+        return u"static_cast<"_s + m_value + u"*>(nullptr)"_s;
     case DefaultValue::Void:
         Q_ASSERT(false);
         break;
@@ -148,7 +151,7 @@ QString DefaultValue::constructorParameter() const
     case DefaultValue::DefaultConstructorWithDefaultValues:
         break;
     }
-    return m_value + QLatin1String("()");
+    return m_value + u"()"_s;
 }
 
 #ifndef QT_NO_DEBUG_STREAM
@@ -241,19 +244,19 @@ bool Generator::setup(const ApiExtractorResult &api)
 Generator::OptionDescriptions Generator::options() const
 {
     return {
-        {QLatin1String(AVOID_PROTECTED_HACK),
-         u"Avoid the use of the '#define protected public' hack."_qs},
-        {QLatin1String(ENABLE_PYSIDE_EXTENSIONS),
+        {QLatin1StringView(AVOID_PROTECTED_HACK),
+         u"Avoid the use of the '#define protected public' hack."_s},
+        {QLatin1StringView(ENABLE_PYSIDE_EXTENSIONS),
          u"Enable PySide extensions, such as support for signal/slots,\n"
-          "use this if you are creating a binding for a Qt-based library."_qs}
+          "use this if you are creating a binding for a Qt-based library."_s}
     };
 }
 
 bool Generator::handleOption(const QString & key, const QString & /* value */)
 {
-    if (key == QLatin1String(ENABLE_PYSIDE_EXTENSIONS))
+    if (key == QLatin1StringView(ENABLE_PYSIDE_EXTENSIONS))
         return ( m_d->m_usePySideExtensions = true);
-    if (key == QLatin1String(AVOID_PROTECTED_HACK))
+    if (key == QLatin1StringView(AVOID_PROTECTED_HACK))
         return (m_d->m_avoidProtectedHack = true);
     return false;
 }
@@ -269,7 +272,7 @@ QString Generator::fileNameForContextHelper(const GeneratorContext &context,
             ? metaClass->name() : metaClass->qualifiedCppName();
         if (!flags.testFlag(FileNameFlag::KeepCase))
             fileNameBase = fileNameBase.toLower();
-        fileNameBase.replace(u"::"_qs, u"_"_qs);
+        fileNameBase.replace(u"::"_s, u"_"_s);
         return fileNameBase + suffix;
     }
 
@@ -359,8 +362,8 @@ QString Generator::getFileNameBaseForSmartPointer(const AbstractMetaType &smartP
     const AbstractMetaType innerType = smartPointerType.getSmartPointerInnerType();
     smartPointerType.typeEntry()->qualifiedCppName();
     QString fileName = smartPointerType.typeEntry()->qualifiedCppName().toLower();
-    fileName.replace(QLatin1String("::"), QLatin1String("_"));
-    fileName.append(QLatin1String("_"));
+    fileName.replace(u"::"_s, u"_"_s);
+    fileName.append(u"_"_s);
     fileName.append(innerType.name().toLower());
 
     return fileName;
@@ -439,18 +442,18 @@ QString Generator::getFullTypeName(const TypeEntry *type)
     if (type->isArray())
         type = static_cast<const ArrayTypeEntry *>(type)->nestedTypeEntry();
     if (!type->isCppPrimitive())
-        result.prepend(QLatin1String("::"));
+        result.prepend(u"::"_s);
     return result;
 }
 
 QString Generator::getFullTypeName(const AbstractMetaType &type)
 {
     if (type.isCString())
-        return QLatin1String("const char*");
+        return u"const char*"_s;
     if (type.isVoidPointer())
-        return QLatin1String("void*");
+        return u"void*"_s;
     if (type.typeEntry()->isContainer())
-        return QLatin1String("::") + type.cppSignature();
+        return u"::"_s + type.cppSignature();
     QString typeName;
     if (type.typeEntry()->isComplex() && type.hasInstantiations())
         typeName = getFullTypeNameWithoutModifiers(type);
@@ -461,15 +464,15 @@ QString Generator::getFullTypeName(const AbstractMetaType &type)
 
 QString Generator::getFullTypeName(const AbstractMetaClass *metaClass)
 {
-    return QLatin1String("::") + metaClass->qualifiedCppName();
+    return u"::"_s + metaClass->qualifiedCppName();
 }
 
 QString Generator::getFullTypeNameWithoutModifiers(const AbstractMetaType &type)
 {
     if (type.isCString())
-        return QLatin1String("const char*");
+        return u"const char*"_s;
     if (type.isVoidPointer())
-        return QLatin1String("void*");
+        return u"void*"_s;
     if (!type.hasInstantiations())
         return getFullTypeName(type.typeEntry());
     QString typeName = type.cppSignature();
@@ -487,7 +490,7 @@ QString Generator::getFullTypeNameWithoutModifiers(const AbstractMetaType &type)
     }
     while (typeName.endsWith(u'*') || typeName.endsWith(u' '))
         typeName.chop(1);
-    return QLatin1String("::") + typeName;
+    return u"::"_s + typeName;
 }
 
 std::optional<DefaultValue>
@@ -510,13 +513,13 @@ std::optional<DefaultValue>
             ctor.chop(1);
             ctor = ctor.trimmed();
         }
-        return DefaultValue(DefaultValue::DefaultConstructor, QLatin1String("::") + ctor);
+        return DefaultValue(DefaultValue::DefaultConstructor, u"::"_s + ctor);
     }
 
     if (type.isNativePointer())
         return DefaultValue(DefaultValue::Pointer, type.typeEntry()->qualifiedCppName());
     if (type.isPointer())
-        return DefaultValue(DefaultValue::Pointer, QLatin1String("::") + type.typeEntry()->qualifiedCppName());
+        return DefaultValue(DefaultValue::Pointer, u"::"_s + type.typeEntry()->qualifiedCppName());
 
     if (type.typeEntry()->isSmartPointer())
         return minimalConstructor(api, type.typeEntry());
@@ -565,13 +568,13 @@ std::optional<DefaultValue>
         if (const auto *nullValue = enumEntry->nullValue())
             return DefaultValue(DefaultValue::Enum, nullValue->name());
         return DefaultValue(DefaultValue::Custom,
-                            QLatin1String("static_cast< ::") + type->qualifiedCppName()
-                            + QLatin1String(">(0)"));
+                            u"static_cast< ::"_s + type->qualifiedCppName()
+                            + u">(0)"_s);
     }
 
     if (type->isFlags()) {
         return DefaultValue(DefaultValue::Custom,
-                            type->qualifiedCppName() + QLatin1String("(0)"));
+                            type->qualifiedCppName() + u"(0)"_s);
     }
 
     if (type->isPrimitive()) {
@@ -581,7 +584,7 @@ std::optional<DefaultValue>
         // heuristically returned. If this is wrong the build of the generated
         // bindings will tell.
         return ctor.isEmpty()
-            ? DefaultValue(DefaultValue::DefaultConstructorWithDefaultValues, QLatin1String("::")
+            ? DefaultValue(DefaultValue::DefaultConstructorWithDefaultValues, u"::"_s
                            + type->qualifiedCppName())
             : DefaultValue(DefaultValue::Custom, ctor);
     }
@@ -600,14 +603,14 @@ std::optional<DefaultValue>
     }
 
     if (errorString != nullptr)
-        *errorString = QLatin1String("No default value could be determined.");
+        *errorString = u"No default value could be determined."_s;
     return {};
 }
 
 static QString constructorCall(const QString &qualifiedCppName, const QStringList &args)
 {
-    return QLatin1String("::") + qualifiedCppName + u'('
-        + args.join(QLatin1String(", ")) + u')';
+    return u"::"_s + qualifiedCppName + u'('
+        + args.join(u", "_s) + u')';
 }
 
 std::optional<DefaultValue>
@@ -633,12 +636,12 @@ std::optional<DefaultValue>
             const auto &arguments = ctor->arguments();
             if (arguments.isEmpty()) {
                 return DefaultValue(DefaultValue::DefaultConstructor,
-                                    QLatin1String("::") + qualifiedCppName);
+                                    u"::"_s + qualifiedCppName);
             }
             // First argument has unmodified default: Default constructible with values
             if (arguments.constFirst().hasUnmodifiedDefaultValueExpression()) {
                 return DefaultValue(DefaultValue::DefaultConstructorWithDefaultValues,
-                                    QLatin1String("::") + qualifiedCppName);
+                                    u"::"_s + qualifiedCppName);
             }
             // Examine arguments, exclude functions taking a self parameter
             bool simple = true;
@@ -690,9 +693,9 @@ QString Generator::translateType(AbstractMetaType cType,
     }
 
     if (cType.isVoid()) {
-        s = QLatin1String("void");
+        s = u"void"_s;
     } else if (cType.isArray()) {
-        s = translateType(*cType.arrayElementType(), context, options) + QLatin1String("[]");
+        s = translateType(*cType.arrayElementType(), context, options) + u"[]"_s;
     } else {
         if (options & Generator::ExcludeConst || options & Generator::ExcludeReference) {
             AbstractMetaType copyType = cType;
@@ -705,7 +708,7 @@ QString Generator::translateType(AbstractMetaType cType,
 
             s = copyType.cppSignature();
             if (!copyType.typeEntry()->isVoid() && !copyType.typeEntry()->isCppPrimitive())
-                s.prepend(QLatin1String("::"));
+                s.prepend(u"::"_s);
         } else {
             s = cType.cppSignature();
         }
@@ -718,41 +721,41 @@ static const QHash<QString, QString> &pythonOperators()
 {
     static const QHash<QString, QString> result = {
         // call operator
-        {u"operator()"_qs, u"__call__"_qs},
+        {u"operator()"_s, u"__call__"_s},
         // Arithmetic operators
-        {u"operator+"_qs, u"__add__"_qs},
-        {u"operator-"_qs, u"__sub__"_qs},
-        {u"operator*"_qs, u"__mul__"_qs},
-        {u"operator/"_qs, u"__div__"_qs},
-        {u"operator%"_qs, u"__mod__"_qs},
+        {u"operator+"_s, u"__add__"_s},
+        {u"operator-"_s, u"__sub__"_s},
+        {u"operator*"_s, u"__mul__"_s},
+        {u"operator/"_s, u"__div__"_s},
+        {u"operator%"_s, u"__mod__"_s},
         // Inplace arithmetic operators
-        {u"operator+="_qs, u"__iadd__"_qs},
-        {u"operator-="_qs, u"__isub__"_qs},
-        {u"operator++"_qs, u"__iadd__"_qs},
-        {u"operator--"_qs, u"__isub__"_qs},
-        {u"operator*="_qs, u"__imul__"_qs},
-        {u"operator/="_qs, u"__idiv__"_qs},
-        {u"operator%="_qs, u"__imod__"_qs},
+        {u"operator+="_s, u"__iadd__"_s},
+        {u"operator-="_s, u"__isub__"_s},
+        {u"operator++"_s, u"__iadd__"_s},
+        {u"operator--"_s, u"__isub__"_s},
+        {u"operator*="_s, u"__imul__"_s},
+        {u"operator/="_s, u"__idiv__"_s},
+        {u"operator%="_s, u"__imod__"_s},
         // Bitwise operators
-        {u"operator&"_qs, u"__and__"_qs},
-        {u"operator^"_qs, u"__xor__"_qs},
-        {u"operator|"_qs, u"__or__"_qs},
-        {u"operator<<"_qs, u"__lshift__"_qs},
-        {u"operator>>"_qs, u"__rshift__"_qs},
-        {u"operator~"_qs, u"__invert__"_qs},
+        {u"operator&"_s, u"__and__"_s},
+        {u"operator^"_s, u"__xor__"_s},
+        {u"operator|"_s, u"__or__"_s},
+        {u"operator<<"_s, u"__lshift__"_s},
+        {u"operator>>"_s, u"__rshift__"_s},
+        {u"operator~"_s, u"__invert__"_s},
         // Inplace bitwise operators
-        {u"operator&="_qs, u"__iand__"_qs},
-        {u"operator^="_qs, u"__ixor__"_qs},
-        {u"operator|="_qs, u"__ior__"_qs},
-        {u"operator<<="_qs, u"__ilshift__"_qs},
-        {u"operator>>="_qs, u"__irshift__"_qs},
+        {u"operator&="_s, u"__iand__"_s},
+        {u"operator^="_s, u"__ixor__"_s},
+        {u"operator|="_s, u"__ior__"_s},
+        {u"operator<<="_s, u"__ilshift__"_s},
+        {u"operator>>="_s, u"__irshift__"_s},
         // Comparison operators
-        {u"operator=="_qs, u"__eq__"_qs},
-        {u"operator!="_qs, u"__ne__"_qs},
-        {u"operator<"_qs, u"__lt__"_qs},
-        {u"operator>"_qs, u"__gt__"_qs},
-        {u"operator<="_qs, u"__le__"_qs},
-        {u"operator>="_qs, u"__ge__"_qs}
+        {u"operator=="_s, u"__eq__"_s},
+        {u"operator!="_s, u"__ne__"_s},
+        {u"operator<"_s, u"__lt__"_s},
+        {u"operator>"_s, u"__gt__"_s},
+        {u"operator<="_s, u"__le__"_s},
+        {u"operator>="_s, u"__ge__"_s}
     };
     return result;
 }
@@ -803,7 +806,7 @@ QString getClassTargetFullName(const AbstractMetaEnum &metaEnum, bool includePac
 
 QString getFilteredCppSignatureString(QString signature)
 {
-    signature.replace(QLatin1String("::"), QLatin1String("_"));
+    signature.replace(u"::"_s, u"_"_s);
     signature.replace(u'<', u'_');
     signature.replace(u'>', u'_');
     signature.replace(u' ', u'_');

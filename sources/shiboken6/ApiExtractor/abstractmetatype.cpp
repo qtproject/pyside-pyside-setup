@@ -34,6 +34,8 @@
 #include "typesystem.h"
 #include "parser/codemodel.h"
 
+#include "qtcompat.h"
+
 #ifndef QT_NO_DEBUG_STREAM
 #  include <QtCore/QDebug>
 #endif
@@ -43,23 +45,25 @@
 #include <QtCore/QSharedPointer>
 #include <QtCore/QStack>
 
+using namespace Qt::StringLiterals;
+
 using AbstractMetaTypeCPtr = QSharedPointer<const AbstractMetaType>;
 
 const QSet<QString> &AbstractMetaType::cppFloatTypes()
 {
-    static const QSet<QString> result{u"double"_qs, u"float"_qs};
+    static const QSet<QString> result{u"double"_s, u"float"_s};
     return result;
 }
 
 const QSet<QString> &AbstractMetaType::cppSignedCharTypes()
 {
-    static const QSet<QString> result{u"char"_qs, u"signed char"_qs};
+    static const QSet<QString> result{u"char"_s, u"signed char"_s};
     return result;
 }
 
 const QSet<QString> &AbstractMetaType::cppUnsignedCharTypes()
 {
-    static const QSet<QString> result{u"unsigned char"_qs};
+    static const QSet<QString> result{u"unsigned char"_s};
     return result;
 }
 
@@ -73,14 +77,14 @@ const QSet<QString> &AbstractMetaType::cppSignedIntTypes()
 {
     static QSet<QString> result;
     if (result.isEmpty()) {
-        result = {u"char"_qs, u"signed char"_qs, u"short"_qs, u"short int"_qs,
-                  u"signed short"_qs, u"signed short int"_qs,
-                  u"int"_qs, u"signed int"_qs,
-                  u"long"_qs, u"long int"_qs,
-                  u"signed long"_qs, u"signed long int"_qs,
-                  u"long long"_qs, u"long long int"_qs,
-                  u"signed long long int"_qs,
-                  u"ptrdiff_t"_qs};
+        result = {u"char"_s, u"signed char"_s, u"short"_s, u"short int"_s,
+                  u"signed short"_s, u"signed short int"_s,
+                  u"int"_s, u"signed int"_s,
+                  u"long"_s, u"long int"_s,
+                  u"signed long"_s, u"signed long int"_s,
+                  u"long long"_s, u"long long int"_s,
+                  u"signed long long int"_s,
+                  u"ptrdiff_t"_s};
         result |= cppSignedCharTypes();
     }
     return result;
@@ -90,12 +94,12 @@ const QSet<QString> &AbstractMetaType::cppUnsignedIntTypes()
 {
     static QSet<QString> result;
     if (result.isEmpty()) {
-        result = {u"unsigned short"_qs, u"unsigned short int"_qs,
-                  u"unsigned"_qs, u"unsigned int"_qs,
-                  u"unsigned long"_qs, u"unsigned long int"_qs,
-                  u"unsigned long long"_qs,
-                  u"unsigned long long int"_qs,
-                  u"size_t"_qs};
+        result = {u"unsigned short"_s, u"unsigned short int"_s,
+                  u"unsigned"_s, u"unsigned int"_s,
+                  u"unsigned long"_s, u"unsigned long int"_s,
+                  u"unsigned long long"_s,
+                  u"unsigned long long int"_s,
+                  u"size_t"_s};
         result |= cppUnsignedCharTypes();
     }
     return result;
@@ -107,7 +111,7 @@ const QSet<QString> &AbstractMetaType::cppIntegralTypes()
     if (result.isEmpty()) {
         result |= cppSignedIntTypes();
         result |= cppUnsignedIntTypes();
-        result.insert(u"bool"_qs);
+        result.insert(u"bool"_s);
     }
     return result;
 }
@@ -118,7 +122,7 @@ const QSet<QString> &AbstractMetaType::cppPrimitiveTypes()
     if (result.isEmpty()) {
         result |= cppIntegralTypes();
         result |= cppFloatTypes();
-        result.insert(u"wchar_t"_qs);
+        result.insert(u"wchar_t"_s);
     }
     return result;
 }
@@ -245,7 +249,7 @@ bool AbstractMetaType::applyArrayModification(QString *errorMessage)
 {
 
     if (d->m_pattern == AbstractMetaType::NativePointerAsArrayPattern) {
-        *errorMessage = QLatin1String("<array> modification already applied.");
+        *errorMessage = u"<array> modification already applied."_s;
         return false;
     }
     if (!d->m_arrayElementType.isNull())  {
@@ -566,9 +570,9 @@ QString AbstractMetaTypeData::formatSignature(bool minimal) const
 {
     QString result;
     if (m_constant)
-        result += QLatin1String("const ");
+        result += u"const "_s;
     if (m_volatile)
-        result += QLatin1String("volatile ");
+        result += u"volatile "_s;
     if (m_pattern == AbstractMetaType::ArrayPattern) {
         // Build nested array dimensions a[2][3] in correct order
         result += m_arrayElementType->minimalSignature();
@@ -589,7 +593,7 @@ QString AbstractMetaTypeData::formatSignature(bool minimal) const
                 result += u',';
             result += m_instantiations.at(i).minimalSignature();
         }
-        result += QLatin1String(" >");
+        result += u" >"_s;
     }
 
     if (!minimal && (!m_indirections.isEmpty() || m_referenceType != NoReference))
@@ -603,7 +607,7 @@ QString AbstractMetaTypeData::formatSignature(bool minimal) const
         result += u'&';
         break;
     case RValueReference:
-        result += QLatin1String("&&");
+        result += u"&&"_s;
         break;
     }
     return result;
@@ -629,7 +633,7 @@ QString AbstractMetaTypeData::formatPythonSignature() const
      */
     QString result;
     if (m_pattern == AbstractMetaType::NativePointerAsArrayPattern)
-        result += QLatin1String("array ");
+        result += u"array "_s;
     // We no longer use the "const" qualifier for heuristics. Instead,
     // NativePointerAsArrayPattern indicates when we have <array> in XML.
     // if (m_typeEntry->isPrimitive() && isConstant())
@@ -654,7 +658,7 @@ QString AbstractMetaTypeData::formatPythonSignature() const
         result += u'[';
         for (int i = 0, size = m_instantiations.size(); i < size; ++i) {
             if (i > 0)
-                result += QLatin1String(", ");
+                result += u", "_s;
             result += m_instantiations.at(i).formatPythonSignature();
         }
         result += u']';
@@ -666,7 +670,7 @@ QString AbstractMetaTypeData::formatPythonSignature() const
     // "PySide6.QtCore.Qt.ItemFlags" instead of "PySide6.QtCore.QFlags<Qt.ItemFlag>"
     if (m_typeEntry->isFlags())
         result = m_typeEntry->qualifiedTargetLangName();
-    result.replace(QLatin1String("::"), QLatin1String("."));
+    result.replace(u"::"_s, u"."_s);
     return result;
 }
 
@@ -763,7 +767,7 @@ AbstractMetaType AbstractMetaType::createVoid()
 {
     static QScopedPointer<AbstractMetaType> metaType;
     if (metaType.isNull()) {
-        static const TypeEntry *voidTypeEntry = TypeDatabase::instance()->findType(QLatin1String("void"));
+        static const TypeEntry *voidTypeEntry = TypeDatabase::instance()->findType(u"void"_s);
         Q_ASSERT(voidTypeEntry);
         metaType.reset(new AbstractMetaType(voidTypeEntry));
         metaType->decideUsagePattern();
@@ -773,7 +777,7 @@ AbstractMetaType AbstractMetaType::createVoid()
 
 void AbstractMetaType::dereference(QString *type)
 {
-    type->prepend(u"(*"_qs);
+    type->prepend(u"(*"_s);
     type->append(u')');
 }
 

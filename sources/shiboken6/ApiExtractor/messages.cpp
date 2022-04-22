@@ -37,12 +37,16 @@
 #include "typesystem.h"
 #include <codemodel.h>
 
+#include "qtcompat.h"
+
 #include <QtCore/QCoreApplication>
 #include <QtCore/QDebug>
 #include <QtCore/QDir>
 #include <QtCore/QFile>
 #include <QtCore/QStringList>
 #include <QtCore/QXmlStreamReader>
+
+using namespace Qt::StringLiterals;
 
 static inline QString colonColon() { return QStringLiteral("::"); }
 
@@ -268,16 +272,16 @@ QString msgNamespaceNoTypeEntry(const NamespaceModelItem &item,
 
 QString msgAmbiguousVaryingTypesFound(const QString &qualifiedName, const TypeEntries &te)
 {
-    QString result = QLatin1String("Ambiguous types of varying types found for \"") + qualifiedName
-        + QLatin1String("\": ");
+    QString result = u"Ambiguous types of varying types found for \""_s + qualifiedName
+        + u"\": "_s;
     QDebug(&result) << te;
     return result;
 }
 
 QString msgAmbiguousTypesFound(const QString &qualifiedName, const TypeEntries &te)
 {
-    QString result = QLatin1String("Ambiguous types found for \"") + qualifiedName
-        + QLatin1String("\": ");
+    QString result = u"Ambiguous types found for \""_s + qualifiedName
+        + u"\": "_s;
     QDebug(&result) << te;
     return result;
 }
@@ -298,9 +302,9 @@ QString msgUnmatchedParameterType(const ArgumentModelItem &arg, int n,
 QString msgUnmatchedReturnType(const FunctionModelItem &functionItem,
                                const QString &why)
 {
-    return QLatin1String("unmatched return type '")
+    return u"unmatched return type '"_s
         + functionItem->type().toString()
-        + QLatin1String("': ") + why;
+        + u"': "_s + why;
 }
 
 QString msgSkippingFunction(const FunctionModelItem &functionItem,
@@ -371,7 +375,7 @@ QString msgGlobalFunctionNotDefined(const FunctionTypeEntry *fte,
     str << fte->sourceLocation() << "Global function '" << signature
         << "' is specified in typesystem, but not defined.";
     if (!candidates.isEmpty())
-        str << " Candidates are: " << candidates.join(u", "_qs);
+        str << " Candidates are: " << candidates.join(u", "_s);
     str << ' ' << msgCompilationError;
     return result;
 }
@@ -431,20 +435,18 @@ QString msgArrayModificationFailed(const FunctionModelItem &functionItem,
 
 QString msgCannotResolveEntity(const QString &name, const QString &reason)
 {
-    return QLatin1String("Cannot resolve entity \"") + name
-        + QLatin1String("\": ") + reason;
+    return u"Cannot resolve entity \""_s + name + u"\": "_s + reason;
 }
 
 QString msgCannotSetArrayUsage(const QString &function, int i, const QString &reason)
 {
-    return function +  QLatin1String(": Cannot use parameter ")
-        + QString::number(i + 1) + QLatin1String(" as an array: ") + reason;
+    return function +  u": Cannot use parameter "_s
+        + QString::number(i + 1) + u" as an array: "_s + reason;
 }
 
 QString msgUnableToTranslateType(const QString &t, const QString &why)
 {
-    return QLatin1String("Unable to translate type \"")
-        + t + QLatin1String("\": ") + why;
+    return u"Unable to translate type \""_s + t + u"\": "_s + why;
 }
 
 QString msgUnableToTranslateType(const TypeInfo &typeInfo,
@@ -455,24 +457,24 @@ QString msgUnableToTranslateType(const TypeInfo &typeInfo,
 
 QString msgCannotFindTypeEntry(const QString &t)
 {
-    return QLatin1String("Cannot find type entry for \"") + t + QLatin1String("\".");
+    return u"Cannot find type entry for \""_s + t + u"\"."_s;
 }
 
 QString msgCannotFindTypeEntryForSmartPointer(const QString &t, const QString &smartPointerType)
 {
-    return QLatin1String("Cannot find type entry \"") + t
-        + QLatin1String("\" for instantiation of \"") + smartPointerType + QLatin1String("\".");
+    return u"Cannot find type entry \""_s + t
+        + u"\" for instantiation of \""_s +smartPointerType + u"\"."_s;
 }
 
 QString msgInvalidSmartPointerType(const TypeInfo &i)
 {
-    return QLatin1String("Invalid smart pointer type \"") + i.toString() + QLatin1String("\".");
+    return u"Invalid smart pointer type \""_s +i.toString() + u"\"."_s;
 }
 
 QString msgCannotFindSmartPointerInstantion(const TypeInfo &i)
 {
-    return QLatin1String("Cannot find instantiation of smart pointer type for \"")
-        + i.toString() + QLatin1String("\".");
+    return u"Cannot find instantiation of smart pointer type for \""_s
+        + i.toString() + u"\"."_s;
 }
 
 QString msgCannotTranslateTemplateArgument(int i,
@@ -498,8 +500,8 @@ QString msgDisallowThread(const AbstractMetaFunction *f)
 
 QString msgNamespaceToBeExtendedNotFound(const QString &namespaceName, const QString &packageName)
 {
-    return QLatin1String("The namespace '") + namespaceName
-        + QLatin1String("' to be extended cannot be found in package ")
+    return u"The namespace '"_s + namespaceName
+        + u"' to be extended cannot be found in package "_s
         + packageName + u'.';
 }
 
@@ -515,9 +517,8 @@ QString msgPropertyTypeParsingFailed(const QString &name, const QString &typeNam
 
 QString msgPropertyExists(const QString &className, const QString &name)
 {
-    return QLatin1String("class ") + className
-        + QLatin1String(" already has a property \"") + name
-        + QLatin1String("\" (defined by Q_PROPERTY).");
+    return u"class "_s + className + u" already has a property \""_s
+           + name + u"\" (defined by Q_PROPERTY)."_s;
 }
 
 QString msgFunctionVisibilityModified(const AbstractMetaClass *c,
@@ -573,9 +574,9 @@ static QString functionDescription(const AbstractMetaFunction *function)
 {
     QString result = u'"' + function->classQualifiedSignature() + u'"';
     if (function->flags().testFlag(AbstractMetaFunction::Flag::HiddenFriend))
-        result += u" (hidden friend)"_qs;
+        result += u" (hidden friend)"_s;
     if (function->flags().testFlag(AbstractMetaFunction::Flag::InheritedFromTemplate))
-        result += u" (inherited from template)"_qs;
+        result += u" (inherited from template)"_s;
     return result;
 }
 
@@ -601,7 +602,7 @@ QString msgCannotFindDocumentation(const QString &fileName,
                                    const QString &query)
 {
     return msgCannotFindDocumentation(fileName, "enum",
-                                      metaClass->name() + QLatin1String("::") + e.name(),
+                                      metaClass->name() + u"::"_s + e.name(),
                                       query);
 }
 
@@ -611,7 +612,7 @@ QString msgCannotFindDocumentation(const QString &fileName,
                                    const QString &query)
 {
     return msgCannotFindDocumentation(fileName, "field",
-                                      metaClass->name() + QLatin1String("::") + f.name(),
+                                      metaClass->name() + u"::"_s + f.name(),
                                       query);
 }
 
@@ -663,9 +664,9 @@ QString msgWriteFailed(const QFile &f, qsizetype size)
 
 QString msgCannotUseEnumAsInt(const QString &name)
 {
-    return QLatin1String("Cannot convert the protected scoped enum \"") + name
-        + QLatin1String("\" to type int when generating wrappers for the protected hack. "
-                        "Compilation errors may occur when used as a function argument.");
+    return u"Cannot convert the protected scoped enum \""_s + name
+           + u"\" to type int when generating wrappers for the protected hack. "
+           "Compilation errors may occur when used as a function argument."_s;
 }
 
 QString msgConversionTypesDiffer(const QString &varType, const QString &conversionType)
@@ -687,19 +688,19 @@ QString msgConversionTypesDiffer(const QString &varType, const QString &conversi
 
 QString msgCannotFindSmartPointerGetter(const SmartPointerTypeEntry *te)
 {
-     return u"Getter \""_qs + te->getter() +  u"()\" of smart pointer \""_qs
-         + te->name() + u"\" not found."_qs;
+     return u"Getter \""_s + te->getter() +  u"()\" of smart pointer \""_s
+         + te->name() + u"\" not found."_s;
 }
 
 QString msgCannotFindSmartPointerMethod(const SmartPointerTypeEntry *te, const QString &m)
 {
-    return u"Method \""_qs + m +  u"()\" of smart pointer \""_qs
-        + te->name() + u"\" not found."_qs;
+    return u"Method \""_s + m +  u"()\" of smart pointer \""_s
+        + te->name() + u"\" not found."_s;
 }
 
 QString msgMethodNotFound(const AbstractMetaClass *klass, const QString &name)
 {
-     return u"Method \""_qs + name + u"\" not found in class "_qs
+     return u"Method \""_s + name + u"\" not found in class "_s
             + klass->name() + u'.';
 }
 
@@ -722,8 +723,8 @@ QString msgLeftOverArguments(const QVariantMap &remainingArgs)
 
 QString msgInvalidVersion(const QString &package, const QString &version)
 {
-    return QLatin1String("Invalid version \"") + version
-        + QLatin1String("\" specified for package ") + package + u'.';
+    return u"Invalid version \""_s + version
+        + u"\" specified for package "_s + package + u'.';
 }
 
 QString msgCyclicDependency(const QString &funcName, const QString &graphName,
@@ -754,9 +755,9 @@ QString msgCyclicDependency(const QString &funcName, const QString &graphName,
 
 QString msgClassNotFound(const TypeEntry *t)
 {
-    return QLatin1String("Could not find class \"")
+    return u"Could not find class \""_s
            + t->qualifiedCppName()
-           + QLatin1String("\" in the code model. Maybe it is forward declared?");
+           + u"\" in the code model. Maybe it is forward declared?"_s;
 }
 
 QString msgEnclosingClassNotFound(const TypeEntry *t)
@@ -770,10 +771,10 @@ QString msgEnclosingClassNotFound(const TypeEntry *t)
 
 QString msgUnknownOperator(const AbstractMetaFunction* func)
 {
-    QString result = QLatin1String("Unknown operator: \"") + func->originalName()
+    QString result = u"Unknown operator: \""_s + func->originalName()
                      + u'"';
     if (const AbstractMetaClass *c = func->implementingClass())
-        result += QLatin1String(" in class: ") + c->name();
+        result += u" in class: "_s + c->name();
     return result;
 }
 
@@ -801,8 +802,7 @@ QString msgCannotFindType(const QString &type, const QString &variable,
 
 QString msgCannotBuildMetaType(const QString &s)
 {
-    return QLatin1String("Unable to build meta type for \"")
-        + s + QLatin1String("\": ");
+    return u"Unable to build meta type for \""_s + s + u"\": "_s;
 }
 
 QString msgCouldNotFindMinimalConstructor(const QString &where, const QString &type, const QString &why)
@@ -848,36 +848,36 @@ QString msgRejectReason(const TypeRejection &r, const QString &needle)
 QString msgCannotFindNamespaceToExtend(const QString &name,
                                        const QString &extendsPackage)
 {
-    return QLatin1String("Cannot find namespace ") + name
-        + QLatin1String(" in package ") + extendsPackage;
+    return u"Cannot find namespace "_s + name
+        + u" in package "_s + extendsPackage;
 }
 
 QString msgExtendingNamespaceRequiresPattern(const QString &name)
 {
-    return QLatin1String("Namespace ") + name
-        + QLatin1String(" requires a file pattern since it extends another namespace.");
+    return u"Namespace "_s + name
+        + u" requires a file pattern since it extends another namespace."_s;
 }
 
 QString msgInvalidRegularExpression(const QString &pattern, const QString &why)
 {
-    return QLatin1String("Invalid pattern \"") + pattern + QLatin1String("\": ") + why;
+    return u"Invalid pattern \""_s + pattern + u"\": "_s + why;
 }
 
 QString msgNoRootTypeSystemEntry()
 {
-    return QLatin1String("Type system entry appears out of order, there does not seem to be a root type system element.");
+    return u"Type system entry appears out of order, there does not seem to be a root type system element."_s;
 }
 
 QString msgIncorrectlyNestedName(const QString &name)
 {
-    return QLatin1String("Nesting types by specifying '::' is no longer supported (")
-           + name + QLatin1String(").");
+    return u"Nesting types by specifying '::' is no longer supported ("_s
+           + name + u")."_s;
 }
 
 QString msgCannotFindView(const QString &viewedName, const QString &name)
 {
-    return QLatin1String("Unable to find viewed type ") + viewedName
-        + QLatin1String(" for ") + name;
+    return u"Unable to find viewed type "_s + viewedName
+        + u" for "_s + name;
 }
 
 QString msgCannotFindSnippet(const QString &file, const QString &snippetLabel)
@@ -917,25 +917,25 @@ QString msgUnknownTypeInArgumentTypeReplacement(const QString &typeReplaced,
 
 QString msgDuplicateBuiltInTypeEntry(const QString &name)
 {
-    return u"A type entry duplicating the built-in type \""_qs
-           + name + u"\" was found. It is ignored."_qs;
+    return u"A type entry duplicating the built-in type \""_s
+           + name + u"\" was found. It is ignored."_s;
 }
 
 QString msgDuplicateTypeEntry(const QString &name)
 {
-    return u"Duplicate type entry: '"_qs + name + u"'."_qs;
+    return u"Duplicate type entry: '"_s + name + u"'."_s;
 }
 
 QString msgInvalidTargetLanguageApiName(const QString &name)
 {
-    return u"Invalid target language API name \""_qs
-           + name + u"\"."_qs;
+    return u"Invalid target language API name \""_s
+           + name + u"\"."_s;
 }
 
 QString msgUnknownCheckFunction(const TypeEntry *t)
 {
-     return u"Unknown check function for type: '"_qs
-            + t->qualifiedCppName() + u"'."_qs;
+     return u"Unknown check function for type: '"_s
+            + t->qualifiedCppName() + u"'."_s;
 }
 
 QString msgArgumentClassNotFound(const AbstractMetaFunctionCPtr &func,

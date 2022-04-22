@@ -33,15 +33,19 @@
 #include "messages.h"
 #include "sourcelocation.h"
 
+#include "qtcompat.h"
+
 #include <QtCore/QDebug>
 #include <QtCore/QRegularExpression>
 #include <QtCore/QSet>
 #include <QtCore/QVarLengthArray>
 
+using namespace Qt::StringLiterals;
+
 static QString buildName(const QString &entryName, const TypeEntry *parent)
 {
     return parent == nullptr || parent->type() == TypeEntry::TypeSystemType
-        ? entryName : parent->name() + QLatin1String("::") + entryName;
+        ? entryName : parent->name() + u"::"_s + entryName;
 }
 
 // Access private class as 'd', cf macro Q_D()
@@ -167,7 +171,7 @@ void TypeEntry::setInclude(const Include &inc)
     // because the Q_QDOC define was set, and the implementation header was never included.
     if (inc.name().endsWith(u"qsharedpointer_impl.h")) {
         QString path = inc.name();
-        path.remove(QLatin1String("_impl"));
+        path.remove(u"_impl"_s);
         m_d->m_include = Include(inc.type(), path);
     } else {
         m_d->m_include = inc;
@@ -380,7 +384,7 @@ QString TypeEntryPrivate::shortName() const
             m_cachedShortName.reserve(m_name.size());
             for (int i = parents.size() - 1; i >= 0; --i) {
                 m_cachedShortName.append(parents.at(i)->entryName());
-                m_cachedShortName.append(QLatin1String("::"));
+                m_cachedShortName.append(u"::"_s);
             }
             m_cachedShortName.append(m_entryName);
         } else {
@@ -476,7 +480,7 @@ QString TypeEntry::buildTargetLangName() const
             if (!result.isEmpty())
                 result.prepend(u'.');
             QString n = p->m_d->m_entryName;
-            n.replace(QLatin1String("::"), QLatin1String(".")); // Primitive types may have "std::"
+            n.replace(u"::"_s, u"."_s); // Primitive types may have "std::"
             result.prepend(n);
         }
     }
@@ -757,7 +761,7 @@ void TypeSystemTypeEntry::setSnakeCase(TypeSystem::SnakeCase sc)
 
 // ----------------- VoidTypeEntry
 VoidTypeEntry::VoidTypeEntry() :
-    TypeEntry(QLatin1String("void"), VoidType, QVersionNumber(0, 0), nullptr)
+    TypeEntry(u"void"_s, VoidType, QVersionNumber(0, 0), nullptr)
 {
 }
 
@@ -772,7 +776,7 @@ TypeEntry *VoidTypeEntry::clone() const
 }
 
 VarargsTypeEntry::VarargsTypeEntry() :
-    TypeEntry(QLatin1String("..."), VarargsType, QVersionNumber(0, 0), nullptr)
+    TypeEntry(u"..."_s, VarargsType, QVersionNumber(0, 0), nullptr)
 {
 }
 
@@ -831,7 +835,7 @@ class ArrayTypeEntryPrivate : public TypeEntryPrivate
 public:
     explicit ArrayTypeEntryPrivate(const TypeEntry *nested_type, const QVersionNumber &vr,
                                    const TypeEntry *parent) :
-        TypeEntryPrivate(QLatin1String("Array"), TypeEntry::ArrayType, vr, parent),
+        TypeEntryPrivate(u"Array"_s, TypeEntry::ArrayType, vr, parent),
         m_nestedType(nested_type)
     {
     }
@@ -861,7 +865,7 @@ const TypeEntry *ArrayTypeEntry::nestedTypeEntry() const
 QString ArrayTypeEntry::buildTargetLangName() const
 {
     S_D(const ArrayTypeEntry);
-    return d->m_nestedType->targetLangName() + QLatin1String("[]");
+    return d->m_nestedType->targetLangName() + u"[]"_s;
 }
 
 TypeEntry *ArrayTypeEntry::clone() const
@@ -1133,7 +1137,7 @@ QString FlagsTypeEntry::buildTargetLangName() const
 {
     S_D(const FlagsTypeEntry);
     QString on = d->m_originalName;
-    on.replace(QLatin1String("::"), QLatin1String("."));
+    on.replace(u"::"_s, u"."_s);
     return on;
 }
 
@@ -1836,7 +1840,7 @@ bool SmartPointerTypeEntry::matchesInstantiation(const TypeEntry *e) const
 
 static QString fixSmartPointerName(QString name)
 {
-    name.replace(u"::"_qs, u"_"_qs);
+    name.replace(u"::"_s, u"_"_s);
     name.replace(u'<', u'_');
     name.remove(u'>');
     name.remove(u' ');
@@ -1858,7 +1862,7 @@ QString SmartPointerTypeEntry::getTargetName(const AbstractMetaType &metaType)
     QString name = metaType.cppSignature();
     const auto templatePos = name.indexOf(u'<');
     if (templatePos != -1) { // "std::shared_ptr<A::B>" -> "shared_ptr<A::B>"
-        const auto colonPos = name.lastIndexOf(u"::"_qs, templatePos);
+        const auto colonPos = name.lastIndexOf(u"::"_s, templatePos);
         if (colonPos != -1)
             name.remove(0, colonPos + 2);
     }
@@ -2137,7 +2141,7 @@ QString CustomConversion::TargetToNativeConversion::sourceTypeCheck() const
         if (cte->hasCheckFunction()) {
             QString result = cte->checkFunction();
             if (result != u"true") // For PyObject, which is always true
-                result += u"(%in)"_qs;
+                result += u"(%in)"_s;
             return result;
         }
     }

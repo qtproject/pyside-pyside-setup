@@ -27,12 +27,17 @@
 ****************************************************************************/
 
 #include "testnestedtypes.h"
-#include <QtTest/QTest>
 #include "testutil.h"
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
 #include <modifications.h>
 #include <typesystem.h>
+
+#include <qtcompat.h>
+
+#include <QtTest/QTest>
+
+using namespace Qt::StringLiterals;
 
 void TestNestedTypes::testNestedTypesModifications()
 {
@@ -122,9 +127,9 @@ void TestNestedTypes::testDuplicationOfNestedTypes()
     QCOMPARE(cls1->name(), u"SomeClass");
     QCOMPARE(cls1->qualifiedCppName(), u"Namespace::SomeClass");
 
-    TypeEntry* t1 = TypeDatabase::instance()->findType(QLatin1String("Namespace::SomeClass"));
+    TypeEntry* t1 = TypeDatabase::instance()->findType(u"Namespace::SomeClass"_s);
     QVERIFY(t1);
-    TypeEntry* t2 = TypeDatabase::instance()->findType(QLatin1String("SomeClass"));
+    TypeEntry* t2 = TypeDatabase::instance()->findType(u"SomeClass"_s);
     QVERIFY(!t2);
 }
 

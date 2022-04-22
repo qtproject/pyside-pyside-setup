@@ -27,11 +27,16 @@
 ****************************************************************************/
 
 #include "testremoveoperatormethod.h"
-#include <QtTest/QTest>
 #include "testutil.h"
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
 #include <typesystem.h>
+
+#include <qtcompat.h>
+
+#include <QtTest/QTest>
+
+using namespace Qt::StringLiterals;
 
 void TestRemoveOperatorMethod::testRemoveOperatorMethod()
 {
@@ -93,18 +98,18 @@ void TestRemoveOperatorMethod::testRemoveOperatorMethod()
     QVERIFY(classA);
     QCOMPARE(classA->functions().size(), 14);
     QStringList removedSignatures;
-    removedSignatures.append(QLatin1String("operator>>(char&)"));
-    removedSignatures.append(QLatin1String("operator>>(char*)"));
-    removedSignatures.append(QLatin1String("operator>>(short&)"));
-    removedSignatures.append(QLatin1String("operator>>(unsigned short&)"));
-    removedSignatures.append(QLatin1String("operator>>(int&)"));
-    removedSignatures.append(QLatin1String("operator>>(unsigned int&)"));
-    removedSignatures.append(QLatin1String("operator>>(int64_t&)"));
-    removedSignatures.append(QLatin1String("operator>>(uint64_t&)"));
-    removedSignatures.append(QLatin1String("operator>>(float&)"));
-    removedSignatures.append(QLatin1String("operator>>(double&)"));
-    removedSignatures.append(QLatin1String("operator>>(Char&)"));
-    removedSignatures.append(QLatin1String("operator>>(String&)"));
+    removedSignatures.append(u"operator>>(char&)"_s);
+    removedSignatures.append(u"operator>>(char*)"_s);
+    removedSignatures.append(u"operator>>(short&)"_s);
+    removedSignatures.append(u"operator>>(unsigned short&)"_s);
+    removedSignatures.append(u"operator>>(int&)"_s);
+    removedSignatures.append(u"operator>>(unsigned int&)"_s);
+    removedSignatures.append(u"operator>>(int64_t&)"_s);
+    removedSignatures.append(u"operator>>(uint64_t&)"_s);
+    removedSignatures.append(u"operator>>(float&)"_s);
+    removedSignatures.append(u"operator>>(double&)"_s);
+    removedSignatures.append(u"operator>>(Char&)"_s);
+    removedSignatures.append(u"operator>>(String&)"_s);
     int notRemoved = classA->functions().size();
     for (const auto &f : classA->functions()) {
         QCOMPARE(f->isModifiedRemoved(), bool(removedSignatures.contains(f->minimalSignature())));

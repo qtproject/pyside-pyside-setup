@@ -27,12 +27,17 @@
 ****************************************************************************/
 
 #include "testdroptypeentries.h"
-#include <QtTest/QTest>
 #include "testutil.h"
 #include <abstractmetaenum.h>
 #include <abstractmetalang.h>
 #include <typesystem.h>
 #include <conditionalstreamreader.h>
+
+#include <qtcompat.h>
+
+#include <QtTest/QTest>
+
+using namespace Qt::StringLiterals;
 
 static const char* cppCode ="\
     struct ValueA {};\n\
@@ -68,12 +73,12 @@ static const char* xmlCode = "\
 
 void TestDropTypeEntries::testDropEntries()
 {
-    const QStringList droppedEntries{QLatin1String("Foo.ValueB"),
-        QLatin1String("ObjectB"), // Check whether module can be omitted
-        QLatin1String("Foo.NamespaceA.InnerClassA"),
-        QLatin1String("Foo.NamespaceB"), QLatin1String("Foo.EnumB"),
-        QLatin1String("Foo.funcB()"),
-        QLatin1String("Foo.NamespaceA.InnerNamespaceA")};
+    const QStringList droppedEntries{u"Foo.ValueB"_s,
+        u"ObjectB"_s, // Check whether module can be omitted
+        u"Foo.NamespaceA.InnerClassA"_s,
+        u"Foo.NamespaceB"_s, u"Foo.EnumB"_s,
+        u"Foo.funcB()"_s,
+        u"Foo.NamespaceA.InnerNamespaceA"_s};
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false,
                                                                 QString(), droppedEntries));
     QVERIFY(!builder.isNull());
@@ -92,8 +97,8 @@ void TestDropTypeEntries::testDropEntries()
     QCOMPARE(globalEnums.constFirst().name(), u"EnumA");
 
     TypeDatabase* td = TypeDatabase::instance();
-    QVERIFY(td->findType(QLatin1String("funcA")));
-    QVERIFY(!td->findType(QLatin1String("funcB")));
+    QVERIFY(td->findType(u"funcA"_s));
+    QVERIFY(!td->findType(u"funcB"_s));
 }
 
 void TestDropTypeEntries::testDontDropEntries()
@@ -113,8 +118,8 @@ void TestDropTypeEntries::testDontDropEntries()
     QCOMPARE(builder->globalEnums().size(), 2);
 
     TypeDatabase* td = TypeDatabase::instance();
-    QVERIFY(td->findType(QLatin1String("funcA")));
-    QVERIFY(td->findType(QLatin1String("funcB")));
+    QVERIFY(td->findType(u"funcA"_s));
+    QVERIFY(td->findType(u"funcB"_s));
 }
 
 static const char* cppCode2 ="\
@@ -132,7 +137,7 @@ static const char* xmlCode2 = R"(
 
 void TestDropTypeEntries::testDropEntryWithChildTags()
 {
-    QStringList droppedEntries(QLatin1String("Foo.ValueA"));
+    QStringList droppedEntries(u"Foo.ValueA"_s);
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode2, xmlCode2, false,
                                                                 QString(), droppedEntries));
     QVERIFY(!builder.isNull());

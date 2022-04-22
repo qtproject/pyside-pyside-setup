@@ -42,8 +42,12 @@
 #include "typedatabase.h"
 #include "typesystem.h"
 
+#include "qtcompat.h"
+
 #include <QtCore/QDebug>
 #include <QtCore/QRegularExpression>
+
+using namespace Qt::StringLiterals;
 
 // Cache FunctionModificationList in a flat list per class (0 for global
 // functions, or typically owner/implementing/declaring class.
@@ -489,7 +493,7 @@ QString AbstractMetaFunctionPrivate::signature() const
             const AbstractMetaArgument &a = m_arguments.at(i);
             const AbstractMetaType &t = a.type();
             if (i > 0)
-                m_cachedSignature += QLatin1String(", ");
+                m_cachedSignature += u", "_s;
             m_cachedSignature += t.cppSignature();
             // We need to have the argument names in the qdoc files
             m_cachedSignature += u' ';
@@ -498,7 +502,7 @@ QString AbstractMetaFunctionPrivate::signature() const
         m_cachedSignature += u')';
 
         if (m_constant)
-            m_cachedSignature += QLatin1String(" const");
+            m_cachedSignature += u" const"_s;
     }
     return m_cachedSignature;
 }
@@ -512,7 +516,7 @@ QString AbstractMetaFunction::classQualifiedSignature() const
 {
     QString result;
     if (d->m_implementingClass)
-        result += d->m_implementingClass->qualifiedCppName() + u"::"_qs;
+        result += d->m_implementingClass->qualifiedCppName() + u"::"_s;
     result += signature();
     return result;
 }
@@ -714,12 +718,12 @@ AbstractMetaFunction::comparisonOperatorType() const
     if (d->m_functionType != ComparisonOperator)
         return {};
     static const QHash<QString, ComparisonOperatorType> mapping = {
-        {u"operator=="_qs, OperatorEqual},
-        {u"operator!="_qs, OperatorNotEqual},
-        {u"operator<"_qs, OperatorLess},
-        {u"operator<="_qs, OperatorLessEqual},
-        {u"operator>"_qs, OperatorGreater},
-        {u"operator>="_qs, OperatorGreaterEqual}
+        {u"operator=="_s, OperatorEqual},
+        {u"operator!="_s, OperatorNotEqual},
+        {u"operator<"_s, OperatorLess},
+        {u"operator<="_s, OperatorLessEqual},
+        {u"operator>"_s, OperatorGreater},
+        {u"operator>="_s, OperatorGreaterEqual}
     };
     const auto it = mapping.constFind(originalName());
     Q_ASSERT(it != mapping.constEnd());
@@ -906,11 +910,11 @@ QString AbstractMetaFunctionPrivate::formatMinimalSignature(const AbstractMetaFu
     }
     result += u')';
     if (m_constant)
-        result += QLatin1String("const");
+        result += u"const"_s;
     result = TypeDatabase::normalizedSignature(result);
 
     if (comment && !q->isVoid()) {
-        result += u"->"_qs;
+        result += u"->"_s;
         result += q->isTypeModified()
                   ? q->modifiedTypeName() : q->type().minimalSignature();
     }
@@ -935,14 +939,14 @@ QString AbstractMetaFunction::debugSignature() const
     const bool isOverride = attributes() & AbstractMetaFunction::OverriddenCppMethod;
     const bool isFinal = attributes() & AbstractMetaFunction::FinalCppMethod;
     if (!isOverride && !isFinal && (attributes() & AbstractMetaFunction::VirtualCppMethod))
-        result += QLatin1String("virtual ");
+        result += u"virtual "_s;
     if (d->m_implementingClass)
-        result += d->m_implementingClass->qualifiedCppName() + u"::"_qs;
+        result += d->m_implementingClass->qualifiedCppName() + u"::"_s;
     result += minimalSignature();
     if (isOverride)
-        result += QLatin1String(" override");
+        result += u" override"_s;
     if (isFinal)
-        result += QLatin1String(" final");
+        result += u" final"_s;
     return result;
 }
 
@@ -1179,11 +1183,11 @@ bool AbstractMetaFunction::isOperatorOverload(const QString &funcName)
     if (isConversionOperator(funcName))
         return true;
 
-    static const QRegularExpression opRegEx(QLatin1String("^operator([+\\-\\*/%=&\\|\\^\\<>!][=]?"
+    static const QRegularExpression opRegEx(u"^operator([+\\-\\*/%=&\\|\\^\\<>!][=]?"
                     "|\\+\\+|\\-\\-|&&|\\|\\||<<[=]?|>>[=]?|~"
                     "|\\[\\]|\\s+delete\\[?\\]?"
                     "|\\(\\)"
-                    "|\\s+new\\[?\\]?)$"));
+                    "|\\s+new\\[?\\]?)$"_s);
     Q_ASSERT(opRegEx.isValid());
     return opRegEx.match(funcName).hasMatch();
 }

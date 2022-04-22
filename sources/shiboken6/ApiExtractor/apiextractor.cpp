@@ -41,6 +41,8 @@
 #include "typedatabase.h"
 #include "typesystem.h"
 
+#include "qtcompat.h"
+
 #include <QtCore/QDir>
 #include <QtCore/QDebug>
 #include <QtCore/QTemporaryFile>
@@ -48,6 +50,8 @@
 #include <algorithm>
 #include <iostream>
 #include <iterator>
+
+using namespace Qt::StringLiterals;
 
 struct InstantiationCollectContext
 {
@@ -540,7 +544,7 @@ void ApiExtractorPrivate::collectInstantiatedOpqaqueContainers(InstantiationColl
             if (typeOpt.has_value()
                 && generateOpaqueContainer(typeOpt.value(), moduleEntry)) {
                 addInstantiatedContainersAndSmartPointers(context, typeOpt.value(),
-                                                          u"opaque containers"_qs);
+                                                          u"opaque containers"_s);
             }
         }
     }
@@ -602,7 +606,7 @@ ApiExtractorPrivate::collectContainerTypesFromConverterMacros(InstantiationColle
                                                               const QString &code,
                                                               bool toPythonMacro)
 {
-    QString convMacro = toPythonMacro ? QLatin1String("%CONVERTTOPYTHON[") : QLatin1String("%CONVERTTOCPP[");
+    QString convMacro = toPythonMacro ? u"%CONVERTTOPYTHON["_s : u"%CONVERTTOCPP["_s;
     int offset = toPythonMacro ? sizeof("%CONVERTTOPYTHON") : sizeof("%CONVERTTOCPP");
     int start = 0;
     QString errorMessage;

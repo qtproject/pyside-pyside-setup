@@ -35,7 +35,11 @@
 #include "typesystem.h"
 #include "parser/codemodel.h"
 
+#include "qtcompat.h"
+
 #include <QtCore/QDebug>
+
+using namespace Qt::StringLiterals;
 
 class AbstractMetaFieldData : public QSharedData
 {
@@ -143,7 +147,7 @@ void AbstractMetaField::setStatic(bool s)
 
 QString AbstractMetaField::qualifiedCppName() const
 {
-    return enclosingClass()->qualifiedCppName() + QLatin1String("::")
+    return enclosingClass()->qualifiedCppName() + u"::"_s
            + originalName();
 }
 

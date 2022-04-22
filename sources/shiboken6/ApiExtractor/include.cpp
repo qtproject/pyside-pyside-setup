@@ -34,13 +34,17 @@
 #include <QtCore/QHash>
 #include <QtCore/QTextStream>
 
+#include "qtcompat.h"
+
+using namespace Qt::StringLiterals;
+
 QString Include::toString() const
 {
     if (m_type == IncludePath)
-        return QLatin1String("#include <") + m_name + u'>';
+        return u"#include <"_s + m_name + u'>';
     if (m_type == LocalPath)
-        return QLatin1String("#include \"") + m_name + u'"';
-    return QLatin1String("import ") + m_name + u';';
+        return u"#include \""_s + m_name + u'"';
+    return u"import "_s + m_name + u';';
 }
 
 size_t qHash(const Include& inc)

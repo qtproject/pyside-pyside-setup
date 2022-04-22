@@ -39,9 +39,13 @@
 #include "reporthandler.h"
 #include "typesystem.h"
 
+#include "qtcompat.h"
+
 #include <QtCore/QDir>
 #include <QtCore/QFile>
 #include <QtCore/QUrl>
+
+using namespace Qt::StringLiterals;
 
 enum { debugFunctionSearch = 0 };
 
@@ -164,7 +168,7 @@ QString QtDocParser::queryFunctionDocumentation(const QString &sourceFileName,
         classDocumentation.findFunctionCandidates(func->name(), func->isConstant());
     if (candidates.isEmpty()) {
         *errorMessage = msgCannotFindDocumentation(sourceFileName, func.data())
-                        + u" (no matches)"_qs;
+                        + u" (no matches)"_s;
         return {};
     }
 
@@ -181,8 +185,8 @@ QString QtDocParser::queryFunctionDocumentation(const QString &sourceFileName,
         || funcFlags.testFlag(AbstractMetaFunction::Flag::OperatorTrailingClassArgumentRemoved)) {
         QString classType = metaClass->qualifiedCppName();
         if (!funcFlags.testFlag(AbstractMetaFunction::Flag::OperatorClassArgumentByValue)) {
-            classType.prepend(u"const "_qs);
-            classType.append(u" &"_qs);
+            classType.prepend(u"const "_s);
+            classType.append(u" &"_s);
         }
         if (funcFlags.testFlag(AbstractMetaFunction::Flag::OperatorLeadingClassArgumentRemoved))
             fq.parameters.prepend(classType);
@@ -233,7 +237,7 @@ static QString extractBrief(QString *value)
     const auto briefLength = briefEnd + briefEndElement().size() - briefStart;
     QString briefValue = value->mid(briefStart, briefLength);
     briefValue.insert(briefValue.size() - briefEndElement().size(),
-                      QLatin1String("<rst> More_...</rst>"));
+                      u"<rst> More_...</rst>"_s);
     value->remove(briefStart, briefLength);
     return briefValue;
 }
@@ -252,7 +256,7 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
 
     QString sourceFileRoot = documentationDataDirectory() + u'/'
         + metaClass->qualifiedCppName().toLower();
-    sourceFileRoot.replace(QLatin1String("::"), QLatin1String("-"));
+    sourceFileRoot.replace(u"::"_s, u"-"_s);
 
     QFileInfo sourceFile(sourceFileRoot + QStringLiteral(".webxml"));
     if (!sourceFile.exists())
@@ -355,7 +359,7 @@ Documentation QtDocParser::retrieveModuleDocumentation(const QString& name)
     const QString prefix = documentationDataDirectory() + u'/'
         + moduleName.toLower();
 
-    const QString sourceFile = prefix + u"-index.webxml"_qs;
+    const QString sourceFile = prefix + u"-index.webxml"_s;
     if (!QFile::exists(sourceFile)) {
         qCWarning(lcShibokenDoc).noquote().nospace()
             << "Can't find qdoc file for module " <<  name << ", tried: "
@@ -378,7 +382,7 @@ Documentation QtDocParser::retrieveModuleDocumentation(const QString& name)
     }
 
     // If a QML module info file exists, insert a link to the Qt docs.
-    const QFileInfo qmlModuleFi(prefix + QLatin1String("-qmlmodule.webxml"));
+    const QFileInfo qmlModuleFi(prefix + u"-qmlmodule.webxml"_s);
     if (qmlModuleFi.isFile()) {
         QString docString = doc.detailed();
         const int pos = docString.lastIndexOf(u"</description>");

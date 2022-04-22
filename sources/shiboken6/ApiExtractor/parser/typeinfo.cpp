@@ -33,11 +33,15 @@
 
 #include <clangparser/clangutils.h>
 
+#include "qtcompat.h"
+
 #include <QtCore/QDebug>
 #include <QtCore/QStack>
 #include <QtCore/QTextStream>
 
 #include <iostream>
+
+using namespace Qt::StringLiterals;
 
 class TypeInfoData : public QSharedData
 {
@@ -94,13 +98,13 @@ static inline TypeInfo createType(const QString &name)
 
 TypeInfo TypeInfo::voidType()
 {
-    static const TypeInfo result = createType(QLatin1String("void"));
+    static const TypeInfo result = createType(u"void"_s);
     return result;
 }
 
 TypeInfo TypeInfo::varArgsType()
 {
-    static const TypeInfo result = createType(QLatin1String("..."));
+    static const TypeInfo result = createType(u"..."_s);
     return result;
 }
 
@@ -316,7 +320,7 @@ TypeInfo TypeInfo::resolveType(CodeModelItem __item, TypeInfo const &__type, con
         // typedef struct xcb_connection_t xcb_connection_t;
         if (nextItem.data() ==__item.data()) {
             std::cerr << "** WARNING Bailing out recursion of " << __FUNCTION__
-                << "() on " << qPrintable(__type.qualifiedName().join(QLatin1String("::")))
+                << "() on " << qPrintable(__type.qualifiedName().join(u"::"_s))
                 << std::endl;
             return otherType;
         }
@@ -391,18 +395,18 @@ QString TypeInfo::toString() const
 {
     QString tmp;
     if (isConstant())
-        tmp += QLatin1String("const ");
+        tmp += u"const "_s;
 
     if (isVolatile())
-        tmp += QLatin1String("volatile ");
+        tmp += u"volatile "_s;
 
-    tmp += d->m_qualifiedName.join(QLatin1String("::"));
+    tmp += d->m_qualifiedName.join(u"::"_s);
 
     if (const int instantiationCount = d->m_instantiations.size()) {
         tmp += u'<';
         for (int i = 0; i < instantiationCount; ++i) {
             if (i)
-                tmp += QLatin1String(", ");
+                tmp += u", "_s;
             tmp += d->m_instantiations.at(i).toString();
         }
         if (tmp.endsWith(u'>'))
@@ -420,15 +424,15 @@ QString TypeInfo::toString() const
         tmp += u'&';
         break;
     case RValueReference:
-        tmp += QLatin1String("&&");
+        tmp += u"&&"_s;
         break;
     }
 
     if (isFunctionPointer()) {
-        tmp += QLatin1String(" (*)(");
+        tmp += u" (*)("_s;
         for (qsizetype i = 0; i < d->m_arguments.size(); ++i) {
             if (i != 0)
-                tmp += QLatin1String(", ");
+                tmp += u", "_s;
 
             tmp += d->m_arguments.at(i).toString();
         }
@@ -555,7 +559,7 @@ void TypeInfo::formatTypeSystemSignature(QTextStream &str) const
 {
     if (d->m_constant)
         str << "const ";
-    str << d->m_qualifiedName.join(QLatin1String("::"));
+    str << d->m_qualifiedName.join(u"::"_s);
     switch (d->m_referenceType) {
     case NoReference:
         break;
