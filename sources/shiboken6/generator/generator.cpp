@@ -107,7 +107,7 @@ QString DefaultValue::initialization() const
     case DefaultValue::Custom:
         return QLatin1String(" = ") + m_value;
     case DefaultValue::Enum:
-        return QLatin1Char('{') + m_value + QLatin1Char('}');
+        return u'{' + m_value + u'}';
     case DefaultValue::Pointer:
         return QLatin1String("{nullptr}");
     case DefaultValue::Void:
@@ -127,8 +127,8 @@ QString DefaultValue::constructorParameter() const
         return QLatin1String("false");
     case DefaultValue::CppScalar: {
         // PYSIDE-846: Use static_cast in case of "unsigned long" and similar
-        const QString cast = m_value.contains(QLatin1Char(' '))
-            ? QLatin1String("static_cast<") + m_value + QLatin1Char('>')
+        const QString cast = m_value.contains(u' ')
+            ? QLatin1String("static_cast<") + m_value + u'>'
             : m_value;
         return cast + QLatin1String("(0)");
     }
@@ -314,7 +314,7 @@ QString Generator::packageName()
 static QString getModuleName()
 {
     QString result = TypeDatabase::instance()->defaultPackageName();
-    result.remove(0, result.lastIndexOf(QLatin1Char('.')) + 1);
+    result.remove(0, result.lastIndexOf(u'.') + 1);
     return result;
 }
 
@@ -346,9 +346,9 @@ bool Generator::generateFileForContext(const GeneratorContext &context)
     if (fileName.isEmpty())
         return true;
 
-    QString filePath = outputDirectory() + QLatin1Char('/')
+    QString filePath = outputDirectory() + u'/'
         + subDirectoryForPackage(typeEntry->targetLangPackage())
-        + QLatin1Char('/') + fileName;
+        + u'/' + fileName;
     FileOut fileOut(filePath);
 
     generateClass(fileOut.stream, context);
@@ -488,7 +488,7 @@ QString Generator::getFullTypeNameWithoutModifiers(const AbstractMetaType &type)
         typeName.chop(2);
         break;
     }
-    while (typeName.endsWith(QLatin1Char('*')) || typeName.endsWith(QLatin1Char(' ')))
+    while (typeName.endsWith(u'*') || typeName.endsWith(u' '))
         typeName.chop(1);
     return QLatin1String("::") + typeName;
 }
@@ -503,13 +503,13 @@ std::optional<DefaultValue>
 
     if (type.isContainer()) {
         QString ctor = type.cppSignature();
-        if (ctor.endsWith(QLatin1Char('*'))) {
+        if (ctor.endsWith(u'*')) {
             ctor.chop(1);
             return DefaultValue(DefaultValue::Pointer, ctor.trimmed());
         }
         if (ctor.startsWith(QLatin1String("const ")))
             ctor.remove(0, sizeof("const ") / sizeof(char) - 1);
-        if (ctor.endsWith(QLatin1Char('&'))) {
+        if (ctor.endsWith(u'&')) {
             ctor.chop(1);
             ctor = ctor.trimmed();
         }
@@ -609,8 +609,8 @@ std::optional<DefaultValue>
 
 static QString constructorCall(const QString &qualifiedCppName, const QStringList &args)
 {
-    return QLatin1String("::") + qualifiedCppName + QLatin1Char('(')
-        + args.join(QLatin1String(", ")) + QLatin1Char(')');
+    return QLatin1String("::") + qualifiedCppName + u'('
+        + args.join(QLatin1String(", ")) + u')';
 }
 
 std::optional<DefaultValue>
@@ -769,7 +769,7 @@ QString Generator::subDirectoryForPackage(QString packageNameIn) const
 {
     if (packageNameIn.isEmpty())
         packageNameIn = packageName();
-    packageNameIn.replace(QLatin1Char('.'), QDir::separator());
+    packageNameIn.replace(u'.', QDir::separator());
     return packageNameIn;
 }
 
@@ -782,13 +782,13 @@ static QString getClassTargetFullName_(const T *t, bool includePackageName)
         // If the type was marked as 'visible=false' we should not use it in
         // the type name
         if (NamespaceTypeEntry::isVisibleScope(context->typeEntry())) {
-            name.prepend(QLatin1Char('.'));
+            name.prepend(u'.');
             name.prepend(context->name());
         }
         context = context->enclosingClass();
     }
     if (includePackageName) {
-        name.prepend(QLatin1Char('.'));
+        name.prepend(u'.');
         name.prepend(t->package());
     }
     return name;
@@ -807,8 +807,8 @@ QString getClassTargetFullName(const AbstractMetaEnum &metaEnum, bool includePac
 QString getFilteredCppSignatureString(QString signature)
 {
     signature.replace(QLatin1String("::"), QLatin1String("_"));
-    signature.replace(QLatin1Char('<'), QLatin1Char('_'));
-    signature.replace(QLatin1Char('>'), QLatin1Char('_'));
-    signature.replace(QLatin1Char(' '), QLatin1Char('_'));
+    signature.replace(u'<', u'_');
+    signature.replace(u'>', u'_');
+    signature.replace(u' ', u'_');
     return signature;
 }

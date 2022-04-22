@@ -586,7 +586,7 @@ void _ScopeModelItem::purgeClassDeclarations()
         // For an empty class, check if there is a matching template
         // definition, and remove it if this is the case.
         if (!klass->isTemplate() && klass->isEmpty()) {
-            const QString definitionPrefix = klass->name() + QLatin1Char('<');
+            const QString definitionPrefix = klass->name() + u'<';
             const bool definitionFound =
                 std::any_of(m_classes.cbegin(), m_classes.cend(),
                             [definitionPrefix] (const ClassModelItem &c) {
@@ -663,7 +663,7 @@ public:
         const QString &itemName = item->name();
         if (!itemName.startsWith(m_name))
             return false;
-        return itemName.size() == m_name.size() || itemName.at(m_name.size()) == QLatin1Char('<');
+        return itemName.size() == m_name.size() || itemName.at(m_name.size()) == u'<';
     }
 
 private:
@@ -674,7 +674,7 @@ private:
 ClassModelItem _ScopeModelItem::findClass(const QString &name) const
 {
     // A fully qualified template is matched by name only
-    const ClassList::const_iterator it = name.contains(QLatin1Char('<'))
+    const ClassList::const_iterator it = name.contains(u'<')
         ? std::find_if(m_classes.begin(), m_classes.end(), ModelItemNamePredicate<_ClassModelItem>(name))
         : std::find_if(m_classes.begin(), m_classes.end(), ClassNamePredicate(name));
     return it != m_classes.end() ? *it : ClassModelItem();

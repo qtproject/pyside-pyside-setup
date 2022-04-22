@@ -380,7 +380,7 @@ void AbstractMetaClass::addPropertySpec(const QPropertySpec &spec)
 
 void AbstractMetaClassPrivate::addFunction(const AbstractMetaFunctionCPtr &function)
 {
-    Q_ASSERT(!function->signature().startsWith(QLatin1Char('(')));
+    Q_ASSERT(!function->signature().startsWith(u'('));
 
     if (!function->isDestructor())
         m_functions << function;
@@ -1292,7 +1292,7 @@ void AbstractMetaClass::getFunctionsFromInvisibleNamespacesToBeGenerated(Abstrac
 
 QString AbstractMetaClass::fullName() const
 {
-    return package() + QLatin1Char('.') + d->m_typeEntry->targetLangName();
+    return package() + u'.' + d->m_typeEntry->targetLangName();
 }
 
 static void addExtraIncludeForType(AbstractMetaClass *metaClass, const AbstractMetaType &type)

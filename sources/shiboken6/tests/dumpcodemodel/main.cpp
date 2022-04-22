@@ -50,7 +50,7 @@ static inline QString languageLevelDescription()
 {
     return QLatin1String("C++ Language level (c++11..c++17, default=")
         + QLatin1String(clang::languageLevelOption(clang::emulatedCompilerLanguageLevel()))
-        + QLatin1Char(')');
+        + u')';
 }
 
 static void formatDebugOutput(const FileModelItem &dom, bool verbose)
@@ -268,7 +268,7 @@ int main(int argc, char **argv)
 
     const FileModelItem dom = AbstractMetaBuilderPrivate::buildDom(arguments, true, level, 0);
     if (dom.isNull()) {
-        QString message = QLatin1String("Unable to parse ") + positionalArguments.join(QLatin1Char(' '));
+        QString message = QLatin1String("Unable to parse ") + positionalArguments.join(u' ');
         std::cerr << qPrintable(message) << '\n';
         return -2;
     }

@@ -70,8 +70,8 @@ static QString fixTypeName(QString t)
 {
     // Fix "Foo &" -> "Foo&", similarly "Bar **" -> "Bar**"
     int pos = t.size() - 1;
-    for (; pos >= 0 && (t.at(pos) == QLatin1Char('&') || t.at(pos) == QLatin1Char('*')); --pos) {}
-    if (pos > 0 && t.at(pos) == QLatin1Char(' '))
+    for (; pos >= 0 && (t.at(pos) == u'&' || t.at(pos) == u'*'); --pos) {}
+    if (pos > 0 && t.at(pos) == u' ')
         t.remove(pos, 1);
     return t;
 }
@@ -81,13 +81,13 @@ static QString fixTypeName(QString t)
 // the class name "Foo<T1,T2>" is the scope for nested items.
 static bool insertTemplateParameterIntoClassName(const QString &parmName, QString *name)
 {
-     if (Q_UNLIKELY(!name->endsWith(QLatin1Char('>'))))
+     if (Q_UNLIKELY(!name->endsWith(u'>')))
         return false;
-     const bool needsComma = name->at(name->size() - 2) != QLatin1Char('<');
+     const bool needsComma = name->at(name->size() - 2) != u'<';
      const int insertionPos = name->size() - 1;
      name->insert(insertionPos, parmName);
      if (needsComma)
-         name->insert(insertionPos, QLatin1Char(','));
+         name->insert(insertionPos, u',');
      return true;
 }
 
@@ -290,7 +290,7 @@ static QString msgCannotDetermineException(const std::string_view &snippetV)
         snippet += QStringLiteral("...");
 
     return QLatin1String("Cannot determine exception specification: \"")
-        + snippet + QLatin1Char('"');
+        + snippet + u'"';
 }
 
 // Return whether noexcept(<value>) throws. noexcept() takes a constexpr value.
@@ -399,7 +399,7 @@ FunctionModelItem BuilderPrivate::createMemberFunction(const CXCursor &cursor,
         m_currentFunctionType == CodeModel::Signal || m_currentFunctionType == CodeModel::Slot
         ? m_currentFunctionType // by annotation
         : functionTypeFromCursor(cursor);
-    isTemplateCode |= m_currentClass->name().endsWith(QLatin1Char('>'));
+    isTemplateCode |= m_currentClass->name().endsWith(u'>');
     auto result = createFunction(cursor, functionType, isTemplateCode);
     result->setAccessPolicy(accessPolicy(clang_getCXXAccessSpecifier(cursor)));
     result->setConstant(clang_CXXMethod_isConst(cursor) != 0);
@@ -453,9 +453,9 @@ void BuilderPrivate::addField(const CXCursor &cursor)
 static QStringList qualifiedName(const QString &t)
 {
     QStringList result;
-    int end = t.indexOf(QLatin1Char('<'));
+    int end = t.indexOf(u'<');
     if (end == -1)
-        end = t.indexOf(QLatin1Char('('));
+        end = t.indexOf(u'(');
     if (end == -1)
         end = t.size();
     int lastPos = 0;
@@ -602,7 +602,7 @@ TypeInfo BuilderPrivate::createTypeInfoUncached(const CXType &type,
 
     // Obtain template instantiations if the name has '<' (thus excluding
     // typedefs like "std::string".
-    if (typeName.contains(QLatin1Char('<')))
+    if (typeName.contains(u'<'))
         addTemplateInstantiations(nestedType, &typeName, &typeInfo);
 
     typeInfo.setQualifiedName(qualifiedName(typeName));
@@ -890,9 +890,9 @@ FileModelItem Builder::dom() const
 
 static QString msgOutOfOrder(const CXCursor &cursor, const char *expectedScope)
 {
-    return getCursorKindName(cursor.kind) + QLatin1Char(' ')
+    return getCursorKindName(cursor.kind) + u' '
         + getCursorSpelling(cursor) + QLatin1String(" encountered outside ")
-        + QLatin1String(expectedScope) + QLatin1Char('.');
+        + QLatin1String(expectedScope) + u'.';
 }
 
 static CodeModel::ClassType codeModelClassTypeFromCursor(CXCursorKind kind)
@@ -1080,7 +1080,7 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         const NamespaceModelItem parentNamespaceItem = qSharedPointerDynamicCast<_NamespaceModelItem>(d->m_scopeStack.back());
         if (parentNamespaceItem.isNull()) {
             const QString message = msgOutOfOrder(cursor, "namespace")
-                + QLatin1String(" (current scope: ") + d->m_scopeStack.back()->name() + QLatin1Char(')');
+                + QLatin1String(" (current scope: ") + d->m_scopeStack.back()->name() + u')';
             const Diagnostic d(message, cursor, CXDiagnostic_Error);
             qWarning() << d;
             appendDiagnostic(d);

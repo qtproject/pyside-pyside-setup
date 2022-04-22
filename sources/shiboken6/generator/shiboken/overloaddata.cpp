@@ -62,7 +62,7 @@ static QString getTypeName(const AbstractMetaType &type)
                 typeEntry = typeEntry->asPrimitive()->basicReferencedTypeEntry();
             types << typeEntry->name();
         }
-        typeName += QLatin1Char('<') + types.join(QLatin1Char(',')) + QLatin1String(" >");
+        typeName += u'<' + types.join(u',') + QLatin1String(" >");
     }
     return typeName;
 }
@@ -108,7 +108,7 @@ static QString getImplicitConversionTypeName(const AbstractMetaType &containerTy
     for (const auto &otherType : containerType.instantiations())
         types << (otherType == instantiation ? impConv : getTypeName(otherType));
 
-    return containerType.typeEntry()->qualifiedCppName() + QLatin1Char('<')
+    return containerType.typeEntry()->qualifiedCppName() + u'<'
            + types.join(QLatin1String(", ")) + QLatin1String(" >");
 }
 
@@ -369,10 +369,10 @@ void OverloadDataRootNode::sortNextOverloads(const ApiExtractorResult &api)
     if (!unmappedResult.isValid()) {
         QString funcName = referenceFunction()->name();
         if (auto owner = referenceFunction()->ownerClass())
-            funcName.prepend(owner->name() + QLatin1Char('.'));
+            funcName.prepend(owner->name() + u'.');
 
         // Dump overload graph
-        QString graphName = QDir::tempPath() + QLatin1Char('/') + funcName + QLatin1String(".dot");
+        QString graphName = QDir::tempPath() + u'/' + funcName + QLatin1String(".dot");
         graph.dumpDot(graphName, [] (const QString &n) { return n; });
         AbstractMetaFunctionCList cyclic;
         for (const auto &typeName : unmappedResult.cyclic) {
@@ -742,9 +742,9 @@ bool OverloadData::showGraph() const
 
 static inline QString toHtml(QString s)
 {
-    s.replace(QLatin1Char('<'), QLatin1String("&lt;"));
-    s.replace(QLatin1Char('>'), QLatin1String("&gt;"));
-    s.replace(QLatin1Char('&'), QLatin1String("&amp;"));
+    s.replace(u'<', QLatin1String("&lt;"));
+    s.replace(u'>', QLatin1String("&gt;"));
+    s.replace(u'&', QLatin1String("&amp;"));
     return s;
 }
 

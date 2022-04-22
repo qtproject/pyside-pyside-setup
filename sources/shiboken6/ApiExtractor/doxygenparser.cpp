@@ -78,7 +78,7 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
 
     QString doxyFilePath;
     for (const char *prefix : prefixes) {
-        doxyFilePath = documentationDataDirectory() + QLatin1Char('/')
+        doxyFilePath = documentationDataDirectory() + u'/'
                        + QLatin1String(prefix) + doxyFileSuffix;
         if (QFile::exists(doxyFilePath))
             break;
@@ -165,7 +165,7 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
             if (!isProperty) {
                 funcQuery += QLatin1String("/../") + tag.second;
             } else {
-                funcQuery = QLatin1Char('(') + funcQuery;
+                funcQuery = u'(' + funcQuery;
                 funcQuery += u"/../"_qs + tag.second + u")[1]"_qs;
             }
 

@@ -63,7 +63,7 @@ static inline QString colonColon() { return QStringLiteral("::"); }
 
 static QString stripTemplateArgs(const QString &name)
 {
-    int pos = name.indexOf(QLatin1Char('<'));
+    int pos = name.indexOf(u'<');
     return pos < 0 ? name : name.left(pos);
 }
 
@@ -150,7 +150,7 @@ void AbstractMetaBuilderPrivate::checkFunctionModifications()
             QString signature = modification.signature();
 
             QString name = signature.trimmed();
-            name.truncate(name.indexOf(QLatin1Char('(')));
+            name.truncate(name.indexOf(u'('));
 
             AbstractMetaClass *clazz = AbstractMetaClass::findClass(m_metaClasses, centry);
             if (!clazz)
@@ -1262,7 +1262,7 @@ void AbstractMetaBuilderPrivate::fixReturnTypeOfConversionOperator(AbstractMetaF
     Q_ASSERT(operatorRegExp.isValid());
     QString castTo = metaFunction->name().remove(operatorRegExp).trimmed();
 
-    if (castTo.endsWith(QLatin1Char('&')))
+    if (castTo.endsWith(u'&'))
         castTo.chop(1);
     if (castTo.startsWith(QLatin1String("const ")))
         castTo.remove(0, 6);
@@ -1478,7 +1478,7 @@ bool AbstractMetaBuilderPrivate::setupInheritance(AbstractMetaClass *metaClass)
     QStringList baseClasses = metaClass->baseClassNames();
 
     // we only support our own containers and ONLY if there is only one baseclass
-    if (baseClasses.size() == 1 && baseClasses.constFirst().contains(QLatin1Char('<'))) {
+    if (baseClasses.size() == 1 && baseClasses.constFirst().contains(u'<')) {
         TypeInfo info;
         ComplexTypeEntry* baseContainerType;
         AbstractMetaClass* templ = findTemplateClass(baseClasses.constFirst(), metaClass, &info, &baseContainerType);
@@ -1732,13 +1732,13 @@ static QString functionSignature(const FunctionModelItem &functionItem)
     const ArgumentList &arguments = functionItem->arguments();
     for (const ArgumentModelItem &arg : arguments)
         args << arg->type().toString();
-    return functionItem->name() + QLatin1Char('(') + args.join(QLatin1Char(',')) + QLatin1Char(')');
+    return functionItem->name() + u'(' + args.join(u',') + u')';
 }
 
 static inline QString qualifiedFunctionSignatureWithType(const FunctionModelItem &functionItem,
                                                          const QString &className = QString())
 {
-    QString result = functionItem->type().toString() + QLatin1Char(' ');
+    QString result = functionItem->type().toString() + u' ';
     if (!className.isEmpty())
         result += className + colonColon();
     result += functionSignature(functionItem);
@@ -2765,7 +2765,7 @@ QString AbstractMetaBuilderPrivate::fixDefaultValue(QString expr, const Abstract
 
     if (type.isFlags() || type.isEnum()) {
         expr = fixEnumDefault(type, expr);
-    } else if (type.isContainer() && expr.contains(QLatin1Char('<'))) {
+    } else if (type.isContainer() && expr.contains(u'<')) {
         // Expand a container of a nested class, fex
         // "QList<FormatRange>()" -> "QList<QTextLayout::FormatRange>()"
         if (type.instantiations().size() != 1)
@@ -2906,7 +2906,7 @@ AbstractMetaClassCList
     const QStringList &baseClassNames = metaClass->baseClassNames();
     for (const QString& parent : baseClassNames) {
         AbstractMetaClass *cls = nullptr;
-        if (parent.contains(QLatin1Char('<')))
+        if (parent.contains(u'<'))
             cls = findTemplateClass(parent, metaClass);
         else
             cls = AbstractMetaClass::findClass(m_metaClasses, parent);
@@ -3276,7 +3276,7 @@ static void writeRejectLogFile(const QString &name,
 
 
     for (int reason = 0; reason < AbstractMetaBuilder::NoReason; ++reason) {
-        s << QString(72, QLatin1Char('*')) << Qt::endl;
+        s << QByteArray(72, '*') << '\n';
         switch (reason) {
         case AbstractMetaBuilder::NotInTypeSystem:
             s << "Not in type system";
@@ -3318,7 +3318,7 @@ static void writeRejectLogFile(const QString &name,
             s << " - " << it.key() << Qt::endl;
         }
 
-        s << QString(72, QLatin1Char('*')) << Qt::endl << Qt::endl;
+        s << QByteArray(72, '*') << "\n\n";
     }
 
 }
@@ -3480,7 +3480,7 @@ void AbstractMetaBuilder::setSkipDeprecated(bool value)
 
 static inline bool isFileSystemSlash(QChar c)
 {
-    return c == QLatin1Char('/') || c == QLatin1Char('\\');
+    return c == u'/' || c == u'\\';
 }
 
 static bool matchHeader(const QString &headerPath, const QString &fileName)
