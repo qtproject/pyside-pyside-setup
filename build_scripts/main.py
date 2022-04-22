@@ -44,7 +44,7 @@ import re
 import sys
 import time
 from pathlib import Path
-from shutil import which
+from shutil import which, copytree
 from textwrap import dedent
 
 import setuptools  # Import setuptools before distutils
@@ -452,7 +452,9 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
             _src = Path(_path / _package_name)
             _dst = Path(_wheel_path / _package_name)
             try:
-                _src.rename(_dst)
+                # This should be copied because the package directory
+                # is used when using the 'install' setup.py instruction.
+                copytree(_src, _dst)
             except Exception as e:
                 log.warn(f'***** problem renaming "{self.st_build_dir}"')
                 log.warn(f'ignored error: {type(e).__name__}: {e}')
