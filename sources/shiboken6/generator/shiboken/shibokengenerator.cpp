@@ -751,9 +751,9 @@ QString ShibokenGenerator::pythonOperatorFunctionName(const AbstractMetaFunction
     if (op == unknownOperator())
         qCWarning(lcShiboken).noquote().nospace() << msgUnknownOperator(func.data());
     if (func->arguments().isEmpty()) {
-        if (op == QLatin1String("__sub__"))
+        if (op == u"__sub__")
             op = QLatin1String("__neg__");
-        else if (op == QLatin1String("__add__"))
+        else if (op == u"__add__")
             op = QLatin1String("__pos__");
     } else if (func->isStatic() && func->arguments().size() == 2) {
         // If a operator overload function has 2 arguments and
@@ -831,8 +831,8 @@ bool ShibokenGenerator::isPyInt(const AbstractMetaType &type)
 
 bool ShibokenGenerator::isNullPtr(const QString &value)
 {
-    return value == QLatin1String("0") || value == QLatin1String("nullptr")
-        || value == QLatin1String("NULLPTR") || value == QLatin1String("{}");
+    return value == u"0" || value == u"nullptr"
+        || value == u"NULLPTR" || value == u"{}";
 }
 
 QString ShibokenGenerator::cpythonCheckFunction(AbstractMetaType metaType) const
@@ -1077,7 +1077,7 @@ QString ShibokenGenerator::cpythonToPythonConversionFunction(const AbstractMetaT
         QString result = QLatin1String("Shiboken::Conversions::") + conversion
             + QLatin1String("ToPython(")
             + cpythonTypeNameExt(type) + QLatin1String(", ");
-        if (conversion != QLatin1String("pointer"))
+        if (conversion != u"pointer")
             result += u'&';
         return result;
     }
@@ -1098,7 +1098,7 @@ QString ShibokenGenerator::cpythonToPythonConversionFunction(const TypeEntry *ty
          QString result = QLatin1String("Shiboken::Conversions::") + conversion
              + QLatin1String("ToPython(") + cpythonTypeNameExt(type)
              + QLatin1String(", ");
-         if (conversion != QLatin1String("pointer"))
+         if (conversion != u"pointer")
              result += u'&';
         return result;
     }
@@ -1132,11 +1132,11 @@ QString ShibokenGenerator::argumentString(const AbstractMetaFunctionCPtr &func,
         !argument.originalDefaultValueExpression().isEmpty())
     {
         QString default_value = argument.originalDefaultValueExpression();
-        if (default_value == QLatin1String("NULL"))
+        if (default_value == u"NULL")
             default_value = QLatin1String(NULL_PTR);
 
         //WORKAROUND: fix this please
-        if (default_value.startsWith(QLatin1String("new ")))
+        if (default_value.startsWith(u"new "))
             default_value.remove(0, 4);
 
         arg += QLatin1String(" = ") + default_value;
@@ -1597,7 +1597,7 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
                 const QString pattern = u"%CPPSELF.%FUNCTION_NAME("_qs + methodCallArgs + u')';
                 QString replacement = u"(Shiboken::Object::hasCppWrapper(reinterpret_cast<SbkObject *>("_qs
                                       + pySelf + u")) ? "_qs;
-                if (func->name() == QLatin1String("metaObject")) {
+                if (func->name() == u"metaObject") {
                     QString wrapperClassName = wrapperName(func->ownerClass());
                     QString cppSelfVar = avoidProtectedHack()
                         ? u"%CPPSELF"_qs
@@ -1616,7 +1616,7 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
         code.replace(QLatin1String("%CPPSELF."), replacement.arg(cppSelf));
         code.replace(QLatin1String("%CPPSELF"), cppSelf);
 
-        if (code.indexOf(QLatin1String("%BEGIN_ALLOW_THREADS")) > -1) {
+        if (code.indexOf(u"%BEGIN_ALLOW_THREADS") > -1) {
             if (code.count(QLatin1String("%BEGIN_ALLOW_THREADS")) == code.count(QLatin1String("%END_ALLOW_THREADS"))) {
                 code.replace(QLatin1String("%BEGIN_ALLOW_THREADS"), QLatin1String(BEGIN_ALLOW_THREADS));
                 code.replace(QLatin1String("%END_ALLOW_THREADS"), QLatin1String(END_ALLOW_THREADS));
@@ -1733,7 +1733,7 @@ static QString miniNormalizer(const QString &varType)
     QString normalized = varType.trimmed();
     if (normalized.isEmpty())
         return normalized;
-    if (normalized.startsWith(QLatin1String("::")))
+    if (normalized.startsWith(u"::"))
         normalized.remove(0, 2);
     QString suffix;
     while (normalized.endsWith(u'*') || normalized.endsWith(u'&')) {
@@ -1817,7 +1817,7 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
                 QString varName = list.at(1).trimmed();
                 if (!varType.isEmpty()) {
                     const QString conversionSignature = conversionType.cppSignature();
-                    if (varType != QLatin1String("auto") && varType != conversionSignature)
+                    if (varType != u"auto" && varType != conversionSignature)
                         throw Exception(msgConversionTypesDiffer(varType, conversionSignature));
                     c << getFullTypeName(conversionType) << ' ' << varName
                         << minimalConstructorExpression(api(), conversionType) << ";\n";
@@ -1858,7 +1858,7 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
                         << code << '\'';
                     throw Exception(m);
                 }
-                if (conversion.contains(QLatin1String("%in"))) {
+                if (conversion.contains(u"%in")) {
                     conversion.prepend(u'(');
                     conversion.replace(QLatin1String("%in"), arg);
                 } else {
@@ -2505,13 +2505,13 @@ void ShibokenGenerator::replaceTemplateVariables(QString &code,
     code.replace(QLatin1String("%RETURN_TYPE"), translateType(func->type(), cpp_class));
     code.replace(QLatin1String("%FUNCTION_NAME"), func->originalName());
 
-    if (code.contains(QLatin1String("%ARGUMENT_NAMES"))) {
+    if (code.contains(u"%ARGUMENT_NAMES")) {
         StringStream aux_stream;
         writeArgumentNames(aux_stream, func, Generator::SkipRemovedArguments);
         code.replace(QLatin1String("%ARGUMENT_NAMES"), aux_stream);
     }
 
-    if (code.contains(QLatin1String("%ARGUMENTS"))) {
+    if (code.contains(u"%ARGUMENTS")) {
         StringStream aux_stream;
         writeFunctionArguments(aux_stream, func, Options(SkipDefaultValues) | SkipRemovedArguments);
         code.replace(QLatin1String("%ARGUMENTS"), aux_stream);

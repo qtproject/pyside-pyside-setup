@@ -54,7 +54,7 @@ void TestRemoveField::testRemoveField()
     QVERIFY(classA);
     QCOMPARE(classA->fields().size(), 1);
     const AbstractMetaField &fieldA = classA->fields().constFirst();
-    QCOMPARE(fieldA.name(), QLatin1String("fieldA"));
+    QCOMPARE(fieldA.name(), u"fieldA");
 }
 
 QTEST_APPLESS_MAIN(TestRemoveField)

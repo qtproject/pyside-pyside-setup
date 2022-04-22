@@ -58,9 +58,9 @@ R"(<typesystem package="Foo">
     QVERIFY(classA);
     DocModificationList docMods = classA->typeEntry()->docModifications();
     QCOMPARE(docMods.size(), 2);
-    QCOMPARE(docMods[0].code().trimmed(), QLatin1String("<brief>Modified Brief</brief>"));
+    QCOMPARE(docMods[0].code().trimmed(), u"<brief>Modified Brief</brief>");
     QCOMPARE(docMods[0].signature(), QString());
-    QCOMPARE(docMods[1].code().trimmed(), QLatin1String("<para>Some changed contents here</para>"));
+    QCOMPARE(docMods[1].code().trimmed(), u"<para>Some changed contents here</para>");
     QCOMPARE(docMods[1].signature(), QString());
 
     // Create a temporary directory for the documentation file since libxml2
@@ -89,7 +89,7 @@ R"(<?xml version="1.0"?>
 )";
     const QString expectedDocSimplified = QString::fromLatin1(expectedDoc).simplified();
     // Check whether the first modification worked.
-    QVERIFY(actualBriefSimplified.contains(QLatin1String("Modified Brief")));
+    QVERIFY(actualBriefSimplified.contains(u"Modified Brief"));
 
 #ifndef HAVE_LIBXSLT
     // QtXmlPatterns is unable to handle para[3] in style sheets,

@@ -623,7 +623,7 @@ std::optional<DefaultValue>
             ctor.chop(1);
             return DefaultValue(DefaultValue::Pointer, ctor.trimmed());
         }
-        if (ctor.startsWith(QLatin1String("const ")))
+        if (ctor.startsWith(u"const "))
             ctor.remove(0, sizeof("const ") / sizeof(char) - 1);
         if (ctor.endsWith(u'&')) {
             ctor.chop(1);
@@ -674,7 +674,7 @@ std::optional<DefaultValue>
 
     if (type->isCppPrimitive()) {
         const QString &name = type->qualifiedCppName();
-        return name == QLatin1String("bool")
+        return name == u"bool"
             ? DefaultValue(DefaultValue::Boolean)
             : DefaultValue(DefaultValue::CppScalar, name);
     }

@@ -225,7 +225,7 @@ void AbstractMetaBuilderPrivate::registerToStringCapability(const FunctionModelI
 {
     ArgumentList arguments = function_item->arguments();
     if (arguments.size() == 2) {
-        if (arguments.at(0)->type().toString() == QLatin1String("QDebug")) {
+        if (arguments.at(0)->type().toString() == u"QDebug") {
             const ArgumentModelItem &arg = arguments.at(1);
             if (AbstractMetaClass *cls = argumentToClass(arg, currentClass)) {
                 if (arg->type().indirections() < 2)
@@ -491,7 +491,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom,
     // Global functions
     const FunctionList &functions = dom->functions();
     for (const FunctionModelItem &func : functions) {
-        if (func->accessPolicy() != Access::Public || func->name().startsWith(QLatin1String("operator")))
+        if (func->accessPolicy() != Access::Public || func->name().startsWith(u"operator"))
             continue;
 
         FunctionTypeEntry *funcEntry = types->findFunctionType(func->name());
@@ -1261,7 +1261,7 @@ void AbstractMetaBuilderPrivate::fixReturnTypeOfConversionOperator(AbstractMetaF
 
     if (castTo.endsWith(u'&'))
         castTo.chop(1);
-    if (castTo.startsWith(QLatin1String("const ")))
+    if (castTo.startsWith(u"const "))
         castTo.remove(0, 6);
 
     TypeEntry *retType = types->findType(castTo);
@@ -1876,12 +1876,12 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
     if (currentClass) {
         // Clang: Skip qt_metacast(), qt_metacall(), expanded from Q_OBJECT
         // and overridden metaObject(), QGADGET helpers
-        if (functionName == QLatin1String("qt_check_for_QGADGET_macro")
-            || functionName.startsWith(QLatin1String("qt_meta"))) {
+        if (functionName == u"qt_check_for_QGADGET_macro"
+            || functionName.startsWith(u"qt_meta")) {
             return nullptr;
         }
         className = currentClass->typeEntry()->qualifiedCppName();
-        if (functionName == QLatin1String("metaObject") && className != QLatin1String("QObject"))
+        if (functionName == u"metaObject" && className != u"QObject")
             return nullptr;
     }
 
@@ -1992,7 +1992,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
     if (arguments.size() == 1) {
         ArgumentModelItem arg = arguments.at(0);
         TypeInfo type = arg->type();
-        if (type.qualifiedName().constFirst() == QLatin1String("void") && type.indirections() == 0)
+        if (type.qualifiedName().constFirst() == u"void" && type.indirections() == 0)
             arguments.pop_front();
     }
 
@@ -2098,7 +2098,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
     if (currentClass && metaFunction->arguments().size() == 1) {
         const AbstractMetaType &argType = metaFunction->arguments().constFirst().type();
         if (argType.typeEntry() == currentClass->typeEntry() && argType.indirections() == 0) {
-            if (metaFunction->name() == QLatin1String("operator=")) {
+            if (metaFunction->name() == u"operator=") {
                 switch (argType.referenceType()) {
                 case NoReference:
                     metaFunction->setFunctionType(AbstractMetaFunction::AssignmentOperatorFunction);
@@ -2366,7 +2366,7 @@ std::optional<AbstractMetaType>
     QString name = qualifierList.takeLast();
 
     // 4. Special case QFlags (include instantiation in name)
-    if (qualifiedName == QLatin1String("QFlags")) {
+    if (qualifiedName == u"QFlags") {
         qualifiedName = typeInfo.toString();
         typeInfo.clearInstantiations();
     }
@@ -2492,9 +2492,9 @@ qint64 AbstractMetaBuilderPrivate::findOutValueFromString(const QString &stringV
     if (ok)
         return value;
 
-    if (stringValue == QLatin1String("true") || stringValue == QLatin1String("false")) {
+    if (stringValue == u"true" || stringValue == u"false") {
         ok = true;
-        return (stringValue == QLatin1String("true"));
+        return (stringValue == u"true");
     }
 
     // This is a very lame way to handle expression evaluation,

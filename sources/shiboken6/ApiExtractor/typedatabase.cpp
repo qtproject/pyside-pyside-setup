@@ -204,7 +204,7 @@ QString TypeDatabase::normalizedSignature(const QString &signature)
     // changes "unsigned int" to "uint" which is undone by the below code
     QString normalized = QLatin1String(QMetaObject::normalizedSignature(signature.toUtf8().constData()));
 
-    if (instance() && signature.contains(QLatin1String("unsigned"))) {
+    if (instance() && signature.contains(u"unsigned")) {
         const IntTypeNormalizationEntries &entries = intTypeNormalizationEntries();
         for (const auto &entry : entries)
             normalized.replace(entry.regex, entry.replacement);

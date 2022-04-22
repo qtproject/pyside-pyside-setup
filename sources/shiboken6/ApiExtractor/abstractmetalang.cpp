@@ -567,7 +567,7 @@ bool AbstractMetaClass::isInvisibleNamespace() const
 
 bool AbstractMetaClass::isQtNamespace() const
 {
-    return isNamespace() && name() == QLatin1String("Qt");
+    return isNamespace() && name() == u"Qt";
 }
 
 QString AbstractMetaClass::qualifiedCppName() const

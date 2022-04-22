@@ -87,7 +87,7 @@ static void formatFunctionUnqualifiedArgTypeQuery(QTextStream &str,
         // to "Qt::Alignment" as seen by qdoc.
         const auto *flagsEntry = static_cast<const FlagsTypeEntry *>(metaType.typeEntry());
         QString name = flagsEntry->qualifiedCppName();
-        if (name.endsWith(u'>') && name.startsWith(QLatin1String("QFlags<"))) {
+        if (name.endsWith(u'>') && name.startsWith(u"QFlags<")) {
             const int lastColon = name.lastIndexOf(u':');
             if (lastColon != -1) {
                 name.replace(lastColon + 1, name.size() - lastColon - 1, metaType.name());
@@ -487,7 +487,7 @@ Documentation QtDocParser::retrieveModuleDocumentation(const QString& name)
     const QFileInfo qmlModuleFi(prefix + QLatin1String("-qmlmodule.webxml"));
     if (qmlModuleFi.isFile()) {
         QString docString = doc.detailed();
-        const int pos = docString.lastIndexOf(QLatin1String("</description>"));
+        const int pos = docString.lastIndexOf(u"</description>");
         if (pos != -1) {
             docString.insert(pos, qmlReferenceLink(qmlModuleFi));
             doc.setDetailed(docString);

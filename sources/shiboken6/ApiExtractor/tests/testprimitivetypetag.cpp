@@ -53,7 +53,7 @@ void TestPrimitiveTypeTag::testPrimitiveTypeDefaultConstructor()
     PrimitiveTypeEntry* typeEntry = TypeDatabase::instance()->findPrimitiveType(QLatin1String("A"));
     QVERIFY(typeEntry);
     QVERIFY(typeEntry->hasDefaultConstructor());
-    QCOMPARE(typeEntry->defaultConstructor(), QLatin1String("A()"));
+    QCOMPARE(typeEntry->defaultConstructor(), u"A()");
 }
 
 QTEST_APPLESS_MAIN(TestPrimitiveTypeTag)

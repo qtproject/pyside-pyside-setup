@@ -493,19 +493,19 @@ QString QtDocGenerator::parseArgDocStyle(const AbstractMetaClass* /* cppClass */
 
         if (thisIsoptional) {
             QString defValue = arg.defaultValueExpression();
-            if (defValue == QLatin1String("QString()")) {
+            if (defValue == u"QString()") {
                 defValue = QLatin1String("\"\"");
-            } else if (defValue == QLatin1String("QStringList()")
-                       || defValue.startsWith(QLatin1String("QVector"))
-                       || defValue.startsWith(QLatin1String("QList"))) {
+            } else if (defValue == u"QStringList()"
+                       || defValue.startsWith(u"QVector")
+                       || defValue.startsWith(u"QList")) {
                 defValue = QLatin1String("list()");
-            } else if (defValue == QLatin1String("QVariant()")) {
+            } else if (defValue == u"QVariant()") {
                 defValue = none();
             } else {
                 defValue.replace(QLatin1String("::"), QLatin1String("."));
-                if (defValue == QLatin1String("nullptr"))
+                if (defValue == u"nullptr")
                     defValue = none();
-                else if (defValue == QLatin1String("0") && arg.type().isObject())
+                else if (defValue == u"0" && arg.type().isObject())
                     defValue = none();
             }
             ret += u'=' + defValue;
@@ -660,7 +660,7 @@ QString QtDocGenerator::translateToPythonType(const AbstractMetaType &type,
         return found.value();
 
     QString strType;
-    if (type.isConstant() && name == QLatin1String("char") && type.indirections() == 1) {
+    if (type.isConstant() && name == u"char" && type.indirections() == 1) {
         strType = QLatin1String("str");
     } else if (name.startsWith(unsignedShortT())) {
         strType = intT();
@@ -672,10 +672,10 @@ QString QtDocGenerator::translateToPythonType(const AbstractMetaType &type,
         strType.remove(u'>');
         strType.remove(u'<');
         strType.replace(QLatin1String("::"), QLatin1String("."));
-        if (strType.contains(QLatin1String("QList")) || strType.contains(QLatin1String("QVector"))) {
+        if (strType.contains(u"QList") || strType.contains(u"QVector")) {
             strType.replace(QLatin1String("QList"), QLatin1String("list of "));
             strType.replace(QLatin1String("QVector"), QLatin1String("list of "));
-        } else if (strType.contains(QLatin1String("QHash")) || strType.contains(QLatin1String("QMap"))) {
+        } else if (strType.contains(u"QHash") || strType.contains(u"QMap")) {
             strType.remove(QLatin1String("QHash"));
             strType.remove(QLatin1String("QMap"));
             QStringList types = strType.split(u',');
@@ -925,7 +925,7 @@ void QtDocGenerator::writeAdditionalDocumentation() const
         // Parse "[directory]" specification
         if (line.size() > 2 && line.startsWith(u'[') && line.endsWith(u']')) {
             const QString dir = line.mid(1, line.size() - 2);
-            if (dir.isEmpty() || dir == QLatin1String(".")) {
+            if (dir.isEmpty() || dir == u".") {
                 targetDir = outDir.absolutePath();
             } else {
                 if (!outDir.exists(dir) && !outDir.mkdir(dir)) {
@@ -1025,15 +1025,15 @@ bool QtDocGenerator::handleOption(const QString &key, const QString &value)
 {
     if (Generator::handleOption(key, value))
         return true;
-    if (key == QLatin1String("library-source-dir")) {
+    if (key == u"library-source-dir") {
         m_parameters.libSourceDir = value;
         return true;
     }
-    if (key == QLatin1String("documentation-data-dir")) {
+    if (key == u"documentation-data-dir") {
         m_parameters.docDataDir = value;
         return true;
     }
-    if (key == QLatin1String("documentation-code-snippets-dir")) {
+    if (key == u"documentation-code-snippets-dir") {
         m_parameters.codeSnippetDirs = value.split(QLatin1Char(PATH_SEP));
         return true;
     }
@@ -1047,13 +1047,13 @@ bool QtDocGenerator::handleOption(const QString &key, const QString &value)
         return true;
     }
 
-    if (key == QLatin1String("documentation-extra-sections-dir")) {
+    if (key == u"documentation-extra-sections-dir") {
         m_extraSectionDir = value;
         return true;
     }
-    if (key == QLatin1String("doc-parser")) {
+    if (key == u"doc-parser") {
         qCDebug(lcShibokenDoc).noquote().nospace() << "doc-parser: " << value;
-        if (value == QLatin1String("doxygen"))
+        if (value == u"doxygen")
             m_docParser.reset(new DoxygenParser);
         return true;
     }
