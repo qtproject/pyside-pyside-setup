@@ -478,25 +478,6 @@ bool AbstractMetaFunction::generateBinding() const
         && !isModifiedRemoved();
 }
 
-QStringList AbstractMetaFunction::introspectionCompatibleSignatures(const QStringList &resolvedArguments) const
-{
-    AbstractMetaArgumentList arguments = this->arguments();
-    if (arguments.size() == resolvedArguments.size()) {
-        QString signature = name() + QLatin1Char('(') + resolvedArguments.join(QLatin1Char(',')) + QLatin1Char(')');
-        return QStringList(TypeDatabase::normalizedSignature(signature));
-    }
-    QStringList returned;
-
-    const AbstractMetaArgument &argument = arguments.at(resolvedArguments.size());
-    QStringList minimalTypeSignature = argument.type().minimalSignature().split(QLatin1String("::"));
-    for (int i = 0; i < minimalTypeSignature.size(); ++i) {
-        returned += introspectionCompatibleSignatures(QStringList(resolvedArguments)
-                                                      << QStringList(minimalTypeSignature.mid(minimalTypeSignature.size() - i - 1)).join(QLatin1String("::")));
-    }
-
-    return returned;
-}
-
 QString AbstractMetaFunctionPrivate::signature() const
 {
     if (m_cachedSignature.isEmpty()) {
@@ -1245,15 +1226,9 @@ bool AbstractMetaFunction::isIncDecrementOperator() const
     return d->m_functionType == IncrementOperator
         || d->m_functionType == DecrementOperator;
 }
-
 bool AbstractMetaFunction::isLogicalOperator() const
 {
     return d->m_functionType == LogicalOperator;
-}
-
-bool AbstractMetaFunction::isSubscriptOperator() const
-{
-    return d->m_functionType == SubscriptOperator;
 }
 
 bool AbstractMetaFunction::isAssignmentOperator() const

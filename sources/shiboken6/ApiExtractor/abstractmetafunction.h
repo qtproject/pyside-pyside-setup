@@ -236,7 +236,6 @@ public:
     bool isSymmetricalComparisonOperator() const;
     bool isIncDecrementOperator() const;
     bool isLogicalOperator() const;
-    bool isSubscriptOperator() const;
     bool isAssignmentOperator() const; // Assignment or move assignment
     bool isGetter() const;
     /// Returns whether it is a Qt-style isNull() method suitable for nb_bool
@@ -308,7 +307,6 @@ public:
     bool usesRValueReferences() const;
     bool generateBinding() const;
 
-    QStringList introspectionCompatibleSignatures(const QStringList &resolvedArguments = QStringList()) const;
     QString signature() const;
     /// Return a signature qualified by class name, for error reporting.
     QString classQualifiedSignature() const;
