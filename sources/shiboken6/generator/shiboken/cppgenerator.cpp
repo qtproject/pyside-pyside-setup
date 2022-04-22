@@ -2191,7 +2191,7 @@ void CppGenerator::writeArgumentsInitializer(TextStream &s, const OverloadData &
 
     s << "PyObject *";
     s << PYTHON_ARGS << "[] = {"
-        << QString(maxArgs, QLatin1Char('0')).split(QLatin1String(""), Qt::SkipEmptyParts).join(QLatin1String(", "))
+        << QByteArrayList(maxArgs, "nullptr").join(", ")
         << "};\n\n";
 
     if (overloadData.hasVarargs()) {
