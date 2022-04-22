@@ -29,6 +29,8 @@
 #include "xmlutils_libxslt.h"
 #include "xmlutils.h"
 
+#include "qtcompat.h"
+
 #include <QtCore/QByteArray>
 #include <QtCore/QCoreApplication>
 #include <QtCore/QDir>
@@ -43,6 +45,8 @@
 
 #include <cstdlib>
 #include <memory>
+
+using namespace Qt::StringLiterals;
 
 static void cleanup()
 {
@@ -109,13 +113,13 @@ static QByteArray formatNode(xmlNodePtr node, QString *errorMessage)
         xmlSaveToIO(qbXmlOutputWriteCallback, qbXmlOutputCloseCallback,
                     &result, "UTF-8", 0);
     if (!saveContext) {
-        *errorMessage = QLatin1String("xmlSaveToIO() failed.");
+        *errorMessage = u"xmlSaveToIO() failed."_s;
         return result;
     }
     const long saveResult = xmlSaveTree(saveContext, node);
     xmlSaveClose(saveContext);
     if (saveResult < 0)
-        *errorMessage = QLatin1String("xmlSaveTree() failed.");
+        *errorMessage = u"xmlSaveTree() failed."_s;
     return result;
 }
 
@@ -144,7 +148,7 @@ QString LibXmlXQuery::doEvaluate(const QString &xPathExpression, QString *errorM
 
     XmlPathObjectUniquePtr xPathObject(xmlXPathEvalExpression(xPathExpressionX, m_xpathContext.get()));
     if (!xPathObject) {
-         *errorMessage = QLatin1String("xmlXPathEvalExpression() failed for \"") + xPathExpression
+         *errorMessage = u"xmlXPathEvalExpression() failed for \""_s + xPathExpression
                          + u'"';
         return QString();
     }
@@ -166,12 +170,12 @@ QSharedPointer<XQuery> libXml_createXQuery(const QString &focus, QString *errorM
 {
     XmlDocUniquePtr doc(xmlParseFile(QFile::encodeName(focus).constData()));
     if (!doc) {
-        *errorMessage = QLatin1String("libxml2: Cannot set focus to ") + QDir::toNativeSeparators(focus);
+        *errorMessage = u"libxml2: Cannot set focus to "_s + QDir::toNativeSeparators(focus);
         return {};
     }
     XmlXPathContextUniquePtr xpathContext(xmlXPathNewContext(doc.get()));
     if (!xpathContext) {
-        *errorMessage = QLatin1String("libxml2: xmlXPathNewContext() failed");
+        *errorMessage = u"libxml2: xmlXPathNewContext() failed"_s;
         return {};
     }
     return QSharedPointer<XQuery>(new LibXmlXQuery(doc, xpathContext));
@@ -188,13 +192,13 @@ QString libXslt_transform(const QString &xml, QString xsl, QString *errorMessage
     ensureInitialized();
     // Read XML data
     if (!xsl.startsWith(u"<?xml")) {
-        xsl.prepend(QLatin1String(xsltPrefix));
-        xsl.append(QLatin1String("</xsl:transform>"));
+        xsl.prepend(QLatin1StringView(xsltPrefix));
+        xsl.append(u"</xsl:transform>"_s);
     }
     const QByteArray xmlData = xml.toUtf8();
     XmlDocUniquePtr xmlDoc(xmlParseMemory(xmlData.constData(), xmlData.size()));
     if (!xmlDoc) {
-        *errorMessage = QLatin1String("xmlParseMemory() failed for XML.");
+        *errorMessage = u"xmlParseMemory() failed for XML."_s;
         return xml;
     }
 
@@ -203,15 +207,14 @@ QString libXslt_transform(const QString &xml, QString xsl, QString *errorMessage
     // xsltFreeStylesheet will delete this pointer
     xmlDocPtr xslDoc = xmlParseMemory(xslData.constData(), xslData.size());
     if (!xslDoc) {
-        *errorMessage = QLatin1String("xmlParseMemory() failed for XSL \"")
-            + xsl + QLatin1String("\".");
+        *errorMessage = u"xmlParseMemory() failed for XSL \""_s + xsl + u"\"."_s;
         return xml;
     };
 
     // Parse XSL data
     XmlStyleSheetUniquePtr xslt(xsltParseStylesheetDoc(xslDoc));
     if (!xslt) {
-        *errorMessage = QLatin1String("xsltParseStylesheetDoc() failed.");
+        *errorMessage = u"xsltParseStylesheetDoc() failed."_s;
         return xml;
     }
 
@@ -224,7 +227,7 @@ QString libXslt_transform(const QString &xml, QString xsl, QString *errorMessage
         result = QString::fromUtf8(reinterpret_cast<char*>(buffer), bufferSize);
         std::free(buffer);
     } else {
-        *errorMessage = QLatin1String("xsltSaveResultToString() failed.");
+        *errorMessage = u"xsltSaveResultToString() failed."_s;
         result = xml;
     }
     return result.trimmed();

@@ -36,6 +36,8 @@
 #include "predefined_templates.h"
 #include "clangparser/compilersupport.h"
 
+#include "qtcompat.h"
+
 #include <QtCore/QBuffer>
 #include <QtCore/QFile>
 #include <QtCore/QDebug>
@@ -49,6 +51,7 @@
 // #include <tr1/tuple>
 #include <algorithm>
 
+using namespace Qt::StringLiterals;
 
 using TypeDatabaseParserContextPtr = QSharedPointer<TypeDatabaseParserContext>;
 
@@ -80,29 +83,29 @@ static const PythonTypes &builtinPythonTypes()
     static const PythonTypes result{
         // "Traditional" custom types
         // numpy
-        {u"PyArrayObject"_qs, u"PyArray_Check"_qs, TypeSystem::CPythonType::Other},
-        {u"PyBuffer"_qs, u"Shiboken::Buffer::checkType"_qs, TypeSystem::CPythonType::Other},
-        {u"PyByteArray"_qs, u"PyByteArray_Check"_qs, TypeSystem::CPythonType::Other},
-        {u"PyBytes"_qs, u"PyBytes_Check"_qs, TypeSystem::CPythonType::Other},
-        {u"PyCallable"_qs, u"PyCallable_Check"_qs, TypeSystem::CPythonType::Other},
-        {u"PyDate"_qs, u"PyDate_Check"_qs, TypeSystem::CPythonType::Other},
-        {u"PyDateTime"_qs, u"PyDateTime_Check_Check"_qs, TypeSystem::CPythonType::Other},
-        {u"PyDict"_qs, u"PyDict_Check"_qs, TypeSystem::CPythonType::Other},
+        {u"PyArrayObject"_s, u"PyArray_Check"_s, TypeSystem::CPythonType::Other},
+        {u"PyBuffer"_s, u"Shiboken::Buffer::checkType"_s, TypeSystem::CPythonType::Other},
+        {u"PyByteArray"_s, u"PyByteArray_Check"_s, TypeSystem::CPythonType::Other},
+        {u"PyBytes"_s, u"PyBytes_Check"_s, TypeSystem::CPythonType::Other},
+        {u"PyCallable"_s, u"PyCallable_Check"_s, TypeSystem::CPythonType::Other},
+        {u"PyDate"_s, u"PyDate_Check"_s, TypeSystem::CPythonType::Other},
+        {u"PyDateTime"_s, u"PyDateTime_Check_Check"_s, TypeSystem::CPythonType::Other},
+        {u"PyDict"_s, u"PyDict_Check"_s, TypeSystem::CPythonType::Other},
         // Convenience macro in sbkconverter.h
-        {u"PyObject"_qs, u"true"_qs, TypeSystem::CPythonType::Other},
+        {u"PyObject"_s, u"true"_s, TypeSystem::CPythonType::Other},
         // shiboken-specific
-        {u"PyPathLike"_qs, u"Shiboken::String::checkPath"_qs, TypeSystem::CPythonType::Other},
-        {u"PySequence"_qs, u"Shiboken::String::checkIterable"_qs, TypeSystem::CPythonType::Other},
-        {u"PyUnicode"_qs, u"PyUnicode_Check"_qs, TypeSystem::CPythonType::String},
-        {u"PyTypeObject"_qs, u"PyType_Check"_qs, TypeSystem::CPythonType::Other},
-        {u"str"_qs, u"Shiboken::String::check"_qs, TypeSystem::CPythonType::String},
+        {u"PyPathLike"_s, u"Shiboken::String::checkPath"_s, TypeSystem::CPythonType::Other},
+        {u"PySequence"_s, u"Shiboken::String::checkIterable"_s, TypeSystem::CPythonType::Other},
+        {u"PyUnicode"_s, u"PyUnicode_Check"_s, TypeSystem::CPythonType::String},
+        {u"PyTypeObject"_s, u"PyType_Check"_s, TypeSystem::CPythonType::Other},
+        {u"str"_s, u"Shiboken::String::check"_s, TypeSystem::CPythonType::String},
         // Types used as target lang API types for primitive types
-        {u"PyBool"_qs, u"PyBool_Check"_qs, TypeSystem::CPythonType::Bool},
-        {u"PyComplex"_qs, u"PyComplex_Check"_qs, TypeSystem::CPythonType::Other},
-        {u"PyLong"_qs, u"PyLong_Check"_qs, TypeSystem::CPythonType::Integer},
-        {u"PyFloat"_qs, u"PyFloat_Check"_qs, TypeSystem::CPythonType::Float},
+        {u"PyBool"_s, u"PyBool_Check"_s, TypeSystem::CPythonType::Bool},
+        {u"PyComplex"_s, u"PyComplex_Check"_s, TypeSystem::CPythonType::Other},
+        {u"PyLong"_s, u"PyLong_Check"_s, TypeSystem::CPythonType::Integer},
+        {u"PyFloat"_s, u"PyFloat_Check"_s, TypeSystem::CPythonType::Float},
         // Single character strings to match C++ char types
-        {u"SbkChar"_qs, u"SbkChar_Check"_qs, TypeSystem::CPythonType::String}
+        {u"SbkChar"_s, u"SbkChar_Check"_s, TypeSystem::CPythonType::String}
     };
     return result;
 }
@@ -212,7 +215,7 @@ static const IntTypeNormalizationEntries &intTypeNormalizationEntries()
     if (firstTime) {
         firstTime = false;
         for (auto t : {"char", "short", "int", "long"}) {
-            const QString intType = QLatin1String(t);
+            const QString intType = QLatin1StringView(t);
             if (!TypeDatabase::instance()->findType(u'u' + intType)) {
                 IntTypeNormalizationEntry entry;
                 entry.replacement = QStringLiteral("unsigned ") + intType;
@@ -279,7 +282,8 @@ QString TypeDatabase::normalizedSignature(const QString &signature)
 {
     // QMetaObject::normalizedSignature() changes const-ref to value and
     // changes "unsigned int" to "uint" which is undone by the below code
-    QString normalized = QLatin1String(QMetaObject::normalizedSignature(signature.toUtf8().constData()));
+    QByteArray normalizedB = QMetaObject::normalizedSignature(signature.toUtf8().constData());
+    QString normalized = QLatin1StringView(normalizedB);
 
     if (instance() && signature.contains(u"unsigned")) {
         const IntTypeNormalizationEntries &entries = intTypeNormalizationEntries();
@@ -324,16 +328,16 @@ QStringList TypeDatabase::typesystemKeywords() const
 
     switch (clang::emulatedCompilerLanguageLevel()) {
     case LanguageLevel::Cpp11:
-        result.append(u"c++11"_qs);
+        result.append(u"c++11"_s);
         break;
     case LanguageLevel::Cpp14:
-        result.append(u"c++14"_qs);
+        result.append(u"c++14"_s);
         break;
     case LanguageLevel::Cpp17:
-        result.append(u"c++17"_qs);
+        result.append(u"c++17"_s);
         break;
     case LanguageLevel::Cpp20:
-        result.append(u"c++20"_qs);
+        result.append(u"c++20"_s);
         break;
     default:
         break;
@@ -618,7 +622,7 @@ TypeEntry *TypeDatabasePrivate::resolveTypeDefEntry(TypedefEntry *typedefEntry,
     }
     if (!source) {
         if (errorMessage)
-            *errorMessage = QLatin1String("Unable to resolve typedef \"")
+            *errorMessage = u"Unable to resolve typedef \""_s
                             + typedefEntry->sourceType() + u'"';
         return nullptr;
     }
@@ -757,7 +761,7 @@ void TypeDatabase::addGlobalUserFunctionModifications(const FunctionModification
 
 QString TypeDatabase::globalNamespaceClassName(const TypeEntry * /*entry*/)
 {
-    return QLatin1String("Global");
+    return u"Global"_s;
 }
 
 FunctionModificationList TypeDatabase::functionModifications(const QString& signature) const
@@ -808,8 +812,8 @@ bool TypeDatabase::addSuppressedWarning(const QString &warning, QString *errorMe
 
     QRegularExpression expression(pattern);
     if (!expression.isValid()) {
-        *errorMessage = QLatin1String("Invalid message pattern \"") + warning
-            + QLatin1String("\": ") + expression.errorString();
+        *errorMessage = u"Invalid message pattern \""_s + warning
+            + u"\": "_s + expression.errorString();
         return false;
     }
     expression.setPatternOptions(expression.patternOptions() | QRegularExpression::MultilineOption);
@@ -858,11 +862,11 @@ void TypeDatabasePrivate::addBuiltInContainerTypes(const TypeDatabaseParserConte
 {
     // Unless the user has added the standard containers (potentially with
     // some opaque types), add them by default.
-    const bool hasStdPair = findType(u"std::pair"_qs) != nullptr;
-    const bool hasStdList = findType(u"std::list"_qs) != nullptr;
-    const bool hasStdVector = findType(u"std::vector"_qs) != nullptr;
-    const bool hasStdMap = findType(u"std::map"_qs) != nullptr;
-    const bool hasStdUnorderedMap = findType(u"std::unordered_map"_qs) != nullptr;
+    const bool hasStdPair = findType(u"std::pair"_s) != nullptr;
+    const bool hasStdList = findType(u"std::list"_s) != nullptr;
+    const bool hasStdVector = findType(u"std::vector"_s) != nullptr;
+    const bool hasStdMap = findType(u"std::map"_s) != nullptr;
+    const bool hasStdUnorderedMap = findType(u"std::unordered_map"_s) != nullptr;
 
     if (hasStdPair && hasStdList && hasStdVector && hasStdMap && hasStdUnorderedMap)
         return;
@@ -927,10 +931,10 @@ bool TypeDatabasePrivate::prepareParsing(QFile &file, const QString &origFileNam
     const QString &filepath = file.fileName();
     if (!file.exists()) {
         m_parsedTypesystemFiles[filepath] = false;
-        QString message = u"Can't find "_qs + origFileName;
+        QString message = u"Can't find "_s + origFileName;
         if (!currentPath.isEmpty())
-            message += QLatin1String(", current path: ") + currentPath;
-        message += u", typesystem paths: "_qs + m_typesystemPaths.join(u", "_qs);
+            message += u", current path: "_s + currentPath;
+        message += u", typesystem paths: "_s + m_typesystemPaths.join(u", "_s);
         qCWarning(lcShiboken, "%s", qPrintable(message));
         return false;
     }
@@ -1342,12 +1346,12 @@ void TypeDatabasePrivate::addBuiltInPrimitiveTypes()
     const QString &rootPackage = root->name();
 
     // C++ primitive types
-    auto *pyLongEntry = findType(u"PyLong"_qs);
+    auto *pyLongEntry = findType(u"PyLong"_s);
     Q_ASSERT(pyLongEntry && pyLongEntry->isCustom());
     auto *pyLongCustomEntry = static_cast<CustomTypeEntry *>(pyLongEntry);
-    auto *pyBoolEntry = findType(u"PyBool"_qs);
+    auto *pyBoolEntry = findType(u"PyBool"_s);
     Q_ASSERT(pyBoolEntry && pyBoolEntry->isCustom());
-    auto *sbkCharEntry = findType(u"SbkChar"_qs);
+    auto *sbkCharEntry = findType(u"SbkChar"_s);
     Q_ASSERT(sbkCharEntry && sbkCharEntry->isCustom());
     auto *sbkCharCustomEntry = static_cast<CustomTypeEntry *>(sbkCharEntry);
 
@@ -1363,7 +1367,7 @@ void TypeDatabasePrivate::addBuiltInPrimitiveTypes()
         }
     }
 
-    auto *pyFloatEntry = findType(u"PyFloat"_qs);
+    auto *pyFloatEntry = findType(u"PyFloat"_s);
     Q_ASSERT(pyFloatEntry && pyFloatEntry->isCustom());
     auto *pyFloatCustomEntry = static_cast<CustomTypeEntry *>(pyFloatEntry);
     for (const auto &t : AbstractMetaType::cppFloatTypes()) {
@@ -1371,19 +1375,19 @@ void TypeDatabasePrivate::addBuiltInPrimitiveTypes()
             addBuiltInPrimitiveType(t, root, rootPackage, pyFloatCustomEntry);
     }
 
-    auto *pyUnicodeEntry = findType(u"PyUnicode"_qs);
+    auto *pyUnicodeEntry = findType(u"PyUnicode"_s);
     Q_ASSERT(pyUnicodeEntry && pyUnicodeEntry->isCustom());
     auto *pyUnicodeCustomEntry = static_cast<CustomTypeEntry *>(pyUnicodeEntry);
 
-    const QString stdString = u"std::string"_qs;
+    const QString stdString = u"std::string"_s;
     if (!m_entries.contains(stdString)) {
-        addBuiltInCppStringPrimitiveType(stdString, u"std::string_view"_qs,
+        addBuiltInCppStringPrimitiveType(stdString, u"std::string_view"_s,
                                          root, rootPackage,
                                          pyUnicodeCustomEntry);
     }
-    const QString stdWString = u"std::wstring"_qs;
+    const QString stdWString = u"std::wstring"_s;
     if (!m_entries.contains(stdWString)) {
-        addBuiltInCppStringPrimitiveType(stdWString, u"std::wstring_view"_qs,
+        addBuiltInCppStringPrimitiveType(stdWString, u"std::wstring_view"_s,
                                          root, rootPackage,
                                          pyUnicodeCustomEntry);
     }

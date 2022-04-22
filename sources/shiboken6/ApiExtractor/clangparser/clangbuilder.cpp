@@ -33,6 +33,8 @@
 #include <codemodel.h>
 #include <reporthandler.h>
 
+#include "qtcompat.h"
+
 #include <QtCore/QDebug>
 #include <QtCore/QDir>
 #include <QtCore/QHash>
@@ -43,6 +45,8 @@
 
 #include <cstring>
 #include <ctype.h>
+
+using namespace Qt::StringLiterals;
 
 namespace clang {
 
@@ -289,8 +293,7 @@ static QString msgCannotDetermineException(const std::string_view &snippetV)
     if (truncate)
         snippet += QStringLiteral("...");
 
-    return QLatin1String("Cannot determine exception specification: \"")
-        + snippet + u'"';
+    return u"Cannot determine exception specification: \""_s + snippet + u'"';
 }
 
 // Return whether noexcept(<value>) throws. noexcept() takes a constexpr value.
@@ -891,8 +894,8 @@ FileModelItem Builder::dom() const
 static QString msgOutOfOrder(const CXCursor &cursor, const char *expectedScope)
 {
     return getCursorKindName(cursor.kind) + u' '
-        + getCursorSpelling(cursor) + QLatin1String(" encountered outside ")
-        + QLatin1String(expectedScope) + u'.';
+        + getCursorSpelling(cursor) + u" encountered outside "_s
+        + QLatin1StringView(expectedScope) + u'.';
 }
 
 static CodeModel::ClassType codeModelClassTypeFromCursor(CXCursorKind kind)
@@ -1080,7 +1083,7 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         const NamespaceModelItem parentNamespaceItem = qSharedPointerDynamicCast<_NamespaceModelItem>(d->m_scopeStack.back());
         if (parentNamespaceItem.isNull()) {
             const QString message = msgOutOfOrder(cursor, "namespace")
-                + QLatin1String(" (current scope: ") + d->m_scopeStack.back()->name() + u')';
+                + u" (current scope: "_s + d->m_scopeStack.back()->name() + u')';
             const Diagnostic d(message, cursor, CXDiagnostic_Error);
             qWarning() << d;
             appendDiagnostic(d);

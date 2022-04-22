@@ -45,8 +45,12 @@
 #include <QtCore/QLibrary>
 #include <QtCore/QVariant>
 
+#include "qtcompat.h"
+
 #include <exception>
 #include <iostream>
+
+using namespace Qt::StringLiterals;
 
 static const QChar clangOptionsSplitter = u',';
 static const QChar keywordsSplitter = u',';
@@ -328,8 +332,8 @@ static inline Generators shibokenGenerators()
 
 static inline QString languageLevelDescription()
 {
-    return QLatin1String("C++ Language level (c++11..c++17, default=")
-        + QLatin1String(clang::languageLevelOption(clang::emulatedCompilerLanguageLevel()))
+    return u"C++ Language level (c++11..c++17, default="_s
+        + QLatin1StringView(clang::languageLevelOption(clang::emulatedCompilerLanguageLevel()))
         + u')';
 }
 
@@ -344,57 +348,57 @@ void printUsage()
     QTextStream(&pathSyntax) << "<path>[" << pathSplitter << "<path>"
         << pathSplitter << "...]";
     OptionDescriptions generalOptions = {
-        {QLatin1String("api-version=<\"package mask\">,<\"version\">"),
-         QLatin1String("Specify the supported api version used to generate the bindings")},
-        {QLatin1String("debug-level=[sparse|medium|full]"),
-         QLatin1String("Set the debug level")},
-        {QLatin1String("documentation-only"),
-         QLatin1String("Do not generates any code, just the documentation")},
-        {QLatin1String("drop-type-entries=\"<TypeEntry0>[;TypeEntry1;...]\""),
-         QLatin1String("Semicolon separated list of type system entries (classes, namespaces,\n"
-                       "global functions and enums) to be dropped from generation.")},
+        {u"api-version=<\"package mask\">,<\"version\">"_s,
+         u"Specify the supported api version used to generate the bindings"_s},
+        {u"debug-level=[sparse|medium|full]"_s,
+         u"Set the debug level"_s},
+        {u"documentation-only"_s,
+         u"Do not generates any code, just the documentation"_s},
+        {u"drop-type-entries=\"<TypeEntry0>[;TypeEntry1;...]\""_s,
+         u"Semicolon separated list of type system entries (classes, namespaces,\n"
+          "global functions and enums) to be dropped from generation."_s},
         {keywordsOption() + QStringLiteral("=keyword1[,keyword2,...]"),
-         QLatin1String("A comma-separated list of keywords for conditional typesystem parsing")},
+         u"A comma-separated list of keywords for conditional typesystem parsing"_s},
         {clangOptionOption(),
-         QLatin1String("Option to be passed to clang")},
+         u"Option to be passed to clang"_s},
         {clangOptionsOption(),
-         QLatin1String("A comma-separated list of options to be passed to clang")},
-        {QLatin1String("-F<path>"), {} },
-        {QLatin1String("framework-include-paths=") + pathSyntax,
-         QLatin1String("Framework include paths used by the C++ parser")},
-        {QLatin1String("-isystem<path>"), {} },
-        {QLatin1String("system-include-paths=") + pathSyntax,
-         QLatin1String("System include paths used by the C++ parser")},
+         u"A comma-separated list of options to be passed to clang"_s},
+        {u"-F<path>"_s, {} },
+        {u"framework-include-paths="_s + pathSyntax,
+         u"Framework include paths used by the C++ parser"_s},
+        {u"-isystem<path>"_s, {} },
+        {u"system-include-paths="_s + pathSyntax,
+         u"System include paths used by the C++ parser"_s},
         {useGlobalHeaderOption(),
-         QLatin1String("Use the global headers in generated code.")},
-        {QLatin1String("generator-set=<\"generator module\">"),
-         QLatin1String("generator-set to be used. e.g. qtdoc")},
+         u"Use the global headers in generated code."_s},
+        {u"generator-set=<\"generator module\">"_s,
+         u"generator-set to be used. e.g. qtdoc"_s},
         {skipDeprecatedOption(),
-         QLatin1String("Skip deprecated functions")},
-        {diffOption(), QLatin1String("Print a diff of wrapper files")},
-        {dryrunOption(), QLatin1String("Dry run, do not generate wrapper files")},
-        {QLatin1String("-h"), {} },
-        {helpOption(), QLatin1String("Display this help and exit")},
-        {QLatin1String("-I<path>"), {} },
-        {QLatin1String("include-paths=") + pathSyntax,
-        QLatin1String("Include paths used by the C++ parser")},
-        {languageLevelOption() + QLatin1String("=, -std=<level>"),
+         u"Skip deprecated functions"_s},
+        {diffOption(), u"Print a diff of wrapper files"_s},
+        {dryrunOption(), u"Dry run, do not generate wrapper files"_s},
+        {u"-h"_s, {} },
+        {helpOption(), u"Display this help and exit"_s},
+        {u"-I<path>"_s, {} },
+        {u"include-paths="_s + pathSyntax,
+        u"Include paths used by the C++ parser"_s},
+        {languageLevelOption() + u"=, -std=<level>"_s,
          languageLevelDescription()},
-        {QLatin1String("license-file=<license-file>"),
-         QLatin1String("File used for copyright headers of generated files")},
-        {QLatin1String("no-suppress-warnings"),
-         QLatin1String("Show all warnings")},
-        {QLatin1String("output-directory=<path>"),
-         QLatin1String("The directory where the generated files will be written")},
-        {QLatin1String("project-file=<file>"),
-         QLatin1String("text file containing a description of the binding project.\n"
-                       "Replaces and overrides command line arguments")},
-        {QLatin1String("silent"), QLatin1String("Avoid printing any message")},
-        {QLatin1String("-T<path>"), {} },
-        {QLatin1String("typesystem-paths=") + pathSyntax,
-         QLatin1String("Paths used when searching for typesystems")},
-        {QLatin1String("version"),
-         QLatin1String("Output version information and exit")}
+        {u"license-file=<license-file>"_s,
+         u"File used for copyright headers of generated files"_s},
+        {u"no-suppress-warnings"_s,
+         u"Show all warnings"_s},
+        {u"output-directory=<path>"_s,
+         u"The directory where the generated files will be written"_s},
+        {u"project-file=<file>"_s,
+         u"text file containing a description of the binding project.\n"
+          "Replaces and overrides command line arguments"_s},
+        {u"silent"_s, u"Avoid printing any message"_s},
+        {u"-T<path>"_s, {} },
+        {u"typesystem-paths="_s + pathSyntax,
+         u"Paths used when searching for typesystems"_s},
+        {u"version"_s,
+         u"Output version information and exit"_s}
     };
     printOptions(s, generalOptions);
 
@@ -459,7 +463,7 @@ int shibokenMain(int argc, char *argv[])
     getCommandLineArgs(args);
     Generators generators;
 
-    auto ait = args.options.find(QLatin1String("version"));
+    auto ait = args.options.find(u"version"_s);
     if (ait != args.options.end()) {
         args.options.erase(ait);
         printVerAndBanner();
@@ -467,9 +471,9 @@ int shibokenMain(int argc, char *argv[])
     }
 
     QString generatorSet;
-    ait = args.options.find(QLatin1String("generator-set"));
-    if (ait == args.options.end()) // Also check QLatin1String("generatorSet") command line argument for backward compatibility.
-        ait = args.options.find(QLatin1String("generatorSet"));
+    ait = args.options.find(u"generator-set"_s);
+    if (ait == args.options.end()) // Also check "generatorSet" command line argument for backward compatibility.
+        ait = args.options.find(u"generatorSet"_s);
     if (ait != args.options.end()) {
         generatorSet = ait.value().toString();
         args.options.erase(ait);
@@ -479,17 +483,17 @@ int shibokenMain(int argc, char *argv[])
     if (generatorSet == u"qtdoc") {
         generators = docGenerators();
         if (generators.isEmpty()) {
-            errorPrint(QLatin1String("Doc strings extractions was not enabled in this shiboken build."));
+            errorPrint(u"Doc strings extractions was not enabled in this shiboken build."_s);
             return EXIT_FAILURE;
         }
     } else if (generatorSet.isEmpty() || generatorSet == u"shiboken") {
         generators = shibokenGenerators();
     } else {
-        errorPrint(QLatin1String("Unknown generator set, try \"shiboken\" or \"qtdoc\"."));
+        errorPrint(u"Unknown generator set, try \"shiboken\" or \"qtdoc\"."_s);
         return EXIT_FAILURE;
     }
 
-    ait = args.options.find(QLatin1String("help"));
+    ait = args.options.find(u"help"_s);
     if (ait != args.options.end()) {
         args.options.erase(ait);
         printUsage();
@@ -515,7 +519,7 @@ int shibokenMain(int argc, char *argv[])
     }
 
     QString licenseComment;
-    ait = args.options.find(QLatin1String("license-file"));
+    ait = args.options.find(u"license-file"_s);
     if (ait != args.options.end()) {
         QFile licenseFile(ait.value().toString());
         args.options.erase(ait);
@@ -528,8 +532,8 @@ int shibokenMain(int argc, char *argv[])
         }
     }
 
-    QString outputDirectory = QLatin1String("out");
-    ait = args.options.find(QLatin1String("output-directory"));
+    QString outputDirectory = u"out"_s;
+    ait = args.options.find(u"output-directory"_s);
     if (ait != args.options.end()) {
         outputDirectory = ait.value().toString();
         args.options.erase(ait);
@@ -552,22 +556,22 @@ int shibokenMain(int argc, char *argv[])
         args.options.erase(ait);
     }
 
-    ait = args.options.find(QLatin1String("silent"));
+    ait = args.options.find(u"silent"_s);
     if (ait != args.options.end()) {
         extractor.setSilent(true);
         args.options.erase(ait);
     } else {
-        ait = args.options.find(QLatin1String("debug-level"));
+        ait = args.options.find(u"debug-level"_s);
         if (ait != args.options.end()) {
             const QString value = ait.value().toString();
             if (!ReportHandler::setDebugLevelFromArg(value)) {
-                errorPrint(QLatin1String("Invalid debug level: ") + value);
+                errorPrint(u"Invalid debug level: "_s + value);
                 return EXIT_FAILURE;
             }
             args.options.erase(ait);
         }
     }
-    ait = args.options.find(QLatin1String("no-suppress-warnings"));
+    ait = args.options.find(u"no-suppress-warnings"_s);
     if (ait != args.options.end()) {
         args.options.erase(ait);
         extractor.setSuppressWarnings(false);
@@ -580,7 +584,7 @@ int shibokenMain(int argc, char *argv[])
             QStringList parts = fullVersion.split(u',');
             QString package;
             QString version;
-            package = parts.size() == 1 ? u"*"_qs : parts.constFirst();
+            package = parts.size() == 1 ? u"*"_s : parts.constFirst();
             version = parts.constLast();
             if (!extractor.setApiVersion(package, version)) {
                 errorPrint(msgInvalidVersion(package, version));
@@ -621,7 +625,7 @@ int shibokenMain(int argc, char *argv[])
                            args, extractor);
 
     if (args.positionalArguments.size() < 2) {
-        errorPrint(QLatin1String("Insufficient positional arguments, specify header-file and typesystem-file."));
+        errorPrint(u"Insufficient positional arguments, specify header-file and typesystem-file."_s);
         std::cout << '\n';
         printUsage();
         return EXIT_FAILURE;
@@ -637,7 +641,7 @@ int shibokenMain(int argc, char *argv[])
     for (const QString &cppFileName : qAsConst(args.positionalArguments)) {
         const QFileInfo cppFileNameFi(cppFileName);
         if (!cppFileNameFi.isFile() && !cppFileNameFi.isSymLink()) {
-            errorPrint(u'"' + cppFileName + QLatin1String("\" does not exist."));
+            errorPrint(u'"' + cppFileName + u"\" does not exist."_s);
             return EXIT_FAILURE;
         }
         cppFileNames.append(cppFileNameFi);
@@ -671,7 +675,7 @@ int shibokenMain(int argc, char *argv[])
      * --project-file, also the arguments of each generator before
      * checking if there isn't any existing arguments in argsHandler.
      */
-    args.options.remove(QLatin1String("project-file"));
+    args.options.remove(u"project-file"_s);
     for (auto it = projectFileArguments.options.cbegin(), end = projectFileArguments.options.cend();
          it != end; ++it) {
         args.options.remove(it.key());
@@ -699,7 +703,7 @@ int shibokenMain(int argc, char *argv[])
     const std::optional<ApiExtractorResult> apiOpt = extractor.run(apiExtractorFlags);
 
     if (!apiOpt.has_value()) {
-        errorPrint(QLatin1String("Error running ApiExtractor."));
+        errorPrint(u"Error running ApiExtractor."_s);
         return EXIT_FAILURE;
     }
 
@@ -719,8 +723,8 @@ int shibokenMain(int argc, char *argv[])
         const bool ok = g->setup(apiOpt.value()) && g->generate();
         ReportHandler::endProgress();
          if (!ok) {
-             errorPrint(QLatin1String("Error running generator: ")
-                        + QLatin1String(g->name()) + u'.');
+             errorPrint(u"Error running generator: "_s
+                        + QLatin1StringView(g->name()) + u'.');
              return EXIT_FAILURE;
          }
     }

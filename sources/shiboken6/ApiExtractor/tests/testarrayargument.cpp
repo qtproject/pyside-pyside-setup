@@ -27,13 +27,18 @@
 ****************************************************************************/
 
 #include "testarrayargument.h"
-#include <QtTest/QTest>
 #include "testutil.h"
 #include <abstractmetaenum.h>
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
 #include <typesystem.h>
 #include <parser/enumvalue.h>
+
+#include <qtcompat.h>
+
+#include <QtTest/QTest>
+
+using namespace Qt::StringLiterals;
 
 void TestArrayArgument::testArrayArgumentWithSizeDefinedByInteger()
 {
@@ -91,21 +96,21 @@ void TestArrayArgument::testArraySignature()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), u"A");
-    QCOMPARE(functionMinimalSignature(classA, QLatin1String("mi1")),
+    QCOMPARE(functionMinimalSignature(classA, u"mi1"_s),
              u"mi1(int[5])");
-    QCOMPARE(functionMinimalSignature(classA, QLatin1String("mi1c")),
+    QCOMPARE(functionMinimalSignature(classA, u"mi1c"_s),
              u"mi1c(const int[5])");
-    QCOMPARE(functionMinimalSignature(classA, QLatin1String("mi1cu")),
+    QCOMPARE(functionMinimalSignature(classA, u"mi1cu"_s),
              u"mi1cu(const int[])");
-    QCOMPARE(functionMinimalSignature(classA, QLatin1String("mc1cu")),
+    QCOMPARE(functionMinimalSignature(classA, u"mc1cu"_s),
              u"mc1cu(const char*)");
-    QCOMPARE(functionMinimalSignature(classA, QLatin1String("mc1cup")),
+    QCOMPARE(functionMinimalSignature(classA, u"mc1cup"_s),
              u"mc1cup(const char*[])");
-    QCOMPARE(functionMinimalSignature(classA, QLatin1String("muc2")),
+    QCOMPARE(functionMinimalSignature(classA, u"muc2"_s),
              u"muc2(unsigned char*[2][3])");
-    QCOMPARE(functionMinimalSignature(classA, QLatin1String("mc2c")),
+    QCOMPARE(functionMinimalSignature(classA, u"mc2c"_s),
              u"mc2c(const char*[5][6])");
-    QCOMPARE(functionMinimalSignature(classA, QLatin1String("mc2cu")),
+    QCOMPARE(functionMinimalSignature(classA, u"mc2cu"_s),
              u"mc2cu(const char[][2])");
 }
 
@@ -129,9 +134,9 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValue()
     AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), u"A");
     QVERIFY(classA);
 
-    auto someEnum = classA->findEnum(QLatin1String("SomeEnum"));
+    auto someEnum = classA->findEnum(u"SomeEnum"_s);
     QVERIFY(someEnum.has_value());
-    auto nvalues = classA->findEnumValue(QLatin1String("NValues"));
+    auto nvalues = classA->findEnumValue(u"NValues"_s);
     QVERIFY(nvalues.has_value());
 
     const AbstractMetaArgument &arg = classA->functions().constLast()->arguments().constFirst();

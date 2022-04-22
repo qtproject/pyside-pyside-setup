@@ -31,6 +31,8 @@
 
 #include <reporthandler.h>
 
+#include "qtcompat.h"
+
 #include <QtCore/QDebug>
 #include <QtCore/QDir>
 #include <QtCore/QFile>
@@ -45,6 +47,8 @@
 #include <string.h>
 #include <algorithm>
 #include <iterator>
+
+using namespace Qt::StringLiterals;
 
 namespace clang {
 
@@ -227,17 +231,17 @@ static QString findClangLibDir()
 {
     for (const char *envVar : {"LLVM_INSTALL_DIR", "CLANG_INSTALL_DIR"}) {
         if (qEnvironmentVariableIsSet(envVar)) {
-            const QString path = QFile::decodeName(qgetenv(envVar)) + QLatin1String("/lib");
+            const QString path = QFile::decodeName(qgetenv(envVar)) + u"/lib"_s;
             if (QFileInfo::exists(path))
                 return path;
             qWarning("%s: %s as pointed to by %s does not exist.", __FUNCTION__, qPrintable(path), envVar);
         }
     }
     const QString llvmConfig =
-        QStandardPaths::findExecutable(QLatin1String("llvm-config"));
+        QStandardPaths::findExecutable(u"llvm-config"_s);
     if (!llvmConfig.isEmpty()) {
         QByteArray stdOut;
-        if (runProcess(llvmConfig, QStringList{QLatin1String("--libdir")}, &stdOut)) {
+        if (runProcess(llvmConfig, QStringList{u"--libdir"_s}, &stdOut)) {
             const QString path = QFile::decodeName(stdOut.trimmed());
             if (QFileInfo::exists(path))
                 return path;
@@ -254,7 +258,7 @@ static QString findClangBuiltInIncludesDir()
     if (!clangPathLibDir.isEmpty()) {
         QString candidate;
         QVersionNumber lastVersionNumber(1, 0, 0);
-        const QString clangDirName = clangPathLibDir + QLatin1String("/clang");
+        const QString clangDirName = clangPathLibDir + u"/clang"_s;
         QDir clangDir(clangDirName);
         const QFileInfoList versionDirs =
             clangDir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
@@ -319,7 +323,7 @@ QByteArrayList emulatedCompilerOptions()
             appendClangBuiltinIncludes(&headerPaths);
         break;
     case Compiler::Clang:
-        headerPaths.append(gppInternalIncludePaths(compilerFromCMake(u"clang++"_qs)));
+        headerPaths.append(gppInternalIncludePaths(compilerFromCMake(u"clang++"_s)));
         result.append(noStandardIncludeOption());
         break;
     case Compiler::Gpp:

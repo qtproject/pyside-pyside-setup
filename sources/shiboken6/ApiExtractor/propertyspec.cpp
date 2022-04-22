@@ -34,6 +34,8 @@
 #include "messages.h"
 #include "typesystem.h"
 
+#include "qtcompat.h"
+
 #include <QtCore/QHash>
 
 #ifndef QT_NO_DEBUG_STREAM
@@ -41,6 +43,8 @@
 #endif
 
 #include <algorithm>
+
+using namespace Qt::StringLiterals;
 
 class QPropertySpecData : public QSharedData
 {
@@ -209,13 +213,13 @@ TypeSystemProperty QPropertySpec::typeSystemPropertyFromQ_Property(const QString
     const auto it = std::find_if(propertyTokens.cbegin(), propertyTokens.cend(),
                                  [](const QString &t) { return tokenLookup.contains(t); });
     if (it == propertyTokens.cend()) {
-        *errorMessage = QLatin1String("Invalid property specification, READ missing");
+        *errorMessage = u"Invalid property specification, READ missing"_s;
         return result;
     }
 
     const int firstToken = int(it - propertyTokens.cbegin());
     if (firstToken < 2) {
-        *errorMessage = QLatin1String("Insufficient number of tokens in property specification");
+        *errorMessage = u"Insufficient number of tokens in property specification"_s;
         return result;
     }
 
@@ -251,7 +255,7 @@ TypeSystemProperty QPropertySpec::typeSystemPropertyFromQ_Property(const QString
         result.name.remove(0, 1);
     }
     if (!result.isValid())
-        *errorMessage = QLatin1String("Incomplete property specification");
+        *errorMessage = u"Incomplete property specification"_s;
     return result;
 }
 

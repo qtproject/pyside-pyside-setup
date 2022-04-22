@@ -48,6 +48,8 @@
 #include <typedatabase.h>
 #include <parser/enumvalue.h>
 
+#include "qtcompat.h"
+
 #include <QtCore/QDebug>
 #include <QtCore/QDir>
 #include <QtCore/QMetaObject>
@@ -58,6 +60,8 @@
 #include <algorithm>
 #include <cstring>
 #include <memory>
+
+using namespace Qt::StringLiterals;
 
 static const char CPP_ARG0[] = "cppArg0";
 const char *CppGenerator::PYTHON_TO_CPPCONVERSION_STRUCT = "Shiboken::Conversions::PythonToCppConversion";
@@ -134,14 +138,14 @@ static bool contains(const ProtocolEntries &l, const QString &needle)
 const ProtocolEntries &mappingProtocols()
 {
     static const ProtocolEntries result = {
-        {QLatin1String("__mlen__"),
-         QLatin1String("PyObject *self"),
-         QLatin1String("Py_ssize_t")},
-        {QLatin1String("__mgetitem__"),
-         QLatin1String("PyObject *self, PyObject *_key"),
-         QLatin1String("PyObject*")},
-        {QLatin1String("__msetitem__"),
-         QLatin1String("PyObject *self, PyObject *_key, PyObject *_value"),
+        {u"__mlen__"_s,
+         u"PyObject *self"_s,
+         u"Py_ssize_t"_s},
+        {u"__mgetitem__"_s,
+         u"PyObject *self, PyObject *_key"_s,
+         u"PyObject*"_s},
+        {u"__msetitem__"_s,
+         u"PyObject *self, PyObject *_key, PyObject *_value"_s,
          intT()}};
     return result;
 }
@@ -151,27 +155,27 @@ const ProtocolEntries &mappingProtocols()
 const ProtocolEntries &sequenceProtocols()
 {
     static const ProtocolEntries result = {
-        {QLatin1String("__len__"),
-         QLatin1String("PyObject *self"),
-         QLatin1String("Py_ssize_t")},
-        {QLatin1String("__getitem__"),
-         QLatin1String("PyObject *self, Py_ssize_t _i"),
-         QLatin1String("PyObject*")},
-        {QLatin1String("__setitem__"),
-         QLatin1String("PyObject *self, Py_ssize_t _i, PyObject *_value"),
+        {u"__len__"_s,
+         u"PyObject *self"_s,
+         u"Py_ssize_t"_s},
+        {u"__getitem__"_s,
+         u"PyObject *self, Py_ssize_t _i"_s,
+         u"PyObject*"_s},
+        {u"__setitem__"_s,
+         u"PyObject *self, Py_ssize_t _i, PyObject *_value"_s,
          intT()},
-        {QLatin1String("__getslice__"),
-         QLatin1String("PyObject *self, Py_ssize_t _i1, Py_ssize_t _i2"),
-         QLatin1String("PyObject*")},
-        {QLatin1String("__setslice__"),
-         QLatin1String("PyObject *self, Py_ssize_t _i1, Py_ssize_t _i2, PyObject *_value"),
+        {u"__getslice__"_s,
+         u"PyObject *self, Py_ssize_t _i1, Py_ssize_t _i2"_s,
+         u"PyObject*"_s},
+        {u"__setslice__"_s,
+         u"PyObject *self, Py_ssize_t _i1, Py_ssize_t _i2, PyObject *_value"_s,
          intT()},
-        {QLatin1String("__contains__"),
-         QLatin1String("PyObject *self, PyObject *_value"),
+        {u"__contains__"_s,
+         u"PyObject *self, PyObject *_value"_s,
          intT()},
-        {QLatin1String("__concat__"),
-         QLatin1String("PyObject *self, PyObject *_other"),
-         QLatin1String("PyObject*")}
+        {u"__concat__"_s,
+         u"PyObject *self, PyObject *_other"_s,
+         u"PyObject*"_s}
     };
     return result;
 }
@@ -183,9 +187,9 @@ static QString opaqueContainerCreationFunc(const AbstractMetaType &type)
         static_cast<const ContainerTypeEntry *>(type.typeEntry());
     const auto *instantiationTypeEntry =
         type.instantiations().constFirst().typeEntry();
-    QString result = u"create"_qs;
+    QString result = u"create"_s;
     if (type.isConstant())
-        result += u"Const"_qs;
+        result += u"Const"_s;
     result += containerTypeEntry->opaqueContainerName(instantiationTypeEntry->name());
     return result;
 }
@@ -203,7 +207,7 @@ CppGenerator::CppGenerator() = default;
 
 QString CppGenerator::fileNameForContext(const GeneratorContext &context) const
 {
-    return fileNameForContextHelper(context, u"_wrapper.cpp"_qs);
+    return fileNameForContextHelper(context, u"_wrapper.cpp"_s);
 }
 
 static bool isInplaceAdd(const AbstractMetaFunctionCPtr &func)
@@ -331,9 +335,9 @@ std::optional<AbstractMetaType>
 void CppGenerator::clearTpFuncs()
 {
     m_tpFuncs = {
-        {QLatin1String("__str__"), {}}, {QLatin1String("__str__"), {}},
-        {reprFunction(), {}}, {QLatin1String("__iter__"), {}},
-        {QLatin1String("__next__"), {}}
+        {u"__str__"_s, {}}, {u"__str__"_s, {}},
+        {reprFunction(), {}}, {u"__iter__"_s, {}},
+        {u"__next__"_s, {}}
     };
 }
 
@@ -382,7 +386,7 @@ static void writePyGetSetDefEntry(TextStream &s, const QString &name,
                                   const QString &getFunc, const QString &setFunc)
 {
     s << "{const_cast<char *>(\"" << name << "\"), " << getFunc << ", "
-        << (setFunc.isEmpty() ? QLatin1String(NULL_PTR) : setFunc) << "},\n";
+        << (setFunc.isEmpty() ? QLatin1StringView(NULL_PTR) : setFunc) << "},\n";
 }
 
 static bool generateRichComparison(const GeneratorContext &c)
@@ -948,7 +952,7 @@ void CppGenerator::writeCacheResetNative(TextStream &s, const GeneratorContext &
 void CppGenerator::writeConstructorNative(TextStream &s, const GeneratorContext &classContext,
                                           const AbstractMetaFunctionCPtr &func) const
 {
-    const QString qualifiedName = classContext.wrapperName() + QLatin1String("::");
+    const QString qualifiedName = classContext.wrapperName() + u"::"_s;
     s << functionSignature(func, qualifiedName, QString(),
                            OriginalTypeDescription | SkipDefaultValues);
     s << " : ";
@@ -991,7 +995,7 @@ static bool allArgumentsRemoved(const AbstractMetaFunctionCPtr& func)
 QString CppGenerator::getVirtualFunctionReturnTypeName(const AbstractMetaFunctionCPtr &func) const
 {
     if (func->type().isVoid())
-        return QLatin1String("\"\"");
+        return u"\"\""_s;
 
     if (func->isTypeModified())
         return u'"' + func->modifiedTypeName() + u'"';
@@ -1004,17 +1008,17 @@ QString CppGenerator::getVirtualFunctionReturnTypeName(const AbstractMetaFunctio
         case ContainerTypeEntry::ListContainer:
             break;
         case ContainerTypeEntry::SetContainer:
-            return uR"("set")"_qs;
+            return uR"("set")"_s;
             break;
         case ContainerTypeEntry::MapContainer:
         case ContainerTypeEntry::MultiMapContainer:
-            return uR"("dict")"_qs;
+            return uR"("dict")"_s;
             break;
         case ContainerTypeEntry::PairContainer:
-            return uR"("tuple")"_qs;
+            return uR"("tuple")"_s;
             break;
         }
-        return uR"("list")"_qs;
+        return uR"("list")"_s;
     }
     if (typeEntry->isSmartPointer())
         return u'"' + typeEntry->qualifiedCppName() + u'"';
@@ -1028,8 +1032,8 @@ QString CppGenerator::getVirtualFunctionReturnTypeName(const AbstractMetaFunctio
     if (func->type().isPrimitive())
         return u'"' + func->type().name() + u'"';
 
-    return QLatin1String("reinterpret_cast<PyTypeObject *>(Shiboken::SbkType< ")
-        + typeEntry->qualifiedCppName() + QLatin1String(" >())->tp_name");
+    return u"reinterpret_cast<PyTypeObject *>(Shiboken::SbkType< "_s
+        + typeEntry->qualifiedCppName() + u" >())->tp_name"_s;
 }
 
 // When writing an overridden method of a wrapper class, write the part
@@ -1075,7 +1079,7 @@ QString CppGenerator::virtualMethodReturn(TextStream &s, const ApiExtractorResul
                                           const FunctionModificationList &functionModifications)
 {
     if (func->isVoid())
-        return QLatin1String("return;");
+        return u"return;"_s;
     const AbstractMetaType &returnType = func->type();
     for (const FunctionModification &mod : functionModifications) {
         for (const ArgumentModification &argMod : mod.argument_mods()) {
@@ -1096,7 +1100,7 @@ QString CppGenerator::virtualMethodReturn(TextStream &s, const ApiExtractorResul
                     offset = match.capturedStart(1);
                 }
                 DefaultValue defaultReturnExpr(DefaultValue::Custom, expr);
-                return QLatin1String("return ") + defaultReturnExpr.returnValue()
+                return u"return "_s + defaultReturnExpr.returnValue()
                        + u';';
             }
         }
@@ -1104,7 +1108,7 @@ QString CppGenerator::virtualMethodReturn(TextStream &s, const ApiExtractorResul
     QString errorMessage;
     const auto defaultReturnExpr = minimalConstructor(api, returnType, &errorMessage);
     if (!defaultReturnExpr.has_value()) {
-        QString errorMsg = QLatin1String(__FUNCTION__) + u": "_qs
+        QString errorMsg = QLatin1StringView(__FUNCTION__) + u": "_s
                            + func->classQualifiedSignature();
         errorMsg = msgCouldNotFindMinimalConstructor(errorMsg,
                                                      func->type().cppSignature(),
@@ -1115,9 +1119,9 @@ QString CppGenerator::virtualMethodReturn(TextStream &s, const ApiExtractorResul
     if (returnType.referenceType() == LValueReference) {
         s << "static " << returnType.typeEntry()->qualifiedCppName()
             << " result;\n";
-        return QLatin1String("return result;");
+        return u"return result;"_s;
     }
-    return QLatin1String("return ") + defaultReturnExpr->returnValue()
+    return u"return "_s + defaultReturnExpr->returnValue()
            + u';';
 }
 
@@ -1126,12 +1130,12 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
                                             int cacheIndex) const
 {
     // abbreviations
-    const QString pyRetVar = QLatin1String(PYTHON_RETURN_VAR);
-    const QString cppRetVar = QLatin1String(CPP_RETURN_VAR);
+    const QString pyRetVar = QLatin1StringView(PYTHON_RETURN_VAR);
+    const QString cppRetVar = QLatin1StringView(CPP_RETURN_VAR);
 
     // skip metaObject function, this will be written manually ahead
     if (usePySideExtensions() && func->ownerClass() && func->ownerClass()->isQObject() &&
-        ((func->name() == u"metaObject"_qs)
+        ((func->name() == u"metaObject"_s)
             || (func->name() == u"qt_metacall")))
         return;
 
@@ -1139,7 +1143,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
     const QString funcName = func->isOperatorOverload()
         ? pythonOperatorFunctionName(func) : func->definitionNames().constFirst();
 
-    QString prefix = wrapperName(func->ownerClass()) + QLatin1String("::");
+    QString prefix = wrapperName(func->ownerClass()) + u"::"_s;
     s << functionSignature(func, prefix, QString(), Generator::SkipDefaultValues |
                                                     Generator::OriginalTypeDescription)
       << "\n{\n" << indent;
@@ -1249,7 +1253,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
             if (!func->conversionRule(TypeSystem::TargetLangCode,
                                       arg.argumentIndex() + 1).isEmpty()) {
                 // Has conversion rule.
-                ac << arg.name() + QLatin1String(CONV_RULE_OUT_VAR_SUFFIX);
+                ac << arg.name() + QLatin1StringView(CONV_RULE_OUT_VAR_SUFFIX);
             } else {
                 QString argName = arg.name();
                 if (convert)
@@ -1262,7 +1266,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
         }
 
         s << "Py_BuildValue(\"(" << getFormatUnitString(func, false) << ")\",\n"
-            << indent << argConversions.join(u",\n"_qs) << outdent << "\n));\n";
+            << indent << argConversions.join(u",\n"_s) << outdent << "\n));\n";
     }
 
     bool invalidateReturn = false;
@@ -1402,8 +1406,8 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
             if (isProtectedEnum) {
                 QString typeCast;
                 if (metaEnum->enclosingClass())
-                    typeCast += u"::"_qs + metaEnum->enclosingClass()->qualifiedCppName();
-                typeCast += u"::"_qs + metaEnum->name();
+                    typeCast += u"::"_s + metaEnum->enclosingClass()->qualifiedCppName();
+                typeCast += u"::"_s + metaEnum->name();
                 s << '(' << typeCast << ')';
             }
         }
@@ -1437,7 +1441,7 @@ void CppGenerator::writeMetaObjectMethod(TextStream &s,
         << "::qt_metacall(QMetaObject::Call call, int id, void **args)\n";
     s << "{\n" << indent;
 
-    const auto list = classContext.metaClass()->queryFunctionsByName(QLatin1String("qt_metacall"));
+    const auto list = classContext.metaClass()->queryFunctionsByName(u"qt_metacall"_s);
 
     CodeSnipList snips;
     if (list.size() == 1) {
@@ -1504,7 +1508,7 @@ void CppGenerator::writeEnumConverterFunctions(TextStream &s, const TypeEntry *e
     c << ";\n";
     writePythonToCppFunction(s, c.toString(), typeName, typeName);
 
-    QString pyTypeCheck = u"PyObject_TypeCheck(pyIn, "_qs + enumPythonType + u')';
+    QString pyTypeCheck = u"PyObject_TypeCheck(pyIn, "_s + enumPythonType + u')';
     writeIsPythonConvertibleToCppFunction(s, typeName, typeName, pyTypeCheck);
 
     c.clear();
@@ -1554,8 +1558,8 @@ void CppGenerator::writeEnumConverterFunctions(TextStream &s, const TypeEntry *e
     // a PolarOrientation and Qt::AlignmentFlag, which was the main
     // issue of the bug.
     const QString numberCondition = QStringLiteral("PyNumber_Check(pyIn) && ") + pyTypeCheck;
-    writePythonToCppFunction(s, c.toString(), QLatin1String("number"), flagsTypeName);
-    writeIsPythonConvertibleToCppFunction(s, QLatin1String("number"), flagsTypeName, numberCondition);
+    writePythonToCppFunction(s, c.toString(), u"number"_s, flagsTypeName);
+    writeIsPythonConvertibleToCppFunction(s, u"number"_s, flagsTypeName, numberCondition);
 }
 
 void CppGenerator::writeConverterFunctions(TextStream &s, const AbstractMetaClass *metaClass,
@@ -1586,13 +1590,13 @@ void CppGenerator::writeConverterFunctions(TextStream &s, const AbstractMetaClas
     s << "// Python to C++ pointer conversion - returns the C++ object of the Python wrapper (keeps object identity).\n";
 
     QString sourceTypeName = metaClass->name();
-    QString targetTypeName = metaClass->name() + QLatin1String("_PTR");
+    QString targetTypeName = metaClass->name() + u"_PTR"_s;
     StringStream c(TextStream::Language::Cpp);
     c << "Shiboken::Conversions::pythonToCppPointer(" << cpythonType << ", pyIn, cppOut);";
     writePythonToCppFunction(s, c.toString(), sourceTypeName, targetTypeName);
 
     // "Is convertible" function for the Python object to C++ pointer conversion.
-    const QString pyTypeCheck = u"PyObject_TypeCheck(pyIn, "_qs + cpythonType + u")"_qs;
+    const QString pyTypeCheck = u"PyObject_TypeCheck(pyIn, "_s + cpythonType + u")"_s;
     writeIsPythonConvertibleToCppFunction(s, sourceTypeName, targetTypeName, pyTypeCheck, QString(), true);
     s << '\n';
 
@@ -1638,7 +1642,7 @@ return result;)";
     s  << '\n' << "// C++ to Python copy conversion.\n";
     targetTypeName = metaClass->name();
 
-    sourceTypeName = targetTypeName + QLatin1String("_COPY");
+    sourceTypeName = targetTypeName + u"_COPY"_s;
 
     c.clear();
 
@@ -1655,8 +1659,8 @@ return result;)";
     targetTypeName = sourceTypeName + QStringLiteral("_COPY");
     c.clear();
 
-    QString pyInVariable = QLatin1String("pyIn");
-    const QString outPtr = u"reinterpret_cast<"_qs + typeName + u" *>(cppOut)"_qs;
+    QString pyInVariable = u"pyIn"_s;
+    const QString outPtr = u"reinterpret_cast<"_s + typeName + u" *>(cppOut)"_s;
     if (!classContext.forSmartPointer()) {
         c << '*' << outPtr << " = *"
             << cpythonWrapperCPtr(typeEntry, pyInVariable) << ';';
@@ -1679,7 +1683,7 @@ return result;)";
     // "Is convertible" function for the Python object to C++ value copy conversion.
     QString copyTypeCheck = pyTypeCheck;
     if (classContext.forSmartPointer())
-        copyTypeCheck.prepend(pyInVariable + u" == Py_None || "_qs);
+        copyTypeCheck.prepend(pyInVariable + u" == Py_None || "_s);
     writeIsPythonConvertibleToCppFunction(s, sourceTypeName, targetTypeName, copyTypeCheck);
     s << '\n';
 
@@ -1700,7 +1704,7 @@ return result;)";
         QString toCppPreConv;
         if (conv->isConversionOperator()) {
             const AbstractMetaClass *sourceClass = conv->ownerClass();
-            typeCheck = u"PyObject_TypeCheck(pyIn, "_qs
+            typeCheck = u"PyObject_TypeCheck(pyIn, "_s
                         + cpythonTypeNameExt(sourceClass->typeEntry()) + u')';
             toCppConv = u'*' + cpythonWrapperCPtr(sourceClass->typeEntry(),
                                                   pyInVariable);
@@ -1713,7 +1717,7 @@ return result;)";
             if (sourceType.isWrapperType()) {
                 if (sourceType.referenceType() == LValueReference
                     || !sourceType.isPointerToWrapperType()) {
-                    toCppConv = u" *"_qs;
+                    toCppConv = u" *"_s;
                 }
                 toCppConv += cpythonWrapperCPtr(sourceType.typeEntry(), pyInVariable);
             }
@@ -1734,14 +1738,14 @@ return result;)";
                 pc << getFullTypeNameWithoutModifiers(sourceType) << " cppIn"
                     << minimalConstructorExpression(api(), sourceType) << ";\n";
                 writeToCppConversion(pc, sourceType, nullptr, pyInVariable,
-                                     u"cppIn"_qs);
+                                     u"cppIn"_s);
                 pc << ';';
                 toCppPreConv = pc.toString();
-                toCppConv.append(QLatin1String("cppIn"));
+                toCppConv.append(u"cppIn"_s);
             } else if (!sourceType.isWrapperType()) {
                 StringStream tcc(TextStream::Language::Cpp);
                 writeToCppConversion(tcc, sourceType, metaClass, pyInVariable,
-                                     u"/*BOZO-1061*/"_qs);
+                                     u"/*BOZO-1061*/"_s);
                 toCppConv = tcc.toString();
             }
         }
@@ -1779,14 +1783,14 @@ void CppGenerator::writeConverterRegister(TextStream &s, const AbstractMetaClass
     {
         Indentation indent(s);
         QString sourceTypeName = metaClass->name();
-        QString targetTypeName = sourceTypeName + QLatin1String("_PTR");
+        QString targetTypeName = sourceTypeName + u"_PTR"_s;
         s << pythonToCppFunctionName(sourceTypeName, targetTypeName) << ',' << '\n'
             << convertibleToCppFunctionName(sourceTypeName, targetTypeName) << ',' << '\n';
         std::swap(targetTypeName, sourceTypeName);
         s << cppToPythonFunctionName(sourceTypeName, targetTypeName);
         if (typeEntry->isValue() || typeEntry->isSmartPointer()) {
             s << ',' << '\n';
-            sourceTypeName = metaClass->name() + QLatin1String("_COPY");
+            sourceTypeName = metaClass->name() + u"_COPY"_s;
             s << cppToPythonFunctionName(sourceTypeName, targetTypeName);
         }
     }
@@ -1803,10 +1807,10 @@ void CppGenerator::writeConverterRegister(TextStream &s, const AbstractMetaClass
 
     auto writeConversionsForType = [writeConversions](const QString &fullTypeName)
     {
-        QStringList lst = fullTypeName.split(QLatin1String("::"),
+        QStringList lst = fullTypeName.split(u"::"_s,
                                                Qt::SkipEmptyParts);
         while (!lst.isEmpty()) {
-            QString signature = lst.join(QLatin1String("::"));
+            QString signature = lst.join(u"::"_s);
             writeConversions(signature);
             lst.removeFirst();
         }
@@ -1819,11 +1823,11 @@ void CppGenerator::writeConverterRegister(TextStream &s, const AbstractMetaClass
         const QString &smartPointerType = classContext.preciseType().instantiations().at(0).cppSignature();
         const QString &smartPointerName = classContext.preciseType().typeEntry()->name();
 
-        QStringList lst = smartPointerType.split(QLatin1String("::"),
+        QStringList lst = smartPointerType.split(u"::"_s,
                                                Qt::SkipEmptyParts);
         while (!lst.isEmpty()) {
-            QString signature = lst.join(QLatin1String("::"));
-            writeConversions(smartPointerName + u'<' + signature + u" >"_qs);
+            QString signature = lst.join(u"::"_s);
+            writeConversions(smartPointerName + u'<' + signature + u" >"_s);
             lst.removeFirst();
         }
 
@@ -1852,10 +1856,10 @@ void CppGenerator::writeConverterRegister(TextStream &s, const AbstractMetaClass
     // Python to C++ copy (value, not pointer neither reference) conversion.
     s << "// Add Python to C++ copy (value, not pointer neither reference) conversion to type converter.\n";
     QString sourceTypeName = metaClass->name();
-    QString targetTypeName = sourceTypeName + QLatin1String("_COPY");
+    QString targetTypeName = sourceTypeName + u"_COPY"_s;
     QString toCpp = pythonToCppFunctionName(sourceTypeName, targetTypeName);
     QString isConv = convertibleToCppFunctionName(sourceTypeName, targetTypeName);
-    writeAddPythonToCppConversion(s, QLatin1String("converter"), toCpp, isConv);
+    writeAddPythonToCppConversion(s, u"converter"_s, toCpp, isConv);
 
     // User provided implicit conversions.
 
@@ -1881,10 +1885,10 @@ void CppGenerator::writeConverterRegister(TextStream &s, const AbstractMetaClass
         }
         QString toCpp = pythonToCppFunctionName(sourceType, targetType);
         QString isConv = convertibleToCppFunctionName(sourceType, targetType);
-        writeAddPythonToCppConversion(s, QLatin1String("converter"), toCpp, isConv);
+        writeAddPythonToCppConversion(s, u"converter"_s, toCpp, isConv);
     }
 
-    writeCustomConverterRegister(s, typeEntry->customConversion(), u"converter"_qs);
+    writeCustomConverterRegister(s, typeEntry->customConversion(), u"converter"_s);
 }
 
 void CppGenerator::writeCustomConverterRegister(TextStream &s, const CustomConversion *customConversion,
@@ -2008,7 +2012,7 @@ static const char fullName[] = ")" << fullPythonFunctionName(rfunc, true)
         if (overloadData.pythonFunctionWrapperUsesListOfArguments())
             s << '[' << maxArgs << ']';
         s << ";\n";
-        writeUnusedVariableCast(s, QLatin1String(PYTHON_TO_CPP_VAR));
+        writeUnusedVariableCast(s, QLatin1StringView(PYTHON_TO_CPP_VAR));
     }
 
     if (initPythonArguments) {
@@ -2288,7 +2292,7 @@ void CppGenerator::writeArgumentsInitializer(TextStream &s, const OverloadData &
 {
     const auto rfunc = overloadData.referenceFunction();
     s << "PyTuple_GET_SIZE(args);\n";
-    writeUnusedVariableCast(s, QLatin1String("numArgs"));
+    writeUnusedVariableCast(s, u"numArgs"_s);
 
     int minArgs = overloadData.minArgs();
     int maxArgs = overloadData.maxArgs();
@@ -2347,7 +2351,7 @@ void CppGenerator::writeArgumentsInitializer(TextStream &s, const OverloadData &
     else
         funcName = rfunc->name();
 
-    QString argsVar = overloadData.hasVarargs() ?  QLatin1String("nonvarargs") : QLatin1String("args");
+    QString argsVar = overloadData.hasVarargs() ?  u"nonvarargs"_s : u"args"_s;
     s << "if (!";
     if (usesNamedArguments) {
         s << "PyArg_ParseTuple(" << argsVar << ", \"|" << QByteArray(maxArgs, 'O')
@@ -2369,7 +2373,7 @@ void CppGenerator::writeCppSelfConversion(TextStream &s, const GeneratorContext 
         return;
     }
 
-    static const QString pythonSelfVar = QLatin1String("self");
+    static const QString pythonSelfVar = u"self"_s;
     if (useWrapperClass)
         s << "static_cast<" << className << " *>(";
     s << cpythonWrapperCPtr(context.metaClass(), pythonSelfVar);
@@ -2381,7 +2385,7 @@ void CppGenerator::writeSmartPointerCppSelfConversion(TextStream &s,
                                                       const GeneratorContext &context)
 {
     Q_ASSERT(context.forSmartPointer());
-    s << cpythonWrapperCPtr(context.preciseType(), u"self"_qs);
+    s << cpythonWrapperCPtr(context.preciseType(), u"self"_s);
 }
 
 static inline void writeCppSelfVarDef(TextStream &s,
@@ -2399,7 +2403,7 @@ void CppGenerator::writeSmartPointerCppSelfDefinition(TextStream &s,
                                                       CppSelfDefinitionFlags flags)
 {
     Q_ASSERT(context.forSmartPointer());
-    writeInvalidPyObjectCheck(s, u"self"_qs, errorReturn);
+    writeInvalidPyObjectCheck(s, u"self"_s, errorReturn);
     writeCppSelfVarDef(s, flags);
     writeSmartPointerCppSelfConversion(s, context);
     s << ";\n";
@@ -2425,9 +2429,9 @@ void CppGenerator::writeCppSelfDefinition(TextStream &s,
     Q_ASSERT(!useWrapperClass || context.useWrapper());
     const QString className = useWrapperClass
         ? context.wrapperName()
-        : (QLatin1String("::") + metaClass->qualifiedCppName());
+        : (u"::"_s + metaClass->qualifiedCppName());
 
-    writeInvalidPyObjectCheck(s, u"self"_qs, errorReturn);
+    writeInvalidPyObjectCheck(s, u"self"_s, errorReturn);
 
     if (flags.testFlag(CppSelfAsReference)) {
          writeCppSelfVarDef(s, flags);
@@ -2442,13 +2446,13 @@ void CppGenerator::writeCppSelfDefinition(TextStream &s,
             writeCppSelfVarDef(s, flags);
             writeCppSelfConversion(s, context, className, useWrapperClass);
             s << ";\n";
-            writeUnusedVariableCast(s, QLatin1String(CPP_SELF_VAR));
+            writeUnusedVariableCast(s, QLatin1StringView(CPP_SELF_VAR));
         }
         return;
     }
 
     s << className << " *" << CPP_SELF_VAR << " = nullptr;\n";
-    writeUnusedVariableCast(s, QLatin1String(CPP_SELF_VAR));
+    writeUnusedVariableCast(s, QLatin1StringView(CPP_SELF_VAR));
 
     // Checks if the underlying C++ object is valid.
     s << "if (self)\n";
@@ -2491,7 +2495,7 @@ void CppGenerator::writeErrorSection(TextStream &s, const OverloadData &overload
     s  << '\n' << cpythonFunctionName(rfunc) << "_TypeError:\n";
     Indentation indentation(s);
     QString argsVar = overloadData.pythonFunctionWrapperUsesListOfArguments()
-        ? QLatin1String("args") : QLatin1String(PYTHON_ARG);
+        ? u"args"_s : QLatin1StringView(PYTHON_ARG);
     s << "Shiboken::setErrorAboutWrongArguments(" << argsVar << ", fullName, errInfo);\n"
         << errorReturn;
 }
@@ -2522,11 +2526,11 @@ void CppGenerator::writeInvalidPyObjectCheck(TextStream &s, const QString &pyObj
 
 static QString pythonToCppConverterForArgumentName(const QString &argumentName)
 {
-    static const QRegularExpression pyArgsRegex(QLatin1String(PYTHON_ARGS)
-                                                + QLatin1String(R"((\[\d+[-]?\d*\]))"));
+    static const QRegularExpression pyArgsRegex(QLatin1StringView(PYTHON_ARGS)
+                                                + uR"((\[\d+[-]?\d*\]))"_s);
     Q_ASSERT(pyArgsRegex.isValid());
     const QRegularExpressionMatch match = pyArgsRegex.match(argumentName);
-    QString result = QLatin1String(PYTHON_TO_CPP_VAR);
+    QString result = QLatin1StringView(PYTHON_TO_CPP_VAR);
     if (match.hasMatch())
         result += match.captured(1);
     return result;
@@ -2555,16 +2559,16 @@ void CppGenerator::writeTypeCheck(TextStream &s, const AbstractMetaType &argType
     // TODO-CONVERTER -----------------------------------------------------------------------
     if (!argType.typeEntry()->isCustom()) {
         typeCheck = u'(' + pythonToCppConverterForArgumentName(argumentName)
-                    + u" = "_qs + typeCheck + u"))"_qs;
+                    + u" = "_s + typeCheck + u"))"_s;
         if (!isNumber && argType.typeEntry()->isCppPrimitive()) {
             typeCheck.prepend(cpythonCheckFunction(argType) + u'('
-                              + argumentName + u") && "_qs);
+                              + argumentName + u") && "_s);
         }
     }
     // TODO-CONVERTER -----------------------------------------------------------------------
 
     if (rejectNull)
-        typeCheck = u'(' + argumentName +  u" != Py_None && "_qs + typeCheck + u')';
+        typeCheck = u'(' + argumentName +  u" != Py_None && "_s + typeCheck + u')';
 
     s << typeCheck;
 }
@@ -2728,7 +2732,7 @@ qsizetype CppGenerator::writePythonToCppTypeConversion(TextStream &s,
 
     qsizetype indirections = -type.indirectionsV().size();
 
-    QString cppOutAux = cppOut + QLatin1String("_local");
+    QString cppOutAux = cppOut + u"_local"_s;
 
     const bool isPrimitive = typeEntry->isPrimitive();
     const bool isEnum = typeEntry->isEnum();
@@ -2766,7 +2770,7 @@ qsizetype CppGenerator::writePythonToCppTypeConversion(TextStream &s,
     if (isEnum && avoidProtectedHack()) {
         auto metaEnum = api().findAbstractMetaEnum(type.typeEntry());
         if (metaEnum.has_value() && metaEnum->isProtected()) {
-            typeName = wrapperName(context) + QLatin1String("::")
+            typeName = wrapperName(context) + u"::"_s
                        + metaEnum.value().name();
             isProtectedEnum = true;
         }
@@ -2816,7 +2820,7 @@ qsizetype CppGenerator::writePythonToCppTypeConversion(TextStream &s,
 
     QString pythonToCppFunc = pythonToCppConverterForArgumentName(pyIn);
 
-    QString pythonToCppCall = pythonToCppFunc + u'(' + pyIn + u", &"_qs
+    QString pythonToCppCall = pythonToCppFunc + u'(' + pyIn + u", &"_s
                               + cppOut + u')';
     if (!valueOrPointer) {
         // pythonToCppFunc may be 0 when less parameters are passed and
@@ -2856,10 +2860,10 @@ static void addConversionRuleCodeSnippet(CodeSnipList &snippetList, QString &rul
     if (rule.isEmpty())
         return;
     if (snippetLanguage == TypeSystem::TargetLangCode) {
-        rule.replace(QLatin1String("%in"), inputName);
-        rule.replace(QLatin1String("%out"), outputName + QLatin1String("_out"));
+        rule.replace(u"%in"_s, inputName);
+        rule.replace(u"%out"_s, outputName + u"_out"_s);
     } else {
-        rule.replace(QLatin1String("%out"), outputName);
+        rule.replace(u"%out"_s, outputName);
     }
     CodeSnip snip(snippetLanguage);
     snip.position = (snippetLanguage == TypeSystem::NativeCode) ? TypeSystem::CodeSnipPositionAny : TypeSystem::CodeSnipPositionBeginning;
@@ -3023,7 +3027,7 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(TextStream &s,
 
         QString pyArgName = (usePyArgs && maxArgs > 1)
             ? pythonArgsAt(child->argPos())
-            : QLatin1String(PYTHON_ARG);
+            : QLatin1StringView(PYTHON_ARG);
         auto od = child;
         int startArg = od->argPos();
         int sequenceArgCount = 0;
@@ -3069,16 +3073,16 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(TextStream &s,
             int numArgs = args.size() - OverloadData::numberOfRemovedArguments(refFunc);
             if (isVarargs)
                 --numArgs;
-            QString check = (isVarargs ? u"numArgs >= "_qs : u"numArgs == "_qs)
+            QString check = (isVarargs ? u"numArgs >= "_s : u"numArgs == "_s)
                             + QString::number(numArgs);
             typeChecks.prepend(check);
         } else if (usePyArgs && sequenceArgCount > 0) {
-            typeChecks.prepend(u"numArgs >= "_qs + QString::number(startArg + sequenceArgCount));
+            typeChecks.prepend(u"numArgs >= "_s + QString::number(startArg + sequenceArgCount));
         } else if (refFunc->isOperatorOverload() && !refFunc->isCallOperator()) {
             QString check;
             if (!refFunc->isReverseOperator())
                 check.append(u'!');
-            check.append(QLatin1String("isReverse"));
+            check.append(u"isReverse"_s);
             typeChecks.prepend(check);
         }
 
@@ -3092,7 +3096,7 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(TextStream &s,
             s << "true";
         } else {
             Indentation indent(s);
-            s << typeChecks.join(QLatin1String("\n&& "));
+            s << typeChecks.join(u"\n&& "_s);
         }
         s << ") {\n";
         {
@@ -3146,13 +3150,13 @@ void CppGenerator::writeSingleFunctionCall(TextStream &s,
 {
     if (func->isDeprecated()) {
         s << "Shiboken::warning(PyExc_DeprecationWarning, 1, \"Function: '"
-                    << func->signature().replace(QLatin1String("::"), QLatin1String("."))
+                    << func->signature().replace(u"::"_s, u"."_s)
                     << "' is marked as deprecated, please check the documentation for more information.\");\n";
     }
 
     if (func->functionType() == AbstractMetaFunction::EmptyFunction) {
         s << "PyErr_Format(PyExc_TypeError, \"%s is a private method.\", \""
-          << func->signature().replace(QLatin1String("::"), QLatin1String("."))
+          << func->signature().replace(u"::"_s, u"."_s)
           << "\");\n" << errorReturn;
         return;
     }
@@ -3171,7 +3175,7 @@ void CppGenerator::writeSingleFunctionCall(TextStream &s,
         const AbstractMetaArgument &arg = func->arguments().at(argIdx);
         if (arg.isModifiedRemoved()) {
             if (!arg.defaultValueExpression().isEmpty()) {
-                const QString cppArgRemoved = QLatin1String(CPP_ARG_REMOVED)
+                const QString cppArgRemoved = QLatin1StringView(CPP_ARG_REMOVED)
                     + QString::number(argIdx);
                 s << getFullTypeName(arg.type()) << ' ' << cppArgRemoved;
                 s << " = " << arg.defaultValueExpression() << ";\n";
@@ -3194,8 +3198,9 @@ void CppGenerator::writeSingleFunctionCall(TextStream &s,
             continue;
         auto argType = getArgumentType(func, argIdx);
         int argPos = argIdx - removedArgs;
-        QString argName = QLatin1String(CPP_ARG) + QString::number(argPos);
-        QString pyArgName = usePyArgs ? pythonArgsAt(argPos) : QLatin1String(PYTHON_ARG);
+        QString argName = QLatin1StringView(CPP_ARG) + QString::number(argPos);
+        QString pyArgName = usePyArgs ? pythonArgsAt(argPos)
+                                      : QLatin1StringView(PYTHON_ARG);
         writeArgumentConversion(s, argType, argName, pyArgName, errorReturn,
                                 func->implementingClass(), arg.defaultValueExpression(),
                                 func->isUserAdded());
@@ -3219,12 +3224,12 @@ QString CppGenerator::cppToPythonFunctionName(const QString &sourceTypeName, QSt
 {
     if (targetTypeName.isEmpty())
         targetTypeName = sourceTypeName;
-    return sourceTypeName + QLatin1String("_CppToPython_") + targetTypeName;
+    return sourceTypeName + u"_CppToPython_"_s + targetTypeName;
 }
 
 QString CppGenerator::pythonToCppFunctionName(const QString &sourceTypeName, const QString &targetTypeName)
 {
-    return sourceTypeName + QLatin1String("_PythonToCpp_") + targetTypeName;
+    return sourceTypeName + u"_PythonToCpp_"_s + targetTypeName;
 }
 QString CppGenerator::pythonToCppFunctionName(const AbstractMetaType &sourceType, const AbstractMetaType &targetType)
 {
@@ -3238,8 +3243,8 @@ QString CppGenerator::pythonToCppFunctionName(const CustomConversion::TargetToNa
 
 QString CppGenerator::convertibleToCppFunctionName(const QString &sourceTypeName, const QString &targetTypeName)
 {
-    return QLatin1String("is_") + sourceTypeName + QLatin1String("_PythonToCpp_")
-            + targetTypeName + QLatin1String("_Convertible");
+    return u"is_"_s + sourceTypeName + u"_PythonToCpp_"_s
+            + targetTypeName + u"_Convertible"_s;
 }
 QString CppGenerator::convertibleToCppFunctionName(const AbstractMetaType &sourceType, const AbstractMetaType &targetType)
 {
@@ -3281,10 +3286,10 @@ static void replaceCppToPythonVariables(QString &code, const QString &typeName,
                                         bool constRef = false)
 {
     CodeSnipAbstract::prependCode(&code, writeCppInRef(typeName, constRef));
-    code.replace(QLatin1String("%INTYPE"), typeName);
-    code.replace(QLatin1String("%OUTTYPE"), QLatin1String("PyObject *"));
-    code.replace(QLatin1String("%in"), QLatin1String("cppInRef"));
-    code.replace(QLatin1String("%out"), QLatin1String("pyOut"));
+    code.replace(u"%INTYPE"_s, typeName);
+    code.replace(u"%OUTTYPE"_s, u"PyObject *"_s);
+    code.replace(u"%in"_s, u"cppInRef"_s);
+    code.replace(u"%out"_s, u"pyOut"_s);
 }
 
 void CppGenerator::writeCppToPythonFunction(TextStream &s, const CustomConversion *customConversion) const
@@ -3314,8 +3319,8 @@ void CppGenerator::writeCppToPythonFunction(TextStream &s, const AbstractMetaTyp
         const AbstractMetaType &type = containerType.instantiations().at(i);
         QString typeName = getFullTypeName(type);
         if (type.isConstant())
-            typeName = QLatin1String("const ") + typeName;
-        code.replace(u"%INTYPE_"_qs + QString::number(i), typeName);
+            typeName = u"const "_s + typeName;
+        code.replace(u"%INTYPE_"_s + QString::number(i), typeName);
     }
     replaceCppToPythonVariables(code, getFullTypeNameWithoutModifiers(containerType), true);
     processCodeSnip(code);
@@ -3369,7 +3374,7 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s,
     // Python to C++ conversion function.
     StringStream c(TextStream::Language::Cpp);
     if (conversion.isEmpty())
-        conversion = u'*' + cpythonWrapperCPtr(sourceType, QLatin1String("pyIn"));
+        conversion = u'*' + cpythonWrapperCPtr(sourceType, u"pyIn"_s);
     if (!preConversion.isEmpty())
         c << preConversion << '\n';
     const QString fullTypeName = targetType.isSmartPointer()
@@ -3383,7 +3388,7 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s,
 
     // Python to C++ convertible check function.
     if (typeCheck.isEmpty())
-        typeCheck = u"PyObject_TypeCheck(pyIn, "_qs + sourcePyType + u')';
+        typeCheck = u"PyObject_TypeCheck(pyIn, "_s + sourcePyType + u')';
     writeIsPythonConvertibleToCppFunction(s, sourceTypeName, targetTypeName, typeCheck);
     s << '\n';
 }
@@ -3398,12 +3403,12 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s,
     if (toNative->sourceType())
         inType = cpythonTypeNameExt(toNative->sourceType());
     else
-        inType = u'(' + toNative->sourceTypeName() + u"_TypeF())"_qs;
-    code.replace(QLatin1String("%INTYPE"), inType);
-    code.replace(QLatin1String("%OUTTYPE"), targetType->qualifiedCppName());
-    code.replace(QLatin1String("%in"), QLatin1String("pyIn"));
-    code.replace(QLatin1String("%out"),
-                 QLatin1String("*reinterpret_cast<") + getFullTypeName(targetType) + QLatin1String(" *>(cppOut)"));
+        inType = u'(' + toNative->sourceTypeName() + u"_TypeF())"_s;
+    code.replace(u"%INTYPE"_s, inType);
+    code.replace(u"%OUTTYPE"_s, targetType->qualifiedCppName());
+    code.replace(u"%in"_s, u"pyIn"_s);
+    code.replace(u"%out"_s,
+                 u"*reinterpret_cast<"_s + getFullTypeName(targetType) + u" *>(cppOut)"_s);
 
     QString sourceTypeName = fixedCppTypeName(toNative);
     QString targetTypeName = fixedCppTypeName(targetType);
@@ -3414,11 +3419,11 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s,
     if (typeCheck.isEmpty()) {
         QString pyTypeName = toNative->sourceTypeName();
         if (pyTypeName == u"Py_None" || pyTypeName == u"PyNone")
-            typeCheck = QLatin1String("%in == Py_None");
+            typeCheck = u"%in == Py_None"_s;
         else if (pyTypeName == u"SbkEnumType")
-            typeCheck = QLatin1String("Shiboken::isShibokenEnum(%in)");
+            typeCheck = u"Shiboken::isShibokenEnum(%in)"_s;
         else if (pyTypeName == u"SbkObject")
-            typeCheck = QLatin1String("Shiboken::Object::checkType(%in)");
+            typeCheck = u"Shiboken::Object::checkType(%in)"_s;
     }
     if (typeCheck.isEmpty()) {
         if (!toNative->sourceType() || toNative->sourceType()->isPrimitive()) {
@@ -3427,10 +3432,10 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s,
                 << "' must provide either an input type check function or a non primitive type entry.";
             throw Exception(m);
         }
-        typeCheck = u"PyObject_TypeCheck(%in, "_qs
+        typeCheck = u"PyObject_TypeCheck(%in, "_s
                     + cpythonTypeNameExt(toNative->sourceType()) + u')';
     }
-    typeCheck.replace(QLatin1String("%in"), QLatin1String("pyIn"));
+    typeCheck.replace(u"%in"_s, u"pyIn"_s);
     processCodeSnip(typeCheck);
     writeIsPythonConvertibleToCppFunction(s, sourceTypeName, targetTypeName, typeCheck);
 }
@@ -3450,8 +3455,8 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s, const Abst
     // Python to C++ conversion function.
     QString cppTypeName = getFullTypeNameWithoutModifiers(containerType);
     QString code = toCppConversions.constFirst()->conversion();
-    const QString line = QLatin1String("auto &cppOutRef = *reinterpret_cast<")
-        + cppTypeName + QLatin1String(" *>(cppOut);");
+    const QString line = u"auto &cppOutRef = *reinterpret_cast<"_s
+        + cppTypeName + u" *>(cppOut);"_s;
     CodeSnipAbstract::prependCode(&code, line);
     for (qsizetype i = 0; i < containerType.instantiations().size(); ++i) {
         const AbstractMetaType &type = containerType.instantiations().at(i);
@@ -3468,22 +3473,22 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s, const Abst
                 rightCode.replace(varName, u'*' + varName);
                 code.replace(pos, code.size() - pos, rightCode);
             }
-            typeName.append(QLatin1String(" *"));
+            typeName.append(u" *"_s);
         }
-        code.replace(u"%OUTTYPE_"_qs + QString::number(i), typeName);
+        code.replace(u"%OUTTYPE_"_s + QString::number(i), typeName);
     }
-    code.replace(QLatin1String("%OUTTYPE"), cppTypeName);
-    code.replace(QLatin1String("%in"), QLatin1String("pyIn"));
-    code.replace(QLatin1String("%out"), QLatin1String("cppOutRef"));
+    code.replace(u"%OUTTYPE"_s, cppTypeName);
+    code.replace(u"%in"_s, u"pyIn"_s);
+    code.replace(u"%out"_s, u"cppOutRef"_s);
     QString typeName = fixedCppTypeName(containerType);
     writePythonToCppFunction(s, code, typeName, typeName);
 
     // Python to C++ convertible check function.
     QString typeCheck = cpythonCheckFunction(containerType);
     if (typeCheck.isEmpty())
-        typeCheck = QLatin1String("false");
+        typeCheck = u"false"_s;
     else
-        typeCheck = typeCheck + QLatin1String("pyIn)");
+        typeCheck = typeCheck + u"pyIn)"_s;
     writeIsPythonConvertibleToCppFunction(s, typeName, typeName, typeCheck);
     s << '\n';
 }
@@ -3544,8 +3549,9 @@ void CppGenerator::writeNamedArgumentResolution(TextStream &s, const AbstractMet
         for (const AbstractMetaArgument &arg : args) {
             const int pyArgIndex = arg.argumentIndex()
                 - OverloadData::numberOfRemovedArguments(func, arg.argumentIndex());
-            QString pyArgName = usePyArgs ? pythonArgsAt(pyArgIndex) : QLatin1String(PYTHON_ARG);
-            QString pyKeyName = QLatin1String("key_") + arg.name();
+            QString pyArgName = usePyArgs ? pythonArgsAt(pyArgIndex)
+                                          : QLatin1StringView(PYTHON_ARG);
+            QString pyKeyName = u"key_"_s + arg.name();
             s << "static PyObject *const " << pyKeyName
                 << " = Shiboken::String::createStaticString(\"" << arg.name() << "\");\n"
                 << "if (PyDict_Contains(kwds, " << pyKeyName << ")) {\n";
@@ -3598,13 +3604,13 @@ QString CppGenerator::argumentNameFromIndex(const ApiExtractorResult &api,
 {
     switch (argIndex) {
     case -1:
-        return u"self"_qs;
+        return u"self"_s;
     case 0:
-        return QLatin1String(PYTHON_RETURN_VAR);
+        return QLatin1StringView(PYTHON_RETURN_VAR);
     case 1: { // Single argument?
         OverloadData data(getFunctionGroups(func->implementingClass()).value(func->name()), api);
         if (!data.pythonFunctionWrapperUsesListOfArguments())
-            return QLatin1String(PYTHON_ARG);
+            return QLatin1StringView(PYTHON_ARG);
         break;
     }
     }
@@ -3720,19 +3726,19 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
 
                     // If have conversion rules I will use this for removed args
                     if (hasConversionRule)
-                        userArgs << arg.name() + QLatin1String(CONV_RULE_OUT_VAR_SUFFIX);
+                        userArgs << arg.name() + QLatin1StringView(CONV_RULE_OUT_VAR_SUFFIX);
                     else if (!arg.defaultValueExpression().isEmpty())
-                        userArgs.append(QLatin1String(CPP_ARG_REMOVED) + QString::number(i));
+                        userArgs.append(QLatin1StringView(CPP_ARG_REMOVED) + QString::number(i));
                 } else {
                     if (hasConversionRule) {
-                        userArgs.append(arg.name() + QLatin1String(CONV_RULE_OUT_VAR_SUFFIX));
+                        userArgs.append(arg.name() + QLatin1StringView(CONV_RULE_OUT_VAR_SUFFIX));
                     } else {
                         const int idx = arg.argumentIndex() - removedArgs;
                         const auto deRef = arg.type().shouldDereferenceArgument();
                         QString argName;
                         if (deRef > 0)
                             argName += QString(deRef, u'*');
-                        argName += QLatin1String(CPP_ARG) + QString::number(idx);
+                        argName += QLatin1StringView(CPP_ARG) + QString::number(idx);
                         userArgs.append(argName);
                     }
                 }
@@ -3755,9 +3761,9 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                 argsClear = false;
                 otherArgsModified |= defValModified || hasConversionRule || arg.isModifiedRemoved();
                 if (hasConversionRule)
-                    otherArgs.prepend(arg.name() + QLatin1String(CONV_RULE_OUT_VAR_SUFFIX));
+                    otherArgs.prepend(arg.name() + QLatin1StringView(CONV_RULE_OUT_VAR_SUFFIX));
                 else
-                    otherArgs.prepend(QLatin1String(CPP_ARG_REMOVED) + QString::number(i));
+                    otherArgs.prepend(QLatin1StringView(CPP_ARG_REMOVED) + QString::number(i));
             }
             if (otherArgsModified)
                 userArgs << otherArgs;
@@ -3771,9 +3777,9 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
             QString firstArg(u'(');
             if (!func->isPointerOperator()) // no de-reference operator
                 firstArg += u'*';
-            firstArg += QLatin1String(CPP_SELF_VAR);
+            firstArg += QLatin1StringView(CPP_SELF_VAR);
             firstArg += u')';
-            QString secondArg = QLatin1String(CPP_ARG0);
+            QString secondArg = QLatin1StringView(CPP_ARG0);
             if (!func->isUnaryOperator()) {
                 auto deRef = func->arguments().constFirst().type().shouldDereferenceArgument();
                 AbstractMetaType::applyDereference(&secondArg, deRef);
@@ -3811,7 +3817,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                         << "(*" << CPP_ARG0 << ')';
                 } else {
                     const QString ctorCall = context.effectiveClassName() + u'('
-                                             + userArgs.join(u", "_qs) + u')';
+                                             + userArgs.join(u", "_s) + u')';
                     if (usePySideExtensions() && owner->isQObject()) {
                         s << "void *addr = PySide::nextQObjectMemoryAddr();\n";
                         uva << "if (addr) {\n";
@@ -3845,19 +3851,20 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                         if (func->isStatic()) {
                             mc << "::" << methodCallClassName << "::";
                         } else {
+                            const QString cppSelfVar = QLatin1StringView(CPP_SELF_VAR);
                             const QString selfVarCast = func->ownerClass() == func->implementingClass()
-                                ? QLatin1String(CPP_SELF_VAR)
-                                : QLatin1String("reinterpret_cast<") + methodCallClassName
-                                  + QLatin1String(" *>(") + QLatin1String(CPP_SELF_VAR) + u')';
+                                ? cppSelfVar
+                                : u"reinterpret_cast<"_s + methodCallClassName
+                                  + u" *>("_s + cppSelfVar + u')';
                             if (func->isConstant()) {
                                 if (avoidProtectedHack()) {
                                     mc << "const_cast<const ::";
                                     if (ownerClass->cppWrapper().testFlag(AbstractMetaClass::CppProtectedHackWrapper)) {
                                         // PYSIDE-500: Need a special wrapper cast when inherited
                                         const QString selfWrapCast = ownerClass == func->implementingClass()
-                                            ? QLatin1String(CPP_SELF_VAR)
-                                            : QLatin1String("reinterpret_cast<") + wrapperName(ownerClass)
-                                              + QLatin1String(" *>(") + QLatin1String(CPP_SELF_VAR) + u')';
+                                            ? cppSelfVar
+                                            : u"reinterpret_cast<"_s + wrapperName(ownerClass)
+                                              + u" *>("_s + cppSelfVar + u')';
                                         mc << wrapperName(ownerClass);
                                         mc << " *>(" << selfWrapCast << ")->";
                                     }
@@ -3887,21 +3894,21 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
 
                         if (!func->isAbstract())
                             mc << (func->isProtected() ? wrapperName(func->ownerClass()) :
-                                                         QLatin1String("::")
+                                                         u"::"_s
                                                          + methodCallClassName) << "::";
                         mc << func->originalName() << "_protected";
                     }
                 } else {
                     mc << func->originalName();
                 }
-                mc << '(' << userArgs.join(QLatin1String(", ")) << ')';
+                mc << '(' << userArgs.join(u", "_s) << ')';
                 if (!func->isAbstract() && func->isVirtual()) {
                     if (!avoidProtectedHack() || !func->isProtected()) {
                         QString virtualCall = mc;
                         QString normalCall = virtualCall;
-                        virtualCall.replace(QLatin1String("%CLASS_NAME"),
+                        virtualCall.replace(u"%CLASS_NAME"_s,
                                             methodCallClassName);
-                        normalCall.remove(QLatin1String("::%CLASS_NAME::"));
+                        normalCall.remove(u"::%CLASS_NAME::"_s);
                         mc.clear();
                         mc << "Shiboken::Object::hasCppWrapper(reinterpret_cast<SbkObject *>(self))\n"
                             << "    ? " << virtualCall << '\n'
@@ -3935,7 +3942,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                     if (metaEnum.has_value()) {
                         QString enumName;
                         if (metaEnum->isProtected()) {
-                            enumName = context.wrapperName() + QLatin1String("::")
+                            enumName = context.wrapperName() + u"::"_s
                                        + metaEnum.value().name();
                         } else {
                             enumName = func->type().cppSignature();
@@ -3953,7 +3960,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                     s << func->type().cppSignature();
                     if (func->type().isObjectTypeUsedAsValueType()) {
                         s << '*';
-                        methodCall = QLatin1String("new ")
+                        methodCall = u"new "_s
                                      + func->type().typeEntry()->qualifiedCppName()
                                      + u'(' + mc.toString() + u')';
                     }
@@ -3971,7 +3978,8 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
             // Convert result
             const auto funcType = func->type();
             if (!func->conversionRule(TypeSystem::TargetLangCode, 0).isEmpty()) {
-                writeConversionRule(s, func, TypeSystem::TargetLangCode, QLatin1String(PYTHON_RETURN_VAR));
+                writeConversionRule(s, func, TypeSystem::TargetLangCode,
+                                    QLatin1StringView(PYTHON_RETURN_VAR));
             } else if (!isCtor && !func->isInplaceOperator() && !func->isVoid()
                 && !func->injectedCodeHasReturnValueAttribution(TypeSystem::TargetLangCode)) {
                 if (func->type().isObjectTypeUsedAsValueType()) {
@@ -3985,7 +3993,8 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                         << "(&" << CPP_RETURN_VAR << ");\n";
                 } else {
                     s << PYTHON_RETURN_VAR << " = ";
-                    writeToPythonConversion(s, funcType, func->ownerClass(), QLatin1String(CPP_RETURN_VAR));
+                    writeToPythonConversion(s, funcType, func->ownerClass(),
+                                            QLatin1StringView(CPP_RETURN_VAR));
                 }
                 s << ";\n";
             }
@@ -4057,7 +4066,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
             }
             const int argIndex = arg_mod.index();
             const QString pyArgName = refCount.action == ReferenceCount::Remove
-                ? u"Py_None"_qs : argumentNameFromIndex(api(), func, argIndex);
+                ? u"Py_None"_s : argumentNameFromIndex(api(), func, argIndex);
 
             if (refCount.action == ReferenceCount::Add || refCount.action == ReferenceCount::Set)
                 s << "Shiboken::Object::keepReference(";
@@ -4181,7 +4190,7 @@ void CppGenerator::writeEnumConverterInitialization(TextStream &s, const TypeEnt
 {
     if (!enumType)
         return;
-    QString enumFlagName = enumType->isFlags() ? QLatin1String("flag") : QLatin1String("enum");
+    QString enumFlagName = enumType->isFlags() ? u"flag"_s : u"enum"_s;
     QString enumPythonType = cpythonTypeNameExt(enumType);
 
     const FlagsTypeEntry *flags = nullptr;
@@ -4204,17 +4213,17 @@ void CppGenerator::writeEnumConverterInitialization(TextStream &s, const TypeEnt
             QString enumTypeName = fixedCppTypeName(flags->originator());
             QString toCpp = pythonToCppFunctionName(enumTypeName, typeName);
             QString isConv = convertibleToCppFunctionName(enumTypeName, typeName);
-            writeAddPythonToCppConversion(s, QLatin1String("converter"), toCpp, isConv);
+            writeAddPythonToCppConversion(s, u"converter"_s, toCpp, isConv);
         }
 
         QString toCpp = pythonToCppFunctionName(typeName, typeName);
         QString isConv = convertibleToCppFunctionName(typeName, typeName);
-        writeAddPythonToCppConversion(s, QLatin1String("converter"), toCpp, isConv);
+        writeAddPythonToCppConversion(s, u"converter"_s, toCpp, isConv);
 
         if (flags) {
-            QString toCpp = pythonToCppFunctionName(QLatin1String("number"), typeName);
-            QString isConv = convertibleToCppFunctionName(QLatin1String("number"), typeName);
-            writeAddPythonToCppConversion(s, QLatin1String("converter"), toCpp, isConv);
+            QString toCpp = pythonToCppFunctionName(u"number"_s, typeName);
+            QString isConv = convertibleToCppFunctionName(u"number"_s, typeName);
+            writeAddPythonToCppConversion(s, u"converter"_s, toCpp, isConv);
         }
 
         s << "Shiboken::Enum::setTypeConverter(" << enumPythonType
@@ -4318,8 +4327,8 @@ void CppGenerator::writeSmartPointerConverterInitialization(TextStream &s, const
             const auto smartTargetType = opt.value();
             s << "// Convert to SmartPointer derived class: ["
                 << smartTargetType.cppSignature() << "]\n";
-            const QString converter = u"Shiboken::Conversions::getConverter(\""_qs
-                                      + smartTargetType.cppSignature() + u"\")"_qs;
+            const QString converter = u"Shiboken::Conversions::getConverter(\""_s
+                                      + smartTargetType.cppSignature() + u"\")"_s;
             writeConversionRegister(type, fixedCppTypeName(smartTargetType), converter);
         } else {
             s << "// Class not found:" << type.instantiations().at(0).cppSignature();
@@ -4347,7 +4356,7 @@ void CppGenerator::writeExtendedConverterInitialization(TextStream &s, const Typ
 
 QString CppGenerator::multipleInheritanceInitializerFunctionName(const AbstractMetaClass *metaClass)
 {
-    return cpythonBaseName(metaClass->typeEntry()) + QLatin1String("_mi_init");
+    return cpythonBaseName(metaClass->typeEntry()) + u"_mi_init"_s;
 }
 
 bool CppGenerator::supportsMappingProtocol(const AbstractMetaClass *metaClass)
@@ -4438,24 +4447,24 @@ void CppGenerator::writeClassDefinition(TextStream &s,
     }
 
     if (!metaClass->baseClass())
-        baseClassName = QLatin1String("SbkObject_TypeF()");
+        baseClassName = u"SbkObject_TypeF()"_s;
 
     bool onlyPrivCtor = !metaClass->hasNonPrivateConstructor();
 
     const bool isQApp = usePySideExtensions()
-        && metaClass->inheritsFrom(u"QCoreApplication"_qs);
+        && metaClass->inheritsFrom(u"QCoreApplication"_s);
 
-    QString tp_flags = u"Py_TPFLAGS_DEFAULT"_qs;
+    QString tp_flags = u"Py_TPFLAGS_DEFAULT"_s;
     if (!metaClass->attributes().testFlag(AbstractMetaClass::FinalCppClass))
-        tp_flags += u"|Py_TPFLAGS_BASETYPE"_qs;
+        tp_flags += u"|Py_TPFLAGS_BASETYPE"_s;
     if (metaClass->isNamespace() || metaClass->hasPrivateDestructor()) {
         tp_dealloc = metaClass->hasPrivateDestructor() ?
-                     QLatin1String("SbkDeallocWrapperWithPrivateDtor") :
-                     QLatin1String("Sbk_object_dealloc /* PYSIDE-832: Prevent replacement of \"0\" with subtype_dealloc. */");
+                     u"SbkDeallocWrapperWithPrivateDtor"_s :
+                     u"Sbk_object_dealloc /* PYSIDE-832: Prevent replacement of \"0\" with subtype_dealloc. */"_s;
         tp_init.clear();
     } else {
         tp_dealloc = isQApp
-            ? QLatin1String("&SbkDeallocQAppWrapper") : QLatin1String("&SbkDeallocWrapper");
+            ? u"&SbkDeallocQAppWrapper"_s : u"&SbkDeallocWrapper"_s;
         if (!onlyPrivCtor && !ctors.isEmpty())
             tp_init = cpythonFunctionName(ctors.constFirst());
     }
@@ -4467,7 +4476,7 @@ void CppGenerator::writeClassDefinition(TextStream &s,
         ? cpythonSetattroFunctionName(metaClass) : QString();
 
     if (metaClass->hasPrivateDestructor() || onlyPrivCtor) {
-        // tp_flags = QLatin1String("Py_TPFLAGS_DEFAULT");
+        // tp_flags = u"Py_TPFLAGS_DEFAULT"_s;
         // This is not generally possible, because PySide does not care about
         // privacy the same way. This worked before the heap types were used,
         // because inheritance is not really checked for static types.
@@ -4476,24 +4485,24 @@ void CppGenerator::writeClassDefinition(TextStream &s,
             // PYSIDE-595: No idea how to do non-inheritance correctly.
             // Since that is only relevant in shiboken, I used a shortcut for
             // PySide.
-            tp_new = u"SbkObject_tp_new"_qs;
+            tp_new = u"SbkObject_tp_new"_s;
         }
         else {
-            tp_new = QLatin1String("SbkDummyNew /* PYSIDE-595: Prevent replacement "
-                                   "of \"0\" with base->tp_new. */");
+            tp_new = u"SbkDummyNew /* PYSIDE-595: Prevent replacement "
+                      "of \"0\" with base->tp_new. */"_s;
         }
     }
     else if (isQApp) {
-        tp_new = u"SbkQApp_tp_new"_qs; // PYSIDE-571: need singleton app
+        tp_new = u"SbkQApp_tp_new"_s; // PYSIDE-571: need singleton app
     }
     else {
-        tp_new = u"SbkObject_tp_new"_qs;
+        tp_new = u"SbkObject_tp_new"_s;
     }
-    tp_flags.append(QLatin1String("|Py_TPFLAGS_HAVE_GC"));
+    tp_flags.append(u"|Py_TPFLAGS_HAVE_GC"_s);
 
     QString tp_richcompare;
     if (generateRichComparison(classContext))
-        tp_richcompare = cpythonBaseName(metaClass) + QLatin1String("_richcompare");
+        tp_richcompare = cpythonBaseName(metaClass) + u"_richcompare"_s;
 
     QString tp_getset;
     if (shouldGenerateGetSetList(metaClass) && !classContext.forSmartPointer())
@@ -4525,14 +4534,14 @@ void CppGenerator::writeClassDefinition(TextStream &s,
          "extern \"C\" {\n";
 
     if (!metaClass->typeEntry()->hashFunction().isEmpty())
-        tp_hash = u'&' + cpythonBaseName(metaClass) + QLatin1String("_HashFunc");
+        tp_hash = u'&' + cpythonBaseName(metaClass) + u"_HashFunc"_s;
 
     const auto callOp = metaClass->findFunction(u"operator()");
     if (!callOp.isNull() && !callOp->isModifiedRemoved())
         tp_call = u'&' + cpythonFunctionName(callOp);
 
-    const QString typePtr = QLatin1String("_") + className
-        + QLatin1String("_Type");
+    const QString typePtr = u"_"_s + className
+        + u"_Type"_s;
     s << "static PyTypeObject *" << typePtr << " = nullptr;\n"
         << "static PyTypeObject *" << className << "_TypeF(void)\n"
         << "{\n" << indent << "return " << typePtr << ";\n" << outdent
@@ -4542,15 +4551,15 @@ void CppGenerator::writeClassDefinition(TextStream &s,
         << pyTypeSlotEntry("Py_tp_repr", m_tpFuncs.value(reprFunction()))
         << pyTypeSlotEntry("Py_tp_hash", tp_hash)
         << pyTypeSlotEntry("Py_tp_call", tp_call)
-        << pyTypeSlotEntry("Py_tp_str", m_tpFuncs.value(QLatin1String("__str__")))
+        << pyTypeSlotEntry("Py_tp_str", m_tpFuncs.value(u"__str__"_s))
         << pyTypeSlotEntry("Py_tp_getattro", tp_getattro)
         << pyTypeSlotEntry("Py_tp_setattro", tp_setattro)
-        << pyTypeSlotEntry("Py_tp_traverse", className + QLatin1String("_traverse"))
-        << pyTypeSlotEntry("Py_tp_clear", className + QLatin1String("_clear"))
+        << pyTypeSlotEntry("Py_tp_traverse", className + u"_traverse"_s)
+        << pyTypeSlotEntry("Py_tp_clear", className + u"_clear"_s)
         << pyTypeSlotEntry("Py_tp_richcompare", tp_richcompare)
-        << pyTypeSlotEntry("Py_tp_iter", m_tpFuncs.value(QLatin1String("__iter__")))
-        << pyTypeSlotEntry("Py_tp_iternext", m_tpFuncs.value(QLatin1String("__next__")))
-        << pyTypeSlotEntry("Py_tp_methods", className + QLatin1String("_methods"))
+        << pyTypeSlotEntry("Py_tp_iter", m_tpFuncs.value(u"__iter__"_s))
+        << pyTypeSlotEntry("Py_tp_iternext", m_tpFuncs.value(u"__next__"_s))
+        << pyTypeSlotEntry("Py_tp_methods", className + u"_methods"_s)
         << pyTypeSlotEntry("Py_tp_getset", tp_getset)
         << pyTypeSlotEntry("Py_tp_init", tp_init)
         << pyTypeSlotEntry("Py_tp_new", tp_new);
@@ -4588,7 +4597,7 @@ void CppGenerator::writeMappingMethods(TextStream &s,
         QString funcName = cpythonFunctionName(func);
         CodeSnipList snips = func->injectedCodeSnips(TypeSystem::CodeSnipPositionAny, TypeSystem::TargetLangCode);
         s << m.returnType << ' ' << funcName << '(' << m.arguments << ")\n{\n";
-        writeInvalidPyObjectCheck(s, u"self"_qs, ErrorReturn::Default);
+        writeInvalidPyObjectCheck(s, u"self"_s, ErrorReturn::Default);
 
         writeCppSelfDefinition(s, func, context, ErrorReturn::Default);
 
@@ -4615,7 +4624,7 @@ void CppGenerator::writeSequenceMethods(TextStream &s,
 
         CodeSnipList snips = func->injectedCodeSnips(TypeSystem::CodeSnipPositionAny, TypeSystem::TargetLangCode);
         s << seq.returnType << ' ' << funcName << '(' << seq.arguments << ")\n{\n" << indent;
-        writeInvalidPyObjectCheck(s, u"self"_qs, ErrorReturn::Default);
+        writeInvalidPyObjectCheck(s, u"self"_s, ErrorReturn::Default);
 
         writeCppSelfDefinition(s, func, context, ErrorReturn::Default);
 
@@ -4633,13 +4642,13 @@ void CppGenerator::writeSequenceMethods(TextStream &s,
 static const QHash<QString, QString> &sqFuncs()
 {
     static const QHash<QString, QString> result = {
-        {QLatin1String("__concat__"), QLatin1String("sq_concat")},
-        {QLatin1String("__contains__"), QLatin1String("sq_contains")},
-        {QLatin1String("__getitem__"), QLatin1String("sq_item")},
-        {QLatin1String("__getslice__"), QLatin1String("sq_slice")},
-        {QLatin1String("__len__"), QLatin1String("sq_length")},
-        {QLatin1String("__setitem__"), QLatin1String("sq_ass_item")},
-        {QLatin1String("__setslice__"), QLatin1String("sq_ass_slice")}
+        {u"__concat__"_s, u"sq_concat"_s},
+        {u"__contains__"_s, u"sq_contains"_s},
+        {u"__getitem__"_s, u"sq_item"_s},
+        {u"__getslice__"_s, u"sq_slice"_s},
+        {u"__len__"_s, u"sq_length"_s},
+        {u"__setitem__"_s, u"sq_ass_item"_s},
+        {u"__setslice__"_s, u"sq_ass_slice"_s}
     };
     return result;
 }
@@ -4661,9 +4670,9 @@ void CppGenerator::writeTypeAsSequenceDefinition(TextStream &s,
 
     //use default implementation
     if (!hasFunctions) {
-        funcs[QLatin1String("__len__")] = baseName + QLatin1String("__len__");
-        funcs[QLatin1String("__getitem__")] = baseName + QLatin1String("__getitem__");
-        funcs[QLatin1String("__setitem__")] = baseName + QLatin1String("__setitem__");
+        funcs[u"__len__"_s] = baseName + u"__len__"_s;
+        funcs[u"__getitem__"_s] = baseName + u"__getitem__"_s;
+        funcs[u"__setitem__"_s] = baseName + u"__setitem__"_s;
     }
 
     for (auto it = sqFuncs().cbegin(), end = sqFuncs().cend(); it != end; ++it) {
@@ -4681,19 +4690,19 @@ void CppGenerator::writeTypeAsMappingDefinition(TextStream &s,
 {
     // Sequence protocol structure members names
     static const QHash<QString, QString> mpFuncs{
-        {QLatin1String("__mlen__"), QLatin1String("mp_length")},
-        {QLatin1String("__mgetitem__"), QLatin1String("mp_subscript")},
-        {QLatin1String("__msetitem__"), QLatin1String("mp_ass_subscript")},
+        {u"__mlen__"_s, u"mp_length"_s},
+        {u"__mgetitem__"_s, u"mp_subscript"_s},
+        {u"__msetitem__"_s, u"mp_ass_subscript"_s},
     };
     QMap<QString, QString> funcs;
     for (const auto &m : mappingProtocols()) {
         const auto func = metaClass->findFunction(m.name);
         if (!func.isNull()) {
-            const QString entry = QLatin1String("reinterpret_cast<void *>(&")
+            const QString entry = u"reinterpret_cast<void *>(&"_s
                                   + cpythonFunctionName(func) + u')';
             funcs.insert(m.name, entry);
         } else {
-            funcs.insert(m.name, QLatin1String(NULL_PTR));
+            funcs.insert(m.name, QLatin1StringView(NULL_PTR));
         }
     }
 
@@ -4708,30 +4717,30 @@ void CppGenerator::writeTypeAsMappingDefinition(TextStream &s,
 static const QHash<QString, QString> &nbFuncs()
 {
     static const QHash<QString, QString> result = {
-        {QLatin1String("__add__"), QLatin1String("nb_add")},
-        {QLatin1String("__sub__"), QLatin1String("nb_subtract")},
-        {QLatin1String("__mul__"), QLatin1String("nb_multiply")},
-        {QLatin1String("__div__"), QLatin1String("nb_divide")},
-        {QLatin1String("__mod__"), QLatin1String("nb_remainder")},
-        {QLatin1String("__neg__"), QLatin1String("nb_negative")},
-        {QLatin1String("__pos__"), QLatin1String("nb_positive")},
-        {QLatin1String("__invert__"), QLatin1String("nb_invert")},
-        {QLatin1String("__lshift__"), QLatin1String("nb_lshift")},
-        {QLatin1String("__rshift__"), QLatin1String("nb_rshift")},
-        {QLatin1String("__and__"), QLatin1String("nb_and")},
-        {QLatin1String("__xor__"), QLatin1String("nb_xor")},
-        {QLatin1String("__or__"), QLatin1String("nb_or")},
-        {QLatin1String("__iadd__"), QLatin1String("nb_inplace_add")},
-        {QLatin1String("__isub__"), QLatin1String("nb_inplace_subtract")},
-        {QLatin1String("__imul__"), QLatin1String("nb_inplace_multiply")},
-        {QLatin1String("__idiv__"), QLatin1String("nb_inplace_divide")},
-        {QLatin1String("__imod__"), QLatin1String("nb_inplace_remainder")},
-        {QLatin1String("__ilshift__"), QLatin1String("nb_inplace_lshift")},
-        {QLatin1String("__irshift__"), QLatin1String("nb_inplace_rshift")},
-        {QLatin1String("__iand__"), QLatin1String("nb_inplace_and")},
-        {QLatin1String("__ixor__"), QLatin1String("nb_inplace_xor")},
-        {QLatin1String("__ior__"), QLatin1String("nb_inplace_or")},
-        {boolT(), QLatin1String("nb_nonzero")}
+        {u"__add__"_s, u"nb_add"_s},
+        {u"__sub__"_s, u"nb_subtract"_s},
+        {u"__mul__"_s, u"nb_multiply"_s},
+        {u"__div__"_s, u"nb_divide"_s},
+        {u"__mod__"_s, u"nb_remainder"_s},
+        {u"__neg__"_s, u"nb_negative"_s},
+        {u"__pos__"_s, u"nb_positive"_s},
+        {u"__invert__"_s, u"nb_invert"_s},
+        {u"__lshift__"_s, u"nb_lshift"_s},
+        {u"__rshift__"_s, u"nb_rshift"_s},
+        {u"__and__"_s, u"nb_and"_s},
+        {u"__xor__"_s, u"nb_xor"_s},
+        {u"__or__"_s, u"nb_or"_s},
+        {u"__iadd__"_s, u"nb_inplace_add"_s},
+        {u"__isub__"_s, u"nb_inplace_subtract"_s},
+        {u"__imul__"_s, u"nb_inplace_multiply"_s},
+        {u"__idiv__"_s, u"nb_inplace_divide"_s},
+        {u"__imod__"_s, u"nb_inplace_remainder"_s},
+        {u"__ilshift__"_s, u"nb_inplace_lshift"_s},
+        {u"__irshift__"_s, u"nb_inplace_rshift"_s},
+        {u"__iand__"_s, u"nb_inplace_and"_s},
+        {u"__ixor__"_s, u"nb_inplace_xor"_s},
+        {u"__ior__"_s, u"nb_inplace_or"_s},
+        {boolT(), u"nb_nonzero"_s}
     };
     return result;
 }
@@ -4756,7 +4765,7 @@ void CppGenerator::writeTypeAsNumberDefinition(TextStream &s, const AbstractMeta
     QString baseName = cpythonBaseName(metaClass);
 
     if (hasBoolCast(metaClass))
-        nb.insert(boolT(), baseName + QLatin1String("___nb_bool"));
+        nb.insert(boolT(), baseName + u"___nb_bool"_s);
 
     for (auto it = nbFuncs().cbegin(), end = nbFuncs().cend(); it != end; ++it) {
         const QString &nbName = it.key();
@@ -4765,17 +4774,17 @@ void CppGenerator::writeTypeAsNumberDefinition(TextStream &s, const AbstractMeta
         const auto nbIt = nb.constFind(nbName);
         if (nbIt != nb.constEnd()) {
             const QString fixednbName = nbName == boolT()
-                ? QLatin1String("nb_bool") : it.value();
+                ? u"nb_bool"_s : it.value();
             s <<  "{Py_" << fixednbName << ", reinterpret_cast<void *>("
                << nbIt.value() << ")},\n";
         }
     }
 
-    auto nbIt = nb.constFind(QLatin1String("__div__"));
+    auto nbIt = nb.constFind(u"__div__"_s);
     if (nbIt != nb.constEnd())
         s << "{Py_nb_true_divide, reinterpret_cast<void *>(" << nbIt.value() << ")},\n";
 
-    nbIt = nb.constFind(QLatin1String("__idiv__"));
+    nbIt = nb.constFind(u"__idiv__"_s);
     if (nbIt != nb.constEnd()) {
         s << "// This function is unused in Python 3. We reference it here.\n"
             << "{0, reinterpret_cast<void *>(" << nbIt.value() << ")},\n"
@@ -4872,7 +4881,7 @@ void CppGenerator::writeGetterFunction(TextStream &s,
 
     if (fieldType.isCppIntegralPrimitive() || fieldType.isEnum()) {
         s << getFullTypeNameWithoutModifiers(fieldType) << " cppOut_local = " << cppField << ";\n";
-        cppField = QLatin1String("cppOut_local");
+        cppField = u"cppOut_local"_s;
     }
 
     s << "PyObject *pyOut = {};\n";
@@ -4955,7 +4964,7 @@ void CppGenerator::writeSetterFunctionPreamble(TextStream &s, const QString &nam
 
     s << PYTHON_TO_CPPCONVERSION_STRUCT << ' ' << PYTHON_TO_CPP_VAR << ";\n"
         << "if (!";
-    writeTypeCheck(s, type, QLatin1String("pyIn"), isNumber(type.typeEntry()));
+    writeTypeCheck(s, type, u"pyIn"_s, isNumber(type.typeEntry()));
     s << ") {\n" << indent
         << "PyErr_SetString(PyExc_TypeError, \"wrong type attributed to '"
         << name << "', '" << type.name() << "' or convertible type expected\");\n"
@@ -5023,10 +5032,10 @@ void CppGenerator::writeRichCompareFunctionHeader(TextStream &s,
     s << baseName << "_richcompare(PyObject *self, PyObject *" << PYTHON_ARG
         << ", int op)\n{\n" << indent;
     writeCppSelfDefinition(s, context, ErrorReturn::Default, CppSelfDefinitionFlag::CppSelfAsReference);
-    writeUnusedVariableCast(s, QLatin1String(CPP_SELF_VAR));
+    writeUnusedVariableCast(s, QLatin1StringView(CPP_SELF_VAR));
     s << "PyObject *" << PYTHON_RETURN_VAR << "{};\n"
         << PYTHON_TO_CPPCONVERSION_STRUCT << ' ' << PYTHON_TO_CPP_VAR << ";\n";
-    writeUnusedVariableCast(s, QLatin1String(PYTHON_TO_CPP_VAR));
+    writeUnusedVariableCast(s, QLatin1StringView(PYTHON_TO_CPP_VAR));
     s << '\n';
 }
 
@@ -5074,13 +5083,14 @@ void CppGenerator::writeRichCompareFunction(TextStream &s,
                     first = false;
                 }
                 s << "if (";
-                writeTypeCheck(s, argType, QLatin1String(PYTHON_ARG), alternativeNumericTypes == 1 || isPyInt(argType));
+                writeTypeCheck(s, argType, QLatin1StringView(PYTHON_ARG),
+                               alternativeNumericTypes == 1 || isPyInt(argType));
                 s << ") {\n";
                 {
                     Indentation indent(s);
                     s << "// " << func->signature() << '\n';
-                    writeArgumentConversion(s, argType, QLatin1String(CPP_ARG0),
-                                            QLatin1String(PYTHON_ARG), ErrorReturn::Default,
+                    writeArgumentConversion(s, argType, QLatin1StringView(CPP_ARG0),
+                                            QLatin1StringView(PYTHON_ARG), ErrorReturn::Default,
                                             metaClass,
                                             QString(), func->isUserAdded());
 
@@ -5107,10 +5117,12 @@ void CppGenerator::writeRichCompareFunction(TextStream &s,
                             s << QByteArray(deRef, '*');
                         s << CPP_ARG0 << ");\n"
                             << PYTHON_RETURN_VAR << " = ";
-                        if (!func->isVoid())
-                            writeToPythonConversion(s, func->type(), metaClass, QLatin1String(CPP_RETURN_VAR));
-                        else
+                        if (!func->isVoid()) {
+                            writeToPythonConversion(s, func->type(), metaClass,
+                                                    QLatin1StringView(CPP_RETURN_VAR));
+                        } else {
                             s << "Py_None;\n" << "Py_INCREF(Py_None)";
+                        }
                         s << ";\n";
                     }
                 }
@@ -5200,10 +5212,10 @@ void CppGenerator::writeSmartPointerRichCompareFunction(TextStream &s,
     writeRichCompareFunctionHeader(s, baseName, context);
 
     s << "if (";
-    writeTypeCheck(s, context.preciseType(), QLatin1String(PYTHON_ARG));
+    writeTypeCheck(s, context.preciseType(), QLatin1StringView(PYTHON_ARG));
     s << ") {\n" << indent;
-    writeArgumentConversion(s, context.preciseType(), QLatin1String(CPP_ARG0),
-                            QLatin1String(PYTHON_ARG), ErrorReturn::Default, metaClass);
+    writeArgumentConversion(s, context.preciseType(), QLatin1StringView(CPP_ARG0),
+                            QLatin1StringView(PYTHON_ARG), ErrorReturn::Default, metaClass);
 
     const auto *te = context.preciseType().typeEntry();
     Q_ASSERT(te->isSmartPointer());
@@ -5370,7 +5382,7 @@ QString CppGenerator::signatureParameter(const AbstractMetaArgument &arg) const
     if (!arg.defaultValueExpression().isEmpty()) {
         s << '=';
         QString e = arg.defaultValueExpression();
-        e.replace(QLatin1String("::"), QLatin1String("."));
+        e.replace(u"::"_s, u"."_s);
         s << e;
     }
     return result;
@@ -5389,7 +5401,7 @@ void CppGenerator::writeSignatureInfo(TextStream &s, const OverloadData &overloa
         // PYSIDE-1328: `self`-ness cannot be computed in Python because there are mixed cases.
         // Toplevel functions like `PySide6.QtCore.QEnum` are always self-less.
         if (!(f->isStatic()) && f->ownerClass())
-            args << QLatin1String("self");
+            args << u"self"_s;
         const auto &arguments = f->arguments();
         for (qsizetype i = 0, size = arguments.size(); i < size; ++i) {
             QString t = f->pyiTypeReplaced(i + 1);
@@ -5446,9 +5458,9 @@ void CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
     if (enclosingClass)
         enclosingObjectVariable = cpythonTypeName(enclosingClass);
     else if (hasUpperEnclosingClass)
-        enclosingObjectVariable = QLatin1String("enclosingClass");
+        enclosingObjectVariable = u"enclosingClass"_s;
     else
-        enclosingObjectVariable = QLatin1String("module");
+        enclosingObjectVariable = u"module"_s;
 
     s << "// Initialization of ";
     s << (cppEnum.isAnonymous() ? "anonymous enum identified by enum value" : "enum");
@@ -5492,12 +5504,12 @@ void CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
 
         QString enumValueText;
         if (!avoidProtectedHack() || !cppEnum.isProtected()) {
-            enumValueText = QLatin1String("(long) ");
+            enumValueText = u"(long) "_s;
             if (cppEnum.enclosingClass())
-                enumValueText += cppEnum.enclosingClass()->qualifiedCppName() + QLatin1String("::");
+                enumValueText += cppEnum.enclosingClass()->qualifiedCppName() + u"::"_s;
             // Fully qualify the value which is required for C++ 11 enum classes.
             if (!cppEnum.isAnonymous())
-                enumValueText += cppEnum.name() + QLatin1String("::");
+                enumValueText += cppEnum.name() + u"::"_s;
             enumValueText += enumValue.name();
         } else {
             enumValueText += enumValue.value().toString();
@@ -5606,11 +5618,11 @@ void CppGenerator::writeFlagsNonZero(TextStream &s, const AbstractMetaEnum &cppE
 
 void CppGenerator::writeFlagsMethods(TextStream &s, const AbstractMetaEnum &cppEnum)
 {
-    writeFlagsBinaryOperator(s, cppEnum, QLatin1String("and"), QLatin1String("&"));
-    writeFlagsBinaryOperator(s, cppEnum, QLatin1String("or"), QLatin1String("|"));
-    writeFlagsBinaryOperator(s, cppEnum, QLatin1String("xor"), QLatin1String("^"));
+    writeFlagsBinaryOperator(s, cppEnum, u"and"_s, u"&"_s);
+    writeFlagsBinaryOperator(s, cppEnum, u"or"_s, u"|"_s);
+    writeFlagsBinaryOperator(s, cppEnum, u"xor"_s, u"^"_s);
 
-    writeFlagsUnaryOperator(s, cppEnum, QLatin1String("invert"), QLatin1String("~"));
+    writeFlagsUnaryOperator(s, cppEnum, u"invert"_s, u"~"_s);
     writeFlagsToLong(s, cppEnum);
     writeFlagsNonZero(s, cppEnum);
 
@@ -5669,7 +5681,7 @@ void CppGenerator::writeFlagsBinaryOperator(TextStream &s, const AbstractMetaEnu
             << "return nullptr;\n" << outdent
         << "cppResult = " << CPP_SELF_VAR << " " << cppOpName << " cppArg;\n"
         << "return ";
-    writeToPythonConversion(s, flagsType, nullptr, QLatin1String("cppResult"));
+    writeToPythonConversion(s, flagsType, nullptr, u"cppResult"_s);
     s << ";\n" << outdent << "}\n\n";
 }
 
@@ -5696,7 +5708,7 @@ void CppGenerator::writeFlagsUnaryOperator(TextStream &s, const AbstractMetaEnum
     if (boolResult)
         s << "PyBool_FromLong(cppResult)";
     else
-        writeToPythonConversion(s, flagsType, nullptr, QLatin1String("cppResult"));
+        writeToPythonConversion(s, flagsType, nullptr, u"cppResult"_s);
     s << ";\n" << outdent << "}\n\n";
 }
 
@@ -5707,14 +5719,14 @@ QString CppGenerator::getSimpleClassInitFunctionName(const AbstractMetaClass *me
     if (metaClass->isNamespace())
         initFunctionName += moduleName();
     initFunctionName += metaClass->qualifiedCppName();
-    initFunctionName.replace(QLatin1String("::"), QLatin1String("_"));
+    initFunctionName.replace(u"::"_s, u"_"_s);
     return initFunctionName;
 }
 
 QString CppGenerator::getSimpleClassStaticFieldsInitFunctionName(const AbstractMetaClass *metaClass)
 {
-    return QLatin1String("init_") + getSimpleClassInitFunctionName(metaClass)
-        + QLatin1String("StaticFields");
+    return u"init_"_s + getSimpleClassInitFunctionName(metaClass)
+        + u"StaticFields"_s;
 }
 
 QString CppGenerator::getInitFunctionName(const GeneratorContext &context)
@@ -5768,7 +5780,7 @@ void CppGenerator::writeClassRegister(TextStream &s,
     const ComplexTypeEntry *classTypeEntry = metaClass->typeEntry();
 
     const AbstractMetaClass *enc = metaClass->targetLangEnclosingClass();
-    QString enclosingObjectVariable = enc ? QLatin1String("enclosingClass") : QLatin1String("module");
+    QString enclosingObjectVariable = enc ? u"enclosingClass"_s : u"module"_s;
 
     QString pyTypeName = cpythonTypeName(metaClass);
     QString initFunctionName = getInitFunctionName(classContext);
@@ -5779,7 +5791,7 @@ void CppGenerator::writeClassRegister(TextStream &s,
     s << "(PyObject *" << enclosingObjectVariable << ")\n{\n" << indent;
 
     // Multiple inheritance
-    QString pyTypeBasesVariable = chopType(pyTypeName) + QLatin1String("_Type_bases");
+    QString pyTypeBasesVariable = chopType(pyTypeName) + u"_Type_bases"_s;
     const auto &baseClasses = metaClass->typeSystemBaseClasses();
     if (metaClass->baseClassNames().size() > 1) {
         s << "PyObject *" << pyTypeBasesVariable
@@ -5795,8 +5807,8 @@ void CppGenerator::writeClassRegister(TextStream &s,
     }
 
     // Create type and insert it in the module or enclosing class.
-    const QString typePtr = QLatin1String("_") + chopType(pyTypeName)
-        + QLatin1String("_Type");
+    const QString typePtr = u"_"_s + chopType(pyTypeName)
+        + u"_Type"_s;
 
     s << typePtr << " = Shiboken::ObjectType::introduceWrapperType(\n";
     {
@@ -5973,7 +5985,7 @@ void CppGenerator::writeInitQtMetaTypeFunctionBody(TextStream &s, const Generato
     const AbstractMetaClass *enclosingClass = metaClass->enclosingClass();
     while (enclosingClass) {
         if (enclosingClass->typeEntry()->generateCode())
-            nameVariants << (enclosingClass->name() + QLatin1String("::") + nameVariants.constLast());
+            nameVariants << (enclosingClass->name() + u"::"_s + nameVariants.constLast());
         enclosingClass = enclosingClass->enclosingClass();
     }
 
@@ -6030,10 +6042,10 @@ void CppGenerator::writeTypeDiscoveryFunction(TextStream &s, const AbstractMetaC
         << "_typeDiscovery(void *cptr, PyTypeObject *instanceType)\n{\n" << indent;
 
     if (!polymorphicExpr.isEmpty()) {
-        polymorphicExpr = polymorphicExpr.replace(QLatin1String("%1"),
-                                                  QLatin1String(" reinterpret_cast< ::")
+        polymorphicExpr = polymorphicExpr.replace(u"%1"_s,
+                                                  u" reinterpret_cast< ::"_s
                                                   + metaClass->qualifiedCppName()
-                                                  + QLatin1String(" *>(cptr)"));
+                                                  + u" *>(cptr)"_s);
         s << " if (" << polymorphicExpr << ")\n";
         {
             Indentation indent(s);
@@ -6093,7 +6105,7 @@ void CppGenerator::writeSetattroFunction(TextStream &s, AttroCheck attroCheck,
     if (attroCheck.testFlag(AttroCheckFlag::SetattroMethodOverride)
             && context.useWrapper()) {
         s << "if (value && PyCallable_Check(value)) {\n" << indent
-            << "auto plain_inst = " << cpythonWrapperCPtr(metaClass, QLatin1String("self")) << ";\n"
+            << "auto plain_inst = " << cpythonWrapperCPtr(metaClass, u"self"_s) << ";\n"
             << "auto inst = dynamic_cast<" << context.wrapperName() << " *>(plain_inst);\n"
             << "if (inst)\n" << indent
             << "inst->resetPyMethodCache();\n" << outdent << outdent
@@ -6114,7 +6126,7 @@ void CppGenerator::writeSetattroFunction(TextStream &s, AttroCheck attroCheck,
         {
             Indentation indent(s);
             s << "auto " << CPP_SELF_VAR << " = "
-                << cpythonWrapperCPtr(metaClass, QLatin1String("self")) << ";\n";
+                << cpythonWrapperCPtr(metaClass, u"self"_s) << ";\n";
             writeClassCodeSnips(s, func->injectedCodeSnips(), TypeSystem::CodeSnipPositionAny,
                                 TypeSystem::TargetLangCode, context);
         }
@@ -6155,9 +6167,9 @@ QString CppGenerator::qObjectGetAttroFunction() const
     if (result.isEmpty()) {
         auto qobjectClass = AbstractMetaClass::findClass(api().classes(), qObjectT());
         Q_ASSERT(qobjectClass);
-        result = QLatin1String("PySide::getMetaDataFromQObject(")
-                 + cpythonWrapperCPtr(qobjectClass, QLatin1String("self"))
-                 + QLatin1String(", self, name)");
+        result = u"PySide::getMetaDataFromQObject("_s
+                 + cpythonWrapperCPtr(qobjectClass, u"self"_s)
+                 + u", self, name)"_s;
     }
     return result;
 }
@@ -6174,7 +6186,7 @@ void CppGenerator::writeGetattroFunction(TextStream &s, AttroCheck attroCheck,
         s << "PySide::Feature::Select(self);\n";
 
     const QString getattrFunc = usePySideExtensions() && metaClass->isQObject()
-        ? qObjectGetAttroFunction() : QLatin1String("PyObject_GenericGetAttr(self, name)");
+        ? qObjectGetAttroFunction() : u"PyObject_GenericGetAttr(self, name)"_s;
 
     if (attroCheck.testFlag(AttroCheckFlag::GetattroOverloads)) {
         s << "// Search the method in the instance dict\n"
@@ -6235,7 +6247,7 @@ void CppGenerator::writeGetattroFunction(TextStream &s, AttroCheck attroCheck,
         {
             Indentation indent(s);
             s << "auto " << CPP_SELF_VAR << " = "
-                << cpythonWrapperCPtr(metaClass, QLatin1String("self")) << ";\n";
+                << cpythonWrapperCPtr(metaClass, u"self"_s) << ";\n";
             writeClassCodeSnips(s, func->injectedCodeSnips(), TypeSystem::CodeSnipPositionAny,
                                 TypeSystem::TargetLangCode, context);
         }
@@ -6399,7 +6411,7 @@ bool CppGenerator::finishGeneration()
     }
 
     QString moduleFileName(outputDirectory() + u'/' + subDirectoryForPackage(packageName()));
-    moduleFileName += u'/' + moduleName().toLower() + QLatin1String("_module_wrapper.cpp");
+    moduleFileName += u'/' + moduleName().toLower() + u"_module_wrapper.cpp"_s;
 
     FileOut file(moduleFileName);
 
@@ -6687,9 +6699,9 @@ bool CppGenerator::finishGeneration()
             continue;
         const TypeEntry *referencedType = pte->basicReferencedTypeEntry();
         QString converter = converterObject(referencedType);
-        QStringList cppSignature = pte->qualifiedCppName().split(QLatin1String("::"), Qt::SkipEmptyParts);
+        QStringList cppSignature = pte->qualifiedCppName().split(u"::"_s, Qt::SkipEmptyParts);
         while (!cppSignature.isEmpty()) {
-            QString signature = cppSignature.join(QLatin1String("::"));
+            QString signature = cppSignature.join(u"::"_s);
             s << "Shiboken::Conversions::registerConverterName("
                 << converter << ", \"" << signature << "\");\n";
             cppSignature.removeFirst();
@@ -6778,25 +6790,25 @@ bool CppGenerator::writeParentChildManagement(TextStream &s, const AbstractMetaF
                 << "Argument index for parent tag out of bounds: " << func->signature();
 
         if (action == ArgumentOwner::Remove) {
-            parentVariable = QLatin1String("Py_None");
+            parentVariable = u"Py_None"_s;
         } else {
             if (parentIndex == 0) {
-                parentVariable = QLatin1String(PYTHON_RETURN_VAR);
+                parentVariable = QLatin1StringView(PYTHON_RETURN_VAR);
             } else if (parentIndex == -1) {
-                parentVariable = QLatin1String("self");
+                parentVariable = u"self"_s;
             } else {
                 parentVariable = usePyArgs
-                    ? pythonArgsAt(parentIndex - 1) : QLatin1String(PYTHON_ARG);
+                    ? pythonArgsAt(parentIndex - 1) : QLatin1StringView(PYTHON_ARG);
             }
         }
 
         if (childIndex == 0) {
-            childVariable = QLatin1String(PYTHON_RETURN_VAR);
+            childVariable = QLatin1StringView(PYTHON_RETURN_VAR);
         } else if (childIndex == -1) {
-            childVariable = QLatin1String("self");
+            childVariable = u"self"_s;
         } else {
             childVariable = usePyArgs
-                ? pythonArgsAt(childIndex - 1) : QLatin1String(PYTHON_ARG);
+                ? pythonArgsAt(childIndex - 1) : QLatin1StringView(PYTHON_ARG);
         }
 
         s << "Shiboken::Object::setParent(" << parentVariable << ", " << childVariable << ");\n";
@@ -6874,7 +6886,7 @@ void CppGenerator::writeDefaultSequenceMethods(TextStream &s,
     s << "PyObject *" << namePrefix
         << "__getitem__(PyObject *self, Py_ssize_t _i)\n{\n" << indent;
     writeCppSelfDefinition(s, context, errorReturn);
-    writeIndexError(s, u"index out of bounds"_qs, errorReturn);
+    writeIndexError(s, u"index out of bounds"_s, errorReturn);
 
     s << metaClass->qualifiedCppName() << "::const_iterator _item = "
         << CPP_SELF_VAR << "->begin();\n"
@@ -6891,7 +6903,7 @@ void CppGenerator::writeDefaultSequenceMethods(TextStream &s,
     const AbstractMetaType &itemType = instantiations.constFirst();
 
     s << "return ";
-    writeToPythonConversion(s, itemType, metaClass, QLatin1String("*_item"));
+    writeToPythonConversion(s, itemType, metaClass, u"*_item"_s);
     s << ";\n" << outdent << "}\n";
 
     // __setitem__
@@ -6900,11 +6912,11 @@ void CppGenerator::writeDefaultSequenceMethods(TextStream &s,
         << indent;
     errorReturn = ErrorReturn::MinusOne;
     writeCppSelfDefinition(s, context, errorReturn);
-    writeIndexError(s, u"list assignment index out of range"_qs, errorReturn);
+    writeIndexError(s, u"list assignment index out of range"_s, errorReturn);
 
     s << PYTHON_TO_CPPCONVERSION_STRUCT << ' ' << PYTHON_TO_CPP_VAR << ";\n"
         << "if (!";
-    writeTypeCheck(s, itemType, QLatin1String("pyArg"), isNumber(itemType.typeEntry()));
+    writeTypeCheck(s, itemType, u"pyArg"_s, isNumber(itemType.typeEntry()));
     s << ") {\n";
     {
         Indentation indent(s);
@@ -6913,8 +6925,8 @@ void CppGenerator::writeDefaultSequenceMethods(TextStream &s,
             << "return -1;\n";
     }
     s << "}\n";
-    writeArgumentConversion(s, itemType, u"cppValue"_qs,
-                            u"pyArg"_qs, errorReturn, metaClass);
+    writeArgumentConversion(s, itemType, u"cppValue"_s,
+                            u"pyArg"_s, errorReturn, metaClass);
 
     s << metaClass->qualifiedCppName() << "::iterator _item = "
         << CPP_SELF_VAR << "->begin();\n"

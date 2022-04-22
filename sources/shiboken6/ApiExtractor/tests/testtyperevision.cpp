@@ -27,12 +27,17 @@
 ****************************************************************************/
 
 #include "testtyperevision.h"
-#include <QtTest/QTest>
 #include "testutil.h"
 #include <abstractmetaenum.h>
 #include <abstractmetalang.h>
 #include <typesystem.h>
 #include <typedatabase.h>
+
+#include <qtcompat.h>
+
+#include <QtTest/QTest>
+
+using namespace Qt::StringLiterals;
 
 void TestTypeRevision::testRevisionAttr()
 {
@@ -59,12 +64,12 @@ void TestTypeRevision::testRevisionAttr()
     AbstractMetaClass *rev2 = AbstractMetaClass::findClass(classes, u"Rev_2");
     QCOMPARE(rev2->typeEntry()->revision(), 2);
 
-    auto rev3 = rev2->findEnum(QLatin1String("Rev_3"));
+    auto rev3 = rev2->findEnum(u"Rev_3"_s);
     QVERIFY(rev3.has_value());
     QCOMPARE(rev3->typeEntry()->revision(), 3);
     FlagsTypeEntry* rev4 = rev3->typeEntry()->flags();
     QCOMPARE(rev4->revision(), 4);
-    auto rev5 = rev2->findEnum(QLatin1String("Rev_5"));
+    auto rev5 = rev2->findEnum(u"Rev_5"_s);
     QVERIFY(rev5.has_value());
     const EnumTypeEntry *revEnumTypeEntry = rev5->typeEntry();
     QCOMPARE(revEnumTypeEntry->revision(), 5);

@@ -27,11 +27,16 @@
 ****************************************************************************/
 
 #include "testnamespace.h"
-#include <QtTest/QTest>
 #include "testutil.h"
 #include <abstractmetalang.h>
 #include <abstractmetaenum.h>
 #include <typesystem.h>
+
+#include <qtcompat.h>
+
+#include <QtTest/QTest>
+
+using namespace Qt::StringLiterals;
 
 void NamespaceTest::testNamespaceMembers()
 {
@@ -55,7 +60,7 @@ void NamespaceTest::testNamespaceMembers()
     AbstractMetaClassList classes = builder->classes();
     AbstractMetaClass *ns = AbstractMetaClass::findClass(classes, u"Namespace");
     QVERIFY(ns);
-    auto metaEnum = ns->findEnum(QLatin1String("Option"));
+    auto metaEnum = ns->findEnum(u"Option"_s);
     QVERIFY(metaEnum.has_value());
     const auto func = ns->findFunction(u"foo");
     QVERIFY(!func.isNull());

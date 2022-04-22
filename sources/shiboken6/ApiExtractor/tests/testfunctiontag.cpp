@@ -27,11 +27,16 @@
 ****************************************************************************/
 
 #include "testfunctiontag.h"
-#include <QtTest/QTest>
 #include "testutil.h"
 #include <abstractmetafunction.h>
 #include <modifications.h>
 #include <typesystem.h>
+
+#include <qtcompat.h>
+
+#include <QtTest/QTest>
+
+using namespace Qt::StringLiterals;
 
 void TestFunctionTag::testFunctionTagForSpecificSignature()
 {
@@ -45,7 +50,7 @@ void TestFunctionTag::testFunctionTagForSpecificSignature()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
 
-    const TypeEntry *func = TypeDatabase::instance()->findType(QLatin1String("globalFunction"));
+    const TypeEntry *func = TypeDatabase::instance()->findType(u"globalFunction"_s);
     QVERIFY(func);
     QCOMPARE(builder->globalFunctions().size(), 1);
 }
@@ -63,7 +68,7 @@ void TestFunctionTag::testFunctionTagForAllSignatures()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
 
-    const TypeEntry *func = TypeDatabase::instance()->findType(QLatin1String("globalFunction"));
+    const TypeEntry *func = TypeDatabase::instance()->findType(u"globalFunction"_s);
     QVERIFY(func);
     QCOMPARE(builder->globalFunctions().size(), 2);
 }
@@ -78,7 +83,7 @@ void TestFunctionTag::testRenameGlobalFunction()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
 
-    const TypeEntry *func = TypeDatabase::instance()->findType(QLatin1String("global_function_with_ugly_name"));
+    const TypeEntry *func = TypeDatabase::instance()->findType(u"global_function_with_ugly_name"_s);
     QVERIFY(func);
 
     QCOMPARE(builder->globalFunctions().size(), 1);

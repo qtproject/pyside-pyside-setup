@@ -42,6 +42,8 @@
 #include <QtCore/QDir>
 #include <QtCore/QTextStream>
 
+#include "qtcompat.h"
+
 #include <cstdlib>
 #ifdef HAVE_LIBXSLT
 #  include <libxslt/xsltutils.h>
@@ -49,6 +51,8 @@
 #endif
 
 #include <algorithm>
+
+using namespace Qt::StringLiterals;
 
 DocParser::DocParser()
 {
@@ -139,14 +143,14 @@ R"(<xsl:template match="/">
         return xml;
     }
 
-    QString xsl = QLatin1String(xslPrefix);
+    QString xsl = QLatin1StringView(xslPrefix);
     for (const DocModification &mod : mods) {
         if (isXpathDocModification(mod)) {
             QString xpath = mod.xpath();
-            xpath.replace(u'"', QLatin1String("&quot;"));
-            xsl += QLatin1String("<xsl:template match=\"")
-                   + xpath + QLatin1String("\">")
-                   + mod.code() + QLatin1String("</xsl:template>\n");
+            xpath.replace(u'"', u"&quot;"_s);
+            xsl += u"<xsl:template match=\""_s
+                   + xpath + u"\">"_s
+                   + mod.code() + u"</xsl:template>\n"_s;
         }
     }
 
@@ -156,7 +160,7 @@ R"(<xsl:template match="/">
         qCWarning(lcShibokenDoc, "%s",
                   qPrintable(msgXpathDocModificationError(mods, errorMessage)));
     if (result == xml) {
-        const QString message = QLatin1String("Query did not result in any modifications to \"")
+        const QString message = u"Query did not result in any modifications to \""_s
             + xml + u'"';
         qCWarning(lcShibokenDoc, "%s",
                   qPrintable(msgXpathDocModificationError(mods, message)));

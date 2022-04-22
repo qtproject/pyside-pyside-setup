@@ -33,10 +33,14 @@
 #include "typeparser.h"
 #include "typesystem.h"
 
+#include "qtcompat.h"
+
 #include <QtCore/QDebug>
 
 #include <algorithm>
 #include <limits>
+
+using namespace Qt::StringLiterals;
 
 static inline QString callOperator() { return QStringLiteral("operator()"); }
 
@@ -44,8 +48,8 @@ QString TemplateInstance::expandCode() const
 {
     TemplateEntry *templateEntry = TypeDatabase::instance()->findTemplate(m_name);
     if (!templateEntry) {
-        const QString m = QLatin1String("<insert-template> referring to non-existing template '")
-                          + m_name + QLatin1String("'.");
+        const QString m = u"<insert-template> referring to non-existing template '"_s
+                          + m_name + u"'."_s;
         throw Exception(m);
     }
 
@@ -54,11 +58,11 @@ QString TemplateInstance::expandCode() const
         code.replace(it.key(), it.value());
     while (!code.isEmpty() && code.at(code.size() - 1).isSpace())
         code.chop(1);
-    QString result = QLatin1String("// TEMPLATE - ") + m_name + QLatin1String(" - START");
+    QString result = u"// TEMPLATE - "_s + m_name + u" - START"_s;
     if (!code.startsWith(u'\n'))
         result += u'\n';
     result += code;
-    result += QLatin1String("\n// TEMPLATE - ") + m_name + QLatin1String(" - END\n");
+    result += u"\n// TEMPLATE - "_s + m_name + u" - END\n"_s;
     return result;
 }
 
@@ -109,10 +113,14 @@ void purgeEmptyCodeSnips(QList<CodeSnip> *list)
 // ---------------------- Modification
 QString FunctionModification::accessModifierString() const
 {
-    if (isPrivate()) return QLatin1String("private");
-    if (isProtected()) return QLatin1String("protected");
-    if (isPublic()) return QLatin1String("public");
-    if (isFriendly()) return QLatin1String("friendly");
+    if (isPrivate())
+        return u"private"_s;
+    if (isProtected())
+        return u"protected"_s;
+    if (isPublic())
+        return u"public"_s;
+    if (isFriendly())
+        return u"friendly"_s;
     return QString();
 }
 
@@ -314,7 +322,7 @@ Arguments splitParameters(QStringView paramString, QString *errorMessage)
             const int nameEndPos = typeString.indexOf(u'@', namePos);
             if (nameEndPos == -1) {
                 if (errorMessage != nullptr) {
-                    *errorMessage = QLatin1String("Mismatched @ in \"")
+                    *errorMessage = u"Mismatched @ in \""_s
                                     + paramString.toString() + u'"';
                 }
                 return {};
@@ -367,7 +375,7 @@ AddedFunction::AddedFunctionPtr
     const QString name = signature.left(openParenPos).trimmed().toString();
     const int closingParenPos = signature.lastIndexOf(u')');
     if (closingParenPos < 0) {
-        *errorMessage = QLatin1String("Missing closing parenthesis");
+        *errorMessage = u"Missing closing parenthesis"_s;
         return {};
     }
 
@@ -388,8 +396,8 @@ AddedFunction::AddedFunctionPtr
         TypeInfo type = p.type == u"..."
             ? TypeInfo::varArgsType() : TypeParser::parse(p.type, errorMessage);
         if (!errorMessage->isEmpty()) {
-            errorMessage->prepend(u"Unable to parse added function "_qs + signatureIn
-                                  + u": "_qs);
+            errorMessage->prepend(u"Unable to parse added function "_s + signatureIn
+                                  + u": "_s);
             return {};
         }
         arguments.append({type, p.name, p.defaultValue});
@@ -858,8 +866,8 @@ bool FunctionModification::setSignature(const QString &s, QString *errorMessage)
         d->m_signaturePattern.setPattern(s);
         if (!d->m_signaturePattern.isValid()) {
             if (errorMessage) {
-                *errorMessage = QLatin1String("Invalid signature pattern: \"")
-                    + s + QLatin1String("\": ") + d->m_signaturePattern.errorString();
+                *errorMessage = u"Invalid signature pattern: \""_s
+                    + s + u"\": "_s + d->m_signaturePattern.errorString();
             }
             return false;
         }

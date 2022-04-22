@@ -46,6 +46,8 @@
 #include <clangparser/clangutils.h>
 #include <clangparser/compilersupport.h>
 
+#include "qtcompat.h"
+
 #include <QtCore/QDebug>
 #include <QtCore/QDir>
 #include <QtCore/QFile>
@@ -58,6 +60,8 @@
 #include <cstdio>
 #include <algorithm>
 #include <memory>
+
+using namespace Qt::StringLiterals;
 
 static inline QString colonColon() { return QStringLiteral("::"); }
 
@@ -77,7 +81,7 @@ bool AbstractMetaBuilderPrivate::m_useGlobalHeader = false;
 bool AbstractMetaBuilderPrivate::m_codeModelTestMode = false;
 
 AbstractMetaBuilderPrivate::AbstractMetaBuilderPrivate() :
-    m_logDirectory(QLatin1String(".") + QDir::separator())
+    m_logDirectory(u"."_s + QDir::separator())
 {
 }
 
@@ -166,7 +170,7 @@ void AbstractMetaBuilderPrivate::checkFunctionModifications()
                 }
 
                 if (function->originalName() == name) {
-                    possibleSignatures.append(function->minimalSignature() + QLatin1String(" in ")
+                    possibleSignatures.append(function->minimalSignature() + u" in "_s
                                               + function->implementingClass()->name());
                 }
             }
@@ -209,7 +213,7 @@ void AbstractMetaBuilderPrivate::registerHashFunction(const FunctionModelItem &f
 
 void AbstractMetaBuilderPrivate::registerToStringCapabilityIn(const NamespaceModelItem &nsItem)
 {
-    const FunctionList &streamOps = nsItem->findFunctions(QLatin1String("operator<<"));
+    const FunctionList &streamOps = nsItem->findFunctions(u"operator<<"_s);
     for (const FunctionModelItem &item : streamOps)
         registerToStringCapability(item, nullptr);
     for (const NamespaceModelItem &ni : nsItem->namespaces())
@@ -600,7 +604,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom,
     }
 
     {
-        const FunctionList &hashFunctions = dom->findFunctions(QLatin1String("qHash"));
+        const FunctionList &hashFunctions = dom->findFunctions(u"qHash"_s);
         for (const FunctionModelItem &item : hashFunctions)
             registerHashFunction(item, nullptr);
     }
@@ -1046,8 +1050,8 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
 
     if (ReportHandler::isDebug(ReportHandler::MediumDebug)) {
         const QString message = type->isContainer()
-            ? u"container: '"_qs + fullClassName + u'\''
-            : u"class: '"_qs + metaClass->fullName() + u'\'';
+            ? u"container: '"_s + fullClassName + u'\''
+            : u"class: '"_s + metaClass->fullName() + u'\'';
         qCInfo(lcShiboken, "%s", qPrintable(message));
     }
 
@@ -1722,7 +1726,7 @@ void AbstractMetaBuilderPrivate::fixArgumentNames(AbstractMetaFunction *func, co
 
     for (int i = 0, size = arguments.size(); i < size; ++i) {
         if (arguments.at(i).name().isEmpty())
-            arguments[i].setName(QLatin1String("arg__") + QString::number(i + 1), false);
+            arguments[i].setName(u"arg__"_s + QString::number(i + 1), false);
     }
 }
 
@@ -1837,7 +1841,7 @@ static bool applyArrayArgumentModifications(const FunctionModificationList &func
                 const int i = argMod.index() - 1;
                 if (i < 0 || i >= func->arguments().size()) {
                     *errorMessage = msgCannotSetArrayUsage(func->minimalSignature(), i,
-                                                           QLatin1String("Index out of range."));
+                                                           u"Index out of range."_s);
                     return false;
                 }
                 auto t = func->arguments().at(i).type();
@@ -1912,7 +1916,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
 
     const bool deprecated = functionItem->isDeprecated();
     if (deprecated && m_skipDeprecated) {
-        m_rejectedFunctions.insert(originalQualifiedSignatureWithReturn + QLatin1String(" is deprecated."),
+        m_rejectedFunctions.insert(originalQualifiedSignatureWithReturn + u" is deprecated."_s,
                                    AbstractMetaBuilder::GenerationDisabled);
         return nullptr;
     }
@@ -2021,7 +2025,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgSkippingFunction(functionItem, originalQualifiedSignatureWithReturn, reason)));
             const QString rejectedFunctionSignature = originalQualifiedSignatureWithReturn
-                + QLatin1String(": ") + reason;
+                + u": "_s + reason;
             m_rejectedFunctions.insert(rejectedFunctionSignature, AbstractMetaBuilder::UnmatchedArgumentType);
             delete metaFunction;
             return nullptr;
@@ -2287,7 +2291,7 @@ static AbstractMetaArgument pointeeArgument(const AbstractMetaClass *s,
 {
     AbstractMetaArgument pointee;
     pointee.setType(instantiationType(s, ste));
-    pointee.setName(u"pointee"_qs);
+    pointee.setName(u"pointee"_s);
     return pointee;
 }
 
@@ -2363,18 +2367,18 @@ static void fixSmartPointerClass(AbstractMetaClass *s, const SmartPointerTypeEnt
 
     const QString refCountName = ste->refCountMethodName();
     if (!refCountName.isEmpty() && s->findFunction(refCountName).isNull())
-        addMethod(s, u"int"_qs, refCountName);
+        addMethod(s, u"int"_s, refCountName);
 
     const QString valueCheckMethod = ste->valueCheckMethod();
     if (!valueCheckMethod.isEmpty() && s->findFunction(valueCheckMethod).isNull()) {
-        auto f = addMethod(s, u"bool"_qs, valueCheckMethod);
+        auto f = addMethod(s, u"bool"_s, valueCheckMethod);
         if (valueCheckMethod == u"operator bool")
             f->setFunctionType(AbstractMetaFunction::ConversionOperator);
     }
 
     const QString nullCheckMethod = ste->nullCheckMethod();
     if (!nullCheckMethod.isEmpty() && s->findFunction(nullCheckMethod).isNull())
-        addMethod(s, u"bool"_qs, nullCheckMethod);
+        addMethod(s, u"bool"_s, nullCheckMethod);
 }
 
 // Create a missing smart pointer class
@@ -2383,7 +2387,7 @@ static AbstractMetaClass *createSmartPointerClass(const SmartPointerTypeEntry *s
 {
     auto *result = new AbstractMetaClass();
     result->setTypeEntry(const_cast<SmartPointerTypeEntry *>(ste));
-    auto *templateArg = new TemplateArgumentEntry(u"T"_qs, ste->version(),
+    auto *templateArg = new TemplateArgumentEntry(u"T"_s, ste->version(),
                                                   ste->typeSystemTypeEntry());
     result->setTemplateArguments({templateArg});
     fixSmartPointerClass(result, ste);
@@ -2471,7 +2475,7 @@ std::optional<AbstractMetaType>
 
     if (typeInfo.isFunctionPointer()) {
         if (errorMessageIn)
-            *errorMessageIn = msgUnableToTranslateType(_typei, QLatin1String("Unsupported function pointer."));
+            *errorMessageIn = msgUnableToTranslateType(_typei, u"Unsupported function pointer."_s);
         return {};
     }
 
@@ -2511,7 +2515,7 @@ std::optional<AbstractMetaType>
         auto elementType = translateTypeStatic(newInfo, currentClass, d, flags, &errorMessage);
         if (!elementType.has_value()) {
             if (errorMessageIn) {
-                errorMessage.prepend(QLatin1String("Unable to translate array element: "));
+                errorMessage.prepend(u"Unable to translate array element: "_s);
                 *errorMessageIn = msgUnableToTranslateType(_typei, errorMessage);
             }
             return {};
@@ -2542,7 +2546,7 @@ std::optional<AbstractMetaType>
 
     QStringList qualifierList = typeInfo.qualifiedName();
     if (qualifierList.isEmpty()) {
-        errorMessage = msgUnableToTranslateType(_typei, QLatin1String("horribly broken type"));
+        errorMessage = msgUnableToTranslateType(_typei, u"horribly broken type"_s);
         if (errorMessageIn)
             *errorMessageIn = errorMessage;
         else
@@ -3325,10 +3329,10 @@ static void writeRejectLogFile(const QString &name,
 
 void AbstractMetaBuilderPrivate::dumpLog() const
 {
-    writeRejectLogFile(m_logDirectory + QLatin1String("mjb_rejected_classes.log"), m_rejectedClasses);
-    writeRejectLogFile(m_logDirectory + QLatin1String("mjb_rejected_enums.log"), m_rejectedEnums);
-    writeRejectLogFile(m_logDirectory + QLatin1String("mjb_rejected_functions.log"), m_rejectedFunctions);
-    writeRejectLogFile(m_logDirectory + QLatin1String("mjb_rejected_fields.log"), m_rejectedFields);
+    writeRejectLogFile(m_logDirectory + u"mjb_rejected_classes.log"_s, m_rejectedClasses);
+    writeRejectLogFile(m_logDirectory + u"mjb_rejected_enums.log"_s, m_rejectedEnums);
+    writeRejectLogFile(m_logDirectory + u"mjb_rejected_functions.log"_s, m_rejectedFunctions);
+    writeRejectLogFile(m_logDirectory + u"mjb_rejected_fields.log"_s, m_rejectedFields);
 }
 
 // Topological sorting of classes. Templates for use with
@@ -3395,7 +3399,7 @@ static QList<MetaClass *> topologicalSortHelper(const QList<MetaClass *> &classL
 
     const auto result = graph.topologicalSort();
     if (!result.isValid() && graph.nodeCount()) {
-        QTemporaryFile tempFile(QDir::tempPath() + QLatin1String("/cyclic_depXXXXXX.dot"));
+        QTemporaryFile tempFile(QDir::tempPath() + u"/cyclic_depXXXXXX.dot"_s);
         tempFile.setAutoRemove(false);
         tempFile.open();
         graph.dumpDot(tempFile.fileName(),

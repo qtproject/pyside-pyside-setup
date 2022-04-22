@@ -34,9 +34,13 @@
 #include <typesystem.h>
 #include <qtdocparser.h>
 
+#include <qtcompat.h>
+
 #include <QtCore/QCoreApplication>
 #include <QtCore/QTemporaryDir>
 #include <QtTest/QTest>
+
+using namespace Qt::StringLiterals;
 
 void TestModifyDocumentation::testModifyDocumentation()
 {
@@ -65,10 +69,10 @@ R"(<typesystem package="Foo">
 
     // Create a temporary directory for the documentation file since libxml2
     // cannot handle Qt resources.
-    QTemporaryDir tempDir(QDir::tempPath() + QLatin1String("/shiboken_testmodifydocXXXXXX"));
+    QTemporaryDir tempDir(QDir::tempPath() + u"/shiboken_testmodifydocXXXXXX"_s);
     QVERIFY2(tempDir.isValid(), qPrintable(tempDir.errorString()));
-    const QString docFileName = QLatin1String("a.xml");
-    QVERIFY(QFile::copy(QLatin1String(":/") + docFileName, tempDir.filePath(docFileName)));
+    const QString docFileName = u"a.xml"_s;
+    QVERIFY(QFile::copy(u":/"_s + docFileName, tempDir.filePath(docFileName)));
 
     QtDocParser docParser;
     docParser.setDocumentationDataDirectory(tempDir.path());

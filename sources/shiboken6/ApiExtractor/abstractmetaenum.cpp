@@ -32,7 +32,11 @@
 #include "typesystem.h"
 #include "parser/enumvalue.h"
 
+#include "qtcompat.h"
+
 #include <QtCore/QDebug>
+
+using namespace Qt::StringLiterals;
 
 class AbstractMetaEnumValueData : public QSharedData
 {
@@ -170,7 +174,7 @@ QString AbstractMetaEnum::name() const
 QString AbstractMetaEnum::qualifiedCppName() const
 {
     return enclosingClass()
-        ? enclosingClass()->qualifiedCppName() + QLatin1String("::") + name()
+        ? enclosingClass()->qualifiedCppName() + u"::"_s + name()
         : name();
 }
 

@@ -27,11 +27,16 @@
 ****************************************************************************/
 
 #include "testconversionoperator.h"
-#include <QtTest/QTest>
 #include "testutil.h"
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
 #include <typesystem.h>
+
+#include <qtcompat.h>
+
+#include <QtTest/QTest>
+
+using namespace Qt::StringLiterals;
 
 void TestConversionOperator::testConversionOperator()
 {
@@ -184,14 +189,14 @@ void TestConversionOperator::testConversionOperatorReturningConstReference()
     QCOMPARE(classB->functions().size(), 3);
     QCOMPARE(classA->externalConversionOperators().size(), 1);
     QCOMPARE(classA->externalConversionOperators().constFirst()->type().cppSignature(),
-             QLatin1String("A"));
+             u"A"_s);
     QCOMPARE(classA->externalConversionOperators().constFirst()->ownerClass()->name(),
-             QLatin1String("B"));
+             u"B"_s);
     QCOMPARE(classA->implicitConversions().size(), 1);
     QCOMPARE(classA->implicitConversions().constFirst()->type().cppSignature(),
-             QLatin1String("A"));
+             u"A"_s);
     QCOMPARE(classA->implicitConversions().constFirst()->ownerClass()->name(),
-             QLatin1String("B"));
+             u"B"_s);
 }
 
 QTEST_APPLESS_MAIN(TestConversionOperator)

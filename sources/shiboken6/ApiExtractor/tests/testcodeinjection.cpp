@@ -33,9 +33,13 @@
 #include <textstream.h>
 #include <typesystem.h>
 
+#include <qtcompat.h>
+
 #include <QtCore/QDir>
 #include <QtCore/QFileInfo>
 #include <QtTest/QTest>
+
+using namespace Qt::StringLiterals;
 
 void TestCodeInjections::testReadFile_data()
 {
@@ -65,18 +69,18 @@ void TestCodeInjections::testReadFile()
     char *argv[] = {nullptr};
     QCoreApplication app(argc, argv);
 
-    QString attribute = QLatin1String("file='") + filePath + u'\'';
+    QString attribute = u"file='"_s + filePath + u'\'';
     if (!snippet.isEmpty())
-        attribute += QLatin1String(" snippet='") + snippet + u'\'';
+        attribute += u" snippet='"_s + snippet + u'\'';
 
-    QString xmlCode = QLatin1String("\
+    QString xmlCode = u"\
     <typesystem package=\"Foo\">\n\
         <value-type name='A'>\n\
-            <conversion-rule class='target' ") + attribute + QLatin1String("/>\n\
-            <inject-code class='target' ") + attribute + QLatin1String("/>\n\
+            <conversion-rule class='target' "_s + attribute + u"/>\n\
+            <inject-code class='target' "_s + attribute + u"/>\n\
             <value-type name='B'/>\n\
         </value-type>\n\
-    </typesystem>\n");
+    </typesystem>\n"_s;
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode.toLocal8Bit().constData()));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
@@ -101,7 +105,7 @@ void TestCodeInjections::testInjectWithValidApiVersion()
     </typesystem>\n";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode,
-                                                                true, QLatin1String("1.0")));
+                                                                true, u"1.0"_s));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     AbstractMetaClass* classA = AbstractMetaClass::findClass(classes, u"A");
@@ -121,7 +125,7 @@ void TestCodeInjections::testInjectWithInvalidApiVersion()
     </typesystem>\n";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode,
-                                                                true, QLatin1String("0.1")));
+                                                                true, u"0.1"_s));
     QVERIFY(!builder.isNull());
 
     AbstractMetaClassList classes = builder->classes();

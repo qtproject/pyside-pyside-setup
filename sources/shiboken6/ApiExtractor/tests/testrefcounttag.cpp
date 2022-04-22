@@ -27,11 +27,16 @@
 ****************************************************************************/
 
 #include "testrefcounttag.h"
-#include <QtTest/QTest>
 #include "testutil.h"
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
 #include <modifications.h>
+
+#include <qtcompat.h>
+
+#include <QtTest/QTest>
+
+using namespace Qt::StringLiterals;
 
 void TestRefCountTag::testReferenceCountTag()
 {
@@ -85,7 +90,7 @@ void TestRefCountTag::testWithApiVersion()
     </typesystem>\n";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode,
-                                                                false, QLatin1String("0.1")));
+                                                                false, u"0.1"_s));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, u"B");

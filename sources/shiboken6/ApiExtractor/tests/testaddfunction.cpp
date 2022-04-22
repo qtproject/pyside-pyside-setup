@@ -27,7 +27,6 @@
 ****************************************************************************/
 
 #include "testaddfunction.h"
-#include <QtTest/QTest>
 #include "testutil.h"
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
@@ -35,33 +34,39 @@
 #include <modifications_p.h>
 #include <typesystem.h>
 
+#include <qtcompat.h>
+
+#include <QtTest/QTest>
+
+using namespace Qt::StringLiterals;
+
 void TestAddFunction::testParsingFuncNameAndConstness()
 {
     // generic test...
     const char sig1[] = "func(type1, const type2, const type3* const)";
     QString errorMessage;
-    auto f1 = AddedFunction::createAddedFunction(QLatin1String(sig1), QLatin1String("void"),
+    auto f1 = AddedFunction::createAddedFunction(QLatin1StringView(sig1), u"void"_s,
                                                  &errorMessage);
     QVERIFY2(!f1.isNull(), qPrintable(errorMessage));
     QCOMPARE(f1->name(), u"func");
     QCOMPARE(f1->arguments().size(), 3);
     TypeInfo retval = f1->returnType();
-    QCOMPARE(retval.qualifiedName(), QStringList{QLatin1String("void")});
+    QCOMPARE(retval.qualifiedName(), QStringList{u"void"_s});
     QCOMPARE(retval.indirections(), 0);
     QCOMPARE(retval.isConstant(), false);
     QCOMPARE(retval.referenceType(), NoReference);
 
     // test with a ugly template as argument and other ugly stuff
     const char sig2[] = "    _fu__nc_       (  type1, const type2, const Abc<int& , C<char*> *   >  * *@my_name@, const type3* const    )   const ";
-    auto f2 = AddedFunction::createAddedFunction(QLatin1String(sig2),
-                                                 QLatin1String("const Abc<int& , C<char*> *   >  * *"),
+    auto f2 = AddedFunction::createAddedFunction(QLatin1StringView(sig2),
+                                                 u"const Abc<int& , C<char*> *   >  * *"_s,
                                                  &errorMessage);
     QVERIFY2(!f2.isNull(), qPrintable(errorMessage));
     QCOMPARE(f2->name(), u"_fu__nc_");
     const auto &args = f2->arguments();
     QCOMPARE(args.size(), 4);
     retval = f2->returnType();
-    QCOMPARE(retval.qualifiedName(), QStringList{QLatin1String("Abc")});
+    QCOMPARE(retval.qualifiedName(), QStringList{u"Abc"_s});
     QCOMPARE(retval.instantiations().size(), 2);
     QCOMPARE(retval.toString(), u"const Abc<int&, C<char*>*>**");
     QCOMPARE(retval.indirections(), 2);
@@ -72,7 +77,7 @@ void TestAddFunction::testParsingFuncNameAndConstness()
 
     QCOMPARE(args.at(2).name, u"my_name");
     auto arg2Type = args.at(2).typeInfo;
-    QCOMPARE(arg2Type.qualifiedName(), QStringList{QLatin1String("Abc")});
+    QCOMPARE(arg2Type.qualifiedName(), QStringList{u"Abc"_s});
     QCOMPARE(arg2Type.instantiations().size(), 2);
     QCOMPARE(arg2Type.toString(), u"const Abc<int&, C<char*>*>**");
     QCOMPARE(arg2Type.indirections(), 2);
@@ -83,7 +88,7 @@ void TestAddFunction::testParsingFuncNameAndConstness()
 
     // function with no args.
     const char sig3[] = "func()";
-    auto f3 = AddedFunction::createAddedFunction(QLatin1String(sig3), QLatin1String("void"),
+    auto f3 = AddedFunction::createAddedFunction(QLatin1StringView(sig3), u"void"_s,
                                                  &errorMessage);
     QVERIFY2(!f3.isNull(), qPrintable(errorMessage));
     QCOMPARE(f3->name(), u"func");
@@ -91,7 +96,7 @@ void TestAddFunction::testParsingFuncNameAndConstness()
 
     // const call operator
     const char sig4[] = "operator()(int)const";
-    auto f4 = AddedFunction::createAddedFunction(QLatin1String(sig4), QLatin1String("int"),
+    auto f4 = AddedFunction::createAddedFunction(QLatin1StringView(sig4), u"int"_s,
                                                  &errorMessage);
     QVERIFY2(!f4.isNull(), qPrintable(errorMessage));
     QCOMPARE(f4->name(), u"operator()");
@@ -140,12 +145,12 @@ struct A {
     QVERIFY(!addedFunc->isStatic());
 
     AbstractMetaType returnType = addedFunc->type();
-    QCOMPARE(returnType.typeEntry(), typeDb->findPrimitiveType(QLatin1String("int")));
+    QCOMPARE(returnType.typeEntry(), typeDb->findPrimitiveType(u"int"_s));
     const AbstractMetaArgumentList &args = addedFunc->arguments();
     QCOMPARE(args.size(), 3);
     QCOMPARE(args.at(0).type().typeEntry(), returnType.typeEntry());
     QCOMPARE(args.at(1).defaultValueExpression(), u"4.6");
-    QCOMPARE(args.at(2).type().typeEntry(), typeDb->findType(QLatin1String("B")));
+    QCOMPARE(args.at(2).type().typeEntry(), typeDb->findType(u"B"_s));
 
     auto addedCallOperator = classA->findFunction(u"operator()");
     QVERIFY(addedCallOperator);
@@ -223,7 +228,7 @@ void TestAddFunction::testAddFunctionWithoutParenteses()
 {
     const char sig1[] = "func";
     QString errorMessage;
-    auto f1 = AddedFunction::createAddedFunction(QLatin1String(sig1), QLatin1String("void"),
+    auto f1 = AddedFunction::createAddedFunction(QLatin1StringView(sig1), u"void"_s,
                                                  &errorMessage);
     QVERIFY2(!f1.isNull(), qPrintable(errorMessage));
     QCOMPARE(f1->name(), u"func");
@@ -257,7 +262,7 @@ void TestAddFunction::testAddFunctionWithDefaultArgs()
 {
     const char sig1[] = "func";
     QString errorMessage;
-    auto f1 = AddedFunction::createAddedFunction(QLatin1String(sig1), QLatin1String("void"),
+    auto f1 = AddedFunction::createAddedFunction(QLatin1StringView(sig1), u"void"_s,
                                                  &errorMessage);
     QVERIFY2(!f1.isNull(), qPrintable(errorMessage));
     QCOMPARE(f1->name(), u"func");
@@ -308,7 +313,7 @@ void TestAddFunction::testAddFunctionAtModuleLevel()
 
     TypeDatabase* typeDb = TypeDatabase::instance();
 
-    AddedFunctionList addedFuncs = typeDb->findGlobalUserFunctions(QLatin1String("func"));
+    AddedFunctionList addedFuncs = typeDb->findGlobalUserFunctions(u"func"_s);
 
     QCOMPARE(addedFuncs.size(), 1);
 
@@ -324,7 +329,7 @@ void TestAddFunction::testAddFunctionWithVarargs()
 {
     const char sig1[] = "func(int,char,...)";
     QString errorMessage;
-    auto f1 = AddedFunction::createAddedFunction(QLatin1String(sig1), QLatin1String("void"),
+    auto f1 = AddedFunction::createAddedFunction(QLatin1StringView(sig1), u"void"_s,
                                                  &errorMessage);
     QVERIFY2(!f1.isNull(), qPrintable(errorMessage));
     QCOMPARE(f1->name(), u"func");
@@ -416,7 +421,7 @@ void TestAddFunction::testAddFunctionWithApiVersion()
         </add-function>\n\
     </typesystem>\n";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode,
-                                                                true, QLatin1String("0.1")));
+                                                                true, u"0.1"_s));
     QVERIFY(!builder.isNull());
     const auto globalFuncs = builder->globalFunctions();
     QCOMPARE(globalFuncs.size(), 1);
@@ -514,18 +519,18 @@ void TestAddFunction::testAddFunctionTypeParser_data()
 
     QTest::newRow("1-arg")
        << QString::fromLatin1("int @a@=42")
-       << Arguments{{QLatin1String("int"), QLatin1String("a"), QLatin1String("42")}};
+       << Arguments{{u"int"_s, u"a"_s, u"42"_s}};
 
     QTest::newRow("2-args")
        << QString::fromLatin1("double @d@, int @a@=42")
-       << Arguments{{QLatin1String("double"), QLatin1String("d"), {}},
-                    {QLatin1String("int"), QLatin1String("a"), QLatin1String("42")}};
+       << Arguments{{u"double"_s, u"d"_s, {}},
+                    {u"int"_s, u"a"_s, u"42"_s}};
 
     QTest::newRow("template-var_args")
        << QString::fromLatin1("const QList<X,Y> &@list@ = QList<X,Y>{1,2}, int @b@=5, ...")
-       << Arguments{{QLatin1String("const QList<X,Y> &"), QLatin1String("list"), QLatin1String("QList<X,Y>{1,2}")},
-                    {QLatin1String("int"), QLatin1String("b"), QLatin1String("5")},
-                    {QLatin1String("..."), {}, {}}};
+       << Arguments{{u"const QList<X,Y> &"_s, u"list"_s, u"QList<X,Y>{1,2}"_s},
+                    {u"int"_s, u"b"_s, u"5"_s},
+                    {u"..."_s, {}, {}}};
 }
 
 void TestAddFunction::testAddFunctionTypeParser()

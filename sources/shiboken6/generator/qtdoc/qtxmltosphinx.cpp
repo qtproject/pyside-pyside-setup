@@ -32,12 +32,16 @@
 #include <codesniphelpers.h>
 #include "rstformat.h"
 
+#include "qtcompat.h"
+
 #include <QtCore/QDebug>
 #include <QtCore/QDir>
 #include <QtCore/QFileInfo>
 #include <QtCore/QLoggingCategory>
 #include <QtCore/QRegularExpression>
 #include <QtCore/QXmlStreamReader>
+
+using namespace Qt::StringLiterals;
 
 static inline QString nameAttribute() { return QStringLiteral("name"); }
 static inline QString titleAttribute() { return QStringLiteral("title"); }
@@ -62,11 +66,11 @@ QString msgTagWarning(const QXmlStreamReader &reader, const QString &context,
 QString msgFallbackWarning(const QString &location, const QString &identifier,
                            const QString &fallback)
 {
-    QString message = QLatin1String("Falling back to \"")
-        + QDir::toNativeSeparators(fallback) + QLatin1String("\" for \"")
+    QString message = u"Falling back to \""_s
+        + QDir::toNativeSeparators(fallback) + u"\" for \""_s
         + location + u'"';
     if (!identifier.isEmpty())
-        message += QLatin1String(" [") + identifier + u']';
+        message += u" ["_s + identifier + u']';
     return message;
 }
 
@@ -74,7 +78,7 @@ QString msgSnippetsResolveError(const QString &path, const QStringList &location
 {
     QString result;
     QTextStream(&result) << "Could not resolve \"" << path << R"(" in ")"
-        << locations.join(uR"(", ")"_qs);
+        << locations.join(uR"(", ")"_s);
     return result;
 }
 
@@ -534,10 +538,10 @@ static QString pySnippetName(const QString &path, SnippetType type)
 {
     switch (type) {
     case SnippetType::CppSource:
-        return path.left(path.size() - 3) + u"py"_qs;
+        return path.left(path.size() - 3) + u"py"_s;
         break;
     case SnippetType::CppHeader:
-        return path + u".py"_qs;
+        return path + u".py"_s;
         break;
     default:
         break;
@@ -609,17 +613,17 @@ QString QtXmlToSphinx::readFromLocation(const QString &location, const QString &
         return QString(); // null
     }
 
-    QString code = QLatin1String(""); // non-null
+    QString code = u""_s; // non-null
     if (identifier.isEmpty()) {
         while (!inputFile.atEnd())
             code += QString::fromUtf8(inputFile.readLine());
         return CodeSnipHelpers::fixSpaces(code);
     }
 
-    const QRegularExpression searchString(QLatin1String("//!\\s*\\[")
-                                          + identifier + QLatin1String("\\]"));
+    const QRegularExpression searchString(u"//!\\s*\\["_s
+                                          + identifier + u"\\]"_s);
     Q_ASSERT(searchString.isValid());
-    static const QRegularExpression codeSnippetCode(QLatin1String("//!\\s*\\[[\\w\\d\\s]+\\]"));
+    static const QRegularExpression codeSnippetCode(u"//!\\s*\\[[\\w\\d\\s]+\\]"_s);
     Q_ASSERT(codeSnippetCode.isValid());
 
     bool getCode = false;
@@ -653,7 +657,7 @@ void QtXmlToSphinx::handleHeadingTag(QXmlStreamReader& reader)
     static char types[] = { '-', '^' };
     QXmlStreamReader::TokenType token = reader.tokenType();
     if (token == QXmlStreamReader::StartElement) {
-        uint typeIdx = reader.attributes().value(QLatin1String("level")).toUInt();
+        uint typeIdx = reader.attributes().value(u"level"_s).toUInt();
         if (typeIdx >= sizeof(types))
             type = types[sizeof(types)-1];
         else
@@ -794,9 +798,9 @@ static inline QString fixLinkType(QStringView type)
 static inline QString linkSourceAttribute(const QString &type)
 {
     if (type == functionLinkType() || type == classLinkType())
-        return QLatin1String("raw");
+        return u"raw"_s;
     return type == u"enum" || type == u"page"
-        ? type : QLatin1String("href");
+        ? type : u"href"_s;
 }
 
 // "See also" links may appear as nested links:
@@ -875,8 +879,8 @@ void QtXmlToSphinx::handleSnippetTag(QXmlStreamReader& reader)
             m_output.flush();
             m_output.string()->chop(2);
         }
-        QString location = reader.attributes().value(QLatin1String("location")).toString();
-        QString identifier = reader.attributes().value(QLatin1String("identifier")).toString();
+        QString location = reader.attributes().value(u"location"_s).toString();
+        QString identifier = reader.attributes().value(u"identifier"_s).toString();
         QString fallbackPath;
         if (reader.attributes().hasAttribute(fallbackPathAttribute()))
             fallbackPath = reader.attributes().value(fallbackPathAttribute()).toString();
@@ -916,7 +920,7 @@ void QtXmlToSphinx::handleDotsTag(QXmlStreamReader& reader)
             m_output << "::\n\n";
         }
         pushOutputBuffer();
-        int indent = reader.attributes().value(QLatin1String("indent")).toInt()
+        int indent = reader.attributes().value(u"indent"_s).toInt()
                      + m_output.indentation() * m_output.tabWidth();
         for (int i = 0; i < indent; ++i)
             m_output << ' ';
@@ -949,7 +953,7 @@ void QtXmlToSphinx::handleTermTag(QXmlStreamReader& reader)
     if (token == QXmlStreamReader::StartElement) {
         pushOutputBuffer();
     } else if (token == QXmlStreamReader::Characters) {
-        m_output << reader.text().toString().replace(QLatin1String("::"), QLatin1String("."));
+        m_output << reader.text().toString().replace(u"::"_s, u"."_s);
     } else if (token == QXmlStreamReader::EndElement) {
         TableCell cell;
         cell.data = popOutputBuffer().trimmed();
@@ -966,8 +970,8 @@ void QtXmlToSphinx::handleItemTag(QXmlStreamReader& reader)
             m_currentTable.appendRow({});
         TableRow& row = m_currentTable.last();
         TableCell cell;
-        cell.colSpan = reader.attributes().value(QLatin1String("colspan")).toShort();
-        cell.rowSpan = reader.attributes().value(QLatin1String("rowspan")).toShort();
+        cell.colSpan = reader.attributes().value(u"colspan"_s).toShort();
+        cell.rowSpan = reader.attributes().value(u"rowspan"_s).toShort();
         row << cell;
         pushOutputBuffer();
     } else if (token == QXmlStreamReader::EndElement) {
@@ -985,7 +989,7 @@ void QtXmlToSphinx::handleHeaderTag(QXmlStreamReader &reader)
     // <header> in WebXML is either a table header or a description of a
     // C++ header with "name"/"href" attributes.
     if (reader.tokenType() == QXmlStreamReader::StartElement
-        && !reader.attributes().hasAttribute(u"name"_qs)) {
+        && !reader.attributes().hasAttribute(u"name"_s)) {
         m_currentTable.setHeaderEnabled(true);
         m_currentTable.appendRow({});
     }
@@ -1014,10 +1018,10 @@ void QtXmlToSphinx::handleListTag(QXmlStreamReader& reader)
     static ListType listType = BulletList;
     QXmlStreamReader::TokenType token = reader.tokenType();
     if (token == QXmlStreamReader::StartElement) {
-        listType = webXmlListType(reader.attributes().value(QLatin1String("type")));
+        listType = webXmlListType(reader.attributes().value(u"type"_s));
         if (listType == EnumeratedList) {
-            m_currentTable.appendRow(TableRow{TableCell(QLatin1String("Constant")),
-                                              TableCell(QLatin1String("Description"))});
+            m_currentTable.appendRow(TableRow{TableCell(u"Constant"_s),
+                                              TableCell(u"Description"_s)});
             m_currentTable.setHeaderEnabled(true);
         }
         m_output.indent();
@@ -1054,7 +1058,7 @@ void QtXmlToSphinx::handleLinkTag(QXmlStreamReader& reader)
     case QXmlStreamReader::StartElement: {
         // <link> embedded in <see-also> means the characters of <see-also> are no link.
         m_seeAlsoContext.reset();
-        const QString type = fixLinkType(reader.attributes().value(QLatin1String("type")));
+        const QString type = fixLinkType(reader.attributes().value(u"type"_s));
         const QString ref = reader.attributes().value(linkSourceAttribute(type)).toString();
         m_linkContext.reset(handleLinkStart(type, ref));
     }
@@ -1075,8 +1079,8 @@ void QtXmlToSphinx::handleLinkTag(QXmlStreamReader& reader)
 
 QtXmlToSphinxLink *QtXmlToSphinx::handleLinkStart(const QString &type, QString ref) const
 {
-    ref.replace(QLatin1String("::"), QLatin1String("."));
-    ref.remove(QLatin1String("()"));
+    ref.replace(u"::"_s, u"."_s);
+    ref.remove(u"()"_s);
     auto *result = new QtXmlToSphinxLink(ref);
 
     if (m_insideBold)
@@ -1141,7 +1145,7 @@ static QString fixLinkText(const QtXmlToSphinxLink *linkContext,
     if (linkContext->linkRef == linktext)
         return QString();
     if ((linkContext->type & QtXmlToSphinxLink::FunctionMask) != 0
-        && (linkContext->linkRef + QLatin1String("()")) == linktext) {
+        && (linkContext->linkRef + u"()"_s) == linktext) {
         return QString();
     }
     return  linktext;
@@ -1234,7 +1238,7 @@ void QtXmlToSphinx::handleImageTag(QXmlStreamReader& reader)
 {
     if (reader.tokenType() != QXmlStreamReader::StartElement)
         return;
-    const QString href = reader.attributes().value(QLatin1String("href")).toString();
+    const QString href = reader.attributes().value(u"href"_s).toString();
     if (copyImage(href))
         m_output << ".. image:: " <<  href << "\n\n";
 }
@@ -1243,7 +1247,7 @@ void QtXmlToSphinx::handleInlineImageTag(QXmlStreamReader& reader)
 {
     if (reader.tokenType() != QXmlStreamReader::StartElement)
         return;
-    const QString href = reader.attributes().value(QLatin1String("href")).toString();
+    const QString href = reader.attributes().value(u"href"_s).toString();
     if (!copyImage(href))
         return;
     // Handle inline images by substitution references. Insert a unique tag
@@ -1265,7 +1269,7 @@ void QtXmlToSphinx::handleRawTag(QXmlStreamReader& reader)
 {
     QXmlStreamReader::TokenType token = reader.tokenType();
     if (token == QXmlStreamReader::StartElement) {
-        QString format = reader.attributes().value(QLatin1String("format")).toString();
+        QString format = reader.attributes().value(u"format"_s).toString();
         m_output << ".. raw:: " << format.toLower() << "\n\n";
     } else if (token == QXmlStreamReader::Characters) {
         Indentation indent(m_output);
@@ -1355,10 +1359,10 @@ void QtXmlToSphinx::handleAnchorTag(QXmlStreamReader& reader)
     QXmlStreamReader::TokenType token = reader.tokenType();
     if (token == QXmlStreamReader::StartElement) {
         QString anchor;
-        if (reader.attributes().hasAttribute(QLatin1String("id")))
-            anchor = reader.attributes().value(QLatin1String("id")).toString();
-        else if (reader.attributes().hasAttribute(QLatin1String("name")))
-            anchor = reader.attributes().value(QLatin1String("name")).toString();
+        if (reader.attributes().hasAttribute(u"id"_s))
+            anchor = reader.attributes().value(u"id"_s).toString();
+        else if (reader.attributes().hasAttribute(u"name"_s))
+            anchor = reader.attributes().value(u"name"_s).toString();
         if (!anchor.isEmpty() && m_opened_anchor != anchor) {
             m_opened_anchor = anchor;
             if (!m_context.isEmpty())
@@ -1499,7 +1503,7 @@ void QtXmlToSphinx::Table::format(TextStream& s) const
         return; // empty table (table with empty cells)
 
     // create a horizontal line to be used later.
-    QString horizontalLine = QLatin1String("+");
+    QString horizontalLine = u"+"_s;
     for (auto colWidth : colWidths)
         horizontalLine += QString(colWidth, u'-') + u'+';
 

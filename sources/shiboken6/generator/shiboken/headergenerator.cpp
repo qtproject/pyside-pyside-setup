@@ -40,6 +40,8 @@
 #include <fileout.h>
 #include "parser/codemodel.h"
 
+#include "qtcompat.h"
+
 #include <algorithm>
 
 #include <QtCore/QDir>
@@ -47,9 +49,11 @@
 #include <QtCore/QVariant>
 #include <QtCore/QDebug>
 
+using namespace Qt::StringLiterals;
+
 QString HeaderGenerator::headerFileNameForContext(const GeneratorContext &context)
 {
-    return fileNameForContextHelper(context, u"_wrapper.h"_qs);
+    return fileNameForContextHelper(context, u"_wrapper.h"_s);
 }
 
 QString HeaderGenerator::fileNameForContext(const GeneratorContext &context) const
@@ -256,7 +260,7 @@ void HeaderGenerator::writeFunction(TextStream &s, const AbstractMetaFunctionCPt
 
     if (avoidProtectedHack() && func->isProtected() && !func->isConstructor()
         && !func->isOperatorOverload()) {
-        writeMemberFunctionWrapper(s, func, QLatin1String("_protected"));
+        writeMemberFunctionWrapper(s, func, u"_protected"_s);
     }
 
     // pure virtual functions need a default implementation
@@ -447,7 +451,7 @@ bool HeaderGenerator::finishGeneration()
         const auto ptrName = smp.type.typeEntry()->entryName();
         int pos = indexName.indexOf(ptrName, 0, Qt::CaseInsensitive);
         if (pos >= 0) {
-            indexName.insert(pos + ptrName.size() + 1, QLatin1String("CONST"));
+            indexName.insert(pos + ptrName.size() + 1, u"CONST"_s);
             _writeTypeIndexValue(macrosStream, indexName, smartPointerCountIndex);
             macrosStream << ", //   (const)\n";
         }
@@ -456,7 +460,7 @@ bool HeaderGenerator::finishGeneration()
     }
 
     _writeTypeIndexValue(macrosStream,
-                         QLatin1String("SBK_") + moduleName() + QLatin1String("_IDX_COUNT"),
+                         u"SBK_"_s + moduleName() + u"_IDX_COUNT"_s,
                          getMaxTypeIndex() + smartPointerCount);
     macrosStream << "\n};\n";
 
@@ -552,7 +556,7 @@ bool HeaderGenerator::finishGeneration()
         + subDirectoryForPackage(packageName()) + u'/';
     const QString moduleHeaderFileName(moduleHeaderDir + getModuleHeaderFileName());
 
-    QString includeShield(QLatin1String("SBK_") + moduleName().toUpper() + QLatin1String("_PYTHON_H"));
+    QString includeShield(u"SBK_"_s + moduleName().toUpper() + u"_PYTHON_H"_s);
 
     FileOut file(moduleHeaderFileName);
     TextStream &s = file.stream;

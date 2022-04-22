@@ -31,6 +31,8 @@
 
 #include <textstream.h>
 
+#include "qtcompat.h"
+
 #include <QtCore/QHash>
 #include <QtCore/QList>
 #include <QtCore/QScopedPointer>
@@ -67,7 +69,7 @@ public:
         QString data;
 
         TableCell(const QString& text = QString()) : data(text) {}
-        TableCell(const char* text) : data(QLatin1String(text)) {}
+        TableCell(const char* text) : data(QString::fromLatin1(text)) {}
     };
 
     using TableRow = QList<TableCell>;

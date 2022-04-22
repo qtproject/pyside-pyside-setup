@@ -27,13 +27,18 @@
 ****************************************************************************/
 
 #include "testabstractmetatype.h"
-#include <QtTest/QTest>
 #include "testutil.h"
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
 #include <typesystem.h>
 #include <parser/codemodel.h>
 #include <typeparser.h>
+
+#include <qtcompat.h>
+
+#include <QtTest/QTest>
+
+using namespace Qt::StringLiterals;
 
 void TestAbstractMetaType::parsing_data()
 {
@@ -104,7 +109,7 @@ void TestAbstractMetaType::testApiVersionSupported()
         <function signature='justAtest3()'/>\n\
     </typesystem>\n";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode,
-                                                                false, QLatin1String("1.0")));
+                                                                false, u"1.0"_s));
     QVERIFY(!builder.isNull());
 
     AbstractMetaClassList classes = builder->classes();
@@ -122,7 +127,7 @@ void TestAbstractMetaType::testApiVersionNotSupported()
         <value-type name='object' since='0.1'/>\n\
     </typesystem>\n";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode,
-                                                                true, QLatin1String("0.1")));
+                                                                true, u"0.1"_s));
     QVERIFY(!builder.isNull());
 
     AbstractMetaClassList classes = builder->classes();
@@ -231,7 +236,7 @@ void TestAbstractMetaType::testObjectTypeUsedAsValue()
     QCOMPARE(classes.size(), 1);
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, u"A");
     QVERIFY(classA);
-    const auto overloads = classA->queryFunctionsByName(QLatin1String("method"));
+    const auto overloads = classA->queryFunctionsByName(u"method"_s);
     QCOMPARE(overloads.size(), 1);
     const auto method = overloads.constFirst();
     QVERIFY(method);

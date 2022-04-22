@@ -27,13 +27,18 @@
 ****************************************************************************/
 
 #include "testmodifyfunction.h"
-#include <QtTest/QTest>
 #include "testutil.h"
 #include <abstractmetabuilder_p.h>
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
 #include <modifications.h>
 #include <typesystem.h>
+
+#include <qtcompat.h>
+
+#include <QtTest/QTest>
+
+using namespace Qt::StringLiterals;
 
 void TestModifyFunction::testRenameArgument_data()
 {
@@ -141,7 +146,7 @@ void TestModifyFunction::invalidateAfterUse()
         <object-type name='E' />\n\
     </typesystem>\n";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode,
-                                                                false, QLatin1String("0.1")));
+                                                                false, u"0.1"_s));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, u"B");
@@ -214,7 +219,7 @@ void TestModifyFunction::testWithApiVersion()
         </object-type>\n\
     </typesystem>\n";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode,
-                                                                false, QLatin1String("0.1")));
+                                                                false, u"0.1"_s));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     AbstractMetaClass* classB = AbstractMetaClass::findClass(classes, u"B");
@@ -253,7 +258,7 @@ struct A {
 </typesystem>
 )XML";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode,
-                                                                false, QLatin1String("0.1")));
+                                                                false, u"0.1"_s));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, u"A");
@@ -307,7 +312,7 @@ void TestModifyFunction::testGlobalFunctionModification()
     QVERIFY(!builder.isNull());
     QCOMPARE(builder->globalFunctions().size(), 1);
 
-    FunctionModificationList mods = TypeDatabase::instance()->functionModifications(QLatin1String("function(A*)"));
+    FunctionModificationList mods = TypeDatabase::instance()->functionModifications(u"function(A*)"_s);
     QCOMPARE(mods.size(), 1);
     const QList<ArgumentModification> &argMods = mods.constFirst().argument_mods();
     QCOMPARE(argMods.size(), 1);
