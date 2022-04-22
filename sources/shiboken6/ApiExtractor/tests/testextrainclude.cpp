@@ -52,7 +52,7 @@ void TestExtraInclude::testClassExtraInclude()
 
     QList<Include> includes = classA->typeEntry()->extraIncludes();
     QCOMPARE(includes.size(), 1);
-    QCOMPARE(includes.constFirst().name(), QLatin1String("header.h"));
+    QCOMPARE(includes.constFirst().name(), u"header.h");
 }
 
 void TestExtraInclude::testGlobalExtraIncludes()
@@ -75,12 +75,12 @@ void TestExtraInclude::testGlobalExtraIncludes()
     TypeDatabase* td = TypeDatabase::instance();
     const TypeSystemTypeEntry *module = td->defaultTypeSystemType();
     QVERIFY(module);
-    QCOMPARE(module->name(), QLatin1String("Foo"));
+    QCOMPARE(module->name(), u"Foo");
 
     QList<Include> includes = module->extraIncludes();
     QCOMPARE(includes.size(), 2);
-    QCOMPARE(includes.constFirst().name(), QLatin1String("header1.h"));
-    QCOMPARE(includes.constLast().name(), QLatin1String("header2.h"));
+    QCOMPARE(includes.constFirst().name(), u"header1.h");
+    QCOMPARE(includes.constLast().name(), u"header2.h");
 }
 
 QTEST_APPLESS_MAIN(TestExtraInclude)

@@ -187,7 +187,7 @@ QString libXslt_transform(const QString &xml, QString xsl, QString *errorMessage
 {
     ensureInitialized();
     // Read XML data
-    if (!xsl.startsWith(QLatin1String("<?xml"))) {
+    if (!xsl.startsWith(u"<?xml")) {
         xsl.prepend(QLatin1String(xsltPrefix));
         xsl.append(QLatin1String("</xsl:transform>"));
     }

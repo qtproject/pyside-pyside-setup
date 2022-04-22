@@ -346,9 +346,9 @@ static const char includeQDebug[] =
 
 static QString chopType(QString s)
 {
-    if (s.endsWith(QLatin1String("_Type")))
+    if (s.endsWith(u"_Type"))
         s.chop(5);
-    else if (s.endsWith(QLatin1String("_TypeF()")))
+    else if (s.endsWith(u"_TypeF()"))
         s.chop(8);
     return s;
 }
@@ -356,7 +356,7 @@ static QString chopType(QString s)
 static bool isStdSetterName(QString setterName, QString propertyName)
 {
    return setterName.size() == propertyName.size() + 3
-          && setterName.startsWith(QLatin1String("set"))
+          && setterName.startsWith(u"set")
           && setterName.endsWith(QStringView{propertyName}.right(propertyName.size() - 1))
           && setterName.at(3) == propertyName.at(0).toUpper();
 }
@@ -608,7 +608,7 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
             writeSignatureInfo(signatureStream, overloadData);
         }
         // call operators
-        else if (rfunc->name() == QLatin1String("operator()")) {
+        else if (rfunc->name() == u"operator()") {
             writeMethodWrapper(s, overloadData, classContext);
             writeSignatureInfo(signatureStream, overloadData);
         }
@@ -1132,7 +1132,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
     // skip metaObject function, this will be written manually ahead
     if (usePySideExtensions() && func->ownerClass() && func->ownerClass()->isQObject() &&
         ((func->name() == u"metaObject"_qs)
-            || (func->name() == QLatin1String("qt_metacall"))))
+            || (func->name() == u"qt_metacall")))
         return;
 
     const TypeEntry *retType = func->type().typeEntry();
@@ -2214,7 +2214,7 @@ void CppGenerator::writeMethodWrapper(TextStream &s, const OverloadData &overloa
         revOpName.insert(2, u'r');
         // For custom classes, operations like __radd__ and __rmul__
         // will enter an infinite loop.
-        if (rfunc->isBinaryOperator() && revOpName.contains(QLatin1String("shift"))) {
+        if (rfunc->isBinaryOperator() && revOpName.contains(u"shift")) {
             s << "Shiboken::AutoDecRef attrName(Py_BuildValue(\"s\", \"" << revOpName << "\"));\n";
             s << "if (!isReverse\n";
             {
@@ -3413,11 +3413,11 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s,
     QString typeCheck = toNative->sourceTypeCheck();
     if (typeCheck.isEmpty()) {
         QString pyTypeName = toNative->sourceTypeName();
-        if (pyTypeName == QLatin1String("Py_None") || pyTypeName == QLatin1String("PyNone"))
+        if (pyTypeName == u"Py_None" || pyTypeName == u"PyNone")
             typeCheck = QLatin1String("%in == Py_None");
-        else if (pyTypeName == QLatin1String("SbkEnumType"))
+        else if (pyTypeName == u"SbkEnumType")
             typeCheck = QLatin1String("Shiboken::isShibokenEnum(%in)");
-        else if (pyTypeName == QLatin1String("SbkObject"))
+        else if (pyTypeName == u"SbkObject")
             typeCheck = QLatin1String("Shiboken::Object::checkType(%in)");
     }
     if (typeCheck.isEmpty()) {
@@ -3790,7 +3790,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                     std::swap(firstArg, secondArg);
 
                 // Emulate operator+=/-= (__iadd__, __isub__) by using ++/--
-                if (((op == QLatin1String("++")) || (op == QLatin1String("--"))) && !func->isReverseOperator())  {
+                if (((op == u"++") || (op == u"--")) && !func->isReverseOperator())  {
                     s  << "\nfor (int i = 0; i < " << secondArg
                         << "; ++i, " << op << firstArg << ");\n";
                     mc << firstArg;
@@ -4222,10 +4222,10 @@ void CppGenerator::writeEnumConverterInitialization(TextStream &s, const TypeEnt
 
         QString signature = enumType->qualifiedCppName();
         // Replace "QFlags<Class::Option>" by "Class::Options"
-        if (flags && signature.startsWith(QLatin1String("QFlags<")) && signature.endsWith(u'>')) {
+        if (flags && signature.startsWith(u"QFlags<") && signature.endsWith(u'>')) {
             signature.chop(1);
             signature.remove(0, 7);
-            const int lastQualifierPos = signature.lastIndexOf(QLatin1String("::"));
+            const int lastQualifierPos = signature.lastIndexOf(u"::");
             if (lastQualifierPos != -1) {
                 signature.replace(lastQualifierPos + 2, signature.size() - lastQualifierPos - 2,
                                   flags->flagsName());
@@ -4237,7 +4237,7 @@ void CppGenerator::writeEnumConverterInitialization(TextStream &s, const TypeEnt
         while (true) {
             s << "Shiboken::Conversions::registerConverterName(converter, \""
                 << signature << "\");\n";
-            const int qualifierPos = signature.indexOf(QLatin1String("::"));
+            const int qualifierPos = signature.indexOf(u"::");
             if (qualifierPos != -1)
                 signature.remove(0, qualifierPos + 2);
             else
@@ -4472,7 +4472,7 @@ void CppGenerator::writeClassDefinition(TextStream &s,
         // privacy the same way. This worked before the heap types were used,
         // because inheritance is not really checked for static types.
         // Instead, we check this at runtime, see SbkObjectType_tp_new.
-        if (metaClass->fullName().startsWith(QLatin1String("PySide6.Qt"))) {
+        if (metaClass->fullName().startsWith(u"PySide6.Qt")) {
             // PYSIDE-595: No idea how to do non-inheritance correctly.
             // Since that is only relevant in shiboken, I used a shortcut for
             // PySide.
@@ -4760,7 +4760,7 @@ void CppGenerator::writeTypeAsNumberDefinition(TextStream &s, const AbstractMeta
 
     for (auto it = nbFuncs().cbegin(), end = nbFuncs().cend(); it != end; ++it) {
         const QString &nbName = it.key();
-        if (nbName == QLatin1String("__div__") || nbName == QLatin1String("__idiv__"))
+        if (nbName == u"__div__" || nbName == u"__idiv__")
             continue; // excludeFromPy3K
         const auto nbIt = nb.constFind(nbName);
         if (nbIt != nb.constEnd()) {
@@ -5431,9 +5431,7 @@ void CppGenerator::writeEnumsInitialization(TextStream &s, AbstractMetaEnumList 
 
 static QString mangleName(QString name)
 {
-    if (   name == QLatin1String("None")
-        || name == QLatin1String("False")
-        || name == QLatin1String("True"))
+    if (name == u"None" || name == u"False" || name == u"True")
         name += u'_';
     return name;
 }
@@ -6765,7 +6763,7 @@ bool CppGenerator::writeParentChildManagement(TextStream &s, const AbstractMetaF
     int childIndex = argIndex;
     if (ctorHeuristicEnabled && argIndex > 0 && argIndex <= numArgs) {
         const AbstractMetaArgument &arg = func->arguments().at(argIndex-1);
-        if (arg.name() == QLatin1String("parent") && arg.type().isObjectType()) {
+        if (arg.name() == u"parent" && arg.type().isObjectType()) {
             action = ArgumentOwner::Add;
             parentIndex = argIndex;
             childIndex = -1;

@@ -78,8 +78,8 @@ void TestAbstractMetaType::testConstCharPtrType()
     AbstractMetaType rtype = func->type();
     // Test properties of const char*
     QVERIFY(!rtype.isVoid());
-    QCOMPARE(rtype.package(), QLatin1String("Foo"));
-    QCOMPARE(rtype.name(), QLatin1String("char"));
+    QCOMPARE(rtype.package(), u"Foo");
+    QCOMPARE(rtype.name(), u"char");
     QVERIFY(rtype.isConstant());
     QVERIFY(!rtype.isArray());
     QVERIFY(!rtype.isContainer());
@@ -142,7 +142,7 @@ void TestAbstractMetaType::testCharType()
 
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
-    QCOMPARE(classes.constFirst()->package(), QLatin1String("Foo"));
+    QCOMPARE(classes.constFirst()->package(), u"Foo");
 
     const auto functions = builder->globalFunctions();
     QCOMPARE(functions.size(), 1);
@@ -150,8 +150,8 @@ void TestAbstractMetaType::testCharType()
     AbstractMetaType rtype = func->type();
     // Test properties of const char*
     QVERIFY(!rtype.isVoid());
-    QCOMPARE(rtype.package(), QLatin1String("Foo"));
-    QCOMPARE(rtype.name(), QLatin1String("char"));
+    QCOMPARE(rtype.package(), u"Foo");
+    QCOMPARE(rtype.name(), u"char");
     QVERIFY(!rtype.isConstant());
     QVERIFY(!rtype.isArray());
     QVERIFY(!rtype.isContainer());
@@ -211,7 +211,7 @@ void TestAbstractMetaType::testTypedefWithTemplates()
     QCOMPARE(args.size(), 1);
     const AbstractMetaArgument &arg = args.constFirst();
     AbstractMetaType metaType = arg.type();
-    QCOMPARE(metaType.cppSignature(), QLatin1String("A<B >"));
+    QCOMPARE(metaType.cppSignature(), u"A<B >");
 }
 
 
@@ -239,7 +239,7 @@ void TestAbstractMetaType::testObjectTypeUsedAsValue()
     QCOMPARE(args.size(), 1);
     const AbstractMetaArgument &arg = args.constFirst();
     AbstractMetaType metaType = arg.type();
-    QCOMPARE(metaType.cppSignature(), QLatin1String("A"));
+    QCOMPARE(metaType.cppSignature(), u"A");
     QVERIFY(metaType.isValue());
     QVERIFY(metaType.typeEntry()->isObject());
 }

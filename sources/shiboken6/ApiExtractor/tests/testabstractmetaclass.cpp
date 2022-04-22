@@ -43,7 +43,7 @@ void TestAbstractMetaClass::testClassName()
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
-    QCOMPARE(classes[0]->name(), QLatin1String("ClassName"));
+    QCOMPARE(classes[0]->name(), u"ClassName");
 }
 
 void TestAbstractMetaClass::testClassNameUnderNamespace()
@@ -59,12 +59,12 @@ void TestAbstractMetaClass::testClassNameUnderNamespace()
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2); // 1 namespace + 1 class
-    if (classes.constFirst()->name() != QLatin1String("ClassName"))
+    if (classes.constFirst()->name() != u"ClassName")
         qSwap(classes[0], classes[1]);
 
-    QCOMPARE(classes[0]->name(), QLatin1String("ClassName"));
-    QCOMPARE(classes[0]->qualifiedCppName(), QLatin1String("Namespace::ClassName"));
-    QCOMPARE(classes[1]->name(), QLatin1String("Namespace"));
+    QCOMPARE(classes[0]->name(), u"ClassName");
+    QCOMPARE(classes[0]->qualifiedCppName(), u"Namespace::ClassName");
+    QCOMPARE(classes[1]->name(), u"Namespace");
     QVERIFY(classes[1]->isNamespace());
 
     // Check ctors info
@@ -73,13 +73,13 @@ void TestAbstractMetaClass::testClassNameUnderNamespace()
 
     auto ctors = classes[0]->queryFunctions(FunctionQueryOption::AnyConstructor);
     QCOMPARE(ctors.size(), 2);
-    if (ctors.constFirst()->minimalSignature() != QLatin1String("ClassName()"))
+    if (ctors.constFirst()->minimalSignature() != u"ClassName()")
         qSwap(ctors[0], ctors[1]);
 
     QCOMPARE(ctors[0]->arguments().size(), 0);
-    QCOMPARE(ctors[0]->minimalSignature(), QLatin1String("ClassName()"));
+    QCOMPARE(ctors[0]->minimalSignature(), u"ClassName()");
     QCOMPARE(ctors[1]->arguments().size(), 1);
-    QCOMPARE(ctors[1]->minimalSignature(), QLatin1String("ClassName(Namespace::ClassName)"));
+    QCOMPARE(ctors[1]->minimalSignature(), u"ClassName(Namespace::ClassName)");
 
     QVERIFY(!classes[0]->hasPrivateDestructor());
     QVERIFY(classes[0]->isCopyConstructible()); // implicit default copy ctor
@@ -275,8 +275,8 @@ void TestAbstractMetaClass::testModifiedDefaultValues()
     QCOMPARE(methodMatches.size(), 1);
     const auto method = methodMatches.constFirst();
     const AbstractMetaArgument &arg = method->arguments().constFirst();
-    QCOMPARE(arg.defaultValueExpression(), QLatin1String("Hello"));
-    QCOMPARE(arg.originalDefaultValueExpression(), QLatin1String("A::B()"));
+    QCOMPARE(arg.defaultValueExpression(), u"Hello");
+    QCOMPARE(arg.originalDefaultValueExpression(), u"A::B()");
 }
 
 void TestAbstractMetaClass::testInnerClassOfAPolymorphicOne()
@@ -428,28 +428,28 @@ void TestAbstractMetaClass::testClassDefaultConstructors()
 
     auto ctors = classA->queryFunctions(FunctionQueryOption::AnyConstructor);
     QCOMPARE(ctors.size(), 2);
-    if (ctors.constFirst()->minimalSignature() != QLatin1String("A()"))
+    if (ctors.constFirst()->minimalSignature() != u"A()")
         qSwap(ctors[0], ctors[1]);
 
     QCOMPARE(ctors[0]->arguments().size(), 0);
-    QCOMPARE(ctors[0]->minimalSignature(), QLatin1String("A()"));
+    QCOMPARE(ctors[0]->minimalSignature(), u"A()");
     QCOMPARE(ctors[1]->arguments().size(), 1);
-    QCOMPARE(ctors[1]->minimalSignature(), QLatin1String("A(A)"));
+    QCOMPARE(ctors[1]->minimalSignature(), u"A(A)");
 
     AbstractMetaClass* classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
     QVERIFY(classB);
     QCOMPARE(classB->functions().size(), 2);
-    QCOMPARE(classB->functions().constFirst()->minimalSignature(), QLatin1String("B()"));
+    QCOMPARE(classB->functions().constFirst()->minimalSignature(), u"B()");
 
     AbstractMetaClass* classC = AbstractMetaClass::findClass(classes, QLatin1String("C"));
     QVERIFY(classC);
     QCOMPARE(classC->functions().size(), 1);
-    QCOMPARE(classC->functions().constFirst()->minimalSignature(), QLatin1String("C(C)"));
+    QCOMPARE(classC->functions().constFirst()->minimalSignature(), u"C(C)");
 
     AbstractMetaClass* classD = AbstractMetaClass::findClass(classes, QLatin1String("D"));
     QVERIFY(classD);
     QCOMPARE(classD->functions().size(), 1);
-    QCOMPARE(classD->functions().constFirst()->minimalSignature(), QLatin1String("D(D)"));
+    QCOMPARE(classD->functions().constFirst()->minimalSignature(), u"D(D)");
     QVERIFY(classD->functions().constFirst()->isPrivate());
 
     AbstractMetaClass* classE = AbstractMetaClass::findClass(classes, QLatin1String("E"));
@@ -462,13 +462,13 @@ void TestAbstractMetaClass::testClassDefaultConstructors()
 
     ctors = classF->queryFunctions(FunctionQueryOption::AnyConstructor);
     QCOMPARE(ctors.size(), 2);
-    if (ctors.constFirst()->minimalSignature() != QLatin1String("F(int,int)"))
+    if (ctors.constFirst()->minimalSignature() != u"F(int,int)")
         qSwap(ctors[0], ctors[1]);
 
     QCOMPARE(ctors[0]->arguments().size(), 2);
-    QCOMPARE(ctors[0]->minimalSignature(), QLatin1String("F(int,int)"));
+    QCOMPARE(ctors[0]->minimalSignature(), u"F(int,int)");
     QCOMPARE(ctors[1]->arguments().size(), 1);
-    QCOMPARE(ctors[1]->minimalSignature(), QLatin1String("F(F)"));
+    QCOMPARE(ctors[1]->minimalSignature(), u"F(F)");
 }
 
 void TestAbstractMetaClass::testClassInheritedDefaultConstructors()
@@ -495,13 +495,13 @@ void TestAbstractMetaClass::testClassInheritedDefaultConstructors()
 
     auto ctors = classA->queryFunctions(FunctionQueryOption::AnyConstructor);
     QCOMPARE(ctors.size(), 2);
-    if (ctors.constFirst()->minimalSignature() != QLatin1String("A()"))
+    if (ctors.constFirst()->minimalSignature() != u"A()")
         qSwap(ctors[0], ctors[1]);
 
     QCOMPARE(ctors[0]->arguments().size(), 0);
-    QCOMPARE(ctors[0]->minimalSignature(), QLatin1String("A()"));
+    QCOMPARE(ctors[0]->minimalSignature(), u"A()");
     QCOMPARE(ctors[1]->arguments().size(), 1);
-    QCOMPARE(ctors[1]->minimalSignature(), QLatin1String("A(A)"));
+    QCOMPARE(ctors[1]->minimalSignature(), u"A(A)");
     QVERIFY(ctors[1]->isPrivate());
 
     AbstractMetaClass* classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
@@ -510,7 +510,7 @@ void TestAbstractMetaClass::testClassInheritedDefaultConstructors()
     ctors = classB->queryFunctions(FunctionQueryOption::Constructors);
     QCOMPARE(ctors.size(), 1);
     QCOMPARE(ctors.constFirst()->arguments().size(), 0);
-    QCOMPARE(ctors.constFirst()->minimalSignature(), QLatin1String("B()"));
+    QCOMPARE(ctors.constFirst()->minimalSignature(), u"B()");
 }
 
 void TestAbstractMetaClass::testAbstractClassDefaultConstructors()
@@ -534,7 +534,7 @@ void TestAbstractMetaClass::testAbstractClassDefaultConstructors()
     const auto ctors = classA->queryFunctions(FunctionQueryOption::Constructors);
     QCOMPARE(ctors.size(), 1);
     QCOMPARE(ctors.constFirst()->arguments().size(), 0);
-    QCOMPARE(ctors.constFirst()->minimalSignature(), QLatin1String("A()"));
+    QCOMPARE(ctors.constFirst()->minimalSignature(), u"A()");
 }
 
 void TestAbstractMetaClass::testObjectTypesMustNotHaveCopyConstructors()
@@ -555,7 +555,7 @@ void TestAbstractMetaClass::testObjectTypesMustNotHaveCopyConstructors()
     const auto ctors = classA->queryFunctions(FunctionQueryOption::Constructors);
     QCOMPARE(ctors.size(), 1);
     QCOMPARE(ctors.constFirst()->arguments().size(), 0);
-    QCOMPARE(ctors.constFirst()->minimalSignature(), QLatin1String("A()"));
+    QCOMPARE(ctors.constFirst()->minimalSignature(), u"A()");
 }
 
 void TestAbstractMetaClass::testIsPolymorphic()

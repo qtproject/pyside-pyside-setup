@@ -347,7 +347,7 @@ FunctionModelItem BuilderPrivate::createFunction(const CXCursor &cursor,
 {
     QString name = getCursorSpelling(cursor);
     // Apply type fixes to "operator X &" -> "operator X&"
-    if (name.startsWith(QLatin1String("operator ")))
+    if (name.startsWith(u"operator "))
         name = fixTypeName(name);
     FunctionModelItem result(new _FunctionModelItem(m_model, name));
     setFileName(cursor, result.data());
@@ -588,7 +588,7 @@ TypeInfo BuilderPrivate::createTypeInfoUncached(const CXType &type,
     // the typedef source is named "type-parameter-0-0". Convert it back to the
     // template parameter name. The CXTypes are the same for all templates and
     // must not be cached.
-    if (!m_currentClass.isNull() && typeName.startsWith(QLatin1String("type-parameter-0-"))) {
+    if (!m_currentClass.isNull() && typeName.startsWith(u"type-parameter-0-")) {
         if (cacheable != nullptr)
             *cacheable = false;
         bool ok;
@@ -939,9 +939,9 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         break;
     case CXCursor_AnnotateAttr: {
         const QString annotation = getCursorSpelling(cursor);
-        if (annotation == QLatin1String("qt_slot"))
+        if (annotation == u"qt_slot")
             d->m_currentFunctionType = CodeModel::Slot;
-        else if (annotation == QLatin1String("qt_signal"))
+        else if (annotation == u"qt_signal")
             d->m_currentFunctionType = CodeModel::Signal;
         else
             d->m_currentFunctionType = CodeModel::Normal;

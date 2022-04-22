@@ -77,7 +77,7 @@ QString CodeSnipHelpers::fixSpaces(QString code)
 {
     code.remove(u'\r');
     // Check for XML <tag>\n<space>bla...
-    if (code.startsWith(QLatin1String("\n ")))
+    if (code.startsWith(u"\n "))
         code.remove(0, 1);
     while (!code.isEmpty() && code.back().isSpace())
         code.chop(1);

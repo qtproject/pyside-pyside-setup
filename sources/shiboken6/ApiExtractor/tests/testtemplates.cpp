@@ -82,7 +82,7 @@ namespace Internet {
     QVERIFY(!func.isNull());
     AbstractMetaType funcType = func->type();
     QVERIFY(!funcType.isVoid());
-    QCOMPARE(funcType.cppSignature(), QLatin1String("QList<Internet::Url >"));
+    QCOMPARE(funcType.cppSignature(), u"QList<Internet::Url >");
 }
 
 void TestTemplates::testTemplateOnContainers()
@@ -122,15 +122,15 @@ namespace Namespace {
     QVERIFY(!func.isNull());
     AbstractMetaType argType = func->arguments().constFirst().type();
     QCOMPARE(argType.instantiations().size(), 1);
-    QCOMPARE(argType.typeEntry()->qualifiedCppName(), QLatin1String("QList"));
+    QCOMPARE(argType.typeEntry()->qualifiedCppName(), u"QList");
 
     const AbstractMetaType &instance1 = argType.instantiations().constFirst();
     QCOMPARE(instance1.instantiations().size(), 1);
-    QCOMPARE(instance1.typeEntry()->qualifiedCppName(), QLatin1String("Namespace::A"));
+    QCOMPARE(instance1.typeEntry()->qualifiedCppName(), u"Namespace::A");
 
     const AbstractMetaType &instance2 = instance1.instantiations().constFirst();
     QCOMPARE(instance2.instantiations().size(), 0);
-    QCOMPARE(instance2.typeEntry()->qualifiedCppName(), QLatin1String("Namespace::E1"));
+    QCOMPARE(instance2.typeEntry()->qualifiedCppName(), u"Namespace::E1");
 }
 
 void TestTemplates::testTemplateValueAsArgument()
@@ -153,9 +153,9 @@ void func(List<int> arg) {}
     QCOMPARE(globalFuncs.size(), 1);
 
     const auto func = globalFuncs.constFirst();
-    QCOMPARE(func->minimalSignature(), QLatin1String("func(List<int>)"));
+    QCOMPARE(func->minimalSignature(), u"func(List<int>)");
     QCOMPARE(func->arguments().constFirst().type().cppSignature(),
-             QLatin1String("List<int >"));
+             u"List<int >");
 }
 
 void TestTemplates::testTemplatePointerAsArgument()
@@ -178,9 +178,9 @@ void func(List<int>* arg) {}
     QCOMPARE(globalFuncs.size(), 1);
 
     const auto func = globalFuncs.constFirst();
-    QCOMPARE(func->minimalSignature(), QLatin1String("func(List<int>*)"));
+    QCOMPARE(func->minimalSignature(), u"func(List<int>*)");
     QCOMPARE(func->arguments().constFirst().type().cppSignature(),
-             QLatin1String("List<int > *"));
+             u"List<int > *");
 }
 
 void TestTemplates::testTemplateReferenceAsArgument()
@@ -203,9 +203,9 @@ void func(List<int>& arg) {}
     QCOMPARE(globalFuncs.size(), 1);
 
     const auto func = globalFuncs.constFirst();
-    QCOMPARE(func->minimalSignature(), QLatin1String("func(List<int>&)"));
+    QCOMPARE(func->minimalSignature(), u"func(List<int>&)");
     QCOMPARE(func->arguments().constFirst().type().cppSignature(),
-             QLatin1String("List<int > &"));
+             u"List<int > &");
 }
 
 void TestTemplates::testTemplateParameterFixup()
@@ -236,13 +236,13 @@ struct List {
     const auto append = list->findFunction(QStringLiteral("append"));
     QVERIFY(!append.isNull());
     QCOMPARE(append->arguments().size(), 1);
-    QCOMPARE(append->arguments().at(0).type().cppSignature(), QLatin1String("List<T >"));
+    QCOMPARE(append->arguments().at(0).type().cppSignature(), u"List<T >");
     // Verify that the parameter of "void erase(Iterator)" is not modified
     const auto erase = list->findFunction(QStringLiteral("erase"));
     QVERIFY(!erase.isNull());
     QCOMPARE(erase->arguments().size(), 1);
     QEXPECT_FAIL("", "Clang: Some other code changes the parameter type", Abort);
-    QCOMPARE(erase->arguments().at(0).type().cppSignature(), QLatin1String("List::Iterator"));
+    QCOMPARE(erase->arguments().at(0).type().cppSignature(), u"List::Iterator");
 }
 
 void TestTemplates::testInheritanceFromContainterTemplate()
@@ -403,7 +403,7 @@ typedef BaseTemplateClass<TypeOne> TypeOneClass;
     QVERIFY(!inst.isEnum());
     QVERIFY(!inst.typeEntry()->isEnum());
     QVERIFY(inst.typeEntry()->isEnumValue());
-    QCOMPARE(inst.cppSignature(), QLatin1String("NSpace::TypeOne"));
+    QCOMPARE(inst.cppSignature(), u"NSpace::TypeOne");
 }
 
 void TestTemplates::testContainerTypeIncompleteArgument()
@@ -443,13 +443,13 @@ typedef Vector<int> IntVector;
 
     const auto method = vector->findFunction(QLatin1String("method"));
     QVERIFY(!method.isNull());
-    QCOMPARE(method->signature(), QLatin1String("method(const Vector<int > & vector)"));
+    QCOMPARE(method->signature(), u"method(const Vector<int > & vector)");
 
     const auto otherMethod = vector->findFunction(QLatin1String("otherMethod"));
     QVERIFY(!otherMethod.isNull());
-    QCOMPARE(otherMethod->signature(), QLatin1String("otherMethod()"));
+    QCOMPARE(otherMethod->signature(), u"otherMethod()");
     QVERIFY(!otherMethod->type().isVoid());
-    QCOMPARE(otherMethod->type().cppSignature(), QLatin1String("Vector<int >"));
+    QCOMPARE(otherMethod->type().cppSignature(), u"Vector<int >");
 }
 
 void TestTemplates::testNonTypeTemplates()
@@ -477,8 +477,8 @@ Array<int, 2> foo();
     auto functions = builder->globalFunctions();
     QCOMPARE(functions.size(), 1);
     auto foo = functions.constFirst();
-    QCOMPARE(foo->name(), QLatin1String("foo"));
-    QCOMPARE(foo->type().name(), QLatin1String("Array"));
+    QCOMPARE(foo->name(), u"foo");
+    QCOMPARE(foo->type().name(), u"Array");
 }
 
 // Perform checks on template inheritance; a typedef of a template class
@@ -577,23 +577,23 @@ void TestTemplates::testTemplateTypeDefs()
     // Check whether the value() method now has an 'int' return
     const auto valueMethod = optionalInt->findFunction(QLatin1String("value"));
     QVERIFY(!valueMethod.isNull());
-    QCOMPARE(valueMethod->type().cppSignature(), QLatin1String("int"));
+    QCOMPARE(valueMethod->type().cppSignature(), u"int");
 
     // ditto for typesystem XML
     const auto xmlValueMethod = xmlOptionalInt->findFunction(QLatin1String("value"));
     QVERIFY(!xmlValueMethod.isNull());
-    QCOMPARE(xmlValueMethod->type().cppSignature(), QLatin1String("int"));
+    QCOMPARE(xmlValueMethod->type().cppSignature(), u"int");
 
     // Check whether the m_value field is of type 'int'
     const auto valueField = optionalInt->findField(u"m_value");
     QVERIFY(valueField.has_value());
-    QCOMPARE(valueField->type().cppSignature(), QLatin1String("int"));
+    QCOMPARE(valueField->type().cppSignature(), u"int");
 
     // ditto for typesystem XML
     const auto xmlValueField =
         xmlOptionalInt->findField(u"m_value");
     QVERIFY(xmlValueField.has_value());
-    QCOMPARE(xmlValueField->type().cppSignature(), QLatin1String("int"));
+    QCOMPARE(xmlValueField->type().cppSignature(), u"int");
 }
 
 void TestTemplates::testTemplateTypeAliases()
@@ -636,13 +636,13 @@ public:
     auto fields = testClass->fields();
     QCOMPARE(fields.size(), 1);
     auto fieldType = testClass->fields().at(0).type();
-    QCOMPARE(fieldType.name(), QLatin1String("Container1"));
+    QCOMPARE(fieldType.name(), u"Container1");
     QCOMPARE(fieldType.instantiations().size(), 1);
 
     auto derived = AbstractMetaClass::findClass(classes, QLatin1String("Derived"));
     QVERIFY(derived);
     auto base = derived->templateBaseClass();
-    QCOMPARE(base->name(), QLatin1String("Container1"));
+    QCOMPARE(base->name(), u"Container1");
 }
 
 QTEST_APPLESS_MAIN(TestTemplates)

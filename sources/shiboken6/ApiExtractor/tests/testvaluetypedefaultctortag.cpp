@@ -54,7 +54,7 @@ void TestValueTypeDefaultCtorTag::testValueTypeDefaultCtorTagArgument()
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QVERIFY(classA);
     QVERIFY(classA->typeEntry()->hasDefaultConstructor());
-    QCOMPARE(classA->typeEntry()->defaultConstructor(), QLatin1String("A(0, 0)"));
+    QCOMPARE(classA->typeEntry()->defaultConstructor(), u"A(0, 0)");
 
     const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
     QVERIFY(classB);

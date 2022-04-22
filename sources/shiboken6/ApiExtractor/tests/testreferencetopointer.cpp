@@ -52,7 +52,7 @@ void TestReferenceToPointer::testReferenceToPointerArgument()
     QVERIFY(classB);
     const auto func = classB->findFunction(QLatin1String("dummy"));
     QVERIFY(!func.isNull());
-    QCOMPARE(func->arguments().constFirst().type().minimalSignature(), QLatin1String("A*&"));
+    QCOMPARE(func->arguments().constFirst().type().minimalSignature(), u"A*&");
 }
 
 QTEST_APPLESS_MAIN(TestReferenceToPointer)

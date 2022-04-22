@@ -165,7 +165,7 @@ void TypeEntry::setInclude(const Include &inc)
     // This is a workaround for preventing double inclusion of the QSharedPointer implementation
     // header, which does not use header guards. In the previous parser this was not a problem
     // because the Q_QDOC define was set, and the implementation header was never included.
-    if (inc.name().endsWith(QLatin1String("qsharedpointer_impl.h"))) {
+    if (inc.name().endsWith(u"qsharedpointer_impl.h")) {
         QString path = inc.name();
         path.remove(QLatin1String("_impl"));
         m_d->m_include = Include(inc.type(), path);

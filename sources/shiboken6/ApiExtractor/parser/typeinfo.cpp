@@ -148,7 +148,7 @@ bool TypeInfoData::isVoid() const
         && m_arguments.isEmpty() && m_arrayElements.isEmpty()
         && m_instantiations.isEmpty()
         && m_qualifiedName.size() == 1
-        && m_qualifiedName.constFirst() == QLatin1String("void");
+        && m_qualifiedName.constFirst() == u"void";
 }
 
 bool TypeInfo::isVoid() const
@@ -517,7 +517,7 @@ void TypeInfo::stripQualifiers(QString *s)
 bool TypeInfoData::isStdType() const
 {
     return m_qualifiedName.size() > 1
-        && m_qualifiedName.constFirst() == QLatin1String("std");
+        && m_qualifiedName.constFirst() == u"std";
 }
 
 bool TypeInfo::isStdType() const
@@ -527,13 +527,13 @@ bool TypeInfo::isStdType() const
 
 static inline bool discardStdType(const QString &name)
 {
-    return name == QLatin1String("allocator") || name == QLatin1String("less");
+    return name == u"allocator" || name == u"less";
 }
 
 void TypeInfoData::simplifyStdType()
 {
     Q_ASSERT(isStdType());
-    if (m_qualifiedName.at(1).startsWith(QLatin1String("__")))
+    if (m_qualifiedName.at(1).startsWith(u"__"))
         m_qualifiedName.removeAt(1);
     for (int t = m_instantiations.size() - 1; t >= 0; --t) {
         if (m_instantiations.at(t).isStdType()) {

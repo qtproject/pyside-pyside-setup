@@ -1027,7 +1027,7 @@ void AbstractMetaFunction::setTypeEntry(FunctionTypeEntry *typeEntry)
 
 bool AbstractMetaFunction::isCallOperator() const
 {
-    return d->m_name == QLatin1String("operator()");
+    return d->m_name == u"operator()";
 }
 
 bool AbstractMetaFunction::hasInjectedCode() const
@@ -1108,7 +1108,7 @@ bool AbstractMetaFunction::hasSignatureModifications() const
 
 bool AbstractMetaFunction::isConversionOperator(const QString &funcName)
 {
-    return funcName.startsWith(QLatin1String("operator "));
+    return funcName.startsWith(u"operator ");
 }
 
 ExceptionSpecification AbstractMetaFunction::exceptionSpecification() const

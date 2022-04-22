@@ -55,7 +55,7 @@ void TestInsertTemplate::testInsertTemplateOnClassInjectCode()
     QVERIFY(classA);
     QCOMPARE(classA->typeEntry()->codeSnips().size(), 1);
     QString code = classA->typeEntry()->codeSnips().constFirst().code();
-    QVERIFY(code.contains(QLatin1String("code template content")));
+    QVERIFY(code.contains(u"code template content"));
 }
 
 void TestInsertTemplate::testInsertTemplateOnModuleInjectCode()
@@ -77,11 +77,11 @@ void TestInsertTemplate::testInsertTemplateOnModuleInjectCode()
 
     const TypeSystemTypeEntry *module = TypeDatabase::instance()->defaultTypeSystemType();
     QVERIFY(module);
-    QCOMPARE(module->name(), QLatin1String("Foo"));
+    QCOMPARE(module->name(), u"Foo");
     QVERIFY(module);
     QCOMPARE(module->codeSnips().size(), 1);
     QString code = module->codeSnips().constFirst().code().trimmed();
-    QVERIFY(code.contains(QLatin1String("code template content")));
+    QVERIFY(code.contains(u"code template content"));
 }
 
 QTEST_APPLESS_MAIN(TestInsertTemplate)
