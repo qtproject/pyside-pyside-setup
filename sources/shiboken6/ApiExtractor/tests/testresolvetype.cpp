@@ -66,7 +66,7 @@ void TestResolveType::testResolveReturnTypeFromParentScope()
     AbstractMetaClassList classes = builder->classes();
     const AbstractMetaClass *classD = AbstractMetaClass::findClass(classes, u"A::D");
     QVERIFY(classD);
-    const auto meth = classD->findFunction(QLatin1String("method"));
+    const auto meth = classD->findFunction(u"method");
     QVERIFY(!meth.isNull());
     QVERIFY(meth);
 }

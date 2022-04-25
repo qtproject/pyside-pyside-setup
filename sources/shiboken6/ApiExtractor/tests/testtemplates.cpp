@@ -78,7 +78,7 @@ namespace Internet {
 
     AbstractMetaClass* classB = AbstractMetaClass::findClass(classes, u"Bookmarks");
     QVERIFY(classB);
-    const auto func = classB->findFunction(QLatin1String("list"));
+    const auto func = classB->findFunction(u"list");
     QVERIFY(!func.isNull());
     AbstractMetaType funcType = func->type();
     QVERIFY(!funcType.isVoid());
@@ -118,7 +118,7 @@ namespace Namespace {
     QVERIFY(classB);
     QVERIFY(!classB->baseClass());
     QVERIFY(classB->baseClassName().isEmpty());
-    const auto func = classB->findFunction(QLatin1String("foo"));
+    const auto func = classB->findFunction(u"foo");
     QVERIFY(!func.isNull());
     AbstractMetaType argType = func->arguments().constFirst().type();
     QCOMPARE(argType.instantiations().size(), 1);
@@ -441,11 +441,11 @@ typedef Vector<int> IntVector;
              ContainerTypeEntry::ListContainer);
     QCOMPARE(vector->functions().size(), 4);
 
-    const auto method = vector->findFunction(QLatin1String("method"));
+    const auto method = vector->findFunction(u"method");
     QVERIFY(!method.isNull());
     QCOMPARE(method->signature(), u"method(const Vector<int > & vector)");
 
-    const auto otherMethod = vector->findFunction(QLatin1String("otherMethod"));
+    const auto otherMethod = vector->findFunction(u"otherMethod");
     QVERIFY(!otherMethod.isNull());
     QCOMPARE(otherMethod->signature(), u"otherMethod()");
     QVERIFY(!otherMethod->type().isVoid());
@@ -575,12 +575,12 @@ void TestTemplates::testTemplateTypeDefs()
     QCOMPARE(xmlOptionalInt->templateBaseClass(), optional);
 
     // Check whether the value() method now has an 'int' return
-    const auto valueMethod = optionalInt->findFunction(QLatin1String("value"));
+    const auto valueMethod = optionalInt->findFunction(u"value");
     QVERIFY(!valueMethod.isNull());
     QCOMPARE(valueMethod->type().cppSignature(), u"int");
 
     // ditto for typesystem XML
-    const auto xmlValueMethod = xmlOptionalInt->findFunction(QLatin1String("value"));
+    const auto xmlValueMethod = xmlOptionalInt->findFunction(u"value");
     QVERIFY(!xmlValueMethod.isNull());
     QCOMPARE(xmlValueMethod->type().cppSignature(), u"int");
 

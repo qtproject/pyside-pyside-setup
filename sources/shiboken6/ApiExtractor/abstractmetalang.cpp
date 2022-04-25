@@ -562,12 +562,12 @@ bool AbstractMetaClass::hasFunction(const QString &str) const
     return !findFunction(str).isNull();
 }
 
-AbstractMetaFunctionCPtr AbstractMetaClass::findFunction(const QString &functionName) const
+AbstractMetaFunctionCPtr AbstractMetaClass::findFunction(QStringView functionName) const
 {
     return AbstractMetaFunction::find(d->m_functions, functionName);
 }
 
-AbstractMetaFunctionCList AbstractMetaClass::findFunctions(const QString &functionName) const
+AbstractMetaFunctionCList AbstractMetaClass::findFunctions(QStringView functionName) const
 {
     AbstractMetaFunctionCList result;
     std::copy_if(d->m_functions.cbegin(), d->m_functions.cend(),
