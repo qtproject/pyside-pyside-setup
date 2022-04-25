@@ -60,7 +60,7 @@ void TestMultipleInheritance::testVirtualClass()
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 4);
 
-    const AbstractMetaClass *classD = AbstractMetaClass::findClass(classes, QLatin1String("D"));
+    const AbstractMetaClass *classD = AbstractMetaClass::findClass(classes, u"D");
     bool functionFound = false;
     for (const auto &f : classD->functions()) {
         if (f->name() == u"theBug") {

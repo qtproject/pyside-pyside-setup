@@ -54,7 +54,7 @@ R"(<typesystem package="Foo">
 )";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
-    AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), QLatin1String("A"));
+    AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), u"A");
     QVERIFY(classA);
     DocModificationList docMods = classA->typeEntry()->docModifications();
     QCOMPARE(docMods.size(), 2);

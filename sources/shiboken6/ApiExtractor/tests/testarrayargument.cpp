@@ -52,7 +52,7 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByInteger()
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
-    const AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), QLatin1String("A"));
+    const AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), u"A");
     QVERIFY(classA);
 
     const AbstractMetaArgument &arg = classA->functions().constLast()->arguments().constFirst();
@@ -90,7 +90,7 @@ void TestArrayArgument::testArraySignature()
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
-    const AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), QLatin1String("A"));
+    const AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), u"A");
     QCOMPARE(functionMinimalSignature(classA, QLatin1String("mi1")),
              u"mi1(int[5])");
     QCOMPARE(functionMinimalSignature(classA, QLatin1String("mi1c")),
@@ -126,7 +126,7 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValue()
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
-    AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), QLatin1String("A"));
+    AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), u"A");
     QVERIFY(classA);
 
     auto someEnum = classA->findEnum(QLatin1String("SomeEnum"));
@@ -157,7 +157,7 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValueFromGlobalEnu
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
-    const AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), QLatin1String("A"));
+    const AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), u"A");
     QVERIFY(classA);
 
     AbstractMetaEnum someEnum = builder->globalEnums().constFirst();

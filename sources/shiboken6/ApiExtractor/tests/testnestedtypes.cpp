@@ -63,10 +63,10 @@ void TestNestedTypes::testNestedTypesModifications()
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
 
-    const AbstractMetaClass *ons = AbstractMetaClass::findClass(classes, QLatin1String("OuterNamespace"));
+    auto *ons = AbstractMetaClass::findClass(classes, u"OuterNamespace");
     QVERIFY(ons);
 
-    const AbstractMetaClass *ins = AbstractMetaClass::findClass(classes, QLatin1String("OuterNamespace::InnerNamespace"));
+    auto *ins = AbstractMetaClass::findClass(classes, u"OuterNamespace::InnerNamespace");
     QVERIFY(ins);
     QCOMPARE(ins->functions().size(), 1);
     QCOMPARE(ins->typeEntry()->codeSnips().size(), 1);
@@ -85,7 +85,7 @@ void TestNestedTypes::testNestedTypesModifications()
     snip = addedFunc->modifications().constFirst().snips().constFirst();
     QCOMPARE(snip.code().trimmed(), u"custom_code2();");
 
-    const AbstractMetaClass *sc = AbstractMetaClass::findClass(classes, QLatin1String("OuterNamespace::InnerNamespace::SomeClass"));
+    auto *sc = AbstractMetaClass::findClass(classes, u"OuterNamespace::InnerNamespace::SomeClass");
     QVERIFY(ins);
     QCOMPARE(sc->functions().size(), 2); // default constructor and removed method
     const auto removedFunc = sc->functions().constLast();
@@ -112,11 +112,11 @@ void TestNestedTypes::testDuplicationOfNestedTypes()
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
-    const AbstractMetaClass *nspace = AbstractMetaClass::findClass(classes, QLatin1String("Namespace"));
+    auto *nspace = AbstractMetaClass::findClass(classes, u"Namespace");
     QVERIFY(nspace);
-    const AbstractMetaClass *cls1 = AbstractMetaClass::findClass(classes, QLatin1String("SomeClass"));
+    auto *cls1 = AbstractMetaClass::findClass(classes, u"SomeClass");
     QVERIFY(cls1);
-    const AbstractMetaClass *cls2 = AbstractMetaClass::findClass(classes, QLatin1String("Namespace::SomeClass"));
+    auto *cls2 = AbstractMetaClass::findClass(classes, u"Namespace::SomeClass");
     QVERIFY(cls2);
     QCOMPARE(cls1, cls2);
     QCOMPARE(cls1->name(), u"SomeClass");
