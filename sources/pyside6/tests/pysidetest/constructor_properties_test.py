@@ -53,7 +53,7 @@ from PySide6.QtWidgets import QApplication, QLabel, QFrame
 
 is_pypy = hasattr(sys, "pypy_version_info")
 if not is_pypy:
-    from PySide6.support import __feature__
+    from PySide6.support import feature
 
 
 class ConstructorPropertiesTest(unittest.TestCase):
@@ -61,11 +61,11 @@ class ConstructorPropertiesTest(unittest.TestCase):
     def setUp(self):
         qApp or QApplication()
         if not is_pypy:
-            __feature__.set_selection(0x80)     # FIXME: 0 is insecure
+            feature.reset()
 
     def tearDown(self):
         if not is_pypy:
-            __feature__.set_selection(0)
+            feature.reset()
         qApp.shutdown()
 
     # PYSIDE-1019: First property extension was support by the constructor.

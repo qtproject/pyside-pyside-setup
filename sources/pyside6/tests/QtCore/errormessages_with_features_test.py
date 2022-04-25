@@ -51,7 +51,7 @@ from PySide6.QtWidgets import QApplication, QLabel
 
 is_pypy = hasattr(sys, "pypy_version_info")
 if not is_pypy:
-    from PySide6.support import __feature__
+    from PySide6.support import feature
 
 import inspect
 
@@ -74,10 +74,10 @@ class ErrormessagesWithFeatures(unittest.TestCase):
 
     def setUp(self):
         qApp or QApplication()
-        __feature__.set_selection(0)
+        feature.reset()
 
     def tearDown(self):
-        __feature__.set_selection(0)
+        feature.reset()
         qApp.shutdown()
 
     def testCorrectErrorMessagesPlain(self):

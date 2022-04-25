@@ -51,7 +51,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QWidget
 
 is_pypy = hasattr(sys, "pypy_version_info")
 if not is_pypy:
-    from PySide6.support import __feature__
+    from PySide6.support import feature
 
 """
 snake_prop_feature_test.py
@@ -72,10 +72,10 @@ class Window(QWidget):
 class FeatureTest(unittest.TestCase):
     def setUp(self):
         qApp or QApplication()
-        __feature__.set_selection(0x80)     # FIXME: 0 is insecure
+        feature.reset()
 
     def tearDown(self):
-        __feature__.set_selection(0)
+        feature.reset()
         qApp.shutdown()
 
     def testRenamedFunctions(self):
@@ -105,7 +105,7 @@ class FeatureTest(unittest.TestCase):
             window.isModal
 
         # switching back
-        __feature__.set_selection(0)
+        feature.reset()
 
         self.assertTrue(callable(window.isModal))
         with self.assertRaises(AttributeError):
