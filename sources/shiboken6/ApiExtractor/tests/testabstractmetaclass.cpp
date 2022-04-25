@@ -329,7 +329,7 @@ void TestAbstractMetaClass::testForwardDeclaredInnerClass()
     QVERIFY(classA);
     const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, u"A::B");
     QVERIFY(classB);
-    const auto fooF = classB->findFunction(QLatin1String("foo"));
+    const auto fooF = classB->findFunction(u"foo");
     QVERIFY(!fooF.isNull());
 }
 

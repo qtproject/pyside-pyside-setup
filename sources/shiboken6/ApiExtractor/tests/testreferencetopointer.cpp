@@ -50,7 +50,7 @@ void TestReferenceToPointer::testReferenceToPointerArgument()
     AbstractMetaClassList classes = builder->classes();
     const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, u"B");
     QVERIFY(classB);
-    const auto func = classB->findFunction(QLatin1String("dummy"));
+    const auto func = classB->findFunction(u"dummy");
     QVERIFY(!func.isNull());
     QCOMPARE(func->arguments().constFirst().type().minimalSignature(), u"A*&");
 }

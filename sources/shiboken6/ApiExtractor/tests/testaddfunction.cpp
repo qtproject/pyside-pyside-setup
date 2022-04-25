@@ -126,7 +126,7 @@ struct A {
     // default ctor, default copy ctor, func a() and the added functions
     QCOMPARE(classA->functions().size(), 5);
 
-    auto addedFunc = classA->findFunction(QLatin1String("b"));
+    auto addedFunc = classA->findFunction(u"b");
     QVERIFY(addedFunc);
     QCOMPARE(addedFunc->access(), Access::Protected);
     QCOMPARE(addedFunc->functionType(), AbstractMetaFunction::NormalFunction);
@@ -147,7 +147,7 @@ struct A {
     QCOMPARE(args.at(1).defaultValueExpression(), u"4.6");
     QCOMPARE(args.at(2).type().typeEntry(), typeDb->findType(QLatin1String("B")));
 
-    auto addedCallOperator = classA->findFunction(QLatin1String("operator()"));
+    auto addedCallOperator = classA->findFunction(u"operator()");
     QVERIFY(addedCallOperator);
 }
 
@@ -245,7 +245,7 @@ void TestAddFunction::testAddFunctionWithoutParenteses()
     AbstractMetaClassList classes = builder->classes();
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, u"A");
     QVERIFY(classA);
-    const auto addedFunc = classA->findFunction(QLatin1String("func"));
+    const auto addedFunc = classA->findFunction(u"func");
     QVERIFY(!addedFunc.isNull());
     QVERIFY(addedFunc->hasInjectedCode());
     const auto snips = addedFunc->injectedCodeSnips(TypeSystem::CodeSnipPositionAny,
@@ -282,7 +282,7 @@ void TestAddFunction::testAddFunctionWithDefaultArgs()
     AbstractMetaClassList classes = builder->classes();
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, u"A");
     QVERIFY(classA);
-    const auto addedFunc = classA->findFunction(QLatin1String("func"));
+    const auto addedFunc = classA->findFunction(u"func");
     QVERIFY(!addedFunc.isNull());
     const AbstractMetaArgument &arg = addedFunc->arguments().at(1);
     QCOMPARE(arg.defaultValueExpression(), u"2");
@@ -346,7 +346,7 @@ void TestAddFunction::testAddFunctionWithVarargs()
     AbstractMetaClassList classes = builder->classes();
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, u"A");
     QVERIFY(classA);
-    const auto addedFunc = classA->findFunction(QLatin1String("func"));
+    const auto addedFunc = classA->findFunction(u"func");
     QVERIFY(!addedFunc.isNull());
     const AbstractMetaArgument &arg = addedFunc->arguments().constLast();
     QVERIFY(arg.type().isVarargs());
@@ -370,7 +370,7 @@ void TestAddFunction::testAddStaticFunction()
     AbstractMetaClassList classes = builder->classes();
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, u"A");
     QVERIFY(classA);
-    const auto addedFunc = classA->findFunction(QLatin1String("func"));
+    const auto addedFunc = classA->findFunction(u"func");
     QVERIFY(!addedFunc.isNull());
     QVERIFY(addedFunc->isStatic());
 }
@@ -396,8 +396,8 @@ void TestAddFunction::testAddGlobalFunction()
     QCOMPARE(globalFuncs.size(), 2);
     const AbstractMetaClass *classB = AbstractMetaClass::findClass(builder->classes(), u"B");
     QVERIFY(classB);
-    QVERIFY(!classB->findFunction(QLatin1String("globalFunc")));
-    QVERIFY(!classB->findFunction(QLatin1String("globalFunc2")));
+    QVERIFY(!classB->findFunction(u"globalFunc"));
+    QVERIFY(!classB->findFunction(u"globalFunc2"));
     QVERIFY(!globalFuncs[0]->injectedCodeSnips().isEmpty());
     QVERIFY(!globalFuncs[1]->injectedCodeSnips().isEmpty());
 }
@@ -443,7 +443,7 @@ void TestAddFunction::testModifyAddedFunction()
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     AbstractMetaClass* foo = AbstractMetaClass::findClass(classes, u"Foo");
-    const auto method = foo->findFunction(QLatin1String("method"));
+    const auto method = foo->findFunction(u"method");
     QVERIFY(!method.isNull());
     QCOMPARE(method->arguments().size(), 2);
     const AbstractMetaArgument &arg = method->arguments().at(1);
@@ -476,7 +476,7 @@ void TestAddFunction::testAddFunctionOnTypedef()
     for (const auto &f : lst)
         QVERIFY(f->signature().startsWith(f->name()));
     QCOMPARE(lst.size(), 2);
-    const auto method = foo->findFunction(QLatin1String("method"));
+    const auto method = foo->findFunction(u"method");
     QVERIFY(!method.isNull());
 }
 

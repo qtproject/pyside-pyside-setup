@@ -367,7 +367,7 @@ public:
     bool isCallOperator() const;
 
     static AbstractMetaFunctionCPtr
-        find(const AbstractMetaFunctionCList &haystack, const QString &needle);
+        find(const AbstractMetaFunctionCList &haystack, QStringView needle);
 
     bool matches(OperatorQueryOptions) const;
 

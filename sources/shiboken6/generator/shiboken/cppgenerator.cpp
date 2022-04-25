@@ -4433,7 +4433,7 @@ void CppGenerator::writeClassDefinition(TextStream &s,
     if (!metaClass->typeEntry()->hashFunction().isEmpty())
         tp_hash = u'&' + cpythonBaseName(metaClass) + QLatin1String("_HashFunc");
 
-    const auto callOp = metaClass->findFunction(QLatin1String("operator()"));
+    const auto callOp = metaClass->findFunction(u"operator()");
     if (!callOp.isNull() && !callOp->isModifiedRemoved())
         tp_call = u'&' + cpythonFunctionName(callOp);
 
