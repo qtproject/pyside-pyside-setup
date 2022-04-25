@@ -50,7 +50,7 @@ from PySide6.QtCore import QCborArray, QObject
 
 is_pypy = hasattr(sys, "pypy_version_info")
 if not is_pypy:
-    from PySide6.support import __feature__
+    from PySide6.support import feature
 
 from textwrap import dedent
 
@@ -122,20 +122,20 @@ class FeaturesTest(unittest.TestCase):
 
                         """), "<string>", "exec"), globals(), edict)
         globals().update(edict)
-        feature_list = __feature__._really_all_feature_names
+        feature_list = feature._really_all_feature_names
         func_list = [tst_bit0, tst_bit1, tst_bit2, tst_bit3,
                      tst_bit4, tst_bit5, tst_bit6, tst_bit7]
 
         for idx in range(0x100):
-            __feature__.set_selection(0)
+            feature.reset()
             config = f"feature_{idx:02x}"
             print()
             print(f"--- Feature Test Config `{config}` ---")
             print("Imports:")
             for bit in range(8):
                 if idx & 1 << bit:
-                    feature = feature_list[bit]
-                    text = f"from __feature__ import {feature}"
+                    cur_feature = feature_list[bit]
+                    text = f"from __feature__ import {cur_feature}"
                     print(text)
                     eval(compile(text, "<string>", "exec"), globals(), edict)
             for bit in range(8):

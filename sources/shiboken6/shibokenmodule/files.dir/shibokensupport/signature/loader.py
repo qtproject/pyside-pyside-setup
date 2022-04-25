@@ -89,16 +89,16 @@ def finish_import(module):
 def feature_import(*args, **kwds):
     # don't spend a stack level here for speed and compatibility
     global feature_import
-    feature_import = __feature__.feature_import
+    feature_import = feature.feature_import
     return feature_import(*args, **kwds)
 
 
 import builtins
 import signature_bootstrap
-from shibokensupport import signature, feature as __feature__
+from shibokensupport import signature, feature
 signature.get_signature = signature_bootstrap.get_signature
 # PYSIDE-1019: Publish the __feature__ dictionary.
-__feature__.pyside_feature_dict = signature_bootstrap.pyside_feature_dict
+feature.pyside_feature_dict = signature_bootstrap.pyside_feature_dict
 builtins.__feature_import__ = signature_bootstrap.__feature_import__
 del signature_bootstrap
 
@@ -127,7 +127,7 @@ def move_into_pyside_package():
         # This can happen in the embedding case.
         put_into_package(PySide6, shibokensupport, "support")
     if not is_pypy:
-        put_into_package(PySide6.support, __feature__, "__feature__")
+        put_into_package(PySide6.support, feature)
     put_into_package(PySide6.support, signature)
     put_into_package(PySide6.support.signature, mapping)
     put_into_package(PySide6.support.signature, errorhandler)
@@ -160,11 +160,11 @@ if "PySide6" in sys.modules:
               "This is a serious configuration error.", file=sys.stderr)
         raise
     # PYSIDE-1019: Modify `__import__` to be `__feature__` aware.
-    # __feature__ is already in sys.modules, so this is actually no import
+    # __feature__ is already in sys.modules as feature, so this is actually no import
     if not is_pypy:
         # PYSIDE-535: Cannot enable __feature__ for various reasons.
-        import PySide6.support.__feature__
-        sys.modules["__feature__"] = PySide6.support.__feature__
+        import PySide6.support.feature
+        sys.modules["__feature__"] = PySide6.support.feature
         builtins.__orig_import__ = builtins.__import__
         builtins.__import__ = builtins.__feature_import__
 

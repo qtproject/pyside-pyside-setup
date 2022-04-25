@@ -68,7 +68,7 @@ all_feature_names = [
     "_feature_80",
 ]
 
-__all__ = ["all_feature_names", "set_selection", "info"] + all_feature_names
+__all__ = ["all_feature_names", "info", "reset", "set_selection"] + all_feature_names
 
 snake_case = 0x01
 true_property = 0x02
@@ -176,6 +176,13 @@ def set_selection(select_id, mod_name=None):
     pyside_feature_dict[mod_name] = flag
     sys.modules["PySide6.QtCore"].__init_feature__()
     return _current_selection(flag)
+
+# The set_section(0) case seems to be unsafe. We will migrate to
+# use the opaque feature.reset() call in all test cases.
+def reset():
+    set_selection(0)
+    pyside_feature_dict.clear()
+    _is_initialized = False
 
 
 def info(mod_name=None):

@@ -96,7 +96,7 @@ def generate_all_pyi(outpath, options):
             # PYSIDE-535: We cannot use __feature__ yet in PyPy
             generate_pyi(import_name, outpath, options)
         else:
-            import __feature__ as feature
+            from PySide6.support import feature
             feature_id = feature.get_select_id(options.feature)
             with feature.force_selection(feature_id, import_name):
                 generate_pyi(import_name, outpath, options)
