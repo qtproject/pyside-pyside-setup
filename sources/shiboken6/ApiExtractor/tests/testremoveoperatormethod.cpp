@@ -89,7 +89,7 @@ void TestRemoveOperatorMethod::testRemoveOperatorMethod()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
+    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, u"A");
     QVERIFY(classA);
     QCOMPARE(classA->functions().size(), 14);
     QStringList removedSignatures;

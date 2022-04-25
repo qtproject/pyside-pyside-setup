@@ -54,9 +54,9 @@ void TestConversionOperator::testConversionOperator()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
-    const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
-    const AbstractMetaClass *classC = AbstractMetaClass::findClass(classes, QLatin1String("C"));
+    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, u"A");
+    const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, u"B");
+    const AbstractMetaClass *classC = AbstractMetaClass::findClass(classes, u"C");
     QVERIFY(classA);
     QVERIFY(classB);
     QVERIFY(classC);
@@ -92,7 +92,7 @@ void TestConversionOperator::testConversionOperatorOfDiscardedClass()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
+    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, u"A");
     QVERIFY(classA);
     QCOMPARE(classA->externalConversionOperators().size(), 0);
 }
@@ -116,8 +116,8 @@ void TestConversionOperator::testRemovedConversionOperator()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
-    const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
+    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, u"A");
+    const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, u"B");
     QVERIFY(classA);
     QVERIFY(classB);
     QCOMPARE(classA->functions().size(), 2);
@@ -142,8 +142,8 @@ void TestConversionOperator::testConversionOperatorReturningReference()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
-    const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
+    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, u"A");
+    const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, u"B");
     QVERIFY(classA);
     QVERIFY(classB);
     QCOMPARE(classA->functions().size(), 2);
@@ -176,8 +176,8 @@ void TestConversionOperator::testConversionOperatorReturningConstReference()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
-    const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
+    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, u"A");
+    const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, u"B");
     QVERIFY(classA);
     QVERIFY(classB);
     QCOMPARE(classA->functions().size(), 2);

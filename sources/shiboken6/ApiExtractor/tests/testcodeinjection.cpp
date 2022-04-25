@@ -80,7 +80,7 @@ void TestCodeInjections::testReadFile()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode.toLocal8Bit().constData()));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
+    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, u"A");
     QCOMPARE(classA->typeEntry()->codeSnips().size(), 1);
     QString code = classA->typeEntry()->codeSnips().constFirst().code();
     QVERIFY(code.indexOf(expected) != -1);
@@ -104,7 +104,7 @@ void TestCodeInjections::testInjectWithValidApiVersion()
                                                                 true, QLatin1String("1.0")));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    AbstractMetaClass* classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
+    AbstractMetaClass* classA = AbstractMetaClass::findClass(classes, u"A");
     QCOMPARE(classA->typeEntry()->codeSnips().size(), 1);
 }
 
@@ -125,7 +125,7 @@ void TestCodeInjections::testInjectWithInvalidApiVersion()
     QVERIFY(!builder.isNull());
 
     AbstractMetaClassList classes = builder->classes();
-    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
+    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, u"A");
     QCOMPARE(classA->typeEntry()->codeSnips().size(), 0);
 }
 

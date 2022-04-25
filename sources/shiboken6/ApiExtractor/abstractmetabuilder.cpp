@@ -369,8 +369,8 @@ void AbstractMetaBuilderPrivate::sortLists()
     // this is a temporary solution before new type revision implementation
     // We need move QMetaObject register before QObject.
     Dependencies additionalDependencies;
-    if (auto qObjectClass = AbstractMetaClass::findClass(m_metaClasses, QStringLiteral("QObject"))) {
-        if (auto qMetaObjectClass = AbstractMetaClass::findClass(m_metaClasses, QStringLiteral("QMetaObject"))) {
+    if (auto qObjectClass = AbstractMetaClass::findClass(m_metaClasses, u"QObject")) {
+        if (auto qMetaObjectClass = AbstractMetaClass::findClass(m_metaClasses, u"QMetaObject")) {
             Dependency dependency;
             dependency.parent = qMetaObjectClass;
             dependency.child = qObjectClass;

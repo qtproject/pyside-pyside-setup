@@ -64,7 +64,7 @@ void TestResolveType::testResolveReturnTypeFromParentScope()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    const AbstractMetaClass *classD = AbstractMetaClass::findClass(classes, QLatin1String("A::D"));
+    const AbstractMetaClass *classD = AbstractMetaClass::findClass(classes, u"A::D");
     QVERIFY(classD);
     const auto meth = classD->findFunction(QLatin1String("method"));
     QVERIFY(!meth.isNull());
