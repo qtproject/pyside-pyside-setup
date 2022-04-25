@@ -57,7 +57,7 @@ void NamespaceTest::testNamespaceMembers()
     QVERIFY(ns);
     auto metaEnum = ns->findEnum(QLatin1String("Option"));
     QVERIFY(metaEnum.has_value());
-    const auto func = ns->findFunction(QLatin1String("foo"));
+    const auto func = ns->findFunction(u"foo");
     QVERIFY(!func.isNull());
 }
 
@@ -89,7 +89,7 @@ void NamespaceTest::testNamespaceInnerClassMembers()
     QVERIFY(ins);
     const AbstractMetaClass *sc = AbstractMetaClass::findClass(classes, u"OuterNamespace::InnerNamespace::SomeClass");
     QVERIFY(sc);
-    const auto meth = sc->findFunction(QLatin1String("method"));
+    const auto meth = sc->findFunction(u"method");
     QVERIFY(!meth.isNull());
 }
 
