@@ -335,9 +335,9 @@ public:
                                                           bool avoidProtectedHack);
 
     static AbstractMetaClass *findClass(const AbstractMetaClassList &classes,
-                                        const QString &name);
+                                        QStringView name);
     static const AbstractMetaClass *findClass(const AbstractMetaClassCList &classes,
-                                              const QString &name);
+                                              QStringView name);
     static AbstractMetaClass *findClass(const AbstractMetaClassList &classes,
                                         const TypeEntry* typeEntry);
     static const AbstractMetaClass *findClass(const AbstractMetaClassCList &classes,

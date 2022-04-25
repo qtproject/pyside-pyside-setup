@@ -56,8 +56,8 @@ void TestImplicitConversions::testWithPrivateCtors()
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 3);
 
-    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
-    const AbstractMetaClass *classC = AbstractMetaClass::findClass(classes, QLatin1String("C"));
+    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, u"A");
+    const AbstractMetaClass *classC = AbstractMetaClass::findClass(classes, u"C");
     const auto implicitConvs = classA->implicitConversions();
     QCOMPARE(implicitConvs.size(), 1);
     QCOMPARE(implicitConvs.constFirst()->arguments().constFirst().type().typeEntry(),
@@ -85,8 +85,8 @@ void TestImplicitConversions::testWithModifiedVisibility()
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
-    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
-    const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
+    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, u"A");
+    const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, u"B");
     const auto implicitConvs = classA->implicitConversions();
     QCOMPARE(implicitConvs.size(), 1);
     QCOMPARE(implicitConvs.constFirst()->arguments().constFirst().type().typeEntry(),
@@ -120,12 +120,12 @@ void TestImplicitConversions::testWithAddedCtor()
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 3);
 
-    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
+    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, u"A");
     auto implicitConvs = classA->implicitConversions();
     QCOMPARE(implicitConvs.size(), 2);
 
     // Added constructors with custom types should never result in implicit converters.
-    const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
+    const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, u"B");
     implicitConvs = classB->implicitConversions();
     QCOMPARE(implicitConvs.size(), 0);
 }
@@ -146,8 +146,8 @@ void TestImplicitConversions::testWithExternalConversionOperator()
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
-    AbstractMetaClass* classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
-    AbstractMetaClass* classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
+    AbstractMetaClass* classA = AbstractMetaClass::findClass(classes, u"A");
+    AbstractMetaClass* classB = AbstractMetaClass::findClass(classes, u"B");
     const auto implicitConvs = classA->implicitConversions();
     QCOMPARE(implicitConvs.size(), 1);
     const auto &externalConvOps = classA->externalConversionOperators();

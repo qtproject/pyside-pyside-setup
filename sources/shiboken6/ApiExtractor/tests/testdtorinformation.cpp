@@ -35,38 +35,86 @@
 
 void TestDtorInformation::testDtorIsPrivate()
 {
-    const char* cppCode ="class Control { public: ~Control() {} }; class Subject { private: ~Subject() {} };";
-    const char* xmlCode = "<typesystem package=\"Foo\"><value-type name=\"Control\"/><value-type name=\"Subject\"/></typesystem>";
+    const char cppCode[] = R"(class Control {
+public:
+    ~Control() {}
+};
+class Subject {
+private:
+    ~Subject() {}
+};
+)";
+    const char xmlCode[] = R"(<typesystem package="Foo">
+    <value-type name="Control"/>
+    <value-type name="Subject"/>
+</typesystem>)";
+
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
-    QCOMPARE(AbstractMetaClass::findClass(classes, QLatin1String("Control"))->hasPrivateDestructor(), false);
-    QCOMPARE(AbstractMetaClass::findClass(classes, QLatin1String("Subject"))->hasPrivateDestructor(), true);
+    auto *klass = AbstractMetaClass::findClass(classes, u"Control");
+    QVERIFY(klass);
+    QVERIFY(!klass->hasPrivateDestructor());
+    klass = AbstractMetaClass::findClass(classes, u"Subject");
+    QVERIFY(klass);
+    QVERIFY(klass->hasPrivateDestructor());
 }
 
 void TestDtorInformation::testDtorIsProtected()
 {
-    const char* cppCode ="class Control { public: ~Control() {} }; class Subject { protected: ~Subject() {} };";
-    const char* xmlCode = "<typesystem package=\"Foo\"><value-type name=\"Control\"/><value-type name=\"Subject\"/></typesystem>";
+    const char  cppCode[] = R"(class Control {
+public:
+    ~Control() {}
+};
+class Subject {
+protected:
+    ~Subject() {}
+};
+)";
+    const char xmlCode[] = R"(<typesystem package="Foo">
+    <value-type name="Control"/>
+    <value-type name="Subject"/>
+</typesystem>)";
+
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
-    QCOMPARE(AbstractMetaClass::findClass(classes, QLatin1String("Control"))->hasProtectedDestructor(), false);
-    QCOMPARE(AbstractMetaClass::findClass(classes, QLatin1String("Subject"))->hasProtectedDestructor(), true);
+    auto *klass = AbstractMetaClass::findClass(classes, u"Control");
+    QVERIFY(klass);
+    QVERIFY(!klass->hasProtectedDestructor());
+    klass = AbstractMetaClass::findClass(classes, u"Subject");
+    QVERIFY(klass);
+    QVERIFY(klass->hasProtectedDestructor());
 }
 
 void TestDtorInformation::testDtorIsVirtual()
 {
-    const char* cppCode ="class Control { public: ~Control() {} }; class Subject { protected: virtual ~Subject() {} };";
-    const char* xmlCode = "<typesystem package=\"Foo\"><value-type name=\"Control\"/><value-type name=\"Subject\"/></typesystem>";
+    const char cppCode[] = R"(class Control {
+public:
+    ~Control() {}
+};
+class Subject {
+protected:
+    virtual ~Subject() {}
+};
+)";
+    const char xmlCode[] = R"(<typesystem package="Foo">
+    <value-type name="Control"/>
+    <value-type name="Subject"/>
+</typesystem>)";
+
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
-    QCOMPARE(AbstractMetaClass::findClass(classes, QLatin1String("Control"))->hasVirtualDestructor(), false);
-    QCOMPARE(AbstractMetaClass::findClass(classes, QLatin1String("Subject"))->hasVirtualDestructor(), true);
+    auto *klass = AbstractMetaClass::findClass(classes, u"Control");
+    QVERIFY(klass);
+    QVERIFY(!klass->hasVirtualDestructor());
+    klass = AbstractMetaClass::findClass(classes, u"Subject");
+    QVERIFY(klass);
+    QVERIFY(klass->hasVirtualDestructor());
 }
 
 void TestDtorInformation::testDtorFromBaseIsVirtual()
@@ -87,31 +135,47 @@ class Subject : public SubjectBase {};
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 4);
 
-    auto klass = AbstractMetaClass::findClass(classes, QLatin1String("ControlBase"));
+    auto klass = AbstractMetaClass::findClass(classes, u"ControlBase");
     QVERIFY(klass);
     QVERIFY(!klass->hasVirtualDestructor());
-    klass = AbstractMetaClass::findClass(classes, QLatin1String("Control"));
+    klass = AbstractMetaClass::findClass(classes, u"Control");
     QVERIFY(klass);
     QVERIFY(!klass->hasVirtualDestructor());
 
-    klass = AbstractMetaClass::findClass(classes, QLatin1String("SubjectBase"));
+    klass = AbstractMetaClass::findClass(classes, u"SubjectBase");
     QVERIFY(klass);
     QVERIFY(klass->hasVirtualDestructor());
-    klass = AbstractMetaClass::findClass(classes, QLatin1String("Subject"));
+    klass = AbstractMetaClass::findClass(classes, u"Subject");
     QVERIFY(klass);
     QVERIFY(klass->hasVirtualDestructor());
 }
 
 void TestDtorInformation::testClassWithVirtualDtorIsPolymorphic()
 {
-    const char* cppCode ="class Control { public: virtual ~Control() {} }; class Subject { protected: virtual ~Subject() {} };";
-    const char* xmlCode = "<typesystem package=\"Foo\"><value-type name=\"Control\"/><value-type name=\"Subject\"/></typesystem>";
+    const char cppCode[] = R"(class Control {
+public:
+    virtual ~Control() {}
+};
+class Subject {
+protected:
+    virtual ~Subject() {}
+};
+)";
+    const char xmlCode[] =  R"(<typesystem package="Foo">
+    <value-type name="Control"/>
+    <value-type name="Subject"/>
+</typesystem>)";
+
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
-    QCOMPARE(AbstractMetaClass::findClass(classes, QLatin1String("Control"))->isPolymorphic(), true);
-    QCOMPARE(AbstractMetaClass::findClass(classes, QLatin1String("Subject"))->isPolymorphic(), true);
+    auto *klass = AbstractMetaClass::findClass(classes, u"Control");
+    QVERIFY(klass);
+    QVERIFY(klass->isPolymorphic());
+    klass = AbstractMetaClass::findClass(classes, u"Subject");
+    QVERIFY(klass);
+    QVERIFY(klass->isPolymorphic());
 }
 
 QTEST_APPLESS_MAIN(TestDtorInformation)

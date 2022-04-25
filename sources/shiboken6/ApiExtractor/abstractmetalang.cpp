@@ -1617,7 +1617,7 @@ std::optional<AbstractMetaEnumValue>
     if (lst.size() > 1) {
         const auto &prefixName = lst.at(0);
         const auto &enumName = lst.at(1);
-        if (AbstractMetaClass *cl = findClass(classes, prefixName.toString()))
+        if (auto *cl = findClass(classes, prefixName))
             return cl->findEnumValue(enumName.toString());
     }
 
@@ -1635,7 +1635,7 @@ std::optional<AbstractMetaEnumValue>
 /// Target language base name or complete Target language package.class name.
 
 template <class It>
-static It findClassHelper(It begin, It end, const QString &name)
+static It findClassHelper(It begin, It end, QStringView name)
 {
     if (name.isEmpty() || begin == end)
         return end;
@@ -1665,14 +1665,14 @@ static It findClassHelper(It begin, It end, const QString &name)
 }
 
 AbstractMetaClass *AbstractMetaClass::findClass(const AbstractMetaClassList &classes,
-                                                const QString &name)
+                                                QStringView name)
 {
     auto it =findClassHelper(classes.cbegin(), classes.cend(), name);
     return it != classes.cend() ? *it : nullptr;
 }
 
 const AbstractMetaClass *AbstractMetaClass::findClass(const AbstractMetaClassCList &classes,
-                                                      const QString &name)
+                                                      QStringView name)
 {
     auto it = findClassHelper(classes.cbegin(), classes.cend(), name);
     return it != classes.cend() ? *it : nullptr;

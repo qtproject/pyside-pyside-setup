@@ -51,12 +51,12 @@ void TestValueTypeDefaultCtorTag::testValueTypeDefaultCtorTagArgument()
 
     AbstractMetaClassList classes = builder->classes();
 
-    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
+    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, u"A");
     QVERIFY(classA);
     QVERIFY(classA->typeEntry()->hasDefaultConstructor());
     QCOMPARE(classA->typeEntry()->defaultConstructor(), u"A(0, 0)");
 
-    const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
+    const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, u"B");
     QVERIFY(classB);
     QVERIFY(!classB->typeEntry()->hasDefaultConstructor());
 }
