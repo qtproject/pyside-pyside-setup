@@ -52,6 +52,10 @@ class QStringConstructor(unittest.TestCase):
         self.assertEqual(obj.objectName(), 'foo')
         obj.setObjectName('áâãà')
         self.assertEqual(obj.objectName(), 'áâãà')
+        obj.setObjectName('A\x00B')
+        self.assertEqual(obj.objectName(), 'A\x00B')
+        obj.setObjectName('ä\x00B')
+        self.assertEqual(obj.objectName(), 'ä\x00B')
         obj.setObjectName(None)
         self.assertEqual(obj.objectName(), '')
 
