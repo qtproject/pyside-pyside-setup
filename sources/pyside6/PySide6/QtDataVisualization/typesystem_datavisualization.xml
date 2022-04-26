@@ -41,6 +41,10 @@
 -->
 <typesystem package="PySide6.QtDataVisualization">
 
+   <extra-includes>
+      <include file-name="qtdatavisualization_helper.h" location="global"/>
+   </extra-includes>
+
   <load-typesystem name="templates/datavisualization_common.xml" generate="no" />
   <load-typesystem name="QtGui/typesystem_gui.xml" generate="no" />
 
@@ -266,6 +270,10 @@
   </object-type>
   <value-type name="QSurfaceDataItem"/>
   <object-type name="QSurfaceDataProxy">
+    <extra-includes>
+      <include file-name="pyside_numpy.h" location="global"/>
+      <include file-name="qtdatavisualization_helper.h" location="global"/>
+    </extra-includes>
 
     <!-- PYSIDE-1438: Replace all add/set/insertRow() taking a 'QList*' by overloads
          taking 'const QList &' since an allocated list needs to be passed. -->
@@ -295,6 +303,17 @@
         <parent index="this" action="add"/>
       </modify-argument>
     </add-function>
+
+    <add-function signature="resetArrayNp(double@x@,double@deltaX@,double@z@,double@deltaZ@,PyArrayObject*@data@)">
+        <inject-code file="../glue/qtdatavisualization.cpp"
+                     snippet="qsurfacedataproxy-resetarraynp"/>
+        <inject-documentation format="target" mode="append">
+        Populates the data from a 2 dimensional numpy array containing the y
+        values for a range starting a ``x``, ``z`` with steps of ``deltaX``,
+        ``deltaZ``, respectively.
+        </inject-documentation>
+    </add-function>
+
   </object-type>
   <object-type name="Q3DBars">
     <modify-function signature="addAxis(QAbstract3DAxis*)">

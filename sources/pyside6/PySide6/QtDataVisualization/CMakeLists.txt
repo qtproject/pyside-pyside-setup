@@ -1,5 +1,7 @@
 project(QtDataVisualization)
 
+list(APPEND QtDataVisualization_src "${QtDataVisualization_SOURCE_DIR}/qtdatavisualization_helper.cpp")
+
 set(QtDataVisualization_SRC
 ${QtDataVisualization_GEN_DIR}/qabstract3daxis_wrapper.cpp
 ${QtDataVisualization_GEN_DIR}/qcategory3daxis_wrapper.cpp
@@ -61,4 +63,8 @@ create_pyside_module(NAME QtDataVisualization
                      LIBRARIES QtDataVisualization_libraries
                      DEPS QtDataVisualization_deps
                      TYPESYSTEM_PATH QtDataVisualization_SOURCE_DIR
-                     SOURCES QtDataVisualization_SRC)
+                     SOURCES QtDataVisualization_SRC
+                     STATIC_SOURCES QtDataVisualization_src)
+
+install(FILES ${pyside6_SOURCE_DIR}/qtdatavisualization_helper.h
+        DESTINATION include/PySide6/QtDataVisualization)
