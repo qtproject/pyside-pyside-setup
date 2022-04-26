@@ -48,6 +48,8 @@
 #include <QtCore/QPoint>
 #include <QtCore/QPointF>
 
+QT_FORWARD_DECLARE_CLASS(QDebug)
+
 // This header provides a PyArray_Check() definition that can be used to avoid
 // having to include the numpy headers. When using numpy headers, make sure
 // to include this header after them to skip the definition. Also remember
@@ -79,6 +81,14 @@ PYSIDE_API QList<QPointF> xyDataToQPointFList(PyObject *pyXIn, PyObject *pyYIn);
 
 PYSIDE_API QList<QPoint> xyDataToQPointList(PyObject *pyXIn, PyObject *pyYIn);
 
+struct debugPyArrayObject
+{
+    explicit debugPyArrayObject(PyObject *object) : m_object(object) {}
+
+    PyObject *m_object;
+};
+
+PYSIDE_API QDebug operator<<(QDebug debug, const debugPyArrayObject &a);
 
 } //namespace PySide::Numpy
 

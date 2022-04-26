@@ -42,6 +42,7 @@
 // Include numpy first to get the proper PyArray_Check
 #  include <numpy/arrayobject.h>
 #  include "pyside_numpy.h"
+#  include <QtCore/QDebug>
 
 // Convert X,Y of type T data to a list of points (QPoint, PointF)
 template <class T, class Point>
@@ -157,10 +158,100 @@ QList<QPoint> xyDataToQPointList(PyObject *pyXIn, PyObject *pyYIn)
     return {};
 }
 
+template <class T>
+static void debugArray(QDebug debug, const  T *data, int n)
+{
+    static const int maxData = 10;
+    debug << " = ";
+    auto *end = data + qMin(n, maxData);
+    for (auto *d = data; d != end; ++d) {
+        if (d != data)
+            debug << ", ";
+        debug << *d;
+    }
+    if (n > maxData)
+        debug << "...";
+}
+
+QDebug operator<<(QDebug debug, const debugPyArrayObject &a)
+{
+    QDebugStateSaver saver(debug);
+    debug.noquote();
+    debug.nospace();
+
+    debug << "PyArrayObject(";
+    if (a.m_object == nullptr) {
+        debug << '0';
+    } else if (PyArray_Check(a.m_object) != 0) {
+        auto *ar = reinterpret_cast<PyArrayObject *>(a.m_object);
+        const int ndim = PyArray_NDIM(ar);
+        const int type = PyArray_TYPE(ar);
+        const int flags  = PyArray_FLAGS(ar);
+        debug << "ndim=" << ndim << " [";
+        for (int d = 0; d < ndim; ++d) {
+            if (d)
+                debug << ", ";
+            debug << PyArray_DIMS(ar)[d];
+        }
+        debug << "], type=";
+        switch (type) {
+        case NPY_INT:
+            debug << "int";
+            break;
+        case NPY_UINT:
+            debug << "uint";
+            break;
+        case NPY_FLOAT:
+            debug << "float";
+            break;
+        case NPY_DOUBLE:
+            debug << "double";
+            break;
+        default:
+            debug << '(' << type << ')';
+            break;
+        }
+        debug << ", flags=0x" << Qt::hex << flags << Qt::dec;
+        if ((flags & NPY_ARRAY_C_CONTIGUOUS) != 0)
+            debug << " [C-contiguous]";
+        if ((flags & NPY_ARRAY_F_CONTIGUOUS) != 0)
+            debug << " [Fortran-contiguous]";
+        if ((flags & NPY_ARRAY_ALIGNED) != 0)
+                debug << " [aligned]";
+        if ((flags & NPY_ARRAY_OWNDATA) != 0)
+                debug << " [owndata]";
+        if ((flags & NPY_ARRAY_WRITEABLE) != 0)
+            debug << " [writeable]";
+
+        if (const int dim0 = PyArray_DIMS(ar)[0]) {
+            auto *data = PyArray_DATA(ar);
+            switch (type) {
+            case NPY_INT:
+                debugArray(debug, reinterpret_cast<const int *>(data), dim0);
+                break;
+            case NPY_UINT:
+                debugArray(debug, reinterpret_cast<const unsigned *>(data), dim0);
+                break;
+            case NPY_FLOAT:
+                debugArray(debug, reinterpret_cast<const float *>(data), dim0);
+                break;
+            case NPY_DOUBLE:
+                debugArray(debug, reinterpret_cast<const double *>(data), dim0);
+                break;
+            }
+        }
+    } else {
+        debug << "Invalid";
+    }
+    debug << ')';
+    return debug;
+}
+
 } //namespace PySide::Numpy
 
 #else // HAVE_NUMPY
 #  include "pyside_numpy.h"
+#  include <QtCore/QDebug>
 namespace PySide::Numpy
 {
 
@@ -184,6 +275,12 @@ QList<QPoint> xyDataToQPointList(PyObject *, PyObject *)
 {
     qWarning("Unimplemented function %s, (numpy was not found).", __FUNCTION__);
     return {};
+}
+
+QDebug operator<<(QDebug debug, const debugPyArrayObject &)
+{
+    debug << "Unimplemented function " <<  __FUNCTION__ << ", (numpy was not found).";
+    return debug;
 }
 
 } //namespace PySide::Numpy
