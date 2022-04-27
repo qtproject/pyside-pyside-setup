@@ -47,11 +47,10 @@
 // Convert X,Y of type T data to a list of points (QPoint, PointF)
 template <class T, class Point>
 static QList<Point>
-    xyDataToQPointHelper(PyArrayObject *pyX, PyArrayObject *pyY,
-                         qsizetype size)
+    xyDataToQPointHelper(const void *xData, const void *yData, qsizetype size)
 {
-    auto *x = reinterpret_cast<const T *>(PyArray_DATA(pyX));
-    auto *y = reinterpret_cast<const T *>(PyArray_DATA(pyY));
+    auto *x = reinterpret_cast<const T *>(xData);
+    auto *y = reinterpret_cast<const T *>(yData);
     QList<Point> result;
     result.reserve(size);
     for (auto xEnd = x + size; x < xEnd; ++x, ++y)
@@ -62,11 +61,10 @@ static QList<Point>
 // Convert X,Y of double/float type data to a list of QPoint (rounding)
 template <class T>
 static QList<QPoint>
-    xyFloatDataToQPointHelper(PyArrayObject *pyX, PyArrayObject *pyY,
-                              qsizetype size)
+    xyFloatDataToQPointHelper(const void *xData, const void *yData, qsizetype size)
 {
-    auto *x = reinterpret_cast<const T *>(PyArray_DATA(pyX));
-    auto *y = reinterpret_cast<const T *>(PyArray_DATA(pyY));
+    auto *x = reinterpret_cast<const T *>(xData);
+    auto *y = reinterpret_cast<const T *>(yData);
     QList<QPoint> result;
     result.reserve(size);
     for (auto xEnd = x + size; x < xEnd; ++x, ++y)
@@ -89,73 +87,92 @@ bool check(PyObject *pyIn)
     return PyArray_Check(pyIn);
 }
 
-struct XyCheck
+View View::fromPyObject(PyObject *pyIn)
 {
-    qsizetype size;
-    int numpytype;
-};
+    if (pyIn == nullptr || PyArray_Check(pyIn) == 0)
+        return {};
+    auto *ar = reinterpret_cast<PyArrayObject *>(pyIn);
+    if ((PyArray_FLAGS(ar) & NPY_ARRAY_C_CONTIGUOUS) == 0)
+        return {};
+    const int ndim = PyArray_NDIM(ar);
+    if (ndim > 2)
+        return {};
 
-// Check whether pyXIn and pyYIn are 1 dimensional vectors of the same size.
-// Return -1, -1 on failure.
-static XyCheck checkXyData(PyArrayObject *pyX, PyArrayObject *pyY)
-{
-    XyCheck result{-1, -1};
-    if (PyArray_NDIM(pyX) != 1 || (PyArray_FLAGS(pyX) & NPY_ARRAY_C_CONTIGUOUS) == 0)
-        return result;
-    if (PyArray_NDIM(pyY) != 1 || (PyArray_FLAGS(pyY) & NPY_ARRAY_C_CONTIGUOUS) == 0)
-        return result;
-    const int xType = PyArray_TYPE(pyX);
-    const int yType = PyArray_TYPE(pyY);
-    if (xType != yType)
-        return result;
-    result.numpytype = xType;
-    result.size = qMin(PyArray_DIMS(pyX)[0], PyArray_DIMS(pyY)[0]);
+    View::Type type;
+    switch (PyArray_TYPE(ar)) {
+    case NPY_INT:
+        type = View::Int;
+        break;
+    case NPY_UINT:
+        type = View::Unsigned;
+        break;
+    case NPY_FLOAT:
+        type = View::Float;
+        break;
+    case NPY_DOUBLE:
+        type = View::Double;
+        break;
+    default:
+        return {};
+    }
+
+    View result;
+    result.ndim = ndim;
+    result.type = type;
+    result.data = PyArray_DATA(ar);
+    result.dimensions[0] = PyArray_DIMS(ar)[0];
+    result.stride[0] = PyArray_STRIDES(ar)[0];
+    if (ndim > 1) {
+        result.dimensions[1] = PyArray_DIMS(ar)[1];
+        result.stride[1] = PyArray_STRIDES(ar)[1];
+    } else {
+        result.dimensions[1] = result.stride[1] = 0;
+    }
     return result;
 }
 
 QList<QPointF> xyDataToQPointFList(PyObject *pyXIn, PyObject *pyYIn)
 {
-    auto *pyX = reinterpret_cast<PyArrayObject *>(pyXIn);
-    auto *pyY = reinterpret_cast<PyArrayObject *>(pyYIn);
-    XyCheck check = checkXyData(pyX, pyY);
-    if (check.size <= 0)
+    View xv = View::fromPyObject(pyXIn);
+    View yv = View::fromPyObject(pyYIn);
+    if (!xv.sameLayout(yv))
         return {};
-    switch (check.numpytype) {
-    case NPY_INT:
-        return xyDataToQPointHelper<int, QPointF>(pyX, pyY, check.size);
-    case NPY_UINT:
-        return xyDataToQPointHelper<unsigned, QPointF>(pyX, pyY, check.size);
-    case NPY_FLOAT:
-        return xyDataToQPointHelper<float, QPointF>(pyX, pyY, check.size);
-    case NPY_DOUBLE:
-        return xyDataToQPointHelper<double, QPointF>(pyX, pyY, check.size);
-    default:
+    const qsizetype size = qMin(xv.dimensions[0], yv.dimensions[0]);
+    if (size == 0)
+        return {};
+    switch (xv.type) {
+    case PySide::Numpy::View::Int:
+        return xyDataToQPointHelper<int, QPointF>(xv.data, yv.data, size);
+    case PySide::Numpy::View::Unsigned:
+        return xyDataToQPointHelper<unsigned, QPointF>(xv.data, yv.data, size);
+    case PySide::Numpy::View::Float:
+        return xyDataToQPointHelper<float, QPointF>(xv.data, yv.data, size);
+    case PySide::Numpy::View::Double:
         break;
     }
-    return {};
+    return xyDataToQPointHelper<double, QPointF>(xv.data, yv.data, size);
 }
 
 QList<QPoint> xyDataToQPointList(PyObject *pyXIn, PyObject *pyYIn)
 {
-    auto *pyX = reinterpret_cast<PyArrayObject *>(pyXIn);
-    auto *pyY = reinterpret_cast<PyArrayObject *>(pyYIn);
-    XyCheck check = checkXyData(pyX, pyY);
-    if (check.size <= 0)
+    View xv = View::fromPyObject(pyXIn);
+    View yv = View::fromPyObject(pyYIn);
+    if (!xv.sameLayout(yv))
         return {};
-    switch (check.numpytype) {
-    case NPY_INT:
-        return xyDataToQPointHelper<int, QPoint>(pyX, pyY, check.size);
-    case NPY_UINT:
-        return xyDataToQPointHelper<unsigned, QPoint>(pyX, pyY, check.size);
-    case NPY_FLOAT:
-        return xyFloatDataToQPointHelper<float>(pyX, pyY, check.size);
-    case NPY_DOUBLE:
-        return xyFloatDataToQPointHelper<double>(pyX, pyY, check.size);
-    default:
+    const qsizetype size = qMin(xv.dimensions[0], yv.dimensions[0]);
+    if (size == 0)
+        return {};
+    switch (xv.type) {
+    case PySide::Numpy::View::Int:
+        return xyDataToQPointHelper<int, QPoint>(xv.data, yv.data, size);
+    case PySide::Numpy::View::Unsigned:
+        return xyDataToQPointHelper<unsigned, QPoint>(xv.data, yv.data, size);
+    case PySide::Numpy::View::Float:
+        return xyFloatDataToQPointHelper<float>(xv.data, yv.data, size);
+    case PySide::Numpy::View::Double:
         break;
     }
-
-    return {};
+    return xyFloatDataToQPointHelper<double>(xv.data, yv.data, size);
 }
 
 template <class T>
@@ -265,6 +282,11 @@ bool check(PyObject *)
     return false;
 }
 
+View View::fromPyObject(PyObject *)
+{
+    return {};
+}
+
 QList<QPointF> xyDataToQPointFList(PyObject *, PyObject *)
 {
     qWarning("Unimplemented function %s, (numpy was not found).", __FUNCTION__);
@@ -286,3 +308,42 @@ QDebug operator<<(QDebug debug, const debugPyArrayObject &)
 } //namespace PySide::Numpy
 
 #endif // !HAVE_NUMPY
+
+namespace PySide::Numpy
+{
+
+bool View::sameLayout(const View &rhs) const
+{
+    return rhs && *this && ndim == rhs.ndim && type == rhs.type;
+}
+
+bool View::sameSize(const View &rhs) const
+{
+    return sameLayout(rhs)
+        && dimensions[0] == rhs.dimensions[0] && dimensions[1] == rhs.dimensions[1];
+}
+
+QDebug operator<<(QDebug debug, const View &v)
+{
+    QDebugStateSaver saver(debug);
+    debug.noquote();
+    debug.nospace();
+
+    debug << "PySide::Numpy::View(";
+    if (v) {
+        debug << "type=" << v.type << ", ndim=" << v.ndim << " ["
+            << v.dimensions[0];
+        if (v.ndim > 1)
+           debug << ", " << v.dimensions[1];
+        debug << "], stride=[" << v.stride[0];
+        if (v.ndim > 1)
+           debug << ", " << v.stride[1];
+        debug << "], data=" << v.data;
+    } else {
+        debug << "invalid";
+    }
+    debug << ')';
+    return debug;
+}
+
+} //namespace PySide::Numpy

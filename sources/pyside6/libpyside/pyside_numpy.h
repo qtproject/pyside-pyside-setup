@@ -65,6 +65,29 @@ bool init();
 /// \return Whether it is a PyArrayObject
 PYSIDE_API bool check(PyObject *pyIn);
 
+/// A simple view of an up to 2 dimensional, C-contiguous array of a standard
+/// type. It can be passed to compilation units that do not include the
+/// numpy headers.
+struct PYSIDE_API View
+{
+    enum Type { Int, Unsigned, Float, Double};
+
+    static View fromPyObject(PyObject *pyIn);
+
+    operator bool() const { return ndim > 0; }
+
+    /// Return whether rhs is of the same type and dimensionality
+    bool sameLayout(const View &rhs) const;
+    /// Return whether rhs is of the same type dimensionality and size
+    bool sameSize(const View &rhs) const;
+
+    int ndim = 0;
+    qsizetype dimensions[2];
+    qsizetype stride[2];
+    void *data = nullptr;
+    Type type = Int;
+};
+
 /// Create a list of QPointF from 2 equally sized numpy array of x and y data
 /// (float,double).
 /// \param pyXIn X data array
@@ -89,6 +112,7 @@ struct debugPyArrayObject
 };
 
 PYSIDE_API QDebug operator<<(QDebug debug, const debugPyArrayObject &a);
+PYSIDE_API QDebug operator<<(QDebug debug, const View &v);
 
 } //namespace PySide::Numpy
 
