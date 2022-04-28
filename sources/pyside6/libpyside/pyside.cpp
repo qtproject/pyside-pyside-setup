@@ -704,17 +704,32 @@ PyObject *getWrapperForQObject(QObject *cppSelf, PyTypeObject *sbk_type)
     return pyOut;
 }
 
+QString pyUnicodeToQString(PyObject *str)
+{
+    Q_ASSERT(PyUnicode_Check(str) != 0);
+
+    const void *data = _PepUnicode_DATA(str);
+    const Py_ssize_t len = PyUnicode_GetLength(str);
+    switch (_PepUnicode_KIND(str)) {
+    case PepUnicode_1BYTE_KIND:
+        return QString::fromLatin1(reinterpret_cast<const char *>(data), len);
+    case PepUnicode_2BYTE_KIND:
+        return QString::fromUtf16(reinterpret_cast<const char16_t *>(data), len);
+    case PepUnicode_4BYTE_KIND:
+        break;
+    }
+    return QString::fromUcs4(reinterpret_cast<const char32_t *>(data), len);
+}
+
 // Inspired by Shiboken::String::toCString;
 QString pyStringToQString(PyObject *str)
 {
     if (str == Py_None)
         return QString();
 
-    if (PyUnicode_Check(str)) {
-        const char *unicodeBuffer = _PepUnicode_AsString(str);
-        if (unicodeBuffer)
-            return QString::fromUtf8(unicodeBuffer);
-    }
+    if (PyUnicode_Check(str) != 0)
+        return pyUnicodeToQString(str);
+
     if (PyBytes_Check(str)) {
         const char *asciiBuffer = PyBytes_AS_STRING(str);
         if (asciiBuffer)

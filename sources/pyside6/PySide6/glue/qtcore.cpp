@@ -1274,19 +1274,7 @@ if (PyErr_WarnEx(PyExc_DeprecationWarning,
 // @snippet conversion-pylong-quintptr
 
 // @snippet conversion-pyunicode
-void *data = _PepUnicode_DATA(%in);
-Py_ssize_t len = PyUnicode_GetLength(%in);
-switch (_PepUnicode_KIND(%in)) {
-    case PepUnicode_1BYTE_KIND:
-        %out = QString::fromLatin1(reinterpret_cast<const char *>(data), len);
-        break;
-    case PepUnicode_2BYTE_KIND:
-        %out = QString::fromUtf16(reinterpret_cast<const char16_t *>(data), len);
-        break;
-    case PepUnicode_4BYTE_KIND:
-        %out = QString::fromUcs4(reinterpret_cast<const char32_t *>(data), len);
-        break;
-}
+%out = PySide::pyUnicodeToQString(%in);
 // @snippet conversion-pyunicode
 
 // @snippet conversion-pynone

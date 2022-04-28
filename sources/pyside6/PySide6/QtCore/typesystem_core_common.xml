@@ -50,6 +50,7 @@
     <function signature="qChecksum(QByteArrayView data, Qt::ChecksumType)"/>
 -->
     <extra-includes>
+        <include file-name="pysideutils.h" location="global"/> <!-- QString conversion -->
         <include file-name="signalmanager.h" location="global"/>
     </extra-includes>
 

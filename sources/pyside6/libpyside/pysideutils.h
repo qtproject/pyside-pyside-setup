@@ -57,6 +57,9 @@ namespace PySide
 /// \return Returns true if self object inherits from class_name, otherwise returns false
 PYSIDE_API bool inherits(PyTypeObject *self, const char *class_name);
 
+/// Given A PyObject repesenting Unicode data, returns an equivalent QString.
+PYSIDE_API QString pyUnicodeToQString(PyObject *str);
+
 /// Given A PyObject repesenting ASCII or Unicode data, returns an equivalent QString.
 PYSIDE_API QString pyStringToQString(PyObject *str);
 
