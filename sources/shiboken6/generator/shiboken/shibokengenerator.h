@@ -29,22 +29,6 @@
 #ifndef SHIBOKENGENERATOR_H
 #define SHIBOKENGENERATOR_H
 
-extern const char *CPP_ARG;
-extern const char *CPP_ARG_REMOVED;
-extern const char *CPP_RETURN_VAR;
-extern const char *CPP_SELF_VAR;
-extern const char *NULL_PTR;
-extern const char *PYTHON_ARG;
-extern const char *PYTHON_ARGS;
-extern const char *PYTHON_OVERRIDE_VAR;
-extern const char *PYTHON_RETURN_VAR;
-extern const char *PYTHON_TO_CPP_VAR;
-extern const char *SMART_POINTER_GETTER;
-
-extern const char *CONV_RULE_OUT_VAR_SUFFIX;
-extern const char *BEGIN_ALLOW_THREADS;
-extern const char *END_ALLOW_THREADS;
-
 #include <generator.h>
 
 #include "typesystem.h"
@@ -463,5 +447,21 @@ private:
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(ShibokenGenerator::AttroCheck);
+
+extern const QString CPP_ARG;
+extern const QString CPP_ARG_REMOVED;
+extern const QString CPP_RETURN_VAR;
+extern const QString CPP_SELF_VAR;
+extern const QString NULL_PTR;
+extern const QString PYTHON_ARG;
+extern const QString PYTHON_ARGS;
+extern const QString PYTHON_OVERRIDE_VAR;
+extern const QString PYTHON_RETURN_VAR;
+extern const QString PYTHON_TO_CPP_VAR;
+extern const QString SMART_POINTER_GETTER;
+
+extern const QString CONV_RULE_OUT_VAR_SUFFIX;
+extern const QString BEGIN_ALLOW_THREADS;
+extern const QString END_ALLOW_THREADS;
 
 #endif // SHIBOKENGENERATOR_H

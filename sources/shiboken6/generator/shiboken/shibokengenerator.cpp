@@ -66,22 +66,22 @@ static const char USE_OPERATOR_BOOL_AS_NB_NONZERO[] = "use-operator-bool-as-nb_n
 static const char WRAPPER_DIAGNOSTICS[] = "wrapper-diagnostics";
 static const char NO_IMPLICIT_CONVERSIONS[] = "no-implicit-conversions";
 
-const char *CPP_ARG = "cppArg";
-const char *CPP_ARG_REMOVED = "removed_cppArg";
-const char *CPP_RETURN_VAR = "cppResult";
-const char *CPP_SELF_VAR = "cppSelf";
-const char *NULL_PTR = "nullptr";
-const char *PYTHON_ARG = "pyArg";
-const char *PYTHON_ARGS = "pyArgs";
-const char *PYTHON_OVERRIDE_VAR = "pyOverride";
-const char *PYTHON_RETURN_VAR = "pyResult";
-const char *PYTHON_TO_CPP_VAR = "pythonToCpp";
-const char *SMART_POINTER_GETTER = "kSmartPointerGetter";
+const QString CPP_ARG = u"cppArg"_s;
+const QString CPP_ARG_REMOVED = u"removed_cppArg"_s;
+const QString CPP_RETURN_VAR = u"cppResult"_s;
+const QString CPP_SELF_VAR = u"cppSelf"_s;
+const QString NULL_PTR = u"nullptr"_s;
+const QString PYTHON_ARG = u"pyArg"_s;
+const QString PYTHON_ARGS = u"pyArgs"_s;
+const QString PYTHON_OVERRIDE_VAR = u"pyOverride"_s;
+const QString PYTHON_RETURN_VAR = u"pyResult"_s;
+const QString PYTHON_TO_CPP_VAR = u"pythonToCpp"_s;
+const QString SMART_POINTER_GETTER = u"kSmartPointerGetter"_s;
 
-const char *CONV_RULE_OUT_VAR_SUFFIX = "_out";
-const char *BEGIN_ALLOW_THREADS =
-    "PyThreadState *_save = PyEval_SaveThread(); // Py_BEGIN_ALLOW_THREADS";
-const char *END_ALLOW_THREADS = "PyEval_RestoreThread(_save); // Py_END_ALLOW_THREADS";
+const QString CONV_RULE_OUT_VAR_SUFFIX = u"_out"_s;
+const QString BEGIN_ALLOW_THREADS =
+    u"PyThreadState *_save = PyEval_SaveThread(); // Py_BEGIN_ALLOW_THREADS"_s;
+const QString END_ALLOW_THREADS = u"PyEval_RestoreThread(_save); // Py_END_ALLOW_THREADS"_s;
 
 struct GeneratorClassInfoCacheEntry
 {
@@ -1026,7 +1026,7 @@ QString ShibokenGenerator::argumentString(const AbstractMetaFunctionCPtr &func,
     {
         QString default_value = argument.originalDefaultValueExpression();
         if (default_value == u"NULL")
-            default_value = QLatin1StringView(NULL_PTR);
+            default_value = NULL_PTR;
 
         //WORKAROUND: fix this please
         if (default_value.startsWith(u"new "))
@@ -1306,19 +1306,19 @@ ShibokenGenerator::ArgumentVarReplacementList
             if (argRemoved)
                 ++removed;
             if (argRemoved && hasConversionRule)
-                argValue = arg.name() + QLatin1StringView(CONV_RULE_OUT_VAR_SUFFIX);
+                argValue = arg.name() + CONV_RULE_OUT_VAR_SUFFIX;
             else if (argRemoved || (lastArg && arg.argumentIndex() > lastArg->argumentIndex()))
-                argValue = QLatin1StringView(CPP_ARG_REMOVED) + QString::number(i);
+                argValue = CPP_ARG_REMOVED + QString::number(i);
             if (!argRemoved && argValue.isEmpty()) {
                 int argPos = i - removed;
                 AbstractMetaType type = arg.modifiedType();
                 if (type.typeEntry()->isCustom()) {
                     argValue = usePyArgs
-                               ? pythonArgsAt(argPos) : QLatin1StringView(PYTHON_ARG);
+                               ? pythonArgsAt(argPos) : PYTHON_ARG;
                 } else {
                     argValue = hasConversionRule
-                               ? arg.name() + QLatin1StringView(CONV_RULE_OUT_VAR_SUFFIX)
-                               : QLatin1StringView(CPP_ARG) + QString::number(argPos);
+                               ? arg.name() + CONV_RULE_OUT_VAR_SUFFIX
+                               : CPP_ARG + QString::number(argPos);
                     auto deRef = type.shouldDereferenceArgument();
                     AbstractMetaType::applyDereference(&argValue, deRef);
                 }
@@ -1361,12 +1361,11 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
 static void replacePyArg0(TypeSystem::Language language, QString *code)
 {
     static const QString pyArg0 = u"%PYARG_0"_s;
-    static const QString pyReturn = QLatin1StringView(PYTHON_RETURN_VAR);
 
     if (!code->contains(pyArg0))
         return;
     if (language != TypeSystem::NativeCode) {
-        code->replace(pyArg0, pyReturn);
+        code->replace(pyArg0, PYTHON_RETURN_VAR);
         return;
     }
 
@@ -1375,13 +1374,13 @@ static void replacePyArg0(TypeSystem::Language language, QString *code)
     // situations (fex _PyVarObject_CAST(op) defined as ((PyVarObject*)(op))).
     // Append ".object()" unless it is followed by a '.' indicating explicit
     // AutoDecRef member invocation.
-    static const QString pyObject = pyReturn + u".object()"_s;
+    static const QString pyObject = PYTHON_RETURN_VAR + u".object()"_s;
     qsizetype pos{};
     while ( (pos = code->indexOf(pyArg0)) >= 0) {
         const auto next = pos + pyArg0.size();
         const bool memberInvocation = next < code->size() && code->at(next) == u'.';
         code->replace(pos, pyArg0.size(),
-                      memberInvocation ? pyReturn : pyObject);
+                      memberInvocation ? PYTHON_RETURN_VAR : pyObject);
     }
 }
 
@@ -1404,7 +1403,7 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
     Q_ASSERT(pyArgsRegex.isValid());
     if (language == TypeSystem::TargetLangCode) {
         if (usePyArgs) {
-            code.replace(pyArgsRegex, QLatin1StringView(PYTHON_ARGS) + u"[\\1-1]"_s);
+            code.replace(pyArgsRegex, PYTHON_ARGS + u"[\\1-1]"_s);
         } else {
             static const QRegularExpression pyArgsRegexCheck(QStringLiteral("%PYARG_([2-9]+)"));
             Q_ASSERT(pyArgsRegexCheck.isValid());
@@ -1414,7 +1413,7 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
                     << msgWrongIndex("%PYARG", match.captured(1), func.data());
                 return;
             }
-            code.replace(u"%PYARG_1"_s, QLatin1StringView(PYTHON_ARG));
+            code.replace(u"%PYARG_1"_s, PYTHON_ARG);
         }
     } else {
         // Replaces the simplest case of attribution to a
@@ -1422,9 +1421,9 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
         static const QRegularExpression pyArgsAttributionRegex(QStringLiteral("%PYARG_(\\d+)\\s*=[^=]\\s*([^;]+)"));
         Q_ASSERT(pyArgsAttributionRegex.isValid());
         code.replace(pyArgsAttributionRegex, u"PyTuple_SET_ITEM("_s
-                     + QLatin1StringView(PYTHON_ARGS) + u", \\1-1, \\2)"_s);
+                     + PYTHON_ARGS + u", \\1-1, \\2)"_s);
         code.replace(pyArgsRegex, u"PyTuple_GET_ITEM("_s
-                     + QLatin1StringView(PYTHON_ARGS) + u", \\1-1)"_s);
+                     + PYTHON_ARGS + u", \\1-1)"_s);
     }
 
     // Replace %ARG#_TYPE variables.
@@ -1453,8 +1452,8 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
         QString returnValueOp = func->type().isPointerToWrapperType()
             ? u"%1->"_s : u"%1."_s;
         if (func->type().isWrapperType())
-            code.replace(u"%0."_s, returnValueOp.arg(QLatin1StringView(CPP_RETURN_VAR)));
-        code.replace(u"%0"_s, QLatin1StringView(CPP_RETURN_VAR));
+            code.replace(u"%0."_s, returnValueOp.arg(CPP_RETURN_VAR));
+        code.replace(u"%0"_s, CPP_RETURN_VAR);
     }
 
     // Replace template variable for self Python object.
@@ -1471,7 +1470,7 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
         else if (language == TypeSystem::NativeCode)
             cppSelf = u"this"_s;
         else
-            cppSelf = QLatin1StringView(CPP_SELF_VAR);
+            cppSelf = CPP_SELF_VAR;
 
         // On comparison operator CPP_SELF_VAR is always a reference.
         if (func->isComparisonOperator())
@@ -1504,10 +1503,8 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
 
         if (code.indexOf(u"%BEGIN_ALLOW_THREADS") > -1) {
             if (code.count(u"%BEGIN_ALLOW_THREADS"_s) == code.count(u"%END_ALLOW_THREADS"_s)) {
-                code.replace(u"%BEGIN_ALLOW_THREADS"_s,
-                             QLatin1StringView(BEGIN_ALLOW_THREADS));
-                code.replace(u"%END_ALLOW_THREADS"_s,
-                             QLatin1StringView(END_ALLOW_THREADS));
+                code.replace(u"%BEGIN_ALLOW_THREADS"_s, BEGIN_ALLOW_THREADS);
+                code.replace(u"%END_ALLOW_THREADS"_s, END_ALLOW_THREADS);
             } else {
                 qCWarning(lcShiboken) << "%BEGIN_ALLOW_THREADS and %END_ALLOW_THREADS mismatch";
             }
@@ -1530,7 +1527,7 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
 
     QStringList args;
     for (const ArgumentVarReplacementPair &pair : argReplacements) {
-        if (pair.second.startsWith(QLatin1StringView(CPP_ARG_REMOVED)))
+        if (pair.second.startsWith(CPP_ARG_REMOVED))
             continue;
         args << pair.second;
     }
@@ -1554,11 +1551,11 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
         // Replaces template %PYTHON_ARGUMENTS variable with a pointer to the Python tuple
         // containing the converted virtual method arguments received from C++ to be passed
         // to the Python override.
-        code.replace(u"%PYTHON_ARGUMENTS"_s, QLatin1StringView(PYTHON_ARGS));
+        code.replace(u"%PYTHON_ARGUMENTS"_s, PYTHON_ARGS);
 
         // replace variable %PYTHON_METHOD_OVERRIDE for a pointer to the Python method
         // override for the C++ virtual method in which this piece of code was inserted
-        code.replace(u"%PYTHON_METHOD_OVERRIDE"_s, QLatin1StringView(PYTHON_OVERRIDE_VAR));
+        code.replace(u"%PYTHON_METHOD_OVERRIDE"_s, PYTHON_OVERRIDE_VAR);
     }
 
     if (avoidProtectedHack()) {
@@ -2291,7 +2288,7 @@ QString ShibokenGenerator::minimalConstructorExpression(const ApiExtractorResult
 
 QString ShibokenGenerator::pythonArgsAt(int i)
 {
-    return QLatin1StringView(PYTHON_ARGS) + u'[' + QString::number(i) + u']';
+    return PYTHON_ARGS + u'[' + QString::number(i) + u']';
 }
 
 void ShibokenGenerator::replaceTemplateVariables(QString &code,
