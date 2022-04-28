@@ -49,230 +49,230 @@ from PySide6.QtDataVisualization import (Q3DTheme, QAbstract3DGraph,
 from PySide6.QtGui import QImage, QLinearGradient, QVector3D
 from PySide6.QtWidgets import QSlider
 
-sampleCountX = 50
-sampleCountZ = 50
-heightMapGridStepX = 6
-heightMapGridStepZ = 6
-sampleMin = -8.0
-sampleMax = 8.0
+SAMPLE_COUNT_X = 50
+SAMPLE_COUNT_Z = 50
+HEIGHT_MAP_GRID_STEP_X = 6
+HEIGHT_MAP_GRID_STEP_Z = 6
+SAMPLE_MIN = -8.0
+SAMPLE_MAX = 8.0
 
 
 class SurfaceGraph(QObject):
     def __init__(self, surface, parent=None):
         super().__init__(parent)
 
-        self.m_graph = surface
-        self.m_graph.setAxisX(QValue3DAxis())
-        self.m_graph.setAxisY(QValue3DAxis())
-        self.m_graph.setAxisZ(QValue3DAxis())
+        self._graph = surface
+        self._graph.setAxisX(QValue3DAxis())
+        self._graph.setAxisY(QValue3DAxis())
+        self._graph.setAxisZ(QValue3DAxis())
 
-        self.m_sqrtSinProxy = QSurfaceDataProxy()
-        self.m_sqrtSinSeries = QSurface3DSeries(self.m_sqrtSinProxy)
-        self.fillSqrtSinProxy()
+        self._sqrtSinProxy = QSurfaceDataProxy()
+        self._sqrtSinSeries = QSurface3DSeries(self._sqrtSinProxy)
+        self.fill_sqrt_sin_proxy()
 
-        imageFile = Path(__file__).parent / "mountain.png"
-        heightMapImage = QImage(imageFile)
-        self.m_heightMapProxy = QHeightMapSurfaceDataProxy(heightMapImage)
-        self.m_heightMapSeries = QSurface3DSeries(self.m_heightMapProxy)
-        self.m_heightMapSeries.setItemLabelFormat("(@xLabel, @zLabel): @yLabel")
-        self.m_heightMapProxy.setValueRanges(34.0, 40.0, 18.0, 24.0)
+        image_file = Path(__file__).parent / "mountain.png"
+        height_map_image = QImage(image_file)
+        self._heightMapProxy = QHeightMapSurfaceDataProxy(height_map_image)
+        self._heightMapSeries = QSurface3DSeries(self._heightMapProxy)
+        self._heightMapSeries.setItemLabelFormat("(@xLabel, @zLabel): @yLabel")
+        self._heightMapProxy.setValueRanges(34.0, 40.0, 18.0, 24.0)
 
-        self.m_heightMapWidth = heightMapImage.width()
-        self.m_heightMapHeight = heightMapImage.height()
+        self._heightMapWidth = height_map_image.width()
+        self._heightMapHeight = height_map_image.height()
 
-        self.m_axisMinSliderX = QSlider()
-        self.m_axisMaxSliderX = QSlider()
-        self.m_axisMinSliderZ = QSlider()
-        self.m_axisMaxSliderZ = QSlider()
-        self.m_rangeMinX = 0.0
-        self.m_rangeMinZ = 0.0
-        self.m_stepX = 0.0
-        self.m_stepZ = 0.0
+        self._axisMinSliderX = QSlider()
+        self._axisMaxSliderX = QSlider()
+        self._axisMinSliderZ = QSlider()
+        self._axisMaxSliderZ = QSlider()
+        self._rangeMinX = 0.0
+        self._rangeMinZ = 0.0
+        self._stepX = 0.0
+        self._stepZ = 0.0
 
-    def fillSqrtSinProxy(self):
-        stepX = (sampleMax - sampleMin) / float(sampleCountX - 1)
-        stepZ = (sampleMax - sampleMin) / float(sampleCountZ - 1)
+    def fill_sqrt_sin_proxy(self):
+        step_x = (SAMPLE_MAX - SAMPLE_MIN) / float(SAMPLE_COUNT_X - 1)
+        step_z = (SAMPLE_MAX - SAMPLE_MIN) / float(SAMPLE_COUNT_Z - 1)
 
-        dataArray = []
-        for i in range(sampleCountZ):
-            newRow = []
+        data_array = []
+        for i in range(SAMPLE_COUNT_Z):
+            new_row = []
             # Keep values within range bounds, since just adding step can cause
             # minor drift due to the rounding errors.
-            z = min(sampleMax, (i * stepZ + sampleMin))
-            for j in range(sampleCountX):
-                x = min(sampleMax, (j * stepX + sampleMin))
+            z = min(SAMPLE_MAX, (i * step_z + SAMPLE_MIN))
+            for j in range(SAMPLE_COUNT_X):
+                x = min(SAMPLE_MAX, (j * step_x + SAMPLE_MIN))
                 R = math.sqrt(z * z + x * x) + 0.01
                 y = (math.sin(R) / R + 0.24) * 1.61
-                newRow.append(QSurfaceDataItem(QVector3D(x, y, z)))
-            dataArray.append(newRow)
+                new_row.append(QSurfaceDataItem(QVector3D(x, y, z)))
+            data_array.append(new_row)
 
-        self.m_sqrtSinProxy.resetArray(dataArray)
+        self._sqrtSinProxy.resetArray(data_array)
 
-    def enableSqrtSinModel(self, enable):
+    def enable_sqrt_sin_model(self, enable):
         if enable:
-            self.m_sqrtSinSeries.setDrawMode(QSurface3DSeries.DrawSurfaceAndWireframe)
-            self.m_sqrtSinSeries.setFlatShadingEnabled(True)
+            self._sqrtSinSeries.setDrawMode(QSurface3DSeries.DrawSurfaceAndWireframe)
+            self._sqrtSinSeries.setFlatShadingEnabled(True)
 
-            self.m_graph.axisX().setLabelFormat("%.2f")
-            self.m_graph.axisZ().setLabelFormat("%.2f")
-            self.m_graph.axisX().setRange(sampleMin, sampleMax)
-            self.m_graph.axisY().setRange(0.0, 2.0)
-            self.m_graph.axisZ().setRange(sampleMin, sampleMax)
-            self.m_graph.axisX().setLabelAutoRotation(30)
-            self.m_graph.axisY().setLabelAutoRotation(90)
-            self.m_graph.axisZ().setLabelAutoRotation(30)
+            self._graph.axisX().setLabelFormat("%.2f")
+            self._graph.axisZ().setLabelFormat("%.2f")
+            self._graph.axisX().setRange(SAMPLE_MIN, SAMPLE_MAX)
+            self._graph.axisY().setRange(0.0, 2.0)
+            self._graph.axisZ().setRange(SAMPLE_MIN, SAMPLE_MAX)
+            self._graph.axisX().setLabelAutoRotation(30)
+            self._graph.axisY().setLabelAutoRotation(90)
+            self._graph.axisZ().setLabelAutoRotation(30)
 
-            self.m_graph.removeSeries(self.m_heightMapSeries)
-            self.m_graph.addSeries(self.m_sqrtSinSeries)
+            self._graph.removeSeries(self._heightMapSeries)
+            self._graph.addSeries(self._sqrtSinSeries)
 
             # Reset range sliders for Sqrt&Sin
-            self.m_rangeMinX = sampleMin
-            self.m_rangeMinZ = sampleMin
-            self.m_stepX = (sampleMax - sampleMin) / float(sampleCountX - 1)
-            self.m_stepZ = (sampleMax - sampleMin) / float(sampleCountZ - 1)
-            self.m_axisMinSliderX.setMaximum(sampleCountX - 2)
-            self.m_axisMinSliderX.setValue(0)
-            self.m_axisMaxSliderX.setMaximum(sampleCountX - 1)
-            self.m_axisMaxSliderX.setValue(sampleCountX - 1)
-            self.m_axisMinSliderZ.setMaximum(sampleCountZ - 2)
-            self.m_axisMinSliderZ.setValue(0)
-            self.m_axisMaxSliderZ.setMaximum(sampleCountZ - 1)
-            self.m_axisMaxSliderZ.setValue(sampleCountZ - 1)
+            self._rangeMinX = SAMPLE_MIN
+            self._rangeMinZ = SAMPLE_MIN
+            self._stepX = (SAMPLE_MAX - SAMPLE_MIN) / float(SAMPLE_COUNT_X - 1)
+            self._stepZ = (SAMPLE_MAX - SAMPLE_MIN) / float(SAMPLE_COUNT_Z - 1)
+            self._axisMinSliderX.setMaximum(SAMPLE_COUNT_X - 2)
+            self._axisMinSliderX.setValue(0)
+            self._axisMaxSliderX.setMaximum(SAMPLE_COUNT_X - 1)
+            self._axisMaxSliderX.setValue(SAMPLE_COUNT_X - 1)
+            self._axisMinSliderZ.setMaximum(SAMPLE_COUNT_Z - 2)
+            self._axisMinSliderZ.setValue(0)
+            self._axisMaxSliderZ.setMaximum(SAMPLE_COUNT_Z - 1)
+            self._axisMaxSliderZ.setValue(SAMPLE_COUNT_Z - 1)
 
-    def enableHeightMapModel(self, enable):
+    def enable_height_map_model(self, enable):
         if enable:
-            self.m_heightMapSeries.setDrawMode(QSurface3DSeries.DrawSurface)
-            self.m_heightMapSeries.setFlatShadingEnabled(False)
+            self._heightMapSeries.setDrawMode(QSurface3DSeries.DrawSurface)
+            self._heightMapSeries.setFlatShadingEnabled(False)
 
-            self.m_graph.axisX().setLabelFormat("%.1f N")
-            self.m_graph.axisZ().setLabelFormat("%.1f E")
-            self.m_graph.axisX().setRange(34.0, 40.0)
-            self.m_graph.axisY().setAutoAdjustRange(True)
-            self.m_graph.axisZ().setRange(18.0, 24.0)
+            self._graph.axisX().setLabelFormat("%.1f N")
+            self._graph.axisZ().setLabelFormat("%.1f E")
+            self._graph.axisX().setRange(34.0, 40.0)
+            self._graph.axisY().setAutoAdjustRange(True)
+            self._graph.axisZ().setRange(18.0, 24.0)
 
-            self.m_graph.axisX().setTitle("Latitude")
-            self.m_graph.axisY().setTitle("Height")
-            self.m_graph.axisZ().setTitle("Longitude")
+            self._graph.axisX().setTitle("Latitude")
+            self._graph.axisY().setTitle("Height")
+            self._graph.axisZ().setTitle("Longitude")
 
-            self.m_graph.removeSeries(self.m_sqrtSinSeries)
-            self.m_graph.addSeries(self.m_heightMapSeries)
+            self._graph.removeSeries(self._sqrtSinSeries)
+            self._graph.addSeries(self._heightMapSeries)
 
             # Reset range sliders for height map
-            mapGridCountX = self.m_heightMapWidth / heightMapGridStepX
-            mapGridCountZ = self.m_heightMapHeight / heightMapGridStepZ
-            self.m_rangeMinX = 34.0
-            self.m_rangeMinZ = 18.0
-            self.m_stepX = 6.0 / float(mapGridCountX - 1)
-            self.m_stepZ = 6.0 / float(mapGridCountZ - 1)
-            self.m_axisMinSliderX.setMaximum(mapGridCountX - 2)
-            self.m_axisMinSliderX.setValue(0)
-            self.m_axisMaxSliderX.setMaximum(mapGridCountX - 1)
-            self.m_axisMaxSliderX.setValue(mapGridCountX - 1)
-            self.m_axisMinSliderZ.setMaximum(mapGridCountZ - 2)
-            self.m_axisMinSliderZ.setValue(0)
-            self.m_axisMaxSliderZ.setMaximum(mapGridCountZ - 1)
-            self.m_axisMaxSliderZ.setValue(mapGridCountZ - 1)
+            map_grid_count_x = self._heightMapWidth / HEIGHT_MAP_GRID_STEP_X
+            map_grid_count_z = self._heightMapHeight / HEIGHT_MAP_GRID_STEP_Z
+            self._rangeMinX = 34.0
+            self._rangeMinZ = 18.0
+            self._stepX = 6.0 / float(map_grid_count_x - 1)
+            self._stepZ = 6.0 / float(map_grid_count_z - 1)
+            self._axisMinSliderX.setMaximum(map_grid_count_x - 2)
+            self._axisMinSliderX.setValue(0)
+            self._axisMaxSliderX.setMaximum(map_grid_count_x - 1)
+            self._axisMaxSliderX.setValue(map_grid_count_x - 1)
+            self._axisMinSliderZ.setMaximum(map_grid_count_z - 2)
+            self._axisMinSliderZ.setValue(0)
+            self._axisMaxSliderZ.setMaximum(map_grid_count_z - 1)
+            self._axisMaxSliderZ.setValue(map_grid_count_z - 1)
 
-    def adjustXMin(self, minimum):
-        minX = self.m_stepX * float(minimum) + self.m_rangeMinX
+    def adjust_xmin(self, minimum):
+        min_x = self._stepX * float(minimum) + self._rangeMinX
 
-        maximum = self.m_axisMaxSliderX.value()
+        maximum = self._axisMaxSliderX.value()
         if minimum >= maximum:
             maximum = minimum + 1
-            self.m_axisMaxSliderX.setValue(maximum)
-        maxX = self.m_stepX * maximum + self.m_rangeMinX
+            self._axisMaxSliderX.setValue(maximum)
+        max_x = self._stepX * maximum + self._rangeMinX
 
-        self.setAxisXRange(minX, maxX)
+        self.set_axis_xrange(min_x, max_x)
 
-    def adjustXMax(self, maximum):
-        maxX = self.m_stepX * float(maximum) + self.m_rangeMinX
+    def adjust_xmax(self, maximum):
+        max_x = self._stepX * float(maximum) + self._rangeMinX
 
-        minimum = self.m_axisMinSliderX.value()
+        minimum = self._axisMinSliderX.value()
         if maximum <= minimum:
             minimum = maximum - 1
-            self.m_axisMinSliderX.setValue(minimum)
-        minX = self.m_stepX * minimum + self.m_rangeMinX
+            self._axisMinSliderX.setValue(minimum)
+        min_x = self._stepX * minimum + self._rangeMinX
 
-        self.setAxisXRange(minX, maxX)
+        self.set_axis_xrange(min_x, max_x)
 
-    def adjustZMin(self, minimum):
-        minZ = self.m_stepZ * float(minimum) + self.m_rangeMinZ
+    def adjust_zmin(self, minimum):
+        min_z = self._stepZ * float(minimum) + self._rangeMinZ
 
-        maximum = self.m_axisMaxSliderZ.value()
+        maximum = self._axisMaxSliderZ.value()
         if minimum >= maximum:
             maximum = minimum + 1
-            self.m_axisMaxSliderZ.setValue(maximum)
-        maxZ = self.m_stepZ * maximum + self.m_rangeMinZ
+            self._axisMaxSliderZ.setValue(maximum)
+        max_z = self._stepZ * maximum + self._rangeMinZ
 
-        self.setAxisZRange(minZ, maxZ)
+        self.set_axis_zrange(min_z, max_z)
 
-    def adjustZMax(self, maximum):
-        maxX = self.m_stepZ * float(maximum) + self.m_rangeMinZ
+    def adjust_zmax(self, maximum):
+        max_x = self._stepZ * float(maximum) + self._rangeMinZ
 
-        minimum = self.m_axisMinSliderZ.value()
+        minimum = self._axisMinSliderZ.value()
         if maximum <= minimum:
             minimum = maximum - 1
-            self.m_axisMinSliderZ.setValue(minimum)
-        minX = self.m_stepZ * minimum + self.m_rangeMinZ
+            self._axisMinSliderZ.setValue(minimum)
+        min_x = self._stepZ * minimum + self._rangeMinZ
 
-        self.setAxisZRange(minX, maxX)
+        self.set_axis_zrange(min_x, max_x)
 
-    def setAxisXRange(self, minimum, maximum):
-        self.m_graph.axisX().setRange(minimum, maximum)
+    def set_axis_xrange(self, minimum, maximum):
+        self._graph.axisX().setRange(minimum, maximum)
 
-    def setAxisZRange(self, minimum, maximum):
-        self.m_graph.axisZ().setRange(minimum, maximum)
+    def set_axis_zrange(self, minimum, maximum):
+        self._graph.axisZ().setRange(minimum, maximum)
 
     @Slot()
-    def changeTheme(self, theme):
-        self.m_graph.activeTheme().setType(Q3DTheme.Theme(theme))
+    def change_theme(self, theme):
+        self._graph.activeTheme().setType(Q3DTheme.Theme(theme))
 
-    def setBlackToYellowGradient(self):
+    def set_black_to_yellow_gradient(self):
         gr = QLinearGradient()
         gr.setColorAt(0.0, Qt.black)
         gr.setColorAt(0.33, Qt.blue)
         gr.setColorAt(0.67, Qt.red)
         gr.setColorAt(1.0, Qt.yellow)
 
-        series = self.m_graph.seriesList()[0]
+        series = self._graph.seriesList()[0]
         series.setBaseGradient(gr)
         series.setColorStyle(Q3DTheme.ColorStyleRangeGradient)
 
-    def setGreenToRedGradient(self):
+    def set_green_to_red_gradient(self):
         gr = QLinearGradient()
         gr.setColorAt(0.0, Qt.darkGreen)
         gr.setColorAt(0.5, Qt.yellow)
         gr.setColorAt(0.8, Qt.red)
         gr.setColorAt(1.0, Qt.darkRed)
 
-        series = self.m_graph.seriesList()[0]
+        series = self._graph.seriesList()[0]
         series.setBaseGradient(gr)
         series.setColorStyle(Q3DTheme.ColorStyleRangeGradient)
 
-    def toggleModeNone(self):
-        self.m_graph.setSelectionMode(QAbstract3DGraph.SelectionNone)
+    def toggle_mode_none(self):
+        self._graph.setSelectionMode(QAbstract3DGraph.SelectionNone)
 
-    def toggleModeItem(self):
-        self.m_graph.setSelectionMode(QAbstract3DGraph.SelectionItem)
+    def toggle_mode_item(self):
+        self._graph.setSelectionMode(QAbstract3DGraph.SelectionItem)
 
-    def toggleModeSliceRow(self):
-        self.m_graph.setSelectionMode(
+    def toggle_mode_slice_row(self):
+        self._graph.setSelectionMode(
             QAbstract3DGraph.SelectionItemAndRow | QAbstract3DGraph.SelectionSlice
         )
 
-    def toggleModeSliceColumn(self):
-        self.m_graph.setSelectionMode(
+    def toggle_mode_slice_column(self):
+        self._graph.setSelectionMode(
             QAbstract3DGraph.SelectionItemAndColumn | QAbstract3DGraph.SelectionSlice
         )
 
-    def setAxisMinSliderX(self, slider):
-        self.m_axisMinSliderX = slider
+    def set_axis_min_slider_x(self, slider):
+        self._axisMinSliderX = slider
 
-    def setAxisMaxSliderX(self, slider):
-        self.m_axisMaxSliderX = slider
+    def set_axis_max_slider_x(self, slider):
+        self._axisMaxSliderX = slider
 
-    def setAxisMinSliderZ(self, slider):
-        self.m_axisMinSliderZ = slider
+    def set_axis_min_slider_z(self, slider):
+        self._axisMinSliderZ = slider
 
-    def setAxisMaxSliderZ(self, slider):
-        self.m_axisMaxSliderZ = slider
+    def set_axis_max_slider_z(self, slider):
+        self._axisMaxSliderZ = slider
