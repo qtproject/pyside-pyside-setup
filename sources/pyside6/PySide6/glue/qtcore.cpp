@@ -47,6 +47,39 @@
 #include "glue/core_snippets_p.h"
 // @snippet include-pyside
 
+// @snippet qarg_helper
+
+// Helper for the Q_ARG/Q_RETURN_ARG functions, creating a meta type
+// and instance.
+struct QArgData
+{
+    operator bool() const { return metaType.isValid() && data != nullptr; }
+
+    QMetaType metaType;
+    void *data = nullptr;
+};
+
+QArgData qArgDataFromPyType(PyObject *t)
+{
+    auto *pyType = reinterpret_cast<PyTypeObject *>(t);
+    QArgData result;
+    result.metaType = PySide::qMetaTypeFromPyType(pyType);
+    if (!result.metaType.isValid()) {
+        PyErr_Format(PyExc_RuntimeError, "%s: Unable to find a QMetaType for \"%s\".",
+                     __FUNCTION__, pyType->tp_name);
+        return result;
+    }
+
+    result.data = result.metaType.create();
+    if (result.data == nullptr) {
+        PyErr_Format(PyExc_RuntimeError, "%s: Unable to create an instance of \"%s\" (%s).",
+                     __FUNCTION__, pyType->tp_name, result.metaType.name());
+        return result;
+    }
+    return result;
+}
+// @snippet qarg_helper
+
 // @snippet qsettings-value
 // If we enter the kwds, means that we have a defaultValue or
 // at least a type.
@@ -1582,3 +1615,121 @@ if (dataChar == nullptr) {
     Shiboken::Conversions::pythonToCppPointer(SbkPySide6_QtCoreTypes[SBK_QLOGGINGCATEGORY_IDX],
     pyArgs[0], &(category));
 // @snippet qloggingcategory_to_cpp
+
+// Q_ARG()-equivalent
+// @snippet q_arg
+const QArgData qArgData = qArgDataFromPyType(%1);
+if (!qArgData)
+    return nullptr;
+
+switch (qArgData.metaType.id()) {
+    case QMetaType::Bool:
+        *reinterpret_cast<bool *>(qArgData.data) = %2 == Py_True;
+        break;
+    case QMetaType::Int:
+        *reinterpret_cast<int *>(qArgData.data) = int(PyLong_AsLong(%2));
+        break;
+    case QMetaType::Double:
+        *reinterpret_cast<double *>(qArgData.data) = PyFloat_AsDouble(%2);
+        break;
+    case QMetaType::QString:
+        *reinterpret_cast<QString *>(qArgData.data) = PySide::pyUnicodeToQString(%2);
+        break;
+    default: {
+        Shiboken::Conversions::SpecificConverter converter(qArgData.metaType.name());
+        const auto type = converter.conversionType();
+        // Copy for values, Pointer for objects
+        if (type == Shiboken::Conversions::SpecificConverter::InvalidConversion) {
+            PyErr_Format(PyExc_RuntimeError, "%s: Unable to find converter for \"%s\".",
+                         __FUNCTION__, qArgData.metaType.name());
+            return nullptr;
+        }
+        converter.toCpp(%2, qArgData.data);
+    }
+}
+
+QtCoreHelper::QGenericArgumentHolder result(qArgData.metaType, qArgData.data);
+%PYARG_0 = %CONVERTTOPYTHON[QtCoreHelper::QGenericArgumentHolder](result);
+// @snippet q_arg
+
+// Q_RETURN_ARG()-equivalent
+// @snippet q_return_arg
+const QArgData qArgData = qArgDataFromPyType(%1);
+if (!qArgData)
+    return nullptr;
+
+QtCoreHelper::QGenericReturnArgumentHolder result(qArgData.metaType, qArgData.data);
+%PYARG_0 = %CONVERTTOPYTHON[QtCoreHelper::QGenericReturnArgumentHolder](result);
+// @snippet q_return_arg
+
+// invokeMethod(QObject *,const char *, QGenericArgument a0, a1, a2 )
+// @snippet qmetaobject-invokemethod-arg
+const bool result = %CPPSELF.invokeMethod(%1, %2, %3, %4, %5);
+%PYARG_0 = %CONVERTTOPYTHON[bool](result);
+// @snippet qmetaobject-invokemethod-arg
+
+// invokeMethod(QObject *,const char *,Qt::ConnectionType, QGenericArgument a0, a1, a2 )
+// @snippet qmetaobject-invokemethod-conn-type-arg
+qDebug() << __FUNCTION__ << %2;
+const bool result = %CPPSELF.invokeMethod(%1, %2, %3, %4, %5, %6);
+%PYARG_0 = %CONVERTTOPYTHON[bool](result);
+// @snippet qmetaobject-invokemethod-conn-type-arg
+
+// @snippet qmetaobject-invokemethod-helpers
+static PyObject *invokeMethodHelper(QObject *obj, const char *member, Qt::ConnectionType type,
+                                    const QtCoreHelper::QGenericReturnArgumentHolder &returnArg,
+                                    const QtCoreHelper::QGenericArgumentHolder &v1,
+                                    const QtCoreHelper::QGenericArgumentHolder &v2,
+                                    const QtCoreHelper::QGenericArgumentHolder &v3)
+
+{
+    const bool callResult = QMetaObject::invokeMethod(obj, member, type,
+                                                      returnArg, v1, v2, v3);
+    if (!callResult) {
+        PyErr_Format(PyExc_RuntimeError, "QMetaObject::invokeMethod(): Invocation of %s::%s() failed.",
+                     obj->metaObject()->className(), member);
+        return nullptr;
+    }
+
+    PyObject *result = nullptr;
+    const void *retData = returnArg.data();
+    const QMetaType metaType = returnArg.metaType();
+    switch (metaType.id()) {
+    case QMetaType::Bool:
+        result = *reinterpret_cast<const bool *>(retData) ? Py_True : Py_False;
+        Py_INCREF(result);
+        break;
+    case QMetaType::Int:
+        result = PyLong_FromLong(*reinterpret_cast<const int *>(retData));
+        break;
+    case QMetaType::Double:
+        result = PyFloat_FromDouble(*reinterpret_cast<const double *>(retData));
+        break;
+    case QMetaType::QString:
+        result = PySide::qStringToPyUnicode(*reinterpret_cast<const QString *>(retData));
+        break;
+    default: {
+        Shiboken::Conversions::SpecificConverter converter(metaType.name());
+        const auto type = converter.conversionType();
+        if (type == Shiboken::Conversions::SpecificConverter::InvalidConversion) {
+            PyErr_Format(PyExc_RuntimeError, "%s: Unable to find converter for \"%s\".",
+                         __FUNCTION__, metaType.name());
+            return nullptr;
+        }
+        result = converter.toPython(retData);
+    }
+    }
+    return result;
+}
+// @snippet qmetaobject-invokemethod-helpers
+
+// invokeMethod(QObject *,const char *, Qt::ConnectionType, QGenericReturnArgument,QGenericArgument a0, a1, a2 )
+// @snippet qmetaobject-invokemethod-conn-type-return-arg
+%PYARG_0 = invokeMethodHelper(%1, %2, %3, %4, %5, %6, %7);
+// @snippet qmetaobject-invokemethod-conn-type-return-arg
+
+// invokeMethod(QObject *,const char *, QGenericReturnArgument,QGenericArgument a0, a1, a2 )
+// @snippet qmetaobject-invokemethod-return-arg
+%PYARG_0 = invokeMethodHelper(%1, %2, Qt::AutoConnection, %3, %4, %5, %6);
+// @snippet qmetaobject-invokemethod-return-arg
+

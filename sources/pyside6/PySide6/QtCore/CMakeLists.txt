@@ -3,6 +3,7 @@ project(QtCore)
 set(QtCore_static_sources
     "${QtCore_SOURCE_DIR}/glue/qeasingcurve_glue.cpp"
     "${QtCore_SOURCE_DIR}/glue/core_snippets.cpp"
+    "${QtCore_SOURCE_DIR}/glue/qtcorehelper.cpp"
 )
 
 if(ENABLE_WIN)
@@ -151,6 +152,8 @@ ${QtCore_GEN_DIR}/qstringlistmodel_wrapper.cpp
 ${QtCore_GEN_DIR}/qsysinfo_wrapper.cpp
 ${QtCore_GEN_DIR}/qsystemsemaphore_wrapper.cpp
 ${QtCore_GEN_DIR}/qt_wrapper.cpp
+${QtCore_GEN_DIR}/qtcorehelper_qgenericargumentholder_wrapper.cpp
+${QtCore_GEN_DIR}/qtcorehelper_qgenericreturnargumentholder_wrapper.cpp
 ${QtCore_GEN_DIR}/qtcorehelper_qmutexlocker_wrapper.cpp
 ${QtCore_GEN_DIR}/qtemporarydir_wrapper.cpp
 ${QtCore_GEN_DIR}/qtemporaryfile_wrapper.cpp

@@ -3,7 +3,7 @@
 
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2022 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -40,8 +40,9 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import (QCoreApplication, QFile, QObject, QTimer,
-                            QSemaphore, Qt, Signal, Slot, SIGNAL)
+from PySide6.QtCore import (QCoreApplication, QFile, QMetaObject, QObject,
+                            QPoint, QTimer, QSemaphore, Qt, Signal, Slot,
+                            SIGNAL, Q_ARG, Q_RETURN_ARG)
 
 
 class Foo(QFile):
@@ -51,6 +52,35 @@ class Foo(QFile):
 class DynObject(QObject):
     def slot(self):
         pass
+
+
+class InvokeTester(QObject):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+    @Slot(int, int, result=int)
+    def add(self, a, b):
+        return a + b
+
+    @Slot(str, str, result=str)
+    def concatenate(self, a, b):
+        return a + b
+
+    @Slot(QPoint, result=int)
+    def manhattan_length(self, point):
+        return abs(point.x()) + abs(point.y())
+
+    @Slot(QPoint, QPoint, result=QPoint)
+    def add_points(self, point1, point2):
+        return point1 + point2
+
+    @Slot(QObject, result=str)
+    def object_name(self, o):
+        return o.objectName()
+
+    @Slot(QObject, result=QObject)
+    def first_child(self, o):
+        return o.children()[0]
 
 
 class SemaphoreSender(QObject):
@@ -130,7 +160,53 @@ class qmetaobject_test(unittest.TestCase):
             QCoreApplication.processEvents()
         self.assertEqual(sender.semaphore, receiver.semaphore)
 
+    # PYSIDE-1898,
+    def test_Invoke(self):
+        tester = InvokeTester()
+
+        # Primitive types
+        sum = QMetaObject.invokeMethod(tester, "add", Q_RETURN_ARG(int),
+                                       Q_ARG(int, 2), Q_ARG(int, 3))
+        self.assertEqual(sum, 5)
+
+        concatenated = QMetaObject.invokeMethod(tester, "concatenate",
+                                                Q_RETURN_ARG(str),
+                                                Q_ARG(str, "bla"),
+                                                Q_ARG(str, "bla"))
+        self.assertEqual(concatenated, "blabla")
+
+        # Wrapped type as in-parameter
+        point = QPoint(10, 20)
+        len = QMetaObject.invokeMethod(tester, "manhattan_length",
+                                       Q_RETURN_ARG(int),
+                                       Q_ARG(QPoint, point))
+        self.assertEqual(len, point.manhattanLength())
+
+        # Wrapped type as result
+        point2 = QPoint(30, 30)
+        point3 = QMetaObject.invokeMethod(tester, "add_points",
+                                          Q_RETURN_ARG(QPoint),
+                                          Q_ARG(QPoint, point),
+                                          Q_ARG(QPoint, point2))
+        self.assertEqual(point + point2, point3)
+
+        # Pass an object
+        o = QObject()
+        o.setObjectName("Foo")
+        name = QMetaObject.invokeMethod(tester, "object_name",
+                                        Q_RETURN_ARG(str),
+                                        Q_ARG(QObject, o))
+        self.assertEqual(name, o.objectName())
+
+        # Return an object
+        child = QObject(o)
+        child.setObjectName("Child")
+        c = QMetaObject.invokeMethod(tester, "first_child",
+                                     Q_RETURN_ARG(QObject),
+                                     Q_ARG(QObject, o))
+        self.assertTrue(c)
+        self.assertEqual(c, child)
+
 
 if __name__ == '__main__':
     unittest.main()
-

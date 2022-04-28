@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2020 The Qt Company Ltd.
+** Copyright (C) 2022 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -40,7 +40,10 @@
 #ifndef QTCOREHELPER_H
 #define QTCOREHELPER_H
 
+#include <QtCore/qsharedpointer.h>
 #include <QtCore/qmutex.h>
+#include <QtCore/qobjectdefs.h>
+
 
 namespace QtCoreHelper {
 
@@ -99,6 +102,51 @@ namespace QtCoreHelper {
     private:
         MutexLocker *m_mutexLocker = nullptr;
         RecursiveMutexLocker *m_recursiveMutexLocker = nullptr;
+    };
+
+    class QGenericArgumentData;
+
+    // Return value of function Q_ARG() to be passed to QMetaObject::invokeMethod.
+    // Frees the data if it is an allocated, primitive type.
+    class QGenericArgumentHolder {
+    public:
+        QGenericArgumentHolder();
+        explicit QGenericArgumentHolder(const QMetaType &type, const void *aData);
+        QGenericArgumentHolder(const QGenericArgumentHolder &);
+        QGenericArgumentHolder(QGenericArgumentHolder &&);
+        QGenericArgumentHolder &operator=(const QGenericArgumentHolder &);
+        QGenericArgumentHolder &operator=(QGenericArgumentHolder &&);
+        ~QGenericArgumentHolder();
+
+        operator QGenericArgument () const;
+
+        QMetaType metaType() const;
+        const void *data() const;
+
+    private:
+        QSharedPointer<QGenericArgumentData> d;
+    };
+
+    class QGenericReturnArgumentData;
+
+    // Return value of function Q_RETURN_ARG() to be passed to QMetaObject::invokeMethod.
+    // Frees the data if it is an allocated, primitive type.
+    class QGenericReturnArgumentHolder  {
+    public:
+        explicit QGenericReturnArgumentHolder(const QMetaType &type, void *aData);
+        QGenericReturnArgumentHolder(const QGenericReturnArgumentHolder &);
+        QGenericReturnArgumentHolder(QGenericReturnArgumentHolder &&);
+        QGenericReturnArgumentHolder &operator=(const QGenericReturnArgumentHolder &);
+        QGenericReturnArgumentHolder &operator=(QGenericReturnArgumentHolder &&);
+        ~QGenericReturnArgumentHolder();
+
+        operator QGenericReturnArgument () const;
+
+        QMetaType metaType() const;
+        const void *data() const;
+
+    private:
+        QSharedPointer<QGenericReturnArgumentData> d;
     };
 
 } // namespace QtCoreHelper
