@@ -332,6 +332,9 @@
   <value-type name="QKeyCombination"/>
 
   <value-type name="QMetaType">
+      <extra-includes>
+          <include file-name="pysidemetatype.h" location="global"/>
+      </extra-includes>
       <enum-type name="Type"/>
       <enum-type name="TypeFlag" flags="TypeFlags"/>
       <conversion-rule>

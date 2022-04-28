@@ -103,6 +103,7 @@ set(libpyside_HEADERS
     pysideqmetatype.h
     pysideqobject.h
     pysidemacros.h
+    pysideqmetatype.h
     signalmanager.h
     pyside.h
     pysidestaticstrings.h

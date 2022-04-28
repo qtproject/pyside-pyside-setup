@@ -40,6 +40,7 @@
 #include "pyside.h"
 #include "pysideinit.h"
 #include "pysidecleanup.h"
+#include "pysidemetatype.h"
 #include "pysideqapp.h"
 #include "pysideqobject.h"
 #include "pysideutils.h"
@@ -930,6 +931,19 @@ QObject *convertToQObject(PyObject *object, bool raiseError)
         return nullptr;
     }
     return reinterpret_cast<QObject*>(ptr);
+}
+
+QMetaType qMetaTypeFromPyType(PyTypeObject *pyType)
+{
+    if (Shiboken::String::checkType(pyType))
+        return QMetaType(QMetaType::QString);
+    if (pyType == &PyFloat_Type)
+        return QMetaType(QMetaType::Double);
+    if (pyType == &PyLong_Type)
+        return QMetaType(QMetaType::Int);
+    if (pyType == SbkObjectType_TypeF())
+        return QMetaType::fromName(Shiboken::ObjectType::getOriginalName(pyType));
+    return QMetaType::fromName(pyType->tp_name);
 }
 
 } //namespace PySide

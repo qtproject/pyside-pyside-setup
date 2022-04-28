@@ -129,16 +129,7 @@ else {
 
 // @snippet conversion-pytypeobject-qmetatype
 auto *pyType = reinterpret_cast<PyTypeObject *&>(%in);
-if (Shiboken::String::checkType(pyType))
-    %out = QMetaType(QMetaType::QString);
-else if (%in == reinterpret_cast<PyObject *>(&PyFloat_Type))
-    %out = QMetaType(QMetaType::Double);
-else if (%in == reinterpret_cast<PyObject *>(&PyLong_Type))
-    %out = QMetaType(QMetaType::Int);
-else if (Py_TYPE(%in) == SbkObjectType_TypeF())
-    %out = QMetaType::fromName(Shiboken::ObjectType::getOriginalName(pyType));
-else
-    %out = QMetaType::fromName(pyType->tp_name);
+%out = PySide::qMetaTypeFromPyType(pyType);
 // @snippet conversion-pytypeobject-qmetatype
 
 // @snippet conversion-qmetatype-pytypeobject
