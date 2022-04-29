@@ -47,6 +47,7 @@
 #include <QtCore/QtGlobal>
 
 QT_FORWARD_DECLARE_CLASS(QString)
+QT_FORWARD_DECLARE_CLASS(QStringView)
 
 namespace PySide
 {
@@ -57,10 +58,13 @@ namespace PySide
 /// \return Returns true if self object inherits from class_name, otherwise returns false
 PYSIDE_API bool inherits(PyTypeObject *self, const char *class_name);
 
-/// Given A PyObject repesenting Unicode data, returns an equivalent QString.
+/// Given A PyObject representing Unicode data, returns an equivalent QString.
 PYSIDE_API QString pyUnicodeToQString(PyObject *str);
 
-/// Given A PyObject repesenting ASCII or Unicode data, returns an equivalent QString.
+/// Given a QString, return the PyObject repeesenting Unicode data.
+PYSIDE_API PyObject *qStringToPyUnicode(QStringView s);
+
+/// Given A PyObject representing ASCII or Unicode data, returns an equivalent QString.
 PYSIDE_API QString pyStringToQString(PyObject *str);
 
 /// Provide an efficient, correct PathLike interface.

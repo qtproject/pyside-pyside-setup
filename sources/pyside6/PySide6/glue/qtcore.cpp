@@ -1416,13 +1416,11 @@ return PyLong_FromUnsignedLong(%in);
 // @snippet return-pylong-quintptr
 
 // @snippet return-pyunicode
-QByteArray ba = %in.toUtf8();
-return PyUnicode_FromStringAndSize(ba.constData(), ba.size());
+return PySide::qStringToPyUnicode(%in);
 // @snippet return-pyunicode
 
 // @snippet return-pyunicode-from-qanystringview
-QByteArray ba = %in.toString().toUtf8();
-return PyUnicode_FromStringAndSize(ba.constData(), ba.size());
+return PySide::qStringToPyUnicode(%in.toString());
 // @snippet return-pyunicode-from-qanystringview
 
 // @snippet return-pyunicode-qchar

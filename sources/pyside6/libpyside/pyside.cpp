@@ -722,6 +722,12 @@ QString pyUnicodeToQString(PyObject *str)
     return QString::fromUcs4(reinterpret_cast<const char32_t *>(data), len);
 }
 
+PyObject *qStringToPyUnicode(QStringView s)
+{
+    const QByteArray ba = s.toUtf8();
+    return PyUnicode_FromStringAndSize(ba.constData(), ba.size());
+}
+
 // Inspired by Shiboken::String::toCString;
 QString pyStringToQString(PyObject *str)
 {
