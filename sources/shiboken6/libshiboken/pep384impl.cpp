@@ -367,7 +367,7 @@ static const char *utf8FastPath(PyObject *str)
     if (PyUnicode_GetLength(str) == 0)
         return "";
     auto *asciiObj = reinterpret_cast<PepASCIIObject *>(str);
-    if (asciiObj->state.kind != PepUnicode_1BYTE_KIND)
+    if (asciiObj->state.kind != PepUnicode_1BYTE_KIND || asciiObj->state.compact == 0)
         return nullptr; // Empirical: PyCompactUnicodeObject.utf8 is only valid for 1 byte
     if (asciiObj->state.ascii) {
         auto *data = asciiObj + 1;
