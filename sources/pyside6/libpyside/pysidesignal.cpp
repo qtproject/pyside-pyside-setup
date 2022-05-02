@@ -170,6 +170,14 @@ PyTypeObject *PySideSignalTypeF(void)
     return type;
 }
 
+static PyObject *signalInstanceRepr(PyObject *self)
+{
+    auto *data = reinterpret_cast<PySideSignalInstance *>(self);
+    auto *typeName = Py_TYPE(self)->tp_name;
+    return Shiboken::String::fromFormat("<%s %s at %p>", typeName,
+                                        data->d->signature.constData(), self);
+}
+
 static PyMethodDef SignalInstance_methods[] = {
     {"connect", reinterpret_cast<PyCFunction>(signalInstanceConnect),
                 METH_VARARGS|METH_KEYWORDS, nullptr},
@@ -182,6 +190,7 @@ static PyType_Slot PySideSignalInstanceType_slots[] = {
     {Py_mp_subscript,   reinterpret_cast<void *>(signalInstanceGetItem)},
     {Py_tp_call,        reinterpret_cast<void *>(signalInstanceCall)},
     {Py_tp_methods,     reinterpret_cast<void *>(SignalInstance_methods)},
+    {Py_tp_repr,        reinterpret_cast<void *>(signalInstanceRepr)},
     {Py_tp_new,         reinterpret_cast<void *>(PyType_GenericNew)},
     {Py_tp_free,        reinterpret_cast<void *>(signalInstanceFree)},
     {Py_tp_dealloc,     reinterpret_cast<void *>(Sbk_object_dealloc)},
