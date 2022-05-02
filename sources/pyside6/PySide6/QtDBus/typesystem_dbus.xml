@@ -66,6 +66,14 @@
                         return-type="QDBusMessage"/>
       <declare-function signature="call(QDBus::CallMode,const QString&amp;,const QVariant&amp;,const QVariant&amp;,const QVariant&amp;,const QVariant&amp;)"
                         return-type="QDBusMessage"/>
+      <declare-function signature="call(QDBus::CallMode,const QString&amp;,const QVariant&amp;,const QVariant&amp;,const QVariant&amp;,const QVariant&amp;,const QVariant&amp;)"
+                        return-type="QDBusMessage"/>
+      <declare-function signature="call(QDBus::CallMode,const QString&amp;,const QVariant&amp;,const QVariant&amp;,const QVariant&amp;,const QVariant&amp;,const QVariant&amp;,const QVariant&amp;)"
+                        return-type="QDBusMessage"/>
+      <declare-function signature="call(QDBus::CallMode,const QString&amp;,const QVariant&amp;,const QVariant&amp;,const QVariant&amp;,const QVariant&amp;,const QVariant&amp;,const QVariant&amp;,const QVariant&amp;)"
+                        return-type="QDBusMessage"/>
+      <declare-function signature="call(QDBus::CallMode,const QString&amp;,const QVariant&amp;,const QVariant&amp;,const QVariant&amp;,const QVariant&amp;,const QVariant&amp;,const QVariant&amp;,const QVariant&amp;,const QVariant&amp;)"
+                        return-type="QDBusMessage"/>
     </object-type>
     <value-type name="QDBusArgument">
       <enum-type name="ElementType"/>
