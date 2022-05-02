@@ -498,6 +498,12 @@ static bool hasHashFunction(const AbstractMetaClass *c)
            || c->hasHashFunction();
 }
 
+static bool needsTypeDiscoveryFunction(const AbstractMetaClass *c)
+{
+    return c->baseClass() != nullptr
+           && (c->isPolymorphic() || !c->typeEntry()->polymorphicIdValue().isEmpty());
+}
+
 /// Function used to write the class generated binding code on the buffer
 /// \param s the output buffer
 /// \param classContext the pointer to metaclass information
@@ -780,7 +786,7 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
     writeClassDefinition(s, metaClass, classContext);
     s << '\n';
 
-    if (metaClass->isPolymorphic() && metaClass->baseClass())
+    if (needsTypeDiscoveryFunction(metaClass))
         writeTypeDiscoveryFunction(s, metaClass);
 
     writeFlagsNumberMethodsDefinitions(s, classEnums);
@@ -5917,7 +5923,7 @@ void CppGenerator::writeClassRegister(TextStream &s,
     }
 
     // Set typediscovery struct or fill the struct of another one
-    if (metaClass->isPolymorphic() && metaClass->baseClass()) {
+    if (needsTypeDiscoveryFunction(metaClass)) {
         s << "Shiboken::ObjectType::setTypeDiscoveryFunctionV2(" << cpythonTypeName(metaClass)
             << ", &" << cpythonBaseName(metaClass) << "_typeDiscovery);\n\n";
     }
