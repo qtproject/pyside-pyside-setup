@@ -6958,18 +6958,19 @@ dbg << )";
     s << CPP_SELF_VAR << R"(;
 buffer.close();
 QByteArray str = buffer.data();
-int idx = str.indexOf('(');
+const auto idx = str.indexOf('(');
+auto *typeName = Py_TYPE(self)->tp_name;
 if (idx >= 0)
 )";
     {
         Indentation indent(s);
-        s << "str.replace(0, idx, Py_TYPE(self)->tp_name);\n";
+        s << "str.replace(0, idx, typeName);\n";
     }
     s << "str = str.trimmed();\n"
         << "PyObject *mod = PyDict_GetItem(Py_TYPE(self)->tp_dict, Shiboken::PyMagicName::module());\n";
     // PYSIDE-595: The introduction of heap types has the side effect that the module name
     // is always prepended to the type name. Therefore the strchr check:
-    s << "if (mod && !strchr(str, '.'))\n";
+    s << "if (mod != nullptr && std::strchr(typeName, '.') == nullptr)\n";
     {
         Indentation indent(s);
         s << "return Shiboken::String::fromFormat(\"<%s.%s at %p>\", Shiboken::String::toCString(mod), str.constData(), self);\n";
