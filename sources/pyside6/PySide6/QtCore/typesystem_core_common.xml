@@ -3183,6 +3183,8 @@
     <enum-type name="Sizes"/>
   </object-type>
 
+  <object-type name="QLoggingCategory"/>
+
   <suppress-warning text="^.*enum 'Qt::Initialization' does not have a type entry.*$"/>
   <suppress-warning text="^.*Enum 'QRandomGenerator::System'.*does not have a type entry.*$"/>
 
