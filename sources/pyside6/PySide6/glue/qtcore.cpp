@@ -1596,3 +1596,8 @@ if (dataChar == nullptr) {
 }
 // @snippet qdatastream-read-bytes
 
+// @snippet qloggingcategory_to_cpp
+    QLoggingCategory *category{nullptr};
+    Shiboken::Conversions::pythonToCppPointer(SbkPySide6_QtCoreTypes[SBK_QLOGGINGCATEGORY_IDX],
+    pyArgs[0], &(category));
+// @snippet qloggingcategory_to_cpp
