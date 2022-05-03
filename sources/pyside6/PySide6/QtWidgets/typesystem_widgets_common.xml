@@ -88,7 +88,10 @@
   <function signature="qDrawPlainRect(QPainter*,int,int,int,int,const QColor&amp;,int,const QBrush*)"/>
   <function signature="qDrawPlainRect(QPainter*,const QRect&amp;,const QColor&amp;,int,const QBrush*)"/>
 
-  <object-type name="QStyleOption" polymorphic-id-expression="%1-&gt;type == QStyleOption::SO_Default">
+  <object-type name="QStyleOption" polymorphic-id-expression="%1-&gt;type == QStyleOption::SO_Default"
+               polymorphic-name-function="styleOptionType">
+    <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp"
+                 snippet="qstyleoption-typename"/>
     <enum-type name="OptionType"/>
     <enum-type name="StyleOptionType"/>
     <enum-type name="StyleOptionVersion"/>

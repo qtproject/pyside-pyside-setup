@@ -1728,6 +1728,8 @@ void TypeSystemParser::applyComplexTypeAttributes(const ConditionalStreamReader 
             ctype->setTargetLangName(attributes->takeAt(i).value().toString());
         } else if (name == u"polymorphic-base") {
             ctype->setPolymorphicIdValue(attributes->takeAt(i).value().toString());
+        } else if (name == u"polymorphic-name-function") {
+            ctype->setPolymorphicNameFunction(attributes->takeAt(i).value().toString());
         } else if (name == u"polymorphic-id-expression") {
             ctype->setPolymorphicIdValue(attributes->takeAt(i).value().toString());
         } else if (name == copyableAttribute()) {

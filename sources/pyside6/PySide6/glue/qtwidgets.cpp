@@ -719,6 +719,63 @@ QAction *cppResult = %CPPSELF.exec(%1, %2, %3, %4);
 %PYARG_0 = %CONVERTTOPYTHON[QAction*](cppResult);
 // @snippet qmenu-exec-3
 
+// @snippet qstyleoption-typename
+const char *styleOptionType(const QStyleOption *o)
+{
+    switch (o->type) {
+    case QStyleOption::SO_Default:
+        break;
+    case QStyleOption::SO_FocusRect:
+        return "StyleOptionFocusRect";
+    case QStyleOption::SO_Button:
+        return "StyleOptionButton";
+    case QStyleOption::SO_Tab:
+        return "StyleOptionTab";
+    case QStyleOption::SO_MenuItem:
+        return "StyleOptionMenuItem";
+    case QStyleOption::SO_Frame:
+        return "StyleOptionFrame";
+    case QStyleOption::SO_ProgressBar:
+        return "StyleOptionProgressBar";
+    case QStyleOption::SO_ToolBox:
+        return "StyleOptionToolBox";
+    case QStyleOption::SO_Header:
+        return "StyleOptionHeader";
+    case QStyleOption::SO_DockWidget:
+        return "StyleOptionDockWidget";
+    case QStyleOption::SO_ViewItem:
+        return "StyleOptionViewItem";
+    case QStyleOption::SO_TabWidgetFrame:
+        return "StyleOptionTabWidgetFrame";
+    case QStyleOption::SO_TabBarBase:
+        return "StyleOptionTabBarBase";
+    case QStyleOption::SO_RubberBand:
+        return "StyleOptionRubberBand";
+    case QStyleOption::SO_ToolBar:
+        return "StyleOptionToolBar";
+    case QStyleOption::SO_GraphicsItem:
+        return "StyleOptionGraphicsItem";
+    case QStyleOption::SO_Slider:
+        return "StyleOptionSlider";
+    case QStyleOption::SO_SpinBox:
+        return "StyleOptionSpinBox";
+    case QStyleOption::SO_ToolButton:
+        return "StyleOptionToolButton";
+    case QStyleOption::SO_ComboBox:
+        return "StyleOptionComboBox";
+    case QStyleOption::SO_TitleBar:
+        return "StyleOptionTitleBar";
+    case QStyleOption::SO_GroupBox:
+        return "StyleOptionGroupBox";
+    case QStyleOption::SO_SizeGrip:
+        return "StyleOptionSizeGrip";
+    default:
+        break;
+    }
+    return "QStyleOption";
+}
+// @snippet qstyleoption-typename
+
 /*********************************************************************
  * CONVERSIONS
  ********************************************************************/

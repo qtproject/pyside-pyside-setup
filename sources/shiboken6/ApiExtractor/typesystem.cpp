@@ -1242,6 +1242,7 @@ public:
     uint m_deleteInMainThread : 1;
 
     QString m_polymorphicIdValue;
+    QString m_polymorphicNameFunction;
     QString m_targetType;
     ComplexTypeEntry::TypeFlags m_typeFlags;
     ComplexTypeEntry::CopyableFlag m_copyableFlag = ComplexTypeEntry::Unknown;
@@ -1419,6 +1420,18 @@ QString ComplexTypeEntry::polymorphicIdValue() const
 {
     S_D(const ComplexTypeEntry);
     return d->m_polymorphicIdValue;
+}
+
+QString ComplexTypeEntry::polymorphicNameFunction() const
+{
+    S_D(const ComplexTypeEntry);
+    return d->m_polymorphicNameFunction;
+}
+
+void ComplexTypeEntry::setPolymorphicNameFunction(const QString &n)
+{
+    S_D(ComplexTypeEntry);
+    d->m_polymorphicNameFunction = n;
 }
 
 QString ComplexTypeEntry::targetType() const
