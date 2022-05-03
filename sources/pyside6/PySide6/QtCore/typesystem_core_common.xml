@@ -3192,6 +3192,33 @@
 
   <object-type name="QLoggingCategory"/>
 
+  <add-function signature="qCDebug(PyObject *, const char *)">
+    <extra-includes>
+    <include file-name="qloggingcategory.h" location="global" />
+    </extra-includes>
+    <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qloggingcategory_to_cpp">
+      qCDebug(*category, %2);
+    </inject-code>
+  </add-function>
+
+  <add-function signature="qCCritical(PyObject *, const char *)">
+    <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qloggingcategory_to_cpp">
+      qCCritical(*category, %2);
+    </inject-code>
+  </add-function>
+
+  <add-function signature="qCInfo(PyObject *, const char *)">
+    <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qloggingcategory_to_cpp">
+      qCInfo(*category, %2);
+    </inject-code>
+  </add-function>
+
+  <add-function signature="qCWarning(PyObject *, const char *)">
+    <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qloggingcategory_to_cpp">
+      qCWarning(*category, %2);
+    </inject-code>
+  </add-function>
+
   <suppress-warning text="^.*enum 'Qt::Initialization' does not have a type entry.*$"/>
   <suppress-warning text="^.*Enum 'QRandomGenerator::System'.*does not have a type entry.*$"/>
 
