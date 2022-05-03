@@ -270,7 +270,9 @@ public:
     ComplexTypeEntry *typeEntry();
     void setTypeEntry(ComplexTypeEntry *type);
 
-    void setHasHashFunction(bool on);
+    /// Returns the global hash function as found by the code parser
+    QString hashFunction() const;
+    void setHashFunction(const QString &);
 
     /// Returns whether the class has a qHash() overload. Currently unused,
     /// specified in type system.

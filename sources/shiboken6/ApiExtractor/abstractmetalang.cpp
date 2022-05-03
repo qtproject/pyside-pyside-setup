@@ -66,7 +66,6 @@ public:
           m_hasPrivateDestructor(false),
           m_hasProtectedDestructor(false),
           m_hasVirtualDestructor(false),
-          m_hasHashFunction(false),
           m_isTypeDef(false),
           m_hasToStringCapability(false),
           m_valueTypeWithCopyConstructorOnly(false),
@@ -105,7 +104,6 @@ public:
     uint m_hasPrivateDestructor : 1;
     uint m_hasProtectedDestructor : 1;
     uint m_hasVirtualDestructor : 1;
-    uint m_hasHashFunction : 1;
     uint m_isTypeDef : 1;
     uint m_hasToStringCapability : 1;
     uint m_valueTypeWithCopyConstructorOnly : 1;
@@ -125,6 +123,7 @@ public:
     AbstractMetaEnumList m_enums;
     QList<QPropertySpec> m_propertySpecs;
     AbstractMetaClassCList m_innerClasses;
+    QString m_hashFunction;
 
     AbstractMetaFunctionCList m_externalConversionOperators;
 
@@ -644,14 +643,19 @@ void AbstractMetaClass::setTypeEntry(ComplexTypeEntry *type)
     d->m_typeEntry = type;
 }
 
-void AbstractMetaClass::setHasHashFunction(bool on)
+QString AbstractMetaClass::hashFunction() const
 {
-    d->m_hasHashFunction = on;
+    return d->m_hashFunction;
+}
+
+void AbstractMetaClass::setHashFunction(const QString &f)
+{
+    d->m_hashFunction = f;
 }
 
 bool AbstractMetaClass::hasHashFunction() const
 {
-    return d->m_hasHashFunction;
+    return !d->m_hashFunction.isEmpty();
 }
 
 // Search whether a functions is a property setter/getter/reset

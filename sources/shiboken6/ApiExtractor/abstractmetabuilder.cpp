@@ -225,10 +225,12 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::argumentToClass(const ArgumentMod
 void AbstractMetaBuilderPrivate::registerHashFunction(const FunctionModelItem &function_item,
                                                       AbstractMetaClass *currentClass)
 {
+    if (function_item->isDeleted())
+        return;
     ArgumentList arguments = function_item->arguments();
-    if (arguments.size() == 1) {
+    if (arguments.size() >= 1) { // (Class, Hash seed).
         if (AbstractMetaClass *cls = argumentToClass(arguments.at(0), currentClass))
-            cls->setHasHashFunction(true);
+            cls->setHashFunction(function_item->name());
     }
 }
 
@@ -3190,7 +3192,7 @@ void AbstractMetaBuilderPrivate::inheritTemplateFunctions(AbstractMetaClass *sub
     auto templateClass = subclass->templateBaseClass();
 
     if (subclass->isTypeDef()) {
-        subclass->setHasHashFunction(templateClass->hasHashFunction());
+        subclass->setHashFunction(templateClass->hashFunction());
         subclass->setHasNonPrivateConstructor(templateClass->hasNonPrivateConstructor());
         subclass->setHasPrivateDestructor(templateClass->hasPrivateDestructor());
         subclass->setHasProtectedDestructor(templateClass->hasProtectedDestructor());

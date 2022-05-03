@@ -492,6 +492,12 @@ static void writePyMethodDefs(TextStream &s, const QString &className,
         << "};\n\n";
 }
 
+static bool hasHashFunction(const AbstractMetaClass *c)
+{
+    return !c->typeEntry()->hashFunction().isEmpty()
+           || c->hasHashFunction();
+}
+
 /// Function used to write the class generated binding code on the buffer
 /// \param s the output buffer
 /// \param classContext the pointer to metaclass information
@@ -764,7 +770,7 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
 
     s << closeExternC;
 
-    if (!typeEntry->hashFunction().isEmpty())
+    if (hasHashFunction(metaClass))
         writeHashFunction(s, classContext);
 
     // Write tp_traverse and tp_clear functions.
@@ -907,7 +913,7 @@ void CppGenerator::generateSmartPointerClass(TextStream &s, const GeneratorConte
 
     s << closeExternC;
 
-    if (!typeEntry->hashFunction().isEmpty())
+    if (hasHashFunction(metaClass))
         writeHashFunction(s, classContext);
 
     // Write tp_traverse and tp_clear functions.
@@ -4530,7 +4536,7 @@ void CppGenerator::writeClassDefinition(TextStream &s,
     s << "// Class Definition -----------------------------------------------\n"
          "extern \"C\" {\n";
 
-    if (!metaClass->typeEntry()->hashFunction().isEmpty())
+    if (hasHashFunction(metaClass))
         tp_hash = u'&' + cpythonBaseName(metaClass) + u"_HashFunc"_s;
 
     const auto callOp = metaClass->findFunction(u"operator()");
@@ -6855,11 +6861,19 @@ void CppGenerator::writeHashFunction(TextStream &s, const GeneratorContext &cont
     const AbstractMetaClass *metaClass = context.metaClass();
     const char hashType[] = "Py_hash_t";
     s << "static " << hashType << ' ' << cpythonBaseName(metaClass)
-        << "_HashFunc(PyObject *self) {\n" << indent;
+        << "_HashFunc(PyObject *self)\n{\n" << indent;
     writeCppSelfDefinition(s, context);
-    s << "return " << hashType << '('
-        << metaClass->typeEntry()->hashFunction() << '(';
-    if (!metaClass->isObjectType())
+
+    bool deref = true;
+    QString name = metaClass->typeEntry()->hashFunction();
+    if (name.isEmpty())
+        name = metaClass->hashFunction();
+    else
+        deref = !metaClass->isObjectType();
+    Q_ASSERT(!name.isEmpty());
+
+    s << "return " << hashType << '(' << name << '(';
+    if (deref)
         s << '*';
     s << CPP_SELF_VAR << "));\n"
         << outdent << "}\n\n";
