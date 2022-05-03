@@ -5995,7 +5995,10 @@ void CppGenerator::writeInitQtMetaTypeFunctionBody(TextStream &s, const Generato
         // Qt metatypes are registered only on their first use, so we do this now.
         bool canBeValue = false;
         if (metaClass->isObjectType()) {
-            if (!metaClass->isQObject())
+            // Generate meta types for slot usage, but not for polymorphic
+            // classes (see PYSIDE-1887, registering // QGraphicsItemGroup*
+            // breaks QGraphicsItem::itemChange()). FIXME: Make configureable.
+            if (!metaClass->isQObject() && !metaClass->isPolymorphic())
                 s << "qRegisterMetaType< ::" << className << " *>();\n";
         } else {
             // check if there's a empty ctor
