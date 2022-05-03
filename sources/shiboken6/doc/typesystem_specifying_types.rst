@@ -392,6 +392,8 @@ object-type
              hash-function="..."
              isNull ="yes | no"
              operator-bool="yes | no"
+             polymorphic-id-expression="..."
+             polymorphic-name-function="..."
              private="yes | no"
              stream="yes | no"
              revision="..."
@@ -438,6 +440,19 @@ object-type
     The *optional* **isNull** and **operator-bool** attributes can be used
     to override the command line setting for generating bool casts
     (see :ref:`bool-cast`).
+
+    The *optional* **polymorphic-id-expression** attribute specifies an
+    expression checking whether a base class pointer is of the matching
+    type. For example, in a ``virtual eventHandler(BaseEvent *e)``
+    function, this is used to construct a Python wrapper matching
+    the derived class (for example, a ``MouseEvent`` or similar).
+
+    The *optional* **polymorphic-name-function** specifies the name of a
+    function returning the type name of a derived class on the base class
+    type entry. Normally, ``typeid(ptr).name()`` is used for this.
+    However, this fails if the type hierarchy does not have virtual functions.
+    In this case, a function is required which typically decides depending
+    on some type enumeration.
 
 interface-type
 ^^^^^^^^^^^^^^

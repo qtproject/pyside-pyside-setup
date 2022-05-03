@@ -1608,8 +1608,14 @@ void CppGenerator::writeConverterFunctions(TextStream &s, const AbstractMetaClas
         c << "}\n"
             << "bool changedTypeName = false;\n"
             << "auto tCppIn = reinterpret_cast<const " << typeName << R"( *>(cppIn);
-const char *typeName = typeid(*tCppIn).name();
-auto sbkType = Shiboken::ObjectType::typeForTypeName(typeName);
+const char *typeName = )";
+
+        const QString nameFunc = metaClass->typeEntry()->polymorphicNameFunction();
+        if (nameFunc.isEmpty())
+            c << "typeid(*tCppIn).name();\n";
+        else
+            c << nameFunc << "(tCppIn);\n";
+        c << R"(auto sbkType = Shiboken::ObjectType::typeForTypeName(typeName);
 if (sbkType && Shiboken::ObjectType::hasSpecialCastFunction(sbkType)) {
     typeName = typeNameOf(tCppIn);
     changedTypeName = true;

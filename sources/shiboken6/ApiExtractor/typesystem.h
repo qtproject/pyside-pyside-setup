@@ -597,6 +597,9 @@ public:
     void setPolymorphicIdValue(const QString &value);
     QString polymorphicIdValue() const;
 
+    QString polymorphicNameFunction() const;
+    void setPolymorphicNameFunction(const QString &n);
+
     QString targetType() const;
     void setTargetType(const QString &code);
 
