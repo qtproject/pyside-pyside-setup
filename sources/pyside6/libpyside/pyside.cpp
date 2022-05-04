@@ -947,7 +947,7 @@ QMetaType qMetaTypeFromPyType(PyTypeObject *pyType)
         return QMetaType(QMetaType::Double);
     if (pyType == &PyLong_Type)
         return QMetaType(QMetaType::Int);
-    if (pyType == SbkObjectType_TypeF())
+    if (Shiboken::ObjectType::checkType(pyType))
         return QMetaType::fromName(Shiboken::ObjectType::getOriginalName(pyType));
     return QMetaType::fromName(pyType->tp_name);
 }
