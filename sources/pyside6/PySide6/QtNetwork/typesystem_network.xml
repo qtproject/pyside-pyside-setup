@@ -214,7 +214,7 @@
         <enum-type name="NetworkError"/>
     </object-type>
 
-    <value-type name="QHostAddress" hash-function="qHash">
+    <value-type name="QHostAddress">
         <enum-type name="ConversionModeFlag" flags="ConversionMode" since="5.8"/>
         <enum-type name="SpecialAddress"/>
         <!-- ### QHostAddress(QIPv6Address) does this -->

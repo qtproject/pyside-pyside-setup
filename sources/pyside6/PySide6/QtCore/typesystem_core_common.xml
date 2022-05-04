@@ -1245,7 +1245,7 @@
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qtime-topython"/>
     </add-function>
   </value-type>
-  <value-type name="QPersistentModelIndex" hash-function="qHash">
+  <value-type name="QPersistentModelIndex">
     <modify-function signature="internalPointer()const">
         <inject-code class="target" position="beginning">
             <insert-template name="return_internal_pointer" />
@@ -1414,7 +1414,7 @@
         </inject-code>
     </modify-function>
   </value-type>
-  <value-type name="QBitArray" hash-function="qHash" >
+  <value-type name="QBitArray">
     <add-function signature="__len__">
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qbitarray-len"/>
     </add-function>
@@ -1859,7 +1859,7 @@
     </add-function>
   </value-type>
 
-  <value-type name="QByteArray" hash-function="qHash">
+  <value-type name="QByteArray">
     <enum-type name="Base64Option" flags="Base64Options" since="5.2"/>
     <enum-type name="Base64DecodingStatus" since="5.15"/>
     <value-type name="FromBase64Result" since="5.15"/>
@@ -2893,7 +2893,7 @@
     <!-- Removed because it expect QString to be mutable -->
     <modify-function signature="QXmlStreamWriter(QString*)" remove="all"/>
   </object-type>
-  <value-type name="QModelIndex" hash-function="qHash">
+  <value-type name="QModelIndex">
     <modify-function signature="internalPointer()const">
         <inject-code class="target" position="beginning">
             <insert-template name="return_internal_pointer" />
