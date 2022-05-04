@@ -605,6 +605,9 @@ public:
     CopyableFlag copyable() const;
     void setCopyable(CopyableFlag flag);
 
+    TypeSystem::QtMetaTypeRegistration qtMetaTypeRegistration() const;
+    void setQtMetaTypeRegistration(TypeSystem::QtMetaTypeRegistration r);
+
     QString hashFunction() const;
     void setHashFunction(const QString &hashFunction);
 

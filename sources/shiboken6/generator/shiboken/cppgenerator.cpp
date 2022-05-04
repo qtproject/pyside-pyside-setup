@@ -39,6 +39,7 @@
 #include <abstractmetafield.h>
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
+#include <abstractmetalang_helpers.h>
 #include <messages.h>
 #include <modifications.h>
 #include <propertyspec.h>
@@ -5981,6 +5982,53 @@ void CppGenerator::writeStaticFieldInitialization(TextStream &s, const AbstractM
     s << '\n' << outdent << "}\n";
 }
 
+enum class QtRegisterMetaType
+{
+    None, Pointer, Value
+};
+
+static bool hasQtMetaTypeRegistrationSpec(const AbstractMetaClass *c)
+{
+    return c->typeEntry()->qtMetaTypeRegistration() !=
+           TypeSystem::QtMetaTypeRegistration::Unspecified;
+}
+
+// Returns if and how to register the Qt meta type. By default, "pointer" for
+// non-QObject object types and "value" for non-abstract, default-constructible
+// value types.
+QtRegisterMetaType qtMetaTypeRegistration(const AbstractMetaClass *c)
+{
+    if (c->isNamespace())
+        return QtRegisterMetaType::None;
+
+    // Specified in type system?
+    const bool isObject = c->isObjectType();
+    switch (c->typeEntry()->qtMetaTypeRegistration()) {
+    case TypeSystem::QtMetaTypeRegistration::Disabled:
+        return QtRegisterMetaType::None;
+    case TypeSystem::QtMetaTypeRegistration::Enabled:
+    case TypeSystem::QtMetaTypeRegistration::BaseEnabled:
+        return isObject ? QtRegisterMetaType::Pointer : QtRegisterMetaType::Value;
+    case TypeSystem::QtMetaTypeRegistration::Unspecified:
+        break;
+    }
+
+    // Is there a "base" specification in some base class, meaning only the
+    // base class is to be registered?
+    if (auto *base = recurseClassHierarchy(c, hasQtMetaTypeRegistrationSpec)) {
+        const auto baseSpec = base->typeEntry()->qtMetaTypeRegistration();
+        if (baseSpec == TypeSystem::QtMetaTypeRegistration::BaseEnabled)
+            return QtRegisterMetaType::None;
+    }
+
+    // Default.
+    if (isObject)
+        return c->isQObject() ? QtRegisterMetaType::None : QtRegisterMetaType::Pointer;
+
+    return !c->isAbstract() && c->isDefaultConstructible()
+        ? QtRegisterMetaType::Value : QtRegisterMetaType::None;
+}
+
 void CppGenerator::writeInitQtMetaTypeFunctionBody(TextStream &s, const GeneratorContext &context)
 {
     const AbstractMetaClass *metaClass = context.metaClass();
@@ -6005,30 +6053,17 @@ void CppGenerator::writeInitQtMetaTypeFunctionBody(TextStream &s, const Generato
         className = context.preciseType().cppSignature();
 
     // Register meta types for signal/slot connections to work
-    if (!metaClass->isNamespace() && !metaClass->isAbstract())  {
-        // Qt metatypes are registered only on their first use, so we do this now.
-        bool canBeValue = false;
-        if (metaClass->isObjectType()) {
-            // Generate meta types for slot usage, but not for polymorphic
-            // classes (see PYSIDE-1887, registering // QGraphicsItemGroup*
-            // breaks QGraphicsItem::itemChange()). FIXME: Make configureable.
-            if (!metaClass->isQObject() && !metaClass->isPolymorphic())
-                s << "qRegisterMetaType< ::" << className << " *>();\n";
-        } else {
-            // check if there's a empty ctor
-            for (const auto &func : metaClass->functions()) {
-                if (func->isConstructor() && func->arguments().isEmpty()) {
-                    canBeValue = true;
-                    break;
-                }
-            }
-        }
-
-        if (canBeValue) {
-            for (const QString &name : qAsConst(nameVariants)) {
-                s << "qRegisterMetaType< ::" << className << " >(\"" << name << "\");\n";
-            }
-        }
+    // Qt metatypes are registered only on their first use, so we do this now.
+    switch (qtMetaTypeRegistration(metaClass)) {
+    case QtRegisterMetaType::None:
+        break;
+    case QtRegisterMetaType::Pointer:
+        s << "qRegisterMetaType< ::" << className << " *>();\n";
+        break;
+    case QtRegisterMetaType::Value:
+        for (const QString &name : qAsConst(nameVariants))
+            s << "qRegisterMetaType< ::" << className << " >(\"" << name << "\");\n";
+        break;
     }
 
     for (const AbstractMetaEnum &metaEnum : metaClass->enums()) {

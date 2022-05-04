@@ -1242,6 +1242,8 @@ public:
     TypeSystem::SnakeCase m_snakeCase = TypeSystem::SnakeCase::Unspecified;
     TypeSystem::BoolCast m_operatorBoolMode = TypeSystem::BoolCast::Unspecified;
     TypeSystem::BoolCast m_isNullMode = TypeSystem::BoolCast::Unspecified;
+    TypeSystem::QtMetaTypeRegistration m_qtMetaTypeRegistration =
+        TypeSystem::QtMetaTypeRegistration::Unspecified;
     // Determined by AbstractMetaBuilder from the code model.
     bool m_isValueTypeWithCopyConstructorOnly = false;
 };
@@ -1453,6 +1455,18 @@ void ComplexTypeEntry::setCopyable(ComplexTypeEntry::CopyableFlag flag)
 {
     S_D(ComplexTypeEntry);
     d->m_copyableFlag = flag;
+}
+
+TypeSystem::QtMetaTypeRegistration ComplexTypeEntry::qtMetaTypeRegistration() const
+{
+    S_D(const ComplexTypeEntry);
+    return d->m_qtMetaTypeRegistration;
+}
+
+void ComplexTypeEntry::setQtMetaTypeRegistration(TypeSystem::QtMetaTypeRegistration r)
+{
+    S_D(ComplexTypeEntry);
+    d->m_qtMetaTypeRegistration = r;
 }
 
 QString ComplexTypeEntry::hashFunction() const

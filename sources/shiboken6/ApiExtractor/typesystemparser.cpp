@@ -95,6 +95,7 @@ static inline QString packageAttribute() { return QStringLiteral("package"); }
 static inline QString positionAttribute() { return QStringLiteral("position"); }
 static inline QString preferredConversionAttribute() { return QStringLiteral("preferred-conversion"); }
 static inline QString preferredTargetLangTypeAttribute() { return QStringLiteral("preferred-target-lang-type"); }
+static inline QString qtMetaTypeAttribute() { return QStringLiteral("qt-register-metatype"); }
 static inline QString removeAttribute() { return QStringLiteral("remove"); }
 static inline QString renameAttribute() { return QStringLiteral("rename"); }
 static inline QString readAttribute() { return QStringLiteral("read"); }
@@ -254,6 +255,17 @@ ENUM_LOOKUP_BEGIN(TypeSystem::BoolCast, Qt::CaseInsensitive,
         {u"true", TypeSystem::BoolCast::Enabled},
         {u"no", TypeSystem::BoolCast::Disabled},
         {u"false", TypeSystem::BoolCast::Disabled},
+    };
+ENUM_LOOKUP_LINEAR_SEARCH()
+
+ENUM_LOOKUP_BEGIN(TypeSystem::QtMetaTypeRegistration, Qt::CaseSensitive,
+                  qtMetaTypeFromAttribute)
+    {
+        {u"yes", TypeSystem::QtMetaTypeRegistration::Enabled},
+        {u"true", TypeSystem::QtMetaTypeRegistration::Enabled},
+        {u"base", TypeSystem::QtMetaTypeRegistration::BaseEnabled},
+        {u"no", TypeSystem::QtMetaTypeRegistration::Disabled},
+        {u"false", TypeSystem::QtMetaTypeRegistration::Disabled},
     };
 ENUM_LOOKUP_LINEAR_SEARCH()
 
@@ -1781,6 +1793,15 @@ void TypeSystemParser::applyComplexTypeAttributes(const ConditionalStreamReader 
             const auto boolCastOpt = boolCastFromAttribute(attribute.value());
             if (boolCastOpt.has_value()) {
                 ctype->setOperatorBoolMode(boolCastOpt.value());
+            } else {
+                qCWarning(lcShiboken, "%s",
+                          qPrintable(msgInvalidAttributeValue(attribute)));
+            }
+        } else if (name == qtMetaTypeAttribute()) {
+            const auto attribute = attributes->takeAt(i);
+            const auto qtMetaTypeOpt = qtMetaTypeFromAttribute(attribute.value());
+            if (qtMetaTypeOpt.has_value()) {
+                ctype->setQtMetaTypeRegistration(qtMetaTypeOpt.value());
             } else {
                 qCWarning(lcShiboken, "%s",
                           qPrintable(msgInvalidAttributeValue(attribute)));

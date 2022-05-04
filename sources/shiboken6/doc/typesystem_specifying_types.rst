@@ -324,6 +324,7 @@ value-type
              operator-bool="yes | no"
              hash-function="..."
              private="yes | no"
+             qt-register-metatype = "yes | no | base"
              stream="yes | no"
              default-constructor="..."
              revision="..."
@@ -351,6 +352,14 @@ value-type
     For the *optional* **disable-wrapper** attribute, see  :ref:`object-type`.
 
     For the *optional* **private** attribute, see :ref:`private_types`.
+
+    The *optional* **qt-register-metatype** attribute determines whether
+    a Qt meta type registration is generated for ``name``. By
+    default, this is generated for non-abstract, default-constructible
+    types for usage in signals and slots.
+    The value ``base`` means that the registration will be generated for the
+    class in question but not for inheriting classes.  This allows for
+    restricting the registration to base classes of type hierarchies.
 
     The **revision** attribute can be used to specify a revision for each type, easing the
     production of ABI compatible bindings.
@@ -393,6 +402,7 @@ object-type
              isNull ="yes | no"
              operator-bool="yes | no"
              private="yes | no"
+             qt-register-metatype = "yes | no | base"
              stream="yes | no"
              revision="..."
              snake-case="yes | no | both" />
@@ -418,6 +428,14 @@ object-type
     parameter, or similar).
 
     For the *optional* **private** attribute, see :ref:`private_types`.
+
+    The *optional* **qt-register-metatype** attribute determines whether
+    a Qt meta type registration is generated for ``name *``. By
+    default, this is only generated for non-QObject types for usage
+    in signals and slots.
+    The value ``base`` means that the registration will be generated for the
+    class in question but not for inheriting classes.  This allows for
+    restricting the registration to base classes of type hierarchies.
 
     The *optional* attribute **stream** specifies whether this type will be able to
     use externally defined operators, like QDataStream << and >>. If equals to **yes**,

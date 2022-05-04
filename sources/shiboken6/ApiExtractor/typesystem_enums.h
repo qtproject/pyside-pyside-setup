@@ -107,6 +107,14 @@ enum class CPythonType
     Other
 };
 
+enum class QtMetaTypeRegistration
+{
+    Unspecified,
+    Enabled,
+    BaseEnabled, // Registration only for the base class of a hierarchy
+    Disabled
+};
+
 enum : int { OverloadNumberUnset = -1, OverloadNumberDefault = 99999 };
 
 } // namespace TypeSystem
