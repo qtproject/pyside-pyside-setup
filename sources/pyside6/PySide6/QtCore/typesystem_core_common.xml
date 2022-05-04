@@ -1859,7 +1859,9 @@
     </add-function>
   </value-type>
 
-  <value-type name="QByteArray">
+  <!-- PYSIDE-1913: Disable isNull() for bool cast; __len__ should be used
+       instead so that b"" yields False. -->
+  <value-type name="QByteArray" isNull="false">
     <enum-type name="Base64Option" flags="Base64Options" since="5.2"/>
     <enum-type name="Base64DecodingStatus" since="5.15"/>
     <value-type name="FromBase64Result" since="5.15"/>
