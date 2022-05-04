@@ -68,8 +68,7 @@ const char *CppGenerator::PYTHON_TO_CPPCONVERSION_STRUCT = "Shiboken::Conversion
 
 static inline QString reprFunction() { return QStringLiteral("__repr__"); }
 
-static const char typeNameFunc[] = R"CPP(
-template <class T>
+static const char typeNameFunc[] = R"CPP(template <class T>
 static const char *typeNameOf(const T &t)
 {
     const char *typeName =  typeid(t).name();
@@ -396,7 +395,7 @@ static bool generateRichComparison(const GeneratorContext &c)
 }
 
 void CppGenerator::generateIncludes(TextStream &s, const GeneratorContext &classContext,
-                                    QList<Include> includes,
+                                    const IncludeGroupList &includes,
                                     const AbstractMetaClassCList &innerClasses) const
 {
     const AbstractMetaClass *metaClass = classContext.metaClass();
@@ -411,9 +410,16 @@ void CppGenerator::generateIncludes(TextStream &s, const GeneratorContext &class
         s << "#define protected public\n\n";
     }
 
+    QByteArrayList cppIncludes{"typeinfo", "iterator", // for containers
+                               "cctype", "cstring"};
     // headers
     s << "// default includes\n";
     s << "#include <shiboken.h>\n";
+    if (wrapperDiagnostics()) {
+        s << "#include <helper.h>\n";
+        cppIncludes << "iostream";
+    }
+
     if (normalClass && usePySideExtensions()) {
         s << includeQDebug;
         if (metaClass->isQObject()) {
@@ -428,20 +434,14 @@ void CppGenerator::generateIncludes(TextStream &s, const GeneratorContext &class
             << "#include <pysideutils.h>\n"
             << "#include <feature_select.h>\n"
             << "QT_WARNING_DISABLE_DEPRECATED\n\n";
-     }
-
-    s << "#include <typeinfo>\n";
+    }
 
     // The multiple inheritance initialization function
     // needs the 'set' class from C++ STL.
     if (normalClass && getMultipleInheritingClass(metaClass) != nullptr)
-        s << "#include <algorithm>\n#include <set>\n";
+        cppIncludes << "algorithm" << "set";
     if (normalClass && metaClass->generateExceptionHandling())
-        s << "#include <exception>\n";
-    s << "#include <iterator>\n"; // For containers
-
-    if (wrapperDiagnostics())
-        s << "#include <helper.h>\n#include <iostream>\n";
+        cppIncludes << "exception";
 
     s << "\n// module include\n" << "#include \"" << getModuleHeaderFileName() << "\"\n";
     if (hasPrivateClasses())
@@ -459,15 +459,14 @@ void CppGenerator::generateIncludes(TextStream &s, const GeneratorContext &class
         }
     }
 
-    if (!includes.isEmpty()) {
-        s << "\n// Extra includes\n";
-        std::sort(includes.begin(), includes.end());
-        for (const Include &inc : qAsConst(includes))
-            s << inc.toString() << '\n';
-        s << '\n';
-    }
+    for (const auto &g : includes)
+        s << g;
 
-    s << "\n#include <cctype>\n#include <cstring>\n";
+    // C++ includes
+    std::sort(cppIncludes.begin(), cppIncludes.end());
+    s << '\n';
+    for (const auto &i : qAsConst(cppIncludes))
+        s << "#include <" << i << ">\n";
 }
 
 static const char openTargetExternC[] =  R"(
@@ -519,13 +518,20 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
     metaClass->getEnumsFromInvisibleNamespacesToBeGenerated(&classEnums);
 
     //Extra includes
-    QList<Include> includes;
-    if (!classContext.useWrapper())
-        includes += typeEntry->extraIncludes();
-    for (const AbstractMetaEnum &cppEnum : qAsConst(classEnums))
-        includes.append(cppEnum.typeEntry()->extraIncludes());
+    IncludeGroupList includeGroups;
+    if (!classContext.useWrapper()) {
+        includeGroups.append(IncludeGroup{u"Extra includes"_s,
+                                          typeEntry->extraIncludes()});
+    }
 
-    generateIncludes(s, classContext, includes, innerClasses);
+    includeGroups.append(IncludeGroup{u"Argument includes"_s,
+                                      typeEntry->argumentIncludes()});
+
+    includeGroups.append(IncludeGroup{u"Enum includes"_s, {}});
+    for (const AbstractMetaEnum &cppEnum : qAsConst(classEnums))
+        includeGroups.back().includes.append(cppEnum.typeEntry()->extraIncludes());
+
+    generateIncludes(s, classContext, includeGroups, innerClasses);
 
     if (typeEntry->typeFlags().testFlag(ComplexTypeEntry::Deprecated))
         s << "#Deprecated\n";
@@ -543,7 +549,7 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
         }
     }
 
-    s  << "\n\n" << typeNameFunc << '\n';
+    s  << '\n' << typeNameFunc << '\n';
 
     // class inject-code native/beginning
     if (!typeEntry->codeSnips().isEmpty()) {
@@ -801,9 +807,10 @@ void CppGenerator::generateSmartPointerClass(TextStream &s, const GeneratorConte
     const AbstractMetaClass *metaClass = classContext.metaClass();
     const auto *typeEntry = static_cast<const SmartPointerTypeEntry *>(metaClass->typeEntry());
 
-    generateIncludes(s, classContext, typeEntry->extraIncludes());
+    IncludeGroup includes{u"Extra includes"_s, typeEntry->extraIncludes()};
+    generateIncludes(s, classContext, {includes});
 
-    s  << "\n\n" << typeNameFunc << '\n';
+    s  << '\n' << typeNameFunc << '\n';
 
     // Create string literal for smart pointer getter method.
     QString rawGetter = typeEntry->getter();

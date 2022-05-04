@@ -36,6 +36,8 @@
 
 #include "qtcompat.h"
 
+#include <algorithm>
+
 using namespace Qt::StringLiterals;
 
 QString Include::toString() const
@@ -52,10 +54,10 @@ size_t qHash(const Include& inc)
     return qHash(inc.m_name);
 }
 
-QTextStream& operator<<(QTextStream& out, const Include& include)
+QTextStream& operator<<(QTextStream& out, const Include& g)
 {
-    if (include.isValid())
-        out << include.toString() << Qt::endl;
+    if (g.isValid())
+        out << g.toString() << Qt::endl;
     return out;
 }
 
@@ -63,6 +65,19 @@ TextStream& operator<<(TextStream& out, const Include& include)
 {
     if (include.isValid())
         out << include.toString() << '\n';
+    return out;
+}
+
+TextStream& operator<<(TextStream &out, const IncludeGroup& g)
+{
+    if (!g.includes.isEmpty()) {
+        if (!g.title.isEmpty())
+            out << "\n// " << g.title << "\n";
+        auto includes = g.includes;
+        std::sort(includes.begin(), includes.end());
+        for (const Include &inc : qAsConst(includes))
+            out << inc.toString() << '\n';
+    }
     return out;
 }
 

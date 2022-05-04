@@ -375,10 +375,11 @@ bool AbstractMetaBuilderPrivate::traverseStreamOperator(const FunctionModelItem 
     }
 
     funcClass->addFunction(AbstractMetaFunctionCPtr(streamFunction));
+    auto *funcTe = funcClass->typeEntry();
     if (funcClass == streamClass)
-        funcClass->typeEntry()->addExtraInclude(streamedClass->typeEntry()->include());
+        funcTe->addArgumentInclude(streamedClass->typeEntry()->include());
     else
-        funcClass->typeEntry()->addExtraInclude(streamClass->typeEntry()->include());
+        funcTe->addArgumentInclude(streamClass->typeEntry()->include());
     return true;
 }
 

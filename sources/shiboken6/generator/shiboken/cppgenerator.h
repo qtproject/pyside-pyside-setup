@@ -80,7 +80,7 @@ private:
 
     void generateSmartPointerClass(TextStream &s, const GeneratorContext &classContext);
     void generateIncludes(TextStream &s, const GeneratorContext &classContext,
-                          QList<Include> includes = {},
+                          const IncludeGroupList &includes = {},
                           const AbstractMetaClassCList &innerClasses = {}) const;
     static void writeInitFunc(TextStream &declStr, TextStream &callStr,
                               const QString &initFunctionName,
