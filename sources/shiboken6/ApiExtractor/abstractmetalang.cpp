@@ -1308,7 +1308,7 @@ static void addExtraIncludeForType(AbstractMetaClass *metaClass, const AbstractM
         const auto *centry = static_cast<const ComplexTypeEntry *>(entry);
         ComplexTypeEntry *class_entry = metaClass->typeEntry();
         if (class_entry && centry->include().isValid())
-            class_entry->addExtraInclude(centry->include());
+            class_entry->addArgumentInclude(centry->include());
     }
 
     if (type.hasInstantiations()) {

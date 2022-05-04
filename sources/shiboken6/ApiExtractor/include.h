@@ -92,4 +92,14 @@ QDebug operator<<(QDebug d, const Include &i);
 
 using IncludeList = QList<Include>;
 
+struct IncludeGroup
+{
+    QString title;
+    IncludeList includes;
+};
+
+TextStream& operator<<(TextStream &out, const IncludeGroup& include);
+
+using IncludeGroupList = QList<IncludeGroup>;
+
 #endif

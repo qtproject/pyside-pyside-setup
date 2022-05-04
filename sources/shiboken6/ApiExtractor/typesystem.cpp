@@ -70,6 +70,7 @@ public:
     CodeSnipList m_codeSnips;
     DocModificationList m_docModifications;
     IncludeList m_extraIncludes;
+    IncludeList m_argumentIncludes;
     Include m_include;
     QString m_targetConversionRule;
     QVersionNumber m_version;
@@ -157,6 +158,17 @@ void TypeEntry::addExtraInclude(const Include &newInclude)
 {
     if (!m_d->m_extraIncludes.contains(newInclude))
         m_d->m_extraIncludes.append(newInclude);
+}
+
+const IncludeList &TypeEntry::argumentIncludes() const
+{
+    return m_d->m_argumentIncludes;
+}
+
+void TypeEntry::addArgumentInclude(const Include &newInclude)
+{
+    if (!m_d->m_argumentIncludes.contains(newInclude))
+        m_d->m_argumentIncludes.append(newInclude);
 }
 
 Include TypeEntry::include() const

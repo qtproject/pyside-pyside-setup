@@ -221,6 +221,10 @@ public:
     void setExtraIncludes(const IncludeList &includes);
     void addExtraInclude(const Include &newInclude);
 
+    /// Extra includes for function arguments determined by the meta builder.
+    const IncludeList &argumentIncludes() const;
+    void addArgumentInclude(const Include &newInclude);
+
     Include include() const;
     void setInclude(const Include &inc);
 
