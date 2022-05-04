@@ -2564,7 +2564,8 @@
       </inject-documentation>
     </add-function>
   </object-type>
-  <object-type name="QEvent"  polymorphic-id-expression="%1-&gt;type() == QEvent::None">
+  <object-type name="QEvent"  polymorphic-id-expression="%1-&gt;type() == QEvent::None"
+               qt-register-metatype="base">
     <enum-type name="Type"/>
     <add-function signature="__repr__" return-type="PyObject">
         <inject-code class="target" position="beginning"

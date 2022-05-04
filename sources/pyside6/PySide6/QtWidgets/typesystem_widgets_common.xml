@@ -271,7 +271,9 @@
     </modify-function>
   </object-type>
 
-  <object-type name="QGraphicsItem">
+  <!-- Register Qt meta type only for base class QGraphicsItem as registering
+       QGraphicsItemGroup* breaks QGraphicsItem::itemChange()), PYSIDE-1887 -->
+  <object-type name="QGraphicsItem" qt-register-metatype="base">
     <enum-type name="CacheMode"/>
     <enum-type name="Extension"/>
     <enum-type name="GraphicsItemChange"/>
@@ -1107,7 +1109,7 @@
     <modify-function signature="setSource(QWidget*)" remove="all"/>
     <!-- ### -->
   </object-type>
-  <object-type name="QGraphicsSceneEvent" copyable="false">
+  <object-type name="QGraphicsSceneEvent" copyable="false" qt-register-metatype="base">
     <!-- ### "setWidget(QWidget*)" is an internal method. -->
     <modify-function signature="setWidget(QWidget*)" remove="all"/>
   </object-type>
@@ -3078,7 +3080,7 @@
         <modify-argument index="1" invalidate-after-use="yes"/>
     </modify-function>
   </object-type>
-  <object-type name="QGraphicsLayoutItem" copyable="false">
+  <object-type name="QGraphicsLayoutItem" copyable="false" qt-register-metatype="base">
     <modify-function signature="getContentsMargins(qreal*,qreal*,qreal*,qreal*)const">
         <modify-argument index="0">
             <replace-type modified-type="PyObject"/>
