@@ -107,13 +107,16 @@ void setDestroyQApplication(DestroyQAppHook func)
 LIBSHIBOKEN_API PyObject *SbkObject_GetDict_NoRef(PyObject *op)
 {
 #ifdef PYPY_VERSION
+    Shiboken::GilState state;
     auto *ret = PyObject_GenericGetDict(op, nullptr);
     Py_DECREF(ret);
     return ret;
 #else
     auto *sbkObj = reinterpret_cast<SbkObject *>(op);
-    if (!sbkObj->ob_dict)
+    if (!sbkObj->ob_dict) {
+        Shiboken::GilState state;
         sbkObj->ob_dict = PyDict_New();
+    }
     return sbkObj->ob_dict;
 #endif
 }
