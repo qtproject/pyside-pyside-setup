@@ -411,17 +411,6 @@ qtqml-javascript-topic.webxml
 qtqml-networkaccessmanagerfactory-example.webxml
 qtqml-qml-i18n-example.webxml
 qtqml-qmlextensionplugins-example.webxml
-qtqml-referenceexamples-adding-example.webxml
-qtqml-referenceexamples-attached-example.webxml
-qtqml-referenceexamples-binding-example.webxml
-qtqml-referenceexamples-coercion-example.webxml
-qtqml-referenceexamples-default-example.webxml
-qtqml-referenceexamples-extended-example.webxml
-qtqml-referenceexamples-grouped-example.webxml
-qtqml-referenceexamples-methods-example.webxml
-qtqml-referenceexamples-properties-example.webxml
-qtqml-referenceexamples-signal-example.webxml
-qtqml-referenceexamples-valuesource-example.webxml
 qtqml-syntax-basics.webxml
 qtqml-syntax-directoryimports.webxml
 qtqml-syntax-imports.webxml
