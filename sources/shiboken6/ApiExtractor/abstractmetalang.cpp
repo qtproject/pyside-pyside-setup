@@ -952,6 +952,8 @@ bool AbstractMetaClass::isDefaultConstructible() const
 // (non-ref or not const value).
 static bool defaultConstructibleField(const AbstractMetaField &f)
 {
+    if (f.isStatic())
+        return true;
     const auto &type = f.type();
     return type.referenceType() == NoReference
         && !(type.indirections() == 0 && type.isConstant()); // no const values
