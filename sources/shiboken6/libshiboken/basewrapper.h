@@ -205,7 +205,8 @@ LIBSHIBOKEN_API void setDestructorFunction(PyTypeObject *self, ObjectDestructor 
 enum WrapperFlags
 {
     InnerClass = 0x1,
-    DeleteInMainThread = 0x2
+    DeleteInMainThread = 0x2,
+    Value = 0x4
 };
 
 /**

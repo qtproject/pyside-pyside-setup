@@ -989,6 +989,8 @@ introduceWrapperType(PyObject *enclosingObject,
     auto sotp = PepType_SOTP(type);
     if (wrapperFlags & DeleteInMainThread)
         sotp->delete_in_main_thread = 1;
+    sotp->type_behaviour = (wrapperFlags & Value) != 0
+                           ? BEHAVIOUR_VALUETYPE : BEHAVIOUR_OBJECTTYPE;
 
     setOriginalName(type, originalName);
     setDestructorFunction(type, cppObjDtor);
@@ -1738,6 +1740,11 @@ static std::vector<PyTypeObject *> getBases(SbkObject *self)
         : std::vector<PyTypeObject *>(1, Py_TYPE(self));
 }
 
+static bool isValueType(SbkObject *self)
+{
+    return PepType_SOTP(Py_TYPE(self))->type_behaviour == BEHAVIOUR_VALUETYPE;
+}
+
 void _debugFormat(std::ostream &s, SbkObject *self)
 {
     assert(self);
@@ -1761,6 +1768,8 @@ void _debugFormat(std::ostream &s, SbkObject *self)
         s << " [validCppObject]";
     if (d->cppObjectCreated)
         s << " [wasCreatedByPython]";
+    s << (isValueType(self) ? " [value]" : " [object]");
+
     if (d->parentInfo) {
         if (auto *parent = d->parentInfo->parent)
             s << ", parent=" << reinterpret_cast<PyObject *>(parent)->ob_type->tp_name
@@ -1791,8 +1800,9 @@ std::string info(SbkObject *self)
     s << "hasOwnership...... " << bool(self->d->hasOwnership) << "\n"
          "containsCppWrapper " << self->d->containsCppWrapper << "\n"
          "validCppObject.... " << self->d->validCppObject << "\n"
-         "wasCreatedByPython " << self->d->cppObjectCreated << "\n";
-
+         "wasCreatedByPython " << self->d->cppObjectCreated << "\n"
+         "value......        " << isValueType(self) << "\n"
+         "reference count... " << reinterpret_cast<PyObject *>(self)->ob_refcnt << '\n';
 
     if (self->d->parentInfo && self->d->parentInfo->parent) {
         s << "parent............ ";

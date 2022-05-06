@@ -5425,6 +5425,8 @@ void CppGenerator::writeClassRegister(TextStream &s,
         wrapperFlags.append(QByteArrayLiteral("Shiboken::ObjectType::WrapperFlags::InnerClass"));
     if (metaClass->deleteInMainThread())
         wrapperFlags.append(QByteArrayLiteral("Shiboken::ObjectType::WrapperFlags::DeleteInMainThread"));
+    if (classTypeEntry->isValue())
+        wrapperFlags.append("Shiboken::ObjectType::WrapperFlags::Value"_ba);
     if (wrapperFlags.isEmpty())
         s << '0';
     else
