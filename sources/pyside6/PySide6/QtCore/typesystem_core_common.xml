@@ -337,6 +337,10 @@
       </extra-includes>
       <enum-type name="Type"/>
       <enum-type name="TypeFlag" flags="TypeFlags"/>
+      <add-function signature="QMetaType(PyTypeObject*)">
+          <inject-code class="target" position="beginning" file="../glue/qtcore.cpp"
+                       snippet="metatype-from-type"/>
+      </add-function>
       <conversion-rule>
           <native-to-target file="../glue/qtcore.cpp" snippet="conversion-qmetatype-pytypeobject"/>
           <target-to-native>
