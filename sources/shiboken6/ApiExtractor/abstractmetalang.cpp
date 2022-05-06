@@ -1814,6 +1814,22 @@ void AbstractMetaClass::format(QDebug &debug) const
         debug << " [final]";
     if (attributes().testFlag(AbstractMetaClass::Deprecated))
         debug << " [deprecated]";
+
+    if (d->m_hasPrivateConstructor)
+        debug << " [private constructor]";
+    if (d->m_hasDeletedDefaultConstructor)
+        debug << " [deleted default constructor]";
+    if (d->m_hasDeletedCopyConstructor)
+        debug << " [deleted copy constructor]";
+    if (d->m_hasPrivateDestructor)
+        debug << " [private destructor]";
+    if (d->m_hasProtectedDestructor)
+        debug << " [protected destructor]";
+    if (d->m_hasVirtualDestructor)
+        debug << " [virtual destructor]";
+    if (d->m_valueTypeWithCopyConstructorOnly)
+        debug << " [value type with copy constructor only]";
+
     if (!d->m_baseClasses.isEmpty()) {
         debug << ", inherits ";
         for (auto b : d->m_baseClasses)
