@@ -111,6 +111,9 @@
   <object-type name="QWebEngineProfile">
     <enum-type name="HttpCacheType"/>
     <enum-type name="PersistentCookiesPolicy"/>
+    <add-function signature="setNotificationPresenter(PyCallable* @notificationPresenter@)">
+      <inject-code class="target" position="beginning" file="../glue/qtwebenginecore.cpp" snippet="qwebengineprofile-setnotificationpresenter"/>
+    </add-function>
   </object-type>
 
   <object-type name="QWebEngineNewWindowRequest">
