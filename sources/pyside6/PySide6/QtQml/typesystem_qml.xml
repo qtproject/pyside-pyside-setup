@@ -196,7 +196,9 @@
         <modify-function signature="QQmlComponent(QQmlEngine*,QUrl,QObject*)" allow-thread="yes"/>
         <modify-function signature="QQmlComponent(QQmlEngine*,QUrl,QQmlComponent::CompilationMode,QObject*)" allow-thread="yes"/>
     </object-type>
-    <object-type name="QQmlContext"/>
+    <object-type name="QQmlContext">
+        <value-type name="PropertyPair"/>
+    </object-type>
     <value-type name="QQmlError">
         <add-function signature="__repr__" return-type="PyObject*">
             <inject-code class="target" position="beginning" file="../glue/qtqml.cpp" snippet="qmlerrror-repr"/>
