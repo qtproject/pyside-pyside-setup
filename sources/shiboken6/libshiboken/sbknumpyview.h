@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2021 The Qt Company Ltd.
+** Copyright (C) 2022 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -37,37 +37,47 @@
 **
 ****************************************************************************/
 
-#ifndef PYSIDE_NUMPY_H
-#define PYSIDE_NUMPY_H
+#ifndef SBKNUMPYVIEW_H
+#define SBKNUMPYVIEW_H
 
 #include <sbkpython.h>
-#include <sbknumpycheck.h>
+#include <shibokenmacros.h>
 
-#include <pysidemacros.h>
+#include <iosfwd>
 
-#include <QtCore/QList>
-#include <QtCore/QPoint>
-#include <QtCore/QPointF>
-
-namespace PySide::Numpy
+namespace Shiboken::Numpy
 {
 
-/// Create a list of QPointF from 2 equally sized numpy array of x and y data
-/// (float,double).
-/// \param pyXIn X data array
-/// \param pyYIn Y data array
-/// \return List of QPointF
+/// Check whether the object is a PyArrayObject
+/// \param pyIn object
+/// \return Whether it is a PyArrayObject
+LIBSHIBOKEN_API bool check(PyObject *pyIn);
 
-PYSIDE_API QList<QPointF> xyDataToQPointFList(PyObject *pyXIn, PyObject *pyYIn);
+/// A simple view of an up to 2 dimensional, C-contiguous array of a standard
+/// type. It can be passed to compilation units that do not include the
+/// numpy headers.
+struct LIBSHIBOKEN_API View
+{
+    enum Type { Int, Unsigned, Float, Double};
 
-/// Create a list of QPoint from 2 equally sized numpy array of x and y data
-/// (int).
-/// \param pyXIn X data array
-/// \param pyYIn Y data array
-/// \return List of QPoint
+    static View fromPyObject(PyObject *pyIn);
 
-PYSIDE_API QList<QPoint> xyDataToQPointList(PyObject *pyXIn, PyObject *pyYIn);
+    operator bool() const { return ndim > 0; }
 
-} //namespace PySide::Numpy
+    /// Return whether rhs is of the same type and dimensionality
+    bool sameLayout(const View &rhs) const;
+    /// Return whether rhs is of the same type dimensionality and size
+    bool sameSize(const View &rhs) const;
 
-#endif // PYSIDE_NUMPY_H
+    int ndim = 0;
+    Py_ssize_t dimensions[2];
+    Py_ssize_t stride[2];
+    void *data = nullptr;
+    Type type = Int;
+};
+
+LIBSHIBOKEN_API std::ostream &operator<<(std::ostream &, const View &v);
+
+} //namespace Shiboken::Numpy
+
+#endif // SBKNUMPYVIEW_H

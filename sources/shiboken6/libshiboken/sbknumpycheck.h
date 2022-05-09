@@ -37,37 +37,30 @@
 **
 ****************************************************************************/
 
-#ifndef PYSIDE_NUMPY_H
-#define PYSIDE_NUMPY_H
+#ifndef SBKNUMPYCHECK_H
+#define SBKNUMPYCHECK_H
 
 #include <sbkpython.h>
-#include <sbknumpycheck.h>
+#include <shibokenmacros.h>
 
-#include <pysidemacros.h>
 
-#include <QtCore/QList>
-#include <QtCore/QPoint>
-#include <QtCore/QPointF>
+// This header provides a PyArray_Check() definition that can be used to avoid
+// having to include the numpy headers. When using numpy headers, make sure
+// to include this header after them to skip the definition. Also remember
+// that import_array() must then be called to initialize numpy.
 
-namespace PySide::Numpy
+namespace Shiboken::Numpy
 {
 
-/// Create a list of QPointF from 2 equally sized numpy array of x and y data
-/// (float,double).
-/// \param pyXIn X data array
-/// \param pyYIn Y data array
-/// \return List of QPointF
+/// Check whether the object is a PyArrayObject
+/// \param pyIn object
+/// \return Whether it is a PyArrayObject
+LIBSHIBOKEN_API bool check(PyObject *pyIn);
 
-PYSIDE_API QList<QPointF> xyDataToQPointFList(PyObject *pyXIn, PyObject *pyYIn);
+} //namespace Shiboken::Numpy
 
-/// Create a list of QPoint from 2 equally sized numpy array of x and y data
-/// (int).
-/// \param pyXIn X data array
-/// \param pyYIn Y data array
-/// \return List of QPoint
+#ifndef PyArray_Check
+#  define PyArray_Check(op) Shiboken::Numpy::check(op)
+#endif
 
-PYSIDE_API QList<QPoint> xyDataToQPointList(PyObject *pyXIn, PyObject *pyYIn);
-
-} //namespace PySide::Numpy
-
-#endif // PYSIDE_NUMPY_H
+#endif // SBKNUMPYCHECK_H

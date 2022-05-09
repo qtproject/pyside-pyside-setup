@@ -37,12 +37,8 @@
 **
 ****************************************************************************/
 
-
-#ifdef HAVE_NUMPY
-// Include numpy first to get the proper PyArray_Check
-#  include <numpy/arrayobject.h>
-#  include "pyside_numpy.h"
-#  include <QtCore/QDebug>
+#include "pyside_numpy.h"
+#include <sbknumpyview.h>
 
 // Convert X,Y of type T data to a list of points (QPoint, PointF)
 template <class T, class Point>
@@ -72,82 +68,26 @@ static QList<QPoint>
     return result;
 }
 
-
 namespace PySide::Numpy
 {
 
-bool init()
-{
-    import_array1(false);
-    return true;
-}
-
-bool check(PyObject *pyIn)
-{
-    return PyArray_Check(pyIn);
-}
-
-View View::fromPyObject(PyObject *pyIn)
-{
-    if (pyIn == nullptr || PyArray_Check(pyIn) == 0)
-        return {};
-    auto *ar = reinterpret_cast<PyArrayObject *>(pyIn);
-    if ((PyArray_FLAGS(ar) & NPY_ARRAY_C_CONTIGUOUS) == 0)
-        return {};
-    const int ndim = PyArray_NDIM(ar);
-    if (ndim > 2)
-        return {};
-
-    View::Type type;
-    switch (PyArray_TYPE(ar)) {
-    case NPY_INT:
-        type = View::Int;
-        break;
-    case NPY_UINT:
-        type = View::Unsigned;
-        break;
-    case NPY_FLOAT:
-        type = View::Float;
-        break;
-    case NPY_DOUBLE:
-        type = View::Double;
-        break;
-    default:
-        return {};
-    }
-
-    View result;
-    result.ndim = ndim;
-    result.type = type;
-    result.data = PyArray_DATA(ar);
-    result.dimensions[0] = PyArray_DIMS(ar)[0];
-    result.stride[0] = PyArray_STRIDES(ar)[0];
-    if (ndim > 1) {
-        result.dimensions[1] = PyArray_DIMS(ar)[1];
-        result.stride[1] = PyArray_STRIDES(ar)[1];
-    } else {
-        result.dimensions[1] = result.stride[1] = 0;
-    }
-    return result;
-}
-
 QList<QPointF> xyDataToQPointFList(PyObject *pyXIn, PyObject *pyYIn)
 {
-    View xv = View::fromPyObject(pyXIn);
-    View yv = View::fromPyObject(pyYIn);
+    auto xv = Shiboken::Numpy::View::fromPyObject(pyXIn);
+    auto yv = Shiboken::Numpy::View::fromPyObject(pyYIn);
     if (!xv.sameLayout(yv))
         return {};
     const qsizetype size = qMin(xv.dimensions[0], yv.dimensions[0]);
     if (size == 0)
         return {};
     switch (xv.type) {
-    case PySide::Numpy::View::Int:
+    case Shiboken::Numpy::View::Int:
         return xyDataToQPointHelper<int, QPointF>(xv.data, yv.data, size);
-    case PySide::Numpy::View::Unsigned:
+    case Shiboken::Numpy::View::Unsigned:
         return xyDataToQPointHelper<unsigned, QPointF>(xv.data, yv.data, size);
-    case PySide::Numpy::View::Float:
+    case Shiboken::Numpy::View::Float:
         return xyDataToQPointHelper<float, QPointF>(xv.data, yv.data, size);
-    case PySide::Numpy::View::Double:
+    case Shiboken::Numpy::View::Double:
         break;
     }
     return xyDataToQPointHelper<double, QPointF>(xv.data, yv.data, size);
@@ -155,195 +95,24 @@ QList<QPointF> xyDataToQPointFList(PyObject *pyXIn, PyObject *pyYIn)
 
 QList<QPoint> xyDataToQPointList(PyObject *pyXIn, PyObject *pyYIn)
 {
-    View xv = View::fromPyObject(pyXIn);
-    View yv = View::fromPyObject(pyYIn);
+    auto xv = Shiboken::Numpy::View::fromPyObject(pyXIn);
+    auto yv = Shiboken::Numpy::View::fromPyObject(pyYIn);
     if (!xv.sameLayout(yv))
         return {};
     const qsizetype size = qMin(xv.dimensions[0], yv.dimensions[0]);
     if (size == 0)
         return {};
     switch (xv.type) {
-    case PySide::Numpy::View::Int:
+    case Shiboken::Numpy::View::Int:
         return xyDataToQPointHelper<int, QPoint>(xv.data, yv.data, size);
-    case PySide::Numpy::View::Unsigned:
+    case Shiboken::Numpy::View::Unsigned:
         return xyDataToQPointHelper<unsigned, QPoint>(xv.data, yv.data, size);
-    case PySide::Numpy::View::Float:
+    case Shiboken::Numpy::View::Float:
         return xyFloatDataToQPointHelper<float>(xv.data, yv.data, size);
-    case PySide::Numpy::View::Double:
+    case Shiboken::Numpy::View::Double:
         break;
     }
     return xyFloatDataToQPointHelper<double>(xv.data, yv.data, size);
-}
-
-template <class T>
-static void debugArray(QDebug debug, const  T *data, int n)
-{
-    static const int maxData = 10;
-    debug << " = ";
-    auto *end = data + qMin(n, maxData);
-    for (auto *d = data; d != end; ++d) {
-        if (d != data)
-            debug << ", ";
-        debug << *d;
-    }
-    if (n > maxData)
-        debug << "...";
-}
-
-QDebug operator<<(QDebug debug, const debugPyArrayObject &a)
-{
-    QDebugStateSaver saver(debug);
-    debug.noquote();
-    debug.nospace();
-
-    debug << "PyArrayObject(";
-    if (a.m_object == nullptr) {
-        debug << '0';
-    } else if (PyArray_Check(a.m_object) != 0) {
-        auto *ar = reinterpret_cast<PyArrayObject *>(a.m_object);
-        const int ndim = PyArray_NDIM(ar);
-        const int type = PyArray_TYPE(ar);
-        const int flags  = PyArray_FLAGS(ar);
-        debug << "ndim=" << ndim << " [";
-        for (int d = 0; d < ndim; ++d) {
-            if (d)
-                debug << ", ";
-            debug << PyArray_DIMS(ar)[d];
-        }
-        debug << "], type=";
-        switch (type) {
-        case NPY_INT:
-            debug << "int";
-            break;
-        case NPY_UINT:
-            debug << "uint";
-            break;
-        case NPY_FLOAT:
-            debug << "float";
-            break;
-        case NPY_DOUBLE:
-            debug << "double";
-            break;
-        default:
-            debug << '(' << type << ')';
-            break;
-        }
-        debug << ", flags=0x" << Qt::hex << flags << Qt::dec;
-        if ((flags & NPY_ARRAY_C_CONTIGUOUS) != 0)
-            debug << " [C-contiguous]";
-        if ((flags & NPY_ARRAY_F_CONTIGUOUS) != 0)
-            debug << " [Fortran-contiguous]";
-        if ((flags & NPY_ARRAY_ALIGNED) != 0)
-                debug << " [aligned]";
-        if ((flags & NPY_ARRAY_OWNDATA) != 0)
-                debug << " [owndata]";
-        if ((flags & NPY_ARRAY_WRITEABLE) != 0)
-            debug << " [writeable]";
-
-        if (const int dim0 = PyArray_DIMS(ar)[0]) {
-            auto *data = PyArray_DATA(ar);
-            switch (type) {
-            case NPY_INT:
-                debugArray(debug, reinterpret_cast<const int *>(data), dim0);
-                break;
-            case NPY_UINT:
-                debugArray(debug, reinterpret_cast<const unsigned *>(data), dim0);
-                break;
-            case NPY_FLOAT:
-                debugArray(debug, reinterpret_cast<const float *>(data), dim0);
-                break;
-            case NPY_DOUBLE:
-                debugArray(debug, reinterpret_cast<const double *>(data), dim0);
-                break;
-            }
-        }
-    } else {
-        debug << "Invalid";
-    }
-    debug << ')';
-    return debug;
-}
-
-} //namespace PySide::Numpy
-
-#else // HAVE_NUMPY
-#  include "pyside_numpy.h"
-#  include <QtCore/QDebug>
-namespace PySide::Numpy
-{
-
-bool init()
-{
-    return true;
-}
-
-bool check(PyObject *)
-{
-    return false;
-}
-
-View View::fromPyObject(PyObject *)
-{
-    return {};
-}
-
-QList<QPointF> xyDataToQPointFList(PyObject *, PyObject *)
-{
-    qWarning("Unimplemented function %s, (numpy was not found).", __FUNCTION__);
-    return {};
-}
-
-QList<QPoint> xyDataToQPointList(PyObject *, PyObject *)
-{
-    qWarning("Unimplemented function %s, (numpy was not found).", __FUNCTION__);
-    return {};
-}
-
-QDebug operator<<(QDebug debug, const debugPyArrayObject &)
-{
-    debug << "Unimplemented function " <<  __FUNCTION__ << ", (numpy was not found).";
-    return debug;
-}
-
-} //namespace PySide::Numpy
-
-#endif // !HAVE_NUMPY
-
-namespace PySide::Numpy
-{
-
-bool View::sameLayout(const View &rhs) const
-{
-    return rhs && *this && ndim == rhs.ndim && type == rhs.type;
-}
-
-bool View::sameSize(const View &rhs) const
-{
-    return sameLayout(rhs)
-        && dimensions[0] == rhs.dimensions[0] && dimensions[1] == rhs.dimensions[1];
-}
-
-QDebug operator<<(QDebug debug, const View &v)
-{
-    QDebugStateSaver saver(debug);
-    debug.noquote();
-    debug.nospace();
-
-    debug << "PySide::Numpy::View(";
-    if (v) {
-        debug << "type=" << v.type << ", ndim=" << v.ndim << " ["
-            << v.dimensions[0];
-        if (v.ndim > 1)
-           debug << ", " << v.dimensions[1];
-        debug << "], stride=[" << v.stride[0];
-        if (v.ndim > 1)
-           debug << ", " << v.stride[1];
-        debug << "], data=" << v.data;
-    } else {
-        debug << "invalid";
-    }
-    debug << ')';
-    return debug;
 }
 
 } //namespace PySide::Numpy

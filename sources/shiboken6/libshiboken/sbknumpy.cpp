@@ -37,37 +37,33 @@
 **
 ****************************************************************************/
 
-#ifndef PYSIDE_NUMPY_H
-#define PYSIDE_NUMPY_H
 
-#include <sbkpython.h>
-#include <sbknumpycheck.h>
+#ifdef HAVE_NUMPY
+// Include numpy first to get the proper PyArray_Check
+#  include <numpy/arrayobject.h>
+#endif
 
-#include <pysidemacros.h>
+#include "sbknumpycheck.h"
+#include "sbknumpyview.h"
 
-#include <QtCore/QList>
-#include <QtCore/QPoint>
-#include <QtCore/QPointF>
-
-namespace PySide::Numpy
+namespace Shiboken::Numpy
 {
 
-/// Create a list of QPointF from 2 equally sized numpy array of x and y data
-/// (float,double).
-/// \param pyXIn X data array
-/// \param pyYIn Y data array
-/// \return List of QPointF
+bool check(PyObject *pyIn)
+{
+#ifdef HAVE_NUMPY
+    return PyArray_Check(pyIn);
+#else
+    return false;
+#endif
+}
 
-PYSIDE_API QList<QPointF> xyDataToQPointFList(PyObject *pyXIn, PyObject *pyYIn);
+} //namespace Shiboken::Numpy
 
-/// Create a list of QPoint from 2 equally sized numpy array of x and y data
-/// (int).
-/// \param pyXIn X data array
-/// \param pyYIn Y data array
-/// \return List of QPoint
+// Include all sources files using numpy so that they are in the same
+// translation unit (see comment at initNumPyArrayConverters()).
 
-PYSIDE_API QList<QPoint> xyDataToQPointList(PyObject *pyXIn, PyObject *pyYIn);
-
-} //namespace PySide::Numpy
-
-#endif // PYSIDE_NUMPY_H
+#include "sbknumpyview.cpp"
+#ifdef HAVE_NUMPY
+#  include "sbknumpyarrayconverter.cpp"
+#endif

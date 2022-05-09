@@ -58,16 +58,6 @@ target_include_directories(pyside6 PUBLIC
   $<INSTALL_INTERFACE:include/PySide6>
 )
 
-if (PYSIDE_NUMPY_SUPPORT AND NOT "${NUMPY_INCLUDE_DIR}" STREQUAL "")
-    message(STATUS "Enabling experimental numpy support in libpyside.")
-    target_include_directories(pyside6 PRIVATE ${NUMPY_INCLUDE_DIR})
-    target_compile_definitions(pyside6 PRIVATE -DHAVE_NUMPY
-                                       PRIVATE -DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
-
-else()
-    message(STATUS "Disabled experimental numpy support in libpyside.")
-endif()
-
 target_link_libraries(pyside6
                       PRIVATE Shiboken6::libshiboken ${libpyside_libraries})
 

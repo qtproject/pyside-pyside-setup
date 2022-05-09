@@ -65,6 +65,7 @@ sbkconverter.cpp
 sbkenum.cpp
 sbkfeature_base.cpp
 sbkmodule.cpp
+sbknumpy.cpp
 sbkcppstring.cpp
 sbkstring.cpp
 sbkstaticstrings.cpp
@@ -85,13 +86,6 @@ signature/signature_extend.cpp
 signature/signature_helper.cpp
 )
 
-if (NOT "${NUMPY_INCLUDE_DIR}" STREQUAL "")
-    message(STATUS "NUMPY_INCLUDE_DIR: " ${NUMPY_INCLUDE_DIR})
-    list(APPEND libshiboken_SRC sbknumpyarrayconverter.cpp)
-else()
-    message(STATUS "NUMPY not found")
-endif()
-
 set(APIEXTRACTOR_EXTRA_INCLUDES ${APIEXTRACTOR_EXTRA_INCLUDES} ${LIBXSLT_INCLUDE_DIR} ${LIBXML2_INCLUDE_DIR})
 
 add_library(libshiboken SHARED ${libshiboken_SRC})
@@ -104,10 +98,12 @@ target_include_directories(libshiboken PUBLIC
 )
 
 if (NOT "${NUMPY_INCLUDE_DIR}" STREQUAL "")
+    message(STATUS "NUMPY_INCLUDE_DIR: " ${NUMPY_INCLUDE_DIR})
     target_include_directories(libshiboken PRIVATE ${NUMPY_INCLUDE_DIR})
     target_compile_definitions(libshiboken PRIVATE -DHAVE_NUMPY
                                            PRIVATE -DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
-
+else()
+    message(STATUS "NUMPY not found")
 endif()
 
 if(SHIBOKEN_IS_CROSS_BUILD)
@@ -156,6 +152,8 @@ install(FILES
         sbkenum_p.h
         sbkfeature_base.h
         sbkmodule.h
+        sbknumpycheck.h
+        sbknumpyview.h
         sbkstring.h
         sbkcppstring.h
         sbkstaticstrings.h

@@ -271,7 +271,7 @@
   <value-type name="QSurfaceDataItem"/>
   <object-type name="QSurfaceDataProxy">
     <extra-includes>
-      <include file-name="pyside_numpy.h" location="global"/>
+      <include file-name="sbknumpycheck.h" location="global"/>
       <include file-name="qtdatavisualization_helper.h" location="global"/>
     </extra-includes>
 

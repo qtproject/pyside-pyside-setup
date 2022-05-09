@@ -39,7 +39,7 @@
 
 #include "qtdatavisualization_helper.h"
 
-#include <pyside_numpy.h>
+#include <sbknumpyview.h>
 
 #include <QtCore/QDebug>
 
@@ -77,7 +77,7 @@ QSurfaceDataArray *surfaceDataFromNp(double xStart, double deltaX, double zStart
 
     auto *result = new QSurfaceDataArray;
 
-    PySide::Numpy::View view = PySide::Numpy::View::fromPyObject(pyData);
+    auto view = Shiboken::Numpy::View::fromPyObject(pyData);
     if (!view) {
         PyErr_Format(PyExc_TypeError, "Invalid array passed to %s", funcName);
         return result;
@@ -93,19 +93,19 @@ QSurfaceDataArray *surfaceDataFromNp(double xStart, double deltaX, double zStart
         return result;
 
     switch (view.type) {
-    case PySide::Numpy::View::Int:
+    case Shiboken::Numpy::View::Int:
         populateArray(xStart, deltaX, zStart, deltaZ, xSize, zSize, view.stride[0],
                       reinterpret_cast<const int *>(view.data), result);
         break;
-    case PySide::Numpy::View::Unsigned:
+    case Shiboken::Numpy::View::Unsigned:
         populateArray(xStart, deltaX, zStart, deltaZ, xSize, zSize, view.stride[0],
                       reinterpret_cast<const unsigned *>(view.data), result);
         break;
-    case PySide::Numpy::View::Float:
+    case Shiboken::Numpy::View::Float:
         populateArray(xStart, deltaX, zStart, deltaZ, xSize, zSize, view.stride[0],
                       reinterpret_cast<const float *>(view.data), result);
         break;
-    case PySide::Numpy::View::Double:
+    case Shiboken::Numpy::View::Double:
         populateArray(xStart, deltaX, zStart, deltaZ, xSize, zSize, view.stride[0],
                       reinterpret_cast<const double *>(view.data), result);
 

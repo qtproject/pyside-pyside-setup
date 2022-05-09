@@ -130,10 +130,18 @@ struct LIBSHIBOKEN_API debugPyBuffer
     const Py_buffer &m_buffer;
 };
 
+struct debugPyArrayObject
+{
+    explicit debugPyArrayObject(PyObject *object) : m_object(object) {}
+
+    PyObject *m_object;
+};
+
 LIBSHIBOKEN_API std::ostream &operator<<(std::ostream &str, const debugPyObject &o);
 LIBSHIBOKEN_API std::ostream &operator<<(std::ostream &str, const debugSbkObject &o);
 LIBSHIBOKEN_API std::ostream &operator<<(std::ostream &str, const debugPyTypeObject &o);
 LIBSHIBOKEN_API std::ostream &operator<<(std::ostream &str, const debugPyBuffer &b);
+LIBSHIBOKEN_API std::ostream &operator<<(std::ostream &str, const debugPyArrayObject &b);
 
 } // namespace Shiboken
 

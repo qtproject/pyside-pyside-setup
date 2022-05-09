@@ -37,13 +37,13 @@
 **
 ****************************************************************************/
 
+// included by sbknumpy.cpp
+
 #include "sbkarrayconverter.h"
 #include "helper.h"
 #include "sbkconverter.h"
 #include "sbkconverter_p.h"
 #include "sbkarrayconverter_p.h"
-
-#include <numpy/arrayobject.h>
 
 #include <algorithm>
 #include <iostream>
