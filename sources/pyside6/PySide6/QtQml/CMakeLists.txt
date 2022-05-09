@@ -19,6 +19,7 @@ ${QtQml_GEN_DIR}/qqmlabstracturlinterceptor_wrapper.cpp
 ${QtQml_GEN_DIR}/qqmlapplicationengine_wrapper.cpp
 ${QtQml_GEN_DIR}/qqmlcomponent_wrapper.cpp
 ${QtQml_GEN_DIR}/qqmlcontext_wrapper.cpp
+${QtQml_GEN_DIR}/qqmlcontext_propertypair_wrapper.cpp
 ${QtQml_GEN_DIR}/qqmlerror_wrapper.cpp
 ${QtQml_GEN_DIR}/qqmldebuggingenabler_wrapper.cpp
 ${QtQml_GEN_DIR}/qqmlengine_wrapper.cpp

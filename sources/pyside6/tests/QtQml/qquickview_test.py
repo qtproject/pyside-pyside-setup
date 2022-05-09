@@ -41,7 +41,7 @@ from helper.helper import quickview_errorstring
 from helper.timedqguiapplication import TimedQGuiApplication
 
 from PySide6.QtCore import QUrl, QObject, Property, Slot, Signal
-from PySide6.QtQml import QQmlEngine
+from PySide6.QtQml import QQmlEngine, QQmlContext
 from PySide6.QtQuick import QQuickView
 
 
@@ -83,6 +83,13 @@ class TestQQuickView(TimedQGuiApplication):
         context = QQmlEngine.contextForObject(rootObject)
         self.assertTrue(context)
         self.assertTrue(context.engine())
+
+        test_context = QQmlContext(context)  # Context properties, PYSIDE-1921
+        prop_pair = QQmlContext.PropertyPair()
+        prop_pair.name = "testProperty"
+        prop_pair.value = 42
+        test_context.setContextProperties([prop_pair])
+        self.assertTrue(test_context.contextProperty("testProperty"), 42)
 
     def testModelExport(self):
         view = QQuickView()
