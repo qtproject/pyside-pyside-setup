@@ -54,7 +54,8 @@ protected:
 
 private:
     void writeCopyCtor(TextStream &s, const AbstractMetaClass *metaClass) const;
-    void writeFunction(TextStream &s, const AbstractMetaFunctionCPtr &func);
+    void writeFunction(TextStream &s, const AbstractMetaFunctionCPtr &func,
+                       FunctionGeneration generation);
     void writeSbkTypeFunction(TextStream &s, const AbstractMetaEnum &cppEnum) const;
     static void writeSbkTypeFunction(TextStream &s, const AbstractMetaClass *cppClass) ;
     static void writeSbkTypeFunction(TextStream &s, const AbstractMetaType &metaType) ;
