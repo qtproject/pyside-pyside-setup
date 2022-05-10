@@ -31,7 +31,7 @@ set(QtUiTools_libraries     pyside6
                             ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
                             ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES}
                             )
-set(QtUiTools_deps QtWidgets QtXml)
+set(QtUiTools_deps QtWidgets)
 
 configure_file("${QtUiTools_SOURCE_DIR}/QtUiTools_global.pre.h.in"
                "${QtUiTools_BINARY_DIR}/QtUiTools_global.pre.h" @ONLY)
