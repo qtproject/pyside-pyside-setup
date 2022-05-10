@@ -138,16 +138,13 @@ void HeaderGenerator::generateClass(TextStream &s, const GeneratorContext &class
             s << '\n';
         }
 
-        const auto &funcs = filterFunctions(metaClass);
         int maxOverrides = 0;
-        for (const auto &func : funcs) {
-            if (func->isWhiteListed()
-                && !func->attributes().testFlag(AbstractMetaFunction::FinalCppMethod)) {
-                writeFunction(s, func);
-                // PYSIDE-803: Build a boolean cache for unused overrides.
-                if (shouldWriteVirtualMethodNative(func))
-                    maxOverrides++;
-            }
+        for (const auto &func : metaClass->functions()) {
+            const auto generation = functionGeneration(func);
+            writeFunction(s, func, generation);
+            // PYSIDE-803: Build a boolean cache for unused overrides.
+            if (generation.testFlag(FunctionGenerationFlag::VirtualMethod))
+                maxOverrides++;
         }
         if (!maxOverrides)
             maxOverrides = 1;
@@ -248,43 +245,34 @@ void HeaderGenerator::writeMemberFunctionWrapper(TextStream &s,
     s << "); }\n";
 }
 
-void HeaderGenerator::writeFunction(TextStream &s, const AbstractMetaFunctionCPtr &func)
+void HeaderGenerator::writeFunction(TextStream &s, const AbstractMetaFunctionCPtr &func,
+                                    FunctionGeneration generation)
 {
 
     // do not write copy ctors here.
-    if (!func->isPrivate() && func->functionType() == AbstractMetaFunction::CopyConstructorFunction) {
+    if (generation.testFlag(FunctionGenerationFlag::WrapperSpecialCopyConstructor)) {
         writeCopyCtor(s, func->ownerClass());
         return;
     }
-    if (func->isUserAdded())
-        return;
 
-    if (avoidProtectedHack() && func->isProtected() && !func->isConstructor()
-        && !func->isOperatorOverload()) {
+    if (generation.testFlag(FunctionGenerationFlag::ProtectedWrapper))
         writeMemberFunctionWrapper(s, func, u"_protected"_s);
-    }
 
-    // pure virtual functions need a default implementation
-    const bool notAbstract = !func->isAbstract();
-    if ((func->isPrivate() && notAbstract && !func->isVisibilityModifiedToPrivate())
-        || (func->isModifiedRemoved() && notAbstract))
-        return;
-
-    if (avoidProtectedHack() && func->ownerClass()->hasPrivateDestructor()
-        && (func->isAbstract() || func->isVirtual()))
-        return;
-
-    if (func->functionType() == AbstractMetaFunction::ConstructorFunction) {
+    if (generation.testFlag(FunctionGenerationFlag::WrapperConstructor)) {
         Options option =  func->hasSignatureModifications()
             ? Generator::OriginalTypeDescription : Generator::NoOption;
         s << functionSignature(func, {}, {}, option) << ";\n";
         return;
     }
 
-    if (func->isAbstract() || func->isVirtual()) {
+    const bool isVirtual = generation.testFlag(FunctionGenerationFlag::VirtualMethod);
+    if (isVirtual || generation.testFlag(FunctionGenerationFlag::QMetaObjectMethod)) {
         s << functionSignature(func, {}, {}, Generator::OriginalTypeDescription)
             << " override;\n";
-        // Check if this method hide other methods in base classes
+    }
+
+    // Check if this method hide other methods in base classes
+    if (isVirtual) {
         for (const auto &f : func->ownerClass()->functions()) {
             if (f != func
                 && !f->isConstructor()

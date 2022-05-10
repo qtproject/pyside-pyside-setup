@@ -588,17 +588,13 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
             s << "}\n\n";
         }
 
-        const auto &funcs = filterFunctions(metaClass);
         int maxOverrides = 0;
         writeCacheResetNative(s, classContext);
-        for (const auto &func : funcs) {
-            const bool notAbstract = !func->isAbstract();
-            if ((func->isPrivate() && notAbstract && !func->isVisibilityModifiedToPrivate())
-                || (func->isModifiedRemoved() && notAbstract))
-                continue;
-            if (func->functionType() == AbstractMetaFunction::ConstructorFunction && !func->isUserAdded())
+        for (const auto &func : metaClass->functions()) {
+            const auto generation = functionGeneration(func);
+            if (generation.testFlag(FunctionGenerationFlag::WrapperConstructor))
                 writeConstructorNative(s, classContext, func);
-            else if (shouldWriteVirtualMethodNative(func))
+            else if (generation.testFlag(FunctionGenerationFlag::VirtualMethod))
                 writeVirtualMethodNative(s, func, maxOverrides++);
         }
 
@@ -1149,12 +1145,6 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
                                             const AbstractMetaFunctionCPtr &func,
                                             int cacheIndex) const
 {
-    // skip metaObject function, this will be written manually ahead
-    if (usePySideExtensions() && func->ownerClass() && func->ownerClass()->isQObject() &&
-        ((func->name() == u"metaObject"_s)
-            || (func->name() == u"qt_metacall")))
-        return;
-
     const TypeEntry *retType = func->type().typeEntry();
     const QString funcName = func->isOperatorOverload()
         ? pythonOperatorFunctionName(func) : func->definitionNames().constFirst();

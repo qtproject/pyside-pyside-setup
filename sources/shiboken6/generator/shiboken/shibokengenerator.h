@@ -52,6 +52,27 @@ QT_FORWARD_DECLARE_CLASS(TextStream)
 class ShibokenGenerator : public Generator
 {
 public:
+    /// Besides the actual bindings (see AbstractMetaFunction::generateBinding(),
+    /// some functions need to be generated into the wrapper class
+    /// (virtual method/avoid protected hack expose).
+    enum class FunctionGenerationFlag
+    {
+        None = 0x0,
+        /// Virtual method overridable in Python
+        VirtualMethod = 0x1,
+        /// Special QObject virtuals
+        QMetaObjectMethod = 0x2,
+        /// Needs a protected wrapper for avoidProtectedHack()
+        /// public "foo_protected()" calling "foo()"
+        ProtectedWrapper = 0x4,        //
+        /// Pass through constructor
+        WrapperConstructor = 0x8,
+        /// Generate a special copy constructor
+        /// "FooBar_Wrapper(const Foo&)" for constructing a wrapper from a value
+        WrapperSpecialCopyConstructor = 0x10
+    };
+    Q_DECLARE_FLAGS(FunctionGeneration, FunctionGenerationFlag);
+
     enum class AttroCheckFlag
     {
         None                   = 0x0,
@@ -176,8 +197,8 @@ protected:
     /// Verifies if the class should have a C++ wrapper generated for it, instead of only a Python wrapper.
     bool shouldGenerateCppWrapper(const AbstractMetaClass *metaClass) const;
 
-    /// Condition to call WriteVirtualMethodNative. Was extracted because also used to count these calls.
-    bool shouldWriteVirtualMethodNative(const AbstractMetaFunctionCPtr &func) const;
+    /// Returns which functions need to be generated into the wrapper class
+    FunctionGeneration functionGeneration(const AbstractMetaFunctionCPtr &func) const;
 
     // Return a list of implicit conversions if generation is enabled.
     AbstractMetaFunctionCList implicitConversions(const TypeEntry *t) const;
@@ -296,8 +317,6 @@ protected:
                                   Options options = NoOption);
 
     static void writeUnusedVariableCast(TextStream &s, const QString &variableName);
-
-    AbstractMetaFunctionCList filterFunctions(const AbstractMetaClass *metaClass) const;
 
     // All data about extended converters: the type entries of the target type, and a
     // list of AbstractMetaClasses accepted as argument for the conversion.
@@ -446,6 +465,7 @@ private:
     static const TypeSystemConverterRegExps &typeSystemConvRegExps();
 };
 
+Q_DECLARE_OPERATORS_FOR_FLAGS(ShibokenGenerator::FunctionGeneration);
 Q_DECLARE_OPERATORS_FOR_FLAGS(ShibokenGenerator::AttroCheck);
 
 extern const QString CPP_ARG;
