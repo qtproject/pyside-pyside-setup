@@ -273,18 +273,16 @@ void HeaderGenerator::writeFunction(TextStream &s, const AbstractMetaFunctionCPt
         && (func->isAbstract() || func->isVirtual()))
         return;
 
-    if (func->isConstructor() || func->isAbstract() || func->isVirtual()) {
-        Options virtualOption = Generator::OriginalTypeDescription;
+    if (func->functionType() == AbstractMetaFunction::ConstructorFunction) {
+        Options option =  func->hasSignatureModifications()
+            ? Generator::OriginalTypeDescription : Generator::NoOption;
+        s << functionSignature(func, {}, {}, option) << ";\n";
+        return;
+    }
 
-        const bool virtualFunc = func->isVirtual() || func->isAbstract();
-        if (!virtualFunc && !func->hasSignatureModifications())
-            virtualOption = Generator::NoOption;
-
-        s << functionSignature(func, QString(), QString(), virtualOption);
-
-        if (virtualFunc)
-            s << " override";
-        s << ";\n";
+    if (func->isAbstract() || func->isVirtual()) {
+        s << functionSignature(func, {}, {}, Generator::OriginalTypeDescription)
+            << " override;\n";
         // Check if this method hide other methods in base classes
         for (const auto &f : func->ownerClass()->functions()) {
             if (f != func
