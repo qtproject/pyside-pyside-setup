@@ -539,6 +539,17 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
             raise DistutilsSetupError("Error building patchelf")
         self._patchelf_path = os.path.join(self.script_dir, "patchelf")
 
+    def _enable_numpy(self):
+        if OPTION["ENABLE_NUMPY_SUPPORT"] or OPTION["PYSIDE_NUMPY_SUPPORT"]:
+            return True
+        if OPTION["DISABLE_NUMPY_SUPPORT"]:
+            return False
+        if self.is_cross_compile:  # Do not search header in host Python
+            return False
+        # Debug builds require numpy to be built in debug mode on Windows
+        # https://numpy.org/devdocs/user/troubleshooting-importerror.html
+        return sys.platform != 'win32' or self.build_type.lower() != 'debug'
+
     def build_extension(self, extension):
         # calculate the subrepos folder name
 
@@ -655,9 +666,12 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
         if OPTION['AVOID_PROTECTED_HACK']:
             cmake_cmd.append("-DAVOID_PROTECTED_HACK=1")
 
-        numpy = get_numpy_location()
-        if numpy and not self.is_cross_compile:
-            cmake_cmd.append(f"-DNUMPY_INCLUDE_DIR={numpy}")
+        if self._enable_numpy():
+            numpy = get_numpy_location()
+            if numpy:
+                cmake_cmd.append(f"-DNUMPY_INCLUDE_DIR={numpy}")
+            else:
+                log.warn('***** numpy include directory was not found.')
 
         if self.build_type.lower() == 'debug':
             if not self.is_cross_compile:
@@ -779,7 +793,8 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
                          "Use '--build-docs' to enable the documentation build")
 
         if OPTION["PYSIDE_NUMPY_SUPPORT"]:
-            cmake_cmd.append("-DPYSIDE_NUMPY_SUPPORT=1")
+            log.info("Warning: '--pyside-numpy-support' is deprecated and will be removed. "
+                     "Use --enable-numpy-support/--disable-numpy-support.")
 
         target_qt_prefix_path = self.qtinfo.prefix_dir
         cmake_cmd.append(f"-DQFP_QT_TARGET_PATH={target_qt_prefix_path}")

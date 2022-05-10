@@ -119,8 +119,7 @@ class QPainterDrawText(UsesQGuiApplication):
                                    QPoint(20.0, 10.0),
                                    QPoint(80.0, 30.0),
                                    QPoint(90.0, 70.0)])
-        # FIXME: Activate once libpyside numpy support is on by default
-        if False and HAVE_NUMPY:
+        if HAVE_NUMPY:
             x = np.array([10.0, 20.0, 80.0, 90.0])
             y = np.array([80.0, 10.0, 30.0, 70.0])
             self.painter.drawPointsNp(x, y)

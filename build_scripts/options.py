@@ -250,7 +250,10 @@ class DistUtilsCommandMixin(object):
         ('qt-src-dir=', None, 'Qt source directory'),
         ('no-qt-tools', None, 'Do not copy the Qt tools'),
         ('no-size-optimization', None, 'Turn off size optimization for PySide6 binaries'),
-        ('pyside-numpy-support', None, 'libpyside: Add (experimental) numpy support'),
+        # Default is auto-detected by PysideBuild._enable_numpy()
+        ('pyside-numpy-support', None, 'libpyside: Add numpy support (deprecated)'),
+        ('enable-numpy-support', None, 'Enable numpy support'),
+        ('disable-numpy-support', None, 'Disable numpy support'),
         ('internal-cmake-install-dir-query-file-path=', None,
          'Path to file where the CMake install path of the project will be saved'),
 
@@ -310,6 +313,8 @@ class DistUtilsCommandMixin(object):
         self.no_qt_tools = False
         self.no_size_optimization = False
         self.pyside_numpy_support = False
+        self.enable_numpy_support = False
+        self.disable_numpy_support = False
         self.plat_name = None
         self.internal_cmake_install_dir_query_file_path = None
         self._per_command_mixin_options_finalized = False
@@ -471,6 +476,8 @@ class DistUtilsCommandMixin(object):
         OPTION['QT_SRC'] = self.qt_src_dir
         OPTION['NO_QT_TOOLS'] = self.no_qt_tools
         OPTION['NO_OVERRIDE_OPTIMIZATION_FLAGS'] = self.no_size_optimization
+        OPTION['DISABLE_NUMPY_SUPPORT'] = self.disable_numpy_support
+        OPTION['ENABLE_NUMPY_SUPPORT'] = self.enable_numpy_support
         OPTION['PYSIDE_NUMPY_SUPPORT'] = self.pyside_numpy_support
 
         if not self._extra_checks():
