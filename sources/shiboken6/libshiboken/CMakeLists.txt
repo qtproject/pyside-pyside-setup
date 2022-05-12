@@ -63,6 +63,7 @@ sbkarrayconverter.cpp
 sbkcontainer.cpp
 sbkconverter.cpp
 sbkenum.cpp
+sbkerrors.cpp
 sbkfeature_base.cpp
 sbkmodule.cpp
 sbknumpy.cpp
@@ -150,6 +151,7 @@ install(FILES
         sbkconverter.h
         sbkenum.h
         sbkenum_p.h
+        sbkerrors.h
         sbkfeature_base.h
         sbkmodule.h
         sbknumpycheck.h

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2022 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -37,26 +37,28 @@
 **
 ****************************************************************************/
 
-#ifndef SHIBOKEN_H
-#define SHIBOKEN_H
+#ifndef SBKERRORS_H
+#define SBKERRORS_H
 
 #include "sbkpython.h"
-#include "autodecref.h"
-#include "basewrapper.h"
-#include "bindingmanager.h"
-#include "gilstate.h"
-#include "threadstatesaver.h"
-#include "helper.h"
-#include "sbkarrayconverter.h"
-#include "sbkconverter.h"
-#include "sbkenum.h"
-#include "sbkerrors.h"
-#include "sbkmodule.h"
-#include "sbkstring.h"
-#include "sbkstaticstrings.h"
 #include "shibokenmacros.h"
-#include "shibokenbuffer.h"
-#include "signature.h"
 
-#endif // SHIBOKEN_H
+namespace Shiboken
+{
+namespace Errors
+{
 
+LIBSHIBOKEN_API void setInstantiateAbstractClass(const char *name);
+LIBSHIBOKEN_API void setInstantiateAbstractClassDisabledWrapper(const char *name);
+LIBSHIBOKEN_API void setInvalidTypeDeletion(const char *name);
+LIBSHIBOKEN_API void setOperatorNotImplemented();
+LIBSHIBOKEN_API void setPureVirtualMethodError(const char *name);
+LIBSHIBOKEN_API void setReverseOperatorNotImplemented();
+LIBSHIBOKEN_API void setSequenceTypeError(const char *expectedType);
+LIBSHIBOKEN_API void setSetterTypeError(const char *name, const char *expectedType);
+LIBSHIBOKEN_API void setWrongContainerType();
+
+} // namespace Errors
+} // namespace Shiboken
+
+#endif // SBKERRORS_H

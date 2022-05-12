@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2022 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -37,26 +37,65 @@
 **
 ****************************************************************************/
 
-#ifndef SHIBOKEN_H
-#define SHIBOKEN_H
-
-#include "sbkpython.h"
-#include "autodecref.h"
-#include "basewrapper.h"
-#include "bindingmanager.h"
-#include "gilstate.h"
-#include "threadstatesaver.h"
-#include "helper.h"
-#include "sbkarrayconverter.h"
-#include "sbkconverter.h"
-#include "sbkenum.h"
 #include "sbkerrors.h"
-#include "sbkmodule.h"
-#include "sbkstring.h"
-#include "sbkstaticstrings.h"
-#include "shibokenmacros.h"
-#include "shibokenbuffer.h"
-#include "signature.h"
 
-#endif // SHIBOKEN_H
+namespace Shiboken
+{
+namespace Errors
+{
 
+void setInstantiateAbstractClass(const char *name)
+{
+    PyErr_Format(PyExc_NotImplementedError,
+                 "'%s' represents a C++ abstract class and cannot be instantiated", name);
+}
+
+void setInstantiateAbstractClassDisabledWrapper(const char *name)
+{
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Abstract class '%s' cannot be instantiated since the wrapper has been disabled.",
+                 name);
+}
+
+void setInvalidTypeDeletion(const char *name)
+{
+    PyErr_Format(PyExc_TypeError, "'%s' may not be deleted", name);
+}
+
+void setOperatorNotImplemented()
+{
+    PyErr_SetString(PyExc_NotImplementedError, "operator not implemented.");
+}
+
+void setPureVirtualMethodError(const char *name)
+{
+    PyErr_Format(PyExc_NotImplementedError, "pure virtual method '%s' not implemented.", name);
+}
+
+
+void setReverseOperatorNotImplemented()
+{
+    PyErr_SetString(PyExc_NotImplementedError, "reverse operator not implemented.");
+}
+
+void setSequenceTypeError(const char *expectedType)
+{
+    PyErr_Format(PyExc_TypeError,
+                 "attributed value with wrong type, '%s' or other convertible type expected",
+                 expectedType);
+}
+
+void setSetterTypeError(const char *name, const char *expectedType)
+{
+    PyErr_Format(PyExc_TypeError,
+                 "wrong type attributed to '%s', '%s' or convertible type expected",
+                 name, expectedType);
+}
+
+void setWrongContainerType()
+{
+    PyErr_SetString(PyExc_TypeError, "Wrong type passed to container conversion.");
+}
+
+} // namespace Errors
+} // namespace Shiboken

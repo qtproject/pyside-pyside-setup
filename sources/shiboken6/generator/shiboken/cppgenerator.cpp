@@ -1068,9 +1068,8 @@ void CppGenerator::writeVirtualMethodCppCall(TextStream &s,
     }
 
     if (func->isAbstract()) {
-        s << "PyErr_SetString(PyExc_NotImplementedError, \"pure virtual method '"
-            << func->ownerClass()->name() << '.' << funcName
-            << "()' not implemented.\");\n"
+        s << "Shiboken::Errors::setPureVirtualMethodError(\""
+            << func->ownerClass()->name() << '.' << funcName << "\");\n"
             << returnStatement << '\n';
         return;
     }
@@ -2071,21 +2070,17 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
             writeUnusedVariableCast(s, QStringLiteral("myType"));
             if (needsMetaObject)
                 writeUnusedVariableCast(s, QStringLiteral("metaObject"));
-            s << "PyErr_SetString(PyExc_NotImplementedError,\n" << indent
-              << "\"Abstract class  '" << metaClass->qualifiedCppName()
-              << "' cannot be instantiated since the wrapper has been disabled.\");\n" << outdent
-              << errorReturn << outdent
-              << "}\n\n";
+            s << "Shiboken::Errors::setInstantiateAbstractClassDisabledWrapper(\""
+                << metaClass->qualifiedCppName() << "\");\n" << errorReturn << outdent
+                << "}\n\n";
             return;
         }
 
         // Refuse to instantiate Abstract C++ class (via C++ Wrapper) unless it is
         // a Python-derived class for which type != myType.
         s << "if (type == myType) {\n" << indent
-            << "PyErr_SetString(PyExc_NotImplementedError,\n" << indent
-            << "\"'" << metaClass->qualifiedCppName()
-            << "' represents a C++ abstract class and cannot be instantiated\");\n" << outdent
-            << errorReturn << outdent
+            << "Shiboken::Errors::setInstantiateAbstractClass(\"" << metaClass->qualifiedCppName()
+            << "\");\n" << errorReturn << outdent
             << "}\n\n";
     }
 
@@ -2940,13 +2935,10 @@ void CppGenerator::writeOverloadedFunctionDecisor(TextStream &s, const OverloadD
     // Ensure that the direct overload that called this reverse
     // is called.
     if (rfunc->isOperatorOverload() && !rfunc->isCallOperator()) {
-        s << "if (isReverse && overloadId == -1) {\n";
-        {
-            Indentation indent(s);
-            s << "PyErr_SetString(PyExc_NotImplementedError, \"reverse operator not implemented.\");\n"
-                << "return {};\n";
-        }
-        s << "}\n\n";
+        s << "if (isReverse && overloadId == -1) {\n" << indent
+            << "Shiboken::Errors::setReverseOperatorNotImplemented();\n"
+            << "return {};\n" << outdent
+            << "}\n\n";
     }
 
     s << "// Function signature not found.\n"
@@ -3687,14 +3679,10 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
     }
 
     if (func->isAbstract()) {
-        s << "if (Shiboken::Object::hasCppWrapper(reinterpret_cast<SbkObject *>(self))) {\n";
-        {
-            Indentation indent(s);
-            s << "PyErr_SetString(PyExc_NotImplementedError, \"pure virtual method '";
-            s << func->ownerClass()->name() << '.' << func->name() << "()' not implemented.\");\n"
-                << errorReturn;
-        }
-        s << "}\n";
+        s << "if (Shiboken::Object::hasCppWrapper(reinterpret_cast<SbkObject *>(self))) {\n"
+            << indent << "Shiboken::Errors::setPureVirtualMethodError(\""
+            << func->ownerClass()->name() << '.' << func->name() << "\");\n"
+            << errorReturn << outdent << "}\n";
     }
 
     // Used to provide contextual information to custom code writer function.
@@ -4970,8 +4958,7 @@ void CppGenerator::writeSetterFunctionPreamble(TextStream &s, const QString &nam
     writeCppSelfDefinition(s, context, ErrorReturn::Zero);
 
     s << "if (pyIn == " << NULL_PTR << ") {\n" << indent
-        << "PyErr_SetString(PyExc_TypeError, \"'"
-        << name << "' may not be deleted\");\n"
+        << "Shiboken::Errors::setInvalidTypeDeletion(\"" << name << "\");\n"
         << "return -1;\n"
         << outdent << "}\n";
 
@@ -4979,8 +4966,8 @@ void CppGenerator::writeSetterFunctionPreamble(TextStream &s, const QString &nam
         << "if (!";
     writeTypeCheck(s, type, u"pyIn"_s, isNumber(type.typeEntry()));
     s << ") {\n" << indent
-        << "PyErr_SetString(PyExc_TypeError, \"wrong type attributed to '"
-        << name << "', '" << type.name() << "' or convertible type expected\");\n"
+        << "Shiboken::Errors::setSetterTypeError(\"" << name << "\", \""
+        << type.name() << "\");\n"
         << "return -1;\n"
         << outdent << "}\n\n";
 }
@@ -5179,7 +5166,7 @@ void CppGenerator::writeRichCompareFunctionFooter(TextStream &s,
         s << "return " << PYTHON_RETURN_VAR << ";\n";
     }
     s << baseName << "_RichComparison_TypeError:\n"
-        << "PyErr_SetString(PyExc_NotImplementedError, \"operator not implemented.\");\n"
+        << "Shiboken::Errors::setOperatorNotImplemented();\n"
         << ErrorReturn::Default << '\n' << outdent << "}\n\n";
 }
 
@@ -6975,14 +6962,9 @@ void CppGenerator::writeDefaultSequenceMethods(TextStream &s,
     s << PYTHON_TO_CPPCONVERSION_STRUCT << ' ' << PYTHON_TO_CPP_VAR << ";\n"
         << "if (!";
     writeTypeCheck(s, itemType, u"pyArg"_s, isNumber(itemType.typeEntry()));
-    s << ") {\n";
-    {
-        Indentation indent(s);
-        s << "PyErr_SetString(PyExc_TypeError, \"attributed value with wrong type, '"
-            << itemType.name() << "' or other convertible type expected\");\n"
-            << "return -1;\n";
-    }
-    s << "}\n";
+    s << ") {\n" << indent
+        << "Shiboken::Errors::setSequenceTypeError(\"" << itemType.name() << "\");\n"
+        << "return -1;\n" << outdent << "}\n";
     writeArgumentConversion(s, itemType, u"cppValue"_s,
                             u"pyArg"_s, errorReturn, metaClass);
 

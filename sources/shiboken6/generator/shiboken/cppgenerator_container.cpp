@@ -152,7 +152,7 @@ CppGenerator::OpaqueContainerData
         << "if (!(";
     writeTypeCheck(s, valueType, pyArg), isNumber(valueType.typeEntry());
     s << ")) {\n" << indent
-        << "PyErr_SetString(PyExc_TypeError, \"Wrong type passed to container conversion.\");\n"
+        << "Shiboken::Errors::setWrongContainerType();\n"
         << "return {};\n" << outdent << "}\n";
         writePythonToCppTypeConversion(s, valueType, pyArg, cppArg, nullptr, {});
     s << "return " << cppArg << ";\n" << outdent << "}\n" << outdent << "};\n\n";
