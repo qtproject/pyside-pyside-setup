@@ -31,7 +31,8 @@
 
 #include <generator.h>
 
-#include "typesystem.h"
+#include "customconversion.h"
+#include "modifications.h"
 
 #include <QtCore/QRegularExpression>
 

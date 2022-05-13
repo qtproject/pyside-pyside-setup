@@ -31,7 +31,8 @@
 #include "abstractmetaenum.h"
 #include "abstractmetafield.h"
 #include "abstractmetalang.h"
-#include "typesystem.h"
+#include "enumtypeentry.h"
+#include "flagstypeentry.h"
 
 using QStringViewList = QList<QStringView>;
 

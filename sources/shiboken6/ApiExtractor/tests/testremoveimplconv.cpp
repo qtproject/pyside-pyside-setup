@@ -31,7 +31,7 @@
 #include <QtTest/QTest>
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
-#include <typesystem.h>
+#include <complextypeentry.h>
 
 // When a constructor able to trigger implicity conversions is removed
 // it should not appear in the implicity conversion list.

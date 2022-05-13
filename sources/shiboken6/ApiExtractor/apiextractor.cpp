@@ -40,7 +40,12 @@
 #include "modifications.h"
 #include "reporthandler.h"
 #include "typedatabase.h"
-#include "typesystem.h"
+#include "customconversion.h"
+#include "containertypeentry.h"
+#include "primitivetypeentry.h"
+#include "smartpointertypeentry.h"
+#include "typedefentry.h"
+#include "typesystemtypeentry.h"
 
 #include "qtcompat.h"
 

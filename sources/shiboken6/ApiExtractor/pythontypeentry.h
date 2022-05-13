@@ -1,6 +1,6 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
-** Copyright (C) 2020 The Qt Company Ltd.
+** Copyright (C) 2022 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -26,14 +26,28 @@
 **
 ****************************************************************************/
 
-#include "enclosingclassmixin.h"
-#include "abstractmetalang.h"
-#include "namespacetypeentry.h"
+#ifndef PYTHONTYPEENTRY_H
+#define PYTHONTYPEENTRY_H
 
-const AbstractMetaClass *EnclosingClassMixin::targetLangEnclosingClass() const
+#include "customtypenentry.h"
+
+class PythonTypeEntry : public CustomTypeEntry
 {
-    auto result = m_enclosingClass;
-    while (result && !NamespaceTypeEntry::isVisibleScope(result->typeEntry()))
-        result = result->enclosingClass();
-    return result;
-}
+public:
+    explicit PythonTypeEntry(const QString &entryName,
+                             const QString &checkFunction,
+                             TypeSystem::CPythonType type);
+
+    TypeEntry *clone() const override;
+
+    TypeSystem::CPythonType cPythonType() const;
+
+#ifndef QT_NO_DEBUG_STREAM
+    void formatDebug(QDebug &d) const override;
+#endif
+
+protected:
+    explicit PythonTypeEntry(TypeEntryPrivate *d);
+};
+
+#endif // PYTHONTYPEENTRY_H

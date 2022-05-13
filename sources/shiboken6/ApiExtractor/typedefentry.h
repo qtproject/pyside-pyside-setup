@@ -1,6 +1,6 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
-** Copyright (C) 2020 The Qt Company Ltd.
+** Copyright (C) 2022 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -26,14 +26,37 @@
 **
 ****************************************************************************/
 
-#include "enclosingclassmixin.h"
-#include "abstractmetalang.h"
-#include "namespacetypeentry.h"
+#ifndef TYPEDEFENTRY_H
+#define TYPEDEFENTRY_H
 
-const AbstractMetaClass *EnclosingClassMixin::targetLangEnclosingClass() const
+#include "complextypeentry.h"
+
+class TypedefEntryPrivate;
+
+class TypedefEntry : public ComplexTypeEntry
 {
-    auto result = m_enclosingClass;
-    while (result && !NamespaceTypeEntry::isVisibleScope(result->typeEntry()))
-        result = result->enclosingClass();
-    return result;
-}
+public:
+    explicit TypedefEntry(const QString &entryName,
+                          const QString &sourceType,
+                          const QVersionNumber &vr,
+                          const TypeEntry *parent);
+
+    QString sourceType() const;
+    void setSourceType(const QString &s);
+
+    TypeEntry *clone() const override;
+
+    const ComplexTypeEntry *source() const;
+    void setSource(const ComplexTypeEntry *source);
+
+    ComplexTypeEntry *target() const;
+    void setTarget(ComplexTypeEntry *target);
+
+#ifndef QT_NO_DEBUG_STREAM
+    void formatDebug(QDebug &d) const override;
+#endif
+protected:
+    explicit TypedefEntry(TypedefEntryPrivate *d);
+};
+
+#endif // TYPEDEFENTRY_H

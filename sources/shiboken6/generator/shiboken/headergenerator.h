@@ -30,6 +30,7 @@
 #define HEADERGENERATOR_H
 
 #include "shibokengenerator.h"
+#include "include.h"
 
 #include <QtCore/QSet>
 

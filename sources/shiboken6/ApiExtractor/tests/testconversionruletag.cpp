@@ -29,7 +29,9 @@
 #include "testconversionruletag.h"
 #include "testutil.h"
 #include <abstractmetalang.h>
-#include <typesystem.h>
+#include <complextypeentry.h>
+#include <customconversion.h>
+#include <primitivetypeentry.h>
 
 #include <qtcompat.h>
 

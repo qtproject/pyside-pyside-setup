@@ -32,7 +32,7 @@
 #include "abstractmetatype.h"
 #include "codemodel.h"
 #include "messages.h"
-#include "typesystem.h"
+#include "complextypeentry.h"
 
 #include "qtcompat.h"
 

@@ -31,7 +31,7 @@
 #include "abstractmetalang.h"
 #include "messages.h"
 #include "typedatabase.h"
-#include "typesystem.h"
+#include "containertypeentry.h"
 #include "parser/codemodel.h"
 
 #include "qtcompat.h"

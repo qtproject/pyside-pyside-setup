@@ -37,7 +37,8 @@
 #include "messages.h"
 #include "propertyspec.h"
 #include "reporthandler.h"
-#include "typesystem.h"
+#include "flagstypeentry.h"
+#include "complextypeentry.h"
 
 #include "qtcompat.h"
 

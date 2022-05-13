@@ -36,7 +36,12 @@
 #include "reporthandler.h"
 #include "fileout.h"
 #include "apiextractor.h"
-#include "typesystem.h"
+#include "arraytypeentry.h"
+#include "enumtypeentry.h"
+#include "enumvaluetypeentry.h"
+#include "namespacetypeentry.h"
+#include "primitivetypeentry.h"
+#include "typesystemtypeentry.h"
 #include <typedatabase.h>
 
 #include "qtcompat.h"

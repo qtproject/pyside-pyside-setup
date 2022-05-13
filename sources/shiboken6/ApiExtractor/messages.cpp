@@ -34,7 +34,9 @@
 #include "modifications.h"
 #include "sourcelocation.h"
 #include "typedatabase.h"
-#include "typesystem.h"
+#include "functiontypeentry.h"
+#include "enumtypeentry.h"
+#include "smartpointertypeentry.h"
 #include <codemodel.h>
 
 #include "qtcompat.h"

@@ -1,6 +1,6 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
-** Copyright (C) 2020 The Qt Company Ltd.
+** Copyright (C) 2022 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -26,14 +26,42 @@
 **
 ****************************************************************************/
 
-#include "enclosingclassmixin.h"
-#include "abstractmetalang.h"
-#include "namespacetypeentry.h"
+#ifndef ENUMTYPEENTRY_H
+#define ENUMTYPEENTRY_H
 
-const AbstractMetaClass *EnclosingClassMixin::targetLangEnclosingClass() const
+#include "typesystem.h"
+
+class EnumTypeEntryPrivate;
+class EnumValueTypeEntry;
+class FlagsTypeEntry;
+
+class EnumTypeEntry : public TypeEntry
 {
-    auto result = m_enclosingClass;
-    while (result && !NamespaceTypeEntry::isVisibleScope(result->typeEntry()))
-        result = result->enclosingClass();
-    return result;
-}
+public:
+    explicit EnumTypeEntry(const QString &entryName,
+                           const QVersionNumber &vr,
+                           const TypeEntry *parent);
+
+    QString targetLangQualifier() const;
+
+    QString qualifier() const;
+
+    const EnumValueTypeEntry *nullValue() const;
+    void setNullValue(const EnumValueTypeEntry *n);
+
+    void setFlags(FlagsTypeEntry *flags);
+    FlagsTypeEntry *flags() const;
+
+    bool isEnumValueRejected(const QString &name) const;
+    void addEnumValueRejection(const QString &name);
+    QStringList enumValueRejections() const;
+
+    TypeEntry *clone() const override;
+#ifndef QT_NO_DEBUG_STREAM
+    void formatDebug(QDebug &d) const override;
+#endif
+protected:
+    explicit EnumTypeEntry(EnumTypeEntryPrivate *d);
+};
+
+#endif // ENUMTYPEENTRY_H

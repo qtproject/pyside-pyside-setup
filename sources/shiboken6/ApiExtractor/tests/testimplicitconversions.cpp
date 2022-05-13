@@ -30,7 +30,7 @@
 #include "testutil.h"
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
-#include <typesystem.h>
+#include <complextypeentry.h>
 #include <QtTest/QTest>
 
 void TestImplicitConversions::testWithPrivateCtors()

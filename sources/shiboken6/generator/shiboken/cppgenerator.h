@@ -31,6 +31,7 @@
 
 #include "shibokengenerator.h"
 #include "abstractmetalang_enums.h"
+#include "include.h"
 
 #include <QtCore/QFlags>
 #include <QtCore/QSharedPointer>

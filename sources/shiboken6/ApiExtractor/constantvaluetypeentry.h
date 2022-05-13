@@ -1,6 +1,6 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
-** Copyright (C) 2020 The Qt Company Ltd.
+** Copyright (C) 2022 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -26,14 +26,23 @@
 **
 ****************************************************************************/
 
-#include "enclosingclassmixin.h"
-#include "abstractmetalang.h"
-#include "namespacetypeentry.h"
+#ifndef CONSTANTVALUETYPEENTRY_H
+#define CONSTANTVALUETYPEENTRY_H
 
-const AbstractMetaClass *EnclosingClassMixin::targetLangEnclosingClass() const
+#include "typesystem.h"
+
+// For primitive values, typically to provide a dummy type for
+// example the '2' in non-type template 'Array<2>'.
+class ConstantValueTypeEntry : public TypeEntry
 {
-    auto result = m_enclosingClass;
-    while (result && !NamespaceTypeEntry::isVisibleScope(result->typeEntry()))
-        result = result->enclosingClass();
-    return result;
-}
+public:
+    explicit  ConstantValueTypeEntry(const QString& name,
+                                     const TypeEntry *parent);
+
+    TypeEntry *clone() const override;
+
+protected:
+    explicit ConstantValueTypeEntry(TypeEntryPrivate *d);
+};
+
+#endif // CONSTANTVALUETYPEENTRY_H

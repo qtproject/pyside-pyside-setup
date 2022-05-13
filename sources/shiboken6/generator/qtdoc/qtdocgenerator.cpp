@@ -44,7 +44,9 @@
 #include <reporthandler.h>
 #include <textstream.h>
 #include <typedatabase.h>
-#include <typesystem.h>
+#include <functiontypeentry.h>
+#include <enumtypeentry.h>
+#include <complextypeentry.h>
 #include <qtdocparser.h>
 #include <doxygenparser.h>
 

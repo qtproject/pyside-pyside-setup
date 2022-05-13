@@ -1,6 +1,6 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
-** Copyright (C) 2020 The Qt Company Ltd.
+** Copyright (C) 2016 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -26,14 +26,35 @@
 **
 ****************************************************************************/
 
-#include "enclosingclassmixin.h"
-#include "abstractmetalang.h"
-#include "namespacetypeentry.h"
+#ifndef FLAGSTYPEENTRY_H
+#define FLAGSTYPEENTRY_H
 
-const AbstractMetaClass *EnclosingClassMixin::targetLangEnclosingClass() const
+#include "typesystem.h"
+
+class EnumTypeEntry;
+class FlagsTypeEntryPrivate;
+
+class FlagsTypeEntry : public TypeEntry
 {
-    auto result = m_enclosingClass;
-    while (result && !NamespaceTypeEntry::isVisibleScope(result->typeEntry()))
-        result = result->enclosingClass();
-    return result;
-}
+public:
+    explicit FlagsTypeEntry(const QString &entryName, const QVersionNumber &vr,
+                            const TypeEntry *parent);
+
+    QString originalName() const;
+    void setOriginalName(const QString &s);
+
+    QString flagsName() const;
+    void setFlagsName(const QString &name);
+
+    EnumTypeEntry *originator() const;
+    void setOriginator(EnumTypeEntry *e);
+
+    TypeEntry *clone() const override;
+
+protected:
+    explicit FlagsTypeEntry(FlagsTypeEntryPrivate *d);
+
+    QString buildTargetLangName() const override;
+};
+
+#endif // FLAGSTYPEENTRY_H

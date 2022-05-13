@@ -30,6 +30,7 @@
 #include <abstractmetalang.h>
 #include "apiextractorresult.h"
 #include "ctypenames.h"
+#include "containertypeentry.h"
 #include "textstream.h"
 
 #include <QtCore/QDebug>

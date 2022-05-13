@@ -46,6 +46,12 @@ class ConditionalStreamReader;
 
 class TypeSystemEntityResolver;
 class TypeDatabase;
+
+class FlagsTypeEntry;
+class TypeSystemTypeEntry;
+class ValueTypeEntry;
+class EnumTypeEntry;
+
 enum class ParserState;
 
 enum class StackElement {

@@ -1,6 +1,6 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
-** Copyright (C) 2020 The Qt Company Ltd.
+** Copyright (C) 2022 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -26,14 +26,31 @@
 **
 ****************************************************************************/
 
-#include "enclosingclassmixin.h"
-#include "abstractmetalang.h"
-#include "namespacetypeentry.h"
+#ifndef ENUMVALUETYPEENTRY_H
+#define ENUMVALUETYPEENTRY_H
 
-const AbstractMetaClass *EnclosingClassMixin::targetLangEnclosingClass() const
+#include "typesystem.h"
+
+class EnumTypeEntry;
+class EnumValueTypeEntryPrivate;
+
+// EnumValueTypeEntry is used for resolving integer type templates
+// like array<EnumValue>. Note: Dummy entries for integer values will
+// be created for non-type template parameters, where m_enclosingEnum==nullptr.
+class EnumValueTypeEntry : public TypeEntry
 {
-    auto result = m_enclosingClass;
-    while (result && !NamespaceTypeEntry::isVisibleScope(result->typeEntry()))
-        result = result->enclosingClass();
-    return result;
-}
+public:
+    explicit EnumValueTypeEntry(const QString& name, const QString& value,
+                                const EnumTypeEntry* enclosingEnum,
+                                bool isScopedEnum, const QVersionNumber &vr);
+
+    QString value() const;
+    const EnumTypeEntry* enclosingEnum() const;
+
+    TypeEntry *clone() const override;
+
+protected:
+    explicit EnumValueTypeEntry(EnumValueTypeEntryPrivate *d);
+};
+
+#endif // ENUMVALUETYPEENTRY_H

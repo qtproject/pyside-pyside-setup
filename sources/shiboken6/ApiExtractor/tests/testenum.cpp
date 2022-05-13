@@ -32,7 +32,8 @@
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
 #include <abstractmetabuilder_p.h>
-#include <typesystem.h>
+#include <enumtypeentry.h>
+#include <flagstypeentry.h>
 #include <parser/enumvalue.h>
 
 #include <qtcompat.h>

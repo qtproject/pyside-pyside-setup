@@ -38,7 +38,8 @@
 #include "reporthandler.h"
 #include "sourcelocation.h"
 #include "typedatabase.h"
-#include "typesystem.h"
+#include "enumtypeentry.h"
+#include "namespacetypeentry.h"
 #include "usingmember.h"
 
 #include <QtCore/QDebug>

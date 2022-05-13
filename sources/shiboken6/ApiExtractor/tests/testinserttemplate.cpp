@@ -31,7 +31,8 @@
 #include "testutil.h"
 #include <abstractmetalang.h>
 #include <modifications.h>
-#include <typesystem.h>
+#include <complextypeentry.h>
+#include <typesystemtypeentry.h>
 
 void TestInsertTemplate::testInsertTemplateOnClassInjectCode()
 {

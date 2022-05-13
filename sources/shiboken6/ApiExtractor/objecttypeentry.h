@@ -1,6 +1,6 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
-** Copyright (C) 2020 The Qt Company Ltd.
+** Copyright (C) 2022 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -26,14 +26,21 @@
 **
 ****************************************************************************/
 
-#include "enclosingclassmixin.h"
-#include "abstractmetalang.h"
-#include "namespacetypeentry.h"
+#ifndef OBJECTTYPEENTRY_H
+#define OBJECTTYPEENTRY_H
 
-const AbstractMetaClass *EnclosingClassMixin::targetLangEnclosingClass() const
+#include "complextypeentry.h"
+
+class ObjectTypeEntry : public ComplexTypeEntry
 {
-    auto result = m_enclosingClass;
-    while (result && !NamespaceTypeEntry::isVisibleScope(result->typeEntry()))
-        result = result->enclosingClass();
-    return result;
-}
+public:
+    explicit ObjectTypeEntry(const QString &entryName, const QVersionNumber &vr,
+                             const TypeEntry *parent);
+
+    TypeEntry *clone() const override;
+
+protected:
+    explicit ObjectTypeEntry(ComplexTypeEntryPrivate *d);
+};
+
+#endif // OBJECTTYPEENTRY_H

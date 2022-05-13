@@ -1,6 +1,6 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
-** Copyright (C) 2020 The Qt Company Ltd.
+** Copyright (C) 2016 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -26,14 +26,25 @@
 **
 ****************************************************************************/
 
-#include "enclosingclassmixin.h"
-#include "abstractmetalang.h"
-#include "namespacetypeentry.h"
+#ifndef VALUETYPEENTRY_H
+#define VALUETYPEENTRY_H
 
-const AbstractMetaClass *EnclosingClassMixin::targetLangEnclosingClass() const
+#include "complextypeentry.h"
+
+class ValueTypeEntry : public ComplexTypeEntry
 {
-    auto result = m_enclosingClass;
-    while (result && !NamespaceTypeEntry::isVisibleScope(result->typeEntry()))
-        result = result->enclosingClass();
-    return result;
-}
+public:
+    explicit ValueTypeEntry(const QString &entryName, const QVersionNumber &vr,
+                            const TypeEntry *parent);
+
+    bool isValue() const override;
+
+    TypeEntry *clone() const override;
+
+protected:
+    explicit ValueTypeEntry(const QString &entryName, Type t, const QVersionNumber &vr,
+                            const TypeEntry *parent);
+    explicit ValueTypeEntry(ComplexTypeEntryPrivate *d);
+};
+
+#endif // VALUETYPEENTRY_H

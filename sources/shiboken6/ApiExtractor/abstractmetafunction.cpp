@@ -40,7 +40,10 @@
 #include "reporthandler.h"
 #include "sourcelocation.h"
 #include "typedatabase.h"
-#include "typesystem.h"
+#include "complextypeentry.h"
+#include "functiontypeentry.h"
+#include "primitivetypeentry.h"
+#include "typesystemtypeentry.h"
 
 #include "qtcompat.h"
 

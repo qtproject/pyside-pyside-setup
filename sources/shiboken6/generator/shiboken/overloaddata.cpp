@@ -31,7 +31,9 @@
 #include <abstractmetalang.h>
 #include <dotview.h>
 #include <reporthandler.h>
-#include <typesystem.h>
+#include <complextypeentry.h>
+#include <containertypeentry.h>
+#include <primitivetypeentry.h>
 #include <graph.h>
 #include "overloaddata.h"
 #include "messages.h"

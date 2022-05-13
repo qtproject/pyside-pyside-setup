@@ -30,7 +30,8 @@
 #include <QtTest/QTest>
 #include "testutil.h"
 #include <abstractmetalang.h>
-#include <typesystem.h>
+#include <complextypeentry.h>
+#include <typesystemtypeentry.h>
 
 void TestExtraInclude::testClassExtraInclude()
 {

@@ -29,7 +29,7 @@
 #include "testprimitivetypetag.h"
 #include "testutil.h"
 #include <abstractmetalang.h>
-#include <typesystem.h>
+#include <primitivetypeentry.h>
 
 #include <qtcompat.h>
 

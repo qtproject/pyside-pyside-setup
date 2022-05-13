@@ -1,6 +1,6 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
-** Copyright (C) 2020 The Qt Company Ltd.
+** Copyright (C) 2022 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -26,14 +26,24 @@
 **
 ****************************************************************************/
 
-#include "enclosingclassmixin.h"
-#include "abstractmetalang.h"
-#include "namespacetypeentry.h"
+#ifndef TYPESYSTEMTYPEENTRY_H
+#define TYPESYSTEMTYPEENTRY_H
 
-const AbstractMetaClass *EnclosingClassMixin::targetLangEnclosingClass() const
+#include "typesystem.h"
+
+class TypeSystemTypeEntry : public TypeEntry
 {
-    auto result = m_enclosingClass;
-    while (result && !NamespaceTypeEntry::isVisibleScope(result->typeEntry()))
-        result = result->enclosingClass();
-    return result;
-}
+public:
+    explicit TypeSystemTypeEntry(const QString &entryName, const QVersionNumber &vr,
+                                 const TypeEntry *parent);
+
+    TypeEntry *clone() const override;
+
+    TypeSystem::SnakeCase snakeCase() const;
+    void setSnakeCase(TypeSystem::SnakeCase sc);
+
+protected:
+    explicit TypeSystemTypeEntry(TypeEntryPrivate *d);
+};
+
+#endif // TYPESYSTEMTYPEENTRY_H

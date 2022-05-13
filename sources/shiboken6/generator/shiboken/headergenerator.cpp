@@ -38,6 +38,14 @@
 #include <reporthandler.h>
 #include <textstream.h>
 #include <fileout.h>
+#include "containertypeentry.h"
+#include "enumtypeentry.h"
+#include "flagstypeentry.h"
+#include "namespacetypeentry.h"
+#include "primitivetypeentry.h"
+#include "typedefentry.h"
+#include "typesystemtypeentry.h"
+
 #include "parser/codemodel.h"
 
 #include "qtcompat.h"

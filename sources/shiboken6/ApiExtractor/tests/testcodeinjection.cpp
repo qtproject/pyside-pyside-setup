@@ -31,7 +31,7 @@
 #include <abstractmetalang.h>
 #include <modifications.h>
 #include <textstream.h>
-#include <typesystem.h>
+#include <complextypeentry.h>
 
 #include <qtcompat.h>
 

@@ -30,7 +30,7 @@
 #include <QtTest/QTest>
 #include "testutil.h"
 #include <abstractmetalang.h>
-#include <typesystem.h>
+#include <complextypeentry.h>
 
 void TestValueTypeDefaultCtorTag::testValueTypeDefaultCtorTagArgument()
 {

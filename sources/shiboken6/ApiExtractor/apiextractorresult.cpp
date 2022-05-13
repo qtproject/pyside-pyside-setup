@@ -31,7 +31,8 @@
 #include "abstractmetalang.h"
 #include "abstractmetaenum.h"
 
-#include "typesystem.h"
+#include "enumtypeentry.h"
+#include "flagstypeentry.h"
 
 ApiExtractorResultData::ApiExtractorResultData() = default;
 

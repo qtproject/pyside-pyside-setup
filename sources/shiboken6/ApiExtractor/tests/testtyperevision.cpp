@@ -30,7 +30,9 @@
 #include "testutil.h"
 #include <abstractmetaenum.h>
 #include <abstractmetalang.h>
-#include <typesystem.h>
+#include <complextypeentry.h>
+#include <enumtypeentry.h>
+#include <flagstypeentry.h>
 #include <typedatabase.h>
 
 #include <qtcompat.h>

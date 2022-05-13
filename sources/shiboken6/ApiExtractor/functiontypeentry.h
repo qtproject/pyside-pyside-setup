@@ -1,6 +1,6 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
-** Copyright (C) 2020 The Qt Company Ltd.
+** Copyright (C) 2022 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -26,14 +26,35 @@
 **
 ****************************************************************************/
 
-#include "enclosingclassmixin.h"
-#include "abstractmetalang.h"
-#include "namespacetypeentry.h"
+#ifndef FUNCTIONTYPEENTRY_H
+#define FUNCTIONTYPEENTRY_H
 
-const AbstractMetaClass *EnclosingClassMixin::targetLangEnclosingClass() const
+#include "typesystem.h"
+
+class FunctionTypeEntryPrivate;
+
+class FunctionTypeEntry : public TypeEntry
 {
-    auto result = m_enclosingClass;
-    while (result && !NamespaceTypeEntry::isVisibleScope(result->typeEntry()))
-        result = result->enclosingClass();
-    return result;
-}
+public:
+    explicit FunctionTypeEntry(const QString& name, const QString& signature,
+                               const QVersionNumber &vr,
+                               const TypeEntry *parent);
+
+    const QStringList &signatures() const;
+    bool hasSignature(const QString& signature) const;
+    void addSignature(const QString& signature);
+
+    TypeSystem::SnakeCase snakeCase() const;
+    void setSnakeCase(TypeSystem::SnakeCase sc);
+
+    TypeEntry *clone() const override;
+
+#ifndef QT_NO_DEBUG_STREAM
+    void formatDebug(QDebug &d) const override;
+#endif
+
+protected:
+    explicit FunctionTypeEntry(FunctionTypeEntryPrivate *d);
+};
+
+#endif // FUNCTIONTYPEENTRY_H

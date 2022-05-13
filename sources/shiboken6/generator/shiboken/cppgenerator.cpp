@@ -47,6 +47,14 @@
 #include <sourcelocation.h>
 #include <textstream.h>
 #include <typedatabase.h>
+#include <containertypeentry.h>
+#include <enumtypeentry.h>
+#include <flagstypeentry.h>
+#include <functiontypeentry.h>
+#include <namespacetypeentry.h>
+#include <primitivetypeentry.h>
+#include <smartpointertypeentry.h>
+#include <typesystemtypeentry.h>
 #include <parser/enumvalue.h>
 
 #include "qtcompat.h"

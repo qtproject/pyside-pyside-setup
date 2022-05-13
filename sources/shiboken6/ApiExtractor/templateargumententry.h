@@ -1,6 +1,6 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
-** Copyright (C) 2020 The Qt Company Ltd.
+** Copyright (C) 2022 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -26,14 +26,26 @@
 **
 ****************************************************************************/
 
-#include "enclosingclassmixin.h"
-#include "abstractmetalang.h"
-#include "namespacetypeentry.h"
+#ifndef TEMPLATEARGUMENTENTRY_H
+#define TEMPLATEARGUMENTENTRY_H
 
-const AbstractMetaClass *EnclosingClassMixin::targetLangEnclosingClass() const
+#include "typesystem.h"
+
+class TemplateArgumentEntryPrivate;
+
+class TemplateArgumentEntry : public TypeEntry
 {
-    auto result = m_enclosingClass;
-    while (result && !NamespaceTypeEntry::isVisibleScope(result->typeEntry()))
-        result = result->enclosingClass();
-    return result;
-}
+public:
+    explicit TemplateArgumentEntry(const QString &entryName, const QVersionNumber &vr,
+                                   const TypeEntry *parent);
+
+    int ordinal() const;
+    void setOrdinal(int o);
+
+    TypeEntry *clone() const override;
+
+protected:
+    explicit TemplateArgumentEntry(TemplateArgumentEntryPrivate *d);
+};
+
+#endif // TEMPLATEARGUMENTENTRY_H

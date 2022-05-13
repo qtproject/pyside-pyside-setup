@@ -36,7 +36,7 @@
 #include "modifications.h"
 #include "propertyspec.h"
 #include "reporthandler.h"
-#include "typesystem.h"
+#include "complextypeentry.h"
 #include "xmlutils.h"
 
 #include "qtcompat.h"

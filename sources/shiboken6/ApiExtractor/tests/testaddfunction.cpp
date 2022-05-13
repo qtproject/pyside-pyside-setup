@@ -32,7 +32,8 @@
 #include <abstractmetalang.h>
 #include <modifications.h>
 #include <modifications_p.h>
-#include <typesystem.h>
+#include <complextypeentry.h>
+#include <primitivetypeentry.h>
 
 #include <qtcompat.h>
 

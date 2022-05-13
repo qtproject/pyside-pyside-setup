@@ -31,7 +31,7 @@
 #include <abstractmetaenum.h>
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
-#include <typesystem.h>
+#include <primitivetypeentry.h>
 #include <parser/enumvalue.h>
 
 #include <qtcompat.h>

@@ -31,7 +31,8 @@
 #include "testutil.h"
 #include <abstractmetalang.h>
 #include <abstractmetatype.h>
-#include <typesystem.h>
+#include <complextypeentry.h>
+#include <containertypeentry.h>
 
 void TestContainer::testContainerType()
 {

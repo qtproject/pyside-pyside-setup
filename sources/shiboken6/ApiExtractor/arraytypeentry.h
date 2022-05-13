@@ -1,6 +1,6 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
-** Copyright (C) 2020 The Qt Company Ltd.
+** Copyright (C) 2022 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -26,14 +26,28 @@
 **
 ****************************************************************************/
 
-#include "enclosingclassmixin.h"
-#include "abstractmetalang.h"
-#include "namespacetypeentry.h"
+#ifndef ARRAYTYPEENTRY_H
+#define ARRAYTYPEENTRY_H
 
-const AbstractMetaClass *EnclosingClassMixin::targetLangEnclosingClass() const
+#include "typesystem.h"
+
+class ArrayTypeEntryPrivate;
+
+class ArrayTypeEntry : public TypeEntry
 {
-    auto result = m_enclosingClass;
-    while (result && !NamespaceTypeEntry::isVisibleScope(result->typeEntry()))
-        result = result->enclosingClass();
-    return result;
-}
+public:
+    explicit ArrayTypeEntry(const TypeEntry *nested_type, const QVersionNumber &vr,
+                            const TypeEntry *parent);
+
+    void setNestedTypeEntry(TypeEntry *nested);
+    const TypeEntry *nestedTypeEntry() const;
+
+    TypeEntry *clone() const override;
+
+protected:
+    explicit ArrayTypeEntry(ArrayTypeEntryPrivate *d);
+
+    QString buildTargetLangName() const override;
+};
+
+#endif // ARRAYTYPEENTRY_H

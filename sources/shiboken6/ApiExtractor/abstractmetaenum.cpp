@@ -29,7 +29,7 @@
 #include "abstractmetaenum.h"
 #include "abstractmetalang.h"
 #include "documentation.h"
-#include "typesystem.h"
+#include "enumtypeentry.h"
 #include "parser/enumvalue.h"
 
 #include "qtcompat.h"

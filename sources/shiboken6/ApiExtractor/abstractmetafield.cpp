@@ -32,7 +32,8 @@
 #include "abstractmetatype.h"
 #include "documentation.h"
 #include "modifications.h"
-#include "typesystem.h"
+#include "complextypeentry.h"
+#include "typesystemtypeentry.h"
 #include "parser/codemodel.h"
 
 #include "qtcompat.h"

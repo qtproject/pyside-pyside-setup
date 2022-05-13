@@ -46,6 +46,14 @@
 #include <textstream.h>
 #include <typedatabase.h>
 #include <abstractmetabuilder.h>
+#include <containertypeentry.h>
+#include <customtypenentry.h>
+#include <enumtypeentry.h>
+#include <flagstypeentry.h>
+#include <namespacetypeentry.h>
+#include <primitivetypeentry.h>
+#include <pythontypeentry.h>
+
 #include <iostream>
 
 #include "qtcompat.h"
