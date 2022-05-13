@@ -8,8 +8,8 @@ endif()
 
 project(scriptableapplication)
 
-# Set CPP standard to C++11 minimum.
-set(CMAKE_CXX_STANDARD 11)
+# Set CPP standard to C++17 minimum.
+set(CMAKE_CXX_STANDARD 17)
 
 # Find required Qt packages.
 find_package(Qt6 COMPONENTS Core)
