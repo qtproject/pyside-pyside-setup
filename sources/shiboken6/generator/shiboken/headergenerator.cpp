@@ -33,6 +33,7 @@
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
 #include <abstractmetalang_helpers.h>
+#include <codesnip.h>
 #include <modifications.h>
 #include <typedatabase.h>
 #include <reporthandler.h>

@@ -32,7 +32,6 @@
 #include <generator.h>
 
 #include "customconversion.h"
-#include "modifications.h"
 
 #include <QtCore/QRegularExpression>
 
@@ -125,17 +124,17 @@ protected:
 
     /// Write user's custom code snippets at class or module level.
     void writeClassCodeSnips(TextStream &s,
-                             const CodeSnipList &codeSnips,
+                             const QList<CodeSnip> &codeSnips,
                              TypeSystem::CodeSnipPosition position,
                              TypeSystem::Language language,
                              const GeneratorContext &context) const;
     void writeCodeSnips(TextStream &s,
-                        const CodeSnipList &codeSnips,
+                        const QList<CodeSnip> &codeSnips,
                         TypeSystem::CodeSnipPosition position,
                         TypeSystem::Language language) const;
     /// Write user's custom code snippets at function level.
     void writeCodeSnips(TextStream &s,
-                        const CodeSnipList &codeSnips,
+                        const QList<CodeSnip> &codeSnips,
                         TypeSystem::CodeSnipPosition position,
                         TypeSystem::Language language,
                         const AbstractMetaFunctionCPtr &func,
@@ -396,7 +395,7 @@ private:
                                const AbstractMetaArgument *lastArg);
 
     /// Returns a string with the user's custom code snippets that comply with \p position and \p language.
-    static QString getCodeSnippets(const CodeSnipList &codeSnips,
+    static QString getCodeSnippets(const QList<CodeSnip> &codeSnips,
                                    TypeSystem::CodeSnipPosition position,
                                    TypeSystem::Language language);
 

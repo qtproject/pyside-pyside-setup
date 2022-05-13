@@ -30,6 +30,7 @@
 #include "testutil.h"
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
+#include <codesnip.h>
 #include <modifications.h>
 #include <modifications_p.h>
 #include <complextypeentry.h>

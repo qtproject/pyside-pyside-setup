@@ -27,6 +27,7 @@
 ****************************************************************************/
 
 #include "qtdocgenerator.h"
+#include "codesnip.h"
 #include "exception.h"
 #include "apiextractorresult.h"
 #include "qtxmltosphinx.h"

@@ -31,7 +31,7 @@
 #include "typesystem.h"
 #include "typedatabase.h"
 #include "typedatabase_p.h"
-#include "modifications.h"
+#include "codesnip.h"
 
 #include <QtCore/QStack>
 #include <QtCore/QHash>

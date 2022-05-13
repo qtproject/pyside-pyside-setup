@@ -28,6 +28,7 @@
 
 #include "shibokengenerator.h"
 #include "apiextractorresult.h"
+#include "codesnip.h"
 #include "ctypenames.h"
 #include <abstractmetabuilder.h>
 #include <abstractmetaenum.h>

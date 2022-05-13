@@ -35,6 +35,7 @@
 #include "documentation.h"
 #include "exception.h"
 #include "messages.h"
+#include "codesnip.h"
 #include "modifications.h"
 #include "propertyspec.h"
 #include "reporthandler.h"

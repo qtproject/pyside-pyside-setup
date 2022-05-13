@@ -28,6 +28,7 @@
 
 #include "typesystem.h"
 #include "arraytypeentry.h"
+#include "codesnip.h"
 #include "complextypeentry.h"
 #include "constantvaluetypeentry.h"
 #include "containertypeentry.h"

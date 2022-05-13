@@ -35,6 +35,7 @@
 #include "abstractmetafield.h"
 #include "abstractmetafunction.h"
 #include "abstractmetalang.h"
+#include "codesnip.h"
 #include "exception.h"
 #include "fileout.h"
 #include "modifications.h"

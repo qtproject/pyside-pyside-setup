@@ -29,6 +29,7 @@
 #include "testcodeinjection.h"
 #include "testutil.h"
 #include <abstractmetalang.h>
+#include <codesnip.h>
 #include <modifications.h>
 #include <textstream.h>
 #include <complextypeentry.h>

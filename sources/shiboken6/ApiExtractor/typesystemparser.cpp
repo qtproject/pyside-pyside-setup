@@ -27,6 +27,7 @@
 ****************************************************************************/
 
 #include "typesystemparser_p.h"
+#include "codesnip.h"
 #include "enumtypeentry.h"
 #include "enumvaluetypeentry.h"
 #include "arraytypeentry.h"
@@ -45,6 +46,7 @@
 #include "typedefentry.h"
 #include "typesystemtypeentry.h"
 #include "valuetypeentry.h"
+#include "modifications.h"
 #include "typedatabase.h"
 #include "messages.h"
 #include "reporthandler.h"

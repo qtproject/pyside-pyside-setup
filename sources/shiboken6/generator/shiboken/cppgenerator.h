@@ -32,6 +32,7 @@
 #include "shibokengenerator.h"
 #include "abstractmetalang_enums.h"
 #include "include.h"
+#include "modifications.h"
 
 #include <QtCore/QFlags>
 #include <QtCore/QSharedPointer>
@@ -95,7 +96,7 @@ private:
     void writeVirtualMethodNative(TextStream &s, const AbstractMetaFunctionCPtr &func,
                                   int cacheIndex) const;
     void writeVirtualMethodCppCall(TextStream &s, const AbstractMetaFunctionCPtr &func,
-                                   const QString &funcName, const CodeSnipList &snips,
+                                   const QString &funcName, const QList<CodeSnip> &snips,
                                    const AbstractMetaArgument *lastArg, const TypeEntry *retType,
                                    const QString &returnStatement) const;
     static QString virtualMethodReturn(TextStream &s, const ApiExtractorResult &api,

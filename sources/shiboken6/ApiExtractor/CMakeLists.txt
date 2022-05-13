@@ -17,6 +17,7 @@ abstractmetafunction.cpp
 abstractmetatype.cpp
 abstractmetalang.cpp
 classdocumentation.cpp
+codesnip.cpp
 codesniphelpers.cpp
 conditionalstreamreader.cpp
 documentation.cpp

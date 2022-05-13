@@ -30,6 +30,7 @@
 #include <QtTest/QTest>
 #include "testutil.h"
 #include <abstractmetalang.h>
+#include <codesnip.h>
 #include <modifications.h>
 #include <complextypeentry.h>
 #include <typesystemtypeentry.h>

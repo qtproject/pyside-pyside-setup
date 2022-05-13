@@ -27,6 +27,7 @@
 ****************************************************************************/
 
 #include "cppgenerator.h"
+#include "codesnip.h"
 #include "headergenerator.h"
 #include "apiextractor.h"
 #include "apiextractorresult.h"

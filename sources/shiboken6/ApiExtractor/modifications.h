@@ -31,16 +31,14 @@
 
 #include "typesystem_enums.h"
 #include "typesystem_typedefs.h"
-#include "codesniphelpers.h"
 #include "parser/typeinfo.h"
 
 #include <QtCore/QList>
-#include <QtCore/QRegularExpression>
 #include <QtCore/QSharedDataPointer>
-#include <QtCore/QSharedPointer>
 #include <QtCore/QString>
 
 class ArgumentModificationData;
+class CodeSnip;
 class FunctionModificationData;
 class ModificationData;
 class FieldModificationData;
@@ -48,28 +46,6 @@ class FieldModificationData;
 QT_BEGIN_NAMESPACE
 class QDebug;
 QT_END_NAMESPACE
-
-class TemplateInstance
-{
-public:
-    explicit TemplateInstance(const QString &name) : m_name(name) {}
-
-    void addReplaceRule(const QString &name, const QString &value)
-    {
-        replaceRules[name] = value;
-    }
-
-    QString expandCode() const;
-
-    QString name() const
-    {
-        return m_name;
-    }
-
-private:
-    const QString m_name;
-    QHash<QString, QString> replaceRules;
-};
 
 struct ReferenceCount
 {
@@ -107,75 +83,6 @@ struct ArgumentOwner
     int index = InvalidIndex;
 };
 
-using TemplateInstancePtr = QSharedPointer<TemplateInstance>;
-
-class CodeSnipFragment
-{
-public:
-    CodeSnipFragment() = default;
-    explicit CodeSnipFragment(const QString &code) : m_code(code) {}
-    explicit CodeSnipFragment(const TemplateInstancePtr &instance) : m_instance(instance) {}
-
-    bool isEmpty() const { return m_code.isEmpty() && m_instance.isNull(); }
-
-    QString code() const;
-
-    TemplateInstancePtr instance() const { return m_instance; }
-
-private:
-    QString m_code;
-    QSharedPointer<TemplateInstance> m_instance;
-};
-
-class CodeSnipAbstract : public CodeSnipHelpers
-{
-public:
-    QString code() const;
-
-    void addCode(const QString &code);
-    void addCode(QStringView code) { addCode(code.toString()); }
-
-    void addTemplateInstance(const TemplateInstancePtr &ti)
-    {
-        codeList.append(CodeSnipFragment(ti));
-    }
-
-    bool isEmpty() const { return codeList.isEmpty(); }
-    void purgeEmptyFragments();
-
-    QList<CodeSnipFragment> codeList;
-
-    static QRegularExpression placeHolderRegex(int index);
-};
-
-class TemplateEntry : public CodeSnipAbstract
-{
-public:
-    explicit TemplateEntry(const QString &name) : m_name(name) {}
-
-    QString name() const
-    {
-        return m_name;
-    }
-
-private:
-    QString m_name;
-};
-
-class CodeSnip : public CodeSnipAbstract
-{
-public:
-    CodeSnip() = default;
-    explicit CodeSnip(TypeSystem::Language lang) : language(lang) {}
-
-    TypeSystem::Language language = TypeSystem::TargetLangCode;
-    TypeSystem::CodeSnipPosition position = TypeSystem::CodeSnipPositionAny;
-};
-
-/// Purge empty fragments and snippets caused by new line characters in
-/// conjunction with <insert-template>.
-void purgeEmptyCodeSnips(QList<CodeSnip> *list);
-
 class ArgumentModification
 {
 public:
@@ -211,8 +118,8 @@ public:
     void setNativeOwnership(TypeSystem::Ownership o);
 
     // Different conversion rules
-    const CodeSnipList &conversionRules() const;
-    CodeSnipList &conversionRules();
+    const QList<CodeSnip> &conversionRules() const;
+    QList<CodeSnip> &conversionRules();
 
     // QObject parent(owner) of this argument
     ArgumentOwner owner() const;
@@ -361,10 +268,10 @@ public:
     int overloadNumber() const;
     void setOverloadNumber(int overloadNumber);
 
-    const CodeSnipList &snips() const;
-    CodeSnipList &snips();
+    const QList<CodeSnip> &snips() const;
+    QList<CodeSnip> &snips();
     void appendSnip(const CodeSnip &snip);
-    void setSnips(const CodeSnipList &snips);
+    void setSnips(const QList<CodeSnip> &snips);
 
     const QList<ArgumentModification> &argument_mods() const;
     QList<ArgumentModification> &argument_mods();
