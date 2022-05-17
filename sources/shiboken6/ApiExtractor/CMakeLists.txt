@@ -28,6 +28,7 @@ messages.cpp
 modifications.cpp
 predefined_templates.cpp
 propertyspec.cpp
+pymethoddefentry.cpp
 reporthandler.cpp
 sourcelocation.cpp
 typeparser.cpp

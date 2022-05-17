@@ -36,6 +36,7 @@
 #include "pytypenames.h"
 #include "fileout.h"
 #include "overloaddata.h"
+#include "pymethoddefentry.h"
 #include <abstractmetaenum.h>
 #include <abstractmetafield.h>
 #include <abstractmetafunction.h>
@@ -652,13 +653,14 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
             // a separate PyMethodDef entry is written which is referenced
             // in the PyMethodDef list and later in getattro() for handling
             // the non-static case.
+            const auto defEntries = methodDefinitionEntries(overloadData);
             if (OverloadData::hasStaticAndInstanceFunctions(overloads)) {
                 QString methDefName = cpythonMethodDefinitionName(rfunc);
-                smd << "static PyMethodDef " << methDefName << " = " << indent;
-                writeMethodDefinitionEntries(smd, overloadData, 1);
-                smd << outdent << ";\n\n";
+                smd << "static PyMethodDef " << methDefName << " = " << indent
+                    << defEntries.constFirst() << outdent << ";\n\n";
             }
-            writeMethodDefinition(md, overloadData);
+            if (!m_tpFuncs.contains(rfunc->name()))
+                md << defEntries;
         }
     }
     const QString methodsDefinitions = md.toString();
@@ -971,7 +973,7 @@ void CppGenerator::writeMethodWrapper(TextStream &s, TextStream &definitionStrea
     OverloadData overloadData(overloads, api());
     writeMethodWrapper(s, overloadData, classContext);
     writeSignatureInfo(signatureStream, overloadData);
-    writeMethodDefinition(definitionStream, overloadData);
+    definitionStream << methodDefinitionEntries(overloadData);
 }
 
 void CppGenerator::writeCacheResetNative(TextStream &s, const GeneratorContext &classContext)
@@ -5297,68 +5299,48 @@ void CppGenerator::writeSmartPointerRichCompareFunction(TextStream &s,
     writeRichCompareFunctionFooter(s, baseName);
 }
 
-QString CppGenerator::methodDefinitionParameters(const OverloadData &overloadData) const
+// Return a flag combination for PyMethodDef
+QByteArrayList CppGenerator::methodDefinitionParameters(const OverloadData &overloadData) const
 {
     const bool usePyArgs = overloadData.pythonFunctionWrapperUsesListOfArguments();
-    const auto func = overloadData.referenceFunction();
     int min = overloadData.minArgs();
     int max = overloadData.maxArgs();
 
-    QString result;
-    QTextStream s(&result);
-    s << "reinterpret_cast<PyCFunction>("
-        << cpythonFunctionName(func) << "), ";
+    QByteArrayList result;
     if ((min == max) && (max < 2) && !usePyArgs) {
-        if (max == 0)
-            s << "METH_NOARGS";
-        else
-            s << "METH_O";
+        result.append(max == 0 ? QByteArrayLiteral("METH_NOARGS")
+                               : QByteArrayLiteral("METH_O"));
     } else {
-        s << "METH_VARARGS";
+        result.append(QByteArrayLiteral("METH_VARARGS"));
         if (overloadData.hasArgumentWithDefaultValue())
-            s << "|METH_KEYWORDS";
+            result.append(QByteArrayLiteral("METH_KEYWORDS"));
     }
     // METH_STATIC causes a crash when used for global functions (also from
     // invisible namespaces).
-    auto ownerClass = func->ownerClass();
+    auto *ownerClass = overloadData.referenceFunction()->ownerClass();
     if (ownerClass
         && !invisibleTopNamespaces().contains(const_cast<AbstractMetaClass *>(ownerClass))) {
         if (overloadData.hasStaticFunction())
-            s << "|METH_STATIC";
+            result.append(QByteArrayLiteral("METH_STATIC"));
         if (overloadData.hasClassMethod())
-            s << "|METH_CLASS";
+            result.append(QByteArrayLiteral("METH_CLASS"));
     }
     return result;
 }
 
-void CppGenerator::writeMethodDefinitionEntries(TextStream &s,
-                                                const OverloadData &overloadData,
-                                                qsizetype maxEntries) const
+QList<PyMethodDefEntry>
+    CppGenerator::methodDefinitionEntries(const OverloadData &overloadData) const
 {
+
     const QStringList names = overloadData.referenceFunction()->definitionNames();
-    const QString parameters = methodDefinitionParameters(overloadData);
-    const qsizetype count = maxEntries > 0
-        ? qMin(names.size(), maxEntries) : names.size();
-    for (qsizetype i = 0; i < count; ++i) {
-        if (i)
-            s << ",\n";
-         s << "{\"" << names.at(i) << "\", " << parameters << '}';
-    }
-}
+    const QString funcName = cpythonFunctionName(overloadData.referenceFunction());
+    const QByteArrayList parameters = methodDefinitionParameters(overloadData);
 
-void CppGenerator::writeMethodDefinition(TextStream &s,
-                                         const OverloadData &overloadData) const
-{
-    const auto func = overloadData.referenceFunction();
-    if (m_tpFuncs.contains(func->name()))
-        return;
-
-    if (OverloadData::hasStaticAndInstanceFunctions(overloadData.overloads())) {
-        s << cpythonMethodDefinitionName(func);
-    } else {
-        writeMethodDefinitionEntries(s, overloadData);
-    }
-    s << ',' << '\n';
+    QList<PyMethodDefEntry> result;
+    result.reserve(names.size());
+    for (const auto &name : names)
+        result.append({name, funcName, parameters});
+    return result;
 }
 
 // Format the type signature of a function parameter
@@ -6438,7 +6420,7 @@ bool CppGenerator::finishGeneration()
 
         writeMethodWrapper(s_globalFunctionImpl, overloadData, classContext);
         writeSignatureInfo(signatureStream, overloadData);
-        writeMethodDefinition(s_globalFunctionDef, overloadData);
+        s_globalFunctionDef << methodDefinitionEntries(overloadData);
     }
 
     AbstractMetaClassCList classesWithStaticFields;

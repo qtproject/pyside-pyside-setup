@@ -39,6 +39,7 @@
 
 class OverloadDataNode;
 class OverloadDataRootNode;
+struct PyMethodDefEntry;
 
 /**
  *   The CppGenerator generate the implementations of C++ bindings classes.
@@ -382,12 +383,9 @@ private:
     void writeClassDefinition(TextStream &s,
                               const AbstractMetaClass *metaClass,
                               const GeneratorContext &classContext);
-    QString methodDefinitionParameters(const OverloadData &overloadData) const;
-    void writeMethodDefinitionEntries(TextStream &s,
-                                      const OverloadData &overloadData,
-                                      qsizetype maxEntries = -1) const;
-    void writeMethodDefinition(TextStream &s,
-                               const OverloadData &overloadData) const;
+    QByteArrayList methodDefinitionParameters(const OverloadData &overloadData) const;
+    QList<PyMethodDefEntry> methodDefinitionEntries(const OverloadData &overloadData) const;
+
     void writeSignatureInfo(TextStream &s, const OverloadData &overloads) const;
     QString signatureParameter(const AbstractMetaArgument &arg) const;
     /// Writes the implementation of all methods part of python sequence protocol
