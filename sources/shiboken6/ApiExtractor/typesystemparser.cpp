@@ -427,6 +427,7 @@ static const StackElementHash &stackElementHash()
     static const StackElementHash result{
         {u"add-conversion", StackElement::AddConversion},
         {u"add-function", StackElement::AddFunction},
+        {u"add-pymethoddef", StackElement::AddPyMethodDef},
         {u"array", StackElement::Array},
         {u"container-type", StackElement::ContainerTypeEntry},
         {u"conversion-rule", StackElement::ConversionRule},
@@ -2502,6 +2503,46 @@ bool TypeSystemParser::parseAddFunction(const ConditionalStreamReader &,
     return true;
 }
 
+bool TypeSystemParser::parseAddPyMethodDef(const ConditionalStreamReader &,
+                                           StackElement topElement,
+                                           QXmlStreamAttributes *attributes)
+{
+    if (!isComplexTypeEntry(topElement)) {
+        m_error = u"add-pymethoddef requires a complex type as parent, was="_s
+                  + tagFromElement(topElement).toString();
+        return false;
+    }
+
+    TypeSystemPyMethodDefEntry def;
+    for (int i = attributes->size() - 1; i >= 0; --i) {
+        const auto name = attributes->at(i).qualifiedName();
+        if (name == nameAttribute()) {
+            def.name = attributes->takeAt(i).value().toString();
+        } else if (name == u"doc") {
+            def.doc = attributes->takeAt(i).value().toString();
+        } else if (name == u"function") {
+            def.function = attributes->takeAt(i).value().toString();
+        } else if (name == u"flags") {
+            auto attribute = attributes->takeAt(i);
+            const auto flags = attribute.value().split(u'|', Qt::SkipEmptyParts);
+            for (const auto &flag : flags)
+                def.methFlags.append(flag.toString().toUtf8());
+        } else if (name == u"signatures") {
+            auto attribute = attributes->takeAt(i);
+            const auto signatures = attribute.value().split(u';', Qt::SkipEmptyParts);
+            for (const auto &signature : signatures)
+                def.signatures.append(signature.toString());
+        }
+    }
+
+    if (def.name.isEmpty() || def.function.isEmpty()) {
+        m_error = u"add-pymethoddef requires at least a name and a function attribute"_s;
+        return false;
+    }
+    static_cast<ComplexTypeEntry *>(m_contextStack.top()->entry)->addPyMethodDef(def);
+    return true;
+}
+
 bool TypeSystemParser::parseProperty(const ConditionalStreamReader &, StackElement topElement,
                                      QXmlStreamAttributes *attributes)
 {
@@ -3298,6 +3339,10 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
         case StackElement::DeclareFunction:
         case StackElement::AddFunction:
             if (!parseAddFunction(reader, topElement, element, &attributes))
+                return false;
+            break;
+        case StackElement::AddPyMethodDef:
+            if (!parseAddPyMethodDef(reader, topElement, &attributes))
                 return false;
             break;
         case StackElement::Property:

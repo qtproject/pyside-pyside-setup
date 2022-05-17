@@ -70,6 +70,7 @@ enum class StackElement {
             InsertTemplate,
             Replace,
             AddFunction,
+            AddPyMethodDef,
             DeclareFunction,
             NativeToTarget,
             TargetToNative,
@@ -221,6 +222,8 @@ private:
     bool parseModifyField(const ConditionalStreamReader &, QXmlStreamAttributes *);
     bool parseAddFunction(const ConditionalStreamReader &, StackElement topElement,
                           StackElement t, QXmlStreamAttributes *);
+    bool parseAddPyMethodDef(const ConditionalStreamReader &,
+                             StackElement topElement, QXmlStreamAttributes *attributes);
     bool parseProperty(const ConditionalStreamReader &, StackElement topElement,
                        QXmlStreamAttributes *);
     bool parseModifyFunction(const ConditionalStreamReader &, StackElement topElement,

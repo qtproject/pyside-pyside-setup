@@ -29,6 +29,11 @@ class IntWrapperTest(unittest.TestCase):
         i -= ten2
         self.assertTrue(i == ten1)
 
+    def testAddPyMethodDef(self):
+        """Test of added free function (PYSIDE-1905)."""
+        i = IntWrapper(10)
+        self.assertEqual(i.add_ints(10, 20), 30)
+
 
 if __name__ == '__main__':
     unittest.main()

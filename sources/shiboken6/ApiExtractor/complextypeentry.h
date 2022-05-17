@@ -5,10 +5,16 @@
 #define COMPLEXTYPEENTRY_H
 
 #include "typesystem.h"
+#include "pymethoddefentry.h"
 
 #include <QtCore/QSet>
 
 class ComplexTypeEntryPrivate;
+
+struct TypeSystemPyMethodDefEntry : public PyMethodDefEntry
+{
+    QStringList signatures;
+};
 
 struct TypeSystemProperty
 {
@@ -63,6 +69,9 @@ public:
     AddedFunctionList addedFunctions() const;
     void setAddedFunctions(const AddedFunctionList &addedFunctions);
     void addNewFunction(const AddedFunctionPtr &addedFunction);
+
+    const QList<TypeSystemPyMethodDefEntry> &addedPyMethodDefEntrys() const;
+    void addPyMethodDef(const TypeSystemPyMethodDefEntry &p);
 
     // Functions specified in the "generate-functions" attribute
     const QSet<QString> &generateFunctions() const;

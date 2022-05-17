@@ -1992,7 +1992,12 @@
 
     <object-type name="Collector" stream="yes"/>
 
-    <value-type name="IntWrapper" />
+    <value-type name="IntWrapper">
+        <inject-code class="native" position="beginning"
+                     file="samplesnippets.cpp" snippet="intwrapper_add_ints"/>
+        <add-pymethoddef name="add_ints" function="Sbk_IntWrapper_add_ints"
+                         flags="METH_VARARGS"/>
+    </value-type>
 
     <value-type name="Str" hash-function="strHash">
         <add-function signature="__str__" return-type="PyObject*">

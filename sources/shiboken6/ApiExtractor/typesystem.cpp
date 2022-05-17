@@ -1231,6 +1231,7 @@ public:
     QSet<QString> m_generateFunctions;
     FieldModificationList m_fieldMods;
     QList<TypeSystemProperty> m_properties;
+    QList<TypeSystemPyMethodDefEntry> m_PyMethodDefEntrys;
     QString m_defaultConstructor;
     QString m_defaultSuperclass;
     QString m_qualifiedCppName;
@@ -1352,6 +1353,18 @@ void ComplexTypeEntry::addNewFunction(const AddedFunctionPtr &addedFunction)
 {
     S_D(ComplexTypeEntry);
     d->m_addedFunctions << addedFunction;
+}
+
+const QList<TypeSystemPyMethodDefEntry> &ComplexTypeEntry::addedPyMethodDefEntrys() const
+{
+    S_D(const ComplexTypeEntry);
+    return d->m_PyMethodDefEntrys;
+}
+
+void ComplexTypeEntry::addPyMethodDef(const TypeSystemPyMethodDefEntry &p)
+{
+    S_D(ComplexTypeEntry);
+    d->m_PyMethodDefEntrys.append(p);
 }
 
 const QSet<QString> &ComplexTypeEntry::generateFunctions() const

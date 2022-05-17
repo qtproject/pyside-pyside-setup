@@ -494,6 +494,19 @@ static bool needsTypeDiscoveryFunction(const AbstractMetaClass *c)
            && (c->isPolymorphic() || !c->typeEntry()->polymorphicIdValue().isEmpty());
 }
 
+static void writeAddedTypeSignatures(TextStream &s, const ComplexTypeEntry *te)
+{
+    for (const auto &e : te->addedPyMethodDefEntrys()) {
+        if (auto count = e.signatures.size()) {
+            for (qsizetype i = 0; i < count; ++i) {
+                if (count > 1)
+                    s << i << ':';
+                s << e.signatures.at(i) << '\n';
+            }
+        }
+    }
+}
+
 /// Function used to write the class generated binding code on the buffer
 /// \param s the output buffer
 /// \param classContext the pointer to metaclass information
@@ -638,6 +651,8 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
                 md << defEntries;
         }
     }
+    for (const auto &pyMethodDef : typeEntry->addedPyMethodDefEntrys())
+        md << pyMethodDef << ",\n";
     const QString methodsDefinitions = md.toString();
     const QString singleMethodDefinitions = smd.toString();
 
@@ -787,6 +802,7 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
     s << '\n';
 
     writeConverterFunctions(s, metaClass, classContext);
+    writeAddedTypeSignatures(signatureStream, typeEntry);
     writeClassRegister(s, metaClass, classContext, signatureStream);
 
     if (metaClass->hasStaticFields())

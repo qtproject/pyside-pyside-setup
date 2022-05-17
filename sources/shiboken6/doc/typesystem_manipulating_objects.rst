@@ -346,6 +346,38 @@ declare-function
     This tells shiboken a public function of that signature exists and
     bindings will be created in specializations of ``QList``.
 
+
+.. _add-pymethoddef:
+
+add-pymethoddef
+^^^^^^^^^^^^^^^
+
+The ``add-pymethoddef`` element allows you to add a free function to
+the ``PyMethodDef`` array of the type. No argument or result conversion
+is generated, allowing for variadic functions and more flexible
+arguments checking.
+
+.. code-block:: xml
+
+     <add-pymethoddef name="..." function="..." flags="..." doc="..."
+                      signatures="..."/>
+
+The ``name`` attribute specifies the name.
+
+The ``function`` attribute specifies the implementation (a static function
+of type ``PyCFunction``).
+
+The ``flags`` attribute specifies the flags (typically ``METH_VARARGS``,
+see `Common Object Structures`_).
+
+The optional ``doc`` attribute specifies the documentation to be set to the
+``ml_doc`` field.
+
+The optional ``signatures`` attribute specifies a semicolon-separated list
+of signatures of the function.
+
+.. _Common Object Structures: https://docs.python.org/3/c-api/structures.html
+
 .. _property-declare:
 
 property
