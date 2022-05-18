@@ -95,6 +95,8 @@ public:
 
     void setSkipDeprecated(bool value);
 
+    void setApiExtractorFlags(ApiExtractorFlags flags);
+
     enum TranslateTypeFlag {
         DontResolveType = 0x1
     };
