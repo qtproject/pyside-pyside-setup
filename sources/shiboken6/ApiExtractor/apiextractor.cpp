@@ -272,6 +272,7 @@ bool ApiExtractorPrivate::runHelper(ApiExtractorFlags flags)
     m_builder->setGlobalHeaders(m_cppFileNames);
     m_builder->setSkipDeprecated(m_skipDeprecated);
     m_builder->setHeaderPaths(m_includePaths);
+    m_builder->setApiExtractorFlags(flags);
 
     QByteArrayList arguments;
     const auto clangOptionsSize = m_clangOptions.size();
