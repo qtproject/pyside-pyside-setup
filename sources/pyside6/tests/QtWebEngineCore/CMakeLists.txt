@@ -27,3 +27,4 @@
 #############################################################################
 
 PYSIDE_TEST(web_engine_custom_scheme.py)
+PYSIDE_TEST(qwebenginecookiestore_test.py)
