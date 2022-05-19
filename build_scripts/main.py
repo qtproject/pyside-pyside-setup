@@ -115,11 +115,12 @@ def get_make(platform_arch, build_type):
     return (make_path, make_generator)
 
 
-def check_allowed_python_version():
-    """
-    Make sure that setup.py is run with an allowed python version.
-    """
+_allowed_versions_cache = None
 
+def get_allowed_python_versions():
+    global _allowed_versions_cache
+    if _allowed_versions_cache is not None:
+        return _allowed_versions_cache
     pattern = r'Programming Language :: Python :: (\d+)\.(\d+)'
     supported = []
 
@@ -129,6 +130,17 @@ def check_allowed_python_version():
             major = int(found.group(1))
             minor = int(found.group(2))
             supported.append((major, minor))
+
+    _allowed_versions_cache = sorted(supported)
+    return _allowed_versions_cache
+
+
+def check_allowed_python_version():
+    """
+    Make sure that setup.py is run with an allowed python version.
+    """
+
+    supported = get_allowed_python_versions()
     this_py = sys.version_info[:2]
     if this_py not in supported:
         log.error(f"Unsupported python version detected. Supported versions: {supported}")
@@ -564,6 +576,8 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
             f"-DQt5Help_DIR={self.qtinfo.docs_dir}",
             f"-DCMAKE_BUILD_TYPE={self.build_type}",
             f"-DCMAKE_INSTALL_PREFIX={self.install_dir}",
+            # Record the minimum Python version for later use in Shiboken.__init__
+            f"-DMINIMUM_PYTHON_VERSION={get_allowed_python_versions()[0]}",
             module_src_dir
         ]
 

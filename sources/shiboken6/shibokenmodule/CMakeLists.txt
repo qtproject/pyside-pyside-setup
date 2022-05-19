@@ -43,6 +43,10 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/_config.py.in"
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/_config.py"
         DESTINATION "${PYTHON_SITE_PACKAGES}/shiboken6")
 
+if ("${MINIMUM_PYTHON_VERSION}" STREQUAL "")
+    set(MINIMUM_PYTHON_VERSION None)
+endif()
+
 # PYSIDE-1497: This `..` is the crucial trick to unify the path location of `Shiboken`.
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/__init__.py.in"
                "${CMAKE_CURRENT_BINARY_DIR}/../__init__.py" @ONLY)

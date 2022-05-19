@@ -104,12 +104,14 @@ typedef struct _typeobject {
 #endif
 
 // This was a macro error in the limited API from the beginning.
-// It was fixed in Python master, but did make it only in Python 3.8 .
-#define PY_ISSUE33738_SOLVED 0x03080000
-#if PY_VERSION_HEX < PY_ISSUE33738_SOLVED
+// It was fixed in Python master, but did make it only into Python 3.8 .
+
+// PYSIDE-1797: This must be a runtime decision.
+//              Remove that when the minimum Python version is 3.8,
+//              because the macro PyIndex_Check bug was fixed then.
+/// FIXME: Remove PyIndex_Check and pep384_issue33738.cpp when Python 3.7 is gone.
 #undef PyIndex_Check
 LIBSHIBOKEN_API int PyIndex_Check(PyObject *obj);
-#endif
 
 LIBSHIBOKEN_API PyObject *_PepType_Lookup(PyTypeObject *type, PyObject *name);
 
