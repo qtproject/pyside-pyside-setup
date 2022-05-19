@@ -1945,31 +1945,54 @@ void CppGenerator::writeContainerConverterFunctions(TextStream &s,
     writePythonToCppConversionFunctions(s, containerType);
 }
 
+// Helpers to collect all smart pointer pointee base classes
+bool collectBaseClasses(const AbstractMetaClass *c, AbstractMetaClassCList &list)
+{
+    const auto bases = c->typeSystemBaseClasses();
+    for (auto *base : bases) {
+        if (!list.contains(base))
+            list.append(base);
+    }
+    return false; // let recurseClassHierarchy() traverse all base classes
+}
+
+static AbstractMetaClassCList findSmartPointeeBaseClasses(const ApiExtractorResult &api,
+                                                          const AbstractMetaType &smartPointerType)
+{
+    AbstractMetaClassCList result;
+    auto *instantiationsTe = smartPointerType.instantiations().at(0).typeEntry();
+    auto targetClass = AbstractMetaClass::findClass(api.classes(), instantiationsTe);
+    if (targetClass == nullptr)
+        return result;
+    recurseClassHierarchy(targetClass,
+                          [&result](const AbstractMetaClass *c) {
+                              return collectBaseClasses(c, result);
+                          });
+    return result;
+}
+
 void CppGenerator::writeSmartPointerConverterFunctions(TextStream &s,
                                                        const AbstractMetaType &smartPointerType) const
 {
-    auto targetClass = AbstractMetaClass::findClass(api().classes(),
-                                                    smartPointerType.instantiations().at(0).typeEntry());
+    const auto baseClasses = findSmartPointeeBaseClasses(api(), smartPointerType);
+    if (baseClasses.isEmpty())
+        return;
 
-    if (targetClass) {
-        const auto *smartPointerTypeEntry =
-                static_cast<const SmartPointerTypeEntry *>(
-                    smartPointerType.typeEntry());
+    auto *smartPointerTypeEntry =
+        static_cast<const SmartPointerTypeEntry *>(smartPointerType.typeEntry());
 
-        // TODO: Missing conversion to smart pointer pointer type:
+    // TODO: Missing conversion to smart pointer pointer type:
 
-        s << "// Register smartpointer conversion for all derived classes\n";
-        const auto classes = targetClass->typeSystemBaseClasses();
-        for (auto base : classes) {
-            auto *baseTe = base->typeEntry();
-            if (smartPointerTypeEntry->matchesInstantiation(baseTe)) {
-                if (auto opt = findSmartPointerInstantiation(smartPointerTypeEntry, baseTe)) {
-                    const auto smartTargetType = opt.value();
-                    s << "// SmartPointer derived class: "
-                        << smartTargetType.cppSignature() << "\n";
-                    writePythonToCppConversionFunctions(s, smartPointerType,
-                                                        smartTargetType, {}, {}, {});
-                }
+    s << "// Register smartpointer conversion for all derived classes\n";
+    for (auto *base : baseClasses) {
+        auto *baseTe = base->typeEntry();
+        if (smartPointerTypeEntry->matchesInstantiation(baseTe)) {
+            if (auto opt = findSmartPointerInstantiation(smartPointerTypeEntry, baseTe)) {
+                const auto smartTargetType = opt.value();
+                s << "// SmartPointer derived class: "
+                    << smartTargetType.cppSignature() << "\n";
+                writePythonToCppConversionFunctions(s, smartPointerType,
+                                                    smartTargetType, {}, {}, {});
             }
         }
     }
@@ -4328,11 +4351,7 @@ void CppGenerator::writeSmartPointerConverterInitialization(TextStream &s, const
         writeAddPythonToCppConversion(s, targetConverter, toCpp, isConv);
     };
 
-    auto klass = AbstractMetaClass::findClass(api().classes(), type.instantiations().at(0).typeEntry());
-    if (!klass)
-        return;
-
-    const auto classes = klass->typeSystemBaseClasses();
+    const auto classes = findSmartPointeeBaseClasses(api(), type);
     if (classes.isEmpty())
         return;
 
