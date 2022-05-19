@@ -191,9 +191,8 @@ check_PyTypeObject_valid()
     Py_DECREF(probe_tp_mro);
 }
 
-#if PY_VERSION_HEX < PY_ISSUE33738_SOLVED
+// PYSIDE-1797: This must be a runtime decision.
 #include "pep384_issue33738.cpp"
-#endif
 
 #endif // Py_LIMITED_API
 

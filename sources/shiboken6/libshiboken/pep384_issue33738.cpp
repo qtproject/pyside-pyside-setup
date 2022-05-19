@@ -47,7 +47,8 @@
 // Simple solution: Create the structure and write such a function.
 // Long term: Submit a patch to python.org .
 
-// Update: I did the long-term solution for python 3.7 in issue 33738.
+// This structure comes from Python 3.7, but we have checked that
+// it also works for Python 3.8 and 3.9.
 
 typedef struct {
     /* Number implementations must check *both*
@@ -112,10 +113,45 @@ typedef struct _oldtypeobject {
 
 } PyOldTypeObject;
 
-int PyIndex_Check(PyObject *obj)
+static bool is_compatible_version()
 {
-    PyOldTypeObject *type = reinterpret_cast<PyOldTypeObject *>(Py_TYPE(obj));
-    return type->tp_as_number != NULL &&
-           type->tp_as_number->nb_index != NULL;
+    auto *sysmodule = PyImport_AddModule("sys");
+    auto *dic = PyModule_GetDict(sysmodule);
+    auto *version = PyDict_GetItemString(dic, "version_info");
+    auto *major = PyTuple_GetItem(version, 0);
+    auto *minor = PyTuple_GetItem(version, 1);
+    auto number = PyLong_AsLong(major) * 1000 + PyLong_AsLong(minor);
+    return number < 3010;
+}
+
+///////////////////////////////////////////////////////////////////////
+//
+// PYSIE-1797: The Solution
+// ========================
+//
+// Inspecting the data structures of Python 3.6, 3.7, 3.8 and 3.9
+// shows that concerning the here needed offset of nb_index, they
+// are all compatible.
+// That means: We can use the above definition for all these versions.
+//
+// From Python 3.10 on, the `PyType_GetSlot` function also works with
+// non-heap types. That means this solution will always work.
+//
+// Note: When we have moved to Python 3.8 as the minimum version,
+// this whole nonsense can be trashed.
+// There is an automatic warning about this in parser.py .
+//
+
+LIBSHIBOKEN_API int PyIndex_Check(PyObject *obj)
+{
+    static bool old_python_version = is_compatible_version();
+    if (old_python_version) {
+        auto *type = reinterpret_cast<PyOldTypeObject *>(Py_TYPE(obj));
+        return type->tp_as_number != nullptr &&
+               type->tp_as_number->nb_index != nullptr;
+    }
+    // From Python 3.10 on, we can use PyType_GetSlot also with normal types!
+    unaryfunc nb_index = reinterpret_cast<unaryfunc>(PyType_GetSlot(Py_TYPE(obj), Py_nb_index));
+    return nb_index != nullptr;
 }
 
