@@ -46,7 +46,13 @@
   <load-typesystem name="QtPrintSupport/typesystem_printsupport.xml" generate="no"/>
   <load-typesystem name="QtWebChannel/typesystem_webchannel.xml" generate="no"/>
 
-  <object-type name="QWebEngineCookieStore"/>
+  <object-type name="QWebEngineCookieStore">
+    <value-type name="FilterRequest" />
+    <add-function signature="setCookieFilter(PyCallable* @filterCallback@)">
+      <inject-code class="target" position="beginning" file="../glue/qtwebenginecore.cpp"
+                   snippet="qwebenginecookiestore-setcookiefilter"/>
+    </add-function>
+  </object-type>
 
   <value-type name="QWebEngineCertificateError">
     <enum-type name="Type"/>

@@ -39,6 +39,9 @@
 import os
 import site
 import sys
+from os.path import expanduser
+import pathlib
+import urllib.request as urllib
 
 from build_scripts.options import has_option, log, option_value
 from build_scripts.utils import (expand_clang_variables, get_ci_qmake_path,
@@ -61,41 +64,44 @@ if _ci_features is not None:
     for f in _ci_features.split(', '):
         CI_FEATURES.append(f)
 CI_RELEASE_CONF = has_option("packaging")
+CI_TEST_WITH_PYPY = has_option("pypy")
 
 
-def call_testrunner(python_ver, buildnro):
-    _pExe, _env, env_pip, env_python = get_qtci_virtualEnv(python_ver, CI_HOST_OS, CI_HOST_ARCH, CI_TARGET_ARCH)
-    rmtree(_env, True)
-    # Pinning the virtualenv before creating one
-    # Use pip3 if possible while pip seems to install the virtualenv to wrong dir in some OS
-    python3 = "python3"
-    if sys.platform == "win32":
-        python3 = os.path.join(os.getenv("PYTHON3_PATH"), "python.exe")
+def call_testrunner(python_ver, buildnro, pypy=None):
 
-    # we shouldn't install anything to m1, while it is not virtualized
-    if CI_HOST_OS == "MacOS" and CI_HOST_ARCH == "ARM64":
-        v_env = "virtualenv"
-        run_instruction([v_env, "-p", _pExe, _env], "Failed to create virtualenv")
+    env_python=""
+    if python_ver == "pypy":
+        print("running with " + pypy)
+        env_python = pypy
     else:
-        run_instruction([python3, "-m", "pip", "install", "--user", "virtualenv==20.7.2"], "Failed to pin virtualenv")
-        # installing to user base might not be in PATH by default.
-        env_path = os.path.join(site.USER_BASE, "bin")
-        v_env = os.path.join(env_path, "virtualenv")
+        _pExe, _env, env_pip, env_python = get_qtci_virtualEnv(python_ver, CI_HOST_OS, CI_HOST_ARCH, CI_TARGET_ARCH)
+        rmtree(_env, True)
+        # Pinning the virtualenv before creating one
+        # Use pip3 if possible while pip seems to install the virtualenv to wrong dir in some OS
+        python3 = "python3"
         if sys.platform == "win32":
-            env_path = os.path.join(site.USER_BASE, "Scripts")
-            v_env = os.path.join(env_path, "virtualenv.exe")
-        try:
-            run_instruction([v_env, "--version"], "Using default virtualenv")
-        except Exception as e:
-            log.info("Failed to use the default virtualenv")
-            log.info(f"{type(e).__name__}: {e}")
+            python3 = os.path.join(os.getenv("PYTHON3_PATH"), "python.exe")
+
+        if  CI_HOST_OS == "MacOS" and CI_HOST_ARCH == "ARM64": # we shouldn't install anything to m1, while it is not virtualized
             v_env = "virtualenv"
-        run_instruction([v_env, "-p", _pExe, _env], "Failed to create virtualenv")
-        # When the 'python_ver' variable is empty, we are using Python 2
-        # Pip is always upgraded when CI template is provisioned, upgrading it in later phase may cause perm issue
-        run_instruction([env_pip, "install", "-r", "requirements.txt"], "Failed to install dependencies")
-        # Install distro to replace missing platform.linux_distribution() in python3.8
-        run_instruction([env_pip, "install", "distro"], "Failed to install distro")
+            run_instruction([v_env, "-p", _pExe,  _env], "Failed to create virtualenv")
+        else:
+            run_instruction([python3, "-m", "pip", "install", "--user", "virtualenv==20.7.2"], "Failed to pin virtualenv")
+            # installing to user base might not be in PATH by default.
+            env_path = os.path.join(site.USER_BASE, "bin")
+            v_env = os.path.join(env_path, "virtualenv")
+            if sys.platform == "win32":
+                env_path = os.path.join(site.USER_BASE, "Scripts")
+                v_env = os.path.join(env_path, "virtualenv.exe")
+            try:
+                run_instruction([v_env, "--version"], "Using default virtualenv")
+            except Exception as e:
+                v_env = "virtualenv"
+            run_instruction([v_env, "-p", _pExe,  _env], "Failed to create virtualenv")
+            # When the 'python_ver' variable is empty, we are using Python 2
+            # Pip is always upgraded when CI template is provisioned, upgrading it in later phase may cause perm issue
+            run_instruction([env_pip, "install", "-r", "requirements.txt"], "Failed to install dependencies")
+
 
     cmd = [env_python, "testrunner.py", "test", "--blacklist", "build_history/blacklist.txt",
            f"--buildno={buildnro}"]
@@ -109,7 +115,8 @@ def call_testrunner(python_ver, buildnro):
         # Run the test for the old set of wheels
         cmd = [env_python, wheel_tester_path, qmake_path]
         run_instruction(cmd, "Error while running wheel_tester.py on old wheels")
-
+        if python_ver == "pypy":
+            return
         # Uninstalling the other wheels
         run_instruction([env_pip, "uninstall", "shiboken6", "shiboken6_generator", "pyside6", "-y"],
                         "Failed to uninstall old wheels")
@@ -119,24 +126,66 @@ def call_testrunner(python_ver, buildnro):
         run_instruction(cmd, "Error while running wheel_tester.py on new wheels")
 
 
+# move to utils
+def install_pypy():
+    localfile = None
+    home = expanduser("~")
+    file = "https://downloads.python.org/pypy/pypy3.8-v7.3.8-osx64.tar.bz2"
+    target =os.path.join(home, "work", "pypy-3.8")
+    pypy = os.path.join(target, "pypy3.8-v7.3.8-osx64", "bin", "pypy")
+    if sys.platform == "win32":
+        file = "http://ci-files01-hki.ci.local/input/pypy/pypy3.8-v7.3.8-win64.zip"
+        pypy = os.path.join(target, "pypy3.8-v7.3.8-win64", "pypy.exe")
+    if CI_HOST_OS == "Linux":
+        file = "https://downloads.python.org/pypy/pypy3.8-v7.3.8-linux64.tar.bz2"
+        pypy = os.path.join(target, "pypy3.8-v7.3.8-linux64", "bin", "pypy")
+
+    for i in range(1, 10):
+        try:
+            log.info(f"Downloading fileUrl {file}, attempt #{i}")
+            localfile, info = urllib.urlretrieve(file)
+            break
+        except urllib.URLError:
+            pass
+    if not localfile:
+        log.error(f"Error downloading {file} : {info}")
+        raise RuntimeError(f" Error downloading {file}")
+
+    pathlib.Path(target).mkdir(parents=True, exist_ok=True)
+    if sys.platform == "win32":
+        cmd = ["7z", "x", "-y", localfile, "-o"+target]
+    else:
+        cmd = ["tar", "xjf", localfile, "-C", target]
+    run_instruction(cmd, "Failed to extract pypy")
+    return  pypy
+
+# move to utils and rename
+def build_with_pypy(pypy):
+    run_instruction([pypy, "-m", "ensurepip"], "Failed to install pip")
+    cmd = [pypy, "-m", "pip", "install", "-r", "requirements.txt"]
+    run_instruction(cmd, "Failed to install requirements.txt")
+
+    cmd = [pypy, "-m", "pip", "install", "numpy"]
+    run_instruction(cmd, "Failed to install numpy")
+
+
 def run_test_instructions():
     # Remove some environment variables that impact cmake
     arch = '32' if CI_TARGET_ARCH == 'X86' else '64'
+    pypy = ""
+    p_ver = "3"
     expand_clang_variables(arch)
     for env_var in ['CC', 'CXX']:
         if os.environ.get(env_var):
             del os.environ[env_var]
-
     os.chdir(CI_ENV_AGENT_DIR)
     testRun = 0
 
-    # In win machines, there are additional python versions to test with
-    if CI_HOST_OS == "Windows":
-        call_testrunner("3.6.1", str(testRun))
-        call_testrunner("3.8.1", str(testRun))
-        call_testrunner("3.10.0", str(testRun))
-    elif CI_HOST_OS == "Linux":
-        call_testrunner("3.8", str(testRun))
+    if CI_TEST_WITH_PYPY:
+        pypy = install_pypy()
+        build_with_pypy(pypy)
+        p_ver = "pypy"
+        call_testrunner(p_ver, str(testRun), pypy)
     else:
         call_testrunner("3", str(testRun))
 

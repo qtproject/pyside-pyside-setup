@@ -156,9 +156,13 @@ def try_install_wheels(wheels_dir, py_version):
         log.info(f"No wheels found in {wheels_dir}")
     log.info("")
 
+    py ="cp"
+    if hasattr(sys, 'pypy_version_info'):
+        py = "pypy"
+
     for p in package_prefix_names():
         log.info(f"Trying to install {p}:")
-        pattern = f"{p}-*cp{int(float(py_version))}*.whl"
+        pattern = f"{p}-*{py}{int(float(py_version))}*.whl"
         files = find_files_using_glob(wheels_dir, pattern)
         if files and len(files) == 1:
             wheel_path = files[0]
@@ -345,6 +349,9 @@ def run_wheel_tests(install_wheels, wheels_dir_name):
     if install_wheels:
         log.info("Attempting to install wheels.\n")
         try_install_wheels(wheels_dir, py_version)
+
+    if hasattr(sys, 'pypy_version_info'):
+        return
 
     log.info("Attempting to build examples.\n")
     try_build_examples()

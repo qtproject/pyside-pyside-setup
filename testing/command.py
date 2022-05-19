@@ -87,7 +87,7 @@ from .runner import TestRunner
 COIN_RERUN_FAILED_ONLY = True
 COIN_THRESHOLD = 3  # report error if >=
 COIN_TESTING = 5  # number of runs
-TIMEOUT = 10 * 60
+TIMEOUT = 20 * 60
 
 if os.environ.get("COIN_RERUN_FAILED_ONLY", "1").lower() in "0 f false n no".split():
     COIN_RERUN_FAILED_ONLY = False

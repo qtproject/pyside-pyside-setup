@@ -199,13 +199,70 @@ bool ShibokenGenerator::shouldGenerateCppWrapper(const AbstractMetaClass *metaCl
             && wrapper.testFlag(AbstractMetaClass::CppProtectedHackWrapper));
 }
 
-bool ShibokenGenerator::shouldWriteVirtualMethodNative(const AbstractMetaFunctionCPtr &func) const
+ShibokenGenerator::FunctionGeneration
+    ShibokenGenerator::functionGeneration(const AbstractMetaFunctionCPtr &func) const
 {
-    // PYSIDE-803: Extracted this because it is used multiple times.
-    const AbstractMetaClass *metaClass = func->ownerClass();
-    return (!avoidProtectedHack() || !metaClass->hasPrivateDestructor())
-            && ((func->isVirtual() || func->isAbstract())
-                 && !func->attributes().testFlag(AbstractMetaFunction::FinalCppMethod));
+    FunctionGeneration result;
+
+    const auto functionType = func->functionType();
+    switch (functionType) {
+    case AbstractMetaFunction::ConversionOperator:
+    case AbstractMetaFunction::AssignmentOperatorFunction:
+    case AbstractMetaFunction::MoveAssignmentOperatorFunction:
+    case AbstractMetaFunction::DestructorFunction:
+    case AbstractMetaFunction::SignalFunction:
+    case AbstractMetaFunction::GetAttroFunction:
+    case AbstractMetaFunction::SetAttroFunction:
+        return result;
+    default:
+        if (func->isUserAdded() || func->usesRValueReferences())
+            return result;
+        break;
+    }
+
+    const bool notModifiedRemoved = !func->isModifiedRemoved();
+    const bool isPrivate = func->isPrivate() && !func->isVisibilityModifiedToPrivate();
+    switch (functionType) {
+    case AbstractMetaFunction::ConstructorFunction:
+        if (!isPrivate && notModifiedRemoved)
+             result.setFlag(FunctionGenerationFlag::WrapperConstructor);
+        return result;
+    case AbstractMetaFunction::CopyConstructorFunction:
+        if (!isPrivate && notModifiedRemoved)
+            result.setFlag(FunctionGenerationFlag::WrapperSpecialCopyConstructor);
+        return result;
+    case AbstractMetaFunction::NormalFunction:
+    case AbstractMetaFunction::SlotFunction:
+        if (avoidProtectedHack() && func->isProtected())
+            result.setFlag(FunctionGenerationFlag::ProtectedWrapper);
+        break;
+    default:
+        break;
+    }
+
+    // Check on virtuals (including operators).
+    const bool isAbstract = func->isAbstract();
+    if (!(isAbstract || func->isVirtual())
+        || func->attributes().testFlag(AbstractMetaFunction::FinalCppMethod)) {
+        return result;
+    }
+
+    // MetaObject virtuals only need to be declared; CppGenerator creates a
+    // special implementation.
+    if (functionType == AbstractMetaFunction::NormalFunction
+        && usePySideExtensions() && func->ownerClass()->isQObject()) {
+        const QString &name = func->name();
+        if (name == u"metaObject"_s || name == u"qt_metacall") {
+            result.setFlag(FunctionGenerationFlag::QMetaObjectMethod);
+            return result;
+        }
+    }
+
+    // Pure virtual functions need a default implementation even if private.
+    if (isAbstract || (notModifiedRemoved && !isPrivate))
+        result.setFlag(FunctionGenerationFlag::VirtualMethod);
+
+    return result;
 }
 
 AbstractMetaFunctionCList ShibokenGenerator::implicitConversions(const TypeEntry *t) const
@@ -1150,38 +1207,6 @@ void ShibokenGenerator::writeFunctionCall(TextStream &s,
 void ShibokenGenerator::writeUnusedVariableCast(TextStream &s, const QString &variableName)
 {
     s << "SBK_UNUSED(" << variableName<< ")\n";
-}
-
-static bool filterFunction(const AbstractMetaFunctionCPtr &func, bool avoidProtectedHack)
-{
-    switch (func->functionType()) {
-    case AbstractMetaFunction::DestructorFunction:
-    case AbstractMetaFunction::SignalFunction:
-    case AbstractMetaFunction::GetAttroFunction:
-    case AbstractMetaFunction::SetAttroFunction:
-        return false;
-    default:
-        break;
-    }
-    if (func->usesRValueReferences())
-        return false;
-    if (func->isModifiedRemoved() && !func->isAbstract()
-        && (!avoidProtectedHack || !func->isProtected())) {
-        return false;
-    }
-    return true;
-}
-
-AbstractMetaFunctionCList ShibokenGenerator::filterFunctions(const AbstractMetaClass *metaClass) const
-{
-    AbstractMetaFunctionCList result;
-    const AbstractMetaFunctionCList &funcs = metaClass->functions();
-    result.reserve(funcs.size());
-    for (const auto &func : funcs) {
-        if (filterFunction(func, avoidProtectedHack()))
-            result.append(func);
-    }
-    return result;
 }
 
 ShibokenGenerator::ExtendedConverterData ShibokenGenerator::getExtendedConverters() const
