@@ -1946,28 +1946,14 @@ void CppGenerator::writeContainerConverterFunctions(TextStream &s,
 }
 
 // Helpers to collect all smart pointer pointee base classes
-bool collectBaseClasses(const AbstractMetaClass *c, AbstractMetaClassCList &list)
-{
-    const auto bases = c->typeSystemBaseClasses();
-    for (auto *base : bases) {
-        if (!list.contains(base))
-            list.append(base);
-    }
-    return false; // let recurseClassHierarchy() traverse all base classes
-}
-
 static AbstractMetaClassCList findSmartPointeeBaseClasses(const ApiExtractorResult &api,
                                                           const AbstractMetaType &smartPointerType)
 {
     AbstractMetaClassCList result;
     auto *instantiationsTe = smartPointerType.instantiations().at(0).typeEntry();
     auto targetClass = AbstractMetaClass::findClass(api.classes(), instantiationsTe);
-    if (targetClass == nullptr)
-        return result;
-    recurseClassHierarchy(targetClass,
-                          [&result](const AbstractMetaClass *c) {
-                              return collectBaseClasses(c, result);
-                          });
+    if (targetClass != nullptr)
+        result = targetClass->allTypeSystemAncestors();
     return result;
 }
 
