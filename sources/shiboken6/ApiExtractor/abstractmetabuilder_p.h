@@ -241,6 +241,7 @@ public:
     QStringList m_headerPaths;
     mutable QHash<QString, Include> m_resolveIncludeHash;
     QList<TypeClassEntry> m_typeSystemTypeDefs; // look up metatype->class for type system typedefs
+    ApiExtractorFlags m_apiExtractorFlags;
     bool m_skipDeprecated = false;
     static bool m_useGlobalHeader;
     static bool m_codeModelTestMode;
