@@ -53,12 +53,21 @@ LIBSHIBOKEN_API void setInstantiateAbstractClassDisabledWrapper(const char *name
 LIBSHIBOKEN_API void setInvalidTypeDeletion(const char *name);
 LIBSHIBOKEN_API void setOperatorNotImplemented();
 LIBSHIBOKEN_API void setPureVirtualMethodError(const char *name);
+LIBSHIBOKEN_API void setPrivateMethod(const char *name);
 LIBSHIBOKEN_API void setReverseOperatorNotImplemented();
 LIBSHIBOKEN_API void setSequenceTypeError(const char *expectedType);
 LIBSHIBOKEN_API void setSetterTypeError(const char *name, const char *expectedType);
 LIBSHIBOKEN_API void setWrongContainerType();
 
 } // namespace Errors
+
+namespace Warnings
+{
+/// Warn about invalid return value of overwritten virtual
+LIBSHIBOKEN_API void warnInvalidReturnValue(const char *className, const char *functionName,
+                                            const char *expectedType, const char *actualType);
+} // namespace Warnings
+
 } // namespace Shiboken
 
 #endif // SBKERRORS_H

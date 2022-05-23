@@ -1359,11 +1359,10 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
                         << cpythonIsConvertibleFunction(func->type())
                         << PYTHON_RETURN_VAR << ");\n" << outdent
                     << "if (!" << PYTHON_TO_CPP_VAR << ") {\n" << indent
-                        << "Shiboken::warning(PyExc_RuntimeWarning, 2,\n" << indent
-                        << "\"Invalid return value in function %s, expected %s, got %s.\",\n"
-                        << "\"" << func->ownerClass()->name() << '.' << funcName << "\",\n"
-                        << getVirtualFunctionReturnTypeName(func) << ",\n"
-                        << "Py_TYPE(" << PYTHON_RETURN_VAR << ")->tp_name);\n" << outdent
+                        << "Shiboken::Warnings::warnInvalidReturnValue(\""
+                        << func->ownerClass()->name() << "\", \"" << funcName << "\", "
+                        << getVirtualFunctionReturnTypeName(func) << ", "
+                        << "Py_TYPE(" << PYTHON_RETURN_VAR << ")->tp_name);\n"
                         << returnStatement << '\n' << outdent
                     << "}\n";
 
@@ -1382,11 +1381,10 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
                     if (func->type().isPointerToWrapperType())
                         s << " && " << PYTHON_RETURN_VAR << " != Py_None";
                     s << ") {\n" << indent
-                        << "Shiboken::warning(PyExc_RuntimeWarning, 2,\n" << indent
-                        << "\"Invalid return value in function %s, expected %s, got %s.\",\n"
-                        << "\"" << func->ownerClass()->name() << '.' << funcName << "\",\n"
-                        << getVirtualFunctionReturnTypeName(func) << ",\n"
-                        << "Py_TYPE(" << PYTHON_RETURN_VAR << ")->tp_name);\n" << outdent
+                        << "Shiboken::Warnings::warnInvalidReturnValue(\""
+                        << func->ownerClass()->name() << "\", \"" << funcName << "\", "
+                        << getVirtualFunctionReturnTypeName(func) << ", "
+                        << "Py_TYPE(" << PYTHON_RETURN_VAR << ")->tp_name);\n"
                         << returnStatement << '\n' << outdent
                     << "}\n";
 
@@ -3189,9 +3187,9 @@ void CppGenerator::writeSingleFunctionCall(TextStream &s,
     }
 
     if (func->functionType() == AbstractMetaFunction::EmptyFunction) {
-        s << "PyErr_Format(PyExc_TypeError, \"%s is a private method.\", \""
-          << func->signature().replace(u"::"_s, u"."_s)
-          << "\");\n" << errorReturn;
+        s << "Shiboken::Errors::setPrivateMethod(\""
+          << func->signature().replace(u"::"_s, u"."_s) << "\");\n"
+          << errorReturn;
         return;
     }
 

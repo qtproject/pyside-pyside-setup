@@ -38,6 +38,7 @@
 ****************************************************************************/
 
 #include "sbkerrors.h"
+#include "helper.h"
 
 namespace Shiboken
 {
@@ -72,6 +73,10 @@ void setPureVirtualMethodError(const char *name)
     PyErr_Format(PyExc_NotImplementedError, "pure virtual method '%s' not implemented.", name);
 }
 
+void setPrivateMethod(const char *name)
+{
+    PyErr_Format(PyExc_TypeError, "%s is a private method.\", ", name);
+}
 
 void setReverseOperatorNotImplemented()
 {
@@ -98,4 +103,16 @@ void setWrongContainerType()
 }
 
 } // namespace Errors
+
+namespace Warnings
+{
+void warnInvalidReturnValue(const char *className, const char *functionName,
+                            const char *expectedType, const char *actualType)
+{
+    Shiboken::warning(PyExc_RuntimeWarning, 2,
+                      "Invalid return value in function '%s.%s', expected %s, got %s.",
+                      className, functionName, expectedType, actualType);
+}
+
+} // namespace Warnings
 } // namespace Shiboken
