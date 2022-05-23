@@ -51,7 +51,6 @@ namespace PySide
 {
 namespace PyName
 {
-STATIC_STRING_IMPL(qtStaticMetaObject, "staticMetaObject")
 STATIC_STRING_IMPL(qtConnect, "connect")
 STATIC_STRING_IMPL(qtDisconnect, "disconnect")
 STATIC_STRING_IMPL(qtEmit, "emit")
@@ -69,7 +68,6 @@ namespace PyMagicName
 STATIC_STRING_IMPL(code, "__code__")
 STATIC_STRING_IMPL(doc, "__doc__")
 STATIC_STRING_IMPL(func, "__func__")
-STATIC_STRING_IMPL(get, "__get__")
 STATIC_STRING_IMPL(name, "__name__")
 STATIC_STRING_IMPL(property_methods, "__property_methods__")
 } // namespace PyMagicName

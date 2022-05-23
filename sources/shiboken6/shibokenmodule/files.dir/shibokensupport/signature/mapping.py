@@ -419,6 +419,7 @@ def init_sample():
         "const char*": str,
         "Complex": complex,
         "double": float,
+        "ByteArray&": bytes,
         "Foo.HANDLE": int,
         "HANDLE": int,
         "Null": None,
