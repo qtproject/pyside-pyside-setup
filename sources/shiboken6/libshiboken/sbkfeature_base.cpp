@@ -4,6 +4,7 @@
 #include "basewrapper.h"
 #include "basewrapper_p.h"
 #include "autodecref.h"
+#include "sbkenum_p.h"
 #include "sbkstring.h"
 #include "sbkstaticstrings.h"
 #include "sbkstaticstrings_p.h"
@@ -23,8 +24,8 @@ extern "C"
 // Maybe the same function from feature_select.cpp will be replaced.
 //
 
-static PyObject *cached_globals = nullptr;
-static PyObject *last_select_id = nullptr;
+static PyObject *cached_globals{};
+static PyObject *last_select_id{};
 
 PyObject *getFeatureSelectId()
 {
@@ -86,9 +87,54 @@ PyObject *mangled_type_getattro(PyTypeObject *type, PyObject *name)
      * What we change here is the meta class of `QObject`.
      */
     static getattrofunc type_getattro = PyType_Type.tp_getattro;
+    static PyObject *ignAttr1 = PyName::qtStaticMetaObject();
+    static PyObject *ignAttr2 = PyMagicName::get();
     if (SelectFeatureSet != nullptr)
         type->tp_dict = SelectFeatureSet(type);
-    return type_getattro(reinterpret_cast<PyObject *>(type), name);
+    auto *ret = type_getattro(reinterpret_cast<PyObject *>(type), name);
+
+    // PYSIDE-1735: Be forgiving with strict enums and fetch the enum, silently.
+    //              The PYI files now look correct, but the old duplication is
+    //              emulated here. This should be removed in Qt 7, see `parser.py`.
+    //
+    // FIXME PYSIDE7 should remove this forgivingness:
+    //
+    //      The duplication of enum values into the enclosing scope, allowing to write
+    //      Qt.AlignLeft instead of Qt.Alignment.AlignLeft, is still implemented but
+    //      no longer advertized in PYI files or line completion.
+
+    if (!ret && name != ignAttr1 && name != ignAttr2) {
+        PyObject *error_type, *error_value, *error_traceback;
+        PyErr_Fetch(&error_type, &error_value, &error_traceback);
+
+        // This is similar to `find_name_in_mro`, but instead of looking directly into
+        // tp_dict, we search for the attribute in local classes of that dict.
+        PyObject *mro = type->tp_mro;
+        assert(PyTuple_Check(mro));
+        size_t idx, n = PyTuple_GET_SIZE(mro);
+        for (idx = 0; idx < n; ++idx) {
+            // FIXME This loop should further be optimized by installing an extra
+            //       <classname>_EnumInfo structure. This comes with the next compatibility patch.
+            auto *base = PyTuple_GET_ITEM(mro, idx);
+            auto *type_base = reinterpret_cast<PyTypeObject *>(base);
+            auto *dict = type_base->tp_dict;
+            PyObject *key, *value;
+            Py_ssize_t pos = 0;
+            while (PyDict_Next(dict, &pos, &key, &value)) {
+                static auto *EnumMeta = getPyEnumMeta();
+                if (Py_TYPE(value) == EnumMeta) {
+                    auto *valtype = reinterpret_cast<PyTypeObject *>(value);
+                    auto *result = PyDict_GetItem(valtype->tp_dict, name);
+                    if (result) {
+                        Py_INCREF(result);
+                        return result;
+                    }
+                }
+            }
+        }
+        PyErr_Restore(error_type, error_value, error_traceback);
+    }
+    return ret;
 }
 
 PyObject *Sbk_TypeGet___dict__(PyTypeObject *type, void *context)
