@@ -48,6 +48,8 @@ from shibokensupport.signature import get_signature
 
 
 class TestEnumFromRemovedNamespace(unittest.TestCase):
+
+    @unittest.skipIf(sys.pyside63_option_python_enum, "Makes no sense with strict Enums")
     def testEnumPromotedToGlobal(self):
         sample.RemovedNamespace1_Enum
         self.assertEqual(sample.RemovedNamespace1_Enum_Value0, 0)
