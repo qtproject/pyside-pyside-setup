@@ -30,6 +30,8 @@ namespace Warnings
 /// Warn about invalid return value of overwritten virtual
 LIBSHIBOKEN_API void warnInvalidReturnValue(const char *className, const char *functionName,
                                             const char *expectedType, const char *actualType);
+LIBSHIBOKEN_API void warnDeprecated(const char *functionName);
+LIBSHIBOKEN_API void warnDeprecated(const char *className, const char *functionName);
 } // namespace Warnings
 
 } // namespace Shiboken

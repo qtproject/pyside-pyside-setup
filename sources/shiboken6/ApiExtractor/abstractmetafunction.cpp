@@ -663,6 +663,8 @@ void AbstractMetaFunction::addArgument(const AbstractMetaArgument &argument)
 
 bool AbstractMetaFunction::isDeprecated() const
 {
+    if (d->m_attributes.testFlag(Attribute::Deprecated))
+        return true;
     for (const auto &modification : modifications(declaringClass())) {
         if (modification.isDeprecated())
             return true;

@@ -110,7 +110,7 @@ public:
         FinalCppMethod              = 0x00040000,
         // Add by meta builder (implicit constructors, inherited methods, etc)
         AddedMethod                 = 0x001000000,
-        Deprecated                  = 0x002000000
+        Deprecated                  = 0x002000000 // Code annotation
     };
     Q_DECLARE_FLAGS(Attributes, Attribute)
     Q_FLAG(Attribute)

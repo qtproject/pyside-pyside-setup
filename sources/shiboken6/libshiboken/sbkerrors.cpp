@@ -78,5 +78,21 @@ void warnInvalidReturnValue(const char *className, const char *functionName,
                       className, functionName, expectedType, actualType);
 }
 
+void warnDeprecated(const char *functionName)
+{
+    Shiboken::warning(PyExc_DeprecationWarning, 1,
+                      "Function: '%s' is marked as deprecated, please check "
+                      "the documentation for more information.",
+                      functionName);
+}
+
+void warnDeprecated(const char *className, const char *functionName)
+{
+    Shiboken::warning(PyExc_DeprecationWarning, 1,
+                      "Function: '%s.%s' is marked as deprecated, please check "
+                      "the documentation for more information.",
+                      className, functionName);
+}
+
 } // namespace Warnings
 } // namespace Shiboken

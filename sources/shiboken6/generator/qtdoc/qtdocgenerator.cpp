@@ -379,7 +379,7 @@ void QtDocGenerator::writeConstructors(TextStream& s, const AbstractMetaClass* c
             const auto version = versionOf(func->typeEntry());
             if (!version.isNull())
                 s << pad << rstVersionAdded(version);
-            if (func->attributes().testFlag(AbstractMetaFunction::Deprecated))
+            if (func->isDeprecated())
                 s << pad << rstDeprecationNote("constructor");
 
             const AbstractMetaArgumentList &arguments = func->arguments();
@@ -690,7 +690,7 @@ void QtDocGenerator::writeFunction(TextStream& s, const AbstractMetaClass* cppCl
         const auto version = versionOf(func->typeEntry());
         if (!version.isNull())
             s << rstVersionAdded(version);
-        if (func->attributes().testFlag(AbstractMetaFunction::Deprecated))
+        if (func->isDeprecated())
             s << rstDeprecationNote("function");
     }
     writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, cppClass, func);

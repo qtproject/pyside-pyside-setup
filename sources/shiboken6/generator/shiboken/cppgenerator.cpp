@@ -3134,12 +3134,6 @@ void CppGenerator::writeFunctionCalls(TextStream &s, const OverloadData &overloa
                 {
                     Indentation indent(s);
                     writeSingleFunctionCall(s, overloadData, func, context, errorReturn);
-                    if (func->attributes().testFlag(AbstractMetaFunction::Deprecated)) {
-                        s << "PyErr_WarnEx(PyExc_DeprecationWarning, \"";
-                        if (auto cls = context.metaClass())
-                            s << cls->name() << '.';
-                        s << func->signature() << " is deprecated\", 1);\n";
-                    }
                     s << "break;\n";
                 }
                 s << "}\n";
@@ -3149,17 +3143,24 @@ void CppGenerator::writeFunctionCalls(TextStream &s, const OverloadData &overloa
     s << "}\n";
 }
 
+static void writeDeprecationWarning(TextStream &s,
+                                    const GeneratorContext &context,
+                                    const AbstractMetaFunctionCPtr &func)
+{
+    s << "Shiboken::Warnings::warnDeprecated(\"";
+    if (auto *cls = context.metaClass())
+        s << cls->name() << "\", ";
+    s << '"' << func->signature().replace(u"::"_s, u"."_s) << "\");\n";
+}
+
 void CppGenerator::writeSingleFunctionCall(TextStream &s,
                                            const OverloadData &overloadData,
                                            const AbstractMetaFunctionCPtr &func,
                                            const GeneratorContext &context,
                                            ErrorReturn errorReturn) const
 {
-    if (func->isDeprecated()) {
-        s << "Shiboken::warning(PyExc_DeprecationWarning, 1, \"Function: '"
-                    << func->signature().replace(u"::"_s, u"."_s)
-                    << "' is marked as deprecated, please check the documentation for more information.\");\n";
-    }
+    if (func->isDeprecated())
+        writeDeprecationWarning(s, context, func);
 
     if (func->functionType() == AbstractMetaFunction::EmptyFunction) {
         s << "Shiboken::Errors::setPrivateMethod(\""
