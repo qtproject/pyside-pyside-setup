@@ -119,10 +119,10 @@
       <enum-type name="ErrorType"/>
     </value-type>
     <object-type name="QDBusInterface"/>
-    <object-type name="QDBusMessage">
+    <value-type name="QDBusMessage">
       <enum-type name="MessageType"/>
-    </object-type>
-    <object-type name="QDBusObjectPath"/>
+    </value-type>
+    <value-type name="QDBusObjectPath"/>
     <object-type name="QDBusPendingCall"/>
     <object-type name="QDBusPendingCallWatcher"/>
 
