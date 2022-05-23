@@ -6909,8 +6909,10 @@ void CppGenerator::writeReturnValueHeuristics(TextStream &s, const AbstractMetaF
 
     ArgumentOwner argOwner = getArgumentOwner(func, ArgumentOwner::ReturnIndex);
     if (argOwner.action == ArgumentOwner::Invalid || argOwner.index != ArgumentOwner::ThisIndex) {
-        if (type.isPointerToWrapperType())
-            s << "Shiboken::Object::setParent(self, " << PYTHON_RETURN_VAR << ");\n";
+        if (type.isPointerToWrapperType()) {
+            s << "// Ownership transferences (heuristics).\n"
+                << "Shiboken::Object::setParent(self, " << PYTHON_RETURN_VAR << ");\n";
+        }
     }
 }
 
