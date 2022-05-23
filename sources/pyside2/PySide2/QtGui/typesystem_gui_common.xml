@@ -479,6 +479,11 @@
         </modify-argument>
         <inject-code class="target" position="end" file="../glue/qtgui.cpp" snippet="qtextblock-userdata"/>
     </modify-function>
+    <modify-function signature="layout()const"> <!-- Suppress return value heuristics -->
+      <modify-argument index="return">
+        <define-ownership class="target" owner="default"/>
+      </modify-argument>
+    </modify-function>
   </value-type>
   <value-type name="QTextBlockFormat">
     <enum-type name="LineHeightTypes" since="4.8" revision="4800"/>
