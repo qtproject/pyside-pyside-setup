@@ -266,7 +266,7 @@ static bool _setProperty(PyObject *qObj, PyObject *name, PyObject *value, bool *
 
     if (look) {
         AutoDecRef propSetter{};
-        static PyObject *magicGet = PyMagicName::get();
+        static PyObject *magicGet = Shiboken::PyMagicName::get();
         if (found && prop_flag) {
             // the indirection of the setter descriptor in a true property
             AutoDecRef descr(PyObject_GetAttr(look, PyName::fset()));
@@ -410,7 +410,7 @@ void initDynamicMetaObject(PyTypeObject *type, const QMetaObject *base, std::siz
         return;
     Shiboken::AutoDecRef pyMetaObject(Shiboken::Conversions::pointerToPython(converter, metaObjectPtr));
     PyObject_SetAttr(reinterpret_cast<PyObject *>(type),
-                     PySide::PyName::qtStaticMetaObject(), pyMetaObject);
+                     Shiboken::PyName::qtStaticMetaObject(), pyMetaObject);
 }
 
 TypeUserData *retrieveTypeUserData(PyTypeObject *pyTypeObj)

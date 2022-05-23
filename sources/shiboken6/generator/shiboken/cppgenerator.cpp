@@ -2245,7 +2245,8 @@ void CppGenerator::writeMethodWrapper(TextStream &s, const OverloadData &overloa
         // For custom classes, operations like __radd__ and __rmul__
         // will enter an infinite loop.
         if (rfunc->isBinaryOperator() && revOpName.contains(u"shift")) {
-            s << "Shiboken::AutoDecRef attrName(Py_BuildValue(\"s\", \"" << revOpName << "\"));\n";
+            revOpName = u"Shiboken::PyMagicName::"_s + revOpName.replace(u"__"_s, u""_s) + u"()"_s;
+            s << "static PyObject *attrName = " << revOpName << ";\n";
             s << "if (!isReverse\n";
             {
                 Indentation indent(s);
@@ -6530,10 +6531,10 @@ bool CppGenerator::finishGeneration()
     // cleanup staticMetaObject attribute
     if (usePySideExtensions()) {
         s << "void cleanTypesAttributes() {\n" << indent
+            << "static PyObject *attrName = Shiboken::PyName::qtStaticMetaObject();\n"
             << "for (int i = 0, imax = SBK_" << moduleName()
             << "_IDX_COUNT; i < imax; i++) {\n" << indent
             << "PyObject *pyType = reinterpret_cast<PyObject *>(" << cppApiVariableName() << "[i]);\n"
-            << "PyObject *attrName = PySide::PyName::qtStaticMetaObject();\n"
             << "if (pyType && PyObject_HasAttr(pyType, attrName))\n" << indent
             << "PyObject_SetAttr(pyType, attrName, Py_None);\n" << outdent
             << outdent << "}\n" << outdent << "}\n";

@@ -27,6 +27,7 @@ LIBSHIBOKEN_API PyObject *result();
 LIBSHIBOKEN_API PyObject *select_id();
 LIBSHIBOKEN_API PyObject *value();
 LIBSHIBOKEN_API PyObject *values();
+LIBSHIBOKEN_API PyObject *qtStaticMetaObject();
 } // namespace PyName
 
 namespace PyMagicName
@@ -46,6 +47,8 @@ LIBSHIBOKEN_API PyObject *qualname();
 LIBSHIBOKEN_API PyObject *self();
 LIBSHIBOKEN_API PyObject *opaque_container();
 LIBSHIBOKEN_API PyObject *code();
+LIBSHIBOKEN_API PyObject *rlshift();
+LIBSHIBOKEN_API PyObject *rrshift();
 } // namespace PyMagicName
 } // namespace Shiboken
 

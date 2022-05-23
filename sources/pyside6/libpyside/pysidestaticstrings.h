@@ -11,7 +11,6 @@ namespace PySide
 {
 namespace PyName
 {
-PYSIDE_API PyObject *qtStaticMetaObject();
 PYSIDE_API PyObject *qtConnect();
 PYSIDE_API PyObject *qtDisconnect();
 PYSIDE_API PyObject *qtEmit();
@@ -29,7 +28,6 @@ namespace PyMagicName
 PYSIDE_API PyObject *code();
 PYSIDE_API PyObject *doc();
 PYSIDE_API PyObject *func();
-PYSIDE_API PyObject *get();
 PYSIDE_API PyObject *name();
 PYSIDE_API PyObject *property_methods();
 } // namespace PyMagicName

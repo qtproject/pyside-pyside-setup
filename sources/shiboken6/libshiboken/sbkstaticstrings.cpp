@@ -29,6 +29,7 @@ STATIC_STRING_IMPL(result, "result")
 STATIC_STRING_IMPL(select_id, "select_id")
 STATIC_STRING_IMPL(value, "value")
 STATIC_STRING_IMPL(values, "values")
+STATIC_STRING_IMPL(qtStaticMetaObject, "staticMetaObject")
 
 // Internal:
 STATIC_STRING_IMPL(classmethod, "classmethod")
@@ -60,6 +61,8 @@ STATIC_STRING_IMPL(qualname, "__qualname__")
 STATIC_STRING_IMPL(self, "__self__")
 STATIC_STRING_IMPL(select_i, "__self__")
 STATIC_STRING_IMPL(code, "__code__")
+STATIC_STRING_IMPL(rlshift, "__rlshift__")
+STATIC_STRING_IMPL(rrshift, "__rrshift__")
 
 // Internal:
 STATIC_STRING_IMPL(base, "__base__")
