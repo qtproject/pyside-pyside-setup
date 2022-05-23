@@ -44,6 +44,8 @@ TextStream &operator<<(TextStream &s, const PyMethodDefEntry &e)
             s << e.methFlags.at(i);
         }
     }
+    if (!e.doc.isEmpty())
+        s << ", R\"(" << e.doc << ")\"";
     s << '}';
     return s;
 }
@@ -61,6 +63,9 @@ QDebug operator<<(QDebug debug, const PyMethodDefEntry &e)
     debug.noquote();
     debug.nospace();
     debug << "PyMethodDefEntry(\"" << e.name << "\", " << e.function
-          << ", " << e.methFlags << ')';
+          << ", " << e.methFlags;
+    if (!e.doc.isEmpty())
+        debug << ", \"" << e.doc << '"';
+    debug << ')';
     return debug;
 }

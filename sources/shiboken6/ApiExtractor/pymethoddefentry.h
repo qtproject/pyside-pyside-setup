@@ -41,6 +41,7 @@ struct PyMethodDefEntry
     QString name;
     QString function;
     QByteArrayList methFlags; // "METH_O" etc.
+    QString doc;
 };
 
 using PyMethodDefEntries = QList<PyMethodDefEntry>;
