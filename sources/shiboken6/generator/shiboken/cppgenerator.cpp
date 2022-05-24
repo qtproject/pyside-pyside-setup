@@ -6782,6 +6782,7 @@ bool CppGenerator::writeParentChildManagement(TextStream &s, const AbstractMetaF
 {
     const int numArgs = func->arguments().size();
     bool ctorHeuristicEnabled = func->isConstructor() && useCtorHeuristic() && useHeuristicPolicy;
+    bool heuristicTriggered = false;
 
     ArgumentOwner argOwner = getArgumentOwner(func, argIndex);
     ArgumentOwner::Action action = argOwner.action;
@@ -6793,6 +6794,7 @@ bool CppGenerator::writeParentChildManagement(TextStream &s, const AbstractMetaF
             action = ArgumentOwner::Add;
             parentIndex = argIndex;
             childIndex = -1;
+            heuristicTriggered = true;
         }
     }
 
@@ -6825,7 +6827,11 @@ bool CppGenerator::writeParentChildManagement(TextStream &s, const AbstractMetaF
                 ? pythonArgsAt(childIndex - 1) : PYTHON_ARG;
         }
 
-        s << "Shiboken::Object::setParent(" << parentVariable << ", " << childVariable << ");\n";
+        s << "// Ownership transferences";
+        if (heuristicTriggered)
+            s << " (constructor heuristics)";
+        s << ".\nShiboken::Object::setParent(" << parentVariable << ", "
+            << childVariable << ");\n";
         return true;
     }
 
@@ -6863,7 +6869,7 @@ void CppGenerator::writeReturnValueHeuristics(TextStream &s, const AbstractMetaF
     ArgumentOwner argOwner = getArgumentOwner(func, ArgumentOwner::ReturnIndex);
     if (argOwner.action == ArgumentOwner::Invalid || argOwner.index != ArgumentOwner::ThisIndex) {
         if (type.isPointerToWrapperType()) {
-            s << "// Ownership transferences (heuristics).\n"
+            s << "// Ownership transferences (return value heuristics).\n"
                 << "Shiboken::Object::setParent(self, " << PYTHON_RETURN_VAR << ");\n";
         }
     }
