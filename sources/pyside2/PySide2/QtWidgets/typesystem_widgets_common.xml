@@ -2083,6 +2083,12 @@
         </modify-argument>
     </modify-function>
 
+    <modify-function signature="nativeParentWidget()const">  <!-- Suppress return value heuristics -->
+        <modify-argument index="return">
+          <define-ownership class="target" owner="default"/>
+        </modify-argument>
+    </modify-function>
+
     <modify-function signature="actionEvent(QActionEvent*)">
         <modify-argument index="1" invalidate-after-use="yes">
             <rename to="event"/>
