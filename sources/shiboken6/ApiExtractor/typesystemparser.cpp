@@ -84,6 +84,7 @@ static inline QString isNullAttribute() { return QStringLiteral("isNull"); }
 static inline QString locationAttribute() { return QStringLiteral("location"); }
 static inline QString modifiedTypeAttribute() { return QStringLiteral("modified-type"); }
 static inline QString operatorBoolAttribute() { return QStringLiteral("operator-bool"); }
+static inline QString parentManagementAttribute() { return QStringLiteral("parent-management"); }
 static inline QString pyiTypeAttribute() { return QStringLiteral("pyi-type"); }
 static inline QString overloadNumberAttribute() { return QStringLiteral("overload-number"); }
 static inline QString ownershipAttribute() { return QStringLiteral("owner"); }
@@ -1818,6 +1819,11 @@ void TypeSystemParser::applyComplexTypeAttributes(const ConditionalStreamReader 
                 qCWarning(lcShiboken, "%s",
                           qPrintable(msgInvalidAttributeValue(attribute)));
             }
+        } else if (name == parentManagementAttribute()) {
+            const auto attribute = attributes->takeAt(i);
+            if (convertBoolean(attribute.value(), parentManagementAttribute(), false))
+                ctype->setTypeFlags(ctype->typeFlags() | ComplexTypeEntry::ParentManagement);
+            ComplexTypeEntry::setParentManagementEnabled(true);
         }
     }
 

@@ -970,6 +970,21 @@ bool AbstractMetaClass::canAddDefaultCopyConstructor() const
     return isImplicitlyCopyConstructible();
 }
 
+static bool classHasParentManagement(const AbstractMetaClass *c)
+{
+    const auto flags = c->typeEntry()->typeFlags();
+    return flags.testFlag(ComplexTypeEntry::ParentManagement);
+}
+
+const TypeEntry *AbstractMetaClass::parentManagementEntry() const
+{
+    if (isObjectType()) {
+        if (auto *c = recurseClassHierarchy(this, classHasParentManagement))
+            return c->typeEntry();
+    }
+    return nullptr;
+}
+
 bool AbstractMetaClass::generateExceptionHandling() const
 {
     return queryFirstFunction(d->m_functions, FunctionQueryOption::Visible

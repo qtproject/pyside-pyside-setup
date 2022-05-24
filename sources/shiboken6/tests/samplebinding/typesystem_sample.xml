@@ -582,7 +582,7 @@
         </modify-function>
     </object-type>
 
-    <object-type name="ObjectType" hash-function="objectTypeHash">
+    <object-type name="ObjectType" hash-function="objectTypeHash" parent-management="yes">
         <modify-function signature="deprecatedFunction()" deprecated="yes" />
         <!-- rename function to avoid Python signature conflit -->
         <modify-function signature="setObject(const Null&amp;)" rename="setNullObject" />

@@ -404,6 +404,7 @@ object-type
              hash-function="..."
              isNull ="yes | no"
              operator-bool="yes | no"
+             parent-management="yes | no"
              polymorphic-id-expression="..."
              polymorphic-name-function="..."
              private="yes | no"
@@ -470,6 +471,16 @@ object-type
     The *optional* **isNull** and **operator-bool** attributes can be used
     to override the command line setting for generating bool casts
     (see :ref:`bool-cast`).
+
+    The *optional* **parent-management** attribute specifies that the class is
+    used for building object trees consisting of parents and children, for
+    example, user interfaces like the ``QWidget`` classes. For those classes,
+    the heuristics enabled by :ref:`ownership-parent-heuristics` and
+    :ref:`return-value-heuristics` are applied to automatically set parent
+    relationships. Compatibility note: In shiboken 6, when no class of the
+    type system has this attribute set, the heuristics will be applied
+    to all classes. In shiboken 7, it will be mandatory to set the
+    attribute.
 
     The *optional* **polymorphic-id-expression** attribute specifies an
     expression checking whether a base class pointer is of the matching

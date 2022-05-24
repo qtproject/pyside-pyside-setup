@@ -240,7 +240,7 @@
 
   <!-- Register Qt meta type only for base class QGraphicsItem as registering
        QGraphicsItemGroup* breaks QGraphicsItem::itemChange()), PYSIDE-1887 -->
-  <object-type name="QGraphicsItem" qt-register-metatype="base">
+  <object-type name="QGraphicsItem" qt-register-metatype="base" parent-management="true">
     <enum-type name="CacheMode"/>
     <enum-type name="Extension"/>
     <enum-type name="GraphicsItemChange"/>
@@ -1815,7 +1815,7 @@
       </modify-argument>
     </modify-function>
   </object-type>
-  <object-type name="QTreeWidgetItem" hash-function="qHash">
+  <object-type name="QTreeWidgetItem" hash-function="qHash" parent-management="true">
     <enum-type name="ChildIndicatorPolicy"/>
     <enum-type name="ItemType"/>
     <modify-function signature="read(QDataStream&amp;)" allow-thread="yes">
@@ -3053,7 +3053,8 @@
         <modify-argument index="1" invalidate-after-use="yes"/>
     </modify-function>
   </object-type>
-  <object-type name="QGraphicsLayoutItem" copyable="false" qt-register-metatype="base">
+  <object-type name="QGraphicsLayoutItem" copyable="false" qt-register-metatype="base"
+               parent-management="true">
     <modify-function signature="getContentsMargins(qreal*,qreal*,qreal*,qreal*)const">
         <modify-argument index="0">
             <replace-type modified-type="PyObject"/>

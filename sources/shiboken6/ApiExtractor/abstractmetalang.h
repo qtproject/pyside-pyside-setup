@@ -113,6 +113,10 @@ public:
     bool isImplicitlyCopyConstructible() const;
     bool canAddDefaultCopyConstructor() const;
 
+    /// Return type entry of the base class that declares the parent management
+    const TypeEntry *parentManagementEntry() const;
+    bool hasParentManagement() const { return parentManagementEntry() != nullptr; }
+
     bool generateExceptionHandling() const;
 
     CppWrapper cppWrapper() const;

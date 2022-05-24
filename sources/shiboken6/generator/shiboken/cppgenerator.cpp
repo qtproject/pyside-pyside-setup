@@ -6813,6 +6813,28 @@ static ArgumentOwner getArgumentOwner(const AbstractMetaFunctionCPtr &func, int 
     return argOwner;
 }
 
+// Whether to enable parent ownership heuristic for a function and its argument.
+// Both must belong to the same class hierarchy and have the same
+// type entry enabling parent management.
+static bool useParentHeuristics(const ApiExtractorResult &api,
+                                const AbstractMetaFunctionCPtr &func,
+                                const AbstractMetaType &argType)
+{
+    if (!ComplexTypeEntry::isParentManagementEnabled()) // FIXME PYSIDE 7: Remove this
+        return true;
+    auto *owner = func->ownerClass();
+    if (owner == nullptr)
+        return false;
+    auto *ownerEntry = owner->parentManagementEntry();
+    if (ownerEntry == nullptr)
+        return false;
+    auto *argTypeEntry = argType.typeEntry();
+    if (!argTypeEntry->isComplex())
+        return false;
+    auto *argClass = AbstractMetaClass::findClass(api.classes(), argTypeEntry);
+    return argClass != nullptr && argClass->parentManagementEntry() == ownerEntry;
+}
+
 bool CppGenerator::writeParentChildManagement(TextStream &s, const AbstractMetaFunctionCPtr &func,
                                               int argIndex,
                                               bool usePyArgs, bool useHeuristicPolicy) const
@@ -6827,7 +6849,8 @@ bool CppGenerator::writeParentChildManagement(TextStream &s, const AbstractMetaF
     int childIndex = argIndex;
     if (ctorHeuristicEnabled && argIndex > 0 && argIndex <= numArgs) {
         const AbstractMetaArgument &arg = func->arguments().at(argIndex-1);
-        if (arg.name() == u"parent" && arg.type().isObjectType()) {
+        if (arg.name() == u"parent" && arg.type().isObjectType()
+            && useParentHeuristics(api(), func, arg.type())) {
             action = ArgumentOwner::Add;
             parentIndex = argIndex;
             childIndex = -1;
@@ -6899,7 +6922,8 @@ void CppGenerator::writeReturnValueHeuristics(TextStream &s, const AbstractMetaF
         || type.isVoid()
         || func->isStatic()
         || func->isConstructor()
-        || func->isTypeModified()) {
+        || func->isTypeModified()
+        || !useParentHeuristics(api(), func, type)) {
         return;
     }
 

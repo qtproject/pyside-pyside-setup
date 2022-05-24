@@ -36,7 +36,10 @@ public:
     enum TypeFlag {
         DisableWrapper     = 0x1,
         Deprecated         = 0x4,
-        ForceAbstract      = 0x8
+        ForceAbstract      = 0x8,
+        // Indicates that the instances are used to create hierarchies
+        // like widgets; parent ownership heuristics are enabled for them.
+        ParentManagement   = 0x10
     };
     Q_DECLARE_FLAGS(TypeFlags, TypeFlag)
 
@@ -139,6 +142,10 @@ public:
     // Determined by AbstractMetaBuilder from the code model.
     bool isValueTypeWithCopyConstructorOnly() const;
     void setValueTypeWithCopyConstructorOnly(bool v);
+
+    // FIXME PYSIDE 7: Remove this
+    static bool isParentManagementEnabled();
+    static void setParentManagementEnabled(bool e);
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &debug) const override;

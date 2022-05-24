@@ -1607,6 +1607,19 @@ void ComplexTypeEntry::setValueTypeWithCopyConstructorOnly(bool v)
     d->m_isValueTypeWithCopyConstructorOnly = v;
 }
 
+// FIXME PYSIDE 7: Remove this and make "true" the default
+static bool parentManagementEnabled = false;
+
+bool ComplexTypeEntry::isParentManagementEnabled()
+{
+    return parentManagementEnabled;
+}
+
+void ComplexTypeEntry::setParentManagementEnabled(bool e)
+{
+    parentManagementEnabled = e;
+}
+
 TypeEntry *ComplexTypeEntry::clone() const
 {
     S_D(const ComplexTypeEntry);

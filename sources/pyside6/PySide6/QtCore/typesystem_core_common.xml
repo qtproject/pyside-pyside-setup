@@ -1594,7 +1594,7 @@
   <object-type name="QIdentityProxyModel"/>
   <object-type name="QTransposeProxyModel" since="5.13"/>
   <!-- QObject is created manually -->
-  <object-type name="QObject">
+  <object-type name="QObject" parent-management="true">
     <extra-includes>
       <include file-name="QThread" location="global"/>
       <include file-name="QCoreApplication" location="global"/>
