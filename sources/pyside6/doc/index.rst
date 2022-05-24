@@ -3,8 +3,9 @@
 
 .. ifconfig:: output_format == 'html'
 
-    **Qt for Python** offers the official Python bindings for `Qt`_, and
-    has two main components:
+    **Qt for Python** offers the official Python bindings for `Qt`_,
+    which enables you to use Python to write your Qt applications.
+    The project has two main components:
 
     * `PySide6`_, so that you can use Qt6 APIs in your Python applications, and
     * `Shiboken6 <shiboken6/index.html>`__, a binding generator tool, which can
@@ -13,8 +14,9 @@
 
 .. ifconfig:: output_format == 'qthelp'
 
-    **Qt for Python** offers the official Python bindings for `Qt`_, and
-    has two main components:
+    **Qt for Python** offers the official Python bindings for `Qt`_,
+    which enables you to use Python to write your Qt applications.
+    The project has two main components:
 
     * `PySide6`_, so that you can use Qt6 APIs in your Python applications, and
     * `Shiboken6 <../shiboken6/index.html>`__, a binding generator tool, which can
@@ -31,7 +33,20 @@ This project is available under the LGPLv3/GPLv3 and the `Qt commercial license`
 .. _`Qt commercial license`: https://www.qt.io/licensing/
 .. _`Porting from PySide2 to PySide6`: porting_from2.html
 
+Quick Start
+===========
 
+You can obtain the latest stable version by running ``pip install pyside6``.
+If you want to build it yourself, check the `getting started guide`_.
+
+To learn how to use it, check out `write your first application`_,
+and to learn what is installed with the ``pyside6``, check the
+`package content, structure, and tools`_ page.
+
+
+.. _`getting started guide`: gettingstarted.html
+.. _`write your first application`: quickstart.html
+.. _`package content, structure, and tools`: package_details.html
 
 Documentation
 =============
