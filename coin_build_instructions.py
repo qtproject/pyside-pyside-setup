@@ -3,6 +3,7 @@
 import calendar
 import datetime
 import os
+import os.path
 import site
 import sys
 
@@ -157,6 +158,11 @@ if __name__ == "__main__":
 
     if CI_TEST_PHASE in ["ALL", "BUILD"]:
         call_setup(python_ver, "BUILD")
+    # Until CI has a feature to set more dynamic signing dir, make sure it actually exist
+    if os.environ.get("QTEST_ENVIRONMENT") == "ci" and sys.platform == "win32":
+        signing_dir = os.path.join(os.getcwd(), "build", "qfpa-p3.6", "package_for_wheels")
+        print("Check for signing dir " + signing_dir)
+        assert(os.path.isdir(signing_dir))
 
     if CI_TEST_PHASE in ["ALL", "WHEEL"]:
         call_setup(python_ver, "WHEEL")
