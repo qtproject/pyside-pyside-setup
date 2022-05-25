@@ -156,6 +156,11 @@ if __name__ == "__main__":
     if CI_TARGET_OS in ["Linux"]:
         python_ver = "3.8"
 
+    if CI_TARGET_OS in ["Windows"]:
+        if os.environ.get('HOST_OSVERSION_COIN') == 'windows_10_21h2':
+            python_ver = "3.10"
+        else:
+            python_ver = "3.7"
     if CI_TEST_PHASE in ["ALL", "BUILD"]:
         call_setup(python_ver, "BUILD")
     # Until CI has a feature to set more dynamic signing dir, make sure it actually exist
