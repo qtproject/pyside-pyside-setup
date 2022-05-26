@@ -1,5 +1,6 @@
 {
     "files": ["__init__.py",
+              "enum_310.py",
               "feature.py",
               "fix-complaints.py",
               "signature/__init__.py",

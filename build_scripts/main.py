@@ -593,8 +593,9 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
             f"-DQt5Help_DIR={self.qtinfo.docs_dir}",
             f"-DCMAKE_BUILD_TYPE={self.build_type}",
             f"-DCMAKE_INSTALL_PREFIX={self.install_dir}",
-            # Record the minimum Python version for later use in Shiboken.__init__
+            # Record the minimum/maximum Python version for later use in Shiboken.__init__
             f"-DMINIMUM_PYTHON_VERSION={get_allowed_python_versions()[0]}",
+            f"-DMAXIMUM_PYTHON_VERSION={get_allowed_python_versions()[-1]}",
             module_src_dir
         ]
 
