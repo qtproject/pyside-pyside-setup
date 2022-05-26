@@ -183,6 +183,7 @@ set(shiboken_python_files
     "signature/parser.py"
     "__init__.py"
     "feature.py"
+    "enum_310.py"
     )
 
 # uninstall target
