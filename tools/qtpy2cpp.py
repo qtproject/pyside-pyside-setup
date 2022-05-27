@@ -45,7 +45,7 @@ if __name__ == '__main__':
     ast_tree = ConvertVisitor.create_ast(input_file)
     if args.stdout:
         sys.stdout.write(f'// Converted from {input_file}\n')
-        ConvertVisitor(sys.stdout).visit(ast_tree)
+        ConvertVisitor(input_file, sys.stdout).visit(ast_tree)
         sys.exit(0)
 
     target_file = file_root + '.cpp'
@@ -59,5 +59,5 @@ if __name__ == '__main__':
 
     with open(target_file, "w") as file:
         file.write(f'// Converted from {input_file}\n')
-        ConvertVisitor(file).visit(ast_tree)
+        ConvertVisitor(input_file, file).visit(ast_tree)
         logger.info(f"Wrote {target_file} ...")

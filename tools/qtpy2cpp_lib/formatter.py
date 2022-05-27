@@ -33,7 +33,7 @@ def format_inheritance(class_def_node):
 def format_for_target(target_node):
     if isinstance(target_node, ast.Tuple):  # for i,e in enumerate()
         result = ''
-        for i, el in enumerate(target_node):
+        for i, el in enumerate(target_node.elts):
             if i > 0:
                 result += ', '
             result += format_reference(el)
