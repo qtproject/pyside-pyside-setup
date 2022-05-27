@@ -63,9 +63,10 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
 
     debug = False
 
-    def __init__(self, output_file):
+    def __init__(self, file_name, output_file):
         ast.NodeVisitor.__init__(self)
         CppFormatter.__init__(self, output_file)
+        self._file_name = file_name
         self._class_scope = []  # List of class names
         self._stack = []  # nodes
         self._debug_indent = 0
@@ -87,9 +88,10 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
             super().generic_visit(node)
         except Exception as e:
             line_no = node.lineno if hasattr(node, 'lineno') else -1
-            message = 'Error "{}" at line {}'.format(str(e), line_no)
+            error_message = str(e)
+            message = f'{self._file_name}:{line_no}: Error "{error_message}"'
             warnings.warn(message)
-            self._output_file.write(f'\n// {message}\n')
+            self._output_file.write(f'\n// {error_message}\n')
         del self._stack[-1]
         if self.debug:
             self._debug_leave(node)
@@ -101,13 +103,14 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
     def visit_Assign(self, node):
         self._output_file.write('\n')
         self.INDENT()
+        line_no = node.lineno if hasattr(node, 'lineno') else -1
         for target in node.targets:
             if isinstance(target, ast.Tuple):
-                warnings.warn('List assignment not handled (line {}).'.
-                              format(node.lineno))
+                w = f"{self._file_name}:{line_no}: List assignment not handled."
+                warnings.warn(w)
             elif isinstance(target, ast.Subscript):
-                warnings.warn('Subscript assignment not handled (line {}).'.
-                              format(node.lineno))
+                w = f"{self._file_name}:{line_no}: Subscript assignment not handled."
+                warnings.warn(w)
             else:
                 self._output_file.write(format_reference(target))
                 self._output_file.write(' = ')
