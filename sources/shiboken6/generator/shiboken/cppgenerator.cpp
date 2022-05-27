@@ -6921,7 +6921,9 @@ void CppGenerator::writeReturnValueHeuristics(TextStream &s, const AbstractMetaF
         || func->isStatic()
         || func->isConstructor()
         || func->isTypeModified()
-        || !useParentHeuristics(api(), func, type)) {
+        || !useParentHeuristics(api(), func, type)
+        // Something like parent(), parentWidget(): No child relationship here.
+        || (func->maybeAccessor() && func->name().startsWith(u"parent"))) {
         return;
     }
 

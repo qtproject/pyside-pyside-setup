@@ -741,8 +741,13 @@ AbstractMetaFunction::comparisonOperatorType() const
 bool AbstractMetaFunction::autoDetectAllowThread() const
 {
     // Disallow for simple getter functions.
-    const bool maybeGetter = d->m_constant != 0 && !isVoid() && d->m_arguments.isEmpty();
-    return !maybeGetter;
+    return !maybeAccessor();
+}
+
+bool AbstractMetaFunction::maybeAccessor() const
+{
+     return d->m_functionType == NormalFunction && d->m_class != nullptr
+        && d->m_constant != 0 && !isVoid() && d->m_arguments.isEmpty();
 }
 
 SourceLocation AbstractMetaFunction::sourceLocation() const

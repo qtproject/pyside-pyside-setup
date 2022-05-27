@@ -274,6 +274,7 @@ public:
     bool isSignal() const { return functionType() == SignalFunction; }
     bool isSlot() const { return functionType() == SlotFunction; }
     bool isEmptyFunction() const { return functionType() == EmptyFunction; }
+    bool maybeAccessor() const;
     FunctionType functionType() const;
     void setFunctionType(FunctionType type);
 
