@@ -50,6 +50,26 @@ from .formatter import (CppFormatter, format_for_loop, format_literal,
 from .nodedump import debug_format_node
 
 
+_QT_STACK_CLASSES = ["QApplication", "QColorDialog", "QCoreApplication",
+                     "QFile", "QFileDialog", "QFileInfo", "QFontDialog",
+                     "QGuiApplication", "QIcon", "QLine", "QLineF",
+                     "QMessageBox", "QPainter", "QPixmap", "QPoint", "QPointF",
+                     "QQmlApplicationEngine", "QQmlComponent", "QQmlEngine",
+                     "QQuickView", "QRect", "QRectF", "QSaveFile", "QSettings",
+                     "QSize", "QSizeF", "QTextStream"]
+
+
+def _is_qt_constructor(assign_node):
+    """Is this assignment node a plain construction of a Qt class?
+       'f = QFile(name)'. Returns the class_name."""
+    call = assign_node.value
+    if (isinstance(call, ast.Call) and isinstance(call.func, ast.Name)):
+        func = call.func.id
+        if func.startswith("Q"):
+            return func
+    return None
+
+
 class ConvertVisitor(ast.NodeVisitor, CppFormatter):
     """AST visitor printing out C++
     Note on implementation:
@@ -69,6 +89,7 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
         self._file_name = file_name
         self._class_scope = []  # List of class names
         self._stack = []  # nodes
+        self._stack_variables = []  # variables instantiated on stack
         self._debug_indent = 0
 
     @staticmethod
@@ -102,6 +123,24 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
 
     def visit_Assign(self, node):
         self.INDENT()
+
+        qt_class = _is_qt_constructor(node)
+        on_stack = qt_class and qt_class in _QT_STACK_CLASSES
+
+        # Is this a free variable and not a member assignment? Instantiate
+        # on stack or give a type
+        if len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+            if qt_class:
+                if on_stack:
+                    # "QFile f(args)"
+                    var = node.targets[0].id
+                    self._stack_variables.append(var)
+                    self._output_file.write(f"{qt_class} {var}(")
+                    self._write_function_args(node.value.args)
+                    self._output_file.write(");\n")
+                    return
+                self._output_file.write("auto *")
+
         line_no = node.lineno if hasattr(node, 'lineno') else -1
         for target in node.targets:
             if isinstance(target, ast.Tuple):
@@ -113,6 +152,8 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
             else:
                 self._output_file.write(format_reference(target))
                 self._output_file.write(' = ')
+        if qt_class and not on_stack:
+            self._output_file.write("new ")
         self.visit(node.value)
         self._output_file.write(';\n')
 
@@ -137,12 +178,15 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
 
     def visit_Call(self, node):
         self._output_file.write(format_start_function_call(node))
+        self._write_function_args(node.args)
+        self._output_file.write(')')
+
+    def _write_function_args(self, args_node):
         # Manually do visit(), skip the children of func
-        for i, arg in enumerate(node.args):
+        for i, arg in enumerate(args_node):
             if i > 0:
                 self._output_file.write(', ')
             self.visit(arg)
-        self._output_file.write(')')
 
     def visit_ClassDef(self, node):
         # Manually do visit() to skip over base classes
@@ -190,6 +234,7 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
         self.generic_visit(node)
         self.dedent()
         self.indent_line('}')
+        self._stack_variables.clear()
 
     def visit_If(self, node):
         # Manually do visit() to get the indentation right. Note:
