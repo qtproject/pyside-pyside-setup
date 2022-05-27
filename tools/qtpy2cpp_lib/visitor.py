@@ -65,7 +65,6 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
         self._output_file.write(' + ')
 
     def visit_Assign(self, node):
-        self._output_file.write('\n')
         self.INDENT()
         line_no = node.lineno if hasattr(node, 'lineno') else -1
         for target in node.targets:
@@ -126,7 +125,6 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
         self._output_file.write(" == ")
 
     def visit_Expr(self, node):
-        self._output_file.write('\n')
         self.INDENT()
         self.generic_visit(node)
         self._output_file.write(';\n')
@@ -236,6 +234,13 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
     def visit_RShift(self, node):
         self.generic_visit(node)
         self._output_file.write(" >> ")
+
+    def visit_Return(self, node):
+        self.indent_string("return")
+        if node.value:
+            self._output_file.write(" ")
+            self.generic_visit(node)
+        self._output_file.write(";\n")
 
     def visit_Str(self, node):
         self.generic_visit(node)
