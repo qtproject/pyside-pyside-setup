@@ -89,6 +89,14 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
         self.generic_visit(node)
         self._output_file.write(')')
 
+    def visit_BitAnd(self, node):
+        self.generic_visit(node)
+        self._output_file.write(" & ")
+
+    def visit_BitOr(self, node):
+        self.generic_visit(node)
+        self._output_file.write(" | ")
+
     def visit_Call(self, node):
         self._output_file.write(format_start_function_call(node))
         # Manually do visit(), skip the children of func
@@ -110,6 +118,10 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
         self.indent_line('};')
         del self._class_scope[-1]
 
+    def visit_Eq(self, node):
+        self.generic_visit(node)
+        self._output_file.write(" == ")
+
     def visit_Expr(self, node):
         self._output_file.write('\n')
         self.INDENT()
@@ -118,7 +130,11 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
 
     def visit_Gt(self, node):
         self.generic_visit(node)
-        self._output_file.write('>')
+        self._output_file.write(" > ")
+
+    def visit_GtE(self, node):
+        self.generic_visit(node)
+        self._output_file.write(" >= ")
 
     def visit_For(self, node):
         # Manually do visit() to get the indentation right.
@@ -173,9 +189,17 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
             self.visit(el)
         self._output_file.write('}')
 
+    def visit_LShift(self, node):
+        self.generic_visit(node)
+        self._output_file.write(" << ")
+
     def visit_Lt(self, node):
         self.generic_visit(node)
-        self._output_file.write('<')
+        self._output_file.write(" < ")
+
+    def visit_LtE(self, node):
+        self.generic_visit(node)
+        self._output_file.write(" <= ")
 
     def visit_Mult(self, node):
         self.generic_visit(node)
@@ -194,9 +218,21 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
         else:
             self._output_file.write('true')
 
+    def visit_Not(self, node):
+        self.generic_visit(node)
+        self._output_file.write("!")
+
+    def visit_NotEq(self, node):
+        self.generic_visit(node)
+        self._output_file.write(" != ")
+
     def visit_Num(self, node):
         self.generic_visit(node)
         self._output_file.write(format_literal(node))
+
+    def visit_RShift(self, node):
+        self.generic_visit(node)
+        self._output_file.write(" >> ")
 
     def visit_Str(self, node):
         self.generic_visit(node)
