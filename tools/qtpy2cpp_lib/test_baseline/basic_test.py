@@ -31,6 +31,10 @@ a = 7
 if a > 5:
     for f in [1, 2]:
         print(f)
+elif a == 2:
+    print(2)
+elif not a:
+    print(0)
 else:
     for i in range(5):
         print(i)
