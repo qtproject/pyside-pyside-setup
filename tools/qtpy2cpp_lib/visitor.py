@@ -70,6 +70,19 @@ def _is_qt_constructor(assign_node):
     return None
 
 
+def _is_if_main(if_node):
+    """Return whether an if statement is: if __name__ == '__main__' """
+    test = if_node.test
+    return (isinstance(test, ast.Compare)
+            and len(test.ops) == 1
+            and isinstance(test.ops[0], ast.Eq)
+            and isinstance(test.left, ast.Name)
+            and test.left.id == "__name__"
+            and len(test.comparators) == 1
+            and isinstance(test.comparators[0], ast.Constant)
+            and test.comparators[0].value == "__main__")
+
+
 class ConvertVisitor(ast.NodeVisitor, CppFormatter):
     """AST visitor printing out C++
     Note on implementation:
@@ -239,6 +252,18 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
     def visit_If(self, node):
         # Manually do visit() to get the indentation right. Note:
         # elsif() is modelled as nested if.
+
+        # Check for the main function
+        if _is_if_main(node):
+            self._output_file.write("\nint main(int argc, char *argv[])\n{\n")
+            self.indent()
+            for b in node.body:
+                self.visit(b)
+            self.indent_string("return 0;\n")
+            self.dedent()
+            self._output_file.write("}\n")
+            return
+
         self.indent_string('if (')
         self.visit(node.test)
         self._output_file.write(') {\n')
