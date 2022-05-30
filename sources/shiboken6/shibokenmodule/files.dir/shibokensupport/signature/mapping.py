@@ -417,6 +417,7 @@ def init_sample():
     type_map.update({
         "char": int,
         "char**": typing.List[str],
+        "const char*": str,
         "Complex": complex,
         "double": float,
         "Foo.HANDLE": int,
@@ -426,6 +427,7 @@ def init_sample():
         "OddBool": bool,
         "PStr": str,
         "PyDate": datetime.date,
+        "PyBuffer": bytes,
         "sample.bool": bool,
         "sample.char": int,
         "sample.double": float,
@@ -436,6 +438,7 @@ def init_sample():
         "sample.Photon.TemplateBase[Photon.IdentityType]": sample.Photon.ValueIdentity,
         "sample.Point": Point,
         "sample.PStr": str,
+        "SampleNamespace.InValue.ZeroIn": 0,
         "sample.unsigned char": int,
         "std.size_t": int,
         "std.string": str,
@@ -591,6 +594,8 @@ def init_PySide6_QtWidgets():
             "QWidget.RenderFlags(QWidget.DrawWindowBackground | QWidget.DrawChildren)"),
         "static_cast<Qt.MatchFlags>(Qt.MatchExactly|Qt.MatchCaseSensitive)": Instance(
             "Qt.MatchFlags(Qt.MatchExactly | Qt.MatchCaseSensitive)"),
+        "static_cast<Qt.MatchFlag>(Qt.MatchExactly|Qt.MatchCaseSensitive)": Instance(
+            "Qt.MatchFlag(Qt.MatchExactly | Qt.MatchCaseSensitive)"),
         "QListWidgetItem.ItemType.Type": PySide6.QtWidgets.QListWidgetItem.Type,
         "QTableWidgetItem.ItemType.Type": PySide6.QtWidgets.QTableWidgetItem.Type,
         "QTreeWidgetItem.ItemType.Type": PySide6.QtWidgets.QTreeWidgetItem.Type,

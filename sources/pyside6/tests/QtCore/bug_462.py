@@ -41,7 +41,7 @@ from PySide6.QtCore import QObject, QCoreApplication, QEvent, QThread
 class MyEvent(QEvent):
     def __init__(self, i):
         print("TYPE:", type(QEvent.User))
-        super().__init__(QEvent.Type(QEvent.User + 100))
+        super().__init__(QEvent.Type(QEvent.User + (0 if sys.pyside63_option_python_enum else 100)))
         self.i = i
 
 

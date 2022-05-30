@@ -51,11 +51,14 @@ from shibokensupport.signature import get_signature
 
 class SignatureTest(unittest.TestCase):
 
-    # Check if the argument of 'OtherObjectType::enumAsInt(SampleNamespace::SomeClass::PublicScopedEnum value)'
+    # Check if the argument of
+    # 'OtherObjectType::enumAsInt(SampleNamespace::SomeClass::PublicScopedEnum value)'
     # has the correct representation
     def testNamespaceFromOtherModule(self):
-        argType = get_signature(OtherObjectType.enumAsInt).parameters['value'].annotation
-        self.assertEqual(objectFullname(argType), 'sample.SampleNamespace.SomeClass.PublicScopedEnum')
+        argType = get_signature(OtherObjectType.enumAsInt).parameters["value"].annotation
+        self.assertEqual(objectFullname(argType),
+            "sample.SampleNamespace.SomeClass.PublicScopedEnum")
+
 
 if __name__ == '__main__':
     unittest.main()

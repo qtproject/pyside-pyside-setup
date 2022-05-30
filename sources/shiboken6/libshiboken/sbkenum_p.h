@@ -47,6 +47,18 @@ struct SbkEnumTypePrivate
 {
     SbkConverter *converter;
     const char *cppName;
+    PyTypeObject *replacementType;
 };
+
+extern "C" {
+
+/// PYSIDE-1735: Patching the Enum / Flags implementation. Remove in 6.4
+LIBSHIBOKEN_API PyTypeObject *morphLastEnumToPython();
+LIBSHIBOKEN_API PyTypeObject *mapFlagsToSameEnum(PyTypeObject *FType, PyTypeObject *EType);
+
+/// PYSIDE-1735: Make sure that we can import the Python enum implementation.
+LIBSHIBOKEN_API PyTypeObject *getPyEnumMeta();
+
+}
 
 #endif // SKB_PYENUM_P_H

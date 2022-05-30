@@ -1910,31 +1910,40 @@ void CppGenerator::writeContainerConverterFunctions(TextStream &s,
     writePythonToCppConversionFunctions(s, containerType);
 }
 
+// Helpers to collect all smart pointer pointee base classes
+static AbstractMetaClassCList findSmartPointeeBaseClasses(const ApiExtractorResult &api,
+                                                          const AbstractMetaType &smartPointerType)
+{
+    AbstractMetaClassCList result;
+    auto *instantiationsTe = smartPointerType.instantiations().at(0).typeEntry();
+    auto targetClass = AbstractMetaClass::findClass(api.classes(), instantiationsTe);
+    if (targetClass != nullptr)
+        result = targetClass->allTypeSystemAncestors();
+    return result;
+}
+
 void CppGenerator::writeSmartPointerConverterFunctions(TextStream &s,
                                                        const AbstractMetaType &smartPointerType) const
 {
-    auto targetClass = AbstractMetaClass::findClass(api().classes(),
-                                                    smartPointerType.instantiations().at(0).typeEntry());
+    const auto baseClasses = findSmartPointeeBaseClasses(api(), smartPointerType);
+    if (baseClasses.isEmpty())
+        return;
 
-    if (targetClass) {
-        const auto *smartPointerTypeEntry =
-                static_cast<const SmartPointerTypeEntry *>(
-                    smartPointerType.typeEntry());
+    auto *smartPointerTypeEntry =
+        static_cast<const SmartPointerTypeEntry *>(smartPointerType.typeEntry());
 
-        // TODO: Missing conversion to smart pointer pointer type:
+    // TODO: Missing conversion to smart pointer pointer type:
 
-        s << "// Register smartpointer conversion for all derived classes\n";
-        const auto classes = targetClass->typeSystemBaseClasses();
-        for (auto base : classes) {
-            auto *baseTe = base->typeEntry();
-            if (smartPointerTypeEntry->matchesInstantiation(baseTe)) {
-                if (auto opt = findSmartPointerInstantiation(smartPointerTypeEntry, baseTe)) {
-                    const auto smartTargetType = opt.value();
-                    s << "// SmartPointer derived class: "
-                        << smartTargetType.cppSignature() << "\n";
-                    writePythonToCppConversionFunctions(s, smartPointerType,
-                                                        smartTargetType, {}, {}, {});
-                }
+    s << "// Register smartpointer conversion for all derived classes\n";
+    for (auto *base : baseClasses) {
+        auto *baseTe = base->typeEntry();
+        if (smartPointerTypeEntry->matchesInstantiation(baseTe)) {
+            if (auto opt = findSmartPointerInstantiation(smartPointerTypeEntry, baseTe)) {
+                const auto smartTargetType = opt.value();
+                s << "// SmartPointer derived class: "
+                    << smartTargetType.cppSignature() << "\n";
+                writePythonToCppConversionFunctions(s, smartPointerType,
+                                                    smartTargetType, {}, {}, {});
             }
         }
     }
@@ -4184,7 +4193,7 @@ void CppGenerator::writeEnumConverterInitialization(TextStream &s, const TypeEnt
     if (!enumType)
         return;
     QString enumFlagName = enumType->isFlags() ? u"flag"_s : u"enum"_s;
-    QString enumPythonType = cpythonTypeNameExt(enumType);
+    QString enumPythonVar = enumType->isFlags() ? u"FType"_s : u"EType"_s;
 
     const FlagsTypeEntry *flags = nullptr;
     if (enumType->isFlags())
@@ -4196,7 +4205,7 @@ void CppGenerator::writeEnumConverterInitialization(TextStream &s, const TypeEnt
         Indentation indent(s);
         QString typeName = fixedCppTypeName(enumType);
         s << "SbkConverter *converter = Shiboken::Conversions::createConverter("
-            << enumPythonType << ',' << '\n';
+            << enumPythonVar << ',' << '\n';
         {
             Indentation indent(s);
             s << cppToPythonFunctionName(typeName, typeName) << ");\n";
@@ -4219,7 +4228,7 @@ void CppGenerator::writeEnumConverterInitialization(TextStream &s, const TypeEnt
             writeAddPythonToCppConversion(s, u"converter"_s, toCpp, isConv);
         }
 
-        s << "Shiboken::Enum::setTypeConverter(" << enumPythonType
+        s << "Shiboken::Enum::setTypeConverter(" << enumPythonVar
             << ", converter, " << (enumType->isFlags() ? "true" : "false") << ");\n";
 
         QString signature = enumType->qualifiedCppName();
@@ -4301,11 +4310,7 @@ void CppGenerator::writeSmartPointerConverterInitialization(TextStream &s, const
         writeAddPythonToCppConversion(s, targetConverter, toCpp, isConv);
     };
 
-    auto klass = AbstractMetaClass::findClass(api().classes(), type.instantiations().at(0).typeEntry());
-    if (!klass)
-        return;
-
-    const auto classes = klass->typeSystemBaseClasses();
+    const auto classes = findSmartPointeeBaseClasses(api(), type);
     if (classes.isEmpty())
         return;
 
@@ -5412,10 +5417,21 @@ void CppGenerator::writeEnumsInitialization(TextStream &s, AbstractMetaEnumList 
 {
     if (enums.isEmpty())
         return;
-    s << "// Initialization of enums.\n\n";
+    bool preambleWrittenE = false;
+    bool preambleWrittenF = false;
     for (const AbstractMetaEnum &cppEnum : qAsConst(enums)) {
         if (cppEnum.isPrivate())
             continue;
+        if (!preambleWrittenE) {
+            s << "// Initialization of enums.\n"
+                << "PyTypeObject *EType{};\n\n";
+            preambleWrittenE = true;
+        }
+        if (!preambleWrittenF && cppEnum.typeEntry()->flags()) {
+            s << "// Initialization of enums, flags part.\n"
+                << "PyTypeObject *FType{};\n\n";
+            preambleWrittenF = true;
+        }
         writeEnumInitialization(s, cppEnum, errorReturn);
     }
 }
@@ -5431,7 +5447,8 @@ void CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
                                            ErrorReturn errorReturn) const
 {
     const AbstractMetaClass *enclosingClass = cppEnum.targetLangEnclosingClass();
-    bool hasUpperEnclosingClass = enclosingClass && enclosingClass->targetLangEnclosingClass() != nullptr;
+    bool hasUpperEnclosingClass = enclosingClass
+                                  && enclosingClass->targetLangEnclosingClass() != nullptr;
     const EnumTypeEntry *enumTypeEntry = cppEnum.typeEntry();
     QString enclosingObjectVariable;
     if (enclosingClass)
@@ -5445,7 +5462,7 @@ void CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
     s << (cppEnum.isAnonymous() ? "anonymous enum identified by enum value" : "enum");
     s << " '" << cppEnum.name() << "'.\n";
 
-    QString enumVarTypeObj;
+    QString enumVarTypeObj = cpythonTypeNameExt(enumTypeEntry);
     if (!cppEnum.isAnonymous()) {
         int packageLevel = packageName().count(u'.') + 1;
         FlagsTypeEntry *flags = enumTypeEntry->flags();
@@ -5454,15 +5471,15 @@ void CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
             // We need 'flags->flagsName()' with the full module/class path.
             QString fullPath = getClassTargetFullName(cppEnum);
             fullPath.truncate(fullPath.lastIndexOf(u'.') + 1);
-            s << cpythonTypeNameExt(flags) << " = PySide::QFlags::create(\""
-                << packageLevel << ':' << fullPath << flags->flagsName() << "\", "
-                << cpythonEnumName(cppEnum) << "_number_slots);\n";
+            s << "FType = PySide::QFlags::create(\""
+                << packageLevel << ':' << fullPath << flags->flagsName() << "\", \n" << indent
+                << cpythonEnumName(cppEnum) << "_number_slots);\n" << outdent
+                << cpythonTypeNameExt(flags) << " = FType;\n";
         }
 
-        enumVarTypeObj = cpythonTypeNameExt(enumTypeEntry);
-
-        s << enumVarTypeObj << " = Shiboken::Enum::"
-            << ((enclosingClass || hasUpperEnclosingClass) ? "createScopedEnum" : "createGlobalEnum")
+        s << "EType = Shiboken::Enum::"
+            << ((enclosingClass
+                || hasUpperEnclosingClass) ? "createScopedEnum" : "createGlobalEnum")
             << '(' << enclosingObjectVariable << ',' << '\n';
         {
             Indentation indent(s);
@@ -5470,10 +5487,10 @@ void CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
                 << '"' << packageLevel << ':' << getClassTargetFullName(cppEnum) << "\",\n"
                 << '"' << cppEnum.qualifiedCppName() << '"';
             if (flags)
-                s << ",\n" << cpythonTypeNameExt(flags);
+                s << ",\nFType";
             s << ");\n";
         }
-        s << "if (!" << cpythonTypeNameExt(cppEnum.typeEntry()) << ")\n"
+        s << "if (!EType)\n"
             << indent << errorReturn << outdent << '\n';
     }
 
@@ -5516,8 +5533,9 @@ void CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
             break;
         case CEnum: {
             s << "if (!Shiboken::Enum::";
-            s << ((enclosingClass || hasUpperEnclosingClass) ? "createScopedEnumItem" : "createGlobalEnumItem");
-            s << '(' << enumVarTypeObj << ',' << '\n';
+            s << ((enclosingClass || hasUpperEnclosingClass) ? "createScopedEnumItem"
+                                                             : "createGlobalEnumItem");
+            s << '(' << "EType" << ',' << '\n';
             Indentation indent(s);
             s << enclosingObjectVariable << ", \"" << mangledName << "\", "
                 << enumValueText << "))\n" << errorReturn;
@@ -5525,15 +5543,22 @@ void CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
             break;
         case EnumClass: {
             s << "if (!Shiboken::Enum::createScopedEnumItem("
-                << enumVarTypeObj << ',' << '\n';
+                << "EType" << ",\n";
             Indentation indentation(s);
-            s << enumVarTypeObj<< ", \"" << mangledName << "\", "
+            s << "EType" << ", \"" << mangledName << "\", "
                << enumValueText << "))\n" << errorReturn;
         }
             break;
         }
     }
-
+    s << "// PYSIDE-1735: Resolving the whole enum class at the end for API compatibility.\n"
+        << "EType = morphLastEnumToPython();\n"
+        << enumVarTypeObj << " = EType;\n";
+    if (cppEnum.typeEntry()->flags()) {
+        s << "// PYSIDE-1735: Mapping the flags class to the same enum class.\n"
+            << cpythonTypeNameExt(cppEnum.typeEntry()->flags()) << " =\n"
+            << indent << "mapFlagsToSameEnum(FType, EType);\n" << outdent;
+    }
     writeEnumConverterInitialization(s, cppEnum);
 
     s << "// End of '" << cppEnum.name() << "' enum";
@@ -6757,6 +6782,7 @@ bool CppGenerator::writeParentChildManagement(TextStream &s, const AbstractMetaF
 {
     const int numArgs = func->arguments().size();
     bool ctorHeuristicEnabled = func->isConstructor() && useCtorHeuristic() && useHeuristicPolicy;
+    bool heuristicTriggered = false;
 
     ArgumentOwner argOwner = getArgumentOwner(func, argIndex);
     ArgumentOwner::Action action = argOwner.action;
@@ -6768,6 +6794,7 @@ bool CppGenerator::writeParentChildManagement(TextStream &s, const AbstractMetaF
             action = ArgumentOwner::Add;
             parentIndex = argIndex;
             childIndex = -1;
+            heuristicTriggered = true;
         }
     }
 
@@ -6800,7 +6827,11 @@ bool CppGenerator::writeParentChildManagement(TextStream &s, const AbstractMetaF
                 ? pythonArgsAt(childIndex - 1) : PYTHON_ARG;
         }
 
-        s << "Shiboken::Object::setParent(" << parentVariable << ", " << childVariable << ");\n";
+        s << "// Ownership transferences";
+        if (heuristicTriggered)
+            s << " (constructor heuristics)";
+        s << ".\nShiboken::Object::setParent(" << parentVariable << ", "
+            << childVariable << ");\n";
         return true;
     }
 
@@ -6837,8 +6868,10 @@ void CppGenerator::writeReturnValueHeuristics(TextStream &s, const AbstractMetaF
 
     ArgumentOwner argOwner = getArgumentOwner(func, ArgumentOwner::ReturnIndex);
     if (argOwner.action == ArgumentOwner::Invalid || argOwner.index != ArgumentOwner::ThisIndex) {
-        if (type.isPointerToWrapperType())
-            s << "Shiboken::Object::setParent(self, " << PYTHON_RETURN_VAR << ");\n";
+        if (type.isPointerToWrapperType()) {
+            s << "// Ownership transferences (return value heuristics).\n"
+                << "Shiboken::Object::setParent(self, " << PYTHON_RETURN_VAR << ");\n";
+        }
     }
 }
 

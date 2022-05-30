@@ -191,9 +191,8 @@ check_PyTypeObject_valid()
     Py_DECREF(probe_tp_mro);
 }
 
-#if PY_VERSION_HEX < PY_ISSUE33738_SOLVED
+// PYSIDE-1797: This must be a runtime decision.
 #include "pep384_issue33738.cpp"
-#endif
 
 #endif // Py_LIMITED_API
 
@@ -981,6 +980,13 @@ static thread_local PySideQFlagsTypePrivate *PFTP_value{};
 
 PySideQFlagsTypePrivate *PepType_PFTP(PySideQFlagsType *flagsType)
 {
+    static PyTypeObject *enumMeta = getPyEnumMeta();
+    auto *mappedType = reinterpret_cast<PyTypeObject *>(flagsType);
+    auto *metaType = Py_TYPE(mappedType);
+    if (metaType == enumMeta) {
+        return reinterpret_cast<PySideQFlagsTypePrivate *>(
+            PepType_SETP(reinterpret_cast<SbkEnumType *>(flagsType)));
+    }
     if (flagsType == PFTP_key)
         return PFTP_value;
     auto it = PFTP_extender.find(flagsType);

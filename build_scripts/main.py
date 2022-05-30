@@ -43,28 +43,30 @@ import platform
 import re
 import sys
 import time
+from packaging.version import parse as parse_version
 from pathlib import Path
 from shutil import which, copytree
 from textwrap import dedent
 
-import setuptools  # Import setuptools before distutils
-# PYSIDE-1760: Although not used here, pre-load this module early to avoid
-#              a racing condition with the import order. Note that this problem
-#              happens only with custom builds of Python without virtual environment.
-import setuptools.command.install_scripts
-from packaging.version import parse as parse_version
+# PYSIDE-1760: Pre-load setuptools modules early to avoid racing conditions.
+#              Please be careful: All setuptools modules must be loaded before _distutils
+#              may be touched (should be avoided anyway, btw.)
+# Note: This bug is only visible when tools like pyenv are not used. They have some
+#       pre-loading effect so that setuptools is already in the cache, hiding the problem.
 from setuptools import Command, Extension
-from setuptools._distutils import log
-from setuptools._distutils import sysconfig as sconfig
-from setuptools._distutils.command.build import build as _build
-# Use the distutils implementation within setuptools
-from setuptools._distutils.errors import DistutilsSetupError
 from setuptools.command.bdist_egg import bdist_egg as _bdist_egg
 from setuptools.command.build_ext import build_ext as _build_ext
 from setuptools.command.build_py import build_py as _build_py
 from setuptools.command.develop import develop as _develop
 from setuptools.command.install import install as _install
 from setuptools.command.install_lib import install_lib as _install_lib
+from setuptools.command.install_scripts import install_scripts  # preload only
+
+# Use the distutils implementation within setuptools (but not before)
+from setuptools._distutils import log
+from setuptools._distutils import sysconfig as sconfig
+from setuptools._distutils.command.build import build as _build
+from setuptools._distutils.errors import DistutilsSetupError
 
 from .build_info_collector import BuildInfoCollectorMixin
 from .config import config
@@ -149,11 +151,12 @@ def get_make(platform_arch, build_type):
     return (make_path, make_generator)
 
 
-def check_allowed_python_version():
-    """
-    Make sure that setup.py is run with an allowed python version.
-    """
+_allowed_versions_cache = None
 
+def get_allowed_python_versions():
+    global _allowed_versions_cache
+    if _allowed_versions_cache is not None:
+        return _allowed_versions_cache
     pattern = r'Programming Language :: Python :: (\d+)\.(\d+)'
     supported = []
 
@@ -163,6 +166,17 @@ def check_allowed_python_version():
             major = int(found.group(1))
             minor = int(found.group(2))
             supported.append((major, minor))
+
+    _allowed_versions_cache = sorted(supported)
+    return _allowed_versions_cache
+
+
+def check_allowed_python_version():
+    """
+    Make sure that setup.py is run with an allowed python version.
+    """
+
+    supported = get_allowed_python_versions()
     this_py = sys.version_info[:2]
     if this_py not in supported:
         log.error(f"Unsupported python version detected. Supported versions: {supported}")
@@ -587,6 +601,8 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
             f"-DQt5Help_DIR={self.qtinfo.docs_dir}",
             f"-DCMAKE_BUILD_TYPE={self.build_type}",
             f"-DCMAKE_INSTALL_PREFIX={self.install_dir}",
+            # Record the minimum Python version for later use in Shiboken.__init__
+            f"-DMINIMUM_PYTHON_VERSION={get_allowed_python_versions()[0]}",
             module_src_dir
         ]
 
@@ -640,7 +656,7 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
         if OPTION['NO_QT_TOOLS']:
             cmake_cmd.append("-DNO_QT_TOOLS=yes")
         if OPTION['SKIP_DOCS']:
-            log.info(f"Warning: '--skip-docs' is deprecated and will be removed. "
+            log.info("Warning: '--skip-docs' is deprecated and will be removed. "
                      "The documentation is not built by default")
         if OPTION['BUILD_DOCS']:
             cmake_cmd.append("-DBUILD_DOCS=yes")
