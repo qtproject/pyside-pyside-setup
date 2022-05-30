@@ -11,7 +11,7 @@ from PySide6.QtWebEngineCore import QWebEnginePage
 # A Find tool bar (bottom area)
 class FindToolBar(QToolBar):
 
-    find = QtCore.Signal(str, QWebEnginePage.FindFlags)
+    find = QtCore.Signal(str, QWebEnginePage.FindFlag)
 
     def __init__(self):
         super().__init__()
@@ -48,7 +48,7 @@ class FindToolBar(QToolBar):
     def _emit_find(self, backward):
         needle = self._line_edit.text().strip()
         if needle:
-            flags = QWebEnginePage.FindFlags()
+            flags = QWebEnginePage.FindFlag(0)
             if self._case_sensitive_checkbox.isChecked():
                 flags |= QWebEnginePage.FindCaseSensitively
             if backward:

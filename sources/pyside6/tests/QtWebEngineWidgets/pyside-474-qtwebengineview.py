@@ -51,7 +51,7 @@ class MainTest(unittest.TestCase):
             QCoreApplication.quit()
         self._view.page().runJavaScript("document.title", 1,
                                         partial(self.javascript_callback))
-        self._view.findText("fox", QWebEnginePage.FindFlags(),
+        self._view.findText("fox", QWebEnginePage.FindFlag(0),
                             partial(self.found_callback))
 
 
