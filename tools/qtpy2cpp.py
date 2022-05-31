@@ -20,7 +20,7 @@ def create_arg_parser(desc):
                         help='Write to stdout')
     parser.add_argument('--force', '-f', action='store_true',
                         help='Force overwrite of existing files')
-    parser.add_argument('file', type=str, help='Python source file')
+    parser.add_argument('files', type=str, nargs="+", help='Python source file(s)')
     return parser
 
 
@@ -33,31 +33,31 @@ if __name__ == '__main__':
     args = arg_parser.parse_args()
     ConvertVisitor.debug = args.debug
 
-    input_file = args.file
-    if not os.path.isfile(input_file):
-        logger.error(f'{input_file} does not exist or is not a file.')
-        sys.exit(-1)
-    file_root, ext = os.path.splitext(input_file)
-    if ext != '.py':
-        logger.error(f'{input_file} does not appear to be a Python file.')
-        sys.exit(-1)
-
-    ast_tree = ConvertVisitor.create_ast(input_file)
-    if args.stdout:
-        sys.stdout.write(f'// Converted from {input_file}\n')
-        ConvertVisitor(input_file, sys.stdout).visit(ast_tree)
-        sys.exit(0)
-
-    target_file = file_root + '.cpp'
-    if os.path.exists(target_file):
-        if not os.path.isfile(target_file):
-            logger.error(f'{target_file} exists and is not a file.')
+    for input_file in args.files:
+        if not os.path.isfile(input_file):
+            logger.error(f'{input_file} does not exist or is not a file.')
             sys.exit(-1)
-        if not args.force:
-            logger.error(f'{target_file} exists. Use -f to overwrite.')
+        file_root, ext = os.path.splitext(input_file)
+        if ext != '.py':
+            logger.error(f'{input_file} does not appear to be a Python file.')
             sys.exit(-1)
 
-    with open(target_file, "w") as file:
-        file.write(f'// Converted from {input_file}\n')
-        ConvertVisitor(input_file, file).visit(ast_tree)
-        logger.info(f"Wrote {target_file} ...")
+        ast_tree = ConvertVisitor.create_ast(input_file)
+        if args.stdout:
+            sys.stdout.write(f'// Converted from {input_file}\n')
+            ConvertVisitor(input_file, sys.stdout).visit(ast_tree)
+            sys.exit(0)
+
+        target_file = file_root + '.cpp'
+        if os.path.exists(target_file):
+            if not os.path.isfile(target_file):
+                logger.error(f'{target_file} exists and is not a file.')
+                sys.exit(-1)
+            if not args.force:
+                logger.error(f'{target_file} exists. Use -f to overwrite.')
+                sys.exit(-1)
+
+        with open(target_file, "w") as file:
+            file.write(f'// Converted from {input_file}\n')
+            ConvertVisitor(input_file, file).visit(ast_tree)
+            logger.info(f"Wrote {target_file} ...")
