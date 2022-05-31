@@ -591,22 +591,6 @@ def init_PySide6_QtNetwork():
     return locals()
 
 
-def init_PySide6_QtMultimedia():
-    # PYSIDE-1599: We force pyi testing in wheel_tester. This seems to fail, sometimes.
-    try:
-        import PySide6.QtMultimediaWidgets
-        check_module(PySide6.QtMultimediaWidgets)
-    except SystemError:
-        print("Failure importing QtMultimediaWidgets")
-        return locals()
-    type_map.update({
-        "QGraphicsVideoItem": PySide6.QtMultimediaWidgets.QGraphicsVideoItem,
-        "qint64": int,
-        "QVideoWidget": PySide6.QtMultimediaWidgets.QVideoWidget,
-    })
-    return locals()
-
-
 def init_PySide6_QtOpenGL():
     type_map.update({
         "GLbitfield": int,
