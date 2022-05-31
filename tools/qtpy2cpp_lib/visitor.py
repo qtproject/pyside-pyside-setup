@@ -189,10 +189,41 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
         self.generic_visit(node)
         self._output_file.write(" | ")
 
-    def visit_Call(self, node):
-        self._output_file.write(format_start_function_call(node))
+    def _format_call(self, node):
+
+        f = node.func
+        if isinstance(f, ast.Name):
+            self._output_file.write(f.id)
+        else:
+            # Attributes denoting chained calls "a->b()->c()".  Walk along in
+            # reverse order, recursing for other calls.
+            names = []
+            n = f
+            while isinstance(n, ast.Attribute):
+                names.insert(0, n.attr)
+                n = n.value
+
+            if isinstance(n, ast.Name):  # Member or variable reference
+                if n.id != "self":
+                    sep = "->"
+                    if n.id in self._stack_variables:
+                        sep = "."
+                    elif n.id[0:1].isupper():  # Heuristics for static
+                        sep = "::"
+                    self._output_file.write(n.id)
+                    self._output_file.write(sep)
+            elif isinstance(n, ast.Call):  # A preceding call
+                self._format_call(n)
+                self._output_file.write("->")
+
+            self._output_file.write("->".join(names))
+
+        self._output_file.write('(')
         self._write_function_args(node.args)
         self._output_file.write(')')
+
+    def visit_Call(self, node):
+        self._format_call(node)
 
     def _write_function_args(self, args_node):
         # Manually do visit(), skip the children of func
