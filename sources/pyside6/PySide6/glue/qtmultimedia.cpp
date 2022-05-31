@@ -8,3 +8,15 @@
 const auto size = %CPPSELF.mappedBytes(%1);
 %PYARG_0 = Shiboken::Buffer::newObject(%0, size, Shiboken::Buffer::ReadWrite);
 // @snippet qvideoframe-bits
+
+// @snippet qaudiobuffer-data
+unsigned char *data = %CPPSELF.%FUNCTION_NAME<unsigned char>();
+const auto size = %CPPSELF.byteCount();
+%PYARG_0 = Shiboken::Buffer::newObject(data, size, Shiboken::Buffer::ReadWrite);
+// @snippet qaudiobuffer-data
+
+// @snippet qaudiobuffer-const-data
+const unsigned char *data = %CPPSELF.%FUNCTION_NAME<unsigned char>();
+const auto size = %CPPSELF.byteCount();
+%PYARG_0 = Shiboken::Buffer::newObject(data, size);
+// @snippet qaudiobuffer-const-data
