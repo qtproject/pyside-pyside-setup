@@ -12,15 +12,7 @@ from .formatter import (CppFormatter, format_for_loop, format_literal,
                         format_reference, format_start_function_call,
                         write_import, write_import_from)
 from .nodedump import debug_format_node
-
-
-_QT_STACK_CLASSES = ["QApplication", "QColorDialog", "QCoreApplication",
-                     "QFile", "QFileDialog", "QFileInfo", "QFontDialog",
-                     "QGuiApplication", "QIcon", "QLine", "QLineF",
-                     "QMessageBox", "QPainter", "QPixmap", "QPoint", "QPointF",
-                     "QQmlApplicationEngine", "QQmlComponent", "QQmlEngine",
-                     "QQuickView", "QRect", "QRectF", "QSaveFile", "QSettings",
-                     "QSize", "QSizeF", "QTextStream"]
+from .qt import ClassFlag, qt_class_flags
 
 
 def _is_qt_constructor(assign_node):
@@ -102,7 +94,7 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
         self.INDENT()
 
         qt_class = _is_qt_constructor(node)
-        on_stack = qt_class and qt_class in _QT_STACK_CLASSES
+        on_stack = qt_class and qt_class_flags(qt_class) & ClassFlag.INSTANTIATE_ON_STACK
 
         # Is this a free variable and not a member assignment? Instantiate
         # on stack or give a type
