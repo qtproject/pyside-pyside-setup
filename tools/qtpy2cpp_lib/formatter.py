@@ -42,7 +42,27 @@
 
 import ast
 
+from .qt import ClassFlag, qt_class_flags
+
 CLOSING = {"{": "}", "(": ")", "[": "]"}  # Closing parenthesis for C++
+
+
+def _fix_function_argument_type(type, for_return):
+    """Fix function argument/return qualifiers using some heuristics for Qt."""
+    if type == "float":
+        return "double"
+    if type == "str":
+        type = "QString"
+    if not type.startswith("Q"):
+        return type
+    flags = qt_class_flags(type)
+    if flags & ClassFlag.PASS_BY_VALUE:
+        return type
+    if flags & ClassFlag.PASS_BY_CONSTREF:
+        return type if for_return else f"const {type} &"
+    if flags & ClassFlag.PASS_BY_REF:
+        return type if for_return else f"{type} &"
+    return type + " *"  # Assume pointer by default
 
 
 def to_string(node):
@@ -106,8 +126,17 @@ def format_for_loop(f_node):
     return result
 
 
+def format_name_constant(node):
+    """Format a ast.NameConstant."""
+    if node.value is None:
+        return "nullptr"
+    return "true" if node.value else "false"
+
+
 def format_literal(node):
     """Returns the value of number/string literals"""
+    if isinstance(node, ast.NameConstant):
+        return format_name_constant(node)
     if isinstance(node, ast.Num):
         return str(node.n)
     if isinstance(node, ast.Str):
@@ -161,10 +190,16 @@ def format_function_def_arguments(function_def_node):
         if result:
             result += ', '
         if a.arg != 'self':
+            if a.annotation and isinstance(a.annotation, ast.Name):
+                result += _fix_function_argument_type(a.annotation.id, False) + ' '
             result += a.arg
             if default_values[i]:
                 result += ' = '
-                result += format_literal(default_values[i])
+                default_value = default_values[i]
+                if isinstance(default_value, ast.Attribute):
+                    result += format_reference(default_value)
+                else:
+                    result += format_literal(default_value)
     return result
 
 
@@ -254,7 +289,10 @@ class CppFormatter(Indenter):
             name = '~' + class_context
             warn = False
         else:
-            name = 'void ' + f_node.name
+            return_type = "void"
+            if f_node.returns and isinstance(f_node.returns, ast.Name):
+                return_type = _fix_function_argument_type(f_node.returns.id, True)
+            name = return_type + " " + f_node.name
         self.indent_string(f'{name}({arguments})')
         if warn:
             self._output_file.write(' /* FIXME: types */')

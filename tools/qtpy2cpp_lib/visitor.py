@@ -45,6 +45,7 @@ import tokenize
 import warnings
 
 from .formatter import (CppFormatter, format_for_loop, format_literal,
+                        format_name_constant,
                         format_reference, format_start_function_call,
                         write_import, write_import_from)
 from .nodedump import debug_format_node
@@ -164,6 +165,9 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
 
     def visit_Attribute(self, node):
         """Format a variable reference (cf visit_Name)"""
+        # Default parameter (like Qt::black)?
+        if self._ignore_function_def_node(node):
+            return
         self._output_file.write(format_reference(node))
 
     def visit_BinOp(self, node):
@@ -182,7 +186,9 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
         self._output_file.write(" | ")
 
     def _format_call(self, node):
-
+        # Decorator list?
+        if self._ignore_function_def_node(node):
+            return
         f = node.func
         if isinstance(f, ast.Name):
             self._output_file.write(f.id)
@@ -217,7 +223,7 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
     def visit_Call(self, node):
         self._format_call(node)
         # Context manager expression?
-        if self._stack and isinstance(self._stack[-1], ast.withitem):
+        if self._within_context_manager():
             self._output_file.write(";\n")
 
     def _write_function_args(self, args_node):
@@ -268,7 +274,18 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
 
     def visit_FunctionDef(self, node):
         class_context = self._class_scope[-1] if self._class_scope else None
+        for decorator in node.decorator_list:
+            func = decorator.func  # (Call)
+            if isinstance(func, ast.Name) and func.id == "Slot":
+                self._output_file.write("\npublic slots:")
         self.write_function_def(node, class_context)
+        # Find stack variables
+        for arg in node.args.args:
+            if arg.annotation and isinstance(arg.annotation, ast.Name):
+                type_name = arg.annotation.id
+                flags = qt_class_flags(type_name)
+                if flags & ClassFlag.PASS_ON_STACK_MASK:
+                    self._stack_variables.append(arg.arg)
         self.indent()
         self.generic_visit(node)
         self.dedent()
@@ -338,21 +355,37 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
         self.generic_visit(node)
         self._output_file.write(' * ')
 
+    def _within_context_manager(self):
+        """Return whether we are within a context manager (with)."""
+        parent = self._stack[-1] if self._stack else None
+        return parent and isinstance(parent, ast.withitem)
+
+    def _ignore_function_def_node(self, node):
+        """Should this node be ignored within a FunctionDef."""
+        if not self._stack:
+            return False
+        parent = self._stack[-1]
+        # A type annotation or default value of an argument?
+        if isinstance(parent, (ast.arguments, ast.arg)):
+            return True
+        if not isinstance(parent, ast.FunctionDef):
+            return False
+        # Return type annotation or decorator call
+        return node == parent.returns or node in parent.decorator_list
+
     def visit_Name(self, node):
         """Format a variable reference (cf visit_Attribute)"""
-        # Context manager variable?
-        if self._stack and isinstance(self._stack[-1], ast.withitem):
+        # Skip Context manager variables, return or argument type annotation
+        if self._within_context_manager() or self._ignore_function_def_node(node):
             return
         self._output_file.write(format_reference(node))
 
     def visit_NameConstant(self, node):
+        # Default parameter?
+        if self._ignore_function_def_node(node):
+            return
         self.generic_visit(node)
-        if node.value is None:
-            self._output_file.write('nullptr')
-        elif not node.value:
-            self._output_file.write('false')
-        else:
-            self._output_file.write('true')
+        self._output_file.write(format_name_constant(node))
 
     def visit_Not(self, node):
         self.generic_visit(node)
