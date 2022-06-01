@@ -224,6 +224,9 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
 
     def visit_Call(self, node):
         self._format_call(node)
+        # Context manager expression?
+        if self._stack and isinstance(self._stack[-1], ast.withitem):
+            self._output_file.write(";\n")
 
     def _write_function_args(self, args_node):
         # Manually do visit(), skip the children of func
@@ -345,6 +348,9 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
 
     def visit_Name(self, node):
         """Format a variable reference (cf visit_Attribute)"""
+        # Context manager variable?
+        if self._stack and isinstance(self._stack[-1], ast.withitem):
+            return
         self._output_file.write(format_reference(node))
 
     def visit_NameConstant(self, node):
@@ -385,6 +391,20 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
 
     def visit_UnOp(self, node):
         self.generic_visit(node)
+
+    def visit_With(self, node):
+        self.indent()
+        self.INDENT()
+        self._output_file.write("{ // Converted from context manager\n")
+        for item in node.items:
+            self.INDENT()
+            if item.optional_vars:
+                self._output_file.write(format_reference(item.optional_vars))
+                self._output_file.write(" = ")
+        self.generic_visit(node)
+        self.INDENT()
+        self._output_file.write("}\n")
+        self.dedent()
 
     def _debug_enter(self, node, parent=None):
         message = '{}>generic_visit({})'.format('  ' * self ._debug_indent,
