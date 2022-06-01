@@ -31,6 +31,7 @@
 
 #include <cstddef>
 #include <fstream>
+#include <mutex>
 #include <unordered_map>
 
 namespace Shiboken
@@ -123,6 +124,11 @@ struct BindingManager::BindingManagerPrivate {
     using DestructorEntries = std::vector<DestructorEntry>;
 
     WrapperMap wrapperMapper;
+    // Guard wrapperMapper mainly for QML which calls into the generated
+    // QObject::metaObject() and elsewhere from threads without GIL, causing
+    // crashes for example in retrieveWrapper(). std::shared_mutex was rejected due to:
+    // https://stackoverflow.com/questions/50972345/when-is-stdshared-timed-mutex-slower-than-stdmutex-and-when-not-to-use-it
+    std::mutex wrapperMapLock;
     Graph classHierarchy;
     DestructorEntries deleteInMainThread;
     bool destroying;
@@ -138,6 +144,7 @@ bool BindingManager::BindingManagerPrivate::releaseWrapper(void *cptr, SbkObject
     // The wrapper argument is checked to ensure that the correct wrapper is released.
     // Returns true if the correct wrapper is found and released.
     // If wrapper argument is NULL, no such check is performed.
+    std::lock_guard<std::mutex> guard(wrapperMapLock);
     auto iter = wrapperMapper.find(cptr);
     if (iter != wrapperMapper.end() && (wrapper == nullptr || iter->second == wrapper)) {
         wrapperMapper.erase(iter);
@@ -149,6 +156,7 @@ bool BindingManager::BindingManagerPrivate::releaseWrapper(void *cptr, SbkObject
 void BindingManager::BindingManagerPrivate::assignWrapper(SbkObject *wrapper, const void *cptr)
 {
     assert(cptr);
+    std::lock_guard<std::mutex> guard(wrapperMapLock);
     auto iter = wrapperMapper.find(cptr);
     if (iter == wrapperMapper.end())
         wrapperMapper.insert(std::make_pair(cptr, wrapper));
@@ -175,6 +183,7 @@ BindingManager::~BindingManager()
      * the BindingManager is being destroyed the interpreter is alredy
      * shutting down. */
     if (Py_IsInitialized()) {  // ensure the interpreter is still valid
+        std::lock_guard<std::mutex> guard(m_d->wrapperMapLock);
         while (!m_d->wrapperMapper.empty()) {
             Object::destroy(m_d->wrapperMapper.begin()->second, const_cast<void *>(m_d->wrapperMapper.begin()->first));
         }
@@ -190,6 +199,7 @@ BindingManager &BindingManager::instance() {
 
 bool BindingManager::hasWrapper(const void *cptr)
 {
+    std::lock_guard<std::mutex> guard(m_d->wrapperMapLock);
     return m_d->wrapperMapper.find(cptr) != m_d->wrapperMapper.end();
 }
 
@@ -250,6 +260,7 @@ void BindingManager::addToDeletionInMainThread(const DestructorEntry &e)
 
 SbkObject *BindingManager::retrieveWrapper(const void *cptr)
 {
+    std::lock_guard<std::mutex> guard(m_d->wrapperMapLock);
     auto iter = m_d->wrapperMapper.find(cptr);
     if (iter == m_d->wrapperMapper.end())
         return nullptr;
@@ -339,6 +350,7 @@ SbkObjectType *BindingManager::resolveType(void **cptr, SbkObjectType *type)
 std::set<PyObject *> BindingManager::getAllPyObjects()
 {
     std::set<PyObject *> pyObjects;
+    std::lock_guard<std::mutex> guard(m_d->wrapperMapLock);
     const WrapperMap &wrappersMap = m_d->wrapperMapper;
     auto it = wrappersMap.begin();
     for (; it != wrappersMap.end(); ++it)
