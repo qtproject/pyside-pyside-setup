@@ -106,7 +106,7 @@ static bool is_compatible_version()
 // There is an automatic warning about this in parser.py .
 //
 
-LIBSHIBOKEN_API int PyIndex_Check(PyObject *obj)
+LIBSHIBOKEN_API int PepIndex_Check(PyObject *obj)
 {
     static bool old_python_version = is_compatible_version();
     if (old_python_version) {
