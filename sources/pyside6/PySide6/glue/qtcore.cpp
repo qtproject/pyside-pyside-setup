@@ -527,7 +527,7 @@ if (ret > 0 && ((strcmp(%1, SIGNAL(destroyed())) == 0) || (strcmp(%1, SIGNAL(des
 // @snippet qobject-receivers
 
 // @snippet qbytearray-mgetitem
-if (PyIndex_Check(_key)) {
+if (PepIndex_Check(_key)) {
     const Py_ssize_t _i = PyNumber_AsSsize_t(_key, PyExc_IndexError);
     if (_i < 0 || _i >= %CPPSELF.size()) {
         PyErr_SetString(PyExc_IndexError, "index out of bounds");
@@ -568,7 +568,7 @@ return %CONVERTTOPYTHON[QByteArray](ba);
 // @snippet qbytearray-mgetitem
 
 // @snippet qbytearray-msetitem
-if (PyIndex_Check(_key)) {
+if (PepIndex_Check(_key)) {
     Py_ssize_t _i = PyNumber_AsSsize_t(_key, PyExc_IndexError);
     if (_i == -1 && PyErr_Occurred())
         return -1;
