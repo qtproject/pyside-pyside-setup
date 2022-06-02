@@ -47,12 +47,6 @@ def generate_all_pyi(outpath, options):
     errors = ", ".join(set(name_list) - set(PySide6.__all__))
     if errors:
         raise ImportError(f"The module(s) '{errors}' do not exist")
-    quirk1, quirk2 = "QtMultimedia", "QtMultimediaWidgets"
-    if name_list == [quirk1]:
-        logger.debug(f"Note: We must defer building of {quirk1}.pyi until {quirk2} is available")
-        name_list = []
-    elif name_list == [quirk2]:
-        name_list = [quirk1, quirk2]
     for mod_name in name_list:
         import_name = "PySide6." + mod_name
         if hasattr(sys, "pypy_version_info"):
