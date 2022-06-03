@@ -50,6 +50,39 @@ from .formatter import (CppFormatter, format_for_loop, format_literal,
 from .nodedump import debug_format_node
 
 
+_QT_STACK_CLASSES = ["QApplication", "QColorDialog", "QCoreApplication",
+                     "QFile", "QFileDialog", "QFileInfo", "QFontDialog",
+                     "QGuiApplication", "QIcon", "QLine", "QLineF",
+                     "QMessageBox", "QPainter", "QPixmap", "QPoint", "QPointF",
+                     "QQmlApplicationEngine", "QQmlComponent", "QQmlEngine",
+                     "QQuickView", "QRect", "QRectF", "QSaveFile", "QSettings",
+                     "QSize", "QSizeF", "QTextStream"]
+
+
+def _is_qt_constructor(assign_node):
+    """Is this assignment node a plain construction of a Qt class?
+       'f = QFile(name)'. Returns the class_name."""
+    call = assign_node.value
+    if (isinstance(call, ast.Call) and isinstance(call.func, ast.Name)):
+        func = call.func.id
+        if func.startswith("Q"):
+            return func
+    return None
+
+
+def _is_if_main(if_node):
+    """Return whether an if statement is: if __name__ == '__main__' """
+    test = if_node.test
+    return (isinstance(test, ast.Compare)
+            and len(test.ops) == 1
+            and isinstance(test.ops[0], ast.Eq)
+            and isinstance(test.left, ast.Name)
+            and test.left.id == "__name__"
+            and len(test.comparators) == 1
+            and isinstance(test.comparators[0], ast.Constant)
+            and test.comparators[0].value == "__main__")
+
+
 class ConvertVisitor(ast.NodeVisitor, CppFormatter):
     """AST visitor printing out C++
     Note on implementation:
@@ -63,11 +96,13 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
 
     debug = False
 
-    def __init__(self, output_file):
+    def __init__(self, file_name, output_file):
         ast.NodeVisitor.__init__(self)
         CppFormatter.__init__(self, output_file)
+        self._file_name = file_name
         self._class_scope = []  # List of class names
         self._stack = []  # nodes
+        self._stack_variables = []  # variables instantiated on stack
         self._debug_indent = 0
 
     @staticmethod
@@ -87,9 +122,10 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
             super().generic_visit(node)
         except Exception as e:
             line_no = node.lineno if hasattr(node, 'lineno') else -1
-            message = 'Error "{}" at line {}'.format(str(e), line_no)
+            error_message = str(e)
+            message = f'{self._file_name}:{line_no}: Error "{error_message}"'
             warnings.warn(message)
-            self._output_file.write(f'\n// {message}\n')
+            self._output_file.write(f'\n// {error_message}\n')
         del self._stack[-1]
         if self.debug:
             self._debug_leave(node)
@@ -99,18 +135,38 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
         self._output_file.write(' + ')
 
     def visit_Assign(self, node):
-        self._output_file.write('\n')
         self.INDENT()
+
+        qt_class = _is_qt_constructor(node)
+        on_stack = qt_class and qt_class in _QT_STACK_CLASSES
+
+        # Is this a free variable and not a member assignment? Instantiate
+        # on stack or give a type
+        if len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+            if qt_class:
+                if on_stack:
+                    # "QFile f(args)"
+                    var = node.targets[0].id
+                    self._stack_variables.append(var)
+                    self._output_file.write(f"{qt_class} {var}(")
+                    self._write_function_args(node.value.args)
+                    self._output_file.write(");\n")
+                    return
+                self._output_file.write("auto *")
+
+        line_no = node.lineno if hasattr(node, 'lineno') else -1
         for target in node.targets:
             if isinstance(target, ast.Tuple):
-                warnings.warn('List assignment not handled (line {}).'.
-                              format(node.lineno))
+                w = f"{self._file_name}:{line_no}: List assignment not handled."
+                warnings.warn(w)
             elif isinstance(target, ast.Subscript):
-                warnings.warn('Subscript assignment not handled (line {}).'.
-                              format(node.lineno))
+                w = f"{self._file_name}:{line_no}: Subscript assignment not handled."
+                warnings.warn(w)
             else:
                 self._output_file.write(format_reference(target))
                 self._output_file.write(' = ')
+        if qt_class and not on_stack:
+            self._output_file.write("new ")
         self.visit(node.value)
         self._output_file.write(';\n')
 
@@ -125,14 +181,25 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
         self.generic_visit(node)
         self._output_file.write(')')
 
+    def visit_BitAnd(self, node):
+        self.generic_visit(node)
+        self._output_file.write(" & ")
+
+    def visit_BitOr(self, node):
+        self.generic_visit(node)
+        self._output_file.write(" | ")
+
     def visit_Call(self, node):
         self._output_file.write(format_start_function_call(node))
+        self._write_function_args(node.args)
+        self._output_file.write(')')
+
+    def _write_function_args(self, args_node):
         # Manually do visit(), skip the children of func
-        for i, arg in enumerate(node.args):
+        for i, arg in enumerate(args_node):
             if i > 0:
                 self._output_file.write(', ')
             self.visit(arg)
-        self._output_file.write(')')
 
     def visit_ClassDef(self, node):
         # Manually do visit() to skip over base classes
@@ -146,15 +213,22 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
         self.indent_line('};')
         del self._class_scope[-1]
 
+    def visit_Eq(self, node):
+        self.generic_visit(node)
+        self._output_file.write(" == ")
+
     def visit_Expr(self, node):
-        self._output_file.write('\n')
         self.INDENT()
         self.generic_visit(node)
         self._output_file.write(';\n')
 
     def visit_Gt(self, node):
         self.generic_visit(node)
-        self._output_file.write('>')
+        self._output_file.write(" > ")
+
+    def visit_GtE(self, node):
+        self.generic_visit(node)
+        self._output_file.write(" >= ")
 
     def visit_For(self, node):
         # Manually do visit() to get the indentation right.
@@ -173,10 +247,23 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
         self.generic_visit(node)
         self.dedent()
         self.indent_line('}')
+        self._stack_variables.clear()
 
     def visit_If(self, node):
         # Manually do visit() to get the indentation right. Note:
         # elsif() is modelled as nested if.
+
+        # Check for the main function
+        if _is_if_main(node):
+            self._output_file.write("\nint main(int argc, char *argv[])\n{\n")
+            self.indent()
+            for b in node.body:
+                self.visit(b)
+            self.indent_string("return 0;\n")
+            self.dedent()
+            self._output_file.write("}\n")
+            return
+
         self.indent_string('if (')
         self.visit(node.test)
         self._output_file.write(') {\n')
@@ -209,9 +296,17 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
             self.visit(el)
         self._output_file.write('}')
 
+    def visit_LShift(self, node):
+        self.generic_visit(node)
+        self._output_file.write(" << ")
+
     def visit_Lt(self, node):
         self.generic_visit(node)
-        self._output_file.write('<')
+        self._output_file.write(" < ")
+
+    def visit_LtE(self, node):
+        self.generic_visit(node)
+        self._output_file.write(" <= ")
 
     def visit_Mult(self, node):
         self.generic_visit(node)
@@ -230,9 +325,28 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
         else:
             self._output_file.write('true')
 
+    def visit_Not(self, node):
+        self.generic_visit(node)
+        self._output_file.write("!")
+
+    def visit_NotEq(self, node):
+        self.generic_visit(node)
+        self._output_file.write(" != ")
+
     def visit_Num(self, node):
         self.generic_visit(node)
         self._output_file.write(format_literal(node))
+
+    def visit_RShift(self, node):
+        self.generic_visit(node)
+        self._output_file.write(" >> ")
+
+    def visit_Return(self, node):
+        self.indent_string("return")
+        if node.value:
+            self._output_file.write(" ")
+            self.generic_visit(node)
+        self._output_file.write(";\n")
 
     def visit_Str(self, node):
         self.generic_visit(node)

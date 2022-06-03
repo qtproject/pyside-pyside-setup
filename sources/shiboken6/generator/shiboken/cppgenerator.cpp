@@ -4600,8 +4600,7 @@ void CppGenerator::writeMappingMethods(TextStream &s,
             continue;
         QString funcName = cpythonFunctionName(func);
         CodeSnipList snips = func->injectedCodeSnips(TypeSystem::CodeSnipPositionAny, TypeSystem::TargetLangCode);
-        s << m.returnType << ' ' << funcName << '(' << m.arguments << ")\n{\n";
-        writeInvalidPyObjectCheck(s, u"self"_s, ErrorReturn::Default);
+        s << m.returnType << ' ' << funcName << '(' << m.arguments << ")\n{\n" << indent;
 
         writeCppSelfDefinition(s, func, context, ErrorReturn::Default);
 
@@ -4609,7 +4608,7 @@ void CppGenerator::writeMappingMethods(TextStream &s,
             ? nullptr : &func->arguments().constLast();
         writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionAny,
                        TypeSystem::TargetLangCode, func, false, lastArg);
-        s<< "}\n\n";
+        s << outdent << "}\n\n";
     }
 }
 
@@ -4628,7 +4627,6 @@ void CppGenerator::writeSequenceMethods(TextStream &s,
 
         CodeSnipList snips = func->injectedCodeSnips(TypeSystem::CodeSnipPositionAny, TypeSystem::TargetLangCode);
         s << seq.returnType << ' ' << funcName << '(' << seq.arguments << ")\n{\n" << indent;
-        writeInvalidPyObjectCheck(s, u"self"_s, ErrorReturn::Default);
 
         writeCppSelfDefinition(s, func, context, ErrorReturn::Default);
 

@@ -51,7 +51,14 @@
         <enum-type name="VolumeScale" since="5.8"/>
     </namespace-type>
 
-    <value-type name="QAudioBuffer"/>
+    <value-type name="QAudioBuffer">
+        <add-function signature="data()" return-type="PyBuffer">
+            <inject-code file="../glue/qtmultimedia.cpp" snippet="qaudiobuffer-data"/>
+        </add-function>
+        <add-function signature="constData()" return-type="PyBuffer">
+            <inject-code file="../glue/qtmultimedia.cpp" snippet="qaudiobuffer-const-data"/>
+        </add-function>
+    </value-type>
     <object-type name="QAudioDecoder">
         <enum-type name="Error"/>
     </object-type>
