@@ -1700,3 +1700,14 @@ static PyObject *invokeMethodHelper(QObject *obj, const char *member, Qt::Connec
 %PYARG_0 = invokeMethodHelper(%1, %2, Qt::AutoConnection, %3, %4, %5, %6);
 // @snippet qmetaobject-invokemethod-return-arg
 
+// @snippet qabstractitemmodel_data
+::QVariant %0 ;
+if (Shiboken::Enum::check(%PYARG_0)) {
+    int in = %CONVERTTOCPP[int](%PYARG_0);
+    %0 = QVariant(in);
+}
+else
+{
+    pythonToCpp(pyResult, &cppResult);
+}
+// @snippet qabstractitemmodel_data
