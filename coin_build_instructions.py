@@ -99,10 +99,6 @@ def call_setup(python_ver, phase):
         # When the 'python_ver' variable is empty, we are using Python 2
         # Pip is always upgraded when CI template is provisioned, upgrading it in later phase may cause perm issue
         run_instruction([env_pip, "install", "-r", "requirements.txt"], "Failed to install dependencies")
-        if sys.platform == "win32":
-            run_instruction([env_pip, "install", "numpy==1.19.3"], "Failed to install numpy 1.19.3")
-        else:
-            run_instruction([env_pip, "install", "numpy"], "Failed to install numpy")
 
     cmd = [env_python, "-u", "setup.py"]
     if phase in ["BUILD"]:
@@ -155,17 +151,19 @@ if __name__ == "__main__":
     python_ver = "3"
     if CI_TARGET_OS in ["Linux"]:
         python_ver = "3.8"
-
+    wheel_package_dir = "qfpa-p3.6"
     if CI_TARGET_OS in ["Windows"]:
         if os.environ.get('HOST_OSVERSION_COIN') == 'windows_10_21h2':
-            python_ver = "3.10"
+            python_ver = "3.10.0"
+            wheel_package_dir = "qfpa-p3.10"
         else:
-            python_ver = "3.7"
+            python_ver = "3.7.9"
+            wheel_package_dir = "qfpa-p3.7"
     if CI_TEST_PHASE in ["ALL", "BUILD"]:
         call_setup(python_ver, "BUILD")
     # Until CI has a feature to set more dynamic signing dir, make sure it actually exist
     if os.environ.get("QTEST_ENVIRONMENT") == "ci" and sys.platform == "win32":
-        signing_dir = os.path.join(os.getcwd(), "build", "qfpa-p3.6", "package_for_wheels")
+        signing_dir = os.path.join(os.getcwd(), "build", wheel_package_dir, "package_for_wheels")
         print("Check for signing dir " + signing_dir)
         assert(os.path.isdir(signing_dir))
 
