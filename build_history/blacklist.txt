@@ -1,3 +1,5 @@
+[smart::smart_pointer]
+    darwin ci
 [testmodifydocumentation]
     darwin arm
 [signals::signal_signature_test]
