@@ -4,6 +4,7 @@ product_dependency:
 dependency_source: supermodule
 dependencies: [
       "../../qt/qt3d",
+      "../../qt/qt5compat",
       "../../qt/qtactiveqt",
       "../../qt/qtbase",
       "../../qt/qtcharts",
