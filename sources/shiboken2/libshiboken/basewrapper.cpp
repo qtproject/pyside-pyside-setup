@@ -503,7 +503,11 @@ void SbkObjectTypeDealloc(PyObject *pyObj)
 
     PyObject_GC_UnTrack(pyObj);
 #ifndef Py_LIMITED_API
+#  if PY_VERSION_HEX >= 0x030A0000
+    Py_TRASHCAN_BEGIN(pyObj, 1);
+#  else
     Py_TRASHCAN_SAFE_BEGIN(pyObj);
+#  endif
 #endif
     if (sotp) {
         if (sotp->user_data && sotp->d_func) {
@@ -518,7 +522,11 @@ void SbkObjectTypeDealloc(PyObject *pyObj)
         sotp = nullptr;
     }
 #ifndef Py_LIMITED_API
+#  if PY_VERSION_HEX >= 0x030A0000
+    Py_TRASHCAN_END;
+#  else
     Py_TRASHCAN_SAFE_END(pyObj);
+#  endif
 #endif
     if (PepRuntime_38_flag) {
         // PYSIDE-939: Handling references correctly.

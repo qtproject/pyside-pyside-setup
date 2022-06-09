@@ -312,13 +312,21 @@ void SbkEnumTypeDealloc(PyObject *pyObj)
 
     PyObject_GC_UnTrack(pyObj);
 #ifndef Py_LIMITED_API
+#  if PY_VERSION_HEX >= 0x030A0000
+    Py_TRASHCAN_BEGIN(pyObj, 1);
+#  else
     Py_TRASHCAN_SAFE_BEGIN(pyObj);
+#  endif
 #endif
     if (PepType_SETP(sbkType)->converter) {
         Shiboken::Conversions::deleteConverter(PepType_SETP(sbkType)->converter);
     }
 #ifndef Py_LIMITED_API
+#  if PY_VERSION_HEX >= 0x030A0000
+    Py_TRASHCAN_END;
+#  else
     Py_TRASHCAN_SAFE_END(pyObj);
+#  endif
 #endif
     if (PepRuntime_38_flag) {
         // PYSIDE-939: Handling references correctly.
