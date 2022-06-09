@@ -1277,6 +1277,7 @@ bool setCppPointer(SbkObject *sbkObj, PyTypeObject *desiredType, void *cptr)
 bool isValid(PyObject *pyObj)
 {
     if (!pyObj || pyObj == Py_None
+        || PyType_Check(pyObj) != 0
         || Py_TYPE(Py_TYPE(pyObj)) != SbkObjectType_TypeF()) {
         return true;
     }
