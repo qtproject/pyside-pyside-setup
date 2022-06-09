@@ -173,8 +173,9 @@ namespace QFlags
             SbkNewQFlagsType_slots[idx].pfunc = numberMethods[idx].pfunc;
         }
         newspec.slots = SbkNewQFlagsType_spec.slots;
-        PyTypeObject *type = (PyTypeObject *)SbkType_FromSpec(&newspec);
-        Py_TYPE(type) = &PyType_Type;
+        auto *obj = SbkType_FromSpec(&newspec);
+        auto *type = reinterpret_cast<PyTypeObject *>(obj);
+        obj->ob_type = &PyType_Type;
 
         PySideQFlagsType *flagsType = reinterpret_cast<PySideQFlagsType *>(type);
         PepType_PFTP(flagsType)->converterPtr = &PepType_PFTP(flagsType)->converter;
