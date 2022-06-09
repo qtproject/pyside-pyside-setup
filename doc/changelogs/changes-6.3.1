@@ -1,0 +1,67 @@
+Qt for Python 6.3.1 is a bug-fix release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+****************************************************************************
+*                                  PySide6                                 *
+****************************************************************************
+
+ - [PYSIDE-1019] Feature switching was improved by avoiding cross-talk
+                 to enable for example tests using PyTest.
+ - [PYSIDE-353]  PySide now builds with PyPy 3.9.
+ - [PYSIDE-1735] New Pythons Enums were added as an optional feature, which
+                 can be activated bv setting  the environment variable
+                 PYSIDE63_OPTION_PYTHON_ENUM.
+ - [PYSIDE-1797] An issue preventing using PySide with Python 3.6 or 3.7
+                 related to symbol PyIndex_Check was fixed.
+ - [PYSIDE-1859] Windows handle types HBITMAP, HICON, HRGN are now supported
+                 (as int types).
+ - [PYSIDE-1880] The QtDataVisualization surface examples have been extended and
+                 improved.
+ - [PYSIDE-1883] QTest.qWait() and QTest.qSleep() have been added.
+ - [PYSIDE-1887] Overriding QGraphicsItem::itemChange() has been fixed.
+ - [PYSIDE-1893] A crash with error "Internal C++ object already deleted." when
+                 using QWidget.nativeParentWidget() has been fixed.
+ - [PYSIDE-1895] Embedded 0 characters in UNICODE strings are now handled
+                 correctly.
+ - [PYSIDE-1899] QLoggingCategory, qCDebug, qCInfo, qCWarning and qCCritical
+                 have been added.
+ - [PYSIDE-1901] String conversion for non-compact strings when
+                 using Limited API has been fixed.
+ - [PYSIDE-1905] Overloads with more parameters have been added to
+                 QDBusAbstractInterface.call()
+ - [PYSIDE-1909] qstyleoption_cast<> has been implemented in order
+                 to be able to handle QStyleOption-derived classes.
+ - [PYSIDE-1911] PySideSignalInstance has now a __repr__.
+ - [PYSIDE-1912] QWebEngineCookieStore.setCookieFilter and
+                 QtWebEngineProfile.setNotificationPresenter have been added.
+ - [PYSIDE-1919] A GIL state crash when collecting QObjects with signals
+                 in Python 3.10 has been fixed.
+ - [PYSIDE-1921] QQmlContext::setContextProperties() has been added.
+ - [PYSIDE-1939] A crash in QTextBlock.layout() has been fixed.
+ - [PYSIDE-1947] QAudioBuffer.data()/constData() have been added.
+
+****************************************************************************
+*                                  Shiboken6                               *
+****************************************************************************
+
+ - [PYSIDE-1932] The Q_ENUM helper functions qt_getEnumMetaObject() and
+                 qt_getEnumName() are now automatically rejected when PySide
+                 extensions are enabled.
+ - [PYSIDE-1909] It is now possible to inject a function that retrieves the
+                 type name of a polymorphic class.
+ - [PYSIDE-1909] Type discovery code is now generated for all classes that
+                 have an id expression set.
+ - [PYSIDE-1933] Converters for all smart pointee base classes are now
+                 generated.
