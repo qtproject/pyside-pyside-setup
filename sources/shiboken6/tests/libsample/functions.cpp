@@ -264,7 +264,7 @@ std::wstring addStdWStrings(const std::wstring &s1, const std::wstring &s2)
     return s1 + s2;
 }
 
-void testNullPtrT(std::nullptr_t t)
+void testNullPtrT(std::nullptr_t)
 {
-    cout << __FUNCTION__ << ' ' << t << '\n';
+    cout << __FUNCTION__ << '\n';
 }
