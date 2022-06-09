@@ -51,9 +51,11 @@ PyObject *create(PyObject *obj, PySideWeakRefFunction func, void *userData)
     if (obj == Py_None)
         return nullptr;
 
-    if (Py_TYPE(PySideCallableObject_TypeF()) == nullptr) {
-        Py_TYPE(PySideCallableObject_TypeF()) = &PyType_Type;
-        PyType_Ready(PySideCallableObject_TypeF());
+    auto *callableObject_Type = PySideCallableObject_TypeF();
+    auto *callableObject_PyObject = reinterpret_cast<PyObject *>(callableObject_Type);
+    if (callableObject_PyObject->ob_type == nullptr) {
+        callableObject_PyObject->ob_type = &PyType_Type;
+        PyType_Ready(callableObject_Type);
     }
 
     PyTypeObject *type = PySideCallableObject_TypeF();
