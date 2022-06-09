@@ -75,9 +75,9 @@ static int PyClassProperty_descr_set(PyObject *self, PyObject *obj, PyObject *va
 static int PyClassProperty_tp_init(PyObject *self, PyObject *args, PyObject *kwargs)
 {
     auto hold = Py_TYPE(self);
-    Py_TYPE(self) = &PyProperty_Type;
+    self->ob_type = &PyProperty_Type;
     auto ret =  PyProperty_Type.tp_init(self, args, kwargs);
-    Py_TYPE(self) = hold;
+    self->ob_type = hold;
     return ret;
 }
 
@@ -161,7 +161,7 @@ void init(PyObject *module)
 {
     PyTypeObject *type = SbkObjectType_TypeF();
     type->tp_setattro = SbkObjectType_meta_setattro;
-    Py_TYPE(PyClassProperty_TypeF()) = type;
+    reinterpret_cast<PyObject *>(type)->ob_type = type;
 
     if (InitSignatureStrings(PyClassProperty_TypeF(), PyClassProperty_SignatureStrings) < 0)
         return;
