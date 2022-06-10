@@ -417,7 +417,11 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
 
     def visit_Slice(self, node):
         self._output_file.write("[")
-        self.generic_visit(node)
+        if node.lower:
+            self.visit(node.lower)
+        self._output_file.write(":")
+        if node.upper:
+            self.visit(node.upper)
         self._output_file.write("]")
 
     def visit_Str(self, node):
