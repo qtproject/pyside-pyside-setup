@@ -337,6 +337,11 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
         # Return type annotation or decorator call
         return node == parent.returns or node in parent.decorator_list
 
+    def visit_Index(self, node):
+        self._output_file.write("[")
+        self.generic_visit(node)
+        self._output_file.write("]")
+
     def visit_Name(self, node):
         """Format a variable reference (cf visit_Attribute)"""
         # Skip Context manager variables, return or argument type annotation
@@ -373,6 +378,11 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
             self._output_file.write(" ")
             self.generic_visit(node)
         self._output_file.write(";\n")
+
+    def visit_Slice(self, node):
+        self._output_file.write("[")
+        self.generic_visit(node)
+        self._output_file.write("]")
 
     def visit_Str(self, node):
         self.generic_visit(node)
