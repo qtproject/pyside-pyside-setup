@@ -59,8 +59,8 @@ Setting up CLANG
 If you don't have libclang already in your system, you can download from the Qt servers,
 e.g. ``libclang-release_100-based-windows-vs2019_64.7z``.
 
-Extract the files, and leave it on any desired path, e.g ``c:\``, and then set these two required
-environment variables::
+Extract the files, and leave it on any desired path, for example, ``c:``,
+and set the environment variable required::
 
     set LLVM_INSTALL_DIR=c:\libclang
     set PATH=C:\libclang\bin;%PATH%

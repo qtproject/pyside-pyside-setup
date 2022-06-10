@@ -49,11 +49,11 @@ If you don't have libclang already in your system, you can download from the Qt 
 
     wget https://download.qt.io/development_releases/prebuilt/libclang/libclang-release_100-based-linux-Rhel7.6-gcc5.3-x86_64.7z
 
-Extract the files, and leave it on any desired path, and then set these two required
-environment variables::
+Extract the files, and leave it on any desired path, and set the environment
+variable required::
 
     7z x libclang-release_100-based-linux-Rhel7.6-gcc5.3-x86_64.7z
-    export CLANG_INSTALL_DIR=$PWD/libclang
+    export LLVM_INSTALL_DIR=$PWD/libclang
 
 Getting PySide2
 ~~~~~~~~~~~~~~~
