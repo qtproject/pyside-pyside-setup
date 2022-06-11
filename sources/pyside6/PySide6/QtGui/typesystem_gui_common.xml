@@ -1883,11 +1883,9 @@
     </add-function>
     <!-- ### Overloads using QList<T> does the job of these methods -->
     <modify-function signature="drawLines(const QLine*,int)" remove="all"/>
-    <modify-function signature="drawLines(const QLineF*,int)" remove="all"/>
     <modify-function signature="drawLines(const QPoint*,int)" remove="all"/>
     <modify-function signature="drawLines(const QPointF*,int)" remove="all"/>
     <modify-function signature="drawRects(const QRect*,int)" remove="all"/>
-    <modify-function signature="drawRects(const QRectF*,int)" remove="all"/>
     <!-- ### -->
     <!-- PYSIDE-1540: Preferably use the QPolygon overloads first to avoid
          a costly sequence type check on QPolygon. -->
@@ -1897,7 +1895,6 @@
             <insert-template name="qpainter_drawlist"/>
         </inject-code>
     </add-function>
-    <modify-function signature="drawPoints(const QPointF*,int)" remove="all"/>
     <add-function signature="drawPoints(QList&lt;QPointF>)" overload-number="3">
         <inject-code>
             <insert-template name="qpainter_drawlist"/>
