@@ -124,8 +124,16 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
             self._debug_leave(node)
 
     def visit_Add(self, node):
+        self._handle_bin_op(node, "+")
+
+    def _is_augmented_assign(self):
+        """Is it 'Augmented_assign' (operators +=/-=, etc)?"""
+        return self._stack and isinstance(self._stack[-1], ast.AugAssign)
+
+    def visit_AugAssign(self, node):
+        """'Augmented_assign', Operators +=/-=, etc."""
         self.generic_visit(node)
-        self._output_file.write(' + ')
+        self._output_file.write("\n")
 
     def visit_Assign(self, node):
         self.INDENT()
@@ -177,13 +185,17 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
         self.generic_visit(node)
         self._output_file.write(')')
 
-    def visit_BitAnd(self, node):
+    def _handle_bin_op(self, node, op):
+        """Handle a binary operator which can appear as 'Augmented Assign'."""
         self.generic_visit(node)
-        self._output_file.write(" & ")
+        full_op = f" {op}= " if self._is_augmented_assign() else f" {op} "
+        self._output_file.write(full_op)
+
+    def visit_BitAnd(self, node):
+        self._handle_bin_op(node, "&")
 
     def visit_BitOr(self, node):
-        self.generic_visit(node)
-        self._output_file.write(" | ")
+        self._handle_bin_op(node, "|")
 
     def _format_call(self, node):
         # Decorator list?
@@ -244,6 +256,9 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
         self.dedent()
         self.indent_line('};')
         del self._class_scope[-1]
+
+    def visit_Div(self, node):
+        self._handle_bin_op(node, "/")
 
     def visit_Eq(self, node):
         self.generic_visit(node)
@@ -352,8 +367,7 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
         self._output_file.write(" <= ")
 
     def visit_Mult(self, node):
-        self.generic_visit(node)
-        self._output_file.write(' * ')
+        self._handle_bin_op(node, "*")
 
     def _within_context_manager(self):
         """Return whether we are within a context manager (with)."""
@@ -427,6 +441,9 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
     def visit_Str(self, node):
         self.generic_visit(node)
         self._output_file.write(format_literal(node))
+
+    def visit_Sub(self, node):
+        self._handle_bin_op(node, "-")
 
     def visit_UnOp(self, node):
         self.generic_visit(node)
