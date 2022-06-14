@@ -111,38 +111,14 @@ int isFlag(PyObject *obType)
      * The function is called in MetaObjectBuilderPrivate::parsePythonType
      * again to obtain the flag value.
      */
-    if (!PyType_Check(obType)) {
-        PyErr_Format(PyExc_TypeError, "a class argument was expected, not a '%.200s' instance",
-                                      Py_TYPE(obType)->tp_name);
-        return -1;
-    };
-    auto *type = reinterpret_cast<PyTypeObject *>(obType);
-    PyObject *mro = type->tp_mro;
-    Py_ssize_t i, n = PyTuple_GET_SIZE(mro);
-    bool right_module = false;
-    bool have_enum = false;
-    bool have_flag = false;
-    bool have_members = PyObject_HasAttr(obType, PyMagicName::members());
-    for (i = 0; i < n; i++) {
-        obType = PyTuple_GET_ITEM(mro, i);
-        type = reinterpret_cast<PyTypeObject *>(obType);
-        AutoDecRef mod(PyObject_GetAttr(obType, PyMagicName::module()));
-        QByteArray cmod = String::toCString(mod);
-        QByteArray cname = type->tp_name;
-        if (cmod == "enum") {
-            right_module = true;
-            if (cname == "Enum")
-                have_enum = true;
-            else if (cname == "Flag")
-                have_flag = true;
-        }
-    }
-    if (!right_module || !(have_enum || have_flag) || !have_members) {
+    int res = enumIsFlag(obType);
+    if (res < 0) {
+        auto *type = reinterpret_cast<PyTypeObject *>(obType);
         PyErr_Format(PyExc_TypeError, "type %.200s does not inherit from 'Enum' or 'Flag'",
                                       type->tp_name);
         return -1;
     }
-    return bool(have_flag);
+    return bool(res);
 }
 
 PyObject *QEnumMacro(PyObject *pyenum, bool flag)

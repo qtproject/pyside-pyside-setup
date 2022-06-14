@@ -22,6 +22,8 @@ LIBSHIBOKEN_API PyTypeObject *mapFlagsToSameEnum(PyTypeObject *FType, PyTypeObje
 
 /// PYSIDE-1735: Make sure that we can import the Python enum implementation.
 LIBSHIBOKEN_API PyTypeObject *getPyEnumMeta();
+// PYSIDE-1735: Helper function supporting QEnum
+LIBSHIBOKEN_API int enumIsFlag(PyObject *ob_enum);
 
 }
 
