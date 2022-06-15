@@ -783,7 +783,8 @@ PyObject *checkInvalidArgumentCount(Py_ssize_t numArgs, Py_ssize_t minArgs, Py_s
         Py_INCREF(result);
     } else if (numArgs < minArgs) {
         static PyObject *const tooFew = Shiboken::String::createStaticString("<");
-        result = tooFew;
+        static PyObject *const noArgs = Shiboken::String::createStaticString("0");
+        result = numArgs > 0 ? tooFew : noArgs;
         Py_INCREF(result);
     }
     return result;
