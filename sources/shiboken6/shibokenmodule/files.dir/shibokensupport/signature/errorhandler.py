@@ -76,6 +76,9 @@ def seterror_argument(args, func_name, info):
         err = TypeError
         if info == "<":
             msg = f"{func_name}(): not enough arguments"
+        elif info == "0":
+           msg = (f"{func_name}(): not enough arguments. "
+                  "Note: keyword arguments are only supported for optional parameters.")
         elif info == ">":
             msg = f"{func_name}(): too many arguments"
         elif info.isalnum():
