@@ -63,7 +63,6 @@ class ellipsis(object):
 ellipsis = ellipsis()
 Point = typing.Tuple[float, float]
 Variant = typing.Any
-ModelIndexList = typing.List[int]
 QImageCleanupFunction = typing.Callable
 
 # unfortunately, typing.Optional[t] expands to typing.Union[t, NoneType]
@@ -521,8 +520,7 @@ def init_PySide6_QtCore():
         "QGenericArgument(Q_NULLPTR)": ellipsis,
         "QJsonObject": typing.Dict[str, PySide6.QtCore.QJsonValue],
         "QModelIndex()": Invalid("PySide6.QtCore.QModelIndex"), # repr is btw. very wrong, fix it?!
-        "QModelIndexList": ModelIndexList,
-        "QModelIndexList": ModelIndexList,
+        "QModelIndexList": typing.List[PySide6.QtCore.QModelIndex],
         "PySideSignalInstance": SignalInstance,
         "QString()": "",
         "Flag.Default": Instance("PySide6.QtCore.QStringConverterBase.Flags"),
