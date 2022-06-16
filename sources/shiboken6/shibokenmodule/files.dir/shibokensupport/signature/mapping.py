@@ -543,6 +543,11 @@ def init_PySide6_QtGui():
         "uint8_t": int,
         "USHRT_MAX": ushort_max,
     })
+
+    # special case - char* can either be 'bytes' or 'str'. The default is 'bytes'.
+    # Here we manually set it to map to 'str'.
+    type_map.update({("PySide6.QtGui.QPixmap.save", "char*"): str})
+
     return locals()
 
 
