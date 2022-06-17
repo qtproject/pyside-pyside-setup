@@ -6483,6 +6483,7 @@ bool CppGenerator::finishGeneration()
         s << R"(#include <pysidecleanup.h>
 #include <pysideqenum.h>
 #include <feature_select.h>
+#include <pysidestaticstrings.h>
 )";
     }
 
@@ -6532,7 +6533,7 @@ bool CppGenerator::finishGeneration()
             << "for (int i = 0, imax = SBK_" << moduleName()
             << "_IDX_COUNT; i < imax; i++) {\n" << indent
             << "PyObject *pyType = reinterpret_cast<PyObject *>(" << cppApiVariableName() << "[i]);\n"
-            << "Shiboken::AutoDecRef attrName(Py_BuildValue(\"s\", \"staticMetaObject\"));\n"
+            << "PyObject *attrName = PySide::PyName::qtStaticMetaObject();\n"
             << "if (pyType && PyObject_HasAttr(pyType, attrName))\n" << indent
             << "PyObject_SetAttr(pyType, attrName, Py_None);\n" << outdent
             << outdent << "}\n" << outdent << "}\n";
