@@ -210,12 +210,10 @@ class SomeClass(QObject):
 @unittest.skipUnless(HAVE_ENUM, "requires 'enum' module (use 'pip install enum34' for Python 2)")
 class TestQEnumMacro(unittest.TestCase):
     def testTopLevel(self):
-        self.assertEqual(type(OuterEnum).__module__, "enum")
         self.assertEqual(type(OuterEnum).__name__, "EnumMeta")
         self.assertEqual(len(OuterEnum.__members__), 2)
 
     def testSomeClass(self):
-        self.assertEqual(type(SomeClass.SomeEnum).__module__, "enum")
         self.assertEqual(type(SomeClass.SomeEnum).__name__, "EnumMeta")
         self.assertEqual(len(SomeClass.SomeEnum.__members__), 3)
         with self.assertRaises(TypeError):

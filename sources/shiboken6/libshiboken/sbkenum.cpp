@@ -315,13 +315,21 @@ static void SbkEnumTypeDealloc(PyObject *pyObj)
 
     PyObject_GC_UnTrack(pyObj);
 #ifndef Py_LIMITED_API
+#  if PY_VERSION_HEX >= 0x030A0000
+    Py_TRASHCAN_BEGIN(pyObj, 1);
+#  else
     Py_TRASHCAN_SAFE_BEGIN(pyObj);
+#  endif
 #endif
     if (setp->converter)
         Conversions::deleteConverter(setp->converter);
     PepType_SETP_delete(enumType);
 #ifndef Py_LIMITED_API
+#  if PY_VERSION_HEX >= 0x030A0000
+    Py_TRASHCAN_END;
+#  else
     Py_TRASHCAN_SAFE_END(pyObj);
+#  endif
 #endif
     if (PepRuntime_38_flag) {
         // PYSIDE-939: Handling references correctly.
@@ -470,6 +478,24 @@ void init_enum()
     useOldEnum = strncmp(envsetting, "0", 10) == 0;
     getPyEnumMeta();
     is_initialized = true;
+}
+
+// PYSIDE-1735: Helper function supporting QEnum
+int enumIsFlag(PyObject *ob_type)
+{
+    init_enum();
+
+    auto *metatype = Py_TYPE(ob_type);
+    if (metatype != reinterpret_cast<PyTypeObject *>(PyEnumMeta))
+        return -1;
+    auto *mro = reinterpret_cast<PyTypeObject *>(ob_type)->tp_mro;
+    Py_ssize_t idx, n = PyTuple_GET_SIZE(mro);
+    for (idx = 0; idx < n; idx++) {
+        auto *sub_type = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
+        if (sub_type == reinterpret_cast<PyTypeObject *>(PyFlag))
+            return 1;
+    }
+    return 0;
 }
 
 } // extern "C"
@@ -1014,6 +1040,10 @@ PyTypeObject *morphLastEnumToPython()
     }
     // Protect against double initialization
     setp->replacementType = newType;
+#if PY_VERSION_HEX < 0x03080000
+    // PYSIDE-1735: Old Python versions can't stand the early enum deallocation.
+    Py_INCREF(enumType);
+#endif
     return newType;
 }
 

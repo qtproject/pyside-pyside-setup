@@ -116,7 +116,7 @@ PyTypeObject *SbkType_FromSpec_BMDWB(PyType_Spec *spec,
 
     if (meta) {
         PyTypeObject *hold = Py_TYPE(type);
-        Py_TYPE(type) = meta;
+        obType->ob_type = meta;
         Py_INCREF(Py_TYPE(type));
         if (hold->tp_flags & Py_TPFLAGS_HEAPTYPE)
             Py_DECREF(hold);

@@ -43,8 +43,8 @@ Note that from version 12 onwards, the prebuilt Windows binaries from
 `LLVM <https://www.llvm.org>`_ no longer contain CMake configuration files; so
 they can no longer be used.
 
-Extract the files, and leave it on any desired path, for example, ``c:``, and then set these two
-required environment variables::
+Extract the files, and leave it on any desired path, for example, ``c:``,
+and set the environment variable required::
 
     set LLVM_INSTALL_DIR=c:\libclang
     set PATH=C:\libclang\bin;%PATH%

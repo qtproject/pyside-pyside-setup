@@ -413,7 +413,11 @@ void SbkObjectType_tp_dealloc(PyTypeObject *sbkType)
 
     PyObject_GC_UnTrack(pyObj);
 #ifndef Py_LIMITED_API
+#  if PY_VERSION_HEX >= 0x030A0000
+    Py_TRASHCAN_BEGIN(pyObj, 1);
+#  else
     Py_TRASHCAN_SAFE_BEGIN(pyObj);
+#  endif
 #endif
     if (sotp) {
         if (sotp->user_data && sotp->d_func) {
@@ -427,7 +431,11 @@ void SbkObjectType_tp_dealloc(PyTypeObject *sbkType)
         PepType_SOTP_delete(sbkType);
     }
 #ifndef Py_LIMITED_API
+#  if PY_VERSION_HEX >= 0x030A0000
+    Py_TRASHCAN_END;
+#  else
     Py_TRASHCAN_SAFE_END(pyObj);
+#  endif
 #endif
     if (PepRuntime_38_flag) {
         // PYSIDE-939: Handling references correctly.
@@ -775,7 +783,8 @@ PyObject *checkInvalidArgumentCount(Py_ssize_t numArgs, Py_ssize_t minArgs, Py_s
         Py_INCREF(result);
     } else if (numArgs < minArgs) {
         static PyObject *const tooFew = Shiboken::String::createStaticString("<");
-        result = tooFew;
+        static PyObject *const noArgs = Shiboken::String::createStaticString("0");
+        result = numArgs > 0 ? tooFew : noArgs;
         Py_INCREF(result);
     }
     return result;
@@ -1269,6 +1278,7 @@ bool setCppPointer(SbkObject *sbkObj, PyTypeObject *desiredType, void *cptr)
 bool isValid(PyObject *pyObj)
 {
     if (!pyObj || pyObj == Py_None
+        || PyType_Check(pyObj) != 0
         || Py_TYPE(Py_TYPE(pyObj)) != SbkObjectType_TypeF()) {
         return true;
     }
