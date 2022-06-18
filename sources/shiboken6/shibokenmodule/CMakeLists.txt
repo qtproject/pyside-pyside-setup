@@ -45,6 +45,7 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/_config.py"
 
 if ("${MINIMUM_PYTHON_VERSION}" STREQUAL "")
     set(MINIMUM_PYTHON_VERSION None)
+    set(MAXIMUM_PYTHON_VERSION None)
 endif()
 
 # PYSIDE-1497: This `..` is the crucial trick to unify the path location of `Shiboken`.

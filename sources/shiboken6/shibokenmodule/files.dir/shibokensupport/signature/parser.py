@@ -77,7 +77,10 @@ In effect, 'type_map' maps text to real Python objects.
 """
 
 def _get_flag_enum_option():
-    from shiboken6 import __version_info__ as ver, __minimum_python_version__ as pyminver
+    from shiboken6 import (__version_info__ as ver,
+                           __minimum_python_version__ as pyminver,
+                           __maximum_python_version__ as pymaxver)
+
     # PYSIDE-1735: Use the new Enums per default if version is >= 6.4
     #              This decides between delivered vs. dev versions.
     #              When 6.4 is out, the switching mode will be gone.
@@ -96,14 +99,14 @@ def _get_flag_enum_option():
     elif hasattr(sys, sysname):
         flag = bool(getattr(sys, sysname))
     sysver = sys.version_info[:2]
-    if flag and sysver < (3, 7):
-        warnings.warn(f"Enums with functional API are not supported in "
-                      f"Python {'.'.join(map(str, sysver))}")
-        flag = False
     # PYSIDE-1797: Emit a warning when we may remove pep384_issue33738.cpp
     if pyminver and pyminver >= (3, 8):
         warnings.warn(f"\n    *** Python is at version {'.'.join(map(str, pyminver))} now. "
                       f"The file pep384_issue33738.cpp should be removed ASAP! ***")
+    # PYSIDE-1735: Emit a warning when we may update enum_310.py
+    if pymaxver and pymaxver > (3, 10):
+        warnings.warn(f"\n    *** Python is at version {'.'.join(map(str, pymaxver))} now. "
+                      f"Please check if enum_310.py should be updated! ***")
     # modify the sys attribute to bool
     setattr(sys, sysname, flag)
     # modify the env attribute to "0" or "1"
