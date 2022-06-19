@@ -41,32 +41,33 @@
 #define PYSIDESTRINGS_H
 
 #include <sbkpython.h>
+#include <pysidemacros.h>
 
 namespace PySide
 {
 namespace PyName
 {
-PyObject *qtStaticMetaObject();
-PyObject *qtConnect();
-PyObject *qtDisconnect();
-PyObject *qtEmit();
-PyObject *dict_ring();
-PyObject *fset();
-PyObject *im_func();
-PyObject *im_self();
-PyObject *name();
-PyObject *parameters();
-PyObject *property();
-PyObject *select_id();
+PYSIDE_API PyObject *qtStaticMetaObject();
+PYSIDE_API PyObject *qtConnect();
+PYSIDE_API PyObject *qtDisconnect();
+PYSIDE_API PyObject *qtEmit();
+PYSIDE_API PyObject *dict_ring();
+PYSIDE_API PyObject *fset();
+PYSIDE_API PyObject *im_func();
+PYSIDE_API PyObject *im_self();
+PYSIDE_API PyObject *name();
+PYSIDE_API PyObject *parameters();
+PYSIDE_API PyObject *property();
+PYSIDE_API PyObject *select_id();
 } // namespace PyName
 namespace PyMagicName
 {
-PyObject *code();
-PyObject *doc();
-PyObject *func();
-PyObject *get();
-PyObject *name();
-PyObject *property_methods();
+PYSIDE_API PyObject *code();
+PYSIDE_API PyObject *doc();
+PYSIDE_API PyObject *func();
+PYSIDE_API PyObject *get();
+PYSIDE_API PyObject *name();
+PYSIDE_API PyObject *property_methods();
 } // namespace PyMagicName
 } // namespace PySide
 
