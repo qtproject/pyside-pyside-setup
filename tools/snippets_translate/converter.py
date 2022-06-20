@@ -108,7 +108,6 @@ def snippet_translate(x):
         x = handle_void_functions(x)
 
     # 'Q*::' -> 'Q*.'
-    # FIXME: This will break iterators, but it's a small price.
     if re.search(r"Q[\w]+::", x):
         x = x.replace("::", ".")
 
@@ -273,6 +272,21 @@ def snippet_translate(x):
     # So we can safely assume it's not a variable declaration
     if re.search(r"^[a-zA-Z0-9]+(<.*?>)? [\w\*\&]+\(.*\)$", x.strip()):
         x = handle_functions(x)
+
+    # if it is a C++ iterator declaration, then ignore it due to dynamic typing in Python
+    # eg: std::vector<int> it;
+    # the case of iterator being used inside a for loop is already handed in handle_for(..)
+    # TODO: handle iterator initialization statement like it = container.begin();
+    if re.search(r"(std::)?[\w]+<[\w]+>::(const_)?iterator", x):
+        x = ""
+        return x
+
+    # By now all the typical special considerations of scope resolution operator should be handled
+    # 'Namespace*::' -> 'Namespace*.'
+    # TODO: In the case where a C++ class function is defined outside the class, this would be wrong
+    # but we do not have such a code snippet yet
+    if re.search(r"[\w]+::", x):
+        x = x.replace("::", ".")
 
     # General return for no special cases
     return dstrip(x)
