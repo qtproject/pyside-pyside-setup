@@ -1705,9 +1705,7 @@ static PyObject *invokeMethodHelper(QObject *obj, const char *member, Qt::Connec
 if (Shiboken::Enum::check(%PYARG_0)) {
     int in = %CONVERTTOCPP[int](%PYARG_0);
     %0 = QVariant(in);
-}
-else
-{
+} else {
     pythonToCpp(pyResult, &cppResult);
 }
 // @snippet qabstractitemmodel_data
