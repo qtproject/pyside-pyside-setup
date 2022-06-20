@@ -86,6 +86,7 @@ macro(collect_optional_modules)
         Designer
         Xml
         Help Multimedia
+        HttpServer
         MultimediaWidgets
         OpenGL
         OpenGLWidgets

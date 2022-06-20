@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+// Copyright (C) 2022 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+-->
+<typesystem package="PySide6.QtHttpServer">
+  <load-typesystem name="QtConcurrent/typesystem_concurrent.xml" generate="no"/>
+  <load-typesystem name="QtWebSockets/typesystem_websockets.xml" generate="no"/>
+
+  <typedef-type name="QFutureHttpServerResponse" source="QFuture&lt;QHttpServerResponse&gt;"/>
+  <object-type name="QAbstractHttpServer"/>
+  <object-type name="QHttpServer"/>
+  <object-type name="QHttpServerFutureResponse"/>
+  <object-type name="QHttpServerResponder">
+      <enum-type name="StatusCode"/>
+  </object-type>
+  <object-type name="QHttpServerRequest">
+      <enum-type name="Method" flags="Methods"/>
+  </object-type>
+  <object-type name="QHttpServerResponse"/>
+  <object-type name="QHttpServerRouter"/>
+  <object-type name="QHttpServerRouterRule"/>
+</typesystem>
