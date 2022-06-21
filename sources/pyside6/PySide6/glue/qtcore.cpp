@@ -1604,3 +1604,13 @@ if (dataChar == nullptr) {
     Shiboken::Conversions::pythonToCppPointer(SbkPySide6_QtCoreTypes[SBK_QLOGGINGCATEGORY_IDX],
     pyArgs[0], &(category));
 // @snippet qloggingcategory_to_cpp
+
+// @snippet qabstractitemmodel_data
+::QVariant %0 ;
+if (Shiboken::Enum::check(%PYARG_0)) {
+    int in = %CONVERTTOCPP[int](%PYARG_0);
+    %0 = QVariant(in);
+} else {
+    pythonToCpp(pyResult, &cppResult);
+}
+// @snippet qabstractitemmodel_data
