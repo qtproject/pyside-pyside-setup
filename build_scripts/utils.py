@@ -601,7 +601,10 @@ def macos_get_rpaths(libpath):
 
 
 def macos_add_rpath(rpath, library_path):
-    back_tick(f"install_name_tool -add_rpath {rpath} {library_path}")
+    try:
+        back_tick(f"install_name_tool -add_rpath {rpath} {library_path}")
+    except RuntimeError as e:
+        print(f"Exception {type(e).__name__}: {e}")
 
 
 def macos_fix_rpaths_for_library(library_path, qt_lib_dir):
