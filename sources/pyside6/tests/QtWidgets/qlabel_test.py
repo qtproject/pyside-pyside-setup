@@ -69,8 +69,7 @@ class QLabelTest(UsesQApplication):
     # Test for PYSIDE-1673, QObject.property() returning a QFlags<> property.
     def testQObjectProperty(self):
         a = self.label.property("alignment")
-        self.assertEqual(type(a), Qt.AlignmentFlag if sys.pyside63_option_python_enum
-                                                   else Qt.Alignment)
+        self.assertEqual(type(a), Qt.Alignment)
         print("alignment=", a)
 
 

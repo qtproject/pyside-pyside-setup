@@ -33,7 +33,6 @@ class TestEnum(unittest.TestCase):
     def testToIntInFunction(self):
         self.assertEqual(str(int(QIODevice.WriteOnly)), "2")
 
-    @unittest.skipIf(sys.pyside63_option_python_enum, "makes no sense for tested Python enums")
     def testOperations(self):
         k = Qt.Key.Key_1
 
@@ -42,15 +41,16 @@ class TestEnum(unittest.TestCase):
         self.assertEqual(k - 2, -(2 - k))
         self.assertEqual(k * 2, 2 * k)
 
-        # Floats
-        with self.assertRaises(TypeError):
-            a = k + 2.0
+        if not sys.pyside63_option_python_enum:
+            # Floats work fine with new enums
+            with self.assertRaises(TypeError):
+                a = k + 2.0
 
-        with self.assertRaises(TypeError):
-            a = k - 2.0
+            with self.assertRaises(TypeError):
+                a = k - 2.0
 
-        with self.assertRaises(TypeError):
-            a = k * 2.0
+            with self.assertRaises(TypeError):
+                a = k * 2.0
 
     @unittest.skipIf(sys.pyside63_option_python_enum, "inheritance forbidden for Python enums")
     def testInherit(self):

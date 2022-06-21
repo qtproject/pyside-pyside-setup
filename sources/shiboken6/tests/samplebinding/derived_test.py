@@ -57,7 +57,6 @@ class DerivedTest(unittest.TestCase):
         self.assertEqual(type(result), OverloadedFuncEnum)
         self.assertEqual(result, sample.OverloadedFunc_d)
 
-    @unittest.skipIf(sys.pyside63_option_python_enum, "Makes no sense with strict Enums")
     def testOtherOverloadedMethodCall(self):
         '''Another test to check overloaded method calling, just to double check.'''
         derived = Derived()
@@ -70,13 +69,13 @@ class DerivedTest(unittest.TestCase):
         self.assertEqual(type(result), Derived.OtherOverloadedFuncEnum)
         self.assertEqual(result, Derived.OtherOverloadedFunc_id)
 
-    @unittest.skipIf(sys.pyside63_option_python_enum, "Makes no sense with strict Enums")
     def testOverloadedMethodCallWithDifferentNumericTypes(self):
         '''Test if the correct overloaded method accepts a different numeric type as argument.'''
         derived = Derived()
         result = derived.overloaded(1.1, 2.2)
         self.assertEqual(type(result), OverloadedFuncEnum)
-        self.assertEqual(result, sample.OverloadedFunc_ii)
+        if not sys.pyside63_option_python_enum:
+            self.assertEqual(result, sample.OverloadedFunc_ii)
 
     def testOverloadedMethodCallWithWrongNumberOfArguments(self):
         '''Test if a call to an overloaded method with the wrong number of arguments raises an exception.'''
