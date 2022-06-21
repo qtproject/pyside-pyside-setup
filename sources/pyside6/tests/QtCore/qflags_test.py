@@ -136,5 +136,24 @@ class QFlagsWrongType(unittest.TestCase):
         self.assertEqual(operator.or_(Qt.NoItemFlags, 43), 43)
 
 
+class QEnumFlagDefault(unittest.TestCase):
+    """
+        Check that old flag and enum syntax can be used.
+        The signatures of these surrogate functions intentionally do not exist
+        because people should learn to use the new Enums correctly.
+    """
+    def testOldQFlag(self):
+        self.assertEqual(Qt.AlignmentFlag(), Qt.AlignmentFlag(0))
+        oldFlag = Qt.Alignment()
+        oldEnum = Qt.AlignmentFlag()
+        self.assertEqual(type(oldFlag), Qt.Alignment)
+        self.assertEqual(type(oldEnum), Qt.AlignmentFlag)
+        if sys.pyside63_option_python_enum:
+            self.assertEqual(type(oldFlag), type(oldEnum))
+        else:
+            with self.assertRaises(AssertionError):
+                self.assertEqual(type(oldFlag), type(oldEnum))
+
+
 if __name__ == '__main__':
     unittest.main()

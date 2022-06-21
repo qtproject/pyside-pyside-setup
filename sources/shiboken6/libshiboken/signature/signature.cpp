@@ -111,22 +111,19 @@ PyObject *GetTypeKey(PyObject *ob)
      *
      * PYSIDE-1286: We use correct __module__ and __qualname__, now.
      */
-    // XXX we obtain also the current selection.
-    // from the current module name.
     AutoDecRef module_name(PyObject_GetAttr(ob, PyMagicName::module()));
     if (module_name.isNull()) {
         // We have no module_name because this is a module ;-)
         PyErr_Clear();
         module_name.reset(PyObject_GetAttr(ob, PyMagicName::name()));
-        return Py_BuildValue("O"/*i"*/, module_name.object()/*, getFeatureSelectId()*/);
+        return Py_BuildValue("O", module_name.object());
     }
     AutoDecRef class_name(PyObject_GetAttr(ob, PyMagicName::qualname()));
     if (class_name.isNull()) {
         Py_FatalError("Signature: missing class name in GetTypeKey");
         return nullptr;
     }
-    return Py_BuildValue("(O"/*i*/"O)", module_name.object(), /*getFeatureSelectId(),*/
-                                  class_name.object());
+    return Py_BuildValue("(OO)", module_name.object(), class_name.object());
 }
 
 static PyObject *empty_dict = nullptr;
