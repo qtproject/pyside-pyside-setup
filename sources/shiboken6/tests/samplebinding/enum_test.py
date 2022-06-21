@@ -45,10 +45,13 @@ import shiboken6
 
 import sample
 from sample import SampleNamespace, ObjectType, Event
+from shibokensupport.signature import get_signature
+
 
 def createTempFile():
     import tempfile
     return tempfile.SpooledTemporaryFile(mode='rw')
+
 
 class EnumTest(unittest.TestCase):
     '''Test case for Python representation of C++ enums.'''
@@ -81,13 +84,11 @@ class EnumTest(unittest.TestCase):
         '''Tries to build the proper enum using an integer.'''
         SampleNamespace.getNumber(SampleNamespace.Option(1))
 
-    @unittest.skipIf(sys.pyside63_option_python_enum, "test not suitable for Python enum")
     def testBuildingEnumWithDefaultValue(self):
         '''Enum constructor with default value'''
         enum = SampleNamespace.Option()
         self.assertEqual(enum, SampleNamespace.None_)
 
-    @unittest.skipIf(sys.pyside63_option_python_enum, "test not suitable for Python enum")
     def testEnumConversionToAndFromPython(self):
         '''Conversion of enum objects from Python to C++ back again.'''
         enumout = SampleNamespace.enumInEnumOut(SampleNamespace.TwoIn)
@@ -155,11 +156,11 @@ class EnumTest(unittest.TestCase):
         base = types[1]
         # The class has an empty signature.
 
-        self.assertEqual(klass.__signature__, None)
+        self.assertEqual(get_signature(klass), None)
         # The base class must be Enum
-        self.assertNotEqual(base.__signature__, None)
+        self.assertNotEqual(get_signature(base), None)
         # It contains an int annotation.
-        param = base.__signature__.parameters["itemValue"]
+        param = get_signature(base).parameters["itemValue"]
         self.assertEqual(param.annotation, int)
 
 
