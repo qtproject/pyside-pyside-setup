@@ -367,6 +367,24 @@ static QString buildPropertyString(const QPropertySpec &spec)
     return text;
 }
 
+static QString _plainName(const QString &s)
+{
+    auto cutPos = s.lastIndexOf(u"::"_s);
+    return cutPos < 0 ? s : s.right(s.length() - (cutPos + 2));
+}
+
+static QString BuildEnumFlagInfo(const EnumTypeEntry *enumType)
+{
+    QString result = _plainName(enumType->name());
+    auto flags = enumType->flags();
+    if (flags) {
+        result += u":IntFlag:"_s + _plainName(flags->flagsName());
+    } else {
+        result += u":IntEnum"_s;
+    }
+    return u'"' + result + u'"';
+}
+
 static void writePyGetSetDefEntry(TextStream &s, const QString &name,
                                   const QString &getFunc, const QString &setFunc)
 {
@@ -682,7 +700,18 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
             s << entry << ",\n";
         s << NULL_PTR << " // Sentinel\n"
             << outdent << "};\n\n";
+
     }
+    // PYSIDE-1735: Write an EnumFlagInfo structure
+    QStringList sorter;
+    for (const auto &entry : qAsConst(classEnums))
+        sorter.append(BuildEnumFlagInfo(entry.typeEntry()));
+    sorter.sort();
+    s << "static const char *" << className << "_EnumFlagInfo[] = {\n" << indent;
+    for (const auto &entry : qAsConst(sorter))
+        s << entry << ",\n";
+    s << NULL_PTR << " // Sentinel\n"
+        << outdent << "};\n\n";
 
     // Write methods definition
     writePyMethodDefs(s, className, methodsDefinitions, typeEntry->isValue());
@@ -5961,6 +5990,9 @@ void CppGenerator::writeClassRegister(TextStream &s,
     metaClass->getEnumsFromInvisibleNamespacesToBeGenerated(&classEnums);
 
     writeEnumsInitialization(s, classEnums, ErrorReturn::Void);
+    if (!classContext.forSmartPointer())
+        s << "SbkObjectType_SetEnumFlagInfo(pyType, " << chopType(pyTypeName)
+            << "_EnumFlagInfo);\n";
 
     if (metaClass->hasSignals())
         writeSignalInitialization(s, metaClass);

@@ -113,6 +113,8 @@ struct SbkObjectTypePrivate
     DeleteUserDataFunc d_func;
     void (*subtype_init)(PyTypeObject *, PyObject *, PyObject *);
     const char **propertyStrings;
+    const char **enumFlagInfo;
+    PyObject *flagsDict;
 };
 
 
