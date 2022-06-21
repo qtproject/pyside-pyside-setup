@@ -86,9 +86,12 @@ PyObject *mangled_type_getattro(PyTypeObject *type, PyObject *name)
      * with the complex `tp_getattro` of `QObject` and other instances.
      * What we change here is the meta class of `QObject`.
      */
-    static getattrofunc type_getattro = PyType_Type.tp_getattro;
-    static PyObject *ignAttr1 = PyName::qtStaticMetaObject();
-    static PyObject *ignAttr2 = PyMagicName::get();
+    static getattrofunc const type_getattro = PyType_Type.tp_getattro;
+    static PyObject *const ignAttr1 = PyName::qtStaticMetaObject();
+    static PyObject *const ignAttr2 = PyMagicName::get();
+    static PyTypeObject *const EnumMeta = getPyEnumMeta();
+    static PyObject *const _member_map_ = String::createStaticString("_member_map_");
+
     if (SelectFeatureSet != nullptr)
         type->tp_dict = SelectFeatureSet(type);
     auto *ret = type_getattro(reinterpret_cast<PyObject *>(type), name);
@@ -121,13 +124,15 @@ PyObject *mangled_type_getattro(PyTypeObject *type, PyObject *name)
             PyObject *key, *value;
             Py_ssize_t pos = 0;
             while (PyDict_Next(dict, &pos, &key, &value)) {
-                static auto *EnumMeta = getPyEnumMeta();
                 if (Py_TYPE(value) == EnumMeta) {
                     auto *valtype = reinterpret_cast<PyTypeObject *>(value);
-                    auto *result = PyDict_GetItem(valtype->tp_dict, name);
-                    if (result) {
-                        Py_INCREF(result);
-                        return result;
+                    auto *member_map = PyDict_GetItem(valtype->tp_dict, _member_map_);
+                    if (member_map && PyDict_Check(member_map)) {
+                        auto *result = PyDict_GetItem(member_map, name);
+                        if (result) {
+                            Py_INCREF(result);
+                            return result;
+                        }
                     }
                 }
             }

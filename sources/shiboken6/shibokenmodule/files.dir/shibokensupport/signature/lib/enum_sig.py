@@ -130,7 +130,8 @@ class ExactEnumerator(object):
                 functions.append((func_name, thing))
             elif type(type(thing)) is EnumMeta:
                 # take the real enum name, not what is in the dict
-                enums.append((thing_name, type(thing).__qualname__, thing))
+                if not thing_name.startswith("_"):
+                    enums.append((thing_name, type(thing).__qualname__, thing))
             elif isinstance(thing, property):
                 properties.append((thing_name, thing))
 
