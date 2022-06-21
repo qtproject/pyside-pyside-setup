@@ -132,6 +132,7 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
 
     def visit_AugAssign(self, node):
         """'Augmented_assign', Operators +=/-=, etc."""
+        self.INDENT()
         self.generic_visit(node)
         self._output_file.write("\n")
 
@@ -449,18 +450,18 @@ class ConvertVisitor(ast.NodeVisitor, CppFormatter):
         self.generic_visit(node)
 
     def visit_With(self, node):
-        self.indent()
         self.INDENT()
         self._output_file.write("{ // Converted from context manager\n")
+        self.indent()
         for item in node.items:
             self.INDENT()
             if item.optional_vars:
                 self._output_file.write(format_reference(item.optional_vars))
                 self._output_file.write(" = ")
         self.generic_visit(node)
+        self.dedent()
         self.INDENT()
         self._output_file.write("}\n")
-        self.dedent()
 
     def _debug_enter(self, node, parent=None):
         message = '{}>generic_visit({})'.format('  ' * self ._debug_indent,

@@ -122,6 +122,9 @@ def format_for_loop(f_node):
     elif isinstance(f_node.iter, ast.List):
         # Range based for over list
         result += ': ' + format_literal_list(f_node.iter)
+    elif isinstance(f_node.iter, ast.Name):
+        # Range based for over variable
+        result += ': ' + f_node.iter.id
     result += ') {'
     return result
 
@@ -284,20 +287,15 @@ class CppFormatter(Indenter):
         """Print a function definition with arguments"""
         self._output_file.write('\n')
         arguments = format_function_def_arguments(f_node)
-        warn = True
         if f_node.name == '__init__' and class_context:  # Constructor
             name = class_context
-            warn = len(arguments) > 0
         elif f_node.name == '__del__' and class_context:  # Destructor
             name = '~' + class_context
-            warn = False
         else:
             return_type = "void"
             if f_node.returns and isinstance(f_node.returns, ast.Name):
                 return_type = _fix_function_argument_type(f_node.returns.id, True)
             name = return_type + " " + f_node.name
         self.indent_string(f'{name}({arguments})')
-        if warn:
-            self._output_file.write(' /* FIXME: types */')
         self._output_file.write('\n')
         self.indent_line('{')

@@ -80,7 +80,8 @@ if __name__ == '__main__':
 
         ast_tree = ConvertVisitor.create_ast(input_file)
         if args.stdout:
-            sys.stdout.write(f'// Converted from {input_file}\n')
+            base_name = os.path.basename(input_file)
+            sys.stdout.write(f'// Converted from {base_name}\n')
             ConvertVisitor(input_file, sys.stdout).visit(ast_tree)
             sys.exit(0)
 
@@ -94,6 +95,7 @@ if __name__ == '__main__':
                 sys.exit(-1)
 
         with open(target_file, "w") as file:
-            file.write(f'// Converted from {input_file}\n')
+            base_name = os.path.basename(input_file)
+            file.write(f'// Converted from {base_name}\n')
             ConvertVisitor(input_file, file).visit(ast_tree)
             logger.info(f"Wrote {target_file} ...")
