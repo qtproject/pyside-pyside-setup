@@ -9,7 +9,21 @@
 
   <typedef-type name="QFutureHttpServerResponse" source="QFuture&lt;QHttpServerResponse&gt;"/>
   <object-type name="QAbstractHttpServer"/>
-  <object-type name="QHttpServer"/>
+  <object-type name="QHttpServer">
+      <extra-includes>
+          <include file-name="QtHttpServer/QHttpServerRequest" location="global"/>
+          <include file-name="QtHttpServer/QHttpServerRouterRule" location="global"/>
+      </extra-includes>
+      <add-function signature="route(const QString &amp;@rule@, PyCallable @callback@)"
+                    return-type="bool">
+        <inject-code class="target" position="beginning" file="../glue/qhttpserver.cpp"
+                     snippet="qhttpserver-route"/>
+      </add-function>
+      <add-function signature="afterRequest(PyCallable @callback@)">
+        <inject-code class="target" position="beginning" file="../glue/qhttpserver.cpp"
+                     snippet="qhttpserver-afterrequest"/>
+      </add-function>
+  </object-type>
   <object-type name="QHttpServerFutureResponse"/>
   <object-type name="QHttpServerResponder">
       <enum-type name="StatusCode"/>
