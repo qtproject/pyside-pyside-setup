@@ -881,7 +881,7 @@ static QByteArray buildSignature(const QByteArray &name, const QByteArray &signa
 
 static QByteArray parseSignature(PyObject *args)
 {
-    if (args && (Shiboken::String::check(args) || !PySequence_Check(args)))
+    if (args && (Shiboken::String::check(args) || !PyTuple_Check(args)))
         return getTypeName(args);
 
     QByteArray signature;
