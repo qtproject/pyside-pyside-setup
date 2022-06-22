@@ -855,8 +855,8 @@ void QtDocGenerator::writeModuleDocumentation()
             }
         }
 
-        s << "List of Classes\n";
-        s << "---------------\n\n";
+        s << "\nList of Classes\n"
+            << "---------------\n\n";
         writeFancyToc(s, it.value());
 
         output.done();
