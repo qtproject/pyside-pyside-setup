@@ -61,7 +61,7 @@ development process using Qt Creator:
 
    .. literalinclude:: main.py
       :linenos:
-      :lines: 40-60
+      :lines: 3-23
       :emphasize-lines: 7-9,14-17
 
 #. Now, set up the application window using
@@ -70,7 +70,7 @@ development process using Qt Creator:
 
    .. literalinclude:: main.py
       :linenos:
-      :lines: 40-65
+      :lines: 3-28
       :emphasize-lines: 23-25
 
    .. note:: Setting the resize policy is important if you want the
@@ -83,7 +83,7 @@ development process using Qt Creator:
 
    .. literalinclude:: main.py
       :linenos:
-      :lines: 40-70
+      :lines: 3-33
       :emphasize-lines: 28-31
 
 #. Load the ``view.qml`` to the ``QQuickView`` and call ``show()`` to
@@ -91,14 +91,14 @@ development process using Qt Creator:
 
    .. literalinclude:: main.py
       :linenos:
-      :lines: 40-79
+      :lines: 3-42
       :emphasize-lines: 33-40
 
 #. Finally, execute the application to start the event loop and clean up.
 
    .. literalinclude:: main.py
       :linenos:
-      :lines: 40-
+      :lines: 3-
       :emphasize-lines: 42-44
 
 #. Your application is ready to be run now. Select **Projects** mode to

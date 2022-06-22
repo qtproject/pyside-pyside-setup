@@ -29,7 +29,7 @@ application and PySide6 integration:
 
    .. literalinclude:: main.py
       :linenos:
-      :lines: 100-113
+      :lines: 63-76
       :emphasize-lines: 4,9
 
    Notice that we only need a :code:`QQmlApplicationEngine` to
@@ -40,7 +40,7 @@ application and PySide6 integration:
 
    .. literalinclude:: main.py
       :linenos:
-      :lines: 51-91
+      :lines: 14-54
       :emphasize-lines: 3,4,7
 
    Notice that the registration happens thanks to the :code:`QmlElement`
@@ -63,7 +63,7 @@ application and PySide6 integration:
 
    .. literalinclude:: view.qml
       :linenos:
-      :lines: 82-92
+      :lines: 45-55
       :emphasize-lines: 6-8
 
    The properties *Italic*, *Bold*, and *Underline* are mutually
@@ -80,7 +80,7 @@ application and PySide6 integration:
 
    .. literalinclude:: main.py
       :linenos:
-      :lines: 79-84
+      :lines: 42-47
       :emphasize-lines: 4,6
 
    Returning *True* or *False* allows you to activate and deactivate
@@ -91,7 +91,7 @@ application and PySide6 integration:
 
    .. literalinclude:: main.py
       :linenos:
-      :lines: 71-76
+      :lines: 34-39
 
 #. Now, for changing the look of our application, you have two options:
 
@@ -114,7 +114,7 @@ application and PySide6 integration:
 
    .. literalinclude:: main.py
       :linenos:
-      :lines: 41-49
+      :lines: 4-12
       :emphasize-lines: 9
 
    You can read more about this configuration file

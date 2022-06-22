@@ -27,6 +27,6 @@ window size is defined based on available screen width (80%) and height (70%).
 .. literalinclude:: datavisualize3/main_window.py
    :language: python
    :linenos:
-   :lines: 40-
+   :lines: 4-
 
 Try running the script to see what output you get with it.

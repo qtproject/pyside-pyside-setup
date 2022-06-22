@@ -18,7 +18,7 @@ The following python script, :code:`main.py`, demonstrates how to do it:
 .. literalinclude:: datavisualize1/main.py
    :language: python
    :linenos:
-   :lines: 40-
+   :lines: 3-
 
 The Python script uses the :code:`argparse` module to accept and parse input
 from the command line. It then uses the input, which in this case is the filename,

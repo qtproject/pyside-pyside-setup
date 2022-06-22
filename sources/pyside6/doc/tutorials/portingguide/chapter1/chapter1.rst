@@ -17,7 +17,7 @@ the beginning of ``createdb.py``:
 .. literalinclude:: createdb.py
    :language: python
    :linenos:
-   :lines: 40-44
+   :lines: 3-7
 
 The ``initDb`` function does most of the work needed to
 set up the database, but it depends on the ``addAuthor``,
@@ -31,7 +31,7 @@ C++ version
 .. literalinclude:: initdb.h
    :language: c++
    :linenos:
-   :lines: 55-81
+   :lines: 18-44
 
 Python version
 ---------------
@@ -39,7 +39,7 @@ Python version
 .. literalinclude:: createdb.py
    :language: python
    :linenos:
-   :lines: 44-65
+   :lines: 7-28
 
 Now that the helper functions are in place, port ``initDb``.
 Here is how the C++ and Python versions of this function
@@ -51,7 +51,7 @@ C++ version
 .. literalinclude:: initdb.h
    :language: c++
    :linenos:
-   :lines: 81-159
+   :lines: 44-122
 
 Python version
 ---------------
@@ -59,7 +59,7 @@ Python version
 .. literalinclude:: createdb.py
    :language: python
    :linenos:
-   :lines: 65-
+   :lines: 28-
 
 .. note:: The Python version uses the ``check`` function to
    execute the SQL statements instead of the ``if...else``
@@ -73,7 +73,7 @@ test it, add the following code to ``main.py`` and run it:
 .. literalinclude:: main.py
    :language: python
    :linenos:
-   :lines: 40-
+   :lines: 3-
 
 Use the following command from the prompt to run:
 

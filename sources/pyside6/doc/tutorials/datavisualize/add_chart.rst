@@ -14,7 +14,7 @@ previous chapter to add a QChartView:
 
 .. literalinclude:: datavisualize5/main_widget.py
    :linenos:
-   :lines: 40-
-   :emphasize-lines: 2-3,6,22-36,48-50
+   :lines: 3-
+   :emphasize-lines: 2-3,6,22-36,47-49
 
 

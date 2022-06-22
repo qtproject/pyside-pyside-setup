@@ -13,7 +13,7 @@ function to plot data using a QLineSeries:
 .. literalinclude:: datavisualize6/main_widget.py
    :language: python
    :linenos:
-   :lines: 40-
+   :lines: 3-
    :emphasize-lines: 33,56-91
 
 Now, run the application to visualize the earthquake magnitudes

@@ -16,7 +16,7 @@ The database contains a single line to mock the beginning of a conversation.
 
    .. literalinclude:: sqlDialog.py
       :linenos:
-      :lines: 40-79
+      :lines: 3-42
 
 The ``SqlConversationModel`` class offers the read-only data model required for the non-editable
 contacts list. It derives from the :ref:`QSqlQueryModel` class, which is the logical choice for
@@ -28,14 +28,14 @@ of a chat application.
 
    .. literalinclude:: sqlDialog.py
       :linenos:
-      :lines: 83-95
+      :lines: 46-58
 
 In ``setRecipient()``, you set a filter over the returned results from the database, and
 emit a signal every time the recipient of the message changes.
 
    .. literalinclude:: sqlDialog.py
       :linenos:
-      :lines: 97-106
+      :lines: 60-69
 
 The ``data()`` function falls back to ``QSqlTableModel``'s implementation if the role is not a
 custom user role.
@@ -44,7 +44,7 @@ that field, and then use that index to find the value to be returned.
 
    .. literalinclude:: sqlDialog.py
       :linenos:
-      :lines: 108-115
+      :lines: 71-78
 
 
 In ``roleNames()``, we return a Python dictionary with our custom role and role names as key-values
@@ -55,7 +55,7 @@ and that's why we're using the ``hash`` function.
 
    .. literalinclude:: sqlDialog.py
       :linenos:
-      :lines: 117-131
+      :lines: 80-94
 
 The ``send_message()`` function uses the given recipient and message to insert a new record into
 the database.
@@ -64,7 +64,7 @@ since all the changes will be cached in the model until you do so.
 
    .. literalinclude:: sqlDialog.py
       :linenos:
-      :lines: 133-152
+      :lines: 96-115
 
 chat.qml
 --------
@@ -73,7 +73,7 @@ Let's look at the ``chat.qml`` file.
 
    .. literalinclude:: chat.qml
       :linenos:
-      :lines: 40-42
+      :lines: 3-5
 
 First, import the Qt Quick module.
 This gives us access to graphical primitives such as Item, Rectangle, Text, and so on.
@@ -88,7 +88,7 @@ Let's step through the ``chat.qml`` file.
 
    .. literalinclude:: chat.qml
       :linenos:
-      :lines: 45-50
+      :lines: 8-13
 
 ``ApplicationWindow`` is a Window with some added convenience for creating a header and a footer.
 It also provides the foundation for popups and supports some basic styling, such as the background
@@ -103,7 +103,7 @@ declare a component to access it:
 
      .. literalinclude:: chat.qml
         :linenos:
-        :lines: 52-54
+        :lines: 15-17
 
 There are two ways of laying out items in QML: `Item Positioners`_ and `Qt Quick Layouts`_.
 
@@ -115,11 +115,11 @@ There are two ways of laying out items in QML: `Item Positioners`_ and `Qt Quick
 
      .. literalinclude:: chat.qml
         :linenos:
-        :lines: 56-59
+        :lines: 19-22
 
      .. literalinclude:: chat.qml
         :linenos:
-        :lines: 108-110
+        :lines: 71-73
 
 Pane is basically a rectangle whose color comes from the application's style.
 It's similar to `Frame`_, but it has no stroke around its border.
@@ -151,7 +151,7 @@ Let's look at the ``Listview`` in detail:
 
    .. literalinclude:: chat.qml
       :linenos:
-      :lines: 59-106
+      :lines: 22-69
 
 After filling the ``width`` and ``height`` of its parent, we also set some margins on the view.
 
@@ -181,7 +181,7 @@ We use Pane to cover the area under these two items:
 
    .. literalinclude:: chat.qml
       :linenos:
-      :lines: 108-132
+      :lines: 71-95
 
 The `TextArea`_ should fill the available width of the screen.
 We assign some placeholder text to provide a visual cue to the contact as to where they should begin
@@ -205,14 +205,14 @@ messages levels that our application will generate (errors, warnings, and inform
 
    .. literalinclude:: main.py
       :linenos:
-      :lines: 40-52
+      :lines: 3-15
 
 ``connectToDatabase()`` creates a connection with the SQLite database, creating the actual file
 if it doesn't already exist.
 
    .. literalinclude:: main.py
       :linenos:
-      :lines: 55-75
+      :lines: 18-38
 
 A few interesting things happen in the ``main`` function:
 
@@ -229,6 +229,6 @@ Finally, the Qt application runs, and your program starts.
 
    .. literalinclude:: main.py
       :linenos:
-      :lines: 78-88
+      :lines: 41-51
 
 .. image:: example_list_view.png

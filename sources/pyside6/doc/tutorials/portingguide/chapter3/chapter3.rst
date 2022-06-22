@@ -11,7 +11,7 @@ and add the following imports to it:
 .. literalinclude:: bookwindow.py
    :language: python
    :linenos:
-   :lines: 40-53
+   :lines: 3-16
 
 .. note:: The imports include the ``BookDelegate`` you
    ported earlier and the ``Ui_BookWindow``. The pyside-uic
@@ -34,7 +34,7 @@ C++ version
 .. literalinclude:: bookwindow.cpp
    :language: c++
    :linenos:
-   :lines: 57-140
+   :lines: 20-103
 
 Python version
 ---------------
@@ -42,7 +42,7 @@ Python version
 .. literalinclude:: bookwindow.py
    :language: python
    :linenos:
-   :lines: 53-116
+   :lines: 16-79
 
 .. note:: The Python version of the ``BookWindow`` class
    definition inherits from both ``QMainWindow`` and
@@ -57,7 +57,7 @@ C++ version
 .. literalinclude:: bookwindow.cpp
    :language: c++
    :linenos:
-   :lines: 115-
+   :lines: 78-
 
 Python version
 ---------------
@@ -65,7 +65,7 @@ Python version
 .. literalinclude:: bookwindow.py
    :language: python
    :linenos:
-   :lines: 117-
+   :lines: 80-
 
 Now that all the necessary pieces are in place, try to put
 them together in ``main.py``.
@@ -73,7 +73,7 @@ them together in ``main.py``.
 .. literalinclude:: main.py
    :language: python
    :linenos:
-   :lines: 40-
+   :lines: 3-
 
 Try running this to see if you get the following output:
 

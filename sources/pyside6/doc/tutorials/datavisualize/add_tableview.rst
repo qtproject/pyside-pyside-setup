@@ -39,7 +39,7 @@ Here is a script that implements the CustomTableModel:
 .. literalinclude:: datavisualize4/table_model.py
    :language: python
    :linenos:
-   :lines: 40-
+   :lines: 3-
 
 Now, create a QWidget that has a QTableView, and connect it to your
 CustomTableModel.
@@ -48,7 +48,7 @@ CustomTableModel.
    :language: python
    :linenos:
    :emphasize-lines: 12-17
-   :lines: 40-
+   :lines: 3-
 
 You also need minor changes to the :code:`main_window.py` and
 :code:`main.py` from chapter 3 to include the Widget inside the
@@ -59,12 +59,12 @@ In the following snippets you'll see those changes highlighted:
 .. literalinclude:: datavisualize4/main_window.py
    :language: python
    :linenos:
-   :lines: 40-
+   :lines: 3-
    :emphasize-lines: 8,11
 
 .. literalinclude:: datavisualize4/main.py
    :language: python
    :linenos:
-   :lines: 40-
+   :lines: 3-
    :emphasize-lines: 46-47
 

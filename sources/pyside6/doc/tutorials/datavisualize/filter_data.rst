@@ -23,7 +23,7 @@ The following script filters and formats the CSV data as described earlier:
 .. literalinclude:: datavisualize2/main.py
    :language: python
    :linenos:
-   :lines: 40-
+   :lines: 3-
 
 Now that you have a tuple of QDateTime and float data, try improving the
 output further. That's what you'll learn in the following chapters.

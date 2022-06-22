@@ -140,7 +140,7 @@ Look at this new example, with more widgets components:
 
 .. literalinclude:: widgetstyling.py
    :linenos:
-   :lines: 59-81
+   :lines: 22-44
 
 This displays a two column widget, with a `QListWidget` on the left and a
 `QLabel` and a `QPushButton` on the right. It looks like this when you run the

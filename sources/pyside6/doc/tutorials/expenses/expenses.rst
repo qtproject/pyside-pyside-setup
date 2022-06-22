@@ -43,14 +43,14 @@ You could do that by defining a class that inherits from `QMainWindow`.
 
 .. literalinclude:: steps/01-expenses.py
    :linenos:
-   :lines: 45-59
+   :lines: 8-22
    :emphasize-lines: 1-4
 
 Now that our class is defined, create an instance of it and call `show()`.
 
 .. literalinclude:: steps/01-expenses.py
    :linenos:
-   :lines: 45-59
+   :lines: 8-22
    :emphasize-lines: 10-12
 
 Menu bar
@@ -61,7 +61,7 @@ to call the method `menuBar()` and populate it inside the `MainWindow` class.
 
 .. literalinclude:: steps/02-expenses.py
    :linenos:
-   :lines: 46-58
+   :lines: 9-21
    :emphasize-lines: 6
 
 Notice that the code snippet adds a *File* menu with the *Exit* option only.
@@ -89,7 +89,7 @@ in the case of a `QAction`, the signal `triggered` can be used:
 
 .. literalinclude:: steps/03-expenses.py
    :linenos:
-   :lines: 56-65
+   :lines: 19-28
    :emphasize-lines: 4, 8-10
 
 Notice that the decorator `@Slot()` is required for each slot you declare to properly
@@ -107,13 +107,13 @@ Additionally, you will define example data to visualize later.
 
 .. literalinclude:: steps/04-expenses.py
    :linenos:
-   :lines: 46-53
+   :lines: 9-16
 
 With the `Widget` class in place, modify `MainWindow`'s initialization code
 
 .. literalinclude:: steps/04-expenses.py
    :linenos:
-   :lines: 80-84
+   :lines: 43-47
 
 Window layout
 -------------
@@ -130,7 +130,7 @@ will add this procedure to the `Widget` constructor.
 
 .. literalinclude:: steps/05-expenses.py
    :linenos:
-   :lines: 48-73
+   :lines: 11-36
 
 As you can see, the code also includes a `QHBoxLayout` that provides the container to place widgets
 horizontally.
@@ -143,7 +143,7 @@ displayed below.
 
 .. literalinclude:: steps/05-expenses.py
    :linenos:
-   :lines: 75-81
+   :lines: 38-44
 
 Having this process on a separate method is a good practice to leave the constructor more readable,
 and to split the main functions of the class in independent processes.
@@ -161,7 +161,7 @@ elements vertically inside a layout.
 
 .. literalinclude:: steps/06-expenses.py
    :linenos:
-   :lines: 64-80
+   :lines: 27-43
 
 Leaving the table on the left side and these newly included widgets to the right side
 will be just a matter to add a layout to our main `QHBoxLayout` as you saw in the previous
@@ -169,7 +169,7 @@ example:
 
 .. literalinclude:: steps/06-expenses.py
    :linenos:
-   :lines: 42-47
+   :lines: 5-10
 
 The next step will be connecting those new buttons to slots.
 
@@ -183,7 +183,7 @@ documentation <https://doc.qt.io/qtforpython/PySide6/QtWidgets/QAbstractButton.h
 
 .. literalinclude:: steps/07-expenses.py
    :linenos:
-   :lines: 92-95
+   :lines: 55-58
 
 As you can see on the previous lines, we are connecting each *clicked* signal to different slots.
 In this example slots are normal class methods in charge of perform a determined task associated
@@ -192,7 +192,7 @@ that way PySide6 knows internally how to register them into Qt.
 
 .. literalinclude:: steps/07-expenses.py
    :linenos:
-   :lines: 100-129
+   :lines: 63-92
    :emphasize-lines: 2,16,28
 
 Since these slots are methods, we can access the class variables, like our `QTableWidget` to
@@ -227,13 +227,13 @@ for your current application:
 
 .. literalinclude:: steps/08-expenses.py
    :linenos:
-   :lines: 99-100
+   :lines: 62-63
 
 The content of the *check_disable* slot will be really simple:
 
 .. literalinclude:: steps/08-expenses.py
    :linenos:
-   :lines: 119-124
+   :lines: 82-87
 
 You have two options, write a verification based on the current value
 of the string you retrieve, or manually get the whole content of both
@@ -255,14 +255,14 @@ side of your application.
 
 .. literalinclude:: steps/09-expenses.py
    :linenos:
-   :lines: 66-68
+   :lines: 29-31
 
 Additionally the order of how you include widgets to the right
 `QVBoxLayout` will also change.
 
 .. literalinclude:: steps/09-expenses.py
    :linenos:
-   :lines: 81-91
+   :lines: 44-54
    :emphasize-lines: 9
 
 Notice that before we had a line with `self.right.addStretch()`
@@ -279,7 +279,7 @@ to a slot that creates a chart and includes it into your `QChartView`.
 
 .. literalinclude:: steps/10-expenses.py
    :linenos:
-   :lines: 103-109
+   :lines: 66-72
    :emphasize-lines: 6
 
 That is nothing new, since you already did it for the other buttons,
@@ -288,7 +288,7 @@ your `QChartView`.
 
 .. literalinclude:: steps/10-expenses.py
    :linenos:
-   :lines: 139-151
+   :lines: 102-114
 
 The following steps show how to fill a `QPieSeries`:
 

@@ -153,7 +153,7 @@ demonstrating some of these differences:
 
 .. literalinclude:: hello_world_ex.py
    :linenos:
-   :lines: 40-
+   :lines: 3-
 
 .. note:: The ``if`` block is just a good practice when
    developing a Python application. It lets the Python file

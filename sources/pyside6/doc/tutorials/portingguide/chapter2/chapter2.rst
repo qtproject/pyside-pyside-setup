@@ -12,7 +12,7 @@ editor for foreign key fields. To begin with, create
 .. literalinclude:: bookdelegate.py
    :language: python
    :linenos:
-   :lines: 40-47
+   :lines: 3-10
 
 After the necessary ``import`` statements, port the
 constructor code for the ``BookDelegate`` class. Both
@@ -26,7 +26,7 @@ C++ version
 .. literalinclude:: bookdelegate.cpp
    :language: c++
    :linenos:
-   :lines: 54-59
+   :lines: 17-22
 
 Python version
 ---------------
@@ -34,7 +34,7 @@ Python version
 .. literalinclude:: bookdelegate.py
    :language: python
    :linenos:
-   :lines: 47-54
+   :lines: 10-17
 
 .. note:: The Python version loads the ``QPixmap`` using
    the absolute path of ``star.png`` in the local
@@ -53,7 +53,7 @@ C++ version
 .. literalinclude:: bookdelegate.cpp
    :language: c++
    :linenos:
-   :lines: 59-
+   :lines: 22-
 
 Python version
 ---------------
@@ -61,7 +61,7 @@ Python version
 .. literalinclude:: bookdelegate.py
    :language: python
    :linenos:
-   :lines: 55-
+   :lines: 18-
 
 Now that the delegate is in place, run the following
 ``main.py`` to see how the data is presented:
@@ -69,7 +69,7 @@ Now that the delegate is in place, run the following
 .. literalinclude:: main.py
    :language: python
    :linenos:
-   :lines: 40-
+   :lines: 3-
 
 Here is how the application will look when you run it:
 
