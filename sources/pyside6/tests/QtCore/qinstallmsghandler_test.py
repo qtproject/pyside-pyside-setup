@@ -37,9 +37,9 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import (QLibraryInfo, QtCriticalMsg, QtDebugMsg, QtInfoMsg,
+from PySide6.QtCore import (QLibraryInfo, QtMsgType,
                             QMessageLogContext,
-                            QtWarningMsg, qCritical, qFormatLogMessage, qDebug,
+                            qCritical, qFormatLogMessage, qDebug,
                             qInstallMessageHandler, qWarning)
 
 
@@ -81,18 +81,18 @@ class QInstallMsgHandlerTest(unittest.TestCase):
         rethandler = qInstallMessageHandler(handler)
         if QLibraryInfo.isDebugBuild():
             qDebug("Test Debug")
-            self.assertEqual(param[0], QtDebugMsg)
+            self.assertEqual(param[0], QtMsgType.QtDebugMsg)
             self.assertEqual(param[2], "Test Debug")
         qWarning("Test Warning")
-        self.assertEqual(param[0], QtWarningMsg)
+        self.assertEqual(param[0], QtMsgType.QtWarningMsg)
         self.assertEqual(param[2], "Test Warning")
         qCritical("Test Critical")
-        self.assertEqual(param[0], QtCriticalMsg)
+        self.assertEqual(param[0], QtMsgType.QtCriticalMsg)
         self.assertEqual(param[2], "Test Critical")
 
     def testFormat(self):
         ctx = QMessageLogContext()
-        s = qFormatLogMessage(QtInfoMsg, ctx, 'bla')
+        s = qFormatLogMessage(QtMsgType.QtInfoMsg, ctx, 'bla')
         self.assertTrue(s)
 
 

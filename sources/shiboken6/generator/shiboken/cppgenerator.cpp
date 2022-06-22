@@ -4441,8 +4441,10 @@ void CppGenerator::writeClassDefinition(TextStream &s,
     AbstractMetaFunctionCList ctors;
     const auto &allCtors = metaClass->queryFunctions(FunctionQueryOption::AnyConstructor);
     for (const auto &f : allCtors) {
-        if (!f->isPrivate() && !f->isModifiedRemoved() && !classContext.forSmartPointer())
+        if (!f->isPrivate() && !f->isModifiedRemoved() && !classContext.forSmartPointer()
+            && f->functionType() != AbstractMetaFunction::MoveConstructorFunction) {
             ctors.append(f);
+        }
     }
 
     if (!metaClass->baseClass())

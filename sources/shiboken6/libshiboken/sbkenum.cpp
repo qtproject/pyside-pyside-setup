@@ -654,7 +654,7 @@ bool createGlobalEnumItem(PyTypeObject *enumType, PyObject *module, const char *
     PyObject *enumItem = createEnumItem(enumType, itemName, itemValue);
     if (!enumItem)
         return false;
-    int ok = PyModule_AddObject(module, itemName, enumItem);
+    int ok = useOldEnum ? PyModule_AddObject(module, itemName, enumItem) : true;
     Py_DECREF(enumItem);
     return ok >= 0;
 }
@@ -665,7 +665,7 @@ bool createScopedEnumItem(PyTypeObject *enumType, PyTypeObject *scope,
     PyObject *enumItem = createEnumItem(enumType, itemName, itemValue);
     if (!enumItem)
         return false;
-    int ok = PyDict_SetItemString(scope->tp_dict, itemName, enumItem);
+    int ok = useOldEnum ? PyDict_SetItemString(scope->tp_dict, itemName, enumItem) : true;
     Py_DECREF(enumItem);
     return ok >= 0;
 }
@@ -1031,13 +1031,6 @@ PyTypeObject *morphLastEnumToPython()
     PyObject_SetAttr(obNewType, PyMagicName::qualname(), qual_name);
     AutoDecRef module(PyObject_GetAttr(obEnumType, PyMagicName::module()));
     PyObject_SetAttr(obNewType, PyMagicName::module(), module);
-    // As a last step, fix the item entries in the enclosing object.
-    pos = 0;
-    while (PyDict_Next(values, &pos, &key, &value)) {
-        AutoDecRef entry(PyObject_GetAttr(obNewType, key));
-        if (PyObject_SetAttr(lec.scopeOrModule, key, entry) < 0)
-            return nullptr;
-    }
     // Protect against double initialization
     setp->replacementType = newType;
 #if PY_VERSION_HEX < 0x03080000
