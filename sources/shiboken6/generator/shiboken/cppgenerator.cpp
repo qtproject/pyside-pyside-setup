@@ -1304,6 +1304,37 @@ QPair<QString, QChar> CppGenerator::virtualMethodNativeArg(const AbstractMetaFun
     return {ac.toString(), u'N'};
 }
 
+static const char PYTHON_ARGS_ARRAY[] = "pyArgArray";
+
+void CppGenerator::writeVirtualMethodNativeVectorCallArgs(TextStream &s,
+                                                          const AbstractMetaFunctionCPtr &func,
+                                                          const AbstractMetaArgumentList &arguments,
+                                                          const QList<int> &invalidateArgs) const
+{
+    Q_ASSERT(!arguments.isEmpty());
+    s << "PyObject *" << PYTHON_ARGS_ARRAY <<'[' << arguments.size() << "] = {\n" << indent;
+    const qsizetype last = arguments.size() - 1;
+    for (qsizetype i = 0; i <= last; ++i) {
+        const AbstractMetaArgument &arg = arguments.at(i);
+        if (func->hasConversionRule(TypeSystem::TargetLangCode, arg.argumentIndex() + 1)) {
+            s << arg.name() + CONV_RULE_OUT_VAR_SUFFIX;
+        } else {
+            writeToPythonConversion(s, arg.type(), func->ownerClass(), arg.name());
+        }
+        if (i < last)
+            s << ',';
+        s << '\n';
+    }
+    s << outdent << "};\n";
+
+    if (!invalidateArgs.isEmpty())
+        s << '\n';
+    for (int index : invalidateArgs) {
+        s << "const bool invalidateArg" << index << " = " << PYTHON_ARGS_ARRAY <<
+          '[' << index - 1 << "]->ob_refcnt == 1;\n";
+    }
+}
+
 void CppGenerator::writeVirtualMethodNativeArgs(TextStream &s,
                                                 const AbstractMetaFunctionCPtr &func,
                                                 const AbstractMetaArgumentList &arguments,
@@ -1336,6 +1367,16 @@ static bool isArgumentNotRemoved(const AbstractMetaArgument &a)
 {
     return !a.isModifiedRemoved();
 }
+
+// PyObject_Vectorcall(): since 3.9
+static const char vectorCallCondition[] =
+    "#if !defined(Py_LIMITED_API) && PY_VERSION_HEX >= 0x03090000\n";
+
+// PyObject_CallNoArgs(): since 3.9, stable API since 3.10
+static const char noArgsCallCondition[] =
+    "#if (defined(Py_LIMITED_API) && Py_LIMITED_API >= 0x030A0000) || (!defined(Py_LIMITED_API) && PY_VERSION_HEX >= 0x03090000)\n";
+static const char inverseNoArgsCallCondition[] =
+    "#if (defined(Py_LIMITED_API) && Py_LIMITED_API < 0x030A0000) || (!defined(Py_LIMITED_API) && PY_VERSION_HEX < 0x03090000)\n";
 
 void CppGenerator::writeVirtualMethodNative(TextStream &s,
                                             const AbstractMetaFunctionCPtr &func,
@@ -1449,7 +1490,27 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
             s << sbkUnusedVariableCast(it->name());
     }
     arguments.erase(removedEnd, arguments.end());
+
+    // FIXME PYSIDE-7: new functions PyObject_Vectorcall() (since 3.9) and
+    // PyObject_CallNoArgs() (since 3.9, stable API since 3.10) might have
+    // become part of the stable API?
+
+    // Code snips might expect the args tuple, don't generate new code
+    const bool generateNewCall = snips.isEmpty();
+    const qsizetype argCount = arguments.size();
+    const char *newCallCondition = argCount == 0 ? noArgsCallCondition : vectorCallCondition;
+    if (generateNewCall) {
+        if (argCount > 0) {
+            s << newCallCondition;
+            writeVirtualMethodNativeVectorCallArgs(s, func, arguments, invalidateArgs);
+            s << "#else\n";
+        } else {
+            s << inverseNoArgsCallCondition;
+        }
+    }
     writeVirtualMethodNativeArgs(s, func, arguments, invalidateArgs);
+    if (generateNewCall)
+        s << "#endif\n";
     s << '\n';
 
     if (!snips.isEmpty()) {
@@ -1465,6 +1526,23 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
     qsizetype returnIndirections = 0;
 
     if (!func->injectedCodeCallsPythonOverride()) {
+        if (generateNewCall) {
+            s << newCallCondition << "Shiboken::AutoDecRef " << PYTHON_RETURN_VAR << '(';
+            if (argCount > 0) {
+                s << "PyObject_Vectorcall(" << PYTHON_OVERRIDE_VAR << ", "
+                    << PYTHON_ARGS_ARRAY << ", " << argCount << ", nullptr));\n";
+                for (int argIndex : qAsConst(invalidateArgs)) {
+                    s << "if (invalidateArg" << argIndex << ")\n" << indent
+                        << "Shiboken::Object::invalidate(" << PYTHON_ARGS_ARRAY
+                        << '[' << (argIndex - 1) << "]);\n" << outdent;
+                    }
+                for (qsizetype i = 0, size = arguments.size(); i < size; ++i)
+                    s << "Py_DECREF(" << PYTHON_ARGS_ARRAY << '[' << i << "]);\n";
+            } else {
+                s << "PyObject_CallNoArgs(" << PYTHON_OVERRIDE_VAR << "));\n";
+            }
+            s << "#else\n";
+        }
         s << "Shiboken::AutoDecRef " << PYTHON_RETURN_VAR << "(PyObject_Call("
             << PYTHON_OVERRIDE_VAR << ", " << PYTHON_ARGS << ", nullptr));\n";
 
@@ -1473,6 +1551,8 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
                 << "Shiboken::Object::invalidate(PyTuple_GET_ITEM(" << PYTHON_ARGS
                 << ", " << (argIndex - 1) << "));\n" << outdent;
         }
+        if (generateNewCall)
+            s << "#endif\n";
 
         s << "if (" << PYTHON_RETURN_VAR << ".isNull()) {\n" << indent
             << "// An error happened in python code!\n"

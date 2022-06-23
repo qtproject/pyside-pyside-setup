@@ -73,6 +73,10 @@ private:
     static QPair<QString, QChar>
         virtualMethodNativeArg(const AbstractMetaFunctionCPtr &func,
                                const AbstractMetaArgument &arg);
+    void writeVirtualMethodNativeVectorCallArgs(TextStream &s,
+                                                const AbstractMetaFunctionCPtr &func,
+                                                const AbstractMetaArgumentList &arguments,
+                                                const QList<int> &invalidateArgs) const;
     void writeVirtualMethodNativeArgs(TextStream &s,
                                       const AbstractMetaFunctionCPtr &func,
                                       const AbstractMetaArgumentList &arguments,
