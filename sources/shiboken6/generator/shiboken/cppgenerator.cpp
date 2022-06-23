@@ -1009,13 +1009,6 @@ Shiboken::Object::destroy(wrapper, this);
 )" << outdent << "}\n";
 }
 
-static bool allArgumentsRemoved(const AbstractMetaFunctionCPtr& func)
-{
-    const AbstractMetaArgumentList &arguments = func->arguments();
-    return std::all_of(arguments.cbegin(), arguments.cend(),
-                       [](const AbstractMetaArgument &a) { return a.isModifiedRemoved(); });
-}
-
 // Return type for error messages when getting invalid types from virtual
 // methods implemented in Python in C++ wrappers
 QString CppGenerator::getVirtualFunctionReturnTypeName(const AbstractMetaFunctionCPtr &func) const
@@ -1150,6 +1143,60 @@ QString CppGenerator::virtualMethodReturn(TextStream &s, const ApiExtractorResul
            + u';';
 }
 
+void CppGenerator::writeVirtualMethodNativeArgs(TextStream &s,
+                                                const AbstractMetaFunctionCPtr &func,
+                                                const AbstractMetaArgumentList &arguments,
+                                                const QList<int> &invalidateArgs) const
+{
+    s << "Shiboken::AutoDecRef " << PYTHON_ARGS << '(';
+    if (arguments.isEmpty()) {
+        s << "PyTuple_New(0));\n";
+        return;
+    }
+    QStringList argConversions;
+    for (const AbstractMetaArgument &arg : arguments) {
+        const auto &argType = arg.type();
+        const auto *argTypeEntry = argType.typeEntry();
+        bool convert = argTypeEntry->isObject()
+                        || argTypeEntry->isValue()
+                        || argType.isValuePointer()
+                        || argType.isNativePointer()
+                        || argTypeEntry->isFlags()
+                        || argTypeEntry->isEnum()
+                        || argTypeEntry->isContainer()
+                        || argType.referenceType() == LValueReference;
+        if (!convert && argTypeEntry->isPrimitive()) {
+            const auto *pte = argTypeEntry->asPrimitive()->basicReferencedTypeEntry();
+            convert = !formatUnits().contains(pte->name());
+        }
+        StringStream ac(TextStream::Language::Cpp);
+        if (!func->conversionRule(TypeSystem::TargetLangCode,
+                                  arg.argumentIndex() + 1).isEmpty()) {
+            // Has conversion rule.
+            ac << arg.name() + CONV_RULE_OUT_VAR_SUFFIX;
+        } else {
+            QString argName = arg.name();
+            if (convert)
+                writeToPythonConversion(ac, arg.type(), func->ownerClass(), argName);
+            else
+                ac << argName;
+        }
+        argConversions << ac.toString();
+    }
+    s << "Py_BuildValue(\"(" << getFormatUnitString(func, false) << ")\",\n"
+        << indent << argConversions.join(u",\n"_s) << outdent << "\n));\n";
+
+    for (int index : qAsConst(invalidateArgs)) {
+        s << "bool invalidateArg" << index << " = PyTuple_GET_ITEM(" << PYTHON_ARGS
+            << ", " << index - 1 << ")->ob_refcnt == 1;\n";
+    }
+}
+
+static bool isArgumentRemoved(const AbstractMetaArgument &a)
+{
+    return a.isModifiedRemoved();
+}
+
 void CppGenerator::writeVirtualMethodNative(TextStream &s,
                                             const AbstractMetaFunctionCPtr &func,
                                             int cacheIndex) const
@@ -1237,53 +1284,6 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
 
     writeConversionRule(s, func, TypeSystem::TargetLangCode, false);
 
-    s << "Shiboken::AutoDecRef " << PYTHON_ARGS << "(";
-
-    if (func->arguments().isEmpty() || allArgumentsRemoved(func)) {
-        s << "PyTuple_New(0));\n";
-    } else {
-        QStringList argConversions;
-        const AbstractMetaArgumentList &arguments = func->arguments();
-        for (const AbstractMetaArgument &arg : arguments) {
-            if (arg.isModifiedRemoved())
-                continue;
-
-            const auto &argType = arg.type();
-            const auto *argTypeEntry = argType.typeEntry();
-            bool convert = argTypeEntry->isObject()
-                            || argTypeEntry->isValue()
-                            || argType.isValuePointer()
-                            || argType.isNativePointer()
-                            || argTypeEntry->isFlags()
-                            || argTypeEntry->isEnum()
-                            || argTypeEntry->isContainer()
-                            || argType.referenceType() == LValueReference;
-
-            if (!convert && argTypeEntry->isPrimitive()) {
-                const auto *pte = argTypeEntry->asPrimitive()->basicReferencedTypeEntry();
-                convert = !formatUnits().contains(pte->name());
-            }
-
-            StringStream ac(TextStream::Language::Cpp);
-            if (!func->conversionRule(TypeSystem::TargetLangCode,
-                                      arg.argumentIndex() + 1).isEmpty()) {
-                // Has conversion rule.
-                ac << arg.name() + CONV_RULE_OUT_VAR_SUFFIX;
-            } else {
-                QString argName = arg.name();
-                if (convert)
-                    writeToPythonConversion(ac, arg.type(), func->ownerClass(), argName);
-                else
-                    ac << argName;
-            }
-
-            argConversions << ac.toString();
-        }
-
-        s << "Py_BuildValue(\"(" << getFormatUnitString(func, false) << ")\",\n"
-            << indent << argConversions.join(u",\n"_s) << outdent << "\n));\n";
-    }
-
     bool invalidateReturn = false;
     QList<int> invalidateArgs;
     for (const FunctionModification &funcMod : func->modifications()) {
@@ -1294,17 +1294,17 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
                     invalidateReturn = true;
             } else {
                 const int actualIndex = func->actualArgumentIndex(index - 1) + 1;
-                if (argMod.resetAfterUse() && !invalidateArgs.contains(actualIndex)) {
+                if (argMod.resetAfterUse() && !invalidateArgs.contains(actualIndex))
                     invalidateArgs.append(actualIndex);
-                    s << "bool invalidateArg" << actualIndex
-                        << " = PyTuple_GET_ITEM(" << PYTHON_ARGS << ", "
-                        << actualIndex - 1 << ")->ob_refcnt == 1;\n";
-                }
             }
         }
     }
     std::sort(invalidateArgs.begin(), invalidateArgs.end());
 
+    auto arguments = func->arguments();
+    auto removedEnd = std::remove_if(arguments.begin(), arguments.end(), isArgumentRemoved);
+    arguments.erase(removedEnd, arguments.end());
+    writeVirtualMethodNativeArgs(s, func, arguments, invalidateArgs);
     s << '\n';
 
     if (!snips.isEmpty()) {

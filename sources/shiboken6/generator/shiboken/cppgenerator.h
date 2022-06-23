@@ -69,6 +69,10 @@ private:
     void writeDestructorNative(TextStream &s, const GeneratorContext &classContext) const;
 
     QString getVirtualFunctionReturnTypeName(const AbstractMetaFunctionCPtr &func) const;
+    void writeVirtualMethodNativeArgs(TextStream &s,
+                                      const AbstractMetaFunctionCPtr &func,
+                                      const AbstractMetaArgumentList &arguments,
+                                      const QList<int> &invalidateArgs) const;
     void writeVirtualMethodNative(TextStream &s, const AbstractMetaFunctionCPtr &func,
                                   int cacheIndex) const;
     void writeVirtualMethodCppCall(TextStream &s, const AbstractMetaFunctionCPtr &func,
