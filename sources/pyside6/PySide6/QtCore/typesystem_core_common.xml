@@ -3213,25 +3213,25 @@
     <include file-name="qloggingcategory.h" location="global" />
     </extra-includes>
     <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qloggingcategory_to_cpp">
-      qCDebug(*category, %2);
+      qCDebug(*category, "%s", %2);
     </inject-code>
   </add-function>
 
   <add-function signature="qCCritical(PyObject *, const char *)">
     <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qloggingcategory_to_cpp">
-      qCCritical(*category, %2);
+      qCCritical(*category, "%s", %2);
     </inject-code>
   </add-function>
 
   <add-function signature="qCInfo(PyObject *, const char *)">
     <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qloggingcategory_to_cpp">
-      qCInfo(*category, %2);
+      qCInfo(*category, "%s", %2);
     </inject-code>
   </add-function>
 
   <add-function signature="qCWarning(PyObject *, const char *)">
     <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qloggingcategory_to_cpp">
-      qCWarning(*category, %2);
+      qCWarning(*category, "%s", %2);
     </inject-code>
   </add-function>
 
