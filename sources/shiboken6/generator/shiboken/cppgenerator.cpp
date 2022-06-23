@@ -1285,21 +1285,26 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
     }
 
     bool invalidateReturn = false;
-    QSet<int> invalidateArgs;
+    QList<int> invalidateArgs;
     for (const FunctionModification &funcMod : func->modifications()) {
         for (const ArgumentModification &argMod : funcMod.argument_mods()) {
             const int index = argMod.index();
-            if (argMod.resetAfterUse() && !invalidateArgs.contains(index)) {
-                invalidateArgs.insert(index);
-                s << "bool invalidateArg" << index
-                    << " = PyTuple_GET_ITEM(" << PYTHON_ARGS << ", "
-                    << index - 1 << ")->ob_refcnt == 1;\n";
-            } else if (index == 0 &&
-                       argMod.targetOwnerShip() == TypeSystem::CppOwnership) {
-                invalidateReturn = true;
+            if (index == 0) {
+                if (argMod.targetOwnerShip() == TypeSystem::CppOwnership)
+                    invalidateReturn = true;
+            } else {
+                const int actualIndex = func->actualArgumentIndex(index - 1) + 1;
+                if (argMod.resetAfterUse() && !invalidateArgs.contains(actualIndex)) {
+                    invalidateArgs.append(actualIndex);
+                    s << "bool invalidateArg" << actualIndex
+                        << " = PyTuple_GET_ITEM(" << PYTHON_ARGS << ", "
+                        << actualIndex - 1 << ")->ob_refcnt == 1;\n";
+                }
             }
         }
     }
+    std::sort(invalidateArgs.begin(), invalidateArgs.end());
+
     s << '\n';
 
     if (!snips.isEmpty()) {

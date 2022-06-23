@@ -555,6 +555,18 @@ int AbstractMetaFunction::actualMinimumArgumentCount() const
     return count;
 }
 
+int AbstractMetaFunction::actualArgumentIndex(int index) const
+{
+    if (index < 0 || index >= int(d->m_arguments.size()))
+        throw Exception(msgArgumentIndexOutOfRange(this, index));
+    int result = 0;
+    for (int i = 0; i < index; ++i) {
+        if (!d->m_arguments.at(i).isModifiedRemoved())
+            ++result;
+    }
+    return result;
+}
+
 // Returns reference counts for argument at idx, or all arguments if idx == -2
 QList<ReferenceCount> AbstractMetaFunction::referenceCounts(const AbstractMetaClass *cls, int idx) const
 {

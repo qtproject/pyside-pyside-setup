@@ -263,6 +263,8 @@ public:
     void setArguments(const AbstractMetaArgumentList &arguments);
     void addArgument(const AbstractMetaArgument &argument);
     int actualMinimumArgumentCount() const;
+    // Return the argument index accounting for the isModifiedRemoved arguments [0..n-1]
+    int actualArgumentIndex(int index) const;
 
     bool isDeprecated() const;
     bool isDestructor() const { return functionType() == DestructorFunction; }

@@ -58,6 +58,14 @@ QString msgNoFunctionForModification(const AbstractMetaClass *klass,
     return result;
 }
 
+QString msgArgumentIndexOutOfRange(const AbstractMetaFunction *func, int index)
+{
+    QString result;
+    QTextStream str(&result);
+    str <<"Index "  << index << " out of range for " << func->classQualifiedSignature() << '.';
+    return result;
+}
+
 QString msgTypeModificationFailed(const QString &type, int n,
                                   const AbstractMetaFunction *func,
                                   const QString &why)

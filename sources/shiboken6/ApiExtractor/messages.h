@@ -36,6 +36,8 @@ QString msgUnnamedArgumentDefaultExpression(const AbstractMetaClass *context,
                                             int n, const QString &className,
                                             const AbstractMetaFunction *f);
 
+QString msgArgumentIndexOutOfRange(const AbstractMetaFunction *func, int index);
+
 QString msgNoFunctionForModification(const AbstractMetaClass *klass,
                                      const QString &signature,
                                      const QString &originalSignature,
