@@ -102,6 +102,7 @@ public:
 
     // returns true if the type was used as a smart pointer
     bool isSmartPointer() const { return typeUsagePattern() == SmartPointerPattern; }
+    bool isUniquePointer() const;
 
     // returns true if the type was used as a flag
     bool isFlags() const { return typeUsagePattern() == FlagsPattern; }

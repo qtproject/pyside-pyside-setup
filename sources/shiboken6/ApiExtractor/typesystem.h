@@ -82,6 +82,7 @@ public:
     bool isNamespace() const;
     bool isContainer() const;
     bool isSmartPointer() const;
+    bool isUniquePointer() const;
     bool isArray() const;
     bool isTemplateArgument() const;
     bool isVoid() const;

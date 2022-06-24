@@ -799,6 +799,11 @@ bool AbstractMetaType::isObjectType() const
     return d->m_typeEntry->isObject();
 }
 
+bool AbstractMetaType::isUniquePointer() const
+{
+    return isSmartPointer() && d->m_typeEntry->isUniquePointer();
+}
+
 bool AbstractMetaType::isPointer() const
 {
     return !d->m_indirections.isEmpty()

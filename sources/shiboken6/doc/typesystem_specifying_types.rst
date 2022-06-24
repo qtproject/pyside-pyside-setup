@@ -629,7 +629,7 @@ smart-pointer-type
         <typesystem>
             <smart-pointer-type name="..."
                 since="..."
-                type="shared | handle | value-handle"
+                type="shared | handle | value-handle | unique"
                 getter="..."
                 ref-count-method="..."
                 value-check-method="..."
@@ -659,6 +659,10 @@ smart-pointer-type
        A handle which has a getter function returning a value
        (``T`` instead of ``T *`` as for the other types).
        It can be used for ``std::optional``.
+    *unique*
+       A standard, unique pointer (``std::unique_ptr``) or a similar
+       movable pointer.
+       Specifying the ``reset-method`` attribute is required for this work.
 
     The example below shows an entry for a ``std::shared_ptr``:
 

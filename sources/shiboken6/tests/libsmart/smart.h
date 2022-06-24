@@ -10,5 +10,6 @@
 #include "smart_registry.h"
 #include "stdsharedptrtestbench.h"
 #include "stdoptionaltestbench.h"
+#include "stduniqueptrtestbench.h"
 
 #endif // SMART_H

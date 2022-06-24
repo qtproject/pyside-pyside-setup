@@ -20,7 +20,11 @@ ${CMAKE_CURRENT_BINARY_DIR}/smart/std_shared_ptr_int_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/smart/std_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/smart/std_optional_int_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/smart/std_optional_integer_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/smart/std_unique_ptr_integer_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/smart/std_unique_ptr_int_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/smart/stdoptionaltestbench_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/smart/stduniqueptrtestbench_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/smart/stduniqueptrvirtualmethodtester_wrapper.cpp
 )
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/smart-binding.txt.in"

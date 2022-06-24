@@ -92,6 +92,7 @@ enum class QtMetaTypeRegistration
 
 enum class SmartPointerType {
     Shared,
+    Unique,
     Handle,
     ValueHandle
 };

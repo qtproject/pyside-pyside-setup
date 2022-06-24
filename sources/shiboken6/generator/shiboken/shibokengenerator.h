@@ -311,6 +311,8 @@ protected:
     /// Return the format character for C++->Python->C++ conversion (Py_BuildValue)
     static const QHash<QString, QChar> &formatUnits();
 
+    static QString stdMove(const QString &c);
+
 private:
     static QString getModuleHeaderFileBaseName(const QString &moduleName = QString());
     static QString cpythonGetterFunctionName(const QString &name,

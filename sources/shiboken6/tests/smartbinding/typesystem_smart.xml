@@ -54,6 +54,13 @@
             <include file-name="memory" location="global"/>
         </smart-pointer-type>
 
+        <smart-pointer-type name="unique_ptr" type="unique" getter="get"
+                            value-check-method="operator bool"
+                            reset-method="reset"
+                            instantiations="Integer,int">
+            <include file-name="memory" location="global"/>
+        </smart-pointer-type>
+
         <smart-pointer-type name="optional" type="value-handle" getter="value"
                             value-check-method="has_value"
                             instantiations="Integer,int">
@@ -63,5 +70,8 @@
     </namespace-type>
     <object-type name="StdSharedPtrTestBench"/>
     <object-type name="StdSharedPtrVirtualMethodTester"/>
+
+    <object-type name="StdUniquePtrTestBench"/>
+    <object-type name="StdUniquePtrVirtualMethodTester"/>
 
 </typesystem>

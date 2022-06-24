@@ -398,6 +398,7 @@ ENUM_LOOKUP_BEGIN(TypeSystem::SmartPointerType, Qt::CaseSensitive,
                   smartPointerTypeFromAttribute)
 {
     {u"handle", TypeSystem::SmartPointerType::Handle},
+    {u"unique", TypeSystem::SmartPointerType::Unique},
     {u"value-handle", TypeSystem::SmartPointerType::ValueHandle},
     {u"shared", TypeSystem::SmartPointerType::Shared}
 };
@@ -1391,6 +1392,11 @@ SmartPointerTypeEntry *
                                               u"smart-pointer-type"_s);
     if (!errorString.isEmpty()) {
         m_error = errorString;
+        return nullptr;
+    }
+
+    if (smartPointerType == TypeSystem::SmartPointerType::Unique && resetMethod.isEmpty()) {
+        m_error = u"Unique pointers require a reset() method."_s;
         return nullptr;
     }
 

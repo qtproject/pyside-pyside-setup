@@ -4,6 +4,7 @@ set(libsmart_SRC
 smart.cpp
 stdsharedptrtestbench.cpp
 stdoptionaltestbench.cpp
+stduniqueptrtestbench.cpp
 )
 
 add_library(libsmart SHARED ${libsmart_SRC})

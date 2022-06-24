@@ -1120,10 +1120,14 @@ void ShibokenGenerator::writeArgumentNames(TextStream &s,
         const int index = argument.argumentIndex() + 1;
         if (options.testFlag(Generator::SkipRemovedArguments) && argument.isModifiedRemoved())
             continue;
+        const auto &type = argument.type();
+        if (argCount > 0)
+            s << ", ";
+        const bool isVirtualCall = options.testFlag(Option::VirtualCall);
+        const bool useStdMove = isVirtualCall && type.isUniquePointer() && type.passByValue();
+        s << (useStdMove ? stdMove(argument.name()) : argument.name());
 
-        s << ((argCount > 0) ? ", " : "") << argument.name();
-
-        if (((options & Generator::VirtualCall) == 0)
+        if (!isVirtualCall
             && (func->hasConversionRule(TypeSystem::NativeCode, index)
                 || func->hasConversionRule(TypeSystem::TargetLangCode, index))
             && !func->isConstructor()) {
@@ -2282,4 +2286,9 @@ void ShibokenGenerator::replaceTemplateVariables(QString &code,
         writeFunctionArguments(aux_stream, func, Options(SkipDefaultValues) | SkipRemovedArguments);
         code.replace(u"%ARGUMENTS"_s, aux_stream);
     }
+}
+
+QString ShibokenGenerator::stdMove(const QString &c)
+{
+    return u"std::move("_s + c + u')';
 }

@@ -299,6 +299,14 @@ bool TypeEntry::isSmartPointer() const
     return m_d->m_type == SmartPointerType;
 }
 
+bool TypeEntry::isUniquePointer() const
+{
+    if (m_d->m_type != SmartPointerType)
+        return false;
+    auto *ste = static_cast<const SmartPointerTypeEntry *>(this);
+    return ste->smartPointerType() == TypeSystem::SmartPointerType::Unique;
+}
+
 bool TypeEntry::isArray() const
 {
     return m_d->m_type == ArrayType;
@@ -2489,7 +2497,8 @@ void SmartPointerTypeEntry::formatDebug(QDebug &debug) const
 
     ComplexTypeEntry::formatDebug(debug);
     if (!d->m_instantiations.isEmpty()) {
-        debug << ", instantiations[" << d->m_instantiations.size() << "]=(";
+        debug << "type=" << d->m_type << ", instantiations["
+            << d->m_instantiations.size() << "]=(";
         for (auto i : d->m_instantiations)
             debug << i->name() << ',';
         debug << ')';

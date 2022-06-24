@@ -1673,9 +1673,19 @@ return result;)";
 
     c.clear();
 
+    const bool isUniquePointer = classContext.forSmartPointer()
+        && typeEntry->isUniquePointer();
+
+    if (isUniquePointer) {
+        c << "auto *source = reinterpret_cast<" << typeName
+            << " *>(const_cast<void *>(cppIn));\n";
+    } else {
+        c << "auto *source = reinterpret_cast<const " << typeName << " *>(cppIn);\n";
+    }
     c << "return Shiboken::Object::newObject(" << cpythonType
-        << ", new ::" << classContext.effectiveClassName()
-        << "(*reinterpret_cast<const " << typeName << " *>(cppIn)), true, true);";
+        << ", new ::" << classContext.effectiveClassName() << '('
+        << (isUniquePointer ? "std::move(*source)" : "*source")
+        << "), true, true);";
     writeCppToPythonFunction(s, c.toString(), sourceTypeName, targetTypeName);
     s << '\n';
 
@@ -1700,9 +1710,9 @@ return result;)";
             c << "*ptr = {};\n";
         else
             c << "ptr->" << resetMethod << "();\n";
+        const QString value = u'*' + cpythonWrapperCPtr(classContext.preciseType(), pyInVariable);
         c << outdent << "else\n" << indent
-            << "*ptr = *"
-            << cpythonWrapperCPtr(classContext.preciseType(), pyInVariable) << ';';
+            << "*ptr = " << (isUniquePointer ? stdMove(value) : value) << ';';
     }
 
     writePythonToCppFunction(s, c.toString(), sourceTypeName, targetTypeName);
@@ -3769,6 +3779,10 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                         userArgs.append(argName);
                     }
                 }
+                // "Pass unique ptr by value" pattern: Apply std::move()
+                auto type = arg.type();
+                if (type.isUniquePointer() && type.passByValue())
+                    userArgs.last() = stdMove(userArgs.constLast());
             }
 
             // If any argument's default value was modified the method must be called

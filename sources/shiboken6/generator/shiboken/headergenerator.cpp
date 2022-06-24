@@ -216,15 +216,19 @@ void HeaderGenerator::writeMemberFunctionWrapper(TextStream &s,
         if (i > 0)
             s << ", ";
         const AbstractMetaArgument &arg = arguments.at(i);
+        const auto &type = arg.type();
         const TypeEntry *enumTypeEntry = nullptr;
-        if (arg.type().isFlags())
-            enumTypeEntry = static_cast<const FlagsTypeEntry *>(arg.type().typeEntry())->originator();
-        else if (arg.type().isEnum())
-            enumTypeEntry = arg.type().typeEntry();
-        if (enumTypeEntry)
-            s << arg.type().cppSignature() << '(' << arg.name() << ')';
-        else
+        if (type.isFlags())
+            enumTypeEntry = static_cast<const FlagsTypeEntry *>(type.typeEntry())->originator();
+        else if (type.isEnum())
+            enumTypeEntry = type.typeEntry();
+        if (enumTypeEntry) {
+            s << type.cppSignature() << '(' << arg.name() << ')';
+        } else if (type.passByValue() && type.isUniquePointer()) {
+            s << stdMove(arg.name());
+        } else {
             s << arg.name();
+        }
     }
     s << "); }\n";
 }
