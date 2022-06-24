@@ -1538,6 +1538,8 @@
       <modify-argument index="return">
         <define-ownership class="native" owner="c++"/>
       </modify-argument>
+      <inject-code class="native" position="end" file="../glue/qtcore.cpp"
+                   snippet="qabstractitemmodel_data"/>
     </modify-function>
     <modify-function signature="headerData(int,Qt::Orientation,int)const">
       <inject-code class="native" position="end" file="../glue/qtcore.cpp"
@@ -1771,9 +1773,6 @@
       <include file-name="QStringList" location="global"/>
       <include file-name="QSize" location="global"/>
     </extra-includes>
-    <modify-function signature="data(const QModelIndex&amp;,int)const">
-      <inject-code class="native" position="end" file="../glue/qtcore.cpp" snippet="qabstractitemmodel_data"/>
-    </modify-function>
   </object-type>
   <value-type name="QUrlQuery" since="5.0"/>
 
