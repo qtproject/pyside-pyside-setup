@@ -45,8 +45,8 @@ from ..utils import (copy_icu_libs, copydir, copyfile, find_files_using_glob,
 from ..versions import PYSIDE
 
 
-def prepare_standalone_package_linux(self, vars):
-    built_modules = vars['built_modules']
+def prepare_standalone_package_linux(self, _vars):
+    built_modules = _vars['built_modules']
 
     constrain_modules = None
     copy_plugins = True
@@ -72,13 +72,13 @@ def prepare_standalone_package_linux(self, vars):
     accepted_modules.append("libicu*.so.??")
 
     copydir("{qt_lib_dir}", destination_lib_dir,
-            filter=accepted_modules,
-            recursive=False, vars=vars, force_copy_symlinks=True)
+            _filter=accepted_modules,
+            recursive=False, _vars=_vars, force_copy_symlinks=True)
 
     if should_copy_icu_libs:
         # Check if ICU libraries were copied over to the destination
         # Qt libdir.
-        resolved_destination_lib_dir = destination_lib_dir.format(**vars)
+        resolved_destination_lib_dir = destination_lib_dir.format(**_vars)
         maybe_icu_libs = find_files_using_glob(resolved_destination_lib_dir, "libicu*")
 
         # If no ICU libraries are present in the Qt libdir (like when
@@ -92,39 +92,39 @@ def prepare_standalone_package_linux(self, vars):
             copy_icu_libs(self._patchelf_path, resolved_destination_lib_dir)
 
     # Set RPATH for Qt libs.
-    self.update_rpath_for_linux_qt_libraries(destination_lib_dir.format(**vars))
+    self.update_rpath_for_linux_qt_libraries(destination_lib_dir.format(**_vars))
 
     # Patching designer to use the Qt libraries provided in the wheel
     if config.is_internal_pyside_build():
-        assistant_path = "{st_build_dir}/{st_package_name}/assistant".format(**vars)
+        assistant_path = "{st_build_dir}/{st_package_name}/assistant".format(**_vars)
         linux_patch_executable(self._patchelf_path, assistant_path)
-        designer_path = "{st_build_dir}/{st_package_name}/designer".format(**vars)
+        designer_path = "{st_build_dir}/{st_package_name}/designer".format(**_vars)
         linux_patch_executable(self._patchelf_path, designer_path)
 
     if self.is_webengine_built(built_modules):
         copydir("{qt_data_dir}/resources",
                 "{st_build_dir}/{st_package_name}/Qt/resources",
-                filter=None,
+                _filter=None,
                 recursive=False,
-                vars=vars)
+                _vars=_vars)
 
     if copy_plugins:
         is_pypy = "pypy" in self.build_classifiers
         # <qt>/plugins/* -> <setup>/{st_package_name}/Qt/plugins
         plugins_target = "{st_build_dir}/{st_package_name}/Qt/plugins"
         copydir("{qt_plugins_dir}", plugins_target,
-                filter=["*.so"],
+                _filter=["*.so"],
                 recursive=True,
-                vars=vars)
+                _vars=_vars)
         if not is_pypy:
             copydir("{install_dir}/plugins/designer",
                     f"{plugins_target}/designer",
-                    filter=["*.so"],
+                    _filter=["*.so"],
                     recursive=False,
-                    vars=vars)
+                    _vars=_vars)
 
         copied_plugins = self.get_shared_libraries_in_path_recursively(
-            plugins_target.format(**vars))
+            plugins_target.format(**_vars))
         self.update_rpath_for_linux_plugins(copied_plugins)
 
     if copy_qml:
@@ -132,16 +132,16 @@ def prepare_standalone_package_linux(self, vars):
         qml_plugins_target = "{st_build_dir}/{st_package_name}/Qt/qml"
         copydir("{qt_qml_dir}",
                 qml_plugins_target,
-                filter=None,
+                _filter=None,
                 force=False,
                 recursive=True,
                 ignore=["*.debug"],
-                vars=vars)
+                _vars=_vars)
         copied_plugins = self.get_shared_libraries_in_path_recursively(
-            qml_plugins_target.format(**vars))
+            qml_plugins_target.format(**_vars))
         self.update_rpath_for_linux_plugins(
             copied_plugins,
-            qt_lib_dir=destination_lib_dir.format(**vars),
+            qt_lib_dir=destination_lib_dir.format(**_vars),
             is_qml_plugin=True)
 
     if copy_translations:
@@ -149,14 +149,14 @@ def prepare_standalone_package_linux(self, vars):
         # <setup>/{st_package_name}/Qt/translations
         copydir("{qt_translations_dir}",
                 "{st_build_dir}/{st_package_name}/Qt/translations",
-                filter=["*.qm", "*.pak"],
+                _filter=["*.qm", "*.pak"],
                 force=False,
-                vars=vars)
+                _vars=_vars)
 
     if copy_qt_conf:
         # Copy the qt.conf file to libexec.
-        qt_libexec_path = "{st_build_dir}/{st_package_name}/Qt/libexec".format(**vars)
+        qt_libexec_path = "{st_build_dir}/{st_package_name}/Qt/libexec".format(**_vars)
         if not os.path.isdir(qt_libexec_path):
             os.makedirs(qt_libexec_path)
         copyfile(f"{{build_dir}}/{PYSIDE}/{{st_package_name}}/qt.conf",
-                 qt_libexec_path, vars=vars)
+                 qt_libexec_path, _vars=_vars)

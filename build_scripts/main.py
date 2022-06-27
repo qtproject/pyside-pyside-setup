@@ -907,7 +907,7 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
         """
         try:
             log.info("\nPreparing setup tools build directory.\n")
-            vars = {
+            _vars = {
                 "site_packages_dir": self.site_packages_dir,
                 "sources_dir": self.sources_dir,
                 "install_dir": self.install_dir,
@@ -939,7 +939,7 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
             # Needed for correct file installation in generator build
             # case.
             if config.is_internal_shiboken_generator_build():
-                vars['cmake_package_name'] = config.shiboken_module_option_name
+                _vars['cmake_package_name'] = config.shiboken_module_option_name
 
             os.chdir(self.script_dir)
 
@@ -957,10 +957,10 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
                     log.warn(f'ignored error: {e}')
 
             if sys.platform == "win32":
-                vars['dbg_postfix'] = OPTION["DEBUG"] and "_d" or ""
-                return prepare_packages_win32(self, vars)
+                _vars['dbg_postfix'] = OPTION["DEBUG"] and "_d" or ""
+                return prepare_packages_win32(self, _vars)
             else:
-                return prepare_packages_posix(self, vars)
+                return prepare_packages_posix(self, _vars)
         except IOError as e:
             print('setup.py/prepare_packages: ', e)
             raise
@@ -970,10 +970,10 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
             return True
         return False
 
-    def get_built_pyside_config(self, vars):
+    def get_built_pyside_config(self, _vars):
         # Get config that contains list of built modules, and
         # SOVERSIONs of the built libraries.
-        st_build_dir = vars['st_build_dir']
+        st_build_dir = _vars['st_build_dir']
         config_path = os.path.join(st_build_dir, config.package_name(), "_config.py")
         temp_config = get_python_dict(config_path)
         if 'built_modules' not in temp_config:
@@ -1042,10 +1042,10 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
             clang_lib_path = os.path.abspath(clang_lib_path)
 
         # The destination will be the shiboken package folder.
-        vars = {}
-        vars['st_build_dir'] = self.st_build_dir
-        vars['st_package_name'] = config.package_name()
-        destination_dir = "{st_build_dir}/{st_package_name}".format(**vars)
+        _vars = {}
+        _vars['st_build_dir'] = self.st_build_dir
+        _vars['st_package_name'] = config.package_name()
+        destination_dir = "{st_build_dir}/{st_package_name}".format(**_vars)
 
         if os.path.exists(clang_lib_path):
             basename = os.path.basename(clang_lib_path)
