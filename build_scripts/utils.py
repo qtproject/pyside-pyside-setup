@@ -366,7 +366,8 @@ def make_file_writable_by_owner(path):
 
 def remove_tree(dirname, ignore=False):
     def handle_remove_readonly(func, path, exc):
-        excvalue = exc[1]
+        # exc returns like 'sys.exc_info()': type, value, traceback
+        _, excvalue, _ = exc
         if func in (os.rmdir, os.remove) and excvalue.errno == errno.EACCES:
             os.chmod(path, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)  # 0777
             func(path)
@@ -1223,14 +1224,9 @@ def parse_cmake_conf_assignments_by_key(source_dir):
         values.
     """
 
-    d = {}
     contents = (Path(source_dir) / ".cmake.conf").read_text()
     matches = re.findall(r'set\((.+?) "(.*?)"\)', contents)
-    for m in matches:
-        key = m[0]
-        value = m[1]
-        if key and value:
-            d[key] = value
+    d = {key: value for key, value in matches}
     return d
 
 

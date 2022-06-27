@@ -96,16 +96,14 @@ class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
         impl = 'no-py-ver-impl-available'
         abi = 'no-abi-tag-info-available'
         py_version = python_target_info['version'].split('.')
-        py_version_major = py_version[0]
-        py_version_minor = py_version[1]
+        py_version_major, py_version_minor, _ = py_version
 
         so_abi = python_target_info['so_abi']
         if so_abi and so_abi.startswith('cpython-'):
-            interpreter_name = so_abi.split('-')[0]
+            interpreter_name, cp_version = so_abi.split('-')
             impl_name = tags.INTERPRETER_SHORT_NAMES.get(interpreter_name) or interpreter_name
             impl_ver = f"{py_version_major}{py_version_minor}"
             impl = impl_name + impl_ver
-            cp_version = so_abi.split("-")[1]
             abi = f'cp{cp_version}'
         tag_tuple = (impl, abi, plat_name)
         return tag_tuple
@@ -151,7 +149,8 @@ class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
         if (old_plat_name in ('linux-x86_64', 'linux_x86_64')
                 and is_64bit()
                 and self.py_limited_api):
-            glibc = platform.libc_ver()[1].replace(".", "_")
+            _, _version = platform.libc_ver()
+            glibc = _version.replace(".", "_")
             tag = (old_impl, old_abi_tag, f"manylinux_{glibc}_x86_64")
 
         # Set manylinux tag for cross-compiled builds when targeting
