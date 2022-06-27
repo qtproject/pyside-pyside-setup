@@ -615,8 +615,8 @@ def macos_fix_rpaths_for_library(library_path, qt_lib_dir):
     macos_add_qt_rpath(library_path, qt_lib_dir, existing_rpath_commands, install_names)
 
 
-def macos_add_qt_rpath(library_path, qt_lib_dir, existing_rpath_commands=[],
-                       library_dependencies=[]):
+def macos_add_qt_rpath(library_path, qt_lib_dir, existing_rpath_commands=None,
+                       library_dependencies=None):
     """
     Adds an rpath load command to the Qt lib directory if necessary
 
@@ -624,6 +624,12 @@ def macos_add_qt_rpath(library_path, qt_lib_dir, existing_rpath_commands=[],
     and adds an rpath load command that points to the Qt lib directory
     (qt_lib_dir).
     """
+    if existing_rpath_commands is None:
+        existing_rpath_commands = []
+
+    if library_dependencies is None:
+        library_dependencies = []
+
     if not existing_rpath_commands:
         existing_rpath_commands = macos_get_rpaths(library_path)
 
