@@ -385,11 +385,11 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
         # Revisit once Clang is bundled with Qt.
         if (sys.platform == "win32"
                 and parse_version(self.qtinfo.version) >= parse_version("5.7.0")):
-            clang_dir = detect_clang()
-            if clang_dir[0]:
-                clangBinDir = os.path.join(clang_dir[0], 'bin')
+            clang_dir, clang_source = detect_clang()
+            if clang_dir:
+                clangBinDir = os.path.join(clang_dir, 'bin')
                 if clangBinDir not in os.environ.get('PATH'):
-                    log.info(f"Adding {clangBinDir} as detected by {clang_dir[1]} to PATH")
+                    log.info(f"Adding {clangBinDir} as detected by {clang_source} to PATH")
                     additional_paths.append(clangBinDir)
             else:
                 raise DistutilsSetupError("Failed to detect Clang when checking "

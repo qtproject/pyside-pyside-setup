@@ -218,7 +218,8 @@ class BuildInfoCollectorMixin(object):
             self.py_arch = platform_arch[:-3]
 
             py_executable = sys.executable
-            py_version = f"{sys.version_info[0]}.{sys.version_info[1]}"
+            _major, _minor, *_ = sys.version_info
+            py_version = f"{_major}.{_minor}"
             py_include_dir = get_config_var("INCLUDEPY")
             py_libdir = get_config_var("LIBDIR")
             # distutils.sysconfig.get_config_var('prefix') returned the
