@@ -240,7 +240,7 @@ class Config(object):
         content += readme
 
         if changes:
-            content += "\n\n" + changes
+            content += f"\n\n{changes}"
 
         return content
 

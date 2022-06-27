@@ -24,7 +24,7 @@ from setuptools.command.build_py import build_py as _build_py
 from setuptools.command.develop import develop as _develop
 from setuptools.command.install import install as _install
 from setuptools.command.install_lib import install_lib as _install_lib
-from setuptools.command.install_scripts import install_scripts  # preload only
+from setuptools.command.install_scripts import install_scripts  # noqa: preload only
 
 # Use the distutils implementation within setuptools (but not before)
 from setuptools._distutils import log
@@ -116,6 +116,7 @@ def get_make(platform_arch, build_type):
 
 
 _allowed_versions_cache = None
+
 
 def get_allowed_python_versions():
     global _allowed_versions_cache
@@ -944,7 +945,7 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
             raise
 
     def qt_is_framework_build(self):
-        if os.path.isdir(self.qtinfo.headers_dir + "/../lib/QtCore.framework"):
+        if os.path.isdir(f"{self.qtinfo.headers_dir}/../lib/QtCore.framework"):
             return True
         return False
 

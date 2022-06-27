@@ -30,13 +30,13 @@ class SetupRunner(object):
     @staticmethod
     def cmd_line_argument_is_in_args(argument, args):
         """ Check if command line argument was passed in args. """
-        return any(arg for arg in list(args) if "--" + argument in arg)
+        return any(arg for arg in list(args) if f"--{argument}" in arg)
 
     @staticmethod
     def get_cmd_line_argument_in_args(argument, args):
         """ Gets the value of a cmd line argument passed in args. """
         for arg in list(args):
-            if "--" + argument in arg:
+            if f"--{argument}" in arg:
                 prefix = f"--{argument}"
                 prefix_len = len(prefix) + 1
                 return arg[prefix_len:]
@@ -45,7 +45,7 @@ class SetupRunner(object):
     @staticmethod
     def remove_cmd_line_argument_in_args(argument, args):
         """ Remove command line argument from args. """
-        return [arg for arg in list(args) if "--" + argument not in arg]
+        return [arg for arg in list(args) if f"--{argument}" not in arg]
 
     @staticmethod
     def construct_cmd_line_argument(name, value=None):
