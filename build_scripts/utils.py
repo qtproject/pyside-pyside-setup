@@ -172,11 +172,11 @@ def find_vcdir(version):
     # trying Express edition
     if productdir is None:
         try:
-            hasattr(msvc9, VSEXPRESS_BASE)
+            hasattr(msvc9, VSEXPRESS_BASE)  # noqa: VSEXPRESS_BASE get defined with msvc9
         except AttributeError:
             pass
         else:
-            vsbase = VSEXPRESS_BASE % version
+            vsbase = VSEXPRESS_BASE % version  # noqa: VSEXPRESS_BASE get defined with msvc9
             try:
                 productdir = msvc9.Reg.get_value(rf"{vsbase}\Setup\VC", "productdir")
             except KeyError:

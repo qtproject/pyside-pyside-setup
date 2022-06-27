@@ -354,9 +354,9 @@ def copy_qt_artifacts(self, copy_pdbs, vars):
     # <qt>/bin/*.dll and Qt *.pdbs -> <setup>/{st_package_name} part two
     # File filter to copy only debug or only release files.
     if constrain_modules:
-        qt_dll_patterns = ["Qt6" + x + "{}.dll" for x in constrain_modules]
+        qt_dll_patterns = [f"Qt6{x}{{}}.dll" for x in constrain_modules]
         if copy_pdbs:
-            qt_dll_patterns += ["Qt6" + x + "{}.pdb" for x in constrain_modules]
+            qt_dll_patterns += [f"Qt6{x}{{}}.pdb" for x in constrain_modules]
     else:
         qt_dll_patterns = ["Qt6*{}.dll", "lib*{}.dll"]
         if copy_pdbs:

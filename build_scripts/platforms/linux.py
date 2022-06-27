@@ -68,7 +68,7 @@ def prepare_standalone_package_linux(self, vars):
 
     accepted_modules = ['libQt6*.so.?']
     if constrain_modules:
-        accepted_modules = ["libQt6" + module + "*.so.?" for module in constrain_modules]
+        accepted_modules = [f"libQt6{module}*.so.?" for module in constrain_modules]
     accepted_modules.append("libicu*.so.??")
 
     copydir("{qt_lib_dir}", destination_lib_dir,
