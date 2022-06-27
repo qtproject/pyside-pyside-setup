@@ -9,7 +9,7 @@ import sys
 import time
 from packaging.version import parse as parse_version
 from pathlib import Path
-from shutil import which, copytree, rmtree
+from shutil import which, copytree
 from textwrap import dedent
 
 # PYSIDE-1760: Pre-load setuptools modules early to avoid racing conditions.
@@ -41,7 +41,7 @@ from .qtinfo import QtInfo
 from .utils import (copydir, copyfile, detect_clang, filter_match,
                     get_numpy_location, get_python_dict, init_msvc_env,
                     linux_fix_rpaths_for_library, macos_fix_rpaths_for_library,
-                    platform_cmake_options, rmtree, run_process,
+                    platform_cmake_options, remove_tree, run_process,
                     run_process_output, update_env_path)
 from .versions import PYSIDE, PYSIDE_MODULE, SHIBOKEN
 from .wheel_override import get_bdist_wheel_override, wheel_module_exists
@@ -445,7 +445,7 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
                 # and 'pyside6' inside the 'package_for_wheels' directory.
                 if _dst.exists():
                     log.warn(f'***** Found directory "{_dst}", removing it first.')
-                    rmtree(_dst)
+                    remove_tree(_dst)
 
                 try:
                     # This should be copied because the package directory
@@ -564,7 +564,7 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
             if not OPTION["REUSE_BUILD"]:
                 log.info(f"Deleting module build folder {module_build_dir}...")
                 try:
-                    rmtree(module_build_dir)
+                    remove_tree(module_build_dir)
                 except Exception as e:
                     log.error(f'***** problem removing "{module_build_dir}"')
                     log.error(f'ignored error: {e}')
@@ -930,7 +930,7 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
             if os.path.isdir(self.st_build_dir):
                 log.info(f"Removing {self.st_build_dir}")
                 try:
-                    rmtree(self.st_build_dir)
+                    remove_tree(self.st_build_dir)
                 except Exception as e:
                     log.warn(f'***** problem removing "{self.st_build_dir}"')
                     log.warn(f'ignored error: {e}')

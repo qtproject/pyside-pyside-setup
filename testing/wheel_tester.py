@@ -35,7 +35,7 @@ sys.path.append(setup_script_dir)
 from setuptools._distutils import log
 
 from build_scripts.utils import (find_files_using_glob, find_glob_in_path,
-                                 rmtree, run_process, run_process_output)
+                                 remove_tree, run_process, run_process_output)
 
 log.set_verbosity(1)
 
@@ -96,7 +96,7 @@ def clean_egg_info():
     paths = find_files_using_glob(setup_script_dir, "*.egg-info")
     for p in paths:
         log.info(f"Removing {p}")
-        rmtree(p)
+        remove_tree(p)
 
 
 def install_wheel(wheel_path):
@@ -241,7 +241,7 @@ def prepare_build_folder(src_path, build_folder_name):
     # preparing a build folder should clean any previous existing build.
     if os.path.exists(build_path):
         log.info(f"Removing {build_path}")
-        rmtree(build_path)
+        remove_tree(build_path)
 
     log.info(f"Creating {build_path}")
     os.makedirs(build_path)
