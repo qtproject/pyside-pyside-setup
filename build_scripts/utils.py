@@ -402,7 +402,7 @@ def make_file_writable_by_owner(path):
     os.chmod(path, current_permissions | stat.S_IWUSR)
 
 
-def rmtree(dirname, ignore=False):
+def remove_tree(dirname, ignore=False):
     def handle_remove_readonly(func, path, exc):
         excvalue = exc[1]
         if func in (os.rmdir, os.remove) and excvalue.errno == errno.EACCES:
@@ -1318,7 +1318,7 @@ def configure_cmake_project(project_path,
                            f"Configure args were:\n  {cmd_string}")
 
     if clean_temp_dir:
-        rmtree(build_path)
+        remove_tree(build_path)
 
     return output
 

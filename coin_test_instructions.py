@@ -42,7 +42,7 @@ import sys
 
 from build_scripts.options import has_option, log, option_value
 from build_scripts.utils import (expand_clang_variables, get_ci_qmake_path,
-                                 get_qtci_virtualEnv, rmtree, run_instruction)
+                                 get_qtci_virtualEnv, remove_tree, run_instruction)
 
 log.set_verbosity(log.INFO)
 
@@ -65,7 +65,7 @@ CI_RELEASE_CONF = has_option("packaging")
 
 def call_testrunner(python_ver, buildnro):
     _pExe, _env, env_pip, env_python = get_qtci_virtualEnv(python_ver, CI_HOST_OS, CI_HOST_ARCH, CI_TARGET_ARCH)
-    rmtree(_env, True)
+    remove_tree(_env, True)
     # Pinning the virtualenv before creating one
     # Use pip3 if possible while pip seems to install the virtualenv to wrong dir in some OS
     python3 = "python3"
