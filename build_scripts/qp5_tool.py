@@ -90,8 +90,8 @@ def which(needle):
     return None
 
 
-def command_log_string(args, dir):
-    result = f'[{os.path.basename(dir)}]'
+def command_log_string(args, directory):
+    result = f'[{os.path.basename(directory)}]'
     for arg in args:
         result += f' "{arg}"' if ' ' in arg else f' {arg}'
     return result

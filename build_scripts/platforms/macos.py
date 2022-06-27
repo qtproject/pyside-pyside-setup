@@ -10,17 +10,17 @@ from ..utils import (copydir, copyfile, macos_add_rpath,
 from ..versions import PYSIDE
 
 
-def _macos_patch_executable(name, vars=None):
+def _macos_patch_executable(name, _vars=None):
     """ Patch an executable to run with the Qt libraries. """
     upper_name = name[0:1].upper() + name[1:]
-    bundle = f"{{st_build_dir}}/{{st_package_name}}/{upper_name}.app".format(**vars)
+    bundle = f"{{st_build_dir}}/{{st_package_name}}/{upper_name}.app".format(**_vars)
     binary = f"{bundle}/Contents/MacOS/{upper_name}"
     rpath = "@loader_path/../../../Qt/lib"
     macos_add_rpath(rpath, binary)
 
 
-def prepare_standalone_package_macos(self, vars):
-    built_modules = vars['built_modules']
+def prepare_standalone_package_macos(self, _vars):
+    built_modules = _vars['built_modules']
 
     constrain_modules = None
     copy_plugins = True
@@ -55,9 +55,9 @@ def prepare_standalone_package_macos(self, vars):
 
     # Patching designer to use the Qt libraries provided in the wheel
     if config.is_internal_pyside_build():
-        _macos_patch_executable('assistant', vars)
-        _macos_patch_executable('designer', vars)
-        _macos_patch_executable('linguist', vars)
+        _macos_patch_executable('assistant', _vars)
+        _macos_patch_executable('designer', _vars)
+        _macos_patch_executable('linguist', _vars)
 
     # <qt>/lib/* -> <setup>/{st_package_name}/Qt/lib
     if self.qt_is_framework_build():
@@ -93,7 +93,7 @@ def prepare_standalone_package_macos(self, vars):
             return True
 
         copydir("{qt_lib_dir}", "{st_build_dir}/{st_package_name}/Qt/lib",
-                recursive=True, vars=vars,
+                recursive=True, _vars=_vars,
                 ignore=["*.la", "*.a", "*.cmake", "*.pc", "*.prl"],
                 dir_filter_function=framework_dir_filter,
                 file_filter_function=framework_variant_filter)
@@ -103,7 +103,7 @@ def prepare_standalone_package_macos(self, vars):
         # from Versions/5/Helpers, thus adding two more levels of
         # directory hierarchy.
         if self.is_webengine_built(built_modules):
-            qt_lib_path = "{st_build_dir}/{st_package_name}/Qt/lib".format(**vars)
+            qt_lib_path = "{st_build_dir}/{st_package_name}/Qt/lib".format(**_vars)
             bundle = "QtWebEngineCore.framework/Helpers/"
             bundle += "QtWebEngineProcess.app"
             binary = "Contents/MacOS/QtWebEngineProcess"
@@ -121,20 +121,20 @@ def prepare_standalone_package_macos(self, vars):
 
         copydir("{qt_lib_dir}",
                 "{st_build_dir}/{st_package_name}/Qt/lib",
-                filter=accepted_modules,
+                _filter=accepted_modules,
                 ignore=ignored_modules,
                 file_filter_function=file_variant_filter,
-                recursive=True, vars=vars, force_copy_symlinks=True)
+                recursive=True, _vars=_vars, force_copy_symlinks=True)
 
         if self.is_webengine_built(built_modules):
             copydir("{qt_data_dir}/resources",
                     "{st_build_dir}/{st_package_name}/Qt/resources",
-                    filter=None,
+                    _filter=None,
                     recursive=False,
-                    vars=vars)
+                    _vars=_vars)
 
             # Fix rpath for WebEngine process executable.
-            qt_libexec_path = "{st_build_dir}/{st_package_name}/Qt/libexec".format(**vars)
+            qt_libexec_path = "{st_build_dir}/{st_package_name}/Qt/libexec".format(**_vars)
             binary = "QtWebEngineProcess"
             final_path = os.path.join(qt_libexec_path, binary)
             rpath = "@loader_path/../lib"
@@ -146,7 +146,7 @@ def prepare_standalone_package_macos(self, vars):
                     os.makedirs(qt_libexec_path)
                 copyfile(
                     f"{{build_dir}}/{PYSIDE}/{{st_package_name}}/qt.conf",
-                    qt_libexec_path, vars=vars)
+                    qt_libexec_path, _vars=_vars)
 
     if copy_plugins:
         is_pypy = "pypy" in self.build_classifiers
@@ -154,34 +154,34 @@ def prepare_standalone_package_macos(self, vars):
         plugins_target = "{st_build_dir}/{st_package_name}/Qt/plugins"
         filters = ["*.dylib"]
         copydir("{qt_plugins_dir}", plugins_target,
-                filter=filters,
+                _filter=filters,
                 recursive=True,
                 dir_filter_function=general_dir_filter,
                 file_filter_function=file_variant_filter,
-                vars=vars)
+                _vars=_vars)
         if not is_pypy:
             copydir("{install_dir}/plugins/designer",
                     f"{plugins_target}/designer",
-                    filter=filters,
+                    _filter=filters,
                     recursive=False,
-                    vars=vars)
+                    _vars=_vars)
 
     if copy_qml:
         # <qt>/qml/* -> <setup>/{st_package_name}/Qt/qml
         copydir("{qt_qml_dir}",
                 "{st_build_dir}/{st_package_name}/Qt/qml",
-                filter=None,
+                _filter=None,
                 recursive=True,
                 force=False,
                 dir_filter_function=general_dir_filter,
                 file_filter_function=file_variant_filter,
-                vars=vars)
+                _vars=_vars)
 
     if copy_translations:
         # <qt>/translations/* ->
         # <setup>/{st_package_name}/Qt/translations
         copydir("{qt_translations_dir}",
                 "{st_build_dir}/{st_package_name}/Qt/translations",
-                filter=["*.qm", "*.pak"],
+                _filter=["*.qm", "*.pak"],
                 force=False,
-                vars=vars)
+                _vars=_vars)
