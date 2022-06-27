@@ -109,7 +109,7 @@ def winsdk_setenv(platform_arch, build_type):
     setenv_env = get_environment_from_batch_command(setenv_cmd)
     _setenv_paths = [setenv_env[k] for k in setenv_env if k.upper() == 'PATH']
     setenv_env_paths = os.pathsep.join(_setenv_paths).split(os.pathsep)
-    setenv_env_without_paths = dict([(k, setenv_env[k]) for k in setenv_env if k.upper() != 'PATH'])
+    setenv_env_without_paths = {k: setenv_env[k] for k in setenv_env if k.upper() != 'PATH'}
 
     # Extend os.environ with SDK env
     log.info("Initializing Windows SDK env...")
@@ -203,7 +203,7 @@ def init_msvc_env(platform_arch, build_type):
     msvc_env = get_environment_from_batch_command(vcvars_cmd)
     _msvc_paths = [msvc_env[k] for k in msvc_env if k.upper() == 'PATH']
     msvc_env_paths = os.pathsep.join(_msvc_paths).split(os.pathsep)
-    msvc_env_without_paths = dict([(k, msvc_env[k]) for k in msvc_env if k.upper() != 'PATH'])
+    msvc_env_without_paths = {k: msvc_env[k] for k in msvc_env if k.upper() != 'PATH'}
 
     # Extend os.environ with MSVC env
     log.info("Initializing MSVC env...")
@@ -305,11 +305,9 @@ def copydir(src, dst, _filter=None, ignore=None, force=True, recursive=True, _va
         src = src.format(**_vars)
         dst = dst.format(**_vars)
         if _filter is not None:
-            for i in range(len(_filter)):
-                _filter[i] = _filter[i].format(**_vars)
+            _filter = [i.format(**_vars) for i in _filter]
         if ignore is not None:
-            for i in range(len(ignore)):
-                ignore[i] = ignore[i].format(**_vars)
+            ignore = [i.format(**_vars) for i in ignore]
 
     if not os.path.exists(src) and not force:
         log.info(f"**Skipping copy tree\n  {src} to\n  {dst}\n  Source does not exist. "
@@ -444,12 +442,12 @@ def get_environment_from_batch_command(env_cmd, initial=None):
     # parse the output sent to stdout
     lines = proc.stdout
     # make sure the lines are strings
-    lines = map(lambda s: s.decode(), lines)
+    lines = [s.decode() for s in lines]
     # consume whatever output occurs until the tag is reached
     consume(itertools.takewhile(lambda l: tag not in l, lines))
     # define a way to handle each KEY=VALUE line
     # parse key/values into pairs
-    pairs = map(lambda l: l.rstrip().split('=', 1), lines)
+    pairs = [l.rstrip().split('=', 1) for l in lines]
     # make sure the pairs are valid
     valid_pairs = filter(validate_pair, pairs)
     # construct a dictionary of the pairs

@@ -12,7 +12,7 @@ from ..versions import PYSIDE
 
 def _macos_patch_executable(name, _vars=None):
     """ Patch an executable to run with the Qt libraries. """
-    upper_name = name[0:1].upper() + name[1:]
+    upper_name = name.capitalize()
     bundle = f"{{st_build_dir}}/{{st_package_name}}/{upper_name}.app".format(**_vars)
     binary = f"{bundle}/Contents/MacOS/{upper_name}"
     rpath = "@loader_path/../../../Qt/lib"
@@ -30,7 +30,7 @@ def prepare_standalone_package_macos(self, _vars):
 
     if config.is_internal_shiboken_generator_build():
         constrain_modules = ["Core", "Network", "Xml", "XmlPatterns"]
-        constrain_frameworks = ['Qt' + name + '.framework' for name in constrain_modules]
+        constrain_frameworks = [f"Qt{name}.framework" for name in constrain_modules]
         copy_plugins = False
         copy_qml = False
         copy_translations = False

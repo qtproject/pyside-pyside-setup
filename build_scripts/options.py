@@ -81,9 +81,9 @@ class Options(object):
 
         :return: Either the option value or None.
         """
-        option = '--' + name
-        short_option = '-' + short_option_name if short_option_name else None
-        single_option_prefix = option + '='
+        option = f"--{name}"
+        short_option = f"-{short_option_name}" if short_option_name else None
+        single_option_prefix = f"{option}="
         value = None
         for index in reversed(range(len(sys.argv))):
             arg = sys.argv[index]
@@ -129,7 +129,7 @@ def _jobs_option_value():
     """Option value for parallel builds."""
     value = option_value('parallel', short_option_name='j')
     if value:
-        return '-j' + value if not value.startswith('-j') else value
+        return f"-j{value}" if not value.startswith('-j') else value
     return ''
 
 
