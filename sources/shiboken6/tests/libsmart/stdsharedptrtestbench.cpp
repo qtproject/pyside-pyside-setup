@@ -50,3 +50,17 @@ void StdSharedPtrTestBench::printInt(const std::shared_ptr<int> &p)
         std::cerr << "nullptr";
     std::cerr << '\n';
 }
+
+StdSharedPtrVirtualMethodTester::StdSharedPtrVirtualMethodTester() = default;
+StdSharedPtrVirtualMethodTester::~StdSharedPtrVirtualMethodTester() = default;
+
+std::shared_ptr<Integer> StdSharedPtrVirtualMethodTester::callModifyInteger(const std::shared_ptr<Integer> &p)
+{
+    return doModifyInteger(p);
+}
+
+std::shared_ptr<Integer> StdSharedPtrVirtualMethodTester::doModifyInteger(std::shared_ptr<Integer> p)
+{
+    p->setValue(p->value() + 1);
+    return p;
+}

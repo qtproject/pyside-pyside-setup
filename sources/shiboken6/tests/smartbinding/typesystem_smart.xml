@@ -62,5 +62,6 @@
 
     </namespace-type>
     <object-type name="StdSharedPtrTestBench"/>
+    <object-type name="StdSharedPtrVirtualMethodTester"/>
 
 </typesystem>

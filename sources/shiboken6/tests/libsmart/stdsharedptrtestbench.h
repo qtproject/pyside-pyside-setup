@@ -25,4 +25,16 @@ public:
     static void printInt(const std::shared_ptr<int> &);
 };
 
+class LIB_SMART_API StdSharedPtrVirtualMethodTester
+{
+public:
+    StdSharedPtrVirtualMethodTester();
+    virtual ~StdSharedPtrVirtualMethodTester();
+
+    std::shared_ptr<Integer> callModifyInteger(const std::shared_ptr<Integer> &p);
+
+protected:
+    virtual std::shared_ptr<Integer> doModifyInteger(std::shared_ptr<Integer> p);
+};
+
 #endif // STDSHAREDPTRTESTBENCH_H
