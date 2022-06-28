@@ -135,24 +135,23 @@ static const QHash<QString, QString> &primitiveTypesCorrespondences()
     return result;
 }
 
-// Format units for C++->Python->C++ conversion
-const QHash<QString, QString> &ShibokenGenerator::formatUnits()
+const QHash<QString, QChar> &ShibokenGenerator::formatUnits()
 {
-    static const QHash<QString, QString> result = {
-        {u"char"_s, u"b"_s},
-        {u"unsigned char"_s, u"B"_s},
-        {intT(), u"i"_s},
-        {u"unsigned int"_s, u"I"_s},
-        {shortT(), u"h"_s},
-        {unsignedShortT(), u"H"_s},
-        {longT(), u"l"_s},
-        {unsignedLongLongT(), u"k"_s},
-        {longLongT(), u"L"_s},
-        {u"__int64"_s, u"L"_s},
-        {unsignedLongLongT(), u"K"_s},
-        {u"unsigned __int64"_s, u"K"_s},
-        {doubleT(), u"d"_s},
-        {floatT(), u"f"_s},
+    static const QHash<QString, QChar> result = {
+        {u"char"_s, u'b'},
+        {u"unsigned char"_s, u'B'},
+        {intT(), u'i'},
+        {u"unsigned int"_s, u'I'},
+        {shortT(), u'h'},
+        {unsignedShortT(), u'H'},
+        {longT(), u'l'},
+        {unsignedLongLongT(), u'k'},
+        {longLongT(), u'L'},
+        {u"__int64"_s, u'L'},
+        {unsignedLongLongT(), u'K'},
+        {u"unsigned __int64"_s, u'K'},
+        {doubleT(), u'd'},
+        {floatT(), u'f'},
     };
     return result;
 }
@@ -511,49 +510,6 @@ bool ShibokenGenerator::shouldRejectNullPointerArgument(const AbstractMetaFuncti
         }
     }
     return false;
-}
-
-QString ShibokenGenerator::getFormatUnitString(const AbstractMetaFunctionCPtr &func, bool incRef)
-{
-    QString result;
-    const char objType = (incRef ? 'O' : 'N');
-    const AbstractMetaArgumentList &arguments = func->arguments();
-    for (const AbstractMetaArgument &arg : arguments) {
-        if (arg.isModifiedRemoved())
-            continue;
-
-        const auto &type = arg.type();
-        if (arg.isTypeModified()) {
-            result += QLatin1Char(objType);
-        } else if (arg.type().isObject()
-            || type.isValue()
-            || type.isValuePointer()
-            || type.isNativePointer()
-            || type.isEnum()
-            || type.isFlags()
-            || type.isContainer()
-            || type.isSmartPointer()
-            || type.referenceType() == LValueReference) {
-            result += QLatin1Char(objType);
-        } else if (type.isPrimitive()) {
-            const auto *ptype = type.typeEntry()->asPrimitive()->basicReferencedTypeEntry();
-            const auto it = formatUnits().constFind(ptype->name());
-            if (it != formatUnits().cend())
-                result += it.value();
-            else
-                result += QLatin1Char(objType);
-        } else if (type.isCString()) {
-            result += u'z';
-        } else {
-            qCWarning(lcShiboken).noquote().nospace()
-                << "Method: " << func->ownerClass()->qualifiedCppName()
-                << "::" << func->signature() << " => Arg:"
-                << arg.name() << "index: " << arg.argumentIndex()
-                << " - cannot be handled properly. Use an inject-code to fix it!";
-            result += u'?';
-        }
-    }
-    return result;
 }
 
 QString ShibokenGenerator::cpythonBaseName(const AbstractMetaType &type)

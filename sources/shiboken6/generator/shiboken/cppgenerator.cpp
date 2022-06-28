@@ -1143,6 +1143,30 @@ QString CppGenerator::virtualMethodReturn(TextStream &s, const ApiExtractorResul
            + u';';
 }
 
+// Create an argument for Py_BuildValue() when writing virtual methods.
+// Return a pair of (argument, format-char).
+QPair<QString, QChar> CppGenerator::virtualMethodNativeArg(const AbstractMetaFunctionCPtr &func,
+                                                             const AbstractMetaArgument &arg)
+{
+    if (func->hasConversionRule(TypeSystem::TargetLangCode, arg.argumentIndex() + 1))
+        return {arg.name() + CONV_RULE_OUT_VAR_SUFFIX, u'N'};
+
+    const auto &type = arg.type();
+    auto *argTypeEntry = type.typeEntry();
+    // Check for primitive types convertible by Py_BuildValue()
+    if (argTypeEntry->isPrimitive() && !type.isCString()) {
+        const auto *pte = argTypeEntry->asPrimitive()->basicReferencedTypeEntry();
+        auto it = formatUnits().constFind(pte->name());
+        if (it != formatUnits().constEnd())
+            return {arg.name(), it.value()};
+    }
+
+    // Rest: convert
+    StringStream ac(TextStream::Language::Cpp);
+    writeToPythonConversion(ac, type, func->ownerClass(), arg.name());
+    return {ac.toString(), u'N'};
+}
+
 void CppGenerator::writeVirtualMethodNativeArgs(TextStream &s,
                                                 const AbstractMetaFunctionCPtr &func,
                                                 const AbstractMetaArgumentList &arguments,
@@ -1153,36 +1177,16 @@ void CppGenerator::writeVirtualMethodNativeArgs(TextStream &s,
         s << "PyTuple_New(0));\n";
         return;
     }
+
+    QString format;
     QStringList argConversions;
     for (const AbstractMetaArgument &arg : arguments) {
-        const auto &argType = arg.type();
-        const auto *argTypeEntry = argType.typeEntry();
-        bool convert = argTypeEntry->isObject()
-                        || argTypeEntry->isValue()
-                        || argType.isValuePointer()
-                        || argType.isNativePointer()
-                        || argTypeEntry->isFlags()
-                        || argTypeEntry->isEnum()
-                        || argTypeEntry->isContainer()
-                        || argType.referenceType() == LValueReference;
-        if (!convert && argTypeEntry->isPrimitive()) {
-            const auto *pte = argTypeEntry->asPrimitive()->basicReferencedTypeEntry();
-            convert = !formatUnits().contains(pte->name());
-        }
-        StringStream ac(TextStream::Language::Cpp);
-        if (func->hasConversionRule(TypeSystem::TargetLangCode,
-                                    arg.argumentIndex() + 1)) {
-            ac << arg.name() + CONV_RULE_OUT_VAR_SUFFIX;
-        } else {
-            QString argName = arg.name();
-            if (convert)
-                writeToPythonConversion(ac, arg.type(), func->ownerClass(), argName);
-            else
-                ac << argName;
-        }
-        argConversions << ac.toString();
+        auto argPair = virtualMethodNativeArg(func, arg);
+        argConversions.append(argPair.first);
+        format += argPair.second;
     }
-    s << "Py_BuildValue(\"(" << getFormatUnitString(func, false) << ")\",\n"
+
+    s << "Py_BuildValue(\"(" << format << ")\",\n"
         << indent << argConversions.join(u",\n"_s) << outdent << "\n));\n";
 
     for (int index : qAsConst(invalidateArgs)) {

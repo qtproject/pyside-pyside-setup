@@ -252,8 +252,6 @@ protected:
     /// Returns the special cast function name, the function used to proper cast class with multiple inheritance.
     static QString cpythonSpecialCastFunctionName(const AbstractMetaClass *metaClass);
 
-    static QString getFormatUnitString(const AbstractMetaFunctionCPtr &func, bool incRef = false);
-
     /// Returns the file name for the module global header. If no module name is provided the current will be used.
     static QString getModuleHeaderFileName(const QString &moduleName = QString());
     static QString getPrivateModuleHeaderFileName(const QString &moduleName = QString());
@@ -310,7 +308,8 @@ protected:
 
     static QString pythonArgsAt(int i);
 
-    static const QHash<QString, QString> &formatUnits();
+    /// Return the format character for C++->Python->C++ conversion (Py_BuildValue)
+    static const QHash<QString, QChar> &formatUnits();
 
 private:
     static QString getModuleHeaderFileBaseName(const QString &moduleName = QString());

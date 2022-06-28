@@ -69,6 +69,9 @@ private:
     void writeDestructorNative(TextStream &s, const GeneratorContext &classContext) const;
 
     QString getVirtualFunctionReturnTypeName(const AbstractMetaFunctionCPtr &func) const;
+    static QPair<QString, QChar>
+        virtualMethodNativeArg(const AbstractMetaFunctionCPtr &func,
+                               const AbstractMetaArgument &arg);
     void writeVirtualMethodNativeArgs(TextStream &s,
                                       const AbstractMetaFunctionCPtr &func,
                                       const AbstractMetaArgumentList &arguments,
