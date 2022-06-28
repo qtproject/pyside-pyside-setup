@@ -170,6 +170,7 @@ def wheel_files_pyside_addons() -> List[ModuleData]:
         module_QtScxml(),
         module_QtSensors(),
         module_QtSerialPort(),
+        module_QtSpatialAudio(),
         module_QtStateMachine(),
         # Not available in 6.3
         # module_QtTextToSpeech(),
@@ -776,6 +777,13 @@ def module_QtSensors() -> ModuleData:
 def module_QtSerialPort() -> ModuleData:
     data = ModuleData("SerialPort")
     data.translations.append("qtserialport_*")
+
+    return data
+
+
+def module_QtSpatialAudio() -> ModuleData:
+    data = ModuleData("QtSpatialAudio")
+    data.metatypes.append("qt6spatialaudio_debug_metatypes.json")
 
     return data
 

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+// Copyright (C) 2022 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+-->
+<typesystem package="PySide6.QtSpatialAudio">
+    <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
+    <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
+    <load-typesystem name="QtNetwork/typesystem_network.xml" generate="no"/>
+    <load-typesystem name="QtMultimedia/typesystem_multimedia.xml" generate="no"/>
+
+    <object-type name="QAmbientSound">
+        <enum-type name="Loops"/>
+    </object-type>
+
+    <object-type name="QAudioEngine">
+        <enum-type name="OutputMode"/>
+    </object-type>
+
+    <object-type name="QAudioListener"/>
+
+    <object-type name="QAudioRoom">
+        <enum-type name="Material"/>
+        <enum-type name="Wall"/>
+    </object-type>
+
+    <object-type name="QSpatialSound">
+        <enum-type name="Loops"/>
+        <enum-type name="DistanceModel"/>
+    </object-type>
+</typesystem>

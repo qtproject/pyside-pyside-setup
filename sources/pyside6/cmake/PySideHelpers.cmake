@@ -105,6 +105,7 @@ macro(collect_optional_modules)
         StateMachine
         TextToSpeech
         Charts
+        SpatialAudio
         Svg
         SvgWidgets
         DataVisualization
