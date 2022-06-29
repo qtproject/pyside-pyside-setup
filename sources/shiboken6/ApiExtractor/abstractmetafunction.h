@@ -309,6 +309,7 @@ public:
     AbstractMetaFunction *copy() const;
 
     QString conversionRule(TypeSystem::Language language, int idx) const;
+    bool hasConversionRule(TypeSystem::Language language, int idx) const;
     QList<ReferenceCount> referenceCounts(const AbstractMetaClass *cls, int idx = -2) const;
     ArgumentOwner argumentOwner(const AbstractMetaClass *cls, int idx) const;
 

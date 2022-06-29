@@ -1170,9 +1170,8 @@ void CppGenerator::writeVirtualMethodNativeArgs(TextStream &s,
             convert = !formatUnits().contains(pte->name());
         }
         StringStream ac(TextStream::Language::Cpp);
-        if (!func->conversionRule(TypeSystem::TargetLangCode,
-                                  arg.argumentIndex() + 1).isEmpty()) {
-            // Has conversion rule.
+        if (func->hasConversionRule(TypeSystem::TargetLangCode,
+                                    arg.argumentIndex() + 1)) {
             ac << arg.name() + CONV_RULE_OUT_VAR_SUFFIX;
         } else {
             QString argName = arg.name();
@@ -1387,8 +1386,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
                 }
             }
 
-            if (!func->conversionRule(TypeSystem::NativeCode, 0).isEmpty()) {
-                // Has conversion rule.
+            if (func->hasConversionRule(TypeSystem::NativeCode, 0)) {
                 writeConversionRule(s, func, TypeSystem::NativeCode, CPP_RETURN_VAR);
             } else if (!func->injectedCodeHasReturnValueAttribution(TypeSystem::NativeCode)) {
                 returnIndirections = writePythonToCppTypeConversion(
@@ -2621,7 +2619,7 @@ static void checkTypeViability(const AbstractMetaFunctionCPtr &func,
         || type.isCString()
         || isRemoved
         || modified
-        || !func->conversionRule(TypeSystem::All, argIdx).isEmpty()
+        || func->hasConversionRule(TypeSystem::All, argIdx)
         || func->hasInjectedCode())
         return;
     QString message;
@@ -3200,8 +3198,8 @@ void CppGenerator::writeSingleFunctionCall(TextStream &s,
     bool mayHaveUnunsedArguments = !func->isUserAdded() && func->hasInjectedCode() && injectCodeCallsFunc;
     int removedArgs = 0;
     for (qsizetype argIdx = 0; argIdx < func->arguments().size(); ++argIdx) {
-        bool hasConversionRule =
-            !func->conversionRule(TypeSystem::NativeCode, int(argIdx + 1)).isEmpty();
+        const bool hasConversionRule =
+            func->hasConversionRule(TypeSystem::NativeCode, int(argIdx + 1));
         const AbstractMetaArgument &arg = func->arguments().at(argIdx);
         if (arg.isModifiedRemoved()) {
             if (!arg.defaultValueExpression().isEmpty()) {
@@ -3741,8 +3739,8 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
             int removedArgs = 0;
             for (int i = 0; i < maxArgs + removedArgs; i++) {
                 const AbstractMetaArgument &arg = func->arguments().at(i);
-                bool hasConversionRule = !func->conversionRule(TypeSystem::NativeCode,
-                                                               arg.argumentIndex() + 1).isEmpty();
+                const bool hasConversionRule =
+                    func->hasConversionRule(TypeSystem::NativeCode, arg.argumentIndex() + 1);
                 if (arg.isModifiedRemoved()) {
                     // If some argument with default value is removed from a
                     // method signature, the said value must be explicitly
@@ -3779,8 +3777,8 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
             for (int i = func->arguments().size() - 1; i >= maxArgs + removedArgs; i--) {
                 const AbstractMetaArgument &arg = func->arguments().at(i);
                 const bool defValModified = arg.hasModifiedDefaultValueExpression();
-                bool hasConversionRule = !func->conversionRule(TypeSystem::NativeCode,
-                                                               arg.argumentIndex() + 1).isEmpty();
+                const bool hasConversionRule =
+                    func->hasConversionRule(TypeSystem::NativeCode, arg.argumentIndex() + 1);
                 if (argsClear && !defValModified && !hasConversionRule)
                     continue;
                 argsClear = false;
@@ -4002,7 +4000,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
 
             // Convert result
             const auto funcType = func->type();
-            if (!func->conversionRule(TypeSystem::TargetLangCode, 0).isEmpty()) {
+            if (func->hasConversionRule(TypeSystem::TargetLangCode, 0)) {
                 writeConversionRule(s, func, TypeSystem::TargetLangCode,
                                     PYTHON_RETURN_VAR);
             } else if (!isCtor && !func->isInplaceOperator() && !func->isVoid()

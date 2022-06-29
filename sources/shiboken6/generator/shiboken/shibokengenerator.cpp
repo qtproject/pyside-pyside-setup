@@ -1168,8 +1168,8 @@ void ShibokenGenerator::writeArgumentNames(TextStream &s,
         s << ((argCount > 0) ? ", " : "") << argument.name();
 
         if (((options & Generator::VirtualCall) == 0)
-            && (!func->conversionRule(TypeSystem::NativeCode, index).isEmpty()
-                || !func->conversionRule(TypeSystem::TargetLangCode, index).isEmpty())
+            && (func->hasConversionRule(TypeSystem::NativeCode, index)
+                || func->hasConversionRule(TypeSystem::TargetLangCode, index))
             && !func->isConstructor()) {
            s << CONV_RULE_OUT_VAR_SUFFIX;
         }
@@ -1310,7 +1310,7 @@ ShibokenGenerator::ArgumentVarReplacementList
         const AbstractMetaArgument &arg = func->arguments().at(i);
         QString argValue;
         if (language == TypeSystem::TargetLangCode) {
-            bool hasConversionRule = !func->conversionRule(convLang, i+1).isEmpty();
+            const bool hasConversionRule = func->hasConversionRule(convLang, i + 1);
             const bool argRemoved = arg.isModifiedRemoved();
             if (argRemoved)
                 ++removed;

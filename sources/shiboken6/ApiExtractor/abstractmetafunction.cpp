@@ -612,6 +612,11 @@ QString AbstractMetaFunction::conversionRule(TypeSystem::Language language, int 
     return QString();
 }
 
+bool AbstractMetaFunction::hasConversionRule(TypeSystem::Language language, int idx) const
+{
+    return !conversionRule(language, idx).isEmpty();
+}
+
 // FIXME If we remove a arg. in the method at the base class, it will not reflect here.
 bool AbstractMetaFunction::argumentRemoved(int key) const
 {
