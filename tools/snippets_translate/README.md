@@ -11,7 +11,7 @@ Here's an explanation for each file:
 * `main.py`, main file that handle the arguments, the general process
   of copying/writing files into the pyside-setup/ repository.
 * `converter.py`, main function that translate each line depending
-  of the decision making process that use different handlers.
+  on the decision-making process that use different handlers.
 * `handlers.py`, functions that handle the different translation cases.
 * `parse_utils.py`, some useful function that help the translation process.
 * `tests/test_converter.py`, tests cases for the converter function.
@@ -20,20 +20,26 @@ Here's an explanation for each file:
 
 ```
 % python main.py -h
-usage: sync_snippets [-h] --qt QT_DIR --pyside PYSIDE_DIR [-w] [-v]
+usage: sync_snippets [-h] --qt QT_DIR --target PYSIDE_DIR [-f DIRECTORY] [-w] [-v] [-d] [-s SINGLE_SNIPPET] [--filter FILTER_SNIPPET]
 
 optional arguments:
   -h, --help           show this help message and exit
   --qt QT_DIR          Path to the Qt directory (QT_SRC_DIR)
-  --pyside PYSIDE_DIR  Path to the pyside-setup directory
+  --target TARGET_DIR  Directory into which to generate the snippets
   -w, --write          Actually copy over the files to the pyside-setup directory
   -v, --verbose        Generate more output
+  -d, --debug          Generate even more output
+  -s SINGLE_SNIPPET, --single SINGLE_SNIPPET
+                       Path to a single file to be translated
+  -f, --directory DIRECTORY  Path to a directory containing the snippets to be translated
+  --filter FILTER_SNIPPET
+                       String to filter the snippets to be translated
 ```
 
 For example:
 
 ```
-python main.py --qt /home/cmaureir/dev/qt6/ --pyside /home/cmaureir/dev/pyside-setup -w
+python main.py --qt /home/cmaureir/dev/qt6/ --target /home/cmaureir/dev/pyside-setup -w
 ```
 
 which will create all the snippet files in the pyside repository. The `-w`
@@ -79,7 +85,7 @@ goes to:
 
 ### Examples
 
-Everything that has .../examples/*/*, for example:
+Everything that has .../examples/*, for example:
 
 ```
     ./qtbase/examples/widgets/dialogs/licensewizard
@@ -175,5 +181,3 @@ for m in modules:
     _out[m] = m_classes
 pprint(_out)
 ```
-
-PySide2 was used to cover more classes that are not available for Qt 6.0.

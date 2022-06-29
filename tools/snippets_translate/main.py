@@ -37,11 +37,11 @@
 ##
 #############################################################################
 
-import argparse
 import logging
 import os
 import re
 import sys
+from argparse import ArgumentParser, Namespace
 from enum import Enum
 from pathlib import Path
 from textwrap import dedent
@@ -81,9 +81,12 @@ class FileStatus(Enum):
     New = 1
 
 
-def get_parser():
-    parser = argparse.ArgumentParser(prog="snippets_translate")
-    # List pyproject files
+def get_parser() -> ArgumentParser:
+    """
+    Returns a parser for the command line arguments of the script.
+    See README.md for more information.
+    """
+    parser = ArgumentParser(prog="snippets_translate")
     parser.add_argument(
         "--qt",
         action="store",
@@ -130,6 +133,14 @@ def get_parser():
         action="store",
         dest="single_snippet",
         help="Path to a single file to be translated",
+    )
+
+    parser.add_argument(
+        "-f",
+        "--directory",
+        action="store",
+        dest="single_directory",
+        help="Path to a single directory to be translated",
     )
 
     parser.add_argument(
@@ -351,72 +362,94 @@ def copy_file(file_path, qt_path, out_path, write=False, debug=False):
     return status
 
 
-def process(options):
+def single_directory(options, qt_path, out_path):
+    # Process all files in the directory
+    directory_path = Path(options.single_directory)
+    for file_path in directory_path.glob("**/*"):
+        if file_path.is_dir() or not is_valid_file(file_path):
+            continue
+        copy_file(file_path, qt_path, out_path, write=options.write_files, debug=options.debug)
+
+
+def single_snippet(options, qt_path, out_path):
+    # Process a single file
+    file = Path(options.single_snippet)
+    if is_valid_file(file):
+        copy_file(file, qt_path, out_path, write=options.write_files, debug=options.debug)
+
+
+def all_modules_in_directory(options, qt_path, out_path):
+    """
+    Process all Qt modules in the directory. Logs how many files were processed.
+    """
+    # New files, already existing files
+    valid_new, valid_exists = 0, 0
+
+    for module in qt_path.iterdir():
+        module_name = module.name
+
+        # Filter only Qt modules
+        if not module_name.startswith("qt"):
+            continue
+
+        if not opt_quiet:
+            log.info(f"Module {module_name}")
+
+        # Iterating everything
+        for f in module.glob("**/*.*"):
+            # Proceed only if the full path contain the filter string
+            if not is_valid_file(f):
+                continue
+
+            if options.filter_snippet and options.filter_snippet not in str(f.absolute()):
+                continue
+
+            status = copy_file(f, qt_path, out_path, write=options.write_files, debug=options.debug)
+
+            # Stats
+            if status == FileStatus.New:
+                valid_new += 1
+            elif status == FileStatus.Exists:
+                valid_exists += 1
+
+        if not opt_quiet:
+            log.info(
+                dedent(
+                    f"""\
+                Summary:
+                  Total valid files: {valid_new + valid_exists}
+                     New files:      {valid_new}
+                     Existing files: {valid_exists}
+                """
+                )
+            )
+
+
+def process_files(options: Namespace) -> None:
     qt_path = Path(options.qt_dir)
     out_path = Path(options.target_dir)
-
-    # (new, exists)
-    valid_new, valid_exists = 0, 0
 
     # Creating directories in case they don't exist
     if not out_path.is_dir():
         out_path.mkdir(parents=True)
 
-    if options.single_snippet:
-        f = Path(options.single_snippet)
-        if is_valid_file(f):
-            status = copy_file(f, qt_path, out_path,
-                               write=options.write_files,
-                               debug=options.debug)
-
+    if options.single_directory:
+        single_directory(options, qt_path, out_path)
+    elif options.single_snippet:
+        single_snippet(options, qt_path, out_path)
     else:
-        for i in qt_path.iterdir():
-            module_name = i.name
-
-            # Filter only Qt modules
-            if not module_name.startswith("qt"):
-                continue
-            if not opt_quiet:
-                log.info(f"Module {module_name}")
-
-            # Iterating everything
-            for f in i.glob("**/*.*"):
-                if is_valid_file(f):
-                    if options.filter_snippet:
-                        # Proceed only if the full path contain the filter string
-                        if options.filter_snippet not in str(f.absolute()):
-                            continue
-                    status = copy_file(f, qt_path, out_path,
-                                       write=options.write_files,
-                                       debug=options.debug)
-
-                    # Stats
-                    if status == FileStatus.New:
-                        valid_new += 1
-                    elif status == FileStatus.Exists:
-                        valid_exists += 1
-
-            if not opt_quiet:
-                log.info(
-                    dedent(
-                        f"""\
-                    Summary:
-                      Total valid files: {valid_new + valid_exists}
-                         New files:      {valid_new}
-                         Existing files: {valid_exists}
-                    """
-                    )
-                )
+        # General case: process all Qt modules in the directory
+        all_modules_in_directory(options, qt_path, out_path)
 
 
 if __name__ == "__main__":
     parser = get_parser()
-    options = parser.parse_args()
-    opt_quiet = False if options.verbose else True
-    opt_quiet = False if options.debug else opt_quiet
+    opt: Namespace = parser.parse_args()
+    opt_quiet = not (opt.verbose or opt.debug)
 
-    if not check_arguments(options):
+    if not check_arguments(opt):
+        # Error, invalid arguments
         parser.print_help()
         sys.exit(-1)
 
-    process(options)
+    process_files(opt)
