@@ -116,8 +116,13 @@ std::ostream &operator<<(std::ostream &str, PyArrayObject *o)
             str << " NPY_ARRAY_NOTSWAPPED";
         if ((flags & NPY_ARRAY_WRITEABLE) != 0)
             str << " NPY_ARRAY_WRITEABLE";
+#if NPY_VERSION >= 0x00000010 // NPY_1_23_API_VERSION
+        if ((flags & NPY_ARRAY_WRITEBACKIFCOPY) != 0)
+            str << " NPY_ARRAY_WRITEBACKIFCOPY";
+#else
         if ((flags & NPY_ARRAY_UPDATEIFCOPY) != 0)
             str << " NPY_ARRAY_UPDATEIFCOPY";
+#endif
     } else {
         str << '0';
     }

@@ -1546,6 +1546,12 @@
       <modify-argument index="return">
         <define-ownership class="native" owner="c++"/>
       </modify-argument>
+      <inject-code class="native" position="end" file="../glue/qtcore.cpp"
+                   snippet="qabstractitemmodel_data"/>
+    </modify-function>
+    <modify-function signature="headerData(int,Qt::Orientation,int)const">
+      <inject-code class="native" position="end" file="../glue/qtcore.cpp"
+                   snippet="qabstractitemmodel_data"/>
     </modify-function>
     <modify-function signature="dataChanged(const QModelIndex&amp;,const QModelIndex&amp;,const QVector&lt;int&gt;&amp;)" allow-thread="yes"/>
     <modify-function signature="layoutAboutToBeChanged(const QList&lt;QPersistentModelIndex&gt;&amp;,QAbstractItemModel::LayoutChangeHint)" allow-thread="yes"/>
@@ -1775,9 +1781,6 @@
       <include file-name="QStringList" location="global"/>
       <include file-name="QSize" location="global"/>
     </extra-includes>
-    <modify-function signature="data(const QModelIndex&amp;,int)const">
-      <inject-code class="native" position="end" file="../glue/qtcore.cpp" snippet="qabstractitemmodel_data"/>
-    </modify-function>
   </object-type>
   <value-type name="QUrlQuery" since="5.0"/>
 
@@ -3187,25 +3190,25 @@
     <include file-name="qloggingcategory.h" location="global" />
     </extra-includes>
     <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qloggingcategory_to_cpp">
-      qCDebug(*category, %2);
+      qCDebug(*category, "%s", %2);
     </inject-code>
   </add-function>
 
   <add-function signature="qCCritical(PyObject *, const char *)">
     <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qloggingcategory_to_cpp">
-      qCCritical(*category, %2);
+      qCCritical(*category, "%s", %2);
     </inject-code>
   </add-function>
 
   <add-function signature="qCInfo(PyObject *, const char *)">
     <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qloggingcategory_to_cpp">
-      qCInfo(*category, %2);
+      qCInfo(*category, "%s", %2);
     </inject-code>
   </add-function>
 
   <add-function signature="qCWarning(PyObject *, const char *)">
     <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qloggingcategory_to_cpp">
-      qCWarning(*category, %2);
+      qCWarning(*category, "%s", %2);
     </inject-code>
   </add-function>
 

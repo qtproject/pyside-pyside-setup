@@ -17,7 +17,7 @@ qualities. This example demonstrates the following features:
 
 For instructions about how to interact with the graph, see `this page`_.
 
-.. image:: ../../surface/doc/surface_mountain.png
+.. image:: surface_mountain.png
    :width: 400
    :alt: Surface Example Screenshot
 

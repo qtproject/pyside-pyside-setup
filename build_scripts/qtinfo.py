@@ -162,7 +162,9 @@ class QtInfo(object):
                 return None
             return self._query_dict[prop_name]
 
-        def _get_qtpaths_output(self, args_list=[], cwd=None):
+        def _get_qtpaths_output(self, args_list=None, cwd=None):
+            if args_list is None:
+                args_list = []
             assert self._qtpaths_command
             cmd = [self._qtpaths_command]
             cmd.extend(args_list)
@@ -175,7 +177,9 @@ class QtInfo(object):
             return output
 
         # FIXME PYSIDE7: Remove qmake handling
-        def _get_qmake_output(self, args_list=[], cwd=None):
+        def _get_qmake_output(self, args_list=None, cwd=None):
+            if args_list is None:
+                args_list = []
             assert self._qmake_command
             cmd = [self._qmake_command]
             cmd.extend(args_list)

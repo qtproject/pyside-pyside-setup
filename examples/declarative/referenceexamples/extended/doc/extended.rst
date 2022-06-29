@@ -1,4 +1,4 @@
-.. _qml-extension-objects-example
+.. _qml-extension-objects-example:
 
 Extending QML - Extension Objects Example
 =========================================

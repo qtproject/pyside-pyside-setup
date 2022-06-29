@@ -131,8 +131,12 @@ def test_cast():
 def test_double_colon():
     assert st("Qt::Align") == "Qt.Align"
     assert st('QSound::play("mysounds/bells.wav");') == 'QSound.play("mysounds/bells.wav")'
-    # FIXME
-    assert st("Widget::method") == "Widget::method"
+    assert st("Widget::method") == "Widget.method"
+
+    # multiline statement connect statement
+    # eg: connect(reply, &QNetworkReply::errorOccurred,
+    #    this, &MyClass::slotError);
+    assert st("this, &MyClass::slotError);") == "self, MyClass.slotError)"
 
 
 def test_cout_endl():
@@ -411,6 +415,8 @@ def test_special_cases():
     assert st("public:") == "# public"
     assert st("private:") == "# private"
 
+    #iterator declaration
+    assert st("std::vector<int>::iterator i;") == ""
 
     # TODO: Handle the existing ones with Python equivalents
     # assert st("std::...")

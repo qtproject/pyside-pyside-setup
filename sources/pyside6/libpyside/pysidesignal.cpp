@@ -46,6 +46,8 @@
 
 #include <shiboken.h>
 
+#include <QtCore/QByteArray>
+#include <QtCore/QHash>
 #include <QtCore/QObject>
 #include <QtCore/QMetaMethod>
 #include <QtCore/QMetaObject>

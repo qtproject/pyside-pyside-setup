@@ -41,9 +41,6 @@
 #include "sbkstaticstrings_p.h"
 #include "autodecref.h"
 
-#include <vector>
-#include <unordered_set>
-
 namespace Shiboken::String
 {
 
@@ -215,50 +212,9 @@ Py_ssize_t len(PyObject *str)
 //     PyObject *attr = PyObject_GetAttr(obj, name());
 //
 
-using StaticStrings = std::unordered_set<PyObject *>;
-
-static void finalizeStaticStrings();    // forward
-
-static StaticStrings &staticStrings()
-{
-    static StaticStrings result;
-    return result;
-}
-
-static void finalizeStaticStrings()
-{
-    auto &set = staticStrings();
-    for (PyObject *ob : set) {
-        Py_SET_REFCNT(ob, 1);
-        Py_DECREF(ob);
-    }
-    set.clear();
-}
-
 PyObject *createStaticString(const char *str)
 {
-    static bool initialized = false;
-    if (!initialized) {
-        Py_AtExit(finalizeStaticStrings);
-        initialized = true;
-    }
-    PyObject *result = PyUnicode_InternFromString(str);
-    if (result == nullptr) {
-        // This error is never checked, but also very unlikely. Report and exit.
-        PyErr_Print();
-        Py_FatalError("unexpected error in createStaticString()");
-    }
-    auto it = staticStrings().find(result);
-    if (it == staticStrings().end())
-        staticStrings().insert(result);
-    /*
-     * Note: We always add one reference even if we have a new string.
-     *       This makes the strings immortal, and we are safe if someone
-     *       uses AutoDecRef, although the set cannot cope with deletions.
-     *       The exit handler cleans that up, anyway.
-     */
-    Py_INCREF(result);
-    return result;
+     return PyUnicode_InternFromString(str);
 }
 
 ///////////////////////////////////////////////////////////////////////

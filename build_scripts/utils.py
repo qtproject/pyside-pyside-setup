@@ -172,11 +172,11 @@ def find_vcdir(version):
     # trying Express edition
     if productdir is None:
         try:
-            hasattr(msvc9, VSEXPRESS_BASE)
+            hasattr(msvc9, VSEXPRESS_BASE)  # noqa: VSEXPRESS_BASE get defined with msvc9
         except AttributeError:
             pass
         else:
-            vsbase = VSEXPRESS_BASE % version
+            vsbase = VSEXPRESS_BASE % version  # noqa: VSEXPRESS_BASE get defined with msvc9
             try:
                 productdir = msvc9.Reg.get_value(rf"{vsbase}\Setup\VC", "productdir")
             except KeyError:
@@ -601,7 +601,10 @@ def macos_get_rpaths(libpath):
 
 
 def macos_add_rpath(rpath, library_path):
-    back_tick(f"install_name_tool -add_rpath {rpath} {library_path}")
+    try:
+        back_tick(f"install_name_tool -add_rpath {rpath} {library_path}")
+    except RuntimeError as e:
+        print(f"Exception {type(e).__name__}: {e}")
 
 
 def macos_fix_rpaths_for_library(library_path, qt_lib_dir):
@@ -648,8 +651,8 @@ def macos_fix_rpaths_for_library(library_path, qt_lib_dir):
     macos_add_qt_rpath(library_path, qt_lib_dir, existing_rpath_commands, install_names)
 
 
-def macos_add_qt_rpath(library_path, qt_lib_dir, existing_rpath_commands=[],
-                       library_dependencies=[]):
+def macos_add_qt_rpath(library_path, qt_lib_dir, existing_rpath_commands=None,
+                       library_dependencies=None):
     """
     Adds an rpath load command to the Qt lib directory if necessary
 
@@ -657,6 +660,12 @@ def macos_add_qt_rpath(library_path, qt_lib_dir, existing_rpath_commands=[],
     and adds an rpath load command that points to the Qt lib directory
     (qt_lib_dir).
     """
+    if existing_rpath_commands is None:
+        existing_rpath_commands = []
+
+    if library_dependencies is None:
+        library_dependencies = []
+
     if not existing_rpath_commands:
         existing_rpath_commands = macos_get_rpaths(library_path)
 

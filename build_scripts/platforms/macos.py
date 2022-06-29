@@ -153,7 +153,7 @@ def prepare_standalone_package_macos(self, vars):
             ignored_modules.extend(['libQt6WebEngine*.dylib'])
         accepted_modules = ['libQt6*.6.dylib']
         if constrain_modules:
-            accepted_modules = ["libQt6" + module + "*.6.dylib" for module in constrain_modules]
+            accepted_modules = [f"libQt6{module}*.6.dylib" for module in constrain_modules]
 
         copydir("{qt_lib_dir}",
                 "{st_build_dir}/{st_package_name}/Qt/lib",
