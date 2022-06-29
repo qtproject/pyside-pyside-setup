@@ -17,7 +17,7 @@ the beginning of ``createdb.py``:
 .. literalinclude:: createdb.py
    :language: python
    :linenos:
-   :lines: 3-7
+   :lines: 3-5
 
 The ``initDb`` function does most of the work needed to
 set up the database, but it depends on the ``addAuthor``,
@@ -31,7 +31,7 @@ C++ version
 .. literalinclude:: initdb.h
    :language: c++
    :linenos:
-   :lines: 18-44
+   :lines: 9-33
 
 Python version
 ---------------
@@ -51,7 +51,7 @@ C++ version
 .. literalinclude:: initdb.h
    :language: c++
    :linenos:
-   :lines: 44-122
+   :lines: 35-112
 
 Python version
 ---------------
