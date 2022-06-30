@@ -11,6 +11,7 @@
 #include <shiboken.h>
 
 #include <QtCore/QByteArray>
+#include <QtCore/QDebug>
 #include <QtCore/QHash>
 #include <QtCore/QObject>
 #include <QtCore/QMetaMethod>
@@ -22,6 +23,46 @@
 #include <cstring>
 
 #define QT_SIGNAL_SENTINEL '2'
+
+QDebug operator<<(QDebug debug, const PySideSignalData::Signature &s)
+{
+    QDebugStateSaver saver(debug);
+    debug.noquote();
+    debug.nospace();
+    debug << "Signature(\"" << s.signature << '"';
+    if (s.attributes)
+        debug << ", attributes=" << s.attributes;
+    debug << ')';
+    return debug;
+}
+
+QDebug operator<<(QDebug debug, const PySideSignalData &d)
+{
+    QDebugStateSaver saver(debug);
+    debug.noquote();
+    debug.nospace();
+    debug << "PySideSignalData(\"" << d.signalName << "\", "
+          << d.signatures;
+    if (d.signalArguments)
+        debug << ", signalArguments=\"" << *d.signalArguments << '"';
+    debug << ')';
+    return debug;
+}
+
+QDebug operator<<(QDebug debug, const PySideSignalInstancePrivate &d)
+{
+    QDebugStateSaver saver(debug);
+    debug.noquote();
+    debug.nospace();
+    debug << "PySideSignalInstancePrivate(\"" << d.signalName
+          << "\", \"" << d.signature << '"';
+    if (d.attributes)
+        debug << ", attributes=" << d.attributes;
+    if (d.homonymousMethod)
+        debug << ", homonymousMethod=" << d.homonymousMethod;
+    debug << ')';
+    return debug;
+}
 
 static bool connection_Check(PyObject *o)
 {
