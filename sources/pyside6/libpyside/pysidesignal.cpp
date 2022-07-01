@@ -559,21 +559,28 @@ static PyObject *signalInstanceEmit(PyObject *self, PyObject *args)
 
 static PyObject *signalInstanceGetItem(PyObject *self, PyObject *key)
 {
-    auto data = reinterpret_cast<PySideSignalInstance *>(self);
-    const auto sigName = data->d->signalName;
+    auto *firstSignal = reinterpret_cast<PySideSignalInstance *>(self);
+    const auto &sigName = firstSignal->d->signalName;
     const auto sigKey = PySide::Signal::parseSignature(key);
     const auto sig = PySide::Signal::buildSignature(sigName, sigKey);
-    while (data) {
+    for (auto *data = firstSignal; data != nullptr; data = data->d->next) {
         if (data->d->signature == sig) {
             PyObject *result = reinterpret_cast<PyObject *>(data);
             Py_INCREF(result);
             return result;
         }
-        data = data->d->next;
     }
 
-    PyErr_Format(PyExc_IndexError, "Signature %s not found for signal: %s",
-                 sig.constData(), sigName.constData());
+    // Build error message with candidates
+    QByteArray message = "Signature \"" + sig + "\" not found for signal: \""
+                         + sigName + "\". Available candidates: ";
+    for (auto *data = firstSignal; data != nullptr; data = data->d->next) {
+        if (data != firstSignal)
+            message += ", ";
+        message += '"' + data->d->signature + '"';
+    }
+
+    PyErr_SetString(PyExc_IndexError, message.constData());
     return nullptr;
 }
 
