@@ -414,6 +414,15 @@ static inline const TypeEntry *pointeeTypeEntry(const AbstractMetaType &smartPtr
     return smartPtrType.instantiations().constFirst().typeEntry();
 }
 
+static AbstractMetaType simplifiedType(AbstractMetaType type)
+{
+    type.setIndirections(0);
+    type.setConstant(false);
+    type.setReferenceType(NoReference);
+    type.decideUsagePattern();
+    return type;
+}
+
 void
 ApiExtractorPrivate::addInstantiatedContainersAndSmartPointers(InstantiationCollectContext &context,
                                                                const AbstractMetaType &type,
@@ -443,12 +452,7 @@ ApiExtractorPrivate::addInstantiatedContainersAndSmartPointers(InstantiationColl
         const QString typeName = getSimplifiedContainerTypeName(type);
         if (!context.instantiatedContainersNames.contains(typeName)) {
             context.instantiatedContainersNames.append(typeName);
-            auto simplifiedType = type;
-            simplifiedType.setIndirections(0);
-            simplifiedType.setConstant(false);
-            simplifiedType.setReferenceType(NoReference);
-            simplifiedType.decideUsagePattern();
-            context.instantiatedContainers.append(simplifiedType);
+            context.instantiatedContainers.append(simplifiedType(type));
         }
         return;
     }
@@ -496,14 +500,14 @@ void ApiExtractorPrivate::addInstantiatedSmartPointer(InstantiationCollectContex
                                                       const AbstractMetaType &type)
 {
     InstantiatedSmartPointer smp;
-    smp.type = type;
+    smp.type = simplifiedType(type);
     smp.smartPointer = AbstractMetaClass::findClass(m_builder->smartPointers(),
                                                     type.typeEntry());
     Q_ASSERT(smp.smartPointer);
 
     const auto &instantiatedType = type.instantiations().constFirst();
     auto *ste = static_cast<const SmartPointerTypeEntry *>(smp.smartPointer->typeEntry());
-    auto *typedefEntry = new TypedefEntry(SmartPointerTypeEntry::getTargetName(type),
+    auto *typedefEntry = new TypedefEntry(SmartPointerTypeEntry::getTargetName(smp.type),
                                           ste->name(), ste->version(), ste->parent());
     typedefEntry->setTargetLangPackage(ste->targetLangPackage());
     auto *instantiationEntry = TypeDatabase::initializeTypeDefEntry(typedefEntry, ste);
