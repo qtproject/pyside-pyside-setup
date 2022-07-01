@@ -86,7 +86,6 @@ macro(collect_optional_modules)
         Designer
         Xml
         Help Multimedia
-        HttpServer
         MultimediaWidgets
         OpenGL
         OpenGLWidgets
@@ -122,6 +121,8 @@ macro(collect_optional_modules)
     list(APPEND ALL_OPTIONAL_MODULES WebChannel WebEngineCore WebEngineWidgets
          WebEngineQuick WebSockets)
     if(NOT WIN32)
+        # FIXME: Move to global once DELETE define clash is resolved.
+        list(APPEND ALL_OPTIONAL_MODULES HttpServer)
         list(APPEND ALL_OPTIONAL_MODULES DBus)
     endif()
     if (Qt${QT_MAJOR_VERSION}Core_VERSION VERSION_GREATER 6.0.2)

@@ -12,6 +12,7 @@ dependencies: [
       "../../qt/qtdatavis3d",
       "../../qt/qtdeclarative",
       "../../qt/qtdoc",
+      "../../qt/qthttpserver",
       "../../qt/qtimageformats",
       "../../qt/qtpositioning",
       "../../qt/qtmultimedia",
