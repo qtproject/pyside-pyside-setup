@@ -1232,6 +1232,13 @@
     </add-function>
   </value-type>
   <value-type name="QPersistentModelIndex">
+    <extra-includes>
+      <include file-name="QtCore/QList" location="global"/>
+    </extra-includes>
+   <!-- For signal QAbstractItemModel::layoutAboutToBeChanged(QList<QPersistentModelIndex>) -->
+   <inject-code class="target" position="end">
+     qRegisterMetaType&lt;QList&lt;QPersistentModelIndex&gt; &gt;("QList_QPersistentModelIndex");
+   </inject-code>
     <modify-function signature="internalPointer()const">
         <inject-code class="target" position="beginning">
             <insert-template name="return_internal_pointer" />
