@@ -9,6 +9,9 @@
 #include <memory>
 
 class Integer;
+namespace Smart {
+class Integer2;
+}
 
 class LIB_SMART_API StdUniquePtrTestBench
 {
@@ -18,6 +21,7 @@ public:
 
     static std::unique_ptr<Integer> createInteger(int v = 42);
     static std::unique_ptr<Integer> createNullInteger();
+    static void printInteger2(const std::unique_ptr<Smart::Integer2> &p);
     static void printInteger(const std::unique_ptr<Integer> &p);
     static void takeInteger(std::unique_ptr<Integer> p); // Call with std::move()
 

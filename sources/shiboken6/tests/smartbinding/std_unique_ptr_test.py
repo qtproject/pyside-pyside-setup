@@ -11,7 +11,7 @@ from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from shiboken_paths import init_paths
 init_paths()
-from smart import Integer, StdUniquePtrTestBench, StdUniquePtrVirtualMethodTester, std
+from smart import Integer, Integer2, StdUniquePtrTestBench, StdUniquePtrVirtualMethodTester, std
 
 
 def call_func_on_ptr(ptr):
@@ -53,6 +53,17 @@ class StdUniquePtrTests(unittest.TestCase):
         iv.setValue(42)
         np = std.unique_ptr_Integer(iv)
         self.assertEqual(np.value(), 42)
+
+    def test_derived(self):
+        iv2 = Integer2()  # Construct from pointee
+        iv2.setValue(42)
+        p = std.unique_ptr_Smart_Integer2(iv2)
+        self.assertEqual(p.value(), 42)
+        StdUniquePtrTestBench.printInteger2(p)  # unique_ptr by ref
+        self.assertTrue(p)
+        StdUniquePtrTestBench.printInteger(p)  # conversion
+        # FIXME: This fails, pointer is moved in value conversion
+        # self.assertTrue(p)
 
     def testInt(self):
         p = StdUniquePtrTestBench.createInt()  # unique_ptr by ref

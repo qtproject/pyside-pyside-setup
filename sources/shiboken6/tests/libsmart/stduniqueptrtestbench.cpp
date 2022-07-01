@@ -17,6 +17,17 @@ std::ostream &operator<<(std::ostream &str, const std::unique_ptr<Integer> &p)
     return str;
 }
 
+std::ostream &operator<<(std::ostream &str, const std::unique_ptr<Smart::Integer2> &p)
+{
+    str << "unique_ptr<Integer>(";
+    if (p.get())
+        str << p->value();
+    else
+        str << "nullptr";
+    str << ')';
+    return str;
+}
+
 std::ostream &operator<<(std::ostream &str, const std::unique_ptr<int> &p)
 {
     str << "unique_ptr<int>(";
@@ -114,4 +125,9 @@ int StdUniquePtrVirtualMethodTester::doModifyIntegerByRef(const std::unique_ptr<
 int StdUniquePtrVirtualMethodTester::doModifyIntegerByValue(std::unique_ptr<Integer> p)
 {
     return p->value() + 1;
+}
+
+void StdUniquePtrTestBench::printInteger2(const std::unique_ptr<Smart::Integer2> &p)
+{
+    std::cerr << __FUNCTION__ << ' ' << p << '\n';
 }

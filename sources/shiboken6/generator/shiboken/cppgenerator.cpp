@@ -3422,7 +3422,9 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s,
         ? targetType.cppSignature()
         : getFullTypeName(targetType.typeEntry());
     c << "*reinterpret_cast<" << fullTypeName << " *>(cppOut) = "
-        << fullTypeName << '(' << conversion << ");";
+        << fullTypeName << '('
+        << (sourceType.isUniquePointer() ? stdMove(conversion) : conversion)
+        << ");";
     QString sourceTypeName = fixedCppTypeName(sourceType);
     QString targetTypeName = fixedCppTypeName(targetType);
     writePythonToCppFunction(s, c.toString(), sourceTypeName, targetTypeName);

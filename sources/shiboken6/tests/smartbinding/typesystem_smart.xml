@@ -57,7 +57,7 @@
         <smart-pointer-type name="unique_ptr" type="unique" getter="get"
                             value-check-method="operator bool"
                             reset-method="reset"
-                            instantiations="Integer,int">
+                            instantiations="Integer,Smart::Integer2,int">
             <include file-name="memory" location="global"/>
         </smart-pointer-type>
 
