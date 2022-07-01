@@ -133,6 +133,8 @@ on both the host, and the target. The used Qt versions on both platforms
 should have the same minor version. That is, Qt 6.3 (host)
 cannot be used with a Qt 6.2 (target), or the other way around.
 
+.. note:: It is recommended to use the same version of Qt on both host and target to avoid possible
+  unconventional errors.
 
 Prerequisites
 ~~~~~~~~~~~~~
@@ -184,6 +186,9 @@ Copy the package from the target to your host:
     rsync -vR --progress USERNAME@TARGET_IP:sysroot.tar.xz .
 
 Once you have the tar file, unpack it inside a ``rpi-sysroot`` directory.
+
+Fix Symlinks
+************
 
 It is recommended to run the following script to fix
 most of the issues you would find with symbolic links:
