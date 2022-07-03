@@ -44,7 +44,6 @@ from sample import *
 from shiboken_test_helper import objectFullname
 
 from shiboken6 import Shiboken
-_init_pyside_extension()   # trigger bootstrap
 
 from shibokensupport.signature import get_signature
 

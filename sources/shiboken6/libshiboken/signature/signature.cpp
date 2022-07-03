@@ -290,8 +290,6 @@ static PyObject *get_signature(PyObject * /* self */, PyObject *args)
     PyObject *ob;
     PyObject *modifier = nullptr;
 
-    init_module_1();
-
     if (!PyArg_ParseTuple(args, "O|O", &ob, &modifier))
         return nullptr;
     if (Py_TYPE(ob) == PepFunction_TypePtr)
@@ -353,7 +351,6 @@ PyMethodDef signature_methods[] = {
 
 static int PySide_BuildSignatureArgs(PyObject *obtype_mod, const char *signatures[])
 {
-    init_module_1();
     AutoDecRef type_key(GetTypeKey(obtype_mod));
     /*
      * PYSIDE-996: Avoid string overflow in MSVC, which has a limit of
@@ -381,7 +378,6 @@ PyObject *PySide_BuildSignatureProps(PyObject *type_key)
      * We simply pick up the arguments that we stored here and replace
      * them by the function result.
      */
-    init_module_2();
     if (type_key == nullptr)
         return nullptr;
     PyObject *numkey = PyDict_GetItem(pyside_globals->arg_dict, type_key);
@@ -480,6 +476,7 @@ static int PySide_FinishSignatures(PyObject *module, const char *signatures[])
 
 int InitSignatureStrings(PyTypeObject *type, const char *signatures[])
 {
+    init_shibokensupport_module();
     auto *ob_type = reinterpret_cast<PyObject *>(type);
     int ret = PySide_BuildSignatureArgs(ob_type, signatures);
     if (ret < 0) {
@@ -599,13 +596,12 @@ static PyObject *adjustFuncName(const char *func_name)
 
 void SetError_Argument(PyObject *args, const char *func_name, PyObject *info)
 {
+    init_shibokensupport_module();
     /*
      * This function replaces the type error construction with extra
      * overloads parameter in favor of using the signature module.
      * Error messages are rare, so we do it completely in Python.
      */
-    init_module_1();
-    init_module_2();
 
     // PYSIDE-1305: Handle errors set by fillQtProperties.
     if (PyErr_Occurred()) {
@@ -647,17 +643,19 @@ void SetError_Argument(PyObject *args, const char *func_name, PyObject *info)
 
 PyObject *Sbk_TypeGet___signature__(PyObject *ob, PyObject *modifier)
 {
+    init_shibokensupport_module();
     return pyside_tp_get___signature__(ob, modifier);
 }
 
 PyObject *Sbk_TypeGet___doc__(PyObject *ob)
 {
+    init_shibokensupport_module();
     return pyside_tp_get___doc__(ob);
 }
 
 PyObject *GetFeatureDict()
 {
-    init_module_1();
+    init_shibokensupport_module();
     return pyside_globals->feature_dict;
 }
 

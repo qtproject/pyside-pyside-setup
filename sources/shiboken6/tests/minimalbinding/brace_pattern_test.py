@@ -48,7 +48,6 @@ from shiboken_paths import init_paths
 init_paths()
 
 from shiboken6 import Shiboken
-_init_pyside_extension()   # trigger bootstrap
 
 from shibokensupport.signature.lib.tool import build_brace_pattern
 
