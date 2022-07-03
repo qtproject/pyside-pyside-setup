@@ -21,6 +21,7 @@
 #include <algorithm>
 #include "threadstatesaver.h"
 #include "signature.h"
+#include "signature_p.h"
 #include "voidptr.h"
 
 #include <iostream>
@@ -720,14 +721,21 @@ void init()
 }
 
 // PYSIDE-1415: Publish Shiboken objects.
-void initSignature(PyObject *module)
+// PYSIDE-1735: Initialize the whole Shiboken startup.
+void initShibokenSupport(PyObject *module)
 {
-    auto *type = SbkObject_TypeF();
-    if (InitSignatureStrings(type, SbkObject_SignatureStrings) < 0)
-        return;
-
     Py_INCREF(SbkObject_TypeF());
     PyModule_AddObject(module, "Object", reinterpret_cast<PyObject *>(SbkObject_TypeF()));
+
+    // PYSIDE-1735: When the initialization was moved into Shiboken import, this
+    //              Py_INCREF became necessary. No idea why.
+    Py_INCREF(module);
+    init_module_1();
+    init_module_2();
+
+    auto *type = SbkObject_TypeF();
+    if (InitSignatureStrings(type, SbkObject_SignatureStrings) < 0)
+        Py_FatalError("Error in initShibokenSupport");
 }
 
 // setErrorAboutWrongArguments now gets overload info from the signature module.

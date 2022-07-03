@@ -119,7 +119,7 @@ namespace Shiboken
 LIBSHIBOKEN_API void init();
 
 /// PYSIDE-1415: Publish Shiboken objects.
-LIBSHIBOKEN_API void initSignature(PyObject *module);
+LIBSHIBOKEN_API void initShibokenSupport(PyObject *module);
 
 /// Delete the class T allocated on \p cptr.
 template<typename T>
