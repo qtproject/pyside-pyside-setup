@@ -68,26 +68,6 @@ def _setupQtDirectories():
               file=sys.stderr)
         raise
 
-    #   Trigger signature initialization.
-    try:
-        # PYSIDE-829: Avoid non-existent attributes in compiled code (Nuitka).
-        # We now use an explicit function instead of touching a signature.
-        _init_pyside_extension()
-    except (AttributeError, NameError):
-        stars = 79 * "*"
-        fname = Shiboken.__file__
-        print(dedent(f'''\
-            {stars}
-            PySide6/__init__.py: The `signature` module was not initialized.
-            This libshiboken module was loaded from
-
-            "{fname}".
-
-            Please make sure that this is the real Shiboken binary and not just a folder.
-            {stars}
-            '''), file=sys.stderr)
-        raise
-
     if sys.platform == 'win32':
         # PATH has to contain the package directory, otherwise plugins
         # won't be able to find their required Qt libraries (e.g. the
