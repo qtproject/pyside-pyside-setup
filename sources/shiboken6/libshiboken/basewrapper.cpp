@@ -730,8 +730,7 @@ void initShibokenSupport(PyObject *module)
     // PYSIDE-1735: When the initialization was moved into Shiboken import, this
     //              Py_INCREF became necessary. No idea why.
     Py_INCREF(module);
-    init_module_1();
-    init_module_2();
+    init_shibokensupport_module();
 
     auto *type = SbkObject_TypeF();
     if (InitSignatureStrings(type, SbkObject_SignatureStrings) < 0)

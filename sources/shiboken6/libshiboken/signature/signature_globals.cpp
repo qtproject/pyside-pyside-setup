@@ -28,26 +28,13 @@ static const unsigned char PySide_SignatureLoader[] = {
 #include "embed/signature_bootstrap_inc.h"
     };
 
-static PyObject *_init_pyside_extension(PyObject * /* self */, PyObject * /* args */)
+static safe_globals_struc *init_phase_1()
 {
-    init_module_1();
-    init_module_2();
-    Py_RETURN_NONE;
-}
-
-// This function will be inserted into __builtins__.
-static PyMethodDef init_methods[] = {
-    {"_init_pyside_extension", (PyCFunction)_init_pyside_extension, METH_NOARGS},
-    {nullptr, nullptr}
-};
-
-static safe_globals_struc *init_phase_1(PyMethodDef *init_meth)
-{
-    {
+    do {
         auto *p = reinterpret_cast<safe_globals_struc *>
                                     (malloc(sizeof(safe_globals_struc)));
         if (p == nullptr)
-            goto error;
+            break;
         /*
          * Initializing module signature_bootstrap.
          * Since we now have an embedding script, we can do this without any
@@ -57,23 +44,21 @@ static safe_globals_struc *init_phase_1(PyMethodDef *init_meth)
         // We must work for multiple versions or we are cross-building for a different
         // Python version interpreter, so use source code.
 #else
-        AutoDecRef marshal_module(PyImport_Import(PyName::marshal()));
-        if (marshal_module.isNull())
-            goto error;
+        AutoDecRef marshal_module(PyImport_Import(PyName::marshal()));      // builtin
         AutoDecRef loads(PyObject_GetAttr(marshal_module, PyName::loads()));
         if (loads.isNull())
-            goto error;
+            break;
 #endif
         char *bytes_cast = reinterpret_cast<char *>(
                                        const_cast<unsigned char *>(PySide_SignatureLoader));
         AutoDecRef bytes(PyBytes_FromStringAndSize(bytes_cast, sizeof(PySide_SignatureLoader)));
         if (bytes.isNull())
-            goto error;
+            break;
 #if defined(Py_LIMITED_API) || defined(SHIBOKEN_NO_EMBEDDING_PYC)
         PyObject *builtins = PyEval_GetBuiltins();
         PyObject *compile = PyDict_GetItem(builtins, PyName::compile());
         if (compile == nullptr)
-            goto error;
+            break;
         AutoDecRef code_obj(PyObject_CallFunction(compile, "Oss",
                                 bytes.object(), "signature_bootstrap.py", "exec"));
 #else
@@ -81,69 +66,64 @@ static safe_globals_struc *init_phase_1(PyMethodDef *init_meth)
                                 loads, bytes.object(), nullptr));
 #endif
         if (code_obj.isNull())
-            goto error;
+            break;
         p->helper_module = PyImport_ExecCodeModule("signature_bootstrap", code_obj);
         if (p->helper_module == nullptr)
-            goto error;
+            break;
         // Initialize the module
         PyObject *mdict = PyModule_GetDict(p->helper_module);
         if (PyDict_SetItem(mdict, PyMagicName::builtins(), PyEval_GetBuiltins()) < 0)
-            goto error;
-        /*
-         * Unpack an embedded ZIP file with more signature modules.
+            break;
+
+        /*********************************************************************
+         *
+         * Attention!
+         * ----------
+         *
+         * We are unpacking an embedded ZIP file with more signature modules.
          * They will be loaded later with the zipimporter.
-         * Due to MSVC's limitation to 64k strings, we need to assemble pieces.
+         * The file `signature_bootstrap.py` does the unpacking and starts the
+         * loader. See `init_phase_2`.
+         *
+         * Due to MSVC's limitation to 64k strings, we needed to assemble pieces.
          */
         auto **block_ptr = reinterpret_cast<const char **>(PySide_CompressedSignaturePackage);
         int npieces = 0;
-        PyObject *piece, *zipped_string_sequence = PyList_New(0);
-        if (zipped_string_sequence == nullptr)
-            return nullptr;
+        PyObject *piece{};
+        AutoDecRef zipped_string_sequence(PyList_New(0));
         for (; **block_ptr != 0; ++block_ptr) {
             npieces++;
             // we avoid the string/unicode dilemma by not using PyString_XXX:
             piece = Py_BuildValue("s", *block_ptr);
             if (piece == nullptr || PyList_Append(zipped_string_sequence, piece) < 0)
-                goto error;
+                break;
         }
         if (PyDict_SetItemString(mdict, "zipstring_sequence", zipped_string_sequence) < 0)
-            goto error;
-        Py_DECREF(zipped_string_sequence);
+            break;
 
         // build a dict for diverse mappings
         p->map_dict = PyDict_New();
-        if (p->map_dict == nullptr)
-            goto error;
 
         // build a dict for the prepared arguments
         p->arg_dict = PyDict_New();
-        if (p->arg_dict == nullptr
-            || PyObject_SetAttrString(p->helper_module, "pyside_arg_dict", p->arg_dict) < 0)
-            goto error;
+        if (PyObject_SetAttrString(p->helper_module, "pyside_arg_dict", p->arg_dict) < 0)
+            break;
 
         // build a dict for assigned signature values
         p->value_dict = PyDict_New();
-        if (p->value_dict == nullptr)
-            goto error;
 
         // PYSIDE-1019: build a __feature__ dict
         p->feature_dict = PyDict_New();
-        if (p->feature_dict == nullptr
-            || PyObject_SetAttrString(p->helper_module, "pyside_feature_dict", p->feature_dict) < 0)
-            goto error;
+        if (PyObject_SetAttrString(p->helper_module, "pyside_feature_dict", p->feature_dict) < 0)
+            break;
 
         // This function will be disabled until phase 2 is done.
         p->finish_import_func = nullptr;
 
-        // Initialize the explicit init function.
-        AutoDecRef init(PyCFunction_NewEx(init_meth, nullptr, nullptr));
-        if (init.isNull()
-            || PyDict_SetItemString(PyEval_GetBuiltins(), init_meth->ml_name, init) != 0)
-            goto error;
-
         return p;
-    }
-error:
+
+    } while (0);
+
     PyErr_Print();
     Py_FatalError("could not initialize part 1");
     return nullptr;
@@ -151,7 +131,7 @@ error:
 
 static int init_phase_2(safe_globals_struc *p, PyMethodDef *methods)
 {
-    {
+    do {
         PyMethodDef *ml;
 
         // The single function to be called, but maybe more to come.
@@ -159,7 +139,7 @@ static int init_phase_2(safe_globals_struc *p, PyMethodDef *methods)
             PyObject *v = PyCFunction_NewEx(ml, nullptr, nullptr);
             if (v == nullptr
                 || PyObject_SetAttrString(p->helper_module, ml->ml_name, v) != 0)
-                goto error;
+                break;
             Py_DECREF(v);
         }
         // The first entry is __feature_import__, add documentation.
@@ -170,33 +150,46 @@ static int init_phase_2(safe_globals_struc *p, PyMethodDef *methods)
 
         PyObject *bootstrap_func = PyObject_GetAttrString(p->helper_module, "bootstrap");
         if (bootstrap_func == nullptr)
-            goto error;
-        // The return value of the bootstrap function is the loader module.
-        PyObject *loader = PyObject_CallFunction(bootstrap_func, "()");
+            break;
+
+        /*********************************************************************
+         *
+         * Attention!
+         * ----------
+         *
+         * This is the entry point where everything in folder
+         * `shibokensupport` becomes initialized. It starts with
+         * `signature_bootstrap.py` and continues from there to `loader.py`.
+         *
+         * The return value of the bootstrap function is the loader module.
+         */
+        PyObject *loader = PyObject_CallFunctionObjArgs(bootstrap_func, nullptr);
         if (loader == nullptr)
-            goto error;
+            break;
+
         // now the loader should be initialized
         p->pyside_type_init_func = PyObject_GetAttrString(loader, "pyside_type_init");
         if (p->pyside_type_init_func == nullptr)
-            goto error;
+            break;
         p->create_signature_func = PyObject_GetAttrString(loader, "create_signature");
         if (p->create_signature_func == nullptr)
-            goto error;
+            break;
         p->seterror_argument_func = PyObject_GetAttrString(loader, "seterror_argument");
         if (p->seterror_argument_func == nullptr)
-            goto error;
+            break;
         p->make_helptext_func = PyObject_GetAttrString(loader, "make_helptext");
         if (p->make_helptext_func == nullptr)
-            goto error;
+            break;
         p->finish_import_func = PyObject_GetAttrString(loader, "finish_import");
         if (p->finish_import_func == nullptr)
-            goto error;
+            break;
         p->feature_import_func = PyObject_GetAttrString(loader, "feature_import");
         if (p->feature_import_func == nullptr)
-            goto error;
+            break;
         return 0;
-    }
-error:
+
+    } while (0);
+
     PyErr_Print();
     Py_FatalError("could not initialize part 2");
     return -1;
@@ -235,12 +228,12 @@ static void handler(int sig) {
 
 safe_globals pyside_globals = nullptr;
 
-void init_module_1(void)
+void init_shibokensupport_module(void)
 {
     static int init_done = 0;
 
     if (!init_done) {
-        pyside_globals = init_phase_1(init_methods);
+        pyside_globals = init_phase_1();
         if (pyside_globals != nullptr)
             init_done = 1;
 
@@ -251,17 +244,6 @@ void init_module_1(void)
             signal(SIGSEGV, handler);   // install our handler
 #endif // _WIN32
 
-    }
-}
-
-void init_module_2(void)
-{
-    static int init_done = 0;
-
-    if (!init_done) {
-        // Phase 2 will call __init__.py which touches a signature, itself.
-        // Therefore we set init_done prior to init_phase_2().
-        init_done = 1;
         init_phase_2(pyside_globals, signature_methods);
         // Enum must be initialized when signatures exist, not earlier.
         init_enum();

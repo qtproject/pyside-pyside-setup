@@ -28,7 +28,6 @@ init_paths()
 from sample import IntArray2, VirtualMethods
 
 import shiboken6
-_init_pyside_extension()   # trigger init, which does not happen in tests
 from shibokensupport.signature import get_signature
 
 import typing

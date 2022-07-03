@@ -29,8 +29,7 @@ typedef struct safe_globals_struc {
 extern safe_globals pyside_globals;
 extern PyMethodDef signature_methods[];
 
-void init_module_1(void);
-void init_module_2(void);
+void init_shibokensupport_module(void);
 
 // signature.cpp
 
