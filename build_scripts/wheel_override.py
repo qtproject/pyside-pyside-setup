@@ -136,7 +136,7 @@ class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
 
         so_abi = python_target_info['so_abi']
         if so_abi and so_abi.startswith('cpython-'):
-            interpreter_name, cp_version = so_abi.split('-')
+            interpreter_name, cp_version = so_abi.split('-')[:2]
             impl_name = tags.INTERPRETER_SHORT_NAMES.get(interpreter_name) or interpreter_name
             impl_ver = f"{py_version_major}{py_version_minor}"
             impl = impl_name + impl_ver
