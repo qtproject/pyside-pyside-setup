@@ -45,7 +45,7 @@ import sys
 import time
 from packaging.version import parse as parse_version
 from pathlib import Path
-from shutil import which, copytree, rmtree
+from shutil import which, copytree
 from textwrap import dedent
 
 # PYSIDE-1760: Pre-load setuptools modules early to avoid racing conditions.
@@ -77,7 +77,7 @@ from .qtinfo import QtInfo
 from .utils import (copydir, copyfile, detect_clang, filter_match,
                     get_numpy_location, get_python_dict, init_msvc_env,
                     linux_fix_rpaths_for_library, macos_fix_rpaths_for_library,
-                    platform_cmake_options, rmtree, run_process,
+                    platform_cmake_options, remove_tree, run_process,
                     run_process_output, update_env_path)
 from .versions import PYSIDE, PYSIDE_MODULE, SHIBOKEN
 from .wheel_override import get_bdist_wheel_override, wheel_module_exists
@@ -385,11 +385,11 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
         # Revisit once Clang is bundled with Qt.
         if (sys.platform == "win32"
                 and parse_version(self.qtinfo.version) >= parse_version("5.7.0")):
-            clang_dir = detect_clang()
-            if clang_dir[0]:
-                clangBinDir = os.path.join(clang_dir[0], 'bin')
+            clang_dir, clang_source = detect_clang()
+            if clang_dir:
+                clangBinDir = os.path.join(clang_dir, 'bin')
                 if clangBinDir not in os.environ.get('PATH'):
-                    log.info(f"Adding {clangBinDir} as detected by {clang_dir[1]} to PATH")
+                    log.info(f"Adding {clangBinDir} as detected by {clang_source} to PATH")
                     additional_paths.append(clangBinDir)
             else:
                 raise DistutilsSetupError("Failed to detect Clang when checking "
@@ -481,7 +481,7 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
                 # and 'pyside6' inside the 'package_for_wheels' directory.
                 if _dst.exists():
                     log.warn(f'***** Found directory "{_dst}", removing it first.')
-                    rmtree(_dst)
+                    remove_tree(_dst)
 
                 try:
                     # This should be copied because the package directory
@@ -589,7 +589,7 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
             if not OPTION["REUSE_BUILD"]:
                 log.info(f"Deleting module build folder {module_build_dir}...")
                 try:
-                    rmtree(module_build_dir)
+                    remove_tree(module_build_dir)
                 except Exception as e:
                     log.error(f'***** problem removing "{module_build_dir}"')
                     log.error(f'ignored error: {e}')
@@ -907,7 +907,7 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
         """
         try:
             log.info("\nPreparing setup tools build directory.\n")
-            vars = {
+            _vars = {
                 "site_packages_dir": self.site_packages_dir,
                 "sources_dir": self.sources_dir,
                 "install_dir": self.install_dir,
@@ -939,7 +939,7 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
             # Needed for correct file installation in generator build
             # case.
             if config.is_internal_shiboken_generator_build():
-                vars['cmake_package_name'] = config.shiboken_module_option_name
+                _vars['cmake_package_name'] = config.shiboken_module_option_name
 
             os.chdir(self.script_dir)
 
@@ -951,16 +951,16 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
             if os.path.isdir(self.st_build_dir):
                 log.info(f"Removing {self.st_build_dir}")
                 try:
-                    rmtree(self.st_build_dir)
+                    remove_tree(self.st_build_dir)
                 except Exception as e:
                     log.warn(f'***** problem removing "{self.st_build_dir}"')
                     log.warn(f'ignored error: {e}')
 
             if sys.platform == "win32":
-                vars['dbg_postfix'] = OPTION["DEBUG"] and "_d" or ""
-                return prepare_packages_win32(self, vars)
+                _vars['dbg_postfix'] = OPTION["DEBUG"] and "_d" or ""
+                return prepare_packages_win32(self, _vars)
             else:
-                return prepare_packages_posix(self, vars)
+                return prepare_packages_posix(self, _vars)
         except IOError as e:
             print('setup.py/prepare_packages: ', e)
             raise
@@ -970,10 +970,10 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
             return True
         return False
 
-    def get_built_pyside_config(self, vars):
+    def get_built_pyside_config(self, _vars):
         # Get config that contains list of built modules, and
         # SOVERSIONs of the built libraries.
-        st_build_dir = vars['st_build_dir']
+        st_build_dir = _vars['st_build_dir']
         config_path = os.path.join(st_build_dir, config.package_name(), "_config.py")
         temp_config = get_python_dict(config_path)
         if 'built_modules' not in temp_config:
@@ -1042,10 +1042,10 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
             clang_lib_path = os.path.abspath(clang_lib_path)
 
         # The destination will be the shiboken package folder.
-        vars = {}
-        vars['st_build_dir'] = self.st_build_dir
-        vars['st_package_name'] = config.package_name()
-        destination_dir = "{st_build_dir}/{st_package_name}".format(**vars)
+        _vars = {}
+        _vars['st_build_dir'] = self.st_build_dir
+        _vars['st_package_name'] = config.package_name()
+        destination_dir = "{st_build_dir}/{st_package_name}".format(**_vars)
 
         if os.path.exists(clang_lib_path):
             basename = os.path.basename(clang_lib_path)

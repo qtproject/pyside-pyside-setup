@@ -102,8 +102,8 @@ def _get_py_library_unix(build_type, py_version, py_prefix, py_libdir,
     if py_libdir is None or not os.path.exists(py_libdir):
         py_libdir = os.path.join(py_prefix, "lib")
     if py_include_dir is None or not os.path.exists(py_include_dir):
-        dir = f"include/python{py_version}"
-        py_include_dir = os.path.join(py_prefix, dir)
+        directory = f"include/python{py_version}"
+        py_include_dir = os.path.join(py_prefix, directory)
     lib_exts = ['.so']
     if sys.platform == 'darwin':
         lib_exts.append('.dylib')
@@ -218,7 +218,8 @@ class BuildInfoCollectorMixin(object):
             self.py_arch = platform_arch[:-3]
 
             py_executable = sys.executable
-            py_version = f"{sys.version_info[0]}.{sys.version_info[1]}"
+            _major, _minor, *_ = sys.version_info
+            py_version = f"{_major}.{_minor}"
             py_include_dir = get_config_var("INCLUDEPY")
             py_libdir = get_config_var("LIBDIR")
             # distutils.sysconfig.get_config_var('prefix') returned the

@@ -264,11 +264,11 @@ def platform_cmake_options(as_tuple_list=False):
     return result
 
 
-def copyfile(src, dst, force=True, vars=None, force_copy_symlink=False,
+def copyfile(src, dst, force=True, _vars=None, force_copy_symlink=False,
              make_writable_by_owner=False):
-    if vars is not None:
-        src = src.format(**vars)
-        dst = dst.format(**vars)
+    if _vars is not None:
+        src = src.format(**_vars)
+        dst = dst.format(**_vars)
 
     if not os.path.exists(src) and not force:
         log.info(f"**Skipping copy file\n  {src} to\n  {dst}\n  Source does not exist")
@@ -317,11 +317,11 @@ def copyfile(src, dst, force=True, vars=None, force_copy_symlink=False,
     return dst
 
 
-def makefile(dst, content=None, vars=None):
-    if vars is not None:
+def makefile(dst, content=None, _vars=None):
+    if _vars is not None:
         if content is not None:
-            content = content.format(**vars)
-        dst = dst.format(**vars)
+            content = content.format(**_vars)
+        dst = dst.format(**_vars)
 
     log.info(f"Making file {dst}.")
 
@@ -334,25 +334,25 @@ def makefile(dst, content=None, vars=None):
             f.write(content)
 
 
-def copydir(src, dst, filter=None, ignore=None, force=True, recursive=True, vars=None,
+def copydir(src, dst, _filter=None, ignore=None, force=True, recursive=True, _vars=None,
             dir_filter_function=None, file_filter_function=None, force_copy_symlinks=False):
 
-    if vars is not None:
-        src = src.format(**vars)
-        dst = dst.format(**vars)
-        if filter is not None:
-            for i in range(len(filter)):
-                filter[i] = filter[i].format(**vars)
+    if _vars is not None:
+        src = src.format(**_vars)
+        dst = dst.format(**_vars)
+        if _filter is not None:
+            for i in range(len(_filter)):
+                _filter[i] = _filter[i].format(**_vars)
         if ignore is not None:
             for i in range(len(ignore)):
-                ignore[i] = ignore[i].format(**vars)
+                ignore[i] = ignore[i].format(**_vars)
 
     if not os.path.exists(src) and not force:
         log.info(f"**Skipping copy tree\n  {src} to\n  {dst}\n  Source does not exist. "
-                 f"filter={filter}. ignore={ignore}.")
+                 f"filter={_filter}. ignore={ignore}.")
         return []
 
-    log.info(f"Copying tree\n  {src} to\n  {dst}. filter={filter}. ignore={ignore}.")
+    log.info(f"Copying tree\n  {src} to\n  {dst}. filter={_filter}. ignore={ignore}.")
 
     names = os.listdir(src)
 
@@ -366,17 +366,17 @@ def copydir(src, dst, filter=None, ignore=None, force=True, recursive=True, vars
                 if (dir_filter_function and not dir_filter_function(name, src, srcname)):
                     continue
                 if recursive:
-                    results.extend(copydir(srcname, dstname, filter, ignore, force, recursive,
-                                           vars, dir_filter_function, file_filter_function,
+                    results.extend(copydir(srcname, dstname, _filter, ignore, force, recursive,
+                                           _vars, dir_filter_function, file_filter_function,
                                            force_copy_symlinks))
             else:
                 if ((file_filter_function is not None and not file_filter_function(name, srcname))
-                        or (filter is not None and not filter_match(name, filter))
+                        or (_filter is not None and not filter_match(name, _filter))
                         or (ignore is not None and filter_match(name, ignore))):
                     continue
                 if not os.path.exists(dst):
                     os.makedirs(dst)
-                results.append(copyfile(srcname, dstname, True, vars, force_copy_symlinks))
+                results.append(copyfile(srcname, dstname, True, _vars, force_copy_symlinks))
         # catch the Error from the recursive copytree so that we can
         # continue with other files
         except shutil.Error as err:
@@ -402,9 +402,10 @@ def make_file_writable_by_owner(path):
     os.chmod(path, current_permissions | stat.S_IWUSR)
 
 
-def rmtree(dirname, ignore=False):
+def remove_tree(dirname, ignore=False):
     def handle_remove_readonly(func, path, exc):
-        excvalue = exc[1]
+        # exc returns like 'sys.exc_info()': type, value, traceback
+        _, excvalue, _ = exc
         if func in (os.rmdir, os.remove) and excvalue.errno == errno.EACCES:
             os.chmod(path, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)  # 0777
             func(path)
@@ -460,10 +461,10 @@ def get_environment_from_batch_command(env_cmd, initial=None):
             return False
         return True
 
-    def consume(iter):
+    def consume(it):
         try:
             while True:
-                next(iter)
+                next(it)
         except StopIteration:
             pass
 
@@ -1261,14 +1262,9 @@ def parse_cmake_conf_assignments_by_key(source_dir):
         values.
     """
 
-    d = {}
     contents = (Path(source_dir) / ".cmake.conf").read_text()
     matches = re.findall(r'set\((.+?) "(.*?)"\)', contents)
-    for m in matches:
-        key = m[0]
-        value = m[1]
-        if key and value:
-            d[key] = value
+    d = {key: value for key, value in matches}
     return d
 
 
@@ -1318,7 +1314,7 @@ def configure_cmake_project(project_path,
                            f"Configure args were:\n  {cmd_string}")
 
     if clean_temp_dir:
-        rmtree(build_path)
+        remove_tree(build_path)
 
     return output
 
