@@ -74,7 +74,7 @@ Find the build system information `Qt 6 Build System
 
    .. code-block:: bash
 
-      cmake -GNinja -DMCAKE_BUILD_TYPE=Debug \
+      cmake -GNinja -DCMAKE_BUILD_TYPE=Debug \
       -DCMAKE_INSTALL_PREFIX=/path/to/install/Qt -DBUILD_qtwebengine=OFF ..
       cmake --build . --parallel
       cmake --install .
