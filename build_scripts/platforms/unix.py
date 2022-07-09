@@ -52,7 +52,7 @@ from .macos import prepare_standalone_package_macos
 def _macos_copy_gui_executable(name, _vars=None):
     """macOS helper: Copy a GUI executable from the .app folder and return the
        files"""
-    app_name = name[:1].upper() + name[1:] + '.app'
+    app_name = f"{name.capitalize()}.app"
     return copydir(f"{{install_dir}}/bin/{app_name}",
                    f"{{st_build_dir}}/{{st_package_name}}/{app_name}",
                    _filter=None, recursive=True,
@@ -92,9 +92,9 @@ def prepare_packages_posix(self, _vars):
     def adjusted_lib_name(name, version):
         postfix = ''
         if sys.platform.startswith('linux'):
-            postfix = '.so.' + version
+            postfix = f".so.{version}"
         elif sys.platform == 'darwin':
-            postfix = '.' + version + '.dylib'
+            postfix = f".{version}.dylib"
         return name + postfix
 
     if config.is_internal_shiboken_module_build():

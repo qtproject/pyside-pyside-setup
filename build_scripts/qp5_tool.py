@@ -228,7 +228,7 @@ def read_config(key):
     """
     if not config_dict:
         read_config_file(config_file)
-    repo_value = config_dict.get(key + '-' + base_dir)
+    repo_value = config_dict.get(f"{key}-{base_dir}")
     return repo_value if repo_value else config_dict.get(key)
 
 
@@ -261,7 +261,7 @@ def read_config_build_arguments():
 def read_config_modules_argument():
     value = read_config(MODULES_KEY)
     if value and value != '' and value != 'all':
-        return '--module-subset=' + value
+        return f"--module-subset={value}"
     return None
 
 
@@ -302,7 +302,7 @@ def get_config_file(base_name):
         if os.path.exists(config_dir):
             config_file = os.path.join(config_dir, base_name)
         else:
-            config_file = os.path.join(home, '.' + base_name)
+            config_file = os.path.join(home, f".{base_name}")
     return config_file
 
 

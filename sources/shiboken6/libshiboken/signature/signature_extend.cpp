@@ -94,20 +94,17 @@ static PyObject *_get_written_signature(signaturefunc sf, PyObject *ob, PyObject
 #ifdef PYPY_VERSION
 PyObject *pyside_bm_get___signature__(PyObject *func, PyObject *modifier)
 {
-    init_module_2();
     return _get_written_signature(GetSignature_Method, func, modifier);
 }
 #endif
 
 PyObject *pyside_cf_get___signature__(PyObject *func, PyObject *modifier)
 {
-    init_module_2();
     return _get_written_signature(GetSignature_Function, func, modifier);
 }
 
 PyObject *pyside_sm_get___signature__(PyObject *sm, PyObject *modifier)
 {
-    init_module_2();
     AutoDecRef func(PyObject_GetAttr(sm, PyMagicName::func()));
     if (Py_TYPE(func) == PepFunction_TypePtr)
         return PyObject_GetAttr(func, PyMagicName::signature());
@@ -116,7 +113,6 @@ PyObject *pyside_sm_get___signature__(PyObject *sm, PyObject *modifier)
 
 PyObject *pyside_md_get___signature__(PyObject *ob_md, PyObject *modifier)
 {
-    init_module_2();
     AutoDecRef func(name_key_to_func(ob_md));
     if (func.object() == Py_None)
         return Py_None;
@@ -127,13 +123,11 @@ PyObject *pyside_md_get___signature__(PyObject *ob_md, PyObject *modifier)
 
 PyObject *pyside_wd_get___signature__(PyObject *ob, PyObject *modifier)
 {
-    init_module_2();
     return _get_written_signature(GetSignature_Wrapper, ob, modifier);
 }
 
 PyObject *pyside_tp_get___signature__(PyObject *obtype_mod, PyObject *modifier)
 {
-    init_module_2();
     return _get_written_signature(GetSignature_TypeMod, obtype_mod, modifier);
 }
 
@@ -163,8 +157,6 @@ static int handle_doc_in_progress = 0;
 
 static PyObject *handle_doc(PyObject *ob, PyObject *old_descr)
 {
-    init_module_1();
-    init_module_2();
     AutoDecRef ob_type_mod(GetClassOrModOf(ob));
     const char *name;
     if (PyModule_Check(ob_type_mod.object()))

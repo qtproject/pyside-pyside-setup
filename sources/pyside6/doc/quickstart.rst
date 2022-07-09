@@ -53,6 +53,9 @@ Installation
     # Prints the Qt version used to compile PySide6
     print(PySide6.QtCore.__version__)
 
+.. note:: For more information about what's included in the ``pyside6``
+   package, check :ref:`package_details`.
+
 Create a Simple Application
 ---------------------------
 

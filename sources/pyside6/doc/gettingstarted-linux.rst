@@ -21,7 +21,6 @@ which arbitrary modules can be installed and which can be removed after use::
 
     python -m venv testenv
     source testenv/bin/activate
-    pip install -r requirements.txt  # General dependencies, documentation, and examples.
 
 will create and use a new virtual environment, which is indicated by the command prompt changing.
 
@@ -48,6 +47,10 @@ Cloning the official repository can be done by::
 Checking out the version that we want to build, for example 6.0::
 
     cd pyside-setup && git checkout 6.0
+
+Install the general dependencies::
+
+    pip install -r requirements.txt
 
 .. note:: Keep in mind you need to use the same version as your Qt installation.
           Additionally, :command:`git checkout -b 6.0 --track origin/6.0` could be a better option

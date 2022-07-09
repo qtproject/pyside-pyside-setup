@@ -475,11 +475,11 @@ def copy_qt_artifacts(self, copy_pdbs, _vars):
                 recursive=False,
                 _vars=_vars)
 
-        _filter = 'QtWebEngineProcess{}.exe'.format(
-            'd' if self.debug else '')
+        _ext = "d" if self.debug else ""
+        _filter = [f"QtWebEngineProcess{_ext}.exe"]
         copydir("{qt_bin_dir}",
                 "{st_build_dir}/{st_package_name}",
-                _filter=[_filter],
+                _filter=_filter,
                 recursive=False, _vars=_vars)
 
     if copy_qt_conf:
