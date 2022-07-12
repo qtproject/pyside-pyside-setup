@@ -222,3 +222,166 @@ Tools
 * ``pyside6-designer``: Qt User Interface Designer. This is a graphical tool
   to create designs of Qt Widget-based forms and use custom widgets
   (see :ref:`using_ui_files`, :ref:`designer_custom_widgets`).
+
+
+.. _NewEnumSystem:
+
+The New Python Enums
+====================
+
+The Motivation to use new Enums
+-------------------------------
+
+For a long time, there were just the Shiboken enums, which were modelled as exact as possible
+after the existing enums in Qt. These enums are small classes which also inherit from
+int.
+
+Meanwhile, Python enums have been developed over the years. They have become a natural
+part of modern Python. The implementation is perfectly modelled after the needs of Python
+users. It is therefore just consequent to stop having two different enum implementations
+in the same application and instead to use the new Python implementation everywhere.
+
+Existing Work
+-------------
+
+The new enums beginning with PySide 6.3, replace the Shiboken enums
+with Python variants, which harmonize the builtin enums with the already existing
+``QEnum`` "macro" shown in the :ref:`QEnum` section.
+
+
+Activating the New Enums
+------------------------
+
+The new approach to enum will be the default in ``PySide 6.4``, but a preview is already built
+into ``PySide 6.3`` with the environment variable:
+`PYSIDE63_OPTION_PYTHON_ENUM=1 python3 <myscript>` enables the new enums.
+In ``PySide 6.4``, this flag is by default on, but it can be switched to the old Shiboken
+enums by setting the variable to 0.
+
+This environment variable will stay until a general acceptance of the new enums has been
+reached and a fallback to the old implementation is no longer needed.
+
+
+The Differences between old and new Enums
+-----------------------------------------
+
+Python enums and Shiboken enums are more or less compatible with each other.
+Tiny differences are in restrictions:
+
+  * Python enums cannot inherit from each other, whereas Shiboken enums can
+
+  * Python enums don't allow undefined values, Shiboken enums do
+
+  * Python enums always need exactly one argument, Shiboken enums have a default zero value
+
+  * Python enums rarely inherit from int, Shiboken enums always do
+
+More visible are the differences between flags, as shown in the following:
+
+The Shiboken flag constructor example has been in PySide prior to 6.3:
+
+::
+
+    flags = Qt.Alignment()
+    enum = Qt.AlignmentFlag
+
+with enum shortcuts like
+
+::
+
+    Qt.AlignLeft = Qt.AlignmentFlag.AlignLeft
+    Qt.AlignTop  = Qt.AlignmentFlag.AlignTop
+
+In PySide 6.3, these shortcuts and flags no longer exist (officially).
+Instead, Python has an enum.Flags class which is a subclass of the enum.Enum class.
+But don't be too scared, here comes the good news...
+
+
+Doing a Smooth Transition from the Old Enums
+--------------------------------------------
+
+Changing all the enum code to suddenly use the new syntax is cumbersome and error-prone,
+because such necessary changes are not easy to find.
+Therefore a ``forgiveness mode`` was developed:
+
+The ``forgiveness mode`` allows you to continue using the old constructs but translates them
+silently into the new ones. If you for example write
+
+::
+
+    flags = Qt.Alignment()
+    enum = Qt.AlignLeft
+
+    item.setForeground(QColor(Qt.green))
+
+    flags_type = QPainter.RenderHints
+    flags = QPainter.RenderHints()
+
+    chart_view.setRenderHint(QPainter.Antialiasing)
+
+you get in reality a construct that mimics the following code which is the
+recommended way of writing Flags and Enums:
+
+::
+
+    flags = Qt.AlignmentFlag(0)
+    enum = Qt.AlignmentFlag.AlignLeft
+
+    item.setForeground(QColor(Qt.GlobalColor.green))
+
+    flags_type = QPainter.RenderHint
+    flags = QPainter.RenderHint(0)
+
+    chart_view.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+This has the effect that you can initially ignore the difference between old and new enums,
+as long as the new enums are properties of classes. (This does not work on global enums
+which don't have a class, see ``Limitations`` below.)
+
+
+Forgiveness Mode and Type Hints
+-------------------------------
+
+When you inspect for instance ``QtCore.pyi``, you will only find the new enums, although
+the old ones are still allowed. Also, line completion will only work with the new constructs
+and never propose the old ones.
+
+The reason to implement ``forgiveness mode`` this way was
+
+  * to make the transition as smooth as possible, but
+
+  * to encourage people to use the new enums whenever new code is written.
+
+So you can continue to write:
+
+::
+
+    self.text.setAlignment(Qt.AlignCenter)
+
+but this construct is used and recommended for the future:
+
+::
+
+    self.text.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+
+Limitations:
+------------
+
+The forgiveness mode works very well whenever the enum class is embedded in a normal
+PySide class. But there are a few global enums, where especially the ``QtMsgType``
+is a problem:
+
+::
+
+    t = QtMsgType.QtDebugMsg
+
+cannot be written in the shortcut form
+
+::
+
+    t = QtDebugMsg
+
+because there is no surrounding PySide class that provides the forgiving mode
+implementation. Typically, the needed changes are easily found because they often occur
+in an import statement.
