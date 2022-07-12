@@ -25,3 +25,6 @@ PYSIDE_LINUX_LIBEXEC_TOOLS = ["uic",
                               "qmlimportscanner"]
 # all Qt tools are in 'bin' folder in Windows
 PYSIDE_WINDOWS_BIN_TOOLS = PYSIDE_LINUX_LIBEXEC_TOOLS + PYSIDE_LINUX_BIN_TOOLS
+
+ANDROID_ESSENTIALS = ["Core", "Gui", "Widgets", "Network", "OpenGL", "Qml", "Quick",
+                      "QuickControls2"]

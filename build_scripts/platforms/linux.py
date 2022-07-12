@@ -11,7 +11,7 @@ from ..utils import (copy_icu_libs, copydir, copyfile, find_files_using_glob,
 from .. import PYSIDE
 
 
-def prepare_standalone_package_linux(pyside_build, _vars, cross_build=False):
+def prepare_standalone_package_linux(pyside_build, _vars, cross_build=False, is_android=False):
     built_modules = _vars['built_modules']
 
     constrain_modules = None
@@ -36,16 +36,23 @@ def prepare_standalone_package_linux(pyside_build, _vars, cross_build=False):
     destination_qt_dir = destination_dir / "Qt"
     destination_qt_lib_dir = destination_qt_dir / "lib"
 
-    accepted_modules = ['libQt6*.so.?']
+    # android libs does not have the Qt major version
+    if is_android:
+        lib_regex = 'libQt6*.so*'
+    else:
+        lib_regex = 'libQt6*.so.?'
+
+    accepted_modules = [lib_regex]
     if constrain_modules:
-        accepted_modules = [f"libQt6{module}*.so.?" for module in constrain_modules]
+        accepted_modules = [f"libQt6{module}*.so.?" if not is_android else f"libQt6{module}*.so*"
+                            for module in constrain_modules]
     accepted_modules.append("libicu*.so.??")
 
     copydir("{qt_lib_dir}", destination_qt_lib_dir,
             _filter=accepted_modules,
             recursive=False, _vars=_vars, force_copy_symlinks=True)
 
-    if should_copy_icu_libs:
+    if should_copy_icu_libs and not cross_build and not is_android:
         # Check if ICU libraries were copied over to the destination
         # Qt libdir.
         maybe_icu_libs = find_files_using_glob(destination_qt_lib_dir, "libicu*")
@@ -58,7 +65,7 @@ def prepare_standalone_package_linux(pyside_build, _vars, cross_build=False):
         # libs to the Pyside Qt dir if necessary.
         # We choose the QtCore lib to inspect, by
         # checking which QtCore library the shiboken6 executable uses.
-        if not maybe_icu_libs and not cross_build:
+        if not maybe_icu_libs:
             copy_icu_libs(pyside_build._patchelf_path, destination_qt_lib_dir)
 
     # Set RPATH for Qt libs.

@@ -43,7 +43,7 @@ from .utils import (copydir, copyfile, detect_clang,
                     linux_fix_rpaths_for_library, macos_fix_rpaths_for_library,
                     platform_cmake_options, remove_tree, run_process,
                     run_process_output, update_env_path, which)
-from . import PYSIDE, PYSIDE_MODULE, SHIBOKEN
+from . import PYSIDE, PYSIDE_MODULE, SHIBOKEN, ANDROID_ESSENTIALS
 from .wheel_override import get_bdist_wheel_override, wheel_module_exists
 from .wheel_utils import (get_package_timestamp, get_package_version,
                           macos_plat_name, macos_pyside_min_deployment_target)
@@ -637,6 +637,10 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
                     module_sub_set += ';'
                 module_sub_set += m
             cmake_cmd.append(f"-DMODULES={module_sub_set}")
+        elif str(OPTION['PLAT_NAME']).startswith("android"):
+            modules = ';'.join(ANDROID_ESSENTIALS)
+            cmake_cmd.append(f"-DMODULES={modules}")
+
         if OPTION["SKIP_MODULES"]:
             skip_modules = ''
             for m in OPTION["SKIP_MODULES"].split(','):
@@ -1057,7 +1061,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
         if self.is_cross_compile:
             if 'darwin' in self.plat_name or 'macos' in self.plat_name:
                 filters = darwin_filters
-            elif 'linux' in self.plat_name:
+            elif 'linux' in self.plat_name or 'android' in self.plat_name:
                 filters = unix_filters
             else:
                 log.warning(f"No shared library filters found for platform {self.plat_name}. "

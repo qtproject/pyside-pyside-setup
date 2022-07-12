@@ -40,6 +40,10 @@ def _copy_gui_executable(name, _vars=None):
 
 
 def prepare_packages_posix(pyside_build, _vars, cross_build=False):
+    is_android = False
+    if str(OPTION['PLAT_NAME']).startswith('android'):
+        is_android = True
+
     executables = []
     libexec_executables = []
     log.info("Copying files...")
@@ -59,7 +63,9 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
 
     def adjusted_lib_name(name, version):
         postfix = ''
-        if sys.platform.startswith('linux'):
+        if config.is_cross_compile() and is_android:
+            postfix = ".so"
+        elif sys.platform.startswith('linux'):
             postfix = f".so.{version}"
         elif sys.platform == 'darwin':
             postfix = f".{version}.dylib"
@@ -108,53 +114,54 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
             _vars=_vars)
 
     if config.is_internal_pyside_build():
-        makefile(
-            "{st_build_dir}/{st_package_name}/scripts/__init__.py",
-            _vars=_vars)
+        if not is_android:
+            makefile(
+                "{st_build_dir}/{st_package_name}/scripts/__init__.py",
+                _vars=_vars)
 
-        # For setting up setuptools entry points
-        for script in ("pyside_tool.py", "metaobjectdump.py", "project.py", "qml.py",
-                       "qtpy2cpp.py", "deploy.py"):
-            src = f"{{install_dir}}/bin/{script}"
-            target = f"{{st_build_dir}}/{{st_package_name}}/scripts/{script}"
-            copyfile(src, target, force=False, _vars=_vars)
+            # For setting up setuptools entry points
+            for script in ("pyside_tool.py", "metaobjectdump.py", "project.py", "qml.py",
+                        "qtpy2cpp.py", "deploy.py"):
+                src = f"{{install_dir}}/bin/{script}"
+                target = f"{{st_build_dir}}/{{st_package_name}}/scripts/{script}"
+                copyfile(src, target, force=False, _vars=_vars)
 
-        for script_dir in ("qtpy2cpp_lib", "deploy_lib", "project"):
-            src = f"{{install_dir}}/bin/{script_dir}"
-            target = f"{{st_build_dir}}/{{st_package_name}}/scripts/{script_dir}"
-            # Exclude subdirectory tests
-            copydir(src, target, _filter=["*.py", "*.spec", "*.jpg"], recursive=False, _vars=_vars)
+            for script_dir in ("qtpy2cpp_lib", "deploy_lib", "project"):
+                src = f"{{install_dir}}/bin/{script_dir}"
+                target = f"{{st_build_dir}}/{{st_package_name}}/scripts/{script_dir}"
+                # Exclude subdirectory tests
+                copydir(src, target, _filter=["*.py", "*.spec", "*.jpg"], recursive=False, _vars=_vars)
 
-        # <install>/bin/* -> {st_package_name}/
-        executables.extend(copydir(
-            "{install_dir}/bin/", destination_dir,
-            _filter=[f"{PYSIDE}-lupdate"],
-            recursive=False, _vars=_vars))
-
-        lib_exec_filters = []
-        if not OPTION['NO_QT_TOOLS']:
-            lib_exec_filters.extend(['uic', 'rcc', 'qmltyperegistrar', 'qmlimportscanner'])
+            # <install>/bin/* -> {st_package_name}/
             executables.extend(copydir(
                 "{install_dir}/bin/", destination_dir,
-                _filter=["lrelease", "lupdate", "qmllint", "qmlformat", "qmlls"],
+                _filter=[f"{PYSIDE}-lupdate"],
                 recursive=False, _vars=_vars))
-            # Copying assistant/designer
-            executables.extend(_copy_gui_executable('assistant', _vars=_vars))
-            executables.extend(_copy_gui_executable('designer', _vars=_vars))
-            executables.extend(_copy_gui_executable('linguist', _vars=_vars))
 
-        copy_qt_metatypes(destination_qt_dir, _vars)
+            lib_exec_filters = []
+            if not OPTION['NO_QT_TOOLS']:
+                lib_exec_filters.extend(['uic', 'rcc', 'qmltyperegistrar', 'qmlimportscanner'])
+                executables.extend(copydir(
+                    "{install_dir}/bin/", destination_dir,
+                    _filter=["lrelease", "lupdate", "qmllint", "qmlformat", "qmlls"],
+                    recursive=False, _vars=_vars))
+                # Copying assistant/designer
+                executables.extend(_copy_gui_executable('assistant', _vars=_vars))
+                executables.extend(_copy_gui_executable('designer', _vars=_vars))
+                executables.extend(_copy_gui_executable('linguist', _vars=_vars))
 
-        # Copy libexec
-        built_modules = pyside_build.get_built_pyside_config(_vars)['built_modules']
-        if pyside_build.is_webengine_built(built_modules):
-            lib_exec_filters.append('QtWebEngineProcess')
-        if lib_exec_filters:
-            libexec_executables.extend(copydir("{qt_lib_execs_dir}",
-                                               destination_qt_dir / "libexec",
-                                               _filter=lib_exec_filters,
-                                               recursive=False,
-                                               _vars=_vars))
+            copy_qt_metatypes(destination_qt_dir, _vars)
+
+            # Copy libexec
+            built_modules = pyside_build.get_built_pyside_config(_vars)['built_modules']
+            if pyside_build.is_webengine_built(built_modules):
+                lib_exec_filters.append('QtWebEngineProcess')
+            if lib_exec_filters:
+                libexec_executables.extend(copydir("{qt_lib_execs_dir}",
+                                                destination_qt_dir / "libexec",
+                                                _filter=lib_exec_filters,
+                                                recursive=False,
+                                                _vars=_vars))
 
         # <install>/lib/lib* -> {st_package_name}/
         copydir(
@@ -165,26 +172,28 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
             ],
             recursive=False, _vars=_vars, force_copy_symlinks=True)
 
-        # <install>/share/{st_package_name}/typesystems/* ->
-        #   <setup>/{st_package_name}/typesystems
-        copydir(
-            "{install_dir}/share/{st_package_name}/typesystems",
-            "{st_build_dir}/{st_package_name}/typesystems",
-            _vars=_vars)
+        if not config.is_cross_compile():
+            # <install>/share/{st_package_name}/typesystems/* ->
+            #   <setup>/{st_package_name}/typesystems
+            copydir(
+                "{install_dir}/share/{st_package_name}/typesystems",
+                "{st_build_dir}/{st_package_name}/typesystems",
+                _vars=_vars)
 
-        # <install>/share/{st_package_name}/glue/* ->
-        #   <setup>/{st_package_name}/glue
-        copydir(
-            "{install_dir}/share/{st_package_name}/glue",
-            "{st_build_dir}/{st_package_name}/glue",
-            _vars=_vars)
+            # <install>/share/{st_package_name}/glue/* ->
+            #   <setup>/{st_package_name}/glue
+            copydir(
+                "{install_dir}/share/{st_package_name}/glue",
+                "{st_build_dir}/{st_package_name}/glue",
+                _vars=_vars)
 
-        # <source>/pyside6/{st_package_name}/support/* ->
-        #   <setup>/{st_package_name}/support/*
-        copydir(
-            f"{{build_dir}}/{PYSIDE}/{{st_package_name}}/support",
-            "{st_build_dir}/{st_package_name}/support",
-            _vars=_vars)
+        if not is_android:
+            # <source>/pyside6/{st_package_name}/support/* ->
+            #   <setup>/{st_package_name}/support/*
+            copydir(
+                f"{{build_dir}}/{PYSIDE}/{{st_package_name}}/support",
+                "{st_build_dir}/{st_package_name}/support",
+                _vars=_vars)
 
         # <source>/pyside6/{st_package_name}/*.pyi ->
         #   <setup>/{st_package_name}/*.pyi
@@ -193,7 +202,7 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
             _filter=["*.pyi", "py.typed"],
             _vars=_vars)
 
-        if not OPTION["NOEXAMPLES"]:
+        if not OPTION["NOEXAMPLES"] and not is_android:
             def pycache_dir_filter(dir_name, parent_full_path, dir_full_path):
                 if fnmatch.fnmatch(dir_name, "__pycache__"):
                     return False
@@ -210,7 +219,8 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
             if sys.platform == 'darwin':
                 prepare_standalone_package_macos(pyside_build, _vars)
             else:
-                prepare_standalone_package_linux(pyside_build, _vars, cross_build)
+                prepare_standalone_package_linux(pyside_build, _vars, cross_build,
+                                                 is_android=is_android)
 
         if config.is_internal_shiboken_generator_build():
             # Copy over clang before rpath patching.

@@ -514,6 +514,8 @@ class CommandMixin(object):
         if not self._extra_checks():
             sys.exit(-1)
 
+        OPTION['PLAT_NAME'] = self.plat_name
+
     def _extra_checks(self):
         if self.is_cross_compile and not self.plat_name:
             log.error("No value provided to --plat-name while cross-compiling.")
