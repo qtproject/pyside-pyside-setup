@@ -59,7 +59,6 @@ class TestEnum(unittest.TestCase):
     def testToIntInFunction(self):
         self.assertEqual(str(int(QIODevice.WriteOnly)), "2")
 
-    @unittest.skipIf(sys.pyside63_option_python_enum, "makes no sense for tested Python enums")
     def testOperations(self):
         k = Qt.Key.Key_1
 
@@ -68,15 +67,16 @@ class TestEnum(unittest.TestCase):
         self.assertEqual(k - 2, -(2 - k))
         self.assertEqual(k * 2, 2 * k)
 
-        # Floats
-        with self.assertRaises(TypeError):
-            a = k + 2.0
+        if not sys.pyside63_option_python_enum:
+            # Floats work fine with new enums
+            with self.assertRaises(TypeError):
+                a = k + 2.0
 
-        with self.assertRaises(TypeError):
-            a = k - 2.0
+            with self.assertRaises(TypeError):
+                a = k - 2.0
 
-        with self.assertRaises(TypeError):
-            a = k * 2.0
+            with self.assertRaises(TypeError):
+                a = k * 2.0
 
     @unittest.skipIf(sys.pyside63_option_python_enum, "inheritance forbidden for Python enums")
     def testInherit(self):
@@ -207,14 +207,15 @@ class SomeClass(QObject):
     QEnum(SomeEnum)     # works even without the decorator assignment
 
 
-@unittest.skipUnless(HAVE_ENUM, "requires 'enum' module (use 'pip install enum34' for Python 2)")
 class TestQEnumMacro(unittest.TestCase):
+    meta_name = "EnumType" if sys.version_info[:2] >= (3, 11) else "EnumMeta"
+
     def testTopLevel(self):
-        self.assertEqual(type(OuterEnum).__name__, "EnumMeta")
+        self.assertEqual(type(OuterEnum).__name__, self.meta_name)
         self.assertEqual(len(OuterEnum.__members__), 2)
 
     def testSomeClass(self):
-        self.assertEqual(type(SomeClass.SomeEnum).__name__, "EnumMeta")
+        self.assertEqual(type(SomeClass.SomeEnum).__name__, self.meta_name)
         self.assertEqual(len(SomeClass.SomeEnum.__members__), 3)
         with self.assertRaises(TypeError):
             int(SomeClass.SomeEnum.C) == 6

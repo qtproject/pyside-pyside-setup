@@ -58,20 +58,12 @@ class TestVariablesUnderNamespace(unittest.TestCase):
 
 class TestClassesUnderNamespace(unittest.TestCase):
     def testIt(self):
-        if sys.pyside63_option_python_enum:
-            c1 = SampleNamespace.SomeClass()
-            e1 = SampleNamespace.SomeClass.ProtectedEnum(0)
-            c2 = SampleNamespace.SomeClass.SomeInnerClass()
-            e2 = SampleNamespace.SomeClass.SomeInnerClass.ProtectedEnum(0)
-            c3 = SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough()
-            e3 = SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough.NiceEnum(0)
-        else:
-            c1 = SampleNamespace.SomeClass()
-            e1 = SampleNamespace.SomeClass.ProtectedEnum()
-            c2 = SampleNamespace.SomeClass.SomeInnerClass()
-            e2 = SampleNamespace.SomeClass.SomeInnerClass.ProtectedEnum()
-            c3 = SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough()
-            e3 = SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough.NiceEnum()
+        c1 = SampleNamespace.SomeClass()
+        e1 = SampleNamespace.SomeClass.ProtectedEnum()
+        c2 = SampleNamespace.SomeClass.SomeInnerClass()
+        e2 = SampleNamespace.SomeClass.SomeInnerClass.ProtectedEnum()
+        c3 = SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough()
+        e3 = SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough.NiceEnum(0)
 
     def testFunctionAddedOnNamespace(self):
         res = SampleNamespace.ImInsideANamespace(2, 2)

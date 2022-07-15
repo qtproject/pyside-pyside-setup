@@ -126,15 +126,10 @@ class MainTest(unittest.TestCase):
         qint64 = 42
         tfarg = os.path.join(PySide6.QtCore.QDir.tempPath(), "XXXXXX.tmp")
         findStr = 'bla'
-        if sys.pyside63_option_python_enum:
-            orientation = PySide6.QtCore.Qt.Orientation(0)
-            openMode = PySide6.QtCore.QIODevice.OpenModeFlag(PySide6.QtCore.QIODevice.ReadOnly)
-            transformationMode = PySide6.QtCore.Qt.TransformationMode(0)
-        else:
-            orientation = PySide6.QtCore.Qt.Orientation()
-            openMode = PySide6.QtCore.QIODevice.OpenMode(PySide6.QtCore.QIODevice.ReadOnly)
-            transformationMode = PySide6.QtCore.Qt.TransformationMode()
+        orientation = PySide6.QtCore.Qt.Orientations()
+        openMode = PySide6.QtCore.QIODevice.OpenMode(PySide6.QtCore.QIODevice.ReadOnly)
         qModelIndex = PySide6.QtCore.QModelIndex()
+        transformationMode = PySide6.QtCore.Qt.TransformationMode()
         qObject = PySide6.QtCore.QObject()
         qPoint = PySide6.QtCore.QPoint()
         try:
@@ -149,8 +144,7 @@ class MainTest(unittest.TestCase):
             pass
         try:
             PySide6.QtWidgets
-            direction = (PySide6.QtWidgets.QBoxLayout.Direction(0)
-                if sys.pyside63_option_python_enum else PySide6.QtWidgets.QBoxLayout.Direction())
+            direction = PySide6.QtWidgets.QBoxLayout.Direction()
             qWidget = PySide6.QtWidgets.QWidget()
             qStyleOptionFrame = PySide6.QtWidgets.QStyleOptionFrame()
             qAction = PySide6.QtGui.QAction(qObject)

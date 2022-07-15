@@ -67,22 +67,19 @@ class QFlagOperatorTest(unittest.TestCase):
 
     def testInvert(self):
         '''QFlags ~ (invert) operator'''
-        self.assertEqual(type(~QIODevice.ReadOnly), QIODevice.OpenModeFlag
-            if sys.pyside63_option_python_enum else QIODevice.OpenMode)
+        self.assertEqual(type(~QIODevice.ReadOnly), QIODevice.OpenMode)
 
     def testOr(self):
         '''QFlags | (or) operator'''
-        self.assertEqual(type(QIODevice.ReadOnly | QIODevice.WriteOnly), QIODevice.OpenModeFlag
-            if sys.pyside63_option_python_enum else QIODevice.OpenMode)
+        self.assertEqual(type(QIODevice.ReadOnly | QIODevice.WriteOnly), QIODevice.OpenMode)
 
     def testAnd(self):
         '''QFlags & (and) operator'''
-        self.assertEqual(type(QIODevice.ReadOnly & QIODevice.WriteOnly), QIODevice.OpenModeFlag
-            if sys.pyside63_option_python_enum else QIODevice.OpenMode)
+        self.assertEqual(type(QIODevice.ReadOnly & QIODevice.WriteOnly), QIODevice.OpenMode)
 
     def testIOr(self):
         '''QFlags |= (ior) operator'''
-        flag = Qt.WindowType(1) if sys.pyside63_option_python_enum else Qt.WindowFlags()
+        flag = Qt.WindowFlags()
         self.assertTrue(Qt.Widget == 0)
         self.assertFalse(flag & Qt.Widget)
         result = flag & Qt.Widget
@@ -92,8 +89,7 @@ class QFlagOperatorTest(unittest.TestCase):
 
     def testInvertOr(self):
         '''QFlags ~ (invert) operator over the result of an | (or) operator'''
-        self.assertEqual(type(~(Qt.ItemIsSelectable | Qt.ItemIsEditable)), Qt.ItemFlag
-            if sys.pyside63_option_python_enum else Qt.ItemFlags)
+        self.assertEqual(type(~(Qt.ItemIsSelectable | Qt.ItemIsEditable)), Qt.ItemFlags)
 
     def testEqual(self):
         '''QFlags == operator'''
@@ -102,8 +98,7 @@ class QFlagOperatorTest(unittest.TestCase):
         flag_type = (flags & Qt.WindowType_Mask)
         self.assertEqual(flag_type, Qt.Window)
 
-        self.assertEqual((Qt.KeyboardModifier if sys.pyside63_option_python_enum else
-            Qt.KeyboardModifiers)(Qt.ControlModifier), Qt.ControlModifier)
+        self.assertEqual(Qt.KeyboardModifiers(Qt.ControlModifier), Qt.ControlModifier)
 
     def testOperatorBetweenFlags(self):
         '''QFlags & QFlags'''
@@ -121,8 +116,7 @@ class QFlagsOnQVariant(unittest.TestCase):
     def testQFlagsOnQVariant(self):
         o = QObject()
         o.setProperty("foo", QIODevice.ReadOnly | QIODevice.WriteOnly)
-        self.assertEqual(type(o.property("foo")), QIODevice.OpenModeFlag
-            if sys.pyside63_option_python_enum else QIODevice.OpenMode)
+        self.assertEqual(type(o.property("foo")), QIODevice.OpenMode)
 
 
 class QFlagsWrongType(unittest.TestCase):
@@ -134,6 +128,25 @@ class QFlagsWrongType(unittest.TestCase):
                 self.assertRaises(TypeError, op, x, Qt.NoItemFlags)
         # making sure this actually does not fail all the time
         self.assertEqual(operator.or_(Qt.NoItemFlags, 43), 43)
+
+
+class QEnumFlagDefault(unittest.TestCase):
+    """
+        Check that old flag and enum syntax can be used.
+        The signatures of these surrogate functions intentionally do not exist
+        because people should learn to use the new Enums correctly.
+    """
+    def testOldQFlag(self):
+        self.assertEqual(Qt.AlignmentFlag(), Qt.AlignmentFlag(0))
+        oldFlag = Qt.Alignment()
+        oldEnum = Qt.AlignmentFlag()
+        self.assertEqual(type(oldFlag), Qt.Alignment)
+        self.assertEqual(type(oldEnum), Qt.AlignmentFlag)
+        if sys.pyside63_option_python_enum:
+            self.assertEqual(type(oldFlag), type(oldEnum))
+        else:
+            with self.assertRaises(AssertionError):
+                self.assertEqual(type(oldFlag), type(oldEnum))
 
 
 if __name__ == '__main__':

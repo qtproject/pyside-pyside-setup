@@ -46,6 +46,7 @@
 #include "sbkstaticstrings_p.h"
 #include "signature.h"
 #include "sbkfeature_base.h"
+#include "gilstate.h"
 
 using namespace Shiboken;
 
@@ -114,6 +115,111 @@ SelectableFeatureHook initSelectableFeature(SelectableFeatureHook func)
     return ret;
 }
 
+// This useful function is for debugging
+[[maybe_unused]] static void disassembleFrame(const char *marker)
+{
+    Shiboken::GilState gil;
+    PyObject *error_type, *error_value, *error_traceback;
+    PyErr_Fetch(&error_type, &error_value, &error_traceback);
+    static PyObject *dismodule = PyImport_ImportModule("dis");
+    static PyObject *disco = PyObject_GetAttrString(dismodule, "disco");
+    static PyObject *const _f_lasti = Shiboken::String::createStaticString("f_lasti");
+    static PyObject *const _f_code = Shiboken::String::createStaticString("f_code");
+    auto *frame = reinterpret_cast<PyObject *>(PyEval_GetFrame());
+    AutoDecRef f_lasti(PyObject_GetAttr(frame, _f_lasti));
+    AutoDecRef f_code(PyObject_GetAttr(frame, _f_code));
+    fprintf(stdout, "\n%s BEGIN\n", marker);
+    PyObject_CallFunctionObjArgs(disco, f_code.object(), f_lasti.object(), nullptr);
+    fprintf(stdout, "%s END\n\n", marker);
+    static PyObject *sysmodule = PyImport_ImportModule("sys");
+    static PyObject *stdout_file = PyObject_GetAttrString(sysmodule, "stdout");
+    PyObject_CallMethod(stdout_file, "flush", nullptr);
+    PyErr_Restore(error_type, error_value, error_traceback);
+}
+
+// PYTHON 3.11
+static int const PRECALL = 166;
+// we have "big instructins" with gaps after them
+static int const LOAD_ATTR_GAP = 4 * 2;
+static int const LOAD_METHOD_GAP = 10 * 2;
+// Python 3.7 - 3.10
+static int const LOAD_METHOD = 160;
+static int const CALL_METHOD = 161;
+// Python 3.6
+static int const CALL_FUNCTION = 131;
+static int const LOAD_ATTR = 106;
+
+static bool currentOpcode_Is_CallMethNoArgs()
+{
+    // We look into the currently active operation if we are going to call
+    // a method with zero arguments.
+    static PyObject *const _f_code = Shiboken::String::createStaticString("f_code");
+    static PyObject *const _f_lasti = Shiboken::String::createStaticString("f_lasti");
+    static PyObject *const _co_code = Shiboken::String::createStaticString("co_code");
+    auto *frame = reinterpret_cast<PyObject *>(PyEval_GetFrame());
+    // We use the limited API for frame and code objects.
+    AutoDecRef f_code(PyObject_GetAttr(frame, _f_code));
+    AutoDecRef dec_f_lasti(PyObject_GetAttr(frame, _f_lasti));
+    Py_ssize_t f_lasti = PyLong_AsSsize_t(dec_f_lasti);
+    AutoDecRef dec_co_code(PyObject_GetAttr(f_code, _co_code));
+    Py_ssize_t code_len;
+    char *co_code{};
+    PyBytes_AsStringAndSize(dec_co_code, &co_code, &code_len);
+    uint8_t opcode1 = co_code[f_lasti];
+    uint8_t opcode2 = co_code[f_lasti + 2];
+    uint8_t oparg2 = co_code[f_lasti + 3];
+    static PyObject *sysmodule = PyImport_AddModule("sys");
+    static PyObject *version = PyObject_GetAttrString(sysmodule, "version_info");
+    static PyObject *major = PyTuple_GetItem(version, 0);
+    static PyObject *minor = PyTuple_GetItem(version, 1);
+    auto number = PyLong_AsLong(major) * 1000 + PyLong_AsLong(minor);
+    if (number < 3007)
+        return opcode1 == LOAD_ATTR && opcode2 == CALL_FUNCTION && oparg2 == 0;
+    if (number < 3011)
+        return opcode1 == LOAD_METHOD && opcode2 == CALL_METHOD && oparg2 == 0;
+
+    // With Python 3.11, the opcodes get bigger and change a bit.
+    // Note: The new adaptive opcodes are elegantly hidden and we
+    //       don't need to take care of them.
+    if (opcode1 == LOAD_METHOD)
+        f_lasti += LOAD_METHOD_GAP;
+    else if (opcode1 == LOAD_ATTR)
+        f_lasti += LOAD_ATTR_GAP;
+    else
+        return false;
+
+    opcode2 = co_code[f_lasti + 2];
+    oparg2 = co_code[f_lasti + 3];
+
+    return opcode2 == PRECALL && oparg2 == 0;
+}
+
+static void _initFlagsDict(SbkObjectTypePrivate *sotp)
+{
+    static PyObject *const split = Shiboken::String::createStaticString("split");
+    static PyObject *const colon = Shiboken::String::createStaticString(":");
+    auto **enumFlagInfo = sotp->enumFlagInfo;
+    auto *dict = PyDict_New();
+    for (; *enumFlagInfo; ++enumFlagInfo) {
+        AutoDecRef line(PyUnicode_FromString(*enumFlagInfo));
+        AutoDecRef parts(PyObject_CallMethodObjArgs(line, split, colon, nullptr));
+        if (PyList_Size(parts) == 3) {
+            auto *key = PyList_GetItem(parts, 2);
+            auto *value = PyList_GetItem(parts, 0);
+            PyDict_SetItem(dict, key, value);
+        }
+    }
+    sotp->flagsDict = dict;
+}
+
+static PyObject *replaceNoArgWithZero(PyObject *callable)
+{
+    static auto *functools = PyImport_ImportModule("_functools");   // builtin
+    static auto *partial = PyObject_GetAttrString(functools, "partial");
+    static auto *zero = PyLong_FromLong(0);
+    return PyObject_CallFunctionObjArgs(partial, callable, zero, nullptr);
+}
+
 PyObject *mangled_type_getattro(PyTypeObject *type, PyObject *name)
 {
     /*
@@ -122,9 +228,12 @@ PyObject *mangled_type_getattro(PyTypeObject *type, PyObject *name)
      * with the complex `tp_getattro` of `QObject` and other instances.
      * What we change here is the meta class of `QObject`.
      */
-    static getattrofunc type_getattro = PyType_Type.tp_getattro;
-    static PyObject *ignAttr1 = PyName::qtStaticMetaObject();
-    static PyObject *ignAttr2 = PyMagicName::get();
+    static getattrofunc const type_getattro = PyType_Type.tp_getattro;
+    static PyObject *const ignAttr1 = PyName::qtStaticMetaObject();
+    static PyObject *const ignAttr2 = PyMagicName::get();
+    static PyTypeObject *const EnumMeta = getPyEnumMeta();
+    static PyObject *const _member_map_ = String::createStaticString("_member_map_");
+
     if (SelectFeatureSet != nullptr)
         type->tp_dict = SelectFeatureSet(type);
     auto *ret = type_getattro(reinterpret_cast<PyObject *>(type), name);
@@ -139,31 +248,85 @@ PyObject *mangled_type_getattro(PyTypeObject *type, PyObject *name)
     //      Qt.AlignLeft instead of Qt.Alignment.AlignLeft, is still implemented but
     //      no longer advertized in PYI files or line completion.
 
+    if (ret && Py_TYPE(ret) == EnumMeta && currentOpcode_Is_CallMethNoArgs()) {
+        // We provide a zero argument for compatibility if it is a call with no args.
+        auto *hold = replaceNoArgWithZero(ret);
+        Py_DECREF(ret);
+        ret = hold;
+    }
+
     if (!ret && name != ignAttr1 && name != ignAttr2) {
         PyObject *error_type, *error_value, *error_traceback;
         PyErr_Fetch(&error_type, &error_value, &error_traceback);
 
         // This is similar to `find_name_in_mro`, but instead of looking directly into
-        // tp_dict, we search for the attribute in local classes of that dict.
+        // tp_dict, we also search for the attribute in local classes of that dict (Part 2).
         PyObject *mro = type->tp_mro;
         assert(PyTuple_Check(mro));
         size_t idx, n = PyTuple_GET_SIZE(mro);
         for (idx = 0; idx < n; ++idx) {
-            // FIXME This loop should further be optimized by installing an extra
-            //       <classname>_EnumInfo structure. This comes with the next compatibility patch.
             auto *base = PyTuple_GET_ITEM(mro, idx);
             auto *type_base = reinterpret_cast<PyTypeObject *>(base);
+            auto sotp = PepType_SOTP(type_base);
+            // The EnumFlagInfo structure tells us if there are Enums at all.
+            const char **enumFlagInfo = sotp->enumFlagInfo;
+            if (!(enumFlagInfo && enumFlagInfo[0]))
+                continue;
+            if (!sotp->flagsDict)
+                _initFlagsDict(sotp);
+            auto *rename = PyDict_GetItem(sotp->flagsDict, name);
+            if (rename) {
+                /*
+                 * Part 1: Look into the flagsDict if we have an old flags name.
+                 * -------------------------------------------------------------
+                 * We need to replace the parameterless
+
+                    QtCore.Qt.Alignment()
+
+                 * by the one-parameter call
+
+                    QtCore.Qt.AlignmentFlag(0)
+
+                 * That means: We need to bind the zero as default into a wrapper and
+                 * return that to be called.
+                 *
+                 * Addendum:
+                 * ---------
+                 * We first need to look into the current opcode of the bytecode to find
+                 * out if we have a call like above or just a type lookup.
+                 */
+                auto *flagType = PyDict_GetItem(type_base->tp_dict, rename);
+                if (currentOpcode_Is_CallMethNoArgs())
+                    return replaceNoArgWithZero(flagType);
+                Py_INCREF(flagType);
+                return flagType;
+            }
             auto *dict = type_base->tp_dict;
             PyObject *key, *value;
             Py_ssize_t pos = 0;
             while (PyDict_Next(dict, &pos, &key, &value)) {
-                static auto *EnumMeta = getPyEnumMeta();
+                /*
+                 * Part 2: Check for a duplication into outer scope.
+                 * -------------------------------------------------
+                 * We need to replace the shortcut
+
+                    QtCore.Qt.AlignLeft
+
+                 * by the correct call
+
+                    QtCore.Qt.AlignmentFlag.AlignLeft
+
+                 * That means: We need to search all Enums of the class.
+                 */
                 if (Py_TYPE(value) == EnumMeta) {
                     auto *valtype = reinterpret_cast<PyTypeObject *>(value);
-                    auto *result = PyDict_GetItem(valtype->tp_dict, name);
-                    if (result) {
-                        Py_INCREF(result);
-                        return result;
+                    auto *member_map = PyDict_GetItem(valtype->tp_dict, _member_map_);
+                    if (member_map && PyDict_Check(member_map)) {
+                        auto *result = PyDict_GetItem(member_map, name);
+                        if (result) {
+                            Py_INCREF(result);
+                            return result;
+                        }
                     }
                 }
             }
@@ -224,6 +387,11 @@ const char **SbkObjectType_GetPropertyStrings(PyTypeObject *type)
 void SbkObjectType_SetPropertyStrings(PyTypeObject *type, const char **strings)
 {
     PepType_SOTP(type)->propertyStrings = strings;
+}
+
+void SbkObjectType_SetEnumFlagInfo(PyTypeObject *type, const char **strings)
+{
+    PepType_SOTP(type)->enumFlagInfo = strings;
 }
 
 // PYSIDE-1626: Enforcing a context switch without further action.
