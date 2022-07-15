@@ -137,7 +137,7 @@ SelectableFeatureHook initSelectableFeature(SelectableFeatureHook func)
     PyErr_Restore(error_type, error_value, error_traceback);
 }
 
-// PYTHON 3.11
+// Python 3.11
 static int const PRECALL = 166;
 // we have "big instructins" with gaps after them
 static int const LOAD_ATTR_GAP = 4 * 2;
@@ -149,30 +149,45 @@ static int const CALL_METHOD = 161;
 static int const CALL_FUNCTION = 131;
 static int const LOAD_ATTR = 106;
 
+static int _getVersion()
+{
+    static PyObject *const sysmodule = PyImport_AddModule("sys");
+    static PyObject *const version = PyObject_GetAttrString(sysmodule, "version_info");
+    static PyObject *const major = PyTuple_GetItem(version, 0);
+    static PyObject *const minor = PyTuple_GetItem(version, 1);
+    static auto number = PyLong_AsLong(major) * 1000 + PyLong_AsLong(minor);
+    return number;
+}
+
 static bool currentOpcode_Is_CallMethNoArgs()
 {
     // We look into the currently active operation if we are going to call
     // a method with zero arguments.
+    auto *frame = PyEval_GetFrame();
+#if PY_VERSION_HEX >= 0x03090000 && !Py_LIMITED_API
+    auto *f_code = PyFrame_GetCode(frame);
+#else
     static PyObject *const _f_code = Shiboken::String::createStaticString("f_code");
+    AutoDecRef dec_f_code(PyObject_GetAttr(reinterpret_cast<PyObject *>(frame), _f_code));
+    auto *f_code = dec_f_code.object();
+#endif
+#if PY_VERSION_HEX >= 0x030B0000 && !Py_LIMITED_API
+    AutoDecRef dec_co_code(PyCode_GetCode(f_code));
+    Py_ssize_t f_lasti = PyFrame_GetLasti(frame);
+#else
     static PyObject *const _f_lasti = Shiboken::String::createStaticString("f_lasti");
     static PyObject *const _co_code = Shiboken::String::createStaticString("co_code");
-    auto *frame = reinterpret_cast<PyObject *>(PyEval_GetFrame());
-    // We use the limited API for frame and code objects.
-    AutoDecRef f_code(PyObject_GetAttr(frame, _f_code));
-    AutoDecRef dec_f_lasti(PyObject_GetAttr(frame, _f_lasti));
+    AutoDecRef dec_co_code(PyObject_GetAttr(reinterpret_cast<PyObject *>(f_code), _co_code));
+    AutoDecRef dec_f_lasti(PyObject_GetAttr(reinterpret_cast<PyObject *>(frame), _f_lasti));
     Py_ssize_t f_lasti = PyLong_AsSsize_t(dec_f_lasti);
-    AutoDecRef dec_co_code(PyObject_GetAttr(f_code, _co_code));
+#endif
     Py_ssize_t code_len;
     char *co_code{};
     PyBytes_AsStringAndSize(dec_co_code, &co_code, &code_len);
     uint8_t opcode1 = co_code[f_lasti];
     uint8_t opcode2 = co_code[f_lasti + 2];
     uint8_t oparg2 = co_code[f_lasti + 3];
-    static PyObject *sysmodule = PyImport_AddModule("sys");
-    static PyObject *version = PyObject_GetAttrString(sysmodule, "version_info");
-    static PyObject *major = PyTuple_GetItem(version, 0);
-    static PyObject *minor = PyTuple_GetItem(version, 1);
-    auto number = PyLong_AsLong(major) * 1000 + PyLong_AsLong(minor);
+    static auto number = _getVersion();
     if (number < 3007)
         return opcode1 == LOAD_ATTR && opcode2 == CALL_FUNCTION && oparg2 == 0;
     if (number < 3011)
@@ -270,7 +285,7 @@ PyObject *mangled_type_getattro(PyTypeObject *type, PyObject *name)
             auto sotp = PepType_SOTP(type_base);
             // The EnumFlagInfo structure tells us if there are Enums at all.
             const char **enumFlagInfo = sotp->enumFlagInfo;
-            if (!(enumFlagInfo && enumFlagInfo[0]))
+            if (!(enumFlagInfo))
                 continue;
             if (!sotp->flagsDict)
                 _initFlagsDict(sotp);
