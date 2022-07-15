@@ -68,8 +68,9 @@ def _get_flag_enum_option():
                       f"The file pep384_issue33738.cpp should be removed ASAP! ***")
     # PYSIDE-1735: Emit a warning when we may update enum_310.py
     if pymaxver and pymaxver > (3, 10):
-        warnings.warn(f"\n    *** Python is at version {'.'.join(map(str, pymaxver))} now. "
-                      f"Please check if enum_310.py should be updated! ***")
+        if sys.version_info >= (3, 11, 0) and sys.version_info.releaselevel == "final":
+            warnings.warn(f"\n    *** Python is at version {'.'.join(map(str, pymaxver))} now. "
+                          f"Please check if enum_310.py should be updated! ***")
     # PYSIDE-1735: Emit a warning when we may update enum_310.py
     if ver[:2] >= (7, 0):
         warnings.warn(f"\n    *** PySide is at version {'.'.join(map(str, ver[:2]))} now. "
