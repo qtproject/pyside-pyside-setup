@@ -672,7 +672,7 @@ static int SbkQByteArray_getbufferproc(PyObject *obj, Py_buffer *view, int flags
 
     QByteArray * cppSelf = %CONVERTTOCPP[QByteArray *](obj);
     //XXX      /|\ omitting this space crashes shiboken!
- #ifdef Py_LIMITED_API
+#ifdef Py_LIMITED_API
     view->obj = obj;
     view->buf = reinterpret_cast<void *>(cppSelf->data());
     view->len = cppSelf->size();
@@ -903,7 +903,6 @@ auto *pyTimer = timerType->tp_new(Shiboken::SbkType<QTimer>(), emptyTuple, nullp
 timerType->tp_init(pyTimer, emptyTuple, nullptr);
 
 auto timer = %CONVERTTOCPP[QTimer *](pyTimer);
-//XXX  /|\ omitting this space crashes shiboken!
 Shiboken::AutoDecRef result(
     PyObject_CallMethod(pyTimer, "connect", "OsOs",
                         pyTimer,

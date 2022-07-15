@@ -305,11 +305,8 @@ LIBSHIBOKEN_API PyObject *PyRun_String(const char *, int, PyObject *, PyObject *
 // buffer functions.
 // But this is no problem as we check it's validity for every version.
 
-#define PYTHON_BUFFER_VERSION_COMPATIBLE    (PY_VERSION_HEX >= 0x03030000 && \
-                                             PY_VERSION_HEX <  0x030C0000)
-#if !PYTHON_BUFFER_VERSION_COMPATIBLE
-# error Please check the buffer compatibility for this python version!
-#endif
+// PYSIDE-1960 The buffer interface is since Python 3.11 part of the stable
+// API and we do not need to check the compatibility by hand anymore.
 
 typedef struct {
      getbufferproc bf_getbuffer;
