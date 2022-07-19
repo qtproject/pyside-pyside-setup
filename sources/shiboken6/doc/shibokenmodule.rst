@@ -19,6 +19,7 @@ Functions
     *    def :meth:`isOwnedByPython<shiboken.isOwnedByPython>` (obj)
     *    def :meth:`wasCreatedByPython<shiboken.wasCreatedByPython>` (obj)
     *    def :meth:`dump<shiboken.dump>` (obj)
+    *    def :meth:`disassembleFrame<shiboken.disassembleFrame>` (marker)
 
 Detailed description
 ^^^^^^^^^^^^^^^^^^^^
@@ -78,4 +79,34 @@ Python objects instances of any Python Type created using Shiboken.
     creating their own bindings as no guarantee is provided that
     the string format will be the same across different versions.
 
-    If the object is not a Shiboken based object, a TypeError is thrown.
+    If the object is not a Shiboken based object, a message is printed.
+
+.. function:: disassembleFrame(label)
+
+    Prints the current executing Python frame to stdout and flushes.
+    The disassembly is decorated by some label. Example:
+
+    .. code-block:: python
+
+        lambda: 42
+
+    is shown from inside C++ as
+
+    .. code-block:: c
+
+        <label> BEGIN
+          1           0 LOAD_CONST               1 (42)
+                      2 RETURN_VALUE
+        <label> END
+
+    When you want to set a breakpoint at the `disassembleFrame` function
+    and you use it from C++, you use the pure function name.
+
+    When you want to use it from Python, you can insert it into your Python
+    code and then maybe instead set a breakpoint at `SbkShibokenModule_disassembleFrame`
+    which is the generated wrapper.
+
+    `label` is a simple string in C++. In Python, you can use any object;
+    internally the `str` function is called with it.
+
+    This method should be used **only** for debug purposes by developers.

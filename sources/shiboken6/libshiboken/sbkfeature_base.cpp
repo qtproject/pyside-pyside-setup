@@ -80,7 +80,7 @@ SelectableFeatureHook initSelectableFeature(SelectableFeatureHook func)
 }
 
 // This useful function is for debugging
-[[maybe_unused]] static void disassembleFrame(const char *marker)
+void disassembleFrame(const char *marker)
 {
     Shiboken::GilState gil;
     PyObject *error_type, *error_value, *error_traceback;

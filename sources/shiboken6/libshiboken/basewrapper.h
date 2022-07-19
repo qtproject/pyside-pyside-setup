@@ -111,6 +111,9 @@ LIBSHIBOKEN_API PyObject *SbkDummyNew(PyTypeObject *type, PyObject *, PyObject *
 /// PYSIDE-74: Fallback used in all types now.
 LIBSHIBOKEN_API PyObject *FallbackRichCompare(PyObject *self, PyObject *other, int op);
 
+/// PYSIDE-1970: Be easily able to see what is happening in the running code.
+LIBSHIBOKEN_API void disassembleFrame(const char *marker);
+
 } // extern "C"
 
 namespace Shiboken

@@ -63,7 +63,7 @@
         </inject-code>
     </add-function>
 
-   <add-function signature="createdByPython(PyObject*)" return-type="bool">
+    <add-function signature="createdByPython(PyObject*)" return-type="bool">
         <inject-code>
             if (Shiboken::Object::checkType(%1)) {
                 bool wasCreatedByPython = Shiboken::Object::wasCreatedByPython(reinterpret_cast&lt;SbkObject *&gt;(%1));
@@ -72,7 +72,17 @@
                 PyErr_SetString(PyExc_TypeError, "You need a shiboken-based type.");
             }
         </inject-code>
-   </add-function>
+    </add-function>
+
+    <add-function signature="disassembleFrame(PyObject*)" return-type="PyObject">
+        <inject-code>
+            Shiboken::AutoDecRef label(PyObject_Str(%1));
+            const char *marker = Shiboken::String::toCString(label);
+            disassembleFrame(marker);
+            Py_INCREF(Py_None);
+            %PYARG_0 = Py_None;
+        </inject-code>
+    </add-function>
 
     <add-function signature="dump(PyObject*)" return-type="PyObject*">
         <inject-code>
