@@ -480,8 +480,6 @@ void TestAddFunction::testAddFunctionWithTemplateArg()
 
 // Test splitting of <add-function> parameter lists.
 
-Q_DECLARE_METATYPE(AddedFunctionParser::Argument)
-
 using Arguments = AddedFunctionParser::Arguments;
 
 void TestAddFunction::testAddFunctionTypeParser_data()

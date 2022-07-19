@@ -9,8 +9,6 @@
 
 using IntGraph = Graph<int>;
 
-Q_DECLARE_METATYPE(IntGraph)
-
 using IntList = QList<int>;
 
 void TestTopoSort::testTopoSort_data()

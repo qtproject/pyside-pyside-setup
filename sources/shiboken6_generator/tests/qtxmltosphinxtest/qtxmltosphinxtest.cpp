@@ -389,8 +389,6 @@ void QtXmlToSphinxTest::testTable()
 
 using TablePtr = std::shared_ptr<QtXmlToSphinx::Table>;
 
-Q_DECLARE_METATYPE(TablePtr);
-
 void QtXmlToSphinxTest::testTableFormatting_data()
 {
     using TableCell = QtXmlToSphinx::TableCell;

@@ -72,9 +72,6 @@ struct DefaultValuesFixture
     AbstractMetaClassCPtr klass{};
 };
 
-Q_DECLARE_METATYPE(DefaultValuesFixture)
-Q_DECLARE_METATYPE(AbstractMetaType)
-
 static int populateDefaultValuesFixture(DefaultValuesFixture *fixture)
 {
     static const char cppCode[] =R"(

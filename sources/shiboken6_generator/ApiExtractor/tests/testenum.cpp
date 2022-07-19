@@ -431,9 +431,6 @@ struct EnumDefaultValuesFixture
     AbstractMetaType testOptions;
 };
 
-Q_DECLARE_METATYPE(EnumDefaultValuesFixture)
-Q_DECLARE_METATYPE(AbstractMetaType)
-
 static int populateDefaultValuesFixture(EnumDefaultValuesFixture *fixture)
 {
     static const char cppCode[] =R"(
