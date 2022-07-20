@@ -696,11 +696,13 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
     for (const auto &entry : qAsConst(classEnums))
         sorter.append(BuildEnumFlagInfo(entry.typeEntry()));
     sorter.sort();
-    s << "static const char *" << className << "_EnumFlagInfo[] = {\n" << indent;
-    for (const auto &entry : qAsConst(sorter))
-        s << entry << ",\n";
-    s << NULL_PTR << " // Sentinel\n"
-        << outdent << "};\n\n";
+    if (!sorter.empty()) {
+        s << "static const char *" << className << "_EnumFlagInfo[] = {\n" << indent;
+        for (const auto &entry : qAsConst(sorter))
+            s << entry << ",\n";
+        s << NULL_PTR << " // Sentinel\n"
+            << outdent << "};\n\n";
+    }
 
     // Write methods definition
     writePyMethodDefs(s, className, methodsDefinitions, typeEntry->isValue());
@@ -5964,7 +5966,7 @@ void CppGenerator::writeClassRegister(TextStream &s,
     metaClass->getEnumsFromInvisibleNamespacesToBeGenerated(&classEnums);
 
     writeEnumsInitialization(s, classEnums, ErrorReturn::Void);
-    if (!classContext.forSmartPointer())
+    if (!classContext.forSmartPointer() && !classEnums.isEmpty())
         s << "SbkObjectType_SetEnumFlagInfo(pyType, " << chopType(pyTypeName)
             << "_EnumFlagInfo);\n";
 
