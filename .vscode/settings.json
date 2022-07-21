@@ -1,0 +1,16 @@
+{
+    "editor.rulers": [
+        72, // comments and docstrings
+        79, // desirable code length
+        100 // maximum code length
+    ],
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        "./sources/pyside6/tests",
+        "-p",
+        "*_test.py"
+    ],
+    "python.testing.pytestEnabled": false,
+    "python.testing.unittestEnabled": true
+}
