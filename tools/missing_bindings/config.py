@@ -47,11 +47,11 @@ modules_to_test = {
     'QtQuick': 'qtquick-module.html',
     'QtQuickWidgets': 'qtquickwidgets-module.html',
     'QtQuickControls2': 'qtquickcontrols2-module.html',
-    # QtQuick3D - no python bindings
+    'QtQuick3D': 'qtquick3d-module.html',
     'QtSql': 'qtsql-module.html',
     'QtWidgets': 'qtwidgets-module.html',
     'QtConcurrent': 'qtconcurrent-module.html',
-    # QtDBUS - no python bindings
+    'QtDBus': 'qtdbus-module.html',
     'QtHelp': 'qthelp-module.html',
     'QtOpenGL': 'qtopengl-module.html',
     'QtPrintSupport': 'qtprintsupport-module.html',
@@ -66,32 +66,32 @@ modules_to_test = {
     'Qt3DRender': 'qt3drender-module.html',
     'Qt3DAnimation': 'qt3danimation-module.html',
     'Qt3DExtras': 'qt3dextras-module.html',
-    # 'QtNetworkAuth':  'qtnetworkauth-module.html',  # no python bindings
+    'QtNetworkAuth':  'qtnetworkauth-module.html',
     # 'QtCoAp' -- TODO
     # 'QtMqtt' -- TODO
     # 'QtOpcUA' -- TODO
 
     # 6.1
-    # 'QtScxml':  'qtscxml-module.html',
-    # 'QtCharts':  'qtcharts-module.html',
-    # 'QtDataVisualization':  'qtdatavisualization-module.html',
+    'QtScxml':  'qtscxml-module.html',
+    'QtCharts':  'qtcharts-module.html',
+    'QtDataVisualization':  'qtdatavisualization-module.html',
 
     # 6.2
     'QtBluetooth': 'qtbluetooth-module.html',
-    # 'QtPositioning':  'qtpositioning-module.html',
-    # 'QtMultimedia':  'qtmultimedia-module.html',
-    # 'QtRemoteObjects':  'qtremoteobjects-module.html',
-    # 'QtSensors':  'qtsensors-module.html',
-    # 'QtSerialPort':  'qtserialport-module.html',
-    # 'QtWebChannel':  'qtwebchannel-module.html',
-    # 'QtWebEngine':  'qtwebengine-module.html',
-    # 'QtWebEngineCore':  'qtwebenginecore-module.html',
-    # 'QtWebEngineWidgets':  'qtwebenginewidgets-module.html',
-    # 'QtWebSockets':  'qtwebsockets-module.html',
+    'QtPositioning':  'qtpositioning-module.html',
+    'QtMultimedia':  'qtmultimedia-module.html',
+    'QtRemoteObjects':  'qtremoteobjects-module.html',
+    'QtSensors':  'qtsensors-module.html',
+    'QtSerialPort':  'qtserialport-module.html',
+    'QtWebChannel':  'qtwebchannel-module.html',
+    'QtWebEngineCore':  'qtwebenginecore-module.html',
+    'QtWebEngineQuick':  'qtwebenginequick-module.html',
+    'QtWebEngineWidgets':  'qtwebenginewidgets-module.html',
+    'QtWebSockets':  'qtwebsockets-module.html',
 
     #  6.x
-    # 'QtSpeech':  'qtspeech-module.html',
-    # 'QtMultimediaWidgets':  'qtmultimediawidgets-module.html',
+    #'QtSpeech':  'qtspeech-module.html',
+    'QtMultimediaWidgets':  'qtmultimediawidgets-module.html',
     # 'QtLocation':  'qtlocation-module.html',
 
     #  Not in 6

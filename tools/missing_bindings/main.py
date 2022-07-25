@@ -48,7 +48,7 @@
 # PySide6.
 #
 # Example invocation of script:
-# python missing_bindings.py --qt-version 6.0 -w all
+# python missing_bindings.py --qt-version 6.3 -w all
 # --qt-version - specify which version of qt documentation to load.
 # -w           - if PyQt6 is an installed package, check if the tested
 # class also exists there.
@@ -64,8 +64,8 @@ from bs4 import BeautifulSoup
 from config import modules_to_test, types_to_ignore
 
 qt_documentation_website_prefixes = {
-    "6.0": "https://doc.qt.io/qt-6/",
-    "dev": "https://doc-snapshots.qt.io/qt5-dev/",
+    "6.3": "https://doc.qt.io/qt-6/",
+    "dev": "https://doc-snapshots.qt.io/qt6-dev/",
 }
 
 
@@ -93,8 +93,8 @@ def get_parser():
     parser.add_argument(
         "--qt-version",
         "-v",
-        default="6.0",
-        choices=["6.0", "dev"],
+        default="6.3",
+        choices=["6.3", "dev"],
         type=str,
         dest="version",
         help="the Qt version to use to check for types",
@@ -106,7 +106,7 @@ def get_parser():
         choices=["all", "in-pyqt", "not-in-pyqt"],
         type=str,
         dest="which_missing",
-        help="Which missing types to show (all, or just those " "that are not present in PyQt)",
+        help="Which missing types to show (all, or just those that are not present in PyQt)",
     )
     return parser
 
@@ -114,30 +114,28 @@ def get_parser():
 def wikilog(*pargs, **kw):
     print(*pargs)
 
-    computed_str = ""
-    for arg in pargs:
-        computed_str += str(arg)
+    computed_str = "".join(str(arg) for arg in pargs)
 
     style = "text"
     if "style" in kw:
         style = kw["style"]
 
     if style == "heading1":
-        computed_str = "= " + computed_str + " ="
+        computed_str = f"= {computed_str} ="
     elif style == "heading5":
-        computed_str = "===== " + computed_str + " ====="
+        computed_str = f"===== {computed_str} ====="
     elif style == "with_newline":
-        computed_str += "\n"
+        computed_str = f"{computed_str}\n"
     elif style == "bold_colon":
         computed_str = computed_str.replace(":", ":'''")
-        computed_str += "'''"
-        computed_str += "\n"
+        computed_str = f"{computed_str}'''\n"
     elif style == "error":
-        computed_str = "''" + computed_str.strip("\n") + "''\n"
+        computed_str = computed_str.strip('\n')
+        computed_str = f"''{computed_str}''\n"
     elif style == "text_with_link":
         computed_str = computed_str
     elif style == "code":
-        computed_str = " " + computed_str
+        computed_str = f" {computed_str}"
     elif style == "end":
         return
 
@@ -184,7 +182,7 @@ if __name__ == "__main__":
     )
 
     wikilog(
-        "Similar report:\n" "https://gist.github.com/ethanhs/6c626ca4e291f3682589699296377d3a",
+        "Similar report:\n https://gist.github.com/ethanhs/6c626ca4e291f3682589699296377d3a",
         style="text_with_link",
     )
 
@@ -226,8 +224,6 @@ if __name__ == "__main__":
 
         try:
             pyqt_module_name = module_name
-            if module_name == "QtCharts":
-                pyqt_module_name = module_name[:-1]
 
             pyqt_tested_module = getattr(
                 __import__(pyqt_package_name, fromlist=[pyqt_module_name]), pyqt_module_name
@@ -249,8 +245,7 @@ if __name__ == "__main__":
         types_on_html_page = []
 
         for link in links:
-            link_text = link.text
-            link_text = link_text.replace("::", ".")
+            link_text = link.text.replace("::", ".")
             if link_text not in types_to_ignore:
                 types_on_html_page.append(link_text)
 
@@ -261,14 +256,7 @@ if __name__ == "__main__":
         missing_types = []
         for qt_type in types_on_html_page:
             try:
-                pyside_qualified_type = "pyside_tested_module."
-
-                if "QtCharts" == module_name:
-                    pyside_qualified_type += "QtCharts."
-                elif "DataVisualization" in module_name:
-                    pyside_qualified_type += "QtDataVisualization."
-
-                pyside_qualified_type += qt_type
+                pyside_qualified_type = f"pyside_tested_module.{qt_type}"
                 eval(pyside_qualified_type)
             except Exception as e:
                 print("Failed eval-in pyside qualified types")
@@ -279,16 +267,9 @@ if __name__ == "__main__":
 
                 is_present_in_pyqt = False
                 try:
-                    pyqt_qualified_type = "pyqt_tested_module."
-
-                    if "Charts" in module_name:
-                        pyqt_qualified_type += "QtCharts."
-                    elif "DataVisualization" in module_name:
-                        pyqt_qualified_type += "QtDataVisualization."
-
-                    pyqt_qualified_type += qt_type
+                    pyqt_qualified_type = f"pyqt_tested_module.{qt_type}"
                     eval(pyqt_qualified_type)
-                    missing_type += " (is present in PyQt6)"
+                    missing_type = f"{missing_type} (is present in PyQt6)"
                     missing_types_compared_to_pyqt += 1
                     total_missing_types_count_compared_to_pyqt += 1
                     is_present_in_pyqt = True
