@@ -117,16 +117,9 @@ if(WIN32)
     set_property(TARGET testbinding PROPERTY SUFFIX ".pyd")
 endif()
 
-if(PYTHON_LIMITED_API)
-    set(TESTBINDING_PYTHON_LIBS ${PYTHON_LIMITED_LIBRARIES})
-else()
-    set(TESTBINDING_PYTHON_LIBS ${PYTHON_LIBRARIES})
-endif()
-
 target_link_libraries(testbinding
                       pysidetest
                       pyside6
-                      ${TESTBINDING_PYTHON_LIBS}
                       Shiboken6::libshiboken
                       ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
                       ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
