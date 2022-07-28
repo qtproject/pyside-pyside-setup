@@ -258,6 +258,7 @@ def module_QtCore() -> ModuleData:
     data.extra_files.append("lupdate*")
     data.extra_files.append("qmllint*")
     data.extra_files.append("qmlformat*")
+    data.extra_files.append("qmlls*")
 
     # General translations
     data.translations.append("qtbase_*")

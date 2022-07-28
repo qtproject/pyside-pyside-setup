@@ -129,7 +129,7 @@ def prepare_packages_posix(self, _vars):
             executables.extend(copydir(
                 "{install_dir}/bin/",
                 "{st_build_dir}/{st_package_name}",
-                _filter=["lrelease", "lupdate", "qmllint", "qmlformat"],
+                _filter=["lrelease", "lupdate", "qmllint", "qmlformat", "qmlls"],
                 recursive=False, _vars=_vars))
             # Copying assistant/designer
             executables.extend(_copy_gui_executable('assistant', _vars=_vars))
