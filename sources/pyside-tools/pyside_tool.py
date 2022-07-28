@@ -78,6 +78,10 @@ def qmllint():
     qt_tool_wrapper("qmllint", sys.argv[1:])
 
 
+def qmlformat():
+    qt_tool_wrapper("qmlformat", sys.argv[1:])
+
+
 def assistant():
     qt_tool_wrapper(ui_tool_binary("assistant"), sys.argv[1:])
 
