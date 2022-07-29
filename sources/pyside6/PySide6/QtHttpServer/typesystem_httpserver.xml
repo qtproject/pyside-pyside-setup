@@ -24,7 +24,6 @@
                      snippet="qhttpserver-afterrequest"/>
       </add-function>
   </object-type>
-  <object-type name="QHttpServerFutureResponse"/>
   <object-type name="QHttpServerResponder">
       <enum-type name="StatusCode"/>
   </object-type>

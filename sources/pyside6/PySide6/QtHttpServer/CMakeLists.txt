@@ -4,7 +4,6 @@ set(QtHttpServer_SRC
     ${QtHttpServer_GEN_DIR}/qabstracthttpserver_wrapper.cpp
     ${QtHttpServer_GEN_DIR}/qfuturehttpserverresponse_wrapper.cpp
     ${QtHttpServer_GEN_DIR}/qhttpserver_wrapper.cpp
-    ${QtHttpServer_GEN_DIR}/qhttpserverfutureresponse_wrapper.cpp
     ${QtHttpServer_GEN_DIR}/qhttpserverresponder_wrapper.cpp
     ${QtHttpServer_GEN_DIR}/qhttpserverrequest_wrapper.cpp
     ${QtHttpServer_GEN_DIR}/qhttpserverresponse_wrapper.cpp
@@ -26,7 +25,7 @@ set(QtHttpServer_include_dirs ${QtHttpServer_SOURCE_DIR}
                                 ${QtWebSockets_GEN_DIR})
 
 set(QtHttpServer_libraries pyside6
-                           ${Qt${QT_MAJOR_VERSION}HttpServer_LIBRARIES}                           
+                           ${Qt${QT_MAJOR_VERSION}HttpServer_LIBRARIES}
                            ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
                            ${Qt${QT_MAJOR_VERSION}Concurrent_LIBRARIES}
                            ${Qt${QT_MAJOR_VERSION}Network_LIBRARIES}
