@@ -15,6 +15,7 @@ since there is no special requirements.
 import json
 import math
 import shutil
+import sys
 from argparse import ArgumentParser, RawTextHelpFormatter
 from pathlib import Path
 from textwrap import dedent
@@ -135,7 +136,12 @@ def get_code_tabs(files, project_dir):
             with open(_path, "r") as _f:
                 _file_content = remove_licenses(_f.read())
         except UnicodeDecodeError as e:
-            print(f"example_gallery: error decoding {_path}:{e}")
+            print(f"example_gallery: error decoding {project_dir}/{_path}:{e}",
+                  file=sys.stderr)
+            raise
+        except FileNotFoundError as e:
+            print(f"example_gallery: error opening {project_dir}/{_path}:{e}",
+                  file=sys.stderr)
             raise
 
         content += add_indent(_file_content, 2)

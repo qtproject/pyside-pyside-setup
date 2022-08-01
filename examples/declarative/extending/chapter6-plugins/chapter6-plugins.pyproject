@@ -1,3 +1,3 @@
 {
-    "files": ["app.qml", "/Charts/piechart.py", "/Charts/pieslice.py"]
+    "files": ["app.qml", "Charts/piechart.py", "Charts/pieslice.py"]
 }
