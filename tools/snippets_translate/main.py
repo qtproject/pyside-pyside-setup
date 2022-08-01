@@ -243,19 +243,20 @@ def translate_file(file_path, final_path, debug, write):
                 table.add_column("Python")
 
         translated_lines = []
-        for line in snippets:
-            if not line:
-                continue
-            translated_line = snippet_translate(line)
-            translated_lines.append(translated_line)
+        for snippet in snippets:
+            for line in snippet:
+                if not line:
+                    continue
+                translated_line = snippet_translate(line)
+                translated_lines.append(translated_line)
 
-            # logging
-            if debug:
-                if have_rich:
-                    table.add_row(line, translated_line)
-                else:
-                    if not opt_quiet:
-                        print(line, translated_line)
+                # logging
+                if debug:
+                    if have_rich:
+                        table.add_row(line, translated_line)
+                    else:
+                        if not opt_quiet:
+                            print(line, translated_line)
 
         if debug and have_rich:
             if not opt_quiet:
