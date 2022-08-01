@@ -7,6 +7,12 @@
 #include <sbkstring.h>
 #include <autodecref.h>
 
+// Remove deprecated MACRO of copysign for MSVC #86286
+// https://github.com/python/cpython/issues/86286
+#ifdef copysign
+#  undef copysign
+#endif
+
 #include <QtCore/QObject>
 #include <QtCore/QString>
 
