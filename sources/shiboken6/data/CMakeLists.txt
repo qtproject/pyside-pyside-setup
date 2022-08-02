@@ -29,7 +29,7 @@ endif()
 configure_package_config_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/Shiboken6Config-spec.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/install/Shiboken6Config${PYTHON_CONFIG_SUFFIX}.cmake"
-     INSTALL_DESTINATION "${LIB_INSTALL_DIR}/cmake/Shiboken6-${shiboken6_VERSION}"
+     INSTALL_DESTINATION "${LIB_INSTALL_DIR}/cmake/Shiboken6"
      PATH_VARS SHIBOKEN_PYTHON_MODULE_DIR SHIBOKEN_SHARED_LIBRARY_DIR
 )
 
@@ -41,16 +41,16 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/shiboken6.pc.in"
                "${CMAKE_CURRENT_BINARY_DIR}/shiboken6${shiboken6_SUFFIX}.pc" @ONLY)
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/Shiboken6Config.cmake"
-        DESTINATION "${LIB_INSTALL_DIR}/cmake/Shiboken6-${shiboken6_VERSION}")
+        DESTINATION "${LIB_INSTALL_DIR}/cmake/Shiboken6")
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/install/Shiboken6Config${PYTHON_CONFIG_SUFFIX}.cmake"
-        DESTINATION "${LIB_INSTALL_DIR}/cmake/Shiboken6-${shiboken6_VERSION}")
+        DESTINATION "${LIB_INSTALL_DIR}/cmake/Shiboken6")
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/Shiboken6ConfigVersion.cmake"
-        DESTINATION "${LIB_INSTALL_DIR}/cmake/Shiboken6-${shiboken6_VERSION}")
+        DESTINATION "${LIB_INSTALL_DIR}/cmake/Shiboken6")
 
 install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/../cmake/ShibokenHelpers.cmake"
-        DESTINATION "${LIB_INSTALL_DIR}/cmake/Shiboken6-${shiboken6_VERSION}")
+        DESTINATION "${LIB_INSTALL_DIR}/cmake/Shiboken6")
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/shiboken6${shiboken6_SUFFIX}.pc"
         DESTINATION "${LIB_INSTALL_DIR}/pkgconfig")

@@ -65,7 +65,7 @@ qfp_strip_library("pyside6qml")
 configure_package_config_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/PySide6QmlConfig-spec.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/install/PySide6QmlConfig${SHIBOKEN_PYTHON_CONFIG_SUFFIX}.cmake"
-     INSTALL_DESTINATION "${LIB_INSTALL_DIR}/cmake/PySide6Qml-${BINDING_API_VERSION}"
+     INSTALL_DESTINATION "${LIB_INSTALL_DIR}/cmake/PySide6Qml"
 )
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/PySide6QmlConfig.cmake.in"
@@ -81,14 +81,14 @@ install(TARGETS pyside6qml EXPORT PySide6QmlTargets
                            ARCHIVE DESTINATION "${LIB_INSTALL_DIR}"
                            RUNTIME DESTINATION bin)
 install(EXPORT PySide6QmlTargets NAMESPACE PySide6Qml::
-        DESTINATION "${LIB_INSTALL_DIR}/cmake/PySide6Qml-${BINDING_API_VERSION}")
+        DESTINATION "${LIB_INSTALL_DIR}/cmake/PySide6Qml")
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/PySide6QmlConfig.cmake"
-        DESTINATION "${LIB_INSTALL_DIR}/cmake/PySide6Qml-${BINDING_API_VERSION}")
+        DESTINATION "${LIB_INSTALL_DIR}/cmake/PySide6Qml")
 
 install(FILES
         "${CMAKE_CURRENT_BINARY_DIR}/install/PySide6QmlConfig${SHIBOKEN_PYTHON_CONFIG_SUFFIX}.cmake"
-        DESTINATION "${LIB_INSTALL_DIR}/cmake/PySide6Qml-${BINDING_API_VERSION}")
+        DESTINATION "${LIB_INSTALL_DIR}/cmake/PySide6Qml")
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/PySide6QmlConfigVersion.cmake"
-        DESTINATION "${LIB_INSTALL_DIR}/cmake/PySide6Qml-${BINDING_API_VERSION}")
+        DESTINATION "${LIB_INSTALL_DIR}/cmake/PySide6Qml")

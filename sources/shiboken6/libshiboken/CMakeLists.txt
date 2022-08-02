@@ -180,4 +180,4 @@ install(TARGETS libshiboken EXPORT Shiboken6Targets
                             ARCHIVE DESTINATION "${LIB_INSTALL_DIR}"
                             RUNTIME DESTINATION bin)
 install(EXPORT Shiboken6Targets NAMESPACE Shiboken6::
-        DESTINATION ${LIB_INSTALL_DIR}/cmake/Shiboken6-${shiboken6_VERSION})
+        DESTINATION ${LIB_INSTALL_DIR}/cmake/Shiboken6)

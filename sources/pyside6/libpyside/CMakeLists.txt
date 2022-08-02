@@ -146,7 +146,7 @@ set(PYSIDE_GLUE "${CMAKE_INSTALL_PREFIX}/share/PySide6${pyside6_SUFFIX}/glue")
 configure_package_config_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/PySide6Config-spec.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/install/PySide6Config${SHIBOKEN_PYTHON_CONFIG_SUFFIX}.cmake"
-     INSTALL_DESTINATION "${LIB_INSTALL_DIR}/cmake/PySide6-${BINDING_API_VERSION}"
+     INSTALL_DESTINATION "${LIB_INSTALL_DIR}/cmake/PySide6"
      PATH_VARS PYSIDE_PYTHONPATH PYSIDE_TYPESYSTEMS PYSIDE_GLUE
 )
 
@@ -163,16 +163,16 @@ install(TARGETS pyside6 EXPORT PySide6Targets
                         ARCHIVE DESTINATION "${LIB_INSTALL_DIR}"
                         RUNTIME DESTINATION bin)
 install(EXPORT PySide6Targets NAMESPACE PySide6::
-        DESTINATION "${LIB_INSTALL_DIR}/cmake/PySide6-${BINDING_API_VERSION}")
+        DESTINATION "${LIB_INSTALL_DIR}/cmake/PySide6")
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/pyside6${pyside6_SUFFIX}.pc"
         DESTINATION "${LIB_INSTALL_DIR}/pkgconfig")
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/PySide6Config.cmake"
-        DESTINATION "${LIB_INSTALL_DIR}/cmake/PySide6-${BINDING_API_VERSION}")
+        DESTINATION "${LIB_INSTALL_DIR}/cmake/PySide6")
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/install/PySide6Config${SHIBOKEN_PYTHON_CONFIG_SUFFIX}.cmake"
-        DESTINATION "${LIB_INSTALL_DIR}/cmake/PySide6-${BINDING_API_VERSION}")
+        DESTINATION "${LIB_INSTALL_DIR}/cmake/PySide6")
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/PySide6ConfigVersion.cmake"
-        DESTINATION "${LIB_INSTALL_DIR}/cmake/PySide6-${BINDING_API_VERSION}")
+        DESTINATION "${LIB_INSTALL_DIR}/cmake/PySide6")
