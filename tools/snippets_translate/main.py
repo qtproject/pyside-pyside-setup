@@ -39,6 +39,8 @@ SKIP_END = (".pro", ".pri", ".cmake", ".qdoc", ".yaml", ".frag", ".qsb", ".vert"
 SKIP_BEGIN = ("changes-", ".")
 SNIPPET_PATTERN = re.compile(r"//! ?\[([^]]+)\]")
 
+SOURCE_PATH = Path(__file__).parents[2] / "sources" / "pyside6" / "doc" / "snippets"
+OVERRIDDEN_SNIPPET = "# OVERRIDDEN_SNIPPET"
 
 class FileStatus(Enum):
     Exists = 0
@@ -169,10 +171,25 @@ def get_snippet_ids(line: str) -> List[str]:
     return result
 
 
-def get_snippets(lines: List[str]) -> List[List[str]]:
+def get_snippet_override(start_id: str, rel_path: str) -> List[str]:
+    # Check if the snippet is overridden by a local file
+    override_name = f"{rel_path.stem}_{start_id}{rel_path.suffix}.py"
+    override_path = SOURCE_PATH / rel_path.parent / override_name
+    snippet = []
+    if override_path.is_file():
+        snippet.append(OVERRIDDEN_SNIPPET)
+        id_string = f"//! [{start_id}]"
+        snippet.append(id_string)
+        snippet.extend(override_path.read_text().splitlines())
+        snippet.append(id_string)
+    return snippet
+
+
+def get_snippets(lines: List[str], rel_path: str) -> List[List[str]]:
     # Extract (potentially overlapping) snippets from a C++ file indicated by //! [1]
     snippets: List[List[str]] = []
     snippet: List[str]
+    done_snippets : List[str] = []
 
     i = 0
     while i < len(lines):
@@ -183,7 +200,15 @@ def get_snippets(lines: List[str]) -> List[List[str]]:
         while start_ids:
             # Start of a snippet
             start_id = start_ids.pop(0)
-            snippet = [line]  # The snippet starts with his id
+            if start_id in done_snippets:
+                continue
+            done_snippets.append(start_id)
+            snippet = get_snippet_override(start_id, rel_path)
+            if snippet:
+                snippets.append(snippet)
+                continue
+
+            snippet.append(line)  # The snippet starts with this id
 
             # Find the end of the snippet
             j = i
@@ -229,9 +254,11 @@ def get_license_from_file(filename):
         return ""
 
 
-def translate_file(file_path, final_path, debug, write):
+def translate_file(file_path, final_path, qt_path, debug, write):
     with open(str(file_path)) as f:
-        snippets = get_snippets(f.read().splitlines())
+        lines = f.read().splitlines()
+        rel_path = file_path.relative_to(qt_path)
+        snippets = get_snippets(lines, rel_path)
     if snippets:
         # TODO: Get license header first
         license_header = get_license_from_file(str(file_path))
@@ -244,6 +271,10 @@ def translate_file(file_path, final_path, debug, write):
 
         translated_lines = []
         for snippet in snippets:
+            if snippet and snippet[0] == OVERRIDDEN_SNIPPET:
+                translated_lines.extend(snippet[1:])
+                continue
+
             for line in snippet:
                 if not line:
                     continue
@@ -322,7 +353,7 @@ def copy_file(file_path, qt_path, out_path, write=False, debug=False):
     # Change .cpp to .py, .h to .h.py
     # Translate C++ code into Python code
     if final_path.name.endswith(".cpp") or final_path.name.endswith(".h"):
-        translate_file(file_path, final_path, debug, write)
+        translate_file(file_path, final_path, qt_path, debug, write)
 
     return status
 
