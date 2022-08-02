@@ -3722,11 +3722,24 @@ CppGenerator::argumentClassFromIndex(const ApiExtractorResult &api,
     return result;
 }
 
+const char tryBlock[] = R"(
+PyObject *errorType{};
+PyObject *errorString{};
+try {
+)";
+
 const char defaultExceptionHandling[] = R"(} catch (const std::exception &e) {
-    PyErr_SetString(PyExc_RuntimeError, e.what());
+    errorType = PyExc_RuntimeError;
+    errorString = Shiboken::String::fromCString(e.what());
 } catch (...) {
-    PyErr_SetString(PyExc_RuntimeError, "An unknown exception was caught");
+    errorType = PyExc_RuntimeError;
+    errorString = Shiboken::Messages::unknownException();
 }
+)";
+
+const char propagateException[] = R"(
+if (errorType != nullptr)
+    PyErr_SetObject(errorType, errorString);
 )";
 
 void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr &func,
@@ -3779,6 +3792,8 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
     }
 
     writeConversionRule(s, func, TypeSystem::NativeCode, usesPyArgs);
+
+    bool generateExceptionHandling = false;
 
     if (!func->isUserAdded()) {
         QStringList userArgs;
@@ -3994,9 +4009,9 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
 
         if (!injectedCodeCallsCppFunction(context, func)) {
             const bool allowThread = func->allowThread();
-            const bool generateExceptionHandling = func->generateExceptionHandling();
+            generateExceptionHandling = func->generateExceptionHandling();
             if (generateExceptionHandling) {
-                s << "try {\n" << indent;
+                s << tryBlock << indent;
                 if (allowThread) {
                     s << "Shiboken::ThreadStateSaver threadSaver;\n"
                         << "threadSaver.save();\n";
@@ -4076,8 +4091,8 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
             if (generateExceptionHandling) { // "catch" code
                 s << outdent << defaultExceptionHandling;
             }
-        }
-    }
+        } // !injected code calls C++ function
+    } // !userAdded
 
     if (func->hasInjectedCode() && !func->isConstructor())
         writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionEnd,
@@ -4161,6 +4176,9 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
         }
     }
     writeParentChildManagement(s, func, usesPyArgs, !hasReturnPolicy);
+
+    if (generateExceptionHandling)
+        s << propagateException;
 }
 
 QStringList CppGenerator::getAncestorMultipleInheritance(const AbstractMetaClass *metaClass)

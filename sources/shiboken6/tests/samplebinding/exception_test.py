@@ -55,5 +55,16 @@ class CppExceptionTest(unittest.TestCase):
 
         self.assertEqual(exceptionCount, 2)
 
+        def testModifications(self):
+            """PYSIDE-1995, test whether exceptions are propagated
+               when return ownership modifications are generated."""
+            exceptionCount = 0
+            try:
+                et = ExceptionTest.create(True);
+            except:
+                exceptionCount += 1
+            self.assertEqual(exceptionCount, 1)
+
+
 if __name__ == '__main__':
     unittest.main()

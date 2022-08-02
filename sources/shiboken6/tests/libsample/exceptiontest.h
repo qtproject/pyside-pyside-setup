@@ -18,6 +18,8 @@ class LIBSAMPLE_API ExceptionTest
 
     int intThrowInt(bool doThrow);
     void voidThrowInt(bool doThrow);
+
+    static ExceptionTest *create(bool doThrow);
 };
 
 #endif // EXCEPTIONTEST_H

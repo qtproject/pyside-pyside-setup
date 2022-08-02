@@ -79,4 +79,10 @@ STATIC_STRING_IMPL(signature, "__signature__")
 STATIC_STRING_IMPL(weakrefoffset, "__weakrefoffset__")
 STATIC_STRING_IMPL(opaque_container, "__opaque_container__")
 } // namespace PyMagicName
+
+namespace Messages
+{
+STATIC_STRING_IMPL(unknownException, "An unknown exception was caught")
+}
+
 } // namespace Shiboken

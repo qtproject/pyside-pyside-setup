@@ -50,6 +50,11 @@ LIBSHIBOKEN_API PyObject *code();
 LIBSHIBOKEN_API PyObject *rlshift();
 LIBSHIBOKEN_API PyObject *rrshift();
 } // namespace PyMagicName
+
+namespace Messages
+{
+LIBSHIBOKEN_API PyObject *unknownException();
+} // Messages
 } // namespace Shiboken
 
 #endif // SBKSTATICSTRINGS_H

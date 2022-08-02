@@ -37,3 +37,10 @@ void ExceptionTest::voidThrowInt(bool doThrow)
     if (doThrow)
         throw 42;
 }
+
+ExceptionTest *ExceptionTest::create(bool doThrow)
+{
+    if (doThrow)
+        throw TestException();
+    return new ExceptionTest;
+}

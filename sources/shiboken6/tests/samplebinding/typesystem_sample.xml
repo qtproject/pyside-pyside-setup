@@ -2362,15 +2362,24 @@
 
     <value-type name="Expression" />
 
-    <object-type name="ExceptionTest" exception-handling="auto-on"/>
-
-    <value-type name="ModelIndex" />
-    <value-type name="ReferentModelIndex">
-        <modify-function signature="operator const ModelIndex&amp;()const">
+    <object-type name="ExceptionTest" exception-handling="auto-on">
+        <modify-function signature="create(bool)">
             <modify-argument index="return">
                 <define-ownership owner="c++"/>
             </modify-argument>
+            <inject-code class="target" position="end">
+            // Test comment
+            </inject-code>
         </modify-function>
+    </object-type>
+
+    <value-type name="ModelIndex" />
+    <value-type name="ReferentModelIndex">
+    <modify-function signature="operator const ModelIndex&amp;()const">
+        <modify-argument index="return">
+            <define-ownership owner="c++"/>
+        </modify-argument>
+    </modify-function>
     </value-type>
     <value-type name="PersistentModelIndex" />
 
