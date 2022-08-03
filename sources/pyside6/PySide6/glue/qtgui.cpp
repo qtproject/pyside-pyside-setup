@@ -306,9 +306,21 @@ if (_i < 0 || _i >= %CPPSELF.count()) {
     PyErr_SetString(PyExc_IndexError, "index out of bounds");
     return 0;
 }
-int item = (*%CPPSELF)[_i];
-return %CONVERTTOPYTHON[int](item);
+QKeyCombination item = (*%CPPSELF)[_i];
+if (usingNewEnum())
+    return %CONVERTTOPYTHON[QKeyCombination](item);
+auto combined = item.toCombined();
+return %CONVERTTOPYTHON[int](combined);
 // @snippet qkeysequence-getitem
+
+// @snippet qkeysequence-repr
+auto ObTuple_Type = reinterpret_cast<PyObject *>(&PyTuple_Type);
+auto ObSelf_Type = reinterpret_cast<PyObject *>(Py_TYPE(%PYSELF));
+Shiboken::AutoDecRef surrogate(PyObject_CallFunctionObjArgs(ObTuple_Type, %PYSELF, nullptr));
+Shiboken::AutoDecRef argstr(PyObject_Repr(surrogate));
+Shiboken::AutoDecRef name(PyObject_GetAttrString(ObSelf_Type, "__name__"));
+return PyUnicode_Concat(name, argstr);
+// @snippet qkeysequence-repr
 
 // @snippet qpicture-data
 %PYARG_0 = Shiboken::Buffer::newObject(%CPPSELF.data(), %CPPSELF.size());

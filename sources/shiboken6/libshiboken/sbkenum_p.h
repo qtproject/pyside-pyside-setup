@@ -24,6 +24,8 @@ LIBSHIBOKEN_API PyTypeObject *mapFlagsToSameEnum(PyTypeObject *FType, PyTypeObje
 LIBSHIBOKEN_API PyTypeObject *getPyEnumMeta();
 /// PYSIDE-1735: Helper function supporting QEnum
 LIBSHIBOKEN_API int enumIsFlag(PyObject *ob_enum);
+/// PYSIDE-1735: Helper function to ask what enum we are using
+LIBSHIBOKEN_API bool usingNewEnum();
 
 }
 
