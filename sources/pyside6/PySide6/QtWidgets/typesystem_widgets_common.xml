@@ -219,7 +219,7 @@
   <value-type name="QSizePolicy">
       <enum-type name="ControlType" flags="ControlTypes"/>
       <enum-type name="Policy"/>
-      <enum-type name="PolicyFlag"/>
+      <enum-type name="PolicyFlag" python-type="IntFlag"/>
   </value-type>
   <value-type name="QTableWidgetSelectionRange"/>
 
@@ -509,7 +509,7 @@
   </object-type>
   <object-type name="QDateEdit"/>
   <object-type name="QDialog">
-    <enum-type name="DialogCode"/>
+    <enum-type name="DialogCode" python-type="IntEnum"/>
     <modify-function signature="exec()" allow-thread="yes"/>
     <add-function signature="exec_()" return-type="int">
         <inject-code file="../glue/qtwidgets.cpp" snippet="qapplication-exec"/>
@@ -1154,17 +1154,17 @@
     </add-function>
   </object-type>
   <object-type name="QStyle">
-    <enum-type name="ComplexControl"/>
-    <enum-type name="ContentsType"/>
-    <enum-type name="ControlElement"/>
-    <enum-type name="PixelMetric"/>
-    <enum-type name="PrimitiveElement"/>
+    <enum-type name="ComplexControl" python-type="IntEnum"/>
+    <enum-type name="ContentsType" python-type="IntEnum"/>
+    <enum-type name="ControlElement" python-type="IntEnum"/>
+    <enum-type name="PixelMetric" python-type="IntEnum"/>
+    <enum-type name="PrimitiveElement" python-type="IntEnum"/>
     <enum-type name="RequestSoftwareInputPanel" since="4.6"/>
-    <enum-type name="StandardPixmap"/>
+    <enum-type name="StandardPixmap" python-type="IntEnum"/>
     <enum-type name="StateFlag" flags="State"/>
-    <enum-type name="StyleHint"/>
+    <enum-type name="StyleHint" python-type="IntEnum"/>
     <enum-type name="SubControl" flags="SubControls"/>
-    <enum-type name="SubElement"/>
+    <enum-type name="SubElement" python-type="IntEnum"/>
     <modify-function signature="drawComplexControl(QStyle::ComplexControl,const QStyleOptionComplex*,QPainter*,const QWidget*)const">
       <modify-argument index="3" invalidate-after-use="yes"/>
       <modify-argument index="4">
@@ -1782,7 +1782,7 @@
     <modify-function signature="closeEditor(QWidget*,QAbstractItemDelegate::EndEditHint)" allow-thread="yes"/>
   </object-type>
   <object-type name="QTableWidgetItem" >
-    <enum-type name="ItemType"/>
+    <enum-type name="ItemType" python-type="IntEnum"/>
     <modify-function signature="read(QDataStream&amp;)" allow-thread="yes">
       <modify-argument index="1" invalidate-after-use="yes"/>
     </modify-function>
@@ -1791,7 +1791,7 @@
     </modify-function>
   </object-type>
   <object-type name="QListWidgetItem" >
-    <enum-type name="ItemType"/>
+    <enum-type name="ItemType" python-type="IntEnum"/>
     <modify-function signature="QListWidgetItem(const QString&amp;,QListWidget*,int)">
       <modify-argument index="this">
         <parent index="2" action="add"/>
@@ -1851,7 +1851,7 @@
   </object-type>
   <object-type name="QTreeWidgetItem" hash-function="qHash">
     <enum-type name="ChildIndicatorPolicy"/>
-    <enum-type name="ItemType"/>
+    <enum-type name="ItemType" python-type="IntEnum"/>
     <modify-function signature="read(QDataStream&amp;)" allow-thread="yes">
       <modify-argument index="1" invalidate-after-use="yes"/>
     </modify-function>
@@ -2285,7 +2285,7 @@
   <object-type name="QMessageBox">
     <enum-type name="ButtonRole"/>
     <enum-type name="Icon"/>
-    <enum-type name="StandardButton" flags="StandardButtons"/>
+    <enum-type name="StandardButton" python-type="IntFlag" flags="StandardButtons"/>
     <modify-function signature="removeButton(QAbstractButton*)">
       <modify-argument index="1">
         <parent index="this" action="add"/>
@@ -2740,8 +2740,8 @@
     </modify-function>
   </object-type>
   <object-type name="QFrame">
-      <enum-type name="Shadow"/>
-      <enum-type name="Shape"/>
+      <enum-type name="Shadow" python-type="IntEnum"/>
+      <enum-type name="Shape" python-type="IntEnum"/>
       <enum-type name="StyleMask"/>
   </object-type>
   <object-type name="QSpinBox"/>
@@ -2895,7 +2895,7 @@
   <object-type name="QCommandLinkButton"/>
   <!-- FIXME PYSIDE7: Move to QtGui -->
   <object-type name="QFileSystemModel" polymorphic-id-expression="qobject_cast&lt;QFileSystemModel*&gt;(%1)">
-    <enum-type name="Roles"/>
+    <enum-type name="Roles" python-type="IntEnum"/>
     <enum-type name="Option" flags="Options" since="5.14"/>
     <modify-function signature="setIconProvider(QAbstractFileIconProvider*)">
       <modify-argument index="1">

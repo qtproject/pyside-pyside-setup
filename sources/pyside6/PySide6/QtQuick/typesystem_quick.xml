@@ -138,7 +138,7 @@
     <object-type name="QSGGeometry">
         <enum-type name="DataPattern"/>
         <enum-type name="AttributeType" since="5.8"/>
-        <enum-type name="DrawingMode" since="5.8"/>
+        <enum-type name="DrawingMode" python-type="IntEnum" since="5.8"/>
         <enum-type name="Type" since="5.8"/>
         <value-type name="Attribute"/>
         <value-type name="AttributeSet"/>

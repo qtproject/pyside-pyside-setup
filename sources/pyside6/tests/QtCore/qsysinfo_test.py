@@ -39,13 +39,15 @@ from PySide6.QtCore import QSysInfo
 
 
 class TestQSysInfo(unittest.TestCase):
+    newenum = sys.pyside63_option_python_enum
+
     def testEnumEndian(self):
-        self.assertEqual(QSysInfo.BigEndian, 0)
-        self.assertEqual(QSysInfo.LittleEndian, 1)
-        self.assertTrue(QSysInfo.ByteOrder > -1)
+        self.assertEqual(QSysInfo.BigEndian.value if self.newenum else QSysInfo.BigEndian, 0)
+        self.assertEqual(QSysInfo.LittleEndian.value if self.newenum else QSysInfo.LittleEndian, 1)
+        self.assertTrue((QSysInfo.ByteOrder.value if self.newenum else QSysInfo.ByteOrder) > -1)
 
     def testEnumSizes(self):
-        self.assertTrue(QSysInfo.WordSize > 0)
+        self.assertTrue((QSysInfo.WordSize.value if self.newenum else QSysInfo.WordSize) > 0)
 
 
 if __name__ == '__main__':

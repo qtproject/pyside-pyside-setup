@@ -388,15 +388,102 @@ static QString _plainName(const QString &s)
     return cutPos < 0 ? s : s.right(s.length() - (cutPos + 2));
 }
 
-static QString BuildEnumFlagInfo(const EnumTypeEntry *enumType)
+/**********************************************************************
+ *
+ * Decision whether to use an IntEnum/IntFlag
+ * ------------------------------------------
+ *
+ * Unfortunately, all attempts to drive this decision automagically
+ * did not work out. We therefore compile a list in with known
+ * IntEnum and IntFlag.
+ */
+
+/*
+ * This function is now unused and replaced by TypeSystem::PythonEnumType
+ */
+#if 0
+static QSet<QString> useIntSet()
 {
+    static const QSet<QString> result{
+        /* IntEnum */ u"PySide6.QtCore.QDataStream.Version"_s,
+        /* IntEnum */ u"PySide6.QtCore.QEvent.Type"_s,
+        /* IntEnum */ u"PySide6.QtCore.QLocale.FloatingPointPrecisionOption"_s,
+        /* IntFlag */ u"PySide6.QtCore.QLocale.LanguageCodeType"_s,
+        /* IntFlag */ u"PySide6.QtCore.QUrl.ComponentFormattingOption"_s,
+        // note:  "QUrl::UrlFormattingOption" is set as IntFlag without flags
+        /* IntFlag */ u"PySide6.QtCore.QUrl.UrlFormattingOption"_s,
+        /* IntFlag */ u"PySide6.QtCore.Qt.AlignmentFlag"_s,
+        /* IntEnum */ u"PySide6.QtCore.Qt.GestureType"_s,
+        /* IntEnum */ u"PySide6.QtCore.Qt.ItemDataRole"_s,
+        /* IntEnum */ u"PySide6.QtCore.Qt.Key"_s,
+        // note:  "Qt::TextFlag" is set as IntFlag without flags
+        /* IntFlag */ u"PySide6.QtCore.Qt.TextFlag"_s,
+        /* IntFlag */ u"PySide6.QtCore.Qt.WindowType"_s,
+        // This is found in QtWidgets but should be in QtGui.
+        /* IntEnum */ u"PySide6.QtGui.QFileSystemModel.Roles"_s,
+        /* IntEnum */ u"PySide6.QtGui.QFont.Stretch"_s,
+        /* IntEnum */ u"PySide6.QtGui.QFont.Weight"_s,
+        /* IntEnum */ u"PySide6.QtGui.QTextFormat.FormatType"_s,
+        /* IntEnum */ u"PySide6.QtGui.QTextFormat.ObjectTypes"_s,
+        /* IntEnum */ u"PySide6.QtGui.QTextFormat.Property"_s,
+        /* IntEnum */ u"PySide6.QtWidgets.QDialog.DialogCode"_s,
+        /* IntEnum */ u"PySide6.QtWidgets.QFrame.Shadow"_s,
+        /* IntEnum */ u"PySide6.QtWidgets.QFrame.Shape"_s,
+        /* IntEnum */ u"PySide6.QtWidgets.QListWidgetItem.ItemType"_s,
+        /* IntFlag */ u"PySide6.QtWidgets.QMessageBox.StandardButton"_s,
+        // note:  "QSizePolicy::PolicyFlag" is set as IntFlag without flags
+        /* IntFlag */ u"PySide6.QtWidgets.QSizePolicy.PolicyFlag"_s,
+        /* IntEnum */ u"PySide6.QtWidgets.QStyle.ComplexControl"_s,
+        /* IntEnum */ u"PySide6.QtWidgets.QStyle.ContentsType"_s,
+        /* IntEnum */ u"PySide6.QtWidgets.QStyle.ControlElement"_s,
+        /* IntEnum */ u"PySide6.QtWidgets.QStyle.PixelMetric"_s,
+        /* IntEnum */ u"PySide6.QtWidgets.QStyle.PrimitiveElement"_s,
+        /* IntEnum */ u"PySide6.QtWidgets.QStyle.StandardPixmap"_s,
+        /* IntEnum */ u"PySide6.QtWidgets.QStyle.StyleHint"_s,
+        /* IntEnum */ u"PySide6.QtWidgets.QStyle.SubElement"_s,
+        /* IntEnum */ u"PySide6.QtWidgets.QTableWidgetItem.ItemType"_s,
+        /* IntEnum */ u"PySide6.QtWidgets.QTreeWidgetItem.ItemType"_s,
+        /* IntEnum */ u"PySide6.QtMultimedia.QMediaPlayer.Loops"_s,
+        /* IntEnum */ u"PySide6.QtQuick.QSGGeometry.DrawingMode"_s,
+        // Added because it should really be used as number
+        /* IntEnum */ u"PySide6.QtCore.QMetaType.Type"_s,
+        /* IntEnum */ u"PySide6.QtSerialPort.QSerialPort.BaudRate"_s
+    };
+    return result;
+}
+#endif
+
+static bool _shouldInheritInt(const AbstractMetaEnum &cppEnum)
+{
+    if (!cppEnum.fullName().startsWith(u"PySide6."_s))
+        return true;
+    // static auto intSet = useIntSet();
+    // return intSet.contains(cppEnum.fullName());
+    return false;
+}
+
+static QString BuildEnumFlagInfo(const AbstractMetaEnum &cppEnum)
+{
+    auto *enumType = cppEnum.typeEntry();
     QString result = _plainName(enumType->name());
     auto flags = enumType->flags();
-    if (flags) {
-        result += u":IntFlag:"_s + _plainName(flags->flagsName());
-    } else {
-        result += u":IntEnum"_s;
+    auto decision = enumType->pythonEnumType();
+    bool _int = _shouldInheritInt(cppEnum);
+    bool _flag = bool(flags);
+
+    if (decision != TypeSystem::PythonEnumType::Unspecified) {
+        _int = true;
+        if (!flags && decision == TypeSystem::PythonEnumType::IntFlag) {
+            qWarning() << "\nnote: " << enumType->name() << "is set as IntFlag without flags\n";
+            _flag = true;
+        }
+        if (flags && decision == TypeSystem::PythonEnumType::IntEnum)
+            qWarning() << "\n*** The expression " << enumType->name() << "should be a flag!\n";
     }
+    result += _flag ? (_int ? u":IntFlag"_s : u":Flag"_s)
+                    : (_int ? u":IntEnum"_s : u":Enum"_s);
+    if (flags)
+        result += u':' + _plainName(flags->flagsName());
     return u'"' + result + u'"';
 }
 
@@ -694,7 +781,7 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
     // PYSIDE-1735: Write an EnumFlagInfo structure
     QStringList sorter;
     for (const auto &entry : qAsConst(classEnums))
-        sorter.append(BuildEnumFlagInfo(entry.typeEntry()));
+        sorter.append(BuildEnumFlagInfo(entry));
     sorter.sort();
     if (!sorter.empty()) {
         s << "static const char *" << className << "_EnumFlagInfo[] = {\n" << indent;
@@ -5965,10 +6052,11 @@ void CppGenerator::writeClassRegister(TextStream &s,
     AbstractMetaEnumList classEnums = metaClass->enums();
     metaClass->getEnumsFromInvisibleNamespacesToBeGenerated(&classEnums);
 
-    writeEnumsInitialization(s, classEnums, ErrorReturn::Void);
     if (!classContext.forSmartPointer() && !classEnums.isEmpty())
-        s << "SbkObjectType_SetEnumFlagInfo(pyType, " << chopType(pyTypeName)
-            << "_EnumFlagInfo);\n";
+        s << "// Pass the ..._EnumFlagInfo to the class.\n"
+            << "SbkObjectType_SetEnumFlagInfo(pyType, " << chopType(pyTypeName)
+            << "_EnumFlagInfo);\n\n";
+    writeEnumsInitialization(s, classEnums, ErrorReturn::Void);
 
     if (metaClass->hasSignals())
         writeSignalInitialization(s, metaClass);

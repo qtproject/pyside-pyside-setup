@@ -175,7 +175,9 @@ class ExactEnumerator(object):
                 self.collision_track.add(thing_name)
 
         init_signature = getattr(klass, "__signature__", None)
-        enums.sort(key=lambda tup: tup[1 : 3])  # sort by class then enum value
+        new_enum = sys.pyside63_option_python_enum
+        # sort by class then enum value
+        enums.sort(key=lambda tup: (tup[1], tup[2].value if new_enum else tup[2]))
 
         # We want to handle functions and properties together.
         func_prop = sorted(functions + properties, key=lambda tup: tup[0])
@@ -192,7 +194,8 @@ class ExactEnumerator(object):
                 if len(enums):
                     self.section()
                 for enum_name, enum_class_name, value in enums:
-                    with self.fmt.enum(enum_class_name, enum_name, int(value)):
+                    with self.fmt.enum(enum_class_name, enum_name,
+                                       value.value if new_enum else value):
                         pass
             if len(subclasses):
                 self.section()

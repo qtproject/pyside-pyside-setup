@@ -331,8 +331,13 @@
   <value-type name="QKeyCombination"/>
 
   <value-type name="QMetaType">
-      <enum-type name="Type"/>
+      <enum-type name="Type" python-type="IntEnum"/>
       <enum-type name="TypeFlag" flags="TypeFlags"/>
+      <!-- PYSIDE-1735: The class QMetaType.Type must be allowed because int is gone -->
+      <add-function signature="QMetaType(QMetaType::Type)">
+          <inject-code class="target" position="beginning" file="../glue/qtcore.cpp"
+                       snippet="metatype-from-metatype-type"/>
+      </add-function>
       <conversion-rule>
           <native-to-target file="../glue/qtcore.cpp" snippet="conversion-qmetatype-pytypeobject"/>
           <target-to-native>
@@ -525,7 +530,7 @@
     <extra-includes>
       <include file-name="QtCore/QProperty" location="global"/>
     </extra-includes>
-    <enum-type name="AlignmentFlag" flags="Alignment"/>
+    <enum-type name="AlignmentFlag" python-type="IntFlag" flags="Alignment"/>
     <enum-type name="AnchorPoint" since="4.6"/>
     <enum-type name="ApplicationAttribute"/>
     <enum-type name="ApplicationState" flags="ApplicationStates" since="5.1"/>
@@ -556,7 +561,7 @@
     <enum-type name="FocusReason"/>
     <enum-type name="GestureFlag" flags="GestureFlags" since="4.6"/>
     <enum-type name="GestureState" since="4.6"/>
-    <enum-type name="GestureType" since="4.6"/>
+    <enum-type name="GestureType" python-type="IntEnum" since="4.6"/>
     <enum-type name="GlobalColor"/>
     <enum-type name="HighDpiScaleFactorRoundingPolicy" since="5.14"/>
     <enum-type name="HitTestAccuracy"/>
@@ -564,11 +569,11 @@
     <enum-type name="InputMethodHint" flags="InputMethodHints" since="4.6"/>
     <enum-type name="InputMethodQuery" flags="InputMethodQueries"/>
     <enum-type name="EnterKeyType" since="5.6"/>
-    <enum-type name="ItemDataRole"/>
+    <enum-type name="ItemDataRole" python-type="IntEnum"/>
     <enum-type name="ItemFlag" flags="ItemFlags"/>
     <enum-type name="ItemSelectionMode"/>
     <enum-type name="ItemSelectionOperation" since="5.5"/>
-    <enum-type name="Key"/>
+    <enum-type name="Key" python-type="IntEnum"/>
     <enum-type name="KeyboardModifier" flags="KeyboardModifiers"/>
     <enum-type name="LayoutDirection"/>
     <enum-type name="MaskMode"/>
@@ -594,7 +599,7 @@
     <enum-type name="SplitBehaviorFlags" flags="SplitBehavior" since="5.14"/>
     <enum-type name="TabFocusBehavior" since="5.5"/>
     <enum-type name="TextElideMode"/>
-    <enum-type name="TextFlag"/>
+    <enum-type name="TextFlag" python-type="IntFlag"/>
     <enum-type name="TextFormat"/>
     <enum-type name="TextInteractionFlag" flags="TextInteractionFlags"/>
     <enum-type name="TileRule" since="4.6"/>
@@ -611,7 +616,7 @@
     <enum-type name="WindowFrameSection"/>
     <enum-type name="WindowModality"/>
     <enum-type name="WindowState" flags="WindowStates"/>
-    <enum-type name="WindowType" flags="WindowFlags"/>
+    <enum-type name="WindowType" python-type="IntFlag" flags="WindowFlags"/>
     <enum-type name="CursorMoveStyle" since="4.8" revision="4800"/>
 
     <modify-function signature="^operator.\(Qt::AlignmentFlag,Qt::TextFlag\)$"
@@ -866,6 +871,10 @@
     </add-function>
     <add-function signature="QDateTime(int,int,int,int,int,int)">
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qdatetime-2"/>
+    </add-function>
+    <!-- PYSIDE-1735: Qt::TimeSpec is no more compatible with int -->
+    <add-function signature="QDateTime(int,int,int,int,int,int,int,Qt::TimeSpec=Qt::LocalTime)">
+        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qdatetime-3"/>
     </add-function>
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
@@ -1295,10 +1304,10 @@
   <value-type name="QLocale">
     <enum-type name="Country"/>
     <enum-type name="DataSizeFormat" flags="DataSizeFormats" since="5.10"/>
-    <enum-type name="FloatingPointPrecisionOption" since="5.7"/>
+    <enum-type name="FloatingPointPrecisionOption" python-type="IntEnum" since="5.7"/>
     <enum-type name="FormatType"/>
     <enum-type name="Language"/>
-    <enum-type name="LanguageCodeType" flags="LanguageCodeTypes" since="6.3"/>
+    <enum-type name="LanguageCodeType" python-type="IntFlag" flags="LanguageCodeTypes" since="6.3"/>
     <enum-type name="MeasurementSystem"/>
     <enum-type name="NumberOption" flags="NumberOptions"/>
     <enum-type name="Script" since="4.8" revision="4800"/>
@@ -1793,9 +1802,9 @@
 
   <value-type name="QUrl" hash-function="PySide::hash">
     <!-- Qt5: lots of changes -->
-    <enum-type name="ComponentFormattingOption" flags="ComponentFormattingOptions,FormattingOptions"/>
+    <enum-type name="ComponentFormattingOption" python-type="IntFlag" flags="ComponentFormattingOptions,FormattingOptions"/>
     <!-- note: above duplication of attribute is not by default XML compliant! -->
-    <enum-type name="UrlFormattingOption"/>
+    <enum-type name="UrlFormattingOption" python-type="IntFlag"/>
     <enum-type name="UserInputResolutionOption" flags="UserInputResolutionOptions"/>
     <enum-type name="ParsingMode"/>
     <enum-type name="AceProcessingOption" flags="AceProcessingOptions" since="6.3"/>
@@ -2571,8 +2580,9 @@
       </inject-documentation>
     </add-function>
   </object-type>
-  <object-type name="QEvent"  polymorphic-id-expression="%1-&gt;type() == QEvent::None">
-    <enum-type name="Type"/>
+  <object-type name="QEvent"  polymorphic-id-expression="%1-&gt;type() == QEvent::None"
+               qt-register-metatype="base">
+    <enum-type name="Type" python-type="IntEnum"/>
     <add-function signature="__repr__" return-type="PyObject">
         <inject-code class="target" position="beginning"
                      file="../glue/qtcore.cpp" snippet="repr-qevent"/>
@@ -2592,7 +2602,7 @@
   <object-type name="QDataStream" stream="yes">
     <enum-type name="FloatingPointPrecision" since="4.6"/>
     <enum-type name="Status"/>
-    <enum-type name="Version"/>
+    <enum-type name="Version" python-type="IntEnum"/>
     <enum-type name="ByteOrder"/>
     <extra-includes>
       <include file-name="QtCore/QtCore" location="global"/>
