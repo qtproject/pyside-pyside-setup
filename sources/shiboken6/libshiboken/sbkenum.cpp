@@ -498,6 +498,13 @@ int enumIsFlag(PyObject *ob_type)
     return 0;
 }
 
+// PYSIDE-1735: Helper function to ask what enum we are using
+bool usingNewEnum()
+{
+    init_enum();
+    return !useOldEnum;
+}
+
 } // extern "C"
 
 //

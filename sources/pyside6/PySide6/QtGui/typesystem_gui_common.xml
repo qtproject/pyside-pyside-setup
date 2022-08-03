@@ -401,9 +401,7 @@
     <enum-type name="StandardKey"/>
 
     <add-function signature="__repr__" return-type="PyObject*">
-        <inject-code class="target" position="beginning">
-            <insert-template name="qkeysequence_repr"/>
-        </inject-code>
+        <inject-code class="target" position="beginning" file="../glue/qtgui.cpp" snippet="qkeysequence-repr"/>
     </add-function>
 
     <add-function signature="__reduce__" return-type="PyObject*">
