@@ -16,6 +16,9 @@ struct SbkEnumTypePrivate
 
 extern "C" {
 
+/// PYSIDE-1735: Pass on the Python enum/flag information.
+LIBSHIBOKEN_API void initEnumFlagsDict(PyTypeObject *type);
+
 /// PYSIDE-1735: Patching the Enum / Flags implementation. Remove in 6.4
 LIBSHIBOKEN_API PyTypeObject *morphLastEnumToPython();
 LIBSHIBOKEN_API PyTypeObject *mapFlagsToSameEnum(PyTypeObject *FType, PyTypeObject *EType);

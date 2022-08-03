@@ -6,7 +6,7 @@
 <typesystem package="PySide6.QtSerialPort">
     <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
     <object-type name="QSerialPort">
-        <enum-type name="BaudRate"/>
+        <enum-type name="BaudRate" python-type="IntEnum"/>
         <enum-type name="DataBits"/>
         <enum-type name="Direction" flags="Directions"/>
         <enum-type name="FlowControl"/>

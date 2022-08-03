@@ -114,7 +114,8 @@ struct SbkObjectTypePrivate
     void (*subtype_init)(PyTypeObject *, PyObject *, PyObject *);
     const char **propertyStrings;
     const char **enumFlagInfo;
-    PyObject *flagsDict;
+    PyObject *enumFlagsDict;
+    PyObject *enumIntSet;
 };
 
 

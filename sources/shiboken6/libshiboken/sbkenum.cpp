@@ -399,6 +399,7 @@ static PyObject *PyEnum{};
 static PyObject *PyIntEnum{};
 static PyObject *PyFlag{};
 static PyObject *PyIntFlag{};
+static PyObject *PyFlag_KEEP{};
 
 PyTypeObject *getPyEnumMeta()
 {
@@ -416,8 +417,12 @@ PyTypeObject *getPyEnumMeta()
             PyFlag = PyObject_GetAttrString(mod, "Flag");
         if (PyFlag && PyType_Check(PyFlag))
             PyIntFlag = PyObject_GetAttrString(mod, "IntFlag");
-        if (PyIntFlag && PyType_Check(PyIntFlag))
+        if (PyIntFlag && PyType_Check(PyIntFlag)) {
+            // KEEP is defined from Python 3.11 on.
+            PyFlag_KEEP = PyObject_GetAttrString(mod, "KEEP");
+            PyErr_Clear();
             return reinterpret_cast<PyTypeObject *>(PyEnumMeta);
+        }
     }
     Py_FatalError("Python module 'enum' not found");
     return nullptr;
@@ -953,6 +958,17 @@ static PyTypeObject *recordCurrentEnum(PyObject *scopeOrModule,
     return nullptr;
 }
 
+static bool is_old_version()
+{
+    auto *sysmodule = PyImport_AddModule("sys");
+    auto *dic = PyModule_GetDict(sysmodule);
+    auto *version = PyDict_GetItemString(dic, "version_info");
+    auto *major = PyTuple_GetItem(version, 0);
+    auto *minor = PyTuple_GetItem(version, 1);
+    auto number = PyLong_AsLong(major) * 1000 + PyLong_AsLong(minor);
+    return number <= 3008;
+}
+
 PyTypeObject *morphLastEnumToPython()
 {
     /// The Python Enum internal structure is way too complicated.
@@ -972,6 +988,20 @@ PyTypeObject *morphLastEnumToPython()
         // If that happens, use the existing new type to keep type checks correct.
         return setp->replacementType;
     }
+
+    auto *scopeOrModule = lec.scopeOrModule;
+    bool useInt = true;
+
+    if (PyType_Check(scopeOrModule)) {
+        // For global objects, we have no good solution, yet where to put the int info.
+        auto type = reinterpret_cast<PyTypeObject *>(scopeOrModule);
+        auto *sotp = PepType_SOTP(type);
+        if (!sotp->enumFlagsDict)
+            initEnumFlagsDict(type);
+        if (!PySet_Contains(sotp->enumIntSet, String::fromCString(lec.name)))
+            useInt = false;
+    }
+
     PyObject *key, *value;
     Py_ssize_t pos = 0;
     PyObject *values = PyDict_GetItem(enumType->tp_dict, PyName::values());
@@ -979,7 +1009,8 @@ PyTypeObject *morphLastEnumToPython()
         return nullptr;
 
     // Walk the values dict and create a Python enum type.
-    auto *PyEnumType = lec.flagsType ? PyIntFlag : PyIntEnum;
+    auto *PyEnumType = lec.flagsType ? (useInt ? PyIntFlag : PyFlag)
+                                     : (useInt ? PyIntEnum : PyEnum);
     AutoDecRef name(PyUnicode_FromString(lec.name));
     AutoDecRef args(PyList_New(0));
     auto *pyName = name.object();
@@ -993,7 +1024,15 @@ PyTypeObject *morphLastEnumToPython()
         PyTuple_SET_ITEM(key_value, 1, num);
         PyList_Append(pyArgs, key_value);
     }
-    auto *obNewType = PyObject_CallFunctionObjArgs(PyEnumType, pyName, pyArgs, nullptr);
+    // We now create the new type. Since Python 3.11, we need to pass in
+    // `boundary=KEEP` because the default STRICT crashes on us.
+    // See  QDir.Filter.Drives | QDir.Filter.Files
+    AutoDecRef callArgs(Py_BuildValue("(OO)", pyName, pyArgs));
+    AutoDecRef callDict(PyDict_New());
+    static PyObject *boundary = String::createStaticString("boundary");
+    if (PyFlag_KEEP)
+        PyDict_SetItem(callDict, boundary, PyFlag_KEEP);
+    auto *obNewType = PyObject_Call(PyEnumType, callArgs, callDict);
     if (!obNewType || PyObject_SetAttr(lec.scopeOrModule, pyName, obNewType) < 0)
             return nullptr;
     auto *newType = reinterpret_cast<PyTypeObject *>(obNewType);
@@ -1004,10 +1043,11 @@ PyTypeObject *morphLastEnumToPython()
     PyObject_SetAttr(obNewType, PyMagicName::module(), module);
     // Protect against double initialization
     setp->replacementType = newType;
-#if PY_VERSION_HEX < 0x03080000
+
     // PYSIDE-1735: Old Python versions can't stand the early enum deallocation.
-    Py_INCREF(enumType);
-#endif
+    static bool old_python_version = is_old_version();
+    if (old_python_version)
+        Py_INCREF(obEnumType);
     return newType;
 }
 

@@ -94,6 +94,7 @@ class QFlagsOnQVariant(unittest.TestCase):
 
 
 class QFlagsWrongType(unittest.TestCase):
+    @unittest.skipIf(sys.pyside63_option_python_enum, "Qt.ItemFlag is no longer an IntEnum")
     def testWrongType(self):
         '''Wrong type passed to QFlags binary operators'''
         for op in operator.or_, operator.and_, operator.xor:

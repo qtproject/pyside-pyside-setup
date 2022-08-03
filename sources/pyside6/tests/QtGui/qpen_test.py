@@ -26,7 +26,8 @@ class Painting(QRasterWindow):
         with QPainter(self) as painter:
             painter.setPen(Qt.NoPen)
             self.penFromEnum = painter.pen()
-            painter.setPen(int(Qt.NoPen))
+            intVal = Qt.NoPen.value if sys.pyside63_option_python_enum else Qt.NoPen
+            painter.setPen(intVal)
             self.penFromInteger = painter.pen()
         QTimer.singleShot(20, self.close)
 

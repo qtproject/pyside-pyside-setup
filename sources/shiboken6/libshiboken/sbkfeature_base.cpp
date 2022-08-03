@@ -173,22 +173,32 @@ static bool currentOpcode_Is_CallMethNoArgs()
     return opcode2 == PRECALL && oparg2 == 0;
 }
 
-static void _initFlagsDict(SbkObjectTypePrivate *sotp)
+void initEnumFlagsDict(PyTypeObject *type)
 {
+    // We create a dict for all flag enums that holds the original C++ name.
+    // We create a set for all int enums or flags.
     static PyObject *const split = Shiboken::String::createStaticString("split");
     static PyObject *const colon = Shiboken::String::createStaticString(":");
+    auto sotp = PepType_SOTP(type);
     auto **enumFlagInfo = sotp->enumFlagInfo;
     auto *dict = PyDict_New();
+    auto *set = PySet_New(nullptr);
     for (; *enumFlagInfo; ++enumFlagInfo) {
         AutoDecRef line(PyUnicode_FromString(*enumFlagInfo));
         AutoDecRef parts(PyObject_CallMethodObjArgs(line, split, colon, nullptr));
+        auto *name = PyList_GetItem(parts, 0);
         if (PyList_Size(parts) == 3) {
             auto *key = PyList_GetItem(parts, 2);
-            auto *value = PyList_GetItem(parts, 0);
+            auto *value = name;
             PyDict_SetItem(dict, key, value);
         }
+        auto *typeName = PyList_GetItem(parts, 1);
+        bool intFlag = strncmp(String::toCString(typeName), "Int", 3) == 0;
+        if (intFlag)
+            PySet_Add(set, name);
     }
-    sotp->flagsDict = dict;
+    sotp->enumFlagsDict = dict;
+    sotp->enumIntSet = set;
 }
 
 static PyObject *replaceNoArgWithZero(PyObject *callable)
@@ -251,12 +261,12 @@ PyObject *mangled_type_getattro(PyTypeObject *type, PyObject *name)
             const char **enumFlagInfo = sotp->enumFlagInfo;
             if (!(enumFlagInfo))
                 continue;
-            if (!sotp->flagsDict)
-                _initFlagsDict(sotp);
-            auto *rename = PyDict_GetItem(sotp->flagsDict, name);
+            if (!sotp->enumFlagsDict)
+                initEnumFlagsDict(type_base);
+            auto *rename = PyDict_GetItem(sotp->enumFlagsDict, name);
             if (rename) {
                 /*
-                 * Part 1: Look into the flagsDict if we have an old flags name.
+                 * Part 1: Look into the enumFlagsDict if we have an old flags name.
                  * -------------------------------------------------------------
                  * We need to replace the parameterless
 
