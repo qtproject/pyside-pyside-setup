@@ -106,6 +106,78 @@ QObject *object = %CPPSELF->menu<QObject *>();
 %PYARG_0 = %CONVERTTOPYTHON[QObject*](object);
 // @snippet qaction-menu
 
+// @snippet qopenglfunctions-glgetv-return-size
+// Return the number of return values of the glGetBoolean/Double/Integerv functions
+// cf https://registry.khronos.org/OpenGL-Refpages/gl4/html/glGet.xhtml
+static int glGetVReturnSize(GLenum pname)
+{
+    switch (pname) {
+    case GL_ALIASED_LINE_WIDTH_RANGE:
+    case GL_DEPTH_RANGE:
+    case GL_MAX_VIEWPORT_DIMS:
+    case GL_POINT_SIZE_RANGE:
+    case GL_SMOOTH_LINE_WIDTH_RANGE:
+    case GL_VIEWPORT_BOUNDS_RANGE:
+        return 2;
+    case GL_BLEND_COLOR:
+    case GL_COLOR_CLEAR_VALUE:
+    case GL_COLOR_WRITEMASK:
+    case GL_SCISSOR_BOX:
+    case GL_VIEWPORT:
+        return 4;
+    case GL_COMPRESSED_TEXTURE_FORMATS:
+        return GL_NUM_COMPRESSED_TEXTURE_FORMATS;
+    default:
+        break;
+    }
+    return 1;
+}
+// @snippet qopenglfunctions-glgetv-return-size
+
+// @snippet qopenglfunctions-glgetbooleanv
+const int size = glGetVReturnSize(%1);
+QVarLengthArray<GLboolean> result(size, GL_FALSE);
+%CPPSELF.%FUNCTION_NAME(%ARGUMENT_NAMES, result.data());
+if (size == 1) {
+    %PYARG_0 = %CONVERTTOPYTHON[bool](result[0]);
+} else {
+    %PYARG_0 = Shiboken::Numpy::createByteArray1(size, result.constData());
+}
+// @snippet qopenglfunctions-glgetbooleanv
+
+// @snippet qopenglfunctions-glgetdoublev
+const int size = glGetVReturnSize(%1);
+QVarLengthArray<GLdouble> result(size, 0);
+%CPPSELF.%FUNCTION_NAME(%ARGUMENT_NAMES, result.data());
+if (size == 1) {
+    %PYARG_0 = %CONVERTTOPYTHON[double](result[0]);
+} else {
+    %PYARG_0 = Shiboken::Numpy::createDoubleArray1(size, result.constData());
+}
+// @snippet qopenglfunctions-glgetdoublev
+
+// @snippet qopenglfunctions-glgetfloatv
+const int size = glGetVReturnSize(%1);
+QVarLengthArray<GLfloat> result(size, 0);
+%CPPSELF.%FUNCTION_NAME(%ARGUMENT_NAMES, result.data());
+if (size == 1) {
+    %PYARG_0 = %CONVERTTOPYTHON[float](result[0]);
+} else {
+    %PYARG_0 = Shiboken::Numpy::createFloatArray1(size, result.constData());
+}
+// @snippet qopenglfunctions-glgetfloatv
+
+// @snippet qopenglfunctions-glgetintegerv
+const int size = glGetVReturnSize(%1);
+QVarLengthArray<GLint> result(size, 0);
+%CPPSELF.%FUNCTION_NAME(%ARGUMENT_NAMES, result.data());
+if (size == 1) {
+    %PYARG_0 = %CONVERTTOPYTHON[int](result[0]);
+} else {
+    %PYARG_0 = Shiboken::Numpy::createIntArray1(size, result.constData());
+}
+// @snippet qopenglfunctions-glgetintegerv
+
 // @snippet glgetshadersource
 GLsizei bufSize = 4096;
 GLsizei length = bufSize - 1;

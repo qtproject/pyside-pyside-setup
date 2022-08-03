@@ -86,7 +86,7 @@
   <rejection class="*" function-name="d_func"/>
   <rejection class="*" field-name="d_ptr"/>
   <rejection class="*" field-name="d"/>
-  <rejection class="^QOpenGL.*$" argument-type="^(const )?GLboolean ?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="^const GLboolean ?\*$"/>
   <rejection class="^QOpenGL.*$" argument-type="^GLchar\*$"/>
   <rejection class="^QOpenGL.*$" argument-type="^(const )?GLchar ?\*(const)?\*$"/>
   <rejection class="^QOpenGL.*$" argument-type="^char\*$"/>
@@ -2890,6 +2890,13 @@
       </modify-function>
   </object-type>
   <object-type name="QOpenGLFunctions" since="5.0">
+      <extra-includes>
+        <include file-name="QtCore/QVarLengthArray" location="global"/>
+        <include file-name="sbkcpptonumpy.h" location="global"/>
+      </extra-includes>
+      <inject-code class="native" position="beginning" file="../glue/qtgui.cpp"
+                   snippet="qopenglfunctions-glgetv-return-size"/>
+
       <enum-type name="OpenGLFeature" flags="OpenGLFeatures"/>
       <add-function signature="glGetShaderSource(&GLuint; @shader@)" return-type="const char *">
           <inject-code class="target" position="beginning" file="../glue/qtgui.cpp"
@@ -2906,14 +2913,38 @@
       <modify-function signature="glGetBufferParameteriv(&GLuint;,&GLuint;,&GLint;*)">
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGetFloatv(&GLuint;,float*)">
-          <modify-argument index="2"><array/></modify-argument>
-      </modify-function>
       <modify-function signature="glGetFramebufferAttachmentParameteriv(&GLuint;,&GLuint;,&GLuint;,&GLint;*)">
           <modify-argument index="4"><array/></modify-argument>
       </modify-function>
+      <modify-function signature="glGetBooleanv(&GLuint;,&GLboolean;*)">
+          <modify-argument index="return" pyi-type="Union[bool,numpy.ndarray]">
+              <replace-type modified-type="PyObject"/>
+          </modify-argument>
+          <modify-argument index="2">
+              <remove-argument/>
+          </modify-argument>
+          <inject-code class="target" position="beginning" file="../glue/qtgui.cpp"
+                       snippet="qopenglfunctions-glgetbooleanv"/>
+      </modify-function>
+      <modify-function signature="glGetFloatv(&GLuint;,float*)">
+          <modify-argument index="return" pyi-type="Union[float,numpy.ndarray]">
+              <replace-type modified-type="PyObject"/>
+          </modify-argument>
+          <modify-argument index="2">
+              <remove-argument/>
+          </modify-argument>
+          <inject-code class="target" position="beginning" file="../glue/qtgui.cpp"
+                       snippet="qopenglfunctions-glgetfloatv"/>
+      </modify-function>
       <modify-function signature="glGetIntegerv(&GLuint;,&GLint;*)">
-          <modify-argument index="2"><array/></modify-argument>
+          <modify-argument index="return" pyi-type="Union[int,numpy.ndarray]">
+              <replace-type modified-type="PyObject"/>
+          </modify-argument>
+          <modify-argument index="2">
+              <remove-argument/>
+          </modify-argument>
+          <inject-code class="target" position="beginning" file="../glue/qtgui.cpp"
+                       snippet="qopenglfunctions-glgetintegerv"/>
       </modify-function>
       <modify-function signature="glGetProgramiv(&GLuint;,&GLuint;,&GLint;*)">
           <modify-argument index="3"><array/></modify-argument>
