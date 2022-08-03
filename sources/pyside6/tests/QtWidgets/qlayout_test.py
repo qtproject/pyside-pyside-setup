@@ -127,6 +127,13 @@ class QLayoutTest(UsesQApplication):
         gc.collect()
         self.assertRaises(RuntimeError, spacer.isEmpty)
 
+    def testConstructorProperties(self):
+        """PYSIDE-1986, test passing properties to the constructor of
+           QHBoxLayout, which does not have default arguments."""
+        layout = QHBoxLayout(objectName="layout", spacing=30)
+        self.assertEqual(layout.spacing(), 30)
+        self.assertEqual(layout.objectName(), "layout")
+
 
 if __name__ == '__main__':
     unittest.main()

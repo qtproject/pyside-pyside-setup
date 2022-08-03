@@ -3595,11 +3595,32 @@ void CppGenerator::writeSetPythonToCppPointerConversion(TextStream &s,
                               converterVar, pythonToCppFunc, isConvertibleFunc);
 }
 
+// PYSIDE-1986: Some QObject derived classes, (QVBoxLayout) do not have default
+// arguments, which breaks setting properties by named arguments. Force the
+// handling code to be generated nevertheless for applicable widget classes,
+// so that the mechanism of falling through to the error handling to set
+// the properties works nevertheless.
+static bool forceQObjectNamedArguments(const AbstractMetaFunctionCPtr &func)
+{
+    if (func->functionType() != AbstractMetaFunction::ConstructorFunction)
+        return false;
+    auto *owner = func->ownerClass();
+    Q_ASSERT(owner);
+    if (!owner->isQObject())
+        return false;
+    const QString &name = owner->name();
+    return name == u"QVBoxLayout" || name == u"QHBoxLayout"
+        || name == u"QSplitterHandle" || name == u"QSizeGrip";
+}
+
 void CppGenerator::writeNamedArgumentResolution(TextStream &s, const AbstractMetaFunctionCPtr &func,
-                                                bool usePyArgs, const OverloadData &overloadData)
+                                                bool usePyArgs, const OverloadData &overloadData) const
 {
     const AbstractMetaArgumentList &args = OverloadData::getArgumentsWithDefaultValues(func);
-    if (args.isEmpty()) {
+    const bool hasDefaultArguments = !args.isEmpty();
+    const bool force = !hasDefaultArguments && usePySideExtensions()
+        && forceQObjectNamedArguments(func);
+    if (!hasDefaultArguments && !force) {
         if (overloadData.hasArgumentWithDefaultValue()) {
             // PySide-535: Allow for empty dict instead of nullptr in PyPy
             s << "if (kwds && PyDict_Size(kwds) > 0) {\n";
@@ -3618,8 +3639,9 @@ void CppGenerator::writeNamedArgumentResolution(TextStream &s, const AbstractMet
     s << "if (kwds && PyDict_Size(kwds) > 0) {\n";
     {
         Indentation indent(s);
-        s << "PyObject *value{};\n"
-            << "Shiboken::AutoDecRef kwds_dup(PyDict_Copy(kwds));\n";
+        if (!force)
+            s << "PyObject *value{};\n";
+        s << "Shiboken::AutoDecRef kwds_dup(PyDict_Copy(kwds));\n";
         for (const AbstractMetaArgument &arg : args) {
             const int pyArgIndex = arg.argumentIndex()
                 - OverloadData::numberOfRemovedArguments(func, arg.argumentIndex());
