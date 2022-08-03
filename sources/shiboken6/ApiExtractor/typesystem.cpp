@@ -999,6 +999,7 @@ public:
     const EnumValueTypeEntry *m_nullValue = nullptr;
     QStringList m_rejectedEnums;
     FlagsTypeEntry *m_flags = nullptr;
+    TypeSystem::PythonEnumType m_pythonEnumType = TypeSystem::PythonEnumType::Unspecified;
 };
 
 EnumTypeEntry::EnumTypeEntry(const QString &entryName,
@@ -1006,6 +1007,18 @@ EnumTypeEntry::EnumTypeEntry(const QString &entryName,
                              const TypeEntry *parent) :
     TypeEntry(new EnumTypeEntryPrivate(entryName, EnumType, vr, parent))
 {
+}
+
+TypeSystem::PythonEnumType EnumTypeEntry::pythonEnumType() const
+{
+    S_D(const EnumTypeEntry);
+    return d->m_pythonEnumType;
+}
+
+void EnumTypeEntry::setPythonEnumType(TypeSystem::PythonEnumType t)
+{
+    S_D(EnumTypeEntry);
+    d->m_pythonEnumType = t;
 }
 
 QString EnumTypeEntry::targetLangQualifier() const
@@ -2395,6 +2408,8 @@ void EnumTypeEntry::formatDebug(QDebug &debug) const
     S_D(const EnumTypeEntry);
 
     TypeEntry::formatDebug(debug);
+    if (d->m_pythonEnumType != TypeSystem::PythonEnumType::Unspecified)
+        debug << ", python-type=" << int(d->m_pythonEnumType);
     if (d->m_flags)
         debug << ", flags=(" << d->m_flags << ')';
 }
