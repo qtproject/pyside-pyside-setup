@@ -249,6 +249,7 @@ enum-type
                 since="..."
                 flags="yes | no"
                 flags-revision="..."
+                python-type = "IntEnum | IntFlag"
                 lower-bound="..."
                 upper-bound="..."
                 force-integer="yes | no"
@@ -274,6 +275,9 @@ enum-type
     name of one of their values, which is unique for the anonymous enum scope.
     Notice that the **enum-type** tag can either have **name** or **identified-by-value**
     but not both.
+
+    The *optional* **python-type** attribute specifies the underlying
+    Python type.
 
     The **revision** attribute can be used to specify a revision for each type, easing the
     production of ABI compatible bindings.

@@ -17,6 +17,9 @@ public:
                            const QVersionNumber &vr,
                            const TypeEntry *parent);
 
+    TypeSystem::PythonEnumType pythonEnumType() const;
+    void setPythonEnumType(TypeSystem::PythonEnumType t);
+
     QString targetLangQualifier() const;
 
     QString qualifier() const;

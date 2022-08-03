@@ -97,6 +97,12 @@ enum class SmartPointerType {
     ValueHandle
 };
 
+enum class PythonEnumType {
+    Unspecified,
+    IntEnum,
+    IntFlag
+};
+
 enum : int { OverloadNumberUnset = -1, OverloadNumberDefault = 99999 };
 
 } // namespace TypeSystem
