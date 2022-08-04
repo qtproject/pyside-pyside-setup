@@ -2,6 +2,10 @@ project(QtOpenGL)
 
 set(QtOpenGL_DROPPED_ENTRIES)
 
+set(QtOpenGL_static_sources
+    "${QtOpenGL_SOURCE_DIR}/glue/utils.cpp"
+)
+
 set(QtOpenGL_SRC
 ${QtOpenGL_GEN_DIR}/qabstractopenglfunctions_wrapper.cpp
 ${QtOpenGL_GEN_DIR}/qopengldebuglogger_wrapper.cpp
@@ -89,4 +93,5 @@ create_pyside_module(NAME QtOpenGL
                      DEPS QtOpenGL_deps
                      TYPESYSTEM_PATH QtOpenGL_SOURCE_DIR
                      SOURCES QtOpenGL_SRC
+                     STATIC_SOURCES QtOpenGL_static_sources
                      DROPPED_ENTRIES QtOpenGL_DROPPED_ENTRIES)

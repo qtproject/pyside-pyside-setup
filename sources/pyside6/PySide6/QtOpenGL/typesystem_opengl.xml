@@ -28,7 +28,7 @@
   <?entity GLintptr intptr_t?>
   <?endif?>
 
-  <rejection class="^QOpenGL.*$" argument-type="^(const )?GLboolean ?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="^const GLboolean ?\*$"/>
   <rejection class="^QOpenGL.*$" argument-type="^GLchar\*$"/>
   <rejection class="^QOpenGL.*$" argument-type="^(const )?GLchar ?\*(const)?\*$"/>
   <rejection class="^QOpenGL.*$" argument-type="^char\*$"/>
@@ -43,10 +43,126 @@
   <rejection class="^QOpenGL.*$" argument-type="QOpenGLTextureHelper*"/>
   <rejection class="^QOpenGL.*$" argument-type="^(const )?QVector.D ?\*$"/>
   <rejection class="^QOpenGL.*$" argument-type="^(const )?void ?\*\*$"/>
+
+  <!-- Reject any non-const array of the version functions -->
   <rejection class="^QOpenGLFunctions.*$" function-name="^glGet(Buffer|VertexAttrib)?Pointer.*$"/>
   <rejection class="^QOpenGLFunctions.*$" function-name="^glMultiDrawElements.*$"/>
-  <!-- Reject any non-const array of the version functions -->
-  <rejection class="^QOpenGLFunctions_\d_\d.*$" argument-type="^GL\w+ ?\*$"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glAreTexturesResident"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glCreateBuffers"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glCreateFramebuffers"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glCreateProgramPipelines"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glCreateQueries"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glCreateRenderbuffers"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glCreateSamplers"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glCreateTextures"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glCreateTransformFeedbacks"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glCreateVertexArrays"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glFeedbackBuffer"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGenBuffers"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGenFramebuffers"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGenProgramPipelines"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGenQueries"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGenRenderbuffers"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGenSamplers"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGenTextures"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGenTransformFeedbacks"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGenVertexArrays"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetActiveAtomicCounterBufferiv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetActiveSubroutineUniformiv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetActiveUniformBlockiv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetActiveUniformsiv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetAttachedShaders"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetBooleani_v"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetBufferParameteriv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetClipPlane"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetColorTableParameterfv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetColorTableParameteriv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetConvolutionParameterfv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetConvolutionParameteriv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetDoublei_v"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetFloati_v"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetFramebufferAttachmentParameteriv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetFramebufferParameteriv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetHistogramParameterfv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetHistogramParameteriv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetIntegeri_v"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetInternalformativ"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetLightfv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetLightiv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetMapdv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetMapfv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetMapiv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetMaterialfv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetMaterialiv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetMinmaxParameterfv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetMinmaxParameteriv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetMultisamplefv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetNamedBufferParameteriv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetNamedFramebufferAttachmentParameteriv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetNamedFramebufferParameteriv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetNamedRenderbufferParameteriv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetnMapdv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetnMapfv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetnMapiv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetnPixelMapfv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetnPixelMapuiv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetnPixelMapusv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetnUniformdv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetnUniformfv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetnUniformiv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetnUniformuiv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetPixelMapfv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetPixelMapuiv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetPixelMapusv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetProgramInterfaceiv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetProgramiv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetProgramPipelineiv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetProgramResourceiv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetProgramStageiv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetQueryIndexediv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetQueryiv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetQueryObjectiv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetQueryObjectuiv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetRenderbufferParameteriv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetSamplerParameterfv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetSamplerParameterIiv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetSamplerParameterIuiv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetSamplerParameteriv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetShaderiv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetShaderPrecisionFormat"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetTexEnvfv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetTexEnviv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetTexGendv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetTexGenfv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetTexGeniv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetTexLevelParameterfv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetTexLevelParameteriv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetTexParameterfv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetTexParameterIiv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetTexParameterIuiv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetTexParameteriv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetTextureLevelParameterfv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetTextureLevelParameteriv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetTextureParameterfv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetTextureParameterIiv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetTextureParameterIuiv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetTextureParameteriv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetTransformFeedbacki_v"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetTransformFeedbackiv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetUniformdv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetUniformfv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetUniformiv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetUniformSubroutineuiv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetUniformuiv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetVertexArrayIndexediv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetVertexArrayiv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetVertexAttribdv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetVertexAttribfv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetVertexAttribIiv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetVertexAttribIuiv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetVertexAttribiv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetVertexAttribLdv"/>
+  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glSelectBuffer"/>
 
   <object-type name="QOpenGLBuffer" since="5.0">
     <enum-type name="Access"/>
@@ -64,16 +180,22 @@
   </value-type>
 
   <object-type name="QOpenGLFunctions_1_0" since="5.1">
+      &glgetv_includes;
+      &glgetv_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_0_compat;
   </object-type>
   <object-type name="QOpenGLFunctions_1_1" since="5.1">
+      &glgetv_includes;
+      &glgetv_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_0_compat;
       &opengl_modifications1_1;
       &opengl_modifications1_1_compat;
   </object-type>
   <object-type name="QOpenGLFunctions_1_2" since="5.1">
+      &glgetv_includes;
+      &glgetv_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_0_compat;
       &opengl_modifications1_1;
@@ -81,6 +203,8 @@
       &opengl_modifications1_2_compat;
   </object-type>
   <object-type name="QOpenGLFunctions_1_3" since="5.1">
+      &glgetv_includes;
+      &glgetv_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_0_compat;
       &opengl_modifications1_1;
@@ -89,6 +213,8 @@
       &opengl_modifications1_3_compat;
   </object-type>
   <object-type name="QOpenGLFunctions_1_4" since="5.1">
+      &glgetv_includes;
+      &glgetv_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_0_compat;
       &opengl_modifications1_1;
@@ -99,6 +225,8 @@
       &opengl_modifications1_4_compat;
   </object-type>
   <object-type name="QOpenGLFunctions_1_5" since="5.1">
+      &glgetv_includes;
+      &glgetv_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_0_compat;
       &opengl_modifications1_1;
@@ -109,6 +237,8 @@
       &opengl_modifications1_4_compat;
   </object-type>
   <object-type name="QOpenGLFunctions_2_0" since="5.1">
+      &glgetv_includes;
+      &glgetv_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_0_compat;
       &opengl_modifications1_1;
@@ -121,6 +251,8 @@
       &opengl_modifications2_0_compat;
   </object-type>
   <object-type name="QOpenGLFunctions_2_1" since="5.1">
+      &glgetv_includes;
+      &glgetv_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_0_compat;
       &opengl_modifications1_1;
@@ -134,6 +266,8 @@
       &opengl_modifications2_1;
   </object-type>
   <object-type name="QOpenGLFunctions_3_0" since="5.1">
+      &glgetv_includes;
+      &glgetv_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_0_compat;
       &opengl_modifications1_1;
@@ -148,6 +282,8 @@
       &opengl_modifications3_0;
   </object-type>
   <object-type name="QOpenGLFunctions_3_1" since="5.1">
+      &glgetv_includes;
+      &glgetv_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_1;
       &opengl_modifications1_4;
@@ -156,6 +292,8 @@
       &opengl_modifications3_0;
   </object-type>
   <object-type name="QOpenGLFunctions_3_2_Compatibility" since="5.1">
+      &glgetv_includes;
+      &glgetv_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_0_compat;
       &opengl_modifications1_1;
@@ -170,6 +308,8 @@
       &opengl_modifications3_0;
   </object-type>
   <object-type name="QOpenGLFunctions_3_2_Core" since="5.1">
+      &glgetv_includes;
+      &glgetv_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_1;
       &opengl_modifications1_4;
@@ -178,6 +318,8 @@
       &opengl_modifications3_0;
   </object-type>
   <object-type name="QOpenGLFunctions_3_3_Compatibility" since="5.1">
+      &glgetv_includes;
+      &glgetv_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_0_compat;
       &opengl_modifications1_1;
@@ -194,6 +336,8 @@
       &opengl_modifications3_3a;
   </object-type>
   <object-type name="QOpenGLFunctions_3_3_Core" since="5.1">
+      &glgetv_includes;
+      &glgetv_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_1;
       &opengl_modifications1_4;
@@ -203,6 +347,8 @@
       &opengl_modifications3_3;
   </object-type>
   <object-type name="QOpenGLFunctions_4_0_Compatibility" since="5.1">
+      &glgetv_includes;
+      &glgetv_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_0_compat;
       &opengl_modifications1_1;
@@ -220,6 +366,8 @@
       &opengl_modifications4_0;
   </object-type>
   <object-type name="QOpenGLFunctions_4_0_Core" since="5.1">
+      &glgetv_includes;
+      &glgetv_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_1;
       &opengl_modifications1_4;
@@ -230,6 +378,8 @@
       &opengl_modifications4_0;
   </object-type>
   <object-type name="QOpenGLFunctions_4_1_Compatibility" since="5.1">
+      &glgetv_includes;
+      &glgetv_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_0_compat;
       &opengl_modifications1_1;
@@ -248,6 +398,8 @@
       &opengl_modifications4_0;
   </object-type>
   <object-type name="QOpenGLFunctions_4_1_Core" since="5.1">
+      &glgetv_includes;
+      &glgetv_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_1;
       &opengl_modifications1_4;
@@ -260,6 +412,8 @@
       &opengl_modifications_va;
   </object-type>
   <object-type name="QOpenGLFunctions_4_2_Compatibility" since="5.1">
+      &glgetv_includes;
+      &glgetv_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_0_compat;
       &opengl_modifications1_1;
@@ -278,6 +432,8 @@
       &opengl_modifications4_1;
   </object-type>
   <object-type name="QOpenGLFunctions_4_2_Core" since="5.1">
+      &glgetv_includes;
+      &glgetv_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_1;
       &opengl_modifications1_4;
@@ -290,6 +446,8 @@
       &opengl_modifications_va;
   </object-type>
   <object-type name="QOpenGLFunctions_4_3_Compatibility" since="5.1">
+      &glgetv_includes;
+      &glgetv_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_0_compat;
       &opengl_modifications1_1;
@@ -309,6 +467,8 @@
       &opengl_modifications4_3;
   </object-type>
   <object-type name="QOpenGLFunctions_4_3_Core" since="5.1">
+      &glgetv_includes;
+      &glgetv_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_1;
       &opengl_modifications1_4;
@@ -322,6 +482,8 @@
       &opengl_modifications_va;
   </object-type>
   <object-type name="QOpenGLFunctions_4_4_Compatibility" since="5.5">
+      &glgetv_includes;
+      &glgetv_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_0_compat;
       &opengl_modifications1_1;
@@ -343,6 +505,8 @@
       &opengl_modifications4_4_core;
   </object-type>
   <object-type name="QOpenGLFunctions_4_4_Core" since="5.5">
+      &glgetv_includes;
+      &glgetv_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_1;
       &opengl_modifications1_4;
@@ -358,6 +522,8 @@
       &opengl_modifications4_4_core;
   </object-type>
   <object-type name="QOpenGLFunctions_4_5_Compatibility" since="5.5">
+      &glgetv_includes;
+      &glgetv_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_0_compat;
       &opengl_modifications1_1;
@@ -380,6 +546,8 @@
       &opengl_modifications4_5;
   </object-type>
   <object-type name="QOpenGLFunctions_4_5_Core" since="5.5">
+      &glgetv_includes;
+      &glgetv_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_1;
       &opengl_modifications1_4;
