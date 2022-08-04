@@ -149,6 +149,7 @@ install(FILES
         sbkarrayconverter.h
         sbkcontainer.h
         sbkconverter.h
+        sbkcpptonumpy.h
         sbkenum.h
         sbkenum_p.h
         sbkerrors.h

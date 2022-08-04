@@ -8,7 +8,10 @@
 #endif
 
 #include "sbknumpycheck.h"
+#include "sbkcpptonumpy.h"
 #include "sbknumpyview.h"
+
+#include <algorithm>
 
 namespace Shiboken::Numpy
 {
@@ -28,6 +31,7 @@ bool check(PyObject *pyIn)
 // translation unit (see comment at initNumPyArrayConverters()).
 
 #include "sbknumpyview.cpp"
+#include "sbkcpptonumpy.cpp"
 #ifdef HAVE_NUMPY
 #  include "sbknumpyarrayconverter.cpp"
 #endif
