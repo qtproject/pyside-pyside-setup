@@ -5471,14 +5471,17 @@ void CppGenerator::writeSignatureInfo(TextStream &s, const OverloadData &overloa
             args << u"self"_s;
         const auto &arguments = f->arguments();
         for (qsizetype i = 0, size = arguments.size(); i < size; ++i) {
-            QString t = f->pyiTypeReplaced(i + 1);
-            if (t.isEmpty()) {
-                t = signatureParameter(arguments.at(i));
-            } else {
-                t.prepend(u':');
-                t.prepend(arguments.at(i).name());
+            const auto n = i + 1;
+            if (!f->argumentRemoved(n)) {
+                QString t = f->pyiTypeReplaced(n);
+                if (t.isEmpty()) {
+                    t = signatureParameter(arguments.at(i));
+                } else {
+                    t.prepend(u':');
+                    t.prepend(arguments.at(i).name());
+                }
+                args.append(t);
             }
-            args.append(t);
         }
 
         // mark the multiple signatures as such, to make it easier to generate different code
