@@ -162,5 +162,9 @@ def qtpy2cpp():
     pyside_script_wrapper("qtpy2cpp.py")
 
 
+def deploy():
+    pyside_script_wrapper("deploy.py")
+
+
 if __name__ == "__main__":
     main()

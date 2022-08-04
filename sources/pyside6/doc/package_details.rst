@@ -129,3 +129,10 @@ PySide Utilities
 * ``pyside6-genpyi``, to generate Python stubs (``.pyi`` files) for Qt modules.
 * ``pyside6-metaobjectdump``, a tool to print out the metatype information in
   JSON to be used as input for ``qmltyperegistrar``.
+
+Deployment
+~~~~~~~~~~
+
+* ``pyside6-deploy``, to deploy desktop applications in Linux, Windows and macOS environments.
+
+

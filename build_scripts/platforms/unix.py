@@ -112,16 +112,16 @@ def prepare_packages_posix(self, _vars, cross_build=False):
 
         # For setting up setuptools entry points
         for script in ("pyside_tool.py", "metaobjectdump.py", "project.py", "qml.py",
-                       "qtpy2cpp.py"):
+                       "qtpy2cpp.py", "deploy.py"):
             src = f"{{install_dir}}/bin/{script}"
             target = f"{{st_build_dir}}/{{st_package_name}}/scripts/{script}"
             copyfile(src, target, force=False, _vars=_vars)
 
-        for script_dir in ("qtpy2cpp_lib",):
+        for script_dir in ("qtpy2cpp_lib","deploy"):
             src = f"{{install_dir}}/bin/{script_dir}"
             target = f"{{st_build_dir}}/{{st_package_name}}/scripts/{script_dir}"
             # Exclude subdirectory tests
-            copydir(src, target, _filter=["*.py"], recursive=False, _vars=_vars)
+            copydir(src, target, _filter=["*.py", "*.spec", "*.jpg"], recursive=False, _vars=_vars)
 
         # <install>/bin/* -> {st_package_name}/
         executables.extend(copydir(
