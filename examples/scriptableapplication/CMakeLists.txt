@@ -18,7 +18,21 @@ find_package(Qt6 COMPONENTS Widgets)
 
 # Use provided python interpreter if given.
 if(NOT python_interpreter)
-    find_program(python_interpreter NAMES python3 python)
+    if(WIN32 AND ${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+        find_program(python_interpreter "python_d")
+        if(NOT python_interpreter)
+            message(FATAL_ERROR
+                "A debug Python interpreter could not be found, which is a requirement when "
+                "building this example in a debug configuration. Make sure python_d.exe is in "
+                "PATH.")
+        endif()
+    else()
+        find_program(python_interpreter "python")
+        if(NOT python_interpreter)
+            message(FATAL_ERROR
+                "No Python interpreter could be found. Make sure python is in PATH.")
+        endif()
+    endif()
 endif()
 message(STATUS "Using python interpreter: ${python_interpreter}")
 
