@@ -238,6 +238,7 @@ type_map.update({
     "uint32_t": int,
     "uint64_t": int,
     "uint8_t": int,
+    "Union": typing.Union,
     "quintptr": int,
     "qulonglong": int,
     "QVariant": Variant,
@@ -440,7 +441,7 @@ def init_smart():
 # The PySide Part
 def init_PySide6_QtCore():
     from PySide6.QtCore import Qt, QUrl, QDir, QKeyCombination
-    from PySide6.QtCore import QRect, QSize, QPoint, QLocale, QByteArray
+    from PySide6.QtCore import QRect, QRectF, QSize, QPoint, QLocale, QByteArray
     from PySide6.QtCore import QMarginsF # 5.9
     from PySide6.QtCore import SignalInstance
     try:

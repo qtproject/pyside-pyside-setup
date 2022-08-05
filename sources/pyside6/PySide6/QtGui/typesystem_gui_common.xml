@@ -2373,7 +2373,7 @@
         <remove-argument/>
       </modify-argument>
       <modify-argument index="return">
-        <replace-type modified-type="PyTupleObject*"/>
+        <replace-type modified-type="Tuple"/>
       </modify-argument>
       <inject-code class="target" position="beginning" file="../glue/qtgui.cpp" snippet="qmatrix4x4-copydatato"/>
     </modify-function>
@@ -2636,7 +2636,7 @@
         <inject-code file="../glue/qtgui.cpp" snippet="qguiapplication-exec"/>
     </add-function>
     <modify-function signature="setOverrideCursor(const QCursor&amp;)">
-        <modify-argument index="return">
+        <modify-argument index="return" pyi-type="PyObject">
             <replace-type modified-type="QtGuiHelper::QOverrideCursorGuard*"/>
         </modify-argument>
         <inject-code class="target" position="end" file="../glue/qtgui.cpp"

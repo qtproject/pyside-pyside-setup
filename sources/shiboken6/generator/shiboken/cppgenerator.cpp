@@ -5485,12 +5485,13 @@ void CppGenerator::writeSignatureInfo(TextStream &s, const OverloadData &overloa
         if (multiple)
             s << idx-- << ':';
         s << funcName << '(' << args.join(u',') << ')';
-        if (!f->isVoid()) {
-            QString t = f->pyiTypeReplaced(0);
-            if (t.isEmpty())
-                t = f->type().pythonSignature();
-            s << "->" << t;
-        }
+
+        QString returnType = f->pyiTypeReplaced(0); // pyi or modified type
+        if (returnType.isEmpty() && !f->isVoid())
+            returnType = f->type().pythonSignature();
+        if (!returnType.isEmpty())
+            s << "->" << returnType;
+
         s << '\n';
     }
 }

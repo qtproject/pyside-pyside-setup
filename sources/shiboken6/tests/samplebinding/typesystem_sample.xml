@@ -1385,7 +1385,7 @@
             }
         </template>
         <modify-function signature="getMargins(int*,int*,int*,int*)const">
-            <modify-argument index="0">
+            <modify-argument index="return" pyi-type="Tuple[int, int, int, int]">
                 <replace-type modified-type="PyObject" />
             </modify-argument>
             <modify-argument index="1">
