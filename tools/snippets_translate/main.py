@@ -209,7 +209,8 @@ def get_snippet_ids(line: str) -> List[str]:
 
 def get_snippet_override(start_id: str, rel_path: str) -> List[str]:
     # Check if the snippet is overridden by a local file
-    override_name = f"{rel_path.stem}_{start_id}{rel_path.suffix}.py"
+    file_start_id = start_id.replace(' ', '_')
+    override_name = f"{rel_path.stem}_{file_start_id}{rel_path.suffix}.py"
     override_path = SOURCE_PATH / rel_path.parent / override_name
     snippet = []
     if override_path.is_file():
