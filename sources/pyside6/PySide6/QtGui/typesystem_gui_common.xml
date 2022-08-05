@@ -2652,6 +2652,13 @@
   <object-type name="QOpenGLPaintDevice" since="5.0"/>
   -->
   <object-type name="QOpenGLExtraFunctions" since="5.6">
+      <extra-includes>
+        <include file-name="QtCore/QVarLengthArray" location="global"/>
+        <include file-name="sbkcpptonumpy.h" location="global"/>
+      </extra-includes>
+      <inject-code class="native" position="beginning" file="../glue/qtgui.cpp"
+                          snippet="qopenglextrafunctions-glgeti-v-return-size"/>
+
       <!-- Exlusions due to compile errors -->
       <modify-function signature="glEndTransformFeedback()" remove="all"/>
       <modify-function signature="glPauseTransformFeedback()" remove="all"/>
@@ -2705,9 +2712,26 @@
       <modify-function signature="glGetFramebufferParameteriv(&GLuint;,&GLuint;,&GLint;*)">
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
+      <modify-function signature="glGetBooleani_v(&GLuint;,&GLuint;,&GLboolean;*)">
+          <modify-argument index="return" pyi-type="Union[bool,numpy.ndarray]">
+              <replace-type modified-type="PyObject"/>
+          </modify-argument>
+          <modify-argument index="3">
+              <remove-argument/>
+          </modify-argument>
+          <inject-code class="target" position="beginning" file="../glue/qtgui.cpp"
+                       snippet="qopenglextrafunctions-glgetbooleani-v"/>
+      </modify-function>
+      <!-- FIXME PYSIDE 7: Use the remove array modification and use
+                           the version with return value instead -->
       <modify-function signature="glGetIntegeri_v(&GLuint;,&GLuint;,&GLint;*)">
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
+      <add-function signature="glGetIntegeri_v(&GLuint;,&GLuint;)" return-type="PyObject">
+          <modify-argument index="return" pyi-type="Union[int,numpy.ndarray]"/>
+          <inject-code class="target" position="beginning" file="../glue/qtgui.cpp"
+                       snippet="qopenglextrafunctions-glgetintegeri-v"/>
+      </add-function>
       <modify-function signature="glGetInternalformativ(&GLuint;,&GLuint;,&GLuint;,&GLint;,&GLint;*)">
           <modify-argument index="5"><array/></modify-argument>
       </modify-function>

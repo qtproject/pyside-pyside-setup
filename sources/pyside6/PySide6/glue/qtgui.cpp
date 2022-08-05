@@ -134,6 +134,16 @@ static int glGetVReturnSize(GLenum pname)
 }
 // @snippet qopenglfunctions-glgetv-return-size
 
+// @snippet qopenglextrafunctions-glgeti-v-return-size
+// Return the number of return values of the indexed
+// glGetBoolean/Double/Integeri_v functions
+// cf https://registry.khronos.org/OpenGL-Refpages/gl4/html/glGet.xhtml
+static int glGetI_VReturnSize(GLenum pname)
+{
+    return pname == GL_VIEWPORT ? 4 : 1;
+}
+// @snippet qopenglextrafunctions-glgeti-v-return-size
+
 // @snippet qopenglfunctions-glgetbooleanv
 const int size = glGetVReturnSize(%1);
 QVarLengthArray<GLboolean> result(size, GL_FALSE);
@@ -177,6 +187,50 @@ if (size == 1) {
     %PYARG_0 = Shiboken::Numpy::createIntArray1(size, result.constData());
 }
 // @snippet qopenglfunctions-glgetintegerv
+
+// @snippet qopenglextrafunctions-glgetbooleani-v
+const int size = glGetI_VReturnSize(%1);
+QVarLengthArray<GLboolean> result(size, GL_FALSE);
+%CPPSELF.%FUNCTION_NAME(%ARGUMENT_NAMES, result.data());
+if (size == 1) {
+    %PYARG_0 = %CONVERTTOPYTHON[bool](result[0]);
+} else {
+    %PYARG_0 = Shiboken::Numpy::createByteArray1(size, result.constData());
+}
+// @snippet qopenglextrafunctions-glgetbooleani-v
+
+// @snippet qopenglextrafunctions-glgetdoublei-v
+const int size = glGetI_VReturnSize(%1);
+QVarLengthArray<GLdouble> result(size, 0);
+%CPPSELF.%FUNCTION_NAME(%ARGUMENT_NAMES, result.data());
+if (size == 1) {
+    %PYARG_0 = %CONVERTTOPYTHON[double](result[0]);
+} else {
+    %PYARG_0 = Shiboken::Numpy::createDoubleArray1(size, result.constData());
+}
+// @snippet qopenglextrafunctions-glgetdoublei-v
+
+// @snippet qopenglextrafunctions-glgetfloati-v
+const int size = glGetI_VReturnSize(%1);
+QVarLengthArray<GLfloat> result(size, 0);
+%CPPSELF.%FUNCTION_NAME(%ARGUMENT_NAMES, result.data());
+if (size == 1) {
+    %PYARG_0 = %CONVERTTOPYTHON[float](result[0]);
+} else {
+    %PYARG_0 = Shiboken::Numpy::createFloatArray1(size, result.constData());
+}
+// @snippet qopenglextrafunctions-glgetfloati-v
+
+// @snippet qopenglextrafunctions-glgetintegeri-v
+const int size = glGetI_VReturnSize(%1);
+QVarLengthArray<GLint> result(size, 0);
+%CPPSELF.%FUNCTION_NAME(%ARGUMENT_NAMES, result.data());
+if (size == 1) {
+    %PYARG_0 = %CONVERTTOPYTHON[int](result[0]);
+} else {
+    %PYARG_0 = Shiboken::Numpy::createIntArray1(size, result.constData());
+}
+// @snippet qopenglextrafunctions-glgetintegeri-v
 
 // @snippet glgetshadersource
 GLsizei bufSize = 4096;
