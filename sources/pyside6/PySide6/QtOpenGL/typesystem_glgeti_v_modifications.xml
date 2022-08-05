@@ -1,0 +1,36 @@
+<modify-function signature="glGetBooleani_v(&GLuint;,&GLuint;,&GLboolean;*)">
+    <modify-argument index="return" pyi-type="Union[bool,numpy.ndarray]">
+        <replace-type modified-type="PyObject"/>
+    </modify-argument>
+    <modify-argument index="3">
+        <remove-argument/>
+    </modify-argument>
+    <inject-code class="target" position="beginning" file="../glue/qtgui.cpp" snippet="qopenglextrafunctions-glgetbooleani-v"/>
+</modify-function>
+<modify-function signature="glGetDoublei_v(&GLuint;,&GLuint;,double*)">
+    <modify-argument index="return" pyi-type="Union[float,numpy.ndarray]">
+        <replace-type modified-type="PyObject"/>
+    </modify-argument>
+    <modify-argument index="3">
+        <remove-argument/>
+    </modify-argument>
+    <inject-code class="target" position="beginning" file="../glue/qtgui.cpp" snippet="qopenglextrafunctions-glgetdoublei-v"/>
+</modify-function>
+<modify-function signature="glGetFloati_v(&GLuint;,&GLuint;,float*)">
+    <modify-argument index="return" pyi-type="Union[float,numpy.ndarray]">
+        <replace-type modified-type="PyObject"/>
+    </modify-argument>
+    <modify-argument index="3">
+        <remove-argument/>
+    </modify-argument>
+    <inject-code class="target" position="beginning" file="../glue/qtgui.cpp" snippet="qopenglextrafunctions-glgetfloati-v"/>
+</modify-function>
+<modify-function signature="glGetIntegeri_v(&GLuint;,&GLuint;,&GLint;*)">
+    <modify-argument index="return" pyi-type="Union[int,numpy.ndarray]">
+        <replace-type modified-type="PyObject"/>
+    </modify-argument>
+    <modify-argument index="3">
+        <remove-argument/>
+    </modify-argument>
+    <inject-code class="target" position="beginning" file="../glue/qtgui.cpp" snippet="qopenglextrafunctions-glgetintegeri-v"/>
+</modify-function>

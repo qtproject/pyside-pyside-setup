@@ -74,3 +74,7 @@ if (auto *f = dynamic_cast<QOpenGLFunctions_4_5_Core *>(af)) {
 // @snippet glgetvreturnsize_declaration
 int glGetVReturnSize(GLenum pname);
 // @snippet glgetvreturnsize_declaration
+
+// @snippet glgeti-vreturnsize_declaration
+int glGetI_VReturnSize(GLenum pname);
+// @snippet glgeti-vreturnsize_declaration

@@ -72,7 +72,6 @@
   <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetActiveUniformBlockiv"/>
   <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetActiveUniformsiv"/>
   <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetAttachedShaders"/>
-  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetBooleani_v"/>
   <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetBufferParameteriv"/>
   <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetClipPlane"/>
   <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetColorTableParameterfv"/>
@@ -85,7 +84,6 @@
   <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetFramebufferParameteriv"/>
   <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetHistogramParameterfv"/>
   <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetHistogramParameteriv"/>
-  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetIntegeri_v"/>
   <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetInternalformativ"/>
   <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetLightfv"/>
   <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetLightiv"/>
@@ -267,7 +265,9 @@
   </object-type>
   <object-type name="QOpenGLFunctions_3_0" since="5.1">
       &glgetv_includes;
+      &glgeti_v_includes;
       &glgetv_modifications;
+      &glgeti_v_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_0_compat;
       &opengl_modifications1_1;
@@ -283,7 +283,9 @@
   </object-type>
   <object-type name="QOpenGLFunctions_3_1" since="5.1">
       &glgetv_includes;
+      &glgeti_v_includes;
       &glgetv_modifications;
+      &glgeti_v_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_1;
       &opengl_modifications1_4;
@@ -293,7 +295,9 @@
   </object-type>
   <object-type name="QOpenGLFunctions_3_2_Compatibility" since="5.1">
       &glgetv_includes;
+      &glgeti_v_includes;
       &glgetv_modifications;
+      &glgeti_v_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_0_compat;
       &opengl_modifications1_1;
@@ -309,7 +313,9 @@
   </object-type>
   <object-type name="QOpenGLFunctions_3_2_Core" since="5.1">
       &glgetv_includes;
+      &glgeti_v_includes;
       &glgetv_modifications;
+      &glgeti_v_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_1;
       &opengl_modifications1_4;
@@ -319,7 +325,9 @@
   </object-type>
   <object-type name="QOpenGLFunctions_3_3_Compatibility" since="5.1">
       &glgetv_includes;
+      &glgeti_v_includes;
       &glgetv_modifications;
+      &glgeti_v_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_0_compat;
       &opengl_modifications1_1;
@@ -337,7 +345,9 @@
   </object-type>
   <object-type name="QOpenGLFunctions_3_3_Core" since="5.1">
       &glgetv_includes;
+      &glgeti_v_includes;
       &glgetv_modifications;
+      &glgeti_v_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_1;
       &opengl_modifications1_4;
@@ -348,7 +358,9 @@
   </object-type>
   <object-type name="QOpenGLFunctions_4_0_Compatibility" since="5.1">
       &glgetv_includes;
+      &glgeti_v_includes;
       &glgetv_modifications;
+      &glgeti_v_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_0_compat;
       &opengl_modifications1_1;
@@ -367,7 +379,9 @@
   </object-type>
   <object-type name="QOpenGLFunctions_4_0_Core" since="5.1">
       &glgetv_includes;
+      &glgeti_v_includes;
       &glgetv_modifications;
+      &glgeti_v_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_1;
       &opengl_modifications1_4;
@@ -379,7 +393,9 @@
   </object-type>
   <object-type name="QOpenGLFunctions_4_1_Compatibility" since="5.1">
       &glgetv_includes;
+      &glgeti_v_includes;
       &glgetv_modifications;
+      &glgeti_v_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_0_compat;
       &opengl_modifications1_1;
@@ -399,7 +415,9 @@
   </object-type>
   <object-type name="QOpenGLFunctions_4_1_Core" since="5.1">
       &glgetv_includes;
+      &glgeti_v_includes;
       &glgetv_modifications;
+      &glgeti_v_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_1;
       &opengl_modifications1_4;
@@ -413,7 +431,9 @@
   </object-type>
   <object-type name="QOpenGLFunctions_4_2_Compatibility" since="5.1">
       &glgetv_includes;
+      &glgeti_v_includes;
       &glgetv_modifications;
+      &glgeti_v_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_0_compat;
       &opengl_modifications1_1;
@@ -433,7 +453,9 @@
   </object-type>
   <object-type name="QOpenGLFunctions_4_2_Core" since="5.1">
       &glgetv_includes;
+      &glgeti_v_includes;
       &glgetv_modifications;
+      &glgeti_v_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_1;
       &opengl_modifications1_4;
@@ -447,7 +469,9 @@
   </object-type>
   <object-type name="QOpenGLFunctions_4_3_Compatibility" since="5.1">
       &glgetv_includes;
+      &glgeti_v_includes;
       &glgetv_modifications;
+      &glgeti_v_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_0_compat;
       &opengl_modifications1_1;
@@ -468,7 +492,9 @@
   </object-type>
   <object-type name="QOpenGLFunctions_4_3_Core" since="5.1">
       &glgetv_includes;
+      &glgeti_v_includes;
       &glgetv_modifications;
+      &glgeti_v_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_1;
       &opengl_modifications1_4;
@@ -483,7 +509,9 @@
   </object-type>
   <object-type name="QOpenGLFunctions_4_4_Compatibility" since="5.5">
       &glgetv_includes;
+      &glgeti_v_includes;
       &glgetv_modifications;
+      &glgeti_v_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_0_compat;
       &opengl_modifications1_1;
@@ -506,7 +534,9 @@
   </object-type>
   <object-type name="QOpenGLFunctions_4_4_Core" since="5.5">
       &glgetv_includes;
+      &glgeti_v_includes;
       &glgetv_modifications;
+      &glgeti_v_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_1;
       &opengl_modifications1_4;
@@ -523,7 +553,9 @@
   </object-type>
   <object-type name="QOpenGLFunctions_4_5_Compatibility" since="5.5">
       &glgetv_includes;
+      &glgeti_v_includes;
       &glgetv_modifications;
+      &glgeti_v_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_0_compat;
       &opengl_modifications1_1;
@@ -547,7 +579,9 @@
   </object-type>
   <object-type name="QOpenGLFunctions_4_5_Core" since="5.5">
       &glgetv_includes;
+      &glgeti_v_includes;
       &glgetv_modifications;
+      &glgeti_v_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_1;
       &opengl_modifications1_4;

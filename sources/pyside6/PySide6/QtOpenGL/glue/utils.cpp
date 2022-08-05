@@ -28,3 +28,11 @@ int glGetVReturnSize(GLenum pname)
     }
     return 1;
 }
+
+// Return the number of return values of the indexed
+// glGetBoolean/Double/Integeri_v functions
+// cf https://registry.khronos.org/OpenGL-Refpages/gl4/html/glGet.xhtml
+int glGetI_VReturnSize(GLenum pname)
+{
+    return pname == GL_VIEWPORT ? 4 : 1;
+}
