@@ -109,7 +109,9 @@ enum class CPythonType
 
 enum class PythonEnumType {
     Unspecified,
+    Enum,
     IntEnum,
+    Flag,
     IntFlag
 };
 
