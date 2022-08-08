@@ -2926,26 +2926,26 @@
           <inject-code class="target" position="beginning" file="../glue/qtgui.cpp"
                        snippet="qopenglfunctions-glgetbooleanv"/>
       </modify-function>
+      <!-- FIXME PYSIDE 7: Use the remove array modification and use
+                           the version with return value instead -->
       <modify-function signature="glGetFloatv(&GLuint;,float*)">
-          <modify-argument index="return" pyi-type="Union[float,numpy.ndarray]">
-              <replace-type modified-type="PyObject"/>
-          </modify-argument>
-          <modify-argument index="2">
-              <remove-argument/>
-          </modify-argument>
+          <modify-argument index="2"><array/></modify-argument>
+      </modify-function>
+      <add-function signature="glGetFloatv(&GLuint;)" return-type="PyObject">
+          <modify-argument index="return" pyi-type="Union[float,numpy.ndarray]"/>
           <inject-code class="target" position="beginning" file="../glue/qtgui.cpp"
                        snippet="qopenglfunctions-glgetfloatv"/>
-      </modify-function>
+      </add-function>
+      <!-- FIXME PYSIDE 7: Use the remove array modification and use
+                           the version with return value instead -->
       <modify-function signature="glGetIntegerv(&GLuint;,&GLint;*)">
-          <modify-argument index="return" pyi-type="Union[int,numpy.ndarray]">
-              <replace-type modified-type="PyObject"/>
-          </modify-argument>
-          <modify-argument index="2">
-              <remove-argument/>
-          </modify-argument>
+           <modify-argument index="2"><array/></modify-argument>
+      </modify-function>
+      <add-function signature="glGetIntegerv(&GLuint;)" return-type="PyObject">
+          <modify-argument index="return" pyi-type="Union[int,numpy.ndarray]"/>
           <inject-code class="target" position="beginning" file="../glue/qtgui.cpp"
                        snippet="qopenglfunctions-glgetintegerv"/>
-      </modify-function>
+      </add-function>
       <modify-function signature="glGetProgramiv(&GLuint;,&GLuint;,&GLint;*)">
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
