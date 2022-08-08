@@ -72,8 +72,8 @@ import unittest
 
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
-from init_paths import init_all_test_paths
-init_all_test_paths()
+from init_paths import init_test_paths
+init_test_paths(True)
 
 from init_platform import enum_all, generate_all
 from util import (isolate_warnings, check_warnings, suppress_warnings, warn,
@@ -117,6 +117,19 @@ if have_refmodule and not hasattr(sig_exists, dict_name):
     print(f"*** wrong module without '{dict_name}', removed: {shortpath}")
     os.unlink(effectiveRefPath)
     have_refmodule = False
+
+
+class TestUnrecognizedOffending(unittest.TestCase):
+    """
+    We run the signature generation on all modules and raise an error
+    if a warning was issued. This is better than turning warnings into
+    errors because that would stop early before we have all warnings.
+    """
+    def test_signatures_recognized(self):
+        with isolate_warnings():
+            found_sigs = enum_all()
+            if check_warnings():
+                raise RuntimeError("There are errors, see above.")
 
 
 @unittest.skipIf(not have_refmodule,

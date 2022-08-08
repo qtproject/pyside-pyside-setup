@@ -236,7 +236,7 @@ def create_signature(props, key):
         # parser.
         pass
     else:
-        if varnames[0] in ("self", "cls"):
+        if varnames and varnames[0] in ("self", "cls"):
             varnames = varnames[1:]
 
     # calculate the modifications
