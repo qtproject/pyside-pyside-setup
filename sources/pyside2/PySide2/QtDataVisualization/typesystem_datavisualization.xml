@@ -85,8 +85,20 @@
     </object-type>
     <object-type name="QCategory3DAxis"/>
     <object-type name="QLogValue3DAxisFormatter"/>
-    <object-type name="QValue3DAxis"/>
+    <object-type name="QValue3DAxis">
+      <modify-function signature="setFormatter(QValue3DAxisFormatter *)">
+        <modify-argument index="1">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+    </object-type>
     <object-type name="QValue3DAxisFormatter">
+      <modify-function signature="createNewInstance() const">
+        <modify-argument index="return">
+          <define-ownership class="native" owner="c++"/>
+          <define-ownership class="target" owner="default"/>
+        </modify-argument>
+      </modify-function>
       <modify-function signature="populateCopy(QtDataVisualization::QValue3DAxisFormatter&amp;)const">
         <modify-argument index="1">
           <parent index="this" action="add"/>
