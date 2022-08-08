@@ -432,7 +432,7 @@ static QSet<QString> useIntSet()
         /* IntEnum */ u"PySide6.QtQuick.QSGGeometry.DrawingMode"_s,
         // Added because it should really be used as number
         /* IntEnum */ u"PySide6.QtCore.QMetaType.Type"_s,
-        /* IntEnum */ u"PySide6.QtSerialPort.QSerialPort.BaudRate"_s
+        /* IntEnum */ u"PySide6.QtSerialPort.QSerialPort.BaudRate"_s,
     };
     return result;
 }
@@ -457,7 +457,8 @@ static QString BuildEnumFlagInfo(const AbstractMetaEnum &cppEnum)
     bool _flag = bool(flags);
 
     if (decision != TypeSystem::PythonEnumType::Unspecified) {
-        _int = true;
+        _int = decision == TypeSystem::PythonEnumType::IntEnum ||
+               decision == TypeSystem::PythonEnumType::IntFlag;
         if (!flags && decision == TypeSystem::PythonEnumType::IntFlag) {
             qWarning() << "\nnote: " << enumType->name() << "is set as IntFlag without flags\n";
             _flag = true;

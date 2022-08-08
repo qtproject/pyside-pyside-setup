@@ -259,8 +259,10 @@ ENUM_LOOKUP_LINEAR_SEARCH()
 ENUM_LOOKUP_BEGIN(TypeSystem::PythonEnumType, Qt::CaseSensitive,
                   pythonEnumTypeFromAttribute)
     {
+        {u"Enum", TypeSystem::PythonEnumType::Enum},
         {u"IntEnum", TypeSystem::PythonEnumType::IntEnum},
-        {u"IntFlag", TypeSystem::PythonEnumType::IntFlag}
+        {u"Flag", TypeSystem::PythonEnumType::Flag},
+        {u"IntFlag", TypeSystem::PythonEnumType::IntFlag},
     };
 ENUM_LOOKUP_LINEAR_SEARCH()
 

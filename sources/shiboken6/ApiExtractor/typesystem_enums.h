@@ -99,7 +99,9 @@ enum class SmartPointerType {
 
 enum class PythonEnumType {
     Unspecified,
+    Enum,
     IntEnum,
+    Flag,
     IntFlag
 };
 
