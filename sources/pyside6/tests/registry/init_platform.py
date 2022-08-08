@@ -77,13 +77,7 @@ def set_ospaths(build_dir):
     ps = os.pathsep
     ospath_var = "PATH" if sys.platform == "win32" else "LD_LIBRARY_PATH"
     old_val = os.environ.get(ospath_var, "")
-    lib_path = [os.path.join(build_dir, "pyside6", "libpyside"),
-                os.path.join(build_dir, "pyside6", "tests", "pysidetest"),
-                os.path.join(build_dir, "shiboken6", "tests", "libminimal"),
-                os.path.join(build_dir, "shiboken6", "tests", "libsample"),
-                os.path.join(build_dir, "shiboken6", "tests", "libother"),
-                os.path.join(build_dir, "shiboken6", "tests", "libsmart"),
-                os.path.join(build_dir, "shiboken6", "libshiboken")]
+    lib_path = [os.path.join(build_dir, "pyside6", "tests", "pysidetest"),]
     ospath = ps.join(lib_path + old_val.split(ps))
     os.environ[ospath_var] = ospath
 
@@ -102,12 +96,6 @@ all_modules.append("testbinding")
 
 from shiboken6 import Shiboken
 all_modules.append("shiboken6.Shiboken")
-
-# 'sample/smart' are needed by 'other', so import them first.
-for modname in "minimal sample smart other".split():
-    sys.path.insert(0, os.path.join(shiboken_build_dir, "tests", modname + "binding"))
-    __import__(modname)
-    all_modules.append(modname)
 
 from shibokensupport.signature.lib.enum_sig import SimplifyingEnumerator
 
@@ -172,6 +160,12 @@ def enum_all():
     return ret
 
 
+LICENSE_TEXT = """
+# Copyright (C) 2022 The Qt Company Ltd.
+# SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+"""
+
+
 def generate_all():
     refPath = get_refpath()
     module = os.path.basename(os.path.splitext(refPath)[0])
@@ -182,7 +176,7 @@ def generate_all():
         license_line = next((lno for lno, line in enumerate(lines)
                              if "$QT_END_LICENSE$" in line))
         fmt.print("#recreate       # uncomment this to enforce generation")
-        fmt.print("".join(lines[:license_line + 3]))
+        fmt.print(LICENSE_TEXT)
         version = sys.version.replace('\n', ' ')
         build = qt_build()
         fmt.print(dedent(f'''\

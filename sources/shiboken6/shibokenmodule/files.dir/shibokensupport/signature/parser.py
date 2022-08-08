@@ -410,6 +410,12 @@ def calculate_props(line):
             line = re.sub(rf"\b{parts[_old]}\b", parts[_new], line)
             type_map[parts[_old]] = parts[_new]
 
+    # PYSIDE-510: This is an ad-hoc fix to be removed.
+    # Special case, observed in 'PySide6.QtWebEngineWidgets.QWebEngineView.printToPdf'
+    # There is "\r" in that line. Should be fixed by something else, but for now:
+    if sys.platform == "win32":
+        line = line.replace("\r", "")
+
     parsed = SimpleNamespace(**_parse_line(line.strip()))
     arglist = parsed.arglist
     annotations = {}

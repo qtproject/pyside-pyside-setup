@@ -25,7 +25,7 @@ class ellipsis(object):
         return "..."
 
 ellipsis = ellipsis()
-Point = typing.Tuple[float, float]
+Point = typing.Tuple[int, int]
 Variant = typing.Any
 QImageCleanupFunction = typing.Callable
 
@@ -283,6 +283,8 @@ type_map.update({
     "zero(str)": "",
     "zero(typing.Any)": None,
     "zero(Any)": None,
+    # This can be refined by importing numpy.typing optionally, but better than nothing.
+    "numpy.ndarray": typing.List[typing.Any],
     })
 
 type_map.update({
@@ -658,9 +660,19 @@ def init_PySide6_QtBluetooth():
     return locals()
 
 
+def init_PySide6_QtHttpServer():
+    type_map.update({
+        "qMakePair(1u, 1u)": (1, 1),
+    })
+    return locals()
+
+
 def init_testbinding():
     type_map.update({
         "testbinding.PySideCPP2.TestObjectWithoutNamespace": testbinding.TestObjectWithoutNamespace,
+        "FlagsNamespace.Option.NoOptions": 0,
+        "StdIntList": typing.List[int],
+        'Str("")': str(""),
     })
     return locals()
 
