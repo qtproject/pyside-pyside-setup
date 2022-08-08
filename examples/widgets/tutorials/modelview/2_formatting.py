@@ -20,6 +20,7 @@ class MyModel(QAbstractTableModel):
     def columnCount(self, parent=None):
         return 3
 
+#! [1]
     def data(self, index, role=Qt.DisplayRole):
         row = index.row()
         col = index.column()
@@ -52,6 +53,7 @@ class MyModel(QAbstractTableModel):
                 return Qt.Checked
 
         return None
+#! [1]
 
 
 if __name__ == '__main__':

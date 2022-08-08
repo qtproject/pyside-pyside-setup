@@ -10,12 +10,14 @@ from PySide6.QtWidgets import QApplication, QTableView
 
 
 class MyModel(QAbstractTableModel):
+#! [1]
     def __init__(self, parent=None):
         super().__init__(parent)
         self._timer = QTimer(self)
         self._timer.setInterval(1000)
         self._timer.timeout.connect(self.timer_hit)
         self._timer.start()
+#! [1]
 
     def rowCount(self, parent=None):
         return 2
@@ -23,20 +25,23 @@ class MyModel(QAbstractTableModel):
     def columnCount(self, parent=None):
         return 3
 
+#! [2]
     def data(self, index, role=Qt.DisplayRole):
         row = index.row()
         col = index.column()
         if role == Qt.DisplayRole and row == 0 and col == 0:
             return QTime.currentTime().toString()
         return None
+#! [2]
 
+#! [3]
     @Slot()
     def timer_hit(self):
         # we identify the top left cell
         top_left = self.createIndex(0, 0)
         # emit a signal to make the view reread identified data
         self.dataChanged.emit(top_left, top_left, [Qt.DisplayRole])
-
+#! [3]
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

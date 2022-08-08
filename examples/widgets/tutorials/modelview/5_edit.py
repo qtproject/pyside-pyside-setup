@@ -33,6 +33,7 @@ class MyModel(QAbstractTableModel):
             return self._grid_data[index.row()][index.column()]
         return None
 
+#! [1]
     def setData(self, index, value, role):
         if role != Qt.EditRole or not self.checkIndex(index):
             return False
@@ -42,9 +43,12 @@ class MyModel(QAbstractTableModel):
         result = " ".join(chain(*self._grid_data))
         self.editCompleted.emit(result)
         return True
+#! [1]
 
+#! [2]
     def flags(self, index):
         return Qt.ItemIsEditable | super().flags(index)
+#! [2]
 
 
 class MainWindow(QMainWindow):

@@ -26,10 +26,12 @@ class MyModel(QAbstractTableModel):
             return f"Row{row}, Column{column}"
         return None
 
+#! [1]
     def headerData(self, section, orientation, role):
         if role == Qt.DisplayRole and orientation == Qt.Horizontal:
             return ["first", "second", "third"][section]
         return None
+#! [1]
 
 
 if __name__ == '__main__':
