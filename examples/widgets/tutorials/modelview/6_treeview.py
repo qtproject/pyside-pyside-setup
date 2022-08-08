@@ -46,7 +46,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QTreeView
 
 """PySide6 port of the widgets/tutorials/modelview/6_treeview example from Qt v6.x"""
 
-
+#! [1]
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -69,6 +69,7 @@ class MainWindow(QMainWindow):
     def prepare_row(self, first, second, third):
         return [QStandardItem(first), QStandardItem(second),
                 QStandardItem(third)]
+#! [1]
 
 
 if __name__ == '__main__':

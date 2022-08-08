@@ -46,6 +46,7 @@ from PySide6.QtWidgets import QApplication, QTableView
 """PySide6 port of the widgets/tutorials/modelview/1_readonly example from Qt v6.x"""
 
 
+#! [1]
 class MyModel(QAbstractTableModel):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -62,6 +63,7 @@ class MyModel(QAbstractTableModel):
             column = index.column() + 1
             return f"Row{row}, Column{column}"
         return None
+#! [1]
 
 
 if __name__ == '__main__':

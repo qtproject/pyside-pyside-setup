@@ -46,7 +46,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QTreeView
 
 """PySide6 port of the widgets/tutorials/modelview/7_selections example from Qt v6.x"""
 
-
+#! [1]
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -82,7 +82,9 @@ class MainWindow(QMainWindow):
         # selection changes shall trigger a slot
         selection_model = self._tree_view.selectionModel()
         selection_model.selectionChanged.connect(self.selection_changed_slot)
+#! [1]
 
+#! [2]
     @Slot(QItemSelection, QItemSelection)
     def selection_changed_slot(self, new_selection, old_selection):
         # get the text of the selected item
@@ -95,6 +97,7 @@ class MainWindow(QMainWindow):
             seek_root = seek_root.parent()
             hierarchy_level += 1
         self.setWindowTitle(f"{selected_text}, Level {hierarchy_level}")
+#! [2]
 
 
 if __name__ == '__main__':
