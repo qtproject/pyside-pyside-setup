@@ -37,12 +37,12 @@ variable required::
     7z x libclang-release_100-based-linux-Rhel7.6-gcc5.3-x86_64.7z
     export LLVM_INSTALL_DIR=$PWD/libclang
 
-Getting PySide
-~~~~~~~~~~~~~~
+Getting the source
+~~~~~~~~~~~~~~~~~~
 
 Cloning the official repository can be done by::
 
-    git clone --recursive https://code.qt.io/pyside/pyside-setup
+    git clone https://code.qt.io/pyside/pyside-setup
 
 Checking out the version that we want to build, for example 6.0::
 
@@ -56,8 +56,11 @@ Install the general dependencies::
           Additionally, :command:`git checkout -b 6.0 --track origin/6.0` could be a better option
           in case you want to work on it.
 
-Building PySide
-~~~~~~~~~~~~~~~
+Building and Installing (setuptools)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The `setuptools` approach uses the `setup.py` file to execute the build,
+install, and packaging steps.
 
 Check your Qt installation path, to specifically use that version of qtpaths to build PySide.
 for example, :command:`/opt/Qt/6.0.0/gcc_64/bin/qtpaths`.
@@ -66,12 +69,39 @@ Build can take a few minutes, so it is recommended to use more than one CPU core
 
     python setup.py build --qtpaths=/opt/Qt/6.0.0/gcc_64/bin/qtpaths --build-tests --ignore-git --parallel=8
 
-Installing PySide
-~~~~~~~~~~~~~~~~~
-
 To install on the current directory, just run::
 
     python setup.py install --qtpaths=/opt/Qt/6.0.0/gcc_64/bin/qtpaths --build-tests --ignore-git --parallel=8
+
+Building and Installing (cmake)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The `setuptools` approach includes internal `CMake` calls when
+building and installing the project, but a CMake-only approach is only
+recommended for packaging the project for distribution builds.
+
+Assumming that Qt is in PATH, for example, the configure step can be done with::
+
+    cmake -B /path/to/the/build/directory \
+          -S /path/to/the/pyside-setup \
+          -DCMAKE_INSTALL_PREFIX=/where/to/install \
+          -DPYTHON_EXECUTABLE=/path/to/interpreter
+
+.. note:: You can add `-DFORCE_LIMITED_API=yes` in case you want to have a
+   build which will be compatible with Python 3.7+.
+
+and then for building::
+
+    cmake --build /path/to/the/build/directory --parallel X
+
+where `X` is the amount of processes you want to use.
+Finally, the install step can be done with::
+
+    cmake --install /path/to/the/build/directory
+
+.. note:: You can build only pyside6 or only shiboken6 by using
+   the diferent source directories with the option `-S`.
+
 
 Test installation
 ~~~~~~~~~~~~~~~~~
