@@ -41,6 +41,7 @@ from pathlib import Path
 
 ROOT_PATH = Path(__file__).parents[2]
 EXAMPLES_PATH = ROOT_PATH / "examples"
+TUTORIAL_EXAMPLES_PATH = ROOT_PATH / "sources" / "pyside6" / "doc" / "tutorials"
 
 
 _PYTHON_EXAMPLE_SNIPPET_MAPPING = {
@@ -76,7 +77,9 @@ _PYTHON_EXAMPLE_SNIPPET_MAPPING = {
     (EXAMPLES_PATH / "widgets" / "tutorials" / "modelview" / "7_selections.py", "1"),
     ("qtbase/examples/widgets/tutorials/modelview/7_selections/mainwindow.cpp",
      "quoting modelview_b"):
-    (EXAMPLES_PATH / "widgets" / "tutorials" / "modelview" / "7_selections.py", "2")
+    (EXAMPLES_PATH / "widgets" / "tutorials" / "modelview" / "7_selections.py", "2"),
+    ("qtbase/src/widgets/doc/snippets/qlistview-dnd/mainwindow.cpp.cpp", "0"):
+    (TUTORIAL_EXAMPLES_PATH / "modelviewprogramming" / "qlistview-dnd.py", "mainwindow0")
 }
 
 
@@ -87,6 +90,40 @@ def python_example_snippet_mapping():
     global _python_example_snippet_mapping
     if not _python_example_snippet_mapping:
         result = _PYTHON_EXAMPLE_SNIPPET_MAPPING
+
+        qt_path = "qtbase/src/widgets/doc/snippets/simplemodel-use/main.cpp"
+        pyside_path = TUTORIAL_EXAMPLES_PATH / "modelviewprogramming" / "stringlistmodel.py"
+        for i in range(3):
+            snippet_id = str(i)
+            result[(qt_path, snippet_id)] = pyside_path, snippet_id
+
+        qt_path = "qtbase/src/widgets/doc/snippets/stringlistmodel/main.cpp"
+        pyside_path = TUTORIAL_EXAMPLES_PATH / "modelviewprogramming" / "stringlistmodel.py"
+        for i in range(6):
+            snippet_id = str(i)
+            result[(qt_path, snippet_id)] = pyside_path, f"main{snippet_id}"
+
+        qt_path = "qtbase/examples/widgets/itemviews/spinboxdelegate/delegate.cpp"
+        pyside_path = (EXAMPLES_PATH / "widgets" / "itemviews" / "spinboxdelegate"
+                       / "spinboxdelegate.py")
+        for i in range(5):
+            snippet_id = str(i)
+            result[(qt_path, snippet_id)] = pyside_path, snippet_id
+
+        qt_path = "qtbase/src/widgets/doc/snippets/stringlistmodel/model.cpp"
+        pyside_path = (TUTORIAL_EXAMPLES_PATH / "modelviewprogramming"
+                       / "stringlistmodel.py")
+        for i in range(10):
+            snippet_id = str(i)
+            result[(qt_path, snippet_id)] = pyside_path,  snippet_id
+
+        qt_path = "qtbase/src/widgets/doc/snippets/qlistview-dnd/model.cpp"
+        pyside_path = (TUTORIAL_EXAMPLES_PATH / "modelviewprogramming"
+                       / "qlistview-dnd.py")
+        for i in range(11):
+            snippet_id = str(i)
+            result[(qt_path, snippet_id)] = pyside_path,  snippet_id
+
         _python_example_snippet_mapping = result
 
     return _python_example_snippet_mapping
