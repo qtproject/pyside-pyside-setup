@@ -598,15 +598,18 @@ QString QtXmlToSphinx::readFromLocation(const QString &location, const QString &
     const QRegularExpression searchString(u"//!\\s*\\["_s
                                           + identifier + u"\\]"_s);
     Q_ASSERT(searchString.isValid());
-    static const QRegularExpression codeSnippetCode(u"//!\\s*\\[[\\w\\d\\s]+\\]"_s);
-    Q_ASSERT(codeSnippetCode.isValid());
+    static const QRegularExpression cppCodeSnippetCode(u"//!\\s*\\[[\\w\\d\\s]+\\]"_s);
+    Q_ASSERT(cppCodeSnippetCode.isValid());
+    static const QRegularExpression pythonCodeSnippetCode(u"#!\\s*\\[[\\w\\d\\s]+\\]"_s);
+    Q_ASSERT(pythonCodeSnippetCode.isValid());
 
     bool getCode = false;
 
     while (!inputFile.atEnd()) {
         QString line = QString::fromUtf8(inputFile.readLine());
         if (getCode && !line.contains(searchString)) {
-            line.remove(codeSnippetCode);
+            line.remove(cppCodeSnippetCode);
+            line.remove(pythonCodeSnippetCode);
             code += line;
         } else if (line.contains(searchString)) {
             if (getCode)
