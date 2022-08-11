@@ -95,6 +95,7 @@ static inline QString packageAttribute() { return QStringLiteral("package"); }
 static inline QString positionAttribute() { return QStringLiteral("position"); }
 static inline QString preferredConversionAttribute() { return QStringLiteral("preferred-conversion"); }
 static inline QString preferredTargetLangTypeAttribute() { return QStringLiteral("preferred-target-lang-type"); }
+static inline QString pythonEnumTypeAttribute() { return QStringLiteral("python-type"); }
 static inline QString removeAttribute() { return QStringLiteral("remove"); }
 static inline QString renameAttribute() { return QStringLiteral("rename"); }
 static inline QString readAttribute() { return QStringLiteral("read"); }
@@ -254,6 +255,14 @@ ENUM_LOOKUP_BEGIN(TypeSystem::BoolCast, Qt::CaseInsensitive,
         {u"true", TypeSystem::BoolCast::Enabled},
         {u"no", TypeSystem::BoolCast::Disabled},
         {u"false", TypeSystem::BoolCast::Disabled},
+    };
+ENUM_LOOKUP_LINEAR_SEARCH()
+
+ENUM_LOOKUP_BEGIN(TypeSystem::PythonEnumType, Qt::CaseSensitive,
+                  pythonEnumTypeFromAttribute)
+    {
+        {u"IntEnum", TypeSystem::PythonEnumType::IntEnum},
+        {u"IntFlag", TypeSystem::PythonEnumType::IntFlag}
     };
 ENUM_LOOKUP_LINEAR_SEARCH()
 
@@ -1509,6 +1518,15 @@ EnumTypeEntry *
         } else if (name == forceIntegerAttribute()) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
+        } else if (name == pythonEnumTypeAttribute()) {
+            const auto attribute = attributes->takeAt(i);
+            const auto typeOpt = pythonEnumTypeFromAttribute(attribute.value());
+            if (typeOpt.has_value()) {
+                entry->setPythonEnumType(typeOpt.value());
+            } else {
+                qCWarning(lcShiboken, "%s",
+                          qPrintable(msgInvalidAttributeValue(attribute)));
+            }
         } else if (name == extensibleAttribute()) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
