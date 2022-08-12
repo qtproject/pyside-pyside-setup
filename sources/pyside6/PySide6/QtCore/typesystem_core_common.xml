@@ -1543,7 +1543,7 @@
         </inject-documentation>
     </add-function>
     <inject-code class="target" position="end" file="../glue/qtcore.cpp" snippet="qabstractitemmodel"/>
-    <modify-function signature="mimeData(QModelIndexList)const">
+    <modify-function signature="mimeData(QList&lt;QModelIndex&gt;)const">
       <modify-argument index="return">
         <define-ownership class="native" owner="c++"/>
         <define-ownership class="target" owner="default"/>
