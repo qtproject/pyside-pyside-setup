@@ -1,0 +1,9 @@
+{
+    "files": ["1_readonly.py",
+              "2_formatting.py",
+              "3_changingmodel.py",
+              "4_headers.py",
+              "5_edit.py",
+              "6_treeview.py",
+              "7_selections.py"]
+}
