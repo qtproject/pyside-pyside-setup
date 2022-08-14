@@ -731,13 +731,17 @@ newItem(PyTypeObject *enumType, long itemValue, const char *itemName)
     if (useOldEnum)
         return newItemOld(enumType, itemValue, itemName);
 
-    if (!itemName) {
-        //PyObject *enumObj = getEnumItemFromValue(enumType, itemValue);
-        PyObject *enumObj = PyObject_CallFunction(reinterpret_cast<PyObject *>(enumType), "i", itemValue);
-        //if (enumObj)
-            return enumObj;
-    }
-    return PyObject_GetAttrString(reinterpret_cast<PyObject *>(enumType), itemName);
+    auto *obEnumType = reinterpret_cast<PyObject *>(enumType);
+    if (!itemName)
+        return PyObject_CallFunction(obEnumType, "i", itemValue);
+
+    static PyObject *const _member_map_ = String::createStaticString("_member_map_");
+    auto *member_map = PyDict_GetItem(enumType->tp_dict, _member_map_);
+    if (!(member_map && PyDict_Check(member_map)))
+        return nullptr;
+    auto *result = PyDict_GetItemString(member_map, itemName);
+    Py_XINCREF(result);
+    return result;
 }
 
 } // namespace Shiboken
