@@ -413,8 +413,12 @@ int SignalManager::SignalManagerPrivate::qtPropertyMetacall(QObject *object,
     pp->d->metaCall(pySelf, call, args);
     Py_XDECREF(pp);
 
-    if (PyErr_Occurred())
+    if (PyErr_Occurred()) {
+        qWarning().noquote().nospace()
+            << "An error occurred executing the property metacall " << call
+            << " on property \"" << mp.name() << "\" of " << object;
         handleMetaCallError(object, &result);
+    }
     return result;
 }
 
