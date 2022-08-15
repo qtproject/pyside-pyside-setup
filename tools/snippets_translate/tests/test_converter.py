@@ -78,6 +78,7 @@ def test_and_or():
 def test_while_if_elseif():
     assert st("while(a)") == "while a:"
     assert st("if  (condition){") == "if condition:"
+    assert st("    if  (condition){") == "    if condition:"
     assert st("} else if (a) {") == " elif a:"
     assert (
         st("if (!m_vbo.isCreated()) // init() failed,")
