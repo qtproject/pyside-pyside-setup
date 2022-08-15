@@ -5,6 +5,24 @@
 <modify-function signature="^gl(DepthRange|Scissor|Viewport)Arrayv\(.*$">
     <modify-argument index="3"><array/></modify-argument>
 </modify-function>
+<modify-function signature="glGetDoublei_v(&GLuint;,&GLuint;,double*)">
+    <modify-argument index="return" pyi-type="Union[float,numpy.ndarray]">
+        <replace-type modified-type="PyObject"/>
+    </modify-argument>
+    <modify-argument index="3">
+        <remove-argument/>
+    </modify-argument>
+    <inject-code class="target" position="beginning" file="../glue/qtgui.cpp" snippet="qopenglextrafunctions-glgetdoublei-v"/>
+</modify-function>
+<modify-function signature="glGetFloati_v(&GLuint;,&GLuint;,float*)">
+    <modify-argument index="return" pyi-type="Union[float,numpy.ndarray]">
+        <replace-type modified-type="PyObject"/>
+    </modify-argument>
+    <modify-argument index="3">
+        <remove-argument/>
+    </modify-argument>
+    <inject-code class="target" position="beginning" file="../glue/qtgui.cpp" snippet="qopenglextrafunctions-glgetfloati-v"/>
+</modify-function>
 <modify-function signature="^glProgramUniform\du?[dfi]v\(.*$">
     <modify-argument index="4"><array/></modify-argument>
 </modify-function>

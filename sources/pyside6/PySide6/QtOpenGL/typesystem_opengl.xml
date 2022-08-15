@@ -78,8 +78,6 @@
   <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetColorTableParameteriv"/>
   <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetConvolutionParameterfv"/>
   <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetConvolutionParameteriv"/>
-  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetDoublei_v"/>
-  <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetFloati_v"/>
   <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetFramebufferAttachmentParameteriv"/>
   <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetFramebufferParameteriv"/>
   <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetHistogramParameterfv"/>
