@@ -480,10 +480,13 @@ def handle_methods_return_type(x):
 
 
 def handle_functions(x):
-    re_capture = re.compile(r"^ *[a-zA-Z0-9]+ ([\w\*\&]+\(.*\)$)")
+    re_capture = re.compile(r"^ *([a-zA-Z0-9]+) ([\w\*\&]+\(.*\)$)")
     capture = re_capture.search(x)
     if capture:
-        content = capture.group(1)
+        return_type = capture.group(1)
+        if return_type == "return":  # "return QModelIndex();"
+            return x
+        content = capture.group(2)
         function_name = content.split("(")[0]
         re_par = re.compile(r"\((.+)\)")
         par_capture = re_par.search(x)
