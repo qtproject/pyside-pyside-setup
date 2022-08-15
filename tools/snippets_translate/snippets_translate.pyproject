@@ -1,3 +1,4 @@
 {
-    "files": ["main.py", "converter.py", "handlers.py", "override.py", "tests/test_converter.py"]
+    "files": ["main.py", "converter.py", "handlers.py", "override.py",
+              "tests/test_converter.py", "tests/test_snippets.py"]
 }
