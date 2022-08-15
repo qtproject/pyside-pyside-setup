@@ -5,6 +5,7 @@ import logging
 import os
 import sys
 from argparse import ArgumentParser, RawTextHelpFormatter
+from pathlib import Path
 
 from qtpy2cpp_lib.visitor import ConvertVisitor
 
@@ -14,52 +15,48 @@ DESCRIPTION = "Tool to convert Python to C++"
 def create_arg_parser(desc):
     parser = ArgumentParser(description=desc,
                             formatter_class=RawTextHelpFormatter)
-    parser.add_argument('--debug', '-d', action='store_true',
-                        help='Debug')
-    parser.add_argument('--stdout', '-s', action='store_true',
-                        help='Write to stdout')
-    parser.add_argument('--force', '-f', action='store_true',
-                        help='Force overwrite of existing files')
-    parser.add_argument('files', type=str, nargs="+", help='Python source file(s)')
+    parser.add_argument("--debug", "-d", action="store_true",
+                        help="Debug")
+    parser.add_argument("--stdout", "-s", action="store_true",
+                        help="Write to stdout")
+    parser.add_argument("--force", "-f", action="store_true",
+                        help="Force overwrite of existing files")
+    parser.add_argument("files", type=str, nargs="+", help="Python source file(s)")
     return parser
 
 
-if __name__ == '__main__':
-    if sys.version_info < (3, 6, 0):
-        raise Exception("This script requires Python 3.6")
+if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
     arg_parser = create_arg_parser(DESCRIPTION)
     args = arg_parser.parse_args()
     ConvertVisitor.debug = args.debug
 
-    for input_file in args.files:
-        if not os.path.isfile(input_file):
-            logger.error(f'{input_file} does not exist or is not a file.')
+    for input_file_str in args.files:
+        input_file = Path(input_file_str)
+        if not input_file.is_file():
+            logger.error(f"{input_file_str} does not exist or is not a file.")
             sys.exit(-1)
         file_root, ext = os.path.splitext(input_file)
-        if ext != '.py':
-            logger.error(f'{input_file} does not appear to be a Python file.')
+        if input_file.suffix != ".py":
+            logger.error(f"{input_file_str} does not appear to be a Python file.")
             sys.exit(-1)
 
-        ast_tree = ConvertVisitor.create_ast(input_file)
+        ast_tree = ConvertVisitor.create_ast(input_file_str)
         if args.stdout:
-            base_name = os.path.basename(input_file)
-            sys.stdout.write(f'// Converted from {base_name}\n')
+            sys.stdout.write(f"// Converted from {input_file.name}\n")
             ConvertVisitor(input_file, sys.stdout).visit(ast_tree)
-            sys.exit(0)
+        else:
+            target_file = input_file.parent / (input_file.stem + ".cpp")
+            if target_file.exists():
+                if not target_file.is_file():
+                    logger.error(f"{target_file} exists and is not a file.")
+                    sys.exit(-1)
+                if not args.force:
+                    logger.error(f"{target_file} exists. Use -f to overwrite.")
+                    sys.exit(-1)
 
-        target_file = file_root + '.cpp'
-        if os.path.exists(target_file):
-            if not os.path.isfile(target_file):
-                logger.error(f'{target_file} exists and is not a file.')
-                sys.exit(-1)
-            if not args.force:
-                logger.error(f'{target_file} exists. Use -f to overwrite.')
-                sys.exit(-1)
-
-        with open(target_file, "w") as file:
-            base_name = os.path.basename(input_file)
-            file.write(f'// Converted from {base_name}\n')
-            ConvertVisitor(input_file, file).visit(ast_tree)
-            logger.info(f"Wrote {target_file} ...")
+            with target_file.open("w") as file:
+                file.write(f"// Converted from {input_file.name}\n")
+                ConvertVisitor(input_file, file).visit(ast_tree)
+                logger.info(f"Wrote {target_file}.")
