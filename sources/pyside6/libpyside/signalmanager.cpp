@@ -3,6 +3,7 @@
 
 #include "signalmanager.h"
 #include "pysidesignal.h"
+#include "pysidelogging_p.h"
 #include "pysideproperty.h"
 #include "pysideproperty_p.h"
 #include "pysidecleanup.h"
@@ -19,6 +20,7 @@
 #include <sbkstring.h>
 #include <sbkstaticstrings.h>
 
+#include <QtCore/QByteArrayView>
 #include <QtCore/QDebug>
 #include <QtCore/QHash>
 
@@ -48,6 +50,24 @@ namespace {
             Shiboken::BindingManager::instance().releaseWrapper(wrapper);
         delete meta;
     }
+}
+
+static const char *metaCallName(QMetaObject::Call call)
+{
+    static const QHash<QMetaObject::Call, const char *> mapping = {
+        {QMetaObject::InvokeMetaMethod, "InvokeMetaMethod"},
+        {QMetaObject::ReadProperty, "ReadProperty"},
+        {QMetaObject::WriteProperty, "WriteProperty"},
+        {QMetaObject::ResetProperty, "ResetProperty"},
+        {QMetaObject::CreateInstance, "CreateInstance"},
+        {QMetaObject::IndexOfMethod, "IndexOfMethod"},
+        {QMetaObject::RegisterPropertyMetaType, "RegisterPropertyMetaType"},
+        {QMetaObject::RegisterMethodArgumentMetaType, "RegisterMethodArgumentMetaType"},
+        {QMetaObject::BindableProperty, "BindableProperty"},
+        {QMetaObject::CustomCall, "CustomCall"}
+    };
+    auto it = mapping.constFind(call);
+    return it != mapping.constEnd() ? it.value() : "<Unknown>";
 }
 
 namespace PySide {
@@ -359,6 +379,11 @@ int SignalManager::SignalManagerPrivate::qtPropertyMetacall(QObject *object,
     int result = id - metaObject->propertyCount();
 
     const QMetaProperty mp = metaObject->property(id);
+
+    qCDebug(lcPySide).noquote().nospace() << __FUNCTION__
+        << ' ' << metaCallName(call) << " #" << id << ' ' << mp.typeName()
+        << "/\"" << mp.name() << "\" " << object;
+
     if (!mp.isValid())
         return result;
 
@@ -394,6 +419,9 @@ int SignalManager::SignalManagerPrivate::qtMethodMetacall(QObject *object,
     int result = id - metaObject->methodCount();
 
     std::unique_ptr<Shiboken::GilState> gil;
+
+    qCDebug(lcPySide).noquote().nospace() << __FUNCTION__ << " #" << id
+        << " \"" << method.methodSignature() << '"';
 
     if (method.methodType() == QMetaMethod::Signal) {
         // emit python signal
@@ -444,6 +472,8 @@ int SignalManager::qt_metacall(QObject *object, QMetaObject::Call call, int id, 
         case QMetaObject::IndexOfMethod:
         case QMetaObject::RegisterMethodArgumentMetaType:
         case QMetaObject::CustomCall:
+            qCDebug(lcPySide).noquote().nospace() << __FUNCTION__ << ' '
+                << metaCallName(call) << " #" << id << ' '  << object;
             id -= object->metaObject()->methodCount();
             break;
     }
@@ -513,6 +543,57 @@ static MetaObjectBuilder *metaBuilderFromDict(PyObject *dict)
     return reinterpret_cast<MetaObjectBuilder *>(PyCapsule_GetPointer(pyBuilder, nullptr));
 }
 
+// Helper to format a method signature "foo(QString)" into
+// Slot decorator "@Slot(str)"
+
+struct slotSignature
+{
+    explicit slotSignature(const char *signature) : m_signature(signature) {}
+
+    const char *m_signature;
+};
+
+QDebug operator<<(QDebug debug, const slotSignature &sig)
+{
+    QDebugStateSaver saver(debug);
+    debug.noquote();
+    debug.nospace();
+    debug << "@Slot(";
+    QByteArrayView signature(sig.m_signature);
+    const auto len = signature.size();
+    auto pos = signature.indexOf('(');
+    if (pos != -1 && pos < len - 2) {
+        ++pos;
+        while (true) {
+            auto nextPos = signature.indexOf(',', pos);
+            if (nextPos == -1)
+                nextPos = len - 1;
+            const QByteArrayView parameter = signature.sliced(pos, nextPos - pos);
+            if (parameter == "QString") {
+                debug << "str";
+            } else if (parameter == "double") {
+                debug << "float";
+            } else {
+                const bool hasDelimiter = parameter.contains("::");
+                if (hasDelimiter)
+                    debug << '"';
+                if (!hasDelimiter && parameter.endsWith('*'))
+                    debug << parameter.first(parameter.size() - 1);
+                else
+                    debug << parameter;
+                if (hasDelimiter)
+                    debug << '"';
+            }
+            pos = nextPos + 1;
+            if (pos >= len)
+                break;
+            debug << ',';
+        }
+    }
+    debug << ')';
+    return debug;
+}
+
 int SignalManager::registerMetaMethodGetIndex(QObject *source, const char *signature, QMetaMethod::MethodType type)
 {
     if (!source) {
@@ -539,6 +620,13 @@ int SignalManager::registerMetaMethodGetIndex(QObject *source, const char *signa
             PyObject *pyDmo = PyCapsule_New(dmo, nullptr, destroyMetaObject);
             PyObject_SetAttr(pySelf, metaObjectAttr, pyDmo);
             Py_DECREF(pyDmo);
+        }
+
+        if (type == QMetaMethod::Slot) {
+            qCWarning(lcPySide).noquote().nospace()
+                << "Warning: Registering dynamic slot \""
+                << signature << "\" on " << source->metaObject()->className()
+                << ". Consider annotating with " << slotSignature(signature);
         }
 
         return type == QMetaMethod::Signal

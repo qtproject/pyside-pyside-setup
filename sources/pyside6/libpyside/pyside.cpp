@@ -22,6 +22,7 @@
 #include "pysidemetafunction.h"
 #include "dynamicqmetaobject.h"
 #include "feature_select.h"
+#include "pysidelogging_p.h"
 
 #include <autodecref.h>
 #include <basewrapper.h>
@@ -52,6 +53,8 @@ QT_BEGIN_NAMESPACE
 extern bool qRegisterResourceData(int, const unsigned char *, const unsigned char *,
         const unsigned char *);
 QT_END_NAMESPACE
+
+Q_LOGGING_CATEGORY(lcPySide, "qt.pyside.libpyside", QtCriticalMsg)
 
 namespace PySide
 {
