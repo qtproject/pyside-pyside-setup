@@ -101,7 +101,7 @@ def test_double_colon():
     # multiline statement connect statement
     # eg: connect(reply, &QNetworkReply::errorOccurred,
     #    this, &MyClass::slotError);
-    assert st("this, &MyClass::slotError);") == "self, MyClass.slotError)"
+    assert st("this, &MyClass::slotError);") == "self.slotError)"
 
 
 def test_cout_endl():
@@ -375,7 +375,7 @@ def test_special_cases():
     )
     assert (
         st("QObject::connect(&window1, &Window::messageSent,")
-        == "QObject.connect(window1, Window.messageSent,"
+        == "window1.messageSent.connect("
     )
     assert st("double num;") == "num = float()"
 
