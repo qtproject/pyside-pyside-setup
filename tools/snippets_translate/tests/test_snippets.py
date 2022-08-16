@@ -37,7 +37,7 @@
 ##
 #############################################################################
 
-from main import get_snippets, get_snippet_ids
+from main import _get_snippets, get_snippet_ids, CPP_SNIPPET_PATTERN
 
 
 def test_stacking():
@@ -48,13 +48,23 @@ def test_stacking():
         "//! [C] //! [A] ",
         "//! [B] //! [D] //! [E]",
     ]
-    snippets = get_snippets(lines)
+    snippets = _get_snippets(lines, CPP_SNIPPET_PATTERN)
     assert len(snippets) == 5
-    assert len(snippets[0]) == 4  # A starts at line 0 and ends at line 3
-    assert len(snippets[1]) == 5  # B starts at line 0 and ends at line 4
-    assert len(snippets[2]) == 3  # C starts at line 1 and ends at line 3
-    assert len(snippets[3]) == 4  # D starts at line 1 and ends at line 4
-    assert len(snippets[4]) == 4  # E starts at line 1 and ends at line 4
+
+    snippet_a = snippets["A"]
+    assert len(snippet_a) == 4  # A starts at line 0 and ends at line 3
+
+    snippet_b = snippets["B"]
+    assert len(snippet_b) == 5  # B starts at line 0 and ends at line 4
+
+    snippet_c = snippets["C"]
+    assert len(snippet_c) == 3  # C starts at line 1 and ends at line 3
+
+    snippet_d = snippets["D"]
+    assert len(snippet_d) == 4  # D starts at line 1 and ends at line 4
+
+    snippet_e = snippets["E"]
+    assert len(snippet_e) == 4  # E starts at line 1 and ends at line 4
 
 
 def test_nesting():
@@ -67,17 +77,20 @@ def test_nesting():
         "//! [C]",
         "//! [B]",
     ]
-    snippets = get_snippets(lines)
+    snippets = _get_snippets(lines, CPP_SNIPPET_PATTERN)
     assert len(snippets) == 3
 
-    assert len(snippets[0]) == 5
-    assert snippets[0] == lines[:5]
+    snippet_a = snippets["A"]
+    assert len(snippet_a) == 5
+    assert snippet_a == lines[:5]
 
-    assert len(snippets[1]) == 6
-    assert snippets[1] == lines[1:]
+    snippet_b = snippets["B"]
+    assert len(snippet_b) == 6
+    assert snippet_b == lines[1:]
 
-    assert len(snippets[2]) == 4
-    assert snippets[2] == lines[2:6]
+    snippet_c = snippets["C"]
+    assert len(snippet_c) == 4
+    assert snippet_c == lines[2:6]
 
 
 def test_overlapping():
@@ -93,17 +106,20 @@ def test_overlapping():
         "posttext",
         "//! [C]",
     ]
-    snippets = get_snippets(lines)
+    snippets = _get_snippets(lines, CPP_SNIPPET_PATTERN)
     assert len(snippets) == 3
 
-    assert len(snippets[0]) == 4
-    assert snippets[0] == lines[1:5]
+    snippet_a = snippets["A"]
+    assert len(snippet_a) == 4
+    assert snippet_a == lines[1:5]
 
-    assert len(snippets[1]) == 7
-    assert snippets[1] == lines[3:]
+    snippet_c = snippets["C"]
+    assert len(snippet_c) == 7
+    assert snippet_c == lines[3:]
 
-    assert len(snippets[2]) == 4
-    assert snippets[2] == lines[4:8]
+    snippet_b = snippets["B"]
+    assert len(snippet_b) == 4
+    assert snippet_b == lines[4:8]
 
 
 def test_snippets():
@@ -118,20 +134,27 @@ def test_snippets():
         "posttext"
     ]
 
-    snippets = get_snippets(lines)
+    snippets = _get_snippets(lines, CPP_SNIPPET_PATTERN)
     assert len(snippets) == 2
 
-    assert len(snippets[0]) == 3
-    assert snippets[0] == lines[1:4]
+    snippet_a = snippets["A"]
+    assert len(snippet_a) == 3
+    assert snippet_a == lines[1:4]
 
-    assert len(snippets[1]) == 4
-    assert snippets[1] == lines[3:7]
+    snippet_b = snippets["B"]
+    assert len(snippet_b) == 4
+    assert snippet_b == lines[3:7]
 
 
 def test_snippet_ids():
-    assert get_snippet_ids("") == []
-    assert get_snippet_ids("//! ") == []  # Invalid id
-    assert get_snippet_ids("//! [some name]") == ["some name"]
-    assert get_snippet_ids("//! [some name] [some other name]") == ["some name"]
-    assert get_snippet_ids("//! [some name] //! ") == ["some name"]  # Invalid id
-    assert get_snippet_ids("//! [some name] //! [some other name]") == ["some name", "some other name"]
+    assert get_snippet_ids("", CPP_SNIPPET_PATTERN) == []
+    assert get_snippet_ids("//! ",
+                           CPP_SNIPPET_PATTERN) == []  # Invalid id
+    assert get_snippet_ids("//! [some name]",
+                           CPP_SNIPPET_PATTERN) == ["some name"]
+    assert get_snippet_ids("//! [some name] [some other name]",
+                           CPP_SNIPPET_PATTERN) == ["some name"]
+    assert get_snippet_ids("//! [some name] //! ",
+                           CPP_SNIPPET_PATTERN) == ["some name"]  # Invalid id
+    assert get_snippet_ids("//! [some name] //! [some other name]",
+                           CPP_SNIPPET_PATTERN) == ["some name", "some other name"]

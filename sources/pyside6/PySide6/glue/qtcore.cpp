@@ -127,6 +127,15 @@ else {
 
 // @snippet qsettings-value
 
+// @snippet metatype-from-metatype-type
+Shiboken::AutoDecRef intArg;
+if (usingNewEnum())
+    intArg.reset(PyObject_GetAttrString(%PYARG_1, "value"));
+else
+    intArg.reset(PyObject_CallMethod(%PYARG_1, "__int__", nullptr));
+%0 = new %TYPE(PyLong_AsLong(intArg));
+// @snippet metatype-from-metatype-type
+
 // @snippet conversion-pytypeobject-qmetatype
 auto *pyType = reinterpret_cast<PyTypeObject *&>(%in);
 if (Shiboken::String::checkType(pyType))
@@ -410,6 +419,12 @@ QDate date(%1, %2, %3);
 QTime time(%4, %5, %6);
 %0 = new %TYPE(date, time);
 // @snippet qdatetime-2
+
+// @snippet qdatetime-3
+QDate date(%1, %2, %3);
+QTime time(%4, %5, %6, %7);
+%0 = new %TYPE(date, time, %8);
+// @snippet qdatetime-3
 
 // @snippet qdatetime-topython
 QDate date = %CPPSELF.date();

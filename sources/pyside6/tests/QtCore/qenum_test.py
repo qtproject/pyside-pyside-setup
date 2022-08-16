@@ -45,7 +45,7 @@ from PySide6.QtCore import Qt, QIODevice, QObject, QEnum, QFlag
 
 
 class TestEnum(unittest.TestCase):
-
+    @unittest.skipIf(sys.pyside63_option_python_enum, "not adequate for new enums to ask the value")
     def testToInt(self):
         self.assertEqual(QIODevice.NotOpen, 0)
         self.assertEqual(QIODevice.ReadOnly, 1)
@@ -56,6 +56,7 @@ class TestEnum(unittest.TestCase):
         self.assertEqual(QIODevice.Text, 16)
         self.assertEqual(QIODevice.Unbuffered, 32)
 
+    @unittest.skipIf(sys.pyside63_option_python_enum, "not adequate for new enums to ask the value")
     def testToIntInFunction(self):
         self.assertEqual(str(int(QIODevice.WriteOnly)), "2")
 
@@ -105,18 +106,21 @@ class TestEnum(unittest.TestCase):
 
 
 class TestQFlags(unittest.TestCase):
+    newenum = sys.pyside63_option_python_enum
+
     def testToItn(self):
         om = QIODevice.NotOpen
+        omcmp = om.value if self.newenum else om
 
         self.assertEqual(om, QIODevice.NotOpen)
-        self.assertTrue(om == 0)
+        self.assertTrue(omcmp == 0)
 
-        self.assertTrue(om != QIODevice.ReadOnly)
-        self.assertTrue(om != 1)
+        self.assertTrue(omcmp != QIODevice.ReadOnly)
+        self.assertTrue(omcmp != 1)
 
     def testToIntInFunction(self):
         om = QIODevice.WriteOnly
-        self.assertEqual(int(om), 2)
+        self.assertEqual(int(om.value if self.newenum else om), 2)
 
     def testNonExtensibleEnums(self):
         try:

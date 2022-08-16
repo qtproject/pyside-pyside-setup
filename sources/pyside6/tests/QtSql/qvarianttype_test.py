@@ -42,11 +42,14 @@ from PySide6.QtSql import QSqlField
 
 class QVariantTypeTest(unittest.TestCase):
     def testQVariantType(self):
+        new_enum = sys.pyside63_option_python_enum
+        cmp_id = QMetaType.QString.value if new_enum else QMetaType.QString
+
         f = QSqlField("name", QMetaType(QMetaType.QString))
-        self.assertEqual(f.metaType().id(), QMetaType.QString)
+        self.assertEqual(f.metaType().id(), cmp_id)
 
         f = QSqlField("name", QMetaType.fromName(b"QString"))
-        self.assertEqual(f.metaType().id(), QMetaType.QString)
+        self.assertEqual(f.metaType().id(), cmp_id)
 
         f = QSqlField("name", QMetaType.fromName(b"double"))
         self.assertEqual(f.metaType(), float)

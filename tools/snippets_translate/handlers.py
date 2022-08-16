@@ -43,9 +43,9 @@ import sys
 from parse_utils import (dstrip, get_indent, get_qt_module_class,
                          parse_arguments, remove_ref, replace_main_commas)
 
-IF_PATTERN = re.compile(r'^if\s*\(')
-ELSE_IF_PATTERN = re.compile(r'^}?\s*else if\s*\(')
-WHILE_PATTERN = re.compile(r'^while\s*\(')
+IF_PATTERN = re.compile(r'^\s*if\s*\(')
+ELSE_IF_PATTERN = re.compile(r'^\s*}?\s*else if\s*\(')
+WHILE_PATTERN = re.compile(r'^\s*while\s*\(')
 
 
 def handle_condition(x, name):
