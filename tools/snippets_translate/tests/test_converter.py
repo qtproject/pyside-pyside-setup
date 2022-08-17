@@ -367,6 +367,7 @@ def test_functions():
         st("QString myDecoderFunc(const QByteArray &localFileName);")
         == "def myDecoderFunc(localFileName):"
     )
+    assert st("return QModelIndex();") == "return QModelIndex()"
 
 
 def test_foreach():
