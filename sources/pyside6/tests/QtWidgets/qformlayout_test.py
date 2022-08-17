@@ -19,12 +19,11 @@ class QFormLayoutTest(UsesQApplication):
 
     def testGetItemPosition(self):
         formlayout = QFormLayout()
-        if not sys.pyside63_option_python_enum:
-            # PYSIDE-1735: This gives random values if no row exists.
-            row, role = formlayout.getItemPosition(0)
-            self.assertTrue(isinstance(row, int))
-            self.assertTrue(isinstance(role, QFormLayout.ItemRole))
-            self.assertEqual(row, -1)
+
+        row, role = formlayout.getItemPosition(0)
+        self.assertTrue(isinstance(row, int))
+        self.assertTrue(isinstance(role, QFormLayout.ItemRole))
+        self.assertEqual(row, -1)
 
         widget = QWidget()
         formlayout.addRow(widget)
@@ -37,12 +36,11 @@ class QFormLayoutTest(UsesQApplication):
     def testGetWidgetPosition(self):
         formlayout = QFormLayout()
         widget = QWidget()
-        if not sys.pyside63_option_python_enum:
-            # PYSIDE-1735: This gives random values if no row exists.
-            row, role = formlayout.getWidgetPosition(widget)
-            self.assertTrue(isinstance(row, int))
-            self.assertTrue(isinstance(role, QFormLayout.ItemRole))
-            self.assertEqual(row, -1)
+
+        row, role = formlayout.getWidgetPosition(widget)
+        self.assertTrue(isinstance(row, int))
+        self.assertTrue(isinstance(role, QFormLayout.ItemRole))
+        self.assertEqual(row, -1)
 
         formlayout.addRow(widget)
         row, role = formlayout.getWidgetPosition(widget)
@@ -54,12 +52,11 @@ class QFormLayoutTest(UsesQApplication):
     def testGetLayoutPosition(self):
         formlayout = QFormLayout()
         layout = QFormLayout()
-        if not sys.pyside63_option_python_enum:
-            # PYSIDE-1735: This gives random values if no row exists.
-            row, role = formlayout.getLayoutPosition(layout)
-            self.assertTrue(isinstance(row, int))
-            self.assertTrue(isinstance(role, QFormLayout.ItemRole))
-            self.assertEqual(row, -1)
+
+        row, role = formlayout.getLayoutPosition(layout)
+        self.assertTrue(isinstance(row, int))
+        self.assertTrue(isinstance(role, QFormLayout.ItemRole))
+        self.assertEqual(row, -1)
 
         formlayout.addRow(layout)
         row, role = formlayout.getLayoutPosition(layout)
