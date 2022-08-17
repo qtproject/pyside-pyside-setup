@@ -670,6 +670,7 @@ def init_PySide6_QtHttpServer():
 def init_testbinding():
     type_map.update({
         "testbinding.PySideCPP2.TestObjectWithoutNamespace": testbinding.TestObjectWithoutNamespace,
+        "testbinding.FlagsNamespace.Options": testbinding.Option,
         "FlagsNamespace.Option.NoOptions": 0,
         "StdIntList": typing.List[int],
         'Str("")': str(""),
