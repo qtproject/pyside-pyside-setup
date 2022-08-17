@@ -676,8 +676,11 @@ QString BuilderPrivate::cursorValueExpression(BaseVisitor *bv, const CXCursor &c
     if (equalSign == std::string::npos)
         return QString();
     ++equalSign;
-    return QString::fromLocal8Bit(snippet.data() + equalSign,
-                                  qsizetype(snippet.size() - equalSign)).trimmed();
+    QString result = QString::fromLocal8Bit(snippet.data() + equalSign,
+                                            qsizetype(snippet.size() - equalSign));
+    // Fix a default expression as read from code. Simplify white space
+    result.remove(u'\r');
+    return result.contains(u'"') ? result.trimmed() : result.simplified();
 }
 
 // Resolve a type (loop over aliases/typedefs), for example for base classes
