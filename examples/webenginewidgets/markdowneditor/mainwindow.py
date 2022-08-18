@@ -47,7 +47,7 @@ class MainWindow(QMainWindow):
         data = defaultTextFile.readAll()
         self._ui.editor.setPlainText(data.data().decode('utf8'))
 
-    @Slot(str)
+    @Slot()
     def plainTextEditChanged(self):
         self.m_content.setText(self._ui.editor.toPlainText())
 

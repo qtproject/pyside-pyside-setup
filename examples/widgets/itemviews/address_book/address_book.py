@@ -2,6 +2,7 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
+from PySide6.QtCore import Slot
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (QMainWindow, QFileDialog, QApplication)
 
@@ -60,11 +61,13 @@ class MainWindow(QMainWindow):
     #
     # In PySide6, these functions return a tuple: (filename, filter)
 
+    @Slot()
     def open_file(self):
         filename, _ = QFileDialog.getOpenFileName(self)
         if filename:
             self._address_widget.read_from_file(filename)
 
+    @Slot()
     def save_file(self):
         filename, _ = QFileDialog.getSaveFileName(self)
         if filename:

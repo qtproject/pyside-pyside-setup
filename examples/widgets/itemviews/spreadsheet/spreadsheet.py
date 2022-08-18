@@ -134,7 +134,7 @@ class SpreadSheet(QMainWindow):
         about_menu = self.menuBar().addMenu("&Help")
         about_menu.addAction(self._about_spreadsheet)
 
-    @Slot()
+    @Slot(QTableWidgetItem)
     def update_status(self, item: QTableWidgetItem) -> None:
         if item and item == self._table.currentItem():
             self.statusBar().showMessage(str(item.data(Qt.StatusTipRole)), 1000)
@@ -144,7 +144,7 @@ class SpreadSheet(QMainWindow):
                 )
             )
 
-    @Slot()
+    @Slot(QTableWidgetItem)
     def update_color(self, item: QTableWidgetItem) -> None:
         pix = QPixmap(16, 16)
         col = QColor()
@@ -169,7 +169,7 @@ class SpreadSheet(QMainWindow):
 
         self._color_action.setIcon(pix)
 
-    @Slot()
+    @Slot(QTableWidgetItem)
     def update_line_edit(self, item: QTableWidgetItem) -> None:
         if item != self._table.currentItem():
             return

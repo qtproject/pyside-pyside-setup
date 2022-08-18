@@ -118,7 +118,7 @@ class GSuggestCompletion(QObject):
     def prevent_suggest(self):
         self.timer.stop()
 
-    @Slot()
+    @Slot(QNetworkReply)
     def handle_network_data(self, network_reply: QNetworkReply):
         url = network_reply.url()
         if network_reply.error() == QNetworkReply.NoError:

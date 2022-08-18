@@ -6,7 +6,7 @@ from argparse import ArgumentParser, RawTextHelpFormatter
 import sys
 
 from PySide6.QtCore import (QByteArray, QFile, QFileInfo, QSaveFile, QSettings,
-                            QTextStream, Qt)
+                            QTextStream, Qt, Slot)
 from PySide6.QtGui import QAction, QIcon, QKeySequence
 from PySide6.QtWidgets import (QApplication, QFileDialog, QMainWindow,
                                QMessageBox, QTextEdit, QWidget)
@@ -42,23 +42,27 @@ class MainWindow(QMainWindow):
         else:
             event.ignore()
 
+    @Slot()
     def new_file(self):
         if self.maybe_save():
             self._text_edit.clear()
             self.set_current_file('')
 
+    @Slot()
     def open(self):
         if self.maybe_save():
             fileName, filtr = QFileDialog.getOpenFileName(self)
             if fileName:
                 self.load_file(fileName)
 
+    @Slot()
     def save(self):
         if self._cur_file:
             return self.save_file(self._cur_file)
 
         return self.save_as()
 
+    @Slot()
     def save_as(self):
         fileName, filtr = QFileDialog.getSaveFileName(self)
         if fileName:
@@ -66,12 +70,14 @@ class MainWindow(QMainWindow):
 
         return False
 
+    @Slot()
     def about(self):
         QMessageBox.about(self, "About Application",
                 "The <b>Application</b> example demonstrates how to write "
                 "modern GUI applications using Qt, with a menu bar, "
                 "toolbars, and a status bar.")
 
+    @Slot()
     def document_was_modified(self):
         self.setWindowModified(self._text_edit.document().isModified())
 

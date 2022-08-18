@@ -7,7 +7,7 @@ try:
 except ImportError:
     import pickle
 
-from PySide6.QtCore import (Qt, Signal, QRegularExpression, QModelIndex,
+from PySide6.QtCore import (Qt, Signal, Slot, QRegularExpression, QModelIndex,
                             QItemSelection, QSortFilterProxyModel)
 from PySide6.QtWidgets import QTabWidget, QMessageBox, QTableView, QAbstractItemView
 
@@ -35,6 +35,7 @@ class AddressWidget(QTabWidget):
 
         self.setup_tabs()
 
+    @Slot()
     def add_entry(self, name=None, address=None):
         """ Add an entry to the addressbook. """
         if name is None and address is None:
@@ -83,6 +84,7 @@ class AddressWidget(QTabWidget):
             table_view = self.currentWidget()
             table_view.resizeRowToContents(ix.row())
 
+    @Slot()
     def edit_entry(self):
         """ Edit an entry in the addressbook. """
         table_view = self.currentWidget()
@@ -115,6 +117,7 @@ class AddressWidget(QTabWidget):
                 ix = self._table_model.index(row, 1, QModelIndex())
                 self._table_model.setData(ix, new_address, Qt.EditRole)
 
+    @Slot()
     def remove_entry(self):
         """ Remove an entry from the addressbook. """
         table_view = self.currentWidget()

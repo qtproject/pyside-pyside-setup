@@ -9,7 +9,7 @@ from functools import partial
 import sys
 
 from PySide6.QtCore import (QByteArray, QFile, QFileInfo, QPoint, QSettings,
-        QSaveFile, QSize, QTextStream, Qt)
+        QSaveFile, QSize, QTextStream, Qt, Slot)
 from PySide6.QtGui import QAction, QIcon, QKeySequence
 from PySide6.QtWidgets import (QApplication, QFileDialog, QMainWindow,
         QMdiArea, QMessageBox, QTextEdit, QWidget)
@@ -156,11 +156,13 @@ class MainWindow(QMainWindow):
             self.write_settings()
             event.accept()
 
+    @Slot()
     def new_file(self):
         child = self.create_mdi_child()
         child.new_file()
         child.show()
 
+    @Slot()
     def open(self):
         file_name, _ = QFileDialog.getOpenFileName(self)
         if file_name:
@@ -178,31 +180,38 @@ class MainWindow(QMainWindow):
         else:
             child.close()
 
+    @Slot()
     def save(self):
         if self.active_mdi_child() and self.active_mdi_child().save():
             self.statusBar().showMessage("File saved", 2000)
 
+    @Slot()
     def save_as(self):
         if self.active_mdi_child() and self.active_mdi_child().save_as():
             self.statusBar().showMessage("File saved", 2000)
 
+    @Slot()
     def cut(self):
         if self.active_mdi_child():
             self.active_mdi_child().cut()
 
+    @Slot()
     def copy(self):
         if self.active_mdi_child():
             self.active_mdi_child().copy()
 
+    @Slot()
     def paste(self):
         if self.active_mdi_child():
             self.active_mdi_child().paste()
 
+    @Slot()
     def about(self):
         QMessageBox.about(self, "About MDI",
                 "The <b>MDI</b> example demonstrates how to write multiple "
                 "document interface applications using Qt.")
 
+    @Slot()
     def update_menus(self):
         has_mdi_child = (self.active_mdi_child() is not None)
         self._save_act.setEnabled(has_mdi_child)
@@ -221,6 +230,7 @@ class MainWindow(QMainWindow):
         self._cut_act.setEnabled(has_selection)
         self._copy_act.setEnabled(has_selection)
 
+    @Slot()
     def update_window_menu(self):
         self._window_menu.clear()
         self._window_menu.addAction(self._close_act)
@@ -402,6 +412,7 @@ class MainWindow(QMainWindow):
                 return window
         return None
 
+    @Slot()
     def switch_layout_direction(self):
         if self.layoutDirection() == Qt.LeftToRight:
             QApplication.setLayoutDirection(Qt.RightToLeft)

@@ -76,6 +76,7 @@ class PatternLineEdit(QLineEdit):
         self.copyToCodeAction.triggered.connect(self.copyToCode)
         self.pasteFromCodeAction.triggered.connect(self.pasteFromCode)
 
+    @Slot()
     def escapeSelection(self):
         selection = self.selectedText()
         selection_start = self.selectionStart()
@@ -89,9 +90,11 @@ class PatternLineEdit(QLineEdit):
             )
             self.setText(t)
 
+    @Slot()
     def copyToCode(self):
         QGuiApplication.clipboard().setText(patternToCode(self.text()))
 
+    @Slot()
     def pasteFromCode(self):
         self.setText(codeToPattern(QGuiApplication.clipboard().text()))
 
@@ -165,6 +168,7 @@ class RegularExpressionDialog(QDialog):
         self.palette.setColor(QPalette.Text, color)
         widget.setPalette(self.palette)
 
+    @Slot()
     def refresh(self):
         self.setUpdatesEnabled(False)
         self.pattern = self.patternLineEdit.text()

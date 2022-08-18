@@ -8,7 +8,7 @@ import os
 from pathlib import Path
 import sys
 
-from PySide6.QtCore import QFile, QIODevice, QObject, QSizeF, Qt
+from PySide6.QtCore import QFile, QIODevice, QObject, QSizeF, Qt, Slot
 from PySide6.QtGui import (QTextCharFormat, QTextFormat, QTextObjectInterface,
                            QPyTextObject)
 from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QLineEdit,
@@ -51,6 +51,7 @@ class Window(QWidget):
 
         self.setWindowTitle(self.tr("Text Object Example"))
 
+    @Slot()
     def insert_text_object(self):
         file_name = self._file_name_line_edit.text()
         file = QFile(file_name)

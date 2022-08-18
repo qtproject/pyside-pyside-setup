@@ -165,6 +165,7 @@ class MainWindow(QMainWindow):
             self._playlist_index += 1
             self._player.setSource(self._playlist[self._playlist_index])
 
+    @Slot("QMediaPlayer::PlaybackState")
     def update_buttons(self, state):
         media_count = len(self._playlist)
         self._play_action.setEnabled(media_count > 0
@@ -177,7 +178,7 @@ class MainWindow(QMainWindow):
     def show_status_message(self, message):
         self.statusBar().showMessage(message, 5000)
 
-    @Slot(QMediaPlayer.Error, str)
+    @Slot("QMediaPlayer::Error", str)
     def _player_error(self, error, error_string):
         print(error_string, file=sys.stderr)
         self.show_status_message(error_string)

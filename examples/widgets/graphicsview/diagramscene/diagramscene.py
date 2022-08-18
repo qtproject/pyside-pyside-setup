@@ -6,10 +6,11 @@ import math
 import sys
 
 from PySide6.QtCore import (QLineF, QPointF, QRect, QRectF, QSize, QSizeF, Qt,
-                            Signal)
+                            Signal, Slot)
 from PySide6.QtGui import (QAction, QColor, QFont, QIcon, QIntValidator,
                            QPainter, QPainterPath, QPen, QPixmap, QPolygonF)
-from PySide6.QtWidgets import (QApplication, QButtonGroup, QComboBox,
+from PySide6.QtWidgets import (QAbstractButton, QApplication, QButtonGroup,
+                               QComboBox,
                                QFontComboBox, QGraphicsAnchorLayout,
                                QGraphicsItem, QGraphicsLineItem,
                                QGraphicsPolygonItem, QGraphicsTextItem,
@@ -382,6 +383,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.widget)
         self.setWindowTitle("Diagramscene")
 
+    @Slot(QAbstractButton)
     def background_button_group_clicked(self, button):
         buttons = self._background_button_group.buttons()
         for myButton in buttons:
@@ -401,6 +403,7 @@ class MainWindow(QMainWindow):
         self.scene.update()
         self.view.update()
 
+    @Slot(int)
     def button_group_clicked(self, idx):
         buttons = self._button_group.buttons()
         for button in buttons:
@@ -413,15 +416,18 @@ class MainWindow(QMainWindow):
             self.scene.set_item_type(idx)
             self.scene.set_mode(DiagramScene.InsertItem)
 
+    @Slot()
     def delete_item(self):
         for item in self.scene.selectedItems():
             if isinstance(item, DiagramItem):
                 item.remove_arrows()
             self.scene.removeItem(item)
 
+    @Slot(int)
     def pointer_group_clicked(self, i):
         self.scene.set_mode(self._pointer_type_group.checkedId())
 
+    @Slot()
     def bring_to_front(self):
         if not self.scene.selectedItems():
             return
@@ -435,6 +441,7 @@ class MainWindow(QMainWindow):
                 z_value = item.zValue() + 0.1
         selected_item.setZValue(z_value)
 
+    @Slot()
     def send_to_back(self):
         if not self.scene.selectedItems():
             return
@@ -448,21 +455,26 @@ class MainWindow(QMainWindow):
                 z_value = item.zValue() - 0.1
         selected_item.setZValue(z_value)
 
+    @Slot(QGraphicsPolygonItem)
     def item_inserted(self, item):
         self._pointer_type_group.button(DiagramScene.MoveItem).setChecked(True)
         self.scene.set_mode(self._pointer_type_group.checkedId())
         self._button_group.button(item.diagram_type).setChecked(False)
 
+    @Slot(QGraphicsTextItem)
     def text_inserted(self, item):
         self._button_group.button(self.insert_text_button).setChecked(False)
         self.scene.set_mode(self._pointer_type_group.checkedId())
 
+    @Slot(QFont)
     def current_font_changed(self, font):
         self.handle_font_change()
 
+    @Slot(int)
     def font_size_changed(self, font):
         self.handle_font_change()
 
+    @Slot(str)
     def scene_scale_changed(self, scale):
         new_scale = int(scale[:-1]) / 100.0
         old_matrix = self.view.transform()
@@ -470,6 +482,7 @@ class MainWindow(QMainWindow):
         self.view.translate(old_matrix.dx(), old_matrix.dy())
         self.view.scale(new_scale, new_scale)
 
+    @Slot()
     def text_color_changed(self):
         self._text_action = self.sender()
         self._font_color_tool_button.setIcon(self.create_color_tool_button_icon(
@@ -477,6 +490,7 @@ class MainWindow(QMainWindow):
                     QColor(self._text_action.data())))
         self.text_button_triggered()
 
+    @Slot()
     def item_color_changed(self):
         self._fill_action = self.sender()
         self._fill_color_tool_button.setIcon(self.create_color_tool_button_icon(
@@ -484,6 +498,7 @@ class MainWindow(QMainWindow):
                     QColor(self._fill_action.data())))
         self.fill_button_triggered()
 
+    @Slot()
     def line_color_changed(self):
         self._line_action = self.sender()
         self._line_color_tool_button.setIcon(self.create_color_tool_button_icon(
@@ -491,15 +506,19 @@ class MainWindow(QMainWindow):
                     QColor(self._line_action.data())))
         self.line_button_triggered()
 
+    @Slot()
     def text_button_triggered(self):
         self.scene.set_text_color(QColor(self._text_action.data()))
 
+    @Slot()
     def fill_button_triggered(self):
         self.scene.set_item_color(QColor(self._fill_action.data()))
 
+    @Slot()
     def line_button_triggered(self):
         self.scene.set_line_color(QColor(self._line_action.data()))
 
+    @Slot()
     def handle_font_change(self):
         font = self._font_combo.currentFont()
         font.setPointSize(int(self._font_size_combo.currentText()))
@@ -512,6 +531,7 @@ class MainWindow(QMainWindow):
 
         self.scene.set_font(font)
 
+    @Slot(QGraphicsItem)
     def item_selected(self, item):
         font = item.font()
         color = item.defaultTextColor()
@@ -521,6 +541,7 @@ class MainWindow(QMainWindow):
         self._italic_action.setChecked(font.italic())
         self._underline_action.setChecked(font.underline())
 
+    @Slot()
     def about(self):
         QMessageBox.about(self, "About Diagram Scene",
                 "The <b>Diagram Scene</b> example shows use of the graphics framework.")

@@ -251,7 +251,7 @@ class AudioTest(QMainWindow):
         QAudio.StoppedState: "StoppedState",
         QAudio.IdleState: "IdleState"}
 
-    @Slot(QAudio.State)
+    @Slot("QAudio::State")
     def handle_state_changed(self, state):
         state = self.state_map.get(state, 'Unknown')
         qWarning(f"state = {state}")

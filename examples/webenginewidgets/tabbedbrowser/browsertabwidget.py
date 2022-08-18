@@ -6,8 +6,8 @@ from functools import partial
 from bookmarkwidget import BookmarkWidget
 from webengineview import WebEngineView
 from historywindow import HistoryWindow
-from PySide6 import QtCore
-from PySide6.QtCore import Qt, QUrl
+from PySide6.QtCore import Qt, QUrl, Signal, Slot
+from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QMenu, QTabBar, QTabWidget
 from PySide6.QtWebEngineCore import QWebEngineDownloadRequest, QWebEnginePage
 
@@ -15,9 +15,9 @@ from PySide6.QtWebEngineCore import QWebEngineDownloadRequest, QWebEnginePage
 class BrowserTabWidget(QTabWidget):
     """Enables having several tabs with QWebEngineView."""
 
-    url_changed = QtCore.Signal(QUrl)
-    enabled_changed = QtCore.Signal(QWebEnginePage.WebAction, bool)
-    download_requested = QtCore.Signal(QWebEngineDownloadRequest)
+    url_changed = Signal(QUrl)
+    enabled_changed = Signal(QWebEnginePage.WebAction, bool)
+    download_requested = Signal(QWebEngineDownloadRequest)
 
     def __init__(self, window_factory_function):
         super().__init__()
@@ -67,21 +67,25 @@ class BrowserTabWidget(QTabWidget):
         index = self.currentIndex()
         return self._webengineviews[index].url() if index >= 0 else QUrl()
 
+    @Slot(QUrl)
     def _url_changed(self, url):
         index = self.currentIndex()
         if index >= 0 and self._webengineviews[index] == self.sender():
                 self.url_changed.emit(url)
 
+    @Slot(str)
     def _title_changed(self, title):
         index = self._index_of_page(self.sender())
         if (index >= 0):
             self.setTabText(index, BookmarkWidget.short_title(title))
 
+    @Slot(QIcon)
     def _icon_changed(self, icon):
         index = self._index_of_page(self.sender())
         if (index >= 0):
             self.setTabIcon(index, icon)
 
+    @Slot(object,bool)
     def _enabled_changed(self, web_action, enabled):
         index = self.currentIndex()
         if index >= 0 and self._webengineviews[index] == self.sender():
@@ -203,5 +207,6 @@ class BrowserTabWidget(QTabWidget):
                 return p
         return -1
 
+    @Slot(QWebEngineDownloadRequest)
     def _download_requested(self, item):
         self.download_requested.emit(item)

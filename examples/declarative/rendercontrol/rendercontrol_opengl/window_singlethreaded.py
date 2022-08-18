@@ -18,7 +18,7 @@ from PySide6.QtQml import QQmlComponent, QQmlEngine
 from PySide6.QtQuick import (QQuickGraphicsDevice,
                              QQuickItem, QQuickRenderControl,
                              QQuickRenderTarget, QQuickWindow)
-from PySide6.QtCore import QCoreApplication, QTimer, QUrl
+from PySide6.QtCore import QCoreApplication, QTimer, QUrl, Slot
 from shiboken6 import VoidPtr
 
 from cuberenderer import CubeRenderer
@@ -127,6 +127,7 @@ class WindowSingleThreaded(QWindow):
     def set_texture_id(self, texture_id):
         self.m_texture_ids[0] = texture_id
 
+    @Slot()
     def createTexture(self):
         # The scene graph has been initialized. It is now time to create a
         # texture and associate it with the QQuickWindow.
@@ -146,10 +147,12 @@ class WindowSingleThreaded(QWindow):
                                                       self.m_textureSize)
         self.m_quickWindow.setRenderTarget(target)
 
+    @Slot()
     def destroyTexture(self):
         self.m_context.functions().glDeleteTextures(1, self.m_texture_ids)
         self.set_texture_id(0)
 
+    @Slot()
     def render(self):
         if not self.m_context.makeCurrent(self.m_offscreenSurface):
             return
@@ -250,6 +253,7 @@ class WindowSingleThreaded(QWindow):
             and self.m_textureSize != self.size() * self.devicePixelRatio()):
             self.resizeTexture()
 
+    @Slot()
     def handleScreenChange(self):
         if self.m_dpr != self.devicePixelRatio():
             self.resizeTexture()

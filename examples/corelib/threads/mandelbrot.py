@@ -9,7 +9,7 @@ import sys
 
 from PySide6.QtCore import (Signal, QMutex, QElapsedTimer, QMutexLocker,
                             QPoint, QPointF, QSize, Qt, QThread,
-                            QWaitCondition)
+                            QWaitCondition, Slot)
 from PySide6.QtGui import QColor, QImage, QPainter, QPixmap, qRgb
 from PySide6.QtWidgets import QApplication, QWidget
 
@@ -302,6 +302,7 @@ class MandelbrotWidget(QWidget):
             delta_y = (self.height() - self.pixmap.height()) / 2 - self._pixmap_offset.y()
             self.scroll(delta_x, delta_y)
 
+    @Slot(QImage,float)
     def update_pixmap(self, image, scale_factor):
         if not self._last_drag_pos.isNull():
             return

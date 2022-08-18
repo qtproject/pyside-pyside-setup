@@ -156,6 +156,7 @@ class MainWindow(QMainWindow):
                 '12 High Street\nSmall Town\nThis country',
                 dialog.order_items(), True)
 
+    @Slot()
     def open_dialog(self):
         dialog = DetailsDialog("Enter Customer Details", self)
 
@@ -163,6 +164,7 @@ class MainWindow(QMainWindow):
             self.create_letter(dialog.sender_name(), dialog.sender_address(),
                     dialog.order_items(), dialog.send_offers())
 
+    @Slot()
     def print_file(self):
         editor = self.letters.currentWidget()
         printer = QPrinter()
@@ -241,6 +243,7 @@ class DetailsDialog(QDialog):
     def send_offers(self):
         return self._offers_check_box.isChecked()
 
+    @Slot()
     def verify(self):
         if self._name_edit.text() and self._address_edit.toPlainText():
             self.accept()

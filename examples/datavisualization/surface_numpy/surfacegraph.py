@@ -71,6 +71,7 @@ class SurfaceGraph(QObject):
         self.m_stepX = 0.0
         self.m_stepZ = 0.0
 
+    @Slot(bool)
     def enable_sqrt_sin_model(self, enable):
         if enable:
             self.m_sqrtSinSeries.setDrawMode(QSurface3DSeries.DrawSurfaceAndWireframe)
@@ -102,6 +103,7 @@ class SurfaceGraph(QObject):
             self.m_axisMaxSliderZ.setMaximum(SAMPLE_COUNT_Z - 1)
             self.m_axisMaxSliderZ.setValue(SAMPLE_COUNT_Z - 1)
 
+    @Slot(bool)
     def enable_height_map_model(self, enable):
         if enable:
             self.m_heightMapSeries.setDrawMode(QSurface3DSeries.DrawSurface)
@@ -136,6 +138,7 @@ class SurfaceGraph(QObject):
             self.m_axisMaxSliderZ.setMaximum(map_grid_count_z - 1)
             self.m_axisMaxSliderZ.setValue(map_grid_count_z - 1)
 
+    @Slot(int)
     def adjust_xmin(self, minimum):
         min_x = self.m_stepX * float(minimum) + self.m_rangeMinX
 
@@ -147,6 +150,7 @@ class SurfaceGraph(QObject):
 
         self.set_axis_xrange(min_x, max_x)
 
+    @Slot(int)
     def adjust_xmax(self, maximum):
         max_x = self.m_stepX * float(maximum) + self.m_rangeMinX
 
@@ -158,6 +162,7 @@ class SurfaceGraph(QObject):
 
         self.set_axis_xrange(min_x, max_x)
 
+    @Slot(int)
     def adjust_zmin(self, minimum):
         min_z = self.m_stepZ * float(minimum) + self.m_rangeMinZ
 
@@ -169,6 +174,7 @@ class SurfaceGraph(QObject):
 
         self.set_axis_zrange(min_z, max_z)
 
+    @Slot(int)
     def adjust_zmax(self, maximum):
         max_x = self.m_stepZ * float(maximum) + self.m_rangeMinZ
 
@@ -186,10 +192,11 @@ class SurfaceGraph(QObject):
     def set_axis_zrange(self, minimum, maximum):
         self.m_graph.axisZ().setRange(minimum, maximum)
 
-    @Slot()
+    @Slot(int)
     def change_theme(self, theme):
         self.m_graph.activeTheme().setType(Q3DTheme.Theme(theme))
 
+    @Slot()
     def set_black_to_yellow_gradient(self):
         gr = QLinearGradient()
         gr.setColorAt(0.0, Qt.black)
@@ -201,6 +208,7 @@ class SurfaceGraph(QObject):
         series.setBaseGradient(gr)
         series.setColorStyle(Q3DTheme.ColorStyleRangeGradient)
 
+    @Slot()
     def set_green_to_red_gradient(self):
         gr = QLinearGradient()
         gr.setColorAt(0.0, Qt.darkGreen)
@@ -212,17 +220,21 @@ class SurfaceGraph(QObject):
         series.setBaseGradient(gr)
         series.setColorStyle(Q3DTheme.ColorStyleRangeGradient)
 
+    @Slot()
     def toggle_mode_none(self):
         self.m_graph.setSelectionMode(QAbstract3DGraph.SelectionNone)
 
+    @Slot()
     def toggle_mode_item(self):
         self.m_graph.setSelectionMode(QAbstract3DGraph.SelectionItem)
 
+    @Slot()
     def toggle_mode_slice_row(self):
         self.m_graph.setSelectionMode(
             QAbstract3DGraph.SelectionItemAndRow | QAbstract3DGraph.SelectionSlice
         )
 
+    @Slot()
     def toggle_mode_slice_column(self):
         self.m_graph.setSelectionMode(
             QAbstract3DGraph.SelectionItemAndColumn | QAbstract3DGraph.SelectionSlice

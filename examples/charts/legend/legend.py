@@ -4,7 +4,7 @@
 """PySide6 port of the Legend example from Qt v5.x"""
 
 import sys
-from PySide6.QtCore import Qt, QRectF
+from PySide6.QtCore import Qt, QRectF, Slot
 from PySide6.QtGui import QBrush, QColor, QPainter, QPen
 from PySide6.QtWidgets import (QApplication, QDoubleSpinBox,
     QFormLayout, QGridLayout, QGroupBox, QPushButton, QWidget)
@@ -123,6 +123,7 @@ class MainWidget(QWidget):
     def hide_legend_spinbox(self):
         self.legend_settings.setVisible(False)
 
+    @Slot()
     def toggle_attached(self):
         legend = self.chart.legend()
         if legend.isAttachedToChart():
@@ -139,6 +140,7 @@ class MainWidget(QWidget):
             self.hide_legend_spinbox()
         self.update()
 
+    @Slot()
     def add_barset(self):
         series_count = self.series.count()
         bar_set = QBarSet(f"set {series_count}")
@@ -146,12 +148,14 @@ class MainWidget(QWidget):
         bar_set.append([1 + delta, 2 + delta, 3 + delta, 4 + delta])
         self.series.append(bar_set)
 
+    @Slot()
     def remove_barset(self):
         sets = self.series.barSets()
         len_sets = len(sets)
         if len_sets > 0:
             self.series.remove(sets[len_sets - 1])
 
+    @Slot()
     def set_legend_alignment(self):
         button = self.sender()
         legend = self.chart.legend()
@@ -174,18 +178,21 @@ class MainWidget(QWidget):
                 button.setText("Align (Top)")
             legend.setAlignment(Qt.AlignTop)
 
+    @Slot()
     def toggle_bold(self):
         legend = self.chart.legend()
         font = legend.font()
         font.setBold(not font.bold())
         legend.setFont(font)
 
+    @Slot()
     def toggle_italic(self):
         legend = self.chart.legend()
         font = legend.font()
         font.setItalic(not font.italic())
         legend.setFont(font)
 
+    @Slot()
     def font_size_changed(self):
         legend = self.chart.legend()
         font = legend.font()
@@ -195,6 +202,7 @@ class MainWidget(QWidget):
         font.setPointSizeF(font_size)
         legend.setFont(font)
 
+    @Slot()
     def update_legend_layout(self):
         legend = self.chart.legend()
 

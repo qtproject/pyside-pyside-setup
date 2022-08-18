@@ -110,6 +110,7 @@ class AddressBook(QWidget):
         self._submit_button.show()
         self._cancel_button.show()
 
+    @Slot()
     def submit_contact(self):
         name = self._name_line.text()
         address = self._address_text.toPlainText()
@@ -143,6 +144,7 @@ class AddressBook(QWidget):
         self._submit_button.hide()
         self._cancel_button.hide()
 
+    @Slot()
     def cancel(self):
         self._name_line.setText(self._old_name)
         self._address_text.setText(self._old_address)
@@ -162,6 +164,7 @@ class AddressBook(QWidget):
         self._submit_button.hide()
         self._cancel_button.hide()
 
+    @Slot()
     def next(self):
         name = self._name_line.text()
         it = iter(self.contacts)
@@ -179,6 +182,7 @@ class AddressBook(QWidget):
         self._name_line.setText(next_name)
         self._address_text.setText(next_address)
 
+    @Slot()
     def previous(self):
         name = self._name_line.text()
 

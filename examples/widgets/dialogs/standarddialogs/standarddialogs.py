@@ -5,7 +5,7 @@
 """PySide6 port of the widgets/dialogs/standarddialogs example from Qt v5.x"""
 
 import sys
-from PySide6.QtCore import QDir, QRect, Qt
+from PySide6.QtCore import QDir, QRect, Qt, Slot
 from PySide6.QtGui import QFont, QPalette, QScreen
 from PySide6.QtWidgets import (QApplication, QColorDialog, QCheckBox, QDialog,
                                QErrorMessage, QFontDialog, QFileDialog, QFrame,
@@ -237,18 +237,21 @@ class Dialog(QDialog):
 
         self.setWindowTitle("Standard Dialogs")
 
+    @Slot()
     def set_integer(self):
         i, ok = QInputDialog.getInt(self,
                 "QInputDialog.getInteger()", "Percentage:", 25, 0, 100, 1)
         if ok:
             self._integer_label.setText(f"{i}%")
 
+    @Slot()
     def set_double(self):
         d, ok = QInputDialog.getDouble(self, "QInputDialog.getDouble()",
                 "Amount:", 37.56, -10000, 10000, 2)
         if ok:
             self._double_label.setText(f"${d:g}")
 
+    @Slot()
     def set_item(self):
         items = ("Spring", "Summer", "Fall", "Winter")
 
@@ -257,6 +260,7 @@ class Dialog(QDialog):
         if ok and item:
             self._item_label.setText(item)
 
+    @Slot()
     def set_text(self):
         text, ok = QInputDialog.getText(self, "QInputDialog.getText()",
                 "User name:", QLineEdit.Normal,
@@ -264,12 +268,14 @@ class Dialog(QDialog):
         if ok and text != '':
             self._text_label.setText(text)
 
+    @Slot()
     def set_multiline_text(self):
         text, ok = QInputDialog.getMultiLineText(self, "QInputDialog::getMultiLineText()",
                 "Address:", "John Doe\nFreedom Street")
         if ok and text != '':
             self._multiline_text_label.setText(text)
 
+    @Slot()
     def set_color(self):
         options_value = self._color_options.value()
         options = QColorDialog.ColorDialogOptions(options_value)
@@ -280,6 +286,7 @@ class Dialog(QDialog):
             self._color_label.setPalette(QPalette(color))
             self._color_label.setAutoFillBackground(True)
 
+    @Slot()
     def set_font(self):
         options_value = self._font_options.value()
         options = QFontDialog.FontDialogOptions(options_value)
@@ -294,6 +301,7 @@ class Dialog(QDialog):
             self._font_label.setText(font.key())
             self._font_label.setFont(font)
 
+    @Slot()
     def set_existing_directory(self):
         options_value = self._file_options.value()
         options = QFileDialog.Options(options_value) | QFileDialog.ShowDirsOnly
@@ -304,6 +312,7 @@ class Dialog(QDialog):
         if directory:
             self._directory_label.setText(directory)
 
+    @Slot()
     def set_open_file_name(self):
         options_value = self._file_options.value()
         options = QFileDialog.Options(options_value)
@@ -315,6 +324,7 @@ class Dialog(QDialog):
         if fileName:
             self._open_file_name_label.setText(fileName)
 
+    @Slot()
     def set_open_file_names(self):
         options_value = self._file_options.value()
         options = QFileDialog.Options(options_value)
@@ -327,6 +337,7 @@ class Dialog(QDialog):
             file_list = ', '.join(files)
             self._open_file_names_label.setText(f"[{file_list}]")
 
+    @Slot()
     def set_save_file_name(self):
         options_value = self._file_options.value()
         options = QFileDialog.Options(options_value)
@@ -338,6 +349,7 @@ class Dialog(QDialog):
         if fileName:
             self._save_file_name_label.setText(fileName)
 
+    @Slot()
     def critical_message(self):
         reply = QMessageBox.critical(self, "QMessageBox.critical()",
                 Dialog.MESSAGE,
@@ -349,6 +361,7 @@ class Dialog(QDialog):
         else:
             self._critical_label.setText("Ignore")
 
+    @Slot()
     def information_message(self):
         reply = QMessageBox.information(self,
                 "QMessageBox.information()", Dialog.MESSAGE)
@@ -357,6 +370,7 @@ class Dialog(QDialog):
         else:
             self._information_label.setText("Escape")
 
+    @Slot()
     def question_message(self):
         reply = QMessageBox.question(self, "QMessageBox.question()",
                 Dialog.MESSAGE,
@@ -368,6 +382,7 @@ class Dialog(QDialog):
         else:
             self._question_label.setText("Cancel")
 
+    @Slot()
     def warning_message(self):
         msg_box = QMessageBox(QMessageBox.Warning,
                 "QMessageBox.warning()", Dialog.MESSAGE,
@@ -379,6 +394,7 @@ class Dialog(QDialog):
         else:
             self._warning_label.setText("Continue")
 
+    @Slot()
     def error_message(self):
         self._error_message_dialog.showMessage("This dialog shows and remembers "
                 "error messages. If the checkbox is checked (as it is by "

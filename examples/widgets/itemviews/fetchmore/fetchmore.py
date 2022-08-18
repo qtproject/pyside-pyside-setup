@@ -113,7 +113,7 @@ class Window(QWidget):
 
         self.setWindowTitle("Fetch More Example")
 
-    @Slot(str, int, int)
+    @Slot(str,int,int,int)
     def update_log(self, path, start, number, total):
         native_path = QDir.toNativeSeparators(path)
         last = start + number - 1
