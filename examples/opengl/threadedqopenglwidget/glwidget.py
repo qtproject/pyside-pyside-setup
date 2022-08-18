@@ -105,6 +105,7 @@ class GLWidget(QOpenGLWidget):
     def on_resized(self):
         self._renderer.unlock_renderer()
 
+    @Slot()
     def grab_context(self):
         if not self._renderer:
             return

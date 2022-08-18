@@ -178,6 +178,7 @@ class TetrixBoard(QFrame):
         return QSize(TetrixBoard.board_width * 5 + self.frameWidth() * 2,
                 TetrixBoard.board_height * 5 + self.frameWidth() * 2)
 
+    @Slot()
     def start(self):
         if self._is_paused:
             return
@@ -197,6 +198,7 @@ class TetrixBoard(QFrame):
         self.new_piece()
         self.timer.start(self.timeout_time(), self)
 
+    @Slot()
     def pause(self):
         if not self._is_started:
             return

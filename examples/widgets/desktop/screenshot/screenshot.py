@@ -42,7 +42,8 @@
 
 import sys
 
-from PySide6.QtCore import QDir, QPoint, QRect, QStandardPaths, Qt, QTimer
+from PySide6.QtCore import (QDir, QPoint, QRect, QStandardPaths, Qt, QTimer,
+                            Slot)
 from PySide6.QtGui import QGuiApplication, QImageWriter
 from PySide6.QtWidgets import (QApplication, QCheckBox, QDialog, QFileDialog,
                                QGridLayout, QGroupBox, QHBoxLayout, QLabel,
@@ -109,6 +110,7 @@ class Screenshot(QWidget):
         if scaled_size != self.screenshot_label.pixmap().size():
             self.update_screenshot_label()
 
+    @Slot()
     def new_screenshot(self):
         if self.hide_this_window_checkbox.isChecked():
             self.hide()
@@ -116,6 +118,7 @@ class Screenshot(QWidget):
 
         QTimer.singleShot(self.delay_spinbox.value() * 1000, self.shoot_screen)
 
+    @Slot()
     def save_screenshot(self):
         fmt = "png"  # In order to avoid shadowing built-in format
         initial_path = QStandardPaths.writableLocation(QStandardPaths.PicturesLocation)
@@ -164,6 +167,7 @@ class Screenshot(QWidget):
         if self.hide_this_window_checkbox.isChecked():
             self.show()
 
+    @Slot()
     def update_checkbox(self):
         if self.delay_spinbox.value() == 0:
             self.hide_this_window_checkbox.setDisabled(True)

@@ -125,7 +125,7 @@ class DeviceDiscoveryDialog(QDialog):
         else:
             self._local_device.setHostMode(QBluetoothLocalDevice.HostPoweredOff)
 
-    @Slot(QBluetoothLocalDevice.HostMode)
+    @Slot("QBluetoothLocalDevice::HostMode")
     def host_mode_state_changed(self, mode):
         self._ui.power.setChecked(mode != QBluetoothLocalDevice.HostPoweredOff)
         self._ui.discoverable.setChecked(mode == QBluetoothLocalDevice.HostDiscoverable)
@@ -155,7 +155,7 @@ class DeviceDiscoveryDialog(QDialog):
         elif chosen_action == remove_pair_action:
             self._local_device.requestPairing(address, QBluetoothLocalDevice.Unpaired)
 
-    @Slot(QBluetoothAddress, QBluetoothLocalDevice.Pairing)
+    @Slot(QBluetoothAddress, "QBluetoothLocalDevice::Pairing")
     def pairing_done(self, address, pairing):
         items = self._ui.list.findItems(address.toString(), Qt.MatchContains)
 

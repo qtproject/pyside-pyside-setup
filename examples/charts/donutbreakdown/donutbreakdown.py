@@ -42,7 +42,7 @@
 
 
 import sys
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Slot
 from PySide6.QtGui import QColor, QFont, QPainter, QScreen
 from PySide6.QtWidgets import QApplication, QMainWindow
 from PySide6.QtCharts import QChart, QChartView, QPieSeries, QPieSlice
@@ -66,6 +66,7 @@ class MainSlice(QPieSlice):
     def name(self):
         return self.name
 
+    @Slot()
     def update_label(self):
         p = self.percentage() * 100
         self.setLabel(f"{self.name} {p:.2f}%")

@@ -47,7 +47,8 @@ import sys
 from textwrap import dedent
 
 
-from PySide6.QtCore import QCoreApplication, QLibraryInfo, QSize, QTimer, Qt
+from PySide6.QtCore import (QCoreApplication, QLibraryInfo, QSize, QTimer, Qt,
+                            Slot)
 from PySide6.QtGui import (QMatrix4x4, QOpenGLContext, QSurfaceFormat, QWindow)
 from PySide6.QtOpenGL import (QOpenGLBuffer, QOpenGLShader,
                               QOpenGLShaderProgram, QOpenGLVertexArrayObject)
@@ -230,6 +231,7 @@ class RenderWindow(QWindow):
         self.context.swapBuffers(self)
         self.context.doneCurrent()
 
+    @Slot()
     def slot_timer(self):
         self.render()
         self.angle += 1

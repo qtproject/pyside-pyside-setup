@@ -106,11 +106,11 @@ class CodeEditor(QPlainTextEdit):
                 bottom = top + self.blockBoundingRect(block).height()
                 block_number += 1
 
-    @Slot()
+    @Slot(int)
     def update_line_number_area_width(self, newBlockCount):
         self.setViewportMargins(self.line_number_area_width(), 0, 0, 0)
 
-    @Slot()
+    @Slot(QRect, int)
     def update_line_number_area(self, rect, dy):
         if dy:
             self.line_number_area.scroll(0, dy)
