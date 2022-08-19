@@ -134,7 +134,7 @@ class ThemeWidget(QWidget):
             for j in range(len(self.data_table[i])):
                 data = self.data_table[i][j]
                 if lower_series:
-                    points = lower_series.pointsVector()
+                    points = lower_series.points()
                     y_value = points[i].y() + data[0].y()
                     upper_series.append(QPointF(j, y_value))
                 else:
@@ -145,10 +145,12 @@ class ThemeWidget(QWidget):
             lower_series = upper_series
 
         chart.createDefaultAxes()
-        chart.axisX().setRange(0, self.value_count - 1)
-        chart.axisY().setRange(0, self.value_max)
+        axis_x = chart.axes(Qt.Horizontal)[0]
+        axis_x.setRange(0, self.value_count - 1)
+        axis_y = chart.axes(Qt.Vertical)[0]
+        axis_y.setRange(0, self.value_max)
         # Add space to label to add space between labels and axis
-        chart.axisY().setLabelFormat("%.1f  ")
+        axis_y.setLabelFormat("%.1f  ")
 
         return chart
 
@@ -166,9 +168,10 @@ class ThemeWidget(QWidget):
         chart.addSeries(series)
 
         chart.createDefaultAxes()
-        chart.axisY().setRange(0, self.value_max * 2)
+        axis_y = chart.axes(Qt.Vertical)[0]
+        axis_y.setRange(0, self.value_max * 2)
         # Add space to label to add space between labels and axis
-        chart.axisY().setLabelFormat("%.1f  ")
+        axis_y.setLabelFormat("%.1f  ")
 
         return chart
 
@@ -185,10 +188,12 @@ class ThemeWidget(QWidget):
             chart.addSeries(series)
 
         chart.createDefaultAxes()
-        chart.axisX().setRange(0, self.value_max)
-        chart.axisY().setRange(0, self.value_count)
+        axis_x = chart.axes(Qt.Horizontal)[0]
+        axis_x.setRange(0, self.value_max)
+        axis_y = chart.axes(Qt.Vertical)[0]
+        axis_y.setRange(0, self.value_count)
         # Add space to label to add space between labels and axis
-        chart.axisY().setLabelFormat("%.1f  ")
+        axis_y.setLabelFormat("%.1f  ")
 
         return chart
 
@@ -222,10 +227,12 @@ class ThemeWidget(QWidget):
             chart.addSeries(series)
 
         chart.createDefaultAxes()
-        chart.axisX().setRange(0, self.value_max)
-        chart.axisY().setRange(0, self.value_count)
+        axis_x = chart.axes(Qt.Horizontal)[0]
+        axis_x.setRange(0, self.value_max)
+        axis_y = chart.axes(Qt.Vertical)[0]
+        axis_y.setRange(0, self.value_count)
         # Add space to label to add space between labels and axis
-        chart.axisY().setLabelFormat("%.1f  ")
+        axis_y.setLabelFormat("%.1f  ")
 
         return chart
 
@@ -241,10 +248,12 @@ class ThemeWidget(QWidget):
             chart.addSeries(series)
 
         chart.createDefaultAxes()
-        chart.axisX().setRange(0, self.value_max)
-        chart.axisY().setRange(0, self.value_count)
+        axis_x = chart.axes(Qt.Horizontal)[0]
+        axis_x.setRange(0, self.value_max)
+        axis_y = chart.axes(Qt.Vertical)[0]
+        axis_y.setRange(0, self.value_count)
         # Add space to label to add space between labels and axis
-        chart.axisY().setLabelFormat("%.1f  ")
+        axis_y.setLabelFormat("%.1f  ")
 
         return chart
 

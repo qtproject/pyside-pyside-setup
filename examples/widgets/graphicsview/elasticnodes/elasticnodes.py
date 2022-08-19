@@ -129,7 +129,7 @@ class Node(QGraphicsItem):
         self._new_pos = QPointF()
         self.setFlag(QGraphicsItem.ItemIsMovable)
         self.setFlag(QGraphicsItem.ItemSendsGeometryChanges)
-        self.setCacheMode(self.DeviceCoordinateCache)
+        self.setCacheMode(QGraphicsItem.DeviceCoordinateCache)
         self.setZValue(-1)
 
     def item_type(self):
