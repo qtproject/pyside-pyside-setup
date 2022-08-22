@@ -18,7 +18,7 @@ find_package(Qt6 COMPONENTS Widgets)
 
 # Use provided python interpreter if given.
 if(NOT python_interpreter)
-    if(WIN32 AND ${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+    if(WIN32 AND "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
         find_program(python_interpreter "python_d")
         if(NOT python_interpreter)
             message(FATAL_ERROR
