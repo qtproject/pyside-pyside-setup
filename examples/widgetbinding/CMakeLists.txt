@@ -52,7 +52,7 @@ set(generated_sources
 # ================================== Shiboken detection ======================================
 # Use provided python interpreter if given.
 if(NOT python_interpreter)
-    if(WIN32 AND ${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+    if(WIN32 AND "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
         find_program(python_interpreter "python_d")
         if(NOT python_interpreter)
             message(FATAL_ERROR
@@ -218,7 +218,7 @@ set_property(TARGET ${bindings_library} PROPERTY PREFIX "")
 set_property(TARGET ${bindings_library} PROPERTY OUTPUT_NAME
              "${bindings_library}${PYTHON_EXTENSION_SUFFIX}")
 if(WIN32)
-    if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+    if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
         set_property(TARGET ${bindings_library} PROPERTY SUFFIX "_d.pyd")
     else()
         set_property(TARGET ${bindings_library} PROPERTY SUFFIX ".pyd")
