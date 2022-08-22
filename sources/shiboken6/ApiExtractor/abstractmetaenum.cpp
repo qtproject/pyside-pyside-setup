@@ -20,6 +20,7 @@ public:
     QString m_stringValue;
     EnumValue m_value;
     Documentation m_doc;
+    bool m_deprecated = false;
 };
 
 AbstractMetaEnumValue::AbstractMetaEnumValue() :
@@ -66,6 +67,17 @@ void AbstractMetaEnumValue::setName(const QString &name)
         d->m_name = name;
 }
 
+bool AbstractMetaEnumValue::isDeprecated() const
+{
+    return d->m_deprecated;
+}
+
+void AbstractMetaEnumValue::setDeprecated(bool deprecated)
+{
+    if (d->m_deprecated != deprecated)
+        d->m_deprecated = deprecated;
+}
+
 Documentation AbstractMetaEnumValue::documentation() const
 {
     return d->m_doc;
@@ -82,7 +94,8 @@ void AbstractMetaEnumValue::setDocumentation(const Documentation &doc)
 class AbstractMetaEnumData : public QSharedData
 {
 public:
-    AbstractMetaEnumData()  : m_hasQenumsDeclaration(false), m_signed(true)
+    AbstractMetaEnumData()  : m_deprecated(false),
+        m_hasQenumsDeclaration(false), m_signed(true)
     {
     }
 
@@ -93,6 +106,7 @@ public:
 
     EnumKind m_enumKind = CEnum;
     Access m_access = Access::Public;
+    uint m_deprecated : 1;
     uint m_hasQenumsDeclaration : 1;
     uint m_signed : 1;
 };
@@ -162,6 +176,17 @@ void AbstractMetaEnum::setAccess(Access a)
 {
     if (a != d->m_access)
         d->m_access = a;
+}
+
+bool AbstractMetaEnum::isDeprecated() const
+{
+    return d->m_deprecated;
+}
+
+void AbstractMetaEnum::setDeprecated(bool deprecated)
+{
+    if (d->m_deprecated != deprecated)
+        d->m_deprecated = deprecated;
 }
 
 const Documentation &AbstractMetaEnum::documentation() const
@@ -243,7 +268,10 @@ void AbstractMetaEnum::setSigned(bool s)
 
 static void formatMetaEnumValue(QDebug &d, const AbstractMetaEnumValue &v)
 {
-    d << v.name() << '=' << v.value();
+    d << v.name() << '=';
+    v.value().formatDebug(d);
+    if (v.isDeprecated())
+        d << " (deprecated)";
 }
 
 QDebug operator<<(QDebug d, const AbstractMetaEnumValue &v)
@@ -260,13 +288,15 @@ QDebug operator<<(QDebug d, const AbstractMetaEnumValue &v)
 static void formatMetaEnum(QDebug &d, const AbstractMetaEnum &e)
 {
     d << e.fullName();
+    if (e.isDeprecated())
+        d << " (deprecated) ";
     if (!e.isSigned())
         d << " (unsigned) ";
     d << '[';
     const AbstractMetaEnumValueList &values = e.values();
     for (int i = 0, count = values.size(); i < count; ++i) {
         if (i)
-            d << ' ';
+            d << ", ";
         formatMetaEnumValue(d, values.at(i));
     }
     d << ']';

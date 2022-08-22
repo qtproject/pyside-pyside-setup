@@ -40,6 +40,9 @@ public:
     QString name() const;
     void setName(const QString &name);
 
+    bool isDeprecated() const;
+    void setDeprecated(bool deprecated);
+
     Documentation documentation() const;
     void setDocumentation(const Documentation& doc);
 
@@ -69,6 +72,9 @@ public:
     void setAccess(Access a);
     bool isPrivate() const { return access() == Access::Private; }
     bool isProtected() const { return access() == Access::Protected; }
+
+    bool isDeprecated() const;
+    void setDeprecated(bool deprecated);
 
     const Documentation &documentation() const;
     void setDocumentation(const Documentation& doc);

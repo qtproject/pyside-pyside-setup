@@ -641,6 +641,9 @@ public:
     void formatDebug(QDebug &d) const override;
 #endif
 
+    bool isDeprecated() const;
+    void setDeprecated(bool d);
+
     bool isSigned() const;
     void setSigned(bool s);
 
@@ -648,6 +651,7 @@ private:
     Access m_accessPolicy = Access::Public;
     EnumeratorList m_enumerators;
     EnumKind m_enumKind = CEnum;
+    bool m_deprecated = false;
     bool m_signed = true;
 };
 
@@ -668,6 +672,9 @@ public:
     EnumValue value() const { return m_value; }
     void setValue(EnumValue v) { m_value = v; }
 
+    bool isDeprecated() const;
+    void setDeprecated(bool d);
+
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const override;
 #endif
@@ -675,6 +682,7 @@ public:
 private:
     QString m_stringValue;
     EnumValue m_value;
+    bool m_deprecated = false;
 };
 
 class _TemplateParameterModelItem: public _CodeModelItem

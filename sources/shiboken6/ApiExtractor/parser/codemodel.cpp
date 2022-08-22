@@ -1305,6 +1305,16 @@ void _EnumModelItem::setSigned(bool s)
     m_signed = s;
 }
 
+bool _EnumModelItem::isDeprecated() const
+{
+    return m_deprecated;
+}
+
+void _EnumModelItem::setDeprecated(bool d)
+{
+    m_deprecated = d;
+}
+
 #ifndef QT_NO_DEBUG_STREAM
 void _EnumModelItem::formatDebug(QDebug &d) const
 {
@@ -1319,6 +1329,8 @@ void _EnumModelItem::formatDebug(QDebug &d) const
         d << " (class)";
         break;
     }
+    if (m_deprecated)
+        d << " (deprecated)";
     if (!m_signed)
          d << " (unsigned)";
     formatModelItemList(d, ", enumerators=", m_enumerators);
@@ -1338,11 +1350,23 @@ void _EnumeratorModelItem::setStringValue(const QString &value)
     m_stringValue = value;
 }
 
+bool _EnumeratorModelItem::isDeprecated() const
+{
+    return m_deprecated;
+}
+
+void _EnumeratorModelItem::setDeprecated(bool d)
+{
+    m_deprecated = d;
+}
+
 #ifndef QT_NO_DEBUG_STREAM
 void _EnumeratorModelItem::formatDebug(QDebug &d) const
 {
     _CodeModelItem::formatDebug(d);
     d << ", value=" << m_value << ", stringValue=\"" << m_stringValue << '"';
+    if (m_deprecated)
+        d << " (deprecated)";
 }
 #endif // !QT_NO_DEBUG_STREAM
 

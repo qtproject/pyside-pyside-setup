@@ -32,6 +32,14 @@ bool EnumValue::equals(const EnumValue &rhs) const
     return m_type == Signed ? m_value == rhs.m_value : m_unsignedValue == rhs.m_unsignedValue;
 }
 
+void EnumValue::formatDebug(QDebug &d) const
+{
+    if (m_type == EnumValue::Signed)
+        d << m_value;
+    else
+        d << m_unsignedValue << 'u';
+}
+
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug d,const EnumValue &v)
 {
@@ -39,10 +47,7 @@ QDebug operator<<(QDebug d,const EnumValue &v)
     d.nospace();
     d.noquote();
     d << "EnumValue(";
-    if (v.m_type == EnumValue::Signed)
-        d << v.m_value;
-    else
-        d << v.m_unsignedValue << 'u';
+    v.formatDebug(d);
     d << ')';
     return d;
 }

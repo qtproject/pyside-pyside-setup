@@ -31,6 +31,8 @@ public:
 
     bool equals(const EnumValue &rhs) const;
 
+    void formatDebug(QDebug &d) const;
+
 private:
 #ifndef QT_NO_DEBUG_STREAM
     friend QDebug operator<<(QDebug, const EnumValue &);

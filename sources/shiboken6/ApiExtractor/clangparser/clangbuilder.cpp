@@ -971,6 +971,8 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         d->setFileName(cursor, d->m_currentEnum.data());
         d->m_currentEnum->setScope(d->m_scope);
         d->m_currentEnum->setEnumKind(kind);
+        if (clang_getCursorAvailability(cursor) == CXAvailability_Deprecated)
+            d->m_currentEnum->setDeprecated(true);
         d->m_currentEnum->setSigned(isSigned(clang_getEnumDeclIntegerType(cursor).kind));
         if (!qSharedPointerDynamicCast<_ClassModelItem>(d->m_scopeStack.back()).isNull())
             d->m_currentEnum->setAccessPolicy(accessPolicy(clang_getCXXAccessSpecifier(cursor)));
@@ -992,6 +994,8 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         EnumeratorModelItem enumConstant(new _EnumeratorModelItem(d->m_model, name));
         enumConstant->setStringValue(d->cursorValueExpression(this, cursor));
         enumConstant->setValue(enumValue);
+        if (clang_getCursorAvailability(cursor) == CXAvailability_Deprecated)
+            enumConstant->setDeprecated(true);
         d->m_currentEnum->addEnumerator(enumConstant);
     }
         break;
