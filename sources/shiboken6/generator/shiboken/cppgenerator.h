@@ -452,7 +452,7 @@ private:
 
     static void writePrimitiveConverterInitialization(TextStream &s,
                                                       const CustomConversion *customConversion);
-    static void writeEnumConverterInitialization(TextStream &s, const TypeEntry *enumType);
+    static void writeFlagsConverterInitialization(TextStream &s, const FlagsTypeEntry *enumType);
     static void writeEnumConverterInitialization(TextStream &s, const AbstractMetaEnum &metaEnum);
     QString writeContainerConverterInitialization(TextStream &s, const AbstractMetaType &type) const;
     void writeSmartPointerConverterInitialization(TextStream &s, const AbstractMetaType &ype) const;

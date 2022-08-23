@@ -4388,92 +4388,96 @@ void CppGenerator::writePrimitiveConverterInitialization(TextStream &s,
     writeCustomConverterRegister(s, customConversion, converter);
 }
 
+static void registerEnumConverterScopes(TextStream &s, QString signature)
+{
+    while (true) {
+        s << "Shiboken::Conversions::registerConverterName(converter, \""
+          << signature << "\");\n";
+        const int qualifierPos = signature.indexOf(u"::");
+        if (qualifierPos != -1)
+            signature.remove(0, qualifierPos + 2);
+        else
+            break;
+    }
+}
+
+void CppGenerator::writeFlagsConverterInitialization(TextStream &s, const FlagsTypeEntry *flags)
+{
+    static const char enumPythonVar[] = "FType";
+
+    const QString qualifiedCppName = flags->qualifiedCppName();
+    s << "// Register converter for flag '" << qualifiedCppName << "'.\n{\n"
+        << indent;
+    QString typeName = fixedCppTypeName(flags);
+    s << "SbkConverter *converter = Shiboken::Conversions::createConverter("
+        << enumPythonVar << ',' << '\n' << indent
+        << cppToPythonFunctionName(typeName, typeName) << ");\n" << outdent;
+
+    const QString enumTypeName = fixedCppTypeName(flags->originator());
+    QString toCpp = pythonToCppFunctionName(enumTypeName, typeName);
+    QString isConv = convertibleToCppFunctionName(enumTypeName, typeName);
+    writeAddPythonToCppConversion(s, u"converter"_s, toCpp, isConv);
+    toCpp = pythonToCppFunctionName(typeName, typeName);
+    isConv = convertibleToCppFunctionName(typeName, typeName);
+    writeAddPythonToCppConversion(s, u"converter"_s, toCpp, isConv);
+    toCpp = pythonToCppFunctionName(u"number"_s, typeName);
+    isConv = convertibleToCppFunctionName(u"number"_s, typeName);
+    writeAddPythonToCppConversion(s, u"converter"_s, toCpp, isConv);
+    s << "Shiboken::Enum::setTypeConverter(" << enumPythonVar
+        << ", converter, true);\n";
+    // Replace "QFlags<Class::Option>" by "Class::Options"
+    QString signature = qualifiedCppName;
+    if (qualifiedCppName.startsWith(u"QFlags<") && qualifiedCppName.endsWith(u'>')) {
+        signature.chop(1);
+        signature.remove(0, 7);
+        const int lastQualifierPos = signature.lastIndexOf(u"::");
+        if (lastQualifierPos != -1) {
+            signature.replace(lastQualifierPos + 2, signature.size() - lastQualifierPos - 2,
+                              flags->flagsName());
+        } else {
+            signature = flags->flagsName();
+        }
+    }
+
+    registerEnumConverterScopes(s, signature);
+
+    // PYSIDE-1673: Also register "QFlags<Class::Option>" purely for
+    // the purpose of finding the converter by QVariant::typeName()
+    // in the QVariant conversion code.
+    s << "Shiboken::Conversions::registerConverterName(converter, \""
+        << flags->name() << "\");\n"
+        << outdent << "}\n";
+}
+
 void CppGenerator::writeEnumConverterInitialization(TextStream &s, const AbstractMetaEnum &metaEnum)
 {
     if (metaEnum.isPrivate() || metaEnum.isAnonymous())
         return;
-    writeEnumConverterInitialization(s, metaEnum.typeEntry());
-}
+    const EnumTypeEntry *enumType = metaEnum.typeEntry();
+    Q_ASSERT(enumType);
 
-void CppGenerator::writeEnumConverterInitialization(TextStream &s, const TypeEntry *enumType)
-{
-    if (!enumType)
-        return;
-    QString enumFlagName = enumType->isFlags() ? u"flag"_s : u"enum"_s;
-    QString enumPythonVar = enumType->isFlags() ? u"FType"_s : u"EType"_s;
+    static const char enumPythonVar[] = "EType";
 
-    const FlagsTypeEntry *flags = nullptr;
-    if (enumType->isFlags())
-        flags = static_cast<const FlagsTypeEntry *>(enumType);
+    s << "// Register converter for enum '" << enumType->qualifiedCppName()
+        << "'.\n{\n" << indent;
 
-    s << "// Register converter for " << enumFlagName << " '" << enumType->qualifiedCppName()
-        << "'.\n{\n";
-    {
-        Indentation indent(s);
-        QString typeName = fixedCppTypeName(enumType);
-        s << "SbkConverter *converter = Shiboken::Conversions::createConverter("
-            << enumPythonVar << ',' << '\n';
-        {
-            Indentation indent(s);
-            s << cppToPythonFunctionName(typeName, typeName) << ");\n";
-        }
+    const QString typeName = fixedCppTypeName(enumType);
+    s << "SbkConverter *converter = Shiboken::Conversions::createConverter("
+        << enumPythonVar << ',' << '\n' << indent
+        << cppToPythonFunctionName(typeName, typeName) << ");\n" << outdent;
 
-        if (flags) {
-            QString enumTypeName = fixedCppTypeName(flags->originator());
-            QString toCpp = pythonToCppFunctionName(enumTypeName, typeName);
-            QString isConv = convertibleToCppFunctionName(enumTypeName, typeName);
-            writeAddPythonToCppConversion(s, u"converter"_s, toCpp, isConv);
-        }
+    const QString toCpp = pythonToCppFunctionName(typeName, typeName);
+    const QString isConv = convertibleToCppFunctionName(typeName, typeName);
+    writeAddPythonToCppConversion(s, u"converter"_s, toCpp, isConv);
+    s << "Shiboken::Enum::setTypeConverter(" << enumPythonVar
+        << ", converter, false);\n";
 
-        QString toCpp = pythonToCppFunctionName(typeName, typeName);
-        QString isConv = convertibleToCppFunctionName(typeName, typeName);
-        writeAddPythonToCppConversion(s, u"converter"_s, toCpp, isConv);
+    registerEnumConverterScopes(s, enumType->qualifiedCppName());
 
-        if (flags) {
-            QString toCpp = pythonToCppFunctionName(u"number"_s, typeName);
-            QString isConv = convertibleToCppFunctionName(u"number"_s, typeName);
-            writeAddPythonToCppConversion(s, u"converter"_s, toCpp, isConv);
-        }
+    s << outdent << "}\n";
 
-        s << "Shiboken::Enum::setTypeConverter(" << enumPythonVar
-            << ", converter, " << (enumType->isFlags() ? "true" : "false") << ");\n";
-
-        QString signature = enumType->qualifiedCppName();
-        // Replace "QFlags<Class::Option>" by "Class::Options"
-        if (flags && signature.startsWith(u"QFlags<") && signature.endsWith(u'>')) {
-            signature.chop(1);
-            signature.remove(0, 7);
-            const int lastQualifierPos = signature.lastIndexOf(u"::");
-            if (lastQualifierPos != -1) {
-                signature.replace(lastQualifierPos + 2, signature.size() - lastQualifierPos - 2,
-                                  flags->flagsName());
-            } else {
-                signature = flags->flagsName();
-            }
-        }
-
-        while (true) {
-            s << "Shiboken::Conversions::registerConverterName(converter, \""
-                << signature << "\");\n";
-            const int qualifierPos = signature.indexOf(u"::");
-            if (qualifierPos != -1)
-                signature.remove(0, qualifierPos + 2);
-            else
-                break;
-        }
-        if (flags) {
-            // PYSIDE-1673: Also register "QFlags<Class::Option>" purely for
-            // the purpose of finding the converter by QVariant::typeName()
-            // in the QVariant conversion code.
-            s << "Shiboken::Conversions::registerConverterName(converter, \""
-                << flags->name() << "\");\n";
-        }
-
-    }
-    s << "}\n";
-
-    if (!flags)
-        writeEnumConverterInitialization(s, static_cast<const EnumTypeEntry *>(enumType)->flags());
+    if (auto *flags = enumType->flags())
+        writeFlagsConverterInitialization(s, flags);
 }
 
 QString CppGenerator::writeContainerConverterInitialization(TextStream &s, const AbstractMetaType &type) const
