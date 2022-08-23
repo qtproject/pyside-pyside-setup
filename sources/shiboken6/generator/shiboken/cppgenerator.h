@@ -88,7 +88,10 @@ private:
     void writeMetaObjectMethod(TextStream &s, const GeneratorContext &classContext) const;
     static void writeMetaCast(TextStream &s, const GeneratorContext &classContext);
 
-    void writeEnumConverterFunctions(TextStream &s, const TypeEntry *enumType) const;
+    void writeFlagsConverterFunctions(TextStream &s, const FlagsTypeEntry *flagsType,
+                                      const QString &enumTypeName,
+                                      const QString &flagsCppTypeName,
+                                      const QString &enumTypeCheck) const;
     void writeEnumConverterFunctions(TextStream &s, const AbstractMetaEnum &metaEnum) const;
     void writeConverterFunctions(TextStream &s, const AbstractMetaClass *metaClass,
                                  const GeneratorContext &classContext) const;

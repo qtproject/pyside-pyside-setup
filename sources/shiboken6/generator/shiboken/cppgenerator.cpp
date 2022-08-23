@@ -1619,33 +1619,75 @@ void CppGenerator::writeMetaCast(TextStream &s,
         << outdent << "}\n\n";
 }
 
+void CppGenerator::writeFlagsConverterFunctions(TextStream &s,
+                                                const FlagsTypeEntry *flagsType,
+                                                const QString &enumTypeName,
+                                                const QString &flagsCppTypeName,
+                                                const QString &enumTypeCheck) const
+{
+    Q_ASSERT(flagsType);
+    const QString flagsTypeName = fixedCppTypeName(flagsType);
+    const QString flagsPythonType = cpythonTypeNameExt(flagsType);
+
+    StringStream c(TextStream::Language::Cpp);
+    c << "*reinterpret_cast<" << flagsCppTypeName << " *>(cppOut) =\n"
+        << "    " << flagsCppTypeName
+        << "(QFlag(int(PySide::QFlags::getValue(reinterpret_cast<PySideQFlagsObject *>(pyIn)))))"
+        << ";\n";
+    writePythonToCppFunction(s, c.toString(), flagsTypeName, flagsTypeName);
+
+    QString pyTypeCheck = u"PyObject_TypeCheck(pyIn, "_s + flagsPythonType + u')';
+    writeIsPythonConvertibleToCppFunction(s, flagsTypeName, flagsTypeName, pyTypeCheck);
+
+    c.clear();
+
+    c << "const int castCppIn = int(*reinterpret_cast<const "
+        << flagsCppTypeName << " *>(cppIn));\n" << "return "
+        << "reinterpret_cast<PyObject *>(PySide::QFlags::newObject(castCppIn, "
+        << flagsPythonType << "));\n";
+    writeCppToPythonFunction(s, c.toString(), flagsTypeName, flagsTypeName);
+    s << '\n';
+
+    c.clear();
+    c << "*reinterpret_cast<" << flagsCppTypeName << " *>(cppOut) =\n"
+      << "    " << flagsCppTypeName
+      << "(QFlag(int(Shiboken::Enum::getValue(pyIn))));\n";
+
+    writePythonToCppFunction(s, c.toString(), enumTypeName, flagsTypeName);
+    writeIsPythonConvertibleToCppFunction(s, enumTypeName, flagsTypeName, enumTypeCheck);
+
+    c.clear();
+    c << "Shiboken::AutoDecRef pyLong(PyNumber_Long(pyIn));\n"
+      << "*reinterpret_cast<" << flagsCppTypeName << " *>(cppOut) =\n"
+      << "    " << flagsCppTypeName
+      << "(QFlag(int(PyLong_AsLong(pyLong.object()))));\n";
+    // PYSIDE-898: Include an additional condition to detect if the type of the
+    // enum corresponds to the object that is being evaluated.
+    // Using only `PyNumber_Check(...)` is too permissive,
+    // then we would have been unable to detect the difference between
+    // a PolarOrientation and Qt::AlignmentFlag, which was the main
+    // issue of the bug.
+    const QString numberCondition = u"PyNumber_Check(pyIn) && "_s + enumTypeCheck;
+    writePythonToCppFunction(s, c.toString(), u"number"_s, flagsTypeName);
+    writeIsPythonConvertibleToCppFunction(s, u"number"_s, flagsTypeName, numberCondition);
+}
+
 void CppGenerator::writeEnumConverterFunctions(TextStream &s, const AbstractMetaEnum &metaEnum) const
 {
     if (metaEnum.isPrivate() || metaEnum.isAnonymous())
         return;
-    writeEnumConverterFunctions(s, metaEnum.typeEntry());
-}
-
-void CppGenerator::writeEnumConverterFunctions(TextStream &s, const TypeEntry *enumType) const
-{
-    if (!enumType)
-        return;
+    EnumTypeEntry *enumType = metaEnum.typeEntry();
+    Q_ASSERT(enumType);
     QString typeName = fixedCppTypeName(enumType);
     QString enumPythonType = cpythonTypeNameExt(enumType);
-    QString cppTypeName = getFullTypeName(enumType).trimmed();
-    if (avoidProtectedHack()) {
-        auto metaEnum = api().findAbstractMetaEnum(enumType);
-        if (metaEnum.has_value() && metaEnum->isProtected())
-            cppTypeName = protectedEnumSurrogateName(metaEnum.value());
-    }
+    const bool useSurrogateName = avoidProtectedHack() && metaEnum.isProtected();
+    QString cppTypeName = useSurrogateName
+        ? protectedEnumSurrogateName(metaEnum) : getFullTypeName(enumType).trimmed();
+
     StringStream c(TextStream::Language::Cpp);
-    c << "*reinterpret_cast<" << cppTypeName << " *>(cppOut) =\n"
-        << "    ";
-    if (enumType->isFlags())
-        c << cppTypeName << "(QFlag(int(PySide::QFlags::getValue(reinterpret_cast<PySideQFlagsObject *>(pyIn)))))";
-    else
-        c << "static_cast<" << cppTypeName << ">(Shiboken::Enum::getValue(pyIn))";
-    c << ";\n";
+    c << "const auto value = static_cast<" << cppTypeName
+        << ">(Shiboken::Enum::getValue(pyIn));\n"
+        << "*reinterpret_cast<" << cppTypeName << " *>(cppOut) = value;\n";
     writePythonToCppFunction(s, c.toString(), typeName, typeName);
 
     QString pyTypeCheck = u"PyObject_TypeCheck(pyIn, "_s + enumPythonType + u')';
@@ -1654,52 +1696,17 @@ void CppGenerator::writeEnumConverterFunctions(TextStream &s, const TypeEntry *e
     c.clear();
 
     c << "const int castCppIn = int(*reinterpret_cast<const "
-        << cppTypeName << " *>(cppIn));\n" << "return ";
-    if (enumType->isFlags()) {
-        c << "reinterpret_cast<PyObject *>(PySide::QFlags::newObject(castCppIn, "
-            << enumPythonType << "))";
-    } else {
-        c << "Shiboken::Enum::newItem(" << enumPythonType << ", castCppIn)";
-    }
-    c << ";\n";
+        << cppTypeName << " *>(cppIn));\n" << "return "
+        << "Shiboken::Enum::newItem(" << enumPythonType << ", castCppIn);\n";
     writeCppToPythonFunction(s, c.toString(), typeName, typeName);
     s << '\n';
 
-    if (enumType->isFlags())
-        return;
-
-    auto flags = reinterpret_cast<const EnumTypeEntry *>(enumType)->flags();
-    if (!flags)
-        return;
-
     // QFlags part.
-
-    writeEnumConverterFunctions(s, flags);
-
-    c.clear();
-    cppTypeName = getFullTypeName(flags).trimmed();
-    c << "*reinterpret_cast<" << cppTypeName << " *>(cppOut) =\n"
-      << "    " << cppTypeName
-      << "(QFlag(int(Shiboken::Enum::getValue(pyIn))));\n";
-
-    QString flagsTypeName = fixedCppTypeName(flags);
-    writePythonToCppFunction(s, c.toString(), typeName, flagsTypeName);
-    writeIsPythonConvertibleToCppFunction(s, typeName, flagsTypeName, pyTypeCheck);
-
-    c.clear();
-    c << "Shiboken::AutoDecRef pyLong(PyNumber_Long(pyIn));\n"
-        << "*reinterpret_cast<" << cppTypeName << " *>(cppOut) =\n"
-        << "    " << cppTypeName
-        << "(QFlag(int(PyLong_AsLong(pyLong.object()))));\n";
-    // PYSIDE-898: Include an additional condition to detect if the type of the
-    // enum corresponds to the object that is being evaluated.
-    // Using only `PyNumber_Check(...)` is too permissive,
-    // then we would have been unable to detect the difference between
-    // a PolarOrientation and Qt::AlignmentFlag, which was the main
-    // issue of the bug.
-    const QString numberCondition = QStringLiteral("PyNumber_Check(pyIn) && ") + pyTypeCheck;
-    writePythonToCppFunction(s, c.toString(), u"number"_s, flagsTypeName);
-    writeIsPythonConvertibleToCppFunction(s, u"number"_s, flagsTypeName, numberCondition);
+    if (auto *flags = enumType->flags()) {
+        const QString flagsCppTypeName = useSurrogateName
+            ? cppTypeName : getFullTypeName(flags).trimmed();
+        writeFlagsConverterFunctions(s, flags, typeName, flagsCppTypeName, pyTypeCheck);
+    }
 }
 
 void CppGenerator::writeConverterFunctions(TextStream &s, const AbstractMetaClass *metaClass,
@@ -6747,12 +6754,8 @@ bool CppGenerator::finishGeneration()
 
         s << "// Enum definitions "
             << "------------------------------------------------------------\n";
-        for (const AbstractMetaEnum &cppEnum : qAsConst(globalEnums)) {
-            if (cppEnum.isAnonymous() || cppEnum.isPrivate())
-                continue;
+        for (const AbstractMetaEnum &cppEnum : qAsConst(globalEnums))
             writeEnumConverterFunctions(s, cppEnum);
-            s << '\n';
-        }
 
         if (convImpl.size() > 0) {
             s << "// Enum converters "
