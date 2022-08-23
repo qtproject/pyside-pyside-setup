@@ -94,5 +94,22 @@ void warnDeprecated(const char *className, const char *functionName)
                       className, functionName);
 }
 
+void warnDeprecatedEnum(const char *enumName)
+{
+    Shiboken::warning(PyExc_DeprecationWarning, 1,
+                      "Enum: '%s' is marked as deprecated, please check "
+                      "the documentation for more information.",
+                      enumName);
+}
+
+void warnDeprecatedEnumValue(const char *enumName, const char *valueName)
+{
+    Shiboken::warning(PyExc_DeprecationWarning, 1,
+                      "Enum value '%s.%s' is marked as deprecated, please check "
+                      "the documentation for more information.",
+                      enumName, valueName);
+
+}
+
 } // namespace Warnings
 } // namespace Shiboken

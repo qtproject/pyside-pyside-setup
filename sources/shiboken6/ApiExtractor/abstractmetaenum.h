@@ -75,6 +75,8 @@ public:
 
     bool isDeprecated() const;
     void setDeprecated(bool deprecated);
+    bool hasDeprecatedValues() const;
+    AbstractMetaEnumValueList deprecatedValues() const;
 
     const Documentation &documentation() const;
     void setDocumentation(const Documentation& doc);

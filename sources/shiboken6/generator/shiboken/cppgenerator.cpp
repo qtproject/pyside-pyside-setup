@@ -1672,6 +1672,28 @@ void CppGenerator::writeFlagsConverterFunctions(TextStream &s,
     writeIsPythonConvertibleToCppFunction(s, u"number"_s, flagsTypeName, numberCondition);
 }
 
+static void generateDeprecatedValueWarnings(TextStream &c,
+                                            const AbstractMetaEnum &metaEnum,
+                                            bool useSurrogateName)
+{
+    const EnumTypeEntry *enumType = metaEnum.typeEntry();
+    const QString prefix = enumType->qualifiedCppName() + u"::"_s;
+    c << "switch (value) {\n";
+    const auto &deprecatedValues = metaEnum.deprecatedValues();
+    for (const auto &v : deprecatedValues) {
+        c << "case ";
+        if (useSurrogateName)
+            c << v.value().toString(); // Protected, use int representation
+        else
+            c << prefix << v.name();
+        c << ":\n" << indent
+            << "Shiboken::Warnings::warnDeprecatedEnumValue(\"" << enumType->name()
+            << "\", \"" << v.name() << "\");\nbreak;\n" << outdent;
+    }
+    if (deprecatedValues.size() < metaEnum.values().size())
+        c << "default:\n" << indent << "break;\n" << outdent << "}\n";
+}
+
 void CppGenerator::writeEnumConverterFunctions(TextStream &s, const AbstractMetaEnum &metaEnum) const
 {
     if (metaEnum.isPrivate() || metaEnum.isAnonymous())
@@ -1685,9 +1707,18 @@ void CppGenerator::writeEnumConverterFunctions(TextStream &s, const AbstractMeta
         ? protectedEnumSurrogateName(metaEnum) : getFullTypeName(enumType).trimmed();
 
     StringStream c(TextStream::Language::Cpp);
+    if (metaEnum.isDeprecated())
+        c << "Shiboken::Warnings::warnDeprecatedEnum(\"" << enumType->name() << "\");\n";
+
     c << "const auto value = static_cast<" << cppTypeName
-        << ">(Shiboken::Enum::getValue(pyIn));\n"
-        << "*reinterpret_cast<" << cppTypeName << " *>(cppOut) = value;\n";
+        << ">(Shiboken::Enum::getValue(pyIn));\n";
+
+    // Warn about deprecated values unless it is protected+scoped (inaccessible values)
+    const bool valuesAcccessible = !useSurrogateName || metaEnum.enumKind() != EnumClass;
+    if (valuesAcccessible && metaEnum.hasDeprecatedValues())
+        generateDeprecatedValueWarnings(c, metaEnum, useSurrogateName);
+
+    c << "*reinterpret_cast<" << cppTypeName << " *>(cppOut) = value;\n";
     writePythonToCppFunction(s, c.toString(), typeName, typeName);
 
     QString pyTypeCheck = u"PyObject_TypeCheck(pyIn, "_s + enumPythonType + u')';

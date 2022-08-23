@@ -11,6 +11,8 @@
 
 #include <QtCore/QDebug>
 
+#include <algorithm>
+
 using namespace Qt::StringLiterals;
 
 class AbstractMetaEnumValueData : public QSharedData
@@ -187,6 +189,25 @@ void AbstractMetaEnum::setDeprecated(bool deprecated)
 {
     if (d->m_deprecated != deprecated)
         d->m_deprecated = deprecated;
+}
+
+static bool isDeprecatedValue(const AbstractMetaEnumValue &v)
+{
+    return v.isDeprecated();
+};
+
+bool AbstractMetaEnum::hasDeprecatedValues() const
+{
+    return std::any_of(d->m_enumValues.cbegin(), d->m_enumValues.cend(),
+                       isDeprecatedValue);
+}
+
+AbstractMetaEnumValueList AbstractMetaEnum::deprecatedValues() const
+{
+    AbstractMetaEnumValueList result;
+    std::copy_if(d->m_enumValues.cbegin(), d->m_enumValues.cend(),
+                 std::back_inserter(result), isDeprecatedValue);
+    return result;
 }
 
 const Documentation &AbstractMetaEnum::documentation() const

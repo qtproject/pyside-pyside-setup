@@ -32,6 +32,8 @@ LIBSHIBOKEN_API void warnInvalidReturnValue(const char *className, const char *f
                                             const char *expectedType, const char *actualType);
 LIBSHIBOKEN_API void warnDeprecated(const char *functionName);
 LIBSHIBOKEN_API void warnDeprecated(const char *className, const char *functionName);
+LIBSHIBOKEN_API void warnDeprecatedEnum(const char *enumName);
+LIBSHIBOKEN_API void warnDeprecatedEnumValue(const char *enumName, const char *valueName);
 } // namespace Warnings
 
 } // namespace Shiboken
