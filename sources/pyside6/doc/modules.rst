@@ -1,5 +1,5 @@
-Qt Modules
-===========
+Qt Modules Supported by Qt for Python
+=====================================
 
 .. toctree::
    :hidden:
