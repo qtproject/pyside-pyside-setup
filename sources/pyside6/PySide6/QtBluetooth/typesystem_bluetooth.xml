@@ -17,7 +17,7 @@
         <enum-type name="Pairing"/>
     </object-type>
     <object-type name="QBluetoothDeviceDiscoveryAgent">
-        <enum-type name="DiscoveryMethod"/>
+        <enum-type name="DiscoveryMethod" flags="DiscoveryMethods"/>
         <enum-type name="Error"/>
     </object-type>
     <value-type name="QBluetoothDeviceInfo">
