@@ -317,11 +317,10 @@ void QtDocGenerator::writeFunctionBlock(TextStream& s, const QString& title, QSt
 
         std::sort(functions.begin(), functions.end());
 
-        s << ".. container:: function_list\n\n";
-        Indentation indentation(s);
+        s << ".. container:: function_list\n\n" << indent;
         for (const QString &func : qAsConst(functions))
             s << "* " << func << '\n';
-        s << "\n\n";
+        s << outdent << "\n\n";
     }
 }
 

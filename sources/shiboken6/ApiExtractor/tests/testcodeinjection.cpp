@@ -112,13 +112,10 @@ void TestCodeInjections::testInjectWithInvalidApiVersion()
 void TestCodeInjections::testTextStream()
 {
     StringStream str(TextStream::Language::Cpp);
-    str << "void foo(int a, int b) {\n";
-    {
-        Indentation i(str);
-        str << "if (a == b)\n" << indent << "return a;\n" << outdent
-            << "#if Q_OS_WIN\nprint()\n#endif\nreturn a + b;\n";
-    }
-    str << "}\n\n// A table\n|"
+    str << "void foo(int a, int b) {\n" << indent
+        << "if (a == b)\n" << indent << "return a;\n" << outdent
+        << "#if Q_OS_WIN\nprint()\n#endif\nreturn a + b;\n" << outdent
+        << "}\n\n// A table\n|"
         << AlignedField("bla", 40, QTextStream::AlignRight) << "|\n|"
         << AlignedField("bla", 40, QTextStream::AlignLeft) << "|\n|"
         << AlignedField(QString(), 40, QTextStream::AlignLeft) << "|\n";
