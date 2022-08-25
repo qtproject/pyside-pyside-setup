@@ -459,11 +459,9 @@ void QtDocGenerator::writeDocSnips(TextStream &s,
                                  TypeSystem::Language language)
 {
     Indentation indentation(s);
-    QStringList invalidStrings;
+    static const QStringList invalidStrings{u"*"_s, u"//"_s, u"/*"_s, u"*/"_s};
     const static QString startMarkup = u"[sphinx-begin]"_s;
     const static QString endMarkup = u"[sphinx-end]"_s;
-
-    invalidStrings << u"*"_s << u"//"_s << u"/*"_s << u"*/"_s;
 
     for (const CodeSnip &snip : codeSnips) {
         if ((snip.position != position) ||

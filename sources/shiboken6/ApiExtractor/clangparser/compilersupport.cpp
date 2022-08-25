@@ -132,9 +132,7 @@ static void filterHomebrewHeaderPaths(HeaderPaths &headerPaths)
 static HeaderPaths gppInternalIncludePaths(const QString &compiler)
 {
     HeaderPaths result;
-    QStringList arguments;
-    arguments << QStringLiteral("-E") << QStringLiteral("-x") << QStringLiteral("c++")
-         << QStringLiteral("-") << QStringLiteral("-v");
+    QStringList arguments{u"-E"_s, u"-x"_s, u"c++"_s, u"-"_s, u"-v"_s};
     QByteArray stdOut;
     QByteArray stdErr;
     if (!runProcess(compiler, arguments, &stdOut, &stdErr))

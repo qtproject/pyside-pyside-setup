@@ -350,20 +350,14 @@ Q_DECLARE_METATYPE(TablePtr);
 
 void QtXmlToSphinxTest::testTableFormatting_data()
 {
-    using TableRow = QtXmlToSphinx::TableRow;
     using TableCell = QtXmlToSphinx::TableCell;
 
     QTest::addColumn<TablePtr>("table");
     QTest::addColumn<QString>("expected");
 
     TablePtr table(new QtXmlToSphinx::Table);
-    TableRow row;
-    row << TableCell("item11")  << TableCell("item12");
-    table->appendRow(row);
-    row.clear();
-    row << TableCell("")  << TableCell("item22");
-    table->appendRow(row);
-    row.clear();
+    table->appendRow({TableCell("item11"), TableCell("item12")});
+    table->appendRow({TableCell(""), TableCell("item22")});
     table->normalize();
 
     const char *expected = R"(+------+------+
@@ -377,12 +371,8 @@ void QtXmlToSphinxTest::testTableFormatting_data()
     QTest::newRow("normal") << table << QString::fromLatin1(expected);
 
     table.reset(new QtXmlToSphinx::Table);
-    row << TableCell("item11")  << TableCell("item12\nline2");
-    table->appendRow(row);
-    row.clear();
-    row << TableCell("")  << TableCell("item22\nline2\nline3");
-    table->appendRow(row);
-    row.clear();
+    table->appendRow({TableCell("item11"), TableCell("item12\nline2")});
+    table->appendRow({TableCell(""), TableCell("item22\nline2\nline3")});
     table->normalize();
 
     expected = R"(+------+------+
