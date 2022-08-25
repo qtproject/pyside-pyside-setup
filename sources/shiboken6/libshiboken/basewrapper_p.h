@@ -115,7 +115,7 @@ struct SbkObjectTypePrivate
     const char **propertyStrings;
     const char **enumFlagInfo;
     PyObject *enumFlagsDict;
-    PyObject *enumIntSet;
+    PyObject *enumTypeDict;
 };
 
 

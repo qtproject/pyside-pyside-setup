@@ -394,6 +394,7 @@ static PyMethodDef SbkEnumObject_Methods[] = {
     {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
+static PyObject *PyEnumModule{};
 static PyObject *PyEnumMeta{};
 static PyObject *PyEnum{};
 static PyObject *PyIntEnum{};
@@ -408,6 +409,7 @@ PyTypeObject *getPyEnumMeta()
 
     static auto *mod = PyImport_ImportModule("enum");
     if (mod) {
+        PyEnumModule = mod;
         PyEnumMeta = PyObject_GetAttrString(mod, "EnumMeta");
         if (PyEnumMeta && PyType_Check(PyEnumMeta))
             PyEnum = PyObject_GetAttrString(mod, "Enum");
@@ -994,16 +996,14 @@ PyTypeObject *morphLastEnumToPython()
     }
 
     auto *scopeOrModule = lec.scopeOrModule;
-    bool useInt = true;
-
+    static PyObject *enumName = String::createStaticString("IntEnum");
     if (PyType_Check(scopeOrModule)) {
         // For global objects, we have no good solution, yet where to put the int info.
         auto type = reinterpret_cast<PyTypeObject *>(scopeOrModule);
         auto *sotp = PepType_SOTP(type);
         if (!sotp->enumFlagsDict)
             initEnumFlagsDict(type);
-        if (!PySet_Contains(sotp->enumIntSet, String::fromCString(lec.name)))
-            useInt = false;
+        enumName = PyDict_GetItem(sotp->enumTypeDict, String::fromCString(lec.name));
     }
 
     PyObject *key, *value;
@@ -1012,9 +1012,10 @@ PyTypeObject *morphLastEnumToPython()
     if (!values)
         return nullptr;
 
+    AutoDecRef PyEnumType(PyObject_GetAttr(PyEnumModule, enumName));
+    assert(PyEnumType.object());
+
     // Walk the values dict and create a Python enum type.
-    auto *PyEnumType = lec.flagsType ? (useInt ? PyIntFlag : PyFlag)
-                                     : (useInt ? PyIntEnum : PyEnum);
     AutoDecRef name(PyUnicode_FromString(lec.name));
     AutoDecRef args(PyList_New(0));
     auto *pyName = name.object();
