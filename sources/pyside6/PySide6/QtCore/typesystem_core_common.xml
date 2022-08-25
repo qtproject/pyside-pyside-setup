@@ -313,7 +313,20 @@
     </conversion-rule>
   </primitive-type>
 
-  <value-type name="QKeyCombination"/>
+  <value-type name="QKeyCombination">
+      <!-- The following do-nothing function is needed for coercion of constructs like
+            QKeyCombination(Qt.CTRL | Qt.Key_B)
+        -->
+      <add-function signature="QKeyCombination(QKeyCombination)">
+          <inject-code class="target" position="beginning" file="../glue/qtcore.cpp"
+                       snippet="keycombination-from-keycombination"/>
+      </add-function>
+      <!-- This is just a copy of KeyModifier to handle Modifier the same -->
+      <add-function signature="QKeyCombination(Qt::Modifier @modifiers@, Qt::Key @key@)">
+          <inject-code class="target" position="beginning" file="../glue/qtcore.cpp"
+                       snippet="keycombination-from-modifier"/>
+      </add-function>
+  </value-type>
 
   <value-type name="QMetaType">
       <extra-includes>
@@ -570,7 +583,7 @@
     <enum-type name="LayoutDirection"/>
     <enum-type name="MaskMode"/>
     <enum-type name="MatchFlag" flags="MatchFlags"/>
-    <enum-type name="Modifier"/>
+    <enum-type name="Modifier" python-type="Flag"/>
     <enum-type name="MouseButton" flags="MouseButtons"/>
     <enum-type name="MouseEventFlag" flags="MouseEventFlags" since="5.3"/>
     <enum-type name="MouseEventSource" since="5.3"/>

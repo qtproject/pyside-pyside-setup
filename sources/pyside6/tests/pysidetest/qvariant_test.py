@@ -11,8 +11,8 @@ from init_paths import init_test_paths
 init_test_paths(True)
 
 from testbinding import TestObject
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QKeySequence
+from PySide6.QtCore import Qt, QKeyCombination
+from PySide6.QtGui import QKeySequence, QAction
 
 from helper.usesqapplication import UsesQApplication
 
@@ -23,6 +23,16 @@ class QVariantTest(UsesQApplication):
         # bug #775
         ks = QKeySequence(Qt.ShiftModifier, Qt.ControlModifier, Qt.Key_P, Qt.Key_R)
         self.assertEqual(TestObject.checkType(ks), 4107)
+
+    # PYSIDE-1735: Test the new way to address QKeyCombination after moving IntEnum to Enum
+    def testQKeySequenceMoreVariations(self):
+        QAction().setShortcut(Qt.CTRL | Qt.Key_B)
+        QAction().setShortcut(Qt.CTRL | Qt.ALT | Qt.Key_B)
+        QAction().setShortcut(Qt.CTRL | Qt.AltModifier | Qt.Key_B)
+        QAction().setShortcut(QKeySequence(QKeyCombination(Qt.CTRL | Qt.Key_B)))
+        QKeySequence(Qt.CTRL | Qt.Key_Q)
+        # Issues a warning but works as well
+        QKeySequence(Qt.CTRL + Qt.Key_Q)
 
 
 if __name__ == '__main__':
