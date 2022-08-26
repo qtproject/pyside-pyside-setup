@@ -2383,61 +2383,46 @@ void CppGenerator::writeMethodWrapper(TextStream &s, const OverloadData &overloa
 
     s << '\n';
 
-    /*
-     * This code is intended for shift operations only:
-     * Make sure reverse <</>> operators defined in other classes (specially from other modules)
-     * are called. A proper and generic solution would require an reengineering in the operator
-     * system like the extended converters.
-     *
-     * Solves #119 - QDataStream <</>> operators not working for QPixmap
-     * http://bugs.openbossa.org/show_bug.cgi?id=119
-     */
-    bool hasReturnValue = overloadData.hasNonVoidReturnType();
-    bool callExtendedReverseOperator = hasReturnValue
-                                       && !rfunc->isInplaceOperator()
-                                       && !rfunc->isCallOperator()
-                                       && rfunc->isOperatorOverload();
+    // This code is intended for shift operations only: Make sure reverse <</>>
+    // operators defined in other classes (specially from other modules)
+    // are called. A proper and generic solution would require an reengineering
+    // in the operator system like the extended converters.
+    // Solves #119 - QDataStream <</>> operators not working for QPixmap.
+    const bool hasReturnValue = overloadData.hasNonVoidReturnType();
 
-    QScopedPointer<Indentation> reverseIndent;
-
-    if (callExtendedReverseOperator) {
-        QString revOpName = ShibokenGenerator::pythonOperatorFunctionName(rfunc);
-        revOpName.insert(2, u'r');
+    if (hasReturnValue && rfunc->functionType() == AbstractMetaFunction::ShiftOperator
+        && rfunc->isBinaryOperator()) {
         // For custom classes, operations like __radd__ and __rmul__
         // will enter an infinite loop.
-        if (rfunc->isBinaryOperator() && revOpName.contains(u"shift")) {
-            revOpName = u"Shiboken::PyMagicName::"_s + revOpName.replace(u"__"_s, u""_s) + u"()"_s;
-            s << "static PyObject *attrName = " << revOpName << ";\n";
-            s << "if (!isReverse\n" << indent
-                << "&& Shiboken::Object::checkType(" << PYTHON_ARG << ")\n"
-                << "&& !PyObject_TypeCheck(" << PYTHON_ARG << ", self->ob_type)\n"
-                << "&& PyObject_HasAttr(" << PYTHON_ARG << ", attrName)) {\n"
-                << "PyObject *revOpMethod = PyObject_GetAttr(" << PYTHON_ARG << ", attrName);\n"
-                << "if (revOpMethod && PyCallable_Check(revOpMethod)) {\n" << indent
-                << PYTHON_RETURN_VAR << " = PyObject_CallFunction(revOpMethod, \"O\", self);\n"
-                << "if (PyErr_Occurred() && (PyErr_ExceptionMatches(PyExc_NotImplementedError)"
-                << " || PyErr_ExceptionMatches(PyExc_AttributeError))) {\n" << indent
-                << "PyErr_Clear();\n"
-                << "Py_XDECREF(" << PYTHON_RETURN_VAR << ");\n"
-                << PYTHON_RETURN_VAR << " = " << NULL_PTR << ";\n"
-                << outdent << "}\n"
-                << outdent << "}\n"
-                << "Py_XDECREF(revOpMethod);\n\n"
-                << outdent << "}\n\n"
-                << "// Do not enter here if other object has implemented a reverse operator.\n"
-                << "if (!" << PYTHON_RETURN_VAR << ") {\n";
-            reverseIndent.reset(new Indentation(s));
-        } // binary shift operator
-    }
-
-    if (maxArgs > 0)
-        writeOverloadedFunctionDecisor(s, overloadData);
-
-    writeFunctionCalls(s, overloadData, classContext, ErrorReturn::Default);
-
-    if (!reverseIndent.isNull()) { // binary shift operator
-        reverseIndent.reset();
-        s  << '\n' << "} // End of \"if (!" << PYTHON_RETURN_VAR << ")\"\n";
+        const QString pythonOp = ShibokenGenerator::pythonOperatorFunctionName(rfunc);
+        s << "static PyObject *attrName = Shiboken::PyMagicName::r"
+            << pythonOp.mid(2, pythonOp.size() -4) << "();\n" // Strip __
+            << "if (!isReverse\n" << indent
+            << "&& Shiboken::Object::checkType(" << PYTHON_ARG << ")\n"
+            << "&& !PyObject_TypeCheck(" << PYTHON_ARG << ", self->ob_type)\n"
+            << "&& PyObject_HasAttr(" << PYTHON_ARG << ", attrName)) {\n"
+            << "PyObject *revOpMethod = PyObject_GetAttr(" << PYTHON_ARG << ", attrName);\n"
+            << "if (revOpMethod && PyCallable_Check(revOpMethod)) {\n" << indent
+            << PYTHON_RETURN_VAR << " = PyObject_CallFunction(revOpMethod, \"O\", self);\n"
+            << "if (PyErr_Occurred() && (PyErr_ExceptionMatches(PyExc_NotImplementedError)"
+            << " || PyErr_ExceptionMatches(PyExc_AttributeError))) {\n" << indent
+            << "PyErr_Clear();\n"
+            << "Py_XDECREF(" << PYTHON_RETURN_VAR << ");\n"
+            << PYTHON_RETURN_VAR << " = " << NULL_PTR << ";\n"
+            << outdent << "}\n"
+            << outdent << "}\n"
+            << "Py_XDECREF(revOpMethod);\n\n"
+            << outdent << "}\n\n"
+            << "// Do not enter here if other object has implemented a reverse operator.\n"
+            << "if (!" << PYTHON_RETURN_VAR << ") {\n" << indent;
+        if (maxArgs > 0)
+            writeOverloadedFunctionDecisor(s, overloadData);
+        writeFunctionCalls(s, overloadData, classContext, ErrorReturn::Default);
+        s  << outdent << '\n' << "} // End of \"if (!" << PYTHON_RETURN_VAR << ")\"\n";
+    } else { // binary shift operator
+        if (maxArgs > 0)
+            writeOverloadedFunctionDecisor(s, overloadData);
+        writeFunctionCalls(s, overloadData, classContext, ErrorReturn::Default);
     }
 
     s << '\n';
