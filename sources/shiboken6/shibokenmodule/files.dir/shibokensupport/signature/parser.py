@@ -398,18 +398,6 @@ def handle_retvar(obj):
 
 
 def calculate_props(line):
-    # PYSIDE-1735: QFlag is now divided into fields for future Python Enums, like
-    #              "PySide.QtCore.^^Qt.ItemFlags^^Qt.ItemFlag^^"
-    #              Resolve that until Enum is finally settled.
-    while "^^" in line:
-        parts = line.split("^^", 3)
-        selected = EnumSelect.SELECTION
-        line = parts[0] + parts[selected.value] + parts[3]
-        if selected is EnumSelect.NEW:
-            _old, _new = EnumSelect.OLD.value, EnumSelect.NEW.value
-            line = re.sub(rf"\b{parts[_old]}\b", parts[_new], line)
-            type_map[parts[_old]] = parts[_new]
-
     parsed = SimpleNamespace(**_parse_line(line.strip()))
     arglist = parsed.arglist
     annotations = {}
