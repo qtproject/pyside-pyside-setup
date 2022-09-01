@@ -42,7 +42,7 @@
 
 import sys
 from PySide6.QtCore import (QDate, QDateTime, QRegularExpression,
-                            QSortFilterProxyModel, QTime, Qt)
+                            QSortFilterProxyModel, QTime, Qt, Slot)
 from PySide6.QtGui import QStandardItemModel
 from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QGridLayout,
                                QGroupBox, QHBoxLayout, QLabel, QLineEdit,
@@ -140,6 +140,7 @@ class Window(QWidget):
         self._proxy_model.setSourceModel(model)
         self._source_view.setModel(model)
 
+    @Slot()
     def filter_reg_exp_changed(self):
         syntax_nr = self._filter_syntax_combo_box.currentData()
         pattern = self._filter_pattern_line_edit.text()
@@ -155,9 +156,11 @@ class Window(QWidget):
             reg_exp.setPatternOptions(options)
         self._proxy_model.setFilterRegularExpression(reg_exp)
 
+    @Slot()
     def filter_column_changed(self):
         self._proxy_model.setFilterKeyColumn(self._filter_column_combo_box.currentIndex())
 
+    @Slot()
     def sort_changed(self):
         if self._sort_case_sensitivity_check_box.isChecked():
             case_sensitivity = Qt.CaseSensitive

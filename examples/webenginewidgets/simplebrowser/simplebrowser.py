@@ -42,7 +42,7 @@
 """PySide6 WebEngineWidgets Example"""
 
 import sys
-from PySide6.QtCore import QUrl
+from PySide6.QtCore import QUrl, Slot
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (QApplication, QLineEdit,
     QMainWindow, QPushButton, QToolBar)
@@ -80,17 +80,21 @@ class MainWindow(QMainWindow):
         self.webEngineView.page().titleChanged.connect(self.setWindowTitle)
         self.webEngineView.page().urlChanged.connect(self.urlChanged)
 
+    @Slot()
     def load(self):
         url = QUrl.fromUserInput(self.addressLineEdit.text())
         if url.isValid():
             self.webEngineView.load(url)
 
+    @Slot()
     def back(self):
         self.webEngineView.page().triggerAction(QWebEnginePage.Back)
 
+    @Slot()
     def forward(self):
         self.webEngineView.page().triggerAction(QWebEnginePage.Forward)
 
+    @Slot(QUrl)
     def urlChanged(self, url):
         self.addressLineEdit.setText(url.toString())
 

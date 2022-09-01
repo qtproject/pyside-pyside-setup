@@ -35,7 +35,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtWidgets import QFormLayout, QWidget
+from PySide6.QtWidgets import QFormLayout, QWidget, QLabel, QMainWindow
 
 from helper.usesqapplication import UsesQApplication
 
@@ -44,12 +44,11 @@ class QFormLayoutTest(UsesQApplication):
 
     def testGetItemPosition(self):
         formlayout = QFormLayout()
-        if not sys.pyside63_option_python_enum:
-            # PYSIDE-1735: This gives random values if no row exists.
-            row, role = formlayout.getItemPosition(0)
-            self.assertTrue(isinstance(row, int))
-            self.assertTrue(isinstance(role, QFormLayout.ItemRole))
-            self.assertEqual(row, -1)
+
+        row, role = formlayout.getItemPosition(0)
+        self.assertTrue(isinstance(row, int))
+        self.assertTrue(isinstance(role, QFormLayout.ItemRole))
+        self.assertEqual(row, -1)
 
         widget = QWidget()
         formlayout.addRow(widget)
@@ -62,12 +61,11 @@ class QFormLayoutTest(UsesQApplication):
     def testGetWidgetPosition(self):
         formlayout = QFormLayout()
         widget = QWidget()
-        if not sys.pyside63_option_python_enum:
-            # PYSIDE-1735: This gives random values if no row exists.
-            row, role = formlayout.getWidgetPosition(widget)
-            self.assertTrue(isinstance(row, int))
-            self.assertTrue(isinstance(role, QFormLayout.ItemRole))
-            self.assertEqual(row, -1)
+
+        row, role = formlayout.getWidgetPosition(widget)
+        self.assertTrue(isinstance(row, int))
+        self.assertTrue(isinstance(role, QFormLayout.ItemRole))
+        self.assertEqual(row, -1)
 
         formlayout.addRow(widget)
         row, role = formlayout.getWidgetPosition(widget)
@@ -79,12 +77,11 @@ class QFormLayoutTest(UsesQApplication):
     def testGetLayoutPosition(self):
         formlayout = QFormLayout()
         layout = QFormLayout()
-        if not sys.pyside63_option_python_enum:
-            # PYSIDE-1735: This gives random values if no row exists.
-            row, role = formlayout.getLayoutPosition(layout)
-            self.assertTrue(isinstance(row, int))
-            self.assertTrue(isinstance(role, QFormLayout.ItemRole))
-            self.assertEqual(row, -1)
+
+        row, role = formlayout.getLayoutPosition(layout)
+        self.assertTrue(isinstance(row, int))
+        self.assertTrue(isinstance(role, QFormLayout.ItemRole))
+        self.assertEqual(row, -1)
 
         formlayout.addRow(layout)
         row, role = formlayout.getLayoutPosition(layout)
@@ -93,7 +90,35 @@ class QFormLayoutTest(UsesQApplication):
         self.assertEqual(row, 0)
         self.assertEqual(role, QFormLayout.SpanningRole)
 
+    def testTakeRow(self):
+        window = QMainWindow()
+        window.setCentralWidget(QWidget())
+        formlayout = QFormLayout(window.centralWidget())
+
+        widget_label = "blub"
+        widget = QLabel(widget_label)
+
+        self.assertEqual(formlayout.count(), 0)
+        formlayout.addRow(widget)
+        self.assertEqual(formlayout.count(), 1)
+        self.assertEqual(formlayout.itemAt(0).widget(), widget)
+
+        widget_id = id(widget)
+
+        # Now there are no more references to the original widget on the
+        # Python side. Assert that this does not break the references to
+        # the widget on the C++ side so that "taking" the row will work.
+        del widget
+
+        takeRowResult = formlayout.takeRow(0)
+        self.assertEqual(formlayout.count(), 0)
+
+        widget = takeRowResult.fieldItem.widget()
+
+        self.assertIsNotNone(widget)
+        self.assertEqual(widget_id, id(widget))
+        self.assertEqual(widget.text(), widget_label)
+
 
 if __name__ == "__main__":
     unittest.main()
-

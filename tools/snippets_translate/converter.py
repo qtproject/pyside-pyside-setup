@@ -46,7 +46,7 @@ from handlers import (handle_array_declarations, handle_casts, handle_class,
                       handle_inc_dec, handle_include, handle_keywords,
                       handle_methods_return_type, handle_negate,
                       handle_type_var_declaration, handle_useless_qt_classes,
-                      handle_void_functions)
+                      handle_void_functions, handle_qt_connects)
 from parse_utils import dstrip, get_indent, remove_ref
 
 
@@ -75,6 +75,10 @@ def snippet_translate(x):
     if x.lstrip().startswith("//"):
         x = x.replace("//", "#", 1)
         return x
+
+    qt_connects = handle_qt_connects(x)
+    if qt_connects:
+        return qt_connects
 
     # Handle "->"
     if "->" in x:

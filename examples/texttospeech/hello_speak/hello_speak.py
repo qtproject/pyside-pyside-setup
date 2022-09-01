@@ -42,7 +42,7 @@
 """PySide6 QTextToSpeech example"""
 
 import sys
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Slot
 from PySide6.QtWidgets import (QApplication, QComboBox, QFormLayout,
     QHBoxLayout, QLineEdit, QMainWindow, QPushButton, QSlider, QWidget)
 
@@ -91,12 +91,14 @@ class MainWindow(QMainWindow):
             self.setWindowTitle('QTextToSpeech Example (no engines available)')
             self.sayButton.setEnabled(False)
 
+    @Slot()
     def say(self):
         self.sayButton.setEnabled(False)
         self.engine.setVoice(self.voices[self.voiceCombo.currentIndex()])
         self.engine.setVolume(float(self.volumeSlider.value()) / 100)
         self.engine.say(self.text.text())
 
+    @Slot("QTextToSpeech::State")
     def stateChanged(self, state):
         if (state == QTextToSpeech.State.Ready):
             self.sayButton.setEnabled(True)

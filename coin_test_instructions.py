@@ -186,7 +186,16 @@ def run_test_instructions():
         p_ver = "pypy"
         call_testrunner(p_ver, str(testRun), pypy)
     else:
-        call_testrunner("3", str(testRun))
+        # In win machines, there are additional python versions to test with
+        if CI_HOST_OS == "Windows":
+            if os.environ.get('HOST_OSVERSION_COIN') == 'windows_10_21h2':
+                call_testrunner("3.10.0", str(testRun))
+            else:
+                call_testrunner("3.7.9", str(testRun))
+        elif CI_HOST_OS == "Linux":
+            call_testrunner("3.8", str(testRun))
+        else:
+            call_testrunner("3", str(testRun))
 
 
 if __name__ == "__main__":

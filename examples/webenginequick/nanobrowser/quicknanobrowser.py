@@ -48,8 +48,8 @@ from PySide6.QtWebEngineQuick import QtWebEngineQuick
 
 
 def main():
-    app = QApplication([])
     QtWebEngineQuick.initialize()
+    app = QApplication([])
     engine = QQmlApplicationEngine()
     qml_file_path = os.path.join(os.path.dirname(__file__), 'browser.qml')
     qml_url = QUrl.fromLocalFile(os.path.abspath(qml_file_path))

@@ -46,7 +46,8 @@ from argparse import ArgumentParser, RawTextHelpFormatter
 import ctypes
 import math
 import sys
-from PySide6.QtCore import QCoreApplication, Signal, SIGNAL, SLOT, Qt, QSize, QPointF
+from PySide6.QtCore import (QCoreApplication, Signal, Slot,
+                            Qt, QSize, QPointF)
 from PySide6.QtGui import (QVector3D, QOpenGLFunctions,
     QMatrix4x4, QOpenGLContext, QSurfaceFormat, QVector3DList)
 from PySide6.QtOpenGL import (QOpenGLVertexArrayObject, QOpenGLBuffer,
@@ -266,6 +267,7 @@ class GLWidget(QOpenGLWidget, QOpenGLFunctions):
             angle -= 360 * 16
         return angle
 
+    @Slot(int)
     def set_xrotation(self, angle):
         angle = self.normalize_angle(angle)
         if angle != self._x_rot:
@@ -273,6 +275,7 @@ class GLWidget(QOpenGLWidget, QOpenGLFunctions):
             self.x_rotation_changed.emit(angle)
             self.update()
 
+    @Slot(int)
     def set_yrotation(self, angle):
         angle = self.normalize_angle(angle)
         if angle != self._y_rot:
@@ -280,6 +283,7 @@ class GLWidget(QOpenGLWidget, QOpenGLFunctions):
             self.y_rotation_changed.emit(angle)
             self.update()
 
+    @Slot(int)
     def set_zrotation(self, angle):
         angle = self.normalize_angle(angle)
         if angle != self._z_rot:
@@ -287,6 +291,7 @@ class GLWidget(QOpenGLWidget, QOpenGLFunctions):
             self.z_rotation_changed.emit(angle)
             self.update()
 
+    @Slot()
     def cleanup(self):
         self.makeCurrent()
         self._logo_vbo.destroy()

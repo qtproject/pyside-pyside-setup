@@ -45,7 +45,7 @@ from PySide6.QtGui import (QCursor, QDesktopServices, QGuiApplication, QIcon,
                            QKeySequence, QShortcut, QStandardItem,
                            QStandardItemModel, QScreen, QWindow)
 from PySide6.QtCore import (QDateTime, QDir, QLibraryInfo, QMetaObject,
-                            QSysInfo, QTextStream, QTimer, Qt, qVersion)
+                            QSysInfo, QTextStream, QTimer, Qt, qVersion, Slot)
 
 
 POEM = """Twinkle, twinkle, little star,
@@ -217,9 +217,11 @@ class WidgetGallery(QDialog):
             self.windowHandle().screenChanged.connect(self.update_systeminfo)
             self.update_systeminfo()
 
+    @Slot(str)
     def change_style(self, style_name):
         QApplication.setStyle(QStyleFactory.create(style_name))
 
+    @Slot()
     def advance_progressbar(self):
         cur_val = self._progress_bar.value()
         max_val = self._progress_bar.maximum()
@@ -416,6 +418,7 @@ class WidgetGallery(QDialog):
         timer.start(1000)
         return result
 
+    @Slot()
     def update_systeminfo(self):
         """Display system information"""
         system_info = SYSTEMINFO.format(sys.version,
@@ -424,6 +427,7 @@ class WidgetGallery(QDialog):
                                         screen_info(self))
         self._systeminfo_textbrowser.setHtml(system_info)
 
+    @Slot()
     def help_on_current_widget(self):
         """Display help on widget under mouse"""
         w = QApplication.widgetAt(QCursor.pos(self.screen()))

@@ -43,7 +43,7 @@
 
 import sys
 
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import Qt, QTimer, Slot
 from PySide6.QtGui import QPainter
 from PySide6.QtWidgets import QApplication, QGridLayout, QWidget
 from PySide6.QtCharts import QChart, QChartView, QPieSeries, QPieSlice
@@ -103,6 +103,7 @@ class Widget(QWidget):
             self.donuts.append(donut)
             self.chart_view.chart().addSeries(donut)
 
+    @Slot()
     def update_rotation(self):
         for donut in self.donuts:
             phase_shift = randrange(-50, 100)

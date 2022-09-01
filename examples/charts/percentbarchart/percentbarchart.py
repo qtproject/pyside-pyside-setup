@@ -81,7 +81,8 @@ class MainWindow(QMainWindow):
         axis = QBarCategoryAxis()
         axis.append(categories)
         chart.createDefaultAxes()
-        chart.setAxisX(axis, series)
+        chart.addAxis(axis, Qt.AlignBottom)
+        series.attachAxis(axis)
 
         chart.legend().setVisible(True)
         chart.legend().setAlignment(Qt.AlignBottom)

@@ -50,7 +50,7 @@ namespace QtGuiHelper {
         Q_DISABLE_COPY_MOVE(QOverrideCursorGuard)
 
         QOverrideCursorGuard() = default;
-        ~QOverrideCursorGuard() { restoreOverrideCursor(); }
+        ~QOverrideCursorGuard() = default;
 
         void restoreOverrideCursor()
         {

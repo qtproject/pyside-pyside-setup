@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2019 The Qt Company Ltd.
+## Copyright (C) 2022 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of Qt for Python.
@@ -113,13 +113,7 @@ def set_ospaths(build_dir):
     ps = os.pathsep
     ospath_var = "PATH" if sys.platform == "win32" else "LD_LIBRARY_PATH"
     old_val = os.environ.get(ospath_var, "")
-    lib_path = [os.path.join(build_dir, "pyside6", "libpyside"),
-                os.path.join(build_dir, "pyside6", "tests", "pysidetest"),
-                os.path.join(build_dir, "shiboken6", "tests", "libminimal"),
-                os.path.join(build_dir, "shiboken6", "tests", "libsample"),
-                os.path.join(build_dir, "shiboken6", "tests", "libother"),
-                os.path.join(build_dir, "shiboken6", "tests", "libsmart"),
-                os.path.join(build_dir, "shiboken6", "libshiboken")]
+    lib_path = [os.path.join(build_dir, "pyside6", "tests", "pysidetest"),]
     ospath = ps.join(lib_path + old_val.split(ps))
     os.environ[ospath_var] = ospath
 
@@ -138,12 +132,6 @@ all_modules.append("testbinding")
 
 from shiboken6 import Shiboken
 all_modules.append("shiboken6.Shiboken")
-
-# 'sample/smart' are needed by 'other', so import them first.
-for modname in "minimal sample smart other".split():
-    sys.path.insert(0, os.path.join(shiboken_build_dir, "tests", modname + "binding"))
-    __import__(modname)
-    all_modules.append(modname)
 
 from shibokensupport.signature.lib.enum_sig import SimplifyingEnumerator
 
@@ -208,6 +196,48 @@ def enum_all():
     return ret
 
 
+LICENSE_TEXT = """
+#############################################################################
+##
+## Copyright (C) 2022 The Qt Company Ltd.
+## Contact: https://www.qt.io/licensing/
+##
+## This file is part of Qt for Python.
+##
+## $QT_BEGIN_LICENSE:LGPL$
+## Commercial License Usage
+## Licensees holding valid commercial Qt licenses may use this file in
+## accordance with the commercial license agreement provided with the
+## Software or, alternatively, in accordance with the terms contained in
+## a written agreement between you and The Qt Company. For licensing terms
+## and conditions see https://www.qt.io/terms-conditions. For further
+## information use the contact form at https://www.qt.io/contact-us.
+##
+## GNU Lesser General Public License Usage
+## Alternatively, this file may be used under the terms of the GNU Lesser
+## General Public License version 3 as published by the Free Software
+## Foundation and appearing in the file LICENSE.LGPL3 included in the
+## packaging of this file. Please review the following information to
+## ensure the GNU Lesser General Public License version 3 requirements
+## will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
+##
+## GNU General Public License Usage
+## Alternatively, this file may be used under the terms of the GNU
+## General Public License version 2.0 or (at your option) the GNU General
+## Public license version 3 or any later version approved by the KDE Free
+## Qt Foundation. The licenses are as published by the Free Software
+## Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
+## included in the packaging of this file. Please review the following
+## information to ensure the GNU General Public License requirements will
+## be met: https://www.gnu.org/licenses/gpl-2.0.html and
+## https://www.gnu.org/licenses/gpl-3.0.html.
+##
+## $QT_END_LICENSE$
+##
+#############################################################################
+"""
+
+
 def generate_all():
     refPath = get_refpath()
     module = os.path.basename(os.path.splitext(refPath)[0])
@@ -218,7 +248,7 @@ def generate_all():
         license_line = next((lno for lno, line in enumerate(lines)
                              if "$QT_END_LICENSE$" in line))
         fmt.print("#recreate       # uncomment this to enforce generation")
-        fmt.print("".join(lines[:license_line + 3]))
+        fmt.print(LICENSE_TEXT)
         version = sys.version.replace('\n', ' ')
         build = qt_build()
         fmt.print(dedent(f'''\

@@ -41,7 +41,7 @@
 from PySide6.QtWebEngineCore import QWebEnginePage
 from PySide6.QtWebEngineWidgets import QWebEngineView
 
-from PySide6 import QtCore
+from PySide6.QtCore import Signal, Slot
 
 _web_actions = [QWebEnginePage.Back, QWebEnginePage.Forward,
                 QWebEnginePage.Reload,
@@ -52,7 +52,7 @@ _web_actions = [QWebEnginePage.Back, QWebEnginePage.Forward,
 
 class WebEngineView(QWebEngineView):
 
-    enabled_changed = QtCore.Signal(QWebEnginePage.WebAction, bool)
+    enabled_changed = Signal(QWebEnginePage.WebAction, bool)
 
     @staticmethod
     def web_actions():
@@ -86,6 +86,7 @@ class WebEngineView(QWebEngineView):
             return self._tab_factory_func()
         return self._window_factory_func()
 
+    @Slot()
     def _enabled_changed(self):
         action = self.sender()
         web_action = self._actions[action]

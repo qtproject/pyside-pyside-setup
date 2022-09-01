@@ -46,7 +46,7 @@
 import sys
 
 from PySide6.QtCore import (QByteArray, QDate, QDateTime, QDir, QEvent, QPoint,
-    QRect, QRegularExpression, QSettings, QSize, QTime, QTimer, Qt)
+    QRect, QRegularExpression, QSettings, QSize, QTime, QTimer, Qt, Slot)
 from PySide6.QtGui import (QAction, QColor, QIcon, QIntValidator,
     QDoubleValidator, QRegularExpressionValidator, QValidator)
 from PySide6.QtWidgets import (QAbstractItemView, QApplication,
@@ -183,6 +183,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Settings Editor")
         self.resize(500, 600)
 
+    @Slot()
     def open_settings(self):
         if self.location_dialog is None:
             self.location_dialog = LocationDialog(self)
@@ -195,6 +196,7 @@ class MainWindow(QMainWindow):
             self.set_settings_object(settings)
             self.fallbacks_action.setEnabled(True)
 
+    @Slot()
     def open_inifile(self):
         file_name, _ = QFileDialog.getOpenFileName(self, "Open INI File",
                 '', "INI Files (*.ini *.conf)")
@@ -209,6 +211,7 @@ class MainWindow(QMainWindow):
         self.set_settings_object(settings)
         self.fallbacks_action.setEnabled(False)
 
+    @Slot()
     def open_property_list(self):
         file_name, _ = QFileDialog.getOpenFileName(self,
                 "Open Property List", '', "Property List Files (*.plist)")
@@ -218,6 +221,7 @@ class MainWindow(QMainWindow):
             self.set_settings_object(settings)
             self.fallbacks_action.setEnabled(False)
 
+    @Slot()
     def open_registry_path(self):
         path, ok = QInputDialog.getText(self, "Open Registry Path",
                 "Enter the path in the Windows registry:",
@@ -228,6 +232,7 @@ class MainWindow(QMainWindow):
             self.set_settings_object(settings)
             self.fallbacks_action.setEnabled(False)
 
+    @Slot()
     def about(self):
         QMessageBox.about(self, "About Settings Editor",
                 "The <b>Settings Editor</b> example shows how to access "
@@ -512,6 +517,7 @@ class SettingsTree(QTreeWidget):
     def sizeHint(self):
         return QSize(800, 600)
 
+    @Slot(bool)
     def set_auto_refresh(self, autoRefresh):
         self.auto_refresh = autoRefresh
 
@@ -522,15 +528,18 @@ class SettingsTree(QTreeWidget):
             else:
                 self.refresh_timer.stop()
 
+    @Slot(bool)
     def set_fallbacks_enabled(self, enabled):
         if self.settings is not None:
             self.settings.setFallbacksEnabled(enabled)
             self.refresh()
 
+    @Slot()
     def maybe_refresh(self):
         if self.state() != QAbstractItemView.EditingState:
             self.refresh()
 
+    @Slot()
     def refresh(self):
         if self.settings is None:
             return

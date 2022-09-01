@@ -96,6 +96,11 @@ QFormLayout::ItemRole _role;
 %CPPSELF->%FUNCTION_NAME(%ARGUMENT_NAMES, &_row, &_role);
 %PYARG_0 = PyTuple_New(2);
 PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[int](_row));
+// On the C++ side, *rolePtr is not set if row == -1, in which case on
+// the Python side this gets converted to a random value outside the
+// enum range. Fix this by setting _role to a default value here.
+if (_row == -1)
+    _role = QFormLayout::LabelRole;
 PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QFormLayout::ItemRole](_role));
 // @snippet qformlayout-fix-args
 

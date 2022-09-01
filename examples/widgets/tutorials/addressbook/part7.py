@@ -166,6 +166,7 @@ class AddressBook(QWidget):
         self.setLayout(main_layout)
         self.setWindowTitle("Simple Address Book")
 
+    @Slot()
     def add_contact(self):
         self._old_name = self._name_line.text()
         self._old_address = self._address_text.toPlainText()
@@ -175,12 +176,14 @@ class AddressBook(QWidget):
 
         self.update_interface(self.AddingMode)
 
+    @Slot()
     def edit_contact(self):
         self._old_name = self._name_line.text()
         self._old_address = self._address_text.toPlainText()
 
         self.update_interface(self.EditingMode)
 
+    @Slot()
     def submit_contact(self):
         name = self._name_line.text()
         address = self._address_text.toPlainText()
@@ -218,11 +221,13 @@ class AddressBook(QWidget):
 
         self.update_interface(self.NavigationMode)
 
+    @Slot()
     def cancel(self):
         self._name_line.setText(self._old_name)
         self._address_text.setText(self._old_address)
         self.update_interface(self.NavigationMode)
 
+    @Slot()
     def remove_contact(self):
         name = self._name_line.text()
         address = self._address_text.toPlainText()
@@ -241,6 +246,7 @@ class AddressBook(QWidget):
 
         self.update_interface(self.NavigationMode)
 
+    @Slot()
     def next(self):
         name = self._name_line.text()
         it = iter(self.contacts)
@@ -258,6 +264,7 @@ class AddressBook(QWidget):
         self._name_line.setText(next_name)
         self._address_text.setText(next_address)
 
+    @Slot()
     def previous(self):
         name = self._name_line.text()
 

@@ -37,6 +37,7 @@ ${QtWidgets_GEN_DIR}/qfocusframe_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qfontcombobox_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qfontdialog_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qformlayout_wrapper.cpp
+${QtWidgets_GEN_DIR}/qformlayout_takerowresult_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qframe_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qgesture_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qgestureevent_wrapper.cpp

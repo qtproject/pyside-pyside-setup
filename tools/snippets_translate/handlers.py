@@ -545,3 +545,49 @@ def handle_useless_qt_classes(x):
         if content:
             x = x.replace(content.group(0), content.group(1))
     return x
+
+
+# The code below handles pairs of instance/pointer to member functions (PMF)
+# which appear in Qt in connect statements like:
+# "connect(fontButton, &QAbstractButton::clicked, this, &Dialog::setFont)".
+# In a first pass, these pairs are replaced by:
+# "connect(fontButton.clicked, self.setFont)" to be able to handle statements
+# spanning lines. A 2nd pass then checks for the presence of a connect
+# statement and replaces it by:
+# "fontButton.clicked.connect(self.setFont)".
+# To be called right after checking for comments.
+
+
+INSTANCE_PMF_RE = re.compile(r"&?(\w+),\s*&\w+::(\w+)")
+
+
+CONNECT_RE = re.compile(r"^(\s*)(QObject::)?connect\((\w+\.\w+),\s*")
+
+
+def handle_qt_connects(line):
+    if not INSTANCE_PMF_RE.search(line):
+        return None
+    # 1st pass, "fontButton, &QAbstractButton::clicked" -> "fontButton.clicked"
+    last_pos = 0
+    result = ""
+    for match in INSTANCE_PMF_RE.finditer(line):
+        instance = match.group(1)
+        if instance == "this":
+            instance = "self"
+        member_fun = match.group(2)
+        next_pos = match.start()
+        result += line[last_pos:next_pos]
+        last_pos = match.end()
+        result += f"{instance}.{member_fun}"
+    result += line[last_pos:]
+
+    # 2nd pass, reorder connect.
+    connect_match = CONNECT_RE.match(result)
+    if not connect_match:
+        return result
+
+    space = connect_match.group(1)
+    signal_ = connect_match.group(3)
+    connect_stmt = f"{space}{signal_}.connect("
+    connect_stmt += result[connect_match.end():]
+    return connect_stmt
