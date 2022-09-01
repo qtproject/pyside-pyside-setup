@@ -46,6 +46,7 @@ from parse_utils import (dstrip, get_indent, get_qt_module_class,
 IF_PATTERN = re.compile(r'^\s*if\s*\(')
 ELSE_IF_PATTERN = re.compile(r'^\s*}?\s*else if\s*\(')
 WHILE_PATTERN = re.compile(r'^\s*while\s*\(')
+CAST_PATTERN = re.compile(r"[a-z]+_cast<(.*?)>\((.*?)\)")  # Non greedy match of <>
 
 
 def handle_condition(x, name):
@@ -93,26 +94,16 @@ def handle_inc_dec(x, operator):
 
 
 def handle_casts(x):
-    re_type = re.compile(r"<(.*)>")
-    re_data = re.compile(r"_cast<.*>\((.*)\)")
-    type_name = re_type.search(x)
-    data_name = re_data.search(x)
-
-    if type_name and data_name:
-        type_name = type_name.group(1).replace("*", "")
-        data_name = data_name.group(1)
-        new_value = f"{type_name}({data_name})"
-
-        if "static_cast" in x:
-            x = re.sub(r"static_cast<.*>\(.*\)", new_value, x)
-        elif "dynamic_cast" in x:
-            x = re.sub(r"dynamic_cast<.*>\(.*\)", new_value, x)
-        elif "const_cast" in x:
-            x = re.sub(r"const_cast<.*>\(.*\)", new_value, x)
-        elif "reinterpret_cast" in x:
-            x = re.sub(r"reinterpret_cast<.*>\(.*\)", new_value, x)
-        elif "qobject_cast" in x:
-            x = re.sub(r"qobject_cast<.*>\(.*\)", new_value, x)
+    while True:
+        match = CAST_PATTERN.search(x)
+        if not match:
+            break
+        type_name = match.group(1).strip()
+        while type_name.endswith("*") or type_name.endswith("&") or type_name.endswith(" "):
+            type_name = type_name[:-1]
+        data_name = match.group(2).strip()
+        python_cast = f"{type_name}({data_name})"
+        x = x[0:match.start(0)] + python_cast + x[match.end(0):]
 
     return x
 
