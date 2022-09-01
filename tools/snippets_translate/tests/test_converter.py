@@ -91,6 +91,10 @@ def test_cast():
         st("elapsed = (elapsed + qobject_cast<QTimer*>(sender())->interval()) % 1000;")
         == "elapsed = (elapsed + QTimer(sender()).interval()) % 1000"
     )
+    assert (
+         st("a = qobject_cast<type*>(data) * 9 + static_cast<int>(42)")
+         == "a = type(data) * 9 + int(42)"
+    )
 
 
 def test_double_colon():
