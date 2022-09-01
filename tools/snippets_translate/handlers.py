@@ -8,9 +8,37 @@ from parse_utils import (dstrip, get_indent, get_qt_module_class,
                          parse_arguments, remove_ref, replace_main_commas)
 
 IF_PATTERN = re.compile(r'^\s*if\s*\(')
+PARENTHESES_NONEMPTY_CONTENT_PATTERN = re.compile(r"\((.+)\)")
+LOCAL_INCLUDE_PATTERN = re.compile(r'"(.*)"')
+GLOBAL_INCLUDE_PATTERN = re.compile(r"<(.*)>")
+IF_CONDITION_PATTERN = PARENTHESES_NONEMPTY_CONTENT_PATTERN
 ELSE_IF_PATTERN = re.compile(r'^\s*}?\s*else if\s*\(')
 WHILE_PATTERN = re.compile(r'^\s*while\s*\(')
 CAST_PATTERN = re.compile(r"[a-z]+_cast<(.*?)>\((.*?)\)")  # Non greedy match of <>
+ITERATOR_LOOP_PATTERN = re.compile(r"= *(.*)egin\(")
+REMOVE_TEMPLATE_PARAMETER_PATTERN = re.compile("<.*>")
+PARENTHESES_CONTENT_PATTERN = re.compile(r"\((.*)\)")
+CONSTRUCTOR_BODY_PATTERN = re.compile(".*{ *}.*")
+CONSTRUCTOR_BODY_REPLACEMENT_PATTERN = re.compile("{ *}")
+CONSTRUCTOR_BASE_PATTERN = re.compile("^ *: *")
+NEGATE_PATTERN = re.compile(r"!(.)")
+CLASS_TEMPLATE_PATTERN = re.compile(r".*<.*>")
+EMPTY_CLASS_PATTERN = re.compile(r".*{.*}")
+EMPTY_CLASS_REPLACEMENT_PATTERN = re.compile(r"{.*}")
+FUNCTION_BODY_PATTERN = re.compile(r"\{(.*)\}")
+ARRAY_DECLARATION_PATTERN = re.compile(r"^[a-zA-Z0-9\<\>]+ ([\w\*]+) *\[?\]?")
+RETURN_TYPE_PATTERN = re.compile(r"^ *[a-zA-Z0-9]+ [\w]+::([\w\*\&]+\(.*\)$)")
+CAPTURE_PATTERN = re.compile(r"^ *([a-zA-Z0-9]+) ([\w\*\&]+\(.*\)$)")
+USELESS_QT_CLASSES_PATTERNS = [
+    re.compile(r"QLatin1String\((.*)\)"),
+    re.compile(r"QLatin1Char\((.*)\)")
+]
+COMMENT1_PATTERN = re.compile(r" *# *[\w\ ]+$")
+COMMENT2_PATTERN = re.compile(r" *# *(.*)$")
+COUT_ENDL_PATTERN = re.compile(r"cout *<<(.*)<< *.*endl")
+COUT1_PATTERN = re.compile(r" *<< *")
+COUT2_PATTERN = re.compile(r".*cout *<<")
+COUT_ENDL2_PATTERN = re.compile(r"<< +endl")
 
 
 def handle_condition(x, name):
@@ -27,10 +55,9 @@ def handle_condition(x, name):
             comment = f"  #{comment_content[-1]}"
             x = x.replace(f"//{comment_content[-1]}", "")
 
-        re_par = re.compile(r"\((.+)\)")
-        match = re_par.search(x)
+        match = IF_CONDITION_PATTERN.search(x)
         if match:
-            condition = re_par.search(x).group(1)
+            condition = match.group(1)
             return f"{get_indent(x)}{name} {condition.strip()}:{comment}"
         else:
             print(f'snippets_translate: Warning "{x}" does not match condition pattern',
@@ -74,8 +101,7 @@ def handle_casts(x):
 
 def handle_include(x):
     if '"' in x:
-        re_par = re.compile(r'"(.*)"')
-        header = re_par.search(x)
+        header = LOCAL_INCLUDE_PATTERN.search(x)
         if header:
             header_name = header.group(1).replace(".h", "")
             module_name = header_name.replace('/', '.')
@@ -85,8 +111,7 @@ def handle_include(x):
             # besides '"something.h"'
             x = ""
     elif "<" in x and ">" in x:
-        re_par = re.compile(r"<(.*)>")
-        name = re_par.search(x).group(1)
+        name = GLOBAL_INCLUDE_PATTERN.search(x).group(1)
         t = get_qt_module_class(name)
         # if it's not a Qt module or class, we discard it.
         if t is None:
@@ -114,8 +139,7 @@ def handle_conditions(x):
 
 
 def handle_for(x):
-    re_content = re.compile(r"\((.*)\)")
-    content = re_content.search(x)
+    content = PARENTHESES_CONTENT_PATTERN.search(x)
 
     new_x = x
     if content:
@@ -130,7 +154,7 @@ def handle_for(x):
 
             # iterators
             if "begin(" in x.lower() and "end(" in x.lower():
-                name = re.search(r"= *(.*)egin\(", start)
+                name = ITERATOR_LOOP_PATTERN.search(start)
                 iterable = None
                 iterator = None
                 if name:
@@ -211,23 +235,22 @@ def handle_for(x):
 
 
 def handle_foreach(x):
-    re_content = re.compile(r"\((.*)\)")
-    content = re_content.search(x)
+    content = PARENTHESES_CONTENT_PATTERN.search(x)
     if content:
         parenthesis = content.group(1)
         iterator, iterable = parenthesis.split(",", 1)
         # remove iterator type
         it = dstrip(iterator.split()[-1])
         # remove <...> from iterable
-        value = re.sub("<.*>", "", iterable)
+        value = REMOVE_TEMPLATE_PARAMETER_PATTERN.sub("", iterable)
         return f"{get_indent(x)}for {it} in {value}:"
 
 
 def handle_type_var_declaration(x):
     # remove content between <...>
     if "<" in x and ">" in x:
-        x = " ".join(re.sub("<.*>", "", i) for i in x.split())
-    content = re.search(r"\((.*)\)", x)
+        x = " ".join(REMOVE_TEMPLATE_PARAMETER_PATTERN.sub("", i) for i in x.split())
+    content = PARENTHESES_CONTENT_PATTERN.search(x)
     if content:
         # this means we have something like:
         #   QSome thing(...)
@@ -243,8 +266,7 @@ def handle_type_var_declaration(x):
 
 
 def handle_constructors(x):
-    re_content = re.compile(r"\((.*)\)")
-    arguments = re_content.search(x).group(1)
+    arguments = PARENTHESES_CONTENT_PATTERN.search(x).group(1)
     class_method = x.split("(")[0].split("::")
     if len(class_method) == 2:
         # Equal 'class name' and 'method name'
@@ -262,8 +284,8 @@ def handle_constructor_default_values(x):
     # we discard that section completely, since even with a single
     # value, we don't need to take care of it, for example:
     # ' : a(1) { }     ->   self.a = 1
-    if re.search(".*{ *}.*", x):
-        x = re.sub("{ *}", "", x)
+    if CONSTRUCTOR_BODY_PATTERN.search(x):
+        x = CONSTRUCTOR_BODY_REPLACEMENT_PATTERN.sub("", x)
 
     values = "".join(x.split(":", 1))
     # Check the commas that are not inside round parenthesis
@@ -278,26 +300,24 @@ def handle_constructor_default_values(x):
     if "@" in values:
         return_values = ""
         for arg in values.split("@"):
-            arg = re.sub("^ *: *", "", arg).strip()
+            arg = CONSTRUCTOR_BASE_PATTERN.sub("", arg).strip()
             if arg.startswith("Q"):
                 class_name = arg.split("(")[0]
                 content = arg.replace(class_name, "")[1:-1]
                 return_values += f"    {class_name}.__init__(self, {content})\n"
             elif arg:
                 var_name = arg.split("(")[0]
-                re_par = re.compile(r"\((.+)\)")
-                content = re_par.search(arg).group(1)
+                content = PARENTHESES_NONEMPTY_CONTENT_PATTERN.search(arg).group(1)
                 return_values += f"    self.{var_name} = {content}\n"
     else:
-        arg = re.sub("^ *: *", "", values).strip()
+        arg = CONSTRUCTOR_BASE_PATTERN.sub("", values).strip()
         if arg.startswith("Q"):
             class_name = arg.split("(")[0]
             content = arg.replace(class_name, "")[1:-1]
             return f"    {class_name}.__init__(self, {content})"
         elif arg:
             var_name = arg.split("(")[0]
-            re_par = re.compile(r"\((.+)\)")
-            match = re_par.search(arg)
+            match = PARENTHESES_NONEMPTY_CONTENT_PATTERN.search(arg)
             if match:
                 content = match.group(1)
                 return f"    self.{var_name} = {content}"
@@ -311,27 +331,27 @@ def handle_constructor_default_values(x):
 def handle_cout_endl(x):
     # if comment at the end
     comment = ""
-    if re.search(r" *# *[\w\ ]+$", x):
-        comment = f' # {re.search(" *# *(.*)$", x).group(1)}'
+    if COMMENT1_PATTERN.search(x):
+        match = COMMENT2_PATTERN.search(x).group(1)
+        comment = f' # {match}'
         x = x.split("#")[0]
 
     if "qDebug()" in x:
         x = x.replace("qDebug()", "cout")
 
     if "cout" in x and "endl" in x:
-        re_cout_endl = re.compile(r"cout *<<(.*)<< *.*endl")
-        data = re_cout_endl.search(x)
+        data = COUT_ENDL_PATTERN.search(x)
         if data:
             data = data.group(1)
-            data = re.sub(" *<< *", ", ", data)
+            data = COUT1_PATTERN.sub(", ", data)
             x = f"{get_indent(x)}print({data}){comment}"
     elif "cout" in x:
-        data = re.sub(".*cout *<<", "", x)
-        data = re.sub(" *<< *", ", ", data)
+        data = COUT2_PATTERN.sub("", x)
+        data = COUT1_PATTERN.sub(", ", data)
         x = f"{get_indent(x)}print({data}){comment}"
     elif "endl" in x:
-        data = re.sub("<< +endl", "", x)
-        data = re.sub(" *<< *", ", ", data)
+        data = COUT_ENDL2_PATTERN.sub("", x)
+        data = COUT1_PATTERN.sub(", ", data)
         x = f"{get_indent(x)}print({data}){comment}"
 
     x = x.replace("( ", "(").replace(" )", ")").replace(" ,", ",").replace("(, ", "(")
@@ -347,8 +367,7 @@ def handle_negate(x):
     elif "/*" in x:
         if x.index("/*") < x.index("!"):
             return x
-    re_negate = re.compile(r"!(.)")
-    next_char = re_negate.search(x).group(1)
+    next_char = NEGATE_PATTERN.search(x).group(1)
     if next_char not in ("=", '"'):
         x = x.replace("!", "not ")
     return x
@@ -356,8 +375,7 @@ def handle_negate(x):
 
 def handle_emit(x):
     function_call = x.replace("emit ", "").strip()
-    re_content = re.compile(r"\((.*)\)")
-    match = re_content.search(function_call)
+    match = PARENTHESES_CONTENT_PATTERN.search(function_call)
     if not match:
         stmt = x.strip()
         print(f'snippets_translate: Warning "{stmt}" does not match function call',
@@ -380,15 +398,14 @@ def handle_void_functions(x):
     # if the arguments are in the same line:
     arguments = None
     if ")" in x:
-        re_content = re.compile(r"\((.*)\)")
-        parenthesis = re_content.search(x).group(1)
+        parenthesis = PARENTHESES_CONTENT_PATTERN.search(x).group(1)
         arguments = dstrip(parse_arguments(parenthesis))
     elif "," in x:
         arguments = dstrip(parse_arguments(x.split("(")[-1]))
 
     # check if includes a '{ ... }' after the method signature
     after_signature = x.split(")")[-1]
-    re_decl = re.compile(r"\{(.*)\}").search(after_signature)
+    re_decl = FUNCTION_BODY_PATTERN.search(after_signature)
     extra = ""
     if re_decl:
         extra = re_decl.group(1)
@@ -424,13 +441,13 @@ def handle_class(x):
         bases_name = ""
 
     # Check if the class_name is templated, then remove it
-    if re.search(r".*<.*>", class_name):
+    if CLASS_TEMPLATE_PATTERN.search(class_name):
         class_name = class_name.split("<")[0]
 
     # Special case: invalid notation for an example:
     #   class B() {...} -> clas B(): pass
-    if re.search(r".*{.*}", class_name):
-        class_name = re.sub(r"{.*}", "", class_name).rstrip()
+    if EMPTY_CLASS_PATTERN.search(class_name):
+        class_name = EMPTY_CLASS_REPLACEMENT_PATTERN.sub("", class_name).rstrip()
         return f"{class_name}(): pass"
 
     # Special case: check if the line ends in ','
@@ -446,8 +463,7 @@ def handle_class(x):
 
 
 def handle_array_declarations(x):
-    re_varname = re.compile(r"^[a-zA-Z0-9\<\>]+ ([\w\*]+) *\[?\]?")
-    content = re_varname.search(x.strip())
+    content = ARRAY_DECLARATION_PATTERN.search(x.strip())
     if content:
         var_name = content.group(1)
         rest_line = "".join(x.split("{")[1:])
@@ -456,13 +472,11 @@ def handle_array_declarations(x):
 
 
 def handle_methods_return_type(x):
-    re_capture = re.compile(r"^ *[a-zA-Z0-9]+ [\w]+::([\w\*\&]+\(.*\)$)")
-    capture = re_capture.search(x)
+    capture = RETURN_TYPE_PATTERN.search(x)
     if capture:
         content = capture.group(1)
         method_name = content.split("(")[0]
-        re_par = re.compile(r"\((.+)\)")
-        par_capture = re_par.search(x)
+        par_capture = PARENTHESES_NONEMPTY_CONTENT_PATTERN.search(x)
         arguments = "(self)"
         if par_capture:
             arguments = f"(self, {par_capture.group(1)})"
@@ -471,16 +485,14 @@ def handle_methods_return_type(x):
 
 
 def handle_functions(x):
-    re_capture = re.compile(r"^ *([a-zA-Z0-9]+) ([\w\*\&]+\(.*\)$)")
-    capture = re_capture.search(x)
+    capture = CAPTURE_PATTERN.search(x)
     if capture:
         return_type = capture.group(1)
         if return_type == "return":  # "return QModelIndex();"
             return x
         content = capture.group(2)
         function_name = content.split("(")[0]
-        re_par = re.compile(r"\((.+)\)")
-        par_capture = re_par.search(x)
+        par_capture = PARENTHESES_NONEMPTY_CONTENT_PATTERN.search(x)
         arguments = ""
         if par_capture:
             for arg in par_capture.group(1).split(","):
@@ -493,10 +505,8 @@ def handle_functions(x):
 
 
 def handle_useless_qt_classes(x):
-    _classes = ("QLatin1String", "QLatin1Char")
-    for i in _classes:
-        re_content = re.compile(fr"{i}\((.*)\)")
-        content = re_content.search(x)
+    for c in USELESS_QT_CLASSES_PATTERNS:
+        content = c.search(x)
         if content:
             x = x.replace(content.group(0), content.group(1))
     return x
