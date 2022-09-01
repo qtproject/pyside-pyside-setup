@@ -279,7 +279,7 @@ TypeInfo TypeParser::parse(const QString &str, QString *errorMessage)
             break;
         }
 
-        tok = scanner.nextToken();
+        tok = scanner.nextToken(errorMessage);
     }
 
     if (stack.isEmpty() || stack.constFirst().qualifiedName().isEmpty()) {
