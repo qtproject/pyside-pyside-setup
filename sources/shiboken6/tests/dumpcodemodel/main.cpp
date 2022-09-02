@@ -12,6 +12,7 @@
 #include <QtCore/QDebug>
 #include <QtCore/QDir>
 #include <QtCore/QFile>
+#include <QtCore/QLibraryInfo>
 #include <QtCore/QVersionNumber>
 #include <QtCore/QXmlStreamWriter>
 
