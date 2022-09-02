@@ -17,6 +17,9 @@ information about a particular change.
 *                                  PySide6                                 *
 ****************************************************************************
 
+ - [PYSIDE-841]  New examples have been added (SpinBoxDelegate,
+                 Bluetooth heart rate).
+ - [PYSIDE-1312] QFormLayout::takeRow() has been added.
  - [PYSIDE-1735] The duplication of enum values into the enclosing scope,
                  allowing to write Qt.AlignLeft instead of Qt.Alignment.AlignLeft,
                  is now implemented differently and no longer advertized in PYI
@@ -25,13 +28,19 @@ information about a particular change.
                  as possible. It is again allowed to use Qt.Alignment()
                  instead of Qt.AlignmentFlag(0), and a default of 0 is
                  always allowed but also not advertized.
+                 Qt.Modifiers/Qt.KeyboardModifierflags can also still be used
+                 interchangeably.
  - [PYSIDE-1735] Most former IntEnum/IntFlag are replaced by pure Enum/Flag
                  classes in a generally compatible way to other implementations.
+ - [PYSIDE-1735] PyEnum handles QKeyCombination correctly with "|" or (deprecated)
+                 "+" operators, without falling back to using IntEnum.
  - [PYSIDE-1735] Python Enums use the newest implementation for Python (3.10)
                  for compatibility and speed.
  - [PYSIDE-1735] A weird build problem on macOS and other platforms was fixed.
  - [PYSide-1735] The cleanup calls by were sped up by using PyName for
                  staticMetaObject.
+ - [PYSIDE-1984] The code snippets in the modelview tutorial have been
+                 improved.
  - [PYSIDE-1930] Returning enums from QAbstractItemModel.flags() and
                  QAbstractItemModel.data() has been fixed.
  - [PYSIDE-1934] The type hinting for the return value of
@@ -43,8 +52,15 @@ information about a particular change.
                  has been fixed.
                  Also, the error message about using the wrong signal overload
                  has been improved.
+ - [PYSIDE-2030] The converter tools for Python code snippets for the
+                 documentation has been improved.
  - [PYSIDE-2019] Crashes related to QtDataVisualization'QValue3DAxisFormatter
-                 have been fixed
+                 have been fixed.
+ - [PYSIDE-2034] The static functions of QMessageBox have been fixed to not
+                 block threads.
+ - [PYSIDE-2039] A regression affecting setting override cursors without
+                 context manager has been fixed.
+
 
 ****************************************************************************
 *                                  Shiboken6                               *
