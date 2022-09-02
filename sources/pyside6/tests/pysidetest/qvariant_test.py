@@ -25,6 +25,7 @@ class QVariantTest(UsesQApplication):
         self.assertEqual(TestObject.checkType(ks), 4107)
 
     # PYSIDE-1735: Test the new way to address QKeyCombination after moving IntEnum to Enum
+    @unittest.skipUnless(sys.pyside63_option_python_enum, "only implemented for new enums")
     def testQKeySequenceMoreVariations(self):
         QAction().setShortcut(Qt.CTRL | Qt.Key_B)
         QAction().setShortcut(Qt.CTRL | Qt.ALT | Qt.Key_B)
