@@ -5,7 +5,9 @@ Package Details
 
 Having a large project as the Qt Framework available from one simple
 installation line::
-  pip install pyside6
+
+    pip install pyside6
+
 is really beneficial,
 but it might be confusing to newcomers.
 
