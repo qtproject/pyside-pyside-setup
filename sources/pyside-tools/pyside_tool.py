@@ -158,5 +158,9 @@ def qml():
     pyside_script_wrapper("qml.py")
 
 
+def qtpy2cpp():
+    pyside_script_wrapper("qtpy2cpp.py")
+
+
 if __name__ == "__main__":
     main()

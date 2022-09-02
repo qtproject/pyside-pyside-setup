@@ -6,7 +6,9 @@ include(cmake/PySideToolsSetup.cmake)
 set(files ${CMAKE_CURRENT_SOURCE_DIR}/pyside_tool.py
           ${CMAKE_CURRENT_SOURCE_DIR}/metaobjectdump.py
           ${CMAKE_CURRENT_SOURCE_DIR}/project.py
-          ${CMAKE_CURRENT_SOURCE_DIR}/qml.py)
+          ${CMAKE_CURRENT_SOURCE_DIR}/qml.py
+          ${CMAKE_CURRENT_SOURCE_DIR}/qtpy2cpp.py)
+
 set(directories)
 
 if(NOT NO_QT_TOOLS STREQUAL "yes")
@@ -32,6 +34,8 @@ if(NOT NO_QT_TOOLS STREQUAL "yes")
                           "${TOOLS_PATH}/linguist${CMAKE_EXECUTABLE_SUFFIX}")
     endif()
 endif()
+
+list(APPEND directories ${CMAKE_CURRENT_SOURCE_DIR}/qtpy2cpp_lib)
 
 # pyside6-rcc, pyside6-uic, pyside6-designer, shiboken and pyside6-lupdate entrypoints
 

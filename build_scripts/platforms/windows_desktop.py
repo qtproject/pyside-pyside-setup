@@ -115,10 +115,17 @@ def prepare_packages_win32(self, _vars):
             _vars=_vars)
 
         # For setting up setuptools entry points
-        for script in ("pyside_tool.py", "metaobjectdump.py", "project.py", "qml.py"):
+        for script in ("pyside_tool.py", "metaobjectdump.py", "project.py", "qml.py",
+                       "qtpy2cpp.py"):
             src = f"{{install_dir}}/bin/{script}"
             target = f"{{st_build_dir}}/{{st_package_name}}/scripts/{script}"
             copyfile(src, target, force=False, _vars=_vars)
+
+        for script_dir in ("qtpy2cpp_lib",):
+            src = f"{{install_dir}}/bin/{script_dir}"
+            target = f"{{st_build_dir}}/{{st_package_name}}/scripts/{script_dir}"
+            # Exclude subdirectory tests
+            copydir(src, target, _filter=["*.py"], recursive=False, _vars=_vars)
 
         # <install>/bin/*.exe,*.dll -> {st_package_name}/
         filters = ["pyside*.exe", "pyside*.dll"]
