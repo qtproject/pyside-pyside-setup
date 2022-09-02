@@ -17,7 +17,8 @@ from helper.usesqguiapplication import UsesQGuiApplication
 from PySide6.QtCore import QTimer
 from PySide6.QtDataVisualization import (Q3DBars, QBar3DSeries, QBarDataItem,
                                          QBarDataProxy, QCategory3DAxis,
-                                         QValue3DAxis, qDefaultSurfaceFormat)
+                                         QValue3DAxis, QValue3DAxisFormatter,
+                                         qDefaultSurfaceFormat)
 
 
 def dataToBarDataRow(data):
@@ -83,6 +84,20 @@ class QtDataVisualizationTestCase(UsesQGuiApplication):
     def testDefaultSurfaceFormat(self):
          format = qDefaultSurfaceFormat(True)
          print(format)
+
+    def testQValue3DAxisFormatter(self):
+        """PYSIDE-2025: Test the added setters of QValue3DAxisFormatter."""
+        formatter = QValue3DAxisFormatter()
+        float_values = [float(10)]
+        formatter.setGridPositions(float_values)
+        self.assertEqual(formatter.gridPositions(), float_values)
+
+        formatter.setLabelPositions(float_values)
+        self.assertEqual(formatter.labelPositions(), float_values)
+
+        label_strings = ["bla"]
+        formatter.setLabelStrings(label_strings)
+        self.assertEqual(formatter.labelStrings(), label_strings)
 
 
 if __name__ == '__main__':

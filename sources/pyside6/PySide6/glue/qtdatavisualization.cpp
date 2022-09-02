@@ -52,3 +52,30 @@ auto *data = QtDataVisualizationHelper::surfaceDataFromNp(%1, %2, %3, %4, %5);
 // %CPPSELF.%FUNCTION_NAME
 %CPPSELF.resetArray(data);
 // @snippet qsurfacedataproxy-resetarraynp
+
+// @snippet qvalue3daxisformatter-friend
+class QFriendlyValue3DAxisFormatter : public QValue3DAxisFormatter
+{
+public:
+using QValue3DAxisFormatter::gridPositions;
+using QValue3DAxisFormatter::labelPositions;
+using QValue3DAxisFormatter::labelStrings;
+};
+
+static inline QFriendlyValue3DAxisFormatter *friendlyFormatter(QValue3DAxisFormatter *f)
+{
+    return static_cast<QFriendlyValue3DAxisFormatter *>(f);
+}
+// @snippet qvalue3daxisformatter-friend
+
+// @snippet qvalue3daxisformatter-setgridpositions
+friendlyFormatter(%CPPSELF)->gridPositions() = %1;
+// @snippet qvalue3daxisformatter-setgridpositions
+
+// @snippet qvalue3daxisformatter-setlabelpositions
+friendlyFormatter(%CPPSELF)->labelPositions() = %1;
+// @snippet qvalue3daxisformatter-setlabelpositions
+
+// @snippet qvalue3daxisformatter-setlabelstrings
+friendlyFormatter(%CPPSELF)->labelStrings() = %1;
+// @snippet qvalue3daxisformatter-setlabelstrings

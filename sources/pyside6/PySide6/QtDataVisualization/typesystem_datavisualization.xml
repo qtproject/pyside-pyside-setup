@@ -63,6 +63,8 @@
   </modify-function>
   </object-type>
   <object-type name="QValue3DAxisFormatter">
+    <inject-code class="native" position="beginning" file="../glue/qtdatavisualization.cpp"
+                 snippet="qvalue3daxisformatter-friend"/>
     <modify-function signature="createNewInstance() const">
       <modify-argument index="return">
         <define-ownership class="native" owner="c++"/>
@@ -74,6 +76,29 @@
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
+    <!-- PYSIDE-2025: gridPositions(), labelPositions(), labelStrings() return
+         non-const-references to lists for modifications. Add setters for them. -->
+    <add-function signature="setGridPositions(const QList&lt;float&gt;&amp;@grid_positions@)">
+      <inject-documentation format="target" mode="append">
+      Sets the normalized grid line positions to ``grid_positions``.
+      </inject-documentation>
+      <inject-code class="target" position="beginning" file="../glue/qtdatavisualization.cpp"
+                   snippet="qvalue3daxisformatter-setgridpositions"/>
+    </add-function>
+    <add-function signature="setLabelPositions(const QList&lt;float&gt;&amp;@label_positions@)">
+      <inject-documentation format="target" mode="append">
+      Sets the normalized label positions to ``label_positions``.
+      </inject-documentation>
+      <inject-code class="target" position="beginning" file="../glue/qtdatavisualization.cpp"
+                   snippet="qvalue3daxisformatter-setlabelpositions"/>
+    </add-function>
+    <add-function signature="setLabelStrings(const QStringList&amp;@label_strings@)">
+      <inject-documentation format="target" mode="append">
+      Sets the label strings to ``label_strings``.
+      </inject-documentation>
+      <inject-code class="target" position="beginning" file="../glue/qtdatavisualization.cpp"
+                   snippet="qvalue3daxisformatter-setlabelstrings"/>
+    </add-function>
   </object-type>
   <object-type name="QAbstract3DSeries">
     <enum-type name="Mesh"/>
