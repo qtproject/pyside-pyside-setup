@@ -194,7 +194,7 @@ if (FULLDOCSBUILD)
 endif()
 
 add_custom_target(apidoc
-                  COMMAND ${SHIBOKEN_PYTHON_INTERPRETER} ${SPHINX_BUILD} -b ${DOC_OUTPUT_FORMAT} ${CMAKE_CURRENT_BINARY_DIR}/rst html
+                  COMMAND ${SHIBOKEN_PYTHON_INTERPRETER} ${SPHINX_BUILD} -b ${DOC_OUTPUT_FORMAT} -j auto ${CMAKE_CURRENT_BINARY_DIR}/rst html
                   COMMENT "Generating PySide htmls..."
                  )
 

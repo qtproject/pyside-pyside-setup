@@ -1,0 +1,22 @@
+{
+    "files": ["main.py",
+              "bluetoothbaseclass.py",
+              "connectionhandler.py",
+              "devicefinder.py",
+              "devicehandler.py",
+              "deviceinfo.py",
+              "heartrate_global.py",
+              "qml/main.qml",
+              "qml/App.qml",
+              "qml/BluetoothAlarmDialog.qml",
+              "qml/BottomLine.qml",
+              "qml/Connect.qml",
+              "qml/GameButton.qml",
+              "qml/GamePage.qml",
+              "qml/GameSettings.qml",
+              "qml/Measure.qml",
+              "qml/SplashScreen.qml",
+              "qml/Stats.qml",
+              "qml/StatsLabel.qml",
+              "qml/TitleBar.qml"]
+}

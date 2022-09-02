@@ -124,6 +124,25 @@ def python_example_snippet_mapping():
             snippet_id = str(i)
             result[(qt_path, snippet_id)] = pyside_path,  snippet_id
 
+        qt_path = "qtconnectivity/examples/bluetooth/heartrate_game/devicefinder.cpp"
+        pyside_path = EXAMPLES_PATH / "bluetooth" / "heartrate_game" / "devicefinder.py"
+        for i in range(5):
+            snippet_id = f"devicediscovery-{i}"
+            result[(qt_path, snippet_id)] = pyside_path,  snippet_id
+
+        qt_path = "qtconnectivity/examples/bluetooth/heartrate_game/devicehandler.cpp"
+        pyside_path = EXAMPLES_PATH / "bluetooth" / "heartrate_game" / "devicehandler.py"
+        for snippet_id in ["Connect-Signals-1", "Connect-Signals-2",
+                           "Filter HeartRate service 2", "Find HRM characteristic",
+                           "Reading value"]:
+            result[(qt_path, snippet_id)] = pyside_path,  snippet_id
+
+        qt_path = "qtconnectivity/examples/bluetooth/heartrate_server/main.cpp"
+        pyside_path = EXAMPLES_PATH / "bluetooth" / "heartrate_server" / "heartrate_server.py"
+        for snippet_id in ["Advertising Data", "Start Advertising", "Service Data",
+                           "Provide Heartbeat"]:
+            result[(qt_path, snippet_id)] = pyside_path,  snippet_id
+
         _python_example_snippet_mapping = result
 
     return _python_example_snippet_mapping

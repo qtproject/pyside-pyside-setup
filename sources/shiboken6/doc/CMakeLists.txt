@@ -18,7 +18,7 @@ if(SPHINX_BUILD)
     # conditional tag for sphinx build
     #string(JOIN "_" SPHINX_TAG ${DOC_OUTPUT_FORMAT} "format")
     add_custom_target(doc
-        COMMAND ${SPHINX_BUILD} -b ${DOC_OUTPUT_FORMAT} -c . ${CMAKE_CURRENT_SOURCE_DIR} html
+        COMMAND ${SPHINX_BUILD} -b ${DOC_OUTPUT_FORMAT} -j auto -c . ${CMAKE_CURRENT_SOURCE_DIR} html
         COMMENT "Generating shiboken documentation HTML files"
         VERBATIM)
 
