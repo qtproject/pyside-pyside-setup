@@ -20,12 +20,14 @@
 #include <algorithm>
 #include <iterator>
 
+using namespace Qt::StringLiterals;
+
 static bool optJoinNamespaces = false;
 
 static inline QString languageLevelDescription()
 {
-    return QLatin1String("C++ Language level (c++11..c++17, default=")
-        + QLatin1String(clang::languageLevelOption(clang::emulatedCompilerLanguageLevel()))
+    return u"C++ Language level (c++11..c++20, default="_s
+        + QLatin1StringView(clang::languageLevelOption(clang::emulatedCompilerLanguageLevel()))
         + u')';
 }
 
@@ -52,7 +54,7 @@ static void formatXmlClass(QXmlStreamWriter &writer, const ClassModelItem &klass
 
 static void formatXmlEnum(QXmlStreamWriter &writer, const EnumModelItem &en)
 {
-    writer.writeStartElement(QStringLiteral("enum-type"));
+    writer.writeStartElement(u"enum-type"_s);
     writer.writeAttribute(nameAttribute(), en->name());
     writer.writeEndElement();
 }
@@ -93,8 +95,8 @@ static void formatXmlClass(QXmlStreamWriter &writer, const ClassModelItem &klass
     const bool isValueType = std::any_of(functions.cbegin(), functions.cend(),
                                          isPublicCopyConstructor);
     formatXmlLocationComment(writer, klass);
-    writer.writeStartElement(isValueType ? QStringLiteral("value-type")
-                                         : QStringLiteral("object-type"));
+    writer.writeStartElement(isValueType ? u"value-type"_s
+                                         : u"object-type"_s);
     writer.writeAttribute(nameAttribute(), klass->name());
     formatXmlScopeMembers(writer, klass);
     writer.writeEndElement();
@@ -115,7 +117,7 @@ static bool hasMembers(const NamespaceModelItem &nsp)
 static void startXmlNamespace(QXmlStreamWriter &writer, const NamespaceModelItem &nsp)
 {
     formatXmlLocationComment(writer, nsp);
-    writer.writeStartElement(QStringLiteral("namespace-type"));
+    writer.writeStartElement(u"namespace-type"_s);
     writer.writeAttribute(nameAttribute(), nsp->name());
 }
 
@@ -148,8 +150,8 @@ static void formatXmlNamespaceMembers(QXmlStreamWriter &writer, const NamespaceM
     for (const auto &func : nsp->functions()) {
         const QString signature = func->typeSystemSignature();
         if (!signature.contains(u"operator")) { // Skip free operators
-            writer.writeStartElement(QStringLiteral("function"));
-            writer.writeAttribute(QStringLiteral("signature"), signature);
+            writer.writeStartElement(u"function"_s);
+            writer.writeAttribute(u"signature"_s, signature);
             writer.writeEndElement();
         }
     }
@@ -162,13 +164,13 @@ static void formatXmlOutput(const FileModelItem &dom)
     QXmlStreamWriter writer(&output);
     writer.setAutoFormatting(true);
     writer.writeStartDocument();
-    writer.writeStartElement(QStringLiteral("typesystem"));
-    writer.writeAttribute(QStringLiteral("package"), QStringLiteral("insert_name"));
-    writer.writeComment(QStringLiteral("Auto-generated ") +
+    writer.writeStartElement(u"typesystem"_s);
+    writer.writeAttribute(u"package"_s, u"insert_name"_s);
+    writer.writeComment(u"Auto-generated "_s +
                         QDateTime::currentDateTime().toString(Qt::ISODate));
     for (auto p : primitiveTypes) {
-        writer.writeStartElement(QStringLiteral("primitive-type"));
-        writer.writeAttribute(nameAttribute(), QLatin1String(p));
+        writer.writeStartElement(u"primitive-type"_s);
+        writer.writeAttribute(nameAttribute(), QLatin1StringView(p));
         writer.writeEndElement();
     }
     formatXmlNamespaceMembers(writer, dom);
@@ -196,29 +198,29 @@ int main(int argc, char **argv)
     parser.setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
     parser.setOptionsAfterPositionalArgumentsMode(QCommandLineParser::ParseAsPositionalArguments);
     const QString description =
-        QString::fromLatin1(descriptionFormat).arg(QLatin1String(qVersion()),
+        QString::fromLatin1(descriptionFormat).arg(QLatin1StringView(qVersion()),
                                                    clang::libClangVersion().toString());
     parser.setApplicationDescription(description);
     parser.addHelpOption();
     parser.addVersionOption();
-    QCommandLineOption verboseOption(QStringLiteral("verbose"),
-                                     QStringLiteral("Display verbose output about types"));
+    QCommandLineOption verboseOption(u"verbose"_s,
+                                     u"Display verbose output about types"_s);
     parser.addOption(verboseOption);
-    QCommandLineOption debugOption(QStringLiteral("debug"),
-                                     QStringLiteral("Display debug output"));
+    QCommandLineOption debugOption(u"debug"_s,
+                                     u"Display debug output"_s);
     parser.addOption(debugOption);
 
-    QCommandLineOption joinNamespacesOption({QStringLiteral("j"), QStringLiteral("join-namespaces")},
-                                            QStringLiteral("Join namespaces"));
+    QCommandLineOption joinNamespacesOption({u"j"_s, u"join-namespaces"_s},
+                                            u"Join namespaces"_s);
     parser.addOption(joinNamespacesOption);
 
-    QCommandLineOption languageLevelOption(QStringLiteral("std"),
+    QCommandLineOption languageLevelOption(u"std"_s,
                                            languageLevelDescription(),
-                                           QStringLiteral("level"));
+                                           u"level"_s);
     parser.addOption(languageLevelOption);
-    parser.addPositionalArgument(QStringLiteral("argument"),
-                                 QStringLiteral("C++ compiler argument"),
-                                 QStringLiteral("argument(s)"));
+    parser.addPositionalArgument(u"argument"_s,
+                                 u"C++ compiler argument"_s,
+                                 u"argument(s)"_s);
 
     parser.process(app);
     const QStringList &positionalArguments = parser.positionalArguments();
@@ -244,7 +246,7 @@ int main(int argc, char **argv)
 
     const FileModelItem dom = AbstractMetaBuilderPrivate::buildDom(arguments, true, level, 0);
     if (dom.isNull()) {
-        QString message = QLatin1String("Unable to parse ") + positionalArguments.join(u' ');
+        QString message = u"Unable to parse "_s + positionalArguments.join(u' ');
         std::cerr << qPrintable(message) << '\n';
         return -2;
     }
