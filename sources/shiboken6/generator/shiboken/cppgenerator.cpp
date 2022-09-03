@@ -416,6 +416,7 @@ static QSet<QString> useIntSet()
         /* IntEnum */ u"PySide6.QtCore.Qt.GestureType"_s,
         /* IntEnum */ u"PySide6.QtCore.Qt.ItemDataRole"_s,
         /* IntEnum */ u"PySide6.QtCore.Qt.Key"_s,
+        /*    Flag */ u"PySide6.QtCore.Qt.Modifier"_s,
         // note:  "Qt::TextFlag" is set as IntFlag without flags
         /* IntFlag */ u"PySide6.QtCore.Qt.TextFlag"_s,
         /* IntFlag */ u"PySide6.QtCore.Qt.WindowType"_s,
@@ -474,12 +475,8 @@ static QString BuildEnumFlagInfo(const AbstractMetaEnum &cppEnum)
     if (decision != TypeSystem::PythonEnumType::Unspecified) {
         _int = decision == TypeSystem::PythonEnumType::IntEnum ||
                decision == TypeSystem::PythonEnumType::IntFlag;
-        if (!flags && decision == TypeSystem::PythonEnumType::IntFlag) {
-            qWarning() << "\nnote: " << enumType->name() << "is set as IntFlag without flags\n";
-            _flag = true;
-        }
-        if (flags && decision == TypeSystem::PythonEnumType::IntEnum)
-            qWarning() << "\n*** The expression " << enumType->name() << "should be a flag!\n";
+        _flag = decision == TypeSystem::PythonEnumType::Flag ||
+                decision == TypeSystem::PythonEnumType::IntFlag;
     }
     result += _flag ? (_int ? u":IntFlag"_s : u":Flag"_s)
                     : (_int ? u":IntEnum"_s : u":Enum"_s);

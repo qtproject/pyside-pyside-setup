@@ -29,7 +29,7 @@
         </inject-code>
     </add-function>
 
-   <add-function signature="getCppPointer(PyObject*)" return-type="PyObject*">
+   <add-function signature="getCppPointer(PyObject*)" return-type="PySequence*">
         <inject-code>
             if (Shiboken::Object::checkType(%1)) {
                 std::vector&lt;void*> ptrs = Shiboken::Object::cppPointers(reinterpret_cast&lt;SbkObject *&gt;(%1));
@@ -74,7 +74,7 @@
         </inject-code>
    </add-function>
 
-    <add-function signature="dump(PyObject*)" return-type="PyObject*">
+    <add-function signature="dump(PyObject*)" return-type="const char *">
         <inject-code>
             if (!Shiboken::Object::checkType(%1)) {
                 %PYARG_0 = Shiboken::String::fromCString("Ordinary Python type.");
@@ -85,19 +85,18 @@
         </inject-code>
     </add-function>
 
-    <add-function signature="getAllValidWrappers(void)" return-type="PyObject*">
+    <add-function signature="getAllValidWrappers(void)" return-type="PySequence*">
         <inject-code>
-            std::set&lt;PyObject*&gt; setAll = Shiboken::BindingManager::instance().getAllPyObjects();
+            const auto setAll = Shiboken::BindingManager::instance().getAllPyObjects();
             PyObject* listAll = PyList_New(0);
-            if (listAll == NULL)
-                return NULL;
+            if (listAll == nullptr)
+                return nullptr;
 
-            const std::set&lt;PyObject*&gt;::iterator end = setAll.end();
-            for (std::set&lt;PyObject*&gt;::iterator iter = setAll.begin(); iter != end; ++iter) {
-                if (*iter != NULL) {
-                    if (PyList_Append(listAll, *iter) != 0) {
+            for (auto *o : setAll) {
+                if (o != nullptr) {
+                    if (PyList_Append(listAll, o) != 0) {
                         Py_DECREF(listAll);
-                        return NULL;
+                        return nullptr;
                     }
                 }
             }

@@ -1628,3 +1628,11 @@ if (Shiboken::Enum::check(%PYARG_0)) {
     pythonToCpp(pyResult, &cppResult);
 }
 // @snippet qabstractitemmodel_data
+
+// @snippet keycombination-from-keycombination
+cptr = new ::%TYPE(%1);
+// @snippet keycombination-from-keycombination
+
+// @snippet keycombination-from-modifier
+cptr = new ::%TYPE(%1, %2);
+// @snippet keycombination-from-modifier

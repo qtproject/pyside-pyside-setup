@@ -211,14 +211,14 @@ static bool currentOpcode_Is_CallMethNoArgs()
 
 void initEnumFlagsDict(PyTypeObject *type)
 {
-    // We create a dict for all flag enums that holds the original C++ name.
-    // We create a set for all int enums or flags.
+    // We create a dict for all flag enums that holds the original C++ name
+    // and a dict that gives every enum/flag type name.
     static PyObject *const split = Shiboken::String::createStaticString("split");
     static PyObject *const colon = Shiboken::String::createStaticString(":");
     auto sotp = PepType_SOTP(type);
     auto **enumFlagInfo = sotp->enumFlagInfo;
     auto *dict = PyDict_New();
-    auto *set = PySet_New(nullptr);
+    auto *typeDict = PyDict_New();
     for (; *enumFlagInfo; ++enumFlagInfo) {
         AutoDecRef line(PyUnicode_FromString(*enumFlagInfo));
         AutoDecRef parts(PyObject_CallMethodObjArgs(line, split, colon, nullptr));
@@ -229,12 +229,10 @@ void initEnumFlagsDict(PyTypeObject *type)
             PyDict_SetItem(dict, key, value);
         }
         auto *typeName = PyList_GetItem(parts, 1);
-        bool intFlag = strncmp(String::toCString(typeName), "Int", 3) == 0;
-        if (intFlag)
-            PySet_Add(set, name);
+        PyDict_SetItem(typeDict, name, typeName);
     }
     sotp->enumFlagsDict = dict;
-    sotp->enumIntSet = set;
+    sotp->enumTypeDict = typeDict;
 }
 
 static PyObject *replaceNoArgWithZero(PyObject *callable)
