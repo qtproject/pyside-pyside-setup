@@ -4,6 +4,7 @@
 #include "testmodifydocumentation.h"
 #include "testutil.h"
 #include <abstractmetalang.h>
+#include <abstractmetafunction.h>
 #include <documentation.h>
 #include <modifications.h>
 #include <complextypeentry.h>
@@ -76,6 +77,33 @@ R"(<?xml version="1.0"?>
     QEXPECT_FAIL("", "QtXmlPatterns cannot handle para[3] (QTBUG-66925)", Abort);
 #endif
     QCOMPARE(actualDocSimplified, expectedDocSimplified);
+}
+
+void TestModifyDocumentation::testInjectAddedFunctionDocumentation()
+{
+    const char cppCode[] ="class A {};\n";
+    const char xmlCode[] = R"XML(
+<typesystem package="Foo">
+    <value-type name='A'>
+        <add-function signature="foo(int@parameter_name@)">
+              <inject-documentation format="target" mode="append">
+                  Injected documentation of added function foo.
+              </inject-documentation>
+        </add-function>
+    </value-type>
+</typesystem>
+)XML";
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), u"A");
+    QVERIFY(classA);
+    const auto f = classA->findFunction(u"foo");
+    QVERIFY(!f.isNull());
+    QVERIFY(f->isUserAdded());
+    auto docMods = f->addedFunctionDocModifications();
+    QCOMPARE(docMods.size(), 1);
+    const QString code = docMods.constFirst().code();
+    QVERIFY(code.contains(u"Injected documentation of added function foo."));
 }
 
 // We expand QTEST_MAIN macro but using QCoreApplication instead of QApplication

@@ -81,11 +81,16 @@ struct AddedFunction
     const FunctionModificationList &modifications() const { return m_modifications; }
     FunctionModificationList &modifications() { return m_modifications; }
 
+    const DocModificationList &docModifications() const { return m_docModifications; }
+    DocModificationList &docModifications() { return m_docModifications; }
+    void addDocModification(const DocModification &m) { m_docModifications.append(m); }
+
 private:
     QString m_name;
     QList<Argument> m_arguments;
     TypeInfo m_returnType;
     FunctionModificationList m_modifications;
+    DocModificationList m_docModifications;
     Access m_access = Public;
     bool m_isConst = false;
     bool m_isClassMethod = false;

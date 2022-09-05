@@ -1027,6 +1027,12 @@ void AbstractMetaFunction::clearModificationsCache()
     d->m_modificationCache.clear();
 }
 
+const DocModificationList AbstractMetaFunction::addedFunctionDocModifications() const
+{
+    return d->m_addedFunction.isNull()
+           ? DocModificationList{} : d->m_addedFunction->docModifications();
+}
+
 QString AbstractMetaFunction::argumentName(int index,
                                            bool /* create */,
                                            const AbstractMetaClass * /* implementor */) const

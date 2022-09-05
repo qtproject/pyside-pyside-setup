@@ -11,6 +11,7 @@ class TestModifyDocumentation : public QObject
 Q_OBJECT
 private slots:
     void testModifyDocumentation();
+    void testInjectAddedFunctionDocumentation();
 };
 
 #endif

@@ -91,6 +91,9 @@ DocModificationList DocParser::getDocModifications(const AbstractMetaClass* cppC
     if (func.isNull())
         return te->docModifications();
 
+    if (func->isUserAdded())
+        return func->addedFunctionDocModifications();
+
     DocModificationList result = te->functionDocModifications();
     const QString minimalSignature = func->minimalSignature();
     const auto filter = [&minimalSignature](const DocModification &mod) {

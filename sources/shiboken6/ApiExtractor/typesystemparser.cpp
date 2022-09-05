@@ -1109,8 +1109,15 @@ bool TypeSystemParser::characters(const String &ch)
         return true;
     }
 
-    if (isDocumentation(type))
-        m_contextStack.top()->docModifications.last().setCode(ch);
+    if (isDocumentation(type)) {
+        const bool isAddedFunction = m_stack.value(m_stack.size() - 2, StackElement::None)
+                                     == StackElement::AddFunction;
+        const auto &top = m_contextStack.top();
+        auto &docModifications = isAddedFunction
+            ? top->addedFunctions.last()->docModifications()
+            : top->docModifications;
+        docModifications.last().setCode(ch);
+    }
 
     return true;
 }
@@ -1923,10 +1930,11 @@ bool TypeSystemParser::parseRenameFunction(const ConditionalStreamReader &,
 bool TypeSystemParser::parseInjectDocumentation(const ConditionalStreamReader &, StackElement topElement,
                                        QXmlStreamAttributes *attributes)
 {
+    const bool isAddFunction = topElement == StackElement::AddFunction;
     const bool validParent = isTypeEntry(topElement)
         || topElement == StackElement::ModifyFunction
         || topElement == StackElement::ModifyField
-        || topElement == StackElement::AddFunction;
+        || isAddFunction;
     if (!validParent) {
         m_error = u"inject-documentation must be inside modify-function, add-function"
                    "modify-field or other tags that creates a type"_s;
@@ -1959,7 +1967,11 @@ bool TypeSystemParser::parseInjectDocumentation(const ConditionalStreamReader &,
     QString signature = isTypeEntry(topElement) ? QString() : m_currentSignature;
     DocModification mod(mode, signature);
     mod.setFormat(lang);
-    m_contextStack.top()->docModifications << mod;
+    auto &top = m_contextStack.top();
+    if (isAddFunction)
+        top->addedFunctions.last()->addDocModification(mod);
+    else
+        top->docModifications << mod;
     return true;
 }
 

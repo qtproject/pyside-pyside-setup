@@ -357,6 +357,8 @@ public:
     const FunctionModificationList &modifications(const AbstractMetaClass *implementor = nullptr) const;
     void clearModificationsCache();
 
+    const DocModificationList addedFunctionDocModifications() const;
+
     static FunctionModificationList findClassModifications(const AbstractMetaFunction *f,
                                                            const AbstractMetaClass *implementor);
     static FunctionModificationList findGlobalModifications(const AbstractMetaFunction *f);
