@@ -518,30 +518,28 @@ bool QtDocGenerator::writeInjectDocumentation(TextStream& s,
     Indentation indentation(s);
     bool didSomething = false;
 
-    const DocModificationList &mods = cppClass->typeEntry()->docModifications();
+    const DocModificationList mods = DocParser::getDocModifications(cppClass, func);
+
     for (const DocModification &mod : mods) {
         if (mod.mode() == mode) {
-            bool modOk = func ? mod.signature() == func->minimalSignature() : mod.signature().isEmpty();
-
-            if (modOk) {
-                Documentation::Format fmt;
-
-                if (mod.format() == TypeSystem::NativeCode)
-                    fmt = Documentation::Native;
-                else if (mod.format() == TypeSystem::TargetLangCode)
-                    fmt = Documentation::Target;
-                else
-                    continue;
-
-                writeFormattedText(s, mod.code(), fmt, cppClass);
+            switch (mod.format()) {
+            case TypeSystem::NativeCode:
+                writeFormattedText(s, mod.code(), Documentation::Native, cppClass);
                 didSomething = true;
+                break;
+            case TypeSystem::TargetLangCode:
+                writeFormattedText(s, mod.code(), Documentation::Target, cppClass);
+                didSomething = true;
+                break;
+            default:
+                break;
             }
         }
     }
 
     s << '\n';
 
-    // TODO: Deprecate the use of doc string on glue code.
+    // FIXME PYSIDE-7: Deprecate the use of doc string on glue code.
     //       This is pre "add-function" and "inject-documentation" tags.
     const TypeSystem::CodeSnipPosition pos = mode == TypeSystem::DocModificationPrepend
         ? TypeSystem::CodeSnipPositionBeginning : TypeSystem::CodeSnipPositionEnd;

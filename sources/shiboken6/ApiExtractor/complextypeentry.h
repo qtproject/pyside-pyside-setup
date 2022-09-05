@@ -75,7 +75,10 @@ public:
     void addCodeSnip(const CodeSnip &codeSnip);
 
     void setDocModification(const DocModificationList& docMods);
+    /// Class documentation modifications
     DocModificationList docModifications() const;
+    /// Function documentation modifications (matching signature)
+    DocModificationList functionDocModifications() const;
 
     /// Extra includes for function arguments determined by the meta builder.
     const IncludeList &argumentIncludes() const;

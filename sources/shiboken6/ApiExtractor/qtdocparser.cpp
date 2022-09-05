@@ -99,25 +99,19 @@ static QString formatFunctionArgTypeQuery(const AbstractMetaType &metaType)
     return result;
 }
 
-QString QtDocParser::queryFunctionDocumentation(const QString &sourceFileName,
-                                                const ClassDocumentation &classDocumentation,
-                                                const AbstractMetaClass* metaClass,
-                                                const AbstractMetaFunctionCPtr &func,
-                                                const DocModificationList &signedModifs,
-                                                QString *errorMessage)
+QString QtDocParser::functionDocumentation(const QString &sourceFileName,
+                                           const ClassDocumentation &classDocumentation,
+                                           const AbstractMetaClass* metaClass,
+                                           const AbstractMetaFunctionCPtr &func,
+                                           QString *errorMessage)
 {
     errorMessage->clear();
-
-    DocModificationList funcModifs;
-    for (const DocModification &funcModif : signedModifs) {
-        if (funcModif.signature() == func->minimalSignature())
-            funcModifs.append(funcModif);
-    }
 
     const QString docString =
         queryFunctionDocumentation(sourceFileName, classDocumentation, metaClass,
                                    func, errorMessage);
 
+    const auto funcModifs = DocParser::getDocModifications(metaClass, func);
     return docString.isEmpty() || funcModifs.isEmpty()
         ? docString : applyDocModifications(funcModifs, docString);
 }
@@ -253,16 +247,8 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
         return;
     }
 
-    DocModificationList signedModifs, classModifs;
-    const DocModificationList &mods = metaClass->typeEntry()->docModifications();
-    for (const DocModification &docModif : mods) {
-        if (docModif.signature().isEmpty())
-            classModifs.append(docModif);
-        else
-            signedModifs.append(docModif);
-    }
-
-    QString docString = applyDocModifications(mods, classDocumentation.description);
+    QString docString = applyDocModifications(metaClass->typeEntry()->docModifications(),
+                                              classDocumentation.description);
 
     if (docString.isEmpty()) {
         QString className = metaClass->name();
@@ -281,8 +267,8 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
     const auto &funcs = DocParser::documentableFunctions(metaClass);
     for (const auto &func : funcs) {
         const QString detailed =
-            queryFunctionDocumentation(sourceFileName, classDocumentation,
-                                       metaClass, func, signedModifs, &errorMessage);
+            functionDocumentation(sourceFileName, classDocumentation,
+                                  metaClass, func, &errorMessage);
         if (!errorMessage.isEmpty())
             qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
         const Documentation documentation(detailed, {});

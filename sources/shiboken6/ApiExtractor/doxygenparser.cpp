@@ -148,7 +148,8 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
                 funcQuery += u"/../"_s + tag.second + u")[1]"_s;
             }
 
-            QString doc = getDocumentation(xquery, funcQuery, DocModificationList());
+            QString doc = getDocumentation(xquery, funcQuery,
+                                           DocParser::getDocModifications(metaClass, func));
             if (doc.isEmpty()) {
                 qCWarning(lcShibokenDoc, "%s",
                           qPrintable(msgCannotFindDocumentation(doxyFilePath, func.data(),

@@ -1226,6 +1226,7 @@ public:
     FunctionModificationList m_functionMods;
     CodeSnipList m_codeSnips;
     DocModificationList m_docModifications;
+    DocModificationList m_functionDocModifications;
     IncludeList m_argumentIncludes;
     QSet<QString> m_generateFunctions;
     FieldModificationList m_fieldMods;
@@ -1363,13 +1364,24 @@ void ComplexTypeEntry::addCodeSnip(const CodeSnip &codeSnip)
 void ComplexTypeEntry::setDocModification(const DocModificationList &docMods)
 {
     S_D(ComplexTypeEntry);
-    d->m_docModifications << docMods;
+    for (const auto &m : docMods) {
+        if (m.signature().isEmpty())
+            d->m_docModifications << m;
+        else
+            d->m_functionDocModifications << m;
+    }
 }
 
 DocModificationList ComplexTypeEntry::docModifications() const
 {
     S_D(const ComplexTypeEntry);
     return d->m_docModifications;
+}
+
+DocModificationList ComplexTypeEntry::functionDocModifications() const
+{
+    S_D(const ComplexTypeEntry);
+    return d->m_functionDocModifications;
 }
 
 const IncludeList &ComplexTypeEntry::argumentIncludes() const

@@ -9,7 +9,7 @@
 #include "messages.h"
 #include "modifications.h"
 #include "reporthandler.h"
-#include "typesystem.h"
+#include "complextypeentry.h"
 #include "xmlutils.h"
 
 #include <QtCore/QBuffer>
@@ -82,6 +82,22 @@ bool DocParser::skipForQuery(const AbstractMetaFunctionCPtr &func)
 
     return std::any_of(func->arguments().cbegin(), func->arguments().cend(),
                        usesRValueReference);
+}
+
+DocModificationList DocParser::getDocModifications(const AbstractMetaClass* cppClass,
+                                                   const AbstractMetaFunctionCPtr &func)
+{
+    auto *te = cppClass->typeEntry();
+    if (func.isNull())
+        return te->docModifications();
+
+    DocModificationList result = te->functionDocModifications();
+    const QString minimalSignature = func->minimalSignature();
+    const auto filter = [&minimalSignature](const DocModification &mod) {
+        return mod.signature() != minimalSignature;
+    };
+    result.erase(std::remove_if(result.begin(), result.end(), filter), result.end());
+    return result;
 }
 
 AbstractMetaFunctionCList DocParser::documentableFunctions(const AbstractMetaClass *metaClass)

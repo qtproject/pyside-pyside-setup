@@ -17,12 +17,11 @@ public:
     Documentation retrieveModuleDocumentation(const QString& name) override;
 
 private:
-    static QString queryFunctionDocumentation(const QString &sourceFileName,
-                                              const ClassDocumentation &classDocumentation,
-                                              const AbstractMetaClass* metaClass,
-                                              const AbstractMetaFunctionCPtr &func,
-                                              const DocModificationList &signedModifs,
-                                              QString *errorMessage);
+    static QString functionDocumentation(const QString &sourceFileName,
+                                         const ClassDocumentation &classDocumentation,
+                                         const AbstractMetaClass* metaClass,
+                                         const AbstractMetaFunctionCPtr &func,
+                                         QString *errorMessage);
 
     static QString queryFunctionDocumentation(const QString &sourceFileName,
                                               const ClassDocumentation &classDocumentation,

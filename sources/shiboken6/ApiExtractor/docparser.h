@@ -91,6 +91,12 @@ public:
 
     static bool skipForQuery(const AbstractMetaFunctionCPtr &func);
 
+    /// Helper to return the documentation modifications for a class
+    /// or a member function.
+    static DocModificationList getDocModifications(const AbstractMetaClass* cppClass,
+                                                   const AbstractMetaFunctionCPtr &func = {});
+
+
 protected:
     static QString getDocumentation(const XQueryPtr &xquery,
                                     const QString &query,
