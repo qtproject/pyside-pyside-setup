@@ -607,7 +607,10 @@ static void getCode(QStringList &code, const CodeSnipList &codeSnips)
 
 static void getCode(QStringList &code, const TypeEntry *type)
 {
-    getCode(code, type->codeSnips());
+    if (type->isComplex())
+        getCode(code, static_cast<const ComplexTypeEntry *>(type)->codeSnips());
+    else if (type->isTypeSystem())
+        getCode(code, static_cast<const TypeSystemTypeEntry *>(type)->codeSnips());
 
     CustomConversion *customConversion = type->customConversion();
     if (!customConversion)

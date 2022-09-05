@@ -64,10 +64,7 @@ public:
     QString m_targetLangPackage;
     mutable QString m_cachedTargetLangName; // "Foo.Bar"
     mutable QString m_cachedTargetLangEntryName; // "Bar"
-    CodeSnipList m_codeSnips;
-    DocModificationList m_docModifications;
     IncludeList m_extraIncludes;
-    IncludeList m_argumentIncludes;
     Include m_include;
     QString m_targetConversionRule;
     QVersionNumber m_version;
@@ -111,36 +108,6 @@ TypeEntry::TypeEntry(TypeEntryPrivate *d) : m_d(d)
 
 TypeEntry::~TypeEntry() = default;
 
-const CodeSnipList &TypeEntry::codeSnips() const
-{
-    return m_d->m_codeSnips;
-}
-
-CodeSnipList &TypeEntry::codeSnips()
-{
-    return m_d->m_codeSnips;
-}
-
-void TypeEntry::setCodeSnips(const CodeSnipList &codeSnips)
-{
-    m_d->m_codeSnips = codeSnips;
-}
-
-void TypeEntry::addCodeSnip(const CodeSnip &codeSnip)
-{
-    m_d->m_codeSnips << codeSnip;
-}
-
-void TypeEntry::setDocModification(const DocModificationList &docMods)
-{
-    m_d->m_docModifications << docMods;
-}
-
-DocModificationList TypeEntry::docModifications() const
-{
-    return m_d->m_docModifications;
-}
-
 const IncludeList &TypeEntry::extraIncludes() const
 {
     return m_d->m_extraIncludes;
@@ -155,17 +122,6 @@ void TypeEntry::addExtraInclude(const Include &newInclude)
 {
     if (!m_d->m_extraIncludes.contains(newInclude))
         m_d->m_extraIncludes.append(newInclude);
-}
-
-const IncludeList &TypeEntry::argumentIncludes() const
-{
-    return m_d->m_argumentIncludes;
-}
-
-void TypeEntry::addArgumentInclude(const Include &newInclude)
-{
-    if (!m_d->m_argumentIncludes.contains(newInclude))
-        m_d->m_argumentIncludes.append(newInclude);
 }
 
 Include TypeEntry::include() const
@@ -746,6 +702,7 @@ class TypeSystemTypeEntryPrivate : public TypeEntryPrivate
 public:
     using TypeEntryPrivate::TypeEntryPrivate;
 
+    CodeSnipList m_codeSnips;
     TypeSystem::SnakeCase m_snakeCase = TypeSystem::SnakeCase::Disabled;
 };
 
@@ -764,6 +721,24 @@ TypeEntry *TypeSystemTypeEntry::clone() const
 {
     S_D(const TypeSystemTypeEntry);
     return new TypeSystemTypeEntry(new TypeSystemTypeEntryPrivate(*d));
+}
+
+const CodeSnipList &TypeSystemTypeEntry::codeSnips() const
+{
+    S_D(const TypeSystemTypeEntry);
+    return d->m_codeSnips;
+}
+
+CodeSnipList &TypeSystemTypeEntry::codeSnips()
+{
+    S_D(TypeSystemTypeEntry);
+    return d->m_codeSnips;
+}
+
+void TypeSystemTypeEntry::addCodeSnip(const CodeSnip &codeSnip)
+{
+    S_D(TypeSystemTypeEntry);
+    d->m_codeSnips.append(codeSnip);
 }
 
 TypeSystem::SnakeCase TypeSystemTypeEntry::snakeCase() const
@@ -1249,6 +1224,9 @@ public:
 
     AddedFunctionList m_addedFunctions;
     FunctionModificationList m_functionMods;
+    CodeSnipList m_codeSnips;
+    DocModificationList m_docModifications;
+    IncludeList m_argumentIncludes;
     QSet<QString> m_generateFunctions;
     FieldModificationList m_fieldMods;
     QList<TypeSystemProperty> m_properties;
@@ -1356,6 +1334,55 @@ FunctionModificationList ComplexTypeEntry::functionModifications(const QString &
             lst << mod;
     }
     return lst;
+}
+
+const CodeSnipList &ComplexTypeEntry::codeSnips() const
+{
+    S_D(const ComplexTypeEntry);
+    return d->m_codeSnips;
+}
+
+CodeSnipList &ComplexTypeEntry::codeSnips()
+{
+    S_D(ComplexTypeEntry);
+    return d->m_codeSnips;
+}
+
+void ComplexTypeEntry::setCodeSnips(const CodeSnipList &codeSnips)
+{
+    S_D(ComplexTypeEntry);
+    d->m_codeSnips = codeSnips;
+}
+
+void ComplexTypeEntry::addCodeSnip(const CodeSnip &codeSnip)
+{
+    S_D(ComplexTypeEntry);
+    d->m_codeSnips << codeSnip;
+}
+
+void ComplexTypeEntry::setDocModification(const DocModificationList &docMods)
+{
+    S_D(ComplexTypeEntry);
+    d->m_docModifications << docMods;
+}
+
+DocModificationList ComplexTypeEntry::docModifications() const
+{
+    S_D(const ComplexTypeEntry);
+    return d->m_docModifications;
+}
+
+const IncludeList &ComplexTypeEntry::argumentIncludes() const
+{
+    S_D(const ComplexTypeEntry);
+    return d->m_argumentIncludes;
+}
+
+void ComplexTypeEntry::addArgumentInclude(const Include &newInclude)
+{
+    S_D(ComplexTypeEntry);
+    if (!d->m_argumentIncludes.contains(newInclude))
+        d->m_argumentIncludes.append(newInclude);
 }
 
 AddedFunctionList ComplexTypeEntry::addedFunctions() const
@@ -2387,7 +2414,6 @@ void TypeEntry::formatDebug(QDebug &debug) const
     FORMAT_NONEMPTY_STRING("package", m_d->m_targetLangPackage)
     FORMAT_BOOL("stream", m_d->m_stream)
     FORMAT_BOOL("built-in", m_d->m_builtin)
-    FORMAT_LIST_SIZE("codeSnips", m_d->m_codeSnips)
     FORMAT_NONEMPTY_STRING("targetConversionRule", m_d->m_targetConversionRule)
     if (m_d->m_viewOn)
        debug << ", views=" << m_d->m_viewOn->name();
@@ -2433,6 +2459,7 @@ void ComplexTypeEntry::formatDebug(QDebug &debug) const
     FORMAT_NONEMPTY_STRING("hash", d->m_hashFunction)
     FORMAT_LIST_SIZE("addedFunctions", d->m_addedFunctions)
     formatList(debug, "functionMods", d->m_functionMods, ", ");
+    FORMAT_LIST_SIZE("codeSnips", d->m_codeSnips)
     FORMAT_LIST_SIZE("fieldMods", d->m_fieldMods)
 }
 

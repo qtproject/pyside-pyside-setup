@@ -17,6 +17,10 @@ public:
     TypeSystem::SnakeCase snakeCase() const;
     void setSnakeCase(TypeSystem::SnakeCase sc);
 
+    const CodeSnipList &codeSnips() const;
+    CodeSnipList &codeSnips();
+    void addCodeSnip(const CodeSnip &codeSnip);
+
 protected:
     explicit TypeSystemTypeEntry(TypeEntryPrivate *d);
 };

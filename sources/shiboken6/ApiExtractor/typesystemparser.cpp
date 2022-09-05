@@ -881,7 +881,7 @@ bool TypeSystemParser::endElement(StackElement element)
                     toNative->setSourceType(m_context->db->findType(toNative->sourceTypeName()));
             }
         }
-        purgeEmptyCodeSnips(&top->entry->codeSnips());
+        purgeEmptyCodeSnips(&static_cast<TypeSystemTypeEntry *>(top->entry)->codeSnips());
         break;
     case StackElement::FunctionTypeEntry:
         TypeDatabase::instance()->addGlobalUserFunctionModifications(top->functionMods);
@@ -907,8 +907,11 @@ bool TypeSystemParser::endElement(StackElement element)
         centry->setAddedFunctions(centry->addedFunctions() + top->addedFunctions);
         centry->setFunctionModifications(centry->functionModifications() + top->functionMods);
         centry->setFieldModifications(centry->fieldModifications() + top->fieldMods);
-        centry->setCodeSnips(centry->codeSnips() + top->entry->codeSnips());
         centry->setDocModification(centry->docModifications() + top->docModifications);
+        if (top->entry->isComplex()) {
+            auto *cte = static_cast<const ComplexTypeEntry *>(top->entry);
+            centry->setCodeSnips(centry->codeSnips() + cte->codeSnips());
+        }
     }
     break;
 
@@ -964,8 +967,6 @@ bool TypeSystemParser::endElement(StackElement element)
         break;
 
     case StackElement::EnumTypeEntry:
-        top->entry->setDocModification(top->docModifications);
-        top->docModifications = DocModificationList();
         m_currentEnum = nullptr;
         break;
     case StackElement::Template:
@@ -1066,8 +1067,11 @@ CodeSnipAbstract *TypeSystemParser::injectCodeTarget(qsizetype offset) const
         return &funcMod.snips().last();
     }
     case ParserState::TypeEntryCodeInjection:
+        Q_ASSERT(top->entry->isComplex());
+        return &static_cast<ComplexTypeEntry *>(top->entry)->codeSnips().last();
     case ParserState::TypeSystemCodeInjection:
-        return &top->entry->codeSnips().last();
+        Q_ASSERT(top->entry->isTypeSystem());
+        return &static_cast<TypeSystemTypeEntry *>(top->entry)->codeSnips().last();
     case ParserState::Template:
         return m_templateEntry;
     default:
@@ -2917,14 +2921,21 @@ bool TypeSystemParser::parseInjectCode(const ConditionalStreamReader &,
     snip.position = position;
     snip.language = lang;
 
-    if (topElement == StackElement::ModifyFunction
-        || topElement == StackElement::AddFunction) {
+    switch (topElement) {
+    case StackElement::ModifyFunction:
+    case StackElement::AddFunction: {
         FunctionModification &mod = m_contextStack.top()->functionMods.last();
         mod.appendSnip(snip);
         if (!snip.code().isEmpty())
             mod.setModifierFlag(FunctionModification::CodeInjection);
-    } else {
-        m_contextStack.top()->entry->addCodeSnip(snip);
+    }
+    break;
+    case StackElement::Root:
+        static_cast<TypeSystemTypeEntry *>(m_contextStack.top()->entry)->addCodeSnip(snip);
+        break;
+    default:
+        static_cast<ComplexTypeEntry *>(m_contextStack.top()->entry)->addCodeSnip(snip);
+        break;
     }
     return true;
 }

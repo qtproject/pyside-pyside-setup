@@ -69,6 +69,18 @@ public:
     void addFunctionModification(const FunctionModification &functionModification);
     FunctionModificationList functionModifications(const QString &signature) const;
 
+    const CodeSnipList &codeSnips() const;
+    CodeSnipList &codeSnips();
+    void setCodeSnips(const CodeSnipList &codeSnips);
+    void addCodeSnip(const CodeSnip &codeSnip);
+
+    void setDocModification(const DocModificationList& docMods);
+    DocModificationList docModifications() const;
+
+    /// Extra includes for function arguments determined by the meta builder.
+    const IncludeList &argumentIncludes() const;
+    void addArgumentInclude(const Include &newInclude);
+
     AddedFunctionList addedFunctions() const;
     void setAddedFunctions(const AddedFunctionList &addedFunctions);
     void addNewFunction(const AddedFunctionPtr &addedFunction);
