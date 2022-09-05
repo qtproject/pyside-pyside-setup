@@ -12,7 +12,6 @@
 #include <QtCore/QScopedPointer>
 
 class AbstractMetaType;
-class CustomConversion;
 class CustomTypeEntry;
 class PrimitiveTypeEntry;
 class SourceLocation;
@@ -160,23 +159,9 @@ public:
     Include include() const;
     void setInclude(const Include &inc);
 
-    // FIXME PYSIDE7: Remove
-    /// Set the target type conversion rule
-    void setTargetConversionRule(const QString& conversionRule);
-
-    /// Returns the target type conversion rule
-    QString targetConversionRule() const;
-
     QVersionNumber version() const;
 
-    /// TODO-CONVERTER: mark as deprecated
-    bool hasTargetConversionRule() const;
-
     bool isCppPrimitive() const;
-
-    bool hasCustomConversion() const;
-    void setCustomConversion(CustomConversion* customConversion);
-    CustomConversion* customConversion() const;
 
     // View on: Type to use for function argument conversion, fex
     // std::string_view -> std::string for foo(std::string_view).

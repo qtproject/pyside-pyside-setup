@@ -53,6 +53,10 @@ public:
     bool preferredTargetLangType() const;
     void setPreferredTargetLangType(bool b);
 
+    bool hasCustomConversion() const;
+    void setCustomConversion(const CustomConversionPtr &customConversion);
+    CustomConversionPtr customConversion() const;
+
     TypeEntry *clone() const override;
 
 #ifndef QT_NO_DEBUG_STREAM

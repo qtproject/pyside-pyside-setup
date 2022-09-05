@@ -931,3 +931,11 @@ QString msgArgumentClassNotFound(const AbstractMetaFunctionCPtr &func,
         << "\" for \"" << func->classQualifiedSignature() << "\" not found!";
     return result;
 }
+
+QString msgMissingCustomConversion(const TypeEntry *t)
+{
+    QString result;
+    QTextStream(&result) << "Entry \"" << t->qualifiedCppName()
+        << "\" is missing a custom conversion.";
+    return result;
+}

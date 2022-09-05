@@ -247,4 +247,6 @@ QString msgUnknownCheckFunction(const TypeEntry *t);
 QString msgArgumentClassNotFound(const AbstractMetaFunctionCPtr &func,
                                  const TypeEntry *t);
 
+QString msgMissingCustomConversion(const TypeEntry *t);
+
 #endif // MESSAGES_H

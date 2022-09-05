@@ -12,6 +12,20 @@ public:
     explicit ValueTypeEntry(const QString &entryName, const QVersionNumber &vr,
                             const TypeEntry *parent);
 
+    bool hasCustomConversion() const;
+    void setCustomConversion(const CustomConversionPtr &customConversion);
+    CustomConversionPtr customConversion() const;
+
+    // FIXME PYSIDE7: Remove
+    /// Set the target type conversion rule
+    void setTargetConversionRule(const QString &conversionRule);
+
+    /// Returns the target type conversion rule
+    QString targetConversionRule() const;
+
+    /// TODO-CONVERTER: mark as deprecated
+    bool hasTargetConversionRule() const;
+
     bool isValue() const override;
 
     TypeEntry *clone() const override;

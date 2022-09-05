@@ -5,6 +5,7 @@
 #define CUSTOMCONVERSION_H
 
 #include "typesystem_enums.h"
+#include "typesystem_typedefs.h"
 
 #include <QtCore/QList>
 #include <QtCore/QString>
@@ -14,7 +15,7 @@ class TypeEntry;
 class CustomConversion
 {
 public:
-    CustomConversion(TypeEntry* ownerType);
+    explicit CustomConversion(const TypeEntry* ownerType);
     ~CustomConversion();
 
     const TypeEntry* ownerType() const;
@@ -56,6 +57,10 @@ public:
     void addTargetToNativeConversion(const QString& sourceTypeName,
                                      const QString& sourceTypeCheck,
                                      const QString& conversion = QString());
+
+    /// Return the custom conversion of a type; helper for type system parser
+    static CustomConversionPtr getCustomConversion(const TypeEntry *type);
+
 private:
     struct CustomConversionPrivate;
     CustomConversionPrivate* m_d;

@@ -96,10 +96,11 @@ private:
     void writeConverterFunctions(TextStream &s, const AbstractMetaClass *metaClass,
                                  const GeneratorContext &classContext) const;
     void writeCustomConverterFunctions(TextStream &s,
-                                       const CustomConversion *customConversion) const;
+                                       const CustomConversionPtr &customConversion) const;
     void writeConverterRegister(TextStream &s, const AbstractMetaClass *metaClass,
                                 const GeneratorContext &classContext) const;
-    static void writeCustomConverterRegister(TextStream &s, const CustomConversion *customConversion,
+    static void writeCustomConverterRegister(TextStream &s,
+                                             const CustomConversionPtr &customConversion,
                                              const QString &converterVar);
 
     void writeContainerConverterFunctions(TextStream &s,
@@ -295,7 +296,7 @@ private:
     /// Writes a C++ to Python conversion function.
     void writeCppToPythonFunction(TextStream &s, const QString &code, const QString &sourceTypeName,
                                   QString targetTypeName = QString()) const;
-    void writeCppToPythonFunction(TextStream &s, const CustomConversion *customConversion) const;
+    void writeCppToPythonFunction(TextStream &s, const CustomConversionPtr &customConversion) const;
     void writeCppToPythonFunction(TextStream &s, const AbstractMetaType &containerType) const;
 
     /// Writes a Python to C++ conversion function.
@@ -451,7 +452,7 @@ private:
     static void writeSpecialCastFunction(TextStream &s, const AbstractMetaClass *metaClass);
 
     static void writePrimitiveConverterInitialization(TextStream &s,
-                                                      const CustomConversion *customConversion);
+                                                      const CustomConversionPtr &customConversion);
     static void writeFlagsConverterInitialization(TextStream &s, const FlagsTypeEntry *enumType);
     static void writeEnumConverterInitialization(TextStream &s, const AbstractMetaEnum &metaEnum);
     QString writeContainerConverterInitialization(TextStream &s, const AbstractMetaType &type) const;

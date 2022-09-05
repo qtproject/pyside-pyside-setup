@@ -6,6 +6,7 @@
 
 #include <generator.h>
 
+#include "typesystem_typedefs.h"
 #include "customconversion.h"
 
 #include <QtCore/QRegularExpression>
@@ -298,7 +299,7 @@ protected:
     ExtendedConverterData getExtendedConverters() const;
 
     /// Returns a list of converters for the non wrapper types of the current module.
-    static QList<const CustomConversion *> getPrimitiveCustomConversions() ;
+    static QList<CustomConversionPtr> getPrimitiveCustomConversions();
 
     /// Returns true if the Python wrapper for the received OverloadData must accept a list of arguments.
     bool pythonFunctionWrapperUsesListOfArguments(const AbstractMetaFunctionCPtr &func) const;

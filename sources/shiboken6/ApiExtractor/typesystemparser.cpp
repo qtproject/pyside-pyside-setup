@@ -137,7 +137,7 @@ static bool isDocumentation(StackElement el)
     return el >= StackElement::FirstDocumentation && el <= StackElement::LastDocumentation;
 }
 
-static QList<CustomConversion *> customConversionsForReview;
+static QList<CustomConversionPtr> customConversionsForReview;
 
 // Set a regular expression for rejection from text. By legacy, those are fixed
 // strings, except for '*' meaning 'match all'. Enclosing in "^..$"
@@ -876,7 +876,7 @@ bool TypeSystemParser::endElement(StackElement element)
         if (m_generate == TypeEntry::GenerateCode) {
             TypeDatabase::instance()->addGlobalUserFunctions(top->addedFunctions);
             TypeDatabase::instance()->addGlobalUserFunctionModifications(top->functionMods);
-            for (CustomConversion *customConversion : qAsConst(customConversionsForReview)) {
+            for (const auto &customConversion : qAsConst(customConversionsForReview)) {
                 const CustomConversion::TargetToNativeConversions &toNatives = customConversion->targetToNativeConversions();
                 for (CustomConversion::TargetToNativeConversion *toNative : toNatives)
                     toNative->setSourceType(m_context->db->findType(toNative->sourceTypeName()));
@@ -931,22 +931,23 @@ bool TypeSystemParser::endElement(StackElement element)
     case StackElement::AddConversion:
         switch (parserState()) {
         case ParserState::PrimitiveTypeNativeToTargetConversion:
-        case ParserState::PrimitiveTypeTargetToNativeConversion:
-            if (auto *customConversion = top->entry->customConversion()) {
-                QString code = top->conversionCodeSnips.constLast().code();
-                if (element == StackElement::AddConversion) {
-                    if (customConversion->targetToNativeConversions().isEmpty()) {
-                        m_error = u"CustomConversion's target to native conversions missing."_s;
-                        return false;
-                    }
-                    customConversion->targetToNativeConversions().last()->setConversion(code);
-                } else {
-                    customConversion->setNativeToTargetConversion(code);
-                }
-            } else {
-                m_error = u"CustomConversion object is missing."_s;
+        case ParserState::PrimitiveTypeTargetToNativeConversion: {
+            auto customConversion = CustomConversion::getCustomConversion(top->entry);
+            if (customConversion.isNull()) {
+                m_error = msgMissingCustomConversion(top->entry);
                 return false;
             }
+            QString code = top->conversionCodeSnips.constLast().code();
+            if (element == StackElement::AddConversion) {
+                if (customConversion->targetToNativeConversions().isEmpty()) {
+                    m_error = u"CustomConversion's target to native conversions missing."_s;
+                    return false;
+                }
+                customConversion->targetToNativeConversions().last()->setConversion(code);
+            } else {
+                customConversion->setNativeToTargetConversion(code);
+            }
+        }
             break;
 
         case ParserState::ArgumentNativeToTargetConversion: {
@@ -2156,14 +2157,18 @@ bool TypeSystemParser::parseCustomConversion(const ConditionalStreamReader &,
         return true;
     }
 
-    if (top->entry->hasTargetConversionRule() || top->entry->hasCustomConversion()) {
-        m_error = u"Types can have only one conversion rule"_s;
-        return false;
+    ValueTypeEntry *valueTypeEntry = nullptr;
+    if (top->entry->isValue()) {
+        valueTypeEntry = static_cast<ValueTypeEntry *>(top->entry);
+        if (valueTypeEntry->hasTargetConversionRule() || valueTypeEntry->hasCustomConversion()) {
+            m_error = u"Types can have only one conversion rule"_s;
+            return false;
+        }
     }
 
     // The old conversion rule tag that uses a file containing the conversion
     // will be kept temporarily for compatibility reasons. FIXME PYSIDE7: Remove
-    if (!sourceFile.isEmpty()) {
+    if (valueTypeEntry != nullptr && !sourceFile.isEmpty()) {
         if (m_generate != TypeEntry::GenerateForSubclass
                 && m_generate != TypeEntry::GenerateNothing) {
             qWarning(lcShiboken, "Specifying conversion rules by \"file\" is deprecated.");
@@ -2181,12 +2186,18 @@ bool TypeSystemParser::parseCustomConversion(const ConditionalStreamReader &,
                 m_error = msgCannotFindSnippet(sourceFile, snippetLabel);
                 return false;
             }
-            top->entry->setTargetConversionRule(conversionRuleOptional.value());
+            valueTypeEntry->setTargetConversionRule(conversionRuleOptional.value());
         }
         return true;
     }
 
-    auto *customConversion = new CustomConversion(top->entry);
+    CustomConversionPtr customConversion(new CustomConversion(top->entry));
+    if (top->entry->isPrimitive())
+        static_cast<PrimitiveTypeEntry *>(top->entry)->setCustomConversion(customConversion);
+    else if (top->entry->isContainer())
+        static_cast<ContainerTypeEntry *>(top->entry)->setCustomConversion(customConversion);
+    else if (top->entry->isValue())
+        static_cast<ValueTypeEntry *>(top->entry)->setCustomConversion(customConversion);
     customConversionsForReview.append(customConversion);
     return true;
 }
@@ -2238,7 +2249,12 @@ bool TypeSystemParser::parseAddConversion(const ConditionalStreamReader &,
         m_error = u"Target to Native conversions must specify the input type with the 'type' attribute."_s;
         return false;
     }
-    top->entry->customConversion()->addTargetToNativeConversion(sourceTypeName, typeCheck);
+    auto customConversion = CustomConversion::getCustomConversion(top->entry);
+    if (customConversion.isNull()) {
+        m_error = msgMissingCustomConversion(top->entry);
+        return false;
+    }
+    customConversion->addTargetToNativeConversion(sourceTypeName, typeCheck);
     return true;
 }
 
@@ -3331,7 +3347,12 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
                 const bool replace = replaceIndex == -1
                     || convertBoolean(attributes.takeAt(replaceIndex).value(),
                                       replaceAttribute(), true);
-                top->entry->customConversion()->setReplaceOriginalTargetToNativeConversions(replace);
+                auto customConversion = CustomConversion::getCustomConversion(top->entry);
+                if (customConversion.isNull()) {
+                    m_error = msgMissingCustomConversion(top->entry);
+                    return false;
+                }
+                customConversion->setReplaceOriginalTargetToNativeConversions(replace);
             }
         }
         break;

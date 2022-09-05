@@ -53,7 +53,7 @@ class TypeEntryPrivate
 public:
     explicit TypeEntryPrivate(const QString &entryName, TypeEntry::Type t, const QVersionNumber &vr,
                               const TypeEntry *parent);
-    virtual ~TypeEntryPrivate();
+    virtual ~TypeEntryPrivate() = default;
 
     QString shortName() const;
 
@@ -66,9 +66,7 @@ public:
     mutable QString m_cachedTargetLangEntryName; // "Bar"
     IncludeList m_extraIncludes;
     Include m_include;
-    QString m_targetConversionRule;
     QVersionNumber m_version;
-    CustomConversion *m_customConversion = nullptr;
     SourceLocation m_sourceLocation; // XML file
     TypeEntry::CodeGeneration m_codeGeneration = TypeEntry::GenerateCode;
     TypeEntry *m_viewOn = nullptr;
@@ -89,11 +87,6 @@ TypeEntryPrivate::TypeEntryPrivate(const QString &entryName, TypeEntry::Type t, 
     m_version(vr),
     m_type(t)
 {
-}
-
-TypeEntryPrivate::~TypeEntryPrivate()
-{
-    delete m_customConversion;
 }
 
 TypeEntry::TypeEntry(const QString &entryName, TypeEntry::Type t, const QVersionNumber &vr,
@@ -143,24 +136,9 @@ void TypeEntry::setInclude(const Include &inc)
     }
 }
 
-void TypeEntry::setTargetConversionRule(const QString &conversionRule)
-{
-    m_d->m_targetConversionRule = conversionRule;
-}
-
-QString TypeEntry::targetConversionRule() const
-{
-    return m_d->m_targetConversionRule;
-}
-
 QVersionNumber TypeEntry::version() const
 {
     return m_d->m_version;
-}
-
-bool TypeEntry::hasTargetConversionRule() const
-{
-    return !m_d->m_targetConversionRule.isEmpty();
 }
 
 bool TypeEntry::isCppPrimitive() const
@@ -567,21 +545,6 @@ bool TypeEntry::isComplex() const
     return false;
 }
 
-bool TypeEntry::hasCustomConversion() const
-{
-    return m_d->m_customConversion != nullptr;
-}
-
-void TypeEntry::setCustomConversion(CustomConversion* customConversion)
-{
-    m_d->m_customConversion = customConversion;
-}
-
-CustomConversion* TypeEntry::customConversion() const
-{
-    return m_d->m_customConversion;
-}
-
 TypeEntry *TypeEntry::viewOn() const
 {
     return m_d->m_viewOn;
@@ -885,8 +848,9 @@ public:
     }
 
     QString m_defaultConstructor;
-    uint m_preferredTargetLangType : 1;
+    CustomConversionPtr m_customConversion;
     PrimitiveTypeEntry* m_referencedTypeEntry = nullptr;
+    uint m_preferredTargetLangType : 1;
 };
 
 PrimitiveTypeEntry::PrimitiveTypeEntry(const QString &entryName, const QVersionNumber &vr,
@@ -959,6 +923,24 @@ void PrimitiveTypeEntry::setPreferredTargetLangType(bool b)
 {
     S_D(PrimitiveTypeEntry);
     d->m_preferredTargetLangType = b;
+}
+
+bool PrimitiveTypeEntry::hasCustomConversion() const
+{
+    S_D(const PrimitiveTypeEntry);
+    return !d->m_customConversion.isNull();
+}
+
+void PrimitiveTypeEntry::setCustomConversion(const CustomConversionPtr &customConversion)
+{
+    S_D(PrimitiveTypeEntry);
+    d->m_customConversion = customConversion;
+}
+
+CustomConversionPtr PrimitiveTypeEntry::customConversion() const
+{
+    S_D(const PrimitiveTypeEntry);
+    return d->m_customConversion;
 }
 
 TypeEntry *PrimitiveTypeEntry::clone() const
@@ -1805,6 +1787,7 @@ public:
     }
 
     OpaqueContainers m_opaqueContainers;
+    CustomConversionPtr m_customConversion;
     ContainerTypeEntry::ContainerKind m_containerKind;
 };
 
@@ -1850,6 +1833,24 @@ QString ContainerTypeEntry::opaqueContainerName(const QString &instantiation) co
     S_D(const ContainerTypeEntry);
     const auto it = d->findOpaqueContainer(instantiation);
     return it != d->m_opaqueContainers.cend() ? it->name : QString{};
+}
+
+bool ContainerTypeEntry::hasCustomConversion() const
+{
+    S_D(const ContainerTypeEntry);
+    return !d->m_customConversion.isNull();
+}
+
+void ContainerTypeEntry::setCustomConversion(const CustomConversionPtr &customConversion)
+{
+    S_D(ContainerTypeEntry);
+    d->m_customConversion = customConversion;
+}
+
+CustomConversionPtr ContainerTypeEntry::customConversion() const
+{
+    S_D(const ContainerTypeEntry);
+    return d->m_customConversion;
 }
 
 TypeEntry *ContainerTypeEntry::clone() const
@@ -2126,10 +2127,56 @@ void NamespaceTypeEntry::setGenerateUsing(bool generateUsing)
 }
 
 // ----------------- ValueTypeEntry
+
+class ValueTypeEntryPrivate : public ComplexTypeEntryPrivate
+{
+public:
+    using ComplexTypeEntryPrivate::ComplexTypeEntryPrivate;
+
+    QString m_targetConversionRule;
+    CustomConversionPtr m_customConversion;
+};
+
 ValueTypeEntry::ValueTypeEntry(const QString &entryName, const QVersionNumber &vr,
                                const TypeEntry *parent) :
-    ComplexTypeEntry(entryName, BasicValueType, vr, parent)
+    ComplexTypeEntry(new ValueTypeEntryPrivate(entryName, BasicValueType, vr, parent))
 {
+}
+
+bool ValueTypeEntry::hasCustomConversion() const
+{
+    S_D(const ValueTypeEntry);
+    return !d->m_customConversion.isNull();
+}
+
+void ValueTypeEntry::setCustomConversion(const CustomConversionPtr &customConversion)
+{
+    S_D(ValueTypeEntry);
+    d->m_customConversion = customConversion;
+}
+
+CustomConversionPtr ValueTypeEntry::customConversion() const
+{
+    S_D(const ValueTypeEntry);
+    return d->m_customConversion;
+}
+
+void ValueTypeEntry::setTargetConversionRule(const QString &conversionRule)
+{
+    S_D(ValueTypeEntry);
+    d->m_targetConversionRule = conversionRule;
+}
+
+QString ValueTypeEntry::targetConversionRule() const
+{
+    S_D(const ValueTypeEntry);
+    return d->m_targetConversionRule;
+}
+
+bool ValueTypeEntry::hasTargetConversionRule() const
+{
+    S_D(const ValueTypeEntry);
+    return !d->m_targetConversionRule.isEmpty();
 }
 
 bool ValueTypeEntry::isValue() const
@@ -2139,8 +2186,8 @@ bool ValueTypeEntry::isValue() const
 
 TypeEntry *ValueTypeEntry::clone() const
 {
-    S_D(const ComplexTypeEntry);
-    return new ValueTypeEntry(new ComplexTypeEntryPrivate(*d));
+    S_D(const ValueTypeEntry);
+    return new ValueTypeEntry(new ValueTypeEntryPrivate(*d));
 }
 
 ValueTypeEntry::ValueTypeEntry(ComplexTypeEntryPrivate *d) :
@@ -2179,11 +2226,9 @@ struct CustomConversion::TargetToNativeConversion::TargetToNativeConversionPriva
     QString conversion;
 };
 
-CustomConversion::CustomConversion(TypeEntry* ownerType)
+CustomConversion::CustomConversion(const TypeEntry *ownerType)
+    : m_d(new CustomConversionPrivate(ownerType))
 {
-    m_d = new CustomConversionPrivate(ownerType);
-    if (ownerType)
-        ownerType->setCustomConversion(this);
 }
 
 CustomConversion::~CustomConversion()
@@ -2300,6 +2345,17 @@ QString CustomConversion::TargetToNativeConversion::conversion() const
 void CustomConversion::TargetToNativeConversion::setConversion(const QString& conversion)
 {
     m_d->conversion = conversion;
+}
+
+CustomConversionPtr CustomConversion::getCustomConversion(const TypeEntry *type)
+{
+    if (type->isPrimitive())
+        return static_cast<const PrimitiveTypeEntry *>(type)->customConversion();
+    if (type->isContainer())
+        return static_cast<const ContainerTypeEntry *>(type)->customConversion();
+    if (type->isValue())
+        return static_cast<const ValueTypeEntry *>(type)->customConversion();
+    return {};
 }
 
 // ----------------- FunctionTypeEntry
@@ -2426,7 +2482,6 @@ void TypeEntry::formatDebug(QDebug &debug) const
     FORMAT_NONEMPTY_STRING("package", m_d->m_targetLangPackage)
     FORMAT_BOOL("stream", m_d->m_stream)
     FORMAT_BOOL("built-in", m_d->m_builtin)
-    FORMAT_NONEMPTY_STRING("targetConversionRule", m_d->m_targetConversionRule)
     if (m_d->m_viewOn)
        debug << ", views=" << m_d->m_viewOn->name();
     if (!m_d->m_version.isNull() && m_d->m_version > QVersionNumber(0, 0))

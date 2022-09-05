@@ -7,6 +7,7 @@
 #include <complextypeentry.h>
 #include <customconversion.h>
 #include <primitivetypeentry.h>
+#include <valuetypeentry.h>
 
 #include <qtcompat.h>
 
@@ -39,8 +40,10 @@ void TestConversionRuleTag::testConversionRuleTagWithFile()
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, u"A");
     QVERIFY(classA);
     const ComplexTypeEntry* typeEntry = classA->typeEntry();
-    QVERIFY(typeEntry->hasTargetConversionRule());
-    QCOMPARE(typeEntry->targetConversionRule(), QLatin1String(conversionData));
+    QVERIFY(typeEntry->isValue());
+    auto *vte = static_cast<const ValueTypeEntry *>(typeEntry);
+    QVERIFY(vte->hasTargetConversionRule());
+    QCOMPARE(vte->targetConversionRule(), QLatin1String(conversionData));
 }
 
 void TestConversionRuleTag::testConversionRuleTagReplace()
@@ -87,8 +90,8 @@ void TestConversionRuleTag::testConversionRuleTagReplace()
     PrimitiveTypeEntry* typeA = typeDb->findPrimitiveType(u"A"_s);
     QVERIFY(typeA);
 
-    CustomConversion* conversion = typeA->customConversion();
-    QVERIFY(conversion);
+    QVERIFY(typeA->hasCustomConversion());
+    auto conversion = typeA->customConversion();
 
     QCOMPARE(typeA, conversion->ownerType());
     QCOMPARE(conversion->nativeToTargetConversion().simplified(),
@@ -153,8 +156,10 @@ if (!TargetDateTimeAPI) TargetDateTime_IMPORT;\n\
     auto *classA = AbstractMetaClass::findClass(builder->classes(), u"Date");
     QVERIFY(classA);
 
-    CustomConversion* conversion = classA->typeEntry()->customConversion();
-    QVERIFY(conversion);
+    QVERIFY(classA->typeEntry()->isValue());
+    auto *vte = static_cast<const ValueTypeEntry *>(classA->typeEntry());
+    QVERIFY(vte->hasCustomConversion());
+    auto conversion = vte->customConversion();
 
     QCOMPARE(conversion->nativeToTargetConversion(), QString());
 
@@ -216,8 +221,8 @@ void TestConversionRuleTag::testConversionRuleTagWithInsertTemplate()
     PrimitiveTypeEntry* typeA = typeDb->findPrimitiveType(u"A"_s);
     QVERIFY(typeA);
 
-    CustomConversion* conversion = typeA->customConversion();
-    QVERIFY(conversion);
+    QVERIFY(typeA->hasCustomConversion());
+    auto conversion = typeA->customConversion();
 
     QCOMPARE(typeA, conversion->ownerType());
     QCOMPARE(conversion->nativeToTargetConversion().trimmed(),

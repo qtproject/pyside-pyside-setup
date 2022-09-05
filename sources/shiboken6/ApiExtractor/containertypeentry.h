@@ -36,6 +36,10 @@ public:
     bool generateOpaqueContainer(const QString &instantiation) const;
     QString opaqueContainerName(const QString &instantiation) const;
 
+    bool hasCustomConversion() const;
+    void setCustomConversion(const CustomConversionPtr &customConversion);
+    CustomConversionPtr customConversion() const;
+
     TypeEntry *clone() const override;
 
 #ifndef QT_NO_DEBUG_STREAM

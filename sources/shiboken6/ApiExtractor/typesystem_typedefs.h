@@ -13,6 +13,7 @@ class CodeSnip;
 class DocModification;
 
 struct AddedFunction;
+class CustomConversion;
 class FieldModification;
 class FunctionModification;
 class TypeEntry;
@@ -20,6 +21,7 @@ class TypeEntry;
 using AddedFunctionPtr = QSharedPointer<AddedFunction>;
 using AddedFunctionList = QList<AddedFunctionPtr>;
 using CodeSnipList = QList<CodeSnip>;
+using CustomConversionPtr = QSharedPointer<CustomConversion>;
 using DocModificationList = QList<DocModification>;
 using FieldModificationList = QList<FieldModification>;
 using FunctionModificationList = QList<FunctionModification>;

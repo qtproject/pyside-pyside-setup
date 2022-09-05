@@ -22,6 +22,7 @@
 #include "smartpointertypeentry.h"
 #include "typedefentry.h"
 #include "typesystemtypeentry.h"
+#include "valuetypeentry.h"
 
 #include "qtcompat.h"
 
@@ -612,8 +613,8 @@ static void getCode(QStringList &code, const TypeEntry *type)
     else if (type->isTypeSystem())
         getCode(code, static_cast<const TypeSystemTypeEntry *>(type)->codeSnips());
 
-    CustomConversion *customConversion = type->customConversion();
-    if (!customConversion)
+    auto customConversion = CustomConversion::getCustomConversion(type);
+    if (customConversion.isNull())
         return;
 
     if (!customConversion->nativeToTargetConversion().isEmpty())

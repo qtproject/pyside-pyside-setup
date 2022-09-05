@@ -32,6 +32,7 @@
 #include <primitivetypeentry.h>
 #include <smartpointertypeentry.h>
 #include <typesystemtypeentry.h>
+#include <valuetypeentry.h>
 #include <parser/enumvalue.h>
 
 #include "qtcompat.h"
@@ -679,9 +680,12 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
     }
 
     // python conversion rules
-    if (typeEntry->hasTargetConversionRule()) {
-        s << "// Python Conversion\n";
-        s << typeEntry->targetConversionRule() << '\n';
+    if (typeEntry->isValue()) {
+        auto *vte = static_cast<const ValueTypeEntry *>(typeEntry);
+        if (vte->hasTargetConversionRule()) {
+            s << "// Python Conversion\n";
+            s << vte->targetConversionRule() << '\n';
+        }
     }
 
     if (classContext.useWrapper()) {
@@ -1942,13 +1946,16 @@ return result;)";
         writePythonToCppConversionFunctions(s, sourceType, targetType, typeCheck, toCppConv, toCppPreConv);
     }
 
-    writeCustomConverterFunctions(s, typeEntry->customConversion());
+    if (typeEntry->isValue()) {
+        auto *vte = static_cast<const ValueTypeEntry *>(typeEntry);
+        writeCustomConverterFunctions(s, vte->customConversion());
+    }
 }
 
 void CppGenerator::writeCustomConverterFunctions(TextStream &s,
-                                                 const CustomConversion *customConversion) const
+                                                 const CustomConversionPtr &customConversion) const
 {
-    if (!customConversion)
+    if (customConversion.isNull())
         return;
     const CustomConversion::TargetToNativeConversions &toCppConversions = customConversion->targetToNativeConversions();
     if (toCppConversions.isEmpty())
@@ -2071,13 +2078,17 @@ void CppGenerator::writeConverterRegister(TextStream &s, const AbstractMetaClass
         writeAddPythonToCppConversion(s, u"converter"_s, toCpp, isConv);
     }
 
-    writeCustomConverterRegister(s, typeEntry->customConversion(), u"converter"_s);
+    if (typeEntry->isValue()) {
+        auto *vte = static_cast<const ValueTypeEntry *>(typeEntry);
+        writeCustomConverterRegister(s, vte->customConversion(), u"converter"_s);
+    }
 }
 
-void CppGenerator::writeCustomConverterRegister(TextStream &s, const CustomConversion *customConversion,
+void CppGenerator::writeCustomConverterRegister(TextStream &s,
+                                                const CustomConversionPtr &customConversion,
                                                 const QString &converterVar)
 {
-    if (!customConversion)
+    if (customConversion.isNull())
         return;
     const CustomConversion::TargetToNativeConversions &toCppConversions = customConversion->targetToNativeConversions();
     if (toCppConversions.isEmpty())
@@ -3417,7 +3428,8 @@ static void replaceCppToPythonVariables(QString &code, const QString &typeName,
     code.replace(u"%out"_s, u"pyOut"_s);
 }
 
-void CppGenerator::writeCppToPythonFunction(TextStream &s, const CustomConversion *customConversion) const
+void CppGenerator::writeCppToPythonFunction(TextStream &s,
+                                            const CustomConversionPtr &customConversion) const
 {
     QString code = customConversion->nativeToTargetConversion();
     auto *ownerType = customConversion->ownerType();
@@ -3427,18 +3439,16 @@ void CppGenerator::writeCppToPythonFunction(TextStream &s, const CustomConversio
 }
 void CppGenerator::writeCppToPythonFunction(TextStream &s, const AbstractMetaType &containerType) const
 {
-    const CustomConversion *customConversion = containerType.typeEntry()->customConversion();
-    if (!customConversion) {
+    Q_ASSERT(containerType.typeEntry()->isContainer());
+    auto *cte = static_cast<const ContainerTypeEntry *>(containerType.typeEntry());
+    if (!cte->hasCustomConversion()) {
         QString m;
         QTextStream(&m) << "Can't write the C++ to Python conversion function for container type '"
              << containerType.typeEntry()->qualifiedCppName()
              << "' - no conversion rule was defined for it in the type system.";
         throw Exception(m);
     }
-    if (!containerType.typeEntry()->isContainer()) {
-        writeCppToPythonFunction(s, customConversion);
-        return;
-    }
+    const auto customConversion = cte->customConversion();
     QString code = customConversion->nativeToTargetConversion();
     for (qsizetype i = 0; i < containerType.instantiations().size(); ++i) {
         const AbstractMetaType &type = containerType.instantiations().at(i);
@@ -3565,11 +3575,14 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s,
 
 void CppGenerator::writePythonToCppConversionFunctions(TextStream &s, const AbstractMetaType &containerType) const
 {
-    const CustomConversion *customConversion = containerType.typeEntry()->customConversion();
-    if (!customConversion) {
+    Q_ASSERT(containerType.typeEntry()->isContainer());
+    auto *cte = static_cast<const ContainerTypeEntry *>(containerType.typeEntry());
+    if (!cte->hasCustomConversion()) {
         //qFatal
         return;
     }
+
+    const auto customConversion = cte->customConversion();
     const CustomConversion::TargetToNativeConversions &toCppConversions = customConversion->targetToNativeConversions();
     if (toCppConversions.isEmpty()) {
         //qFatal
@@ -4293,7 +4306,7 @@ void CppGenerator::writeSpecialCastFunction(TextStream &s, const AbstractMetaCla
 }
 
 void CppGenerator::writePrimitiveConverterInitialization(TextStream &s,
-                                                         const CustomConversion *customConversion)
+                                                         const CustomConversionPtr &customConversion)
 {
     const TypeEntry *type = customConversion->ownerType();
     QString converter = converterObject(type);
@@ -6651,10 +6664,10 @@ bool CppGenerator::finishGeneration()
         }
     }
 
-    const QList<const CustomConversion *> &typeConversions = getPrimitiveCustomConversions();
+    const QList<CustomConversionPtr> &typeConversions = getPrimitiveCustomConversions();
     if (!typeConversions.isEmpty()) {
         s  << "\n// Primitive Type converters.\n\n";
-        for (const CustomConversion *conversion : typeConversions) {
+        for (const auto &conversion : typeConversions) {
             s << "// C++ to Python conversion for primitive type '" << conversion->ownerType()->qualifiedCppName() << "'.\n";
             writeCppToPythonFunction(s, conversion);
             writeCustomConverterFunctions(s, conversion);
@@ -6747,7 +6760,7 @@ bool CppGenerator::finishGeneration()
 
     if (!typeConversions.isEmpty()) {
         s << '\n';
-        for (const CustomConversion *conversion : typeConversions) {
+        for (const auto &conversion : typeConversions) {
             writePrimitiveConverterInitialization(s, conversion);
             s << '\n';
         }

@@ -29,6 +29,7 @@
 #include <namespacetypeentry.h>
 #include <primitivetypeentry.h>
 #include <pythontypeentry.h>
+#include <valuetypeentry.h>
 
 #include <iostream>
 
@@ -250,10 +251,11 @@ ShibokenGenerator::FunctionGeneration
 
 AbstractMetaFunctionCList ShibokenGenerator::implicitConversions(const TypeEntry *t) const
 {
-    if (!generateImplicitConversions())
+    if (!generateImplicitConversions() || !t->isValue())
         return {};
-    auto *customConversion = t->customConversion();
-    if (customConversion && customConversion->replaceOriginalTargetToNativeConversions())
+    auto *vte = static_cast<const ValueTypeEntry *>(t);
+    auto customConversion = vte->customConversion();
+    if (!customConversion.isNull() && customConversion->replaceOriginalTargetToNativeConversions())
         return {};
 
     auto result = api().implicitConversions(t);
@@ -1174,15 +1176,13 @@ ShibokenGenerator::ExtendedConverterData ShibokenGenerator::getExtendedConverter
     return extConvs;
 }
 
-QList<const CustomConversion *> ShibokenGenerator::getPrimitiveCustomConversions()
+QList<CustomConversionPtr> ShibokenGenerator::getPrimitiveCustomConversions()
 {
-    QList<const CustomConversion *> conversions;
+    QList<CustomConversionPtr> conversions;
     const PrimitiveTypeEntryList &primitiveTypeList = primitiveTypes();
     for (const PrimitiveTypeEntry *type : primitiveTypeList) {
-        if (!type->shouldGenerate() || !type->isUserPrimitive() || !type->customConversion())
-            continue;
-
-        conversions << type->customConversion();
+        if (type->shouldGenerate() && type->isUserPrimitive() && type->hasCustomConversion())
+            conversions << type->customConversion();
     }
     return conversions;
 }

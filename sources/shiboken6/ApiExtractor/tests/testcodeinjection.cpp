@@ -8,6 +8,7 @@
 #include <modifications.h>
 #include <textstream.h>
 #include <complextypeentry.h>
+#include <valuetypeentry.h>
 
 #include <qtcompat.h>
 
@@ -64,7 +65,9 @@ void TestCodeInjections::testReadFile()
     QCOMPARE(classA->typeEntry()->codeSnips().size(), 1);
     QString code = classA->typeEntry()->codeSnips().constFirst().code();
     QVERIFY(code.indexOf(expected) != -1);
-    code = classA->typeEntry()->targetConversionRule();
+    QVERIFY(classA->typeEntry()->isValue());
+    auto *vte = static_cast<const ValueTypeEntry *>(classA->typeEntry());
+    code = vte->targetConversionRule();
     QVERIFY(code.indexOf(expected) != -1);
 }
 
