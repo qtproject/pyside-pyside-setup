@@ -6,6 +6,7 @@
 #include "abstractmetalang.h"
 #include "abstractmetalang_helpers.h"
 #include "abstractmetatype.h"
+#include "addedfunction.h"
 #include <codemodel.h>
 #include "documentation.h"
 #include "exception.h"
@@ -1000,7 +1001,7 @@ const FunctionModificationList &
                                                const AbstractMetaClass *implementor) const
 {
     if (!m_addedFunction.isNull())
-        return m_addedFunction->modifications;
+        return m_addedFunction->modifications();
     for (const auto &ce : m_modificationCache) {
         if (ce.klass == implementor)
             return ce.modifications;

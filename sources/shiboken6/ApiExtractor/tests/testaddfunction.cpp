@@ -6,8 +6,8 @@
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
 #include <codesnip.h>
-#include <modifications.h>
-#include <modifications_p.h>
+#include <addedfunction.h>
+#include <addedfunction_p.h>
 #include <complextypeentry.h>
 #include <primitivetypeentry.h>
 
@@ -294,7 +294,7 @@ void TestAddFunction::testAddFunctionAtModuleLevel()
 
     QCOMPARE(addedFuncs.size(), 1);
 
-    const FunctionModificationList mods = addedFuncs.constFirst()->modifications;
+    auto &mods = addedFuncs.constFirst()->modifications();
 
     QCOMPARE(mods.size(), 1);
     QVERIFY(mods.constFirst().isCodeInjection());

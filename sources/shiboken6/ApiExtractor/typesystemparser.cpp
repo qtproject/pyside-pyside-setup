@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "typesystemparser_p.h"
+#include "addedfunction.h"
 #include "codesnip.h"
 #include "enumtypeentry.h"
 #include "enumvaluetypeentry.h"
@@ -923,7 +924,7 @@ bool TypeSystemParser::endElement(StackElement element)
         Q_ASSERT(modIndex >= 0);
         Q_ASSERT(!top->addedFunctions.isEmpty());
         while (modIndex < top->functionMods.size())
-            top->addedFunctions.last()->modifications.append(top->functionMods.takeAt(modIndex));
+            top->addedFunctions.last()->modifications().append(top->functionMods.takeAt(modIndex));
     }
     break;
     case StackElement::NativeToTarget:

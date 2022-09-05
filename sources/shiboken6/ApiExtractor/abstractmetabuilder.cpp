@@ -5,6 +5,7 @@
 #include "abstractmetaenum.h"
 #include "abstractmetafield.h"
 #include "abstractmetafunction.h"
+#include "addedfunction.h"
 #include "graph.h"
 #include "exception.h"
 #include "messages.h"

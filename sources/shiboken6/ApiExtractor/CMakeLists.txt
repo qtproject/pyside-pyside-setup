@@ -16,6 +16,7 @@ abstractmetafield.cpp
 abstractmetafunction.cpp
 abstractmetatype.cpp
 abstractmetalang.cpp
+addedfunction.cpp
 classdocumentation.cpp
 codesnip.cpp
 codesniphelpers.cpp

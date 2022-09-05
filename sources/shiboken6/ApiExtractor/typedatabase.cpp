@@ -3,6 +3,7 @@
 
 #include "typedatabase.h"
 #include "abstractmetatype.h"
+#include "addedfunction.h"
 #include "exception.h"
 #include "messages.h"
 #include "typesystemparser_p.h"

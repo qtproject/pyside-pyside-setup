@@ -6,7 +6,6 @@
 
 #include "typesystem_enums.h"
 #include "typesystem_typedefs.h"
-#include "parser/typeinfo.h"
 
 #include <QtCore/QList>
 #include <QtCore/QSharedDataPointer>
@@ -308,121 +307,6 @@ public:
 private:
     QSharedDataPointer<FieldModificationData> d;
 };
-
-/**
-*   \internal
-*   Struct used to store information about functions added by the typesystem.
-*   This info will be used later to create a fake AbstractMetaFunction which
-*   will be inserted into the right AbstractMetaClass.
-*/
-struct AddedFunction
-{
-    using AddedFunctionPtr = QSharedPointer<AddedFunction>;
-
-    /// Function access types.
-    enum Access {
-        Protected = 0x1,
-        Public =    0x2
-    };
-
-    struct Argument
-    {
-        TypeInfo typeInfo;
-        QString name;
-        QString defaultValue;
-    };
-
-    /// Creates a new AddedFunction with a signature and a return type.
-    explicit AddedFunction(const QString &name, const QList<Argument> &arguments,
-                           const TypeInfo &returnType);
-
-    static AddedFunctionPtr createAddedFunction(const QString &signatureIn,
-                                                const QString &returnTypeIn,
-                                                QString *errorMessage);
-
-    AddedFunction() = default;
-
-    /// Returns the function name.
-    QString name() const
-    {
-        return m_name;
-    }
-
-    /// Set the function access type.
-    void setAccess(Access access)
-    {
-        m_access = access;
-    }
-
-    /// Returns the function access type.
-    Access access() const
-    {
-        return m_access;
-    }
-
-    /// Returns the function return type.
-    TypeInfo returnType() const
-    {
-        return m_returnType;
-    }
-
-    /// Returns a list of argument type infos.
-    const QList<Argument> &arguments() const
-    {
-        return m_arguments;
-    }
-
-    /// Returns true if this is a constant method.
-    bool isConstant() const
-    {
-        return m_isConst;
-    }
-    void setConstant(bool c) { m_isConst = c; };
-
-    /// Set this method static.
-    void setStatic(bool value)
-    {
-        m_isStatic = value;
-    }
-
-    /// Set this method as a classmethod.
-    void setClassMethod(bool value)
-    {
-        m_isClassMethod = value;
-    }
-
-    /// Returns true if this is a static method.
-    bool isStatic() const
-    {
-        return m_isStatic;
-    }
-
-    /// Returns true if this is a class method.
-    bool isClassMethod() const
-    {
-        return m_isClassMethod;
-    }
-
-    bool isDeclaration() const { return m_isDeclaration; } // <declare-function>
-    void setDeclaration(bool value) { m_isDeclaration = value; }
-
-    FunctionModificationList modifications;
-
-private:
-    QString m_name;
-    QList<Argument> m_arguments;
-    TypeInfo m_returnType;
-    Access m_access = Public;
-    bool m_isConst = false;
-    bool m_isClassMethod = false;
-    bool m_isStatic = false;
-    bool m_isDeclaration = false;
-};
-
-#ifndef QT_NO_DEBUG_STREAM
-QDebug operator<<(QDebug d, const AddedFunction::Argument &a);
-QDebug operator<<(QDebug d, const AddedFunction &af);
-#endif
 
 class DocModification
 {
