@@ -14,7 +14,8 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtCore import (QCoreApplication, QFile, QMetaObject, QObject,
-                            QPoint, QTimer, QSemaphore, Qt, Signal, Slot,
+                            QModelIndex, QPoint, QTimer, QSemaphore,
+                            QStringListModel, Qt, Signal, Slot,
                             SIGNAL, Q_ARG, Q_RETURN_ARG)
 
 
@@ -179,6 +180,15 @@ class qmetaobject_test(unittest.TestCase):
                                      Q_ARG(QObject, o))
         self.assertTrue(c)
         self.assertEqual(c, child)
+
+    def test_InvokeTypeString(self):
+        strings = ["item1", "item2"]
+        model = QStringListModel(strings)
+        index = model.index(1, 0)
+        QMetaObject.invokeMethod(model, "setData",
+                                 Q_ARG(QModelIndex, index),
+                                 Q_ARG("QVariant", "bla"))
+        self.assertEqual(model.data(index), "bla")
 
 
 if __name__ == '__main__':

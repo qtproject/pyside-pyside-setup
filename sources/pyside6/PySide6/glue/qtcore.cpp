@@ -25,19 +25,31 @@ struct QArgData
 
 QArgData qArgDataFromPyType(PyObject *t)
 {
-    auto *pyType = reinterpret_cast<PyTypeObject *>(t);
     QArgData result;
-    result.metaType = PySide::qMetaTypeFromPyType(pyType);
+    const char *typeName{};
+    if (PyType_Check(t)) {
+        auto *pyType = reinterpret_cast<PyTypeObject *>(t);
+        typeName = pyType->tp_name;
+        result.metaType = PySide::qMetaTypeFromPyType(pyType);
+    } else if (PyUnicode_Check(t)) {
+        typeName = Shiboken::String::toCString(t);
+        result.metaType = QMetaType::fromName(typeName);
+    } else {
+        PyErr_Format(PyExc_RuntimeError, "%s: Parameter should be a type or type string.",
+                     __FUNCTION__);
+        return result;
+    }
+
     if (!result.metaType.isValid()) {
         PyErr_Format(PyExc_RuntimeError, "%s: Unable to find a QMetaType for \"%s\".",
-                     __FUNCTION__, pyType->tp_name);
+                     __FUNCTION__, typeName);
         return result;
     }
 
     result.data = result.metaType.create();
     if (result.data == nullptr) {
         PyErr_Format(PyExc_RuntimeError, "%s: Unable to create an instance of \"%s\" (%s).",
-                     __FUNCTION__, pyType->tp_name, result.metaType.name());
+                     __FUNCTION__, typeName, result.metaType.name());
         return result;
     }
     return result;
@@ -1651,7 +1663,6 @@ const bool result = %CPPSELF.invokeMethod(%1, %2, %3, %4, %5);
 
 // invokeMethod(QObject *,const char *,Qt::ConnectionType, QGenericArgument a0, a1, a2 )
 // @snippet qmetaobject-invokemethod-conn-type-arg
-qDebug() << __FUNCTION__ << %2;
 const bool result = %CPPSELF.invokeMethod(%1, %2, %3, %4, %5, %6);
 %PYARG_0 = %CONVERTTOPYTHON[bool](result);
 // @snippet qmetaobject-invokemethod-conn-type-arg

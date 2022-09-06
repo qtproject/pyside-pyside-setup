@@ -54,21 +54,21 @@
         <inject-code file="../glue/qtcore.cpp" snippet="use-stream-for-format-security"/>
     </add-function>
 
-    <add-function signature="Q_ARG(PyTypeObject *@type@, PyObject *@value@)"
+    <add-function signature="Q_ARG(PyObject *@type@, PyObject *@value@)"
                   return-type="QtCoreHelper::QGenericArgumentHolder">
         <inject-code file="../glue/qtcore.cpp" snippet="q_arg"/>
         <inject-documentation format="target" mode="append">
-        This function takes a type and a value of that type and returns an internal
-        object that can be passed to QMetaObject.invokeMethod().
-        See also Q_RETURN_ARG().
+        This function takes a type (or a type string) and a value of that type
+        and returns an internal object that can be passed to
+        QMetaObject.invokeMethod(). See also Q_RETURN_ARG().
         </inject-documentation>
     </add-function>
-    <add-function signature="Q_RETURN_ARG(PyTypeObject *@type@)"
+    <add-function signature="Q_RETURN_ARG(PyObject *@type@)"
                   return-type="QtCoreHelper::QGenericReturnArgumentHolder">
         <inject-code file="../glue/qtcore.cpp" snippet="q_return_arg"/>
         <inject-documentation format="target" mode="append">
-        This macro takes a type a value of which is then returned by
-        QMetaObject::invokeMethod(). See also Q_ARG().
+        This macro takes a type (or a type string) a value of which is then
+        returned by QMetaObject::invokeMethod(). See also Q_ARG().
         </inject-documentation>
     </add-function>
 
