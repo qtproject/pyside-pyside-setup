@@ -1,0 +1,3 @@
+{
+    "files": ["main.py", "viewer.qml", "viewer.qrc", "resources/test.pdf"]
+}
