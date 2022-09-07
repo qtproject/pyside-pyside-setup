@@ -79,10 +79,31 @@ Qt Modules Supported by Qt for Python
 
     ---
 
+    :mod:`Qt Multimedia <PySide6.QtMultimedia>`
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    Provides API for multimedia-specific use cases.
+
+    ---
+
+    :mod:`Qt Multimedia Widgets <PySide6.QtMultimediaWidgets>`
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    Provides the widget-based multimedia API.
+
+    ---
+
     :mod:`QtNetwork <PySide6.QtNetwork>`
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     Offers classes that let you to write TCP/IP clients and servers.
+
+    ---
+
+    :mod:`Qt Network Authorization <PySide6.QtNetworkAuth>`
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    Provides support for OAuth-based authorization to online services.
 
     ---
 
@@ -118,10 +139,11 @@ Qt Modules Supported by Qt for Python
 
     ---
 
-    :mod:`QtOpenGLFunctions <PySide6.QtOpenGLFunctions>`
+    :mod:`QtOpenGL Widgets <PySide6.QtOpenGLWidgets>`
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    The QOpenGLFunctions class provides cross-platform access to the OpenGL ES 2.0 API.
+    Provides the  OpenGLWidget class enabling OpenGL rendering for a certain
+    part of the widget tree.
 
     ---
 
@@ -129,6 +151,13 @@ Qt Modules Supported by Qt for Python
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     The QOpenGLWidget class is a widget for rendering OpenGL graphics.
+
+    ---
+
+    :mod:`Qt Positioning <PySide6.QtPositioning>`
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    Provides access to position, satellite info and area monitoring classes.
 
     ---
 
@@ -164,6 +193,20 @@ Qt Modules Supported by Qt for Python
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     Provides the QQuickWidget class for embedding Qt Quick in widget-based applications.
+
+    ---
+
+    :mod:`Qt Sensors <PySide6.QtSensors>`
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    Provides access to sensor hardware.
+
+    ---
+
+    :mod:`Qt Serial Port <PySide6.QtSerialPort>`
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    Provides classes to interact with hardware and virtual serial ports.
 
     ---
 
@@ -246,6 +289,14 @@ Qt Modules Supported by Qt for Python
 
     ---
 
+    :mod:`Qt WebChannel <PySide6.QtWebChannel>`
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    Provides access to QObject or QML objects from HTML clients for seamless
+    integration of Qt applications with HTML/JavaScript clients.
+
+    ---
+
     :mod:`QtWebEngine Core C++ Classes <PySide6.QtWebEngineCore>`
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -264,6 +315,13 @@ Qt Modules Supported by Qt for Python
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     Provides QML types for rendering web content within a QML application.
+
+    ---
+
+    :mod:`Qt WebSockets <PySide6.QtWebSockets>`
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    Provides WebSocket communication compliant with RFC 6455.
 
     ---
 
