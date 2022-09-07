@@ -85,6 +85,25 @@ class QFlagOperatorTest(unittest.TestCase):
         flags = Qt.NoItemFlags | Qt.ItemIsUserCheckable
         self.assertEqual(flags | Qt.ItemIsEnabled, Qt.ItemIsEnabled | flags)
 
+    def testEqualNonNumericalObject(self):
+        '''QFlags ==,!= non-numerical object '''
+        flags = Qt.NoItemFlags | Qt.ItemIsUserCheckable
+
+        self.assertTrue(flags != None)  # noqa: E711
+        self.assertFalse(flags == None)  # noqa: E711
+
+        self.assertTrue(flags != "tomato")
+        self.assertFalse(flags == "tomato")
+
+        with self.assertRaises(TypeError):
+            flags > None
+        with self.assertRaises(TypeError):
+            flags >= None
+        with self.assertRaises(TypeError):
+            flags < None
+        with self.assertRaises(TypeError):
+            flags <= None
+
 
 class QFlagsOnQVariant(unittest.TestCase):
     def testQFlagsOnQVariant(self):

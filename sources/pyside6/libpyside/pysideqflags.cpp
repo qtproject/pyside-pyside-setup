@@ -64,8 +64,14 @@ extern "C" {
     {
         int result = 0;
         if (!PyNumber_Check(other)) {
-            PyErr_BadArgument();
-            return nullptr;
+            switch (op) {
+            case Py_EQ:
+                Py_RETURN_FALSE;
+            case Py_NE:
+                Py_RETURN_TRUE;
+            default:
+                Py_RETURN_NOTIMPLEMENTED;
+            }
         }
 
         if (self == other) {
