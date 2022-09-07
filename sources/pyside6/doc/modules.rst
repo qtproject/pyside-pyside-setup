@@ -217,6 +217,13 @@ Qt Modules Supported by Qt for Python
 
     ---
 
+    :mod:`Qt Spatial Audio <PySide6.QtSpatialAudio>`
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    Provides APIs for modeling sound source and their surrounds in 3D space.
+
+    ---
+
     :mod:`QtSql <PySide6.QtSql>`
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

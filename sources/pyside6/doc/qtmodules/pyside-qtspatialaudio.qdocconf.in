@@ -1,0 +1,3 @@
+include(@QT_SRC_DIR@/../qtmultimedia/src/spatialaudio/doc/qtspatialaudio.qdocconf)
+includepaths += -I @QT_SRC_DIR@/../qtmultimedia/src/spatialaudio/doc
+include(../pyside-config.qdocconf)
