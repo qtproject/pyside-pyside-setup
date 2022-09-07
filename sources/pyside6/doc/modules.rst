@@ -161,6 +161,20 @@ Qt Modules Supported by Qt for Python
 
     ---
 
+    :mod:`Qt PDF <PySide6.QtPdf>`
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    Classes and functions for rendering PDF documents.
+
+    ---
+
+    :mod:`Qt PDF Widgets <PySide6.QtPdfWidgets>`
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    A PDF viewer widget.
+
+    ---
+
     :mod:`QtPrintSupport <PySide6.QtPrintSupport>`
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

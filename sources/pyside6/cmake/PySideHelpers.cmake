@@ -89,6 +89,8 @@ macro(collect_optional_modules)
         MultimediaWidgets
         OpenGL
         OpenGLWidgets
+        Pdf
+        PdfWidgets
         Positioning
         NetworkAuth
         Nfc

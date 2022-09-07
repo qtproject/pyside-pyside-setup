@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!--
+// Copyright (C) 2022 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+-->
+<typesystem package="PySide6.QtPdfWidgets">
+    <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
+    <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
+    <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no"/>
+    <load-typesystem name="QtPdf/typesystem_pdf.xml" generate="no"/>
+    <object-type name="QPdfView">
+        <enum-type name="PageMode"/>
+        <enum-type name="ZoomMode"/>
+    </object-type>
+</typesystem>

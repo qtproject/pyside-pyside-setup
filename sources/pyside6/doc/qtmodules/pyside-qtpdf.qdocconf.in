@@ -1,0 +1,3 @@
+include(@QT_SRC_DIR@/../qtwebengine/src/pdf/doc/qtpdf.qdocconf)
+includepaths += -I @QT_SRC_DIR@/../qtwebengine/src/pdf/doc
+include(../pyside-config.qdocconf)
