@@ -68,11 +68,9 @@ class Options(object):
 
     def option_value(self, name, short_option_name=None, remove=True):
         """
-        Returns the value of a command line option or environment
-        variable.
+        Returns the value of a command line option.
 
-        :param name: The name of the command line option or environment
-         variable.
+        :param name: The name of the command line option.
 
         :param remove: Whether the option and its value should be
          removed from sys.argv. Useful when there's a need to query for
@@ -105,9 +103,6 @@ class Options(object):
 
                 if remove:
                     sys.argv[index:index + 1] = []
-
-        if value is None:
-            value = os.getenv(name.upper().replace('-', '_'))
 
         self.dict[name] = value
         return value
