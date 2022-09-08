@@ -75,9 +75,11 @@ else()
     set(python_executable "${PYTHON_EXECUTABLE}")
 endif()
 
+set(TOOLS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../tools")
+
 if (FULLDOCSBUILD)
     # Fetch and transform the snippets from Qt
-    set(SNIPPETS_TOOL "${CMAKE_CURRENT_SOURCE_DIR}/../../../tools/snippets_translate/main.py")
+    set(SNIPPETS_TOOL "${TOOLS_DIR}/snippets_translate/main.py")
     set(SNIPPETS_TARGET ${CMAKE_CURRENT_BINARY_DIR}/rst/codesnippets)
 
     # Note QT_SRC_DIR points to 'qtbase',
@@ -96,7 +98,7 @@ set(EXAMPLE_TOOL_OPTIONS --target "${EXAMPLE_TOOL_TARGET}")
 if (QUIET_BUILD)
     list(APPEND EXAMPLE_TOOL_OPTIONS "-q")
 endif()
-set(EXAMPLE_TOOL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../tools/example_gallery/main.py")
+set(EXAMPLE_TOOL_DIR "${TOOLS_DIR}/example_gallery/main.py")
 
 add_custom_target("example_gallery" DEPENDS "${EXAMPLE_TOOL_TARGET}")
 add_custom_command(OUTPUT "${EXAMPLE_TOOL_TARGET}"
@@ -122,8 +124,13 @@ if (FULLDOCSBUILD)
     file(READ "${pyside6_BINARY_DIR}/pyside6_global.h" docHeaderContents)
     file(READ "typesystem_doc.xml.in" typeSystemDocXmlContents)
 
+    execute_process(
+      COMMAND ${PYTHON_EXECUTABLE} "${TOOLS_DIR}/doc_modules.py" "${QT_INCLUDE_DIR}"
+      OUTPUT_VARIABLE ALL_DOC_MODULES
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
+    separate_arguments (ALL_DOC_MODULES UNIX_COMMAND "${ALL_DOC_MODULES}")
 
-    foreach(moduleIn ${all_module_shortnames})
+    foreach(moduleIn ${ALL_DOC_MODULES})
         string(TOLOWER "${moduleIn}" lowerModuleIn)
         set(docConf "${CMAKE_CURRENT_LIST_DIR}/qtmodules/pyside-qt${lowerModuleIn}.qdocconf.in")
         if(EXISTS "${docConf}")
