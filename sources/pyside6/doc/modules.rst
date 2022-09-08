@@ -18,7 +18,6 @@ Qt Modules Supported by Qt for Python
 
     ---
 
-
     :mod:`QtCharts <PySide6.QtCharts>`
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -103,7 +102,9 @@ Qt Modules Supported by Qt for Python
     :mod:`Qt Network Authorization <PySide6.QtNetworkAuth>`
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    Provides support for OAuth-based authorization to online services.
+    Provides a set of APIs that enable Qt applications to obtain limited
+    access to online accounts and HTTP services without exposing users'
+    passwords.
 
     ---
 
@@ -111,24 +112,6 @@ Qt Modules Supported by Qt for Python
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     The NFC API provides connectivity between NFC enabled devices.
-
-    ---
-
-    :mod:`QtNetworkAuth <PySide6.QtNetworkAuth>`
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-    Provides a set of APIs that enable Qt applications to obtain limited
-    access to online accounts and HTTP services without exposing users'
-    passwords.
-
-    ---
-
-    :mod:`QtRemoteObjects <PySide6.QtRemoteObjects>`
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-    Inter-Process Communication (IPC) module developed for Qt. This module
-    extends Qt's existing functionalities to enable information exchange
-    between processes or computers, easily.
 
     ---
 
@@ -144,13 +127,6 @@ Qt Modules Supported by Qt for Python
 
     Provides the  OpenGLWidget class enabling OpenGL rendering for a certain
     part of the widget tree.
-
-    ---
-
-    :mod:`QtOpenGLWidgets <PySide6.QtOpenGLWidgets>`
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-    The QOpenGLWidget class is a widget for rendering OpenGL graphics.
 
     ---
 
@@ -210,6 +186,22 @@ Qt Modules Supported by Qt for Python
 
     ---
 
+    :mod:`QtRemoteObjects <PySide6.QtRemoteObjects>`
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    Inter-Process Communication (IPC) module developed for Qt. This module
+    extends Qt's existing functionalities to enable information exchange
+    between processes or computers, easily.
+
+    ---
+
+    :mod:`Qt Scxml <PySide6.QtScxml>`
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    Provides classes to create and use state machines from SCXML files.
+
+    ---
+
     :mod:`Qt Sensors <PySide6.QtSensors>`
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -221,13 +213,6 @@ Qt Modules Supported by Qt for Python
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     Provides classes to interact with hardware and virtual serial ports.
-
-    ---
-
-    :mod:`Qt Scxml <PySide6.QtScxml>`
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-    Provides classes to create and use state machines from SCXML files.
 
     ---
 
@@ -249,15 +234,6 @@ Qt Modules Supported by Qt for Python
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     Provides classes for creating and executing state graphs.
-
-    ---
-
-    :mod:`QtSerialPort <PySide6.QtSerialPort>`
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-    Provides the basic functionality, which includes configuring, I/O
-    operations, getting and setting the control signals of the RS-232
-    pinouts.
 
     ---
 
@@ -286,27 +262,6 @@ Qt Modules Supported by Qt for Python
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     Provides classes to handle forms created with Qt Designer.
-
-    ---
-
-    :mod:`QtWidgets <PySide6.QtWidgets>`
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-    Extends Qt GUI with C++ widget functionality.
-
-    ---
-
-    :mod:`QtXml <PySide6.QtXml>`
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-    Provides a C++ implementation of DOM.
-
-    ---
-
-    :mod:`Qt3DAnimation <PySide6.Qt3DAnimation>`
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-    Provides basic elements required to animate 3D objects.
 
     ---
 
@@ -343,6 +298,27 @@ Qt Modules Supported by Qt for Python
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     Provides WebSocket communication compliant with RFC 6455.
+
+    ---
+
+    :mod:`QtWidgets <PySide6.QtWidgets>`
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    Extends Qt GUI with C++ widget functionality.
+
+    ---
+
+    :mod:`QtXml <PySide6.QtXml>`
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    Provides a C++ implementation of DOM.
+
+    ---
+
+    :mod:`Qt3DAnimation <PySide6.Qt3DAnimation>`
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    Provides basic elements required to animate 3D objects.
 
     ---
 
