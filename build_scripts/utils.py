@@ -15,6 +15,7 @@ import tempfile
 import urllib.request as urllib
 from collections import defaultdict
 from pathlib import Path
+from textwrap import dedent, indent
 
 try:
     # Using the distutils implementation within setuptools
@@ -1230,6 +1231,40 @@ def parse_cmake_conf_assignments_by_key(source_dir):
     return d
 
 
+def _configure_failure_message(project_path, cmd, return_code, output, error, env):
+    """Format a verbose message about configure_cmake_project() failures."""
+    cmd_string = ' '.join(cmd)
+    error_text = indent(error.strip(), "    ")
+    output_text = indent(output.strip(), "    ")
+    result = dedent(f"""
+                 Failed to configure CMake project: '{project_path}'
+                 Configure args were:
+                     {cmd_string}
+                 Return code: {return_code}
+                 """)
+
+    first = True
+    for k, v in env.items():
+        if k.startswith("CMAKE"):
+            if first:
+                result += "Environment:\n"
+                first = False
+            result += f"    {k}={v}\n"
+
+    result += f"\nwith error:\n{error_text}\n"
+
+    CMAKE_CMAKEOUTPUT_LOG_PATTERN = r'See also "([^"]+CMakeOutput\.log)"\.'
+    cmakeoutput_log_match = re.search(CMAKE_CMAKEOUTPUT_LOG_PATTERN, output)
+    if cmakeoutput_log_match:
+        cmakeoutput_log = Path(cmakeoutput_log_match.group(1))
+        if cmakeoutput_log.is_file():
+            log = indent(cmakeoutput_log.read_text().strip(), "    ")
+            result += f"CMakeOutput.log:\n{log}\n"
+
+    result += f"Output:\n{output_text}\n"
+    return result
+
+
 def configure_cmake_project(project_path,
                             cmake_path,
                             build_path=None,
@@ -1257,7 +1292,6 @@ def configure_cmake_project(project_path,
     for arg, value in cmake_cache_args:
         cmd.extend([f'-D{arg}={value}'])
 
-    cmd_string = ' '.join(cmd)
     proc = subprocess.run(cmd, shell=False, cwd=build_path,
                           capture_output=True, universal_newlines=True)
     return_code = proc.returncode
@@ -1265,10 +1299,9 @@ def configure_cmake_project(project_path,
     error = proc.stderr
 
     if return_code != 0:
-        raise RuntimeError(f"\nFailed to configure CMake project \n "
-                           f"'{project_path}' \n with error: \n {error}\n "
-                           f"Return code: {return_code}\n"
-                           f"Configure args were:\n  {cmd_string}")
+        m = _configure_failure_message(project_path, cmd, return_code,
+                                       output, error, os.environ)
+        raise RuntimeError(m)
 
     if clean_temp_dir:
         remove_tree(build_path)
