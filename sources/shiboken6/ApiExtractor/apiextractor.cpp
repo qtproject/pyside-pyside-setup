@@ -624,8 +624,8 @@ static void getCode(QStringList &code, const TypeEntry *type)
     if (toCppConversions.isEmpty())
         return;
 
-    for (CustomConversion::TargetToNativeConversion *toNative : qAsConst(toCppConversions))
-        code.append(toNative->conversion());
+    for (const auto &toNative : qAsConst(toCppConversions))
+        code.append(toNative.conversion());
 }
 
 void ApiExtractorPrivate::collectContainerTypesFromSnippets(InstantiationCollectContext &context)

@@ -877,9 +877,10 @@ bool TypeSystemParser::endElement(StackElement element)
             TypeDatabase::instance()->addGlobalUserFunctions(top->addedFunctions);
             TypeDatabase::instance()->addGlobalUserFunctionModifications(top->functionMods);
             for (const auto &customConversion : qAsConst(customConversionsForReview)) {
-                const CustomConversion::TargetToNativeConversions &toNatives = customConversion->targetToNativeConversions();
-                for (CustomConversion::TargetToNativeConversion *toNative : toNatives)
-                    toNative->setSourceType(m_context->db->findType(toNative->sourceTypeName()));
+                TargetToNativeConversions &toNatives =
+                    customConversion->targetToNativeConversions();
+                for (auto &toNative : toNatives)
+                    toNative.setSourceType(m_context->db->findType(toNative.sourceTypeName()));
             }
         }
         purgeEmptyCodeSnips(&static_cast<TypeSystemTypeEntry *>(top->entry)->codeSnips());
@@ -943,7 +944,7 @@ bool TypeSystemParser::endElement(StackElement element)
                     m_error = u"CustomConversion's target to native conversions missing."_s;
                     return false;
                 }
-                customConversion->targetToNativeConversions().last()->setConversion(code);
+                customConversion->targetToNativeConversions().last().setConversion(code);
             } else {
                 customConversion->setNativeToTargetConversion(code);
             }

@@ -286,12 +286,14 @@ private:
     /// Returns the name of a Python to C++ conversion function.
     static QString pythonToCppFunctionName(const QString &sourceTypeName, const QString &targetTypeName);
     static QString pythonToCppFunctionName(const AbstractMetaType &sourceType, const AbstractMetaType &targetType);
-    static QString pythonToCppFunctionName(const CustomConversion::TargetToNativeConversion *toNative, const TypeEntry *targetType);
+    static QString pythonToCppFunctionName(const TargetToNativeConversion &toNative,
+                                           const TypeEntry *targetType);
 
     /// Returns the name of a Python to C++ convertible check function.
     static QString convertibleToCppFunctionName(const QString &sourceTypeName, const QString &targetTypeName);
     static QString convertibleToCppFunctionName(const AbstractMetaType &sourceType, const AbstractMetaType &targetType);
-    static QString convertibleToCppFunctionName(const CustomConversion::TargetToNativeConversion *toNative, const TypeEntry *targetType);
+    static QString convertibleToCppFunctionName(const TargetToNativeConversion &toNative,
+                                                const TypeEntry *targetType);
 
     /// Writes a C++ to Python conversion function.
     void writeCppToPythonFunction(TextStream &s, const QString &code, const QString &sourceTypeName,
@@ -320,7 +322,7 @@ private:
                                              const QString &preConversion = QString()) const;
     /// Writes a pair of Python to C++ conversion and check functions for implicit conversions.
     void writePythonToCppConversionFunctions(TextStream &s,
-                                             const CustomConversion::TargetToNativeConversion *toNative,
+                                             const TargetToNativeConversion &toNative,
                                              const TypeEntry *targetType) const;
 
     /// Writes a pair of Python to C++ conversion and check functions for instantiated container types.

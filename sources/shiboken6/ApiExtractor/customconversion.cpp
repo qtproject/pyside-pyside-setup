@@ -1,0 +1,131 @@
+// Copyright (C) 2022 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
+
+#include "customconversion.h"
+#include "containertypeentry.h"
+#include "customtypenentry.h"
+#include "primitivetypeentry.h"
+#include "valuetypeentry.h"
+
+using namespace Qt::StringLiterals;
+
+CustomConversion::CustomConversion(const TypeEntry *ownerType) :
+    m_ownerType(ownerType)
+{
+}
+
+const TypeEntry *CustomConversion::ownerType() const
+{
+    return m_ownerType;
+}
+
+QString CustomConversion::nativeToTargetConversion() const
+{
+    return m_nativeToTargetConversion;
+}
+
+void CustomConversion::setNativeToTargetConversion(const QString &nativeToTargetConversion)
+{
+    m_nativeToTargetConversion = nativeToTargetConversion;
+}
+
+bool CustomConversion::replaceOriginalTargetToNativeConversions() const
+{
+    return m_replaceOriginalTargetToNativeConversions;
+}
+
+void CustomConversion::setReplaceOriginalTargetToNativeConversions(bool r)
+{
+    m_replaceOriginalTargetToNativeConversions = r;
+}
+
+bool CustomConversion::hasTargetToNativeConversions() const
+{
+    return !(m_targetToNativeConversions.isEmpty());
+}
+
+TargetToNativeConversions &CustomConversion::targetToNativeConversions()
+{
+    return m_targetToNativeConversions;
+}
+
+const TargetToNativeConversions &CustomConversion::targetToNativeConversions() const
+{
+    return m_targetToNativeConversions;
+}
+
+void CustomConversion::addTargetToNativeConversion(const QString &sourceTypeName,
+                                                   const QString &sourceTypeCheck,
+                                                   const QString &conversion)
+{
+    m_targetToNativeConversions.append(TargetToNativeConversion(sourceTypeName,
+                                                                   sourceTypeCheck,
+                                                                   conversion));
+}
+
+TargetToNativeConversion::TargetToNativeConversion(const QString &sourceTypeName,
+                                                   const QString &sourceTypeCheck,
+                                                   const QString &conversion) :
+    m_sourceTypeName(sourceTypeName), m_sourceTypeCheck(sourceTypeCheck),
+    m_conversion(conversion)
+{
+}
+
+const TypeEntry *TargetToNativeConversion::sourceType() const
+{
+    return m_sourceType;
+}
+
+void TargetToNativeConversion::setSourceType(const TypeEntry *sourceType)
+{
+    m_sourceType = sourceType;
+}
+
+bool TargetToNativeConversion::isCustomType() const
+{
+    return m_sourceType == nullptr;
+}
+
+QString TargetToNativeConversion::sourceTypeName() const
+{
+    return m_sourceTypeName;
+}
+
+QString TargetToNativeConversion::sourceTypeCheck() const
+{
+    if (!m_sourceTypeCheck.isEmpty())
+        return m_sourceTypeCheck;
+
+    if (m_sourceType != nullptr && m_sourceType->isCustom()) {
+        const auto *cte = static_cast<const CustomTypeEntry *>(m_sourceType);
+        if (cte->hasCheckFunction()) {
+            QString result = cte->checkFunction();
+            if (result != u"true") // For PyObject, which is always true
+                result += u"(%in)"_s;
+            return result;
+        }
+    }
+
+    return {};
+}
+
+QString TargetToNativeConversion::conversion() const
+{
+    return m_conversion;
+}
+
+void TargetToNativeConversion::setConversion(const QString &conversion)
+{
+    m_conversion = conversion;
+}
+
+CustomConversionPtr CustomConversion::getCustomConversion(const TypeEntry *type)
+{
+    if (type->isPrimitive())
+        return static_cast<const PrimitiveTypeEntry *>(type)->customConversion();
+    if (type->isContainer())
+        return static_cast<const ContainerTypeEntry *>(type)->customConversion();
+    if (type->isValue())
+        return static_cast<const ValueTypeEntry *>(type)->customConversion();
+    return {};
+}

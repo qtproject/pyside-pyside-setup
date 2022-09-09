@@ -7,7 +7,7 @@
 #include <generator.h>
 
 #include "typesystem_typedefs.h"
-#include "customconversion.h"
+#include "typesystem_enums.h"
 
 #include <QtCore/QRegularExpression>
 
@@ -17,6 +17,7 @@ class DocParser;
 class CodeSnip;
 class QPropertySpec;
 class OverloadData;
+class TargetToNativeConversion;
 class TextStream;
 struct GeneratorClassInfoCacheEntry;
 
@@ -192,7 +193,7 @@ protected:
 
     static QString pythonOperatorFunctionName(const AbstractMetaFunctionCPtr &func);
 
-    static QString fixedCppTypeName(const CustomConversion::TargetToNativeConversion *toNative);
+    static QString fixedCppTypeName(const TargetToNativeConversion &toNative);
     static QString fixedCppTypeName(const AbstractMetaType &type);
     static QString fixedCppTypeName(const TypeEntry *type, QString typeName = QString());
 

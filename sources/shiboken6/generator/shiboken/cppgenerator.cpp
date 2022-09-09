@@ -3,8 +3,8 @@
 
 #include "cppgenerator.h"
 #include "codesnip.h"
+#include "customconversion.h"
 #include "headergenerator.h"
-#include "apiextractor.h"
 #include "apiextractorresult.h"
 #include "ctypenames.h"
 #include <exception.h>
@@ -1957,12 +1957,13 @@ void CppGenerator::writeCustomConverterFunctions(TextStream &s,
 {
     if (customConversion.isNull())
         return;
-    const CustomConversion::TargetToNativeConversions &toCppConversions = customConversion->targetToNativeConversions();
+    const TargetToNativeConversions &toCppConversions = customConversion->targetToNativeConversions();
     if (toCppConversions.isEmpty())
         return;
-    s << "// Python to C++ conversions for type '" << customConversion->ownerType()->qualifiedCppName() << "'.\n";
-    for (CustomConversion::TargetToNativeConversion *toNative : toCppConversions)
-        writePythonToCppConversionFunctions(s, toNative, customConversion->ownerType());
+    auto *ownerType = customConversion->ownerType();
+    s << "// Python to C++ conversions for type '" << ownerType->qualifiedCppName() << "'.\n";
+    for (const auto &toNative : toCppConversions)
+        writePythonToCppConversionFunctions(s, toNative, ownerType);
     s << '\n';
 }
 
@@ -2090,11 +2091,12 @@ void CppGenerator::writeCustomConverterRegister(TextStream &s,
 {
     if (customConversion.isNull())
         return;
-    const CustomConversion::TargetToNativeConversions &toCppConversions = customConversion->targetToNativeConversions();
+    const TargetToNativeConversions &toCppConversions =
+        customConversion->targetToNativeConversions();
     if (toCppConversions.isEmpty())
         return;
     s << "// Add user defined implicit conversions to type converter.\n";
-    for (CustomConversion::TargetToNativeConversion *toNative : toCppConversions) {
+    for (const auto &toNative : toCppConversions) {
         QString toCpp = pythonToCppFunctionName(toNative, customConversion->ownerType());
         QString isConv = convertibleToCppFunctionName(toNative, customConversion->ownerType());
         writeAddPythonToCppConversion(s, converterVar, toCpp, isConv);
@@ -3371,7 +3373,7 @@ QString CppGenerator::pythonToCppFunctionName(const AbstractMetaType &sourceType
 {
     return pythonToCppFunctionName(fixedCppTypeName(sourceType), fixedCppTypeName(targetType));
 }
-QString CppGenerator::pythonToCppFunctionName(const CustomConversion::TargetToNativeConversion *toNative,
+QString CppGenerator::pythonToCppFunctionName(const TargetToNativeConversion &toNative,
                                               const TypeEntry *targetType)
 {
     return pythonToCppFunctionName(fixedCppTypeName(toNative), fixedCppTypeName(targetType));
@@ -3386,7 +3388,7 @@ QString CppGenerator::convertibleToCppFunctionName(const AbstractMetaType &sourc
 {
     return convertibleToCppFunctionName(fixedCppTypeName(sourceType), fixedCppTypeName(targetType));
 }
-QString CppGenerator::convertibleToCppFunctionName(const CustomConversion::TargetToNativeConversion *toNative,
+QString CppGenerator::convertibleToCppFunctionName(const TargetToNativeConversion &toNative,
                                                    const TypeEntry *targetType)
 {
     return convertibleToCppFunctionName(fixedCppTypeName(toNative), fixedCppTypeName(targetType));
@@ -3527,16 +3529,16 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s,
 }
 
 void CppGenerator::writePythonToCppConversionFunctions(TextStream &s,
-                                                      const CustomConversion::TargetToNativeConversion *toNative,
+                                                      const TargetToNativeConversion &toNative,
                                                       const TypeEntry *targetType) const
 {
     // Python to C++ conversion function.
-    QString code = toNative->conversion();
+    QString code = toNative.conversion();
     QString inType;
-    if (toNative->sourceType())
-        inType = cpythonTypeNameExt(toNative->sourceType());
+    if (toNative.sourceType())
+        inType = cpythonTypeNameExt(toNative.sourceType());
     else
-        inType = u'(' + toNative->sourceTypeName() + u"_TypeF())"_s;
+        inType = u'(' + toNative.sourceTypeName() + u"_TypeF())"_s;
     code.replace(u"%INTYPE"_s, inType);
     code.replace(u"%OUTTYPE"_s, targetType->qualifiedCppName());
     code.replace(u"%in"_s, u"pyIn"_s);
@@ -3548,9 +3550,9 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s,
     writePythonToCppFunction(s, code, sourceTypeName, targetTypeName);
 
     // Python to C++ convertible check function.
-    QString typeCheck = toNative->sourceTypeCheck();
+    QString typeCheck = toNative.sourceTypeCheck();
     if (typeCheck.isEmpty()) {
-        QString pyTypeName = toNative->sourceTypeName();
+        QString pyTypeName = toNative.sourceTypeName();
         if (pyTypeName == u"Py_None" || pyTypeName == u"PyNone")
             typeCheck = u"%in == Py_None"_s;
         else if (pyTypeName == u"SbkEnumType")
@@ -3559,14 +3561,14 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s,
             typeCheck = u"Shiboken::Object::checkType(%in)"_s;
     }
     if (typeCheck.isEmpty()) {
-        if (!toNative->sourceType() || toNative->sourceType()->isPrimitive()) {
+        if (!toNative.sourceType() || toNative.sourceType()->isPrimitive()) {
             QString m;
             QTextStream(&m) << "User added implicit conversion for C++ type '" << targetType->qualifiedCppName()
                 << "' must provide either an input type check function or a non primitive type entry.";
             throw Exception(m);
         }
         typeCheck = u"PyObject_TypeCheck(%in, "_s
-                    + cpythonTypeNameExt(toNative->sourceType()) + u')';
+                    + cpythonTypeNameExt(toNative.sourceType()) + u')';
     }
     typeCheck.replace(u"%in"_s, u"pyIn"_s);
     processCodeSnip(typeCheck);
@@ -3583,14 +3585,15 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s, const Abst
     }
 
     const auto customConversion = cte->customConversion();
-    const CustomConversion::TargetToNativeConversions &toCppConversions = customConversion->targetToNativeConversions();
+    const TargetToNativeConversions &toCppConversions =
+        customConversion->targetToNativeConversions();
     if (toCppConversions.isEmpty()) {
         //qFatal
         return;
     }
     // Python to C++ conversion function.
     QString cppTypeName = getFullTypeNameWithoutModifiers(containerType);
-    QString code = toCppConversions.constFirst()->conversion();
+    QString code = toCppConversions.constFirst().conversion();
     const QString line = u"auto &cppOutRef = *reinterpret_cast<"_s
         + cppTypeName + u" *>(cppOut);"_s;
     CodeSnipAbstract::prependCode(&code, line);

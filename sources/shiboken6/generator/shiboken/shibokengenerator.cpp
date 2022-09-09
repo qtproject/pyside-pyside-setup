@@ -4,6 +4,7 @@
 #include "shibokengenerator.h"
 #include "apiextractorresult.h"
 #include "codesnip.h"
+#include "customconversion.h"
 #include "ctypenames.h"
 #include <abstractmetabuilder.h>
 #include <abstractmetaenum.h>
@@ -647,11 +648,11 @@ QString ShibokenGenerator::cpythonTypeNameExt(const AbstractMetaType &type)
 
 static inline QString unknownOperator() { return QStringLiteral("__UNKNOWN_OPERATOR__"); }
 
-QString ShibokenGenerator::fixedCppTypeName(const CustomConversion::TargetToNativeConversion *toNative)
+QString ShibokenGenerator::fixedCppTypeName(const TargetToNativeConversion &toNative)
 {
-    if (toNative->sourceType())
-        return fixedCppTypeName(toNative->sourceType());
-    return toNative->sourceTypeName();
+    if (toNative.sourceType())
+        return fixedCppTypeName(toNative.sourceType());
+    return toNative.sourceTypeName();
 }
 QString ShibokenGenerator::fixedCppTypeName(const AbstractMetaType &type)
 {

@@ -101,32 +101,33 @@ void TestConversionRuleTag::testConversionRuleTagReplace()
     QVERIFY(conversion->hasTargetToNativeConversions());
     QCOMPARE(conversion->targetToNativeConversions().size(), 3);
 
-    CustomConversion::TargetToNativeConversion* toNative = conversion->targetToNativeConversions().at(0);
-    QVERIFY(toNative);
-    QCOMPARE(toNative->sourceTypeName(), u"TargetNone");
-    QVERIFY(toNative->isCustomType());
-    QCOMPARE(toNative->sourceType(), nullptr);
-    QCOMPARE(toNative->sourceTypeCheck(), u"%IN == Target_None");
-    QCOMPARE(toNative->conversion().simplified(),
+    QVERIFY(!conversion->targetToNativeConversions().isEmpty());
+    auto toNative = conversion->targetToNativeConversions().at(0);
+    QCOMPARE(toNative.sourceTypeName(), u"TargetNone");
+    QVERIFY(toNative.isCustomType());
+    QCOMPARE(toNative.sourceType(), nullptr);
+    QCOMPARE(toNative.sourceTypeCheck(), u"%IN == Target_None");
+    QCOMPARE(toNative.conversion().simplified(),
              u"DoThat(); DoSomething(); %OUT = A();");
 
+    QVERIFY(conversion->targetToNativeConversions().size() > 1);
     toNative = conversion->targetToNativeConversions().at(1);
-    QVERIFY(toNative);
-    QCOMPARE(toNative->sourceTypeName(), u"B");
-    QVERIFY(!toNative->isCustomType());
+    QCOMPARE(toNative.sourceTypeName(), u"B");
+    QVERIFY(!toNative.isCustomType());
     TypeEntry* typeB = typeDb->findType(u"B"_s);
     QVERIFY(typeB);
-    QCOMPARE(toNative->sourceType(), typeB);
-    QCOMPARE(toNative->sourceTypeCheck(), u"CheckIfInputObjectIsB(%IN)");
-    QCOMPARE(toNative->conversion().trimmed(), u"%OUT = %IN.createA();");
+    QCOMPARE(toNative.sourceType(), typeB);
+    QCOMPARE(toNative.sourceTypeCheck(), u"CheckIfInputObjectIsB(%IN)");
+    QCOMPARE(toNative.conversion().trimmed(), u"%OUT = %IN.createA();");
 
+    QVERIFY(conversion->targetToNativeConversions().size() > 2);
     toNative = conversion->targetToNativeConversions().at(2);
-    QVERIFY(toNative);
-    QCOMPARE(toNative->sourceTypeName(), u"String");
-    QVERIFY(toNative->isCustomType());
-    QCOMPARE(toNative->sourceType(), nullptr);
-    QCOMPARE(toNative->sourceTypeCheck(), u"String_Check(%IN)");
-    QCOMPARE(toNative->conversion().trimmed(), u"%OUT = new A(String_AsString(%IN), String_GetSize(%IN));");
+    QCOMPARE(toNative.sourceTypeName(), u"String");
+    QVERIFY(toNative.isCustomType());
+    QCOMPARE(toNative.sourceType(), nullptr);
+    QCOMPARE(toNative.sourceTypeCheck(), u"String_Check(%IN)");
+    QCOMPARE(toNative.conversion().trimmed(),
+             u"%OUT = new A(String_AsString(%IN), String_GetSize(%IN));");
 }
 
 void TestConversionRuleTag::testConversionRuleTagAdd()
@@ -167,14 +168,13 @@ if (!TargetDateTimeAPI) TargetDateTime_IMPORT;\n\
     QVERIFY(conversion->hasTargetToNativeConversions());
     QCOMPARE(conversion->targetToNativeConversions().size(), 1);
 
-    CustomConversion::TargetToNativeConversion *toNative =
-        conversion->targetToNativeConversions().constFirst();
-    QVERIFY(toNative);
-    QCOMPARE(toNative->sourceTypeName(), u"TargetDate");
-    QVERIFY(toNative->isCustomType());
-    QCOMPARE(toNative->sourceType(), nullptr);
-    QCOMPARE(toNative->sourceTypeCheck(), u"TargetDate_Check(%IN)");
-    QCOMPARE(toNative->conversion().trimmed(),
+    QVERIFY(!conversion->targetToNativeConversions().isEmpty());
+    const auto &toNative = conversion->targetToNativeConversions().constFirst();
+    QCOMPARE(toNative.sourceTypeName(), u"TargetDate");
+    QVERIFY(toNative.isCustomType());
+    QCOMPARE(toNative.sourceType(), nullptr);
+    QCOMPARE(toNative.sourceTypeCheck(), u"TargetDate_Check(%IN)");
+    QCOMPARE(toNative.conversion().trimmed(),
              uR"(if (!TargetDateTimeAPI) TargetDateTime_IMPORT;
 %OUT = new Date(TargetDate_Day(%IN), TargetDate_Month(%IN), TargetDate_Year(%IN));)");
 }
@@ -231,9 +231,9 @@ void TestConversionRuleTag::testConversionRuleTagWithInsertTemplate()
     QVERIFY(conversion->hasTargetToNativeConversions());
     QCOMPARE(conversion->targetToNativeConversions().size(), 1);
 
-    CustomConversion::TargetToNativeConversion* toNative = conversion->targetToNativeConversions().constFirst();
-    QVERIFY(toNative);
-    QCOMPARE(toNative->conversion().trimmed(),
+    QVERIFY(!conversion->targetToNativeConversions().isEmpty());
+    const auto &toNative = conversion->targetToNativeConversions().constFirst();
+    QCOMPARE(toNative.conversion().trimmed(),
              QLatin1StringView(targetToNativeExpected));
 }
 

@@ -21,6 +21,7 @@ classdocumentation.cpp
 codesnip.cpp
 codesniphelpers.cpp
 conditionalstreamreader.cpp
+customconversion.cpp
 documentation.cpp
 dotview.cpp
 enclosingclassmixin.cpp
