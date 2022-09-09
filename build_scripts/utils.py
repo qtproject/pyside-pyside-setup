@@ -1258,16 +1258,11 @@ def configure_cmake_project(project_path,
         cmd.extend([f'-D{arg}={value}'])
 
     cmd_string = ' '.join(cmd)
-    # FIXME Python 3.7: Use subprocess.run()
-    proc = subprocess.Popen(cmd,
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE,
-                            shell=False,
-                            cwd=build_path,
-                            universal_newlines=True)
-    output, error = proc.communicate()
-    proc.wait()
+    proc = subprocess.run(cmd, shell=False, cwd=build_path,
+                          capture_output=True, universal_newlines=True)
     return_code = proc.returncode
+    output = proc.stdout
+    error = proc.stderr
 
     if return_code != 0:
         raise RuntimeError(f"\nFailed to configure CMake project \n "
