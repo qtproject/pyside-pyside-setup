@@ -67,6 +67,7 @@ static PyType_Slot PySidePropertyType_slots[] = {
     {Py_tp_init, reinterpret_cast<void *>(qpropertyTpInit)},
     {Py_tp_new, reinterpret_cast<void *>(qpropertyTpNew)},
     {Py_tp_getset, PySidePropertyType_getset},
+    {Py_tp_del, reinterpret_cast<void *>(PyObject_GC_Del)},
     {0, nullptr}
 };
 
@@ -235,6 +236,7 @@ static void qpropertyDeAlloc(PyObject *self)
         // This was not needed before Python 3.8 (Python issue 35810)
         Py_DECREF(Py_TYPE(self));
     }
+    PyObject_GC_UnTrack(self);
     Py_TYPE(self)->tp_free(self);
 }
 
