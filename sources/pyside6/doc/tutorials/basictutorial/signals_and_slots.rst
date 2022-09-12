@@ -185,7 +185,7 @@ the different functionality.
             speak = Signal((int,), (str,))
 
             def __init__(self, parent=None):
-                super().__init__(self, parent)
+                super().__init__(parent)
 
                 self.speak[int].connect(self.say_something)
                 self.speak[str].connect(self.say_something)
