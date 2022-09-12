@@ -290,24 +290,24 @@ def test_constuctors():
 def test_inheritance_init():
     assert (
         st(": QClass(fun(re, 1, 2), parent), a(1)")
-        == "    QClass.__init__(self, fun(re, 1, 2), parent)\n    self.a = 1"
+        == "    super().__init__(fun(re, 1, 2), parent)\n    self.a = 1"
     )
     assert (
         st(":   QQmlNdefRecord(copyFooRecord(record), parent)")
-        == "    QQmlNdefRecord.__init__(self, copyFooRecord(record), parent)"
+        == "    super().__init__(copyFooRecord(record), parent)"
     )
     assert (
         st("    : QWidget(parent), helper(helper)")
-        == "    QWidget.__init__(self, parent)\n    self.helper = helper"
+        == "    super().__init__(parent)\n    self.helper = helper"
     )
-    assert st("   : QWidget(parent)") == "    QWidget.__init__(self, parent)"
+    assert st("   : QWidget(parent)") == "    super().__init__(parent)"
     assert (
         st(": a(0), bB(99), cC2(1), p_S(10),")
         == "    self.a = 0\n    self.bB = 99\n    self.cC2 = 1\n    self.p_S = 10"
     )
     assert (
         st(": QAbstractFileEngineIterator(nameFilters, filters), index(0) ")
-        == "    QAbstractFileEngineIterator.__init__(self, nameFilters, filters)\n    self.index = 0"
+        == "    super().__init__(nameFilters, filters)\n    self.index = 0"
     )
     assert (
         st(": m_document(doc), m_text(text)") == "    self.m_document = doc\n    self.m_text = text"
@@ -317,7 +317,7 @@ def test_inheritance_init():
         st(": option->palette.color(QPalette::Mid);")
         == "    self.option.palette.color = QPalette.Mid"
     )
-    assert st(": QSqlResult(driver) {}") == "    QSqlResult.__init__(self, driver)"
+    assert st(": QSqlResult(driver) {}") == "    super().__init__(driver)"
 
 
 def test_arrays():
