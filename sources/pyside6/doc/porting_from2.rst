@@ -4,23 +4,17 @@ Porting Applications from PySide2 to PySide6
 Module Availability
 -------------------
 
-Qt for Python 6.0.0 initially ships with the essential
-`Modules <https://doc.qt.io/qt-6/qtmodules.html>`_ and some
-add-ons (Qt 3D, Qt Concurrent, Qt Help, Qt OpenGL, Qt Print Support
-Qt Quick Widgets, Qt SQL, Qt SVG, Qt UI Tools and Qt XML).
-
-More modules will follow in subsequent releases as they
-are added to Qt.
-
-For Qt for Python 6.1, Active Qt, Qt Charts, Qt Data Visualization,
-Qt StateMachine and Qt SCXML are planned.
+Qt for Python 6.2.0 provides all modules planned for inclusion in Qt 6.
 
 Module-Level Changes
 --------------------
 
-* *Qt Quick Controls 1* have been removed.
+* The modules *QtMacExtras*, *Qt Quick Controls 1*, *QtWinExtras*,
+  *QtXmlPatterns* and *QtX11Extras* have been removed.
 * ``QStateMachine`` and related classes have been extracted to a new
   *QtStateMachine* module.
+* The modules *QtWebKit* and *QtWebKitWidgets* have been replaced by the new
+  *QtWebEngineCore*, *QtWebEngineQuick* and *QtWebEngineWidgets* modules.
 * ``QXmlReader`` and related classes (*SAX API*) have been removed.
 * The content of the *QtOpenGL* module has been replaced. The class
   ``QGLWidget`` and related classes (``QGLContext``, ``QGLFunctions``,
@@ -97,4 +91,4 @@ accordingly. For example:
 
 More information can be found in the
 `Porting to Qt 6 <https://doc.qt.io/qt-6/portingguide.html>`_ Guide
-and the `Qt 6.0 Documentation <https://doc.qt.io/qt-6/index.html>`_ .
+and the `Qt 6.2 Documentation <https://doc.qt.io/qt-6/index.html>`_ .

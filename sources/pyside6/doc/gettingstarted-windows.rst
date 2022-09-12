@@ -7,14 +7,14 @@ selected when using the online installer.
 Requirements
 ------------
 
- * `MSVC2017`_ (or MSVC2019) for Python 3 on Windows,
+ * `MSVC2022`_ or (MSVC2019) for Python 3 on Windows,
  * `OpenSSL`_ (optional for SSL support, Qt must have been configured using the same SSL library).
  * ``sphinx`` package for the documentation (optional).
 
 .. note:: Python 3.8.0 was missing some API required for PySide/Shiboken so it's not possible
     to use it for a Windows build.
 
-.. _MSVC2017: https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=BuildTools
+.. _MSVC2022: https://visualstudio.microsoft.com/downloads/
 .. _OpenSSL: https://sourceforge.net/projects/openssl/
 
 Building from source on Windows 10
@@ -53,11 +53,11 @@ Getting PySide
 
 Cloning the official repository can be done by::
 
-    git clone --recursive https://code.qt.io/pyside/pyside-setup
+    git clone https://code.qt.io/pyside/pyside-setup
 
-Checking out the version that we want to build, for example,  6.0::
+Checking out the version that we want to build, for example, 6.2::
 
-    cd pyside-setup && git checkout 6.0
+    cd pyside-setup && git checkout 6.2
 
 Install the general dependencies::
 
@@ -69,7 +69,7 @@ Building PySide
 ~~~~~~~~~~~~~~~
 
 Check your Qt installation path, to specifically use that version of qtpaths to build PySide.
-for example, ``E:\Qt\6.0.0\msvc2019_64\bin\qtpaths.exe``.
+for example, ``C:\Qt\6.2.1\msvc2019_64\bin\qtpaths.exe``.
 
 Build can take a few minutes, so it is recommended to use more than one CPU core::
 
