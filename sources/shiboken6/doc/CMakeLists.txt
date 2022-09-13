@@ -41,7 +41,7 @@ if(SPHINX_BUILD)
             endif()
 
             add_custom_command(TARGET doc POST_BUILD
-                COMMAND "${python_executable}" ${PATCH_QHP_SCRIPT} -f ${QHP_FILE} -v shiboken6
+                COMMAND "${python_executable}" ${PATCH_QHP_SCRIPT} -v shiboken6 ${QHP_FILE}
                 COMMAND "${qhelpgenerator_binary}" ${QHP_FILE}
                 COMMENT "Generating shiboken documentation QCH files based on the QHP files"
                 VERBATIM)
