@@ -121,7 +121,7 @@ def get_code_tabs(files, project_dir):
 
     for i, project_file in enumerate(files):
         pfile = Path(project_file)
-        if pfile.suffix in (".jpg", ".png", ".pyc"):
+        if pfile.suffix in (".jpg", ".pdf", ".png", ".pyc", ".svg", ".svgz"):
             continue
 
         content += f".. tabbed:: {project_file}\n\n"
