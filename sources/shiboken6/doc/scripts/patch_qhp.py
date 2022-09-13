@@ -50,9 +50,13 @@ registering the documentation in Qt Assistant."""
 
 
 VIRTUAL_FOLDER_PATTERN = re.compile("(^.*virtualFolder.)doc(.*$)")
+# Strip "PySide6.QtModule." from index entries
+INDEX_CLASS_PATTERN = re.compile(r'^(\s*<keyword name=")PySide6\.[^.]+\.(.*\(class in .*)$')
+INDEX_METHOD_PATTERN = re.compile(r'^(\s+<keyword name=".* \()PySide6\.[^.]+\.(.*>)$')
 
 
 virtual_folder = ""
+strip_pyside_module = False
 
 
 def process_line(line):
@@ -61,6 +65,15 @@ def process_line(line):
     if match:
         print(f"{match.group(1)}{virtual_folder}{match.group(2)}")
         return
+    if strip_pyside_module:
+        match = INDEX_METHOD_PATTERN.match(line)
+        if match:
+            print(f"{match.group(1)}{match.group(2)}")
+            return
+        match = INDEX_CLASS_PATTERN.match(line)
+        if match:
+            print(f"{match.group(1)}{match.group(2)}")
+            return
     sys.stdout.write(line)
 
 
@@ -69,9 +82,12 @@ if __name__ == '__main__':
                                 formatter_class=RawTextHelpFormatter)
     arg_parser.add_argument('-v', '--vfolder', type=str,
                             help='String to be injected into the Qhp file.')
+    arg_parser.add_argument("--pyside", "-p", action="store_true",
+                            help="Strip the PySide module path off the index entries.")
     arg_parser.add_argument("file", type=str,  help='Qhp filename.')
     options = arg_parser.parse_args()
     virtual_folder = options.vfolder
+    strip_pyside_module = options.pyside
 
     try:
         with fileinput.input(options.file, inplace=True,
