@@ -7,6 +7,8 @@ Builds a '.pyproject' file
 
 Builds Qt Designer forms, resource files and QML type files.
 
+Deploys the application by creating an executable for the corresponding platform
+
 For each entry in a '.pyproject' file:
 - <name>.pyproject: Recurse to handle subproject
 - <name>.qrc      : Runs the resource compiler to create a file rc_<name>.py
@@ -31,7 +33,8 @@ from typing import Dict, List, Optional, Tuple
 MODE_HELP = """build    Builds the project
 run      Builds the project and runs the first file")
 clean    Cleans the build artifacts")
-qmllint  Runs the qmllint tool"""
+qmllint  Runs the qmllint tool
+deploy   Deploys the application"""
 
 
 opt_quiet = False
@@ -45,6 +48,7 @@ RCC_CMD = "pyside6-rcc"
 MOD_CMD = "pyside6-metaobjectdump"
 QMLTYPEREGISTRAR_CMD = "pyside6-qmltyperegistrar"
 QMLLINT_CMD = "pyside6-qmllint"
+DEPLOY_CMD = "pyside6-deploy"
 QTPATHS_CMD = "qtpaths6"
 
 
@@ -259,7 +263,6 @@ def _check_qml_decorators(py_file: Path) -> Tuple[bool, QmlProjectData]:
 
 
 class Project:
-
     def __init__(self, project_file: Path):
         """Parse the project."""
         self._project_file = project_file
@@ -269,6 +272,9 @@ class Project:
         # QML files
         self._qml_files: List[Path] = []
         self._sub_projects: List[Project] = []
+        # Python files
+        self._main_file: Path = None
+        self._python_files: List[Path] = []
 
         # Files for QML modules using the QmlElement decorators
         self._qml_module_sources: List[Path] = []
@@ -286,6 +292,12 @@ class Project:
                     self._files.append(file)
                     if file.suffix == ".qml":
                         self._qml_files.append(file)
+                    elif file.suffix == ".py":
+                        if file.name == "main.py":
+                            self._main_file = file
+                        self._python_files.append(file)
+        if not self._main_file:
+            self._find_main_file()
         self._qml_module_check()
 
     @property
@@ -295,6 +307,31 @@ class Project:
     @property
     def files(self):
         return self._files
+
+    @property
+    def main_file(self):
+        return self._main_file
+
+    @property
+    def python_files(self):
+        return self._python_files
+
+    def _find_main_file(self) -> str:
+        """ Find the entry point file containing the main function"""
+
+        def is_main(file):
+            return "__main__" in file.read_text(encoding="utf-8")
+
+        if not self.main_file:
+            for python_file in self.python_files:
+                if is_main(python_file):
+                    self.main_file = python_file
+                    return str(python_file)
+
+        # __main__ not found
+        print("Python file with main function not found. Add the file to"
+              f" {project_file}", file=sys.stderr)
+        sys.exit(1)
 
     def _qml_module_check(self):
         """Run a pre-check on Python source files and find the ones with QML
@@ -337,18 +374,17 @@ class Project:
             return (Path(py_file), [RCC_CMD, os.fspath(file), "-o", py_file])
         # generate .qmltypes from sources with Qml decorators
         if file.suffix == ".py" and file in self._qml_module_sources:
-            assert(self._qml_module_dir)
+            assert self._qml_module_dir
             qml_module_dir = os.fspath(self._qml_module_dir)
             json_file = f"{qml_module_dir}/{file.stem}{METATYPES_JSON_SUFFIX}"
-            return (Path(json_file), [MOD_CMD, "-o", json_file,
-                                      os.fspath(file)])
+            return (Path(json_file), [MOD_CMD, "-o", json_file, os.fspath(file)])
         # Run qmltyperegistrar
         if file.name.endswith(METATYPES_JSON_SUFFIX):
-            assert(self._qml_module_dir)
-            stem = file.name[:len(file.name) - len(METATYPES_JSON_SUFFIX)]
+            assert self._qml_module_dir
+            stem = file.name[: len(file.name) - len(METATYPES_JSON_SUFFIX)]
             qmltypes_file = self._qml_module_dir / f"{stem}.qmltypes"
             cmd = [QMLTYPEREGISTRAR_CMD, "--generate-qmltypes",
-                   os.fspath(qmltypes_file), "-o", os.devnull, os.fspath(file)]
+                os.fspath(qmltypes_file),"-o", os.devnull, os.fspath(file)]
             cmd.extend(self._qml_project_data.registrar_options())
             return (qmltypes_file, cmd)
 
@@ -358,8 +394,7 @@ class Project:
         """Regenerate the 'qmldir' file."""
         if opt_dry_run or not self._qml_dir_file:
             return
-        if opt_force or requires_rebuild(self._qml_module_sources,
-                                         self._qml_dir_file):
+        if opt_force or requires_rebuild(self._qml_module_sources, self._qml_dir_file):
             with self._qml_dir_file.open("w") as qf:
                 qf.write(f"module {self._qml_project_data.import_name}\n")
                 for f in self._qml_module_dir.glob("*.qmltypes"):
@@ -385,14 +420,10 @@ class Project:
         self._regenerate_qmldir()
 
     def run(self):
-        """Runs the project (first .py file)."""
+        """Runs the project"""
         self.build()
-        if self.files:
-            for file in self._files:
-                if file.suffix == ".py":
-                    cmd = [sys.executable, os.fspath(file)]
-                    run_command(cmd, cwd=self._project_file.parent)
-                    break
+        cmd = [sys.executable, str(self.main_file)]
+        run_command(cmd, cwd=self._project_file.parent)
 
     def _clean_file(self, source: Path):
         """Clean an artifact."""
@@ -419,8 +450,7 @@ class Project:
     def _qmllint(self):
         """Helper for running qmllint on .qml files (non-recursive)."""
         if not self._qml_files:
-            print(f"{self._project_file.name}: No QML files found",
-                  file=sys.stderr)
+            print(f"{self._project_file.name}: No QML files found", file=sys.stderr)
             return
 
         cmd = [QMLLINT_CMD]
@@ -437,6 +467,12 @@ class Project:
             sub_project._qmllint()
         self._qmllint()
 
+    def deploy(self):
+        """Deploys the application"""
+        cmd = [DEPLOY_CMD]
+        cmd.extend([str(self.main_file), "-f"])
+        run_command(cmd, cwd=self._project_file.parent)
+
 
 def resolve_project_file(cmdline: str) -> Optional[Path]:
     """Return the project file from the command  line value, either
@@ -451,17 +487,14 @@ def resolve_project_file(cmdline: str) -> Optional[Path]:
 
 
 if __name__ == "__main__":
-    parser = ArgumentParser(description=__doc__,
-                            formatter_class=RawTextHelpFormatter)
+    parser = ArgumentParser(description=__doc__, formatter_class=RawTextHelpFormatter)
     parser.add_argument("--quiet", "-q", action="store_true", help="Quiet")
-    parser.add_argument("--dry-run", "-n", action="store_true",
-                        help="Only print commands")
-    parser.add_argument("--force", "-f", action="store_true",
-                        help="Force rebuild")
+    parser.add_argument("--dry-run", "-n", action="store_true", help="Only print commands")
+    parser.add_argument("--force", "-f", action="store_true", help="Force rebuild")
     parser.add_argument("--qml-module", "-Q", action="store_true",
                         help="Perform check for QML module")
     parser.add_argument("mode",
-                        choices=["build", "run", "clean", "qmllint"],
+                        choices=["build", "run", "clean", "qmllint", "deploy"],
                         default="build", type=str, help=MODE_HELP)
     parser.add_argument("file", help="Project file", nargs="?", type=str)
 
@@ -471,7 +504,6 @@ if __name__ == "__main__":
     opt_force = options.force
     opt_qml_module = options.qml_module
     mode = options.mode
-
     project_file = resolve_project_file(options.file)
     if not project_file:
         print(f"Cannot determine project_file {options.file}", file=sys.stderr)
@@ -485,6 +517,8 @@ if __name__ == "__main__":
         project.clean()
     elif mode == "qmllint":
         project.qmllint()
+    elif mode == "deploy":
+        project.deploy()
     else:
         print(f"Invalid mode {mode}", file=sys.stderr)
         sys.exit(1)
