@@ -340,7 +340,7 @@ def handle_constructor_default_values(x):
             if arg.startswith("Q"):
                 class_name = arg.split("(")[0]
                 content = arg.replace(class_name, "")[1:-1]
-                return_values += f"    {class_name}.__init__(self, {content})\n"
+                return_values += f"    super().__init__({content})\n"
             elif arg:
                 var_name = arg.split("(")[0]
                 content = PARENTHESES_NONEMPTY_CONTENT_PATTERN.search(arg).group(1)
@@ -350,7 +350,7 @@ def handle_constructor_default_values(x):
         if arg.startswith("Q"):
             class_name = arg.split("(")[0]
             content = arg.replace(class_name, "")[1:-1]
-            return f"    {class_name}.__init__(self, {content})"
+            return f"    super().__init__({content})"
         elif arg:
             var_name = arg.split("(")[0]
             match = PARENTHESES_NONEMPTY_CONTENT_PATTERN.search(arg)
