@@ -37,10 +37,7 @@ r"""
     :license: BSD, see LICENSE for details.
 """
 
-import os
-import re
 import sys
-import inspect
 try:
     from hashlib import md5
 except ImportError:
@@ -51,38 +48,9 @@ from docutils.parsers.rst import directives, Directive
 
 from sphinx.ext.graphviz import render_dot_html, render_dot_latex
 
-class InheritanceException(Exception):
-    pass
+from import_inheritance import (get_inheritance_entries_by_import,
+                                InheritanceException)
 
-# When passed something like:
-#  PySide6.QtCore.QStateMachine.SignalEvent
-# try to import the underlying module and return a
-# handle to the object. In a loop, import
-#   PySide6.QtCore.QStateMachine.SignalEvent
-#   PySide6.QtCore.QStateMachine
-#   PySide6.QtCore
-# until the import succeeds and walk up the attributes
-# to obtain the object
-
-def importClassOrModule(name):
-    components = name.split('.')
-    for i in range(len(components), 0, -1):
-        importPath = '.'.join(components[: i])
-        try:
-            __import__(importPath)
-        except ImportError:
-            continue
-        if i == len(components):
-            return sys.modules[importPath]
-        remaining = components[i :]
-        cls = sys.modules[importPath]
-        for component in remaining:
-            try:
-                cls = getattr(cls, component)
-            except Exception: # No such attribute
-                return None
-        return cls
-    return None
 
 class InheritanceGraph(object):
     """
@@ -98,89 +66,9 @@ class InheritanceGraph(object):
         in the graph.
         """
         self.class_names = class_names
-        classes = self._import_classes(class_names, currmodule)
-        self.class_info = self._class_info(classes, show_builtins, parts)
-        if not self.class_info:
-            raise InheritanceException('No classes found for '
-                                       'inheritance diagram')
-
-    def _import_class_or_module(self, name, currmodule):
-        """
-        Import a class using its fully-qualified *name*.
-        """
-        todoc = importClassOrModule(name)
-        if not todoc and currmodule is not None:
-            todoc = importClassOrModule(f"{currmodule}.{name}")
-        if not todoc:
-            moduleStr = f'(module {currmodule})' if currmodule else ''
-            raise InheritanceException(f'Could not import class {name} specified for '
-                                       f'inheritance diagram {moduleStr}.')
-        if inspect.isclass(todoc):
-            return [todoc]
-        elif inspect.ismodule(todoc):
-            classes = []
-            for cls in todoc.__dict__.values():
-                if inspect.isclass(cls) and cls.__module__ == todoc.__name__:
-                    classes.append(cls)
-            return classes
-        raise InheritanceException(f'{name} specified for inheritance diagram is '
-                                   'not a class or module')
-
-    def _import_classes(self, class_names, currmodule):
-        """Import a list of classes."""
-        classes = []
-        for name in class_names:
-            classes.extend(self._import_class_or_module(name, currmodule))
-        return classes
-
-    def _class_info(self, classes, show_builtins, parts):
-        """Return name and bases for all classes that are ancestors of
-        *classes*.
-
-        *parts* gives the number of dotted name parts that is removed from the
-        displayed node names.
-        """
-        all_classes = {}
-        builtins = __builtins__.values()
-
-        def recurse(cls):
-            if not show_builtins and cls in builtins:
-                return
-
-            nodename = self.class_name(cls, parts)
-            fullname = self.class_name(cls, 0)
-
-            baselist = []
-            all_classes[cls] = (nodename, fullname, baselist)
-            for base in cls.__bases__:
-                if not show_builtins and base in builtins:
-                    continue
-                if  base.__name__ == "Object" and base.__module__ == "Shiboken":
-                    continue
-                baselist.append(self.class_name(base, parts))
-                if base not in all_classes:
-                    recurse(base)
-
-        for cls in classes:
-            recurse(cls)
-
-        return list(all_classes.values())
-
-    def class_name(self, cls, parts=0):
-        """Given a class object, return a fully-qualified name.
-
-        This works for things I've tested in matplotlib so far, but may not be
-        completely general.
-        """
-        module = cls.__module__
-        if module == '__builtin__':
-            fullname = cls.__name__
-        else:
-            fullname = f"{module}.{cls.__qualname__}"
-        if parts == 0:
-            return fullname
-        name_parts = fullname.split('.')
-        return '.'.join(name_parts[-parts:])
+        self.class_info = get_inheritance_entries_by_import(class_names, currmodule,
+                                                            __builtins__, show_builtins,
+                                                            parts)
 
     def get_all_class_names(self):
         """
