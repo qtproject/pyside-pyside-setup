@@ -3,31 +3,44 @@
 
 import fileinput
 import re
+import sys
 from argparse import ArgumentParser, RawTextHelpFormatter
 
-options = ArgumentParser(description='Qhp file updater',
-                         formatter_class=RawTextHelpFormatter)
-options.add_argument('-f',
-                     '--filename',
-                     type=str,
-                     help='Qhp filename with the relative path.',
-                     required=True)
-options.add_argument('-v',
-                     '--vfolder',
-                     type=str,
-                     help='String to be injected into the Qhp file.')
-args=options.parse_args()
 
-try:
-    for line in fileinput.input(args.filename,inplace=True,backup='.bak'):
-        line_copy=line.strip()
-        if not line_copy: # check for empty line
-            continue
-        match=re.match('(^.*virtualFolder.)doc(.*$)',line)
-        if match:
-            repl=''.join([match.group(1), args.vfolder, match.group(2)])
-            print(line.replace(match.group(0),repl),end=' ')
-        else:
-            print(line.rstrip())
-except:
-    pass
+DESC="""Qhp file updater
+
+Replaces virtual folder ids in .qhp files preparing for
+registering the documentation in Qt Assistant."""
+
+
+VIRTUAL_FOLDER_PATTERN = re.compile("(^.*virtualFolder.)doc(.*$)")
+
+
+virtual_folder = ""
+
+
+def process_line(line):
+    global virtual_folder
+    match = VIRTUAL_FOLDER_PATTERN.match(line)
+    if match:
+        print(f"{match.group(1)}{virtual_folder}{match.group(2)}")
+        return
+    sys.stdout.write(line)
+
+
+if __name__ == '__main__':
+    arg_parser = ArgumentParser(description=DESC,
+                                formatter_class=RawTextHelpFormatter)
+    arg_parser.add_argument('-v', '--vfolder', type=str,
+                            help='String to be injected into the Qhp file.')
+    arg_parser.add_argument("file", type=str,  help='Qhp filename.')
+    options = arg_parser.parse_args()
+    virtual_folder = options.vfolder
+
+    try:
+        with fileinput.input(options.file, inplace=True,
+                             backup=".bak") as fh:
+            for line in fh:
+                process_line(line)
+    except Exception as e:
+        print(f"WARNING: patch_qhp.py failed: {e}", file=sys.stderr)
