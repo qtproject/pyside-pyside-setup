@@ -69,7 +69,7 @@ Building PySide
 ~~~~~~~~~~~~~~~
 
 Check your Qt installation path, to specifically use that version of qtpaths to build PySide.
-for example, ``C:\Qt\6.2.1\msvc2019_64\bin\qtpaths.exe``.
+for example, ``C:\Qt\6.4.0\msvc2019_64\bin\qtpaths.exe``.
 
 Build can take a few minutes, so it is recommended to use more than one CPU core::
 

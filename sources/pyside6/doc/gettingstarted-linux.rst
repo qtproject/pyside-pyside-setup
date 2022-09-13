@@ -67,11 +67,11 @@ for example, :command:`/opt/Qt/6.0.0/gcc_64/bin/qtpaths`.
 
 Build can take a few minutes, so it is recommended to use more than one CPU core::
 
-    python setup.py build --qtpaths=/opt/Qt/6.2.1/gcc_64/bin/qtpaths --build-tests --ignore-git --parallel=8
+    python setup.py build --qtpaths=/opt/Qt/6.4.0/gcc_64/bin/qtpaths --build-tests --ignore-git --parallel=8
 
 To install on the current directory, just run::
 
-    python setup.py install --qtpaths=/opt/Qt/6.2.1/gcc_64/bin/qtpaths --build-tests --ignore-git --parallel=8
+    python setup.py install --qtpaths=/opt/Qt/6.4.0/gcc_64/bin/qtpaths --build-tests --ignore-git --parallel=8
 
 Building and Installing (cmake)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
