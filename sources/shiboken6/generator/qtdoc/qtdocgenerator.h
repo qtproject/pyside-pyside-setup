@@ -84,6 +84,7 @@ private:
 
     void writeModuleDocumentation();
     void writeAdditionalDocumentation() const;
+    bool writeInheritanceFile();
 
     static QString parseArgDocStyle(const AbstractMetaClass *cppClass,
                                     const AbstractMetaFunctionCPtr &func);
@@ -101,6 +102,7 @@ private:
     QScopedPointer<DocParser> m_docParser;
     QtXmlToSphinxParameters m_parameters;
     QString m_additionalDocumentationList;
+    QString m_inheritanceFile;
 };
 
 #endif // DOCGENERATOR_H

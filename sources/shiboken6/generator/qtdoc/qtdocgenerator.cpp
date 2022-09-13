@@ -31,6 +31,9 @@
 #include <QtCore/QTextStream>
 #include <QtCore/QFile>
 #include <QtCore/QDir>
+#include <QtCore/QJsonArray>
+#include <QtCore/QJsonDocument>
+#include <QtCore/QJsonObject>
 
 #include <algorithm>
 #include <limits>
@@ -745,6 +748,30 @@ bool QtDocGenerator::finishGeneration()
         writeModuleDocumentation();
     if (!m_additionalDocumentationList.isEmpty())
         writeAdditionalDocumentation();
+    if (!m_inheritanceFile.isEmpty() && !writeInheritanceFile())
+        return false;
+    return true;
+}
+
+bool QtDocGenerator::writeInheritanceFile()
+{
+    QFile inheritanceFile(m_inheritanceFile);
+    if (!inheritanceFile.open(QIODevice::WriteOnly | QIODevice::Text))
+        throw Exception(msgCannotOpenForWriting(m_inheritanceFile));
+
+    QJsonObject dict;
+    for (auto *c : api().classes()) {
+        const auto &bases = c->baseClasses();
+        if (!bases.isEmpty()) {
+            QJsonArray list;
+            for (auto *base : bases)
+                list.append(QJsonValue(base->fullName()));
+            dict[c->fullName()] = list;
+        }
+    }
+    QJsonDocument document;
+    document.setObject(dict);
+    inheritanceFile.write(document.toJson(QJsonDocument::Compact));
     return true;
 }
 
@@ -960,7 +987,10 @@ Generator::OptionDescriptions QtDocGenerator::options() const
          u"Directory where library source code is located"_s},
         {additionalDocumentationOption() + u"=<file>"_s,
          u"List of additional XML files to be converted to .rst files\n"
-          "(for example, tutorials)."_s}
+          "(for example, tutorials)."_s},
+        {u"inheritance-file=<file>"_s,
+         u"Generate a JSON file containing the class inheritance."_s}
+
     });
     return result;
 }
@@ -1005,6 +1035,12 @@ bool QtDocGenerator::handleOption(const QString &key, const QString &value)
         m_additionalDocumentationList = value;
         return true;
     }
+
+    if (key == u"inheritance-file") {
+        m_inheritanceFile = value;
+        return true;
+    }
+
     return false;
 }
 

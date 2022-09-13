@@ -289,6 +289,9 @@ QtDocGenerator Options
    List of additional XML files to be converted to .rst files
    (for example, tutorials).
 
+``--inheritance-file=<file>``
+   Generate a JSON file containing the class inheritance.
+
 .. _project-file:
 
 ********************

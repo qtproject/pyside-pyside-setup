@@ -49,6 +49,8 @@ endif()
 
 set(DOC_DATA_DIR "${CMAKE_CURRENT_BINARY_DIR}/qdoc-output")
 
+set(ENV_INHERITANCE_FILE "${CMAKE_CURRENT_BINARY_DIR}/inheritance.json")
+
 get_filename_component(ROOT ${CMAKE_CURRENT_BINARY_DIR} DIRECTORY)
 set(TS_ROOT "${ROOT}/PySide6")
 
@@ -196,7 +198,9 @@ if (FULLDOCSBUILD)
 endif()
 
 add_custom_target(apidoc
-                  COMMAND ${SHIBOKEN_PYTHON_INTERPRETER} ${SPHINX_BUILD} -b ${DOC_OUTPUT_FORMAT} -j auto ${CMAKE_CURRENT_BINARY_DIR}/rst html
+                  COMMAND ${CMAKE_COMMAND} -E env INHERITANCE_FILE=${ENV_INHERITANCE_FILE}
+                          ${SHIBOKEN_PYTHON_INTERPRETER} ${SPHINX_BUILD} -b ${DOC_OUTPUT_FORMAT}
+                          -j auto ${CMAKE_CURRENT_BINARY_DIR}/rst html
                   COMMENT "Generating PySide htmls..."
                  )
 
@@ -245,6 +249,7 @@ add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/rst/PySide6/QtCore/index.
                            --snippets-path-rewrite=${QT_ROOT_PATH}:${CODE_SNIPPET_ROOT}
                            --documentation-extra-sections-dir=${CMAKE_CURRENT_BINARY_DIR}/rst/extras
                            --additional-documentation=${CMAKE_CURRENT_BINARY_DIR}/rst/additionaldocs.lst
+                           --inheritance-file=${ENV_INHERITANCE_FILE}
                            ${CMAKE_CURRENT_BINARY_DIR}/typesystem_doc.xml
                    WORKING_DIRECTORY ${${module}_SOURCE_DIR}
                    COMMENT "Running generator to generate documentation...")
