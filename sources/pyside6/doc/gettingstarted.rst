@@ -94,7 +94,7 @@ Using the ``--build-tests`` option will enable us to run all the auto tests insi
   python testrunner.py test > testlog.txt
 
 .. note:: On Windows, don't forget to have qtpaths in your path
-   (:command:`set PATH=E:\\\Path\\\to\\\Qt\\\6.0.0\\\msvc2019_64\\\bin;%PATH%`)
+   (:command:`set PATH=C:\\\Path\\\to\\\Qt\\\6.2.1\\\msvc2019_64\\\bin;%PATH%`)
 
 You can also run a specific test (for example ``qpainter_test``) by running::
 
@@ -321,7 +321,7 @@ An example of the ``setup.py`` invocation might look like the following:
         --parallel=8 --ignore-git --reuse-build --standalone --limited-api=yes \
         --cmake-toolchain-file=/opt/toolchain-aarch64.cmake \
         --qt-host-path=/opt/Qt/6.3.0/gcc_64 \
-        --plat-name=linux_aarch64 \
+        --plat-name=linux_aarch64
 
 Depending on the target platform, you could use ``linux_armv7``,
 ``linux_aarch64``, etc.
@@ -431,7 +431,7 @@ The target executes several steps:
 #. ``sphinx`` is run to produce the documentation in HTML format.
 
 Re-running the command will not execute step 1 unless the file
-``qdoc_output/webxml/qtcore-index.webxml`` is removed from the build tree.
+``qdoc-output/webxml/qtcore-index.webxml`` is removed from the build tree.
 Similarly, step 2 will not be executed unless the file ``rst/PySide6/QtCore/index.rst``
 is removed.
 
@@ -456,12 +456,6 @@ use Qt Assistant instead, use the following command to register the QCH file bef
 Qt Assistant::
 
     assistant -register PySide.qch
-
-.. note:: Qt Assistant renders the QCH content using the QTextBrowser backend, which supports
-   a subset of the CSS styles, However, Qt Creator offers an alternative litehtml-based
-   backend, which offers better browsing experience. At the moment, this is not the default
-   backend, so you have to select the litehtml backend
-   explicitly under the ``General`` tab in ``Qt Creator >> Tools >> Options >> Help``.
 
 Using the internal tools
 ------------------------

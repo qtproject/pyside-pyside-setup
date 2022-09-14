@@ -46,14 +46,14 @@ Cloning the official repository can be done by::
 
 Checking out the version that we want to build, for example 6.0::
 
-    cd pyside-setup && git checkout 6.0
+    cd pyside-setup && git checkout 6.2
 
 Install the general dependencies::
 
     pip install -r requirements.txt
 
 .. note:: Keep in mind you need to use the same version as your Qt installation.
-          Additionally, :command:`git checkout -b 6.0 --track origin/6.0` could be a better option
+          Additionally, :command:`git checkout -b 6.2 --track origin/6.2` could be a better option
           in case you want to work on it.
 
 Building and Installing (setuptools)
@@ -67,11 +67,11 @@ for example, :command:`/opt/Qt/6.0.0/gcc_64/bin/qtpaths`.
 
 Build can take a few minutes, so it is recommended to use more than one CPU core::
 
-    python setup.py build --qtpaths=/opt/Qt/6.0.0/gcc_64/bin/qtpaths --build-tests --ignore-git --parallel=8
+    python setup.py build --qtpaths=/opt/Qt/6.2.1/gcc_64/bin/qtpaths --build-tests --ignore-git --parallel=8
 
 To install on the current directory, just run::
 
-    python setup.py install --qtpaths=/opt/Qt/6.0.0/gcc_64/bin/qtpaths --build-tests --ignore-git --parallel=8
+    python setup.py install --qtpaths=/opt/Qt/6.2.1/gcc_64/bin/qtpaths --build-tests --ignore-git --parallel=8
 
 Building and Installing (cmake)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

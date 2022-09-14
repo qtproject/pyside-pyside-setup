@@ -215,7 +215,7 @@ else()
         set(PATCH_QHP_SCRIPT "${CMAKE_CURRENT_LIST_DIR}/../../shiboken6/doc/scripts/patch_qhp.py")
         file(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/html/PySide.qhp QHP_FILE)
         add_custom_command(TARGET apidoc POST_BUILD
-                COMMAND ${python_executable} ${PATCH_QHP_SCRIPT} -f ${QHP_FILE} -v pyside6
+                COMMAND ${python_executable} ${PATCH_QHP_SCRIPT} -v pyside6 ${QHP_FILE}
                 COMMAND "${qhelpgenerator_binary}" ${QHP_FILE}
                 COMMENT "Generating QCH from a QHP file..."
                 VERBATIM
