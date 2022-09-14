@@ -50,6 +50,8 @@ from sphinx.ext.graphviz import render_dot_html, render_dot_latex
 
 from import_inheritance import (get_inheritance_entries_by_import,
                                 InheritanceException)
+from json_inheritance import (is_inheritance_from_json_enabled,
+                              get_inheritance_entries_from_json)
 
 
 class InheritanceGraph(object):
@@ -66,9 +68,14 @@ class InheritanceGraph(object):
         in the graph.
         """
         self.class_names = class_names
-        self.class_info = get_inheritance_entries_by_import(class_names, currmodule,
-                                                            __builtins__, show_builtins,
-                                                            parts)
+        if is_inheritance_from_json_enabled():
+            self.class_info = get_inheritance_entries_from_json(class_names)
+        else:
+            self.class_info = get_inheritance_entries_by_import(class_names,
+                                                                currmodule,
+                                                                __builtins__,
+                                                                show_builtins,
+                                                                parts)
 
     def get_all_class_names(self):
         """
