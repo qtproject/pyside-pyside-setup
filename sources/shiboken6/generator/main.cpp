@@ -67,6 +67,8 @@ struct CommandLineArguments
         addToOptionsList(option, pathListValue, QDir::listSeparator());
     }
 
+    bool addCommonOption(const QString &option, const QString &value);
+
     QVariantMap options; // string,stringlist for path lists, etc.
     QStringList positionalArguments;
 };
@@ -105,6 +107,27 @@ void CommandLineArguments::addToOptionsList(const QString &option,
     addToOptionsList(option, newValues);
 }
 
+// Add options common to project file and command line
+bool CommandLineArguments::addCommonOption(const QString &option,
+                                           const QString &value)
+{
+    bool result = true;
+    if (option == clangOptionOption()) {
+        options.insert(option, QStringList(value));
+    } else if (option == clangOptionsOption()) {
+        addToOptionsList(option, value, clangOptionsSplitter);
+    } else if (option == apiVersionOption()) {
+        addToOptionsList(option, value, apiVersionSplitter);
+    } else if (option == keywordsOption()) {
+        addToOptionsList(option, value, keywordsSplitter);
+    } else if (option == dropTypeEntriesOption()) {
+        addToOptionsList(option, value, dropTypeEntriesSplitter);
+    } else {
+        result = false;
+    }
+    return result;
+}
+
 static void printOptions(QTextStream &s, const OptionDescriptions &options)
 {
     s.setFieldAlignment(QTextStream::AlignLeft);
@@ -124,6 +147,48 @@ static void printOptions(QTextStream &s, const OptionDescriptions &options)
     }
 }
 
+// Return the file command line option matching a project file keyword
+static QString projectFileKeywordToCommandLineOption(const QString &p)
+{
+    if (p == u"include-path")
+        return includePathOption(); // "include-paths", ...
+    if (p == u"framework-include-path")
+        return frameworkIncludePathOption();
+    if (p == u"typesystem-path")
+        return typesystemPathOption();
+    if (p == u"system-include-paths")
+        return systemIncludePathOption();
+    return {};
+}
+
+static void processProjectFileLine(const QByteArray &line, CommandLineArguments &args)
+{
+    if (line.isEmpty())
+        return;
+    const QString lineS = QString::fromUtf8(line);
+    const auto split = line.indexOf(u'=');
+    if (split < 0) {
+        args.options.insert(lineS, QString{});
+        return;
+    }
+
+    const QString key = lineS.left(split).trimmed();
+    const QString value = lineS.mid(split + 1).trimmed();
+    const QString fileOption = projectFileKeywordToCommandLineOption(key);
+    if (fileOption.isEmpty()) {
+        if (key == u"header-file") {
+            args.positionalArguments.prepend(value);
+        } else if (key == u"typesystem-file") {
+            args.positionalArguments.append(value);
+        } else {
+            args.options.insert(key, value);
+        }
+    } else {
+        // Add single line value to the path list
+        args.addToOptionsList(fileOption, QDir::toNativeSeparators(value));
+    }
+}
+
 static std::optional<CommandLineArguments>
     processProjectFile(const QString &appName, QFile &projectFile)
 {
@@ -136,59 +201,8 @@ static std::optional<CommandLineArguments>
     }
 
     CommandLineArguments args;
-
-    while (!projectFile.atEnd()) {
-        line = projectFile.readLine().trimmed();
-        if (line.isEmpty())
-            continue;
-
-        int split = line.indexOf('=');
-        QByteArray key;
-        QString value;
-        if (split > 0) {
-            key = line.left(split).trimmed();
-            value = QString::fromUtf8(line.mid(split + 1).trimmed());
-        } else {
-            key = line;
-        }
-
-        if (key == "include-path") {
-            args.addToOptionsList(includePathOption(),
-                                  QDir::toNativeSeparators(value));
-        } else if (key == "framework-include-path") {
-            args.addToOptionsList(frameworkIncludePathOption(),
-                                  QDir::toNativeSeparators(value));
-        } else if (key == "system-include-paths") {
-            args.addToOptionsList(systemIncludePathOption(),
-                                  QDir::toNativeSeparators(value));
-        } else if (key == "typesystem-path") {
-            args.addToOptionsList(typesystemPathOption(),
-                                  QDir::toNativeSeparators(value));
-        } else if (key == "language-level") {
-            args.options.insert(languageLevelOption(), value);
-        } else if (key == "clang-option") {
-            args.addToOptionsList(clangOptionsOption(), value);
-        } else if (key == "clang-options") {
-            args.addToOptionsList(clangOptionsOption(),
-                                  value, clangOptionsSplitter);
-        } else if (key == "api-version") {
-            args.addToOptionsList(apiVersionOption(),
-                                  value, apiVersionSplitter);
-        } else if (key == "keywords") {
-            args.addToOptionsList(keywordsOption(),
-                                  value, keywordsSplitter);
-        } else if (key == "drop-type-entries") {
-            args.addToOptionsList(dropTypeEntriesOption(),
-                                  value, dropTypeEntriesSplitter);
-        } else if (key == "header-file") {
-            args.positionalArguments.prepend(value);
-        } else if (key == "typesystem-file") {
-            args.positionalArguments.append(value);
-        } else {
-            args.options.insert(QString::fromUtf8(key), value);
-        }
-    }
-
+    while (!projectFile.atEnd())
+        processProjectFileLine(projectFile.readLine().trimmed(), args);
     return args;
 }
 
@@ -231,26 +245,18 @@ static void getCommandLineArg(QString arg, int &argNum, CommandLineArguments &ar
 {
     if (arg.startsWith(u"--")) {
         arg.remove(0, 2);
-        const int split = arg.indexOf(u'=');
+        const auto split = arg.indexOf(u'=');
         if (split < 0) {
             args.options.insert(arg, QString());
             return;
         }
         const QString option = arg.left(split);
         const QString value = arg.mid(split + 1).trimmed();
-        if (option == includePathOption() || option == frameworkIncludePathOption()
-            || option == systemIncludePathOption() || option == typesystemPathOption()) {
+        if (args.addCommonOption(option, value)) {
+        } else if (option == includePathOption() || option == frameworkIncludePathOption()
+                   || option == systemIncludePathOption() || option == typesystemPathOption()) {
+            // Add platform path-separator separated list value to path list
             args.addToOptionsPathList(option, value);
-        } else if (option == apiVersionOption()) {
-            args.addToOptionsList(apiVersionOption(), value, apiVersionSplitter);
-        } else if (option == dropTypeEntriesOption()) {
-            args.addToOptionsList(dropTypeEntriesOption(), value, dropTypeEntriesSplitter);
-        } else if (option == clangOptionOption()) {
-            args.addToOptionsList(clangOptionsOption(), value);
-        } else if (option == clangOptionsOption()) {
-            args.addToOptionsList(clangOptionsOption(), value, clangOptionsSplitter);
-        } else if (option == keywordsOption()) {
-            args.addToOptionsList(keywordsOption(), value, keywordsSplitter);
         } else {
             args.options.insert(option, value);
         }
