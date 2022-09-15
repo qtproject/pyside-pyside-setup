@@ -7,6 +7,7 @@
 #include <QtCore/QByteArrayList>
 
 QT_FORWARD_DECLARE_CLASS(QVersionNumber)
+QT_FORWARD_DECLARE_CLASS(QString)
 
 enum class LanguageLevel {
     Default,
@@ -41,7 +42,13 @@ LanguageLevel languageLevelFromOption(const char *);
 QByteArrayList detectVulkan();
 
 Compiler compiler();
+bool setCompiler(const QString &name);
+
+const QString &compilerPath();
+void setCompilerPath(const QString &name);
+
 Platform platform();
+bool setPlatform(const QString &name);
 } // namespace clang
 
 #endif // COMPILERSUPPORT_H

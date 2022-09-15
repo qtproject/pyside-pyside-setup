@@ -194,6 +194,15 @@ Options
     When '-' is passed as the first option in the list, none of the options
     built into shiboken will be added, allowing for a complete replacement.
 
+``--compiler=<type>``
+    Emulated compiler type (g++, msvc, clang)
+
+``--compiler-path=<file>``
+    Path to the compiler for determining builtin include paths
+
+``--platform=<file>``
+    Emulated platform (windows, darwin, unix)
+
 .. _include-paths:
 
 ``-I<path>, --include-paths=<path>[:<path>:...]``

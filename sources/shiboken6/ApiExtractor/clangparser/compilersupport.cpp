@@ -43,6 +43,32 @@ static Compiler _compiler =
 
 Compiler compiler() { return _compiler; }
 
+bool setCompiler(const QString &name)
+{
+    bool result = true;
+    if (name == u"msvc")
+        _compiler = Compiler::Msvc;
+    else if (name == u"g++")
+        _compiler = Compiler::Gpp;
+    else if (name == u"clang")
+        _compiler = Compiler::Clang;
+    else
+        result = false;
+    return result;
+}
+
+QString _compilerPath; // Pre-defined compiler path (from command line)
+
+const QString &compilerPath()
+{
+    return _compilerPath;
+}
+
+void setCompilerPath(const QString &name)
+{
+    _compilerPath = name;
+}
+
 static Platform _platform =
 #if defined (Q_OS_DARWIN)
     Platform::macOS;
@@ -53,6 +79,20 @@ static Platform _platform =
 #endif
 
 Platform platform() { return _platform; }
+
+bool setPlatform(const QString &name)
+{
+    bool result = true;
+    if (name == u"windows")
+        _platform = Platform::Windows;
+    else if (name == u"darwin")
+        _platform = Platform::macOS;
+    else if (name == u"unix")
+        _platform = Platform::Unix;
+    else
+        result = false;
+    return result;
+}
 
 static bool runProcess(const QString &program, const QStringList &arguments,
                        QByteArray *stdOutIn = nullptr, QByteArray *stdErrIn = nullptr)
@@ -255,6 +295,8 @@ static QString findClangBuiltInIncludesDir()
 
 static QString compilerFromCMake(const QString &defaultCompiler)
 {
+    if (!compilerPath().isEmpty())
+        return compilerPath();
 // Added !defined(Q_OS_DARWIN) due to PYSIDE-1032
     QString result = defaultCompiler;
     if (platform() != Platform::macOS)

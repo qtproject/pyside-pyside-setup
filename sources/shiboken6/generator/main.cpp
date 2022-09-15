@@ -35,6 +35,9 @@ static const QChar apiVersionSplitter = u'|';
 static inline QString keywordsOption() { return QStringLiteral("keywords"); }
 static inline QString clangOptionOption() { return QStringLiteral("clang-option"); }
 static inline QString clangOptionsOption() { return QStringLiteral("clang-options"); }
+static inline QString compilerOption() { return QStringLiteral("compiler"); }
+static inline QString compilerPathOption() { return QStringLiteral("compiler-path"); }
+static inline QString platformOption() { return QStringLiteral("platform"); }
 static inline QString apiVersionOption() { return QStringLiteral("api-version"); }
 static inline QString dropTypeEntriesOption() { return QStringLiteral("drop-type-entries"); }
 static inline QString languageLevelOption() { return QStringLiteral("language-level"); }
@@ -112,7 +115,10 @@ bool CommandLineArguments::addCommonOption(const QString &option,
                                            const QString &value)
 {
     bool result = true;
-    if (option == clangOptionOption()) {
+    if (option == compilerOption() || option == compilerPathOption()
+        || option == platformOption()) {
+        options.insert(option, value);
+    } else if (option == clangOptionOption()) {
         options.insert(option, QStringList(value));
     } else if (option == clangOptionsOption()) {
         addToOptionsList(option, value, clangOptionsSplitter);
@@ -344,6 +350,12 @@ void printUsage()
          u"Option to be passed to clang"_s},
         {clangOptionsOption(),
          u"A comma-separated list of options to be passed to clang"_s},
+        {compilerOption() + u"=<type>"_s,
+         u"Emulated compiler type (g++, msvc, clang)"_s},
+        {platformOption() + u"=<name>"_s,
+         u"Emulated platform (windows, darwin, unix)"_s},
+        {compilerPathOption() + u"=<file>"_s,
+         u"Path to the compiler for determining builtin include paths"_s},
         {u"-F<path>"_s, {} },
         {u"framework-include-paths="_s + pathSyntax,
          u"Framework include paths used by the C++ parser"_s},
@@ -595,6 +607,32 @@ int shibokenMain(int argc, char *argv[])
     ait = args.options.find(clangOptionsOption());
     if (ait != args.options.end()) {
         extractor.setClangOptions(ait.value().toStringList());
+        args.options.erase(ait);
+    }
+
+    ait = args.options.find(compilerOption());
+    if (ait != args.options.end()) {
+        const QString name = ait.value().toString();
+        if (!clang::setCompiler(name)) {
+            errorPrint(u"Invalid value \""_s + name + u"\" passed to --compiler"_s);
+            return EXIT_FAILURE;
+        }
+        args.options.erase(ait);
+    }
+
+    ait = args.options.find(compilerPathOption());
+    if (ait != args.options.end()) {
+        clang::setCompilerPath(ait.value().toString());
+        args.options.erase(ait);
+    }
+
+    ait = args.options.find(platformOption());
+    if (ait != args.options.end()) {
+        const QString name = ait.value().toString();
+        if (!clang::setPlatform(name)) {
+            errorPrint(u"Invalid value \""_s + name + u"\" passed to --platform"_s);
+            return EXIT_FAILURE;
+        }
         args.options.erase(ait);
     }
 
