@@ -30,7 +30,7 @@ class TestMetaObjectDump(unittest.TestCase):
         pyside_root = self._dir.parents[4]
         self._metaobjectdump_tool = pyside_root / "sources" / "pyside-tools" / "metaobjectdump.py"
         self._examples_dir = (pyside_root / "examples" /
-                              "declarative" / "referenceexamples")
+                              "qml" / "referenceexamples")
 
         # Compile a list of examples (tuple [file, base line, command])
         examples = []
