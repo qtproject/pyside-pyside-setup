@@ -92,6 +92,8 @@ def snippet_translate(x):
     # that include the string 'new'
     if "new " in x:
         x = x.replace("new ", "")
+        if not x.endswith(")"):  # "new Foo" -> "new Foo()"
+            x += "()"
 
     # Handle 'const'
     # Some variables/functions have the word 'const' so we explicitly
