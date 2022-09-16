@@ -100,7 +100,7 @@ def test_else():
 
 def test_new():
     assert st("a = new Something(...);") == "a = Something(...)"
-    assert st("a = new Something") == "a = Something"
+    assert st("a = new Something") == "a = Something()"
 
 
 def test_semicolon():
