@@ -11,7 +11,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QKeySequence
+from PySide6.QtGui import QKeySequence, qt_set_sequence_auto_mnemonic
 
 from helper.usesqguiapplication import UsesQGuiApplication
 
@@ -34,6 +34,9 @@ class QKeySequenceTest(UsesQGuiApplication):
             self.assertEqual(ks[1], Qt.CTRL)
             self.assertEqual(ks[2], Qt.Key_P)
             self.assertEqual(ks[3], Qt.Key_R)
+
+        def testAutoMnemonic(self):
+            qt_set_sequence_auto_mnemonic(True)
 
 
 if __name__ == '__main__':

@@ -5,6 +5,10 @@
  * INJECT CODE
  ********************************************************************/
 
+// @snippet gui-declarations
+void qt_set_sequence_auto_mnemonic(bool);
+// @snippet gui-declarations
+
 // @snippet qaccessible-pysidefactory
 // Helper for QAccessible::installFactory() that forwards the calls to
 // Python callables.

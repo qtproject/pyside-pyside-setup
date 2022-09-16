@@ -60,6 +60,8 @@
   <function signature="qPixelFormatHsl(uchar,uchar,QPixelFormat::AlphaUsage,QPixelFormat::AlphaPosition,QPixelFormat::TypeInterpretation)"/>
   <function signature="qPixelFormatHsv(uchar,uchar,QPixelFormat::AlphaUsage,QPixelFormat::AlphaPosition,QPixelFormat::TypeInterpretation)"/>
   <function signature="qPixelFormatYuv(QPixelFormat::YUVLayout,uchar,QPixelFormat::AlphaUsage,QPixelFormat::AlphaPosition,QPixelFormat::AlphaPremultiplied,QPixelFormat::TypeInterpretation,QPixelFormat::ByteOrder)"/>
+  <function signature="qt_set_sequence_auto_mnemonic(bool)"/>
+
   <rejection class="*" function-name="qobject_interface_iid&lt;QStyleFactoryInterface*&gt;"/>
   <rejection class="*" function-name="qobject_interface_iid&lt;QAccessibleFactoryInterface*&gt;"/>
   <rejection class="*" function-name="qobject_interface_iid&lt;QInputContextFactoryInterface*&gt;"/>
@@ -127,6 +129,9 @@
   <rejection class="QPolygon" function-name="point"/>
   <rejection class="QActionGroup" function-name="selected"/>
   <rejection class="QPaintEngine" function-name="fix_neg_rect"/>
+
+  <inject-code class="native" position="beginning" file="../glue/qtgui.cpp"
+               snippet="gui-declarations"/>
 
   <!-- For Qt::mightBeRichText(QString), Qt::convertFromPlainText(QString,Qt::WhiteSpaceMode)
        Match on files from '/QtGui/' (shadow build) or '/gui/' (developer build)

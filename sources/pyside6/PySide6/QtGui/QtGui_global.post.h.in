@@ -1,2 +1,3 @@
 #include "qpytextobject.h"  // PySide class
 #include <qtguihelper.h>
+void qt_set_sequence_auto_mnemonic(bool b);
