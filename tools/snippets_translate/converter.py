@@ -25,8 +25,6 @@ ELSE_REPLACEMENT_PATTERN = re.compile(r"}? *else *{?")
 CLASS_PATTERN = re.compile(r"^ *class ")
 STRUCT_PATTERN = re.compile(r"^ *struct ")
 DELETE_PATTERN = re.compile(r"^ *delete ")
-PUBLIC_PATTERN = re.compile(r"^public:$")
-PRIVATE_PATTERN = re.compile(r"^private:$")
 VAR1_PATTERN = re.compile(r"^[a-zA-Z0-9]+(<.*?>)? [\w\*\&]+(\(.*?\))? ?(?!.*=|:).*$")
 VAR2_PATTERN = re.compile(r"^[a-zA-Z0-9]+(<.*?>)? [\w]+::[\w\*\&]+\(.*\)$")
 VAR3_PATTERN = re.compile(r"^[a-zA-Z0-9]+(<.*?>)? [\w\*]+ *= *[\w\.\"\']*(\(.*?\))?")
@@ -37,6 +35,10 @@ RETURN_TYPE_PATTERN = re.compile(r"^[a-zA-Z0-9]+(<.*?>)? [\w]+::[\w\*\&]+\(.*\)$
 FUNCTION_PATTERN = re.compile(r"^[a-zA-Z0-9]+(<.*?>)? [\w\*\&]+\(.*\)$")
 ITERATOR_PATTERN = re.compile(r"(std::)?[\w]+<[\w]+>::(const_)?iterator")
 SCOPE_PATTERN = re.compile(r"[\w]+::")
+
+
+QUALIFIERS = {"public:", "protected:", "private:", "public slots:",
+              "protected slots:", "private slots:", "signals:"}
 
 
 def snippet_translate(x):
@@ -215,13 +217,9 @@ def snippet_translate(x):
     if DELETE_PATTERN.search(x):
         return x.replace("delete", "del")
 
-    # 'public:'
-    if PUBLIC_PATTERN.search(xs):
-        return x.replace("public:", "# public")
-
-    # 'private:'
-    if PRIVATE_PATTERN.search(xs):
-        return x.replace("private:", "# private")
+    # 'public:', etc
+    if xs in QUALIFIERS:
+        return f"# {x}".replace(":", "")
 
     # For expressions like: `Type var`
     # which does not contain a `= something` on the right side
