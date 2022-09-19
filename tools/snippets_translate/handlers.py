@@ -39,6 +39,7 @@ COUT_ENDL_PATTERN = re.compile(r"cout *<<(.*)<< *.*endl")
 COUT1_PATTERN = re.compile(r" *<< *")
 COUT2_PATTERN = re.compile(r".*cout *<<")
 COUT_ENDL2_PATTERN = re.compile(r"<< +endl")
+NEW_PATTERN = re.compile(r"new +([a-zA-Z][a-zA-Z0-9_]*)")
 
 
 def handle_condition(x, name):
@@ -510,6 +511,23 @@ def handle_useless_qt_classes(x):
         if content:
             x = x.replace(content.group(0), content.group(1))
     return x
+
+
+def handle_new(x):
+    """Parse operator new() and add parentheses were needed:
+       func(new Foo, new Bar(x))" -> "func(Foo(), Bar(x))"""
+    result = ""
+    last_pos = 0
+    for match in NEW_PATTERN.finditer(x):
+        end = match.end(0)
+        parentheses_needed = end >= len(x) or x[end] != "("
+        type_name = match.group(1)
+        result += x[last_pos:match.start(0)] + type_name
+        if parentheses_needed:
+            result += "()"
+        last_pos = end
+    result += x[last_pos:]
+    return result
 
 
 # The code below handles pairs of instance/pointer to member functions (PMF)

@@ -65,6 +65,10 @@ def test_else():
 def test_new():
     assert st("a = new Something(...);") == "a = Something(...)"
     assert st("a = new Something") == "a = Something()"
+    assert st("foo(new X, new Y(b), new Z)") == "foo(X(), Y(b), Z())"
+    # Class member initialization list
+    assert st("m_mem(new Something(p)),") == "m_mem(Something(p)),"
+    assert st("m_mem(new Something),") == "m_mem(Something()),"
 
 
 def test_semicolon():
