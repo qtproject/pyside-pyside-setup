@@ -37,6 +37,7 @@
 ##
 #############################################################################
 
+import ast
 import enum
 import functools
 import keyword
@@ -94,10 +95,16 @@ def _get_flag_enum_option():
             flag = True
         elif opt in ("no", "off", "false"):
             flag = False
-        elif opt.isnumeric():
-            flag = bool(int(opt))
+        else:
+            # instead of a simple int() conversion, let's allow for "0xf" or "0b1111"
+            try:
+                flag = ast.literal_eval(opt)
+            except Exception:
+                flag = True
     elif hasattr(sys, sysname):
-        flag = bool(getattr(sys, sysname))
+        flag = getattr(sys, sysname)
+        if not isinstance(flag, int):
+            flag = True
     # PYSIDE-1797: Emit a warning when we may remove pep384_issue33738.cpp
     if pyminver and pyminver >= (3, 8):
         warnings.warn(f"\n    *** Python is at version {'.'.join(map(str, pyminver))} now. "
@@ -115,10 +122,9 @@ def _get_flag_enum_option():
     if ver[:2] >= (7, 0):
         warnings.warn(f"\n    *** PySide is at version {'.'.join(map(str, ver[:2]))} now. "
                       f"Please drop the forgiving Enum behavior in `mangled_type_getattro` ***")
-    # modify the sys attribute to bool
+    # normalize the sys attribute
     setattr(sys, sysname, flag)
-    # modify the env attribute to "0" or "1"
-    os.environ[envname] = str(int(flag))
+    os.environ[envname] = str(flag)
     return flag
 
 
