@@ -8,11 +8,11 @@ from argparse import ArgumentParser, RawTextHelpFormatter
 from functools import partial
 import sys
 
-from PySide6.QtCore import (QByteArray, QFile, QFileInfo, QPoint, QSettings,
-        QSaveFile, QSize, QTextStream, Qt, Slot)
+from PySide6.QtCore import (QByteArray, QFile, QFileInfo, QSettings,
+        QSaveFile, QTextStream, Qt, Slot)
 from PySide6.QtGui import QAction, QIcon, QKeySequence
 from PySide6.QtWidgets import (QApplication, QFileDialog, QMainWindow,
-        QMdiArea, QMessageBox, QTextEdit, QWidget)
+        QMdiArea, QMessageBox, QTextEdit)
 
 import mdi_rc
 

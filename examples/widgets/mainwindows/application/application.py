@@ -9,7 +9,7 @@ from PySide6.QtCore import (QByteArray, QFile, QFileInfo, QSaveFile, QSettings,
                             QTextStream, Qt, Slot)
 from PySide6.QtGui import QAction, QIcon, QKeySequence
 from PySide6.QtWidgets import (QApplication, QFileDialog, QMainWindow,
-                               QMessageBox, QTextEdit, QWidget)
+                               QMessageBox, QTextEdit)
 
 import application_rc
 

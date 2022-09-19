@@ -9,7 +9,7 @@ import random
 import sys
 
 from PySide6.QtCore import QBasicTimer, QSize, Qt, Signal, Slot
-from PySide6.QtGui import QColor, QPainter
+from PySide6.QtGui import QColor, QPainter, QPixmap
 from PySide6.QtWidgets import (QApplication, QFrame, QGridLayout, QLabel,
                                QLCDNumber, QPushButton, QWidget)
 
@@ -324,7 +324,7 @@ class TetrixBoard(QFrame):
         with QPainter(pixmap) as painter:
             painter.fillRect(pixmap.rect(), self.nextPieceLabel.palette().background())
 
-        for int in range(4):
+        for i in range(4):
             x = self._next_piece.x(i) - self._next_piece.min_x()
             y = self._next_piece.y(i) - self._next_piece.min_y()
             self.draw_square(painter, x * self.square_width(),

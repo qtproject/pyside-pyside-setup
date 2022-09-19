@@ -5,7 +5,7 @@
 import pickle
 import sys
 
-from PySide6.QtCore import QFile, QIODevice, QTextStream, Qt, Signal, Slot
+from PySide6.QtCore import Qt, Slot
 from PySide6.QtWidgets import (QApplication, QDialog, QFileDialog,
                                QGridLayout, QHBoxLayout, QLabel, QLineEdit,
                                QMessageBox, QPushButton, QTextEdit,

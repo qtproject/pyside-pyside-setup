@@ -7,7 +7,7 @@
 import sys
 
 from PySide6.QtWidgets import (QApplication, QFormLayout, QLabel, QLineEdit,
-                               QVBoxLayout, QWidget, QWizardPage, QWizard)
+                               QVBoxLayout, QWizardPage, QWizard)
 
 
 def create_intro_page():

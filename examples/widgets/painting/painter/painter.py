@@ -9,7 +9,7 @@ from PySide6.QtWidgets import (
     QStyle,
     QColorDialog,
 )
-from PySide6.QtCore import QPoint, Qt, QDir, Slot, QStandardPaths
+from PySide6.QtCore import Qt, Slot, QStandardPaths
 from PySide6.QtGui import (
     QMouseEvent,
     QPaintEvent,

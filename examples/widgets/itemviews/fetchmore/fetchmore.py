@@ -11,9 +11,8 @@ down the list to see the model being populated on demand.
 
 import sys
 
-from PySide6.QtCore import (QAbstractListModel, QDir, QFileInfo, QLibraryInfo,
+from PySide6.QtCore import (QAbstractListModel, QDir,
                             QModelIndex, Qt, Signal, Slot)
-from PySide6.QtGui import QPalette
 from PySide6.QtWidgets import (QApplication, QFileIconProvider, QListView,
                                QPlainTextEdit, QSizePolicy, QVBoxLayout,
                                QWidget)

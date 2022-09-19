@@ -5,9 +5,8 @@ import math
 import sys
 
 from PySide6.QtWidgets import QWidget, QApplication
-from PySide6.QtCore import QPoint, QRect, QTimer, Qt, Slot
-from PySide6.QtGui import (QColor, QPainter, QPaintEvent, QPen, QPointList,
-                           QTransform)
+from PySide6.QtCore import QPoint, QRect, QTimer, Qt
+from PySide6.QtGui import QPainter, QPointList
 
 
 WIDTH = 680

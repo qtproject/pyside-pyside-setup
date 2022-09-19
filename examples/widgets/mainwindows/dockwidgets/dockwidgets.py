@@ -103,7 +103,7 @@ class MainWindow(QMainWindow):
         if not file.open(QFile.WriteOnly | QFile.Text):
             reason = file.errorString()
             QMessageBox.warning(self, "Dock Widgets",
-                    "Cannot write file {filename}:\n{reason}.")
+                    f"Cannot write file {filename}:\n{reason}.")
             return
 
         out = QTextStream(file)

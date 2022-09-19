@@ -6,14 +6,14 @@
 
 import sys
 
-from PySide6.QtCore import QDate, Qt, Signal, Slot
+from PySide6.QtCore import QDate, Qt, Slot
 from PySide6.QtGui import (QFont, QTextCharFormat, QTextCursor,
                            QTextFrameFormat, QTextLength, QTextTableFormat)
 from PySide6.QtWidgets import (QApplication, QCheckBox, QDialog,
                                QDialogButtonBox, QGridLayout, QLabel,
                                QLineEdit, QMainWindow, QMenu, QMessageBox,
                                QTableWidget, QTableWidgetItem, QTabWidget,
-                               QTextEdit, QWidget)
+                               QTextEdit)
 from PySide6.QtPrintSupport import QAbstractPrintDialog, QPrintDialog, QPrinter
 
 

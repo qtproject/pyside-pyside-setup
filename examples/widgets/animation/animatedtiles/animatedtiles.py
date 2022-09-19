@@ -8,11 +8,11 @@ import math
 from PySide6.QtCore import (QEasingCurve, QObject, QParallelAnimationGroup,
                             QPointF, QPropertyAnimation, QRandomGenerator,
                             QRectF, QTimer, Qt, Property, Signal)
-from PySide6.QtGui import (QBrush, QColor, QLinearGradient, QPainter,
+from PySide6.QtGui import (QBrush, QLinearGradient, QPainter,
                            QPainterPath, QPixmap, QTransform)
 from PySide6.QtWidgets import (QApplication, QGraphicsItem, QGraphicsPixmapItem,
                                QGraphicsRectItem, QGraphicsScene, QGraphicsView,
-                               QGraphicsWidget, QStyle, QWidget)
+                               QGraphicsWidget, QStyle)
 from PySide6.QtStateMachine import QState, QStateMachine
 
 import animatedtiles_rc

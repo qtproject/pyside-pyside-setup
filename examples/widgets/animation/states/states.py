@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (QApplication, QGraphicsLinearLayout,
                                QGraphicsObject, QGraphicsProxyWidget,
                                QGraphicsWidget, QGraphicsScene, QGraphicsView,
                                QGroupBox, QPushButton, QRadioButton,
-                               QTextEdit, QVBoxLayout, QWidget)
+                               QTextEdit, QVBoxLayout)
 
 from PySide6.QtStateMachine import QState, QStateMachine
 

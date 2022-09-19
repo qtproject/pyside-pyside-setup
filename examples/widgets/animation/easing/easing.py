@@ -8,10 +8,10 @@ import sys
 from PySide6.QtCore import (Property, QEasingCurve, QObject, QPropertyAnimation,
                             QPoint, QPointF, QRect, QRectF, QSize, Qt)
 from PySide6.QtGui import (QBrush, QColor, QIcon, QLinearGradient, QPainter,
-                           QPainterPath, QPen, QPixmap)
+                           QPainterPath, QPixmap)
 from PySide6.QtWidgets import (QApplication, QGraphicsPixmapItem,
-                               QGraphicsItem, QGraphicsScene, QGraphicsView,
-                               QListWidget, QListWidgetItem, QWidget)
+                               QGraphicsItem, QGraphicsScene,
+                               QListWidgetItem, QWidget)
 
 from ui_form import Ui_Form
 

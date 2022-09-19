@@ -3,12 +3,12 @@
 
 from PySide6.QtPrintSupport import QPrintDialog, QPrinter
 from PySide6.QtWidgets import (QApplication, QDialog, QFileDialog, QLabel,
-                               QMainWindow, QMenuBar, QMessageBox, QScrollArea,
-                               QScrollBar, QSizePolicy, QStatusBar)
-from PySide6.QtGui import (QAction, QClipboard, QColorSpace, QGuiApplication,
-                           QImage, QImageReader, QImageWriter, QKeySequence,
-                           QPalette, QPainter, QPixmap, QScreen)
-from PySide6.QtCore import QDir, QMimeData, QStandardPaths, Qt, Slot
+                               QMainWindow, QMessageBox, QScrollArea,
+                               QSizePolicy)
+from PySide6.QtGui import (QColorSpace, QGuiApplication,
+                           QImageReader, QImageWriter, QKeySequence,
+                           QPalette, QPainter, QPixmap)
+from PySide6.QtCore import QDir, QStandardPaths, Qt, Slot
 
 
 ABOUT = """<p>The <b>Image Viewer</b> example shows how to combine QLabel

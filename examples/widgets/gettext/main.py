@@ -5,9 +5,9 @@ from pathlib import Path
 import gettext
 import sys
 
-from PySide6.QtCore import QItemSelection, QLocale, Qt, Slot
+from PySide6.QtCore import QItemSelection, Slot
 from PySide6.QtWidgets import (QAbstractItemView, QApplication, QListWidget,
-                               QMainWindow, QWidget)
+                               QMainWindow)
 
 
 _ = None

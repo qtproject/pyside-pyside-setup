@@ -1,13 +1,12 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
-from pathlib import Path
 import sys
 
 from PySide6.QtCore import (QItemSelection, QLibraryInfo, QLocale, QTranslator,
-                            Qt, Slot)
+                            Slot)
 from PySide6.QtWidgets import (QAbstractItemView, QApplication, QListWidget,
-                               QMainWindow, QWidget)
+                               QMainWindow)
 
 
 import linguist_rc

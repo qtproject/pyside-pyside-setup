@@ -7,7 +7,7 @@
 import sys
 import math
 
-from PySide6.QtCore import QPoint, QRect, QTimer, Qt, Signal, Slot
+from PySide6.QtCore import QPoint, QRect, QTimer, Qt, Signal, Slot, qWarning
 from PySide6.QtGui import QColor, QFont, QPainter, QPalette, QRegion
 from PySide6.QtWidgets import (QApplication, QGridLayout, QHBoxLayout,
                                QLCDNumber, QPushButton, QSlider,

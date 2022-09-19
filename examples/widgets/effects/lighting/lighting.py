@@ -10,7 +10,7 @@ from PySide6.QtGui import (QBrush, QColor, QLinearGradient, QPainter, QPen,
                            QPixmap, QRadialGradient)
 from PySide6.QtWidgets import (QApplication, QFrame, QGraphicsDropShadowEffect,
                                QGraphicsEllipseItem, QGraphicsRectItem,
-                               QGraphicsScene, QGraphicsView, QWidget)
+                               QGraphicsScene, QGraphicsView)
 
 
 class Lighting(QGraphicsView):

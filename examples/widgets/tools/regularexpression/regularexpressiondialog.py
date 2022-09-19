@@ -12,7 +12,6 @@ from PySide6.QtWidgets import (QCheckBox, QComboBox, QDialog, QFormLayout,
     QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit, QPlainTextEdit,
     QSpinBox, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget,)
 
-from PySide6.QtGui import QClipboard
 
 def rawStringLiteral(pattern: str) -> str:
     pattern = 'r"' + pattern
@@ -21,8 +20,8 @@ def rawStringLiteral(pattern: str) -> str:
 
 
 def patternToCode(pattern: str) -> str:
-    pattern = pattern.replace(f"\\", f"\\\\")
-    pattern = pattern.replace(f'"', f'\\"')
+    pattern = pattern.replace("\\", "\\\\")
+    pattern = pattern.replace('"', '\\"')
     pattern = '"' + pattern
     pattern = pattern + '"'
     return pattern
@@ -31,7 +30,7 @@ def patternToCode(pattern: str) -> str:
 def codeToPattern(code: str) -> str:
 
     try:
-        new_code = code[0]
+        _ = code[0]
     except IndexError:
         logging.warning("code is empty")
         return code

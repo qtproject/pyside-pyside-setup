@@ -2,16 +2,16 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
 import sys
-from PySide6.QtCore import (QCoreApplication, QDir, QFile, QFileInfo, QMimeData,
+from PySide6.QtCore import (QCoreApplication, QDir, QFile, QFileInfo,
                             QMimeDatabase, QUrl, Qt, Slot)
-from PySide6.QtGui import (QAction, QActionGroup, QColor, QGuiApplication, QClipboard,
-                           QCloseEvent, QFont, QFontDatabase, QFontInfo, QIcon,
+from PySide6.QtGui import (QAction, QActionGroup, QColor, QGuiApplication,
+                           QFont, QFontDatabase, QFontInfo, QIcon,
                            QKeySequence, QPalette, QPixmap, QTextBlockFormat,
                            QTextCharFormat, QTextCursor, QTextDocumentWriter,
-                           QTextFormat, QTextList, QTextListFormat)
+                           QTextFormat, QTextListFormat)
 from PySide6.QtWidgets import (QApplication, QMainWindow, QColorDialog, QComboBox,
-                               QDialog, QFileDialog, QFontComboBox, QStatusBar,
-                               QTextEdit, QToolBar, QMenu, QMenuBar, QMessageBox)
+                               QDialog, QFileDialog, QFontComboBox,
+                               QTextEdit, QMessageBox)
 from PySide6.QtPrintSupport import (QAbstractPrintDialog, QPrinter,
                                     QPrintDialog, QPrintPreviewDialog)
 
@@ -406,7 +406,7 @@ class TextEdit(QMainWindow):
     @Slot()
     def file_save(self):
         if not self._file_name or self._file_name.startswith(":/"):
-            return fileSaveAs()
+            return self.file_save_as()
 
         writer = QTextDocumentWriter(self._file_name)
         document = self._text_edit.document()

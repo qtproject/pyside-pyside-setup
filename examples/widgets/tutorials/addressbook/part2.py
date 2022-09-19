@@ -4,9 +4,9 @@
 
 import sys
 
-from PySide6.QtCore import Qt, Signal, Slot
-from PySide6.QtWidgets import (QApplication, QDialog, QGridLayout,
-                               QHBoxLayout, QLabel, QLineEdit,
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import (QApplication, QGridLayout,
+                               QLabel, QLineEdit,
                                QMessageBox, QPushButton, QTextEdit,
                                QVBoxLayout, QWidget)
 

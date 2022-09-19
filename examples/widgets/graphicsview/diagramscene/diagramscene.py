@@ -7,12 +7,10 @@ import sys
 
 from PySide6.QtCore import (QLineF, QPointF, QRect, QRectF, QSize, QSizeF, Qt,
                             Signal, Slot)
-from PySide6.QtGui import (QAction, QColor, QFont, QIcon, QIntValidator,
+from PySide6.QtGui import (QAction, QBrush, QColor, QFont, QIcon, QIntValidator,
                            QPainter, QPainterPath, QPen, QPixmap, QPolygonF)
 from PySide6.QtWidgets import (QAbstractButton, QApplication, QButtonGroup,
-                               QComboBox,
-                               QFontComboBox, QGraphicsAnchorLayout,
-                               QGraphicsItem, QGraphicsLineItem,
+                               QComboBox, QFontComboBox, QGraphicsItem, QGraphicsLineItem,
                                QGraphicsPolygonItem, QGraphicsTextItem,
                                QGraphicsScene, QGraphicsView, QGridLayout,
                                QHBoxLayout, QLabel, QMainWindow, QMenu,

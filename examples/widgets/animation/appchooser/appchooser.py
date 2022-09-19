@@ -8,7 +8,7 @@ from PySide6.QtCore import (QPointF, QPropertyAnimation, QRect, QRectF, Qt,
                             Signal)
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import (QApplication, QGraphicsScene, QGraphicsView,
-                               QGraphicsWidget, QWidget)
+                               QGraphicsWidget)
 from PySide6.QtStateMachine import QState, QStateMachine
 
 import appchooser_rc

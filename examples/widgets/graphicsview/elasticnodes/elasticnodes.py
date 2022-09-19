@@ -8,10 +8,10 @@ import math
 
 from PySide6.QtCore import (QLineF, QPointF, QRandomGenerator, QRectF, QSizeF,
                             Qt, qAbs)
-from PySide6.QtGui import (QColor, QBrush, QPainter, QPainterPath, QPen,
+from PySide6.QtGui import (QColor, QBrush, QLinearGradient, QPainter, QPainterPath, QPen,
                            QPolygonF, QRadialGradient)
 from PySide6.QtWidgets import (QApplication, QGraphicsItem, QGraphicsScene,
-                               QGraphicsView, QStyle, QWidget)
+                               QGraphicsView, QStyle)
 
 
 def random(boundary):

@@ -7,7 +7,6 @@ import sys
 from argparse import ArgumentParser, RawTextHelpFormatter
 
 from PySide6.QtCore import QCoreApplication, qVersion
-from PySide6.QtGui import QScreen
 from PySide6.QtWidgets import QApplication
 
 from textedit import TextEdit

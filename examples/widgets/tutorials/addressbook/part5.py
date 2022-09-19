@@ -2,10 +2,9 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
-import pickle
 import sys
 
-from PySide6.QtCore import Qt, Signal, Slot
+from PySide6.QtCore import Qt, Slot
 from PySide6.QtWidgets import (QApplication, QDialog, QGridLayout,
                                QHBoxLayout, QLabel, QLineEdit,
                                QMessageBox, QPushButton, QTextEdit,

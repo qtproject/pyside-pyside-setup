@@ -11,9 +11,9 @@ from PySide6.QtCore import (QCoreApplication, QDir, QFile, QFileInfo,
 from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import (QAbstractItemView, QApplication, QComboBox,
                                QDialog, QFileDialog, QGridLayout, QHBoxLayout,
-                               QHeaderView, QLabel, QLineEdit, QProgressDialog,
+                               QHeaderView, QLabel, QProgressDialog,
                                QPushButton, QSizePolicy, QTableWidget,
-                               QTableWidgetItem, QVBoxLayout, QWidget)
+                               QTableWidgetItem)
 
 
 class Window(QDialog):

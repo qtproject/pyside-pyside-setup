@@ -5,8 +5,8 @@
 """PySide6 port of the widgets/dialogs/standarddialogs example from Qt v5.x"""
 
 import sys
-from PySide6.QtCore import QDir, QRect, Qt, Slot
-from PySide6.QtGui import QFont, QPalette, QScreen
+from PySide6.QtCore import QDir, Qt, Slot
+from PySide6.QtGui import QFont, QPalette
 from PySide6.QtWidgets import (QApplication, QColorDialog, QCheckBox, QDialog,
                                QErrorMessage, QFontDialog, QFileDialog, QFrame,
                                QGridLayout, QGroupBox, QInputDialog, QLabel,

@@ -8,8 +8,8 @@ import sys
 import math
 import random
 
-from PySide6.QtCore import (QPoint, QRect, QTime, QTimer, Qt, SIGNAL, SLOT,
-                            Signal, Slot)
+from PySide6.QtCore import (QPoint, QRect, QTime, QTimer, Qt,
+                            Signal, Slot, qWarning)
 from PySide6.QtGui import QColor, QFont, QPainter, QPalette, QRegion
 from PySide6.QtWidgets import (QApplication, QGridLayout, QHBoxLayout, QLabel,
                                QLCDNumber, QPushButton, QSizePolicy, QSlider,

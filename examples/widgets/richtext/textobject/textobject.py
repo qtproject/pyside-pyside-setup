@@ -8,9 +8,8 @@ import os
 from pathlib import Path
 import sys
 
-from PySide6.QtCore import QFile, QIODevice, QObject, QSizeF, Qt, Slot
-from PySide6.QtGui import (QTextCharFormat, QTextFormat, QTextObjectInterface,
-                           QPyTextObject)
+from PySide6.QtCore import QFile, QIODevice, QSizeF, Slot
+from PySide6.QtGui import (QTextCharFormat, QTextFormat, QPyTextObject)
 from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QLineEdit,
                                QMessageBox, QPushButton, QTextEdit,
                                QVBoxLayout, QWidget)

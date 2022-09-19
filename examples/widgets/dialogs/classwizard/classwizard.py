@@ -6,14 +6,12 @@ import os
 from pathlib import Path
 import sys
 
-from PySide6.QtCore import (QByteArray, QDir, QFile, QFileInfo,
-                            QRegularExpression, Qt, QUrl, Slot)
+from PySide6.QtCore import QDir, QFileInfo, QUrl, Slot
 from PySide6.QtGui import QDesktopServices, QPixmap
 from PySide6.QtWidgets import (QApplication, QComboBox, QCheckBox, QFormLayout,
-                               QFileDialog, QGroupBox, QGridLayout,
-                               QHBoxLayout, QLabel, QLineEdit, QMessageBox,
-                               QPushButton, QRadioButton, QToolButton,
-                               QVBoxLayout, QWizard, QWizardPage)
+                               QFileDialog, QHBoxLayout, QLabel, QLineEdit,
+                               QMessageBox, QToolButton, QVBoxLayout, QWizard,
+                               QWizardPage)
 
 from listchooser import ListChooser, PropertyChooser, SignalChooser
 
@@ -77,7 +75,7 @@ class ClassWizard(QWizard):
         """Overrides QWizard.nextId() to insert the property/signal
            page in case the class is a QObject."""
         idx = self.currentId()
-        if self.currentId() == self._class_info_index:
+        if idx == self._class_info_index:
             qobject = self.field('qobject')
             return self._qobject_index if qobject else self._output_index
         return super(ClassWizard, self).nextId()
@@ -177,7 +175,7 @@ class ClassWizard(QWizard):
         block += '):\n'
 
         if base_class:
-            block += f'        super().__init__('
+            block += '        super().__init__('
             if qobject:
                 block += 'parent'
             block += ')\n'

@@ -6,12 +6,11 @@
 
 import sys
 
-from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (QApplication, QComboBox, QDialog,
                                QDialogButtonBox, QGridLayout, QGroupBox,
                                QFormLayout, QHBoxLayout, QLabel, QLineEdit,
                                QMenu, QMenuBar, QPushButton, QSpinBox,
-                               QTextEdit, QVBoxLayout, QWidget)
+                               QTextEdit, QVBoxLayout)
 
 
 class Dialog(QDialog):

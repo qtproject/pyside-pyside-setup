@@ -6,9 +6,9 @@ import sys
 from PySide6.QtWidgets import *
 from PySide6.QtGui import (QCursor, QDesktopServices, QGuiApplication, QIcon,
                            QKeySequence, QShortcut, QStandardItem,
-                           QStandardItemModel, QScreen, QWindow)
-from PySide6.QtCore import (QDateTime, QDir, QLibraryInfo, QMetaObject,
-                            QSysInfo, QTextStream, QTimer, Qt, qVersion, Slot)
+                           QStandardItemModel)
+from PySide6.QtCore import (QDateTime, QDir, QLibraryInfo,
+                            QSysInfo, QTimer, Qt, qVersion, Slot)
 
 
 POEM = """Twinkle, twinkle, little star,

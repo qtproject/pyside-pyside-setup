@@ -1,14 +1,13 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
-from PySide6.QtCore import (QCoreApplication, QDir, QRegularExpression, Qt,
-                            Property, Slot)
+from PySide6.QtCore import QRegularExpression, Property, Slot
 from PySide6.QtGui import QRegularExpressionValidator
 from PySide6.QtWidgets import (QComboBox, QDialog, QDialogButtonBox,
                                QFormLayout, QGroupBox, QHBoxLayout,
-                               QInputDialog, QLineEdit, QListWidget,
+                               QLineEdit, QListWidget,
                                QListWidgetItem, QPushButton, QVBoxLayout,
-                               QWidget)
+                               )
 
 
 DEFAULT_TYPES = ['int', 'str', 'PySide6.QtCore.QPoint', 'PySide6.QtCore.QRect',

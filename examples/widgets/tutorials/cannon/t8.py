@@ -6,7 +6,7 @@
 
 import sys
 
-from PySide6.QtCore import Signal, Slot, Qt
+from PySide6.QtCore import Signal, Slot, Qt, qWarning
 from PySide6.QtGui import QColor, QFont, QPainter, QPalette
 from PySide6.QtWidgets import (QApplication, QGridLayout, QLCDNumber,
                                QPushButton, QSlider, QVBoxLayout, QWidget)

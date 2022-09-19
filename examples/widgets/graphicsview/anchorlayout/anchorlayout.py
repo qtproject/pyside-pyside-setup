@@ -8,7 +8,7 @@ from PySide6.QtCore import QSizeF, Qt
 from PySide6.QtWidgets import (QApplication, QGraphicsAnchorLayout,
                                QGraphicsProxyWidget, QGraphicsScene,
                                QGraphicsView, QGraphicsWidget,
-                               QPushButton, QSizePolicy, QWidget)
+                               QPushButton, QSizePolicy)
 
 
 def create_item(minimum, preferred, maximum, name):

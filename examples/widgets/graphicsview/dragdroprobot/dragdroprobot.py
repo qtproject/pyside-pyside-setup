@@ -11,7 +11,7 @@ from PySide6.QtGui import (QBrush, QColor, QDrag, QImage, QPainter, QPixmap,
                            QPen, QTransform)
 from PySide6.QtWidgets import (QApplication, QGraphicsItem,
                                QGraphicsItemAnimation, QGraphicsScene,
-                               QGraphicsView, QWidget)
+                               QGraphicsView)
 
 import dragdroprobot_rc
 
