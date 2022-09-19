@@ -975,6 +975,104 @@ static bool is_old_version()
     return number <= 3008;
 }
 
+///////////////////////////////////////////////////////////////////////
+//
+// Support for Missing Values
+// ==========================
+//
+// Qt enums sometimes use undefined values in enums.
+// The enum module handles this by the option "KEEP" for Flag and
+// IntFlag. The handling of missing enum values is still strict.
+//
+// We changed that (also for compatibility with some competitor)
+// and provide a `_missing_` function that creates the missing value.
+//
+// The idea:
+// ---------
+// We cannot modify the already created class.
+// But we can create a one-element class with the new value and
+// pretend that this is the already existing class.
+//
+// We create each constant only once and keep the result in a dict
+// "_sbk_missing_". This is similar to a competitor's "_sip_missing_".
+//
+static PyObject *missing_func(PyObject *self, PyObject *args)
+{
+    // In order to relax matters to be more compatible with C++, we need
+    // to create a pseudo-member with that value.
+    static auto *const _sbk_missing = Shiboken::String::createStaticString("_sbk_missing_");
+    static auto *const _name = Shiboken::String::createStaticString("__name__");
+    static auto *const _mro = Shiboken::String::createStaticString("__mro__");
+    static auto *const _class = Shiboken::String::createStaticString("__class__");
+
+    PyObject *klass{}, *value{};
+    if (!PyArg_UnpackTuple(args, "missing", 2, 2, &klass, &value))
+        Py_RETURN_NONE;
+    if (!PyLong_Check(value))
+        Py_RETURN_NONE;
+    auto *type = reinterpret_cast<PyTypeObject *>(klass);
+    auto *sbk_missing = PyDict_GetItem(type->tp_dict, _sbk_missing);
+    if (!sbk_missing) {
+        sbk_missing = PyDict_New();
+        PyDict_SetItem(type->tp_dict, _sbk_missing, sbk_missing);
+    }
+    // See if the value is already in the dict.
+    AutoDecRef val_str(PyObject_CallMethod(value, "__str__", nullptr));
+    auto *ret = PyDict_GetItem(sbk_missing, val_str);
+    if (ret) {
+        Py_INCREF(ret);
+        return ret;
+    }
+    // No, we must create a new object and insert it into the dict.
+    AutoDecRef cls_name(PyObject_GetAttr(klass, _name));
+    AutoDecRef mro(PyObject_GetAttr(klass, _mro));
+    auto *baseClass(PyTuple_GetItem(mro, 1));
+    AutoDecRef param(PyDict_New());
+    PyDict_SetItem(param, val_str, value);
+    AutoDecRef fake(PyObject_CallFunctionObjArgs(baseClass, cls_name.object(), param.object(),
+                                                 nullptr));
+    ret = PyObject_GetAttr(fake, val_str);
+    PyDict_SetItem(sbk_missing, val_str, ret);
+    // Now the real fake: Pretend that the type is our original type!
+    PyObject_SetAttr(ret, _class, klass);
+    return ret;
+}
+
+static struct PyMethodDef dummy_methods[] = {
+    {"_missing_", reinterpret_cast<PyCFunction>(missing_func), METH_VARARGS|METH_STATIC, nullptr},
+    {nullptr, nullptr, 0, nullptr}
+};
+
+static PyType_Slot dummy_slots[] = {
+    {Py_tp_base, reinterpret_cast<void *>(&PyType_Type)},
+    {Py_tp_methods, reinterpret_cast<void *>(dummy_methods)},
+    {0, nullptr}
+};
+
+static PyType_Spec dummy_spec = {
+    "1:builtins.EnumType",
+    0,
+    0,
+    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,
+    dummy_slots,
+};
+
+static PyObject *create_missing_func(PyObject *klass)
+{
+    // When creating the class, memorize it in the missing function by
+    // a partial function argument.
+    static auto *const type = SbkType_FromSpec(&dummy_spec);
+    static auto *const obType = reinterpret_cast<PyObject *>(type);
+    static auto *const _missing = Shiboken::String::createStaticString("_missing_");
+    static auto *const func = PyObject_GetAttr(obType, _missing);
+    static auto *const functools = PyImport_ImportModule("_functools");   // builtin
+    static auto *const _partial = Shiboken::String::createStaticString("partial");
+    static auto *const partial = PyObject_GetAttr(functools, _partial);
+    return PyObject_CallFunctionObjArgs(partial, func, klass, nullptr);
+}
+//
+////////////////////////////////////////////////////////////////////////
+
 PyTypeObject *morphLastEnumToPython()
 {
     /// The Python Enum internal structure is way too complicated.
@@ -1014,6 +1112,7 @@ PyTypeObject *morphLastEnumToPython()
 
     AutoDecRef PyEnumType(PyObject_GetAttr(PyEnumModule, enumName));
     assert(PyEnumType.object());
+    bool isFlag = PyObject_IsSubclass(PyEnumType, PyFlag);
 
     // Walk the values dict and create a Python enum type.
     AutoDecRef name(PyUnicode_FromString(lec.name));
@@ -1038,8 +1137,15 @@ PyTypeObject *morphLastEnumToPython()
     if (PyFlag_KEEP)
         PyDict_SetItem(callDict, boundary, PyFlag_KEEP);
     auto *obNewType = PyObject_Call(PyEnumType, callArgs, callDict);
-    if (!obNewType || PyObject_SetAttr(lec.scopeOrModule, pyName, obNewType) < 0)
-            return nullptr;
+    if (!obNewType || PyObject_SetAttr(scopeOrModule, pyName, obNewType) < 0)
+        return nullptr;
+
+    // For compatibility with Qt enums, provide a permissive missing method for (Int)?Enum.
+    if (!isFlag) {
+        AutoDecRef enum_missing(create_missing_func(obNewType));
+        PyObject_SetAttrString(obNewType, "_missing_", enum_missing);
+    }
+
     auto *newType = reinterpret_cast<PyTypeObject *>(obNewType);
     auto *obEnumType = reinterpret_cast<PyObject *>(enumType);
     AutoDecRef qual_name(PyObject_GetAttr(obEnumType, PyMagicName::qualname()));
