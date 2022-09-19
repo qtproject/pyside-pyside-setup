@@ -1,0 +1,4 @@
+{
+    "files": ["main.py", "console.py", "mainwindow.py", "mainwindow.ui",
+              "settingsdialog.py", "settingsdialog.ui", "terminal.qrc"]
+}
