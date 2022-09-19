@@ -36,7 +36,8 @@ if(NOT NO_QT_TOOLS STREQUAL "yes")
     endif()
 endif()
 
-list(APPEND directories ${CMAKE_CURRENT_SOURCE_DIR}/qtpy2cpp_lib)
+list(APPEND directories ${CMAKE_CURRENT_SOURCE_DIR}/qtpy2cpp_lib
+                        ${CMAKE_CURRENT_SOURCE_DIR}/project_lib)
 
 # pyside6-rcc, pyside6-uic, pyside6-designer, shiboken and pyside6-lupdate entrypoints
 

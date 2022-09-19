@@ -29,12 +29,17 @@ from argparse import ArgumentParser, RawTextHelpFormatter
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
+from project_lib.newproject import new_project, ProjectType
 
 MODE_HELP = """build    Builds the project
-run      Builds the project and runs the first file")
-clean    Cleans the build artifacts")
-qmllint  Runs the qmllint tool
-deploy   Deploys the application"""
+run        Builds the project and runs the first file")
+clean      Cleans the build artifacts")
+qmllint    Runs the qmllint tool
+deploy     Deploys the application
+new-ui     Creates a new QtWidgets project with a Qt Designer-based main window
+new-widget Creates a new QtWidgets project with a main window
+new-quick  Creates a new QtQuick project
+"""
 
 
 opt_quiet = False
@@ -63,6 +68,11 @@ QT_MODULES = "QT_MODULES"
 
 
 METATYPES_JSON_SUFFIX = "_metatypes.json"
+
+
+NEW_PROJECT_TYPES = {"new-quick": ProjectType.QUICK,
+                     "new-ui": ProjectType.WIDGET_FORM,
+                     "new-widget": ProjectType.WIDGET}
 
 
 def run_command(command: List[str], cwd: str = None, ignore_fail: bool = False):
@@ -493,9 +503,10 @@ if __name__ == "__main__":
     parser.add_argument("--force", "-f", action="store_true", help="Force rebuild")
     parser.add_argument("--qml-module", "-Q", action="store_true",
                         help="Perform check for QML module")
-    parser.add_argument("mode",
-                        choices=["build", "run", "clean", "qmllint", "deploy"],
-                        default="build", type=str, help=MODE_HELP)
+    mode_choices = ["build", "run", "clean", "qmllint", "deploy"]
+    mode_choices.extend(NEW_PROJECT_TYPES.keys())
+    parser.add_argument("mode", choices=mode_choices, default="build",
+                        type=str, help=MODE_HELP)
     parser.add_argument("file", help="Project file", nargs="?", type=str)
 
     options = parser.parse_args()
@@ -504,6 +515,14 @@ if __name__ == "__main__":
     opt_force = options.force
     opt_qml_module = options.qml_module
     mode = options.mode
+
+    new_project_type = NEW_PROJECT_TYPES.get(mode)
+    if new_project_type:
+        if not options.file:
+            print(f"{mode} requires a directory name.", file=sys.stderr)
+            sys.exit(1)
+        sys.exit(new_project(options.file, new_project_type))
+
     project_file = resolve_project_file(options.file)
     if not project_file:
         print(f"Cannot determine project_file {options.file}", file=sys.stderr)
