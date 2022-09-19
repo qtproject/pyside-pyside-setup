@@ -365,6 +365,8 @@ PyObject *unpickleEnum(PyObject *enum_class_name, PyObject *value)
     return PyObject_CallFunctionObjArgs(klass, value, nullptr);
 }
 
+int enumOption{};
+
 } // namespace Enum
 } // namespace Shiboken
 
@@ -432,23 +434,25 @@ PyTypeObject *getPyEnumMeta()
 
 void init_enum()
 {
-    static bool is_initialized = false;
-    if (is_initialized)
+    static bool isInitialized = false;
+    if (isInitialized)
         return;
-    if (!(is_initialized || enum_unpickler || _init_enum()))
+    if (!(isInitialized || enum_unpickler || _init_enum()))
         Py_FatalError("could not load enum pickling helper function");
     Py_AtExit(cleanupEnumTypes);
 
     // PYSIDE-1735: Determine whether we should use the old or the new enum implementation.
-    static const char *envname = "PYSIDE63_OPTION_PYTHON_ENUM";
-    const char *envsetting = getenv(envname);
-    // I tried to use the save version getenv_s instead, but this function does not
-    // exist on macOS. But this does no harm:
-    // This variable has been set already by parser.py initialization.
-    assert(envsetting);
-    useOldEnum = strncmp(envsetting, "0", 10) == 0;
+    static PyObject *sysmodule = PyImport_AddModule("sys");
+    static PyObject *option = PyObject_GetAttrString(sysmodule, "pyside63_option_python_enum");
+    if (!option || !PyLong_Check(option)) {
+        PyErr_Clear();
+        option = PyLong_FromLong(0);
+    }
+    int ignoreOver{};
+    Enum::enumOption = PyLong_AsLongAndOverflow(option, &ignoreOver);
+    useOldEnum = Enum::enumOption == Enum::ENOPT_OLD_ENUM;
     getPyEnumMeta();
-    is_initialized = true;
+    isInitialized = true;
 }
 
 // PYSIDE-1735: Helper function supporting QEnum
@@ -996,7 +1000,7 @@ static bool is_old_version()
 // We create each constant only once and keep the result in a dict
 // "_sbk_missing_". This is similar to a competitor's "_sip_missing_".
 //
-static PyObject *missing_func(PyObject *self, PyObject *args)
+static PyObject *missing_func(PyObject * /* self */ , PyObject *args)
 {
     // In order to relax matters to be more compatible with C++, we need
     // to create a pseudo-member with that value.
@@ -1114,6 +1118,14 @@ PyTypeObject *morphLastEnumToPython()
     assert(PyEnumType.object());
     bool isFlag = PyObject_IsSubclass(PyEnumType, PyFlag);
 
+    // See if we should use the Int versions of the types, again
+    bool useIntInheritance = Enum::enumOption & Enum::ENOPT_INHERIT_INT;
+    if (useIntInheritance) {
+        auto *surrogate = PyObject_IsSubclass(PyEnumType, PyFlag) ? PyIntFlag : PyIntEnum;
+        Py_INCREF(surrogate);
+        PyEnumType.reset(surrogate);
+    }
+
     // Walk the values dict and create a Python enum type.
     AutoDecRef name(PyUnicode_FromString(lec.name));
     AutoDecRef args(PyList_New(0));
@@ -1142,8 +1154,11 @@ PyTypeObject *morphLastEnumToPython()
 
     // For compatibility with Qt enums, provide a permissive missing method for (Int)?Enum.
     if (!isFlag) {
-        AutoDecRef enum_missing(create_missing_func(obNewType));
-        PyObject_SetAttrString(obNewType, "_missing_", enum_missing);
+        bool supportMissing = !(Enum::enumOption & Enum::ENOPT_NO_MISSING);
+        if (supportMissing) {
+            AutoDecRef enum_missing(create_missing_func(obNewType));
+            PyObject_SetAttrString(obNewType, "_missing_", enum_missing);
+        }
     }
 
     auto *newType = reinterpret_cast<PyTypeObject *>(obNewType);
@@ -1152,6 +1167,21 @@ PyTypeObject *morphLastEnumToPython()
     PyObject_SetAttr(obNewType, PyMagicName::qualname(), qual_name);
     AutoDecRef module(PyObject_GetAttr(obEnumType, PyMagicName::module()));
     PyObject_SetAttr(obNewType, PyMagicName::module(), module);
+
+    // See if we should re-introduce shortcuts in the enclosing object.
+    const bool useGlobalShortcut = (Enum::enumOption & Enum::ENOPT_GLOBAL_SHORTCUT) != 0;
+    const bool useScopedShortcut = (Enum::enumOption & Enum::ENOPT_SCOPED_SHORTCUT) != 0;
+    if (useGlobalShortcut || useScopedShortcut) {
+        bool isModule = PyModule_Check(scopeOrModule);
+        pos = 0;
+        while (PyDict_Next(values, &pos, &key, &value)) {
+            AutoDecRef entry(PyObject_GetAttr(obNewType, key));
+            if ((useGlobalShortcut && isModule) || (useScopedShortcut && !isModule))
+                if (PyObject_SetAttr(scopeOrModule, key, entry) < 0)
+                    return nullptr;
+        }
+    }
+
     // Protect against double initialization
     setp->replacementType = newType;
 

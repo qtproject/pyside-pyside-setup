@@ -32,4 +32,22 @@ LIBSHIBOKEN_API bool usingNewEnum();
 
 }
 
+namespace Shiboken { namespace Enum {
+
+enum : int {
+    ENOPT_OLD_ENUM        = 0x00,
+    ENOPT_NEW_ENUM        = 0x01,
+    ENOPT_INHERIT_INT     = 0x02,
+    ENOPT_GLOBAL_SHORTCUT = 0x04,
+    ENOPT_SCOPED_SHORTCUT = 0x08,
+    ENOPT_NO_FAKESHORTCUT = 0x10,
+    ENOPT_NO_FAKERENAMES  = 0x20,
+    ENOPT_NO_ZERODEFAULT  = 0x40,
+    ENOPT_NO_MISSING      = 0x80,
+};
+
+LIBSHIBOKEN_API extern int enumOption;
+
+}}
+
 #endif // SBKENUM_P_H

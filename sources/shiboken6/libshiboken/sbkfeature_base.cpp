@@ -236,10 +236,13 @@ PyObject *mangled_type_getattro(PyTypeObject *type, PyObject *name)
     //      no longer advertized in PYI files or line completion.
 
     if (ret && Py_TYPE(ret) == EnumMeta && currentOpcode_Is_CallMethNoArgs()) {
-        // We provide a zero argument for compatibility if it is a call with no args.
-        auto *hold = replaceNoArgWithZero(ret);
-        Py_DECREF(ret);
-        ret = hold;
+        bool useZeroDefault = !(Enum::enumOption & Enum::ENOPT_NO_ZERODEFAULT);
+        if (useZeroDefault) {
+            // We provide a zero argument for compatibility if it is a call with no args.
+            auto *hold = replaceNoArgWithZero(ret);
+            Py_DECREF(ret);
+            ret = hold;
+        }
     }
 
     if (!ret && name != ignAttr1 && name != ignAttr2) {
@@ -261,58 +264,64 @@ PyObject *mangled_type_getattro(PyTypeObject *type, PyObject *name)
                 continue;
             if (!sotp->enumFlagsDict)
                 initEnumFlagsDict(type_base);
-            auto *rename = PyDict_GetItem(sotp->enumFlagsDict, name);
-            if (rename) {
-                /*
-                 * Part 1: Look into the enumFlagsDict if we have an old flags name.
-                 * -------------------------------------------------------------
-                 * We need to replace the parameterless
+            bool useFakeRenames = !(Enum::enumOption & Enum::ENOPT_NO_FAKERENAMES);
+            if (useFakeRenames) {
+                auto *rename = PyDict_GetItem(sotp->enumFlagsDict, name);
+                if (rename) {
+                    /*
+                     * Part 1: Look into the enumFlagsDict if we have an old flags name.
+                     * -------------------------------------------------------------
+                     * We need to replace the parameterless
 
-                    QtCore.Qt.Alignment()
+                        QtCore.Qt.Alignment()
 
-                 * by the one-parameter call
+                     * by the one-parameter call
 
-                    QtCore.Qt.AlignmentFlag(0)
+                        QtCore.Qt.AlignmentFlag(0)
 
-                 * That means: We need to bind the zero as default into a wrapper and
-                 * return that to be called.
-                 *
-                 * Addendum:
-                 * ---------
-                 * We first need to look into the current opcode of the bytecode to find
-                 * out if we have a call like above or just a type lookup.
-                 */
-                auto *flagType = PyDict_GetItem(type_base->tp_dict, rename);
-                if (currentOpcode_Is_CallMethNoArgs())
-                    return replaceNoArgWithZero(flagType);
-                Py_INCREF(flagType);
-                return flagType;
+                     * That means: We need to bind the zero as default into a wrapper and
+                     * return that to be called.
+                     *
+                     * Addendum:
+                     * ---------
+                     * We first need to look into the current opcode of the bytecode to find
+                     * out if we have a call like above or just a type lookup.
+                     */
+                    auto *flagType = PyDict_GetItem(type_base->tp_dict, rename);
+                    if (currentOpcode_Is_CallMethNoArgs())
+                        return replaceNoArgWithZero(flagType);
+                    Py_INCREF(flagType);
+                    return flagType;
+                }
             }
-            auto *dict = type_base->tp_dict;
-            PyObject *key, *value;
-            Py_ssize_t pos = 0;
-            while (PyDict_Next(dict, &pos, &key, &value)) {
-                /*
-                 * Part 2: Check for a duplication into outer scope.
-                 * -------------------------------------------------
-                 * We need to replace the shortcut
+            bool useFakeShortcuts = !(Enum::enumOption & Enum::ENOPT_NO_FAKESHORTCUT);
+            if (useFakeShortcuts) {
+                auto *dict = type_base->tp_dict;
+                PyObject *key, *value;
+                Py_ssize_t pos = 0;
+                while (PyDict_Next(dict, &pos, &key, &value)) {
+                    /*
+                     * Part 2: Check for a duplication into outer scope.
+                     * -------------------------------------------------
+                     * We need to replace the shortcut
 
-                    QtCore.Qt.AlignLeft
+                        QtCore.Qt.AlignLeft
 
-                 * by the correct call
+                     * by the correct call
 
-                    QtCore.Qt.AlignmentFlag.AlignLeft
+                        QtCore.Qt.AlignmentFlag.AlignLeft
 
-                 * That means: We need to search all Enums of the class.
-                 */
-                if (Py_TYPE(value) == EnumMeta) {
-                    auto *valtype = reinterpret_cast<PyTypeObject *>(value);
-                    auto *member_map = PyDict_GetItem(valtype->tp_dict, _member_map_);
-                    if (member_map && PyDict_Check(member_map)) {
-                        auto *result = PyDict_GetItem(member_map, name);
-                        if (result) {
-                            Py_INCREF(result);
-                            return result;
+                     * That means: We need to search all Enums of the class.
+                     */
+                    if (Py_TYPE(value) == EnumMeta) {
+                        auto *valtype = reinterpret_cast<PyTypeObject *>(value);
+                        auto *member_map = PyDict_GetItem(valtype->tp_dict, _member_map_);
+                        if (member_map && PyDict_Check(member_map)) {
+                            auto *result = PyDict_GetItem(member_map, name);
+                            if (result) {
+                                Py_INCREF(result);
+                                return result;
+                            }
                         }
                     }
                 }
