@@ -11,9 +11,11 @@ int glGetVReturnSize(GLenum pname)
     case GL_ALIASED_LINE_WIDTH_RANGE:
     case GL_DEPTH_RANGE:
     case GL_MAX_VIEWPORT_DIMS:
+#if !QT_CONFIG(opengles2)
     case GL_POINT_SIZE_RANGE:
     case GL_SMOOTH_LINE_WIDTH_RANGE:
     case GL_VIEWPORT_BOUNDS_RANGE:
+#endif
         return 2;
     case GL_BLEND_COLOR:
     case GL_COLOR_CLEAR_VALUE:
