@@ -46,6 +46,7 @@ from handlers import (handle_array_declarations, handle_casts, handle_class,
                       handle_inc_dec, handle_include, handle_keywords,
                       handle_methods_return_type, handle_negate,
                       handle_type_var_declaration, handle_useless_qt_classes,
+                      handle_new,
                       handle_void_functions, handle_qt_connects)
 from parse_utils import dstrip, get_indent, remove_ref
 
@@ -129,9 +130,7 @@ def snippet_translate(x):
     # This contains an extra whitespace because of some variables
     # that include the string 'new'
     if "new " in x:
-        x = x.replace("new ", "")
-        if not x.endswith(")"):  # "new Foo" -> "new Foo()"
-            x += "()"
+        x = handle_new(x)
 
     # Handle 'const'
     # Some variables/functions have the word 'const' so we explicitly
