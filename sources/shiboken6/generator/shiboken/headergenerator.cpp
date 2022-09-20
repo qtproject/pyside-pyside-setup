@@ -10,6 +10,7 @@
 #include <abstractmetalang.h>
 #include <abstractmetalang_helpers.h>
 #include <codesnip.h>
+#include <clangparser/compilersupport.h>
 #include <typedatabase.h>
 #include <reporthandler.h>
 #include <textstream.h>
@@ -32,6 +33,32 @@
 #include <QtCore/QDebug>
 
 using namespace Qt::StringLiterals;
+
+//  PYSIDE-504: Handling the "protected hack"
+//  The problem: Creating wrappers when the class has private destructors.
+//  You can see an example on Windows in qclipboard_wrapper.h and others.
+//  Simply search for the text "// C++11: need to declare (unimplemented) destructor".
+//  The protected hack is the definition "#define protected public".
+//  For most compilers, this "hack" is enabled, because the problem of private
+//  destructors simply vanishes.
+//
+//  If one does not want to use this hack, then a new problem arises:
+//  C++11 requires that a destructor is declared in a wrapper class when it is
+//  private in the base class. There is no implementation allowed!
+//
+//  Unfortunately, MSVC in recent versions supports C++11, and due to restrictive
+//  rules, it is impossible to use the hack with this compiler.
+//  More unfortunate: Clang, when C++11 is enabled, also enforces a declaration
+//  of a private destructor, but it falsely then creates a linker error!
+//
+//  Originally, we wanted to remove the protected hack. But due to the Clang
+//  problem, we gave up on removal of the protected hack and use it always
+//  when we can. This might change again when the Clang problem is solved.
+
+static bool alwaysGenerateDestructorDeclaration()
+{
+    return  clang::compiler() == Compiler::Msvc;
+}
 
 QString HeaderGenerator::headerFileNameForContext(const GeneratorContext &context)
 {
@@ -133,9 +160,8 @@ void HeaderGenerator::generateClass(TextStream &s, const GeneratorContext &class
 
         //destructor
         // PYSIDE-504: When C++ 11 is used, then the destructor must always be declared.
-        // See abstractmetalang.cpp, determineCppWrapper() and generator.h for further
-        // reference.
-        if (!avoidProtectedHack() || !metaClass->hasPrivateDestructor() || alwaysGenerateDestructor) {
+        if (!avoidProtectedHack() || !metaClass->hasPrivateDestructor()
+            || alwaysGenerateDestructorDeclaration()) {
             if (avoidProtectedHack() && metaClass->hasPrivateDestructor())
                 s << "// C++11: need to declare (unimplemented) destructor because "
                      "the base class destructor is private.\n";
