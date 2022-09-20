@@ -326,6 +326,10 @@ An example of the ``setup.py`` invocation might look like the following:
 Depending on the target platform, you could use ``linux_armv7``,
 ``linux_aarch64``, etc.
 
+For embedded platforms, which typically do not have Qt and its tools fully
+built, the option ``--no-qt-tools`` can be used to prevent the bundling of the
+tools.
+
 If the process succeeds, you will find the target wheels in your ``dist/``
 directory, for example:
 
