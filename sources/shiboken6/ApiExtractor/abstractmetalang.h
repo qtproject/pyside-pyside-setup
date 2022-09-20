@@ -7,7 +7,6 @@
 #include "abstractmetalang_enums.h"
 #include "abstractmetalang_typedefs.h"
 #include "enclosingclassmixin.h"
-#include "typesystem_enums.h"
 #include "typesystem_typedefs.h"
 
 #include <QtCore/qobjectdefs.h>

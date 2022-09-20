@@ -4,10 +4,8 @@
 #ifndef TYPESYSTEM_TYPEDEFS_H
 #define TYPESYSTEM_TYPEDEFS_H
 
-#include <QtCore/QHash>
 #include <QtCore/QList>
 #include <QtCore/QSharedPointer>
-#include <QtCore/QList>
 
 class CodeSnip;
 class DocModification;

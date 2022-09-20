@@ -10,7 +10,6 @@
 #include "abstractmetalang.h"
 #include "abstractmetatype.h"
 #include "include.h"
-#include "modifications.h"
 #include "typeparser.h"
 
 #include <QtCore/QFileInfo>

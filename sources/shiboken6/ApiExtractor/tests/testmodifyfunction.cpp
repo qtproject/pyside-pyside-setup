@@ -3,9 +3,11 @@
 
 #include "testmodifyfunction.h"
 #include "testutil.h"
+#include <abstractmetaargument.h>
 #include <abstractmetabuilder_p.h>
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
+#include <abstractmetatype.h>
 #include <modifications.h>
 #include <typesystem.h>
 

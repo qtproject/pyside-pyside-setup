@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "abstractmetabuilder_p.h"
+#include "abstractmetaargument.h"
 #include "abstractmetaenum.h"
 #include "abstractmetafield.h"
 #include "abstractmetafunction.h"
+#include "abstractmetatype.h"
 #include "addedfunction.h"
 #include "graph.h"
 #include "exception.h"

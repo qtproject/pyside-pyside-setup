@@ -5,6 +5,7 @@
 #define PYTHONTYPEENTRY_H
 
 #include "customtypenentry.h"
+#include "typesystem_enums.h"
 
 class PythonTypeEntry : public CustomTypeEntry
 {

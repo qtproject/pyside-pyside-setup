@@ -7,7 +7,6 @@
 #include "complextypeentry.h"
 #include "constantvaluetypeentry.h"
 #include "containertypeentry.h"
-#include "customconversion.h"
 #include "customtypenentry.h"
 #include "enumtypeentry.h"
 #include "enumvaluetypeentry.h"
@@ -27,7 +26,6 @@
 #include "abstractmetatype.h"
 #include "typedatabase.h"
 #include "modifications.h"
-#include "messages.h"
 #include "sourcelocation.h"
 
 #include "qtcompat.h"

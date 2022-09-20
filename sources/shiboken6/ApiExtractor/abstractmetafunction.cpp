@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "abstractmetafunction.h"
+#include "abstractmetaargument.h"
 #include "abstractmetabuilder.h"
 #include "abstractmetalang.h"
 #include "abstractmetalang_helpers.h"
@@ -13,7 +14,6 @@
 #include "messages.h"
 #include "codesnip.h"
 #include "modifications.h"
-#include "propertyspec.h"
 #include "reporthandler.h"
 #include "sourcelocation.h"
 #include "typedatabase.h"

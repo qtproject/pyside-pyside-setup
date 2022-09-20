@@ -3,6 +3,7 @@
 
 #include "testresolvetype.h"
 #include "testutil.h"
+#include <abstractmetaargument.h>
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
 #include <abstractmetatype.h>

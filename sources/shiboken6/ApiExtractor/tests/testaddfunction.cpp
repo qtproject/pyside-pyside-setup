@@ -3,8 +3,10 @@
 
 #include "testaddfunction.h"
 #include "testutil.h"
+#include <abstractmetaargument.h>
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
+#include <abstractmetatype.h>
 #include <codesnip.h>
 #include <addedfunction.h>
 #include <addedfunction_p.h>

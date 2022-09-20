@@ -5,6 +5,8 @@
 #define TYPESYSTEMTYPEENTRY_H
 
 #include "typesystem.h"
+#include "typesystem_enums.h"
+#include "typesystem_typedefs.h"
 
 class TypeSystemTypeEntry : public TypeEntry
 {

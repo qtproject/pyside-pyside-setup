@@ -4,8 +4,6 @@
 #ifndef TYPEPARSER_H
 #define TYPEPARSER_H
 
-#include "parser/codemodel_enums.h"
-
 #include <QtCore/QString>
 
 class TypeInfo;

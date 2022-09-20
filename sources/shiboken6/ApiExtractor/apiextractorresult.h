@@ -4,13 +4,10 @@
 #ifndef APIEXTRACTORRESULT_H
 #define APIEXTRACTORRESULT_H
 
-#include "abstractmetalang.h"
 #include "apiextractorflags.h"
-#include "abstractmetaenum.h"
 #include "abstractmetatype.h"
-#include "typesystem_typedefs.h"
+#include "abstractmetalang_typedefs.h"
 
-#include <QtCore/QHash>
 #include <QtCore/QExplicitlySharedDataPointer>
 
 #include <optional>

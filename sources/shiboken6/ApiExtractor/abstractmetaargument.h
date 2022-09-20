@@ -4,15 +4,11 @@
 #ifndef ABSTRACTMETAARGUMENT_H
 #define ABSTRACTMETAARGUMENT_H
 
-#include "abstractmetalang_typedefs.h"
-#include "abstractmetatype.h"
-#include "typesystem_enums.h"
-#include "typesystem_typedefs.h"
-
 #include <QtCore/QSharedDataPointer>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 
+class AbstractMetaType;
 class AbstractMetaArgumentData;
 class Documentation;
 
@@ -31,7 +27,7 @@ public:
     void setType(const AbstractMetaType &type);
     void setModifiedType(const AbstractMetaType &type);
     const AbstractMetaType &modifiedType() const;
-    bool isTypeModified() const { return modifiedType() != type(); }
+    bool isTypeModified() const;
 
     bool isModifiedRemoved() const;
     void setModifiedRemoved(bool v);

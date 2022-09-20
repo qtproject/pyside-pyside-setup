@@ -3,13 +3,13 @@
 
 #include "headergenerator.h"
 #include <apiextractorresult.h>
+#include <abstractmetaargument.h>
 #include <abstractmetaenum.h>
 #include <abstractmetafield.h>
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
 #include <abstractmetalang_helpers.h>
 #include <codesnip.h>
-#include <modifications.h>
 #include <typedatabase.h>
 #include <reporthandler.h>
 #include <textstream.h>
@@ -21,8 +21,6 @@
 #include "primitivetypeentry.h"
 #include "typedefentry.h"
 #include "typesystemtypeentry.h"
-
-#include "parser/codemodel.h"
 
 #include "qtcompat.h"
 

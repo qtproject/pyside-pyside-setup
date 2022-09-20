@@ -6,9 +6,7 @@
 
 #include <abstractmetatype.h>
 #include <typedatabase_typedefs.h>
-#include <QtCore/QObject>
 #include <QtCore/QSharedPointer>
-#include <QtCore/QTextStream>
 #include <QtCore/QList>
 
 #include <optional>

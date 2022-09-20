@@ -4,6 +4,7 @@
 #include "testabstractmetaclass.h"
 #include "abstractmetabuilder.h"
 #include "testutil.h"
+#include <abstractmetaargument.h>
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
 #include <usingmember.h>

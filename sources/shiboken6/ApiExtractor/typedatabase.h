@@ -6,7 +6,6 @@
 
 #include "include.h"
 #include "typedatabase_typedefs.h"
-#include "typesystem_enums.h"
 #include "typesystem_typedefs.h"
 
 #include <QtCore/QRegularExpression>

@@ -12,7 +12,6 @@
 #include "abstractmetalang.h"
 #include "codesnip.h"
 #include "exception.h"
-#include "fileout.h"
 #include "modifications.h"
 #include "reporthandler.h"
 #include "typedatabase.h"
@@ -22,7 +21,6 @@
 #include "smartpointertypeentry.h"
 #include "typedefentry.h"
 #include "typesystemtypeentry.h"
-#include "valuetypeentry.h"
 
 #include "qtcompat.h"
 

@@ -6,7 +6,6 @@
 
 #include <QtCore/QByteArray>
 #include <QtCore/QList>
-#include <QtCore/QString>
 
 enum class HeaderType
 {

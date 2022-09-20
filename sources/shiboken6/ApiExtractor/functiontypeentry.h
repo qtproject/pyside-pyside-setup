@@ -5,6 +5,7 @@
 #define FUNCTIONTYPEENTRY_H
 
 #include "typesystem.h"
+#include "typesystem_enums.h"
 
 class FunctionTypeEntryPrivate;
 

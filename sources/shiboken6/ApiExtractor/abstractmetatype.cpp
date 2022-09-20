@@ -7,9 +7,9 @@
 #include "messages.h"
 #include "typedatabase.h"
 #include "containertypeentry.h"
-#include "parser/codemodel.h"
 
 #include "qtcompat.h"
+#include "typeinfo.h"
 
 #ifndef QT_NO_DEBUG_STREAM
 #  include <QtCore/QDebug>

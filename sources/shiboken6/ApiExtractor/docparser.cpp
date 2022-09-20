@@ -1,11 +1,11 @@
 // Copyright (C) 2016 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
+
 #include "docparser.h"
-#include "classdocumentation.h"
-#include "abstractmetaenum.h"
-#include "abstractmetafield.h"
+#include "abstractmetaargument.h"
 #include "abstractmetafunction.h"
 #include "abstractmetalang.h"
+#include "abstractmetatype.h"
 #include "messages.h"
 #include "modifications.h"
 #include "reporthandler.h"

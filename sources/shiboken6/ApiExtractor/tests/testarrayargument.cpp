@@ -3,9 +3,11 @@
 
 #include "testarrayargument.h"
 #include "testutil.h"
+#include <abstractmetaargument.h>
 #include <abstractmetaenum.h>
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
+#include <abstractmetatype.h>
 #include <primitivetypeentry.h>
 #include <parser/enumvalue.h>
 

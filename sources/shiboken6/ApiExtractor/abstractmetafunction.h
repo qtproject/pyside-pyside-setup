@@ -6,9 +6,9 @@
 
 #include "abstractmetalang_enums.h"
 #include "abstractmetalang_typedefs.h"
-#include "abstractmetaargument.h"
 #include "typesystem_enums.h"
 #include "typesystem_typedefs.h"
+#include "parser/codemodel_enums.h"
 
 #include <QtCore/QScopedPointer>
 

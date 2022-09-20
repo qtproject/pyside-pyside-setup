@@ -5,9 +5,9 @@
 #include "abstractmetalang.h"
 #include "abstractmetabuilder_p.h"
 #include "abstractmetatype.h"
-#include "codemodel.h"
 #include "messages.h"
 #include "complextypeentry.h"
+#include "typeinfo.h"
 
 #include "qtcompat.h"
 

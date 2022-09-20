@@ -3,6 +3,7 @@
 
 #include "testenum.h"
 #include "testutil.h"
+#include <abstractmetaargument.h>
 #include <abstractmetaenum.h>
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>

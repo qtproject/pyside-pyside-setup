@@ -5,6 +5,8 @@
 #define COMPLEXTYPEENTRY_H
 
 #include "typesystem.h"
+#include "typesystem_enums.h"
+#include "typesystem_typedefs.h"
 #include "pymethoddefentry.h"
 
 #include <QtCore/QSet>

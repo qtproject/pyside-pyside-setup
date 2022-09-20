@@ -6,14 +6,10 @@
 
 #include <textstream.h>
 
-#include "qtcompat.h"
-
-#include <QtCore/QHash>
 #include <QtCore/QList>
 #include <QtCore/QScopedPointer>
 #include <QtCore/QSharedPointer>
 #include <QtCore/QStack>
-#include <QtCore/QTextStream>
 
 QT_BEGIN_NAMESPACE
 class QDebug;

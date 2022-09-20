@@ -4,10 +4,9 @@
 #ifndef TYPESYSTEM_H
 #define TYPESYSTEM_H
 
-#include "typesystem_enums.h"
-#include "typesystem_typedefs.h"
 #include "include.h"
 
+#include <QtCore/qobjectdefs.h>
 #include <QtCore/QString>
 #include <QtCore/QScopedPointer>
 

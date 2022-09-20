@@ -3,9 +3,11 @@
 
 #include "testtemplates.h"
 #include "testutil.h"
+#include <abstractmetaargument.h>
 #include <abstractmetafield.h>
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
+#include <abstractmetatype.h>
 #include <complextypeentry.h>
 #include <containertypeentry.h>
 

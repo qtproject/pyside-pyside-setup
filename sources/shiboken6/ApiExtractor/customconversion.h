@@ -4,7 +4,6 @@
 #ifndef CUSTOMCONVERSION_H
 #define CUSTOMCONVERSION_H
 
-#include "typesystem_enums.h"
 #include "typesystem_typedefs.h"
 
 #include <QtCore/QList>

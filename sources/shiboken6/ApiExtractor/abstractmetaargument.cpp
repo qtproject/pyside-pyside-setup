@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "abstractmetaargument.h"
+#include "abstractmetatype.h"
 #include "documentation.h"
 
 #include "qtcompat.h"
@@ -55,6 +56,11 @@ void AbstractMetaArgument::setType(const AbstractMetaType &type)
 const AbstractMetaType &AbstractMetaArgument::modifiedType() const
 {
     return d->m_modifiedType;
+}
+
+bool AbstractMetaArgument::isTypeModified() const
+{
+    return modifiedType() != type();
 }
 
 bool AbstractMetaArgument::isModifiedRemoved() const

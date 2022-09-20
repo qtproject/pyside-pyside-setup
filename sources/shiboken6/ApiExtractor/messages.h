@@ -8,9 +8,7 @@
 #include "parser/codemodel_fwd.h"
 #include "typesystem_typedefs.h"
 
-#include <QtCore/QMap>
 #include <QtCore/QString>
-#include <QtCore/QList>
 
 class EnumTypeEntry;
 class FunctionTypeEntry;

@@ -3,13 +3,11 @@
 
 #include "modifications.h"
 #include "codesnip.h"
-#include "exception.h"
-#include "typedatabase.h"
-#include "typesystem.h"
 
 #include "qtcompat.h"
 
 #include <QtCore/QDebug>
+#include <QtCore/QRegularExpression>
 
 #include <algorithm>
 #include <limits>

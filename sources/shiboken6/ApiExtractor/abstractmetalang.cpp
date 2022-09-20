@@ -3,9 +3,12 @@
 
 #include "abstractmetalang.h"
 #include "abstractmetalang_helpers.h"
+#include "abstractmetaargument.h"
 #include "abstractmetaenum.h"
 #include "abstractmetafunction.h"
+#include "abstractmetatype.h"
 #include "abstractmetafield.h"
+#include "parser/codemodel.h"
 #include "documentation.h"
 #include "messages.h"
 #include "modifications.h"

@@ -3,8 +3,10 @@
 
 #include "testabstractmetatype.h"
 #include "testutil.h"
+#include <abstractmetaargument.h>
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
+#include <abstractmetatype.h>
 #include <typesystem.h>
 #include <parser/codemodel.h>
 #include <typeparser.h>

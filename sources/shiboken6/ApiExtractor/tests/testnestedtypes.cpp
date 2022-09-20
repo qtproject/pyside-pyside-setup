@@ -5,6 +5,7 @@
 #include "testutil.h"
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
+#include <abstractmetatype.h>
 #include <codesnip.h>
 #include <modifications.h>
 #include <complextypeentry.h>

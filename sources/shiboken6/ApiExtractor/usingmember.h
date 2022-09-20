@@ -5,7 +5,7 @@
 #define USINGMEMBER_H
 
 #include "abstractmetalang_typedefs.h"
-#include "parser/codemodel.h"
+#include "parser/codemodel_enums.h"
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 

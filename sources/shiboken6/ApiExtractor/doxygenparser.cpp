@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "doxygenparser.h"
+#include "abstractmetaargument.h"
 #include "abstractmetalang.h"
 #include "abstractmetafield.h"
 #include "abstractmetafunction.h"
 #include "abstractmetaenum.h"
+#include "abstractmetatype.h"
 #include "documentation.h"
 #include "messages.h"
 #include "modifications.h"

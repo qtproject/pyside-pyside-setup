@@ -3,10 +3,11 @@
 
 #include "qtdocparser.h"
 #include "classdocumentation.h"
+#include "abstractmetaargument.h"
 #include "abstractmetaenum.h"
-#include "abstractmetafield.h"
 #include "abstractmetafunction.h"
 #include "abstractmetalang.h"
+#include "abstractmetatype.h"
 #include "documentation.h"
 #include "modifications.h"
 #include "messages.h"
