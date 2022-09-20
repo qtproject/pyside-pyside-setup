@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "cppgenerator.h"
+#include "defaultvalue.h"
+#include "generatorcontext.h"
 #include "codesnip.h"
 #include "customconversion.h"
 #include "headergenerator.h"

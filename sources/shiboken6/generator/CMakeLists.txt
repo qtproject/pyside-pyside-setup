@@ -8,6 +8,8 @@ endif()
 
 set(shiboken6_SRC
 generator.cpp
+generatorcontext.cpp
+defaultvalue.cpp
 shiboken/cppgenerator.cpp
 shiboken/cppgenerator_container.cpp
 shiboken/headergenerator.cpp

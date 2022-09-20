@@ -10,6 +10,7 @@
 #include "typesystem_typedefs.h"
 
 #include <QtCore/QFlags>
+#include <QtCore/QHash>
 #include <QtCore/QSharedPointer>
 
 class OverloadDataNode;

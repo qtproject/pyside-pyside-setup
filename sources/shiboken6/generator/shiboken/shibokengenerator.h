@@ -13,12 +13,13 @@
 
 #include <array>
 
+class EnumTypeEntry;
+class FlagsTypeEntry;
 class DocParser;
 class CodeSnip;
 class QPropertySpec;
 class OverloadData;
 class TargetToNativeConversion;
-class TextStream;
 struct GeneratorClassInfoCacheEntry;
 
 QT_FORWARD_DECLARE_CLASS(TextStream)

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "headergenerator.h"
+#include "generatorcontext.h"
 #include <apiextractorresult.h>
 #include <abstractmetaargument.h>
 #include <abstractmetaenum.h>

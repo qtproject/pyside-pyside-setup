@@ -4,7 +4,7 @@
 #ifndef GENERATOR_H
 #define GENERATOR_H
 
-#include <abstractmetatype.h>
+#include <abstractmetalang_typedefs.h>
 #include <typedatabase_typedefs.h>
 #include <QtCore/QSharedPointer>
 #include <QtCore/QList>
@@ -12,110 +12,13 @@
 #include <optional>
 
 class ApiExtractorResult;
-class AbstractMetaFunction;
-class AbstractMetaClass;
-class AbstractMetaEnum;
-class TypeEntry;
-class ComplexTypeEntry;
-class AbstractMetaType;
-class EnumTypeEntry;
-class FlagsTypeEntry;
+class GeneratorContext;
+class DefaultValue;
 class TextStream;
-
-QT_BEGIN_NAMESPACE
-class QFile;
-class QDebug;
-QT_END_NAMESPACE
-
-class PrimitiveTypeEntry;
-class ContainerTypeEntry;
 
 QString getClassTargetFullName(const AbstractMetaClass *metaClass, bool includePackageName = true);
 QString getClassTargetFullName(const AbstractMetaEnum &metaEnum, bool includePackageName = true);
 QString getFilteredCppSignatureString(QString signature);
-
-class DefaultValue
-{
-public:
-    enum Type
-    {
-        Boolean,
-        CppScalar, // A C++ scalar type (int,..) specified by value()
-        Custom, // A custom constructor/expression, uses value() as is
-        DefaultConstructor, // For classes named value()
-        DefaultConstructorWithDefaultValues, // as DefaultConstructor, but can't return {} though.
-        Enum, // Enum value as specified by value()
-        Pointer, // Pointer of type value()
-        Void  // "", for return values only
-    };
-
-    explicit DefaultValue(Type t, QString value = QString());
-    explicit DefaultValue(QString customValue);
-
-    QString returnValue() const;
-    QString initialization() const;
-    QString constructorParameter() const;
-
-    QString value() const { return m_value; }
-    void setValue(const QString &value) { m_value = value; }
-
-    Type type() const { return m_type; }
-    void setType(Type type) { m_type = type; }
-
-private:
-    Type m_type;
-    QString m_value;
-};
-
-#ifndef QT_NO_DEBUG_STREAM
-QDebug operator<<(QDebug debug, const DefaultValue &v);
-#endif
-
-/**
- * A GeneratorContext object contains a pointer to an AbstractMetaClass and/or a specialized
- * AbstractMetaType, for which code is currently being generated.
- *
- * The main case is when the context contains only an AbstractMetaClass pointer, which is used
- * by different methods to generate appropriate expressions, functions, type names, etc.
- *
- * The second case is for generation of code for smart pointers. In this case the m_metaClass member
- * contains the generic template class of the smart pointer, and the m_preciseClassType member
- * contains the instantiated template type, e.g. a concrete shared_ptr<int>. To
- * distinguish this case, the member m_forSmartPointer is set to true.
- *
- * In the future the second case might be generalized for all template type instantiations.
- */
-class GeneratorContext {
-    friend class ShibokenGenerator;
-    friend class Generator;
-public:
-    enum Type { Class, WrappedClass, SmartPointer };
-
-    GeneratorContext() = default;
-
-    const AbstractMetaClass *metaClass() const { return m_metaClass; }
-    const AbstractMetaType &preciseType() const { return m_preciseClassType; }
-    const AbstractMetaClass *pointeeClass() const { return m_pointeeClass; }
-
-    bool forSmartPointer() const { return m_type == SmartPointer; }
-    bool useWrapper() const { return m_type ==  WrappedClass; }
-
-    QString wrapperName() const;
-    /// Returns the wrapper name in case of useWrapper(), the qualified class
-    /// name or the smart pointer specialization.
-    QString effectiveClassName() const;
-
-private:
-    const AbstractMetaClass *m_metaClass = nullptr;
-    const AbstractMetaClass *m_pointeeClass = nullptr;
-    AbstractMetaType m_preciseClassType;
-    QString m_wrappername;
-    Type m_type = Class;
-};
-
-#ifndef QT_NO_DEBUG_STREAM
-QDebug operator<<(QDebug debug, const GeneratorContext &c);
-#endif
 
 /**
  *   Base class for all generators. The default implementations does nothing,
@@ -318,4 +221,3 @@ using GeneratorPtr = QSharedPointer<Generator>;
 using Generators = QList<GeneratorPtr>;
 
 #endif // GENERATOR_H
-

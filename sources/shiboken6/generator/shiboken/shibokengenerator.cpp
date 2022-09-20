@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "shibokengenerator.h"
+#include "defaultvalue.h"
+#include "generatorcontext.h"
 #include "apiextractorresult.h"
 #include "codesnip.h"
 #include "customconversion.h"
