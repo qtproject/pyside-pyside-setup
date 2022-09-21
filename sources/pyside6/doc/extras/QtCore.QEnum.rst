@@ -87,6 +87,5 @@ The Python way to specify this would be
     class Alignment(enum.Flag):
         ...
 
-We are considering to map all builtin enums and flags to Python enums as well
-in a later release.
-
+Meanwhile we have converted all enums and flags to Python Enums (optional in ``PySide 6.3``,
+default in ``PySide 6.4``), see the :ref:`NewEnumSystem` section.
