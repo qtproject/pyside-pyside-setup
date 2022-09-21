@@ -74,7 +74,7 @@ def _copy_gui_executable(name, _vars=None):
     return _unix_copy_gui_executable(name, _vars)
 
 
-def prepare_packages_posix(self, _vars):
+def prepare_packages_posix(self, _vars, cross_build=False):
     executables = []
     libexec_executables = []
 
@@ -245,7 +245,7 @@ def prepare_packages_posix(self, _vars):
             if sys.platform == 'darwin':
                 prepare_standalone_package_macos(self, _vars)
             else:
-                prepare_standalone_package_linux(self, _vars)
+                prepare_standalone_package_linux(self, _vars, cross_build)
 
         if config.is_internal_shiboken_generator_build():
             # Copy over clang before rpath patching.

@@ -46,7 +46,7 @@ from ..utils import (copy_icu_libs, copydir, copyfile, find_files_using_glob,
 from ..versions import PYSIDE
 
 
-def prepare_standalone_package_linux(self, _vars):
+def prepare_standalone_package_linux(self, _vars, cross_build=False):
     built_modules = _vars['built_modules']
 
     constrain_modules = None
@@ -86,10 +86,11 @@ def prepare_standalone_package_linux(self, _vars):
         # Qt is built against system ICU, or in the Coin CI where ICU
         # libs are in a different directory) try to find out / resolve
         # which ICU libs are used by QtCore (if used at all) using a
-        # custom written ldd, and copy the ICU libs to the Pyside Qt
-        # dir if necessary. We choose the QtCore lib to inspect, by
+        # custom written ldd (non-cross build only), and copy the ICU
+        # libs to the Pyside Qt dir if necessary.
+        # We choose the QtCore lib to inspect, by
         # checking which QtCore library the shiboken6 executable uses.
-        if not maybe_icu_libs:
+        if not maybe_icu_libs and not cross_build:
             copy_icu_libs(self._patchelf_path, resolved_destination_lib_dir)
 
     # Set RPATH for Qt libs.

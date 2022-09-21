@@ -947,6 +947,8 @@ def find_qt_core_library_glob(lib_dir):
 # ldd for the specified platforms.
 # This has less priority because ICU libs are not used in the default
 # Qt configuration build.
+# Note: Uses ldd to query shared library dependencies and thus does not
+# work for cross builds.
 def copy_icu_libs(patchelf, destination_lib_dir):
     """
     Copy ICU libraries that QtCore depends on,
