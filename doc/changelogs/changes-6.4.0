@@ -1,0 +1,187 @@
+Qt for Python 6.4.0 is a minor release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+****************************************************************************
+*                                  PySide6                                 *
+****************************************************************************
+
+ - Modules QtPdf, QtPdfWidgets and QtSpatialAudio have been added.
+ - [PYSIDE-353]  PySide builds with PyPy 3.9.
+ - [PYSIDE-769]  Examples that demonstrate usage of Trio async package with Qt
+                 have been added.
+ - [PYSIDE-841]  Examples surface_numpy, minimal surface (QtDataVisualization),
+                 dropsite, dirview, Google suggest license wizard, QtBluetooth
+                 heart rate server and client, QML window, QML Plugins,
+                 analog clock (QtGui), digital clock (QtWidgets), spreadsheet,
+                 terminal (QtSerialPort) and character map, have been added.
+ - [PYSIDE-962]  Errors message about test-configuring projects
+                 with cmake have been improved.
+ - [PYSIDE-1019] The feature module has been improved by a reset function.
+ - [PYSIDE-1106] The documentation build process has been improved; it no
+                 longer requires a complete PySide6 build.
+ - [PYSIDE-1312] Support for QFormLayout::TakeRowResult has been added.
+ - [PYSIDE-1612] A tool for deployment, pyside6-deploy, has been added.
+ - [PYSIDE-1721] The C++ to Python code snippet translation has been
+                 much improved.
+ - [PYSIDE-1731] PyEnum: Fix the old Enums to produce correct .pyi files,
+                 again.
+ - [PYSIDE-1735] The new forgiveness mode of Python enums allows to use old
+                 enum code, most of the time.
+ - [PYSIDE-1735] PyEnum: Most IntEnum/IntFlag classes were modified to Enum/Flag
+ - [PYSIDE-1735] PyEnum: QKeyCombination was improved to also work after the change
+                 from IntEnum to Enum.
+ - [PYSIDE-1735] PyEnum can now be fully configured by flags at startup for internal
+                 use. The default is unchanged and enables everything as before.
+ - [PYSIDE-1797] Link errors about PyIndex_Check() when using Limited_API have
+                 been fixed.
+ - [PYSIDE-1860] Modules are now optimized for size.
+ - [PYSIDE-1878] The tool pyside6-qml has been added.
+ - [PYSIDE-1880] A numpy overload for QSurfaceDataProxy.resetArray() has
+                 been added.
+ - [PYSIDE-1883] Test::qWait()/qSleep() have been added.
+ - [PYSIDE-1887] Overriding QGraphicsItem::itemChange() has been fixed.
+ - [PYSIDE-1887] Specify meta type registration for some class hierarchies
+ - [PYSIDE-1893] Error "Internal C++ object already deleted." when using
+                 QWidget.nativeParentWidget() has been fixed.
+ - [PYSIDE-1895] '\0' can now be embedded in 1 byte strings.
+ - [PYSIDE-1898] Q_ARG/Q_RETURN_ARG have been implemented for
+                 QMetaObject.invokeMethod() with arguments.
+ - [PYSIDE-1898] qMetaTypeFromPyType() has been fixed for for wrapped types.
+ - [PYSIDE-1898] QMetaType: a constructor taking a PyTypeObject has been added.
+ - [PYSIDE-1899] Class QLoggingCategory and functions qCDebug(), qCInfo(),
+                 qCWarning() and qCCritical() has been added.
+ - [PYSIDE-1859] The Microsoft Windows handle types HBITMAP, HICON and HRGN
+                 have been added.
+ - [PYSIDE-1906] All qHash() functions are now exposed to Python.
+ - [PYSIDE-1913] The bool cast for QByteArray has been changed to return
+                 False for empty byte arrays to match the expected behavior.
+ - [PYSIDE-1924] Numpy support is now enabled by default.
+ - [PYSIDE-1945] pyside6-qtpy2cpp.py, a Qt-specific, simple tool for
+                 converting Python code to C++ has been added.
+ - [PYSIDE-1957] The Qt5Compat QML imports have been added
+                 (QtGraphicalEffects).
+ - [PYSIDE-1901] The broken string conversion for non-compact
+                 strings when using Limited API has been fixed.
+ - [PYSIDE-1905] Overloads with more parameters have been added to
+                 QDBusAbstractInterface::call().
+ - [PYSIDE-1906] qHash() functions are now automatically exposed as tp_hash.
+ - [PYSIDE-1909] Type discovery for QStyleOption-derived classes
+                 has been fixed.
+ - [PYSIDE-1911] A __repr__ function for PySideSignalInstance has been added.
+ - [PYSIDE-1912] QWebEngineCookieStore.setCookieFilter() and
+                 QtWebEngineProfile.setNotificationPresenter() have been added.
+ - [PYSIDE-1919] A GIL state crash when collecting QObjects
+                 with signals occurring in Python 3.10 has been fixed.
+ - [PYSIDE-1921] QQmlContext.setContextProperties() has been added.
+ - [PYSIDE-1930] Returning enums from QAbstractListModel.data() has been fixed.
+ - [PYSIDE-1934] Type hinting for QListWidget.selected_indexes() has been
+                 fixed.
+ - [PYSIDE-1939] A crash in QTextBlock.layout() has been fixed.
+ - [PYSIDE-1947] QAudioBuffer.data()/constData() has been added.
+ - [PYSIDE-1957] Add Qt5Compat.GraphicalEffects
+ - [PYSIDE-1960] Support for Python 3.11 has been added.
+ - [PYSIDE-1968] Type hinting for QPixmap.save() has been fixed.
+ - [PYSIDE-1974] Returning flags from QAbstractTableModel and other
+                 models has been fixed.
+ - [PYSIDE-1978] Signal
+                 QAbstractItemModel::layoutAboutToBeChanged(QList<QPersistentModelIndex>)
+                 has been fixed.
+ - [PYSIDE-1984] The snippets of the model view tutorials have been fixed.
+ - [PYSIDE-1986] Setting properties by named arguments for Q[VH]BoxLayout
+                 has been fixed.
+ - [PYSIDE-2000] The VS Code debugging tutorial for Windows has been updated.
+ - [PYSIDE-2004] The tools qmlformat and qmlls have been added.
+ - [PYSIDE-2005] A documentation section for cmake-only build has been added.
+ - [PYSIDE-2017] The functions glGet(Boolean|Double|Float|Integer)v()
+                 and glGet(Boolean|Double|Float|Integer)i_v() have been added.
+ - [PYSIDE-2019] Issues with QtDataVisualization's QValue3DAxisFormatter
+                 have been fixed.
+ - [PYSIDE-2021] The index operator of QKeySequence now returns QKeyCombination
+                 when the new PyEnums are used.
+ - [PYSIDE-2025] Setters for the the lists in
+                 QtDataVisualization's QValue3DAxisFormatter
+                 have been fixed added.
+ - [PYSIDE-2033] A logging category "qt.pyside.libpyside" with useful warnings
+                 has been added to libpyside.
+ - [PYSIDE-2034] Blocking threads in static functions of QMessageBox
+                 have been fixed.
+ - [PYSIDE-2038] Documentation: Improve module pages title
+ - [PYSIDE-2039] A regression bug when setting override cursors without context
+                 manager has been fixed.
+ - [PYSIDE-2048] A TypeError when comparing Qt.Flags and objects has been
+                 fixed.
+ - [PYSIDE-2059] Function qt_set_sequence_auto_mnemonic() has been added to
+                 QtGui.
+ - [PYSIDE-2060] Cross-compilation to Raspberry Pi 4 has been fixed.
+
+****************************************************************************
+*                                  Shiboken6                               *
+****************************************************************************
+
+ -               When using C++ 20, the spaceship comparison operator is
+                 now recognized.
+ -               The signatures for function modifications now also allow for
+                 specifying unresolved types.
+ - [PYSIDE-454]  Support for std::unique_ptr pointer has been added.
+ - [PYSIDE-1735] Python Enums use the newest implementation for Python (3.10)
+                 for compatibility and speed.
+ - [PYSIDE-1735] The initialization of the signature module was moved into
+                 Shiboken and rearranged. This was necessary for the new
+                 backward-compatible PyEnum module.
+ - [PYSIDE-1735] The new Python enums are made as compatible to the old ones
+                 as possible. It is again allowed to use Qt.Alignment() instead
+                 of Qt.AlignmentFlag(0), and a default of 0 is always allowed.
+ - [PYSIDE-1735] Most former IntEnum/IntFlag are replaced by pure Enum/Flag
+                 classes in a generally compatible way to other implementations.
+ - [PYSIDE-1735] Shiboken now generates warnings about using deprecated
+                 enumerations and deprecated enumeration values.
+ - [PYSIDE-1764] It is now possible to specify a list of functions to be
+                 generated instead of removing undesired functions.
+ - [PYSIDE-1932] The Q_ENUM helper functions qt_getEnumMetaObject() and
+                 qt_getEnumName() are now automatically rejected when
+                 PySide extensions are enabled.
+ - [PYSIDE-1939] An type system attribute for restricting the parent
+                 ownership heuristics to relevant classes has been introduced.
+ - [PYSIDE-454]  The types "handle" and "value-handle" have been added
+                 to the smart pointers typesystem element.
+ - [PYSIDE-661]  Generated error messages habe been moved into the library,
+                 significantly reducing the module size.
+ - [PYSIDE-1735] Propagate C++ enum deprecation
+ - [PYSIDE-1735] shiboken 6: Generate warnings about deprecated enum/values
+ - [PYSIDE-1812] Command line options for compiler, path and platform
+                 have been added.
+ - [PYSIDE-1887] Meta type registration is now configureable in the type
+                 system.
+ - [PYSIDE-1905] A way to specify free functions with complete custom
+                 implementations has been added (bypassing the generated
+                 argument conversion and overload decisor code).
+ - [PYSIDE-1909] A function to get the type name of a polymorphic class
+                 can now be specified.
+ - [PYSIDE-1909] Type discovery for classes that with an id expression
+                 has been fixed.
+ - [PYSIDE-1933] Converters for all smart pointee base classes are now
+                 generated.
+ - [PYSIDE-1939] Heuristics for for parent ownership can now be specified
+                 by an attribute.
+ - [PYSIDE-1995] Exceptions are now propagated through return value ownership
+                 modifications.
+ - [PYSIDE-2017] The modified pyi return types of functions are now used
+                 for signatures. Signatures also no longer contain
+                 removed arguments.
+ - [PYSIDE-2025] Documentation injection for added functions with
+                 parameter names has been fixed.
+ - [PYSIDE-2040] The full path of libdir is now used in the pkg-config file.
+ - [PYSIDE-2046] A crash caused by invalid return types of added
+                 functions has been fixed.
