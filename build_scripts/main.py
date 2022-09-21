@@ -939,7 +939,7 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
                 _vars['dbg_postfix'] = OPTION["DEBUG"] and "_d" or ""
                 return prepare_packages_win32(self, _vars)
             else:
-                return prepare_packages_posix(self, _vars)
+                return prepare_packages_posix(self, _vars, self.is_cross_compile)
         except IOError as e:
             print('setup.py/prepare_packages: ', e)
             raise
