@@ -284,8 +284,8 @@ static QString compilerFromCMake(const QString &defaultCompiler)
 {
 // Added !defined(Q_OS_DARWIN) due to PYSIDE-1032
     QString result = defaultCompiler;
-    if (platform() != Platform::macOS)
 #ifdef CMAKE_CXX_COMPILER
+    if (platform() != Platform::macOS)
         result = QString::fromLocal8Bit(CMAKE_CXX_COMPILER);
 #endif
     return result;
