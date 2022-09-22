@@ -46,9 +46,12 @@ public:
         ListOfPointF
     };
 
-    ListUser() {}
-    ListUser(const ListUser& other) : m_lst(other.m_lst) {}
-    virtual ~ListUser() {}
+    ListUser();
+    ListUser(const ListUser &other);
+    ListUser(ListUser &&other);
+    ListUser &operator=(const ListUser &other);
+    ListUser &operator=(ListUser &&other);
+    virtual ~ListUser();
 
     virtual std::list<int> createList();
     std::list<int> callCreateList();

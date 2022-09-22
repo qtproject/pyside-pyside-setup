@@ -33,7 +33,6 @@ class ValueAndVirtual
 {
 public:
     ValueAndVirtual(int id) : m_id(id) {}
-    ValueAndVirtual(const ValueAndVirtual &other) { m_id = other.m_id; }
 
     bool operator()(int id, int id2) { return id == id2; }
 

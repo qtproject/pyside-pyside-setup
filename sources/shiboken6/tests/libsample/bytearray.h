@@ -40,7 +40,6 @@ public:
     ByteArray(char data);
     ByteArray(const char* data);
     ByteArray(const char* data, int len);
-    ByteArray(const ByteArray& other);
 
     int size() const;
     char at(int i) const;
