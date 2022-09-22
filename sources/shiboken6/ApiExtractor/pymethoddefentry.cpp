@@ -19,7 +19,9 @@ TextStream &operator<<(TextStream &s, const PyMethodDefEntry &e)
             s << e.methFlags.at(i);
         }
     }
-    if (!e.doc.isEmpty())
+    if (e.doc.isEmpty())
+        s << ", nullptr";
+    else
         s << ", R\"(" << e.doc << ")\"";
     s << '}';
     return s;

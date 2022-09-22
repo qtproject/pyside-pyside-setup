@@ -53,6 +53,7 @@
 using namespace Qt::StringLiterals;
 
 static const QString CPP_ARG0 = u"cppArg0"_s;
+static const char methodDefSentinel[] = "{nullptr, nullptr, 0, nullptr} // Sentinel\n";
 const char *CppGenerator::PYTHON_TO_CPPCONVERSION_STRUCT = "Shiboken::Conversions::PythonToCppConversion";
 
 static inline QString reprFunction() { return QStringLiteral("__repr__"); }
@@ -477,7 +478,7 @@ static void writePyGetSetDefEntry(TextStream &s, const QString &name,
                                   const QString &getFunc, const QString &setFunc)
 {
     s << "{const_cast<char *>(\"" << name << "\"), " << getFunc << ", "
-        << (setFunc.isEmpty() ? NULL_PTR : setFunc) << "},\n";
+        << (setFunc.isEmpty() ? NULL_PTR : setFunc) << ", nullptr, nullptr},\n";
 }
 
 static bool generateRichComparison(const GeneratorContext &c)
@@ -582,9 +583,9 @@ static void writePyMethodDefs(TextStream &s, const QString &className,
         << methodsDefinitions << '\n';
     if (generateCopy) {
         s << "{\"__copy__\", reinterpret_cast<PyCFunction>(" << className << "___copy__)"
-          << ", METH_NOARGS},\n";
+          << ", METH_NOARGS, nullptr},\n";
     }
-    s  << '{' << NULL_PTR << ", " << NULL_PTR << "} // Sentinel\n" << outdent
+    s  << methodDefSentinel << outdent
         << "};\n\n";
 }
 
@@ -901,7 +902,7 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
                                       cpythonGetterFunctionName(property, metaClass), setter);
             }
         }
-        s << '{' << NULL_PTR << "} // Sentinel\n"
+        s << "{nullptr, nullptr, nullptr, nullptr, nullptr} // Sentinel\n"
             << outdent << "};\n\n";
     }
 
@@ -5438,7 +5439,7 @@ QList<PyMethodDefEntry>
     QList<PyMethodDefEntry> result;
     result.reserve(names.size());
     for (const auto &name : names)
-        result.append({name, funcName, parameters});
+        result.append({name, funcName, parameters, {}});
     return result;
 }
 
@@ -6619,7 +6620,7 @@ bool CppGenerator::finishGeneration()
         << s_globalFunctionImpl.toString() << '\n'
         << "static PyMethodDef " << moduleName() << "_methods[] = {\n" << indent
         << s_globalFunctionDef.toString()
-        << "{0} // Sentinel\n" << outdent << "};\n\n"
+        << methodDefSentinel << outdent << "};\n\n"
         << "// Classes initialization functions "
         << "------------------------------------------------------------\n"
         << s_classInitDecl.toString() << '\n';

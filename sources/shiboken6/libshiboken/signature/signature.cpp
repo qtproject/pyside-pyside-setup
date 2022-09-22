@@ -286,10 +286,10 @@ static PyObject *feature_import(PyObject * /* self */, PyObject *args, PyObject 
 }
 
 PyMethodDef signature_methods[] = {
-    {"__feature_import__", (PyCFunction)feature_import, METH_VARARGS | METH_KEYWORDS},
+    {"__feature_import__", (PyCFunction)feature_import, METH_VARARGS | METH_KEYWORDS, nullptr},
     {"get_signature", (PyCFunction)get_signature, METH_VARARGS,
         "get the __signature__, but pass an optional string parameter"},
-    {nullptr, nullptr}
+    {nullptr, nullptr, 0, nullptr}
 };
 
 ////////////////////////////////////////////////////////////////////////////

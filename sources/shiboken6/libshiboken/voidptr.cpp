@@ -167,8 +167,8 @@ PyObject *toBytes(PyObject *self, PyObject *args)
 }
 
 static struct PyMethodDef SbkVoidPtrObject_methods[] = {
-    {"toBytes", toBytes, METH_NOARGS},
-    {nullptr}
+    {"toBytes", toBytes, METH_NOARGS, nullptr},
+    {nullptr, nullptr, 0, nullptr}
 };
 
 static Py_ssize_t SbkVoidPtrObject_length(PyObject *v)

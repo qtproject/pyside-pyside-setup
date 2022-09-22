@@ -37,16 +37,16 @@ dummy_func(PyObject * /* self */, PyObject * /* args */)
 }
 
 static struct PyMethodDef probe_methoddef[] = {
-    {"dummy", dummy_func, METH_NOARGS},
-    {nullptr}
+    {"dummy", dummy_func, METH_NOARGS, nullptr},
+    {nullptr, nullptr, 0, nullptr}
 };
 
 static PyGetSetDef probe_getseters[] = {
-    {nullptr}  /* Sentinel */
+    {nullptr, nullptr, nullptr, nullptr, nullptr}  /* Sentinel */
 };
 
 static PyMemberDef probe_members[] = {
-    {nullptr}  /* Sentinel */
+    {nullptr, 0, 0, 0, nullptr}  /* Sentinel */
 };
 
 #define probe_tp_dealloc    make_dummy(1)
