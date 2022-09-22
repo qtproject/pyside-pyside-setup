@@ -21,8 +21,12 @@ public:
 
     inline StrList() : m_ctorUsed(NoParamsCtor) {}
     inline explicit StrList(const Str& str) : m_ctorUsed(StrCtor) { push_back(str); }
-    inline StrList(const StrList& lst) : std::list<Str>(lst), m_ctorUsed(CopyCtor) {}
     inline StrList(const std::list<Str>& lst) : std::list<Str>(lst), m_ctorUsed(ListOfStrCtor) {}
+
+    inline StrList(const StrList &lst) : std::list<Str>(lst), m_ctorUsed(CopyCtor) {}
+    StrList(StrList &&) = default;
+    StrList &operator=(const StrList &) = default;
+    StrList &operator=(StrList &&) = default;
 
     inline void append(Str str) { push_back(str); }
     Str join(const Str& sep) const;

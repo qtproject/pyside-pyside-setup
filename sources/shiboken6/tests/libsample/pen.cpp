@@ -61,6 +61,10 @@ Pen::Pen(const Pen& pen) : m_ctor(CopyCtor)
 {
 }
 
+Pen::Pen(Pen &&) = default;
+Pen &Pen::operator=(const Pen& pen) = default;
+Pen &Pen::operator=(Pen &&) = default;
+
 int Pen::ctorType()
 {
     return m_ctor;

@@ -13,6 +13,13 @@ ListUser::callCreateList()
     return createList();
 }
 
+ListUser::ListUser() = default;
+ListUser::ListUser(const ListUser &other) = default;
+ListUser::ListUser(ListUser &&other) = default;
+ListUser &ListUser::operator=(const ListUser &other) = default;
+ListUser &ListUser::operator=(ListUser &&other) = default;
+ListUser::~ListUser() = default;
+
 std::list<int>
 ListUser::createList()
 {

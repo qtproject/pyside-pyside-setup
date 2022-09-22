@@ -9,21 +9,22 @@
 class ModelIndex
 {
 public:
-    ModelIndex() : m_value(0) {}
-    ModelIndex(const ModelIndex& other) { m_value = other.m_value; }
+    ModelIndex() = default;
+
     inline void setValue(int value) { m_value = value; }
     inline int value() const { return m_value; }
     static int getValue(const ModelIndex& index) { return index.value(); }
 private:
-    int m_value;
+    int m_value = 0;
 };
 
 class ReferentModelIndex
 {
 public:
-    ReferentModelIndex() {}
-    ReferentModelIndex(const ModelIndex& index) : m_index(index) {}
-    ReferentModelIndex(const ReferentModelIndex& other) { m_index = other.m_index; }
+    ReferentModelIndex() = default;
+
+    explicit ReferentModelIndex(const ModelIndex& index) : m_index(index) {}
+
     inline void setValue(int value) { m_index.setValue(value); }
     inline int value() const { return m_index.value(); }
     operator const ModelIndex&() const { return m_index; }
@@ -34,9 +35,10 @@ private:
 class PersistentModelIndex
 {
 public:
-    PersistentModelIndex() {}
-    PersistentModelIndex(const ModelIndex& index) : m_index(index) {}
-    PersistentModelIndex(const PersistentModelIndex& other) { m_index = other.m_index; }
+    PersistentModelIndex() = default;
+
+    explicit PersistentModelIndex(const ModelIndex& index) : m_index(index) {}
+
     inline void setValue(int value) { m_index.setValue(value); }
     inline int value() const { return m_index.value(); }
     operator ModelIndex() const { return m_index; }

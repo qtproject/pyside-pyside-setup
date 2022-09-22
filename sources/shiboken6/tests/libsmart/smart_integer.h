@@ -56,7 +56,8 @@ namespace Smart {
 class LIB_SMART_API Integer2 : public Integer {
 public:
     Integer2();
-    Integer2(const Integer2 &other);
+    Integer2(const Integer2 &);
+    Integer2 &operator=(const Integer2 &);
 };
 } // namespace Smart
 

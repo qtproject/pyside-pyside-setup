@@ -32,13 +32,6 @@ ByteArray::ByteArray(const char* data, int len)
     m_data[len] = '\0';
 }
 
-ByteArray::ByteArray(const ByteArray& other)
-{
-    m_data = std::vector<char>(other.size() + 1);
-    memcpy(&m_data[0], &other.m_data[0], other.size());
-    m_data[other.size()] = '\0';
-}
-
 int
 ByteArray::size() const
 {

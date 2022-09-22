@@ -18,11 +18,6 @@ Union::Union(const Intersection& filter)
     m_filters.push_back(filter);
 }
 
-Union::Union(const Union& filter)
-{
-    m_filters = filter.filters();
-}
-
 Intersection::Intersection(const Data& filter)
 {
     m_filters.push_back(filter);
@@ -31,11 +26,6 @@ Intersection::Intersection(const Data& filter)
 Intersection::Intersection(const Union& filter)
 {
     m_filters.push_back(filter);
-}
-
-Intersection::Intersection(const Intersection& filter)
-{
-    m_filters = filter.filters();
 }
 
 Intersection operator&(const Intersection& a, const Intersection& b)

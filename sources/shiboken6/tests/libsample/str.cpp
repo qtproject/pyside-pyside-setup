@@ -9,11 +9,6 @@
 
 using namespace std;
 
-Str::Str(const Str& s)
-{
-    init(s.cstring());
-}
-
 Str::Str(char c)
 {
     char str[2] = { c, 0 };
@@ -30,10 +25,6 @@ Str::init(const char* cstr)
 {
     if (cstr)
         m_str = cstr;
-}
-
-Str::~Str()
-{
 }
 
 Str
