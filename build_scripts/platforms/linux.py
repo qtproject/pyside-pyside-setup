@@ -40,6 +40,7 @@
 import os
 
 from ..config import config
+from ..options import OPTION
 from ..utils import (copy_icu_libs, copydir, copyfile, find_files_using_glob,
                      linux_patch_executable)
 from ..versions import PYSIDE
@@ -95,7 +96,7 @@ def prepare_standalone_package_linux(self, _vars):
     self.update_rpath_for_linux_qt_libraries(destination_lib_dir.format(**_vars))
 
     # Patching designer to use the Qt libraries provided in the wheel
-    if config.is_internal_pyside_build():
+    if config.is_internal_pyside_build() and not OPTION['NO_QT_TOOLS']:
         assistant_path = "{st_build_dir}/{st_package_name}/assistant".format(**_vars)
         linux_patch_executable(self._patchelf_path, assistant_path)
         designer_path = "{st_build_dir}/{st_package_name}/designer".format(**_vars)

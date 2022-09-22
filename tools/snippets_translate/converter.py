@@ -46,6 +46,7 @@ from handlers import (handle_array_declarations, handle_casts, handle_class,
                       handle_inc_dec, handle_include, handle_keywords,
                       handle_methods_return_type, handle_negate,
                       handle_type_var_declaration, handle_useless_qt_classes,
+                      handle_new,
                       handle_void_functions, handle_qt_connects)
 from parse_utils import dstrip, get_indent, remove_ref
 
@@ -61,8 +62,6 @@ ELSE_REPLACEMENT_PATTERN = re.compile(r"}? *else *{?")
 CLASS_PATTERN = re.compile(r"^ *class ")
 STRUCT_PATTERN = re.compile(r"^ *struct ")
 DELETE_PATTERN = re.compile(r"^ *delete ")
-PUBLIC_PATTERN = re.compile(r"^public:$")
-PRIVATE_PATTERN = re.compile(r"^private:$")
 VAR1_PATTERN = re.compile(r"^[a-zA-Z0-9]+(<.*?>)? [\w\*\&]+(\(.*?\))? ?(?!.*=|:).*$")
 VAR2_PATTERN = re.compile(r"^[a-zA-Z0-9]+(<.*?>)? [\w]+::[\w\*\&]+\(.*\)$")
 VAR3_PATTERN = re.compile(r"^[a-zA-Z0-9]+(<.*?>)? [\w\*]+ *= *[\w\.\"\']*(\(.*?\))?")
@@ -73,6 +72,10 @@ RETURN_TYPE_PATTERN = re.compile(r"^[a-zA-Z0-9]+(<.*?>)? [\w]+::[\w\*\&]+\(.*\)$
 FUNCTION_PATTERN = re.compile(r"^[a-zA-Z0-9]+(<.*?>)? [\w\*\&]+\(.*\)$")
 ITERATOR_PATTERN = re.compile(r"(std::)?[\w]+<[\w]+>::(const_)?iterator")
 SCOPE_PATTERN = re.compile(r"[\w]+::")
+
+
+QUALIFIERS = {"public:", "protected:", "private:", "public slots:",
+              "protected slots:", "private slots:", "signals:"}
 
 
 def snippet_translate(x):
@@ -127,9 +130,7 @@ def snippet_translate(x):
     # This contains an extra whitespace because of some variables
     # that include the string 'new'
     if "new " in x:
-        x = x.replace("new ", "")
-        if not x.endswith(")"):  # "new Foo" -> "new Foo()"
-            x += "()"
+        x = handle_new(x)
 
     # Handle 'const'
     # Some variables/functions have the word 'const' so we explicitly
@@ -251,13 +252,9 @@ def snippet_translate(x):
     if DELETE_PATTERN.search(x):
         return x.replace("delete", "del")
 
-    # 'public:'
-    if PUBLIC_PATTERN.search(xs):
-        return x.replace("public:", "# public")
-
-    # 'private:'
-    if PRIVATE_PATTERN.search(xs):
-        return x.replace("private:", "# private")
+    # 'public:', etc
+    if xs in QUALIFIERS:
+        return f"# {x}".replace(":", "")
 
     # For expressions like: `Type var`
     # which does not contain a `= something` on the right side
