@@ -45,8 +45,8 @@ public:
     // The MethodCalled enum and related static methods were created to
     // test bug #630 [http://bugs.openbossa.org/show_bug.cgi?id=630]
     enum MethodCalled { ObjectTypeCalled, ObjectModelCalled };
-    static MethodCalled receivesObjectTypeFamily(const ObjectType& object) { return ObjectModel::ObjectTypeCalled; }
-    static MethodCalled receivesObjectTypeFamily(const ObjectModel& object) { return ObjectModel::ObjectModelCalled; }
+    static MethodCalled receivesObjectTypeFamily(const ObjectType &object);
+    static MethodCalled receivesObjectTypeFamily(const ObjectModel &object);
 
 private:
     // The model holds only one piece of data.

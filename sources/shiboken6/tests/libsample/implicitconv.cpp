@@ -28,6 +28,11 @@
 
 #include "implicitconv.h"
 
+ImplicitConv::ImplicitConv(const Null &) :
+    m_ctorEnum(CtorPrimitiveType)
+{
+}
+
 ImplicitConv
 ImplicitConv::implicitConvCommon(ImplicitConv implicit)
 {
@@ -41,26 +46,27 @@ ImplicitConv::implicitConvDefault(ImplicitConv implicit)
 }
 
 ImplicitConv::ICOverloadedFuncEnum
-ImplicitConv::implicitConvOverloading(ImplicitConv implicit, int dummyArg)
+ImplicitConv::implicitConvOverloading(ImplicitConv, int)
 {
     return ImplicitConv::OverFunc_Ii;
 }
 
 ImplicitConv::ICOverloadedFuncEnum
-ImplicitConv::implicitConvOverloading(ImplicitConv implicit, bool dummyArg)
+ImplicitConv::implicitConvOverloading(ImplicitConv, bool)
 {
     return ImplicitConv::OverFunc_Ib;
 }
 
 ImplicitConv::ICOverloadedFuncEnum
-ImplicitConv::implicitConvOverloading(int dummyArg)
+ImplicitConv::implicitConvOverloading(int)
 {
     return ImplicitConv::OverFunc_i;
 }
 
 ImplicitConv::ICOverloadedFuncEnum
-ImplicitConv::implicitConvOverloading(CtorEnum dummyArg)
+ImplicitConv::implicitConvOverloading(CtorEnum)
 {
     return ImplicitConv::OverFunc_C;
 }
+
 

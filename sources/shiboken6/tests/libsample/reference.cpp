@@ -37,6 +37,11 @@ Reference::show() const
     cout << "Reference.objId: " << m_objId << ", address: " << this;
 }
 
+Reference &Reference::returnMySecondArg(int, Reference &ref)
+{
+    return ref;
+}
+
 int
 Reference::usesReferenceVirtual(Reference& r, int inc)
 {
@@ -75,4 +80,9 @@ Reference::callAlterReferenceIdVirtual(Reference& r)
 
 ObjTypeReference::~ObjTypeReference()
 {
+}
+
+ObjTypeReference &ObjTypeReference::returnMySecondArg(int, ObjTypeReference &ref)
+{
+    return ref;
 }

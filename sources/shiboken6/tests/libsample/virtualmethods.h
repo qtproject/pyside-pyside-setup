@@ -106,7 +106,7 @@ public:
         getMargins(left, top, right, bottom);
     }
 
-    virtual int recursionOnModifiedVirtual(Str arg) const { return 0; }
+    virtual int recursionOnModifiedVirtual(Str arg) const;
     int callRecursionOnModifiedVirtual(Str arg) const { return recursionOnModifiedVirtual(arg); }
 
     virtual const Str & returnConstRef() const;

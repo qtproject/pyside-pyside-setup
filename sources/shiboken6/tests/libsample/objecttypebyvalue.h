@@ -35,12 +35,20 @@ class ObjectTypeByValue
 {
 public:
     ObjectTypeByValue returnSomeKindOfMe() { return ObjectTypeByValue(); }
-    void acceptKindOfMeAsValue(ObjectTypeByValue kindOfMe) {}
+    void acceptKindOfMeAsValue(ObjectTypeByValue kindOfMe);
 
-    void acceptListOfObjectTypeByValue(std::list<ObjectTypeByValue> listOfMe) {}
+    void acceptListOfObjectTypeByValue(std::list<ObjectTypeByValue> listOfMe);
 
     // prop used to check for segfaults
     ProtectedProperty prop;
 };
 
-#endif
+inline void ObjectTypeByValue::acceptKindOfMeAsValue(ObjectTypeByValue)
+{
+}
+
+inline void ObjectTypeByValue::acceptListOfObjectTypeByValue(std::list<ObjectTypeByValue>)
+{
+}
+
+#endif // OBJECTTYPEBYVALUE_H

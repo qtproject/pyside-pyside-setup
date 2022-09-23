@@ -58,7 +58,7 @@ public:
     inline static int multiplier() { return 10; }
 
     virtual Reference& returnMyFirstArg(Reference& ref) { return ref; }
-    virtual Reference& returnMySecondArg(int a, Reference& ref) { return ref; }
+    virtual Reference& returnMySecondArg(int a, Reference &ref);
 
     // nonsense operator to test if Shiboken is ignoring dereference operators.
     int operator*() { return m_objId; }
@@ -73,7 +73,7 @@ public:
     ObjTypeReference(const ObjTypeReference&) {}
     virtual ~ObjTypeReference();
     virtual ObjTypeReference& returnMyFirstArg(ObjTypeReference& ref) { return ref; }
-    virtual ObjTypeReference& returnMySecondArg(int a, ObjTypeReference& ref) { return ref; }
+    virtual ObjTypeReference &returnMySecondArg(int a, ObjTypeReference &ref);
     virtual ObjTypeReference& justAPureVirtualFunc(ObjTypeReference& ref) = 0;
 };
 

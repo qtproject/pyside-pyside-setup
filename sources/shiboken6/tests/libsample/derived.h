@@ -49,7 +49,7 @@ public:
     public:
         void uselessMethod() {}
         SomeInnerClass operator+(const SomeInnerClass& other) { return other; }
-        bool operator==(const SomeInnerClass& other) { return true; }
+        bool operator==(const SomeInnerClass &) { return true; }
     };
 
     Derived(int id = -1);

@@ -66,6 +66,14 @@ MapUser::showMap(std::map<std::string, int> mapping)
         cout << (*it).first << " => " << (*it).second << endl;
 }
 
+void MapUser::pointerToMap(std::map<std::string, std::string> *)
+{
+}
+
+void MapUser::referenceToMap(std::map<std::string, std::string> &)
+{
+}
+
 std::map<int, std::list<std::list<double> > > MapUser::foo() const
 {
     std::map<int, std::list<std::list<double> > > result;

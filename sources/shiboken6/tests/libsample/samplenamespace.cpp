@@ -86,8 +86,7 @@ getNumber(Option opt)
     return retval;
 }
 
-void
-doSomethingWithArray(const unsigned char* data, unsigned int size, const char* format)
+void doSomethingWithArray(const unsigned char *, unsigned int, const char *)
 {
     // This function does nothing in fact.
     // It is here as a dummy copy of QPixmap.loadFromData method
@@ -100,23 +99,19 @@ enumItemAsDefaultValueToIntArgument(int value)
     return value;
 }
 
-void
-forceDecisorSideA(ObjectType* object)
+void forceDecisorSideA(ObjectType *)
 {
 }
 
-void
-forceDecisorSideA(const Point& pt, const Str& text, ObjectType* object)
+void forceDecisorSideA(const Point &, const Str &, ObjectType *)
 {
 }
 
-void
-forceDecisorSideB(int a, ObjectType* object)
+void forceDecisorSideB(int, ObjectType *)
 {
 }
 
-void
-forceDecisorSideB(int a, const Point& pt, const Str& text, ObjectType* object)
+void forceDecisorSideB(int, const Point &, const Str &, ObjectType *)
 {
 }
 
