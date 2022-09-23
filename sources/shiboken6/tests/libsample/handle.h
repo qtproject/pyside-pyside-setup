@@ -23,7 +23,7 @@ public:
     explicit HandleHolder(HANDLE ptr = nullptr) : m_handle(ptr) {}
     explicit HandleHolder(Foo::HANDLE val): m_handle2(val) {}
 
-    inline void set(HANDLE ptr) { HANDLE tmp; tmp = m_handle;  m_handle = tmp; }
+    void set(HANDLE ptr);
     inline void set(const Foo::HANDLE& val) { m_handle2 = val; }
     inline HANDLE handle() { return m_handle; }
     inline Foo::HANDLE handle2() { return m_handle2; }
@@ -36,6 +36,12 @@ private:
     HANDLE m_handle;
     Foo::HANDLE m_handle2;
 };
+
+inline void HandleHolder::set(HANDLE)
+{
+    HANDLE tmp = m_handle;
+    m_handle = tmp;
+}
 
 struct LIBSAMPLE_API PrimitiveStruct {};
 using PrimitiveStructPtr = struct PrimitiveStruct *;

@@ -3,11 +3,11 @@
 
 #include "pen.h"
 
-Color::Color(SampleNamespace::InValue arg) : m_null(false)
+Color::Color(SampleNamespace::InValue) : m_null(false)
 {
 }
 
-Color::Color(unsigned int arg) : m_null(false)
+Color::Color(unsigned int) : m_null(false)
 {
 }
 
@@ -49,15 +49,15 @@ Pen::Pen() : m_ctor(EmptyCtor)
 {
 }
 
-Pen::Pen(SampleNamespace::Option option) : m_ctor(EnumCtor)
+Pen::Pen(SampleNamespace::Option) : m_ctor(EnumCtor)
 {
 }
 
-Pen::Pen(const Color& color) : m_ctor(ColorCtor)
+Pen::Pen(const Color &) : m_ctor(ColorCtor)
 {
 }
 
-Pen::Pen(const Pen& pen) : m_ctor(CopyCtor)
+Pen::Pen(const Pen &) : m_ctor(CopyCtor)
 {
 }
 
@@ -70,7 +70,7 @@ int Pen::ctorType()
     return m_ctor;
 }
 
-void Pen::drawLine(int x1, int y1, int x2, int y2, RenderHints renderHints)
+void Pen::drawLine(int, int, int, int, RenderHints)
 {
 }
 

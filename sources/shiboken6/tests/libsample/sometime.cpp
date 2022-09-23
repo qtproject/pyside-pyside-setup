@@ -31,8 +31,7 @@ Time::somethingCompletelyDifferent()
     return ZeroArgs;
 }
 
-Time::NumArgs
-Time::somethingCompletelyDifferent(int h, int m, ImplicitConv ic, ObjectType* type)
+Time::NumArgs Time::somethingCompletelyDifferent(int, int, ImplicitConv ic, ObjectType *type)
 {
     if (type)
         return FourArgs;

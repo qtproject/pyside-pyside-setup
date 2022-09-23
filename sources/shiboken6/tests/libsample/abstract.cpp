@@ -66,7 +66,7 @@ void Abstract::callVirtualGettingEnum(PrintFormat p)
     virtualGettingAEnum(p);
 }
 
-void Abstract::virtualGettingAEnum(Abstract::PrintFormat p)
+void Abstract::virtualGettingAEnum(Abstract::PrintFormat)
 {
 }
 

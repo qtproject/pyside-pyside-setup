@@ -15,16 +15,44 @@ public:
     Echo(){}
     ~Echo(){}
 
-    void doNothingWithConstBool(const bool hi) {}
-    void methodWithNamedArg(const Str& string = Str("")) {}
+    void doNothingWithConstBool(const bool hi);
+    void methodWithNamedArg(const Str& string = Str(""));
 
     Str operator()(const Str& s, const int i) { return s + i; }
 
     // These method are here just for compilation test purposes
-    Echo& operator<<(unsigned int item) { return *this; }
-    Echo& operator<<(signed int item) { return *this; }
-    Echo& operator<<(const ObjectType* item) { return *this; }
-    Echo& operator<<(Str str) { return *this; }
+    Echo& operator<<(unsigned int item);
+    Echo& operator<<(signed int item);
+    Echo& operator<<(const ObjectType *item);
+    Echo& operator<<(Str str);
 };
 
-#endif
+inline void Echo::doNothingWithConstBool(const bool)
+{
+}
+
+inline void Echo::methodWithNamedArg(const Str &)
+{
+}
+
+inline Echo &Echo::operator<<(unsigned int)
+{
+    return *this;
+}
+
+inline Echo &Echo::operator<<(signed int)
+{
+    return *this;
+}
+
+inline Echo &Echo::operator<<(const ObjectType *)
+{
+    return *this;
+}
+
+inline Echo &Echo::operator<<(Str)
+{
+    return *this;
+}
+
+#endif // ECHO_H

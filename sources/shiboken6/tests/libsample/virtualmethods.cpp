@@ -32,6 +32,11 @@ VirtualMethods::getMargins(int* left, int* top, int* right, int* bottom) const
     *bottom = m_bottom;
 }
 
+int VirtualMethods::recursionOnModifiedVirtual(Str) const
+{
+    return 0;
+}
+
 const Str & VirtualMethods::returnConstRef() const
 {
     static const Str result;

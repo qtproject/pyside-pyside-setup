@@ -5,3 +5,12 @@
 
 int ProtectedVirtualDestructor::dtor_called = 0;
 
+const char *ProtectedNonPolymorphic::dataTypeName(void *) const
+{
+    return "pointer";
+}
+
+const char *ProtectedNonPolymorphic::dataTypeName(int) const
+{
+    return "integer";
+}

@@ -18,41 +18,26 @@ class ImplicitBase
 {
 public:
     ImplicitBase(){}
-    ImplicitBase(const ImplicitTarget &b){}
+    ImplicitBase(const ImplicitTarget &b);
 };
 
-class SortedOverload
+inline ImplicitBase::ImplicitBase(const ImplicitTarget &)
+{
+}
+
+class LIBSAMPLE_API SortedOverload
 {
 public:
 
-    inline const char *overload(int x) {
-        return "int";
-    }
+    const char *overload(int x);
+    const char *overload(double x);
+    const char *overload(ImplicitBase x);
+    const char *overload(ImplicitTarget x);
+    const char *overload(const std::list<ImplicitBase> &x);
 
-    inline const char *overload(double x) {
-        return "double";
-    }
+    int implicit_overload(const ImplicitBase &x);
 
-    inline const char *overload(ImplicitBase x) {
-        return "ImplicitBase";
-    }
-
-    inline const char *overload(ImplicitTarget x) {
-        return "ImplicitTarget";
-    }
-
-    inline const char *overload(const std::list<ImplicitBase> &x) {
-        return "list(ImplicitBase)";
-    }
-
-    inline int implicit_overload(const ImplicitBase &x) {
-        return 1;
-    }
-
-    inline const char *overloadDeep(int x, ImplicitBase &y) {
-        return "ImplicitBase";
-    }
-
+    const char *overloadDeep(int x, ImplicitBase &y);
 
     inline const char* pyObjOverload(int, int) { return "int,int"; }
     inline const char* pyObjOverload(unsigned char*, int) { return "PyObject,int"; }

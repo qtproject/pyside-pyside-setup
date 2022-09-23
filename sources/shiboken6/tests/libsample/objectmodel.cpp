@@ -15,3 +15,12 @@ ObjectModel::data() const
     return m_data;
 }
 
+ObjectModel::MethodCalled ObjectModel::receivesObjectTypeFamily(const ObjectModel &)
+{
+    return ObjectModel::ObjectModelCalled;
+}
+
+ObjectModel::MethodCalled ObjectModel::receivesObjectTypeFamily(const ObjectType &)
+{
+    return ObjectModel::ObjectTypeCalled;
+}

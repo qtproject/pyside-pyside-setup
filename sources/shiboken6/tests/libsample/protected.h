@@ -25,8 +25,8 @@ protected:
     inline int protectedSum(int a0, int a1) { return a0 + a1; }
     inline int modifiedProtectedSum(int a0, int a1) { return a0 + a1; }
     inline static const char* protectedStatic() { return "protectedStatic"; }
-    inline const char* dataTypeName(void *data = nullptr) const { return "pointer"; }
-    inline const char* dataTypeName(int data) const { return "integer"; }
+    const char *dataTypeName(void *data = nullptr) const;
+    const char *dataTypeName(int data) const;
 
 private:
     std::string m_name;

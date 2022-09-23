@@ -18,6 +18,67 @@ Modifications::~Modifications()
     delete m_object;
 }
 
+Modifications::OverloadedModFunc Modifications::overloaded(int, bool, Point, Point)
+{
+    return Overloaded_ibPP;
+}
+
+Modifications::OverloadedModFunc Modifications::overloaded(int, bool, int, int)
+{
+    return Overloaded_ibii;
+}
+
+Modifications::OverloadedModFunc Modifications::overloaded(int, bool, int, Point)
+{
+    return Overloaded_ibiP;
+}
+
+Modifications::OverloadedModFunc Modifications::overloaded(int, bool, int, bool)
+{
+    return Overloaded_ibib;
+}
+
+Modifications::OverloadedModFunc Modifications::overloaded(int, bool, int, double)
+{
+    return Overloaded_ibid;
+}
+
+void Modifications::argRemoval0(int, bool, int, int)
+{
+}
+
+void Modifications::argRemoval0(int, bool, int, bool)
+{
+}
+
+void Modifications::argRemoval1(int, bool, Point, Point, int)
+{
+}
+
+void Modifications::argRemoval1(int, bool, int, bool)
+{
+}
+
+void Modifications::argRemoval2(int, bool, Point, Point, int)
+{
+}
+
+void Modifications::argRemoval3(int, Point, bool, Point, int)
+{
+}
+
+void Modifications::argRemoval4(int, Point, bool, Point, int)
+{
+}
+
+void Modifications::argRemoval5(int, bool, Point, Point, int)
+{
+}
+
+void Modifications::argRemoval5(int, bool, int, bool)
+{
+}
+
 std::pair<double, double>
 Modifications::pointToPair(Point pt, bool* ok)
 {

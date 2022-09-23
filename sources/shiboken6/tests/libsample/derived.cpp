@@ -49,26 +49,22 @@ Derived::defaultValue(int n)
     return ((double) n) + 0.1;
 }
 
-OverloadedFuncEnum
-Derived::overloaded(int i, int d)
+OverloadedFuncEnum Derived::overloaded(int, int)
 {
     return OverloadedFunc_ii;
 }
 
-OverloadedFuncEnum
-Derived::overloaded(double n)
+OverloadedFuncEnum Derived::overloaded(double)
 {
     return OverloadedFunc_d;
 }
 
-Derived::OtherOverloadedFuncEnum
-Derived::otherOverloaded(int a, int b, bool c, double d)
+Derived::OtherOverloadedFuncEnum Derived::otherOverloaded(int, int, bool, double)
 {
     return OtherOverloadedFunc_iibd;
 }
 
-Derived::OtherOverloadedFuncEnum
-Derived::otherOverloaded(int a, double b)
+Derived::OtherOverloadedFuncEnum Derived::otherOverloaded(int, double)
 {
     return OtherOverloadedFunc_id;
 }

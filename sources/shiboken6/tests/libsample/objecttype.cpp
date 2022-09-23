@@ -133,8 +133,7 @@ ObjectType::causeEvent(Event::EventType eventType)
     return event(&e);
 }
 
-bool
-ObjectType::event(Event* event)
+bool ObjectType::event(Event *)
 {
     return true;
 }
@@ -152,6 +151,10 @@ void
 ObjectType::callInvalidateEvent(Event* event)
 {
     invalidateEvent(event);
+}
+
+void ObjectType::invalidateEvent(Event *)
+{
 }
 
 void
@@ -205,13 +208,13 @@ objectTypeHash(const ObjectType* objectType)
     return reinterpret_cast<std::size_t>(objectType);
 }
 
-unsigned char
-ObjectType::callWithEnum(const Str& prefix, Event::EventType type, unsigned char value){
+unsigned char ObjectType::callWithEnum(const Str &, Event::EventType, unsigned char value)
+{
     return value*value;
 }
 
-unsigned char
-ObjectType::callWithEnum(const Str& prefix, unsigned char value) {
+unsigned char ObjectType::callWithEnum(const Str &, unsigned char value)
+{
     return value;
 }
 
@@ -280,8 +283,7 @@ ObjectTypeDerived::~ObjectTypeDerived()
 {
 }
 
-bool
-ObjectTypeDerived::event(Event* event)
+bool ObjectTypeDerived::event(Event *)
 {
     return true;
 }

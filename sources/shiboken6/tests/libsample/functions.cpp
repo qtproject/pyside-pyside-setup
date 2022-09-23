@@ -78,14 +78,12 @@ returnCString()
     return __FUNCTION__;
 }
 
-GlobalOverloadFuncEnum
-overloadedFunc(int val)
+GlobalOverloadFuncEnum overloadedFunc(int)
 {
     return GlobalOverloadFunc_i;
 }
 
-GlobalOverloadFuncEnum
-overloadedFunc(double val)
+GlobalOverloadFuncEnum overloadedFunc(double)
 {
     return GlobalOverloadFunc_d;
 }

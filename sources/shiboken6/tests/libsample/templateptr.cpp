@@ -3,6 +3,6 @@
 
 #include "templateptr.h"
 
-void TemplatePtr::dummy(std::list<std::pair<BlackBox *, BlackBox *> > & items)
+void TemplatePtr::dummy(std::list<std::pair<BlackBox *, BlackBox *> > &)
 {
 }

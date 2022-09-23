@@ -76,7 +76,7 @@ public:
     static int processEvent(ObjectTypeList objects, Event *event);
 
     void callInvalidateEvent(Event* event);
-    virtual void invalidateEvent(Event* event) {}
+    virtual void invalidateEvent(Event *event);
 
     // This nonsense method emulate QWidget.setLayout method
     // All layout objects will became children of this object.
