@@ -17,7 +17,7 @@ typedef struct {
     bool isWritable;
 } SbkVoidPtrObject;
 
-PyObject *SbkVoidPtrObject_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
+PyObject *SbkVoidPtrObject_new(PyTypeObject *type, PyObject * /* args */, PyObject * /* kwds */)
 {
     // PYSIDE-560: It is much safer to first call a function and then do a
     // type cast than to do everything in one line. The bad construct looked
@@ -153,7 +153,7 @@ PyObject *SbkVoidPtrObject_int(PyObject *v)
     return PyLong_FromVoidPtr(sbkObject->cptr);
 }
 
-PyObject *toBytes(PyObject *self, PyObject *args)
+PyObject *toBytes(PyObject *self, PyObject * /* args */)
 {
     auto *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(self);
     if (sbkObject->size < 0) {

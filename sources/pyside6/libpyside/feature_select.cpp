@@ -464,7 +464,7 @@ static PyObject *methodWithNewName(PyTypeObject *type,
     return descr;
 }
 
-static bool feature_01_addLowerNames(PyTypeObject *type, PyObject *prev_dict, int id)
+static bool feature_01_addLowerNames(PyTypeObject *type, PyObject *prev_dict, int /* id */)
 {
     PyMethodDef *meth = type->tp_methods;
     PyObject *lower_dict = type->tp_dict;
@@ -752,7 +752,7 @@ static bool patch_property_impl()
 //
 
 #define SIMILAR_FEATURE(xx)  \
-static bool feature_##xx##_addDummyNames(PyTypeObject *type, PyObject *prev_dict, int id) \
+static bool feature_##xx##_addDummyNames(PyTypeObject *type, PyObject *prev_dict, int /* id */) \
 { \
     PyObject *dict = type->tp_dict; \
     if (PyDict_Update(dict, prev_dict) < 0) \

@@ -227,7 +227,7 @@ static void PyObject_PythonToCpp_PyObject_PTR(PyObject *pyIn, void *cppOut)
 {
     *reinterpret_cast<PyObject **>(cppOut) = pyIn;
 }
-static PythonToCppFunc is_PyObject_PythonToCpp_PyObject_PTR_Convertible(PyObject *pyIn)
+static PythonToCppFunc is_PyObject_PythonToCpp_PyObject_PTR_Convertible(PyObject * /* pyIn */)
 {
     return PyObject_PythonToCpp_PyObject_PTR;
 }

@@ -31,7 +31,7 @@ public:
 
     FieldModificationList modifications() const;
 
-    bool isModifiedRemoved(int types = TypeSystem::All) const;
+    bool isModifiedRemoved() const;
     bool generateOpaqueContainer() const;
 
     const AbstractMetaType &type() const;

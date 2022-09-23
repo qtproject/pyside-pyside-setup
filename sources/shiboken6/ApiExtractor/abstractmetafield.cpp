@@ -56,7 +56,7 @@ std::optional<AbstractMetaField>
 /*******************************************************************************
  * Indicates that this field has a modification that removes it
  */
-bool AbstractMetaField::isModifiedRemoved(int types) const
+bool AbstractMetaField::isModifiedRemoved() const
 {
     const FieldModificationList &mods = modifications();
     for (const FieldModification &mod : mods) {

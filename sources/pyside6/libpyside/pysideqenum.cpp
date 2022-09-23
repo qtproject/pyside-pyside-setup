@@ -17,7 +17,7 @@ extern "C" {
 
 using namespace Shiboken;
 
-static PyObject *analyzePyEnum(PyObject *pyenum, PyObject *container = nullptr)
+static PyObject *analyzePyEnum(PyObject *pyenum)
 {
     /*
      * This is the straight-forward implementation of QEnum/QFlag. It does no

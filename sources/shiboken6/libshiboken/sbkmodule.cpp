@@ -36,7 +36,7 @@ PyObject *import(const char *moduleName)
     return module;
 }
 
-PyObject *create(const char *moduleName, void *moduleData)
+PyObject *create(const char * /* moduleName */, void *moduleData)
 {
     Shiboken::init();
     return PyModule_Create(reinterpret_cast<PyModuleDef *>(moduleData));
