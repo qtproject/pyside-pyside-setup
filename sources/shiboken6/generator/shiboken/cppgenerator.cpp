@@ -2257,6 +2257,9 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
     s << "static int\n";
     s << cpythonFunctionName(rfunc)
         << "(PyObject *self, PyObject *args, PyObject *kwds)\n{\n" << indent;
+    if (overloadData.maxArgs() == 0)
+        s << sbkUnusedVariableCast(u"args"_s);
+    s << sbkUnusedVariableCast(u"kwds"_s);
 
     const bool needsMetaObject = usePySideExtensions() && metaClass->isQObject();
     if (needsMetaObject)
@@ -2396,13 +2399,19 @@ void CppGenerator::writeMethodWrapper(TextStream &s, const OverloadData &overloa
 
     s << "static PyObject *";
     s << cpythonFunctionName(rfunc) << "(PyObject *self";
+    bool hasKwdArgs = false;
     if (maxArgs > 0) {
         s << ", PyObject *"
             << (overloadData.pythonFunctionWrapperUsesListOfArguments() ? u"args"_s : PYTHON_ARG);
-        if (overloadData.hasArgumentWithDefaultValue() || rfunc->isCallOperator())
+        hasKwdArgs = overloadData.hasArgumentWithDefaultValue() || rfunc->isCallOperator();
+        if (hasKwdArgs)
             s << ", PyObject *kwds";
     }
     s << ")\n{\n" << indent;
+    if (rfunc->ownerClass() == nullptr || overloadData.hasStaticFunction())
+        s << sbkUnusedVariableCast(u"self"_s);
+    if (hasKwdArgs)
+        s << sbkUnusedVariableCast(u"kwds"_s);
 
     writeMethodWrapperPreamble(s, overloadData, classContext);
 
@@ -3502,6 +3511,9 @@ void CppGenerator::writeIsPythonConvertibleToCppFunction(TextStream &s,
     if (acceptNoneAsCppNull) {
         s << "if (pyIn == Py_None)\n" << indent
             << "return Shiboken::Conversions::nonePythonToCppNullPtr;\n" << outdent;
+    } else {
+        if (!condition.contains(u"pyIn"))
+            s << sbkUnusedVariableCast(u"pyIn"_s);
     }
     s << "if (" << condition << ")\n" << indent
         << "return " << pythonToCppFuncName << ";\n" << outdent
@@ -5816,6 +5828,8 @@ void CppGenerator::writeFlagsUnaryOperator(TextStream &s, const AbstractMetaEnum
 
     s << "PyObject *" << cpythonEnumName(cppEnum) << "___" << pyOpName
         << "__(PyObject *self, PyObject *" << PYTHON_ARG << ")\n{\n" << indent;
+    if (cppOpName == u"~")
+        s << sbkUnusedVariableCast(PYTHON_ARG);
 
     AbstractMetaType flagsType = AbstractMetaType::fromTypeEntry(flagsEntry);
     s << "::" << flagsEntry->originalName() << " " << CPP_SELF_VAR << ";\n"
@@ -6200,7 +6214,9 @@ void CppGenerator::writeTypeDiscoveryFunction(TextStream &s, const AbstractMetaC
     QString polymorphicExpr = metaClass->typeEntry()->polymorphicIdValue();
 
     s << "static void *" << cpythonBaseName(metaClass)
-        << "_typeDiscovery(void *cptr, PyTypeObject *instanceType)\n{\n" << indent;
+        << "_typeDiscovery(void *cptr, PyTypeObject *instanceType)\n{\n" << indent
+        << sbkUnusedVariableCast(u"cptr"_s)
+        << sbkUnusedVariableCast(u"instanceType"_s);
 
     if (!polymorphicExpr.isEmpty()) {
         polymorphicExpr = polymorphicExpr.replace(u"%1"_s,

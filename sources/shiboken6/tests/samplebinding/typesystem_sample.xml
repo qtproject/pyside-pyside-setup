@@ -84,6 +84,7 @@
             </native-to-target>
             <target-to-native>
                 <add-conversion type="PyNone">
+                    SBK_UNUSED(%in)
                     %out = 0;
                 </add-conversion>
                 <add-conversion check="checkPyCapsuleOrPyCObject(%in)" type="PyObject">
@@ -168,6 +169,7 @@
                 %out = %OUTTYPE(str);
                 </add-conversion>
                 <add-conversion type="Py_None">
+                SBK_UNUSED(%in)
                 %out = %OUTTYPE();
                 </add-conversion>
             </target-to-native>
@@ -256,6 +258,7 @@
 
     <add-function signature="getPythonType(const char*)" return-type="PyObject">
         <inject-code class="target" position="beginning">
+        SBK_UNUSED(self)
         %PYARG_0 = (PyObject*) Shiboken::Conversions::getPythonTypeObject(%1);
         if (!%PYARG_0)
             %PYARG_0 = Py_None;
@@ -2058,6 +2061,7 @@
         <conversion-rule>
             <target-to-native>
                 <add-conversion type="Py_None">
+                SBK_UNUSED(%in)
                 %out = %OUTTYPE();
                 </add-conversion>
                 <add-conversion type="PyObject" check="Shiboken::String::check(%in) || PyBytes_Check(%in)">

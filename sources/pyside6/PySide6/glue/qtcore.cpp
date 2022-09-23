@@ -1299,6 +1299,7 @@ if (PyErr_WarnEx(PyExc_DeprecationWarning,
 // @snippet conversion-pyunicode
 
 // @snippet conversion-pynone
+SBK_UNUSED(%in)
 %out = %OUTTYPE();
 // @snippet conversion-pynone
 
