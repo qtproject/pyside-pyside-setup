@@ -292,8 +292,6 @@ protected:
                                   const AbstractMetaFunctionCPtr &metaFunc,
                                   Options options = NoOption);
 
-    static void writeUnusedVariableCast(TextStream &s, const QString &variableName);
-
     // All data about extended converters: the type entries of the target type, and a
     // list of AbstractMetaClasses accepted as argument for the conversion.
     using ExtendedConverterData = QHash<const TypeEntry *, AbstractMetaClassCList>;

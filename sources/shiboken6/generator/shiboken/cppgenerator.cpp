@@ -52,6 +52,19 @@
 
 using namespace Qt::StringLiterals;
 
+struct sbkUnusedVariableCast
+{
+    explicit sbkUnusedVariableCast(QString name) : m_name(name) {}
+
+    const QString m_name;
+};
+
+TextStream &operator<<(TextStream &str, const sbkUnusedVariableCast &c)
+{
+    str << "SBK_UNUSED(" << c.m_name << ")\n";
+    return str;
+}
+
 static const QString CPP_ARG0 = u"cppArg0"_s;
 static const char methodDefSentinel[] = "{nullptr, nullptr, 0, nullptr} // Sentinel\n";
 const char *CppGenerator::PYTHON_TO_CPPCONVERSION_STRUCT = "Shiboken::Conversions::PythonToCppConversion";
@@ -2219,8 +2232,7 @@ static const char fullName[] = ")" << fullPythonFunctionName(rfunc, true)
             << PYTHON_TO_CPPCONVERSION_STRUCT << ' ' << PYTHON_TO_CPP_VAR;
         if (overloadData.pythonFunctionWrapperUsesListOfArguments())
             s << '[' << maxArgs << ']';
-        s << ";\n";
-        writeUnusedVariableCast(s, PYTHON_TO_CPP_VAR);
+        s << ";\n" << sbkUnusedVariableCast(PYTHON_TO_CPP_VAR);
     }
 
     if (initPythonArguments) {
@@ -2261,11 +2273,11 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
     if (metaClass->isAbstract()) {
         // C++ Wrapper disabled: Abstract C++ class cannot be instantiated.
         if (metaClass->typeEntry()->typeFlags().testFlag(ComplexTypeEntry::DisableWrapper)) {
-            writeUnusedVariableCast(s, QStringLiteral("sbkSelf"));
-            writeUnusedVariableCast(s, QStringLiteral("type"));
-            writeUnusedVariableCast(s, QStringLiteral("myType"));
+            s << sbkUnusedVariableCast(u"sbkSelf"_s)
+                << sbkUnusedVariableCast(u"type"_s)
+                << sbkUnusedVariableCast(u"myType"_s);
             if (needsMetaObject)
-                writeUnusedVariableCast(s, QStringLiteral("metaObject"));
+                s << sbkUnusedVariableCast(u"metaObject"_s);
             s << "Shiboken::Errors::setInstantiateAbstractClassDisabledWrapper(\""
                 << metaClass->qualifiedCppName() << "\");\n" << errorReturn << outdent
                 << "}\n\n";
@@ -2463,8 +2475,7 @@ void CppGenerator::writeArgumentsInitializer(TextStream &s, const OverloadData &
                                              ErrorReturn errorReturn)
 {
     const auto rfunc = overloadData.referenceFunction();
-    s << "PyTuple_GET_SIZE(args);\n";
-    writeUnusedVariableCast(s, u"numArgs"_s);
+    s << "PyTuple_GET_SIZE(args);\n" << sbkUnusedVariableCast(u"numArgs"_s);
 
     int minArgs = overloadData.minArgs();
     int maxArgs = overloadData.maxArgs();
@@ -2617,14 +2628,13 @@ void CppGenerator::writeCppSelfDefinition(TextStream &s,
             // PYSIDE-131: The single case of a class method for now: tr().
             writeCppSelfVarDef(s, flags);
             writeCppSelfConversion(s, context, className, useWrapperClass);
-            s << ";\n";
-            writeUnusedVariableCast(s, CPP_SELF_VAR);
+            s << ";\n" << sbkUnusedVariableCast(CPP_SELF_VAR);
         }
         return;
     }
 
-    s << className << " *" << CPP_SELF_VAR << " = nullptr;\n";
-    writeUnusedVariableCast(s, CPP_SELF_VAR);
+    s << className << " *" << CPP_SELF_VAR << " = nullptr;\n"
+        << sbkUnusedVariableCast(CPP_SELF_VAR);
 
     // Checks if the underlying C++ object is valid.
     s << "if (self)\n" << indent
@@ -2819,7 +2829,7 @@ void CppGenerator::writeArgumentConversion(TextStream &s,
         writeInvalidPyObjectCheck(s, pyArgName, errorReturn);
     writePythonToCppTypeConversion(s, argType, pyArgName, argName, context, defaultValue);
     if (castArgumentAsUnused)
-        writeUnusedVariableCast(s, argName);
+        s << sbkUnusedVariableCast(argName);
 }
 
 AbstractMetaType
@@ -3320,8 +3330,8 @@ void CppGenerator::writeSingleFunctionCall(TextStream &s,
                 const QString cppArgRemoved = CPP_ARG_REMOVED
                     + QString::number(argIdx);
                 s << getFullTypeName(arg.type()) << ' ' << cppArgRemoved;
-                s << " = " << arg.defaultValueExpression() << ";\n";
-                writeUnusedVariableCast(s, cppArgRemoved);
+                s << " = " << arg.defaultValueExpression() << ";\n"
+                    << sbkUnusedVariableCast(cppArgRemoved);
             } else if (!injectCodeCallsFunc && !func->isUserAdded() && !hasConversionRule) {
                 // When an argument is removed from a method signature and no other means of calling
                 // the method are provided (as with code injection) the generator must abort.
@@ -5167,11 +5177,10 @@ void CppGenerator::writeRichCompareFunctionHeader(TextStream &s,
     s << baseName << "_richcompare(PyObject *self, PyObject *" << PYTHON_ARG
         << ", int op)\n{\n" << indent;
     writeCppSelfDefinition(s, context, ErrorReturn::Default, CppSelfDefinitionFlag::CppSelfAsReference);
-    writeUnusedVariableCast(s, CPP_SELF_VAR);
-    s << "PyObject *" << PYTHON_RETURN_VAR << "{};\n"
-        << PYTHON_TO_CPPCONVERSION_STRUCT << ' ' << PYTHON_TO_CPP_VAR << ";\n";
-    writeUnusedVariableCast(s, PYTHON_TO_CPP_VAR);
-    s << '\n';
+    s << sbkUnusedVariableCast(CPP_SELF_VAR)
+        << "PyObject *" << PYTHON_RETURN_VAR << "{};\n"
+        << PYTHON_TO_CPPCONVERSION_STRUCT << ' ' << PYTHON_TO_CPP_VAR << ";\n"
+        << sbkUnusedVariableCast(PYTHON_TO_CPP_VAR) << '\n';
 }
 
 static const char richCompareComment[] =
