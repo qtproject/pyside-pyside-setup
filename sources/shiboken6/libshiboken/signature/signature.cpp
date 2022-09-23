@@ -128,7 +128,7 @@ PyObject *GetTypeKey(PyObject *ob)
 
 static PyObject *empty_dict = nullptr;
 
-PyObject *TypeKey_to_PropsDict(PyObject *type_key, PyObject *obtype)
+PyObject *TypeKey_to_PropsDict(PyObject *type_key)
 {
     PyObject *dict = PyDict_GetItem(pyside_globals->arg_dict, type_key);
     if (dict == nullptr) {
@@ -196,7 +196,7 @@ PyObject *GetSignature_Function(PyObject *obfunc, PyObject *modifier)
     AutoDecRef type_key(GetTypeKey(obtype_mod));
     if (type_key.isNull())
         Py_RETURN_NONE;
-    PyObject *dict = TypeKey_to_PropsDict(type_key, obtype_mod);
+    PyObject *dict = TypeKey_to_PropsDict(type_key);
     if (dict == nullptr)
         return nullptr;
     AutoDecRef func_name(PyObject_GetAttr(obfunc, PyMagicName::name()));
@@ -224,7 +224,7 @@ PyObject *GetSignature_Wrapper(PyObject *ob, PyObject *modifier)
     AutoDecRef class_key(GetTypeKey(objclass));
     if (func_name.isNull() || objclass.isNull() || class_key.isNull())
         return nullptr;
-    PyObject *dict = TypeKey_to_PropsDict(class_key, objclass);
+    PyObject *dict = TypeKey_to_PropsDict(class_key);
     if (dict == nullptr)
         return nullptr;
     PyObject *props = PyDict_GetItem(dict, func_name);
@@ -242,7 +242,7 @@ PyObject *GetSignature_TypeMod(PyObject *ob, PyObject *modifier)
     AutoDecRef ob_name(PyObject_GetAttr(ob, PyMagicName::name()));
     AutoDecRef ob_key(GetTypeKey(ob));
 
-    PyObject *dict = TypeKey_to_PropsDict(ob_key, ob);
+    PyObject *dict = TypeKey_to_PropsDict(ob_key);
     if (dict == nullptr)
         return nullptr;
     PyObject *props = PyDict_GetItem(dict, ob_name);

@@ -140,7 +140,7 @@ check_set_special_type_attr(PyTypeObject *type, PyObject *value, const char *nam
 
 // PYSIDE-1177: Add a setter to allow setting type doc.
 static int
-type_set_doc(PyTypeObject *type, PyObject *value, void *context)
+type_set_doc(PyTypeObject *type, PyObject *value, void * /* context */)
 {
     if (!check_set_special_type_attr(type, value, "__doc__"))
         return -1;

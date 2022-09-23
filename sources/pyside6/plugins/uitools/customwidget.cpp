@@ -134,7 +134,7 @@ QWidget *PyCustomWidget::createWidget(QWidget *parent)
     return reinterpret_cast<QWidget *>(Shiboken::Object::cppPointer(result, Py_TYPE(result)));
 }
 
-void PyCustomWidget::initialize(QDesignerFormEditorInterface *core)
+void PyCustomWidget::initialize(QDesignerFormEditorInterface *)
 {
     m_initialized = true;
 }

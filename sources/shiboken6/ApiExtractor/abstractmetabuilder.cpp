@@ -3116,8 +3116,7 @@ void AbstractMetaBuilderPrivate::inheritTemplateFunctions(AbstractMetaClass *sub
     for (const AbstractMetaField &field : templateClassFields) {
         // If the field is modified or the instantiation has a field named
         // the same as an existing field we have shadowing, so we need to skip it.
-        if (field.isModifiedRemoved(TypeSystem::All)
-            || field.isStatic()
+        if (field.isModifiedRemoved() || field.isStatic()
             || AbstractMetaField::find(existingSubclassFields, field.name()).has_value()) {
             continue;
         }
