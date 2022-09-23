@@ -50,7 +50,7 @@ if(MSVC)
     set(CMAKE_CXX_FLAGS "/Zc:wchar_t /GR /EHsc /DWIN32 /D_WINDOWS /D_SCL_SECURE_NO_WARNINGS")
     #set(CMAKE_CXX_FLAGS "/Zc:wchar_t /GR /EHsc /DNOCOLOR /DWIN32 /D_WINDOWS /D_SCL_SECURE_NO_WARNINGS") # XXX
 else()
-    set (gcc_warnings_options "-Wall -Wextra -Wno-unused-parameter -Wno-cast-function-type -Wno-strict-aliasing")
+    set (gcc_warnings_options "-Wall -Wextra -Wno-cast-function-type -Wno-strict-aliasing")
     if(CMAKE_HOST_UNIX AND NOT CYGWIN)
         add_definitions(-fPIC)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${gcc_warnings_options} -fvisibility=hidden")
