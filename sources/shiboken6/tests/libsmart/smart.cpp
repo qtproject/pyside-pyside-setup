@@ -293,7 +293,5 @@ Smart::Integer2::Integer2()
 {
 }
 
-Smart::Integer2::Integer2(const Smart::Integer2 &other)
-    : Integer (other)
-{
-}
+Smart::Integer2::Integer2(const Smart::Integer2 &) = default;
+Smart::Integer2 &Smart::Integer2::operator=(const Integer2 &) = default;

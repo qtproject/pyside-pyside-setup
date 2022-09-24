@@ -66,8 +66,7 @@ public:
 
     Union(const Data&);
     Union(const Intersection&);
-    Union() {};
-    Union(const Union&);
+    Union() = default;
 
     std::list<Filter> filters() const { return m_filters; }
     void addFilter(const Filter& data) { m_filters.push_back(data); }
@@ -82,8 +81,7 @@ public:
 
     Intersection(const Data&);
     Intersection(const Union&);
-    Intersection() {};
-    Intersection(const Intersection&);
+    Intersection() = default;
 
     std::list<Filter> filters() const { return m_filters; }
     void addFilter(const Filter& data) { m_filters.push_back(data); }
