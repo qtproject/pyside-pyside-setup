@@ -43,11 +43,16 @@ import sys
 
 from PySide6.QtGui import QPainter, QBrush, QColor
 from PySide6.QtWidgets import QApplication
-from PySide6.QtQml import qmlRegisterType
+from PySide6.QtQml import QmlElement
 from PySide6.QtCore import QUrl, Property, Signal, Qt, QPointF
 from PySide6.QtQuick import QQuickPaintedItem, QQuickView
 
+QML_IMPORT_NAME = "TextBalloonPlugin"
+QML_IMPORT_MAJOR_VERSION = 1
+QML_IMPORT_MINOR_VERSION = 0  # Optional
 
+
+@QmlElement
 class TextBalloon(QQuickPaintedItem):
 
     rightAlignedChanged = Signal()
@@ -97,7 +102,6 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     view = QQuickView()
     view.setResizeMode(QQuickView.SizeRootObjectToView)
-    qmlRegisterType(TextBalloon, "TextBalloonPlugin", 1, 0, "TextBalloon")
     qml_file = Path(__file__).parent / "main.qml"
     view.setSource(QUrl.fromLocalFile(qml_file))
 
