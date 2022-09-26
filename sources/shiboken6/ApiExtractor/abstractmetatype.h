@@ -189,6 +189,7 @@ public:
 
     static void dereference(QString *type); // "foo" -> "(*foo)"
     /// Apply the result of shouldDereferenceArgument()
+    static QString dereferencePrefix(qsizetype n); // Return the prefix **/& as as required
     static void applyDereference(QString *type, qsizetype n);
     static bool stripDereference(QString *type); // "(*foo)" -> "foo"
 

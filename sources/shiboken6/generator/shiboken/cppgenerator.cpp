@@ -3912,10 +3912,8 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                     } else {
                         const int idx = arg.argumentIndex() - removedArgs;
                         const auto deRef = arg.type().shouldDereferenceArgument();
-                        QString argName;
-                        if (deRef > 0)
-                            argName += QString(deRef, u'*');
-                        argName += CPP_ARG + QString::number(idx);
+                        QString argName = AbstractMetaType::dereferencePrefix(deRef)
+                                          + CPP_ARG + QString::number(idx);
                         userArgs.append(argName);
                     }
                 }

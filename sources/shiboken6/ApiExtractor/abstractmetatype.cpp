@@ -756,13 +756,18 @@ void AbstractMetaType::dereference(QString *type)
     type->append(u')');
 }
 
+QString AbstractMetaType::dereferencePrefix(qsizetype n)
+{
+    const QChar c = n > 0 ? u'*' : u'&';
+    return QString(qAbs(n), c);
+}
+
 void AbstractMetaType::applyDereference(QString *type, qsizetype n)
 {
     if (n == 0)
         return;
 
-    const char c = n > 0 ? '*' : '&';
-    type->prepend(QString(qAbs(n), QLatin1Char(c)));
+    type->prepend(dereferencePrefix(n));
     type->prepend(u'(');
     type->append(u')');
 }
