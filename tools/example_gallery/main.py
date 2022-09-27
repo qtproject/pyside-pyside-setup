@@ -168,7 +168,7 @@ def get_code_tabs(files, project_dir):
         _path = project_dir / project_file
         _file_content = ""
         try:
-            with open(_path, "r") as _f:
+            with open(_path, "r", encoding="utf-8") as _f:
                 _file_content = remove_licenses(_f.read())
         except UnicodeDecodeError as e:
             print(f"example_gallery: error decoding {_path}:{e}")
@@ -276,7 +276,7 @@ if __name__ == "__main__":
 
         files = []
         try:
-            with pyproject_file.open("r") as pyf:
+            with pyproject_file.open("r", encoding="utf-8") as pyf:
                 pyproject = json.load(pyf)
                 files = pyproject["files"]
         except (json.JSONDecodeError, KeyError) as e:
@@ -286,11 +286,11 @@ if __name__ == "__main__":
         if files:
             rst_file_full = EXAMPLES_DOC / rst_file
 
-            with open(rst_file_full, "w") as out_f:
+            with open(rst_file_full, "w", encoding="utf-8") as out_f:
                 if has_doc:
                     doc_rst = original_doc_dir / f"{example_name}.rst"
 
-                    with open(doc_rst) as doc_f:
+                    with open(doc_rst, encoding="utf-8") as doc_f:
                         content_f = doc_f.read()
 
                     # Copy other files in the 'doc' directory, but
