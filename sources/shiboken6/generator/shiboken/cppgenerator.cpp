@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "cppgenerator.h"
+#include "generatorargument.h"
 #include "defaultvalue.h"
 #include "generatorcontext.h"
 #include "codesnip.h"
@@ -2824,21 +2825,24 @@ void CppGenerator::writeTypeCheck(TextStream &s,
     writeTypeCheck(s, argType, argumentName, numberType, rejectNull);
 }
 
-void CppGenerator::writeArgumentConversion(TextStream &s,
-                                           const AbstractMetaType &argType,
-                                           const QString &argName, const QString &pyArgName,
-                                           ErrorReturn errorReturn,
-                                           const AbstractMetaClass *context,
-                                           const QString &defaultValue,
-                                           bool castArgumentAsUnused) const
+qsizetype CppGenerator::writeArgumentConversion(TextStream &s,
+                                                const AbstractMetaType &argType,
+                                                const QString &argName,
+                                                const QString &pyArgName,
+                                                ErrorReturn errorReturn,
+                                                const AbstractMetaClass *context,
+                                                const QString &defaultValue,
+                                                bool castArgumentAsUnused) const
 {
+    qsizetype result = 0;
     if (argType.typeEntry()->isCustom() || argType.typeEntry()->isVarargs())
-        return;
+        return result;
     if (argType.isWrapperType())
         writeInvalidPyObjectCheck(s, pyArgName, errorReturn);
-    writePythonToCppTypeConversion(s, argType, pyArgName, argName, context, defaultValue);
+    result = writePythonToCppTypeConversion(s, argType, pyArgName, argName, context, defaultValue);
     if (castArgumentAsUnused)
         s << sbkUnusedVariableCast(argName);
+    return result;
 }
 
 AbstractMetaType
@@ -2909,44 +2913,17 @@ qsizetype CppGenerator::writePythonToCppTypeConversion(TextStream &s,
     if (typeEntry->isCustom() || typeEntry->isVarargs())
         return 0;
 
-    qsizetype indirections = -type.indirectionsV().size();
+    const auto arg = GeneratorArgument::fromMetaType(type);
+    const bool isPrimitive = arg.type == GeneratorArgument::Type::Primitive;
 
     QString cppOutAux = cppOut + u"_local"_s;
 
-    const bool isPrimitive = typeEntry->isPrimitive();
-    const bool isEnum = typeEntry->isEnum();
-    const bool isFlags = typeEntry->isFlags();
-    const bool treatAsPointer = type.valueTypeWithCopyConstructorOnlyPassed();
-    const bool isContainer = typeEntry->isContainer();
-    bool isPointerOrObjectType = (type.isObjectType() || type.isPointer())
-        && !type.isUserPrimitive() && !type.isExtendedCppPrimitive()
-        && !isEnum && !isFlags;
-    const bool isNotContainerEnumOrFlags = !isContainer
-                                           && !isEnum && !isFlags;
-    const bool mayHaveImplicitConversion = type.referenceType() == LValueReference
-                                     && !type.isUserPrimitive()
-                                     && !type.isExtendedCppPrimitive()
-                                     && isNotContainerEnumOrFlags
-                                     && !(treatAsPointer || isPointerOrObjectType);
-
-    // For implicit conversions or containers, either value or pointer conversion
-    // may occur. An implicit conversion uses value conversion whereas the object
-    // itself uses pointer conversion. For containers, the PyList/container
-    // conversion is by value whereas opaque containers use pointer conversion.
-    // For a container passed by pointer, a local variable is also needed.
-    const bool valueOrPointer = mayHaveImplicitConversion
-       || type.generateOpaqueContainer()
-       || (isContainer && indirections != 0);
-
-    const AbstractMetaTypeList &nestedArrayTypes = type.nestedArrayTypes();
-    const bool isCppPrimitiveArray = !nestedArrayTypes.isEmpty()
-        && nestedArrayTypes.constLast().isCppPrimitive();
-    QString typeName = isCppPrimitiveArray
-        ? arrayHandleType(nestedArrayTypes)
-        : getFullTypeNameWithoutModifiers(type);
+    QString typeName = arg.type == GeneratorArgument::Type::CppPrimitiveArray
+       ? arrayHandleType(type.nestedArrayTypes())
+       : getFullTypeNameWithoutModifiers(type);
 
     bool isProtectedEnum = false;
-    if (isEnum && avoidProtectedHack()) {
+    if (arg.type == GeneratorArgument::Type::Enum && avoidProtectedHack()) {
         auto metaEnum = api().findAbstractMetaEnum(type.typeEntry());
         if (metaEnum.has_value() && metaEnum->isProtected()) {
             typeName = wrapperName(context) + u"::"_s
@@ -2956,19 +2933,21 @@ qsizetype CppGenerator::writePythonToCppTypeConversion(TextStream &s,
     }
 
     s << typeName;
-    if (isCppPrimitiveArray) {
+    switch (arg.conversion) {
+    case GeneratorArgument::Conversion::CppPrimitiveArray:
         s << ' ' << cppOut;
-    } else if (valueOrPointer) {
-        ++indirections;
+        break;
+    case GeneratorArgument::Conversion::ValueOrPointer: {
         // Generate either value conversion for &cppOutAux or pointer
         // conversion for &cppOut
         s << ' ' << cppOutAux;
         // No default value for containers which can also be passed by pointer.
-        if (!isContainer)
+        if (arg.type != GeneratorArgument::Type::Container)
             writeMinimalConstructorExpression(s, api(), type, isPrimitive, defaultValue);
         s << ";\n" << typeName << " *" << cppOut << " = &" << cppOutAux;
-    } else if (treatAsPointer || isPointerOrObjectType) {
-        ++indirections;
+    }
+        break;
+    case GeneratorArgument::Conversion::Pointer: {
         s << " *" << cppOut;
         if (!defaultValue.isEmpty()) {
             const bool needsConstCast = !isNullPtr(defaultValue)
@@ -2981,7 +2960,9 @@ qsizetype CppGenerator::writePythonToCppTypeConversion(TextStream &s,
             if (needsConstCast)
                 s << ')';
         }
-    } else {
+    }
+        break;
+    case GeneratorArgument::Conversion::Default:
         s << ' ' << cppOut;
         if (isProtectedEnum && avoidProtectedHack()) {
             s << " = ";
@@ -2989,11 +2970,14 @@ qsizetype CppGenerator::writePythonToCppTypeConversion(TextStream &s,
                 s << "{}";
             else
                 s << defaultValue;
-        } else if (type.isUserPrimitive() || isEnum || isFlags) {
+        } else if (type.isUserPrimitive()
+                   || arg.type == GeneratorArgument::Type::Enum
+                   || arg.type == GeneratorArgument::Type::Flags) {
             writeMinimalConstructorExpression(s, api(), typeEntry, isPrimitive, defaultValue);
         } else if (!type.isContainer() && !type.isSmartPointer()) {
             writeMinimalConstructorExpression(s, api(), type, isPrimitive, defaultValue);
         }
+        break;
     }
     s << ";\n";
 
@@ -3001,7 +2985,7 @@ qsizetype CppGenerator::writePythonToCppTypeConversion(TextStream &s,
 
     QString pythonToCppCall = pythonToCppFunc + u'(' + pyIn + u", &"_s
                               + cppOut + u')';
-    if (!valueOrPointer) {
+    if (arg.conversion != GeneratorArgument::Conversion::ValueOrPointer) {
         // pythonToCppFunc may be 0 when less parameters are passed and
         // the defaultValue takes effect.
         if (!defaultValue.isEmpty())
@@ -3009,7 +2993,7 @@ qsizetype CppGenerator::writePythonToCppTypeConversion(TextStream &s,
         s << pythonToCppCall << ";\n";
         if (!defaultValue.isEmpty())
             s << outdent;
-        return indirections;
+        return arg.indirections;
     }
 
     // pythonToCppFunc may be 0 when less parameters are passed and
@@ -3027,7 +3011,7 @@ qsizetype CppGenerator::writePythonToCppTypeConversion(TextStream &s,
     else
         s << "}\n" << outdent;
 
-    return indirections;
+    return arg.indirections;
 }
 
 static void addConversionRuleCodeSnippet(CodeSnipList &snippetList, QString &rule,
@@ -3330,7 +3314,10 @@ void CppGenerator::writeSingleFunctionCall(TextStream &s,
     bool injectCodeCallsFunc = injectedCodeCallsCppFunction(context, func);
     bool mayHaveUnunsedArguments = !func->isUserAdded() && func->hasInjectedCode() && injectCodeCallsFunc;
     int removedArgs = 0;
-    for (qsizetype argIdx = 0; argIdx < func->arguments().size(); ++argIdx) {
+
+    const auto argCount = func->arguments().size();
+    QList<qsizetype> indirections(argCount, 0);
+    for (qsizetype argIdx = 0; argIdx < argCount; ++argIdx) {
         const bool hasConversionRule =
             func->hasConversionRule(TypeSystem::NativeCode, int(argIdx + 1));
         const AbstractMetaArgument &arg = func->arguments().at(argIdx);
@@ -3361,9 +3348,10 @@ void CppGenerator::writeSingleFunctionCall(TextStream &s,
         int argPos = argIdx - removedArgs;
         QString argName = CPP_ARG + QString::number(argPos);
         QString pyArgName = usePyArgs ? pythonArgsAt(argPos) : PYTHON_ARG;
-        writeArgumentConversion(s, argType, argName, pyArgName, errorReturn,
-                                func->implementingClass(), arg.defaultValueExpression(),
-                                func->isUserAdded());
+        indirections[argIdx] =
+            writeArgumentConversion(s, argType, argName, pyArgName, errorReturn,
+                                    func->implementingClass(), arg.defaultValueExpression(),
+                                    func->isUserAdded());
     }
 
     s << '\n';
@@ -3373,7 +3361,7 @@ void CppGenerator::writeSingleFunctionCall(TextStream &s,
     s << "if (!PyErr_Occurred()) {\n" << indent;
     writeMethodCall(s, func, context,
                     overloadData.pythonFunctionWrapperUsesListOfArguments(),
-                    func->arguments().size() - numRemovedArgs, errorReturn);
+                    func->arguments().size() - numRemovedArgs, indirections, errorReturn);
 
     if (!func->isConstructor())
         writeNoneReturn(s, func, overloadData.hasNonVoidReturnType());
@@ -3626,7 +3614,8 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s, const Abst
         const AbstractMetaType &type = containerType.instantiations().at(i);
         QString typeName = getFullTypeName(type);
         // Containers of opaque containers are not handled here.
-        if (type.shouldDereferenceArgument() > 0 && !type.generateOpaqueContainer()) {
+        const auto generatorArg = GeneratorArgument::fromMetaType(type);
+        if (generatorArg.indirections > 0 && !type.generateOpaqueContainer()) {
             for (int pos = 0; ; ) {
                 const QRegularExpressionMatch match = convertToCppRegEx().match(code, pos);
                 if (!match.hasMatch())
@@ -3836,7 +3825,9 @@ if (errorType != nullptr)
 
 void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr &func,
                                    const GeneratorContext &context, bool usesPyArgs,
-                                   int maxArgs, ErrorReturn errorReturn) const
+                                   int maxArgs,
+                                   const QList<qsizetype> &argumentIndirections,
+                                   ErrorReturn errorReturn) const
 {
     s << "// " << func->minimalSignature() << (func->isReverseOperator() ? " [reverse operator]": "") << '\n';
     if (func->isConstructor()) {
@@ -3911,7 +3902,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                         userArgs.append(arg.name() + CONV_RULE_OUT_VAR_SUFFIX);
                     } else {
                         const int idx = arg.argumentIndex() - removedArgs;
-                        const auto deRef = arg.type().shouldDereferenceArgument();
+                        const auto deRef = argumentIndirections.at(i);
                         QString argName = AbstractMetaType::dereferencePrefix(deRef)
                                           + CPP_ARG + QString::number(idx);
                         userArgs.append(argName);
@@ -3959,10 +3950,8 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
             firstArg += CPP_SELF_VAR;
             firstArg += u')';
             QString secondArg = CPP_ARG0;
-            if (!func->isUnaryOperator()) {
-                auto deRef = func->arguments().constFirst().type().shouldDereferenceArgument();
-                AbstractMetaType::applyDereference(&secondArg, deRef);
-            }
+            if (!func->isUnaryOperator())
+                AbstractMetaType::applyDereference(&secondArg, argumentIndirections.at(0));
 
             if (func->isUnaryOperator())
                 std::swap(firstArg, secondArg);
@@ -5261,8 +5250,9 @@ void CppGenerator::writeRichCompareFunction(TextStream &s,
                     s << '&';
                 s << CPP_SELF_VAR << ' '
                     << AbstractMetaFunction::cppComparisonOperator(op) << " (";
-                if (auto deRef = argType.shouldDereferenceArgument(); deRef > 0)
-                    s << QByteArray(deRef, '*');
+                auto generatorArg = GeneratorArgument::fromMetaType(argType);
+                if (generatorArg.indirections != 0)
+                    s << QByteArray(generatorArg.indirections, '*');
                 s << CPP_ARG0 << ");\n"
                     << PYTHON_RETURN_VAR << " = ";
                 if (!func->isVoid()) {

@@ -247,4 +247,6 @@ QString msgArgumentClassNotFound(const AbstractMetaFunctionCPtr &func,
 
 QString msgMissingCustomConversion(const TypeEntry *t);
 
+QString msgUnknownArrayPointerConversion(const QString &s);
+
 #endif // MESSAGES_H

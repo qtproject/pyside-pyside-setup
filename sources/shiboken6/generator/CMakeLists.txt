@@ -1,6 +1,8 @@
 project(shibokengenerator)
 set(package_name "Shiboken6Tools")
 
+set(CMAKE_AUTOMOC ON)
+
 if(NOT (Qt${QT_MAJOR_VERSION}Core_FOUND AND PYTHONINTERP_FOUND))
     message(WARNING "Some dependencies were not found: shiboken6 generator compilation disabled!")
     return()
@@ -12,6 +14,7 @@ generatorcontext.cpp
 defaultvalue.cpp
 shiboken/cppgenerator.cpp
 shiboken/cppgenerator_container.cpp
+shiboken/generatorargument.cpp
 shiboken/headergenerator.cpp
 shiboken/overloaddata.cpp
 shiboken/shibokengenerator.cpp

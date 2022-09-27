@@ -939,3 +939,9 @@ QString msgMissingCustomConversion(const TypeEntry *t)
         << "\" is missing a custom conversion.";
     return result;
 }
+
+QString msgUnknownArrayPointerConversion(const QString &s)
+{
+    return u"Warning: Falling back to pointer conversion for unknown array type \""_s
+        + s + u"\""_s;
+}

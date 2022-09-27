@@ -104,6 +104,8 @@ class EnumTest(unittest.TestCase):
         self.assertEqual(event.eventType(), Event.BASIC_EVENT)
         event.setEventTypeByConstRef(Event.SOME_EVENT)
         self.assertEqual(event.eventType(), Event.SOME_EVENT)
+        event.setEventTypeByConstPtr(Event.BASIC_EVENT)
+        self.assertEqual(event.eventType(), Event.BASIC_EVENT)
 
     @unittest.skipIf(sys.pyside63_option_python_enum, "test not suitable for Python enum")
     def testEnumTpPrintImplementation(self):

@@ -209,12 +209,12 @@ private:
      *   \param defaultValue         an optional default value to be used instead of the conversion result
      *   \param castArgumentAsUnused if true the converted argument is cast as unused to avoid compiler warnings
      */
-    void writeArgumentConversion(TextStream &s, const AbstractMetaType &argType,
-                                 const QString &argName, const QString &pyArgName,
-                                 ErrorReturn errorReturn,
-                                 const AbstractMetaClass *context = nullptr,
-                                 const QString &defaultValue = QString(),
-                                 bool castArgumentAsUnused = false) const;
+    qsizetype writeArgumentConversion(TextStream &s, const AbstractMetaType &argType,
+                                      const QString &argName, const QString &pyArgName,
+                                      ErrorReturn errorReturn,
+                                      const AbstractMetaClass *context = nullptr,
+                                      const QString &defaultValue = QString(),
+                                      bool castArgumentAsUnused = false) const;
 
     /**
      *  Returns the AbstractMetaType for a function argument.
@@ -352,7 +352,8 @@ private:
 
     void writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr &func,
                          const GeneratorContext &context, bool usesPyArgs,
-                         int maxArgs, ErrorReturn errorReturn) const;
+                         int maxArgs, const QList<qsizetype> &argumentIndirections,
+                         ErrorReturn errorReturn) const;
 
     static QString getInitFunctionName(const GeneratorContext &context) ;
     static QString getSimpleClassInitFunctionName(const AbstractMetaClass *metaClass) ;

@@ -215,10 +215,6 @@ public:
     bool isPointerToWrapperType() const;
     /// Wrapper type passed by reference
     bool isWrapperPassedByReference() const;
-    /// Checks if the meta type of an argument should be dereferenced by the Python
-    /// method wrapper passing it to C++.
-    /// \return positive numbers for dereferencing, negative for referencing
-    qsizetype shouldDereferenceArgument() const;
     /// Returns true if the type is a C++ integral primitive,
     /// i.e. bool, char, int, long, and their unsigned counterparts.
     bool isCppIntegralPrimitive() const;

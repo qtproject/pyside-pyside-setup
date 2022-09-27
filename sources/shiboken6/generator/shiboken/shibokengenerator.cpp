@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "shibokengenerator.h"
+#include "generatorargument.h"
 #include "defaultvalue.h"
 #include "generatorcontext.h"
 #include "apiextractorresult.h"
@@ -1285,8 +1286,8 @@ ShibokenGenerator::ArgumentVarReplacementList
                     argValue = hasConversionRule
                                ? arg.name() + CONV_RULE_OUT_VAR_SUFFIX
                                : CPP_ARG + QString::number(argPos);
-                    auto deRef = type.shouldDereferenceArgument();
-                    AbstractMetaType::applyDereference(&argValue, deRef);
+                    const auto generatorArg = GeneratorArgument::fromMetaType(type);
+                    AbstractMetaType::applyDereference(&argValue, generatorArg.indirections);
                 }
             }
         } else {
@@ -1505,7 +1506,8 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
         AbstractMetaType type = arg.modifiedType();
         if (type.isWrapperType()) {
             QString replacement = pair.second;
-            if (type.shouldDereferenceArgument() > 0)
+            const auto generatorArg = GeneratorArgument::fromMetaType(type);
+            if (generatorArg.indirections  > 0)
                 AbstractMetaType::stripDereference(&replacement);
             if (type.referenceType() == LValueReference || type.isPointer())
                 code.replace(u'%' + QString::number(idx) + u'.', replacement + u"->"_s);

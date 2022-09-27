@@ -852,25 +852,6 @@ bool AbstractMetaType::isWrapperPassedByReference() const
            && !isPointer();
 }
 
-qsizetype AbstractMetaType::shouldDereferenceArgument() const
-{
-    if (isWrapperPassedByReference() || valueTypeWithCopyConstructorOnlyPassed()
-        || isObjectTypeUsedAsValueType()) {
-        return 1;
-    }
-
-    if (!d->m_typeEntry->isContainer())
-        return 0;
-
-    qsizetype result = -d->m_indirections.size();
-
-    // For opaque containers, the cppArg in the generated code is a pointer
-    if (generateOpaqueContainer())
-        ++result;
-
-    return result;
-}
-
 bool AbstractMetaType::isCppIntegralPrimitive() const
 {
     return  d->m_typeEntry->isCppIntegralPrimitive();

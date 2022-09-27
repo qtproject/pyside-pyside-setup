@@ -31,6 +31,7 @@ struct Event
 
     void setEventType(EventType et) { m_eventType = et; }
     void setEventTypeByConstRef(const EventType &et) { m_eventType = et; }
+    void setEventTypeByConstPtr(const EventType *etPtr) { m_eventType = *etPtr; }
 
 private:
     EventType m_eventType;
