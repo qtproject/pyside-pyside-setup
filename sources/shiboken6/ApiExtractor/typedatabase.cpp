@@ -138,6 +138,7 @@ struct TypeDatabasePrivate
     bool isSuppressedWarningHelper(const String &s) const;
     bool resolveSmartPointerInstantiations(const TypeDatabaseParserContextPtr &context);
     void formatDebug(QDebug &d) const;
+    void formatBuiltinTypes(QDebug &d) const;
 
     bool m_suppressWarnings = true;
     TypeEntryMultiMap m_entries; // Contains duplicate entries (cf addInlineNamespaceLookups).
@@ -1296,6 +1297,92 @@ void TypeDatabasePrivate::formatDebug(QDebug &d) const
     d <<"\nglobalUserFunctions=" << m_globalUserFunctions << '\n';
     formatList(d, "globalFunctionMods", m_functionMods, '\n');
     d << ')';
+}
+
+// Helpers for dumping out primitive type info
+
+struct formatPrimitiveEntry
+{
+    explicit formatPrimitiveEntry(const PrimitiveTypeEntry *e) : m_pe(e) {}
+
+    const PrimitiveTypeEntry *m_pe;
+};
+
+QDebug operator<<(QDebug debug, const formatPrimitiveEntry &fe)
+{
+    QDebugStateSaver saver(debug);
+    debug.noquote();
+    debug.nospace();
+    const QString &name = fe.m_pe->name();
+    const QString &targetLangName = fe.m_pe->targetLangApiName();
+    debug << '"' << name << '"';
+    if (name != targetLangName)
+        debug << " (\"" << targetLangName << "\")";
+    if (fe.m_pe->isBuiltIn())
+        debug << " [builtin]";
+    if (fe.m_pe->isExtendedCppPrimitive()) {
+        debug << " [";
+        if (!fe.m_pe->isCppPrimitive())
+            debug << "extended ";
+        debug << "C++]";
+    }
+    return debug;
+}
+
+// Sort primitive types for displaying; base type and typedef'ed types
+struct PrimitiveFormatListEntry
+{
+    const PrimitiveTypeEntry *baseType;
+    PrimitiveTypeEntryList typedefs;
+};
+
+static bool operator<(const PrimitiveFormatListEntry &e1, const PrimitiveFormatListEntry &e2)
+{
+    return e1.baseType->name() < e2.baseType->name();
+}
+
+using PrimitiveFormatListEntries = QList<PrimitiveFormatListEntry>;
+
+static qsizetype indexOf(const PrimitiveFormatListEntries &e,  const PrimitiveTypeEntry *needle)
+{
+    for (qsizetype i = 0, size = e.size(); i < size; ++i) {
+        if (e.at(i).baseType == needle)
+            return i;
+    }
+    return -1;
+}
+
+void TypeDatabase::formatBuiltinTypes(QDebug debug) const
+{
+    QDebugStateSaver saver(debug);
+    debug.noquote();
+    debug.nospace();
+
+    // Determine base types and their typedef'ed types
+    QList<PrimitiveFormatListEntry> primitiveEntries;
+    for (auto *e : qAsConst(d->m_entries)) {
+        if (e->isPrimitive()) {
+            auto *pe = static_cast<const PrimitiveTypeEntry *>(e);
+            auto *basic = pe->basicReferencedTypeEntry();
+            if (basic != pe) {
+                const auto idx = indexOf(primitiveEntries, basic);
+                if (idx != -1)
+                    primitiveEntries[idx].typedefs.append(pe);
+                else
+                    primitiveEntries.append(PrimitiveFormatListEntry{basic, {pe}});
+            } else {
+                primitiveEntries.append(PrimitiveFormatListEntry{pe, {}});
+            }
+        }
+    }
+
+    std::sort(primitiveEntries.begin(), primitiveEntries.end());
+
+    for (const auto &e : qAsConst(primitiveEntries)) {
+        debug << "Primitive: " << formatPrimitiveEntry(e.baseType) << '\n';
+        for (auto *pe : e.typedefs)
+            debug << "             "  << formatPrimitiveEntry(pe) << '\n';
+    }
 }
 
 void TypeDatabasePrivate::addBuiltInType(TypeEntry *e)

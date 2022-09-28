@@ -200,6 +200,7 @@ public:
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const;
 #endif
+    void formatBuiltinTypes(QDebug debug) const;
 
 private:
     TypeDatabasePrivate *d;

@@ -50,6 +50,7 @@ static inline QString diffOption() { return QStringLiteral("diff"); }
 static inline QString useGlobalHeaderOption() { return QStringLiteral("use-global-header"); }
 static inline QString dryrunOption() { return QStringLiteral("dry-run"); }
 static inline QString skipDeprecatedOption() { return QStringLiteral("skip-deprecated"); }
+static inline QString printBuiltinTypesOption() { return QStringLiteral("print-builtin-types"); }
 
 static const char helpHint[] = "Note: use --help or -h for more information.\n";
 
@@ -390,6 +391,8 @@ void printUsage()
         {u"-T<path>"_s, {} },
         {u"typesystem-paths="_s + pathSyntax,
          u"Paths used when searching for typesystems"_s},
+        {printBuiltinTypesOption(),
+         u"Print information about builtin types"_s},
         {u"version"_s,
          u"Output version information and exit"_s}
     };
@@ -620,6 +623,11 @@ int shibokenMain(int argc, char *argv[])
         args.options.erase(ait);
     }
 
+    ait = args.options.find(printBuiltinTypesOption());
+    const bool printBuiltinTypes = ait != args.options.end();
+    if (printBuiltinTypes)
+        args.options.erase(ait);
+
     ait = args.options.find(compilerPathOption());
     if (ait != args.options.end()) {
         clang::setCompilerPath(ait.value().toString());
@@ -734,6 +742,9 @@ int shibokenMain(int argc, char *argv[])
         qCInfo(lcShiboken) << "API Extractor:\n" << extractor
             << "\n\nType datase:\n" << *TypeDatabase::instance();
     }
+
+    if (printBuiltinTypes)
+        TypeDatabase::instance()->formatBuiltinTypes(qInfo());
 
     for (const GeneratorPtr &g : qAsConst(generators)) {
         g->setOutputDirectory(outputDirectory);

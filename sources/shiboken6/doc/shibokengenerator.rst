@@ -258,6 +258,9 @@ Options
 ``--help``
     Display this help and exit.
 
+``--print-builtin-types``
+    Print information about builtin types
+
 .. _version:
 
 ``--version``
