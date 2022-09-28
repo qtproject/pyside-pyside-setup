@@ -870,7 +870,6 @@
   </object-type>
 
   <object-type name="QMenuBar">
-    <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp" snippet="qwidget-addaction-glue"/>
     <modify-function signature="addMenu(QMenu*)">
       <modify-argument index="return">
         <parent index="1" action="add"/>

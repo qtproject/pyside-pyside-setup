@@ -11,8 +11,6 @@
 
 using namespace Qt::StringLiterals;
 
-static inline QString callOperator() { return QStringLiteral("operator()"); }
-
 QString TemplateInstance::expandCode() const
 {
     TemplateEntry *templateEntry = TypeDatabase::instance()->findTemplate(m_name);
