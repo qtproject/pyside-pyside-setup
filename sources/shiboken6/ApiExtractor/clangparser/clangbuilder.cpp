@@ -824,10 +824,11 @@ bool BuilderPrivate::visitHeader(const QString &fileName) const
     case Platform::macOS:
         // Parse the following system headers to get the correct typdefs for types like
         // int32_t, which are used in the macOS implementation of OpenGL framework.
+        // They are installed under /Applications/Xcode.app/Contents/Developer/Platforms...
         if (baseName == u"gltypes.h"
-            || fileName.startsWith(u"/usr/include/_types")
-            || fileName.startsWith(u"/usr/include/_types")
-            || fileName.startsWith(u"/usr/include/sys/_types")) {
+            || fileName.contains(u"/usr/include/_types")
+            || fileName.contains(u"/usr/include/_types")
+            || fileName.contains(u"/usr/include/sys/_types")) {
             return true;
         }
         break;
