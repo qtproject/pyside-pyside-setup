@@ -125,17 +125,17 @@ static const QHash<QString, QString> &primitiveTypesCorrespondences()
         {u"char"_s, sbkCharT()},
         {u"signed char"_s, sbkCharT()},
         {u"unsigned char"_s, sbkCharT()},
-        {intT(), pyIntT()},
-        {u"signed int"_s, pyIntT()},
-        {u"uint"_s, pyIntT()},
-        {u"unsigned int"_s, pyIntT()},
-        {shortT(), pyIntT()},
-        {u"ushort"_s, pyIntT()},
-        {u"signed short"_s, pyIntT()},
-        {u"signed short int"_s, pyIntT()},
-        {unsignedShortT(), pyIntT()},
-        {u"unsigned short int"_s, pyIntT()},
-        {longT(), pyIntT()},
+        {intT(), pyLongT()},
+        {u"signed int"_s, pyLongT()},
+        {u"uint"_s, pyLongT()},
+        {u"unsigned int"_s, pyLongT()},
+        {shortT(), pyLongT()},
+        {u"ushort"_s, pyLongT()},
+        {u"signed short"_s, pyLongT()},
+        {u"signed short int"_s, pyLongT()},
+        {unsignedShortT(), pyLongT()},
+        {u"unsigned short int"_s, pyLongT()},
+        {longT(), pyLongT()},
         {doubleT(), pyFloatT()},
         {floatT(), pyFloatT()},
         {u"unsigned long"_s, pyLongT()},
@@ -770,8 +770,7 @@ QString ShibokenGenerator::pythonOperatorFunctionName(const AbstractMetaFunction
 
 bool ShibokenGenerator::isNumber(const QString &cpythonApiName)
 {
-    return cpythonApiName == pyIntT()
-       || cpythonApiName == pyFloatT() || cpythonApiName == pyLongT()
+    return cpythonApiName == pyFloatT() || cpythonApiName == pyLongT()
        || cpythonApiName == pyBoolT();
 }
 
