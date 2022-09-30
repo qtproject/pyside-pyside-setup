@@ -231,6 +231,8 @@ public:
     QString modifiedName() const;
 
     QString minimalSignature() const;
+    /// List of signatures matched for modifications
+    QStringList modificationSignatures() const;
     // Signature with replaced argument types and return type for overload
     // decisor comment.
     QString signatureComment() const;
@@ -291,6 +293,10 @@ public:
     QString signature() const;
     /// Return a signature qualified by class name, for error reporting.
     QString classQualifiedSignature() const;
+
+    /// Signature with unresolved typedefs as seen by the code parser
+    QString unresolvedSignature() const;
+    void setUnresolvedSignature(const QString &);
 
     bool isConstant() const;
     void setConstant(bool constant);

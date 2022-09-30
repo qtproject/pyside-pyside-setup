@@ -69,6 +69,7 @@ public:
     mutable QString m_cachedMinimalSignature;
     mutable QString m_cachedSignature;
     mutable QString m_cachedModifiedName;
+    QString m_unresolvedSignature;
 
     FunctionTypeEntry* m_typeEntry = nullptr;
     AbstractMetaFunction::FunctionType m_functionType = AbstractMetaFunction::NormalFunction;
@@ -522,6 +523,16 @@ QString AbstractMetaFunction::classQualifiedSignature() const
     return result;
 }
 
+QString AbstractMetaFunction::unresolvedSignature() const
+{
+    return d->m_unresolvedSignature;
+}
+
+void AbstractMetaFunction::setUnresolvedSignature(const QString &s)
+{
+    d->m_unresolvedSignature = s;
+}
+
 bool AbstractMetaFunction::isConstant() const
 {
     return d->m_constant;
@@ -953,6 +964,14 @@ QString AbstractMetaFunction::minimalSignature() const
     return d->m_cachedMinimalSignature;
 }
 
+QStringList AbstractMetaFunction::modificationSignatures() const
+{
+    QStringList result{minimalSignature()};
+    if (d->m_unresolvedSignature != result.constFirst())
+        result.append(d->m_unresolvedSignature);
+    return result;
+}
+
 QString AbstractMetaFunction::signatureComment() const
 {
     return d->formatMinimalSignature(this, true);
@@ -978,10 +997,10 @@ QString AbstractMetaFunction::debugSignature() const
 FunctionModificationList AbstractMetaFunction::findClassModifications(const AbstractMetaFunction *f,
                                                                       const AbstractMetaClass *implementor)
 {
-    const QString signature = f->minimalSignature();
+    const auto signatures = f->modificationSignatures();
     FunctionModificationList mods;
     while (implementor) {
-        mods += implementor->typeEntry()->functionModifications(signature);
+        mods += implementor->typeEntry()->functionModifications(signatures);
         if ((implementor == implementor->baseClass()) ||
             (implementor == f->implementingClass() && !mods.isEmpty())) {
                 break;
@@ -993,7 +1012,8 @@ FunctionModificationList AbstractMetaFunction::findClassModifications(const Abst
 
 FunctionModificationList AbstractMetaFunction::findGlobalModifications(const AbstractMetaFunction *f)
 {
-    return TypeDatabase::instance()->functionModifications(f->minimalSignature());
+    auto *td = TypeDatabase::instance();
+    return td->globalFunctionModifications(f->modificationSignatures());
 }
 
 const FunctionModificationList &
@@ -1564,7 +1584,10 @@ void AbstractMetaFunction::formatDebugVerbose(QDebug &debug) const
             debug << ", ";
         debug <<  d->m_arguments.at(i);
     }
-    debug << "), signature=\"" << minimalSignature() << '"';
+    const QString signature = minimalSignature();
+    debug << "), signature=\"" << signature << '"';
+    if (signature != d->m_unresolvedSignature)
+        debug << ", unresolvedSignature=\"" << d->m_unresolvedSignature << '"';
     if (d->m_constant)
         debug << " [const]";
     if (d->m_reverse)

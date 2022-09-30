@@ -579,11 +579,16 @@ void FunctionModification::setAllowThread(FunctionModification::AllowThread allo
         d->m_allowThread = allow;
 }
 
-bool FunctionModification::matches(const QString &functionSignature) const
+bool FunctionModification::matches(const QStringList &functionSignatures) const
 {
-    return d->m_signature.isEmpty()
-            ? d->m_signaturePattern.match(functionSignature).hasMatch()
-            : d->m_signature == functionSignature;
+    if (!d->m_signature.isEmpty())
+        return functionSignatures.contains(d->m_signature);
+
+    for (const auto &s : functionSignatures) {
+        if (d->m_signaturePattern.match(s).hasMatch())
+            return true;
+    }
+    return false;
 }
 
 bool FunctionModification::setSignature(const QString &s, QString *errorMessage)

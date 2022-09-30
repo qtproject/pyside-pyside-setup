@@ -163,7 +163,8 @@ public:
 
     void addGlobalUserFunctionModifications(const FunctionModificationList &functionModifications);
 
-    FunctionModificationList functionModifications(const QString &signature) const;
+    FunctionModificationList
+        globalFunctionModifications(const QStringList &signatures) const;
 
     void setSuppressWarnings(bool on);
 

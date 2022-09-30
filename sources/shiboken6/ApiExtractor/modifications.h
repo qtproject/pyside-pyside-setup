@@ -228,7 +228,7 @@ public:
     AllowThread allowThread() const;
     void setAllowThread(AllowThread allow);
 
-    bool matches(const QString &functionSignature) const;
+    bool matches(const QStringList &functionSignatures) const;
 
     bool setSignature(const QString &s, QString *errorMessage =  nullptr);
     QString signature() const;

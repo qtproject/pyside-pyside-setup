@@ -1306,12 +1306,13 @@ void ComplexTypeEntry::addFunctionModification(const FunctionModification &funct
     d->m_functionMods << functionModification;
 }
 
-FunctionModificationList ComplexTypeEntry::functionModifications(const QString &signature) const
+FunctionModificationList
+    ComplexTypeEntry::functionModifications(const QStringList &signatures) const
 {
     S_D(const ComplexTypeEntry);
     FunctionModificationList lst;
     for (const auto &mod : std::as_const(d->m_functionMods)) {
-        if (mod.matches(signature))
+        if (mod.matches(signatures))
             lst << mod;
     }
     return lst;

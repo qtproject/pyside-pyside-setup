@@ -754,11 +754,12 @@ QString TypeDatabase::globalNamespaceClassName(const TypeEntry * /*entry*/)
     return u"Global"_s;
 }
 
-FunctionModificationList TypeDatabase::functionModifications(const QString& signature) const
+FunctionModificationList
+    TypeDatabase::globalFunctionModifications(const QStringList &signatures) const
 {
     FunctionModificationList lst;
     for (const auto &mod : d->m_functionMods) {
-        if (mod.matches(signature))
+        if (mod.matches(signatures))
             lst << mod;
     }
 

@@ -289,7 +289,8 @@ void TestModifyFunction::testGlobalFunctionModification()
     QVERIFY(!builder.isNull());
     QCOMPARE(builder->globalFunctions().size(), 1);
 
-    FunctionModificationList mods = TypeDatabase::instance()->functionModifications(u"function(A*)"_s);
+    auto *td = TypeDatabase::instance();
+    FunctionModificationList mods = td->globalFunctionModifications({u"function(A*)"_s});
     QCOMPARE(mods.size(), 1);
     const QList<ArgumentModification> &argMods = mods.constFirst().argument_mods();
     QCOMPARE(argMods.size(), 1);

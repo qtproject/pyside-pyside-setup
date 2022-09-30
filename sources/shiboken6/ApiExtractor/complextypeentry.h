@@ -69,7 +69,7 @@ public:
     FunctionModificationList functionModifications() const;
     void setFunctionModifications(const FunctionModificationList &functionModifications);
     void addFunctionModification(const FunctionModification &functionModification);
-    FunctionModificationList functionModifications(const QString &signature) const;
+    FunctionModificationList functionModifications(const QStringList &signatures) const;
 
     const CodeSnipList &codeSnips() const;
     CodeSnipList &codeSnips();

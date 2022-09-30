@@ -42,6 +42,7 @@
 #include <QtCore/QDir>
 #include <QtCore/QFile>
 #include <QtCore/QFileInfo>
+#include <QtCore/QMetaObject>
 #include <QtCore/QQueue>
 #include <QtCore/QRegularExpression>
 #include <QtCore/QTemporaryFile>
@@ -175,13 +176,14 @@ void AbstractMetaBuilderPrivate::checkFunctionModifications()
             QStringList possibleSignatures;
             for (const auto &function : clazz->functions()) {
                 if (function->implementingClass() == clazz
-                    && modification.matches(function->minimalSignature())) {
+                    && modification.matches(function->modificationSignatures())) {
                     found = true;
                     break;
                 }
 
                 if (function->originalName() == name) {
-                    possibleSignatures.append(function->minimalSignature() + u" in "_s
+                    const QString signatures = function->modificationSignatures().join(u'/');
+                    possibleSignatures.append(signatures + u" in "_s
                                               + function->implementingClass()->name());
                 }
             }
@@ -1955,6 +1957,10 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
     }
 
     auto *metaFunction = new AbstractMetaFunction(functionName);
+    const QByteArray cSignature = signature.toUtf8();
+    const QString unresolvedSignature =
+        QString::fromUtf8(QMetaObject::normalizedSignature(cSignature.constData()));
+    metaFunction->setUnresolvedSignature(unresolvedSignature);
     if (functionItem->isHiddenFriend())
         metaFunction->setFlags(AbstractMetaFunction::Flag::HiddenFriend);
     metaFunction->setSourceLocation(functionItem->sourceLocation());
