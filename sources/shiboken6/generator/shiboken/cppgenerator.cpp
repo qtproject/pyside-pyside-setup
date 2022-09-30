@@ -1332,9 +1332,9 @@ void CppGenerator::writeVirtualMethodNativeArgs(TextStream &s,
     }
 }
 
-static bool isArgumentRemoved(const AbstractMetaArgument &a)
+static bool isArgumentNotRemoved(const AbstractMetaArgument &a)
 {
-    return a.isModifiedRemoved();
+    return !a.isModifiedRemoved();
 }
 
 void CppGenerator::writeVirtualMethodNative(TextStream &s,
@@ -1353,7 +1353,8 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
     const QString returnStatement = virtualMethodReturn(s, api(), func,
                                                         func->modifications());
 
-    if (func->isAbstract() && func->isModifiedRemoved()) {
+    const bool isAbstract = func->isAbstract();
+    if (isAbstract && func->isModifiedRemoved()) {
         qCWarning(lcShiboken, "%s", qPrintable(msgPureVirtualFunctionRemoved(func.data())));
         s << returnStatement << '\n' << outdent << "}\n\n";
         return;
@@ -1380,7 +1381,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
            << R"(] << '\n';)" << '\n';
     }
     // PYSIDE-803: Build a boolean cache for unused overrides
-    const bool multi_line = func->isVoid() || !snips.isEmpty() || func->isAbstract();
+    const bool multi_line = func->isVoid() || !snips.isEmpty() || isAbstract;
     s << "if (m_PyMethodCache[" << cacheIndex << "])" << (multi_line ? " {\n" : "\n")
         << indent;
     writeVirtualMethodCppCall(s, func, funcName, snips, lastArg, retType,
@@ -1441,7 +1442,12 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
     std::sort(invalidateArgs.begin(), invalidateArgs.end());
 
     auto arguments = func->arguments();
-    auto removedEnd = std::remove_if(arguments.begin(), arguments.end(), isArgumentRemoved);
+    auto removedEnd = std::stable_partition(arguments.begin(), arguments.end(),
+                                            isArgumentNotRemoved);
+    if (isAbstract) { // Base function is not called, indicate unused arguments.
+        for (auto it = removedEnd; it != arguments.end(); ++it)
+            s << sbkUnusedVariableCast(it->name());
+    }
     arguments.erase(removedEnd, arguments.end());
     writeVirtualMethodNativeArgs(s, func, arguments, invalidateArgs);
     s << '\n';
@@ -2258,7 +2264,7 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
     s << "static int\n";
     s << cpythonFunctionName(rfunc)
         << "(PyObject *self, PyObject *args, PyObject *kwds)\n{\n" << indent;
-    if (overloadData.maxArgs() == 0)
+    if (overloadData.maxArgs() == 0 || metaClass->isAbstract())
         s << sbkUnusedVariableCast(u"args"_s);
     s << sbkUnusedVariableCast(u"kwds"_s);
 
