@@ -209,6 +209,14 @@ Qt Modules Supported by Qt for Python
 
     ---
 
+    :mod:`Qt Serial Bus <PySide6.QtSerialBus>`
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    Provides access to serial industrial bus interfaces. Currently, the module
+    supports the CAN bus and Modbus protocols.
+
+    ---
+
     :mod:`Qt Serial Port <PySide6.QtSerialPort>`
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

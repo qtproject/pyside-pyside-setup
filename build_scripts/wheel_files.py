@@ -170,6 +170,7 @@ def wheel_files_pyside_addons() -> List[ModuleData]:
         module_QtScxml(),
         module_QtSensors(),
         module_QtSerialPort(),
+        module_QtSerialBus(),
         module_QtSpatialAudio(),
         module_QtStateMachine(),
         module_QtTextToSpeech(),
@@ -859,6 +860,12 @@ def module_QtOpenGL() -> ModuleData:
 def module_QtOpenGLWidgets() -> ModuleData:
     data = ModuleData("OpenGLWidgets")
 
+    return data
+
+
+def module_QtSerialBus() -> ModuleData:
+    data = ModuleData("SerialBus")
+    data.plugins.append("canbus")
     return data
 
 

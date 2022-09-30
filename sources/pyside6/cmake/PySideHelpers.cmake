@@ -103,6 +103,7 @@ macro(collect_optional_modules)
         Scxml
         Sensors
         SerialPort
+        SerialBus
         StateMachine
         TextToSpeech
         Charts

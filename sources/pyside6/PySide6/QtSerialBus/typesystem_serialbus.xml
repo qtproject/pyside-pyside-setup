@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+// Copyright (C) 2022 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+-->
+
+<typesystem package="PySide6.QtSerialBus">
+    <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
+    <load-typesystem name="QtNetwork/typesystem_network.xml" generate="no"/>
+    <load-typesystem name="QtSerialPort/typesystem_serialport.xml" generate="no"/>
+
+    <object-type name="QCanBus"/>
+    <object-type name="QCanBusDevice">
+        <enum-type name="CanBusError"/>
+        <enum-type name="CanBusDeviceState"/>
+        <enum-type name="CanBusStatus"/>
+        <enum-type name="ConfigurationKey"/>
+        <enum-type name="Direction" flags="Directions"/>
+        <modify-function signature="deviceInfo()const" access="final"/>
+        <value-type name="Filter">
+            <enum-type name="FormatFilter" flags="FormatFilters"/>
+        </value-type>
+    </object-type>
+    <value-type name="QCanBusDeviceInfo"> <!-- deleted default constructor -->
+        <modify-function signature="swap(QCanBusDeviceInfo&amp;)" remove="all"/>
+    </value-type>
+    <object-type name="QCanBusFactory"/>
+    <value-type name="QCanBusFrame">
+        <enum-type name="FrameType"/>
+        <enum-type name="FrameError" flags="FrameErrors"/>
+        <value-type name="TimeStamp"/>
+    </value-type>
+    <object-type name="QModbusClient"/>
+    <value-type name="QModbusDataUnit">
+        <enum-type name="RegisterType"/>
+    </value-type>
+    <object-type name="QModbusDevice">
+        <enum-type name="Error"/>
+        <enum-type name="State"/>
+        <enum-type name="ConnectionParameter"/>
+        <enum-type name="IntermediateError"/>
+    </object-type>
+    <value-type name="QModbusDeviceIdentification">
+        <enum-type name="ObjectId"/>
+        <enum-type name="ReadDeviceIdCode"/>
+        <enum-type name="ConformityLevel"/>
+    </value-type>
+    <object-type name="QModbusPdu">
+        <enum-type name="ExceptionCode"/>
+        <enum-type name="FunctionCode"/>
+        <modify-field name="ExceptionByte" remove="true"/> <!-- Link error -->
+    </object-type>
+    <object-type name="QModbusReply">
+        <enum-type name="ReplyType"/>
+    </object-type>
+    <object-type name="QModbusRequest"/>
+    <object-type name="QModbusRtuSerialClient"/>
+    <object-type name="QModbusRtuSerialServer"/>
+    <object-type name="QModbusServer">
+        <enum-type name="Option"/>
+    </object-type>
+    <object-type name="QModbusTcpClient"/>
+    <object-type name="QModbusTcpConnectionObserver"/>
+    <object-type name="QModbusTcpServer"/>
+</typesystem>
