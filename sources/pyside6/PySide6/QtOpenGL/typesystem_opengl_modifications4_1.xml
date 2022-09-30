@@ -5,7 +5,7 @@
 <modify-function signature="^gl(DepthRange|Scissor|Viewport)Arrayv\(.*$">
     <modify-argument index="3"><array/></modify-argument>
 </modify-function>
-<modify-function signature="glGetDoublei_v(&GLuint;,&GLuint;,double*)">
+<modify-function signature="glGetDoublei_v(GLenum,GLuint,GLdouble*)">
     <modify-argument index="return" pyi-type="Union[float,numpy.ndarray]">
         <replace-type modified-type="PyObject"/>
     </modify-argument>
@@ -14,7 +14,7 @@
     </modify-argument>
     <inject-code class="target" position="beginning" file="../glue/qtgui.cpp" snippet="qopenglextrafunctions-glgetdoublei-v"/>
 </modify-function>
-<modify-function signature="glGetFloati_v(&GLuint;,&GLuint;,float*)">
+<modify-function signature="glGetFloati_v(GLenum,GLuint,GLfloat*)">
     <modify-argument index="return" pyi-type="Union[float,numpy.ndarray]">
         <replace-type modified-type="PyObject"/>
     </modify-argument>
@@ -35,6 +35,6 @@
 <modify-function signature="^gl(Scissor|Viewport)Indexedf?v\(.*$">
     <modify-argument index="2"><array/></modify-argument>
 </modify-function>
-<modify-function signature="glShaderBinary(&GLint;,const &GLuint;*,&GLuint;,const void *,&GLint;)">
+<modify-function signature="^glShaderBinary\(GLsizei,const GLuint\*,.*$">
     <modify-argument index="2"><array/></modify-argument>
 </modify-function>

@@ -8,26 +8,6 @@
   <load-typesystem name="QtGui/typesystem_gui.xml" generate="no" />
   <load-typesystem name="templates/opengl_common.xml" generate="no" />
 
-  <?if !darwin?>
-  <?entity GLint int?>
-  <?entity GLuint unsigned int?>
-  <?entity GLbyte unsigned char?>
-  <?entity GLboolean unsigned char?>
-  <?entity GLsizei int?>
-  <?entity GLsizeiptr long?>
-  <?entity GLintptr long?>
-  <?endif?>
-
-  <?if darwin?>
-  <?entity GLint int32_t?>
-  <?entity GLuint uint32_t?>
-  <?entity GLbyte uint8_t?>
-  <?entity GLboolean uint8_t?>
-  <?entity GLsizei int32_t?>
-  <?entity GLsizeiptr intptr_t?>
-  <?entity GLintptr intptr_t?>
-  <?endif?>
-
   <rejection class="^QOpenGL.*$" argument-type="^const GLboolean ?\*$"/>
   <rejection class="^QOpenGL.*$" argument-type="^GLchar\*$"/>
   <rejection class="^QOpenGL.*$" argument-type="^(const )?GLchar ?\*(const)?\*$"/>
@@ -634,19 +614,19 @@
       <modify-function signature="setUniformValueArray(int,const float*,int,int)">
           <modify-argument index="2"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="setUniformValueArray(int,const &GLint;*,int)">
+      <modify-function signature="setUniformValueArray(int,const GLint*,int)">
           <modify-argument index="2"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="setUniformValueArray(int,const &GLuint;*,int)">
+      <modify-function signature="setUniformValueArray(int,const GLuint*,int)">
           <modify-argument index="2"><array/></modify-argument>
       </modify-function>
       <modify-function signature="setUniformValueArray(const char*,const float*,int,int)">
           <modify-argument index="2"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="setUniformValueArray(const char*,const &GLint;*,int)">
+      <modify-function signature="setUniformValueArray(const char*,const GLint*,int)">
           <modify-argument index="2"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="setUniformValueArray(const char*,const &GLuint;*,int)">
+      <modify-function signature="setUniformValueArray(const char*,const GLuint*,int)">
           <modify-argument index="2"><array/></modify-argument>
       </modify-function>
       <!-- Add explicit signatures for the setUniformValue functions -->
@@ -655,13 +635,13 @@
       <add-function signature="setUniformValue1f(const char*, float)" return-type="void">
           <inject-code file="../glue/qtopengl.cpp" snippet="qopenglshaderprogram_setuniformvalue_float"/>
       </add-function>
-      <add-function signature="setUniformValue1i(const char*, &GLint;)" return-type="void">
+      <add-function signature="setUniformValue1i(const char*, GLint)" return-type="void">
           <inject-code file="../glue/qtopengl.cpp" snippet="qopenglshaderprogram_setuniformvalue_int"/>
       </add-function>
-      <add-function signature="setUniformValue1f(&GLint;, float)" return-type="void">
+      <add-function signature="setUniformValue1f(GLint, float)" return-type="void">
           <inject-code file="../glue/qtopengl.cpp" snippet="qopenglshaderprogram_setuniformvalue_float"/>
       </add-function>
-      <add-function signature="setUniformValue1i(&GLint;, &GLint;)" return-type="void">
+      <add-function signature="setUniformValue1i(GLint, GLint)" return-type="void">
           <inject-code file="../glue/qtopengl.cpp" snippet="qopenglshaderprogram_setuniformvalue_int"/>
       </add-function>
   </object-type>
