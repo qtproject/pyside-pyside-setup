@@ -8,6 +8,8 @@
 #include <abstractmetalang.h>
 #include <abstractmetatype.h>
 #include <complextypeentry.h>
+#include <primitivetypeentry.h>
+#include <typedatabase.h>
 
 #include <qtcompat.h>
 
@@ -225,5 +227,43 @@ void TestResolveType::testFixDefaultArguments()
     QCOMPARE(actual, expected);
 }
 
-QTEST_APPLESS_MAIN(TestResolveType)
+// Verify that the typedefs of the C++ 11 integer types (int32_t, ...)
+// are seen by the C++ parser, otherwise they are handled as unknown
+// primitive types, causing invalid code to be generated.
+// (see BuilderPrivate::visitHeader(),
+// sources/shiboken6/ApiExtractor/clangparser/clangbuilder.cpp).
+void TestResolveType::testCppTypes()
+{
+    static const char cppCode[] =R"(
+#include <cstdint>
 
+class Test
+{
+public:
+    explicit Test(int32_t v);
+};
+)";
+    static const char xmlCode[] = R"(
+<typesystem package="Foo">
+    <value-type name='Test'/>
+    <primitive-type name='int32_t'/>
+</typesystem>
+)";
+
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
+    const AbstractMetaClass *testClass = AbstractMetaClass::findClass(classes, u"Test");
+    QVERIFY(testClass);
+
+    auto *tdb = TypeDatabase::instance();
+    auto *int32TEntry = tdb->findType(u"int32_t"_s);
+    QVERIFY2(int32TEntry, "int32_t not found");
+    QVERIFY(int32TEntry->isPrimitive());
+    auto *int32T = static_cast<const PrimitiveTypeEntry *>(int32TEntry);
+    auto *basicType = int32T->basicReferencedTypeEntry();
+    QVERIFY2(basicType != int32T,
+             "Typedef for int32_t not found. Check the system include paths.");
+}
+
+QTEST_APPLESS_MAIN(TestResolveType)

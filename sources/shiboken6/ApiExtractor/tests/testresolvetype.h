@@ -15,6 +15,7 @@ class TestResolveType : public QObject
         void testResolveReturnTypeFromParentScope();
         void testFixDefaultArguments_data();
         void testFixDefaultArguments();
+        void testCppTypes();
 };
 
 #endif
