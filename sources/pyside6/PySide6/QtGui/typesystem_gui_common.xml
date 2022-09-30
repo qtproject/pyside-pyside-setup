@@ -10,26 +10,6 @@
   <load-typesystem name="templates/gui_common.xml" generate="no"/>
   <load-typesystem name="templates/opengl_common.xml" generate="no"/>
 
-  <?if !darwin?>
-  <?entity GLint int?>
-  <?entity GLuint unsigned int?>
-  <?entity GLbyte unsigned char?>
-  <?entity GLboolean unsigned char?>
-  <?entity GLsizei int?>
-  <?entity GLsizeiptr long?>
-  <?entity GLintptr long?>
-  <?endif?>
-
-  <?if darwin?>
-  <?entity GLint int32_t?>
-  <?entity GLuint uint32_t?>
-  <?entity GLbyte uint8_t?>
-  <?entity GLboolean uint8_t?>
-  <?entity GLsizei int32_t?>
-  <?entity GLsizeiptr intptr_t?>
-  <?entity GLintptr intptr_t?>
-  <?endif?>
-
   <rejection class="^Q.*$" argument-type="^QPlatform.*$"/>
   <function signature="qAlpha(uint)"/>
   <function signature="qBlue(uint)"/>
@@ -2669,53 +2649,53 @@
       <modify-function signature="^glClearBuffer.*\(.*\*.*$">
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glDebugMessageControl(&GLuint;,&GLuint;,&GLuint;,&GLint;,const &GLuint;*,&GLbyte;)">
+      <modify-function signature="glDebugMessageControl(GLenum,GLenum,GLenum,GLsizei,const GLuint*,GLboolean)">
           <modify-argument index="5"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glDeleteProgramPipelines(&GLint;,const &GLuint;*)">
+      <modify-function signature="glDeleteProgramPipelines(GLsizei,const GLuint*)">
           <modify-argument index="2"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glDeleteQueries(&GLint;,const &GLuint;*)">
+      <modify-function signature="glDeleteQueries(GLsizei,const GLuint*)">
           <modify-argument index="2"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glDeleteSamplers(&GLint;,const &GLuint;*)">
+      <modify-function signature="glDeleteSamplers(GLsizei,const GLuint*)">
           <modify-argument index="2"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glDeleteTransformFeedbacks(&GLint;,const &GLuint;*)">
+      <modify-function signature="glDeleteTransformFeedbacks(GLsizei,const GLuint*)">
           <modify-argument index="2"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glDeleteVertexArrays(&GLint;,const &GLuint;*)">
+      <modify-function signature="glDeleteVertexArrays(GLsizei,const GLuint*)">
           <modify-argument index="2"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glDrawBuffers(&GLint;,const &GLuint;*)">
+      <modify-function signature="glDrawBuffers(GLsizei,const GLenum*)">
           <modify-argument index="2"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGenProgramPipelines(&GLint;,&GLuint;*)">
+      <modify-function signature="glGenProgramPipelines(GLsizei,GLuint*)">
           <modify-argument index="2"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGenQueries(&GLint;,&GLuint;*)">
+      <modify-function signature="glGenQueries(GLsizei,GLuint*)">
           <modify-argument index="2"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGenSamplers(&GLint;,&GLuint;*)">
+      <modify-function signature="glGenSamplers(GLsizei,GLuint*)">
           <modify-argument index="2"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGenTransformFeedbacks(&GLint;,&GLuint;*)">
+      <modify-function signature="glGenTransformFeedbacks(GLsizei,GLuint*)">
           <modify-argument index="2"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGenVertexArrays(&GLint;,&GLuint;*)">
+      <modify-function signature="glGenVertexArrays(GLsizei,GLuint*)">
           <modify-argument index="2"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGetActiveUniformBlockiv(&GLuint;,&GLuint;,&GLuint;,&GLint;*)">
+      <modify-function signature="glGetActiveUniformBlockiv(GLuint,GLuint,GLenum,GLint*)">
           <modify-argument index="4"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGetActiveUniformsiv(&GLuint;,&GLint;,const &GLuint;*,&GLuint;,&GLint;*)">
+      <modify-function signature="glGetActiveUniformsiv(GLuint,GLsizei,const GLuint*,GLenum,GLint*)">
           <modify-argument index="3"><array/></modify-argument>
           <modify-argument index="5"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGetFramebufferParameteriv(&GLuint;,&GLuint;,&GLint;*)">
+      <modify-function signature="glGetFramebufferParameteriv(GLenum,GLenum,GLint*)">
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGetBooleani_v(&GLuint;,&GLuint;,&GLboolean;*)">
+      <modify-function signature="glGetBooleani_v(GLenum,GLuint,GLboolean*)">
           <modify-argument index="return" pyi-type="Union[bool,numpy.ndarray]">
               <replace-type modified-type="PyObject"/>
           </modify-argument>
@@ -2727,143 +2707,143 @@
       </modify-function>
       <!-- FIXME PYSIDE 7: Use the remove array modification and use
                            the version with return value instead -->
-      <modify-function signature="glGetIntegeri_v(&GLuint;,&GLuint;,&GLint;*)">
+      <modify-function signature="glGetIntegeri_v(GLenum,GLuint,GLint*)">
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
-      <add-function signature="glGetIntegeri_v(&GLuint;,&GLuint;)" return-type="PyObject">
+      <add-function signature="glGetIntegeri_v(GLuint,GLuint)" return-type="PyObject">
           <modify-argument index="return" pyi-type="Union[int,numpy.ndarray]"/>
           <inject-code class="target" position="beginning" file="../glue/qtgui.cpp"
                        snippet="qopenglextrafunctions-glgetintegeri-v"/>
       </add-function>
-      <modify-function signature="glGetInternalformativ(&GLuint;,&GLuint;,&GLuint;,&GLint;,&GLint;*)">
+      <modify-function signature="glGetInternalformativ(GLenum,GLenum,GLenum,GLsizei,GLint*)">
           <modify-argument index="5"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGetMultisamplefv(&GLuint;,&GLuint;,float*)">
+      <modify-function signature="glGetMultisamplefv(GLenum,GLuint,GLfloat*)">
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGetProgramInterfaceiv(&GLuint;,&GLuint;,&GLuint;,&GLint;*)">
+      <modify-function signature="glGetProgramInterfaceiv(GLuint,GLenum,GLenum,GLint*)">
           <modify-argument index="4"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGetProgramPipelineiv(&GLuint;,&GLuint;,&GLint;*)">
+      <modify-function signature="glGetProgramPipelineiv(GLuint,GLenum,GLint*)">
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGetProgramResourceiv(&GLuint;,&GLuint;,&GLuint;,&GLint;,const &GLuint;*,&GLint;,&GLint;*,&GLint;*)">
+      <modify-function signature="glGetProgramResourceiv(GLuint,GLenum,GLuint,GLsizei,const GLenum*,GLsizei,GLsizei*,GLint*)">
           <modify-argument index="5"><array/></modify-argument>
           <modify-argument index="7"><array/></modify-argument>
           <modify-argument index="8"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGetQueryObjectuiv(&GLuint;,&GLuint;,&GLuint;*)">
+      <modify-function signature="glGetQueryObjectuiv(GLuint,GLenum,GLuint*)">
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGetQueryiv(&GLuint;,&GLuint;,&GLint;*)">
+      <modify-function signature="glGetQueryiv(GLenum,GLenum,GLint*)">
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGetSamplerParameterfv(&GLuint;,&GLuint;,float*)">
+      <modify-function signature="glGetSamplerParameterfv(GLuint,GLenum,GLfloat*)">
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGetSamplerParameteriv(&GLuint;,&GLuint;,&GLint;*)">
+      <modify-function signature="glGetSamplerParameteriv(GLuint,GLenum,GLint*)">
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGetSamplerParameterIiv(&GLuint;,&GLuint;,&GLint;*)">
+      <modify-function signature="glGetSamplerParameterIiv(GLuint,GLenum,GLint*)">
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGetSamplerParameterIuiv(&GLuint;,&GLuint;,&GLuint;*)">
+      <modify-function signature="glGetSamplerParameterIuiv(GLuint,GLenum,GLuint*)">
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGetTexLevelParameteriv(&GLuint;,&GLint;,&GLuint;,&GLint;*)">
+      <modify-function signature="glGetTexLevelParameteriv(GLenum,GLint,GLenum,GLint*)">
           <modify-argument index="4"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGetTexLevelParameterfv(&GLuint;,&GLint;,&GLuint;,float*)">
+      <modify-function signature="glGetTexLevelParameterfv(GLenum,GLint,GLenum,GLfloat*)">
           <modify-argument index="4"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGetTexParameterIiv(&GLuint;,&GLuint;,&GLint;*)">
+      <modify-function signature="glGetTexParameterIiv(GLenum,GLenum,GLint*)">
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGetTexParameterIuiv(&GLuint;,&GLuint;,&GLuint;*)">
+      <modify-function signature="glGetTexParameterIuiv(GLenum,GLenum,GLuint*)">
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGetnUniformiv(&GLuint;,&GLint;,&GLint;,&GLint;*)">
+      <modify-function signature="glGetnUniformiv(GLuint,GLint,GLsizei,GLint*)">
           <modify-argument index="4"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGetnUniformuiv(&GLuint;,&GLint;,&GLint;,&GLuint;*)">
+      <modify-function signature="glGetnUniformuiv(GLuint,GLint,GLsizei,GLuint*)">
           <modify-argument index="4"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGetUniformuiv(&GLuint;,&GLint;,&GLuint;*)">
+      <modify-function signature="glGetUniformuiv(GLuint,GLint,GLuint*)">
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGetVertexAttribIiv(&GLuint;,&GLuint;,&GLint;*)">
+      <modify-function signature="glGetVertexAttribIiv(GLuint,GLenum,GLint*)">
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGetVertexAttribIuiv(&GLuint;,&GLuint;,&GLuint;*)">
+      <modify-function signature="glGetVertexAttribIuiv(GLuint,GLenum,GLuint*)">
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glInvalidateFramebuffer(&GLuint;,&GLint;,const &GLuint;*)">
+      <modify-function signature="glInvalidateFramebuffer(GLenum,GLsizei,const GLenum*)">
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glInvalidateSubFramebuffer(&GLuint;,&GLint;,const &GLuint;*,&GLint;,&GLint;,&GLint;,&GLint;)">
+      <modify-function signature="glInvalidateSubFramebuffer(GLenum,GLsizei,const GLenum*,GLint,GLint,GLsizei,GLsizei)">
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glProgramUniform1fv(&GLuint;,&GLint;,&GLint;,const float*)">
+      <modify-function signature="glProgramUniform1fv(GLuint,GLint,GLsizei,const GLfloat*)">
           <modify-argument index="4"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glProgramUniform1iv(&GLuint;,&GLint;,&GLint;,const &GLint;*)">
+      <modify-function signature="glProgramUniform1iv(GLuint,GLint,GLsizei,const GLint*)">
           <modify-argument index="4"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glProgramUniform1uiv(&GLuint;,&GLint;,&GLint;,const &GLuint;*)">
+      <modify-function signature="glProgramUniform1uiv(GLuint,GLint,GLsizei,const GLuint*)">
           <modify-argument index="4"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glProgramUniform2fv(&GLuint;,&GLint;,&GLint;,const float*)">
+      <modify-function signature="glProgramUniform2fv(GLuint,GLint,GLsizei,const GLfloat*)">
           <modify-argument index="4"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glProgramUniform2iv(&GLuint;,&GLint;,&GLint;,const &GLint;*)">
+      <modify-function signature="glProgramUniform2iv(GLuint,GLint,GLsizei,const GLint*)">
           <modify-argument index="4"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glProgramUniform2uiv(&GLuint;,&GLint;,&GLint;,const &GLuint;*)">
+      <modify-function signature="glProgramUniform2uiv(GLuint,GLint,GLsizei,const GLuint*)">
           <modify-argument index="4"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glProgramUniform3fv(&GLuint;,&GLint;,&GLint;,const float*)">
+      <modify-function signature="glProgramUniform3fv(GLuint,GLint,GLsizei,const GLfloat*)">
           <modify-argument index="4"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glProgramUniform3iv(&GLuint;,&GLint;,&GLint;,const &GLint;*)">
+      <modify-function signature="glProgramUniform3iv(GLuint,GLint,GLsizei,const GLint*)">
           <modify-argument index="4"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glProgramUniform3uiv(&GLuint;,&GLint;,&GLint;,const &GLuint;*)">
+      <modify-function signature="glProgramUniform3uiv(GLuint,GLint,GLsizei,const GLuint*)">
           <modify-argument index="4"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glProgramUniform4fv(&GLuint;,&GLint;,&GLint;,const float*)">
+      <modify-function signature="glProgramUniform4fv(GLuint,GLint,GLsizei,const GLfloat*)">
           <modify-argument index="4"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glProgramUniform4iv(&GLuint;,&GLint;,&GLint;,const &GLint;*)">
+      <modify-function signature="glProgramUniform4iv(GLuint,GLint,GLsizei,const GLint*)">
           <modify-argument index="4"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glProgramUniform4uiv(&GLuint;,&GLint;,&GLint;,const &GLuint;*)">
+      <modify-function signature="glProgramUniform4uiv(GLuint,GLint,GLsizei,const GLuint*)">
           <modify-argument index="4"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glProgramUniformMatrix2fv(&GLuint;,&GLint;,&GLint;,&GLbyte;,const float*)">
+      <modify-function signature="glProgramUniformMatrix2fv(GLuint,GLint,GLsizei,GLboolean,const GLfloat*)">
           <modify-argument index="5"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glProgramUniformMatrix2x3fv(&GLuint;,&GLint;,&GLint;,&GLbyte;,const float*)">
+      <modify-function signature="glProgramUniformMatrix2x3fv(GLuint,GLint,GLsizei,GLboolean,const GLfloat*)">
           <modify-argument index="5"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glProgramUniformMatrix2x4fv(&GLuint;,&GLint;,&GLint;,&GLbyte;,const float*)">
+      <modify-function signature="glProgramUniformMatrix2x4fv(GLuint,GLint,GLsizei,GLboolean,const GLfloat*)">
           <modify-argument index="5"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glProgramUniformMatrix3fv(&GLuint;,&GLint;,&GLint;,&GLbyte;,const float*)">
+      <modify-function signature="glProgramUniformMatrix3fv(GLuint,GLint,GLsizei,GLboolean,const GLfloat*)">
           <modify-argument index="5"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glProgramUniformMatrix3x2fv(&GLuint;,&GLint;,&GLint;,&GLbyte;,const float*)">
+      <modify-function signature="glProgramUniformMatrix3x2fv(GLuint,GLint,GLsizei,GLboolean,const GLfloat*)">
           <modify-argument index="5"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glProgramUniformMatrix3x4fv(&GLuint;,&GLint;,&GLint;,&GLbyte;,const float*)">
+      <modify-function signature="glProgramUniformMatrix3x4fv(GLuint,GLint,GLsizei,GLboolean,const GLfloat*)">
           <modify-argument index="5"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glProgramUniformMatrix4fv(&GLuint;,&GLint;,&GLint;,&GLbyte;,const float*)">
+      <modify-function signature="glProgramUniformMatrix4fv(GLuint,GLint,GLsizei,GLboolean,const GLfloat*)">
           <modify-argument index="5"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glProgramUniformMatrix4x2fv(&GLuint;,&GLint;,&GLint;,&GLbyte;,const float*)">
+      <modify-function signature="glProgramUniformMatrix4x2fv(GLuint,GLint,GLsizei,GLboolean,const GLfloat*)">
           <modify-argument index="5"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glProgramUniformMatrix4x3fv(&GLuint;,&GLint;,&GLint;,&GLbyte;,const float*)">
+      <modify-function signature="glProgramUniformMatrix4x3fv(GLuint,GLint,GLsizei,GLboolean,const GLfloat*)">
           <modify-argument index="5"><array/></modify-argument>
       </modify-function>
       <modify-function signature="^glSamplerParameterI?u?[fi]v\(.*$">
@@ -2872,43 +2852,43 @@
       <modify-function signature="^glTexParameterI?u?[fi]v\(.*$">
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glUniform1uiv(&GLint;,&GLint;,const &GLuint;*)">
+      <modify-function signature="glUniform1uiv(GLint,GLsizei,const GLuint*)">
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glUniform2uiv(&GLint;,&GLint;,const &GLuint;*)">
+      <modify-function signature="glUniform2uiv(GLint,GLsizei,const GLuint*)">
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glUniform3uiv(&GLint;,&GLint;,const &GLuint;*)">
+      <modify-function signature="glUniform3uiv(GLint,GLsizei,const GLuint*)">
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glUniform4uiv(&GLint;,&GLint;,const &GLuint;*)">
+      <modify-function signature="glUniform4uiv(GLint,GLsizei,const GLuint*)">
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glUniformMatrix2x3fv(&GLint;,&GLsizei;,&GLboolean;,const float*)">
+      <modify-function signature="glUniformMatrix2x3fv(GLint,GLsizei,GLboolean,const GLfloat*)">
           <modify-argument index="4"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glUniformMatrix2x4fv(&GLint;,&GLsizei;,&GLboolean;,const float*)">
+      <modify-function signature="glUniformMatrix2x4fv(GLint,GLsizei,GLboolean,const GLfloat*)">
           <modify-argument index="4"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glUniformMatrix3x2fv(&GLint;,&GLsizei;,&GLboolean;,const float*)">
+      <modify-function signature="glUniformMatrix3x2fv(GLint,GLsizei,GLboolean,const GLfloat*)">
           <modify-argument index="4"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glUniformMatrix3x4fv(&GLint;,&GLsizei;,&GLboolean;,const float*)">
+      <modify-function signature="glUniformMatrix3x4fv(GLint,GLsizei,GLboolean,const GLfloat*)">
           <modify-argument index="4"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glUniformMatrix4x2fv(&GLint;,&GLsizei;,&GLboolean;,const float*)">
+      <modify-function signature="glUniformMatrix4x2fv(GLint,GLsizei,GLboolean,const GLfloat*)">
           <modify-argument index="4"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glUniformMatrix4x3fv(&GLint;,&GLsizei;,&GLboolean;,const float*)">
+      <modify-function signature="glUniformMatrix4x3fv(GLint,GLsizei,GLboolean,const GLfloat*)">
           <modify-argument index="4"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glVertexAttribI4iv(&GLuint;,const &GLint;*)">
+      <modify-function signature="glVertexAttribI4iv(GLuint,const GLint*)">
           <modify-argument index="2"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glVertexAttribI4uiv(&GLuint;,const &GLuint;*)">
+      <modify-function signature="glVertexAttribI4uiv(GLuint,const GLuint*)">
           <modify-argument index="2"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGetStringi(&GLuint;,&GLuint;)">
+      <modify-function signature="glGetStringi(GLenum,GLuint)">
           <modify-argument index="return">
               <replace-type modified-type="QString"/>
           </modify-argument>
@@ -2925,25 +2905,25 @@
                    snippet="qopenglfunctions-glgetv-return-size"/>
 
       <enum-type name="OpenGLFeature" flags="OpenGLFeatures"/>
-      <add-function signature="glGetShaderSource(&GLuint; @shader@)" return-type="const char *">
+      <add-function signature="glGetShaderSource(GLuint @shader@)" return-type="const char *">
           <inject-code class="target" position="beginning" file="../glue/qtgui.cpp"
                        snippet="glgetshadersource"/>
       </add-function>
-      <add-function signature="glShaderSource(&GLuint; @shader@,const QString &amp; @source@)">
+      <add-function signature="glShaderSource(GLuint @shader@,const QString &amp; @source@)">
           <inject-code class="target" position="beginning" file="../glue/qtgui.cpp"
                        snippet="glshadersource"/>
       </add-function>
-      <modify-function signature="glGetAttachedShaders(&GLuint;,&GLint;,&GLint;*,&GLuint;*)">
+      <modify-function signature="glGetAttachedShaders(GLuint,GLsizei,GLsizei*,GLuint*)">
           <modify-argument index="3"><array/></modify-argument>
           <modify-argument index="4"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGetBufferParameteriv(&GLuint;,&GLuint;,&GLint;*)">
+      <modify-function signature="glGetBufferParameteriv(GLenum,GLenum,GLint*)">
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGetFramebufferAttachmentParameteriv(&GLuint;,&GLuint;,&GLuint;,&GLint;*)">
+      <modify-function signature="glGetFramebufferAttachmentParameteriv(GLenum,GLenum,GLenum,GLint*)">
           <modify-argument index="4"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGetBooleanv(&GLuint;,&GLboolean;*)">
+      <modify-function signature="glGetBooleanv(GLenum,GLboolean*)">
           <modify-argument index="return" pyi-type="Union[bool,numpy.ndarray]">
               <replace-type modified-type="PyObject"/>
           </modify-argument>
@@ -2955,34 +2935,34 @@
       </modify-function>
       <!-- FIXME PYSIDE 7: Use the remove array modification and use
                            the version with return value instead -->
-      <modify-function signature="glGetFloatv(&GLuint;,float*)">
+      <modify-function signature="glGetFloatv(GLenum,GLfloat*)">
           <modify-argument index="2"><array/></modify-argument>
       </modify-function>
-      <add-function signature="glGetFloatv(&GLuint;)" return-type="PyObject">
+      <add-function signature="glGetFloatv(GLuint)" return-type="PyObject">
           <modify-argument index="return" pyi-type="Union[float,numpy.ndarray]"/>
           <inject-code class="target" position="beginning" file="../glue/qtgui.cpp"
                        snippet="qopenglfunctions-glgetfloatv"/>
       </add-function>
       <!-- FIXME PYSIDE 7: Use the remove array modification and use
                            the version with return value instead -->
-      <modify-function signature="glGetIntegerv(&GLuint;,&GLint;*)">
+      <modify-function signature="glGetIntegerv(GLenum,GLint*)">
            <modify-argument index="2"><array/></modify-argument>
       </modify-function>
-      <add-function signature="glGetIntegerv(&GLuint;)" return-type="PyObject">
+      <add-function signature="glGetIntegerv(GLuint)" return-type="PyObject">
           <modify-argument index="return" pyi-type="Union[int,numpy.ndarray]"/>
           <inject-code class="target" position="beginning" file="../glue/qtgui.cpp"
                        snippet="qopenglfunctions-glgetintegerv"/>
       </add-function>
-      <modify-function signature="glGetProgramiv(&GLuint;,&GLuint;,&GLint;*)">
+      <modify-function signature="glGetProgramiv(GLuint,GLenum,GLint*)">
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGetRenderbufferParameteriv(&GLuint;,&GLuint;,&GLint;*)">
+      <modify-function signature="glGetRenderbufferParameteriv(GLenum,GLenum,GLint*)">
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGetShaderiv(&GLuint;,&GLuint;,&GLint;*)">
+      <modify-function signature="glGetShaderiv(GLuint,GLenum,GLint*)">
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGetShaderPrecisionFormat(&GLuint;,&GLuint;,&GLint;*,&GLint;*)">
+      <modify-function signature="glGetShaderPrecisionFormat(GLenum,GLenum,GLint*,GLint*)">
           <modify-argument index="3"><array/></modify-argument>
           <modify-argument index="4"><array/></modify-argument>
       </modify-function>
@@ -3007,7 +2987,7 @@
       <modify-function signature="^glGetVertexAttrib[fi]v\(.*$">
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="glGetString(&GLuint;)">
+      <modify-function signature="glGetString(GLenum)">
           <modify-argument index="return">
               <replace-type modified-type="QString"/>
           </modify-argument>
@@ -3015,7 +2995,7 @@
             <insert-template name="glGetString_return_QString"/>
           </inject-code>
       </modify-function>
-      <modify-function signature="glShaderBinary(&GLint;,const &GLuint;*,&GLuint;,const void *,&GLint;)">
+      <modify-function signature="glShaderBinary(GLint,const GLuint*,GLenum,const void*,GLint)">
           <modify-argument index="2"><array/></modify-argument>
       </modify-function>
   </object-type>
