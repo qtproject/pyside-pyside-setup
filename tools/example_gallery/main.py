@@ -248,8 +248,15 @@ if __name__ == "__main__":
         try:
             with pyproject_file.open("r", encoding="utf-8") as pyf:
                 pyproject = json.load(pyf)
-                files = pyproject["files"]
-        except (json.JSONDecodeError, KeyError) as e:
+                # iterate through the list of files in .pyproject and
+                # check if they exist, before appending to the list.
+                for f in pyproject["files"]:
+                    if not Path(f).exists:
+                        print(f"example_gallery: {f} listed in {pyproject_file} does not exist")
+                        raise FileNotFoundError
+                    else:
+                        files.append(f)
+        except (json.JSONDecodeError, KeyError, FileNotFoundError) as e:
             print(f"example_gallery: error reading {pyproject_file}: {e}")
             raise
 
