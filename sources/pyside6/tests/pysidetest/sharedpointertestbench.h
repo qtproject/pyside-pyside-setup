@@ -45,6 +45,10 @@ public:
 
     static QSharedPointer<QObject> createSharedPointerQObject();
     static void printSharedPointerQObject(const QSharedPointer<QObject> &p);
+
+    static QSharedPointer<const QObject> createSharedPointerConstQObject();
+    static void printSharedPointerConstQObject(const QSharedPointer<const QObject> &p);
+
 };
 
 #endif // SHAREDPOINTERTESTBENCH_H
