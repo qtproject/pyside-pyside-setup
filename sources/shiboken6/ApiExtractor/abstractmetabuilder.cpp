@@ -1321,7 +1321,7 @@ AbstractMetaFunctionRawPtrList
                 currentClass->addSynthesizedComparisonOperators();
         } else if (auto *metaFunction = traverseFunction(function, currentClass)) {
             result.append(metaFunction);
-        } else if (function->functionType() == CodeModel::Constructor) {
+        } else if (!function->isDeleted() && function->functionType() == CodeModel::Constructor) {
             auto arguments = function->arguments();
             *constructorAttributes |= AbstractMetaClass::HasRejectedConstructor;
             if (arguments.isEmpty() || arguments.constFirst()->defaultValue())

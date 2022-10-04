@@ -27,4 +27,16 @@ private:
     PrivateCtor() : m_instanciations(0) {}
 };
 
+class DeletedDefaultCtor
+{
+public:
+    DeletedDefaultCtor() = delete;
+
+    DeletedDefaultCtor(const DeletedDefaultCtor &) = default;
+    DeletedDefaultCtor(DeletedDefaultCtor &&) = default;
+    DeletedDefaultCtor &operator=(const DeletedDefaultCtor &) = default;
+    DeletedDefaultCtor &operator=(DeletedDefaultCtor &&) = default;
+    ~DeletedDefaultCtor() = default;
+};
+
 #endif

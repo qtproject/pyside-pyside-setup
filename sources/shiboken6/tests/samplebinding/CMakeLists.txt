@@ -27,6 +27,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/customoverloadsequence_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/cvlistuser_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/cvvaluetype_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/sbkdate_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/deleteddefaultctor_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/derived_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/derivedusingct_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/derived_someinnerclass_wrapper.cpp

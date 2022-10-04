@@ -2226,6 +2226,7 @@
 
     <object-type name="PrivateCtor" />
     <object-type name="PrivateDtor" />
+    <value-type name="DeletedDefaultCtor"/>
 
     <object-type name="Base1"/>
     <object-type name="Base2"/>

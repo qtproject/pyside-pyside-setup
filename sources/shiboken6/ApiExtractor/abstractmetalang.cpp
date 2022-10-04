@@ -972,6 +972,7 @@ bool AbstractMetaClass::isImplicitlyDefaultConstructible() const
 static bool canAddDefaultConstructorHelper(const AbstractMetaClass *cls)
 {
     return !cls->isNamespace()
+        && !cls->hasDeletedDefaultConstructor()
         && !cls->attributes().testFlag(AbstractMetaClass::HasRejectedConstructor)
         && !cls->hasPrivateDestructor();
 }
