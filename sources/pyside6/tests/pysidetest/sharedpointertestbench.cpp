@@ -29,3 +29,16 @@ void SharedPointerTestbench::printSharedPointerQObject(const QSharedPointer<QObj
 {
     qDebug() << __FUNCTION__ << p.data();
 }
+
+QSharedPointer<const QObject> SharedPointerTestbench::createSharedPointerConstQObject()
+{
+    auto *o = new QObject;
+    o->setObjectName(u"ConstTestObject"_qs);
+    QSharedPointer<const QObject> result(o);
+    return result;
+}
+
+void SharedPointerTestbench::printSharedPointerConstQObject(const QSharedPointer<const QObject> &p)
+{
+    qDebug() << __FUNCTION__ << p.data();
+}

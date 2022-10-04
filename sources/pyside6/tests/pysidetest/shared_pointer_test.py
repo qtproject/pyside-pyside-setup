@@ -28,6 +28,8 @@ class SharedPointerTests(unittest.TestCase):
         p = SharedPointerTestbench.createSharedPointerQObject()
         self.assertEqual(p.objectName(), "TestObject")
         SharedPointerTestbench.printSharedPointerQObject(p)
+        p = SharedPointerTestbench.createSharedPointerConstQObject()
+        SharedPointerTestbench.printSharedPointerConstQObject(p)
 
     def testIntSharedPointer(self):
         p = SharedPointerTestbench.createSharedPointerInt(42)

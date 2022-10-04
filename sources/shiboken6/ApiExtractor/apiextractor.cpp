@@ -499,7 +499,7 @@ void ApiExtractorPrivate::addInstantiatedSmartPointer(InstantiationCollectContex
                                                       const AbstractMetaType &type)
 {
     InstantiatedSmartPointer smp;
-    smp.type = simplifiedType(type);
+    smp.type =  canonicalSmartPtrInstantiation(type);
     smp.smartPointer = AbstractMetaClass::findClass(m_builder->smartPointers(),
                                                     type.typeEntry());
     Q_ASSERT(smp.smartPointer);
