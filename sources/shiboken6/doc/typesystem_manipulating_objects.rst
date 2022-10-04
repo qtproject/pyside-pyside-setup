@@ -166,6 +166,7 @@ modify-function
                               access="public | private | protected"
                               allow-thread="true | auto | false"
                               exception-handling="off | auto-off | auto-on | on"
+                              final="true | false"
                               overload-number="number"
                               rename="..."
                               snake-case="yes | no | both" />
@@ -239,6 +240,10 @@ modify-function
 
     Numbers should be given for all overloads; otherwise, the order will be in
     declaration order.
+
+    The optional ``final`` attribute can be specified for virtual functions
+    and disables generating the code for overriding the function in Python
+    (native call). This is useful when the result type is not constructible.
 
     The ``remove`` attribute is an *optional* boolean attribute, which can
     mark the function to be discarded on generation.

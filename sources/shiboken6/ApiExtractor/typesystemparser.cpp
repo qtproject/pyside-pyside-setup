@@ -2748,7 +2748,7 @@ bool TypeSystemParser::parseModifyFunction(const ConditionalStreamReader &reader
             return false;
         }
         const FunctionModification::ModifierFlag m = modifierFlagOpt.value();
-        if (m == FunctionModification::Final || m == FunctionModification::NonFinal) {
+        if (m == FunctionModification::NonFinal) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeValueWarning(reader,
                       accessAttribute(), access)));

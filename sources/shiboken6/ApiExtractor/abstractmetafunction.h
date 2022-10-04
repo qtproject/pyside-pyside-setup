@@ -239,6 +239,7 @@ public:
     QString debugSignature() const; // including virtual/override/final, etc., for debugging only.
 
     bool isModifiedRemoved(const AbstractMetaClass *cls = nullptr) const;
+    bool isModifiedFinal(const AbstractMetaClass *cls = nullptr) const;
 
     bool isVoid() const;
 

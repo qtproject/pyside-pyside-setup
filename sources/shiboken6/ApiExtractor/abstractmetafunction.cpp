@@ -285,6 +285,17 @@ bool AbstractMetaFunction::isModifiedRemoved(const AbstractMetaClass *cls) const
     return false;
 }
 
+bool AbstractMetaFunction::isModifiedFinal(const AbstractMetaClass *cls) const
+{
+    if (!isInGlobalScope() && cls == nullptr)
+        cls = d->m_implementingClass;
+    for (const auto &mod : modifications(cls)) {
+        if (mod.modifiers().testFlag(FunctionModification::Final))
+            return true;
+    }
+    return false;
+}
+
 bool AbstractMetaFunction::isVoid() const
 {
     return d->m_type.isVoid();

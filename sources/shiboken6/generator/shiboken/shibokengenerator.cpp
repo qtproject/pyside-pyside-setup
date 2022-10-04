@@ -231,7 +231,8 @@ ShibokenGenerator::FunctionGeneration
     // Check on virtuals (including operators).
     const bool isAbstract = func->isAbstract();
     if (!(isAbstract || func->isVirtual())
-        || func->attributes().testFlag(AbstractMetaFunction::FinalCppMethod)) {
+        || func->attributes().testFlag(AbstractMetaFunction::FinalCppMethod)
+        || func->isModifiedFinal()) {
         return result;
     }
 
