@@ -172,8 +172,7 @@ def wheel_files_pyside_addons() -> List[ModuleData]:
         module_QtSerialPort(),
         module_QtSpatialAudio(),
         module_QtStateMachine(),
-        # Not available in 6.3
-        # module_QtTextToSpeech(),
+        module_QtTextToSpeech(),
         module_QtVirtualKeyboard(),
         module_QtWebChannel(),
         module_QtWebEngineCore(),
@@ -538,6 +537,7 @@ def module_QtSvgWidgets() -> ModuleData:
 
 def module_QtTextToSpeech() -> ModuleData:
     data = ModuleData("TextToSpeech")
+    data.plugins.append("texttospeech")
 
     return data
 
@@ -734,6 +734,7 @@ def module_QtMultimedia() -> ModuleData:
     data.qtlib.append("libQt6MultimediaQuick")
     data.metatypes.append("qt6multimediaquickprivate_relwithdebinfo_metatypes.json")
     data.translations.append("qtmultimedia_*")
+    data.plugins.append("multimedia")
 
     return data
 
