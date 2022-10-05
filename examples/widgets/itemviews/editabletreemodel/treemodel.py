@@ -2,14 +2,11 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
 
-from PySide6.QtCore import QModelIndex, Qt, QAbstractItemModel, Signal
+from PySide6.QtCore import QModelIndex, Qt, QAbstractItemModel
 from treeitem import TreeItem
 
 
 class TreeModel(QAbstractItemModel):
-    # Define signals
-    dataChanged = Signal(QModelIndex, QModelIndex, object)
-    headerDataChanged = Signal(Qt.Orientation, int, int)
 
     def __init__(self, headers: list, data: str, parent=None):
         super().__init__(parent)
@@ -154,9 +151,7 @@ class TreeModel(QAbstractItemModel):
         result: bool = self.root_item.set_data(section, value)
 
         if result:
-            # todo: Check if emit headerDataChanged signal is correct
-            # emit headerDataChanged(orientation, section, section)
-            self.headerDataChanged(orientation, section, section)
+            self.headerDataChanged.emit(orientation, section, section)
 
         return result
 
