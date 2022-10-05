@@ -341,7 +341,7 @@ class GameBoard(QWidget):
 
         QShortcut(QKeySequence(Qt.Key_Enter), self, self.fire)
         QShortcut(QKeySequence(Qt.Key_Return), self, self.fire)
-        QShortcut(QKeySequence(Qt.CTRL + Qt.Key_Q), self, self.close)
+        QShortcut(QKeySequence(Qt.CTRL | Qt.Key_Q), self, self.close)
 
         top_layout = QHBoxLayout()
         top_layout.addWidget(shoot)

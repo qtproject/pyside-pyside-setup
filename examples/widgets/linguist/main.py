@@ -41,7 +41,7 @@ class Window(QMainWindow):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
-    path = QLibraryInfo.location(QLibraryInfo.TranslationsPath)
+    path = QLibraryInfo.path(QLibraryInfo.TranslationsPath)
     translator = QTranslator(app)
     if translator.load(QLocale.system(), 'qtbase', '_', path):
         app.installTranslator(translator)
