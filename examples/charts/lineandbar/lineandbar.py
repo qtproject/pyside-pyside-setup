@@ -51,13 +51,15 @@ class TestChart(QMainWindow):
         self.categories = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]
         self._axis_x = QBarCategoryAxis()
         self._axis_x.append(self.categories)
-        self.chart.setAxisX(self._axis_x, self._line_series)
-        self.chart.setAxisX(self._axis_x, self._bar_series)
+        self.chart.addAxis(self._axis_x, Qt.AlignBottom)
+        self._line_series.attachAxis(self._axis_x)
+        self._bar_series.attachAxis(self._axis_x)
         self._axis_x.setRange("Jan", "Jun")
 
         self._axis_y = QValueAxis()
-        self.chart.setAxisY(self._axis_y, self._line_series)
-        self.chart.setAxisY(self._axis_y, self._bar_series)
+        self.chart.addAxis(self._axis_x, Qt.AlignLeft)
+        self._line_series.attachAxis(self._axis_y)
+        self._bar_series.attachAxis(self._axis_y)
         self._axis_y.setRange(0, 20)
 
         self.chart.legend().setVisible(True)
