@@ -90,8 +90,6 @@ class BookDelegate(QSqlRelationalDelegate):
                 painter.drawPixmap(x, y, self.star)
                 x += width
 
-            # Since we draw the grid ourselves:
-            self.drawFocus(painter, option, option.rect.adjusted(0, 0, -1, -1))
 
         pen = painter.pen()
         painter.setPen(option.palette.color(QPalette.Mid))
