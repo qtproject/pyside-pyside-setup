@@ -1,0 +1,5 @@
+{
+    "files": ["main.py", "mainwindow.py", "mainwindow.ui", "settingsdialog.py",
+              "settingsdialog.ui", "ui_settingsdialog.py",
+              "writeregistermodel.py", "modbusclient.qrc"]
+}
