@@ -48,8 +48,6 @@ from widgetgallery import WidgetGallery
 
 
 if __name__ == '__main__':
-    QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
-    QCoreApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
     app = QApplication()
     gallery = WidgetGallery()
     gallery.show()

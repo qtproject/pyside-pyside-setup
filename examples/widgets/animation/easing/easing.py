@@ -148,7 +148,7 @@ class Window(QWidget):
 
         self._anim = Animation(self._item, b'pos')
         self._anim.setEasingCurve(QEasingCurve.OutBounce)
-        self._ui.easingCurvePicker.setCurrentRow(int(QEasingCurve.OutBounce))
+        self._ui.easingCurvePicker.setCurrentRow(0)
 
         self.start_animation()
 
@@ -161,15 +161,8 @@ class Window(QWidget):
 
         brush = QBrush(gradient)
 
-        # The original C++ code uses undocumented calls to get the names of the
-        # different curve types.  We do the Python equivalant (but without
-        # cheating)
-        curve_types = [(n, c) for n, c in QEasingCurve.__dict__.items()
-                        if (isinstance(c, QEasingCurve.Type)
-                            and c != QEasingCurve.Custom
-                            and c != QEasingCurve.NCurveTypes
-                            and c != QEasingCurve.TCBSpline)]
-        curve_types.sort(key=lambda ct: ct[1])
+        curve_types = [(f"QEasingCurve.{e.name}", e) for e in QEasingCurve.Type if e.value <= 40]
+
 
         with QPainter(pix) as painter:
 
@@ -229,15 +222,15 @@ class Window(QWidget):
         self._anim.setEasingCurve(curve_type)
         self._anim.setCurrentTime(0)
 
-        is_elastic = (curve_type >= QEasingCurve.InElastic
-                    and curve_type <= QEasingCurve.OutInElastic)
-        is_bounce = (curve_type >= QEasingCurve.InBounce
-                    and curve_type <= QEasingCurve.OutInBounce)
+        is_elastic = (curve_type.value >= QEasingCurve.InElastic.value
+                    and curve_type.value <= QEasingCurve.OutInElastic.value)
+        is_bounce = (curve_type.value >= QEasingCurve.InBounce.value
+                    and curve_type.value <= QEasingCurve.OutInBounce.value)
 
         self._ui.periodSpinBox.setEnabled(is_elastic)
         self._ui.amplitudeSpinBox.setEnabled(is_elastic or is_bounce)
-        self._ui.overshootSpinBox.setEnabled(curve_type >= QEasingCurve.InBack
-                                          and curve_type <= QEasingCurve.OutInBack)
+        self._ui.overshootSpinBox.setEnabled(curve_type.value >= QEasingCurve.InBack.value
+                                          and curve_type.value <= QEasingCurve.OutInBack.value)
 
     def path_changed(self, index):
         self._anim.set_path_type(index)

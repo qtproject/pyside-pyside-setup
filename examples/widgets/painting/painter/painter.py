@@ -173,7 +173,8 @@ class MainWindow(QMainWindow):
 
         self.setCentralWidget(self.painter_widget)
 
-        self.set_color(Qt.black)
+        self.color = Qt.black
+        self.set_color(self.color)
 
         self.mime_type_filters = ["image/png", "image/jpeg"]
 
@@ -212,19 +213,21 @@ class MainWindow(QMainWindow):
     @Slot()
     def on_color_clicked(self):
 
-        color = QColorDialog.getColor(Qt.black, self)
+        color = QColorDialog.getColor(self.color, self)
+
         if color:
             self.set_color(color)
 
     def set_color(self, color: QColor = Qt.black):
 
+        self.color = color
         # Create color icon
         pix_icon = QPixmap(32, 32)
-        pix_icon.fill(color)
+        pix_icon.fill(self.color)
 
         self.color_action.setIcon(QIcon(pix_icon))
-        self.painter_widget.pen.setColor(color)
-        self.color_action.setText(QColor(color).name())
+        self.painter_widget.pen.setColor(self.color)
+        self.color_action.setText(QColor(self.color).name())
 
 
 if __name__ == "__main__":

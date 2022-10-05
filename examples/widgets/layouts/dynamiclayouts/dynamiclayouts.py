@@ -88,7 +88,7 @@ class Dialog(QDialog):
         self._main_layout.setSizeConstraint(QLayout.SetNoConstraint)
         self.setMinimumSize(0, 0)
 
-        orientation = Qt.Orientation(int(self._buttons_orientation_combo_box.itemData(index)))
+        orientation = Qt.Orientation(self._buttons_orientation_combo_box.itemData(index))
 
         if orientation == self._button_box.orientation():
             return
