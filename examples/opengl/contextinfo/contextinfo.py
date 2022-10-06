@@ -133,9 +133,9 @@ class RenderWindow(QWindow):
         self.vbo.write(vertices_size, VoidPtr(self._colors_data), colors_size)
         self.vbo.release()
 
-        vao_binder = QOpenGLVertexArrayObject.Binder(self.vao)
-        if self.vao.isCreated():  # have VAO support, use it
-            self.setup_vertex_attribs()
+        with QOpenGLVertexArrayObject.Binder(self.vao):
+            if self.vao.isCreated():  # have VAO support, use it
+                self.setup_vertex_attribs()
 
     def setup_vertex_attribs(self):
         self.vbo.bind()

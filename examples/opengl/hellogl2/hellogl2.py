@@ -343,21 +343,19 @@ class GLWidget(QOpenGLWidget, QOpenGLFunctions):
         self._light_pos_loc = self.program.uniformLocation("lightPos")
 
         self.vao.create()
-        vao_binder = QOpenGLVertexArrayObject.Binder(self.vao)
+        with QOpenGLVertexArrayObject.Binder(self.vao):
+            self._logo_vbo.create()
+            self._logo_vbo.bind()
+            float_size = ctypes.sizeof(ctypes.c_float)
+            self._logo_vbo.allocate(self.logo.const_data(), self.logo.count() * float_size)
 
-        self._logo_vbo.create()
-        self._logo_vbo.bind()
-        float_size = ctypes.sizeof(ctypes.c_float)
-        self._logo_vbo.allocate(self.logo.const_data(), self.logo.count() * float_size)
+            self.setup_vertex_attribs()
 
-        self.setup_vertex_attribs()
+            self.camera.setToIdentity()
+            self.camera.translate(0, 0, -1)
 
-        self.camera.setToIdentity()
-        self.camera.translate(0, 0, -1)
-
-        self.program.setUniformValue(self._light_pos_loc, QVector3D(0, 0, 70))
-        self.program.release()
-        vao_binder = None
+            self.program.setUniformValue(self._light_pos_loc, QVector3D(0, 0, 70))
+            self.program.release()
 
     def setup_vertex_attribs(self):
         self._logo_vbo.bind()
@@ -382,16 +380,15 @@ class GLWidget(QOpenGLWidget, QOpenGLFunctions):
         self.world.rotate(self._y_rot / 16, 0, 1, 0)
         self.world.rotate(self._z_rot / 16, 0, 0, 1)
 
-        vao_binder = QOpenGLVertexArrayObject.Binder(self.vao)
-        self.program.bind()
-        self.program.setUniformValue(self._proj_matrix_loc, self.proj)
-        self.program.setUniformValue(self._mv_matrix_loc, self.camera * self.world)
-        normal_matrix = self.world.normalMatrix()
-        self.program.setUniformValue(self._normal_matrix_loc, normal_matrix)
+        with QOpenGLVertexArrayObject.Binder(self.vao):
+            self.program.bind()
+            self.program.setUniformValue(self._proj_matrix_loc, self.proj)
+            self.program.setUniformValue(self._mv_matrix_loc, self.camera * self.world)
+            normal_matrix = self.world.normalMatrix()
+            self.program.setUniformValue(self._normal_matrix_loc, normal_matrix)
 
-        self.glDrawArrays(GL.GL_TRIANGLES, 0, self.logo.vertex_count())
-        self.program.release()
-        vao_binder = None
+            self.glDrawArrays(GL.GL_TRIANGLES, 0, self.logo.vertex_count())
+            self.program.release()
 
     def resizeGL(self, width, height):
         self.proj.setToIdentity()

@@ -78,3 +78,12 @@ int glGetVReturnSize(GLenum pname);
 // @snippet glgeti-vreturnsize_declaration
 int glGetI_VReturnSize(GLenum pname);
 // @snippet glgeti-vreturnsize_declaration
+
+// @snippet vao-binder-enter
+Py_INCREF(%PYSELF);
+pyResult = %PYSELF;
+// @snippet vao-binder-enter
+
+// @snippet vao-binder-exit
+%CPPSELF.release();
+// @snippet vao-binder-exit
