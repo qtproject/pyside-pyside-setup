@@ -678,7 +678,14 @@
   </object-type>
   <value-type name="QOpenGLVersionProfile" since="5.1"/>
   <object-type name="QOpenGLVertexArrayObject">
-      <object-type name="Binder"/>
+      <object-type name="Binder">
+          <add-function signature="__enter__()" return-type="QOpenGLVertexArrayObject::Binder">
+              <inject-code file="../glue/qtopengl.cpp" snippet="vao-binder-enter"/>
+          </add-function>
+          <add-function signature="__exit__(PyObject*,PyObject*,PyObject*)">
+              <inject-code file="../glue/qtopengl.cpp" snippet="vao-binder-exit"/>
+          </add-function>
+      </object-type>
   </object-type>
 
   <suppress-warning text="^There's no user provided way.*QOpenGLFunctions_\d_\d.*::glIndex.*$"/>
