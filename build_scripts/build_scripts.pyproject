@@ -1,7 +1,8 @@
 {
     "files": ["main.py", "__init__.py", "build_info_collector.py",
               "config.py", "options.py", "qtinfo.py",
-              "setup_runner.py", "utils.py", "wheel_override.py",
+              "setup_runner.py", "utils.py",
+              "wheel_files.py", "wheel_override.py",
               "versions.py", "wheel_utils.py",
               "platforms/__init__.py", "platforms/linux.py",
               "platforms/macos.py", "platforms/unix.py",
