@@ -66,8 +66,7 @@ class Eratosthenes():
     """ This Sieve of Eratosthenes runs on a configurable tick (default
         0.1 seconds). At each tick, a new subroutine will be created
         that will check multiples of the next prime number. Each of
-        these subroutines also operates on the same second tick. The
-        tick is coordinated through the trio event loop's internal clock. """
+        these subroutines also operates on the same tick. """
 
     def __init__(self, num, window, tick=0.1):
         self.num = num
@@ -79,21 +78,18 @@ class Eratosthenes():
         self.done = False
         self.nursery = None
 
-    def get_tick(self):
-        return trio.lowlevel.current_clock().current_time() + self.tick
-
     async def start(self):
         async with trio.open_nursery() as self.nursery:
             self.nursery.start_soon(self.update_text)
             while self.base <= self.num / 2:
-                await trio.sleep_until(self.get_tick())
+                await trio.sleep(self.tick)
                 for i in range(self.base + 1, self.num):
                     if self.sieve[i]:
                         self.base = i
                         break
                 self.nursery.start_soon(self.mark_number, self.base + 1)
             while sum(self.coroutines) > 0:
-                await trio.sleep_until(self.get_tick())
+                await trio.sleep(self.tick)
             self.done = True
 
     async def mark_number(self, base):
@@ -104,14 +100,13 @@ class Eratosthenes():
             if self.sieve[i - 1]:
                 self.sieve[i - 1] = False
                 self.window.set_num.emit(i, color)
-            await trio.sleep_until(self.get_tick())
+            await trio.sleep(self.tick)
         self.coroutines[id] = 0
 
     async def update_text(self):
         while not self.done:
-            tick = self.get_tick()
-            await trio.sleep_until(tick)
-            if int(tick) % 2:
+            await trio.sleep(self.tick)
+            if int(trio.lowlevel.current_clock().current_time() + self.tick) % 2:
                 text = "⚙️ ...Calculating prime numbers... ⚙️"
             else:
                 text = "👩‍💻 ...Hacking the universe... 👩‍💻"
