@@ -827,7 +827,6 @@ bool BuilderPrivate::visitHeader(const QString &fileName) const
         // They are installed under /Applications/Xcode.app/Contents/Developer/Platforms...
         if (baseName == u"gltypes.h"
             || fileName.contains(u"/usr/include/_types")
-            || fileName.contains(u"/usr/include/_types")
             || fileName.contains(u"/usr/include/sys/_types")) {
             return true;
         }
