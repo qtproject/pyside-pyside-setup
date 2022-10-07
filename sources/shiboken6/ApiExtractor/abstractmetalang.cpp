@@ -343,7 +343,7 @@ void AbstractMetaClass::setFunctions(const AbstractMetaFunctionCList &functions)
     // Functions must be sorted by name before next loop
     sortFunctions();
 
-    for (const auto &f : qAsConst(d->m_functions)) {
+    for (const auto &f : std::as_const(d->m_functions)) {
         qSharedPointerConstCast<AbstractMetaFunction>(f)->setOwnerClass(this);
         if (!f->isPublic())
             d->m_hasNonpublic = true;
@@ -1293,7 +1293,7 @@ std::optional<AbstractMetaEnum>
 std::optional<AbstractMetaEnumValue>
     AbstractMetaClass::findEnumValue(const QString &enumValueName) const
 {
-    for (const AbstractMetaEnum &e : qAsConst(d->m_enums)) {
+    for (const AbstractMetaEnum &e : std::as_const(d->m_enums)) {
         auto v = e.findEnumValue(enumValueName);
         if (v.has_value())
             return v;
@@ -1421,7 +1421,7 @@ void AbstractMetaClass::fixFunctions()
 
     d->addUsingConstructors(this);
 
-    for (const auto &f : qAsConst(funcs)) {
+    for (const auto &f : std::as_const(funcs)) {
         // Fishy: Setting up of implementing/declaring/base classes changes
         // the applicable modifications; clear cached ones.
         qSharedPointerConstCast<AbstractMetaFunction>(f)->clearModificationsCache();
@@ -1447,7 +1447,7 @@ void AbstractMetaClass::fixFunctions()
         superFuncs += virtuals;
 
         QSet<AbstractMetaFunctionCPtr> funcsToAdd;
-        for (const auto &sf : qAsConst(superFuncs)) {
+        for (const auto &sf : std::as_const(superFuncs)) {
             if (sf->isModifiedRemoved())
                 continue;
 
@@ -1463,7 +1463,7 @@ void AbstractMetaClass::fixFunctions()
             // we generally don't care about private functions, but we have to get the ones that are
             // virtual in case they override abstract functions.
             bool add = addSuperFunction(sf);
-            for (const auto &cf : qAsConst(nonRemovedFuncs)) {
+            for (const auto &cf : std::as_const(nonRemovedFuncs)) {
                 AbstractMetaFunctionPtr f(qSharedPointerConstCast<AbstractMetaFunction>(cf));
                 const AbstractMetaFunction::CompareResult cmp = cf->compareTo(sf.data());
 
@@ -1575,7 +1575,7 @@ void AbstractMetaClass::fixFunctions()
                 funcsToAdd << sf;
         }
 
-        for (const auto &f : qAsConst(funcsToAdd)) {
+        for (const auto &f : std::as_const(funcsToAdd)) {
             AbstractMetaFunction *copy = f->copy();
             (*copy) += AbstractMetaFunction::AddedMethod;
             funcs.append(AbstractMetaFunctionCPtr(copy));
@@ -1585,7 +1585,7 @@ void AbstractMetaClass::fixFunctions()
     bool hasPrivateConstructors = false;
     bool hasPublicConstructors = false;
     // Apply modifications after the declaring class has been set
-    for (const auto &func : qAsConst(funcs)) {
+    for (const auto &func : std::as_const(funcs)) {
         auto ncFunc = qSharedPointerConstCast<AbstractMetaFunction>(func);
         for (const auto &mod : func->modifications(this)) {
             if (mod.isRenameModifier())

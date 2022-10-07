@@ -228,7 +228,7 @@ PyDesignerCustomWidgets::PyDesignerCustomWidgets(QObject *parent) : QObject(pare
 
     // Run all register*py files
     QString errorMessage;
-    for (const auto &pythonFile : qAsConst(pythonFiles)) {
+    for (const auto &pythonFile : std::as_const(pythonFiles)) {
         qCDebug(lcPySidePlugin) << "running" << pythonFile;
         if (!runPyScriptFile(pythonFile, &errorMessage))
             qCWarning(lcPySidePlugin, "%s", qPrintable(errorMessage));

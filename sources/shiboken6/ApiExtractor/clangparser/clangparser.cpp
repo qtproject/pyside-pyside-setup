@@ -308,7 +308,7 @@ bool parse(const QByteArrayList  &clangArgs, bool addCompilerSupportArguments,
         debug.nospace();
         debug << "Errors in "
             << QDir::toNativeSeparators(QFile::decodeName(clangArgs.constLast())) << ":\n";
-        for (const Diagnostic &diagnostic : qAsConst(diagnostics))
+        for (const Diagnostic &diagnostic : std::as_const(diagnostics))
             debug << diagnostic << '\n';
     }
 

@@ -220,7 +220,7 @@ static std::optional<CommandLineArguments> getProjectFileArguments()
     arguments.removeFirst();
 
     QString projectFileName;
-    for (const QString &arg : qAsConst(arguments)) {
+    for (const QString &arg : std::as_const(arguments)) {
         if (arg.startsWith(u"--project-file")) {
             int split = arg.indexOf(u'=');
             if (split > 0)
@@ -665,7 +665,7 @@ int shibokenMain(int argc, char *argv[])
     ReportHandler::setPrefix(u'(' + messagePrefix + u')');
 
     QFileInfoList cppFileNames;
-    for (const QString &cppFileName : qAsConst(args.positionalArguments)) {
+    for (const QString &cppFileName : std::as_const(args.positionalArguments)) {
         const QFileInfo cppFileNameFi(cppFileName);
         if (!cppFileNameFi.isFile() && !cppFileNameFi.isSymLink()) {
             errorPrint(u'"' + cppFileName + u"\" does not exist."_s);
@@ -677,7 +677,7 @@ int shibokenMain(int argc, char *argv[])
     // Pass option to all generators (Cpp/Header generator have the same options)
     for (ait = args.options.begin(); ait != args.options.end(); ) {
         bool found = false;
-        for (const GeneratorPtr &generator : qAsConst(generators))
+        for (const GeneratorPtr &generator : std::as_const(generators))
             found |= generator->handleOption(ait.key(), ait.value().toString());
         if (found)
             ait = args.options.erase(ait);
@@ -746,7 +746,7 @@ int shibokenMain(int argc, char *argv[])
     if (printBuiltinTypes)
         TypeDatabase::instance()->formatBuiltinTypes(qInfo());
 
-    for (const GeneratorPtr &g : qAsConst(generators)) {
+    for (const GeneratorPtr &g : std::as_const(generators)) {
         g->setOutputDirectory(outputDirectory);
         g->setLicenseComment(licenseComment);
         ReportHandler::startProgress(QByteArray("Running ") + g->name() + "...");

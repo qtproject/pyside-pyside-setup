@@ -471,7 +471,7 @@ QString QtXmlToSphinx::transform(const QString& doc)
     if (!m_inlineImages.isEmpty()) {
         // Write out inline image definitions stored in handleInlineImageTag().
         m_output << '\n' << disableIndent;
-        for (const InlineImage &img : qAsConst(m_inlineImages))
+        for (const InlineImage &img : std::as_const(m_inlineImages))
             m_output << ".. |" << img.tag << "| image:: " << img.href << '\n';
         m_output << '\n' << enableIndent;
         m_inlineImages.clear();
@@ -1409,7 +1409,7 @@ void QtXmlToSphinx::Table::normalize()
     //QDoc3 generates tables with wrong number of columns. We have to
     //check and if necessary, merge the last columns.
     qsizetype maxCols = -1;
-    for (const auto &row : qAsConst(m_rows)) {
+    for (const auto &row : std::as_const(m_rows)) {
         if (row.size() > maxCols)
             maxCols = row.size();
     }

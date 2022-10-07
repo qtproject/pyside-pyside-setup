@@ -183,7 +183,7 @@ void *qt_metacast(const char *_clname) override;
 
         if (!m_inheritedOverloads.isEmpty()) {
             s << "// Inherited overloads, because the using keyword sux\n";
-            for (const auto &func : qAsConst(m_inheritedOverloads))
+            for (const auto &func : std::as_const(m_inheritedOverloads))
                 writeMemberFunctionWrapper(s, func);
             m_inheritedOverloads.clear();
         }
@@ -578,13 +578,13 @@ bool HeaderGenerator::finishGeneration()
     QStringList requiredTargetImports = TypeDatabase::instance()->requiredTargetImports();
     if (!requiredTargetImports.isEmpty()) {
         s << "// Module Includes\n";
-        for (const QString &requiredModule : qAsConst(requiredTargetImports))
+        for (const QString &requiredModule : std::as_const(requiredTargetImports))
             s << "#include <" << getModuleHeaderFileName(requiredModule) << ">\n";
         s<< '\n';
     }
 
     s << "// Bound library includes\n";
-    for (const Include &include : qAsConst(includes))
+    for (const Include &include : std::as_const(includes))
         s << include;
 
     if (!primitiveTypes().isEmpty()) {
@@ -644,7 +644,7 @@ void HeaderGenerator::writePrivateHeader(const QString &moduleHeaderDir,
     ps << "#ifndef " << privateIncludeShield << '\n';
     ps << "#define " << privateIncludeShield << "\n\n";
 
-    for (const Include &include : qAsConst(privateIncludes))
+    for (const Include &include : std::as_const(privateIncludes))
         ps << include;
     ps << '\n';
 

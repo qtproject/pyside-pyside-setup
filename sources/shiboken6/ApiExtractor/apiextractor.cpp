@@ -234,7 +234,7 @@ bool ApiExtractorPrivate::runHelper(ApiExtractorFlags flags)
             << ": " << qPrintable(ppFile.errorString()) << '\n';
         return false;
     }
-    for (const auto &cppFileName : qAsConst(m_cppFileNames)) {
+    for (const auto &cppFileName : std::as_const(m_cppFileNames)) {
         ppFile.write("#include \"");
         ppFile.write(cppFileName.absoluteFilePath().toLocal8Bit());
         ppFile.write("\"\n");
@@ -263,7 +263,7 @@ bool ApiExtractorPrivate::runHelper(ApiExtractorFlags flags)
             arguments.append(m_clangOptions.at(i).toUtf8());
     }
 
-    for (const HeaderPath &headerPath : qAsConst(m_includePaths))
+    for (const HeaderPath &headerPath : std::as_const(m_includePaths))
         arguments.append(HeaderPath::includeOption(headerPath));
     arguments.append(QFile::encodeName(preprocessedCppFileName));
     if (ReportHandler::isDebug(ReportHandler::SparseDebug)) {
@@ -600,7 +600,7 @@ void ApiExtractorPrivate::collectInstantiatedOpqaqueContainers(InstantiationColl
 
 static void getCode(QStringList &code, const CodeSnipList &codeSnips)
 {
-    for (const CodeSnip &snip : qAsConst(codeSnips))
+    for (const CodeSnip &snip : std::as_const(codeSnips))
         code.append(snip.code());
 }
 
@@ -622,7 +622,7 @@ static void getCode(QStringList &code, const TypeEntry *type)
     if (toCppConversions.isEmpty())
         return;
 
-    for (const auto &toNative : qAsConst(toCppConversions))
+    for (const auto &toNative : std::as_const(toCppConversions))
         code.append(toNative.conversion());
 }
 
@@ -646,7 +646,7 @@ void ApiExtractorPrivate::collectContainerTypesFromSnippets(InstantiationCollect
     for (const auto &func : m_builder->globalFunctions())
         getCode(snips, func->injectedCodeSnips());
 
-    for (const QString &code : qAsConst(snips)) {
+    for (const QString &code : std::as_const(snips)) {
         collectContainerTypesFromConverterMacros(context, code, true);
         collectContainerTypesFromConverterMacros(context, code, false);
     }

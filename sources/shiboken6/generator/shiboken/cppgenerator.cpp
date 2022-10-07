@@ -577,7 +577,7 @@ void CppGenerator::generateIncludes(TextStream &s, const GeneratorContext &class
     // C++ includes
     std::sort(cppIncludes.begin(), cppIncludes.end());
     s << '\n';
-    for (const auto &i : qAsConst(cppIncludes))
+    for (const auto &i : std::as_const(cppIncludes))
         s << "#include <" << i << ">\n";
 }
 
@@ -665,7 +665,7 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
                                       typeEntry->argumentIncludes()});
 
     includeGroups.append(IncludeGroup{u"Enum includes"_s, {}});
-    for (const AbstractMetaEnum &cppEnum : qAsConst(classEnums))
+    for (const AbstractMetaEnum &cppEnum : std::as_const(classEnums))
         includeGroups.back().includes.append(cppEnum.typeEntry()->extraIncludes());
 
     generateIncludes(s, classContext, includeGroups, innerClasses);
@@ -802,7 +802,7 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
 
         s << '\n';
         s << "static const char *" << className << "_PropertyStrings[] = {\n" << indent;
-        for (const auto &entry : qAsConst(sorter))
+        for (const auto &entry : std::as_const(sorter))
             s << entry << ",\n";
         s << NULL_PTR << " // Sentinel\n"
             << outdent << "};\n\n";
@@ -810,12 +810,12 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
     }
     // PYSIDE-1735: Write an EnumFlagInfo structure
     QStringList sorter;
-    for (const auto &entry : qAsConst(classEnums))
+    for (const auto &entry : std::as_const(classEnums))
         sorter.append(BuildEnumFlagInfo(entry));
     sorter.sort();
     if (!sorter.empty()) {
         s << "static const char *" << className << "_EnumFlagInfo[] = {\n" << indent;
-        for (const auto &entry : qAsConst(sorter))
+        for (const auto &entry : std::as_const(sorter))
             s << entry << ",\n";
         s << NULL_PTR << " // Sentinel\n"
             << outdent << "};\n\n";
@@ -1326,7 +1326,7 @@ void CppGenerator::writeVirtualMethodNativeArgs(TextStream &s,
     s << "Py_BuildValue(\"(" << format << ")\",\n"
         << indent << argConversions.join(u",\n"_s) << outdent << "\n));\n";
 
-    for (int index : qAsConst(invalidateArgs)) {
+    for (int index : std::as_const(invalidateArgs)) {
         s << "bool invalidateArg" << index << " = PyTuple_GET_ITEM(" << PYTHON_ARGS
             << ", " << index - 1 << ")->ob_refcnt == 1;\n";
     }
@@ -1468,7 +1468,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
         s << "Shiboken::AutoDecRef " << PYTHON_RETURN_VAR << "(PyObject_Call("
             << PYTHON_OVERRIDE_VAR << ", " << PYTHON_ARGS << ", nullptr));\n";
 
-        for (int argIndex : qAsConst(invalidateArgs)) {
+        for (int argIndex : std::as_const(invalidateArgs)) {
             s << "if (invalidateArg" << argIndex << ")\n" << indent
                 << "Shiboken::Object::invalidate(PyTuple_GET_ITEM(" << PYTHON_ARGS
                 << ", " << (argIndex - 1) << "));\n" << outdent;
@@ -1773,7 +1773,7 @@ void CppGenerator::writeConverterFunctions(TextStream &s, const AbstractMetaClas
     metaClass->getEnumsFromInvisibleNamespacesToBeGenerated(&classEnums);
     if (!classEnums.isEmpty())
         s << "// Python to C++ enum conversion.\n";
-    for (const AbstractMetaEnum &metaEnum : qAsConst(classEnums))
+    for (const AbstractMetaEnum &metaEnum : std::as_const(classEnums))
         writeEnumConverterFunctions(s, metaEnum);
 
     if (metaClass->isNamespace())
@@ -1909,7 +1909,7 @@ return result;)";
         s << "// Implicit conversions.\n";
 
     AbstractMetaType targetType = AbstractMetaType::fromAbstractMetaClass(metaClass);
-    for (const auto &conv : qAsConst(implicitConvs)) {
+    for (const auto &conv : std::as_const(implicitConvs)) {
         if (conv->isModifiedRemoved())
             continue;
 
@@ -2084,7 +2084,7 @@ void CppGenerator::writeConverterRegister(TextStream &s, const AbstractMetaClass
         s << "// Add implicit conversions to type converter.\n";
 
     AbstractMetaType targetType = AbstractMetaType::fromAbstractMetaClass(metaClass);
-    for (const auto &conv : qAsConst(implicitConvs)) {
+    for (const auto &conv : std::as_const(implicitConvs)) {
         if (conv->isModifiedRemoved())
             continue;
         AbstractMetaType sourceType;
@@ -4196,7 +4196,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
 
     if (!ownership_mods.isEmpty()) {
         s  << '\n' << "// Ownership transferences.\n";
-        for (const ArgumentModification &arg_mod : qAsConst(ownership_mods)) {
+        for (const ArgumentModification &arg_mod : std::as_const(ownership_mods)) {
             const int argIndex = arg_mod.index();
             const QString pyArgName = argumentNameFromIndex(api(), func, argIndex);
 
@@ -4222,7 +4222,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
         }
 
     } else if (!refcount_mods.isEmpty()) {
-        for (const ArgumentModification &arg_mod : qAsConst(refcount_mods)) {
+        for (const ArgumentModification &arg_mod : std::as_const(refcount_mods)) {
             ReferenceCount refCount = arg_mod.referenceCounts().constFirst();
             if (refCount.action != ReferenceCount::Set
                 && refCount.action != ReferenceCount::Remove
@@ -5553,7 +5553,7 @@ void CppGenerator::writeEnumsInitialization(TextStream &s, AbstractMetaEnumList 
         return;
     bool preambleWrittenE = false;
     bool preambleWrittenF = false;
-    for (const AbstractMetaEnum &cppEnum : qAsConst(enums)) {
+    for (const AbstractMetaEnum &cppEnum : std::as_const(enums)) {
         if (cppEnum.isPrivate())
             continue;
         if (!preambleWrittenE) {
@@ -6183,14 +6183,14 @@ void CppGenerator::writeInitQtMetaTypeFunctionBody(TextStream &s, const Generato
         s << "qRegisterMetaType< ::" << className << " *>();\n";
         break;
     case QtRegisterMetaType::Value:
-        for (const QString &name : qAsConst(nameVariants))
+        for (const QString &name : std::as_const(nameVariants))
             s << "qRegisterMetaType< ::" << className << " >(\"" << name << "\");\n";
         break;
     }
 
     for (const AbstractMetaEnum &metaEnum : metaClass->enums()) {
         if (!metaEnum.isPrivate() && !metaEnum.isAnonymous()) {
-            for (const QString &name : qAsConst(nameVariants)) {
+            for (const QString &name : std::as_const(nameVariants)) {
                 s << "qRegisterMetaType< ::"
                     << metaEnum.typeEntry()->qualifiedCppName() << " >(\""
                     << name << "::" << metaEnum.name() << "\");\n";
@@ -6583,7 +6583,7 @@ bool CppGenerator::finishGeneration()
     }
 
     s << "#include \"" << getModuleHeaderFileName() << '"'  << "\n\n";
-    for (const Include &include : qAsConst(includes))
+    for (const Include &include : std::as_const(includes))
         s << include;
     s << '\n';
 
@@ -6599,12 +6599,12 @@ bool CppGenerator::finishGeneration()
     s  << '\n';
     // Extra includes
     QList<Include> extraIncludes = moduleEntry->extraIncludes();
-    for (const AbstractMetaEnum &cppEnum : qAsConst(globalEnums))
+    for (const AbstractMetaEnum &cppEnum : std::as_const(globalEnums))
         extraIncludes.append(cppEnum.typeEntry()->extraIncludes());
     if (!extraIncludes.isEmpty()) {
         s << "// Extra includes\n";
         std::sort(extraIncludes.begin(), extraIncludes.end());
-        for (const Include &inc : qAsConst(extraIncludes))
+        for (const Include &inc : std::as_const(extraIncludes))
             s << inc;
         s << '\n';
     }
@@ -6649,7 +6649,7 @@ bool CppGenerator::finishGeneration()
 
         s << "// Enum definitions "
             << "------------------------------------------------------------\n";
-        for (const AbstractMetaEnum &cppEnum : qAsConst(globalEnums))
+        for (const AbstractMetaEnum &cppEnum : std::as_const(globalEnums))
             writeEnumConverterFunctions(s, cppEnum);
 
         if (convImpl.size() > 0) {
@@ -6858,7 +6858,7 @@ bool CppGenerator::finishGeneration()
     // of the previously registered types (PYSIDE-1529).
     if (!classesWithStaticFields.isEmpty()) {
         s << "\n// Static field initialization\n";
-        for (auto cls : qAsConst(classesWithStaticFields))
+        for (auto cls : std::as_const(classesWithStaticFields))
             s << getSimpleClassStaticFieldsInitFunctionName(cls) << "();\n";
     }
 
@@ -6876,7 +6876,7 @@ bool CppGenerator::finishGeneration()
         writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionEnd, TypeSystem::NativeCode);
 
     if (usePySideExtensions()) {
-        for (const AbstractMetaEnum &metaEnum : qAsConst(globalEnums))
+        for (const AbstractMetaEnum &metaEnum : std::as_const(globalEnums))
             if (!metaEnum.isAnonymous()) {
                 s << "qRegisterMetaType< ::" << metaEnum.typeEntry()->qualifiedCppName()
                   << " >(\"" << metaEnum.name() << "\");\n";

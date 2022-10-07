@@ -451,7 +451,7 @@ void _ClassModelItem::formatDebug(QDebug &d) const
 // ---------------------------------------------------------------------------
 FunctionModelItem _ScopeModelItem::declaredFunction(const FunctionModelItem &item)
 {
-    for (const FunctionModelItem &fun : qAsConst(m_functions)) {
+    for (const FunctionModelItem &fun : std::as_const(m_functions)) {
         if (fun->name() == item->name() && fun->isSimilar(item))
             return fun;
 

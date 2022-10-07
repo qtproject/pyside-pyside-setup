@@ -872,7 +872,7 @@ bool TypeSystemParser::endElement(StackElement element)
         if (m_generate == TypeEntry::GenerateCode) {
             TypeDatabase::instance()->addGlobalUserFunctions(top->addedFunctions);
             TypeDatabase::instance()->addGlobalUserFunctionModifications(top->functionMods);
-            for (const auto &customConversion : qAsConst(customConversionsForReview)) {
+            for (const auto &customConversion : std::as_const(customConversionsForReview)) {
                 TargetToNativeConversions &toNatives =
                     customConversion->targetToNativeConversions();
                 for (auto &toNative : toNatives)

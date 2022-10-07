@@ -162,7 +162,7 @@ void AbstractMetaBuilderPrivate::checkFunctionModifications()
 
         FunctionModificationList modifications = centry->functionModifications();
 
-        for (const FunctionModification &modification : qAsConst(modifications)) {
+        for (const FunctionModification &modification : std::as_const(modifications)) {
             QString signature = modification.signature();
 
             QString name = signature.trimmed();
@@ -408,7 +408,7 @@ void AbstractMetaBuilderPrivate::sortLists()
     }
     m_metaClasses = classesTopologicalSorted(m_metaClasses, additionalDependencies);
 
-    for (AbstractMetaClass *cls : qAsConst(m_metaClasses))
+    for (AbstractMetaClass *cls : std::as_const(m_metaClasses))
         cls->sortFunctions();
 
     // Ensure that indexes are in alphabetical order, roughly, except
@@ -545,7 +545,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom,
     }
 
     ReportHandler::startProgress("Fixing class inheritance...");
-    for (AbstractMetaClass *cls : qAsConst(m_metaClasses)) {
+    for (AbstractMetaClass *cls : std::as_const(m_metaClasses)) {
         if (cls->needsInheritanceSetup()) {
             setupInheritance(cls);
             traverseUsingMembers(cls);
@@ -558,7 +558,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom,
     }
 
     ReportHandler::startProgress("Detecting inconsistencies in class model...");
-    for (AbstractMetaClass *cls : qAsConst(m_metaClasses)) {
+    for (AbstractMetaClass *cls : std::as_const(m_metaClasses)) {
         cls->fixFunctions();
 
         if (cls->canAddDefaultConstructor())
@@ -592,7 +592,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom,
                 const QStringList &signatures = fte->signatures();
                 for (const QString &signature : signatures) {
                     bool ok = false;
-                    for (const auto &func : qAsConst(m_globalFunctions)) {
+                    for (const auto &func : std::as_const(m_globalFunctions)) {
                         if (signature == func->minimalSignature()) {
                             ok = true;
                             break;
@@ -654,7 +654,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom,
 
     ReportHandler::startProgress("Writing log files...");
 
-    for (AbstractMetaClass *cls : qAsConst(m_metaClasses)) {
+    for (AbstractMetaClass *cls : std::as_const(m_metaClasses)) {
 //         setupEquals(cls);
 //         setupComparable(cls);
         setupExternalConversion(cls);
@@ -2744,7 +2744,7 @@ qint64 AbstractMetaBuilderPrivate::findOutValueFromString(const QString &stringV
         return enumValue->value().value();
     }
 
-    for (const AbstractMetaEnum &metaEnum : qAsConst(m_globalEnums)) {
+    for (const AbstractMetaEnum &metaEnum : std::as_const(m_globalEnums)) {
         auto ev = metaEnum.findEnumValue(stringValue);
         if (ev.has_value()) {
             ok = true;
@@ -2920,7 +2920,7 @@ AbstractMetaClass* AbstractMetaBuilderPrivate::findTemplateClass(const QString &
             *info = parsed;
 
         AbstractMetaClass *templ = nullptr;
-        for (AbstractMetaClass *c : qAsConst(m_templates)) {
+        for (AbstractMetaClass *c : std::as_const(m_templates)) {
             if (c->typeEntry()->name() == qualifiedName) {
                 templ = c;
                 break;
@@ -3049,7 +3049,7 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
                 possibleNames << subclass->enclosingClass()->qualifiedCppName() + colonColon() + typeName;
             possibleNames << typeName;
 
-            for (const QString &possibleName : qAsConst(possibleNames)) {
+            for (const QString &possibleName : std::as_const(possibleNames)) {
                 t = typeDb->findType(possibleName);
                 if (t)
                     break;

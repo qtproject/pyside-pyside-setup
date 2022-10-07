@@ -141,7 +141,7 @@ void OverloadDataRootNode::sortNextOverloads(const ApiExtractorResult &api)
     static const QStringList signedIntegerPrimitives{intT(), shortT(), longT(), longLongT()};
 
     // sort the children overloads
-    for (const auto &ov : qAsConst(m_children))
+    for (const auto &ov : std::as_const(m_children))
         ov->sortNextOverloads(api);
 
     if (m_children.size() <= 1 || sortByOverloadNumberModification(m_children))
@@ -152,7 +152,7 @@ void OverloadDataRootNode::sortNextOverloads(const ApiExtractorResult &api)
     // with graph sorting using integers.
 
     OverloadGraph graph;
-    for (const auto &ov : qAsConst(m_children)) {
+    for (const auto &ov : std::as_const(m_children)) {
         const QString typeName = getTypeName(ov->modifiedArgType());
         auto it = typeToOverloads.find(typeName);
         if (it == typeToOverloads.end()) {
@@ -183,7 +183,7 @@ void OverloadDataRootNode::sortNextOverloads(const ApiExtractorResult &api)
             // as Point must come before the PointF instantiation, or else list<Point> will never
             // be called. In the case of primitive types, list<double> must come before list<int>.
             if (instantiation.isPrimitive() && (signedIntegerPrimitives.contains(instantiation.name()))) {
-                for (const QString &primitive : qAsConst(nonIntegerPrimitives))
+                for (const QString &primitive : std::as_const(nonIntegerPrimitives))
                     graph.addNode(getImplicitConversionTypeName(ov->argType(), instantiation, nullptr, primitive));
             } else {
                 const auto &funcs = api.implicitConversions(instantiation);
@@ -213,7 +213,7 @@ void OverloadDataRootNode::sortNextOverloads(const ApiExtractorResult &api)
 
     AbstractMetaFunctionCList involvedConversions;
 
-    for (const auto &ov : qAsConst(m_children)) {
+    for (const auto &ov : std::as_const(m_children)) {
         const AbstractMetaType &targetType = ov->argType();
         const QString targetTypeEntryName = getTypeName(ov->modifiedArgType());
 
@@ -263,7 +263,7 @@ void OverloadDataRootNode::sortNextOverloads(const ApiExtractorResult &api)
                     graph.addEdge(convertible, targetTypeEntryName);
 
                 if (instantiation.isPrimitive() && (signedIntegerPrimitives.contains(instantiation.name()))) {
-                    for (const QString &primitive : qAsConst(nonIntegerPrimitives)) {
+                    for (const QString &primitive : std::as_const(nonIntegerPrimitives)) {
                         QString convertibleTypeName =
                             getImplicitConversionTypeName(ov->argType(), instantiation, nullptr, primitive);
                         // Avoid cyclic dependency.
@@ -323,22 +323,22 @@ void OverloadDataRootNode::sortNextOverloads(const ApiExtractorResult &api)
     if (graph.hasNode(qStringT()) && graph.hasNode(qByteArrayT()))
         graph.addEdge(qStringT(), qByteArrayT());
 
-    for (const auto &ov : qAsConst(m_children)) {
+    for (const auto &ov : std::as_const(m_children)) {
         const AbstractMetaType &targetType = ov->argType();
         if (!targetType.isEnum())
             continue;
 
         QString targetTypeEntryName = getTypeName(targetType);
         // Enum values must precede types implicitly convertible from "int" or "unsigned int".
-        for (const QString &implicitFromInt : qAsConst(classesWithIntegerImplicitConversion))
+        for (const QString &implicitFromInt : std::as_const(classesWithIntegerImplicitConversion))
             graph.addEdge(targetTypeEntryName, implicitFromInt);
     }
 
 
     // Special case for double(int i) (not tracked by m_generator->implicitConversions
-    for (const QString &signedIntegerName : qAsConst(signedIntegerPrimitives)) {
+    for (const QString &signedIntegerName : std::as_const(signedIntegerPrimitives)) {
         if (graph.hasNode(signedIntegerName)) {
-            for (const QString &nonIntegerName : qAsConst(nonIntegerPrimitives)) {
+            for (const QString &nonIntegerName : std::as_const(nonIntegerPrimitives)) {
                 if (graph.hasNode(nonIntegerName))
                     graph.addEdge(nonIntegerName, signedIntegerName);
             }
@@ -463,7 +463,7 @@ OverloadDataNode *OverloadDataRootNode::addOverloadDataNode(const AbstractMetaFu
 {
     OverloadDataNodePtr overloadData;
     if (!func->isOperatorOverload()) {
-        for (const auto &tmp : qAsConst(m_children)) {
+        for (const auto &tmp : std::as_const(m_children)) {
             // TODO: 'const char *', 'char *' and 'char' will have the same TypeEntry?
 
             // If an argument have a type replacement, then we should create a new overloaddata

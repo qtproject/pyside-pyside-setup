@@ -358,11 +358,11 @@ void TypeDatabase::addSystemInclude(const QString &name)
 void TypeDatabase::addInlineNamespaceLookups(const NamespaceTypeEntry *n)
 {
     TypeEntryList additionalEntries; // Store before modifying the hash
-    for (TypeEntry *entry : qAsConst(d->m_entries)) {
+    for (TypeEntry *entry : std::as_const(d->m_entries)) {
         if (entry->isChildOf(n))
             additionalEntries.append(entry);
     }
-    for (const auto &ae : qAsConst(additionalEntries))
+    for (const auto &ae : std::as_const(additionalEntries))
         d->m_entries.insert(ae->shortName(), ae);
 }
 
@@ -1168,7 +1168,7 @@ static void _computeTypeIndexes()
     std::sort(list.begin(), list.end(), typeEntryLessThan);
 
     maxTypeIndex = 0;
-    for (TypeEntry *e : qAsConst(list))
+    for (TypeEntry *e : std::as_const(list))
         e->setSbkIndex(maxTypeIndex++);
     computeTypeIndexes = false;
 }
@@ -1360,7 +1360,7 @@ void TypeDatabase::formatBuiltinTypes(QDebug debug) const
 
     // Determine base types and their typedef'ed types
     QList<PrimitiveFormatListEntry> primitiveEntries;
-    for (auto *e : qAsConst(d->m_entries)) {
+    for (auto *e : std::as_const(d->m_entries)) {
         if (e->isPrimitive()) {
             auto *pe = static_cast<const PrimitiveTypeEntry *>(e);
             auto *basic = pe->basicReferencedTypeEntry();
@@ -1378,7 +1378,7 @@ void TypeDatabase::formatBuiltinTypes(QDebug debug) const
 
     std::sort(primitiveEntries.begin(), primitiveEntries.end());
 
-    for (const auto &e : qAsConst(primitiveEntries)) {
+    for (const auto &e : std::as_const(primitiveEntries)) {
         debug << "Primitive: " << formatPrimitiveEntry(e.baseType) << '\n';
         for (auto *pe : e.typedefs)
             debug << "             "  << formatPrimitiveEntry(pe) << '\n';

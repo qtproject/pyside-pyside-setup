@@ -612,7 +612,7 @@ for (auto *act : actions) {
 }
 
 %CPPSELF.clear();
-for (auto *obj : qAsConst(lst)) {
+for (auto *obj : std::as_const(lst)) {
     Shiboken::Object::invalidate(reinterpret_cast<SbkObject *>(obj));
     Py_XDECREF(obj);
 }

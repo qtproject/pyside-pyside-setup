@@ -1715,7 +1715,7 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
         }
         replacements.append(qMakePair(conversionString, conversion));
     }
-    for (const StringPair &rep : qAsConst(replacements))
+    for (const StringPair &rep : std::as_const(replacements))
         code.replace(rep.first, rep.second);
 }
 
@@ -1785,7 +1785,7 @@ bool ShibokenGenerator::classNeedsGetattroFunctionImpl(const AbstractMetaClass *
     const auto &functionGroup = getFunctionGroups(metaClass);
     for (auto it = functionGroup.cbegin(), end = functionGroup.cend(); it != end; ++it) {
         AbstractMetaFunctionCList overloads;
-        for (const auto &func : qAsConst(it.value())) {
+        for (const auto &func : std::as_const(it.value())) {
             if (func->isAssignmentOperator() || func->isConversionOperator()
                 || func->isModifiedRemoved()
                 || func->isPrivate() || func->ownerClass() != func->implementingClass()
@@ -1809,7 +1809,7 @@ AbstractMetaFunctionCList
         const auto &functionGroups = getFunctionGroups(metaClass);
         for (auto it = functionGroups.cbegin(), end = functionGroups.cend(); it != end; ++it) {
             AbstractMetaFunctionCList overloads;
-            for (const auto &func : qAsConst(it.value())) {
+            for (const auto &func : std::as_const(it.value())) {
                 if (func->isAssignmentOperator() || func->isConversionOperator()
                     || func->isModifiedRemoved()
                     || func->isPrivate() || func->ownerClass() != func->implementingClass()
@@ -1854,7 +1854,7 @@ QString ShibokenGenerator::getPrivateModuleHeaderFileName(const QString &moduleN
 static void dumpFunction(AbstractMetaFunctionList lst)
 {
     qDebug() << "DUMP FUNCTIONS: ";
-    for (AbstractMetaFunction *func : qAsConst(lst))
+    for (AbstractMetaFunction *func : std::as_const(lst))
         qDebug() << "*" << func->ownerClass()->name()
                         << func->signature()
                         << "Private: " << func->isPrivate()

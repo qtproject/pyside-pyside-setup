@@ -50,7 +50,7 @@ TextStream& operator<<(TextStream &out, const IncludeGroup& g)
             out << "\n// " << g.title << "\n";
         auto includes = g.includes;
         std::sort(includes.begin(), includes.end());
-        for (const Include &inc : qAsConst(includes))
+        for (const Include &inc : std::as_const(includes))
             out << inc.toString() << '\n';
     }
     return out;

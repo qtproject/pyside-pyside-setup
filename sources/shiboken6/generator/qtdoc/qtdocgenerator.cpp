@@ -181,7 +181,7 @@ static void writeInheritedByList(TextStream& s, const AbstractMetaClass* metaCla
 
     s << "**Inherited by:** ";
     QStringList classes;
-    for (auto c : qAsConst(res))
+    for (auto c : std::as_const(res))
         classes << u":ref:`"_s + c->name() + u'`';
     s << classes.join(u", "_s) << "\n\n";
 }
@@ -242,7 +242,7 @@ void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classC
 
 
     QStringList uniqueFunctions;
-    for (const auto &func : qAsConst(functionList)) {
+    for (const auto &func : std::as_const(functionList)) {
         if (shouldSkip(func))
             continue;
 
@@ -323,7 +323,7 @@ void QtDocGenerator::writeFunctionBlock(TextStream& s, const QString& title, QSt
         std::sort(functions.begin(), functions.end());
 
         s << ".. container:: function_list\n\n" << indent;
-        for (const QString &func : qAsConst(functions))
+        for (const QString &func : std::as_const(functions))
             s << "* " << func << '\n';
         s << outdent << "\n\n";
     }
@@ -371,7 +371,7 @@ void QtDocGenerator::writeConstructors(TextStream& s, const AbstractMetaClass* c
         s << sectionTitle << cppClass->fullName();
     } else {
         QByteArray pad;
-        for (const auto &func : qAsConst(lst)) {
+        for (const auto &func : std::as_const(lst)) {
             s << pad;
             if (first) {
                 first = false;
@@ -405,7 +405,7 @@ void QtDocGenerator::writeConstructors(TextStream& s, const AbstractMetaClass* c
 
     s << '\n';
 
-    for (const auto &func : qAsConst(lst))
+    for (const auto &func : std::as_const(lst))
         writeFormattedDetailedText(s, func->documentation(), cppClass);
 }
 
@@ -486,7 +486,7 @@ void QtDocGenerator::writeDocSnips(TextStream &s,
             int offset = 0;
 
             for (QString row : rows) {
-                for (const QString &invalidString : qAsConst(invalidStrings))
+                for (const QString &invalidString : std::as_const(invalidStrings))
                     row.remove(invalidString);
 
                 if (row.trimmed().size() == 0) {
@@ -726,7 +726,7 @@ static void writeFancyToc(TextStream& s, const QStringList& items)
         QtXmlToSphinx::TableRow row;
         const QString charEntry = u"**"_s + it.key() + u"**"_s;
         row << QtXmlToSphinx::TableCell(charEntry);
-        for (const QString &item : qAsConst(it.value())) {
+        for (const QString &item : std::as_const(it.value())) {
             if (row.size() >= numColumns) {
                 table.appendRow(row);
                 row.clear();
@@ -833,7 +833,7 @@ void QtDocGenerator::writeModuleDocumentation()
         s << ".. container:: hide\n\n" << indent
             << ".. toctree::\n" << indent
             << ":maxdepth: 1\n\n";
-        for (const QString &className : qAsConst(it.value()))
+        for (const QString &className : std::as_const(it.value()))
             s << className << '\n';
         s << "\n\n" << outdent << outdent
             << "Detailed Description\n--------------------\n\n";
@@ -1126,7 +1126,7 @@ QString QtDocGenerator::resolveContextForMethod(const QString &context,
         }
 
         const AbstractMetaClass *implementingClass = nullptr;
-        for (const auto &func : qAsConst(funcList)) {
+        for (const auto &func : std::as_const(funcList)) {
             implementingClass = func->implementingClass();
             if (implementingClass->name() == currentClass)
                 break;
