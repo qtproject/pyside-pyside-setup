@@ -1593,10 +1593,8 @@ QDebug(&result).nospace() << "<PySide6.QtCore.QEvent(" << %CPPSELF->type() << ")
 // @snippet repr-qevent
 
 // @snippet qmetaproperty_write_enum
-if (Shiboken::Enum::check(%PYARG_2)) {
-    int in = %CONVERTTOCPP[int](%PYARG_2);
-    cppArg1 = QVariant(in);
-}
+if (Shiboken::Enum::check(%PYARG_2))
+    cppArg1 = QVariant(int(Shiboken::Enum::getValue(%PYARG_2)));
 // @snippet qmetaproperty_write_enum
 
 // @snippet qdatastream-read-bytes
@@ -1620,13 +1618,11 @@ if (dataChar == nullptr) {
 // @snippet qloggingcategory_to_cpp
 
 // @snippet qabstractitemmodel_data
-::QVariant %0 ;
-if (Shiboken::Enum::check(%PYARG_0)) {
-    int in = %CONVERTTOCPP[int](%PYARG_0);
-    %0 = QVariant(in);
-} else {
+::QVariant %0;
+if (Shiboken::Enum::check(%PYARG_0))
+    %0 = QVariant(int(Shiboken::Enum::getValue(%PYARG_0)));
+else
     pythonToCpp(pyResult, &cppResult);
-}
 // @snippet qabstractitemmodel_data
 
 // @snippet keycombination-from-keycombination
