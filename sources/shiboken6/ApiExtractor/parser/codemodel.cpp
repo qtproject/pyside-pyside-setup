@@ -413,9 +413,9 @@ template <class List>
 static void formatModelItemList(QDebug &d, const char *prefix, const List &l,
                                 const char *separator = ", ")
 {
-    if (const int size = l.size()) {
+    if (const auto size = l.size()) {
         d << prefix << '[' << size << "](";
-        for (int i = 0; i < size; ++i) {
+        for (qsizetype i = 0; i < size; ++i) {
             if (i)
                 d << separator;
             l.at(i)->formatDebug(d);
@@ -432,7 +432,7 @@ void _ClassModelItem::formatDebug(QDebug &d) const
             d << " [final]";
         d << ", inherits=";
         d << ", inherits=";
-        for (int i = 0, size = m_baseClasses.size(); i < size; ++i) {
+        for (qsizetype i = 0, size = m_baseClasses.size(); i < size; ++i) {
             if (i)
                 d << ", ";
             d << m_baseClasses.at(i).name << " (" << m_baseClasses.at(i).accessPolicy << ')';
@@ -556,7 +556,7 @@ template class LIBSAMPLE_EXPORT Tpl<54>;
 */
 void _ScopeModelItem::purgeClassDeclarations()
 {
-    for (int i = m_classes.size() - 1; i >= 0; --i) {
+    for (auto i = m_classes.size() - 1; i >= 0; --i) {
         auto klass = m_classes.at(i);
         // For an empty class, check if there is a matching template
         // definition, and remove it if this is the case.
@@ -1063,7 +1063,7 @@ QString _FunctionModelItem::typeSystemSignature() const  // For dumping out type
     QString result;
     QTextStream str(&result);
     str << name() << '(';
-    for (int a = 0, size = m_arguments.size(); a < size; ++a) {
+    for (qsizetype a = 0, size = m_arguments.size(); a < size; ++a) {
         if (a)
             str << ',';
         m_arguments.at(a)->type().formatTypeSystemSignature(str);
@@ -1254,7 +1254,7 @@ void _TemplateTypeAliasModelItem::formatDebug(QDebug &d) const
 {
     _CodeModelItem::formatDebug(d);
     d << ", <";
-    for (int i = 0, count = m_templateParameters.size(); i < count; ++i) {
+    for (qsizetype i = 0, count = m_templateParameters.size(); i < count; ++i) {
         if (i)
             d << ", ";
         d << m_templateParameters.at(i)->name();

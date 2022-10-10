@@ -166,16 +166,17 @@ QList<Diagnostic> getDiagnostics(CXTranslationUnit tu)
     return result;
 }
 
-QPair<int, int> parseTemplateArgumentList(const QString &l,
-                                          const TemplateArgumentHandler &handler,
-                                          int from)
+QPair<qsizetype, qsizetype>
+    parseTemplateArgumentList(const QString &l,
+                              const TemplateArgumentHandler &handler,
+                              qsizetype from)
 {
-    const int ltPos = l.indexOf(u'<', from);
+    const auto ltPos = l.indexOf(u'<', from);
     if (ltPos == - 1)
         return qMakePair(-1, -1);
-    int startPos = ltPos + 1;
+    auto startPos = ltPos + 1;
     int level = 1;
-    for (int p = startPos, end = l.size(); p < end; ) {
+    for (qsizetype p = startPos, end = l.size(); p < end; ) {
         const char c = l.at(p).toLatin1();
         switch (c) {
         case ',':
@@ -256,9 +257,9 @@ QDebug operator<<(QDebug s, const Diagnostic &d)
     if (d.source != Diagnostic::Clang)
         s << " [other]";
 
-    if (const int childMessagesCount = d.childMessages.size()) {
+    if (const auto childMessagesCount = d.childMessages.size()) {
         s << '\n';
-        for (int i = 0; i < childMessagesCount; ++i)
+        for (qsizetype i = 0; i < childMessagesCount; ++i)
             s << "   " << d.childMessages.at(i) << '\n';
     }
 

@@ -486,7 +486,7 @@ std::optional<DefaultValue>
             // Examine arguments, exclude functions taking a self parameter
             bool simple = true;
             bool suitable = true;
-            for (int i = 0, size = arguments.size();
+            for (qsizetype i = 0, size = arguments.size();
                  suitable && i < size && !arguments.at(i).hasOriginalDefaultValueExpression(); ++i) {
                 const AbstractMetaArgument &arg = arguments.at(i);
                 const TypeEntry *aType = arg.type().typeEntry();
@@ -501,7 +501,7 @@ std::optional<DefaultValue>
     for (auto it = candidates.cbegin(), end = candidates.cend(); it != end; ++it) {
         const AbstractMetaArgumentList &arguments = it.value()->arguments();
         QStringList args;
-        for (int i = 0, size = arguments.size(); i < size; ++i) {
+        for (qsizetype i = 0, size = arguments.size(); i < size; ++i) {
             const AbstractMetaArgument &arg = arguments.at(i);
             if (arg.hasModifiedDefaultValueExpression()) {
                 args << arg.defaultValueExpression(); // Spell out modified values

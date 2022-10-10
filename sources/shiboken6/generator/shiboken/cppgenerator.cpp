@@ -3927,7 +3927,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
             QStringList otherArgs;
             bool otherArgsModified = false;
             bool argsClear = true;
-            for (int i = func->arguments().size() - 1; i >= maxArgs + removedArgs; i--) {
+            for (auto i = func->arguments().size() - 1; i >= maxArgs + removedArgs; i--) {
                 const AbstractMetaArgument &arg = func->arguments().at(i);
                 const bool defValModified = arg.hasModifiedDefaultValueExpression();
                 const bool hasConversionRule =
@@ -4287,7 +4287,7 @@ void CppGenerator::writeMultipleInheritanceInitializerFunction(TextStream &s, co
     QString className = metaClass->qualifiedCppName();
     const QStringList ancestors = getAncestorMultipleInheritance(metaClass);
     s << "static int mi_offsets[] = { ";
-    for (int i = 0; i < ancestors.size(); i++)
+    for (qsizetype i = 0; i < ancestors.size(); i++)
         s << "-1, ";
     s << "-1 };\n"
         << "int *\n"
@@ -5926,7 +5926,7 @@ void CppGenerator::writeClassRegister(TextStream &s,
     if (metaClass->baseClassNames().size() > 1) {
         s << "PyObject *" << pyTypeBasesVariable
             << " = PyTuple_Pack(" << baseClasses.size() << ',' << '\n' << indent;
-        for (int i = 0, size = baseClasses.size(); i < size; ++i) {
+        for (qsizetype i = 0, size = baseClasses.size(); i < size; ++i) {
             if (i)
                 s << ",\n";
             s << "reinterpret_cast<PyObject *>("

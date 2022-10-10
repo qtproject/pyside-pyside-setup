@@ -535,7 +535,7 @@ ENUM_LOOKUP_LINEAR_SEARCH()
 static int indexOfAttribute(const QXmlStreamAttributes &atts,
                             QStringView name)
 {
-    for (int i = 0, size = atts.size(); i < size; ++i) {
+    for (qsizetype i = 0, size = atts.size(); i < size; ++i) {
         if (atts.at(i).qualifiedName() == name)
             return i;
     }
@@ -566,7 +566,7 @@ static QString msgUnusedAttributes(QStringView tag, const QXmlStreamAttributes &
     QString result;
     QTextStream str(&result);
     str << attributes.size() << " attributes(s) unused on <" << tag << ">: ";
-    for (int i = 0, size = attributes.size(); i < size; ++i) {
+    for (qsizetype i = 0, size = attributes.size(); i < size; ++i) {
         if (i)
             str << ", ";
         str << attributes.at(i);
@@ -611,7 +611,7 @@ QString TypeSystemEntityResolver::readFile(const QString &entityName, QString *e
     QString result = QString::fromUtf8(file.readAll()).trimmed();
     // Remove license header comments on which QXmlStreamReader chokes
     if (result.startsWith(u"<!--")) {
-        const int commentEnd = result.indexOf(u"-->");
+        const auto commentEnd = result.indexOf(u"-->");
         if (commentEnd != -1) {
             result.remove(0, commentEnd + 3);
             result = result.trimmed();
@@ -734,7 +734,7 @@ static inline
 static bool addRejection(TypeDatabase *database, QXmlStreamAttributes *attributes,
                          QString *errorMessage)
 {
-    const int classIndex = indexOfAttribute(*attributes, classAttribute());
+    const auto classIndex = indexOfAttribute(*attributes, classAttribute());
     if (classIndex == -1) {
         *errorMessage = msgMissingAttribute(classAttribute());
         return false;
@@ -745,7 +745,7 @@ static bool addRejection(TypeDatabase *database, QXmlStreamAttributes *attribute
     if (!setRejectionRegularExpression(className, &rejection.className, errorMessage))
         return false;
 
-    for (int i = attributes->size() - 1; i >= 0; --i) {
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto &attribute = attributes->at(i);
         const auto name = attribute.qualifiedName();
         const auto typeOpt = typeRejectionFromAttribute(name);
@@ -1276,7 +1276,7 @@ bool TypeSystemParser::applyCommonAttributes(const ConditionalStreamReader &read
     type->setSourceLocation(SourceLocation(m_currentFile,
                                            reader.lineNumber()));
     type->setCodeGeneration(m_generate);
-    for (int i = attributes->size() - 1; i >= 0; --i) {
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name ==  u"revision") {
             type->setRevision(attributes->takeAt(i).value().toInt());
@@ -1301,7 +1301,7 @@ CustomTypeEntry *TypeSystemParser::parseCustomTypeEntry(const ConditionalStreamR
     if (!checkRootElement())
         return nullptr;
     auto *result = new CustomTypeEntry(name, since, m_contextStack.top()->entry);
-    for (int i = attributes->size() - 1; i >= 0; --i) {
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == checkFunctionAttribute())
             result->setCheckFunction(attributes->takeAt(i).value().toString());
@@ -1372,7 +1372,7 @@ SmartPointerTypeEntry *
     QString nullCheckMethod;
     QString resetMethod;
     QString instantiations;
-    for (int i = attributes->size() - 1; i >= 0; --i) {
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == u"type") {
             const auto attribute = attributes->takeAt(i);
@@ -1444,7 +1444,7 @@ PrimitiveTypeEntry *
     QString targetLangApiName;
     if (!applyCommonAttributes(reader, type, attributes))
         return nullptr;
-    for (int i = attributes->size() - 1; i >= 0; --i) {
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == targetLangNameAttribute()) {
             type->setTargetLangName(attributes->takeAt(i).value().toString());
@@ -1496,7 +1496,7 @@ ContainerTypeEntry *
 {
     if (!checkRootElement())
         return nullptr;
-    const int typeIndex = indexOfAttribute(*attributes, u"type");
+    const auto typeIndex = indexOfAttribute(*attributes, u"type");
     if (typeIndex == -1) {
         m_error = u"no 'type' attribute specified"_s;
         return nullptr;
@@ -1514,7 +1514,7 @@ ContainerTypeEntry *
         return nullptr;
     applyComplexTypeAttributes(reader, type, attributes);
 
-    for (int i = attributes->size() - 1; i >= 0; --i) {
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == u"opaque-containers") {
             const auto attribute = attributes->takeAt(i);
@@ -1541,7 +1541,7 @@ EnumTypeEntry *
     entry->setTargetLangPackage(m_defaultPackage);
 
     QString flagNames;
-    for (int i = attributes->size() - 1; i >= 0; --i) {
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == u"upper-bound") {
             qCWarning(lcShiboken, "%s",
@@ -1589,7 +1589,7 @@ NamespaceTypeEntry *
     std::unique_ptr<NamespaceTypeEntry> result(new NamespaceTypeEntry(name, since, currentParentTypeEntry()));
     auto visibility = TypeSystem::Visibility::Unspecified;
     applyCommonAttributes(reader, result.get(), attributes);
-    for (int i = attributes->size() - 1; i >= 0; --i) {
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto attributeName = attributes->at(i).qualifiedName();
         if (attributeName == u"files") {
             const QString pattern = attributes->takeAt(i).value().toString();
@@ -1670,7 +1670,7 @@ FunctionTypeEntry *
     QString signature;
     TypeSystem::SnakeCase snakeCase = TypeSystem::SnakeCase::Disabled;
 
-    for (int i = attributes->size() - 1; i >= 0; --i) {
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == signatureAttribute()) {
             signature = TypeDatabase::normalizedSignature(attributes->takeAt(i).value().toString());
@@ -1723,7 +1723,7 @@ TypedefEntry *
         m_error = u"typedef entries must be nested in namespaces or type system."_s;
         return nullptr;
     }
-    const int sourceIndex = indexOfAttribute(*attributes, sourceAttribute());
+    const auto sourceIndex = indexOfAttribute(*attributes, sourceAttribute());
     if (sourceIndex == -1) {
         m_error =  msgMissingAttribute(sourceAttribute());
         return nullptr;
@@ -1746,7 +1746,7 @@ void TypeSystemParser::applyComplexTypeAttributes(const ConditionalStreamReader 
     auto allowThread = m_allowThread;
 
     QString package = m_defaultPackage;
-    for (int i = attributes->size() - 1; i >= 0; --i) {
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == streamAttribute()) {
             ctype->setStream(convertBoolean(attributes->takeAt(i).value(), streamAttribute(), false));
@@ -1883,7 +1883,7 @@ bool TypeSystemParser::parseRenameFunction(const ConditionalStreamReader &,
 {
     QString signature;
     QString rename;
-    for (int i = attributes->size() - 1; i >= 0; --i) {
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == signatureAttribute()) {
             // Do not remove as it is needed for the type entry later on
@@ -1940,7 +1940,7 @@ bool TypeSystemParser::parseInjectDocumentation(const ConditionalStreamReader &,
 
     TypeSystem::DocModificationMode mode = TypeSystem::DocModificationReplace;
     TypeSystem::Language lang = TypeSystem::NativeCode;
-    for (int i = attributes->size() - 1; i >= 0; --i) {
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == u"mode") {
             const auto attribute = attributes->takeAt(i);
@@ -1985,7 +1985,7 @@ bool TypeSystemParser::parseModifyDocumentation(const ConditionalStreamReader &,
         return false;
     }
 
-    const int xpathIndex = indexOfAttribute(*attributes, xPathAttribute());
+    const auto xpathIndex = indexOfAttribute(*attributes, xPathAttribute());
     if (xpathIndex == -1) {
         m_error = msgMissingAttribute(xPathAttribute());
         return false;
@@ -2005,7 +2005,7 @@ TypeSystemTypeEntry *TypeSystemParser::parseRootElement(const ConditionalStreamR
 {
     TypeSystem::SnakeCase snakeCase = TypeSystem::SnakeCase::Unspecified;
 
-    for (int i = attributes->size() - 1; i >= 0; --i) {
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == packageAttribute()) {
             m_defaultPackage = attributes->takeAt(i).value().toString();
@@ -2072,7 +2072,7 @@ bool TypeSystemParser::loadTypesystem(const ConditionalStreamReader &,
 {
     QString typeSystemName;
     bool generateChild = true;
-    for (int i = attributes->size() - 1; i >= 0; --i) {
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == nameAttribute())
             typeSystemName = attributes->takeAt(i).value().toString();
@@ -2098,7 +2098,7 @@ bool TypeSystemParser::parseRejectEnumValue(const ConditionalStreamReader &,
         m_error = u"<reject-enum-value> node must be used inside a <enum-type> node"_s;
         return false;
     }
-    const int nameIndex = indexOfAttribute(*attributes, nameAttribute());
+    const auto nameIndex = indexOfAttribute(*attributes, nameAttribute());
     if (nameIndex == -1) {
         m_error = msgMissingAttribute(nameAttribute());
         return false;
@@ -2115,7 +2115,7 @@ bool TypeSystemParser::parseReplaceArgumentType(const ConditionalStreamReader &,
         m_error = u"Type replacement can only be specified for argument modifications"_s;
         return false;
     }
-    const int modifiedTypeIndex = indexOfAttribute(*attributes, modifiedTypeAttribute());
+    const auto modifiedTypeIndex = indexOfAttribute(*attributes, modifiedTypeAttribute());
     if (modifiedTypeIndex == -1) {
         m_error = u"Type replacement requires 'modified-type' attribute"_s;
         return false;
@@ -2141,7 +2141,7 @@ bool TypeSystemParser::parseCustomConversion(const ConditionalStreamReader &,
     QString sourceFile;
     QString snippetLabel;
     TypeSystem::Language lang = TypeSystem::NativeCode;
-    for (int i = attributes->size() - 1; i >= 0; --i) {
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == classAttribute()) {
             const auto languageAttribute = attributes->takeAt(i);
@@ -2246,7 +2246,7 @@ bool TypeSystemParser::parseAddConversion(const ConditionalStreamReader &,
     if (parserState() == ParserState::ArgumentTargetToNativeConversion)
         return true;
 
-    for (int i = attributes->size() - 1; i >= 0; --i) {
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == u"type")
              sourceTypeName = attributes->takeAt(i).value().toString();
@@ -2305,7 +2305,7 @@ bool TypeSystemParser::parseModifyArgument(const ConditionalStreamReader &,
     QString renameTo;
     QString pyiType;
     bool resetAfterUse = false;
-    for (int i = attributes->size() - 1; i >= 0; --i) {
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == indexAttribute()) {
              index = attributes->takeAt(i).value().toString();
@@ -2368,7 +2368,7 @@ bool TypeSystemParser::parseDefineOwnership(const ConditionalStreamReader &,
 
     TypeSystem::Language lang = TypeSystem::TargetLangCode;
     std::optional<TypeSystem::Ownership> ownershipOpt;
-    for (int i = attributes->size() - 1; i >= 0; --i) {
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == classAttribute()) {
             const auto classAttribute = attributes->takeAt(i);
@@ -2416,7 +2416,7 @@ bool TypeSystemParser::parseRename(const ConditionalStreamReader &,
         return false;
     }
 
-    const int toIndex = indexOfAttribute(*attributes, toAttribute());
+    const auto toIndex = indexOfAttribute(*attributes, toAttribute());
     if (toIndex == -1) {
         m_error = msgMissingAttribute(toAttribute());
         return false;
@@ -2430,7 +2430,7 @@ bool TypeSystemParser::parseModifyField(const ConditionalStreamReader &,
                                         QXmlStreamAttributes *attributes)
 {
     FieldModification fm;
-    for (int i = attributes->size() - 1; i >= 0; --i) {
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == nameAttribute()) {
             fm.setName(attributes->takeAt(i).value().toString());
@@ -2495,7 +2495,7 @@ bool TypeSystemParser::parseAddFunction(const ConditionalStreamReader &,
     bool classMethod = false;
     QString access;
     int overloadNumber = TypeSystem::OverloadNumberUnset;
-    for (int i = attributes->size() - 1; i >= 0; --i) {
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == u"signature") {
             originalSignature = attributes->takeAt(i).value().toString();
@@ -2576,7 +2576,7 @@ bool TypeSystemParser::parseAddPyMethodDef(const ConditionalStreamReader &,
     }
 
     TypeSystemPyMethodDefEntry def;
-    for (int i = attributes->size() - 1; i >= 0; --i) {
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == nameAttribute()) {
             def.name = attributes->takeAt(i).value().toString();
@@ -2615,7 +2615,7 @@ bool TypeSystemParser::parseProperty(const ConditionalStreamReader &, StackEleme
     }
 
     TypeSystemProperty property;
-    for (int i = attributes->size() - 1; i >= 0; --i) {
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == nameAttribute()) {
             property.name = attributes->takeAt(i).value().toString();
@@ -2662,7 +2662,7 @@ bool TypeSystemParser::parseModifyFunction(const ConditionalStreamReader &reader
     TypeSystem::ExceptionHandling exceptionHandling = TypeSystem::ExceptionHandling::Unspecified;
     TypeSystem::AllowThread allowThread = TypeSystem::AllowThread::Unspecified;
     TypeSystem::SnakeCase snakeCase = TypeSystem::SnakeCase::Unspecified;
-    for (int i = attributes->size() - 1; i >= 0; --i) {
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == u"signature") {
             originalSignature = attributes->takeAt(i).value().toString();
@@ -2782,7 +2782,7 @@ bool TypeSystemParser::parseReplaceDefaultExpression(const ConditionalStreamRead
         m_error = u"Replace default expression only allowed as child of argument modification"_s;
         return false;
     }
-    const int withIndex = indexOfAttribute(*attributes, u"with");
+    const auto withIndex = indexOfAttribute(*attributes, u"with");
     if (withIndex == -1 || attributes->at(withIndex).value().isEmpty()) {
         m_error = u"Default expression replaced with empty string. Use remove-default-expression instead."_s;
         return false;
@@ -2803,7 +2803,7 @@ bool TypeSystemParser::parseReferenceCount(const ConditionalStreamReader &reader
     }
 
     ReferenceCount rc;
-    for (int i = attributes->size() - 1; i >= 0; --i) {
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == actionAttribute()) {
             const QXmlStreamAttribute attribute = attributes->takeAt(i);
@@ -2840,7 +2840,7 @@ bool TypeSystemParser::parseParentOwner(const ConditionalStreamReader &,
         return false;
     }
     ArgumentOwner ao;
-    for (int i = attributes->size() - 1; i >= 0; --i) {
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == indexAttribute()) {
             const QString index = attributes->takeAt(i).value().toString();
@@ -2864,7 +2864,7 @@ bool TypeSystemParser::readFileSnippet(QXmlStreamAttributes *attributes, CodeSni
 {
     QString fileName;
     QString snippetLabel;
-    for (int i = attributes->size() - 1; i >= 0; --i) {
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == u"file") {
             fileName = attributes->takeAt(i).value().toString();
@@ -2923,7 +2923,7 @@ bool TypeSystemParser::parseInjectCode(const ConditionalStreamReader &,
     CodeSnip snip;
     if (!readFileSnippet(attributes, &snip))
         return false;
-    for (int i = attributes->size() - 1; i >= 0; --i) {
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == classAttribute()) {
             const auto attribute = attributes->takeAt(i);
@@ -2972,7 +2972,7 @@ bool TypeSystemParser::parseInclude(const ConditionalStreamReader &,
 {
     QString fileName;
     Include::IncludeType location = Include::IncludePath;
-    for (int i = attributes->size() - 1; i >= 0; --i) {
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == fileNameAttribute()) {
             fileName = attributes->takeAt(i).value().toString();
@@ -3006,7 +3006,7 @@ bool TypeSystemParser::parseInclude(const ConditionalStreamReader &,
 bool TypeSystemParser::parseSystemInclude(const ConditionalStreamReader &,
                                           QXmlStreamAttributes *attributes)
 {
-    const int index = indexOfAttribute(*attributes, fileNameAttribute());
+    const auto index = indexOfAttribute(*attributes, fileNameAttribute());
     if (index == -1) {
         m_error = msgMissingAttribute(fileNameAttribute());
         return false;
@@ -3029,7 +3029,7 @@ TemplateInstance *
                    "conversion-rule, native-to-target or add-conversion tags."_s;
         return nullptr;
     }
-    const int nameIndex = indexOfAttribute(*attributes, nameAttribute());
+    const auto nameIndex = indexOfAttribute(*attributes, nameAttribute());
     if (nameIndex == -1) {
         m_error = msgMissingAttribute(nameAttribute());
         return nullptr;
@@ -3046,7 +3046,7 @@ bool TypeSystemParser::parseReplace(const ConditionalStreamReader &,
     }
     QString from;
     QString to;
-    for (int i = attributes->size() - 1; i >= 0; --i) {
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == u"from")
             from = attributes->takeAt(i).value().toString();
@@ -3104,7 +3104,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
     QXmlStreamAttributes attributes = reader.attributes();
 
     VersionRange versionRange;
-    for (int i = attributes.size() - 1; i >= 0; --i) {
+    for (auto i = attributes.size() - 1; i >= 0; --i) {
         const auto name = attributes.at(i).qualifiedName();
         if (name == sinceAttribute()) {
             if (!parseVersion(attributes.takeAt(i).value().toString(),
@@ -3158,7 +3158,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
     if (isTypeEntry(element)) {
         QString name;
         if (element != StackElement::FunctionTypeEntry) {
-            const int nameIndex = indexOfAttribute(attributes, nameAttribute());
+            const auto nameIndex = indexOfAttribute(attributes, nameAttribute());
             if (nameIndex != -1) {
                 name = attributes.takeAt(nameIndex).value().toString();
             } else if (element != StackElement::EnumTypeEntry) { // anonymous enum?
@@ -3206,7 +3206,8 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
         }
 
         if (element == StackElement::EnumTypeEntry) {
-            const int enumIdentifiedByIndex = indexOfAttribute(attributes, enumIdentifiedByValueAttribute());
+            const auto enumIdentifiedByIndex =
+                indexOfAttribute(attributes, enumIdentifiedByValueAttribute());
             const QString identifiedByValue = enumIdentifiedByIndex != -1
                 ? attributes.takeAt(enumIdentifiedByIndex).value().toString() : QString();
             if (name.isEmpty()) {
@@ -3352,7 +3353,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
 
             const auto topParent = m_stack.value(m_stack.size() - 3, StackElement::None);
             if (isTypeEntry(topParent)) {
-                const int replaceIndex = indexOfAttribute(attributes, replaceAttribute());
+                const auto replaceIndex = indexOfAttribute(attributes, replaceAttribute());
                 const bool replace = replaceIndex == -1
                     || convertBoolean(attributes.takeAt(replaceIndex).value(),
                                       replaceAttribute(), true);
@@ -3382,7 +3383,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
                 return false;
             break;
         case StackElement::SuppressedWarning: {
-            const int textIndex = indexOfAttribute(attributes, textAttribute());
+            const auto textIndex = indexOfAttribute(attributes, textAttribute());
             if (textIndex == -1) {
                 qCWarning(lcShiboken) << "Suppressed warning with no text specified";
             } else {
@@ -3466,7 +3467,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
                 return false;
             break;
         case StackElement::Template: {
-            const int nameIndex = indexOfAttribute(attributes, nameAttribute());
+            const auto nameIndex = indexOfAttribute(attributes, nameAttribute());
             if (nameIndex == -1) {
                 m_error = msgMissingAttribute(nameAttribute());
                 return false;

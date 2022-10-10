@@ -192,7 +192,7 @@ QDebug operator<<(QDebug d, const CodeSnip &s)
             d << '"';
             const QString &code = f.code();
             const auto lines = QStringView{code}.split(u'\n');
-            for (int i = 0, size = lines.size(); i < size; ++i) {
+            for (qsizetype i = 0, size = lines.size(); i < size; ++i) {
                 if (i)
                     d << "\\n";
                 d << lines.at(i).trimmed();

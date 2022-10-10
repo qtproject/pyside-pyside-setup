@@ -213,9 +213,9 @@ static QByteArray msgCreateTranslationUnit(const QByteArrayList &clangArgs, unsi
 {
     QByteArray result = "clang_parseTranslationUnit2(0x";
     result += QByteArray::number(flags, 16);
-    const int count = clangArgs.size();
+    const auto count = clangArgs.size();
     result += ", cmd[" + QByteArray::number(count) + "]=";
-    for (int i = 0; i < count; ++i) {
+    for (qsizetype i = 0; i < count; ++i) {
         const QByteArray &arg = clangArgs.at(i);
         if (i)
             result += ' ';

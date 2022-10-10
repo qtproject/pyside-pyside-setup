@@ -79,7 +79,7 @@ public:
 
     bool isStdType() const;
 
-    QPair<int, int> parseTemplateArgumentList(const QString &l, int from = 0);
+    QPair<qsizetype, qsizetype> parseTemplateArgumentList(const QString &l, qsizetype from = 0);
 
     bool equals(const TypeInfo &other) const;
 

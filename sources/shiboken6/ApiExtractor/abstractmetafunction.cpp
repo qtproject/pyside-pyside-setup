@@ -360,10 +360,10 @@ AbstractMetaFunction::CompareResult AbstractMetaFunction::compareTo(const Abstra
         maxArguments = arguments();
     }
 
-    int minCount = minArguments.size();
-    int maxCount = maxArguments.size();
+    const auto minCount = minArguments.size();
+    const auto maxCount = maxArguments.size();
     bool same = true;
-    for (int i = 0; i < maxCount; ++i) {
+    for (qsizetype i = 0; i < maxCount; ++i) {
         if (i < minCount) {
             const AbstractMetaArgument &min_arg = minArguments.at(i);
             const AbstractMetaArgument &max_arg = maxArguments.at(i);
@@ -556,7 +556,7 @@ bool AbstractMetaFunction::isUserDeclared() const
 int AbstractMetaFunction::actualMinimumArgumentCount() const
 {
     int count = 0;
-    for (int i = 0, size = d->m_arguments.size(); i < size; ++i && ++count) {
+    for (qsizetype i = 0, size = d->m_arguments.size(); i < size; ++i && ++count) {
         const auto &arg = d->m_arguments.at(i);
         if (arg.isModifiedRemoved())
             --count;
@@ -1579,7 +1579,7 @@ void AbstractMetaFunction::formatDebugVerbose(QDebug &debug) const
     if (d->m_exceptionHandlingModification != TypeSystem::ExceptionHandling::Unspecified)
         debug << " exeption-mod " << int(d->m_exceptionHandlingModification);
     debug << '(';
-    for (int i = 0, count = d->m_arguments.size(); i < count; ++i) {
+    for (qsizetype i = 0, count = d->m_arguments.size(); i < count; ++i) {
         if (i)
             debug << ", ";
         debug <<  d->m_arguments.at(i);

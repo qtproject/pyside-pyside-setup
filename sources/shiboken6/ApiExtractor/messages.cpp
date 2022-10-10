@@ -49,8 +49,8 @@ QString msgNoFunctionForModification(const AbstractMetaClass *klass,
             str << "    " << s << '\n';
     } else if (!allFunctions.isEmpty()) {
         str << "\n  No candidates were found. Member functions:\n";
-        const int maxCount = qMin(10, allFunctions.size());
-        for (int f = 0; f < maxCount; ++f)
+        const auto maxCount = qMin(qsizetype(10), allFunctions.size());
+        for (qsizetype f = 0; f < maxCount; ++f)
             str << "    " << allFunctions.at(f)->minimalSignature() << '\n';
         if (maxCount < allFunctions.size())
             str << "    ...\n";
@@ -723,9 +723,9 @@ QString msgCyclicDependency(const QString &funcName, const QString &graphName,
          << "\". Cyclic functions:";
     for (const auto &c : cyclic)
         str << ' ' << c->signature();
-    if (const int count = involvedConversions.size()) {
+    if (const auto count = involvedConversions.size()) {
         str << " Implicit conversions (" << count << "): ";
-        for (int i = 0; i < count; ++i) {
+        for (qsizetype i = 0; i < count; ++i) {
             if (i)
                 str << ", \"";
             str << involvedConversions.at(i)->signature() << '"';

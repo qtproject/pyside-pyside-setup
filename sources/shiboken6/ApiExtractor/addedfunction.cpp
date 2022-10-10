@@ -37,11 +37,11 @@ QDebug operator<<(QDebug d, const Argument &a)
 
 // Helper for finding the end of a function parameter, observing
 // nested template parameters or lists.
-static int parameterTokenEnd(int startPos, QStringView paramString)
+static qsizetype parameterTokenEnd(qsizetype startPos, QStringView paramString)
 {
-    const int end = paramString.size();
+    const auto end = paramString.size();
     int nestingLevel = 0;
-    for (int p = startPos; p < end; ++p) {
+    for (qsizetype p = startPos; p < end; ++p) {
         switch (paramString.at(p).toLatin1()) {
         case ',':
             if (nestingLevel == 0)
@@ -69,9 +69,9 @@ static int parameterTokenEnd(int startPos, QStringView paramString)
 static QList<QStringView> splitParameterTokens(QStringView paramString)
 {
     QList<QStringView> result;
-    int startPos = 0;
+    qsizetype startPos = 0;
     for ( ; startPos < paramString.size(); ) {
-        int end = parameterTokenEnd(startPos, paramString);
+        const auto end = parameterTokenEnd(startPos, paramString);
         result.append(paramString.mid(startPos, end - startPos).trimmed());
         startPos = end + 1;
     }

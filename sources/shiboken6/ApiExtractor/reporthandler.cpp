@@ -122,7 +122,7 @@ void ReportHandler::messageOutput(QtMsgType type, const QMessageLogContext &cont
     QString message = m_prefix;
     if (!message.isEmpty())
         message.append(u' ');
-    const int prefixLength = message.size();
+    const auto prefixLength = message.size();
     message.append(text);
     // Replace file location tab by space
     if (fileLocationPos >= 0)

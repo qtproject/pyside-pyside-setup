@@ -645,7 +645,7 @@ bool AbstractMetaClass::hasHashFunction() const
 AbstractMetaClass::PropertyFunctionSearchResult
     AbstractMetaClass::searchPropertyFunction(const QString &name) const
 {
-    for (int i = 0, size = d->m_propertySpecs.size(); i < size; ++i) {
+    for (qsizetype i = 0, size = d->m_propertySpecs.size(); i < size; ++i) {
         const auto &propertySpec = d->m_propertySpecs.at(i);
         if (name == propertySpec.read())
             return PropertyFunctionSearchResult{i, PropertyFunction::Read};
@@ -1838,8 +1838,8 @@ void AbstractMetaClass::format(QDebug &debug) const
     if (debug.verbosity() > 2)
         debug << static_cast<const void *>(this) << ", ";
     debug << '"' << qualifiedCppName();
-    if (const int count = d->m_templateArgs.size()) {
-        for (int i = 0; i < count; ++i)
+    if (const auto count = d->m_templateArgs.size()) {
+        for (qsizetype i = 0; i < count; ++i)
             debug << (i ? ',' : '<') << d->m_templateArgs.at(i)->qualifiedCppName();
         debug << '>';
     }
@@ -1883,13 +1883,13 @@ void AbstractMetaClass::format(QDebug &debug) const
     if (auto templateBase = templateBaseClass()) {
         const auto &instantiatedTypes = templateBaseClassInstantiations();
         debug << ", instantiates \"" << templateBase->name();
-        for (int i = 0, count = instantiatedTypes.size(); i < count; ++i)
+        for (qsizetype i = 0, count = instantiatedTypes.size(); i < count; ++i)
             debug << (i ? ',' : '<') << instantiatedTypes.at(i).name();
         debug << ">\"";
     }
-    if (const int count = d->m_propertySpecs.size()) {
+    if (const auto count = d->m_propertySpecs.size()) {
         debug << ", properties (" << count << "): [";
-        for (int i = 0; i < count; ++i) {
+        for (qsizetype i = 0; i < count; ++i) {
             if (i)
                 debug << ", ";
             d->m_propertySpecs.at(i).formatDebug(debug);
@@ -1903,18 +1903,18 @@ void AbstractMetaClass::formatMembers(QDebug &debug) const
     if (!d->m_enums.isEmpty())
         debug << ", enums[" << d->m_enums.size() << "]=" << d->m_enums;
     if (!d->m_functions.isEmpty()) {
-        const int count = d->m_functions.size();
+        const auto count = d->m_functions.size();
         debug << ", functions=[" << count << "](";
-        for (int i = 0; i < count; ++i) {
+        for (qsizetype i = 0; i < count; ++i) {
             if (i)
                 debug << ", ";
             d->m_functions.at(i)->formatDebugBrief(debug);
         }
         debug << ')';
     }
-    if (const int count = d->m_fields.size()) {
+    if (const auto count = d->m_fields.size()) {
         debug << ", fields=[" << count << "](";
-        for (int i = 0; i < count; ++i) {
+        for (qsizetype i = 0; i < count; ++i) {
             if (i)
                 debug << ", ";
             d->m_fields.at(i).formatDebug(debug);

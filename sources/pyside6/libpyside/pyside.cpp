@@ -850,7 +850,7 @@ bool registerInternalQtConf()
     rccData.append('\n');
 
     // The RCC data structure expects a 4-byte size value representing the actual data.
-    int size = rccData.size();
+    qsizetype size = rccData.size();
 
     for (int i = 0; i < 4; ++i) {
         rccData.prepend((size & 0xff));

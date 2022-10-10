@@ -309,9 +309,9 @@ TypeInfo TypeInfo::resolveType(CodeModelItem __item, TypeInfo const &__type, con
         // other="QList<int>", replace the instantiations to obtain "QVector<int>".
         auto aliasInstantiations = templateTypeAlias->type().instantiations();
         const auto &concreteInstantiations = otherType.instantiations();
-        const int count = qMin(aliasInstantiations.size(), concreteInstantiations.size());
-        for (int i = 0; i < count; ++i)
-            aliasInstantiations[i] = concreteInstantiations[i];
+        const auto count = qMin(aliasInstantiations.size(), concreteInstantiations.size());
+        for (qsizetype i = 0; i < count; ++i)
+            aliasInstantiations[i] = concreteInstantiations.at(i);
         combined.setInstantiations(aliasInstantiations);
         const CodeModelItem nextItem = __scope->model()->findItem(combined.qualifiedName(), __scope);
         if (!nextItem)
@@ -361,7 +361,7 @@ private:
     QStack<TypeInfo *> m_parseStack;
 };
 
-QPair<int, int> TypeInfo::parseTemplateArgumentList(const QString &l, int from)
+QPair<qsizetype, qsizetype> TypeInfo::parseTemplateArgumentList(const QString &l, qsizetype from)
 {
     return clang::parseTemplateArgumentList(l, clang::TemplateArgumentHandler(TypeInfoTemplateArgumentHandler(this)), from);
 }
@@ -377,9 +377,9 @@ QString TypeInfo::toString() const
 
     tmp += d->m_qualifiedName.join(u"::"_s);
 
-    if (const int instantiationCount = d->m_instantiations.size()) {
+    if (const auto instantiationCount = d->m_instantiations.size()) {
         tmp += u'<';
-        for (int i = 0; i < instantiationCount; ++i) {
+        for (qsizetype i = 0; i < instantiationCount; ++i) {
             if (i)
                 tmp += u", "_s;
             tmp += d->m_instantiations.at(i).toString();
@@ -468,7 +468,7 @@ bool TypeInfo::stripLeadingVolatile(QString *s)
 bool TypeInfo::stripLeadingQualifier(const QString &qualifier, QString *s)
 {
     // "const int x"
-    const int qualifierSize = qualifier.size();
+    const auto qualifierSize = qualifier.size();
     if (s->size() < qualifierSize + 1 || !s->startsWith(qualifier)
         || !s->at(qualifierSize).isSpace()) {
         return false;
@@ -514,7 +514,7 @@ void TypeInfoData::simplifyStdType()
     Q_ASSERT(isStdType());
     if (m_qualifiedName.at(1).startsWith(u"__"))
         m_qualifiedName.removeAt(1);
-    for (int t = m_instantiations.size() - 1; t >= 0; --t) {
+    for (auto t = m_instantiations.size() - 1; t >= 0; --t) {
         if (m_instantiations.at(t).isStdType()) {
             if (discardStdType(m_instantiations.at(t).qualifiedName().constLast()))
                 m_instantiations.removeAt(t);

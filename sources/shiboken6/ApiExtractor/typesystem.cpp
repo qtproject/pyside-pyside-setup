@@ -331,7 +331,7 @@ QString TypeEntryPrivate::shortName() const
         }
         if (foundInlineNamespace) {
             m_cachedShortName.reserve(m_name.size());
-            for (int i = parents.size() - 1; i >= 0; --i) {
+            for (auto i = parents.size() - 1; i >= 0; --i) {
                 m_cachedShortName.append(parents.at(i)->entryName());
                 m_cachedShortName.append(u"::"_s);
             }
@@ -2299,9 +2299,9 @@ ObjectTypeEntry::ObjectTypeEntry(ComplexTypeEntryPrivate *d) :
 template <class Container, class Separator>
 static void formatList(QDebug &d, const char *name, const Container &c, Separator sep)
 {
-    if (const int size = c.size()) {
+    if (const auto size = c.size()) {
         d << ", " << name << '[' << size << "]=(";
-        for (int i = 0; i < size; ++i) {
+        for (qsizetype i = 0; i < size; ++i) {
             if (i)
                 d << sep;
              d << c.at(i);

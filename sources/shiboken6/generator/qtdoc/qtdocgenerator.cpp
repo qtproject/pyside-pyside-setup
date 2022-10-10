@@ -359,7 +359,7 @@ void QtDocGenerator::writeConstructors(TextStream& s, const AbstractMetaClass* c
 
     auto lst = cppClass->queryFunctions(FunctionQueryOption::AnyConstructor
                                         | FunctionQueryOption::Visible);
-    for (int i = lst.size() - 1; i >= 0; --i) {
+    for (auto i = lst.size() - 1; i >= 0; --i) {
         if (lst.at(i)->isModifiedRemoved() || lst.at(i)->functionType() == AbstractMetaFunction::MoveConstructorFunction)
             lst.removeAt(i);
     }
@@ -474,8 +474,8 @@ void QtDocGenerator::writeDocSnips(TextStream &s,
 
         QString code = snip.code();
         while (code.contains(startMarkup) && code.contains(endMarkup)) {
-            int startBlock = code.indexOf(startMarkup) + startMarkup.size();
-            int endBlock = code.indexOf(endMarkup);
+            const auto startBlock = code.indexOf(startMarkup) + startMarkup.size();
+            const auto endBlock = code.indexOf(endMarkup);
 
             if ((startBlock == -1) || (endBlock == -1))
                 break;
@@ -483,7 +483,7 @@ void QtDocGenerator::writeDocSnips(TextStream &s,
             QString codeBlock = code.mid(startBlock, endBlock - startBlock);
             const QStringList rows = codeBlock.split(u'\n');
             int currentRow = 0;
-            int offset = 0;
+            qsizetype offset = 0;
 
             for (QString row : rows) {
                 for (const QString &invalidString : std::as_const(invalidStrings))

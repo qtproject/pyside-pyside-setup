@@ -298,7 +298,7 @@ static void getCommandLineArgs(CommandLineArguments &args)
 {
     const QStringList arguments = QCoreApplication::arguments();
     int argNum = 0;
-    for (int i = 1, size = arguments.size(); i < size; ++i)
+    for (qsizetype i = 1, size = arguments.size(); i < size; ++i)
         getCommandLineArg(arguments.at(i).trimmed(), argNum, args);
 }
 

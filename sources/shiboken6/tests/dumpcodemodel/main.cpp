@@ -124,7 +124,7 @@ static void startXmlNamespace(QXmlStreamWriter &writer, const NamespaceModelItem
 static void formatXmlNamespaceMembers(QXmlStreamWriter &writer, const NamespaceModelItem &nsp)
 {
     auto nestedNamespaces = nsp->namespaces();
-    for (int i = nestedNamespaces.size() - 1; i >= 0; --i) {
+    for (auto i = nestedNamespaces.size() - 1; i >= 0; --i) {
         if (!hasMembers(nestedNamespaces.at(i)))
             nestedNamespaces.removeAt(i);
     }
@@ -135,7 +135,7 @@ static void formatXmlNamespaceMembers(QXmlStreamWriter &writer, const NamespaceM
         if (optJoinNamespaces) {
             // Write out members of identical namespaces and remove
             const QString name = current->name();
-            for (int i = 0; i < nestedNamespaces.size(); ) {
+            for (qsizetype i = 0; i < nestedNamespaces.size(); ) {
                 if (nestedNamespaces.at(i)->name() == name) {
                     formatXmlNamespaceMembers(writer, nestedNamespaces.at(i));
                     nestedNamespaces.removeAt(i);

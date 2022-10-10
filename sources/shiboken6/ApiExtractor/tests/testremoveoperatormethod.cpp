@@ -85,7 +85,7 @@ void TestRemoveOperatorMethod::testRemoveOperatorMethod()
     removedSignatures.append(u"operator>>(double&)"_s);
     removedSignatures.append(u"operator>>(Char&)"_s);
     removedSignatures.append(u"operator>>(String&)"_s);
-    int notRemoved = classA->functions().size();
+    auto notRemoved = classA->functions().size();
     for (const auto &f : classA->functions()) {
         QCOMPARE(f->isModifiedRemoved(), bool(removedSignatures.contains(f->minimalSignature())));
         notRemoved -= int(f->isModifiedRemoved());

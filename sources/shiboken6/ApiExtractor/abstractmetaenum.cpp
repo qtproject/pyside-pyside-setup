@@ -315,7 +315,7 @@ static void formatMetaEnum(QDebug &d, const AbstractMetaEnum &e)
         d << " (unsigned) ";
     d << '[';
     const AbstractMetaEnumValueList &values = e.values();
-    for (int i = 0, count = values.size(); i < count; ++i) {
+    for (qsizetype i = 0, count = values.size(); i < count; ++i) {
         if (i)
             d << ", ";
         formatMetaEnumValue(d, values.at(i));

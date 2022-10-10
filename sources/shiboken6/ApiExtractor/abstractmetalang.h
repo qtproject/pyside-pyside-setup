@@ -270,7 +270,7 @@ public:
     };
     struct PropertyFunctionSearchResult
     {
-        int index;
+        qsizetype index;
         PropertyFunction function;
     };
 

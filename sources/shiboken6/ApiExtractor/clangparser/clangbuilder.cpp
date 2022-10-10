@@ -48,7 +48,7 @@ static inline bool withinClassDeclaration(const CXCursor &cursor)
 static QString fixTypeName(QString t)
 {
     // Fix "Foo &" -> "Foo&", similarly "Bar **" -> "Bar**"
-    int pos = t.size() - 1;
+    auto pos = t.size() - 1;
     for (; pos >= 0 && (t.at(pos) == u'&' || t.at(pos) == u'*'); --pos) {}
     if (pos > 0 && t.at(pos) == u' ')
         t.remove(pos, 1);
@@ -63,7 +63,7 @@ static bool insertTemplateParameterIntoClassName(const QString &parmName, QStrin
      if (Q_UNLIKELY(!name->endsWith(u'>')))
         return false;
      const bool needsComma = name->at(name->size() - 2) != u'<';
-     const int insertionPos = name->size() - 1;
+     const auto insertionPos = name->size() - 1;
      name->insert(insertionPos, parmName);
      if (needsComma)
          name->insert(insertionPos, u',');
@@ -502,7 +502,7 @@ void BuilderPrivate::addTemplateInstantiations(const CXType &type,
         && !t->instantiations().isEmpty();
     if (!parsed)
         t->setInstantiations({});
-    const QPair<int, int> pos = parsed
+    const auto pos = parsed
         ? parseTemplateArgumentList(*typeName, dummyTemplateArgumentHandler)
         : t->parseTemplateArgumentList(*typeName);
     if (pos.first != -1 && pos.second != -1 && pos.second > pos.first)
@@ -614,7 +614,7 @@ void BuilderPrivate::addTypeDef(const CXCursor &cursor, const CXType &cxType)
 
 ClassModelItem BuilderPrivate::currentTemplateClass() const
 {
-    for (int i = m_scopeStack.size() - 1; i >= 0; --i) {
+    for (auto i = m_scopeStack.size() - 1; i >= 0; --i) {
         auto klass = qSharedPointerDynamicCast<_ClassModelItem>(m_scopeStack.at(i));
         if (!klass.isNull() && klass->isTemplate())
             return klass;
@@ -1046,7 +1046,7 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         // operators). Note: CXTranslationUnit_SkipFunctionBodies must be off for
         // clang_isCursorDefinition() to work here.
         if (!d->m_withinFriendDecl || clang_isCursorDefinition(cursor) != 0) {
-            int scope = d->m_scopeStack.size() - 1; // enclosing class
+            auto scope = d->m_scopeStack.size() - 1; // enclosing class
             if (d->m_withinFriendDecl) {
                 // Friend declaration: go back to namespace or file scope.
                 for (--scope;  d->m_scopeStack.at(scope)->kind() == _CodeModelItem::Kind_Class; --scope) {

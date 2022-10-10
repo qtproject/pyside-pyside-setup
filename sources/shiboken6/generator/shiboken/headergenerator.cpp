@@ -400,11 +400,11 @@ static void formatTypeDefEntries(TextStream &s)
         const QString name = e->qualifiedCppName();
         // Fixme: simplify by using nested namespaces in C++ 17.
         const auto components = QStringView{name}.split(u"::");
-        const int nameSpaceCount = components.size() -  1;
-        for (int n = 0; n < nameSpaceCount; ++n)
+        const auto nameSpaceCount = components.size() -  1;
+        for (qsizetype n = 0; n < nameSpaceCount; ++n)
             s << "namespace " << components.at(n) << " {\n";
         s << "using " << components.constLast() << " = " << e->sourceType() << ";\n";
-        for (int n = 0; n < nameSpaceCount; ++n)
+        for (qsizetype n = 0; n < nameSpaceCount; ++n)
             s << "}\n";
     }
     s << '\n';

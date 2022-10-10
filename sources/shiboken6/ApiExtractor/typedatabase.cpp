@@ -779,9 +779,9 @@ bool TypeDatabase::addSuppressedWarning(const QString &warning, QString *errorMe
         pattern = warning;
     } else {
         // Legacy syntax: Use wildcards '*' (unless escaped by '\')
-        QList<int> asteriskPositions;
-        const int warningSize = warning.size();
-        for (int i = 0; i < warningSize; ++i) {
+        QList<qsizetype> asteriskPositions;
+        const auto warningSize = warning.size();
+        for (qsizetype i = 0, warningSize = warning.size(); i < warningSize; ++i) {
             if (warning.at(i) == u'\\')
                 ++i;
             else if (warning.at(i) == u'*')
@@ -790,11 +790,11 @@ bool TypeDatabase::addSuppressedWarning(const QString &warning, QString *errorMe
         asteriskPositions.append(warningSize);
 
         pattern.append(u'^');
-        int lastPos = 0;
-        for (int a = 0, aSize = asteriskPositions.size(); a < aSize; ++a) {
+        qsizetype lastPos = 0;
+        for (qsizetype a = 0, aSize = asteriskPositions.size(); a < aSize; ++a) {
             if (a)
                 pattern.append(QStringLiteral(".*"));
-            const int nextPos = asteriskPositions.at(a);
+            const auto nextPos = asteriskPositions.at(a);
             if (nextPos > lastPos)
                 pattern.append(QRegularExpression::escape(warning.mid(lastPos, nextPos - lastPos)));
             lastPos = nextPos + 1;
@@ -1003,9 +1003,9 @@ static QStringList splitTypeList(const QString &s)
 {
     QStringList result;
     int templateDepth = 0;
-    int lastPos = 0;
-    const int size = s.size();
-    for (int i = 0; i < size; ++i) {
+    qsizetype lastPos = 0;
+    const auto size = s.size();
+    for (qsizetype i = 0; i < size; ++i) {
         switch (s.at(i).toLatin1()) {
         case '<':
             ++templateDepth;
@@ -1205,7 +1205,7 @@ bool TypeDatabase::setApiVersion(const QString& packageWildcardPattern, const QS
     if (versionNumber.isNull())
         return false;
     ApiVersions &versions = *apiVersions();
-    for (int i = 0, size = versions.size(); i < size; ++i) {
+    for (qsizetype i = 0, size = versions.size(); i < size; ++i) {
         if (versions.at(i).first.pattern() == packagePattern) {
             versions[i].second = versionNumber;
             return true;
@@ -1224,7 +1224,7 @@ bool TypeDatabase::checkApiVersion(const QString &package,
     const ApiVersions &versions = *apiVersions();
     if (versions.isEmpty()) // Nothing specified: use latest.
         return true;
-    for (int i = 0, size = versions.size(); i < size; ++i) {
+    for (qsizetype i = 0, size = versions.size(); i < size; ++i) {
         if (versions.at(i).first.match(package).hasMatch())
             return versions.at(i).second >= vr.since
                 && versions.at(i).second <= vr.until;
@@ -1242,9 +1242,9 @@ bool TypeDatabase::hasDroppedTypeEntries() const
 template <class Container, class Separator>
 static void formatList(QDebug &d, const char *name, const Container &c, Separator sep)
 {
-    if (const int size = c.size()) {
+    if (const auto size = c.size()) {
         d << ", " << name << '[' << size << "]=(";
-        for (int i = 0; i < size; ++i) {
+        for (qsizetype i = 0; i < size; ++i) {
             if (i)
                 d << sep;
              d << c.at(i);

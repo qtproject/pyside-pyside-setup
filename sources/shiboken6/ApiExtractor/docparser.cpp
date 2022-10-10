@@ -106,7 +106,7 @@ DocModificationList DocParser::getDocModifications(const AbstractMetaClass* cppC
 AbstractMetaFunctionCList DocParser::documentableFunctions(const AbstractMetaClass *metaClass)
 {
     auto result = metaClass->functionsInTargetLang();
-    for (int i = result.size() - 1; i >= 0; --i)  {
+    for (auto i = result.size() - 1; i >= 0; --i)  {
         if (DocParser::skipForQuery(result.at(i)) || result.at(i)->isUserAdded())
             result.removeAt(i);
     }

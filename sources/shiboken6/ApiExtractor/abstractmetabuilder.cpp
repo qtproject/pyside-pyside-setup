@@ -436,12 +436,12 @@ FileModelItem AbstractMetaBuilderPrivate::buildDom(QByteArrayList arguments,
                                         clangFlags, builder)
         ? builder.dom() : FileModelItem();
     const clang::BaseVisitor::Diagnostics &diagnostics = builder.diagnostics();
-    if (const int diagnosticsCount = diagnostics.size()) {
+    if (const auto diagnosticsCount = diagnostics.size()) {
         QDebug d = qWarning();
         d.nospace();
         d.noquote();
         d << "Clang: " << diagnosticsCount << " diagnostic messages:\n";
-        for (int i = 0; i < diagnosticsCount; ++i)
+        for (qsizetype i = 0; i < diagnosticsCount; ++i)
             d << "  " << diagnostics.at(i) << '\n';
     }
     return result;
@@ -1082,7 +1082,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
     TypeEntries template_args;
     template_args.clear();
     auto argumentParent = metaClass->typeEntry()->typeSystemTypeEntry();
-    for (int i = 0; i < template_parameters.size(); ++i) {
+    for (qsizetype i = 0; i < template_parameters.size(); ++i) {
         const TemplateParameterModelItem &param = template_parameters.at(i);
         auto param_type = new TemplateArgumentEntry(param->name(), type->version(),
                                                     argumentParent);
@@ -1428,12 +1428,12 @@ void AbstractMetaBuilderPrivate::fillAddedFunctions(AbstractMetaClass *metaClass
 
 QString AbstractMetaBuilder::getSnakeCaseName(const QString &name)
 {
-    const int size = name.size();
+    const auto size = name.size();
     if (size < 3)
         return name;
     QString result;
     result.reserve(size + 4);
-    for (int i = 0; i < size; ++i) {
+    for (qsizetype i = 0; i < size; ++i) {
         const QChar c = name.at(i);
         if (c.isUpper()) {
             if (i > 0) {
@@ -1695,7 +1695,7 @@ AbstractMetaFunction *
 
     // Find the correct default values
     const FunctionModificationList functionMods = metaFunction->modifications(metaClass);
-    for (int i = 0; i < metaArguments.size(); ++i) {
+    for (qsizetype i = 0; i < metaArguments.size(); ++i) {
         AbstractMetaArgument &metaArg = metaArguments[i];
 
         // use replace-default-expression for set default value
@@ -1750,7 +1750,7 @@ void AbstractMetaBuilderPrivate::fixArgumentNames(AbstractMetaFunction *func, co
         }
     }
 
-    for (int i = 0, size = arguments.size(); i < size; ++i) {
+    for (qsizetype i = 0, size = arguments.size(); i < size; ++i) {
         if (arguments.at(i).name().isEmpty())
             arguments[i].setName(u"arg__"_s + QString::number(i + 1), false);
     }
@@ -2039,7 +2039,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
             arguments.pop_front();
     }
 
-    for (int i = 0; i < arguments.size(); ++i) {
+    for (qsizetype i = 0; i < arguments.size(); ++i) {
         const ArgumentModelItem &arg = arguments.at(i);
 
         if (TypeDatabase::instance()->isArgumentTypeRejected(className, arg->type().toString(), &rejectReason)) {
@@ -2103,7 +2103,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
     }
 
     // Find the correct default values
-    for (int i = 0, size = metaArguments.size(); i < size; ++i) {
+    for (qsizetype i = 0, size = metaArguments.size(); i < size; ++i) {
         const ArgumentModelItem &arg = arguments.at(i);
         AbstractMetaArgument &metaArg = metaArguments[i];
 
@@ -2504,7 +2504,7 @@ std::optional<AbstractMetaType>
         // the global scope when they are referenced from inside a namespace.
         // This is a work around to fix this bug since fixing it in resolveType
         // seemed non-trivial
-        int i = d ? d->m_scopes.size() - 1 : -1;
+        qsizetype i = d ? d->m_scopes.size() - 1 : -1;
         while (i >= 0) {
             typeInfo = TypeInfo::resolveType(_typei, d->m_scopes.at(i--));
             if (typeInfo.qualifiedName().join(colonColon()) != _typei.qualifiedName().join(colonColon()))
@@ -2561,7 +2561,7 @@ std::optional<AbstractMetaType>
             return {};
         }
 
-        for (int i = typeInfo.arrayElements().size() - 1; i >= 0; --i) {
+        for (auto i = typeInfo.arrayElements().size() - 1; i >= 0; --i) {
             AbstractMetaType arrayType;
             arrayType.setArrayElementType(elementType.value());
             const QString &arrayElement = typeInfo.arrayElements().at(i);
@@ -2621,7 +2621,7 @@ std::optional<AbstractMetaType>
     metaType.setOriginalTypeDescription(_typei.toString());
 
     const auto &templateArguments = typeInfo.instantiations();
-    for (int t = 0, size = templateArguments.size(); t < size; ++t) {
+    for (qsizetype t = 0, size = templateArguments.size(); t < size; ++t) {
         const  TypeInfo &ti = templateArguments.at(t);
         auto targType = translateTypeStatic(ti, currentClass, d, flags, &errorMessage);
         // For non-type template parameters, create a dummy type entry on the fly
@@ -2906,7 +2906,7 @@ AbstractMetaClass* AbstractMetaBuilderPrivate::findTemplateClass(const QString &
     QStringList scope = context->typeEntry()->qualifiedCppName().split(colonColon());
     QString errorMessage;
     scope.removeLast();
-    for (int i = scope.size(); i >= 0; --i) {
+    for (auto i = scope.size(); i >= 0; --i) {
         QString prefix = i > 0 ? QStringList(scope.mid(0, i)).join(colonColon()) + colonColon() : QString();
         QString completeName = prefix + name;
         const TypeInfo parsed = TypeParser::parse(completeName, &errorMessage);
@@ -3145,9 +3145,9 @@ AbstractMetaFunctionPtr
     }
 
     ComplexTypeEntry *te = subclass->typeEntry();
-    FunctionModificationList mods = function->modifications(templateClass);
-    for (int i = 0; i < mods.size(); ++i) {
-        FunctionModification mod = mods.at(i);
+    const FunctionModificationList mods = function->modifications(templateClass);
+
+    for (auto mod : mods) {
         mod.setSignature(f->minimalSignature());
 
 // If we ever need it... Below is the code to do
@@ -3538,7 +3538,7 @@ static bool matchHeader(const QString &headerPath, const QString &fileName)
 #else
     static const Qt::CaseSensitivity caseSensitivity = Qt::CaseSensitive;
 #endif
-    const int pathSize = headerPath.size();
+    const auto pathSize = headerPath.size();
     return fileName.size() > pathSize
         && isFileSystemSlash(fileName.at(pathSize))
         && fileName.startsWith(headerPath, caseSensitivity);
@@ -3592,9 +3592,9 @@ void AbstractMetaBuilder::formatDebug(QDebug &debug) const
     debug << "m_globalHeader=" << d->m_globalHeaders;
     debugFormatSequence(debug, "globalEnums", d->m_globalEnums, "\n");
     debugFormatSequence(debug, "globalFunctions", d->m_globalFunctions, "\n");
-    if (const int scopeCount = d->m_scopes.size()) {
+    if (const auto scopeCount = d->m_scopes.size()) {
         debug << "\n  scopes[" << scopeCount << "]=(";
-        for (int i = 0; i < scopeCount; ++i) {
+        for (qsizetype i = 0; i < scopeCount; ++i) {
             if (i)
                 debug << ", ";
             _CodeModelItem::formatKind(debug, d->m_scopes.at(i)->kind());

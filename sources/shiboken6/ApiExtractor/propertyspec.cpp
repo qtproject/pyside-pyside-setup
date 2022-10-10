@@ -192,13 +192,13 @@ TypeSystemProperty QPropertySpec::typeSystemPropertyFromQ_Property(const QString
         return result;
     }
 
-    const int firstToken = int(it - propertyTokens.cbegin());
+    const auto firstToken = qsizetype(it - propertyTokens.cbegin());
     if (firstToken < 2) {
         *errorMessage = u"Insufficient number of tokens in property specification"_s;
         return result;
     }
 
-    for (int pos = firstToken; pos + 1 < propertyTokens.size(); pos += 2) {
+    for (qsizetype pos = firstToken; pos + 1 < propertyTokens.size(); pos += 2) {
         switch (tokenLookup.value(propertyTokens.at(pos))) {
         case PropertyToken::Read:
             result.read = propertyTokens.at(pos + 1);
@@ -254,7 +254,7 @@ std::optional<QPropertySpec>
      auto type = b->translateType(info, metaClass, {}, &typeError);
      if (!type.has_value()) {
          const QStringList qualifiedName = info.qualifiedName();
-         for (int j = scopes.size(); j >= 0 && !type; --j) {
+         for (auto j = scopes.size(); j >= 0 && !type; --j) {
              info.setQualifiedName(scopes.mid(0, j) + qualifiedName);
              type = b->translateType(info, metaClass, {}, &typeError);
          }

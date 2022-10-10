@@ -74,7 +74,7 @@ static void formatFunctionUnqualifiedArgTypeQuery(QTextStream &str,
     case AbstractMetaType::ContainerPattern: { // QVector<int>
         str << metaType.typeEntry()->qualifiedCppName() << '<';
         const auto instantiations = metaType.instantiations();
-        for (int i = 0, size = instantiations.size(); i < size; ++i) {
+        for (qsizetype i = 0, size = instantiations.size(); i < size; ++i) {
             if (i)
                 str << ", ";
             const auto &instantiation = instantiations.at(i);

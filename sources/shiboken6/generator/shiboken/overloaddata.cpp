@@ -55,7 +55,7 @@ static bool typesAreEqual(const AbstractMetaType &typeA, const AbstractMetaType 
             if (typeA.instantiations().size() != typeB.instantiations().size())
                 return false;
 
-            for (int i = 0; i < typeA.instantiations().size(); ++i) {
+            for (qsizetype i = 0; i < typeA.instantiations().size(); ++i) {
                 if (!typesAreEqual(typeA.instantiations().at(i), typeB.instantiations().at(i)))
                     return false;
             }
@@ -641,10 +641,10 @@ bool OverloadDataRootNode::isFinalOccurrence(const AbstractMetaFunctionCPtr &fun
 
 AbstractMetaFunctionCPtr OverloadDataRootNode::getFunctionWithDefaultValue() const
 {
-    const int argpos = argPos();
+    const qsizetype argpos = argPos();
     for (const auto &func : m_overloads) {
-        int removedArgs = 0;
-        for (int i = 0; i <= argpos + removedArgs; i++) {
+        qsizetype removedArgs = 0;
+        for (qsizetype i = 0; i <= argpos + removedArgs; i++) {
             if (func->arguments().at(i).isModifiedRemoved())
                 removedArgs++;
         }
@@ -661,7 +661,7 @@ QList<int> OverloadData::invalidArgumentLengths() const
     for (const auto &func : m_overloads) {
         const AbstractMetaArgumentList args = func->arguments();
         int offset = 0;
-        for (int i = 0; i < args.size(); ++i) {
+        for (qsizetype i = 0; i < args.size(); ++i) {
             if (func->arguments().at(i).isModifiedRemoved()) {
                 offset++;
             } else {
@@ -691,8 +691,8 @@ int OverloadData::numberOfRemovedArguments(const AbstractMetaFunctionCPtr &func,
 {
     Q_ASSERT(finalArgPos >= 0);
     int removed = 0;
-    const int size = func->arguments().size();
-    for (int i = 0; i < qMin(size, finalArgPos + removed); ++i) {
+    const auto size = func->arguments().size();
+    for (qsizetype i = 0; i < qMin(size, qsizetype(finalArgPos + removed)); ++i) {
         if (func->arguments().at(i).isModifiedRemoved())
             ++removed;
     }
@@ -935,7 +935,7 @@ void OverloadDataRootNode::formatOverloads(QDebug &d) const
     if (count < 2)
         return;
     d << "=(";
-    for (int i = 0; i < count; ++i) {
+    for (qsizetype i = 0; i < count; ++i) {
         if (i)
             d << '\n';
         d << m_overloads.at(i)->signature();
@@ -949,7 +949,7 @@ void OverloadDataRootNode::formatNextOverloadData(QDebug &d) const
     d << ", next[" << count << ']';
     if (d.verbosity() >= 3) {
         d << "=(";
-        for (int i = 0; i < count; ++i) {
+        for (qsizetype i = 0; i < count; ++i) {
             if (i)
                 d << '\n';
             m_children.at(i)->formatDebug(d);

@@ -563,7 +563,7 @@ QString AbstractMetaTypeData::formatSignature(bool minimal) const
         result += u'<';
         if (minimal)
             result += u' ';
-        for (int i = 0, size = m_instantiations.size(); i < size; ++i) {
+        for (qsizetype i = 0, size = m_instantiations.size(); i < size; ++i) {
             if (i > 0)
                 result += u',';
             result += m_instantiations.at(i).minimalSignature();
@@ -631,7 +631,7 @@ QString AbstractMetaTypeData::formatPythonSignature() const
     }
     if (!m_instantiations.isEmpty()) {
         result += u'[';
-        for (int i = 0, size = m_instantiations.size(); i < size; ++i) {
+        for (qsizetype i = 0, size = m_instantiations.size(); i < size; ++i) {
             if (i > 0)
                 result += u", "_s;
             result += m_instantiations.at(i).formatPythonSignature();
@@ -1018,9 +1018,9 @@ void AbstractMetaType::formatDebug(QDebug &debug) const
                 << "\", arrayElementCount="  << arrayElementCount();
         }
         const auto &instantiations = this->instantiations();
-        if (const int instantiationsSize = instantiations.size()) {
+        if (const auto instantiationsSize = instantiations.size()) {
             debug << ", instantiations[" << instantiationsSize << "]=<";
-            for (int i = 0; i < instantiationsSize; ++i) {
+            for (qsizetype i = 0; i < instantiationsSize; ++i) {
                 if (i)
                     debug << ", ";
                 instantiations.at(i).formatDebug(debug);

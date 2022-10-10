@@ -89,9 +89,10 @@ CXDiagnosticSeverity maxSeverity(const QList<Diagnostic> &ds);
 // with each match (level and string). Return begin and end of the list.
 using TemplateArgumentHandler = std::function<void (int, QStringView)>;
 
-QPair<int, int> parseTemplateArgumentList(const QString &l,
-                                          const TemplateArgumentHandler &handler,
-                                          int from = 0);
+QPair<qsizetype, qsizetype>
+    parseTemplateArgumentList(const QString &l,
+                              const TemplateArgumentHandler &handler,
+                              qsizetype from = 0);
 
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug, const SourceLocation &);

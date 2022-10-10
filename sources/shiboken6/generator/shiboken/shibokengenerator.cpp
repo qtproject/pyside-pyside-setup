@@ -1052,11 +1052,8 @@ void ShibokenGenerator::writeFunctionArguments(TextStream &s,
                                                const AbstractMetaFunctionCPtr &func,
                                                Options options) const
 {
-    AbstractMetaArgumentList arguments = func->arguments();
-
     int argUsed = 0;
-    for (int i = 0; i < arguments.size(); ++i) {
-        const auto &arg = arguments.at(i);
+    for (const auto &arg : func->arguments()) {
         if (options.testFlag(Generator::SkipRemovedArguments) && arg.isModifiedRemoved())
             continue;
 
@@ -1264,7 +1261,7 @@ ShibokenGenerator::ArgumentVarReplacementList
     TypeSystem::Language convLang = (language == TypeSystem::TargetLangCode)
                                     ? TypeSystem::NativeCode : TypeSystem::TargetLangCode;
     int removed = 0;
-    for (int i = 0; i < func->arguments().size(); ++i) {
+    for (qsizetype i = 0; i < func->arguments().size(); ++i) {
         const AbstractMetaArgument &arg = func->arguments().at(i);
         QString argValue;
         if (language == TypeSystem::TargetLangCode) {
