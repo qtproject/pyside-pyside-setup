@@ -42,20 +42,20 @@ FileOut::~FileOut()
     }
 }
 
-static QList<int> lcsLength(const QByteArrayList &a, const QByteArrayList &b)
+static QList<qsizetype> lcsLength(const QByteArrayList &a, const QByteArrayList &b)
 {
-    const int height = a.size() + 1;
-    const int width = b.size() + 1;
+    const auto height = a.size() + 1;
+    const auto width = b.size() + 1;
 
-    QList<int> res(width * height, 0);
+    QList<qsizetype> res(width * height, 0);
 
-    for (int row = 1; row < height; row++) {
-        for (int col = 1; col < width; col++) {
-            if (a[row-1] == b[col-1])
-                res[width * row + col] = res[width * (row-1) + col-1] + 1;
+    for (qsizetype row = 1; row < height; row++) {
+        for (qsizetype col = 1; col < width; col++) {
+            if (a.at(row - 1) == b.at(col - 1))
+                res[width * row + col] = res[width * (row - 1) + col - 1] + 1;
             else
-                res[width * row + col] = qMax(res[width * row     + col-1],
-                                              res[width * (row-1) + col]);
+                res[width * row + col] = qMax(res[width * row + col - 1],
+                                              res[width * (row - 1) + col]);
         }
     }
     return res;
@@ -70,8 +70,8 @@ enum Type {
 struct Unit
 {
     Type type;
-    int start;
-    int end;
+    qsizetype start;
+    qsizetype end;
 
     void print(const QByteArrayList &a, const QByteArrayList &b) const;
 };
@@ -81,33 +81,33 @@ void Unit::print(const QByteArrayList &a, const QByteArrayList &b) const
     switch (type) {
     case Unchanged:
         if ((end - start) > 9) {
-            for (int i = start; i <= start + 2; i++)
+            for (auto i = start; i <= start + 2; ++i)
                 std::printf("  %s\n", a.at(i).constData());
             std::printf("%s=\n= %d more lines\n=%s\n",
-                        colorInfo, end - start - 6, colorReset);
-            for (int i = end - 2; i <= end; i++)
+                        colorInfo, int(end - start - 6), colorReset);
+            for (auto i = end - 2; i <= end; ++i)
                 std::printf("  %s\n", a.at(i).constData());
         } else {
-            for (int i = start; i <= end; i++)
+            for (auto i = start; i <= end; ++i)
                 std::printf("  %s\n", a.at(i).constData());
         }
         break;
     case Add:
         std::fputs(colorAdd, stdout);
-        for (int i = start; i <= end; i++)
+        for (auto i = start; i <= end; ++i)
             std::printf("+ %s\n", b.at(i).constData());
         std::fputs(colorReset, stdout);
         break;
     case Delete:
         std::fputs(colorDelete, stdout);
-        for (int i = start; i <= end; i++)
+        for (auto i = start; i <= end; ++i)
             std::printf("- %s\n", a.at(i).constData());
         std::fputs(colorReset, stdout);
         break;
     }
 }
 
-static void unitAppend(Type type, int pos, QList<Unit> *units)
+static void unitAppend(Type type, qsizetype pos, QList<Unit> *units)
 {
     if (!units->isEmpty() && units->last().type == type)
         units->last().end = pos;
@@ -115,9 +115,9 @@ static void unitAppend(Type type, int pos, QList<Unit> *units)
         units->append(Unit{type, pos, pos});
 }
 
-static QList<Unit> diffHelper(const QList<int> &lcs,
-                                const QByteArrayList &a, const QByteArrayList &b,
-                                int row, int col)
+static QList<Unit> diffHelper(const QList<qsizetype> &lcs,
+                              const QByteArrayList &a, const QByteArrayList &b,
+                              qsizetype row, qsizetype col)
 {
     if (row > 0 && col > 0 && a.at(row - 1) == b.at(col - 1)) {
         QList<Unit> result = diffHelper(lcs, a, b, row - 1, col - 1);
@@ -125,7 +125,7 @@ static QList<Unit> diffHelper(const QList<int> &lcs,
         return result;
     }
 
-    const int width = b.size() + 1;
+    const auto width = b.size() + 1;
     if (col > 0
         && (row == 0 || lcs.at(width * row + col -1 ) >= lcs.at(width * (row - 1) + col))) {
         QList<Unit> result = diffHelper(lcs, a, b, row, col - 1);
