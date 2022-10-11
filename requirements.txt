@@ -16,3 +16,4 @@ dataclasses; python_version < '3.7'
 furo
 sphinx-copybutton
 distro; sys_platform == 'linux'
+patchelf==0.15; sys_platform == 'linux'

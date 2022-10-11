@@ -528,12 +528,8 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
                 self._patchelf_path = os.path.join(os.getcwd(), self._patchelf_path)
             log.info(f"Using {self._patchelf_path} ...")
             return
-        log.info("Building patchelf...")
-        module_src_dir = os.path.join(self.sources_dir, "patchelf")
-        build_cmd = ["g++", f"{module_src_dir}/patchelf.cc", "-o", "patchelf"]
-        if run_process(build_cmd) != 0:
-            raise DistutilsSetupError("Error building patchelf")
-        self._patchelf_path = os.path.join(self.script_dir, "patchelf")
+        else:
+            raise DistutilsSetupError("patchelf not found")
 
     def _enable_numpy(self):
         if OPTION["ENABLE_NUMPY_SUPPORT"] or OPTION["PYSIDE_NUMPY_SUPPORT"]:
