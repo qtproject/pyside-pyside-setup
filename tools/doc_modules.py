@@ -18,6 +18,10 @@ ROOT_DIR = Path(__file__).parents[1].resolve()
 SOURCE_DIR = ROOT_DIR / "sources" / "pyside6" / "PySide6"
 
 
+qt_version = None
+qt_include_dir = None
+
+
 class TypeSystemContentHandler(ContentHandler):
     """XML SAX content handler that extracts required modules from the
        "load-typesystem" elements of the typesystem_file. Nodes that start
@@ -54,6 +58,13 @@ def required_typesystems(module):
     return handler.required_modules
 
 
+def query_qtpaths(keyword):
+    query_cmd = ["qtpaths", "-query", keyword]
+    output = subprocess.check_output(query_cmd, stderr=subprocess.STDOUT,
+                                     universal_newlines=True)
+    return output.strip()
+
+
 def sort_modules(dependency_dict):
     """Sort the modules by dependencies using brute force: Keep adding
        modules all of whose requirements are present to the result list
@@ -77,6 +88,66 @@ def sort_modules(dependency_dict):
     return result
 
 
+def _write_type_system(modules, file):
+    """Helper to write the type system for shiboken. It needs to be in
+       dependency order to prevent shiboken from loading the included
+       typesystems with generate="no", which causes those modules to be
+       missing."""
+    for module in modules:
+        name = module[2:].lower()
+        filename = f"{module}/typesystem_{name}.xml"
+        print(f'    <load-typesystem name="{filename}" generate="yes"/>',
+              file=file)
+    print("</typesystem>", file=file)
+
+
+def write_type_system(modules, filename):
+    """Write the type system for shiboken in dependency order."""
+    if filename == "-":
+        _write_type_system(modules, sys.stdout)
+    else:
+        path = Path(filename)
+        exists = path.exists()
+        with path.open(mode="a") as f:
+            if not exists:
+                print('<typesystem  package="PySide">', file=f)
+            _write_type_system(modules, f)
+
+
+def _write_global_header(modules, file):
+    """Helper to write the global header for shiboken."""
+    for module in modules:
+        print(f"#include <{module}/{module}>", file=file)
+
+
+def write_global_header(modules, filename):
+    """Write the global header for shiboken."""
+    if filename == "-":
+        _write_global_header(modules, sys.stdout)
+    else:
+        with Path(filename).open(mode="a") as f:
+            _write_global_header(modules, f)
+
+
+def _write_docconf(modules, file):
+    """Helper to write the include paths for the .qdocconf file."""
+    # @TODO fix this for macOS frameworks.
+    for module in modules:
+        root = f"    -I/{qt_include_dir}/{module}"
+        print(f"{root} \\", file=file)
+        print(f"{root}/{qt_version} \\", file=file)
+        print(f"{root}/{qt_version}/{module} \\", file=file)
+
+
+def write_docconf(modules, filename):
+    """Write the include paths for the .qdocconf file."""
+    if filename == "-":
+        _write_docconf(modules, sys.stdout)
+    else:
+        with Path(filename).open(mode="a") as f:
+            _write_docconf(modules, f)
+
+
 if __name__ == "__main__":
     argument_parser = ArgumentParser(description=DESC,
                                      formatter_class=RawTextHelpFormatter)
@@ -84,9 +155,17 @@ if __name__ == "__main__":
                                  help="Verbose")
     argument_parser.add_argument("qt_include_dir", help="Qt Include dir",
                                  nargs='?', type=str)
+    argument_parser.add_argument("qt_version", help="Qt version string",
+                                 nargs='?', type=str)
+    argument_parser.add_argument("--typesystem", "-t", help="Typesystem file to write",
+                                 action="store", type=str)
+    argument_parser.add_argument("--global-header", "-g", help="Global header to write",
+                                 action="store", type=str)
+    argument_parser.add_argument("--docconf", "-d", help="docconf file to write",
+                                 action="store", type=str)
+
     options = argument_parser.parse_args()
     verbose = options.verbose
-    qt_include_dir = None
     if options.qt_include_dir:
         qt_include_dir = Path(options.qt_include_dir)
         if not qt_include_dir.is_dir():
@@ -96,12 +175,12 @@ if __name__ == "__main__":
     else:
         verbose = True  # Called by hand to find out about available modules
         query_cmd = ["qtpaths", "-query", "QT_INSTALL_HEADERS"]
-        output = subprocess.check_output(query_cmd, stderr=subprocess.STDOUT,
-                                         universal_newlines=True)
-        qt_include_dir = Path(output.strip())
+        qt_include_dir = Path(query_qtpaths("QT_INSTALL_HEADERS"))
         if not qt_include_dir.is_dir():
             print("Cannot determine include directory", file=sys.stderr)
             sys.exit(-1)
+
+    qt_version = options.qt_version if options.qt_version else query_qtpaths("QT_VERSION")
 
     # Build a typesystem dependency dict of the available modules in order
     # to be able to sort_modules by dependencies. This is required as
@@ -118,3 +197,10 @@ if __name__ == "__main__":
 
     modules = sort_modules(module_dependency_dict)
     print(" ".join([m[2:] for m in modules]))
+
+    if options.typesystem:
+        write_type_system(modules, options.typesystem)
+    if options.global_header:
+        write_global_header(modules, options.global_header)
+    if options.docconf:
+        write_docconf(modules, options.docconf)
