@@ -7,7 +7,7 @@ import tempfile
 import textwrap
 import logging
 
-from setuptools import setup  # Import setuptools before distutils
+from setuptools import setup
 
 from build_scripts.config import config
 from build_scripts.main import (cmd_class_dict, get_package_version,

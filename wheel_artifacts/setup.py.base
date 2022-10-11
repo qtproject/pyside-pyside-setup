@@ -1,12 +1,11 @@
 import setuptools
-from setuptools import setup, Extension
-from setuptools._distutils import cmd
+from setuptools import setup, Extension, Command
 
 # This class and Extension file is intended only to force setuptools
 # to understand we are using extension modules, but because we don't
 # include the source files in the 'Extension' object, it gets wrongly
 # lost.
-class build_ext(cmd.Command):
+class build_ext(Command):
     def initialize_options(self):
         pass
     def finalize_options(self):

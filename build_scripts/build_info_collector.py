@@ -4,9 +4,9 @@
 import os
 import platform
 import sys
+import sysconfig
 from sysconfig import get_config_var
 
-from setuptools._distutils import sysconfig as sconfig
 from setuptools.errors import SetupError
 
 from .log import log
@@ -295,7 +295,13 @@ class BuildInfoCollectorMixin(object):
             site_packages_no_prefix = self.python_target_info['python_info']['site_packages_dir']
             self.site_packages_dir = os.path.join(install_dir, site_packages_no_prefix)
         else:
-            self.site_packages_dir = sconfig.get_python_lib(1, 0, prefix=install_dir)
+            # Setuptools doesn't have an equivalent of a get_python_lib with a
+            # prefix, so we build the path manually:
+            #     self.site_packages_dir = sconfig.get_python_lib(1, 0, prefix=install_dir)
+            _base = sysconfig.get_paths()["data"]
+            _purelib = sysconfig.get_paths()["purelib"]
+            assert _base in _purelib
+            self.site_packages_dir = f"{install_dir}{_purelib.replace(_base, '')}"
 
     def post_collect_and_assign(self):
         # self.build_lib is only available after the base class

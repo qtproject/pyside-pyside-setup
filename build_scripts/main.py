@@ -6,6 +6,7 @@ import os
 import platform
 import re
 import sys
+import sysconfig
 import time
 from packaging.version import parse as parse_version
 from pathlib import Path
@@ -21,6 +22,7 @@ from setuptools import Command, Extension
 from setuptools.command.bdist_egg import bdist_egg as _bdist_egg
 from setuptools.command.build_ext import build_ext as _build_ext
 from setuptools.command.build_py import build_py as _build_py
+from setuptools.command.build import build as _build
 from setuptools.command.develop import develop as _develop
 from setuptools.command.install import install as _install
 from setuptools.command.install_lib import install_lib as _install_lib
@@ -28,8 +30,6 @@ from setuptools.command.install_scripts import install_scripts  # noqa: preload 
 
 # Use the distutils implementation within setuptools (but not before)
 from .log import log
-from setuptools._distutils import sysconfig as sconfig
-from setuptools._distutils.command.build import build as _build
 from setuptools.errors import SetupError
 
 from .build_info_collector import BuildInfoCollectorMixin
@@ -462,7 +462,7 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
         if config.is_internal_shiboken_generator_build_and_part_of_top_level_all():
             return
 
-        setuptools_install_prefix = sconfig.get_python_lib(1)
+        setuptools_install_prefix = sysconfig.get_paths()["purelib"]
         if OPTION["FINAL_INSTALL_PREFIX"]:
             setuptools_install_prefix = OPTION["FINAL_INSTALL_PREFIX"]
         log.info("=" * 30)

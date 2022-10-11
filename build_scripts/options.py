@@ -7,7 +7,7 @@ except ModuleNotFoundError:
     # This is motivated by our CI using an old version of setuptools
     # so then the coin_build_instructions.py script is executed, and
     # import from this file, it was failing.
-    from distutils.cmd import Command
+    from distutils.cmd import Command  # TODO: remove
 
 import os
 import sys
