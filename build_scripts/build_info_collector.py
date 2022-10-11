@@ -8,7 +8,7 @@ from sysconfig import get_config_var
 
 from setuptools._distutils import log
 from setuptools._distutils import sysconfig as sconfig
-from setuptools._distutils.errors import DistutilsSetupError
+from setuptools.errors import SetupError
 
 from .options import OPTION
 from .qtinfo import QtInfo
@@ -50,7 +50,7 @@ def _get_py_library_win(build_type, py_version, py_prefix, py_libdir,
         # same base directory to define the py_libdir variable.
         py_libdir = os.path.join(os.path.dirname(py_include_dir), "libs")
         if not os.path.isdir(py_libdir):
-            raise DistutilsSetupError("Failed to locate the 'libs' directory")
+            raise SetupError("Failed to locate the 'libs' directory")
     dbg_postfix = "_d" if build_type == "Debug" else ""
     if OPTION["MAKESPEC"] == "mingw":
         static_lib_name = f"libpython{py_version.replace('.', '')}{dbg_postfix}.a"
@@ -111,7 +111,7 @@ def _get_py_library_unix(build_type, py_version, py_prefix, py_libdir,
                 return pypy_library
             libs_tried.append(pypy_library)
     _libs_tried = ', '.join(libs_tried)
-    raise DistutilsSetupError(f"Failed to locate the Python library with {_libs_tried}")
+    raise SetupError(f"Failed to locate the Python library with {_libs_tried}")
 
 
 def get_py_library(build_type, py_version, py_prefix, py_libdir, py_include_dir):

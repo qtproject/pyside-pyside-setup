@@ -20,13 +20,13 @@ from textwrap import dedent, indent
 try:
     # Using the distutils implementation within setuptools
     from setuptools._distutils import log
-    from setuptools._distutils.errors import DistutilsSetupError
+    from setuptools.errors import SetupError
 except ModuleNotFoundError:
     # This is motivated by our CI using an old version of setuptools
     # so then the coin_build_instructions.py script is executed, and
     # import from this file, it was failing.
     from distutils import log
-    from distutils.errors import DistutilsSetupError
+    from distutils.errors import DistutilsSetupError as SetupError
 
 try:
     WindowsError
@@ -96,8 +96,8 @@ def winsdk_setenv(platform_arch, build_type):
                     continue
                 setenv_paths.append(setenv_path)
     if len(setenv_paths) == 0:
-        raise DistutilsSetupError("Failed to find the Windows SDK with MSVC compiler "
-                                  f"version {msvc9.VERSION}")
+        raise SetupError("Failed to find the Windows SDK with MSVC "
+                         f"compiler version {msvc9.VERSION}")
     for setenv_path in setenv_paths:
         log.info(f"Found {setenv_path}")
 
@@ -172,8 +172,8 @@ def init_msvc_env(platform_arch, build_type):
     log.info(f"Searching MSVC compiler version {msvc9.VERSION}")
     vcdir_path = find_vcdir(msvc9.VERSION)
     if not vcdir_path:
-        raise DistutilsSetupError(f"Failed to find the MSVC compiler version {msvc9.VERSION} on "
-                                  "your system.")
+        raise SetupError(f"Failed to find the MSVC compiler version {msvc9.VERSION} on "
+                          "your system.")
     else:
         log.info(f"Found {vcdir_path}")
 

@@ -30,7 +30,7 @@ from setuptools.command.install_scripts import install_scripts  # noqa: preload 
 from setuptools._distutils import log
 from setuptools._distutils import sysconfig as sconfig
 from setuptools._distutils.command.build import build as _build
-from setuptools._distutils.errors import DistutilsSetupError
+from setuptools.errors import SetupError
 
 from .build_info_collector import BuildInfoCollectorMixin
 from .config import config
@@ -84,7 +84,7 @@ def _get_make(platform_arch, build_type):
             init_msvc_env(platform_arch, build_type)
             nmake_path = which("nmake")
             if not nmake_path or not os.path.exists(nmake_path):
-                raise DistutilsSetupError('"nmake" could not be found.')
+                raise SetupError('"nmake" could not be found.')
         if not OPTION["NO_JOM"]:
             jom_path = which("jom")
             if jom_path:
@@ -93,13 +93,13 @@ def _get_make(platform_arch, build_type):
         log.info(f"nmake was found in {nmake_path}")
         if OPTION["JOBS"]:
             msg = "Option --jobs can only be used with 'jom' on Windows."
-            raise DistutilsSetupError(msg)
+            raise SetupError(msg)
         return (nmake_path, "NMake Makefiles")
     if makespec == "mingw":
         return ("mingw32-make", "mingw32-make")
     if makespec == "ninja":
         return ("ninja", "Ninja")
-    raise DistutilsSetupError(f'Invalid option --make-spec "{makespec}".')
+    raise SetupError(f'Invalid option --make-spec "{makespec}".')
 
 
 def get_make(platform_arch, build_type):
@@ -110,7 +110,7 @@ def get_make(platform_arch, build_type):
         if not found_path or not os.path.exists(found_path):
             m = (f"You need the program '{make_path}' on your system path to "
                  f"compile {PYSIDE_MODULE}.")
-            raise DistutilsSetupError(m)
+            raise SetupError(m)
         make_path = found_path
     return (make_path, make_generator)
 
@@ -356,8 +356,8 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
                     log.info(f"Adding {clangBinDir} as detected by {clang_source} to PATH")
                     additional_paths.append(clangBinDir)
             else:
-                raise DistutilsSetupError("Failed to detect Clang when checking "
-                                          "LLVM_INSTALL_DIR, CLANG_INSTALL_DIR, llvm-config")
+                raise SetupError("Failed to detect Clang when checking "
+                                 "LLVM_INSTALL_DIR, CLANG_INSTALL_DIR, llvm-config")
 
         update_env_path(additional_paths)
 
@@ -684,8 +684,8 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
         elif not OPTION["LIMITED_API"]:
             pass
         else:
-            raise DistutilsSetupError("option limited-api must be 'yes' or 'no' "
-                                      "(default yes if applicable, i.e. python version >= 3.6)")
+            raise SetupError("option limited-api must be 'yes' or 'no' "
+                             "(default yes if applicable, i.e. python version >= 3.6)")
 
         if OPTION["VERBOSE_BUILD"]:
             cmake_cmd.append("-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON")
@@ -701,7 +701,7 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
                     or sys.platform.startswith('darwin')):
                 cmake_cmd.append("-DSANITIZE_ADDRESS=ON")
             else:
-                raise DistutilsSetupError("Address sanitizer can only be used on Linux and macOS.")
+                raise SetupError("Address sanitizer can only be used on Linux and macOS.")
 
         if extension.lower() == PYSIDE:
             pyside_qt_conf_prefix = ''
@@ -798,7 +798,7 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
 
         if self.is_cross_compile and (not OPTION["SHIBOKEN_HOST_PATH"]
                                       or not os.path.exists(OPTION["SHIBOKEN_HOST_PATH"])):
-            raise DistutilsSetupError(
+            raise SetupError(
                 "Please specify the location of host shiboken tools via --shiboken-host-path=")
 
         if self.shiboken_host_path:
@@ -817,7 +817,7 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
         if not OPTION["SKIP_CMAKE"]:
             log.info(f"Configuring module {extension} ({module_src_dir})...")
             if run_process(cmake_cmd) != 0:
-                raise DistutilsSetupError(f"Error configuring {extension}")
+                raise SetupError(f"Error configuring {extension}")
         else:
             log.info(f"Reusing old configuration for module {extension} ({module_src_dir})...")
 
@@ -828,7 +828,7 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
         if OPTION["VERBOSE_BUILD"] and self.make_generator == "Ninja":
             cmd_make.append("-v")
         if run_process(cmd_make) != 0:
-            raise DistutilsSetupError(f"Error compiling {extension}")
+            raise SetupError(f"Error compiling {extension}")
 
         if sys.version_info == (3, 6) and sys.platform == "darwin":
             # Python 3.6 has a Sphinx problem because of docutils 0.17 .
@@ -846,7 +846,7 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
                     if OPTION["VERBOSE_BUILD"] and self.make_generator == "Ninja":
                         make_doc_cmd.append("-v")
                     if run_process(make_doc_cmd) != 0:
-                        raise DistutilsSetupError("Error generating documentation "
+                        raise SetupError("Error generating documentation "
                                                   f"for {extension}")
                 else:
                     log.info("Sphinx not found, skipping documentation build")
@@ -866,7 +866,7 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
             # ninja: error: unknown target 'install/fast'
             target = 'install/fast' if self.make_generator != 'Ninja' else 'install'
             if run_process([self.make_path, target]) != 0:
-                raise DistutilsSetupError(f"Error pseudo installing {extension}")
+                raise SetupError(f"Error pseudo installing {extension}")
         else:
             log.info(f"Skipped installing module {extension}")
 
@@ -1208,7 +1208,7 @@ class PysideRstDocs(Command, DistUtilsCommandMixin):
                     log.info("-- Generating PySide documentation")
                     log.info(f"-- Documentation directory: 'html/{PYSIDE}/'")
             else:
-                raise DistutilsSetupError("Sphinx not found - aborting")
+                raise SetupError("Sphinx not found - aborting")
             self.html_dir = "html"
 
             # creating directories html/pyside6/shiboken6
@@ -1228,7 +1228,7 @@ class PysideRstDocs(Command, DistUtilsCommandMixin):
                 elif self.name == PYSIDE:
                     self.out_dir = os.path.join(self.html_dir, PYSIDE)
             except (PermissionError, FileExistsError):
-                raise DistutilsSetupError(f"Error while creating directories for {self.doc_dir}")
+                raise SetupError(f"Error while creating directories for {self.doc_dir}")
 
     def run(self):
         if not self.skip:
@@ -1242,7 +1242,7 @@ class PysideRstDocs(Command, DistUtilsCommandMixin):
             if OPTION["QUIET"]:
                 cmake_cmd.append('-DQUIET_BUILD=1')
             if run_process(cmake_cmd) != 0:
-                raise DistutilsSetupError(f"Error running CMake for {self.doc_dir}")
+                raise SetupError(f"Error running CMake for {self.doc_dir}")
 
             if self.name == PYSIDE:
                 self.sphinx_src = os.path.join(self.out_dir, "rst")
@@ -1252,7 +1252,7 @@ class PysideRstDocs(Command, DistUtilsCommandMixin):
             sphinx_cmd = ["sphinx-build", "-b", "html", "-j", "auto", "-c", self.sphinx_src,
                           self.doc_dir, self.out_dir]
             if run_process(sphinx_cmd) != 0:
-                raise DistutilsSetupError(f"Error running CMake for {self.doc_dir}")
+                raise SetupError(f"Error running CMake for {self.doc_dir}")
         # Last message
         if not self.skip and self.name == PYSIDE:
             log.info(f"-- The documentation was built. Check html/{PYSIDE}/index.html")

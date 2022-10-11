@@ -6,7 +6,7 @@ import time
 from sysconfig import get_config_var, get_platform
 
 from packaging.version import parse as parse_version
-from setuptools._distutils.errors import DistutilsSetupError
+from setuptools.errors import SetupError
 
 from .options import OPTION
 from .qtinfo import QtInfo
@@ -28,12 +28,11 @@ def get_qt_version():
     qt_version = qtinfo.version
 
     if not qt_version:
-        raise DistutilsSetupError("Failed to query the Qt version with "
-                                  f"qmake {qtinfo.qmake_command}")
+        raise SetupError("Failed to query the Qt version with qmake {qtinfo.qmake_command}")
 
     if parse_version(qtinfo.version) < parse_version("5.7"):
-        raise DistutilsSetupError(f"Incompatible Qt version detected: {qt_version}. "
-                                  "A Qt version >= 5.7 is required.")
+        raise SetupError(f"Incompatible Qt version detected: {qt_version}. "
+                         "A Qt version >= 5.7 is required.")
 
     return qt_version
 
@@ -69,7 +68,7 @@ def macos_qt_min_deployment_target():
     target = QtInfo().macos_min_deployment_target
 
     if not target:
-        raise DistutilsSetupError("Failed to query for Qt's QMAKE_MACOSX_DEPLOYMENT_TARGET.")
+        raise SetupError("Failed to query for Qt's QMAKE_MACOSX_DEPLOYMENT_TARGET.")
     return target
 
 
@@ -102,11 +101,9 @@ def macos_pyside_min_deployment_target():
     # precedence.
     if setup_target:
         if python_target and setup_target_split < python_target_split:
-            raise DistutilsSetupError(message.format(setup_target, "Python",
-                                                     python_target))
+            raise SetupError(message.format(setup_target, "Python", python_target))
         if setup_target_split < qt_target_split:
-            raise DistutilsSetupError(message.format(setup_target, "Qt",
-                                                     qt_target))
+            raise SetupError(message.format(setup_target, "Qt", qt_target))
         # All checks clear, use setup.py provided value.
         return setup_target
 
