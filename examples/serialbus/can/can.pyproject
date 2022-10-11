@@ -1,0 +1,10 @@
+{
+    "files": ["main.py", "bitratebox.py",
+              "canbusdeviceinfobox.py", "canbusdeviceinfobox.ui",
+              "canbusdeviceinfodialog.py", "canbusdeviceinfodialog.ui",
+              "connectdialog.py", "connectdialog.ui",
+              "mainwindow.py", "mainwindow.ui",
+              "receivedframesmodel.py", "receivedframesview.py",
+              "sendframebox.py", "sendframebox.ui",
+              "can.qrc"]
+}
