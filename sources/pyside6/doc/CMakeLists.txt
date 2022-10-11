@@ -119,13 +119,21 @@ if (FULLDOCSBUILD)
 
     # The last element of the include list is the mkspec directory containing qplatformdefs.h
     list(GET Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS -1 mkspecInclude)
-    configure_file("pyside-config.qdocconf.in" "${CMAKE_CURRENT_LIST_DIR}/pyside-config.qdocconf" @ONLY)
+    set(config_docconf "${CMAKE_CURRENT_LIST_DIR}/pyside-config.qdocconf")
+    configure_file("pyside-config.qdocconf.in" "${config_docconf}" @ONLY)
 
+    set(global_header "${pyside6_BINARY_DIR}/qdoc.h")
     file(READ "${pyside6_BINARY_DIR}/pyside6_global.h" docHeaderContents)
+    file(WRITE ${global_header} "${docHeaderContents}")
+
+    set(global_typesystem "${CMAKE_CURRENT_BINARY_DIR}/typesystem_doc.xml")
     file(READ "typesystem_doc.xml.in" typeSystemDocXmlContents)
+    file(WRITE ${global_typesystem} "${typeSystemDocXmlContents}")
 
     execute_process(
-      COMMAND ${PYTHON_EXECUTABLE} "${TOOLS_DIR}/doc_modules.py" "${QT_INCLUDE_DIR}"
+      COMMAND ${PYTHON_EXECUTABLE} "${TOOLS_DIR}/doc_modules.py"
+              -t "${global_typesystem}" -g "${global_header}" -d "${config_docconf}"
+              "${QT_INCLUDE_DIR}" "${SUPPORTED_QT_VERSION}"
       OUTPUT_VARIABLE ALL_DOC_MODULES
       OUTPUT_STRIP_TRAILING_WHITESPACE)
     separate_arguments (ALL_DOC_MODULES UNIX_COMMAND "${ALL_DOC_MODULES}")
@@ -138,47 +146,9 @@ if (FULLDOCSBUILD)
             get_filename_component(BASENAME ${OUTFILE} NAME)
             configure_file(${docConf} "${CMAKE_CURRENT_LIST_DIR}/qtmodules/${BASENAME}" @ONLY)
             file(APPEND "pyside.qdocconf.in" "\@CMAKE_CURRENT_LIST_DIR\@/qtmodules/${BASENAME}\n")
-            # Handle docconf files in Qt that contain multiple modules
-            if ("${moduleIn}" STREQUAL "3DExtras")
-                set(modules 3DCore 3DRender 3DInput 3DLogic 3DAnimation "${moduleIn}")
-            elseif ("${moduleIn}" STREQUAL "OpenGL")
-                set(modules "${moduleIn}" OpenGLWidgets)
-            elseif ("${moduleIn}" STREQUAL "QuickWidgets")
-                set(modules Qml Quick "${moduleIn}")
-            elseif ("${moduleIn}" STREQUAL "MultimediaWidgets")
-                set(modules Multimedia "${moduleIn}")
-            elseif ("${moduleIn}" STREQUAL "Pdf")
-                set(modules "${moduleIn}" PdfWidgets)
-            elseif ("${moduleIn}" STREQUAL "Scxml")
-                set(modules StateMachine "${moduleIn}")
-            elseif ("${moduleIn}" STREQUAL "Svg")
-                set(modules "${moduleIn}" SvgWidgets)
-            elseif ("${moduleIn}" STREQUAL "WebEngineWidgets")
-                set(modules WebEngineCore WebEngineWidgets WebEngineQuick "${moduleIn}")
-                set(HAS_WEBENGINE_WIDGETS 1)
-            else()
-                set(modules "${moduleIn}")
-            endif()
-            foreach(module ${modules})
-                string(TOLOWER "${module}" lowerModule)
-                # -- @TODO fix this for macOS frameworks.
-                file(APPEND "${CMAKE_CURRENT_LIST_DIR}/pyside-config.qdocconf"
-                     "    -I${QT_INCLUDE_DIR}/Qt${module} \\\n"
-                     "    -I${QT_INCLUDE_DIR}/Qt${module}/${Qt${QT_MAJOR_VERSION}Core_VERSION} \\\n"
-                     "    -I${QT_INCLUDE_DIR}/Qt${module}/${Qt${QT_MAJOR_VERSION}Core_VERSION}/Qt${module} \\\n")
-
-                set(globalHeader "Qt${module}")
-                set(docHeaderContents "${docHeaderContents}\n#include <Qt${module}/${globalHeader}>")
-                set(typeSystemDocXmlContents "${typeSystemDocXmlContents}\n<load-typesystem name=\"Qt${module}/typesystem_${lowerModule}.xml\" generate=\"yes\"/>")
-            endforeach()
         endif()
     endforeach()
 
-    set(typeSystemDocXmlContents "${typeSystemDocXmlContents}\n</typesystem>\n")
-    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/typesystem_doc.xml" "${typeSystemDocXmlContents}")
-
-    set(docHeader "${pyside6_BINARY_DIR}/qdoc.h")
-    file(WRITE ${docHeader} "${docHeaderContents}")
     configure_file("pyside.qdocconf.in" "pyside.qdocconf" @ONLY)
 
 
@@ -244,7 +214,7 @@ configure_file("conf.py.in" "rst/conf.py" @ONLY)
 set(CODE_SNIPPET_ROOT "${CMAKE_CURRENT_BINARY_DIR}/rst/codesnippets")
 
 add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/rst/PySide6/QtCore/index.rst"
-                   COMMAND Shiboken6::shiboken6 --generator-set=qtdoc ${docHeader}
+                   COMMAND Shiboken6::shiboken6 --generator-set=qtdoc ${global_header}
                            --enable-pyside-extensions
                            --include-paths="${QT_INCLUDE_DIR}${PATH_SEP}${pyside6_SOURCE_DIR}${PATH_SEP}${TS_ROOT}"
                            --api-version=${SUPPORTED_QT_VERSION}
@@ -257,7 +227,7 @@ add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/rst/PySide6/QtCore/index.
                            --documentation-extra-sections-dir=${CMAKE_CURRENT_BINARY_DIR}/rst/extras
                            --additional-documentation=${CMAKE_CURRENT_BINARY_DIR}/rst/additionaldocs.lst
                            --inheritance-file=${ENV_INHERITANCE_FILE}
-                           ${CMAKE_CURRENT_BINARY_DIR}/typesystem_doc.xml
+                           ${global_typesystem}
                    WORKING_DIRECTORY ${${module}_SOURCE_DIR}
                    COMMENT "Running generator to generate documentation...")
 
