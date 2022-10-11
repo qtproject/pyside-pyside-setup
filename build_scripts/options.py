@@ -133,7 +133,7 @@ def _jobs_option_value():
     return ''
 
 
-# Declare options which need to be known when instantiating the DistUtils
+# Declare options which need to be known when instantiating the setuptools
 # commands or even earlier during SetupRunner.run().
 OPTION = {
     "BUILD_TYPE": option_value("build-type"),
@@ -162,8 +162,8 @@ if _deprecated_option_jobs:
     OPTION["JOBS"] = _deprecated_option_jobs
 
 
-class DistUtilsCommandMixin(object):
-    """Mixin for the DistUtils build/install commands handling the options."""
+class CommandMixin(object):
+    """Mixin for the setuptools build/install commands handling the options."""
 
     _static_class_finalized_once = False
 
@@ -290,7 +290,7 @@ class DistUtilsCommandMixin(object):
         # ensuring that all commands that inherit from
         # the mixin, get our custom properties set by the time
         # finalize_options is called.
-        if DistUtilsCommandMixin._static_class_finalized_once:
+        if CommandMixin._static_class_finalized_once:
             current_command: Command = self
             dist = current_command.distribution
             main_command_name = dist.commands[0]
@@ -306,14 +306,14 @@ class DistUtilsCommandMixin(object):
     @memoize
     def get_mixin_options_set():
         keys = set()
-        for (name, _, _) in DistUtilsCommandMixin.mixin_user_options:
+        for (name, _, _) in CommandMixin.mixin_user_options:
             keys.add(name.rstrip("=").replace("-", "_"))
         return keys
 
     def mixin_finalize_options(self):
         # The very first we finalize options, record that.
-        if not DistUtilsCommandMixin._static_class_finalized_once:
-            DistUtilsCommandMixin._static_class_finalized_once = True
+        if not CommandMixin._static_class_finalized_once:
+            CommandMixin._static_class_finalized_once = True
 
         # Ensure we finalize once per command object, rather than per
         # setup.py invocation. We want to have the option values

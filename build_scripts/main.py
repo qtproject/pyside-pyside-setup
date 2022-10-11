@@ -34,7 +34,7 @@ from setuptools.errors import SetupError
 
 from .build_info_collector import BuildInfoCollectorMixin
 from .config import config
-from .options import OPTION, DistUtilsCommandMixin
+from .options import OPTION, CommandMixin
 from .platforms.unix import prepare_packages_posix
 from .platforms.windows_desktop import prepare_packages_win32
 from .qtinfo import QtInfo
@@ -166,20 +166,20 @@ def prepare_build():
                     qt_src_dir = maybe_qt_src_dir
 
 
-class PysideInstall(_install, DistUtilsCommandMixin):
+class PysideInstall(_install, CommandMixin):
 
-    user_options = _install.user_options + DistUtilsCommandMixin.mixin_user_options
+    user_options = _install.user_options + CommandMixin.mixin_user_options
 
     def __init__(self, *args, **kwargs):
         self.command_name = "install"
         _install.__init__(self, *args, **kwargs)
-        DistUtilsCommandMixin.__init__(self)
+        CommandMixin.__init__(self)
 
     def initialize_options(self):
         _install.initialize_options(self)
 
     def finalize_options(self):
-        DistUtilsCommandMixin.mixin_finalize_options(self)
+        CommandMixin.mixin_finalize_options(self)
         _install.finalize_options(self)
 
         if sys.platform == 'darwin' or self.is_cross_compile:
@@ -264,19 +264,19 @@ class PysideInstallLib(_install_lib):
         return outfiles
 
 
-class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
+class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
 
-    user_options = _build.user_options + DistUtilsCommandMixin.mixin_user_options
+    user_options = _build.user_options + CommandMixin.mixin_user_options
 
     def __init__(self, *args, **kwargs):
         self.command_name = "build"
         _build.__init__(self, *args, **kwargs)
-        DistUtilsCommandMixin.__init__(self)
+        CommandMixin.__init__(self)
         BuildInfoCollectorMixin.__init__(self)
 
     def finalize_options(self):
         os_name_backup = os.name
-        DistUtilsCommandMixin.mixin_finalize_options(self)
+        CommandMixin.mixin_finalize_options(self)
         BuildInfoCollectorMixin.collect_and_assign(self)
 
         use_os_name_hack = False
@@ -1178,14 +1178,14 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
             log.info(f"Patched rpath to '{rpath_value}' in {library}.")
 
 
-class PysideRstDocs(Command, DistUtilsCommandMixin):
+class PysideRstDocs(Command, CommandMixin):
     description = "Build .rst documentation only"
-    user_options = DistUtilsCommandMixin.mixin_user_options
+    user_options = CommandMixin.mixin_user_options
 
     def __init__(self, *args, **kwargs):
         self.command_name = "build_rst_docs"
         Command.__init__(self, *args, **kwargs)
-        DistUtilsCommandMixin.__init__(self)
+        CommandMixin.__init__(self)
 
     def initialize_options(self):
         log.info("-- This build process will not include the API documentation."
@@ -1258,7 +1258,7 @@ class PysideRstDocs(Command, DistUtilsCommandMixin):
             log.info(f"-- The documentation was built. Check html/{PYSIDE}/index.html")
 
     def finalize_options(self):
-        DistUtilsCommandMixin.mixin_finalize_options(self)
+        CommandMixin.mixin_finalize_options(self)
 
 
 cmd_class_dict = {

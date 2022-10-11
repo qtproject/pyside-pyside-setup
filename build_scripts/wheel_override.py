@@ -8,7 +8,7 @@ import sys
 from email.generator import Generator
 
 from .log import log
-from .options import OPTION, DistUtilsCommandMixin
+from .options import OPTION, CommandMixin
 from .utils import is_64bit
 from .wheel_utils import get_package_version, get_qt_version, macos_plat_name
 
@@ -34,19 +34,19 @@ def get_bdist_wheel_override():
     return PysideBuildWheel if wheel_module_exists else None
 
 
-class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
+class PysideBuildWheel(_bdist_wheel, CommandMixin):
 
-    user_options = (_bdist_wheel.user_options + DistUtilsCommandMixin.mixin_user_options
+    user_options = (_bdist_wheel.user_options + CommandMixin.mixin_user_options
                     if wheel_module_exists else None)
 
     def __init__(self, *args, **kwargs):
         self.command_name = "bdist_wheel"
         self._package_version = None
         _bdist_wheel.__init__(self, *args, **kwargs)
-        DistUtilsCommandMixin.__init__(self)
+        CommandMixin.__init__(self)
 
     def finalize_options(self):
-        DistUtilsCommandMixin.mixin_finalize_options(self)
+        CommandMixin.mixin_finalize_options(self)
         if sys.platform == 'darwin':
             # Override the platform name to contain the correct
             # minimum deployment target.
