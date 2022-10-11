@@ -20,6 +20,7 @@ import os
 import platform
 import sys
 import tempfile
+import logging
 from argparse import ArgumentParser, RawTextHelpFormatter
 from pathlib import Path
 
@@ -32,12 +33,11 @@ this_dir = os.path.dirname(this_file)
 setup_script_dir = os.path.abspath(os.path.join(this_dir, ".."))
 sys.path.append(setup_script_dir)
 
-from setuptools._distutils import log
-
 from build_scripts.utils import (find_files_using_glob, find_glob_in_path,
                                  remove_tree, run_process, run_process_output)
+from build_scripts.log import log
 
-log.set_verbosity(1)
+log.setLevel(logging.DEBUG)
 
 NEW_WHEELS = False
 

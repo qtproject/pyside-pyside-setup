@@ -16,10 +16,10 @@ except NameError:
     this_file = sys.argv[0]
 this_file = os.path.abspath(this_file)
 this_dir = os.path.dirname(this_file)
-build_scripts_dir = os.path.abspath(os.path.join(this_dir, "../build_scripts"))
+build_scripts_dir = os.path.abspath(os.path.join(this_dir, ".."))
 
 sys.path.append(build_scripts_dir)
-from utils import detect_clang
+from build_scripts.utils import detect_clang
 
 
 class TestRunner(object):

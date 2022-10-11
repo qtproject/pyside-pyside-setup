@@ -27,7 +27,7 @@ from setuptools.command.install_lib import install_lib as _install_lib
 from setuptools.command.install_scripts import install_scripts  # noqa: preload only
 
 # Use the distutils implementation within setuptools (but not before)
-from setuptools._distutils import log
+from .log import log
 from setuptools._distutils import sysconfig as sconfig
 from setuptools._distutils.command.build import build as _build
 from setuptools.errors import SetupError
@@ -444,7 +444,7 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
                 # This applies to 'shiboken6', 'shiboken6_generator',
                 # and 'pyside6' inside the 'package_for_wheels' directory.
                 if _dst.exists():
-                    log.warn(f'***** Found directory "{_dst}", removing it first.')
+                    log.warning(f'Found directory "{_dst}", removing it first.')
                     remove_tree(_dst)
 
                 try:
@@ -452,8 +452,8 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
                     # is used when using the 'install' setup.py instruction.
                     copytree(_src, _dst)
                 except Exception as e:
-                    log.warn(f'***** problem renaming "{self.st_build_dir}"')
-                    log.warn(f'ignored error: {type(e).__name__}: {e}')
+                    log.warning(f'problem renaming "{self.st_build_dir}"')
+                    log.warning(f'ignored error: {type(e).__name__}: {e}')
         else:
             log.info("Skipped preparing and building packages.")
         log.info(f"--- Build completed ({elapsed()}s)")
@@ -666,7 +666,7 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
             if numpy:
                 cmake_cmd.append(f"-DNUMPY_INCLUDE_DIR={numpy}")
             else:
-                log.warn('***** numpy include directory was not found.')
+                log.warning('numpy include directory was not found.')
 
         if self.build_type.lower() == 'debug':
             if not self.is_cross_compile:
@@ -928,8 +928,8 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
                 try:
                     remove_tree(self.st_build_dir)
                 except Exception as e:
-                    log.warn(f'***** problem removing "{self.st_build_dir}"')
-                    log.warn(f'ignored error: {e}')
+                    log.warning(f'problem removing "{self.st_build_dir}"')
+                    log.warning(f'ignored error: {e}')
 
             if sys.platform == "win32":
                 _vars['dbg_postfix'] = OPTION["DEBUG"] and "_d" or ""
@@ -1048,8 +1048,8 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
             elif 'linux' in self.plat_name:
                 filters = unix_filters
             else:
-                log.warn(f"No shared library filters found for platform {self.plat_name}. "
-                         f"The package might miss Qt libraries and plugins.")
+                log.warning(f"No shared library filters found for platform {self.plat_name}. "
+                            f"The package might miss Qt libraries and plugins.")
         else:
             if sys.platform == 'darwin':
                 filters = darwin_filters

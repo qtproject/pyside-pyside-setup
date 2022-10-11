@@ -6,10 +6,10 @@ import platform
 import sys
 from sysconfig import get_config_var
 
-from setuptools._distutils import log
 from setuptools._distutils import sysconfig as sconfig
 from setuptools.errors import SetupError
 
+from .log import log
 from .options import OPTION
 from .qtinfo import QtInfo
 from .utils import configure_cmake_project, parse_cmake_project_message_info

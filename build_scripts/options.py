@@ -3,20 +3,20 @@
 
 try:
     from setuptools import Command
-    from setuptools._distutils import log
 except ModuleNotFoundError:
     # This is motivated by our CI using an old version of setuptools
     # so then the coin_build_instructions.py script is executed, and
     # import from this file, it was failing.
-    from distutils import log
     from distutils.cmd import Command
 
 import os
 import sys
 import warnings
+import logging
 from pathlib import Path
 from shutil import which
 
+from .log import log
 from .qtinfo import QtInfo
 from .utils import memoize
 
@@ -356,7 +356,7 @@ class DistUtilsCommandMixin(object):
         OPTION['SKIP_PACKAGING'] = self.skip_packaging
         OPTION['VERBOSE_BUILD'] = self.verbose_build
         if self.verbose_build:
-            log.set_verbosity(1)
+            log.setLevel(logging.DEBUG)
         OPTION['SANITIZE_ADDRESS'] = self.sanitize_address
         OPTION['SHORTER_PATHS'] = self.shorter_paths
         OPTION['DOC_BUILD_ONLINE'] = self.doc_build_online

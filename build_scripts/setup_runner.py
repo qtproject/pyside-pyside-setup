@@ -5,15 +5,16 @@ import os
 import sys
 import tempfile
 import textwrap
+import logging
 
 from setuptools import setup  # Import setuptools before distutils
-from setuptools._distutils import log
 
 from build_scripts.config import config
 from build_scripts.main import (cmd_class_dict, get_package_version,
                                 get_setuptools_extension_modules)
 from build_scripts.options import ADDITIONAL_OPTIONS, OPTION
 from build_scripts.utils import run_process
+from build_scripts.log import log
 
 
 class SetupRunner(object):
@@ -185,15 +186,8 @@ class SetupRunner(object):
 
         # Enable logging for both the top-level invocation of setup.py
         # as well as for child invocations. We we now use
-        # setuptools._distutils.log instead of distutils.log, and this
-        # new log object does not have its verbosity set by default
-        # when setuptools instantiates a distutils Distribution object,
-        # which calls
-        # dist.parse_command_line() -> log.set_verbosity(self.verbose)
-        # on the old distutils log object.
-        # So we do it explicitly here.
         if not OPTION["QUIET"]:
-            log.set_verbosity(log.INFO)
+            log.setLevel(logging.ERROR)
 
         # This is an internal invocation of setup.py, so start actual
         # build.

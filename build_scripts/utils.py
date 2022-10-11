@@ -17,9 +17,10 @@ from collections import defaultdict
 from pathlib import Path
 from textwrap import dedent, indent
 
+from .log import log
+
 try:
     # Using the distutils implementation within setuptools
-    from setuptools._distutils import log
     from setuptools.errors import SetupError
 except ModuleNotFoundError:
     # This is motivated by our CI using an old version of setuptools
@@ -886,7 +887,7 @@ def ldd(executable_path):
         result = _ldd_ldd(executable_path)
     except RuntimeError as e:
         message = f"ldd: Falling back to ld.so ({str(e)})"
-        log.warn(message)
+        log.warning(message)
     if not result:
         result = _ldd_ldso(executable_path)
     return result
@@ -1148,7 +1149,7 @@ def get_qtci_virtualEnv(python_ver, host, hostArch, targetArch):
                 _path = os.getenv(var, "")
                 _pExe = os.path.join(_path, "python.exe")
                 if not os.path.isfile(_pExe):
-                    log.warn(f"Can't find python.exe from {_pExe}, using default python3")
+                    log.warning(f"Can't find python.exe from {_pExe}, using default python3")
                     _pExe = os.path.join(os.getenv("PYTHON3_32_PATH"), "python.exe")
             else:
                 _pExe = os.path.join(os.getenv("PYTHON2_32_PATH"), "python.exe")
@@ -1159,7 +1160,7 @@ def get_qtci_virtualEnv(python_ver, host, hostArch, targetArch):
                 _path = os.getenv(var, "")
                 _pExe = os.path.join(_path, "python.exe")
                 if not os.path.isfile(_pExe):
-                    log.warn(f"Can't find python.exe from {_pExe}, using default python3")
+                    log.warning(f"Can't find python.exe from {_pExe}, using default python3")
                     _pExe = os.path.join(os.getenv("PYTHON3_PATH"), "python.exe")
         env_python = f"{_env}\\Scripts\\python.exe"
         env_pip = f"{_env}\\Scripts\\pip.exe"
@@ -1195,7 +1196,7 @@ def acceptCITestConfiguration(hostOS, hostOSVer, targetArch, compiler):
     # we shouldn't release the 2015 version.
     # BUT, 32 bit build is done only on msvc 2015...
     if compiler in ["MSVC2015"] and targetArch in ["X86_64"]:
-        log.warn(f"Disabled {compiler} to {targetArch} from Coin configuration")
+        log.warning(f"Disabled {compiler} to {targetArch} from Coin configuration")
         return False
     return True
 

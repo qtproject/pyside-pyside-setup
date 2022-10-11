@@ -1,14 +1,16 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 import os
+import logging
 import site
 import sys
 
+from build_scripts.log import log
 from build_scripts.options import has_option, log, option_value
 from build_scripts.utils import (expand_clang_variables, get_ci_qmake_path,
                                  get_qtci_virtualEnv, remove_tree, run_instruction)
 
-log.set_verbosity(log.INFO)
+log.setLevel(logging.INFO)
 
 # Values must match COIN thrift
 CI_HOST_OS = option_value("os")

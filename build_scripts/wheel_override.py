@@ -7,8 +7,7 @@ import platform
 import sys
 from email.generator import Generator
 
-from setuptools._distutils import log as logger
-
+from .log import log
 from .options import OPTION, DistUtilsCommandMixin
 from .utils import is_64bit
 from .wheel_utils import get_package_version, get_qt_version, macos_plat_name
@@ -27,7 +26,7 @@ try:
     wheel_module_exists = True
 except Exception as e:
     _bdist_wheel, wheel_version = type, ""  # dummy to make class statement happy
-    logger.warn(f"***** Exception while trying to prepare bdist_wheel override class: {e}. "
+    log.warning(f"***** Exception while trying to prepare bdist_wheel override class: {e}. "
                 "Skipping wheel overriding.")
 
 
@@ -255,7 +254,7 @@ class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
                 writeTag(impl)
 
         wheelfile_path = os.path.join(wheelfile_base, 'WHEEL')
-        logger.info(f'creating {wheelfile_path}')
+        log.info(f'creating {wheelfile_path}')
         with open(wheelfile_path, 'w') as f:
             Generator(f, maxheaderlen=0).flatten(msg)
 

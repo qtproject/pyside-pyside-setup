@@ -3,8 +3,7 @@
 
 import os
 
-from setuptools._distutils import log
-
+from .log import log
 from .versions import PYSIDE, PYSIDE_MODULE, SHIBOKEN
 
 

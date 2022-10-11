@@ -2,18 +2,20 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 import calendar
 import datetime
+import logging
 import os
 import os.path
 import site
 import sys
 
-from build_scripts.options import has_option, log, option_value
+from build_scripts.log import log
+from build_scripts.options import has_option, option_value
 from build_scripts.utils import (expand_clang_variables, get_ci_qtpaths_path,
                                  get_qtci_virtualEnv,
                                  parse_cmake_conf_assignments_by_key, remove_tree,
                                  run_instruction)
 
-log.set_verbosity(log.INFO)
+log.setLevel(logging.INFO)
 
 # Values must match COIN thrift
 CI_HOST_OS = option_value("os")
