@@ -128,7 +128,7 @@ static bool currentOpcode_Is_CallMethNoArgs()
     // We look into the currently active operation if we are going to call
     // a method with zero arguments.
     auto *frame = PyEval_GetFrame();
-#if PY_VERSION_HEX >= 0x03090000 && !Py_LIMITED_API
+#if PY_VERSION_HEX >= 0x03090000 && !Py_LIMITED_API && !defined(PYPY_VERSION)
     auto *f_code = PyFrame_GetCode(frame);
 #else
     static PyObject *const _f_code = Shiboken::String::createStaticString("f_code");

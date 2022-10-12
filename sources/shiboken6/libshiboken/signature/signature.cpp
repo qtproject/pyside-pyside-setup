@@ -140,7 +140,7 @@ PyObject *GetSignature_Method(PyObject *obfunc, PyObject *modifier)
     AutoDecRef type_key(GetTypeKey(obtype_mod));
     if (type_key.isNull())
         Py_RETURN_NONE;
-    PyObject *dict = TypeKey_to_PropsDict(type_key, obtype_mod);
+    PyObject *dict = TypeKey_to_PropsDict(type_key);
     if (dict == nullptr)
         return nullptr;
     AutoDecRef func_name(PyObject_GetAttr(obfunc, PyMagicName::name()));
