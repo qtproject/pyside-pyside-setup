@@ -107,7 +107,7 @@ endif()
 
 if(CMAKE_HOST_APPLE)
     set(OSX_USE_LIBCPP "OFF" CACHE BOOL "Explicitly link the libc++ standard library \
-        (useful for osx deployment targets lower than 10.9.")
+        (useful for macOS deployment targets lower than 10.9.")
     if(OSX_USE_LIBCPP)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
     endif()

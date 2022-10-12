@@ -190,11 +190,11 @@ class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
             if self.plat_name and not self.plat_name.startswith("macosx"):
                 plat_name = self.plat_name
             else:
-                # on macosx always limit the platform name to comply with any
+                # on macOS always limit the platform name to comply with any
                 # c-extension modules in bdist_dir, since the user can specify
                 # a higher MACOSX_DEPLOYMENT_TARGET via tools like CMake
 
-                # on other platforms, and on macosx if there are no c-extension
+                # on other platforms, and on macOS if there are no c-extension
                 # modules, use the default platform name.
                 plat_name = get_platform(self.bdist_dir)
 
