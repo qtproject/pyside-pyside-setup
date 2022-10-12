@@ -9,7 +9,7 @@ instructions:
         property: host.os
         equals_value: MacOS
     userMessageOnFailure: >
-         Failed to install setuptools on osx
+         Failed to install setuptools on macOS
   - type: ExecuteCommand
     command: "python3 -u coin_build_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} {{.Env.CI_USE_SCCACHE}} --instdir=/Users/qt/work/install  --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}} --phase=ALL"
     maxTimeInSeconds: 14400
@@ -24,7 +24,7 @@ instructions:
           property: host.os
           equals_value: MacOS
     userMessageOnFailure: >
-         Failed to execute build instructions on osx
+         Failed to execute build instructions on macOS
   - type: ExecuteCommand
     command: "python3 -u coin_build_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} {{.Env.CI_USE_SCCACHE}} --instdir=/Users/qt/work/install  --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch=X86_64-ARM64 --phase=ALL"
     maxTimeInSeconds: 14400
@@ -39,7 +39,7 @@ instructions:
           property: host.os
           equals_value: MacOS
     userMessageOnFailure: >
-         Failed to execute build instructions on osx
+         Failed to execute build instructions on macOS
   - type: ExecuteCommand
     command: "python3 -u coin_build_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} {{.Env.CI_USE_SCCACHE}} --instdir=/home/qt/work/install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}} --phase=ALL"
     maxTimeInSeconds: 14400
