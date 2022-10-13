@@ -26,13 +26,13 @@ def create_main_window():
     available_geometry = main_win.screen().availableGeometry()
     main_win.resize(available_geometry.width() * 2 / 3,
                     available_geometry.height() * 2 / 3)
-    main_win.show()
     return main_win
 
 
 def create_main_window_with_browser():
     """Creates a MainWindow with a BrowserTabWidget."""
     main_win = create_main_window()
+    main_win.show()
     return main_win.add_browser_tab()
 
 
@@ -352,6 +352,7 @@ if __name__ == '__main__':
         initial_urls.append('http://qt.io')
     for url in initial_urls:
         main_win.load_url_in_new_tab(QUrl.fromUserInput(url))
+    main_win.show()
     exit_code = app.exec()
     main_win.write_bookmarks()
     sys.exit(exit_code)
