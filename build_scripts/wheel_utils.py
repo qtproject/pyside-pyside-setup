@@ -3,6 +3,7 @@
 
 import os
 import time
+from pathlib import Path
 from sysconfig import get_config_var, get_platform
 
 from packaging.version import parse as parse_version
@@ -40,8 +41,8 @@ def get_qt_version():
 @memoize
 def get_package_version():
     """ Returns the version string for the PySide6 package. """
-    setup_script_dir = os.getcwd()
-    pyside_project_dir = os.path.join(setup_script_dir, "sources", PYSIDE)
+    setup_script_dir = Path.cwd()
+    pyside_project_dir = setup_script_dir / "sources" / PYSIDE
     d = parse_cmake_conf_assignments_by_key(pyside_project_dir)
     major_version = d['pyside_MAJOR_VERSION']
     minor_version = d['pyside_MINOR_VERSION']

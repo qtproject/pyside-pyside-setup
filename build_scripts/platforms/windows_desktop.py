@@ -5,6 +5,8 @@ import fnmatch
 import functools
 import os
 
+from pathlib import Path
+
 from ..config import config
 from ..options import OPTION
 from ..utils import (copydir, copyfile, download_and_extract_7z, filter_match,
@@ -194,7 +196,7 @@ def prepare_packages_win32(self, _vars):
                     return False
                 return True
             # examples/* -> <setup>/{st_package_name}/examples
-            copydir(os.path.join(self.script_dir, "examples"),
+            copydir(self.script_dir / "examples",
                     "{st_build_dir}/{st_package_name}/examples",
                     force=False, _vars=_vars, dir_filter_function=pycache_dir_filter)
 
@@ -209,11 +211,11 @@ def prepare_packages_win32(self, _vars):
     if config.is_internal_shiboken_module_build():
         # The C++ std library dlls need to be packaged with the
         # shiboken module, because libshiboken uses C++ code.
-        copy_msvc_redist_files(_vars, "{build_dir}/msvc_redist".format(**_vars))
+        copy_msvc_redist_files(_vars, Path("{build_dir}/msvc_redist".format(**_vars)))
 
     if config.is_internal_pyside_build() or config.is_internal_shiboken_generator_build():
         copy_qt_artifacts(self, copy_pdbs, _vars)
-        copy_msvc_redist_files(_vars, "{build_dir}/msvc_redist".format(**_vars))
+        copy_msvc_redist_files(_vars, Path("{build_dir}/msvc_redist".format(**_vars)))
 
 
 def copy_msvc_redist_files(_vars, redist_target_path):
@@ -233,8 +235,8 @@ def copy_msvc_redist_files(_vars, redist_target_path):
     ]
 
     # Make a directory where the files should be extracted.
-    if not os.path.exists(redist_target_path):
-        os.makedirs(redist_target_path)
+    if not redist_target_path.exists():
+        redist_target_path.mkdir(parents=True)
 
     # Extract Qt dependency dlls when building on Qt CI.
     in_coin = os.environ.get('COIN_LAUNCH_PARAMETERS', None)
@@ -315,7 +317,7 @@ def copy_qt_artifacts(self, copy_pdbs, _vars):
         # because the extracted archive also contains the opengl32sw
         # and the d3dcompiler dlls, which are copied not by this
         # function, but by the copydir below.
-        copy_msvc_redist_files(_vars, "{qt_bin_dir}".format(**_vars))
+        copy_msvc_redist_files(_vars, Path("{qt_bin_dir}".format(**_vars)))
 
     if artifacts:
         copydir("{qt_bin_dir}",
@@ -345,6 +347,10 @@ def copy_qt_artifacts(self, copy_pdbs, _vars):
                 return True
             return False
 
+        # Setup Paths
+        file_name = Path(file_name)
+        file_full_path = Path(file_full_path)
+
         # In debug_and_release case, choosing which files to copy
         # is more difficult. We want to copy only the files that
         # match the PySide6 build type. So if PySide6 is built in
@@ -359,23 +365,24 @@ def copy_qt_artifacts(self, copy_pdbs, _vars):
         # file is a debug or release file.
 
         # e.g. ["Qt6Cored", ".dll"]
-        file_base_name, file_ext = os.path.splitext(file_name)
+        file_base_name = file_name.stem
+        file_ext = file_name.suffix
         # e.g. "/home/work/qt/qtbase/bin"
-        file_path_dir_name = os.path.dirname(file_full_path)
+        file_path_dir_name = file_full_path.parent
         # e.g. "Qt6Coredd"
         maybe_debug_name = f"{file_base_name}d"
         if self.debug:
             _filter = debug
 
             def predicate(path):
-                return not os.path.exists(path)
+                return not path.exists()
         else:
             _filter = release
 
             def predicate(path):
-                return os.path.exists(path)
+                return path.exists()
         # e.g. "/home/work/qt/qtbase/bin/Qt6Coredd.dll"
-        other_config_path = os.path.join(file_path_dir_name, maybe_debug_name + file_ext)
+        other_config_path = file_path_dir_name / (maybe_debug_name + file_ext)
 
         if (filter_match(file_name, _filter) and predicate(other_config_path)):
             return True

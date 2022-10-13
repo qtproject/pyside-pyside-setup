@@ -5,6 +5,7 @@
 import os
 import platform
 import sys
+from pathlib import Path
 from email.generator import Generator
 
 from .log import log
@@ -253,7 +254,7 @@ class PysideBuildWheel(_bdist_wheel, CommandMixin):
             for impl in impl_tag.split('.'):
                 writeTag(impl)
 
-        wheelfile_path = os.path.join(wheelfile_base, 'WHEEL')
+        wheelfile_path = Path(wheelfile_base) / 'WHEEL'
         log.info(f'creating {wheelfile_path}')
         with open(wheelfile_path, 'w') as f:
             Generator(f, maxheaderlen=0).flatten(msg)

@@ -34,6 +34,21 @@ try:
 except NameError:
     WindowsError = None
 
+def which(name):
+    """
+    Like shutil.which, but accepts a string or a PathLike and returns a Path
+    """
+    path = None
+    try:
+        if isinstance(name, Path):
+            name = str(name)
+        path = shutil.which(name)
+        if path is None:
+            raise TypeError("None was returned")
+        path = Path(path)
+    except TypeError as e:
+        log.error(f"{name} was not found in PATH: {e}")
+    return path
 
 def is_64bit():
     return sys.maxsize > 2147483647
@@ -51,7 +66,7 @@ def filter_match(name, patterns):
 def update_env_path(newpaths):
     paths = os.environ['PATH'].lower().split(os.pathsep)
     for path in newpaths:
-        if not path.lower() in paths:
+        if not str(path).lower() in paths:
             log.info(f"Inserting path '{path}' to environment")
             paths.insert(0, path)
             os.environ['PATH'] = f"{path}{os.pathsep}{os.environ['PATH']}"
@@ -83,13 +98,13 @@ def winsdk_setenv(platform_arch, build_type):
         sdk_versions = msvc9.Reg.read_keys(base, msvc9.WINSDK_BASE)
         if sdk_versions:
             for sdk_version in sdk_versions:
-                installationfolder = msvc9.Reg.get_value(f"{msvc9.WINSDK_BASE}\\{sdk_version}",
-                                                         "installationfolder")
+                installationfolder = Path(msvc9.Reg.get_value(f"{msvc9.WINSDK_BASE}\\{sdk_version}",
+                                                         "installationfolder"))
                 # productversion = msvc9.Reg.get_value(
                 #                      "{}\\{}".format(msvc9.WINSDK_BASE, sdk_version),
                 #                      "productversion")
-                setenv_path = os.path.join(installationfolder, os.path.join('bin', 'SetEnv.cmd'))
-                if not os.path.exists(setenv_path):
+                setenv_path = installationfolder / 'bin' / 'SetEnv.cmd'
+                if setenv_path.exists():
                     continue
                 if sdk_version not in sdk_version_map:
                     continue
@@ -131,7 +146,7 @@ def find_vcdir(version):
     from setuptools._distutils import msvc9compiler as msvc9
     vsbase = msvc9.VS_BASE % version
     try:
-        productdir = msvc9.Reg.get_value(rf"{vsbase}\Setup\VC", "productdir")
+        productdir = Path(msvc9.Reg.get_value(rf"{vsbase}\Setup\VC", "productdir"))
     except KeyError:
         productdir = None
 
@@ -149,14 +164,14 @@ def find_vcdir(version):
                 productdir = None
                 log.debug("Unable to find productdir in registry")
 
-    if not productdir or not os.path.isdir(productdir):
+    if not productdir or not productdir.is_dir():
         toolskey = f"VS{version:0.0f}0COMNTOOLS"
-        toolsdir = os.environ.get(toolskey, None)
+        toolsdir = Path(os.environ.get(toolskey, None))
 
-        if toolsdir and os.path.isdir(toolsdir):
-            productdir = os.path.join(toolsdir, os.pardir, os.pardir, "VC")
-            productdir = os.path.abspath(productdir)
-            if not os.path.isdir(productdir):
+        if toolsdir and toolsdir.is_dir():
+            productdir = toolsdir / os.pardir / os.pardir / "VC"
+            productdir = productdir.resolve()
+            if not productdir.is_dir():
                 log.debug(f"{productdir} is not a valid directory")
                 return None
         else:
@@ -171,7 +186,7 @@ def init_msvc_env(platform_arch, build_type):
     from setuptools._distutils import msvc9compiler as msvc9
 
     log.info(f"Searching MSVC compiler version {msvc9.VERSION}")
-    vcdir_path = find_vcdir(msvc9.VERSION)
+    vcdir_path = Path(find_vcdir(msvc9.VERSION))
     if not vcdir_path:
         raise SetupError(f"Failed to find the MSVC compiler version {msvc9.VERSION} on "
                           "your system.")
@@ -180,15 +195,15 @@ def init_msvc_env(platform_arch, build_type):
 
     log.info(f"Searching MSVC compiler {msvc9.VERSION} environment init script")
     if platform_arch.startswith("32"):
-        vcvars_path = os.path.join(vcdir_path, "bin", "vcvars32.bat")
+        vcvars_path = vcdir_path / "bin" / "vcvars32.bat"
     else:
-        vcvars_path = os.path.join(vcdir_path, "bin", "vcvars64.bat")
-        if not os.path.exists(vcvars_path):
-            vcvars_path = os.path.join(vcdir_path, "bin", "amd64", "vcvars64.bat")
-            if not os.path.exists(vcvars_path):
-                vcvars_path = os.path.join(vcdir_path, "bin", "amd64", "vcvarsamd64.bat")
+        vcvars_path = vcdir_path / "bin" / "vcvars64.bat"
+        if not vcvars_path.exists():
+            vcvars_path = vcdir_path / "bin" / "amd64" / "vcvars64.bat"
+            if not vcvars_path.exists():
+                vcvars_path = vcdir_path / "bin" / "amd64" / "vcvarsamd64.bat"
 
-    if not os.path.exists(vcvars_path):
+    if not vcvars_path.exists():
         # MSVC init script not found, try to find and init Windows SDK env
         log.error("Failed to find the MSVC compiler environment init script "
                   "(vcvars.bat) on your system.")
@@ -233,15 +248,18 @@ def platform_cmake_options(as_tuple_list=False):
 def copyfile(src, dst, force=True, _vars=None, force_copy_symlink=False,
              make_writable_by_owner=False):
     if _vars is not None:
-        src = src.format(**_vars)
-        dst = dst.format(**_vars)
+        src = Path(str(src).format(**_vars))
+        dst = Path(str(dst).format(**_vars))
+    else:
+        src = Path(src)
+        dst = Path(dst)
 
-    if not os.path.exists(src) and not force:
+    if not src.exists() and not force:
         log.info(f"**Skipping copy file\n  {src} to\n  {dst}\n  Source does not exist")
         return
 
-    if not os.path.islink(src) or force_copy_symlink:
-        if os.path.isfile(dst):
+    if not src.is_symlink() or force_copy_symlink:
+        if dst.is_file():
             src_stat = os.stat(src)
             dst_stat = os.stat(dst)
             if (src_stat.st_size == dst_stat.st_size
@@ -256,16 +274,18 @@ def copyfile(src, dst, force=True, _vars=None, force_copy_symlink=False,
 
         return dst
 
-    link_target_path = os.path.realpath(src)
-    if os.path.dirname(link_target_path) == os.path.dirname(src):
-        link_target = os.path.basename(link_target_path)
-        link_name = os.path.basename(src)
-        current_directory = os.getcwd()
+    # We use 'strict=False' to mimic os.path.realpath in case
+    # the directory doesn't exist.
+    link_target_path = src.resolve(strict=False)
+    if link_target_path.parent == src.parent:
+        link_target = link_target_path.name
+        link_name = src.name
+        current_directory = Path.cwd()
         try:
-            target_dir = dst if os.path.isdir(dst) else os.path.dirname(dst)
+            target_dir = dst if dst.is_dir() else dst.parent
             os.chdir(target_dir)
-            if os.path.exists(link_name):
-                if (os.path.islink(link_name)
+            if link_name.exists():
+                if (link_name.is_symlink()
                         and os.readlink(link_name) == link_target):
                     log.info(f"Symlink already exists\n  {link_name} ->\n  {link_target}")
                     return dst
@@ -287,13 +307,13 @@ def makefile(dst, content=None, _vars=None):
     if _vars is not None:
         if content is not None:
             content = content.format(**_vars)
-        dst = dst.format(**_vars)
+        dst = Path(dst.format(**_vars))
 
     log.info(f"Making file {dst}.")
 
-    dstdir = os.path.dirname(dst)
-    if not os.path.exists(dstdir):
-        os.makedirs(dstdir)
+    dstdir = dst.parent
+    if not dstdir.exists():
+        dstdir.mkdir(parents=True)
 
     with open(dst, "wt") as f:
         if content is not None:
@@ -304,14 +324,14 @@ def copydir(src, dst, _filter=None, ignore=None, force=True, recursive=True, _va
             dir_filter_function=None, file_filter_function=None, force_copy_symlinks=False):
 
     if _vars is not None:
-        src = src.format(**_vars)
-        dst = dst.format(**_vars)
+        src = Path(str(src).format(**_vars))
+        dst = Path(str(dst).format(**_vars))
         if _filter is not None:
             _filter = [i.format(**_vars) for i in _filter]
         if ignore is not None:
             ignore = [i.format(**_vars) for i in ignore]
 
-    if not os.path.exists(src) and not force:
+    if not src.exists() and not force:
         log.info(f"**Skipping copy tree\n  {src} to\n  {dst}\n  Source does not exist. "
                  f"filter={_filter}. ignore={ignore}.")
         return []
@@ -323,10 +343,10 @@ def copydir(src, dst, _filter=None, ignore=None, force=True, recursive=True, _va
     results = []
     copy_errors = []
     for name in names:
-        srcname = os.path.join(src, name)
-        dstname = os.path.join(dst, name)
+        srcname = src / name
+        dstname = dst / name
         try:
-            if os.path.isdir(srcname):
+            if srcname.is_dir():
                 if (dir_filter_function and not dir_filter_function(name, src, srcname)):
                     continue
                 if recursive:
@@ -338,8 +358,8 @@ def copydir(src, dst, _filter=None, ignore=None, force=True, recursive=True, _va
                         or (_filter is not None and not filter_match(name, _filter))
                         or (ignore is not None and filter_match(name, ignore))):
                     continue
-                if not os.path.exists(dst):
-                    os.makedirs(dst)
+                if not dst.is_dir():
+                    dst.mkdir(parents=True)
                 results.append(copyfile(srcname, dstname, True, _vars, force_copy_symlinks))
         # catch the Error from the recursive copytree so that we can
         # continue with other files
@@ -348,8 +368,8 @@ def copydir(src, dst, _filter=None, ignore=None, force=True, recursive=True, _va
         except EnvironmentError as why:
             copy_errors.append((srcname, dstname, str(why)))
     try:
-        if os.path.exists(dst):
-            shutil.copystat(src, dst)
+        if dst.exists():
+            shutil.copystat(str(src), str(dst))
     except OSError as why:
         if WindowsError is not None and isinstance(why, WindowsError):
             # Copying file access times may fail on Windows
@@ -396,7 +416,7 @@ def run_process(args, initial_env=None):
     No output is captured.
     """
     command = " ".join([(" " in x and f'"{x}"' or x) for x in args])
-    log.info(f"In directory {os.getcwd()}:\n\tRunning command:  {command}")
+    log.info(f"In directory {Path.cwd()}:\n\tRunning command:  {command}")
 
     if initial_env is None:
         initial_env = os.environ
@@ -659,7 +679,7 @@ def find_glob_in_path(pattern):
         pattern += '.exe'
 
     for path in os.environ.get('PATH', '').split(os.pathsep):
-        for match in glob.glob(os.path.join(path, pattern)):
+        for match in glob.glob(str(Path(path) / pattern)):
             result.append(match)
     return result
 
@@ -684,7 +704,7 @@ def detect_clang():
         clang_dir = os.environ.get(source, None)
         if not clang_dir:
             raise OSError("clang not found")
-    return (clang_dir, source)
+    return (Path(clang_dir), source)
 
 
 _7z_binary = None
@@ -710,8 +730,8 @@ def download_and_extract_7z(fileurl, target):
         outputDir = f"-o{target}"
         if not _7z_binary:
             if sys.platform == "win32":
-                candidate = "c:\\Program Files\\7-Zip\\7z.exe"
-                if os.path.exists(candidate):
+                candidate = Path("c:\\Program Files\\7-Zip\\7z.exe")
+                if candidate.exists():
                     _7z_binary = candidate
             if not _7z_binary:
                 _7z_binary = '7z'
@@ -841,7 +861,8 @@ def _ldd_ldso(executable_path):
 
     # Choose appropriate runtime dynamic linker.
     for rtld in rtld_list:
-        if os.path.isfile(rtld) and os.access(rtld, os.X_OK):
+        rtld = Path(rtld)
+        if rtld.is_file() and os.access(rtld, os.X_OK):
             (_, _, code) = back_tick(rtld, True)
             # Code 127 is returned by ld.so when called without any
             # arguments (some kind of sanity check I guess).
@@ -895,8 +916,8 @@ def ldd(executable_path):
 
 def find_files_using_glob(path, pattern):
     """ Returns list of files that matched glob `pattern` in `path`. """
-    final_pattern = os.path.join(path, pattern)
-    maybe_files = glob.glob(final_pattern)
+    final_pattern = Path(path) / pattern
+    maybe_files = glob.glob(str(final_pattern))
     return maybe_files
 
 
@@ -920,9 +941,9 @@ def copy_icu_libs(patchelf, destination_lib_dir):
     Copy ICU libraries that QtCore depends on,
     to given `destination_lib_dir`.
     """
-    qt_core_library_path = find_qt_core_library_glob(destination_lib_dir)
+    qt_core_library_path = Path(find_qt_core_library_glob(destination_lib_dir))
 
-    if not qt_core_library_path or not os.path.exists(qt_core_library_path):
+    if not qt_core_library_path or not qt_core_library_path.exists():
         raise RuntimeError(f"QtCore library does not exist at path: {qt_core_library_path}. "
                            "Failed to copy ICU libraries.")
 
@@ -943,12 +964,13 @@ def copy_icu_libs(patchelf, destination_lib_dir):
             raise RuntimeError("Failed to find the necessary ICU libraries required by QtCore.")
         log.info('Copying the detected ICU libraries required by QtCore.')
 
-        if not os.path.exists(destination_lib_dir):
-            os.makedirs(destination_lib_dir)
+        destination_lib_dir = Path(destination_lib_dir)
+        if not destination_lib_dir.exists():
+            destination_lib_dir.mkdir(parents=True)
 
         for path in paths:
-            basename = os.path.basename(path)
-            destination = os.path.join(destination_lib_dir, basename)
+            basename = Path(path).name
+            destination = destination_lib_dir / basename
             copyfile(path, destination, force_copy_symlink=True)
             # Patch the ICU libraries to contain the $ORIGIN rpath
             # value, so that only the local package libraries are used.
@@ -973,7 +995,7 @@ def linux_run_read_elf(executable_path):
 def linux_set_rpaths(patchelf, executable_path, rpath_string):
     """ Patches the `executable_path` with a new rpath string. """
 
-    cmd = [patchelf, '--set-rpath', rpath_string, executable_path]
+    cmd = [str(patchelf), '--set-rpath', str(rpath_string), str(executable_path)]
 
     if run_process(cmd) != 0:
         raise RuntimeError(f"Error patching rpath in {executable_path}")
@@ -1146,22 +1168,22 @@ def get_qtci_virtualEnv(python_ver, host, hostArch, targetArch):
             if python_ver.startswith("3"):
                 var = f"PYTHON{python_ver}-32_PATH"
                 log.info(f"Try to find python from {var} env variable")
-                _path = os.getenv(var, "")
-                _pExe = os.path.join(_path, "python.exe")
-                if not os.path.isfile(_pExe):
-                    log.warning(f"Can't find python.exe from {_pExe}, using default python3")
-                    _pExe = os.path.join(os.getenv("PYTHON3_32_PATH"), "python.exe")
+                _path = Path(os.getenv(var, ""))
+                _pExe = _path / "python.exe"
+                if not _pExe.is_file():
+                    log.warn(f"Can't find python.exe from {_pExe}, using default python3")
+                    _pExe = Path(os.getenv("PYTHON3_32_PATH")) / "python.exe"
             else:
-                _pExe = os.path.join(os.getenv("PYTHON2_32_PATH"), "python.exe")
+                _pExe = Path(os.getenv("PYTHON2_32_PATH")) / "python.exe"
         else:
             if python_ver.startswith("3"):
                 var = f"PYTHON{python_ver}-64_PATH"
                 log.info(f"Try to find python from {var} env variable")
-                _path = os.getenv(var, "")
-                _pExe = os.path.join(_path, "python.exe")
-                if not os.path.isfile(_pExe):
-                    log.warning(f"Can't find python.exe from {_pExe}, using default python3")
-                    _pExe = os.path.join(os.getenv("PYTHON3_PATH"), "python.exe")
+                _path = Path(os.getenv(var, ""))
+                _pExe = _path / "python.exe"
+                if not _pExe.is_file():
+                    log.warn(f"Can't find python.exe from {_pExe}, using default python3")
+                    _pExe = Path(os.getenv("PYTHON3_PATH")) / "python.exe"
         env_python = f"{_env}\\Scripts\\python.exe"
         env_pip = f"{_env}\\Scripts\\pip.exe"
     else:
@@ -1294,6 +1316,8 @@ def configure_cmake_project(project_path,
 
     for arg, value in cmake_cache_args:
         cmd.extend([f'-D{arg}={value}'])
+
+    cmd = [str(i) for i in cmd]
 
     proc = subprocess.run(cmd, shell=False, cwd=build_path,
                           capture_output=True, universal_newlines=True)

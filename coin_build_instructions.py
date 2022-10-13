@@ -92,15 +92,15 @@ def call_setup(python_ver, phase):
             env_path = os.path.join(site.USER_BASE, "Scripts")
             v_env = os.path.join(env_path, "virtualenv.exe")
         try:
-            run_instruction([v_env, "--version"], "Using default virtualenv")
+            run_instruction([str(v_env), "--version"], "Using default virtualenv")
         except Exception as e:
             log.info("Failed to use the default virtualenv")
             log.info(f"{type(e).__name__}: {e}")
             v_env = "virtualenv"
-        run_instruction([v_env, "-p", _pExe, _env], "Failed to create virtualenv")
+        run_instruction([str(v_env), "-p", str(_pExe), str(_env)], "Failed to create virtualenv")
         # When the 'python_ver' variable is empty, we are using Python 2
         # Pip is always upgraded when CI template is provisioned, upgrading it in later phase may cause perm issue
-        run_instruction([env_pip, "install", "-r", "requirements.txt"], "Failed to install dependencies")
+        run_instruction([str(env_pip), "install", "-r", "requirements.txt"], "Failed to install dependencies")
 
     cmd = [env_python, "-u", "setup.py"]
     if phase in ["BUILD"]:

@@ -14,11 +14,10 @@ import sys
 import warnings
 import logging
 from pathlib import Path
-from shutil import which
 
 from .log import log
 from .qtinfo import QtInfo
-from .utils import memoize
+from .utils import memoize, which
 
 _AVAILABLE_MKSPECS = ["ninja", "msvc", "mingw"] if sys.platform == "win32" else ["ninja", "make"]
 
@@ -363,13 +362,13 @@ class CommandMixin(object):
 
         qtpaths_abs_path = None
         if self.qtpaths:
-            qtpaths_abs_path = os.path.abspath(self.qtpaths)
+            qtpaths_abs_path = self.qtpaths.resolve()
             OPTION['QTPATHS'] = qtpaths_abs_path
         # FIXME PYSIDE7: Remove qmake handling
         # make qtinfo.py independent of relative paths.
         qmake_abs_path = None
         if self.qmake:
-            qmake_abs_path = os.path.abspath(self.qmake)
+            qmake_abs_path = Path(self.qmake).resolve()
             OPTION['QMAKE'] = qmake_abs_path
         OPTION['HAS_QMAKE_OPTION'] = self.has_qmake_option
         OPTION['QT_VERSION'] = self.qt
@@ -378,14 +377,15 @@ class CommandMixin(object):
 
         qt_target_path = None
         if self.qt_target_path:
+            self.qt_target_path = Path(self.qt_target_path)
             qt_target_path = self.qt_target_path
 
         # We use the CMake project to find host Qt if neither qmake or
         # qtpaths is available. This happens when building the host
         # tools in the overall cross-building process.
         use_cmake = False
-        if using_cmake_toolchain_file or \
-                (not self.qmake and not self.qtpaths and self.qt_target_path):
+        if (using_cmake_toolchain_file or
+                (not self.qmake and not self.qtpaths and self.qt_target_path)):
             use_cmake = True
 
         QtInfo().setup(qtpaths_abs_path, self.cmake, qmake_abs_path,
@@ -407,7 +407,7 @@ class CommandMixin(object):
                     "Error was:\n\n\n")
             raise e
 
-        OPTION['CMAKE'] = os.path.abspath(self.cmake)
+        OPTION['CMAKE'] = self.cmake.resolve()
         OPTION['OPENSSL'] = self.openssl
         OPTION['SHIBOKEN_CONFIG_DIR'] = self.shiboken_config_dir
         if self.shiboken_config_dir:
@@ -455,19 +455,25 @@ class CommandMixin(object):
 
     def _find_qtpaths_in_path(self):
         if not self.qtpaths:
-            self.qtpaths = which("qtpaths")
+            self.qtpaths = Path(which("qtpaths"))
         if not self.qtpaths:
-            self.qtpaths = which("qtpaths6")
+            self.qtpaths = Path(which("qtpaths6"))
 
     def _determine_defaults_and_check(self):
         if not self.cmake:
-            self.cmake = which("cmake")
+            self.cmake = Path(which("cmake"))
         if not self.cmake:
             log.error("cmake could not be found.")
             return False
-        if not os.path.exists(self.cmake):
+        if not self.cmake.exists():
             log.error(f"'{self.cmake}' does not exist.")
             return False
+
+        # Setting up the Paths when passing via command line
+        if isinstance(self.qtpaths, str):
+            self.qtpaths = Path(self.qtpaths)
+        if isinstance(self.qmake, str):
+            self.qmake = Path(self.qmake)
 
         # When cross-compiling, we only accept the qt-target-path
         # option and don't rely on auto-searching in PATH or the other
@@ -493,17 +499,17 @@ class CommandMixin(object):
                 return False
 
             # Validate that the given tool path exists.
-            if self.qtpaths and not os.path.exists(self.qtpaths):
+            if self.qtpaths and not self.qtpaths.exists():
                 log.error(f"The specified qtpaths path '{self.qtpaths}' does not exist.")
                 return False
 
-            if self.qmake and not os.path.exists(self.qmake):
+            if self.qmake and not self.qmake.exists():
                 log.error(f"The specified qmake path '{self.qmake}' does not exist.")
                 return False
         else:
             # Check for existence, but don't require if it's not set. A
             # check later will be done to see if it's needed.
-            if self.qt_target_path and not os.path.exists(self.qt_target_path):
+            if self.qt_target_path and not self.qt_target_path.exists():
                 log.error(f"Provided --qt-target-path='{self.qt_target_path}' "
                           "path does not exist.")
                 return False

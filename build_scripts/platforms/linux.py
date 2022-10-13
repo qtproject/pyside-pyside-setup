@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 import os
+from pathlib import Path
 
 from ..config import config
 from ..options import OPTION
@@ -121,8 +122,8 @@ def prepare_standalone_package_linux(self, _vars, cross_build=False):
 
     if copy_qt_conf:
         # Copy the qt.conf file to libexec.
-        qt_libexec_path = "{st_build_dir}/{st_package_name}/Qt/libexec".format(**_vars)
-        if not os.path.isdir(qt_libexec_path):
+        qt_libexec_path = Path("{st_build_dir}/{st_package_name}/Qt/libexec".format(**_vars))
+        if not qt_libexec_path.is_dir():
             os.makedirs(qt_libexec_path)
         copyfile(f"{{build_dir}}/{PYSIDE}/{{st_package_name}}/qt.conf",
-                 qt_libexec_path, _vars=_vars)
+                 str(qt_libexec_path), _vars=_vars)

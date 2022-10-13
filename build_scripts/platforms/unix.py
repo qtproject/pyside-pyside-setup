@@ -205,7 +205,7 @@ def prepare_packages_posix(self, _vars, cross_build=False):
                     return False
                 return True
             # examples/* -> <setup>/{st_package_name}/examples
-            copydir(os.path.join(self.script_dir, "examples"),
+            copydir(str(self.script_dir / "examples"),
                     "{st_build_dir}/{st_package_name}/examples",
                     force=False, _vars=_vars, dir_filter_function=pycache_dir_filter)
 

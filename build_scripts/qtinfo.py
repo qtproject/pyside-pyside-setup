@@ -130,7 +130,7 @@ class QtInfo(object):
             if args_list is None:
                 args_list = []
             assert self._qtpaths_command
-            cmd = [self._qtpaths_command]
+            cmd = [str(self._qtpaths_command)]
             cmd.extend(args_list)
             proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=False,
                                     cwd=cwd, universal_newlines=True)

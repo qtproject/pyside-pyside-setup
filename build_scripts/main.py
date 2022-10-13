@@ -10,7 +10,7 @@ import sysconfig
 import time
 from packaging.version import parse as parse_version
 from pathlib import Path
-from shutil import which, copytree
+from shutil import copytree
 from textwrap import dedent
 
 # PYSIDE-1760: Pre-load setuptools modules early to avoid racing conditions.
@@ -42,15 +42,15 @@ from .utils import (copydir, copyfile, detect_clang, filter_match,
                     get_numpy_location, get_python_dict, init_msvc_env,
                     linux_fix_rpaths_for_library, macos_fix_rpaths_for_library,
                     platform_cmake_options, remove_tree, run_process,
-                    run_process_output, update_env_path)
+                    run_process_output, update_env_path, which)
 from .versions import PYSIDE, PYSIDE_MODULE, SHIBOKEN
 from .wheel_override import get_bdist_wheel_override, wheel_module_exists
 from .wheel_utils import (get_package_timestamp, get_package_version,
                           macos_plat_name, macos_pyside_min_deployment_target)
 
-setup_script_dir = os.getcwd()
-build_scripts_dir = os.path.join(setup_script_dir, 'build_scripts')
-setup_py_path = os.path.join(setup_script_dir, "setup.py")
+setup_script_dir = Path.cwd()
+build_scripts_dir = setup_script_dir / 'build_scripts'
+setup_py_path = setup_script_dir / "setup.py"
 
 start_time = int(time.time())
 
@@ -78,15 +78,15 @@ def _get_make(platform_arch, build_type):
     if makespec == "make":
         return ("make", "Unix Makefiles")
     if makespec == "msvc":
-        nmake_path = which("nmake")
-        if nmake_path is None or not os.path.exists(nmake_path):
+        nmake_path = Path(which("nmake"))
+        if nmake_path is None or not nmake_path.exists():
             log.info("nmake not found. Trying to initialize the MSVC env...")
             init_msvc_env(platform_arch, build_type)
-            nmake_path = which("nmake")
-            if not nmake_path or not os.path.exists(nmake_path):
+            nmake_path = Path(which("nmake"))
+            if not nmake_path or not nmake_path.exists():
                 raise SetupError('"nmake" could not be found.')
         if not OPTION["NO_JOM"]:
-            jom_path = which("jom")
+            jom_path = Path(which("jom"))
             if jom_path:
                 log.info(f"jom was found in {jom_path}")
                 return (jom_path, "NMake Makefiles JOM")
@@ -96,18 +96,18 @@ def _get_make(platform_arch, build_type):
             raise SetupError(msg)
         return (nmake_path, "NMake Makefiles")
     if makespec == "mingw":
-        return ("mingw32-make", "mingw32-make")
+        return (Path("mingw32-make"), "mingw32-make")
     if makespec == "ninja":
-        return ("ninja", "Ninja")
+        return (Path("ninja"), "Ninja")
     raise SetupError(f'Invalid option --make-spec "{makespec}".')
 
 
 def get_make(platform_arch, build_type):
     """Retrieve the make command and CMake generator name"""
     (make_path, make_generator) = _get_make(platform_arch, build_type)
-    if not os.path.isabs(make_path):
-        found_path = which(make_path)
-        if not found_path or not os.path.exists(found_path):
+    if not make_path.is_absolute():
+        found_path = Path(which(make_path))
+        if not found_path or not found_path.exists():
             m = (f"You need the program '{make_path}' on your system path to "
                  f"compile {PYSIDE_MODULE}.")
             raise SetupError(m)
@@ -161,8 +161,8 @@ def prepare_build():
             if install_prefix.endswith("qtbase"):
                 qt_src_dir = install_prefix
             else:  # SDK: Use 'Src' directory
-                maybe_qt_src_dir = os.path.join(os.path.dirname(install_prefix), 'Src', 'qtbase')
-                if os.path.exists(maybe_qt_src_dir):
+                maybe_qt_src_dir = Path(install_prefix).parent / 'Src' / 'qtbase'
+                if maybe_qt_src_dir.exists():
                     qt_src_dir = maybe_qt_src_dir
 
 
@@ -255,9 +255,9 @@ class PysideInstallLib(_install_lib):
         or into build/wheel when command is 'bdist_wheel'.
         """
 
-        if os.path.isdir(self.build_dir):
+        if self.build_dir.is_dir():
             # Using our own copydir makes sure to preserve symlinks.
-            outfiles = copydir(os.path.abspath(self.build_dir), os.path.abspath(self.install_dir))
+            outfiles = copydir(Path(self.build_dir).resolve(), Path(self.install_dir).resolve())
         else:
             self.warn(f"'{self.build_dir}' does not exist -- no Python modules to install")
             return
@@ -351,8 +351,8 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
                 and parse_version(self.qtinfo.version) >= parse_version("5.7.0")):
             clang_dir, clang_source = detect_clang()
             if clang_dir:
-                clangBinDir = os.path.join(clang_dir, 'bin')
-                if clangBinDir not in os.environ.get('PATH'):
+                clangBinDir = clang_dir / 'bin'
+                if str(clangBinDir) not in os.environ.get('PATH'):
                     log.info(f"Adding {clangBinDir} as detected by {clang_source} to PATH")
                     additional_paths.append(clangBinDir)
             else:
@@ -368,18 +368,18 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
 
         # Save the shiboken build dir path for clang deployment
         # purposes.
-        self.shiboken_build_dir = os.path.join(self.build_dir, SHIBOKEN)
+        self.shiboken_build_dir = self.build_dir / SHIBOKEN
 
         self.log_pre_build_info()
 
         # Prepare folders
-        if not os.path.exists(self.sources_dir):
+        if not self.sources_dir.exists():
             log.info(f"Creating sources folder {self.sources_dir}...")
             os.makedirs(self.sources_dir)
-        if not os.path.exists(self.build_dir):
+        if not self.build_dir.exists():
             log.info(f"Creating build folder {self.build_dir}...")
             os.makedirs(self.build_dir)
-        if not os.path.exists(self.install_dir):
+        if not self.install_dir.exists():
             log.info(f"Creating install folder {self.install_dir}...")
             os.makedirs(self.install_dir)
 
@@ -400,10 +400,10 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
                 # we record the latest successful build and note the
                 # build directory for supporting the tests.
                 timestamp = time.strftime('%Y-%m-%d_%H%M%S')
-                build_history = os.path.join(setup_script_dir, 'build_history')
-                unique_dir = os.path.join(build_history, timestamp)
-                os.makedirs(unique_dir)
-                fpath = os.path.join(unique_dir, 'build_dir.txt')
+                build_history = setup_script_dir / 'build_history'
+                unique_dir = build_history / timestamp
+                unique_dir.mkdir(parents=True)
+                fpath = unique_dir / 'build_dir.txt'
                 with open(fpath, 'w') as f:
                     print(self.build_dir, file=f)
                     print(self.build_classifiers, file=f)
@@ -437,7 +437,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
 
             if _project is not None:
                 if not _wheel_path.exists():
-                    _wheel_path.mkdir()
+                    _wheel_path.mkdir(parents=True)
                 _src = Path(_path / _project)
                 _dst = Path(_wheel_path / _project)
                 # Remove the directory in case it exists.
@@ -524,12 +524,13 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
             return
         self._patchelf_path = which('patchelf')
         if self._patchelf_path:
-            if not os.path.isabs(self._patchelf_path):
-                self._patchelf_path = os.path.join(os.getcwd(), self._patchelf_path)
+            self._patchelf_path = Path(self._patchelf_path)
+            if not self._patchelf_path.is_absolute():
+                self._patchelf_path = Path.cwd() / self._patchelf_path
             log.info(f"Using {self._patchelf_path} ...")
             return
         else:
-            raise DistutilsSetupError("patchelf not found")
+            raise SetupError("patchelf not found")
 
     def _enable_numpy(self):
         if OPTION["ENABLE_NUMPY_SUPPORT"] or OPTION["PYSIDE_NUMPY_SUPPORT"]:
@@ -549,13 +550,13 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
 
         # Prepare folders
         os.chdir(self.build_dir)
-        module_build_dir = os.path.join(self.build_dir, extension)
-        skipflag_file = f"{module_build_dir} -skip"
-        if os.path.exists(skipflag_file):
+        module_build_dir = self.build_dir / extension
+        skipflag_file = Path(f"{module_build_dir}-skip")
+        if skipflag_file.exists():
             log.info(f"Skipping {extension} because {skipflag_file} exists")
             return
 
-        module_build_exists = os.path.exists(module_build_dir)
+        module_build_exists = module_build_dir.exists()
         if module_build_exists:
             if not OPTION["REUSE_BUILD"]:
                 log.info(f"Deleting module build folder {module_build_dir}...")
@@ -566,15 +567,15 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
                     log.error(f'ignored error: {e}')
             else:
                 log.info(f"Reusing module build folder {module_build_dir}...")
-        if not os.path.exists(module_build_dir):
+        if not module_build_dir.exists():
             log.info(f"Creating module build folder {module_build_dir}...")
             os.makedirs(module_build_dir)
         os.chdir(module_build_dir)
 
-        module_src_dir = os.path.join(self.sources_dir, extension)
+        module_src_dir = self.sources_dir / extension
 
         # Build module
-        cmake_cmd = [OPTION["CMAKE"]]
+        cmake_cmd = [str(OPTION["CMAKE"])]
         if OPTION["QUIET"]:
             # Pass a special custom option, to allow printing a lot less information when doing
             # a quiet build.
@@ -593,7 +594,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
             # Record the minimum/maximum Python version for later use in Shiboken.__init__
             f"-DMINIMUM_PYTHON_VERSION={get_allowed_python_versions()[0]}",
             f"-DMAXIMUM_PYTHON_VERSION={get_allowed_python_versions()[-1]}",
-            module_src_dir
+            str(module_src_dir)
         ]
 
         # When cross-compiling we set Python_ROOT_DIR to tell
@@ -613,7 +614,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
         # If a custom shiboken cmake config directory path was provided, pass it to CMake.
         if OPTION["SHIBOKEN_CONFIG_DIR"] and config.is_internal_pyside_build():
             config_dir = OPTION["SHIBOKEN_CONFIG_DIR"]
-            if os.path.exists(config_dir):
+            if config_dir.exists():
                 log.info(f"Using custom provided {SHIBOKEN} installation: {config_dir}")
                 cmake_cmd.append(f"-DShiboken6_DIR={config_dir}")
             else:
@@ -797,9 +798,9 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
             cmake_cmd.append(f"-DQFP_QT_HOST_PATH={self.qt_host_path}")
 
         if self.is_cross_compile and (not OPTION["SHIBOKEN_HOST_PATH"]
-                                      or not os.path.exists(OPTION["SHIBOKEN_HOST_PATH"])):
-            raise SetupError(
-                "Please specify the location of host shiboken tools via --shiboken-host-path=")
+                                      or not OPTION["SHIBOKEN_HOST_PATH"].exists()):
+            raise SetupError("Please specify the location of host shiboken tools via "
+                             "--shiboken-host-path=")
 
         if self.shiboken_host_path:
             cmake_cmd.append(f"-DQFP_SHIBOKEN_HOST_PATH={self.shiboken_host_path}")
@@ -822,7 +823,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
             log.info(f"Reusing old configuration for module {extension} ({module_src_dir})...")
 
         log.info(f"-- Compiling module {extension}...")
-        cmd_make = [self.make_path]
+        cmd_make = [str(self.make_path)]
         if OPTION["JOBS"]:
             cmd_make.append(OPTION["JOBS"])
         if OPTION["VERBOSE_BUILD"] and self.make_generator == "Ninja":
@@ -842,7 +843,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
                 found = importlib.util.find_spec("sphinx")
                 if found:
                     log.info("Generating Shiboken documentation")
-                    make_doc_cmd = [self.make_path, "doc"]
+                    make_doc_cmd = [str(self.make_path), "doc"]
                     if OPTION["VERBOSE_BUILD"] and self.make_generator == "Ninja":
                         make_doc_cmd.append("-v")
                     if run_process(make_doc_cmd) != 0:
@@ -865,7 +866,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
                 time.sleep(1)
             # ninja: error: unknown target 'install/fast'
             target = 'install/fast' if self.make_generator != 'Ninja' else 'install'
-            if run_process([self.make_path, target]) != 0:
+            if run_process([str(self.make_path), target]) != 0:
                 raise SetupError(f"Error pseudo installing {extension}")
         else:
             log.info(f"Skipped installing module {extension}")
@@ -923,7 +924,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
             # when copying the files for each of the sub-projects and
             # we don't want to accidentally install shiboken files
             # as part of pyside-tools package.
-            if os.path.isdir(self.st_build_dir):
+            if self.st_build_dir.is_dir():
                 log.info(f"Removing {self.st_build_dir}")
                 try:
                     remove_tree(self.st_build_dir)
@@ -941,15 +942,13 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
             raise
 
     def qt_is_framework_build(self):
-        if os.path.isdir(f"{self.qtinfo.headers_dir}/../lib/QtCore.framework"):
-            return True
-        return False
+        return Path(f"{self.qtinfo.headers_dir}/../lib/QtCore.framework").is_dir()
 
     def get_built_pyside_config(self, _vars):
         # Get config that contains list of built modules, and
         # SOVERSIONs of the built libraries.
-        st_build_dir = _vars['st_build_dir']
-        config_path = os.path.join(st_build_dir, config.package_name(), "_config.py")
+        st_build_dir = Path(_vars['st_build_dir'])
+        config_path = st_build_dir / config.package_name() / "_config.py"
         temp_config = get_python_dict(config_path)
         if 'built_modules' not in temp_config:
             temp_config['built_modules'] = []
@@ -967,11 +966,11 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
         """
         log.info('Finding path to the libclang shared library.')
         cmake_cmd = [
-            OPTION["CMAKE"],
+            str(OPTION["CMAKE"]),
             "-L",         # Lists variables
             "-N",         # Just inspects the cache (faster)
             "-B",         # Specifies the build dir
-            self.shiboken_build_dir
+            str(self.shiboken_build_dir)
         ]
         out = run_process_output(cmake_cmd)
         lines = [s.strip() for s in out]
@@ -992,10 +991,11 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
             # clang_lib_path points to the static import library
             # (lib/libclang.lib), whereas we want to copy the shared
             # library (bin/libclang.dll).
-            clang_lib_path = re.sub(r'lib/libclang.lib$',
+            clang_lib_path = Path(re.sub(r'lib/libclang.lib$',
                                     'bin/libclang.dll',
-                                    clang_lib_path)
+                                    clang_lib_path))
         else:
+            clang_lib_path = Path(clang_lib_path)
             # shiboken6 links against libclang.so.6 or a similarly
             # named library.
             # If the linked against library is a symlink, resolve
@@ -1007,26 +1007,26 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
             # E.g. On Linux libclang.so -> libclang.so.6 ->
             # libclang.so.6.0.
             # "libclang.so.6" is the name we want for the copied file.
-            if os.path.islink(clang_lib_path):
-                link_target = os.readlink(clang_lib_path)
-                if os.path.isabs(link_target):
+            if clang_lib_path.is_symlink():
+                link_target = Path(os.readlink(clang_lib_path))
+                if link_target.is_absolute():
                     clang_lib_path = link_target
                 else:
                     # link_target is relative, transform to absolute.
-                    clang_lib_path = os.path.join(os.path.dirname(clang_lib_path), link_target)
-            clang_lib_path = os.path.abspath(clang_lib_path)
+                    clang_lib_path = clang_lib_path.parent / link_target
+            clang_lib_path = clang_lib_path.resolve()
 
         # The destination will be the shiboken package folder.
         _vars = {}
         _vars['st_build_dir'] = self.st_build_dir
         _vars['st_package_name'] = config.package_name()
-        destination_dir = "{st_build_dir}/{st_package_name}".format(**_vars)
+        destination_dir = Path("{st_build_dir}/{st_package_name}".format(**_vars))
 
-        if os.path.exists(clang_lib_path):
-            basename = os.path.basename(clang_lib_path)
+        if clang_lib_path.exists():
+            basename = clang_lib_path.name
             log.info(f"Copying libclang shared library {clang_lib_path} to the package "
                      f"folder as {basename}.")
-            destination_path = os.path.join(destination_dir, basename)
+            destination_path = destination_dir / basename
 
             # Need to modify permissions in case file is not writable
             # (a reinstall would cause a permission denied error).
@@ -1071,7 +1071,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
         for dir_path, dir_names, file_names in os.walk(initial_path):
             for name in file_names:
                 if filter_match(name, filters):
-                    library_path = os.path.join(dir_path, name)
+                    library_path = Path(dir_path) / name
                     libraries.append(library_path)
         return libraries
 
@@ -1115,10 +1115,10 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
 
         # Update rpath
         for srcname in executables:
-            srcpath = os.path.join(package_path, srcname)
-            if os.path.isdir(srcpath) or os.path.islink(srcpath):
+            srcpath = Path(package_path) / srcname
+            if srcpath.is_dir() or srcpath.is_symlink():
                 continue
-            if not os.path.exists(srcpath):
+            if not srcpath.exists():
                 continue
             rpath_cmd(srcpath)
             log.info("Patched rpath to '$ORIGIN/' (Linux) or "
@@ -1129,6 +1129,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
             plugin_paths,
             qt_lib_dir=None,
             is_qml_plugin=False):
+
         # If the linux sysroot (where the plugins are copied from)
         # is from a mainline distribution, it might have a different
         # directory layout than then one we expect to have in the
@@ -1141,15 +1142,19 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
 
         log.info("Patching rpath for Qt and QML plugins.")
         for plugin in plugin_paths:
-            if os.path.isdir(plugin) or os.path.islink(plugin):
+            plugin = Path(plugin)
+            if plugin.is_dir() or plugin.is_symlink():
                 continue
-            if not os.path.exists(plugin):
+            if not plugin.exists():
                 continue
 
             if is_qml_plugin:
-                plugin_dir = os.path.dirname(plugin)
+                plugin_dir = plugin.parent
+                # FIXME: there is no os.path.relpath equivalent on pathlib.
+                # The Path.relative_to is not equivalent and raises ValueError when the paths
+                # are not subpaths, so it doesn't generate "../../something".
                 rel_path_from_qml_plugin_qt_lib_dir = os.path.relpath(qt_lib_dir, plugin_dir)
-                rpath_value = os.path.join("$ORIGIN", rel_path_from_qml_plugin_qt_lib_dir)
+                rpath_value = Path("$ORIGIN") / rel_path_from_qml_plugin_qt_lib_dir
             else:
                 rpath_value = "$ORIGIN/../../lib"
 
@@ -1164,14 +1169,15 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
         if not (self.is_cross_compile and sys.platform.startswith('linux') and self.standalone):
             return
 
+        qt_lib_dir = Path(qt_lib_dir)
         rpath_value = "$ORIGIN"
         log.info(f"Patching rpath for Qt and ICU libraries in {qt_lib_dir}.")
         libs = self.package_libraries(qt_lib_dir)
-        lib_paths = [os.path.join(qt_lib_dir, lib) for lib in libs]
+        lib_paths = [qt_lib_dir / lib for lib in libs]
         for library in lib_paths:
-            if os.path.isdir(library) or os.path.islink(library):
+            if library.is_dir() or library.is_symlink():
                 continue
-            if not os.path.exists(library):
+            if library.exists():
                 continue
 
             linux_fix_rpaths_for_library(self._patchelf_path, library, rpath_value, override=True)
@@ -1195,9 +1201,7 @@ class PysideRstDocs(Command, CommandMixin):
             self.skip = True
         if not self.skip:
             self.name = config.package_name().lower()
-            self.doc_dir = os.path.join(config.setup_script_dir, "sources")
-            self.doc_dir = os.path.join(self.doc_dir, self.name)
-            self.doc_dir = os.path.join(self.doc_dir, "doc")
+            self.doc_dir = config.setup_script_dir / "sources" / self.name / "doc"
             # Check if sphinx is installed to proceed.
             found = importlib.util.find_spec("sphinx")
             if found:
@@ -1213,20 +1217,20 @@ class PysideRstDocs(Command, CommandMixin):
 
             # creating directories html/pyside6/shiboken6
             try:
-                if not os.path.isdir(self.html_dir):
-                    os.mkdir(self.html_dir)
+                if not self.html_dir.is_dir():
+                    self.html_dir.mkdir(parents=True)
                 if self.name == SHIBOKEN:
-                    out_pyside = os.path.join(self.html_dir, PYSIDE)
-                    if not os.path.isdir(out_pyside):
-                        os.mkdir(out_pyside)
-                    out_shiboken = os.path.join(out_pyside, SHIBOKEN)
-                    if not os.path.isdir(out_shiboken):
-                        os.mkdir(out_shiboken)
+                    out_pyside = self.html_dir / PYSIDE
+                    if not out_pyside.is_dir():
+                        out_pyside.mkdir(parents=True)
+                    out_shiboken = out_pyside / SHIBOKEN
+                    if not out_shiboken.is_dir():
+                        out_shiboken.mkdir(parents=True)
                     self.out_dir = out_shiboken
                 # We know that on the shiboken step, we already created the
                 # 'pyside6' directory
                 elif self.name == PYSIDE:
-                    self.out_dir = os.path.join(self.html_dir, PYSIDE)
+                    self.out_dir = self.html_dir / PYSIDE
             except (PermissionError, FileExistsError):
                 raise SetupError(f"Error while creating directories for {self.doc_dir}")
 
@@ -1245,7 +1249,7 @@ class PysideRstDocs(Command, CommandMixin):
                 raise SetupError(f"Error running CMake for {self.doc_dir}")
 
             if self.name == PYSIDE:
-                self.sphinx_src = os.path.join(self.out_dir, "rst")
+                self.sphinx_src = self.out_dir / "rst"
             elif self.name == SHIBOKEN:
                 self.sphinx_src = self.out_dir
 

@@ -7,6 +7,7 @@ import tempfile
 import textwrap
 import logging
 
+from pathlib import Path
 from setuptools import setup
 
 from build_scripts.config import config
@@ -26,7 +27,7 @@ class SetupRunner(object):
         self.orig_argv = orig_argv
         self.sub_argv = list(orig_argv)
 
-        self.setup_script_dir = os.getcwd()
+        self.setup_script_dir = Path.cwd()
 
     @staticmethod
     def cmd_line_argument_is_in_args(argument, args):

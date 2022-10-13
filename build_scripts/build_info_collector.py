@@ -5,6 +5,7 @@ import os
 import platform
 import sys
 import sysconfig
+from pathlib import Path
 from sysconfig import get_config_var
 
 from setuptools.errors import SetupError
@@ -21,7 +22,7 @@ def prefix():
     virtual_env_name = os.environ.get('VIRTUAL_ENV', None)
     has_virtual_env = False
     if virtual_env_name is not None:
-        name = os.path.basename(virtual_env_name)
+        name = Path(virtual_env_name).name
         has_virtual_env = True
     else:
         name = "qfp"
@@ -31,7 +32,7 @@ def prefix():
         name += "p"
     if OPTION["LIMITED_API"] == "yes":
         name += "a"
-    return name, has_virtual_env
+    return Path(name), has_virtual_env
 
 
 def is_debug_python():
@@ -41,33 +42,33 @@ def is_debug_python():
 def _get_py_library_win(build_type, py_version, py_prefix, py_libdir,
                         py_include_dir):
     """Helper for finding the Python library on Windows"""
-    if py_include_dir is None or not os.path.exists(py_include_dir):
-        py_include_dir = os.path.join(py_prefix, "include")
-    if py_libdir is None or not os.path.exists(py_libdir):
+    if py_include_dir is None or not Path(py_include_dir).exists():
+        py_include_dir = Path(py_prefix) / "include"
+    if py_libdir is None or not Path(py_libdir).exists():
         # For virtual environments on Windows, the py_prefix will contain a
         # path pointing to it, instead of the system Python installation path.
         # Since INCLUDEPY contains a path to the system location, we use the
         # same base directory to define the py_libdir variable.
-        py_libdir = os.path.join(os.path.dirname(py_include_dir), "libs")
-        if not os.path.isdir(py_libdir):
+        py_libdir = Path(py_include_dir).parent / "libs"
+        if not py_libdir.is_dir():
             raise SetupError("Failed to locate the 'libs' directory")
     dbg_postfix = "_d" if build_type == "Debug" else ""
     if OPTION["MAKESPEC"] == "mingw":
         static_lib_name = f"libpython{py_version.replace('.', '')}{dbg_postfix}.a"
-        return os.path.join(py_libdir, static_lib_name)
+        return Path(py_libdir) / static_lib_name
     v = py_version.replace(".", "")
     python_lib_name = f"python{v}{dbg_postfix}.lib"
-    return os.path.join(py_libdir, python_lib_name)
+    return Path(py_libdir) / python_lib_name
 
 
 def _get_py_library_unix(build_type, py_version, py_prefix, py_libdir,
                          py_include_dir):
     """Helper for finding the Python library on UNIX"""
-    if py_libdir is None or not os.path.exists(py_libdir):
-        py_libdir = os.path.join(py_prefix, "lib")
-    if py_include_dir is None or not os.path.exists(py_include_dir):
+    if py_libdir is None or not Path(py_libdir).exists():
+        py_libdir = Path(py_prefix) / "lib"
+    if py_include_dir is None or not Path(py_include_dir).exists():
         directory = f"include/python{py_version}"
-        py_include_dir = os.path.join(py_prefix, directory)
+        py_include_dir = Path(py_prefix) / directory
     lib_exts = ['.so']
     if sys.platform == 'darwin':
         lib_exts.append('.dylib')
@@ -81,8 +82,8 @@ def _get_py_library_unix(build_type, py_version, py_prefix, py_libdir,
     libs_tried = []
     for lib_ext in lib_exts:
         lib_name = f"libpython{py_version}{lib_suff}{lib_ext}"
-        py_library = os.path.join(py_libdir, lib_name)
-        if os.path.exists(py_library):
+        py_library = Path(py_libdir) / lib_name
+        if py_library.exists():
             return py_library
         libs_tried.append(py_library)
 
@@ -90,12 +91,12 @@ def _get_py_library_unix(build_type, py_version, py_prefix, py_libdir,
     # suffix.
     py_multiarch = get_config_var("MULTIARCH")
     if py_multiarch:
-        try_py_libdir = os.path.join(py_libdir, py_multiarch)
+        try_py_libdir = Path(py_libdir) / py_multiarch
         libs_tried = []
         for lib_ext in lib_exts:
             lib_name = f"libpython{py_version}{lib_suff}{lib_ext}"
-            py_library = os.path.join(try_py_libdir, lib_name)
-            if os.path.exists(py_library):
+            py_library = try_py_libdir / lib_name
+            if py_library.exists():
                 return py_library
             libs_tried.append(py_library)
 
@@ -103,11 +104,11 @@ def _get_py_library_unix(build_type, py_version, py_prefix, py_libdir,
     if hasattr(sys, "pypy_version_info"):
         vi = sys.version_info[:2]
         version_quirk = ".".join(map(str, vi)) if vi >= (3, 9) else "3"
-        pypy_libdir = os.path.join(os.path.dirname(py_libdir), "bin")
+        pypy_libdir = Path(py_libdir).parent /  "bin"
         for lib_ext in lib_exts:
             lib_name = f"libpypy{version_quirk}-c{lib_ext}"
-            pypy_library = os.path.join(pypy_libdir, lib_name)
-            if os.path.exists(pypy_library):
+            pypy_library = pypy_libdir / lib_name
+            if pypy_library.exists():
                 return pypy_library
             libs_tried.append(pypy_library)
     _libs_tried = ', '.join(libs_tried)
@@ -122,7 +123,7 @@ def get_py_library(build_type, py_version, py_prefix, py_libdir, py_include_dir)
     else:
         py_library = _get_py_library_unix(build_type, py_version, py_prefix,
                                           py_libdir, py_include_dir)
-    if py_library.endswith('.a'):
+    if str(py_library).endswith('.a'):
         # Python was compiled as a static library
         log.error(f"Failed to locate a dynamic Python library, using {py_library}")
     return py_library
@@ -142,7 +143,7 @@ class BuildInfoCollectorMixin(object):
         pass
 
     def collect_and_assign(self):
-        script_dir = os.getcwd()
+        script_dir = Path.cwd()
 
         # build_base is not set during install command, so we default to
         # the 'build command's build_base value ourselves.
@@ -151,12 +152,12 @@ class BuildInfoCollectorMixin(object):
             self.build_base = "build"
             build_base = self.build_base
 
-        sources_dir = os.path.join(script_dir, "sources")
+        sources_dir = script_dir / "sources"
 
         if self.is_cross_compile:
-            config_tests_dir = os.path.join(script_dir, build_base, "config.tests")
-            python_target_info_dir = os.path.join(sources_dir, "shiboken6", "config.tests",
-                                                  "target_python_info")
+            config_tests_dir = script_dir / build_base / "config.tests"
+            python_target_info_dir = (sources_dir / "shiboken6" / "config.tests"
+                                      / "target_python_info")
             cmake_cache_args = []
 
             if self.python_target_path:
@@ -192,13 +193,14 @@ class BuildInfoCollectorMixin(object):
             # We use 'base' instead (although, platbase points to the
             # same location)
             py_prefix = get_config_var("base")
-            if not py_prefix or not os.path.exists(py_prefix):
+            if not py_prefix or not Path(py_prefix).exists():
                 py_prefix = sys.prefix
             self.py_prefix = py_prefix
+            py_prefix = Path(py_prefix)
             if sys.platform == "win32":
-                py_scripts_dir = os.path.join(py_prefix, "Scripts")
+                py_scripts_dir = py_prefix / "Scripts"
             else:
-                py_scripts_dir = os.path.join(py_prefix, "bin")
+                py_scripts_dir = py_prefix / "bin"
             self.py_scripts_dir = py_scripts_dir
         else:
             # We don't look for an interpreter when cross-compiling.
@@ -221,8 +223,8 @@ class BuildInfoCollectorMixin(object):
                 py_prefix = python_info['prefix']
                 self.py_prefix = py_prefix
 
-                py_scripts_dir = os.path.join(py_prefix, 'bin')
-                if os.path.exists(py_scripts_dir):
+                py_scripts_dir = py_prefix / 'bin'
+                if py_scripts_dir.exists():
                     self.py_scripts_dir = py_scripts_dir
                 else:
                     self.py_scripts_dir = None
@@ -264,9 +266,9 @@ class BuildInfoCollectorMixin(object):
         elif not has_virtual_env:
             build_name += f"-{self.build_classifiers}"
 
-        common_prefix_dir = os.path.join(script_dir, build_base)
-        build_dir = os.path.join(common_prefix_dir, build_name, "build")
-        install_dir = os.path.join(common_prefix_dir, build_name, "install")
+        common_prefix_dir = script_dir / build_base
+        build_dir = common_prefix_dir / build_name / "build"
+        install_dir = common_prefix_dir / build_name / "install"
 
         # Change the setuptools build_lib dir to be under the same
         # directory where the cmake build and install dirs are so
@@ -275,15 +277,15 @@ class BuildInfoCollectorMixin(object):
         # Replaces
         #   build/lib.macosx-10.14-x86_64-3.7' with
         #   build/{venv_prefix}/package'
-        setup_tools_build_lib_dir = os.path.join(common_prefix_dir, build_name, "package")
+        setup_tools_build_lib_dir = common_prefix_dir / build_name / "package"
         self.build_lib = setup_tools_build_lib_dir
 
-        self.script_dir = script_dir
-        self.sources_dir = sources_dir
-        self.build_dir = build_dir
-        self.install_dir = install_dir
-        self.py_executable = py_executable
-        self.py_include_dir = py_include_dir
+        self.script_dir = Path(script_dir)
+        self.sources_dir = Path(sources_dir)
+        self.build_dir = Path(build_dir)
+        self.install_dir = Path(install_dir)
+        self.py_executable = Path(py_executable)
+        self.py_include_dir = Path(py_include_dir)
 
         if not self.is_cross_compile:
             self.py_library = get_py_library(build_type, py_version, py_prefix,
@@ -293,7 +295,7 @@ class BuildInfoCollectorMixin(object):
 
         if self.is_cross_compile:
             site_packages_no_prefix = self.python_target_info['python_info']['site_packages_dir']
-            self.site_packages_dir = os.path.join(install_dir, site_packages_no_prefix)
+            self.site_packages_dir = install_dir / site_packages_no_prefix
         else:
             # Setuptools doesn't have an equivalent of a get_python_lib with a
             # prefix, so we build the path manually:
@@ -306,4 +308,4 @@ class BuildInfoCollectorMixin(object):
     def post_collect_and_assign(self):
         # self.build_lib is only available after the base class
         # finalize_options is called.
-        self.st_build_dir = os.path.join(self.script_dir, self.build_lib)
+        self.st_build_dir = self.script_dir / self.build_lib

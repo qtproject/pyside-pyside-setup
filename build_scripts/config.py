@@ -4,6 +4,8 @@
 import os
 
 from .log import log
+from pathlib import Path
+
 from .versions import PYSIDE, PYSIDE_MODULE, SHIBOKEN
 
 
@@ -97,7 +99,7 @@ class Config(object):
         else:
             self.build_type = self._build_type_all
 
-        self.setup_script_dir = setup_script_dir
+        self.setup_script_dir = Path(setup_script_dir)
 
         self.cmake_toolchain_file = cmake_toolchain_file
 
@@ -222,7 +224,7 @@ class Config(object):
         content = ''
         changes = ''
         try:
-            with open(os.path.join(self.setup_script_dir, readme_filename)) as f:
+            with open(self.setup_script_dir / readme_filename) as f:
                 readme = f.read()
         except Exception as e:
             log.error(f"Couldn't read contents of {readme_filename}. {e}")
@@ -233,7 +235,7 @@ class Config(object):
         include_changes = False
         if include_changes:
             try:
-                with open(os.path.join(self.setup_script_dir, changes_filename)) as f:
+                with open(self.setup_script_dir / changes_filename) as f:
                     changes = f.read()
             except Exception as e:
                 log.error(f"Couldn't read contents of {changes_filename}. {e}")

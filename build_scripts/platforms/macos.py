@@ -3,6 +3,7 @@
 
 import fnmatch
 import os
+from pathlib import Path
 
 from ..config import config
 from ..options import OPTION
@@ -72,11 +73,11 @@ def prepare_standalone_package_macos(self, _vars):
 
             if dir_name in ['Headers', 'fonts']:
                 return False
-            if dir_full_path.endswith('Versions/Current'):
+            if str(dir_full_path).endswith('Versions/Current'):
                 return False
-            if dir_full_path.endswith('Versions/5/Resources'):
+            if str(dir_full_path).endswith('Versions/5/Resources'):
                 return False
-            if dir_full_path.endswith('Versions/5/Helpers'):
+            if str(dir_full_path).endswith('Versions/5/Helpers'):
                 return False
             return general_dir_filter(dir_name, parent_full_path, dir_full_path)
 
@@ -87,7 +88,7 @@ def prepare_standalone_package_macos(self, _vars):
         def framework_variant_filter(file_name, file_full_path):
             if self.qtinfo.build_type != 'debug_and_release':
                 return True
-            dir_path = os.path.dirname(file_full_path)
+            dir_path = Path(file_full_path).parent
             in_framework = dir_path.endswith("Versions/5")
             if file_name.endswith('_debug') and in_framework and no_copy_debug:
                 return False
@@ -104,12 +105,11 @@ def prepare_standalone_package_macos(self, _vars):
         # from Versions/5/Helpers, thus adding two more levels of
         # directory hierarchy.
         if self.is_webengine_built(built_modules):
-            qt_lib_path = "{st_build_dir}/{st_package_name}/Qt/lib".format(**_vars)
-            bundle = "QtWebEngineCore.framework/Helpers/"
-            bundle += "QtWebEngineProcess.app"
+            qt_lib_path = Path("{st_build_dir}/{st_package_name}/Qt/lib".format(**_vars))
+            bundle = Path("QtWebEngineCore.framework/Helpers/") / "QtWebEngineProcess.app"
             binary = "Contents/MacOS/QtWebEngineProcess"
-            webengine_process_path = os.path.join(bundle, binary)
-            final_path = os.path.join(qt_lib_path, webengine_process_path)
+            webengine_process_path = bundle / binary
+            final_path = qt_lib_path / webengine_process_path
             rpath = "@loader_path/../../../../../"
             macos_fix_rpaths_for_library(final_path, rpath)
     else:
@@ -135,16 +135,16 @@ def prepare_standalone_package_macos(self, _vars):
                     _vars=_vars)
 
             # Fix rpath for WebEngine process executable.
-            qt_libexec_path = "{st_build_dir}/{st_package_name}/Qt/libexec".format(**_vars)
+            qt_libexec_path = Path("{st_build_dir}/{st_package_name}/Qt/libexec".format(**_vars))
             binary = "QtWebEngineProcess"
-            final_path = os.path.join(qt_libexec_path, binary)
+            final_path = qt_libexec_path / binary
             rpath = "@loader_path/../lib"
             macos_fix_rpaths_for_library(final_path, rpath)
 
             if copy_qt_conf:
                 # Copy the qt.conf file to libexec.
-                if not os.path.isdir(qt_libexec_path):
-                    os.makedirs(qt_libexec_path)
+                if not qt_libexec_path.is_dir():
+                    qt_libexec_path.mkdir(parents=True)
                 copyfile(
                     f"{{build_dir}}/{PYSIDE}/{{st_package_name}}/qt.conf",
                     qt_libexec_path, _vars=_vars)
