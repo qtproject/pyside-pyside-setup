@@ -15,10 +15,10 @@
 
 import collections
 import optparse
-import os.path
 import re
 import subprocess
 import sys
+from pathlib import Path
 from pprint import pprint
 
 
@@ -183,23 +183,23 @@ class MachOFile:
         if recorded_path.startswith(ImagePath.EXECUTABLE_PATH_TOKEN):
             executable_image_path = self.executable_path()
             if executable_image_path:
-                path.resolved_path = os.path.normpath(
+                path.resolved_path = Path(
                     recorded_path.replace(
                         ImagePath.EXECUTABLE_PATH_TOKEN,
-                        os.path.dirname(executable_image_path.resolved_path)))
+                        Path(executable_image_path.resolved_path).parent))
 
         # handle @loader_path
         elif recorded_path.startswith(ImagePath.LOADER_PATH_TOKEN):
-            path.resolved_path = os.path.normpath(recorded_path.replace(
+            path.resolved_path = Path(recorded_path.replace(
                 ImagePath.LOADER_PATH_TOKEN,
-                os.path.dirname(self.image_path.resolved_path)))
+                Path(self.image_path.resolved_path).parent))
 
         # handle @rpath
         elif recorded_path.startswith(ImagePath.RPATH_TOKEN):
             for rpath in self.all_rpaths():
-                resolved_path = os.path.normpath(recorded_path.replace(
+                resolved_path = Path(recorded_path.replace(
                     ImagePath.RPATH_TOKEN, rpath.resolved_path))
-                if os.path.exists(resolved_path):
+                if resolved_path.exists():
                     path.resolved_path = resolved_path
                     path.rpath_source = rpath.rpath_source
                     break
@@ -302,7 +302,7 @@ class ImagePath:
         return description
 
     def exists(self):
-        return self.resolved_path and os.path.exists(self.resolved_path)
+        return self.resolved_path and Path(self.resolved_path).exists()
 
     def resolved_equals_recorded(self):
         return (self.resolved_path and self.recorded_path and

@@ -140,7 +140,7 @@ def get_parser() -> ArgumentParser:
 
 
 def is_directory(directory):
-    if not os.path.isdir(directory):
+    if not directory.is_dir():
         log.error(f"Path '{directory}' is not a directory")
         return False
     return True
@@ -162,7 +162,7 @@ def check_arguments(options):
             log.info(msg, extra=extra)
 
     # Check 'qt_dir'
-    return is_directory(options.qt_dir)
+    return is_directory(Path(options.qt_dir))
 
 
 def is_valid_file(x):

@@ -18,11 +18,11 @@
 # class also exists there.
 
 import argparse
-import os.path
 import sys
 from textwrap import dedent
 from time import gmtime, strftime
 from urllib import request
+from pathlib import Path
 
 from bs4 import BeautifulSoup
 from config import modules_to_test, types_to_ignore
@@ -150,7 +150,7 @@ if __name__ == "__main__":
         style="text_with_link",
     )
 
-    python_executable = os.path.basename(sys.executable or "")
+    python_executable = Path(sys.executable).name or ""
     command_line_arguments = " ".join(sys.argv)
     report_date = strftime("%Y-%m-%d %H:%M:%S %Z", gmtime())
 
