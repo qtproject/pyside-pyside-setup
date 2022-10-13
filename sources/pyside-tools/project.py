@@ -368,7 +368,7 @@ class Project:
         """Return path and command for a file's artifact"""
         if file.suffix == ".ui":  # Qt form files
             py_file = f"{file.parent}/ui_{file.stem}.py"
-            return (Path(py_file), [UIC_CMD, os.fspath(file), "-o", py_file])
+            return (Path(py_file), [UIC_CMD, os.fspath(file), "--rc-prefix", "-o", py_file])
         if file.suffix == ".qrc":  # Qt resources
             py_file = f"{file.parent}/rc_{file.stem}.py"
             return (Path(py_file), [RCC_CMD, os.fspath(file), "-o", py_file])
