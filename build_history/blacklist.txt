@@ -19,7 +19,6 @@
     py2
     py3
 [QtCore::qthread_test]
-    linux py3.6
 # PYSIDE-754
 [QtWebEngineCore::web_engine_custom_scheme]
     win32

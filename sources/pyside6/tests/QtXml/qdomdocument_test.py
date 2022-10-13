@@ -47,7 +47,7 @@ class QDomDocumentTest(unittest.TestCase):
         self.assertFalse(ok)
         self.assertEqual(errorStr, 'Opening and ending tag mismatch.')
         self.assertEqual(errorLine, 4)
-        self.assertEqual(errorColumn, 21)
+        self.assertEqual(errorColumn, 4)
 
     def testQDomDocumentSetContentWithGoodXmlData(self):
         '''Sets valid xml as the QDomDocument contents.'''

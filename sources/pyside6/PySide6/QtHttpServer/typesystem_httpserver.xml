@@ -8,7 +8,8 @@
   <load-typesystem name="QtWebSockets/typesystem_websockets.xml" generate="no"/>
 
   <typedef-type name="QFutureHttpServerResponse" source="QFuture&lt;QHttpServerResponse&gt;"/>
-  <object-type name="QAbstractHttpServer"/>
+  <!-- virtual void missingHandler(const QHttpServerRequest &, QHttpServerResponder &&) = 0 -->
+  <object-type name="QAbstractHttpServer" disable-wrapper="yes"/>
   <object-type name="QHttpServer">
       <extra-includes>
           <include file-name="QtHttpServer/QHttpServerRequest" location="global"/>

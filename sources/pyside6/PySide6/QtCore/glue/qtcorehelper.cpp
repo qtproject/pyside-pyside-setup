@@ -60,7 +60,7 @@ QGenericArgumentHolder &QGenericArgumentHolder::operator=(const QGenericArgument
 QGenericArgumentHolder &QGenericArgumentHolder::operator=(QGenericArgumentHolder &&) = default;
 QGenericArgumentHolder::~QGenericArgumentHolder() = default;
 
-QGenericArgumentHolder::operator QGenericArgument() const
+QGenericArgument QGenericArgumentHolder::toGenericArgument() const
 {
     return d ? d->m_argument : QGenericArgument{};
 }
@@ -86,7 +86,7 @@ QGenericReturnArgumentHolder &QGenericReturnArgumentHolder::operator=(const QGen
 QGenericReturnArgumentHolder &QGenericReturnArgumentHolder::operator=(QGenericReturnArgumentHolder &&) = default;
 QGenericReturnArgumentHolder::~QGenericReturnArgumentHolder() = default;
 
-QGenericReturnArgumentHolder::operator QGenericReturnArgument() const
+QGenericReturnArgument QGenericReturnArgumentHolder::toGenericReturnArgument() const
 {
     return d->m_argument;
 }

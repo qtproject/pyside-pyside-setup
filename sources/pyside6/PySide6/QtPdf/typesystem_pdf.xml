@@ -15,7 +15,10 @@
         <enum-type name="MetaDataField"/>
         <enum-type name="PageModelRole"/>
     </object-type>
-    <value-type name="QPdfDocumentRenderOptions"/>
+    <value-type name="QPdfDocumentRenderOptions">
+        <enum-type name="RenderFlag" flags="RenderFlags" since="6.5"/>
+        <enum-type name="Rotation" since="6.5"/>
+    </value-type>
     <object-type name="QPdfPageRenderer">
         <enum-type name="RenderMode"/>
         <enum-type name="RenderFlag" flags="RenderFlags"/>

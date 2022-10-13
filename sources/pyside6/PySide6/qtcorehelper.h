@@ -82,7 +82,7 @@ namespace QtCoreHelper {
         QGenericArgumentHolder &operator=(QGenericArgumentHolder &&);
         ~QGenericArgumentHolder();
 
-        operator QGenericArgument () const;
+        QGenericArgument toGenericArgument() const;
 
         QMetaType metaType() const;
         const void *data() const;
@@ -104,7 +104,7 @@ namespace QtCoreHelper {
         QGenericReturnArgumentHolder &operator=(QGenericReturnArgumentHolder &&);
         ~QGenericReturnArgumentHolder();
 
-        operator QGenericReturnArgument () const;
+        QGenericReturnArgument toGenericReturnArgument() const;
 
         QMetaType metaType() const;
         const void *data() const;

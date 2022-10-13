@@ -71,7 +71,7 @@ class ModuleData:
             self.qml = [f"qml/{i}" for i in self.qml]
             self.translations = [f"translations/{i}" for i in self.translations]
             self.metatypes = [
-                f"lib/metatypes/{i}".replace("_relwithdebinfo", "") for i in self.metatypes
+                f"metatypes/{i}".replace("_relwithdebinfo", "") for i in self.metatypes
             ]
             self.plugins = [f"plugins/{i}" for i in self.plugins]
         else:
@@ -83,7 +83,7 @@ class ModuleData:
                 self.qtlib = [f"Qt/lib/{i}.*{self.ext}*" for i in self.qtlib]
             self.qml = [f"Qt/qml/{i}" for i in self.qml]
             self.translations = [f"Qt/translations/{i}" for i in self.translations]
-            self.metatypes = [f"Qt/lib/metatypes/{i}" for i in self.metatypes]
+            self.metatypes = [f"Qt/metatypes/{i}" for i in self.metatypes]
             self.plugins = [f"Qt/plugins/{i}" for i in self.plugins]
 
         self.typesystems = [f"typesystems/{i}" for i in self.typesystems]

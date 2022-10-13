@@ -1663,7 +1663,8 @@ QtCoreHelper::QGenericReturnArgumentHolder result(qArgData.metaType, qArgData.da
 // invokeMethod(QObject *,const char *, QGenericArgument a0, a1, a2 )
 // @snippet qmetaobject-invokemethod-arg
 PyThreadState *_save = PyEval_SaveThread(); // Py_BEGIN_ALLOW_THREADS
-const bool result = %CPPSELF.invokeMethod(%1, %2, %3, %4, %5);
+const bool result = %CPPSELF.invokeMethod(%1, %2, %3.toGenericArgument(), %4.toGenericArgument(),
+                                          %5.toGenericArgument());
 PyEval_RestoreThread(_save); // Py_END_ALLOW_THREADS
 %PYARG_0 = %CONVERTTOPYTHON[bool](result);
 // @snippet qmetaobject-invokemethod-arg
@@ -1671,7 +1672,9 @@ PyEval_RestoreThread(_save); // Py_END_ALLOW_THREADS
 // invokeMethod(QObject *,const char *,Qt::ConnectionType, QGenericArgument a0, a1, a2 )
 // @snippet qmetaobject-invokemethod-conn-type-arg
 PyThreadState *_save = PyEval_SaveThread(); // Py_BEGIN_ALLOW_THREADS
-const bool result = %CPPSELF.invokeMethod(%1, %2, %3, %4, %5, %6);
+const bool result = %CPPSELF.invokeMethod(%1, %2, %3,
+                                          %4.toGenericArgument(), %5.toGenericArgument(),
+                                          %6.toGenericArgument());
 PyEval_RestoreThread(_save); // Py_END_ALLOW_THREADS
 %PYARG_0 = %CONVERTTOPYTHON[bool](result);
 // @snippet qmetaobject-invokemethod-conn-type-arg
@@ -1686,7 +1689,9 @@ static PyObject *invokeMethodHelper(QObject *obj, const char *member, Qt::Connec
 {
     PyThreadState *_save = PyEval_SaveThread(); // Py_BEGIN_ALLOW_THREADS
     const bool callResult = QMetaObject::invokeMethod(obj, member, type,
-                                                      returnArg, v1, v2, v3);
+                                                      returnArg.toGenericReturnArgument(),
+                                                      v1.toGenericArgument(), v2.toGenericArgument(),
+                                                      v3.toGenericArgument());
     PyEval_RestoreThread(_save); // Py_END_ALLOW_THREADS
     if (!callResult) {
         PyErr_Format(PyExc_RuntimeError, "QMetaObject::invokeMethod(): Invocation of %s::%s() failed.",

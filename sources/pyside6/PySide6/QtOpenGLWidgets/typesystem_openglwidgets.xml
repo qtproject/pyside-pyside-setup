@@ -10,5 +10,6 @@
 
   <object-type name="QOpenGLWidget">
       <enum-type name="UpdateBehavior"/>
+      <enum-type name="TargetBuffer" since="6.5"/>
   </object-type>
 </typesystem>

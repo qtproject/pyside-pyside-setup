@@ -538,6 +538,7 @@
     </extra-includes>
     <enum-type name="AlignmentFlag" python-type="IntFlag" flags="Alignment"/>
     <enum-type name="AnchorPoint" since="4.6"/>
+    <enum-type name="Appearance" since="6.5"/>
     <enum-type name="ApplicationAttribute"/>
     <enum-type name="ApplicationState" flags="ApplicationStates"/>
     <enum-type name="ArrowType"/>
@@ -594,6 +595,7 @@
     <enum-type name="PenCapStyle"/>
     <enum-type name="PenJoinStyle"/>
     <enum-type name="PenStyle"/>
+    <enum-type name="PermissionStatus" since="6.5"/>
     <enum-type name="ReturnByValueConstant"/>
     <enum-type name="ScreenOrientation" flags="ScreenOrientations"/>
     <enum-type name="ScrollBarPolicy"/>
@@ -2963,6 +2965,7 @@
     <!-- This isn't part of Qt public API -->
     <modify-function signature="attributes()const" remove="all"/>
     <modify-function signature="getParameterTypes(int*)const" remove="all"/>
+    <modify-field name="mobj" remove="yes"/>
   </value-type>
   <object-type name="QMetaObject">
     <enum-type name="Call"/>
