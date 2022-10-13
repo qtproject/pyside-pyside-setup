@@ -10,6 +10,8 @@ import time
 import warnings
 from argparse import ArgumentParser, RawTextHelpFormatter
 from enum import Enum
+from pathlib import Path
+from typing import List
 
 DESC = """
 Utility script for working with Qt for Python.
@@ -75,7 +77,7 @@ opt_dry_run = False
 opt_verbose = False
 
 
-def which(needle):
+def which(needle: str):
     """Perform a path search"""
     needles = [needle]
     if IS_WINDOWS:
@@ -84,22 +86,22 @@ def which(needle):
 
     for path in os.environ.get("PATH", "").split(os.pathsep):
         for n in needles:
-            binary = os.path.join(path, n)
-            if os.path.isfile(binary):
+            binary = Path(path) / n
+            if binary.is_file():
                 return binary
     return None
 
 
-def command_log_string(args, directory):
-    result = f'[{os.path.basename(directory)}]'
+def command_log_string(args: List[str], directory: Path):
+    result = f'[{directory.name}]'
     for arg in args:
         result += f' "{arg}"' if ' ' in arg else f' {arg}'
     return result
 
 
-def execute(args):
+def execute(args: List[str]):
     """Execute a command and print to log"""
-    log_string = command_log_string(args, os.getcwd())
+    log_string = command_log_string(args, Path.cwd())
     print(log_string)
     if opt_dry_run:
         return
@@ -229,27 +231,28 @@ def read_config_modules_argument():
     return None
 
 
-def read_config_python_binary():
+def read_config_python_binary() -> str:
     binary = read_config(PYTHON_KEY)
     virtual_env = os.environ.get('VIRTUAL_ENV')
     if not binary:
         # Use 'python3' unless virtualenv is set
         use_py3 = not virtual_env and which('python3')
         binary = 'python3' if use_py3 else 'python'
-    if not os.path.isabs(binary):
-        abs_path = which(binary)
+    binary = Path(binary)
+    if not binary.is_absolute():
+        abs_path = which(str(binary))
         if abs_path:
             binary = abs_path
         else:
             warnings.warn(f'Unable to find "{binary}"', RuntimeWarning)
     if virtual_env:
-        if not binary.startswith(virtual_env):
+        if not str(binary).startswith(virtual_env):
             w = f'Python "{binary}" is not under VIRTUAL_ENV "{virtual_env}"'
             warnings.warn(w, RuntimeWarning)
-    return binary
+    return str(binary)
 
 
-def get_config_file(base_name):
+def get_config_file(base_name) -> Path:
     global user
     home = os.getenv('HOME')
     if IS_WINDOWS:
@@ -259,18 +262,18 @@ def get_config_file(base_name):
             home = os.getenv('HOMEDRIVE') + os.getenv('HOMEPATH')
             os.environ['HOME'] = home
         user = os.getenv('USERNAME')
-        config_file = os.path.join(os.getenv('APPDATA'), base_name)
+        config_file = Path(os.getenv('APPDATA')) / base_name
     else:
         user = os.getenv('USER')
-        config_dir = os.path.join(home, '.config')
-        if os.path.exists(config_dir):
-            config_file = os.path.join(config_dir, base_name)
+        config_dir = Path(home) / '.config'
+        if config_dir.exists():
+            config_file = config_dir / base_name
         else:
-            config_file = os.path.join(home, f".{base_name}")
+            config_file = Path(home) / f".{base_name}"
     return config_file
 
 
-def build(target):
+def build(target: str):
     """Run configure and build steps"""
     start_time = time.time()
 
@@ -312,7 +315,7 @@ def run_tests():
     logfile_name = datetime.datetime.today().strftime("test_%Y%m%d_%H%M.txt")
     binary = sys.executable
     command = f'"{binary}" testrunner.py test > {logfile_name}'
-    print(command_log_string([command], os.getcwd()))
+    print(command_log_string([command], Path.cwd()))
     start_time = time.time()
     result = 0 if opt_dry_run else os.system(command)
     elapsed_time = int(time.time() - start_time)
@@ -354,7 +357,7 @@ if __name__ == '__main__':
     user = None
 
     config_file = get_config_file('qp5_tool.conf')
-    argument_parser = create_argument_parser(DESC.replace('%CONFIGFILE%', config_file))
+    argument_parser = create_argument_parser(DESC.replace('%CONFIGFILE%', str(config_file)))
     options = argument_parser.parse_args()
     opt_dry_run = options.dry_run
     opt_verbose = options.verbose
@@ -379,19 +382,19 @@ if __name__ == '__main__':
         warnings.warn('Unable to find git', RuntimeWarning)
         sys.exit(-1)
 
-    if not os.path.exists(config_file):
+    if not config_file.exists():
         print('Create initial config file ', config_file, " ..")
         with open(config_file, 'w') as f:
             f.write(DEFAULT_CONFIG_FILE.format(' '.join(DEFAULT_BUILD_ARGS)))
 
-    while not os.path.exists('.git'):
-        cwd = os.getcwd()
-        if cwd == '/' or (IS_WINDOWS and len(cwd) < 4):
+    while not Path(".git").exists():
+        cwd = Path.cwd()
+        if str(cwd) == '/' or (IS_WINDOWS and len(cwd) < 4):
             warnings.warn('Unable to find git root', RuntimeWarning)
             sys.exit(-1)
-        os.chdir(os.path.dirname(cwd))
+        os.chdir(cwd.parent)
 
-    base_dir = os.path.basename(os.getcwd())
+    base_dir = Path.cwd().name
 
     if options.clean:
         run_git(['clean', '-dxf'])
