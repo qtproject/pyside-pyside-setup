@@ -1,4 +1,4 @@
-.. _features-why:
+.. _feature-why:
 
 Why do we have a __feature__?
 =============================
