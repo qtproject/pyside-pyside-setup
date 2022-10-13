@@ -200,7 +200,7 @@ def test_for():
     assert st("for (QChar ch : s)") == "for ch in s:"
     assert (
         st("for (const QByteArray &ext : " "qAsConst(extensionList))")
-        == "for ext in qAsConst(extensionList):"
+        == "for ext in extensionList:"
     )
     assert st("for (QTreeWidgetItem *item : found) {") == "for item in found:"
 

@@ -231,7 +231,10 @@ def handle_for(x):
         elif x.count(":") > 0:
             iterator, iterable = content.split(":", 1)
             var = iterator.split()[-1].replace("&", "").strip()
-            new_x = f"for {remove_ref(var)} in {iterable.strip()}:"
+            iterable = iterable.strip()
+            if iterable.startswith("qAsConst(") or iterable.startswith("std::as_const("):
+                iterable = iterable[iterable.find("(") + 1: -1]
+            new_x = f"for {remove_ref(var)} in {iterable}:"
     return f"{get_indent(x)}{dstrip(new_x)}"
 
 
