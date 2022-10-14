@@ -123,7 +123,7 @@ def prepare_packages_win32(self, _vars):
             target = f"{{st_build_dir}}/{{st_package_name}}/scripts/{script}"
             copyfile(src, target, force=False, _vars=_vars)
 
-        for script_dir in ("qtpy2cpp_lib", "deploy", "project_lib"):
+        for script_dir in ("qtpy2cpp_lib", "deploy", "project"):
             src = f"{{install_dir}}/bin/{script_dir}"
             target = f"{{st_build_dir}}/{{st_package_name}}/scripts/{script_dir}"
             # Exclude subdirectory tests
