@@ -9,7 +9,38 @@
     <load-typesystem name="QtNetwork/typesystem_network.xml" generate="no"/>
     <load-typesystem name="QtSerialPort/typesystem_serialport.xml" generate="no"/>
 
-    <object-type name="QCanBus"/>
+    <object-type name="QCanBus">
+        <!-- Remove errorMessage argument, return tuple instead.  -->
+        <modify-function signature="availableDevices(QString,QString*)const">
+            <modify-argument index="2">
+                <remove-default-expression/>
+                <remove-argument/>
+            </modify-argument>
+            <modify-argument index="return">
+                <replace-type modified-type="tuple"/>
+            </modify-argument>
+            <inject-code class="target" position="beginning"
+                         file="../glue/qtserialbus.cpp" snippet="qcanbus-available-devices"/>
+            <inject-documentation format="target" mode="append">
+            The function returns a tuple of (device_list, error_string).
+            </inject-documentation>
+        </modify-function>
+        <modify-function signature="createDevice(QString,QString,QString*)const">
+            <modify-argument index="3">
+                <remove-default-expression/>
+                <remove-argument/>
+            </modify-argument>
+            <modify-argument index="return"> <!-- Suppress return value heuristics -->
+                <define-ownership class="target" owner="default"/>
+                <replace-type modified-type="tuple"/>
+            </modify-argument>
+            <inject-code class="target" position="beginning"
+                         file="../glue/qtserialbus.cpp" snippet="qcanbus-createdevice"/>
+            <inject-documentation format="target" mode="append">
+            The function returns a tuple of (device, error_string).
+            </inject-documentation>
+        </modify-function>
+    </object-type>
     <object-type name="QCanBusDevice">
         <enum-type name="CanBusError"/>
         <enum-type name="CanBusDeviceState"/>
