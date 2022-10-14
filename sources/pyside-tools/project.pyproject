@@ -1,0 +1,4 @@
+{
+    "files": ["project.py", "project/__init__.py", "project/newproject.py",
+              "project/project_data.py", "project/utils.py"]
+}

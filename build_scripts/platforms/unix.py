@@ -117,7 +117,7 @@ def prepare_packages_posix(self, _vars, cross_build=False):
             target = f"{{st_build_dir}}/{{st_package_name}}/scripts/{script}"
             copyfile(src, target, force=False, _vars=_vars)
 
-        for script_dir in ("qtpy2cpp_lib","deploy"):
+        for script_dir in ("qtpy2cpp_lib", "deploy", "project"):
             src = f"{{install_dir}}/bin/{script_dir}"
             target = f"{{st_build_dir}}/{{st_package_name}}/scripts/{script_dir}"
             # Exclude subdirectory tests

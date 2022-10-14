@@ -10,7 +10,8 @@ set(files ${CMAKE_CURRENT_SOURCE_DIR}/pyside_tool.py
           ${CMAKE_CURRENT_SOURCE_DIR}/qtpy2cpp.py
           ${CMAKE_CURRENT_SOURCE_DIR}/deploy.py)
 
-set(directories ${CMAKE_CURRENT_SOURCE_DIR}/deploy)
+set(directories ${CMAKE_CURRENT_SOURCE_DIR}/deploy
+                ${CMAKE_CURRENT_SOURCE_DIR}/project)
 
 if(NOT NO_QT_TOOLS STREQUAL "yes")
     set(TOOLS_PATH "${QT6_INSTALL_PREFIX}/${QT6_HOST_INFO_BINDIR}")
