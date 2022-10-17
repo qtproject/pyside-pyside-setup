@@ -1447,6 +1447,7 @@
     <enum-type name="InputMode"/>
 
     <modify-function signature="getInt(QWidget*,const QString&amp;,const QString&amp;,int,int,int,int,bool*,QFlags&lt;Qt::WindowType&gt;)" allow-thread="yes">
+      <modify-argument index="return" pyi-type="Tuple[int, bool]"/>
       <modify-argument index="8">
         <remove-default-expression/>
         <remove-argument/>
@@ -1457,6 +1458,7 @@
     </modify-function>
 
     <modify-function signature="getItem(QWidget*,const QString&amp;,const QString&amp;,const QStringList&amp;,int,bool,bool*,QFlags&lt;Qt::WindowType&gt;,QFlags&lt;Qt::InputMethodHint&gt;)" allow-thread="yes">
+      <modify-argument index="return" pyi-type="Tuple[str, bool]"/>
       <modify-argument index="7">
         <remove-default-expression/>
         <remove-argument/>
@@ -1467,6 +1469,7 @@
     </modify-function>
 
     <modify-function signature="getMultiLineText(QWidget*,const QString&amp;,const QString&amp;,const QString&amp;,bool*,QFlags&lt;Qt::WindowType&gt;,QFlags&lt;Qt::InputMethodHint&gt;)" allow-thread="yes">
+      <modify-argument index="return" pyi-type="Tuple[str, bool]"/>
       <modify-argument index="5">
         <remove-default-expression/>
         <remove-argument/>
@@ -1477,6 +1480,7 @@
     </modify-function>
 
     <modify-function signature="getText(QWidget*,const QString&amp;,const QString&amp;,QLineEdit::EchoMode,const QString&amp;,bool*,QFlags&lt;Qt::WindowType&gt;,QFlags&lt;Qt::InputMethodHint&gt;)" allow-thread="yes">
+      <modify-argument index="return" pyi-type="Tuple[str, bool]"/>
       <modify-argument index="6">
         <remove-default-expression/>
         <remove-argument/>
@@ -1487,6 +1491,7 @@
     </modify-function>
 
     <modify-function signature="getDouble(QWidget*,const QString&amp;,const QString&amp;,double,double,double,int,bool*,QFlags&lt;Qt::WindowType&gt;,double)" allow-thread="yes">
+      <modify-argument index="return" pyi-type="Tuple[float, bool]"/>
       <modify-argument index="8">
         <remove-default-expression/>
         <remove-argument/>
