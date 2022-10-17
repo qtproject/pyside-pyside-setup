@@ -689,7 +689,7 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
             pass
         else:
             raise DistutilsSetupError("option limited-api must be 'yes' or 'no' "
-                                      "(default yes if applicable, i.e. python version >= 3.6)")
+                                      "(default yes if applicable, i.e. python version >= 3.7)")
 
         if OPTION["VERBOSE_BUILD"]:
             cmake_cmd.append("-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON")
@@ -733,7 +733,7 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
 
         if extension.lower() in [SHIBOKEN]:
             cmake_cmd.append("-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=yes")
-            cmake_cmd.append("-DUSE_PYTHON_VERSION=3.6")
+            cmake_cmd.append("-DUSE_PYTHON_VERSION=3.7")
 
         cmake_cmd += platform_cmake_options()
 

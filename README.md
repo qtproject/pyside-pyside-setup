@@ -137,7 +137,7 @@ using `setup.py build`:
 
 ## Requirements
 
- * Python 3.6+ is supported,
+ * Python 3.7+ is supported,
  * CMake: Specify the path to cmake with `--cmake` option or add cmake to the
    system path.
  * Qt 6.0+ is supported. Specify the path to qmake with `--qmake` option or
