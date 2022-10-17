@@ -486,6 +486,9 @@ def module_QtQuick() -> ModuleData:
         "libQt6QuickTimeline",
     ]
 
+    # Adding GraphicalEffects files
+    data.qml.extend("Qt5Compat/GraphicalEffects")
+
     data.qtlib.extend(_qtlib)
     data.metatypes.extend(_metatypes)
 
