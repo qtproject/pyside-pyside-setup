@@ -209,7 +209,8 @@ def wheel_pyside6_essentials() -> Tuple[SetupData, List[ModuleData]]:
             "pyside6-qml = PySide6.scripts.pyside_tool:qml",
             "pyside6-qmlformat = PySide6.scripts.pyside_tool:qmlformat",
             "pyside6-qmlls = PySide6.scripts.pyside_tool:qmlls",
-            "pyside6-deploy = PySide6.scripts.pyside_tool:deploy",
+            "pyside6-qtpy2cpp = PySide6.scripts.pyside_tool:qtpy2cpp",
+            "pyside6-deploy = PySide6.scripts.pyside_tool:deploy"
         ],
     )
 
