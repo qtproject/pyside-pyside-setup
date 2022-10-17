@@ -807,6 +807,10 @@ bool BuilderPrivate::visitHeader(const QString &fileName) const
     // Resolve OpenGL typedefs although the header is considered a system header.
     const QString baseName = clang::baseName(fileName);
     if (baseName == u"gl.h"
+        || baseName == u"gl2.h"
+        || baseName == u"gl3.h"
+        || baseName == u"gl31.h"
+        || baseName == u"gl32.h"
         || baseName == u"stdint.h" // Windows: int32_t, uint32_t
         || baseName == u"stddef.h") { // size_t
         return true;
