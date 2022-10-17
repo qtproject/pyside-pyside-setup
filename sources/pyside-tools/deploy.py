@@ -33,9 +33,8 @@ import shutil
 import traceback
 from textwrap import dedent
 
-from deploy_lib import Config, PythonExecutable
+from deploy_lib import Config, PythonExecutable, MAJOR_VERSION
 
-MAJOR_VERSION = 6
 EXE_FORMAT = ".exe" if sys.platform == "win32" else ".bin"
 
 

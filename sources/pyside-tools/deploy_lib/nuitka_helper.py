@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from typing import List
 
-from . import run_command
+from . import run_command, MAJOR_VERSION
 
 
 class Nuitka:
@@ -17,19 +17,21 @@ class Nuitka:
     def __init__(self, nuitka):
         self.nuitka = nuitka
 
-    def create_executable(
-        self, source_file: Path, extra_args: str, qml_files: List[Path], dry_run: bool
-    ):
+    def create_executable(self, source_file: Path, extra_args: str, qml_files: List[Path],
+                          excluded_qml_plugins, dry_run: bool):
         extra_args = extra_args.split()
         qml_args = []
         if qml_files:
-            # this includes "all" the plugins
-            # FIXME: adding the "qml" plugin is equivalent to "all" because of dependencies
-            # Ideally it should only add the specific qml plugins. eg: quick window, quick controls
             qml_args.append("--include-qt-plugins=all")
             qml_args.extend(
                 [f"--include-data-files={qml_file}=./{qml_file.name}" for qml_file in qml_files]
             )
+
+            if excluded_qml_plugins:
+                prefix = "lib" if sys.platform != "win32" else ""
+                for plugin in excluded_qml_plugins:
+                    dll_name = plugin.replace("Qt", f"Qt{MAJOR_VERSION}")
+                    qml_args.append(f"--noinclude-dlls={prefix}{dll_name}*")
 
         output_dir = source_file.parent / "deployment"
         if not dry_run:
@@ -48,5 +50,5 @@ class Nuitka:
             linux_icon = str(Path(__file__).parent / "pyside_icon.jpg")
             command.append(f"--linux-onefile-icon={linux_icon}")
 
-        command_str = run_command(command=command, dry_run=dry_run)
+        command_str, _ = run_command(command=command, dry_run=dry_run)
         return command_str

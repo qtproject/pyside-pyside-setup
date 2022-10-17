@@ -8,6 +8,11 @@ import shutil
 import logging
 
 from project import ProjectData
+from .commands import run_qmlimportscanner
+
+# Some QML plugins like QtCore are excluded from this list as they don't contribute much to
+# executable size. Excluding them saves the extra processing of checking for them in files
+EXCLUDED_QML_PLUGINS = {"QtQuick", "QtQuick3D", "QtCharts", "QtWebEngine", "QtTest", "QtSensors"}
 
 
 class Config:
@@ -60,8 +65,14 @@ class Config:
         else:
             self._find_and_set_qml_files()
 
+        self.excluded_qml_plugins = []
+        if self.get_value("qt", "excluded_qml_plugins"):
+            self.excluded_qml_plugins = self.get_value("qt", "excluded_qml_plugins").split(",")
+        else:
+            self._find_and_set_excluded_qml_plugins()
+
     def update_config(self):
-        logging.info("[DEPLOY] Creating {config_file}")
+        logging.info(f"[DEPLOY] Creating {self.config_file}")
         with open(self.config_file, "w+") as config_file:
             self.parser.write(config_file, space_around_delimiters=True)
 
@@ -97,7 +108,7 @@ class Config:
             return self.get_value(config_property_group, config_property_key)
         else:
             logging.exception(
-                f"[DEPLOY]: No {config_property_key} specified in config file or as cli option"
+                f"[DEPLOY] No {config_property_key} specified in config file or as cli option"
             )
             raise
 
@@ -132,6 +143,14 @@ class Config:
     @python_path.setter
     def python_path(self, python_path):
         self._python_path = python_path
+
+    @property
+    def excluded_qml_plugins(self):
+        return self._excluded_qml_plugins
+
+    @excluded_qml_plugins.setter
+    def excluded_qml_plugins(self, excluded_qml_plugins):
+        self._excluded_qml_plugins = excluded_qml_plugins
 
     def _find_and_set_qml_files(self):
         """Fetches all the qml_files in the folder and sets them if the
@@ -224,3 +243,14 @@ class Config:
             self.set_value("app", "project_file", str(files[0].relative_to(self.project_dir)))
             logging.info(f"[DEPLOY] Project file {files[0]} found and set in config file")
 
+    def _find_and_set_excluded_qml_plugins(self):
+        if self.qml_files:
+            included_qml_modules = set(run_qmlimportscanner(qml_files=self.qml_files,
+                                                            dry_run=self.dry_run))
+            self.excluded_qml_plugins = EXCLUDED_QML_PLUGINS.difference(included_qml_modules)
+
+            # needed for dry_run testing
+            self.excluded_qml_plugins = sorted(self.excluded_qml_plugins)
+
+            if self.excluded_qml_plugins:
+                self.set_value("qt", "excluded_qml_plugins", ",".join(self.excluded_qml_plugins))

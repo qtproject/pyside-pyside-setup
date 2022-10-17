@@ -16,7 +16,6 @@ exec_directory =
 # Path to .pyproject project file
 project_file =
 
-
 [python]
 
 # Python path
@@ -33,8 +32,11 @@ packages = nuitka,ordered_set,zstandard
 # normally all the QML files are added automatically
 qml_files =
 
+# excluded qml plugin binaries
+excluded_qml_plugins =
+
 [nuitka]
 
 # (str) specify any extra nuitka arguments
 # eg: extra_args = --show-modules --follow-stdlib
-extra_args = --quiet
+extra_args = --quiet --noinclude-qt-translations=True

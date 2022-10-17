@@ -60,7 +60,7 @@ class PythonExecutable:
                         dry_run=self.dry_run,
                     )
                 else:
-                    logging.info(f"[DEPLOY]: Upgrading package: {package}")
+                    logging.info(f"[DEPLOY] Upgrading package: {package}")
                     run_command(
                         command=[self.exe, "-m", "pip", "install", "--upgrade", package],
                         dry_run=self.dry_run,
@@ -77,6 +77,7 @@ class PythonExecutable:
                         source_file=source_file,
                         extra_args=extra_args,
                         qml_files=config.qml_files,
+                        excluded_qml_plugins=config.excluded_qml_plugins,
                         dry_run=self.dry_run,
                     )
 
