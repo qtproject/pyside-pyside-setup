@@ -211,7 +211,9 @@ if(NOT TARGET uninstall)
                       -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
 endif()
 
-shiboken_internal_set_python_site_packages()
+if(NOT PYTHON_SITE_PACKAGES)
+    shiboken_internal_set_python_site_packages()
+endif()
 
 set(GENERATOR_EXTRA_FLAGS --generator-set=shiboken
                           --enable-parent-ctor-heuristic
