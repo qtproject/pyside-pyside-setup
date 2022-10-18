@@ -43,7 +43,7 @@ static void cleanupEnumTypes();
 struct SbkEnumObject
 {
     PyObject_HEAD
-    long ob_value;
+    Enum::EnumValueType ob_value;
     PyObject *ob_name;
 };
 
@@ -515,7 +515,8 @@ private:
 namespace Enum {
 
 // forward
-static PyObject *newItemOld(PyTypeObject *enumType, long itemValue, const char *itemName);
+static PyObject *newItemOld(PyTypeObject *enumType, EnumValueType itemValue,
+                            const char *itemName);
 
 // forward
 static PyTypeObject * newTypeWithNameOld(const char *name,
@@ -534,7 +535,8 @@ bool check(PyObject *pyObj)
     return Py_TYPE(Py_TYPE(pyObj)) == reinterpret_cast<PyTypeObject *>(meta);
 }
 
-static PyObject *getEnumItemFromValueOld(PyTypeObject *enumType, long itemValue)
+static PyObject *getEnumItemFromValueOld(PyTypeObject *enumType,
+                                         EnumValueType itemValue)
 {
     PyObject *key, *value;
     Py_ssize_t pos = 0;
@@ -552,7 +554,7 @@ static PyObject *getEnumItemFromValueOld(PyTypeObject *enumType, long itemValue)
     return nullptr;
 }
 
-PyObject *getEnumItemFromValue(PyTypeObject *enumType, long itemValue)
+PyObject *getEnumItemFromValue(PyTypeObject *enumType, EnumValueType itemValue)
 {
     init_enum();
     // PYSIDE-1735: Decide dynamically if new or old enums will be used.
@@ -565,7 +567,7 @@ PyObject *getEnumItemFromValue(PyTypeObject *enumType, long itemValue)
         PyErr_Clear();
         return nullptr;
     }
-    AutoDecRef ob_value(PyLong_FromLong(itemValue));
+    AutoDecRef ob_value(PyLong_FromLongLong(itemValue));
     auto *result = PyDict_GetItem(val2members, ob_value);
     Py_XINCREF(result);
     return result;
@@ -620,7 +622,8 @@ PyTypeObject *createScopedEnum(PyTypeObject *scope, const char *name, const char
     return enumType;
 }
 
-static PyObject *createEnumItem(PyTypeObject *enumType, const char *itemName, long itemValue)
+static PyObject *createEnumItem(PyTypeObject *enumType, const char *itemName,
+                                EnumValueType itemValue)
 {
     init_enum();
     PyObject *enumItem = newItemOld(enumType, itemValue, itemName);
@@ -631,7 +634,8 @@ static PyObject *createEnumItem(PyTypeObject *enumType, const char *itemName, lo
     return enumItem;
 }
 
-bool createGlobalEnumItem(PyTypeObject *enumType, PyObject *module, const char *itemName, long itemValue)
+bool createGlobalEnumItem(PyTypeObject *enumType, PyObject *module,
+                          const char *itemName, EnumValueType itemValue)
 {
     PyObject *enumItem = createEnumItem(enumType, itemName, itemValue);
     if (!enumItem)
@@ -642,7 +646,7 @@ bool createGlobalEnumItem(PyTypeObject *enumType, PyObject *module, const char *
 }
 
 bool createScopedEnumItem(PyTypeObject *enumType, PyTypeObject *scope,
-                          const char *itemName, long itemValue)
+                          const char *itemName, EnumValueType itemValue)
 {
     PyObject *enumItem = createEnumItem(enumType, itemName, itemValue);
     if (!enumItem)
@@ -654,8 +658,8 @@ bool createScopedEnumItem(PyTypeObject *enumType, PyTypeObject *scope,
 
 // This exists temporary as the old way to create an enum item.
 // For the public interface, we use a new function
-static PyObject *
-newItemOld(PyTypeObject *enumType, long itemValue, const char *itemName)
+static PyObject *newItemOld(PyTypeObject *enumType,
+                            EnumValueType itemValue, const char *itemName)
 {
     bool newValue = true;
     SbkEnumObject *enumObj;
@@ -693,8 +697,8 @@ newItemOld(PyTypeObject *enumType, long itemValue, const char *itemName)
     return reinterpret_cast<PyObject *>(enumObj);
 }
 
-PyObject *
-newItem(PyTypeObject *enumType, long itemValue, const char *itemName)
+PyObject *newItem(PyTypeObject *enumType, EnumValueType itemValue,
+                  const char *itemName)
 {
     init_enum();
     // PYSIDE-1735: Decide dynamically if new or old enums will be used.
@@ -703,7 +707,7 @@ newItem(PyTypeObject *enumType, long itemValue, const char *itemName)
 
     auto *obEnumType = reinterpret_cast<PyObject *>(enumType);
     if (!itemName)
-        return PyObject_CallFunction(obEnumType, "i", itemValue);
+        return PyObject_CallFunction(obEnumType, "L", itemValue);
 
     static PyObject *const _member_map_ = String::createStaticString("_member_map_");
     auto *member_map = PyDict_GetItem(enumType->tp_dict, _member_map_);
@@ -858,7 +862,7 @@ const char *getCppName(PyTypeObject *enumType)
     return setp->cppName;
 }
 
-long int getValue(PyObject *enumItem)
+EnumValueType getValue(PyObject *enumItem)
 {
     init_enum();
 
@@ -869,7 +873,7 @@ long int getValue(PyObject *enumItem)
         return reinterpret_cast<SbkEnumObject *>(enumItem)->ob_value;
 
     AutoDecRef pyValue(PyObject_GetAttrString(enumItem, "value"));
-    return PyLong_AsLong(pyValue);
+    return PyLong_AsLongLong(pyValue);
 }
 
 void setTypeConverter(PyTypeObject *type, SbkConverter *converter, bool isFlag)
@@ -1136,7 +1140,7 @@ PyTypeObject *morphLastEnumToPython()
         PyTuple_SET_ITEM(key_value, 0, key);
         Py_INCREF(key);
         auto *obj = reinterpret_cast<SbkEnumObject *>(value);
-        auto *num = PyLong_FromLong(obj->ob_value);
+        auto *num = PyLong_FromLongLong(obj->ob_value);
         PyTuple_SET_ITEM(key_value, 1, num);
         PyList_Append(pyArgs, key_value);
     }
