@@ -1213,7 +1213,7 @@ class PysideRstDocs(Command, CommandMixin):
                     log.info(f"-- Documentation directory: 'html/{PYSIDE}/'")
             else:
                 raise SetupError("Sphinx not found - aborting")
-            self.html_dir = "html"
+            self.html_dir = Path("html")
 
             # creating directories html/pyside6/shiboken6
             try:
@@ -1237,9 +1237,9 @@ class PysideRstDocs(Command, CommandMixin):
     def run(self):
         if not self.skip:
             cmake_cmd = [
-                OPTION["CMAKE"],
-                "-S", self.doc_dir,
-                "-B", self.out_dir,
+                str(OPTION["CMAKE"]),
+                "-S", str(self.doc_dir),
+                "-B", str(self.out_dir),
                 "-DDOC_OUTPUT_FORMAT=html",
                 "-DFULLDOCSBUILD=0",
             ]
@@ -1253,8 +1253,9 @@ class PysideRstDocs(Command, CommandMixin):
             elif self.name == SHIBOKEN:
                 self.sphinx_src = self.out_dir
 
-            sphinx_cmd = ["sphinx-build", "-b", "html", "-j", "auto", "-c", self.sphinx_src,
-                          self.doc_dir, self.out_dir]
+            sphinx_cmd = ["sphinx-build", "-b", "html", "-j", "auto", "-c",
+                          str(self.sphinx_src), str(self.doc_dir),
+                          str(self.out_dir)]
             if run_process(sphinx_cmd) != 0:
                 raise SetupError(f"Error running CMake for {self.doc_dir}")
         # Last message
