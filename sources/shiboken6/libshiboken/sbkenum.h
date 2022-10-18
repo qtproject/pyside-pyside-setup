@@ -30,6 +30,8 @@ inline bool isShibokenEnum(PyObject *pyObj)
 
 namespace Enum
 {
+    using EnumValueType = long long;
+
     LIBSHIBOKEN_API bool check(PyObject *obj);
     /**
      *  Creates a new enum type (and its flags type, if any is given)
@@ -61,19 +63,23 @@ namespace Enum
      *  \param itemValue Numerical value of the enum item.
      *  \return true if everything goes fine, false if it fails.
      */
-    LIBSHIBOKEN_API bool createGlobalEnumItem(PyTypeObject *enumType, PyObject *module, const char *itemName, long itemValue);
+    LIBSHIBOKEN_API bool createGlobalEnumItem(PyTypeObject *enumType, PyObject *module,
+                                              const char *itemName,
+                                              EnumValueType itemValue);
     /// This function does the same as createGlobalEnumItem, but adds the enum to a Shiboken type or namespace.
     LIBSHIBOKEN_API bool createScopedEnumItem(PyTypeObject *enumType, PyTypeObject *scope,
-                                              const char *itemName, long itemValue);
+                                              const char *itemName, EnumValueType itemValue);
 
-    LIBSHIBOKEN_API PyObject *newItem(PyTypeObject *enumType, long itemValue, const char *itemName = nullptr);
+    LIBSHIBOKEN_API PyObject *newItem(PyTypeObject *enumType, EnumValueType itemValue,
+                                      const char *itemName = nullptr);
 
     LIBSHIBOKEN_API PyTypeObject *newTypeWithName(const char *name, const char *cppName,
                                                   PyTypeObject *numbers_fromFlag=nullptr);
     LIBSHIBOKEN_API const char *getCppName(PyTypeObject *type);
 
-    LIBSHIBOKEN_API long getValue(PyObject *enumItem);
-    LIBSHIBOKEN_API PyObject *getEnumItemFromValue(PyTypeObject *enumType, long itemValue);
+    LIBSHIBOKEN_API EnumValueType getValue(PyObject *enumItem);
+    LIBSHIBOKEN_API PyObject *getEnumItemFromValue(PyTypeObject *enumType,
+                                                   EnumValueType itemValue);
 
     /// Sets the enum/flag's type converter.
     LIBSHIBOKEN_API void setTypeConverter(PyTypeObject *type, SbkConverter *converter, bool isFlag);
