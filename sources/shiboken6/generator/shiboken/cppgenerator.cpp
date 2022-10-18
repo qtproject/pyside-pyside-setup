@@ -5631,7 +5631,10 @@ void CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
 
         QString enumValueText;
         if (!avoidProtectedHack() || !cppEnum.isProtected()) {
-            enumValueText = u"Shiboken::Enum::EnumValueType("_s;
+            enumValueText = cppEnum.typeEntry()->cppType();
+            if (enumValueText.isEmpty())
+                enumValueText = u"Shiboken::Enum::EnumValueType"_s;
+            enumValueText += u'(';
             if (cppEnum.enclosingClass())
                 enumValueText += cppEnum.enclosingClass()->qualifiedCppName() + u"::"_s;
             // Fully qualify the value which is required for C++ 11 enum classes.

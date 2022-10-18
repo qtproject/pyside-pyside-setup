@@ -252,6 +252,7 @@ enum-type
                 since="..."
                 flags="yes | no"
                 flags-revision="..."
+                cpp-type = "..."
                 python-type = "IntEnum | IntFlag"
                 lower-bound="..."
                 upper-bound="..."
@@ -281,6 +282,10 @@ enum-type
 
     The *optional* **python-type** attribute specifies the underlying
     Python type.
+
+    The *optional* **cpp-type** attribute specifies a C++ to be used for
+    casting values. This can be useful for large values triggering MSVC
+    signedness issues.
 
     The **revision** attribute can be used to specify a revision for each type, easing the
     production of ABI compatible bindings.

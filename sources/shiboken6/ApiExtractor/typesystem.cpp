@@ -961,6 +961,7 @@ public:
     const EnumValueTypeEntry *m_nullValue = nullptr;
     QStringList m_rejectedEnums;
     FlagsTypeEntry *m_flags = nullptr;
+    QString m_cppType;
     TypeSystem::PythonEnumType m_pythonEnumType = TypeSystem::PythonEnumType::Unspecified;
 };
 
@@ -1022,6 +1023,18 @@ FlagsTypeEntry *EnumTypeEntry::flags() const
 {
     S_D(const EnumTypeEntry);
     return d->m_flags;
+}
+
+QString EnumTypeEntry::cppType() const
+{
+    S_D(const EnumTypeEntry);
+    return d->m_cppType;
+}
+
+void EnumTypeEntry::setCppType(const QString &t)
+{
+    S_D(EnumTypeEntry);
+    d->m_cppType = t;
 }
 
 bool EnumTypeEntry::isEnumValueRejected(const QString &name) const
