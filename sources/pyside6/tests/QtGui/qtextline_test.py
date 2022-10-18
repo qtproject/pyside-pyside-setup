@@ -10,7 +10,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtGui import QTextLayout
+from PySide6.QtGui import QTextLayout, QTextOption
 from helper.usesqguiapplication import UsesQGuiApplication
 
 
@@ -27,6 +27,11 @@ class QTextLineTest(UsesQGuiApplication):
         x, cursorPos = line.cursorToX(1)
         self.assertEqual(type(x), float)
         self.assertEqual(type(cursorPos), int)
+
+    def testTextOption(self):
+        """PYSIDE-2088, large enum values causing MSVC issues."""
+        v = QTextOption.IncludeTrailingSpaces | QTextOption.ShowTabsAndSpaces
+        self.assertEqual(v.value, 2147483649)
 
 
 if __name__ == '__main__':

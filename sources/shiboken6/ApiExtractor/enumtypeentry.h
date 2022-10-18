@@ -31,6 +31,9 @@ public:
     void setFlags(FlagsTypeEntry *flags);
     FlagsTypeEntry *flags() const;
 
+    QString cppType() const;
+    void setCppType(const QString &t);
+
     bool isEnumValueRejected(const QString &name) const;
     void addEnumValueRejection(const QString &name);
     QStringList enumValueRejections() const;
