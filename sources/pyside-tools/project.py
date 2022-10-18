@@ -294,9 +294,9 @@ class Project:
                         self._qml_files.append(file)
                     elif file.suffix == ".py":
                         if file.name == "main.py":
-                            self._main_file = file
+                            self.main_file = file
                         self._python_files.append(file)
-        if not self._main_file:
+        if not self.main_file:
             self._find_main_file()
         self._qml_module_check()
 
@@ -311,6 +311,10 @@ class Project:
     @property
     def main_file(self):
         return self._main_file
+
+    @main_file.setter
+    def main_file(self, main_file):
+        self._main_file = main_file
 
     @property
     def python_files(self):
