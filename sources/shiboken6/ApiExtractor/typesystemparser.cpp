@@ -90,6 +90,7 @@ static inline QString positionAttribute() { return QStringLiteral("position"); }
 static inline QString preferredConversionAttribute() { return QStringLiteral("preferred-conversion"); }
 static inline QString preferredTargetLangTypeAttribute() { return QStringLiteral("preferred-target-lang-type"); }
 static inline QString pythonEnumTypeAttribute() { return QStringLiteral("python-type"); }
+static inline QString cppEnumTypeAttribute() { return QStringLiteral("cpp-type"); }
 static inline QString qtMetaTypeAttribute() { return QStringLiteral("qt-register-metatype"); }
 static inline QString removeAttribute() { return QStringLiteral("remove"); }
 static inline QString renameAttribute() { return QStringLiteral("rename"); }
@@ -1561,6 +1562,8 @@ EnumTypeEntry *
                 qCWarning(lcShiboken, "%s",
                           qPrintable(msgInvalidAttributeValue(attribute)));
             }
+        } else if (name == cppEnumTypeAttribute()) {
+            entry->setCppType(attributes->takeAt(i).value().toString());
         } else if (name == extensibleAttribute()) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));

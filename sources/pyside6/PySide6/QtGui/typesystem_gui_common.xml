@@ -301,7 +301,8 @@
   <value-type name="QTextInlineObject"/>
   <value-type name="QTextDocumentFragment"/>
   <value-type name="QTextOption">
-      <enum-type name="Flag" flags="Flags"/>
+      <!-- PYSIDE-2088, Avoid MSVC signedness issues -->
+      <enum-type name="Flag" flags="Flags" cpp-type="unsigned"/>
       <enum-type name="TabType"/>
       <enum-type name="WrapMode"/>
       <value-type name="Tab"/>
