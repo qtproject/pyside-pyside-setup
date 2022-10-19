@@ -82,7 +82,7 @@ private:
     void writeVirtualMethodCppCall(TextStream &s, const AbstractMetaFunctionCPtr &func,
                                    const QString &funcName, const QList<CodeSnip> &snips,
                                    const AbstractMetaArgument *lastArg, const TypeEntry *retType,
-                                   const QString &returnStatement) const;
+                                   const QString &returnStatement, bool hasGil) const;
     static QString virtualMethodReturn(TextStream &s, const ApiExtractorResult &api,
                                        const AbstractMetaFunctionCPtr &func,
                                        const FunctionModificationList &functionModifications);
