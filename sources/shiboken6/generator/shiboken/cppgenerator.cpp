@@ -1195,7 +1195,7 @@ void CppGenerator::writeVirtualMethodCppCall(TextStream &s,
                                              const CodeSnipList &snips,
                                              const AbstractMetaArgument *lastArg,
                                              const TypeEntry *retType,
-                                             const QString &returnStatement) const
+                                             const QString &returnStatement, bool hasGil) const
 {
     if (!snips.isEmpty()) {
         writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionBeginning,
@@ -1203,11 +1203,16 @@ void CppGenerator::writeVirtualMethodCppCall(TextStream &s,
     }
 
     if (func->isAbstract()) {
+        if (!hasGil)
+            s << "Shiboken::GilState gil;\n";
         s << "Shiboken::Errors::setPureVirtualMethodError(\""
             << func->ownerClass()->name() << '.' << funcName << "\");\n"
             << returnStatement << '\n';
         return;
     }
+
+    if (hasGil)
+        s << "gil.release();\n";
 
     if (retType)
         s << "return ";
@@ -1421,7 +1426,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
     s << "if (m_PyMethodCache[" << cacheIndex << "])" << (multi_line ? " {\n" : "\n")
         << indent;
     writeVirtualMethodCppCall(s, func, funcName, snips, lastArg, retType,
-                              returnStatement);
+                              returnStatement, false);
     s << outdent;
     if (multi_line)
         s << "}\n";
@@ -1450,12 +1455,11 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
     s << "static const char *funcName = \"" << propStr << funcName << "\";\n"
         << "Shiboken::AutoDecRef " << PYTHON_OVERRIDE_VAR
         << "(Shiboken::BindingManager::instance().getOverride(this, nameCache, funcName));\n"
-        << "if (" << PYTHON_OVERRIDE_VAR << ".isNull()) {\n"
-        << indent << "gil.release();\n";
+        << "if (" << PYTHON_OVERRIDE_VAR << ".isNull()) {\n" << indent;
     if (useOverrideCaching(func->ownerClass()))
         s << "m_PyMethodCache[" << cacheIndex << "] = true;\n";
     writeVirtualMethodCppCall(s, func, funcName, snips, lastArg, retType,
-                              returnStatement);
+                              returnStatement, true);
     s << outdent << "}\n\n"; //WS
 
     writeConversionRule(s, func, TypeSystem::TargetLangCode, false);
