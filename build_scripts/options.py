@@ -10,11 +10,10 @@ except ModuleNotFoundError:
     from distutils.cmd import Command  # TODO: remove
 
 import sys
-import warnings
 import logging
 from pathlib import Path
 
-from .log import log
+from .log import log, LogLevel
 from .qtinfo import QtInfo
 from .utils import memoize, which
 
@@ -35,14 +34,14 @@ Additional options:
 
 
 def _warn_multiple_option(option):
-    warnings.warn(f'Option "{option}" occurs multiple times on the command line.')
+    log.warning(f'Option "{option}" occurs multiple times on the command line.')
 
 
 def _warn_deprecated_option(option, replacement=None):
     w = f'Option "{option}" is deprecated and may be removed in a future release.'
     if replacement:
         w = f'{w}\nUse "{replacement}" instead.'
-    warnings.warn(w)
+    log.warning(w)
 
 
 class Options(object):
@@ -136,7 +135,9 @@ OPTION = {
     # Legacy, not used any more.
     "JOM": has_option('jom'),
     "MACOS_USE_LIBCPP": has_option("macos-use-libc++"),
-    "QUIET": has_option('quiet', remove=False),
+    "LOG_LEVEL": option_value("log-level", remove=False),
+    "QUIET": has_option('quiet'),
+    "VERBOSE_BUILD": has_option('verbose-build'),
     "SNAPSHOT_BUILD": has_option("snapshot-build"),
     "LIMITED_API": option_value("limited-api"),
     "PACKAGE_TIMESTAMP": option_value("package-timestamp"),
@@ -179,7 +180,9 @@ class CommandMixin(object):
         ('skip-cmake', None, 'Skip CMake step'),
         ('skip-make-install', None, 'Skip install step'),
         ('skip-packaging', None, 'Skip packaging step'),
+        ('log-level=', None, 'Log level of the build.'),
         ('verbose-build', None, 'Verbose build'),
+        ('quiet', None, 'Quiet build'),
         ('sanitize-address', None, 'Build with address sanitizer'),
         ('shorter-paths', None, 'Use shorter paths'),
         ('doc-build-online', None, 'Build online documentation'),
@@ -240,6 +243,7 @@ class CommandMixin(object):
         self.skip_cmake = False
         self.skip_make_install = False
         self.skip_packaging = False
+        self.log_level = "info"
         self.verbose_build = False
         self.sanitize_address = False
         self.snapshot_build = False
@@ -351,9 +355,42 @@ class CommandMixin(object):
         OPTION['SKIP_CMAKE'] = self.skip_cmake
         OPTION['SKIP_MAKE_INSTALL'] = self.skip_make_install
         OPTION['SKIP_PACKAGING'] = self.skip_packaging
+        # Logging options:
+        # 'quiet' and 'verbose-build' are deprecated,
+        # log-level has higher priority when used.
+        OPTION['LOG_LEVEL'] = self.log_level
         OPTION['VERBOSE_BUILD'] = self.verbose_build
-        if self.verbose_build:
-            log.setLevel(logging.DEBUG)
+        # The OPTION["QUIET"] doesn't need to be initialized with a value
+        # because is an argument that it will not be removed due to being
+        # a setuptools argument as well.
+
+        # By default they are False, so we check if they changed with xor
+        if bool(OPTION["QUIET"]) != bool(OPTION["VERBOSE_BUILD"]):
+            log.warn("Using --quiet and --verbose-build is deprecated. "
+                     "Please use --log-level=quiet or --log-level=verbose instead.")
+            # We assign a string value instead of the enum
+            # because is what we get from the command line.
+            # Later we assign the enum
+            if OPTION["QUIET"]:
+                OPTION["LOG_LEVEL"] = "quiet"
+            elif OPTION["VERBOSE_BUILD"]:
+                OPTION["LOG_LEVEL"] = "verbose"
+
+        if OPTION["LOG_LEVEL"] not in ("quiet", "info", "verbose"):
+            log.error(f"Invalid value for log level: '--log-level={OPTION['LOG_LEVEL']}'. "
+                      "Use 'quiet', 'info', or 'verbose'.")
+            sys.exit(-1)
+        else:
+            if OPTION["LOG_LEVEL"] == "quiet":
+                OPTION["LOG_LEVEL"] = LogLevel.QUIET
+                log.setLevel(logging.ERROR)
+            elif OPTION["LOG_LEVEL"] == "info":
+                OPTION["LOG_LEVEL"] = LogLevel.INFO
+                log.setLevel(logging.INFO)
+            elif OPTION["LOG_LEVEL"] == "verbose":
+                OPTION["LOG_LEVEL"] = LogLevel.VERBOSE
+                log.setLevel(logging.DEBUG)
+
         OPTION['SANITIZE_ADDRESS'] = self.sanitize_address
         OPTION['SHORTER_PATHS'] = self.shorter_paths
         OPTION['DOC_BUILD_ONLINE'] = self.doc_build_online

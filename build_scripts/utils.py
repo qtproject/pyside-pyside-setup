@@ -119,7 +119,7 @@ def copyfile(src, dst, force=True, _vars=None, force_copy_symlink=False,
                 log.info(f"{dst} is up to date.")
                 return dst
 
-        log.info(f"Copying file\n  {src} to\n  {dst}.")
+        log.debug(f"Copying file\n  {src} to\n  {dst}.")
         shutil.copy2(src, dst)
         if make_writable_by_owner:
             make_file_writable_by_owner(dst)
@@ -193,7 +193,7 @@ def copydir(src, dst, _filter=None, ignore=None, force=True, recursive=True, _va
                  f"filter={_filter}. ignore={ignore}.")
         return []
 
-    log.info(f"Copying tree\n  {src} to\n  {dst}. filter={_filter}. ignore={ignore}.")
+    log.debug(f"Copying tree\n  {src} to\n  {dst}. filter={_filter}. ignore={ignore}.")
 
     names = os.listdir(src)
 
@@ -273,7 +273,7 @@ def run_process(args, initial_env=None):
     No output is captured.
     """
     command = " ".join([(" " in x and f'"{x}"' or x) for x in args])
-    log.info(f"In directory {Path.cwd()}:\n\tRunning command:  {command}")
+    log.debug(f"In directory {Path.cwd()}:\n\tRunning command:  {command}")
 
     if initial_env is None:
         initial_env = os.environ
@@ -765,7 +765,7 @@ def copy_icu_libs(patchelf, destination_lib_dir):
         paths = ldd_get_paths_for_dependencies(icu_regex, dependencies=dependencies)
         if not paths:
             raise RuntimeError("Failed to find the necessary ICU libraries required by QtCore.")
-        log.info('Copying the detected ICU libraries required by QtCore.')
+        log.debug('Copying the detected ICU libraries required by QtCore.')
 
         destination_lib_dir = Path(destination_lib_dir)
         if not destination_lib_dir.exists():

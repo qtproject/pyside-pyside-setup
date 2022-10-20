@@ -29,7 +29,7 @@ from setuptools.command.install_lib import install_lib as _install_lib
 from setuptools.command.install_scripts import install_scripts  # noqa: preload only
 
 # Use the distutils implementation within setuptools (but not before)
-from .log import log
+from .log import log, LogLevel
 from setuptools.errors import SetupError
 
 from .build_info_collector import BuildInfoCollectorMixin
@@ -572,14 +572,16 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
 
         # Build module
         cmake_cmd = [str(OPTION["CMAKE"])]
-        if OPTION["QUIET"]:
+        cmake_quiet_build = 1
+        cmake_rule_messages = 0
+        if OPTION["LOG_LEVEL"] == LogLevel.VERBOSE:
             # Pass a special custom option, to allow printing a lot less information when doing
             # a quiet build.
-            cmake_cmd.append('-DQUIET_BUILD=1')
+            cmake_quiet_build = 0
             if self.make_generator == "Unix Makefiles":
                 # Hide progress messages for each built source file.
                 # Doesn't seem to work if set within the cmake files themselves.
-                cmake_cmd.append('-DCMAKE_RULE_MESSAGES=0')
+                cmake_rule_messages = 1
 
         if OPTION["UNITY"]:
             cmake_cmd.append("-DCMAKE_UNITY_BUILD=ON")
@@ -596,6 +598,8 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
             # Record the minimum/maximum Python version for later use in Shiboken.__init__
             f"-DMINIMUM_PYTHON_VERSION={get_allowed_python_versions()[0]}",
             f"-DMAXIMUM_PYTHON_VERSION={get_allowed_python_versions()[-1]}",
+            f"-DQUIET_BUILD={cmake_quiet_build}",
+            f"-DCMAKE_RULE_MESSAGES={cmake_rule_messages}",
             str(module_src_dir)
         ]
 
@@ -692,8 +696,11 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
                              "(default yes if applicable, i.e. Python "
                              "version >= 3.7 and release build if on Windows)")
 
-        if OPTION["VERBOSE_BUILD"]:
+        if OPTION["LOG_LEVEL"] == LogLevel.VERBOSE:
             cmake_cmd.append("-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON")
+        else:
+            cmake_cmd.append("-DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF")
+
 
         if OPTION['COMPILER_LAUNCHER']:
             compiler_launcher = OPTION['COMPILER_LAUNCHER']
@@ -830,7 +837,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
         cmd_make = [str(self.make_path)]
         if OPTION["JOBS"]:
             cmd_make.append(OPTION["JOBS"])
-        if OPTION["VERBOSE_BUILD"] and self.make_generator == "Ninja":
+        if OPTION["LOG_LEVEL"] == LogLevel.VERBOSE and self.make_generator == "Ninja":
             cmd_make.append("-v")
         if run_process(cmd_make) != 0:
             raise SetupError(f"Error compiling {extension}")
@@ -848,7 +855,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
                 if found:
                     log.info("Generating Shiboken documentation")
                     make_doc_cmd = [str(self.make_path), "doc"]
-                    if OPTION["VERBOSE_BUILD"] and self.make_generator == "Ninja":
+                    if OPTION["LOG_LEVEL"] == LogLevel.VERBOSE and self.make_generator == "Ninja":
                         make_doc_cmd.append("-v")
                     if run_process(make_doc_cmd) != 0:
                         raise SetupError("Error generating documentation "
@@ -886,7 +893,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
         from the build dir to the install dir (the virtualenv site-packages for example).
         """
         try:
-            log.info("\nPreparing setup tools build directory.\n")
+            log.info("Preparing setup tools build directory.")
             _vars = {
                 "site_packages_dir": self.site_packages_dir,
                 "sources_dir": self.sources_dir,
@@ -1080,7 +1087,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
         recursively)"""
         return self._find_shared_libraries(initial_path, recursive=True)
 
-    def update_rpath(self, package_path, executables, libexec=False):
+    def update_rpath(self, package_path, executables, libexec=False, message=None):
         ROOT = '@loader_path' if sys.platform == 'darwin' else '$ORIGIN'
         QT_PATH = '/../lib' if libexec else '/Qt/lib'
 
@@ -1127,7 +1134,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
             if not executable.exists():
                 continue
             rpath_cmd(executable)
-            log.info(f"{message} {executable}.")
+            log.debug(f"{message} {executable}.")
 
     def update_rpath_for_linux_plugins(
             self,
@@ -1164,7 +1171,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
 
             linux_fix_rpaths_for_library(self._patchelf_path, plugin, rpath_value,
                                          override=True)
-            log.info(f"Patched rpath to '{rpath_value}' in {plugin}.")
+            log.debug(f"Patched rpath to '{rpath_value}' in {plugin}.")
 
     def update_rpath_for_linux_qt_libraries(self, qt_lib_dir):
         # Ensure that Qt libs and ICU libs have $ORIGIN in their rpath.
@@ -1183,7 +1190,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
                 continue
 
             linux_fix_rpaths_for_library(self._patchelf_path, library, rpath_value, override=True)
-            log.info(f"Patched rpath to '{rpath_value}' in {library}.")
+            log.debug(f"Patched rpath to '{rpath_value}' in {library}.")
 
 
 class PysideRstDocs(Command, CommandMixin):
@@ -1245,8 +1252,20 @@ class PysideRstDocs(Command, CommandMixin):
                 "-DDOC_OUTPUT_FORMAT=html",
                 "-DFULLDOCSBUILD=0",
             ]
-            if OPTION["QUIET"]:
-                cmake_cmd.append('-DQUIET_BUILD=1')
+
+            cmake_quiet_build = 1
+            cmake_message_log_level = "STATUS"
+
+            # Define log level
+            if OPTION["LOG_LEVEL"] == LogLevel.VERBOSE:
+                cmake_quiet_build = 0
+                cmake_message_log_level = "VERBOSE"
+            elif OPTION["LOG_LEVEL"] == LogLevel.QUIET:
+                cmake_message_log_level = "ERROR"
+
+            cmake_cmd.append(f"-DQUIET_BUILD={cmake_quiet_build}")
+            cmake_cmd.append(f"-DCMAKE_MESSAGE_LOG_LEVEL={cmake_message_log_level}")
+
             if run_process(cmake_cmd) != 0:
                 raise SetupError(f"Error running CMake for {self.doc_dir}")
 

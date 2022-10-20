@@ -5,6 +5,7 @@ import fnmatch
 import sys
 from pathlib import Path
 
+from ..log import log
 from ..config import config
 from ..options import OPTION
 from ..utils import copydir, copyfile, copy_qt_metatypes, makefile
@@ -41,6 +42,7 @@ def _copy_gui_executable(name, _vars=None):
 def prepare_packages_posix(pyside_build, _vars, cross_build=False):
     executables = []
     libexec_executables = []
+    log.info("Copying files...")
 
     destination_dir = Path("{st_build_dir}/{st_package_name}".format(**_vars))
     destination_qt_dir = destination_dir / "Qt"

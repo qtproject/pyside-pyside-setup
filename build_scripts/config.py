@@ -1,7 +1,7 @@
 # Copyright (C) 2018 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
-from .log import log
+from .log import log, LogLevel
 from pathlib import Path
 
 from . import PYSIDE, PYSIDE_MODULE, SHIBOKEN
@@ -77,7 +77,7 @@ class Config(object):
                     ext_modules=None,
                     setup_script_dir=None,
                     cmake_toolchain_file=None,
-                    quiet=False,
+                    log_level=LogLevel.INFO,
                     qt_install_path: Path = None):
         """
         Sets up the global singleton config which is used in many parts
@@ -117,7 +117,7 @@ class Config(object):
         setup_kwargs['version'] = package_version
         setup_kwargs['python_requires'] = ">=3.7, <3.12"
 
-        if quiet:
+        if log_level == LogLevel.QUIET:
             # Tells distutils / setuptools to be quiet, and only print warnings or errors.
             # Makes way less noise in the terminal when building.
             setup_kwargs['verbose'] = 0

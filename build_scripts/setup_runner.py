@@ -15,7 +15,7 @@ from build_scripts.main import (cmd_class_dict, get_package_version,
                                 get_setuptools_extension_modules)
 from build_scripts.options import ADDITIONAL_OPTIONS, OPTION
 from build_scripts.utils import run_process, find_qt_install_path
-from build_scripts.log import log
+from build_scripts.log import log, LogLevel
 
 
 class SetupRunner(object):
@@ -191,13 +191,17 @@ class SetupRunner(object):
                            ext_modules=get_setuptools_extension_modules(),
                            setup_script_dir=self.setup_script_dir,
                            cmake_toolchain_file=OPTION["CMAKE_TOOLCHAIN_FILE"],
-                           quiet=OPTION["QUIET"],
+                           log_level=OPTION["LOG_LEVEL"],
                            qt_install_path=qt_install_path)
 
         # Enable logging for both the top-level invocation of setup.py
         # as well as for child invocations. We we now use
-        if not OPTION["QUIET"]:
+        if OPTION["LOG_LEVEL"] == LogLevel.VERBOSE:
+            log.setLevel(logging.DEBUG)
+        elif OPTION["LOG_LEVEL"] == LogLevel.QUIET:
             log.setLevel(logging.ERROR)
+        elif OPTION["LOG_LEVEL"] == LogLevel.INFO:
+            log.setLevel(logging.INFO)
 
         # This is an internal invocation of setup.py, so start actual
         # build.

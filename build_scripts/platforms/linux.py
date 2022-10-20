@@ -3,6 +3,7 @@
 
 from pathlib import Path
 
+from ..log import log
 from ..config import config
 from ..options import OPTION
 from ..utils import (copy_icu_libs, copydir, copyfile, find_files_using_glob,
@@ -19,6 +20,8 @@ def prepare_standalone_package_linux(pyside_build, _vars, cross_build=False):
     copy_translations = True
     copy_qt_conf = True
     should_copy_icu_libs = True
+
+    log.info("Copying files...")
 
     if config.is_internal_shiboken_generator_build():
         constrain_modules = ["Core", "Network", "Xml", "XmlPatterns"]

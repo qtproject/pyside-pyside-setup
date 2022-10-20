@@ -7,6 +7,8 @@ import os
 import tempfile
 
 from pathlib import Path
+
+from ..log import log
 from ..config import config
 from ..options import OPTION
 from ..utils import (copydir, copyfile, copy_qt_metatypes,
@@ -23,6 +25,7 @@ def prepare_packages_win32(pyside_build, _vars):
 
     destination_dir = Path("{st_build_dir}/{st_package_name}".format(**_vars))
     destination_qt_dir = destination_dir
+    log.info("Copying files...")
 
     # <install>/lib/site-packages/{st_package_name}/* ->
     # <setup>/{st_package_name}
