@@ -113,12 +113,7 @@ def _get_flag_enum_option():
     if pyminver and pyminver >= (3, 11):
         warnings.warn(f"\n    *** Python is at version {'.'.join(map(str, pyminver))} now. "
                       f"The files bufferprocs_py37.(cpp|h) should be removed ASAP! ***")
-    # PYSIDE-1735: Emit a warning when we may update enum_310.py
-    if pymaxver and pymaxver > (3, 10):
-        if sys.version_info >= (3, 11, 0) and sys.version_info.releaselevel == "final":
-            warnings.warn(f"\n    *** Python is at version {'.'.join(map(str, pymaxver))} now. "
-                          f"Please check if enum_310.py should be updated! ***")
-    # PYSIDE-1735: Emit a warning when we may update enum_310.py
+    # PYSIDE-1735: Emit a warning when we should maybe evict forgiveness mode
     if ver[:2] >= (7, 0):
         warnings.warn(f"\n    *** PySide is at version {'.'.join(map(str, ver[:2]))} now. "
                       f"Please drop the forgiving Enum behavior in `mangled_type_getattro` ***")

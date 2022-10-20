@@ -148,13 +148,8 @@ from shibokensupport.signature import importhandler
 from shibokensupport.signature.lib import enum_sig
 from shibokensupport.signature.lib import pyi_generator
 from shibokensupport.signature.lib import tool
-if sys.version_info[:2] < (3, 10):
-    # PYSIDE-1735: Use the faster and more complete enum implementation.
-    from shibokensupport import enum_310 as enum
-    sys.modules["enum"] = enum
-    # compatibility
-    if sys.version_info[:2] < (3, 8):
-        enum.Enum._convert = classmethod(enum.EnumMeta._convert_)
+
+import enum
 
 if "PySide6" in sys.modules:
     # We publish everything under "PySide6.support", again.
