@@ -354,6 +354,17 @@ static void SbkDeallocWrapperCommon(PyObject *pyObj, bool canDelete)
     }
 }
 
+static inline PyObject *_Sbk_NewVarObject(PyTypeObject *type)
+{
+    // PYSIDE-1970: Support __slots__, implemented by PyVarObject
+    auto const baseSize = sizeof(SbkObject);
+    auto varCount = Py_SIZE(type);
+    auto *self = PyObject_GC_NewVar(PyObject, type, varCount);
+    if (varCount)
+        std::memset(reinterpret_cast<char *>(self) + baseSize, 0, varCount * sizeof(void *));
+    return self;
+}
+
 void SbkDeallocWrapper(PyObject *pyObj)
 {
     SbkDeallocWrapperCommon(pyObj, true);
@@ -433,7 +444,7 @@ PyObject *MakeQAppWrapper(PyTypeObject *type)
     }
 
     // monitoring the last application state
-    PyObject *qApp_curr = type != nullptr ? PyObject_GC_New(PyObject, type) : Py_None;
+    PyObject *qApp_curr = type != nullptr ? _Sbk_NewVarObject(type) : Py_None;
     static PyObject *builtins = PyEval_GetBuiltins();
     if (PyDict_SetItem(builtins, Shiboken::PyName::qApp(), qApp_curr) < 0)
         return nullptr;
@@ -538,11 +549,11 @@ static PyTypeObject *SbkObjectType_tp_new(PyTypeObject *metatype, PyObject *args
     return newType;
 }
 
-static PyObject *_setupNew(SbkObject *self, PyTypeObject *subtype)
+static PyObject *_setupNew(PyObject *obSelf, PyTypeObject *subtype)
 {
     auto *obSubtype = reinterpret_cast<PyObject *>(subtype);
     auto *sbkSubtype = subtype;
-    auto *obSelf = reinterpret_cast<PyObject *>(self);
+    auto *self = reinterpret_cast<SbkObject *>(obSelf);
 
     Py_INCREF(obSubtype);
     auto d = new SbkObjectPrivate;
@@ -566,18 +577,19 @@ static PyObject *_setupNew(SbkObject *self, PyTypeObject *subtype)
     return obSelf;
 }
 
-PyObject *SbkObject_tp_new(PyTypeObject *subtype, PyObject *, PyObject *)
+PyObject *SbkObject_tp_new(PyTypeObject *subtype, PyObject * /* args */, PyObject * /* kwds */)
 {
-    SbkObject *self = PyObject_GC_New(SbkObject, subtype);
+    PyObject *self = _Sbk_NewVarObject(subtype);
     return _setupNew(self, subtype);
 }
 
 PyObject *SbkQApp_tp_new(PyTypeObject *subtype, PyObject *, PyObject *)
 {
-    auto self = reinterpret_cast<SbkObject *>(MakeQAppWrapper(subtype));
+    auto *obSelf = MakeQAppWrapper(subtype);
+    auto *self = reinterpret_cast<SbkObject *>(obSelf);
     if (self == nullptr)
         return nullptr;
-    auto ret = _setupNew(self, subtype);
+    auto ret = _setupNew(obSelf, subtype);
     auto priv = self->d;
     priv->isQAppSingleton = 1;
     return ret;
