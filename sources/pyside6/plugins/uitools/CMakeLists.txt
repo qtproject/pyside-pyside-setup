@@ -20,11 +20,7 @@ if(CMAKE_HOST_UNIX AND NOT CYGWIN)
 endif()
 add_definitions(-DQT_STATICPLUGIN)
 
-if(${QT_MAJOR_VERSION} GREATER_EQUAL 6)
-    set_property(TARGET pyside6 PROPERTY CXX_STANDARD 17)
-else()
-    set_property(TARGET pyside6 PROPERTY CXX_STANDARD 11)
-endif()
+set_property(TARGET pyside6 PROPERTY CXX_STANDARD 17)
 
 target_link_libraries(uiplugin
                       Qt::Core
