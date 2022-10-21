@@ -257,15 +257,9 @@ macro(shiboken_check_if_limited_api)
     endif()
 
     if(FORCE_LIMITED_API STREQUAL "yes")
-        if (${PYTHON_VERSION_MAJOR} EQUAL 3 AND ${PYTHON_VERSION_MINOR} GREATER 4)
-            # GREATER_EQUAL is available only from cmake 3.7 on. We mean python 3.5 .
-            set(PYTHON_LIMITED_API 1)
-        endif()
+        set(PYTHON_LIMITED_API 1)
         if(WIN32)
-            if (${PYTHON_VERSION_MAJOR} EQUAL 3 AND ${PYTHON_VERSION_MINOR} GREATER 4)
-                # PYSIDE-560: XXX maybe add an option to setup.py as override
-                set(SHIBOKEN_PYTHON_LIBRARIES ${PYTHON_LIMITED_LIBRARIES})
-            endif()
+            set(SHIBOKEN_PYTHON_LIBRARIES ${PYTHON_LIMITED_LIBRARIES})
         endif()
     endif()
 endmacro()
