@@ -546,13 +546,13 @@ static PyObject *adjustFuncName(const char *func_name)
     if (prop_name) {
         auto _prop_name = String::toCString(prop_name);
         if (is_class_prop)
-            sprintf(_buf, "%s.__dict__['%s'].fset", _path, _prop_name);
+            snprintf(_buf, sizeof(_buf), "%s.__dict__['%s'].fset", _path, _prop_name);
         else
-            sprintf(_buf, "%s.%s.fset", _path, _prop_name);
+            snprintf(_buf, sizeof(_buf), "%s.%s.fset", _path, _prop_name);
     }
     else {
         auto _name = String::toCString(name);
-        sprintf(_buf, "%s.%s", _path, _name);
+        snprintf(_buf, sizeof(_buf), "%s.%s", _path, _name);
     }
     return String::fromCString(_buf);
 }
