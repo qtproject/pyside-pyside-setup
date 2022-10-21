@@ -381,11 +381,12 @@ static const char *utf8FastPath(PyObject *str)
 const char *_PepUnicode_AsString(PyObject *str)
 {
     /*
-     * We need to keep the string alive but cannot borrow the Python object.
-     * Ugly easy way out: We re-code as an interned bytes string. This
-     * produces a pseudo-leak as long as there are new strings.
-     * Typically, this function is used for name strings, and the dict size
-     * will not grow so much.
+     * This function is the surrogate for PyUnicode_AsUTF8, which keeps the data
+     * in the unicode object as long as that object exists.
+     *
+     * The function does too much if not optimized by utf8, because it keeps the
+     * string alive, unconditionally.
+     * We should not rely on this behavior and think of PyUnicode_AsUTF8, only.
      */
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
