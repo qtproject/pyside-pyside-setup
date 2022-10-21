@@ -110,6 +110,7 @@ AbstractMetaFunctionCList DocParser::documentableFunctions(const AbstractMetaCla
         if (DocParser::skipForQuery(result.at(i)) || result.at(i)->isUserAdded())
             result.removeAt(i);
     }
+    result.append(metaClass->cppSignalFunctions());
     return result;
 }
 
