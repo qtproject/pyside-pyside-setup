@@ -71,7 +71,7 @@ Time::toString() const
     if (m_is_null)
         return Str();
     char buffer[13];
-    sprintf(buffer, "%02d:%02d:%02d.%03d", m_hour, m_minute, m_second, m_msec);
+    snprintf(buffer, sizeof(buffer), "%02d:%02d:%02d.%03d", m_hour, m_minute, m_second, m_msec);
     return Str(buffer);
 }
 
