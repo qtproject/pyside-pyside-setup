@@ -276,9 +276,11 @@ static void signalFree(void *vself)
 {
     auto pySelf = reinterpret_cast<PyObject *>(vself);
     auto self = reinterpret_cast<PySideSignal *>(vself);
-    delete self->data->signalArguments;
-    delete self->data;
-    self->data = nullptr;
+    if (self->data) {
+        delete self->data->signalArguments;
+        delete self->data;
+        self->data = nullptr;
+    }
     Py_XDECREF(self->homonymousMethod);
     self->homonymousMethod = nullptr;
 
