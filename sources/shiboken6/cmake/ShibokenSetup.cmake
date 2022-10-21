@@ -10,12 +10,8 @@ option(DISABLE_DOCSTRINGS "Disable documentation extraction." FALSE)
 shiboken_internal_disable_pkg_config_if_needed()
 shiboken_internal_detect_if_cross_building()
 
-if(SHIBOKEN_IS_CROSS_BUILD AND CMAKE_VERSION VERSION_LESS "3.17")
-    # TODO: We rely on FindPython shipped with CMake 3.17+ to provide the value of Python_SOABI.
-    # It might be possible to extract the Python_SOABI manually with CMake 3.16 if we reimplement
-    # the logic that FindPython does in 3.17 ourselves.
-    message(FATAL_ERROR "You need CMake version 3.17 or greater to cross-build.")
-endif()
+# Note: For cross building, we rely on FindPython shipped with CMake 3.17+ to
+# provide the value of Python_SOABI.
 
 shiboken_internal_decide_parts_to_build()
 shiboken_internal_find_host_shiboken_tools()

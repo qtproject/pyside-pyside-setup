@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.18)
 
 if(BUILD_TESTS)
     find_package(Qt${QT_MAJOR_VERSION}Test 6.0 REQUIRED)
