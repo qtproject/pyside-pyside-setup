@@ -1956,13 +1956,14 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
         return nullptr;
     }
 
+    AbstractMetaFunction::Flags flags;
     auto *metaFunction = new AbstractMetaFunction(functionName);
     const QByteArray cSignature = signature.toUtf8();
     const QString unresolvedSignature =
         QString::fromUtf8(QMetaObject::normalizedSignature(cSignature.constData()));
     metaFunction->setUnresolvedSignature(unresolvedSignature);
     if (functionItem->isHiddenFriend())
-        metaFunction->setFlags(AbstractMetaFunction::Flag::HiddenFriend);
+        flags.setFlag(AbstractMetaFunction::Flag::HiddenFriend);
     metaFunction->setSourceLocation(functionItem->sourceLocation());
     if (deprecated)
         *metaFunction += AbstractMetaFunction::Deprecated;
@@ -2031,6 +2032,13 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
     }
 
     ArgumentList arguments = functionItem->arguments();
+    // Add private signals for documentation purposes
+    if (!arguments.isEmpty()
+        && m_apiExtractorFlags.testFlag(ApiExtractorFlag::UsePySideExtensions)
+        && arguments.constLast()->type().qualifiedName().constLast() == u"QPrivateSignal") {
+        flags.setFlag(AbstractMetaFunction::Flag::PrivateSignal);
+        arguments.removeLast();
+    }
 
     if (arguments.size() == 1) {
         ArgumentModelItem arg = arguments.at(0);
@@ -2157,6 +2165,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
             }
         }
     }
+    metaFunction->setFlags(flags);
     return metaFunction;
 }
 

@@ -127,7 +127,8 @@ public:
         OperatorTrailingClassArgumentRemoved = 0x2,
         OperatorClassArgumentByValue = 0x4, // The removed class argument was passed by value
         InheritedFromTemplate = 0x8, // Inherited from a template in metabuilder
-        HiddenFriend = 0x10
+        HiddenFriend = 0x10,
+        PrivateSignal = 0x20 // Private Qt signal (cannot emit from client code)
     };
     Q_DECLARE_FLAGS(Flags, Flag)
 
