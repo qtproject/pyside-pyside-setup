@@ -247,9 +247,9 @@ void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classC
             continue;
 
         if (func->isStatic())
-            s <<  ".. staticmethod:: ";
+            s <<  ".. py:staticmethod:: ";
         else
-            s <<  ".. method:: ";
+            s <<  ".. py:method:: ";
 
         writeFunction(s, metaClass, func, !uniqueFunctions.contains(func->name()));
         uniqueFunctions.append(func->name());
@@ -685,6 +685,10 @@ void QtDocGenerator::writeFunction(TextStream& s, const AbstractMetaClass* cppCl
         Indentation indentation(s);
         if (!indexed)
             s << "\n:noindex:";
+        if (func->attributes().testFlag(AbstractMetaFunction::Attribute::FinalCppMethod))
+            s << "\n:final:";
+        else if (func->isAbstract())
+            s << "\n:abstractmethod:";
         s << "\n\n";
         writeFunctionParametersType(s, cppClass, func);
         const auto version = versionOf(func->typeEntry());
