@@ -345,9 +345,9 @@ macro(shiboken_find_required_python)
 endmacro()
 
 macro(shiboken_validate_python_version)
-    if(PYTHON_VERSION_MAJOR EQUAL "3" AND PYTHON_VERSION_MINOR LESS "5")
+    if(PYTHON_VERSION_MAJOR EQUAL "3" AND PYTHON_VERSION_MINOR LESS "7")
             message(FATAL_ERROR
-                   "Shiboken requires Python 3.5+.")
+                   "Shiboken requires Python 3.7+.")
     endif()
 endmacro()
 

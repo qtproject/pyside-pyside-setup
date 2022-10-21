@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.16)
-cmake_policy(VERSION 3.16)
+cmake_minimum_required(VERSION 3.18)
+cmake_policy(VERSION 3.18)
 
 # Enable policy to run automoc on generated files.
 if(POLICY CMP0071)
