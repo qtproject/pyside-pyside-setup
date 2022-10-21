@@ -256,7 +256,7 @@ macro(shiboken_check_if_limited_api)
             OUTPUT_STRIP_TRAILING_WHITESPACE)
     endif()
 
-    if(FORCE_LIMITED_API STREQUAL "yes")
+    if(FORCE_LIMITED_API)
         set(PYTHON_LIMITED_API 1)
         if(WIN32)
             set(SHIBOKEN_PYTHON_LIBRARIES ${PYTHON_LIMITED_LIBRARIES})
