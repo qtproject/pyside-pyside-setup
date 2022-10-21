@@ -114,7 +114,6 @@
   <rejection class="*" argument-type="^Q\w+Private( const)?\&amp;$"/>
   <!-- Note: "QHelpModel(QHelpEnginePrivate*)" is needed -->
   <rejection class="*" argument-type="^Q[^H]\w+Private( const)?\*$"/>
-  <rejection class="*" argument-type="^.*::QPrivateSignal$"/>
   <rejection class="*" argument-type="Qt::Initialization"/>
 
   <rejection class="*" argument-type="FILE*"/>
