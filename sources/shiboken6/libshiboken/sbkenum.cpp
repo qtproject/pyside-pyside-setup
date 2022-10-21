@@ -404,6 +404,12 @@ static PyObject *PyFlag{};
 static PyObject *PyIntFlag{};
 static PyObject *PyFlag_KEEP{};
 
+bool PyEnumMeta_Check(PyObject *ob)
+{
+    return Py_TYPE(ob) == (useOldEnum ? SbkEnumType_TypeF()
+                                      : reinterpret_cast<PyTypeObject *>(PyEnumMeta));
+}
+
 PyTypeObject *getPyEnumMeta()
 {
     if (PyEnumMeta)
