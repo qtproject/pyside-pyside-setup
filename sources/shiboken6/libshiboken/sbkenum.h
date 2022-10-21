@@ -10,6 +10,8 @@
 extern "C"
 {
 
+LIBSHIBOKEN_API bool PyEnumMeta_Check(PyObject *ob);
+
 /// exposed for the signature module
 LIBSHIBOKEN_API void init_enum();
 
@@ -76,6 +78,7 @@ namespace Enum
     LIBSHIBOKEN_API PyTypeObject *newTypeWithName(const char *name, const char *cppName,
                                                   PyTypeObject *numbers_fromFlag=nullptr);
     LIBSHIBOKEN_API const char *getCppName(PyTypeObject *type);
+    LIBSHIBOKEN_API PyObject *getCppNameNew(PyTypeObject *type);
 
     LIBSHIBOKEN_API EnumValueType getValue(PyObject *enumItem);
     LIBSHIBOKEN_API PyObject *getEnumItemFromValue(PyTypeObject *enumType,
