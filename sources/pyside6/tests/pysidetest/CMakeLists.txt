@@ -1,7 +1,7 @@
 project(pysidetest)
 project(testbinding)
 
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.18)
 
 set(QT_USE_QTCORE 1)
 # no more supported: include(${QT_USE_FILE})
