@@ -2035,6 +2035,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
     // Add private signals for documentation purposes
     if (!arguments.isEmpty()
         && m_apiExtractorFlags.testFlag(ApiExtractorFlag::UsePySideExtensions)
+        && functionItem->functionType() == CodeModel::Signal
         && arguments.constLast()->type().qualifiedName().constLast() == u"QPrivateSignal") {
         flags.setFlag(AbstractMetaFunction::Flag::PrivateSignal);
         arguments.removeLast();
