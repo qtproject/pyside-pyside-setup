@@ -132,7 +132,7 @@ def prepare_packages_posix(self, _vars, cross_build=False):
 
         lib_exec_filters = []
         if not OPTION['NO_QT_TOOLS']:
-            lib_exec_filters.extend(['uic', 'rcc', 'qmltyperegistrar'])
+            lib_exec_filters.extend(['uic', 'rcc', 'qmltyperegistrar', 'qmlimportscanner'])
             executables.extend(copydir(
                 "{install_dir}/bin/",
                 "{st_build_dir}/{st_package_name}",
