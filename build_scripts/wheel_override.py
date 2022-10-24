@@ -59,7 +59,7 @@ class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
         # the initial cpython version we support.
         limited_api_enabled = OPTION["LIMITED_API"] == 'yes'
         if limited_api_enabled:
-            self.py_limited_api = "cp36"
+            self.py_limited_api = "cp37"
 
         self._package_version = get_package_version()
 
