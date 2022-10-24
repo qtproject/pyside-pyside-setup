@@ -74,6 +74,10 @@ def qmltyperegistrar():
     qt_tool_wrapper("qmltyperegistrar", sys.argv[1:], True)
 
 
+def qmlimportscanner():
+    qt_tool_wrapper("qmlimportscanner", sys.argv[1:], True)
+
+
 def qmllint():
     qt_tool_wrapper("qmllint", sys.argv[1:])
 

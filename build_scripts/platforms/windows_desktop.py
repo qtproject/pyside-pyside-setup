@@ -132,7 +132,7 @@ def prepare_packages_win32(self, _vars):
         if not OPTION['NO_QT_TOOLS']:
             filters.extend(["lrelease.exe", "lupdate.exe", "uic.exe",
                             "rcc.exe", "qmllint.exe", "qmltyperegistrar.exe"
-                            "assistant.exe", "designer.exe",
+                            "assistant.exe", "designer.exe", "qmlimportscanner.exe",
                             "linguist.exe", "qmlformat.exe", "qmlls.exe"])
         copydir(
             "{install_dir}/bin/",

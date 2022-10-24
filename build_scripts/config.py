@@ -201,7 +201,7 @@ class Config(object):
             _pyside_tools = ["uic", "rcc", "assistant", "designer", "linguist",
                              "lupdate", "lrelease", "genpyi", "metaobjectdump",
                              "project", "qml", "qmltyperegistrar", "qmllint", "qmlformat", "qmlls",
-                             "qtpy2cpp", "deploy"]
+                             "qtpy2cpp", "deploy", "qmlimportscanner"]
 
             setup_kwargs['entry_points'] = {
                 'console_scripts': [f'{PYSIDE}-{tool} = {package_name}.scripts.pyside_tool:{tool}'

@@ -205,6 +205,7 @@ def wheel_pyside6_essentials() -> Tuple[SetupData, List[ModuleData]]:
             "pyside6-metaobjectdump = PySide6.scripts.pyside_tool:metaobjectdump",
             "pyside6-project = PySide6.scripts.pyside_tool:project",
             "pyside6-qmltyperegistrar = PySide6.scripts.pyside_tool:qmltyperegistrar",
+            "pyside6-qmlimportscanner = PySide6.scripts.pyside_tool:qmlimportscanner",
             "pyside6-qmllint = PySide6.scripts.pyside_tool:qmllint",
             "pyside6-qml = PySide6.scripts.pyside_tool:qml",
             "pyside6-qmlformat = PySide6.scripts.pyside_tool:qmlformat",
