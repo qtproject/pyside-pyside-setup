@@ -47,7 +47,8 @@ public:
         HasRejectedDefaultConstructor = 0x00000020,
 
         FinalCppClass                 = 0x00000100,
-        Deprecated                    = 0x00000200
+        Deprecated                    = 0x00000200,
+        Struct                        = 0x00000400
     };
     Q_DECLARE_FLAGS(Attributes, Attribute)
     Q_FLAG(Attribute)
