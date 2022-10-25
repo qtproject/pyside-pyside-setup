@@ -1060,6 +1060,9 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
     if (classItem->isFinal())
         *metaClass += AbstractMetaClass::FinalCppClass;
 
+    if (classItem->classType() == CodeModel::Struct)
+        *metaClass += AbstractMetaClass::Struct;
+
     QStringList baseClassNames;
     const QList<_ClassModelItem::BaseClass> &baseClasses = classItem->baseClasses();
     for (const _ClassModelItem::BaseClass &baseClass : baseClasses) {
