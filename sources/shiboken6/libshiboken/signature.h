@@ -4,6 +4,9 @@
 #ifndef SIGNATURE_H
 #define SIGNATURE_H
 
+#include "shibokenmacros.h"
+#include "sbkpython.h"
+
 extern "C"
 {
 
