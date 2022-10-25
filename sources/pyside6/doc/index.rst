@@ -157,6 +157,18 @@ Documentation
         :text: Shiboken
         :classes: btn-qt btn-block stretched-link
 
+    ---
+    :img-top: images/Development.svg
+
+    Notes for Developers.
+
+    +++
+
+    .. link-button:: developer-notes
+        :type: ref
+        :text: Developers
+        :classes: btn-qt btn-block stretched-link
+
 
 We have also a `wiki page`_ where you can find how to report bugs, contribute or contact the community.
 
