@@ -4,7 +4,7 @@
 import os
 import sys
 from pathlib import Path
-from .utils import run_command
+from . import run_command
 
 
 class Nuitka:
