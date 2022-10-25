@@ -20,7 +20,7 @@ class PythonExecutable:
         self.dry_run = dry_run
         if create_venv:
             self.__create_venv()
-        self.nuitka = Nuitka(nuitka=[self.exe, "-m", "nuitka"])
+        self.nuitka = Nuitka(nuitka=[os.fspath(self.exe), "-m", "nuitka"])
 
     @property
     def exe(self):
