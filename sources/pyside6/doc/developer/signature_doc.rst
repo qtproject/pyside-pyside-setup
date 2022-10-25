@@ -109,21 +109,26 @@ The C++ code involved with the signature module is completely in the file
 shiboken6/libshiboken/signature.cpp . All other functionality is implemented in
 the ``signature`` Python package. It has the following structure::
 
-    shiboken6/files.dir/shibokensupport/
-                                        backport_inspect.py
-
-                                        signature/
-                                                  loader.py
-                                                  parser.py
-                                                  mapping.py
-                                                  errorhandler.py
-                                                  layout.py
-
-                                                  lib/
-                                                      enum_sig.py
-                                                      tool.py
-
-
+ sources/shiboken6/shibokenmodule/files.dir/shibokensupport
+ ├── __init__.py
+ ├── feature.py
+ ├── fix-complaints.py
+ ├── shibokensupport.pyproject
+ └── signature
+     ├── PSF-3.7.0.txt
+     ├── __init__.py
+     ├── errorhandler.py
+     ├── importhandler.py
+     ├── layout.py
+     ├── lib
+     │   ├── __init__.py
+     │   ├── enum_sig.py
+     │   ├── pyi_generator.py
+     │   └── tool.py
+     ├── loader.py
+     ├── mapping.py
+     ├── parser.py
+     └── qt_attribution.json
 
 Really important are the **parser**, **mapping**, **errorhandler**, **enum_sig**,
 **layout** and **loader** modules. The rest is needed to create Python 2 compatibility
