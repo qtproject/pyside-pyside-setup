@@ -13,13 +13,15 @@
 // General documentation can be found in `signature_doc.rst`.
 //
 
+#include "signature.h"
+#include "signature_p.h"
+
 #include "basewrapper.h"
 #include "autodecref.h"
 #include "sbkstring.h"
 #include "sbkstaticstrings.h"
 #include "sbkstaticstrings_p.h"
-#include "sbkfeature_base.h"
-#include "signature_p.h"
+
 #include <structmember.h>
 
 using namespace Shiboken;
