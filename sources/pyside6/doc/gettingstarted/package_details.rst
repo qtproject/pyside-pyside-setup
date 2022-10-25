@@ -107,6 +107,8 @@ QML Development
 * ``pyside6-qmltyperegistrar``, to read metatypes files and generate
   files that contain the necessary code to register all the types marked with
   relevant macros.
+* ``pyside6-qmlimportscanner``, to identify the QML modules imported from a
+    project/QML files and dump the result as a JSON array.
 
 Translations
 ~~~~~~~~~~~~
