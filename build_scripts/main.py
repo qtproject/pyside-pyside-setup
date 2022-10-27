@@ -43,7 +43,7 @@ from .utils import (copydir, copyfile, detect_clang, filter_match,
                     linux_fix_rpaths_for_library, macos_fix_rpaths_for_library,
                     platform_cmake_options, remove_tree, run_process,
                     run_process_output, update_env_path, which)
-from .versions import PYSIDE, PYSIDE_MODULE, SHIBOKEN
+from . import PYSIDE, PYSIDE_MODULE, SHIBOKEN
 from .wheel_override import get_bdist_wheel_override, wheel_module_exists
 from .wheel_utils import (get_package_timestamp, get_package_version,
                           macos_plat_name, macos_pyside_min_deployment_target)

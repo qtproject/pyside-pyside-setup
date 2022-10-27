@@ -9,7 +9,7 @@ from ..config import config
 from ..options import OPTION
 from ..utils import (copydir, copyfile, macos_add_rpath,
                      macos_fix_rpaths_for_library)
-from ..versions import PYSIDE
+from .. import PYSIDE
 
 
 def _macos_patch_executable(name, _vars=None):

@@ -43,12 +43,16 @@ list(APPEND directories ${CMAKE_CURRENT_SOURCE_DIR}/qtpy2cpp_lib)
 # pyside6-rcc, pyside6-uic, pyside6-designer, shiboken and pyside6-lupdate entrypoints
 
 foreach(file ${files})
-    install(FILES "${file}"
-            DESTINATION bin
-            PERMISSIONS
-            OWNER_EXECUTE OWNER_WRITE OWNER_READ
-            GROUP_EXECUTE GROUP_READ
-            WORLD_EXECUTE WORLD_READ)
+    if(EXISTS ${file})
+        install(FILES "${file}"
+                DESTINATION bin
+                PERMISSIONS
+                OWNER_EXECUTE OWNER_WRITE OWNER_READ
+                GROUP_EXECUTE GROUP_READ
+                WORLD_EXECUTE WORLD_READ)
+    else()
+        message(WARNING "${file} does not exist. Hence, pyside6-${file} will not work")
+    endif()
 endforeach()
 
 foreach(directory ${directories})

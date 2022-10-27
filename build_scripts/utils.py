@@ -18,6 +18,8 @@ from pathlib import Path
 from textwrap import dedent, indent
 
 from .log import log
+from . import (PYSIDE_PYTHON_TOOLS, PYSIDE_LINUX_BIN_TOOLS, PYSIDE_LINUX_LIBEXEC_TOOLS,
+               PYSIDE_WINDOWS_BIN_TOOLS)
 
 try:
     # Using the distutils implementation within setuptools
@@ -34,6 +36,7 @@ try:
 except NameError:
     WindowsError = None
 
+
 def which(name):
     """
     Like shutil.which, but accepts a string or a PathLike and returns a Path
@@ -49,6 +52,7 @@ def which(name):
     except TypeError as e:
         log.error(f"{name} was not found in PATH: {e}")
     return path
+
 
 def is_64bit():
     return sys.maxsize > 2147483647
@@ -1350,3 +1354,47 @@ def parse_cmake_project_message_info(output):
             value = found.group(3).strip()
             result[category][key] = str(value)
     return result
+
+
+def available_pyside_tools(qt_tools_path: Path, package_for_wheels: bool = False):
+    pyside_tools = PYSIDE_PYTHON_TOOLS.copy()
+    lib_exec_path = qt_tools_path / "libexec"
+
+    if package_for_wheels:
+        # Qt wrappers in build/{python_env_name}/package_for_wheels/PySide6
+        bin_path = qt_tools_path
+    else:
+        bin_path = qt_tools_path / "bin"
+
+    def tool_exist(tool_path: Path):
+        if tool_path.exists():
+            return True
+        else:
+            log.warning(f"{tool_path} not found. pyside-{tool_path.name} not included.")
+            return False
+
+    if sys.platform == 'win32':
+        pyside_tools.extend([tool for tool in PYSIDE_WINDOWS_BIN_TOOLS
+                             if tool_exist(bin_path / f"{tool}.exe")])
+    else:
+        pyside_tools.extend([tool for tool in PYSIDE_LINUX_LIBEXEC_TOOLS
+                             if tool_exist(lib_exec_path / tool)])
+        pyside_tools.extend([tool for tool in PYSIDE_LINUX_BIN_TOOLS
+                             if tool_exist(bin_path / tool)])
+
+    return pyside_tools
+
+
+def find_qt_install_path() -> Path:
+    """
+        Find Qt installation path
+    """
+
+    def where_is(x):
+        return Path(which(x))
+
+    qtpaths = where_is("qtpaths") if where_is("qtpaths") else where_is("qtpaths6")
+    if not qtpaths:
+        raise RuntimeError("qtpaths not found")
+    else:
+        return qtpaths.parents[1]

@@ -8,7 +8,7 @@ import sys
 from ..config import config
 from ..options import OPTION
 from ..utils import copydir, copyfile, makefile
-from ..versions import PYSIDE, SHIBOKEN
+from .. import PYSIDE, SHIBOKEN
 from .linux import prepare_standalone_package_linux
 from .macos import prepare_standalone_package_macos
 

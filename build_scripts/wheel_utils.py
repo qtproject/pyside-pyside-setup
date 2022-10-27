@@ -12,7 +12,7 @@ from setuptools.errors import SetupError
 from .options import OPTION
 from .qtinfo import QtInfo
 from .utils import memoize, parse_cmake_conf_assignments_by_key
-from .versions import PYSIDE
+from . import PYSIDE
 
 
 @memoize

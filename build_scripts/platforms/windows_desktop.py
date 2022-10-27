@@ -11,7 +11,7 @@ from ..config import config
 from ..options import OPTION
 from ..utils import (copydir, copyfile, download_and_extract_7z, filter_match,
                      makefile)
-from ..versions import PYSIDE, SHIBOKEN
+from .. import PYSIDE, SHIBOKEN
 
 
 def prepare_packages_win32(pyside_build, _vars):

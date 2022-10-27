@@ -29,6 +29,7 @@ def qt_tool_wrapper(qt_tool, args, libexec=False):
         exe = pyside_dir / 'Qt' / 'libexec' / qt_tool
     else:
         exe = pyside_dir / qt_tool
+
     cmd = [os.fspath(exe)] + args
     proc = Popen(cmd, stderr=PIPE)
     out, err = proc.communicate()
@@ -37,6 +38,7 @@ def qt_tool_wrapper(qt_tool, args, libexec=False):
         command = ' '.join(cmd)
         print(f"Error: {msg}\nwhile executing '{command}'")
     sys.exit(proc.returncode)
+
 
 
 def pyside_script_wrapper(script_name):

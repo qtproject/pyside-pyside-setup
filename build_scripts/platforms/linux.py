@@ -8,7 +8,7 @@ from ..config import config
 from ..options import OPTION
 from ..utils import (copy_icu_libs, copydir, copyfile, find_files_using_glob,
                      linux_patch_executable)
-from ..versions import PYSIDE
+from .. import PYSIDE
 
 
 def prepare_standalone_package_linux(pyside_build, _vars, cross_build=False):

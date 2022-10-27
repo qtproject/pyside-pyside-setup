@@ -15,6 +15,7 @@ import build  # type: ignore
 from build_scripts.wheel_files import (ModuleData,  # type: ignore
                                        wheel_files_pyside_addons,
                                        wheel_files_pyside_essentials)
+from build_scripts.utils import available_pyside_tools
 
 
 @dataclass
@@ -187,32 +188,16 @@ def wheel_shiboken_module() -> Tuple[SetupData, None]:
     return setup, None
 
 
-def wheel_pyside6_essentials() -> Tuple[SetupData, List[ModuleData]]:
+def wheel_pyside6_essentials(packaged_qt_tools_path: Path) -> Tuple[SetupData, List[ModuleData]]:
+    _pyside_tools = available_pyside_tools(packaged_qt_tools_path, package_for_wheels=True)
+    _console_scripts = [f"pyside6-{tool} = PySide6.scripts.pyside_tool:{tool}"
+                        for tool in _pyside_tools]
     setup = SetupData(
         name="PySide6_Essentials",
         version=get_version_from_package("PySide6"),  # we use 'PySide6' here
         description="Python bindings for the Qt cross-platform application and UI framework (Essentials)",
         long_description="README.pyside6_essentials.md",
-        console_scripts=[
-            "pyside6-uic = PySide6.scripts.pyside_tool:uic",
-            "pyside6-rcc = PySide6.scripts.pyside_tool:rcc",
-            "pyside6-assistant = PySide6.scripts.pyside_tool:assistant",
-            "pyside6-designer= PySide6.scripts.pyside_tool:designer",
-            "pyside6-linguist = PySide6.scripts.pyside_tool:linguist",
-            "pyside6-lupdate = PySide6.scripts.pyside_tool:lupdate",
-            "pyside6-lrelease = PySide6.scripts.pyside_tool:lrelease",
-            "pyside6-genpyi = PySide6.scripts.pyside_tool:genpyi",
-            "pyside6-metaobjectdump = PySide6.scripts.pyside_tool:metaobjectdump",
-            "pyside6-project = PySide6.scripts.pyside_tool:project",
-            "pyside6-qmltyperegistrar = PySide6.scripts.pyside_tool:qmltyperegistrar",
-            "pyside6-qmlimportscanner = PySide6.scripts.pyside_tool:qmlimportscanner",
-            "pyside6-qmllint = PySide6.scripts.pyside_tool:qmllint",
-            "pyside6-qml = PySide6.scripts.pyside_tool:qml",
-            "pyside6-qmlformat = PySide6.scripts.pyside_tool:qmlformat",
-            "pyside6-qmlls = PySide6.scripts.pyside_tool:qmlls",
-            "pyside6-qtpy2cpp = PySide6.scripts.pyside_tool:qtpy2cpp",
-            "pyside6-deploy = PySide6.scripts.pyside_tool:deploy"
-        ],
+        console_scripts=_console_scripts
     )
 
     data = wheel_files_pyside_essentials()
@@ -319,7 +304,8 @@ if __name__ == "__main__":
     for name, wheel_info in wheels.items():
 
         print(f"Starting process for: {name}")
-        setup, data = wheel_info()
+        setup, data = wheel_info() if not name=="PySide6_Essentials" else \
+                      wheel_pyside6_essentials(package_path / "PySide6")
 
         # 1. Generate 'setup.cfg'
         print("-- Generating setup.cfg")

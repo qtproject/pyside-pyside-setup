@@ -6,7 +6,8 @@ import os
 from .log import log
 from pathlib import Path
 
-from .versions import PYSIDE, PYSIDE_MODULE, SHIBOKEN
+from . import PYSIDE, PYSIDE_MODULE, SHIBOKEN
+from .utils import available_pyside_tools
 
 
 class Config(object):
@@ -78,7 +79,8 @@ class Config(object):
                     ext_modules=None,
                     setup_script_dir=None,
                     cmake_toolchain_file=None,
-                    quiet=False):
+                    quiet=False,
+                    qt_install_path: Path = None):
         """
         Sets up the global singleton config which is used in many parts
         of the setup process.
@@ -199,11 +201,7 @@ class Config(object):
             setup_kwargs['install_requires'] = [
                 f"{self.shiboken_module_st_name}=={package_version}"
             ]
-            _pyside_tools = ["uic", "rcc", "assistant", "designer", "linguist",
-                             "lupdate", "lrelease", "genpyi", "metaobjectdump",
-                             "project", "qml", "qmltyperegistrar", "qmllint", "qmlformat", "qmlls",
-                             "qtpy2cpp", "deploy", "qmlimportscanner"]
-
+            _pyside_tools = available_pyside_tools(qt_tools_path=qt_install_path)
             setup_kwargs['entry_points'] = {
                 'console_scripts': [f'{PYSIDE}-{tool} = {package_name}.scripts.pyside_tool:{tool}'
                                     for tool in _pyside_tools]
