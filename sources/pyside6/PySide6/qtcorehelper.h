@@ -11,8 +11,8 @@
 
 namespace QtCoreHelper {
 
-    using MutexLocker = QMutexLocker<QMutex>;
-    using RecursiveMutexLocker = QMutexLocker<QRecursiveMutex>;
+    using MutexLocker = QT_PREPEND_NAMESPACE(QMutexLocker<QMutex>);
+    using RecursiveMutexLocker = QT_PREPEND_NAMESPACE(QMutexLocker<QRecursiveMutex>);
 
     // ::QMutexLocker is a template with the QMutex class as parameter which can
     // only be represented by different type names in Python. Provide a common API.
