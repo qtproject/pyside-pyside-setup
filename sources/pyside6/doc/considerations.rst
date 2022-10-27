@@ -1,7 +1,7 @@
 .. _pysideapi2:
 
-|project| Considerations
-========================
+Considerations
+==============
 
 API Changes
 -----------
@@ -149,15 +149,15 @@ There was a long-standing bug in the ``tp_richcompare`` implementation of PySide
 This oversight was fixed in version 5.15.1 .
 
 
-|project| Features
-==================
+Features
+--------
 
 In |project|, we begin for the first time to support a more pythonic user interface.
 With a special import statement, you can switch on features which replace certain aspects of
 the Python interpreter. This is done by an import statement right after the PySide6 import.
 
 snake_case
-----------
+~~~~~~~~~~
 
 With the statement:
 
@@ -169,7 +169,7 @@ all methods in the current module are switched from ``camelCase`` to ``snake_cas
 A single upper case letter is replaced by an underscore and the lower case letter.
 
 true_property
--------------
+~~~~~~~~~~~~~
 
 With the statement:
 
@@ -182,7 +182,7 @@ are replaced by Python property objects. Properties are also listed as such
 in the according QMetaObject of a class.
 
 Example for both features
--------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Some |project| snippet might read:
 
@@ -200,14 +200,14 @@ Additionally, properties can also be declared directly in Shiboken for
 non Qt-libraries, see :ref:`property-declare`.
 
 More about features
--------------------
+~~~~~~~~~~~~~~~~~~~
 
 Detailed info about features can be found here: :ref:`feature-why`
 
 Tools
------
+~~~~~
 
-|project|  ships some Qt tools:
+|project| ships some Qt tools:
 
 * ``pyside6-rcc``: Qt Resource Compiler. This is a command line tool
   that compiles ``.qrc`` files containing binary data, for example images,
@@ -227,10 +227,10 @@ Tools
 .. _NewEnumSystem:
 
 The New Python Enums
-====================
+--------------------
 
 The Motivation to use new Enums
--------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For a long time, there were just the Shiboken enums, which were modelled as exact as possible
 after the existing enums in Qt. These enums are small classes which also inherit from
@@ -242,7 +242,7 @@ users. It is therefore just consequent to stop having two different enum impleme
 in the same application and instead to use the new Python implementation everywhere.
 
 Existing Work
--------------
+~~~~~~~~~~~~~
 
 The new enums beginning with PySide 6.3, replace the Shiboken enums
 with Python variants, which harmonize the builtin enums with the already existing
@@ -250,7 +250,7 @@ with Python variants, which harmonize the builtin enums with the already existin
 
 
 Activating the New Enums
-------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 The new approach to enum will be the default in ``PySide 6.4``, but a preview is already built
 into ``PySide 6.3`` with the environment variable:
@@ -263,7 +263,7 @@ reached and a fallback to the old implementation is no longer needed.
 
 
 The Differences between old and new Enums
------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Python enums and Shiboken enums are more or less compatible with each other.
 Tiny differences are in restrictions:
@@ -298,7 +298,7 @@ But don't be too scared, here comes the good news...
 
 
 Doing a Smooth Transition from the Old Enums
---------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Changing all the enum code to suddenly use the new syntax is cumbersome and error-prone,
 because such necessary changes are not easy to find.
@@ -340,7 +340,7 @@ which don't have a class, see ``Limitations`` below.)
 
 
 Forgiveness Mode and Type Hints
--------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 When you inspect for instance ``QtCore.pyi``, you will only find the new enums, although
 the old ones are still allowed. Also, line completion will only work with the new constructs
@@ -365,8 +365,8 @@ but this construct is used and recommended for the future:
     self.text.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
 
-Limitations:
-------------
+Limitations
+~~~~~~~~~~~
 
 The forgiveness mode works very well whenever the enum class is embedded in a normal
 PySide class. But there are a few global enums, where especially the ``QtMsgType``

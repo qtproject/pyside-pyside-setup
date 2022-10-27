@@ -1,10 +1,9 @@
-*************************************************
 The Transition To The Limited Python API (PEP384)
-*************************************************
+=================================================
 
 
 Foreword
-========
+--------
 
 Python supports a limited API that restricts access to certain structures.
 Besides eliminating whole modules and all functions and macros which names
@@ -21,7 +20,7 @@ For details about the eliminated modules and functions, please see the
 
 
 Changed Modules
-===============
+---------------
 
 All changed module's include files are listed with the changed functions here.
 As a general rule, it was tried to keep the changes to a minimum diff.
@@ -30,7 +29,7 @@ if possible. Completely removed names ``Py{name}`` were re-implemented as ``Pep{
 
 
 memoryobject.h
---------------
+~~~~~~~~~~~~~~
 
 The buffer protocol was completely removed. We redefined all the structures
 and methods, because PySide uses that. This is an exception to the limited API
@@ -39,7 +38,7 @@ This is related to the following:
 
 
 abstract.h
-----------
+~~~~~~~~~~
 
 This belongs to the buffer protocol like memoryobject.h .
 As replacement for ``Py_buffer`` we defined ``Pep_buffer`` and several other
@@ -54,14 +53,14 @@ or if we should try to get rid of ``Pep_buffer``, completely.
 
 
 pydebug.h
----------
+~~~~~~~~~
 
 We have no direct access to ``Py_VerboseFlag`` because debugging is not
 supported. We redefined it as macro ``Py_VerboseFlag`` which calls ``Pep_VerboseFlag``.
 
 
 unicodeobject.h
----------------
+~~~~~~~~~~~~~~~
 
 The macro ``PyUnicode_GET_SIZE`` was removed and replaced by ``PepUnicode_GetLength``
 which evaluates to ``PyUnicode_GetSize`` for Python 2 and ``PyUnicode_GetLength`` for Python 3.
@@ -73,34 +72,34 @@ and it would be better to change the code and replace this function.
 
 
 bytesobject.h
--------------
+~~~~~~~~~~~~~
 
 The macros ``PyBytes_AS_STRING`` and ``PyBytes_GET_SIZE`` were redefined to call
 the according functions.
 
 
 floatobject.h
--------------
+~~~~~~~~~~~~~
 
 ``PyFloat_AS_DOUBLE`` now calls ``PyFloat_AsDouble``.
 
 
 tupleobject.h
--------------
+~~~~~~~~~~~~~
 
 ``PyTuple_GET_ITEM``, ``PyTuple_SET_ITEM`` and ``PyTuple_GET_SIZE`` were redefined as
 function calls.
 
 
 listobject.h
-------------
+~~~~~~~~~~~~
 
 ``PyList_GET_ITEM``, ``PyList_SET_ITEM`` and ``PyList_GET_SIZE`` were redefined as
 function calls.
 
 
 dictobject.h
-------------
+~~~~~~~~~~~~
 
 ``PyDict_GetItem`` also exists in a ``PyDict_GetItemWithError`` version that does
 not suppress errors. This suppression has the side effect of touching global
@@ -110,7 +109,7 @@ Needed to avoid the GIL when accessing dictionaries.
 
 
 methodobject.h
---------------
+~~~~~~~~~~~~~~
 
 ``PyCFunction_GET_FUNCTION``, ``PyCFunction_GET_SELF`` and ``PyCFunction_GET_FLAGS``
 were redefined as function calls.
@@ -120,14 +119,14 @@ Direct access to the methoddef structure is not available, and we defined
 
 
 pythonrun.h
------------
+~~~~~~~~~~~
 
 The simple function ``PyRun_String`` is not available. It was re-implemented
 in a simplified version for the signature module.
 
 
 funcobject.h
-------------
+~~~~~~~~~~~~
 
 The definitions of funcobject.h are completely missing, although there
 are extra ``#ifdef`` conditional defines inside, too. This suggests that the exclusion
@@ -145,7 +144,7 @@ There is no equivalent for function name access, therefore we introduced
 
 
 classobject.h
--------------
+~~~~~~~~~~~~~
 
 Classobject is also completely not imported, instead of defining an opaque type.
 
@@ -157,7 +156,7 @@ We defined the missing functions ``PyMethod_New``, ``PyMethod_Function`` and
 
 
 code.h
-------
+~~~~~~
 
 The whole code.c code is gone, although it may make sense to
 define some minimum accessibility. This will be clarified on
@@ -173,7 +172,7 @@ We further added the missing flags, although few are used:
 .. _`Python-Dev`: https://mail.python.org/mailman/listinfo/python-dev
 
 datetime.h
-----------
+~~~~~~~~~~
 
 The DateTime module is explicitly not included in the limited API.
 We defined all the needed functions but called them via Python instead
@@ -211,7 +210,7 @@ The re-defined macros and methods are::
 
 
 object.h
---------
+~~~~~~~~
 
 The file object.h contains the ``PyTypeObject`` structure, which is supposed
 to be completely opaque. All access to types should be done through
@@ -294,7 +293,7 @@ Therefore, a forgotten debugging call of this functions will break COIN. :-)
 
 
 Using The New Type API
-======================
+----------------------
 
 After converting everything but the object.h file, we were a little
 bit shocked: it suddenly was clear that we would have no more
@@ -310,7 +309,7 @@ between the APIs and their consequences.
 
 
 The Interface
--------------
+~~~~~~~~~~~~~
 
 The old type API of Python knows static types and heap types.
 Static types are written down as a declaration of a ``PyTypeObject``
@@ -466,7 +465,7 @@ very important, since all derived types invisibly inherit these two fields.
 
 
 Future Versions Of The Limited API
-==================================
+----------------------------------
 
 As we have seen, the current version of the limited API does a bit of
 cheating, because it uses parts of the data structure that should be
@@ -486,7 +485,7 @@ calls to ``PyType_GetSlot``. After that, no more changes will be necessary.
 
 
 Appendix A: The Transition To Simpler Types
-===========================================
+-------------------------------------------
 
 After all code had been converted to the limited API, there was a
 remaining problem with the ``PyHeapTypeObject``.
@@ -500,7 +499,7 @@ by a pointer that is computed at runtime.
 
 
 Restricted PyTypeObject
------------------------
+~~~~~~~~~~~~~~~~~~~~~~~
 
 Before we are going into details, let us motivate the existence of
 the restricted ``PyTypeObject``:
@@ -539,7 +538,7 @@ explicitly because that *does* change its layout over time.
 
 
 Diversification
----------------
+~~~~~~~~~~~~~~~
 
 There were multiple ``Sbk{something}`` structures which all used a "d" field
 for their private data. This made it not easy to find the right
@@ -573,7 +572,7 @@ After renaming, it was easier to do the following transformations.
 
 
 Abstraction
------------
+~~~~~~~~~~~
 
 After renaming the type extension pointers to ``sotp``, I replaced
 them by function-like macros which did the special access *behind*
@@ -603,7 +602,7 @@ key to fulfil what Pep 384 wants to achieve: *No more version-dependent fields*.
 
 
 Simplification
---------------
+~~~~~~~~~~~~~~
 
 After all type extension fields were replaced by macro calls, we
 could remove the following version dependent re-definition of ``PyHeapTypeObject``
@@ -629,7 +628,7 @@ type alias to PyTypeObject.
 
 
 Appendix B: Verification Of PyTypeObject
-========================================
+----------------------------------------
 
 We have introduced a limited PyTypeObject in the same place
 as the original PyTypeObject, and now we need to prove that
@@ -644,7 +643,7 @@ and produces a regular heap type object.
 
 
 Unused Information
-------------------
+~~~~~~~~~~~~~~~~~~
 
 We know many things about types that are not explicitly said,
 but they are inherently clear:
@@ -663,7 +662,7 @@ The validation checks if rule (b) is still valid.
 
 
 How it Works
-------------
+~~~~~~~~~~~~
 
 The basic idea of the validation is to produce a new type using
 ``PyType_FromSpec`` and to see where in the type structure these fields
@@ -690,7 +689,7 @@ the places where we expect them, then verification is done.
 
 
 About ``tp_dict``
------------------
+~~~~~~~~~~~~~~~~~
 
 One word about the ``tp_dict`` field: This field is a bit special in
 the proof, since it does not appear in the spec and cannot easily

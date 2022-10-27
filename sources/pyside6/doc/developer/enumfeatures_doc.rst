@@ -1,6 +1,5 @@
-************************
 The Set of Enum Features
-************************
+========================
 
 The development of the new Python enums took the form of a series of patches.
 While we put a lot of effort into supporting the old Enums (without promoting
@@ -11,7 +10,7 @@ combination of enum functions step by step with a specific set of flags.
 
 
 The Possible Enum Flags
-=======================
+-----------------------
 
 This is the table of all flags used to control the creation of Python enums.
 
@@ -37,7 +36,7 @@ by using ``ast.literal_eval``.
 
 
 ENOPT_OLD_ENUM (0x00)
----------------------
+~~~~~~~~~~~~~~~~~~~~~
 
 This option completely disables the new enum implementation.
 Even though this is a valid option, we want to avoid it if possible.
@@ -48,7 +47,7 @@ to provide a temporary solution before extending enum support accordingly.
 
 
 ENOPT_NEW_ENUM (0x01)
----------------------
+~~~~~~~~~~~~~~~~~~~~~
 
 In a perfect world, no one would choose anything other than this default
 setting. Unfortunately, reality is not always like that. That is why
@@ -56,7 +55,7 @@ there are the following flags.
 
 
 The most likely flags needed
-============================
+----------------------------
 
 If there are errors, they are likely to be the following: Either implicit
 assumptions are there that require IntEnum, or global enums are used that
@@ -64,7 +63,7 @@ unfortunately cannot be replaced with tricks.
 
 
 ENOPT_INHERIT_INT (0x02)
-------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 When this flag is set, all ``enum.Enum/enum.Flag`` classes are converted to
 ``enum.IntEnum/enum.IntFlag``. This solves the most likely compatibility
@@ -84,7 +83,7 @@ workaround until we have implemented alternatives.
 
 
 ENOPT_GLOBAL_SHORTCUT (0x04)
-----------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 At the beginning of the Python enum implementation, we continued to support
 the shortcut behavior of Shiboken enums: the enum constants were mirrored
@@ -101,7 +100,7 @@ A flag value of 0x6 is likely to solve the majority of problems.
 
 
 Flags for completeness
-======================
+----------------------
 
 The following flags complement the description of Python Enums.
 They essentially serve the better understanding of the
@@ -109,7 +108,7 @@ implementation and make it fully transparent and customizable.
 
 
 ENOPT_SCOPED_SHORTCUT (0x08)
-----------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For completeness, we also supported mirroring scoped enums, although this
 has since been replaced by forgiveness mode. If you want to try this,
@@ -118,7 +117,7 @@ effect of this flag will remain invisible.
 
 
 ENOPT_NO_FAKERENAMES (0x10)
----------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Forgiveness mode emulates renaming ``Enum.Flag`` classes back to Shiboken
 QFlags structures, which have slightly different names.
@@ -130,7 +129,7 @@ To see the effect of this renaming, you can turn it off with this flag.
 
 
 ENOPT_NO_ZERODEFAULT (0x40)
----------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 As part of the forgiveness mode, Python enums can be created by a
 parameterless call, although Python enums actually force a parameter
@@ -140,7 +139,7 @@ The effect can be examined if this flag is set to disable it.
 
 
 ENOPT_NO_MISSING (0x80)
------------------------
+~~~~~~~~~~~~~~~~~~~~~~~
 
 There are a few cases where Shiboken enums use missing values. In
 ``enum.Flag`` structures, this is allowed anyway because we have set the

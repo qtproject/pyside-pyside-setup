@@ -179,6 +179,3 @@ We have also a `wiki page`_ where you can find how to report bugs, contribute or
    :glob:
 
    contents.rst
-   gettingstarted*
-   overviews/*
-   feature-why

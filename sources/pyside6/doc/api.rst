@@ -1,7 +1,7 @@
 .. _pyside-api:
 
-|project| Modules
-=================
+Modules API
+===========
 
 Basic modules
 -------------
@@ -74,4 +74,6 @@ All the modules
 There are many other modules currently supported by |pymodname|, here you can find a complete list
 of them.
 
-  :doc:`Check all the modules <modules>`
+.. toctree::
+
+   modules.rst

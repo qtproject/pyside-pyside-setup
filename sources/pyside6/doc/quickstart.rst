@@ -1,5 +1,5 @@
-|project| Quick start
-======================
+Quick start
+===========
 
 Requirements
 ------------

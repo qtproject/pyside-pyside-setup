@@ -8,7 +8,7 @@ to Python to understand this.
 
 Before you start, ensure that all the prerequisites for
 Qt for Python are met. See
-:doc:`Getting Started <../../gettingstarted>` for more
+:doc:`Getting Started <../../gettingstarted/index>` for more
 information. In addition, familiarize yourself with the
 basic differences between Qt in C++ and in Python.
 

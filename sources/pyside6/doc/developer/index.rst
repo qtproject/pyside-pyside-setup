@@ -30,3 +30,4 @@ many features and implementation details that the project has:
    enumfeatures_doc.rst
    limited_api.rst
    signature_doc.rst
+   feature-motivation.rst

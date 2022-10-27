@@ -1,7 +1,7 @@
 .. _video-gallery:
 
-|project| Videos
-================
+Videos
+======
 
 Tutorials
 ---------
