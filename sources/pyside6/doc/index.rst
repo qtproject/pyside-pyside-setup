@@ -169,6 +169,18 @@ Documentation
         :text: Developers
         :classes: btn-qt btn-block stretched-link
 
+    ---
+    :img-top: images/Commercial.svg
+
+    Packages, installation, and details.
+
+    +++
+
+    .. link-button:: commercial-page
+        :type: ref
+        :text: Commercial
+        :classes: btn-qt btn-block stretched-link
+
 
 We have also a `wiki page`_ where you can find how to report bugs, contribute or contact the community.
 
