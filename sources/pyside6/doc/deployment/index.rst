@@ -1,7 +1,7 @@
 .. _deployment-guides:
 
-|project| Deployment
-====================
+Deployment
+==========
 
 Deploying or freezing an application is an important part of a Python project,
 this means to bundle all required resources so that the application finds everything it needs to

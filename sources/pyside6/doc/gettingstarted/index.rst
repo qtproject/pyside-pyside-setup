@@ -1,5 +1,5 @@
-|project| Getting Started
-==========================
+Getting Started
+===============
 
 .. important:: This page is focused on building |project| **from source**.
   If you just want to install |pymodname|, you need to run: :command:`pip install pyside6`.
@@ -28,6 +28,16 @@ website.
 
 Guides per platform
 -------------------
+
+.. toctree::
+    :maxdepth: 1
+    :hidden:
+
+    linux.rst
+    macOS.rst
+    windows.rst
+    package_details.rst
+    porting_from2.rst
 
 You can refer to the following pages for platform specific instructions:
 

@@ -1,5 +1,5 @@
-|project| Tutorials
-====================
+Tutorials
+=========
 
 A collection of tutorials with walkthrough guides are
 provided with |project| to help new users get started.

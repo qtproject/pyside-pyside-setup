@@ -1,6 +1,7 @@
-*************************
+.. _signature-extension:
+
 The signature C extension
-*************************
+=========================
 
 This module is a C extension for CPython 3.5 and up, and CPython 2.7.
 Its purpose is to provide support for the ``__signature__`` attribute
@@ -8,7 +9,7 @@ of builtin PyCFunction objects.
 
 
 Short Introduction to the Topic
-===============================
+-------------------------------
 
 Beginning with CPython 3.5, Python functions began to grow a ``__signature__``
 attribute for normal Python functions. This is totally optional and just
@@ -20,7 +21,7 @@ would be nice to have this info directly available.
 
 
 The Idea to Support Signatures
-==============================
+------------------------------
 
 We want to have an additional ``__signature__`` attribute in all PySide
 methods, without changing lots of generated code.
@@ -35,7 +36,7 @@ this is an adequate compromise.
 
 
 How this Code Works
--------------------
+~~~~~~~~~~~~~~~~~~~
 
 Signatures are supported for regular Python functions, only. Creating signatures
 for ``PyCFunction`` objects would require quite some extra effort in Python.
@@ -71,7 +72,7 @@ It calls ``GetSignature_Function`` which returns the signature if it is found.
 
 
 Why this Code is Fast
----------------------
+~~~~~~~~~~~~~~~~~~~~~
 
 It costs a little time (maybe 6 seconds) to run through every single signature
 object, since these are more than 25000 Python objects. But all the signature
@@ -103,7 +104,7 @@ It turned out that the overhead is below 0.5 ms.
 
 
 The Signature Package Structure
--------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The C++ code involved with the signature module is completely in the file
 shiboken6/libshiboken/signature.cpp . All other functionality is implemented in
@@ -136,7 +137,7 @@ or be compatible with embedding and installers.
 
 
 loader.py
-~~~~~~~~~
++++++++++
 
 This module assembles and imports the ``inspect`` module, and then exports the
 ``create_signature`` function. This function takes a fake function and some
@@ -144,7 +145,7 @@ attributes and builds a ``__signature__`` object with the inspect module.
 
 
 parser.py
-~~~~~~~~~
++++++++++
 
 This module takes a class signatures string from C++ and parses it into the
 needed properties for the ``create_signature`` function. Its entry point is the
@@ -152,7 +153,7 @@ needed properties for the ``create_signature`` function. Its entry point is the
 
 
 mapping.py
-~~~~~~~~~~
+++++++++++
 
 The purpose of the mapping module is maintaining a list of replacement strings
 that map from the *signature text* in C to the property strings that Python
@@ -161,7 +162,7 @@ but a few hundred cases are better to spell explicitly, here.
 
 
 errorhandler.py
-~~~~~~~~~~~~~~~
++++++++++++++++
 
 Since ``Qt For Python 5.12``, we no longer use the builtin type error messages from C++.
 Instead, we get much better results with the signature module. At the same time,
@@ -170,7 +171,7 @@ optional.
 
 
 enum_sig.py
-~~~~~~~~~~~
++++++++++++
 
 The diverse applications of the signature module all needed to iterate over modules,
 classes and functions. In order to centralize this enumeration, the process has
@@ -181,7 +182,7 @@ See for example the .pyi generator ``pyside6/PySide6/support/generate_pyi.py``.
 
 
 layout.py
-~~~~~~~~~
++++++++++
 
 As more applications used the signature module, different formatting of signatures
 was needed. To support that, we created the function ``create_signature``, which
@@ -189,13 +190,13 @@ has a parameter to choose from some predefined layouts.
 
 
 *typing27.py*
-~~~~~~~~~~~~~
++++++++++++++
 
 Python 2 has no typing module at all. This is a backport of the minimum that is needed.
 
 
 *backport_inspect.py*
-~~~~~~~~~~~~~~~~~~~~~
++++++++++++++++++++++
 
 Python 2 has an inspect module, but lacks the signature functions, completely.
 This module adds the missing functionality, which is merged at runtime into
@@ -203,7 +204,7 @@ the inspect module.
 
 
 Multiple Arities
-----------------
+~~~~~~~~~~~~~~~~
 
 One aspect that was ignored so far was *multiple arities*: How to handle it when
 a function has more than one signature?
@@ -216,7 +217,7 @@ but this simple rules seem to work well:
 
 
 Impacts of The Signature Module
-===============================
+-------------------------------
 
 The signature module has a number of impacts to other PySide modules, which were
 created as a consequence of its existence, and there will be a few more in the
@@ -224,7 +225,7 @@ future:
 
 
 existence_test.py
------------------
+~~~~~~~~~~~~~~~~~
 
 The file ``pyside6/tests/registry/existence_test.py`` was written using the
 signatures from the signatures module. The idea is that there are some 15000
@@ -241,7 +242,7 @@ An error is normally only reported as a warning, but:
 
 
 Interaction With The Coin Module
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+++++++++++++++++++++++++++++++++
 
 When this test program is run in COIN, then the warnings are turned into
 errors. The reason is that only in COIN, we have a stable configuration
@@ -252,7 +253,7 @@ exception for generated code, these files are *intentionally* checked in.
 
 
 What Happens When a List is Missing?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+++++++++++++++++++++++++++++++++++++
 
 When a new version of PySide gets created, then the existence test files
 initially do not exist.
@@ -271,7 +272,7 @@ in.
 
 
 Explicitly Enforcing Recreation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
++++++++++++++++++++++++++++++++
 
 The former way to regenerate the registry files was to remove the files
 and check that in. This has the desired effect, but creates huge deltas.
@@ -282,7 +283,7 @@ effect.
 
 
 init_platform.py
-~~~~~~~~~~~~~~~~
+++++++++++++++++
 
 For generating the ``exists_{platf}_{version}`` modules, the module
 ``pyside6/tests/registry/init_platform.py`` was written. It can be used
@@ -291,7 +292,7 @@ changes, directly.
 
 
 scrape_testresults.py
----------------------
+~~~~~~~~~~~~~~~~~~~~~
 
 To simplify and automate the process of extracting the ``exists_{platf}_{version}_ci.py``
 files, the script ``pyside6/tests/registry/scrape_testresults.py`` has been written.
@@ -317,7 +318,7 @@ folder. It should be reviewed and then eventually checked in.
 
 
 generate_pyi.py
----------------
+~~~~~~~~~~~~~~~
 
 ``pyside6/PySide6/support/generate_pyi.py`` is still under development.
 This module generates so-called hinting stubs for integration of PySide
@@ -342,7 +343,7 @@ A useful command to change all .pyi files to use all features is
 
 
 pyi_generator.py
-----------------
+~~~~~~~~~~~~~~~~
 
 ``shiboken6/shibokenmodule/files.dir/shibokensupport/signature/lib/pyi_generator.py``
 has been extracted from ``generate_pyi.py``. It allows the generation of ``.pyi``
@@ -352,7 +353,7 @@ A shortcut for this command is ``shiboken6-genpyi``.
 
 
 Current Extensions
-------------------
+~~~~~~~~~~~~~~~~~~
 
 Before the signature module was written, there already existed the concept of
 signatures, but in a more C++ - centric way. From that time, there existed
@@ -369,7 +370,7 @@ This was implemented in ``Qt For Python 5.12.1``.
 
 
 Literature
-==========
+----------
 
     `PEP 362 – Function Signature Object <https://www.python.org/dev/peps/pep-0362/>`__
 
