@@ -7,6 +7,8 @@
 #include "primitivetypeentry.h"
 #include "valuetypeentry.h"
 
+#include <QtCore/qdebug.h>
+
 using namespace Qt::StringLiterals;
 
 CustomConversion::CustomConversion(const TypeEntry *ownerType) :
@@ -119,6 +121,16 @@ void TargetToNativeConversion::setConversion(const QString &conversion)
     m_conversion = conversion;
 }
 
+void TargetToNativeConversion::formatDebug(QDebug &debug) const
+{
+    debug << "(source=\"" << m_sourceTypeName << '"';
+    if (debug.verbosity() > 2)
+        debug << ", conversion=\"" << m_conversion << '"';
+    if (isCustomType())
+        debug << ", [custom]";
+    debug << ')';
+}
+
 CustomConversionPtr CustomConversion::getCustomConversion(const TypeEntry *type)
 {
     if (type->isPrimitive())
@@ -128,4 +140,58 @@ CustomConversionPtr CustomConversion::getCustomConversion(const TypeEntry *type)
     if (type->isValue())
         return static_cast<const ValueTypeEntry *>(type)->customConversion();
     return {};
+}
+
+void CustomConversion::formatDebug(QDebug &debug) const
+{
+    debug << "(owner=\"" << m_ownerType->qualifiedCppName() << '"';
+    if (!m_nativeToTargetConversion.isEmpty())
+        debug << ", nativeToTargetConversion=\"" << m_nativeToTargetConversion << '"';
+    if (!m_targetToNativeConversions.isEmpty()) {
+        debug << ", targetToNativeConversions=[";
+        for (qsizetype i = 0, size = m_targetToNativeConversions.size(); i < size; ++i) {
+            if (i)
+                debug << ", ";
+            debug << m_targetToNativeConversions.at(i);
+
+        }
+        debug << ']';
+    }
+    if (m_replaceOriginalTargetToNativeConversions)
+        debug << ", [replaceOriginalTargetToNativeConversions]";
+    debug << ')';
+}
+
+QDebug operator<<(QDebug debug, const TargetToNativeConversion &t)
+{
+    QDebugStateSaver saver(debug);
+    debug.noquote();
+    debug.nospace();
+    debug << "TargetToNativeConversion";
+    t.formatDebug(debug);
+    return debug;
+}
+
+QDebug operator<<(QDebug debug, const CustomConversion &c)
+{
+    QDebugStateSaver saver(debug);
+    debug.noquote();
+    debug.nospace();
+    debug << "CustomConversion";
+    c.formatDebug(debug);
+    return debug;
+}
+
+QDebug operator<<(QDebug debug, const CustomConversionPtr &cptr)
+{
+    QDebugStateSaver saver(debug);
+    debug.noquote();
+    debug.nospace();
+    debug << "CustomConversionPtr";
+    if (auto *c = cptr.data()) {
+        c->formatDebug(debug);
+    } else {
+        debug << "(0)";
+    }
+    return debug;
 }

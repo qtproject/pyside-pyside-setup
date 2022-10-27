@@ -9,6 +9,8 @@
 #include <QtCore/QList>
 #include <QtCore/QString>
 
+QT_FORWARD_DECLARE_CLASS(QDebug)
+
 class TypeEntry;
 
 class TargetToNativeConversion
@@ -25,6 +27,9 @@ public:
     QString sourceTypeCheck() const;
     QString conversion() const;
     void setConversion(const QString &conversion);
+
+    void formatDebug(QDebug &d) const;
+
 private:
     const TypeEntry *m_sourceType = nullptr;
     QString m_sourceTypeName;
@@ -59,11 +64,17 @@ public:
     /// Return the custom conversion of a type; helper for type system parser
     static CustomConversionPtr getCustomConversion(const TypeEntry *type);
 
+    void formatDebug(QDebug &debug) const;
+
 private:
     const TypeEntry *m_ownerType;
     QString m_nativeToTargetConversion;
     TargetToNativeConversions m_targetToNativeConversions;
     bool m_replaceOriginalTargetToNativeConversions = false;
 };
+
+QDebug operator<<(QDebug debug, const TargetToNativeConversion &t);
+QDebug operator<<(QDebug debug, const CustomConversion &c);
+QDebug operator<<(QDebug debug, const CustomConversionPtr &cptr);
 
 #endif // CUSTOMCONVERSION_H
