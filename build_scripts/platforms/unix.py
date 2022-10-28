@@ -38,7 +38,7 @@ def _copy_gui_executable(name, _vars=None):
     return _unix_copy_gui_executable(name, _vars)
 
 
-def prepare_packages_posix(self, _vars, cross_build=False):
+def prepare_packages_posix(pyside_build, _vars, cross_build=False):
     executables = []
     libexec_executables = []
 
@@ -51,7 +51,7 @@ def prepare_packages_posix(self, _vars, cross_build=False):
         "{st_build_dir}/{st_package_name}",
         _vars=_vars)
 
-    generated_config = self.get_built_pyside_config(_vars)
+    generated_config = pyside_build.get_built_pyside_config(_vars)
 
     def adjusted_lib_name(name, version):
         postfix = ''
@@ -150,8 +150,8 @@ def prepare_packages_posix(self, _vars, cross_build=False):
                 recursive=False, _vars=_vars, force_copy_symlinks=True)
 
         # Copy libexec
-        built_modules = self.get_built_pyside_config(_vars)['built_modules']
-        if self.is_webengine_built(built_modules):
+        built_modules = pyside_build.get_built_pyside_config(_vars)['built_modules']
+        if pyside_build.is_webengine_built(built_modules):
             lib_exec_filters.append('QtWebEngineProcess')
         if lib_exec_filters:
             libexec_executables.extend(copydir("{qt_lib_execs_dir}",
@@ -205,7 +205,7 @@ def prepare_packages_posix(self, _vars, cross_build=False):
                     return False
                 return True
             # examples/* -> <setup>/{st_package_name}/examples
-            copydir(os.path.join(self.script_dir, "examples"),
+            copydir(os.path.join(pyside_build.script_dir, "examples"),
                     "{st_build_dir}/{st_package_name}/examples",
                     force=False, _vars=_vars, dir_filter_function=pycache_dir_filter)
 
@@ -214,18 +214,18 @@ def prepare_packages_posix(self, _vars, cross_build=False):
         if config.is_internal_pyside_build() or config.is_internal_shiboken_generator_build():
             _vars['built_modules'] = generated_config['built_modules']
             if sys.platform == 'darwin':
-                prepare_standalone_package_macos(self, _vars)
+                prepare_standalone_package_macos(pyside_build, _vars)
             else:
-                prepare_standalone_package_linux(self, _vars, cross_build)
+                prepare_standalone_package_linux(pyside_build, _vars, cross_build)
 
         if config.is_internal_shiboken_generator_build():
             # Copy over clang before rpath patching.
-            self.prepare_standalone_clang(is_win=False)
+            pyside_build.prepare_standalone_clang(is_win=False)
 
     # Update rpath to $ORIGIN
     if sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
         rpath_path = "{st_build_dir}/{st_package_name}".format(**_vars)
-        self.update_rpath(rpath_path, executables)
-        self.update_rpath(rpath_path, self.package_libraries(rpath_path))
+        pyside_build.update_rpath(rpath_path, executables)
+        pyside_build.update_rpath(rpath_path, pyside_build.package_libraries(rpath_path))
         if libexec_executables:
-            self.update_rpath(rpath_path, libexec_executables, libexec=True)
+            pyside_build.update_rpath(rpath_path, libexec_executables, libexec=True)

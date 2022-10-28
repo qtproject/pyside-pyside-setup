@@ -10,7 +10,7 @@ from ..utils import (copy_icu_libs, copydir, copyfile, find_files_using_glob,
 from ..versions import PYSIDE
 
 
-def prepare_standalone_package_linux(self, _vars, cross_build=False):
+def prepare_standalone_package_linux(pyside_build, _vars, cross_build=False):
     built_modules = _vars['built_modules']
 
     constrain_modules = None
@@ -55,19 +55,19 @@ def prepare_standalone_package_linux(self, _vars, cross_build=False):
         # We choose the QtCore lib to inspect, by
         # checking which QtCore library the shiboken6 executable uses.
         if not maybe_icu_libs and not cross_build:
-            copy_icu_libs(self._patchelf_path, resolved_destination_lib_dir)
+            copy_icu_libs(pyside_build._patchelf_path, resolved_destination_lib_dir)
 
     # Set RPATH for Qt libs.
-    self.update_rpath_for_linux_qt_libraries(destination_lib_dir.format(**_vars))
+    pyside_build.update_rpath_for_linux_qt_libraries(destination_lib_dir.format(**_vars))
 
     # Patching designer to use the Qt libraries provided in the wheel
     if config.is_internal_pyside_build() and not OPTION['NO_QT_TOOLS']:
         assistant_path = "{st_build_dir}/{st_package_name}/assistant".format(**_vars)
-        linux_patch_executable(self._patchelf_path, assistant_path)
+        linux_patch_executable(pyside_build._patchelf_path, assistant_path)
         designer_path = "{st_build_dir}/{st_package_name}/designer".format(**_vars)
-        linux_patch_executable(self._patchelf_path, designer_path)
+        linux_patch_executable(pyside_build._patchelf_path, designer_path)
 
-    if self.is_webengine_built(built_modules):
+    if pyside_build.is_webengine_built(built_modules):
         copydir("{qt_data_dir}/resources",
                 "{st_build_dir}/{st_package_name}/Qt/resources",
                 _filter=None,
@@ -75,7 +75,7 @@ def prepare_standalone_package_linux(self, _vars, cross_build=False):
                 _vars=_vars)
 
     if copy_plugins:
-        is_pypy = "pypy" in self.build_classifiers
+        is_pypy = "pypy" in pyside_build.build_classifiers
         # <qt>/plugins/* -> <setup>/{st_package_name}/Qt/plugins
         plugins_target = "{st_build_dir}/{st_package_name}/Qt/plugins"
         copydir("{qt_plugins_dir}", plugins_target,
@@ -89,9 +89,9 @@ def prepare_standalone_package_linux(self, _vars, cross_build=False):
                     recursive=False,
                     _vars=_vars)
 
-        copied_plugins = self.get_shared_libraries_in_path_recursively(
+        copied_plugins = pyside_build.get_shared_libraries_in_path_recursively(
             plugins_target.format(**_vars))
-        self.update_rpath_for_linux_plugins(copied_plugins)
+        pyside_build.update_rpath_for_linux_plugins(copied_plugins)
 
     if copy_qml:
         # <qt>/qml/* -> <setup>/{st_package_name}/Qt/qml
@@ -103,9 +103,9 @@ def prepare_standalone_package_linux(self, _vars, cross_build=False):
                 recursive=True,
                 ignore=["*.debug"],
                 _vars=_vars)
-        copied_plugins = self.get_shared_libraries_in_path_recursively(
+        copied_plugins = pyside_build.get_shared_libraries_in_path_recursively(
             qml_plugins_target.format(**_vars))
-        self.update_rpath_for_linux_plugins(
+        pyside_build.update_rpath_for_linux_plugins(
             copied_plugins,
             qt_lib_dir=destination_lib_dir.format(**_vars),
             is_qml_plugin=True)

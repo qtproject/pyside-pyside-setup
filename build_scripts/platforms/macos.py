@@ -20,7 +20,7 @@ def _macos_patch_executable(name, _vars=None):
     macos_add_rpath(rpath, binary)
 
 
-def prepare_standalone_package_macos(self, _vars):
+def prepare_standalone_package_macos(pyside_build, _vars):
     built_modules = _vars['built_modules']
 
     constrain_modules = None
@@ -48,7 +48,7 @@ def prepare_standalone_package_macos(self, _vars):
     no_copy_debug = True
 
     def file_variant_filter(file_name, file_full_path):
-        if self.qtinfo.build_type != 'debug_and_release':
+        if pyside_build.qtinfo.build_type != 'debug_and_release':
             return True
         if file_name.endswith('_debug.dylib') and no_copy_debug:
             return False
@@ -61,11 +61,11 @@ def prepare_standalone_package_macos(self, _vars):
         _macos_patch_executable('linguist', _vars)
 
     # <qt>/lib/* -> <setup>/{st_package_name}/Qt/lib
-    if self.qt_is_framework_build():
+    if pyside_build.qt_is_framework_build():
         def framework_dir_filter(dir_name, parent_full_path, dir_full_path):
             if '.framework' in dir_name:
                 if (dir_name.startswith('QtWebEngine')
-                        and not self.is_webengine_built(built_modules)):
+                        and not pyside_build.is_webengine_built(built_modules)):
                     return False
                 if constrain_modules and dir_name not in constrain_frameworks:
                     return False
@@ -85,7 +85,7 @@ def prepare_standalone_package_macos(self, _vars):
         no_copy_debug = True
 
         def framework_variant_filter(file_name, file_full_path):
-            if self.qtinfo.build_type != 'debug_and_release':
+            if pyside_build.qtinfo.build_type != 'debug_and_release':
                 return True
             dir_path = os.path.dirname(file_full_path)
             in_framework = dir_path.endswith("Versions/5")
@@ -103,7 +103,7 @@ def prepare_standalone_package_macos(self, _vars):
         # present rpath does not work because it assumes a symlink
         # from Versions/5/Helpers, thus adding two more levels of
         # directory hierarchy.
-        if self.is_webengine_built(built_modules):
+        if pyside_build.is_webengine_built(built_modules):
             qt_lib_path = "{st_build_dir}/{st_package_name}/Qt/lib".format(**_vars)
             bundle = "QtWebEngineCore.framework/Helpers/"
             bundle += "QtWebEngineProcess.app"
@@ -114,7 +114,7 @@ def prepare_standalone_package_macos(self, _vars):
             macos_fix_rpaths_for_library(final_path, rpath)
     else:
         ignored_modules = []
-        if not self.is_webengine_built(built_modules):
+        if not pyside_build.is_webengine_built(built_modules):
             ignored_modules.extend(['libQt6WebEngine*.dylib'])
         accepted_modules = ['libQt6*.6.dylib']
         if constrain_modules:
@@ -127,7 +127,7 @@ def prepare_standalone_package_macos(self, _vars):
                 file_filter_function=file_variant_filter,
                 recursive=True, _vars=_vars, force_copy_symlinks=True)
 
-        if self.is_webengine_built(built_modules):
+        if pyside_build.is_webengine_built(built_modules):
             copydir("{qt_data_dir}/resources",
                     "{st_build_dir}/{st_package_name}/Qt/resources",
                     _filter=None,
@@ -150,7 +150,7 @@ def prepare_standalone_package_macos(self, _vars):
                     qt_libexec_path, _vars=_vars)
 
     if copy_plugins:
-        is_pypy = "pypy" in self.build_classifiers
+        is_pypy = "pypy" in pyside_build.build_classifiers
         # <qt>/plugins/* -> <setup>/{st_package_name}/Qt/plugins
         plugins_target = "{st_build_dir}/{st_package_name}/Qt/plugins"
         filters = ["*.dylib"]
