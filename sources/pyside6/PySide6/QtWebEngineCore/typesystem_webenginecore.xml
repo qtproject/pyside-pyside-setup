@@ -73,6 +73,9 @@
   </object-type>
 
   <object-type name="QWebEngineProfile">
+    <extra-includes>
+        <include file-name="QtWebEngineCore/QWebEngineNotification" location="global"/>
+    </extra-includes>
     <enum-type name="HttpCacheType"/>
     <enum-type name="PersistentCookiesPolicy"/>
     <add-function signature="setNotificationPresenter(PyCallable* @notificationPresenter@)">

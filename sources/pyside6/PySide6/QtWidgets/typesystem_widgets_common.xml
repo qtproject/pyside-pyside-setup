@@ -1963,8 +1963,10 @@
     </modify-function>
 
     <extra-includes>
+      <include file-name="QApplication" location="global"/>
       <include file-name="QIcon" location="global"/>
       <include file-name="QMessageBox" location="global"/>
+      <include file-name="QStyle" location="global"/>
     </extra-includes>
 
     <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp"

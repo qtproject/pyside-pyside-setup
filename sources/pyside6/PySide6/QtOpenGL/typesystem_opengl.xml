@@ -581,6 +581,35 @@
   </object-type>
 
   <object-type name="QOpenGLVersionFunctionsFactory">
+      <extra-includes>
+          <include file-name="QtOpenGL/qopenglfunctions_1_0.h" location="global"/>
+          <include file-name="QtOpenGL/qopenglfunctions_1_1.h" location="global"/>
+          <include file-name="QtOpenGL/qopenglfunctions_1_2.h" location="global"/>
+          <include file-name="QtOpenGL/qopenglfunctions_1_3.h" location="global"/>
+          <include file-name="QtOpenGL/qopenglfunctions_1_4.h" location="global"/>
+          <include file-name="QtOpenGL/qopenglfunctions_1_5.h" location="global"/>
+          <include file-name="QtOpenGL/qopenglfunctions_2_0.h" location="global"/>
+          <include file-name="QtOpenGL/qopenglfunctions_2_1.h" location="global"/>
+          <include file-name="QtOpenGL/qopenglfunctions_3_0.h" location="global"/>
+          <include file-name="QtOpenGL/qopenglfunctions_3_1.h" location="global"/>
+          <include file-name="QtOpenGL/qopenglfunctions_3_2_compatibility.h" location="global"/>
+          <include file-name="QtOpenGL/qopenglfunctions_3_2_core.h" location="global"/>
+          <include file-name="QtOpenGL/qopenglfunctions_3_3_compatibility.h" location="global"/>
+          <include file-name="QtOpenGL/qopenglfunctions_3_3_core.h" location="global"/>
+          <include file-name="QtOpenGL/qopenglfunctions_4_0_compatibility.h" location="global"/>
+          <include file-name="QtOpenGL/qopenglfunctions_4_0_core.h" location="global"/>
+          <include file-name="QtOpenGL/qopenglfunctions_4_1_compatibility.h" location="global"/>
+          <include file-name="QtOpenGL/qopenglfunctions_4_1_core.h" location="global"/>
+          <include file-name="QtOpenGL/qopenglfunctions_4_2_compatibility.h" location="global"/>
+          <include file-name="QtOpenGL/qopenglfunctions_4_2_core.h" location="global"/>
+          <include file-name="QtOpenGL/qopenglfunctions_4_3_compatibility.h" location="global"/>
+          <include file-name="QtOpenGL/qopenglfunctions_4_3_core.h" location="global"/>
+          <include file-name="QtOpenGL/qopenglfunctions_4_4_compatibility.h" location="global"/>
+          <include file-name="QtOpenGL/qopenglfunctions_4_4_core.h" location="global"/>
+          <include file-name="QtOpenGL/qopenglfunctions_4_5_compatibility.h" location="global"/>
+          <include file-name="QtOpenGL/qopenglfunctions_4_5_core.h" location="global"/>
+          <include file-name="QtOpenGL/qopenglfunctions_es2.h" location="global"/>
+      </extra-includes>
       <modify-function signature="get(const QOpenGLVersionProfile &amp;,QOpenGLContext *)">
           <inject-code class="target" position="beginning" file="../glue/qtopengl.cpp"
                        snippet="qopenglversionfunctionsfactory-get"/>
