@@ -659,19 +659,9 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
     AbstractMetaEnumList classEnums = metaClass->enums();
     metaClass->getEnumsFromInvisibleNamespacesToBeGenerated(&classEnums);
 
-    //Extra includes
     IncludeGroupList includeGroups;
-    if (!classContext.useWrapper()) {
-        includeGroups.append(IncludeGroup{u"Extra includes"_s,
-                                          typeEntry->extraIncludes()});
-    }
-
-    includeGroups.append(IncludeGroup{u"Argument includes"_s,
-                                      typeEntry->argumentIncludes()});
-
-    includeGroups.append(IncludeGroup{u"Enum includes"_s, {}});
-    for (const AbstractMetaEnum &cppEnum : qAsConst(classEnums))
-        includeGroups.back().includes.append(cppEnum.typeEntry()->extraIncludes());
+    if (!classContext.useWrapper() || !avoidProtectedHack())
+        includeGroups.append(classIncludes(metaClass));
 
     generateIncludes(s, classContext, includeGroups, innerClasses);
 

@@ -1850,6 +1850,30 @@ QString ShibokenGenerator::getPrivateModuleHeaderFileName(const QString &moduleN
     return getModuleHeaderFileBaseName(moduleName) + QStringLiteral("_p.h");
 }
 
+IncludeGroupList ShibokenGenerator::classIncludes(const AbstractMetaClass *metaClass) const
+{
+    IncludeGroupList result;
+    auto *typeEntry = metaClass->typeEntry();
+    //Extra includes
+    result.append(IncludeGroup{u"Extra includes"_s,
+                               typeEntry->extraIncludes()});
+
+    result.append({u"Enum includes"_s, {}});
+    for (const auto &cppEnum : metaClass->enums())
+        result.back().includes.append(cppEnum.typeEntry()->extraIncludes());
+
+    result.append({u"Argument includes"_s, typeEntry->argumentIncludes()});
+    const auto implicitConvs = implicitConversions(typeEntry);
+    for (auto &f : implicitConvs) {
+        if (f->isConversionOperator()) {
+            auto *source = f->ownerClass();
+            Q_ASSERT(source);
+            result.back().append(source->typeEntry()->include());
+        }
+    }
+    return result;
+}
+
 /*
 static void dumpFunction(AbstractMetaFunctionList lst)
 {
