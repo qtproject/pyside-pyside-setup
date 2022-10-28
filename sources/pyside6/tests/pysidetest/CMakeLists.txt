@@ -73,10 +73,15 @@ make_path(testbinding_include_dirs  ${pyside6_BINARY_DIR}
 make_path(testbinding_typesystem_path ${pyside6_SOURCE_DIR}
                                       ${pyside6_BINARY_DIR})
 
+shiboken_get_tool_shell_wrapper(shiboken tool_wrapper)
+
 add_custom_command(
-OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/mjb_rejected_classes.log"
-        BYPRODUCTS ${testbinding_SRC}
-        COMMAND Shiboken6::shiboken6 ${GENERATOR_EXTRA_FLAGS}
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/mjb_rejected_classes.log"
+    BYPRODUCTS ${testbinding_SRC}
+    COMMAND
+        ${tool_wrapper}
+        $<TARGET_FILE:Shiboken6::shiboken6>
+        ${GENERATOR_EXTRA_FLAGS}
         ${CMAKE_CURRENT_SOURCE_DIR}/pysidetest_global.h
         --include-paths=${testbinding_include_dirs}
         ${shiboken_framework_include_dirs_option}
@@ -84,8 +89,8 @@ OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/mjb_rejected_classes.log"
         --output-directory=${CMAKE_CURRENT_BINARY_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/typesystem_pysidetest.xml
         --api-version=${SUPPORTED_QT_VERSION}
-WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-COMMENT "Running generator for test binding..."
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMENT "Running generator for test binding..."
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}

@@ -7,17 +7,19 @@ set(sample_SRC ${CMAKE_CURRENT_BINARY_DIR}/Shiboken/shiboken_module_wrapper.cpp)
 
 set(shibokenmodule_TYPESYSTEM ${CMAKE_CURRENT_SOURCE_DIR}/typesystem_shiboken.xml)
 
+shiboken_get_tool_shell_wrapper(shiboken tool_wrapper)
+
 add_custom_command(
-OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/mjb_rejected_classes.log"
-BYPRODUCTS ${sample_SRC}
-# Note: shiboken6 is an executable target. By not specifying its explicit
-# path, CMAKE figures it out, itself!
-# This fixes an issue with Visual Studio, see https://github.com/PySide/shiboken6/pull/11
-COMMAND Shiboken6::shiboken6
-        --project-file=${CMAKE_CURRENT_BINARY_DIR}/shibokenmodule.txt ${GENERATOR_EXTRA_FLAGS}
-DEPENDS ${shibokenmodule_TYPESYSTEM}
-WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-COMMENT "Running generator for 'Shiboken'..."
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/mjb_rejected_classes.log"
+    BYPRODUCTS ${sample_SRC}
+    COMMAND
+        ${tool_wrapper}
+        $<TARGET_FILE:Shiboken6::shiboken6>
+        --project-file=${CMAKE_CURRENT_BINARY_DIR}/shibokenmodule.txt
+        ${GENERATOR_EXTRA_FLAGS}
+    DEPENDS ${shibokenmodule_TYPESYSTEM}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMENT "Running generator for 'Shiboken'..."
 )
 
 add_library(shibokenmodule MODULE ${sample_SRC})

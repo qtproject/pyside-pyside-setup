@@ -670,3 +670,77 @@ macro(create_generator_target library_name)
     add_custom_target(${library_name}_generator DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/mjb_rejected_classes.log")
     add_dependencies(${library_name} ${library_name}_generator)
 endmacro()
+
+# Generate a shell script wrapper that sets environment variables for executing a specific tool.
+#
+# tool_name should be a unique tool name, preferably without spaces.
+# Returns the wrapper path in path_out_var.
+#
+# Currently adds the Qt bin dir and the libclang.dll bin dir to PATH.
+# On platforms other than Windows, returs an empty string.
+# Meant to be used as the first argument to add_custom_command's COMMAND option.
+function(shiboken_get_tool_shell_wrapper tool_name path_out_var)
+    # No need for a wrapper on non Windows hosts.
+    if(NOT CMAKE_HOST_WIN32)
+        set(${path_out_var} "" PARENT_SCOPE)
+        return()
+    endif()
+
+    # Generate the wrapper only once during the execution of CMake.
+    get_property(is_called GLOBAL PROPERTY "_shiboken_tool_wrapper_${tool_name}_created")
+
+    if(is_called)
+        get_property(wrapper_path GLOBAL PROPERTY "_shiboken_tool_wrapper_${tool_name}_path")
+        set(${path_out_var} "${wrapper_path}" PARENT_SCOPE)
+        return()
+    endif()
+
+    set(path_dirs "")
+    set(path_dirs_native "")
+
+    # Assert that Qt is already found.
+    if(NOT QT6_INSTALL_PREFIX OR NOT QT6_INSTALL_BINS)
+        message(FATAL_ERROR "Qt should have been found already by now.")
+    endif()
+
+    # Get path to the Qt bin dir.
+    set(qt_bin_dir "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}")
+    list(APPEND path_dirs "${qt_bin_dir}")
+
+    # Get path to libclang.dll.
+    set(libclang_bin_dir "")
+    if(DEFINED ENV{LLVM_INSTALL_DIR})
+        set(libclang_bin_dir "$ENV{LLVM_INSTALL_DIR}/bin")
+    elseif(DEFINED ENV{CLANG_INSTALL_DIR})
+        set(libclang_bin_dir "$ENV{CLANG_INSTALL_DIR}/bin")
+    else()
+        message(WARNING
+            "Couldn't find libclang.dll. "
+            "You will likely need to add it manually to PATH to ensure the build succeeds.")
+    endif()
+    if(libclang_bin_dir)
+        list(APPEND path_dirs "${libclang_bin_dir}")
+    endif()
+
+    # Convert the paths from unix-style to native Windows style.
+    foreach(path_dir IN LISTS path_dirs)
+        if(EXISTS "${path_dir}")
+            file(TO_NATIVE_PATH "${path_dir}" path_dir_native)
+            list(APPEND path_dirs_native "${path_dir_native}")
+        endif()
+    endforeach()
+
+    set(wrapper_dir "${CMAKE_BINARY_DIR}/.qfp/bin")
+    file(MAKE_DIRECTORY "${wrapper_dir}")
+    set(wrapper_path "${wrapper_dir}/${tool_name}_wrapper.bat")
+
+    file(WRITE "${wrapper_path}" "@echo off
+set PATH=${path_dirs_native};%PATH%
+%*")
+
+    # Remember the creation of the file for a specific tool.
+    set_property(GLOBAL PROPERTY "_shiboken_tool_wrapper_${tool_name}_path" "${wrapper_path}")
+    set_property(GLOBAL PROPERTY "_shiboken_tool_wrapper_${tool_name}_created" TRUE)
+
+    set(${path_out_var} "${wrapper_path}" PARENT_SCOPE)
+endfunction()

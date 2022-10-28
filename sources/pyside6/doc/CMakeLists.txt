@@ -213,21 +213,27 @@ configure_file("conf.py.in" "rst/conf.py" @ONLY)
 
 set(CODE_SNIPPET_ROOT "${CMAKE_CURRENT_BINARY_DIR}/rst/codesnippets")
 
+shiboken_get_tool_shell_wrapper(shiboken tool_wrapper)
+
 add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/rst/PySide6/QtCore/index.rst"
-                   COMMAND Shiboken6::shiboken6 --generator-set=qtdoc ${global_header}
-                           --enable-pyside-extensions
-                           --include-paths="${QT_INCLUDE_DIR}${PATH_SEP}${pyside6_SOURCE_DIR}${PATH_SEP}${TS_ROOT}"
-                           --api-version=${SUPPORTED_QT_VERSION}
-                           --typesystem-paths="${QDOC_TYPESYSTEM_PATH}"
-                           --library-source-dir=${QT_SRC_DIR}
-                           --documentation-data-dir=${DOC_DATA_DIR}/webxml
-                           --output-directory=${CMAKE_CURRENT_BINARY_DIR}/rst
-                           --documentation-code-snippets-dir=${CODE_SNIPPET_ROOT}
-                           --snippets-path-rewrite=${QT_ROOT_PATH}:${CODE_SNIPPET_ROOT}
-                           --documentation-extra-sections-dir=${CMAKE_CURRENT_BINARY_DIR}/rst/extras
-                           --additional-documentation=${CMAKE_CURRENT_BINARY_DIR}/rst/additionaldocs.lst
-                           --inheritance-file=${ENV_INHERITANCE_FILE}
-                           ${global_typesystem}
+                   COMMAND
+                       ${tool_wrapper}
+                       $<TARGET_FILE:Shiboken6::shiboken6>
+                       --generator-set=qtdoc
+                       ${global_header}
+                       --enable-pyside-extensions
+                       --include-paths="${QT_INCLUDE_DIR}${PATH_SEP}${pyside6_SOURCE_DIR}${PATH_SEP}${TS_ROOT}"
+                       --api-version=${SUPPORTED_QT_VERSION}
+                       --typesystem-paths="${QDOC_TYPESYSTEM_PATH}"
+                       --library-source-dir=${QT_SRC_DIR}
+                       --documentation-data-dir=${DOC_DATA_DIR}/webxml
+                       --output-directory=${CMAKE_CURRENT_BINARY_DIR}/rst
+                       --documentation-code-snippets-dir=${CODE_SNIPPET_ROOT}
+                       --snippets-path-rewrite=${QT_ROOT_PATH}:${CODE_SNIPPET_ROOT}
+                       --documentation-extra-sections-dir=${CMAKE_CURRENT_BINARY_DIR}/rst/extras
+                       --additional-documentation=${CMAKE_CURRENT_BINARY_DIR}/rst/additionaldocs.lst
+                       --inheritance-file=${ENV_INHERITANCE_FILE}
+                       ${global_typesystem}
                    WORKING_DIRECTORY ${${module}_SOURCE_DIR}
                    COMMENT "Running generator to generate documentation...")
 

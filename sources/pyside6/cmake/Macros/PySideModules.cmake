@@ -126,7 +126,12 @@ macro(create_pyside_module)
         install(FILES ${module_GLUE_SOURCES} DESTINATION share/PySide6${pyside6_SUFFIX}/typesystems/glue)
     endif()
 
-    set(shiboken_command Shiboken6::shiboken6 ${GENERATOR_EXTRA_FLAGS}
+    shiboken_get_tool_shell_wrapper(shiboken tool_wrapper)
+
+    set(shiboken_command
+        ${tool_wrapper}
+        $<TARGET_FILE:Shiboken6::shiboken6>
+        ${GENERATOR_EXTRA_FLAGS}
         "--include-paths=${shiboken_include_dirs}"
         "--typesystem-paths=${pyside_binary_dir}${PATH_SEP}${pyside6_SOURCE_DIR}${PATH_SEP}${${module_TYPESYSTEM_PATH}}"
         --output-directory=${CMAKE_CURRENT_BINARY_DIR}
