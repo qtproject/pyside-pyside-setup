@@ -112,10 +112,10 @@ void HeaderGenerator::generateClass(TextStream &s, const GeneratorContext &class
     for (auto &inst : metaClass->templateBaseClassInstantiations())
         s << inst.typeEntry()->include();
 
-    if (classContext.useWrapper() && !typeEntry->extraIncludes().isEmpty()) {
-        s << "\n// Extra includes\n";
-        for (const Include &inc : typeEntry->extraIncludes())
-            s << inc.toString() << '\n';
+    if (classContext.useWrapper() && avoidProtectedHack()) {
+         const auto includeGroups = classIncludes(metaClass);
+         for( const auto &includeGroup : includeGroups)
+             s << includeGroup;
     }
 
     if (classContext.useWrapper() && usePySideExtensions() && metaClass->isQObject())

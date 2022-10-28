@@ -21,6 +21,7 @@ class QPropertySpec;
 class OverloadData;
 class TargetToNativeConversion;
 struct GeneratorClassInfoCacheEntry;
+struct IncludeGroup;
 
 QT_FORWARD_DECLARE_CLASS(TextStream)
 
@@ -258,6 +259,9 @@ protected:
     /// Returns the file name for the module global header. If no module name is provided the current will be used.
     static QString getModuleHeaderFileName(const QString &moduleName = QString());
     static QString getPrivateModuleHeaderFileName(const QString &moduleName = QString());
+
+    /// Includes for header (native wrapper class) or binding source
+    QList<IncludeGroup> classIncludes(const AbstractMetaClass *metaClass) const;
 
     OptionDescriptions options() const override;
     bool handleOption(const QString &key, const QString &value) override;
