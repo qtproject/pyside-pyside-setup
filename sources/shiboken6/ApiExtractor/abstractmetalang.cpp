@@ -529,6 +529,16 @@ bool AbstractMetaClass::isInvisibleNamespace() const
         && !NamespaceTypeEntry::isVisibleScope(d->m_typeEntry);
 }
 
+bool AbstractMetaClass::isInlineNamespace() const
+{
+    bool result = false;
+    if (d->m_typeEntry->isNamespace()) {
+        auto *nte = static_cast<const NamespaceTypeEntry *>(d->m_typeEntry);
+        result = nte->isInlineNamespace();
+    }
+    return result;
+}
+
 bool AbstractMetaClass::isQtNamespace() const
 {
     return isNamespace() && name() == u"Qt";

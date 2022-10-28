@@ -413,12 +413,111 @@ static void formatTypeDefEntries(TextStream &s)
     s << '\n';
 }
 
+// Helpers for forward-declaring classes in the module header for the
+// specialization of the SbkType template functions. This is possible if the
+// class does not have inner types or enums which need to be known.
+static bool canForwardDeclare(const AbstractMetaClass *c)
+{
+    if (c->isNamespace() || !c->enums().isEmpty()
+        || !c->innerClasses().isEmpty() || c->isTypeDef()) {
+        return false;
+    }
+    if (auto *encl = c->enclosingClass())
+        return encl->isNamespace();
+    return true;
+}
+
+static void writeForwardDeclaration(TextStream &s, const AbstractMetaClass *c)
+{
+    Q_ASSERT(!c->isNamespace());
+    const bool isStruct = c->attributes().testFlag(AbstractMetaClass::Struct);
+    s << (isStruct ? "struct " : "class ");
+    // Do not use name as this can be modified/renamed for target lang.
+    const QString qualifiedCppName = c->qualifiedCppName();
+    const auto lastQualifier = qualifiedCppName.lastIndexOf(u':');
+    if (lastQualifier != -1)
+        s << QStringView{qualifiedCppName}.mid(lastQualifier + 1);
+    else
+        s << qualifiedCppName;
+    s << ";\n";
+}
+
+// Helpers for writing out namespaces hierarchically when writing class
+// forward declarations to the module header. Ensure inline namespaces
+// are marked as such (else clang complains) and namespaces are ordered.
+struct NameSpace {
+    const AbstractMetaClass *nameSpace;
+    AbstractMetaClassCList classes;
+};
+
+static bool operator<(const NameSpace &n1, const NameSpace &n2)
+{
+    return n1.nameSpace->name() < n2.nameSpace->name();
+}
+
+using NameSpaces = QList<NameSpace>;
+
+static qsizetype indexOf(const NameSpaces &nsps, const AbstractMetaClass *needle)
+{
+    for (qsizetype i = 0, count = nsps.size(); i < count; ++i) {
+        if (nsps.at(i).nameSpace == needle)
+            return i;
+    }
+    return -1;
+}
+
+static void writeNamespaceForwardDeclarationRecursion(TextStream &s, qsizetype idx,
+                                                      const NameSpaces &nameSpaces)
+{
+    auto &root = nameSpaces.at(idx);
+    s << '\n';
+    if (root.nameSpace->isInlineNamespace())
+        s << "inline ";
+    s << "namespace " << root.nameSpace->name() << " {\n" << indent;
+    for (auto *c : root.classes)
+        writeForwardDeclaration(s, c);
+
+    for (qsizetype i = 0, count = nameSpaces.size(); i < count; ++i) {
+        if (i != idx && nameSpaces.at(i).nameSpace->enclosingClass() == root.nameSpace)
+            writeNamespaceForwardDeclarationRecursion(s, i, nameSpaces);
+    }
+    s << outdent << "}\n";
+}
+
+static void writeForwardDeclarations(TextStream &s,
+                                     const AbstractMetaClassCList &classList)
+{
+    NameSpaces nameSpaces;
+
+    for (auto *c : classList) {
+        if (auto *encl = c->enclosingClass()) {
+            Q_ASSERT(encl->isNamespace());
+            auto idx = indexOf(nameSpaces, encl);
+            if (idx != -1)
+                nameSpaces[idx].classes.append(c);
+            else
+                nameSpaces.append(NameSpace{encl, {c}});
+        } else {
+            writeForwardDeclaration(s, c);
+        }
+    }
+
+    std::sort(nameSpaces.begin(), nameSpaces.end());
+
+    // Recursively write out namespaces starting at the root elements.
+    for (qsizetype i = 0, count = nameSpaces.size(); i < count; ++i) {
+        const auto &nsp = nameSpaces.at(i);
+        if (nsp.nameSpace->enclosingClass() == nullptr)
+            writeNamespaceForwardDeclarationRecursion(s, i, nameSpaces);
+    }
+}
 
 bool HeaderGenerator::finishGeneration()
 {
     // Generate the main header for this module.
     // This header should be included by binding modules
     // extendind on top of this one.
+    AbstractMetaClassCList forwardDeclarations;
     QSet<Include> includes;
     QSet<Include> privateIncludes;
     StringStream macrosStream(TextStream::Language::Cpp);
@@ -531,7 +630,11 @@ bool HeaderGenerator::finishGeneration()
         //Includes
         const bool isPrivate = classType->isPrivate();
         auto &includeList = isPrivate ? privateIncludes : includes;
-        includeList << classType->include();
+        if (leanHeaders() && canForwardDeclare(metaClass))
+            forwardDeclarations.append(metaClass);
+         else
+            includeList << classType->include();
+
         auto &typeFunctionsStr = isPrivate ? privateTypeFunctions : typeFunctions;
 
         for (const AbstractMetaEnum &cppEnum : metaClass->enums()) {
@@ -590,20 +693,24 @@ bool HeaderGenerator::finishGeneration()
     for (const Include &include : qAsConst(includes))
         s << include;
 
-    if (!primitiveTypes().isEmpty()) {
-        s << "// Conversion Includes - Primitive Types\n";
-        const PrimitiveTypeEntryList &primitiveTypeList = primitiveTypes();
-        for (const PrimitiveTypeEntry *ptype : primitiveTypeList)
-            s << ptype->include();
-        s<< '\n';
-    }
+    if (leanHeaders()) {
+        writeForwardDeclarations(s, forwardDeclarations);
+    } else {
+        if (!primitiveTypes().isEmpty()) {
+            s << "// Conversion Includes - Primitive Types\n";
+            const PrimitiveTypeEntryList &primitiveTypeList = primitiveTypes();
+            for (const PrimitiveTypeEntry *ptype : primitiveTypeList)
+                s << ptype->include();
+            s<< '\n';
+        }
 
-    if (!containerTypes().isEmpty()) {
-        s << "// Conversion Includes - Container Types\n";
-        const ContainerTypeEntryList &containerTypeList = containerTypes();
-        for (const ContainerTypeEntry *ctype : containerTypeList)
-            s << ctype->include();
-        s<< '\n';
+        if (!containerTypes().isEmpty()) {
+            s << "// Conversion Includes - Container Types\n";
+            const ContainerTypeEntryList &containerTypeList = containerTypes();
+            for (const ContainerTypeEntry *ctype : containerTypeList)
+                s << ctype->include();
+            s<< '\n';
+        }
     }
 
     s << macrosStream.toString() << '\n';
