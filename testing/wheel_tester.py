@@ -18,11 +18,13 @@ directory (e.g. setup.py bdist_wheel was already executed).
 
 import os
 import platform
+import shutil
 import sys
 import tempfile
 import logging
 from argparse import ArgumentParser, RawTextHelpFormatter
 from pathlib import Path
+from configparser import ConfigParser
 
 try:
     this_file = __file__
@@ -202,6 +204,55 @@ def run_nuitka_test(example):
         raise RuntimeError(f"Failure running {example} with Nuitka.")
 
 
+def _run_deploy_test(example, tmpdirname):
+    """Helper for running deployment and example."""
+    main_file = None
+    for py_file in example.glob("*.py"):
+        shutil.copy(py_file, tmpdirname)
+        if not main_file or py_file.name == "main.py":
+            main_file = py_file
+    deploy_tool = Path(sys.executable).parent / "pyside6-deploy"
+    cmd = [os.fspath(deploy_tool), "-f", main_file.name, "--init"]
+    if run_process(cmd) != 0:
+        raise RuntimeError("Error creating pysidedeploy.spec")
+
+    config_file = Path(tmpdirname) / "pysidedeploy.spec"
+    parser = ConfigParser(comment_prefixes="/", allow_no_value=True)
+    parser.read(config_file)
+    parser.set("nuitka", "extra_args", "--verbose --assume-yes-for-downloads")
+    with open(config_file, "w+") as config_file_writer:
+        parser.write(config_file_writer, space_around_delimiters=True)
+
+    cmd = [os.fspath(deploy_tool), "-f", "-c", os.fspath(config_file)]
+    if run_process(cmd) != 0:
+        raise RuntimeError("Error deploying")
+
+    suffix = "exe" if sys.platform == "win32" else "bin"
+    binary = f"{tmpdirname}/{main_file.stem}.{suffix}"
+    if run_process([binary]) != 0:
+        raise RuntimeError("Error running the deployed example")
+    return True
+
+
+def run_deploy_test(example):
+    """Test pyside6-deploy."""
+    log.info(f"Running deploy test of {example}")
+    current_dir = Path.cwd()
+    result = False
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        try:
+            os.chdir(tmpdirname)
+            result = _run_deploy_test(example, tmpdirname)
+        except RuntimeError as e:
+            log.error(str(e))
+            raise e
+        finally:
+            os.chdir(os.fspath(current_dir))
+    state = "succeeded" if result else "failed"
+    log.info(f"Deploy test {state}")
+    return result
+
+
 def run_ninja():
     args = ["ninja"]
     exit_code = run_process(args)
@@ -264,9 +315,17 @@ def try_build_examples():
 
     log.info("Attempting to build hello.py using Nuitka.")
     src_path = Path(examples_dir) / "installer_test"
-    # Nuitka is loaded by coin_build_instructions.py, but not when
-    # testing directly this script.
-    run_nuitka_test(os.fspath(src_path / "hello.py"))
+
+    # disable for windows as it Nuitka --onefile deployment in Windows
+    # requires DependencyWalker. Download and installing will slow down
+    # Coin
+    if sys.platform != "win32":
+        run_deploy_test(src_path)
+
+    if False:  # pre 6.4.1, kept for reference
+        # Nuitka is loaded by coin_build_instructions.py, but not when
+        # testing directly this script.
+        run_nuitka_test(os.fspath(src_path / "hello.py"))
 
     log.info("Attempting to build and run samplebinding using cmake.")
     src_path = os.path.join(examples_dir, "samplebinding")
