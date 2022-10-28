@@ -31,13 +31,19 @@ ${CMAKE_CURRENT_BINARY_DIR}/smart/stduniqueptrvirtualmethodtester_wrapper.cpp
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/smart-binding.txt.in"
                "${CMAKE_CURRENT_BINARY_DIR}/smart-binding.txt" @ONLY)
 
+shiboken_get_tool_shell_wrapper(shiboken tool_wrapper)
+
 add_custom_command(
-OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/mjb_rejected_classes.log"
-BYPRODUCTS ${smart_SRC}
-COMMAND Shiboken6::shiboken6 --project-file=${CMAKE_CURRENT_BINARY_DIR}/smart-binding.txt ${GENERATOR_EXTRA_FLAGS}
-DEPENDS ${smart_TYPESYSTEM} ${CMAKE_CURRENT_SOURCE_DIR}/global.h Shiboken6::shiboken6
-WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-COMMENT "Running generator for 'smart' test binding..."
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/mjb_rejected_classes.log"
+    BYPRODUCTS ${smart_SRC}
+    COMMAND
+        ${tool_wrapper}
+        $<TARGET_FILE:Shiboken6::shiboken6>
+        --project-file=${CMAKE_CURRENT_BINARY_DIR}/smart-binding.txt
+        ${GENERATOR_EXTRA_FLAGS}
+    DEPENDS ${smart_TYPESYSTEM} ${CMAKE_CURRENT_SOURCE_DIR}/global.h Shiboken6::shiboken6
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMENT "Running generator for 'smart' test binding..."
 )
 
 add_library(smart MODULE ${smart_SRC})

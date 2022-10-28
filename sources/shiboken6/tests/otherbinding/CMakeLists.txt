@@ -22,13 +22,19 @@ ${CMAKE_CURRENT_BINARY_DIR}/other/valuewithunitintmillimeter_wrapper.cpp
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/other-binding.txt.in"
                "${CMAKE_CURRENT_BINARY_DIR}/other-binding.txt" @ONLY)
 
+shiboken_get_tool_shell_wrapper(shiboken tool_wrapper)
+
 add_custom_command(
-OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/mjb_rejected_classes.log"
-BYPRODUCTS ${other_SRC}
-COMMAND Shiboken6::shiboken6 --project-file=${CMAKE_CURRENT_BINARY_DIR}/other-binding.txt ${GENERATOR_EXTRA_FLAGS}
-DEPENDS ${other_TYPESYSTEM} ${CMAKE_CURRENT_SOURCE_DIR}/global.h Shiboken6::shiboken6
-WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-COMMENT "Running generator for 'other' test binding..."
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/mjb_rejected_classes.log"
+    BYPRODUCTS ${other_SRC}
+    COMMAND
+        ${tool_wrapper}
+        $<TARGET_FILE:Shiboken6::shiboken6>
+        --project-file=${CMAKE_CURRENT_BINARY_DIR}/other-binding.txt
+        ${GENERATOR_EXTRA_FLAGS}
+    DEPENDS ${other_TYPESYSTEM} ${CMAKE_CURRENT_SOURCE_DIR}/global.h Shiboken6::shiboken6
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMENT "Running generator for 'other' test binding..."
 )
 
 add_library(other MODULE ${other_SRC})
