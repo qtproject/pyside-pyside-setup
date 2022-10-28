@@ -13,3 +13,4 @@ typesystem-path = @CMAKE_CURRENT_SOURCE_DIR@
 
 enable-parent-ctor-heuristic
 use-isnull-as-nb_nonzero
+lean-headers

@@ -217,6 +217,7 @@ public:
 
     bool isNamespace() const;
     bool isInvisibleNamespace() const;
+    bool isInlineNamespace() const;
 
     bool isQObject() const { return inheritsFrom(u"QObject"_qs); }
     bool isQtNamespace() const;

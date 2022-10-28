@@ -131,6 +131,7 @@ macro(create_pyside_module)
         "--typesystem-paths=${pyside_binary_dir}${PATH_SEP}${pyside6_SOURCE_DIR}${PATH_SEP}${${module_TYPESYSTEM_PATH}}"
         --output-directory=${CMAKE_CURRENT_BINARY_DIR}
         --license-file=${CMAKE_CURRENT_SOURCE_DIR}/../licensecomment.txt
+        --lean-headers
         --api-version=${SUPPORTED_QT_VERSION})
 
     if(CMAKE_HOST_APPLE)

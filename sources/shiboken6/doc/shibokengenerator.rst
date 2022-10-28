@@ -118,6 +118,10 @@ Options
     If a class has an isNull() const method, it will be used to
     compute the value of boolean casts (see :ref:`bool-cast`).
 
+``--lean-headers``
+    Forward declare classes in module headers instead of including their class
+    headers where possible.
+
 .. _use-operator-bool-as-nb-nonzero:
 
 ``--use-operator-bool-as-nb_nonzero``

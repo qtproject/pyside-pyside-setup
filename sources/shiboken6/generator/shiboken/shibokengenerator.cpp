@@ -54,6 +54,7 @@ static const char USE_ISNULL_AS_NB_NONZERO[] = "use-isnull-as-nb_nonzero";
 static const char USE_OPERATOR_BOOL_AS_NB_NONZERO[] = "use-operator-bool-as-nb_nonzero";
 static const char WRAPPER_DIAGNOSTICS[] = "wrapper-diagnostics";
 static const char NO_IMPLICIT_CONVERSIONS[] = "no-implicit-conversions";
+static const char LEAN_HEADERS[] = "lean-headers";
 
 const QString CPP_ARG = u"cppArg"_s;
 const QString CPP_ARG_REMOVED = u"removed_cppArg"_s;
@@ -2081,6 +2082,8 @@ Generator::OptionDescriptions ShibokenGenerator::options() const
         {QLatin1StringView(USE_ISNULL_AS_NB_NONZERO),
          u"If a class have an isNull() const method, it will be used to compute\n"
           "the value of boolean casts"_s},
+        {QLatin1StringView(LEAN_HEADERS),
+         u"Forward declare classes in module headers"_s},
         {QLatin1StringView(USE_OPERATOR_BOOL_AS_NB_NONZERO),
          u"If a class has an operator bool, it will be used to compute\n"
           "the value of boolean casts"_s},
@@ -2104,6 +2107,8 @@ bool ShibokenGenerator::handleOption(const QString &key, const QString &value)
         return (m_verboseErrorMessagesDisabled = true);
     if (key == QLatin1StringView(USE_ISNULL_AS_NB_NONZERO))
         return (m_useIsNullAsNbNonZero = true);
+    if (key == QLatin1StringView(LEAN_HEADERS))
+        return (m_leanHeaders= true);
     if (key == QLatin1StringView(USE_OPERATOR_BOOL_AS_NB_NONZERO))
         return (m_useOperatorBoolAsNbNonZero = true);
     if (key == QLatin1StringView(NO_IMPLICIT_CONVERSIONS)) {
@@ -2133,6 +2138,11 @@ bool ShibokenGenerator::useReturnValueHeuristic() const
 bool ShibokenGenerator::useIsNullAsNbNonZero() const
 {
     return m_useIsNullAsNbNonZero;
+}
+
+bool ShibokenGenerator::leanHeaders() const
+{
+    return m_leanHeaders;
 }
 
 bool ShibokenGenerator::useOperatorBoolAsNbNonZero() const
