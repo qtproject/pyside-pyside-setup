@@ -14,11 +14,11 @@ from ..utils import (copydir, copyfile, download_and_extract_7z, filter_match,
 from ..versions import PYSIDE, SHIBOKEN
 
 
-def prepare_packages_win32(self, _vars):
+def prepare_packages_win32(pyside_build, _vars):
     # For now, debug symbols will not be shipped into the package.
     copy_pdbs = False
     pdbs = []
-    if (self.debug or self.build_type == 'RelWithDebInfo') and copy_pdbs:
+    if (pyside_build.debug or pyside_build.build_type == 'RelWithDebInfo') and copy_pdbs:
         pdbs = ['*.pdb']
 
     # <install>/lib/site-packages/{st_package_name}/* ->
@@ -196,7 +196,7 @@ def prepare_packages_win32(self, _vars):
                     return False
                 return True
             # examples/* -> <setup>/{st_package_name}/examples
-            copydir(self.script_dir / "examples",
+            copydir(pyside_build.script_dir / "examples",
                     "{st_build_dir}/{st_package_name}/examples",
                     force=False, _vars=_vars, dir_filter_function=pycache_dir_filter)
 
@@ -214,7 +214,7 @@ def prepare_packages_win32(self, _vars):
         copy_msvc_redist_files(_vars, Path("{build_dir}/msvc_redist".format(**_vars)))
 
     if config.is_internal_pyside_build() or config.is_internal_shiboken_generator_build():
-        copy_qt_artifacts(self, copy_pdbs, _vars)
+        copy_qt_artifacts(pyside_build, copy_pdbs, _vars)
         copy_msvc_redist_files(_vars, Path("{build_dir}/msvc_redist".format(**_vars)))
 
 
@@ -260,8 +260,8 @@ def copy_msvc_redist_files(_vars, redist_target_path):
             _filter=msvc_redist, recursive=False, _vars=_vars)
 
 
-def copy_qt_artifacts(self, copy_pdbs, _vars):
-    built_modules = self.get_built_pyside_config(_vars)['built_modules']
+def copy_qt_artifacts(pyside_build, copy_pdbs, _vars):
+    built_modules = pyside_build.get_built_pyside_config(_vars)['built_modules']
 
     constrain_modules = None
     copy_plugins = True
@@ -299,9 +299,9 @@ def copy_qt_artifacts(self, copy_pdbs, _vars):
         "libEGL{}.dll",
         "libGLESv2{}.dll"
     ]
-    if self.qtinfo.build_type != 'debug_and_release':
+    if pyside_build.qtinfo.build_type != 'debug_and_release':
         egl_suffix = '*'
-    elif self.debug:
+    elif pyside_build.debug:
         egl_suffix = 'd'
     else:
         egl_suffix = ''
@@ -342,7 +342,7 @@ def copy_qt_artifacts(self, copy_pdbs, _vars):
         # If qt is not a debug_and_release build, that means there
         # is only one set of shared libraries, so we can just copy
         # them.
-        if self.qtinfo.build_type != 'debug_and_release':
+        if pyside_build.qtinfo.build_type != 'debug_and_release':
             if filter_match(file_name, release):
                 return True
             return False
@@ -371,7 +371,7 @@ def copy_qt_artifacts(self, copy_pdbs, _vars):
         file_path_dir_name = file_full_path.parent
         # e.g. "Qt6Coredd"
         maybe_debug_name = f"{file_base_name}d"
-        if self.debug:
+        if pyside_build.debug:
             _filter = debug
 
             def predicate(path):
@@ -396,7 +396,7 @@ def copy_qt_artifacts(self, copy_pdbs, _vars):
             recursive=False, _vars=_vars)
 
     if copy_plugins:
-        is_pypy = "pypy" in self.build_classifiers
+        is_pypy = "pypy" in pyside_build.build_classifiers
         # <qt>/plugins/* -> <setup>/{st_package_name}/plugins
         plugins_target = "{st_build_dir}/{st_package_name}/plugins"
         plugin_dll_patterns = ["*{}.dll"]
@@ -446,14 +446,14 @@ def copy_qt_artifacts(self, copy_pdbs, _vars):
                 recursive=True,
                 _vars=_vars)
 
-    if self.is_webengine_built(built_modules):
+    if pyside_build.is_webengine_built(built_modules):
         copydir("{qt_data_dir}/resources",
                 "{st_build_dir}/{st_package_name}/resources",
                 _filter=None,
                 recursive=False,
                 _vars=_vars)
 
-        _ext = "d" if self.debug else ""
+        _ext = "d" if pyside_build.debug else ""
         _filter = [f"QtWebEngineProcess{_ext}.exe"]
         copydir("{qt_bin_dir}",
                 "{st_build_dir}/{st_package_name}",
@@ -467,4 +467,4 @@ def copy_qt_artifacts(self, copy_pdbs, _vars):
                  _vars=_vars)
 
     if copy_clang:
-        self.prepare_standalone_clang(is_win=True)
+        pyside_build.prepare_standalone_clang(is_win=True)
