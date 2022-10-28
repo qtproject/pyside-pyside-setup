@@ -535,6 +535,8 @@ void CppGenerator::generateIncludes(TextStream &s, const GeneratorContext &class
 
     if (normalClass && usePySideExtensions()) {
         s << includeQDebug;
+        if (metaClass->hasToStringCapability())
+            s << "#include <QtCore/QBuffer>\n";
         if (metaClass->isQObject()) {
             s << "#include <pysideqobject.h>\n"
                 << "#include <pysidesignal.h>\n"
@@ -543,6 +545,7 @@ void CppGenerator::generateIncludes(TextStream &s, const GeneratorContext &class
                 << "#include <pysidemetafunction.h>\n";
         }
         s << "#include <pysideqenum.h>\n"
+            << "#include <pysideqflags.h>\n"
             << "#include <pysideqmetatype.h>\n"
             << "#include <pysideutils.h>\n"
             << "#include <feature_select.h>\n"
@@ -970,6 +973,8 @@ void CppGenerator::generateSmartPointerClass(TextStream &s, const GeneratorConte
     const bool isValueHandle = smartPointerType ==TypeSystem::SmartPointerType::ValueHandle;
 
     IncludeGroup includes{u"Extra includes"_s, typeEntry->extraIncludes()};
+    if (hasPointeeClass)
+        includes.append(classContext.pointeeClass()->typeEntry()->include());
     generateIncludes(s, classContext, {includes});
 
     s  << '\n' << typeNameFunc << '\n';
@@ -6557,6 +6562,26 @@ bool CppGenerator::finishGeneration()
         writeInitFunc(s_classInitDecl, s_classPythonDefines,
                       getInitFunctionName(context),
                       smp.type.typeEntry()->targetLangEnclosingEntry());
+        includes << smp.type.instantiations().constFirst().typeEntry()->include();
+    }
+
+    for (auto &instantiatedContainer : api().instantiatedContainers()) {
+        for (const auto &inst : instantiatedContainer.instantiations())
+            includes << inst.typeEntry()->include();
+    }
+
+    const ExtendedConverterData extendedConverters = getExtendedConverters();
+    for (auto it = extendedConverters.cbegin(), end = extendedConverters.cend(); it != end; ++it) {
+        const TypeEntry *te = it.key();
+        includes << te->include();
+        for (const auto &metaClass : it.value())
+            includes << metaClass->typeEntry()->include();
+    }
+
+    const QList<CustomConversionPtr> &typeConversions = getPrimitiveCustomConversions();
+    for (const auto &c : typeConversions) {
+        if (auto *te = c->ownerType())
+            includes << te->include();
     }
 
     QString moduleFileName(outputDirectory() + u'/' + subDirectoryForPackage(packageName()));
@@ -6594,8 +6619,12 @@ bool CppGenerator::finishGeneration()
 
     // Global enums
     AbstractMetaEnumList globalEnums = api().globalEnums();
-    for (const AbstractMetaClass *nsp : invisibleTopNamespaces())
+    for (const AbstractMetaClass *nsp : invisibleTopNamespaces()) {
+        const auto oldSize = globalEnums.size();
         nsp->getEnumsToBeGenerated(&globalEnums);
+        if (globalEnums.size() > oldSize)
+            s << nsp->typeEntry()->include();
+    }
 
     TypeDatabase *typeDb = TypeDatabase::instance();
     const TypeSystemTypeEntry *moduleEntry = typeDb->defaultTypeSystemType();
@@ -6679,7 +6708,6 @@ bool CppGenerator::finishGeneration()
 
     s << "\n// Module initialization "
         << "------------------------------------------------------------\n";
-    ExtendedConverterData extendedConverters = getExtendedConverters();
     if (!extendedConverters.isEmpty()) {
         s  << '\n' << "// Extended Converters.\n\n";
         for (ExtendedConverterData::const_iterator it = extendedConverters.cbegin(), end = extendedConverters.cend(); it != end; ++it) {
@@ -6694,7 +6722,6 @@ bool CppGenerator::finishGeneration()
         }
     }
 
-    const QList<CustomConversionPtr> &typeConversions = getPrimitiveCustomConversions();
     if (!typeConversions.isEmpty()) {
         s  << "\n// Primitive Type converters.\n\n";
         for (const auto &conversion : typeConversions) {

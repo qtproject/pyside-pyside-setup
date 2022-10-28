@@ -326,6 +326,10 @@ void AbstractMetaBuilderPrivate::traverseOperatorFunction(const FunctionModelIte
     metaFunction->setFlags(flags);
     metaFunction->setAccess(Access::Public);
     baseoperandClass->addFunction(AbstractMetaFunctionCPtr(metaFunction));
+    if (!metaFunction->arguments().isEmpty()) {
+        const auto include = metaFunction->arguments().constFirst().type().typeEntry()->include();
+        baseoperandClass->typeEntry()->addArgumentInclude(include);
+    }
     Q_ASSERT(!metaFunction->wasPrivate());
 }
 
@@ -1035,10 +1039,14 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
         reason = AbstractMetaBuilder::GenerationDisabled;
     } else if (!type) {
         TypeEntry *te = TypeDatabase::instance()->findType(fullClassName);
-        if (te && !te->isComplex())
+        if (te && !te->isComplex()) {
             reason = AbstractMetaBuilder::RedefinedToNotClass;
-        else
+            // Set the default include file name
+            if (!te->include().isValid())
+                setInclude(te, classItem->fileName());
+        } else {
             reason = AbstractMetaBuilder::NotInTypeSystem;
+        }
     } else if (type->codeGeneration() == TypeEntry::GenerateNothing) {
         reason = AbstractMetaBuilder::GenerationDisabled;
     }
