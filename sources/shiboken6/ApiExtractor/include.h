@@ -71,6 +71,17 @@ struct IncludeGroup
 {
     QString title;
     IncludeList includes;
+
+    void append(const Include &include)
+    {
+        IncludeGroup::appendInclude(include, &includes);
+    }
+
+    static void appendInclude(const Include &include, IncludeList *list)
+    {
+        if (include.isValid() && !list->contains(include))
+            list->append(include);
+    }
 };
 
 TextStream& operator<<(TextStream &out, const IncludeGroup& include);

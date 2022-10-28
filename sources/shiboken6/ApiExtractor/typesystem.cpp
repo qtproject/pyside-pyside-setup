@@ -12,6 +12,7 @@
 #include "enumvaluetypeentry.h"
 #include "flagstypeentry.h"
 #include "functiontypeentry.h"
+#include "include.h"
 #include "namespacetypeentry.h"
 #include "objecttypeentry.h"
 #include "primitivetypeentry.h"
@@ -1387,8 +1388,7 @@ const IncludeList &ComplexTypeEntry::argumentIncludes() const
 void ComplexTypeEntry::addArgumentInclude(const Include &newInclude)
 {
     S_D(ComplexTypeEntry);
-    if (!d->m_argumentIncludes.contains(newInclude))
-        d->m_argumentIncludes.append(newInclude);
+    IncludeGroup::appendInclude(newInclude, &d->m_argumentIncludes);
 }
 
 AddedFunctionList ComplexTypeEntry::addedFunctions() const

@@ -109,6 +109,9 @@ void HeaderGenerator::generateClass(TextStream &s, const GeneratorContext &class
     //Includes
     auto typeEntry = metaClass->typeEntry();
     s << typeEntry->include() << '\n';
+    for (auto &inst : metaClass->templateBaseClassInstantiations())
+        s << inst.typeEntry()->include();
+
     if (classContext.useWrapper() && !typeEntry->extraIncludes().isEmpty()) {
         s << "\n// Extra includes\n";
         for (const Include &inc : typeEntry->extraIncludes())

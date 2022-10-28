@@ -1341,11 +1341,10 @@ static void addExtraIncludeForType(AbstractMetaClass *metaClass, const AbstractM
 
     Q_ASSERT(metaClass);
     const TypeEntry *entry = type.typeEntry();
-    if (entry && entry->isComplex()) {
-        const auto *centry = static_cast<const ComplexTypeEntry *>(entry);
+
+    if (entry && entry->include().isValid()) {
         ComplexTypeEntry *class_entry = metaClass->typeEntry();
-        if (class_entry && centry->include().isValid())
-            class_entry->addArgumentInclude(centry->include());
+        class_entry->addArgumentInclude(entry->include());
     }
 
     if (type.hasInstantiations()) {
@@ -1362,8 +1361,12 @@ static void addExtraIncludesForFunction(AbstractMetaClass *metaClass,
     addExtraIncludeForType(metaClass, meta_function->type());
 
     const AbstractMetaArgumentList &arguments = meta_function->arguments();
-    for (const AbstractMetaArgument &argument : arguments)
-        addExtraIncludeForType(metaClass, argument.type());
+    for (const AbstractMetaArgument &argument : arguments) {
+        const auto &type = argument.type();
+        addExtraIncludeForType(metaClass, type);
+        if (argument.modifiedType() != type)
+            addExtraIncludeForType(metaClass, argument.modifiedType());
+    }
 }
 
 static bool addSuperFunction(const AbstractMetaFunctionCPtr &f)
