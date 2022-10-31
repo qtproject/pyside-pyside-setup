@@ -256,6 +256,8 @@ macro(shiboken_check_if_limited_api)
             OUTPUT_STRIP_TRAILING_WHITESPACE)
     endif()
 
+    message(STATUS "PYTHON_LIMITED_LIBRARIES: " ${PYTHON_LIMITED_LIBRARIES})
+
     if(FORCE_LIMITED_API OR SHIBOKEN_PYTHON_LIMITED_API)
         set(PYTHON_LIMITED_API 1)
         if(WIN32)
