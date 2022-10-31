@@ -4,7 +4,9 @@
 import os
 import sys
 from pathlib import Path
-from .utils import run_command
+from typing import List
+
+from . import run_command
 
 
 class Nuitka:
@@ -16,7 +18,7 @@ class Nuitka:
         self.nuitka = nuitka
 
     def create_executable(
-        self, source_file: Path, extra_args: str, qml_files: list[Path], dry_run: bool
+        self, source_file: Path, extra_args: str, qml_files: List[Path], dry_run: bool
     ):
         extra_args = extra_args.split()
         qml_args = []
