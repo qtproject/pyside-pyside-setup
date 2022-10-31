@@ -424,6 +424,7 @@ static QSet<QString> useIntSet()
         /* IntEnum */ u"PySide6.QtGui.QFileSystemModel.Roles"_s,
         /* IntEnum */ u"PySide6.QtGui.QFont.Stretch"_s,
         /* IntEnum */ u"PySide6.QtGui.QFont.Weight"_s,
+        /* IntEnum */ u"PySide6.QtGui.QTextDocument.ResourceType"_s,
         /* IntEnum */ u"PySide6.QtGui.QTextFormat.FormatType"_s,
         /* IntEnum */ u"PySide6.QtGui.QTextFormat.ObjectTypes"_s,
         /* IntEnum */ u"PySide6.QtGui.QTextFormat.Property"_s,
