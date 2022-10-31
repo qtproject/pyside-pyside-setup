@@ -9,6 +9,8 @@
     <namespace-type name="Qt3DAnimation">
         <object-type name="QAbstractAnimation">
             <enum-type name="AnimationType"/>
+            <!-- Disambiguate from QtCore/qabstractanimation.h -->
+            <include file-name="Qt3DAnimation/qabstractanimation.h" location="global"/>
         </object-type>
         <object-type name="QAbstractAnimationClip"/>
         <value-type name="QAnimationClipData" since="6.1"/>
@@ -27,7 +29,10 @@
             <enum-type name="Status"/>
         </object-type>
         <object-type name="QAnimationController"/>
-        <object-type name="QAnimationGroup"/>
+        <object-type name="QAnimationGroup">
+            <!-- Disambiguate from QtCore/qanimationgroup.h -->
+            <include file-name="Qt3DAnimation/qanimationgroup.h" location="global"/>
+        </object-type>
         <object-type name="QBlendedClipAnimator"/>
         <value-type name="QChannel"/>
         <value-type name="QChannelComponent"/>
