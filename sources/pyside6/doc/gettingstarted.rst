@@ -47,9 +47,8 @@ You can refer to the following pages for platform specific instructions:
     </table>
 
 .. important:: |project| does not yet support WebAssembly and the mobile operating systems (Android or iOS).
-
-Most Linux-based embedded OS provide PySide with their official
-package manager (for example, `Raspbian`_ and `ArchlinuxARM`_).
+               Most Linux-based embedded OS provide PySide with their official
+               package manager (for example, `Raspbian`_ and `ArchlinuxARM`_).
 
 .. _Raspbian: https://www.raspbian.org/
 .. _ArchlinuxARM: https://archlinuxarm.org/
@@ -67,7 +66,7 @@ A normal building command will look like this::
 Which will build and install the project with **debug** symbols, including the **tests**,
 using **ninja** (instead of make), and considering only the **module subset** of
 :mod:`QtCore <PySide6.QtCore>`, :mod:`QtGui <PySide6.QtGui>`, and
-:mod:`QtWidgets <PySide6.QtWidgets`.
+:mod:`QtWidgets <PySide6.QtWidgets>`.
 
 Other important options to consider are:
  * ``--cmake``, to specify the path to the cmake binary,
@@ -399,6 +398,11 @@ files.
 This is useful when updating the general sections of the documentation, adding tutorials,
 modifying the build instructions, and more.
 
+.. note:: In case you are interested in generating the Example Gallery, you
+          would need to first run ``python tools/example_gallery/main.py`` to
+          generate the examples ``rst`` for the gallery.
+
+
 2. Building the documentation (rst + API)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -418,11 +422,15 @@ Since the process relies on a Qt installation, you need to specify where the
 
     export QT_SRC_DIR=/path/to/qtbase
 
-Once the common ``setup.py`` build process finishes (remember to use ``--build-docs`` to enable
-the documentation build), you can go to the generated ``*_build/*_release/pyside6``
-directory, and run::
+Once the common ``setup.py`` build process finishes (remember to use
+``--build-docs`` to enable the documentation build, and ``--doc-build-inline``
+to get the HTML files), you can go to the generated
+``build/<your_env_name>/build/pyside6`` directory, and run::
 
     ninja apidoc
+
+You can add ``-j X``, to perform the build process in parallel with
+X processes.
 
 .. note:: The :command:`apidoc` make target builds offline documentation in QCH (Qt Creator Help)
    format by default. You can switch to building for the online use with the ``--doc-build-online``
@@ -441,7 +449,7 @@ is removed.
 
 Finally, you will get a ``html`` directory containing all the generated documentation. The offline
 help files, ``PySide.qch`` and ``Shiboken.qch``, can be moved to any directory of your choice. You
-can find ``Shiboken.qch`` in the build directory, ``*_build\*_release\shiboken6\doc\html``.
+can find ``Shiboken.qch`` in the build directory, ``build/<your_env_name>/build/shiboken6/doc/html``.
 
 If you want to temporarily change a ``.rst`` file to examine the impact on
 formatting, you can re-run ``sphinx`` in the ``doc`` directory::
