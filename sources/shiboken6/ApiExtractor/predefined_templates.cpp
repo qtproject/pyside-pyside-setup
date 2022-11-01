@@ -10,7 +10,7 @@ using namespace Qt::StringLiterals;
 static QString pySequenceToCppContainer(const QString &insertFunc,
                                         bool reserve)
 {
-    QString result;
+    QString result = u"(%out).clear();\n"_s;
     if (reserve) {
         result += uR"(if (PyList_Check(%in)) {
     const Py_ssize_t size = PySequence_Size(%in);
@@ -68,6 +68,7 @@ static QString pyDictToCppMap(bool isQMap)
 {
     return uR"(PyObject *key;
 PyObject *value;
+%out.clear();
 Py_ssize_t pos = 0;
 while (PyDict_Next(%in, &pos, &key, &value)) {
     %OUTTYPE_0 cppKey = %CONVERTTOCPP[%OUTTYPE_0](key);
@@ -134,6 +135,7 @@ static QString pyDictToCppMultiHash(bool isQMultiHash)
 {
     return uR"(PyObject *key;
     PyObject *values;
+    %out.clear();
     Py_ssize_t pos = 0;
     while (PyDict_Next(%in, &pos, &key, &values)) {
         %OUTTYPE_0 cppKey = %CONVERTTOCPP[%OUTTYPE_0](key);
