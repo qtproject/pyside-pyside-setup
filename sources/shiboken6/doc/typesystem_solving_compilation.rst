@@ -53,6 +53,8 @@ extra-includes
     the type converter and registration code. It can be used to specify
     additional includes required for the converter code snippets.
 
+.. _include-element:
+
 include
 ^^^^^^^
 

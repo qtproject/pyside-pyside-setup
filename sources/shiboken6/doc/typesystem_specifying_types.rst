@@ -191,8 +191,8 @@ namespace-type
     language, and it is a child of the :ref:`typesystem` node or other
     ``namespace-type`` nodes. It may contain :ref:`add-function`,
     :ref:`declare-function`,  :ref:`enum-type`, :ref:`extra-includes`,
-    :ref:`modify-function`, ``namespace-type``, :ref:`object-type`,
-    :ref:`smart-pointer-type`, :ref:`typedef-type` or :ref:`value-type`
+    :ref:`include-element`,  :ref:`modify-function`, ``namespace-type``,
+    :ref:`object-type`, :ref:`smart-pointer-type`, :ref:`typedef-type` or :ref:`value-type`
     child nodes.
 
     .. code-block:: xml
@@ -320,9 +320,9 @@ value-type
     i.e. it is stored in the function call stack. It is a child of the :ref:`typesystem`
     node or other type nodes and may contain :ref:`add-function`, :ref:`add-pymethoddef`,
     :ref:`declare-function`, :ref:`conversion-rule`, :ref:`enum-type`,
-    :ref:`extra-includes`, :ref:`modify-function`, :ref:`object-type`,
-    :ref:`smart-pointer-type`, :ref:`typedef-type` or further ``value-type``
-    child nodes.
+    :ref:`extra-includes`, :ref:`include-element`, :ref:`modify-function`,
+    :ref:`object-type`, :ref:`smart-pointer-type`, :ref:`typedef-type` or further
+    ``value-type`` child nodes.
 
     .. code-block:: xml
 
@@ -399,8 +399,8 @@ object-type
     C++ and it is stored on the heap. It is a child of the :ref:`typesystem` node
     or other type nodes and may contain :ref:`add-function`, :ref:`add-pymethoddef`,
     :ref:`declare-function`, :ref:`enum-type`, :ref:`extra-includes`,
-    :ref:`modify-function`, ``object-type``, :ref:`smart-pointer-type`,
-    :ref:`typedef-type` or :ref:`value-type` child nodes.
+    :ref:`include-element`, :ref:`modify-function`, ``object-type``,
+    :ref:`smart-pointer-type`, :ref:`typedef-type` or :ref:`value-type` child nodes.
 
     .. code-block:: xml
 
