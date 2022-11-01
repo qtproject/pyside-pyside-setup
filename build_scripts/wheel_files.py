@@ -143,6 +143,10 @@ def wheel_files_pyside_essentials() -> List[ModuleData]:
         module_QtUiTools(),
         # Only for plugins
         module_QtWayland(),
+        # there are no bindings for these modules, but their binaries are
+        # required for qmlls
+        module_QtLanguageServer(),
+        module_QtJsonRpc(),
     ]
     return files
 
@@ -192,41 +196,50 @@ def wheel_files_pyside_addons() -> List[ModuleData]:
 def module_QtCore() -> ModuleData:
     # QtCore
     data = ModuleData("Core", examples=["corelib"])
-    data.typesystems.append("common.xml")
-    data.typesystems.append("core_common.xml")
-    data.typesystems.append("typesystem_core_common.xml")
-    data.typesystems.append("typesystem_core_win.xml")
+
+    _typesystems = [
+        "common.xml",
+        "core_common.xml",
+        "typesystem_core_common.xml",
+        "typesystem_core_win.xml"
+    ]
+
+    data.typesystems.extend(_typesystems)
     data.include.append("*.h")
     if sys.platform == "win32":
         data.plugins.append("assetimporters")
         data.plugins.append("styles")
         data.qtlib.append("pyside6.*")
         data.extra_files.append("qt.conf")
-        data.extra_files.append("uic.exe")
         data.extra_files.append("rcc.exe")
         data.extra_files.append("qtdiag.exe")
         data.extra_files.append("d3dcompiler*")
-        data.extra_files.append("lconvert*")
         data.extra_files.append("pyside6.*.lib")
         data.extra_files.append("resources/icudtl.dat")
     else:
         data.lib.append("libpyside6.*")
         if sys.platform == "darwin":
             data.plugins.append("styles")
+        data.extra_files.append("Qt/libexec/rcc")
+        data.extra_files.append("Qt/libexec/qt.conf")
 
     data.examples.append("samplebinding")
-    data.examples.append("widgetbinding")
-    data.examples.append("scriptableapplication")
     data.examples.append("utils")
-    data.examples.append("external")
-    data.examples.append("installer_test")
-    data.examples.append("macextras")
+
+    if sys.platform == "darwin":
+        data.examples.append("macextras")
 
     # *.py
     data.extra_dirs.append("support")
+
+    # pyside-tools with python backend
+    # Including the 'scripts' folder would include all the tools into the
+    # PySide6_Essentials wheel. The moment when we add a tool that has a
+    # dependency on a module in PySide6_AddOns, then we should split out
+    # the following line into individual subfolder and files, to better
+    # control which tool goes into which wheel
     data.extra_dirs.append("scripts")
 
-    data.extra_dirs.append("Qt/libexec/")
     data.extra_dirs.append("typesystems/glue")
 
     data.extra_files.append("__feature__.pyi")
@@ -242,25 +255,16 @@ def module_QtCore() -> ModuleData:
         data.extra_files.append("assistant*")
     data.translations.append("assistant_*")
 
-    # Designer
-    if sys.platform == "darwin":
-        data.extra_dirs.append("Designer.app")
-    else:
-        data.extra_files.append("designer*")
-    data.translations.append("designer_*")
-
     # Linguist
     if sys.platform == "darwin":
         data.extra_dirs.append("Linguist.app")
     else:
         data.extra_files.append("linguist*")
+        data.extra_files.append("lconvert*")
     data.translations.append("linguist_*")
 
     data.extra_files.append("lrelease*")
     data.extra_files.append("lupdate*")
-    data.extra_files.append("qmllint*")
-    data.extra_files.append("qmlformat*")
-    data.extra_files.append("qmlls*")
 
     # General translations
     data.translations.append("qtbase_*")
@@ -328,6 +332,15 @@ def module_QtWidgets() -> ModuleData:
     data.typesystems.append("widgets_common.xml")
     data.typesystems.append("typesystem_widgets_common.xml")
 
+    if sys.platform == "win32":
+        data.extra_files.append("uic.exe")
+    else:
+        data.extra_files.append("Qt/libexec/uic")
+
+    data.examples.append("widgetbinding")
+    data.examples.append("scriptableapplication")
+    data.examples.append("external")
+
     return data
 
 
@@ -369,6 +382,13 @@ def module_QtDesigner() -> ModuleData:
     data.metatypes.append("qt6designercomponentsprivate_relwithdebinfo_metatypes.json")
     data.plugins.append("designer")
     data.extra_files.append("Qt/plugins/assetimporters/libuip*")
+
+    # Designer
+    if sys.platform == "darwin":
+        data.extra_dirs.append("Designer.app")
+    else:
+        data.extra_files.append("designer*")
+    data.translations.append("designer_*")
 
     return data
 
@@ -414,6 +434,7 @@ def module_QtQml() -> ModuleData:
         "libQt6QmlModels",
         "libQt6QmlWorkerScript",
         "libQt6QmlXmlListModel",
+        "libQt6QmlCompiler"
     ]
 
     _include = [
@@ -431,6 +452,7 @@ def module_QtQml() -> ModuleData:
         "qt6labswavefrontmesh_relwithdebinfo_metatypes.json",
         "qt6packetprotocolprivate_relwithdebinfo_metatypes.json",
         "qt6qmlcompilerprivate_relwithdebinfo_metatypes.json",
+        "qt6qmlcompilerplusprivate_relwithdebinfo_metatypes.json",
         "qt6qmlcore_relwithdebinfo_metatypes.json",
         "qt6qmldebugprivate_relwithdebinfo_metatypes.json",
         "qt6qmldomprivate_relwithdebinfo_metatypes.json",
@@ -460,14 +482,22 @@ def module_QtQml() -> ModuleData:
         data.extra_files.append("pyside6qml.*.dll")
         data.extra_files.append("qml/builtins.qmltypes")
         data.extra_files.append("qml/jsroot.qmltypes")
+        data.extra_files.append("qmlimportscanner.exe")
+        data.extra_files.append("qmltyperegistrar.exe")
     else:
         data.extra_files.append("Qt/qml/builtins.qmltypes")
         data.extra_files.append("Qt/qml/jsroot.qmltypes")
+        data.extra_files.append("Qt/libexec/qmlimportscanner")
+        data.extra_files.append("Qt/libexec/qmltyperegistrar")
 
     data.qtlib.extend(_qtlib)
     data.include.extend(_include)
     data.metatypes.extend(_metatypes)
     data.qml.extend(_qml)
+
+    data.extra_files.append("qmllint*")
+    data.extra_files.append("qmlformat*")
+    data.extra_files.append("qmlls*")
 
     return data
 
@@ -712,6 +742,8 @@ def module_QtWebEngineCore() -> ModuleData:
     if sys.platform == "win32":
         data.extra_files.append("resources/qtwebengine*.pak")
         data.extra_files.append("QtWebEngineProcess.exe")
+    else:
+        data.extra_files.append("Qt/libexec/QtWebEngineProcess")
 
     return data
 
@@ -876,17 +908,27 @@ def module_QtOpenGL() -> ModuleData:
 
 def module_QtOpenGLWidgets() -> ModuleData:
     data = ModuleData("OpenGLWidgets")
-
     return data
 
 
 def module_QtVirtualKeyboard() -> ModuleData:
     data = ModuleData("VirtualKeyboard")
     data.plugins.append("virtualkeyboard")
-
     return data
+
 
 def module_QtHttpServer() -> ModuleData:
     data = ModuleData("HttpServer")
+    return data
 
+
+def module_QtLanguageServer() -> ModuleData:
+    data = ModuleData("LanguageServer")
+    data.metatypes.append("qt6languageserverprivate_relwithdebinfo_metatypes.json")
+    return data
+
+
+def module_QtJsonRpc() -> ModuleData:
+    data = ModuleData("JsonRpc")
+    data.metatypes.append("qt6jsonrpcprivate_relwithdebinfo_metatypes.json")
     return data
