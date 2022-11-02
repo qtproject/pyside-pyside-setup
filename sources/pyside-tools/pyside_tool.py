@@ -129,6 +129,10 @@ def designer():
         framework_prefix = sysconfig.get_config_var("PYTHONFRAMEWORKPREFIX")
         lib_path = os.fspath(Path(framework_prefix) / library_name)
         os.environ['DYLD_INSERT_LIBRARIES'] = lib_path
+    elif sys.platform == 'win32':
+        # Find Python DLLs from the base installation
+        if os.environ.get("VIRTUAL_ENV"):
+            _append_to_path_var("PATH", os.fspath(Path(sys._base_executable).parent))
     # Add the Wiggly Widget example
     wiggly_dir = os.fspath(pyside_dir / 'examples' / 'widgetbinding')
     _append_to_path_var('PYSIDE_DESIGNER_PLUGINS', wiggly_dir)
