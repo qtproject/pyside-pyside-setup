@@ -127,7 +127,7 @@
     </conversion-rule>
   </primitive-type>
 
-  <object-type name="QAbstractFileIconProvider" since="6.0">
+  <object-type name="QAbstractFileIconProvider">
       <enum-type name="IconType"/>
       <enum-type name="Option" flags="Options"/>
   </object-type>
@@ -192,7 +192,7 @@
     </add-function>
   </object-type>
   <object-type name="QActionGroup">
-    <enum-type name="ExclusionPolicy" since="5.14"/>
+    <enum-type name="ExclusionPolicy"/>
     <modify-function signature="addAction(QAction*)">
       <modify-argument index="1">
         <parent index="this" action="add"/>
@@ -455,7 +455,7 @@
   </value-type>
   <value-type name="QTextBlockFormat">
     <enum-type name="LineHeightTypes" since="4.8" revision="4800"/>
-    <enum-type name="MarkerType" since="5.14"/>
+    <enum-type name="MarkerType"/>
   </value-type>
   <value-type name="QTextTableCellFormat"/>
   <value-type name="QTextCharFormat" >
@@ -1028,18 +1028,18 @@
     </modify-function>
   </value-type>
 
-  <namespace-type name="QColorConstants" since="5.14">
+  <namespace-type name="QColorConstants">
     <extra-includes>
         <include file-name="QColor" location="global"/>
     </extra-includes>
-    <namespace-type name="Svg" since="5.14">
+    <namespace-type name="Svg">
         <extra-includes>
             <include file-name="QColor" location="global"/>
         </extra-includes>
     </namespace-type>
   </namespace-type>
 
-  <value-type name="QColorSpace" since="5.14">
+  <value-type name="QColorSpace">
       <enum-type name="NamedColorSpace"/>
       <enum-type name="Primaries"/>
       <enum-type name="TransferFunction"/>
@@ -1132,7 +1132,7 @@
   <value-type name="QGradient" polymorphic-id-expression="%1-&gt;type() == QGradient::NoGradient">
       <enum-type name="CoordinateMode"/>
       <enum-type name="InterpolationMode"/>
-      <enum-type name="Preset" since="5.12"/>
+      <enum-type name="Preset"/>
       <enum-type name="Spread"/>
       <enum-type name="Type"/>
   </value-type>
@@ -1141,7 +1141,7 @@
       <enum-type name="PaintDeviceMetric"/>
   </object-type>
   <object-type name="QPagedPaintDevice">
-    <enum-type name="PdfVersion" since="5.10"/>
+    <enum-type name="PdfVersion"/>
   </object-type>
   <object-type name="QAbstractTextDocumentLayout">
     <value-type name="PaintContext" >
@@ -1346,7 +1346,7 @@
       <enum-type name="Reason"/>
   </object-type>
 
-  <value-type name="QEventPoint" since="6.0">
+  <value-type name="QEventPoint">
       <enum-type name="State"/>
   </value-type>
   <object-type name="QDragEnterEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::DragEnter">
@@ -1434,7 +1434,7 @@
   <object-type name="QShortcutEvent" copyable = "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Shortcut">
   </object-type>
   <object-type name="QShowEvent" copyable= "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Show"/>
-  <object-type name="QSinglePointEvent" copyable="false" since="6.0"/>
+  <object-type name="QSinglePointEvent" copyable="false"/>
   <object-type name="QStatusTipEvent" copyable= "false" polymorphic-id-expression="%1-&gt;type() == QEvent::StatusTip"/>
   <object-type name="QTabletEvent" copyable= "false" polymorphic-id-expression="%1-&gt;type() == QEvent::TabletMove || %1-&gt;type() == QEvent::TabletPress || %1-&gt;type() == QEvent::TabletRelease">
       <add-function signature="__repr__" return-type="PyObject">
@@ -1494,7 +1494,7 @@
   <object-type name="QScrollEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::Scroll">
       <enum-type name="ScrollState"/>
   </object-type>
-  <object-type name="QPointerEvent" copyable= "false" since="6.0">
+  <object-type name="QPointerEvent" copyable= "false">
       <add-function signature="__repr__" return-type="PyObject">
           <inject-code class="target" position="beginning">
               <insert-template name="repr_qdebug_gui"/>
@@ -1535,7 +1535,7 @@
       <include file-name="QRect" location="global"/>
     </extra-includes>
     <enum-type name="ImageOption"/>
-    <enum-type name="Transformation" flags="Transformations" since="5.5"/>
+    <enum-type name="Transformation" flags="Transformations"/>
     <modify-function signature="setDevice(QIODevice*)">
       <modify-argument index="1">
         <parent index="this" action="add"/>
@@ -1798,7 +1798,7 @@
       <include file-name="QTextCursor" location="global"/>
     </extra-includes>
     <enum-type name="FindFlag" flags="FindFlags"/>
-    <enum-type name="MarkdownFeature" flags="MarkdownFeatures" since="5.14"/>
+    <enum-type name="MarkdownFeature" flags="MarkdownFeatures"/>
     <enum-type name="MetaInformation"/>
     <enum-type name="ResourceType" python-type="IntEnum"/>
     <enum-type name="Stacks" since="4.7"/>
@@ -2294,7 +2294,7 @@
   </value-type>
 
   <value-type name="QMatrix4x4" since="4.6">
-    <enum-type name="Flag" flags="Flags" since="6.0"/>
+    <enum-type name="Flag" flags="Flags"/>
 
     <!-- Qt5: HAIRY TRICK ALERT ahead!
         Qt5 partially replaced 'qreal' by float.
@@ -2407,9 +2407,9 @@
     </add-function>
 
     <!-- Qt5.5: XXX support the output variables! For now, I just suppressed the new methods. -->
-    <modify-function signature="getAxisAndAngle(float*,float*,float*,float*)const" since="5.5" remove="all"/>
-    <modify-function signature="getAxisAndAngle(QVector3D*,float*)const" since="5.5" remove="all"/>
-    <modify-function signature="getEulerAngles(float*,float*,float*)const" since="5.5" remove="all"/>
+    <modify-function signature="getAxisAndAngle(float*,float*,float*,float*)const"/>
+    <modify-function signature="getAxisAndAngle(QVector3D*,float*)const"/>
+    <modify-function signature="getEulerAngles(float*,float*,float*)const"/>
   </value-type>
 
   <object-type name="QTouchEvent" since="4.6">
@@ -2548,13 +2548,13 @@
   </object-type>
   <rejection class="QSurface" field-name="m_reserved"/>
   <value-type name="QSurfaceFormat">
-    <enum-type name="ColorSpace" since="5.10"/>
+    <enum-type name="ColorSpace"/>
     <enum-type name="FormatOption" flags="FormatOptions"/>
     <enum-type name="OpenGLContextProfile"/>
     <enum-type name="RenderableType"/>
     <enum-type name="SwapBehavior"/>
   </value-type>
-  <object-type name="QOffscreenSurface" since="5.1"/>
+  <object-type name="QOffscreenSurface"/>
   <primitive-type name="QPlatformSurface">
     <extra-includes>
       <include file-name="QtGui/qpa/qplatformsurface.h" location="global"/>
@@ -2633,11 +2633,11 @@
   <object-type name="QOpenGLContext">
     <enum-type name="OpenGLModuleType"/>
   </object-type>
-  <object-type name="QOpenGLContextGroup" since="5.0"/>
+  <object-type name="QOpenGLContextGroup"/>
   <!-- Compile error on Windows: QOpenGLPaintDevice::QOpenGLPaintDevice(const QOpenGLPaintDevice &)': attempting to reference a deleted function
-  <object-type name="QOpenGLPaintDevice" since="5.0"/>
+  <object-type name="QOpenGLPaintDevice"/>
   -->
-  <object-type name="QOpenGLExtraFunctions" since="5.6">
+  <object-type name="QOpenGLExtraFunctions">
       <extra-includes>
         <include file-name="QtCore/QVarLengthArray" location="global"/>
         <include file-name="sbkcpptonumpy.h" location="global"/>
@@ -2899,7 +2899,7 @@
                        snippet="glgetstring-return"/>
       </modify-function>
   </object-type>
-  <object-type name="QOpenGLFunctions" since="5.0">
+  <object-type name="QOpenGLFunctions">
       <extra-includes>
         <include file-name="QtCore/QVarLengthArray" location="global"/>
         <include file-name="sbkcpptonumpy.h" location="global"/>
@@ -3003,33 +3003,33 @@
       </modify-function>
   </object-type>
   <!-- Classes are result of a macro expansion in src/gui/opengl/qopenglversionfunctions.h
-  <object-type name="QOpenGLFunctions_1_0" since="5.1"/>
-  <object-type name="QOpenGLFunctions_1_1" since="5.1"/>
-  <object-type name="QOpenGLFunctions_1_2" since="5.1"/>
-  <object-type name="QOpenGLFunctions_1_3" since="5.1"/>
-  <object-type name="QOpenGLFunctions_1_4" since="5.1"/>
-  <object-type name="QOpenGLFunctions_1_5" since="5.1"/>
-  <object-type name="QOpenGLFunctions_2_0" since="5.1">
-  <object-type name="QOpenGLFunctions_2_1" since="5.1"/>
-  <object-type name="QOpenGLFunctions_3_0" since="5.1"/>
-  <object-type name="QOpenGLFunctions_3_1" since="5.1"/>
-  <object-type name="QOpenGLFunctions_3_2_Compatibility" since="5.1"/>
-  <object-type name="QOpenGLFunctions_3_2_Core" since="5.1"/>
-  <object-type name="QOpenGLFunctions_3_3_Compatibility" since="5.1"/>
-  <object-type name="QOpenGLFunctions_3_3_Core" since="5.1"/>
-  <object-type name="QOpenGLFunctions_4_0_Compatibility" since="5.1"/>
-  <object-type name="QOpenGLFunctions_4_0_Core" since="5.1"/>
-  <object-type name="QOpenGLFunctions_4_1_Compatibility" since="5.1"/>
-  <object-type name="QOpenGLFunctions_4_1_Core" since="5.1"/>
-  <object-type name="QOpenGLFunctions_4_2_Compatibility" since="5.1"/>
-  <object-type name="QOpenGLFunctions_4_2_Core" since="5.1"/>
-  <object-type name="QOpenGLFunctions_4_3_Compatibility" since="5.1"/>
-  <object-type name="QOpenGLFunctions_4_3_Core" since="5.1"/>
+  <object-type name="QOpenGLFunctions_1_0"/>
+  <object-type name="QOpenGLFunctions_1_1"/>
+  <object-type name="QOpenGLFunctions_1_2"/>
+  <object-type name="QOpenGLFunctions_1_3"/>
+  <object-type name="QOpenGLFunctions_1_4"/>
+  <object-type name="QOpenGLFunctions_1_5"/>
+  <object-type name="QOpenGLFunctions_2_0">
+  <object-type name="QOpenGLFunctions_2_1"/>
+  <object-type name="QOpenGLFunctions_3_0"/>
+  <object-type name="QOpenGLFunctions_3_1"/>
+  <object-type name="QOpenGLFunctions_3_2_Compatibility"/>
+  <object-type name="QOpenGLFunctions_3_2_Core"/>
+  <object-type name="QOpenGLFunctions_3_3_Compatibility"/>
+  <object-type name="QOpenGLFunctions_3_3_Core"/>
+  <object-type name="QOpenGLFunctions_4_0_Compatibility"/>
+  <object-type name="QOpenGLFunctions_4_0_Core"/>
+  <object-type name="QOpenGLFunctions_4_1_Compatibility"/>
+  <object-type name="QOpenGLFunctions_4_1_Core"/>
+  <object-type name="QOpenGLFunctions_4_2_Compatibility"/>
+  <object-type name="QOpenGLFunctions_4_2_Core"/>
+  <object-type name="QOpenGLFunctions_4_3_Compatibility"/>
+  <object-type name="QOpenGLFunctions_4_3_Core"/>
   <object-type name="QOpenGLFunctions_4_4_Compatibility" since="5.5/>
-  <object-type name="QOpenGLFunctions_4_4_Core" since="5.5"/>
-  <object-type name="QOpenGLFunctions_4_5_Compatibility since="5.5""/>
-  <object-type name="QOpenGLFunctions_4_5_Core" since="5.5"/>
-  <object-type name="QOpenGLFunctions_ES2" since="5.1"/>
+  <object-type name="QOpenGLFunctions_4_4_Core"/>
+  <object-type name="QOpenGLFunctions_4_5_Compatibility/>
+  <object-type name="QOpenGLFunctions_4_5_Core"/>
+  <object-type name="QOpenGLFunctions_ES2"/>
   -->
   <value-type name="QPageLayout">
       <enum-type name="Mode"/>
@@ -3055,7 +3055,7 @@
       <enum-type name="YUVLayout"/>
   </value-type>
   <object-type name="QPdfWriter"/>
-  <object-type name="QPointingDevice" since="6.0">
+  <object-type name="QPointingDevice">
     <enum-type name="PointerType" flags="PointerTypes"/>
     <enum-type name="GrabTransition"/>
   </object-type>

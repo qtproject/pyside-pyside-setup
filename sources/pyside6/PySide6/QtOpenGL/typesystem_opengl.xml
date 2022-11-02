@@ -140,45 +140,36 @@
   <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glGetVertexAttribLdv"/>
   <rejection class="^QOpenGLFunctions_\d_\d.*$" function-name="glSelectBuffer"/>
 
-  <object-type name="QOpenGLBuffer" since="5.0">
+  <object-type name="QOpenGLBuffer">
     <enum-type name="Access"/>
     <enum-type name="RangeAccessFlag" flags="RangeAccessFlags"/>
     <enum-type name="Type"/>
     <enum-type name="UsagePattern"/>
   </object-type>
-  <object-type name="QOpenGLDebugLogger" since="5.1">
+  <object-type name="QOpenGLDebugLogger">
       <enum-type name="LoggingMode"/>
   </object-type>
-  <value-type name="QOpenGLDebugMessage" since="5.1">
+  <value-type name="QOpenGLDebugMessage">
       <enum-type name="Source" flags="Sources"/>
       <enum-type name="Type" flags="Types"/>
       <enum-type name="Severity" flags="Severities"/>
   </value-type>
 
-  <object-type name="QOpenGLFunctions_1_0" since="5.1">
+  <object-type name="QOpenGLFunctions_1_0">
       &glgetv_includes;
       &glgetv_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_0_compat;
   </object-type>
-  <object-type name="QOpenGLFunctions_1_1" since="5.1">
-      &glgetv_includes;
-      &glgetv_modifications;
-      &opengl_modifications1_0;
-      &opengl_modifications1_0_compat;
-      &opengl_modifications1_1;
-      &opengl_modifications1_1_compat;
-  </object-type>
-  <object-type name="QOpenGLFunctions_1_2" since="5.1">
+  <object-type name="QOpenGLFunctions_1_1">
       &glgetv_includes;
       &glgetv_modifications;
       &opengl_modifications1_0;
       &opengl_modifications1_0_compat;
       &opengl_modifications1_1;
       &opengl_modifications1_1_compat;
-      &opengl_modifications1_2_compat;
   </object-type>
-  <object-type name="QOpenGLFunctions_1_3" since="5.1">
+  <object-type name="QOpenGLFunctions_1_2">
       &glgetv_includes;
       &glgetv_modifications;
       &opengl_modifications1_0;
@@ -186,9 +177,8 @@
       &opengl_modifications1_1;
       &opengl_modifications1_1_compat;
       &opengl_modifications1_2_compat;
-      &opengl_modifications1_3_compat;
   </object-type>
-  <object-type name="QOpenGLFunctions_1_4" since="5.1">
+  <object-type name="QOpenGLFunctions_1_3">
       &glgetv_includes;
       &glgetv_modifications;
       &opengl_modifications1_0;
@@ -197,10 +187,8 @@
       &opengl_modifications1_1_compat;
       &opengl_modifications1_2_compat;
       &opengl_modifications1_3_compat;
-      &opengl_modifications1_4;
-      &opengl_modifications1_4_compat;
   </object-type>
-  <object-type name="QOpenGLFunctions_1_5" since="5.1">
+  <object-type name="QOpenGLFunctions_1_4">
       &glgetv_includes;
       &glgetv_modifications;
       &opengl_modifications1_0;
@@ -212,7 +200,19 @@
       &opengl_modifications1_4;
       &opengl_modifications1_4_compat;
   </object-type>
-  <object-type name="QOpenGLFunctions_2_0" since="5.1">
+  <object-type name="QOpenGLFunctions_1_5">
+      &glgetv_includes;
+      &glgetv_modifications;
+      &opengl_modifications1_0;
+      &opengl_modifications1_0_compat;
+      &opengl_modifications1_1;
+      &opengl_modifications1_1_compat;
+      &opengl_modifications1_2_compat;
+      &opengl_modifications1_3_compat;
+      &opengl_modifications1_4;
+      &opengl_modifications1_4_compat;
+  </object-type>
+  <object-type name="QOpenGLFunctions_2_0">
       &glgetv_includes;
       &glgetv_modifications;
       &opengl_modifications1_0;
@@ -226,7 +226,7 @@
       &opengl_modifications2_0;
       &opengl_modifications2_0_compat;
   </object-type>
-  <object-type name="QOpenGLFunctions_2_1" since="5.1">
+  <object-type name="QOpenGLFunctions_2_1">
       &glgetv_includes;
       &glgetv_modifications;
       &opengl_modifications1_0;
@@ -241,7 +241,7 @@
       &opengl_modifications2_0_compat;
       &opengl_modifications2_1;
   </object-type>
-  <object-type name="QOpenGLFunctions_3_0" since="5.1">
+  <object-type name="QOpenGLFunctions_3_0">
       &glgetv_includes;
       &glgeti_v_includes;
       &glgetv_modifications;
@@ -259,7 +259,7 @@
       &opengl_modifications2_1;
       &opengl_modifications3_0;
   </object-type>
-  <object-type name="QOpenGLFunctions_3_1" since="5.1">
+  <object-type name="QOpenGLFunctions_3_1">
       &glgetv_includes;
       &glgeti_v_includes;
       &glgetv_modifications;
@@ -271,7 +271,7 @@
       &opengl_modifications2_1;
       &opengl_modifications3_0;
   </object-type>
-  <object-type name="QOpenGLFunctions_3_2_Compatibility" since="5.1">
+  <object-type name="QOpenGLFunctions_3_2_Compatibility">
       &glgetv_includes;
       &glgeti_v_includes;
       &glgetv_modifications;
@@ -289,7 +289,7 @@
       &opengl_modifications2_1;
       &opengl_modifications3_0;
   </object-type>
-  <object-type name="QOpenGLFunctions_3_2_Core" since="5.1">
+  <object-type name="QOpenGLFunctions_3_2_Core">
       &glgetv_includes;
       &glgeti_v_includes;
       &glgetv_modifications;
@@ -301,7 +301,7 @@
       &opengl_modifications2_1;
       &opengl_modifications3_0;
   </object-type>
-  <object-type name="QOpenGLFunctions_3_3_Compatibility" since="5.1">
+  <object-type name="QOpenGLFunctions_3_3_Compatibility">
       &glgetv_includes;
       &glgeti_v_includes;
       &glgetv_modifications;
@@ -321,7 +321,7 @@
       &opengl_modifications3_3;
       &opengl_modifications3_3a;
   </object-type>
-  <object-type name="QOpenGLFunctions_3_3_Core" since="5.1">
+  <object-type name="QOpenGLFunctions_3_3_Core">
       &glgetv_includes;
       &glgeti_v_includes;
       &glgetv_modifications;
@@ -334,7 +334,7 @@
       &opengl_modifications3_0;
       &opengl_modifications3_3;
   </object-type>
-  <object-type name="QOpenGLFunctions_4_0_Compatibility" since="5.1">
+  <object-type name="QOpenGLFunctions_4_0_Compatibility">
       &glgetv_includes;
       &glgeti_v_includes;
       &glgetv_modifications;
@@ -355,7 +355,7 @@
       &opengl_modifications3_3a;
       &opengl_modifications4_0;
   </object-type>
-  <object-type name="QOpenGLFunctions_4_0_Core" since="5.1">
+  <object-type name="QOpenGLFunctions_4_0_Core">
       &glgetv_includes;
       &glgeti_v_includes;
       &glgetv_modifications;
@@ -369,7 +369,7 @@
       &opengl_modifications3_3;
       &opengl_modifications4_0;
   </object-type>
-  <object-type name="QOpenGLFunctions_4_1_Compatibility" since="5.1">
+  <object-type name="QOpenGLFunctions_4_1_Compatibility">
       &glgetv_includes;
       &glgeti_v_includes;
       &glgetv_modifications;
@@ -391,45 +391,7 @@
       &opengl_modifications4_1;
       &opengl_modifications4_0;
   </object-type>
-  <object-type name="QOpenGLFunctions_4_1_Core" since="5.1">
-      &glgetv_includes;
-      &glgeti_v_includes;
-      &glgetv_modifications;
-      &glgeti_v_modifications;
-      &opengl_modifications1_0;
-      &opengl_modifications1_1;
-      &opengl_modifications1_4;
-      &opengl_modifications2_0;
-      &opengl_modifications2_1;
-      &opengl_modifications3_0;
-      &opengl_modifications3_3;
-      &opengl_modifications4_0;
-      &opengl_modifications4_1;
-      &opengl_modifications_va;
-  </object-type>
-  <object-type name="QOpenGLFunctions_4_2_Compatibility" since="5.1">
-      &glgetv_includes;
-      &glgeti_v_includes;
-      &glgetv_modifications;
-      &glgeti_v_modifications;
-      &opengl_modifications1_0;
-      &opengl_modifications1_0_compat;
-      &opengl_modifications1_1;
-      &opengl_modifications1_1_compat;
-      &opengl_modifications1_2_compat;
-      &opengl_modifications1_3_compat;
-      &opengl_modifications1_4;
-      &opengl_modifications1_4_compat;
-      &opengl_modifications2_0;
-      &opengl_modifications2_0_compat;
-      &opengl_modifications2_1;
-      &opengl_modifications3_0;
-      &opengl_modifications3_3;
-      &opengl_modifications3_3a;
-      &opengl_modifications4_0;
-      &opengl_modifications4_1;
-  </object-type>
-  <object-type name="QOpenGLFunctions_4_2_Core" since="5.1">
+  <object-type name="QOpenGLFunctions_4_1_Core">
       &glgetv_includes;
       &glgeti_v_includes;
       &glgetv_modifications;
@@ -445,7 +407,45 @@
       &opengl_modifications4_1;
       &opengl_modifications_va;
   </object-type>
-  <object-type name="QOpenGLFunctions_4_3_Compatibility" since="5.1">
+  <object-type name="QOpenGLFunctions_4_2_Compatibility">
+      &glgetv_includes;
+      &glgeti_v_includes;
+      &glgetv_modifications;
+      &glgeti_v_modifications;
+      &opengl_modifications1_0;
+      &opengl_modifications1_0_compat;
+      &opengl_modifications1_1;
+      &opengl_modifications1_1_compat;
+      &opengl_modifications1_2_compat;
+      &opengl_modifications1_3_compat;
+      &opengl_modifications1_4;
+      &opengl_modifications1_4_compat;
+      &opengl_modifications2_0;
+      &opengl_modifications2_0_compat;
+      &opengl_modifications2_1;
+      &opengl_modifications3_0;
+      &opengl_modifications3_3;
+      &opengl_modifications3_3a;
+      &opengl_modifications4_0;
+      &opengl_modifications4_1;
+  </object-type>
+  <object-type name="QOpenGLFunctions_4_2_Core">
+      &glgetv_includes;
+      &glgeti_v_includes;
+      &glgetv_modifications;
+      &glgeti_v_modifications;
+      &opengl_modifications1_0;
+      &opengl_modifications1_1;
+      &opengl_modifications1_4;
+      &opengl_modifications2_0;
+      &opengl_modifications2_1;
+      &opengl_modifications3_0;
+      &opengl_modifications3_3;
+      &opengl_modifications4_0;
+      &opengl_modifications4_1;
+      &opengl_modifications_va;
+  </object-type>
+  <object-type name="QOpenGLFunctions_4_3_Compatibility">
       &glgetv_includes;
       &glgeti_v_includes;
       &glgetv_modifications;
@@ -468,7 +468,7 @@
       &opengl_modifications4_1;
       &opengl_modifications4_3;
   </object-type>
-  <object-type name="QOpenGLFunctions_4_3_Core" since="5.1">
+  <object-type name="QOpenGLFunctions_4_3_Core">
       &glgetv_includes;
       &glgeti_v_includes;
       &glgetv_modifications;
@@ -485,7 +485,7 @@
       &opengl_modifications4_1;
       &opengl_modifications_va;
   </object-type>
-  <object-type name="QOpenGLFunctions_4_4_Compatibility" since="5.5">
+  <object-type name="QOpenGLFunctions_4_4_Compatibility">
       &glgetv_includes;
       &glgeti_v_includes;
       &glgetv_modifications;
@@ -510,7 +510,7 @@
       &opengl_modifications4_4;
       &opengl_modifications4_4_core;
   </object-type>
-  <object-type name="QOpenGLFunctions_4_4_Core" since="5.5">
+  <object-type name="QOpenGLFunctions_4_4_Core">
       &glgetv_includes;
       &glgeti_v_includes;
       &glgetv_modifications;
@@ -529,7 +529,7 @@
       &opengl_modifications4_4;
       &opengl_modifications4_4_core;
   </object-type>
-  <object-type name="QOpenGLFunctions_4_5_Compatibility" since="5.5">
+  <object-type name="QOpenGLFunctions_4_5_Compatibility">
       &glgetv_includes;
       &glgeti_v_includes;
       &glgetv_modifications;
@@ -548,34 +548,34 @@
       &opengl_modifications3_0;
       &opengl_modifications3_3;
       &opengl_modifications3_3a;
-      &opengl_modifications4_0;
-      &opengl_modifications4_1;
-      &opengl_modifications4_3;
-      &opengl_modifications4_4;
-      &opengl_modifications4_4_core;
-      &opengl_modifications4_5;
-  </object-type>
-  <object-type name="QOpenGLFunctions_4_5_Core" since="5.5">
-      &glgetv_includes;
-      &glgeti_v_includes;
-      &glgetv_modifications;
-      &glgeti_v_modifications;
-      &opengl_modifications1_0;
-      &opengl_modifications1_1;
-      &opengl_modifications1_4;
-      &opengl_modifications2_0;
-      &opengl_modifications2_1;
-      &opengl_modifications3_0;
-      &opengl_modifications3_3;
       &opengl_modifications4_0;
       &opengl_modifications4_1;
       &opengl_modifications4_3;
       &opengl_modifications4_4;
       &opengl_modifications4_4_core;
       &opengl_modifications4_5;
+  </object-type>
+  <object-type name="QOpenGLFunctions_4_5_Core">
+      &glgetv_includes;
+      &glgeti_v_includes;
+      &glgetv_modifications;
+      &glgeti_v_modifications;
+      &opengl_modifications1_0;
+      &opengl_modifications1_1;
+      &opengl_modifications1_4;
+      &opengl_modifications2_0;
+      &opengl_modifications2_1;
+      &opengl_modifications3_0;
+      &opengl_modifications3_3;
+      &opengl_modifications4_0;
+      &opengl_modifications4_1;
+      &opengl_modifications4_3;
+      &opengl_modifications4_4;
+      &opengl_modifications4_4_core;
+      &opengl_modifications4_5;
       &opengl_modifications_va;
   </object-type>
-  <object-type name="QOpenGLFunctions_ES2" since="5.1">
+  <object-type name="QOpenGLFunctions_ES2">
       &opengl_modifications1_0;
       &opengl_modifications1_1;
   </object-type>
@@ -616,18 +616,18 @@
       </modify-function>
   </object-type>
 
-  <object-type name="QOpenGLFramebufferObject" since="5.0">
+  <object-type name="QOpenGLFramebufferObject">
     <enum-type name="Attachment"/>
-    <enum-type name="FramebufferRestorePolicy" since="5.7"/>
+    <enum-type name="FramebufferRestorePolicy"/>
   </object-type>
   <value-type name="QOpenGLFramebufferObjectFormat"/>
-  <object-type name="QAbstractOpenGLFunctions" since="5.1"/>
+  <object-type name="QAbstractOpenGLFunctions"/>
   <value-type  name="QOpenGLPixelTransferOptions"/>
-  <object-type name="QOpenGLShader" since="5.0">
+  <object-type name="QOpenGLShader">
     <enum-type name="ShaderTypeBit" flags="ShaderType"/>
   </object-type>
   <object-type name="QOpenGLPaintDevice"/>
-  <object-type name="QOpenGLShaderProgram" since="5.0">
+  <object-type name="QOpenGLShaderProgram">
       <modify-function signature="setAttributeArray(int,const float*,int,int)">
           <modify-argument index="2"><array/></modify-argument>
       </modify-function>
@@ -674,7 +674,7 @@
           <inject-code file="../glue/qtopengl.cpp" snippet="qopenglshaderprogram_setuniformvalue_int"/>
       </add-function>
   </object-type>
-  <object-type name="QOpenGLTexture" since="5.2">
+  <object-type name="QOpenGLTexture">
       <enum-type name="BindingTarget"/>
       <enum-type name="CoordinateDirection"/>
       <enum-type name="ComparisonFunction"/>
@@ -700,12 +700,12 @@
   <object-type name="QOpenGLTextureBlitter">
       <enum-type name="Origin"/>
   </object-type>
-  <object-type name="QOpenGLTimeMonitor" since="5.1"/>
-  <object-type name="QOpenGLTimerQuery" since="5.1"/>
-  <object-type name="QOpenGLWindow" since="5.4">
+  <object-type name="QOpenGLTimeMonitor"/>
+  <object-type name="QOpenGLTimerQuery"/>
+  <object-type name="QOpenGLWindow">
       <enum-type name="UpdateBehavior"/>
   </object-type>
-  <value-type name="QOpenGLVersionProfile" since="5.1"/>
+  <value-type name="QOpenGLVersionProfile"/>
   <object-type name="QOpenGLVertexArrayObject">
       <object-type name="Binder">
           <add-function signature="__enter__()" return-type="QOpenGLVertexArrayObject::Binder">

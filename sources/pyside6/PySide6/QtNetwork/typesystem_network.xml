@@ -8,19 +8,19 @@
 
     <rejection class="dtlsopenssl"/>
 
-    <enum-type name="QDtlsError" since="5.12"/>
-    <enum-type name="QOcspCertificateStatus" since="5.13"/>
-    <enum-type name="QOcspRevocationReason" since="5.13"/>
+    <enum-type name="QDtlsError"/>
+    <enum-type name="QOcspCertificateStatus"/>
+    <enum-type name="QOcspRevocationReason"/>
 
-    <namespace-type name="QPasswordDigestor" since="5.12">
+    <namespace-type name="QPasswordDigestor">
         <extra-includes>
             <include file-name="qpassworddigestor.h" location="global"/>
         </extra-includes>
     </namespace-type>
 
     <namespace-type name="QSsl">
-        <enum-type name="AlertLevel" since="6.0"/>
-        <enum-type name="AlertType" since="6.0"/>
+        <enum-type name="AlertLevel"/>
+        <enum-type name="AlertType"/>
         <enum-type name="AlternativeNameEntryType"/>
         <enum-type name="EncodingFormat"/>
         <enum-type name="ImplementedClass" since="6.1"/>
@@ -64,18 +64,18 @@
     <value-type name="QDnsServiceRecord"/>
     <value-type name="QDnsTextRecord"/>
 
-    <object-type name="QDtls" since="5.12">
+    <object-type name="QDtls">
         <enum-type name="HandshakeState"/>
     </object-type>
     <object-type name="QDtlsClientVerifier"/>
 
-    <value-type name="QHstsPolicy" since="5.9">
+    <value-type name="QHstsPolicy">
         <enum-type name="PolicyFlag" flags="PolicyFlags"/>
     </value-type>
     <object-type name="QHttpMultiPart">
         <enum-type name="ContentType"/>
     </object-type>
-    <value-type name="QHttpPart" since="5.9"/>
+    <value-type name="QHttpPart"/>
     <value-type name="QHttp2Configuration"/>
 
     <object-type name="QTcpServer">
@@ -96,7 +96,7 @@
             </inject-code>
         </modify-function>
     </object-type>
-    <value-type name="QOcspResponse" since="5.13"/>
+    <value-type name="QOcspResponse"/>
     <object-type name="QTcpSocket"/>
     <object-type name="QUdpSocket">
         <modify-function signature="readDatagram(char*,qint64,QHostAddress*,quint16*)" allow-thread="yes">
@@ -173,13 +173,13 @@
         <enum-type name="TransportMedium" since="6.3"/>
     </object-type>
     <object-type name="QNetworkCookieJar"/>
-    <value-type name="QNetworkDatagram" since="5.8"/>
+    <value-type name="QNetworkDatagram"/>
     <object-type name="QNetworkReply">
         <enum-type name="NetworkError"/>
     </object-type>
 
     <value-type name="QHostAddress">
-        <enum-type name="ConversionModeFlag" flags="ConversionMode" since="5.8"/>
+        <enum-type name="ConversionModeFlag" flags="ConversionMode"/>
         <enum-type name="SpecialAddress"/>
         <!-- ### QHostAddress(QIPv6Address) does this -->
         <modify-function signature="QHostAddress(const quint8*)" remove="all"/>
@@ -197,12 +197,12 @@
     </value-type>
 
     <value-type name="QNetworkAddressEntry">
-        <enum-type name="DnsEligibilityStatus" since="5.11"/>
+        <enum-type name="DnsEligibilityStatus"/>
     </value-type>
 
     <value-type name="QNetworkInterface">
         <enum-type name="InterfaceFlag" flags="InterfaceFlags"/>
-        <enum-type name="InterfaceType" since="5.11"/>
+        <enum-type name="InterfaceType"/>
     </value-type>
 
     <value-type name="QNetworkProxy">
@@ -241,8 +241,8 @@
         <enum-type name="Priority" since="4.7"/>
         <enum-type name="CacheLoadControl"/>
         <enum-type name="KnownHeaders"/>
-        <enum-type name="RedirectPolicy" since="5.9"/>
-        <enum-type name="TransferTimeoutConstant" since="5.15"/>
+        <enum-type name="RedirectPolicy"/>
+        <enum-type name="TransferTimeoutConstant"/>
     </value-type>
 
     <object-type name="QAbstractNetworkCache"/>
@@ -254,7 +254,7 @@
 
     <!-- The following entries may be present in the system or not. Keep this section organized. -->
     <value-type name="QSslCertificate">
-        <enum-type name="PatternSyntax" since="5.15"/>
+        <enum-type name="PatternSyntax"/>
         <enum-type name="SubjectInfo"/>
     </value-type>
 
@@ -266,7 +266,7 @@
         <enum-type name="NextProtocolNegotiationStatus"/>
     </value-type>
 
-    <value-type name="QSslDiffieHellmanParameters" since="5.8">
+    <value-type name="QSslDiffieHellmanParameters">
         <enum-type name="Error"/>
     </value-type>
 

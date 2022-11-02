@@ -18,7 +18,7 @@
       <enum-type name="CoordinateFormat"/>
   </value-type>
   <value-type name="QGeoPath"/>
-  <value-type name="QGeoPolygon" since="5.10"/>
+  <value-type name="QGeoPolygon"/>
   <value-type name="QGeoPositionInfo">
       <enum-type name="Attribute"/>
   </value-type>

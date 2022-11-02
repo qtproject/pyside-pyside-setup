@@ -47,7 +47,7 @@
   <object-type name="QGeoRoutingManager"/>
   <object-type name="QGeoRoutingManagerEngine"/>
   <object-type name="QGeoServiceProviderFactory"/>
-  <object-type name="QGeoServiceProviderFactoryV2" since="5.11"/>
+  <object-type name="QGeoServiceProviderFactoryV2"/>
   <value-type name="QPlaceAttribute"/>
   <value-type name="QPlaceCategory"/>
   <value-type name="QPlaceContactDetail"/>

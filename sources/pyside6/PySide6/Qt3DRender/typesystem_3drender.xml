@@ -12,7 +12,7 @@
         <object-type name="QAbstractLight">
             <enum-type name="Type"/>
         </object-type>
-        <object-type name="QAbstractRayCaster" since="5.11">
+        <object-type name="QAbstractRayCaster">
             <enum-type name="RunMode"/>
             <enum-type name="FilterMode"/>
         </object-type>
@@ -20,7 +20,7 @@
             <enum-type name="CubeMapFace"/>
             <enum-type name="ComparisonFunction"/>
             <enum-type name="ComparisonMode"/>
-            <enum-type name="HandleType" since="5.13"/>
+            <enum-type name="HandleType"/>
             <enum-type name="Filter"/>
             <enum-type name="Status"/>
             <enum-type name="Target"/>
@@ -39,7 +39,7 @@
         <object-type name="QBlendEquationArguments">
             <enum-type name="Blending"/>
         </object-type>
-        <object-type name="QBlitFramebuffer" since="5.10">
+        <object-type name="QBlitFramebuffer">
             <enum-type name="InterpolationMethod"/>
         </object-type>
         <object-type name="QBufferCapture"/>
@@ -56,7 +56,7 @@
         <object-type name="QClipPlane"/>
         <object-type name="QColorMask"/>
         <object-type name="QComputeCommand">
-            <enum-type name="RunType" since="5.13"/>
+            <enum-type name="RunType"/>
         </object-type>
         <object-type name="QCullFace">
             <enum-type name="CullingMode"/>
@@ -97,7 +97,7 @@
         </object-type>
         <object-type name="QLevelOfDetailBoundingSphere"/>
         <object-type name="QLevelOfDetailSwitch"/>
-        <object-type name="QLineWidth" since="5.10"/>
+        <object-type name="QLineWidth"/>
         <object-type name="QMaterial"/>
         <object-type name="QMemoryBarrier">
             <enum-type name="Operation" flags="Operations"/>
@@ -108,7 +108,7 @@
         <object-type name="QMultiSampleAntiAliasing"/>
         <object-type name="QNoDepthMask"/>
         <object-type name="QNoDraw"/>
-        <object-type name="QNoPicking" since="5.14"/>
+        <object-type name="QNoPicking"/>
         <object-type name="QObjectPicker"/>
         <object-type name="QPaintedTextureImage"/>
         <object-type name="QParameter"/>
@@ -117,8 +117,8 @@
             <enum-type name="Modifiers"/>
         </object-type>
         <object-type name="QPickingProxy"/>
-        <object-type name="QPickLineEvent" since="5.10"/>
-        <object-type name="QPickPointEvent" since="5.10"/>
+        <object-type name="QPickLineEvent"/>
+        <object-type name="QPickPointEvent"/>
         <object-type name="QPickTriangleEvent"/>
         <object-type name="QPickingSettings">
             <enum-type name="FaceOrientationPickingMode"/>
@@ -130,19 +130,19 @@
             <enum-type name="SizeMode"/>
         </object-type>
         <object-type name="QPolygonOffset"/>
-        <object-type name="QProximityFilter" since="5.10"/>
+        <object-type name="QProximityFilter"/>
         <object-type name="QRasterMode">
             <enum-type name="RasterMode"/>
             <enum-type name="FaceMode"/>
         </object-type>
-        <object-type name="QRayCaster" since="5.11"/>
-        <value-type name="QRayCasterHit" since="5.11">
+        <object-type name="QRayCaster"/>
+        <value-type name="QRayCasterHit">
             <enum-type name="HitType"/>
         </value-type>
         <object-type name="QRenderAspect">
             <enum-type name="SubmissionType"/>
         </object-type>
-        <object-type name="QRenderCapabilities" since="5.15">
+        <object-type name="QRenderCapabilities">
             <enum-type name="API"/>
             <enum-type name="Profile"/>
         </object-type>
@@ -166,9 +166,9 @@
             <enum-type name="ComponentType"/>
         </object-type>
         <object-type name="QScissorTest"/>
-        <object-type name="QScreenRayCaster" since="5.11"/>
+        <object-type name="QScreenRayCaster"/>
         <object-type name="QSeamlessCubemap"/>
-        <object-type name="QSetFence" since="5.13">
+        <object-type name="QSetFence">
             <enum-type name="HandleType"/>
         </object-type>
         <object-type name="QShaderData"/>
@@ -177,12 +177,12 @@
             <enum-type name="ShaderType"/>
             <enum-type name="Status"/>
         </object-type>
-        <object-type name="QShaderImage" since="5.14">
+        <object-type name="QShaderImage">
             <enum-type name="Access"/>
             <enum-type name="ImageFormat"/>
         </object-type>
-        <object-type name="QShaderProgramBuilder" since="5.10"/>
-        <object-type name="QSharedGLTexture" since="5.13"/>
+        <object-type name="QShaderProgramBuilder"/>
+        <object-type name="QSharedGLTexture"/>
         <object-type name="QSortPolicy">
             <enum-type name="SortType"/>
         </object-type>
@@ -228,7 +228,7 @@
             <enum-type name="WrapMode"/>
         </object-type>
         <object-type name="QViewport"/>
-        <object-type name="QWaitFence" since="5.13">
+        <object-type name="QWaitFence">
             <enum-type name="HandleType"/>
         </object-type>
     </namespace-type>

@@ -35,7 +35,7 @@
              in generator tests folder. -->
     </primitive-type>
 
-    <enum-type name="QQmlModuleImportSpecialVersions" since="6.0"/>
+    <enum-type name="QQmlModuleImportSpecialVersions"/>
 
     <!-- expose QQmlIncubationController::incubateWhile() (see
          QtQml_VolatileBoolTypeF/pysideqmlvolatilebool.h) -->
@@ -116,8 +116,8 @@
     <inject-code class="target" position="end" file="../glue/qtqml.cpp" snippet="init"/>
 
     <object-type name="QJSEngine">
-        <enum-type name="Extension" flags="Extensions" since="5.6"/>
-        <enum-type name="ObjectOwnership" since="6.0"/>
+        <enum-type name="Extension" flags="Extensions"/>
+        <enum-type name="ObjectOwnership"/>
         <add-function signature="toScriptValue(const QVariant&amp;)" return-type="QJSValue">
             <inject-code class="target" position="end" file="../glue/qtqml.cpp" snippet="qjsengine-toscriptvalue"/>
         </add-function>
@@ -129,7 +129,7 @@
         <enum-type name="Type"/>
     </value-type>
     <value-type name="QJSValue">
-        <enum-type name="ErrorType" since="5.12"/>
+        <enum-type name="ErrorType"/>
         <enum-type name="SpecialValue"/>
         <enum-type name="ObjectConversionBehavior" since="6.1"/>
     </value-type>
