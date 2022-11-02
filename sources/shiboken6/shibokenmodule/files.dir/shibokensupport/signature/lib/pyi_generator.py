@@ -151,6 +151,12 @@ class Formatter(Writer):
         self.print(f"{spaces}{enum_name:25}: {class_name} = ... # {hexval}")
         yield
 
+    @contextmanager
+    def signal(self, class_name, sig_name, sig_str):
+        spaces = indent * self.level
+        self.print(f"{spaces}{sig_name:25}: ClassVar[{class_name}] = ... # {sig_str}")
+        yield
+
 
 def find_imports(text):
     return [imp for imp in PySide6.__all__ if f"PySide6.{imp}." in text]
@@ -160,8 +166,8 @@ FROM_IMPORTS = [
     (None, ["builtins"]),
     (None, ["os"]),
     (None, ["enum"] if sys.pyside63_option_python_enum else []),
-    ("typing", typing.__all__),
-    ("PySide6.QtCore", ["PyClassProperty"]),
+    ("typing", sorted(typing.__all__)),
+    ("PySide6.QtCore", ["PyClassProperty", "Signal", "SignalInstance"]),
     ("shiboken6", ["Shiboken"]),
     ]
 

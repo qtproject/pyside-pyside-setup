@@ -38,6 +38,10 @@ if hasattr(sys, "pypy_version_info"):
     _normal_functions += (type(get_sig),)
 
 
+def signal_check(thing):
+    return thing and type(thing) in (Signal, SignalInstance)
+
+
 class ExactEnumerator(object):
     """
     ExactEnumerator enumerates all signatures in a module as they are.
@@ -48,13 +52,13 @@ class ExactEnumerator(object):
     """
 
     def __init__(self, formatter, result_type=dict):
-        global EnumMeta
+        global EnumMeta, Signal, SignalInstance
         try:
             # Lazy import
-            from PySide6.QtCore import Qt
+            from PySide6.QtCore import Qt, Signal, SignalInstance
             EnumMeta = type(Qt.Key)
         except ImportError:
-            EnumMeta = None
+            EnumMeta = Signal = SignalInstance = None
 
         self.fmt = formatter
         self.result_type = result_type
@@ -120,9 +124,12 @@ class ExactEnumerator(object):
         functions = []
         enums = []
         properties = []
+        signals = []
 
         for thing_name, thing in class_members:
-            if inspect.isclass(thing):
+            if signal_check(thing):
+                signals.append((thing_name, thing))
+            elif inspect.isclass(thing):
                 subclass_name = ".".join((class_name, thing_name))
                 subclasses.append((subclass_name, thing))
             elif inspect.isroutine(thing):
@@ -160,6 +167,16 @@ class ExactEnumerator(object):
                 for enum_name, enum_class_name, value in enums:
                     with self.fmt.enum(enum_class_name, enum_name,
                                        value.value if new_enum else value):
+                        pass
+            if hasattr(self.fmt, "signal"):
+                # this is an optional feature
+                if len(signals):
+                    self.section()
+                for signal_name, signal in signals:
+                    sig_class = type(signal)
+                    sig_class_name = f"{sig_class.__qualname__}"
+                    sig_str = str(signal)
+                    with self.fmt.signal(sig_class_name, signal_name, sig_str):
                         pass
             if len(subclasses):
                 self.section()
