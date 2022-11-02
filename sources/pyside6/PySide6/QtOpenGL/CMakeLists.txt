@@ -36,6 +36,7 @@ if("opengles2" IN_LIST QtGui_enabled_features)
     list(APPEND QtOpenGL_SRC ${QtOpenGL_GEN_DIR}/qopenglfunctions_es2_wrapper.cpp)
     message(STATUS "Qt${QT_MAJOR_VERSION}Gui: Dropping Desktop OpenGL classes (GLES2)")
 else()
+    list(APPEND QtOpenGL_DROPPED_ENTRIES QOpenGLFunctions_ES2)
     list(APPEND QtOpenGL_SRC
          ${QtOpenGL_GEN_DIR}/qopenglfunctions_1_0_wrapper.cpp
          ${QtOpenGL_GEN_DIR}/qopenglfunctions_1_1_wrapper.cpp
