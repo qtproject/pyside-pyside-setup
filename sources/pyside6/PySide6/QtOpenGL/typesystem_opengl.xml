@@ -608,7 +608,6 @@
           <include file-name="QtOpenGL/qopenglfunctions_4_4_core.h" location="global"/>
           <include file-name="QtOpenGL/qopenglfunctions_4_5_compatibility.h" location="global"/>
           <include file-name="QtOpenGL/qopenglfunctions_4_5_core.h" location="global"/>
-          <include file-name="QtOpenGL/qopenglfunctions_es2.h" location="global"/>
       </extra-includes>
       <modify-function signature="get(const QOpenGLVersionProfile &amp;,QOpenGLContext *)">
           <inject-code class="target" position="beginning" file="../glue/qtopengl.cpp"
