@@ -570,7 +570,7 @@
     <enum-type name="EventPriority"/>
     <enum-type name="FillRule"/>
     <enum-type name="FindChildOption" flags="FindChildOptions" since="5.0"/>
-    <enum-type name="FocusPolicy"/>
+    <enum-type name="FocusPolicy" python-type="IntFlag"/>
     <enum-type name="FocusReason"/>
     <enum-type name="GestureFlag" flags="GestureFlags" since="4.6"/>
     <enum-type name="GestureState" since="4.6"/>
