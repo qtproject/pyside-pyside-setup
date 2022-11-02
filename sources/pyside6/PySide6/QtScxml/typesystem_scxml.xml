@@ -8,7 +8,7 @@
     <object-type name="QScxmlCompiler">
         <object-type name="Loader"/>
     </object-type>
-    <object-type name="QScxmlCppDataModel" since="5.12"/>
+    <object-type name="QScxmlCppDataModel"/>
     <object-type name="QScxmlEvent">
         <enum-type name="EventType"/>
     </object-type>
@@ -24,9 +24,9 @@
         </modify-function>
     </object-type>
     <object-type name="QScxmlTableData"/>
-    <object-type name="QScxmlDataModel" since="5.12">
+    <object-type name="QScxmlDataModel">
         <!-- Needs to have exports fixed -->
-        <interface-type name="ForeachLoopBody" since="5.12"/>
+        <interface-type name="ForeachLoopBody"/>
         <modify-function signature="^evaluateTo(String|Bool|Variant)\(.*bool ?\*.*$">
             <modify-argument index="2">
               <remove-default-expression/>
@@ -45,5 +45,5 @@
         <value-type name="InvokeInfo"/>
         <value-type name="ParameterInfo"/>
     </namespace-type>
-    <object-type name="QScxmlNullDataModel" since="5.12"/>
+    <object-type name="QScxmlNullDataModel"/>
 </typesystem>

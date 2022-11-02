@@ -7,10 +7,10 @@
 <typesystem package="PySide6.Qt3DExtras">
     <load-typesystem name="Qt3DRender/typesystem_3drender.xml" generate="no"/>
     <namespace-type name="Qt3DExtras">
-        <object-type name="QAbstractCameraController" since="5.10">
+        <object-type name="QAbstractCameraController">
             <value-type name="InputState"/>
         </object-type>
-        <object-type name="QAbstractSpriteSheet" since="5.10"/>
+        <object-type name="QAbstractSpriteSheet"/>
         <object-type name="QConeGeometry"/>
         <object-type name="QConeMesh"/>
         <object-type name="QConeGeometryView"/>
@@ -21,7 +21,7 @@
         <object-type name="QCylinderGeometryView"/>
         <object-type name="QCylinderMesh"/>
         <object-type name="QDiffuseMapMaterial"/>
-        <object-type name="QDiffuseSpecularMaterial" since="5.10"/>
+        <object-type name="QDiffuseSpecularMaterial"/>
         <object-type name="QDiffuseSpecularMapMaterial"/>
         <object-type name="QExtrudedTextGeometry"/>
         <object-type name="QExtrudedTextMesh"/>
@@ -44,9 +44,9 @@
         <object-type name="QSphereGeometry"/>
         <object-type name="QSphereGeometryView"/>
         <object-type name="QSphereMesh"/>
-        <object-type name="QSpriteGrid" since="5.10"/>
-        <object-type name="QSpriteSheet" since="5.10"/>
-        <object-type name="QSpriteSheetItem" since="5.10"/>
+        <object-type name="QSpriteGrid"/>
+        <object-type name="QSpriteSheet"/>
+        <object-type name="QSpriteSheetItem"/>
         <object-type name="QText2DEntity"/>
         <object-type name="QTextureMaterial"/>
         <object-type name="QTorusGeometry"/>

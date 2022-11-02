@@ -2296,7 +2296,7 @@
     <enum-type name="ButtonSymbols"/>
     <enum-type name="CorrectionMode"/>
     <enum-type name="StepEnabledFlag" flags="StepEnabled"/>
-    <enum-type name="StepType" since="5.12"/>
+    <enum-type name="StepType"/>
     <modify-function signature="setLineEdit(QLineEdit*)">
       <modify-argument index="1">
         <parent index="this" action="add"/>
@@ -2877,7 +2877,7 @@
   <!-- FIXME PYSIDE7: Move to QtGui -->
   <object-type name="QFileSystemModel" polymorphic-id-expression="qobject_cast&lt;QFileSystemModel*&gt;(%1)">
     <enum-type name="Roles" python-type="IntEnum"/>
-    <enum-type name="Option" flags="Options" since="5.14"/>
+    <enum-type name="Option" flags="Options"/>
     <modify-function signature="setIconProvider(QAbstractFileIconProvider*)">
       <modify-argument index="1">
         <parent index="this" action="add"/>

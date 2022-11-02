@@ -7,7 +7,7 @@
 <typesystem package="PySide6.QtHelp">
     <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no"/>
 
-    <value-type name="QCompressedHelpInfo" since="5.13"/>
+    <value-type name="QCompressedHelpInfo"/>
     <value-type name="QHelpContentItem">
       <modify-function signature="parent()const">
         <modify-argument index="return">
@@ -19,12 +19,12 @@
     <object-type name="QHelpContentWidget"/>
     <object-type name="QHelpEngine"/>
     <object-type name="QHelpEngineCore"/>
-    <value-type name="QHelpFilterData" since="5.13"/>
-    <object-type name="QHelpFilterEngine" since="5.13"/>
-    <object-type name="QHelpFilterSettingsWidget" since="5.15"/>
+    <value-type name="QHelpFilterData"/>
+    <object-type name="QHelpFilterEngine"/>
+    <object-type name="QHelpFilterSettingsWidget"/>
     <object-type name="QHelpIndexModel"/>
     <object-type name="QHelpIndexWidget"/>
-    <value-type name="QHelpLink" since="5.15"/>
+    <value-type name="QHelpLink"/>
     <object-type name="QHelpSearchEngine"/>
     <value-type name="QHelpSearchQuery">
         <enum-type name="FieldName"/>

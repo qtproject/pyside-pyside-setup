@@ -130,8 +130,8 @@
 
 
   <enum-type name="QtMsgType"/>
-  <enum-type name="QCborSimpleType" since="5.12"/>
-  <enum-type name="QCborKnownTags" since="5.12"/>
+  <enum-type name="QCborSimpleType"/>
+  <enum-type name="QCborKnownTags"/>
   <enum-type name="QCborTag"/>
 
   <primitive-type name="qint8"/>
@@ -272,24 +272,24 @@
     </conversion-rule>
   </primitive-type>
 
-  <value-type name="QCborError" since="5.12">
+  <value-type name="QCborError">
       <enum-type name="Code"/>
       <include file-name="qcborcommon.h" location="global"/>
   </value-type>
 
-  <value-type name="QCborParserError" since="5.12">
+  <value-type name="QCborParserError">
       <include file-name="qcborvalue.h" location="global"/>
   </value-type>
 
-  <value-type name="QCborValue" since="5.12">
+  <value-type name="QCborValue">
       <enum-type name="EncodingOption" flags="EncodingOptions"/>
       <enum-type name="DiagnosticNotationOption" flags="DiagnosticNotationOptions"/>
       <enum-type name="Type"/>
   </value-type>
-  <value-type name="QCborArray" since="5.12"/>
-  <value-type name="QCborMap" since="5.12"/>
+  <value-type name="QCborArray"/>
+  <value-type name="QCborMap"/>
 
-  <object-type name="QCborStreamReader" since="5.12">
+  <object-type name="QCborStreamReader">
     <enum-type name="StringResultCode"/>
     <enum-type name="Type"/>
     <include file-name="qcborstream.h" location="global"/>
@@ -299,9 +299,9 @@
     <!-- 32bit (qsizetype = int) -->
     <modify-function signature="readStringChunk(char*,int)" remove="all"/>
   </object-type>
-  <typedef-type name="QCborStringResultString" source="QCborStreamReader::StringResult&lt;QString&gt;" since="5.12"/>
-  <typedef-type name="QCborStringResultByteArray" source="QCborStreamReader::StringResult&lt;QByteArray&gt;" since="5.12"/>
-  <object-type name="QCborStreamWriter" since="5.12">
+  <typedef-type name="QCborStringResultString" source="QCborStreamReader::StringResult&lt;QString&gt;"/>
+  <typedef-type name="QCborStringResultByteArray" source="QCborStreamReader::StringResult&lt;QByteArray&gt;"/>
+  <object-type name="QCborStreamWriter">
     <include file-name="qcborstream.h" location="global"/>
   </object-type>
 
@@ -539,14 +539,14 @@
     <enum-type name="AlignmentFlag" python-type="IntFlag" flags="Alignment"/>
     <enum-type name="AnchorPoint" since="4.6"/>
     <enum-type name="ApplicationAttribute"/>
-    <enum-type name="ApplicationState" flags="ApplicationStates" since="5.1"/>
+    <enum-type name="ApplicationState" flags="ApplicationStates"/>
     <enum-type name="ArrowType"/>
     <enum-type name="AspectRatioMode"/>
     <enum-type name="Axis"/>
     <enum-type name="BGMode"/>
     <enum-type name="BrushStyle"/>
     <enum-type name="CaseSensitivity"/>
-    <enum-type name="ChecksumType" since="5.9"/>
+    <enum-type name="ChecksumType"/>
     <enum-type name="CheckState"/>
     <enum-type name="ClipOperation"/>
     <enum-type name="ConnectionType"/>
@@ -559,26 +559,26 @@
     <enum-type name="DockWidgetArea" flags="DockWidgetAreas"/>
     <enum-type name="DockWidgetAreaSizes"/>
     <enum-type name="DropAction" flags="DropActions"/>
-    <enum-type name="Edge" flags="Edges" since="5.1"/>
+    <enum-type name="Edge" flags="Edges"/>
     <enum-type name="EventPriority"/>
     <enum-type name="FillRule"/>
-    <enum-type name="FindChildOption" flags="FindChildOptions" since="5.0"/>
+    <enum-type name="FindChildOption" flags="FindChildOptions"/>
     <enum-type name="FocusPolicy"/>
     <enum-type name="FocusReason"/>
     <enum-type name="GestureFlag" flags="GestureFlags" since="4.6"/>
     <enum-type name="GestureState" since="4.6"/>
     <enum-type name="GestureType" python-type="IntEnum" since="4.6"/>
     <enum-type name="GlobalColor"/>
-    <enum-type name="HighDpiScaleFactorRoundingPolicy" since="5.14"/>
+    <enum-type name="HighDpiScaleFactorRoundingPolicy"/>
     <enum-type name="HitTestAccuracy"/>
     <enum-type name="ImageConversionFlag" flags="ImageConversionFlags"/>
     <enum-type name="InputMethodHint" flags="InputMethodHints" since="4.6"/>
     <enum-type name="InputMethodQuery" flags="InputMethodQueries"/>
-    <enum-type name="EnterKeyType" since="5.6"/>
+    <enum-type name="EnterKeyType"/>
     <enum-type name="ItemDataRole" python-type="IntEnum"/>
     <enum-type name="ItemFlag" flags="ItemFlags"/>
     <enum-type name="ItemSelectionMode"/>
-    <enum-type name="ItemSelectionOperation" since="5.5"/>
+    <enum-type name="ItemSelectionOperation"/>
     <enum-type name="Key" python-type="IntEnum"/>
     <enum-type name="KeyboardModifier" flags="KeyboardModifiers"/>
     <enum-type name="LayoutDirection"/>
@@ -586,30 +586,30 @@
     <enum-type name="MatchFlag" flags="MatchFlags"/>
     <enum-type name="Modifier" python-type="Flag"/>
     <enum-type name="MouseButton" flags="MouseButtons"/>
-    <enum-type name="MouseEventFlag" flags="MouseEventFlags" since="5.3"/>
-    <enum-type name="MouseEventSource" since="5.3"/>
-    <enum-type name="NativeGestureType" since="5.0"/>
+    <enum-type name="MouseEventFlag" flags="MouseEventFlags"/>
+    <enum-type name="MouseEventSource"/>
+    <enum-type name="NativeGestureType"/>
     <enum-type name="NavigationMode" since="4.6"/>
     <enum-type name="Orientation" flags="Orientations"/>
     <enum-type name="PenCapStyle"/>
     <enum-type name="PenJoinStyle"/>
     <enum-type name="PenStyle"/>
-    <enum-type name="ReturnByValueConstant" since="6.0"/>
-    <enum-type name="ScreenOrientation" flags="ScreenOrientations" since="5.0"/>
+    <enum-type name="ReturnByValueConstant"/>
+    <enum-type name="ScreenOrientation" flags="ScreenOrientations"/>
     <enum-type name="ScrollBarPolicy"/>
-    <enum-type name="ScrollPhase" since="5.2"/>
+    <enum-type name="ScrollPhase"/>
     <enum-type name="ShortcutContext"/>
     <enum-type name="SizeHint"/>
     <enum-type name="SizeMode"/>
     <enum-type name="SortOrder"/>
-    <enum-type name="SplitBehaviorFlags" flags="SplitBehavior" since="5.14"/>
-    <enum-type name="TabFocusBehavior" since="5.5"/>
+    <enum-type name="SplitBehaviorFlags" flags="SplitBehavior"/>
+    <enum-type name="TabFocusBehavior"/>
     <enum-type name="TextElideMode"/>
     <enum-type name="TextFlag" python-type="IntFlag"/>
     <enum-type name="TextFormat"/>
     <enum-type name="TextInteractionFlag" flags="TextInteractionFlags"/>
     <enum-type name="TileRule" since="4.6"/>
-    <enum-type name="TimerType" since="5.0"/>
+    <enum-type name="TimerType"/>
     <enum-type name="TimeSpec"/>
     <enum-type name="ToolBarArea" flags="ToolBarAreas"/>
     <enum-type name="ToolBarAreaSizes"/>
@@ -671,7 +671,7 @@
     <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qt-installmessagehandler"/>
   </add-function>
 
-  <value-type name="QDeadlineTimer" since="5.8">
+  <value-type name="QDeadlineTimer">
     <enum-type name="ForeverConstant"/>
   </value-type>
 
@@ -756,7 +756,7 @@
     </modify-function>
   </value-type>
   <object-type name="QResource">
-    <enum-type name="Compression" since="5.13"/>
+    <enum-type name="Compression"/>
     <modify-function signature="data()const">
         <inject-documentation format="target">
             Returns a read only buffer object pointing to the segment of data that this resource represents. If the resource is compressed the data returns is compressed and qUncompress() must be used to access the data. If the resource is a directory None is returned.
@@ -783,7 +783,7 @@
 
   <object-type name="QBasicTimer"/>
   <value-type name="QByteArrayMatcher"/>
-  <value-type name="QCalendar" since="5.14">
+  <value-type name="QCalendar">
       <object-type name="SystemId"/> <!-- not default-constructible -->
       <value-type name="YearMonthDay"/>
       <enum-type name="System"/>
@@ -856,7 +856,7 @@
     <extra-includes>
       <include file-name="pysideqhash.h" location="global"/>
     </extra-includes>
-    <enum-type name="YearRange" since="5.14"/>
+    <enum-type name="YearRange"/>
     <inject-code class="native" position="beginning">
         <insert-template name="pydatetime_importandcheck_function">
             <replace from="$DATETIMETYPE" to="PyDateTime"/>
@@ -1281,7 +1281,7 @@
   </value-type>
 
   <value-type name="QUuid">
-    <enum-type name="StringFormat" since="5.11"/>
+    <enum-type name="StringFormat"/>
     <enum-type name="Variant"/>
     <enum-type name="Version"/>
     <add-function signature="__repr__" return-type="PyObject*">
@@ -1302,15 +1302,15 @@
     </add-function>
   </value-type>
 
-  <value-type name="QMimeType" since="5.0"/>
-  <object-type name="QMimeDatabase" since="5.0">
+  <value-type name="QMimeType"/>
+  <object-type name="QMimeDatabase">
     <enum-type name="MatchMode"/>
   </object-type>
 
   <value-type name="QLocale">
     <enum-type name="Country"/>
-    <enum-type name="DataSizeFormat" flags="DataSizeFormats" since="5.10"/>
-    <enum-type name="FloatingPointPrecisionOption" python-type="IntEnum" since="5.7"/>
+    <enum-type name="DataSizeFormat" flags="DataSizeFormats"/>
+    <enum-type name="FloatingPointPrecisionOption" python-type="IntEnum"/>
     <enum-type name="FormatType"/>
     <enum-type name="Language"/>
     <enum-type name="LanguageCodeType" python-type="IntFlag" flags="LanguageCodeTypes" since="6.3"/>
@@ -1532,7 +1532,7 @@
   <value-type name="QModelRoleData"/>
 
   <object-type name="QAbstractItemModel">
-    <enum-type name="CheckIndexOption" flags="CheckIndexOptions" since="5.11"/>
+    <enum-type name="CheckIndexOption" flags="CheckIndexOptions"/>
     <enum-type name="LayoutChangeHint"/>
      <!-- This function was replaced by a added function -->
     <modify-function signature="createIndex(int,int,const void*)const" remove="all"/>
@@ -1614,7 +1614,7 @@
       <include file-name="QSize" location="global"/>
     </extra-includes>
   </object-type>
-  <object-type name="QConcatenateTablesProxyModel" since="5.13"/>
+  <object-type name="QConcatenateTablesProxyModel"/>
   <object-type name="QSortFilterProxyModel">
     <extra-includes>
       <include file-name="QItemSelection" location="global"/>
@@ -1628,7 +1628,7 @@
     </modify-function>
   </object-type>
   <object-type name="QIdentityProxyModel"/>
-  <object-type name="QTransposeProxyModel" since="5.13"/>
+  <object-type name="QTransposeProxyModel"/>
   <!-- QObject is created manually -->
   <object-type name="QObject" parent-management="true">
     <extra-includes>
@@ -1804,7 +1804,7 @@
       <include file-name="QSize" location="global"/>
     </extra-includes>
   </object-type>
-  <value-type name="QUrlQuery" since="5.0"/>
+  <value-type name="QUrlQuery"/>
 
   <value-type name="QUrl" hash-function="PySide::hash">
     <!-- Qt5: lots of changes -->
@@ -1842,7 +1842,7 @@
   </value-type>
 
   <value-type name="QRegularExpression">
-    <enum-type name="WildcardConversionOption" flags="WildcardConversionOptions" since="6.0"/>
+    <enum-type name="WildcardConversionOption" flags="WildcardConversionOptions"/>
     <enum-type name="MatchOption" flags="MatchOptions"/>
     <enum-type name="MatchType"/>
     <enum-type name="PatternOption" flags="PatternOptions"/>
@@ -1884,9 +1884,9 @@
   <!-- PYSIDE-1913: Disable isNull() for bool cast; __len__ should be used
        instead so that b"" yields False. -->
   <value-type name="QByteArray" isNull="false">
-    <enum-type name="Base64Option" flags="Base64Options" since="5.2"/>
-    <enum-type name="Base64DecodingStatus" since="5.15"/>
-    <value-type name="FromBase64Result" since="5.15"/>
+    <enum-type name="Base64Option" flags="Base64Options"/>
+    <enum-type name="Base64DecodingStatus"/>
+    <value-type name="FromBase64Result"/>
     <conversion-rule>
         <target-to-native>
             <add-conversion type="Py_None" file="../glue/qtcore.cpp" snippet="conversion-pynone"/>
@@ -2126,7 +2126,7 @@
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qbytearray-msetitem"/>
     </add-function>
   </value-type>
-  <primitive-type name="QByteArrayView" view-on="QByteArray" since="6.0">
+  <primitive-type name="QByteArrayView" view-on="QByteArray">
     <conversion-rule>
         <native-to-target file="../glue/qtcore.cpp" snippet="return-pybytes"/>
     </conversion-rule>
@@ -2176,9 +2176,9 @@
       <modify-function signature="processEvents(QFlags&lt;QEventLoop::ProcessEventsFlag>)" allow-thread="yes"/>
       <modify-function signature="processEvents(QFlags&lt;QEventLoop::ProcessEventsFlag>,int)" allow-thread="yes"/>
   </object-type>
-  <object-type name="QFileDevice" since="5.0">
+  <object-type name="QFileDevice">
     <enum-type name="FileError"/>
-    <enum-type name="FileTime" since="5.10"/>
+    <enum-type name="FileTime"/>
     <enum-type name="MemoryMapFlag" flags="MemoryMapFlags"/>
     <enum-type name="Permission" flags="Permissions"/>
     <enum-type name="FileHandleFlag" flags="FileHandleFlags"/>
@@ -2298,7 +2298,7 @@
         <inject-code class="native" position="end" file="../glue/qtcore.cpp" snippet="return-readData"/>
     </modify-function>
   </object-type>
-  <object-type name="QIODeviceBase" since="6.0">
+  <object-type name="QIODeviceBase">
       <enum-type name="OpenModeFlag" flags="OpenMode"/>
   </object-type>
   <object-type name="QCryptographicHash">
@@ -2313,7 +2313,7 @@
   <value-type name="QOperatingSystemVersionBase" since="6.3">
       <enum-type name="OSType"/>
   </value-type>
-  <value-type name="QOperatingSystemVersion" since="5.9">
+  <value-type name="QOperatingSystemVersion">
       <enum-type name="OSType"/>
       <modify-function signature="QOperatingSystemVersion(const QOperatingSystemVersionBase&amp;)" remove="all"/>
   </value-type>
@@ -2375,16 +2375,16 @@
   <object-type name="QMutex">
     <modify-function signature="tryLock(int)" allow-thread="yes"/>
   </object-type>
-  <object-type name="QRecursiveMutex" since="5.14">
+  <object-type name="QRecursiveMutex">
     <modify-function signature="lock()" allow-thread="yes"/>
     <modify-function signature="tryLock(int)" allow-thread="yes"/>
   </object-type>
-  <object-type name="QRandomGenerator" since="5.10">
+  <object-type name="QRandomGenerator">
       <modify-function signature="global()" rename="global_"/>
       <modify-function signature="operator()()" remove="all"/>
       <modify-function signature="generate(quint32*,quint32*)" remove="all"/>
   </object-type>
-  <object-type name="QRandomGenerator64" since="5.10">
+  <object-type name="QRandomGenerator64">
       <modify-function signature="global()" rename="global_"/>
       <modify-function signature="operator()()" remove="all"/>
   </object-type>
@@ -2392,9 +2392,9 @@
     <modify-function signature="acquire(int)" allow-thread="yes"/>
     <modify-function signature="tryAcquire(int,int)" allow-thread="yes"/>
   </object-type>
-  <object-type name="QSemaphoreReleaser" since="5.10"/>
+  <object-type name="QSemaphoreReleaser"/>
 
-  <value-type name="QSocketDescriptor" since="5.15">
+  <value-type name="QSocketDescriptor">
     <inject-code class="native" position="beginning" file="../glue/qtcore.cpp" snippet="qsocketdescriptor"/>
   </value-type>
   <object-type name="QSocketNotifier">
@@ -2485,14 +2485,14 @@
   </object-type>
   <object-type name="QSignalMapper"/>
 
-  <object-type name="QCollatorSortKey" since="5.2"/>
-  <object-type name="QCollator" since="5.2"/>
+  <object-type name="QCollatorSortKey"/>
+  <object-type name="QCollator"/>
 
-  <object-type name="QCommandLineOption" since="5.2">
-    <enum-type name="Flag" flags="Flags" since="5.8"/>
+  <object-type name="QCommandLineOption">
+    <enum-type name="Flag" flags="Flags"/>
   </object-type>
-  <object-type name="QCommandLineParser" since="5.2">
-    <enum-type name="OptionsAfterPositionalArgumentsMode" since="5.6"/>
+  <object-type name="QCommandLineParser">
+    <enum-type name="OptionsAfterPositionalArgumentsMode"/>
     <enum-type name="SingleDashWordOptionMode"/>
   </object-type>
 
@@ -2801,7 +2801,7 @@
     <!-- Removed because it expect QString to be mutable -->
     <modify-function signature="QTextStream(QString*,QFlags&lt;QIODeviceBase::OpenModeFlag&gt;)" remove="all"/>
     <!-- Qt5.5: Removed because it expect QString to be mutable -->
-    <modify-function signature="readLineInto(QString*,qint64)" since="5.5" remove="all"/>
+    <modify-function signature="readLineInto(QString*,qint64)"/>
     <!-- Removed because we use the non-const version -->
     <modify-function signature="QTextStream(const QByteArray&amp;,QFlags&lt;QIODeviceBase::OpenModeFlag&gt;)" remove="all"/>
 
@@ -2844,7 +2844,7 @@
     <modify-function signature="readLine(qint64)" allow-thread="yes"/>
     <modify-function signature="readAll()" allow-thread="yes"/>
   </object-type>
-  <object-type name="QStandardPaths" since="5.0">
+  <object-type name="QStandardPaths">
     <enum-type name="StandardLocation"/>
     <enum-type name="LocateOption" flags="LocateOptions"/>
   </object-type>
@@ -2959,11 +2959,7 @@
     <include file-name="qobjectdefs.h" location="global"/>
   </value-type>
 
-  <object-type name="QMessageLogContext" since="5.14"/>
-
-  <object-type name="QMessageLogContext" since="5.9" until="5.13.2">
-    <modify-function signature="copy(const QMessageLogContext &amp;)" remove="all"/>
-  </object-type>
+  <object-type name="QMessageLogContext"/>
 
   <value-type name="QMetaMethod">
     <enum-type name="Access"/>
@@ -3134,7 +3130,7 @@
   </value-type>
 
   <value-type name="QMargins" since="4.6"/>
-  <value-type name="QMarginsF" since="5.3"/>
+  <value-type name="QMarginsF"/>
 
   <object-type name="QParallelAnimationGroup" since="4.6"/>
 
@@ -3150,7 +3146,7 @@
 
   <object-type name="QVariantAnimation" since="4.6"/>
 
-  <value-type name="QVersionNumber" since="5.6">
+  <value-type name="QVersionNumber">
     <modify-function signature="fromString(QAnyStringView,qsizetype*)">
       <modify-argument index="2">
         <remove-argument/>

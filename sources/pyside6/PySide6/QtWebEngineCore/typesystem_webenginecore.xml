@@ -97,7 +97,7 @@
   <object-type name="QWebEngineSettings">
     <enum-type name="FontFamily"/>
     <enum-type name="FontSize"/>
-    <enum-type name="UnknownUrlSchemePolicy" since="5.11"/>
+    <enum-type name="UnknownUrlSchemePolicy"/>
     <enum-type name="WebAttribute"/>
   </object-type>
 
@@ -126,7 +126,7 @@
   <object-type name="QWebEngineUrlRequestJob">
     <enum-type name="Error"/>
   </object-type>
-  <value-type name="QWebEngineUrlScheme" since="5.12">
+  <value-type name="QWebEngineUrlScheme">
       <enum-type name="Syntax"/>
       <enum-type name="SpecialPort"/>
       <enum-type name="Flag" flags="Flags"/>

@@ -8,11 +8,11 @@
     <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
     <namespace-type name="Qt3DCore" generate-using="no">
         <object-type name="QAbstractAspect"/>
-        <object-type name="QAbstractFunctor" since="6.0"/>
-        <object-type name="QAbstractSkeleton" since="5.10"/>
-        <object-type name="QArmature" since="5.10"/>
+        <object-type name="QAbstractFunctor"/>
+        <object-type name="QAbstractSkeleton"/>
+        <object-type name="QArmature"/>
         <object-type name="QAspectEngine">
-          <enum-type name="RunMode" since="5.14"/>
+          <enum-type name="RunMode"/>
           <modify-function signature="registerAspect(Qt3DCore::QAbstractAspect*)">
             <modify-argument index="this">
               <parent index="1" action="add"/>
@@ -31,8 +31,8 @@
         <!-- TODO: Solve issues related to windows and a unresolved
             external symbol
         <object-type name="QBackendNodeMapper"/>-->
-        <object-type name="QBoundingVolume" since="6.0"/>
-        <object-type name="QBuffer" since="6.0">
+        <object-type name="QBoundingVolume"/>
+        <object-type name="QBuffer">
             <enum-type name="AccessType"/>
             <enum-type name="UsageType"/>
             <!-- Disambiguate from QtCore/qbuffer.h -->
@@ -47,11 +47,11 @@
           </modify-function>
         </object-type>
         <object-type name="QCoreSettings"/>
-        <object-type name="QGeometry" since="6.0"/>
-        <object-type name="QGeometryView" since="6.0">
+        <object-type name="QGeometry"/>
+        <object-type name="QGeometryView">
             <enum-type name="PrimitiveType"/>
         </object-type>
-        <object-type name="QJoint" since="5.10">
+        <object-type name="QJoint">
           <modify-function signature="addChildJoint(Qt3DCore::QJoint*)">
             <modify-argument index="this">
               <parent index="1" action="add"/>
@@ -61,8 +61,8 @@
         <object-type name="QNode"/>
         <value-type name="QNodeId"/>
         <value-type name="QNodeIdTypePair"/>
-        <object-type name="QSkeleton" since="5.10"/>
-        <object-type name="QSkeletonLoader" since="5.10">
+        <object-type name="QSkeleton"/>
+        <object-type name="QSkeletonLoader">
             <enum-type name="Status"/>
         </object-type>
         <object-type name="QTransform">
