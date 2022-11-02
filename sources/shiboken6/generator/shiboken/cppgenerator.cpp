@@ -416,6 +416,7 @@ static QSet<QString> useIntSet()
         // note:  "QUrl::UrlFormattingOption" is set as IntFlag without flags
         /* IntFlag */ u"PySide6.QtCore.QUrl.UrlFormattingOption"_s,
         /* IntFlag */ u"PySide6.QtCore.Qt.AlignmentFlag"_s,
+        /* IntFlag */ u"PySide6.QtCore.Qt.FocusPolicy"_s,
         /* IntEnum */ u"PySide6.QtCore.Qt.GestureType"_s,
         /* IntEnum */ u"PySide6.QtCore.Qt.ItemDataRole"_s,
         /* IntEnum */ u"PySide6.QtCore.Qt.Key"_s,
