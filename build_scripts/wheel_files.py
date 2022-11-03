@@ -164,6 +164,8 @@ def wheel_files_pyside_addons() -> List[ModuleData]:
         module_QtMultimediaWidgets(),
         module_QtNetworkAuth(),
         module_QtNfc(),
+        module_QtPdf(),
+        module_QtPdfWidgets(),
         module_QtPositioning(),
         module_QtQuick3D(),
         module_QtRemoteObjects(),
@@ -372,6 +374,18 @@ def module_QtDesigner() -> ModuleData:
 
 def module_QtNfc() -> ModuleData:
     data = ModuleData("Nfc")
+
+    return data
+
+
+def module_QtPdf() -> ModuleData:
+    data = ModuleData("Pdf")
+
+    return data
+
+
+def module_QtPdfWidgets() -> ModuleData:
+    data = ModuleData("PdfWidgets")
 
     return data
 
