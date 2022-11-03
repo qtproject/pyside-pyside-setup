@@ -487,7 +487,7 @@ def module_QtQuick() -> ModuleData:
     ]
 
     # Adding GraphicalEffects files
-    data.qml.extend("Qt5Compat/GraphicalEffects")
+    data.qml.append("Qt5Compat/GraphicalEffects")
 
     data.qtlib.extend(_qtlib)
     data.metatypes.extend(_metatypes)
