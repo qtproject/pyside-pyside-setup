@@ -182,6 +182,7 @@ def wheel_files_pyside_addons() -> List[ModuleData]:
         module_QtWebEngineQuick(),
         module_QtWebEngineWidgets(),
         module_QtWebSockets(),
+        module_QtHttpServer(),
     ]
     return files
 
@@ -889,5 +890,10 @@ def module_QtSerialBus() -> ModuleData:
 def module_QtVirtualKeyboard() -> ModuleData:
     data = ModuleData("VirtualKeyboard")
     data.plugins.append("virtualkeyboard")
+
+    return data
+
+def module_QtHttpServer() -> ModuleData:
+    data = ModuleData("HttpServer")
 
     return data
