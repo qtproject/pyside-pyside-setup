@@ -493,10 +493,17 @@ static void writeForwardDeclarations(TextStream &s,
         if (auto *encl = c->enclosingClass()) {
             Q_ASSERT(encl->isNamespace());
             auto idx = indexOf(nameSpaces, encl);
-            if (idx != -1)
+            if (idx != -1) {
                 nameSpaces[idx].classes.append(c);
-            else
+            } else {
                 nameSpaces.append(NameSpace{encl, {c}});
+                for (auto *enclNsp = encl->enclosingClass(); enclNsp != nullptr;
+                     enclNsp = enclNsp->enclosingClass()) {
+                    idx = indexOf(nameSpaces, enclNsp);
+                    if (idx == -1)
+                        nameSpaces.append(NameSpace{enclNsp, {}});
+                }
+            }
         } else {
             writeForwardDeclaration(s, c);
         }
@@ -518,6 +525,7 @@ bool HeaderGenerator::finishGeneration()
     // This header should be included by binding modules
     // extendind on top of this one.
     AbstractMetaClassCList forwardDeclarations;
+    AbstractMetaClassCList privateForwardDeclarations;
     QSet<Include> includes;
     QSet<Include> privateIncludes;
     StringStream macrosStream(TextStream::Language::Cpp);
@@ -630,8 +638,9 @@ bool HeaderGenerator::finishGeneration()
         //Includes
         const bool isPrivate = classType->isPrivate();
         auto &includeList = isPrivate ? privateIncludes : includes;
+        auto &forwardList = isPrivate ? privateForwardDeclarations : forwardDeclarations;
         if (leanHeaders() && canForwardDeclare(metaClass))
-            forwardDeclarations.append(metaClass);
+            forwardList.append(metaClass);
          else
             includeList << classType->include();
 
@@ -730,7 +739,8 @@ bool HeaderGenerator::finishGeneration()
 
     if (hasPrivateClasses()) {
         writePrivateHeader(moduleHeaderDir, includeShield,
-                           privateIncludes, privateTypeFunctions.toString());
+                           privateIncludes, privateForwardDeclarations,
+                           privateTypeFunctions.toString());
     }
     return true;
 }
@@ -738,6 +748,7 @@ bool HeaderGenerator::finishGeneration()
 void HeaderGenerator::writePrivateHeader(const QString &moduleHeaderDir,
                                          const QString &publicIncludeShield,
                                          const QSet<Include> &privateIncludes,
+                                         const AbstractMetaClassCList &forwardDeclarations,
                                          const QString &privateTypeFunctions)
 {
     // Write includes and type functions of private classes
@@ -757,6 +768,9 @@ void HeaderGenerator::writePrivateHeader(const QString &moduleHeaderDir,
     for (const Include &include : qAsConst(privateIncludes))
         ps << include;
     ps << '\n';
+
+    if (leanHeaders())
+        writeForwardDeclarations(ps, forwardDeclarations);
 
     if (usePySideExtensions())
         ps << "QT_WARNING_PUSH\nQT_WARNING_DISABLE_DEPRECATED\n";

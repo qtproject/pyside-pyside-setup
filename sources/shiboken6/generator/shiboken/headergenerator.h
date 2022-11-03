@@ -46,6 +46,7 @@ private:
     void writePrivateHeader(const QString &moduleHeaderDir,
                             const QString &publicIncludeShield,
                             const QSet<Include> &privateIncludes,
+                            const AbstractMetaClassCList &forwardDeclarations,
                             const QString &privateTypeFunctions);
 
     QSet<AbstractMetaFunctionCPtr> m_inheritedOverloads;
