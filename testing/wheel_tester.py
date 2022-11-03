@@ -313,8 +313,13 @@ def run_wheel_tests(install_wheels, wheels_dir_name):
         try_install_wheels(wheels_dir, py_version)
 
     log.info("Attempting to build examples.\n")
-    try_build_examples()
+    bin_dir = os.fspath(Path(sys.executable).parent)
+    path = os.environ["PATH"]
+    if bin_dir not in path:
+        log.info(f"Adding {bin_dir} to PATH...")
+        os.environ["PATH"] = f"{bin_dir}{os.pathsep}{path}"
 
+    try_build_examples()
     log.info("All tests passed!")
 
 
