@@ -278,8 +278,8 @@ def copyfile(src, dst, force=True, _vars=None, force_copy_symlink=False,
     # the directory doesn't exist.
     link_target_path = src.resolve(strict=False)
     if link_target_path.parent == src.parent:
-        link_target = link_target_path.name
-        link_name = src.name
+        link_target = Path(link_target_path.name)
+        link_name = Path(src.name)
         current_directory = Path.cwd()
         try:
             target_dir = dst if dst.is_dir() else dst.parent
