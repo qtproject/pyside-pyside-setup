@@ -419,16 +419,19 @@ modifying the build instructions, and more.
 The documentation is being generated using **qdoc** to get the API information, and also **sphinx**
 for the local Python related notes.
 
-The system required ``libxml2`` and ``libxslt``, also on the Python environment, ``sphinx`` and
-``graphviz`` need to be installed before running the installation process::
+The system requires the ``libxml2`` and ``libxslt`` libraries.
+In the Python environment, ``graphviz`` needs to be installed on top
+of the modules listed in ``requirements.txt`` before running the
+installation process::
 
-    pip install graphviz sphinx sphinx_tabs
+    pip install graphviz
 
 After installing ``graphviz``, the ``dot`` command needs to be in PATH, otherwise,
 the process will fail. Installing ``graphviz`` system-wide is also an option.
 
 Since the process relies on a Qt installation, you need to specify where the
-``qtbase`` directory is located::
+``qtbase`` directory of a Qt source tree is located, either by using
+the command line option ``--qt-src-dir`` or setting the environment variable::
 
     export QT_SRC_DIR=/path/to/qtbase
 
