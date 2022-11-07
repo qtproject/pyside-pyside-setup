@@ -375,10 +375,7 @@ class CommandMixin(object):
         self.qt_host_path = OPTION['QT_HOST_PATH']
         OPTION['QT_TARGET_PATH'] = self.qt_target_path
 
-        qt_target_path = None
-        if self.qt_target_path:
-            self.qt_target_path = Path(self.qt_target_path)
-            qt_target_path = self.qt_target_path
+        qt_target_path = self.qt_target_path
 
         # We use the CMake project to find host Qt if neither qmake or
         # qtpaths is available. This happens when building the host
@@ -474,6 +471,8 @@ class CommandMixin(object):
             self.qtpaths = Path(self.qtpaths)
         if isinstance(self.qmake, str):
             self.qmake = Path(self.qmake)
+        if self.qt_target_path and isinstance(self.qt_target_path, str):
+            self.qt_target_path = Path(self.qt_target_path)
 
         # When cross-compiling, we only accept the qt-target-path
         # option and don't rely on auto-searching in PATH or the other
