@@ -446,8 +446,10 @@ static QSet<QString> useIntSet()
         /* IntEnum */ u"PySide6.QtWidgets.QStyle.SubElement"_s,
         /* IntEnum */ u"PySide6.QtWidgets.QTableWidgetItem.ItemType"_s,
         /* IntEnum */ u"PySide6.QtWidgets.QTreeWidgetItem.ItemType"_s,
+        /* IntEnum */ u"PySide6.QtCharts.QBoxSet.ValuePositions"_s,
         /* IntEnum */ u"PySide6.QtMultimedia.QMediaPlayer.Loops"_s,
         /* IntEnum */ u"PySide6.QtQuick.QSGGeometry.DrawingMode"_s,
+        /* IntEnum */ u"PySide6.QtWebEngineCore.QWebEngineScript.ScriptWorldId"_s,
         // Added because it should really be used as number
         /* IntEnum */ u"PySide6.QtCore.QMetaType.Type"_s,
         /* IntEnum */ u"PySide6.QtSerialPort.QSerialPort.BaudRate"_s,

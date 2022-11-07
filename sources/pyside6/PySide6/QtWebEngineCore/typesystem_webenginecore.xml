@@ -122,7 +122,7 @@
 
   <value-type name="QWebEngineScript">
     <enum-type name="InjectionPoint"/>
-    <enum-type name="ScriptWorldId"/>
+    <enum-type name="ScriptWorldId" python-type="IntEnum"/>
   </value-type>
 
   <object-type name="QWebEngineScriptCollection"/>
