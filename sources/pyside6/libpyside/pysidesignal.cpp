@@ -867,6 +867,8 @@ QByteArray getTypeName(PyObject *obType)
             return QByteArrayLiteral("bool");
         if (type == &PyList_Type)
             return QByteArrayLiteral("QVariantList");
+        if (type == &PyDict_Type)
+            return QByteArrayLiteral("QVariantMap");
         if (Py_TYPE(type) == SbkEnumType_TypeF())
             return Shiboken::Enum::getCppName(type);
         return QByteArrayLiteral("PyObject");
