@@ -80,7 +80,7 @@
       </modify-function>
   </object-type>
   <object-type name="QBoxSet">
-      <enum-type name="ValuePositions"/>
+      <enum-type name="ValuePositions" python-type="IntEnum"/>
   </object-type>
   <object-type name="QCandlestickLegendMarker"/>
   <object-type name="QCandlestickModelMapper"/>
