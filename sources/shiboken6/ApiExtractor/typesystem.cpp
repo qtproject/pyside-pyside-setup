@@ -1892,6 +1892,8 @@ public:
     {
     }
 
+    qsizetype instantiationIndex(const TypeEntry *t) const;
+
     QString m_getterName;
     QString m_refCountMethodName;
     QString m_valueCheckMethod;
@@ -1900,6 +1902,15 @@ public:
     SmartPointerTypeEntry::Instantiations m_instantiations;
     TypeSystem::SmartPointerType m_smartPointerType;
 };
+
+qsizetype SmartPointerTypeEntryPrivate::instantiationIndex(const TypeEntry *t) const
+{
+    for (qsizetype i = 0, size = m_instantiations.size(); i < size; ++i) {
+        if (m_instantiations.at(i).typeEntry == t)
+            return i;
+    }
+    return -1;
+}
 
 SmartPointerTypeEntry::SmartPointerTypeEntry(const QString &entryName,
                                              const QString &getterName,
@@ -1971,7 +1982,7 @@ TypeEntry *SmartPointerTypeEntry::clone() const
     return new SmartPointerTypeEntry(new SmartPointerTypeEntryPrivate(*d));
 }
 
-SmartPointerTypeEntry::Instantiations SmartPointerTypeEntry::instantiations() const
+const SmartPointerTypeEntry::Instantiations &SmartPointerTypeEntry::instantiations() const
 {
     S_D(const SmartPointerTypeEntry);
     return d->m_instantiations;
@@ -1991,7 +2002,8 @@ SmartPointerTypeEntry::SmartPointerTypeEntry(SmartPointerTypeEntryPrivate *d) :
 bool SmartPointerTypeEntry::matchesInstantiation(const TypeEntry *e) const
 {
     S_D(const SmartPointerTypeEntry);
-    return d->m_instantiations.isEmpty() || d->m_instantiations.contains(e);
+    // No instantiations specified, or match
+    return d->m_instantiations.isEmpty() || d->instantiationIndex(e) != -1;
 }
 
 static QString fixSmartPointerName(QString name)
@@ -2003,18 +2015,14 @@ static QString fixSmartPointerName(QString name)
     return name;
 }
 
-QString SmartPointerTypeEntry::getTargetFullName(const AbstractMetaType &metaType,
-                                                 bool includePackageName)
+QString SmartPointerTypeEntry::getTargetName(const AbstractMetaType &metaType) const
 {
-    QString result;
-    if (includePackageName)
-        result += metaType.package() + u'.';
-    result += fixSmartPointerName(metaType.cppSignature());
-    return result;
-}
+    S_D(const SmartPointerTypeEntry);
+    auto *instantiatedTe = metaType.instantiations().constFirst().typeEntry();
+    const auto index = d->instantiationIndex(instantiatedTe);
+    if (index != -1 && !d->m_instantiations.at(index).name.isEmpty())
+        return d->m_instantiations.at(index).name;
 
-QString SmartPointerTypeEntry::getTargetName(const AbstractMetaType &metaType)
-{
     QString name = metaType.cppSignature();
     const auto templatePos = name.indexOf(u'<');
     if (templatePos != -1) { // "std::shared_ptr<A::B>" -> "shared_ptr<A::B>"
@@ -2463,8 +2471,11 @@ void SmartPointerTypeEntry::formatDebug(QDebug &debug) const
     if (!d->m_instantiations.isEmpty()) {
         debug << "type=" << d->m_type << ", instantiations["
             << d->m_instantiations.size() << "]=(";
-        for (auto i : d->m_instantiations)
-            debug << i->name() << ',';
+        for (auto i : d->m_instantiations) {
+            debug << i.typeEntry->name() << ',';
+            if (!i.name.isEmpty())
+                debug << "=\"" << i.name << '"';
+        }
         debug << ')';
     }
 }

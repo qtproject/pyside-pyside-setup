@@ -28,7 +28,7 @@
     -->
     <smart-pointer-type name="SharedPtr" type="shared" getter="data" ref-count-method="useCount"
                         null-check-method="isNull"
-                        instantiations="Integer,Smart::Integer2,Obj"/>
+                        instantiations="Integer,Smart::Integer2=SmartInteger2Ptr,Obj"/>
 
     <object-type name="Obj" />
     <value-type name="Integer" />

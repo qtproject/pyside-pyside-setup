@@ -231,6 +231,8 @@ class SmartPointerTests(unittest.TestCase):
 
         # Create a shared pointer to an Integer2
         integer2 = o.createSharedPtrInteger2()
+        # User defined name
+        self.assertEqual(type(integer2).__name__, "SmartInteger2Ptr")
         self.assertEqual(integer2.value(), 456)
 
         # pass Smart<Integer2> to a function that accepts Smart<Integer>

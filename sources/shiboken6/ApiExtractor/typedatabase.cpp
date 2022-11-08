@@ -1034,20 +1034,28 @@ bool TypeDatabasePrivate::resolveSmartPointerInstantiations(const TypeDatabasePa
         const auto instantiationNames = splitTypeList(it.value());
         SmartPointerTypeEntry::Instantiations instantiations;
         instantiations.reserve(instantiationNames.size());
-        for (const auto &instantiationName : instantiationNames) {
-            const auto types = findCppTypes(instantiationName);
-            if (types.isEmpty()) {
-                const QString m = msgCannotFindTypeEntryForSmartPointer(instantiationName,
+        for (const auto &instantiation : instantiationNames) {
+            QString name;
+            QString type = instantiation;
+            const auto equalsPos = instantiation.indexOf(u'=');
+            if (equalsPos != -1) {
+                type.truncate(equalsPos);
+                name = instantiation.mid(equalsPos + 1);
+            }
+
+            const auto typeEntries = findCppTypes(type);
+            if (typeEntries.isEmpty()) {
+                const QString m = msgCannotFindTypeEntryForSmartPointer(type,
                                                                         smartPointerEntry->name());
                 qCWarning(lcShiboken, "%s", qPrintable(m));
                 return false;
             }
-            if (types.size() > 1) {
-                const QString m = msgAmbiguousTypesFound(instantiationName, types);
+            if (typeEntries.size() > 1) {
+                const QString m = msgAmbiguousTypesFound(type, typeEntries);
                 qCWarning(lcShiboken, "%s", qPrintable(m));
                 return false;
             }
-            instantiations.append(types.constFirst());
+            instantiations.append({name, typeEntries.constFirst()});
         }
         smartPointerEntry->setInstantiations(instantiations);
     }

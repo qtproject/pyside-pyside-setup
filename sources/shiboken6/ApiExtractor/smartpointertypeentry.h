@@ -8,10 +8,16 @@
 
 class SmartPointerTypeEntryPrivate;
 
+struct SmartPointerInstantiation
+{
+    QString name; // user defined name
+    const TypeEntry *typeEntry;
+};
+
 class SmartPointerTypeEntry : public ComplexTypeEntry
 {
 public:
-    using Instantiations = QList<const TypeEntry *>;
+    using Instantiations = QList<SmartPointerInstantiation>;
 
     explicit SmartPointerTypeEntry(const QString &entryName,
                                    const QString &getterName,
@@ -35,13 +41,11 @@ public:
 
     TypeEntry *clone() const override;
 
-    Instantiations instantiations() const;
+    const Instantiations &instantiations() const;
     void setInstantiations(const Instantiations &i);
     bool matchesInstantiation(const TypeEntry *e) const;
 
-    static QString getTargetFullName(const AbstractMetaType &metaType,
-                                     bool includePackageName = true);
-    static QString getTargetName(const AbstractMetaType &metaType);
+    QString getTargetName(const AbstractMetaType &metaType) const;
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const override;

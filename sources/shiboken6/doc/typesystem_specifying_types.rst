@@ -660,6 +660,12 @@ smart-pointer-type
     The *optional* attribute **reset-method** specifies a method
     that can be used to clear the pointer.
 
+    The *optional* instantiations attribute specifies a comma-separated
+    list of instantiation types. When left empty, all instantiations
+    found in the code will be generated. The type name might optionally
+    be followed an equal sign and the Python type name, for example
+    ``instantiations="int=IntPtr,double=DoublePtr"``.
+
     The *optional* attribute **type** specifies the type:
 
     *shared*

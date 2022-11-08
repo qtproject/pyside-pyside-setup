@@ -506,8 +506,9 @@ void ApiExtractorPrivate::addInstantiatedSmartPointer(InstantiationCollectContex
 
     const auto &instantiatedType = type.instantiations().constFirst();
     auto *ste = static_cast<const SmartPointerTypeEntry *>(smp.smartPointer->typeEntry());
-    auto *typedefEntry = new TypedefEntry(SmartPointerTypeEntry::getTargetName(smp.type),
-                                          ste->name(), ste->version(), ste->parent());
+    QString name = ste->getTargetName(smp.type);
+    auto *parentTypeEntry = ste->parent();
+    auto *typedefEntry = new TypedefEntry(name, ste->name(), ste->version(), parentTypeEntry);
     typedefEntry->setTargetLangPackage(ste->targetLangPackage());
     auto *instantiationEntry = TypeDatabase::initializeTypeDefEntry(typedefEntry, ste);
 
