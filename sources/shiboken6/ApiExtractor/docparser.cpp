@@ -3,12 +3,14 @@
 
 #include "docparser.h"
 #include "abstractmetaargument.h"
+#include "abstractmetaenum.h"
 #include "abstractmetafunction.h"
 #include "abstractmetalang.h"
 #include "abstractmetatype.h"
 #include "messages.h"
 #include "modifications.h"
 #include "reporthandler.h"
+#include "enumtypeentry.h"
 #include "complextypeentry.h"
 #include "xmlutils.h"
 
@@ -101,6 +103,21 @@ DocModificationList DocParser::getDocModifications(const AbstractMetaClass* cppC
     };
     result.erase(std::remove_if(result.begin(), result.end(), filter), result.end());
     return result;
+}
+
+QString DocParser::enumBaseClass(const AbstractMetaEnum &e)
+{
+    switch (e.typeEntry()->pythonEnumType()) {
+    case TypeSystem::PythonEnumType::IntEnum:
+        return u"IntEnum"_s;
+    case TypeSystem::PythonEnumType::Flag:
+        return u"Flag"_s;
+    case TypeSystem::PythonEnumType::IntFlag:
+        return u"IntFlag"_s;
+    default:
+        break;
+    }
+    return e.typeEntry()->flags() != nullptr ? u"Flag"_s : u"Enum"_s;
 }
 
 AbstractMetaFunctionCList DocParser::documentableFunctions(const AbstractMetaClass *metaClass)
