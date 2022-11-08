@@ -96,6 +96,7 @@ public:
     static DocModificationList getDocModifications(const AbstractMetaClass* cppClass,
                                                    const AbstractMetaFunctionCPtr &func = {});
 
+    static QString enumBaseClass(const AbstractMetaEnum &e);
 
 protected:
     static QString getDocumentation(const XQueryPtr &xquery,

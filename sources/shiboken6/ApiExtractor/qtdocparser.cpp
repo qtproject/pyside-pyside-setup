@@ -292,7 +292,17 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
         Documentation enumDoc;
         const auto index = classDocumentation.indexOfEnum(meta_enum.name());
         if (index != -1) {
-            enumDoc.setValue(classDocumentation.enums.at(index).description);
+            QString doc = classDocumentation.enums.at(index).description;
+            const auto firstPara = doc.indexOf(u"<para>");
+            if (firstPara != -1) {
+                const QString baseClass = QtDocParser::enumBaseClass(meta_enum);
+                if (baseClass != u"Enum") {
+                    const QString note = u"(inherits <teletype>enum."_s + baseClass
+                                         + u"</teletype>) "_s;
+                    doc.insert(firstPara + 6, note);
+                }
+            }
+            enumDoc.setValue(doc);
             meta_enum.setDocumentation(enumDoc);
         } else {
             qCWarning(lcShibokenDoc, "%s",
