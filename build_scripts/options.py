@@ -452,8 +452,6 @@ class CommandMixin(object):
 
     def _find_qtpaths_in_path(self):
         if not self.qtpaths:
-            self.qtpaths = Path(which("qtpaths"))
-        if not self.qtpaths:
             self.qtpaths = Path(which("qtpaths6"))
 
     def _determine_defaults_and_check(self):
