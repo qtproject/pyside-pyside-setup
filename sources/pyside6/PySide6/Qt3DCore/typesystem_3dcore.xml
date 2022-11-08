@@ -6,6 +6,9 @@
 
 <typesystem package="PySide6.Qt3DCore">
     <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
+    <smart-pointer-type name="QSharedPointer" type="shared" getter="data"
+                        reset-method="reset"
+                        instantiations="Qt3DCore::QAspectJob=Qt3DCore::QAspectJobPtr,Qt3DCore::QBackendNodeMapper=Qt3DCore::QBackendNodeMapperPtr,Qt3DCore::QEntity=Qt3DCore::QEntityPtr"/>
     <namespace-type name="Qt3DCore" generate-using="no">
         <object-type name="QAbstractAspect"/>
         <object-type name="QAbstractFunctor"/>

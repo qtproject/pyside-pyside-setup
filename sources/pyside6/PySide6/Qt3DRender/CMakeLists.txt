@@ -1,6 +1,9 @@
 project(Qt3DRender)
 
 set(Qt3DRender_SRC
+${Qt3DRender_GEN_DIR}/qsharedpointer_propertyreaderinterface_wrapper.cpp
+${Qt3DRender_GEN_DIR}/qsharedpointer_qtextureimagedata_wrapper.cpp
+${Qt3DRender_GEN_DIR}/qsharedpointer_qtextureimagedatagenerator_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_propertyreaderinterface_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qabstractlight_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qabstractraycaster_wrapper.cpp

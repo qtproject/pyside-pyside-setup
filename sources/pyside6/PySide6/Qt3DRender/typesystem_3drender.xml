@@ -6,6 +6,9 @@
 
 <typesystem package="PySide6.Qt3DRender">
     <load-typesystem name="Qt3DCore/typesystem_3dcore.xml" generate="no"/>
+    <smart-pointer-type name="QSharedPointer" type="shared" getter="data"
+                        reset-method="reset"
+                        instantiations="Qt3DRender::PropertyReaderInterface=Qt3DRender::PropertyReaderInterfacePtr,Qt3DRender::QTextureImageData=Qt3DRender::QTextureImageDataPtr,Qt3DRender::QTextureImageDataGenerator=Qt3DRender::QTextureImageDataGeneratorPtr"/>
     <namespace-type name="Qt3DRender">
         <enum-type name="API"/>
         <object-type name="PropertyReaderInterface"/>
