@@ -106,6 +106,7 @@ static int signalTpInit(PyObject *, PyObject *, PyObject *);
 static void signalFree(void *);
 static void signalInstanceFree(void *);
 static PyObject *signalGetItem(PyObject *self, PyObject *key);
+static PyObject *signalGetAttr(PyObject *self, PyObject *name);
 static PyObject *signalToString(PyObject *self);
 static PyObject *signalDescrGet(PyObject *self, PyObject *obj, PyObject *type);
 
@@ -153,6 +154,7 @@ static PyTypeObject *PySideMetaSignal_TypeF(void)
 
 static PyType_Slot PySideSignalType_slots[] = {
     {Py_mp_subscript,   reinterpret_cast<void *>(signalGetItem)},
+    {Py_tp_getattro,    reinterpret_cast<void *>(signalGetAttr)},
     {Py_tp_descr_get,   reinterpret_cast<void *>(signalDescrGet)},
     {Py_tp_call,        reinterpret_cast<void *>(signalCall)},
     {Py_tp_str,         reinterpret_cast<void *>(signalToString)},
@@ -301,10 +303,28 @@ static PyObject *signalGetItem(PyObject *obSelf, PyObject *key)
     return Shiboken::String::fromCString(sig.constData());
 }
 
-
 static PyObject *signalToString(PyObject *self)
 {
     return signalGetItem(self, nullptr);
+}
+
+static PyObject *signalGetAttr(PyObject *obSelf, PyObject *name)
+{
+    auto self = reinterpret_cast<PySideSignal *>(obSelf);
+
+    if (PyUnicode_CompareWithASCIIString(name, "signatures") != 0)
+        return PyObject_GenericGetAttr(obSelf, name);
+
+    auto nelems = self->data->signatures.count();
+    PyObject *tuple = PyTuple_New(nelems);
+
+    for (Py_ssize_t idx = 0; idx < nelems; ++idx) {
+        QByteArray sigKey = self->data->signatures.at(idx).signature;
+        auto sig = PySide::Signal::buildSignature(self->data->signalName, sigKey);
+        PyObject *entry = Shiboken::String::fromCString(sig.constData());
+        PyTuple_SetItem(tuple, idx, entry);
+    }
+    return tuple;
 }
 
 static void signalInstanceFree(void *vself)
