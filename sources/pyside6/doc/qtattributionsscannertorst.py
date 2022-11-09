@@ -10,7 +10,14 @@ import json
 import subprocess
 import sys
 import warnings
+from argparse import ArgumentParser, RawTextHelpFormatter
 from pathlib import Path
+
+
+USAGE = "Usage: qtattributionsscannertorst [directory] [file]'"
+
+
+libexec_dir = None
 
 
 def indent(lines, indent):
@@ -61,13 +68,16 @@ def readFile(fileName):
     with open(fileName, 'r') as file:
         return file.readlines()
 
-def runScanner(directory, targetFileName):
+
+def get_libexec_dir():
+    libexec_b = subprocess.check_output("qtpaths6 -query QT_INSTALL_LIBEXECS", shell=True)
+    return libexec_b.decode('utf-8').strip()
+
+
+def runScanner(directory, targetFileName, libexec_dir):
     # qtattributionsscanner recursively searches for qt_attribution.json files
     # and outputs them in JSON with the paths of the 'LicenseFile' made absolute
-    libexec_b = subprocess.check_output('qtpaths -query QT_INSTALL_LIBEXECS',
-                                        shell=True)
-    libexec = libexec_b.decode('utf-8').strip()
-    scanner = os.path.join(libexec, 'qtattributionsscanner')
+    scanner = os.path.join(libexec_dir, 'qtattributionsscanner')
     command = f'{scanner}  --output-format json {directory}'
     jsonS = subprocess.check_output(command, shell=True)
     if not jsonS:
@@ -93,10 +103,16 @@ def runScanner(directory, targetFileName):
                     warnings.warn(f'"{licenseFile}" is not a file', RuntimeWarning)
             targetFile.write(content)
 
-if len(sys.argv) < 3:
-    print("Usage: qtattributionsscannertorst [directory] [file]'")
-    sys.exit(0)
 
-directory = sys.argv[1]
-targetFileName = sys.argv[2]
-runScanner(directory, targetFileName)
+if __name__ == '__main__':
+    parser = ArgumentParser(description=USAGE, formatter_class=RawTextHelpFormatter)
+    parser.add_argument("-l", "--libexec", type=str, help="libexec directory of Qt")
+    parser.add_argument('directory')
+    parser.add_argument('target')
+    options = parser.parse_args()
+    directory = options.directory
+    targetFileName = options.target
+    libexec_dir = options.libexec
+    if not libexec_dir:
+        libexec_dir = get_libexec_dir()
+    runScanner(directory, targetFileName, libexec_dir)

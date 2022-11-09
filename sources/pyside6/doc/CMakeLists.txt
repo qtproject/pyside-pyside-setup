@@ -241,9 +241,11 @@ add_custom_target("doc_copy"
 add_custom_target("docrsts"
                   DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/rst/PySide6/QtCore/index.rst")
 
+set(LIBEXEC_PATH "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_LIBEXECS}")
 add_custom_target("licensedocrsts"
     COMMAND ${python_executable}
             ${CMAKE_CURRENT_LIST_DIR}/qtattributionsscannertorst.py
+            -l "${LIBEXEC_PATH}"
             ${CMAKE_CURRENT_LIST_DIR}/../../..
             ${CMAKE_CURRENT_BINARY_DIR}/rst/licenses.rst
     COMMENT "Creating 3rdparty license documentation..."
