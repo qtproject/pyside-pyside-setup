@@ -8,6 +8,7 @@
 #include "smart_integer.h"
 #include "smart_obj.h"
 #include "smart_registry.h"
+#include "smart_test.h"
 #include "stdsharedptrtestbench.h"
 #include "stdoptionaltestbench.h"
 #include "stduniqueptrtestbench.h"

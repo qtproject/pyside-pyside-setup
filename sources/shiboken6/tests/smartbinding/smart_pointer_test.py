@@ -233,6 +233,7 @@ class SmartPointerTests(unittest.TestCase):
         integer2 = o.createSharedPtrInteger2()
         # User defined name
         self.assertEqual(type(integer2).__name__, "SmartInteger2Ptr")
+        self.assertTrue("smart.Test.SmartInteger2Ptr" in repr(type(integer2)))
         self.assertEqual(integer2.value(), 456)
 
         # pass Smart<Integer2> to a function that accepts Smart<Integer>

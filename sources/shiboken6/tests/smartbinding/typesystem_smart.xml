@@ -28,7 +28,7 @@
     -->
     <smart-pointer-type name="SharedPtr" type="shared" getter="data" ref-count-method="useCount"
                         null-check-method="isNull"
-                        instantiations="Integer,Smart::Integer2=SmartInteger2Ptr,Obj"/>
+                        instantiations="Integer,Smart::Integer2=Test::SmartInteger2Ptr,Obj"/>
 
     <object-type name="Obj" />
     <value-type name="Integer" />
@@ -73,5 +73,9 @@
 
     <object-type name="StdUniquePtrTestBench"/>
     <object-type name="StdUniquePtrVirtualMethodTester"/>
+
+    <namespace-type name="Test">
+        <enum-type name="DummyEnum"/>
+    </namespace-type>
 
 </typesystem>

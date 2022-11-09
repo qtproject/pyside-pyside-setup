@@ -67,6 +67,8 @@ QString msgNoEnumTypeConflict(const EnumModelItem &enumItem,
 QString msgNamespaceNoTypeEntry(const NamespaceModelItem &item,
                                 const QString &fullName);
 
+QString msgNamespaceNotFound(const QString &name);
+
 QString msgAmbiguousVaryingTypesFound(const QString &qualifiedName, const TypeEntries &te);
 QString msgAmbiguousTypesFound(const QString &qualifiedName, const TypeEntries &te);
 

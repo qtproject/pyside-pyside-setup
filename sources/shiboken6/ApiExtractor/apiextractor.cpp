@@ -12,6 +12,7 @@
 #include "abstractmetalang.h"
 #include "codesnip.h"
 #include "exception.h"
+#include "messages.h"
 #include "modifications.h"
 #include "reporthandler.h"
 #include "typedatabase.h"
@@ -20,6 +21,7 @@
 #include "primitivetypeentry.h"
 #include "smartpointertypeentry.h"
 #include "typedefentry.h"
+#include "namespacetypeentry.h"
 #include "typesystemtypeentry.h"
 
 #include "qtcompat.h"
@@ -508,14 +510,35 @@ void ApiExtractorPrivate::addInstantiatedSmartPointer(InstantiationCollectContex
     auto *ste = static_cast<const SmartPointerTypeEntry *>(smp.smartPointer->typeEntry());
     QString name = ste->getTargetName(smp.type);
     auto *parentTypeEntry = ste->parent();
+    InheritTemplateFlags flags;
+
+    auto colonPos = name.lastIndexOf(u"::");
+    const bool withinNameSpace = colonPos != -1;
+    if (withinNameSpace) { // user defined
+        const QString nameSpace = name.left(colonPos);
+        name.remove(0, colonPos + 2);
+        const auto nameSpaces = TypeDatabase::instance()->findNamespaceTypes(nameSpace);
+        if (nameSpaces.isEmpty())
+            throw Exception(msgNamespaceNotFound(name));
+        parentTypeEntry = nameSpaces.constFirst();
+    } else {
+        flags.setFlag(InheritTemplateFlag::SetEnclosingClass);
+    }
+
     auto *typedefEntry = new TypedefEntry(name, ste->name(), ste->version(), parentTypeEntry);
     typedefEntry->setTargetLangPackage(ste->targetLangPackage());
     auto *instantiationEntry = TypeDatabase::initializeTypeDefEntry(typedefEntry, ste);
 
     smp.specialized = ApiExtractor::inheritTemplateClass(instantiationEntry, smp.smartPointer,
-                                                         {instantiatedType},
-                                                         InheritTemplateFlag::SetEnclosingClass);
+                                                         {instantiatedType}, flags);
     Q_ASSERT(smp.specialized);
+    if (withinNameSpace) { // move class to desired namespace
+        auto *enclClass = AbstractMetaClass::findClass(m_builder->classes(), parentTypeEntry);
+        Q_ASSERT(enclClass);
+        auto *specialized = const_cast<AbstractMetaClass *>(smp.specialized);
+        specialized->setEnclosingClass(enclClass);
+        enclClass->addInnerClass(specialized);
+    }
 
     if (instantiationEntry->isComplex()) {
         addOwnerModification(smp.specialized->queryFunctions(FunctionQueryOption::Constructors),
@@ -550,8 +573,15 @@ ApiExtractorPrivate::collectInstantiatedContainersAndSmartPointers(Instantiation
         collectInstantiatedContainersAndSmartPointers(context, func);
     for (const AbstractMetaField &field : metaClass->fields())
         addInstantiatedContainersAndSmartPointers(context, field.type(), field.name());
-    for (auto *innerClass : metaClass->innerClasses())
-        collectInstantiatedContainersAndSmartPointers(context, innerClass);
+
+    // The list of inner classes might be extended when smart pointer
+    // instantiations are specified to be in namespaces.
+    auto &innerClasses = metaClass->innerClasses();
+    for (auto i = innerClasses.size() - 1; i >= 0; --i) {
+         auto *innerClass = innerClasses.at(i);
+         if (!innerClass->typeEntry()->isSmartPointer())
+             collectInstantiatedContainersAndSmartPointers(context, innerClass);
+    }
 }
 
 void

@@ -255,6 +255,11 @@ QString msgNamespaceNoTypeEntry(const NamespaceModelItem &item,
     return result;
 }
 
+QString msgNamespaceNotFound(const QString &name)
+{
+    return u"namespace '"_s + name + u"' not found."_s;
+}
+
 QString msgAmbiguousVaryingTypesFound(const QString &qualifiedName, const TypeEntries &te)
 {
     QString result = u"Ambiguous types of varying types found for \""_s + qualifiedName

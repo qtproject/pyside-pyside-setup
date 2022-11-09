@@ -665,6 +665,7 @@ smart-pointer-type
     found in the code will be generated. The type name might optionally
     be followed an equal sign and the Python type name, for example
     ``instantiations="int=IntPtr,double=DoublePtr"``.
+    It is also possible to specify a namespace delimited by ``::``.
 
     The *optional* attribute **type** specifies the type:
 
