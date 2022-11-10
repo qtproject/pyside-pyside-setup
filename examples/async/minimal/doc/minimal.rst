@@ -21,20 +21,20 @@ implemented: `eratosthenes` and `minimal`:
    :alt: Async example: Minimal
 
 * `eratosthenes` is a more extensive example that visualizes the Sieve of
-Eratosthenes algorithm. This algorithm per se is not one that is particularly
-suitable for asynchronous operations as it's not I/O-heavy, but synchronizing
-coroutines to a configurable tick allows for a good visualization.
+  Eratosthenes algorithm. This algorithm per se is not one that is particularly
+  suitable for asynchronous operations as it's not I/O-heavy, but synchronizing
+  coroutines to a configurable tick allows for a good visualization.
 * `minimal` is a minimal example featuring a button that triggers an
-asynchronous coroutine with a sleep. It is designed to highlight which
-boilerplate code is essential for an async program with Qt and offers a
-starting point for more complex programs.
+  asynchronous coroutine with a sleep. It is designed to highlight which
+  boilerplate code is essential for an async program with Qt and offers a
+  starting point for more complex programs.
 
 Both examples feature:
 
 1. A window class.
 2. An `AsyncHelper` class containing `start_guest_run` plus helpers and
-callbacks necessary for its invocation. The entry point for the Trio guest run
-is provided as an argument from outside, which can be any async function.
+   callbacks necessary for its invocation. The entry point for the Trio guest
+   run is provided as an argument from outside, which can be any async function.
 
 While `eratosthenes` offloads the asynchronous logic that will run in trio's
 event loop into a separate class, `minimal` demonstrates that async functions
