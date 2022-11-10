@@ -1,0 +1,78 @@
+Qt for Python 6.4.1 is a bug-fix release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+****************************************************************************
+*                                  PySide6                                 *
+****************************************************************************
+
+ - A context manager for QOpenGLVertexArrayObject.Binder has been added.
+
+ - [PYSIDE-1970] The long missing support for __slots__ was finally added.
+ - [PYSIDE-841]  networkx graph viewer, charts lightMarker and selection
+                 examples have been added.
+ - [PYSIDE-1106] Documentation builds have been fixed to work with
+                 system-installed versions of Qt 6.
+ - [PYSIDE-1603] A bug when passing wrong keyword args to signals has been
+                 fixed.
+ - [PYSIDE-1612] The missing entry point for pyside6-qtpy2cpp has been
+                 added.
+ - [PYSIDE-1713] A `signatures` attribute has been added to the Signal type in
+                 order to increase compatibility with other implementations.
+ - [PYSIDE-1735] Developer documentation about enum features has been added.
+ - [PYSIDE-1735] Some enums have been changed to be IntEnum-based.
+ - [PYSIDE-1844] Build system: It is no longer required to have Qt in PATH
+                 (tough recommended).
+ - [PYSIDE-1957] The missing Qt5Compat.GraphicalEffects has been added
+                 to the wheel.
+ - [PYSIDE-2074] Build system: Overriding of PYTHON_SITE_PACKAGES
+                 has been enabled.
+ - [PYSIDE-2081] Type annotations for the static functions of QInputDialog
+                 have been fixed.
+ - [PYSIDE-2084] The build with OpenGLES has been fixed.
+ - [PYSIDE-2087] It is now possible to build QtUiTools without Qt Designer.
+ - [PYSIDE-2089] Crashes when not implementing abstract methods have been
+                 fixed.
+ - [PYSIDE-2091] Build system: The check for FORCE_LIMITED_API has been fixed.
+ - [PYSIDE-2091] Build system: The minimum required CMake version has
+                 been bumped to CMake 3.18+ (matching Qt).
+ - [PYSIDE-2095] A bug when using signals with new enums on Python 3.11
+                 has been fixed.
+ - [PYSIDE-2101] Python 3.10 and higher are not compatible to the __signature__
+                 attribute. This has been fixed by a temporary patch
+                 until the final removal of that attribute.
+ - [PYSIDE-2106] A bug resulting in duplication of values in QML properties
+                 of type QVariantList has been fixed.
+ - [PYSIDE-2121] A deadlock when using
+                 QMetaObject.invokeMethod(BlockingQueuedConnection)
+                 has been fixed.
+
+****************************************************************************
+*                                  Shiboken6                               *
+****************************************************************************
+
+ - [PYSIDE-2099] The option --lean-header to generate forward declarations
+                 instead of includes into the module header has been added.
+                 This considerably reduces the dependencies but may require
+                 additional includes to be specified for injected code.
+ - [PYSIDE-1106] The documentation of signals (including private signals)
+                 has been fixed.
+ - [PYSIDE-1106] Documentation now uses py:method directives with markup
+                 for abstract methods.
+ - [PYSIDE-1844] Build system: On Windows, shiboken is now executed by a
+                 wrapper providing the appropriate PATH containing Qt and
+                 libclang, removing the need to set the PATH.
+ - [PYSIDE-2088] A way of specifying types for casting enum values has been
+                 added, fixing an overflow occurring for
+                 TextOption.IncludeTrailingSpaces.
