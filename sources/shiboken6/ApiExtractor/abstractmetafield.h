@@ -7,6 +7,7 @@
 #include "abstractmetalang_typedefs.h"
 #include "parser/codemodel_enums.h"
 #include "typesystem_enums.h"
+#include "modifications_typedefs.h"
 #include "typesystem_typedefs.h"
 #include "enclosingclassmixin.h"
 

@@ -1090,7 +1090,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
     }
 
     TemplateParameterList template_parameters = classItem->templateParameters();
-    TypeEntries template_args;
+    TypeEntryCList template_args;
     template_args.clear();
     auto argumentParent = metaClass->typeEntry()->typeSystemTypeEntry();
     for (qsizetype i = 0; i < template_parameters.size(); ++i) {
@@ -2193,10 +2193,10 @@ static const TypeEntry* findTypeEntryUsingContext(const AbstractMetaClass* metaC
 }
 
 // Helper for findTypeEntries/translateTypeStatic()
-TypeEntries AbstractMetaBuilderPrivate::findTypeEntriesHelper(const QString &qualifiedName,
-                                                              const QString &name,
-                                                              const AbstractMetaClass *currentClass,
-                                                              AbstractMetaBuilderPrivate *d)
+TypeEntryCList AbstractMetaBuilderPrivate::findTypeEntriesHelper(const QString &qualifiedName,
+                                                                 const QString &name,
+                                                                 const AbstractMetaClass *currentClass,
+                                                                 AbstractMetaBuilderPrivate *d)
 {
     // 5.1 - Try first using the current scope
     if (currentClass) {
@@ -2240,13 +2240,13 @@ TypeEntries AbstractMetaBuilderPrivate::findTypeEntriesHelper(const QString &qua
 
 // Helper for translateTypeStatic() that calls findTypeEntriesHelper()
 // and does some error checking.
-TypeEntries AbstractMetaBuilderPrivate::findTypeEntries(const QString &qualifiedName,
-                                                        const QString &name,
-                                                        const AbstractMetaClass *currentClass,
-                                                        AbstractMetaBuilderPrivate *d,
-                                                        QString *errorMessage)
+TypeEntryCList AbstractMetaBuilderPrivate::findTypeEntries(const QString &qualifiedName,
+                                                           const QString &name,
+                                                           const AbstractMetaClass *currentClass,
+                                                           AbstractMetaBuilderPrivate *d,
+                                                           QString *errorMessage)
 {
-    TypeEntries types = findTypeEntriesHelper(qualifiedName, name, currentClass, d);
+    TypeEntryCList types = findTypeEntriesHelper(qualifiedName, name, currentClass, d);
     if (types.isEmpty()) {
         if (errorMessage != nullptr)
             *errorMessage = msgCannotFindTypeEntry(qualifiedName);
@@ -2624,7 +2624,7 @@ std::optional<AbstractMetaType>
         typeInfo.clearInstantiations();
     }
 
-    const TypeEntries types = findTypeEntries(qualifiedName, name, currentClass, d, errorMessageIn);
+    const TypeEntryCList types = findTypeEntries(qualifiedName, name, currentClass, d, errorMessageIn);
     if (types.isEmpty()) {
         if (errorMessageIn != nullptr)
             *errorMessageIn = msgUnableToTranslateType(_typei, *errorMessageIn);

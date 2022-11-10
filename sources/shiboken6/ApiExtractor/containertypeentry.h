@@ -5,6 +5,7 @@
 #define CONTAINERTYPEENTRY_H
 
 #include "complextypeentry.h"
+#include "customconversion_typedefs.h"
 
 class ContainerTypeEntryPrivate;
 

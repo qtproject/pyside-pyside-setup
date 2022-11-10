@@ -6944,7 +6944,7 @@ bool CppGenerator::finishGeneration()
     writeEnumsInitialization(s, globalEnums, ErrorReturn::Default);
 
     s << "// Register primitive types converters.\n";
-    const PrimitiveTypeEntryList &primitiveTypeList = primitiveTypes();
+    const PrimitiveTypeEntryCList &primitiveTypeList = primitiveTypes();
     for (const PrimitiveTypeEntry *pte : primitiveTypeList) {
         if (!pte->generateCode() || !pte->isCppPrimitive())
             continue;

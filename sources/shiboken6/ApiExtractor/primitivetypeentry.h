@@ -5,7 +5,7 @@
 #define PRIMITIVETYPEENTRY_H
 
 #include "typesystem.h"
-#include "typesystem_typedefs.h"
+#include "customconversion_typedefs.h"
 
 class PrimitiveTypeEntryPrivate;
 

@@ -6,6 +6,7 @@
 
 #include "abstractmetalang_typedefs.h"
 #include "parser/codemodel_fwd.h"
+#include "modifications_typedefs.h"
 #include "typesystem_typedefs.h"
 
 #include <QtCore/QString>
@@ -69,8 +70,8 @@ QString msgNamespaceNoTypeEntry(const NamespaceModelItem &item,
 
 QString msgNamespaceNotFound(const QString &name);
 
-QString msgAmbiguousVaryingTypesFound(const QString &qualifiedName, const TypeEntries &te);
-QString msgAmbiguousTypesFound(const QString &qualifiedName, const TypeEntries &te);
+QString msgAmbiguousVaryingTypesFound(const QString &qualifiedName, const TypeEntryCList &te);
+QString msgAmbiguousTypesFound(const QString &qualifiedName, const TypeEntryCList &te);
 
 QString msgUnmatchedParameterType(const ArgumentModelItem &arg, int n,
                                   const QString &why);

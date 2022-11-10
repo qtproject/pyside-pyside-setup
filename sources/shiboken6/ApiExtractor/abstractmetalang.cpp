@@ -111,7 +111,7 @@ public:
     AbstractMetaFunctionCList m_externalConversionOperators;
 
     QStringList m_baseClassNames;  // Base class names from C++, including rejected
-    TypeEntries m_templateArgs;
+    TypeEntryCList m_templateArgs;
     ComplexTypeEntry *m_typeEntry = nullptr;
     SourceLocation m_sourceLocation;
     UsingMembers m_usingMembers;
@@ -601,12 +601,12 @@ bool AbstractMetaClass::hasProtectedFields() const
     return false;
 }
 
-const TypeEntries &AbstractMetaClass::templateArguments() const
+const TypeEntryCList &AbstractMetaClass::templateArguments() const
 {
     return d->m_templateArgs;
 }
 
-void AbstractMetaClass::setTemplateArguments(const TypeEntries &args)
+void AbstractMetaClass::setTemplateArguments(const TypeEntryCList &args)
 {
     d->m_templateArgs = args;
 }

@@ -10,7 +10,7 @@
 #include "generator.h"
 #include "documentation.h"
 #include "typesystem_enums.h"
-#include "typesystem_typedefs.h"
+#include "modifications_typedefs.h"
 #include "qtxmltosphinxinterface.h"
 
 class DocParser;

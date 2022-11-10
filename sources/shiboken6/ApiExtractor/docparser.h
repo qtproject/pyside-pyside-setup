@@ -3,8 +3,8 @@
 #ifndef DOCPARSER_H
 #define DOCPARSER_H
 
-#include "typesystem_typedefs.h"
 #include "abstractmetalang_typedefs.h"
+#include "modifications_typedefs.h"
 
 #include <QtCore/QString>
 #include <QtCore/QSharedPointer>

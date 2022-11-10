@@ -4,6 +4,7 @@
 #ifndef CUSTOMCONVERSION_H
 #define CUSTOMCONVERSION_H
 
+#include "customconversion_typedefs.h"
 #include "typesystem_typedefs.h"
 
 #include <QtCore/QList>

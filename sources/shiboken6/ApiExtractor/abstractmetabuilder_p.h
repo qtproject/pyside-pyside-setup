@@ -11,6 +11,8 @@
 #include "abstractmetatype.h"
 #include "include.h"
 #include "typeparser.h"
+#include "modifications_typedefs.h"
+#include "typesystem_typedefs.h"
 
 #include <QtCore/QFileInfo>
 #include <QtCore/QList>
@@ -144,13 +146,13 @@ public:
         translateTypeStatic(const TypeInfo &type, const AbstractMetaClass *current,
                             AbstractMetaBuilderPrivate *d = nullptr, TranslateTypeFlags flags = {},
                             QString *errorMessageIn = nullptr);
-    static TypeEntries findTypeEntriesHelper(const QString &qualifiedName, const QString &name,
-                                             const AbstractMetaClass *currentClass = nullptr,
-                                             AbstractMetaBuilderPrivate *d = nullptr);
-    static TypeEntries findTypeEntries(const QString &qualifiedName, const QString &name,
-                                       const AbstractMetaClass *currentClass = nullptr,
-                                       AbstractMetaBuilderPrivate *d = nullptr,
-                                       QString *errorMessage = nullptr);
+    static TypeEntryCList findTypeEntriesHelper(const QString &qualifiedName, const QString &name,
+                                                const AbstractMetaClass *currentClass = nullptr,
+                                                AbstractMetaBuilderPrivate *d = nullptr);
+    static TypeEntryCList findTypeEntries(const QString &qualifiedName, const QString &name,
+                                          const AbstractMetaClass *currentClass = nullptr,
+                                          AbstractMetaBuilderPrivate *d = nullptr,
+                                          QString *errorMessage = nullptr);
 
     qint64 findOutValueFromString(const QString &stringValue, bool &ok);
 

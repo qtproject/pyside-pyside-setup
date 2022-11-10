@@ -661,10 +661,10 @@ void ApiExtractorPrivate::collectContainerTypesFromSnippets(InstantiationCollect
 {
     QStringList snips;
     auto *td = TypeDatabase::instance();
-    const PrimitiveTypeEntryList &primitiveTypeList = td->primitiveTypes();
+    const PrimitiveTypeEntryCList &primitiveTypeList = td->primitiveTypes();
     for (const PrimitiveTypeEntry *type : primitiveTypeList)
         getCode(snips, type);
-    const ContainerTypeEntryList &containerTypeList = td->containerTypes();
+    const ContainerTypeEntryCList &containerTypeList = td->containerTypes();
     for (const ContainerTypeEntry *type : containerTypeList)
         getCode(snips, type);
     for (auto metaClass : m_builder->classes())

@@ -1176,7 +1176,7 @@ ShibokenGenerator::ExtendedConverterData ShibokenGenerator::getExtendedConverter
 QList<CustomConversionPtr> ShibokenGenerator::getPrimitiveCustomConversions()
 {
     QList<CustomConversionPtr> conversions;
-    const PrimitiveTypeEntryList &primitiveTypeList = primitiveTypes();
+    const auto &primitiveTypeList = primitiveTypes();
     for (const PrimitiveTypeEntry *type : primitiveTypeList) {
         if (type->shouldGenerate() && type->isUserPrimitive() && type->hasCustomConversion())
             conversions << type->customConversion();
