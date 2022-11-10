@@ -5,23 +5,26 @@
 #define TYPESYSTEM_TYPEDEFS_H
 
 #include <QtCore/QList>
-#include <QtCore/QSharedPointer>
 
-class CodeSnip;
-class DocModification;
-
-struct AddedFunction;
-class CustomConversion;
-class FieldModification;
-class FunctionModification;
+class ComplexTypeEntry;
+class ConstantValueTypeEntry;
+class ContainerTypeEntry;
+class FlagsTypeEntry;
+class FunctionTypeEntry;
+class NamespaceTypeEntry;
+class ObjectTypeEntry;
+class PrimitiveTypeEntry;
+class SmartPointerTypeEntry;
+class TemplateEntry;
 class TypeEntry;
+class TypedefEntry;
+class TypeSystemTypeEntry;
 
-using AddedFunctionPtr = QSharedPointer<AddedFunction>;
-using AddedFunctionList = QList<AddedFunctionPtr>;
-using CodeSnipList = QList<CodeSnip>;
-using CustomConversionPtr = QSharedPointer<CustomConversion>;
-using DocModificationList = QList<DocModification>;
-using FieldModificationList = QList<FieldModification>;
-using FunctionModificationList = QList<FunctionModification>;
-using TypeEntries = QList<const TypeEntry *>;
+using ContainerTypeEntryCList = QList<const ContainerTypeEntry *>;
+using NamespaceTypeEntryList = QList<NamespaceTypeEntry *>;
+using PrimitiveTypeEntryCList = QList<const PrimitiveTypeEntry *>;
+using SmartPointerTypeEntryList = QList<const SmartPointerTypeEntry *>;
+using TypeEntryList = QList<TypeEntry *>;
+using TypeEntryCList = QList<const TypeEntry *>;
+
 #endif // TYPESYSTEM_TYPEDEFS_H

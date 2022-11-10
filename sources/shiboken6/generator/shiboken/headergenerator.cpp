@@ -584,7 +584,7 @@ bool HeaderGenerator::finishGeneration()
     // TODO-CONVERTER ------------------------------------------------------------------------------
     // Using a counter would not do, a fix must be made to APIExtractor's getTypeIndex().
     macrosStream << "// Converter indices\nenum : int {\n";
-    const PrimitiveTypeEntryList &primitives = primitiveTypes();
+    const auto &primitives = primitiveTypes();
     int pCount = 0;
     for (const PrimitiveTypeEntry *ptype : primitives) {
         /* Note: do not generate indices for typedef'd primitive types
@@ -707,7 +707,7 @@ bool HeaderGenerator::finishGeneration()
     } else {
         if (!primitiveTypes().isEmpty()) {
             s << "// Conversion Includes - Primitive Types\n";
-            const PrimitiveTypeEntryList &primitiveTypeList = primitiveTypes();
+            const auto &primitiveTypeList = primitiveTypes();
             for (const PrimitiveTypeEntry *ptype : primitiveTypeList)
                 s << ptype->include();
             s<< '\n';
@@ -715,7 +715,7 @@ bool HeaderGenerator::finishGeneration()
 
         if (!containerTypes().isEmpty()) {
             s << "// Conversion Includes - Container Types\n";
-            const ContainerTypeEntryList &containerTypeList = containerTypes();
+            const ContainerTypeEntryCList &containerTypeList = containerTypes();
             for (const ContainerTypeEntry *ctype : containerTypeList)
                 s << ctype->include();
             s<< '\n';

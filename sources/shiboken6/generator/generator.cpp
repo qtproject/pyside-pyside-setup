@@ -126,12 +126,12 @@ const AbstractMetaClassCList &Generator::invisibleTopNamespaces() const
     return m_d->m_invisibleTopNamespaces;
 }
 
-PrimitiveTypeEntryList Generator::primitiveTypes()
+PrimitiveTypeEntryCList Generator::primitiveTypes()
 {
     return TypeDatabase::instance()->primitiveTypes();
 }
 
-ContainerTypeEntryList Generator::containerTypes()
+ContainerTypeEntryCList Generator::containerTypes()
 {
     return TypeDatabase::instance()->containerTypes();
 }

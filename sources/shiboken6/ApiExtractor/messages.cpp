@@ -255,7 +255,7 @@ QString msgNamespaceNoTypeEntry(const NamespaceModelItem &item,
     return result;
 }
 
-QString msgAmbiguousVaryingTypesFound(const QString &qualifiedName, const TypeEntries &te)
+QString msgAmbiguousVaryingTypesFound(const QString &qualifiedName, const TypeEntryCList &te)
 {
     QString result = u"Ambiguous types of varying types found for \""_s + qualifiedName
         + u"\": "_s;
@@ -263,7 +263,7 @@ QString msgAmbiguousVaryingTypesFound(const QString &qualifiedName, const TypeEn
     return result;
 }
 
-QString msgAmbiguousTypesFound(const QString &qualifiedName, const TypeEntries &te)
+QString msgAmbiguousTypesFound(const QString &qualifiedName, const TypeEntryCList &te)
 {
     QString result = u"Ambiguous types found for \""_s + qualifiedName
         + u"\": "_s;

@@ -113,10 +113,10 @@ protected:
                                             FileNameFlags flags = {});
 
     /// Returns all primitive types found by APIExtractor
-    static PrimitiveTypeEntryList primitiveTypes();
+    static PrimitiveTypeEntryCList primitiveTypes();
 
     /// Returns all container types found by APIExtractor
-    static ContainerTypeEntryList containerTypes();
+    static ContainerTypeEntryCList containerTypes();
 
     virtual GeneratorContext contextForClass(const AbstractMetaClass *c) const;
     static GeneratorContext contextForSmartPointer(const AbstractMetaClass *c,

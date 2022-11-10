@@ -241,8 +241,8 @@ public:
     bool hasProtectedFields() const;
 
 
-    const TypeEntries &templateArguments() const;
-    void setTemplateArguments(const TypeEntries &);
+    const TypeEntryCList &templateArguments() const;
+    void setTemplateArguments(const TypeEntryCList &);
 
     // only valid during metabuilder's run
     const QStringList &baseClassNames() const;

@@ -5,8 +5,8 @@
 #define TYPEDATABASE_H
 
 #include "include.h"
+#include "modifications_typedefs.h"
 #include "typedatabase_typedefs.h"
-#include "typesystem_typedefs.h"
 
 #include <QtCore/QRegularExpression>
 #include <QtCore/QStringList>
@@ -15,25 +15,12 @@
 
 QT_FORWARD_DECLARE_CLASS(QIODevice)
 
-class ComplexTypeEntry;
-class ContainerTypeEntry;
-class FlagsTypeEntry;
-class FunctionTypeEntry;
-class NamespaceTypeEntry;
-class ObjectTypeEntry;
-class TemplateEntry;
-class TypeEntry;
-
 struct TypeDatabasePrivate;
 struct TypeDatabaseParserContext;
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 
 int getMaxTypeIndex();
-
-class ContainerTypeEntry;
-class PrimitiveTypeEntry;
-class TypeSystemTypeEntry;
 
 struct VersionRange
 {
@@ -113,15 +100,15 @@ public:
     QString defaultPackageName() const;
 
     TypeEntry *findType(const QString &name) const;
-    TypeEntries findTypes(const QString &name) const;
-    TypeEntries findCppTypes(const QString &name) const;
+    TypeEntryCList findTypes(const QString &name) const;
+    TypeEntryCList findCppTypes(const QString &name) const;
 
     const TypeEntryMultiMap &entries() const;
     const TypedefEntryMap  &typedefEntries() const;
 
-    PrimitiveTypeEntryList primitiveTypes() const;
+    PrimitiveTypeEntryCList primitiveTypes() const;
 
-    ContainerTypeEntryList containerTypes() const;
+    ContainerTypeEntryCList containerTypes() const;
 
     SmartPointerTypeEntryList smartPointerTypes() const;
 

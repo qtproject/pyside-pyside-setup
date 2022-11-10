@@ -104,7 +104,7 @@ struct TypeDatabasePrivate
 {
     const TypeSystemTypeEntry *defaultTypeSystemType() const;
     TypeEntry *findType(const QString &name) const;
-    TypeEntries findCppTypes(const QString &name) const;
+    TypeEntryCList findCppTypes(const QString &name) const;
     bool addType(TypeEntry *e, QString *errorMessage = nullptr);
     bool parseFile(QIODevice *device, TypeDatabase *db, bool generate = true);
     static bool parseFile(const TypeDatabaseParserContextPtr &context,
@@ -130,7 +130,7 @@ struct TypeDatabasePrivate
     void addBuiltInContainerTypes(const TypeDatabaseParserContextPtr &context);
     TypeEntryMultiMapConstIteratorRange findTypeRange(const QString &name) const;
     template <class Predicate>
-    TypeEntries findTypesHelper(const QString &name, Predicate pred) const;
+    TypeEntryCList findTypesHelper(const QString &name, Predicate pred) const;
     template <class Type, class Predicate>
     QList<const Type *> findTypesByTypeHelper(Predicate pred) const;
     TypeEntry *resolveTypeDefEntry(TypedefEntry *typedefEntry, QString *errorMessage);
@@ -442,9 +442,9 @@ TypeEntry *TypeDatabasePrivate::findType(const QString &name) const
 }
 
 template <class Predicate>
-TypeEntries TypeDatabasePrivate::findTypesHelper(const QString &name, Predicate pred) const
+TypeEntryCList TypeDatabasePrivate::findTypesHelper(const QString &name, Predicate pred) const
 {
-    TypeEntries result;
+    TypeEntryCList result;
     const auto entries = findTypeRange(name);
     for (TypeEntry *entry : entries) {
         if (pred(entry))
@@ -464,7 +464,7 @@ QList<const Type *> TypeDatabasePrivate::findTypesByTypeHelper(Predicate pred) c
     return result;
 }
 
-TypeEntries TypeDatabase::findTypes(const QString &name) const
+TypeEntryCList TypeDatabase::findTypes(const QString &name) const
 {
     return d->findTypesHelper(name, useType);
 }
@@ -493,12 +493,12 @@ static bool useCppType(const TypeEntry *t)
     return result;
 }
 
-TypeEntries TypeDatabase::findCppTypes(const QString &name) const
+TypeEntryCList TypeDatabase::findCppTypes(const QString &name) const
 {
     return d->findCppTypes(name);
 }
 
-TypeEntries TypeDatabasePrivate::findCppTypes(const QString &name) const
+TypeEntryCList TypeDatabasePrivate::findCppTypes(const QString &name) const
 {
     return findTypesHelper(name, useCppType);
 }
@@ -519,13 +519,13 @@ TypeEntryMultiMapConstIteratorRange TypeDatabasePrivate::findTypeRange(const QSt
     return {range.first, range.second};
 }
 
-PrimitiveTypeEntryList TypeDatabase::primitiveTypes() const
+PrimitiveTypeEntryCList TypeDatabase::primitiveTypes() const
 {
     auto pred = [](const TypeEntry *t) { return t->isPrimitive(); };
     return d->findTypesByTypeHelper<PrimitiveTypeEntry>(pred);
 }
 
-ContainerTypeEntryList TypeDatabase::containerTypes() const
+ContainerTypeEntryCList TypeDatabase::containerTypes() const
 {
     auto pred = [](const TypeEntry *t) { return t->isContainer(); };
     return d->findTypesByTypeHelper<ContainerTypeEntry>(pred);
@@ -1333,7 +1333,7 @@ QDebug operator<<(QDebug debug, const formatPrimitiveEntry &fe)
 struct PrimitiveFormatListEntry
 {
     const PrimitiveTypeEntry *baseType;
-    PrimitiveTypeEntryList typedefs;
+    PrimitiveTypeEntryCList typedefs;
 };
 
 static bool operator<(const PrimitiveFormatListEntry &e1, const PrimitiveFormatListEntry &e2)

@@ -5,7 +5,7 @@
 #define MODIFICATIONS_H
 
 #include "typesystem_enums.h"
-#include "typesystem_typedefs.h"
+#include "modifications_typedefs.h"
 
 #include <QtCore/QList>
 #include <QtCore/QSharedDataPointer>

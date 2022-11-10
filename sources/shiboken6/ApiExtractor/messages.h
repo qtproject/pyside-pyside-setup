@@ -6,6 +6,7 @@
 
 #include "abstractmetalang_typedefs.h"
 #include "parser/codemodel_fwd.h"
+#include "modifications_typedefs.h"
 #include "typesystem_typedefs.h"
 
 #include <QtCore/QString>
@@ -67,8 +68,8 @@ QString msgNoEnumTypeConflict(const EnumModelItem &enumItem,
 QString msgNamespaceNoTypeEntry(const NamespaceModelItem &item,
                                 const QString &fullName);
 
-QString msgAmbiguousVaryingTypesFound(const QString &qualifiedName, const TypeEntries &te);
-QString msgAmbiguousTypesFound(const QString &qualifiedName, const TypeEntries &te);
+QString msgAmbiguousVaryingTypesFound(const QString &qualifiedName, const TypeEntryCList &te);
+QString msgAmbiguousTypesFound(const QString &qualifiedName, const TypeEntryCList &te);
 
 QString msgUnmatchedParameterType(const ArgumentModelItem &arg, int n,
                                   const QString &why);

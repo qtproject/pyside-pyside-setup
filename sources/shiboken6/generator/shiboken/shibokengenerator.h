@@ -6,6 +6,7 @@
 
 #include <generator.h>
 
+#include "customconversion_typedefs.h"
 #include "typesystem_typedefs.h"
 #include "typesystem_enums.h"
 

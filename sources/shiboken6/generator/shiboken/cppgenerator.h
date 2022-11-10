@@ -7,7 +7,7 @@
 #include "shibokengenerator.h"
 #include "abstractmetalang_enums.h"
 #include "include.h"
-#include "typesystem_typedefs.h"
+#include "modifications_typedefs.h"
 
 #include <QtCore/QFlags>
 #include <QtCore/QHash>

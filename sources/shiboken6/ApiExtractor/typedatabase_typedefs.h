@@ -4,20 +4,12 @@
 #ifndef TYPEDATABASE_TYPEDEFS_H
 #define TYPEDATABASE_TYPEDEFS_H
 
+#include "typesystem_typedefs.h"
+
 #include <QtCore/QMultiMap>
 #include <QtCore/QString>
 #include <QtCore/QList>
 
-class ConstantValueTypeEntry;
-class ContainerTypeEntry;
-class NamespaceTypeEntry;
-class PrimitiveTypeEntry;
-class SmartPointerTypeEntry;
-class TemplateEntry;
-class TypeEntry;
-class TypedefEntry;
-
-using TypeEntryList = QList<TypeEntry *>;
 using TemplateEntryMap =QMap<QString, TemplateEntry *>;
 
 template <class Key, class Value>
@@ -37,10 +29,5 @@ using TypeEntryMultiMapConstIteratorRange = QMultiMapConstIteratorRange<QString,
 
 using TypeEntryMap = QMap<QString, TypeEntry *>;
 using TypedefEntryMap = QMap<QString, TypedefEntry *>;
-
-using ContainerTypeEntryList = QList<const ContainerTypeEntry *>;
-using NamespaceTypeEntryList = QList<NamespaceTypeEntry *>;
-using PrimitiveTypeEntryList = QList<const PrimitiveTypeEntry *>;
-using SmartPointerTypeEntryList = QList<const SmartPointerTypeEntry *>;
 
 #endif // TYPEDATABASE_TYPEDEFS_H
