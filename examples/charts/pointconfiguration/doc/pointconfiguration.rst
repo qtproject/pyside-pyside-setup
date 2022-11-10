@@ -31,8 +31,8 @@ Create a subclass of :py:`QMainWindow` to contain the chart and controls.
 
 .. literalinclude:: ../../../../examples/charts/pointconfiguration/chartwindow.py
    :linenos:
-   :lineno-start: 15
-   :lines: 15-17
+   :lineno-start: 16
+   :lines: 16-18
 
 Create a line series
 ~~~~~~~~~~~~~~~~~~~~
@@ -43,7 +43,7 @@ visible.
 .. literalinclude:: ../../../../examples/charts/pointconfiguration/chartwindow.py
    :linenos:
    :lineno-start: 20
-   :lines: 20-27
+   :lines: 20-28
 
 Create the point configuration controls
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -62,8 +62,8 @@ Now, create controls to configure the color, size, and label visibility attribut
 
 .. literalinclude:: ../../../../examples/charts/pointconfiguration/chartwindow.py
    :linenos:
-   :lineno-start: 29
-   :lines: 29-52
+   :lineno-start: 31
+   :lines: 31-52
 
 Populate the controls upon selecting a point
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -87,8 +87,8 @@ look up the values in :py:`PointConfigurations`, and update the checkbox and lin
    :lines: 54
 .. literalinclude:: ../../../../examples/charts/pointconfiguration/chartwindow.py
    :linenos:
-   :lineno-start: 95
-   :lines: 95-137
+   :lineno-start: 97
+   :lines: 97-132
 
 Provide the logic to configure the selected point
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -102,11 +102,11 @@ value that is associated with the control, to the :py:`m_selectedPointConfig` an
 .. literalinclude:: ../../../../examples/charts/pointconfiguration/chartwindow.py
    :linenos:
    :lineno-start: 55
-   :lines: 55-58
+   :lines: 55-60
 .. literalinclude:: ../../../../examples/charts/pointconfiguration/chartwindow.py
    :linenos:
-   :lineno-start: 139
-   :lines: 139-157
+   :lineno-start: 140
+   :lines: 140-156
 
 Create the chart and lay out the controls
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -116,12 +116,8 @@ window, and select an initial point.
 
 .. literalinclude:: ../../../../examples/charts/pointconfiguration/chartwindow.py
    :linenos:
-   :lineno-start: 60
-   :lines: 60-93
-.. literalinclude:: ../../../../examples/charts/pointconfiguration/chartwindow.py
-   :linenos:
-   :lineno-start: 159
-   :lines: 159-163
+   :lineno-start: 62
+   :lines: 62-95
 
 In our entrypoint file `pointconfiguration.py`, instantiate the :py:`ChartWindow`, resize it, show
 it, and start the event loop.
