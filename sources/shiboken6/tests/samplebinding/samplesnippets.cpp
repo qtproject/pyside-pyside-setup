@@ -3,7 +3,7 @@
 
 // @snippet intwrapper_add_ints
 extern "C" {
-static PyObject *Sbk_IntWrapper_add_ints(PyObject *self, PyObject *args)
+static PyObject *Sbk_IntWrapper_add_ints(PyObject * /* self */, PyObject *args)
 {
     PyObject *result = nullptr;
     if (PyTuple_Check(args) != 0 && PyTuple_Size(args) == 2) {
