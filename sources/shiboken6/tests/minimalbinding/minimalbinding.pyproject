@@ -1,0 +1,9 @@
+{
+    "files": ["brace_pattern_test.py",
+              "listuser_test.py",
+              "minbool_test.py",
+              "obj_test.py",
+              "typedef_test.py",
+              "val_test.py",
+              "typesystem_minimal.xml"]
+}

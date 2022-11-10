@@ -1,0 +1,17 @@
+{
+    "files": ["collector_external_operator_test.py",
+              "conversion_operator_for_class_without_implicit_conversions_test.py",
+              "extended_multiply_operator_test.py",
+              "module_reload_test.py",
+              "new_ctor_operator_test.py",
+              "objtypehashes_test.py",
+              "otherderived_test.py",
+              "othertypesystypedef_test.py",
+              "signature_test.py",
+              "smartptr_test.py",
+              "test_module_template.py",
+              "typediscovery_test.py",
+              "usersprimitivefromothermodule_test.py",
+              "wrongctor_test.py",
+              "typesystem_other.xml"]
+}

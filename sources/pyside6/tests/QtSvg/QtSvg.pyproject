@@ -1,0 +1,4 @@
+{
+    "files": ["qsvggenerator_test.py",
+              "qsvgrenderer_test.py"]
+}

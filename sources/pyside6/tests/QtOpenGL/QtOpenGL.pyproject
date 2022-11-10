@@ -1,0 +1,4 @@
+{
+    "files": ["qopenglbuffer_test.py",
+              "qopenglwindow_test.py"]
+}

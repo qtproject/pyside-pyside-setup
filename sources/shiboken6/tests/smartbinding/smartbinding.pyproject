@@ -1,0 +1,7 @@
+{
+    "files": ["smart_pointer_test.py",
+              "std_optional_test.py",
+              "std_shared_ptr_test.py",
+              "std_unique_ptr_test.py",
+              "typesystem_smart.xml"]
+}

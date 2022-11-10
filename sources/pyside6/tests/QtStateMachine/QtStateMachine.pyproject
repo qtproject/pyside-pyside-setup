@@ -1,0 +1,7 @@
+{
+    "files": ["bug_1031.py",
+              "qabstracttransition_test.py",
+              "qstate_test.py",
+              "qstatemachine_test.py",
+              "setprop_on_ctor_test.py"]
+}

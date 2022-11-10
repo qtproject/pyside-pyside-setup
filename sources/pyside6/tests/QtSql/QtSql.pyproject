@@ -1,0 +1,5 @@
+{
+    "files": ["bug_1013.py",
+              "qsqldatabaseandqueries_test.py",
+              "qvarianttype_test.py"]
+}

@@ -1,0 +1,11 @@
+{
+    "files": ["accessManager_test.py",
+              "bug_1084.py",
+              "bug_446.py",
+              "dnslookup_test.py",
+              "qhostinfo_test.py",
+              "qipv6address_test.py",
+              "qpassworddigestor_test.py",
+              "tcpserver_test.py",
+              "udpsocket_test.py"]
+}

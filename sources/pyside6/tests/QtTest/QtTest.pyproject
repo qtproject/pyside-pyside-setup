@@ -1,0 +1,7 @@
+{
+    "files": ["click_test.py",
+              "eventfilter_test.py",
+              "qsignalspy_test.py",
+              "qvalidator_test.py",
+              "touchevent_test.py"]
+}

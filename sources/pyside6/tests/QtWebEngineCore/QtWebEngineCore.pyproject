@@ -1,0 +1,4 @@
+{
+    "files": ["qwebenginecookiestore_test.py",
+              "web_engine_custom_scheme.py"]
+}

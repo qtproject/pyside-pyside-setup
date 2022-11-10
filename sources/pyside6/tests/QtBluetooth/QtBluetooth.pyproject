@@ -1,0 +1,4 @@
+{
+    "files": ["localdevice.py",
+              "lowenergy_characteristics.py"]
+}
