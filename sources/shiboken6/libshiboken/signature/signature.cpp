@@ -227,6 +227,8 @@ PyObject *GetSignature_TypeMod(PyObject *ob, PyObject *modifier)
 // The `modifier` argument is a string that is passed in from `loader.py`.
 // Configuration what the modifiers mean is completely in Python.
 //
+// PYSIDE-2101: The __signature__ attribute is gone due to rlcompleter.
+//
 
 PyObject *get_signature_intern(PyObject *ob, PyObject *modifier)
 {
@@ -302,7 +304,7 @@ static PyObject *feature_import(PyObject * /* self */, PyObject *args, PyObject 
 PyMethodDef signature_methods[] = {
     {"__feature_import__", (PyCFunction)feature_import, METH_VARARGS | METH_KEYWORDS, nullptr},
     {"get_signature", (PyCFunction)get_signature, METH_VARARGS,
-        "get the __signature__, but pass an optional string parameter"},
+        "get the signature, passing an optional string parameter"},
     {nullptr, nullptr, 0, nullptr}
 };
 
@@ -614,13 +616,9 @@ void SetError_Argument(PyObject *args, const char *func_name, PyObject *info)
  * But the __doc__ attribute existed already by inheritance, and calling
  * PyType_Modified() is not supported. So we added the getsets explicitly
  * to the metatype.
+ *
+ * PYSIDE-2101: The __signature__ attribute is gone due to rlcompleter.
  */
-
-PyObject *Sbk_TypeGet___signature__(PyObject *ob, PyObject *modifier)
-{
-    init_shibokensupport_module();
-    return pyside_tp_get___signature__(ob, modifier);
-}
 
 PyObject *Sbk_TypeGet___doc__(PyObject *ob)
 {

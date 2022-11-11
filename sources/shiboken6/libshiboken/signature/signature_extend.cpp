@@ -70,8 +70,6 @@ PyObject *pyside_cf_get___signature__(PyObject *func, PyObject *modifier)
 PyObject *pyside_sm_get___signature__(PyObject *sm, PyObject *modifier)
 {
     AutoDecRef func(PyObject_GetAttr(sm, PyMagicName::func()));
-    if (Py_TYPE(func) == PepFunction_TypePtr)
-        return PyObject_GetAttr(func, PyMagicName::signature());
     return _get_written_signature(GetSignature_Function, func, modifier);
 }
 
@@ -169,59 +167,29 @@ static PyObject *pyside_wd_get___doc__(PyObject *wd)
     return handle_doc(wd, old_wd_doc_descr);
 }
 
-// the default setter for all objects
-static int pyside_set___signature__(PyObject *op, PyObject *value)
-{
-    // By this additional check, this function refuses write access.
-    // We consider both nullptr and Py_None as not been written.
-    AutoDecRef has_val(get_signature_intern(op, nullptr));
-    if (!(has_val.isNull() || has_val == Py_None)) {
-        PyErr_Format(PyExc_AttributeError,
-                     "Attribute '__signature__' of '%.50s' object is not writable",
-                     Py_TYPE(op)->tp_name);
-        return -1;
-    }
-    int ret = value == nullptr ? PyDict_DelItem(pyside_globals->value_dict, op)
-                               : PyDict_SetItem(pyside_globals->value_dict, op, value);
-    Py_XINCREF(value);
-    return ret;
-}
-
 // PYSIDE-535: We cannot patch types easily in PyPy.
 //             Let's use the `get_signature` function, instead.
 static PyGetSetDef new_PyCFunction_getsets[] = {
     {const_cast<char *>("__doc__"),       reinterpret_cast<getter>(pyside_cf_get___doc__),
                                           nullptr, nullptr, nullptr},
-    {const_cast<char *>("__signature__"), reinterpret_cast<getter>(pyside_cf_get___signature__),
-                                          reinterpret_cast<setter>(pyside_set___signature__),
-                                          nullptr, nullptr},
     {nullptr, nullptr, nullptr, nullptr, nullptr}
 };
 
 static PyGetSetDef new_PyStaticMethod_getsets[] = {
     {const_cast<char *>("__doc__"),       reinterpret_cast<getter>(pyside_sm_get___doc__),
                                           nullptr, nullptr, nullptr},
-    {const_cast<char *>("__signature__"), reinterpret_cast<getter>(pyside_sm_get___signature__),
-                                          reinterpret_cast<setter>(pyside_set___signature__),
-                                          nullptr, nullptr},
     {nullptr, nullptr, nullptr, nullptr, nullptr}
 };
 
 static PyGetSetDef new_PyMethodDescr_getsets[] = {
     {const_cast<char *>("__doc__"),       reinterpret_cast<getter>(pyside_md_get___doc__),
                                           nullptr, nullptr, nullptr},
-    {const_cast<char *>("__signature__"), reinterpret_cast<getter>(pyside_md_get___signature__),
-                                          reinterpret_cast<setter>(pyside_set___signature__),
-                                          nullptr, nullptr},
     {nullptr, nullptr, nullptr, nullptr, nullptr}
 };
 
 static PyGetSetDef new_PyWrapperDescr_getsets[] = {
     {const_cast<char *>("__doc__"),       reinterpret_cast<getter>(pyside_wd_get___doc__),
                                           nullptr, nullptr, nullptr},
-    {const_cast<char *>("__signature__"), reinterpret_cast<getter>(pyside_wd_get___signature__),
-                                          reinterpret_cast<setter>(pyside_set___signature__),
-                                          nullptr, nullptr},
     {nullptr, nullptr, nullptr, nullptr, nullptr}
 };
 

@@ -7002,7 +7002,7 @@ bool CppGenerator::finishGeneration()
         s << "PySide::registerCleanupFunction(cleanTypesAttributes);\n\n";
     }
 
-    // finish the rest of __signature__ initialization.
+    // finish the rest of get_signature() initialization.
     s << "FinishSignatureInitialization(module, " << moduleName()
         << "_SignatureStrings);\n"
         << "\nreturn module;\n" << outdent << "}\n";

@@ -38,7 +38,7 @@ class PointerPrimitiveTypeTest(unittest.TestCase):
     def testArraySignature(self):
         # signature="IntArray2(const int*)"
         found = False
-        for sig in IntArray2.__signature__:
+        for sig in get_signature(IntArray2):
             if "data" in sig.parameters:
                 found = True
                 break

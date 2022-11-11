@@ -51,6 +51,8 @@ int add_more_getsets(PyTypeObject *type, PyGetSetDef *gsp, PyObject **doc_descr)
     /*
      * This function is used to assign a new `__signature__` attribute,
      * and also to override a `__doc__` or `__name__` attribute.
+     *
+     * PYSIDE-2101: The __signature__ attribute is gone due to rlcompleter.
      */
     assert(PyType_Check(type));
     PyType_Ready(type);

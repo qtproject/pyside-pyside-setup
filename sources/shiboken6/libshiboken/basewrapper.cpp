@@ -113,11 +113,8 @@ type_set_doc(PyTypeObject *type, PyObject *value, void * /* context */)
 }
 
 // PYSIDE-908: The function PyType_Modified does not work in PySide, so we need to
-// explicitly pass __doc__. For __signature__ it _did_ actually work, because
-// it was not existing before. We add them both for clarity.
+// explicitly pass __doc__.
 static PyGetSetDef SbkObjectType_tp_getset[] = {
-    {const_cast<char *>("__signature__"), reinterpret_cast<getter>(Sbk_TypeGet___signature__),
-                                          nullptr, nullptr, nullptr},
     {const_cast<char *>("__doc__"),       reinterpret_cast<getter>(Sbk_TypeGet___doc__),
                                           reinterpret_cast<setter>(type_set_doc), nullptr, nullptr},
     {const_cast<char *>("__dict__"),      reinterpret_cast<getter>(Sbk_TypeGet___dict__),
