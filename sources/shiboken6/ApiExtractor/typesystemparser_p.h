@@ -120,7 +120,7 @@ struct StackElementContext
     FunctionModificationList functionMods;
     FieldModificationList fieldMods;
     DocModificationList docModifications;
-    TypeEntry* entry = nullptr;
+    TypeEntry *entry = nullptr;
     int addedFunctionModificationIndex = -1;
 };
 
@@ -260,7 +260,7 @@ private:
     QString m_error;
     const TypeEntry::CodeGeneration m_generate;
 
-    EnumTypeEntry* m_currentEnum = nullptr;
+    EnumTypeEntry *m_currentEnum = nullptr;
     TemplateInstancePtr m_templateInstance;
     TemplateEntry *m_templateEntry = nullptr;
     ContextStack m_contextStack;

@@ -27,7 +27,7 @@ void TestReverseOperators::testReverseSum()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    AbstractMetaClass* classA = AbstractMetaClass::findClass(classes, u"A");
+    auto *classA = AbstractMetaClass::findClass(classes, u"A");
     QVERIFY(classA);
     QCOMPARE(classA->functions().size(), 4);
 

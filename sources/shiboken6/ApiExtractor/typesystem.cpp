@@ -848,7 +848,7 @@ public:
 
     QString m_defaultConstructor;
     CustomConversionPtr m_customConversion;
-    PrimitiveTypeEntry* m_referencedTypeEntry = nullptr;
+    PrimitiveTypeEntry *m_referencedTypeEntry = nullptr;
     uint m_preferredTargetLangType : 1;
 };
 
@@ -1241,7 +1241,7 @@ public:
     ComplexTypeEntry::CopyableFlag m_copyableFlag = ComplexTypeEntry::Unknown;
     QString m_hashFunction;
 
-    const ComplexTypeEntry* m_baseContainerType = nullptr;
+    const ComplexTypeEntry *m_baseContainerType = nullptr;
     // For class functions
     TypeSystem::ExceptionHandling m_exceptionHandling = TypeSystem::ExceptionHandling::Unspecified;
     TypeSystem::AllowThread m_allowThread = TypeSystem::AllowThread::Unspecified;

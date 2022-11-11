@@ -12,8 +12,8 @@
 
 void TestInsertTemplate::testInsertTemplateOnClassInjectCode()
 {
-    const char* cppCode ="struct A{};\n";
-    const char* xmlCode = "\
+    const char cppCode[] = "struct A{};\n";
+    const char xmlCode[] = "\
     <typesystem package='Foo'>\n\
         <template name='code_template'>\n\
         code template content\n\
@@ -37,8 +37,8 @@ void TestInsertTemplate::testInsertTemplateOnClassInjectCode()
 
 void TestInsertTemplate::testInsertTemplateOnModuleInjectCode()
 {
-    const char* cppCode ="";
-    const char* xmlCode = "\
+    const char cppCode[] = "";
+    const char xmlCode[] = "\
     <typesystem package='Foo'>\n\
         <template name='code_template'>\n\
         code template content\n\

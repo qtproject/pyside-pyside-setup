@@ -28,7 +28,7 @@ void TestModifyFunction::testRenameArgument()
 {
     QFETCH(QByteArray, pattern);
 
-    const char* cppCode ="\
+    const char cppCode[] = "\
     struct A {\n\
         void method(int=0);\n\
     };\n";
@@ -57,12 +57,12 @@ void TestModifyFunction::testRenameArgument()
 
 void TestModifyFunction::testOwnershipTransfer()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     struct A {};\n\
     struct B {\n\
         virtual A* method();\n\
     };\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package=\"Foo\">\n\
         <object-type name='A' />\n\
         <object-type name='B'>\n\
@@ -87,7 +87,7 @@ void TestModifyFunction::testOwnershipTransfer()
 
 void TestModifyFunction::invalidateAfterUse()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     struct A {\n\
         virtual void call(int *a);\n\
     };\n\
@@ -101,7 +101,7 @@ void TestModifyFunction::invalidateAfterUse()
     };\n\
     struct E : D {\n\
     };\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package='Foo'>\n\
         <primitive-type name='int'/>\n\
         <object-type name='A'>\n\
@@ -173,13 +173,13 @@ void TestModifyFunction::invalidateAfterUse()
 
 void TestModifyFunction::testWithApiVersion()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     struct A {};\n\
     struct B {\n\
         virtual A* method();\n\
         virtual B* methodB();\n\
     };\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package='Foo'>\n\
         <object-type name='A' />\n\
         <object-type name='B'>\n\
@@ -199,7 +199,7 @@ void TestModifyFunction::testWithApiVersion()
                                                                 false, u"0.1"_s));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    AbstractMetaClass* classB = AbstractMetaClass::findClass(classes, u"B");
+    auto *classB = AbstractMetaClass::findClass(classes, u"B");
     auto func = classB->findFunction(u"method");
 
     auto returnOwnership = func->argumentTargetOwnership(func->ownerClass(), 0);
@@ -269,10 +269,10 @@ struct A {
 
 void TestModifyFunction::testGlobalFunctionModification()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     struct A {};\n\
     void function(A* a = 0);\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package='Foo'>\n\
         <primitive-type name='A'/>\n\
         <function signature='function(A*)'>\n\

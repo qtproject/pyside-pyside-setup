@@ -41,7 +41,7 @@ void TestCodeInjections::testReadFile()
     QFETCH(QString, snippet);
     QFETCH(QString, expected);
 
-    const char* cppCode ="struct A {};\n";
+    const char cppCode[] = "struct A {};\n";
     int argc = 0;
     char *argv[] = {nullptr};
     QCoreApplication app(argc, argv);
@@ -73,8 +73,8 @@ void TestCodeInjections::testReadFile()
 
 void TestCodeInjections::testInjectWithValidApiVersion()
 {
-    const char* cppCode ="struct A {};\n";
-    const char* xmlCode = "\
+    const char cppCode[] = "struct A {};\n";
+    const char xmlCode[] = "\
     <typesystem package='Foo'>\n\
         <value-type name='A'>\n\
             <inject-code class='target' since='1.0'>\n\
@@ -87,14 +87,14 @@ void TestCodeInjections::testInjectWithValidApiVersion()
                                                                 true, u"1.0"_s));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    AbstractMetaClass* classA = AbstractMetaClass::findClass(classes, u"A");
+    auto *classA = AbstractMetaClass::findClass(classes, u"A");
     QCOMPARE(classA->typeEntry()->codeSnips().size(), 1);
 }
 
 void TestCodeInjections::testInjectWithInvalidApiVersion()
 {
-    const char* cppCode ="struct A {};\n";
-    const char* xmlCode  = "\
+    const char cppCode[] = "struct A {};\n";
+    const char xmlCode[]  = "\
     <typesystem package=\"Foo\">\n\
         <value-type name='A'>\n\
             <inject-code class='target' since='1.0'>\n\

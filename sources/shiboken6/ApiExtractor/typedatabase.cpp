@@ -179,7 +179,7 @@ TypeDatabase::~TypeDatabase()
     delete d;
 }
 
-TypeDatabase* TypeDatabase::instance(bool newInstance)
+TypeDatabase *TypeDatabase::instance(bool newInstance)
 {
     static TypeDatabase *db = nullptr;
     if (!db || newInstance) {
@@ -338,7 +338,7 @@ QStringList TypeDatabase::typesystemKeywords() const
 
 IncludeList TypeDatabase::extraIncludes(const QString& className) const
 {
-    ComplexTypeEntry* typeEntry = findComplexType(className);
+    ComplexTypeEntry *typeEntry = findComplexType(className);
     return typeEntry ? typeEntry->extraIncludes() : IncludeList();
 }
 
@@ -366,7 +366,7 @@ void TypeDatabase::addInlineNamespaceLookups(const NamespaceTypeEntry *n)
         d->m_entries.insert(ae->shortName(), ae);
 }
 
-ContainerTypeEntry* TypeDatabase::findContainerType(const QString &name) const
+ContainerTypeEntry *TypeDatabase::findContainerType(const QString &name) const
 {
     QString template_name = name;
 
@@ -374,7 +374,7 @@ ContainerTypeEntry* TypeDatabase::findContainerType(const QString &name) const
     if (pos > 0)
         template_name = name.left(pos);
 
-    TypeEntry* type_entry = findType(template_name);
+    auto *type_entry = findType(template_name);
     if (type_entry && type_entry->isContainer())
         return static_cast<ContainerTypeEntry*>(type_entry);
     return nullptr;
@@ -386,7 +386,7 @@ static bool inline useType(const TypeEntry *t)
         || static_cast<const PrimitiveTypeEntry *>(t)->preferredTargetLangType();
 }
 
-FunctionTypeEntry* TypeDatabase::findFunctionType(const QString& name) const
+FunctionTypeEntry *TypeDatabase::findFunctionType(const QString &name) const
 {
     const auto entries = d->findTypeRange(name);
     for (TypeEntry *entry : entries) {
@@ -426,12 +426,12 @@ QString TypeDatabase::defaultPackageName() const
     return d->m_typeSystemEntries.constFirst()->name();
 }
 
-TypeEntry* TypeDatabase::findType(const QString& name) const
+TypeEntry *TypeDatabase::findType(const QString &name) const
 {
     return d->findType(name);
 }
 
-TypeEntry* TypeDatabasePrivate::findType(const QString& name) const
+TypeEntry *TypeDatabasePrivate::findType(const QString &name) const
 {
     const auto entries = findTypeRange(name);
     for (TypeEntry *entry : entries) {
@@ -684,7 +684,7 @@ bool TypeDatabase::isReturnTypeRejected(const QString& className, const QString&
     return findRejection(d->m_rejections, TypeRejection::ReturnType, className, typeName, reason);
 }
 
-FlagsTypeEntry* TypeDatabase::findFlagsType(const QString &name) const
+FlagsTypeEntry *TypeDatabase::findFlagsType(const QString &name) const
 {
     TypeEntry *fte = findType(name);
     if (!fte) {
@@ -959,12 +959,12 @@ bool TypeDatabasePrivate::parseFile(const TypeDatabaseParserContextPtr &context,
     return ok;
 }
 
-bool TypeDatabase::parseFile(QIODevice* device, bool generate)
+bool TypeDatabase::parseFile(QIODevice *device, bool generate)
 {
     return d->parseFile(device, this, generate);
 }
 
-bool TypeDatabasePrivate::parseFile(QIODevice* device, TypeDatabase *db, bool generate)
+bool TypeDatabasePrivate::parseFile(QIODevice *device, TypeDatabase *db, bool generate)
 {
     const TypeDatabaseParserContextPtr context(new TypeDatabaseParserContext);
     context->db = db;
@@ -1076,7 +1076,7 @@ PrimitiveTypeEntry *TypeDatabase::findPrimitiveType(const QString& name) const
     return nullptr;
 }
 
-ComplexTypeEntry* TypeDatabase::findComplexType(const QString& name) const
+ComplexTypeEntry *TypeDatabase::findComplexType(const QString& name) const
 {
     const auto entries = d->findTypeRange(name);
     for (TypeEntry *entry : entries) {
@@ -1086,7 +1086,7 @@ ComplexTypeEntry* TypeDatabase::findComplexType(const QString& name) const
     return nullptr;
 }
 
-ObjectTypeEntry* TypeDatabase::findObjectType(const QString& name) const
+ObjectTypeEntry *TypeDatabase::findObjectType(const QString& name) const
 {
     const auto entries = d->findTypeRange(name);
     for (TypeEntry *entry : entries) {
@@ -1139,7 +1139,7 @@ void TypeDatabase::setDropTypeEntries(QStringList dropTypeEntries)
 static bool computeTypeIndexes = true;
 static int maxTypeIndex;
 
-static bool typeEntryLessThan(const TypeEntry* t1, const TypeEntry* t2)
+static bool typeEntryLessThan(const TypeEntry *t1, const TypeEntry *t2)
 {
     if (t1->revision() < t2->revision())
         return true;
@@ -1149,7 +1149,7 @@ static bool typeEntryLessThan(const TypeEntry* t1, const TypeEntry* t2)
 
 static void _computeTypeIndexes()
 {
-    TypeDatabase* tdb = TypeDatabase::instance();
+    auto *tdb = TypeDatabase::instance();
 
     TypeEntryList list;
 

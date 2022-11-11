@@ -14,10 +14,10 @@ using namespace Qt::StringLiterals;
 
 void TestPrimitiveTypeTag::testPrimitiveTypeDefaultConstructor()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     struct A {};\n\
     struct B {};\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package=\"Foo\">\n\
         <primitive-type name='A' default-constructor='A()'/>\n\
         <object-type name='B'/>\n\
@@ -30,7 +30,7 @@ void TestPrimitiveTypeTag::testPrimitiveTypeDefaultConstructor()
     const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, u"B");
     QVERIFY(classB);
 
-    PrimitiveTypeEntry* typeEntry = TypeDatabase::instance()->findPrimitiveType(u"A"_s);
+    auto *typeEntry = TypeDatabase::instance()->findPrimitiveType(u"A"_s);
     QVERIFY(typeEntry);
     QVERIFY(typeEntry->hasDefaultConstructor());
     QCOMPARE(typeEntry->defaultConstructor(), u"A()");

@@ -19,7 +19,7 @@ using namespace Qt::StringLiterals;
 
 void TestNestedTypes::testNestedTypesModifications()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     namespace OuterNamespace {\n\
         namespace InnerNamespace {\n\
             struct SomeClass {\n\
@@ -27,7 +27,7 @@ void TestNestedTypes::testNestedTypesModifications()
             };\n\
         };\n\
     };\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package='Foo'>\n\
         <namespace-type name='OuterNamespace'>\n\
             <namespace-type name='InnerNamespace'>\n\
@@ -78,11 +78,11 @@ void TestNestedTypes::testNestedTypesModifications()
 
 void TestNestedTypes::testDuplicationOfNestedTypes()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     namespace Namespace {\n\
         class SomeClass {};\n\
     };\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package='Foo'>\n\
         <namespace-type name='Namespace'>\n\
             <value-type name='SomeClass'>\n\
@@ -105,9 +105,9 @@ void TestNestedTypes::testDuplicationOfNestedTypes()
     QCOMPARE(cls1->name(), u"SomeClass");
     QCOMPARE(cls1->qualifiedCppName(), u"Namespace::SomeClass");
 
-    TypeEntry* t1 = TypeDatabase::instance()->findType(u"Namespace::SomeClass"_s);
+    auto *t1 = TypeDatabase::instance()->findType(u"Namespace::SomeClass"_s);
     QVERIFY(t1);
-    TypeEntry* t2 = TypeDatabase::instance()->findType(u"SomeClass"_s);
+    auto *t2 = TypeDatabase::instance()->findType(u"SomeClass"_s);
     QVERIFY(!t2);
 }
 

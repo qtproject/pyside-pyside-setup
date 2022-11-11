@@ -15,7 +15,7 @@ using namespace Qt::StringLiterals;
 
 void NamespaceTest::testNamespaceMembers()
 {
-    const char* cppCode = "\
+    const char cppCode[] = "\
     namespace Namespace\n\
     {\n\
         enum Option {\n\
@@ -24,7 +24,7 @@ void NamespaceTest::testNamespaceMembers()
         };\n\
         void foo(Option opt);\n\
     };\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package='Foo'>\n\
         <namespace-type name='Namespace'>\n\
             <enum-type name='Option' />\n\
@@ -43,7 +43,7 @@ void NamespaceTest::testNamespaceMembers()
 
 void NamespaceTest::testNamespaceInnerClassMembers()
 {
-    const char* cppCode = "\
+    const char cppCode[] = "\
     namespace OuterNamespace\n\
     {\n\
         namespace InnerNamespace {\n\
@@ -52,7 +52,7 @@ void NamespaceTest::testNamespaceInnerClassMembers()
             };\n\
         };\n\
     };\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package='Foo'>\n\
         <namespace-type name='OuterNamespace'>\n\
             <namespace-type name='InnerNamespace'>\n\

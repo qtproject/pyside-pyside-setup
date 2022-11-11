@@ -380,9 +380,9 @@ public:
     int propertySpecIndex() const;
     void setPropertySpecIndex(int i);
 
-    FunctionTypeEntry* typeEntry() const;
+    FunctionTypeEntry *typeEntry() const;
 
-    void setTypeEntry(FunctionTypeEntry* typeEntry);
+    void setTypeEntry(FunctionTypeEntry *typeEntry);
 
     bool isCallOperator() const;
 

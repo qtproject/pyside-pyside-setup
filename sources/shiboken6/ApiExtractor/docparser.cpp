@@ -86,7 +86,7 @@ bool DocParser::skipForQuery(const AbstractMetaFunctionCPtr &func)
                        usesRValueReference);
 }
 
-DocModificationList DocParser::getDocModifications(const AbstractMetaClass* cppClass,
+DocModificationList DocParser::getDocModifications(const AbstractMetaClass *cppClass,
                                                    const AbstractMetaFunctionCPtr &func)
 {
     auto *te = cppClass->typeEntry();

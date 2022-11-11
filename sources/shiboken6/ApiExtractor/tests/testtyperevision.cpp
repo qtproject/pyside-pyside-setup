@@ -18,10 +18,10 @@ using namespace Qt::StringLiterals;
 
 void TestTypeRevision::testRevisionAttr()
 {
-    const char* cppCode = "class Rev_0 {};"
+    const char cppCode[] = "class Rev_0 {};"
                           "class Rev_1 {};"
                           "class Rev_2 { public: enum Rev_3 { X }; enum Rev_5 { Y }; };";
-    const char* xmlCode = "<typesystem package=\"Foo\">"
+    const char xmlCode[] = "<typesystem package=\"Foo\">"
                         "<value-type name=\"Rev_0\"/>"
                         "<value-type name=\"Rev_1\" revision=\"1\"/>"
                         "<object-type name=\"Rev_2\" revision=\"2\">"
@@ -44,7 +44,7 @@ void TestTypeRevision::testRevisionAttr()
     auto rev3 = rev2->findEnum(u"Rev_3"_s);
     QVERIFY(rev3.has_value());
     QCOMPARE(rev3->typeEntry()->revision(), 3);
-    FlagsTypeEntry* rev4 = rev3->typeEntry()->flags();
+    FlagsTypeEntry *rev4 = rev3->typeEntry()->flags();
     QCOMPARE(rev4->revision(), 4);
     auto rev5 = rev2->findEnum(u"Rev_5"_s);
     QVERIFY(rev5.has_value());

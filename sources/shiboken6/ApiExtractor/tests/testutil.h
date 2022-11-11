@@ -24,7 +24,7 @@ namespace TestUtil
     {
         ReportHandler::setSilent(silent);
         ReportHandler::startTimer();
-        TypeDatabase* td = TypeDatabase::instance(true);
+        auto *td = TypeDatabase::instance(true);
         if (apiVersion.isEmpty())
             TypeDatabase::clearApiVersions();
         else if (!TypeDatabase::setApiVersion(QStringLiteral("*"), apiVersion))

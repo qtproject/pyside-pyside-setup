@@ -69,7 +69,7 @@ struct ApiExtractorPrivate
     QFileInfoList m_cppFileNames;
     HeaderPaths m_includePaths;
     QStringList m_clangOptions;
-    AbstractMetaBuilder* m_builder = nullptr;
+    AbstractMetaBuilder *m_builder = nullptr;
     QString m_logDirectory;
     LanguageLevel m_languageLevel = LanguageLevel::Default;
     bool m_skipDeprecated = false;

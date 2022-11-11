@@ -18,8 +18,10 @@ using namespace Qt::StringLiterals;
 
 void TestAbstractMetaClass::testClassName()
 {
-    const char* cppCode ="class ClassName {};";
-    const char* xmlCode = "<typesystem package=\"Foo\"><value-type name=\"ClassName\"/></typesystem>";
+    const char cppCode[] = "class ClassName {};";
+    const char xmlCode[] = R"(<typesystem package="Foo">
+    <value-type name="ClassName"/>
+</typesystem>)";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
@@ -29,8 +31,8 @@ void TestAbstractMetaClass::testClassName()
 
 void TestAbstractMetaClass::testClassNameUnderNamespace()
 {
-    const char* cppCode ="namespace Namespace { class ClassName {}; }\n";
-    const char* xmlCode = R"XML(
+    const char cppCode[] = "namespace Namespace { class ClassName {}; }\n";
+    const char xmlCode[] = R"XML(
     <typesystem package="Foo">
         <namespace-type name="Namespace">
             <value-type name="ClassName"/>
@@ -111,15 +113,13 @@ public:
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 4);
-    AbstractMetaClass* a = AbstractMetaClass::findClass(classes, u"A");
-    AbstractMetaClass* b = AbstractMetaClass::findClass(classes, u"B");
-    AbstractMetaClass* c = AbstractMetaClass::findClass(classes, u"C");
+    auto *a = AbstractMetaClass::findClass(classes, u"A");
+    auto *b = AbstractMetaClass::findClass(classes, u"B");
+    auto *c = AbstractMetaClass::findClass(classes, u"C");
     const AbstractMetaClass *f = AbstractMetaClass::findClass(classes, u"F");
     QVERIFY(f);
 
-    AbstractMetaClass* no_class = nullptr;
-
-    QCOMPARE(a->baseClass(), no_class);
+    QCOMPARE(a->baseClass(), nullptr);
     QCOMPARE(b->baseClass(), a);
     QCOMPARE(c->baseClass(), b);
     QCOMPARE(f->baseClass(), c);
@@ -206,12 +206,12 @@ class Derived : public Base {};
 
 void TestAbstractMetaClass::testDefaultValues()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     struct A {\n\
         class B {};\n\
         void method(B b = B());\n\
     };\n";
-    const char* xmlCode = R"XML(
+    const char xmlCode[] = R"XML(
     <typesystem package="Foo">
         <value-type name='A'>
             <value-type name='B'/>
@@ -221,7 +221,7 @@ void TestAbstractMetaClass::testDefaultValues()
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
-    AbstractMetaClass* classA = AbstractMetaClass::findClass(classes, u"A");
+    auto *classA = AbstractMetaClass::findClass(classes, u"A");
     const auto candidates = classA->queryFunctionsByName(u"method"_s);
     QCOMPARE(candidates.size(), 1);
     const auto &method = candidates.constFirst();
@@ -231,12 +231,12 @@ void TestAbstractMetaClass::testDefaultValues()
 
 void TestAbstractMetaClass::testModifiedDefaultValues()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     struct A {\n\
         class B {};\n\
         void method(B b = B());\n\
     };\n";
-    const char* xmlCode = R"XML(
+    const char xmlCode[] = R"XML(
     <typesystem package="Foo">
         <value-type name='A'>
             <modify-function signature='method(A::B)'>
@@ -251,7 +251,7 @@ void TestAbstractMetaClass::testModifiedDefaultValues()
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
-    AbstractMetaClass* classA = AbstractMetaClass::findClass(classes, u"A");
+    auto *classA = AbstractMetaClass::findClass(classes, u"A");
     const auto methodMatches = classA->queryFunctionsByName(u"method"_s);
     QCOMPARE(methodMatches.size(), 1);
     const auto method = methodMatches.constFirst();
@@ -262,12 +262,12 @@ void TestAbstractMetaClass::testModifiedDefaultValues()
 
 void TestAbstractMetaClass::testInnerClassOfAPolymorphicOne()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     struct A {\n\
         class B {};\n\
         virtual void method();\n\
     };\n";
-    const char* xmlCode = R"XML(
+    const char xmlCode[] = R"XML(
     <typesystem package="Foo">
         <object-type name='A'>
             <value-type name='B'/>
@@ -361,7 +361,7 @@ void TestAbstractMetaClass::testSpecialFunctions()
 
 void TestAbstractMetaClass::testClassDefaultConstructors()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     struct A {};\n\
     \n\
     struct B {\n\
@@ -387,7 +387,7 @@ void TestAbstractMetaClass::testClassDefaultConstructors()
     struct F {\n\
         F(int, int);\n\
     };\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package='Foo'>\n\
         <primitive-type name='int'/>\n\
         <value-type name='A'/>\n\
@@ -403,7 +403,7 @@ void TestAbstractMetaClass::testClassDefaultConstructors()
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 6);
 
-    AbstractMetaClass* classA = AbstractMetaClass::findClass(classes, u"A");
+    auto *classA = AbstractMetaClass::findClass(classes, u"A");
     QVERIFY(classA);
     QCOMPARE(classA->functions().size(), 2);
 
@@ -417,28 +417,28 @@ void TestAbstractMetaClass::testClassDefaultConstructors()
     QCOMPARE(ctors[1]->arguments().size(), 1);
     QCOMPARE(ctors[1]->minimalSignature(), u"A(A)");
 
-    AbstractMetaClass* classB = AbstractMetaClass::findClass(classes, u"B");
+    auto *classB = AbstractMetaClass::findClass(classes, u"B");
     QVERIFY(classB);
     QCOMPARE(classB->functions().size(), 2);
     QCOMPARE(classB->functions().constFirst()->minimalSignature(), u"B()");
 
-    AbstractMetaClass* classC = AbstractMetaClass::findClass(classes, u"C");
+    auto *classC = AbstractMetaClass::findClass(classes, u"C");
     QVERIFY(classC);
     QCOMPARE(classC->functions().size(), 1);
     QCOMPARE(classC->functions().constFirst()->minimalSignature(), u"C(C)");
 
-    AbstractMetaClass* classD = AbstractMetaClass::findClass(classes, u"D");
+    auto *classD = AbstractMetaClass::findClass(classes, u"D");
     QVERIFY(classD);
     QCOMPARE(classD->functions().size(), 1);
     QCOMPARE(classD->functions().constFirst()->minimalSignature(), u"D(D)");
     QVERIFY(classD->functions().constFirst()->isPrivate());
 
-    AbstractMetaClass* classE = AbstractMetaClass::findClass(classes, u"E");
+    auto *classE = AbstractMetaClass::findClass(classes, u"E");
     QVERIFY(classE);
     QVERIFY(classE->hasPrivateDestructor());
     QCOMPARE(classE->functions().size(), 0);
 
-    AbstractMetaClass* classF = AbstractMetaClass::findClass(classes, u"F");
+    auto *classF = AbstractMetaClass::findClass(classes, u"F");
     QVERIFY(classF);
 
     ctors = classF->queryFunctions(FunctionQueryOption::AnyConstructor);
@@ -454,14 +454,14 @@ void TestAbstractMetaClass::testClassDefaultConstructors()
 
 void TestAbstractMetaClass::testClassInheritedDefaultConstructors()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     struct A {\n\
         A();\n\
     private: \n\
         A(const A&);\n\
     };\n\
     struct B : public A {};\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package='Foo'>\n\
         <object-type name='A'/>\n\
         <object-type name='B'/>\n\
@@ -471,7 +471,7 @@ void TestAbstractMetaClass::testClassInheritedDefaultConstructors()
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
-    AbstractMetaClass* classA = AbstractMetaClass::findClass(classes, u"A");
+    auto *classA = AbstractMetaClass::findClass(classes, u"A");
     QVERIFY(classA);
 
     auto ctors = classA->queryFunctions(FunctionQueryOption::AnyConstructor);
@@ -485,7 +485,7 @@ void TestAbstractMetaClass::testClassInheritedDefaultConstructors()
     QCOMPARE(ctors[1]->minimalSignature(), u"A(A)");
     QVERIFY(ctors[1]->isPrivate());
 
-    AbstractMetaClass* classB = AbstractMetaClass::findClass(classes, u"B");
+    auto *classB = AbstractMetaClass::findClass(classes, u"B");
     QVERIFY(classB);
 
     ctors = classB->queryFunctions(FunctionQueryOption::Constructors);
@@ -496,11 +496,11 @@ void TestAbstractMetaClass::testClassInheritedDefaultConstructors()
 
 void TestAbstractMetaClass::testAbstractClassDefaultConstructors()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     struct A {\n\
         virtual void method() = 0;\n\
     };\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package='Foo'>\n\
         <object-type name='A'/>\n\
     </typesystem>\n";
@@ -509,7 +509,7 @@ void TestAbstractMetaClass::testAbstractClassDefaultConstructors()
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
-    AbstractMetaClass* classA = AbstractMetaClass::findClass(classes, u"A");
+    auto *classA = AbstractMetaClass::findClass(classes, u"A");
     QVERIFY(classA);
 
     const auto ctors = classA->queryFunctions(FunctionQueryOption::Constructors);
@@ -520,8 +520,8 @@ void TestAbstractMetaClass::testAbstractClassDefaultConstructors()
 
 void TestAbstractMetaClass::testObjectTypesMustNotHaveCopyConstructors()
 {
-    const char* cppCode ="struct A {};\n";
-    const char* xmlCode = "\
+    const char cppCode[] = "struct A {};\n";
+    const char xmlCode[] = "\
     <typesystem package='Foo'>\n\
         <object-type name='A'/>\n\
     </typesystem>\n";
@@ -530,7 +530,7 @@ void TestAbstractMetaClass::testObjectTypesMustNotHaveCopyConstructors()
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
-    AbstractMetaClass* classA = AbstractMetaClass::findClass(classes, u"A");
+    auto *classA = AbstractMetaClass::findClass(classes, u"A");
     QVERIFY(classA);
 
     const auto ctors = classA->queryFunctions(FunctionQueryOption::Constructors);
@@ -541,7 +541,7 @@ void TestAbstractMetaClass::testObjectTypesMustNotHaveCopyConstructors()
 
 void TestAbstractMetaClass::testIsPolymorphic()
 {
-    const char* cppCode = "\
+    const char cppCode[] = "\
     class A\n\
     {\n\
     public:\n\
@@ -555,7 +555,7 @@ void TestAbstractMetaClass::testIsPolymorphic()
         B();\n\
         inline bool abc() const { return false; }\n\
     };\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package='Foo'>\n\
         <primitive-type name='bool'/>\n\
         <value-type name='A'/>\n\
@@ -566,10 +566,10 @@ void TestAbstractMetaClass::testIsPolymorphic()
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
-    AbstractMetaClass* b = AbstractMetaClass::findClass(classes, u"A");
+    auto *b = AbstractMetaClass::findClass(classes, u"A");
 
     QVERIFY(!b->isPolymorphic());
-    AbstractMetaClass* a = AbstractMetaClass::findClass(classes, u"B");
+    auto *a = AbstractMetaClass::findClass(classes, u"B");
     QVERIFY(!a->isPolymorphic());
 }
 

@@ -51,17 +51,17 @@ protected:
     bool finishGeneration() override;
 
 private:
-    void writeEnums(TextStream& s, const AbstractMetaClass* cppClass) const;
+    void writeEnums(TextStream &s, const AbstractMetaClass *cppClass) const;
 
     void writeFields(TextStream &s, const AbstractMetaClass *cppClass) const;
-    static QString functionSignature(const AbstractMetaClass* cppClass,
+    static QString functionSignature(const AbstractMetaClass *cppClass,
                                      const AbstractMetaFunctionCPtr &func);
-    void writeFunction(TextStream& s, const AbstractMetaClass* cppClass,
+    void writeFunction(TextStream &s, const AbstractMetaClass *cppClass,
                        const AbstractMetaFunctionCPtr &func, bool indexed = true);
     void writeFunctionParametersType(TextStream &s, const AbstractMetaClass *cppClass,
                                      const AbstractMetaFunctionCPtr &func) const;
-    static void writeFunctionList(TextStream& s, const AbstractMetaClass* cppClass);
-    static void writeFunctionBlock(TextStream& s, const QString& title,
+    static void writeFunctionList(TextStream &s, const AbstractMetaClass *cppClass);
+    static void writeFunctionBlock(TextStream &s, const QString& title,
                                    QStringList& functions);
     void writeParameterType(TextStream &s, const AbstractMetaClass *cppClass,
                             const AbstractMetaArgument &arg) const;
@@ -76,8 +76,8 @@ private:
     void writeFormattedDetailedText(TextStream &s, const Documentation &doc,
                                     const AbstractMetaClass *metaclass = nullptr) const;
 
-    bool writeInjectDocumentation(TextStream& s, TypeSystem::DocModificationMode mode,
-                                  const AbstractMetaClass* cppClass,
+    bool writeInjectDocumentation(TextStream &s, TypeSystem::DocModificationMode mode,
+                                  const AbstractMetaClass *cppClass,
                                   const AbstractMetaFunctionCPtr &func);
     static void writeDocSnips(TextStream &s, const CodeSnipList &codeSnips,
                               TypeSystem::CodeSnipPosition position, TypeSystem::Language language);

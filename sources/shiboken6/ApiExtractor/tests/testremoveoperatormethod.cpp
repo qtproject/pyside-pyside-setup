@@ -15,7 +15,7 @@ using namespace Qt::StringLiterals;
 
 void TestRemoveOperatorMethod::testRemoveOperatorMethod()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     #include <stdint.h>\n\
     \n\
     struct Char {};\n\
@@ -37,7 +37,7 @@ void TestRemoveOperatorMethod::testRemoveOperatorMethod()
         A& operator>>(ByteArray&);\n\
         A& operator>>(String&);\n\
     };\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package='Foo'>\n\
         <primitive-type name='char'/>\n\
         <primitive-type name='short'/>\n\

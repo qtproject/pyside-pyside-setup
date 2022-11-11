@@ -167,7 +167,7 @@ void QtDocGenerator::writeFormattedText(TextStream &s, const QString &doc,
     s << '\n';
 }
 
-static void writeInheritedByList(TextStream& s, const AbstractMetaClass* metaClass,
+static void writeInheritedByList(TextStream &s, const AbstractMetaClass *metaClass,
                                  const AbstractMetaClassCList& allClasses)
 {
     AbstractMetaClassCList res;
@@ -258,7 +258,7 @@ void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classC
     writeInjectDocumentation(s, TypeSystem::DocModificationAppend, metaClass, nullptr);
 }
 
-void QtDocGenerator::writeFunctionList(TextStream& s, const AbstractMetaClass* cppClass)
+void QtDocGenerator::writeFunctionList(TextStream &s, const AbstractMetaClass *cppClass)
 {
     QStringList functionList;
     QStringList virtualList;
@@ -314,7 +314,7 @@ void QtDocGenerator::writeFunctionList(TextStream& s, const AbstractMetaClass* c
     }
 }
 
-void QtDocGenerator::writeFunctionBlock(TextStream& s, const QString& title, QStringList& functions)
+void QtDocGenerator::writeFunctionBlock(TextStream &s, const QString& title, QStringList& functions)
 {
     if (!functions.isEmpty()) {
         s << title << '\n'
@@ -329,7 +329,7 @@ void QtDocGenerator::writeFunctionBlock(TextStream& s, const QString& title, QSt
     }
 }
 
-void QtDocGenerator::writeEnums(TextStream& s, const AbstractMetaClass* cppClass) const
+void QtDocGenerator::writeEnums(TextStream &s, const AbstractMetaClass *cppClass) const
 {
     static const QString section_title = u".. attribute:: "_s;
 
@@ -343,7 +343,7 @@ void QtDocGenerator::writeEnums(TextStream& s, const AbstractMetaClass* cppClass
 
 }
 
-void QtDocGenerator::writeFields(TextStream& s, const AbstractMetaClass* cppClass) const
+void QtDocGenerator::writeFields(TextStream &s, const AbstractMetaClass *cppClass) const
 {
     static const QString section_title = u".. attribute:: "_s;
 
@@ -353,7 +353,7 @@ void QtDocGenerator::writeFields(TextStream& s, const AbstractMetaClass* cppClas
     }
 }
 
-void QtDocGenerator::writeConstructors(TextStream& s, const AbstractMetaClass* cppClass) const
+void QtDocGenerator::writeConstructors(TextStream &s, const AbstractMetaClass *cppClass) const
 {
     static const QString sectionTitle = u".. class:: "_s;
 
@@ -409,7 +409,7 @@ void QtDocGenerator::writeConstructors(TextStream& s, const AbstractMetaClass* c
         writeFormattedDetailedText(s, func->documentation(), cppClass);
 }
 
-QString QtDocGenerator::parseArgDocStyle(const AbstractMetaClass* /* cppClass */,
+QString QtDocGenerator::parseArgDocStyle(const AbstractMetaClass * /* cppClass */,
                                          const AbstractMetaFunctionCPtr &func)
 {
     QString ret;
@@ -515,9 +515,9 @@ void QtDocGenerator::writeDocSnips(TextStream &s,
     }
 }
 
-bool QtDocGenerator::writeInjectDocumentation(TextStream& s,
+bool QtDocGenerator::writeInjectDocumentation(TextStream &s,
                                             TypeSystem::DocModificationMode mode,
-                                            const AbstractMetaClass* cppClass,
+                                            const AbstractMetaClass *cppClass,
                                             const AbstractMetaFunctionCPtr &func)
 {
     Indentation indentation(s);
@@ -555,7 +555,7 @@ bool QtDocGenerator::writeInjectDocumentation(TextStream& s,
     return didSomething;
 }
 
-QString QtDocGenerator::functionSignature(const AbstractMetaClass* cppClass,
+QString QtDocGenerator::functionSignature(const AbstractMetaClass *cppClass,
                                           const AbstractMetaFunctionCPtr &func)
 {
     QString funcName;
@@ -569,7 +569,7 @@ QString QtDocGenerator::functionSignature(const AbstractMetaClass* cppClass,
 }
 
 QString QtDocGenerator::translateToPythonType(const AbstractMetaType &type,
-                                              const AbstractMetaClass* cppClass) const
+                                              const AbstractMetaClass *cppClass) const
 {
     static const QStringList nativeTypes =
         {boolT(), floatT(), intT(), pyObjectT(), pyStrT()};
@@ -639,7 +639,7 @@ QString QtDocGenerator::getFuncName(const AbstractMetaFunctionCPtr& cppFunc)
     return result;
 }
 
-void QtDocGenerator::writeParameterType(TextStream& s, const AbstractMetaClass* cppClass,
+void QtDocGenerator::writeParameterType(TextStream &s, const AbstractMetaClass *cppClass,
                                         const AbstractMetaArgument &arg) const
 {
     s << ":param " << arg.name() << ": "
@@ -676,7 +676,7 @@ void QtDocGenerator::writeFunctionParametersType(TextStream &s, const AbstractMe
     s << '\n';
 }
 
-void QtDocGenerator::writeFunction(TextStream& s, const AbstractMetaClass* cppClass,
+void QtDocGenerator::writeFunction(TextStream &s, const AbstractMetaClass *cppClass,
                                    const AbstractMetaFunctionCPtr &func, bool indexed)
 {
     s << functionSignature(cppClass, func);

@@ -9,13 +9,13 @@
 
 void TestValueTypeDefaultCtorTag::testValueTypeDefaultCtorTagArgument()
 {
-    const char* cppCode ="\n\
+    const char cppCode[] = "\n\
     struct A {\n\
         A(int,int);\n\
     };\n\
     struct B {};\n\
     ";
-    const char* xmlCode = "\n\
+    const char xmlCode[] = "\n\
     <typesystem package='Foo'>\n\
         <primitive-type name='int' />\n\
         <value-type name='A' default-constructor='A(0, 0)' />\n\

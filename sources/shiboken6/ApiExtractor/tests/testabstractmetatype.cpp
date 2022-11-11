@@ -48,8 +48,8 @@ void TestAbstractMetaType::parsing()
 
 void TestAbstractMetaType::testConstCharPtrType()
 {
-    const char* cppCode ="const char* justAtest();\n";
-    const char* xmlCode = "<typesystem package=\"Foo\">\n\
+    const char cppCode[] = "const char* justAtest();\n";
+    const char xmlCode[] = "<typesystem package=\"Foo\">\n\
         <primitive-type name='char'/>\n\
         <function signature='justAtest()' />\n\
     </typesystem>\n";
@@ -75,9 +75,9 @@ void TestAbstractMetaType::testConstCharPtrType()
 
 void TestAbstractMetaType::testApiVersionSupported()
 {
-    const char* cppCode ="class foo {}; class foo2 {};\n\
+    const char cppCode[] = "class foo {}; class foo2 {};\n\
                           void justAtest(); void justAtest3();\n";
-    const char* xmlCode = "<typesystem package='Foo'>\n\
+    const char xmlCode[] = "<typesystem package='Foo'>\n\
         <value-type name='foo' since='0.1'/>\n\
         <value-type name='foo2' since='1.0'/>\n\
         <value-type name='foo3' since='1.1'/>\n\
@@ -99,8 +99,8 @@ void TestAbstractMetaType::testApiVersionSupported()
 
 void TestAbstractMetaType::testApiVersionNotSupported()
 {
-    const char* cppCode ="class object {};\n";
-    const char* xmlCode = "<typesystem package='Foo'>\n\
+    const char cppCode[] = "class object {};\n";
+    const char xmlCode[] = "<typesystem package='Foo'>\n\
         <value-type name='object' since='0.1'/>\n\
     </typesystem>\n";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode,
@@ -113,8 +113,8 @@ void TestAbstractMetaType::testApiVersionNotSupported()
 
 void TestAbstractMetaType::testCharType()
 {
-    const char* cppCode ="char justAtest(); class A {};\n";
-    const char* xmlCode = "<typesystem package=\"Foo\">\n\
+    const char cppCode[] = "char justAtest(); class A {};\n";
+    const char xmlCode[] = "<typesystem package=\"Foo\">\n\
     <primitive-type name='char'/>\n\
     <value-type name='A'/>\n\
     <function signature='justAtest()'/>\n\
@@ -147,13 +147,13 @@ void TestAbstractMetaType::testCharType()
 
 void TestAbstractMetaType::testTypedef()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     struct A {\n\
         void someMethod();\n\
     };\n\
     typedef A B;\n\
     typedef B C;\n";
-    const char* xmlCode = "<typesystem package=\"Foo\">\n\
+    const char xmlCode[] = "<typesystem package=\"Foo\">\n\
     <value-type name='C' />\n\
     </typesystem>\n";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
@@ -168,7 +168,7 @@ void TestAbstractMetaType::testTypedef()
 
 void TestAbstractMetaType::testTypedefWithTemplates()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     template<typename T>\n\
     class A {};\n\
     \n\
@@ -176,7 +176,7 @@ void TestAbstractMetaType::testTypedefWithTemplates()
     typedef A<B> C;\n\
     \n\
     void func(C c);\n";
-    const char* xmlCode = "<typesystem package=\"Foo\">\n\
+    const char xmlCode[] = "<typesystem package=\"Foo\">\n\
     <container-type name='A' type='list'/>\n\
     <value-type name='B' />\n\
     <function signature='func(A&lt;B&gt;)'/>\n\
@@ -199,11 +199,11 @@ void TestAbstractMetaType::testTypedefWithTemplates()
 
 void TestAbstractMetaType::testObjectTypeUsedAsValue()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     class A {\n\
         void method(A);\n\
     };\n";
-    const char* xmlCode = "<typesystem package='Foo'>\n\
+    const char xmlCode[] = "<typesystem package='Foo'>\n\
     <object-type name='A'/>\n\
     </typesystem>\n";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));

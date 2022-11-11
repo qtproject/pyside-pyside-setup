@@ -10,12 +10,12 @@
 
 void TestRemoveField::testRemoveField()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     struct A {\n\
         int fieldA;\n\
         int fieldB;\n\
     };\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package=\"Foo\">\n\
         <primitive-type name='int'/>\n\
         <value-type name='A'>\n\

@@ -12,12 +12,12 @@
 
 void TestReferenceToPointer::testReferenceToPointerArgument()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     struct A {};\n\
     struct B {\n\
         void dummy(A*&);\n\
     };\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package=\"Foo\">\n\
         <object-type name='A'/>\n\
         <object-type name='B'/>\n\

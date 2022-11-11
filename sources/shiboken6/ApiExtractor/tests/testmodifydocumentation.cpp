@@ -20,7 +20,7 @@ using namespace Qt::StringLiterals;
 
 void TestModifyDocumentation::testModifyDocumentation()
 {
-    const char* cppCode ="struct B { void b(); }; class A {};\n";
+    const char cppCode[] = "struct B { void b(); }; class A {};\n";
     const char xmlCode[] =
 R"(<typesystem package="Foo">
     <value-type name='B'>
