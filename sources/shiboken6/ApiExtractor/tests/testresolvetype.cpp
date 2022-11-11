@@ -25,7 +25,7 @@ void TestResolveType::initTestCase()
 
 void TestResolveType::testResolveReturnTypeFromParentScope()
 {
-    const char* cppCode = "\n\
+    const char cppCode[] = "\n\
     namespace A {\n\
         struct B {\n\
             struct C {};\n\
@@ -35,7 +35,7 @@ void TestResolveType::testResolveReturnTypeFromParentScope()
             C* method();\n\
         };\n\
     };";
-    const char* xmlCode = R"XML(
+    const char xmlCode[] = R"XML(
     <typesystem package='Foo'>
         <namespace-type name='A'>
             <value-type name='B'>

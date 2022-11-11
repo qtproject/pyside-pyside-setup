@@ -1521,8 +1521,9 @@ bool AbstractMetaBuilderPrivate::setupInheritance(AbstractMetaClass *metaClass)
     // we only support our own containers and ONLY if there is only one baseclass
     if (baseClasses.size() == 1 && baseClasses.constFirst().contains(u'<')) {
         TypeInfo info;
-        ComplexTypeEntry* baseContainerType;
-        AbstractMetaClass* templ = findTemplateClass(baseClasses.constFirst(), metaClass, &info, &baseContainerType);
+        ComplexTypeEntry *baseContainerType;
+        auto *templ = findTemplateClass(baseClasses.constFirst(), metaClass,
+                                        &info, &baseContainerType);
         if (templ) {
             setupInheritance(templ);
             inheritTemplate(metaClass, templ, info);
@@ -1548,9 +1549,9 @@ bool AbstractMetaBuilderPrivate::setupInheritance(AbstractMetaClass *metaClass)
         return false;
     }
 
-    TypeDatabase* types = TypeDatabase::instance();
+    auto *types = TypeDatabase::instance();
 
-    for (const auto  &baseClassName : baseClasses) {
+    for (const auto &baseClassName : baseClasses) {
         if (!types->isClassRejected(baseClassName)) {
             auto typeEntry = types->findType(baseClassName);
             if (typeEntry == nullptr || !typeEntry->isComplex()) {
@@ -2181,9 +2182,10 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
     return metaFunction;
 }
 
-static const TypeEntry* findTypeEntryUsingContext(const AbstractMetaClass* metaClass, const QString& qualifiedName)
+static const TypeEntry *findTypeEntryUsingContext(const AbstractMetaClass *metaClass,
+                                                  const QString& qualifiedName)
 {
-    const TypeEntry* type = nullptr;
+    const TypeEntry *type = nullptr;
     QStringList context = metaClass->qualifiedCppName().split(colonColon());
     while (!type && !context.isEmpty()) {
         type = TypeDatabase::instance()->findType(context.join(colonColon()) + colonColon() + qualifiedName);
@@ -2915,14 +2917,14 @@ bool AbstractMetaBuilderPrivate::isEnum(const FileModelItem &dom, const QStringL
     return item && item->kind() == _EnumModelItem::__node_kind;
 }
 
-AbstractMetaClass* AbstractMetaBuilderPrivate::findTemplateClass(const QString &name,
+AbstractMetaClass *AbstractMetaBuilderPrivate::findTemplateClass(const QString &name,
                                                                  const AbstractMetaClass *context,
                                                                  TypeInfo *info,
                                                                  ComplexTypeEntry **baseContainerType) const
 {
     if (baseContainerType)
         *baseContainerType = nullptr;
-    TypeDatabase* types = TypeDatabase::instance();
+    auto *types = TypeDatabase::instance();
 
     QStringList scope = context->typeEntry()->qualifiedCppName().split(colonColon());
     QString errorMessage;

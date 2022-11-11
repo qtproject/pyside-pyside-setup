@@ -71,7 +71,7 @@ public:
     mutable QString m_cachedModifiedName;
     QString m_unresolvedSignature;
 
-    FunctionTypeEntry* m_typeEntry = nullptr;
+    FunctionTypeEntry *m_typeEntry = nullptr;
     AbstractMetaFunction::FunctionType m_functionType = AbstractMetaFunction::NormalFunction;
     AbstractMetaType m_type;
     QString m_modifiedTypeName;

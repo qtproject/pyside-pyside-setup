@@ -20,7 +20,7 @@ using namespace Qt::StringLiterals;
 
 void TestEnum::testEnumCppSignature()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     enum GlobalEnum { A, B };\n\
     \n\
     struct A {\n\
@@ -28,7 +28,7 @@ void TestEnum::testEnumCppSignature()
         void method(ClassEnum);\n\
     };\n\
     void func(A::ClassEnum);\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package=\"Foo\">\n\
         <enum-type name='GlobalEnum'/>\n\
         <value-type name='A'>\n\
@@ -78,12 +78,12 @@ void TestEnum::testEnumCppSignature()
 
 void TestEnum::testEnumWithApiVersion()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     struct A {\n\
         enum ClassEnum { EnumA, EnumB };\n\
         enum ClassEnum2 { EnumC, EnumD };\n\
     };\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package=\"Foo\">\n\
         <value-type name='A'>\n\
             <enum-type name='ClassEnum' since='0.1'/>\n\
@@ -101,13 +101,13 @@ void TestEnum::testEnumWithApiVersion()
 
 void TestEnum::testAnonymousEnum()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     enum { Global0, Global1 };\n\
     struct A {\n\
         enum { A0, A1 };\n\
         enum { isThis = true, isThat = false };\n\
     };\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package=\"Foo\">\n\
         <!-- Uses the first value of the enum to identify it. -->\n\
         <enum-type identified-by-value='Global0'/>\n\
@@ -164,10 +164,10 @@ void TestEnum::testAnonymousEnum()
 
 void TestEnum::testGlobalEnums()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     enum EnumA { A0, A1 };\n\
     enum EnumB { B0 = 2, B1 = 0x4 };\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package=\"Foo\">\n\
         <enum-type name='EnumA'/>\n\
         <enum-type name='EnumB'/>\n\
@@ -208,12 +208,12 @@ void TestEnum::testGlobalEnums()
 
 void TestEnum::testEnumValueFromNeighbourEnum()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     namespace A {\n\
         enum EnumA { ValueA0, ValueA1 };\n\
         enum EnumB { ValueB0 = A::ValueA1, ValueB1 = ValueA0 };\n\
     };\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package=\"Foo\">\n\
         <namespace-type name='A'>\n\
             <enum-type name='EnumA'/>\n\
@@ -259,7 +259,7 @@ void TestEnum::testEnumValueFromNeighbourEnum()
 
 void TestEnum::testEnumValueFromExpression()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     struct A {\n\
         enum EnumA : unsigned {\n\
             ValueA0 = 3u,\n\
@@ -275,7 +275,7 @@ void TestEnum::testEnumValueFromExpression()
             ValueB0 = ~3,\n\
         };\n\
     };\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package=\"Foo\">\n\
         <value-type name='A'>\n\
             <enum-type name='EnumA'/>\n\
@@ -347,14 +347,14 @@ void TestEnum::testEnumValueFromExpression()
 
 void TestEnum::testPrivateEnum()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     class A {\n\
     private:\n\
         enum PrivateEnum { Priv0 = 0x0f, Priv1 = 0xf0 };\n\
     public:\n\
         enum PublicEnum { Pub0 = Priv0, Pub1 = A::Priv1 };\n\
     };\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package=\"Foo\">\n\
         <value-type name='A'>\n\
             <enum-type name='PublicEnum'/>\n\
@@ -390,12 +390,12 @@ void TestEnum::testPrivateEnum()
 
 void TestEnum::testTypedefEnum()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     typedef enum EnumA {\n\
         A0,\n\
         A1,\n\
     } EnumA;\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package=\"Foo\">\n\
         <enum-type name='EnumA'/>\n\
     </typesystem>\n";

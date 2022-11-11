@@ -216,7 +216,7 @@ QString msgClassNotFound(const TypeEntry *t);
 
 QString msgEnclosingClassNotFound(const TypeEntry *t);
 
-QString msgUnknownOperator(const AbstractMetaFunction* func);
+QString msgUnknownOperator(const AbstractMetaFunction *func);
 
 QString msgWrongIndex(const char *varName, const QString &capture,
                       const AbstractMetaFunction *func);

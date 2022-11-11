@@ -19,12 +19,12 @@ using namespace Qt::StringLiterals;
 
 void TestArrayArgument::testArrayArgumentWithSizeDefinedByInteger()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     struct A {\n\
         enum SomeEnum { Value0, Value1, NValues };\n\
         void method(double[3]);\n\
     };\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package='Foo'>\n\
         <primitive-type name='double'/>\n\
         <object-type name='A'>\n\
@@ -93,12 +93,12 @@ void TestArrayArgument::testArraySignature()
 
 void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValue()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     struct A {\n\
         enum SomeEnum { Value0, Value1, NValues };\n\
         void method(double[NValues]);\n\
     };\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package='Foo'>\n\
         <primitive-type name='double'/>\n\
         <object-type name='A'>\n\
@@ -124,12 +124,12 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValue()
 
 void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValueFromGlobalEnum()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     enum SomeEnum { Value0, Value1, NValues };\n\
     struct A {\n\
         void method(double[NValues]);\n\
     };\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package='Foo'>\n\
         <primitive-type name='double'/>\n\
         <enum-type name='SomeEnum'/>\n\

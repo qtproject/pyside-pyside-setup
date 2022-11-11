@@ -10,10 +10,10 @@
 
 void TestCtorInformation::testCtorIsPrivate()
 {
-    const char* cppCode = "class Control { public: Control() {} };\n\
+    const char cppCode[] = "class Control { public: Control() {} };\n\
                            class Subject { private: Subject() {} };\n\
                            class CtorLess { };\n";
-    const char* xmlCode = "<typesystem package='Foo'>\n\
+    const char xmlCode[] = "<typesystem package='Foo'>\n\
                                 <value-type name='Control'/>\n\
                                 <object-type name='Subject'/>\n\
                                 <value-type name='CtorLess'/>\n\
@@ -35,10 +35,10 @@ void TestCtorInformation::testCtorIsPrivate()
 
 void TestCtorInformation::testHasNonPrivateCtor()
 {
-    const char* cppCode = "template<typename T>\n\
+    const char cppCode[] = "template<typename T>\n\
                            struct Base { Base(double) {} };\n\
                            typedef Base<int> Derived;\n";
-    const char* xmlCode = "<typesystem package='Foo'>\n\
+    const char xmlCode[] = "<typesystem package='Foo'>\n\
                                 <primitive-type name='int'/>\n\
                                 <primitive-type name='double'/>\n\
                                 <object-type name='Base' generate='no'/>\n\

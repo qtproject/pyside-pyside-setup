@@ -754,7 +754,7 @@ QString msgEnclosingClassNotFound(const TypeEntry *t)
     return result;
 }
 
-QString msgUnknownOperator(const AbstractMetaFunction* func)
+QString msgUnknownOperator(const AbstractMetaFunction *func)
 {
     QString result = u"Unknown operator: \""_s + func->originalName()
                      + u'"';

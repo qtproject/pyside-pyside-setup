@@ -94,12 +94,12 @@ protected:
 
 void TestDtorInformation::testDtorFromBaseIsVirtual()
 {
-    const char* cppCode = R"CPP(class ControlBase { public: ~ControlBase() {} };
+    const char cppCode[] = R"CPP(class ControlBase { public: ~ControlBase() {} };
 class Control : public ControlBase {};
 class SubjectBase { public: virtual ~SubjectBase() {} };
 class Subject : public SubjectBase {};
 )CPP";
-    const char* xmlCode = R"XML(<typesystem package="Foo"><value-type name="ControlBase"/>
+    const char xmlCode[] = R"XML(<typesystem package="Foo"><value-type name="ControlBase"/>
 <value-type name="Control"/>"
 <value-type name="SubjectBase"/>"
 <value-type name="Subject"/>

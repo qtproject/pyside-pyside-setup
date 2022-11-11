@@ -12,11 +12,11 @@
 
 void TestNumericalTypedef::testNumericalTypedef()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     typedef double real;\n\
     void funcDouble(double);\n\
     void funcReal(real);\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package='Foo'>\n\
         <primitive-type name='double'/>\n\
         <primitive-type name='real'/>\n\
@@ -50,11 +50,11 @@ void TestNumericalTypedef::testNumericalTypedef()
 
 void TestNumericalTypedef::testUnsignedNumericalTypedef()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     typedef unsigned short custom_ushort;\n\
     void funcUnsignedShort(unsigned short);\n\
     void funcUShort(custom_ushort);\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package='Foo'>\n\
         <primitive-type name='short'/>\n\
         <primitive-type name='unsigned short'/>\n\

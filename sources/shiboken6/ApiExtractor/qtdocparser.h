@@ -12,20 +12,20 @@ class QtDocParser : public DocParser
 {
 public:
     QtDocParser() = default;
-    void fillDocumentation(AbstractMetaClass* metaClass) override;
+    void fillDocumentation(AbstractMetaClass *metaClass) override;
     Documentation retrieveModuleDocumentation() override;
     Documentation retrieveModuleDocumentation(const QString& name) override;
 
 private:
     static QString functionDocumentation(const QString &sourceFileName,
                                          const ClassDocumentation &classDocumentation,
-                                         const AbstractMetaClass* metaClass,
+                                         const AbstractMetaClass *metaClass,
                                          const AbstractMetaFunctionCPtr &func,
                                          QString *errorMessage);
 
     static QString queryFunctionDocumentation(const QString &sourceFileName,
                                               const ClassDocumentation &classDocumentation,
-                                              const AbstractMetaClass* metaClass,
+                                              const AbstractMetaClass *metaClass,
                                               const AbstractMetaFunctionCPtr &func,
                                               QString *errorMessage);
 };

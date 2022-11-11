@@ -12,7 +12,7 @@
 
 void TestImplicitConversions::testWithPrivateCtors()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     class B;\n\
     class C;\n\
     class A {\n\
@@ -22,7 +22,7 @@ void TestImplicitConversions::testWithPrivateCtors()
     };\n\
     class B {};\n\
     class C {};\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package='Foo'>\n\
         <value-type name='A'/>\n\
         <value-type name='B'/>\n\
@@ -43,14 +43,14 @@ void TestImplicitConversions::testWithPrivateCtors()
 
 void TestImplicitConversions::testWithModifiedVisibility()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     class B;\n\
     class A {\n\
     public:\n\
         A(const B&);\n\
     };\n\
     class B {};\n";
-    const char* xmlCode = R"(
+    const char xmlCode[] = R"(
 <typesystem package='Foo'>
     <value-type name='A'>
         <modify-function signature='A(const B&amp;)' access='private'/>
@@ -73,7 +73,7 @@ void TestImplicitConversions::testWithModifiedVisibility()
 
 void TestImplicitConversions::testWithAddedCtor()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     class B;\n\
     class A {\n\
     public:\n\
@@ -81,7 +81,7 @@ void TestImplicitConversions::testWithAddedCtor()
     };\n\
     class B {};\n\
     class C {};\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package='Foo'>\n\
         <custom-type name='TARGETLANGTYPE'/>\n\
         <value-type name='A'>\n\
@@ -109,12 +109,12 @@ void TestImplicitConversions::testWithAddedCtor()
 
 void TestImplicitConversions::testWithExternalConversionOperator()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     class A {};\n\
     struct B {\n\
         operator A() const;\n\
     };\n";
-    const char* xmlCode = "\n\
+    const char xmlCode[] = "\n\
     <typesystem package='Foo'>\n\
         <value-type name='A'/>\n\
         <value-type name='B'/>\n\
@@ -123,8 +123,8 @@ void TestImplicitConversions::testWithExternalConversionOperator()
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
-    AbstractMetaClass* classA = AbstractMetaClass::findClass(classes, u"A");
-    AbstractMetaClass* classB = AbstractMetaClass::findClass(classes, u"B");
+    auto *classA = AbstractMetaClass::findClass(classes, u"A");
+    auto *classB = AbstractMetaClass::findClass(classes, u"B");
     const auto implicitConvs = classA->implicitConversions();
     QCOMPARE(implicitConvs.size(), 1);
     const auto &externalConvOps = classA->externalConversionOperators();

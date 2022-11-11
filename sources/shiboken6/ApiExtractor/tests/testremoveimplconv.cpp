@@ -14,14 +14,14 @@
 // it should not appear in the implicity conversion list.
 void TestRemoveImplConv::testRemoveImplConv()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     struct A {};\n\
     struct B {};\n\
     struct C {\n\
         C(const A&);\n\
         C(const B&);\n\
     };\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package=\"Foo\">\n\
         <value-type name='A'/>\n\
         <value-type name='B'/>\n\

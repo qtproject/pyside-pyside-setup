@@ -210,7 +210,7 @@ public:
     void setExtendedNamespace(const AbstractMetaClass *e);
 
     const AbstractMetaClassCList &innerClasses() const;
-    void addInnerClass(AbstractMetaClass* cl);
+    void addInnerClass(AbstractMetaClass *cl);
     void setInnerClasses(const AbstractMetaClassCList &innerClasses);
 
     QString package() const;
@@ -323,9 +323,9 @@ public:
     static const AbstractMetaClass *findClass(const AbstractMetaClassCList &classes,
                                               QStringView name);
     static AbstractMetaClass *findClass(const AbstractMetaClassList &classes,
-                                        const TypeEntry* typeEntry);
+                                        const TypeEntry *typeEntry);
     static const AbstractMetaClass *findClass(const AbstractMetaClassCList &classes,
-                                              const TypeEntry* typeEntry);
+                                              const TypeEntry *typeEntry);
     const AbstractMetaClass *findBaseClass(const QString &qualifiedName) const;
 
     static std::optional<AbstractMetaEnumValue> findEnumValue(const AbstractMetaClassList &classes,

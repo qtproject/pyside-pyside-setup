@@ -11,7 +11,7 @@
 
 void TestContainer::testContainerType()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     namespace std {\n\
     template<class T>\n\
     class list {\n\
@@ -20,7 +20,7 @@ void TestContainer::testContainerType()
     }\n\
     class A : public std::list<int> {\n\
     };\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package='Foo'>\n\
         <namespace-type name='std' generate='no' />\n\
         <container-type name='std::list' type='list' />\n\
@@ -32,7 +32,7 @@ void TestContainer::testContainerType()
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
     //search for class A
-    AbstractMetaClass* classA = AbstractMetaClass::findClass(classes, u"A");
+    auto *classA = AbstractMetaClass::findClass(classes, u"A");
     QVERIFY(classA);
     auto baseContainer = classA->typeEntry()->baseContainerType();
     QVERIFY(baseContainer);
@@ -42,7 +42,7 @@ void TestContainer::testContainerType()
 
 void TestContainer::testListOfValueType()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     namespace std {\n\
     template<class T>\n\
     class list {\n\
@@ -52,7 +52,7 @@ void TestContainer::testListOfValueType()
     class ValueType {};\n\
     class A : public std::list<ValueType> {\n\
     };\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package='Foo'>\n\
         <namespace-type name='std' generate='no'/>\n\
         <container-type name='std::list' type='list'/>\n\

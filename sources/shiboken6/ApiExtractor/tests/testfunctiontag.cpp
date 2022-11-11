@@ -50,8 +50,8 @@ void TestFunctionTag::testFunctionTagForAllSignatures()
 
 void TestFunctionTag::testRenameGlobalFunction()
 {
-    const char* cppCode ="void global_function_with_ugly_name();\n";
-    const char* xmlCode = "\
+    const char cppCode[] = "void global_function_with_ugly_name();\n";
+    const char xmlCode[] = "\
     <typesystem package='Foo'>\n\
         <function signature='global_function_with_ugly_name()' rename='smooth'/>\n\
     </typesystem>\n";

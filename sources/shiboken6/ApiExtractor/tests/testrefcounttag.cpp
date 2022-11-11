@@ -15,12 +15,12 @@ using namespace Qt::StringLiterals;
 
 void TestRefCountTag::testReferenceCountTag()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     struct A {};\n\
     struct B {\n\
         void keepObject(B* b);\n\
     };\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package=\"Foo\">\n\
         <object-type name='A'/>\n\
         <object-type name='B'>\n\
@@ -44,12 +44,12 @@ void TestRefCountTag::testReferenceCountTag()
 
 void TestRefCountTag::testWithApiVersion()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     struct A {};\n\
     struct B {\n\
         void keepObject(B*, B*);\n\
     };\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package=\"Foo\">\n\
         <object-type name='A'/>\n\
         <object-type name='B'>\n\

@@ -14,7 +14,7 @@
 
 using namespace Qt::StringLiterals;
 
-static const char* cppCode ="\
+static const char cppCode[] = "\
     struct ValueA {};\n\
     struct ValueB {};\n\
     struct ObjectA {};\n\
@@ -29,7 +29,7 @@ static const char* cppCode ="\
     void funcA();\n\
     void funcB();\n";
 
-static const char* xmlCode = "\
+static const char xmlCode[] = "\
 <typesystem package='Foo'>\n\
     <value-type name='ValueA'/>\n\
     <value-type name='ValueB'/>\n\
@@ -71,7 +71,7 @@ void TestDropTypeEntries::testDropEntries()
     QCOMPARE(globalEnums.size(), 1);
     QCOMPARE(globalEnums.constFirst().name(), u"EnumA");
 
-    TypeDatabase* td = TypeDatabase::instance();
+    auto *td = TypeDatabase::instance();
     QVERIFY(td->findType(u"funcA"_s));
     QVERIFY(!td->findType(u"funcB"_s));
 }
@@ -92,17 +92,17 @@ void TestDropTypeEntries::testDontDropEntries()
 
     QCOMPARE(builder->globalEnums().size(), 2);
 
-    TypeDatabase* td = TypeDatabase::instance();
+    auto *td = TypeDatabase::instance();
     QVERIFY(td->findType(u"funcA"_s));
     QVERIFY(td->findType(u"funcB"_s));
 }
 
-static const char* cppCode2 ="\
+static const char cppCode2[] = "\
     struct ValueA {\n\
         void func();\n\
     };\n";
 
-static const char* xmlCode2 = R"(
+static const char xmlCode2[] = R"(
 <typesystem package='Foo'>
     <value-type name='ValueA'>
         <modify-function signature='func()' remove='all'/>

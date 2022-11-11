@@ -39,7 +39,7 @@ void TestConversionRuleTag::testConversionRuleTagWithFile()
     AbstractMetaClassList classes = builder->classes();
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, u"A");
     QVERIFY(classA);
-    const ComplexTypeEntry* typeEntry = classA->typeEntry();
+    const ComplexTypeEntry *typeEntry = classA->typeEntry();
     QVERIFY(typeEntry->isValue());
     auto *vte = static_cast<const ValueTypeEntry *>(typeEntry);
     QVERIFY(vte->hasTargetConversionRule());
@@ -56,7 +56,7 @@ void TestConversionRuleTag::testConversionRuleTagReplace()
     struct B {\n\
         A createA();\n\
     };\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package='Foo'>\n\
         <primitive-type name='int'/>\n\
         <primitive-type name='char'/>\n\
@@ -86,8 +86,8 @@ void TestConversionRuleTag::testConversionRuleTagReplace()
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
-    TypeDatabase* typeDb = TypeDatabase::instance();
-    PrimitiveTypeEntry* typeA = typeDb->findPrimitiveType(u"A"_s);
+    auto *typeDb = TypeDatabase::instance();
+    auto *typeA = typeDb->findPrimitiveType(u"A"_s);
     QVERIFY(typeA);
 
     QVERIFY(typeA->hasCustomConversion());
@@ -114,7 +114,7 @@ void TestConversionRuleTag::testConversionRuleTagReplace()
     toNative = conversion->targetToNativeConversions().at(1);
     QCOMPARE(toNative.sourceTypeName(), u"B");
     QVERIFY(!toNative.isCustomType());
-    TypeEntry* typeB = typeDb->findType(u"B"_s);
+    auto *typeB = typeDb->findType(u"B"_s);
     QVERIFY(typeB);
     QCOMPARE(toNative.sourceType(), typeB);
     QCOMPARE(toNative.sourceTypeCheck(), u"CheckIfInputObjectIsB(%IN)");
@@ -137,7 +137,7 @@ void TestConversionRuleTag::testConversionRuleTagAdd()
         Date();\n\
         Date(int, int, int);\n\
     };\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package='Foo'>\n\
         <primitive-type name='int'/>\n\
         <value-type name='Date'>\n\
@@ -182,7 +182,7 @@ if (!TargetDateTimeAPI) TargetDateTime_IMPORT;\n\
 void TestConversionRuleTag::testConversionRuleTagWithInsertTemplate()
 {
     const char cppCode[] = "struct A {};";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package='Foo'>\n\
         <primitive-type name='int'/>\n\
         <!-- single line -->\n\
@@ -217,8 +217,8 @@ void TestConversionRuleTag::testConversionRuleTagWithInsertTemplate()
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
-    TypeDatabase* typeDb = TypeDatabase::instance();
-    PrimitiveTypeEntry* typeA = typeDb->findPrimitiveType(u"A"_s);
+    auto *typeDb = TypeDatabase::instance();
+    auto *typeA = typeDb->findPrimitiveType(u"A"_s);
     QVERIFY(typeA);
 
     QVERIFY(typeA->hasCustomConversion());

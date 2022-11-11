@@ -10,7 +10,7 @@
 
 void TestMultipleInheritance::testVirtualClass()
 {
-    const char* cppCode ="\
+    const char cppCode[] = "\
     struct A {\n\
         virtual ~A();\n\
         virtual void theBug();\n\
@@ -22,7 +22,7 @@ void TestMultipleInheritance::testVirtualClass()
     };\n\
     struct D : C {\n\
     };\n";
-    const char* xmlCode = "\
+    const char xmlCode[] = "\
     <typesystem package=\"Foo\">\n\
         <object-type name='A' />\n\
         <object-type name='B' />\n\

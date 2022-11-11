@@ -103,7 +103,7 @@ struct A {
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
-    TypeDatabase* typeDb = TypeDatabase::instance();
+    auto *typeDb = TypeDatabase::instance();
     AbstractMetaClassList classes = builder->classes();
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, u"A");
     QVERIFY(classA);
@@ -290,7 +290,7 @@ void TestAddFunction::testAddFunctionAtModuleLevel()
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, u"A");
     QVERIFY(classA);
 
-    TypeDatabase* typeDb = TypeDatabase::instance();
+    auto *typeDb = TypeDatabase::instance();
 
     AddedFunctionList addedFuncs = typeDb->findGlobalUserFunctions(u"func"_s);
 
@@ -426,7 +426,7 @@ void TestAddFunction::testModifyAddedFunction()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    AbstractMetaClass* foo = AbstractMetaClass::findClass(classes, u"Foo");
+    auto *foo = AbstractMetaClass::findClass(classes, u"Foo");
     const auto method = foo->findFunction(u"method");
     QVERIFY(!method.isNull());
     QCOMPARE(method->arguments().size(), 2);
@@ -453,7 +453,7 @@ void TestAddFunction::testAddFunctionOnTypedef()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    AbstractMetaClass* foo = AbstractMetaClass::findClass(classes, u"FooInt");
+    auto *foo = AbstractMetaClass::findClass(classes, u"FooInt");
     QVERIFY(foo);
     QVERIFY(foo->hasNonPrivateConstructor());
     const auto &lst = foo->queryFunctions(FunctionQueryOption::AnyConstructor);

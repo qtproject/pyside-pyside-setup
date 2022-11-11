@@ -44,7 +44,7 @@ public:
     const InstantiatedSmartPointers &instantiatedSmartPointers() const;
 
     // Query functions for the generators
-    std::optional<AbstractMetaEnum> findAbstractMetaEnum(const TypeEntry* typeEntry) const;
+    std::optional<AbstractMetaEnum> findAbstractMetaEnum(const TypeEntry *typeEntry) const;
 
     /// Retrieves a list of constructors used in implicit conversions
     /// available on the given type. The TypeEntry must be a value-type
