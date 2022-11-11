@@ -23,6 +23,7 @@
 #include <QtCore/QByteArrayView>
 #include <QtCore/QDebug>
 #include <QtCore/QHash>
+#include <QtCore/QScopedPointer>
 
 #include <algorithm>
 #include <limits>
@@ -494,11 +495,11 @@ int SignalManager::callPythonMetaMethod(const QMetaMethod &method, void **args, 
     }
 
     if (pyArguments) {
-        Shiboken::Conversions::SpecificConverter *retConverter = nullptr;
+        QScopedPointer<Shiboken::Conversions::SpecificConverter> retConverter;
         const char *returnType = method.typeName();
         if (returnType && std::strcmp("", returnType) && std::strcmp("void", returnType)) {
-            retConverter = new Shiboken::Conversions::SpecificConverter(returnType);
-            if (!retConverter || !*retConverter) {
+            retConverter.reset(new Shiboken::Conversions::SpecificConverter(returnType));
+            if (!retConverter->isValid()) {
                 PyErr_Format(PyExc_RuntimeError, "Can't find converter for '%s' to call Python meta method.", returnType);
                 return -1;
             }
@@ -513,7 +514,6 @@ int SignalManager::callPythonMetaMethod(const QMetaMethod &method, void **args, 
         if (!retval.isNull() && retval != Py_None && !PyErr_Occurred() && retConverter) {
             retConverter->toCpp(retval, args[0]);
         }
-        delete retConverter;
     }
 
     return -1;
