@@ -686,10 +686,12 @@ class PysideBuild(_build, DistUtilsCommandMixin, BuildInfoCollectorMixin):
         elif OPTION["LIMITED_API"] == "no":
             cmake_cmd.append("-DFORCE_LIMITED_API=no")
         elif not OPTION["LIMITED_API"]:
-            pass
+            if sys.platform == 'win32' and self.debug:
+                cmake_cmd.append("-DFORCE_LIMITED_API=no")
         else:
             raise DistutilsSetupError("option limited-api must be 'yes' or 'no' "
-                                      "(default yes if applicable, i.e. python version >= 3.7)")
+                                      "(default yes if applicable, i.e. Python "
+                                      "version >= 3.7 and release build if on Windows)")
 
         if OPTION["VERBOSE_BUILD"]:
             cmake_cmd.append("-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON")
