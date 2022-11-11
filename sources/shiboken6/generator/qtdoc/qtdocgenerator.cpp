@@ -85,7 +85,7 @@ static bool functionSort(const AbstractMetaFunctionCPtr &func1, const AbstractMe
     return func1->name() < func2->name();
 }
 
-static inline QVersionNumber versionOf(const TypeEntry *te)
+static inline QVersionNumber versionOf(const TypeEntryCPtr &te)
 {
     if (te) {
         const auto version = te->version();
@@ -108,7 +108,7 @@ QString QtDocGenerator::fileNameSuffix()
     return u".rst"_s;
 }
 
-bool QtDocGenerator::shouldGenerate(const TypeEntry *te) const
+bool QtDocGenerator::shouldGenerate(const TypeEntryCPtr &te) const
 {
     return Generator::shouldGenerate(te)
         && te->type() != TypeEntry::SmartPointerType;

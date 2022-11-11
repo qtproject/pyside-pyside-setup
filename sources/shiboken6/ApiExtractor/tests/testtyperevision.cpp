@@ -44,11 +44,11 @@ void TestTypeRevision::testRevisionAttr()
     auto rev3 = rev2->findEnum(u"Rev_3"_s);
     QVERIFY(rev3.has_value());
     QCOMPARE(rev3->typeEntry()->revision(), 3);
-    FlagsTypeEntry *rev4 = rev3->typeEntry()->flags();
+    auto rev4 = rev3->typeEntry()->flags();
     QCOMPARE(rev4->revision(), 4);
     auto rev5 = rev2->findEnum(u"Rev_5"_s);
     QVERIFY(rev5.has_value());
-    const EnumTypeEntry *revEnumTypeEntry = rev5->typeEntry();
+    EnumTypeEntryCPtr revEnumTypeEntry = rev5->typeEntry();
     QCOMPARE(revEnumTypeEntry->revision(), 5);
     QCOMPARE(revEnumTypeEntry->flags()->revision(), 5);
 }

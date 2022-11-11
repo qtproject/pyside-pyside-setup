@@ -7,6 +7,7 @@
 #include "apiextractorflags.h"
 #include "abstractmetatype.h"
 #include "abstractmetalang_typedefs.h"
+#include "typesystem_typedefs.h"
 
 #include <QtCore/QExplicitlySharedDataPointer>
 
@@ -44,14 +45,15 @@ public:
     const InstantiatedSmartPointers &instantiatedSmartPointers() const;
 
     // Query functions for the generators
-    std::optional<AbstractMetaEnum> findAbstractMetaEnum(const TypeEntry *typeEntry) const;
+    std::optional<AbstractMetaEnum>
+        findAbstractMetaEnum(TypeEntryCPtr typeEntry) const;
 
     /// Retrieves a list of constructors used in implicit conversions
     /// available on the given type. The TypeEntry must be a value-type
     /// or else it will return an empty list.
     ///  \param type a TypeEntry that is expected to be a value-type
     /// \return a list of constructors that could be used as implicit converters
-    AbstractMetaFunctionCList implicitConversions(const TypeEntry *type) const;
+    AbstractMetaFunctionCList implicitConversions(const TypeEntryCPtr &type) const;
     AbstractMetaFunctionCList implicitConversions(const AbstractMetaType &metaType) const;
 
     ApiExtractorFlags flags() const;

@@ -12,12 +12,12 @@ class NamespaceTypeEntry : public ComplexTypeEntry
 {
 public:
     explicit NamespaceTypeEntry(const QString &entryName, const QVersionNumber &vr,
-                                const TypeEntry *parent);
+                                const TypeEntryCPtr &parent);
 
     TypeEntry *clone() const override;
 
-    const NamespaceTypeEntry *extends() const;
-    void setExtends(const NamespaceTypeEntry *e);
+    NamespaceTypeEntryCPtr extends() const;
+    void setExtends(const NamespaceTypeEntryCPtr &e);
 
     const QRegularExpression &filePattern() const; // restrict files
     void setFilePattern(const QRegularExpression &r);
@@ -33,6 +33,7 @@ public:
     bool isInlineNamespace() const;
     void setInlineNamespace(bool i);
 
+    static bool isVisibleScope(const TypeEntryCPtr &e);
     static bool isVisibleScope(const TypeEntry *e);
 
 #ifndef QT_NO_DEBUG_STREAM

@@ -245,12 +245,12 @@ void HeaderGenerator::writeMemberFunctionWrapper(TextStream &s,
             s << ", ";
         const AbstractMetaArgument &arg = arguments.at(i);
         const auto &type = arg.type();
-        const TypeEntry *enumTypeEntry = nullptr;
+        TypeEntryCPtr enumTypeEntry;
         if (type.isFlags())
-            enumTypeEntry = static_cast<const FlagsTypeEntry *>(type.typeEntry())->originator();
+            enumTypeEntry = qSharedPointerCast<const FlagsTypeEntry>(type.typeEntry())->originator();
         else if (type.isEnum())
             enumTypeEntry = type.typeEntry();
-        if (enumTypeEntry) {
+        if (!enumTypeEntry.isNull()) {
             s << type.cppSignature() << '(' << arg.name() << ')';
         } else if (type.passByValue() && type.isUniquePointer()) {
             s << stdMove(arg.name());
@@ -339,7 +339,7 @@ static const AbstractMetaClass *
 }
 
 void HeaderGenerator::writeTypeIndexValueLine(TextStream &s, const ApiExtractorResult &api,
-                                              const TypeEntry *typeEntry)
+                                              const TypeEntryCPtr &typeEntry)
 {
     if (!typeEntry || !typeEntry->generateCode())
         return;
@@ -350,7 +350,7 @@ void HeaderGenerator::writeTypeIndexValueLine(TextStream &s, const ApiExtractorR
         // For a typedef "using Foo=QList<int>", write a type index
         // SBK_QLIST_INT besides SBK_FOO which is then matched by function
         // argument. Check against duplicate typedefs for the same types.
-        const auto *cType = static_cast<const ComplexTypeEntry *>(typeEntry);
+        const auto cType = qSharedPointerCast<const ComplexTypeEntry>(typeEntry);
         if (cType->baseContainerType()) {
             auto metaClass = AbstractMetaClass::findClass(api.classes(), cType);
             Q_ASSERT(metaClass != nullptr);
@@ -366,7 +366,7 @@ void HeaderGenerator::writeTypeIndexValueLine(TextStream &s, const ApiExtractorR
         }
     }
     if (typeEntry->isEnum()) {
-        auto ete = static_cast<const EnumTypeEntry *>(typeEntry);
+        auto ete = qSharedPointerCast<const EnumTypeEntry>(typeEntry);
         if (ete->flags())
             writeTypeIndexValueLine(s, api, ete->flags());
     }
@@ -390,7 +390,7 @@ void HeaderGenerator::writeTypeIndexValueLines(TextStream &s, const ApiExtractor
 // Format the typedefs for the typedef entries to be generated
 static void formatTypeDefEntries(TextStream &s)
 {
-    QList<const TypedefEntry *> entries;
+    QList<TypedefEntryCPtr> entries;
     const auto typeDbEntries = TypeDatabase::instance()->typedefEntries();
     for (auto it = typeDbEntries.cbegin(), end = typeDbEntries.cend(); it != end; ++it) {
         if (it.value()->generateCode() != 0)
@@ -399,7 +399,7 @@ static void formatTypeDefEntries(TextStream &s)
     if (entries.isEmpty())
         return;
     s << "\n// typedef entries\n";
-    for (const auto e : entries) {
+    for (const auto &e : entries) {
         const QString name = e->qualifiedCppName();
         // Fixme: simplify by using nested namespaces in C++ 17.
         const auto components = QStringView{name}.split(u"::");
@@ -586,7 +586,7 @@ bool HeaderGenerator::finishGeneration()
     macrosStream << "// Converter indices\nenum : int {\n";
     const auto &primitives = primitiveTypes();
     int pCount = 0;
-    for (const PrimitiveTypeEntry *ptype : primitives) {
+    for (const auto &ptype : primitives) {
         /* Note: do not generate indices for typedef'd primitive types
          * as they'll use the primitive type converters instead, so we
          * don't need to create any other.
@@ -631,7 +631,7 @@ bool HeaderGenerator::finishGeneration()
 
     StringStream protEnumsSurrogates(TextStream::Language::Cpp);
     for (auto metaClass : classList) {
-        const TypeEntry *classType = metaClass->typeEntry();
+        const auto classType = metaClass->typeEntry();
         if (!shouldGenerate(classType))
             continue;
 
@@ -649,8 +649,7 @@ bool HeaderGenerator::finishGeneration()
         for (const AbstractMetaEnum &cppEnum : metaClass->enums()) {
             if (cppEnum.isAnonymous() || cppEnum.isPrivate())
                 continue;
-            EnumTypeEntry *enumType = cppEnum.typeEntry();
-            includeList << enumType->include();
+            includeList << cppEnum.typeEntry()->include();
             writeProtectedEnumSurrogate(protEnumsSurrogates, cppEnum);
             writeSbkTypeFunction(typeFunctionsStr, cppEnum);
         }
@@ -660,8 +659,7 @@ bool HeaderGenerator::finishGeneration()
     }
 
     for (const auto &smp : api().instantiatedSmartPointers()) {
-        const TypeEntry *classType = smp.type.typeEntry();
-        includes << classType->include();
+        includes << smp.type.typeEntry()->include();
         writeSbkTypeFunction(typeFunctions, smp.type);
     }
     if (usePySideExtensions())
@@ -708,7 +706,7 @@ bool HeaderGenerator::finishGeneration()
         if (!primitiveTypes().isEmpty()) {
             s << "// Conversion Includes - Primitive Types\n";
             const auto &primitiveTypeList = primitiveTypes();
-            for (const PrimitiveTypeEntry *ptype : primitiveTypeList)
+            for (const auto &ptype : primitiveTypeList)
                 s << ptype->include();
             s<< '\n';
         }
@@ -716,7 +714,7 @@ bool HeaderGenerator::finishGeneration()
         if (!containerTypes().isEmpty()) {
             s << "// Conversion Includes - Container Types\n";
             const ContainerTypeEntryCList &containerTypeList = containerTypes();
-            for (const ContainerTypeEntry *ctype : containerTypeList)
+            for (const auto &ctype : containerTypeList)
                 s << ctype->include();
             s<< '\n';
         }
@@ -802,8 +800,8 @@ void HeaderGenerator::writeSbkTypeFunction(TextStream &s, const AbstractMetaEnum
     s << "template<> inline PyTypeObject *SbkType< ::" << enumName << " >() ";
     s << "{ return " << cpythonTypeNameExt(cppEnum.typeEntry()) << "; }\n";
 
-    FlagsTypeEntry *flag = cppEnum.typeEntry()->flags();
-    if (flag) {
+    const auto flag = cppEnum.typeEntry()->flags();
+    if (!flag.isNull()) {
         s <<  "template<> inline PyTypeObject *SbkType< ::" << flag->name() << " >() "
           << "{ return " << cpythonTypeNameExt(flag) << "; }\n";
     }

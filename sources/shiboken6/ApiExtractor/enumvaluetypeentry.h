@@ -15,12 +15,12 @@ class EnumValueTypeEntryPrivate;
 class EnumValueTypeEntry : public TypeEntry
 {
 public:
-    explicit EnumValueTypeEntry(const QString& name, const QString &value,
-                                const EnumTypeEntry *enclosingEnum,
+    explicit EnumValueTypeEntry(const QString& name, const QString& value,
+                                const EnumTypeEntryCPtr &enclosingEnum,
                                 bool isScopedEnum, const QVersionNumber &vr);
 
     QString value() const;
-    const EnumTypeEntry *enclosingEnum() const;
+    EnumTypeEntryCPtr enclosingEnum() const;
 
     TypeEntry *clone() const override;
 

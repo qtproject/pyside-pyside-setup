@@ -55,7 +55,7 @@ QString msgArgumentOutOfRange(int number, int minValue, int maxValue);
 QString msgArgumentRemovalFailed(const AbstractMetaFunction *func, int n,
                                  const QString &why);
 
-QString msgClassOfEnumNotFound(const EnumTypeEntry *entry);
+QString msgClassOfEnumNotFound(const EnumTypeEntryCPtr &entry);
 
 QString msgNoEnumTypeEntry(const EnumModelItem &enumItem,
                            const QString &className);
@@ -63,7 +63,7 @@ QString msgNoEnumTypeEntry(const EnumModelItem &enumItem,
 
 QString msgNoEnumTypeConflict(const EnumModelItem &enumItem,
                               const QString &className,
-                              const TypeEntry *t);
+                              const TypeEntryCPtr &t);
 
 QString msgNamespaceNoTypeEntry(const NamespaceModelItem &item,
                                 const QString &fullName);
@@ -91,9 +91,9 @@ QString msgSkippingFunction(const FunctionModelItem &functionItem,
 QString msgSkippingField(const VariableModelItem &field, const QString &className,
                          const QString &type);
 
-QString msgTypeNotDefined(const TypeEntry *entry);
+QString msgTypeNotDefined(const TypeEntryCPtr &entry);
 
-QString msgGlobalFunctionNotDefined(const FunctionTypeEntry *fte,
+QString msgGlobalFunctionNotDefined(const FunctionTypeEntryCPtr &fte,
                                     const QString &signature,
                                     const QStringList &candidates);
 
@@ -101,7 +101,7 @@ QString msgStrippingArgument(const FunctionModelItem &f, int i,
                              const QString &originalSignature,
                              const ArgumentModelItem &arg);
 
-QString msgEnumNotDefined(const EnumTypeEntry *t);
+QString msgEnumNotDefined(const EnumTypeEntryCPtr &t);
 
 QString msgUnknownBase(const AbstractMetaClass *metaClass,
                        const QString &baseClassName);
@@ -186,9 +186,9 @@ QString msgCannotUseEnumAsInt(const QString &name);
 
 QString msgConversionTypesDiffer(const QString &varType, const QString &conversionType);
 
-QString msgCannotFindSmartPointerGetter(const SmartPointerTypeEntry *);
+QString msgCannotFindSmartPointerGetter(const SmartPointerTypeEntryCPtr &);
 
-QString msgCannotFindSmartPointerMethod(const SmartPointerTypeEntry *te, const QString &m);
+QString msgCannotFindSmartPointerMethod(const SmartPointerTypeEntryCPtr &te, const QString &m);
 
 QString msgMethodNotFound(const AbstractMetaClass *klass, const QString &name);
 
@@ -215,9 +215,9 @@ QString msgCyclicDependency(const QString &funcName, const QString &graphName,
                             const AbstractMetaFunctionCList &cyclic,
                             const AbstractMetaFunctionCList &involvedConversions);
 
-QString msgClassNotFound(const TypeEntry *t);
+QString msgClassNotFound(const TypeEntryCPtr &t);
 
-QString msgEnclosingClassNotFound(const TypeEntry *t);
+QString msgEnclosingClassNotFound(const TypeEntryCPtr &t);
 
 QString msgUnknownOperator(const AbstractMetaFunction *func);
 
@@ -243,12 +243,12 @@ QString msgDuplicateBuiltInTypeEntry(const QString &name);
 QString msgDuplicateTypeEntry(const QString &name);
 QString msgInvalidTargetLanguageApiName(const QString &name);
 
-QString msgUnknownCheckFunction(const TypeEntry *t);
+QString msgUnknownCheckFunction(const TypeEntryCPtr &t);
 
 QString msgArgumentClassNotFound(const AbstractMetaFunctionCPtr &func,
-                                 const TypeEntry *t);
+                                 const TypeEntryCPtr &t);
 
-QString msgMissingCustomConversion(const TypeEntry *t);
+QString msgMissingCustomConversion(const TypeEntryCPtr &t);
 
 QString msgUnknownArrayPointerConversion(const QString &s);
 

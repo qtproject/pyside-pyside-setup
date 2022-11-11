@@ -13,7 +13,7 @@ class FlagsTypeEntry : public TypeEntry
 {
 public:
     explicit FlagsTypeEntry(const QString &entryName, const QVersionNumber &vr,
-                            const TypeEntry *parent);
+                            const TypeEntryCPtr &parent);
 
     QString originalName() const;
     void setOriginalName(const QString &s);
@@ -21,8 +21,8 @@ public:
     QString flagsName() const;
     void setFlagsName(const QString &name);
 
-    EnumTypeEntry *originator() const;
-    void setOriginator(EnumTypeEntry *e);
+    EnumTypeEntryPtr originator() const;
+    void setOriginator(const EnumTypeEntryPtr &e);
 
     TypeEntry *clone() const override;
 

@@ -14,7 +14,7 @@ class FunctionTypeEntry : public TypeEntry
 public:
     explicit FunctionTypeEntry(const QString& name, const QString& signature,
                                const QVersionNumber &vr,
-                               const TypeEntry *parent);
+                               const TypeEntryCPtr &parent);
 
     const QStringList &signatures() const;
     bool hasSignature(const QString& signature) const;

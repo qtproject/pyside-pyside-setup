@@ -63,7 +63,7 @@ private:
                           const AbstractMetaClassCList &innerClasses = {}) const;
     static void writeInitFunc(TextStream &declStr, TextStream &callStr,
                               const QString &initFunctionName,
-                              const TypeEntry *enclosingEntry = nullptr);
+                              const TypeEntryCPtr &enclosingEntry = {});
     static void writeCacheResetNative(TextStream &s, const GeneratorContext &classContext);
     void writeConstructorNative(TextStream &s, const GeneratorContext &classContext,
                                 const AbstractMetaFunctionCPtr &func) const;
@@ -85,7 +85,7 @@ private:
                                   int cacheIndex) const;
     void writeVirtualMethodCppCall(TextStream &s, const AbstractMetaFunctionCPtr &func,
                                    const QString &funcName, const QList<CodeSnip> &snips,
-                                   const AbstractMetaArgument *lastArg, const TypeEntry *retType,
+                                   const AbstractMetaArgument *lastArg, const TypeEntryCPtr &retType,
                                    const QString &returnStatement, bool hasGil) const;
     static QString virtualMethodReturn(TextStream &s, const ApiExtractorResult &api,
                                        const AbstractMetaFunctionCPtr &func,
@@ -93,7 +93,7 @@ private:
     void writeMetaObjectMethod(TextStream &s, const GeneratorContext &classContext) const;
     static void writeMetaCast(TextStream &s, const GeneratorContext &classContext);
 
-    void writeFlagsConverterFunctions(TextStream &s, const FlagsTypeEntry *flagsType,
+    void writeFlagsConverterFunctions(TextStream &s, const FlagsTypeEntryCPtr &flagsType,
                                       const QString &enumTypeName,
                                       const QString &flagsCppTypeName,
                                       const QString &enumTypeCheck) const;
@@ -292,13 +292,13 @@ private:
     static QString pythonToCppFunctionName(const QString &sourceTypeName, const QString &targetTypeName);
     static QString pythonToCppFunctionName(const AbstractMetaType &sourceType, const AbstractMetaType &targetType);
     static QString pythonToCppFunctionName(const TargetToNativeConversion &toNative,
-                                           const TypeEntry *targetType);
+                                           const TypeEntryCPtr &targetType);
 
     /// Returns the name of a Python to C++ convertible check function.
     static QString convertibleToCppFunctionName(const QString &sourceTypeName, const QString &targetTypeName);
     static QString convertibleToCppFunctionName(const AbstractMetaType &sourceType, const AbstractMetaType &targetType);
     static QString convertibleToCppFunctionName(const TargetToNativeConversion &toNative,
-                                                const TypeEntry *targetType);
+                                                const TypeEntryCPtr &targetType);
 
     /// Writes a C++ to Python conversion function.
     void writeCppToPythonFunction(TextStream &s, const QString &code, const QString &sourceTypeName,
@@ -328,7 +328,7 @@ private:
     /// Writes a pair of Python to C++ conversion and check functions for implicit conversions.
     void writePythonToCppConversionFunctions(TextStream &s,
                                              const TargetToNativeConversion &toNative,
-                                             const TypeEntry *targetType) const;
+                                             const TypeEntryCPtr &targetType) const;
 
     /// Writes a pair of Python to C++ conversion and check functions for instantiated container types.
     void writePythonToCppConversionFunctions(TextStream &s,
@@ -461,11 +461,12 @@ private:
 
     static void writePrimitiveConverterInitialization(TextStream &s,
                                                       const CustomConversionPtr &customConversion);
-    static void writeFlagsConverterInitialization(TextStream &s, const FlagsTypeEntry *enumType);
+    static void writeFlagsConverterInitialization(TextStream &s, const FlagsTypeEntryCPtr &enumType);
     static void writeEnumConverterInitialization(TextStream &s, const AbstractMetaEnum &metaEnum);
     QString writeContainerConverterInitialization(TextStream &s, const AbstractMetaType &type) const;
     void writeSmartPointerConverterInitialization(TextStream &s, const AbstractMetaType &ype) const;
-    static void writeExtendedConverterInitialization(TextStream &s, const TypeEntry *externalType,
+    static void writeExtendedConverterInitialization(TextStream &s,
+                                                     const TypeEntryCPtr &externalType,
                                                      const AbstractMetaClassCList &conversions);
 
     void writeParentChildManagement(TextStream &s, const AbstractMetaFunctionCPtr &func,
@@ -517,8 +518,8 @@ private:
     { return boolCast(metaClass).has_value(); }
 
     std::optional<AbstractMetaType>
-        findSmartPointerInstantiation(const SmartPointerTypeEntry *pointer,
-                                      const TypeEntry *pointee) const;
+        findSmartPointerInstantiation(const SmartPointerTypeEntryCPtr &pointer,
+                                      const TypeEntryCPtr &pointee) const;
     void clearTpFuncs();
 
     QHash<QString, QString> m_tpFuncs;

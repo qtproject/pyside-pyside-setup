@@ -12,7 +12,7 @@ class TypeSystemTypeEntry : public TypeEntry
 {
 public:
     explicit TypeSystemTypeEntry(const QString &entryName, const QVersionNumber &vr,
-                                 const TypeEntry *parent);
+                                 const TypeEntryCPtr &parent);
 
     TypeEntry *clone() const override;
 

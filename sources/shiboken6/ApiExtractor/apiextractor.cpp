@@ -41,7 +41,6 @@ struct InstantiationCollectContext
     AbstractMetaTypeList instantiatedContainers;
     InstantiatedSmartPointers instantiatedSmartPointers;
     QStringList instantiatedContainersNames;
-    QList<const TypeEntry *> m_synthesizedTypeEntries;
 };
 
 struct ApiExtractorPrivate
@@ -312,7 +311,6 @@ std::optional<ApiExtractorResult> ApiExtractor::run(ApiExtractorFlags flags)
     data->m_flags = flags;
     qSwap(data->m_instantiatedContainers, collectContext.instantiatedContainers);
     qSwap(data->m_instantiatedSmartPointers, collectContext.instantiatedSmartPointers);
-    qSwap(data->m_synthesizedTypeEntries, collectContext.m_synthesizedTypeEntries);
     return ApiExtractorResult(data);
 }
 
@@ -358,7 +356,7 @@ AbstractMetaFunctionPtr
                                                       templateClass, subclass);
 }
 
-AbstractMetaClass *ApiExtractor::inheritTemplateClass(ComplexTypeEntry *te,
+AbstractMetaClass *ApiExtractor::inheritTemplateClass(const ComplexTypeEntryPtr &te,
                                                       const AbstractMetaClass *templateClass,
                                                       const AbstractMetaTypeList &templateTypes,
                                                       InheritTemplateFlags flags)
@@ -410,7 +408,7 @@ AbstractMetaType canonicalSmartPtrInstantiation(const AbstractMetaType &type)
     return fixedType;
 }
 
-static inline const TypeEntry *pointeeTypeEntry(const AbstractMetaType &smartPtrType)
+static inline TypeEntryCPtr pointeeTypeEntry(const AbstractMetaType &smartPtrType)
 {
     return smartPtrType.instantiations().constFirst().typeEntry();
 }
@@ -486,7 +484,7 @@ static FunctionModification invalidateArgMod(const AbstractMetaFunctionCPtr &f, 
 }
 
 static void addOwnerModification(const AbstractMetaFunctionCList &functions,
-                                 ComplexTypeEntry *typeEntry)
+                                 const ComplexTypeEntryPtr &typeEntry)
 {
     for (const auto &f : functions) {
         if (!f->arguments().isEmpty()
@@ -507,9 +505,9 @@ void ApiExtractorPrivate::addInstantiatedSmartPointer(InstantiationCollectContex
     Q_ASSERT(smp.smartPointer);
 
     const auto &instantiatedType = type.instantiations().constFirst();
-    auto *ste = static_cast<const SmartPointerTypeEntry *>(smp.smartPointer->typeEntry());
+    const auto ste = qSharedPointerCast<const SmartPointerTypeEntry>(smp.smartPointer->typeEntry());
     QString name = ste->getTargetName(smp.type);
-    auto *parentTypeEntry = ste->parent();
+    auto parentTypeEntry = ste->parent();
     InheritTemplateFlags flags;
 
     auto colonPos = name.lastIndexOf(u"::");
@@ -525,9 +523,10 @@ void ApiExtractorPrivate::addInstantiatedSmartPointer(InstantiationCollectContex
         flags.setFlag(InheritTemplateFlag::SetEnclosingClass);
     }
 
-    auto *typedefEntry = new TypedefEntry(name, ste->name(), ste->version(), parentTypeEntry);
+    TypedefEntryPtr typedefEntry(new TypedefEntry(name, ste->name(), ste->version(),
+                                                  parentTypeEntry));
     typedefEntry->setTargetLangPackage(ste->targetLangPackage());
-    auto *instantiationEntry = TypeDatabase::initializeTypeDefEntry(typedefEntry, ste);
+    auto instantiationEntry = TypeDatabase::initializeTypeDefEntry(typedefEntry, ste);
 
     smp.specialized = ApiExtractor::inheritTemplateClass(instantiationEntry, smp.smartPointer,
                                                          {instantiatedType}, flags);
@@ -550,8 +549,6 @@ void ApiExtractorPrivate::addInstantiatedSmartPointer(InstantiationCollectContex
     }
 
     context.instantiatedSmartPointers.append(smp);
-    context.m_synthesizedTypeEntries.append(typedefEntry);
-    context.m_synthesizedTypeEntries.append(instantiationEntry);
 }
 
 void
@@ -599,10 +596,10 @@ ApiExtractorPrivate::collectInstantiatedContainersAndSmartPointers(Instantiation
 // the current package or, for primitive types, if the container is in the
 // current package.
 static bool generateOpaqueContainer(const AbstractMetaType &type,
-                                    const TypeSystemTypeEntry *moduleEntry)
+                                    const TypeSystemTypeEntryCPtr &moduleEntry)
 {
-    auto *te = type.instantiations().constFirst().typeEntry();
-    auto *typeModuleEntry = typeSystemTypeEntry(te);
+    auto te = type.instantiations().constFirst().typeEntry();
+    auto typeModuleEntry = typeSystemTypeEntry(te);
     return typeModuleEntry == moduleEntry
            || (te->isPrimitive() && typeSystemTypeEntry(type.typeEntry()) == moduleEntry);
 }
@@ -612,9 +609,9 @@ void ApiExtractorPrivate::collectInstantiatedOpqaqueContainers(InstantiationColl
     // Add all instantiations of opaque containers for types from the current
     // module.
     auto *td = TypeDatabase::instance();
-    const auto *moduleEntry = TypeDatabase::instance()->defaultTypeSystemType();
+    const auto moduleEntry = TypeDatabase::instance()->defaultTypeSystemType();
     const auto &containers = td->containerTypes();
-    for (const auto *container : containers) {
+    for (const auto &container : containers) {
         for (const auto &oc : container->opaqueContainers()) {
             QString errorMessage;
             const QString typeName = container->qualifiedCppName() + u'<'
@@ -635,12 +632,12 @@ static void getCode(QStringList &code, const CodeSnipList &codeSnips)
         code.append(snip.code());
 }
 
-static void getCode(QStringList &code, const TypeEntry *type)
+static void getCode(QStringList &code, const TypeEntryCPtr &type)
 {
     if (type->isComplex())
-        getCode(code, static_cast<const ComplexTypeEntry *>(type)->codeSnips());
+        getCode(code, qSharedPointerCast<const ComplexTypeEntry>(type)->codeSnips());
     else if (type->isTypeSystem())
-        getCode(code, static_cast<const TypeSystemTypeEntry *>(type)->codeSnips());
+        getCode(code, qSharedPointerCast<const TypeSystemTypeEntry>(type)->codeSnips());
 
     auto customConversion = CustomConversion::getCustomConversion(type);
     if (customConversion.isNull())
@@ -662,16 +659,16 @@ void ApiExtractorPrivate::collectContainerTypesFromSnippets(InstantiationCollect
     QStringList snips;
     auto *td = TypeDatabase::instance();
     const PrimitiveTypeEntryCList &primitiveTypeList = td->primitiveTypes();
-    for (const PrimitiveTypeEntry *type : primitiveTypeList)
+    for (const auto &type : primitiveTypeList)
         getCode(snips, type);
     const ContainerTypeEntryCList &containerTypeList = td->containerTypes();
-    for (const ContainerTypeEntry *type : containerTypeList)
+    for (const auto &type : containerTypeList)
         getCode(snips, type);
     for (auto metaClass : m_builder->classes())
         getCode(snips, metaClass->typeEntry());
 
-    const TypeSystemTypeEntry *moduleEntry = td->defaultTypeSystemType();
-    Q_ASSERT(moduleEntry);
+    const auto moduleEntry = td->defaultTypeSystemType();
+    Q_ASSERT(!moduleEntry.isNull());
     getCode(snips, moduleEntry);
 
     for (const auto &func : m_builder->globalFunctions())

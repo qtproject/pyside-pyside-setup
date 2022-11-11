@@ -10,7 +10,7 @@
 #include <QtCore/QString>
 #include <QtCore/QList>
 
-using TemplateEntryMap =QMap<QString, TemplateEntry *>;
+using TemplateEntryMap =QMap<QString, TemplateEntryPtr>;
 
 template <class Key, class Value>
 struct QMultiMapConstIteratorRange // A range of iterator for a range-based for loop
@@ -24,10 +24,10 @@ struct QMultiMapConstIteratorRange // A range of iterator for a range-based for 
     ConstIterator m_end;
 };
 
-using TypeEntryMultiMap = QMultiMap<QString, TypeEntry *>;
-using TypeEntryMultiMapConstIteratorRange = QMultiMapConstIteratorRange<QString, TypeEntry *>;
+using TypeEntryMultiMap = QMultiMap<QString, TypeEntryPtr>;
+using TypeEntryMultiMapConstIteratorRange = QMultiMapConstIteratorRange<QString, TypeEntryPtr>;
 
-using TypeEntryMap = QMap<QString, TypeEntry *>;
-using TypedefEntryMap = QMap<QString, TypedefEntry *>;
+using TypeEntryMap = QMap<QString, TypeEntryPtr>;
+using TypedefEntryMap = QMap<QString, TypedefEntryPtr>;
 
 #endif // TYPEDATABASE_TYPEDEFS_H

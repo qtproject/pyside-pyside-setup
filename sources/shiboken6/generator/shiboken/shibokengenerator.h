@@ -78,7 +78,7 @@ public:
     static QString minimalConstructorExpression(const ApiExtractorResult &api,
                                                 const AbstractMetaType &type);
     static QString minimalConstructorExpression(const ApiExtractorResult &api,
-                                                const TypeEntry *type);
+                                                const TypeEntryCPtr &type);
 
 protected:
     bool doSetup() override;
@@ -181,7 +181,7 @@ protected:
     FunctionGeneration functionGeneration(const AbstractMetaFunctionCPtr &func) const;
 
     // Return a list of implicit conversions if generation is enabled.
-    AbstractMetaFunctionCList implicitConversions(const TypeEntry *t) const;
+    AbstractMetaFunctionCList implicitConversions(const TypeEntryCPtr &t) const;
 
     QString wrapperName(const AbstractMetaClass *metaClass) const;
 
@@ -198,29 +198,29 @@ protected:
 
     static QString fixedCppTypeName(const TargetToNativeConversion &toNative);
     static QString fixedCppTypeName(const AbstractMetaType &type);
-    static QString fixedCppTypeName(const TypeEntry *type, QString typeName = QString());
+    static QString fixedCppTypeName(const TypeEntryCPtr &type, QString typeName = {});
 
     static bool isNumber(const QString &cpythonApiName);
-    static bool isNumber(const TypeEntry *type);
+    static bool isNumber(const TypeEntryCPtr &type);
     static bool isNumber(const AbstractMetaType &type);
-    static bool isPyInt(const TypeEntry *type);
+    static bool isPyInt(const TypeEntryCPtr &type);
     static bool isPyInt(const AbstractMetaType &type);
 
     static bool isNullPtr(const QString &value);
 
     static QString converterObject(const AbstractMetaType &type) ;
-    static QString converterObject(const TypeEntry *type);
+    static QString converterObject(const TypeEntryCPtr &type);
 
     static QString cpythonBaseName(const AbstractMetaClass *metaClass);
-    static QString cpythonBaseName(const TypeEntry *type);
+    static QString cpythonBaseName(const TypeEntryCPtr &type);
     static QString cpythonBaseName(const AbstractMetaType &type);
     static QString cpythonTypeName(const AbstractMetaClass *metaClass);
-    static QString cpythonTypeName(const TypeEntry *type);
-    static QString cpythonTypeNameExt(const TypeEntry *type);
+    static QString cpythonTypeName(const TypeEntryCPtr &type);
+    static QString cpythonTypeNameExt(const TypeEntryCPtr &type);
     static QString cpythonTypeNameExt(const AbstractMetaType &type) ;
-    static QString cpythonCheckFunction(const TypeEntry *type);
+    static QString cpythonCheckFunction(TypeEntryCPtr type);
     static QString cpythonCheckFunction(AbstractMetaType metaType);
-    static QString cpythonIsConvertibleFunction(const TypeEntry *type);
+    static QString cpythonIsConvertibleFunction(const TypeEntryCPtr &type);
     static QString cpythonIsConvertibleFunction(AbstractMetaType metaType);
     static QString cpythonIsConvertibleFunction(const AbstractMetaArgument &metaArg);
 
@@ -230,7 +230,7 @@ protected:
     static QString cpythonToPythonConversionFunction(const AbstractMetaType &type,
                                                      const AbstractMetaClass *context = nullptr);
     static QString cpythonToPythonConversionFunction(const AbstractMetaClass *metaClass);
-    static QString cpythonToPythonConversionFunction(const TypeEntry *type);
+    static QString cpythonToPythonConversionFunction(const TypeEntryCPtr &type);
 
     static QString cpythonFunctionName(const AbstractMetaFunctionCPtr &func) ;
     static QString cpythonMethodDefinitionName(const AbstractMetaFunctionCPtr &func);
@@ -247,12 +247,12 @@ protected:
                                       const QString &argName = QStringLiteral("self"));
      static QString cpythonWrapperCPtr(const AbstractMetaType &metaType,
                                       const QString &argName);
-    static QString cpythonWrapperCPtr(const TypeEntry *type, const QString &argName);
+    static QString cpythonWrapperCPtr(const TypeEntryCPtr &type, const QString &argName);
 
-    static QString cpythonEnumName(const EnumTypeEntry *enumEntry);
+    static QString cpythonEnumName(const EnumTypeEntryCPtr &enumEntry);
     static QString cpythonEnumName(const AbstractMetaEnum &metaEnum);
 
-    static QString cpythonFlagsName(const FlagsTypeEntry *flagsEntry);
+    static QString cpythonFlagsName(const FlagsTypeEntryCPtr &flagsEntry);
     static QString cpythonFlagsName(const AbstractMetaEnum *metaEnum);
     /// Returns the special cast function name, the function used to proper cast class with multiple inheritance.
     static QString cpythonSpecialCastFunctionName(const AbstractMetaClass *metaClass);
@@ -287,7 +287,7 @@ protected:
     /// Returns the type index variable name for a given typedef for a template
     /// class instantiation made of the template class and the instantiation values
     static QString getTypeAlternateTemplateIndexVariableName(const AbstractMetaClass *metaClass);
-    static QString getTypeIndexVariableName(const TypeEntry *type);
+    static QString getTypeIndexVariableName(TypeEntryCPtr type);
     static QString getTypeIndexVariableName(const AbstractMetaType &type) ;
 
     /// Returns true if the user don't want verbose error messages on the generated bindings.
@@ -301,7 +301,7 @@ protected:
 
     // All data about extended converters: the type entries of the target type, and a
     // list of AbstractMetaClasses accepted as argument for the conversion.
-    using ExtendedConverterData = QHash<const TypeEntry *, AbstractMetaClassCList>;
+    using ExtendedConverterData = QHash<TypeEntryCPtr, AbstractMetaClassCList>;
     /// Returns all extended conversions for the current module.
     ExtendedConverterData getExtendedConverters() const;
 

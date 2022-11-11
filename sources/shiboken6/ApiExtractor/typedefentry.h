@@ -14,18 +14,18 @@ public:
     explicit TypedefEntry(const QString &entryName,
                           const QString &sourceType,
                           const QVersionNumber &vr,
-                          const TypeEntry *parent);
+                          const TypeEntryCPtr &parent);
 
     QString sourceType() const;
     void setSourceType(const QString &s);
 
     TypeEntry *clone() const override;
 
-    const ComplexTypeEntry *source() const;
-    void setSource(const ComplexTypeEntry *source);
+    ComplexTypeEntryCPtr source() const;
+    void setSource(const ComplexTypeEntryCPtr &source);
 
-    ComplexTypeEntry *target() const;
-    void setTarget(ComplexTypeEntry *target);
+    ComplexTypeEntryPtr target() const;
+    void setTarget(ComplexTypeEntryPtr target);
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const override;

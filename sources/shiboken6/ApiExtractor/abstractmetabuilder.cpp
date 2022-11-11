@@ -139,7 +139,7 @@ const AbstractMetaEnumList &AbstractMetaBuilder::globalEnums() const
     return d->m_globalEnums;
 }
 
-const QHash<const TypeEntry *, AbstractMetaEnum> &AbstractMetaBuilder::typeEntryToEnumsHash() const
+const QHash<TypeEntryCPtr, AbstractMetaEnum> &AbstractMetaBuilder::typeEntryToEnumsHash() const
 {
     return d->m_enums;
 }
@@ -149,13 +149,13 @@ void AbstractMetaBuilderPrivate::checkFunctionModifications()
     const auto &entries = TypeDatabase::instance()->entries();
 
     for (auto it = entries.cbegin(), end = entries.cend(); it != end; ++it) {
-        const TypeEntry *entry = it.value();
-        if (!entry)
+        TypeEntryCPtr entry = it.value();
+        if (entry.isNull())
             continue;
         if (!entry->isComplex() || !entry->generateCode())
             continue;
 
-        auto centry = static_cast<const ComplexTypeEntry *>(entry);
+        auto centry = qSharedPointerCast<const ComplexTypeEntry>(entry);
 
         if (!centry->generateCode())
             continue;
@@ -205,8 +205,8 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::argumentToClass(const ArgumentMod
     auto type = translateType(argument->type(), currentClass);
     if (!type.has_value())
         return returned;
-    const TypeEntry *entry = type->typeEntry();
-    if (entry && entry->isComplex())
+    TypeEntryCPtr entry = type->typeEntry();
+    if (!entry.isNull() && entry->isComplex())
         returned = AbstractMetaClass::findClass(m_metaClasses, entry);
     return returned;
 }
@@ -274,7 +274,7 @@ void AbstractMetaBuilderPrivate::traverseOperatorFunction(const FunctionModelIte
         firstArgumentIsSelf = false;
     } else {
         auto type = translateType(item->type(), currentClass);
-        const TypeEntry *retType = type.has_value() ? type->typeEntry() : nullptr;
+        const auto retType = type.has_value() ? type->typeEntry() : TypeEntryCPtr{};
         AbstractMetaClass *otherArgClass = argumentToClass(itemArguments.at(1), currentClass);
         if (otherArgClass && retType
             && (retType->isValue() || retType->isObject())
@@ -378,7 +378,7 @@ bool AbstractMetaBuilderPrivate::traverseStreamOperator(const FunctionModelItem 
     }
 
     funcClass->addFunction(AbstractMetaFunctionCPtr(streamFunction));
-    auto *funcTe = funcClass->typeEntry();
+    auto funcTe = funcClass->typeEntry();
     if (funcClass == streamClass)
         funcTe->addArgumentInclude(streamedClass->typeEntry()->include());
     else
@@ -527,8 +527,8 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom,
         if (func->accessPolicy() != Access::Public || func->name().startsWith(u"operator"))
             continue;
 
-        FunctionTypeEntry *funcEntry = types->findFunctionType(func->name());
-        if (!funcEntry || !funcEntry->generateCode())
+        FunctionTypeEntryPtr funcEntry = types->findFunctionType(func->name());
+        if (funcEntry.isNull() || !funcEntry->generateCode())
             continue;
 
         AbstractMetaFunction *metaFunc = traverseFunction(func, nullptr);
@@ -582,7 +582,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom,
     ReportHandler::startProgress("Detecting inconsistencies in typesystem ("
                                  + QByteArray::number(allEntries.size()) + ")...");
     for (auto it = allEntries.cbegin(), end = allEntries.cend(); it != end; ++it) {
-        TypeEntry *entry = it.value();
+        TypeEntryPtr entry = it.value();
         if (!entry->isPrimitive()) {
             if ((entry->isValue() || entry->isObject())
                 && !types->shouldDropTypeEntry(entry->qualifiedCppName())
@@ -592,7 +592,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom,
                 && !AbstractMetaClass::findClass(m_metaClasses, entry)) {
                 qCWarning(lcShiboken, "%s", qPrintable(msgTypeNotDefined(entry)));
             } else if (entry->generateCode() && entry->type() == TypeEntry::FunctionType) {
-                auto fte = static_cast<const FunctionTypeEntry *>(entry);
+                auto fte = qSharedPointerCast<const FunctionTypeEntry>(entry);
                 const QStringList &signatures = fte->signatures();
                 for (const QString &signature : signatures) {
                     bool ok = false;
@@ -610,7 +610,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom,
                     }
                 }
             } else if (entry->isEnum() && entry->generateCode()) {
-                auto enumEntry = static_cast<const EnumTypeEntry *>(entry);
+                const auto enumEntry = qSharedPointerCast<const EnumTypeEntry>(entry);
                 AbstractMetaClass *cls = AbstractMetaClass::findClass(m_metaClasses,
                                                                       enumEntry->parent());
 
@@ -828,11 +828,11 @@ std::optional<AbstractMetaEnum>
 {
     QString qualifiedName = enumItem->qualifiedName().join(colonColon());
 
-    TypeEntry *typeEntry = nullptr;
-    const TypeEntry *enclosingTypeEntry = enclosing ? enclosing->typeEntry() : nullptr;
+    TypeEntryPtr typeEntry;
+    const auto enclosingTypeEntry = enclosing ? enclosing->typeEntry() : TypeEntryCPtr{};
     if (enumItem->accessPolicy() == Access::Private) {
-        typeEntry = new EnumTypeEntry(enumItem->qualifiedName().constLast(),
-                                      QVersionNumber(0, 0), enclosingTypeEntry);
+        typeEntry.reset(new EnumTypeEntry(enumItem->qualifiedName().constLast(),
+                                          QVersionNumber(0, 0), enclosingTypeEntry));
         TypeDatabase::instance()->addType(typeEntry);
     } else if (enumItem->enumKind() != AnonymousEnum) {
         typeEntry = TypeDatabase::instance()->findType(qualifiedName);
@@ -890,7 +890,7 @@ std::optional<AbstractMetaEnum>
         metaEnum.setHasQEnumsDeclaration(true);
     }
 
-    auto *enumTypeEntry = static_cast<EnumTypeEntry *>(typeEntry);
+    auto enumTypeEntry = qSharedPointerCast<EnumTypeEntry>(typeEntry);
     metaEnum.setTypeEntry(enumTypeEntry);
     metaEnum.setAccess(enumItem->accessPolicy());
     if (metaEnum.access() == Access::Private)
@@ -916,10 +916,9 @@ std::optional<AbstractMetaEnum>
     const bool isScopedEnum = enumItem->enumKind() == EnumClass;
     const EnumeratorList &enumerators = enumItem->enumerators();
     for (const EnumeratorModelItem &e : enumerators) {
-        auto enumValue =
-            new EnumValueTypeEntry(e->name(), e->stringValue(),
-                                   enumTypeEntry, isScopedEnum,
-                                   enumTypeEntry->version());
+        EnumValueTypeEntryPtr enumValue(new EnumValueTypeEntry(e->name(), e->stringValue(),
+                                                               enumTypeEntry, isScopedEnum,
+                                                               enumTypeEntry->version()));
         TypeDatabase::instance()->addType(enumValue);
         if (e->value().isNullValue())
             enumTypeEntry->setNullValue(enumValue);
@@ -948,11 +947,11 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseTypeDef(const FileModelIt
     // If this is the alias for a primitive type
     // we store the aliased type on the alias
     // TypeEntry
-    PrimitiveTypeEntry *ptype = types->findPrimitiveType(className);
+    const auto ptype = types->findPrimitiveType(className);
     const auto &targetNames = typeDef->type().qualifiedName();
-    PrimitiveTypeEntry *pTarget = targetNames.size() == 1
-        ? types->findPrimitiveType(targetNames.constFirst()) : nullptr;
-    if (ptype) {
+    const auto pTarget = targetNames.size() == 1
+        ? types->findPrimitiveType(targetNames.constFirst()) : PrimitiveTypeEntryPtr{};
+    if (!ptype.isNull()) {
         ptype->setReferencedTypeEntry(pTarget);
         return nullptr;
     }
@@ -961,7 +960,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseTypeDef(const FileModelIt
     // (like size_t = unsigned)? Add it to the type DB.
     if (pTarget && isCppPrimitive(basicReferencedNonBuiltinTypeEntry(pTarget))
         && currentClass == nullptr) {
-        auto *pte = new PrimitiveTypeEntry(className, {}, nullptr);
+        PrimitiveTypeEntryPtr pte(new PrimitiveTypeEntry(className, {}, {}));
         pte->setReferencedTypeEntry(pTarget);
         pte->setBuiltIn(true);
         types->addType(pte);
@@ -969,8 +968,8 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseTypeDef(const FileModelIt
     }
 
     // If we haven't specified anything for the typedef, then we don't care
-    ComplexTypeEntry *type = types->findComplexType(fullClassName);
-    if (!type)
+    auto type = types->findComplexType(fullClassName);
+    if (type.isNull())
         return nullptr;
 
     auto *metaClass = new AbstractMetaClass;
@@ -992,7 +991,7 @@ void AbstractMetaBuilderPrivate::traverseTypesystemTypedefs()
 {
     const auto &entries = TypeDatabase::instance()->typedefEntries();
     for (auto it = entries.begin(), end = entries.end(); it != end; ++it) {
-        TypedefEntry *te = it.value();
+        TypedefEntryPtr te = it.value();
         auto *metaClass = new AbstractMetaClass;
         metaClass->setTypeDef(true);
         metaClass->setTypeEntry(te->target());
@@ -1032,14 +1031,14 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
                           + colonColon() + fullClassName;
     }
 
-    ComplexTypeEntry *type = TypeDatabase::instance()->findComplexType(fullClassName);
+    const auto type = TypeDatabase::instance()->findComplexType(fullClassName);
     AbstractMetaBuilder::RejectReason reason = AbstractMetaBuilder::NoReason;
 
     if (TypeDatabase::instance()->isClassRejected(fullClassName)) {
         reason = AbstractMetaBuilder::GenerationDisabled;
-    } else if (!type) {
-        TypeEntry *te = TypeDatabase::instance()->findType(fullClassName);
-        if (te && !te->isComplex()) {
+    } else if (type.isNull()) {
+        TypeEntryPtr te = TypeDatabase::instance()->findType(fullClassName);
+        if (!te.isNull() && !te->isComplex()) {
             reason = AbstractMetaBuilder::RedefinedToNotClass;
             // Set the default include file name
             if (!te->include().isValid())
@@ -1098,7 +1097,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
         auto param_type = new TemplateArgumentEntry(param->name(), type->version(),
                                                     argumentParent);
         param_type->setOrdinal(i);
-        template_args.append(param_type);
+        template_args.append(TypeEntryCPtr(param_type));
     }
     metaClass->setTemplateArguments(template_args);
 
@@ -1305,8 +1304,8 @@ void AbstractMetaBuilderPrivate::fixReturnTypeOfConversionOperator(AbstractMetaF
     if (castTo.startsWith(u"const "))
         castTo.remove(0, 6);
 
-    TypeEntry *retType = types->findType(castTo);
-    if (!retType)
+    TypeEntryPtr retType = types->findType(castTo);
+    if (retType.isNull())
         return;
 
     AbstractMetaType metaType(retType);
@@ -1521,7 +1520,7 @@ bool AbstractMetaBuilderPrivate::setupInheritance(AbstractMetaClass *metaClass)
     // we only support our own containers and ONLY if there is only one baseclass
     if (baseClasses.size() == 1 && baseClasses.constFirst().contains(u'<')) {
         TypeInfo info;
-        ComplexTypeEntry *baseContainerType;
+        ComplexTypeEntryPtr baseContainerType;
         auto *templ = findTemplateClass(baseClasses.constFirst(), metaClass,
                                         &info, &baseContainerType);
         if (templ) {
@@ -1736,7 +1735,7 @@ bool AbstractMetaBuilderPrivate::traverseAddedMemberFunction(const AddedFunction
     if (metaFunction->name() == metaClass->name()) {
         metaFunction->setFunctionType(AbstractMetaFunction::ConstructorFunction);
         if (fargs.size() == 1) {
-            const TypeEntry *te = fargs.constFirst().type().typeEntry();
+            const auto te = fargs.constFirst().type().typeEntry();
             if (te->isCustom())
                 metaFunction->setExplicit(true);
             if (te->name() == metaFunction->name())
@@ -2182,10 +2181,10 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
     return metaFunction;
 }
 
-static const TypeEntry *findTypeEntryUsingContext(const AbstractMetaClass *metaClass,
-                                                  const QString& qualifiedName)
+static TypeEntryCPtr findTypeEntryUsingContext(const AbstractMetaClass *metaClass,
+                                               const QString& qualifiedName)
 {
-    const TypeEntry *type = nullptr;
+    TypeEntryCPtr type;
     QStringList context = metaClass->qualifiedCppName().split(colonColon());
     while (!type && !context.isEmpty()) {
         type = TypeDatabase::instance()->findType(context.join(colonColon()) + colonColon() + qualifiedName);
@@ -2232,7 +2231,7 @@ TypeEntryCList AbstractMetaBuilderPrivate::findTypeEntriesHelper(const QString &
     //    of the parameters.
     if (currentClass) {
         const auto &template_args = currentClass->templateArguments();
-        for (const TypeEntry *te : template_args) {
+        for (const auto &te : template_args) {
             if (te->name() == qualifiedName)
                 return {te};
         }
@@ -2258,9 +2257,11 @@ TypeEntryCList AbstractMetaBuilderPrivate::findTypeEntries(const QString &qualif
     // Resolve entries added by metabuilder (for example, "GLenum") to match
     // the signatures for modifications.
     for (qsizetype i = 0, size = types.size(); i < size; ++i) {
-        const auto *e = types.at(i);
-        if (e->isPrimitive())
-            types[i] = basicReferencedNonBuiltinTypeEntry(e->asPrimitive());
+        const auto &e = types.at(i);
+        if (e->isPrimitive()) {
+            const auto pte = qSharedPointerCast<const PrimitiveTypeEntry>(e);
+            types[i] = basicReferencedNonBuiltinTypeEntry(pte);
+        }
     }
 
     if (types.size() == 1)
@@ -2268,7 +2269,7 @@ TypeEntryCList AbstractMetaBuilderPrivate::findTypeEntries(const QString &qualif
 
     const auto typeEntryType = types.constFirst()->type();
     const bool sameType = std::all_of(types.cbegin() + 1, types.cend(),
-                                      [typeEntryType](const TypeEntry *e) {
+                                      [typeEntryType](const TypeEntryCPtr &e) {
                                           return e->type() == typeEntryType;
                                       });
 
@@ -2330,8 +2331,8 @@ static AbstractMetaFunctionPtr
     addMethod(AbstractMetaClass *s, const QString &returnTypeName,
               const QString &name, bool isConst = true)
 {
-    auto *typeEntry = TypeDatabase::instance()->findPrimitiveType(returnTypeName);
-    Q_ASSERT(typeEntry);
+    auto typeEntry = TypeDatabase::instance()->findPrimitiveType(returnTypeName);
+    Q_ASSERT(!typeEntry.isNull());
     AbstractMetaType returnType(typeEntry);
     returnType.decideUsagePattern();
     return addMethod(s, returnType, name, isConst);
@@ -2339,7 +2340,7 @@ static AbstractMetaFunctionPtr
 
 // Create the instantiation type of a smart pointer
 static AbstractMetaType instantiationType(const AbstractMetaClass *s,
-                                          const SmartPointerTypeEntry *ste)
+                                          const SmartPointerTypeEntryCPtr &ste)
 {
     AbstractMetaType type(s->templateArguments().constFirst());
     if (ste->smartPointerType() != TypeSystem::SmartPointerType::ValueHandle)
@@ -2350,7 +2351,7 @@ static AbstractMetaType instantiationType(const AbstractMetaClass *s,
 
 // Create the pointee argument of a smart pointer constructor or reset()
 static AbstractMetaArgument pointeeArgument(const AbstractMetaClass *s,
-                                            const SmartPointerTypeEntry *ste)
+                                            const SmartPointerTypeEntryCPtr &ste)
 {
     AbstractMetaArgument pointee;
     pointee.setType(instantiationType(s, ste));
@@ -2360,7 +2361,8 @@ static AbstractMetaArgument pointeeArgument(const AbstractMetaClass *s,
 
 // Add the smart pointer constructors. For MSVC, (when not specifying
 // <system-header>), clang only sees the default constructor.
-static void fixSmartPointerConstructors(AbstractMetaClass *s, const SmartPointerTypeEntry *ste)
+static void fixSmartPointerConstructors(AbstractMetaClass *s,
+                                        const SmartPointerTypeEntryCPtr &ste)
 {
     const auto ctors = s->queryFunctions(FunctionQueryOption::Constructors);
     bool seenDefaultConstructor = false;
@@ -2389,7 +2391,8 @@ static void fixSmartPointerConstructors(AbstractMetaClass *s, const SmartPointer
 }
 
 // Similarly, add the smart pointer reset() functions
-static void fixSmartPointerReset(AbstractMetaClass *s, const SmartPointerTypeEntry *ste)
+static void fixSmartPointerReset(AbstractMetaClass *s,
+                                 const SmartPointerTypeEntryCPtr &ste)
 {
     const QString resetMethodName = ste->resetMethod();
     const auto functions = s->findFunctions(resetMethodName);
@@ -2417,7 +2420,8 @@ static void fixSmartPointerReset(AbstractMetaClass *s, const SmartPointerTypeEnt
 }
 
 // Add the relevant missing smart pointer functions.
-static void fixSmartPointerClass(AbstractMetaClass *s, const SmartPointerTypeEntry *ste)
+static void fixSmartPointerClass(AbstractMetaClass *s,
+                                 const SmartPointerTypeEntryCPtr &ste)
 {
     fixSmartPointerConstructors(s, ste);
 
@@ -2445,16 +2449,16 @@ static void fixSmartPointerClass(AbstractMetaClass *s, const SmartPointerTypeEnt
 }
 
 // Create a missing smart pointer class
-static AbstractMetaClass *createSmartPointerClass(const SmartPointerTypeEntry *ste,
+static AbstractMetaClass *createSmartPointerClass(const SmartPointerTypeEntryCPtr &ste,
                                                   const AbstractMetaClassList &allClasses)
 {
     auto *result = new AbstractMetaClass();
-    result->setTypeEntry(const_cast<SmartPointerTypeEntry *>(ste));
-    auto *templateArg = new TemplateArgumentEntry(u"T"_s, ste->version(),
-                                                  typeSystemTypeEntry(ste));
+    result->setTypeEntry(qSharedPointerConstCast<SmartPointerTypeEntry>(ste));
+    TypeEntryCPtr templateArg(new TemplateArgumentEntry(u"T"_s, ste->version(),
+                                                        typeSystemTypeEntry(ste)));
     result->setTemplateArguments({templateArg});
     fixSmartPointerClass(result, ste);
-    auto *enclosingTe = ste->parent();
+    auto enclosingTe = ste->parent();
     if (!enclosingTe->isTypeSystem()) {
         auto *enclosing = AbstractMetaClass::findClass(allClasses, enclosingTe);
         if (enclosing == nullptr)
@@ -2470,7 +2474,7 @@ static AbstractMetaClass *createSmartPointerClass(const SmartPointerTypeEntry *s
 void AbstractMetaBuilderPrivate::fixSmartPointers()
 {
     const auto smartPointerTypes = TypeDatabase::instance()->smartPointerTypes();
-    for (auto *ste : smartPointerTypes) {
+    for (const auto &ste : smartPointerTypes) {
         const AbstractMetaClass *smartPointerClass =
             AbstractMetaClass::findClass(m_smartPointers, ste);
         if (smartPointerClass) {
@@ -2597,8 +2601,9 @@ std::optional<AbstractMetaType>
                     arrayType.setArrayElementCount(int(elems));
             }
             auto elementTypeEntry = elementType->typeEntry();
-            arrayType.setTypeEntry(new ArrayTypeEntry(elementTypeEntry, elementTypeEntry->version(),
-                                                      elementTypeEntry->parent()));
+            TypeEntryCPtr at(new ArrayTypeEntry(elementTypeEntry, elementTypeEntry->version(),
+                                                elementTypeEntry->parent()));
+            arrayType.setTypeEntry(at);
             arrayType.decideUsagePattern();
 
             elementType = arrayType;
@@ -2633,7 +2638,7 @@ std::optional<AbstractMetaType>
         return {};
     }
 
-    const TypeEntry *type = types.constFirst();
+    TypeEntryCPtr type = types.constFirst();
     const TypeEntry::Type typeEntryType = type->type();
 
     AbstractMetaType metaType;
@@ -2652,7 +2657,7 @@ std::optional<AbstractMetaType>
         if (!targType.has_value()) {
             const QString value = ti.qualifiedName().join(colonColon());
             if (isNumber(value)) {
-                auto *module = typeSystemTypeEntry(type);
+                auto module = typeSystemTypeEntry(type);
                 TypeDatabase::instance()->addConstantValueTypeEntry(value, module);
                 targType = translateTypeStatic(ti, currentClass, d, flags, &errorMessage);
             }
@@ -2679,8 +2684,8 @@ std::optional<AbstractMetaType>
             type = instantiationType;
         } else {
             auto it = std::find_if(types.cbegin(), types.cend(),
-                                   [instantiationType](const TypeEntry *e) {
-                auto smartPtr = static_cast<const SmartPointerTypeEntry *>(e);
+                                   [instantiationType](const TypeEntryCPtr &e) {
+                auto smartPtr = qSharedPointerCast<const SmartPointerTypeEntry>(e);
                 return smartPtr->matchesInstantiation(instantiationType);
             });
             if (it == types.cend()) {
@@ -2838,7 +2843,7 @@ QString AbstractMetaBuilderPrivate::fixDefaultValue(QString expr, const Abstract
         // "QList<FormatRange>()" -> "QList<QTextLayout::FormatRange>()"
         if (type.instantiations().size() != 1)
             return expr; // Only simple types are handled, not QMap<int, int>.
-        auto *innerTypeEntry = type.instantiations().constFirst().typeEntry();
+        auto innerTypeEntry = type.instantiations().constFirst().typeEntry();
         if (!innerTypeEntry->isComplex())
             return expr;
         const QString &qualifiedInnerTypeName = innerTypeEntry->qualifiedCppName();
@@ -2892,7 +2897,7 @@ QString AbstractMetaBuilderPrivate::fixDefaultValue(QString expr, const Abstract
             }
         }
         // Is this a class constructor "Class(Field)"? Expand it.
-        auto *te = type.typeEntry();
+        const auto te = type.typeEntry();
         if (!te->isComplex())
             return expr;
         const QString &qualifiedTypeName = te->qualifiedCppName();
@@ -2921,10 +2926,10 @@ bool AbstractMetaBuilderPrivate::isEnum(const FileModelItem &dom, const QStringL
 AbstractMetaClass *AbstractMetaBuilderPrivate::findTemplateClass(const QString &name,
                                                                  const AbstractMetaClass *context,
                                                                  TypeInfo *info,
-                                                                 ComplexTypeEntry **baseContainerType) const
+                                                                 ComplexTypeEntryPtr *baseContainerType) const
 {
     if (baseContainerType)
-        *baseContainerType = nullptr;
+        baseContainerType->reset();
     auto *types = TypeDatabase::instance();
 
     QStringList scope = context->typeEntry()->qualifiedCppName().split(colonColon());
@@ -2997,7 +3002,7 @@ std::optional<AbstractMetaType>
     returned.setOriginalTemplateType(metaType);
 
     if (returned.typeEntry()->isTemplateArgument()) {
-        const auto *tae = static_cast<const TemplateArgumentEntry*>(returned.typeEntry());
+        const auto tae = qSharedPointerCast<const TemplateArgumentEntry>(returned.typeEntry());
 
         // If the template is intantiated with void we special case this as rejecting the functions that use this
         // parameter from the instantiation.
@@ -3028,7 +3033,7 @@ std::optional<AbstractMetaType>
 }
 
 AbstractMetaClass *
-    AbstractMetaBuilder::inheritTemplateClass(ComplexTypeEntry *te,
+    AbstractMetaBuilder::inheritTemplateClass(const ComplexTypeEntryPtr &te,
                                               const AbstractMetaClass *templateClass,
                                               const AbstractMetaTypeList &templateTypes,
                                               InheritTemplateFlags flags)
@@ -3054,7 +3059,7 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
     for (const TypeInfo &i : info.instantiations()) {
         QString typeName = i.qualifiedName().join(colonColon());
         TypeDatabase *typeDb = TypeDatabase::instance();
-        TypeEntry *t = nullptr;
+        TypeEntryPtr t;
         // Check for a non-type template integer parameter, that is, for a base
         // "template <int R, int C> Matrix<R, C>" and subclass
         // "typedef Matrix<2,3> Matrix2x3;". If so, create dummy entries of
@@ -3168,7 +3173,7 @@ AbstractMetaFunctionPtr
         f->setOriginalName(subclass->name());
     }
 
-    ComplexTypeEntry *te = subclass->typeEntry();
+    ComplexTypeEntryPtr te = subclass->typeEntry();
     const FunctionModificationList mods = function->modifications(templateClass);
 
     for (auto mod : mods) {
@@ -3403,7 +3408,7 @@ void AbstractMetaBuilderPrivate::dumpLog() const
 // Add a dependency of the class associated with typeEntry on clazz.
 template <class MetaClass>
 static bool addClassDependency(const QList<MetaClass *> &classList,
-                               const TypeEntry *typeEntry,
+                               const TypeEntryCPtr &typeEntry,
                                MetaClass *clazz,
                                Graph<MetaClass *> *graph)
 {
@@ -3568,7 +3573,7 @@ static bool matchHeader(const QString &headerPath, const QString &fileName)
         && fileName.startsWith(headerPath, caseSensitivity);
 }
 
-void AbstractMetaBuilderPrivate::setInclude(TypeEntry *te, const QString &path) const
+void AbstractMetaBuilderPrivate::setInclude(const TypeEntryPtr &te, const QString &path) const
 {
     auto it = m_resolveIncludeHash.find(path);
     if (it == m_resolveIncludeHash.end()) {

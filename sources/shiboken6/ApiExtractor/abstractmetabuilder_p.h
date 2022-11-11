@@ -158,7 +158,7 @@ public:
 
     AbstractMetaClass *findTemplateClass(const QString& name, const AbstractMetaClass *context,
                                          TypeInfo *info = Q_NULLPTR,
-                                         ComplexTypeEntry **baseContainerType = Q_NULLPTR) const;
+                                         ComplexTypeEntryPtr *baseContainerType = nullptr) const;
     AbstractMetaClassCList getBaseClasses(const AbstractMetaClass *metaClass) const;
 
     static bool inheritTemplate(AbstractMetaClass *subclass,
@@ -188,7 +188,7 @@ public:
     static bool isEnum(const FileModelItem &dom, const QStringList &qualifiedName);
 
     void sortLists();
-    void setInclude(TypeEntry *te, const QString &path) const;
+    void setInclude(const TypeEntryPtr &te, const QString &path) const;
     static void fixArgumentNames(AbstractMetaFunction *func, const FunctionModificationList &mods);
 
     void fillAddedFunctions(AbstractMetaClass *metaClass);
@@ -212,7 +212,7 @@ public:
     RejectMap m_rejectedFunctions;
     RejectMap m_rejectedFields;
 
-    QHash<const TypeEntry *, AbstractMetaEnum> m_enums;
+    QHash<TypeEntryCPtr, AbstractMetaEnum> m_enums;
 
     QList<NamespaceModelItem> m_scopes;
 

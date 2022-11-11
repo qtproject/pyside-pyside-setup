@@ -5,6 +5,7 @@
 #define TYPESYSTEM_H
 
 #include "include.h"
+#include "typesystem_typedefs.h"
 
 #include <QtCore/qobjectdefs.h>
 #include <QtCore/QString>
@@ -61,14 +62,14 @@ public:
     Q_ENUM(CodeGeneration)
 
     explicit TypeEntry(const QString &entryName, Type t, const QVersionNumber &vr,
-                       const TypeEntry *parent);
+                       const TypeEntryCPtr &parent);
     virtual ~TypeEntry();
 
     Type type() const;
 
-    const TypeEntry *parent() const;
-    void setParent(const TypeEntry *p);
-    bool isChildOf(const TypeEntry *p) const;
+    TypeEntryCPtr parent() const;
+    void setParent(const TypeEntryCPtr &);
+    bool isChildOf(const TypeEntryCPtr &p) const;
 
     bool isPrimitive() const;
     bool isEnum() const;
@@ -129,9 +130,9 @@ public:
     /// be a JNI name, for Python it should represent the CPython type name.
     /// \return string representing the target language API name
     /// Currently used only for PrimitiveTypeEntry (attribute "target").
-    const CustomTypeEntry *targetLangApiType() const;
+    CustomTypeEntryCPtr targetLangApiType() const;
     bool hasTargetLangApiType() const;
-    void setTargetLangApiType(CustomTypeEntry *cte);
+    void setTargetLangApiType(const CustomTypeEntryPtr &cte);
     QString targetLangApiName() const;
 
     // The type's name in TargetLang
@@ -160,17 +161,15 @@ public:
     // View on: Type to use for function argument conversion, fex
     // std::string_view -> std::string for foo(std::string_view).
     // cf AbstractMetaType::viewOn()
-    TypeEntry *viewOn() const;
-    void setViewOn(TypeEntry *v);
+    TypeEntryPtr viewOn() const;
+    void setViewOn(const TypeEntryPtr &v);
 
     virtual TypeEntry *clone() const;
 
-    void useAsTypedef(const TypeEntry *source);
+    void useAsTypedef(const TypeEntryCPtr &source);
 
     SourceLocation sourceLocation() const;
     void setSourceLocation(const SourceLocation &sourceLocation);
-
-    const PrimitiveTypeEntry *asPrimitive() const;
 
     // Query functions for generators
     /// Returns true if the type passed has a Python wrapper for it.
@@ -195,22 +194,22 @@ private:
     QScopedPointer<TypeEntryPrivate> m_d;
 };
 
-const TypeSystemTypeEntry *typeSystemTypeEntry(const TypeEntry *e);
+TypeSystemTypeEntryCPtr typeSystemTypeEntry(TypeEntryCPtr e);
 
 // cf AbstractMetaClass::targetLangEnclosingClass()
-const TypeEntry *targetLangEnclosingEntry(const TypeEntry *e);
+TypeEntryCPtr targetLangEnclosingEntry(const TypeEntryCPtr &e);
 
-bool isCppPrimitive(const TypeEntry *e);
+bool isCppPrimitive(const TypeEntryCPtr &e);
 
 /// Returns true if the type is a primitive but not a C++ primitive.
-bool isUserPrimitive(const TypeEntry *e);
+bool isUserPrimitive(const TypeEntryCPtr &e);
 
 /// Returns true if the type is a C++ integral primitive,
 /// i.e. bool, char, int, long, and their unsigned counterparts.
-bool isCppIntegralPrimitive(const TypeEntry *e);
+bool isCppIntegralPrimitive(const TypeEntryCPtr &e);
 
 /// Returns true if the type is an extended C++ primitive, a void*,
 /// a const char*, or a std::string (cf isCppPrimitive()).
-bool isExtendedCppPrimitive(const TypeEntry *e);
+bool isExtendedCppPrimitive(const TypeEntryCPtr &e);
 
 #endif // TYPESYSTEM_H

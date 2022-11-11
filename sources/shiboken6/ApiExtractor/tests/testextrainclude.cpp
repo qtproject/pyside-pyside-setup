@@ -49,8 +49,8 @@ void TestExtraInclude::testGlobalExtraIncludes()
     QVERIFY(AbstractMetaClass::findClass(classes, u"A"));
 
     auto *td = TypeDatabase::instance();
-    const TypeSystemTypeEntry *module = td->defaultTypeSystemType();
-    QVERIFY(module);
+    TypeSystemTypeEntryCPtr module = td->defaultTypeSystemType();
+    QVERIFY(!module.isNull());
     QCOMPARE(module->name(), u"Foo");
 
     QList<Include> includes = module->extraIncludes();

@@ -31,16 +31,16 @@ using namespace Qt::StringLiterals;
 
 static QString getTypeName(const AbstractMetaType &type)
 {
-    const TypeEntry *typeEntry = type.typeEntry();
+    TypeEntryCPtr typeEntry = type.typeEntry();
     if (typeEntry->isPrimitive())
-        typeEntry = basicReferencedTypeEntry(typeEntry->asPrimitive());
+        typeEntry = basicReferencedTypeEntry(typeEntry);
     QString typeName = typeEntry->name();
     if (typeEntry->isContainer()) {
         QStringList types;
         for (const auto &cType : type.instantiations()) {
-            const TypeEntry *typeEntry = cType.typeEntry();
+            TypeEntryCPtr typeEntry = cType.typeEntry();
             if (typeEntry->isPrimitive())
-                typeEntry = basicReferencedTypeEntry(typeEntry->asPrimitive());
+                typeEntry = basicReferencedTypeEntry(typeEntry);
             types << typeEntry->name();
         }
         typeName += u'<' + types.join(u',') + u" >"_s;
@@ -241,7 +241,7 @@ void OverloadDataRootNode::sortNextOverloads(const ApiExtractorResult &api)
 
         // Process inheritance relationships
         if (targetType.isValue() || targetType.isObject()) {
-            auto *te = targetType.typeEntry();
+            const auto te = targetType.typeEntry();
             auto metaClass = AbstractMetaClass::findClass(api.classes(), te);
             if (!metaClass)
                 throw Exception(msgArgumentClassNotFound(m_overloads.constFirst(), te));

@@ -8,15 +8,13 @@
 #include "typesystem_enums.h"
 
 class EnumTypeEntryPrivate;
-class EnumValueTypeEntry;
-class FlagsTypeEntry;
 
 class EnumTypeEntry : public TypeEntry
 {
 public:
     explicit EnumTypeEntry(const QString &entryName,
                            const QVersionNumber &vr,
-                           const TypeEntry *parent);
+                           const TypeEntryCPtr &parent);
 
     TypeSystem::PythonEnumType pythonEnumType() const;
     void setPythonEnumType(TypeSystem::PythonEnumType t);
@@ -25,11 +23,11 @@ public:
 
     QString qualifier() const;
 
-    const EnumValueTypeEntry *nullValue() const;
-    void setNullValue(const EnumValueTypeEntry *n);
+    EnumValueTypeEntryCPtr nullValue() const;
+    void setNullValue(const EnumValueTypeEntryCPtr &n);
 
-    void setFlags(FlagsTypeEntry *flags);
-    FlagsTypeEntry *flags() const;
+    void setFlags(const FlagsTypeEntryPtr &flags);
+    FlagsTypeEntryPtr flags() const;
 
     QString cppType() const;
     void setCppType(const QString &t);

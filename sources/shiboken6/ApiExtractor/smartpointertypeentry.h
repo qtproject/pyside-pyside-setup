@@ -11,7 +11,7 @@ class SmartPointerTypeEntryPrivate;
 struct SmartPointerInstantiation
 {
     QString name; // user defined name
-    const TypeEntry *typeEntry;
+    TypeEntryCPtr typeEntry;
 };
 
 class SmartPointerTypeEntry : public ComplexTypeEntry
@@ -24,7 +24,7 @@ public:
                                    TypeSystem::SmartPointerType type,
                                    const QString &refCountMethodName,
                                    const QVersionNumber &vr,
-                                   const TypeEntry *parent);
+                                   const TypeEntryCPtr &parent);
 
     TypeSystem::SmartPointerType smartPointerType() const;
 
@@ -43,7 +43,7 @@ public:
 
     const Instantiations &instantiations() const;
     void setInstantiations(const Instantiations &i);
-    bool matchesInstantiation(const TypeEntry *e) const;
+    bool matchesInstantiation(const TypeEntryCPtr &e) const;
 
     QString getTargetName(const AbstractMetaType &metaType) const;
 

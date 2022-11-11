@@ -7,6 +7,7 @@
 #include "abstractmetalang_enums.h"
 #include "abstractmetalang_typedefs.h"
 #include "parser/codemodel_enums.h"
+#include "typedatabase_typedefs.h"
 
 #include <QtCore/qobjectdefs.h>
 #include <QtCore/QSharedDataPointer>
@@ -46,7 +47,7 @@ public:
     Q_ENUM(TypeUsagePattern)
 
     AbstractMetaType();
-    explicit AbstractMetaType(const TypeEntry *t);
+    explicit AbstractMetaType(const TypeEntryCPtr &t);
     AbstractMetaType(const AbstractMetaType &);
     AbstractMetaType &operator=(const AbstractMetaType &);
     AbstractMetaType(AbstractMetaType &&);
@@ -146,8 +147,8 @@ public:
 
     bool applyArrayModification(QString *errorMessage);
 
-    const TypeEntry *typeEntry() const;
-    void setTypeEntry(const TypeEntry *type);
+    TypeEntryCPtr typeEntry() const;
+    void setTypeEntry(const TypeEntryCPtr &type);
 
     void setOriginalTypeDescription(const QString &otd);
     QString originalTypeDescription() const;
@@ -183,7 +184,7 @@ public:
     static std::optional<AbstractMetaType>
         fromString(QString typeSignature, QString *errorMessage = nullptr);
     /// Creates an AbstractMetaType object from a TypeEntry.
-    static AbstractMetaType fromTypeEntry(const TypeEntry *typeEntry);
+    static AbstractMetaType fromTypeEntry(const TypeEntryCPtr &typeEntry);
     /// Creates an AbstractMetaType object from an AbstractMetaClass.
     static AbstractMetaType fromAbstractMetaClass(const AbstractMetaClass *metaClass);
 

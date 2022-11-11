@@ -6,6 +6,7 @@
 #include "typesystem.h"
 #include "typedatabase.h"
 #include "typedatabase_p.h"
+#include "typesystem_typedefs.h"
 #include "codesnip.h"
 
 #include <QtCore/QStack>
@@ -120,7 +121,7 @@ struct StackElementContext
     FunctionModificationList functionMods;
     FieldModificationList fieldMods;
     DocModificationList docModifications;
-    TypeEntry *entry = nullptr;
+    TypeEntryPtr entry;
     int addedFunctionModificationIndex = -1;
 };
 
@@ -144,7 +145,7 @@ private:
     bool parseXml(ConditionalStreamReader &reader);
     bool setupSmartPointerInstantiations();
     bool startElement(const ConditionalStreamReader &reader, StackElement element);
-    SmartPointerTypeEntry *parseSmartPointerEntry(const ConditionalStreamReader &,
+    SmartPointerTypeEntryPtr parseSmartPointerEntry(const ConditionalStreamReader &,
                                                   const QString &name,
                                                   const QVersionNumber &since,
                                                   QXmlStreamAttributes *attributes);
@@ -154,43 +155,44 @@ private:
 
     bool importFileElement(const QXmlStreamAttributes &atts);
 
-    const TypeEntry *currentParentTypeEntry() const;
+    TypeEntryCPtr currentParentTypeEntry() const;
     bool checkRootElement();
-    bool applyCommonAttributes(const ConditionalStreamReader &reader, TypeEntry *type,
+    bool applyCommonAttributes(const ConditionalStreamReader &reader,
+                               const TypeEntryPtr &type,
                                QXmlStreamAttributes *attributes);
-    PrimitiveTypeEntry *
+    PrimitiveTypeEntryPtr
         parsePrimitiveTypeEntry(const ConditionalStreamReader &, const QString &name,
                                 const QVersionNumber &since, QXmlStreamAttributes *);
-    CustomTypeEntry *
+    CustomTypeEntryPtr
         parseCustomTypeEntry(const ConditionalStreamReader &, const QString &name,
                              const QVersionNumber &since, QXmlStreamAttributes *);
-    ContainerTypeEntry *
+    ContainerTypeEntryPtr
         parseContainerTypeEntry(const ConditionalStreamReader &, const QString &name,
                                  const QVersionNumber &since, QXmlStreamAttributes *);
-    EnumTypeEntry *
+    EnumTypeEntryPtr
         parseEnumTypeEntry(const ConditionalStreamReader &, const QString &name,
                            const QVersionNumber &since, QXmlStreamAttributes *);
-    FlagsTypeEntry *
-        parseFlagsEntry(const ConditionalStreamReader &, EnumTypeEntry *enumEntry,
+    FlagsTypeEntryPtr
+        parseFlagsEntry(const ConditionalStreamReader &, const EnumTypeEntryPtr &enumEntry,
                         QString flagName, const QVersionNumber &since,
                         QXmlStreamAttributes *);
 
-    NamespaceTypeEntry *
+    NamespaceTypeEntryPtr
         parseNamespaceTypeEntry(const ConditionalStreamReader &,
                                 const QString &name, const QVersionNumber &since,
                                 QXmlStreamAttributes *attributes);
 
-    ValueTypeEntry *
+    ValueTypeEntryPtr
         parseValueTypeEntry(const ConditionalStreamReader &, const QString &name,
                             const QVersionNumber &since, QXmlStreamAttributes *);
-    FunctionTypeEntry *
+    FunctionTypeEntryPtr
         parseFunctionTypeEntry(const ConditionalStreamReader &, const QString &name,
                                const QVersionNumber &since, QXmlStreamAttributes *);
-    TypedefEntry *
+    TypedefEntryPtr
         parseTypedefEntry(const ConditionalStreamReader &, const QString &name,
                           StackElement topElement,
                           const QVersionNumber &since, QXmlStreamAttributes *);
-    void applyComplexTypeAttributes(const ConditionalStreamReader &, ComplexTypeEntry *ctype,
+    void applyComplexTypeAttributes(const ConditionalStreamReader &, const ComplexTypeEntryPtr &ctype,
                                     QXmlStreamAttributes *) const;
     bool parseRenameFunction(const ConditionalStreamReader &, QString *name,
                              QXmlStreamAttributes *);
@@ -198,7 +200,7 @@ private:
                                   QXmlStreamAttributes *);
     bool parseModifyDocumentation(const ConditionalStreamReader &, StackElement topElement,
                                   QXmlStreamAttributes *);
-    TypeSystemTypeEntry *
+    TypeSystemTypeEntryPtr
         parseRootElement(const ConditionalStreamReader &, const QVersionNumber &since,
                          QXmlStreamAttributes *);
     bool loadTypesystem(const ConditionalStreamReader &, QXmlStreamAttributes *);
@@ -237,7 +239,7 @@ private:
      bool readFileSnippet(QXmlStreamAttributes *attributes, CodeSnip *snip);
      bool parseInjectCode(const ConditionalStreamReader &, StackElement topElement, QXmlStreamAttributes *);
      bool parseInclude(const ConditionalStreamReader &, StackElement topElement,
-                       TypeEntry *entry, QXmlStreamAttributes *);
+                       const TypeEntryPtr &entry, QXmlStreamAttributes *);
      bool parseSystemInclude(const ConditionalStreamReader &, QXmlStreamAttributes *);
      TemplateInstance
          *parseInsertTemplate(const ConditionalStreamReader &, StackElement topElement,
@@ -260,9 +262,9 @@ private:
     QString m_error;
     const TypeEntry::CodeGeneration m_generate;
 
-    EnumTypeEntry *m_currentEnum = nullptr;
+    EnumTypeEntryPtr m_currentEnum;
     TemplateInstancePtr m_templateInstance;
-    TemplateEntry *m_templateEntry = nullptr;
+    TemplateEntryPtr m_templateEntry;
     ContextStack m_contextStack;
 
     QString m_currentSignature;

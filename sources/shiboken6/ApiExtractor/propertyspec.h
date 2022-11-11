@@ -6,6 +6,8 @@
 
 class AbstractMetaType;
 
+#include "typesystem_typedefs.h"
+
 #include <QtCore/QStringList>
 #include <QtCore/QSharedDataPointer>
 
@@ -54,7 +56,7 @@ public:
     const AbstractMetaType &type() const;
     void setType(const AbstractMetaType &t);
 
-    const TypeEntry *typeEntry() const;
+    TypeEntryCPtr typeEntry() const;
 
     QString name() const;
     void setName(const QString &name);

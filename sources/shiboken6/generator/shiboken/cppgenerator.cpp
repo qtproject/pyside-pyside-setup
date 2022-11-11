@@ -186,9 +186,9 @@ const ProtocolEntries &sequenceProtocols()
 // Return name of function to create PyObject wrapping a container
 static QString opaqueContainerCreationFunc(const AbstractMetaType &type)
 {
-    const auto *containerTypeEntry =
-        static_cast<const ContainerTypeEntry *>(type.typeEntry());
-    const auto *instantiationTypeEntry =
+    const auto containerTypeEntry =
+        qSharedPointerCast<const ContainerTypeEntry>(type.typeEntry());
+    const auto instantiationTypeEntry =
         type.instantiations().constFirst().typeEntry();
     QString result = u"create"_s;
     if (type.isConstant())
@@ -284,9 +284,9 @@ QList<AbstractMetaFunctionCList>
 CppGenerator::BoolCastFunctionOptional
     CppGenerator::boolCast(const AbstractMetaClass *metaClass) const
 {
-    const auto *te = metaClass->typeEntry();
+    const auto te = metaClass->typeEntry();
     if (te->isSmartPointer()) {
-        auto *ste = static_cast<const SmartPointerTypeEntry *>(te);
+        auto ste = qSharedPointerCast<const SmartPointerTypeEntry>(te);
 
         auto valueCheckMethod = ste->valueCheckMethod();
         if (!valueCheckMethod.isEmpty()) {
@@ -324,8 +324,8 @@ CppGenerator::BoolCastFunctionOptional
 }
 
 std::optional<AbstractMetaType>
-    CppGenerator::findSmartPointerInstantiation(const SmartPointerTypeEntry *pointer,
-                                                const TypeEntry *pointee) const
+    CppGenerator::findSmartPointerInstantiation(const SmartPointerTypeEntryCPtr &pointer,
+                                                const TypeEntryCPtr &pointee) const
 {
     for (const auto &smp : api().instantiatedSmartPointers()) {
         const auto &i = smp.type;
@@ -472,7 +472,7 @@ static bool _shouldInheritInt(const AbstractMetaEnum &cppEnum)
 
 static QString BuildEnumFlagInfo(const AbstractMetaEnum &cppEnum)
 {
-    auto *enumType = cppEnum.typeEntry();
+    auto enumType = cppEnum.typeEntry();
     QString result = _plainName(enumType->name());
     auto flags = enumType->flags();
     auto decision = enumType->pythonEnumType();
@@ -503,7 +503,7 @@ static bool generateRichComparison(const GeneratorContext &c)
 {
     auto *metaClass = c.metaClass();
     if (c.forSmartPointer()) {
-        auto *te = static_cast<const SmartPointerTypeEntry *>(metaClass->typeEntry());
+        auto te = qSharedPointerCast<const SmartPointerTypeEntry>(metaClass->typeEntry());
         return te->smartPointerType() == TypeSystem::SmartPointerType::Shared;
     }
 
@@ -622,7 +622,7 @@ static bool needsTypeDiscoveryFunction(const AbstractMetaClass *c)
            && (c->isPolymorphic() || !c->typeEntry()->polymorphicIdValue().isEmpty());
 }
 
-static void writeAddedTypeSignatures(TextStream &s, const ComplexTypeEntry *te)
+static void writeAddedTypeSignatures(TextStream &s, const ComplexTypeEntryCPtr &te)
 {
     for (const auto &e : te->addedPyMethodDefEntrys()) {
         if (auto count = e.signatures.size()) {
@@ -647,11 +647,11 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
 
     s.setLanguage(TextStream::Language::Cpp);
     const AbstractMetaClass *metaClass = classContext.metaClass();
-    const auto *typeEntry = metaClass->typeEntry();
+    const auto typeEntry = metaClass->typeEntry();
 
     auto innerClasses = metaClass->innerClasses();
     for (auto it = innerClasses.begin(); it != innerClasses.end(); ) {
-        auto *innerTypeEntry = (*it)->typeEntry();
+        auto innerTypeEntry = (*it)->typeEntry();
         if (shouldGenerate(innerTypeEntry) && !innerTypeEntry->isSmartPointer())
             ++it;
         else
@@ -674,7 +674,7 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
         const AbstractMetaClass *context = metaClass->enclosingClass();
         while (context) {
             if (context->isNamespace() && !context->enclosingClass()
-                && static_cast<const NamespaceTypeEntry *>(context->typeEntry())->generateUsing()) {
+                && qSharedPointerCast<const NamespaceTypeEntry>(context->typeEntry())->generateUsing()) {
                 s << "\nusing namespace " << context->qualifiedCppName() << ";\n";
                 break;
             }
@@ -694,7 +694,7 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
 
     // python conversion rules
     if (typeEntry->isValue()) {
-        auto *vte = static_cast<const ValueTypeEntry *>(typeEntry);
+        auto vte = qSharedPointerCast<const ValueTypeEntry>(typeEntry);
         if (vte->hasTargetConversionRule()) {
             s << "// Python Conversion\n";
             s << vte->targetConversionRule() << '\n';
@@ -959,7 +959,7 @@ void CppGenerator::generateSmartPointerClass(TextStream &s, const GeneratorConte
 {
     s.setLanguage(TextStream::Language::Cpp);
     const AbstractMetaClass *metaClass = classContext.metaClass();
-    const auto *typeEntry = static_cast<const SmartPointerTypeEntry *>(metaClass->typeEntry());
+    const auto typeEntry = qSharedPointerCast<const SmartPointerTypeEntry>(metaClass->typeEntry());
     const bool hasPointeeClass = classContext.pointeeClass() != nullptr;
     const auto smartPointerType = typeEntry->smartPointerType();
     const bool isValueHandle = smartPointerType ==TypeSystem::SmartPointerType::ValueHandle;
@@ -1157,7 +1157,7 @@ QString CppGenerator::getVirtualFunctionReturnTypeName(const AbstractMetaFunctio
     // SbkType would return null when the type is a container.
     auto typeEntry = func->type().typeEntry();
     if (typeEntry->isContainer()) {
-        const auto *cte = static_cast<const ContainerTypeEntry *>(typeEntry);
+        const auto cte = qSharedPointerCast<const ContainerTypeEntry>(typeEntry);
         switch (cte->containerKind()) {
         case ContainerTypeEntry::ListContainer:
             break;
@@ -1197,7 +1197,7 @@ void CppGenerator::writeVirtualMethodCppCall(TextStream &s,
                                              const QString &funcName,
                                              const CodeSnipList &snips,
                                              const AbstractMetaArgument *lastArg,
-                                             const TypeEntry *retType,
+                                             const TypeEntryCPtr &retType,
                                              const QString &returnStatement, bool hasGil) const
 {
     if (!snips.isEmpty()) {
@@ -1292,10 +1292,10 @@ QPair<QString, QChar> CppGenerator::virtualMethodNativeArg(const AbstractMetaFun
         return {arg.name() + CONV_RULE_OUT_VAR_SUFFIX, u'N'};
 
     const auto &type = arg.type();
-    auto *argTypeEntry = type.typeEntry();
+    auto argTypeEntry = type.typeEntry();
     // Check for primitive types convertible by Py_BuildValue()
     if (argTypeEntry->isPrimitive() && !type.isCString()) {
-        const auto *pte = basicReferencedTypeEntry(argTypeEntry->asPrimitive());
+        const auto pte = basicReferencedTypeEntry(argTypeEntry);
         auto it = formatUnits().constFind(pte->name());
         if (it != formatUnits().constEnd())
             return {arg.name(), it.value()};
@@ -1385,7 +1385,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
                                             const AbstractMetaFunctionCPtr &func,
                                             int cacheIndex) const
 {
-    const TypeEntry *retType = func->type().typeEntry();
+    TypeEntryCPtr retType = func->type().typeEntry();
     const QString funcName = func->isOperatorOverload()
         ? pythonOperatorFunctionName(func) : func->definitionNames().constFirst();
 
@@ -1725,7 +1725,7 @@ void CppGenerator::writeMetaCast(TextStream &s,
 }
 
 void CppGenerator::writeFlagsConverterFunctions(TextStream &s,
-                                                const FlagsTypeEntry *flagsType,
+                                                const FlagsTypeEntryCPtr &flagsType,
                                                 const QString &enumTypeName,
                                                 const QString &flagsCppTypeName,
                                                 const QString &enumTypeCheck) const
@@ -1781,7 +1781,7 @@ static void generateDeprecatedValueWarnings(TextStream &c,
                                             const AbstractMetaEnum &metaEnum,
                                             bool useSurrogateName)
 {
-    const EnumTypeEntry *enumType = metaEnum.typeEntry();
+    EnumTypeEntryCPtr enumType = metaEnum.typeEntry();
     const QString prefix = enumType->qualifiedCppName() + u"::"_s;
     c << "switch (value) {\n";
     const auto &deprecatedValues = metaEnum.deprecatedValues();
@@ -1803,7 +1803,7 @@ void CppGenerator::writeEnumConverterFunctions(TextStream &s, const AbstractMeta
 {
     if (metaEnum.isPrivate() || metaEnum.isAnonymous())
         return;
-    EnumTypeEntry *enumType = metaEnum.typeEntry();
+    EnumTypeEntryPtr enumType = metaEnum.typeEntry();
     Q_ASSERT(enumType);
     QString typeName = fixedCppTypeName(enumType);
     QString enumPythonType = cpythonTypeNameExt(enumType);
@@ -1838,7 +1838,7 @@ void CppGenerator::writeEnumConverterFunctions(TextStream &s, const AbstractMeta
     s << '\n';
 
     // QFlags part.
-    if (auto *flags = enumType->flags()) {
+    if (auto flags = enumType->flags(); !flags.isNull()) {
         const QString flagsCppTypeName = useSurrogateName
             ? cppTypeName : getFullTypeName(flags).trimmed();
         writeFlagsConverterFunctions(s, flags, typeName, flagsCppTypeName, pyTypeCheck);
@@ -1851,7 +1851,7 @@ void CppGenerator::writeConverterFunctions(TextStream &s, const AbstractMetaClas
     s << "// Type conversion functions.\n\n";
 
     AbstractMetaEnumList classEnums = metaClass->enums();
-    auto *typeEntry = metaClass->typeEntry();
+    auto typeEntry = metaClass->typeEntry();
     metaClass->getEnumsFromInvisibleNamespacesToBeGenerated(&classEnums);
     if (!classEnums.isEmpty())
         s << "// Python to C++ enum conversion.\n";
@@ -1961,7 +1961,7 @@ return result;)";
         c << '*' << outPtr << " = *"
             << cpythonWrapperCPtr(typeEntry, pyInVariable) << ';';
     } else {
-        auto *ste = static_cast<const SmartPointerTypeEntry *>(typeEntry);
+        auto ste = qSharedPointerCast<const SmartPointerTypeEntry>(typeEntry);
         const QString resetMethod = ste->resetMethod();
         c << "auto *ptr = " << outPtr << ";\n";
         c << "if (" << pyInVariable << " == Py_None)\n" << indent;
@@ -2052,7 +2052,7 @@ return result;)";
     }
 
     if (typeEntry->isValue()) {
-        auto *vte = static_cast<const ValueTypeEntry *>(typeEntry);
+        auto vte = qSharedPointerCast<const ValueTypeEntry>(typeEntry);
         writeCustomConverterFunctions(s, vte->customConversion());
     }
 }
@@ -2065,7 +2065,7 @@ void CppGenerator::writeCustomConverterFunctions(TextStream &s,
     const TargetToNativeConversions &toCppConversions = customConversion->targetToNativeConversions();
     if (toCppConversions.isEmpty())
         return;
-    auto *ownerType = customConversion->ownerType();
+    auto ownerType = customConversion->ownerType();
     s << "// Python to C++ conversions for type '" << ownerType->qualifiedCppName() << "'.\n";
     for (const auto &toNative : toCppConversions)
         writePythonToCppConversionFunctions(s, toNative, ownerType);
@@ -2075,7 +2075,7 @@ void CppGenerator::writeCustomConverterFunctions(TextStream &s,
 void CppGenerator::writeConverterRegister(TextStream &s, const AbstractMetaClass *metaClass,
                                           const GeneratorContext &classContext) const
 {
-    const auto *typeEntry = metaClass->typeEntry();
+    const auto typeEntry = metaClass->typeEntry();
     if (typeEntry->isNamespace())
         return;
     s << "// Register Converter\n"
@@ -2185,7 +2185,7 @@ void CppGenerator::writeConverterRegister(TextStream &s, const AbstractMetaClass
     }
 
     if (typeEntry->isValue()) {
-        auto *vte = static_cast<const ValueTypeEntry *>(typeEntry);
+        auto vte = qSharedPointerCast<const ValueTypeEntry>(typeEntry);
         writeCustomConverterRegister(s, vte->customConversion(), u"converter"_s);
     }
 }
@@ -2220,7 +2220,7 @@ static AbstractMetaClassCList findSmartPointeeBaseClasses(const ApiExtractorResu
                                                           const AbstractMetaType &smartPointerType)
 {
     AbstractMetaClassCList result;
-    auto *instantiationsTe = smartPointerType.instantiations().at(0).typeEntry();
+    auto instantiationsTe = smartPointerType.instantiations().at(0).typeEntry();
     auto targetClass = AbstractMetaClass::findClass(api.classes(), instantiationsTe);
     if (targetClass != nullptr)
         result = targetClass->allTypeSystemAncestors();
@@ -2234,14 +2234,14 @@ void CppGenerator::writeSmartPointerConverterFunctions(TextStream &s,
     if (baseClasses.isEmpty())
         return;
 
-    auto *smartPointerTypeEntry =
-        static_cast<const SmartPointerTypeEntry *>(smartPointerType.typeEntry());
+    auto smartPointerTypeEntry =
+        qSharedPointerCast<const SmartPointerTypeEntry>(smartPointerType.typeEntry());
 
     // TODO: Missing conversion to smart pointer pointer type:
 
     s << "// Register smartpointer conversion for all derived classes\n";
     for (auto *base : baseClasses) {
-        auto *baseTe = base->typeEntry();
+        auto baseTe = base->typeEntry();
         if (smartPointerTypeEntry->matchesInstantiation(baseTe)) {
             if (auto opt = findSmartPointerInstantiation(smartPointerTypeEntry, baseTe)) {
                 const auto smartTargetType = opt.value();
@@ -2889,7 +2889,7 @@ void CppGenerator::writeTypeCheck(TextStream &s,
                                   const QSharedPointer<OverloadDataNode> &overloadData,
                                   const QString &argumentName)
 {
-    QSet<const TypeEntry *> numericTypes;
+    QSet<TypeEntryCPtr> numericTypes;
     const OverloadDataList &siblings = overloadData->parent()->children();
     for (const auto &sibling : siblings) {
         for (const auto &func : sibling->overloads()) {
@@ -2997,7 +2997,7 @@ qsizetype CppGenerator::writePythonToCppTypeConversion(TextStream &s,
                                                   const AbstractMetaClass *context,
                                                   const QString &defaultValue) const
 {
-    const TypeEntry *typeEntry = type.typeEntry();
+    TypeEntryCPtr typeEntry = type.typeEntry();
     if (typeEntry->isCustom() || typeEntry->isVarargs())
         return 0;
 
@@ -3286,7 +3286,7 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(TextStream &s,
 
                 if (func->isConstructor() && func->arguments().size() == 1) {
                     const AbstractMetaClass *ownerClass = func->ownerClass();
-                    const ComplexTypeEntry *baseContainerType = ownerClass->typeEntry()->baseContainerType();
+                    ComplexTypeEntryCPtr baseContainerType = ownerClass->typeEntry()->baseContainerType();
                     if (baseContainerType && baseContainerType == func->arguments().constFirst().type().typeEntry()
                         && ownerClass->isCopyable()) {
                         tck << '!' << cpythonCheckFunction(ownerClass->typeEntry())
@@ -3472,7 +3472,7 @@ QString CppGenerator::pythonToCppFunctionName(const AbstractMetaType &sourceType
     return pythonToCppFunctionName(fixedCppTypeName(sourceType), fixedCppTypeName(targetType));
 }
 QString CppGenerator::pythonToCppFunctionName(const TargetToNativeConversion &toNative,
-                                              const TypeEntry *targetType)
+                                              const TypeEntryCPtr &targetType)
 {
     return pythonToCppFunctionName(fixedCppTypeName(toNative), fixedCppTypeName(targetType));
 }
@@ -3487,7 +3487,7 @@ QString CppGenerator::convertibleToCppFunctionName(const AbstractMetaType &sourc
     return convertibleToCppFunctionName(fixedCppTypeName(sourceType), fixedCppTypeName(targetType));
 }
 QString CppGenerator::convertibleToCppFunctionName(const TargetToNativeConversion &toNative,
-                                                   const TypeEntry *targetType)
+                                                   const TypeEntryCPtr &targetType)
 {
     return convertibleToCppFunctionName(fixedCppTypeName(toNative), fixedCppTypeName(targetType));
 }
@@ -3532,7 +3532,7 @@ void CppGenerator::writeCppToPythonFunction(TextStream &s,
                                             const CustomConversionPtr &customConversion) const
 {
     QString code = customConversion->nativeToTargetConversion();
-    auto *ownerType = customConversion->ownerType();
+    auto ownerType = customConversion->ownerType();
     const bool constRef = !ownerType->isPrimitive(); // PyCapsule needs a non-const ref
     replaceCppToPythonVariables(code, getFullTypeName(ownerType), constRef);
     writeCppToPythonFunction(s, code, fixedCppTypeName(customConversion->ownerType()));
@@ -3540,7 +3540,7 @@ void CppGenerator::writeCppToPythonFunction(TextStream &s,
 void CppGenerator::writeCppToPythonFunction(TextStream &s, const AbstractMetaType &containerType) const
 {
     Q_ASSERT(containerType.typeEntry()->isContainer());
-    auto *cte = static_cast<const ContainerTypeEntry *>(containerType.typeEntry());
+    auto cte = qSharedPointerCast<const ContainerTypeEntry>(containerType.typeEntry());
     if (!cte->hasCustomConversion()) {
         QString m;
         QTextStream(&m) << "Can't write the C++ to Python conversion function for container type '"
@@ -3631,7 +3631,7 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s,
 
 void CppGenerator::writePythonToCppConversionFunctions(TextStream &s,
                                                       const TargetToNativeConversion &toNative,
-                                                      const TypeEntry *targetType) const
+                                                      const TypeEntryCPtr &targetType) const
 {
     // Python to C++ conversion function.
     QString code = toNative.conversion();
@@ -3679,7 +3679,7 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s,
 void CppGenerator::writePythonToCppConversionFunctions(TextStream &s, const AbstractMetaType &containerType) const
 {
     Q_ASSERT(containerType.typeEntry()->isContainer());
-    auto *cte = static_cast<const ContainerTypeEntry *>(containerType.typeEntry());
+    auto cte = qSharedPointerCast<const ContainerTypeEntry>(containerType.typeEntry());
     if (!cte->hasCustomConversion()) {
         //qFatal
         return;
@@ -3882,7 +3882,7 @@ CppGenerator::argumentClassFromIndex(const ApiExtractorResult &api,
             type = type.instantiations().constFirst();
     }
 
-    auto *te = type.typeEntry();
+    auto te = type.typeEntry();
     if (type.isVoid() || !te->isComplex())
         throw Exception(msgInvalidArgumentModification(func, argIndex));
     auto *result = AbstractMetaClass::findClass(api.classes(), te);
@@ -4411,7 +4411,7 @@ void CppGenerator::writeSpecialCastFunction(TextStream &s, const AbstractMetaCla
 void CppGenerator::writePrimitiveConverterInitialization(TextStream &s,
                                                          const CustomConversionPtr &customConversion)
 {
-    const TypeEntry *type = customConversion->ownerType();
+    TypeEntryCPtr type = customConversion->ownerType();
     QString converter = converterObject(type);
     s << "// Register converter for type '" << type->qualifiedTargetLangName() << "'.\n"
         << converter << " = Shiboken::Conversions::createConverter(";
@@ -4441,7 +4441,8 @@ static void registerEnumConverterScopes(TextStream &s, QString signature)
     }
 }
 
-void CppGenerator::writeFlagsConverterInitialization(TextStream &s, const FlagsTypeEntry *flags)
+void CppGenerator::writeFlagsConverterInitialization(TextStream &s,
+                                                     const FlagsTypeEntryCPtr &flags)
 {
     static const char enumPythonVar[] = "FType";
 
@@ -4493,7 +4494,7 @@ void CppGenerator::writeEnumConverterInitialization(TextStream &s, const Abstrac
 {
     if (metaEnum.isPrivate() || metaEnum.isAnonymous())
         return;
-    const EnumTypeEntry *enumType = metaEnum.typeEntry();
+    EnumTypeEntryCPtr enumType = metaEnum.typeEntry();
     Q_ASSERT(enumType);
 
     static const char enumPythonVar[] = "EType";
@@ -4516,7 +4517,7 @@ void CppGenerator::writeEnumConverterInitialization(TextStream &s, const Abstrac
 
     s << outdent << "}\n";
 
-    if (auto *flags = enumType->flags())
+    if (auto flags = enumType->flags(); !flags.isNull())
         writeFlagsConverterInitialization(s, flags);
 }
 
@@ -4565,13 +4566,13 @@ void CppGenerator::writeSmartPointerConverterInitialization(TextStream &s, const
     if (classes.isEmpty())
         return;
 
-    auto *smartPointerTypeEntry = static_cast<const SmartPointerTypeEntry *>(type.typeEntry());
+    auto smartPointerTypeEntry = qSharedPointerCast<const SmartPointerTypeEntry>(type.typeEntry());
 
     s << "// Register SmartPointer converter for type '" << cppSignature << "'." << '\n'
        << "///////////////////////////////////////////////////////////////////////////////////////\n\n";
 
     for (auto *base : classes) {
-        auto *baseTe = base->typeEntry();
+        auto baseTe = base->typeEntry();
         if (auto opt = findSmartPointerInstantiation(smartPointerTypeEntry, baseTe)) {
             const auto smartTargetType = opt.value();
             s << "// Convert to SmartPointer derived class: ["
@@ -4587,7 +4588,8 @@ void CppGenerator::writeSmartPointerConverterInitialization(TextStream &s, const
     s << "///////////////////////////////////////////////////////////////////////////////////////" << '\n' << '\n';
 }
 
-void CppGenerator::writeExtendedConverterInitialization(TextStream &s, const TypeEntry *externalType,
+void CppGenerator::writeExtendedConverterInitialization(TextStream &s,
+                                                        const TypeEntryCPtr &externalType,
                                                         const AbstractMetaClassCList &conversions)
 {
     s << "// Extended implicit conversions for " << externalType->qualifiedTargetLangName()
@@ -4634,7 +4636,7 @@ bool CppGenerator::supportsSequenceProtocol(const AbstractMetaClass *metaClass)
             return true;
     }
 
-    const ComplexTypeEntry *baseType = metaClass->typeEntry()->baseContainerType();
+    ComplexTypeEntryCPtr baseType = metaClass->typeEntry()->baseContainerType();
     return baseType && baseType->isContainer();
 }
 
@@ -5392,7 +5394,7 @@ using ComparisonOperatorList = QList<AbstractMetaFunction::ComparisonOperatorTyp
 static ComparisonOperatorList smartPointeeComparisons(const GeneratorContext &context)
 {
     Q_ASSERT(context.forSmartPointer());
-    auto *te = context.preciseType().instantiations().constFirst().typeEntry();
+    auto te = context.preciseType().instantiations().constFirst().typeEntry();
     if (isExtendedCppPrimitive(te)) { // Primitive pointee types have all
         return {AbstractMetaFunction::OperatorEqual,
                 AbstractMetaFunction::OperatorNotEqual,
@@ -5433,9 +5435,9 @@ void CppGenerator::writeSmartPointerRichCompareFunction(TextStream &s,
     writeArgumentConversion(s, context.preciseType(), CPP_ARG0,
                             PYTHON_ARG, ErrorReturn::Default, metaClass);
 
-    const auto *te = context.preciseType().typeEntry();
+    const auto te = context.preciseType().typeEntry();
     Q_ASSERT(te->isSmartPointer());
-    const auto *ste = static_cast<const SmartPointerTypeEntry *>(te);
+    const auto ste = qSharedPointerCast<const SmartPointerTypeEntry>(te);
 
     s << "const auto *" << selfPointeeVar << " = " << CPP_SELF_VAR
         << '.' << ste->getter() << "();\n";
@@ -5665,7 +5667,7 @@ void CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
     const AbstractMetaClass *enclosingClass = cppEnum.targetLangEnclosingClass();
     bool hasUpperEnclosingClass = enclosingClass
                                   && enclosingClass->targetLangEnclosingClass() != nullptr;
-    const EnumTypeEntry *enumTypeEntry = cppEnum.typeEntry();
+    EnumTypeEntryCPtr enumTypeEntry = cppEnum.typeEntry();
     QString enclosingObjectVariable;
     if (enclosingClass)
         enclosingObjectVariable = cpythonTypeName(enclosingClass);
@@ -5681,8 +5683,8 @@ void CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
     QString enumVarTypeObj = cpythonTypeNameExt(enumTypeEntry);
     if (!cppEnum.isAnonymous()) {
         int packageLevel = packageName().count(u'.') + 1;
-        FlagsTypeEntry *flags = enumTypeEntry->flags();
-        if (flags) {
+        FlagsTypeEntryPtr flags = enumTypeEntry->flags();
+        if (!flags.isNull()) {
             // The following could probably be made nicer:
             // We need 'flags->flagsName()' with the full module/class path.
             QString fullPath = getClassTargetFullName(cppEnum);
@@ -5805,7 +5807,7 @@ void CppGenerator::writeSignalInitialization(TextStream &s, const AbstractMetaCl
 
 void CppGenerator::writeFlagsToLong(TextStream &s, const AbstractMetaEnum &cppEnum)
 {
-    FlagsTypeEntry *flagsEntry = cppEnum.typeEntry()->flags();
+    FlagsTypeEntryPtr flagsEntry = cppEnum.typeEntry()->flags();
     if (!flagsEntry)
         return;
     s << "static PyObject *" << cpythonEnumName(cppEnum) << "_long(PyObject *self)\n"
@@ -5819,8 +5821,8 @@ void CppGenerator::writeFlagsToLong(TextStream &s, const AbstractMetaEnum &cppEn
 
 void CppGenerator::writeFlagsNonZero(TextStream &s, const AbstractMetaEnum &cppEnum)
 {
-    FlagsTypeEntry *flagsEntry = cppEnum.typeEntry()->flags();
-    if (!flagsEntry)
+    FlagsTypeEntryPtr flagsEntry = cppEnum.typeEntry()->flags();
+    if (flagsEntry.isNull())
         return;
     s << "static int " << cpythonEnumName(cppEnum) << "__nonzero(PyObject *self)\n";
     s << "{\n" << indent << "int val;\n";
@@ -5874,8 +5876,8 @@ void CppGenerator::writeFlagsNumberMethodsDefinitions(TextStream &s,
 void CppGenerator::writeFlagsBinaryOperator(TextStream &s, const AbstractMetaEnum &cppEnum,
                                             const QString &pyOpName, const QString &cppOpName)
 {
-    FlagsTypeEntry *flagsEntry = cppEnum.typeEntry()->flags();
-    Q_ASSERT(flagsEntry);
+    FlagsTypeEntryPtr flagsEntry = cppEnum.typeEntry()->flags();
+    Q_ASSERT(!flagsEntry.isNull());
 
     s << "PyObject *" << cpythonEnumName(cppEnum) << "___" << pyOpName
         << "__(PyObject *self, PyObject *" << PYTHON_ARG << ")\n{\n" << indent;
@@ -5903,7 +5905,7 @@ void CppGenerator::writeFlagsUnaryOperator(TextStream &s, const AbstractMetaEnum
                                            const QString &pyOpName,
                                            const QString &cppOpName, bool boolResult)
 {
-    FlagsTypeEntry *flagsEntry = cppEnum.typeEntry()->flags();
+    FlagsTypeEntryPtr flagsEntry = cppEnum.typeEntry()->flags();
     Q_ASSERT(flagsEntry);
 
     s << "PyObject *" << cpythonEnumName(cppEnum) << "___" << pyOpName
@@ -5993,7 +5995,7 @@ void CppGenerator::writeClassRegister(TextStream &s,
                                       const GeneratorContext &classContext,
                                       const QString &signatures) const
 {
-    const ComplexTypeEntry *classTypeEntry = metaClass->typeEntry();
+    ComplexTypeEntryCPtr classTypeEntry = metaClass->typeEntry();
 
     const AbstractMetaClass *enc = metaClass->targetLangEnclosingClass();
     QString enclosingObjectVariable = enc ? u"enclosingClass"_s : u"module"_s;
@@ -6571,7 +6573,7 @@ void CppGenerator::writeNbBoolFunction(const GeneratorContext &context,
 // function.
 void CppGenerator::writeInitFunc(TextStream &declStr, TextStream &callStr,
                                  const QString &initFunctionName,
-                                 const TypeEntry *enclosingEntry)
+                                 const TypeEntryCPtr &enclosingEntry)
 {
     const bool hasParent =
         enclosingEntry && enclosingEntry->type() != TypeEntry::TypeSystemType;
@@ -6619,7 +6621,7 @@ bool CppGenerator::finishGeneration()
 
     AbstractMetaClassCList classesWithStaticFields;
     for (auto cls : api().classes()){
-        auto *te = cls->typeEntry();
+        auto te = cls->typeEntry();
         if (shouldGenerate(te)) {
             writeInitFunc(s_classInitDecl, s_classPythonDefines,
                           getSimpleClassInitFunctionName(cls),
@@ -6636,7 +6638,7 @@ bool CppGenerator::finishGeneration()
     for (const auto &smp : api().instantiatedSmartPointers()) {
         GeneratorContext context = contextForSmartPointer(smp.specialized, smp.type);
         auto *enclosingClass = context.metaClass()->enclosingClass();
-        auto *enclosingTypeEntry = enclosingClass != nullptr
+        auto enclosingTypeEntry = enclosingClass != nullptr
             ? enclosingClass->typeEntry()
             : targetLangEnclosingEntry(smp.type.typeEntry());
         writeInitFunc(s_classInitDecl, s_classPythonDefines,
@@ -6652,7 +6654,7 @@ bool CppGenerator::finishGeneration()
 
     const ExtendedConverterData extendedConverters = getExtendedConverters();
     for (auto it = extendedConverters.cbegin(), end = extendedConverters.cend(); it != end; ++it) {
-        const TypeEntry *te = it.key();
+        TypeEntryCPtr te = it.key();
         includes << te->include();
         for (const auto &metaClass : it.value())
             includes << metaClass->typeEntry()->include();
@@ -6660,7 +6662,7 @@ bool CppGenerator::finishGeneration()
 
     const QList<CustomConversionPtr> &typeConversions = getPrimitiveCustomConversions();
     for (const auto &c : typeConversions) {
-        if (auto *te = c->ownerType())
+        if (auto te = c->ownerType(); !te.isNull())
             includes << te->include();
     }
 
@@ -6707,8 +6709,8 @@ bool CppGenerator::finishGeneration()
     }
 
     TypeDatabase *typeDb = TypeDatabase::instance();
-    const TypeSystemTypeEntry *moduleEntry = typeDb->defaultTypeSystemType();
-    Q_ASSERT(moduleEntry);
+    TypeSystemTypeEntryCPtr moduleEntry = typeDb->defaultTypeSystemType();
+    Q_ASSERT(!moduleEntry.isNull());
 
     s  << '\n';
     // Extra includes
@@ -6791,7 +6793,7 @@ bool CppGenerator::finishGeneration()
     if (!extendedConverters.isEmpty()) {
         s  << '\n' << "// Extended Converters.\n\n";
         for (ExtendedConverterData::const_iterator it = extendedConverters.cbegin(), end = extendedConverters.cend(); it != end; ++it) {
-            const TypeEntry *externalType = it.key();
+            TypeEntryCPtr externalType = it.key();
             s << "// Extended implicit conversions for "
                 << externalType->qualifiedTargetLangName() << '.' << '\n';
             for (const AbstractMetaClass *sourceClass : it.value()) {
@@ -6945,12 +6947,12 @@ bool CppGenerator::finishGeneration()
 
     s << "// Register primitive types converters.\n";
     const PrimitiveTypeEntryCList &primitiveTypeList = primitiveTypes();
-    for (const PrimitiveTypeEntry *pte : primitiveTypeList) {
+    for (const auto &pte : primitiveTypeList) {
         if (!pte->generateCode() || !isCppPrimitive(pte))
             continue;
         if (!pte->referencesType())
             continue;
-        const auto *referencedType = basicReferencedTypeEntry(pte);
+        TypeEntryCPtr referencedType = basicReferencedTypeEntry(pte);
         QString converter = converterObject(referencedType);
         QStringList cppSignature = pte->qualifiedCppName().split(u"::"_s, Qt::SkipEmptyParts);
         while (!cppSignature.isEmpty()) {
@@ -7027,10 +7029,10 @@ static bool useParentHeuristics(const ApiExtractorResult &api,
     auto *owner = func->ownerClass();
     if (owner == nullptr)
         return false;
-    auto *ownerEntry = owner->parentManagementEntry();
-    if (ownerEntry == nullptr)
+    auto ownerEntry = owner->parentManagementEntry();
+    if (ownerEntry.isNull())
         return false;
-    auto *argTypeEntry = argType.typeEntry();
+    auto argTypeEntry = argType.typeEntry();
     if (!argTypeEntry->isComplex())
         return false;
     auto *argClass = AbstractMetaClass::findClass(api.classes(), argTypeEntry);

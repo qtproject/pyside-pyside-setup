@@ -86,20 +86,20 @@ public:
     const QStringList &systemIncludes() const;
     void addSystemInclude(const QString &name);
 
-    void addInlineNamespaceLookups(const NamespaceTypeEntry *n);
+    void addInlineNamespaceLookups(const NamespaceTypeEntryCPtr &n);
 
-    PrimitiveTypeEntry *findPrimitiveType(const QString &name) const;
-    ComplexTypeEntry *findComplexType(const QString &name) const;
-    ObjectTypeEntry *findObjectType(const QString &name) const;
+    PrimitiveTypeEntryPtr findPrimitiveType(const QString &name) const;
+    ComplexTypeEntryPtr findComplexType(const QString &name) const;
+    ObjectTypeEntryPtr findObjectType(const QString &name) const;
     NamespaceTypeEntryList findNamespaceTypes(const QString &name) const;
-    NamespaceTypeEntry *findNamespaceType(const QString &name, const QString &fileName = QString()) const;
-    ContainerTypeEntry *findContainerType(const QString &name) const;
-    FunctionTypeEntry *findFunctionType(const QString &name) const;
-    const TypeSystemTypeEntry *findTypeSystemType(const QString &name) const;
-    const TypeSystemTypeEntry *defaultTypeSystemType() const;
+    NamespaceTypeEntryPtr findNamespaceType(const QString &name, const QString &fileName = QString()) const;
+    ContainerTypeEntryPtr findContainerType(const QString &name) const;
+    FunctionTypeEntryPtr findFunctionType(const QString &name) const;
+    TypeSystemTypeEntryCPtr findTypeSystemType(const QString &name) const;
+    TypeSystemTypeEntryCPtr defaultTypeSystemType() const;
     QString defaultPackageName() const;
 
-    TypeEntry *findType(const QString &name) const;
+    TypeEntryPtr findType(const QString &name) const;
     TypeEntryCList findTypes(const QString &name) const;
     TypeEntryCList findCppTypes(const QString &name) const;
 
@@ -125,21 +125,21 @@ public:
     bool isReturnTypeRejected(const QString &className, const QString &typeName,
                               QString *reason = nullptr) const;
 
-    bool addType(TypeEntry *e, QString *errorMessage = nullptr);
-    ConstantValueTypeEntry *addConstantValueTypeEntry(const QString &value,
-                                                      const TypeEntry *parent);
-    void addTypeSystemType(const TypeSystemTypeEntry *e);
+    bool addType(const TypeEntryPtr &e, QString *errorMessage = nullptr);
+    ConstantValueTypeEntryPtr addConstantValueTypeEntry(const QString &value,
+                                                      const TypeEntryCPtr &parent);
+    void addTypeSystemType(const TypeSystemTypeEntryCPtr &e);
 
-    static ComplexTypeEntry *
-        initializeTypeDefEntry(TypedefEntry *typedefEntry,
-                               const ComplexTypeEntry *source);
+    static ComplexTypeEntryPtr
+        initializeTypeDefEntry(const TypedefEntryPtr &typedefEntry,
+                               const ComplexTypeEntryCPtr &source);
 
-    FlagsTypeEntry *findFlagsType(const QString &name) const;
-    void addFlagsType(FlagsTypeEntry *fte);
+    FlagsTypeEntryPtr findFlagsType(const QString &name) const;
+    void addFlagsType(FlagsTypeEntryPtr fte);
 
-    TemplateEntry *findTemplate(const QString &name) const;
+    TemplateEntryPtr findTemplate(const QString &name) const;
 
-    void addTemplate(TemplateEntry *t);
+    void addTemplate(const TemplateEntryPtr &t);
     void addTemplate(const QString &name, const QString &code);
 
     AddedFunctionList globalUserFunctions() const;
@@ -159,7 +159,7 @@ public:
 
     bool isSuppressedWarning(QStringView s) const;
 
-    static QString globalNamespaceClassName(const TypeEntry *te);
+    static QString globalNamespaceClassName(const TypeEntryCPtr &te);
 
     // Top level file parsing
     bool parseFile(const QString &filename, bool generate = true);
@@ -194,6 +194,7 @@ private:
 };
 
 #ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, const TypeEntryCPtr &te);
 QDebug operator<<(QDebug d, const TypeEntry *te);
 QDebug operator<<(QDebug d, const TypeDatabase &db);
 #endif

@@ -373,8 +373,8 @@ typedef BaseTemplateClass<TypeOne> TypeOneClass;
     QCOMPARE(one->templateBaseClass(), base);
     QCOMPARE(one->functions().size(), base->functions().size());
     QVERIFY(one->isTypeDef());
-    const ComplexTypeEntry *oneType = one->typeEntry();
-    const ComplexTypeEntry *baseType = base->typeEntry();
+    auto oneType = one->typeEntry();
+    auto baseType = base->typeEntry();
     QCOMPARE(oneType->baseContainerType(), baseType);
     QCOMPARE(one->baseClassNames(), QStringList(u"BaseTemplateClass<TypeOne>"_s));
 
@@ -418,8 +418,8 @@ typedef Vector<int> IntVector;
     auto *vector = AbstractMetaClass::findClass(classes, u"IntVector");
     QVERIFY(vector);
     auto baseContainer = vector->typeEntry()->baseContainerType();
-    QVERIFY(baseContainer);
-    QCOMPARE(reinterpret_cast<const ContainerTypeEntry*>(baseContainer)->containerKind(),
+    QVERIFY(!baseContainer.isNull());
+    QCOMPARE(reinterpret_cast<const ContainerTypeEntry*>(baseContainer.data())->containerKind(),
              ContainerTypeEntry::ListContainer);
     QCOMPARE(vector->functions().size(), 4);
 

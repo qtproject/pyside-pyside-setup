@@ -89,7 +89,7 @@ bool DocParser::skipForQuery(const AbstractMetaFunctionCPtr &func)
 DocModificationList DocParser::getDocModifications(const AbstractMetaClass *cppClass,
                                                    const AbstractMetaFunctionCPtr &func)
 {
-    auto *te = cppClass->typeEntry();
+    auto te = cppClass->typeEntry();
     if (func.isNull())
         return te->docModifications();
 

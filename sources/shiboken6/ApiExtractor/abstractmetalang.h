@@ -114,8 +114,8 @@ public:
     bool canAddDefaultCopyConstructor() const;
 
     /// Return type entry of the base class that declares the parent management
-    const TypeEntry *parentManagementEntry() const;
-    bool hasParentManagement() const { return parentManagementEntry() != nullptr; }
+    TypeEntryCPtr parentManagementEntry() const;
+    bool hasParentManagement() const { return !parentManagementEntry().isNull(); }
 
     void addSynthesizedComparisonOperators();
 
@@ -248,9 +248,9 @@ public:
     const QStringList &baseClassNames() const;
     void setBaseClassNames(const QStringList &names);
 
-    const ComplexTypeEntry *typeEntry() const;
-    ComplexTypeEntry *typeEntry();
-    void setTypeEntry(ComplexTypeEntry *type);
+    ComplexTypeEntryCPtr typeEntry() const;
+    ComplexTypeEntryPtr typeEntry();
+    void setTypeEntry(const ComplexTypeEntryPtr &type);
 
     /// Returns the global hash function as found by the code parser
     QString hashFunction() const;
@@ -323,9 +323,9 @@ public:
     static const AbstractMetaClass *findClass(const AbstractMetaClassCList &classes,
                                               QStringView name);
     static AbstractMetaClass *findClass(const AbstractMetaClassList &classes,
-                                        const TypeEntry *typeEntry);
+                                        const TypeEntryCPtr &typeEntry);
     static const AbstractMetaClass *findClass(const AbstractMetaClassCList &classes,
-                                              const TypeEntry *typeEntry);
+                                              const TypeEntryCPtr &typeEntry);
     const AbstractMetaClass *findBaseClass(const QString &qualifiedName) const;
 
     static std::optional<AbstractMetaEnumValue> findEnumValue(const AbstractMetaClassList &classes,

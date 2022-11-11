@@ -10,7 +10,7 @@ class CustomTypeEntry : public TypeEntry
 {
 public:
     explicit CustomTypeEntry(const QString &entryName, const QVersionNumber &vr,
-                             const TypeEntry *parent);
+                             const TypeEntryCPtr &parent);
 
     TypeEntry *clone() const override;
 

@@ -8,6 +8,7 @@
 #include "apiextractorflags.h"
 #include "header_paths.h"
 #include "typesystem_enums.h"
+#include "typesystem_typedefs.h"
 
 #include "clangparser/compilersupport.h"
 
@@ -50,7 +51,7 @@ public:
     AbstractMetaClassList takeSmartPointers();
     const AbstractMetaFunctionCList &globalFunctions() const;
     const AbstractMetaEnumList &globalEnums() const;
-    const QHash<const TypeEntry *, AbstractMetaEnum> &typeEntryToEnumsHash() const;
+    const QHash<TypeEntryCPtr, AbstractMetaEnum> &typeEntryToEnumsHash() const;
 
     bool build(const QByteArrayList &arguments,
                ApiExtractorFlags apiExtractorFlags = {},
@@ -94,7 +95,7 @@ public:
                                 const AbstractMetaTypeList &templateTypes);
 
     static AbstractMetaClass *
-        inheritTemplateClass(ComplexTypeEntry *te,
+        inheritTemplateClass(const ComplexTypeEntryPtr &te,
                              const AbstractMetaClass *templateClass,
                              const AbstractMetaTypeList &templateTypes,
                              InheritTemplateFlags flags = {});

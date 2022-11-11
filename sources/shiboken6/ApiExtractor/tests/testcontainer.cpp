@@ -36,7 +36,7 @@ void TestContainer::testContainerType()
     QVERIFY(classA);
     auto baseContainer = classA->typeEntry()->baseContainerType();
     QVERIFY(baseContainer);
-    QCOMPARE(reinterpret_cast<const ContainerTypeEntry*>(baseContainer)->containerKind(),
+    QCOMPARE(reinterpret_cast<const ContainerTypeEntry*>(baseContainer.data())->containerKind(),
              ContainerTypeEntry::ListContainer);
 }
 

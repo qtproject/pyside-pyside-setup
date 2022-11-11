@@ -485,9 +485,9 @@ namespace Test2
     const auto namespaceEnums = testNamespace->enums();
     if (namespaceEnums.size() != 2)
         return -4;
-    QList<const EnumTypeEntry *> enumTypeEntries{
-        static_cast<const EnumTypeEntry *>(namespaceEnums.at(0).typeEntry()),
-        static_cast<const EnumTypeEntry *>(namespaceEnums.at(1).typeEntry())};
+    QList<EnumTypeEntryCPtr > enumTypeEntries{
+        qSharedPointerCast<const EnumTypeEntry>(namespaceEnums.at(0).typeEntry()),
+        qSharedPointerCast<const EnumTypeEntry>(namespaceEnums.at(1).typeEntry())};
     if (enumTypeEntries.constFirst()->flags())
         std::swap(enumTypeEntries[0], enumTypeEntries[1]);
     fixture->testEnum = AbstractMetaType(enumTypeEntries.at(0));

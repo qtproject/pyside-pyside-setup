@@ -21,8 +21,8 @@ public:
                                       const QString &sourceTypeCheck,
                                       const QString &conversion = {});
 
-    const TypeEntry *sourceType() const;
-    void setSourceType(const TypeEntry *sourceType);
+    TypeEntryCPtr sourceType() const;
+    void setSourceType(const TypeEntryCPtr &sourceType);
     bool isCustomType() const;
     QString sourceTypeName() const;
     QString sourceTypeCheck() const;
@@ -32,7 +32,7 @@ public:
     void formatDebug(QDebug &d) const;
 
 private:
-    const TypeEntry *m_sourceType = nullptr;
+    TypeEntryCPtr m_sourceType;
     QString m_sourceTypeName;
     QString m_sourceTypeCheck;
     QString m_conversion;
@@ -43,9 +43,9 @@ using TargetToNativeConversions = QList<TargetToNativeConversion>;
 class CustomConversion
 {
 public:
-    explicit CustomConversion(const TypeEntry *ownerType);
+    explicit CustomConversion(const TypeEntryCPtr &ownerType);
 
-    const TypeEntry *ownerType() const;
+    TypeEntryCPtr ownerType() const;
     QString nativeToTargetConversion() const;
     void setNativeToTargetConversion(const QString &nativeToTargetConversion);
 
@@ -63,12 +63,12 @@ public:
                                      const QString &conversion = QString());
 
     /// Return the custom conversion of a type; helper for type system parser
-    static CustomConversionPtr getCustomConversion(const TypeEntry *type);
+    static CustomConversionPtr getCustomConversion(const TypeEntryCPtr &type);
 
     void formatDebug(QDebug &debug) const;
 
 private:
-    const TypeEntry *m_ownerType;
+    TypeEntryCPtr m_ownerType;
     QString m_nativeToTargetConversion;
     TargetToNativeConversions m_targetToNativeConversions;
     bool m_replaceOriginalTargetToNativeConversions = false;

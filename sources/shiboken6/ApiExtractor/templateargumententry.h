@@ -12,7 +12,7 @@ class TemplateArgumentEntry : public TypeEntry
 {
 public:
     explicit TemplateArgumentEntry(const QString &entryName, const QVersionNumber &vr,
-                                   const TypeEntry *parent);
+                                   const TypeEntryCPtr &parent);
 
     int ordinal() const;
     void setOrdinal(int o);

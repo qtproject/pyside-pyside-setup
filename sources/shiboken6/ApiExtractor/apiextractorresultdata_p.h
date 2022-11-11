@@ -22,8 +22,7 @@ public:
     AbstractMetaEnumList m_globalEnums;
     AbstractMetaTypeList m_instantiatedContainers;
     InstantiatedSmartPointers m_instantiatedSmartPointers;
-    QHash<const TypeEntry *, AbstractMetaEnum> m_enums;
-    QList<const TypeEntry *> m_synthesizedTypeEntries; // not exposed, just for ownership
+    QHash<TypeEntryCPtr, AbstractMetaEnum> m_enums;
     ApiExtractorFlags m_flags;
 };
 

@@ -16,7 +16,7 @@ class PrimitiveTypeEntry : public TypeEntry
 {
 public:
     explicit PrimitiveTypeEntry(const QString &entryName, const QVersionNumber &vr,
-                                const TypeEntry *parent);
+                                const TypeEntryCPtr &parent);
 
     QString defaultConstructor() const;
     void setDefaultConstructor(const QString& defaultConstructor);
@@ -28,13 +28,13 @@ public:
      *   \return the type referenced by the typedef, or a null pointer
      *   if the current object is not an typedef
      */
-    PrimitiveTypeEntry *referencedTypeEntry() const;
+    PrimitiveTypeEntryPtr referencedTypeEntry() const;
 
     /**
      *   Defines type referenced by this entry.
      *   \param referencedTypeEntry type referenced by this entry
      */
-    void setReferencedTypeEntry(PrimitiveTypeEntry *referencedTypeEntry);
+    void setReferencedTypeEntry(PrimitiveTypeEntryPtr referencedTypeEntry);
 
     /// Returns whether this entry references another entry.
     bool referencesType() const;
@@ -60,12 +60,13 @@ protected:
 /// i.e. a type that is not an typedef'ed.
 /// \return the most basic non-typedef'ed primitive type represented
 /// by this typedef or self in case it is not a reference.
-const PrimitiveTypeEntry *basicReferencedTypeEntry(const PrimitiveTypeEntry *e);
+PrimitiveTypeEntryCPtr basicReferencedTypeEntry(const PrimitiveTypeEntryCPtr &e);
+PrimitiveTypeEntryCPtr basicReferencedTypeEntry(const TypeEntryCPtr &e);
 
 /// Finds the basic primitive type that the typedef represents
 /// and was explicitly specified in the type system.
 /// \return the basic primitive type that was explicitly specified in
 /// the type system.
-const PrimitiveTypeEntry *basicReferencedNonBuiltinTypeEntry(const PrimitiveTypeEntry *e);
+PrimitiveTypeEntryCPtr basicReferencedNonBuiltinTypeEntry(const PrimitiveTypeEntryCPtr &e);
 
 #endif // PRIMITIVETYPEENTRY_H

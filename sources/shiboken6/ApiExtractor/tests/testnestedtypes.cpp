@@ -105,10 +105,10 @@ void TestNestedTypes::testDuplicationOfNestedTypes()
     QCOMPARE(cls1->name(), u"SomeClass");
     QCOMPARE(cls1->qualifiedCppName(), u"Namespace::SomeClass");
 
-    auto *t1 = TypeDatabase::instance()->findType(u"Namespace::SomeClass"_s);
-    QVERIFY(t1);
-    auto *t2 = TypeDatabase::instance()->findType(u"SomeClass"_s);
-    QVERIFY(!t2);
+    auto t1 = TypeDatabase::instance()->findType(u"Namespace::SomeClass"_s);
+    QVERIFY(!t1.isNull());
+    auto t2 = TypeDatabase::instance()->findType(u"SomeClass"_s);
+    QVERIFY(t2.isNull());
 }
 
 QTEST_APPLESS_MAIN(TestNestedTypes)

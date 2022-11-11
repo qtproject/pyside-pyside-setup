@@ -38,7 +38,7 @@
 
 using namespace Qt::StringLiterals;
 
-static QString buildName(const QString &entryName, const TypeEntry *parent)
+static QString buildName(const QString &entryName, const TypeEntryCPtr &parent)
 {
     return parent == nullptr || parent->type() == TypeEntry::TypeSystemType
         ? entryName : parent->name() + u"::"_s + entryName;
@@ -51,12 +51,12 @@ class TypeEntryPrivate
 {
 public:
     explicit TypeEntryPrivate(const QString &entryName, TypeEntry::Type t, const QVersionNumber &vr,
-                              const TypeEntry *parent);
+                              const TypeEntryCPtr &parent);
     virtual ~TypeEntryPrivate() = default;
 
     QString shortName() const;
 
-    const TypeEntry *m_parent;
+    TypeEntryCPtr m_parent;
     QString m_name; // C++ fully qualified
     mutable QString m_cachedShortName; // C++ excluding inline namespaces
     QString m_entryName;
@@ -68,8 +68,8 @@ public:
     QVersionNumber m_version;
     SourceLocation m_sourceLocation; // XML file
     TypeEntry::CodeGeneration m_codeGeneration = TypeEntry::GenerateCode;
-    TypeEntry *m_viewOn = nullptr;
-    CustomTypeEntry *m_targetLangApiType = nullptr;
+    TypeEntryPtr m_viewOn;
+    CustomTypeEntryPtr m_targetLangApiType;
     int m_revision = 0;
     int m_sbkIndex = 0;
     TypeEntry::Type m_type;
@@ -79,7 +79,7 @@ public:
 };
 
 TypeEntryPrivate::TypeEntryPrivate(const QString &entryName, TypeEntry::Type t, const QVersionNumber &vr,
-                                   const TypeEntry *parent) :
+                                   const TypeEntryCPtr &parent) :
     m_parent(parent),
     m_name(buildName(entryName, parent)),
     m_entryName(entryName),
@@ -89,7 +89,7 @@ TypeEntryPrivate::TypeEntryPrivate(const QString &entryName, TypeEntry::Type t, 
 }
 
 TypeEntry::TypeEntry(const QString &entryName, TypeEntry::Type t, const QVersionNumber &vr,
-                     const TypeEntry *parent) :
+                     const TypeEntryCPtr &parent) :
     TypeEntry(new TypeEntryPrivate(entryName, t, vr, parent))
 {
 }
@@ -140,7 +140,7 @@ QVersionNumber TypeEntry::version() const
     return m_d->m_version;
 }
 
-bool isCppPrimitive(const TypeEntry *e)
+bool isCppPrimitive(const TypeEntryCPtr &e)
 {
     if (!e->isPrimitive())
         return false;
@@ -148,8 +148,7 @@ bool isCppPrimitive(const TypeEntry *e)
     if (e->type() == TypeEntry::VoidType)
         return true;
 
-    const PrimitiveTypeEntry *referencedType =
-        basicReferencedTypeEntry(e->asPrimitive());
+    PrimitiveTypeEntryCPtr referencedType = basicReferencedTypeEntry(e);
     const QString &typeName = referencedType->name();
     return AbstractMetaType::cppPrimitiveTypes().contains(typeName);
 }
@@ -159,17 +158,17 @@ TypeEntry::Type TypeEntry::type() const
     return m_d->m_type;
 }
 
-const TypeEntry *TypeEntry::parent() const
+TypeEntryCPtr TypeEntry::parent() const
 {
     return m_d->m_parent;
 }
 
-void TypeEntry::setParent(const TypeEntry *p)
+void TypeEntry::setParent(const TypeEntryCPtr &p)
 {
     m_d->m_parent = p;
 }
 
-bool TypeEntry::isChildOf(const TypeEntry *p) const
+bool TypeEntry::isChildOf(const TypeEntryCPtr &p) const
 {
     for (auto e = m_d->m_parent; e; e = e->parent()) {
         if (e == p)
@@ -178,16 +177,16 @@ bool TypeEntry::isChildOf(const TypeEntry *p) const
     return false;
 }
 
-const TypeSystemTypeEntry *typeSystemTypeEntry(const TypeEntry *e)
+TypeSystemTypeEntryCPtr typeSystemTypeEntry(TypeEntryCPtr e)
 {
     for (; e; e = e->parent()) {
         if (e->type() == TypeEntry::TypeSystemType)
-            return static_cast<const TypeSystemTypeEntry *>(e);
+            return qSharedPointerCast<const TypeSystemTypeEntry>(e);
     }
-    return nullptr;
+    return {};
 }
 
-const TypeEntry *targetLangEnclosingEntry(const TypeEntry *e)
+TypeEntryCPtr targetLangEnclosingEntry(const TypeEntryCPtr &e)
 {
     auto result = e->parent();
     while (result && result->type() != TypeEntry::TypeSystemType
@@ -320,11 +319,11 @@ QString TypeEntry::name() const
 QString TypeEntryPrivate::shortName() const
 {
     if (m_cachedShortName.isEmpty()) {
-        QVarLengthArray<const TypeEntry *> parents;
+        QVarLengthArray<TypeEntryCPtr > parents;
         bool foundInlineNamespace = false;
         for (auto p = m_parent; p != nullptr && p->type() != TypeEntry::TypeSystemType; p = p->parent()) {
             if (p->type() == TypeEntry::NamespaceType
-                && static_cast<const NamespaceTypeEntry *>(p)->isInlineNamespace()) {
+                && qSharedPointerCast<const NamespaceTypeEntry>(p)->isInlineNamespace()) {
                 foundInlineNamespace = true;
             } else {
                 parents.append(p);
@@ -389,7 +388,7 @@ QString TypeEntry::qualifiedCppName() const
     return m_d->m_name;
 }
 
-const CustomTypeEntry *TypeEntry::targetLangApiType() const
+CustomTypeEntryCPtr TypeEntry::targetLangApiType() const
 {
     return m_d->m_targetLangApiType;
 }
@@ -399,7 +398,7 @@ bool TypeEntry::hasTargetLangApiType() const
     return m_d->m_targetLangApiType != nullptr;
 }
 
-void TypeEntry::setTargetLangApiType(CustomTypeEntry *cte)
+void TypeEntry::setTargetLangApiType(const CustomTypeEntryPtr &cte)
 {
     m_d->m_targetLangApiType = cte;
 }
@@ -459,17 +458,11 @@ void TypeEntry::setSourceLocation(const SourceLocation &sourceLocation)
     m_d->m_sourceLocation = sourceLocation;
 }
 
-const PrimitiveTypeEntry *TypeEntry::asPrimitive() const
-{
-    Q_ASSERT(m_d->m_type == PrimitiveType);
-    return static_cast<const PrimitiveTypeEntry *>(this);
-}
-
-bool isUserPrimitive(const TypeEntry *e)
+bool isUserPrimitive(const TypeEntryCPtr &e)
 {
     if (!e->isPrimitive())
         return false;
-    const auto *type = basicReferencedTypeEntry(e->asPrimitive());
+    const auto type = basicReferencedTypeEntry(e);
     return !isCppPrimitive(type)
         && type->qualifiedCppName() != u"std::string";
 }
@@ -479,21 +472,21 @@ bool TypeEntry::isWrapperType() const
   return isObject() || isValue() || isSmartPointer();
 }
 
-bool isCppIntegralPrimitive(const TypeEntry *e)
+bool isCppIntegralPrimitive(const TypeEntryCPtr &e)
 {
     if (!isCppPrimitive(e))
         return false;
-    const auto *type = basicReferencedTypeEntry(e->asPrimitive());
+    const auto type = basicReferencedTypeEntry(e);
     return AbstractMetaType::cppIntegralTypes().contains(type->qualifiedCppName());
 }
 
-bool isExtendedCppPrimitive(const TypeEntry *e)
+bool isExtendedCppPrimitive(const TypeEntryCPtr &e)
 {
     if (isCppPrimitive(e))
         return true;
     if (!e->isPrimitive())
         return false;
-    const auto *type = basicReferencedTypeEntry(e->asPrimitive());
+    const auto type = basicReferencedTypeEntry(e);
     const QString &name = type->qualifiedCppName();
     return name == u"std::string" || name == u"std::wstring";
 }
@@ -544,12 +537,12 @@ bool TypeEntry::isComplex() const
     return false;
 }
 
-TypeEntry *TypeEntry::viewOn() const
+TypeEntryPtr TypeEntry::viewOn() const
 {
     return m_d->m_viewOn;
 }
 
-void TypeEntry::setViewOn(TypeEntry *v)
+void TypeEntry::setViewOn(const TypeEntryPtr &v)
 {
     m_d->m_viewOn = v;
 }
@@ -560,7 +553,7 @@ TypeEntry *TypeEntry::clone() const
 }
 
 // Take over parameters relevant for typedefs
-void TypeEntry::useAsTypedef(const TypeEntry *source)
+void TypeEntry::useAsTypedef(const TypeEntryCPtr &source)
 {
     // XML Typedefs are in the global namespace for now.
     m_d->m_parent = typeSystemTypeEntry(source);
@@ -583,7 +576,7 @@ public:
 };
 
 CustomTypeEntry::CustomTypeEntry(const QString &entryName, const QVersionNumber &vr,
-                                 const TypeEntry *parent) :
+                                 const TypeEntryCPtr &parent) :
     TypeEntry(new CustomTypeEntryPrivate(entryName, CustomType, vr, parent))
 {
 }
@@ -669,7 +662,7 @@ public:
 };
 
 TypeSystemTypeEntry::TypeSystemTypeEntry(const QString &entryName, const QVersionNumber &vr,
-                                         const TypeEntry *parent) :
+                                         const TypeEntryCPtr &parent) :
     TypeEntry(new TypeSystemTypeEntryPrivate(entryName, TypeSystemType, vr, parent))
 {
 }
@@ -757,7 +750,7 @@ public:
 };
 
 TemplateArgumentEntry::TemplateArgumentEntry(const QString &entryName, const QVersionNumber &vr,
-                                             const TypeEntry *parent) :
+                                             const TypeEntryCPtr &parent) :
     TypeEntry(new TemplateArgumentEntryPrivate(entryName, TemplateArgumentType, vr, parent))
 {
 }
@@ -789,30 +782,30 @@ TemplateArgumentEntry::TemplateArgumentEntry(TemplateArgumentEntryPrivate *d) :
 class ArrayTypeEntryPrivate : public TypeEntryPrivate
 {
 public:
-    explicit ArrayTypeEntryPrivate(const TypeEntry *nested_type, const QVersionNumber &vr,
-                                   const TypeEntry *parent) :
+    explicit ArrayTypeEntryPrivate(const TypeEntryCPtr &nested_type, const QVersionNumber &vr,
+                                   const TypeEntryCPtr &parent) :
         TypeEntryPrivate(u"Array"_s, TypeEntry::ArrayType, vr, parent),
         m_nestedType(nested_type)
     {
     }
 
-    const TypeEntry *m_nestedType;
+    TypeEntryCPtr m_nestedType;
 };
 
-ArrayTypeEntry::ArrayTypeEntry(const TypeEntry *nested_type, const QVersionNumber &vr,
-                               const TypeEntry *parent) :
+ArrayTypeEntry::ArrayTypeEntry(const TypeEntryCPtr &nested_type, const QVersionNumber &vr,
+                               const TypeEntryCPtr &parent) :
     TypeEntry(new ArrayTypeEntryPrivate(nested_type, vr, parent))
 {
     Q_ASSERT(nested_type);
 }
 
-void ArrayTypeEntry::setNestedTypeEntry(TypeEntry *nested)
+void ArrayTypeEntry::setNestedTypeEntry(const TypeEntryPtr &nested)
 {
     S_D(ArrayTypeEntry);
     d->m_nestedType = nested;
 }
 
-const TypeEntry *ArrayTypeEntry::nestedTypeEntry() const
+TypeEntryCPtr ArrayTypeEntry::nestedTypeEntry() const
 {
     S_D(const ArrayTypeEntry);
     return d->m_nestedType;
@@ -840,7 +833,7 @@ class PrimitiveTypeEntryPrivate : public TypeEntryPrivate
 {
 public:
     PrimitiveTypeEntryPrivate(const QString &entryName, const QVersionNumber &vr,
-                              const TypeEntry *parent) :
+                              const TypeEntryCPtr &parent) :
         TypeEntryPrivate(entryName, TypeEntry::PrimitiveType, vr, parent),
         m_preferredTargetLangType(true)
     {
@@ -848,12 +841,12 @@ public:
 
     QString m_defaultConstructor;
     CustomConversionPtr m_customConversion;
-    PrimitiveTypeEntry *m_referencedTypeEntry = nullptr;
+    PrimitiveTypeEntryPtr m_referencedTypeEntry;
     uint m_preferredTargetLangType : 1;
 };
 
 PrimitiveTypeEntry::PrimitiveTypeEntry(const QString &entryName, const QVersionNumber &vr,
-                                       const TypeEntry *parent) :
+                                       const TypeEntryCPtr &parent) :
     TypeEntry(new PrimitiveTypeEntryPrivate(entryName, vr, parent))
 {
 }
@@ -876,29 +869,35 @@ bool PrimitiveTypeEntry::hasDefaultConstructor() const
     return !d->m_defaultConstructor.isEmpty();
 }
 
-PrimitiveTypeEntry *PrimitiveTypeEntry::referencedTypeEntry() const
+PrimitiveTypeEntryPtr PrimitiveTypeEntry::referencedTypeEntry() const
 {
     S_D(const PrimitiveTypeEntry);
     return d->m_referencedTypeEntry;
 }
 
-void PrimitiveTypeEntry::setReferencedTypeEntry(PrimitiveTypeEntry *referencedTypeEntry)
+void PrimitiveTypeEntry::setReferencedTypeEntry(PrimitiveTypeEntryPtr referencedTypeEntry)
 {
     S_D(PrimitiveTypeEntry);
     d->m_referencedTypeEntry = referencedTypeEntry;
 }
 
-const PrimitiveTypeEntry *basicReferencedTypeEntry(const PrimitiveTypeEntry *e)
+PrimitiveTypeEntryCPtr basicReferencedTypeEntry(const PrimitiveTypeEntryCPtr &e)
 {
-    auto *result = e;
-    while (auto *referenced = result->referencedTypeEntry())
+    auto result = e;
+    while (auto referenced = result->referencedTypeEntry())
         result = referenced;
     return result;
 }
 
-const PrimitiveTypeEntry *basicReferencedNonBuiltinTypeEntry(const PrimitiveTypeEntry *e)
+PrimitiveTypeEntryCPtr basicReferencedTypeEntry(const TypeEntryCPtr &e)
 {
-    auto *result = e;
+    Q_ASSERT(e->isPrimitive());
+    return basicReferencedTypeEntry(qSharedPointerCast<const PrimitiveTypeEntry>(e));
+}
+
+PrimitiveTypeEntryCPtr basicReferencedNonBuiltinTypeEntry(const PrimitiveTypeEntryCPtr &e)
+{
+    auto result = e;
     for (;  result->referencedTypeEntry() ; result = result->referencedTypeEntry()) {
         if (!result->isBuiltIn())
             break;
@@ -959,16 +958,16 @@ class EnumTypeEntryPrivate : public TypeEntryPrivate
 public:
     using TypeEntryPrivate::TypeEntryPrivate;
 
-    const EnumValueTypeEntry *m_nullValue = nullptr;
+    EnumValueTypeEntryCPtr m_nullValue;
     QStringList m_rejectedEnums;
-    FlagsTypeEntry *m_flags = nullptr;
+    FlagsTypeEntryPtr m_flags;
     QString m_cppType;
     TypeSystem::PythonEnumType m_pythonEnumType = TypeSystem::PythonEnumType::Unspecified;
 };
 
 EnumTypeEntry::EnumTypeEntry(const QString &entryName,
                              const QVersionNumber &vr,
-                             const TypeEntry *parent) :
+                             const TypeEntryCPtr &parent) :
     TypeEntry(new EnumTypeEntryPrivate(entryName, EnumType, vr, parent))
 {
 }
@@ -1002,25 +1001,25 @@ QString EnumTypeEntry::qualifier() const
         parentEntry->name() : QString();
 }
 
-const EnumValueTypeEntry *EnumTypeEntry::nullValue() const
+EnumValueTypeEntryCPtr EnumTypeEntry::nullValue() const
 {
     S_D(const EnumTypeEntry);
     return d->m_nullValue;
 }
 
-void EnumTypeEntry::setNullValue(const EnumValueTypeEntry *n)
+void EnumTypeEntry::setNullValue(const EnumValueTypeEntryCPtr &n)
 {
     S_D(EnumTypeEntry);
     d->m_nullValue = n;
 }
 
-void EnumTypeEntry::setFlags(FlagsTypeEntry *flags)
+void EnumTypeEntry::setFlags(const FlagsTypeEntryPtr &flags)
 {
     S_D(EnumTypeEntry);
     d->m_flags = flags;
 }
 
-FlagsTypeEntry *EnumTypeEntry::flags() const
+FlagsTypeEntryPtr EnumTypeEntry::flags() const
 {
     S_D(const EnumTypeEntry);
     return d->m_flags;
@@ -1072,7 +1071,7 @@ class EnumValueTypeEntryPrivate : public TypeEntryPrivate
 {
 public:
     EnumValueTypeEntryPrivate(const QString &name, const QString &value,
-                              const EnumTypeEntry *enclosingEnum,
+                              const EnumTypeEntryCPtr &enclosingEnum,
                               bool isScopedEnum,
                               const QVersionNumber &vr) :
         TypeEntryPrivate(name, TypeEntry::EnumValue, vr,
@@ -1083,11 +1082,11 @@ public:
     }
 
     QString m_value;
-    const EnumTypeEntry *m_enclosingEnum;
+    EnumTypeEntryCPtr m_enclosingEnum;
 };
 
 EnumValueTypeEntry::EnumValueTypeEntry(const QString &name, const QString &value,
-                                       const EnumTypeEntry *enclosingEnum,
+                                       const EnumTypeEntryCPtr &enclosingEnum,
                                        bool isScopedEnum,
                                        const QVersionNumber &vr) :
     TypeEntry(new EnumValueTypeEntryPrivate(name, value, enclosingEnum, isScopedEnum, vr))
@@ -1100,7 +1099,7 @@ QString EnumValueTypeEntry::value() const
     return d->m_value;
 }
 
-const EnumTypeEntry *EnumValueTypeEntry::enclosingEnum() const
+EnumTypeEntryCPtr EnumValueTypeEntry::enclosingEnum() const
 {
     S_D(const EnumValueTypeEntry);
     return d->m_enclosingEnum;
@@ -1125,11 +1124,11 @@ public:
 
     QString m_originalName;
     QString m_flagsName;
-    EnumTypeEntry *m_enum = nullptr;
+    EnumTypeEntryPtr m_enum;
 };
 
 FlagsTypeEntry::FlagsTypeEntry(const QString &entryName, const QVersionNumber &vr,
-                               const TypeEntry *parent) :
+                               const TypeEntryCPtr &parent) :
     TypeEntry(new FlagsTypeEntryPrivate(entryName, FlagsType, vr, parent))
 {
 }
@@ -1171,13 +1170,13 @@ void FlagsTypeEntry::setFlagsName(const QString &name)
     d->m_flagsName = name;
 }
 
-EnumTypeEntry *FlagsTypeEntry::originator() const
+EnumTypeEntryPtr FlagsTypeEntry::originator() const
 {
     S_D(const FlagsTypeEntry);
     return d->m_enum;
 }
 
-void FlagsTypeEntry::setOriginator(EnumTypeEntry *e)
+void FlagsTypeEntry::setOriginator(const EnumTypeEntryPtr &e)
 {
     S_D(FlagsTypeEntry);
     d->m_enum = e;
@@ -1191,7 +1190,7 @@ TypeEntry *FlagsTypeEntry::clone() const
 
 // ----------------- ConstantValueTypeEntry
 ConstantValueTypeEntry::ConstantValueTypeEntry(const QString& name,
-                                               const TypeEntry *parent) :
+                                               const TypeEntryCPtr &parent) :
     TypeEntry(name, ConstantValueType, QVersionNumber(0, 0), parent)
 {
 }
@@ -1207,7 +1206,7 @@ class ComplexTypeEntryPrivate : public TypeEntryPrivate
 public:
     ComplexTypeEntryPrivate(const QString &entryName, TypeEntry::Type t,
                             const QVersionNumber &vr,
-                            const TypeEntry *parent) :
+                            const TypeEntryCPtr &parent) :
         TypeEntryPrivate(entryName, t, vr, parent),
         m_qualifiedCppName(buildName(entryName, parent)),
         m_polymorphicBase(false),
@@ -1241,7 +1240,7 @@ public:
     ComplexTypeEntry::CopyableFlag m_copyableFlag = ComplexTypeEntry::Unknown;
     QString m_hashFunction;
 
-    const ComplexTypeEntry *m_baseContainerType = nullptr;
+    ComplexTypeEntryCPtr m_baseContainerType;
     // For class functions
     TypeSystem::ExceptionHandling m_exceptionHandling = TypeSystem::ExceptionHandling::Unspecified;
     TypeSystem::AllowThread m_allowThread = TypeSystem::AllowThread::Unspecified;
@@ -1256,7 +1255,7 @@ public:
 
 ComplexTypeEntry::ComplexTypeEntry(const QString &entryName, TypeEntry::Type t,
                                    const QVersionNumber &vr,
-                                   const TypeEntry *parent) :
+                                   const TypeEntryCPtr &parent) :
     TypeEntry(new ComplexTypeEntryPrivate(entryName, t, vr, parent))
 {
 }
@@ -1583,13 +1582,13 @@ void ComplexTypeEntry::setHashFunction(const QString &hashFunction)
     d->m_hashFunction = hashFunction;
 }
 
-void ComplexTypeEntry::setBaseContainerType(const ComplexTypeEntry *baseContainer)
+void ComplexTypeEntry::setBaseContainerType(const ComplexTypeEntryCPtr &baseContainer)
 {
     S_D(ComplexTypeEntry);
     d->m_baseContainerType = baseContainer;
 }
 
-const ComplexTypeEntry *ComplexTypeEntry::baseContainerType() const
+ComplexTypeEntryCPtr ComplexTypeEntry::baseContainerType() const
 {
     S_D(const ComplexTypeEntry);
     return d->m_baseContainerType;
@@ -1681,7 +1680,7 @@ TypeEntry *ComplexTypeEntry::clone() const
 }
 
 // Take over parameters relevant for typedefs
-void ComplexTypeEntry::useAsTypedef(const ComplexTypeEntry *source)
+void ComplexTypeEntry::useAsTypedef(const ComplexTypeEntryCPtr &source)
 {
     S_D(ComplexTypeEntry);
     TypeEntry::useAsTypedef(source);
@@ -1709,7 +1708,7 @@ public:
     TypedefEntryPrivate(const QString &entryName,
                         const QString &sourceType,
                         const QVersionNumber &vr,
-                        const TypeEntry *parent) :
+                        const TypeEntryCPtr &parent) :
         ComplexTypeEntryPrivate(entryName, TypeEntry::TypedefType,
                                 vr, parent),
         m_sourceType(sourceType)
@@ -1717,12 +1716,12 @@ public:
     }
 
     QString m_sourceType;
-    const ComplexTypeEntry *m_source = nullptr;
-    ComplexTypeEntry *m_target = nullptr;
+    ComplexTypeEntryCPtr m_source;
+    ComplexTypeEntryPtr m_target;
 };
 
 TypedefEntry::TypedefEntry(const QString &entryName, const QString &sourceType,
-                           const QVersionNumber &vr, const TypeEntry *parent) :
+                           const QVersionNumber &vr, const TypeEntryCPtr &parent) :
     ComplexTypeEntry(new TypedefEntryPrivate(entryName, sourceType, vr, parent))
 {
 }
@@ -1745,25 +1744,25 @@ TypeEntry *TypedefEntry::clone() const
     return new TypedefEntry(new TypedefEntryPrivate(*d));
 }
 
-const ComplexTypeEntry *TypedefEntry::source() const
+ComplexTypeEntryCPtr TypedefEntry::source() const
 {
     S_D(const TypedefEntry);
     return d->m_source;
 }
 
-void TypedefEntry::setSource(const ComplexTypeEntry *source)
+void TypedefEntry::setSource(const ComplexTypeEntryCPtr &source)
 {
     S_D(TypedefEntry);
     d->m_source = source;
 }
 
-ComplexTypeEntry *TypedefEntry::target() const
+ComplexTypeEntryPtr TypedefEntry::target() const
 {
     S_D(const TypedefEntry);
     return d->m_target;
 }
 
-void TypedefEntry::setTarget(ComplexTypeEntry *target)
+void TypedefEntry::setTarget(ComplexTypeEntryPtr target)
 {
     S_D(TypedefEntry);
     d->m_target = target;
@@ -1784,7 +1783,7 @@ public:
     ContainerTypeEntryPrivate(const QString &entryName,
                               ContainerTypeEntry::ContainerKind containerKind,
                               const QVersionNumber &vr,
-                              const TypeEntry *parent) :
+                              const TypeEntryCPtr &parent) :
         ComplexTypeEntryPrivate(entryName, TypeEntry::ContainerType, vr, parent),
         m_containerKind(containerKind)
     {
@@ -1805,7 +1804,7 @@ public:
 
 ContainerTypeEntry::ContainerTypeEntry(const QString &entryName, ContainerKind containerKind,
                                        const QVersionNumber &vr,
-                                       const TypeEntry *parent) :
+                                       const TypeEntryCPtr &parent) :
     ComplexTypeEntry(new ContainerTypeEntryPrivate(entryName, containerKind, vr, parent))
 {
     setCodeGeneration(GenerateForSubclass);
@@ -1884,7 +1883,7 @@ public:
                                  const QString &getterName,
                                  TypeSystem::SmartPointerType type,
                                  const QString &refCountMethodName,
-                                 const QVersionNumber &vr, const TypeEntry *parent) :
+                                 const QVersionNumber &vr, const TypeEntryCPtr &parent) :
         ComplexTypeEntryPrivate(entryName, TypeEntry::SmartPointerType, vr, parent),
         m_getterName(getterName),
         m_refCountMethodName(refCountMethodName),
@@ -1892,7 +1891,7 @@ public:
     {
     }
 
-    qsizetype instantiationIndex(const TypeEntry *t) const;
+    qsizetype instantiationIndex(const TypeEntryCPtr &t) const;
 
     QString m_getterName;
     QString m_refCountMethodName;
@@ -1903,7 +1902,7 @@ public:
     TypeSystem::SmartPointerType m_smartPointerType;
 };
 
-qsizetype SmartPointerTypeEntryPrivate::instantiationIndex(const TypeEntry *t) const
+qsizetype SmartPointerTypeEntryPrivate::instantiationIndex(const TypeEntryCPtr &t) const
 {
     for (qsizetype i = 0, size = m_instantiations.size(); i < size; ++i) {
         if (m_instantiations.at(i).typeEntry == t)
@@ -1916,7 +1915,8 @@ SmartPointerTypeEntry::SmartPointerTypeEntry(const QString &entryName,
                                              const QString &getterName,
                                              TypeSystem::SmartPointerType smartPointerType,
                                              const QString &refCountMethodName,
-                                             const QVersionNumber &vr, const TypeEntry *parent) :
+                                             const QVersionNumber &vr,
+                                             const TypeEntryCPtr &parent) :
     ComplexTypeEntry(new SmartPointerTypeEntryPrivate(entryName, getterName, smartPointerType,
                                                       refCountMethodName, vr, parent))
 {
@@ -1999,7 +1999,7 @@ SmartPointerTypeEntry::SmartPointerTypeEntry(SmartPointerTypeEntryPrivate *d) :
 {
 }
 
-bool SmartPointerTypeEntry::matchesInstantiation(const TypeEntry *e) const
+bool SmartPointerTypeEntry::matchesInstantiation(const TypeEntryCPtr &e) const
 {
     S_D(const SmartPointerTypeEntry);
     // No instantiations specified, or match
@@ -2018,7 +2018,7 @@ static QString fixSmartPointerName(QString name)
 QString SmartPointerTypeEntry::getTargetName(const AbstractMetaType &metaType) const
 {
     S_D(const SmartPointerTypeEntry);
-    auto *instantiatedTe = metaType.instantiations().constFirst().typeEntry();
+    auto instantiatedTe = metaType.instantiations().constFirst().typeEntry();
     const auto index = d->instantiationIndex(instantiatedTe);
     if (index != -1 && !d->m_instantiations.at(index).name.isEmpty())
         return d->m_instantiations.at(index).name;
@@ -2040,7 +2040,7 @@ public:
     using ComplexTypeEntryPrivate::ComplexTypeEntryPrivate;
 
     QRegularExpression m_filePattern;
-    const NamespaceTypeEntry *m_extends = nullptr;
+    NamespaceTypeEntryCPtr m_extends;
     TypeSystem::Visibility m_visibility = TypeSystem::Visibility::Auto;
     bool m_hasPattern = false;
     bool m_inlineNamespace = false;
@@ -2048,7 +2048,7 @@ public:
 };
 
 NamespaceTypeEntry::NamespaceTypeEntry(const QString &entryName, const QVersionNumber &vr,
-                                       const TypeEntry *parent) :
+                                       const TypeEntryCPtr &parent) :
     ComplexTypeEntry(new NamespaceTypeEntryPrivate(entryName, NamespaceType, vr, parent))
 {
 }
@@ -2059,13 +2059,13 @@ TypeEntry *NamespaceTypeEntry::clone() const
     return new NamespaceTypeEntry(new NamespaceTypeEntryPrivate(*d));
 }
 
-const NamespaceTypeEntry *NamespaceTypeEntry::extends() const
+NamespaceTypeEntryCPtr NamespaceTypeEntry::extends() const
 {
     S_D(const NamespaceTypeEntry);
     return d->m_extends;
 }
 
-void NamespaceTypeEntry::setExtends(const NamespaceTypeEntry *e)
+void NamespaceTypeEntry::setExtends(const NamespaceTypeEntryCPtr &e)
 {
     S_D(NamespaceTypeEntry);
     d->m_extends = e;
@@ -2128,6 +2128,11 @@ void NamespaceTypeEntry::setInlineNamespace(bool i)
     d->m_inlineNamespace = i;
 }
 
+bool NamespaceTypeEntry::isVisibleScope(const TypeEntryCPtr &e)
+{
+    return isVisibleScope(e.data());
+}
+
 bool NamespaceTypeEntry::isVisibleScope(const TypeEntry *e)
 {
     return e->type() != TypeEntry::NamespaceType
@@ -2158,7 +2163,7 @@ public:
 };
 
 ValueTypeEntry::ValueTypeEntry(const QString &entryName, const QVersionNumber &vr,
-                               const TypeEntry *parent) :
+                               const TypeEntryCPtr &parent) :
     ComplexTypeEntry(new ValueTypeEntryPrivate(entryName, BasicValueType, vr, parent))
 {
 }
@@ -2216,7 +2221,7 @@ ValueTypeEntry::ValueTypeEntry(ComplexTypeEntryPrivate *d) :
 }
 
 ValueTypeEntry::ValueTypeEntry(const QString &entryName, Type t, const QVersionNumber &vr,
-                               const TypeEntry *parent) :
+                               const TypeEntryCPtr &parent) :
     ComplexTypeEntry(entryName, t, vr, parent)
 {
 }
@@ -2227,7 +2232,7 @@ class FunctionTypeEntryPrivate : public TypeEntryPrivate
 public:
     FunctionTypeEntryPrivate(const QString &entryName, const QString &signature,
                              const QVersionNumber &vr,
-                             const TypeEntry *parent) :
+                             const TypeEntryCPtr &parent) :
          TypeEntryPrivate(entryName,  TypeEntry::FunctionType, vr, parent),
          m_signatures(signature)
     {
@@ -2239,7 +2244,7 @@ public:
 
 FunctionTypeEntry::FunctionTypeEntry(const QString &entryName, const QString &signature,
                                      const QVersionNumber &vr,
-                                     const TypeEntry *parent) :
+                                     const TypeEntryCPtr &parent) :
     TypeEntry(new FunctionTypeEntryPrivate(entryName, signature, vr, parent))
 {
 }
@@ -2287,7 +2292,7 @@ FunctionTypeEntry::FunctionTypeEntry(FunctionTypeEntryPrivate *d) :
 
 // ----------------- ObjectTypeEntry
 ObjectTypeEntry::ObjectTypeEntry(const QString &entryName, const QVersionNumber &vr,
-                                 const TypeEntry *parent)
+                                 const TypeEntryCPtr &parent)
     : ComplexTypeEntry(entryName, ObjectType, vr, parent)
 {
 }
@@ -2363,7 +2368,7 @@ void TypeEntry::formatDebug(QDebug &debug) const
 void PrimitiveTypeEntry::formatDebug(QDebug &debug) const
 {
     TypeEntry::formatDebug(debug);
-    if (auto *e = referencedTypeEntry()) {
+    if (auto e = referencedTypeEntry(); !e.isNull()) {
         debug << ", references";
         for (; e != nullptr; e = e->referencedTypeEntry())
             debug << ":\"" << e->qualifiedCppName() <<'"';
@@ -2471,7 +2476,7 @@ void SmartPointerTypeEntry::formatDebug(QDebug &debug) const
     if (!d->m_instantiations.isEmpty()) {
         debug << "type=" << d->m_type << ", instantiations["
             << d->m_instantiations.size() << "]=(";
-        for (auto i : d->m_instantiations) {
+        for (const auto &i : d->m_instantiations) {
             debug << i.typeEntry->name() << ',';
             if (!i.name.isEmpty())
                 debug << "=\"" << i.name << '"';
@@ -2494,6 +2499,12 @@ QDebug operator<<(QDebug d, const TypeEntry *te)
     return d;
 }
 
+QDebug operator<<(QDebug d, const TypeEntryCPtr &te)
+{
+    d << te.data();
+    return d;
+}
+
 QDebug operator<<(QDebug d, const TemplateEntry *te)
 {
     QDebugStateSaver saver(d);
@@ -2506,6 +2517,12 @@ QDebug operator<<(QDebug d, const TemplateEntry *te)
         d << '0';
     }
     d << ')';
+    return d;
+}
+
+QDebug operator<<(QDebug d, const TemplateEntryCPtr &te)
+{
+    d << te.data();
     return d;
 }
 #endif // QT_NO_DEBUG_STREAM

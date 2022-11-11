@@ -210,7 +210,7 @@ QString msgUnnamedArgumentDefaultExpression(const AbstractMetaClass *context,
     return result;
 }
 
-QString msgClassOfEnumNotFound(const EnumTypeEntry *entry)
+QString msgClassOfEnumNotFound(const EnumTypeEntryCPtr &entry)
 {
     QString result;
     QTextStream str(&result);
@@ -233,7 +233,7 @@ QString msgNoEnumTypeEntry(const EnumModelItem &enumItem,
 
 QString msgNoEnumTypeConflict(const EnumModelItem &enumItem,
                               const QString &className,
-                              const TypeEntry *t)
+                              const TypeEntryCPtr &t)
 {
     QString result;
     QDebug debug(&result); // Use the debug operator for TypeEntry::Type
@@ -347,7 +347,7 @@ QString msgSkippingField(const VariableModelItem &field, const QString &classNam
 static const char msgCompilationError[] =
     "This could potentially lead to compilation errors.";
 
-QString msgTypeNotDefined(const TypeEntry *entry)
+QString msgTypeNotDefined(const TypeEntryCPtr &entry)
 {
     QString result;
     QTextStream str(&result);
@@ -356,7 +356,7 @@ QString msgTypeNotDefined(const TypeEntry *entry)
     return result;
 }
 
-QString msgGlobalFunctionNotDefined(const FunctionTypeEntry *fte,
+QString msgGlobalFunctionNotDefined(const FunctionTypeEntryCPtr &fte,
                                     const QString &signature,
                                     const QStringList &candidates)
 {
@@ -383,7 +383,7 @@ QString msgStrippingArgument(const FunctionModelItem &f, int i,
     return result;
 }
 
-QString msgEnumNotDefined(const EnumTypeEntry *t)
+QString msgEnumNotDefined(const EnumTypeEntryCPtr &t)
 {
     QString result;
     QTextStream str(&result);
@@ -676,13 +676,13 @@ QString msgConversionTypesDiffer(const QString &varType, const QString &conversi
     return result;
 }
 
-QString msgCannotFindSmartPointerGetter(const SmartPointerTypeEntry *te)
+QString msgCannotFindSmartPointerGetter(const SmartPointerTypeEntryCPtr &te)
 {
      return u"Getter \""_s + te->getter() +  u"()\" of smart pointer \""_s
          + te->name() + u"\" not found."_s;
 }
 
-QString msgCannotFindSmartPointerMethod(const SmartPointerTypeEntry *te, const QString &m)
+QString msgCannotFindSmartPointerMethod(const SmartPointerTypeEntryCPtr &te, const QString &m)
 {
     return u"Method \""_s + m +  u"()\" of smart pointer \""_s
         + te->name() + u"\" not found."_s;
@@ -743,14 +743,14 @@ QString msgCyclicDependency(const QString &funcName, const QString &graphName,
 
 // shibokengenerator.cpp
 
-QString msgClassNotFound(const TypeEntry *t)
+QString msgClassNotFound(const TypeEntryCPtr &t)
 {
     return u"Could not find class \""_s
            + t->qualifiedCppName()
            + u"\" in the code model. Maybe it is forward declared?"_s;
 }
 
-QString msgEnclosingClassNotFound(const TypeEntry *t)
+QString msgEnclosingClassNotFound(const TypeEntryCPtr &t)
 {
     QString result;
     QTextStream str(&result);
@@ -922,14 +922,14 @@ QString msgInvalidTargetLanguageApiName(const QString &name)
            + name + u"\"."_s;
 }
 
-QString msgUnknownCheckFunction(const TypeEntry *t)
+QString msgUnknownCheckFunction(const TypeEntryCPtr &t)
 {
      return u"Unknown check function for type: '"_s
             + t->qualifiedCppName() + u"'."_s;
 }
 
 QString msgArgumentClassNotFound(const AbstractMetaFunctionCPtr &func,
-                                 const TypeEntry *t)
+                                 const TypeEntryCPtr &t)
 {
     QString result;
     QTextStream(&result) << "Internal Error: Class \"" <<  t->qualifiedCppName()
@@ -937,7 +937,7 @@ QString msgArgumentClassNotFound(const AbstractMetaFunctionCPtr &func,
     return result;
 }
 
-QString msgMissingCustomConversion(const TypeEntry *t)
+QString msgMissingCustomConversion(const TypeEntryCPtr &t)
 {
     QString result;
     QTextStream(&result) << "Entry \"" << t->qualifiedCppName()

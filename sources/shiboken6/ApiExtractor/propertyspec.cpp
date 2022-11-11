@@ -70,7 +70,7 @@ void QPropertySpec::setType(const AbstractMetaType &t)
         d->m_type = t;
 }
 
-const TypeEntry *QPropertySpec::typeEntry() const
+TypeEntryCPtr QPropertySpec::typeEntry() const
 {
     return d->m_type.typeEntry();
 }

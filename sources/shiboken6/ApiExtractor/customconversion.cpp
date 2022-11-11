@@ -11,12 +11,12 @@
 
 using namespace Qt::StringLiterals;
 
-CustomConversion::CustomConversion(const TypeEntry *ownerType) :
+CustomConversion::CustomConversion(const TypeEntryCPtr &ownerType) :
     m_ownerType(ownerType)
 {
 }
 
-const TypeEntry *CustomConversion::ownerType() const
+TypeEntryCPtr CustomConversion::ownerType() const
 {
     return m_ownerType;
 }
@@ -73,12 +73,12 @@ TargetToNativeConversion::TargetToNativeConversion(const QString &sourceTypeName
 {
 }
 
-const TypeEntry *TargetToNativeConversion::sourceType() const
+TypeEntryCPtr TargetToNativeConversion::sourceType() const
 {
     return m_sourceType;
 }
 
-void TargetToNativeConversion::setSourceType(const TypeEntry *sourceType)
+void TargetToNativeConversion::setSourceType(const TypeEntryCPtr &sourceType)
 {
     m_sourceType = sourceType;
 }
@@ -99,7 +99,7 @@ QString TargetToNativeConversion::sourceTypeCheck() const
         return m_sourceTypeCheck;
 
     if (m_sourceType != nullptr && m_sourceType->isCustom()) {
-        const auto *cte = static_cast<const CustomTypeEntry *>(m_sourceType);
+        const auto cte = qSharedPointerCast<const CustomTypeEntry>(m_sourceType);
         if (cte->hasCheckFunction()) {
             QString result = cte->checkFunction();
             if (result != u"true") // For PyObject, which is always true
@@ -131,14 +131,14 @@ void TargetToNativeConversion::formatDebug(QDebug &debug) const
     debug << ')';
 }
 
-CustomConversionPtr CustomConversion::getCustomConversion(const TypeEntry *type)
+CustomConversionPtr CustomConversion::getCustomConversion(const TypeEntryCPtr &type)
 {
     if (type->isPrimitive())
-        return static_cast<const PrimitiveTypeEntry *>(type)->customConversion();
+        return qSharedPointerCast<const PrimitiveTypeEntry>(type)->customConversion();
     if (type->isContainer())
-        return static_cast<const ContainerTypeEntry *>(type)->customConversion();
+        return qSharedPointerCast<const ContainerTypeEntry>(type)->customConversion();
     if (type->isValue())
-        return static_cast<const ValueTypeEntry *>(type)->customConversion();
+        return qSharedPointerCast<const ValueTypeEntry>(type)->customConversion();
     return {};
 }
 

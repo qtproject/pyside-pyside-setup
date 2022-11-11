@@ -11,7 +11,7 @@ class ValueTypeEntry : public ComplexTypeEntry
 {
 public:
     explicit ValueTypeEntry(const QString &entryName, const QVersionNumber &vr,
-                            const TypeEntry *parent);
+                            const TypeEntryCPtr &parent);
 
     bool hasCustomConversion() const;
     void setCustomConversion(const CustomConversionPtr &customConversion);
@@ -33,7 +33,7 @@ public:
 
 protected:
     explicit ValueTypeEntry(const QString &entryName, Type t, const QVersionNumber &vr,
-                            const TypeEntry *parent);
+                            const TypeEntryCPtr &parent);
     explicit ValueTypeEntry(ComplexTypeEntryPrivate *d);
 };
 

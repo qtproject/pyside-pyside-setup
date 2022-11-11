@@ -11,11 +11,11 @@ class ArrayTypeEntryPrivate;
 class ArrayTypeEntry : public TypeEntry
 {
 public:
-    explicit ArrayTypeEntry(const TypeEntry *nested_type, const QVersionNumber &vr,
-                            const TypeEntry *parent);
+    explicit ArrayTypeEntry(const TypeEntryCPtr &nested_type, const QVersionNumber &vr,
+                            const TypeEntryCPtr &parent);
 
-    void setNestedTypeEntry(TypeEntry *nested);
-    const TypeEntry *nestedTypeEntry() const;
+    void setNestedTypeEntry(const TypeEntryPtr &nested);
+    TypeEntryCPtr nestedTypeEntry() const;
 
     TypeEntry *clone() const override;
 

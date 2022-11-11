@@ -257,11 +257,11 @@ public:
     QVERIFY(testClass);
 
     auto *tdb = TypeDatabase::instance();
-    auto *int32TEntry = tdb->findType(u"int32_t"_s);
-    QVERIFY2(int32TEntry, "int32_t not found");
+    auto int32TEntry = tdb->findType(u"int32_t"_s);
+    QVERIFY2(!int32TEntry.isNull(), "int32_t not found");
     QVERIFY(int32TEntry->isPrimitive());
-    auto *int32T = static_cast<const PrimitiveTypeEntry *>(int32TEntry);
-    auto *basicType = int32T->basicReferencedTypeEntry();
+    auto int32T = qSharedPointerCast<const PrimitiveTypeEntry>(int32TEntry);
+    auto basicType = basicReferencedTypeEntry(int32T);
     QVERIFY2(basicType != int32T,
              "Typedef for int32_t not found. Check the system include paths.");
 }

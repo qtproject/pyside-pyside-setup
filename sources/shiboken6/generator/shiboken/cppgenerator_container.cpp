@@ -85,7 +85,7 @@ CppGenerator::OpaqueContainerData
 {
     OpaqueContainerData result;
     const auto &valueType = containerType.instantiations().constFirst();
-    const auto *containerTypeEntry = static_cast<const ContainerTypeEntry *>(containerType.typeEntry());
+    const auto containerTypeEntry = qSharedPointerCast<const ContainerTypeEntry>(containerType.typeEntry());
     result.name = containerTypeEntry->opaqueContainerName(valueType.typeEntry()->name());
 
     const auto cppSignature = containerType.cppSignature();

@@ -880,7 +880,7 @@ bool TypeSystemParser::endElement(StackElement element)
                     toNative.setSourceType(m_context->db->findType(toNative.sourceTypeName()));
             }
         }
-        purgeEmptyCodeSnips(&static_cast<TypeSystemTypeEntry *>(top->entry)->codeSnips());
+        purgeEmptyCodeSnips(&qSharedPointerCast<TypeSystemTypeEntry>(top->entry)->codeSnips());
         break;
     case StackElement::FunctionTypeEntry:
         TypeDatabase::instance()->addGlobalUserFunctionModifications(top->functionMods);
@@ -892,7 +892,7 @@ bool TypeSystemParser::endElement(StackElement element)
     case StackElement::NamespaceTypeEntry: {
         Q_ASSERT(top->entry);
         Q_ASSERT(top->entry->isComplex());
-        auto *centry = static_cast<ComplexTypeEntry *>(top->entry);
+        auto centry = qSharedPointerCast<ComplexTypeEntry>(top->entry);
         purgeEmptyCodeSnips(&centry->codeSnips());
         centry->setAddedFunctions(top->addedFunctions);
         centry->setFunctionModifications(top->functionMods);
@@ -902,13 +902,13 @@ bool TypeSystemParser::endElement(StackElement element)
     break;
 
     case StackElement::TypedefTypeEntry: {
-        auto *centry = static_cast<TypedefEntry *>(top->entry)->target();
+        auto centry = qSharedPointerCast<TypedefEntry>(top->entry)->target();
         centry->setAddedFunctions(centry->addedFunctions() + top->addedFunctions);
         centry->setFunctionModifications(centry->functionModifications() + top->functionMods);
         centry->setFieldModifications(centry->fieldModifications() + top->fieldMods);
         centry->setDocModification(centry->docModifications() + top->docModifications);
         if (top->entry->isComplex()) {
-            auto *cte = static_cast<const ComplexTypeEntry *>(top->entry);
+            auto cte = qSharedPointerCast<const ComplexTypeEntry>(top->entry);
             centry->setCodeSnips(centry->codeSnips() + cte->codeSnips());
         }
     }
@@ -1068,12 +1068,12 @@ CodeSnipAbstract *TypeSystemParser::injectCodeTarget(qsizetype offset) const
     }
     case ParserState::TypeEntryCodeInjection:
         Q_ASSERT(top->entry->isComplex());
-        return &static_cast<ComplexTypeEntry *>(top->entry)->codeSnips().last();
+        return &qSharedPointerCast<ComplexTypeEntry>(top->entry)->codeSnips().last();
     case ParserState::TypeSystemCodeInjection:
         Q_ASSERT(top->entry->isTypeSystem());
-        return &static_cast<TypeSystemTypeEntry *>(top->entry)->codeSnips().last();
+        return &qSharedPointerCast<TypeSystemTypeEntry>(top->entry)->codeSnips().last();
     case ParserState::Template:
-        return m_templateEntry;
+        return m_templateEntry.data();
     default:
         break;
     }
@@ -1210,7 +1210,7 @@ static bool shouldDropTypeEntry(const TypeDatabase *db,
                                 QString name)
 {
     for (auto i = stack.size() - 1; i >= 0; --i) {
-        if (auto *entry = stack.at(i)->entry) {
+        if (auto entry = stack.at(i)->entry) {
             if (entry->type() == TypeEntry::TypeSystemType) {
                 if (db->shouldDropTypeEntry(name)) // Unqualified
                     return true;
@@ -1237,7 +1237,7 @@ static QString checkSignatureError(const QString& signature, const QString& tag)
     return QString();
 }
 
-inline const TypeEntry *TypeSystemParser::currentParentTypeEntry() const
+inline TypeEntryCPtr TypeSystemParser::currentParentTypeEntry() const
 {
     const auto size = m_contextStack.size();
     return size > 1 ? m_contextStack.at(size - 2)->entry : nullptr;
@@ -1246,15 +1246,15 @@ inline const TypeEntry *TypeSystemParser::currentParentTypeEntry() const
 bool TypeSystemParser::checkRootElement()
 {
     for (auto i = m_contextStack.size() - 1; i >= 0; --i) {
-        auto *e = m_contextStack.at(i)->entry;
-        if (e && e->isTypeSystem())
+        auto e = m_contextStack.at(i)->entry;
+        if (!e.isNull() && e->isTypeSystem())
             return true;
     }
     m_error = msgNoRootTypeSystemEntry();
     return false;
 }
 
-static TypeEntry *findViewedType(const QString &name)
+static TypeEntryPtr findViewedType(const QString &name)
 {
     const auto range = TypeDatabase::instance()->entries().equal_range(name);
     for (auto i = range.first; i != range.second; ++i) {
@@ -1271,7 +1271,8 @@ static TypeEntry *findViewedType(const QString &name)
     return nullptr;
 }
 
-bool TypeSystemParser::applyCommonAttributes(const ConditionalStreamReader &reader, TypeEntry *type,
+bool TypeSystemParser::applyCommonAttributes(const ConditionalStreamReader &reader,
+                                             const TypeEntryPtr &type,
                                              QXmlStreamAttributes *attributes)
 {
     type->setSourceLocation(SourceLocation(m_currentFile,
@@ -1283,8 +1284,8 @@ bool TypeSystemParser::applyCommonAttributes(const ConditionalStreamReader &read
             type->setRevision(attributes->takeAt(i).value().toInt());
         } else if (name == u"view-on") {
             const QString name = attributes->takeAt(i).value().toString();
-            TypeEntry *views = findViewedType(name);
-            if (views == nullptr) {
+            TypeEntryPtr views = findViewedType(name);
+            if (views.isNull()) {
                 m_error = msgCannotFindView(name, type->name());
                 return false;
             }
@@ -1294,14 +1295,14 @@ bool TypeSystemParser::applyCommonAttributes(const ConditionalStreamReader &read
     return true;
 }
 
-CustomTypeEntry *TypeSystemParser::parseCustomTypeEntry(const ConditionalStreamReader &,
+CustomTypeEntryPtr TypeSystemParser::parseCustomTypeEntry(const ConditionalStreamReader &,
                                                         const QString &name,
                                                         const QVersionNumber &since,
                                                         QXmlStreamAttributes *attributes)
 {
     if (!checkRootElement())
         return nullptr;
-    auto *result = new CustomTypeEntry(name, since, m_contextStack.top()->entry);
+    CustomTypeEntryPtr result(new CustomTypeEntry(name, since, m_contextStack.top()->entry));
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == checkFunctionAttribute())
@@ -1310,18 +1311,18 @@ CustomTypeEntry *TypeSystemParser::parseCustomTypeEntry(const ConditionalStreamR
     return result;
 }
 
-FlagsTypeEntry *
+FlagsTypeEntryPtr
     TypeSystemParser::parseFlagsEntry(const ConditionalStreamReader &reader,
-                             EnumTypeEntry *enumEntry, QString flagName,
+                             const EnumTypeEntryPtr &enumEntry, QString flagName,
                              const QVersionNumber &since,
                              QXmlStreamAttributes *attributes)
 
 {
     if (!checkRootElement())
         return nullptr;
-    auto ftype = new FlagsTypeEntry(u"QFlags<"_s + enumEntry->name() + u'>',
-                                    since,
-                                    typeSystemTypeEntry(currentParentTypeEntry()));
+    FlagsTypeEntryPtr ftype(new FlagsTypeEntry(u"QFlags<"_s + enumEntry->name() + u'>',
+                                               since,
+                                               typeSystemTypeEntry(currentParentTypeEntry())));
     ftype->setOriginator(enumEntry);
     ftype->setTargetLangPackage(enumEntry->targetLangPackage());
     // Try toenumEntry get the guess the qualified flag name
@@ -1359,7 +1360,7 @@ FlagsTypeEntry *
     return ftype;
 }
 
-SmartPointerTypeEntry *
+SmartPointerTypeEntryPtr
     TypeSystemParser::parseSmartPointerEntry(const ConditionalStreamReader &reader,
                                     const QString &name, const QVersionNumber &since,
                                     QXmlStreamAttributes *attributes)
@@ -1422,8 +1423,8 @@ SmartPointerTypeEntry *
         return nullptr;
     }
 
-    auto *type = new SmartPointerTypeEntry(name, getter, smartPointerType,
-                                           refCountMethodName, since, currentParentTypeEntry());
+    SmartPointerTypeEntryPtr type(new SmartPointerTypeEntry(name, getter, smartPointerType,
+                                                            refCountMethodName, since, currentParentTypeEntry()));
     if (!applyCommonAttributes(reader, type, attributes))
         return nullptr;
     applyComplexTypeAttributes(reader, type, attributes);
@@ -1434,14 +1435,14 @@ SmartPointerTypeEntry *
     return type;
 }
 
-PrimitiveTypeEntry *
+PrimitiveTypeEntryPtr
     TypeSystemParser::parsePrimitiveTypeEntry(const ConditionalStreamReader &reader,
                                      const QString &name, const QVersionNumber &since,
                                      QXmlStreamAttributes *attributes)
 {
     if (!checkRootElement())
         return nullptr;
-    auto *type = new PrimitiveTypeEntry(name, since, currentParentTypeEntry());
+    PrimitiveTypeEntryPtr type (new PrimitiveTypeEntry(name, since, currentParentTypeEntry()));
     QString targetLangApiName;
     if (!applyCommonAttributes(reader, type, attributes))
         return nullptr;
@@ -1464,19 +1465,19 @@ PrimitiveTypeEntry *
     }
 
     if (!targetLangApiName.isEmpty()) {
-        auto *e = m_context->db->findType(targetLangApiName);
-        if (e == nullptr || !e->isCustom()) {
+        auto e = m_context->db->findType(targetLangApiName);
+        if (e.isNull() || !e->isCustom()) {
                m_error = msgInvalidTargetLanguageApiName(targetLangApiName);
                return nullptr;
         }
-        type->setTargetLangApiType(static_cast<CustomTypeEntry *>(e));
+        type->setTargetLangApiType(qSharedPointerCast<CustomTypeEntry>(e));
     }
     type->setTargetLangPackage(m_defaultPackage);
     return type;
 }
 
 // "int:QList_int;QString:QList_QString"
-static bool parseOpaqueContainers(QStringView s, ContainerTypeEntry *cte)
+static bool parseOpaqueContainers(QStringView s, ContainerTypeEntryPtr cte)
 {
     const auto entries = s.split(u';');
     for (const auto &entry : entries) {
@@ -1490,7 +1491,7 @@ static bool parseOpaqueContainers(QStringView s, ContainerTypeEntry *cte)
     return true;
 }
 
-ContainerTypeEntry *
+ContainerTypeEntryPtr
     TypeSystemParser::parseContainerTypeEntry(const ConditionalStreamReader &reader,
                                      const QString &name, const QVersionNumber &since,
                                      QXmlStreamAttributes *attributes)
@@ -1509,8 +1510,8 @@ ContainerTypeEntry *
         return nullptr;
     }
     attributes->removeAt(typeIndex);
-    auto *type = new ContainerTypeEntry(name, containerTypeOpt.value(),
-                                        since, currentParentTypeEntry());
+    ContainerTypeEntryPtr type(new ContainerTypeEntry(name, containerTypeOpt.value(),
+                                                      since, currentParentTypeEntry()));
     if (!applyCommonAttributes(reader, type, attributes))
         return nullptr;
     applyComplexTypeAttributes(reader, type, attributes);
@@ -1530,14 +1531,14 @@ ContainerTypeEntry *
     return type;
 }
 
-EnumTypeEntry *
+EnumTypeEntryPtr
     TypeSystemParser::parseEnumTypeEntry(const ConditionalStreamReader &reader,
                                 const QString &name, const QVersionNumber &since,
                                 QXmlStreamAttributes *attributes)
 {
     if (!checkRootElement())
         return nullptr;
-    auto *entry = new EnumTypeEntry(name, since, currentParentTypeEntry());
+    EnumTypeEntryPtr entry(new EnumTypeEntry(name, since, currentParentTypeEntry()));
     applyCommonAttributes(reader, entry, attributes);
     entry->setTargetLangPackage(m_defaultPackage);
 
@@ -1582,16 +1583,16 @@ EnumTypeEntry *
 }
 
 
-NamespaceTypeEntry *
+NamespaceTypeEntryPtr
     TypeSystemParser::parseNamespaceTypeEntry(const ConditionalStreamReader &reader,
                                      const QString &name, const QVersionNumber &since,
                                      QXmlStreamAttributes *attributes)
 {
     if (!checkRootElement())
         return nullptr;
-    std::unique_ptr<NamespaceTypeEntry> result(new NamespaceTypeEntry(name, since, currentParentTypeEntry()));
+    NamespaceTypeEntryPtr result(new NamespaceTypeEntry(name, since, currentParentTypeEntry()));
     auto visibility = TypeSystem::Visibility::Unspecified;
-    applyCommonAttributes(reader, result.get(), attributes);
+    applyCommonAttributes(reader, result, attributes);
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto attributeName = attributes->at(i).qualifiedName();
         if (attributeName == u"files") {
@@ -1606,7 +1607,7 @@ NamespaceTypeEntry *
             const auto extendsPackageName = attributes->at(i).value();
             auto allEntries = TypeDatabase::instance()->findNamespaceTypes(name);
             auto extendsIt = std::find_if(allEntries.cbegin(), allEntries.cend(),
-                                          [extendsPackageName] (const NamespaceTypeEntry *e) {
+                                          [extendsPackageName] (const NamespaceTypeEntryCPtr &e) {
                                               return e->targetLangPackage() == extendsPackageName;
                                           });
             if (extendsIt == allEntries.cend()) {
@@ -1634,24 +1635,24 @@ NamespaceTypeEntry *
     if (visibility != TypeSystem::Visibility::Unspecified)
         result->setVisibility(visibility);
     // Handle legacy "generate" before the common handling
-    applyComplexTypeAttributes(reader, result.get(), attributes);
+    applyComplexTypeAttributes(reader, result, attributes);
 
     if (result->extends() && !result->hasPattern()) {
         m_error = msgExtendingNamespaceRequiresPattern(name);
-        return nullptr;
+        return {};
     }
 
-    return result.release();
+    return result;
 }
 
-ValueTypeEntry *
+ValueTypeEntryPtr
     TypeSystemParser::parseValueTypeEntry(const ConditionalStreamReader &reader,
                                  const QString &name, const QVersionNumber &since,
                                  QXmlStreamAttributes *attributes)
 {
     if (!checkRootElement())
         return nullptr;
-    auto *typeEntry = new ValueTypeEntry(name, since, currentParentTypeEntry());
+    ValueTypeEntryPtr typeEntry(new ValueTypeEntry(name, since, currentParentTypeEntry()));
     if (!applyCommonAttributes(reader, typeEntry, attributes))
         return nullptr;
     applyComplexTypeAttributes(reader, typeEntry, attributes);
@@ -1662,7 +1663,7 @@ ValueTypeEntry *
     return typeEntry;
 }
 
-FunctionTypeEntry *
+FunctionTypeEntryPtr
     TypeSystemParser::parseFunctionTypeEntry(const ConditionalStreamReader &reader,
                                     const QString &name, const QVersionNumber &since,
                                     QXmlStreamAttributes *attributes)
@@ -1693,10 +1694,10 @@ FunctionTypeEntry *
         return nullptr;
     }
 
-    TypeEntry *existingType = m_context->db->findType(name);
+    TypeEntryPtr existingType = m_context->db->findType(name);
 
-    if (!existingType) {
-        auto *result = new FunctionTypeEntry(name, signature, since, currentParentTypeEntry());
+    if (existingType.isNull()) {
+        FunctionTypeEntryPtr result(new FunctionTypeEntry(name, signature, since, currentParentTypeEntry()));
         result->setSnakeCase(snakeCase);
         applyCommonAttributes(reader, result, attributes);
         return result;
@@ -1708,12 +1709,12 @@ FunctionTypeEntry *
         return nullptr;
     }
 
-    auto *result = reinterpret_cast<FunctionTypeEntry *>(existingType);
+    auto result = qSharedPointerCast<FunctionTypeEntry>(existingType);
     result->addSignature(signature);
     return result;
 }
 
-TypedefEntry *
+TypedefEntryPtr
  TypeSystemParser::parseTypedefEntry(const ConditionalStreamReader &reader,
                                      const QString &name, StackElement topElement,
                                      const QVersionNumber &since,
@@ -1732,7 +1733,7 @@ TypedefEntry *
         return nullptr;
     }
     const QString sourceType = attributes->takeAt(sourceIndex).value().toString();
-    auto result = new TypedefEntry(name, sourceType, since, currentParentTypeEntry());
+    TypedefEntryPtr result(new TypedefEntry(name, sourceType, since, currentParentTypeEntry()));
     if (!applyCommonAttributes(reader, result, attributes))
         return nullptr;
     applyComplexTypeAttributes(reader, result, attributes);
@@ -1740,7 +1741,7 @@ TypedefEntry *
 }
 
 void TypeSystemParser::applyComplexTypeAttributes(const ConditionalStreamReader &reader,
-                                         ComplexTypeEntry *ctype,
+                                         const ComplexTypeEntryPtr &ctype,
                                          QXmlStreamAttributes *attributes) const
 {
     bool generate = true;
@@ -2002,7 +2003,7 @@ bool TypeSystemParser::parseModifyDocumentation(const ConditionalStreamReader &,
 }
 
 // m_exceptionHandling
-TypeSystemTypeEntry *TypeSystemParser::parseRootElement(const ConditionalStreamReader &,
+TypeSystemTypeEntryPtr TypeSystemParser::parseRootElement(const ConditionalStreamReader &,
                                                const QVersionNumber &since,
                                                QXmlStreamAttributes *attributes)
 {
@@ -2045,18 +2046,18 @@ TypeSystemTypeEntry *TypeSystemParser::parseRootElement(const ConditionalStreamR
     }
 
     if (m_defaultPackage.isEmpty()) { // Extending default, see addBuiltInContainerTypes()
-        auto *moduleEntry = const_cast<TypeSystemTypeEntry *>(m_context->db->defaultTypeSystemType());
-        Q_ASSERT(moduleEntry);
+        auto moduleEntry = qSharedPointerConstCast<TypeSystemTypeEntry>(m_context->db->defaultTypeSystemType());
+        Q_ASSERT(!moduleEntry.isNull());
         m_defaultPackage = moduleEntry->name();
         return moduleEntry;
     }
 
-    auto *moduleEntry =
-        const_cast<TypeSystemTypeEntry *>(m_context->db->findTypeSystemType(m_defaultPackage));
-    const bool add = moduleEntry == nullptr;
+    auto moduleEntry =
+        qSharedPointerConstCast<TypeSystemTypeEntry>(m_context->db->findTypeSystemType(m_defaultPackage));
+    const bool add = moduleEntry.isNull();
     if (add) {
-        moduleEntry = new TypeSystemTypeEntry(m_defaultPackage, since,
-                                              currentParentTypeEntry());
+        moduleEntry.reset(new TypeSystemTypeEntry(m_defaultPackage, since,
+                                                  currentParentTypeEntry()));
     }
     moduleEntry->setCodeGeneration(m_generate);
     moduleEntry->setSnakeCase(snakeCase);
@@ -2097,7 +2098,7 @@ bool TypeSystemParser::loadTypesystem(const ConditionalStreamReader &,
 bool TypeSystemParser::parseRejectEnumValue(const ConditionalStreamReader &,
                                    QXmlStreamAttributes *attributes)
 {
-    if (!m_currentEnum) {
+    if (m_currentEnum.isNull()) {
         m_error = u"<reject-enum-value> node must be used inside a <enum-type> node"_s;
         return false;
     }
@@ -2169,9 +2170,9 @@ bool TypeSystemParser::parseCustomConversion(const ConditionalStreamReader &,
         return true;
     }
 
-    ValueTypeEntry *valueTypeEntry = nullptr;
+    ValueTypeEntryPtr valueTypeEntry;
     if (top->entry->isValue()) {
-        valueTypeEntry = static_cast<ValueTypeEntry *>(top->entry);
+        valueTypeEntry = qSharedPointerCast<ValueTypeEntry>(top->entry);
         if (valueTypeEntry->hasTargetConversionRule() || valueTypeEntry->hasCustomConversion()) {
             m_error = u"Types can have only one conversion rule"_s;
             return false;
@@ -2205,11 +2206,11 @@ bool TypeSystemParser::parseCustomConversion(const ConditionalStreamReader &,
 
     CustomConversionPtr customConversion(new CustomConversion(top->entry));
     if (top->entry->isPrimitive())
-        static_cast<PrimitiveTypeEntry *>(top->entry)->setCustomConversion(customConversion);
+        qSharedPointerCast<PrimitiveTypeEntry>(top->entry)->setCustomConversion(customConversion);
     else if (top->entry->isContainer())
-        static_cast<ContainerTypeEntry *>(top->entry)->setCustomConversion(customConversion);
+        qSharedPointerCast<ContainerTypeEntry>(top->entry)->setCustomConversion(customConversion);
     else if (top->entry->isValue())
-        static_cast<ValueTypeEntry *>(top->entry)->setCustomConversion(customConversion);
+        qSharedPointerCast<ValueTypeEntry>(top->entry)->setCustomConversion(customConversion);
     customConversionsForReview.append(customConversion);
     return true;
 }
@@ -2604,7 +2605,7 @@ bool TypeSystemParser::parseAddPyMethodDef(const ConditionalStreamReader &,
         m_error = u"add-pymethoddef requires at least a name and a function attribute"_s;
         return false;
     }
-    static_cast<ComplexTypeEntry *>(m_contextStack.top()->entry)->addPyMethodDef(def);
+    qSharedPointerCast<ComplexTypeEntry>(m_contextStack.top()->entry)->addPyMethodDef(def);
     return true;
 }
 
@@ -2638,7 +2639,7 @@ bool TypeSystemParser::parseProperty(const ConditionalStreamReader &, StackEleme
         m_error = u"<property> element is missing required attibutes (name/type/get)."_s;
         return false;
     }
-    static_cast<ComplexTypeEntry *>(m_contextStack.top()->entry)->addProperty(property);
+    qSharedPointerCast<ComplexTypeEntry>(m_contextStack.top()->entry)->addProperty(property);
     return true;
 }
 
@@ -2719,7 +2720,7 @@ bool TypeSystemParser::parseModifyFunction(const ConditionalStreamReader &reader
     // Child of global <function>
     const auto &top = m_contextStack.top();
     if (originalSignature.isEmpty() && top->entry->isFunction()) {
-        auto f = static_cast<const FunctionTypeEntry *>(top->entry);
+        auto f = qSharedPointerCast<const FunctionTypeEntry>(top->entry);
         originalSignature = f->signatures().value(0);
     }
 
@@ -2960,10 +2961,10 @@ bool TypeSystemParser::parseInjectCode(const ConditionalStreamReader &,
     }
     break;
     case StackElement::Root:
-        static_cast<TypeSystemTypeEntry *>(m_contextStack.top()->entry)->addCodeSnip(snip);
+        qSharedPointerCast<TypeSystemTypeEntry>(m_contextStack.top()->entry)->addCodeSnip(snip);
         break;
     default:
-        static_cast<ComplexTypeEntry *>(m_contextStack.top()->entry)->addCodeSnip(snip);
+        qSharedPointerCast<ComplexTypeEntry>(m_contextStack.top()->entry)->addCodeSnip(snip);
         break;
     }
     return true;
@@ -2971,7 +2972,7 @@ bool TypeSystemParser::parseInjectCode(const ConditionalStreamReader &,
 
 bool TypeSystemParser::parseInclude(const ConditionalStreamReader &,
                            StackElement topElement,
-                           TypeEntry *entry, QXmlStreamAttributes *attributes)
+                           const TypeEntryPtr &entry, QXmlStreamAttributes *attributes)
 {
     QString fileName;
     Include::IncludeType location = Include::IncludePath;
@@ -3070,8 +3071,8 @@ bool TypeSystemParser::checkDuplicatedTypeEntry(const ConditionalStreamReader &r
 {
     if (t == StackElement::PrimitiveTypeEntry || t == StackElement::FunctionTypeEntry)
         return true;
-    const auto *duplicated = m_context->db->findType(name);
-    if (!duplicated || duplicated->isNamespace())
+    const auto duplicated = m_context->db->findType(name);
+    if (duplicated.isNull() || duplicated->isNamespace())
         return true;
     if (duplicated->isBuiltIn()) {
         qCWarning(lcShiboken, "%s",
@@ -3202,8 +3203,8 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
         // types (which we need to do in order to support fake meta objects)
         if (element != StackElement::PrimitiveTypeEntry
             && element != StackElement::FunctionTypeEntry) {
-            TypeEntry *tmp = m_context->db->findType(name);
-            if (tmp && !tmp->isNamespace())
+            TypeEntryPtr tmp = m_context->db->findType(name);
+            if (!tmp.isNull() && !tmp->isNamespace())
                 qCWarning(lcShiboken).noquote().nospace()
                     << "Duplicate type entry: '" << name << '\'';
         }
@@ -3269,7 +3270,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
         case StackElement::InterfaceTypeEntry: {
             if (!checkRootElement())
                 return false;
-            auto *ce  = new ObjectTypeEntry(name, versionRange.since, currentParentTypeEntry());
+            ComplexTypeEntryPtr ce(new ObjectTypeEntry(name, versionRange.since, currentParentTypeEntry()));
             top->entry = ce;
             applyCommonAttributes(reader, top->entry, &attributes);
             applyComplexTypeAttributes(reader, ce, &attributes);
@@ -3475,8 +3476,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
                 m_error = msgMissingAttribute(nameAttribute());
                 return false;
             }
-            m_templateEntry =
-                new TemplateEntry(attributes.takeAt(nameIndex).value().toString());
+            m_templateEntry.reset(new TemplateEntry(attributes.takeAt(nameIndex).value().toString()));
         }
             break;
         case StackElement::InsertTemplate:

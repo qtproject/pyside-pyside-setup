@@ -56,11 +56,6 @@ public:
     {
     }
 
-    ~AbstractMetaClassPrivate()
-    {
-        qDeleteAll(m_templateArgs);
-    }
-
     void addFunction(const AbstractMetaFunctionCPtr &function);
     static AbstractMetaFunction *
         createFunction(const QString &name, AbstractMetaFunction::FunctionType t,
@@ -112,7 +107,7 @@ public:
 
     QStringList m_baseClassNames;  // Base class names from C++, including rejected
     TypeEntryCList m_templateArgs;
-    ComplexTypeEntry *m_typeEntry = nullptr;
+    ComplexTypeEntryPtr m_typeEntry;
     SourceLocation m_sourceLocation;
     UsingMembers m_usingMembers;
 
@@ -533,7 +528,7 @@ bool AbstractMetaClass::isInlineNamespace() const
 {
     bool result = false;
     if (d->m_typeEntry->isNamespace()) {
-        auto *nte = static_cast<const NamespaceTypeEntry *>(d->m_typeEntry);
+        const auto nte = qSharedPointerCast<const NamespaceTypeEntry>(d->m_typeEntry);
         result = nte->isInlineNamespace();
     }
     return result;
@@ -621,17 +616,17 @@ void AbstractMetaClass::setBaseClassNames(const QStringList &names)
     d->m_baseClassNames = names;
 }
 
-const ComplexTypeEntry *AbstractMetaClass::typeEntry() const
+ComplexTypeEntryCPtr AbstractMetaClass::typeEntry() const
 {
     return d->m_typeEntry;
 }
 
-ComplexTypeEntry *AbstractMetaClass::typeEntry()
+ComplexTypeEntryPtr AbstractMetaClass::typeEntry()
 {
     return d->m_typeEntry;
 }
 
-void AbstractMetaClass::setTypeEntry(ComplexTypeEntry *type)
+void AbstractMetaClass::setTypeEntry(const ComplexTypeEntryPtr &type)
 {
     d->m_typeEntry = type;
 }
@@ -838,8 +833,8 @@ AbstractMetaFunction *
 
 static AbstractMetaType boolType()
 {
-    auto *boolType = TypeDatabase::instance()->findType(u"bool"_s);
-    Q_ASSERT(boolType);
+    auto boolType = TypeDatabase::instance()->findType(u"bool"_s);
+    Q_ASSERT(!boolType.isNull());
     AbstractMetaType result(boolType);
     result.decideUsagePattern();
     return result;
@@ -1030,7 +1025,7 @@ static bool classHasParentManagement(const AbstractMetaClass *c)
     return flags.testFlag(ComplexTypeEntry::ParentManagement);
 }
 
-const TypeEntry *AbstractMetaClass::parentManagementEntry() const
+TypeEntryCPtr AbstractMetaClass::parentManagementEntry() const
 {
     if (isObjectType()) {
         if (auto *c = recurseClassHierarchy(this, classHasParentManagement))
@@ -1350,10 +1345,10 @@ static void addExtraIncludeForType(AbstractMetaClass *metaClass, const AbstractM
 {
 
     Q_ASSERT(metaClass);
-    const TypeEntry *entry = type.typeEntry();
+    const auto entry = type.typeEntry();
 
     if (entry && entry->include().isValid()) {
-        ComplexTypeEntry *class_entry = metaClass->typeEntry();
+        const auto class_entry = metaClass->typeEntry();
         class_entry->addArgumentInclude(entry->include());
     }
 
@@ -1733,7 +1728,7 @@ const AbstractMetaClass *AbstractMetaClass::findClass(const AbstractMetaClassCLi
 }
 
 AbstractMetaClass *AbstractMetaClass::findClass(const AbstractMetaClassList &classes,
-                                                const TypeEntry *typeEntry)
+                                                const TypeEntryCPtr &typeEntry)
 {
     for (AbstractMetaClass *c : classes) {
         if (c->typeEntry() == typeEntry)
@@ -1743,7 +1738,7 @@ AbstractMetaClass *AbstractMetaClass::findClass(const AbstractMetaClassList &cla
 }
 
 const AbstractMetaClass *AbstractMetaClass::findClass(const AbstractMetaClassCList &classes,
-                                                      const TypeEntry *typeEntry)
+                                                      const TypeEntryCPtr &typeEntry)
 {
     for (auto c : classes) {
         if (c->typeEntry() == typeEntry)

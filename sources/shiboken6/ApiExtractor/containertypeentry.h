@@ -28,7 +28,7 @@ public:
     };
 
     explicit ContainerTypeEntry(const QString &entryName, ContainerKind containerKind,
-                                const QVersionNumber &vr, const TypeEntry *parent);
+                                const QVersionNumber &vr, const TypeEntryCPtr &parent);
 
     ContainerKind containerKind() const;
 

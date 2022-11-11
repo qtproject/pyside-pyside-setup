@@ -12,7 +12,7 @@ class ConstantValueTypeEntry : public TypeEntry
 {
 public:
     explicit  ConstantValueTypeEntry(const QString& name,
-                                     const TypeEntry *parent);
+                                     const TypeEntryCPtr &parent);
 
     TypeEntry *clone() const override;
 

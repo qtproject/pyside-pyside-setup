@@ -4,15 +4,16 @@
 #ifndef TYPEDATABASE_P_H
 #define TYPEDATABASE_P_H
 
+#include "typesystem_typedefs.h"
+
 #include <QtCore/QHash>
 #include <QtCore/QString>
 
 class TypeDatabase;
-class SmartPointerTypeEntry;
 
 struct TypeDatabaseParserContext
 {
-    using SmartPointerInstantiations = QHash<SmartPointerTypeEntry *, QString>;
+    using SmartPointerInstantiations = QHash<SmartPointerTypeEntryPtr, QString>;
 
     TypeDatabase *db;
     SmartPointerInstantiations smartPointerInstantiations;

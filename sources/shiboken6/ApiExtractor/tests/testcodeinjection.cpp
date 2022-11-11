@@ -66,7 +66,7 @@ void TestCodeInjections::testReadFile()
     QString code = classA->typeEntry()->codeSnips().constFirst().code();
     QVERIFY(code.indexOf(expected) != -1);
     QVERIFY(classA->typeEntry()->isValue());
-    auto *vte = static_cast<const ValueTypeEntry *>(classA->typeEntry());
+    auto vte = qSharedPointerCast<const ValueTypeEntry>(classA->typeEntry());
     code = vte->targetConversionRule();
     QVERIFY(code.indexOf(expected) != -1);
 }

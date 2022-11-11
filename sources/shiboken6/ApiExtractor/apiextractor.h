@@ -8,6 +8,7 @@
 #include "apiextractorflags.h"
 #include "header_paths.h"
 #include "clangparser/compilersupport.h"
+#include "typesystem_typedefs.h"
 
 #include <QtCore/QFileInfoList>
 #include <QtCore/QStringList>
@@ -78,7 +79,7 @@ public:
 
     /// Forwards to AbstractMetaBuilder::inheritTemplateClass()
     static AbstractMetaClass *
-        inheritTemplateClass(ComplexTypeEntry *te,
+        inheritTemplateClass(const ComplexTypeEntryPtr &te,
                              const AbstractMetaClass *templateClass,
                              const AbstractMetaTypeList &templateTypes,
                              InheritTemplateFlags flags = {});

@@ -39,9 +39,9 @@ void TestConversionRuleTag::testConversionRuleTagWithFile()
     AbstractMetaClassList classes = builder->classes();
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, u"A");
     QVERIFY(classA);
-    const ComplexTypeEntry *typeEntry = classA->typeEntry();
+    const auto typeEntry = classA->typeEntry();
     QVERIFY(typeEntry->isValue());
-    auto *vte = static_cast<const ValueTypeEntry *>(typeEntry);
+    auto vte = qSharedPointerCast<const ValueTypeEntry>(typeEntry);
     QVERIFY(vte->hasTargetConversionRule());
     QCOMPARE(vte->targetConversionRule(), QLatin1String(conversionData));
 }
@@ -87,8 +87,8 @@ void TestConversionRuleTag::testConversionRuleTagReplace()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     auto *typeDb = TypeDatabase::instance();
-    auto *typeA = typeDb->findPrimitiveType(u"A"_s);
-    QVERIFY(typeA);
+    auto typeA = typeDb->findPrimitiveType(u"A"_s);
+    QVERIFY(!typeA.isNull());
 
     QVERIFY(typeA->hasCustomConversion());
     auto conversion = typeA->customConversion();
@@ -114,8 +114,8 @@ void TestConversionRuleTag::testConversionRuleTagReplace()
     toNative = conversion->targetToNativeConversions().at(1);
     QCOMPARE(toNative.sourceTypeName(), u"B");
     QVERIFY(!toNative.isCustomType());
-    auto *typeB = typeDb->findType(u"B"_s);
-    QVERIFY(typeB);
+    auto typeB = typeDb->findType(u"B"_s);
+    QVERIFY(!typeB.isNull());
     QCOMPARE(toNative.sourceType(), typeB);
     QCOMPARE(toNative.sourceTypeCheck(), u"CheckIfInputObjectIsB(%IN)");
     QCOMPARE(toNative.conversion().trimmed(), u"%OUT = %IN.createA();");
@@ -158,7 +158,7 @@ if (!TargetDateTimeAPI) TargetDateTime_IMPORT;\n\
     QVERIFY(classA);
 
     QVERIFY(classA->typeEntry()->isValue());
-    auto *vte = static_cast<const ValueTypeEntry *>(classA->typeEntry());
+    auto vte = qSharedPointerCast<const ValueTypeEntry>(classA->typeEntry());
     QVERIFY(vte->hasCustomConversion());
     auto conversion = vte->customConversion();
 
@@ -218,8 +218,8 @@ void TestConversionRuleTag::testConversionRuleTagWithInsertTemplate()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     auto *typeDb = TypeDatabase::instance();
-    auto *typeA = typeDb->findPrimitiveType(u"A"_s);
-    QVERIFY(typeA);
+    auto typeA = typeDb->findPrimitiveType(u"A"_s);
+    QVERIFY(!typeA.isNull());
 
     QVERIFY(typeA->hasCustomConversion());
     auto conversion = typeA->customConversion();

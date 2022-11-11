@@ -89,15 +89,15 @@ QString AbstractMetaBuilderPrivate::fixEnumDefault(const AbstractMetaType &type,
     if (isIntegerConstant(expr))
         return expr;
 
-    const auto *typeEntry = type.typeEntry();
-    const EnumTypeEntry *enumTypeEntry = nullptr;
-    const FlagsTypeEntry *flagsTypeEntry = nullptr;
+    const auto typeEntry = type.typeEntry();
+    EnumTypeEntryCPtr enumTypeEntry;
+    FlagsTypeEntryCPtr flagsTypeEntry;
     if (typeEntry->isFlags()) {
-        flagsTypeEntry = static_cast<const FlagsTypeEntry *>(typeEntry);
+        flagsTypeEntry = qSharedPointerCast<const FlagsTypeEntry>(typeEntry);
         enumTypeEntry = flagsTypeEntry->originator();
     } else {
         Q_ASSERT(typeEntry->isEnum());
-        enumTypeEntry = static_cast<const EnumTypeEntry *>(typeEntry);
+        enumTypeEntry = qSharedPointerCast<const EnumTypeEntry>(typeEntry);
     }
     // Use the enum's qualified name (would otherwise be "QFlags<Enum>")
     if (!enumTypeEntry->qualifiedCppName().contains(u"::"))

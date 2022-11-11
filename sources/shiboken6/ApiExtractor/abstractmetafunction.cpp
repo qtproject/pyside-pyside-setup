@@ -71,7 +71,7 @@ public:
     mutable QString m_cachedModifiedName;
     QString m_unresolvedSignature;
 
-    FunctionTypeEntry *m_typeEntry = nullptr;
+    FunctionTypeEntryPtr m_typeEntry;
     AbstractMetaFunction::FunctionType m_functionType = AbstractMetaFunction::NormalFunction;
     AbstractMetaType m_type;
     QString m_modifiedTypeName;
@@ -224,8 +224,7 @@ bool AbstractMetaFunction::returnsBool() const
 {
     if (d->m_type.typeUsagePattern() != AbstractMetaType::PrimitivePattern)
         return false;
-    const auto *pte = d->m_type.typeEntry()->asPrimitive();
-    return basicReferencedTypeEntry(pte)->name() == u"bool";
+    return basicReferencedTypeEntry(d->m_type.typeEntry())->name() == u"bool";
 }
 
 bool AbstractMetaFunction::isOperatorBool() const
@@ -1081,12 +1080,12 @@ void AbstractMetaFunction::setPropertySpecIndex(int i)
     d->m_propertySpecIndex = i;
 }
 
-FunctionTypeEntry *AbstractMetaFunction::typeEntry() const
+FunctionTypeEntryPtr AbstractMetaFunction::typeEntry() const
 {
     return d->m_typeEntry;
 }
 
-void AbstractMetaFunction::setTypeEntry(FunctionTypeEntry *typeEntry)
+void AbstractMetaFunction::setTypeEntry(const FunctionTypeEntryPtr &typeEntry)
 {
     d->m_typeEntry = typeEntry;
 }

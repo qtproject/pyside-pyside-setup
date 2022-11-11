@@ -13,8 +13,8 @@ using namespace Qt::StringLiterals;
 
 QString TemplateInstance::expandCode() const
 {
-    TemplateEntry *templateEntry = TypeDatabase::instance()->findTemplate(m_name);
-    if (!templateEntry) {
+    const auto templateEntry = TypeDatabase::instance()->findTemplate(m_name);
+    if (templateEntry.isNull()) {
         const QString m = u"<insert-template> referring to non-existing template '"_s
                           + m_name + u"'."_s;
         throw Exception(m);

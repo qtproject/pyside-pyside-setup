@@ -130,7 +130,7 @@ protected:
     static QString getFileNameBaseForSmartPointer(const AbstractMetaType &smartPointerType);
 
     /// Returns true if the generator should generate any code for the AbstractMetaClass.
-    virtual bool shouldGenerate(const TypeEntry *t) const;
+    virtual bool shouldGenerate(const TypeEntryCPtr &t) const;
 
     /**
     *   Translate metatypes to binding source format.
@@ -151,7 +151,7 @@ protected:
     static QString packageName();
 
     // Returns the full name of the type.
-    static QString getFullTypeName(const TypeEntry *type);
+    static QString getFullTypeName(TypeEntryCPtr type);
     static QString getFullTypeName(const AbstractMetaType &type);
     static QString getFullTypeName(const AbstractMetaClass *metaClass);
 
@@ -168,7 +168,7 @@ protected:
      *   Returns a null string if it fails.
      */
     static std::optional<DefaultValue>
-        minimalConstructor(const ApiExtractorResult &api, const TypeEntry *type,
+        minimalConstructor(const ApiExtractorResult &api, const TypeEntryCPtr &type,
                            QString *errorString = nullptr);
     static std::optional<DefaultValue>
         minimalConstructor(const ApiExtractorResult &api, const AbstractMetaType &type,

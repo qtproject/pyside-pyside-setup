@@ -57,7 +57,7 @@ static void formatFunctionUnqualifiedArgTypeQuery(QTextStream &str,
     case AbstractMetaType::FlagsPattern: {
         // Modify qualified name "QFlags<Qt::AlignmentFlag>" with name "Alignment"
         // to "Qt::Alignment" as seen by qdoc.
-        const auto *flagsEntry = static_cast<const FlagsTypeEntry *>(metaType.typeEntry());
+        const auto flagsEntry = qSharedPointerCast<const FlagsTypeEntry>(metaType.typeEntry());
         QString name = flagsEntry->qualifiedCppName();
         if (name.endsWith(u'>') && name.startsWith(u"QFlags<")) {
             const int lastColon = name.lastIndexOf(u':');

@@ -52,7 +52,7 @@ public:
     };
 
     explicit ComplexTypeEntry(const QString &entryName, Type t, const QVersionNumber &vr,
-                              const TypeEntry *parent);
+                              const TypeEntryCPtr &parent);
 
     bool isComplex() const override;
 
@@ -135,9 +135,9 @@ public:
     QString hashFunction() const;
     void setHashFunction(const QString &hashFunction);
 
-    void setBaseContainerType(const ComplexTypeEntry *baseContainer);
+    void setBaseContainerType(const ComplexTypeEntryCPtr &baseContainer);
 
-    const ComplexTypeEntry *baseContainerType() const;
+    ComplexTypeEntryCPtr baseContainerType() const;
 
     TypeSystem::ExceptionHandling exceptionHandling() const;
     void setExceptionHandling(TypeSystem::ExceptionHandling e);
@@ -151,7 +151,7 @@ public:
 
     TypeEntry *clone() const override;
 
-    void useAsTypedef(const ComplexTypeEntry *source);
+    void useAsTypedef(const ComplexTypeEntryCPtr &source);
 
     TypeSystem::SnakeCase snakeCase() const;
     void setSnakeCase(TypeSystem::SnakeCase sc);

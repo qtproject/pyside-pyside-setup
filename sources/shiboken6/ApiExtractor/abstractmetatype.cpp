@@ -105,7 +105,7 @@ const QSet<QString> &AbstractMetaType::cppPrimitiveTypes()
 class AbstractMetaTypeData : public QSharedData
 {
 public:
-    AbstractMetaTypeData(const TypeEntry *t);
+    AbstractMetaTypeData(const TypeEntryCPtr &t);
 
     int actualIndirections() const;
     bool passByConstRef() const;
@@ -120,7 +120,7 @@ public:
     template <class Predicate>
     bool generateOpaqueContainer(Predicate p) const;
 
-    const TypeEntry *m_typeEntry;
+    TypeEntryCPtr m_typeEntry;
     AbstractMetaTypeList m_instantiations;
     mutable QString m_cachedCppSignature;
     mutable QString m_cachedPythonSignature;
@@ -142,7 +142,7 @@ public:
     AbstractMetaTypeList m_children;
 };
 
-AbstractMetaTypeData::AbstractMetaTypeData(const TypeEntry *t) :
+AbstractMetaTypeData::AbstractMetaTypeData(const TypeEntryCPtr &t) :
     m_typeEntry(t),
     m_constant(false),
     m_volatile(false),
@@ -151,7 +151,8 @@ AbstractMetaTypeData::AbstractMetaTypeData(const TypeEntry *t) :
 {
 }
 
-AbstractMetaType::AbstractMetaType(const TypeEntry *t) : d(new AbstractMetaTypeData(t))
+AbstractMetaType::AbstractMetaType(const TypeEntryCPtr &t) :
+    d(new AbstractMetaTypeData(t))
 {
     Q_ASSERT(t);
 }
@@ -251,12 +252,12 @@ bool AbstractMetaType::applyArrayModification(QString *errorMessage)
     return true;
 }
 
-const TypeEntry *AbstractMetaType::typeEntry() const
+TypeEntryCPtr AbstractMetaType::typeEntry() const
 {
     return d->m_typeEntry;
 }
 
-void AbstractMetaType::setTypeEntry(const TypeEntry *type)
+void AbstractMetaType::setTypeEntry(const TypeEntryCPtr &type)
 {
     if (d->m_typeEntry != type)
         d->m_typeEntry = type;
@@ -742,8 +743,8 @@ AbstractMetaType AbstractMetaType::createVoid()
 {
     static QScopedPointer<AbstractMetaType> metaType;
     if (metaType.isNull()) {
-        static const TypeEntry *voidTypeEntry = TypeDatabase::instance()->findType(u"void"_s);
-        Q_ASSERT(voidTypeEntry);
+        static TypeEntryCPtr voidTypeEntry = TypeDatabase::instance()->findType(u"void"_s);
+        Q_ASSERT(!voidTypeEntry.isNull());
         metaType.reset(new AbstractMetaType(voidTypeEntry));
         metaType->decideUsagePattern();
     }
@@ -870,7 +871,7 @@ bool AbstractMetaType::isValueTypeWithCopyConstructorOnly() const
 {
     bool result = false;
     if (d->m_typeEntry->isComplex()) {
-        const auto *cte = static_cast<const ComplexTypeEntry *>(d->m_typeEntry);
+        const auto cte = qSharedPointerCast<const ComplexTypeEntry>(d->m_typeEntry);
         result = cte->isValueTypeWithCopyConstructorOnly();
     }
     return result;
@@ -908,7 +909,7 @@ AbstractMetaType::fromString(QString typeSignature, QString *errorMessage)
     return it.value();
 }
 
-AbstractMetaType AbstractMetaType::fromTypeEntry(const TypeEntry *typeEntry)
+AbstractMetaType AbstractMetaType::fromTypeEntry(const TypeEntryCPtr &typeEntry)
 {
     QString typeName = typeEntry->qualifiedCppName();
     if (typeName.startsWith(u"::"))
@@ -939,7 +940,7 @@ bool AbstractMetaTypeData::generateOpaqueContainer(Predicate pred) const
         return false;
     if (m_indirections.size() > 1)
         return false;
-    auto *containerTypeEntry = static_cast<const ContainerTypeEntry *>(m_typeEntry);
+    auto containerTypeEntry = qSharedPointerCast<const ContainerTypeEntry>(m_typeEntry);
     auto kind = containerTypeEntry->containerKind();
     if (kind != ContainerTypeEntry::ListContainer)
         return false;
@@ -949,7 +950,7 @@ bool AbstractMetaTypeData::generateOpaqueContainer(Predicate pred) const
     const QString signature = instantation.cppSignature();
 
     bool result = false;
-    auto *instTypEntry = instantation.typeEntry();
+    auto instTypEntry = instantation.typeEntry();
     switch (instTypEntry->type()) {
     case TypeEntry::PrimitiveType:
     case TypeEntry::FlagsType:
@@ -966,7 +967,7 @@ bool AbstractMetaTypeData::generateOpaqueContainer(Predicate pred) const
 }
 
 // Simple predicate for checking whether an opaque container should be generated
-static bool opaqueContainerPredicate(const ContainerTypeEntry *t,
+static bool opaqueContainerPredicate(const ContainerTypeEntryCPtr &t,
                                      const QString &signature)
 {
     return t->generateOpaqueContainer(signature);
@@ -982,7 +983,7 @@ bool AbstractMetaType::generateOpaqueContainer() const
 // (cf AbstractMetaFunction::generateOpaqueContainerReturn())
 bool AbstractMetaType::generateOpaqueContainerForGetter(const QString &modifiedType) const
 {
-    auto predicate = [&modifiedType](const ContainerTypeEntry *t, const QString &signature) {
+    auto predicate = [&modifiedType](const ContainerTypeEntryCPtr &t, const QString &signature) {
         return t->opaqueContainerName(signature) == modifiedType;
     };
     return d->generateOpaqueContainer(predicate);

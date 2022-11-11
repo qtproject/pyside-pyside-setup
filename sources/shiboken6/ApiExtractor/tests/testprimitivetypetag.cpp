@@ -30,8 +30,8 @@ void TestPrimitiveTypeTag::testPrimitiveTypeDefaultConstructor()
     const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, u"B");
     QVERIFY(classB);
 
-    auto *typeEntry = TypeDatabase::instance()->findPrimitiveType(u"A"_s);
-    QVERIFY(typeEntry);
+    auto typeEntry = TypeDatabase::instance()->findPrimitiveType(u"A"_s);
+    QVERIFY(!typeEntry.isNull());
     QVERIFY(typeEntry->hasDefaultConstructor());
     QCOMPARE(typeEntry->defaultConstructor(), u"A()");
 }

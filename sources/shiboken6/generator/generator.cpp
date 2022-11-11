@@ -177,7 +177,7 @@ void Generator::setOutputDirectory(const QString &outDir)
 bool Generator::generateFileForContext(const GeneratorContext &context)
 {
     const AbstractMetaClass *cls = context.metaClass();
-    auto *typeEntry = cls->typeEntry();
+    auto typeEntry = cls->typeEntry();
 
     if (!shouldGenerate(typeEntry))
         return true;
@@ -233,14 +233,14 @@ bool Generator::generate()
     for (auto cls : m_d->api.classes()) {
         if (!generateFileForContext(contextForClass(cls)))
             return false;
-        auto *te = cls->typeEntry();
+        auto te = cls->typeEntry();
         if (shouldGenerate(te) && te->isPrivate())
             m_d->m_hasPrivateClasses = true;
     }
 
     for (const auto &smp: m_d->api.instantiatedSmartPointers()) {
         const AbstractMetaClass *pointeeClass = nullptr;
-        const auto *instantiatedType = smp.type.instantiations().constFirst().typeEntry();
+        const auto instantiatedType = smp.type.instantiations().constFirst().typeEntry();
         if (instantiatedType->isComplex()) // not a C++ primitive
             pointeeClass = AbstractMetaClass::findClass(m_d->api.classes(), instantiatedType);
         if (!generateFileForContext(contextForSmartPointer(smp.specialized, smp.type,
@@ -251,7 +251,7 @@ bool Generator::generate()
     return finishGeneration();
 }
 
-bool Generator::shouldGenerate(const TypeEntry *typeEntry) const
+bool Generator::shouldGenerate(const TypeEntryCPtr &typeEntry) const
 {
     return typeEntry->shouldGenerate();
 }
@@ -276,11 +276,11 @@ bool Generator::avoidProtectedHack() const
     return m_d->m_avoidProtectedHack;
 }
 
-QString Generator::getFullTypeName(const TypeEntry *type)
+QString Generator::getFullTypeName(TypeEntryCPtr type)
 {
     QString result = type->qualifiedCppName();
     if (type->isArray())
-        type = static_cast<const ArrayTypeEntry *>(type)->nestedTypeEntry();
+        type = qSharedPointerCast<const ArrayTypeEntry>(type)->nestedTypeEntry();
     if (!isCppPrimitive(type))
         result.prepend(u"::"_s);
     return result;
@@ -365,7 +365,7 @@ std::optional<DefaultValue>
         return minimalConstructor(api, type.typeEntry());
 
     if (type.typeEntry()->isComplex()) {
-        auto cType = static_cast<const ComplexTypeEntry *>(type.typeEntry());
+        auto cType = qSharedPointerCast<const ComplexTypeEntry>(type.typeEntry());
         if (cType->hasDefaultConstructor())
             return DefaultValue(DefaultValue::Custom, cType->defaultConstructor());
         auto klass = AbstractMetaClass::findClass(api.classes(), cType);
@@ -390,7 +390,7 @@ std::optional<DefaultValue>
 
 std::optional<DefaultValue>
    Generator::minimalConstructor(const ApiExtractorResult &api,
-                                 const TypeEntry *type,
+                                 const TypeEntryCPtr &type,
                                  QString *errorString)
 {
     if (!type)
@@ -404,8 +404,8 @@ std::optional<DefaultValue>
     }
 
     if (type->isEnum()) {
-        const auto enumEntry = static_cast<const EnumTypeEntry *>(type);
-        if (const auto *nullValue = enumEntry->nullValue())
+        const auto enumEntry = qSharedPointerCast<const EnumTypeEntry>(type);
+        if (const auto nullValue = enumEntry->nullValue(); !nullValue.isNull())
             return DefaultValue(DefaultValue::Enum, nullValue->name());
         return DefaultValue(DefaultValue::Custom,
                             u"static_cast< ::"_s + type->qualifiedCppName()
@@ -418,7 +418,7 @@ std::optional<DefaultValue>
     }
 
     if (type->isPrimitive()) {
-        QString ctor = static_cast<const PrimitiveTypeEntry *>(type)->defaultConstructor();
+        QString ctor = qSharedPointerCast<const PrimitiveTypeEntry>(type)->defaultConstructor();
         // If a non-C++ (i.e. defined by the user) primitive type does not have
         // a default constructor defined by the user, the empty constructor is
         // heuristically returned. If this is wrong the build of the generated
@@ -461,7 +461,7 @@ std::optional<DefaultValue>
     if (!metaClass)
         return {};
 
-    auto cType = static_cast<const ComplexTypeEntry *>(metaClass->typeEntry());
+    auto cType = qSharedPointerCast<const ComplexTypeEntry>(metaClass->typeEntry());
     if (cType->hasDefaultConstructor())
         return DefaultValue(DefaultValue::Custom, cType->defaultConstructor());
 
@@ -489,7 +489,7 @@ std::optional<DefaultValue>
             for (qsizetype i = 0, size = arguments.size();
                  suitable && i < size && !arguments.at(i).hasOriginalDefaultValueExpression(); ++i) {
                 const AbstractMetaArgument &arg = arguments.at(i);
-                const TypeEntry *aType = arg.type().typeEntry();
+                TypeEntryCPtr aType = arg.type().typeEntry();
                 suitable &= aType != cType;
                 simple &= isCppPrimitive(aType) || aType->isEnum() || arg.type().isPointer();
             }

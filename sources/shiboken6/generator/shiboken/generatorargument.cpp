@@ -19,7 +19,7 @@ GeneratorArgument GeneratorArgument::fromMetaType(const AbstractMetaType &type)
 {
     GeneratorArgument result;
 
-    const TypeEntry *typeEntry = type.typeEntry();
+    const auto typeEntry = type.typeEntry();
     if (typeEntry->isCustom() || typeEntry->isVarargs())
         return result;
 

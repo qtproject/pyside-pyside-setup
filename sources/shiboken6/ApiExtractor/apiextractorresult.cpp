@@ -18,7 +18,6 @@ ApiExtractorResultData::~ApiExtractorResultData()
     qDeleteAll(m_templates);
     for (auto &smp : m_instantiatedSmartPointers)
         delete smp.specialized;
-    qDeleteAll(m_synthesizedTypeEntries);
 }
 
 ApiExtractorResult::ApiExtractorResult() : d(new ApiExtractorResultData)
@@ -80,17 +79,18 @@ void ApiExtractorResult::setFlags(ApiExtractorFlags f)
     d->m_flags = f;
 }
 
-std::optional<AbstractMetaEnum> ApiExtractorResult::findAbstractMetaEnum(const TypeEntry *typeEntry) const
+std::optional<AbstractMetaEnum>
+    ApiExtractorResult::findAbstractMetaEnum(TypeEntryCPtr typeEntry) const
 {
-    if (typeEntry && typeEntry->isFlags())
-        typeEntry = static_cast<const FlagsTypeEntry *>(typeEntry)->originator();
+    if (!typeEntry.isNull() && typeEntry->isFlags())
+        typeEntry = qSharedPointerCast<const FlagsTypeEntry>(typeEntry)->originator();
     const auto it = d->m_enums.constFind(typeEntry);
     if (it == d->m_enums.constEnd())
         return {};
     return it.value();
 }
 
-AbstractMetaFunctionCList ApiExtractorResult::implicitConversions(const TypeEntry *type) const
+AbstractMetaFunctionCList ApiExtractorResult::implicitConversions(const TypeEntryCPtr &type) const
 {
     if (type->isValue()) {
         if (auto metaClass = AbstractMetaClass::findClass(d->m_metaClasses, type))

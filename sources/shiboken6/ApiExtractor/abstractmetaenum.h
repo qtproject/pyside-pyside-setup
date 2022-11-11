@@ -7,6 +7,7 @@
 #include "abstractmetalang_typedefs.h"
 #include "enclosingclassmixin.h"
 #include "parser/codemodel_enums.h"
+#include "typesystem_typedefs.h"
 
 #include <QtCore/QSharedDataPointer>
 #include <QtCore/QString>
@@ -96,8 +97,8 @@ public:
     bool hasQEnumsDeclaration() const;
     void setHasQEnumsDeclaration(bool on);
 
-    EnumTypeEntry *typeEntry() const;
-    void setTypeEntry(EnumTypeEntry *entry);
+    EnumTypeEntryPtr typeEntry() const;
+    void setTypeEntry(const EnumTypeEntryPtr &entry);
 
     bool isSigned() const;
     void setSigned(bool s);
