@@ -225,7 +225,7 @@ bool AbstractMetaFunction::returnsBool() const
     if (d->m_type.typeUsagePattern() != AbstractMetaType::PrimitivePattern)
         return false;
     const auto *pte = d->m_type.typeEntry()->asPrimitive();
-    return pte->basicReferencedTypeEntry()->name() == u"bool";
+    return basicReferencedTypeEntry(pte)->name() == u"bool";
 }
 
 bool AbstractMetaFunction::isOperatorBool() const
@@ -1472,14 +1472,14 @@ TypeSystem::SnakeCase AbstractMetaFunction::snakeCase() const
     if (d->m_typeEntry) { // Global function
         const auto snakeCase = d->m_typeEntry->snakeCase();
         return snakeCase != TypeSystem::SnakeCase::Unspecified
-            ? snakeCase : d->m_typeEntry->typeSystemTypeEntry()->snakeCase();
+            ? snakeCase : typeSystemTypeEntry(d->m_typeEntry)->snakeCase();
     }
 
     if (d->m_class) {
         auto typeEntry = d->m_class->typeEntry();
         const auto snakeCase = typeEntry->snakeCase();
         return snakeCase != TypeSystem::SnakeCase::Unspecified
-            ? snakeCase : typeEntry->typeSystemTypeEntry()->snakeCase();
+            ? snakeCase : typeSystemTypeEntry(typeEntry)->snakeCase();
     }
     return TypeSystem::SnakeCase::Disabled;
 }

@@ -281,7 +281,7 @@ QString Generator::getFullTypeName(const TypeEntry *type)
     QString result = type->qualifiedCppName();
     if (type->isArray())
         type = static_cast<const ArrayTypeEntry *>(type)->nestedTypeEntry();
-    if (!type->isCppPrimitive())
+    if (!isCppPrimitive(type))
         result.prepend(u"::"_s);
     return result;
 }
@@ -396,7 +396,7 @@ std::optional<DefaultValue>
     if (!type)
         return {};
 
-    if (type->isCppPrimitive()) {
+    if (isCppPrimitive(type)) {
         const QString &name = type->qualifiedCppName();
         return name == u"bool"
             ? DefaultValue(DefaultValue::Boolean)
@@ -491,7 +491,7 @@ std::optional<DefaultValue>
                 const AbstractMetaArgument &arg = arguments.at(i);
                 const TypeEntry *aType = arg.type().typeEntry();
                 suitable &= aType != cType;
-                simple &= aType->isCppPrimitive() || aType->isEnum() || arg.type().isPointer();
+                simple &= isCppPrimitive(aType) || aType->isEnum() || arg.type().isPointer();
             }
             if (suitable)
                 candidates.insert(arguments.size() + (simple ? 0 : 100), ctor);
@@ -547,7 +547,7 @@ QString Generator::translateType(AbstractMetaType cType,
                 copyType.setReferenceType(NoReference);
 
             s = copyType.cppSignature();
-            if (!copyType.typeEntry()->isVoid() && !copyType.typeEntry()->isCppPrimitive())
+            if (!copyType.typeEntry()->isVoid() && !isCppPrimitive(copyType.typeEntry()))
                 s.prepend(u"::"_s);
         } else {
             s = cType.cppSignature();

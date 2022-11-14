@@ -36,18 +36,6 @@ public:
      */
     void setReferencedTypeEntry(PrimitiveTypeEntry *referencedTypeEntry);
 
-    /// Finds the most basic primitive type that the typedef represents,
-    /// i.e. a type that is not an typedef'ed.
-    /// \return the most basic non-typedef'ed primitive type represented
-    /// by this typedef or self in case it is not a reference.
-    const PrimitiveTypeEntry *basicReferencedTypeEntry() const;
-
-    /// Finds the basic primitive type that the typedef represents
-    /// and was explicitly specified in the type system.
-    /// \return the basic primitive type that was explicitly specified in
-    /// the type system.
-    const PrimitiveTypeEntry *basicReferencedNonBuiltinTypeEntry() const;
-
     /// Returns whether this entry references another entry.
     bool referencesType() const;
 
@@ -67,5 +55,17 @@ public:
 protected:
     explicit PrimitiveTypeEntry(PrimitiveTypeEntryPrivate *d);
 };
+
+/// Finds the most basic primitive type that the typedef represents,
+/// i.e. a type that is not an typedef'ed.
+/// \return the most basic non-typedef'ed primitive type represented
+/// by this typedef or self in case it is not a reference.
+const PrimitiveTypeEntry *basicReferencedTypeEntry(const PrimitiveTypeEntry *e);
+
+/// Finds the basic primitive type that the typedef represents
+/// and was explicitly specified in the type system.
+/// \return the basic primitive type that was explicitly specified in
+/// the type system.
+const PrimitiveTypeEntry *basicReferencedNonBuiltinTypeEntry(const PrimitiveTypeEntry *e);
 
 #endif // PRIMITIVETYPEENTRY_H

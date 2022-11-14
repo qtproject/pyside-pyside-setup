@@ -1328,9 +1328,9 @@ QDebug operator<<(QDebug debug, const formatPrimitiveEntry &fe)
         debug << " (\"" << targetLangName << "\")";
     if (fe.m_pe->isBuiltIn())
         debug << " [builtin]";
-    if (fe.m_pe->isExtendedCppPrimitive()) {
+    if (isExtendedCppPrimitive(fe.m_pe)) {
         debug << " [";
-        if (!fe.m_pe->isCppPrimitive())
+        if (!isCppPrimitive(fe.m_pe))
             debug << "extended ";
         debug << "C++]";
     }
@@ -1371,7 +1371,7 @@ void TypeDatabase::formatBuiltinTypes(QDebug debug) const
     for (auto *e : std::as_const(d->m_entries)) {
         if (e->isPrimitive()) {
             auto *pe = static_cast<const PrimitiveTypeEntry *>(e);
-            auto *basic = pe->basicReferencedTypeEntry();
+            auto *basic = basicReferencedTypeEntry(pe);
             if (basic != pe) {
                 const auto idx = indexOf(primitiveEntries, basic);
                 if (idx != -1)

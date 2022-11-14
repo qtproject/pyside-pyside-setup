@@ -1295,7 +1295,7 @@ QPair<QString, QChar> CppGenerator::virtualMethodNativeArg(const AbstractMetaFun
     auto *argTypeEntry = type.typeEntry();
     // Check for primitive types convertible by Py_BuildValue()
     if (argTypeEntry->isPrimitive() && !type.isCString()) {
-        const auto *pte = argTypeEntry->asPrimitive()->basicReferencedTypeEntry();
+        const auto *pte = basicReferencedTypeEntry(argTypeEntry->asPrimitive());
         auto it = formatUnits().constFind(pte->name());
         if (it != formatUnits().constEnd())
             return {arg.name(), it.value()};
@@ -2828,7 +2828,7 @@ void CppGenerator::writeTypeCheck(TextStream &s, const AbstractMetaType &argType
     if (!argType.typeEntry()->isCustom()) {
         typeCheck = u'(' + pythonToCppConverterForArgumentName(argumentName)
                     + u" = "_s + typeCheck + u"))"_s;
-        if (!isNumber && argType.typeEntry()->isCppPrimitive()) {
+        if (!isNumber && isCppPrimitive(argType.typeEntry())) {
             typeCheck.prepend(cpythonCheckFunction(argType) + u'('
                               + argumentName + u") && "_s);
         }
@@ -5393,7 +5393,7 @@ static ComparisonOperatorList smartPointeeComparisons(const GeneratorContext &co
 {
     Q_ASSERT(context.forSmartPointer());
     auto *te = context.preciseType().instantiations().constFirst().typeEntry();
-    if (te->isExtendedCppPrimitive()) { // Primitive pointee types have all
+    if (isExtendedCppPrimitive(te)) { // Primitive pointee types have all
         return {AbstractMetaFunction::OperatorEqual,
                 AbstractMetaFunction::OperatorNotEqual,
                 AbstractMetaFunction::OperatorLess,
@@ -6623,7 +6623,7 @@ bool CppGenerator::finishGeneration()
         if (shouldGenerate(te)) {
             writeInitFunc(s_classInitDecl, s_classPythonDefines,
                           getSimpleClassInitFunctionName(cls),
-                          te->targetLangEnclosingEntry());
+                          targetLangEnclosingEntry(te));
             if (cls->hasStaticFields()) {
                 s_classInitDecl << "void "
                     << getSimpleClassStaticFieldsInitFunctionName(cls) << "();\n";
@@ -6638,7 +6638,7 @@ bool CppGenerator::finishGeneration()
         auto *enclosingClass = context.metaClass()->enclosingClass();
         auto *enclosingTypeEntry = enclosingClass != nullptr
             ? enclosingClass->typeEntry()
-            : smp.type.typeEntry()->targetLangEnclosingEntry();
+            : targetLangEnclosingEntry(smp.type.typeEntry());
         writeInitFunc(s_classInitDecl, s_classPythonDefines,
                       getInitFunctionName(context),
                       enclosingTypeEntry);
@@ -6946,11 +6946,11 @@ bool CppGenerator::finishGeneration()
     s << "// Register primitive types converters.\n";
     const PrimitiveTypeEntryCList &primitiveTypeList = primitiveTypes();
     for (const PrimitiveTypeEntry *pte : primitiveTypeList) {
-        if (!pte->generateCode() || !pte->isCppPrimitive())
+        if (!pte->generateCode() || !isCppPrimitive(pte))
             continue;
         if (!pte->referencesType())
             continue;
-        const TypeEntry *referencedType = pte->basicReferencedTypeEntry();
+        const auto *referencedType = basicReferencedTypeEntry(pte);
         QString converter = converterObject(referencedType);
         QStringList cppSignature = pte->qualifiedCppName().split(u"::"_s, Qt::SkipEmptyParts);
         while (!cppSignature.isEmpty()) {

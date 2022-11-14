@@ -1321,7 +1321,7 @@ FlagsTypeEntry *
         return nullptr;
     auto ftype = new FlagsTypeEntry(u"QFlags<"_s + enumEntry->name() + u'>',
                                     since,
-                                    currentParentTypeEntry()->typeSystemTypeEntry());
+                                    typeSystemTypeEntry(currentParentTypeEntry()));
     ftype->setOriginator(enumEntry);
     ftype->setTargetLangPackage(enumEntry->targetLangPackage());
     // Try toenumEntry get the guess the qualified flag name

@@ -959,7 +959,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseTypeDef(const FileModelIt
 
     // It is a (nested?) global typedef to a primitive type
     // (like size_t = unsigned)? Add it to the type DB.
-    if (pTarget && pTarget->basicReferencedNonBuiltinTypeEntry()->isCppPrimitive()
+    if (pTarget && isCppPrimitive(basicReferencedNonBuiltinTypeEntry(pTarget))
         && currentClass == nullptr) {
         auto *pte = new PrimitiveTypeEntry(className, {}, nullptr);
         pte->setReferencedTypeEntry(pTarget);
@@ -1092,7 +1092,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
     TemplateParameterList template_parameters = classItem->templateParameters();
     TypeEntryCList template_args;
     template_args.clear();
-    auto argumentParent = metaClass->typeEntry()->typeSystemTypeEntry();
+    auto argumentParent = typeSystemTypeEntry(metaClass->typeEntry());
     for (qsizetype i = 0; i < template_parameters.size(); ++i) {
         const TemplateParameterModelItem &param = template_parameters.at(i);
         auto param_type = new TemplateArgumentEntry(param->name(), type->version(),
@@ -2260,7 +2260,7 @@ TypeEntryCList AbstractMetaBuilderPrivate::findTypeEntries(const QString &qualif
     for (qsizetype i = 0, size = types.size(); i < size; ++i) {
         const auto *e = types.at(i);
         if (e->isPrimitive())
-            types[i] = e->asPrimitive()->basicReferencedNonBuiltinTypeEntry();
+            types[i] = basicReferencedNonBuiltinTypeEntry(e->asPrimitive());
     }
 
     if (types.size() == 1)
@@ -2451,7 +2451,7 @@ static AbstractMetaClass *createSmartPointerClass(const SmartPointerTypeEntry *s
     auto *result = new AbstractMetaClass();
     result->setTypeEntry(const_cast<SmartPointerTypeEntry *>(ste));
     auto *templateArg = new TemplateArgumentEntry(u"T"_s, ste->version(),
-                                                  ste->typeSystemTypeEntry());
+                                                  typeSystemTypeEntry(ste));
     result->setTemplateArguments({templateArg});
     fixSmartPointerClass(result, ste);
     auto *enclosingTe = ste->parent();
@@ -2652,7 +2652,8 @@ std::optional<AbstractMetaType>
         if (!targType.has_value()) {
             const QString value = ti.qualifiedName().join(colonColon());
             if (isNumber(value)) {
-                TypeDatabase::instance()->addConstantValueTypeEntry(value, type->typeSystemTypeEntry());
+                auto *module = typeSystemTypeEntry(type);
+                TypeDatabase::instance()->addConstantValueTypeEntry(value, module);
                 targType = translateTypeStatic(ti, currentClass, d, flags, &errorMessage);
             }
         }
@@ -3061,7 +3062,7 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
         if (isNumber(typeName)) {
             t = typeDb->findType(typeName);
             if (!t) {
-                auto parent = subclass->typeEntry()->typeSystemTypeEntry();
+                auto parent = typeSystemTypeEntry(subclass->typeEntry());
                 t = TypeDatabase::instance()->addConstantValueTypeEntry(typeName, parent);
             }
         } else {

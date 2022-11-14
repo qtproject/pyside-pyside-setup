@@ -69,9 +69,6 @@ public:
     const TypeEntry *parent() const;
     void setParent(const TypeEntry *p);
     bool isChildOf(const TypeEntry *p) const;
-    const TypeSystemTypeEntry *typeSystemTypeEntry() const;
-    // cf AbstractMetaClass::targetLangEnclosingClass()
-    const TypeEntry *targetLangEnclosingEntry() const;
 
     bool isPrimitive() const;
     bool isEnum() const;
@@ -160,8 +157,6 @@ public:
 
     QVersionNumber version() const;
 
-    bool isCppPrimitive() const;
-
     // View on: Type to use for function argument conversion, fex
     // std::string_view -> std::string for foo(std::string_view).
     // cf AbstractMetaType::viewOn()
@@ -178,17 +173,9 @@ public:
     const PrimitiveTypeEntry *asPrimitive() const;
 
     // Query functions for generators
-    /// Returns true if the type is a primitive but not a C++ primitive.
-    bool isUserPrimitive() const;
     /// Returns true if the type passed has a Python wrapper for it.
     /// Although namespace has a Python wrapper, it's not considered a type.
     bool isWrapperType() const;
-    /// Returns true if the type is a C++ integral primitive,
-    /// i.e. bool, char, int, long, and their unsigned counterparts.
-    bool isCppIntegralPrimitive() const;
-    /// Returns true if the type is an extended C++ primitive, a void*,
-    /// a const char*, or a std::string (cf isCppPrimitive()).
-    bool isExtendedCppPrimitive() const;
 
 #ifndef QT_NO_DEBUG_STREAM
     virtual void formatDebug(QDebug &d) const;
@@ -207,5 +194,23 @@ private:
     int sbkIndexHelper() const;
     QScopedPointer<TypeEntryPrivate> m_d;
 };
+
+const TypeSystemTypeEntry *typeSystemTypeEntry(const TypeEntry *e);
+
+// cf AbstractMetaClass::targetLangEnclosingClass()
+const TypeEntry *targetLangEnclosingEntry(const TypeEntry *e);
+
+bool isCppPrimitive(const TypeEntry *e);
+
+/// Returns true if the type is a primitive but not a C++ primitive.
+bool isUserPrimitive(const TypeEntry *e);
+
+/// Returns true if the type is a C++ integral primitive,
+/// i.e. bool, char, int, long, and their unsigned counterparts.
+bool isCppIntegralPrimitive(const TypeEntry *e);
+
+/// Returns true if the type is an extended C++ primitive, a void*,
+/// a const char*, or a std::string (cf isCppPrimitive()).
+bool isExtendedCppPrimitive(const TypeEntry *e);
 
 #endif // TYPESYSTEM_H

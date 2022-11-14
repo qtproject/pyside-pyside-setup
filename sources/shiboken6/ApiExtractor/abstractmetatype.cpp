@@ -656,7 +656,7 @@ QString AbstractMetaType::formatPythonSignature() const
 
 bool AbstractMetaType::isCppPrimitive() const
 {
-    return d->m_pattern == PrimitivePattern && d->m_typeEntry->isCppPrimitive();
+    return d->m_pattern == PrimitivePattern && ::isCppPrimitive(d->m_typeEntry);
 }
 
 bool AbstractMetaType::isConstant() const
@@ -827,7 +827,7 @@ bool AbstractMetaType::isVoidPointer() const
 
 bool AbstractMetaType::isUserPrimitive() const
 {
-    return d->m_indirections.isEmpty() && d->m_typeEntry->isUserPrimitive();
+    return d->m_indirections.isEmpty() && ::isUserPrimitive(d->m_typeEntry);
 }
 
 bool AbstractMetaType::isObjectTypeUsedAsValueType() const
@@ -854,7 +854,7 @@ bool AbstractMetaType::isWrapperPassedByReference() const
 
 bool AbstractMetaType::isCppIntegralPrimitive() const
 {
-    return  d->m_typeEntry->isCppIntegralPrimitive();
+    return ::isCppIntegralPrimitive(d->m_typeEntry);
 }
 
 bool AbstractMetaType::isExtendedCppPrimitive() const
@@ -863,7 +863,7 @@ bool AbstractMetaType::isExtendedCppPrimitive() const
         return true;
     if (!d->m_indirections.isEmpty())
         return false;
-    return d->m_typeEntry->isExtendedCppPrimitive();
+    return ::isExtendedCppPrimitive(d->m_typeEntry);
 }
 
 bool AbstractMetaType::isValueTypeWithCopyConstructorOnly() const

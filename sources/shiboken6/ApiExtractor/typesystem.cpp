@@ -140,16 +140,16 @@ QVersionNumber TypeEntry::version() const
     return m_d->m_version;
 }
 
-bool TypeEntry::isCppPrimitive() const
+bool isCppPrimitive(const TypeEntry *e)
 {
-    if (!isPrimitive())
+    if (!e->isPrimitive())
         return false;
 
-    if (m_d->m_type == VoidType)
+    if (e->type() == TypeEntry::VoidType)
         return true;
 
     const PrimitiveTypeEntry *referencedType =
-        static_cast<const PrimitiveTypeEntry *>(this)->basicReferencedTypeEntry();
+        basicReferencedTypeEntry(e->asPrimitive());
     const QString &typeName = referencedType->name();
     return AbstractMetaType::cppPrimitiveTypes().contains(typeName);
 }
@@ -178,18 +178,18 @@ bool TypeEntry::isChildOf(const TypeEntry *p) const
     return false;
 }
 
-const TypeSystemTypeEntry *TypeEntry::typeSystemTypeEntry() const
+const TypeSystemTypeEntry *typeSystemTypeEntry(const TypeEntry *e)
 {
-    for (auto e = this; e; e = e->parent()) {
+    for (; e; e = e->parent()) {
         if (e->type() == TypeEntry::TypeSystemType)
             return static_cast<const TypeSystemTypeEntry *>(e);
     }
     return nullptr;
 }
 
-const TypeEntry *TypeEntry::targetLangEnclosingEntry() const
+const TypeEntry *targetLangEnclosingEntry(const TypeEntry *e)
 {
-    auto result = m_d->m_parent;
+    auto result = e->parent();
     while (result && result->type() != TypeEntry::TypeSystemType
            && !NamespaceTypeEntry::isVisibleScope(result)) {
         result = result->parent();
@@ -465,12 +465,12 @@ const PrimitiveTypeEntry *TypeEntry::asPrimitive() const
     return static_cast<const PrimitiveTypeEntry *>(this);
 }
 
-bool TypeEntry::isUserPrimitive() const
+bool isUserPrimitive(const TypeEntry *e)
 {
-    if (!isPrimitive())
+    if (!e->isPrimitive())
         return false;
-    const auto *type = asPrimitive()->basicReferencedTypeEntry();
-    return !type->isCppPrimitive()
+    const auto *type = basicReferencedTypeEntry(e->asPrimitive());
+    return !isCppPrimitive(type)
         && type->qualifiedCppName() != u"std::string";
 }
 
@@ -479,21 +479,21 @@ bool TypeEntry::isWrapperType() const
   return isObject() || isValue() || isSmartPointer();
 }
 
-bool TypeEntry::isCppIntegralPrimitive() const
+bool isCppIntegralPrimitive(const TypeEntry *e)
 {
-    if (!isCppPrimitive())
+    if (!isCppPrimitive(e))
         return false;
-    const auto *type = asPrimitive()->basicReferencedTypeEntry();
+    const auto *type = basicReferencedTypeEntry(e->asPrimitive());
     return AbstractMetaType::cppIntegralTypes().contains(type->qualifiedCppName());
 }
 
-bool TypeEntry::isExtendedCppPrimitive() const
+bool isExtendedCppPrimitive(const TypeEntry *e)
 {
-    if (isCppPrimitive())
+    if (isCppPrimitive(e))
         return true;
-    if (!isPrimitive())
+    if (!e->isPrimitive())
         return false;
-    const auto *type = asPrimitive()->basicReferencedTypeEntry();
+    const auto *type = basicReferencedTypeEntry(e->asPrimitive());
     const QString &name = type->qualifiedCppName();
     return name == u"std::string" || name == u"std::wstring";
 }
@@ -563,7 +563,7 @@ TypeEntry *TypeEntry::clone() const
 void TypeEntry::useAsTypedef(const TypeEntry *source)
 {
     // XML Typedefs are in the global namespace for now.
-    m_d->m_parent = source->typeSystemTypeEntry();
+    m_d->m_parent = typeSystemTypeEntry(source);
     m_d->m_entryName = source->m_d->m_entryName;
     m_d->m_name = source->m_d->m_name;
     m_d->m_targetLangPackage = source->m_d->m_targetLangPackage;
@@ -888,17 +888,17 @@ void PrimitiveTypeEntry::setReferencedTypeEntry(PrimitiveTypeEntry *referencedTy
     d->m_referencedTypeEntry = referencedTypeEntry;
 }
 
-const PrimitiveTypeEntry *PrimitiveTypeEntry::basicReferencedTypeEntry() const
+const PrimitiveTypeEntry *basicReferencedTypeEntry(const PrimitiveTypeEntry *e)
 {
-    auto *result = this;
+    auto *result = e;
     while (auto *referenced = result->referencedTypeEntry())
         result = referenced;
     return result;
 }
 
-const PrimitiveTypeEntry *PrimitiveTypeEntry::basicReferencedNonBuiltinTypeEntry() const
+const PrimitiveTypeEntry *basicReferencedNonBuiltinTypeEntry(const PrimitiveTypeEntry *e)
 {
-    auto *result = this;
+    auto *result = e;
     for (;  result->referencedTypeEntry() ; result = result->referencedTypeEntry()) {
         if (!result->isBuiltIn())
             break;

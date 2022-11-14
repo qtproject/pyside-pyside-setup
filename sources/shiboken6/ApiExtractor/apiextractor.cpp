@@ -602,9 +602,9 @@ static bool generateOpaqueContainer(const AbstractMetaType &type,
                                     const TypeSystemTypeEntry *moduleEntry)
 {
     auto *te = type.instantiations().constFirst().typeEntry();
-    auto *typeModuleEntry = te->typeSystemTypeEntry();
+    auto *typeModuleEntry = typeSystemTypeEntry(te);
     return typeModuleEntry == moduleEntry
-           || (te->isPrimitive() && type.typeEntry()->typeSystemTypeEntry() == moduleEntry);
+           || (te->isPrimitive() && typeSystemTypeEntry(type.typeEntry()) == moduleEntry);
 }
 
 void ApiExtractorPrivate::collectInstantiatedOpqaqueContainers(InstantiationCollectContext &context)

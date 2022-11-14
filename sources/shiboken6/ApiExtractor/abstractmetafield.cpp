@@ -202,7 +202,7 @@ TypeSystem::SnakeCase AbstractMetaField::snakeCase() const
     auto typeEntry = enclosingClass()->typeEntry();
     const auto snakeCase = typeEntry->snakeCase();
     return snakeCase != TypeSystem::SnakeCase::Unspecified
-        ? snakeCase : typeEntry->typeSystemTypeEntry()->snakeCase();
+        ? snakeCase : typeSystemTypeEntry(typeEntry)->snakeCase();
 }
 
 FieldModificationList AbstractMetaField::modifications() const

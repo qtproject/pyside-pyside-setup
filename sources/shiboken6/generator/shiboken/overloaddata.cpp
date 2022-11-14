@@ -33,14 +33,14 @@ static QString getTypeName(const AbstractMetaType &type)
 {
     const TypeEntry *typeEntry = type.typeEntry();
     if (typeEntry->isPrimitive())
-        typeEntry = typeEntry->asPrimitive()->basicReferencedTypeEntry();
+        typeEntry = basicReferencedTypeEntry(typeEntry->asPrimitive());
     QString typeName = typeEntry->name();
     if (typeEntry->isContainer()) {
         QStringList types;
         for (const auto &cType : type.instantiations()) {
             const TypeEntry *typeEntry = cType.typeEntry();
             if (typeEntry->isPrimitive())
-                typeEntry = typeEntry->asPrimitive()->basicReferencedTypeEntry();
+                typeEntry = basicReferencedTypeEntry(typeEntry->asPrimitive());
             types << typeEntry->name();
         }
         typeName += u'<' + types.join(u',') + u" >"_s;
