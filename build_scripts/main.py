@@ -388,7 +388,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
         # need to specify a host shiboken path explicitly)
         if self.internal_cmake_install_dir_query_file_path:
             with open(self.internal_cmake_install_dir_query_file_path, 'w') as f:
-                f.write(self.install_dir)
+                f.write(os.fspath(self.install_dir))
 
         if (not OPTION["ONLYPACKAGE"]
                 and not config.is_internal_shiboken_generator_build_and_part_of_top_level_all()):
