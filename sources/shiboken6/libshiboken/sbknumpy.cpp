@@ -7,6 +7,7 @@
 #  include <numpy/arrayobject.h>
 #endif
 
+#include "helper.h"
 #include "sbknumpycheck.h"
 #include "sbkcpptonumpy.h"
 #include "sbknumpyview.h"
@@ -21,6 +22,7 @@ bool check(PyObject *pyIn)
 #ifdef HAVE_NUMPY
     return PyArray_Check(pyIn);
 #else
+    SBK_UNUSED(pyIn);
     return false;
 #endif
 }
