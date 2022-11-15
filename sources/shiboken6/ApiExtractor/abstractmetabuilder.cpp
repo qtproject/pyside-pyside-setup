@@ -1171,7 +1171,7 @@ void AbstractMetaBuilderPrivate::traverseUsingMembers(AbstractMetaClass *metaCla
         int pos = className.indexOf(u'<'); // strip "QList<value>"
         if (pos != -1)
             className.truncate(pos);
-        if (auto baseClass = metaClass->AbstractMetaClass::findBaseClass(className)) {
+        if (auto baseClass = findBaseClass(metaClass, className)) {
             QString name = um.memberName;
             const int lastQualPos = name.lastIndexOf(colonColon());
             if (lastQualPos != -1)

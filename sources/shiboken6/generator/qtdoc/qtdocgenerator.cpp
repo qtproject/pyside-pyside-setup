@@ -281,7 +281,7 @@ static void writeInheritedByList(TextStream &s, const AbstractMetaClass *metaCla
 {
     AbstractMetaClassCList res;
     for (auto c : allClasses) {
-        if (c != metaClass && c->inheritsFrom(metaClass))
+        if (c != metaClass && inheritsFrom(c, metaClass))
             res << c;
     }
 

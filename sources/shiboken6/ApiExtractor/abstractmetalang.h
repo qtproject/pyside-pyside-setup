@@ -113,10 +113,6 @@ public:
     bool isImplicitlyCopyConstructible() const;
     bool canAddDefaultCopyConstructor() const;
 
-    /// Return type entry of the base class that declares the parent management
-    TypeEntryCPtr parentManagementEntry() const;
-    bool hasParentManagement() const { return !parentManagementEntry().isNull(); }
-
     void addSynthesizedComparisonOperators();
 
     bool generateExceptionHandling() const;
@@ -219,14 +215,11 @@ public:
     bool isInvisibleNamespace() const;
     bool isInlineNamespace() const;
 
-    bool isQObject() const;
     bool isQtNamespace() const;
 
     QString qualifiedCppName() const;
 
     bool hasSignals() const;
-    bool inheritsFrom(const AbstractMetaClass *other) const;
-    bool inheritsFrom(const QString &name) const;
 
     /**
     *   Says if the class that declares or inherits a virtual function.
@@ -375,6 +368,18 @@ void AbstractMetaClass::invisibleNamespaceRecursion(Function f) const
         }
     }
 }
+
+bool inheritsFrom(const AbstractMetaClass *c, const AbstractMetaClass *other);
+bool inheritsFrom(const AbstractMetaClass *c, const QString &name);
+
+inline bool isQObject(const AbstractMetaClass *c) { return inheritsFrom(c, u"QObject"_qs); }
+
+const AbstractMetaClass *findBaseClass(const AbstractMetaClass *c,
+                                       const QString &qualifiedName);
+/// Return type entry of the base class that declares the parent management
+TypeEntryCPtr parentManagementEntry(const AbstractMetaClass *klass);
+inline bool hasParentManagement(const AbstractMetaClass *c)
+{ return !parentManagementEntry(c).isNull(); }
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaClass::CppWrapper);
 

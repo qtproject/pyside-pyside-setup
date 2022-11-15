@@ -542,11 +542,6 @@ bool AbstractMetaClass::isInlineNamespace() const
     return result;
 }
 
-bool AbstractMetaClass::isQObject() const
-{
-    return inheritsFrom(u"QObject"_s);
-}
-
 bool AbstractMetaClass::isQtNamespace() const
 {
     return isNamespace() && name() == u"Qt";
@@ -1048,10 +1043,10 @@ static bool classHasParentManagement(const AbstractMetaClass *c)
     return flags.testFlag(ComplexTypeEntry::ParentManagement);
 }
 
-TypeEntryCPtr AbstractMetaClass::parentManagementEntry() const
+TypeEntryCPtr parentManagementEntry(const AbstractMetaClass *klass)
 {
-    if (isObjectType()) {
-        if (auto *c = recurseClassHierarchy(this, classHasParentManagement))
+    if (klass->typeEntry()->isObject()) {
+        if (auto *c = recurseClassHierarchy(klass, classHasParentManagement))
             return c->typeEntry();
     }
     return nullptr;
@@ -1555,7 +1550,8 @@ void AbstractMetaClass::fixFunctions()
                         if (sf->isFinalInTargetLang() && !sf->isPrivate() && !f->isPrivate() && !sf->isStatic() && !f->isStatic()) {
                             // Shadowed funcion, need to make base class
                             // function non-virtual
-                            if (f->implementingClass() != sf->implementingClass() && f->implementingClass()->inheritsFrom(sf->implementingClass())) {
+                            if (f->implementingClass() != sf->implementingClass()
+                                && inheritsFrom(f->implementingClass(), sf->implementingClass())) {
 
                                 // Check whether the superclass method has been redefined to non-final
 
@@ -1771,40 +1767,41 @@ const AbstractMetaClass *AbstractMetaClass::findClass(const AbstractMetaClassCLi
 }
 
 /// Returns true if this class is a subclass of the given class
-bool AbstractMetaClass::inheritsFrom(const AbstractMetaClass *cls) const
+bool inheritsFrom(const AbstractMetaClass *c, const AbstractMetaClass *cls)
 {
     Q_ASSERT(cls != nullptr);
 
-    if (this == cls || d->m_templateBaseClass == cls)
+    if (c == cls || c->templateBaseClass() == cls)
         return true;
 
-    return recurseClassHierarchy(this, [cls](const AbstractMetaClass *c) {
+    return recurseClassHierarchy(c, [cls](const AbstractMetaClass *c) {
         return cls == c;
     }) != nullptr;
 }
 
-bool AbstractMetaClass::inheritsFrom(const QString &name) const
+bool inheritsFrom(const AbstractMetaClass *c, const QString &name)
 {
-    if (this->qualifiedCppName() == name)
+    if (c->qualifiedCppName() == name)
         return true;
 
-    if (d->m_templateBaseClass != nullptr
-        && d->m_templateBaseClass->qualifiedCppName() == name) {
+    if (c->templateBaseClass() != nullptr
+        && c->templateBaseClass()->qualifiedCppName() == name) {
         return true;
     }
 
-    return recurseClassHierarchy(this, [&name](const AbstractMetaClass *c) {
+    return recurseClassHierarchy(c, [&name](const AbstractMetaClass *c) {
         return c->qualifiedCppName() == name;
     }) != nullptr;
 }
 
-const AbstractMetaClass *AbstractMetaClass::findBaseClass(const QString &qualifiedName) const
+const AbstractMetaClass *findBaseClass(const AbstractMetaClass *c,
+                                       const QString &qualifiedName)
 {
-    if (d->m_templateBaseClass != nullptr
-        && d->m_templateBaseClass->qualifiedCppName() == qualifiedName) {
-        return d->m_templateBaseClass;
-    }
-    return recurseClassHierarchy(this, [&qualifiedName](const AbstractMetaClass *c) {
+    auto *tp = c->templateBaseClass();
+    if (tp != nullptr && tp->qualifiedCppName() == qualifiedName)
+        return tp;
+
+    return recurseClassHierarchy(c, [&qualifiedName](const AbstractMetaClass *c) {
         return c->qualifiedCppName() == qualifiedName;
     });
 }

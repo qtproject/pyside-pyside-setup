@@ -119,7 +119,7 @@ void HeaderGenerator::generateClass(TextStream &s, const GeneratorContext &class
              s << includeGroup;
     }
 
-    if (classContext.useWrapper() && usePySideExtensions() && metaClass->isQObject())
+    if (classContext.useWrapper() && usePySideExtensions() && isQObject(metaClass))
         s << "namespace PySide { class DynamicQMetaObject; }\n\n";
 
     while (classContext.useWrapper()) {
@@ -178,7 +178,7 @@ void HeaderGenerator::generateClass(TextStream &s, const GeneratorContext &class
                             classContext);
 
         if ((!avoidProtectedHack() || !metaClass->hasPrivateDestructor())
-            && usePySideExtensions() && metaClass->isQObject()) {
+            && usePySideExtensions() && isQObject(metaClass)) {
             s << outdent << "public:\n" << indent <<
 R"(int qt_metacall(QMetaObject::Call call, int id, void **args) override;
 void *qt_metacast(const char *_clname) override;

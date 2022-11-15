@@ -240,7 +240,7 @@ ShibokenGenerator::FunctionGeneration
     // MetaObject virtuals only need to be declared; CppGenerator creates a
     // special implementation.
     if (functionType == AbstractMetaFunction::NormalFunction
-        && usePySideExtensions() && func->ownerClass()->isQObject()) {
+        && usePySideExtensions() && isQObject(func->ownerClass())) {
         const QString &name = func->name();
         if (name == u"metaObject"_s || name == u"qt_metacall") {
             result.setFlag(FunctionGenerationFlag::QMetaObjectMethod);
@@ -1764,7 +1764,7 @@ ShibokenGenerator::AttroCheck ShibokenGenerator::checkAttroFunctionNeeds(const A
         // QObject, the property code needs to be generated, too.
         if ((result & AttroCheckFlag::SetattroMask) != 0
             && !result.testFlag(AttroCheckFlag::SetattroQObject)
-            && metaClass->isQObject()) {
+            && isQObject(metaClass)) {
             result |= AttroCheckFlag::SetattroQObject;
         }
     }

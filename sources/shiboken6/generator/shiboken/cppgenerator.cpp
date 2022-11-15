@@ -540,7 +540,7 @@ void CppGenerator::generateIncludes(TextStream &s, const GeneratorContext &class
         s << includeQDebug;
         if (metaClass->hasToStringCapability())
             s << "#include <QtCore/QBuffer>\n";
-        if (metaClass->isQObject()) {
+        if (isQObject(metaClass)) {
             s << "#include <pysideqobject.h>\n"
                 << "#include <pysidesignal.h>\n"
                 << "#include <pysideproperty.h>\n"
@@ -722,7 +722,7 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
         }
 
         if (!avoidProtectedHack() || !metaClass->hasPrivateDestructor()) {
-            if (usePySideExtensions() && metaClass->isQObject())
+            if (usePySideExtensions() && isQObject(metaClass))
                 writeMetaObjectMethod(s, classContext);
             writeDestructorNative(s, classContext);
         }
@@ -1886,7 +1886,7 @@ void CppGenerator::writeConverterFunctions(TextStream &s, const AbstractMetaClas
     // C++ pointer to a Python wrapper, keeping identity.
     s << "// C++ to Python pointer conversion - tries to find the Python wrapper for the C++ object (keeps object identity).\n";
     c.clear();
-    if (usePySideExtensions() && metaClass->isQObject()) {
+    if (usePySideExtensions() && isQObject(metaClass)) {
         c << "return PySide::getWrapperForQObject(reinterpret_cast<"
             << typeName << " *>(const_cast<void *>(cppIn)), " << cpythonType << ");\n";
     } else {
@@ -2263,7 +2263,7 @@ bool CppGenerator::needsArgumentErrorHandling(const OverloadData &overloadData) 
         return false;
     auto rfunc = overloadData.referenceFunction();
     return rfunc->functionType() == AbstractMetaFunction::ConstructorFunction
-        && rfunc->ownerClass()->isQObject();
+        && isQObject(rfunc->ownerClass());
 }
 
 void CppGenerator::writeMethodWrapperPreamble(TextStream &s,const OverloadData &overloadData,
@@ -2350,7 +2350,7 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
         s << sbkUnusedVariableCast(u"args"_s);
     s << sbkUnusedVariableCast(u"kwds"_s);
 
-    const bool needsMetaObject = usePySideExtensions() && metaClass->isQObject();
+    const bool needsMetaObject = usePySideExtensions() && isQObject(metaClass);
     if (needsMetaObject)
         s << "const QMetaObject *metaObject;\n";
 
@@ -2603,7 +2603,7 @@ void CppGenerator::writeArgumentsInitializer(TextStream &s, const OverloadData &
     // Disable argument count checks for QObject constructors to allow for
     // passing properties as KW args.
     auto *owner = rfunc->ownerClass();
-    bool isQObjectConstructor = owner != nullptr && owner->isQObject()
+    bool isQObjectConstructor = owner != nullptr && isQObject(owner)
         && rfunc->functionType() == AbstractMetaFunction::ConstructorFunction;
 
     if (usesNamedArguments && !isQObjectConstructor) {
@@ -3776,7 +3776,7 @@ static bool forceQObjectNamedArguments(const AbstractMetaFunctionCPtr &func)
         return false;
     auto *owner = func->ownerClass();
     Q_ASSERT(owner);
-    if (!owner->isQObject())
+    if (!isQObject(owner))
         return false;
     const QString &name = owner->name();
     return name == u"QVBoxLayout" || name == u"QHBoxLayout"
@@ -3837,7 +3837,7 @@ void CppGenerator::writeNamedArgumentResolution(TextStream &s, const AbstractMet
     // until extra keyword signals and properties are handled.
     s << "if (PyDict_Size(kwds_dup) > 0) {\n" << indent
         << "errInfo.reset(kwds_dup.release());\n";
-    if (!(func->isConstructor() && func->ownerClass()->isQObject()))
+    if (!(func->isConstructor() && isQObject(func->ownerClass())))
         s << "goto " << cpythonFunctionName(func) << "_TypeError;\n";
     else
         s << "// fall through to handle extra keyword signals and properties\n";
@@ -4077,7 +4077,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                 } else {
                     const QString ctorCall = context.effectiveClassName() + u'('
                                              + userArgs.join(u", "_s) + u')';
-                    if (usePySideExtensions() && owner->isQObject()) {
+                    if (usePySideExtensions() && isQObject(owner)) {
                         s << "void *addr = PySide::nextQObjectMemoryAddr();\n";
                         uva << "if (addr) {\n" << indent
                             << "cptr = new (addr) ::" << ctorCall << ";\n"
@@ -4708,7 +4708,7 @@ void CppGenerator::writeClassDefinition(TextStream &s,
     bool onlyPrivCtor = !metaClass->hasNonPrivateConstructor();
 
     const bool isQApp = usePySideExtensions()
-        && metaClass->inheritsFrom(u"QCoreApplication"_s);
+        && inheritsFrom(metaClass, u"QCoreApplication"_s);
 
     QString tp_flags = u"Py_TPFLAGS_DEFAULT"_s;
     if (!metaClass->attributes().testFlag(AbstractMetaClass::FinalCppClass))
@@ -6174,7 +6174,7 @@ void CppGenerator::writeClassRegister(TextStream &s,
             writeInitQtMetaTypeFunctionBody(s, classContext);
     }
 
-    if (usePySideExtensions() && metaClass->isQObject()) {
+    if (usePySideExtensions() && isQObject(metaClass)) {
         s << "Shiboken::ObjectType::setSubTypeInitHook(pyType, &PySide::initQObjectSubType);\n"
             << "PySide::initDynamicMetaObject(pyType, &::"
             << metaClass->qualifiedCppName() << "::staticMetaObject, sizeof(";
@@ -6245,7 +6245,7 @@ QtRegisterMetaType qtMetaTypeRegistration(const AbstractMetaClass *c)
 
     // Default.
     if (isObject)
-        return c->isQObject() ? QtRegisterMetaType::None : QtRegisterMetaType::Pointer;
+        return isQObject(c) ? QtRegisterMetaType::None : QtRegisterMetaType::Pointer;
 
     return !c->isAbstract() && c->isDefaultConstructible()
         ? QtRegisterMetaType::Value : QtRegisterMetaType::None;
@@ -6450,7 +6450,7 @@ void CppGenerator::writeGetattroFunction(TextStream &s, AttroCheck attroCheck,
     if (usePySideExtensions())
         s << "PySide::Feature::Select(self);\n";
 
-    const QString getattrFunc = usePySideExtensions() && metaClass->isQObject()
+    const QString getattrFunc = usePySideExtensions() && isQObject(metaClass)
         ? qObjectGetAttroFunction() : u"PyObject_GenericGetAttr(self, name)"_s;
 
     if (attroCheck.testFlag(AttroCheckFlag::GetattroOverloads)) {
@@ -7041,14 +7041,14 @@ static bool useParentHeuristics(const ApiExtractorResult &api,
     auto *owner = func->ownerClass();
     if (owner == nullptr)
         return false;
-    auto ownerEntry = owner->parentManagementEntry();
+    auto ownerEntry = parentManagementEntry(owner);
     if (ownerEntry.isNull())
         return false;
     auto argTypeEntry = argType.typeEntry();
     if (!argTypeEntry->isComplex())
         return false;
     auto *argClass = AbstractMetaClass::findClass(api.classes(), argTypeEntry);
-    return argClass != nullptr && argClass->parentManagementEntry() == ownerEntry;
+    return argClass != nullptr && parentManagementEntry(argClass) == ownerEntry;
 }
 
 bool CppGenerator::writeParentChildManagement(TextStream &s, const AbstractMetaFunctionCPtr &func,
