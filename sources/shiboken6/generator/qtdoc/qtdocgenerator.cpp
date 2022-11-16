@@ -342,6 +342,13 @@ void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classC
         writeFunctionToc(s, u"Static functions"_s, metaClass, doc.tocStaticFunctions);
     }
 
+    s << "\n.. note::\n"
+         "    This documentation may contain snippets that were automatically\n"
+         "    translated from C++ to Python. We always welcome contributions\n"
+         "    to the snippet translation. If you see an issue with the\n"
+         "    translation, you can also let us know by creating a ticket on\n"
+         "    https:/bugreports.qt.io/projects/PYSIDE\n\n";
+
     s << "\nDetailed Description\n"
            "--------------------\n\n"
         << ".. _More:\n";

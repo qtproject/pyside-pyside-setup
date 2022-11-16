@@ -174,6 +174,8 @@ private:
     QString m_opened_anchor;
     QList<InlineImage> m_inlineImages;
 
+    bool m_containsAutoTranslations = false;
+
     struct Snippet
     {
         enum Result {
@@ -187,10 +189,12 @@ private:
         Result result;
     };
 
+    void setAutoTranslatedNote(QString *str) const;
+
     Snippet readSnippetFromLocations(const QString &path,
                                      const QString &identifier,
                                      const QString &fallbackPath,
-                                     QString *errorMessage) const;
+                                     QString *errorMessage);
     static QString readFromLocation(const QString &location, const QString &identifier,
                              QString *errorMessage);
     void pushOutputBuffer();
