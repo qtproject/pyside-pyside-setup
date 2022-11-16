@@ -1656,13 +1656,17 @@ QtCoreHelper::QGenericReturnArgumentHolder result(qArgData.metaType, qArgData.da
 
 // invokeMethod(QObject *,const char *, QGenericArgument a0, a1, a2 )
 // @snippet qmetaobject-invokemethod-arg
+PyThreadState *_save = PyEval_SaveThread(); // Py_BEGIN_ALLOW_THREADS
 const bool result = %CPPSELF.invokeMethod(%1, %2, %3, %4, %5);
+PyEval_RestoreThread(_save); // Py_END_ALLOW_THREADS
 %PYARG_0 = %CONVERTTOPYTHON[bool](result);
 // @snippet qmetaobject-invokemethod-arg
 
 // invokeMethod(QObject *,const char *,Qt::ConnectionType, QGenericArgument a0, a1, a2 )
 // @snippet qmetaobject-invokemethod-conn-type-arg
+PyThreadState *_save = PyEval_SaveThread(); // Py_BEGIN_ALLOW_THREADS
 const bool result = %CPPSELF.invokeMethod(%1, %2, %3, %4, %5, %6);
+PyEval_RestoreThread(_save); // Py_END_ALLOW_THREADS
 %PYARG_0 = %CONVERTTOPYTHON[bool](result);
 // @snippet qmetaobject-invokemethod-conn-type-arg
 
@@ -1674,8 +1678,10 @@ static PyObject *invokeMethodHelper(QObject *obj, const char *member, Qt::Connec
                                     const QtCoreHelper::QGenericArgumentHolder &v3)
 
 {
+    PyThreadState *_save = PyEval_SaveThread(); // Py_BEGIN_ALLOW_THREADS
     const bool callResult = QMetaObject::invokeMethod(obj, member, type,
                                                       returnArg, v1, v2, v3);
+    PyEval_RestoreThread(_save); // Py_END_ALLOW_THREADS
     if (!callResult) {
         PyErr_Format(PyExc_RuntimeError, "QMetaObject::invokeMethod(): Invocation of %s::%s() failed.",
                      obj->metaObject()->className(), member);
