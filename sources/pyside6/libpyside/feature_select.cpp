@@ -614,6 +614,28 @@ PyObject *adjustPropertyName(PyObject *dict, PyObject *name)
     return name;
 }
 
+static QByteArrayList GetPropertyStringsMro(PyTypeObject *type)
+{
+    /*
+     * PYSIDE-2042: There are possibly more methods which should become properties,
+     *              because the wrapping process does not obey inheritance.
+     *              Therefore, we need to walk the mro to find property strings.
+     */
+    auto res = QByteArrayList();
+
+    PyObject *mro = type->tp_mro;
+    Py_ssize_t idx, n = PyTuple_GET_SIZE(mro);
+    // We leave 'Shiboken.Object' and 'object' alone, therefore "n - 2".
+    for (idx = 0; idx < n - 2; idx++) {
+        auto *subType = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
+        auto props = SbkObjectType_GetPropertyStrings(subType);
+        if (props != nullptr)
+            for (; *props != nullptr; ++props)
+                res << QByteArray(*props);
+    }
+    return res;
+}
+
 static bool feature_02_true_property(PyTypeObject *type, PyObject *prev_dict, int id)
 {
     /*
@@ -643,12 +665,12 @@ static bool feature_02_true_property(PyTypeObject *type, PyObject *prev_dict, in
     }
     // We then replace methods by properties.
     bool lower = (id & 0x01) != 0;
-    auto props = SbkObjectType_GetPropertyStrings(type);
-    if (props == nullptr || *props == nullptr)
+    auto props = GetPropertyStringsMro(type);
+    if (props.isEmpty())
         return true;
-    for (; *props != nullptr; ++props) {
+
+    for (const auto &propStr : std::as_const(props)) {
         bool isStdWrite;
-        auto propStr = *props;
         auto fields = parseFields(propStr, &isStdWrite);
         bool haveWrite = fields.size() == 3;
         PyObject *name = make_snake_case(fields[0], lower);
