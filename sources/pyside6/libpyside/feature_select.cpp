@@ -553,14 +553,14 @@ static PyObject *createProperty(PyTypeObject *type, PyObject *getter, PyObject *
     return prop;
 }
 
-static QStringList parseFields(const char *propstr, bool *stdwrite)
+static const QByteArrayList parseFields(const char *propStr, bool *stdWrite)
 {
     /*
      * Break the string into subfields at ':' and add defaults.
      */
-    if (stdwrite)
-        *stdwrite = true;
-    QString s = QString(QLatin1String(propstr));
+    if (stdWrite)
+        *stdWrite = true;
+    QByteArray s = QByteArray(propStr);
     auto list = s.split(u':');
     assert(list.size() == 2 || list.size() == 3);
     auto name = list[0];
@@ -570,20 +570,20 @@ static QStringList parseFields(const char *propstr, bool *stdwrite)
     if (list.size() == 2)
         return list;
     auto write = list[2];
-    if (stdwrite)
-        *stdwrite = write.isEmpty();
+    if (stdWrite)
+        *stdWrite = write.isEmpty();
     if (write.isEmpty()) {
-        list[2] = QLatin1String("set") + name;
-        list[2][3] = list[2][3].toUpper();
+        list[2] = "set" + name;
+        list[2][3] = std::toupper(list[2][3]);
     }
     return list;
 }
 
-static PyObject *make_snake_case(QString s, bool lower)
+static PyObject *make_snake_case(const QByteArray &s, bool lower)
 {
     if (s.isNull())
         return nullptr;
-    return String::getSnakeCaseName(s.toLatin1().data(), lower);
+    return String::getSnakeCaseName(s.constData(), lower);
 }
 
 PyObject *adjustPropertyName(PyObject *dict, PyObject *name)
@@ -648,8 +648,8 @@ static bool feature_02_true_property(PyTypeObject *type, PyObject *prev_dict, in
         return true;
     for (; *props != nullptr; ++props) {
         bool isStdWrite;
-        auto propstr = *props;
-        auto fields = parseFields(propstr, &isStdWrite);
+        auto propStr = *props;
+        auto fields = parseFields(propStr, &isStdWrite);
         bool haveWrite = fields.size() == 3;
         PyObject *name = make_snake_case(fields[0], lower);
         PyObject *read = make_snake_case(fields[1], lower);
@@ -748,7 +748,7 @@ static bool patch_property_impl()
 //
 // PYSIDE-1019: Support switchable extensions
 //
-//     Feature 0x04..0x40: A fake switchable option for testing
+//     Feature 0x04..0x80: A fake switchable option for testing
 //
 
 #define SIMILAR_FEATURE(xx)  \

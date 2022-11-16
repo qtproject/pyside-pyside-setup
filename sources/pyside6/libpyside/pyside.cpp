@@ -151,14 +151,14 @@ static const QByteArray _sigWithOrigName(const QByteArray &signature, bool mangl
  * dict entries in the mro are already mangled.
  */
 
-static const QByteArrayList parseFields(const char *propstr, int flags, bool *stdwrite)
+static const QByteArrayList parseFields(const char *propStr, int flags, bool *stdWrite)
 {
     /*
      * Break the string into subfields at ':' and add defaults.
      */
-    if (stdwrite)
-        *stdwrite = true;
-    QByteArray s = QByteArray(propstr);
+    if (stdWrite)
+        *stdWrite = true;
+    QByteArray s = QByteArray(propStr);
     auto list = s.split(':');
     assert(list.size() == 2 || list.size() == 3);
     auto name = list[0];
@@ -168,8 +168,8 @@ static const QByteArrayList parseFields(const char *propstr, int flags, bool *st
     if (list.size() == 2)
         return list;
     auto write = list[2];
-    if (stdwrite)
-        *stdwrite = write.isEmpty();
+    if (stdWrite)
+        *stdWrite = write.isEmpty();
     if (write.isEmpty()) {
         auto snake_flag = flags & 0x01;
         if (snake_flag) {
@@ -201,13 +201,13 @@ static QByteArrayList _SbkType_LookupProperty(PyTypeObject *type,
         if (props == nullptr || *props == nullptr)
             continue;
         for (; *props != nullptr; ++props) {
-            QByteArray propstr(*props);
-            if (std::strncmp(propstr, origName, len) == 0) {
-                if (propstr[len] != ':')
+            QByteArray propStr(*props);
+            if (std::strncmp(propStr, origName, len) == 0) {
+                if (propStr[len] != ':')
                     continue;
                 // We found the property. Return the parsed fields.
-                propstr = _sigWithMangledName(propstr, snake_flag);
-                return parseFields(propstr, flags, nullptr);
+                propStr = _sigWithMangledName(propStr, snake_flag);
+                return parseFields(propStr, flags, nullptr);
             }
         }
     }
@@ -220,10 +220,10 @@ static QByteArrayList _SbkType_FakeProperty(const QByteArray &name, int flags)
      * Handle a pseudo.property and return all fields.
      */
     int snake_flag = flags & 0x01;
-    QByteArray propstr(name);
-    propstr += "::";
-    propstr = _sigWithMangledName(propstr, snake_flag);
-    return parseFields(propstr, snake_flag, nullptr);
+    QByteArray propStr(name);
+    propStr += "::";
+    propStr = _sigWithMangledName(propStr, snake_flag);
+    return parseFields(propStr, snake_flag, nullptr);
 }
 
 static bool _setProperty(PyObject *qObj, PyObject *name, PyObject *value, bool *accept)
