@@ -46,9 +46,19 @@ endif()
 #
 
 set(libpysideqml_HEADERS
-    pysideqmlmacros.h
+    pysideqmlattached.h
+    pysideqmlattached_p.h
+    pysideqmlextended_p.h
+    pysideqmlforeign_p.h
     pysideqml.h
+    pysideqmllistproperty_p.h
+    pysideqmlmacros.h
+    pysideqmlmetacallerror_p.h
+    pysideqmlnamedelement_p.h
     pysideqmlregistertype.h
+    pysideqmlregistertype_p.h
+    pysideqmltypeinfo_p.h
+    pysideqmluncreatable.h
 )
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")

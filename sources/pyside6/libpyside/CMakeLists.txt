@@ -86,26 +86,36 @@ set(libpyside_HEADERS
     class_property.h
     dynamicqmetaobject.h
     feature_select.h
+    globalreceiverv2.h
+    pysideclassdecorator_p.h
     pysideclassinfo.h
+    pysideclassinfo_p.h
     pysidecleanup.h
+    pyside.h
     pysideinit.h
+    pysidelogging_p.h
+    pysidemacros.h
+    pysidemetafunction.h
+    pysidemetafunction_p.h
+    pysidemetatype.h
+    pyside_numpy.h
+    pyside_p.h
+    pysideproperty.h
+    pysideproperty_p.h
     pysideqapp.h
     pysideqenum.h
+    pysideqflags.h
     pysideqhash.h
     pysideqmetatype.h
     pysideqobject.h
-    pysidemacros.h
-    pysideqmetatype.h
-    signalmanager.h
-    pyside.h
-    pysidestaticstrings.h
-    pysidemetafunction.h
     pysidesignal.h
+    pysidesignal_p.h
+    pysideslot_p.h
+    pysidestaticstrings.h
     pysideutils.h
-    pysideproperty.h
-    pysideqflags.h
     pysideweakref.h
     qobjectconnect.h
+    signalmanager.h
 )
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
