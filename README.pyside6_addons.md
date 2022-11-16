@@ -39,6 +39,9 @@ it includes the following Qt modules:
 * QtWebEngineQuick
 * QtWebEngineWidgets
 * QtWebSockets
+* QtPdf
+* QtPdfWidgets
+* QtHttpServer
 
 ### Documentation and Bugs
 
