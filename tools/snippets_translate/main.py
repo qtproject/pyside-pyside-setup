@@ -371,6 +371,7 @@ def translate_file(file_path, final_path, qt_path, debug, write):
                 target_file.parent.mkdir(parents=True, exist_ok=True)
 
             with target_file.open("w", encoding="utf-8") as out_f:
+                out_f.write("//! [AUTO]\n\n")
                 out_f.write(license_header)
                 out_f.write("\n\n")
 

@@ -429,16 +429,34 @@ QString QtXmlToSphinx::popOutputBuffer()
     return result;
 }
 
+static const QString autoTranslatedPlaceholder = u"AUTO_GENERATED\n"_s;
+static const QString autoTranslatedNote =
+uR"(.. warning::
+    This section contains snippets that were automatically
+    translated from C++ to Python and may contain errors.
+
+)"_s;
+
+void QtXmlToSphinx::setAutoTranslatedNote(QString *str) const
+{
+    if (m_containsAutoTranslations)
+        str->replace(autoTranslatedPlaceholder, autoTranslatedNote);
+    else
+        str->remove(autoTranslatedPlaceholder);
+}
+
 QString QtXmlToSphinx::transform(const QString& doc)
 {
     Q_ASSERT(m_buffers.isEmpty());
-    Indentation indentation(m_output);
     if (doc.trimmed().isEmpty())
         return doc;
 
     pushOutputBuffer();
 
     QXmlStreamReader reader(doc);
+
+    m_output << autoTranslatedPlaceholder;
+    Indentation indentation(m_output);
 
     while (!reader.atEnd()) {
         QXmlStreamReader::TokenType token = reader.readNext();
@@ -480,6 +498,7 @@ QString QtXmlToSphinx::transform(const QString& doc)
     m_output.flush();
     QString retval = popOutputBuffer();
     Q_ASSERT(m_buffers.isEmpty());
+    setAutoTranslatedNote(&retval);
     return retval;
 }
 
@@ -528,7 +547,7 @@ static QString pySnippetName(const QString &path, SnippetType type)
 QtXmlToSphinx::Snippet QtXmlToSphinx::readSnippetFromLocations(const QString &path,
                                                 const QString &identifier,
                                                 const QString &fallbackPath,
-                                                QString *errorMessage) const
+                                                QString *errorMessage)
 {
     // For anything else but C++ header/sources (no conversion to Python),
     // use existing fallback paths first.
@@ -550,6 +569,7 @@ QtXmlToSphinx::Snippet QtXmlToSphinx::readSnippetFromLocations(const QString &pa
                 rewrittenPath.replace(m_parameters.codeSnippetRewriteOld,
                                       m_parameters.codeSnippetRewriteNew);
                 const QString code = readFromLocation(rewrittenPath, identifier, errorMessage);
+                m_containsAutoTranslations = true;
                 return {code, code.isNull() ? Snippet::Error : Snippet::Converted};
             }
         }
@@ -561,7 +581,7 @@ QtXmlToSphinx::Snippet QtXmlToSphinx::readSnippetFromLocations(const QString &pa
         }
     }
 
-    resolvedPath =resolveFile(locations, path);
+    resolvedPath = resolveFile(locations, path);
     if (!resolvedPath.isEmpty()) {
         const QString code = readFromLocation(resolvedPath, identifier, errorMessage);
         return {code, code.isNull() ? Snippet::Error : Snippet::Resolved};
@@ -864,6 +884,7 @@ void QtXmlToSphinx::handleSnippetTag(QXmlStreamReader& reader)
         if (reader.attributes().hasAttribute(fallbackPathAttribute()))
             fallbackPath = reader.attributes().value(fallbackPathAttribute()).toString();
         QString errorMessage;
+
         const Snippet snippet = readSnippetFromLocations(location, identifier,
                                                          fallbackPath, &errorMessage);
         if (!errorMessage.isEmpty())
@@ -886,6 +907,7 @@ void QtXmlToSphinx::handleSnippetTag(QXmlStreamReader& reader)
         m_output << '\n';
     }
 }
+
 void QtXmlToSphinx::handleDotsTag(QXmlStreamReader& reader)
 {
     QXmlStreamReader::TokenType token = reader.tokenType();
