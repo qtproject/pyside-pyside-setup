@@ -213,6 +213,7 @@ configure_file("conf.py.in" "rst/conf.py" @ONLY)
 
 set(CODE_SNIPPET_ROOT "${CMAKE_CURRENT_BINARY_DIR}/rst/codesnippets")
 
+if (FULLDOCSBUILD)
 shiboken_get_tool_shell_wrapper(shiboken tool_wrapper)
 
 add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/rst/PySide6/QtCore/index.rst"
@@ -236,6 +237,7 @@ add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/rst/PySide6/QtCore/index.
                        ${global_typesystem}
                    WORKING_DIRECTORY ${${module}_SOURCE_DIR}
                    COMMENT "Running generator to generate documentation...")
+endif()
 
 add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/rst/extras"
                    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/rst
