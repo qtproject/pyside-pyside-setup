@@ -137,7 +137,7 @@ else {
 // @snippet qsettings-value
 
 // @snippet metatype-from-type
-%0 = new %TYPE(PySide::qMetaTypeFromPyType(reinterpret_cast<PyTypeObject *&>(%1)));
+%0 = new %TYPE(PySide::qMetaTypeFromPyType(reinterpret_cast<PyTypeObject *>(%1)));
 // @snippet metatype-from-type
 
 // @snippet metatype-from-metatype-type
@@ -150,7 +150,7 @@ else
 // @snippet metatype-from-metatype-type
 
 // @snippet conversion-pytypeobject-qmetatype
-auto *pyType = reinterpret_cast<PyTypeObject *&>(%in);
+auto *pyType = reinterpret_cast<PyTypeObject *>(%in);
 %out = PySide::qMetaTypeFromPyType(pyType);
 // @snippet conversion-pytypeobject-qmetatype
 
