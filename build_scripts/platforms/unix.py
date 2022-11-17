@@ -4,6 +4,7 @@
 import fnmatch
 import os
 import sys
+from pathlib import Path
 
 from ..config import config
 from ..options import OPTION
@@ -205,7 +206,7 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
                     return False
                 return True
             # examples/* -> <setup>/{st_package_name}/examples
-            copydir(str(pyside_build.script_dir / "examples"),
+            copydir(Path(pyside_build.script_dir) / "examples",
                     "{st_build_dir}/{st_package_name}/examples",
                     force=False, _vars=_vars, dir_filter_function=pycache_dir_filter)
 

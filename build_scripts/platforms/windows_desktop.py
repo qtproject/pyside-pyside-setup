@@ -6,7 +6,6 @@ import functools
 import os
 
 from pathlib import Path
-
 from ..config import config
 from ..options import OPTION
 from ..utils import (copydir, copyfile, download_and_extract_7z, filter_match,
@@ -196,7 +195,7 @@ def prepare_packages_win32(pyside_build, _vars):
                     return False
                 return True
             # examples/* -> <setup>/{st_package_name}/examples
-            copydir(pyside_build.script_dir / "examples",
+            copydir(Path(pyside_build.script_dir) / "examples",
                     "{st_build_dir}/{st_package_name}/examples",
                     force=False, _vars=_vars, dir_filter_function=pycache_dir_filter)
 
