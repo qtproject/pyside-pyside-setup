@@ -517,7 +517,7 @@ class CommandMixin(object):
             log.error("Option --jobs can only be used with jom on Windows.")
             return False
 
-        if sys.platform == 'win32' and OPTION["LIMITED_API"] and self.debug:
+        if sys.platform == 'win32' and OPTION["LIMITED_API"] == "yes" and self.debug:
             log.error("It is not possible to make a debug build of PySide6 with limited API. "
                       "Please select a release build or disable limited API.")
             return False
