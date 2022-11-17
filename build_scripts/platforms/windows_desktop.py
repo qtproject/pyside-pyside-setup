@@ -132,7 +132,7 @@ def prepare_packages_win32(pyside_build, _vars):
         filters = ["pyside*.exe", "pyside*.dll"]
         if not OPTION['NO_QT_TOOLS']:
             filters.extend(["lrelease.exe", "lupdate.exe", "uic.exe",
-                            "rcc.exe", "qmllint.exe", "qmltyperegistrar.exe"
+                            "rcc.exe", "qmllint.exe", "qmltyperegistrar.exe",
                             "assistant.exe", "designer.exe", "qmlimportscanner.exe",
                             "linguist.exe", "qmlformat.exe", "qmlls.exe"])
         copydir(
