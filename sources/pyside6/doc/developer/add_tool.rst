@@ -26,7 +26,7 @@ Add a Qt tool wrapper
 - Install the files (``sources/pyside-tools/CMakeLists.txt``).
 - Include the tool in the deprecated 'setup.py bdist_wheel' process:
 
-   - Add an entry point in ``build_scripts/config.py``.
+   - Add the tool in ``build_scripts/__init__.py``.
 
    - Copy the files to the wheels in ``build_scripts/platforms/*.py``.
 
