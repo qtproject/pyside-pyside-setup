@@ -1985,7 +1985,7 @@ bool TypeSystemParser::parseModifyDocumentation(const ConditionalStreamReader &,
         || topElement == StackElement::ModifyField;
     if (!validParent) {
         m_error = u"modify-documentation must be inside modify-function, "
-                   "modify-field or other tags that creates a type"_qs;
+                   "modify-field or other tags that creates a type"_s;
         return false;
     }
 

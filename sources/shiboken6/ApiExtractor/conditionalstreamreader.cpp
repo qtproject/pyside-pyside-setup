@@ -6,6 +6,8 @@
 #include <QtCore/QDebug>
 #include <QtCore/QHash>
 
+using namespace Qt::StringLiterals;
+
 // ProxyEntityResolver proxies a QXmlStreamEntityResolver set by the user
 // on ConditionalStreamReader and stores entity definitions from the
 // <?entity name value?> processing instruction in a cache
@@ -126,7 +128,7 @@ bool ConditionalStreamReader::readEntityDefinitonPi()
     const auto data = m_reader.processingInstructionData();
     const auto separator = data.indexOf(u' ');
     if (separator <= 0 || separator == data.size() - 1) {
-        m_reader.raiseError(u"Malformed entity definition: "_qs + data.toString());
+        m_reader.raiseError(u"Malformed entity definition: "_s + data.toString());
         return false;
     }
     defineEntity(data.left(separator).toString(),

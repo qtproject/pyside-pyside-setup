@@ -534,6 +534,11 @@ bool AbstractMetaClass::isInlineNamespace() const
     return result;
 }
 
+bool AbstractMetaClass::isQObject() const
+{
+    return inheritsFrom(u"QObject"_s);
+}
+
 bool AbstractMetaClass::isQtNamespace() const
 {
     return isNamespace() && name() == u"Qt";
@@ -853,7 +858,7 @@ void AbstractMetaClass::addSynthesizedComparisonOperators()
     selfType.decideUsagePattern();
     AbstractMetaArgument selfArgument;
     selfArgument.setType(selfType);
-    selfArgument.setName(u"rhs"_qs);
+    selfArgument.setName(u"rhs"_s);
     AbstractMetaArgumentList arguments(1, selfArgument);
 
     static const char *operators[]

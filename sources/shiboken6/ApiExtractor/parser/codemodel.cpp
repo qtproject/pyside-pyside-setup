@@ -15,6 +15,8 @@
 #include <functional>
 #include <iostream>
 
+using namespace Qt::StringLiterals;
+
 // Predicate to find an item by name in a list of QSharedPointer<Item>
 template <class T> class ModelItemNamePredicate
 {
@@ -682,15 +684,15 @@ _ScopeModelItem::FindEnumByValueReturn
     const bool unqualified = fullValue.size() == enumValue.size();
     QString scopePrefix = scope().join(u"::");
     if (!scopePrefix.isEmpty())
-        scopePrefix += u"::"_qs;
-    scopePrefix += name() + u"::"_qs;
+        scopePrefix += u"::"_s;
+    scopePrefix += name() + u"::"_s;
 
     for (const auto &e : m_enums) {
         const auto index = e->indexOfValue(enumValue);
         if (index != -1) {
             QString fullyQualifiedName = scopePrefix;
             if (e->enumKind() != AnonymousEnum)
-                fullyQualifiedName += e->name() + u"::"_qs;
+                fullyQualifiedName += e->name() + u"::"_s;
             fullyQualifiedName += e->enumerators().at(index)->name();
             if (unqualified || fullyQualifiedName.endsWith(fullValue))
                 return {e, fullyQualifiedName};

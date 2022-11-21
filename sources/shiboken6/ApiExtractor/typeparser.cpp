@@ -8,6 +8,8 @@
 #include <QtCore/QStack>
 #include <QtCore/QTextStream>
 
+using namespace Qt::StringLiterals;
+
 class Scanner
 {
 public:
@@ -283,7 +285,7 @@ TypeInfo TypeParser::parse(const QString &str, QString *errorMessage)
     }
 
     if (stack.isEmpty() || stack.constFirst().qualifiedName().isEmpty()) {
-        *errorMessage = u"Unable to parse type \""_qs + str + u"\"."_qs;
+        *errorMessage = u"Unable to parse type \""_s + str + u"\"."_s;
         return {};
     }
     return stack.constFirst();

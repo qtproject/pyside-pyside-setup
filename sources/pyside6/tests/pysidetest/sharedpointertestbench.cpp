@@ -6,6 +6,8 @@
 #include <QtCore/QObject>
 #include <QtCore/QDebug>
 
+using namespace Qt::StringLiterals;
+
 SharedPointerTestbench::SharedPointerTestbench() = default;
 
 QSharedPointer<int> SharedPointerTestbench::createSharedPointerInt(int v)
@@ -21,7 +23,7 @@ void SharedPointerTestbench::printSharedPointerInt(const QSharedPointer<int> &p)
 QSharedPointer<QObject> SharedPointerTestbench::createSharedPointerQObject()
 {
     QSharedPointer<QObject> result(new QObject);
-    result->setObjectName(u"TestObject"_qs);
+    result->setObjectName(u"TestObject"_s);
     return result;
 }
 
@@ -33,7 +35,7 @@ void SharedPointerTestbench::printSharedPointerQObject(const QSharedPointer<QObj
 QSharedPointer<const QObject> SharedPointerTestbench::createSharedPointerConstQObject()
 {
     auto *o = new QObject;
-    o->setObjectName(u"ConstTestObject"_qs);
+    o->setObjectName(u"ConstTestObject"_s);
     QSharedPointer<const QObject> result(o);
     return result;
 }

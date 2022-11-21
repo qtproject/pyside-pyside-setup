@@ -13,6 +13,8 @@
 #include <exception>
 #include <iostream>
 
+using namespace Qt::StringLiterals;
+
 static const char help[] = R"(QtXmlToSphinx WebXML to rst converter
 
 A manual test for converting WebXML files to rst files for checking
@@ -89,7 +91,7 @@ int main(int argc, char *argv[])
     QCommandLineParser commandLineParser;
     commandLineParser.setApplicationDescription(QString::fromLatin1(help));
     commandLineParser.addHelpOption();
-    commandLineParser.addPositionalArgument(u"[file]"_qs, u"WebXML file to process."_qs);
+    commandLineParser.addPositionalArgument(u"[file]"_s, u"WebXML file to process."_s);
     commandLineParser.process(QCoreApplication::arguments());
     if (commandLineParser.positionalArguments().isEmpty())
         commandLineParser.showHelp(0); // quits

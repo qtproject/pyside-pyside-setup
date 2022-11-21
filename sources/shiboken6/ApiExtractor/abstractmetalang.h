@@ -219,7 +219,7 @@ public:
     bool isInvisibleNamespace() const;
     bool isInlineNamespace() const;
 
-    bool isQObject() const { return inheritsFrom(u"QObject"_qs); }
+    bool isQObject() const;
     bool isQtNamespace() const;
 
     QString qualifiedCppName() const;

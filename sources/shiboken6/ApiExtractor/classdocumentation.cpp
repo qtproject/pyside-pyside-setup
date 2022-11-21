@@ -13,6 +13,8 @@
 
 #include <algorithm>
 
+using namespace Qt::StringLiterals;
+
 // Sort functions by name and argument count
 static bool functionDocumentationLessThan(const FunctionDocumentation &f1,
                                           const FunctionDocumentation &f2)
@@ -109,30 +111,30 @@ static void parseWebXmlElement(WebXmlTag tag, const QXmlStreamAttributes &attrib
 {
     switch (tag) {
     case WebXmlTag::Class:
-        cd->name = attributes.value(u"name"_qs).toString();
+        cd->name = attributes.value(u"name"_s).toString();
         break;
     case WebXmlTag::Enum: {
         EnumDocumentation ed;
-        ed.name = attributes.value(u"name"_qs).toString();
+        ed.name = attributes.value(u"name"_s).toString();
         cd->enums.append(ed);
     }
         break;
     case WebXmlTag::Function: {
         FunctionDocumentation fd;
-        fd.name = attributes.value(u"name"_qs).toString();
-        fd.signature = attributes.value(u"signature"_qs).toString();
-        fd.returnType = attributes.value(u"type"_qs).toString();
-        fd.constant = attributes.value(u"const"_qs) == u"true";
+        fd.name = attributes.value(u"name"_s).toString();
+        fd.signature = attributes.value(u"signature"_s).toString();
+        fd.returnType = attributes.value(u"type"_s).toString();
+        fd.constant = attributes.value(u"const"_s) == u"true";
         cd->functions.append(fd);
     }
         break;
     case WebXmlTag::Parameter:
         Q_ASSERT(!cd->functions.isEmpty());
-        cd->functions.last().parameters.append(attributes.value(u"type"_qs).toString());
+        cd->functions.last().parameters.append(attributes.value(u"type"_s).toString());
         break;
     case WebXmlTag::Property: {
         PropertyDocumentation pd;
-        pd.name = attributes.value(u"name"_qs).toString();
+        pd.name = attributes.value(u"name"_s).toString();
         cd->properties.append(pd);
     }
         break;

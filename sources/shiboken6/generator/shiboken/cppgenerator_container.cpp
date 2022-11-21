@@ -12,6 +12,8 @@
 
 #include <algorithm>
 
+using namespace Qt::StringLiterals;
+
 // Write a PyMethodDef entry, allowing for registering C++ functions
 // under different names for Python.
 static void writeMethod(TextStream &s, const QString &privateObjType,
@@ -92,8 +94,8 @@ CppGenerator::OpaqueContainerData
     s << "\n// Binding for " << cppSignature << "\n\n";
 
     // Generate template specialization of value converter helper unless it is already there
-    const QString pyArg = u"pyArg"_qs;
-    const QString cppArg = u"cppArg"_qs;
+    const QString pyArg = u"pyArg"_s;
+    const QString cppArg = u"cppArg"_s;
 
     const QString valueTypeName = valueType.cppSignature();
     const QString checkFunction = cpythonCheckFunction(valueType);
@@ -133,12 +135,12 @@ CppGenerator::OpaqueContainerData
         writePythonToCppTypeConversion(s, valueType, pyArg, cppArg, nullptr, {});
     s << "return " << cppArg << ";\n" << outdent << "}\n" << outdent << "};\n\n";
 
-    const QString privateObjType = u"ShibokenSequenceContainerPrivate<"_qs
+    const QString privateObjType = u"ShibokenSequenceContainerPrivate<"_s
         + cppSignature + u'>';
 
     // methods
     const bool isStdVector = containerType.name() == u"std::vector";
-    const QString methods = result.name + u"_methods"_qs;
+    const QString methods = result.name + u"_methods"_s;
     s << "static PyMethodDef " << methods << "[] = {\n" << indent;
     writeMethod(s, privateObjType, "push_back");
     writeMethod(s, privateObjType, "push_back", "append"); // Qt convention
@@ -159,7 +161,7 @@ CppGenerator::OpaqueContainerData
         << outdent << "};\n\n";
 
     // slots
-    const QString slotsList = result.name + u"_slots"_qs;
+    const QString slotsList = result.name + u"_slots"_s;
     s << "static PyType_Slot " << slotsList << "[] = {\n" << indent;
     writeSlot(s, privateObjType, "Py_tp_init", "tpInit");
     writeSlot(s, privateObjType, "Py_tp_new", "tpNew");
@@ -172,7 +174,7 @@ CppGenerator::OpaqueContainerData
     s << "{0, nullptr}\n" << outdent << "};\n\n";
 
     // spec
-    const QString specName = result.name + u"_spec"_qs;
+    const QString specName = result.name + u"_spec"_s;
     const QString name = moduleName() + u'.' + result.name;
     s << "static PyType_Spec " << specName << " = {\n" << indent
         << "\"" << name.count(u'.') << ':' << name << "\",\n"
@@ -180,7 +182,7 @@ CppGenerator::OpaqueContainerData
         <<  slotsList << outdent << "\n};\n\n";
 
     // type creation function that sets a key in the type dict.
-    const QString typeCreationFName =  u"create"_qs + result.name + u"Type"_qs;
+    const QString typeCreationFName =  u"create"_s + result.name + u"Type"_s;
     s << "static inline PyTypeObject *" << typeCreationFName << "()\n{\n" << indent
         << "auto *result = reinterpret_cast<PyTypeObject *>(SbkType_FromSpec(&"
         << specName <<  "));\nPy_INCREF(Py_True);\n"
@@ -189,26 +191,26 @@ CppGenerator::OpaqueContainerData
         << "return result;\n" << outdent << "}\n\n";
 
     // _TypeF() function
-    const QString typeFName =  result.name + u"_TypeF"_qs;
+    const QString typeFName =  result.name + u"_TypeF"_s;
     s << "static PyTypeObject *" << typeFName << "()\n{\n" << indent
         << "static PyTypeObject *type = " << typeCreationFName
         << "();\nreturn type;\n" << outdent << "}\n\n";
 
     // creation functions from C++ references
-    writeContainerCreationFunc(s, u"create"_qs + result.name, typeFName,
+    writeContainerCreationFunc(s, u"create"_s + result.name, typeFName,
                                containerType.cppSignature());
-    writeContainerCreationFunc(s, u"createConst"_qs + result.name, typeFName,
+    writeContainerCreationFunc(s, u"createConst"_s + result.name, typeFName,
                                containerType.cppSignature(), true);
 
     // Check function
-    result.checkFunctionName = result.name + u"_Check"_qs;
+    result.checkFunctionName = result.name + u"_Check"_s;
     s << "extern \"C\" int " << result.checkFunctionName << "(PyObject *" << pyArg
         << ")\n{\n" << indent << "return " << pyArg << " != nullptr && "
         << pyArg << " != Py_None && " << pyArg << "->ob_type == "
         << typeFName << "();\n" << outdent << "}\n\n";
 
     // SBK converter Python to C++
-    result.pythonToConverterFunctionName = u"PythonToCpp"_qs + result.name;
+    result.pythonToConverterFunctionName = u"PythonToCpp"_s + result.name;
     s << "extern \"C\" void " << result.pythonToConverterFunctionName
         << "(PyObject *" << pyArg << ", void *cppOut)\n{\n" << indent
         << "auto *d = ShibokenSequenceContainerPrivate<" << cppSignature
@@ -217,7 +219,7 @@ CppGenerator::OpaqueContainerData
         << outdent << "}\n\n";
 
     // SBK check function for converting Python to C++ that returns the converter
-    result.converterCheckFunctionName = u"is"_qs + result.name + u"PythonToCppConvertible"_qs;
+    result.converterCheckFunctionName = u"is"_s + result.name + u"PythonToCppConvertible"_s;
     s << "extern \"C\" PythonToCppFunc " << result.converterCheckFunctionName
         << "(PyObject *" << pyArg << ")\n{\n" << indent << "if ("
         << result.checkFunctionName << '(' << pyArg << "))\n" << indent
