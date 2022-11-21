@@ -155,7 +155,7 @@ static inline PyObject *getSelectId(PyObject *dict)
 
 static inline void setCurrentSelectId(PyTypeObject *type, PyObject *select_id)
 {
-    SbkObjectType_SetReserved(type, PyLong_AsSsize_t(select_id));    // int/long cheating
+    SbkObjectType_SetReserved(type, PyLong_AsSsize_t(select_id));
 }
 
 static inline void setCurrentSelectId(PyTypeObject *type, int id)
@@ -267,7 +267,7 @@ static bool createNewFeatureSet(PyTypeObject *type, PyObject *select_id)
     Py_INCREF(prev_dict);   // keep the first ref unchanged
     if (!addNewDict(type, select_id))
         return false;
-    auto id = PyLong_AsSsize_t(select_id);   // int/long cheating
+    auto id = PyLong_AsSsize_t(select_id);
     if (id == -1)
         return false;
     setCurrentSelectId(type, id);
@@ -313,7 +313,7 @@ static bool SelectFeatureSetSubtype(PyTypeObject *type, PyObject *select_id)
     return true;
 }
 
-static inline PyObject *SelectFeatureSet(PyTypeObject *type)
+static inline void SelectFeatureSet(PyTypeObject *type)
 {
     /*
      * This is the main function of the module.
@@ -325,8 +325,10 @@ static inline PyObject *SelectFeatureSet(PyTypeObject *type)
      */
     if (Py_TYPE(type->tp_dict) == Py_TYPE(PyType_Type.tp_dict)) {
         // We initialize the dynamic features by using our own dict type.
-        if (!replaceClassDict(type))
-            return nullptr;
+        if (!replaceClassDict(type)) {
+            Py_FatalError("failed to replace class dict!");
+            return;
+        }
     }
     PyObject *select_id = getFeatureSelectId();         // borrowed
     PyObject *current_id = getCurrentSelectId(type);    // borrowed
@@ -349,7 +351,7 @@ static inline PyObject *SelectFeatureSet(PyTypeObject *type)
         // PYSIDE-1436: Clear all caches for the type and subtypes.
         PyType_Modified(type);
     }
-    return type->tp_dict;
+    return;
 }
 
 // For cppgenerator:
@@ -358,14 +360,13 @@ void Select(PyObject *obj)
     if (featurePointer == nullptr)
         return;
     auto type = Py_TYPE(obj);
-    type->tp_dict = SelectFeatureSet(type);
+    SelectFeatureSet(type);
 }
 
-PyObject *Select(PyTypeObject *type)
+void Select(PyTypeObject *type)
 {
     if (featurePointer != nullptr)
-        type->tp_dict = SelectFeatureSet(type);
-    return type->tp_dict;
+        SelectFeatureSet(type);
 }
 
 static bool feature_01_addLowerNames(PyTypeObject *type, PyObject *prev_dict, int id);

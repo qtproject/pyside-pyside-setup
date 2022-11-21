@@ -58,7 +58,7 @@ typedef void (*SubTypeInitHook)(PyTypeObject *, PyObject *, PyObject *);
 
 /// PYSIDE-1019: Set the function to select the current feature.
 /// Return value is the previous content.
-typedef PyObject *(*SelectableFeatureHook)(PyTypeObject *);
+typedef void (*SelectableFeatureHook)(PyTypeObject *);
 LIBSHIBOKEN_API SelectableFeatureHook initSelectableFeature(SelectableFeatureHook func);
 
 /// PYSIDE-1019: Get access to PySide reserved bits.
