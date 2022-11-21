@@ -311,10 +311,15 @@ def get_license_from_file(filename):
 
 
 def translate_file(file_path, final_path, qt_path, debug, write):
-    with open(str(file_path)) as f:
-        lines = f.read().splitlines()
-        rel_path = file_path.relative_to(qt_path)
-        snippets = get_snippets(lines, rel_path)
+    snippets = []
+    try:
+        with file_path.open("r", encoding="utf-8") as f:
+            lines = f.read().splitlines()
+            rel_path = file_path.relative_to(qt_path)
+            snippets = get_snippets(lines, rel_path)
+    except Exception as e:
+        log.error(f"Error reading {file_path}: {e}")
+        raise
     if snippets:
         # TODO: Get license header first
         license_header = get_license_from_file(str(file_path))
@@ -363,7 +368,7 @@ def translate_file(file_path, final_path, qt_path, debug, write):
                     log.info(f"Creating directories for {target_file.parent}")
                 target_file.parent.mkdir(parents=True, exist_ok=True)
 
-            with target_file.open("w") as out_f:
+            with target_file.open("w", encoding="utf-8") as out_f:
                 out_f.write(license_header)
                 out_f.write("\n\n")
 
