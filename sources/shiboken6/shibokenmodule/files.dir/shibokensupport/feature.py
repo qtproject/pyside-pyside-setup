@@ -18,6 +18,7 @@ and takes an optional `mod_name` parameter.
 The select id `-1` has the spectial meaning "ignore this module".
 """
 
+import inspect
 import sys
 from contextlib import contextmanager
 
@@ -84,6 +85,7 @@ def feature_import(name, *args, **kwargs):
     # PYSIDE-1398: sys._getframe(1) may not exist when embedding.
     # PYSIDE-1338: The "1" below is the redirection in loader.py .
     # PYSIDE-1548: Ensure that features are not affected by other imports.
+    # PYSIDE-2029: Need to always switch. The cache was wrong interpreted.
     calling_frame = _cf = sys._getframe(1).f_back
     importing_module = _cf.f_globals.get("__name__", "__main__") if _cf else "__main__"
     existing = pyside_feature_dict.get(importing_module, 0)
@@ -105,11 +107,6 @@ def feature_import(name, *args, **kwargs):
         # Initialize feature (multiple times allowed) and clear cache.
         sys.modules["PySide6.QtCore"].__init_feature__()
         return sys.modules["__feature__"]
-
-    if importing_module not in pyside_feature_dict:
-        # Ignore new modules if not from PySide.
-        default = 0 if name.split(".")[0] == "PySide6" else -1
-        pyside_feature_dict[importing_module] = default
     # Redirect to the original import
     return None
 
@@ -121,9 +118,41 @@ def __init__():
         # use _one_ recursive import...
         import PySide6.QtCore
         # Initialize all prior imported modules
-        for name in sys.modules:
-            pyside_feature_dict.setdefault(name, -1)
+        for name, module in sys.modules.items():
+            if name not in pyside_feature_dict:
+                pyside_feature_dict[name] = 0 if _mod_uses_pyside(module) else -1
         _is_initialized = True
+
+
+def feature_imported(module):
+    # PYSIDE-2029: Need to inspect imported modules for PySide usage.
+    """
+    Set the module feature default after import.
+
+    A module that uses PySide has a switching default of 0 = "no feature".
+    Otherwise the default is -1 = "ignore this module".
+    """
+    name = module.__name__
+    if name not in pyside_feature_dict:
+        pyside_feature_dict[name] = 0 if _mod_uses_pyside(module) else -1
+
+
+def _mod_uses_pyside(module):
+    """
+    Find out if this module uses PySide.
+
+    Simple approach: Search the source code for the string "PySide6".
+    Maybe we later support source-less modules by inspecting all code objects.
+    """
+    try:
+        source = inspect.getsource(module)
+    except TypeError:
+        # this is a builtin module like sys
+        return False
+    except OSError:
+        # this is a module withot source file
+        return False
+    return "PySide6" in source
 
 
 def set_selection(select_id, mod_name=None):

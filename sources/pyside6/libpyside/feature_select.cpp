@@ -163,15 +163,6 @@ static inline void setCurrentSelectId(PyTypeObject *type, int id)
     SbkObjectType_SetReserved(type, id);
 }
 
-static inline PyObject *getCurrentSelectId(PyTypeObject *type)
-{
-    int id = SbkObjectType_GetReserved(type);
-    // This can be too early.
-    if (id < 0)
-        id = 0;
-    return fast_id_array[id];
-}
-
 static bool replaceClassDict(PyTypeObject *type)
 {
     /*
@@ -218,7 +209,7 @@ static bool addNewDict(PyTypeObject *type, PyObject *select_id)
     return true;
 }
 
-static bool moveToFeatureSet(PyTypeObject *type, PyObject *select_id)
+static inline bool moveToFeatureSet(PyTypeObject *type, PyObject *select_id)
 {
     /*
      * Rotate the ring to the given `select_id` and return `true`.
@@ -227,7 +218,6 @@ static bool moveToFeatureSet(PyTypeObject *type, PyObject *select_id)
     auto initial_dict = type->tp_dict;
     auto dict = initial_dict;
     do {
-        dict = nextInCircle(dict);
         AutoDecRef current_id(getSelectId(dict));
         // This works because small numbers are singleton objects.
         if (current_id == select_id) {
@@ -235,6 +225,7 @@ static bool moveToFeatureSet(PyTypeObject *type, PyObject *select_id)
             setCurrentSelectId(type, select_id);
             return true;
         }
+        dict = nextInCircle(dict);
     } while (dict != initial_dict);
     type->tp_dict = initial_dict;
     setCurrentSelectId(type, getSelectId(initial_dict));
@@ -290,7 +281,7 @@ static bool createNewFeatureSet(PyTypeObject *type, PyObject *select_id)
     return true;
 }
 
-static bool SelectFeatureSetSubtype(PyTypeObject *type, PyObject *select_id)
+static inline bool SelectFeatureSetSubtype(PyTypeObject *type, PyObject *select_id)
 {
     /*
      * This is the selector for one sublass. We need to call this for
@@ -330,28 +321,21 @@ static inline void SelectFeatureSet(PyTypeObject *type)
             return;
         }
     }
+
     PyObject *select_id = getFeatureSelectId();         // borrowed
-    PyObject *current_id = getCurrentSelectId(type);    // borrowed
-    static PyObject *undef = fast_id_array[-1];
 
-    // PYSIDE-1019: During import PepType_SOTP is still zero.
-    if (current_id == undef)
-        current_id = select_id = fast_id_array[0];
-
-    if (select_id != current_id) {
-        PyObject *mro = type->tp_mro;
-        Py_ssize_t idx, n = PyTuple_GET_SIZE(mro);
-        // We leave 'Shiboken.Object' and 'object' alone, therefore "n - 2".
-        for (idx = 0; idx < n - 2; idx++) {
-            auto *sub_type = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
-            // When any subtype is already resolved (false), we can stop.
-            if (!SelectFeatureSetSubtype(sub_type, select_id))
-                break;
-        }
-        // PYSIDE-1436: Clear all caches for the type and subtypes.
-        PyType_Modified(type);
+    // PYSIDE-2029: We are no longer caching extremely, but switching safe.
+    PyObject *mro = type->tp_mro;
+    Py_ssize_t idx, n = PyTuple_GET_SIZE(mro);
+    // We leave 'Shiboken.Object' and 'object' alone, therefore "n - 2".
+    for (idx = 0; idx < n - 2; idx++) {
+        auto *sub_type = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
+        // When any subtype is already resolved (false), we can stop.
+        if (!SelectFeatureSetSubtype(sub_type, select_id))
+            break;
     }
-    return;
+    // PYSIDE-1436: Clear all caches for the type and subtypes.
+    PyType_Modified(type);
 }
 
 // For cppgenerator:

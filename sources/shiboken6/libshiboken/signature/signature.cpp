@@ -284,7 +284,18 @@ static PyObject *feature_import(PyObject * /* self */, PyObject *args, PyObject 
     if (import_func == nullptr) {
         Py_FatalError("builtins has no \"__orig_import__\" function");
     }
-    return PyObject_Call(import_func, args, kwds);
+    ret = PyObject_Call(import_func, args, kwds);
+    if (ret) {
+        // PYSIDE-2029: Intercept after the import to search for PySide usage.
+        PyObject *post = PyObject_CallFunctionObjArgs(pyside_globals->feature_imported_func,
+                                                      ret, nullptr);
+        Py_XDECREF(post);
+        if (post == nullptr) {
+            Py_DECREF(ret);
+            return nullptr;
+        }
+    }
+    return ret;
 }
 
 PyMethodDef signature_methods[] = {

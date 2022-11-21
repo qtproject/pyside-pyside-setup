@@ -53,6 +53,13 @@ def feature_import(*args, **kwds):
     feature_import = feature.feature_import
     return feature_import(*args, **kwds)
 
+# name used in signature.cpp
+def feature_imported(*args, **kwds):
+    # don't spend a stack level here for speed and compatibility
+    global feature_imported
+    feature_imported = feature.feature_imported
+    return feature_imported(*args, **kwds)
+
 
 import builtins
 import signature_bootstrap

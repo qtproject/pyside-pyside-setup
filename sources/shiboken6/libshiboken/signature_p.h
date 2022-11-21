@@ -24,6 +24,7 @@ typedef struct safe_globals_struc {
     PyObject *make_helptext_func;
     PyObject *finish_import_func;
     PyObject *feature_import_func;
+    PyObject *feature_imported_func;
 } safe_globals_struc, *safe_globals;
 
 extern safe_globals pyside_globals;
