@@ -835,7 +835,7 @@ def module_QtSerialPort() -> ModuleData:
 
 
 def module_QtSpatialAudio() -> ModuleData:
-    data = ModuleData("QtSpatialAudio")
+    data = ModuleData("SpatialAudio")
     data.metatypes.append("qt6spatialaudio_debug_metatypes.json")
 
     return data
