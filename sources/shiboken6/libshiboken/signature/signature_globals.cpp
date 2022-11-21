@@ -186,6 +186,9 @@ static int init_phase_2(safe_globals_struc *p, PyMethodDef *methods)
         p->feature_import_func = PyObject_GetAttrString(loader, "feature_import");
         if (p->feature_import_func == nullptr)
             break;
+        p->feature_imported_func = PyObject_GetAttrString(loader, "feature_imported");
+        if (p->feature_imported_func == nullptr)
+            break;
         return 0;
 
     } while (0);
