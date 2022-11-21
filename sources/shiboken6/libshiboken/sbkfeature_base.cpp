@@ -44,7 +44,7 @@ PyObject *getFeatureSelectId()
 
     PyObject *select_id = PyDict_GetItem(feature_dict, modname);
     if (select_id == nullptr
-        || !PyLong_Check(select_id)  // int/long cheating
+        || !PyLong_Check(select_id)
         || select_id == undef)
         return last_select_id;
 
@@ -103,7 +103,7 @@ void disassembleFrame(const char *marker)
 
 // Python 3.11
 static int const PRECALL = 166;
-// we have "big instructins" with gaps after them
+// we have "big instructions" with gaps after them
 static int const LOAD_ATTR_GAP = 4 * 2;
 static int const LOAD_METHOD_GAP = 10 * 2;
 // Python 3.7 - 3.10
@@ -222,7 +222,7 @@ PyObject *mangled_type_getattro(PyTypeObject *type, PyObject *name)
     static PyObject *const _member_map_ = String::createStaticString("_member_map_");
 
     if (SelectFeatureSet != nullptr)
-        type->tp_dict = SelectFeatureSet(type);
+        SelectFeatureSet(type);
     auto *ret = type_getattro(reinterpret_cast<PyObject *>(type), name);
 
     // PYSIDE-1735: Be forgiving with strict enums and fetch the enum, silently.
@@ -340,8 +340,10 @@ PyObject *Sbk_TypeGet___dict__(PyTypeObject *type, void * /* context */)
     auto dict = type->tp_dict;
     if (dict == nullptr)
         Py_RETURN_NONE;
-    if (SelectFeatureSet != nullptr)
-        dict = SelectFeatureSet(type);
+    if (SelectFeatureSet != nullptr) {
+        SelectFeatureSet(type);
+        dict = type->tp_dict;
+    }
     return PyDictProxy_New(dict);
 }
 
@@ -352,7 +354,7 @@ PyObject *SbkObject_GenericGetAttr(PyObject *obj, PyObject *name)
 {
     auto type = Py_TYPE(obj);
     if (SelectFeatureSet != nullptr)
-        type->tp_dict = SelectFeatureSet(type);
+        SelectFeatureSet(type);
     return PyObject_GenericGetAttr(obj, name);
 }
 
@@ -360,7 +362,7 @@ int SbkObject_GenericSetAttr(PyObject *obj, PyObject *name, PyObject *value)
 {
     auto type = Py_TYPE(obj);
     if (SelectFeatureSet != nullptr)
-        type->tp_dict = SelectFeatureSet(type);
+        SelectFeatureSet(type);
     return PyObject_GenericSetAttr(obj, name, value);
 }
 
@@ -394,7 +396,7 @@ void SbkObjectType_SetEnumFlagInfo(PyTypeObject *type, const char **strings)
 void SbkObjectType_UpdateFeature(PyTypeObject *type)
 {
     if (SelectFeatureSet != nullptr)
-        type->tp_dict = SelectFeatureSet(type);
+        SelectFeatureSet(type);
 }
 
 } // extern "C"
