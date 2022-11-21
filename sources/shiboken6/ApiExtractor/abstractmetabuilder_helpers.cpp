@@ -9,6 +9,8 @@
 #include "enumtypeentry.h"
 #include "flagstypeentry.h"
 
+using namespace Qt::StringLiterals;
+
 using QStringViewList = QList<QStringView>;
 
 // Return a prefix to fully qualify value, eg:
@@ -19,7 +21,7 @@ static QString resolveScopePrefixHelper(const QStringViewList &scopeList,
 {
     QString name;
     for (qsizetype i = scopeList.size() - 1 ; i >= 0; --i) {
-        const QString prefix = scopeList.at(i).toString() + u"::"_qs;
+        const QString prefix = scopeList.at(i).toString() + u"::"_s;
         if (value.startsWith(prefix))
             name.clear();
         else
@@ -35,7 +37,7 @@ QString AbstractMetaBuilder::resolveScopePrefix(const AbstractMetaClass *scope,
         return {};
     const QString &qualifiedCppName = scope->qualifiedCppName();
     const QStringViewList scopeList =
-        QStringView{qualifiedCppName}.split(u"::"_qs, Qt::SkipEmptyParts);
+        QStringView{qualifiedCppName}.split(u"::"_s, Qt::SkipEmptyParts);
     return resolveScopePrefixHelper(scopeList, value);
 }
 
@@ -49,7 +51,7 @@ static QString resolveEnumValueScopePrefix(const AbstractMetaEnum &metaEnum,
     const QString &qualifiedCppName = scope->qualifiedCppName();
     const QString &enumName = metaEnum.name();
     QStringViewList parts =
-        QStringView{qualifiedCppName}.split(u"::"_qs, Qt::SkipEmptyParts);
+        QStringView{qualifiedCppName}.split(u"::"_s, Qt::SkipEmptyParts);
     // Append the type (as required for enum classes) unless it is an anonymous enum.
     if (!metaEnum.isAnonymous())
         parts.append(QStringView{enumName});
@@ -157,7 +159,7 @@ QString AbstractMetaBuilderPrivate::fixEnumDefault(const AbstractMetaType &type,
             qualified.prepend(resolveEnumValueScopePrefix(metaEnum, token));
         qualifiedTokens.append(qualified);
     }
-    const QString qualifiedExpression = qualifiedTokens.join(u" | "_qs);
+    const QString qualifiedExpression = qualifiedTokens.join(u" | "_s);
     if (!typeCast)
         return qualifiedExpression;
 

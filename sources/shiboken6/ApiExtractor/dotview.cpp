@@ -9,12 +9,14 @@
 #include <QtCore/QProcess>
 #include <QtCore/QTemporaryFile>
 
+using namespace Qt::StringLiterals;
+
 bool showDotGraph(const QString &name, const QString &graph)
 {
-    const QString imageType = u"jpg"_qs;
+    const QString imageType = u"jpg"_s;
 
     // Write out the graph to a temporary file
-    QTemporaryFile dotFile(QDir::tempPath() + u'/' + name + u"_XXXXXX.dot"_qs);
+    QTemporaryFile dotFile(QDir::tempPath() + u'/' + name + u"_XXXXXX.dot"_s);
     if (!dotFile.open()) {
         qWarning("Cannot open temporary file: %s", qPrintable(dotFile.errorString()));
         return false;
@@ -26,7 +28,7 @@ bool showDotGraph(const QString &name, const QString &graph)
     // Convert to image using "dot"
     const QString imageFile = tempDotFile.left(tempDotFile.size() - 3) + imageType;
     QProcess process;
-    process.start(u"dot"_qs, {u"-T"_qs + imageType, u"-o"_qs + imageFile, tempDotFile});
+    process.start(u"dot"_s, {u"-T"_s + imageType, u"-o"_s + imageFile, tempDotFile});
     if (!process.waitForStarted() || !process.waitForFinished()) {
         qWarning("Image conversion failed: %s", qPrintable(process.errorString()));
         return false;
@@ -41,9 +43,9 @@ bool showDotGraph(const QString &name, const QString &graph)
     // Launch image. Should use QDesktopServices::openUrl(),
     // but we don't link against QtGui
 #ifdef Q_OS_UNIX
-    const QString imageViewer = u"gwenview"_qs;
+    const QString imageViewer = u"gwenview"_s;
 #else
-    const QString imageViewer = u"mspaint"_qs;
+    const QString imageViewer = u"mspaint"_s;
 #endif
     if (!QProcess::startDetached(imageViewer, {imageFile})) {
         qWarning("Failed to launch viewer: %s", qPrintable(imageViewer));
