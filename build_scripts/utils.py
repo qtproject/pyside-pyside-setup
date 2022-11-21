@@ -1358,7 +1358,6 @@ def parse_cmake_project_message_info(output):
 
 def available_pyside_tools(qt_tools_path: Path, package_for_wheels: bool = False):
     pyside_tools = PYSIDE_PYTHON_TOOLS.copy()
-    lib_exec_path = qt_tools_path / "libexec"
 
     if package_for_wheels:
         # Qt wrappers in build/{python_env_name}/package_for_wheels/PySide6
@@ -1377,6 +1376,7 @@ def available_pyside_tools(qt_tools_path: Path, package_for_wheels: bool = False
         pyside_tools.extend([tool for tool in PYSIDE_WINDOWS_BIN_TOOLS
                              if tool_exist(bin_path / f"{tool}.exe")])
     else:
+        lib_exec_path = qt_tools_path / "Qt" / "libexec"
         pyside_tools.extend([tool for tool in PYSIDE_LINUX_LIBEXEC_TOOLS
                              if tool_exist(lib_exec_path / tool)])
         pyside_tools.extend([tool for tool in PYSIDE_LINUX_BIN_TOOLS
