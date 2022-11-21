@@ -76,6 +76,7 @@ class Options(object):
 
         :return: Either the option value or None.
         """
+
         option = f"--{name}"
         short_option = f"-{short_option_name}" if short_option_name else None
         single_option_prefix = f"{option}="
@@ -125,6 +126,30 @@ def _jobs_option_value():
     return ''
 
 
+def find_qtpaths():
+    # for these command --qtpaths should not be required
+    no_qtpaths_commands = ["--help", "--help-commands", "--qt-target-path", "build_rst_docs"]
+
+    for no_qtpaths_command in no_qtpaths_commands:
+        if any(no_qtpaths_command in argument for argument in sys.argv):
+            return None
+
+    qtpaths = option_value("qtpaths")
+    if qtpaths:
+        return qtpaths
+
+    # if qtpaths is not given as cli option, try to find it in PATH
+    qtpaths = which("qtpaths6")
+    if qtpaths:
+        return str(qtpaths.resolve())
+
+    qtpaths = which("qtpaths")
+    if qtpaths:
+        return str(qtpaths.resolve())
+
+    return qtpaths
+
+
 # Declare options which need to be known when instantiating the setuptools
 # commands or even earlier during SetupRunner.run().
 OPTION = {
@@ -147,9 +172,13 @@ OPTION = {
     "CMAKE_TOOLCHAIN_FILE": option_value("cmake-toolchain-file"),
     "SHIBOKEN_HOST_PATH": option_value("shiboken-host-path"),
     "SHIBOKEN_HOST_PATH_QUERY_FILE": option_value("internal-shiboken-host-path-query-file"),
-    "QT_HOST_PATH": option_value("qt-host-path")
+    "QT_HOST_PATH": option_value("qt-host-path"),
     # This is used to identify the template for doc builds
+    "QTPATHS": find_qtpaths()
+    # This is an optional command line option. If --qtpaths is not provided via command-line,
+    # then qtpaths is checked inside PATH variable
 }
+
 _deprecated_option_jobs = option_value('jobs')
 if _deprecated_option_jobs:
     _warn_deprecated_option('jobs', 'parallel')
@@ -303,6 +332,9 @@ class CommandMixin(object):
                 if key not in current_command_opts and key in mixin_options_set:
                     current_command_opts[key] = value
 
+        # qtpaths is already known before running SetupRunner
+        self.qtpaths = OPTION["QTPATHS"]
+
     @staticmethod
     @memoize
     def get_mixin_options_set():
@@ -398,9 +430,9 @@ class CommandMixin(object):
         OPTION['UNITY_BUILD_BATCH_SIZE'] = self.unity_build_batch_size
 
         qtpaths_abs_path = None
-        if self.qtpaths:
-            qtpaths_abs_path = self.qtpaths.resolve()
-            OPTION['QTPATHS'] = qtpaths_abs_path
+        if self.qtpaths and Path(self.qtpaths).exists():
+            qtpaths_abs_path = Path(self.qtpaths).resolve()
+
         # FIXME PYSIDE7: Remove qmake handling
         # make qtinfo.py independent of relative paths.
         qmake_abs_path = None
@@ -428,18 +460,19 @@ class CommandMixin(object):
                        qt_target_path=qt_target_path,
                        cmake_toolchain_file=cmake_toolchain_file)
 
-        try:
-            QtInfo().prefix_dir
-        except Exception as e:
-            if not self.qt_target_path:
-                log.error(
-                    "\nCould not find Qt. You can pass the --qt-target-path=<qt-dir> option as a "
-                    "hint where to find Qt. Error was:\n\n\n")
-            else:
-                log.error(
-                    f"\nCould not find Qt via provided option --qt-target-path={qt_target_path} "
-                    "Error was:\n\n\n")
-            raise e
+        if 'build_rst_docs' not in sys.argv:
+            try:
+                QtInfo().prefix_dir
+            except Exception as e:
+                if not self.qt_target_path:
+                    log.error(
+                        "\nCould not find Qt. You can pass the --qt-target-path=<qt-dir> option "
+                        "as a hint where to find Qt. Error was:\n\n\n")
+                else:
+                    log.error(
+                        f"\nCould not find Qt via provided option --qt-target-path={qt_target_path}"
+                        "Error was:\n\n\n")
+                raise e
 
         OPTION['CMAKE'] = self.cmake.resolve()
         OPTION['OPENSSL'] = self.openssl
@@ -487,10 +520,6 @@ class CommandMixin(object):
             return False
         return True
 
-    def _find_qtpaths_in_path(self):
-        if not self.qtpaths:
-            self.qtpaths = Path(which("qtpaths6"))
-
     def _determine_defaults_and_check(self):
         if not self.cmake:
             self.cmake = Path(which("cmake"))
@@ -522,11 +551,6 @@ class CommandMixin(object):
             if self.qmake:
                 self.has_qmake_option = True
                 _warn_deprecated_option('qmake', 'qtpaths')
-
-            # If no option was given explicitly, prefer to find qtpaths
-            # in PATH.
-            if not self.qmake and not self.qtpaths:
-                self._find_qtpaths_in_path()
 
             # If no tool was specified and qtpaths was not found in PATH,
             # ask to provide a path to qtpaths.

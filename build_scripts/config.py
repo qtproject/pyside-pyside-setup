@@ -199,11 +199,13 @@ class Config(object):
             setup_kwargs['install_requires'] = [
                 f"{self.shiboken_module_st_name}=={package_version}"
             ]
-            _pyside_tools = available_pyside_tools(qt_tools_path=qt_install_path)
-            setup_kwargs['entry_points'] = {
-                'console_scripts': [f'{PYSIDE}-{tool} = {package_name}.scripts.pyside_tool:{tool}'
-                                    for tool in _pyside_tools]
-            }
+            if qt_install_path:
+                _pyside_tools = available_pyside_tools(qt_tools_path=qt_install_path)
+                setup_kwargs['entry_points'] = {
+                    'console_scripts': [f'{PYSIDE}-{tool} = {package_name}.scripts.pyside_tool:'
+                                        f'{tool}'
+                                        for tool in _pyside_tools]
+                }
         self.setup_kwargs = setup_kwargs
 
     def get_long_description(self):

@@ -1152,20 +1152,6 @@ def available_pyside_tools(qt_tools_path: Path, package_for_wheels: bool = False
     return pyside_tools
 
 
-def find_qt_install_path() -> Path:
-    """
-        Find Qt installation path
-    """
-
-    def where_is(x):
-        return Path(which(x))
-
-    qtpaths = where_is("qtpaths") if where_is("qtpaths") else where_is("qtpaths6")
-    if not qtpaths:
-        raise RuntimeError("qtpaths not found")
-    else:
-        return qtpaths.parents[1]
-
 def copy_qt_metatypes(destination_qt_dir, _vars):
     """Copy the Qt metatypes files which changed location in 6.5"""
     # <qt>/[lib]?/metatypes/* -> <setup>/{st_package_name}/Qt/[lib]?/metatypes

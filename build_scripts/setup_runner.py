@@ -14,7 +14,7 @@ from build_scripts.config import config
 from build_scripts.main import (cmd_class_dict, get_package_version,
                                 get_setuptools_extension_modules)
 from build_scripts.options import ADDITIONAL_OPTIONS, OPTION
-from build_scripts.utils import run_process, find_qt_install_path
+from build_scripts.utils import run_process
 from build_scripts.log import log, LogLevel
 
 
@@ -174,14 +174,9 @@ class SetupRunner(object):
         # PYSIDE-1746: We prevent the generation of .pyc/.pyo files during installation.
         #              These files are generated anyway on their import.
         sys.dont_write_bytecode = True
-
-        # find qtpaths
-        arg_qt = list(filter(lambda v: v.startswith("--qtpaths"), sys.argv))
-        if len(arg_qt) != 0:
-            qt_install_path = arg_qt[0].replace("--qtpaths=", "")
-            qt_install_path = Path(qt_install_path).absolute().parents[1]
-        else:
-            qt_install_path = find_qt_install_path()
+        qt_install_path = OPTION["QTPATHS"]
+        if qt_install_path:
+            qt_install_path = Path(qt_install_path).parents[1]
 
         # Prepare initial config.
         config.init_config(build_type=OPTION["BUILD_TYPE"],
