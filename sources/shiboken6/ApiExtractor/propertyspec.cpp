@@ -5,6 +5,7 @@
 #include "abstractmetalang.h"
 #include "abstractmetabuilder_p.h"
 #include "abstractmetatype.h"
+#include "documentation.h"
 #include "messages.h"
 #include "complextypeentry.h"
 #include "typeinfo.h"
@@ -43,6 +44,7 @@ public:
     QString m_designable;
     QString m_reset;
     QString m_notify;
+    Documentation m_documentation;
     AbstractMetaType m_type;
     int m_index = -1;
     // Indicates whether actual code is generated instead of relying on libpyside.
@@ -86,6 +88,17 @@ void QPropertySpec::setName(const QString &name)
 {
     if (d->m_name != name)
         d->m_name = name;
+}
+
+Documentation QPropertySpec::documentation() const
+{
+    return d->m_documentation;
+}
+
+void QPropertySpec::setDocumentation(const Documentation &doc)
+{
+    if (d->m_documentation != doc)
+        d->m_documentation = doc;
 }
 
 QString QPropertySpec::read() const
@@ -312,6 +325,8 @@ void QPropertySpec::formatDebug(QDebug &debug) const
           debug << ", reset=" << d->m_reset;
     if (!d->m_designable.isEmpty())
           debug << ", designable=" << d->m_designable;
+    if (!d->m_documentation.isEmpty())
+        debug << ", doc=\"" << d->m_documentation << '"';
 }
 
 QDebug operator<<(QDebug d, const QPropertySpec &p)

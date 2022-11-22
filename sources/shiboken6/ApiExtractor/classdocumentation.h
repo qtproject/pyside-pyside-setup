@@ -19,6 +19,7 @@ struct EnumDocumentation
 struct PropertyDocumentation
 {
     QString name;
+    QString brief;
     QString description;
 };
 
