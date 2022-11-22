@@ -106,6 +106,8 @@ public:
      */
     static QString moduleName();
 
+    static QString pythonOperatorFunctionName(const QString &cppOpFuncName);
+
 protected:
     /// Helper for determining the file name
     static QString fileNameForContextHelper(const GeneratorContext &context,
@@ -142,8 +144,6 @@ protected:
     QString translateType(AbstractMetaType metatype,
                           const AbstractMetaClass *context,
                           Options options = NoOption) const;
-
-    static QString pythonOperatorFunctionName(const QString &cppOpFuncName);
 
     /**
      *   Returns the package name.

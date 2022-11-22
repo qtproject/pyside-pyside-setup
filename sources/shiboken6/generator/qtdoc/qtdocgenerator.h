@@ -15,6 +15,8 @@
 
 class DocParser;
 
+struct GeneratorDocumentation;
+
 /**
 *   The DocGenerator generates documentation from library being binded.
 */
@@ -43,6 +45,9 @@ public:
     const QLoggingCategory &loggingCategory() const override;
     QtXmlToSphinxLink resolveLink(const QtXmlToSphinxLink &) const override;
 
+    static QString getFuncName(const AbstractMetaFunctionCPtr &cppFunc);
+    static QString formatArgs(const AbstractMetaFunctionCPtr &func);
+
 protected:
     bool shouldGenerate(const TypeEntryCPtr &) const override;
     static QString fileNameSuffix();
@@ -60,13 +65,15 @@ private:
                        const AbstractMetaFunctionCPtr &func, bool indexed = true);
     void writeFunctionParametersType(TextStream &s, const AbstractMetaClass *cppClass,
                                      const AbstractMetaFunctionCPtr &func) const;
-    static void writeFunctionList(TextStream &s, const AbstractMetaClass *cppClass);
-    static void writeFunctionBlock(TextStream &s, const QString& title,
-                                   QStringList& functions);
+    static void writeFunctionToc(TextStream &s, const QString &title,
+                                 const AbstractMetaClass *cppClass,
+                                 const AbstractMetaFunctionCList &functions);
     void writeParameterType(TextStream &s, const AbstractMetaClass *cppClass,
                             const AbstractMetaArgument &arg) const;
 
-    void writeConstructors(TextStream &s, const AbstractMetaClass *cppClass) const;
+    void writeConstructors(TextStream &s,
+                           const AbstractMetaClass *cppClass,
+                           const AbstractMetaFunctionCList &constructors) const;
 
     void writeFormattedText(TextStream &s, const QString &doc,
                             Documentation::Format format,
@@ -86,15 +93,14 @@ private:
     void writeAdditionalDocumentation() const;
     bool writeInheritanceFile();
 
-    static QString parseArgDocStyle(const AbstractMetaClass *cppClass,
-                                    const AbstractMetaFunctionCPtr &func);
     QString translateToPythonType(const AbstractMetaType &type, const AbstractMetaClass *cppClass) const;
-    static QString getFuncName(const AbstractMetaFunctionCPtr& cppFunc);
 
     bool convertToRst(const QString &sourceFileName,
                       const QString &targetFileName,
                       const QString &context = QString(),
                       QString *errorMessage = nullptr) const;
+
+    GeneratorDocumentation generatorDocumentation(const AbstractMetaClass *cppClass) const;
 
     QString m_extraSectionDir;
     QStringList m_functionList;
