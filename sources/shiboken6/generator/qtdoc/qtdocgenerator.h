@@ -68,6 +68,12 @@ private:
     static void writeFunctionToc(TextStream &s, const QString &title,
                                  const AbstractMetaClass *cppClass,
                                  const AbstractMetaFunctionCList &functions);
+    void writePropertyToc(TextStream &s,
+                          const GeneratorDocumentation &doc,
+                          const AbstractMetaClass *cppClass);
+    void writeProperties(TextStream &s,
+                         const GeneratorDocumentation &doc,
+                         const AbstractMetaClass *cppClass) const;
     void writeParameterType(TextStream &s, const AbstractMetaClass *cppClass,
                             const AbstractMetaArgument &arg) const;
 
@@ -93,7 +99,8 @@ private:
     void writeAdditionalDocumentation() const;
     bool writeInheritanceFile();
 
-    QString translateToPythonType(const AbstractMetaType &type, const AbstractMetaClass *cppClass) const;
+    QString translateToPythonType(const AbstractMetaType &type, const AbstractMetaClass *cppClass,
+                                  bool createRef = true) const;
 
     bool convertToRst(const QString &sourceFileName,
                       const QString &targetFileName,
