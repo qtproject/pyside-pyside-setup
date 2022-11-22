@@ -44,6 +44,17 @@ using namespace Qt::StringLiterals;
 
 struct GeneratorDocumentation
 {
+    struct Property
+    {
+        QString name;
+        Documentation documentation;
+        AbstractMetaType type;
+        AbstractMetaFunctionCPtr getter;
+        AbstractMetaFunctionCPtr setter;
+        AbstractMetaFunctionCPtr reset;
+        AbstractMetaFunctionCPtr notify;
+    };
+
     AbstractMetaFunctionCList constructors;
     AbstractMetaFunctionCList allFunctions; // Except constructors
     AbstractMetaFunctionCList tocNormalFunctions; // Index lists
@@ -51,7 +62,25 @@ struct GeneratorDocumentation
     AbstractMetaFunctionCList tocSignalFunctions;
     AbstractMetaFunctionCList tocSlotFunctions;
     AbstractMetaFunctionCList tocStaticFunctions;
+
+    QList<Property> properties;
 };
+
+static bool operator<(const GeneratorDocumentation::Property &lhs,
+                      const GeneratorDocumentation::Property &rhs)
+{
+    return lhs.name < rhs.name;
+}
+
+static QString propertyRefTarget(const AbstractMetaClass *cppClass, const QString &name)
+{
+    QString result = cppClass->fullName() +  u'.' + name;
+    result.replace(u"::"_s, u"."_s);
+    // For sphinx referencing, disambiguate the target from the getter name
+    // by inserting an invisible "Hangul choseong filler" character.
+    result.insert(1, QChar(0x115F));
+    return result;
+}
 
 static inline QString additionalDocumentationOption() { return QStringLiteral("additional-documentation"); }
 
@@ -129,6 +158,23 @@ static TextStream &operator<<(TextStream &s, const docRef &dr)
     return s;
 }
 
+// Format a short documentation reference (automatically dropping the prefix
+// by using '~'), usable for property/attributes ("attr").
+struct shortDocRef
+{
+    explicit shortDocRef(const char *kind, const QString &target) :
+        m_kind(kind), m_target(target) {}
+
+    const char *m_kind;
+    const QString &m_target;
+};
+
+static TextStream &operator<<(TextStream &s, const shortDocRef &sdr)
+{
+    s << ':' << sdr.m_kind << ":`~" << sdr.m_target << '`';
+    return s;
+}
+
 struct functionRef : public docRef
 {
     explicit functionRef(const QString &name, const AbstractMetaClass *cppClass) :
@@ -151,6 +197,12 @@ static TextStream &operator<<(TextStream &s, const functionTocEntry &ft)
         << ' ' << QtDocGenerator::formatArgs(ft.m_func);
     return s;
 }
+
+struct propRef : public shortDocRef // Attribute/property (short) reference
+{
+    explicit propRef(const QString &target) :
+        shortDocRef("attr", target) {}
+};
 
 QtDocGenerator::QtDocGenerator()
 {
@@ -279,8 +331,9 @@ void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classC
 
     const GeneratorDocumentation doc = generatorDocumentation(metaClass);
 
-    if (!doc.allFunctions.isEmpty()) {
+    if (!doc.allFunctions.isEmpty() || !doc.properties.isEmpty()) {
         s << "\nSynopsis\n--------\n\n";
+        writePropertyToc(s, doc, metaClass);
         writeFunctionToc(s, u"Functions"_s, metaClass, doc.tocNormalFunctions);
         writeFunctionToc(s, u"Virtual functions"_s, metaClass, doc.tocVirtuals);
         writeFunctionToc(s, u"Slots"_s, metaClass, doc.tocSlotFunctions);
@@ -298,6 +351,10 @@ void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classC
 
     if (!metaClass->isNamespace())
         writeConstructors(s, metaClass, doc.constructors);
+
+    if (!doc.properties.isEmpty())
+        writeProperties(s, doc, metaClass);
+
     writeEnums(s, metaClass);
     if (!metaClass->isNamespace())
         writeFields(s, metaClass);
@@ -325,6 +382,54 @@ void QtDocGenerator::writeFunctionToc(TextStream &s, const QString &title,
         for (const auto &func : functions)
             s << "* def " << functionTocEntry(func, cppClass) << '\n';
         s << outdent << "\n\n";
+    }
+}
+
+void QtDocGenerator::writePropertyToc(TextStream &s,
+                                      const GeneratorDocumentation &doc,
+                                      const AbstractMetaClass *cppClass)
+{
+    if (doc.properties.isEmpty())
+        return;
+
+    const QString title = u"Properties"_s;
+    s << title << '\n'
+      << Pad('^', title.size()) << '\n';
+
+    s << ".. container:: function_list\n\n" << indent;
+    for (const auto &prop : doc.properties) {
+        s << "* " << propRef(propertyRefTarget(cppClass, prop.name));
+        if (prop.documentation.hasBrief())
+            s << " - " << prop.documentation.brief();
+        s << '\n';
+    }
+    s << outdent << "\n\n";
+}
+
+void QtDocGenerator::writeProperties(TextStream &s,
+                                     const GeneratorDocumentation &doc,
+                                     const AbstractMetaClass *cppClass) const
+{
+    s << "\n.. note:: Properties can be used directly when "
+        << "``from __feature__ import true_property`` is used or via accessor "
+        << "functions otherwise.\n\n";
+
+    for (const auto &prop : doc.properties) {
+        const QString type = translateToPythonType(prop.type, cppClass, /* createRef */ false);
+        s <<  ".. py:property:: " << propertyRefTarget(cppClass, prop.name)
+            << "\n   :type: " << type << "\n\n\n";
+        if (!prop.documentation.isEmpty())
+            writeFormattedText(s, prop.documentation.detailed(), Documentation::Native, cppClass);
+        s << "**Access functions:**\n";
+        if (!prop.getter.isNull())
+            s << " * " << functionTocEntry(prop.getter, cppClass) << '\n';
+        if (!prop.setter.isNull())
+            s << " * " << functionTocEntry(prop.setter, cppClass) << '\n';
+        if (!prop.reset.isNull())
+            s << " * " << functionTocEntry(prop.reset, cppClass) << '\n';
+        if (!prop.notify.isNull())
+            s << " * Signal " << functionTocEntry(prop.notify, cppClass) << '\n';
+        s << '\n';
     }
 }
 
@@ -558,7 +663,8 @@ QString QtDocGenerator::functionSignature(const AbstractMetaClass *cppClass,
 }
 
 QString QtDocGenerator::translateToPythonType(const AbstractMetaType &type,
-                                              const AbstractMetaClass *cppClass) const
+                                              const AbstractMetaClass *cppClass,
+                                              bool createRef) const
 {
     static const QStringList nativeTypes =
         {boolT(), floatT(), intT(), pyObjectT(), pyStrT()};
@@ -611,7 +717,10 @@ QString QtDocGenerator::translateToPythonType(const AbstractMetaType &type,
     } else {
         auto k = AbstractMetaClass::findClass(api().classes(), type.typeEntry());
         strType = k ? k->fullName() : type.name();
-        strType = QStringLiteral(":any:`") + strType + u'`';
+        if (createRef) {
+            strType.prepend(u":any:`"_s);
+            strType.append(u'`');
+        }
     }
     return strType;
 }
@@ -692,6 +801,19 @@ void QtDocGenerator::writeFunction(TextStream &s, const AbstractMetaClass *cppCl
         writeFormattedDetailedText(s, func->documentation(), cppClass);
     }
     writeInjectDocumentation(s, TypeSystem::DocModificationAppend, cppClass, func);
+
+    if (auto propIndex = func->propertySpecIndex(); propIndex >= 0) {
+        const QString name = cppClass->propertySpecs().at(propIndex).name();
+        const QString target = propertyRefTarget(cppClass, name);
+        if (func->isPropertyReader())
+            s << "\nGetter of property " << propRef(target) << " .\n\n";
+        else if (func->isPropertyWriter())
+            s << "\nSetter of property " << propRef(target) << " .\n\n";
+        else if (func->isPropertyResetter())
+            s << "\nReset function of property " << propRef(target) << " .\n\n";
+        else if (func->attributes().testFlag(AbstractMetaFunction::Attribute::PropertyNotify))
+            s << "\nNotification signal of property " << propRef(target) << " .\n\n";
+    }
 }
 
 static void writeFancyToc(TextStream& s, const QStringList& items)
@@ -1089,6 +1211,25 @@ GeneratorDocumentation
         else
             result.tocNormalFunctions.append(func);
     }
+
+    // Find the property getters/setters
+    for (const auto &spec: cppClass->propertySpecs()) {
+        GeneratorDocumentation::Property property;
+        property.name = spec.name();
+        property.type = spec.type();
+        property.documentation = spec.documentation();
+        if (!spec.read().isEmpty())
+            property.getter = AbstractMetaFunction::find(result.allFunctions, spec.read());
+        if (!spec.write().isEmpty())
+            property.setter = AbstractMetaFunction::find(result.allFunctions, spec.write());
+        if (!spec.reset().isEmpty())
+            property.reset = AbstractMetaFunction::find(result.allFunctions, spec.reset());
+        if (!spec.notify().isEmpty())
+            property.notify = AbstractMetaFunction::find(result.tocSignalFunctions, spec.notify());
+        result.properties.append(property);
+    }
+    std::sort(result.properties.begin(), result.properties.end());
+
     return result;
 }
 

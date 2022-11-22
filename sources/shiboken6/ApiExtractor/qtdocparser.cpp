@@ -123,17 +123,6 @@ QString QtDocParser::queryFunctionDocumentation(const QString &sourceFileName,
                                                 const AbstractMetaFunctionCPtr &func,
                                                 QString *errorMessage)
 {
-    // Properties
-    if (func->isPropertyReader() || func->isPropertyWriter() || func->isPropertyResetter()) {
-        const QPropertySpec &prop = metaClass->propertySpecs().at(func->propertySpecIndex());
-        const auto index = classDocumentation.indexOfProperty(prop.name());
-        if (index == -1) {
-            *errorMessage = msgCannotFindDocumentation(sourceFileName, func.data());
-            return {};
-        }
-        return classDocumentation.properties.at(index).description;
-    }
-
     // Search candidates by name and const-ness
     FunctionDocumentationList candidates =
         classDocumentation.findFunctionCandidates(func->name(), func->isConstant());
