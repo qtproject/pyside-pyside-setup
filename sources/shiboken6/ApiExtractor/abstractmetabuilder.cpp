@@ -1385,6 +1385,11 @@ void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
                     metaFunction->setPropertySpecIndex(propertyFunction.index);
                 }
                 break;
+            case AbstractMetaClass::PropertyFunction::Notify:
+                if (metaFunction->isSignal()) {
+                    *metaFunction += AbstractMetaFunction::PropertyNotify;
+                    metaFunction->setPropertySpecIndex(propertyFunction.index);
+                }
             }
         }
 

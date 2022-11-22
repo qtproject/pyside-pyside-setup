@@ -103,6 +103,7 @@ public:
         PropertyReader              = 0x00000100,
         PropertyWriter              = 0x00000200,
         PropertyResetter            = 0x00000400,
+        PropertyNotify              = 0x00000800,
 
         Invokable                   = 0x00001000,
 

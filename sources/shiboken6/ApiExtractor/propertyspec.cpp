@@ -31,6 +31,7 @@ public:
         m_write(ts.write),
         m_designable(ts.designable),
         m_reset(ts.reset),
+        m_notify(ts.notify),
         m_type(type),
         m_generateGetSetDef(ts.generateGetSetDef)
     {
@@ -41,6 +42,7 @@ public:
     QString m_write;
     QString m_designable;
     QString m_reset;
+    QString m_notify;
     AbstractMetaType m_type;
     int m_index = -1;
     // Indicates whether actual code is generated instead of relying on libpyside.
@@ -135,6 +137,17 @@ void QPropertySpec::setReset(const QString &reset)
         d->m_reset = reset;
 }
 
+QString QPropertySpec::notify() const
+{
+    return d->m_notify;
+}
+
+void QPropertySpec::setNotify(const QString &notify)
+{
+    if (d->m_notify != notify)
+        d->m_notify = notify;
+}
+
 int QPropertySpec::index() const
 {
     return d->m_index;
@@ -163,13 +176,14 @@ void QPropertySpec::setGenerateGetSetDef(bool generateGetSetDef)
 TypeSystemProperty QPropertySpec::typeSystemPropertyFromQ_Property(const QString &declarationIn,
                                                                    QString *errorMessage)
 {
-    enum class PropertyToken { None, Read, Write, Designable, Reset };
+    enum class PropertyToken { None, Read, Write, Designable, Reset, Notify };
 
     static const QHash<QString, PropertyToken> tokenLookup = {
         {QStringLiteral("READ"), PropertyToken::Read},
         {QStringLiteral("WRITE"), PropertyToken::Write},
         {QStringLiteral("DESIGNABLE"), PropertyToken::Designable},
-        {QStringLiteral("RESET"), PropertyToken::Reset}
+        {QStringLiteral("RESET"), PropertyToken::Reset},
+        {QStringLiteral("NOTIFY"), PropertyToken::Notify}
     };
 
     errorMessage->clear();
@@ -212,6 +226,10 @@ TypeSystemProperty QPropertySpec::typeSystemPropertyFromQ_Property(const QString
         case PropertyToken::Designable:
             result.designable = propertyTokens.at(pos + 1);
             break;
+        case PropertyToken::Notify:
+            result.notify = propertyTokens.at(pos + 1);
+            break;
+
         case PropertyToken::None:
             break;
         }
