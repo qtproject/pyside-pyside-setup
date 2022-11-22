@@ -262,6 +262,7 @@ public:
 
     const QList<QPropertySpec> &propertySpecs() const;
     void addPropertySpec(const QPropertySpec &spec);
+    void setPropertyDocumentation(const QString &name, const Documentation &doc);
 
     // Helpers to search whether a functions is a property setter/getter/reset
     enum class PropertyFunction

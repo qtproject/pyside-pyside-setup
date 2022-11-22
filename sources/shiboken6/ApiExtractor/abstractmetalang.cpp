@@ -69,6 +69,7 @@ public:
     bool isUsingMember(const AbstractMetaClass *c, const QString &memberName,
                        Access minimumAccess) const;
     bool hasConstructors() const;
+    qsizetype indexOfProperty(const QString &name) const;
 
     uint m_hasVirtuals : 1;
     uint m_isPolymorphic : 1;
@@ -353,6 +354,13 @@ const QList<QPropertySpec> &AbstractMetaClass::propertySpecs() const
 void AbstractMetaClass::addPropertySpec(const QPropertySpec &spec)
 {
     d->m_propertySpecs << spec;
+}
+
+void AbstractMetaClass::setPropertyDocumentation(const QString &name, const Documentation &doc)
+{
+    const auto index = d->indexOfProperty(name);
+    if (index >= 0)
+        d->m_propertySpecs[index].setDocumentation(doc);
 }
 
 void AbstractMetaClassPrivate::addFunction(const AbstractMetaFunctionCPtr &function)
@@ -672,10 +680,9 @@ AbstractMetaClass::PropertyFunctionSearchResult
 std::optional<QPropertySpec>
     AbstractMetaClass::propertySpecByName(const QString &name) const
 {
-    for (const auto &propertySpec : d->m_propertySpecs) {
-        if (name == propertySpec.name())
-            return propertySpec;
-    }
+    const auto index = d->indexOfProperty(name);
+    if (index >= 0)
+        return d->m_propertySpecs.at(index);
     return {};
 }
 
@@ -758,6 +765,15 @@ bool AbstractMetaClassPrivate::hasConstructors() const
 {
     return AbstractMetaClass::queryFirstFunction(m_functions,
                                                  FunctionQueryOption::AnyConstructor) != nullptr;
+}
+
+qsizetype AbstractMetaClassPrivate::indexOfProperty(const QString &name) const
+{
+    for (qsizetype i = 0; i < m_propertySpecs.size(); ++i) {
+        if (m_propertySpecs.at(i).name() == name)
+            return i;
+    }
+    return -1;
 }
 
 bool AbstractMetaClass::hasConstructors() const

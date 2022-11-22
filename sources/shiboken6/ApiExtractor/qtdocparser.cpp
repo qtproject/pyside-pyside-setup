@@ -242,10 +242,15 @@ void QtDocParser::fillDocumentation(AbstractMetaClass *metaClass)
     const QString sourceFileName = sourceFile.absoluteFilePath();
     QString errorMessage;
 
-    ClassDocumentation classDocumentation = parseWebXml(sourceFileName, &errorMessage);
+    const ClassDocumentation classDocumentation = parseWebXml(sourceFileName, &errorMessage);
     if (!classDocumentation) {
         qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
         return;
+    }
+
+    for (const auto &p : classDocumentation.properties) {
+        Documentation doc(p.description, p.brief);
+        metaClass->setPropertyDocumentation(p.name, doc);
     }
 
     QString docString = applyDocModifications(metaClass->typeEntry()->docModifications(),

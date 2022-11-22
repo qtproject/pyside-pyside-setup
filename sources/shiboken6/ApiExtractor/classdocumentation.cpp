@@ -135,6 +135,7 @@ static void parseWebXmlElement(WebXmlTag tag, const QXmlStreamAttributes &attrib
     case WebXmlTag::Property: {
         PropertyDocumentation pd;
         pd.name = attributes.value(u"name"_s).toString();
+        pd.brief = attributes.value(u"brief"_s).toString();
         cd->properties.append(pd);
     }
         break;

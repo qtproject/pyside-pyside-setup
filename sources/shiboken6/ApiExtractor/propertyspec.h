@@ -16,6 +16,7 @@ class AbstractMetaType;
 class AbstractMetaClass;
 class AbstractMetaBuilderPrivate;
 class AbstractMetaType;
+class Documentation;
 class TypeEntry;
 
 struct TypeSystemProperty;
@@ -60,6 +61,9 @@ public:
 
     QString name() const;
     void setName(const QString &name);
+
+    Documentation documentation() const;
+    void setDocumentation(const Documentation &doc);
 
     QString read() const;
     void setRead(const QString &read);
