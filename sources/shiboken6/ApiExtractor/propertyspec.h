@@ -74,6 +74,9 @@ public:
     QString reset() const;
     void setReset(const QString &reset);
 
+    QString notify() const; // Q_PROPERTY/C++ only
+    void setNotify(const QString &notify);
+
     int index() const;
     void setIndex(int index);
 

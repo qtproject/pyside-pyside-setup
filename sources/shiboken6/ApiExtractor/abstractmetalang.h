@@ -268,7 +268,8 @@ public:
     {
         Read,
         Write,
-        Reset
+        Reset,
+        Notify
     };
     struct PropertyFunctionSearchResult
     {

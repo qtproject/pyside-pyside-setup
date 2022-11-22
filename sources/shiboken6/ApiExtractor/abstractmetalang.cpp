@@ -663,6 +663,8 @@ AbstractMetaClass::PropertyFunctionSearchResult
             return PropertyFunctionSearchResult{i, PropertyFunction::Write};
         if (name == propertySpec.reset())
             return PropertyFunctionSearchResult{i, PropertyFunction::Reset};
+        if (name == propertySpec.notify())
+            return PropertyFunctionSearchResult{i, PropertyFunction::Notify};
     }
     return PropertyFunctionSearchResult{-1, PropertyFunction::Read};
 }
