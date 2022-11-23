@@ -286,16 +286,20 @@ def get_snippets(lines: List[str], rel_path: str) -> List[List[str]]:
 
 def get_license_from_file(filename):
     lines = []
-    with open(filename, "r") as f:
-        line = True
-        while line:
-            line = f.readline().rstrip()
+    try:
+        with open(filename, "r", encoding="utf-8") as f:
+            line = True
+            while line:
+                line = f.readline().rstrip()
 
-            if line.startswith("/*") or line.startswith("**"):
-                lines.append(line)
-            # End of the comment
-            if line.endswith("*/"):
-                break
+                if line.startswith("/*") or line.startswith("**"):
+                    lines.append(line)
+                # End of the comment
+                if line.endswith("*/"):
+                    break
+    except Exception as e:
+        log.error(f"Error reading {filename}: {e}")
+        raise
     if lines:
         # We know we have the whole block, so we can
         # perform replacements to translate the comment
