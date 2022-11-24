@@ -10,6 +10,7 @@
 #include <QtCore/QSet>
 
 class AbstractMetaFunction;
+struct ModuleHeaderParameters;
 
 /**
  *   The HeaderGenerator generate the declarations of C++ bindings classes.
@@ -45,9 +46,8 @@ private:
                                     const QString &postfix = {}) const;
     void writePrivateHeader(const QString &moduleHeaderDir,
                             const QString &publicIncludeShield,
-                            const QSet<Include> &privateIncludes,
-                            const AbstractMetaClassCList &forwardDeclarations,
-                            const QString &privateTypeFunctions);
+                            const ModuleHeaderParameters &parameters);
+    void writeTypeFunctions(TextStream &s, const QString &typeFunctions);
 
     QSet<AbstractMetaFunctionCPtr> m_inheritedOverloads;
     AbstractMetaClassCList m_alternateTemplateIndexes;

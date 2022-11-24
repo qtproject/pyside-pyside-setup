@@ -27,6 +27,7 @@
 #include "qtcompat.h"
 
 #include <algorithm>
+#include <set>
 
 #include <QtCore/QDir>
 #include <QtCore/QTextStream>
@@ -519,15 +520,20 @@ static void writeForwardDeclarations(TextStream &s,
     }
 }
 
+// Include parameters required for the module/private module header
+struct ModuleHeaderParameters
+{
+    AbstractMetaClassCList forwardDeclarations;
+    std::set<Include> includes;
+    QString typeFunctions;
+};
+
 bool HeaderGenerator::finishGeneration()
 {
-    // Generate the main header for this module.
-    // This header should be included by binding modules
-    // extendind on top of this one.
-    AbstractMetaClassCList forwardDeclarations;
-    AbstractMetaClassCList privateForwardDeclarations;
-    QSet<Include> includes;
-    QSet<Include> privateIncludes;
+    // Generate the main header for this module. This header should be included
+    // by binding modules extending on top of this one.
+    ModuleHeaderParameters parameters;
+    ModuleHeaderParameters privateParameters;
     StringStream macrosStream(TextStream::Language::Cpp);
 
     const auto snips = TypeDatabase::instance()->defaultTypeSystemType()->codeSnips();
@@ -616,15 +622,12 @@ bool HeaderGenerator::finishGeneration()
 
     macrosStream << "// Macros for type check\n";
 
-    StringStream typeFunctions(TextStream::Language::Cpp);
-    StringStream privateTypeFunctions(TextStream::Language::Cpp);
-    if (usePySideExtensions()) {
-        typeFunctions << "QT_WARNING_PUSH\n";
-        typeFunctions << "QT_WARNING_DISABLE_DEPRECATED\n";
-    }
+    TextStream typeFunctions(&parameters.typeFunctions, TextStream::Language::Cpp);
+    TextStream privateTypeFunctions(&privateParameters.typeFunctions, TextStream::Language::Cpp);
+
     for (const AbstractMetaEnum &cppEnum : api().globalEnums()) {
         if (!cppEnum.isAnonymous()) {
-            includes << cppEnum.typeEntry()->include();
+            parameters.includes.insert(cppEnum.typeEntry()->include());
             writeSbkTypeFunction(typeFunctions, cppEnum);
         }
     }
@@ -637,13 +640,12 @@ bool HeaderGenerator::finishGeneration()
 
         //Includes
         const bool isPrivate = classType->isPrivate();
-        auto &includeList = isPrivate ? privateIncludes : includes;
-        auto &forwardList = isPrivate ? privateForwardDeclarations : forwardDeclarations;
+        auto &par = isPrivate ? privateParameters : parameters;
         const auto classInclude = classType->include();
         if (leanHeaders() && canForwardDeclare(metaClass))
-            forwardList.append(metaClass);
-         else
-            includeList << classInclude;
+            par.forwardDeclarations.append(metaClass);
+        else
+            par.includes.insert(classInclude);
 
         auto &typeFunctionsStr = isPrivate ? privateTypeFunctions : typeFunctions;
 
@@ -651,7 +653,7 @@ bool HeaderGenerator::finishGeneration()
             if (cppEnum.isAnonymous() || cppEnum.isPrivate())
                 continue;
             if (const auto inc = cppEnum.typeEntry()->include(); inc != classInclude)
-                includeList << inc;
+                par.includes.insert(inc);
             writeProtectedEnumSurrogate(protEnumsSurrogates, cppEnum);
             writeSbkTypeFunction(typeFunctionsStr, cppEnum);
         }
@@ -661,11 +663,9 @@ bool HeaderGenerator::finishGeneration()
     }
 
     for (const auto &smp : api().instantiatedSmartPointers()) {
-        includes << smp.type.typeEntry()->include();
+        parameters.includes.insert(smp.type.typeEntry()->include());
         writeSbkTypeFunction(typeFunctions, smp.type);
     }
-    if (usePySideExtensions())
-        typeFunctions << "QT_WARNING_POP\n";
 
     const QString moduleHeaderDir = outputDirectory() + u'/'
         + subDirectoryForPackage(packageName()) + u'/';
@@ -699,11 +699,11 @@ bool HeaderGenerator::finishGeneration()
     }
 
     s << "// Bound library includes\n";
-    for (const Include &include : std::as_const(includes))
+    for (const Include &include : parameters.includes)
         s << include;
 
     if (leanHeaders()) {
-        writeForwardDeclarations(s, forwardDeclarations);
+        writeForwardDeclarations(s, parameters.forwardDeclarations);
     } else {
         if (!primitiveTypes().isEmpty()) {
             s << "// Conversion Includes - Primitive Types\n";
@@ -729,27 +729,21 @@ bool HeaderGenerator::finishGeneration()
             << protEnumsSurrogates.toString() << '\n';
     }
 
-    s << "namespace Shiboken\n{\n\n"
-        << "// PyType functions, to get the PyObjectType for a type T\n"
-        << typeFunctions.toString() << '\n'
-        << "} // namespace Shiboken\n\n"
-        << "#endif // " << includeShield << "\n\n";
+    writeTypeFunctions(s, parameters.typeFunctions);
+
+    s << "#endif // " << includeShield << "\n\n";
 
     file.done();
 
-    if (hasPrivateClasses()) {
-        writePrivateHeader(moduleHeaderDir, includeShield,
-                           privateIncludes, privateForwardDeclarations,
-                           privateTypeFunctions.toString());
-    }
+    if (hasPrivateClasses())
+        writePrivateHeader(moduleHeaderDir, includeShield, privateParameters);
+
     return true;
 }
 
 void HeaderGenerator::writePrivateHeader(const QString &moduleHeaderDir,
                                          const QString &publicIncludeShield,
-                                         const QSet<Include> &privateIncludes,
-                                         const AbstractMetaClassCList &forwardDeclarations,
-                                         const QString &privateTypeFunctions)
+                                         const ModuleHeaderParameters &parameters)
 {
     // Write includes and type functions of private classes
 
@@ -765,26 +759,34 @@ void HeaderGenerator::writePrivateHeader(const QString &moduleHeaderDir,
     ps << "#ifndef " << privateIncludeShield << '\n';
     ps << "#define " << privateIncludeShield << "\n\n";
 
-    for (const Include &include : std::as_const(privateIncludes))
+    for (const Include &include : parameters.includes)
         ps << include;
     ps << '\n';
 
     if (leanHeaders())
-        writeForwardDeclarations(ps, forwardDeclarations);
+        writeForwardDeclarations(ps, parameters.forwardDeclarations);
 
-    if (usePySideExtensions())
-        ps << "QT_WARNING_PUSH\nQT_WARNING_DISABLE_DEPRECATED\n";
-
-    ps << "namespace Shiboken\n{\n\n"
-        << "// PyType functions, to get the PyObjectType for a type T\n"
-        << privateTypeFunctions << '\n'
-        << "} // namespace Shiboken\n\n";
-
-    if (usePySideExtensions())
-        ps << "QT_WARNING_POP\n";
+    writeTypeFunctions(ps, parameters.typeFunctions);
 
     ps << "#endif\n";
     privateFile.done();
+}
+
+void HeaderGenerator::writeTypeFunctions(TextStream &s, const QString &typeFunctions)
+{
+    if (typeFunctions.isEmpty())
+        return;
+
+    if (usePySideExtensions())
+        s << "QT_WARNING_PUSH\nQT_WARNING_DISABLE_DEPRECATED\n";
+
+    s << "namespace Shiboken\n{\n\n"
+        << "// PyType functions, to get the PyObjectType for a type T\n"
+        << typeFunctions << '\n'
+        << "} // namespace Shiboken\n\n";
+
+    if (usePySideExtensions())
+        s << "QT_WARNING_POP\n";
 }
 
 void HeaderGenerator::writeProtectedEnumSurrogate(TextStream &s, const AbstractMetaEnum &cppEnum) const
