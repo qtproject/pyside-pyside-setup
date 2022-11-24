@@ -42,23 +42,46 @@ public:
 
     QString toString() const;
 
-    bool operator<(const Include& other) const
-    {
-        return m_name < other.m_name;
-    }
+    friend size_t qHash(const Include &);
+    int compare(const Include &rhs) const;
 
-    bool operator==(const Include& other) const
-    {
-        return m_type == other.m_type && m_name == other.m_name;
-    }
-
-    friend size_t qHash(const Include&);
     private:
         IncludeType m_type = IncludePath;
         QString m_name;
 };
 
 size_t qHash(const Include& inc);
+
+inline bool operator<(const Include &lhs, const Include &rhs)
+{
+    return lhs.compare(rhs) < 0;
+}
+
+inline bool operator<=(const Include &lhs, const Include &rhs)
+{
+    return lhs.compare(rhs) <= 0;
+}
+
+inline bool operator==(const Include &lhs, const Include &rhs)
+{
+    return lhs.compare(rhs) == 0;
+}
+
+inline bool operator!=(const Include &lhs, const Include &rhs)
+{
+    return lhs.compare(rhs) != 0;
+}
+
+inline bool operator>=(const Include &lhs, const Include &rhs)
+{
+    return lhs.compare(rhs) >= 0;
+}
+
+inline bool operator>(const Include &lhs, const Include &rhs)
+{
+    return lhs.compare(rhs) > 0;
+}
+
 QTextStream& operator<<(QTextStream& out, const Include& include);
 TextStream& operator<<(TextStream& out, const Include& include);
 #ifndef QT_NO_DEBUG_STREAM

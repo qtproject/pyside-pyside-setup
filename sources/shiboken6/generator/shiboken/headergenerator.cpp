@@ -639,10 +639,11 @@ bool HeaderGenerator::finishGeneration()
         const bool isPrivate = classType->isPrivate();
         auto &includeList = isPrivate ? privateIncludes : includes;
         auto &forwardList = isPrivate ? privateForwardDeclarations : forwardDeclarations;
+        const auto classInclude = classType->include();
         if (leanHeaders() && canForwardDeclare(metaClass))
             forwardList.append(metaClass);
          else
-            includeList << classType->include();
+            includeList << classInclude;
 
         auto &typeFunctionsStr = isPrivate ? privateTypeFunctions : typeFunctions;
 
@@ -651,6 +652,8 @@ bool HeaderGenerator::finishGeneration()
                 continue;
             EnumTypeEntry *enumType = cppEnum.typeEntry();
             includeList << enumType->include();
+            if (const auto inc = enumType->include(); inc != classInclude)
+                includeList << inc;
             writeProtectedEnumSurrogate(protEnumsSurrogates, cppEnum);
             writeSbkTypeFunction(typeFunctionsStr, cppEnum);
         }
