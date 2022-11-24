@@ -69,7 +69,7 @@ def _get_flag_enum_option():
         flag = getattr(sys, sysname)
         if not isinstance(flag, int):
             flag = True
-    p = f"\n    *** Python is at version {'.'.join(map(str, pyminver or 0))} now."
+    p = f"\n    *** Python is at version {'.'.join(map(str, pyminver or (0,)))} now."
     # PYSIDE-1797: Emit a warning when we may remove pep384_issue33738.cpp
     if pyminver and pyminver >= (3, 8):
         warnings.warn(f"{p} The file pep384_issue33738.cpp should be removed ASAP! ***")
