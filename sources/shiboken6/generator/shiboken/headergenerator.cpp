@@ -639,17 +639,19 @@ bool HeaderGenerator::finishGeneration()
         const bool isPrivate = classType->isPrivate();
         auto &includeList = isPrivate ? privateIncludes : includes;
         auto &forwardList = isPrivate ? privateForwardDeclarations : forwardDeclarations;
+        const auto classInclude = classType->include();
         if (leanHeaders() && canForwardDeclare(metaClass))
             forwardList.append(metaClass);
          else
-            includeList << classType->include();
+            includeList << classInclude;
 
         auto &typeFunctionsStr = isPrivate ? privateTypeFunctions : typeFunctions;
 
         for (const AbstractMetaEnum &cppEnum : metaClass->enums()) {
             if (cppEnum.isAnonymous() || cppEnum.isPrivate())
                 continue;
-            includeList << cppEnum.typeEntry()->include();
+            if (const auto inc = cppEnum.typeEntry()->include(); inc != classInclude)
+                includeList << inc;
             writeProtectedEnumSurrogate(protEnumsSurrogates, cppEnum);
             writeSbkTypeFunction(typeFunctionsStr, cppEnum);
         }

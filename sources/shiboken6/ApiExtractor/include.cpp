@@ -24,6 +24,15 @@ QString Include::toString() const
     return u"import "_s + m_name + u';';
 }
 
+int Include::compare(const Include &rhs) const
+{
+    if (m_type < rhs.m_type)
+        return -1;
+    if (m_type > rhs.m_type)
+        return 1;
+    return m_name.compare(rhs.m_name);
+}
+
 size_t qHash(const Include& inc)
 {
     return qHash(inc.m_name);
