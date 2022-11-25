@@ -65,18 +65,18 @@ Documentation
 
     .. link-button:: quickstart
         :type: ref
-        :text: Check it out!
+        :text: Start here!
         :classes: btn-qt btn-block stretched-link
     ---
     :img-top: images/Support.svg
 
-    Install and build from source.
+    Modules, docs, and cross compilation.
 
     +++
 
     .. link-button:: gettingstarted/index
         :type: ref
-        :text: Getting Started
+        :text: Build Instructions
         :classes: btn-qt btn-block stretched-link
     ---
     :img-top: images/Dev.svg
