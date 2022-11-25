@@ -284,37 +284,35 @@ def get_snippets(lines: List[str], rel_path: str) -> List[List[str]]:
     return result.values()
 
 
-def get_license_from_file(filename):
-    lines = []
-    try:
-        with open(filename, "r", encoding="utf-8") as f:
-            line = True
-            while line:
-                line = f.readline().rstrip()
+def get_license_from_file(lines):
+    result = []
+    spdx = len(lines) >= 2 and lines[0].startswith("//") and "SPDX" in lines[1]
+    if spdx:  # SPDX, 6.4
+        for line in lines:
+            if line.startswith("//"):
+                result.append("# " + line[3:])
+            else:
+                break
+    else:  # Old style, C-Header, 6.2
+        for line in lines:
+            if line.startswith("/*") or line.startswith("**"):
+                result.append(line)
+            # End of the comment
+            if line.endswith("*/"):
+                break
+        if result:
+            # We know we have the whole block, so we can
+            # perform replacements to translate the comment
+            result[0] = result[0].replace("/*", "**").replace("*", "#")
+            result[-1] = result[-1].replace("*/", "**").replace("*", "#")
 
-                if line.startswith("/*") or line.startswith("**"):
-                    lines.append(line)
-                # End of the comment
-                if line.endswith("*/"):
-                    break
-    except Exception as e:
-        log.error(f"Error reading {filename}: {e}")
-        raise
-    if lines:
-        # We know we have the whole block, so we can
-        # perform replacements to translate the comment
-        lines[0] = lines[0].replace("/*", "**").replace("*", "#")
-        lines[-1] = lines[-1].replace("*/", "**").replace("*", "#")
-
-        for i in range(1, len(lines) - 1):
-            lines[i] = re.sub(r"^\*\*", "##", lines[i])
-
-        return "\n".join(lines)
-    else:
-        return ""
+            for i in range(1, len(result) - 1):
+                result[i] = re.sub(r"^\*\*", "##", result[i])
+    return "\n".join(result)
 
 
 def translate_file(file_path, final_path, qt_path, debug, write):
+    lines = []
     snippets = []
     try:
         with file_path.open("r", encoding="utf-8") as f:
@@ -326,7 +324,7 @@ def translate_file(file_path, final_path, qt_path, debug, write):
         raise
     if snippets:
         # TODO: Get license header first
-        license_header = get_license_from_file(str(file_path))
+        license_header = get_license_from_file(lines)
         if debug:
             if have_rich:
                 console = Console()
