@@ -26,5 +26,6 @@ visualize data from a CSV in a line chart.
    add_chart*
    plot*
 
-You can download the sources from :download:`here <datavisualize.tar.bz2>`.
+You can download the sources from `here`_.
 
+.. _here: https://code.qt.io/cgit/pyside/pyside-setup.git/tree/sources/pyside6/doc/tutorials/datavisualize
