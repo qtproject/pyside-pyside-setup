@@ -46,6 +46,12 @@ class QLocaleTestToNumber(unittest.TestCase):
         obj = QLocale(QLocale.C)
         self.assertTrue(not obj.toULongLong('-37')[1])
 
+    def testToCurrencyString(self):
+        """PYSIDE-2133, do not use int overload, dropping decimals."""
+        en_locale = QLocale("en_US")
+        value = en_locale.toCurrencyString(1234.56)
+        self.assertEqual(value, "$1,234.56")
+
 
 if __name__ == '__main__':
     unittest.main()

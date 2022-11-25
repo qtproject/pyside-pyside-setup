@@ -1429,6 +1429,10 @@
             <insert-template name="fix_args,bool*"/>
         </inject-code>
     </modify-function>
+    <!-- PYSIDE-2133, remove unsigned overloads of toCurrencyString() to
+         ensure float overloads are used -->
+    <modify-function signature="^toCurrencyString\(q?u.*$" remove="all"/>
+    <modify-function signature="^toCurrencyString\(.*short.*$" remove="all"/>
   </value-type>
   <value-type name="QBitArray">
     <add-function signature="__len__">
