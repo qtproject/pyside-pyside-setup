@@ -3,6 +3,8 @@
 Quick start
 ===========
 
+New to Qt? Check also the :ref:`faq-section` section at the end of this page.
+
 Requirements
 ------------
 
@@ -16,27 +18,39 @@ Before you can install |project|, first you must install the following software:
 Installation
 ------------
 
-
-.. raw:: html
-
-    <img src="https://qt-wiki-uploads.s3.amazonaws.com/images/8/8a/Pyside6_install.gif"
-         style="float: right; width: 35%; padding-left: 20px;"
-         alt="PySide6 installation animation" />
-
 * **Creating and activating an environment**
   You can do this by running the following on a terminal:
 
-  * :command:`python -m venv env`, (Your Python executable might be called ``python3``)
-  * :command:`source env/bin/activate`   for Linux and macOS
-  * :command:`env\\\Scripts\\\activate.bat`  for Windows
+  * Create environment (Your Python executable might be called ``python3``)::
 
-* **Installation**
+        python -m venv env
+
+  * Activate the environment (Linux and macOS)::
+
+        source env/bin/activate
+
+  * Activate the environment (Windows)::
+
+        env\Scripts\activate.bat
+
+  Check this animation on how to do it:
+
+  .. image:: https://qt-wiki-uploads.s3.amazonaws.com/images/8/8a/Pyside6_install.gif
+     :alt: Installation gif
+
+* **Installing PySide6**
 
   Now you are ready to install the |project| packages using ``pip``.
   From the terminal, run the following command:
 
-  * :command:`pip install pyside6`, for the latest version.
-  * :command:`pip install pyside6==6.0`, for the version ``6.0`` specifically.
+  * For the latest version::
+
+        pip install pyside6
+
+  * For a specific version, like 6.4.1::
+
+        pip install pyside6==6.4.1
+
   * It is also possible to install a specific snapshot from our servers.
     To do so, you can use the following command::
 
@@ -123,3 +137,63 @@ guide you through the development process:
 
   .. image:: images/screenshot_hello.png
      :alt: Hello World application
+
+.. _faq-section:
+
+Frequently Asked Questions
+--------------------------
+
+Here you can find a couple of common questions and situations that will
+clarify questions before you start programming.
+
+.. panels::
+    :container: container-lg pb-1
+    :column: col-lg-4 col-md-4 col-sm-6 col-xs-12 p-2
+
+    .. link-button:: faq/whatisqt
+        :type: ref
+        :text: Qt, QML, Widgets... What is the difference?
+        :classes: btn-link btn-block stretched-link
+    ---
+
+    .. link-button:: faq/whichide
+        :type: ref
+        :text: Which IDEs are compatible with PySide?
+        :classes: btn-link btn-block stretched-link
+    ---
+
+    .. link-button:: faq/whatisshiboken
+        :type: ref
+        :text: Binding Generation: What is Shiboken?
+        :classes: btn-link btn-block stretched-link
+    ---
+
+    .. link-button:: faq/typesoffiles
+        :type: ref
+        :text: File Types in PySide
+        :classes: btn-link btn-block stretched-link
+    ---
+
+    .. link-button:: faq/distribution
+        :type: ref
+        :text: Distributing your application to other systems and platforms
+        :classes: btn-link btn-block stretched-link
+
+    ---
+
+    .. link-button:: faq/whyqtforpython
+        :type: ref
+        :text: As a Qt/C++ developer, why should I consider Qt for Python?
+        :classes: btn-link btn-block stretched-link
+
+.. toctree::
+    :hidden:
+
+    faq/whatisqt.rst
+    faq/whichide.rst
+    faq/whatisshiboken.rst
+    faq/typesoffiles.rst
+    faq/distribution.rst
+    faq/whyqtforpython.rst
+
+
