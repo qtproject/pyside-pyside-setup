@@ -74,7 +74,7 @@ Documentation
 
     +++
 
-    .. link-button:: gettingstarted
+    .. link-button:: gettingstarted/index
         :type: ref
         :text: Getting Started
         :classes: btn-qt btn-block stretched-link
