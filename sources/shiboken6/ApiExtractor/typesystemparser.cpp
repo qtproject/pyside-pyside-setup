@@ -440,6 +440,7 @@ static const StackElementHash &stackElementHash()
         {u"add-function", StackElement::AddFunction},
         {u"add-pymethoddef", StackElement::AddPyMethodDef},
         {u"array", StackElement::Array},
+        {u"configuration", StackElement::Configuration},
         {u"container-type", StackElement::ContainerTypeEntry},
         {u"conversion-rule", StackElement::ConversionRule},
         {u"custom-constructor", StackElement::Unimplemented},
@@ -1918,6 +1919,32 @@ void TypeSystemParser::applyComplexTypeAttributes(const ConditionalStreamReader 
         ctype->setCodeGeneration(m_generate);
     else
         ctype->setCodeGeneration(TypeEntry::GenerationDisabled);
+}
+
+bool TypeSystemParser::parseConfiguration(StackElement topElement,
+                                          QXmlStreamAttributes *attributes)
+{
+    if (!isComplexTypeEntry(topElement)
+        && topElement != StackElement::EnumTypeEntry) {
+        m_error = u"<configuration> must be nested into a complex or enum type entry."_s;
+        return false;
+    }
+    QString condition;
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
+        const auto name = attributes->at(i).qualifiedName();
+        if (name == u"condition") {
+            condition = attributes->takeAt(i).value().toString();
+        }
+    }
+    if (condition.isEmpty()) {
+        m_error = u"<configuration> requires a \"condition\" attribute."_s;
+        return false;
+    }
+    const auto topEntry = m_contextStack.top()->entry;
+    const auto configurableEntry = std::dynamic_pointer_cast<ConfigurableTypeEntry>(topEntry);
+    Q_ASSERT(configurableEntry);
+    configurableEntry->setConfigCondition(condition);
+    return true;
 }
 
 bool TypeSystemParser::parseRenameFunction(const ConditionalStreamReader &,
@@ -3529,6 +3556,8 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
             break;
         case StackElement::OpaqueContainer:
             if (!parseOpaqueContainerElement(&attributes))
+        case StackElement::Configuration:
+            if (!parseConfiguration(topElement, &attributes))
                 return false;
             break;
         default:

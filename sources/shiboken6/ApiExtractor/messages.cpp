@@ -349,8 +349,14 @@ QString msgTypeNotDefined(const TypeEntryCPtr &entry)
 {
     QString result;
     QTextStream str(&result);
+    const bool hasConfigCondition = entry->isComplex()
+        && std::static_pointer_cast<const ConfigurableTypeEntry>(entry)->hasConfigCondition();
     str << entry->sourceLocation() << "type '" <<entry->qualifiedCppName()
-        << "' is specified in typesystem, but not defined. " << msgCompilationError;
+        << "' is specified in typesystem, but not defined";
+    if (hasConfigCondition)
+        str << " (disabled by configuration?).";
+    else
+        str << ". " << msgCompilationError;
     return result;
 }
 

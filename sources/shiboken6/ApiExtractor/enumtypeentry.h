@@ -4,12 +4,13 @@
 #ifndef ENUMTYPEENTRY_H
 #define ENUMTYPEENTRY_H
 
-#include "typesystem.h"
+#include "configurabletypeentry.h"
 #include "typesystem_enums.h"
 
 class EnumTypeEntryPrivate;
 
-class EnumTypeEntry : public TypeEntry
+// EnumTypeEntry is configurable for global enums only
+class EnumTypeEntry : public ConfigurableTypeEntry
 {
 public:
     explicit EnumTypeEntry(const QString &entryName,

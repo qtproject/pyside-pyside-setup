@@ -320,8 +320,8 @@ value-type
     language as a value type. This means that it is an object passed by value on C++,
     i.e. it is stored in the function call stack. It is a child of the :ref:`typesystem`
     node or other type nodes and may contain :ref:`add-function`, :ref:`add-pymethoddef`,
-    :ref:`declare-function`, :ref:`conversion-rule`, :ref:`enum-type`,
-    :ref:`extra-includes`, :ref:`include-element`, :ref:`modify-function`,
+    :ref:`configuration-element`, :ref:`declare-function`, :ref:`conversion-rule`,
+    :ref:`enum-type`, :ref:`extra-includes`, :ref:`include-element`, :ref:`modify-function`,
     :ref:`object-type`, :ref:`smart-pointer-type`, :ref:`typedef-type` or further
     ``value-type`` child nodes.
 
@@ -399,9 +399,10 @@ object-type
     language as an object type. This means that it is an object passed by pointer on
     C++ and it is stored on the heap. It is a child of the :ref:`typesystem` node
     or other type nodes and may contain :ref:`add-function`, :ref:`add-pymethoddef`,
-    :ref:`declare-function`, :ref:`enum-type`, :ref:`extra-includes`,
-    :ref:`include-element`, :ref:`modify-function`, ``object-type``,
-    :ref:`smart-pointer-type`, :ref:`typedef-type` or :ref:`value-type` child nodes.
+    :ref:`configuration-element`, :ref:`declare-function`, :ref:`enum-type`,
+    :ref:`extra-includes`, :ref:`include-element`, :ref:`modify-function`,
+    ``object-type``, :ref:`smart-pointer-type`, :ref:`typedef-type` or
+    :ref:`value-type` child nodes.
 
     .. code-block:: xml
 

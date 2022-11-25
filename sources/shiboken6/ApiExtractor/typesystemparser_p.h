@@ -104,6 +104,7 @@ enum class StackElement {
 
             ImportFile,
             OpaqueContainer,
+            Configuration,
             Unimplemented
 };
 
@@ -199,6 +200,8 @@ private:
                           const QVersionNumber &since, QXmlStreamAttributes *);
     void applyComplexTypeAttributes(const ConditionalStreamReader &, const ComplexTypeEntryPtr &ctype,
                                     QXmlStreamAttributes *) const;
+    bool parseConfiguration(StackElement topElement,
+                            QXmlStreamAttributes *attributes);
     bool parseRenameFunction(const ConditionalStreamReader &, QString *name,
                              QXmlStreamAttributes *);
     bool parseInjectDocumentation(const ConditionalStreamReader &, StackElement topElement,

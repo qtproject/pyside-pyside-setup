@@ -10,6 +10,7 @@
 
 class ArrayTypeEntry;
 class ComplexTypeEntry;
+class ConfigurableTypeEntry;
 class ConstantValueTypeEntry;
 class ContainerTypeEntry;
 class CustomTypeEntry;
@@ -29,6 +30,7 @@ class ValueTypeEntry;
 
 using ArrayTypeEntryPtr = std::shared_ptr<ArrayTypeEntry>;
 using ComplexTypeEntryPtr = std::shared_ptr<ComplexTypeEntry>;
+using ConfigurableTypeEntryPtr = std::shared_ptr<ConfigurableTypeEntry>;
 using ConstantValueTypeEntryPtr = std::shared_ptr<ConstantValueTypeEntry>;
 using ContainerTypeEntryPtr = std::shared_ptr<ContainerTypeEntry>;
 using CustomTypeEntryPtr = std::shared_ptr<CustomTypeEntry>;
@@ -49,6 +51,7 @@ using ValueTypeEntryPtr = std::shared_ptr<ValueTypeEntry>;
 using ArrayTypeEntryCPtr = std::shared_ptr<const ArrayTypeEntry>;
 using ComplexTypeEntryCPtr = std::shared_ptr<const ComplexTypeEntry>;
 using ConstantValueTypeEntryCPtr = std::shared_ptr<const ConstantValueTypeEntry>;
+using ConfigurableTypeEntryCPtr = std::shared_ptr<const ConfigurableTypeEntry>;
 using ContainerTypeEntryCPtr = std::shared_ptr<const ContainerTypeEntry>;
 using CustomTypeEntryCPtr = std::shared_ptr<const CustomTypeEntry>;
 using EnumTypeEntryCPtr = std::shared_ptr<const EnumTypeEntry>;

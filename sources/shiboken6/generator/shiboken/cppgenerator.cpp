@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "cppgenerator.h"
+#include "configurablescope.h"
 #include "generatorargument.h"
 #include "defaultvalue.h"
 #include "generatorcontext.h"
@@ -1799,6 +1800,8 @@ void CppGenerator::writeEnumConverterFunctions(TextStream &s, const AbstractMeta
         generateDeprecatedValueWarnings(c, metaEnum, useSurrogateName);
 
     c << "*reinterpret_cast<" << cppTypeName << " *>(cppOut) = value;\n";
+
+    ConfigurableScope configScope(s, enumType);
     writePythonToCppFunction(s, c.toString(), typeName, typeName);
 
     QString pyTypeCheck = u"PyObject_TypeCheck(pyIn, "_s + enumPythonType + u')';
@@ -5665,6 +5668,7 @@ void CppGenerator::writeEnumsInitialization(TextStream &s, AbstractMetaEnumList 
                 << "PyTypeObject *FType{};\n\n";
             preambleWrittenF = true;
         }
+        ConfigurableScope configScope(s, cppEnum.typeEntry());
         writeEnumInitialization(s, cppEnum, errorReturn);
     }
 }
@@ -5881,6 +5885,7 @@ void CppGenerator::writeFlagsNumberMethodsDefinitions(TextStream &s,
 {
     for (const AbstractMetaEnum &e : enums) {
         if (!e.isAnonymous() && !e.isPrivate() && e.typeEntry()->flags()) {
+            ConfigurableScope configScope(s, e.typeEntry());
             writeFlagsMethods(s, e);
             writeFlagsNumberMethodsDefinition(s, e);
             s << '\n';
@@ -6651,6 +6656,11 @@ bool CppGenerator::finishGeneration()
     for (const auto &cls : api().classes()){
         auto te = cls->typeEntry();
         if (shouldGenerate(te)) {
+            const bool hasConfigCondition = te->hasConfigCondition();
+            if (hasConfigCondition) {
+                s_classInitDecl << te->configCondition() << '\n';
+                s_classPythonDefines << te->configCondition() << '\n';
+            }
             writeInitFunc(s_classInitDecl, s_classPythonDefines,
                           getSimpleClassInitFunctionName(cls),
                           targetLangEnclosingEntry(te));
@@ -6658,6 +6668,10 @@ bool CppGenerator::finishGeneration()
                 s_classInitDecl << "void "
                     << getSimpleClassStaticFieldsInitFunctionName(cls) << "();\n";
                 classesWithStaticFields.append(cls);
+            }
+            if (hasConfigCondition) {
+                s_classInitDecl << "#endif\n";
+                s_classPythonDefines << "#endif\n";
             }
         }
     }
@@ -7005,8 +7019,10 @@ bool CppGenerator::finishGeneration()
     // of the previously registered types (PYSIDE-1529).
     if (!classesWithStaticFields.isEmpty()) {
         s << "\n// Static field initialization\n";
-        for (const auto &cls : std::as_const(classesWithStaticFields))
+        for (const auto &cls : std::as_const(classesWithStaticFields)) {
+            ConfigurableScope configScope(s, cls->typeEntry());
             s << getSimpleClassStaticFieldsInitFunctionName(cls) << "();\n";
+        }
     }
 
     s << "\nif (PyErr_Occurred()) {\n" << indent
@@ -7025,6 +7041,7 @@ bool CppGenerator::finishGeneration()
     if (usePySideExtensions()) {
         for (const AbstractMetaEnum &metaEnum : std::as_const(globalEnums))
             if (!metaEnum.isAnonymous()) {
+                ConfigurableScope configScope(s, metaEnum.typeEntry());
                 s << "qRegisterMetaType< ::" << metaEnum.typeEntry()->qualifiedCppName()
                   << " >(\"" << metaEnum.name() << "\");\n";
             }

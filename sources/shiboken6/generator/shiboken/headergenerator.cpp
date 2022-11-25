@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "headergenerator.h"
+#include "configurablescope.h"
 #include "generatorcontext.h"
 #include <apiextractorresult.h>
 #include <abstractmetaargument.h>
@@ -551,10 +552,21 @@ static void writeForwardDeclarations(TextStream &s,
 }
 
 // Include parameters required for the module/private module header
+
+using ConditionalIncludeMap = QMap<QString, IncludeGroup>;
+
+static TextStream &operator<<(TextStream &s, const ConditionalIncludeMap &m)
+{
+    for (auto it = m.cbegin(), end = m.cend(); it != end; ++it)
+        s << it.key() << '\n' << it.value() << "#endif\n";
+    return s;
+}
+
 struct ModuleHeaderParameters
 {
     AbstractMetaClassCList forwardDeclarations;
     std::set<Include> includes;
+    ConditionalIncludeMap conditionalIncludes;
     QString typeFunctions;
 };
 
@@ -657,7 +669,11 @@ bool HeaderGenerator::finishGeneration()
 
     for (const AbstractMetaEnum &cppEnum : api().globalEnums()) {
         if (!cppEnum.isAnonymous()) {
-            parameters.includes.insert(cppEnum.typeEntry()->include());
+            const auto te = cppEnum.typeEntry();
+            if (te->hasConfigCondition())
+                parameters.conditionalIncludes[te->configCondition()].append(te->include());
+            else
+                parameters.includes.insert(cppEnum.typeEntry()->include());
             writeSbkTypeFunction(typeFunctions, cppEnum);
         }
     }
@@ -672,13 +688,17 @@ bool HeaderGenerator::finishGeneration()
         const bool isPrivate = classType->isPrivate();
         auto &par = isPrivate ? privateParameters : parameters;
         const auto classInclude = classType->include();
+        const bool hasConfigCondition = classType->hasConfigCondition();
         if (leanHeaders() && canForwardDeclare(metaClass))
             par.forwardDeclarations.append(metaClass);
+        else if (hasConfigCondition)
+            par.conditionalIncludes[classType->configCondition()].append(classInclude);
         else
             par.includes.insert(classInclude);
 
         auto &typeFunctionsStr = isPrivate ? privateTypeFunctions : typeFunctions;
 
+        ConfigurableScope configScope(typeFunctionsStr, classType);
         for (const AbstractMetaEnum &cppEnum : metaClass->enums()) {
             if (cppEnum.isAnonymous() || cppEnum.isPrivate())
                 continue;
@@ -731,6 +751,7 @@ bool HeaderGenerator::finishGeneration()
     s << "// Bound library includes\n";
     for (const Include &include : parameters.includes)
         s << include;
+    s << parameters.conditionalIncludes;
 
     if (leanHeaders()) {
         writeForwardDeclarations(s, parameters.forwardDeclarations);
@@ -791,6 +812,7 @@ void HeaderGenerator::writePrivateHeader(const QString &moduleHeaderDir,
 
     for (const Include &include : parameters.includes)
         ps << include;
+    ps << parameters.conditionalIncludes;
     ps << '\n';
 
     if (leanHeaders())
@@ -830,9 +852,10 @@ void HeaderGenerator::writeSbkTypeFunction(TextStream &s, const AbstractMetaEnum
      const QString enumName = avoidProtectedHack() && cppEnum.isProtected()
         ? protectedEnumSurrogateName(cppEnum)
         : cppEnum.qualifiedCppName();
-
+    const auto te = cppEnum.typeEntry();
+    ConfigurableScope configScope(s, te);
     s << "template<> inline PyTypeObject *SbkType< ::" << enumName << " >() ";
-    s << "{ return " << cpythonTypeNameExt(cppEnum.typeEntry()) << "; }\n";
+    s << "{ return " << cpythonTypeNameExt(te) << "; }\n";
 
     const auto flag = cppEnum.typeEntry()->flags();
     if (flag) {

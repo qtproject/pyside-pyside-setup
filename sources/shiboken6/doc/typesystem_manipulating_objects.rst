@@ -460,3 +460,29 @@ property
     .. note:: In the *Qt* coding style, the property name typically conflicts
         with the getter name. It is recommended to exclude the getter from the
         wrapper generation using the ``remove`` function modification.
+
+.. _configuration-element:
+
+configuration
+^^^^^^^^^^^^^
+
+    The ``configuration`` element allows you to generate a preprocessor
+    condition excluding a type depending on an expression into the module
+    header. This is specifically tailored to the
+    `Qt Feature system <https://doc.qt.io/qt-6/configure-options.html>`_ ,
+    but may also be used for similar systems.
+
+    It may appear as a child of a complex type such as :ref:`object-type` or
+    :ref:`value-type`.
+
+    .. code-block:: xml
+
+        <configuration condition="..."/>
+
+    The ``condition`` attribute specifies the preprocessor condition.
+
+    This is an alternative way of omitting classes depending on some
+    configuration (see also option :ref:`drop-type-entries`) intended
+    for building several configurations from one generated source tree,
+    but still requires listing the correct source files in the
+    ``CMakeLists.txt`` file.

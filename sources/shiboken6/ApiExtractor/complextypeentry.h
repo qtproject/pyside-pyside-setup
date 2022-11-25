@@ -4,7 +4,7 @@
 #ifndef COMPLEXTYPEENTRY_H
 #define COMPLEXTYPEENTRY_H
 
-#include "typesystem.h"
+#include "configurabletypeentry.h"
 #include "typesystem_enums.h"
 #include "modifications_typedefs.h"
 #include "pymethoddefentry.h"
@@ -33,7 +33,7 @@ struct TypeSystemProperty
     bool generateGetSetDef = false;
 };
 
-class ComplexTypeEntry : public TypeEntry
+class ComplexTypeEntry : public ConfigurableTypeEntry
 {
 public:
     enum TypeFlag {

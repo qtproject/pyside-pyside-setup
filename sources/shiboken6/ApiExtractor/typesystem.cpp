@@ -5,6 +5,7 @@
 #include "arraytypeentry.h"
 #include "codesnip.h"
 #include "complextypeentry.h"
+#include "configurabletypeentry.h"
 #include "constantvaluetypeentry.h"
 #include "containertypeentry.h"
 #include "customtypenentry.h"
@@ -953,11 +954,59 @@ PrimitiveTypeEntry::PrimitiveTypeEntry(PrimitiveTypeEntryPrivate *d)
 {
 }
 
-// ----------------- EnumTypeEntry
-class EnumTypeEntryPrivate : public TypeEntryPrivate
+// ----------------- ConfigurableTypeEntry
+
+class ConfigurableTypeEntryPrivate : public TypeEntryPrivate
 {
 public:
     using TypeEntryPrivate::TypeEntryPrivate;
+
+    QString m_configCondition;
+};
+
+ConfigurableTypeEntry::ConfigurableTypeEntry(const QString &entryName, Type t,
+                                             const QVersionNumber &vr,
+                                             const TypeEntryCPtr &parent) :
+    TypeEntry(new ConfigurableTypeEntryPrivate(entryName, t, vr, parent))
+{
+}
+
+ConfigurableTypeEntry::ConfigurableTypeEntry(ConfigurableTypeEntryPrivate *d) :
+    TypeEntry(d)
+{
+}
+
+TypeEntry *ConfigurableTypeEntry::clone() const
+{
+    S_D(const ConfigurableTypeEntry);
+    return new ConfigurableTypeEntry(new ConfigurableTypeEntryPrivate(*d));
+}
+
+QString ConfigurableTypeEntry::configCondition() const
+{
+    S_D(const ConfigurableTypeEntry);
+    return d->m_configCondition;
+}
+
+void ConfigurableTypeEntry::setConfigCondition(const QString &c)
+{
+    S_D(ConfigurableTypeEntry);
+    d->m_configCondition = c;
+    if (!d->m_configCondition.startsWith(u'#'))
+        d->m_configCondition.prepend(u"#if ");
+}
+
+bool ConfigurableTypeEntry::hasConfigCondition() const
+{
+    S_D(const ConfigurableTypeEntry);
+    return !d->m_configCondition.isEmpty();
+}
+
+// ----------------- EnumTypeEntry
+class EnumTypeEntryPrivate : public ConfigurableTypeEntryPrivate
+{
+public:
+    using ConfigurableTypeEntryPrivate::ConfigurableTypeEntryPrivate;
 
     EnumValueTypeEntryCPtr m_nullValue;
     QStringList m_rejectedEnums;
@@ -969,7 +1018,7 @@ public:
 EnumTypeEntry::EnumTypeEntry(const QString &entryName,
                              const QVersionNumber &vr,
                              const TypeEntryCPtr &parent) :
-    TypeEntry(new EnumTypeEntryPrivate(entryName, EnumType, vr, parent))
+    ConfigurableTypeEntry(new EnumTypeEntryPrivate(entryName, EnumType, vr, parent))
 {
 }
 
@@ -1063,7 +1112,7 @@ TypeEntry *EnumTypeEntry::clone() const
 }
 
 EnumTypeEntry::EnumTypeEntry(EnumTypeEntryPrivate *d) :
-    TypeEntry(d)
+    ConfigurableTypeEntry(d)
 {
 }
 
@@ -1202,13 +1251,13 @@ ConstantValueTypeEntry::ConstantValueTypeEntry(TypeEntryPrivate *d) :
 }
 
 // ----------------- ComplexTypeEntry
-class ComplexTypeEntryPrivate : public TypeEntryPrivate
+class ComplexTypeEntryPrivate : public ConfigurableTypeEntryPrivate
 {
 public:
     ComplexTypeEntryPrivate(const QString &entryName, TypeEntry::Type t,
                             const QVersionNumber &vr,
                             const TypeEntryCPtr &parent) :
-        TypeEntryPrivate(entryName, t, vr, parent),
+        ConfigurableTypeEntryPrivate(entryName, t, vr, parent),
         m_qualifiedCppName(buildName(entryName, parent)),
         m_polymorphicBase(false),
         m_genericClass(false),
@@ -1257,7 +1306,7 @@ public:
 ComplexTypeEntry::ComplexTypeEntry(const QString &entryName, TypeEntry::Type t,
                                    const QVersionNumber &vr,
                                    const TypeEntryCPtr &parent) :
-    TypeEntry(new ComplexTypeEntryPrivate(entryName, t, vr, parent))
+    ConfigurableTypeEntry(new ComplexTypeEntryPrivate(entryName, t, vr, parent))
 {
 }
 
@@ -1690,7 +1739,7 @@ void ComplexTypeEntry::useAsTypedef(const ComplexTypeEntryCPtr &source)
 }
 
 ComplexTypeEntry::ComplexTypeEntry(ComplexTypeEntryPrivate *d) :
-    TypeEntry(d)
+    ConfigurableTypeEntry(d)
 {
 }
 

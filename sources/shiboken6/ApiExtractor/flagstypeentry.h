@@ -9,6 +9,7 @@
 class EnumTypeEntry;
 class FlagsTypeEntryPrivate;
 
+// FlagsTypeEntry is configurable for global flags only
 class FlagsTypeEntry : public TypeEntry
 {
 public:
