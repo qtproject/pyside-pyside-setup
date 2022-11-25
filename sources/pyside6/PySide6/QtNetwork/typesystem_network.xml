@@ -8,9 +8,15 @@
 
     <rejection class="dtlsopenssl"/>
 
-    <enum-type name="QDtlsError"/>
-    <enum-type name="QOcspCertificateStatus"/>
-    <enum-type name="QOcspRevocationReason"/>
+    <enum-type name="QDtlsError">
+        <configuration condition="QT_CONFIG(ssl)"/>
+    </enum-type>
+    <enum-type name="QOcspCertificateStatus">
+        <configuration condition="QT_CONFIG(ssl)"/>
+    </enum-type>
+    <enum-type name="QOcspRevocationReason">
+        <configuration condition="QT_CONFIG(ssl)"/>
+    </enum-type>
 
     <namespace-type name="QPasswordDigestor">
         <extra-includes>
@@ -66,8 +72,11 @@
 
     <object-type name="QDtls">
         <enum-type name="HandshakeState"/>
+        <configuration condition="QT_CONFIG(dtls)"/>
     </object-type>
-    <object-type name="QDtlsClientVerifier"/>
+    <object-type name="QDtlsClientVerifier">
+        <configuration condition="QT_CONFIG(dtls)"/>
+    </object-type>
 
     <value-type name="QHstsPolicy">
         <enum-type name="PolicyFlag" flags="PolicyFlags"/>
@@ -96,7 +105,9 @@
             </inject-code>
         </modify-function>
     </object-type>
-    <value-type name="QOcspResponse"/>
+    <value-type name="QOcspResponse">
+        <configuration condition="QT_CONFIG(ssl)"/>
+    </value-type>
     <object-type name="QTcpSocket"/>
     <object-type name="QUdpSocket">
         <modify-function signature="readDatagram(char*,qint64,QHostAddress*,quint16*)" allow-thread="yes">
@@ -198,11 +209,13 @@
 
     <value-type name="QNetworkAddressEntry">
         <enum-type name="DnsEligibilityStatus"/>
+        <configuration condition="#ifndef QT_NO_NETWORKINTERFACE"/>
     </value-type>
 
     <value-type name="QNetworkInterface">
         <enum-type name="InterfaceFlag" flags="InterfaceFlags"/>
         <enum-type name="InterfaceType"/>
+        <configuration condition="#ifndef QT_NO_NETWORKINTERFACE"/>
     </value-type>
 
     <value-type name="QNetworkProxy">
@@ -249,31 +262,45 @@
     <object-type name="QNetworkDiskCache"/>
     <value-type name="QNetworkCacheMetaData"/>
 
-    <object-type name="QSctpServer"/>
-    <object-type name="QSctpSocket"/>
+    <object-type name="QSctpServer">
+        <configuration condition="QT_CONFIG(sctp)"/>
+    </object-type>
+    <object-type name="QSctpSocket">
+        <configuration condition="QT_CONFIG(sctp)"/>
+    </object-type>
 
     <!-- The following entries may be present in the system or not. Keep this section organized. -->
     <value-type name="QSslCertificate">
         <enum-type name="PatternSyntax"/>
         <enum-type name="SubjectInfo"/>
+        <configuration condition="QT_CONFIG(ssl)"/>
     </value-type>
 
-    <value-type name="QSslCertificateExtension"/>
+    <value-type name="QSslCertificateExtension">
+        <configuration condition="QT_CONFIG(ssl)"/>
+    </value-type>
 
-    <value-type name="QSslCipher"/>
+    <value-type name="QSslCipher">
+        <configuration condition="QT_CONFIG(ssl)"/>
+    </value-type>
 
     <value-type name="QSslConfiguration">
         <enum-type name="NextProtocolNegotiationStatus"/>
+        <configuration condition="QT_CONFIG(ssl)"/>
     </value-type>
 
     <value-type name="QSslDiffieHellmanParameters">
         <enum-type name="Error"/>
+        <configuration condition="QT_CONFIG(ssl)"/>
     </value-type>
 
-    <value-type name="QSslEllipticCurve"/>
+    <value-type name="QSslEllipticCurve">
+        <configuration condition="QT_CONFIG(ssl)"/>
+    </value-type>
 
     <value-type name="QSslError">
         <enum-type name="SslError"/>
+        <configuration condition="QT_CONFIG(ssl)"/>
     </value-type>
 
     <value-type name="QSslKey"/>
@@ -282,11 +309,16 @@
         <enum-type name="PeerVerifyMode"/>
         <modify-function signature="connectToHostEncrypted(const QString&amp;,quint16,QFlags&lt;QIODeviceBase::OpenModeFlag>,QAbstractSocket::NetworkLayerProtocol)" allow-thread="yes"/>
         <modify-function signature="waitForEncrypted(int)" allow-thread="yes"/>
+        <configuration condition="QT_CONFIG(ssl)"/>
     </object-type>
 
-    <value-type name="QSslPreSharedKeyAuthenticator"/>
+    <value-type name="QSslPreSharedKeyAuthenticator">
+        <configuration condition="QT_CONFIG(ssl)"/>
+    </value-type>
 
-    <object-type name="QSslServer" since="6.4"/>
+    <object-type name="QSslServer" since="6.4">
+        <configuration condition="QT_CONFIG(ssl)"/>
+    </object-type>
 
     <!-- The above entries may be present in the system or not. Keep this section organized. -->
 </typesystem>

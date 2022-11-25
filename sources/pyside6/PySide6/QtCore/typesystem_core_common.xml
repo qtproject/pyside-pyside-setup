@@ -1271,9 +1271,12 @@
   </value-type>
 
   <value-type name="QTimeZone">
+    <configuration condition="QT_CONFIG(timezone)"/>
     <enum-type name="TimeType"/>
     <enum-type name="NameType"/>
-    <value-type name="OffsetData"/>
+    <value-type name="OffsetData">
+        <configuration condition="QT_CONFIG(timezone)"/>
+    </value-type>
   </value-type>
 
   <value-type name="QUuid">
@@ -1468,6 +1471,7 @@
     <modify-function signature="tryLockForWrite(int)" allow-thread="yes"/>
   </object-type>
   <object-type name="QReadLocker">
+    <configuration condition="QT_CONFIG(thread)"/>
     <modify-function signature="QReadLocker(QReadWriteLock*)">
         <modify-argument index="1">
             <reference-count action="set"/>
@@ -1482,6 +1486,7 @@
     </add-function>
   </object-type>
   <object-type name="QWriteLocker">
+    <configuration condition="QT_CONFIG(thread)"/>
     <modify-function signature="QWriteLocker(QReadWriteLock*)">
         <modify-argument index="1">
             <reference-count action="set"/>
@@ -1499,6 +1504,7 @@
     <enum-type name="IteratorFlag" flags="IteratorFlags"/>
   </object-type>
   <object-type name="QThread">
+    <configuration condition="QT_CONFIG(thread)"/>
     <inject-code file="../glue/qtcore.cpp" class="native" position="beginning" snippet="qthread_pthread_cleanup"/>
     <enum-type name="Priority"/>
     <modify-function signature="currentThreadId()" remove="all"/>
@@ -2326,6 +2332,7 @@
   </object-type>
   <namespace-type name="QtCoreHelper" visible="no">
     <object-type name="QMutexLocker" copyable="no">
+      <configuration condition="QT_CONFIG(thread)"/>
       <!-- PYSIDE-1271: Creating locking capable objects inside sections that
       contain allow-thread, require the classes to also allow having threads.
       The lack of the option here, was generating a deadlock when running a
@@ -2366,14 +2373,17 @@
 
   <!-- Qt5 addition -->
   <object-type name="QBasicMutex">
+    <configuration condition="QT_CONFIG(thread)"/>
     <modify-function signature="lock()" allow-thread="yes"/>
     <modify-function signature="tryLock()" allow-thread="yes"/>
   </object-type>
 
   <object-type name="QMutex">
+    <configuration condition="QT_CONFIG(thread)"/>
     <modify-function signature="tryLock(int)" allow-thread="yes"/>
   </object-type>
   <object-type name="QRecursiveMutex">
+    <configuration condition="QT_CONFIG(thread)"/>
     <modify-function signature="lock()" allow-thread="yes"/>
     <modify-function signature="tryLock(int)" allow-thread="yes"/>
   </object-type>
@@ -2387,10 +2397,13 @@
       <modify-function signature="operator()()" remove="all"/>
   </object-type>
   <object-type name="QSemaphore">
+    <configuration condition="QT_CONFIG(thread)"/>
     <modify-function signature="acquire(int)" allow-thread="yes"/>
     <modify-function signature="tryAcquire(int,int)" allow-thread="yes"/>
   </object-type>
-  <object-type name="QSemaphoreReleaser"/>
+  <object-type name="QSemaphoreReleaser">
+    <configuration condition="QT_CONFIG(thread)"/>
+  </object-type>
 
   <value-type name="QSocketDescriptor">
     <inject-code class="native" position="beginning" file="../glue/qtcore.cpp" snippet="qsocketdescriptor"/>
@@ -2433,6 +2446,7 @@
     </modify-function>
   </object-type>
   <object-type name="QWaitCondition">
+    <configuration condition="QT_CONFIG(thread)"/>
     <modify-function signature="wait(QMutex*,QDeadlineTimer)" allow-thread="yes"/>
     <modify-function signature="wait(QMutex*,unsigned long)" allow-thread="yes"/>
     <modify-function signature="wait(QReadWriteLock*,QDeadlineTimer)" allow-thread="yes"/>
@@ -2458,6 +2472,7 @@
     </add-function>
   </object-type>
   <object-type name="QProcess">
+    <configuration condition="QT_CONFIG(process)"/>
     <enum-type name="ExitStatus"/>
     <enum-type name="InputChannelMode"/>
     <enum-type name="ProcessChannel"/>
@@ -2847,11 +2862,13 @@
     <enum-type name="LocateOption" flags="LocateOptions"/>
   </object-type>
   <object-type name="QSystemSemaphore">
+    <configuration condition="#ifndef QT_NO_SYSTEMSEMAPHORE"/>
     <enum-type name="AccessMode"/>
     <enum-type name="SystemSemaphoreError"/>
   </object-type>
 
   <object-type name="QThreadPool">
+    <configuration condition="QT_CONFIG(thread)"/>
     <modify-function signature="clear()" allow-thread="yes"/>
     <modify-function signature="activeThreadCount()const" allow-thread="yes"/>
     <modify-function signature="releaseThread()" allow-thread="yes"/>
@@ -2931,19 +2948,23 @@
   </value-type>
 
   <object-type name="QFutureInterfaceBase">
+      <configuration condition="QT_CONFIG(future)"/>
       <enum-type name="State"/>
       <enum-type name="CancelMode" since="6.3"/>
   </object-type>
   <value-type name="QFuture" generate="no">
       <include file-name="QtCore/qfuture.h" location="global"/>
+      <configuration condition="QT_CONFIG(future)"/>
       <modify-function signature="waitForFinished()" allow-thread="yes"/>
   </value-type>
   <object-type name="QFutureWatcherBase" generate="no">
+      <configuration condition="QT_CONFIG(future)"/>
       <modify-function signature="futureInterface()" remove="all"/>
       <modify-function signature="futureInterface() const" remove="all"/>
   </object-type>
   <object-type name="QFutureWatcher" generate="no">
       <include file-name="QtCore/qfuturewatcher.h" location="global"/>
+      <configuration condition="QT_CONFIG(future)"/>
   </object-type>
 
   <!--// FIXME PYSIDE 7: Remove in favor of QtCoreHelper::QGenericArgumentHolder for
@@ -3136,6 +3157,7 @@
   <object-type name="QPauseAnimation" since="4.6"/>
 
   <value-type name="QProcessEnvironment" since="4.6">
+      <configuration condition="QT_CONFIG(processenvironment)"/>
       <enum-type name="Initialization" since="6.3"/>
   </value-type>
 
@@ -3198,12 +3220,15 @@
   </add-function>
 
   <object-type name="QFactoryInterface"/>
-  <object-type name="QRunnable"/>
+  <object-type name="QRunnable">
+    <configuration condition="QT_CONFIG(thread)"/>
+  </object-type>
 
   <object-type name="QPluginLoader"/>
   <object-type name="QStringListModel"/>
 
    <object-type name="QSharedMemory">
+       <configuration condition="#ifndef QT_NO_SHAREDMEMORY"/>
        <enum-type name="AccessMode"/>
        <enum-type name="SharedMemoryError"/>
        <modify-function signature="data()">
