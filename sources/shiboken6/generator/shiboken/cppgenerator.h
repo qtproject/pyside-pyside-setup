@@ -427,7 +427,8 @@ private:
                                         const QString &baseName,
                                         const GeneratorContext &context) const;
     static void writeRichCompareFunctionFooter(TextStream &s,
-                                               const QString &baseName);
+                                               const QString &baseName,
+                                               bool writeLabel);
     void writeRichCompareFunction(TextStream &s, const GeneratorContext &context) const;
     void writeSmartPointerRichCompareFunction(TextStream &s, const GeneratorContext &context) const;
 

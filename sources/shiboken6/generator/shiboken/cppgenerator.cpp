@@ -5275,6 +5275,11 @@ void CppGenerator::writeRichCompareFunctionHeader(TextStream &s,
         << sbkUnusedVariableCast(PYTHON_TO_CPP_VAR) << '\n';
 }
 
+static bool containsGoto(const CodeSnip &s)
+{
+    return s.code().contains(u"goto");
+}
+
 static const char richCompareComment[] =
     "// PYSIDE-74: By default, we redirect to object's tp_richcompare (which is `==`, `!=`).\n";
 
@@ -5288,6 +5293,7 @@ void CppGenerator::writeRichCompareFunction(TextStream &s,
     s << "switch (op) {\n" << indent;
     const QList<AbstractMetaFunctionCList> &groupedFuncs =
         filterGroupedOperatorFunctions(metaClass, OperatorQueryOption::ComparisonOp);
+    bool needErrorLabel = false;
     for (const AbstractMetaFunctionCList &overloads : groupedFuncs) {
         const auto rfunc = overloads[0];
 
@@ -5333,6 +5339,7 @@ void CppGenerator::writeRichCompareFunction(TextStream &s,
                                    TypeSystem::TargetLangCode, func,
                                    false /* uses PyArgs */, &func->arguments().constLast());
                     generateOperatorCode = false;
+                    needErrorLabel |= std::any_of(snips.cbegin(), snips.cend(), containsGoto);
                 }
             }
             if (generateOperatorCode) {
@@ -5367,6 +5374,7 @@ void CppGenerator::writeRichCompareFunction(TextStream &s,
                 << "Py_INCREF(" << PYTHON_RETURN_VAR << ");\n" << outdent;
         } else {
             s << indent << "goto " << baseName << "_RichComparison_TypeError;\n" << outdent;
+            needErrorLabel = true;
         }
         s << "}\n\n";
 
@@ -5375,19 +5383,20 @@ void CppGenerator::writeRichCompareFunction(TextStream &s,
     s << "default:\n" << indent
         << richCompareComment
         << "return FallbackRichCompare(self, " << PYTHON_ARG << ", op);\n"
-        << "goto " << baseName << "_RichComparison_TypeError;\n" << outdent
-        << outdent << "}\n\n";
+        << outdent << outdent << "}\n\n";
 
-    writeRichCompareFunctionFooter(s, baseName);
+    writeRichCompareFunctionFooter(s, baseName, needErrorLabel);
 }
 
 void CppGenerator::writeRichCompareFunctionFooter(TextStream &s,
-                                                  const QString &baseName)
+                                                  const QString &baseName,
+                                                  bool writeErrorLabel)
 {
     s << "if (" << PYTHON_RETURN_VAR << " && !PyErr_Occurred())\n" << indent
-        << "return " << PYTHON_RETURN_VAR << ";\n" << outdent
-        << baseName << "_RichComparison_TypeError:\n"
-        << "Shiboken::Errors::setOperatorNotImplemented();\n"
+        << "return " << PYTHON_RETURN_VAR << ";\n" << outdent;
+    if (writeErrorLabel)
+        s << baseName << "_RichComparison_TypeError:\n";
+    s << "Shiboken::Errors::setOperatorNotImplemented();\n"
         << ErrorReturn::Default << '\n' << outdent << "}\n\n";
 }
 
@@ -5498,7 +5507,7 @@ void CppGenerator::writeSmartPointerRichCompareFunction(TextStream &s,
       << "goto " << baseName << "_RichComparison_TypeError;\n"
       << outdent << "}\n";
 
-    writeRichCompareFunctionFooter(s, baseName);
+    writeRichCompareFunctionFooter(s, baseName, true);
 }
 
 // Return a flag combination for PyMethodDef
