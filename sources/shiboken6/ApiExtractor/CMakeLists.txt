@@ -52,7 +52,6 @@ parser/enumvalue.cpp
 xmlutils.cpp
 )
 
-find_package(Qt${QT_MAJOR_VERSION}Xml 6.0)
 find_package(LibXml2 2.6.32)
 find_package(LibXslt 1.1.19)
 
@@ -75,7 +74,7 @@ target_include_directories(apiextractor PRIVATE ${CLANG_INCLUDE_DIRS}
                                                 ${CMAKE_CURRENT_SOURCE_DIR}
                                                 ${CMAKE_CURRENT_BINARY_DIR}
                                                 ${CMAKE_CURRENT_SOURCE_DIR}/parser)
-target_link_libraries(apiextractor PUBLIC Qt${QT_MAJOR_VERSION}::Core)
+target_link_libraries(apiextractor PUBLIC Qt::Core)
 target_link_libraries(apiextractor PRIVATE libclang)
 
 if (HAS_LIBXSLT)
@@ -100,7 +99,7 @@ target_compile_definitions(apiextractor
 set(LIB_INSTALL_DIR "lib${LIB_SUFFIX}" CACHE PATH "The subdirectory relative to the install prefix where libraries will be installed (default is /lib${LIB_SUFFIX})" FORCE)
 
 if (BUILD_TESTS)
-    find_package(Qt${QT_MAJOR_VERSION}Test 6.0 REQUIRED)
+    find_package(Qt6 REQUIRED COMPONENTS Test)
     set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/tests)
     enable_testing()
     add_subdirectory(tests)

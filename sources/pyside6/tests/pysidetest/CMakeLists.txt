@@ -14,7 +14,7 @@ set(CMAKE_AUTOMOC ON)
 add_definitions(-DQT_SHARED)
 add_definitions(-DRXX_ALLOCATOR_INIT_0)
 
-find_package(Qt${QT_MAJOR_VERSION}Widgets)
+find_package(Qt6 COMPONENTS QtWidgets)
 
 set(pysidetest_SRC
 containertest.cpp
@@ -110,10 +110,7 @@ set_target_properties(pysidetest PROPERTIES
 
 target_link_libraries(pysidetest
                       Shiboken6::libshiboken
-                      ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
-                      ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
-                      ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES}
-                      )
+                      Qt::Core Qt::Gui Qt::Widgets)
 
 add_library(testbinding MODULE ${testbinding_SRC})
 set_property(TARGET testbinding PROPERTY PREFIX "")
@@ -126,9 +123,7 @@ target_link_libraries(testbinding
                       pysidetest
                       pyside6
                       Shiboken6::libshiboken
-                      ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
-                      ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
-                      ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES})
+                      Qt::Core Qt::Gui Qt::Widgets)
 
 add_dependencies(testbinding pyside6 QtCore QtGui QtWidgets pysidetest)
 create_generator_target(testbinding)

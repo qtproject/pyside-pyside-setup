@@ -12,9 +12,7 @@ project(scriptableapplication)
 set(CMAKE_CXX_STANDARD 17)
 
 # Find required Qt packages.
-find_package(Qt6 COMPONENTS Core)
-find_package(Qt6 COMPONENTS Gui)
-find_package(Qt6 COMPONENTS Widgets)
+find_package(Qt6 COMPONENTS Core Gui Widgets)
 
 # Use provided python interpreter if given.
 if(NOT python_interpreter)

@@ -7,10 +7,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(CMAKE_AUTOMOC ON)
 
-find_package(Qt6 COMPONENTS Core)
-find_package(Qt6 COMPONENTS Gui)
-find_package(Qt6 COMPONENTS Widgets)
-find_package(Qt6 COMPONENTS UiPlugin)
+find_package(Qt6 COMPONENTS Core Gui Widgets UiPlugin)
 
 qt_add_plugin(PySidePlugin)
 
