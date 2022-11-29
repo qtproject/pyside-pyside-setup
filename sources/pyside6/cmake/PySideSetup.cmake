@@ -90,7 +90,7 @@ if(QFP_QT_HOST_PATH)
         endif()
     endif()
 endif()
-find_package(Qt${QT_MAJOR_VERSION} 6.0 REQUIRED COMPONENTS Core)
+find_package(Qt6 REQUIRED COMPONENTS Core)
 
 add_definitions(${Qt${QT_MAJOR_VERSION}Core_DEFINITIONS})
 
@@ -177,7 +177,7 @@ foreach(m ${DISABLED_MODULES})
 endforeach()
 
 # Whether to add libpysideqml
-find_package(Qt${QT_MAJOR_VERSION}Qml)
+find_package(Qt6 COMPONENTS Qml)
 
 string(REGEX MATCHALL "[0-9]+" qt_version_helper "${Qt${QT_MAJOR_VERSION}Core_VERSION}")
 
@@ -227,5 +227,5 @@ if(SANITIZE_ADDRESS AND NOT MSVC)
     setup_sanitize_address()
 endif()
 
-find_package(Qt${QT_MAJOR_VERSION}Designer)
+find_package(Qt6 COMPONENTS Designer)
 

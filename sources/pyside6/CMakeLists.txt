@@ -16,7 +16,7 @@ endif()
 
 if(Qt${QT_MAJOR_VERSION}UiTools_FOUND)
     add_subdirectory(plugins/uitools)
-    find_package(Qt${QT_MAJOR_VERSION}Designer)
+    find_package(Qt6 COMPONENTS Designer)
     # PYSIDE-535: Enable when PyPy supports embedding
     if (Qt${QT_MAJOR_VERSION}Designer_FOUND AND NOT PYPY_VERSION)
         add_subdirectory(plugins/designer)

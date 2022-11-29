@@ -9,5 +9,5 @@ target_include_directories(dumpcodemodel
 target_link_libraries(dumpcodemodel
     PRIVATE
         apiextractor
-        Qt${QT_MAJOR_VERSION}::Core
+        Qt::Core
 )

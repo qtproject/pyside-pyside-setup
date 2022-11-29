@@ -19,7 +19,7 @@ shiboken_internal_set_up_extra_dependency_paths()
 
 set(QT_MAJOR_VERSION 6)
 message(STATUS "Using Qt ${QT_MAJOR_VERSION}")
-find_package(Qt${QT_MAJOR_VERSION} 6.0 REQUIRED COMPONENTS Core)
+find_package(Qt6 REQUIRED COMPONENTS Core)
 
 if(QUIET_BUILD)
     set_quiet_build()
