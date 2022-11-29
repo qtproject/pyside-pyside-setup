@@ -1376,7 +1376,8 @@ def available_pyside_tools(qt_tools_path: Path, package_for_wheels: bool = False
         pyside_tools.extend([tool for tool in PYSIDE_WINDOWS_BIN_TOOLS
                              if tool_exist(bin_path / f"{tool}.exe")])
     else:
-        lib_exec_path = qt_tools_path / "Qt" / "libexec"
+        lib_exec_path = qt_tools_path / "Qt" / "libexec" if package_for_wheels \
+                        else qt_tools_path / "libexec"
         pyside_tools.extend([tool for tool in PYSIDE_LINUX_LIBEXEC_TOOLS
                              if tool_exist(lib_exec_path / tool)])
         pyside_tools.extend([tool for tool in PYSIDE_LINUX_BIN_TOOLS
