@@ -97,15 +97,6 @@ struct SbkObjectTypePrivate
     TypeDiscoveryFuncV2 type_discovery;
     /// Pointer to a function responsible for deletion of the C++ instance calling the proper destructor.
     ObjectDestructor cpp_dtor;
-    /// PYSIDE-1019: Caching the current select Id
-    int pyside_reserved_bits;   // MSVC has bug with the sign bit, so use no bitfield.!
-    /// True if this type holds two or more C++ instances, e.g.: a Python class which inherits from two C++ classes.
-    unsigned int is_multicpp : 1;
-    /// True if this type was defined by the user.
-    unsigned int is_user_type : 1;
-    /// Tells is the type is a value type or an object-type, see BEHAVIOUR_ *constants.
-    unsigned int type_behaviour : 2;
-    unsigned int delete_in_main_thread : 1;
     /// C++ name
     char *original_name;
     /// Type user data
@@ -116,6 +107,14 @@ struct SbkObjectTypePrivate
     const char **enumFlagInfo;
     PyObject *enumFlagsDict;
     PyObject *enumTypeDict;
+
+    /// True if this type holds two or more C++ instances, e.g.: a Python class which inherits from two C++ classes.
+    unsigned int is_multicpp : 1;
+    /// True if this type was defined by the user.
+    unsigned int is_user_type : 1;
+    /// Tells is the type is a value type or an object-type, see BEHAVIOUR_ *constants.
+    unsigned int type_behaviour : 2;
+    unsigned int delete_in_main_thread : 1;
 };
 
 

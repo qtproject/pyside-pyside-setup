@@ -56,9 +56,13 @@ PyObject *getFeatureSelectId()
 
 int currentSelectId(PyTypeObject *type)
 {
-    int sel = SbkObjectType_GetReserved(type);
-    // This could theoretically be -1 if used too early.
-    assert(sel >= 0);
+    PyObject *PyId = PyObject_GetAttr(type->tp_dict, PyName::select_id());
+    if (PyId == nullptr) {
+        PyErr_Clear();
+        return 0x00;
+    }
+    int sel = PyLong_AsLong(PyId);
+    Py_DECREF(PyId);
     return sel;
 }
 
@@ -364,17 +368,6 @@ int SbkObject_GenericSetAttr(PyObject *obj, PyObject *name, PyObject *value)
     if (SelectFeatureSet != nullptr)
         SelectFeatureSet(type);
     return PyObject_GenericSetAttr(obj, name, value);
-}
-
-// Caching the select Id.
-int SbkObjectType_GetReserved(PyTypeObject *type)
-{
-    return PepType_SOTP(type)->pyside_reserved_bits;
-}
-
-void SbkObjectType_SetReserved(PyTypeObject *type, int value)
-{
-    PepType_SOTP(type)->pyside_reserved_bits = value;
 }
 
 const char **SbkObjectType_GetPropertyStrings(PyTypeObject *type)

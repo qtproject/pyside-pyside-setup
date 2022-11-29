@@ -153,16 +153,6 @@ static inline PyObject *getSelectId(PyObject *dict)
     return select_id;
 }
 
-static inline void setCurrentSelectId(PyTypeObject *type, PyObject *select_id)
-{
-    SbkObjectType_SetReserved(type, PyLong_AsSsize_t(select_id));
-}
-
-static inline void setCurrentSelectId(PyTypeObject *type, int id)
-{
-    SbkObjectType_SetReserved(type, id);
-}
-
 static bool replaceClassDict(PyTypeObject *type)
 {
     /*
@@ -184,7 +174,6 @@ static bool replaceClassDict(PyTypeObject *type)
     // Replace `__dict__` which usually has refcount 1 (but see cyclic_test.py)
     Py_DECREF(type->tp_dict);
     type->tp_dict = new_dict;
-    setCurrentSelectId(type, select_id.object());
     return true;
 }
 
@@ -205,7 +194,6 @@ static bool addNewDict(PyTypeObject *type, PyObject *select_id)
     setNextDict(dict, new_dict);
     setNextDict(new_dict, next_dict);
     type->tp_dict = new_dict;
-    setCurrentSelectId(type, select_id);
     return true;
 }
 
@@ -222,13 +210,11 @@ static inline bool moveToFeatureSet(PyTypeObject *type, PyObject *select_id)
         // This works because small numbers are singleton objects.
         if (current_id == select_id) {
             type->tp_dict = dict;
-            setCurrentSelectId(type, select_id);
             return true;
         }
         dict = nextInCircle(dict);
     } while (dict != initial_dict);
     type->tp_dict = initial_dict;
-    setCurrentSelectId(type, getSelectId(initial_dict));
     return false;
 }
 
@@ -261,7 +247,6 @@ static bool createNewFeatureSet(PyTypeObject *type, PyObject *select_id)
     auto id = PyLong_AsSsize_t(select_id);
     if (id == -1)
         return false;
-    setCurrentSelectId(type, id);
     FeatureProc *proc = featurePointer;
     for (int idx = id; *proc != nullptr; ++proc, idx >>= 1) {
         if (idx & 1) {

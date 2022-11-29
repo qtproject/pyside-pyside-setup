@@ -31,6 +31,7 @@
 #include <sbkconverter.h>
 #include <sbkstring.h>
 #include <sbkstaticstrings.h>
+#include <sbkfeature_base.h>
 
 #include <QtCore/QByteArray>
 #include <QtCore/QCoreApplication>
@@ -232,7 +233,7 @@ static bool _setProperty(PyObject *qObj, PyObject *name, PyObject *value, bool *
 
     QByteArray propName(Shiboken::String::toCString(name));
     auto type = Py_TYPE(qObj);
-    int flags = SbkObjectType_GetReserved(type);
+    int flags = currentSelectId(type);
     int prop_flag = flags & 0x02;
     auto found = false;
     QByteArray getterName{}, setterName{};
@@ -301,7 +302,7 @@ bool fillQtProperties(PyObject *qObj, const QMetaObject *metaObj, PyObject *kwds
 
     PyObject *key, *value;
     Py_ssize_t pos = 0;
-    int flags = SbkObjectType_GetReserved(Py_TYPE(qObj));
+    int flags = currentSelectId(Py_TYPE(qObj));
     int snake_flag = flags & 0x01;
 
     while (PyDict_Next(kwds, &pos, &key, &value)) {
@@ -517,7 +518,7 @@ PyObject *getMetaDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *nam
         PyErr_Fetch(&type, &value, &traceback);     // This was omitted for a loong time.
 
         const char *cname = Shiboken::String::toCString(name);
-        int flags = SbkObjectType_GetReserved(Py_TYPE(self));
+        int flags = currentSelectId(Py_TYPE(self));
         int snake_flag = flags & 0x01;
         uint cnameLen = qstrlen(cname);
         if (std::strncmp("__", cname, 2)) {
