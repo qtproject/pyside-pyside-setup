@@ -11,10 +11,12 @@
 #include "autodecref.h"
 #include "sbkpython.h"
 #include "signature.h"
+#include "helper.h"
 
 #include <cstring>
 #include <vector>
 #include <sstream>
+#include <iostream>
 
 #define SbkEnumType_Check(o) (Py_TYPE(Py_TYPE(o)) == SbkEnumType_TypeF())
 using enum_func = PyObject *(*)(PyObject *, PyObject *);
@@ -877,6 +879,9 @@ EnumValueType getValue(PyObject *enumItem)
     // PYSIDE-1735: Decide dynamically if new or old enums will be used.
     if (useOldEnum)
         return reinterpret_cast<SbkEnumObject *>(enumItem)->ob_value;
+
+    std::cerr << __FUNCTION__ << ' ' << Shiboken::debugPyObject(enumItem)
+              << " err=" << Shiboken::debugPyObject(PyErr_Occurred()) << '\n';
 
     AutoDecRef pyValue(PyObject_GetAttrString(enumItem, "value"));
     return PyLong_AsLongLong(pyValue);
