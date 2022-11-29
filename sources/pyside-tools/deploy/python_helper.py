@@ -49,13 +49,13 @@ class PythonExecutable:
             elif sys.platform in ["linux", "darwin"]:
                 self.exe = venv_path / "bin" / "python"
         else:
-            logging.info("[DEPLOY]: You are already in virtual environment!")
+            logging.info("[DEPLOY] You are already in virtual environment!")
 
     def install(self, packages: list = None):
         if packages:
             for package in packages:
                 if not self.is_installed(package=package):
-                    logging.info(f"[DEPLOY]: Installing package: {package}")
+                    logging.info(f"[DEPLOY] Installing package: {package}")
                     run_command(
                         command=[self.exe, "-m", "pip", "install", package],
                         dry_run=self.dry_run,
@@ -72,7 +72,7 @@ class PythonExecutable:
 
     def create_executable(self, source_file: Path, extra_args: str, config: Config):
         if config.qml_files:
-            logging.info(f"[DEPLOY]: Included QML files: {config.qml_files}")
+            logging.info(f"[DEPLOY] Included QML files: {config.qml_files}")
 
         self.nuitka.create_executable(
             source_file=source_file,
