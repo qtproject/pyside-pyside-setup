@@ -6,7 +6,8 @@ import configparser
 from configparser import ConfigParser
 import shutil
 import logging
-import os
+
+from project import ProjectData
 
 
 class Config:
@@ -14,24 +15,50 @@ class Config:
     Wrapper class around config file, whose options are used to control the executable creation
     """
 
-    def __init__(self, config_file: Path) -> None:
+    def __init__(self, config_file: Path, source_file: Path, python_exe: Path, dry_run: bool):
         self.config_file = config_file
         self.parser = ConfigParser(comment_prefixes="/", allow_no_value=True)
         if not self.config_file.exists():
-            logging.info(f"[DEPLOY]: Creating config file {self.config_file}")
+            logging.info(f"[DEPLOY] Creating config file {self.config_file}")
             shutil.copy(Path(__file__).parent / "default.spec", self.config_file)
         else:
             print(f"Using existing config file {config_file}")
         self.parser.read(self.config_file)
 
+        self.dry_run = dry_run
+        # set source_file
+        self.source_file = Path(
+            self.set_or_fetch(config_property_val=source_file, config_property_key="input_file")
+        )
+
+        # set python path
+        self.python_path = Path(
+            self.set_or_fetch(
+                config_property_val=python_exe,
+                config_property_key="python_path",
+                config_property_group="python",
+            )
+        )
+
         self.project_dir = None
         if self.get_value("app", "project_dir"):
             self.project_dir = Path(self.get_value("app", "project_dir")).absolute()
+        else:
+            self._find_and_set_project_dir()
+
+        self.project_data: ProjectData = None
+        if self.get_value("app", "project_file"):
+            project_file = Path(self.get_value("app", "project_file")).absolute()
+            self.project_data = ProjectData(project_file=project_file)
+        else:
+            self._find_and_set_project_file()
 
         self.qml_files = []
         config_qml_files = self.get_value("qt", "qml_files")
         if config_qml_files and self.project_dir:
             self.qml_files = [Path(self.project_dir) / file for file in config_qml_files.split(",")]
+        else:
+            self._find_and_set_qml_files()
 
     def update_config(self):
         logging.info("[DEPLOY] Creating {config_file}")
@@ -44,17 +71,17 @@ class Config:
             if current_value != new_value:
                 self.parser.set(section, key, new_value)
         except configparser.NoOptionError:
-            logging.warning(f"[DEPLOY]: key {key} does not exist")
+            logging.warning(f"[DEPLOY] key {key} does not exist")
         except configparser.NoSectionError:
-            logging.warning(f"[DEPLOY]: section {section} does not exist")
+            logging.warning(f"[DEPLOY] section {section} does not exist")
 
     def get_value(self, section: str, key: str):
         try:
             return self.parser.get(section, key)
         except configparser.NoOptionError:
-            logging.warning(f"[DEPLOY]: key {key} does not exist")
+            logging.warning(f"[DEPLOY] key {key} does not exist")
         except configparser.NoSectionError:
-            logging.warning(f"[DEPLOY]: section {section} does not exist")
+            logging.warning(f"[DEPLOY] section {section} does not exist")
 
     def set_or_fetch(self, config_property_val, config_property_key, config_property_group="app"):
         """
@@ -90,16 +117,31 @@ class Config:
     def project_dir(self, project_dir):
         self._project_dir = project_dir
 
-    def find_and_set_qml_files(self):
+    @property
+    def source_file(self):
+        return self._source_file
+
+    @source_file.setter
+    def source_file(self, source_file):
+        self._source_file = source_file
+
+    @property
+    def python_path(self):
+        return self._python_path
+
+    @python_path.setter
+    def python_path(self, python_path):
+        self._python_path = python_path
+
+    def _find_and_set_qml_files(self):
         """Fetches all the qml_files in the folder and sets them if the
         field qml_files is empty in the config_dir"""
 
-        if self.project_dir:
-            qml_files_str = self.get_value("qt", "qml_files")
-            self.qml_files = []
-            for file in qml_files_str.split(","):
-                if file:
-                    self.qml_files.append(Path(self.project_dir) / file)
+        if self.project_data:
+            qml_files = self.project_data.qml_files
+            for sub_project_file in self.project_data.sub_projects_files:
+                qml_files.extend(ProjectData(project_file=sub_project_file).qml_files)
+            self.qml_files = qml_files
         else:
             qml_files_temp = None
             source_file = (
@@ -140,38 +182,45 @@ class Config:
                 if qml_files_temp:
                     extra_qml_files = [Path(file) for file in qml_files_temp]
                     self.qml_files.extend(extra_qml_files)
-                    self.set_value(
-                        "qt", "qml_files", ",".join([str(file) for file in self.qml_files])
-                    )
-                    logging.info("[DEPLOY] QML files identified and set in config_file")
-
-    def find_and_set_project_dir(self):
-        source_file = (
-            Path(self.get_value("app", "input_file"))
-            if self.get_value("app", "input_file")
-            else None
-        )
-
-        if self.qml_files and source_file:
-            paths = self.qml_files.copy()
-            paths.append(source_file.absolute())
-            self.project_dir = Path(os.path.commonpath(paths=paths))
-
-            # update all qml paths
-            logging.info("[DEPLOY] Update QML files paths to relative paths")
-            qml_relative_paths = ",".join(
-                [str(qml_file.relative_to(self.project_dir)) for qml_file in self.qml_files]
+        if self.qml_files:
+            self.set_value(
+                "qt",
+                "qml_files",
+                ",".join([str(file.relative_to(self.project_dir)) for file in self.qml_files]),
             )
-            self.set_value("qt", "qml_files", qml_relative_paths)
-        else:
-            self.project_dir = source_file.parent
+            logging.info("[DEPLOY] QML files identified and set in config_file")
+
+    def _find_and_set_project_dir(self):
+        # there is no other way to find the project_dir than assume it is the parent directory
+        # of source_file
+        self.project_dir = self.source_file.parent
 
         # update input_file path
         logging.info("[DEPLOY] Update input_file path")
-        self.set_value("app", "input_file", str(source_file.relative_to(self.project_dir)))
+        self.set_value("app", "input_file", str(self.source_file.relative_to(self.project_dir)))
 
         logging.info("[DEPLOY] Update project_dir path")
         if self.project_dir != Path.cwd():
             self.set_value("app", "project_dir", str(self.project_dir))
         else:
             self.set_value("app", "project_dir", str(self.project_dir.relative_to(Path.cwd())))
+
+    def _find_and_set_project_file(self):
+        logging.info("[DEPLOY] Searching for .pyproject file")
+
+        if self.project_dir:
+            files = list(self.project_dir.glob("*.pyproject"))
+        else:
+            logging.exception("[DEPLOY] Project directory not set in config file")
+            raise
+
+        if not files:
+            logging.info("[DEPLOY] No .pyproject file found. Project file not set")
+        elif len(files) > 1:
+            logging.warning("DEPLOY: More that one .pyproject files found. Project file not set")
+            raise
+        else:
+            self.project_data = ProjectData(files[0])
+            self.set_value("app", "project_file", str(files[0].relative_to(self.project_dir)))
+            logging.info(f"[DEPLOY] Project file {files[0]} found and set in config file")
+

@@ -3,7 +3,8 @@
 # Title of your application
 title = My Application
 
-# Project Directory
+# Project Directory. The general assumption is that project_dir is the parent directory
+# of input_file
 project_dir =
 
 # Source file path
@@ -11,6 +12,10 @@ input_file =
 
 # Directory where exec is stored
 exec_directory =
+
+# Path to .pyproject project file
+project_file =
+
 
 [python]
 

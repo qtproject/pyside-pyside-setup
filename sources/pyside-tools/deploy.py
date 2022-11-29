@@ -50,7 +50,7 @@ def clean(purge_path: Path):
     """remove the generated deployment files"""
     if purge_path.exists():
         shutil.rmtree(purge_path)
-        logging.info("[DEPLOY]: deployment directory purged")
+        logging.info("[DEPLOY] deployment directory purged")
     else:
         print(f"{purge_path} does not exist")
 
@@ -94,47 +94,35 @@ if __name__ == "__main__":
         else:
             config_file = Path.cwd() / "pysidedeploy.spec"
 
-    final_exec_path = None
-    config = Config(config_file=config_file)
-
-    # set if available, else fetch from config_file
-    source_file = Path(
-        config.set_or_fetch(config_property_val=args.main_file, config_property_key="input_file")
-    )
-
-    if config.project_dir:
-        source_file = config.project_dir / source_file
-
-    generated_files_path = source_file.parent / "deployment"
-    if generated_files_path.exists():
-        clean(generated_files_path)
-
-    logging.info("[DEPLOY]: Start")
+    logging.info("[DEPLOY] Start")
 
     try:
         python = None
-        python_path = config.get_value("python", "python_path")
-        if python_path and Path(python_path).exists():
-            python = PythonExecutable(Path(python_path), dry_run=args.dry_run)
-        else:
-            # checking if inside virtual environment
-            if not PythonExecutable.is_venv():
-                if not args.force:
-                    response = input("Not in virtualenv. Do you want to create one? [Y/n]")
-                else:
-                    response = "no"
+        # checking if inside virtual environment
+        if not PythonExecutable.is_venv():
+            if not args.force:
+                response = input("Not in virtualenv. Do you want to create one? [Y/n]")
+            else:
+                response = "no"
 
-                if response.lower() in "yes":
-                    # creating new virtual environment
-                    python = PythonExecutable(create_venv=True, dry_run=args.dry_run)
-                    logging.info("[DEPLOY]: virutalenv created")
+            if response.lower() in "yes":
+                # creating new virtual environment
+                python = PythonExecutable(create_venv=True, dry_run=args.dry_run)
+                logging.info("[DEPLOY] virutalenv created")
 
-            # in venv or user entered no
-            if not python:
-                python = PythonExecutable(dry_run=args.dry_run)
-                logging.info(f"[DEPLOY]: using python at {sys.executable}")
+        # in venv or user entered no
+        if not python:
+            python = PythonExecutable(dry_run=args.dry_run)
+            logging.info(f"[DEPLOY] using python at {sys.executable}")
 
-        config.set_value("python", "python_path", str(python.exe))
+        config = Config(config_file=config_file, source_file=args.main_file,
+                        python_exe=python.exe, dry_run=args.dry_run)
+
+        source_file = config.project_dir / config.source_file
+
+        generated_files_path = source_file.parent / "deployment"
+        if generated_files_path.exists():
+            clean(generated_files_path)
 
         if not args.init and not args.dry_run:
             # install packages needed for deployment
@@ -144,12 +132,6 @@ if __name__ == "__main__":
             # nuitka requires patchelf to make patchelf rpath changes for some Qt files
             if sys.platform.startswith("linux"):
                 python.install(packages=["patchelf"])
-
-        # identify and set qml files
-        config.find_and_set_qml_files()
-
-        if not config.project_dir:
-            config.find_and_set_project_dir()
 
         if config.project_dir == Path.cwd():
             final_exec_path = config.project_dir.relative_to(Path.cwd())
@@ -166,7 +148,7 @@ if __name__ == "__main__":
 
         if args.init:
             # config file created above. Exiting.
-            logging.info(f"[DEPLOY]: Config file  {args.config_file} created")
+            logging.info(f"[DEPLOY]: Config file  {config.config_file} created")
             sys.exit(0)
 
         # create executable
@@ -192,4 +174,4 @@ if __name__ == "__main__":
                 )
             clean(generated_files_path)
 
-    logging.info("[DEPLOY]: End")
+    logging.info("[DEPLOY] End")
