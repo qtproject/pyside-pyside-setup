@@ -21,6 +21,7 @@
 #include "sbkstring.h"
 #include "sbkstaticstrings.h"
 #include "sbkstaticstrings_p.h"
+#include "sbkfeature_base.h"
 
 #include <structmember.h>
 
@@ -534,7 +535,7 @@ static PyObject *adjustFuncName(const char *func_name)
     // Find the feature flags
     auto type = reinterpret_cast<PyTypeObject *>(obtype.object());
     auto dict = type->tp_dict;
-    int id = SbkObjectType_GetReserved(type);
+    int id = currentSelectId(type);
     id = id < 0 ? 0 : id;   // if undefined, set to zero
     auto lower = id & 0x01;
     auto is_prop = id & 0x02;

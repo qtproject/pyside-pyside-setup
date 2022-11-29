@@ -61,10 +61,6 @@ typedef void (*SubTypeInitHook)(PyTypeObject *, PyObject *, PyObject *);
 typedef void (*SelectableFeatureHook)(PyTypeObject *);
 LIBSHIBOKEN_API SelectableFeatureHook initSelectableFeature(SelectableFeatureHook func);
 
-/// PYSIDE-1019: Get access to PySide reserved bits.
-LIBSHIBOKEN_API int SbkObjectType_GetReserved(PyTypeObject *type);
-LIBSHIBOKEN_API void SbkObjectType_SetReserved(PyTypeObject *type, int value);
-
 /// PYSIDE-1626: Enforcing a context switch without further action.
 LIBSHIBOKEN_API void SbkObjectType_UpdateFeature(PyTypeObject *type);
 
