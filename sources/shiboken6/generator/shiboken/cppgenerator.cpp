@@ -3370,12 +3370,15 @@ void CppGenerator::writeFunctionCalls(TextStream &s, const OverloadData &overloa
 
 static void writeDeprecationWarning(TextStream &s,
                                     const GeneratorContext &context,
-                                    const AbstractMetaFunctionCPtr &func)
+                                    const AbstractMetaFunctionCPtr &func,
+                                    CppGenerator::ErrorReturn errorReturn)
 {
     s << "Shiboken::Warnings::warnDeprecated(\"";
     if (auto *cls = context.metaClass())
         s << cls->name() << "\", ";
-    s << '"' << func->signature().replace(u"::"_s, u"."_s) << "\");\n";
+    // Check error in case "warning-as-error" is set.
+    s << '"' << func->signature().replace(u"::"_s, u"."_s) << "\");\n"
+        << "if (PyErr_Occurred())\n" << indent << errorReturn << outdent;
 }
 
 void CppGenerator::writeSingleFunctionCall(TextStream &s,
@@ -3385,7 +3388,7 @@ void CppGenerator::writeSingleFunctionCall(TextStream &s,
                                            ErrorReturn errorReturn) const
 {
     if (func->isDeprecated())
-        writeDeprecationWarning(s, context, func);
+        writeDeprecationWarning(s, context, func, errorReturn);
 
     if (func->functionType() == AbstractMetaFunction::EmptyFunction) {
         s << "Shiboken::Errors::setPrivateMethod(\""
