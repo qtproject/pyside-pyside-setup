@@ -266,7 +266,7 @@ static bool createNewFeatureSet(PyTypeObject *type, PyObject *select_id)
     return true;
 }
 
-static inline bool SelectFeatureSetSubtype(PyTypeObject *type, PyObject *select_id)
+static inline void SelectFeatureSetSubtype(PyTypeObject *type, PyObject *select_id)
 {
     /*
      * This is the selector for one sublass. We need to call this for
@@ -277,17 +277,16 @@ static inline bool SelectFeatureSetSubtype(PyTypeObject *type, PyObject *select_
         // The dict type will be replaced after the first call.
         if (!replaceClassDict(type)) {
             Py_FatalError("failed to replace class dict!");
-            return false;
+            return;
         }
     }
     if (!moveToFeatureSet(type, select_id)) {
         if (!createNewFeatureSet(type, select_id)) {
             Py_FatalError("failed to create a new feature set!");
-            return false;
+            return;
         }
     }
-    return true;
-}
+ }
 
 static inline void SelectFeatureSet(PyTypeObject *type)
 {
@@ -307,17 +306,23 @@ static inline void SelectFeatureSet(PyTypeObject *type)
         }
     }
 
-    PyObject *select_id = getFeatureSelectId();         // borrowed
+    PyObject *select_id = getFeatureSelectId();      // borrowed
+    static PyObject *last_select_id{};
+    static PyTypeObject *last_type{};
 
-    // PYSIDE-2029: We are no longer caching extremely, but switching safe.
+    // PYSIDE-2029: Implement a very simple but effective cache that cannot fail.
+    if (type == last_type && select_id == last_select_id)
+        return;
+    last_type = type;
+    last_select_id = select_id;
+
     PyObject *mro = type->tp_mro;
     Py_ssize_t idx, n = PyTuple_GET_SIZE(mro);
     // We leave 'Shiboken.Object' and 'object' alone, therefore "n - 2".
     for (idx = 0; idx < n - 2; idx++) {
         auto *sub_type = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
         // When any subtype is already resolved (false), we can stop.
-        if (!SelectFeatureSetSubtype(sub_type, select_id))
-            break;
+        SelectFeatureSetSubtype(sub_type, select_id);
     }
     // PYSIDE-1436: Clear all caches for the type and subtypes.
     PyType_Modified(type);
