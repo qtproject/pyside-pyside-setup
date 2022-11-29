@@ -87,8 +87,6 @@ signature/signature_extend.cpp
 signature/signature_helper.cpp
 )
 
-set(APIEXTRACTOR_EXTRA_INCLUDES ${APIEXTRACTOR_EXTRA_INCLUDES} ${LIBXSLT_INCLUDE_DIR} ${LIBXML2_INCLUDE_DIR})
-
 add_library(libshiboken SHARED ${libshiboken_SRC})
 add_library(Shiboken6::libshiboken ALIAS libshiboken)
 
