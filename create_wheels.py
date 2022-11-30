@@ -18,6 +18,9 @@ from build_scripts.wheel_files import (ModuleData,  # type: ignore
 from build_scripts.utils import available_pyside_tools
 
 
+PACKAGE_FOR_WHEELS = "package_for_wheels"
+
+
 @dataclass
 class SetupData:
     name: str
@@ -231,29 +234,27 @@ def wheel_pyside6() -> Tuple[SetupData, Optional[List[ModuleData]]]:
     return setup, None
 
 
-def get_build_directory(options: Namespace):
-    _venv = ""
-    _directories = list(Path("build").glob("qfp*"))
-    # Search for a "--env" option first"
-    if options.env is not None:
-        _venv = f"{options.env}a"
-    # Search for a 'qfp' directory second
-    elif _directories and len(_directories) > 0:
-        # Take the first 'qfp' directory
-        _venv = _directories[0].name
-    # Fall back to the virtual environment name
-    else:
-        # Check if we are using a virtual environment
-        try:
-            _venv = os.environ["VIRTUAL_ENV"]
-            if not _venv:
-                raise Exception("No virtual environment found")
-            _venv = f"{_venv}a"
-        except Exception as e:
-            print(f"{type(e).__name__} : {e}")
-            sys.exit(-1)
+def venv_name():
+    v = os.environ.get("VIRTUAL_ENV")
+    return Path(v).name if v else None
 
-    return Path(_venv)
+
+def get_build_directory(options: Namespace):
+    build_dir = Path("build")
+    # Search for a "--env" option first", try postfix "a" for limited API or "d", debug
+    venv = options.env if options.env else venv_name()
+    if venv:
+        for postfix in ("a", "d", ""):
+            result = build_dir / f"{venv}{postfix}"
+            if result.is_dir():
+                return result
+    if options.env:
+        raise Exception(f'Invalid environment "{options.env}" passed')
+    # Fallback to existing dirs (skip "config.tests")
+    for d in build_dir.glob("*"):
+        if (d / PACKAGE_FOR_WHEELS).is_dir():
+            return d
+    raise Exception("Unable to determine build directory, no matching virtual environment found")
 
 
 if __name__ == "__main__":
@@ -263,7 +264,7 @@ if __name__ == "__main__":
     parser.add_argument("--env", type=str, default=None)
     options = parser.parse_args()
 
-    venv = get_build_directory(options)
+    build_directory = get_build_directory(options)
 
     verbose = False
     # Setup paths
@@ -271,7 +272,8 @@ if __name__ == "__main__":
     artifacts_path = Path("wheel_artifacts/")
     # the extra 'a' is for compatibility with the build_scripts
     # notation that adds an 'a' when using limited-api
-    package_path = Path("build") / venv.name / "package_for_wheels"
+    package_path = build_directory / PACKAGE_FOR_WHEELS
+    print(f'Using build dir "{build_directory.name}"')
 
     # Check for 'package_for_wheels' directory
     if not package_path.is_dir():
