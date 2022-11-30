@@ -97,10 +97,6 @@ typedef bool(*FeatureProc)(PyTypeObject *type, PyObject *prev_dict, int id);
 
 static FeatureProc *featurePointer = nullptr;
 
-static PyObject *_fast_id_array[1 + 256] = {};
-// this will point to element 1 to allow indexing from -1
-static PyObject **fast_id_array;
-
 // Create a derived dict class
 static PyTypeObject *
 createDerivedDictType()
@@ -142,15 +138,21 @@ static inline void setNextDict(PyObject *dict, PyObject *next_dict)
     PyObject_SetAttr(dict, PyName::dict_ring(), next_dict);
 }
 
-static inline void setSelectId(PyObject *dict, PyObject *select_id)
+static inline void setSelectId(PyObject *dict, int select_id)
 {
-    PyObject_SetAttr(dict, PyName::select_id(), select_id);
+    PyObject_SetAttr(dict, PyName::select_id(), PyLong_FromLong(select_id));
 }
 
-static inline PyObject *getSelectId(PyObject *dict)
+static inline int getSelectId(PyObject *dict)
 {
-    auto select_id = PyObject_GetAttr(dict, PyName::select_id());
-    return select_id;
+    auto *py_select_id = PyObject_GetAttr(dict, PyName::select_id());
+    if (py_select_id == nullptr) {
+        PyErr_Clear();
+        return 0;
+    }
+    int ret = PyLong_AsLong(py_select_id);
+    Py_DECREF(py_select_id);
+    return ret;
 }
 
 static bool replaceClassDict(PyTypeObject *type)
@@ -160,14 +162,13 @@ static bool replaceClassDict(PyTypeObject *type)
      * This is mandatory for all type dicts when they are touched.
      */
     ensureNewDictType();
-    PyObject *dict = type->tp_dict;
-    auto ob_ndt = reinterpret_cast<PyObject *>(new_dict_type);
-    PyObject *new_dict = PyObject_CallObject(ob_ndt, nullptr);
+    auto *dict = type->tp_dict;
+    auto *ob_ndt = reinterpret_cast<PyObject *>(new_dict_type);
+    auto *new_dict = PyObject_CallObject(ob_ndt, nullptr);
     if (new_dict == nullptr || PyDict_Update(new_dict, dict) < 0)
         return false;
     // Insert the default id. Cannot fail for small numbers.
-    AutoDecRef select_id(PyLong_FromLong(0));
-    setSelectId(new_dict, select_id);
+    setSelectId(new_dict, 0);
     // insert the dict into itself as ring
     setNextDict(new_dict, new_dict);
     // We have now an exact copy of the dict with a new type.
@@ -177,15 +178,15 @@ static bool replaceClassDict(PyTypeObject *type)
     return true;
 }
 
-static bool addNewDict(PyTypeObject *type, PyObject *select_id)
+static bool addNewDict(PyTypeObject *type, int select_id)
 {
     /*
      * Add a new dict to the ring and set it as `type->tp_dict`.
      * A 'false' return is fatal.
      */
-    auto dict = type->tp_dict;
-    auto ob_ndt = reinterpret_cast<PyObject *>(new_dict_type);
-    auto new_dict = PyObject_CallObject(ob_ndt, nullptr);
+    auto *dict = type->tp_dict;
+    auto *ob_ndt = reinterpret_cast<PyObject *>(new_dict_type);
+    auto *new_dict = PyObject_CallObject(ob_ndt, nullptr);
     if (new_dict == nullptr)
         return false;
     setSelectId(new_dict, select_id);
@@ -197,16 +198,16 @@ static bool addNewDict(PyTypeObject *type, PyObject *select_id)
     return true;
 }
 
-static inline bool moveToFeatureSet(PyTypeObject *type, PyObject *select_id)
+static inline bool moveToFeatureSet(PyTypeObject *type, int select_id)
 {
     /*
      * Rotate the ring to the given `select_id` and return `true`.
      * If not found, stay at the current position and return `false`.
      */
-    auto initial_dict = type->tp_dict;
-    auto dict = initial_dict;
+    auto *initial_dict = type->tp_dict;
+    auto *dict = initial_dict;
     do {
-        AutoDecRef current_id(getSelectId(dict));
+        int current_id = getSelectId(dict);
         // This works because small numbers are singleton objects.
         if (current_id == select_id) {
             type->tp_dict = dict;
@@ -218,7 +219,7 @@ static inline bool moveToFeatureSet(PyTypeObject *type, PyObject *select_id)
     return false;
 }
 
-static bool createNewFeatureSet(PyTypeObject *type, PyObject *select_id)
+static bool createNewFeatureSet(PyTypeObject *type, int select_id)
 {
     /*
      * Create a new feature set.
@@ -228,15 +229,8 @@ static bool createNewFeatureSet(PyTypeObject *type, PyObject *select_id)
      * content in `prev_dict`. It is responsible of filling `type->tp_dict`
      * with modified content.
      */
-    static auto small_1 = PyLong_FromLong(255);
-    Q_UNUSED(small_1);
-    static auto small_2 = PyLong_FromLong(255);
-    Q_UNUSED(small_2);
-    // make sure that small integers are cached
-    assert(small_1 != nullptr && small_1 == small_2);
 
-    static auto zero = fast_id_array[0];
-    bool ok = moveToFeatureSet(type, zero);
+    bool ok = moveToFeatureSet(type, 0);
     Q_UNUSED(ok);
     assert(ok);
 
@@ -244,7 +238,7 @@ static bool createNewFeatureSet(PyTypeObject *type, PyObject *select_id)
     Py_INCREF(prev_dict);   // keep the first ref unchanged
     if (!addNewDict(type, select_id))
         return false;
-    auto id = PyLong_AsSsize_t(select_id);
+    int id = select_id;
     if (id == -1)
         return false;
     FeatureProc *proc = featurePointer;
@@ -266,7 +260,7 @@ static bool createNewFeatureSet(PyTypeObject *type, PyObject *select_id)
     return true;
 }
 
-static inline void SelectFeatureSetSubtype(PyTypeObject *type, PyObject *select_id)
+static inline void SelectFeatureSetSubtype(PyTypeObject *type, int select_id)
 {
     /*
      * This is the selector for one sublass. We need to call this for
@@ -286,7 +280,35 @@ static inline void SelectFeatureSetSubtype(PyTypeObject *type, PyObject *select_
             return;
         }
     }
- }
+}
+
+static PyObject *cached_globals{};
+static int last_select_id{};
+
+static inline int getFeatureSelectId()
+{
+    static auto *undef = PyLong_FromLong(-1);
+    static auto *feature_dict = GetFeatureDict();
+    // these things are all borrowed
+    auto *globals = PyEval_GetGlobals();
+    if (globals == nullptr
+        || globals == cached_globals)
+        return last_select_id;
+
+    auto *modname = PyDict_GetItem(globals, PyMagicName::name());
+    if (modname == nullptr)
+        return last_select_id;
+
+    auto *py_select_id = PyDict_GetItem(feature_dict, modname);
+    if (py_select_id == nullptr
+        || !PyLong_Check(py_select_id)
+        || py_select_id == undef)
+        return last_select_id;
+
+    cached_globals = globals;
+    last_select_id = PyLong_AsLong(py_select_id) & 0xff;
+    return last_select_id;
+}
 
 static inline void SelectFeatureSet(PyTypeObject *type)
 {
@@ -306,8 +328,8 @@ static inline void SelectFeatureSet(PyTypeObject *type)
         }
     }
 
-    PyObject *select_id = getFeatureSelectId();      // borrowed
-    static PyObject *last_select_id{};
+    int select_id = getFeatureSelectId();
+    static int last_select_id{};
     static PyTypeObject *last_type{};
 
     // PYSIDE-2029: Implement a very simple but effective cache that cannot fail.
@@ -316,12 +338,11 @@ static inline void SelectFeatureSet(PyTypeObject *type)
     last_type = type;
     last_select_id = select_id;
 
-    PyObject *mro = type->tp_mro;
+    auto *mro = type->tp_mro;
     Py_ssize_t idx, n = PyTuple_GET_SIZE(mro);
     // We leave 'Shiboken.Object' and 'object' alone, therefore "n - 2".
     for (idx = 0; idx < n - 2; idx++) {
         auto *sub_type = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
-        // When any subtype is already resolved (false), we can stop.
         SelectFeatureSetSubtype(sub_type, select_id);
     }
     // PYSIDE-1436: Clear all caches for the type and subtypes.
@@ -333,7 +354,7 @@ void Select(PyObject *obj)
 {
     if (featurePointer == nullptr)
         return;
-    auto type = Py_TYPE(obj);
+    auto *type = Py_TYPE(obj);
     SelectFeatureSet(type);
 }
 
@@ -364,12 +385,6 @@ static FeatureProc featureProcArray[] = {
     nullptr
 };
 
-void finalize()
-{
-    for (int idx = -1; idx < 256; ++idx)
-        Py_DECREF(fast_id_array[idx]);
-}
-
 static bool patch_property_impl();
 static bool is_initialized = false;
 
@@ -377,17 +392,14 @@ void init()
 {
     // This function can be called multiple times.
     if (!is_initialized) {
-        fast_id_array = &_fast_id_array[1];
-        for (int idx = -1; idx < 256; ++idx)
-            fast_id_array[idx] = PyLong_FromLong(idx);
         featurePointer = featureProcArray;
         initSelectableFeature(SelectFeatureSet);
-        registerCleanupFunction(finalize);
         patch_property_impl();
         is_initialized = true;
     }
+    last_select_id = 0;
     // Reset the cache. This is called at any "from __feature__ import".
-    initFeatureShibokenPart();
+    cached_globals = nullptr;
 }
 
 void Enable(bool enable)
@@ -417,7 +429,7 @@ static PyObject *methodWithNewName(PyTypeObject *type,
     /*
      * Create a method with a lower case name.
      */
-    auto obtype = reinterpret_cast<PyObject *>(type);
+    auto *obtype = reinterpret_cast<PyObject *>(type);
     int len = strlen(new_name);
     auto name = new char[len + 1];
     strcpy(name, new_name);
@@ -501,8 +513,8 @@ static PyObject *modifyStaticToClassMethod(PyTypeObject *type, PyObject *sm)
     AutoDecRef func_ob(PyObject_GetAttr(sm, PyMagicName::func()));
     if (func_ob.isNull())
         return nullptr;
-    auto func = reinterpret_cast<PyCFunctionObject *>(func_ob.object());
-    auto new_func = new PyMethodDef;
+    auto *func = reinterpret_cast<PyCFunctionObject *>(func_ob.object());
+    auto *new_func = new PyMethodDef;
     new_func->ml_name = func->m_ml->ml_name;
     new_func->ml_meth = func->m_ml->ml_meth;
     new_func->ml_flags = (func->m_ml->ml_flags & ~METH_STATIC) | METH_CLASS;
@@ -516,14 +528,14 @@ static PyObject *createProperty(PyTypeObject *type, PyObject *getter, PyObject *
     assert(getter != nullptr);
     if (setter == nullptr)
         setter = Py_None;
-    auto ptype = &PyProperty_Type;
+    auto *ptype = &PyProperty_Type;
     if (Py_TYPE(getter) == PepStaticMethod_TypePtr) {
         ptype = PyClassProperty_TypeF();
         getter = modifyStaticToClassMethod(type, getter);
         if (setter != Py_None)
             setter = modifyStaticToClassMethod(type, setter);
     }
-    auto obtype = reinterpret_cast<PyObject *>(ptype);
+    auto *obtype = reinterpret_cast<PyObject *>(ptype);
     PyObject *prop = PyObject_CallFunctionObjArgs(obtype, getter, setter, nullptr);
     return prop;
 }
@@ -692,7 +704,7 @@ static bool feature_02_true_property(PyTypeObject *type, PyObject *prev_dict, in
 
 static PyObject *property_doc_get(PyObject *self, void *)
 {
-    auto po = reinterpret_cast<propertyobject *>(self);
+    auto *po = reinterpret_cast<propertyobject *>(self);
 
     if (po->prop_doc != nullptr && po->prop_doc != Py_None) {
         Py_INCREF(po->prop_doc);
@@ -700,7 +712,7 @@ static PyObject *property_doc_get(PyObject *self, void *)
     }
     if (po->prop_get) {
         // PYSIDE-1019: Fetch the default `__doc__` from fget. We do it late.
-        auto txt = PyObject_GetAttr(po->prop_get, PyMagicName::doc());
+        auto *txt = PyObject_GetAttr(po->prop_get, PyMagicName::doc());
         if (txt != nullptr) {
             Py_INCREF(txt);
             po->prop_doc = txt;
@@ -714,7 +726,7 @@ static PyObject *property_doc_get(PyObject *self, void *)
 
 static int property_doc_set(PyObject *self, PyObject *value, void *)
 {
-    auto po = reinterpret_cast<propertyobject *>(self);
+    auto *po = reinterpret_cast<propertyobject *>(self);
 
     Py_INCREF(value);
     po->prop_doc = value;
@@ -731,8 +743,8 @@ static bool patch_property_impl()
 {
     // Turn `__doc__` into a computed attribute without changing writability.
     auto gsp = property_getset;
-    auto type = &PyProperty_Type;
-    auto dict = type->tp_dict;
+    auto *type = &PyProperty_Type;
+    auto *dict = type->tp_dict;
     AutoDecRef descr(PyDescr_NewGetSet(type, gsp));
     if (descr.isNull())
         return false;

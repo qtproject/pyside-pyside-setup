@@ -19,41 +19,8 @@ extern "C"
 
 ////////////////////////////////////////////////////////////////////////////
 //
-// getFeatureSelectId
+// Minimal __feature__ support in Shiboken
 //
-// This function is needed here already for signature handling.
-// Maybe the same function from feature_select.cpp will be replaced.
-//
-
-static PyObject *cached_globals{};
-static PyObject *last_select_id{};
-
-PyObject *getFeatureSelectId()
-{
-    static PyObject *undef = PyLong_FromLong(-1);
-    static PyObject *feature_dict = GetFeatureDict();
-    // these things are all borrowed
-    PyObject *globals = PyEval_GetGlobals();
-    if (globals == nullptr
-        || globals == cached_globals)
-        return last_select_id;
-
-    PyObject *modname = PyDict_GetItem(globals, PyMagicName::name());
-    if (modname == nullptr)
-        return last_select_id;
-
-    PyObject *select_id = PyDict_GetItem(feature_dict, modname);
-    if (select_id == nullptr
-        || !PyLong_Check(select_id)
-        || select_id == undef)
-        return last_select_id;
-
-    cached_globals = globals;
-    last_select_id = select_id;
-    assert(PyLong_AsSsize_t(select_id) >= 0);
-    return select_id;
-}
-
 int currentSelectId(PyTypeObject *type)
 {
     PyObject *PyId = PyObject_GetAttr(type->tp_dict, PyName::select_id());
@@ -66,14 +33,6 @@ int currentSelectId(PyTypeObject *type)
     return sel;
 }
 
-void initFeatureShibokenPart()
-{
-    static PyObject *no_sel = PyLong_FromLong(0);
-    last_select_id = no_sel;
-    // Reset the cache. This is called at any "from __feature__ import".
-    cached_globals = nullptr;
-}
-
 static SelectableFeatureHook SelectFeatureSet = nullptr;
 
 SelectableFeatureHook initSelectableFeature(SelectableFeatureHook func)
@@ -82,6 +41,8 @@ SelectableFeatureHook initSelectableFeature(SelectableFeatureHook func)
     SelectFeatureSet = func;
     return ret;
 }
+//
+////////////////////////////////////////////////////////////////////////////
 
 // This useful function is for debugging
 void disassembleFrame(const char *marker)
