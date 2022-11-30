@@ -30,22 +30,23 @@ def prepare_standalone_package_linux(pyside_build, _vars, cross_build=False):
         should_copy_icu_libs = False
 
     # <qt>/lib/* -> <setup>/{st_package_name}/Qt/lib
-    destination_lib_dir = "{st_build_dir}/{st_package_name}/Qt/lib"
+    destination_dir = "{st_build_dir}/{st_package_name}".format(**_vars)
+    destination_qt_dir = f"{destination_dir}/Qt"
+    destination_qt_lib_dir = f"{destination_qt_dir}/lib"
 
     accepted_modules = ['libQt6*.so.?']
     if constrain_modules:
         accepted_modules = [f"libQt6{module}*.so.?" for module in constrain_modules]
     accepted_modules.append("libicu*.so.??")
 
-    copydir("{qt_lib_dir}", destination_lib_dir,
+    copydir("{qt_lib_dir}", destination_qt_lib_dir,
             _filter=accepted_modules,
             recursive=False, _vars=_vars, force_copy_symlinks=True)
 
     if should_copy_icu_libs:
         # Check if ICU libraries were copied over to the destination
         # Qt libdir.
-        resolved_destination_lib_dir = destination_lib_dir.format(**_vars)
-        maybe_icu_libs = find_files_using_glob(resolved_destination_lib_dir, "libicu*")
+        maybe_icu_libs = find_files_using_glob(destination_qt_lib_dir, "libicu*")
 
         # If no ICU libraries are present in the Qt libdir (like when
         # Qt is built against system ICU, or in the Coin CI where ICU
@@ -56,21 +57,21 @@ def prepare_standalone_package_linux(pyside_build, _vars, cross_build=False):
         # We choose the QtCore lib to inspect, by
         # checking which QtCore library the shiboken6 executable uses.
         if not maybe_icu_libs and not cross_build:
-            copy_icu_libs(pyside_build._patchelf_path, resolved_destination_lib_dir)
+            copy_icu_libs(pyside_build._patchelf_path, destination_qt_lib_dir)
 
     # Set RPATH for Qt libs.
-    pyside_build.update_rpath_for_linux_qt_libraries(destination_lib_dir.format(**_vars))
+    pyside_build.update_rpath_for_linux_qt_libraries(destination_qt_lib_dir)
 
     # Patching designer to use the Qt libraries provided in the wheel
     if config.is_internal_pyside_build() and not OPTION['NO_QT_TOOLS']:
-        assistant_path = "{st_build_dir}/{st_package_name}/assistant".format(**_vars)
+        assistant_path = f"{destination_dir}/assistant"
         linux_patch_executable(pyside_build._patchelf_path, assistant_path)
-        designer_path = "{st_build_dir}/{st_package_name}/designer".format(**_vars)
+        designer_path = f"{destination_dir}/designer"
         linux_patch_executable(pyside_build._patchelf_path, designer_path)
 
     if pyside_build.is_webengine_built(built_modules):
         copydir("{qt_data_dir}/resources",
-                "{st_build_dir}/{st_package_name}/Qt/resources",
+                f"{destination_qt_dir}/resources",
                 _filter=None,
                 recursive=False,
                 _vars=_vars)
@@ -78,7 +79,7 @@ def prepare_standalone_package_linux(pyside_build, _vars, cross_build=False):
     if copy_plugins:
         is_pypy = "pypy" in pyside_build.build_classifiers
         # <qt>/plugins/* -> <setup>/{st_package_name}/Qt/plugins
-        plugins_target = "{st_build_dir}/{st_package_name}/Qt/plugins"
+        plugins_target = f"{destination_qt_dir}/plugins"
         copydir("{qt_plugins_dir}", plugins_target,
                 _filter=["*.so"],
                 recursive=True,
@@ -96,7 +97,7 @@ def prepare_standalone_package_linux(pyside_build, _vars, cross_build=False):
 
     if copy_qml:
         # <qt>/qml/* -> <setup>/{st_package_name}/Qt/qml
-        qml_plugins_target = "{st_build_dir}/{st_package_name}/Qt/qml"
+        qml_plugins_target = f"{destination_qt_dir}/qml"
         copydir("{qt_qml_dir}",
                 qml_plugins_target,
                 _filter=None,
@@ -105,24 +106,24 @@ def prepare_standalone_package_linux(pyside_build, _vars, cross_build=False):
                 ignore=["*.debug"],
                 _vars=_vars)
         copied_plugins = pyside_build.get_shared_libraries_in_path_recursively(
-            qml_plugins_target.format(**_vars))
+            qml_plugins_target)
         pyside_build.update_rpath_for_linux_plugins(
             copied_plugins,
-            qt_lib_dir=destination_lib_dir.format(**_vars),
+            qt_lib_dir=destination_qt_lib_dir,
             is_qml_plugin=True)
 
     if copy_translations:
         # <qt>/translations/* ->
         # <setup>/{st_package_name}/Qt/translations
         copydir("{qt_translations_dir}",
-                "{st_build_dir}/{st_package_name}/Qt/translations",
+                f"{destination_qt_dir}/translations",
                 _filter=["*.qm", "*.pak"],
                 force=False,
                 _vars=_vars)
 
     if copy_qt_conf:
         # Copy the qt.conf file to libexec.
-        qt_libexec_path = Path("{st_build_dir}/{st_package_name}/Qt/libexec".format(**_vars))
+        qt_libexec_path = Path(destination_qt_dir) / "libexec"
         if not qt_libexec_path.is_dir():
             os.makedirs(qt_libexec_path)
         copyfile(f"{{build_dir}}/{PYSIDE}/{{st_package_name}}/qt.conf",

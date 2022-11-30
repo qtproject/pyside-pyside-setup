@@ -30,6 +30,10 @@ def prepare_standalone_package_macos(pyside_build, _vars):
     copy_translations = True
     copy_qt_conf = True
 
+    destination_dir = "{st_build_dir}/{st_package_name}".format(**_vars)
+    destination_qt_dir = f"{destination_dir}/Qt"
+    destination_qt_lib_dir = f"{destination_qt_dir}/lib"
+
     if config.is_internal_shiboken_generator_build():
         constrain_modules = ["Core", "Network", "Xml", "XmlPatterns"]
         constrain_frameworks = [f"Qt{name}.framework" for name in constrain_modules]
@@ -94,7 +98,7 @@ def prepare_standalone_package_macos(pyside_build, _vars):
                 return False
             return True
 
-        copydir("{qt_lib_dir}", "{st_build_dir}/{st_package_name}/Qt/lib",
+        copydir("{qt_lib_dir}", destination_qt_lib_dir,
                 recursive=True, _vars=_vars,
                 ignore=["*.la", "*.a", "*.cmake", "*.pc", "*.prl"],
                 dir_filter_function=framework_dir_filter,
@@ -105,7 +109,7 @@ def prepare_standalone_package_macos(pyside_build, _vars):
         # from Versions/5/Helpers, thus adding two more levels of
         # directory hierarchy.
         if pyside_build.is_webengine_built(built_modules):
-            qt_lib_path = Path("{st_build_dir}/{st_package_name}/Qt/lib".format(**_vars))
+            qt_lib_path = Path(destination_qt_lib_dir)
             bundle = Path("QtWebEngineCore.framework/Helpers/") / "QtWebEngineProcess.app"
             binary = "Contents/MacOS/QtWebEngineProcess"
             webengine_process_path = bundle / binary
@@ -120,8 +124,7 @@ def prepare_standalone_package_macos(pyside_build, _vars):
         if constrain_modules:
             accepted_modules = [f"libQt6{module}*.6.dylib" for module in constrain_modules]
 
-        copydir("{qt_lib_dir}",
-                "{st_build_dir}/{st_package_name}/Qt/lib",
+        copydir("{qt_lib_dir}", destination_qt_lib_dir,
                 _filter=accepted_modules,
                 ignore=ignored_modules,
                 file_filter_function=file_variant_filter,
@@ -129,13 +132,13 @@ def prepare_standalone_package_macos(pyside_build, _vars):
 
         if pyside_build.is_webengine_built(built_modules):
             copydir("{qt_data_dir}/resources",
-                    "{st_build_dir}/{st_package_name}/Qt/resources",
+                    f"{destination_qt_dir}/resources",
                     _filter=None,
                     recursive=False,
                     _vars=_vars)
 
             # Fix rpath for WebEngine process executable.
-            qt_libexec_path = Path("{st_build_dir}/{st_package_name}/Qt/libexec".format(**_vars))
+            qt_libexec_path = Path(destination_qt_dir) / "libexec"
             binary = "QtWebEngineProcess"
             final_path = qt_libexec_path / binary
             rpath = "@loader_path/../lib"
@@ -152,7 +155,7 @@ def prepare_standalone_package_macos(pyside_build, _vars):
     if copy_plugins:
         is_pypy = "pypy" in pyside_build.build_classifiers
         # <qt>/plugins/* -> <setup>/{st_package_name}/Qt/plugins
-        plugins_target = "{st_build_dir}/{st_package_name}/Qt/plugins"
+        plugins_target = f"{destination_qt_dir}/plugins"
         filters = ["*.dylib"]
         copydir("{qt_plugins_dir}", plugins_target,
                 _filter=filters,
@@ -169,8 +172,7 @@ def prepare_standalone_package_macos(pyside_build, _vars):
 
     if copy_qml:
         # <qt>/qml/* -> <setup>/{st_package_name}/Qt/qml
-        copydir("{qt_qml_dir}",
-                "{st_build_dir}/{st_package_name}/Qt/qml",
+        copydir("{qt_qml_dir}", f"{destination_qt_dir}/qml",
                 _filter=None,
                 recursive=True,
                 force=False,
@@ -181,8 +183,7 @@ def prepare_standalone_package_macos(pyside_build, _vars):
     if copy_translations:
         # <qt>/translations/* ->
         # <setup>/{st_package_name}/Qt/translations
-        copydir("{qt_translations_dir}",
-                "{st_build_dir}/{st_package_name}/Qt/translations",
+        copydir("{qt_translations_dir}", f"{destination_qt_dir}/translations",
                 _filter=["*.qm", "*.pak"],
                 force=False,
                 _vars=_vars)

@@ -43,13 +43,16 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
     executables = []
     libexec_executables = []
 
+    destination_dir = "{st_build_dir}/{st_package_name}".format(**_vars)
+    destination_qt_dir = f"{destination_dir}/Qt"
+    destination_qt_lib_dir = f"{destination_qt_dir}/lib"
+
     # <install>/lib/site-packages/{st_package_name}/* ->
     # <setup>/{st_package_name}
     # This copies the module .so/.dylib files and various .py files
     # (__init__, config, git version, etc.)
     copydir(
-        "{site_packages_dir}/{st_package_name}",
-        "{st_build_dir}/{st_package_name}",
+        "{site_packages_dir}/{st_package_name}", destination_dir,
         _vars=_vars)
 
     generated_config = pyside_build.get_built_pyside_config(_vars)
@@ -72,8 +75,7 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
 
         # <install>/lib/lib* -> {st_package_name}/
         copydir(
-            "{install_dir}/lib/",
-            "{st_build_dir}/{st_package_name}",
+            "{install_dir}/lib/", destination_dir,
             _filter=[
                 adjusted_lib_name("libshiboken*",
                                   generated_config['shiboken_library_soversion']),
@@ -83,8 +85,7 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
     if config.is_internal_shiboken_generator_build():
         # <install>/bin/* -> {st_package_name}/
         executables.extend(copydir(
-            "{install_dir}/bin/",
-            "{st_build_dir}/{st_package_name}",
+            "{install_dir}/bin/", destination_dir,
             _filter=[SHIBOKEN],
             recursive=False, _vars=_vars))
 
@@ -126,8 +127,7 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
 
         # <install>/bin/* -> {st_package_name}/
         executables.extend(copydir(
-            "{install_dir}/bin/",
-            "{st_build_dir}/{st_package_name}",
+            "{install_dir}/bin/", destination_dir,
             _filter=[f"{PYSIDE}-lupdate"],
             recursive=False, _vars=_vars))
 
@@ -135,8 +135,7 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
         if not OPTION['NO_QT_TOOLS']:
             lib_exec_filters.extend(['uic', 'rcc', 'qmltyperegistrar', 'qmlimportscanner'])
             executables.extend(copydir(
-                "{install_dir}/bin/",
-                "{st_build_dir}/{st_package_name}",
+                "{install_dir}/bin/", destination_dir,
                 _filter=["lrelease", "lupdate", "qmllint", "qmlformat", "qmlls"],
                 recursive=False, _vars=_vars))
             # Copying assistant/designer
@@ -145,8 +144,7 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
             executables.extend(_copy_gui_executable('linguist', _vars=_vars))
 
         # <qt>/lib/metatypes/* -> <setup>/{st_package_name}/Qt/lib/metatypes
-        destination_lib_dir = "{st_build_dir}/{st_package_name}/Qt/lib"
-        copydir("{qt_lib_dir}/metatypes", f"{destination_lib_dir}/metatypes",
+        copydir("{qt_lib_dir}/metatypes", f"{destination_qt_lib_dir}/metatypes",
                 _filter=["*.json"],
                 recursive=False, _vars=_vars, force_copy_symlinks=True)
 
@@ -156,15 +154,14 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
             lib_exec_filters.append('QtWebEngineProcess')
         if lib_exec_filters:
             libexec_executables.extend(copydir("{qt_lib_execs_dir}",
-                                               "{st_build_dir}/{st_package_name}/Qt/libexec",
+                                               f"{destination_qt_dir}/libexec",
                                                _filter=lib_exec_filters,
                                                recursive=False,
                                                _vars=_vars))
 
         # <install>/lib/lib* -> {st_package_name}/
         copydir(
-            "{install_dir}/lib/",
-            "{st_build_dir}/{st_package_name}",
+            "{install_dir}/lib", destination_dir,
             _filter=[
                 adjusted_lib_name("libpyside*",
                                   generated_config['pyside_library_soversion']),
@@ -195,8 +192,7 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
         # <source>/pyside6/{st_package_name}/*.pyi ->
         #   <setup>/{st_package_name}/*.pyi
         copydir(
-            f"{{build_dir}}/{PYSIDE}/{{st_package_name}}",
-            "{st_build_dir}/{st_package_name}",
+            f"{{build_dir}}/{PYSIDE}/{{st_package_name}}", destination_dir,
             _filter=["*.pyi", "py.typed"],
             _vars=_vars)
 
@@ -225,7 +221,7 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
 
     # Update rpath to $ORIGIN
     if sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
-        rpath_path = "{st_build_dir}/{st_package_name}".format(**_vars)
+        rpath_path = destination_dir
         pyside_build.update_rpath(rpath_path, executables)
         pyside_build.update_rpath(rpath_path, pyside_build.package_libraries(rpath_path))
         if libexec_executables:
