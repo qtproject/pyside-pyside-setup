@@ -14,7 +14,7 @@ set(CMAKE_AUTOMOC ON)
 add_definitions(-DQT_SHARED)
 add_definitions(-DRXX_ALLOCATOR_INIT_0)
 
-find_package(Qt6 COMPONENTS QtWidgets)
+find_package(Qt6 REQUIRED COMPONENTS Widgets)
 
 set(pysidetest_SRC
 containertest.cpp
