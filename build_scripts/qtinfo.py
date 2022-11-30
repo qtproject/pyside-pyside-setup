@@ -58,6 +58,10 @@ class QtInfo(object):
             return self.get_property("QT_VERSION")
 
         @property
+        def version_tuple(self):
+            return tuple(map(int, self.version.split(".")))
+
+        @property
         def bins_dir(self):
             return self.get_property("QT_INSTALL_BINS")
 
@@ -70,6 +74,11 @@ class QtInfo(object):
             return self.get_property("QT_INSTALL_LIBS")
 
         @property
+        def metatypes_dir(self):
+            parent = self.arch_data if self.version_tuple >= (6, 5, 0) else self.libs_dir
+            return os.fspath(Path(parent) / "metatypes")
+
+        @property
         def lib_execs_dir(self):
             return self.get_property("QT_INSTALL_LIBEXECS")
 
@@ -80,6 +89,10 @@ class QtInfo(object):
         @property
         def prefix_dir(self):
             return self.get_property("QT_INSTALL_PREFIX")
+
+        @property
+        def arch_data(self):
+            return self.get_property("QT_INSTALL_ARCHDATA")
 
         @property
         def imports_dir(self):

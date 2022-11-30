@@ -1399,3 +1399,13 @@ def find_qt_install_path() -> Path:
         raise RuntimeError("qtpaths not found")
     else:
         return qtpaths.parents[1]
+
+def copy_qt_metatypes(destination_qt_dir, _vars):
+    """Copy the Qt metatypes files which changed location in 6.5"""
+    # <qt>/[lib]?/metatypes/* -> <setup>/{st_package_name}/Qt/[lib]?/metatypes
+    qt_meta_types_dir = "{qt_metatypes_dir}".format(**_vars)
+    qt_prefix_dir = "{qt_prefix_dir}".format(**_vars)
+    rel_meta_data_dir = os.fspath(Path(qt_meta_types_dir).relative_to(qt_prefix_dir))
+    copydir(qt_meta_types_dir, f"{destination_qt_dir}/{rel_meta_data_dir}",
+            _filter=["*.json"],
+            recursive=False, _vars=_vars, force_copy_symlinks=True)

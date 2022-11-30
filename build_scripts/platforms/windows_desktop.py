@@ -8,8 +8,8 @@ import os
 from pathlib import Path
 from ..config import config
 from ..options import OPTION
-from ..utils import (copydir, copyfile, download_and_extract_7z, filter_match,
-                     makefile)
+from ..utils import (copydir, copyfile, copy_qt_metatypes,
+                     download_and_extract_7z, filter_match, makefile)
 from .. import PYSIDE, SHIBOKEN
 
 
@@ -131,10 +131,7 @@ def prepare_packages_win32(pyside_build, _vars):
                 _filter=filters,
                 recursive=False, _vars=_vars)
 
-        # <qt>/lib/metatypes/* -> <setup>/{st_package_name}/lib/metatypes
-        copydir("{qt_lib_dir}/metatypes", destination_qt_lib_dir,
-                _filter=["*.json"],
-                recursive=False, _vars=_vars)
+        copy_qt_metatypes(destination_qt_dir, _vars)
 
         # <install>/lib/*.lib -> {st_package_name}/
         copydir(

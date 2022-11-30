@@ -8,7 +8,7 @@ from pathlib import Path
 
 from ..config import config
 from ..options import OPTION
-from ..utils import copydir, copyfile, makefile
+from ..utils import copydir, copyfile, copy_qt_metatypes, makefile
 from .. import PYSIDE, SHIBOKEN
 from .linux import prepare_standalone_package_linux
 from .macos import prepare_standalone_package_macos
@@ -143,10 +143,7 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
             executables.extend(_copy_gui_executable('designer', _vars=_vars))
             executables.extend(_copy_gui_executable('linguist', _vars=_vars))
 
-        # <qt>/lib/metatypes/* -> <setup>/{st_package_name}/Qt/lib/metatypes
-        copydir("{qt_lib_dir}/metatypes", f"{destination_qt_lib_dir}/metatypes",
-                _filter=["*.json"],
-                recursive=False, _vars=_vars, force_copy_symlinks=True)
+        copy_qt_metatypes(destination_qt_dir, _vars)
 
         # Copy libexec
         built_modules = pyside_build.get_built_pyside_config(_vars)['built_modules']
