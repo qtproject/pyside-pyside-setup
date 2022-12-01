@@ -288,7 +288,7 @@ void AbstractMetaBuilderPrivate::traverseOperatorFunction(const FunctionModelIte
         return;
 
     if (item->isSpaceshipOperator() && !item->isDeleted()) {
-        baseoperandClass->addSynthesizedComparisonOperators();
+        AbstractMetaClass::addSynthesizedComparisonOperators(baseoperandClass);
         return;
     }
 
@@ -325,7 +325,7 @@ void AbstractMetaBuilderPrivate::traverseOperatorFunction(const FunctionModelIte
     }
     metaFunction->setFlags(flags);
     metaFunction->setAccess(Access::Public);
-    baseoperandClass->addFunction(AbstractMetaFunctionCPtr(metaFunction));
+    AbstractMetaClass::addFunction(baseoperandClass, AbstractMetaFunctionCPtr(metaFunction));
     if (!metaFunction->arguments().isEmpty()) {
         const auto include = metaFunction->arguments().constFirst().type().typeEntry()->include();
         baseoperandClass->typeEntry()->addArgumentInclude(include);
@@ -377,7 +377,7 @@ bool AbstractMetaBuilderPrivate::traverseStreamOperator(const FunctionModelItem 
         funcClass = streamClass;
     }
 
-    funcClass->addFunction(AbstractMetaFunctionCPtr(streamFunction));
+    AbstractMetaClass::addFunction(funcClass, AbstractMetaFunctionCPtr(streamFunction));
     auto funcTe = funcClass->typeEntry();
     if (funcClass == streamClass)
         funcTe->addArgumentInclude(streamedClass->typeEntry()->include());
@@ -563,12 +563,12 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom,
 
     ReportHandler::startProgress("Detecting inconsistencies in class model...");
     for (AbstractMetaClass *cls : std::as_const(m_metaClasses)) {
-        cls->fixFunctions();
+        AbstractMetaClass::fixFunctions(cls);
 
         if (cls->canAddDefaultConstructor())
-             cls->addDefaultConstructor();
+            AbstractMetaClass::addDefaultConstructor(cls);
         if (cls->canAddDefaultCopyConstructor())
-            cls->addDefaultCopyConstructor();
+            AbstractMetaClass::addDefaultCopyConstructor(cls);
 
         const bool avoidProtectedHack = flags.testFlag(ApiExtractorFlag::AvoidProtectedHack);
         const bool vco =
@@ -1328,7 +1328,7 @@ AbstractMetaFunctionRawPtrList
             traverseOperatorFunction(function, currentClass);
         } else if (function->isSpaceshipOperator() && !function->isDeleted()) {
             if (currentClass)
-                currentClass->addSynthesizedComparisonOperators();
+                AbstractMetaClass::addSynthesizedComparisonOperators(currentClass);
         } else if (auto *metaFunction = traverseFunction(function, currentClass)) {
             result.append(metaFunction);
         } else if (!function->isDeleted() && function->functionType() == CodeModel::Constructor) {
@@ -1414,7 +1414,7 @@ void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
             if (metaFunction->isConversionOperator())
                 fixReturnTypeOfConversionOperator(metaFunction);
 
-            metaClass->addFunction(AbstractMetaFunctionCPtr(metaFunction));
+            AbstractMetaClass::addFunction(metaClass, AbstractMetaFunctionCPtr(metaFunction));
             applyFunctionModifications(metaFunction);
         } else if (metaFunction->isDestructor()) {
             metaClass->setHasPrivateDestructor(metaFunction->isPrivate());
@@ -1750,7 +1750,7 @@ bool AbstractMetaBuilderPrivate::traverseAddedMemberFunction(const AddedFunction
 
     metaFunction->setDeclaringClass(metaClass);
     metaFunction->setImplementingClass(metaClass);
-    metaClass->addFunction(AbstractMetaFunctionCPtr(metaFunction));
+    AbstractMetaClass::addFunction(metaClass, AbstractMetaFunctionCPtr(metaFunction));
     metaClass->setHasNonPrivateConstructor(true);
     return true;
 }
@@ -2326,7 +2326,7 @@ static AbstractMetaFunctionPtr
 {
     AbstractMetaFunctionPtr function(new AbstractMetaFunction(name));
     function->setType(returnType);
-    s->addFunction(function);
+    AbstractMetaClass::addFunction(s, function);
     function->setConstant(isConst);
     synthesizeWarning(function);
     return function;
@@ -2383,14 +2383,14 @@ static void fixSmartPointerConstructors(AbstractMetaClass *s,
         AbstractMetaFunctionPtr constructor(new AbstractMetaFunction(s->name()));
         constructor->setFunctionType(AbstractMetaFunction::ConstructorFunction);
         constructor->addArgument(pointeeArgument(s, ste));
-        s->addFunction(constructor);
+        AbstractMetaClass::addFunction(s, constructor);
         synthesizeWarning(constructor);
     }
 
     if (!seenDefaultConstructor) {
         AbstractMetaFunctionPtr constructor(new AbstractMetaFunction(s->name()));
         constructor->setFunctionType(AbstractMetaFunction::ConstructorFunction);
-        s->addFunction(constructor);
+        AbstractMetaClass::addFunction(s, constructor);
         synthesizeWarning(constructor);
     }
 }
@@ -2413,13 +2413,13 @@ static void fixSmartPointerReset(AbstractMetaClass *s,
     if (!seenParameter) {
         AbstractMetaFunctionPtr f(new AbstractMetaFunction(resetMethodName));
         f->addArgument(pointeeArgument(s, ste));
-        s->addFunction(f);
+        AbstractMetaClass::addFunction(s, f);
         synthesizeWarning(f);
     }
 
     if (!seenParameterLess) {
         AbstractMetaFunctionPtr f(new AbstractMetaFunction(resetMethodName));
-        s->addFunction(f);
+        AbstractMetaClass::addFunction(s, f);
         synthesizeWarning(f);
     }
 }
@@ -3260,7 +3260,7 @@ void AbstractMetaBuilderPrivate::inheritTemplateFunctions(AbstractMetaClass *sub
             AbstractMetaFunctionCPtr f = inheritTemplateMember(function, templateTypes,
                                                                templateClass, subclass);
             if (!f.isNull())
-                subclass->addFunction(f);
+                AbstractMetaClass::addFunction(subclass, f);
         }
     }
 

@@ -67,7 +67,7 @@ public:
 
     const AbstractMetaFunctionCList &functions() const;
     void setFunctions(const AbstractMetaFunctionCList &functions);
-    void addFunction(const AbstractMetaFunctionCPtr &function);
+    static void addFunction(AbstractMetaClass *klass, const AbstractMetaFunctionCPtr &function);
     bool hasFunction(const QString &str) const;
     AbstractMetaFunctionCPtr findFunction(QStringView functionName) const;
     AbstractMetaFunctionCList findFunctions(QStringView functionName) const;
@@ -81,8 +81,8 @@ public:
     bool hasCopyConstructor() const;
     bool hasPrivateCopyConstructor() const;
 
-    void addDefaultConstructor();
-    void addDefaultCopyConstructor();
+    static void addDefaultConstructor(AbstractMetaClass *klass);
+    static void addDefaultCopyConstructor(AbstractMetaClass *klass);
 
     bool hasNonPrivateConstructor() const;
     void setHasNonPrivateConstructor(bool value);
@@ -113,7 +113,7 @@ public:
     bool isImplicitlyCopyConstructible() const;
     bool canAddDefaultCopyConstructor() const;
 
-    void addSynthesizedComparisonOperators();
+    static void addSynthesizedComparisonOperators(AbstractMetaClass *c);
 
     bool generateExceptionHandling() const;
 
@@ -330,7 +330,7 @@ public:
     void setSourceLocation(const SourceLocation &sourceLocation);
 
     // For AbstractMetaBuilder
-    void fixFunctions();
+    static void fixFunctions(AbstractMetaClass *klass);
     bool needsInheritanceSetup() const;
     void setInheritanceDone(bool b);
     bool inheritanceDone() const;

@@ -66,6 +66,9 @@ public:
                         const AbstractMetaArgumentList &arguments,
                         AbstractMetaClass *q);
     void addUsingConstructors(AbstractMetaClass *q);
+    void sortFunctions();
+    void setFunctions(const AbstractMetaFunctionCList &functions,
+                      AbstractMetaClass *q);
     bool isUsingMember(const AbstractMetaClass *c, const QString &memberName,
                        Access minimumAccess) const;
     bool hasConstructors() const;
@@ -314,7 +317,7 @@ bool AbstractMetaClass::hasStaticFields() const
 
 void AbstractMetaClass::sortFunctions()
 {
-    std::sort(d->m_functions.begin(), d->m_functions.end(), function_sorter);
+   d->sortFunctions();
 }
 
 const AbstractMetaClass *AbstractMetaClass::templateBaseClass() const
@@ -332,17 +335,23 @@ const AbstractMetaFunctionCList &AbstractMetaClass::functions() const
     return d->m_functions;
 }
 
-void AbstractMetaClass::setFunctions(const AbstractMetaFunctionCList &functions)
+void AbstractMetaClassPrivate::sortFunctions()
 {
-    d->m_functions = functions;
+    std::sort(m_functions.begin(), m_functions.end(), function_sorter);
+}
+
+void AbstractMetaClassPrivate::setFunctions(const AbstractMetaFunctionCList &functions,
+                                            AbstractMetaClass *q)
+{
+    m_functions = functions;
 
     // Functions must be sorted by name before next loop
     sortFunctions();
 
-    for (const auto &f : std::as_const(d->m_functions)) {
-        qSharedPointerConstCast<AbstractMetaFunction>(f)->setOwnerClass(this);
+    for (const auto &f : std::as_const(m_functions)) {
+        qSharedPointerConstCast<AbstractMetaFunction>(f)->setOwnerClass(q);
         if (!f->isPublic())
-            d->m_hasNonpublic = true;
+            m_hasNonpublic = true;
     }
 }
 
@@ -379,20 +388,20 @@ void AbstractMetaClassPrivate::addFunction(const AbstractMetaFunctionCPtr &funct
         && function->functionType() == AbstractMetaFunction::ConstructorFunction;
 }
 
-void AbstractMetaClass::addFunction(const AbstractMetaFunctionCPtr &function)
+void AbstractMetaClass::addFunction(AbstractMetaClass *klass, const AbstractMetaFunctionCPtr &function)
 {
     auto nonConstF = qSharedPointerConstCast<AbstractMetaFunction>(function);
-    nonConstF->setOwnerClass(this);
+    nonConstF->setOwnerClass(klass);
 
     // Set the default value of the declaring class. This may be changed
     // in fixFunctions later on
-    nonConstF->setDeclaringClass(this);
+    nonConstF->setDeclaringClass(klass);
 
     // Some of the queries below depend on the implementing class being set
     // to function properly. Such as function modifications
-    nonConstF->setImplementingClass(this);
+    nonConstF->setImplementingClass(klass);
 
-    d->addFunction(function);
+    klass->d->addFunction(function);
 }
 
 bool AbstractMetaClass::hasSignal(const AbstractMetaFunction *other) const
@@ -809,25 +818,25 @@ void AbstractMetaClassPrivate::addConstructor(AbstractMetaFunction::FunctionType
     addFunction(AbstractMetaFunctionCPtr(f));
 }
 
-void AbstractMetaClass::addDefaultConstructor()
+void AbstractMetaClass::addDefaultConstructor(AbstractMetaClass *klass)
 {
-    d->addConstructor(AbstractMetaFunction::ConstructorFunction,
-                      Access::Public, {}, this);
+    klass->d->addConstructor(AbstractMetaFunction::ConstructorFunction,
+                             Access::Public, {}, klass);
 }
 
-void AbstractMetaClass::addDefaultCopyConstructor()
+void AbstractMetaClass::addDefaultCopyConstructor(AbstractMetaClass *klass)
 {
-    AbstractMetaType argType(typeEntry());
+    AbstractMetaType argType(klass->typeEntry());
     argType.setReferenceType(LValueReference);
     argType.setConstant(true);
     argType.setTypeUsagePattern(AbstractMetaType::ValuePattern);
 
     AbstractMetaArgument arg;
     arg.setType(argType);
-    arg.setName(name());
+    arg.setName(klass->name());
 
-    d->addConstructor(AbstractMetaFunction::CopyConstructorFunction,
-                      Access::Public, {arg}, this);
+    klass->d->addConstructor(AbstractMetaFunction::CopyConstructorFunction,
+                             Access::Public, {arg}, klass);
 }
 
 AbstractMetaFunction *
@@ -861,11 +870,11 @@ static AbstractMetaType boolType()
 // Helper to synthesize comparison operators from a spaceship operator. Since
 // shiboken also generates code for comparing to different types, this fits
 // better than of handling it in the generator code.
-void AbstractMetaClass::addSynthesizedComparisonOperators()
+void AbstractMetaClass::addSynthesizedComparisonOperators(AbstractMetaClass *c)
 {
     static const auto returnType = boolType();
 
-    AbstractMetaType selfType(typeEntry());
+    AbstractMetaType selfType(c->typeEntry());
     selfType.setConstant(true);
     selfType.setReferenceType(LValueReference);
     selfType.decideUsagePattern();
@@ -880,8 +889,8 @@ void AbstractMetaClass::addSynthesizedComparisonOperators()
         auto *f = AbstractMetaClassPrivate::createFunction(QLatin1StringView(op),
                                                            AbstractMetaFunction::ComparisonOperator,
                                                            Access::Public, arguments,
-                                                           returnType, this);
-        d->addFunction(AbstractMetaFunctionCPtr(f));
+                                                           returnType, c);
+         c->d->addFunction(AbstractMetaFunctionCPtr(f));
     }
 }
 
@@ -1435,18 +1444,19 @@ void AbstractMetaClassPrivate::addUsingConstructors(AbstractMetaClass *q)
     }
 }
 
-void AbstractMetaClass::fixFunctions()
+void AbstractMetaClass::fixFunctions(AbstractMetaClass *klass)
 {
+    auto *d = klass->d.data();
     if (d->m_functionsFixed)
         return;
 
     d->m_functionsFixed = true;
 
-    AbstractMetaFunctionCList funcs = functions();
+    AbstractMetaFunctionCList funcs = klass->functions();
     AbstractMetaFunctionCList nonRemovedFuncs;
     nonRemovedFuncs.reserve(funcs.size());
 
-    d->addUsingConstructors(this);
+    d->addUsingConstructors(klass);
 
     for (const auto &f : std::as_const(funcs)) {
         // Fishy: Setting up of implementing/declaring/base classes changes
@@ -1458,7 +1468,7 @@ void AbstractMetaClass::fixFunctions()
 
     for (auto *superClassC : d->m_baseClasses) {
         auto *superClass = const_cast<AbstractMetaClass *>(superClassC);
-        superClass->fixFunctions();
+        AbstractMetaClass::fixFunctions(superClass);
         // Since we always traverse the complete hierarchy we are only
         // interrested in what each super class implements, not what
         // we may have propagated from their base classes again.
@@ -1479,7 +1489,7 @@ void AbstractMetaClass::fixFunctions()
                 continue;
 
             // skip functions added in base classes
-            if (sf->isUserAdded() && sf->declaringClass() != this)
+            if (sf->isUserAdded() && sf->declaringClass() != klass)
                 continue;
 
             // Skip base class comparison operators declared as members (free
@@ -1526,7 +1536,7 @@ void AbstractMetaClass::fixFunctions()
 
                         if (f->access() != sf->access()) {
                             qCWarning(lcShiboken, "%s",
-                                      qPrintable(msgFunctionVisibilityModified(this, f.data())));
+                                      qPrintable(msgFunctionVisibilityModified(klass, f.data())));
 #if 0
                             // If new visibility is private, we can't
                             // do anything. If it isn't, then we
@@ -1615,7 +1625,7 @@ void AbstractMetaClass::fixFunctions()
     // Apply modifications after the declaring class has been set
     for (const auto &func : std::as_const(funcs)) {
         auto ncFunc = qSharedPointerConstCast<AbstractMetaFunction>(func);
-        for (const auto &mod : func->modifications(this)) {
+        for (const auto &mod : func->modifications(klass)) {
             if (mod.isRenameModifier())
                 ncFunc->setName(mod.renamedToName());
         }
@@ -1623,8 +1633,8 @@ void AbstractMetaClass::fixFunctions()
 
         // Make sure class is abstract if one of the functions is
         if (func->isAbstract()) {
-            (*this) += AbstractMetaClass::Abstract;
-            (*this) -= AbstractMetaClass::FinalInTargetLang;
+            (*klass) += AbstractMetaClass::Abstract;
+            (*klass) -= AbstractMetaClass::FinalInTargetLang;
         }
 
         if (func->isConstructor()) {
@@ -1637,15 +1647,15 @@ void AbstractMetaClass::fixFunctions()
 
 
         // Make sure that we include files for all classes that are in use
-        addExtraIncludesForFunction(this, func);
+        addExtraIncludesForFunction(klass, func);
     }
 
     if (hasPrivateConstructors && !hasPublicConstructors) {
-        (*this) += AbstractMetaClass::Abstract;
-        (*this) -= AbstractMetaClass::FinalInTargetLang;
+        (*klass) += AbstractMetaClass::Abstract;
+        (*klass) -= AbstractMetaClass::FinalInTargetLang;
     }
 
-    setFunctions(funcs);
+    d->setFunctions(funcs, klass);
 }
 
 bool AbstractMetaClass::needsInheritanceSetup() const
