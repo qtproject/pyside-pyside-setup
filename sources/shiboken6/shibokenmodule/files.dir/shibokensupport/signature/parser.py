@@ -70,6 +70,7 @@ def _get_flag_enum_option():
         if not isinstance(flag, int):
             flag = True
     p = f"\n    *** Python is at version {'.'.join(map(str, pyminver or (0,)))} now."
+    q = f"\n    *** PySide is at version {'.'.join(map(str, ver[:2]))} now."
     # PYSIDE-1797: Emit a warning when we may remove pep384_issue33738.cpp
     if pyminver and pyminver >= (3, 8):
         warnings.warn(f"{p} The file pep384_issue33738.cpp should be removed ASAP! ***")
@@ -81,7 +82,9 @@ def _get_flag_enum_option():
         warnings.warn(f"{p} The files bufferprocs_py37.(cpp|h) should be removed ASAP! ***")
     # PYSIDE-1735: Emit a warning when we should maybe evict forgiveness mode
     if ver[:2] >= (7, 0):
-        warnings.warn(f"{p} Please drop Enum forgiveness mode in `mangled_type_getattro` ***")
+        warnings.warn(f"{q} Please drop Enum forgiveness mode in `mangled_type_getattro` ***")
+    if ver[:2] >= (6, 5):
+        warnings.warn(f"{q} Please drop the misleading function `getMetaDataFromQObject` ***")
     # normalize the sys attribute
     setattr(sys, sysname, flag)
     os.environ[envname] = str(flag)

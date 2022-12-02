@@ -490,8 +490,10 @@ void initQApp()
     setDestroyQApplication(destroyQCoreApplication);
 }
 
-PyObject *getMetaDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *name)
+PyObject *getHiddenDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *name)
 {
+    using Shiboken::AutoDecRef;
+
     PyObject *attr = PyObject_GenericGetAttr(self, name);
     if (!Shiboken::Object::isValid(reinterpret_cast<SbkObject *>(self), false))
         return attr;
@@ -505,6 +507,7 @@ PyObject *getMetaDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *nam
     }
 
     // Mutate native signals to signal instance type
+    // Caution: This inserts the signal instance into the instance dict.
     if (attr && PyObject_TypeCheck(attr, PySideSignal_TypeF())) {
         auto *inst = Signal::initialize(reinterpret_cast<PySideSignal *>(attr), name, self);
         PyObject *signalInst = reinterpret_cast<PyObject *>(inst);
@@ -517,13 +520,46 @@ PyObject *getMetaDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *nam
         PyObject *type, *value, *traceback;
         PyErr_Fetch(&type, &value, &traceback);     // This was omitted for a loong time.
 
-        const char *cname = Shiboken::String::toCString(name);
         int flags = currentSelectId(Py_TYPE(self));
         int snake_flag = flags & 0x01;
+        int propFlag = flags & 0x02;
+
+        if (propFlag) {
+            // PYSIDE-1889: If we have actually a Python property, return f(get|set|del).
+            //              Do not store this attribute in the instance dict, because this
+            //              would create confusion with overload.
+            // Note: before implementing this property handling, the meta function code
+            // below created meta functions which was quite wrong.
+            auto *subdict = _PepType_Lookup(Py_TYPE(self), PyMagicName::property_methods());
+            PyObject *propName = PyDict_GetItem(subdict, name);
+            if (propName) {
+                // We really have a property name and need to fetch the fget or fset function.
+                static PyObject *const _fget = Shiboken::String::createStaticString("fget");
+                static PyObject *const _fset = Shiboken::String::createStaticString("fset");
+                static PyObject *const _fdel = Shiboken::String::createStaticString("fdel");
+                static PyObject *const arr[3] = {_fget, _fset, _fdel};
+                auto prop = _PepType_Lookup(Py_TYPE(self), propName);
+                for (int idx = 0; idx < 3; ++idx) {
+                    auto *trial = arr[idx];
+                    auto *res = PyObject_GetAttr(prop, trial);
+                    if (res) {
+                        AutoDecRef elemName(PyObject_GetAttr(res, PyMagicName::name()));
+                        // Note: This comparison works because of interned strings.
+                        if (elemName == name)
+                            return res;
+                        Py_DECREF(res);
+                    }
+                    PyErr_Clear();
+                }
+            }
+        }
+
+        const char *cname = Shiboken::String::toCString(name);
         uint cnameLen = qstrlen(cname);
         if (std::strncmp("__", cname, 2)) {
             const QMetaObject *metaObject = cppSelf->metaObject();
             QList<QMetaMethod> signalList;
+            // Caution: This inserts a meta function or a signal into the instance dict.
             for (int i=0, imax = metaObject->methodCount(); i < imax; i++) {
                 QMetaMethod method = metaObject->method(i);
                 // PYSIDE-1753: Snake case names must be renamed here too, or they will be
@@ -558,6 +594,12 @@ PyObject *getMetaDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *nam
         PyErr_Restore(type, value, traceback);
     }
     return attr;
+}
+
+// PYSIDE-1889: Keeping the old, misleading API for a while.
+PyObject *getMetaDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *name)
+{
+    return getHiddenDataFromQObject(cppSelf, self, name);
 }
 
 bool inherits(PyTypeObject *objType, const char *class_name)
