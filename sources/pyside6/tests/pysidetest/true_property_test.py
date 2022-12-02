@@ -33,6 +33,22 @@ class TruePropertyInheritanceTest(UsesQApplication):
         check = spin_box.sizeHint
         self.assertEqual(type(check), QSize)
 
+    def testHiddenMethods(self):
+        # PYSIDE-1889: setVisible is no longer a meta function but comes from the Property
+        widget = QWidget()
+        self.assertTrue("visible" in QWidget.__dict__)
+        self.assertFalse("isVisible" in QWidget.__dict__)
+        self.assertFalse("setVisible" in QWidget.__dict__)
+        self.assertTrue(hasattr(widget, "isVisible"))
+        self.assertTrue(hasattr(widget, "setVisible"))
+        self.assertEqual(widget.isVisible, QWidget.visible.fget)
+        self.assertEqual(widget.setVisible, QWidget.visible.fset)
+        # This works with inheritance as well:
+        class SubClass(QWidget):
+            pass
+        sub_widget = SubClass()
+        self.assertEqual(sub_widget.isVisible, QWidget.visible.fget)
+
 
 if __name__ == '__main__':
     unittest.main()

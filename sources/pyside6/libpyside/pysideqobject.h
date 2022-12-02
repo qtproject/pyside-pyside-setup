@@ -40,12 +40,15 @@ PYSIDE_API bool isQObjectDerived(PyTypeObject *pyType, bool raiseError);
 /// Convenience to convert a PyObject to QObject
 PYSIDE_API QObject *convertToQObject(PyObject *object, bool raiseError);
 
-/// Check for properties and signals registered on MetaObject and return these
+/// Check for properties and signals registered on MetaObject and return these.
+/// Also handle Python properties when true_property was selected.
 /// \param cppSelf Is the QObject which contains the metaobject
 /// \param self Python object of cppSelf
 /// \param name Name of the argument which the function will try retrieve from MetaData
 /// \return The Python object which contains the Data obtained in metaObject or the Python
-/// attribute related with name
+/// method pulled out of a Python property.
+PYSIDE_API PyObject *getHiddenDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *name);
+/// This is an alias, meanwhile misleading:
 PYSIDE_API PyObject *getMetaDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *name);
 
 /// Mutex for accessing QObject memory helpers from multiple threads

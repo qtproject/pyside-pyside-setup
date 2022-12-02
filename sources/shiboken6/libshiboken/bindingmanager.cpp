@@ -276,6 +276,8 @@ PyObject *BindingManager::getOverride(const void *cptr,
     auto *obWrapper = reinterpret_cast<PyObject *>(wrapper);
     auto *wrapper_dict = SbkObject_GetDict_NoRef(obWrapper);
     if (PyObject *method = PyDict_GetItem(wrapper_dict, pyMethodName)) {
+        // Note: This special case was implemented for duck-punching, which happens
+        // in the instance dict. It does not work with properties.
         Py_INCREF(method);
         return method;
     }
