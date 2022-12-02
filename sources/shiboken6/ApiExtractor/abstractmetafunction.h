@@ -241,8 +241,8 @@ public:
     QString signatureComment() const;
     QString debugSignature() const; // including virtual/override/final, etc., for debugging only.
 
-    bool isModifiedRemoved(const AbstractMetaClass *cls = nullptr) const;
-    bool isModifiedFinal(const AbstractMetaClass *cls = nullptr) const;
+    bool isModifiedRemoved(AbstractMetaClassCPtr cls = {}) const;
+    bool isModifiedFinal(AbstractMetaClassCPtr cls = {}) const;
 
     bool isVoid() const;
 
@@ -250,19 +250,19 @@ public:
     void setType(const AbstractMetaType &type);
 
     // The class that has this function as a member.
-    const AbstractMetaClass *ownerClass() const;
-    void setOwnerClass(const AbstractMetaClass *cls);
+    AbstractMetaClassCPtr ownerClass() const;
+    void setOwnerClass(const AbstractMetaClassCPtr &cls);
 
     // Owner excluding invisible namespaces
-    const AbstractMetaClass *targetLangOwner() const;
+    AbstractMetaClassCPtr targetLangOwner() const;
 
     // The first class in a hierarchy that declares the function
-    const AbstractMetaClass *declaringClass() const;
-    void setDeclaringClass(const AbstractMetaClass *cls);
+    AbstractMetaClassCPtr declaringClass() const;
+    void setDeclaringClass(const AbstractMetaClassCPtr &cls);
 
     // The class that actually implements this function
-    const AbstractMetaClass *implementingClass() const;
-    void setImplementingClass(const AbstractMetaClass *cls);
+    AbstractMetaClassCPtr implementingClass() const;
+    void setImplementingClass(const AbstractMetaClassCPtr &cls);
 
     const AbstractMetaArgumentList &arguments() const;
     AbstractMetaArgumentList &arguments();
@@ -320,11 +320,13 @@ public:
 
     QString conversionRule(TypeSystem::Language language, int idx) const;
     bool hasConversionRule(TypeSystem::Language language, int idx) const;
-    QList<ReferenceCount> referenceCounts(const AbstractMetaClass *cls, int idx = -2) const;
-    ArgumentOwner argumentOwner(const AbstractMetaClass *cls, int idx) const;
+    QList<ReferenceCount>
+        referenceCounts(const AbstractMetaClassCPtr &cls, int idx = -2) const;
+    ArgumentOwner argumentOwner(const AbstractMetaClassCPtr &cls, int idx) const;
 
     // Returns the ownership rules for the given argument (target lang).
-    TypeSystem::Ownership argumentTargetOwnership(const AbstractMetaClass *cls, int idx) const;
+    TypeSystem::Ownership
+        argumentTargetOwnership(const AbstractMetaClassCPtr &cls, int idx) const;
 
     const QString &modifiedTypeName() const;
     bool isTypeModified() const { return !modifiedTypeName().isEmpty(); }
@@ -364,19 +366,19 @@ public:
     */
     bool hasSignatureModifications() const;
 
-    const FunctionModificationList &modifications(const AbstractMetaClass *implementor = nullptr) const;
+    const FunctionModificationList &modifications(AbstractMetaClassCPtr implementor = {}) const;
     void clearModificationsCache();
 
     const DocModificationList addedFunctionDocModifications() const;
 
     static FunctionModificationList findClassModifications(const AbstractMetaFunction *f,
-                                                           const AbstractMetaClass *implementor);
+                                                           AbstractMetaClassCPtr implementor);
     static FunctionModificationList findGlobalModifications(const AbstractMetaFunction *f);
 
     /**
      * Return the argument name if there is a modification the renamed value will be returned
      */
-    QString argumentName(int index, bool create = true, const AbstractMetaClass *cl = nullptr) const;
+    QString argumentName(int index, bool create = true, AbstractMetaClassCPtr cl = {}) const;
 
     int propertySpecIndex() const;
     void setPropertySpecIndex(int i);

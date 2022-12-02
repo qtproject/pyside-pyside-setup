@@ -56,41 +56,41 @@ protected:
     bool finishGeneration() override;
 
 private:
-    void writeEnums(TextStream &s, const AbstractMetaClass *cppClass) const;
+    void writeEnums(TextStream &s, const AbstractMetaClassCPtr &cppClass) const;
 
-    void writeFields(TextStream &s, const AbstractMetaClass *cppClass) const;
-    static QString functionSignature(const AbstractMetaClass *cppClass,
+    void writeFields(TextStream &s, const AbstractMetaClassCPtr &cppClass) const;
+    static QString functionSignature(const AbstractMetaClassCPtr &cppClass,
                                      const AbstractMetaFunctionCPtr &func);
-    void writeFunction(TextStream &s, const AbstractMetaClass *cppClass,
+    void writeFunction(TextStream &s, const AbstractMetaClassCPtr &cppClass,
                        const AbstractMetaFunctionCPtr &func, bool indexed = true);
-    void writeFunctionParametersType(TextStream &s, const AbstractMetaClass *cppClass,
+    void writeFunctionParametersType(TextStream &s, const AbstractMetaClassCPtr &cppClass,
                                      const AbstractMetaFunctionCPtr &func) const;
     static void writeFunctionToc(TextStream &s, const QString &title,
-                                 const AbstractMetaClass *cppClass,
+                                 const AbstractMetaClassCPtr &cppClass,
                                  const AbstractMetaFunctionCList &functions);
     void writePropertyToc(TextStream &s,
                           const GeneratorDocumentation &doc,
-                          const AbstractMetaClass *cppClass);
+                          const AbstractMetaClassCPtr &cppClass);
     void writeProperties(TextStream &s,
                          const GeneratorDocumentation &doc,
-                         const AbstractMetaClass *cppClass) const;
-    void writeParameterType(TextStream &s, const AbstractMetaClass *cppClass,
+                         const AbstractMetaClassCPtr &cppClass) const;
+    void writeParameterType(TextStream &s, const AbstractMetaClassCPtr &cppClass,
                             const AbstractMetaArgument &arg) const;
 
     void writeConstructors(TextStream &s,
-                           const AbstractMetaClass *cppClass,
+                           const AbstractMetaClassCPtr &cppClass,
                            const AbstractMetaFunctionCList &constructors) const;
 
     void writeFormattedText(TextStream &s, const QString &doc,
                             Documentation::Format format,
-                            const AbstractMetaClass *metaClass = nullptr) const;
+                            const AbstractMetaClassCPtr &metaClass = {}) const;
     void writeFormattedBriefText(TextStream &s, const Documentation &doc,
-                                 const AbstractMetaClass *metaclass = nullptr) const;
+                                 const AbstractMetaClassCPtr &metaclass = {}) const;
     void writeFormattedDetailedText(TextStream &s, const Documentation &doc,
-                                    const AbstractMetaClass *metaclass = nullptr) const;
+                                    const AbstractMetaClassCPtr &metaclass = {}) const;
 
     bool writeInjectDocumentation(TextStream &s, TypeSystem::DocModificationMode mode,
-                                  const AbstractMetaClass *cppClass,
+                                  const AbstractMetaClassCPtr &cppClass,
                                   const AbstractMetaFunctionCPtr &func);
     static void writeDocSnips(TextStream &s, const CodeSnipList &codeSnips,
                               TypeSystem::CodeSnipPosition position, TypeSystem::Language language);
@@ -99,7 +99,8 @@ private:
     void writeAdditionalDocumentation() const;
     bool writeInheritanceFile();
 
-    QString translateToPythonType(const AbstractMetaType &type, const AbstractMetaClass *cppClass,
+    QString translateToPythonType(const AbstractMetaType &type,
+                                  const AbstractMetaClassCPtr &cppClass,
                                   bool createRef = true) const;
 
     bool convertToRst(const QString &sourceFileName,
@@ -107,7 +108,7 @@ private:
                       const QString &context = QString(),
                       QString *errorMessage = nullptr) const;
 
-    GeneratorDocumentation generatorDocumentation(const AbstractMetaClass *cppClass) const;
+    GeneratorDocumentation generatorDocumentation(const AbstractMetaClassCPtr &cppClass) const;
 
     QString m_extraSectionDir;
     QStringList m_functionList;

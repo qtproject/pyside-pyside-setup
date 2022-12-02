@@ -11,14 +11,7 @@
 
 ApiExtractorResultData::ApiExtractorResultData() = default;
 
-ApiExtractorResultData::~ApiExtractorResultData()
-{
-    qDeleteAll(m_smartPointers);
-    qDeleteAll(m_metaClasses);
-    qDeleteAll(m_templates);
-    for (auto &smp : m_instantiatedSmartPointers)
-        delete smp.specialized;
-}
+ApiExtractorResultData::~ApiExtractorResultData() = default;
 
 ApiExtractorResult::ApiExtractorResult() : d(new ApiExtractorResultData)
 {

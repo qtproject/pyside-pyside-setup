@@ -34,8 +34,8 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByInteger()
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
-    const AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), u"A");
-    QVERIFY(classA);
+    const auto classA = AbstractMetaClass::findClass(builder->classes(), u"A");
+    QVERIFY(!classA.isNull());
 
     const AbstractMetaArgument &arg = classA->functions().constLast()->arguments().constFirst();
     QVERIFY(arg.type().isArray());
@@ -43,7 +43,7 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByInteger()
     QCOMPARE(arg.type().arrayElementType()->name(), u"double");
 }
 
-static QString functionMinimalSignature(const AbstractMetaClass *c, const QString &name)
+static QString functionMinimalSignature(const AbstractMetaClassCPtr &c, const QString &name)
 {
     const auto f = c->findFunction(name);
     return f.isNull() ? QString() : f->minimalSignature();
@@ -72,7 +72,7 @@ void TestArrayArgument::testArraySignature()
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
-    const AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), u"A");
+    const auto classA = AbstractMetaClass::findClass(builder->classes(), u"A");
     QCOMPARE(functionMinimalSignature(classA, u"mi1"_s),
              u"mi1(int[5])");
     QCOMPARE(functionMinimalSignature(classA, u"mi1c"_s),
@@ -108,8 +108,8 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValue()
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
-    AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), u"A");
-    QVERIFY(classA);
+    AbstractMetaClassPtr classA = AbstractMetaClass::findClass(builder->classes(), u"A");
+    QVERIFY(!classA.isNull());
 
     auto someEnum = classA->findEnum(u"SomeEnum"_s);
     QVERIFY(someEnum.has_value());
@@ -139,8 +139,8 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValueFromGlobalEnu
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
-    const AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), u"A");
-    QVERIFY(classA);
+    const auto classA = AbstractMetaClass::findClass(builder->classes(), u"A");
+    QVERIFY(!classA.isNull());
 
     AbstractMetaEnum someEnum = builder->globalEnums().constFirst();
     auto nvalues = someEnum.findEnumValue(u"NValues");

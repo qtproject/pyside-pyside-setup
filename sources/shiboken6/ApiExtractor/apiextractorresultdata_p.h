@@ -16,7 +16,6 @@ public:
     ~ApiExtractorResultData();
 
     AbstractMetaClassCList m_metaClasses;
-    AbstractMetaClassCList m_templates; // not exposed, just for ownership
     AbstractMetaClassCList m_smartPointers;
     AbstractMetaFunctionCList m_globalFunctions;
     AbstractMetaEnumList m_globalEnums;

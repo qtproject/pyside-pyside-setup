@@ -13,8 +13,8 @@
 class AbstractMetaClass;
 
 struct Dependency {
-    AbstractMetaClass *parent;
-    AbstractMetaClass *child;
+    AbstractMetaClassPtr parent;
+    AbstractMetaClassPtr child;
 };
 
 using Dependencies = QList<Dependency>;

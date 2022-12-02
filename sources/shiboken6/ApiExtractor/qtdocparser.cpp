@@ -102,7 +102,7 @@ static QString formatFunctionArgTypeQuery(const AbstractMetaType &metaType)
 
 QString QtDocParser::functionDocumentation(const QString &sourceFileName,
                                            const ClassDocumentation &classDocumentation,
-                                           const AbstractMetaClass *metaClass,
+                                           const AbstractMetaClassCPtr &metaClass,
                                            const AbstractMetaFunctionCPtr &func,
                                            QString *errorMessage)
 {
@@ -119,7 +119,7 @@ QString QtDocParser::functionDocumentation(const QString &sourceFileName,
 
 QString QtDocParser::queryFunctionDocumentation(const QString &sourceFileName,
                                                 const ClassDocumentation &classDocumentation,
-                                                const AbstractMetaClass *metaClass,
+                                                const AbstractMetaClassCPtr &metaClass,
                                                 const AbstractMetaFunctionCPtr &func,
                                                 QString *errorMessage)
 {
@@ -202,14 +202,14 @@ static QString extractBrief(QString *value)
     return briefValue;
 }
 
-void QtDocParser::fillDocumentation(AbstractMetaClass *metaClass)
+void QtDocParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
 {
-    if (!metaClass)
+    if (metaClass.isNull())
         return;
 
-    auto *context = metaClass->enclosingClass();
-    while(context) {
-        if (context->enclosingClass() == nullptr)
+    auto context = metaClass->enclosingClass();
+    while (!context.isNull()) {
+        if (context->enclosingClass().isNull())
             break;
         context = context->enclosingClass();
     }

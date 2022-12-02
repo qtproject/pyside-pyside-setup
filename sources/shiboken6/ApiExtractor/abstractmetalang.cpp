@@ -60,16 +60,16 @@ public:
     static AbstractMetaFunction *
         createFunction(const QString &name, AbstractMetaFunction::FunctionType t,
                        Access access, const AbstractMetaArgumentList &arguments,
-                       const AbstractMetaType &returnType, AbstractMetaClass *q);
+                       const AbstractMetaType &returnType, const AbstractMetaClassPtr &q);
     void addConstructor(AbstractMetaFunction::FunctionType t,
                         Access access,
                         const AbstractMetaArgumentList &arguments,
-                        AbstractMetaClass *q);
-    void addUsingConstructors(AbstractMetaClass *q);
+                        const AbstractMetaClassPtr &q);
+    void addUsingConstructors(const AbstractMetaClassPtr &q);
     void sortFunctions();
     void setFunctions(const AbstractMetaFunctionCList &functions,
-                      AbstractMetaClass *q);
-    bool isUsingMember(const AbstractMetaClass *c, const QString &memberName,
+                      const AbstractMetaClassCPtr &q);
+    bool isUsingMember(const AbstractMetaClassCPtr &c, const QString &memberName,
                        Access minimumAccess) const;
     bool hasConstructors() const;
     qsizetype indexOfProperty(const QString &name) const;
@@ -93,13 +93,13 @@ public:
 
     Documentation m_doc;
 
-    const AbstractMetaClass *m_enclosingClass = nullptr;
-    const AbstractMetaClass *m_defaultSuperclass = nullptr;
+    AbstractMetaClassCPtr m_enclosingClass;
+    AbstractMetaClassCPtr m_defaultSuperclass;
     AbstractMetaClassCList m_baseClasses; // Real base classes after setting up inheritance
     AbstractMetaTypeList m_baseTemplateInstantiations;
-    const AbstractMetaClass *m_extendedNamespace = nullptr;
+    AbstractMetaClassCPtr m_extendedNamespace;
 
-    const AbstractMetaClass *m_templateBaseClass = nullptr;
+    AbstractMetaClassCPtr m_templateBaseClass;
     AbstractMetaFunctionCList m_functions;
     AbstractMetaFieldList m_fields;
     AbstractMetaEnumList m_enums;
@@ -320,12 +320,12 @@ void AbstractMetaClass::sortFunctions()
    d->sortFunctions();
 }
 
-const AbstractMetaClass *AbstractMetaClass::templateBaseClass() const
+AbstractMetaClassCPtr AbstractMetaClass::templateBaseClass() const
 {
     return d->m_templateBaseClass;
 }
 
-void AbstractMetaClass::setTemplateBaseClass(const AbstractMetaClass *cls)
+void AbstractMetaClass::setTemplateBaseClass(const AbstractMetaClassCPtr &cls)
 {
     d->m_templateBaseClass = cls;
 }
@@ -341,7 +341,7 @@ void AbstractMetaClassPrivate::sortFunctions()
 }
 
 void AbstractMetaClassPrivate::setFunctions(const AbstractMetaFunctionCList &functions,
-                                            AbstractMetaClass *q)
+                                            const AbstractMetaClassCPtr &q)
 {
     m_functions = functions;
 
@@ -388,7 +388,8 @@ void AbstractMetaClassPrivate::addFunction(const AbstractMetaFunctionCPtr &funct
         && function->functionType() == AbstractMetaFunction::ConstructorFunction;
 }
 
-void AbstractMetaClass::addFunction(AbstractMetaClass *klass, const AbstractMetaFunctionCPtr &function)
+void AbstractMetaClass::addFunction(const AbstractMetaClassPtr &klass,
+                                    const AbstractMetaFunctionCPtr &function)
 {
     auto nonConstF = qSharedPointerConstCast<AbstractMetaFunction>(function);
     nonConstF->setOwnerClass(klass);
@@ -439,17 +440,17 @@ QString AbstractMetaClass::baseClassName() const
 }
 
 // Attribute "default-superclass"
-const AbstractMetaClass *AbstractMetaClass::defaultSuperclass() const
+AbstractMetaClassCPtr AbstractMetaClass::defaultSuperclass() const
 {
     return d->m_defaultSuperclass;
 }
 
-void AbstractMetaClass::setDefaultSuperclass(AbstractMetaClass *s)
+void AbstractMetaClass::setDefaultSuperclass(const AbstractMetaClassPtr &s)
 {
     d->m_defaultSuperclass = s;
 }
 
-const AbstractMetaClass *AbstractMetaClass::baseClass() const
+AbstractMetaClassCPtr AbstractMetaClass::baseClass() const
 {
     return d->m_baseClasses.value(0, nullptr);
 }
@@ -464,7 +465,7 @@ const AbstractMetaClassCList &AbstractMetaClass::baseClasses() const
 AbstractMetaClassCList AbstractMetaClass::typeSystemBaseClasses() const
 {
     AbstractMetaClassCList result = d->m_baseClasses;
-    if (d->m_defaultSuperclass != nullptr) {
+    if (!d->m_defaultSuperclass.isNull()) {
         result.removeAll(d->m_defaultSuperclass);
         result.prepend(d->m_defaultSuperclass);
     }
@@ -476,21 +477,21 @@ AbstractMetaClassCList AbstractMetaClass::allTypeSystemAncestors() const
 {
     AbstractMetaClassCList result;
     const auto baseClasses = typeSystemBaseClasses();
-    for (auto *base : baseClasses) {
+    for (const auto &base : baseClasses) {
         result.append(base);
         result.append(base->allTypeSystemAncestors());
     }
     return result;
 }
 
-void AbstractMetaClass::addBaseClass(const AbstractMetaClass *baseClass)
+void AbstractMetaClass::addBaseClass(const AbstractMetaClassCPtr &baseClass)
 {
     Q_ASSERT(baseClass);
     d->m_baseClasses.append(baseClass);
     d->m_isPolymorphic |= baseClass->isPolymorphic();
 }
 
-void AbstractMetaClass::setBaseClass(const AbstractMetaClass *baseClass)
+void AbstractMetaClass::setBaseClass(const AbstractMetaClassCPtr &baseClass)
 {
     if (baseClass) {
         d->m_baseClasses.prepend(baseClass);
@@ -498,12 +499,12 @@ void AbstractMetaClass::setBaseClass(const AbstractMetaClass *baseClass)
     }
 }
 
-const AbstractMetaClass *AbstractMetaClass::extendedNamespace() const
+AbstractMetaClassCPtr AbstractMetaClass::extendedNamespace() const
 {
     return d->m_extendedNamespace;
 }
 
-void AbstractMetaClass::setExtendedNamespace(const AbstractMetaClass *e)
+void AbstractMetaClass::setExtendedNamespace(const AbstractMetaClassCPtr &e)
 {
     d->m_extendedNamespace = e;
 }
@@ -513,7 +514,7 @@ const AbstractMetaClassCList &AbstractMetaClass::innerClasses() const
     return d->m_innerClasses;
 }
 
-void AbstractMetaClass::addInnerClass(AbstractMetaClass *cl)
+void AbstractMetaClass::addInnerClass(const AbstractMetaClassPtr &cl)
 {
     d->m_innerClasses << cl;
 }
@@ -808,7 +809,7 @@ bool AbstractMetaClass::hasPrivateCopyConstructor() const
 void AbstractMetaClassPrivate::addConstructor(AbstractMetaFunction::FunctionType t,
                                               Access access,
                                               const AbstractMetaArgumentList &arguments,
-                                              AbstractMetaClass *q)
+                                              const AbstractMetaClassPtr &q)
 {
     auto *f = createFunction(q->name(), t, access, arguments, AbstractMetaType::createVoid(), q);
     if (access != Access::Private)
@@ -818,13 +819,13 @@ void AbstractMetaClassPrivate::addConstructor(AbstractMetaFunction::FunctionType
     addFunction(AbstractMetaFunctionCPtr(f));
 }
 
-void AbstractMetaClass::addDefaultConstructor(AbstractMetaClass *klass)
+void AbstractMetaClass::addDefaultConstructor(const AbstractMetaClassPtr &klass)
 {
     klass->d->addConstructor(AbstractMetaFunction::ConstructorFunction,
                              Access::Public, {}, klass);
 }
 
-void AbstractMetaClass::addDefaultCopyConstructor(AbstractMetaClass *klass)
+void AbstractMetaClass::addDefaultCopyConstructor(const AbstractMetaClassPtr &klass)
 {
     AbstractMetaType argType(klass->typeEntry());
     argType.setReferenceType(LValueReference);
@@ -845,7 +846,7 @@ AbstractMetaFunction *
                                             Access access,
                                             const AbstractMetaArgumentList &arguments,
                                             const AbstractMetaType &returnType,
-                                            AbstractMetaClass *q)
+                                            const AbstractMetaClassPtr &q)
 {
     auto *f = new AbstractMetaFunction(name);
     f->setType(returnType);
@@ -870,7 +871,7 @@ static AbstractMetaType boolType()
 // Helper to synthesize comparison operators from a spaceship operator. Since
 // shiboken also generates code for comparing to different types, this fits
 // better than of handling it in the generator code.
-void AbstractMetaClass::addSynthesizedComparisonOperators(AbstractMetaClass *c)
+void AbstractMetaClass::addSynthesizedComparisonOperators(const AbstractMetaClassPtr &c)
 {
     static const auto returnType = boolType();
 
@@ -996,7 +997,7 @@ bool AbstractMetaClass::isImplicitlyDefaultConstructible() const
     return std::all_of(d->m_fields.cbegin(), d->m_fields.cend(),
                         defaultConstructibleField)
         && std::all_of(d->m_baseClasses.cbegin(), d->m_baseClasses.cend(),
-                       [] (const AbstractMetaClass *c) {
+                       [] (const AbstractMetaClassCPtr &c) {
                            return c->isDefaultConstructible();
                        });
 }
@@ -1031,7 +1032,7 @@ bool AbstractMetaClass::isImplicitlyCopyConstructible() const
 {
     // Fields are currently not considered
     return std::all_of(d->m_baseClasses.cbegin(), d->m_baseClasses.cend(),
-                       [] (const AbstractMetaClass *c) {
+                       [] (const AbstractMetaClassCPtr &c) {
                            return c->isCopyConstructible();
                        });
 }
@@ -1046,16 +1047,16 @@ bool AbstractMetaClass::canAddDefaultCopyConstructor() const
     return isImplicitlyCopyConstructible();
 }
 
-static bool classHasParentManagement(const AbstractMetaClass *c)
+static bool classHasParentManagement(const AbstractMetaClassCPtr &c)
 {
     const auto flags = c->typeEntry()->typeFlags();
     return flags.testFlag(ComplexTypeEntry::ParentManagement);
 }
 
-TypeEntryCPtr parentManagementEntry(const AbstractMetaClass *klass)
+TypeEntryCPtr parentManagementEntry(const AbstractMetaClassCPtr &klass)
 {
     if (klass->typeEntry()->isObject()) {
-        if (auto *c = recurseClassHierarchy(klass, classHasParentManagement))
+        if (auto c = recurseClassHierarchy(klass, classHasParentManagement); !c.isNull())
             return c->typeEntry();
     }
     return nullptr;
@@ -1125,7 +1126,7 @@ void AbstractMetaClass::addUsingMember(const UsingMember &um)
     d->m_usingMembers.append(um);
 }
 
-bool AbstractMetaClassPrivate::isUsingMember(const AbstractMetaClass *c,
+bool AbstractMetaClassPrivate::isUsingMember(const AbstractMetaClassCPtr &c,
                                              const QString &memberName,
                                              Access minimumAccess) const
 {
@@ -1136,7 +1137,7 @@ bool AbstractMetaClassPrivate::isUsingMember(const AbstractMetaClass *c,
     return it != m_usingMembers.cend() && it->access >= minimumAccess;
 }
 
-bool AbstractMetaClass::isUsingMember(const AbstractMetaClass *c,
+bool AbstractMetaClass::isUsingMember(const AbstractMetaClassCPtr &c,
                                       const QString &memberName,
                                       Access minimumAccess) const
 {
@@ -1348,7 +1349,7 @@ void AbstractMetaClass::getEnumsToBeGenerated(AbstractMetaEnumList *enumList) co
 void AbstractMetaClass::getEnumsFromInvisibleNamespacesToBeGenerated(AbstractMetaEnumList *enumList) const
 {
     if (isNamespace()) {
-        invisibleNamespaceRecursion([enumList](const AbstractMetaClass *c) {
+        invisibleNamespaceRecursion([enumList](const AbstractMetaClassCPtr &c) {
             c->getEnumsToBeGenerated(enumList);
         });
     }
@@ -1357,7 +1358,7 @@ void AbstractMetaClass::getEnumsFromInvisibleNamespacesToBeGenerated(AbstractMet
 void AbstractMetaClass::getFunctionsFromInvisibleNamespacesToBeGenerated(AbstractMetaFunctionCList *funcList) const
 {
     if (isNamespace()) {
-        invisibleNamespaceRecursion([funcList](const AbstractMetaClass *c) {
+        invisibleNamespaceRecursion([funcList](const AbstractMetaClassCPtr &c) {
             funcList->append(c->functions());
         });
     }
@@ -1368,7 +1369,8 @@ QString AbstractMetaClass::fullName() const
     return package() + u'.' + d->m_typeEntry->targetLangName();
 }
 
-static void addExtraIncludeForType(AbstractMetaClass *metaClass, const AbstractMetaType &type)
+static void addExtraIncludeForType(const AbstractMetaClassPtr &metaClass,
+                                   const AbstractMetaType &type)
 {
 
     Q_ASSERT(metaClass);
@@ -1385,11 +1387,11 @@ static void addExtraIncludeForType(AbstractMetaClass *metaClass, const AbstractM
     }
 }
 
-static void addExtraIncludesForFunction(AbstractMetaClass *metaClass,
+static void addExtraIncludesForFunction(const AbstractMetaClassPtr &metaClass,
                                         const AbstractMetaFunctionCPtr &meta_function)
 {
     Q_ASSERT(metaClass);
-    Q_ASSERT(meta_function);
+    Q_ASSERT(!meta_function.isNull());
     addExtraIncludeForType(metaClass, meta_function->type());
 
     const AbstractMetaArgumentList &arguments = meta_function->arguments();
@@ -1420,7 +1422,7 @@ static bool addSuperFunction(const AbstractMetaFunctionCPtr &f)
 // Add constructors imported via "using" from the base classes. This is not
 // needed for normal hidden inherited member functions since we generate a
 // cast to the base class to call them into binding code.
-void AbstractMetaClassPrivate::addUsingConstructors(AbstractMetaClass *q)
+void AbstractMetaClassPrivate::addUsingConstructors(const AbstractMetaClassPtr &q)
 {
     // Restricted to the non-constructor case currently to avoid
     // having to compare the parameter lists of existing constructors.
@@ -1429,7 +1431,7 @@ void AbstractMetaClassPrivate::addUsingConstructors(AbstractMetaClass *q)
         return;
     }
 
-    for (auto superClass : m_baseClasses) {
+    for (const auto &superClass : m_baseClasses) {
         // Find any "using base-constructor" directives
         if (isUsingMember(superClass, superClass->name(), Access::Protected)) {
             // Add to derived class with parameter lists.
@@ -1444,7 +1446,7 @@ void AbstractMetaClassPrivate::addUsingConstructors(AbstractMetaClass *q)
     }
 }
 
-void AbstractMetaClass::fixFunctions(AbstractMetaClass *klass)
+void AbstractMetaClass::fixFunctions(const AbstractMetaClassPtr &klass)
 {
     auto *d = klass->d.data();
     if (d->m_functionsFixed)
@@ -1466,8 +1468,8 @@ void AbstractMetaClass::fixFunctions(AbstractMetaClass *klass)
             nonRemovedFuncs.append(f);
     }
 
-    for (auto *superClassC : d->m_baseClasses) {
-        auto *superClass = const_cast<AbstractMetaClass *>(superClassC);
+    for (const auto &superClassC : d->m_baseClasses) {
+        auto superClass = qSharedPointerConstCast<AbstractMetaClass>(superClassC);
         AbstractMetaClass::fixFunctions(superClass);
         // Since we always traverse the complete hierarchy we are only
         // interrested in what each super class implements, not what
@@ -1695,11 +1697,11 @@ std::optional<AbstractMetaEnumValue>
     if (lst.size() > 1) {
         const auto &prefixName = lst.at(0);
         const auto &enumName = lst.at(1);
-        if (auto *cl = findClass(classes, prefixName))
+        if (auto cl = findClass(classes, prefixName); !cl.isNull())
             return cl->findEnumValue(enumName.toString());
     }
 
-    for (AbstractMetaClass *metaClass : classes) {
+    for (const auto &metaClass : classes) {
         auto enumValue = metaClass->findEnumValue(name);
         if (enumValue.has_value())
             return enumValue;
@@ -1742,31 +1744,31 @@ static It findClassHelper(It begin, It end, QStringView name)
     return end;
 }
 
-AbstractMetaClass *AbstractMetaClass::findClass(const AbstractMetaClassList &classes,
-                                                QStringView name)
+AbstractMetaClassPtr AbstractMetaClass::findClass(const AbstractMetaClassList &classes,
+                                                  QStringView name)
 {
     auto it =findClassHelper(classes.cbegin(), classes.cend(), name);
     return it != classes.cend() ? *it : nullptr;
 }
 
-const AbstractMetaClass *AbstractMetaClass::findClass(const AbstractMetaClassCList &classes,
-                                                      QStringView name)
+AbstractMetaClassCPtr AbstractMetaClass::findClass(const AbstractMetaClassCList &classes,
+                                                   QStringView name)
 {
     auto it = findClassHelper(classes.cbegin(), classes.cend(), name);
     return it != classes.cend() ? *it : nullptr;
 }
 
-AbstractMetaClass *AbstractMetaClass::findClass(const AbstractMetaClassList &classes,
-                                                const TypeEntryCPtr &typeEntry)
+AbstractMetaClassPtr AbstractMetaClass::findClass(const AbstractMetaClassList &classes,
+                                                  const TypeEntryCPtr &typeEntry)
 {
-    for (AbstractMetaClass *c : classes) {
+    for (AbstractMetaClassPtr c : classes) {
         if (c->typeEntry() == typeEntry)
             return c;
     }
     return nullptr;
 }
 
-const AbstractMetaClass *AbstractMetaClass::findClass(const AbstractMetaClassCList &classes,
+AbstractMetaClassCPtr AbstractMetaClass::findClass(const AbstractMetaClassCList &classes,
                                                       const TypeEntryCPtr &typeEntry)
 {
     for (auto c : classes) {
@@ -1777,19 +1779,19 @@ const AbstractMetaClass *AbstractMetaClass::findClass(const AbstractMetaClassCLi
 }
 
 /// Returns true if this class is a subclass of the given class
-bool inheritsFrom(const AbstractMetaClass *c, const AbstractMetaClass *cls)
+bool inheritsFrom(const AbstractMetaClassCPtr &c, const AbstractMetaClassCPtr &cls)
 {
     Q_ASSERT(cls != nullptr);
 
     if (c == cls || c->templateBaseClass() == cls)
         return true;
 
-    return recurseClassHierarchy(c, [cls](const AbstractMetaClass *c) {
-        return cls == c;
-    }) != nullptr;
+    return !recurseClassHierarchy(c, [cls](const AbstractMetaClassCPtr &c) {
+        return cls.data() == c.data();
+    }).isNull();
 }
 
-bool inheritsFrom(const AbstractMetaClass *c, const QString &name)
+bool inheritsFrom(const AbstractMetaClassCPtr &c, const QString &name)
 {
     if (c->qualifiedCppName() == name)
         return true;
@@ -1799,19 +1801,19 @@ bool inheritsFrom(const AbstractMetaClass *c, const QString &name)
         return true;
     }
 
-    return recurseClassHierarchy(c, [&name](const AbstractMetaClass *c) {
+    return !recurseClassHierarchy(c, [&name](const AbstractMetaClassCPtr &c) {
         return c->qualifiedCppName() == name;
-    }) != nullptr;
+    }).isNull();
 }
 
-const AbstractMetaClass *findBaseClass(const AbstractMetaClass *c,
-                                       const QString &qualifiedName)
+AbstractMetaClassCPtr findBaseClass(const AbstractMetaClassCPtr &c,
+                                    const QString &qualifiedName)
 {
-    auto *tp = c->templateBaseClass();
-    if (tp != nullptr && tp->qualifiedCppName() == qualifiedName)
+    auto tp = c->templateBaseClass();
+    if (!tp.isNull() && tp->qualifiedCppName() == qualifiedName)
         return tp;
 
-    return recurseClassHierarchy(c, [&qualifiedName](const AbstractMetaClass *c) {
+    return recurseClassHierarchy(c, [&qualifiedName](const AbstractMetaClassCPtr &c) {
         return c->qualifiedCppName() == qualifiedName;
     });
 }
@@ -1841,7 +1843,7 @@ void AbstractMetaClass::setValueTypeWithCopyConstructorOnly(bool v)
     d->m_valueTypeWithCopyConstructorOnly = v;
 }
 
-bool AbstractMetaClass::determineValueTypeWithCopyConstructorOnly(const AbstractMetaClass *c,
+bool AbstractMetaClass::determineValueTypeWithCopyConstructorOnly(const AbstractMetaClassCPtr &c,
                                                                   bool avoidProtectedHack)
 {
 
@@ -1907,7 +1909,7 @@ void AbstractMetaClass::format(QDebug &debug) const
 
     if (!d->m_baseClasses.isEmpty()) {
         debug << ", inherits ";
-        for (auto b : d->m_baseClasses)
+        for (const auto &b : d->m_baseClasses)
             debug << " \"" << b->name() << '"';
     }
 
@@ -1982,7 +1984,7 @@ QDebug operator<<(QDebug debug, const UsingMember &d)
     return debug;
 }
 
-QDebug operator<<(QDebug d, const AbstractMetaClass *ac)
+QDebug operator<<(QDebug d, const AbstractMetaClassCPtr &ac)
 {
     QDebugStateSaver saver(d);
     d.noquote();

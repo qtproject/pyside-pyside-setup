@@ -25,8 +25,8 @@ void TestRemoveField::testRemoveField()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, u"A");
-    QVERIFY(classA);
+    const auto classA = AbstractMetaClass::findClass(classes, u"A");
+    QVERIFY(!classA.isNull());
     QCOMPARE(classA->fields().size(), 1);
     const AbstractMetaField &fieldA = classA->fields().constFirst();
     QCOMPARE(fieldA.name(), u"fieldA");

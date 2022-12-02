@@ -5,9 +5,9 @@
 #include "abstractmetalang.h"
 #include "namespacetypeentry.h"
 
-const AbstractMetaClass *EnclosingClassMixin::targetLangEnclosingClass() const
+AbstractMetaClassCPtr EnclosingClassMixin::targetLangEnclosingClass() const
 {
-    auto result = m_enclosingClass;
+    auto result = m_enclosingClass.toStrongRef();
     while (result && !NamespaceTypeEntry::isVisibleScope(result->typeEntry()))
         result = result->enclosingClass();
     return result;

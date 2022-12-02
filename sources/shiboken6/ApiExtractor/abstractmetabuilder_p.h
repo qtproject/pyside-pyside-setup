@@ -29,7 +29,7 @@ public:
     struct TypeClassEntry
     {
         AbstractMetaType type;
-        const AbstractMetaClass *klass;
+        AbstractMetaClassCPtr klass;
     };
 
     using TranslateTypeFlags = AbstractMetaBuilder::TranslateTypeFlags;
@@ -37,7 +37,6 @@ public:
     Q_DISABLE_COPY(AbstractMetaBuilderPrivate)
 
     AbstractMetaBuilderPrivate();
-    ~AbstractMetaBuilderPrivate();
 
     static FileModelItem buildDom(QByteArrayList arguments,
                                   bool addCompilerSupportArguments,
@@ -60,57 +59,58 @@ public:
 
     NamespaceModelItem currentScope() const { return m_scopes.constLast(); }
 
-    AbstractMetaClass *argumentToClass(const ArgumentModelItem &,
-                                       const AbstractMetaClass *currentClass);
+    AbstractMetaClassPtr argumentToClass(const ArgumentModelItem &,
+                                       const AbstractMetaClassCPtr &currentClass);
 
-    void addAbstractMetaClass(AbstractMetaClass *cls, const _CodeModelItem *item);
-    AbstractMetaClass *traverseTypeDef(const FileModelItem &dom,
+    void addAbstractMetaClass(const AbstractMetaClassPtr &cls, const _CodeModelItem *item);
+    AbstractMetaClassPtr traverseTypeDef(const FileModelItem &dom,
                                        const TypeDefModelItem &typeDef,
-                                       AbstractMetaClass *currentClass);
+                                       const AbstractMetaClassPtr &currentClass);
     void traverseTypesystemTypedefs();
-    AbstractMetaClass *traverseClass(const FileModelItem &dom,
+    AbstractMetaClassPtr traverseClass(const FileModelItem &dom,
                                      const ClassModelItem &item,
-                                     AbstractMetaClass *currentClass);
-    void traverseScopeMembers(const ScopeModelItem &item, AbstractMetaClass *metaClass);
+                                     const AbstractMetaClassPtr &currentClass);
+    void traverseScopeMembers(const ScopeModelItem &item,
+                              const AbstractMetaClassPtr &metaClass);
     void traverseClassMembers(const ClassModelItem &scopeItem);
-    void traverseUsingMembers(AbstractMetaClass *metaClass);
+    void traverseUsingMembers(const AbstractMetaClassPtr &metaClass);
     void traverseNamespaceMembers(const NamespaceModelItem &scopeItem);
-    bool setupInheritance(AbstractMetaClass *metaClass);
-    AbstractMetaClass *traverseNamespace(const FileModelItem &dom,
+    bool setupInheritance(const AbstractMetaClassPtr &metaClass);
+    AbstractMetaClassPtr traverseNamespace(const FileModelItem &dom,
                                          const NamespaceModelItem &item);
     std::optional<AbstractMetaEnum> traverseEnum(const EnumModelItem &item,
-                                                 AbstractMetaClass *enclosing,
+                                                 const AbstractMetaClassPtr &enclosing,
                                                  const QSet<QString> &enumsDeclarations);
-    void traverseEnums(const ScopeModelItem &item, AbstractMetaClass *parent,
+    void traverseEnums(const ScopeModelItem &item, const AbstractMetaClassPtr &parent,
                        const QStringList &enumsDeclarations);
     AbstractMetaFunctionRawPtrList classFunctionList(const ScopeModelItem &scopeItem,
                                                      AbstractMetaClass::Attributes *constructorAttributes,
-                                                     AbstractMetaClass *currentClass);
-    void traverseFunctions(ScopeModelItem item, AbstractMetaClass *parent);
+                                                     const AbstractMetaClassPtr &currentClass);
+    void traverseFunctions(ScopeModelItem item, const AbstractMetaClassPtr &parent);
     static void applyFunctionModifications(AbstractMetaFunction *func);
-    void traverseFields(const ScopeModelItem &item, AbstractMetaClass *parent);
+    void traverseFields(const ScopeModelItem &item, const AbstractMetaClassPtr &parent);
     bool traverseStreamOperator(const FunctionModelItem &functionItem,
-                                AbstractMetaClass *currentClass);
+                                const AbstractMetaClassPtr &currentClass);
     void traverseOperatorFunction(const FunctionModelItem &item,
-                                  AbstractMetaClass *currentClass);
+                                  const AbstractMetaClassPtr &currentClass);
     AbstractMetaFunction *traverseAddedFunctionHelper(const AddedFunctionPtr &addedFunc,
-                                                      AbstractMetaClass *metaClass,
+                                                      const AbstractMetaClassPtr &metaClass,
                                                       QString *errorMessage);
     bool traverseAddedGlobalFunction(const AddedFunctionPtr &addedFunc,
                                      QString *errorMessage);
     bool traverseAddedMemberFunction(const AddedFunctionPtr &addedFunc,
-                                     AbstractMetaClass *metaClass,
+                                     const AbstractMetaClassPtr &metaClass,
                                      QString *errorMessage);
     AbstractMetaFunction *traverseFunction(const FunctionModelItem &function,
-                                           AbstractMetaClass *currentClass);
+                                           const AbstractMetaClassPtr &currentClass);
     std::optional<AbstractMetaField> traverseField(const VariableModelItem &field,
-                                                   const AbstractMetaClass *cls);
+                                                   const AbstractMetaClassCPtr &cls);
     void checkFunctionModifications();
     void registerHashFunction(const FunctionModelItem &functionItem,
-                              AbstractMetaClass *currentClass);
+                              const AbstractMetaClassPtr &currentClass);
     void registerToStringCapabilityIn(const NamespaceModelItem &namespaceItem);
     void registerToStringCapability(const FunctionModelItem &functionItem,
-                                    AbstractMetaClass *currentClass);
+                                    const AbstractMetaClassPtr &currentClass);
 
     /**
      *   A conversion operator function should not have its owner class as
@@ -124,48 +124,49 @@ public:
      */
     static void fixReturnTypeOfConversionOperator(AbstractMetaFunction *metaFunction);
 
-    void parseQ_Properties(AbstractMetaClass *metaClass, const QStringList &declarations);
-    void setupEquals(AbstractMetaClass *metaClass);
-    void setupComparable(AbstractMetaClass *metaClass);
-    void setupExternalConversion(const AbstractMetaClass *cls);
+    void parseQ_Properties(const AbstractMetaClassPtr &metaClass,
+                           const QStringList &declarations);
+    void setupEquals(const AbstractMetaClassPtr &metaClass);
+    void setupComparable(const AbstractMetaClassPtr &metaClass);
+    void setupExternalConversion(const AbstractMetaClassCPtr &cls);
 
     static bool isQualifiedCppIdentifier(QStringView e);
     QString fixDefaultValue(QString expr, const AbstractMetaType &type,
-                            const AbstractMetaClass *) const;
+                            const AbstractMetaClassCPtr &) const;
     QString fixSimpleDefaultValue(QStringView expr,
-                                  const AbstractMetaClass *klass) const;
+                                  const AbstractMetaClassCPtr &klass) const;
 
     QString fixEnumDefault(const AbstractMetaType &type, const QString &expr) const;
     /// Qualify a static field name for default value expressions
-    static QString qualifyStaticField(const AbstractMetaClass *c, QStringView field);
+    static QString qualifyStaticField(const AbstractMetaClassCPtr &c, QStringView field);
 
     std::optional<AbstractMetaType>
-        translateType(const TypeInfo &type, const AbstractMetaClass *currentClass,
+        translateType(const TypeInfo &type, const AbstractMetaClassCPtr &currentClass,
                       TranslateTypeFlags flags = {}, QString *errorMessage = nullptr);
     static std::optional<AbstractMetaType>
-        translateTypeStatic(const TypeInfo &type, const AbstractMetaClass *current,
+        translateTypeStatic(const TypeInfo &type, const AbstractMetaClassCPtr &current,
                             AbstractMetaBuilderPrivate *d = nullptr, TranslateTypeFlags flags = {},
                             QString *errorMessageIn = nullptr);
     static TypeEntryCList findTypeEntriesHelper(const QString &qualifiedName, const QString &name,
-                                                const AbstractMetaClass *currentClass = nullptr,
+                                                const AbstractMetaClassCPtr &currentClass = {},
                                                 AbstractMetaBuilderPrivate *d = nullptr);
     static TypeEntryCList findTypeEntries(const QString &qualifiedName, const QString &name,
-                                          const AbstractMetaClass *currentClass = nullptr,
+                                          const AbstractMetaClassCPtr &currentClass = {},
                                           AbstractMetaBuilderPrivate *d = nullptr,
                                           QString *errorMessage = nullptr);
 
     qint64 findOutValueFromString(const QString &stringValue, bool &ok);
 
-    AbstractMetaClass *findTemplateClass(const QString& name, const AbstractMetaClass *context,
+    AbstractMetaClassPtr findTemplateClass(const QString& name, const AbstractMetaClassCPtr &context,
                                          TypeInfo *info = Q_NULLPTR,
                                          ComplexTypeEntryPtr *baseContainerType = nullptr) const;
-    AbstractMetaClassCList getBaseClasses(const AbstractMetaClass *metaClass) const;
+    AbstractMetaClassCList getBaseClasses(const AbstractMetaClassCPtr &metaClass) const;
 
-    static bool inheritTemplate(AbstractMetaClass *subclass,
-                                const AbstractMetaClass *templateClass,
+    static bool inheritTemplate(const AbstractMetaClassPtr &subclass,
+                                const AbstractMetaClassCPtr &templateClass,
                                 const TypeInfo &info);
-    static bool inheritTemplate(AbstractMetaClass *subclass,
-                                const AbstractMetaClass *templateClass,
+    static bool inheritTemplate(const AbstractMetaClassPtr &subclass,
+                                const AbstractMetaClassCPtr &templateClass,
                                 const AbstractMetaTypeList &templateTypes,
                                 InheritTemplateFlags flags = {});
 
@@ -176,10 +177,10 @@ public:
     static AbstractMetaFunctionPtr
         inheritTemplateMember(const AbstractMetaFunctionCPtr &function,
                               const AbstractMetaTypeList &templateTypes,
-                              const AbstractMetaClass *templateClass,
-                              AbstractMetaClass *subclass);
+                              const AbstractMetaClassCPtr &templateClass,
+                              const AbstractMetaClassPtr &subclass);
 
-    static void inheritTemplateFunctions(AbstractMetaClass *subclass);
+    static void inheritTemplateFunctions(const AbstractMetaClassPtr &subclass);
     static std::optional<AbstractMetaType>
         inheritTemplateType(const AbstractMetaTypeList &templateTypes,
                             const AbstractMetaType &metaType);
@@ -191,8 +192,8 @@ public:
     void setInclude(const TypeEntryPtr &te, const QString &path) const;
     static void fixArgumentNames(AbstractMetaFunction *func, const FunctionModificationList &mods);
 
-    void fillAddedFunctions(AbstractMetaClass *metaClass);
-    const AbstractMetaClass *resolveTypeSystemTypeDef(const AbstractMetaType &t) const;
+    void fillAddedFunctions(const AbstractMetaClassPtr &metaClass);
+    AbstractMetaClassCPtr resolveTypeSystemTypeDef(const AbstractMetaType &t) const;
 
     void fixSmartPointers();
 
@@ -200,8 +201,8 @@ public:
     AbstractMetaClassList m_metaClasses;
     AbstractMetaClassList m_templates;
     AbstractMetaClassList m_smartPointers;
-    QHash<const _CodeModelItem *, AbstractMetaClass *> m_itemToClass;
-    QHash<const AbstractMetaClass *, const _CodeModelItem *> m_classToItem;
+    QHash<const _CodeModelItem *, AbstractMetaClassPtr > m_itemToClass;
+    QHash<AbstractMetaClassCPtr, const _CodeModelItem *> m_classToItem;
     AbstractMetaFunctionCList m_globalFunctions;
     AbstractMetaEnumList m_globalEnums;
 

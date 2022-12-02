@@ -238,7 +238,7 @@ static bool skipOperatorFunc(const AbstractMetaFunctionCPtr &func)
 }
 
 QList<AbstractMetaFunctionCList>
-    CppGenerator::filterGroupedOperatorFunctions(const AbstractMetaClass *metaClass,
+    CppGenerator::filterGroupedOperatorFunctions(const AbstractMetaClassCPtr &metaClass,
                                                  OperatorQueryOptions query)
 {
     // ( func_name, num_args ) => func_list
@@ -282,7 +282,7 @@ QList<AbstractMetaFunctionCList>
 }
 
 CppGenerator::BoolCastFunctionOptional
-    CppGenerator::boolCast(const AbstractMetaClass *metaClass) const
+    CppGenerator::boolCast(const AbstractMetaClassCPtr &metaClass) const
 {
     const auto te = metaClass->typeEntry();
     if (te->isSmartPointer()) {
@@ -501,7 +501,7 @@ static void writePyGetSetDefEntry(TextStream &s, const QString &name,
 
 static bool generateRichComparison(const GeneratorContext &c)
 {
-    auto *metaClass = c.metaClass();
+    const auto metaClass = c.metaClass();
     if (c.forSmartPointer()) {
         auto te = qSharedPointerCast<const SmartPointerTypeEntry>(metaClass->typeEntry());
         return te->smartPointerType() == TypeSystem::SmartPointerType::Shared;
@@ -514,7 +514,7 @@ void CppGenerator::generateIncludes(TextStream &s, const GeneratorContext &class
                                     const IncludeGroupList &includes,
                                     const AbstractMetaClassCList &innerClasses) const
 {
-    const AbstractMetaClass *metaClass = classContext.metaClass();
+    const auto metaClass = classContext.metaClass();
 
     // write license comment
     s << licenseComment() << '\n';
@@ -571,7 +571,7 @@ void CppGenerator::generateIncludes(TextStream &s, const GeneratorContext &class
 
     if (!innerClasses.isEmpty()) {
         s  << "\n// inner classes\n";
-        for (const AbstractMetaClass *innerClass : innerClasses) {
+        for (const auto &innerClass : innerClasses) {
             GeneratorContext innerClassContext = contextForClass(innerClass);
             s << "#include \""
                 << HeaderGenerator::headerFileNameForContext(innerClassContext) << "\"\n";
@@ -610,13 +610,13 @@ static void writePyMethodDefs(TextStream &s, const QString &className,
         << "};\n\n";
 }
 
-static bool hasHashFunction(const AbstractMetaClass *c)
+static bool hasHashFunction(const AbstractMetaClassCPtr &c)
 {
     return !c->typeEntry()->hashFunction().isEmpty()
            || c->hasHashFunction();
 }
 
-static bool needsTypeDiscoveryFunction(const AbstractMetaClass *c)
+static bool needsTypeDiscoveryFunction(const AbstractMetaClassCPtr &c)
 {
     return c->baseClass() != nullptr
            && (c->isPolymorphic() || !c->typeEntry()->polymorphicIdValue().isEmpty());
@@ -646,7 +646,7 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
     }
 
     s.setLanguage(TextStream::Language::Cpp);
-    const AbstractMetaClass *metaClass = classContext.metaClass();
+    AbstractMetaClassCPtr metaClass = classContext.metaClass();
     const auto typeEntry = metaClass->typeEntry();
 
     auto innerClasses = metaClass->innerClasses();
@@ -671,7 +671,7 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
 
     // Use class base namespace
     {
-        const AbstractMetaClass *context = metaClass->enclosingClass();
+        AbstractMetaClassCPtr context = metaClass->enclosingClass();
         while (context) {
             if (context->isNamespace() && !context->enclosingClass()
                 && qSharedPointerCast<const NamespaceTypeEntry>(context->typeEntry())->generateUsing()) {
@@ -958,7 +958,7 @@ static bool hasParameterPredicate(const AbstractMetaFunctionCPtr &f)
 void CppGenerator::generateSmartPointerClass(TextStream &s, const GeneratorContext &classContext)
 {
     s.setLanguage(TextStream::Language::Cpp);
-    const AbstractMetaClass *metaClass = classContext.metaClass();
+    AbstractMetaClassCPtr metaClass = classContext.metaClass();
     const auto typeEntry = qSharedPointerCast<const SmartPointerTypeEntry>(metaClass->typeEntry());
     const bool hasPointeeClass = classContext.pointeeClass() != nullptr;
     const auto smartPointerType = typeEntry->smartPointerType();
@@ -1845,7 +1845,7 @@ void CppGenerator::writeEnumConverterFunctions(TextStream &s, const AbstractMeta
     }
 }
 
-void CppGenerator::writeConverterFunctions(TextStream &s, const AbstractMetaClass *metaClass,
+void CppGenerator::writeConverterFunctions(TextStream &s, const AbstractMetaClassCPtr &metaClass,
                                            const GeneratorContext &classContext) const
 {
     s << "// Type conversion functions.\n\n";
@@ -1999,7 +1999,7 @@ return result;)";
         QString toCppConv;
         QString toCppPreConv;
         if (conv->isConversionOperator()) {
-            const AbstractMetaClass *sourceClass = conv->ownerClass();
+            const auto sourceClass = conv->ownerClass();
             typeCheck = u"PyObject_TypeCheck(pyIn, "_s
                         + cpythonTypeNameExt(sourceClass->typeEntry()) + u')';
             toCppConv = u'*' + cpythonWrapperCPtr(sourceClass->typeEntry(),
@@ -2072,7 +2072,7 @@ void CppGenerator::writeCustomConverterFunctions(TextStream &s,
     s << '\n';
 }
 
-void CppGenerator::writeConverterRegister(TextStream &s, const AbstractMetaClass *metaClass,
+void CppGenerator::writeConverterRegister(TextStream &s, const AbstractMetaClassCPtr &metaClass,
                                           const GeneratorContext &classContext) const
 {
     const auto typeEntry = metaClass->typeEntry();
@@ -2240,7 +2240,7 @@ void CppGenerator::writeSmartPointerConverterFunctions(TextStream &s,
     // TODO: Missing conversion to smart pointer pointer type:
 
     s << "// Register smartpointer conversion for all derived classes\n";
-    for (auto *base : baseClasses) {
+    for (const auto &base : baseClasses) {
         auto baseTe = base->typeEntry();
         if (smartPointerTypeEntry->matchesInstantiation(baseTe)) {
             if (auto opt = findSmartPointerInstantiation(smartPointerTypeEntry, baseTe)) {
@@ -2271,7 +2271,7 @@ void CppGenerator::writeMethodWrapperPreamble(TextStream &s,const OverloadData &
                                               ErrorReturn errorReturn) const
 {
     const auto rfunc = overloadData.referenceFunction();
-    const AbstractMetaClass *ownerClass = rfunc->targetLangOwner();
+    const auto ownerClass = rfunc->targetLangOwner();
     Q_ASSERT(ownerClass == context.metaClass());
     int minArgs = overloadData.minArgs();
     int maxArgs = overloadData.maxArgs();
@@ -2341,7 +2341,7 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
     const ErrorReturn errorReturn = ErrorReturn::MinusOne;
 
     const auto rfunc = overloadData.referenceFunction();
-    const AbstractMetaClass *metaClass = rfunc->ownerClass();
+    const auto metaClass = rfunc->ownerClass();
 
     s << "static int\n";
     s << cpythonFunctionName(rfunc)
@@ -2602,8 +2602,8 @@ void CppGenerator::writeArgumentsInitializer(TextStream &s, const OverloadData &
 
     // Disable argument count checks for QObject constructors to allow for
     // passing properties as KW args.
-    auto *owner = rfunc->ownerClass();
-    bool isQObjectConstructor = owner != nullptr && isQObject(owner)
+    const auto owner = rfunc->ownerClass();
+    bool isQObjectConstructor = !owner.isNull() && isQObject(owner)
         && rfunc->functionType() == AbstractMetaFunction::ConstructorFunction;
 
     if (usesNamedArguments && !isQObjectConstructor) {
@@ -2701,7 +2701,7 @@ void CppGenerator::writeCppSelfDefinition(TextStream &s,
         return;
     }
 
-    const AbstractMetaClass *metaClass = context.metaClass();
+    AbstractMetaClassCPtr metaClass = context.metaClass();
     const auto cppWrapper = context.metaClass()->cppWrapper();
     // In the Python method, use the wrapper to access the protected
     // functions.
@@ -2918,7 +2918,7 @@ qsizetype CppGenerator::writeArgumentConversion(TextStream &s,
                                                 const QString &argName,
                                                 const QString &pyArgName,
                                                 ErrorReturn errorReturn,
-                                                const AbstractMetaClass *context,
+                                                const AbstractMetaClassCPtr &context,
                                                 const QString &defaultValue,
                                                 bool castArgumentAsUnused) const
 {
@@ -2994,7 +2994,7 @@ qsizetype CppGenerator::writePythonToCppTypeConversion(TextStream &s,
                                                   const AbstractMetaType &type,
                                                   const QString &pyIn,
                                                   const QString &cppOut,
-                                                  const AbstractMetaClass *context,
+                                                  const AbstractMetaClassCPtr &context,
                                                   const QString &defaultValue) const
 {
     TypeEntryCPtr typeEntry = type.typeEntry();
@@ -3167,7 +3167,7 @@ void CppGenerator::writeOverloadedFunctionDecisor(TextStream &s, const OverloadD
         s << "// " << i << ": ";
         if (func->isStatic())
             s << "static ";
-        if (const auto *decl = func->declaringClass())
+        if (const auto decl = func->declaringClass(); !decl.isNull())
             s << decl->name() << "::";
         s << func->signatureComment() << '\n';
     }
@@ -3285,7 +3285,7 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(TextStream &s,
                 auto func = od->referenceFunction();
 
                 if (func->isConstructor() && func->arguments().size() == 1) {
-                    const AbstractMetaClass *ownerClass = func->ownerClass();
+                    AbstractMetaClassCPtr ownerClass = func->ownerClass();
                     ComplexTypeEntryCPtr baseContainerType = ownerClass->typeEntry()->baseContainerType();
                     if (baseContainerType && baseContainerType == func->arguments().constFirst().type().typeEntry()
                         && ownerClass->isCopyable()) {
@@ -3374,7 +3374,7 @@ static void writeDeprecationWarning(TextStream &s,
                                     CppGenerator::ErrorReturn errorReturn)
 {
     s << "Shiboken::Warnings::warnDeprecated(\"";
-    if (auto *cls = context.metaClass())
+    if (const auto cls = context.metaClass(); !cls.isNull())
         s << cls->name() << "\", ";
     // Check error in case "warning-as-error" is set.
     s << '"' << func->signature().replace(u"::"_s, u"."_s) << "\");\n"
@@ -3774,8 +3774,8 @@ static bool forceQObjectNamedArguments(const AbstractMetaFunctionCPtr &func)
 {
     if (func->functionType() != AbstractMetaFunction::ConstructorFunction)
         return false;
-    auto *owner = func->ownerClass();
-    Q_ASSERT(owner);
+    const auto owner = func->ownerClass();
+    Q_ASSERT(!owner.isNull());
     if (!isQObject(owner))
         return false;
     const QString &name = owner->name();
@@ -3863,7 +3863,7 @@ QString CppGenerator::argumentNameFromIndex(const ApiExtractorResult &api,
     return pythonArgsAt(argIndex - 1);
 }
 
-const AbstractMetaClass *
+AbstractMetaClassCPtr
 CppGenerator::argumentClassFromIndex(const ApiExtractorResult &api,
                                      const AbstractMetaFunctionCPtr &func, int argIndex)
 {
@@ -3888,8 +3888,8 @@ CppGenerator::argumentClassFromIndex(const ApiExtractorResult &api,
     auto te = type.typeEntry();
     if (type.isVoid() || !te->isComplex())
         throw Exception(msgInvalidArgumentModification(func, argIndex));
-    auto *result = AbstractMetaClass::findClass(api.classes(), te);
-    if (!result)
+    const auto result = AbstractMetaClass::findClass(api.classes(), te);
+    if (result.isNull())
         throw Exception(msgClassNotFound(te));
     return result;
 }
@@ -4297,8 +4297,8 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
             s << "Shiboken::Object::";
             if (ownership == TypeSystem::TargetLangOwnership) {
                 s << "getOwnership(" << pyArgName << ");";
-            } else if (auto *ac = argumentClassFromIndex(api(), func, argIndex);
-                       ac->hasVirtualDestructor()) {
+            } else if (auto ac = argumentClassFromIndex(api(), func, argIndex);
+                       !ac.isNull() && ac->hasVirtualDestructor()) {
                 s << "releaseOwnership(" << pyArgName << ");";
             } else {
                 s << "invalidate(" << pyArgName << ");";
@@ -4343,12 +4343,12 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
         s << propagateException;
 }
 
-QStringList CppGenerator::getAncestorMultipleInheritance(const AbstractMetaClass *metaClass)
+QStringList CppGenerator::getAncestorMultipleInheritance(const AbstractMetaClassCPtr &metaClass)
 {
     QStringList result;
     const auto &baseClases = metaClass->typeSystemBaseClasses();
     if (!baseClases.isEmpty()) {
-        for (const AbstractMetaClass *baseClass : baseClases) {
+        for (const auto &baseClass : baseClases) {
             QString offset;
             QTextStream(&offset) << "reinterpret_cast<uintptr_t>(static_cast<const "
                 << baseClass->qualifiedCppName() << " *>(class_ptr)) - base";
@@ -4361,13 +4361,14 @@ QStringList CppGenerator::getAncestorMultipleInheritance(const AbstractMetaClass
             result.append(offset);
         }
 
-        for (const AbstractMetaClass *baseClass : baseClases)
+        for (const auto &baseClass : baseClases)
             result.append(getAncestorMultipleInheritance(baseClass));
     }
     return result;
 }
 
-void CppGenerator::writeMultipleInheritanceInitializerFunction(TextStream &s, const AbstractMetaClass *metaClass)
+void CppGenerator::writeMultipleInheritanceInitializerFunction(TextStream &s,
+                                                               const AbstractMetaClassCPtr &metaClass)
 {
     QString className = metaClass->qualifiedCppName();
     const QStringList ancestors = getAncestorMultipleInheritance(metaClass);
@@ -4391,7 +4392,7 @@ void CppGenerator::writeMultipleInheritanceInitializerFunction(TextStream &s, co
         << "}\nreturn mi_offsets;\n" << outdent << "}\n";
 }
 
-void CppGenerator::writeSpecialCastFunction(TextStream &s, const AbstractMetaClass *metaClass)
+void CppGenerator::writeSpecialCastFunction(TextStream &s, const AbstractMetaClassCPtr &metaClass)
 {
     QString className = metaClass->qualifiedCppName();
     s << "static void * " << cpythonSpecialCastFunctionName(metaClass)
@@ -4399,7 +4400,7 @@ void CppGenerator::writeSpecialCastFunction(TextStream &s, const AbstractMetaCla
         << "auto me = reinterpret_cast< ::" << className << " *>(obj);\n";
     bool firstClass = true;
     const auto &allAncestors = metaClass->allTypeSystemAncestors();
-    for (const AbstractMetaClass *baseClass : allAncestors) {
+    for (const auto &baseClass : allAncestors) {
         if (!firstClass)
             s << "else ";
         s << "if (desiredType == " << cpythonTypeNameExt(baseClass->typeEntry())
@@ -4574,7 +4575,7 @@ void CppGenerator::writeSmartPointerConverterInitialization(TextStream &s, const
     s << "// Register SmartPointer converter for type '" << cppSignature << "'." << '\n'
        << "///////////////////////////////////////////////////////////////////////////////////////\n\n";
 
-    for (auto *base : classes) {
+    for (const auto &base : classes) {
         auto baseTe = base->typeEntry();
         if (auto opt = findSmartPointerInstantiation(smartPointerTypeEntry, baseTe)) {
             const auto smartTargetType = opt.value();
@@ -4597,7 +4598,7 @@ void CppGenerator::writeExtendedConverterInitialization(TextStream &s,
 {
     s << "// Extended implicit conversions for " << externalType->qualifiedTargetLangName()
       << ".\n";
-    for (const AbstractMetaClass *sourceClass : conversions) {
+    for (const auto &sourceClass : conversions) {
         const QString converterVar = cppApiVariableName(externalType->targetLangPackage()) + u'['
             + getTypeIndexVariableName(externalType) + u']';
         QString sourceTypeName = fixedCppTypeName(sourceClass->typeEntry());
@@ -4608,12 +4609,12 @@ void CppGenerator::writeExtendedConverterInitialization(TextStream &s,
     }
 }
 
-QString CppGenerator::multipleInheritanceInitializerFunctionName(const AbstractMetaClass *metaClass)
+QString CppGenerator::multipleInheritanceInitializerFunctionName(const AbstractMetaClassCPtr &metaClass)
 {
     return cpythonBaseName(metaClass->typeEntry()) + u"_mi_init"_s;
 }
 
-bool CppGenerator::supportsMappingProtocol(const AbstractMetaClass *metaClass)
+bool CppGenerator::supportsMappingProtocol(const AbstractMetaClassCPtr &metaClass)
 {
     for (const auto &m : mappingProtocols()) {
         if (metaClass->hasFunction(m.name))
@@ -4623,7 +4624,7 @@ bool CppGenerator::supportsMappingProtocol(const AbstractMetaClass *metaClass)
     return false;
 }
 
-bool CppGenerator::supportsNumberProtocol(const AbstractMetaClass *metaClass) const
+bool CppGenerator::supportsNumberProtocol(const AbstractMetaClassCPtr &metaClass) const
 {
     return metaClass->hasArithmeticOperatorOverload()
             || metaClass->hasIncDecrementOperatorOverload()
@@ -4632,7 +4633,7 @@ bool CppGenerator::supportsNumberProtocol(const AbstractMetaClass *metaClass) co
             || hasBoolCast(metaClass);
 }
 
-bool CppGenerator::supportsSequenceProtocol(const AbstractMetaClass *metaClass)
+bool CppGenerator::supportsSequenceProtocol(const AbstractMetaClassCPtr &metaClass)
 {
     for (const auto &seq : sequenceProtocols()) {
         if (metaClass->hasFunction(seq.name))
@@ -4643,7 +4644,7 @@ bool CppGenerator::supportsSequenceProtocol(const AbstractMetaClass *metaClass)
     return baseType && baseType->isContainer();
 }
 
-bool CppGenerator::shouldGenerateGetSetList(const AbstractMetaClass *metaClass) const
+bool CppGenerator::shouldGenerateGetSetList(const AbstractMetaClassCPtr &metaClass) const
 {
     for (const AbstractMetaField &f : metaClass->fields()) {
         if (!f.isStatic())
@@ -4683,7 +4684,7 @@ TextStream &operator<<(TextStream &str, const pyTypeSlotEntry &e)
 }
 
 void CppGenerator::writeClassDefinition(TextStream &s,
-                                        const AbstractMetaClass *metaClass,
+                                        const AbstractMetaClassCPtr &metaClass,
                                         const GeneratorContext &classContext)
 {
     QString tp_init;
@@ -4778,8 +4779,8 @@ void CppGenerator::writeClassDefinition(TextStream &s,
     }
 
     // class or some ancestor has multiple inheritance
-    const AbstractMetaClass *miClass = getMultipleInheritingClass(metaClass);
-    if (miClass) {
+    const auto miClass = getMultipleInheritingClass(metaClass);
+    if (!miClass.isNull()) {
         if (metaClass == miClass)
             writeMultipleInheritanceInitializerFunction(s, metaClass);
         writeSpecialCastFunction(s, metaClass);
@@ -4843,7 +4844,7 @@ void CppGenerator::writeClassDefinition(TextStream &s,
 }
 
 void CppGenerator::writeMappingMethods(TextStream &s,
-                                       const AbstractMetaClass *metaClass,
+                                       const AbstractMetaClassCPtr &metaClass,
                                        const GeneratorContext &context) const
 {
     for (const auto & m : mappingProtocols()) {
@@ -4865,7 +4866,7 @@ void CppGenerator::writeMappingMethods(TextStream &s,
 }
 
 void CppGenerator::writeSequenceMethods(TextStream &s,
-                                        const AbstractMetaClass *metaClass,
+                                        const AbstractMetaClassCPtr &metaClass,
                                         const GeneratorContext &context) const
 {
     bool injectedCode = false;
@@ -4908,7 +4909,7 @@ static const QHash<QString, QString> &sqFuncs()
 }
 
 void CppGenerator::writeTypeAsSequenceDefinition(TextStream &s,
-                                                 const AbstractMetaClass *metaClass)
+                                                 const AbstractMetaClassCPtr &metaClass)
 {
     bool hasFunctions = false;
     QMap<QString, QString> funcs;
@@ -4940,7 +4941,7 @@ void CppGenerator::writeTypeAsSequenceDefinition(TextStream &s,
 }
 
 void CppGenerator::writeTypeAsMappingDefinition(TextStream &s,
-                                                const AbstractMetaClass *metaClass)
+                                                const AbstractMetaClassCPtr &metaClass)
 {
     // Sequence protocol structure members names
     static const QHash<QString, QString> mpFuncs{
@@ -4999,7 +5000,7 @@ static const QHash<QString, QString> &nbFuncs()
     return result;
 }
 
-void CppGenerator::writeTypeAsNumberDefinition(TextStream &s, const AbstractMetaClass *metaClass) const
+void CppGenerator::writeTypeAsNumberDefinition(TextStream &s, const AbstractMetaClassCPtr &metaClass) const
 {
     QMap<QString, QString> nb;
 
@@ -5047,7 +5048,7 @@ void CppGenerator::writeTypeAsNumberDefinition(TextStream &s, const AbstractMeta
     }
 }
 
-void CppGenerator::writeTpTraverseFunction(TextStream &s, const AbstractMetaClass *metaClass)
+void CppGenerator::writeTpTraverseFunction(TextStream &s, const AbstractMetaClassCPtr &metaClass)
 {
     QString baseName = cpythonBaseName(metaClass);
     s << "static int " << baseName
@@ -5056,7 +5057,7 @@ void CppGenerator::writeTpTraverseFunction(TextStream &s, const AbstractMetaClas
         << outdent << "}\n";
 }
 
-void CppGenerator::writeTpClearFunction(TextStream &s, const AbstractMetaClass *metaClass)
+void CppGenerator::writeTpClearFunction(TextStream &s, const AbstractMetaClassCPtr &metaClass)
 {
     QString baseName = cpythonBaseName(metaClass);
     s << "static int " << baseName << "_clear(PyObject *self)\n{\n" << indent
@@ -5066,7 +5067,7 @@ void CppGenerator::writeTpClearFunction(TextStream &s, const AbstractMetaClass *
 
 void CppGenerator::writeCopyFunction(TextStream &s, const GeneratorContext &context) const
 {
-    const AbstractMetaClass *metaClass = context.metaClass();
+    const auto metaClass = context.metaClass();
     const QString className = chopType(cpythonTypeName(metaClass));
     s << "static PyObject *" << className << "___copy__(PyObject *self)\n"
         << "{\n" << indent;
@@ -5286,7 +5287,7 @@ static const char richCompareComment[] =
 void CppGenerator::writeRichCompareFunction(TextStream &s,
                                             const GeneratorContext &context) const
 {
-    const AbstractMetaClass *metaClass = context.metaClass();
+    const auto metaClass = context.metaClass();
     QString baseName = cpythonBaseName(metaClass);
     writeRichCompareFunctionHeader(s, baseName, context);
 
@@ -5416,8 +5417,8 @@ static ComparisonOperatorList smartPointeeComparisons(const GeneratorContext &co
                 AbstractMetaFunction::OperatorGreaterEqual};
     }
 
-    auto *pointeeClass = context.pointeeClass();
-    if (!pointeeClass)
+    const auto pointeeClass = context.pointeeClass();
+    if (pointeeClass.isNull())
         return {};
 
     ComparisonOperatorList result;
@@ -5437,7 +5438,7 @@ void CppGenerator::writeSmartPointerRichCompareFunction(TextStream &s,
     static const char selfPointeeVar[] = "cppSelfPointee";
     static const char cppArg0PointeeVar[] = "cppArg0Pointee";
 
-    const AbstractMetaClass *metaClass = context.metaClass();
+    const auto metaClass = context.metaClass();
     QString baseName = cpythonBaseName(metaClass);
     writeRichCompareFunctionHeader(s, baseName, context);
 
@@ -5528,9 +5529,9 @@ QByteArrayList CppGenerator::methodDefinitionParameters(const OverloadData &over
     }
     // METH_STATIC causes a crash when used for global functions (also from
     // invisible namespaces).
-    auto *ownerClass = overloadData.referenceFunction()->ownerClass();
-    if (ownerClass
-        && !invisibleTopNamespaces().contains(const_cast<AbstractMetaClass *>(ownerClass))) {
+    const auto ownerClass = overloadData.referenceFunction()->ownerClass();
+    if (!ownerClass.isNull()
+        && !invisibleTopNamespaces().contains(qSharedPointerConstCast<AbstractMetaClass>(ownerClass))) {
         if (overloadData.hasStaticFunction())
             result.append(QByteArrayLiteral("METH_STATIC"));
         if (overloadData.hasClassMethod())
@@ -5676,12 +5677,12 @@ static QString mangleName(QString name)
 void CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum &cppEnum,
                                            ErrorReturn errorReturn) const
 {
-    const AbstractMetaClass *enclosingClass = cppEnum.targetLangEnclosingClass();
-    bool hasUpperEnclosingClass = enclosingClass
-                                  && enclosingClass->targetLangEnclosingClass() != nullptr;
+    const auto enclosingClass = cppEnum.targetLangEnclosingClass();
+    const bool hasUpperEnclosingClass = !enclosingClass.isNull()
+                                        && !enclosingClass->targetLangEnclosingClass().isNull();
     EnumTypeEntryCPtr enumTypeEntry = cppEnum.typeEntry();
     QString enclosingObjectVariable;
-    if (enclosingClass)
+    if (!enclosingClass.isNull())
         enclosingObjectVariable = cpythonTypeName(enclosingClass);
     else if (hasUpperEnclosingClass)
         enclosingObjectVariable = u"enclosingClass"_s;
@@ -5791,7 +5792,7 @@ void CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
     s << ".\n\n";
 }
 
-void CppGenerator::writeSignalInitialization(TextStream &s, const AbstractMetaClass *metaClass)
+void CppGenerator::writeSignalInitialization(TextStream &s, const AbstractMetaClassCPtr &metaClass)
 {
     // Try to check something and print some warnings
     const auto &signalFuncs = metaClass->cppSignalFunctions();
@@ -5942,7 +5943,7 @@ void CppGenerator::writeFlagsUnaryOperator(TextStream &s, const AbstractMetaEnum
     s << ";\n" << outdent << "}\n\n";
 }
 
-QString CppGenerator::getSimpleClassInitFunctionName(const AbstractMetaClass *metaClass)
+QString CppGenerator::getSimpleClassInitFunctionName(const AbstractMetaClassCPtr &metaClass)
 {
     QString initFunctionName;
     // Disambiguate namespaces per module to allow for extending them.
@@ -5953,7 +5954,8 @@ QString CppGenerator::getSimpleClassInitFunctionName(const AbstractMetaClass *me
     return initFunctionName;
 }
 
-QString CppGenerator::getSimpleClassStaticFieldsInitFunctionName(const AbstractMetaClass *metaClass)
+QString
+    CppGenerator::getSimpleClassStaticFieldsInitFunctionName(const AbstractMetaClassCPtr &metaClass)
 {
     return u"init_"_s + getSimpleClassInitFunctionName(metaClass)
         + u"StaticFields"_s;
@@ -5984,7 +5986,7 @@ void CppGenerator::writeSignatureStrings(TextStream &s,
 }
 
 // Return the class name for which to invoke the destructor
-QString CppGenerator::destructorClassName(const AbstractMetaClass *metaClass,
+QString CppGenerator::destructorClassName(const AbstractMetaClassCPtr &metaClass,
                                           const GeneratorContext &classContext) const
 {
     if (metaClass->isNamespace() || metaClass->hasPrivateDestructor())
@@ -6003,13 +6005,13 @@ QString CppGenerator::destructorClassName(const AbstractMetaClass *metaClass,
 }
 
 void CppGenerator::writeClassRegister(TextStream &s,
-                                      const AbstractMetaClass *metaClass,
+                                      const AbstractMetaClassCPtr &metaClass,
                                       const GeneratorContext &classContext,
                                       const QString &signatures) const
 {
     ComplexTypeEntryCPtr classTypeEntry = metaClass->typeEntry();
 
-    const AbstractMetaClass *enc = metaClass->targetLangEnclosingClass();
+    AbstractMetaClassCPtr enc = metaClass->targetLangEnclosingClass();
     QString enclosingObjectVariable = enc ? u"enclosingClass"_s : u"module"_s;
 
     QString pyTypeName = cpythonTypeName(metaClass);
@@ -6126,8 +6128,8 @@ void CppGenerator::writeClassRegister(TextStream &s,
     }
 
     // Fill multiple inheritance data, if needed.
-    const AbstractMetaClass *miClass = getMultipleInheritingClass(metaClass);
-    if (miClass) {
+    const auto miClass = getMultipleInheritingClass(metaClass);
+    if (!miClass.isNull()) {
         s << "MultipleInheritanceInitFunction func = ";
         if (miClass == metaClass) {
             s << multipleInheritanceInitializerFunctionName(miClass) << ";\n";
@@ -6188,7 +6190,8 @@ void CppGenerator::writeClassRegister(TextStream &s,
     s << outdent << "}\n";
 }
 
-void CppGenerator::writeStaticFieldInitialization(TextStream &s, const AbstractMetaClass *metaClass)
+void CppGenerator::writeStaticFieldInitialization(TextStream &s,
+                                                  const AbstractMetaClassCPtr &metaClass)
 {
     s << "\nvoid " << getSimpleClassStaticFieldsInitFunctionName(metaClass)
         << "()\n{\n" << indent << "auto dict = reinterpret_cast<PyTypeObject *>("
@@ -6209,7 +6212,7 @@ enum class QtRegisterMetaType
     None, Pointer, Value
 };
 
-static bool hasQtMetaTypeRegistrationSpec(const AbstractMetaClass *c)
+static bool hasQtMetaTypeRegistrationSpec(const AbstractMetaClassCPtr &c)
 {
     return c->typeEntry()->qtMetaTypeRegistration() !=
            TypeSystem::QtMetaTypeRegistration::Unspecified;
@@ -6218,7 +6221,7 @@ static bool hasQtMetaTypeRegistrationSpec(const AbstractMetaClass *c)
 // Returns if and how to register the Qt meta type. By default, "pointer" for
 // non-QObject object types and "value" for non-abstract, default-constructible
 // value types.
-QtRegisterMetaType qtMetaTypeRegistration(const AbstractMetaClass *c)
+QtRegisterMetaType qtMetaTypeRegistration(const AbstractMetaClassCPtr &c)
 {
     if (c->isNamespace())
         return QtRegisterMetaType::None;
@@ -6237,7 +6240,7 @@ QtRegisterMetaType qtMetaTypeRegistration(const AbstractMetaClass *c)
 
     // Is there a "base" specification in some base class, meaning only the
     // base class is to be registered?
-    if (auto *base = recurseClassHierarchy(c, hasQtMetaTypeRegistrationSpec)) {
+    if (auto base = recurseClassHierarchy(c, hasQtMetaTypeRegistrationSpec); !base.isNull()) {
         const auto baseSpec = base->typeEntry()->qtMetaTypeRegistration();
         if (baseSpec == TypeSystem::QtMetaTypeRegistration::BaseEnabled)
             return QtRegisterMetaType::None;
@@ -6253,7 +6256,7 @@ QtRegisterMetaType qtMetaTypeRegistration(const AbstractMetaClass *c)
 
 void CppGenerator::writeInitQtMetaTypeFunctionBody(TextStream &s, const GeneratorContext &context)
 {
-    const AbstractMetaClass *metaClass = context.metaClass();
+    const auto metaClass = context.metaClass();
     // Gets all class name variants used on different possible scopes
     QStringList nameVariants;
     if (!context.forSmartPointer())
@@ -6261,7 +6264,7 @@ void CppGenerator::writeInitQtMetaTypeFunctionBody(TextStream &s, const Generato
     else
         nameVariants << context.preciseType().cppSignature();
 
-    const AbstractMetaClass *enclosingClass = metaClass->enclosingClass();
+    AbstractMetaClassCPtr enclosingClass = metaClass->enclosingClass();
     while (enclosingClass) {
         if (enclosingClass->typeEntry()->generateCode())
             nameVariants << (enclosingClass->name() + u"::"_s + nameVariants.constLast());
@@ -6303,7 +6306,8 @@ void CppGenerator::writeInitQtMetaTypeFunctionBody(TextStream &s, const Generato
     }
 }
 
-void CppGenerator::writeTypeDiscoveryFunction(TextStream &s, const AbstractMetaClass *metaClass)
+void CppGenerator::writeTypeDiscoveryFunction(TextStream &s,
+                                              const AbstractMetaClassCPtr &metaClass)
 {
     QString polymorphicExpr = metaClass->typeEntry()->polymorphicIdValue();
 
@@ -6321,7 +6325,7 @@ void CppGenerator::writeTypeDiscoveryFunction(TextStream &s, const AbstractMetaC
             << "return cptr;\n" << outdent;
     } else if (metaClass->isPolymorphic()) {
         const auto &ancestors = metaClass->allTypeSystemAncestors();
-        for (auto *ancestor : ancestors) {
+        for (const auto &ancestor : ancestors) {
             if (ancestor->baseClass())
                 continue;
             if (ancestor->isPolymorphic()) {
@@ -6342,7 +6346,8 @@ void CppGenerator::writeTypeDiscoveryFunction(TextStream &s, const AbstractMetaC
     s << "return {};\n" << outdent << "}\n\n";
 }
 
-void CppGenerator::writeSetattroDefinition(TextStream &s, const AbstractMetaClass *metaClass) const
+void CppGenerator::writeSetattroDefinition(TextStream &s,
+                                           const AbstractMetaClassCPtr &metaClass) const
 {
     s << "static int " << ShibokenGenerator::cpythonSetattroFunctionName(metaClass)
         << "(PyObject *self, PyObject *name, PyObject *value)\n{\n" << indent;
@@ -6362,7 +6367,7 @@ void CppGenerator::writeSetattroFunction(TextStream &s, AttroCheck attroCheck,
                                          const GeneratorContext &context) const
 {
     Q_ASSERT(!context.forSmartPointer());
-    const AbstractMetaClass *metaClass = context.metaClass();
+    const auto metaClass = context.metaClass();
     writeSetattroDefinition(s, metaClass);
 
     // PYSIDE-1019: Switch tp_dict before doing tp_setattro.
@@ -6420,7 +6425,7 @@ void CppGenerator::writeSmartPointerSetattroFunction(TextStream &s,
     writeSetattroDefaultReturn(s);
 }
 
-void CppGenerator::writeGetattroDefinition(TextStream &s, const AbstractMetaClass *metaClass)
+void CppGenerator::writeGetattroDefinition(TextStream &s, const AbstractMetaClassCPtr &metaClass)
 {
     s << "static PyObject *" << cpythonGetattroFunctionName(metaClass)
         << "(PyObject *self, PyObject *name)\n{\n" << indent;
@@ -6443,7 +6448,7 @@ void CppGenerator::writeGetattroFunction(TextStream &s, AttroCheck attroCheck,
                                          const GeneratorContext &context) const
 {
     Q_ASSERT(!context.forSmartPointer());
-    const AbstractMetaClass *metaClass = context.metaClass();
+    const auto metaClass = context.metaClass();
     writeGetattroDefinition(s, metaClass);
 
     // PYSIDE-1019: Switch tp_dict before doing tp_getattro.
@@ -6506,7 +6511,7 @@ void CppGenerator::writeSmartPointerGetattroFunction(TextStream &s,
                                                      const BoolCastFunctionOptional &boolCast)
 {
     Q_ASSERT(context.forSmartPointer());
-    const AbstractMetaClass *metaClass = context.metaClass();
+    const auto metaClass = context.metaClass();
     writeGetattroDefinition(s, metaClass);
     s << "PyObject *tmp = PyObject_GenericGetAttr(self, name);\n"
         << "if (tmp)\n" << indent << "return tmp;\n" << outdent
@@ -6632,7 +6637,7 @@ bool CppGenerator::finishGeneration()
     }
 
     AbstractMetaClassCList classesWithStaticFields;
-    for (auto cls : api().classes()){
+    for (const auto &cls : api().classes()){
         auto te = cls->typeEntry();
         if (shouldGenerate(te)) {
             writeInitFunc(s_classInitDecl, s_classPythonDefines,
@@ -6649,10 +6654,11 @@ bool CppGenerator::finishGeneration()
     // Initialize smart pointer types.
     for (const auto &smp : api().instantiatedSmartPointers()) {
         GeneratorContext context = contextForSmartPointer(smp.specialized, smp.type);
-        auto *enclosingClass = context.metaClass()->enclosingClass();
-        auto enclosingTypeEntry = enclosingClass != nullptr
-            ? enclosingClass->typeEntry()
-            : targetLangEnclosingEntry(smp.type.typeEntry());
+        const auto enclosingClass = context.metaClass()->enclosingClass();
+        auto enclosingTypeEntry = enclosingClass.isNull()
+            ? targetLangEnclosingEntry(smp.type.typeEntry())
+            : enclosingClass->typeEntry();
+
         writeInitFunc(s_classInitDecl, s_classPythonDefines,
                       getInitFunctionName(context),
                       enclosingTypeEntry);
@@ -6713,7 +6719,7 @@ bool CppGenerator::finishGeneration()
 
     // Global enums
     AbstractMetaEnumList globalEnums = api().globalEnums();
-    for (const AbstractMetaClass *nsp : invisibleTopNamespaces()) {
+    for (const auto &nsp : invisibleTopNamespaces()) {
         const auto oldSize = globalEnums.size();
         nsp->getEnumsToBeGenerated(&globalEnums);
         if (globalEnums.size() > oldSize)
@@ -6808,7 +6814,7 @@ bool CppGenerator::finishGeneration()
             TypeEntryCPtr externalType = it.key();
             s << "// Extended implicit conversions for "
                 << externalType->qualifiedTargetLangName() << '.' << '\n';
-            for (const AbstractMetaClass *sourceClass : it.value()) {
+            for (const auto &sourceClass : it.value()) {
                 AbstractMetaType sourceType = AbstractMetaType::fromAbstractMetaClass(sourceClass);
                 AbstractMetaType targetType = AbstractMetaType::fromTypeEntry(externalType);
                 writePythonToCppConversionFunctions(s, sourceType, targetType);
@@ -6984,7 +6990,7 @@ bool CppGenerator::finishGeneration()
     // of the previously registered types (PYSIDE-1529).
     if (!classesWithStaticFields.isEmpty()) {
         s << "\n// Static field initialization\n";
-        for (auto cls : std::as_const(classesWithStaticFields))
+        for (const auto &cls : std::as_const(classesWithStaticFields))
             s << getSimpleClassStaticFieldsInitFunctionName(cls) << "();\n";
     }
 
@@ -7038,8 +7044,8 @@ static bool useParentHeuristics(const ApiExtractorResult &api,
 {
     if (!ComplexTypeEntry::isParentManagementEnabled()) // FIXME PYSIDE 7: Remove this
         return true;
-    auto *owner = func->ownerClass();
-    if (owner == nullptr)
+    const auto owner = func->ownerClass();
+    if (owner.isNull())
         return false;
     auto ownerEntry = parentManagementEntry(owner);
     if (ownerEntry.isNull())
@@ -7047,8 +7053,8 @@ static bool useParentHeuristics(const ApiExtractorResult &api,
     auto argTypeEntry = argType.typeEntry();
     if (!argTypeEntry->isComplex())
         return false;
-    auto *argClass = AbstractMetaClass::findClass(api.classes(), argTypeEntry);
-    return argClass != nullptr && parentManagementEntry(argClass) == ownerEntry;
+    const auto argClass = AbstractMetaClass::findClass(api.classes(), argTypeEntry);
+    return !argClass.isNull() && parentManagementEntry(argClass) == ownerEntry;
 }
 
 bool CppGenerator::writeParentChildManagement(TextStream &s, const AbstractMetaFunctionCPtr &func,
@@ -7156,7 +7162,7 @@ void CppGenerator::writeReturnValueHeuristics(TextStream &s, const AbstractMetaF
 
 void CppGenerator::writeHashFunction(TextStream &s, const GeneratorContext &context) const
 {
-    const AbstractMetaClass *metaClass = context.metaClass();
+    const auto metaClass = context.metaClass();
     const char hashType[] = "Py_hash_t";
     s << "static " << hashType << ' ' << cpythonBaseName(metaClass)
         << "_HashFunc(PyObject *self)\n{\n" << indent;
@@ -7180,7 +7186,7 @@ void CppGenerator::writeHashFunction(TextStream &s, const GeneratorContext &cont
 void CppGenerator::writeDefaultSequenceMethods(TextStream &s,
                                                const GeneratorContext &context) const
 {
-    const AbstractMetaClass *metaClass = context.metaClass();
+    const auto metaClass = context.metaClass();
     ErrorReturn errorReturn = ErrorReturn::Zero;
 
     // __len__
@@ -7251,7 +7257,7 @@ QString CppGenerator::writeReprFunction(TextStream &s,
                                         const GeneratorContext &context,
                                         uint indirections) const
 {
-    const AbstractMetaClass *metaClass = context.metaClass();
+    const auto metaClass = context.metaClass();
     QString funcName = cpythonBaseName(metaClass) + reprFunction();
     s << "extern \"C\"\n{\n"
         << "static PyObject *" << funcName << "(PyObject *self)\n{\n" << indent;

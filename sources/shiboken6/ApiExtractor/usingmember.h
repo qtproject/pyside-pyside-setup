@@ -12,7 +12,7 @@ QT_FORWARD_DECLARE_CLASS(QDebug)
 struct UsingMember // Introducing a base class member via 'using' directive
 {
     QString memberName;
-    const AbstractMetaClass *baseClass;
+    AbstractMetaClassCPtr baseClass;
     Access access;
 };
 

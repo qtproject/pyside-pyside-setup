@@ -74,13 +74,13 @@ public:
     static AbstractMetaFunctionPtr
         inheritTemplateMember(const AbstractMetaFunctionCPtr &function,
                               const AbstractMetaTypeList &templateTypes,
-                              const AbstractMetaClass *templateClass,
-                              AbstractMetaClass *subclass);
+                              const AbstractMetaClassCPtr &templateClass,
+                              const AbstractMetaClassPtr &subclass);
 
     /// Forwards to AbstractMetaBuilder::inheritTemplateClass()
-    static AbstractMetaClass *
+    static AbstractMetaClassPtr
         inheritTemplateClass(const ComplexTypeEntryPtr &te,
-                             const AbstractMetaClass *templateClass,
+                             const AbstractMetaClassCPtr &templateClass,
                              const AbstractMetaTypeList &templateTypes,
                              InheritTemplateFlags flags = {});
 

@@ -29,7 +29,7 @@ static inline QString colonColon() { return QStringLiteral("::"); }
 
 // abstractmetabuilder.cpp
 
-QString msgNoFunctionForModification(const AbstractMetaClass *klass,
+QString msgNoFunctionForModification(const AbstractMetaClassCPtr &klass,
                                      const QString &signature,
                                      const QString &originalSignature,
                                      const QStringList &possibleSignatures,
@@ -79,7 +79,7 @@ QString msgTypeModificationFailed(const QString &type, int n,
         str << "type of argument " << n;
 
     str << " of ";
-    if (auto *c = func->ownerClass())
+    if (auto c = func->ownerClass(); !c.isNull())
         str << c->name() << "::";
     str << func->signature() << " to \"" << type << "\": " << why;
     return result;
@@ -113,7 +113,7 @@ QString msgArgumentRemovalFailed(const AbstractMetaFunction *func, int n,
     QString result;
     QTextStream str(&result);
     str << "Unable to remove argument " << n << " of ";
-    if (auto *c = func->ownerClass())
+    if (auto c = func->ownerClass(); !c.isNull())
         str << c->name() << "::";
     str << func->signature() << ":  " << why;
     return result;
@@ -157,7 +157,7 @@ static void msgFormatEnumType(Stream &str,
 }
 
 static void formatAddedFuncError(const QString &addedFuncName,
-                                 const AbstractMetaClass *context,
+                                 const AbstractMetaClassCPtr &context,
                                  QTextStream &str)
 {
     if (context) {
@@ -173,7 +173,7 @@ static void formatAddedFuncError(const QString &addedFuncName,
 QString msgAddedFunctionInvalidArgType(const QString &addedFuncName,
                                        const QStringList &typeName,
                                        int pos, const QString &why,
-                                       const AbstractMetaClass *context)
+                                       const AbstractMetaClassCPtr &context)
 {
     QString result;
     QTextStream str(&result);
@@ -186,7 +186,7 @@ QString msgAddedFunctionInvalidArgType(const QString &addedFuncName,
 
 QString msgAddedFunctionInvalidReturnType(const QString &addedFuncName,
                                           const QStringList &typeName, const QString &why,
-                                          const AbstractMetaClass *context)
+                                          const AbstractMetaClassCPtr &context)
 {
     QString result;
     QTextStream str(&result);
@@ -197,7 +197,7 @@ QString msgAddedFunctionInvalidReturnType(const QString &addedFuncName,
     return result;
 }
 
-QString msgUnnamedArgumentDefaultExpression(const AbstractMetaClass *context,
+QString msgUnnamedArgumentDefaultExpression(const AbstractMetaClassCPtr &context,
                                             int n, const QString &className,
                                             const AbstractMetaFunction *f)
 {
@@ -324,7 +324,7 @@ QString msgShadowingFunction(const AbstractMetaFunction *f1,
     return result;
 }
 
-QString msgSignalOverloaded(const AbstractMetaClass *c,
+QString msgSignalOverloaded(const AbstractMetaClassCPtr &c,
                             const AbstractMetaFunction *f)
 {
     QString result;
@@ -392,7 +392,7 @@ QString msgEnumNotDefined(const EnumTypeEntryCPtr &t)
     return result;
 }
 
-QString msgUnknownBase(const AbstractMetaClass *metaClass,
+QString msgUnknownBase(const AbstractMetaClassCPtr &metaClass,
                        const QString &baseClassName)
 {
     QString result;
@@ -402,7 +402,7 @@ QString msgUnknownBase(const AbstractMetaClass *metaClass,
     return result;
 }
 
-QString msgBaseNotInTypeSystem(const AbstractMetaClass *metaClass,
+QString msgBaseNotInTypeSystem(const AbstractMetaClassCPtr &metaClass,
                                const QString &baseClassName)
 {
     QString result;
@@ -511,7 +511,7 @@ QString msgPropertyExists(const QString &className, const QString &name)
            + name + u"\" (defined by Q_PROPERTY)."_s;
 }
 
-QString msgFunctionVisibilityModified(const AbstractMetaClass *c,
+QString msgFunctionVisibilityModified(const AbstractMetaClassCPtr &c,
                                       const AbstractMetaFunction *f)
 {
     QString result;
@@ -521,7 +521,7 @@ QString msgFunctionVisibilityModified(const AbstractMetaClass *c,
     return result;
 }
 
-QString msgUsingMemberClassNotFound(const AbstractMetaClass *c,
+QString msgUsingMemberClassNotFound(const AbstractMetaClassCPtr &c,
                                     const QString &baseClassName,
                                     const QString &memberName)
 {
@@ -587,7 +587,7 @@ QString msgFallbackForDocumentation(const QString &fileName,
 }
 
 QString msgCannotFindDocumentation(const QString &fileName,
-                                   const AbstractMetaClass *metaClass,
+                                   const AbstractMetaClassCPtr &metaClass,
                                    const AbstractMetaEnum &e,
                                    const QString &query)
 {
@@ -597,7 +597,7 @@ QString msgCannotFindDocumentation(const QString &fileName,
 }
 
 QString msgCannotFindDocumentation(const QString &fileName,
-                                   const AbstractMetaClass *metaClass,
+                                   const AbstractMetaClassCPtr &metaClass,
                                    const AbstractMetaField &f,
                                    const QString &query)
 {
@@ -688,7 +688,7 @@ QString msgCannotFindSmartPointerMethod(const SmartPointerTypeEntryCPtr &te, con
         + te->name() + u"\" not found."_s;
 }
 
-QString msgMethodNotFound(const AbstractMetaClass *klass, const QString &name)
+QString msgMethodNotFound(const AbstractMetaClassCPtr &klass, const QString &name)
 {
      return u"Method \""_s + name + u"\" not found in class "_s
             + klass->name() + u'.';
@@ -734,7 +734,7 @@ QString msgCyclicDependency(const QString &funcName, const QString &graphName,
             if (i)
                 str << ", \"";
             str << involvedConversions.at(i)->signature() << '"';
-            if (const AbstractMetaClass *c = involvedConversions.at(i)->implementingClass())
+            if (const auto c = involvedConversions.at(i)->implementingClass(); !c.isNull())
                 str << '(' << c->name() << ')';
         }
     }
@@ -763,7 +763,7 @@ QString msgUnknownOperator(const AbstractMetaFunction *func)
 {
     QString result = u"Unknown operator: \""_s + func->originalName()
                      + u'"';
-    if (const AbstractMetaClass *c = func->implementingClass())
+    if (const auto c = func->implementingClass(); !c.isNull())
         result += u" in class: "_s + c->name();
     return result;
 }
@@ -774,7 +774,7 @@ QString msgWrongIndex(const char *varName, const QString &capture,
     QString result;
     QTextStream str(&result);
     str << "Wrong index for " << varName << " variable (" << capture << ") on ";
-    if (const AbstractMetaClass *c = func->implementingClass())
+    if (const auto c = func->implementingClass(); !c.isNull())
         str << c->name() << "::";
     str << func->signature();
     return  result;

@@ -23,8 +23,8 @@ void TestExtraInclude::testClassExtraInclude()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, u"A");
-    QVERIFY(classA);
+    const auto classA = AbstractMetaClass::findClass(classes, u"A");
+    QVERIFY(!classA.isNull());
 
     QList<Include> includes = classA->typeEntry()->extraIncludes();
     QCOMPARE(includes.size(), 1);

@@ -86,7 +86,7 @@ bool DocParser::skipForQuery(const AbstractMetaFunctionCPtr &func)
                        usesRValueReference);
 }
 
-DocModificationList DocParser::getDocModifications(const AbstractMetaClass *cppClass,
+DocModificationList DocParser::getDocModifications(const AbstractMetaClassCPtr &cppClass,
                                                    const AbstractMetaFunctionCPtr &func)
 {
     auto te = cppClass->typeEntry();
@@ -120,7 +120,7 @@ QString DocParser::enumBaseClass(const AbstractMetaEnum &e)
     return e.typeEntry()->flags() != nullptr ? u"Flag"_s : u"Enum"_s;
 }
 
-AbstractMetaFunctionCList DocParser::documentableFunctions(const AbstractMetaClass *metaClass)
+AbstractMetaFunctionCList DocParser::documentableFunctions(const AbstractMetaClassCPtr &metaClass)
 {
     auto result = metaClass->functionsInTargetLang();
     for (auto i = result.size() - 1; i >= 0; --i)  {

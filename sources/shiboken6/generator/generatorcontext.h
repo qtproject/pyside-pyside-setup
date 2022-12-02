@@ -31,9 +31,9 @@ public:
 
     GeneratorContext() = default;
 
-    const AbstractMetaClass *metaClass() const { return m_metaClass; }
+    AbstractMetaClassCPtr metaClass() const { return m_metaClass; }
     const AbstractMetaType &preciseType() const { return m_preciseClassType; }
-    const AbstractMetaClass *pointeeClass() const { return m_pointeeClass; }
+    AbstractMetaClassCPtr pointeeClass() const { return m_pointeeClass; }
 
     bool forSmartPointer() const { return m_type == SmartPointer; }
     bool useWrapper() const { return m_type ==  WrappedClass; }
@@ -44,8 +44,8 @@ public:
     QString effectiveClassName() const;
 
 private:
-    const AbstractMetaClass *m_metaClass = nullptr;
-    const AbstractMetaClass *m_pointeeClass = nullptr;
+    AbstractMetaClassCPtr m_metaClass;
+    AbstractMetaClassCPtr m_pointeeClass;
     AbstractMetaType m_preciseClassType;
     QString m_wrappername;
     Type m_type = Class;

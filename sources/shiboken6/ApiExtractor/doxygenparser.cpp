@@ -41,7 +41,7 @@ Documentation DoxygenParser::retrieveModuleDocumentation()
         return retrieveModuleDocumentation(packageName());
 }
 
-void DoxygenParser::fillDocumentation(AbstractMetaClass *metaClass)
+void DoxygenParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
 {
     if (!metaClass)
         return;

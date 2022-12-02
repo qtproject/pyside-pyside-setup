@@ -26,7 +26,7 @@ public:
 
     DocParser();
     virtual ~DocParser();
-    virtual void fillDocumentation(AbstractMetaClass *metaClass) = 0;
+    virtual void fillDocumentation(const AbstractMetaClassPtr &metaClass) = 0;
 
     /**
      *   Process and retrieves documentation concerning the entire
@@ -93,7 +93,7 @@ public:
 
     /// Helper to return the documentation modifications for a class
     /// or a member function.
-    static DocModificationList getDocModifications(const AbstractMetaClass *cppClass,
+    static DocModificationList getDocModifications(const AbstractMetaClassCPtr &cppClass,
                                                    const AbstractMetaFunctionCPtr &func = {});
 
     static QString enumBaseClass(const AbstractMetaEnum &e);
@@ -103,7 +103,7 @@ protected:
                                     const QString &query,
                                     const DocModificationList &mods);
 
-    static AbstractMetaFunctionCList documentableFunctions(const AbstractMetaClass *metaClass);
+    static AbstractMetaFunctionCList documentableFunctions(const AbstractMetaClassCPtr &metaClass);
 
     static QString applyDocModifications(const DocModificationList &mods, const QString &xml);
 

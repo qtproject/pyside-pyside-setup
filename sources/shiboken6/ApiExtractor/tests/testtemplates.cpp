@@ -58,8 +58,8 @@ namespace Internet {
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
 
-    auto *classB = AbstractMetaClass::findClass(classes, u"Bookmarks");
-    QVERIFY(classB);
+    const auto classB = AbstractMetaClass::findClass(classes, u"Bookmarks");
+    QVERIFY(!classB.isNull());
     const auto func = classB->findFunction(u"list");
     QVERIFY(!func.isNull());
     AbstractMetaType funcType = func->type();
@@ -96,8 +96,8 @@ namespace Namespace {
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
 
-    auto *classB = AbstractMetaClass::findClass(classes, u"B");
-    QVERIFY(classB);
+    const auto classB = AbstractMetaClass::findClass(classes, u"B");
+    QVERIFY(!classB.isNull());
     QVERIFY(!classB->baseClass());
     QVERIFY(classB->baseClassName().isEmpty());
     const auto func = classB->findFunction(u"foo");
@@ -213,7 +213,7 @@ struct List {
     const AbstractMetaClassList templates = builder->templates();
 
     QCOMPARE(templates.size(), 1);
-    const AbstractMetaClass *list = templates.constFirst();
+    AbstractMetaClassCPtr list = templates.constFirst();
     // Verify that the parameter of "void append(List l)" gets fixed to "List<T >"
     const auto append = list->findFunction(QStringLiteral("append"));
     QVERIFY(!append.isNull());
@@ -256,10 +256,10 @@ struct FooBars : public ListContainer<FooBar> {};
     QCOMPARE(classes.size(), 2);
     QCOMPARE(templates.size(), 1);
 
-    const auto *foobars = AbstractMetaClass::findClass(classes, u"FooBars");
+    const auto foobars = AbstractMetaClass::findClass(classes, u"FooBars");
     QCOMPARE(foobars->functions().size(), 4);
 
-    const AbstractMetaClass *lc = templates.constFirst();
+    AbstractMetaClassCPtr lc = templates.constFirst();
     QCOMPARE(lc->functions().size(), 2);
 }
 
@@ -290,8 +290,8 @@ template<SomeEnum type> struct Future {};
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
 
-    auto *classB = AbstractMetaClass::findClass(classes, u"B");
-    QVERIFY(classB);
+    const auto classB = AbstractMetaClass::findClass(classes, u"B");
+    QVERIFY(!classB.isNull());
     QVERIFY(!classB->baseClass());
     QVERIFY(classB->baseClassName().isEmpty());
     // 3 functions: simple constructor, copy constructor and "method()".
@@ -329,8 +329,8 @@ template<SomeEnum type> struct Future {};
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
 
-    auto *classB = AbstractMetaClass::findClass(classes, u"Namespace::B");
-    QVERIFY(classB);
+    const auto classB = AbstractMetaClass::findClass(classes, u"Namespace::B");
+    QVERIFY(!classB.isNull());
     QVERIFY(!classB->baseClass());
     QVERIFY(classB->baseClassName().isEmpty());
     // 3 functions: simple constructor, copy constructor and "method()".
@@ -366,10 +366,10 @@ typedef BaseTemplateClass<TypeOne> TypeOneClass;
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 3);
 
-    const auto *base = AbstractMetaClass::findClass(classes, u"BaseTemplateClass");
-    QVERIFY(base);
-    const auto *one = AbstractMetaClass::findClass(classes, u"TypeOneClass");
-    QVERIFY(one);
+    const auto base = AbstractMetaClass::findClass(classes, u"BaseTemplateClass");
+    QVERIFY(!base.isNull());
+    const auto one = AbstractMetaClass::findClass(classes, u"TypeOneClass");
+    QVERIFY(!one.isNull());
     QCOMPARE(one->templateBaseClass(), base);
     QCOMPARE(one->functions().size(), base->functions().size());
     QVERIFY(one->isTypeDef());
@@ -415,8 +415,8 @@ typedef Vector<int> IntVector;
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
 
-    auto *vector = AbstractMetaClass::findClass(classes, u"IntVector");
-    QVERIFY(vector);
+    const auto vector = AbstractMetaClass::findClass(classes, u"IntVector");
+    QVERIFY(!vector.isNull());
     auto baseContainer = vector->typeEntry()->baseContainerType();
     QVERIFY(!baseContainer.isNull());
     QCOMPARE(reinterpret_cast<const ContainerTypeEntry*>(baseContainer.data())->containerKind(),
@@ -541,19 +541,17 @@ void TestTemplates::testTemplateTypeDefs()
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
 
-    const AbstractMetaClass *optional = AbstractMetaClass::findClass(classes, u"Optional");
-    QVERIFY(optional);
+    const auto optional = AbstractMetaClass::findClass(classes, u"Optional");
+    QVERIFY(!optional.isNull());
 
     // Find the typedef'ed class
-    const AbstractMetaClass *optionalInt =
-        AbstractMetaClass::findClass(classes, u"IntOptional");
-    QVERIFY(optionalInt);
+    const auto optionalInt = AbstractMetaClass::findClass(classes, u"IntOptional");
+    QVERIFY(!optionalInt.isNull());
     QCOMPARE(optionalInt->templateBaseClass(), optional);
 
     // Find the class typedef'ed in the typesystem XML
-    const AbstractMetaClass *xmlOptionalInt =
-        AbstractMetaClass::findClass(classes, u"XmlIntOptional");
-    QVERIFY(xmlOptionalInt);
+    const auto xmlOptionalInt = AbstractMetaClass::findClass(classes, u"XmlIntOptional");
+    QVERIFY(!xmlOptionalInt.isNull());
     QCOMPARE(xmlOptionalInt->templateBaseClass(), optional);
 
     // Check whether the value() method now has an 'int' return
@@ -612,8 +610,8 @@ public:
     QVERIFY(!builder.isNull());
 
     AbstractMetaClassList classes = builder->classes();
-    auto testClass = AbstractMetaClass::findClass(classes, u"Test");
-    QVERIFY(testClass);
+    const auto testClass = AbstractMetaClass::findClass(classes, u"Test");
+    QVERIFY(!testClass.isNull());
 
     auto fields = testClass->fields();
     QCOMPARE(fields.size(), 1);
@@ -621,8 +619,8 @@ public:
     QCOMPARE(fieldType.name(), u"Container1");
     QCOMPARE(fieldType.instantiations().size(), 1);
 
-    auto derived = AbstractMetaClass::findClass(classes, u"Derived");
-    QVERIFY(derived);
+    const auto derived = AbstractMetaClass::findClass(classes, u"Derived");
+    QVERIFY(!derived.isNull());
     auto base = derived->templateBaseClass();
     QCOMPARE(base->name(), u"Container1");
 }

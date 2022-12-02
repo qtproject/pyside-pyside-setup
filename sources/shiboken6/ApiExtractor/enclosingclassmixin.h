@@ -4,16 +4,21 @@
 #ifndef ENCLOSINGCLASSMIXIN_H
 #define ENCLOSINGCLASSMIXIN_H
 
+#include "abstractmetalang_typedefs.h"
+
 class AbstractMetaClass;
 
 class EnclosingClassMixin {
 public:
-    const AbstractMetaClass *enclosingClass() const { return m_enclosingClass; }
-    void setEnclosingClass(const AbstractMetaClass *cls) { m_enclosingClass = cls; }
-    const AbstractMetaClass *targetLangEnclosingClass() const;
+
+    const AbstractMetaClassCPtr enclosingClass() const
+        { return m_enclosingClass.toStrongRef(); }
+    void setEnclosingClass(const AbstractMetaClassCPtr &cls)
+        { m_enclosingClass = cls.toWeakRef(); }
+    AbstractMetaClassCPtr targetLangEnclosingClass() const;
 
 private:
-     const AbstractMetaClass *m_enclosingClass = nullptr;
+    QWeakPointer<const AbstractMetaClass> m_enclosingClass;
 };
 
 #endif // ENCLOSINGCLASSMIXIN_H

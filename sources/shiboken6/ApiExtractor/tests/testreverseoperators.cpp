@@ -27,8 +27,8 @@ void TestReverseOperators::testReverseSum()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    auto *classA = AbstractMetaClass::findClass(classes, u"A");
-    QVERIFY(classA);
+    const auto classA = AbstractMetaClass::findClass(classes, u"A");
+    QVERIFY(!classA.isNull());
     QCOMPARE(classA->functions().size(), 4);
 
     AbstractMetaFunctionCPtr reverseOp;
@@ -69,12 +69,12 @@ void TestReverseOperators::testReverseSumWithAmbiguity()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, u"A");
-    QVERIFY(classA);
+    const auto classA = AbstractMetaClass::findClass(classes, u"A");
+    QVERIFY(!classA.isNull());
     QCOMPARE(classA->functions().size(), 4);
 
-    const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, u"B");
-    QVERIFY(classB);
+    const auto classB = AbstractMetaClass::findClass(classes, u"B");
+    QVERIFY(!classB.isNull());
     QCOMPARE(classB->functions().size(), 4);
 
     AbstractMetaFunctionCPtr reverseOp;
@@ -114,8 +114,8 @@ void  TestReverseOperators::testSpaceshipOperator()
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
-    const AbstractMetaClass *testClass = AbstractMetaClass::findClass(classes, u"Test");
-    QVERIFY(testClass);
+    const auto testClass = AbstractMetaClass::findClass(classes, u"Test");
+    QVERIFY(!testClass.isNull());
     const auto &functions = testClass->functions();
     // 6 operators should be synthesized
     const auto count = std::count_if(functions.cbegin(), functions.cend(),

@@ -37,8 +37,8 @@ void TestConversionRuleTag::testConversionRuleTagWithFile()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode.toLocal8Bit().data()));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, u"A");
-    QVERIFY(classA);
+    const auto classA = AbstractMetaClass::findClass(classes, u"A");
+    QVERIFY(!classA.isNull());
     const auto typeEntry = classA->typeEntry();
     QVERIFY(typeEntry->isValue());
     auto vte = qSharedPointerCast<const ValueTypeEntry>(typeEntry);
@@ -154,8 +154,8 @@ if (!TargetDateTimeAPI) TargetDateTime_IMPORT;\n\
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
-    auto *classA = AbstractMetaClass::findClass(builder->classes(), u"Date");
-    QVERIFY(classA);
+    const auto classA = AbstractMetaClass::findClass(builder->classes(), u"Date");
+    QVERIFY(!classA.isNull());
 
     QVERIFY(classA->typeEntry()->isValue());
     auto vte = qSharedPointerCast<const ValueTypeEntry>(classA->typeEntry());

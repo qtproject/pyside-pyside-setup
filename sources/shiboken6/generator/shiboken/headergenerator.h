@@ -30,16 +30,16 @@ protected:
     bool finishGeneration() override;
 
 private:
-    void writeCopyCtor(TextStream &s, const AbstractMetaClass *metaClass) const;
+    void writeCopyCtor(TextStream &s, const AbstractMetaClassCPtr &metaClass) const;
     void writeFunction(TextStream &s, const AbstractMetaFunctionCPtr &func,
                        FunctionGeneration generation);
     void writeSbkTypeFunction(TextStream &s, const AbstractMetaEnum &cppEnum) const;
-    static void writeSbkTypeFunction(TextStream &s, const AbstractMetaClass *cppClass) ;
-    static void writeSbkTypeFunction(TextStream &s, const AbstractMetaType &metaType) ;
+    static void writeSbkTypeFunction(TextStream &s, const AbstractMetaClassCPtr &cppClass);
+    static void writeSbkTypeFunction(TextStream &s, const AbstractMetaType &metaType);
     void writeTypeIndexValueLine(TextStream &s, const ApiExtractorResult &api,
                                  const TypeEntryCPtr &typeEntry);
     void writeTypeIndexValueLines(TextStream &s, const ApiExtractorResult &api,
-                                  const AbstractMetaClass *metaClass);
+                                  const AbstractMetaClassCPtr &metaClass);
     void writeProtectedEnumSurrogate(TextStream &s, const AbstractMetaEnum &cppEnum) const;
     void writeMemberFunctionWrapper(TextStream &s,
                                     const AbstractMetaFunctionCPtr &func,

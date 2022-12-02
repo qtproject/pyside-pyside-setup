@@ -54,7 +54,7 @@ void TestEnum::testEnumCppSignature()
              u"A::ClassEnum");
 
     // enum as parameter of a method
-    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, u"A");
+    const auto classA = AbstractMetaClass::findClass(classes, u"A");
     QCOMPARE(classA->enums().size(), 1);
     const auto funcs = classA->queryFunctionsByName(u"method"_s);
     QVERIFY(!funcs.isEmpty());
@@ -286,8 +286,8 @@ void TestEnum::testEnumValueFromExpression()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
 
-    AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), u"A");
-    QVERIFY(classA);
+    AbstractMetaClassPtr classA = AbstractMetaClass::findClass(builder->classes(), u"A");
+    QVERIFY(!classA.isNull());
 
     auto enumA = classA->findEnum(u"EnumA"_s);
     QVERIFY(enumA.has_value());
@@ -364,8 +364,8 @@ void TestEnum::testPrivateEnum()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
 
-    AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), u"A");
-    QVERIFY(classA);
+    const auto classA = AbstractMetaClass::findClass(builder->classes(), u"A");
+    QVERIFY(!classA.isNull());
     QCOMPARE(classA->enums().size(), 2);
 
     auto privateEnum = classA->findEnum(u"PrivateEnum"_s);
@@ -472,14 +472,14 @@ namespace Test2
     fixture->globalEnum = AbstractMetaType(globalEnums.constFirst().typeEntry());
     fixture->globalEnum.decideUsagePattern();
 
-    const AbstractMetaClass *testNamespace = nullptr;
-    for (auto *c : fixture->builder->classes()) {
+    AbstractMetaClassCPtr testNamespace;
+    for (const auto &c : fixture->builder->classes()) {
         if (c->name() == u"Test2") {
             testNamespace = c;
             break;
         }
     }
-    if (!testNamespace)
+    if (testNamespace.isNull())
         return -3;
 
     const auto namespaceEnums = testNamespace->enums();

@@ -76,13 +76,6 @@ AbstractMetaBuilderPrivate::AbstractMetaBuilderPrivate() :
 {
 }
 
-AbstractMetaBuilderPrivate::~AbstractMetaBuilderPrivate()
-{
-    qDeleteAll(m_templates);
-    qDeleteAll(m_smartPointers);
-    qDeleteAll(m_metaClasses);
-}
-
 AbstractMetaBuilder::AbstractMetaBuilder() : d(new AbstractMetaBuilderPrivate)
 {
     d->q = this;
@@ -168,8 +161,8 @@ void AbstractMetaBuilderPrivate::checkFunctionModifications()
             QString name = signature.trimmed();
             name.truncate(name.indexOf(u'('));
 
-            AbstractMetaClass *clazz = AbstractMetaClass::findClass(m_metaClasses, centry);
-            if (!clazz)
+            const auto clazz = AbstractMetaClass::findClass(m_metaClasses, centry);
+            if (clazz.isNull())
                 continue;
 
             bool found = false;
@@ -198,10 +191,10 @@ void AbstractMetaBuilderPrivate::checkFunctionModifications()
     }
 }
 
-AbstractMetaClass *AbstractMetaBuilderPrivate::argumentToClass(const ArgumentModelItem &argument,
-                                                               const AbstractMetaClass *currentClass)
+AbstractMetaClassPtr AbstractMetaBuilderPrivate::argumentToClass(const ArgumentModelItem &argument,
+                                                               const AbstractMetaClassCPtr &currentClass)
 {
-    AbstractMetaClass *returned = nullptr;
+    AbstractMetaClassPtr returned;
     auto type = translateType(argument->type(), currentClass);
     if (!type.has_value())
         return returned;
@@ -215,13 +208,13 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::argumentToClass(const ArgumentMod
  * Checks the argument of a hash function and flags the type if it is a complex type
  */
 void AbstractMetaBuilderPrivate::registerHashFunction(const FunctionModelItem &function_item,
-                                                      AbstractMetaClass *currentClass)
+                                                      const AbstractMetaClassPtr &currentClass)
 {
     if (function_item->isDeleted())
         return;
     ArgumentList arguments = function_item->arguments();
     if (arguments.size() >= 1) { // (Class, Hash seed).
-        if (AbstractMetaClass *cls = argumentToClass(arguments.at(0), currentClass))
+        if (AbstractMetaClassPtr cls = argumentToClass(arguments.at(0), currentClass))
             cls->setHashFunction(function_item->name());
     }
 }
@@ -240,13 +233,13 @@ void AbstractMetaBuilderPrivate::registerToStringCapabilityIn(const NamespaceMod
  */
 
 void AbstractMetaBuilderPrivate::registerToStringCapability(const FunctionModelItem &function_item,
-                                                            AbstractMetaClass *currentClass)
+                                                            const AbstractMetaClassPtr &currentClass)
 {
     ArgumentList arguments = function_item->arguments();
     if (arguments.size() == 2) {
         if (arguments.at(0)->type().toString() == u"QDebug") {
             const ArgumentModelItem &arg = arguments.at(1);
-            if (AbstractMetaClass *cls = argumentToClass(arg, currentClass)) {
+            if (AbstractMetaClassPtr cls = argumentToClass(arg, currentClass)) {
                 if (arg->type().indirections() < 2)
                     cls->setToStringCapability(true, int(arg->type().indirections()));
             }
@@ -255,7 +248,7 @@ void AbstractMetaBuilderPrivate::registerToStringCapability(const FunctionModelI
 }
 
 void AbstractMetaBuilderPrivate::traverseOperatorFunction(const FunctionModelItem &item,
-                                                          AbstractMetaClass *currentClass)
+                                                          const AbstractMetaClassPtr &currentClass)
 {
     if (item->accessPolicy() != Access::Public)
         return;
@@ -275,8 +268,8 @@ void AbstractMetaBuilderPrivate::traverseOperatorFunction(const FunctionModelIte
     } else {
         auto type = translateType(item->type(), currentClass);
         const auto retType = type.has_value() ? type->typeEntry() : TypeEntryCPtr{};
-        AbstractMetaClass *otherArgClass = argumentToClass(itemArguments.at(1), currentClass);
-        if (otherArgClass && retType
+        const auto otherArgClass = argumentToClass(itemArguments.at(1), currentClass);
+        if (!otherArgClass.isNull() && !retType.isNull()
             && (retType->isValue() || retType->isObject())
             && retType != baseoperandClass->typeEntry()
             && retType == otherArgClass->typeEntry()) {
@@ -284,7 +277,7 @@ void AbstractMetaBuilderPrivate::traverseOperatorFunction(const FunctionModelIte
             firstArgumentIsSelf = false;
         }
     }
-    if (baseoperandClass == nullptr)
+    if (baseoperandClass.isNull())
         return;
 
     if (item->isSpaceshipOperator() && !item->isDeleted()) {
@@ -334,7 +327,7 @@ void AbstractMetaBuilderPrivate::traverseOperatorFunction(const FunctionModelIte
 }
 
 bool AbstractMetaBuilderPrivate::traverseStreamOperator(const FunctionModelItem &item,
-                                                        AbstractMetaClass *currentClass)
+                                                        const AbstractMetaClassPtr &currentClass)
 {
     ArgumentList itemArguments = item->arguments();
     if (itemArguments.size() != 2 || item->accessPolicy() != Access::Public)
@@ -364,7 +357,7 @@ bool AbstractMetaBuilderPrivate::traverseStreamOperator(const FunctionModelItem 
     *streamFunction += AbstractMetaFunction::FinalInTargetLang;
     streamFunction->setAccess(Access::Public);
 
-    AbstractMetaClass *funcClass;
+    AbstractMetaClassPtr funcClass;
 
     if (!streamClass->typeEntry()->generateCode()) {
         AbstractMetaArgumentList reverseArgs = streamFunction->arguments();
@@ -389,7 +382,7 @@ bool AbstractMetaBuilderPrivate::traverseStreamOperator(const FunctionModelItem 
 static bool metaEnumLessThan(const AbstractMetaEnum &e1, const AbstractMetaEnum &e2)
 { return e1.fullName() < e2.fullName(); }
 
-static bool metaClassLessThan(const AbstractMetaClass *c1, const AbstractMetaClass *c2)
+static bool metaClassLessThan(const AbstractMetaClassCPtr &c1, const AbstractMetaClassCPtr &c2)
 { return c1->fullName() < c2->fullName(); }
 
 static bool metaFunctionLessThan(const AbstractMetaFunctionCPtr &f1, const AbstractMetaFunctionCPtr &f2)
@@ -412,7 +405,7 @@ void AbstractMetaBuilderPrivate::sortLists()
     }
     m_metaClasses = classesTopologicalSorted(m_metaClasses, additionalDependencies);
 
-    for (AbstractMetaClass *cls : std::as_const(m_metaClasses))
+    for (const auto &cls : std::as_const(m_metaClasses))
         cls->sortFunctions();
 
     // Ensure that indexes are in alphabetical order, roughly, except
@@ -480,7 +473,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom,
     ReportHandler::startProgress("Generating class model ("
                                  + QByteArray::number(typeValues.size()) + ")...");
     for (const ClassModelItem &item : typeValues) {
-        if (AbstractMetaClass *cls = traverseClass(dom, item, nullptr))
+        if (const auto cls = traverseClass(dom, item, nullptr))
             addAbstractMetaClass(cls, item.data());
     }
 
@@ -509,7 +502,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom,
     ReportHandler::startProgress("Resolving typedefs ("
                                  + QByteArray::number(typeDefs.size()) + ")...");
     for (const TypeDefModelItem &typeDef : typeDefs) {
-        if (AbstractMetaClass *cls = traverseTypeDef(dom, typeDef, nullptr))
+        if (const auto cls = traverseTypeDef(dom, typeDef, nullptr))
             addAbstractMetaClass(cls, typeDef.data());
     }
 
@@ -549,7 +542,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom,
     }
 
     ReportHandler::startProgress("Fixing class inheritance...");
-    for (AbstractMetaClass *cls : std::as_const(m_metaClasses)) {
+    for (const auto &cls : std::as_const(m_metaClasses)) {
         if (cls->needsInheritanceSetup()) {
             setupInheritance(cls);
             traverseUsingMembers(cls);
@@ -562,7 +555,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom,
     }
 
     ReportHandler::startProgress("Detecting inconsistencies in class model...");
-    for (AbstractMetaClass *cls : std::as_const(m_metaClasses)) {
+    for (const auto &cls : std::as_const(m_metaClasses)) {
         AbstractMetaClass::fixFunctions(cls);
 
         if (cls->canAddDefaultConstructor())
@@ -611,12 +604,12 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom,
                 }
             } else if (entry->isEnum() && entry->generateCode()) {
                 const auto enumEntry = qSharedPointerCast<const EnumTypeEntry>(entry);
-                AbstractMetaClass *cls = AbstractMetaClass::findClass(m_metaClasses,
-                                                                      enumEntry->parent());
+                const auto cls = AbstractMetaClass::findClass(m_metaClasses,
+                                                              enumEntry->parent());
 
-                const bool enumFound = cls
-                    ? cls->findEnum(entry->targetLangEntryName()).has_value()
-                    : m_enums.contains(entry);
+                const bool enumFound = cls.isNull()
+                    ? m_enums.contains(entry)
+                    : cls->findEnum(entry->targetLangEntryName()).has_value();
 
                 if (!enumFound) {
                     entry->setCodeGeneration(TypeEntry::GenerateNothing);
@@ -658,7 +651,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom,
 
     ReportHandler::startProgress("Writing log files...");
 
-    for (AbstractMetaClass *cls : std::as_const(m_metaClasses)) {
+    for (const auto &cls : std::as_const(m_metaClasses)) {
 //         setupEquals(cls);
 //         setupComparable(cls);
         setupExternalConversion(cls);
@@ -718,7 +711,7 @@ void AbstractMetaBuilder::setLogDirectory(const QString &logDir)
        d->m_logDirectory.append(QDir::separator());
 }
 
-void AbstractMetaBuilderPrivate::addAbstractMetaClass(AbstractMetaClass *cls,
+void AbstractMetaBuilderPrivate::addAbstractMetaClass(const AbstractMetaClassPtr &cls,
                                                       const _CodeModelItem *item)
 {
     m_itemToClass.insert(item, cls);
@@ -732,8 +725,9 @@ void AbstractMetaBuilderPrivate::addAbstractMetaClass(AbstractMetaClass *cls,
     }
 }
 
-AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(const FileModelItem &dom,
-                                                                 const NamespaceModelItem &namespaceItem)
+AbstractMetaClassPtr
+    AbstractMetaBuilderPrivate::traverseNamespace(const FileModelItem &dom,
+                                                  const NamespaceModelItem &namespaceItem)
 {
     QString namespaceName = currentScope()->qualifiedName().join(colonColon());
     if (!namespaceName.isEmpty())
@@ -758,17 +752,17 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(const FileModel
     }
 
     // Continue populating namespace?
-    AbstractMetaClass *metaClass = AbstractMetaClass::findClass(m_metaClasses, type);
-    if (!metaClass) {
-        metaClass = new AbstractMetaClass;
+    AbstractMetaClassPtr metaClass = AbstractMetaClass::findClass(m_metaClasses, type);
+    if (metaClass.isNull()) {
+        metaClass.reset(new AbstractMetaClass);
         metaClass->setTypeEntry(type);
         addAbstractMetaClass(metaClass, namespaceItem.data());
         if (auto extendsType = type->extends()) {
-            AbstractMetaClass *extended = AbstractMetaClass::findClass(m_metaClasses, extendsType);
-            if (!extended) {
+            const auto extended = AbstractMetaClass::findClass(m_metaClasses, extendsType);
+            if (extended.isNull()) {
                 qCWarning(lcShiboken, "%s",
                           qPrintable(msgNamespaceToBeExtendedNotFound(extendsType->name(), extendsType->targetLangPackage())));
-                return nullptr;
+                return {};
             }
             metaClass->setExtendedNamespace(extended);
         }
@@ -782,8 +776,8 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(const FileModel
 
     const ClassList &classes = namespaceItem->classes();
     for (const ClassModelItem &cls : classes) {
-        AbstractMetaClass *mjc = traverseClass(dom, cls, metaClass);
-        if (mjc) {
+        const auto mjc = traverseClass(dom, cls, metaClass);
+        if (!mjc.isNull()) {
             metaClass->addInnerClass(mjc);
             mjc->setEnclosingClass(metaClass);
             addAbstractMetaClass(mjc, cls.data());
@@ -794,8 +788,8 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(const FileModel
     // specific typedefs to be used as classes.
     const TypeDefList typeDefs = namespaceItem->typeDefs();
     for (const TypeDefModelItem &typeDef : typeDefs) {
-        AbstractMetaClass *cls = traverseTypeDef(dom, typeDef, metaClass);
-        if (cls) {
+        const auto cls = traverseTypeDef(dom, typeDef, metaClass);
+        if (!cls.isNull()) {
             metaClass->addInnerClass(cls);
             cls->setEnclosingClass(metaClass);
             addAbstractMetaClass(cls, typeDef.data());
@@ -804,8 +798,8 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(const FileModel
 
     // Traverse namespaces recursively
     for (const NamespaceModelItem &ni : namespaceItem->namespaces()) {
-        AbstractMetaClass *mjc = traverseNamespace(dom, ni);
-        if (mjc) {
+        const auto mjc = traverseNamespace(dom, ni);
+        if (!mjc.isNull()) {
             metaClass->addInnerClass(mjc);
             mjc->setEnclosingClass(metaClass);
             m_classToItem.insert(mjc, ni.data()); // Add for enum lookup.
@@ -823,7 +817,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(const FileModel
 
 std::optional<AbstractMetaEnum>
     AbstractMetaBuilderPrivate::traverseEnum(const EnumModelItem &enumItem,
-                                             AbstractMetaClass *enclosing,
+                                             const AbstractMetaClassPtr &enclosing,
                                              const QSet<QString> &enumsDeclarations)
 {
     QString qualifiedName = enumItem->qualifiedName().join(colonColon());
@@ -930,9 +924,9 @@ std::optional<AbstractMetaEnum>
     return metaEnum;
 }
 
-AbstractMetaClass *AbstractMetaBuilderPrivate::traverseTypeDef(const FileModelItem &,
+AbstractMetaClassPtr AbstractMetaBuilderPrivate::traverseTypeDef(const FileModelItem &,
                                                                const TypeDefModelItem &typeDef,
-                                                               AbstractMetaClass *currentClass)
+                                                               const AbstractMetaClassPtr &currentClass)
 {
     TypeDatabase *types = TypeDatabase::instance();
     QString className = stripTemplateArgs(typeDef->name());
@@ -972,7 +966,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseTypeDef(const FileModelIt
     if (type.isNull())
         return nullptr;
 
-    auto *metaClass = new AbstractMetaClass;
+    AbstractMetaClassPtr metaClass(new AbstractMetaClass);
     metaClass->setTypeDef(true);
     metaClass->setTypeEntry(type);
     metaClass->setBaseClassNames(QStringList(typeDef->type().toString()));
@@ -992,7 +986,7 @@ void AbstractMetaBuilderPrivate::traverseTypesystemTypedefs()
     const auto &entries = TypeDatabase::instance()->typedefEntries();
     for (auto it = entries.begin(), end = entries.end(); it != end; ++it) {
         TypedefEntryPtr te = it.value();
-        auto *metaClass = new AbstractMetaClass;
+        AbstractMetaClassPtr metaClass(new AbstractMetaClass);
         metaClass->setTypeDef(true);
         metaClass->setTypeEntry(te->target());
         metaClass->setBaseClassNames(QStringList(te->sourceType()));
@@ -1018,9 +1012,9 @@ void AbstractMetaBuilderPrivate::traverseTypesystemTypedefs()
     }
 }
 
-AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem &dom,
+AbstractMetaClassPtr AbstractMetaBuilderPrivate::traverseClass(const FileModelItem &dom,
                                                              const ClassModelItem &classItem,
-                                                             AbstractMetaClass *currentClass)
+                                                             const AbstractMetaClassPtr &currentClass)
 {
     QString className = stripTemplateArgs(classItem->name());
     QString fullClassName = className;
@@ -1058,7 +1052,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
         return nullptr;
     }
 
-    auto *metaClass = new AbstractMetaClass;
+    AbstractMetaClassPtr metaClass(new AbstractMetaClass);
     metaClass->setSourceLocation(classItem->sourceLocation());
     metaClass->setTypeEntry(type);
     if ((type->typeFlags() & ComplexTypeEntry::ForceAbstract) != 0)
@@ -1109,8 +1103,8 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
     {
         const ClassList &innerClasses = classItem->classes();
         for (const ClassModelItem &ci : innerClasses) {
-            AbstractMetaClass *cl = traverseClass(dom, ci, metaClass);
-            if (cl) {
+            const auto cl = traverseClass(dom, ci, metaClass);
+            if (!cl.isNull()) {
                 cl->setEnclosingClass(metaClass);
                 metaClass->addInnerClass(cl);
                 addAbstractMetaClass(cl, ci.data());
@@ -1123,8 +1117,8 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
     // specific typedefs to be used as classes.
     const TypeDefList typeDefs = classItem->typeDefs();
     for (const TypeDefModelItem &typeDef : typeDefs) {
-        AbstractMetaClass *cls = traverseTypeDef(dom, typeDef, metaClass);
-        if (cls) {
+        const auto cls = traverseTypeDef(dom, typeDef, metaClass);
+        if (!cls.isNull()) {
             cls->setEnclosingClass(metaClass);
             addAbstractMetaClass(cls, typeDef.data());
         }
@@ -1138,7 +1132,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
 }
 
 void AbstractMetaBuilderPrivate::traverseScopeMembers(const ScopeModelItem &item,
-                                                      AbstractMetaClass *metaClass)
+                                                      const AbstractMetaClassPtr &metaClass)
 {
     // Classes/Namespace members
     traverseFields(item, metaClass);
@@ -1152,15 +1146,12 @@ void AbstractMetaBuilderPrivate::traverseScopeMembers(const ScopeModelItem &item
 
 void AbstractMetaBuilderPrivate::traverseClassMembers(const ClassModelItem &item)
 {
-    AbstractMetaClass *metaClass = m_itemToClass.value(item.data());
-    if (!metaClass)
-        return;
-
-    // Class members
-    traverseScopeMembers(item, metaClass);
+    const auto metaClass = m_itemToClass.value(item.data());
+    if (!metaClass.isNull()) // Class members
+        traverseScopeMembers(item, metaClass);
 }
 
-void AbstractMetaBuilderPrivate::traverseUsingMembers(AbstractMetaClass *metaClass)
+void AbstractMetaBuilderPrivate::traverseUsingMembers(const AbstractMetaClassPtr &metaClass)
 {
     const _CodeModelItem *item = m_classToItem.value(metaClass);
     if (item == nullptr || item->kind() != _CodeModelItem::Kind_Class)
@@ -1187,8 +1178,8 @@ void AbstractMetaBuilderPrivate::traverseUsingMembers(AbstractMetaClass *metaCla
 
 void AbstractMetaBuilderPrivate::traverseNamespaceMembers(const NamespaceModelItem &item)
 {
-    AbstractMetaClass *metaClass = m_itemToClass.value(item.data());
-    if (!metaClass)
+    const auto metaClass = m_itemToClass.value(item.data());
+    if (metaClass.isNull())
         return;
 
     // Namespace members
@@ -1213,7 +1204,7 @@ static inline QString qualifiedFieldSignatureWithType(const QString &className,
 
 std::optional<AbstractMetaField>
     AbstractMetaBuilderPrivate::traverseField(const VariableModelItem &field,
-                                              const AbstractMetaClass *cls)
+                                              const AbstractMetaClassCPtr &cls)
 {
     QString fieldName = field->name();
     QString className = cls->typeEntry()->qualifiedCppName();
@@ -1276,7 +1267,7 @@ static bool applyFieldModifications(AbstractMetaField *f)
 }
 
 void AbstractMetaBuilderPrivate::traverseFields(const ScopeModelItem &scope_item,
-                                                AbstractMetaClass *metaClass)
+                                                const AbstractMetaClassPtr &metaClass)
 {
     const VariableList &variables = scope_item->variables();
     for (const VariableModelItem &field : variables) {
@@ -1316,7 +1307,7 @@ void AbstractMetaBuilderPrivate::fixReturnTypeOfConversionOperator(AbstractMetaF
 AbstractMetaFunctionRawPtrList
     AbstractMetaBuilderPrivate::classFunctionList(const ScopeModelItem &scopeItem,
                                                   AbstractMetaClass::Attributes *constructorAttributes,
-                                                  AbstractMetaClass *currentClass)
+                                                  const AbstractMetaClassPtr &currentClass)
 {
     *constructorAttributes = {};
     AbstractMetaFunctionRawPtrList result;
@@ -1342,7 +1333,7 @@ AbstractMetaFunctionRawPtrList
 }
 
 void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
-                                                   AbstractMetaClass *metaClass)
+                                                   const AbstractMetaClassPtr &metaClass)
 {
     AbstractMetaClass::Attributes constructorAttributes;
     const AbstractMetaFunctionRawPtrList functions =
@@ -1430,7 +1421,7 @@ void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
     fillAddedFunctions(metaClass);
 }
 
-void AbstractMetaBuilderPrivate::fillAddedFunctions(AbstractMetaClass *metaClass)
+void AbstractMetaBuilderPrivate::fillAddedFunctions(const AbstractMetaClassPtr &metaClass)
 {
     // Add the functions added by the typesystem
     QString errorMessage;
@@ -1513,7 +1504,7 @@ void AbstractMetaBuilderPrivate::applyFunctionModifications(AbstractMetaFunction
     }
 }
 
-bool AbstractMetaBuilderPrivate::setupInheritance(AbstractMetaClass *metaClass)
+bool AbstractMetaBuilderPrivate::setupInheritance(const AbstractMetaClassPtr &metaClass)
 {
     if (metaClass->inheritanceDone())
         return true;
@@ -1526,9 +1517,9 @@ bool AbstractMetaBuilderPrivate::setupInheritance(AbstractMetaClass *metaClass)
     if (baseClasses.size() == 1 && baseClasses.constFirst().contains(u'<')) {
         TypeInfo info;
         ComplexTypeEntryPtr baseContainerType;
-        auto *templ = findTemplateClass(baseClasses.constFirst(), metaClass,
-                                        &info, &baseContainerType);
-        if (templ) {
+        const auto templ = findTemplateClass(baseClasses.constFirst(), metaClass,
+                                             &info, &baseContainerType);
+        if (!templ.isNull()) {
             setupInheritance(templ);
             inheritTemplate(metaClass, templ, info);
             metaClass->typeEntry()->setBaseContainerType(templ->typeEntry());
@@ -1594,7 +1585,7 @@ bool AbstractMetaBuilderPrivate::setupInheritance(AbstractMetaClass *metaClass)
 }
 
 void AbstractMetaBuilderPrivate::traverseEnums(const ScopeModelItem &scopeItem,
-                                               AbstractMetaClass *metaClass,
+                                               const AbstractMetaClassPtr &metaClass,
                                                const QStringList &enumsDeclarations)
 {
     const EnumList &enums = scopeItem->enums();
@@ -1642,7 +1633,7 @@ bool AbstractMetaBuilderPrivate::traverseAddedGlobalFunction(const AddedFunction
 
 AbstractMetaFunction *
     AbstractMetaBuilderPrivate::traverseAddedFunctionHelper(const AddedFunctionPtr &addedFunc,
-                                                            AbstractMetaClass *metaClass /* = nullptr */,
+                                                            const AbstractMetaClassPtr &metaClass /* = {} */,
                                                             QString *errorMessage)
 {
     auto returnType = translateType(addedFunc->returnType(), metaClass, {}, errorMessage);
@@ -1726,7 +1717,7 @@ AbstractMetaFunction *
 }
 
 bool AbstractMetaBuilderPrivate::traverseAddedMemberFunction(const AddedFunctionPtr &addedFunc,
-                                                             AbstractMetaClass *metaClass,
+                                                             const AbstractMetaClassPtr &metaClass,
                                                              QString *errorMessage)
 {
     AbstractMetaFunction *metaFunction =
@@ -1899,7 +1890,7 @@ static bool applyArrayArgumentModifications(const FunctionModificationList &func
 }
 
 AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const FunctionModelItem &functionItem,
-                                                                   AbstractMetaClass *currentClass)
+                                                                   const AbstractMetaClassPtr &currentClass)
 {
     if (!functionItem->templateParameters().isEmpty())
         return nullptr;
@@ -2186,7 +2177,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
     return metaFunction;
 }
 
-static TypeEntryCPtr findTypeEntryUsingContext(const AbstractMetaClass *metaClass,
+static TypeEntryCPtr findTypeEntryUsingContext(const AbstractMetaClassCPtr &metaClass,
                                                const QString& qualifiedName)
 {
     TypeEntryCPtr type;
@@ -2201,7 +2192,7 @@ static TypeEntryCPtr findTypeEntryUsingContext(const AbstractMetaClass *metaClas
 // Helper for findTypeEntries/translateTypeStatic()
 TypeEntryCList AbstractMetaBuilderPrivate::findTypeEntriesHelper(const QString &qualifiedName,
                                                                  const QString &name,
-                                                                 const AbstractMetaClass *currentClass,
+                                                                 const AbstractMetaClassCPtr &currentClass,
                                                                  AbstractMetaBuilderPrivate *d)
 {
     // 5.1 - Try first using the current scope
@@ -2212,7 +2203,7 @@ TypeEntryCList AbstractMetaBuilderPrivate::findTypeEntriesHelper(const QString &
         // 5.1.1 - Try using the class parents' scopes
         if (d && !currentClass->baseClassNames().isEmpty()) {
             const auto &baseClasses = d->getBaseClasses(currentClass);
-            for (const AbstractMetaClass *cls : baseClasses) {
+            for (const auto &cls : baseClasses) {
                 if (auto type = findTypeEntryUsingContext(cls, qualifiedName))
                     return {type};
             }
@@ -2248,7 +2239,7 @@ TypeEntryCList AbstractMetaBuilderPrivate::findTypeEntriesHelper(const QString &
 // and does some error checking.
 TypeEntryCList AbstractMetaBuilderPrivate::findTypeEntries(const QString &qualifiedName,
                                                            const QString &name,
-                                                           const AbstractMetaClass *currentClass,
+                                                           const AbstractMetaClassCPtr &currentClass,
                                                            AbstractMetaBuilderPrivate *d,
                                                            QString *errorMessage)
 {
@@ -2297,7 +2288,7 @@ TypeEntryCList AbstractMetaBuilderPrivate::findTypeEntries(const QString &qualif
 // Reverse lookup of AbstractMetaType representing a template specialization
 // found during traversing function arguments to its type system typedef'ed
 // class.
-const AbstractMetaClass *AbstractMetaBuilderPrivate::resolveTypeSystemTypeDef(const AbstractMetaType &t) const
+AbstractMetaClassCPtr AbstractMetaBuilderPrivate::resolveTypeSystemTypeDef(const AbstractMetaType &t) const
 {
     if (t.hasInstantiations()) {
         auto pred = [t](const TypeClassEntry &e) { return e.type.equals(t); };
@@ -2321,7 +2312,7 @@ static void synthesizeWarning(const AbstractMetaFunctionCPtr &f)
 }
 
 static AbstractMetaFunctionPtr
-    addMethod(AbstractMetaClass *s, const AbstractMetaType &returnType,
+    addMethod(const AbstractMetaClassPtr &s, const AbstractMetaType &returnType,
               const QString &name, bool isConst = true)
 {
     AbstractMetaFunctionPtr function(new AbstractMetaFunction(name));
@@ -2333,7 +2324,7 @@ static AbstractMetaFunctionPtr
 }
 
 static AbstractMetaFunctionPtr
-    addMethod(AbstractMetaClass *s, const QString &returnTypeName,
+    addMethod(const AbstractMetaClassPtr &s, const QString &returnTypeName,
               const QString &name, bool isConst = true)
 {
     auto typeEntry = TypeDatabase::instance()->findPrimitiveType(returnTypeName);
@@ -2344,7 +2335,7 @@ static AbstractMetaFunctionPtr
 }
 
 // Create the instantiation type of a smart pointer
-static AbstractMetaType instantiationType(const AbstractMetaClass *s,
+static AbstractMetaType instantiationType(const AbstractMetaClassCPtr &s,
                                           const SmartPointerTypeEntryCPtr &ste)
 {
     AbstractMetaType type(s->templateArguments().constFirst());
@@ -2355,7 +2346,7 @@ static AbstractMetaType instantiationType(const AbstractMetaClass *s,
 }
 
 // Create the pointee argument of a smart pointer constructor or reset()
-static AbstractMetaArgument pointeeArgument(const AbstractMetaClass *s,
+static AbstractMetaArgument pointeeArgument(const AbstractMetaClassCPtr &s,
                                             const SmartPointerTypeEntryCPtr &ste)
 {
     AbstractMetaArgument pointee;
@@ -2366,7 +2357,7 @@ static AbstractMetaArgument pointeeArgument(const AbstractMetaClass *s,
 
 // Add the smart pointer constructors. For MSVC, (when not specifying
 // <system-header>), clang only sees the default constructor.
-static void fixSmartPointerConstructors(AbstractMetaClass *s,
+static void fixSmartPointerConstructors(const AbstractMetaClassPtr &s,
                                         const SmartPointerTypeEntryCPtr &ste)
 {
     const auto ctors = s->queryFunctions(FunctionQueryOption::Constructors);
@@ -2396,7 +2387,7 @@ static void fixSmartPointerConstructors(AbstractMetaClass *s,
 }
 
 // Similarly, add the smart pointer reset() functions
-static void fixSmartPointerReset(AbstractMetaClass *s,
+static void fixSmartPointerReset(const AbstractMetaClassPtr &s,
                                  const SmartPointerTypeEntryCPtr &ste)
 {
     const QString resetMethodName = ste->resetMethod();
@@ -2425,7 +2416,7 @@ static void fixSmartPointerReset(AbstractMetaClass *s,
 }
 
 // Add the relevant missing smart pointer functions.
-static void fixSmartPointerClass(AbstractMetaClass *s,
+static void fixSmartPointerClass(const AbstractMetaClassPtr &s,
                                  const SmartPointerTypeEntryCPtr &ste)
 {
     fixSmartPointerConstructors(s, ste);
@@ -2454,10 +2445,10 @@ static void fixSmartPointerClass(AbstractMetaClass *s,
 }
 
 // Create a missing smart pointer class
-static AbstractMetaClass *createSmartPointerClass(const SmartPointerTypeEntryCPtr &ste,
-                                                  const AbstractMetaClassList &allClasses)
+static AbstractMetaClassPtr createSmartPointerClass(const SmartPointerTypeEntryCPtr &ste,
+                                                   const AbstractMetaClassList &allClasses)
 {
-    auto *result = new AbstractMetaClass();
+    AbstractMetaClassPtr result(new AbstractMetaClass());
     result->setTypeEntry(qSharedPointerConstCast<SmartPointerTypeEntry>(ste));
     TypeEntryCPtr templateArg(new TemplateArgumentEntry(u"T"_s, ste->version(),
                                                         typeSystemTypeEntry(ste)));
@@ -2465,12 +2456,12 @@ static AbstractMetaClass *createSmartPointerClass(const SmartPointerTypeEntryCPt
     fixSmartPointerClass(result, ste);
     auto enclosingTe = ste->parent();
     if (!enclosingTe->isTypeSystem()) {
-        auto *enclosing = AbstractMetaClass::findClass(allClasses, enclosingTe);
-        if (enclosing == nullptr)
+        const auto enclosing = AbstractMetaClass::findClass(allClasses, enclosingTe);
+        if (enclosing.isNull())
             throw Exception(msgEnclosingClassNotFound(ste));
         result->setEnclosingClass(enclosing);
         auto inner = enclosing->innerClasses();
-        inner.append(result);
+        inner.append(qSharedPointerConstCast<const AbstractMetaClass>(result));
         enclosing->setInnerClasses(inner);
     }
     return result;
@@ -2480,10 +2471,11 @@ void AbstractMetaBuilderPrivate::fixSmartPointers()
 {
     const auto smartPointerTypes = TypeDatabase::instance()->smartPointerTypes();
     for (const auto &ste : smartPointerTypes) {
-        const AbstractMetaClass *smartPointerClass =
+        const auto smartPointerClass =
             AbstractMetaClass::findClass(m_smartPointers, ste);
-        if (smartPointerClass) {
-            fixSmartPointerClass(const_cast<AbstractMetaClass *>(smartPointerClass), ste);
+        if (!smartPointerClass.isNull()) {
+            fixSmartPointerClass(qSharedPointerConstCast<AbstractMetaClass>(smartPointerClass),
+                                 ste);
         } else {
             qCWarning(lcShiboken, "Synthesizing smart pointer \"%s\"...",
                       qPrintable(ste->qualifiedCppName()));
@@ -2494,7 +2486,7 @@ void AbstractMetaBuilderPrivate::fixSmartPointers()
 
 std::optional<AbstractMetaType>
     AbstractMetaBuilderPrivate::translateType(const TypeInfo &_typei,
-                                              const AbstractMetaClass *currentClass,
+                                              const AbstractMetaClassCPtr &currentClass,
                                               TranslateTypeFlags flags,
                                               QString *errorMessage)
 {
@@ -2509,7 +2501,7 @@ static bool isNumber(const QString &s)
 
 std::optional<AbstractMetaType>
     AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo &_typei,
-                                                    const AbstractMetaClass *currentClass,
+                                                    const AbstractMetaClassCPtr &currentClass,
                                                     AbstractMetaBuilderPrivate *d,
                                                     TranslateTypeFlags flags,
                                                     QString *errorMessageIn)
@@ -2724,7 +2716,7 @@ std::optional<AbstractMetaType>
 
 std::optional<AbstractMetaType>
     AbstractMetaBuilder::translateType(const TypeInfo &_typei,
-                                       AbstractMetaClass *currentClass,
+                                       const AbstractMetaClassPtr &currentClass,
                                        TranslateTypeFlags flags,
                                        QString *errorMessage)
 {
@@ -2735,7 +2727,7 @@ std::optional<AbstractMetaType>
 
 std::optional<AbstractMetaType>
     AbstractMetaBuilder::translateType(const QString &t,
-                                      AbstractMetaClass *currentClass,
+                                      const AbstractMetaClassPtr &currentClass,
                                       TranslateTypeFlags flags,
                                       QString *errorMessageIn)
 {
@@ -2815,7 +2807,7 @@ void AbstractMetaBuilder::setCodeModelTestMode(bool b)
 // Helper to fix a simple default value (field or enum reference) in a
 // class context.
 QString AbstractMetaBuilderPrivate::fixSimpleDefaultValue(QStringView expr,
-                                                          const AbstractMetaClass *klass) const
+                                                          const AbstractMetaClassCPtr &klass) const
 {
     const QString field = qualifyStaticField(klass, expr);
 
@@ -2834,7 +2826,7 @@ QString AbstractMetaBuilderPrivate::fixSimpleDefaultValue(QStringView expr,
 
 // see TestResolveType::testFixDefaultArguments()
 QString AbstractMetaBuilderPrivate::fixDefaultValue(QString expr, const AbstractMetaType &type,
-                                                    const AbstractMetaClass *implementingClass) const
+                                                    const AbstractMetaClassCPtr &implementingClass) const
 {
     expr.replace(u'\n', u' '); // breaks signature parser
 
@@ -2917,7 +2909,7 @@ QString AbstractMetaBuilderPrivate::fixDefaultValue(QString expr, const Abstract
 }
 
 QString AbstractMetaBuilder::fixDefaultValue(const QString &expr, const AbstractMetaType &type,
-                                             const AbstractMetaClass *c) const
+                                             const AbstractMetaClassCPtr &c) const
 {
     return d->fixDefaultValue(expr, type, c);
 }
@@ -2928,10 +2920,11 @@ bool AbstractMetaBuilderPrivate::isEnum(const FileModelItem &dom, const QStringL
     return item && item->kind() == _EnumModelItem::__node_kind;
 }
 
-AbstractMetaClass *AbstractMetaBuilderPrivate::findTemplateClass(const QString &name,
-                                                                 const AbstractMetaClass *context,
-                                                                 TypeInfo *info,
-                                                                 ComplexTypeEntryPtr *baseContainerType) const
+AbstractMetaClassPtr
+    AbstractMetaBuilderPrivate::findTemplateClass(const QString &name,
+                                                  const AbstractMetaClassCPtr &context,
+                                                  TypeInfo *info,
+                                                  ComplexTypeEntryPtr *baseContainerType) const
 {
     if (baseContainerType)
         baseContainerType->reset();
@@ -2953,8 +2946,8 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::findTemplateClass(const QString &
         if (info)
             *info = parsed;
 
-        AbstractMetaClass *templ = nullptr;
-        for (AbstractMetaClass *c : std::as_const(m_templates)) {
+        AbstractMetaClassPtr templ;
+        for (const auto &c : std::as_const(m_templates)) {
             if (c->typeEntry()->name() == qualifiedName) {
                 templ = c;
                 break;
@@ -2975,7 +2968,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::findTemplateClass(const QString &
 }
 
 AbstractMetaClassCList
-    AbstractMetaBuilderPrivate::getBaseClasses(const AbstractMetaClass *metaClass) const
+    AbstractMetaBuilderPrivate::getBaseClasses(const AbstractMetaClassCPtr &metaClass) const
 {
     // Shortcut if inheritance has already been set up
     if (metaClass->inheritanceDone() || !metaClass->needsInheritanceSetup())
@@ -2983,13 +2976,11 @@ AbstractMetaClassCList
     AbstractMetaClassCList baseClasses;
     const QStringList &baseClassNames = metaClass->baseClassNames();
     for (const QString& parent : baseClassNames) {
-        AbstractMetaClass *cls = nullptr;
-        if (parent.contains(u'<'))
-            cls = findTemplateClass(parent, metaClass);
-        else
-            cls = AbstractMetaClass::findClass(m_metaClasses, parent);
+        const auto cls = parent.contains(u'<')
+            ? findTemplateClass(parent, metaClass)
+            : AbstractMetaClass::findClass(m_metaClasses, parent);
 
-        if (cls)
+        if (!cls.isNull())
             baseClasses << cls;
     }
     return baseClasses;
@@ -3037,26 +3028,26 @@ std::optional<AbstractMetaType>
     return returned;
 }
 
-AbstractMetaClass *
+AbstractMetaClassPtr
     AbstractMetaBuilder::inheritTemplateClass(const ComplexTypeEntryPtr &te,
-                                              const AbstractMetaClass *templateClass,
+                                              const AbstractMetaClassCPtr &templateClass,
                                               const AbstractMetaTypeList &templateTypes,
                                               InheritTemplateFlags flags)
 {
-    auto result = std::make_unique<AbstractMetaClass>();
+    AbstractMetaClassPtr result(new AbstractMetaClass);
     result->setTypeDef(true);
 
     result->setTypeEntry(te);
-    if (!AbstractMetaBuilderPrivate::inheritTemplate(result.get(), templateClass,
+    if (!AbstractMetaBuilderPrivate::inheritTemplate(result, templateClass,
                                                      templateTypes, flags)) {
-        return nullptr;
+        return {};
     }
-    AbstractMetaBuilderPrivate::inheritTemplateFunctions(result.get());
-    return result.release();
+    AbstractMetaBuilderPrivate::inheritTemplateFunctions(result);
+    return result;
 }
 
-bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
-                                                 const AbstractMetaClass *templateClass,
+bool AbstractMetaBuilderPrivate::inheritTemplate(const AbstractMetaClassPtr &subclass,
+                                                 const AbstractMetaClassCPtr &templateClass,
                                                  const TypeInfo &info)
 {
     AbstractMetaTypeList  templateTypes;
@@ -3106,8 +3097,8 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
     return inheritTemplate(subclass, templateClass, templateTypes);
 }
 
-bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
-                                                 const AbstractMetaClass *templateClass,
+bool AbstractMetaBuilderPrivate::inheritTemplate(const AbstractMetaClassPtr &subclass,
+                                                 const AbstractMetaClassCPtr &templateClass,
                                                  const AbstractMetaTypeList &templateTypes,
                                                  InheritTemplateFlags flags)
 {
@@ -3157,8 +3148,8 @@ AbstractMetaFunctionPtr
 AbstractMetaFunctionPtr
     AbstractMetaBuilderPrivate::inheritTemplateMember(const AbstractMetaFunctionCPtr &function,
                                                       const AbstractMetaTypeList &templateTypes,
-                                                      const AbstractMetaClass *templateClass,
-                                                      AbstractMetaClass *subclass)
+                                                      const AbstractMetaClassCPtr &templateClass,
+                                                      const AbstractMetaClassPtr &subclass)
 {
     AbstractMetaFunctionPtr f = inheritTemplateFunction(function, templateTypes);
     if (f.isNull())
@@ -3215,8 +3206,8 @@ AbstractMetaFunctionPtr
 AbstractMetaFunctionPtr
     AbstractMetaBuilder::inheritTemplateMember(const AbstractMetaFunctionCPtr &function,
                                                const AbstractMetaTypeList &templateTypes,
-                                               const AbstractMetaClass *templateClass,
-                                               AbstractMetaClass *subclass)
+                                               const AbstractMetaClassCPtr &templateClass,
+                                               const AbstractMetaClassPtr &subclass)
 {
     return AbstractMetaBuilderPrivate::inheritTemplateMember(function, templateTypes,
                                                              templateClass, subclass);
@@ -3224,8 +3215,8 @@ AbstractMetaFunctionPtr
 
 static bool doInheritTemplateFunction(const AbstractMetaFunctionCPtr &function,
                                       const AbstractMetaFunctionCList &existingSubclassFuncs,
-                                      const AbstractMetaClass *templateBaseClass,
-                                      const AbstractMetaClass *subclass)
+                                      const AbstractMetaClassCPtr &templateBaseClass,
+                                      const AbstractMetaClassCPtr &subclass)
 {
     // If the function is modified or the instantiation has an equally named
     // function we are shadowing, so we need to skip it (unless the subclass
@@ -3238,7 +3229,7 @@ static bool doInheritTemplateFunction(const AbstractMetaFunctionCPtr &function,
         || subclass->isUsingMember(templateBaseClass, function->name(), Access::Protected);
 }
 
-void AbstractMetaBuilderPrivate::inheritTemplateFunctions(AbstractMetaClass *subclass)
+void AbstractMetaBuilderPrivate::inheritTemplateFunctions(const AbstractMetaClassPtr &subclass)
 {
     auto templateClass = subclass->templateBaseClass();
 
@@ -3285,7 +3276,7 @@ void AbstractMetaBuilderPrivate::inheritTemplateFunctions(AbstractMetaClass *sub
     }
 }
 
-void AbstractMetaBuilderPrivate::parseQ_Properties(AbstractMetaClass *metaClass,
+void AbstractMetaBuilderPrivate::parseQ_Properties(const AbstractMetaClassPtr &metaClass,
                                                    const QStringList &declarations)
 {
     const QStringList scopes = currentScope()->qualifiedName();
@@ -3325,18 +3316,19 @@ void AbstractMetaBuilderPrivate::parseQ_Properties(AbstractMetaClass *metaClass,
     }
 }
 
-void AbstractMetaBuilderPrivate::setupExternalConversion(const AbstractMetaClass *cls)
+void AbstractMetaBuilderPrivate::setupExternalConversion(const AbstractMetaClassCPtr &cls)
 {
     const auto &convOps = cls->operatorOverloads(OperatorQueryOption::ConversionOp);
     for (const auto &func : convOps) {
         if (func->isModifiedRemoved())
             continue;
-        AbstractMetaClass *metaClass = AbstractMetaClass::findClass(m_metaClasses, func->type().typeEntry());
-        if (!metaClass)
+        const auto metaClass =
+            AbstractMetaClass::findClass(m_metaClasses, func->type().typeEntry());
+        if (metaClass.isNull())
             continue;
         metaClass->addExternalConversionOperator(func);
     }
-    for (auto *innerClass : cls->innerClasses())
+    for (const auto &innerClass : cls->innerClasses())
         setupExternalConversion(innerClass);
 }
 
@@ -3412,10 +3404,10 @@ void AbstractMetaBuilderPrivate::dumpLog() const
 // AbstractMetaClassList/AbstractMetaClassCList.
 // Add a dependency of the class associated with typeEntry on clazz.
 template <class MetaClass>
-static bool addClassDependency(const QList<MetaClass *> &classList,
+static bool addClassDependency(const QList<QSharedPointer<MetaClass> > &classList,
                                const TypeEntryCPtr &typeEntry,
-                               MetaClass *clazz,
-                               Graph<MetaClass *> *graph)
+                               QSharedPointer<MetaClass> clazz,
+                               Graph<QSharedPointer<MetaClass> > *graph)
 {
     if (!typeEntry->isComplex() || typeEntry == clazz->typeEntry())
         return false;
@@ -3426,10 +3418,11 @@ static bool addClassDependency(const QList<MetaClass *> &classList,
 }
 
 template <class MetaClass>
-static QList<MetaClass *> topologicalSortHelper(const QList<MetaClass *> &classList,
-                                                const Dependencies &additionalDependencies)
+static QList<QSharedPointer<MetaClass> >
+    topologicalSortHelper(const QList<QSharedPointer<MetaClass> > &classList,
+                          const Dependencies &additionalDependencies)
 {
-    Graph<MetaClass *> graph(classList.cbegin(), classList.cend());
+    Graph<QSharedPointer<MetaClass> > graph(classList.cbegin(), classList.cend());
 
     for (const auto &dep : additionalDependencies) {
         if (!graph.addEdge(dep.parent, dep.child)) {
@@ -3439,14 +3432,14 @@ static QList<MetaClass *> topologicalSortHelper(const QList<MetaClass *> &classL
         }
     }
 
-    for (auto *clazz : classList) {
+    for (const auto &clazz : classList) {
         if (auto enclosingC = clazz->enclosingClass()) {
-            auto enclosing = const_cast<AbstractMetaClass *>(enclosingC);
+            const auto enclosing = qSharedPointerConstCast<MetaClass>(enclosingC);
             graph.addEdge(enclosing, clazz);
         }
 
-        for (auto baseClass : clazz->baseClasses())
-            graph.addEdge(const_cast<MetaClass *>(baseClass), clazz);
+        for (const auto &baseClass : clazz->baseClasses())
+            graph.addEdge(qSharedPointerConstCast<MetaClass>(baseClass), clazz);
 
         for (const auto &func : clazz->functions()) {
             const AbstractMetaArgumentList &arguments = func->arguments();
@@ -3476,7 +3469,7 @@ static QList<MetaClass *> topologicalSortHelper(const QList<MetaClass *> &classL
         tempFile.setAutoRemove(false);
         tempFile.open();
         graph.dumpDot(tempFile.fileName(),
-                      [] (const AbstractMetaClass *c) { return c->name(); });
+                      [] (const AbstractMetaClassCPtr &c) { return c->name(); });
 
         QString message;
         QTextStream str(&message);

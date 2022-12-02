@@ -33,7 +33,7 @@ using namespace Qt::StringLiterals;
 // functions, or typically owner/implementing/declaring class.
 struct ModificationCacheEntry
 {
-     const AbstractMetaClass *klass;
+     AbstractMetaClassCPtr klass;
      FunctionModificationList modifications;
 };
 
@@ -58,7 +58,7 @@ public:
     int overloadNumber(const AbstractMetaFunction *q) const;
 
     const FunctionModificationList &modifications(const AbstractMetaFunction *q,
-                                                  const AbstractMetaClass *implementor) const;
+                                                  const AbstractMetaClassCPtr &implementor) const;
 
     bool applyTypeModification(const AbstractMetaFunction *q,
                                const QString &type, int number, QString *errorMessage);
@@ -75,9 +75,9 @@ public:
     AbstractMetaFunction::FunctionType m_functionType = AbstractMetaFunction::NormalFunction;
     AbstractMetaType m_type;
     QString m_modifiedTypeName;
-    const AbstractMetaClass *m_class = nullptr;
-    const AbstractMetaClass *m_implementingClass = nullptr;
-    const AbstractMetaClass *m_declaringClass = nullptr;
+    AbstractMetaClassCPtr m_class;
+    AbstractMetaClassCPtr m_implementingClass;
+    AbstractMetaClassCPtr m_declaringClass;
     mutable ModificationCache m_modificationCache;
     int m_propertySpecIndex = -1;
     AbstractMetaArgumentList m_arguments;
@@ -272,9 +272,9 @@ void AbstractMetaFunction::setFlags(Flags f)
 /*******************************************************************************
  * Indicates that this function has a modification that removes it
  */
-bool AbstractMetaFunction::isModifiedRemoved(const AbstractMetaClass *cls) const
+bool AbstractMetaFunction::isModifiedRemoved(AbstractMetaClassCPtr cls) const
 {
-    if (!isInGlobalScope() && cls == nullptr)
+    if (!isInGlobalScope() && cls.isNull())
         cls = d->m_implementingClass;
     for (const auto &mod : modifications(cls)) {
         if (mod.isRemoved())
@@ -284,7 +284,7 @@ bool AbstractMetaFunction::isModifiedRemoved(const AbstractMetaClass *cls) const
     return false;
 }
 
-bool AbstractMetaFunction::isModifiedFinal(const AbstractMetaClass *cls) const
+bool AbstractMetaFunction::isModifiedFinal(AbstractMetaClassCPtr cls) const
 {
     if (!isInGlobalScope() && cls == nullptr)
         cls = d->m_implementingClass;
@@ -310,12 +310,12 @@ void AbstractMetaFunction::setType(const AbstractMetaType &type)
     d->m_type = type;
 }
 
-const AbstractMetaClass *AbstractMetaFunction::ownerClass() const
+AbstractMetaClassCPtr AbstractMetaFunction::ownerClass() const
 {
     return d->m_class;
 }
 
-void AbstractMetaFunction::setOwnerClass(const AbstractMetaClass *cls)
+void AbstractMetaFunction::setOwnerClass(const AbstractMetaClassCPtr &cls)
 {
     d->m_class = cls;
 }
@@ -482,7 +482,7 @@ bool AbstractMetaFunction::isWhiteListed() const
     case NormalFunction:
     case SignalFunction:
     case SlotFunction:
-        if (auto *dc = declaringClass()) {
+        if (auto dc = declaringClass(); !dc.isNull()) {
             const QSet<QString> &whiteList = dc->typeEntry()->generateFunctions();
             return whiteList.isEmpty() || whiteList.contains(d->m_name)
                    || whiteList.contains(minimalSignature());
@@ -590,7 +590,7 @@ int AbstractMetaFunction::actualArgumentIndex(int index) const
 }
 
 // Returns reference counts for argument at idx, or all arguments if idx == -2
-QList<ReferenceCount> AbstractMetaFunction::referenceCounts(const AbstractMetaClass *cls, int idx) const
+QList<ReferenceCount> AbstractMetaFunction::referenceCounts(const AbstractMetaClassCPtr &cls, int idx) const
 {
     QList<ReferenceCount> returned;
 
@@ -605,7 +605,7 @@ QList<ReferenceCount> AbstractMetaFunction::referenceCounts(const AbstractMetaCl
     return returned;
 }
 
-ArgumentOwner AbstractMetaFunction::argumentOwner(const AbstractMetaClass *cls, int idx) const
+ArgumentOwner AbstractMetaFunction::argumentOwner(const AbstractMetaClassCPtr &cls, int idx) const
 {
     for (const auto &mod : modifications(cls)) {
         for (const ArgumentModification &argumentMod : mod.argument_mods()) {
@@ -654,28 +654,28 @@ bool AbstractMetaFunction::argumentRemoved(int key) const
     return false;
 }
 
-const AbstractMetaClass *AbstractMetaFunction::targetLangOwner() const
+AbstractMetaClassCPtr AbstractMetaFunction::targetLangOwner() const
 {
     return d->m_class && d->m_class->isInvisibleNamespace()
         ?  d->m_class->targetLangEnclosingClass() : d->m_class;
 }
 
-const AbstractMetaClass *AbstractMetaFunction::declaringClass() const
+AbstractMetaClassCPtr AbstractMetaFunction::declaringClass() const
 {
     return d->m_declaringClass;
 }
 
-void AbstractMetaFunction::setDeclaringClass(const AbstractMetaClass *cls)
+void AbstractMetaFunction::setDeclaringClass(const AbstractMetaClassCPtr &cls)
 {
     d->m_declaringClass = cls;
 }
 
-const AbstractMetaClass *AbstractMetaFunction::implementingClass() const
+AbstractMetaClassCPtr AbstractMetaFunction::implementingClass() const
 {
     return d->m_implementingClass;
 }
 
-void AbstractMetaFunction::setImplementingClass(const AbstractMetaClass *cls)
+void AbstractMetaFunction::setImplementingClass(const AbstractMetaClassCPtr &cls)
 {
     d->m_implementingClass = cls;
 }
@@ -799,12 +799,12 @@ void AbstractMetaFunction::setSourceLocation(const SourceLocation &sourceLocatio
     d->m_sourceLocation = sourceLocation;
 }
 
-static inline TypeSystem::AllowThread allowThreadMod(const AbstractMetaClass *klass)
+static inline TypeSystem::AllowThread allowThreadMod(const AbstractMetaClassCPtr &klass)
 {
     return klass->typeEntry()->allowThread();
 }
 
-static inline bool hasAllowThreadMod(const AbstractMetaClass *klass)
+static inline bool hasAllowThreadMod(const AbstractMetaClassCPtr &klass)
 {
     return allowThreadMod(klass) != TypeSystem::AllowThread::Unspecified;
 }
@@ -837,7 +837,7 @@ bool AbstractMetaFunction::allowThread() const
     return result;
 }
 
-TypeSystem::Ownership AbstractMetaFunction::argumentTargetOwnership(const AbstractMetaClass *cls, int idx) const
+TypeSystem::Ownership AbstractMetaFunction::argumentTargetOwnership(const AbstractMetaClassCPtr &cls, int idx) const
 {
     for (const auto &modification : modifications(cls)) {
         for (const ArgumentModification &argumentModification : modification.argument_mods()) {
@@ -1005,7 +1005,7 @@ QString AbstractMetaFunction::debugSignature() const
 }
 
 FunctionModificationList AbstractMetaFunction::findClassModifications(const AbstractMetaFunction *f,
-                                                                      const AbstractMetaClass *implementor)
+                                                                      AbstractMetaClassCPtr implementor)
 {
     const auto signatures = f->modificationSignatures();
     FunctionModificationList mods;
@@ -1028,7 +1028,7 @@ FunctionModificationList AbstractMetaFunction::findGlobalModifications(const Abs
 
 const FunctionModificationList &
     AbstractMetaFunctionPrivate::modifications(const AbstractMetaFunction *q,
-                                               const AbstractMetaClass *implementor) const
+                                               const AbstractMetaClassCPtr &implementor) const
 {
     if (!m_addedFunction.isNull())
         return m_addedFunction->modifications();
@@ -1045,9 +1045,9 @@ const FunctionModificationList &
 }
 
 const FunctionModificationList &
-    AbstractMetaFunction::modifications(const AbstractMetaClass *implementor) const
+    AbstractMetaFunction::modifications(AbstractMetaClassCPtr implementor) const
 {
-    if (implementor == nullptr)
+    if (implementor.isNull())
         implementor = d->m_class;
     return d->modifications(this, implementor);
 }
@@ -1065,7 +1065,7 @@ const DocModificationList AbstractMetaFunction::addedFunctionDocModifications() 
 
 QString AbstractMetaFunction::argumentName(int index,
                                            bool /* create */,
-                                           const AbstractMetaClass * /* implementor */) const
+                                           AbstractMetaClassCPtr  /* implementor */) const
 {
     return d->m_arguments[--index].name();
 }
@@ -1186,12 +1186,12 @@ void AbstractMetaFunction::setExceptionSpecification(ExceptionSpecification e)
     d->m_exceptionSpecification = e;
 }
 
-static inline TypeSystem::ExceptionHandling exceptionMod(const AbstractMetaClass *klass)
+static inline TypeSystem::ExceptionHandling exceptionMod(const AbstractMetaClassCPtr &klass)
 {
     return klass->typeEntry()->exceptionHandling();
 }
 
-static inline bool hasExceptionMod(const AbstractMetaClass *klass)
+static inline bool hasExceptionMod(const AbstractMetaClassCPtr &klass)
 {
     return exceptionMod(klass) != TypeSystem::ExceptionHandling::Unspecified;
 }

@@ -17,8 +17,8 @@ class ApiExtractorResultData;
 
 struct InstantiatedSmartPointer
 {
-    const AbstractMetaClass *smartPointer = nullptr; // Template class
-    const AbstractMetaClass *specialized = nullptr; // Specialized for type
+    AbstractMetaClassCPtr smartPointer; // Template class
+    AbstractMetaClassCPtr specialized; // Specialized for type
     AbstractMetaType type;
 };
 

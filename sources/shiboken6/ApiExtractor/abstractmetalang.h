@@ -67,7 +67,8 @@ public:
 
     const AbstractMetaFunctionCList &functions() const;
     void setFunctions(const AbstractMetaFunctionCList &functions);
-    static void addFunction(AbstractMetaClass *klass, const AbstractMetaFunctionCPtr &function);
+    static void addFunction(const AbstractMetaClassPtr &klass,
+                            const AbstractMetaFunctionCPtr &function);
     bool hasFunction(const QString &str) const;
     AbstractMetaFunctionCPtr findFunction(QStringView functionName) const;
     AbstractMetaFunctionCList findFunctions(QStringView functionName) const;
@@ -81,8 +82,8 @@ public:
     bool hasCopyConstructor() const;
     bool hasPrivateCopyConstructor() const;
 
-    static void addDefaultConstructor(AbstractMetaClass *klass);
-    static void addDefaultCopyConstructor(AbstractMetaClass *klass);
+    static void addDefaultConstructor(const AbstractMetaClassPtr &klass);
+    static void addDefaultCopyConstructor(const AbstractMetaClassPtr &klass);
 
     bool hasNonPrivateConstructor() const;
     void setHasNonPrivateConstructor(bool value);
@@ -113,7 +114,7 @@ public:
     bool isImplicitlyCopyConstructible() const;
     bool canAddDefaultCopyConstructor() const;
 
-    static void addSynthesizedComparisonOperators(AbstractMetaClass *c);
+    static void addSynthesizedComparisonOperators(const AbstractMetaClassPtr &c);
 
     bool generateExceptionHandling() const;
 
@@ -121,7 +122,7 @@ public:
 
     const UsingMembers &usingMembers() const;
     void addUsingMember(const UsingMember &um);
-    bool isUsingMember(const AbstractMetaClass *c, const QString &memberName,
+    bool isUsingMember(const AbstractMetaClassCPtr &c, const QString &memberName,
                        Access minimumAccess) const;
     bool hasUsingMemberFor(const QString &memberName) const;
 
@@ -186,27 +187,27 @@ public:
 
     QString baseClassName() const;
 
-    const AbstractMetaClass *defaultSuperclass() const; // Attribute "default-superclass"
-    void setDefaultSuperclass(AbstractMetaClass *s);
+    AbstractMetaClassCPtr defaultSuperclass() const; // Attribute "default-superclass"
+    void setDefaultSuperclass(const AbstractMetaClassPtr &s);
 
-    const AbstractMetaClass *baseClass() const;
+    AbstractMetaClassCPtr baseClass() const;
     const AbstractMetaClassCList &baseClasses() const;
     // base classes including defaultSuperclass
     AbstractMetaClassCList typeSystemBaseClasses() const;
     // Recursive list of all base classes including defaultSuperclass
     AbstractMetaClassCList allTypeSystemAncestors() const;
 
-    void addBaseClass(const AbstractMetaClass *base_class);
-    void setBaseClass(const AbstractMetaClass *base_class);
+    void addBaseClass(const AbstractMetaClassCPtr &base_class);
+    void setBaseClass(const AbstractMetaClassCPtr &base_class);
 
     /**
      *   \return the namespace from another package which this namespace extends.
      */
-    const AbstractMetaClass *extendedNamespace() const;
-    void setExtendedNamespace(const AbstractMetaClass *e);
+    AbstractMetaClassCPtr extendedNamespace() const;
+    void setExtendedNamespace(const AbstractMetaClassCPtr &e);
 
     const AbstractMetaClassCList &innerClasses() const;
-    void addInnerClass(AbstractMetaClass *cl);
+    void addInnerClass(const AbstractMetaClassPtr &cl);
     void setInnerClasses(const AbstractMetaClassCList &innerClasses);
 
     QString package() const;
@@ -285,8 +286,8 @@ public:
 
     void sortFunctions();
 
-    const AbstractMetaClass *templateBaseClass() const;
-    void setTemplateBaseClass(const AbstractMetaClass *cls);
+    AbstractMetaClassCPtr templateBaseClass() const;
+    void setTemplateBaseClass(const AbstractMetaClassCPtr &cls);
 
     bool hasTemplateBaseClassInstantiations() const;
     const AbstractMetaTypeList &templateBaseClassInstantiations() const;
@@ -310,18 +311,18 @@ public:
     bool isCopyable() const;
     bool isValueTypeWithCopyConstructorOnly() const;
     void setValueTypeWithCopyConstructorOnly(bool v);
-    static bool determineValueTypeWithCopyConstructorOnly(const AbstractMetaClass *c,
+    static bool determineValueTypeWithCopyConstructorOnly(const AbstractMetaClassCPtr &c,
                                                           bool avoidProtectedHack);
 
-    static AbstractMetaClass *findClass(const AbstractMetaClassList &classes,
+    static AbstractMetaClassPtr findClass(const AbstractMetaClassList &classes,
                                         QStringView name);
-    static const AbstractMetaClass *findClass(const AbstractMetaClassCList &classes,
+    static AbstractMetaClassCPtr findClass(const AbstractMetaClassCList &classes,
                                               QStringView name);
-    static AbstractMetaClass *findClass(const AbstractMetaClassList &classes,
+    static AbstractMetaClassPtr findClass(const AbstractMetaClassList &classes,
                                         const TypeEntryCPtr &typeEntry);
-    static const AbstractMetaClass *findClass(const AbstractMetaClassCList &classes,
+    static AbstractMetaClassCPtr findClass(const AbstractMetaClassCList &classes,
                                               const TypeEntryCPtr &typeEntry);
-    const AbstractMetaClass *findBaseClass(const QString &qualifiedName) const;
+    AbstractMetaClassCPtr findBaseClass(const QString &qualifiedName) const;
 
     static std::optional<AbstractMetaEnumValue> findEnumValue(const AbstractMetaClassList &classes,
                                                               const QString &string);
@@ -330,7 +331,7 @@ public:
     void setSourceLocation(const SourceLocation &sourceLocation);
 
     // For AbstractMetaBuilder
-    static void fixFunctions(AbstractMetaClass *klass);
+    static void fixFunctions(const AbstractMetaClassPtr &klass);
     bool needsInheritanceSetup() const;
     void setInheritanceDone(bool b);
     bool inheritanceDone() const;
@@ -342,7 +343,7 @@ private:
 #ifndef QT_NO_DEBUG_STREAM
     void format(QDebug &d) const;
     void formatMembers(QDebug &d) const;
-    friend QDebug operator<<(QDebug d, const AbstractMetaClass *ac);
+    friend QDebug operator<<(QDebug d, const AbstractMetaClassCPtr &ac);
 #endif
 
     QScopedPointer<AbstractMetaClassPrivate> d;
@@ -361,7 +362,7 @@ inline bool AbstractMetaClass::isAbstract() const
 template <class Function>
 void AbstractMetaClass::invisibleNamespaceRecursion(Function f) const
 {
-    for (auto ic : innerClasses()) {
+    for (const auto &ic : innerClasses()) {
         if (ic->isInvisibleNamespace()) {
             f(ic);
             ic->invisibleNamespaceRecursion(f);
@@ -369,16 +370,16 @@ void AbstractMetaClass::invisibleNamespaceRecursion(Function f) const
     }
 }
 
-bool inheritsFrom(const AbstractMetaClass *c, const AbstractMetaClass *other);
-bool inheritsFrom(const AbstractMetaClass *c, const QString &name);
+bool inheritsFrom(const AbstractMetaClassCPtr &c, const AbstractMetaClassCPtr &other);
+bool inheritsFrom(const AbstractMetaClassCPtr &c, const QString &name);
+inline bool isQObject(const AbstractMetaClassCPtr &c) { return inheritsFrom(c, u"QObject"_qs); }
 
-inline bool isQObject(const AbstractMetaClass *c) { return inheritsFrom(c, u"QObject"_qs); }
+AbstractMetaClassCPtr findBaseClass(const AbstractMetaClassCPtr &c,
+                                    const QString &qualifiedName);
 
-const AbstractMetaClass *findBaseClass(const AbstractMetaClass *c,
-                                       const QString &qualifiedName);
 /// Return type entry of the base class that declares the parent management
-TypeEntryCPtr parentManagementEntry(const AbstractMetaClass *klass);
-inline bool hasParentManagement(const AbstractMetaClass *c)
+TypeEntryCPtr parentManagementEntry(const AbstractMetaClassCPtr &klass);
+inline bool hasParentManagement(const AbstractMetaClassCPtr &c)
 { return !parentManagementEntry(c).isNull(); }
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaClass::CppWrapper);

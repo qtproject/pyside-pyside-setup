@@ -80,10 +80,10 @@ public:
     Q_DECLARE_FLAGS(TranslateTypeFlags, TranslateTypeFlag);
 
     static std::optional<AbstractMetaType>
-        translateType(const TypeInfo &_typei, AbstractMetaClass *currentClass = nullptr,
+        translateType(const TypeInfo &_typei, const AbstractMetaClassPtr &currentClass = {},
                       TranslateTypeFlags flags = {}, QString *errorMessage = nullptr);
     static std::optional<AbstractMetaType>
-        translateType(const QString &t, AbstractMetaClass *currentClass = nullptr,
+        translateType(const QString &t, const AbstractMetaClassPtr &currentClass = {},
                       TranslateTypeFlags flags = {}, QString *errorMessage = nullptr);
 
     /// Performs a template specialization of the function.
@@ -94,9 +94,9 @@ public:
         inheritTemplateFunction(const AbstractMetaFunctionCPtr &function,
                                 const AbstractMetaTypeList &templateTypes);
 
-    static AbstractMetaClass *
+    static AbstractMetaClassPtr
         inheritTemplateClass(const ComplexTypeEntryPtr &te,
-                             const AbstractMetaClass *templateClass,
+                             const AbstractMetaClassCPtr &templateClass,
                              const AbstractMetaTypeList &templateTypes,
                              InheritTemplateFlags flags = {});
 
@@ -109,22 +109,22 @@ public:
     static AbstractMetaFunctionPtr
         inheritTemplateMember(const AbstractMetaFunctionCPtr &function,
                               const AbstractMetaTypeList &templateTypes,
-                              const AbstractMetaClass *templateClass,
-                              AbstractMetaClass *subclass);
+                              const AbstractMetaClassCPtr &templateClass,
+                              const AbstractMetaClassPtr &subclass);
 
     static QString getSnakeCaseName(const QString &name);
     // Names under which an item will be registered to Python depending on snakeCase
     static QStringList definitionNames(const QString &name,
                                        TypeSystem::SnakeCase snakeCase);
 
-    static QString resolveScopePrefix(const AbstractMetaClass *scope,
+    static QString resolveScopePrefix(const AbstractMetaClassCPtr &scope,
                                       QStringView value);
 
     static bool dontFixDefaultValue(QStringView expr);
 
     // For testing purposes
     QString fixDefaultValue(const QString &expr, const AbstractMetaType &type,
-                            const AbstractMetaClass *) const;
+                            const AbstractMetaClassCPtr &) const;
     QString fixEnumDefault(const AbstractMetaType &type, const QString &expr) const;
 
     static void setCodeModelTestMode(bool b);

@@ -16,8 +16,10 @@ class GeneratorContext;
 class DefaultValue;
 class TextStream;
 
-QString getClassTargetFullName(const AbstractMetaClass *metaClass, bool includePackageName = true);
-QString getClassTargetFullName(const AbstractMetaEnum &metaEnum, bool includePackageName = true);
+QString getClassTargetFullName(const AbstractMetaClassCPtr &metaClass,
+                               bool includePackageName = true);
+QString getClassTargetFullName(const AbstractMetaEnum &metaEnum,
+                               bool includePackageName = true);
 QString getFilteredCppSignatureString(QString signature);
 
 /**
@@ -120,10 +122,10 @@ protected:
     /// Returns all container types found by APIExtractor
     static ContainerTypeEntryCList containerTypes();
 
-    virtual GeneratorContext contextForClass(const AbstractMetaClass *c) const;
-    static GeneratorContext contextForSmartPointer(const AbstractMetaClass *c,
-                                                   const AbstractMetaType &t,
-                                                   const AbstractMetaClass *pointeeClass = nullptr);
+    virtual GeneratorContext contextForClass(const AbstractMetaClassCPtr &c) const;
+    static GeneratorContext
+        contextForSmartPointer(const AbstractMetaClassCPtr &c, const AbstractMetaType &t,
+                           const AbstractMetaClassCPtr &pointeeClass = {});
 
     /// Generates a file for given AbstractMetaClass or AbstractMetaType (smart pointer case).
     bool generateFileForContext(const GeneratorContext &context);
@@ -142,7 +144,7 @@ protected:
     *   \return the metatype translated to binding source format
     */
     QString translateType(AbstractMetaType metatype,
-                          const AbstractMetaClass *context,
+                          const AbstractMetaClassCPtr &context,
                           Options options = NoOption) const;
 
     /**
@@ -153,7 +155,7 @@ protected:
     // Returns the full name of the type.
     static QString getFullTypeName(TypeEntryCPtr type);
     static QString getFullTypeName(const AbstractMetaType &type);
-    static QString getFullTypeName(const AbstractMetaClass *metaClass);
+    static QString getFullTypeName(const AbstractMetaClassCPtr &metaClass);
 
     /**
      *  Returns the full qualified C++ name for an AbstractMetaType, but removing modifiers
@@ -175,7 +177,7 @@ protected:
                            QString *errorString = nullptr);
     static std::optional<DefaultValue>
         minimalConstructor(const ApiExtractorResult &api,
-                           const AbstractMetaClass *metaClass,
+                           const AbstractMetaClassCPtr &metaClass,
                            QString *errorString = nullptr);
 
     /**

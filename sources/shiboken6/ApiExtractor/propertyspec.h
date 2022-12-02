@@ -6,6 +6,7 @@
 
 class AbstractMetaType;
 
+#include "abstractmetalang_typedefs.h"
 #include "typesystem_typedefs.h"
 
 #include <QtCore/QStringList>
@@ -42,14 +43,14 @@ public:
 
     static std::optional<QPropertySpec>
         fromTypeSystemProperty(AbstractMetaBuilderPrivate *b,
-                               AbstractMetaClass *metaClass,
+                               const AbstractMetaClassPtr &metaClass,
                                const TypeSystemProperty &ts,
                                const QStringList &scopes,
                                QString *errorMessage);
 
     static std::optional<QPropertySpec>
         parseQ_Property(AbstractMetaBuilderPrivate *b,
-                        AbstractMetaClass *metaClass,
+                        const AbstractMetaClassPtr &metaClass,
                         const QString &declarationIn,
                         const QStringList &scopes,
                         QString *errorMessage);

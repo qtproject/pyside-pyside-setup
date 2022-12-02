@@ -186,7 +186,7 @@ public:
     /// Creates an AbstractMetaType object from a TypeEntry.
     static AbstractMetaType fromTypeEntry(const TypeEntryCPtr &typeEntry);
     /// Creates an AbstractMetaType object from an AbstractMetaClass.
-    static AbstractMetaType fromAbstractMetaClass(const AbstractMetaClass *metaClass);
+    static AbstractMetaType fromAbstractMetaClass(const AbstractMetaClassCPtr &metaClass);
 
     static void dereference(QString *type); // "foo" -> "(*foo)"
     /// Apply the result of shouldDereferenceArgument()

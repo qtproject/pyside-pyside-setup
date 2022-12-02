@@ -34,7 +34,7 @@ void TestRefCountTag::testReferenceCountTag()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, u"B");
+    const auto classB = AbstractMetaClass::findClass(classes, u"B");
     const auto func = classB->findFunction(u"keepObject");
     QVERIFY(!func.isNull());
     const auto refCount =
@@ -68,7 +68,7 @@ void TestRefCountTag::testWithApiVersion()
                                                                 false, u"0.1"_s));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, u"B");
+    const auto classB = AbstractMetaClass::findClass(classes, u"B");
     const auto func = classB->findFunction(u"keepObject");
     QVERIFY(!func.isNull());
     const auto refCount =

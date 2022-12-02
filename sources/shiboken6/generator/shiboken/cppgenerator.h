@@ -44,7 +44,7 @@ public:
 protected:
     QString fileNameForContext(const GeneratorContext &context) const override;
     static QList<AbstractMetaFunctionCList>
-        filterGroupedOperatorFunctions(const AbstractMetaClass *metaClass,
+        filterGroupedOperatorFunctions(const AbstractMetaClassCPtr &metaClass,
                                        OperatorQueryOptions query);
     void generateClass(TextStream &s, const GeneratorContext &classContext) override;
     bool finishGeneration() override;
@@ -98,11 +98,11 @@ private:
                                       const QString &flagsCppTypeName,
                                       const QString &enumTypeCheck) const;
     void writeEnumConverterFunctions(TextStream &s, const AbstractMetaEnum &metaEnum) const;
-    void writeConverterFunctions(TextStream &s, const AbstractMetaClass *metaClass,
+    void writeConverterFunctions(TextStream &s, const AbstractMetaClassCPtr &metaClass,
                                  const GeneratorContext &classContext) const;
     void writeCustomConverterFunctions(TextStream &s,
                                        const CustomConversionPtr &customConversion) const;
-    void writeConverterRegister(TextStream &s, const AbstractMetaClass *metaClass,
+    void writeConverterRegister(TextStream &s, const AbstractMetaClassCPtr &metaClass,
                                 const GeneratorContext &classContext) const;
     static void writeCustomConverterRegister(TextStream &s,
                                              const CustomConversionPtr &customConversion,
@@ -179,15 +179,16 @@ private:
     static void writeTypeCheck(TextStream& s, const QSharedPointer<OverloadDataNode> &overloadData,
                         const QString &argumentName);
 
-    static void writeTypeDiscoveryFunction(TextStream &s, const AbstractMetaClass *metaClass);
+    static void writeTypeDiscoveryFunction(TextStream &s,
+                                           const AbstractMetaClassCPtr &metaClass);
 
-    void writeSetattroDefinition(TextStream &s, const AbstractMetaClass *metaClass) const;
+    void writeSetattroDefinition(TextStream &s, const AbstractMetaClassCPtr &metaClass) const;
     static void writeSetattroDefaultReturn(TextStream &s);
     void writeSmartPointerSetattroFunction(TextStream &s,
                                            const GeneratorContext &context) const;
     void writeSetattroFunction(TextStream &s, AttroCheck attroCheck,
                                const GeneratorContext &context) const;
-    static void writeGetattroDefinition(TextStream &s, const AbstractMetaClass *metaClass);
+    static void writeGetattroDefinition(TextStream &s, const AbstractMetaClassCPtr &metaClass);
     static void writeSmartPointerGetattroFunction(TextStream &s,
                                                   const GeneratorContext &context,
                                                   const BoolCastFunctionOptional &boolCast);
@@ -216,7 +217,7 @@ private:
     qsizetype writeArgumentConversion(TextStream &s, const AbstractMetaType &argType,
                                       const QString &argName, const QString &pyArgName,
                                       ErrorReturn errorReturn,
-                                      const AbstractMetaClass *context = nullptr,
+                                      const AbstractMetaClassCPtr &context = {},
                                       const QString &defaultValue = QString(),
                                       bool castArgumentAsUnused = false) const;
 
@@ -238,7 +239,7 @@ private:
                                         const AbstractMetaType &type,
                                         const QString &pyIn,
                                         const QString &cppOut,
-                                        const AbstractMetaClass *context = nullptr,
+                                        const AbstractMetaClassCPtr &context = {},
                                         const QString &defaultValue = {}) const;
 
     /// Writes the conversion rule for arguments of regular and virtual methods.
@@ -350,7 +351,7 @@ private:
                                          const AbstractMetaFunctionCPtr &func, int argIndex);
     /// Returns the class for an ownership modification of the argument.
     /// Throws if the argument is not a class or cannot be found.
-    static const AbstractMetaClass *
+    static AbstractMetaClassCPtr
         argumentClassFromIndex(const ApiExtractorResult &api,
                                const AbstractMetaFunctionCPtr &func, int argIndex);
 
@@ -360,22 +361,23 @@ private:
                          ErrorReturn errorReturn) const;
 
     static QString getInitFunctionName(const GeneratorContext &context) ;
-    static QString getSimpleClassInitFunctionName(const AbstractMetaClass *metaClass) ;
-    static QString getSimpleClassStaticFieldsInitFunctionName(const AbstractMetaClass *metaClass);
+    static QString getSimpleClassInitFunctionName(const AbstractMetaClassCPtr &metaClass);
+    static QString
+        getSimpleClassStaticFieldsInitFunctionName(const AbstractMetaClassCPtr &metaClass);
 
     static void writeSignatureStrings(TextStream &s, const QString &signatures,
                                       const QString &arrayName,
                                       const char *comment);
     void writeClassRegister(TextStream &s,
-                            const AbstractMetaClass *metaClass,
+                            const AbstractMetaClassCPtr &metaClass,
                             const GeneratorContext &classContext,
                             const QString &signatures) const;
-    QString destructorClassName(const AbstractMetaClass *metaClass,
+    QString destructorClassName(const AbstractMetaClassCPtr &metaClass,
                                 const GeneratorContext &classContext) const;
     static void writeStaticFieldInitialization(TextStream &s,
-                                               const AbstractMetaClass *metaClass);
+                                               const AbstractMetaClassCPtr &metaClass);
     void writeClassDefinition(TextStream &s,
-                              const AbstractMetaClass *metaClass,
+                              const AbstractMetaClassCPtr &metaClass,
                               const GeneratorContext &classContext);
     QByteArrayList methodDefinitionParameters(const OverloadData &overloadData) const;
     QList<PyMethodDefEntry> methodDefinitionEntries(const OverloadData &overloadData) const;
@@ -384,22 +386,22 @@ private:
     QString signatureParameter(const AbstractMetaArgument &arg) const;
     /// Writes the implementation of all methods part of python sequence protocol
     void writeSequenceMethods(TextStream &s,
-                              const AbstractMetaClass *metaClass,
+                              const AbstractMetaClassCPtr &metaClass,
                               const GeneratorContext &context) const;
     static void writeTypeAsSequenceDefinition(TextStream &s,
-                                         const AbstractMetaClass *metaClass);
+                                         const AbstractMetaClassCPtr &metaClass);
 
     /// Writes the PyMappingMethods structure for types that supports the python mapping protocol.
     static void writeTypeAsMappingDefinition(TextStream &s,
-                                        const AbstractMetaClass *metaClass);
+                                        const AbstractMetaClassCPtr &metaClass);
     void writeMappingMethods(TextStream &s,
-                             const AbstractMetaClass *metaClass,
+                             const AbstractMetaClassCPtr &metaClass,
                              const GeneratorContext &context) const;
 
-    void writeTypeAsNumberDefinition(TextStream &s, const AbstractMetaClass *metaClass) const;
+    void writeTypeAsNumberDefinition(TextStream &s, const AbstractMetaClassCPtr &metaClass) const;
 
-    static void writeTpTraverseFunction(TextStream &s, const AbstractMetaClass *metaClass);
-    static void writeTpClearFunction(TextStream &s, const AbstractMetaClass *metaClass);
+    static void writeTpTraverseFunction(TextStream &s, const AbstractMetaClassCPtr &metaClass);
+    static void writeTpClearFunction(TextStream &s, const AbstractMetaClassCPtr &metaClass);
 
     void writeCopyFunction(TextStream &s, const GeneratorContext &context) const;
 
@@ -437,7 +439,7 @@ private:
     void writeEnumInitialization(TextStream &s, const AbstractMetaEnum &metaEnum,
                                  ErrorReturn errorReturn) const;
 
-    static void writeSignalInitialization(TextStream &s, const AbstractMetaClass *metaClass);
+    static void writeSignalInitialization(TextStream &s, const AbstractMetaClassCPtr &metaClass);
 
     static void writeFlagsMethods(TextStream &s, const AbstractMetaEnum &cppEnum);
     static void writeFlagsToLong(TextStream &s, const AbstractMetaEnum &cppEnum);
@@ -455,10 +457,13 @@ private:
                                         const QString &cppOpName,
                                         bool boolResult = false);
 
-    /// Writes the function that registers the multiple inheritance information for the classes that need it.
-    static void writeMultipleInheritanceInitializerFunction(TextStream &s, const AbstractMetaClass *metaClass);
-    /// Writes the implementation of special cast functions, used when we need to cast a class with multiple inheritance.
-    static void writeSpecialCastFunction(TextStream &s, const AbstractMetaClass *metaClass);
+    /// Writes the function that registers the multiple inheritance information
+    /// for the classes that need it.
+    static void writeMultipleInheritanceInitializerFunction(TextStream &s,
+                                                            const AbstractMetaClassCPtr &metaClass);
+    /// Writes the implementation of special cast functions, used when we need
+    /// to cast a class with multiple inheritance.
+    static void writeSpecialCastFunction(TextStream &s, const AbstractMetaClassCPtr &metaClass);
 
     static void writePrimitiveConverterInitialization(TextStream &s,
                                                       const CustomConversionPtr &customConversion);
@@ -486,22 +491,22 @@ private:
      *   \return name of the multiple inheritance information initializer function or
      *           an empty string if there is no multiple inheritance in its ancestry.
      */
-    static QString multipleInheritanceInitializerFunctionName(const AbstractMetaClass *metaClass);
+    static QString multipleInheritanceInitializerFunctionName(const AbstractMetaClassCPtr &metaClass);
 
     /// Returns a list of all classes to which the given class could be cast.
-    static QStringList getAncestorMultipleInheritance(const AbstractMetaClass *metaClass);
+    static QStringList getAncestorMultipleInheritance(const AbstractMetaClassCPtr &metaClass);
 
     /// Returns true if the given class supports the python number protocol
-    bool supportsNumberProtocol(const AbstractMetaClass *metaClass) const;
+    bool supportsNumberProtocol(const AbstractMetaClassCPtr &metaClass) const;
 
     /// Returns true if the given class supports the python sequence protocol
-    static bool supportsSequenceProtocol(const AbstractMetaClass *metaClass) ;
+    static bool supportsSequenceProtocol(const AbstractMetaClassCPtr &metaClass) ;
 
     /// Returns true if the given class supports the python mapping protocol
-    static bool supportsMappingProtocol(const AbstractMetaClass *metaClass) ;
+    static bool supportsMappingProtocol(const AbstractMetaClassCPtr &metaClass) ;
 
     /// Returns true if generator should produce getters and setters for the given class.
-    bool shouldGenerateGetSetList(const AbstractMetaClass *metaClass) const;
+    bool shouldGenerateGetSetList(const AbstractMetaClassCPtr &metaClass) const;
 
     void writeHashFunction(TextStream &s, const GeneratorContext &context) const;
 
@@ -514,8 +519,8 @@ private:
     QString writeReprFunction(TextStream &s, const GeneratorContext &context,
                               uint indirections) const;
 
-    BoolCastFunctionOptional boolCast(const AbstractMetaClass *metaClass) const;
-    bool hasBoolCast(const AbstractMetaClass *metaClass) const
+    BoolCastFunctionOptional boolCast(const AbstractMetaClassCPtr &metaClass) const;
+    bool hasBoolCast(const AbstractMetaClassCPtr &metaClass) const
     { return boolCast(metaClass).has_value(); }
 
     std::optional<AbstractMetaType>

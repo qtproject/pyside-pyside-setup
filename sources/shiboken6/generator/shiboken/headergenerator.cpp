@@ -72,13 +72,14 @@ QString HeaderGenerator::fileNameForContext(const GeneratorContext &context) con
     return headerFileNameForContext(context);
 }
 
-void HeaderGenerator::writeCopyCtor(TextStream &s, const AbstractMetaClass *metaClass) const
+void HeaderGenerator::writeCopyCtor(TextStream &s,
+                                    const AbstractMetaClassCPtr &metaClass) const
 {
     s << wrapperName(metaClass) << "(const " << metaClass->qualifiedCppName()
       << "& self) : " << metaClass->qualifiedCppName() << "(self)\n{\n}\n\n";
 }
 
-static void writeProtectedEnums(TextStream &s, const AbstractMetaClass *metaClass)
+static void writeProtectedEnums(TextStream &s, const AbstractMetaClassCPtr &metaClass)
 {
     const QString name = metaClass->qualifiedCppName();
     for (const auto &e : metaClass->enums()) {
@@ -90,7 +91,7 @@ static void writeProtectedEnums(TextStream &s, const AbstractMetaClass *metaClas
 void HeaderGenerator::generateClass(TextStream &s, const GeneratorContext &classContextIn)
 {
     GeneratorContext classContext = classContextIn;
-    const AbstractMetaClass *metaClass = classContext.metaClass();
+    AbstractMetaClassCPtr metaClass = classContext.metaClass();
     m_inheritedOverloads.clear();
 
     // write license comment
@@ -136,7 +137,7 @@ void HeaderGenerator::generateClass(TextStream &s, const GeneratorContext &class
 
         // Make protected enums accessible
         if (avoidProtectedHack()) {
-            recurseClassHierarchy(metaClass, [&s] (const AbstractMetaClass *metaClass) {
+            recurseClassHierarchy(metaClass, [&s] (const AbstractMetaClassCPtr &metaClass) {
                 writeProtectedEnums(s, metaClass);
                 return false;
             });
@@ -323,13 +324,13 @@ static inline void _writeTypeIndexValueLine(TextStream &s,
 }
 
 // Find equivalent typedefs "using Foo=QList<int>", "using Bar=QList<int>"
-static const AbstractMetaClass *
+static AbstractMetaClassCPtr
     findEquivalentTemplateTypedef(const AbstractMetaClassCList &haystack,
-                                  const AbstractMetaClass *needle)
+                                  const AbstractMetaClassCPtr &needle)
 {
-    auto *templateBaseClass = needle->templateBaseClass();
+    auto templateBaseClass = needle->templateBaseClass();
     const auto &instantiations = needle->templateBaseClassInstantiations();
-    for (auto *candidate : haystack) {
+    for (const auto &candidate : haystack) {
         if (candidate->isTypeDef()
             && candidate->templateBaseClass() == templateBaseClass
             && candidate->templateBaseClassInstantiations() == instantiations) {
@@ -374,7 +375,7 @@ void HeaderGenerator::writeTypeIndexValueLine(TextStream &s, const ApiExtractorR
 }
 
 void HeaderGenerator::writeTypeIndexValueLines(TextStream &s, const ApiExtractorResult &api,
-                                               const AbstractMetaClass *metaClass)
+                                               const AbstractMetaClassCPtr &metaClass)
 {
     auto typeEntry = metaClass->typeEntry();
     if (!typeEntry->generateCode())
@@ -417,18 +418,18 @@ static void formatTypeDefEntries(TextStream &s)
 // Helpers for forward-declaring classes in the module header for the
 // specialization of the SbkType template functions. This is possible if the
 // class does not have inner types or enums which need to be known.
-static bool canForwardDeclare(const AbstractMetaClass *c)
+static bool canForwardDeclare(const AbstractMetaClassCPtr &c)
 {
     if (c->isNamespace() || !c->enums().isEmpty()
         || !c->innerClasses().isEmpty() || c->isTypeDef()) {
         return false;
     }
-    if (auto *encl = c->enclosingClass())
+    if (auto encl = c->enclosingClass(); !encl.isNull())
         return encl->isNamespace();
     return true;
 }
 
-static void writeForwardDeclaration(TextStream &s, const AbstractMetaClass *c)
+static void writeForwardDeclaration(TextStream &s, const AbstractMetaClassCPtr &c)
 {
     Q_ASSERT(!c->isNamespace());
     const bool isStruct = c->attributes().testFlag(AbstractMetaClass::Struct);
@@ -447,7 +448,7 @@ static void writeForwardDeclaration(TextStream &s, const AbstractMetaClass *c)
 // forward declarations to the module header. Ensure inline namespaces
 // are marked as such (else clang complains) and namespaces are ordered.
 struct NameSpace {
-    const AbstractMetaClass *nameSpace;
+    AbstractMetaClassCPtr nameSpace;
     AbstractMetaClassCList classes;
 };
 
@@ -458,7 +459,7 @@ static bool operator<(const NameSpace &n1, const NameSpace &n2)
 
 using NameSpaces = QList<NameSpace>;
 
-static qsizetype indexOf(const NameSpaces &nsps, const AbstractMetaClass *needle)
+static qsizetype indexOf(const NameSpaces &nsps, const AbstractMetaClassCPtr &needle)
 {
     for (qsizetype i = 0, count = nsps.size(); i < count; ++i) {
         if (nsps.at(i).nameSpace == needle)
@@ -475,7 +476,7 @@ static void writeNamespaceForwardDeclarationRecursion(TextStream &s, qsizetype i
     if (root.nameSpace->isInlineNamespace())
         s << "inline ";
     s << "namespace " << root.nameSpace->name() << " {\n" << indent;
-    for (auto *c : root.classes)
+    for (const auto &c : root.classes)
         writeForwardDeclaration(s, c);
 
     for (qsizetype i = 0, count = nameSpaces.size(); i < count; ++i) {
@@ -490,15 +491,15 @@ static void writeForwardDeclarations(TextStream &s,
 {
     NameSpaces nameSpaces;
 
-    for (auto *c : classList) {
-        if (auto *encl = c->enclosingClass()) {
+    for (const auto &c : classList) {
+        if (auto encl = c->enclosingClass(); !encl.isNull()) {
             Q_ASSERT(encl->isNamespace());
             auto idx = indexOf(nameSpaces, encl);
             if (idx != -1) {
                 nameSpaces[idx].classes.append(c);
             } else {
                 nameSpaces.append(NameSpace{encl, {c}});
-                for (auto *enclNsp = encl->enclosingClass(); enclNsp != nullptr;
+                for (auto enclNsp = encl->enclosingClass(); !enclNsp.isNull();
                      enclNsp = enclNsp->enclosingClass()) {
                     idx = indexOf(nameSpaces, enclNsp);
                     if (idx == -1)
@@ -546,11 +547,11 @@ bool HeaderGenerator::finishGeneration()
     auto classList = api().classes();
 
     std::sort(classList.begin(), classList.end(),
-              [](const AbstractMetaClass *a, const AbstractMetaClass *b) {
+              [](const AbstractMetaClassCPtr &a, const AbstractMetaClassCPtr &b) {
                   return a->typeEntry()->sbkIndex() < b->typeEntry()->sbkIndex();
               });
 
-    for (const AbstractMetaClass *metaClass : classList)
+    for (const auto &metaClass : classList)
         writeTypeIndexValueLines(macrosStream, api(), metaClass);
 
     for (const AbstractMetaEnum &metaEnum : api().globalEnums())
@@ -633,7 +634,7 @@ bool HeaderGenerator::finishGeneration()
     }
 
     StringStream protEnumsSurrogates(TextStream::Language::Cpp);
-    for (auto metaClass : classList) {
+    for (const auto &metaClass : classList) {
         const auto classType = metaClass->typeEntry();
         if (!shouldGenerate(classType))
             continue;
@@ -811,7 +812,7 @@ void HeaderGenerator::writeSbkTypeFunction(TextStream &s, const AbstractMetaEnum
     }
 }
 
-void HeaderGenerator::writeSbkTypeFunction(TextStream &s, const AbstractMetaClass *cppClass)
+void HeaderGenerator::writeSbkTypeFunction(TextStream &s, const AbstractMetaClassCPtr &cppClass)
 {
     s <<  "template<> inline PyTypeObject *SbkType< ::" << cppClass->qualifiedCppName() << " >() "
       <<  "{ return reinterpret_cast<PyTypeObject *>(" << cpythonTypeNameExt(cppClass->typeEntry()) << "); }\n";

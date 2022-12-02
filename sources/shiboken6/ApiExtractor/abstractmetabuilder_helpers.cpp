@@ -30,7 +30,7 @@ static QString resolveScopePrefixHelper(const QStringViewList &scopeList,
     return name;
 }
 
-QString AbstractMetaBuilder::resolveScopePrefix(const AbstractMetaClass *scope,
+QString AbstractMetaBuilder::resolveScopePrefix(const AbstractMetaClassCPtr &scope,
                                                 QStringView value)
 {
     if (!scope)
@@ -45,7 +45,7 @@ QString AbstractMetaBuilder::resolveScopePrefix(const AbstractMetaClass *scope,
 static QString resolveEnumValueScopePrefix(const AbstractMetaEnum &metaEnum,
                                            QStringView value)
 {
-    const AbstractMetaClass *scope = metaEnum.enclosingClass();
+    AbstractMetaClassCPtr scope = metaEnum.enclosingClass();
     if (!scope)
         return {}; // global enum, value should work as is
     const QString &qualifiedCppName = scope->qualifiedCppName();
@@ -177,7 +177,7 @@ bool AbstractMetaBuilder::dontFixDefaultValue(QStringView expr)
         || isIntegerConstant(expr) || isFloatConstant(expr);
 }
 
-QString AbstractMetaBuilderPrivate::qualifyStaticField(const AbstractMetaClass *c,
+QString AbstractMetaBuilderPrivate::qualifyStaticField(const AbstractMetaClassCPtr &c,
                                                        QStringView field)
 {
     if (!c || c->fields().isEmpty())

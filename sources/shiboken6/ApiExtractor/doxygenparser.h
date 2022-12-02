@@ -10,7 +10,7 @@ class DoxygenParser : public DocParser
 {
 public:
     DoxygenParser() = default;
-    void fillDocumentation(AbstractMetaClass *metaClass) override;
+    void fillDocumentation(const AbstractMetaClassPtr &metaClass) override;
     Documentation retrieveModuleDocumentation() override;
     Documentation retrieveModuleDocumentation(const QString& name) override;
 };

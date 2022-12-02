@@ -47,8 +47,8 @@ void TestResolveType::testResolveReturnTypeFromParentScope()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    const AbstractMetaClass *classD = AbstractMetaClass::findClass(classes, u"A::D");
-    QVERIFY(classD);
+    const auto classD = AbstractMetaClass::findClass(classes, u"A::D");
+    QVERIFY(!classD.isNull());
     const auto meth = classD->findFunction(u"method");
     QVERIFY(!meth.isNull());
     QVERIFY(meth);
@@ -66,7 +66,7 @@ struct DefaultValuesFixture
     AbstractMetaType stringType;
     AbstractMetaType classType;
     AbstractMetaType listType;
-    const AbstractMetaClass *klass{};
+    AbstractMetaClassCPtr klass{};
 };
 
 Q_DECLARE_METATYPE(DefaultValuesFixture)
@@ -253,8 +253,8 @@ public:
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    const AbstractMetaClass *testClass = AbstractMetaClass::findClass(classes, u"Test");
-    QVERIFY(testClass);
+    const auto testClass = AbstractMetaClass::findClass(classes, u"Test");
+    QVERIFY(!testClass.isNull());
 
     auto *tdb = TypeDatabase::instance();
     auto int32TEntry = tdb->findType(u"int32_t"_s);

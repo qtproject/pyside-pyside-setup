@@ -25,19 +25,19 @@ QT_FORWARD_DECLARE_CLASS(QXmlStreamReader)
 QString msgAddedFunctionInvalidArgType(const QString &addedFuncName,
                                        const QStringList &typeName,
                                        int pos, const QString &why,
-                                       const AbstractMetaClass *context = nullptr);
+                                       const AbstractMetaClassCPtr &context = {});
 
 QString msgAddedFunctionInvalidReturnType(const QString &addedFuncName,
                                           const QStringList &typeName, const QString &why,
-                                          const AbstractMetaClass *context = nullptr);
+                                          const AbstractMetaClassCPtr &context = {});
 
-QString msgUnnamedArgumentDefaultExpression(const AbstractMetaClass *context,
+QString msgUnnamedArgumentDefaultExpression(const AbstractMetaClassCPtr &context,
                                             int n, const QString &className,
                                             const AbstractMetaFunction *f);
 
 QString msgArgumentIndexOutOfRange(const AbstractMetaFunction *func, int index);
 
-QString msgNoFunctionForModification(const AbstractMetaClass *klass,
+QString msgNoFunctionForModification(const AbstractMetaClassCPtr &klass,
                                      const QString &signature,
                                      const QString &originalSignature,
                                      const QStringList &possibleSignatures,
@@ -82,7 +82,7 @@ QString msgUnmatchedReturnType(const FunctionModelItem &functionItem,
 QString msgShadowingFunction(const AbstractMetaFunction *f1,
                              const AbstractMetaFunction *f2);
 
-QString msgSignalOverloaded(const AbstractMetaClass *c,
+QString msgSignalOverloaded(const AbstractMetaClassCPtr &c,
                             const AbstractMetaFunction *f);
 
 QString msgSkippingFunction(const FunctionModelItem &functionItem,
@@ -103,10 +103,10 @@ QString msgStrippingArgument(const FunctionModelItem &f, int i,
 
 QString msgEnumNotDefined(const EnumTypeEntryCPtr &t);
 
-QString msgUnknownBase(const AbstractMetaClass *metaClass,
+QString msgUnknownBase(const AbstractMetaClassCPtr &metaClass,
                        const QString &baseClassName);
 
-QString msgBaseNotInTypeSystem(const AbstractMetaClass *metaClass,
+QString msgBaseNotInTypeSystem(const AbstractMetaClassCPtr &metaClass,
                                const QString &baseClassName);
 
 QString msgArrayModificationFailed(const FunctionModelItem &functionItem,
@@ -140,10 +140,10 @@ QString msgPropertyTypeParsingFailed(const QString &name, const QString &typeNam
                                      const QString &why);
 QString msgPropertyExists(const QString &className, const QString &name);
 
-QString msgFunctionVisibilityModified(const AbstractMetaClass *c,
+QString msgFunctionVisibilityModified(const AbstractMetaClassCPtr &c,
                                       const AbstractMetaFunction *f);
 
-QString msgUsingMemberClassNotFound(const AbstractMetaClass *c,
+QString msgUsingMemberClassNotFound(const AbstractMetaClassCPtr &c,
                                     const QString &baseClassName,
                                     const QString &memberName);
 
@@ -164,12 +164,12 @@ QString msgFallbackForDocumentation(const QString &fileName,
                                     const QString &query = {});
 
 QString msgCannotFindDocumentation(const QString &fileName,
-                                   const AbstractMetaClass *metaClass,
+                                   const AbstractMetaClassCPtr &metaClass,
                                    const AbstractMetaEnum &e,
                                    const QString &query = {});
 
 QString msgCannotFindDocumentation(const QString &fileName,
-                                   const AbstractMetaClass *metaClass,
+                                   const AbstractMetaClassCPtr &metaClass,
                                    const AbstractMetaField &f,
                                    const QString &query);
 
@@ -190,7 +190,7 @@ QString msgCannotFindSmartPointerGetter(const SmartPointerTypeEntryCPtr &);
 
 QString msgCannotFindSmartPointerMethod(const SmartPointerTypeEntryCPtr &te, const QString &m);
 
-QString msgMethodNotFound(const AbstractMetaClass *klass, const QString &name);
+QString msgMethodNotFound(const AbstractMetaClassCPtr &klass, const QString &name);
 
 QString msgLeftOverArguments(const QVariantMap &remainingArgs);
 

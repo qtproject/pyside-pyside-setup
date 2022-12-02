@@ -66,10 +66,10 @@ bool Generator::setup(const ApiExtractorResult &api)
         return false;
     }
 
-    for (auto c : api.classes()) {
+    for (const auto &c : api.classes()) {
         if (c->enclosingClass() == nullptr && c->isInvisibleNamespace()) {
             m_d->m_invisibleTopNamespaces.append(c);
-            c->invisibleNamespaceRecursion([&](const AbstractMetaClass *ic) {
+            c->invisibleNamespaceRecursion([&](const AbstractMetaClassCPtr &ic) {
                 m_d->m_invisibleTopNamespaces.append(ic);
             });
         }
@@ -104,7 +104,7 @@ QString Generator::fileNameForContextHelper(const GeneratorContext &context,
 
 {
     if (!context.forSmartPointer()) {
-        const AbstractMetaClass *metaClass = context.metaClass();
+        const auto metaClass = context.metaClass();
         QString fileNameBase = flags.testFlag(FileNameFlag::UnqualifiedName)
             ? metaClass->name() : metaClass->qualifiedCppName();
         if (!flags.testFlag(FileNameFlag::KeepCase))
@@ -176,7 +176,7 @@ void Generator::setOutputDirectory(const QString &outDir)
 
 bool Generator::generateFileForContext(const GeneratorContext &context)
 {
-    const AbstractMetaClass *cls = context.metaClass();
+    const auto cls = context.metaClass();
     auto typeEntry = cls->typeEntry();
 
     if (!shouldGenerate(typeEntry))
@@ -209,16 +209,17 @@ QString Generator::getFileNameBaseForSmartPointer(const AbstractMetaType &smartP
     return fileName;
 }
 
-GeneratorContext Generator::contextForClass(const AbstractMetaClass *c) const
+GeneratorContext Generator::contextForClass(const AbstractMetaClassCPtr &c) const
 {
     GeneratorContext result;
     result.m_metaClass = c;
     return result;
 }
 
-GeneratorContext Generator::contextForSmartPointer(const AbstractMetaClass *c,
-                                                   const AbstractMetaType &t,
-                                                   const AbstractMetaClass *pointeeClass)
+GeneratorContext
+    Generator::contextForSmartPointer(const AbstractMetaClassCPtr &c,
+                                      const AbstractMetaType &t,
+                                      const AbstractMetaClassCPtr &pointeeClass)
 {
     GeneratorContext result;
     result.m_metaClass = c;
@@ -230,7 +231,7 @@ GeneratorContext Generator::contextForSmartPointer(const AbstractMetaClass *c,
 
 bool Generator::generate()
 {
-    for (auto cls : m_d->api.classes()) {
+    for (const auto &cls : m_d->api.classes()) {
         if (!generateFileForContext(contextForClass(cls)))
             return false;
         auto te = cls->typeEntry();
@@ -239,7 +240,7 @@ bool Generator::generate()
     }
 
     for (const auto &smp: m_d->api.instantiatedSmartPointers()) {
-        const AbstractMetaClass *pointeeClass = nullptr;
+        AbstractMetaClassCPtr pointeeClass;
         const auto instantiatedType = smp.type.instantiations().constFirst().typeEntry();
         if (instantiatedType->isComplex()) // not a C++ primitive
             pointeeClass = AbstractMetaClass::findClass(m_d->api.classes(), instantiatedType);
@@ -302,7 +303,7 @@ QString Generator::getFullTypeName(const AbstractMetaType &type)
     return typeName + QString::fromLatin1("*").repeated(type.indirections());
 }
 
-QString Generator::getFullTypeName(const AbstractMetaClass *metaClass)
+QString Generator::getFullTypeName(const AbstractMetaClassCPtr &metaClass)
 {
     return u"::"_s + metaClass->qualifiedCppName();
 }
@@ -455,7 +456,7 @@ static QString constructorCall(const QString &qualifiedCppName, const QStringLis
 
 std::optional<DefaultValue>
     Generator::minimalConstructor(const ApiExtractorResult &api,
-                                  const AbstractMetaClass *metaClass,
+                                  const AbstractMetaClassCPtr &metaClass,
                                   QString *errorString)
 {
     if (!metaClass)
@@ -521,7 +522,7 @@ std::optional<DefaultValue>
 }
 
 QString Generator::translateType(AbstractMetaType cType,
-                                 const AbstractMetaClass *context,
+                                 const AbstractMetaClassCPtr &context,
                                  Options options) const
 {
     QString s;
@@ -614,10 +615,10 @@ QString Generator::subDirectoryForPackage(QString packageNameIn) const
 }
 
 template<typename T>
-static QString getClassTargetFullName_(const T *t, bool includePackageName)
+static QString getClassTargetFullName_(T t, bool includePackageName)
 {
     QString name = t->name();
-    const AbstractMetaClass *context = t->enclosingClass();
+    AbstractMetaClassCPtr context = t->enclosingClass();
     while (context) {
         // If the type was marked as 'visible=false' we should not use it in
         // the type name
@@ -634,12 +635,14 @@ static QString getClassTargetFullName_(const T *t, bool includePackageName)
     return name;
 }
 
-QString getClassTargetFullName(const AbstractMetaClass *metaClass, bool includePackageName)
+QString getClassTargetFullName(const AbstractMetaClassCPtr &metaClass,
+                               bool includePackageName)
 {
     return getClassTargetFullName_(metaClass, includePackageName);
 }
 
-QString getClassTargetFullName(const AbstractMetaEnum &metaEnum, bool includePackageName)
+QString getClassTargetFullName(const AbstractMetaEnum &metaEnum,
+                               bool includePackageName)
 {
     return getClassTargetFullName_(&metaEnum, includePackageName);
 }

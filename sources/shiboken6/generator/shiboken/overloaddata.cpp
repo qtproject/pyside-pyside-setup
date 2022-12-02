@@ -246,7 +246,7 @@ void OverloadDataRootNode::sortNextOverloads(const ApiExtractorResult &api)
             if (!metaClass)
                 throw Exception(msgArgumentClassNotFound(m_overloads.constFirst(), te));
             const auto &ancestors = metaClass->allTypeSystemAncestors();
-            for (const AbstractMetaClass *ancestor : ancestors) {
+            for (const auto &ancestor : ancestors) {
                 QString ancestorTypeName = ancestor->typeEntry()->name();
                 if (!graph.hasNode(ancestorTypeName))
                     continue;

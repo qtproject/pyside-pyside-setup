@@ -54,7 +54,7 @@ struct ApiExtractorPrivate
     void collectInstantiatedContainersAndSmartPointers(InstantiationCollectContext &context,
                                                        const AbstractMetaFunctionCPtr &func);
     void collectInstantiatedContainersAndSmartPointers(InstantiationCollectContext &context,
-                                                       const AbstractMetaClass *metaClass);
+                                                       const AbstractMetaClassCPtr &metaClass);
     void collectInstantiatedContainersAndSmartPointers(InstantiationCollectContext &context);
     void collectInstantiatedOpqaqueContainers(InstantiationCollectContext &context);
     void collectContainerTypesFromSnippets(InstantiationCollectContext &context);
@@ -303,7 +303,6 @@ std::optional<ApiExtractorResult> ApiExtractor::run(ApiExtractorFlags flags)
     auto *data = new ApiExtractorResultData;
 
     classListToCList(d->m_builder->takeClasses(), &data->m_metaClasses);
-    classListToCList(d->m_builder->takeTemplates(), &data->m_templates);
     classListToCList(d->m_builder->takeSmartPointers(), &data->m_smartPointers);
     data->m_globalFunctions = d->m_builder->globalFunctions();
     data->m_globalEnums = d->m_builder->globalEnums();
@@ -349,15 +348,15 @@ AbstractMetaFunctionPtr
 AbstractMetaFunctionPtr
     ApiExtractor::inheritTemplateMember(const AbstractMetaFunctionCPtr &function,
                                         const AbstractMetaTypeList &templateTypes,
-                                        const AbstractMetaClass *templateClass,
-                                        AbstractMetaClass *subclass)
+                                        const AbstractMetaClassCPtr &templateClass,
+                                        const AbstractMetaClassPtr &subclass)
 {
     return AbstractMetaBuilder::inheritTemplateMember(function, templateTypes,
                                                       templateClass, subclass);
 }
 
-AbstractMetaClass *ApiExtractor::inheritTemplateClass(const ComplexTypeEntryPtr &te,
-                                                      const AbstractMetaClass *templateClass,
+AbstractMetaClassPtr ApiExtractor::inheritTemplateClass(const ComplexTypeEntryPtr &te,
+                                                      const AbstractMetaClassCPtr &templateClass,
                                                       const AbstractMetaTypeList &templateTypes,
                                                       InheritTemplateFlags flags)
 {
@@ -532,9 +531,9 @@ void ApiExtractorPrivate::addInstantiatedSmartPointer(InstantiationCollectContex
                                                          {instantiatedType}, flags);
     Q_ASSERT(smp.specialized);
     if (withinNameSpace) { // move class to desired namespace
-        auto *enclClass = AbstractMetaClass::findClass(m_builder->classes(), parentTypeEntry);
-        Q_ASSERT(enclClass);
-        auto *specialized = const_cast<AbstractMetaClass *>(smp.specialized);
+        const auto enclClass = AbstractMetaClass::findClass(m_builder->classes(), parentTypeEntry);
+        Q_ASSERT(!enclClass.isNull());
+        auto specialized = qSharedPointerConstCast<AbstractMetaClass>(smp.specialized);
         specialized->setEnclosingClass(enclClass);
         enclClass->addInnerClass(specialized);
     }
@@ -562,7 +561,7 @@ ApiExtractorPrivate::collectInstantiatedContainersAndSmartPointers(Instantiation
 
 void
 ApiExtractorPrivate::collectInstantiatedContainersAndSmartPointers(InstantiationCollectContext &context,
-                                                                   const AbstractMetaClass *metaClass)
+                                                                   const AbstractMetaClassCPtr &metaClass)
 {
     if (!metaClass->typeEntry()->generateCode())
         return;
@@ -575,7 +574,7 @@ ApiExtractorPrivate::collectInstantiatedContainersAndSmartPointers(Instantiation
     // instantiations are specified to be in namespaces.
     auto &innerClasses = metaClass->innerClasses();
     for (auto i = innerClasses.size() - 1; i >= 0; --i) {
-         auto *innerClass = innerClasses.at(i);
+         const auto &innerClass = innerClasses.at(i);
          if (!innerClass->typeEntry()->isSmartPointer())
              collectInstantiatedContainersAndSmartPointers(context, innerClass);
     }
@@ -587,7 +586,7 @@ ApiExtractorPrivate::collectInstantiatedContainersAndSmartPointers(Instantiation
     collectInstantiatedOpqaqueContainers(context);
     for (const auto &func : m_builder->globalFunctions())
         collectInstantiatedContainersAndSmartPointers(context, func);
-    for (auto metaClass : m_builder->classes())
+    for (const auto &metaClass : m_builder->classes())
         collectInstantiatedContainersAndSmartPointers(context, metaClass);
     collectContainerTypesFromSnippets(context);
 }

@@ -19,8 +19,8 @@ void TestVoidArg::testVoidParsedFunction()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, u"A");
-    QVERIFY(classA);
+    const auto classA = AbstractMetaClass::findClass(classes, u"A");
+    QVERIFY(!classA.isNull());
     const auto addedFunc = classA->findFunction(u"a");
     QVERIFY(!addedFunc.isNull());
     QCOMPARE(addedFunc->arguments().size(), 0);
@@ -38,8 +38,8 @@ void TestVoidArg::testVoidAddedFunction()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, u"A");
-    QVERIFY(classA);
+    const auto classA = AbstractMetaClass::findClass(classes, u"A");
+    QVERIFY(!classA.isNull());
     const auto addedFunc = classA->findFunction(u"a");
     QVERIFY(!addedFunc.isNull());
     QCOMPARE(addedFunc->arguments().size(), 0);
@@ -56,8 +56,8 @@ void TestVoidArg::testVoidPointerParsedFunction()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, u"A");
-    QVERIFY(classA);
+    const auto classA = AbstractMetaClass::findClass(classes, u"A");
+    QVERIFY(!classA.isNull());
     const auto addedFunc = classA->findFunction(u"a");
     QVERIFY(!addedFunc.isNull());
     QCOMPARE(addedFunc->arguments().size(), 1);

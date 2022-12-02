@@ -79,7 +79,7 @@ struct GeneratorClassInfoCacheEntry
     bool needsGetattroFunction = false;
 };
 
-using GeneratorClassInfoCache = QHash<const AbstractMetaClass *, GeneratorClassInfoCacheEntry>;
+using GeneratorClassInfoCache = QHash<AbstractMetaClassCPtr, GeneratorClassInfoCacheEntry>;
 
 Q_GLOBAL_STATIC(GeneratorClassInfoCache, generatorClassInfoCache)
 
@@ -163,7 +163,7 @@ const QHash<QString, QChar> &ShibokenGenerator::formatUnits()
 }
 
 QString ShibokenGenerator::translateTypeForWrapperMethod(const AbstractMetaType &cType,
-                                                         const AbstractMetaClass *context,
+                                                         const AbstractMetaClassCPtr &context,
                                                          Options options) const
 {
     if (cType.isArray()) {
@@ -180,7 +180,7 @@ QString ShibokenGenerator::translateTypeForWrapperMethod(const AbstractMetaType 
     return translateType(cType, context, options);
 }
 
-bool ShibokenGenerator::shouldGenerateCppWrapper(const AbstractMetaClass *metaClass) const
+bool ShibokenGenerator::shouldGenerateCppWrapper(const AbstractMetaClassCPtr &metaClass) const
 {
     const auto wrapper = metaClass->cppWrapper();
     return wrapper.testFlag(AbstractMetaClass::CppVirtualMethodWrapper)
@@ -273,7 +273,7 @@ AbstractMetaFunctionCList ShibokenGenerator::implicitConversions(const TypeEntry
     return result;
 }
 
-QString ShibokenGenerator::wrapperName(const AbstractMetaClass *metaClass) const
+QString ShibokenGenerator::wrapperName(const AbstractMetaClassCPtr &metaClass) const
 {
     Q_ASSERT(shouldGenerateCppWrapper(metaClass));
     QString result = metaClass->name();
@@ -282,11 +282,11 @@ QString ShibokenGenerator::wrapperName(const AbstractMetaClass *metaClass) const
     return result + u"Wrapper"_s;
 }
 
-QString ShibokenGenerator::fullPythonClassName(const AbstractMetaClass *metaClass)
+QString ShibokenGenerator::fullPythonClassName(const AbstractMetaClassCPtr &metaClass)
 {
     QString fullClassName = metaClass->name();
-    const AbstractMetaClass *enclosing = metaClass->enclosingClass();
-    while (enclosing) {
+    auto enclosing = metaClass->enclosingClass();
+    while (!enclosing.isNull()) {
         if (NamespaceTypeEntry::isVisibleScope(enclosing->typeEntry()))
             fullClassName.prepend(enclosing->name() + u'.');
         enclosing = enclosing->enclosingClass();
@@ -359,30 +359,30 @@ QString ShibokenGenerator::cpythonMethodDefinitionName(const AbstractMetaFunctio
            + func->name();
 }
 
-QString ShibokenGenerator::cpythonGettersSettersDefinitionName(const AbstractMetaClass *metaClass)
+QString ShibokenGenerator::cpythonGettersSettersDefinitionName(const AbstractMetaClassCPtr &metaClass)
 {
     return cpythonBaseName(metaClass) + u"_getsetlist"_s;
 }
 
-QString ShibokenGenerator::cpythonSetattroFunctionName(const AbstractMetaClass *metaClass)
+QString ShibokenGenerator::cpythonSetattroFunctionName(const AbstractMetaClassCPtr &metaClass)
 {
     return cpythonBaseName(metaClass) + u"_setattro"_s;
 }
 
 
-QString ShibokenGenerator::cpythonGetattroFunctionName(const AbstractMetaClass *metaClass)
+QString ShibokenGenerator::cpythonGetattroFunctionName(const AbstractMetaClassCPtr &metaClass)
 {
     return cpythonBaseName(metaClass) + u"_getattro"_s;
 }
 
 QString ShibokenGenerator::cpythonGetterFunctionName(const QString &name,
-                                                     const AbstractMetaClass *enclosingClass)
+                                                     const AbstractMetaClassCPtr &enclosingClass)
 {
     return cpythonBaseName(enclosingClass) + QStringLiteral("_get_") + name;
 }
 
 QString ShibokenGenerator::cpythonSetterFunctionName(const QString &name,
-                                                     const AbstractMetaClass *enclosingClass)
+                                                     const AbstractMetaClassCPtr &enclosingClass)
 {
     return cpythonBaseName(enclosingClass) + QStringLiteral("_set_") + name;
 }
@@ -398,13 +398,13 @@ QString ShibokenGenerator::cpythonSetterFunctionName(const AbstractMetaField &me
 }
 
 QString ShibokenGenerator::cpythonGetterFunctionName(const QPropertySpec &property,
-                                                     const AbstractMetaClass *metaClass)
+                                                     const AbstractMetaClassCPtr &metaClass)
 {
     return cpythonGetterFunctionName(property.name(), metaClass);
 }
 
 QString ShibokenGenerator::cpythonSetterFunctionName(const QPropertySpec &property,
-                                                     const AbstractMetaClass *metaClass)
+                                                     const AbstractMetaClassCPtr &metaClass)
 {
     return cpythonSetterFunctionName(property.name(), metaClass);
 }
@@ -442,12 +442,12 @@ QString ShibokenGenerator::cpythonFlagsName(const AbstractMetaEnum *metaEnum)
     return flags.isNull() ? QString{} : cpythonFlagsName(flags);
 }
 
-QString ShibokenGenerator::cpythonSpecialCastFunctionName(const AbstractMetaClass *metaClass)
+QString ShibokenGenerator::cpythonSpecialCastFunctionName(const AbstractMetaClassCPtr &metaClass)
 {
     return cpythonBaseName(metaClass->typeEntry()) + u"SpecialCastFunction"_s;
 }
 
-QString ShibokenGenerator::cpythonWrapperCPtr(const AbstractMetaClass *metaClass,
+QString ShibokenGenerator::cpythonWrapperCPtr(const AbstractMetaClassCPtr &metaClass,
                                               const QString &argName)
 {
     return cpythonWrapperCPtr(metaClass->typeEntry(), argName);
@@ -474,20 +474,21 @@ QString ShibokenGenerator::cpythonWrapperCPtr(const TypeEntryCPtr &type,
 }
 
 void ShibokenGenerator::writeToPythonConversion(TextStream & s, const AbstractMetaType &type,
-                                                const AbstractMetaClass * /* context */,
+                                                const AbstractMetaClassCPtr & /* context */,
                                                 const QString &argumentName)
 {
     s << cpythonToPythonConversionFunction(type) << argumentName << ')';
 }
 
-void ShibokenGenerator::writeToCppConversion(TextStream &s, const AbstractMetaClass *metaClass,
+void ShibokenGenerator::writeToCppConversion(TextStream &s,
+                                             const AbstractMetaClassCPtr &metaClass,
                                              const QString &inArgName, const QString &outArgName)
 {
     s << cpythonToCppConversionFunction(metaClass) << inArgName << ", &" << outArgName << ')';
 }
 
 void ShibokenGenerator::writeToCppConversion(TextStream &s, const AbstractMetaType &type,
-                                             const AbstractMetaClass *context, const QString &inArgName,
+                                             const AbstractMetaClassCPtr &context, const QString &inArgName,
                                              const QString &outArgName)
 {
     s << cpythonToCppConversionFunction(type, context) << inArgName << ", &" << outArgName << ')';
@@ -525,7 +526,7 @@ QString ShibokenGenerator::cpythonBaseName(const AbstractMetaType &type)
     return cpythonBaseName(type.typeEntry());
 }
 
-QString ShibokenGenerator::cpythonBaseName(const AbstractMetaClass *metaClass)
+QString ShibokenGenerator::cpythonBaseName(const AbstractMetaClassCPtr &metaClass)
 {
     return cpythonBaseName(metaClass->typeEntry());
 }
@@ -569,7 +570,7 @@ QString ShibokenGenerator::cpythonBaseName(const TypeEntryCPtr &type)
     return baseName.replace(u"::"_s, u"_"_s);
 }
 
-QString ShibokenGenerator::cpythonTypeName(const AbstractMetaClass *metaClass)
+QString ShibokenGenerator::cpythonTypeName(const AbstractMetaClassCPtr &metaClass)
 {
     return cpythonTypeName(metaClass->typeEntry());
 }
@@ -938,14 +939,14 @@ QString ShibokenGenerator::cpythonIsConvertibleFunction(const AbstractMetaArgume
     return cpythonIsConvertibleFunction(metaArg.type());
 }
 
-QString ShibokenGenerator::cpythonToCppConversionFunction(const AbstractMetaClass *metaClass)
+QString ShibokenGenerator::cpythonToCppConversionFunction(const AbstractMetaClassCPtr &metaClass)
 {
     return u"Shiboken::Conversions::pythonToCppPointer("_s
         + cpythonTypeNameExt(metaClass->typeEntry()) + u", "_s;
 }
 
 QString ShibokenGenerator::cpythonToCppConversionFunction(const AbstractMetaType &type,
-                                                          const AbstractMetaClass * /* context */)
+                                                          AbstractMetaClassCPtr  /* context */)
 {
     if (type.isWrapperType()) {
         return u"Shiboken::Conversions::pythonToCpp"_s
@@ -957,7 +958,7 @@ QString ShibokenGenerator::cpythonToCppConversionFunction(const AbstractMetaType
 }
 
 QString ShibokenGenerator::cpythonToPythonConversionFunction(const AbstractMetaType &type,
-                                                             const AbstractMetaClass * /* context */)
+                                                             AbstractMetaClassCPtr  /* context */)
 {
     if (type.isWrapperType()) {
         QString conversion;
@@ -981,7 +982,7 @@ QString ShibokenGenerator::cpythonToPythonConversionFunction(const AbstractMetaT
                    (type.isCString() || type.isVoidPointer()) ? QString() : u"&"_s);
 }
 
-QString ShibokenGenerator::cpythonToPythonConversionFunction(const AbstractMetaClass *metaClass)
+QString ShibokenGenerator::cpythonToPythonConversionFunction(const AbstractMetaClassCPtr &metaClass)
 {
     return cpythonToPythonConversionFunction(metaClass->typeEntry());
 }
@@ -1062,7 +1063,7 @@ void ShibokenGenerator::writeFunctionArguments(TextStream &s,
     }
 }
 
-GeneratorContext ShibokenGenerator::contextForClass(const AbstractMetaClass *c) const
+GeneratorContext ShibokenGenerator::contextForClass(const AbstractMetaClassCPtr &c) const
 {
     GeneratorContext result = Generator::contextForClass(c);
     if (shouldGenerateCppWrapper(c)) {
@@ -1151,7 +1152,7 @@ void ShibokenGenerator::writeFunctionCall(TextStream &s,
 ShibokenGenerator::ExtendedConverterData ShibokenGenerator::getExtendedConverters() const
 {
     ExtendedConverterData extConvs;
-    for (auto metaClass : api().classes()) {
+    for (const auto &metaClass : api().classes()) {
         // Use only the classes for the current module.
         if (!shouldGenerate(metaClass->typeEntry()))
             continue;
@@ -1735,12 +1736,13 @@ bool ShibokenGenerator::injectedCodeCallsCppFunction(const GeneratorContext &con
     return func->injectedCodeContains(wrappedCtorCall);
 }
 
-bool ShibokenGenerator::useOverrideCaching(const AbstractMetaClass *metaClass)
+bool ShibokenGenerator::useOverrideCaching(const AbstractMetaClassCPtr &metaClass)
 {
     return metaClass->isPolymorphic();
 }
 
-ShibokenGenerator::AttroCheck ShibokenGenerator::checkAttroFunctionNeeds(const AbstractMetaClass *metaClass) const
+ShibokenGenerator::AttroCheck
+    ShibokenGenerator::checkAttroFunctionNeeds(const AbstractMetaClassCPtr &metaClass) const
 {
     AttroCheck result;
     if (metaClass->typeEntry()->isSmartPointer()) {
@@ -1771,7 +1773,7 @@ ShibokenGenerator::AttroCheck ShibokenGenerator::checkAttroFunctionNeeds(const A
     return result;
 }
 
-bool ShibokenGenerator::classNeedsGetattroFunctionImpl(const AbstractMetaClass *metaClass)
+bool ShibokenGenerator::classNeedsGetattroFunctionImpl(const AbstractMetaClassCPtr &metaClass)
 {
     if (!metaClass)
         return false;
@@ -1797,7 +1799,7 @@ bool ShibokenGenerator::classNeedsGetattroFunctionImpl(const AbstractMetaClass *
 }
 
 AbstractMetaFunctionCList
-    ShibokenGenerator::getMethodsWithBothStaticAndNonStaticMethods(const AbstractMetaClass *metaClass)
+    ShibokenGenerator::getMethodsWithBothStaticAndNonStaticMethods(const AbstractMetaClassCPtr &metaClass)
 {
     AbstractMetaFunctionCList methods;
     if (metaClass) {
@@ -1821,7 +1823,8 @@ AbstractMetaFunctionCList
     return methods;
 }
 
-const AbstractMetaClass *ShibokenGenerator::getMultipleInheritingClass(const AbstractMetaClass *metaClass)
+AbstractMetaClassCPtr
+    ShibokenGenerator::getMultipleInheritingClass(const AbstractMetaClassCPtr &metaClass)
 {
     if (!metaClass || metaClass->baseClassNames().isEmpty())
         return nullptr;
@@ -1845,7 +1848,7 @@ QString ShibokenGenerator::getPrivateModuleHeaderFileName(const QString &moduleN
     return getModuleHeaderFileBaseName(moduleName) + QStringLiteral("_p.h");
 }
 
-IncludeGroupList ShibokenGenerator::classIncludes(const AbstractMetaClass *metaClass) const
+IncludeGroupList ShibokenGenerator::classIncludes(const AbstractMetaClassCPtr &metaClass) const
 {
     IncludeGroupList result;
     const auto typeEntry = metaClass->typeEntry();
@@ -1861,8 +1864,8 @@ IncludeGroupList ShibokenGenerator::classIncludes(const AbstractMetaClass *metaC
     const auto implicitConvs = implicitConversions(typeEntry);
     for (auto &f : implicitConvs) {
         if (f->isConversionOperator()) {
-            auto *source = f->ownerClass();
-            Q_ASSERT(source);
+            const auto source = f->ownerClass();
+            Q_ASSERT(!source.isNull());
             result.back().append(source->typeEntry()->include());
         }
     }
@@ -1917,12 +1920,13 @@ ShibokenGenerator::FunctionGroups ShibokenGenerator::getGlobalFunctionGroups() c
 {
     FunctionGroups results;
     insertIntoFunctionGroups(api().globalFunctions(), &results);
-    for (auto nsp : invisibleTopNamespaces())
+    for (const auto &nsp : invisibleTopNamespaces())
         insertIntoFunctionGroups(nsp->functions(), &results);
     return results;
 }
 
-const GeneratorClassInfoCacheEntry &ShibokenGenerator::getGeneratorClassInfo(const AbstractMetaClass *scope)
+const GeneratorClassInfoCacheEntry &
+    ShibokenGenerator::getGeneratorClassInfo(const AbstractMetaClassCPtr &scope)
 {
     auto cache = generatorClassInfoCache();
     auto it = cache->find(scope);
@@ -1934,7 +1938,8 @@ const GeneratorClassInfoCacheEntry &ShibokenGenerator::getGeneratorClassInfo(con
     return it.value();
 }
 
-ShibokenGenerator::FunctionGroups ShibokenGenerator::getFunctionGroups(const AbstractMetaClass *scope)
+ShibokenGenerator::FunctionGroups
+    ShibokenGenerator::getFunctionGroups(const AbstractMetaClassCPtr &scope)
 {
     Q_ASSERT(scope);
     return getGeneratorClassInfo(scope).functionGroups;
@@ -1957,7 +1962,8 @@ static void removeConstOverloads(AbstractMetaFunctionCList *overloads)
     }
 }
 
-ShibokenGenerator::FunctionGroups ShibokenGenerator::getFunctionGroupsImpl(const AbstractMetaClass *scope)
+ShibokenGenerator::FunctionGroups
+    ShibokenGenerator::getFunctionGroupsImpl(const AbstractMetaClassCPtr &scope)
 {
     AbstractMetaFunctionCList lst = scope->functions();
     scope->getFunctionsFromInvisibleNamespacesToBeGenerated(&lst);
@@ -1994,7 +2000,7 @@ static bool hidesBaseClassFunctions(const AbstractMetaFunctionCPtr &f)
                  & (AbstractMetaFunction::OverriddenCppMethod | AbstractMetaFunction::FinalCppMethod));
 }
 
-void ShibokenGenerator::getInheritedOverloads(const AbstractMetaClass *scope,
+void ShibokenGenerator::getInheritedOverloads(const AbstractMetaClassCPtr &scope,
                                              AbstractMetaFunctionCList *overloads)
 {
     if (overloads->isEmpty() || scope->isNamespace() || scope->baseClasses().isEmpty())
@@ -2020,7 +2026,8 @@ void ShibokenGenerator::getInheritedOverloads(const AbstractMetaClass *scope,
 
     AbstractMetaFunctionCList baseCandidates;
 
-    auto basePredicate = [&functionName, &seenSignatures, &baseCandidates](const AbstractMetaClass *b) {
+    auto basePredicate = [&functionName, &seenSignatures, &baseCandidates]
+                         (const AbstractMetaClassCPtr &b) {
         for (const auto &f : b->functions()) {
             if (f->generateBinding() && f->name() == functionName) {
                 const QString signature = f->minimalSignature();
@@ -2033,7 +2040,7 @@ void ShibokenGenerator::getInheritedOverloads(const AbstractMetaClass *scope,
         return false; // Keep going
     };
 
-    for (const auto *baseClass : scope->baseClasses())
+    for (const auto &baseClass : scope->baseClasses())
         recurseClassHierarchy(baseClass, basePredicate);
 
     // Remove the ones that are not made visible with using declarations
@@ -2194,10 +2201,11 @@ static void appendIndexSuffix(QString *s)
     s->append(QStringLiteral("IDX"));
 }
 
-QString ShibokenGenerator::getTypeAlternateTemplateIndexVariableName(const AbstractMetaClass *metaClass)
+QString
+    ShibokenGenerator::getTypeAlternateTemplateIndexVariableName(const AbstractMetaClassCPtr &metaClass)
 {
-    const AbstractMetaClass *templateBaseClass = metaClass->templateBaseClass();
-    Q_ASSERT(templateBaseClass);
+    const auto templateBaseClass = metaClass->templateBaseClass();
+    Q_ASSERT(!templateBaseClass.isNull());
     QString result = u"SBK_"_s
         + _fixedCppTypeName(templateBaseClass->typeEntry()->qualifiedCppName()).toUpper();
     for (const auto &instantiation : metaClass->templateBaseClassInstantiations())
@@ -2206,7 +2214,7 @@ QString ShibokenGenerator::getTypeAlternateTemplateIndexVariableName(const Abstr
     return result;
 }
 
-QString ShibokenGenerator::getTypeIndexVariableName(const AbstractMetaClass *metaClass)
+QString ShibokenGenerator::getTypeIndexVariableName(const AbstractMetaClassCPtr &metaClass)
 {
     return getTypeIndexVariableName(metaClass->typeEntry());
 }
@@ -2290,8 +2298,8 @@ QString ShibokenGenerator::pythonArgsAt(int i)
 void ShibokenGenerator::replaceTemplateVariables(QString &code,
                                                  const AbstractMetaFunctionCPtr &func) const
 {
-    const AbstractMetaClass *cpp_class = func->ownerClass();
-    if (cpp_class)
+    const auto cpp_class = func->ownerClass();
+    if (!cpp_class.isNull())
         code.replace(u"%TYPE"_s, cpp_class->name());
 
     const AbstractMetaArgumentList &argument = func->arguments();

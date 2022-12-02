@@ -18,10 +18,12 @@ struct UsingMember;
 
 using AbstractMetaFunctionPtr = QSharedPointer<AbstractMetaFunction>;
 using AbstractMetaFunctionCPtr = QSharedPointer<const AbstractMetaFunction>;
+using AbstractMetaClassPtr = QSharedPointer<AbstractMetaClass>;
+using AbstractMetaClassCPtr = QSharedPointer<const AbstractMetaClass>;
 
 using AbstractMetaArgumentList = QList<AbstractMetaArgument>;
-using AbstractMetaClassList = QList<AbstractMetaClass *>;
-using AbstractMetaClassCList = QList<const AbstractMetaClass *>;
+using AbstractMetaClassList = QList<AbstractMetaClassPtr>;
+using AbstractMetaClassCList = QList<AbstractMetaClassCPtr>;
 using AbstractMetaEnumList = QList<AbstractMetaEnum>;
 using AbstractMetaEnumValueList = QList<AbstractMetaEnumValue>;
 using AbstractMetaFieldList = QList<AbstractMetaField>;

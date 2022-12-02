@@ -72,7 +72,7 @@ static bool operator<(const GeneratorDocumentation::Property &lhs,
     return lhs.name < rhs.name;
 }
 
-static QString propertyRefTarget(const AbstractMetaClass *cppClass, const QString &name)
+static QString propertyRefTarget(const AbstractMetaClassCPtr &cppClass, const QString &name)
 {
     QString result = cppClass->fullName() +  u'.' + name;
     result.replace(u"::"_s, u"."_s);
@@ -139,12 +139,13 @@ static inline QVersionNumber versionOf(const TypeEntryCPtr &te)
 // for functions where we list the parameters instead.
 struct docRef
 {
-    explicit docRef(const char *kind, const QString &name, const AbstractMetaClass *cppClass) :
+    explicit docRef(const char *kind, const QString &name,
+                    const AbstractMetaClassCPtr &cppClass) :
         m_kind(kind), m_name(name), m_cppClass(cppClass) {}
 
     const char *m_kind;
     const QString &m_name;
-    const AbstractMetaClass *m_cppClass;
+    const AbstractMetaClassCPtr m_cppClass;
 };
 
 static TextStream &operator<<(TextStream &s, const docRef &dr)
@@ -177,18 +178,18 @@ static TextStream &operator<<(TextStream &s, const shortDocRef &sdr)
 
 struct functionRef : public docRef
 {
-    explicit functionRef(const QString &name, const AbstractMetaClass *cppClass) :
+    explicit functionRef(const QString &name, const AbstractMetaClassCPtr &cppClass) :
         docRef("meth", name, cppClass) {}
 };
 
 struct functionTocEntry // Format a TOC entry for a function
 {
     explicit functionTocEntry(const AbstractMetaFunctionCPtr& func,
-                              const AbstractMetaClass *cppClass) :
+                              const AbstractMetaClassCPtr &cppClass) :
         m_func(func), m_cppClass(cppClass) {}
 
     AbstractMetaFunctionCPtr m_func;
-    const AbstractMetaClass *m_cppClass;
+    const AbstractMetaClassCPtr m_cppClass;
 };
 
 static TextStream &operator<<(TextStream &s, const functionTocEntry &ft)
@@ -231,20 +232,20 @@ QString QtDocGenerator::fileNameForContext(const GeneratorContext &context) cons
 }
 
 void QtDocGenerator::writeFormattedBriefText(TextStream &s, const Documentation &doc,
-                                             const AbstractMetaClass *metaclass) const
+                                             const AbstractMetaClassCPtr &metaclass) const
 {
     writeFormattedText(s, doc.brief(), doc.format(), metaclass);
 }
 
 void QtDocGenerator::writeFormattedDetailedText(TextStream &s, const Documentation &doc,
-                                                const AbstractMetaClass *metaclass) const
+                                                const AbstractMetaClassCPtr &metaclass) const
 {
     writeFormattedText(s, doc.detailed(), doc.format(), metaclass);
 }
 
 void QtDocGenerator::writeFormattedText(TextStream &s, const QString &doc,
                                         Documentation::Format format,
-                                        const AbstractMetaClass *metaClass) const
+                                        const AbstractMetaClassCPtr &metaClass) const
 {
     QString metaClassName;
 
@@ -276,11 +277,11 @@ void QtDocGenerator::writeFormattedText(TextStream &s, const QString &doc,
     s << '\n';
 }
 
-static void writeInheritedByList(TextStream &s, const AbstractMetaClass *metaClass,
+static void writeInheritedByList(TextStream &s, const AbstractMetaClassCPtr &metaClass,
                                  const AbstractMetaClassCList& allClasses)
 {
     AbstractMetaClassCList res;
-    for (auto c : allClasses) {
+    for (const auto &c : allClasses) {
         if (c != metaClass && inheritsFrom(c, metaClass))
             res << c;
     }
@@ -290,20 +291,20 @@ static void writeInheritedByList(TextStream &s, const AbstractMetaClass *metaCla
 
     s << "**Inherited by:** ";
     QStringList classes;
-    for (auto c : std::as_const(res))
+    for (const auto &c : std::as_const(res))
         classes << u":ref:`"_s + c->name() + u'`';
     s << classes.join(u", "_s) << "\n\n";
 }
 
 void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classContext)
 {
-    const AbstractMetaClass *metaClass = classContext.metaClass();
+    AbstractMetaClassCPtr metaClass = classContext.metaClass();
     qCDebug(lcShibokenDoc).noquote().nospace() << "Generating Documentation for " << metaClass->fullName();
 
     m_packages[metaClass->package()] << fileNameForContext(classContext);
 
     m_docParser->setPackageName(metaClass->package());
-    m_docParser->fillDocumentation(const_cast<AbstractMetaClass*>(metaClass));
+    m_docParser->fillDocumentation(qSharedPointerConstCast<AbstractMetaClass>(metaClass));
 
     QString className = metaClass->name();
     s << ".. _" << className << ":" << "\n\n";
@@ -371,7 +372,7 @@ void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classC
 }
 
 void QtDocGenerator::writeFunctionToc(TextStream &s, const QString &title,
-                                      const AbstractMetaClass *cppClass,
+                                      const AbstractMetaClassCPtr &cppClass,
                                       const AbstractMetaFunctionCList &functions)
 {
     if (!functions.isEmpty()) {
@@ -387,7 +388,7 @@ void QtDocGenerator::writeFunctionToc(TextStream &s, const QString &title,
 
 void QtDocGenerator::writePropertyToc(TextStream &s,
                                       const GeneratorDocumentation &doc,
-                                      const AbstractMetaClass *cppClass)
+                                      const AbstractMetaClassCPtr &cppClass)
 {
     if (doc.properties.isEmpty())
         return;
@@ -408,7 +409,7 @@ void QtDocGenerator::writePropertyToc(TextStream &s,
 
 void QtDocGenerator::writeProperties(TextStream &s,
                                      const GeneratorDocumentation &doc,
-                                     const AbstractMetaClass *cppClass) const
+                                     const AbstractMetaClassCPtr &cppClass) const
 {
     s << "\n.. note:: Properties can be used directly when "
         << "``from __feature__ import true_property`` is used or via accessor "
@@ -433,7 +434,7 @@ void QtDocGenerator::writeProperties(TextStream &s,
     }
 }
 
-void QtDocGenerator::writeEnums(TextStream &s, const AbstractMetaClass *cppClass) const
+void QtDocGenerator::writeEnums(TextStream &s, const AbstractMetaClassCPtr &cppClass) const
 {
     static const QString section_title = u".. attribute:: "_s;
 
@@ -447,7 +448,7 @@ void QtDocGenerator::writeEnums(TextStream &s, const AbstractMetaClass *cppClass
 
 }
 
-void QtDocGenerator::writeFields(TextStream &s, const AbstractMetaClass *cppClass) const
+void QtDocGenerator::writeFields(TextStream &s, const AbstractMetaClassCPtr &cppClass) const
 {
     static const QString section_title = u".. attribute:: "_s;
 
@@ -457,7 +458,7 @@ void QtDocGenerator::writeFields(TextStream &s, const AbstractMetaClass *cppClas
     }
 }
 
-void QtDocGenerator::writeConstructors(TextStream &s, const AbstractMetaClass *cppClass,
+void QtDocGenerator::writeConstructors(TextStream &s, const AbstractMetaClassCPtr &cppClass,
                                        const AbstractMetaFunctionCList &constructors) const
 {
     static const QString sectionTitle = u".. class:: "_s;
@@ -614,7 +615,7 @@ void QtDocGenerator::writeDocSnips(TextStream &s,
 
 bool QtDocGenerator::writeInjectDocumentation(TextStream &s,
                                             TypeSystem::DocModificationMode mode,
-                                            const AbstractMetaClass *cppClass,
+                                            const AbstractMetaClassCPtr &cppClass,
                                             const AbstractMetaFunctionCPtr &func)
 {
     Indentation indentation(s);
@@ -652,7 +653,7 @@ bool QtDocGenerator::writeInjectDocumentation(TextStream &s,
     return didSomething;
 }
 
-QString QtDocGenerator::functionSignature(const AbstractMetaClass *cppClass,
+QString QtDocGenerator::functionSignature(const AbstractMetaClassCPtr &cppClass,
                                           const AbstractMetaFunctionCPtr &func)
 {
     QString funcName = cppClass->fullName();
@@ -663,7 +664,7 @@ QString QtDocGenerator::functionSignature(const AbstractMetaClass *cppClass,
 }
 
 QString QtDocGenerator::translateToPythonType(const AbstractMetaType &type,
-                                              const AbstractMetaClass *cppClass,
+                                              const AbstractMetaClassCPtr &cppClass,
                                               bool createRef) const
 {
     static const QStringList nativeTypes =
@@ -737,14 +738,16 @@ QString QtDocGenerator::getFuncName(const AbstractMetaFunctionCPtr &cppFunc)
     return result;
 }
 
-void QtDocGenerator::writeParameterType(TextStream &s, const AbstractMetaClass *cppClass,
+void QtDocGenerator::writeParameterType(TextStream &s,
+                                        const AbstractMetaClassCPtr &cppClass,
                                         const AbstractMetaArgument &arg) const
 {
     s << ":param " << arg.name() << ": "
       << translateToPythonType(arg.type(), cppClass) << '\n';
 }
 
-void QtDocGenerator::writeFunctionParametersType(TextStream &s, const AbstractMetaClass *cppClass,
+void QtDocGenerator::writeFunctionParametersType(TextStream &s,
+                                                 const AbstractMetaClassCPtr &cppClass,
                                                  const AbstractMetaFunctionCPtr &func) const
 {
     s << '\n';
@@ -774,7 +777,7 @@ void QtDocGenerator::writeFunctionParametersType(TextStream &s, const AbstractMe
     s << '\n';
 }
 
-void QtDocGenerator::writeFunction(TextStream &s, const AbstractMetaClass *cppClass,
+void QtDocGenerator::writeFunction(TextStream &s, const AbstractMetaClassCPtr &cppClass,
                                    const AbstractMetaFunctionCPtr &func, bool indexed)
 {
     s << functionSignature(cppClass, func);
@@ -877,11 +880,11 @@ bool QtDocGenerator::writeInheritanceFile()
         throw Exception(msgCannotOpenForWriting(m_inheritanceFile));
 
     QJsonObject dict;
-    for (auto *c : api().classes()) {
+    for (const auto &c : api().classes()) {
         const auto &bases = c->baseClasses();
         if (!bases.isEmpty()) {
             QJsonArray list;
-            for (auto *base : bases)
+            for (const auto &base : bases)
                 list.append(QJsonValue(base->fullName()));
             dict[c->fullName()] = list;
         }
@@ -1183,7 +1186,7 @@ bool QtDocGenerator::convertToRst(const QString &sourceFileName,
 }
 
 GeneratorDocumentation
-    QtDocGenerator::generatorDocumentation(const AbstractMetaClass *cppClass) const
+    QtDocGenerator::generatorDocumentation(const AbstractMetaClassCPtr &cppClass) const
 {
     GeneratorDocumentation result;
     const auto allFunctions = cppClass->functions();
@@ -1237,10 +1240,10 @@ GeneratorDocumentation
 QString QtDocGenerator::expandFunction(const QString &function) const
 {
     const int firstDot = function.indexOf(u'.');
-    const AbstractMetaClass *metaClass = nullptr;
+    AbstractMetaClassCPtr metaClass;
     if (firstDot != -1) {
         const auto className = QStringView{function}.left(firstDot);
-        for (auto cls : api().classes()) {
+        for (const auto &cls : api().classes()) {
             if (cls->name() == className) {
                 metaClass = cls;
                 break;
@@ -1248,10 +1251,10 @@ QString QtDocGenerator::expandFunction(const QString &function) const
         }
     }
 
-    return metaClass
-        ? metaClass->typeEntry()->qualifiedTargetLangName()
-          + function.right(function.size() - firstDot)
-        : function;
+    return metaClass.isNull()
+        ? function
+        : metaClass->typeEntry()->qualifiedTargetLangName()
+          + function.right(function.size() - firstDot);
 }
 
 QString QtDocGenerator::expandClass(const QString &context,
@@ -1275,15 +1278,15 @@ QString QtDocGenerator::resolveContextForMethod(const QString &context,
 {
     const auto currentClass = QStringView{context}.split(u'.').constLast();
 
-    const AbstractMetaClass *metaClass = nullptr;
-    for (auto cls : api().classes()) {
+    AbstractMetaClassCPtr metaClass;
+    for (const auto &cls : api().classes()) {
         if (cls->name() == currentClass) {
             metaClass = cls;
             break;
         }
     }
 
-    if (metaClass) {
+    if (!metaClass.isNull()) {
         AbstractMetaFunctionCList funcList;
         const auto &methods = metaClass->queryFunctionsByName(methodName);
         for (const auto &func : methods) {
@@ -1291,14 +1294,14 @@ QString QtDocGenerator::resolveContextForMethod(const QString &context,
                 funcList.append(func);
         }
 
-        const AbstractMetaClass *implementingClass = nullptr;
+        AbstractMetaClassCPtr implementingClass;
         for (const auto &func : std::as_const(funcList)) {
             implementingClass = func->implementingClass();
             if (implementingClass->name() == currentClass)
                 break;
         }
 
-        if (implementingClass)
+        if (!implementingClass.isNull())
             return implementingClass->typeEntry()->qualifiedTargetLangName();
     }
 

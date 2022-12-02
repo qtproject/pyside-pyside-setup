@@ -927,7 +927,7 @@ AbstractMetaType AbstractMetaType::fromTypeEntry(const TypeEntryCPtr &typeEntry)
     return metaType;
 }
 
-AbstractMetaType AbstractMetaType::fromAbstractMetaClass(const AbstractMetaClass *metaClass)
+AbstractMetaType AbstractMetaType::fromAbstractMetaClass(const AbstractMetaClassCPtr &metaClass)
 {
     return fromTypeEntry(metaClass->typeEntry());
 }

@@ -4,21 +4,24 @@
 #ifndef ABSTRACTMETALANG_HELPERS_H
 #define ABSTRACTMETALANG_HELPERS_H
 
+#include "abstractmetalang_typedefs.h"
+
 template <class MetaClass>
-MetaClass *findByName(QList<MetaClass *> haystack, QStringView needle)
+QSharedPointer<MetaClass> findByName(const QList<QSharedPointer<MetaClass> > &haystack,
+                                      QStringView needle)
 {
-    for (MetaClass *c : haystack) {
+    for (const auto &c : haystack) {
         if (c->name() == needle)
             return c;
     }
-    return nullptr;
+    return {};
 }
 
 // Helper for recursing the base classes of an AbstractMetaClass.
 // Returns the class for which the predicate is true.
 template <class Predicate>
-const AbstractMetaClass *recurseClassHierarchy(const AbstractMetaClass *klass,
-                                               Predicate pred)
+AbstractMetaClassCPtr recurseClassHierarchy(const AbstractMetaClassCPtr &klass,
+                                            Predicate pred)
 {
     if (pred(klass))
         return klass;
@@ -26,7 +29,7 @@ const AbstractMetaClass *recurseClassHierarchy(const AbstractMetaClass *klass,
         if (auto r = recurseClassHierarchy(base, pred))
             return r;
     }
-    return nullptr;
+    return {};
 }
 
 #endif // ABSTRACTMETALANG_HELPERS_H

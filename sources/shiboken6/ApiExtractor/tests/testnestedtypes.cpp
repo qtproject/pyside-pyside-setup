@@ -46,11 +46,11 @@ void TestNestedTypes::testNestedTypesModifications()
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
 
-    auto *ons = AbstractMetaClass::findClass(classes, u"OuterNamespace");
-    QVERIFY(ons);
+    const auto ons = AbstractMetaClass::findClass(classes, u"OuterNamespace");
+    QVERIFY(!ons.isNull());
 
-    auto *ins = AbstractMetaClass::findClass(classes, u"OuterNamespace::InnerNamespace");
-    QVERIFY(ins);
+    const auto ins = AbstractMetaClass::findClass(classes, u"OuterNamespace::InnerNamespace");
+    QVERIFY(!ins.isNull());
     QCOMPARE(ins->functions().size(), 1);
     QCOMPARE(ins->typeEntry()->codeSnips().size(), 1);
     CodeSnip snip = ins->typeEntry()->codeSnips().constFirst();
@@ -68,8 +68,9 @@ void TestNestedTypes::testNestedTypesModifications()
     snip = addedFunc->modifications().constFirst().snips().constFirst();
     QCOMPARE(snip.code().trimmed(), u"custom_code2();");
 
-    auto *sc = AbstractMetaClass::findClass(classes, u"OuterNamespace::InnerNamespace::SomeClass");
-    QVERIFY(ins);
+    const auto sc =
+        AbstractMetaClass::findClass(classes, u"OuterNamespace::InnerNamespace::SomeClass");
+    QVERIFY(!sc.isNull());
     QCOMPARE(sc->functions().size(), 2); // default constructor and removed method
     const auto removedFunc = sc->functions().constLast();
     QVERIFY(removedFunc->isModifiedRemoved());
@@ -95,12 +96,12 @@ void TestNestedTypes::testDuplicationOfNestedTypes()
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
-    auto *nspace = AbstractMetaClass::findClass(classes, u"Namespace");
-    QVERIFY(nspace);
-    auto *cls1 = AbstractMetaClass::findClass(classes, u"SomeClass");
-    QVERIFY(cls1);
-    auto *cls2 = AbstractMetaClass::findClass(classes, u"Namespace::SomeClass");
-    QVERIFY(cls2);
+    const auto nspace = AbstractMetaClass::findClass(classes, u"Namespace");
+    QVERIFY(!nspace.isNull());
+    const auto cls1 = AbstractMetaClass::findClass(classes, u"SomeClass");
+    QVERIFY(!cls1.isNull());
+    const auto cls2 = AbstractMetaClass::findClass(classes, u"Namespace::SomeClass");
+    QVERIFY(!cls2.isNull());
     QCOMPARE(cls1, cls2);
     QCOMPARE(cls1->name(), u"SomeClass");
     QCOMPARE(cls1->qualifiedCppName(), u"Namespace::SomeClass");

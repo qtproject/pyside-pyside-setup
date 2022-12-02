@@ -269,7 +269,7 @@ TypeSystemProperty QPropertySpec::typeSystemPropertyFromQ_Property(const QString
 // the AbstractMetaType from the type string.
 std::optional<QPropertySpec>
     QPropertySpec::fromTypeSystemProperty(AbstractMetaBuilderPrivate *b,
-                                          AbstractMetaClass *metaClass,
+                                          const AbstractMetaClassPtr &metaClass,
                                           const TypeSystemProperty &ts,
                                           const QStringList &scopes,
                                           QString *errorMessage)
@@ -302,7 +302,7 @@ std::optional<QPropertySpec>
 // via TypeSystemProperty.
 std::optional<QPropertySpec>
     QPropertySpec::parseQ_Property(AbstractMetaBuilderPrivate *b,
-                                   AbstractMetaClass *metaClass,
+                                   const AbstractMetaClassPtr &metaClass,
                                    const QString &declarationIn,
                                    const QStringList &scopes,
                                    QString *errorMessage)

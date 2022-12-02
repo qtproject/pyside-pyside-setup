@@ -48,7 +48,7 @@ void TestModifyFunction::testRenameArgument()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode.constData(), false));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, u"A");
+    const auto classA = AbstractMetaClass::findClass(classes, u"A");
     const auto func = classA->findFunction(u"method");
     QVERIFY(!func.isNull());
 
@@ -76,7 +76,7 @@ void TestModifyFunction::testOwnershipTransfer()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, u"B");
+    const auto classB = AbstractMetaClass::findClass(classes, u"B");
     const auto func = classB->findFunction(u"method");
     QVERIFY(!func.isNull());
 
@@ -126,14 +126,14 @@ void TestModifyFunction::invalidateAfterUse()
                                                                 false, u"0.1"_s));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, u"B");
+    const auto classB = AbstractMetaClass::findClass(classes, u"B");
     auto func = classB->findFunction(u"call");
     QCOMPARE(func->modifications().size(), 1);
     QCOMPARE(func->modifications().at(0).argument_mods().size(), 1);
     QVERIFY(func->modifications().at(0).argument_mods().at(0).resetAfterUse());
 
-    const AbstractMetaClass *classC = AbstractMetaClass::findClass(classes, u"C");
-    QVERIFY(classC);
+    const auto classC = AbstractMetaClass::findClass(classes, u"C");
+    QVERIFY(!classC.isNull());
     func = classC->findFunction(u"call");
     QCOMPARE(func->modifications().size(), 1);
     QCOMPARE(func->modifications().at(0).argument_mods().size(), 1);
@@ -144,7 +144,7 @@ void TestModifyFunction::invalidateAfterUse()
     QCOMPARE(func->modifications().at(0).argument_mods().size(), 1);
     QVERIFY(func->modifications().at(0).argument_mods().at(0).resetAfterUse());
 
-    const AbstractMetaClass *classD =  AbstractMetaClass::findClass(classes, u"D");
+    AbstractMetaClassCPtr classD =  AbstractMetaClass::findClass(classes, u"D");
     QVERIFY(classD);
     func = classD->findFunction(u"call");
     QCOMPARE(func->modifications().size(), 1);
@@ -156,8 +156,8 @@ void TestModifyFunction::invalidateAfterUse()
     QCOMPARE(func->modifications().at(0).argument_mods().size(), 1);
     QVERIFY(func->modifications().at(0).argument_mods().at(0).resetAfterUse());
 
-    const AbstractMetaClass *classE = AbstractMetaClass::findClass(classes, u"E");
-    QVERIFY(classE);
+    const auto classE = AbstractMetaClass::findClass(classes, u"E");
+    QVERIFY(!classE.isNull());
     func = classE->findFunction(u"call");
     QVERIFY(func);
     QCOMPARE(func->modifications().size(), 1);
@@ -199,7 +199,7 @@ void TestModifyFunction::testWithApiVersion()
                                                                 false, u"0.1"_s));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    auto *classB = AbstractMetaClass::findClass(classes, u"B");
+    const auto classB = AbstractMetaClass::findClass(classes, u"B");
     auto func = classB->findFunction(u"method");
 
     auto returnOwnership = func->argumentTargetOwnership(func->ownerClass(), 0);
@@ -238,8 +238,8 @@ struct A {
                                                                 false, u"0.1"_s));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, u"A");
-    QVERIFY(classA);
+    const auto classA = AbstractMetaClass::findClass(classes, u"A");
+    QVERIFY(!classA.isNull());
 
     // Nothing specified, true
     const auto f1 = classA->findFunction(u"f1");
@@ -436,8 +436,8 @@ void TestModifyFunction::testScopedModifications()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode.constData(), xmlCode.constData(), false));
     QVERIFY(!builder.isNull());
 
-    const AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), u"A");
-    QVERIFY(classA);
+    const auto classA = AbstractMetaClass::findClass(builder->classes(), u"A");
+    QVERIFY(!classA.isNull());
 
     auto f = classA->findFunction(QStringLiteral("unspecified"));
     QVERIFY(!f.isNull());
