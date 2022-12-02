@@ -9,7 +9,7 @@
 #include "abstractmetalang_typedefs.h"
 #include "typesystem_typedefs.h"
 
-#include <QtCore/QExplicitlySharedDataPointer>
+#include <QtCore/QHash>
 
 #include <optional>
 
@@ -29,7 +29,6 @@ class ApiExtractorResult
 {
 public:
     ApiExtractorResult();
-    explicit ApiExtractorResult(ApiExtractorResultData *data);
     ApiExtractorResult(const ApiExtractorResult &);
     ApiExtractorResult &operator=(const ApiExtractorResult &);
     ApiExtractorResult(ApiExtractorResult &&);
@@ -60,7 +59,16 @@ public:
     void setFlags(ApiExtractorFlags f);
 
 private:
-    QExplicitlySharedDataPointer<ApiExtractorResultData> d;
+    AbstractMetaClassCList m_metaClasses;
+    AbstractMetaClassCList m_smartPointers;
+    AbstractMetaFunctionCList m_globalFunctions;
+    AbstractMetaEnumList m_globalEnums;
+    AbstractMetaTypeList m_instantiatedContainers;
+    InstantiatedSmartPointers m_instantiatedSmartPointers;
+    QHash<TypeEntryCPtr, AbstractMetaEnum> m_enums;
+    ApiExtractorFlags m_flags;
+
+    friend class ApiExtractor;
 };
 
 #endif // APIEXTRACTORRESULT_H

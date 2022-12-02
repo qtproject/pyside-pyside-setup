@@ -2,25 +2,13 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "apiextractorresult.h"
-#include "apiextractorresultdata_p.h"
 #include "abstractmetalang.h"
 #include "abstractmetaenum.h"
 
 #include "enumtypeentry.h"
 #include "flagstypeentry.h"
 
-ApiExtractorResultData::ApiExtractorResultData() = default;
-
-ApiExtractorResultData::~ApiExtractorResultData() = default;
-
-ApiExtractorResult::ApiExtractorResult() : d(new ApiExtractorResultData)
-{
-}
-
-ApiExtractorResult::ApiExtractorResult(ApiExtractorResultData *data) :
-    d(data)
-{
-}
+ApiExtractorResult::ApiExtractorResult() = default;
 
 ApiExtractorResult::ApiExtractorResult(const ApiExtractorResult &) = default;
 
@@ -34,42 +22,42 @@ ApiExtractorResult::~ApiExtractorResult() = default;
 
 const AbstractMetaEnumList &ApiExtractorResult::globalEnums() const
 {
-    return d->m_globalEnums;
+    return m_globalEnums;
 }
 
 const AbstractMetaFunctionCList &ApiExtractorResult::globalFunctions() const
 {
-    return d->m_globalFunctions;
+    return m_globalFunctions;
 }
 
 const AbstractMetaClassCList &ApiExtractorResult::classes() const
 {
-    return d->m_metaClasses;
+    return m_metaClasses;
 }
 
 const AbstractMetaClassCList &ApiExtractorResult::smartPointers() const
 {
-    return d->m_smartPointers;
+    return m_smartPointers;
 }
 
 const AbstractMetaTypeList &ApiExtractorResult::instantiatedContainers() const
 {
-    return d->m_instantiatedContainers;
+    return m_instantiatedContainers;
 }
 
 const InstantiatedSmartPointers &ApiExtractorResult::instantiatedSmartPointers() const
 {
-    return d->m_instantiatedSmartPointers;
+    return m_instantiatedSmartPointers;
 }
 
 ApiExtractorFlags ApiExtractorResult::flags() const
 {
-    return d->m_flags;
+    return m_flags;
 }
 
 void ApiExtractorResult::setFlags(ApiExtractorFlags f)
 {
-    d->m_flags = f;
+    m_flags = f;
 }
 
 std::optional<AbstractMetaEnum>
@@ -77,8 +65,8 @@ std::optional<AbstractMetaEnum>
 {
     if (!typeEntry.isNull() && typeEntry->isFlags())
         typeEntry = qSharedPointerCast<const FlagsTypeEntry>(typeEntry)->originator();
-    const auto it = d->m_enums.constFind(typeEntry);
-    if (it == d->m_enums.constEnd())
+    const auto it = m_enums.constFind(typeEntry);
+    if (it == m_enums.constEnd())
         return {};
     return it.value();
 }
@@ -86,7 +74,7 @@ std::optional<AbstractMetaEnum>
 AbstractMetaFunctionCList ApiExtractorResult::implicitConversions(const TypeEntryCPtr &type) const
 {
     if (type->isValue()) {
-        if (auto metaClass = AbstractMetaClass::findClass(d->m_metaClasses, type))
+        if (auto metaClass = AbstractMetaClass::findClass(m_metaClasses, type))
             return metaClass->implicitConversions();
     }
     return {};

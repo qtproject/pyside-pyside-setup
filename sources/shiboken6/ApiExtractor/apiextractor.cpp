@@ -3,7 +3,6 @@
 
 #include "apiextractor.h"
 #include "apiextractorresult.h"
-#include "apiextractorresultdata_p.h"
 #include "abstractmetaargument.h"
 #include "abstractmetabuilder.h"
 #include "abstractmetaenum.h"
@@ -300,17 +299,16 @@ std::optional<ApiExtractorResult> ApiExtractor::run(ApiExtractorFlags flags)
     InstantiationCollectContext collectContext;
     d->collectInstantiatedContainersAndSmartPointers(collectContext);
 
-    auto *data = new ApiExtractorResultData;
-
-    classListToCList(d->m_builder->takeClasses(), &data->m_metaClasses);
-    classListToCList(d->m_builder->takeSmartPointers(), &data->m_smartPointers);
-    data->m_globalFunctions = d->m_builder->globalFunctions();
-    data->m_globalEnums = d->m_builder->globalEnums();
-    data->m_enums = d->m_builder->typeEntryToEnumsHash();
-    data->m_flags = flags;
-    qSwap(data->m_instantiatedContainers, collectContext.instantiatedContainers);
-    qSwap(data->m_instantiatedSmartPointers, collectContext.instantiatedSmartPointers);
-    return ApiExtractorResult(data);
+    ApiExtractorResult result;
+    classListToCList(d->m_builder->takeClasses(), &result.m_metaClasses);
+    classListToCList(d->m_builder->takeSmartPointers(), &result.m_smartPointers);
+    result.m_globalFunctions = d->m_builder->globalFunctions();
+    result.m_globalEnums = d->m_builder->globalEnums();
+    result.m_enums = d->m_builder->typeEntryToEnumsHash();
+    result.m_flags = flags;
+    qSwap(result.m_instantiatedContainers, collectContext.instantiatedContainers);
+    qSwap(result.m_instantiatedSmartPointers, collectContext.instantiatedSmartPointers);
+    return result;
 }
 
 LanguageLevel ApiExtractor::languageLevel() const
