@@ -486,8 +486,8 @@ def get_environment_from_batch_command(env_cmd, initial=None):
 
 def back_tick(cmd, ret_err=False):
     """
-    Run command `cmd`, return stdout, or stdout, stderr,
-    return_code if `ret_err` is True.
+    Run command `cmd`, return stdout, or (stdout, stderr,
+    return_code) if `ret_err` is True.
 
     Parameters
     ----------
@@ -511,22 +511,20 @@ def back_tick(cmd, ret_err=False):
     Raises RuntimeError if command returns non-zero exit code when ret_err
     isn't set.
     """
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-    out, err = proc.communicate()
-    if not isinstance(out, str):
-        # python 3
-        out = out.decode()
-        err = err.decode()
-    retcode = proc.returncode
-    if retcode is None and not ret_err:
-        proc.terminate()
-        raise RuntimeError(f"{cmd} process did not terminate")
-    if retcode != 0 and not ret_err:
-        raise RuntimeError(f"{cmd} process returned code {retcode}\n*** {err}")
-    out = out.strip()
+    with subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                          stderr=subprocess.PIPE, shell=True) as proc:
+        out_bytes, err_bytes = proc.communicate()
+        out = out_bytes.decode().strip()
+        err = err_bytes.decode().strip()
+        retcode = proc.returncode
+        if retcode is None and not ret_err:
+            proc.terminate()
+            raise RuntimeError(f"{cmd} process did not terminate")
+        if retcode != 0 and not ret_err:
+            raise RuntimeError(f"{cmd} process returned code {retcode}\n*** {err}")
     if not ret_err:
         return out
-    return out, err.strip(), retcode
+    return out, err, retcode
 
 
 MACOS_OUTNAME_RE = re.compile(r'\(compatibility version [\d.]+, current version [\d.]+\)')
