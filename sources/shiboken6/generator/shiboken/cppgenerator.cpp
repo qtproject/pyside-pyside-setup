@@ -50,6 +50,7 @@
 #include <algorithm>
 #include <cstring>
 #include <memory>
+#include <set>
 
 using namespace Qt::StringLiterals;
 
@@ -6611,7 +6612,7 @@ bool CppGenerator::finishGeneration()
     StringStream s_classInitDecl(TextStream::Language::Cpp);
     StringStream s_classPythonDefines(TextStream::Language::Cpp);
 
-    QSet<Include> includes;
+    std::set<Include> includes;
     StringStream s_globalFunctionImpl(TextStream::Language::Cpp);
     StringStream s_globalFunctionDef(TextStream::Language::Cpp);
     StringStream signatureStream(TextStream::Language::Cpp);
@@ -6620,8 +6621,8 @@ bool CppGenerator::finishGeneration()
     for (auto it = functionGroups.cbegin(), end = functionGroups.cend(); it != end; ++it) {
         const AbstractMetaFunctionCList &overloads = it.value();
         for (const auto &func : overloads) {
-                if (func->typeEntry())
-                    includes << func->typeEntry()->include();
+            if (auto te = func->typeEntry(); !te.isNull())
+                includes.insert(te->include());
         }
 
         if (overloads.isEmpty())
@@ -6662,26 +6663,26 @@ bool CppGenerator::finishGeneration()
         writeInitFunc(s_classInitDecl, s_classPythonDefines,
                       getInitFunctionName(context),
                       enclosingTypeEntry);
-        includes << smp.type.instantiations().constFirst().typeEntry()->include();
+        includes.insert(smp.type.instantiations().constFirst().typeEntry()->include());
     }
 
     for (auto &instantiatedContainer : api().instantiatedContainers()) {
         for (const auto &inst : instantiatedContainer.instantiations())
-            includes << inst.typeEntry()->include();
+            includes.insert(inst.typeEntry()->include());
     }
 
     const ExtendedConverterData extendedConverters = getExtendedConverters();
     for (auto it = extendedConverters.cbegin(), end = extendedConverters.cend(); it != end; ++it) {
         TypeEntryCPtr te = it.key();
-        includes << te->include();
+        includes.insert(te->include());
         for (const auto &metaClass : it.value())
-            includes << metaClass->typeEntry()->include();
+            includes.insert(metaClass->typeEntry()->include());
     }
 
     const QList<CustomConversionPtr> &typeConversions = getPrimitiveCustomConversions();
     for (const auto &c : typeConversions) {
         if (auto te = c->ownerType(); !te.isNull())
-            includes << te->include();
+            includes.insert(te->include());
     }
 
     QString moduleFileName(outputDirectory() + u'/' + subDirectoryForPackage(packageName()));
@@ -6713,7 +6714,7 @@ bool CppGenerator::finishGeneration()
     }
 
     s << "#include \"" << getModuleHeaderFileName() << '"'  << "\n\n";
-    for (const Include &include : std::as_const(includes))
+    for (const Include &include : includes)
         s << include;
     s << '\n';
 
