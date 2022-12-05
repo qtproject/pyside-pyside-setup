@@ -92,7 +92,7 @@ def prepare_standalone_package_linux(pyside_build, _vars, cross_build=False):
                     _vars=_vars)
 
         copied_plugins = pyside_build.get_shared_libraries_in_path_recursively(
-            os.fspath(plugins_target))
+            plugins_target)
         pyside_build.update_rpath_for_linux_plugins(copied_plugins)
 
     if copy_qml:
@@ -106,7 +106,7 @@ def prepare_standalone_package_linux(pyside_build, _vars, cross_build=False):
                 ignore=["*.debug"],
                 _vars=_vars)
         copied_plugins = pyside_build.get_shared_libraries_in_path_recursively(
-            os.fspath(qml_plugins_target))
+            qml_plugins_target)
         pyside_build.update_rpath_for_linux_plugins(
             copied_plugins,
             qt_lib_dir=destination_qt_lib_dir,

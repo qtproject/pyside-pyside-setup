@@ -1060,28 +1060,29 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
                 filters = unix_filters
         return filters
 
+    def _find_shared_libraries(self, path, recursive=False):
+        """Helper to find shared libraries in a path."""
+        result = set()
+        for filter in self.get_shared_library_filters():
+            glob_pattern = f"**/{filter}" if recursive else filter
+            for library in path.glob(glob_pattern):
+                result.add(library)
+        return list(result)
+
     def package_libraries(self, package_path):
         """Returns the libraries of the Python module"""
-        filters = self.get_shared_library_filters()
-        return [lib for lib in os.listdir(
-            package_path) if filter_match(lib, filters)]
+        return self._find_shared_libraries(package_path)
 
     def get_shared_libraries_in_path_recursively(self, initial_path):
         """Returns shared library plugins in given path (collected
         recursively)"""
-        filters = self.get_shared_library_filters()
-        libraries = []
-        for dir_path, dir_names, file_names in os.walk(initial_path):
-            for name in file_names:
-                if filter_match(name, filters):
-                    library_path = Path(dir_path) / name
-                    libraries.append(library_path)
-        return libraries
+        return self._find_shared_libraries(initial_path, recursive=True)
 
     def update_rpath(self, package_path, executables, libexec=False):
         ROOT = '@loader_path' if sys.platform == 'darwin' else '$ORIGIN'
         QT_PATH = '/../lib' if libexec else '/Qt/lib'
 
+        message = "Patched rpath to '$ORIGIN/' in"
         if sys.platform.startswith('linux'):
             def rpath_cmd(srcpath):
                 final_rpath = ''
@@ -1100,6 +1101,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
                                              override=override)
 
         elif sys.platform == 'darwin':
+            message = "Updated rpath in"
             def rpath_cmd(srcpath):
                 final_rpath = ''
                 # Command line rpath option takes precedence over
@@ -1117,15 +1119,13 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
             raise RuntimeError(f"Not configured for platform {sys.platform}")
 
         # Update rpath
-        for srcname in executables:
-            srcpath = Path(package_path) / srcname
-            if srcpath.is_dir() or srcpath.is_symlink():
+        for executable in executables:
+            if executable.is_dir() or executable.is_symlink():
                 continue
-            if not srcpath.exists():
+            if not executable.exists():
                 continue
-            rpath_cmd(srcpath)
-            log.info("Patched rpath to '$ORIGIN/' (Linux) or "
-                     f"updated rpath (OS/X) in {srcpath}.")
+            rpath_cmd(executable)
+            log.info(f"{message} {executable}.")
 
     def update_rpath_for_linux_plugins(
             self,
@@ -1145,7 +1145,6 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
 
         log.info("Patching rpath for Qt and QML plugins.")
         for plugin in plugin_paths:
-            plugin = Path(plugin)
             if plugin.is_dir() or plugin.is_symlink():
                 continue
             if not plugin.exists():
@@ -1175,9 +1174,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
         qt_lib_dir = Path(qt_lib_dir)
         rpath_value = "$ORIGIN"
         log.info(f"Patching rpath for Qt and ICU libraries in {qt_lib_dir}.")
-        libs = self.package_libraries(qt_lib_dir)
-        lib_paths = [qt_lib_dir / lib for lib in libs]
-        for library in lib_paths:
+        for library in self.package_libraries(qt_lib_dir):
             if library.is_dir() or library.is_symlink():
                 continue
             if library.exists():
