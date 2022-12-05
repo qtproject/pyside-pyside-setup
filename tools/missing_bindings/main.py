@@ -28,7 +28,7 @@ from bs4 import BeautifulSoup
 from config import modules_to_test, types_to_ignore
 
 qt_documentation_website_prefixes = {
-    "6.3": "https://doc.qt.io/qt-6/",
+    "6.4": "https://doc.qt.io/qt-6/",
     "dev": "https://doc-snapshots.qt.io/qt6-dev/",
 }
 
@@ -57,8 +57,8 @@ def get_parser():
     parser.add_argument(
         "--qt-version",
         "-v",
-        default="6.3",
-        choices=["6.3", "dev"],
+        default="6.4",
+        choices=["6.4", "dev"],
         type=str,
         dest="version",
         help="the Qt version to use to check for types",
