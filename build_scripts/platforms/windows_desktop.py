@@ -20,9 +20,8 @@ def prepare_packages_win32(pyside_build, _vars):
     if (pyside_build.debug or pyside_build.build_type == 'RelWithDebInfo') and copy_pdbs:
         pdbs = ['*.pdb']
 
-    destination_dir = "{st_build_dir}/{st_package_name}".format(**_vars)
+    destination_dir = Path("{st_build_dir}/{st_package_name}".format(**_vars))
     destination_qt_dir = destination_dir
-    destination_qt_lib_dir = f"{destination_qt_dir}/lib"
 
     # <install>/lib/site-packages/{st_package_name}/* ->
     # <setup>/{st_package_name}
@@ -94,7 +93,7 @@ def prepare_packages_win32(pyside_build, _vars):
         # <install>/include/* -> <setup>/{st_package_name}/include
         copydir(
             "{install_dir}/include/{cmake_package_name}",
-            f"{destination_dir}/include",
+            destination_dir / "include",
             _vars=_vars)
 
     if config.is_internal_pyside_build():
@@ -143,21 +142,21 @@ def prepare_packages_win32(pyside_build, _vars):
         #   <setup>/{st_package_name}/typesystems
         copydir(
             "{install_dir}/share/{st_package_name}/typesystems",
-            f"{destination_dir}/typesystems",
+            destination_dir / "typesystems",
             _vars=_vars)
 
         # <install>/share/{st_package_name}/glue/* ->
         #   <setup>/{st_package_name}/glue
         copydir(
             "{install_dir}/share/{st_package_name}/glue",
-            f"{destination_dir}/glue",
+            destination_dir / "glue",
             _vars=_vars)
 
         # <source>/pyside6/{st_package_name}/support/* ->
         #   <setup>/{st_package_name}/support/*
         copydir(
             f"{{build_dir}}/{PYSIDE}/{{st_package_name}}/support",
-            f"{destination_dir}/support",
+            destination_dir / "support",
             _vars=_vars)
 
         # <source>/pyside6/{st_package_name}/*.pyi ->
@@ -179,12 +178,12 @@ def prepare_packages_win32(pyside_build, _vars):
                 return True
             # examples/* -> <setup>/{st_package_name}/examples
             copydir(Path(pyside_build.script_dir) / "examples",
-                    f"{destination_dir}/examples",
+                    destination_dir / "examples",
                     force=False, _vars=_vars, dir_filter_function=pycache_dir_filter)
 
         if _vars['ssl_libs_dir']:
             # <ssl_libs>/* -> <setup>/{st_package_name}/openssl
-            copydir("{ssl_libs_dir}", f"{destination_dir}/openssl",
+            copydir("{ssl_libs_dir}", destination_dir / "openssl",
                     _filter=[
                         "libeay32.dll",
                         "ssleay32.dll"],

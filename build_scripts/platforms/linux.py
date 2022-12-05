@@ -30,9 +30,9 @@ def prepare_standalone_package_linux(pyside_build, _vars, cross_build=False):
         should_copy_icu_libs = False
 
     # <qt>/lib/* -> <setup>/{st_package_name}/Qt/lib
-    destination_dir = "{st_build_dir}/{st_package_name}".format(**_vars)
-    destination_qt_dir = f"{destination_dir}/Qt"
-    destination_qt_lib_dir = f"{destination_qt_dir}/lib"
+    destination_dir = Path("{st_build_dir}/{st_package_name}".format(**_vars))
+    destination_qt_dir = destination_dir / "Qt"
+    destination_qt_lib_dir = destination_qt_dir / "lib"
 
     accepted_modules = ['libQt6*.so.?']
     if constrain_modules:
@@ -64,14 +64,14 @@ def prepare_standalone_package_linux(pyside_build, _vars, cross_build=False):
 
     # Patching designer to use the Qt libraries provided in the wheel
     if config.is_internal_pyside_build() and not OPTION['NO_QT_TOOLS']:
-        assistant_path = f"{destination_dir}/assistant"
+        assistant_path = destination_dir / "assistant"
         linux_patch_executable(pyside_build._patchelf_path, assistant_path)
-        designer_path = f"{destination_dir}/designer"
+        designer_path = destination_dir / "designer"
         linux_patch_executable(pyside_build._patchelf_path, designer_path)
 
     if pyside_build.is_webengine_built(built_modules):
         copydir("{qt_data_dir}/resources",
-                f"{destination_qt_dir}/resources",
+                destination_qt_dir / "resources",
                 _filter=None,
                 recursive=False,
                 _vars=_vars)
@@ -79,25 +79,25 @@ def prepare_standalone_package_linux(pyside_build, _vars, cross_build=False):
     if copy_plugins:
         is_pypy = "pypy" in pyside_build.build_classifiers
         # <qt>/plugins/* -> <setup>/{st_package_name}/Qt/plugins
-        plugins_target = f"{destination_qt_dir}/plugins"
+        plugins_target = destination_qt_dir / "plugins"
         copydir("{qt_plugins_dir}", plugins_target,
                 _filter=["*.so"],
                 recursive=True,
                 _vars=_vars)
         if not is_pypy:
             copydir("{install_dir}/plugins/designer",
-                    f"{plugins_target}/designer",
+                    plugins_target / "designer",
                     _filter=["*.so"],
                     recursive=False,
                     _vars=_vars)
 
         copied_plugins = pyside_build.get_shared_libraries_in_path_recursively(
-            plugins_target.format(**_vars))
+            os.fspath(plugins_target))
         pyside_build.update_rpath_for_linux_plugins(copied_plugins)
 
     if copy_qml:
         # <qt>/qml/* -> <setup>/{st_package_name}/Qt/qml
-        qml_plugins_target = f"{destination_qt_dir}/qml"
+        qml_plugins_target = destination_qt_dir / "qml"
         copydir("{qt_qml_dir}",
                 qml_plugins_target,
                 _filter=None,
@@ -106,7 +106,7 @@ def prepare_standalone_package_linux(pyside_build, _vars, cross_build=False):
                 ignore=["*.debug"],
                 _vars=_vars)
         copied_plugins = pyside_build.get_shared_libraries_in_path_recursively(
-            qml_plugins_target)
+            os.fspath(qml_plugins_target))
         pyside_build.update_rpath_for_linux_plugins(
             copied_plugins,
             qt_lib_dir=destination_qt_lib_dir,
@@ -116,15 +116,15 @@ def prepare_standalone_package_linux(pyside_build, _vars, cross_build=False):
         # <qt>/translations/* ->
         # <setup>/{st_package_name}/Qt/translations
         copydir("{qt_translations_dir}",
-                f"{destination_qt_dir}/translations",
+                destination_qt_dir / "translations",
                 _filter=["*.qm", "*.pak"],
                 force=False,
                 _vars=_vars)
 
     if copy_qt_conf:
         # Copy the qt.conf file to libexec.
-        qt_libexec_path = Path(destination_qt_dir) / "libexec"
+        qt_libexec_path = destination_qt_dir / "libexec"
         if not qt_libexec_path.is_dir():
-            os.makedirs(qt_libexec_path)
+            qt_libexec_path.mkdir(parents=True)
         copyfile(f"{{build_dir}}/{PYSIDE}/{{st_package_name}}/qt.conf",
-                 str(qt_libexec_path), _vars=_vars)
+                 qt_libexec_path, _vars=_vars)

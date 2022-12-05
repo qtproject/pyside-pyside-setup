@@ -30,9 +30,9 @@ def prepare_standalone_package_macos(pyside_build, _vars):
     copy_translations = True
     copy_qt_conf = True
 
-    destination_dir = "{st_build_dir}/{st_package_name}".format(**_vars)
-    destination_qt_dir = f"{destination_dir}/Qt"
-    destination_qt_lib_dir = f"{destination_qt_dir}/lib"
+    destination_dir = Path("{st_build_dir}/{st_package_name}".format(**_vars))
+    destination_qt_dir = destination_dir / "Qt"
+    destination_qt_lib_dir = destination_qt_dir / "lib"
 
     if config.is_internal_shiboken_generator_build():
         constrain_modules = ["Core", "Network", "Xml", "XmlPatterns"]
@@ -109,11 +109,10 @@ def prepare_standalone_package_macos(pyside_build, _vars):
         # from Versions/5/Helpers, thus adding two more levels of
         # directory hierarchy.
         if pyside_build.is_webengine_built(built_modules):
-            qt_lib_path = Path(destination_qt_lib_dir)
             bundle = Path("QtWebEngineCore.framework/Helpers/") / "QtWebEngineProcess.app"
             binary = "Contents/MacOS/QtWebEngineProcess"
             webengine_process_path = bundle / binary
-            final_path = qt_lib_path / webengine_process_path
+            final_path = destination_qt_lib_dir / webengine_process_path
             rpath = "@loader_path/../../../../../"
             macos_fix_rpaths_for_library(final_path, rpath)
     else:
@@ -132,7 +131,7 @@ def prepare_standalone_package_macos(pyside_build, _vars):
 
         if pyside_build.is_webengine_built(built_modules):
             copydir("{qt_data_dir}/resources",
-                    f"{destination_qt_dir}/resources",
+                    destination_qt_dir / "resources",
                     _filter=None,
                     recursive=False,
                     _vars=_vars)
@@ -155,7 +154,7 @@ def prepare_standalone_package_macos(pyside_build, _vars):
     if copy_plugins:
         is_pypy = "pypy" in pyside_build.build_classifiers
         # <qt>/plugins/* -> <setup>/{st_package_name}/Qt/plugins
-        plugins_target = f"{destination_qt_dir}/plugins"
+        plugins_target = destination_qt_dir / "plugins"
         filters = ["*.dylib"]
         copydir("{qt_plugins_dir}", plugins_target,
                 _filter=filters,
@@ -165,14 +164,14 @@ def prepare_standalone_package_macos(pyside_build, _vars):
                 _vars=_vars)
         if not is_pypy:
             copydir("{install_dir}/plugins/designer",
-                    f"{plugins_target}/designer",
+                    plugins_target / "designer",
                     _filter=filters,
                     recursive=False,
                     _vars=_vars)
 
     if copy_qml:
         # <qt>/qml/* -> <setup>/{st_package_name}/Qt/qml
-        copydir("{qt_qml_dir}", f"{destination_qt_dir}/qml",
+        copydir("{qt_qml_dir}", destination_qt_dir / "qml",
                 _filter=None,
                 recursive=True,
                 force=False,
@@ -183,7 +182,7 @@ def prepare_standalone_package_macos(pyside_build, _vars):
     if copy_translations:
         # <qt>/translations/* ->
         # <setup>/{st_package_name}/Qt/translations
-        copydir("{qt_translations_dir}", f"{destination_qt_dir}/translations",
+        copydir("{qt_translations_dir}", destination_qt_dir / "translations",
                 _filter=["*.qm", "*.pak"],
                 force=False,
                 _vars=_vars)

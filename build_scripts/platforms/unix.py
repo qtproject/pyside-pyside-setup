@@ -43,9 +43,8 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
     executables = []
     libexec_executables = []
 
-    destination_dir = "{st_build_dir}/{st_package_name}".format(**_vars)
-    destination_qt_dir = f"{destination_dir}/Qt"
-    destination_qt_lib_dir = f"{destination_qt_dir}/lib"
+    destination_dir = Path("{st_build_dir}/{st_package_name}".format(**_vars))
+    destination_qt_dir = destination_dir / "Qt"
 
     # <install>/lib/site-packages/{st_package_name}/* ->
     # <setup>/{st_package_name}
@@ -151,7 +150,7 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
             lib_exec_filters.append('QtWebEngineProcess')
         if lib_exec_filters:
             libexec_executables.extend(copydir("{qt_lib_execs_dir}",
-                                               f"{destination_qt_dir}/libexec",
+                                               destination_qt_dir / "libexec",
                                                _filter=lib_exec_filters,
                                                recursive=False,
                                                _vars=_vars))

@@ -251,12 +251,12 @@ def platform_cmake_options(as_tuple_list=False):
 
 def copyfile(src, dst, force=True, _vars=None, force_copy_symlink=False,
              make_writable_by_owner=False):
-    if _vars is not None:
-        src = Path(str(src).format(**_vars))
-        dst = Path(str(dst).format(**_vars))
-    else:
-        src = Path(src)
-        dst = Path(dst)
+    if isinstance(src, str):
+        src = Path(src.format(**_vars)) if _vars else Path(src)
+    if isinstance(dst, str):
+        dst = Path(dst.format(**_vars)) if _vars else Path(dst)
+    assert(isinstance(src, Path))
+    assert(isinstance(dst, Path))
 
     if not src.exists() and not force:
         log.info(f"**Skipping copy file\n  {src} to\n  {dst}\n  Source does not exist")
@@ -327,9 +327,14 @@ def makefile(dst, content=None, _vars=None):
 def copydir(src, dst, _filter=None, ignore=None, force=True, recursive=True, _vars=None,
             dir_filter_function=None, file_filter_function=None, force_copy_symlinks=False):
 
+    if isinstance(src, str):
+        src = Path(src.format(**_vars)) if _vars else Path(src)
+    if isinstance(dst, str):
+        dst = Path(dst.format(**_vars)) if _vars else Path(dst)
+    assert(isinstance(src, Path))
+    assert(isinstance(dst, Path))
+
     if _vars is not None:
-        src = Path(str(src).format(**_vars))
-        dst = Path(str(dst).format(**_vars))
         if _filter is not None:
             _filter = [i.format(**_vars) for i in _filter]
         if ignore is not None:
@@ -1404,6 +1409,6 @@ def copy_qt_metatypes(destination_qt_dir, _vars):
     qt_meta_types_dir = "{qt_metatypes_dir}".format(**_vars)
     qt_prefix_dir = "{qt_prefix_dir}".format(**_vars)
     rel_meta_data_dir = os.fspath(Path(qt_meta_types_dir).relative_to(qt_prefix_dir))
-    copydir(qt_meta_types_dir, f"{destination_qt_dir}/{rel_meta_data_dir}",
+    copydir(qt_meta_types_dir, destination_qt_dir / rel_meta_data_dir,
             _filter=["*.json"],
             recursive=False, _vars=_vars, force_copy_symlinks=True)
