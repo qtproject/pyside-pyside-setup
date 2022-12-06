@@ -67,7 +67,7 @@ def get_parser():
         "--which-missing",
         "-w",
         default="all",
-        choices=["all", "in-pyqt", "not-in-pyqt"],
+        choices=["all", "in-pyqt", "not-in-pyqt", "in-pyside-not-in-pyqt"],
         type=str,
         dest="which_missing",
         help="Which missing types to show (all, or just those that are not present in PyQt)",
@@ -94,7 +94,7 @@ def wikilog(*pargs, **kw):
         computed_str = computed_str.replace(":", ":'''")
         computed_str = f"{computed_str}'''\n"
     elif style == "error":
-        computed_str = computed_str.strip('\n')
+        computed_str = computed_str.strip("\n")
         computed_str = f"''{computed_str}''\n"
     elif style == "text_with_link":
         computed_str = computed_str
@@ -121,6 +121,8 @@ if __name__ == "__main__":
     total_missing_types_count = 0
     total_missing_types_count_compared_to_pyqt = 0
     total_missing_modules_count = 0
+    total_missing_pyqt_types_count = 0
+    total_missing_pyqt_modules_count = 0
 
     wiki_file = open("missing_bindings_for_wiki_qt_io.txt", "w")
     wiki_file.truncate()
@@ -199,6 +201,7 @@ if __name__ == "__main__":
                 f"Received error: {e_str}.\n",
                 style="error",
             )
+            total_missing_pyqt_modules_count += 1
 
         # Get C++ class list from documentation page.
         page = request.urlopen(url)
@@ -215,47 +218,74 @@ if __name__ == "__main__":
 
         wikilog(f"Number of types in {module_name}: {len(types_on_html_page)}", style="bold_colon")
 
-        missing_types_count = 0
+        missing_pyside_types_count = 0
+        missing_pyqt_types_count = 0
         missing_types_compared_to_pyqt = 0
         missing_types = []
         for qt_type in types_on_html_page:
+            is_present_in_pyqt = False
+            is_present_in_pyside = False
+            missing_type = None
+
+            try:
+                pyqt_qualified_type = f"pyqt_tested_module.{qt_type}"
+                eval(pyqt_qualified_type)
+                is_present_in_pyqt = True
+            except Exception as e:
+                print(f"{type(e).__name__}: {e}")
+                missing_pyqt_types_count += 1
+                total_missing_pyqt_types_count += 1
+
             try:
                 pyside_qualified_type = f"pyside_tested_module.{qt_type}"
                 eval(pyside_qualified_type)
+                is_present_in_pyside = True
             except Exception as e:
                 print("Failed eval-in pyside qualified types")
                 print(f"{type(e).__name__}: {e}")
                 missing_type = qt_type
-                missing_types_count += 1
+                missing_pyside_types_count += 1
                 total_missing_types_count += 1
 
-                is_present_in_pyqt = False
-                try:
-                    pyqt_qualified_type = f"pyqt_tested_module.{qt_type}"
-                    eval(pyqt_qualified_type)
+                if is_present_in_pyqt:
                     missing_type = f"{missing_type} (is present in PyQt6)"
                     missing_types_compared_to_pyqt += 1
                     total_missing_types_count_compared_to_pyqt += 1
-                    is_present_in_pyqt = True
-                except Exception as e:
-                    print(f"{type(e).__name__}: {e}")
 
+            # missing in PySide
+            if not is_present_in_pyside:
                 if args.which_missing == "all":
                     missing_types.append(missing_type)
+                    message = f"Missing types in PySide (all) {module_name}:"
+                # missing in PySide and present in pyqt
                 elif args.which_missing == "in-pyqt" and is_present_in_pyqt:
                     missing_types.append(missing_type)
+                    message = f"Missing types in PySide6 (but present in PyQt6) {module_name}:"
+                # missing in both PyQt and PySide
                 elif args.which_missing == "not-in-pyqt" and not is_present_in_pyqt:
                     missing_types.append(missing_type)
+                    message = f"Missing types in PySide6 (also missing in PyQt6) {module_name}:"
+            elif (
+                args.which_missing == "in-pyside-not-in-pyqt"
+                and not is_present_in_pyqt
+            ):
+                missing_types.append(qt_type)
+                message = f"Missing types in PyQt6 (but present in PySide6) {module_name}:"
 
         if len(missing_types) > 0:
-            wikilog(f"Missing types in {module_name}:", style="with_newline")
+            wikilog(message, style="with_newline")
             missing_types.sort()
             for missing_type in missing_types:
                 wikilog(missing_type, style="code")
             wikilog("")
 
+        if args.which_missing != "in-pyside-not-in-pyqt":
+            missing_types_count = missing_pyside_types_count
+        else:
+            missing_types_count = missing_pyqt_types_count
+
         wikilog(f"Number of missing types: {missing_types_count}", style="bold_colon")
-        if len(missing_types) > 0:
+        if len(missing_types) > 0 and args.which_missing != "in-pyside-not-in-pyqt":
             wikilog(
                 "Number of missing types that are present in PyQt6: "
                 f"{missing_types_compared_to_pyqt}",
@@ -266,11 +296,24 @@ if __name__ == "__main__":
             wikilog("", style="end")
 
     wikilog("Summary", style="heading5")
-    wikilog(f"Total number of missing types: {total_missing_types_count}", style="bold_colon")
-    wikilog(
-        "Total number of missing types that are present in PyQt6: "
-        f"{total_missing_types_count_compared_to_pyqt}",
-        style="bold_colon",
-    )
-    wikilog(f"Total number of missing modules: {total_missing_modules_count}", style="bold_colon")
+
+    if args.which_missing != "in-pyside-not-in-pyqt":
+        wikilog(f"Total number of missing types: {total_missing_types_count}", style="bold_colon")
+        wikilog(
+            "Total number of missing types that are present in PyQt6: "
+            f"{total_missing_types_count_compared_to_pyqt}",
+            style="bold_colon",
+        )
+        wikilog(
+            f"Total number of missing modules: {total_missing_modules_count}", style="bold_colon"
+        )
+    else:
+        wikilog(
+            f"Total number of missing types in PyQt6: {total_missing_pyqt_types_count}",
+            style="bold_colon",
+        )
+        wikilog(
+            f"Total number of missing modules in PyQt6: {total_missing_pyqt_modules_count}",
+            style="bold_colon",
+        )
     wiki_file.close()
