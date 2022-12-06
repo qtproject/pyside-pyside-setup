@@ -66,6 +66,40 @@ void setWrongContainerType()
     PyErr_SetString(PyExc_TypeError, "Wrong type passed to container conversion.");
 }
 
+struct ErrorStore {
+    PyObject *type;
+    PyObject *exc;
+    PyObject *traceback;
+};
+
+static ErrorStore savedError{};
+
+void storeError()
+{
+    // This error happened in a function with no way to return an error state.
+    // Therefore, we handle the error when we are error checking, anyway.
+    PyErr_Fetch(&savedError.type, &savedError.exc, &savedError.traceback);
+    PyErr_NormalizeException(&savedError.type, &savedError.exc, &savedError.traceback);
+}
+
+PyObject *occurred()
+{
+    // This error handler can be called in any Python context.
+    if (savedError.type) {
+        PyErr_Format(PyExc_RuntimeError, "Delayed %s exception:",
+            reinterpret_cast<PyTypeObject *>(savedError.type)->tp_name);
+        PyObject *type;
+        PyObject *exc;
+        PyObject *traceback;
+        PyErr_Fetch(&type, &exc, &traceback);
+        PyErr_NormalizeException(&type, &exc, &traceback);
+        PyException_SetContext(savedError.exc, exc);
+        PyErr_Restore(savedError.type, savedError.exc, savedError.traceback);
+        savedError.type = nullptr;
+    }
+    return PyErr_Occurred();
+}
+
 } // namespace Errors
 
 namespace Warnings
