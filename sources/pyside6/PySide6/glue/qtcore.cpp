@@ -536,15 +536,6 @@ const QString result = qObjectTr(reinterpret_cast<PyTypeObject *>(%PYSELF), %1, 
 %PYARG_0 = %CONVERTTOPYTHON[QString](result);
 // @snippet qobject-tr
 
-// @snippet qobject-receivers
-// Avoid return +1 because SignalManager connect to "destroyed()" signal to control object timelife
-int ret = %CPPSELF.%FUNCTION_NAME(%1);
-if (ret > 0 && ((strcmp(%1, SIGNAL(destroyed())) == 0) || (strcmp(%1, SIGNAL(destroyed(QObject*))) == 0)))
-    ret -= PySide::SignalManager::instance().countConnectionsWith(%CPPSELF);
-
-%PYARG_0 = %CONVERTTOPYTHON[int](ret);
-// @snippet qobject-receivers
-
 // @snippet qbytearray-mgetitem
 if (PepIndex_Check(_key)) {
     const Py_ssize_t _i = PyNumber_AsSsize_t(_key, PyExc_IndexError);

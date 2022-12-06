@@ -18,11 +18,6 @@
 
 #define RECEIVER_DESTROYED_SLOT_NAME "__receiverDestroyed__(QObject*)"
 
-namespace
-{
-    static int DESTROY_SIGNAL_ID = 0;
-    static int DESTROY_SLOT_ID = 0;
-}
 
 namespace PySide
 {
@@ -146,7 +141,7 @@ void DynamicSlotDataV2::onCallbackDestroyed(void *data)
     auto self = reinterpret_cast<DynamicSlotDataV2 *>(data);
     self->m_weakRef = nullptr;
     Py_BEGIN_ALLOW_THREADS
-    delete self->m_parent;
+    SignalManager::instance().deleteGobalReceiver(self->m_parent);
     Py_END_ALLOW_THREADS
 }
 
@@ -160,31 +155,17 @@ DynamicSlotDataV2::~DynamicSlotDataV2()
     Py_DECREF(m_callback);
 }
 
-GlobalReceiverV2::GlobalReceiverV2(PyObject *callback, GlobalReceiverV2MapPtr map) :
+GlobalReceiverV2::GlobalReceiverV2(PyObject *callback) :
     QObject(nullptr),
-    m_metaObject("__GlobalReceiver__", &QObject::staticMetaObject),
-    m_sharedMap(std::move(map))
+    m_metaObject("__GlobalReceiver__", &QObject::staticMetaObject)
 {
     m_data = new DynamicSlotDataV2(callback, this);
-    m_metaObject.addSlot(RECEIVER_DESTROYED_SLOT_NAME);
-    m_metaObject.update();
-    m_refs.append(nullptr);
-
-
-    if (DESTROY_SIGNAL_ID == 0)
-        DESTROY_SIGNAL_ID = QObject::staticMetaObject.indexOfSignal("destroyed(QObject*)");
-
-    if (DESTROY_SLOT_ID == 0)
-        DESTROY_SLOT_ID = m_metaObject.indexOfMethod(QMetaMethod::Slot, RECEIVER_DESTROYED_SLOT_NAME);
-
-
 }
 
 GlobalReceiverV2::~GlobalReceiverV2()
 {
     m_refs.clear();
     // Remove itself from map.
-    m_sharedMap->remove(m_data->key());
     // Suppress handling of destroyed() for objects whose last reference is contained inside
     // the callback object that will now be deleted. The reference could be a default argument,
     // a callback local variable, etc.
@@ -204,69 +185,34 @@ int GlobalReceiverV2::addSlot(const char *signature)
 
 void GlobalReceiverV2::incRef(const QObject *link)
 {
-    if (link) {
-        if (!m_refs.contains(link)) {
-            bool connected{};
-            Py_BEGIN_ALLOW_THREADS
-            connected = QMetaObject::connect(link, DESTROY_SIGNAL_ID, this, DESTROY_SLOT_ID);
-            Py_END_ALLOW_THREADS
-            if (connected)
-                m_refs.append(link);
-            else
-                Q_ASSERT(false);
-        } else {
-            m_refs.append(link);
-        }
-    } else {
-        m_refs.append(nullptr);
-    }
+    Q_ASSERT(link);
+    m_refs.append(link);
 }
 
 void GlobalReceiverV2::decRef(const QObject *link)
 {
-    if (m_refs.isEmpty())
-        return;
-
-
+    Q_ASSERT(link);
     m_refs.removeOne(link);
-    if (link) {
-        if (!m_refs.contains(link)) {
-            bool result{};
-            Py_BEGIN_ALLOW_THREADS
-            result = QMetaObject::disconnect(link, DESTROY_SIGNAL_ID, this, DESTROY_SLOT_ID);
-            Py_END_ALLOW_THREADS
-            Q_ASSERT(result);
-            if (!result)
-                return;
-        }
-    }
-
-    if (m_refs.isEmpty())
-        Py_BEGIN_ALLOW_THREADS
-        delete this;
-        Py_END_ALLOW_THREADS
-
-}
-
-int GlobalReceiverV2::refCount(const QObject *link) const
-{
-    if (link)
-        return m_refs.count(link);
-
-    return m_refs.size();
 }
 
 void GlobalReceiverV2::notify()
 {
-    const QSet<const QObject *> objSet(m_refs.cbegin(), m_refs.cend());
-    Py_BEGIN_ALLOW_THREADS
-    for (const QObject *o : objSet) {
-        if (o) {
-            QMetaObject::disconnect(o, DESTROY_SIGNAL_ID, this, DESTROY_SLOT_ID);
-            QMetaObject::connect(o, DESTROY_SIGNAL_ID, this, DESTROY_SLOT_ID);
-        }
-    }
-    Py_END_ALLOW_THREADS
+    purgeDeletedSenders();
+}
+
+static bool isNull(const QPointer<const QObject> &p)
+{
+    return p.isNull();
+}
+
+void GlobalReceiverV2::purgeDeletedSenders()
+{
+    m_refs.erase(std::remove_if(m_refs.begin(), m_refs.end(), isNull), m_refs.end());
+}
+
+bool GlobalReceiverV2::isEmpty() const
+{
+    return std::all_of(m_refs.cbegin(), m_refs.cend(), isNull);
 }
 
 GlobalReceiverKey GlobalReceiverV2::key() const
@@ -294,26 +240,15 @@ int GlobalReceiverV2::qt_metacall(QMetaObject::Call call, int id, void **args)
     Q_ASSERT(slot.methodType() == QMetaMethod::Slot);
 
     if (!m_data) {
-        if (id != DESTROY_SLOT_ID) {
-            const QByteArray message = "PySide6 Warning: Skipping callback call "
-                + slot.methodSignature() + " because the callback object is being destructed.";
-            PyErr_WarnEx(PyExc_RuntimeWarning, message.constData(), 0);
-        }
+        const QByteArray message = "PySide6 Warning: Skipping callback call "
+            + slot.methodSignature() + " because the callback object is being destructed.";
+        PyErr_WarnEx(PyExc_RuntimeWarning, message.constData(), 0);
         return -1;
     }
 
-    if (id == DESTROY_SLOT_ID) {
-        if (m_refs.isEmpty())
-            return -1;
-        auto obj = *reinterpret_cast<QObject **>(args[1]);
-        incRef(); //keep the object live (safe ref)
-        m_refs.removeAll(obj); // remove all refs to this object
-        decRef(); //remove the safe ref
-    } else {
-        const bool isShortCuit = std::strchr(slot.methodSignature(), '(') == nullptr;
-        Shiboken::AutoDecRef callback(m_data->callback());
-        SignalManager::callPythonMetaMethod(slot, args, callback, isShortCuit);
-    }
+    const bool isShortCuit = std::strchr(slot.methodSignature(), '(') == nullptr;
+    Shiboken::AutoDecRef callback(m_data->callback());
+    SignalManager::callPythonMetaMethod(slot, args, callback, isShortCuit);
 
     // SignalManager::callPythonMetaMethod might have failed, in that case we have to print the
     // error so it considered "handled".

@@ -10,6 +10,7 @@
 
 #include <QtCore/QByteArray>
 #include <QtCore/QObject>
+#include <QtCore/QPointer>
 #include <QtCore/QMap>
 #include <QtCore/QSharedPointer>
 
@@ -37,9 +38,6 @@ inline bool operator!=(const GlobalReceiverKey &k1, const GlobalReceiverKey &k2)
 
 size_t qHash(const GlobalReceiverKey &k, size_t seed = 0);
 
-using GlobalReceiverV2Map = QHash<GlobalReceiverKey, GlobalReceiverV2 *>;
-using GlobalReceiverV2MapPtr = QSharedPointer<GlobalReceiverV2Map>;
-
 /// A class used to link C++ Signals to non C++ slots (Python callbacks) by
 /// providing fake slots for QObject::connect().
 /// It keeps a Python callback and the list of QObject senders. It is stored
@@ -49,9 +47,7 @@ class GlobalReceiverV2 : public QObject
 public:
     /// Create a GlobalReceiver object that will call 'callback'
     /// @param callback A Python callable object (can be a method or not)
-    /// @param map      A SharedPointer used on Signal manager that contains
-    ///                 all instaces of GlobalReceiver
-    GlobalReceiverV2(PyObject *callback, GlobalReceiverV2MapPtr map);
+    explicit GlobalReceiverV2(PyObject *callback);
 
     ~GlobalReceiverV2() override;
 
@@ -68,20 +64,17 @@ public:
     void notify();
 
     /// Used to increment the reference of the GlobalReceiver object
-    /// @param link This is a optional parameter used to link the ref to
+    /// @param link This is a parameter used to link the ref to
     ///             some QObject life.
-    void incRef(const QObject *link = nullptr);
+    void incRef(const QObject *link);
 
     /// Used to decrement the reference of the GlobalReceiver object.
-    /// @param link This is a optional parameter used to dismiss the link
+    /// @param link This is a parameter used to dismiss the link
     ///             ref to some QObject.
-    void decRef(const QObject *link = nullptr);
+    void decRef(const QObject *link);
 
-    /// Return the count of refs which the GlobalReceiver has
-    /// @param link If any QObject was passed, the function returns the
-    ///             number of references relative to this 'link' object.
-    /// @return The number of references
-    int refCount(const QObject *link) const;
+    /// Returns whether any senders are registered.
+    bool isEmpty() const;
 
     /// Use to retrieve the unique hash of this GlobalReceiver object
     /// @return hash key
@@ -96,10 +89,12 @@ public:
     MetaObjectBuilder &metaObjectBuilder() { return m_metaObject; }
 
 private:
+    void purgeDeletedSenders();
+
     MetaObjectBuilder m_metaObject;
     DynamicSlotDataV2 *m_data;
-    QList<const QObject *> m_refs;
-    GlobalReceiverV2MapPtr m_sharedMap;
+    using QObjectPointer = QPointer<const QObject>;
+    QList<QObjectPointer> m_refs;
 };
 
 }

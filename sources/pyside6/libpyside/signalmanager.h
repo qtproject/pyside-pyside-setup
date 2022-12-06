@@ -67,14 +67,13 @@ public:
     // used to discovery metaobject
     static const QMetaObject* retrieveMetaObject(PyObject* self);
 
-    // Used to discovery if SignalManager was connected with object "destroyed()" signal.
-    int countConnectionsWith(const QObject *object);
-
     // Disconnect all signals managed by Globalreceiver
     void clear();
 
     // Utility function to call a python method usign args received in qt_metacall
     static int callPythonMetaMethod(const QMetaMethod& method, void** args, PyObject* obj, bool isShortCuit);
+
+    static void deleteGobalReceiver(const QObject *globalReceiver);
 
 private:
     struct SignalManagerPrivate;

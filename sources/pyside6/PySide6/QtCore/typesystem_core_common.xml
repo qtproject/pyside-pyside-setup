@@ -1773,10 +1773,6 @@
         </modify-argument>
     </add-function>
 
-   <modify-function signature="receivers(const char*)const">
-     <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-receivers"/>
-   </modify-function>
-
    <modify-function signature="destroyed(QObject*)" allow-thread="yes">
      <modify-argument index="1">
        <rename to="object"/>

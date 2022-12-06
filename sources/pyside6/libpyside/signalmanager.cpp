@@ -187,28 +187,19 @@ QDataStream &operator>>(QDataStream &in, PyObjectWrapper &myObj)
 
 };
 
+namespace PySide {
+using GlobalReceiverV2Ptr = QSharedPointer<GlobalReceiverV2>;
+using GlobalReceiverV2Map = QHash<PySide::GlobalReceiverKey, GlobalReceiverV2Ptr>;
+}
+
 using namespace PySide;
 
 struct SignalManager::SignalManagerPrivate
 {
-    GlobalReceiverV2MapPtr m_globalReceivers;
+    void deleteGobalReceiver(const QObject *gr);
+
+    GlobalReceiverV2Map m_globalReceivers;
     static SignalManager::QmlMetaCallErrorHandler m_qmlMetaCallErrorHandler;
-
-    SignalManagerPrivate() : m_globalReceivers(new GlobalReceiverV2Map{})
-    {
-    }
-
-    ~SignalManagerPrivate()
-    {
-        if (!m_globalReceivers.isNull()) {
-            // Delete receivers by always retrieving the current first element, because deleting a
-            // receiver can indirectly delete another one, and if we use qDeleteAll, that could
-            // cause either a double delete, or iterator invalidation, and thus undefined behavior.
-            while (!m_globalReceivers->isEmpty())
-                delete *m_globalReceivers->cbegin();
-            Q_ASSERT(m_globalReceivers->isEmpty());
-        }
-    }
 
     static void handleMetaCallError(QObject *object, int *result);
     static int qtPropertyMetacall(QObject *object, QMetaObject::Call call,
@@ -264,8 +255,7 @@ SignalManager::SignalManager() : m_d(new SignalManagerPrivate)
 
 void SignalManager::clear()
 {
-    delete m_d;
-    m_d = new SignalManagerPrivate();
+    m_d->m_globalReceivers.clear();
 }
 
 SignalManager::~SignalManager()
@@ -286,34 +276,16 @@ void SignalManager::setQmlMetaCallErrorHandler(QmlMetaCallErrorHandler handler)
 
 QObject *SignalManager::globalReceiver(QObject *sender, PyObject *callback)
 {
-    GlobalReceiverV2MapPtr globalReceivers = m_d->m_globalReceivers;
-    GlobalReceiverKey key = GlobalReceiverV2::key(callback);
-    GlobalReceiverV2 *gr = nullptr;
-    auto it = globalReceivers->find(key);
-    if (it == globalReceivers->end()) {
-        gr = new GlobalReceiverV2(callback, globalReceivers);
-        globalReceivers->insert(key, gr);
-        if (sender) {
-            gr->incRef(sender); // create a link reference
-            gr->decRef(); // remove extra reference
-        }
-    } else {
-        gr = it.value();
-        if (sender)
-            gr->incRef(sender);
+    auto &globalReceivers = m_d->m_globalReceivers;
+    const GlobalReceiverKey key = GlobalReceiverV2::key(callback);
+    auto it = globalReceivers.find(key);
+    if (it == globalReceivers.end()) {
+        it = globalReceivers.insert(key, GlobalReceiverV2Ptr(new GlobalReceiverV2(callback)));
     }
+    if (sender)
+        it.value()->incRef(sender); // create a link reference
 
-    return reinterpret_cast<QObject *>(gr);
-}
-
-int SignalManager::countConnectionsWith(const QObject *object)
-{
-    int count = 0;
-    for (GlobalReceiverV2Map::const_iterator it = m_d->m_globalReceivers->cbegin(), end = m_d->m_globalReceivers->cend(); it != end; ++it) {
-        if (it.value()->refCount(object))
-            count++;
-    }
-    return count;
+    return it.value().data();
 }
 
 void SignalManager::notifyGlobalReceiver(QObject *receiver)
@@ -323,13 +295,30 @@ void SignalManager::notifyGlobalReceiver(QObject *receiver)
 
 void SignalManager::releaseGlobalReceiver(const QObject *source, QObject *receiver)
 {
-    auto gr = reinterpret_cast<GlobalReceiverV2 *>(receiver);
+    auto gr = static_cast<GlobalReceiverV2 *>(receiver);
     gr->decRef(source);
+    if (gr->isEmpty())
+        m_d->deleteGobalReceiver(gr);
+}
+
+void SignalManager::deleteGobalReceiver(const QObject *gr)
+{
+    SignalManager::instance().m_d->deleteGobalReceiver(gr);
+}
+
+void SignalManager::SignalManagerPrivate::deleteGobalReceiver(const QObject *gr)
+{
+    for (auto it = m_globalReceivers.begin(), end = m_globalReceivers.end(); it != end; ++it) {
+        if (it.value().data() == gr) {
+            m_globalReceivers.erase(it);
+            break;
+        }
+    }
 }
 
 int SignalManager::globalReceiverSlotIndex(QObject *receiver, const char *signature) const
 {
-    return reinterpret_cast<GlobalReceiverV2 *>(receiver)->addSlot(signature);
+    return static_cast<GlobalReceiverV2 *>(receiver)->addSlot(signature);
 }
 
 bool SignalManager::emitSignal(QObject *source, const char *signal, PyObject *args)
