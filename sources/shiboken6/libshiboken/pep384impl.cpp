@@ -19,7 +19,7 @@ extern "C"
 {
 
 /*
- * The documentation is located in pep384impl_doc.rst
+ * The documentation is located in `sources/pyside6/doc/developer/limited_api.rst`.
 
  * Here is the verification code for PyTypeObject.
  * We create a type object and check if its fields
