@@ -157,8 +157,8 @@ public:
     qint64 findOutValueFromString(const QString &stringValue, bool &ok);
 
     AbstractMetaClass *findTemplateClass(const QString& name, const AbstractMetaClass *context,
-                                         TypeInfo *info = Q_NULLPTR,
-                                         ComplexTypeEntry **baseContainerType = Q_NULLPTR) const;
+                                         TypeInfo *info = nullptr,
+                                         ComplexTypeEntry **baseContainerType = nullptr) const;
     AbstractMetaClassCList getBaseClasses(const AbstractMetaClass *metaClass) const;
 
     static bool inheritTemplate(AbstractMetaClass *subclass,

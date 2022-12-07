@@ -37,7 +37,7 @@ public:
     {
     }
 
-    Token nextToken(QString *errorMessage = Q_NULLPTR);
+    Token nextToken(QString *errorMessage = nullptr);
     QString identifier() const;
 
     QString msgParseError(const QString &why) const;

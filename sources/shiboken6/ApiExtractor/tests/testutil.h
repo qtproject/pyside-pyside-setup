@@ -34,7 +34,7 @@ namespace TestUtil
         // parse typesystem
         buffer.setData(xmlCode);
         if (!buffer.open(QIODevice::ReadOnly))
-            return Q_NULLPTR;
+            return nullptr;
         if (!td->parseFile(&buffer))
             return nullptr;
         buffer.close();
