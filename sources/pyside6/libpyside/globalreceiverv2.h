@@ -40,81 +40,56 @@ size_t qHash(const GlobalReceiverKey &k, size_t seed = 0);
 using GlobalReceiverV2Map = QHash<GlobalReceiverKey, GlobalReceiverV2 *>;
 using GlobalReceiverV2MapPtr = QSharedPointer<GlobalReceiverV2Map>;
 
-/**
- * A class used to make the link between the C++ Signal/Slot and Python callback
- * This class is used internally by SignalManager
- **/
-
+/// A class used to link C++ Signals to non C++ slots (Python callbacks) by
+/// providing fake slots for QObject::connect().
+/// It keeps a Python callback and the list of QObject senders. It is stored
+/// in SignalManager by a hash of the Python callback.
 class GlobalReceiverV2 : public QObject
 {
 public:
-    /**
-     * Create a GlobalReceiver object that will call 'callback' argumentent
-     *
-     * @param   callback    A Python callable object (can be a method or not)
-     * @param   ma          A SharedPointer used on Signal manager that contains all instaces of GlobalReceiver
-     **/
+    /// Create a GlobalReceiver object that will call 'callback'
+    /// @param callback A Python callable object (can be a method or not)
+    /// @param map      A SharedPointer used on Signal manager that contains
+    ///                 all instaces of GlobalReceiver
     GlobalReceiverV2(PyObject *callback, GlobalReceiverV2MapPtr map);
 
-    /**
-     * Destructor
-     **/
     ~GlobalReceiverV2() override;
 
-    /**
-     * Reimplemented function from QObject
-     **/
+    /// Reimplemented function from QObject
     int qt_metacall(QMetaObject::Call call, int id, void **args) override;
     const QMetaObject *metaObject() const override;
 
-    /**
-     * Add a extra slot to this object
-     *
-     * @param   signature   The signature of the slot to be added
-     * @return  The index of this slot on metaobject
-     **/
+    /// Add a extra slot to this object
+    /// @param  signature The signature of the slot to be added
+    /// @return The index of this slot on metaobject
     int addSlot(const char *signature);
 
-    /**
-     * Notify to GlobalReceiver about when a new connection was made
-     **/
+    /// Notify to GlobalReceiver about when a new connection was made
     void notify();
 
-    /**
-     * Used to increment the reference of the GlobalReceiver object
-     *
-     * @param   link    This is a optional paramenter used to link the ref to some QObject life
-     **/
+    /// Used to increment the reference of the GlobalReceiver object
+    /// @param link This is a optional parameter used to link the ref to
+    ///             some QObject life.
     void incRef(const QObject *link = nullptr);
 
-    /**
-     * Used to decrement the reference of the GlobalReceiver object
-     *
-     * @param   link    This is a optional paramenter used to dismiss the link ref to some QObject
-     **/
+    /// Used to decrement the reference of the GlobalReceiver object.
+    /// @param link This is a optional parameter used to dismiss the link
+    ///             ref to some QObject.
     void decRef(const QObject *link = nullptr);
 
-    /*
-     * Return the count of refs which the GlobalReceiver has
-     *
-     * @param   link    If any QObject was passed, the function return the number of references relative to this 'link' object
-     * @return  The number of references
-     **/
+    /// Return the count of refs which the GlobalReceiver has
+    /// @param link If any QObject was passed, the function returns the
+    ///             number of references relative to this 'link' object.
+    /// @return The number of references
     int refCount(const QObject *link) const;
 
-    /**
-     * Use to retrieve the unique hash of this GlobalReceiver object
-     *
-     * @return  a string with a unique id based on GlobalReceiver contents
-     **/
+    /// Use to retrieve the unique hash of this GlobalReceiver object
+    /// @return hash key
     GlobalReceiverKey key() const;
 
-    /**
-     * Use to retrieve the unique hash of the PyObject based on GlobalReceiver rules
-     *
-     * @param   callback The Python callable object used to calculate the id
-     * @return  a string with a unique id based on GlobalReceiver contents
-     **/
+    /// Use to retrieve the unique hash of the PyObject based on GlobalReceiver rules
+    /// @param callback The Python callable object used to calculate the id
+    /// @return hash key
     static GlobalReceiverKey key(PyObject *callback);
 
     const MetaObjectBuilder &metaObjectBuilder() const { return m_metaObject; }
