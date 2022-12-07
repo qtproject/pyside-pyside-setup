@@ -193,7 +193,7 @@ GlobalReceiverV2::~GlobalReceiverV2()
     // leading to the object being deleted, which emits destroyed(), which would try to invoke
     // the already deleted callback, and also try to delete the object again.
     DynamicSlotDataV2 *data = m_data;
-    m_data = Q_NULLPTR;
+    m_data = nullptr;
     delete data;
 }
 
