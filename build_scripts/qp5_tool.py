@@ -288,7 +288,7 @@ def build(target: str):
         build_arguments.remove('--quiet')
     arguments.extend(build_arguments)
     generator = read_config(GENERATOR_KEY)
-    if generator == 'Ninja':
+    if generator != 'Ninja':
         arguments.extend(['--make-spec', 'ninja'])
     jobs = read_int_config(JOBS_KEY)
     if jobs > 1:
