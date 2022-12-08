@@ -452,6 +452,8 @@ class CommandMixin(object):
     def _determine_defaults_and_check(self):
         if not self.cmake:
             self.cmake = Path(which("cmake"))
+        elif isinstance(self.cmake, str):  # command line option
+            self.cmake = Path(self.cmake)
         if not self.cmake:
             log.error("cmake could not be found.")
             return False
