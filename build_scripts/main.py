@@ -39,7 +39,7 @@ from .platforms.unix import prepare_packages_posix
 from .platforms.windows_desktop import prepare_packages_win32
 from .qtinfo import QtInfo
 from .utils import (copydir, copyfile, detect_clang, filter_match,
-                    get_numpy_location, get_python_dict, init_msvc_env,
+                    get_numpy_location, get_python_dict,
                     linux_fix_rpaths_for_library, macos_fix_rpaths_for_library,
                     platform_cmake_options, remove_tree, run_process,
                     run_process_output, update_env_path, which)
@@ -78,18 +78,14 @@ def _get_make(platform_arch, build_type):
     if makespec == "make":
         return ("make", "Unix Makefiles")
     if makespec == "msvc":
-        nmake_path = Path(which("nmake"))
-        if nmake_path is None or not nmake_path.exists():
-            log.info("nmake not found. Trying to initialize the MSVC env...")
-            init_msvc_env(platform_arch, build_type)
-            nmake_path = Path(which("nmake"))
-            if not nmake_path or not nmake_path.exists():
-                raise SetupError('"nmake" could not be found.')
         if not OPTION["NO_JOM"]:
             jom_path = Path(which("jom"))
             if jom_path:
                 log.info(f"jom was found in {jom_path}")
                 return (jom_path, "NMake Makefiles JOM")
+        nmake_path = Path(which("nmake"))
+        if nmake_path is None or not nmake_path.exists():
+            raise SetupError("nmake not found")
         log.info(f"nmake was found in {nmake_path}")
         if OPTION["JOBS"]:
             msg = "Option --jobs can only be used with 'jom' on Windows."
