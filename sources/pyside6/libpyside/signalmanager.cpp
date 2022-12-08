@@ -196,7 +196,10 @@ using namespace PySide;
 
 struct SignalManager::SignalManagerPrivate
 {
+    ~SignalManagerPrivate() { clear(); }
+
     void deleteGobalReceiver(const QObject *gr);
+    void clear();
 
     GlobalReceiverV2Map m_globalReceivers;
     static SignalManager::QmlMetaCallErrorHandler m_qmlMetaCallErrorHandler;
@@ -255,7 +258,7 @@ SignalManager::SignalManager() : m_d(new SignalManagerPrivate)
 
 void SignalManager::clear()
 {
-    m_d->m_globalReceivers.clear();
+    m_d->clear();
 }
 
 SignalManager::~SignalManager()
@@ -314,6 +317,16 @@ void SignalManager::SignalManagerPrivate::deleteGobalReceiver(const QObject *gr)
             break;
         }
     }
+}
+
+void SignalManager::SignalManagerPrivate::clear()
+{
+    // Delete receivers by always retrieving the current first element,
+    // because deleting a receiver can indirectly delete another one
+    // via ~DynamicSlotDataV2(). Using ~QHash/clear() could cause an
+    // iterator invalidation, and thus undefined behavior.
+    while (!m_globalReceivers.isEmpty())
+        m_globalReceivers.erase(m_globalReceivers.cbegin());
 }
 
 int SignalManager::globalReceiverSlotIndex(QObject *receiver, const char *signature) const
