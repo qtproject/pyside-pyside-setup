@@ -15,7 +15,11 @@ Here are a few distribution options that you can use:
  3. Freeze the application into a single binary file or directory.
  4. Provide native installer (msi, dmg)
 
-If you choose Option 3, consider using one of these tools:
+If you are considering Option 3, then starting with 6.4, we ship a new tool called `pyside6-deploy`
+that deploys your PySide6 application to all desktop platforms - Windows, Linux, and macOS. To know
+more about how to use the tool see :ref:`pyside6-deploy`. Additionally, you can also use other
+popular deployment tools shown below:
+
  * `fbs`_
  * `PyInstaller`_
  * `cx_Freeze`_
@@ -30,8 +34,10 @@ If you choose Option 3, consider using one of these tools:
 .. _py2app: https://py2app.readthedocs.io/en/latest/
 .. _briefcase: https://briefcase.readthedocs.io
 
-Since |project| is a cross-platform framework, we focus on solutions for the three major
-platforms that Qt supports: Windows, Linux, and macOS.
+Although you can deploy PySide6 application using these tools, it is recommended to use
+`pyside6-deploy` as it is easier to use and also to get the most optimized executable. Since
+|project| is a cross-platform framework, we focus on solutions for the three major platforms that
+Qt supports: Windows, Linux, and macOS.
 
 The following table summarizes the platform support for those packaging tools:
 
@@ -138,6 +144,7 @@ Here's a set of tutorials on how to use these tools:
     :name: mastertoc
     :maxdepth: 2
 
+    deployment-pyside6-deploy.rst
     deployment-fbs.rst
     deployment-pyinstaller.rst
     deployment-cxfreeze.rst
