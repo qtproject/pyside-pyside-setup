@@ -47,7 +47,7 @@ class GlobalReceiverV2 : public QObject
 public:
     /// Create a GlobalReceiver object that will call 'callback'
     /// @param callback A Python callable object (can be a method or not)
-    explicit GlobalReceiverV2(PyObject *callback);
+    explicit GlobalReceiverV2(PyObject *callback, QObject *receiver = nullptr);
 
     ~GlobalReceiverV2() override;
 
@@ -88,6 +88,8 @@ public:
     const MetaObjectBuilder &metaObjectBuilder() const { return m_metaObject; }
     MetaObjectBuilder &metaObjectBuilder() { return m_metaObject; }
 
+    static const char *senderDynamicProperty;
+
 private:
     void purgeDeletedSenders();
 
@@ -95,6 +97,7 @@ private:
     DynamicSlotDataV2 *m_data;
     using QObjectPointer = QPointer<const QObject>;
     QList<QObjectPointer> m_refs;
+    QPointer<QObject> m_receiver;
 };
 
 }

@@ -277,13 +277,14 @@ void SignalManager::setQmlMetaCallErrorHandler(QmlMetaCallErrorHandler handler)
     SignalManagerPrivate::m_qmlMetaCallErrorHandler = handler;
 }
 
-QObject *SignalManager::globalReceiver(QObject *sender, PyObject *callback)
+QObject *SignalManager::globalReceiver(QObject *sender, PyObject *callback, QObject *receiver)
 {
     auto &globalReceivers = m_d->m_globalReceivers;
     const GlobalReceiverKey key = GlobalReceiverV2::key(callback);
     auto it = globalReceivers.find(key);
     if (it == globalReceivers.end()) {
-        it = globalReceivers.insert(key, GlobalReceiverV2Ptr(new GlobalReceiverV2(callback)));
+        GlobalReceiverV2Ptr gr(new GlobalReceiverV2(callback, receiver));
+        it = globalReceivers.insert(key, gr);
     }
     if (sender)
         it.value()->incRef(sender); // create a link reference

@@ -536,6 +536,18 @@ const QString result = qObjectTr(reinterpret_cast<PyTypeObject *>(%PYSELF), %1, 
 %PYARG_0 = %CONVERTTOPYTHON[QString](result);
 // @snippet qobject-tr
 
+// @snippet qobject-sender
+// Retrieve the sender from a dynamic property set by GlobalReceiverV2 in case of a
+// non-C++ slot (Python callback).
+auto *ret = %CPPSELF.%FUNCTION_NAME();
+if (ret == nullptr) {
+    auto senderV = %CPPSELF.property("_q_pyside_sender");
+    if (senderV.typeId() == QMetaType::QObjectStar)
+        ret = senderV.value<QObject *>();
+}
+%PYARG_0 = %CONVERTTOPYTHON[QObject*](ret);
+// @snippet qobject-sender
+
 // @snippet qbytearray-mgetitem
 if (PepIndex_Check(_key)) {
     const Py_ssize_t _i = PyNumber_AsSsize_t(_key, PyExc_IndexError);

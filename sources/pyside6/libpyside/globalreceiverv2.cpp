@@ -155,9 +155,12 @@ DynamicSlotDataV2::~DynamicSlotDataV2()
     Py_DECREF(m_callback);
 }
 
-GlobalReceiverV2::GlobalReceiverV2(PyObject *callback) :
+const char *GlobalReceiverV2::senderDynamicProperty = "_q_pyside_sender";
+
+GlobalReceiverV2::GlobalReceiverV2(PyObject *callback, QObject *receiver) :
     QObject(nullptr),
-    m_metaObject("__GlobalReceiver__", &QObject::staticMetaObject)
+    m_metaObject("__GlobalReceiver__", &QObject::staticMetaObject),
+    m_receiver(receiver)
 {
     m_data = new DynamicSlotDataV2(callback, this);
 }
@@ -246,9 +249,16 @@ int GlobalReceiverV2::qt_metacall(QMetaObject::Call call, int id, void **args)
         return -1;
     }
 
+    const bool setSenderDynamicProperty = !m_receiver.isNull();
+    if (setSenderDynamicProperty)
+        m_receiver->setProperty(senderDynamicProperty, QVariant::fromValue(sender()));
+
     const bool isShortCuit = std::strchr(slot.methodSignature(), '(') == nullptr;
     Shiboken::AutoDecRef callback(m_data->callback());
     SignalManager::callPythonMetaMethod(slot, args, callback, isShortCuit);
+
+    if (setSenderDynamicProperty)
+        m_receiver->setProperty(senderDynamicProperty, QVariant{});
 
     // SignalManager::callPythonMetaMethod might have failed, in that case we have to print the
     // error so it considered "handled".

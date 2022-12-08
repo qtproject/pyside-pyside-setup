@@ -116,7 +116,7 @@ static GetReceiverResult getReceiver(QObject *source, const char *signal,
 
     if (result.usingGlobalReceiver) {
         PySide::SignalManager &signalManager = PySide::SignalManager::instance();
-        result.receiver = signalManager.globalReceiver(source, callback);
+        result.receiver = signalManager.globalReceiver(source, callback, result.receiver);
         // PYSIDE-1354: Move the global receiver to the original receivers's thread
         // so that autoconnections work correctly.
         if (receiverThread && receiverThread != result.receiver->thread())

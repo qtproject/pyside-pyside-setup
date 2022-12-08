@@ -52,7 +52,7 @@ public:
 
     static void setQmlMetaCallErrorHandler(QmlMetaCallErrorHandler handler);
 
-    QObject* globalReceiver(QObject* sender, PyObject* callback);
+    QObject* globalReceiver(QObject *sender, PyObject *callback, QObject *receiver = nullptr);
     void releaseGlobalReceiver(const QObject* sender, QObject* receiver);
     int globalReceiverSlotIndex(QObject* sender, const char* slotSignature) const;
     void notifyGlobalReceiver(QObject* receiver);
