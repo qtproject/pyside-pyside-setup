@@ -56,6 +56,112 @@ def clean(purge_path: Path):
         print(f"{purge_path} does not exist")
 
 
+def main(main_file: Path = None, config_file: Path = None, init: bool = False,
+         loglevel=logging.WARNING, dry_run: bool = False, keep_deployment_files: bool = False,
+         force: bool = False):
+    logging.basicConfig(level=loglevel)
+
+    if config_file and Path(config_file).exists():
+        config_file = Path(config_file)
+
+    if not config_file and not main_file.exists():
+        print(dedent("""
+            Directory does not contain main.py file
+            Please specify the main python entrypoint file or the config file
+            Run "pyside6-deploy --help" to see info about cli options
+
+            pyside6-deploy exiting..."""))
+        return
+
+    if main_file:
+        if main_file.parent != Path.cwd():
+            config_file = main_file.parent / "pysidedeploy.spec"
+        else:
+            config_file = Path.cwd() / "pysidedeploy.spec"
+
+    logging.info("[DEPLOY] Start")
+
+    try:
+        python = None
+        # checking if inside virtual environment
+        if not PythonExecutable.is_venv():
+            if not force:
+                response = input("Not in virtualenv. Do you want to create one? [Y/n]")
+            else:
+                response = "no"
+
+            if response.lower() in "yes":
+                # creating new virtual environment
+                python = PythonExecutable(create_venv=True, dry_run=dry_run)
+                logging.info("[DEPLOY] virutalenv created")
+
+        # in venv or user entered no
+        if not python:
+            python = PythonExecutable(dry_run=dry_run)
+            logging.info(f"[DEPLOY] using python at {sys.executable}")
+
+        config = Config(config_file=config_file, source_file=main_file,
+                        python_exe=python.exe, dry_run=dry_run)
+
+        source_file = config.project_dir / config.source_file
+
+        generated_files_path = source_file.parent / "deployment"
+        if generated_files_path.exists():
+            clean(generated_files_path)
+
+        if not init and not dry_run:
+            # install packages needed for deployment
+            print("[DEPLOY] Installing dependencies \n")
+            packages = config.get_value("python", "packages").split(",")
+            python.install(packages=packages)
+            # nuitka requires patchelf to make patchelf rpath changes for some Qt files
+            if sys.platform.startswith("linux"):
+                python.install(packages=["patchelf"])
+
+        if config.project_dir == Path.cwd():
+            final_exec_path = config.project_dir.relative_to(Path.cwd())
+        else:
+            final_exec_path = config.project_dir
+        final_exec_path = Path(
+            config.set_or_fetch(
+                config_property_val=final_exec_path, config_property_key="exec_directory"
+            )
+        ).absolute()
+
+        if not dry_run:
+            config.update_config()
+
+        if init:
+            # config file created above. Exiting.
+            logging.info(f"[DEPLOY]: Config file  {config.config_file} created")
+            return
+
+        # create executable
+        if not dry_run:
+            print("[DEPLOY] Deploying application")
+        python.create_executable(
+            source_file=source_file,
+            extra_args=config.get_value("nuitka", "extra_args"),
+            config=config,
+        )
+    except Exception:
+        print(f"Exception occurred: {traceback.format_exc()}")
+    finally:
+        # clean up generated deployment files and copy executable into
+        # final_exec_path
+        if not keep_deployment_files and not dry_run and not init:
+            generated_exec_path = generated_files_path / (source_file.stem + EXE_FORMAT)
+            if generated_exec_path.exists() and final_exec_path:
+                shutil.copy(generated_exec_path, final_exec_path)
+                print(
+                    f"[DEPLOY] Executed file created in "
+                    f"{final_exec_path / (source_file.stem + EXE_FORMAT)}"
+                )
+            clean(generated_files_path)
+
+    logging.info("[DEPLOY] End")
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description=f"This tool deploys PySide{MAJOR_VERSION} to different platforms",
@@ -86,105 +192,6 @@ if __name__ == "__main__":
     parser.add_argument("-f", "--force", action="store_true", help="force all input prompts")
 
     args = parser.parse_args()
-    logging.basicConfig(level=args.loglevel)
-    config_file = None
+    main(args.main_file, args.config_file, args.init, args.loglevel, args.dry_run,
+         args.keep_deployment_files, args.force)
 
-    if args.config_file and Path(args.config_file).exists():
-        config_file = Path(args.config_file)
-
-    if not config_file and not args.main_file.exists():
-        print(dedent("""
-            Directory does not contain main.py file
-            Please specify the main python entrypoint file or the config file
-            Run "pyside6-deploy --help" to see info about cli options
-
-            pyside6-deploy exiting..."""))
-        sys.exit(0)
-
-    if args.main_file:
-        if args.main_file.parent != Path.cwd():
-            config_file = args.main_file.parent / "pysidedeploy.spec"
-        else:
-            config_file = Path.cwd() / "pysidedeploy.spec"
-
-    logging.info("[DEPLOY] Start")
-
-    try:
-        python = None
-        # checking if inside virtual environment
-        if not PythonExecutable.is_venv():
-            if not args.force:
-                response = input("Not in virtualenv. Do you want to create one? [Y/n]")
-            else:
-                response = "no"
-
-            if response.lower() in "yes":
-                # creating new virtual environment
-                python = PythonExecutable(create_venv=True, dry_run=args.dry_run)
-                logging.info("[DEPLOY] virutalenv created")
-
-        # in venv or user entered no
-        if not python:
-            python = PythonExecutable(dry_run=args.dry_run)
-            logging.info(f"[DEPLOY] using python at {sys.executable}")
-
-        config = Config(config_file=config_file, source_file=args.main_file,
-                        python_exe=python.exe, dry_run=args.dry_run)
-
-        source_file = config.project_dir / config.source_file
-
-        generated_files_path = source_file.parent / "deployment"
-        if generated_files_path.exists():
-            clean(generated_files_path)
-
-        if not args.init and not args.dry_run:
-            # install packages needed for deployment
-            print("[DEPLOY] Installing dependencies \n")
-            packages = config.get_value("python", "packages").split(",")
-            python.install(packages=packages)
-            # nuitka requires patchelf to make patchelf rpath changes for some Qt files
-            if sys.platform.startswith("linux"):
-                python.install(packages=["patchelf"])
-
-        if config.project_dir == Path.cwd():
-            final_exec_path = config.project_dir.relative_to(Path.cwd())
-        else:
-            final_exec_path = config.project_dir
-        final_exec_path = Path(
-            config.set_or_fetch(
-                config_property_val=final_exec_path, config_property_key="exec_directory"
-            )
-        ).absolute()
-
-        if not args.dry_run:
-            config.update_config()
-
-        if args.init:
-            # config file created above. Exiting.
-            logging.info(f"[DEPLOY]: Config file  {config.config_file} created")
-            sys.exit(0)
-
-        # create executable
-        if not args.dry_run:
-            print("[DEPLOY] Deploying application")
-        python.create_executable(
-            source_file=source_file,
-            extra_args=config.get_value("nuitka", "extra_args"),
-            config=config,
-        )
-    except Exception:
-        print(f"Exception occurred: {traceback.format_exc()}")
-    finally:
-        # clean up generated deployment files and copy executable into
-        # final_exec_path
-        if not args.keep_deployment_files and not args.dry_run and not args.init:
-            generated_exec_path = generated_files_path / (source_file.stem + EXE_FORMAT)
-            if generated_exec_path.exists() and final_exec_path:
-                shutil.copy(generated_exec_path, final_exec_path)
-                print(
-                    f"[DEPLOY] Executed file created in "
-                    f"{final_exec_path / (source_file.stem + EXE_FORMAT)}"
-                )
-            clean(generated_files_path)
-
-    logging.info("[DEPLOY] End")
