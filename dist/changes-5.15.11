@@ -24,3 +24,13 @@ information about a particular change.
  - [PYSIDE-2019] Crashes when using QtDataVisualization's
                  QValue3DAxisFormatter have been fixed.
  - [PYSIDE-2043] Errors when using VSCode's Intellisense have been fixed.
+ - [PYSIDE-2034] Blocking threads in static functions of QMessageBox
+                 have been fixed.
+
+****************************************************************************
+*                                  Shiboken2                               *
+****************************************************************************
+
+ - [PYSIDE-1012] Missing includes for g++ 11.3 have been added.
+ - [PYSIDE-1960] Crashes in libshiboken related to Python 3.11
+                 have been fixed.
