@@ -9,6 +9,8 @@ in a single session. With VSCode you would be able to do the following:
 * Put breakpoints in both the Python and the C++ code.
 * Step from Python to C++ code and vice versa.
 
+For Windows, see :ref:`creating_windows_debug_builds`.
+
 Let's get started with setting up everything and debugging a Python process.
 
 Setting the Python interpreter
