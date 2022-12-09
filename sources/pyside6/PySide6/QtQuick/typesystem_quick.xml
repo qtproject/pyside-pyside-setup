@@ -65,6 +65,13 @@
                 <insert-template name="fix_args,bool*"/>
             </inject-code>
         </modify-function>
+        <modify-function signature="updatePaintNode(QSGNode*,QQuickItem::UpdatePaintNodeData*)">
+          <modify-argument index="return">
+            <define-ownership class="native" owner="c++"/>
+            <define-ownership class="target" owner="default"/>
+          </modify-argument>
+        </modify-function>
+
         <!-- TODO: Find a way to wrap `union ItemChangeData {}` -->
     </object-type>
 
@@ -96,7 +103,14 @@
         <enum-type name="TextRenderType"/>
     </object-type>
 
-    <object-type name="QSGBasicGeometryNode"/>
+    <object-type name="QSGBasicGeometryNode">
+        <modify-function signature="setGeometry(QSGGeometry*)">
+            <modify-argument index="1">
+              <define-ownership class="target" owner="c++"/>
+            </modify-argument>
+        </modify-function>
+    </object-type>
+
     <object-type name="QSGClipNode"/>
     <object-type name="QSGDynamicTexture"/>
     <object-type name="QSGFlatColorMaterial"/>
@@ -129,7 +143,18 @@
         </add-function>
 
     </object-type>
-    <object-type name="QSGGeometryNode"/>
+    <object-type name="QSGGeometryNode">
+        <modify-function signature="setMaterial(QSGMaterial*)">
+            <modify-argument index="1">
+              <define-ownership class="target" owner="c++"/>
+            </modify-argument>
+        </modify-function>
+        <modify-function signature="setOpaqueMaterial(QSGMaterial*)">
+            <modify-argument index="1">
+              <define-ownership class="target" owner="c++"/>
+            </modify-argument>
+        </modify-function>
+    </object-type>
 
     <object-type name="QSGMaterial">
         <enum-type name="Flag" flags="Flags"/>
