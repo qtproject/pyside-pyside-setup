@@ -75,6 +75,21 @@ Build can take a few minutes, so it is recommended to use more than one CPU core
 
     python setup.py build --qtpaths=c:\path\to\qtpaths.exe --openssl=c:\path\to\openssl\bin --build-tests --ignore-git --parallel=8
 
+.. _creating_windows_debug_builds:
+
+Creating Debug Builds
+~~~~~~~~~~~~~~~~~~~~~
+
+* Choose *Custom Installation* when installing Python and tick the options for
+  debug binaries and libraries
+
+* Use ``venv`` to create a virtual environment and pass the debug binary:
+
+   python_d.exe -m venv testenv_d
+
+* Use ``python_d.exe`` to invoke ``setup.py``
+
+
 Installing PySide
 ~~~~~~~~~~~~~~~~~
 
