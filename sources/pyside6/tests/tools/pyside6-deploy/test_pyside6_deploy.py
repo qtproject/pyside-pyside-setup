@@ -6,15 +6,10 @@ import tempfile
 import shutil
 import sys
 import os
-import subprocess
 import importlib
 from pathlib import Path
 from configparser import ConfigParser
-
-
-def execute(args):
-    output = subprocess.check_output(args=args).decode("utf-8")
-    return output
+from unittest import mock
 
 
 class ConfigFile:
@@ -41,15 +36,21 @@ class TestPySide6Deploy(unittest.TestCase):
         cls.temp_example_qml = Path(
             shutil.copytree(example_qml, Path(cls.temp_dir) / "editingmodel")
         ).resolve()
-        cls.deploy_tool = cls.pyside_root / "sources" / "pyside-tools" / "deploy.py"
-        cls.pydeploy_run_cmd = [sys.executable, os.fspath(cls.deploy_tool), "--dry-run"]
         cls.current_dir = Path.cwd()
         cls.linux_onefile_icon = (
-            cls.pyside_root / "sources" / "pyside-tools" / "deploy" / "pyside_icon.jpg"
+            cls.pyside_root / "sources" / "pyside-tools" / "deploy_lib" / "pyside_icon.jpg"
         )
+
+        sys.path.append(str(cls.pyside_root / "sources" / "pyside-tools"))
+        importlib.import_module("deploy_lib")
+        cls.deploy = importlib.import_module("deploy")
+        sys.modules["deploy"] = cls.deploy
 
         # required for comparing long strings
         cls.maxDiff = None
+
+        # print no outputs to stdout
+        sys.stdout = mock.MagicMock()
 
     def setUpWidgets(self):
         os.chdir(self.temp_example_widgets)
@@ -60,7 +61,7 @@ class TestPySide6Deploy(unittest.TestCase):
             f" --enable-plugin=pyside6 --output-dir={str(self.deployment_files)} --quiet"
         )
         if sys.platform.startswith("linux"):
-            self.expected_run_cmd +=  f" --linux-onefile-icon={str(self.linux_onefile_icon)}"
+            self.expected_run_cmd += f" --linux-onefile-icon={str(self.linux_onefile_icon)}"
         self.config_file = self.temp_example_widgets / "pysidedeploy.spec"
 
     def testWidgetDryRun(self):
@@ -68,38 +69,25 @@ class TestPySide6Deploy(unittest.TestCase):
         # subprocess.check_call() in commands.py as the the dry run command
         # is the command being run.
         self.setUpWidgets()
-        extra_args = [self.main_file]
-        cmd = self.pydeploy_run_cmd + extra_args
-        original_output = execute(args=cmd)
-        self.assertEqual(str(original_output.strip()), self.expected_run_cmd)
-        os.remove(self.config_file)
+        original_output = self.deploy.main(self.main_file, dry_run=True, force=True)
+        self.assertEqual(original_output, self.expected_run_cmd)
+        self.config_file.unlink()
 
     def testWidgetConfigFile(self):
         # includes both dry run and config_file tests
 
         self.setUpWidgets()
         # init
-        extra_args = [self.main_file, "--init"]
-        cmd = self.pydeploy_run_cmd.copy()
-        cmd.remove("--dry-run")
-        cmd.extend(extra_args)
-        init_result = execute(args=cmd)
-        self.assertEqual(init_result, "")
+        init_result = self.deploy.main(self.main_file, init=True, force=True)
+        self.assertEqual(init_result, None)
 
         # test with config
         config_path = self.temp_example_widgets / "pysidedeploy.spec"
-        extra_args = ["-c", os.fspath(config_path)]
-        cmd = self.pydeploy_run_cmd + extra_args
-        original_outputs = execute(args=cmd)
-        original_outputs = original_outputs.splitlines()
+        original_output = self.deploy.main(config_file=config_path, dry_run=True, force=True)
+        self.assertEqual(original_output, self.expected_run_cmd)
 
-        self.assertEqual(
-            original_outputs[0].strip(), f"Using existing config file {str(config_path)}"
-        )
-        self.assertEqual(str(original_outputs[1].strip()), self.expected_run_cmd)
-
-        # test config file contents
-        config_obj =  ConfigFile(config_file=self.config_file)
+        # # test config file contents
+        config_obj = ConfigFile(config_file=self.config_file)
         self.assertEqual(config_obj.get_value("app", "input_file"), "tetrix.py")
         self.assertEqual(config_obj.get_value("app", "project_dir"), ".")
         self.assertEqual(config_obj.get_value("app", "exec_directory"), ".")
@@ -109,7 +97,7 @@ class TestPySide6Deploy(unittest.TestCase):
         self.assertEqual(config_obj.get_value("qt", "qml_files"), "")
         self.assertEqual(config_obj.get_value("nuitka", "extra_args"), "--quiet")
 
-        os.remove(self.config_file)
+        self.config_file.unlink()
 
     def setUpQml(self):
         os.chdir(self.temp_example_qml)
@@ -127,19 +115,15 @@ class TestPySide6Deploy(unittest.TestCase):
         )
 
         if sys.platform.startswith("linux"):
-            self.expected_run_cmd +=  f" --linux-onefile-icon={str(self.linux_onefile_icon)}"
+            self.expected_run_cmd += f" --linux-onefile-icon={str(self.linux_onefile_icon)}"
         self.config_file = self.temp_example_qml / "pysidedeploy.spec"
 
     def testQmlConfigFile(self):
         self.setUpQml()
 
         # create config file
-        extra_args = [self.main_file, "--init"]
-        cmd = self.pydeploy_run_cmd.copy()
-        cmd.remove("--dry-run")
-        cmd.extend(extra_args)
-        init_result = execute(args=cmd)
-        self.assertEqual(init_result, "")
+        init_result = self.deploy.main(self.main_file, init=True, force=True)
+        self.assertEqual(init_result, None)
 
         # test config file contents
         config_obj = ConfigFile(config_file=self.config_file)
@@ -153,22 +137,19 @@ class TestPySide6Deploy(unittest.TestCase):
             config_obj.get_value("qt", "qml_files"), "main.qml,MovingRectangle.qml"
         )
         self.assertEqual(config_obj.get_value("nuitka", "extra_args"), "--quiet")
-        os.remove(self.config_file)
+        self.config_file.unlink()
 
     def testQmlDryRun(self):
         self.setUpQml()
-        extra_args = [self.main_file]
-        cmd = self.pydeploy_run_cmd + extra_args
-        original_output = execute(args=cmd)
-        self.assertEqual(str(original_output.strip()), self.expected_run_cmd)
-        os.remove(self.config_file)
+        original_output = self.deploy.main(self.main_file, dry_run=True, force=True)
+        self.assertEqual(original_output, self.expected_run_cmd)
+        self.config_file.unlink()
 
     def testMainFileDryRun(self):
         self.setUpQml()
-        cmd = self.pydeploy_run_cmd
-        original_output = execute(args=cmd)
-        self.assertEqual(str(original_output.strip()), self.expected_run_cmd)
-        os.remove(self.config_file)
+        original_output = self.deploy.main(self.main_file, dry_run=True, force=True)
+        self.assertEqual(original_output, self.expected_run_cmd)
+        self.config_file.unlink()
 
     def tearDown(self) -> None:
         super().tearDown()
