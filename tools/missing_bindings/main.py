@@ -26,6 +26,8 @@ from pathlib import Path
 
 from bs4 import BeautifulSoup
 from config import modules_to_test, types_to_ignore
+import pandas as pd
+import matplotlib.pyplot as plt
 
 qt_documentation_website_prefixes = {
     "6.4": "https://doc.qt.io/qt-6/",
@@ -71,6 +73,12 @@ def get_parser():
         type=str,
         dest="which_missing",
         help="Which missing types to show (all, or just those that are not present in PyQt)",
+    )
+    parser.add_argument(
+        "--plot",
+        action="store_true",
+        help="Create module-wise bar plot comparisons for the missing bindings comparisons"
+             " between Qt, PySide6 and PyQt6",
     )
     return parser
 
@@ -118,6 +126,7 @@ if __name__ == "__main__":
     pyside_package_name = "PySide6"
     pyqt_package_name = "PyQt6"
 
+    data = {"module": [], "qt": [], "pyside": [], "pyqt": []}
     total_missing_types_count = 0
     total_missing_types_count_compared_to_pyqt = 0
     total_missing_modules_count = 0
@@ -216,7 +225,8 @@ if __name__ == "__main__":
             if link_text not in types_to_ignore:
                 types_on_html_page.append(link_text)
 
-        wikilog(f"Number of types in {module_name}: {len(types_on_html_page)}", style="bold_colon")
+        total_qt_types = len(types_on_html_page)
+        wikilog(f"Number of types in {module_name}: {total_qt_types}", style="bold_colon")
 
         missing_pyside_types_count = 0
         missing_pyqt_types_count = 0
@@ -284,6 +294,14 @@ if __name__ == "__main__":
         else:
             missing_types_count = missing_pyqt_types_count
 
+        if args.plot:
+            total_pyside_types = total_qt_types - missing_pyside_types_count
+            total_pyqt_types = total_qt_types - missing_pyqt_types_count
+            data["module"].append(module_name)
+            data["qt"].append(total_qt_types)
+            data["pyside"].append(total_pyside_types)
+            data["pyqt"].append(total_pyqt_types)
+
         wikilog(f"Number of missing types: {missing_types_count}", style="bold_colon")
         if len(missing_types) > 0 and args.which_missing != "in-pyside-not-in-pyqt":
             wikilog(
@@ -294,6 +312,18 @@ if __name__ == "__main__":
             wikilog(f"End of missing types for {module_name}\n", style="end")
         else:
             wikilog("", style="end")
+
+    if args.plot:
+        df = pd.DataFrame(data=data, columns=["module", "qt", "pyside", "pyqt"])
+        df.set_index("module", inplace=True)
+        df.plot(kind="bar", title="Qt API Coverage plot")
+        plt.legend()
+        plt.xticks(rotation=45)
+        plt.ylabel("Types Count")
+        figure = plt.gcf()
+        figure.set_size_inches(32, 18) # set to full_screen
+        plt.savefig("missing_bindings_comparison_plot.png", bbox_inches='tight')
+        print(f"Plot saved in {Path.cwd() / 'missing_bindings_comparison_plot.png'}\n")
 
     wikilog("Summary", style="heading5")
 
