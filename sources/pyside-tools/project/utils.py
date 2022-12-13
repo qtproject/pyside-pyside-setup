@@ -53,7 +53,7 @@ def remove_path(path: Path):
 
 def package_dir() -> Path:
     """Return the PySide6 root."""
-    return Path(__file__).resolve().parents[1]
+    return Path(__file__).resolve().parents[2]
 
 
 _qtpaths_info: Dict[str, str] = {}
