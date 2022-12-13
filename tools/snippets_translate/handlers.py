@@ -30,8 +30,12 @@ ARRAY_DECLARATION_PATTERN = re.compile(r"^[a-zA-Z0-9\<\>]+ ([\w\*]+) *\[?\]?")
 RETURN_TYPE_PATTERN = re.compile(r"^ *[a-zA-Z0-9]+ [\w]+::([\w\*\&]+\(.*\)$)")
 CAPTURE_PATTERN = re.compile(r"^ *([a-zA-Z0-9]+) ([\w\*\&]+\(.*\)$)")
 USELESS_QT_CLASSES_PATTERNS = [
-    re.compile(r"QLatin1String\((.*)\)"),
-    re.compile(r"QLatin1Char\((.*)\)")
+    re.compile(r'QLatin1StringView\(("[^"]*")\)'),
+    re.compile(r'QLatin1String\(("[^"]*")\)'),
+    re.compile(r'QString\.fromLatin1\(("[^"]*")\)'),
+    re.compile(r"QLatin1Char\(('[^']*')\)"),
+    re.compile(r'QStringLiteral\(("[^"]*")\)'),
+    re.compile(r'QString\.fromUtf8\(("[^"]*")\)')
 ]
 COMMENT1_PATTERN = re.compile(r" *# *[\w\ ]+$")
 COMMENT2_PATTERN = re.compile(r" *# *(.*)$")
@@ -510,9 +514,13 @@ def handle_functions(x):
 
 def handle_useless_qt_classes(x):
     for c in USELESS_QT_CLASSES_PATTERNS:
-        content = c.search(x)
-        if content:
-            x = x.replace(content.group(0), content.group(1))
+        while True:
+            match = c.search(x)
+            if match:
+                x = x[0:match.start()] + match.group(1) + x[match.end():]
+            else:
+                break
+    x = x.replace('"_s', '"')  # New string literals
     return x
 
 

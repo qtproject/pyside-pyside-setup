@@ -368,7 +368,12 @@ def test_ternary_operator():
 
 def test_useless_qt_classes():
     assert st('result += QLatin1String("; ");') == 'result += "; "'
+    assert st('result += QString::fromLatin1("; ");') == 'result += "; "'
+    assert (
+        st('result = QStringLiteral("A") + QStringLiteral("B");')
+        == 'result = "A" + "B"')
     assert st("<< QLatin1Char('\0') << endl;") == "print('\0')"
+    assert st('result = "A"_s;') == 'result = "A"'
 
 
 def test_special_cases():
