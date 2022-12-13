@@ -119,8 +119,9 @@ class QmlProjectData:
                 for f in meta_dir.glob(pattern):
                     foreign_files.append(os.fspath(f))
                     break
-                list = ",".join(foreign_files)
-                result.append(f"--foreign-types={list}")
+                if foreign_files:
+                    foreign_files_str = ",".join(foreign_files)
+                    result.append(f"--foreign-types={foreign_files_str}")
         return result
 
     @property
