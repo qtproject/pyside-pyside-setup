@@ -73,31 +73,6 @@ const char *CppGenerator::PYTHON_TO_CPPCONVERSION_STRUCT = "Shiboken::Conversion
 
 static inline QString reprFunction() { return QStringLiteral("__repr__"); }
 
-static const char typeNameFunc[] = R"CPP(template <class T>
-static const char *typeNameOf(const T &t)
-{
-    const char *typeName =  typeid(t).name();
-    auto size = std::strlen(typeName);
-#if defined(Q_CC_MSVC) // MSVC: "class QPaintDevice * __ptr64"
-    if (auto lastStar = strchr(typeName, '*')) {
-        // MSVC: "class QPaintDevice * __ptr64"
-        while (*--lastStar == ' ') {
-        }
-        size = lastStar - typeName + 1;
-    }
-#else // g++, Clang: "QPaintDevice *" -> "P12QPaintDevice"
-    if (size > 2 && typeName[0] == 'P' && std::isdigit(typeName[1])) {
-        ++typeName;
-        --size;
-    }
-#endif
-    char *result = new char[size + 1];
-    result[size] = '\0';
-    memcpy(result, typeName, size);
-    return result;
-}
-)CPP";
-
 TextStream &operator<<(TextStream &s, CppGenerator::ErrorReturn r)
 {
     s << "return";
@@ -683,7 +658,7 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
         }
     }
 
-    s  << '\n' << typeNameFunc << '\n';
+    s  << '\n';
 
     // class inject-code native/beginning
     if (!typeEntry->codeSnips().isEmpty()) {
@@ -970,7 +945,7 @@ void CppGenerator::generateSmartPointerClass(TextStream &s, const GeneratorConte
         includes.append(classContext.pointeeClass()->typeEntry()->include());
     generateIncludes(s, classContext, {includes});
 
-    s  << '\n' << typeNameFunc << '\n';
+    s  << '\n';
 
     // Create string literal for smart pointer getter method.
     QString rawGetter = typeEntry->getter();
@@ -1906,7 +1881,7 @@ const char *typeName = )";
             c << nameFunc << "(tCppIn);\n";
         c << R"(auto sbkType = Shiboken::ObjectType::typeForTypeName(typeName);
 if (sbkType && Shiboken::ObjectType::hasSpecialCastFunction(sbkType)) {
-    typeName = typeNameOf(tCppIn);
+    typeName = Shiboken::typeNameOf(typeid(*tCppIn).name());
     changedTypeName = true;
 }
 )"

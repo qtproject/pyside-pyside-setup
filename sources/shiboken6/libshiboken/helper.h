@@ -36,6 +36,10 @@ LIBSHIBOKEN_API bool listToArgcArgv(PyObject *argList, int *argc, char ***argv, 
  */
 LIBSHIBOKEN_API int *sequenceToIntArray(PyObject *obj, bool zeroTerminated = false);
 
+/// Fix a type name returned by typeid(t).name(), depending on compiler.
+/// \returns Fixed name (allocated).
+LIBSHIBOKEN_API const char *typeNameOf(const char *typeIdName);
+
 /**
  *  Creates and automatically deallocates C++ arrays.
  */

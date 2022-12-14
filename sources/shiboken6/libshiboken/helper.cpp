@@ -6,10 +6,13 @@
 #include "sbkstring.h"
 #include "sbkstaticstrings.h"
 
+#include <algorithm>
+
 #include <iomanip>
 #include <iostream>
-
+#include <cstring>
 #include <cstdarg>
+#include <cctype>
 
 #ifdef _WIN32
 #  ifndef NOMINMAX
@@ -19,8 +22,6 @@
 #else
 #  include <pthread.h>
 #endif
-
-#include <algorithm>
 
 static void formatPyTypeObject(const PyTypeObject *obj, std::ostream &str)
 {
@@ -440,6 +441,28 @@ void _initMainThreadId() { _mainThreadId =  currentThreadId(); }
 ThreadId mainThreadId()
 {
     return _mainThreadId;
+}
+
+const char *typeNameOf(const char *typeIdName)
+{
+    auto size = std::strlen(typeIdName);
+#if defined(Q_CC_MSVC) // MSVC: "class QPaintDevice * __ptr64"
+    if (auto *lastStar = strchr(typeName, '*')) {
+        // MSVC: "class QPaintDevice * __ptr64"
+        while (*--lastStar == ' ') {
+        }
+        size = lastStar - typeName + 1;
+    }
+#else // g++, Clang: "QPaintDevice *" -> "P12QPaintDevice"
+    if (size > 2 && typeIdName[0] == 'P' && std::isdigit(typeIdName[1])) {
+        ++typeIdName;
+        --size;
+    }
+#endif
+    char *result = new char[size + 1];
+    result[size] = '\0';
+    std::memcpy(result, typeIdName, size);
+    return result;
 }
 
 } // namespace Shiboken
