@@ -213,6 +213,9 @@ if (_widget) {
 // @snippet qtoolbox-removeitem
 
 // @snippet qlayout-help-functions
+#ifndef _QLAYOUT_HELP_FUNCTIONS_
+#define _QLAYOUT_HELP_FUNCTIONS_ // Guard for jumbo builds
+
 void addLayoutOwnership(QLayout *layout, QLayoutItem *item);
 void removeLayoutOwnership(QLayout *layout, QWidget *widget);
 
@@ -330,6 +333,7 @@ inline void removeLayoutOwnership(QLayout *layout, QWidget *widget)
             removeLayoutOwnership(layout, item);
     }
 }
+#endif // _QLAYOUT_HELP_FUNCTIONS_
 // @snippet qlayout-help-functions
 
 // @snippet qlayout-setalignment
@@ -434,11 +438,14 @@ for (int i = 0, count = %CPPSELF.count(); i < count; ++i) {
 // @snippet qlistwidget-clear
 
 // @snippet qwidget-retrieveobjectname
+#ifndef _RETRIEVEOBJECTNAME_
+#define _RETRIEVEOBJECTNAME_ // Guard for jumbo builds
 static QByteArray retrieveObjectName(PyObject *obj)
 {
     Shiboken::AutoDecRef objName(PyObject_Str(obj));
     return Shiboken::String::toCString(objName);
 }
+#endif
 // @snippet qwidget-retrieveobjectname
 
 // @snippet qwidget-glue
