@@ -1374,13 +1374,13 @@ static bool isArgumentNotRemoved(const AbstractMetaArgument &a)
 
 // PyObject_Vectorcall(): since 3.9
 static const char vectorCallCondition[] =
-    "#if !defined(Py_LIMITED_API) && PY_VERSION_HEX >= 0x03090000\n";
+    "#if !defined(PYPY_VERSION) && !defined(Py_LIMITED_API) && PY_VERSION_HEX >= 0x03090000\n";
 
 // PyObject_CallNoArgs(): since 3.9, stable API since 3.10
 static const char noArgsCallCondition[] =
-    "#if (defined(Py_LIMITED_API) && Py_LIMITED_API >= 0x030A0000) || (!defined(Py_LIMITED_API) && PY_VERSION_HEX >= 0x03090000)\n";
+    "#if !defined(PYPY_VERSION) && ((defined(Py_LIMITED_API) && Py_LIMITED_API >= 0x030A0000) || (!defined(Py_LIMITED_API) && PY_VERSION_HEX >= 0x03090000))\n";
 static const char inverseNoArgsCallCondition[] =
-    "#if (defined(Py_LIMITED_API) && Py_LIMITED_API < 0x030A0000) || (!defined(Py_LIMITED_API) && PY_VERSION_HEX < 0x03090000)\n";
+    "#if defined(PYPY_VERSION) || (defined(Py_LIMITED_API) && Py_LIMITED_API < 0x030A0000) || (!defined(Py_LIMITED_API) && PY_VERSION_HEX < 0x03090000)\n";
 
 void CppGenerator::writeVirtualMethodNative(TextStream &s,
                                             const AbstractMetaFunctionCPtr &func,
