@@ -581,6 +581,12 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
                 # Doesn't seem to work if set within the cmake files themselves.
                 cmake_cmd.append('-DCMAKE_RULE_MESSAGES=0')
 
+        if OPTION["UNITY"]:
+            cmake_cmd.append("-DCMAKE_UNITY_BUILD=ON")
+            batch_size = OPTION["UNITY_BUILD_BATCH_SIZE"]
+            cmake_cmd.append(f"-DCMAKE_UNITY_BUILD_BATCH_SIZE={batch_size}")
+            log.info("Using UNITY build")
+
         cmake_cmd += [
             "-G", self.make_generator,
             f"-DBUILD_TESTS={self.build_tests}",

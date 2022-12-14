@@ -217,6 +217,8 @@ class CommandMixin(object):
         # We redeclare plat-name as an option so it's recognized by the
         # install command and doesn't throw an error.
         ('plat-name=', None, 'The platform name for which we are cross-compiling'),
+        ('unity', None, 'Use CMake UNITY_BUILD_MODE'),
+        ('unity-build-batch-size=', None, 'Value of CMAKE_UNITY_BUILD_BATCH_SIZE')
     ]
 
     def __init__(self):
@@ -275,6 +277,8 @@ class CommandMixin(object):
         self.plat_name = None
         self.internal_cmake_install_dir_query_file_path = None
         self._per_command_mixin_options_finalized = False
+        self.unity = False
+        self.unity_build_batch_size = "16"
 
         # When initializing a command other than the main one (so the
         # first one), we need to copy the user options from the main
@@ -353,6 +357,8 @@ class CommandMixin(object):
         OPTION['SANITIZE_ADDRESS'] = self.sanitize_address
         OPTION['SHORTER_PATHS'] = self.shorter_paths
         OPTION['DOC_BUILD_ONLINE'] = self.doc_build_online
+        OPTION['UNITY'] = self.unity
+        OPTION['UNITY_BUILD_BATCH_SIZE'] = self.unity_build_batch_size
 
         qtpaths_abs_path = None
         if self.qtpaths:

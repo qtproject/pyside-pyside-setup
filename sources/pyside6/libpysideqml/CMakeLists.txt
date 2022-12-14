@@ -13,6 +13,11 @@ set(libpysideqml_SRC
     pysideqmltypeinfo.cpp
 )
 
+# Hack for // https://github.com/python/cpython/issues/86286 causes issues
+set_source_files_properties(
+    pysideqmlmetacallerror.cpp PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON
+)
+
 add_library(pyside6qml SHARED ${libpysideqml_SRC} ${other_files})
 add_library(PySide6::pyside6qml ALIAS pyside6qml)
 
