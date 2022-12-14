@@ -471,7 +471,6 @@ extern const QString PYTHON_ARGS;
 extern const QString PYTHON_OVERRIDE_VAR;
 extern const QString PYTHON_RETURN_VAR;
 extern const QString PYTHON_TO_CPP_VAR;
-extern const QString SMART_POINTER_GETTER;
 
 extern const QString CONV_RULE_OUT_VAR_SUFFIX;
 extern const QString BEGIN_ALLOW_THREADS;

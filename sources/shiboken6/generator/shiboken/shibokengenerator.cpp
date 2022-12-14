@@ -66,7 +66,6 @@ const QString PYTHON_ARGS = u"pyArgs"_s;
 const QString PYTHON_OVERRIDE_VAR = u"pyOverride"_s;
 const QString PYTHON_RETURN_VAR = u"pyResult"_s;
 const QString PYTHON_TO_CPP_VAR = u"pythonToCpp"_s;
-const QString SMART_POINTER_GETTER = u"kSmartPointerGetter"_s;
 
 const QString CONV_RULE_OUT_VAR_SUFFIX = u"_out"_s;
 const QString BEGIN_ALLOW_THREADS =

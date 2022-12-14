@@ -947,10 +947,6 @@ void CppGenerator::generateSmartPointerClass(TextStream &s, const GeneratorConte
 
     s  << '\n';
 
-    // Create string literal for smart pointer getter method.
-    QString rawGetter = typeEntry->getter();
-    s << "static const char " << SMART_POINTER_GETTER << "[] = \"" << rawGetter << "\";";
-
     // class inject-code native/beginning
     if (!typeEntry->codeSnips().isEmpty()) {
         writeClassCodeSnips(s, typeEntry->codeSnips(),
@@ -995,7 +991,7 @@ void CppGenerator::generateSmartPointerClass(TextStream &s, const GeneratorConte
             writeMethodWrapper(s, md, signatureStream, resets, classContext);
     }
 
-    auto it = functionGroups.constFind(rawGetter);
+    auto it = functionGroups.constFind(typeEntry->getter());
     if (it == functionGroups.cend() || it.value().size() != 1)
         throw Exception(msgCannotFindSmartPointerGetter(typeEntry));
 
@@ -6386,14 +6382,22 @@ static const char smartPtrComment[] =
    "// Try to find the 'name' attribute, by retrieving the PyObject for "
    "the corresponding C++ object held by the smart pointer.\n";
 
+static QString smartPointerGetter(const GeneratorContext &context)
+{
+    const auto te = context.metaClass()->typeEntry();
+    Q_ASSERT(te->isSmartPointer());
+    return qSharedPointerCast<const SmartPointerTypeEntry>(te)->getter();
+}
+
 void CppGenerator::writeSmartPointerSetattroFunction(TextStream &s,
                                                      const GeneratorContext &context) const
 {
     Q_ASSERT(context.forSmartPointer());
     writeSetattroDefinition(s, context.metaClass());
     s << smartPtrComment
-        << "if (auto *rawObj = PyObject_CallMethod(self, " << SMART_POINTER_GETTER
-        << ", 0)) {\n" << indent
+        << "if (auto *rawObj = PyObject_CallMethod(self, \""
+        << smartPointerGetter(context)
+        << "\", 0)) {\n" << indent
         << "if (PyObject_HasAttr(rawObj, name) != 0)\n" << indent
         << "return PyObject_GenericSetAttr(rawObj, name, value);\n" << outdent
         << "Py_DECREF(rawObj);\n" << outdent
@@ -6510,8 +6514,9 @@ return nullptr;
     // This generates the code which dispatches access to member functions
     // and fields from the smart pointer to its pointee.
     s << smartPtrComment
-        << "if (auto *rawObj = PyObject_CallMethod(self, "
-        << SMART_POINTER_GETTER << ", 0)) {\n" << indent
+        << "if (auto *rawObj = PyObject_CallMethod(self, \""
+        << smartPointerGetter(context)
+        << "\", 0)) {\n" << indent
         << "if (auto *attribute = PyObject_GetAttr(rawObj, name))\n"
         << indent << "tmp = attribute;\n" << outdent
         << "Py_DECREF(rawObj);\n" << outdent
