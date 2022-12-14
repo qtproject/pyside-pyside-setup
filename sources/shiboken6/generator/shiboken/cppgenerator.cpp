@@ -4348,13 +4348,13 @@ void CppGenerator::writeMultipleInheritanceInitializerFunction(TextStream &s,
 {
     QString className = metaClass->qualifiedCppName();
     const QStringList ancestors = getAncestorMultipleInheritance(metaClass);
+    s  << "int *\n"
+        << multipleInheritanceInitializerFunctionName(metaClass) << "(const void *cptr)\n"
+        << "{\n" << indent;
     s << "static int mi_offsets[] = { ";
     for (qsizetype i = 0; i < ancestors.size(); i++)
         s << "-1, ";
     s << "-1 };\n"
-        << "int *\n"
-        << multipleInheritanceInitializerFunctionName(metaClass) << "(const void *cptr)\n"
-        << "{\n" << indent
         << "if (mi_offsets[0] == -1) {\n" << indent
         << "std::set<int> offsets;\n"
             << "const auto *class_ptr = reinterpret_cast<const " << className << " *>(cptr);\n"
