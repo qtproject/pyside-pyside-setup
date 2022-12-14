@@ -389,7 +389,8 @@ if __name__ == '__main__':
 
     while not Path(".git").exists():
         cwd = Path.cwd()
-        if str(cwd) == '/' or (IS_WINDOWS and len(cwd) < 4):
+        cwd_s = os.fspath(cwd)
+        if cwd_s == '/' or (IS_WINDOWS and len(cwd_s) < 4):
             warnings.warn('Unable to find git root', RuntimeWarning)
             sys.exit(-1)
         os.chdir(cwd.parent)
