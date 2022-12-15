@@ -5,6 +5,9 @@
 #include "pysideqobject.h"
 
 #include "shiboken.h"
+#ifndef Py_LIMITED_API
+#  include <datetime.h>
+#endif
 #include "basewrapper.h"
 #include "autodecref.h"
 
@@ -236,4 +239,25 @@ QString qObjectTr(PyTypeObject *type, const char *sourceText, const char *disamb
             break;
     }
     return result;
+}
+
+bool PyDate_ImportAndCheck(PyObject *pyIn)
+{
+    if (!PyDateTimeAPI)
+        PyDateTime_IMPORT;
+    return PyDate_Check(pyIn);
+}
+
+bool PyDateTime_ImportAndCheck(PyObject *pyIn)
+{
+    if (!PyDateTimeAPI)
+        PyDateTime_IMPORT;
+    return PyDateTime_Check(pyIn);
+}
+
+bool PyTime_ImportAndCheck(PyObject *pyIn)
+{
+    if (!PyDateTimeAPI)
+        PyDateTime_IMPORT;
+    return PyTime_Check(pyIn);
 }

@@ -284,13 +284,4 @@
     }
     </template>
 
-    <template name="pydatetime_importandcheck_function">
-        static bool PyDateTime_ImportAndCheck(PyObject *pyIn)
-        {
-            if (!PyDateTimeAPI)
-                PyDateTime_IMPORT;
-            return $DATETIMETYPE_Check(pyIn);
-        }
-    </template>
-
 </typesystem>

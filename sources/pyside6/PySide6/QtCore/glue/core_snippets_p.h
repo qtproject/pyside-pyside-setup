@@ -48,4 +48,8 @@ void qObjectFindChildren(const QObject *parent, const QRegularExpression &patter
 // Helpers for translation
 QString qObjectTr(PyTypeObject *type, const char *sourceText, const char *disambiguation, int n);
 
+bool PyDate_ImportAndCheck(PyObject *pyIn);
+bool PyDateTime_ImportAndCheck(PyObject *pyIn);
+bool PyTime_ImportAndCheck(PyObject *pyIn);
+
 #endif // CORE_SNIPPETS_P_H

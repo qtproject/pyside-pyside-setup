@@ -792,16 +792,13 @@
   <value-type name="QDate" hash-function="PySide::hash" >
     <extra-includes>
       <include file-name="pysideqhash.h" location="global"/>
+      <include file-name="glue/core_snippets_p.h" location="local"/>
     </extra-includes>
-    <inject-code class="native" position="beginning">
-        <insert-template name="pydatetime_importandcheck_function">
-            <replace from="$DATETIMETYPE" to="PyDate"/>
-        </insert-template>
-    </inject-code>
     <conversion-rule>
         <target-to-native>
             <add-conversion type="Py_None" file="../glue/qtcore.cpp" snippet="conversion-pynone"/>
-            <add-conversion type="PyDate" check="PyDateTime_ImportAndCheck(%in)" file="../glue/qtcore.cpp" snippet="conversion-qdate-pydate"/>
+            <add-conversion type="PyDate" check="PyDate_ImportAndCheck(%in)"
+                            file="../glue/qtcore.cpp" snippet="conversion-qdate-pydate"/>
         </target-to-native>
     </conversion-rule>
     <extra-includes>
@@ -855,17 +852,14 @@
   <value-type name="QDateTime" hash-function="PySide::hash">
     <extra-includes>
       <include file-name="pysideqhash.h" location="global"/>
+      <include file-name="glue/core_snippets_p.h" location="local"/>
     </extra-includes>
     <enum-type name="YearRange"/>
-    <inject-code class="native" position="beginning">
-        <insert-template name="pydatetime_importandcheck_function">
-            <replace from="$DATETIMETYPE" to="PyDateTime"/>
-        </insert-template>
-    </inject-code>
     <conversion-rule>
         <target-to-native>
             <add-conversion type="Py_None" file="../glue/qtcore.cpp" snippet="conversion-pynone"/>
-            <add-conversion type="PyDateTime" check="PyDateTime_ImportAndCheck(%in)" file="../glue/qtcore.cpp" snippet="conversion-qdatetime-pydatetime"/>
+            <add-conversion type="PyDateTime" check="PyDateTime_ImportAndCheck(%in)"
+                            file="../glue/qtcore.cpp" snippet="conversion-qdatetime-pydatetime"/>
         </target-to-native>
     </conversion-rule>
     <extra-includes>
@@ -1217,16 +1211,13 @@
   <value-type name="QTime" hash-function="PySide::hash">
     <extra-includes>
       <include file-name="pysideqhash.h" location="global"/>
+      <include file-name="glue/core_snippets_p.h" location="local"/>
     </extra-includes>
-    <inject-code class="native" position="beginning">
-        <insert-template name="pydatetime_importandcheck_function">
-            <replace from="$DATETIMETYPE" to="PyTime"/>
-        </insert-template>
-    </inject-code>
     <conversion-rule>
         <target-to-native>
             <add-conversion type="Py_None" file="../glue/qtcore.cpp" snippet="conversion-pynone"/>
-            <add-conversion type="PyTime" check="PyDateTime_ImportAndCheck(%in)" file="../glue/qtcore.cpp" snippet="conversion-qtime-pytime"/>
+            <add-conversion type="PyTime" check="PyTime_ImportAndCheck(%in)"
+                            file="../glue/qtcore.cpp" snippet="conversion-qtime-pytime"/>
         </target-to-native>
     </conversion-rule>
 
