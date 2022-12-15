@@ -939,17 +939,17 @@ void PepType_SETP_delete(SbkEnumType *enumType)
 /*
  * PySideQFlagsType extender
  */
-static std::unordered_map<PySideQFlagsType *, PySideQFlagsTypePrivate> PFTP_extender{};
+static std::unordered_map<PySideQFlagsType *, SbkQFlagsTypePrivate> PFTP_extender{};
 static thread_local PySideQFlagsType *PFTP_key{};
-static thread_local PySideQFlagsTypePrivate *PFTP_value{};
+static thread_local SbkQFlagsTypePrivate *PFTP_value{};
 
-PySideQFlagsTypePrivate *PepType_PFTP(PySideQFlagsType *flagsType)
+SbkQFlagsTypePrivate *PepType_PFTP(PySideQFlagsType *flagsType)
 {
     static PyTypeObject *enumMeta = getPyEnumMeta();
     auto *mappedType = reinterpret_cast<PyTypeObject *>(flagsType);
     auto *metaType = Py_TYPE(mappedType);
     if (metaType == enumMeta) {
-        return reinterpret_cast<PySideQFlagsTypePrivate *>(
+        return reinterpret_cast<SbkQFlagsTypePrivate *>(
             PepType_SETP(reinterpret_cast<SbkEnumType *>(flagsType)));
     }
     if (flagsType == PFTP_key)
@@ -957,7 +957,7 @@ PySideQFlagsTypePrivate *PepType_PFTP(PySideQFlagsType *flagsType)
     auto it = PFTP_extender.find(flagsType);
     if (it == PFTP_extender.end()) {
         it = PFTP_extender.insert({flagsType, {}}).first;
-        memset(&it->second, 0, sizeof(PySideQFlagsTypePrivate));
+        memset(&it->second, 0, sizeof(SbkQFlagsTypePrivate));
     }
     PFTP_key = flagsType;
     PFTP_value = &it->second;
@@ -1001,16 +1001,16 @@ static inline void *PepType_ExTP(PyTypeObject *type, size_t size)
         static PyTypeObject *alias{};
         const char *kind = size == sizeof(SbkObjectTypePrivate) ? "SOTP" :
                            size == sizeof(SbkEnumTypePrivate) ? "SETP" :
-                           size == sizeof(PySideQFlagsTypePrivate) ? "PFTP" :
+                           size == sizeof(SbkQFlagsTypePrivate) ? "PFTP" :
                            "unk.";
         fprintf(stderr, "%s:%d %p x %s s=%ld\n", __func__, __LINE__, type, kind, size);
         PyObject *kill{};
         if (strlen(env_p) > 0) {
-            if (size == sizeof(PySideQFlagsTypePrivate)) {
+            if (size == sizeof(SbkQFlagsTypePrivate)) {
                 if (alias == nullptr)
                     alias = type;
             }
-            if (size != sizeof(PySideQFlagsTypePrivate)) {
+            if (size != sizeof(SbkQFlagsTypePrivate)) {
                 if (type == alias)
                     Py_INCREF(kill);
             }

@@ -139,9 +139,9 @@ LIBSHIBOKEN_API SbkEnumTypePrivate *PepType_SETP(SbkEnumType *type);
 LIBSHIBOKEN_API void PepType_SETP_delete(SbkEnumType *enumType);
 
 struct PySideQFlagsType;
-struct PySideQFlagsTypePrivate;
+struct SbkQFlagsTypePrivate;
 
-LIBSHIBOKEN_API PySideQFlagsTypePrivate *PepType_PFTP(PySideQFlagsType *type);
+LIBSHIBOKEN_API SbkQFlagsTypePrivate *PepType_PFTP(PySideQFlagsType *type);
 LIBSHIBOKEN_API void PepType_PFTP_delete(PySideQFlagsType *flagsType);
 
 /*****************************************************************************/

@@ -5,14 +5,14 @@
 
 #include <autodecref.h>
 #include <sbkenum.h>
+#include <sbkconverter.h>
 #include <sbkenum_p.h>
 
 extern "C" {
     struct SbkConverter;
 
-    struct PySideQFlagsTypePrivate
+    struct PySideQFlagsTypePrivate : public SbkQFlagsTypePrivate
     {
-        SbkConverter *converter;
         // PYSIDE-1735: These fields are just there for comatibility with the enumstructure.
         //              We need to switch between flags and enum at runtine.
         //              This will vanish completely when we no longer support two implementations.
