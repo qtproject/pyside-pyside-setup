@@ -101,7 +101,7 @@ Build PySide6 using the Qt 6 that you built earlier
 ----------------------------------------------------
 
 Follow the steps mentioned `Getting Started - Qt for Python
-<https://doc.qt.io/qtforpython/gettingstarted.html>`_
+<https://doc.qt.io/qtforpython/gettingstarted/index.html>`_
 
 You may manually select the modules to install using the ``--module-subset`` cli
 argument for `setup.py`. This was my installation script

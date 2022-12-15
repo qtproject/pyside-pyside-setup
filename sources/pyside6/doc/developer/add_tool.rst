@@ -30,7 +30,7 @@ Add a Qt tool wrapper
 
    - Copy the files to the wheels in ``build_scripts/platforms/*.py``.
 
-   - Add an entry to ``sources/pyside6/doc/package_details.rst``.
+   - Add an entry to ``sources/pyside6/doc/gettingstarted/package_details.rst``.
 
 - Include the tool in the new wheel creation process:
 
