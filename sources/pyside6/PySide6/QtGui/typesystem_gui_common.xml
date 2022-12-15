@@ -644,7 +644,7 @@
     <enum-type name="Stretch" python-type="IntEnum"/>
     <enum-type name="Style"/>
     <enum-type name="StyleHint"/>
-    <enum-type name="StyleStrategy"/>
+    <enum-type name="StyleStrategy" python-type="Flag"/>
     <enum-type name="Weight" python-type="IntEnum"/>
     <enum-type name="HintingPreference" since="4.8" revision="4800"/>
     <extra-includes>
