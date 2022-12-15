@@ -137,7 +137,7 @@ extern "C" {
 
 namespace PySide
 {
-namespace QFlags
+namespace QFlagsSupport
 {
     static PyType_Slot SbkNewQFlagsType_slots[] = {
         {Py_nb_bool, nullptr},

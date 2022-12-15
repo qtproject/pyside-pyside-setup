@@ -1709,7 +1709,7 @@ void CppGenerator::writeFlagsConverterFunctions(TextStream &s,
     StringStream c(TextStream::Language::Cpp);
     c << "*reinterpret_cast<" << flagsCppTypeName << " *>(cppOut) =\n"
         << "    " << flagsCppTypeName
-        << "(QFlag(int(PySide::QFlags::getValue(reinterpret_cast<PySideQFlagsObject *>(pyIn)))))"
+        << "(QFlag(int(PySide::QFlagsSupport::getValue(reinterpret_cast<PySideQFlagsObject *>(pyIn)))))"
         << ";\n";
     writePythonToCppFunction(s, c.toString(), flagsTypeName, flagsTypeName);
 
@@ -1720,7 +1720,7 @@ void CppGenerator::writeFlagsConverterFunctions(TextStream &s,
 
     c << "const int castCppIn = int(*reinterpret_cast<const "
         << flagsCppTypeName << " *>(cppIn));\n" << "return "
-        << "reinterpret_cast<PyObject *>(PySide::QFlags::newObject(castCppIn, "
+        << "reinterpret_cast<PyObject *>(PySide::QFlagsSupport::newObject(castCppIn, "
         << flagsPythonType << "));\n";
     writeCppToPythonFunction(s, c.toString(), flagsTypeName, flagsTypeName);
     s << '\n';
@@ -5674,7 +5674,7 @@ void CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
             // We need 'flags->flagsName()' with the full module/class path.
             QString fullPath = getClassTargetFullName(cppEnum);
             fullPath.truncate(fullPath.lastIndexOf(u'.') + 1);
-            s << "FType = PySide::QFlags::create(\""
+            s << "FType = PySide::QFlagsSupport::create(\""
                 << packageLevel << ':' << fullPath << flags->flagsName() << "\", \n" << indent
                 << cpythonEnumName(cppEnum) << "_number_slots);\n" << outdent
                 << cpythonTypeNameExt(flags) << " = FType;\n";

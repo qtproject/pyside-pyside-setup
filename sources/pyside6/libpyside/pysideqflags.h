@@ -22,7 +22,7 @@ extern "C"
 
 namespace PySide
 {
-namespace QFlags
+namespace QFlagsSupport
 {
     /**
      * Creates a new QFlags type.
