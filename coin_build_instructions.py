@@ -104,7 +104,7 @@ def call_setup(python_ver, phase):
 
     cmd = [env_python, "-u", "setup.py"]
     if phase in ["BUILD"]:
-        cmd += ["build", "--standalone"]
+        cmd += ["build", "--standalone", "--unity"]
     elif phase in ["WHEEL"] or CI_RELEASE_CONF:
         cmd += ["bdist_wheel", "--reuse-build", "--standalone", "--skip-cmake", "--skip-make-install", "--only-package"]
 
