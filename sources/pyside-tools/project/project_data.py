@@ -115,7 +115,10 @@ class QmlProjectData:
             meta_dir = qt_metatype_json_dir()
             for mod in self._qt_modules:
                 mod_id = mod[2:].lower()
-                pattern = f"qt6{mod_id}_*{METATYPES_JSON_SUFFIX}"
+                pattern = f"qt6{mod_id}_*"
+                if sys.platform != "win32":
+                    pattern += "_"  # qt6core_debug_metatypes.json (Linux)
+                pattern += METATYPES_JSON_SUFFIX
                 for f in meta_dir.glob(pattern):
                     foreign_files.append(os.fspath(f))
                     break
