@@ -273,7 +273,7 @@ static bool _setProperty(PyObject *qObj, PyObject *name, PyObject *value, bool *
         static PyObject *magicGet = Shiboken::PyMagicName::get();
         if (found && prop_flag) {
             // the indirection of the setter descriptor in a true property
-            AutoDecRef descr(PyObject_GetAttr(look, PyName::fset()));
+            AutoDecRef descr(PyObject_GetAttr(look, PySideName::fset()));
             propSetter.reset(PyObject_CallMethodObjArgs(descr, magicGet, qObj, nullptr));
         } else {
             // look is already the descriptor
@@ -530,7 +530,7 @@ PyObject *getHiddenDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *n
             //              would create confusion with overload.
             // Note: before implementing this property handling, the meta function code
             // below created meta functions which was quite wrong.
-            auto *subdict = _PepType_Lookup(Py_TYPE(self), PyMagicName::property_methods());
+            auto *subdict = _PepType_Lookup(Py_TYPE(self), PySideMagicName::property_methods());
             PyObject *propName = PyDict_GetItem(subdict, name);
             if (propName) {
                 // We really have a property name and need to fetch the fget or fset function.
@@ -543,7 +543,7 @@ PyObject *getHiddenDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *n
                     auto *trial = arr[idx];
                     auto *res = PyObject_GetAttr(prop, trial);
                     if (res) {
-                        AutoDecRef elemName(PyObject_GetAttr(res, PyMagicName::name()));
+                        AutoDecRef elemName(PyObject_GetAttr(res, PySideMagicName::name()));
                         // Note: This comparison works because of interned strings.
                         if (elemName == name)
                             return res;
@@ -774,9 +774,9 @@ QString pyPathToQString(PyObject *path)
 
 bool isCompiledMethod(PyObject *callback)
 {
-    return PyObject_HasAttr(callback, PySide::PyName::im_func())
-           && PyObject_HasAttr(callback, PySide::PyName::im_self())
-           && PyObject_HasAttr(callback, PySide::PyMagicName::code());
+    return PyObject_HasAttr(callback, PySide::PySideName::im_func())
+           && PyObject_HasAttr(callback, PySide::PySideName::im_self())
+           && PyObject_HasAttr(callback, PySide::PySideMagicName::code());
 }
 
 static const unsigned char qt_resource_name[] = {

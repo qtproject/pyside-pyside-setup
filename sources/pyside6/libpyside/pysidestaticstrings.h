@@ -9,7 +9,7 @@
 
 namespace PySide
 {
-namespace PyName
+namespace PySideName
 {
 PYSIDE_API PyObject *qtConnect();
 PYSIDE_API PyObject *qtDisconnect();
@@ -23,7 +23,7 @@ PYSIDE_API PyObject *parameters();
 PYSIDE_API PyObject *property();
 PYSIDE_API PyObject *select_id();
 } // namespace PyName
-namespace PyMagicName
+namespace PySideMagicName
 {
 PYSIDE_API PyObject *code();
 PYSIDE_API PyObject *doc();

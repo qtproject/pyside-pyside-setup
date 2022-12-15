@@ -129,18 +129,18 @@ static void ensureNewDictType()
 static inline PyObject *nextInCircle(PyObject *dict)
 {
     // returns a borrowed ref
-    AutoDecRef next_dict(PyObject_GetAttr(dict, PyName::dict_ring()));
+    AutoDecRef next_dict(PyObject_GetAttr(dict, PySideName::dict_ring()));
     return next_dict;
 }
 
 static inline void setNextDict(PyObject *dict, PyObject *next_dict)
 {
-    PyObject_SetAttr(dict, PyName::dict_ring(), next_dict);
+    PyObject_SetAttr(dict, PySideName::dict_ring(), next_dict);
 }
 
 static inline void setSelectId(PyObject *dict, int select_id)
 {
-    PyObject_SetAttr(dict, PyName::select_id(), PyLong_FromLong(select_id));
+    PyObject_SetAttr(dict, PySideName::select_id(), PyLong_FromLong(select_id));
 }
 
 static inline int getSelectId(PyObject *dict)
@@ -585,7 +585,7 @@ PyObject *adjustPropertyName(PyObject *dict, PyObject *name)
             if (PyList_CheckExact(sig)) {
                 name_clash = true;
             } else {
-                Shiboken::AutoDecRef params(PyObject_GetAttr(sig, PyName::parameters()));
+                Shiboken::AutoDecRef params(PyObject_GetAttr(sig, PySideName::parameters()));
                 // Are there parameters except self or cls?
                 if (PyObject_Size(params.object()) > 1)
                     name_clash = true;

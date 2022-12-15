@@ -373,20 +373,20 @@ static void extractFunctionArgumentsFromSlot(PyObject *slot,
         // just go by attributes.
         isMethod = true;
 
-        function = PyObject_GetAttr(slot, PySide::PyName::im_func());
+        function = PyObject_GetAttr(slot, PySide::PySideName::im_func());
 
         // Not retaining a reference inline with what PyMethod_GET_FUNCTION does.
         Py_DECREF(function);
 
         if (functionName != nullptr) {
-            PyObject *name = PyObject_GetAttr(function, PySide::PyMagicName::name());
+            PyObject *name = PyObject_GetAttr(function, PySide::PySideMagicName::name());
             *functionName = Shiboken::String::toCString(name);
             // Not retaining a reference inline with what PepFunction_GetName does.
             Py_DECREF(name);
         }
 
         objCode = reinterpret_cast<PepCodeObject *>(
-                    PyObject_GetAttr(function, PySide::PyMagicName::code()));
+                    PyObject_GetAttr(function, PySide::PySideMagicName::code()));
         // Not retaining a reference inline with what PyFunction_GET_CODE does.
         Py_XDECREF(objCode);
 
@@ -401,14 +401,14 @@ static void extractFunctionArgumentsFromSlot(PyObject *slot,
         function = slot;
 
         if (functionName != nullptr) {
-            PyObject *name = PyObject_GetAttr(function, PySide::PyMagicName::name());
+            PyObject *name = PyObject_GetAttr(function, PySide::PySideMagicName::name());
             *functionName = Shiboken::String::toCString(name);
             // Not retaining a reference inline with what PepFunction_GetName does.
             Py_DECREF(name);
         }
 
         objCode = reinterpret_cast<PepCodeObject *>(
-                    PyObject_GetAttr(function, PySide::PyMagicName::code()));
+                    PyObject_GetAttr(function, PySide::PySideMagicName::code()));
         // Not retaining a reference inline with what PyFunction_GET_CODE does.
         Py_XDECREF(objCode);
 
@@ -525,7 +525,7 @@ static PyObject *signalInstanceConnect(PyObject *self, PyObject *args, PyObject 
     if (match) {
         Shiboken::AutoDecRef tupleArgs(PyList_AsTuple(pyArgs));
         Shiboken::AutoDecRef pyMethod(PyObject_GetAttr(source->d->source,
-                                                       PySide::PyName::qtConnect()));
+                                                       PySide::PySideName::qtConnect()));
         if (pyMethod.isNull()) { // PYSIDE-79: check if pyMethod exists.
             PyErr_SetString(PyExc_RuntimeError, "method 'connect' vanished!");
             return nullptr;
@@ -579,7 +579,7 @@ static PyObject *signalInstanceEmit(PyObject *self, PyObject *args)
         PyList_Append(pyArgs, PyTuple_GetItem(args, i));
 
     Shiboken::AutoDecRef pyMethod(PyObject_GetAttr(source->d->source,
-                                                   PySide::PyName::qtEmit()));
+                                                   PySide::PySideName::qtEmit()));
 
     Shiboken::AutoDecRef tupleArgs(PyList_AsTuple(pyArgs));
     return PyObject_CallObject(pyMethod.object(), tupleArgs);
@@ -653,7 +653,7 @@ static PyObject *signalInstanceDisconnect(PyObject *self, PyObject *args)
     if (match) {
         Shiboken::AutoDecRef tupleArgs(PyList_AsTuple(pyArgs));
         Shiboken::AutoDecRef pyMethod(PyObject_GetAttr(source->d->source,
-                                                       PySide::PyName::qtDisconnect()));
+                                                       PySide::PySideName::qtDisconnect()));
         PyObject *result = PyObject_CallObject(pyMethod, tupleArgs);
         if (!result || result == Py_True)
             return result;
@@ -981,7 +981,7 @@ PySideSignalInstance *initialize(PySideSignal *self, PyObject *name, PyObject *o
 bool connect(PyObject *source, const char *signal, PyObject *callback)
 {
     Shiboken::AutoDecRef pyMethod(PyObject_GetAttr(source,
-                                                   PySide::PyName::qtConnect()));
+                                                   PySide::PySideName::qtConnect()));
     if (pyMethod.isNull())
         return false;
 
@@ -1248,8 +1248,8 @@ QString codeCallbackName(PyObject *callback, const QString &funcName)
     // PYSIDE-1523: Handle the compiled case.
     if (PySide::isCompiledMethod(callback)) {
         // Not retaining references inline with what PyMethod_GET_(SELF|FUNC) does.
-        Shiboken::AutoDecRef self(PyObject_GetAttr(callback, PySide::PyName::im_self()));
-        Shiboken::AutoDecRef func(PyObject_GetAttr(callback, PySide::PyName::im_func()));
+        Shiboken::AutoDecRef self(PyObject_GetAttr(callback, PySide::PySideName::im_self()));
+        Shiboken::AutoDecRef func(PyObject_GetAttr(callback, PySide::PySideName::im_func()));
         return funcName + QString::number(quint64(self), 16) + QString::number(quint64(func), 16);
     }
     return funcName + QString::number(quint64(callback), 16);

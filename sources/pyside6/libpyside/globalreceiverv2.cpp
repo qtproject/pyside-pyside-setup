@@ -78,10 +78,10 @@ DynamicSlotDataV2::DynamicSlotDataV2(PyObject *callback, GlobalReceiverV2 *paren
         // PYSIDE-1523: PyMethod_Check is not accepting compiled form, we just go by attributes.
         m_isMethod = true;
 
-        m_callback = PyObject_GetAttr(callback, PySide::PyName::im_func());
+        m_callback = PyObject_GetAttr(callback, PySide::PySideName::im_func());
         Py_DECREF(m_callback);
 
-        m_pythonSelf = PyObject_GetAttr(callback, PySide::PyName::im_self());
+        m_pythonSelf = PyObject_GetAttr(callback, PySide::PySideName::im_self());
         Py_DECREF(m_pythonSelf);
 
         //monitor class from method lifetime
@@ -102,8 +102,8 @@ GlobalReceiverKey DynamicSlotDataV2::key(PyObject *callback)
         return {PyMethod_GET_SELF(callback), PyMethod_GET_FUNCTION(callback)};
     } else if (PySide::isCompiledMethod(callback)) {
         // PYSIDE-1589: Fix for slots in compiled functions
-        Shiboken::AutoDecRef self(PyObject_GetAttr(callback, PySide::PyName::im_self()));
-        Shiboken::AutoDecRef func(PyObject_GetAttr(callback, PySide::PyName::im_func()));
+        Shiboken::AutoDecRef self(PyObject_GetAttr(callback, PySide::PySideName::im_self()));
+        Shiboken::AutoDecRef func(PyObject_GetAttr(callback, PySide::PySideName::im_func()));
         return {self, func};
     }
     return {nullptr, callback};

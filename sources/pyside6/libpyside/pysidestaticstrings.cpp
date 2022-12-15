@@ -13,7 +13,7 @@ PyObject *funcName() \
 
 namespace PySide
 {
-namespace PyName
+namespace PySideName
 {
 STATIC_STRING_IMPL(qtConnect, "connect")
 STATIC_STRING_IMPL(qtDisconnect, "disconnect")
@@ -27,7 +27,7 @@ STATIC_STRING_IMPL(parameters, "parameters")
 STATIC_STRING_IMPL(property, "property")
 STATIC_STRING_IMPL(select_id, "select_id")
 } // namespace PyName
-namespace PyMagicName
+namespace PySideMagicName
 {
 STATIC_STRING_IMPL(code, "__code__")
 STATIC_STRING_IMPL(doc, "__doc__")
