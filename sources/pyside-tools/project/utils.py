@@ -65,7 +65,7 @@ def qtpaths() -> Dict[str, str]:
     if not _qtpaths_info:
         output = subprocess.check_output([QTPATHS_CMD, "--query"])
         for line in output.decode("utf-8").split("\n"):
-            tokens = line.strip().split(":")
+            tokens = line.strip().split(":", maxsplit=1)  # "Path=C:\..."
             if len(tokens) == 2:
                 _qtpaths_info[tokens[0]] = tokens[1]
     return _qtpaths_info
