@@ -31,7 +31,7 @@ This project is available under the LGPLv3/GPLv3 and the `Qt commercial license`
 .. _Qt: https://doc.qt.io
 .. _PySide6: quickstart.html
 .. _`Qt commercial license`: https://www.qt.io/licensing/
-.. _`Porting from PySide2 to PySide6`: porting_from2.html
+.. _`Porting from PySide2 to PySide6`: gettingstarted/porting_from2.html
 
 Quick Start
 ===========
@@ -44,9 +44,9 @@ and to learn what is installed with the ``pyside6``, check the
 `package content, structure, and tools`_ page.
 
 
-.. _`getting started guide`: gettingstarted.html
+.. _`getting started guide`: gettingstarted/index.html
 .. _`write your first application`: quickstart.html
-.. _`package content, structure, and tools`: package_details.html
+.. _`package content, structure, and tools`: gettingstarted/package_details.html
 
 Documentation
 =============
