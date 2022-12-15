@@ -1,0 +1,47 @@
+Qt for Python 6.4.2 is a bug-fix release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+****************************************************************************
+*                                  PySide6                                 *
+****************************************************************************
+
+ - [PYSIDE-769]  asyncio versions of the async examples have been added.
+ - [PYSIDE-1019] A callback error when using true_property has been fixed.
+ - [PYSIDE-1106] Documentation: The automatic code snippet conversion
+                 has been improved.
+ - [PYSIDE-1889] __feature__: A weird case of false metafunction lookup
+                 has been fixed.
+ - [PYSIDE-2029] __feature__ switching now works even with recursive
+                 imports like in the qasync module. It also has been
+                 optimized and simplified in preparation for eventual
+                 PyPy support.
+ - [PYSIDE-2042] true_property was fixed to work with inherited properties
+                 as well.
+ - [PYSIDE-2128] An issue affecting CMake-only builds has been fixed.
+ - [PYSIDE-2133] The float type overload of QLocale.toCurrencyString()
+                 has been fixed.
+ - [PYSIDE-2136] Errors when calling deprecated functions with
+                 warning-as-error set have been fixed.
+
+****************************************************************************
+*                                  Shiboken6                               *
+****************************************************************************
+
+ - [PYSIDE-74]   A warning about nonreachable code in generated rich
+                 comparison code has been fixed.
+ - [PYSIDE-1012] Missing g++ includes for g++ 11.3 have been added.
+ - [PYSIDE-1019] Parse the notify specification from Q_PROPERTY
+ - [PYSIDE-1019] Documentation: QObject properties are now documented
+                 similar to the C++ documentation.
