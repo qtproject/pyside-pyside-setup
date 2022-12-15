@@ -54,8 +54,6 @@
 
 using namespace Qt::StringLiterals;
 
-static inline QString colonColon() { return QStringLiteral("::"); }
-
 static QString stripTemplateArgs(const QString &name)
 {
     int pos = name.indexOf(u'<');
@@ -729,9 +727,9 @@ AbstractMetaClassPtr
     AbstractMetaBuilderPrivate::traverseNamespace(const FileModelItem &dom,
                                                   const NamespaceModelItem &namespaceItem)
 {
-    QString namespaceName = currentScope()->qualifiedName().join(colonColon());
+    QString namespaceName = currentScope()->qualifiedName().join(u"::"_s);
     if (!namespaceName.isEmpty())
-        namespaceName.append(colonColon());
+        namespaceName.append(u"::"_s);
     namespaceName.append(namespaceItem->name());
 
     if (TypeDatabase::instance()->isClassRejected(namespaceName)) {
@@ -820,7 +818,7 @@ std::optional<AbstractMetaEnum>
                                              const AbstractMetaClassPtr &enclosing,
                                              const QSet<QString> &enumsDeclarations)
 {
-    QString qualifiedName = enumItem->qualifiedName().join(colonColon());
+    QString qualifiedName = enumItem->qualifiedName().join(u"::"_s);
 
     TypeEntryPtr typeEntry;
     const auto enclosingTypeEntry = enclosing ? enclosing->typeEntry() : TypeEntryCPtr{};
@@ -836,7 +834,7 @@ std::optional<AbstractMetaEnum>
         for (const EnumeratorModelItem &enumValue : enums) {
             tmpQualifiedName.removeLast();
             tmpQualifiedName << enumValue->name();
-            qualifiedName = tmpQualifiedName.join(colonColon());
+            qualifiedName = tmpQualifiedName.join(u"::"_s);
             typeEntry = TypeDatabase::instance()->findType(qualifiedName);
             if (typeEntry)
                 break;
@@ -935,7 +933,7 @@ AbstractMetaClassPtr AbstractMetaBuilderPrivate::traverseTypeDef(const FileModel
     // we have an inner class
     if (currentClass) {
         fullClassName = stripTemplateArgs(currentClass->typeEntry()->qualifiedCppName())
-                          + colonColon() + fullClassName;
+                          + u"::"_s + fullClassName;
     }
 
     // If this is the alias for a primitive type
@@ -1022,7 +1020,7 @@ AbstractMetaClassPtr AbstractMetaBuilderPrivate::traverseClass(const FileModelIt
     // we have inner an class
     if (currentClass) {
         fullClassName = stripTemplateArgs(currentClass->typeEntry()->qualifiedCppName())
-                          + colonColon() + fullClassName;
+                          + u"::"_s + fullClassName;
     }
 
     const auto type = TypeDatabase::instance()->findComplexType(fullClassName);
@@ -1164,7 +1162,7 @@ void AbstractMetaBuilderPrivate::traverseUsingMembers(const AbstractMetaClassPtr
             className.truncate(pos);
         if (auto baseClass = findBaseClass(metaClass, className)) {
             QString name = um.memberName;
-            const int lastQualPos = name.lastIndexOf(colonColon());
+            const int lastQualPos = name.lastIndexOf(u"::"_s);
             if (lastQualPos != -1)
                 name.remove(0, lastQualPos + 2);
             metaClass->addUsingMember({name, baseClass, um.access});
@@ -1199,7 +1197,7 @@ static inline QString fieldSignatureWithType(const VariableModelItem &field)
 static inline QString qualifiedFieldSignatureWithType(const QString &className,
                                                       const VariableModelItem &field)
 {
-    return className + colonColon() + fieldSignatureWithType(field);
+    return className + u"::"_s + fieldSignatureWithType(field);
 }
 
 std::optional<AbstractMetaField>
@@ -1232,7 +1230,7 @@ std::optional<AbstractMetaField>
     auto metaType = translateType(fieldType, cls);
 
     if (!metaType.has_value()) {
-        const QString type = TypeInfo::resolveType(fieldType, currentScope()).qualifiedName().join(colonColon());
+        const QString type = TypeInfo::resolveType(fieldType, currentScope()).qualifiedName().join(u"::"_s);
         if (cls->typeEntry()->generateCode()) {
              qCWarning(lcShiboken, "%s",
                        qPrintable(msgSkippingField(field, cls->name(), type)));
@@ -1777,7 +1775,7 @@ static inline QString qualifiedFunctionSignatureWithType(const FunctionModelItem
 {
     QString result = functionItem->type().toString() + u' ';
     if (!className.isEmpty())
-        result += className + colonColon();
+        result += className + u"::"_s;
     result += functionSignature(functionItem);
     return result;
 }
@@ -2181,9 +2179,9 @@ static TypeEntryCPtr findTypeEntryUsingContext(const AbstractMetaClassCPtr &meta
                                                const QString& qualifiedName)
 {
     TypeEntryCPtr type;
-    QStringList context = metaClass->qualifiedCppName().split(colonColon());
+    QStringList context = metaClass->qualifiedCppName().split(u"::"_s);
     while (!type && !context.isEmpty()) {
-        type = TypeDatabase::instance()->findType(context.join(colonColon()) + colonColon() + qualifiedName);
+        type = TypeDatabase::instance()->findType(context.join(u"::"_s) + u"::"_s + qualifiedName);
         context.removeLast();
     }
     return type;
@@ -2531,7 +2529,7 @@ std::optional<AbstractMetaType>
         qsizetype i = d ? d->m_scopes.size() - 1 : -1;
         while (i >= 0) {
             typeInfo = TypeInfo::resolveType(_typei, d->m_scopes.at(i--));
-            if (typeInfo.qualifiedName().join(colonColon()) != _typei.qualifiedName().join(colonColon()))
+            if (typeInfo.qualifiedName().join(u"::"_s) != _typei.qualifiedName().join(u"::"_s))
                 break;
         }
 
@@ -2619,7 +2617,7 @@ std::optional<AbstractMetaType>
         return {};
     }
 
-    QString qualifiedName = qualifierList.join(colonColon());
+    QString qualifiedName = qualifierList.join(u"::"_s);
     QString name = qualifierList.takeLast();
 
     // 4. Special case QFlags (include instantiation in name)
@@ -2652,7 +2650,7 @@ std::optional<AbstractMetaType>
         // For non-type template parameters, create a dummy type entry on the fly
         // as is done for classes.
         if (!targType.has_value()) {
-            const QString value = ti.qualifiedName().join(colonColon());
+            const QString value = ti.qualifiedName().join(u"::"_s);
             if (isNumber(value)) {
                 auto module = typeSystemTypeEntry(type);
                 TypeDatabase::instance()->addConstantValueTypeEntry(value, module);
@@ -2930,14 +2928,14 @@ AbstractMetaClassPtr
         baseContainerType->reset();
     auto *types = TypeDatabase::instance();
 
-    QStringList scope = context->typeEntry()->qualifiedCppName().split(colonColon());
+    QStringList scope = context->typeEntry()->qualifiedCppName().split(u"::"_s);
     QString errorMessage;
     scope.removeLast();
     for (auto i = scope.size(); i >= 0; --i) {
-        QString prefix = i > 0 ? QStringList(scope.mid(0, i)).join(colonColon()) + colonColon() : QString();
+        QString prefix = i > 0 ? QStringList(scope.mid(0, i)).join(u"::"_s) + u"::"_s : QString();
         QString completeName = prefix + name;
         const TypeInfo parsed = TypeParser::parse(completeName, &errorMessage);
-        QString qualifiedName = parsed.qualifiedName().join(colonColon());
+        QString qualifiedName = parsed.qualifiedName().join(u"::"_s);
         if (qualifiedName.isEmpty()) {
             qWarning().noquote().nospace() << "Unable to parse type \"" << completeName
                 << "\" while looking for template \"" << name << "\": " << errorMessage;
@@ -3053,7 +3051,7 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(const AbstractMetaClassPtr &sub
     AbstractMetaTypeList  templateTypes;
 
     for (const TypeInfo &i : info.instantiations()) {
-        QString typeName = i.qualifiedName().join(colonColon());
+        QString typeName = i.qualifiedName().join(u"::"_s);
         TypeDatabase *typeDb = TypeDatabase::instance();
         TypeEntryPtr t;
         // Check for a non-type template integer parameter, that is, for a base
@@ -3068,10 +3066,10 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(const AbstractMetaClassPtr &sub
             }
         } else {
             QStringList possibleNames;
-            possibleNames << subclass->qualifiedCppName() + colonColon() + typeName;
-            possibleNames << templateClass->qualifiedCppName() + colonColon() + typeName;
+            possibleNames << subclass->qualifiedCppName() + u"::"_s + typeName;
+            possibleNames << templateClass->qualifiedCppName() + u"::"_s + typeName;
             if (subclass->enclosingClass())
-                possibleNames << subclass->enclosingClass()->qualifiedCppName() + colonColon() + typeName;
+                possibleNames << subclass->enclosingClass()->qualifiedCppName() + u"::"_s + typeName;
             possibleNames << typeName;
 
             for (const QString &possibleName : std::as_const(possibleNames)) {

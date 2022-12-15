@@ -8,6 +8,7 @@
 #include "constantvaluetypeentry.h"
 #include "containertypeentry.h"
 #include "customtypenentry.h"
+#include "debughelpers_p.h"
 #include "enumtypeentry.h"
 #include "enumvaluetypeentry.h"
 #include "flagstypeentry.h"
@@ -2321,20 +2322,6 @@ ObjectTypeEntry::ObjectTypeEntry(ComplexTypeEntryPrivate *d) :
 #define FORMAT_LIST_SIZE(name, var) \
     if (!var.isEmpty()) \
          debug << ", " << var.size() << ' '  << name;
-
-template <class Container, class Separator>
-static void formatList(QDebug &d, const char *name, const Container &c, Separator sep)
-{
-    if (const auto size = c.size()) {
-        d << ", " << name << '[' << size << "]=(";
-        for (qsizetype i = 0; i < size; ++i) {
-            if (i)
-                d << sep;
-             d << c.at(i);
-        }
-        d << ')';
-    }
-}
 
 void TypeEntry::formatDebug(QDebug &debug) const
 {

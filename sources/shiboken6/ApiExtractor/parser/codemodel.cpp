@@ -6,6 +6,7 @@
 #include "codemodel.h"
 
 #include <sourcelocation.h>
+#include <debughelpers_p.h>
 
 #include <QtCore/QDebug>
 #include <QtCore/QDir>
@@ -244,26 +245,6 @@ void _CodeModelItem::setEnclosingScope(const _ScopeModelItem *s)
 }
 
 #ifndef QT_NO_DEBUG_STREAM
-template <class It>
-void formatSequence(QDebug &d, It i1, It i2, const char *separator=", ")
-{
-    for (It i = i1; i != i2; ++i) {
-        if (i != i1)
-            d << separator;
-        d << *i;
-    }
-}
-
-template <class It>
-static void formatPtrSequence(QDebug &d, It i1, It i2, const char *separator=", ")
-{
-    for (It i = i1; i != i2; ++i) {
-        if (i != i1)
-            d << separator;
-        d << i->data();
-    }
-}
-
 void _CodeModelItem::formatKind(QDebug &d, int k)
 {
     switch (k) {

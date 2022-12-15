@@ -25,7 +25,6 @@ using namespace Qt::StringLiterals;
 
 namespace clang {
 
-static inline QString colonColon() { return QStringLiteral("::"); }
 static inline QString templateBrackets() { return QStringLiteral("<>"); }
 
 static inline bool isClassCursor(const CXCursor &c)
@@ -438,7 +437,7 @@ static QStringList qualifiedName(const QString &t)
         end = t.size();
     int lastPos = 0;
     while (true) {
-        const int nextPos = t.indexOf(colonColon(), lastPos);
+        const int nextPos = t.indexOf(u"::"_s, lastPos);
         if (nextPos < 0 || nextPos >= end)
             break;
         result.append(t.mid(lastPos, nextPos - lastPos));
@@ -720,11 +719,11 @@ std::pair<QString, ClassModelItem> BuilderPrivate::getBaseClass(CXType type) con
     // "std::vector<T>").
     const QStringList &baseScope = it.value()->scope();
     if (!baseScope.isEmpty()) {
-        const int lastSep = baseClassName.lastIndexOf(colonColon());
+        const int lastSep = baseClassName.lastIndexOf(u"::"_s);
         if (lastSep >= 0)
-            baseClassName.remove(0, lastSep + colonColon().size());
-        baseClassName.prepend(colonColon());
-        baseClassName.prepend(baseScope.join(colonColon()));
+            baseClassName.remove(0, lastSep + u"::"_s.size());
+        baseClassName.prepend(u"::"_s);
+        baseClassName.prepend(baseScope.join(u"::"_s));
     }
     return {baseClassName, it.value()};
 }

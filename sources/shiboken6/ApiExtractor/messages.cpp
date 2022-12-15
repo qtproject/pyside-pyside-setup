@@ -25,8 +25,6 @@
 
 using namespace Qt::StringLiterals;
 
-static inline QString colonColon() { return QStringLiteral("::"); }
-
 // abstractmetabuilder.cpp
 
 QString msgNoFunctionForModification(const AbstractMetaClassCPtr &klass,
@@ -126,7 +124,7 @@ static void msgFormatEnumType(Stream &str,
 {
     switch (enumItem->enumKind()) {
     case CEnum:
-        str << "Enum '" << enumItem->qualifiedName().join(colonColon()) << '\'';
+        str << "Enum '" << enumItem->qualifiedName().join(u"::"_s) << '\'';
         break;
     case AnonymousEnum: {
         const EnumeratorList &values = enumItem->enumerators();
@@ -149,7 +147,7 @@ static void msgFormatEnumType(Stream &str,
     }
         break;
     case EnumClass:
-        str << "Scoped enum '" << enumItem->qualifiedName().join(colonColon()) << '\'';
+        str << "Scoped enum '" << enumItem->qualifiedName().join(u"::"_s) << '\'';
         break;
     }
     if (!className.isEmpty())
@@ -178,7 +176,7 @@ QString msgAddedFunctionInvalidArgType(const QString &addedFuncName,
     QString result;
     QTextStream str(&result);
     formatAddedFuncError(addedFuncName, context, str);
-    str << "Unable to translate type \"" << typeName.join(colonColon())
+    str << "Unable to translate type \"" << typeName.join(u"::"_s)
         << "\" of argument " << pos << " of added function \""
         << addedFuncName << "\": " << why;
     return result;
@@ -191,7 +189,7 @@ QString msgAddedFunctionInvalidReturnType(const QString &addedFuncName,
     QString result;
     QTextStream str(&result);
     formatAddedFuncError(addedFuncName, context, str);
-    str << "Unable to translate return type \"" << typeName.join(colonColon())
+    str << "Unable to translate return type \"" << typeName.join(u"::"_s)
         << "\" of added function \"" << addedFuncName << "\": "
         << why;
     return result;

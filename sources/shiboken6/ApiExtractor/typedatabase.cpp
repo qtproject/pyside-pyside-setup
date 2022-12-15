@@ -10,6 +10,7 @@
 #include "constantvaluetypeentry.h"
 #include "containertypeentry.h"
 #include "customtypenentry.h"
+#include "debughelpers_p.h"
 #include "flagstypeentry.h"
 #include "functiontypeentry.h"
 #include "namespacetypeentry.h"
@@ -1246,21 +1247,6 @@ bool TypeDatabase::hasDroppedTypeEntries() const
 }
 
 #ifndef QT_NO_DEBUG_STREAM
-
-template <class Container, class Separator>
-static void formatList(QDebug &d, const char *name, const Container &c, Separator sep)
-{
-    if (const auto size = c.size()) {
-        d << ", " << name << '[' << size << "]=(";
-        for (qsizetype i = 0; i < size; ++i) {
-            if (i)
-                d << sep;
-             d << c.at(i);
-        }
-        d << ')';
-    }
-}
-
 void TypeDatabase::formatDebug(QDebug &debug) const
 {
     d->formatDebug(debug);
@@ -1303,7 +1289,7 @@ void TypeDatabasePrivate::formatDebug(QDebug &d) const
         d << ")\n";
     }
     d <<"\nglobalUserFunctions=" << m_globalUserFunctions << '\n';
-    formatList(d, "globalFunctionMods", m_functionMods, '\n');
+    formatList(d, "globalFunctionMods", m_functionMods, "\n");
     d << ')';
 }
 

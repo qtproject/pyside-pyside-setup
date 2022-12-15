@@ -40,8 +40,6 @@ static void ensureInitialized()
     }
 }
 
-namespace {
-
 // RAI Helpers for cleaning up libxml2/libxslt data
 
 struct XmlDocDeleter // for std::unique_ptr<xmlDoc>
@@ -63,8 +61,6 @@ struct XmlXPathContextDeleter
 {
     void operator()(xmlXPathContextPtr xPathContext) { xmlXPathFreeContext(xPathContext); }
 };
-
-} // namespace
 
 using XmlDocUniquePtr = std::unique_ptr<xmlDoc, XmlDocDeleter>;
 using XmlPathObjectUniquePtr = std::unique_ptr<xmlXPathObject, XmlXPathObjectDeleter>;

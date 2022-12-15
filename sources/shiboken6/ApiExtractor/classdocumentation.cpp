@@ -3,6 +3,7 @@
 
 #include "classdocumentation.h"
 #include "messages.h"
+#include "debughelpers_p.h"
 
 #include <QtCore/QDebug>
 #include <QtCore/QBuffer>
@@ -277,21 +278,6 @@ QString webXmlModuleDescription(const QString &fileName, QString *errorMessage)
     return result;
 }
 
-// Debug helpers
-template <class T>
-static void formatList(QDebug &debug, const char *title, const QList<T> &l)
-{
-    if (const qsizetype size = l.size()) {
-        debug << title << '[' << size << "]=(";
-        for (qsizetype i = 0; i < size; ++i) {
-            if (i)
-                debug << ", ";
-            debug << l.at(i);
-        }
-        debug << ')';
-    }
-}
-
 static void formatDescription(QDebug &debug, const QString &desc)
 {
     debug << "description=";
@@ -351,7 +337,7 @@ QDebug operator<<(QDebug debug, const FunctionDocumentation &f)
             debug << ", returns " << f.returnType;
         if (f.constant)
             debug << ", const";
-        formatList(debug, ", parameters", f.parameters);
+        formatList(debug, ", parameters", f.parameters, ", ");
         debug << ", signature=\"" << f.signature << "\", ";
         formatDescription(debug, f.description);
     }

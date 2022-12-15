@@ -7,6 +7,7 @@
 #include "codemodel.h"
 
 #include <clangparser/clangutils.h>
+#include <debughelpers_p.h>
 
 #include "qtcompat.h"
 
@@ -558,16 +559,6 @@ void TypeInfo::formatTypeSystemSignature(QTextStream &str) const
 }
 
 #ifndef QT_NO_DEBUG_STREAM
-template <class It>
-void formatSequence(QDebug &d, It i1, It i2, const char *separator=", ")
-{
-    for (It i = i1; i != i2; ++i) {
-        if (i != i1)
-            d << separator;
-        d << *i;
-    }
-}
-
 void TypeInfo::formatDebug(QDebug &debug) const
 {
     debug << '"';

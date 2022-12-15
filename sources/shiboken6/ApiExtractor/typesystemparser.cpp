@@ -47,7 +47,6 @@
 using namespace Qt::StringLiterals;
 
 static inline QString allowThreadAttribute() { return QStringLiteral("allow-thread"); }
-static inline QString colonColon() { return QStringLiteral("::"); }
 static inline QString checkFunctionAttribute() { return QStringLiteral("check-function"); }
 static inline QString copyableAttribute() { return QStringLiteral("copyable"); }
 static inline QString accessAttribute() { return QStringLiteral("access"); }
@@ -1326,17 +1325,17 @@ FlagsTypeEntryPtr
     ftype->setOriginator(enumEntry);
     ftype->setTargetLangPackage(enumEntry->targetLangPackage());
     // Try toenumEntry get the guess the qualified flag name
-    if (!flagName.contains(colonColon())) {
+    if (!flagName.contains(u"::"_s)) {
         auto eq = enumEntry->qualifier();
         if (!eq.isEmpty())
-            flagName.prepend(eq + colonColon());
+            flagName.prepend(eq + u"::"_s);
     }
 
     ftype->setOriginalName(flagName);
     if (!applyCommonAttributes(reader, ftype, attributes))
         return nullptr;
 
-    QStringList lst = flagName.split(colonColon());
+    QStringList lst = flagName.split(u"::"_s);
     const QString name = lst.takeLast();
     const QString targetLangFlagName = lst.join(u'.');
     const QString &targetLangQualifier = enumEntry->targetLangQualifier();
