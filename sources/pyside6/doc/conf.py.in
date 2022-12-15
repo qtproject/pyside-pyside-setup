@@ -122,16 +122,16 @@ html_theme = 'furo'
 # documentation.
 html_theme_options = {
     "dark_css_variables": {
-        "color-brand-primary": "#66689d",
-        "color-brand-content": "#66689d",
+        "color-brand-primary": "#41cd52",
+        "color-brand-content": "#41cd52",
         "color-admonition-title--important": "#41cd52",
         "color-admonition-title-background--important": "#474b53",
         "font-stack": "'Titillium Web', sans-serif",
     },
     "light_css_variables": {
-        "color-brand-primary": "#66689d",
-        "color-brand-content": "#41cd52",
-        "color-admonition-title--important": "#41cd52",
+        "color-brand-primary": "#004f7b",
+        "color-brand-content": "#004f7b",
+        "color-admonition-title--important": "#004f7b",
         "font-stack": "'Titillium Web', sans-serif",
     },
 }
