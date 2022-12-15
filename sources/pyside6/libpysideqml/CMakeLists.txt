@@ -21,6 +21,8 @@ target_include_directories(pyside6qml PUBLIC
   $<INSTALL_INTERFACE:include/PySide6Qml>
 )
 
+target_compile_definitions(pyside6qml PRIVATE -DQT_LEAN_HEADERS=1 -DQT_NO_KEYWORDS=1)
+
 target_link_libraries(pyside6qml
                       PRIVATE PySide6::pyside6 Shiboken6::libshiboken ${libpysideqml_libraries})
 

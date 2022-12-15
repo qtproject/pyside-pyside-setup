@@ -73,7 +73,7 @@ PyTypeObject *PySideQmlForeign_TypeF(void)
 
 } // extern "C"
 
-static const char *qmlAttached_SignatureStrings[] = {
+static const char *qmlForeign_SignatureStrings[] = {
     "PySide6.QtQml.QmlForeign(self,type:type)",
     nullptr // Sentinel
 };
@@ -82,7 +82,7 @@ namespace PySide::Qml {
 
 void initQmlForeign(PyObject *module)
 {
-    if (InitSignatureStrings(PySideQmlForeign_TypeF(), qmlAttached_SignatureStrings) < 0)
+    if (InitSignatureStrings(PySideQmlForeign_TypeF(), qmlForeign_SignatureStrings) < 0)
         return;
 
     Py_INCREF(PySideQmlForeign_TypeF());
