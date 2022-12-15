@@ -2,13 +2,13 @@
 .btn-qt:active,
 .btn-qt:focus,
 .btn-qt.active {
-  background: #41cd52;
+  background: var(--color-brand-primary);
   color: #fff !important;
   border-color: #fff;
 }
 
 .btn-link {
-  color: #41cd52 !important;
+  color: var(--color-brand-primary) !important;
 }
 
 .btn-link:hover {
@@ -20,8 +20,8 @@
  * to the pages before the bootstrap ones, so we cannot override them
  * without using it */
 .btn-qt {
-  color: #41cd52 !important;
-  border-color: #41cd52 !important;
+  color: var(--color-brand-primary) !important;
+  border-color: var(--color-brand-primary) !important;
   font-weight: bold !important;
 }
 .card-img-top-main {
