@@ -4,8 +4,6 @@
 #include <iostream>
 #include "pairuser.h"
 
-using namespace std;
-
 std::pair<int, int>
 PairUser::callCreatePair()
 {

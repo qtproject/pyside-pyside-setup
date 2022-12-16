@@ -4,8 +4,6 @@
 #include <iostream>
 #include "complex.h"
 
-using namespace std;
-
 Complex::Complex(double real, double imag)
     : m_real(real), m_imag(imag)
 {
@@ -23,7 +21,7 @@ Complex::operator+(Complex& other)
 void
 Complex::show()
 {
-    cout << "(real: " << m_real << ", imag: " << m_imag << ")";
+    std::cout << "(real: " << m_real << ", imag: " << m_imag << ")";
 }
 
 

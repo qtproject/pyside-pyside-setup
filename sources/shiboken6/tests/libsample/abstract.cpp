@@ -5,8 +5,6 @@
 #include "abstract.h"
 #include "objecttype.h"
 
-using namespace std;
-
 const int Abstract::staticPrimitiveField = 0;
 
 Abstract::Abstract(int id) : m_id(id)
@@ -42,23 +40,23 @@ Abstract::callPureVirtual()
 void
 Abstract::show(PrintFormat format)
 {
-    cout << '<';
+    std::cout << '<';
     switch(format) {
         case Short:
-            cout << this;
+            std::cout << this;
             break;
         case Verbose:
-            cout << "class " << className() << " | cptr: " << this;
-            cout << ", id: " << m_id;
+            std::cout << "class " << className() << " | cptr: " << this
+                << ", id: " << m_id;
             break;
         case OnlyId:
-            cout << "id: " << m_id;
+            std::cout << "id: " << m_id;
             break;
         case ClassNameAndId:
-            cout << className() << " - id: " << m_id;
+            std::cout << className() << " - id: " << m_id;
             break;
     }
-    cout << '>';
+    std::cout << '>';
 }
 
 void Abstract::callVirtualGettingEnum(PrintFormat p)

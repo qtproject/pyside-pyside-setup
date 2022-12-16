@@ -4,15 +4,13 @@
 #include "objecttypelayout.h"
 #include <iostream>
 
-using namespace std;
-
 void ObjectTypeLayout::addObject(ObjectType* obj)
 {
     if (obj->isLayoutType()) {
         ObjectTypeLayout* l = reinterpret_cast<ObjectTypeLayout*>(obj);
         if (l->parent()) {
-            cerr << "[WARNING] ObjectTypeLayout::addObject: layout '" << l->objectName().cstring();
-            cerr << "' already has a parent." << endl;
+            std::cerr << "[WARNING] ObjectTypeLayout::addObject: layout '"
+                << l->objectName().cstring() << "' already has a parent.\n";
             return;
         }
 

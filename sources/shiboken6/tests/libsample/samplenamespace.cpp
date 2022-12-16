@@ -6,8 +6,6 @@
 #include <time.h>
 #include "samplenamespace.h"
 
-using namespace std;
-
 namespace SampleNamespace
 {
 

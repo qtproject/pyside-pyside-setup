@@ -4,8 +4,6 @@
 #include <iostream>
 #include "mapuser.h"
 
-using namespace std;
-
 std::map<std::string, std::pair<Complex, int> >
 MapUser::callCreateMap()
 {
@@ -36,9 +34,9 @@ MapUser::createMap()
 void
 MapUser::showMap(std::map<std::string, int> mapping)
 {
-    cout << __FUNCTION__ << endl;
+    std::cout << __FUNCTION__ << std::endl;
     for (auto it = mapping.begin(), end = mapping.end(); it != end; ++it)
-        cout << (*it).first << " => " << (*it).second << endl;
+        std::cout << (*it).first << " => " << (*it).second << std::endl;
 }
 
 void MapUser::pointerToMap(std::map<std::string, std::string> *)

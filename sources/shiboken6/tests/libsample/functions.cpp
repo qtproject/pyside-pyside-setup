@@ -7,12 +7,10 @@
 #include <iostream>
 #include <numeric>
 
-using namespace std;
-
 void
 printSomething()
 {
-    cout << __FUNCTION__ << endl;
+    std::cout << __FUNCTION__ << std::endl;
 }
 
 int
@@ -227,7 +225,7 @@ void ClassWithFunctionPointer::doNothing(void *operand)
     (void) operand;
 }
 
-string addStdStrings(const std::string &s1, const std::string &s2)
+std::string addStdStrings(const std::string &s1, const std::string &s2)
 {
     return s1 + s2;
 }
@@ -239,5 +237,5 @@ std::wstring addStdWStrings(const std::wstring &s1, const std::wstring &s2)
 
 void testNullPtrT(std::nullptr_t)
 {
-    cout << __FUNCTION__ << '\n';
+    std::cout << __FUNCTION__ << '\n';
 }

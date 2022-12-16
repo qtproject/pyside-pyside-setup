@@ -4,8 +4,6 @@
 #include <iostream>
 #include "polygon.h"
 
-using namespace std;
-
 Polygon::Polygon(double x, double y)
 {
     m_points.push_back(Point(x, y));

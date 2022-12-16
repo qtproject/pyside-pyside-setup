@@ -4,8 +4,6 @@
 #include <iostream>
 #include "point.h"
 
-using namespace std;
-
 Point::Point(int x, int y) : m_x(x), m_y(y)
 {
 }
@@ -35,7 +33,7 @@ Point::copy() const
 void
 Point::show()
 {
-    cout << "(x: " << m_x << ", y: " << m_y << ")";
+    std::cout << "(x: " << m_x << ", y: " << m_y << ")";
 }
 
 bool

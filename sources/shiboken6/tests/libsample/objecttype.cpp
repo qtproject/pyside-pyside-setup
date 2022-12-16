@@ -10,8 +10,6 @@
 
 #include <algorithm>
 
-using namespace std;
-
 ObjectType::ObjectType(ObjectType* parent) : m_parent(nullptr), m_layout(nullptr), m_call_id(-1)
 {
     setParent(parent);
@@ -161,14 +159,16 @@ void
 ObjectType::setLayout(ObjectTypeLayout* l)
 {
     if (!l) {
-        cerr << "[WARNING] ObjectType::setLayout: Cannot set layout to 0." << endl;
+        std::cerr << "[WARNING] ObjectType::setLayout: Cannot set layout to 0.\n";
         return;
     }
 
     if (layout()) {
         if (layout() != l) {
-            cerr << "[WARNING] ObjectType::setLayout: Attempting to set ObjectTypeLayout '" << l->objectName().cstring();
-            cerr << "' on ObjectType '" << objectName().cstring() << "', which already has a layout." << endl;
+            std::cerr << "[WARNING] ObjectType::setLayout: Attempting to set ObjectTypeLayout '"
+                << l->objectName().cstring()
+                << "' on ObjectType '" << objectName().cstring()
+                << "', which already has a layout.\n";
         }
         return;
     }
@@ -176,8 +176,10 @@ ObjectType::setLayout(ObjectTypeLayout* l)
     ObjectType* oldParent = l->parent();
     if (oldParent && oldParent != this) {
         if (oldParent->isLayoutType()) {
-            cerr << "[WARNING] ObjectType::setLayout: Attempting to set ObjectTypeLayout '" << l->objectName().cstring();
-            cerr << "' on ObjectType '" << objectName().cstring() << "', when the ObjectTypeLayout already has a parent layout." << endl;
+            std::cerr << "[WARNING] ObjectType::setLayout: Attempting to set ObjectTypeLayout '"
+                << l->objectName().cstring()
+                << "' on ObjectType '" << objectName().cstring()
+                << "', when the ObjectTypeLayout already has a parent layout.\n";
             return;
         } else {
             // Steal the layout from an ObjectType parent.

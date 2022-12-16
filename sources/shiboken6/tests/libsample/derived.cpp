@@ -4,8 +4,6 @@
 #include <iostream>
 #include "derived.h"
 
-using namespace std;
-
 Derived::Derived(int id) : Abstract(id)
 {
 }

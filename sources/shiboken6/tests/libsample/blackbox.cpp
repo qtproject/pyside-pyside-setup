@@ -3,8 +3,6 @@
 
 #include "blackbox.h"
 
-using namespace std;
-
 BlackBox::~BlackBox()
 {
     // Free all maps.

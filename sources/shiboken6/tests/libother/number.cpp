@@ -5,12 +5,10 @@
 #include <cstring>
 #include <sstream>
 
-using namespace std;
-
 Str
 Number::toStr() const
 {
-    ostringstream in;
+    std::ostringstream in;
     in << m_value;
     return in.str().c_str();
 }

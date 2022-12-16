@@ -5,8 +5,6 @@
 #include "modifications.h"
 #include "objecttype.h"
 
-using namespace std;
-
 Modifications::Modifications()
 {
     m_object = new ObjectType();
@@ -127,7 +125,7 @@ Modifications::increment(int number)
 void
 Modifications::exclusiveCppStuff()
 {
-    cout << __FUNCTION__ << endl;
+    std::cout << __FUNCTION__ << std::endl;
 }
 
 int

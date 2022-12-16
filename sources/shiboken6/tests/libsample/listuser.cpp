@@ -5,8 +5,6 @@
 #include <cstdlib>
 #include "listuser.h"
 
-using namespace std;
-
 std::list<int>
 ListUser::callCreateList()
 {

@@ -7,8 +7,6 @@
 #include <cstring>
 #include <sstream>
 
-using namespace std;
-
 Str::Str(char c)
 {
     char str[2] = { c, 0 };
@@ -65,7 +63,7 @@ Str::toInt(bool* ok, int base) const
 {
     bool my_ok;
     int result = 0;
-    istringstream conv(m_str);
+    std::istringstream conv(m_str);
     switch (base) {
         case 8:
             conv >> std::oct >> result;
@@ -77,7 +75,7 @@ Str::toInt(bool* ok, int base) const
             conv >> std::hex >> result;
             break;
     }
-    my_ok = istringstream::eofbit & conv.rdstate();
+    my_ok = std::istringstream::eofbit & conv.rdstate();
     if (!my_ok)
         result = 0;
     if (ok)
@@ -106,7 +104,7 @@ Str::set_char(int pos, char ch)
 
 Str Str::operator+(int number) const
 {
-    ostringstream in;
+    std::ostringstream in;
     in << m_str << number;
     return in.str().c_str();
 }
@@ -118,7 +116,7 @@ bool Str::operator==(const Str& other) const
 
 Str operator+(int number, const Str& str)
 {
-    ostringstream in;
+    std::ostringstream in;
     in << number << str.m_str;
     return in.str().c_str();
 }

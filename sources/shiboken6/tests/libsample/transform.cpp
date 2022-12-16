@@ -4,15 +4,7 @@
 
 #include "transform.h"
 
-#ifdef _WIN32
-#include <math.h>
-#include <float.h>
-static inline bool isfinite(double a) { return _finite(a); }
-#else
 #include <cmath>
-#endif
-
-using namespace std;
 
 Point applyHomogeneousTransform(
     const Point& in,
@@ -25,14 +17,11 @@ Point applyHomogeneousTransform(
     double y = m21 * in.x() + m22 * in.y() + m23;
     double w = m31 * in.x() + m32 * in.y() + m33;
 
-    if (isfinite(w) && fabs(w) > 1e-10)
-    {
+    if (std::isfinite(w) && fabs(w) > 1e-10) {
         if (okay)
             *okay = true;
         return Point(x / w, y / w);
-    }
-    else
-    {
+    } else {
         if (okay)
             *okay = false;
         return Point();

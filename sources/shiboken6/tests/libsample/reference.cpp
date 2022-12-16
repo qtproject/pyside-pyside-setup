@@ -4,12 +4,10 @@
 #include <iostream>
 #include "reference.h"
 
-using namespace std;
-
 void
 Reference::show() const
 {
-    cout << "Reference.objId: " << m_objId << ", address: " << this;
+    std::cout << "Reference.objId: " << m_objId << ", address: " << this;
 }
 
 Reference &Reference::returnMySecondArg(int, Reference &ref)

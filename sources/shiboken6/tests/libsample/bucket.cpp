@@ -12,9 +12,6 @@
 #define SLEEP(x) usleep(x)
 #endif
 
-
-using namespace std;
-
 Bucket::Bucket() : m_locked(false)
 {
 }

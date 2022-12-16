@@ -4,8 +4,6 @@
 #include "injectcode.h"
 #include <sstream>
 
-using namespace std;
-
 InjectCode::InjectCode()
 {
 }

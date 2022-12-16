@@ -4,8 +4,6 @@
 #include <iostream>
 #include "pointf.h"
 
-using namespace std;
-
 PointF::PointF(const Point& point) : m_x(point.x()), m_y(point.y())
 {
 }
@@ -26,7 +24,7 @@ PointF::midpoint(const PointF& other, PointF* midpoint) const
 void
 PointF::show()
 {
-    cout << "(x: " << m_x << ", y: " << m_y << ")";
+    std::cout << "(x: " << m_x << ", y: " << m_y << ")";
 }
 
 bool
