@@ -3,6 +3,7 @@ packaging
 build==0.7
 sphinx
 sphinx-panels
+myst-parser
 six
 wheel>=0.35
 PyOpenGL

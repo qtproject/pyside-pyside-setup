@@ -27,7 +27,24 @@ extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.ifconfig',
     'sphinx.ext.coverage', 'sphinx.ext.intersphinx', 'sphinx.ext.todo',
     'sphinx.ext.graphviz',
     'sphinx.ext.viewcode',
-    'sphinx_panels', 'sphinx_copybutton']
+    'sphinx_panels', 'sphinx_copybutton',
+    'myst_parser']
+
+myst_enable_extensions = [
+    "amsmath",
+    "colon_fence",
+    "deflist",
+    "dollarmath",
+    "fieldlist",
+    "html_admonition",
+    "html_image",
+    "replacements",
+    "smartquotes",
+    "strikethrough",
+    "substitution",
+    "tasklist",
+]
+myst_heading_anchors = 6
 
 output_format='@DOC_OUTPUT_FORMAT@'
 
@@ -43,7 +60,10 @@ rst_epilog = """
 templates_path = ['@CMAKE_CURRENT_SOURCE_DIR@/_templates']
 
 # The suffix of source filenames.
-source_suffix = '.rst'
+source_suffix = {
+    '.rst': 'restructuredtext',
+    '.md': 'markdown',
+}
 
 # The encoding of source files.
 source_encoding = 'utf-8'
