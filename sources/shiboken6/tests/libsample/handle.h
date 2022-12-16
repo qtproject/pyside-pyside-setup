@@ -8,38 +8,38 @@
 
 /* See http://bugs.pyside.org/show_bug.cgi?id=1105. */
 namespace Foo {
-    using HANDLE = unsigned long;
+    using SAMPLE_HANDLE = unsigned long;
 }
 
 class LIBSAMPLE_API OBJ
 {
 };
 
-using HANDLE = OBJ *;
+using SAMPLE_HANDLE = OBJ *;
 
 class LIBSAMPLE_API HandleHolder
 {
 public:
-    explicit HandleHolder(HANDLE ptr = nullptr) : m_handle(ptr) {}
-    explicit HandleHolder(Foo::HANDLE val): m_handle2(val) {}
+    explicit HandleHolder(SAMPLE_HANDLE ptr = nullptr) : m_handle(ptr) {}
+    explicit HandleHolder(Foo::SAMPLE_HANDLE val): m_handle2(val) {}
 
-    void set(HANDLE ptr);
-    inline void set(const Foo::HANDLE& val) { m_handle2 = val; }
-    inline HANDLE handle() { return m_handle; }
-    inline Foo::HANDLE handle2() { return m_handle2; }
+    void set(SAMPLE_HANDLE ptr);
+    inline void set(const Foo::SAMPLE_HANDLE& val) { m_handle2 = val; }
+    inline SAMPLE_HANDLE handle() { return m_handle; }
+    inline Foo::SAMPLE_HANDLE handle2() { return m_handle2; }
 
-    static HANDLE createHandle();
+    static SAMPLE_HANDLE createHandle();
     bool compare(HandleHolder* other);
     bool compare2(HandleHolder* other);
 
 private:
-    HANDLE m_handle;
-    Foo::HANDLE m_handle2;
+    SAMPLE_HANDLE m_handle;
+    Foo::SAMPLE_HANDLE m_handle2;
 };
 
-inline void HandleHolder::set(HANDLE)
+inline void HandleHolder::set(SAMPLE_HANDLE)
 {
-    HANDLE tmp = m_handle;
+    SAMPLE_HANDLE tmp = m_handle;
     m_handle = tmp;
 }
 

@@ -6,7 +6,7 @@
     <primitive-type name="ObjectType::Identifier"/>
     <primitive-type name="std::nullptr_t"/>
 
-    <primitive-type name="Foo::HANDLE" target-lang-api-name="PyLong"/>
+    <primitive-type name="Foo::SAMPLE_HANDLE" target-lang-api-name="PyLong"/>
 
     <primitive-type name="std::size_t" target-lang-api-name="PyLong">
         <conversion-rule>
@@ -74,7 +74,7 @@
         </conversion-rule>
     </primitive-type>
 
-    <primitive-type name="HANDLE" target-lang-api-name="PyComplex">
+    <primitive-type name="SAMPLE_HANDLE" target-lang-api-name="PyComplex">
         <include file-name="handle.h" location="local"/>
         <conversion-rule>
             <native-to-target>

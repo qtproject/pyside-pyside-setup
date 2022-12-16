@@ -3,9 +3,9 @@
 
 #include "handle.h"
 
-HANDLE HandleHolder::createHandle()
+SAMPLE_HANDLE HandleHolder::createHandle()
 {
-    return (HANDLE) new OBJ;
+    return (SAMPLE_HANDLE) new OBJ;
 }
 
 bool HandleHolder::compare(HandleHolder* other)
