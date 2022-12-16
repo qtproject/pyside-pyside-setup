@@ -11,6 +11,10 @@
 #include "glue/core_snippets_p.h"
 // @snippet include-pyside
 
+// @snippet core-snippets-p-h
+#include "glue/core_snippets_p.h"
+// @snippet core-snippets-p-h
+
 // @snippet qarg_helper
 
 // Helper for the Q_ARG/Q_RETURN_ARG functions, creating a meta type

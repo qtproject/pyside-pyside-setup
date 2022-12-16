@@ -792,8 +792,9 @@
   <value-type name="QDate" hash-function="PySide::hash" >
     <extra-includes>
       <include file-name="pysideqhash.h" location="global"/>
-      <include file-name="glue/core_snippets_p.h" location="local"/>
     </extra-includes>
+    <inject-code class="native" position="beginning" file="../glue/qtcore.cpp"
+                 snippet="core-snippets-p-h"/>
     <conversion-rule>
         <target-to-native>
             <add-conversion type="Py_None" file="../glue/qtcore.cpp" snippet="conversion-pynone"/>
@@ -852,8 +853,9 @@
   <value-type name="QDateTime" hash-function="PySide::hash">
     <extra-includes>
       <include file-name="pysideqhash.h" location="global"/>
-      <include file-name="glue/core_snippets_p.h" location="local"/>
     </extra-includes>
+    <inject-code class="native" position="beginning" file="../glue/qtcore.cpp"
+                 snippet="core-snippets-p-h"/>
     <enum-type name="YearRange"/>
     <conversion-rule>
         <target-to-native>
@@ -1211,8 +1213,9 @@
   <value-type name="QTime" hash-function="PySide::hash">
     <extra-includes>
       <include file-name="pysideqhash.h" location="global"/>
-      <include file-name="glue/core_snippets_p.h" location="local"/>
     </extra-includes>
+    <inject-code class="native" position="beginning" file="../glue/qtcore.cpp"
+                 snippet="core-snippets-p-h"/>
     <conversion-rule>
         <target-to-native>
             <add-conversion type="Py_None" file="../glue/qtcore.cpp" snippet="conversion-pynone"/>
@@ -1630,8 +1633,9 @@
       <include file-name="QThread" location="global"/>
       <include file-name="QCoreApplication" location="global"/>
       <include file-name="signalmanager.h" location="local"/>
-      <include file-name="glue/core_snippets_p.h" location="local"/>
     </extra-includes>
+    <inject-code class="native" position="beginning" file="../glue/qtcore.cpp"
+                 snippet="core-snippets-p-h"/>
     <modify-function signature="metaObject()const">
       <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-metaobject"/>
       <modify-argument index="return">
