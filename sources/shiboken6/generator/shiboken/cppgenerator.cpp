@@ -554,6 +554,9 @@ void CppGenerator::generateIncludes(TextStream &s, const GeneratorContext &class
         }
     }
 
+    if (avoidProtectedHack())
+        s << baseWrapperIncludes(classContext);
+
     for (const auto &g : includes)
         s << g;
 

@@ -1974,6 +1974,18 @@ void AbstractMetaClass::setSourceLocation(const SourceLocation &sourceLocation)
     d->m_sourceLocation = sourceLocation;
 }
 
+AbstractMetaClassCList allBaseClasses(const AbstractMetaClassCPtr metaClass)
+{
+    AbstractMetaClassCList result;
+    recurseClassHierarchy(metaClass, [&result] (const AbstractMetaClassCPtr &c) {
+        if (!result.contains(c))
+            result.append(c);
+        return false;
+    });
+    result.removeFirst(); // remove self
+    return result;
+}
+
 QDebug operator<<(QDebug debug, const UsingMember &d)
 {
     QDebugStateSaver saver(debug);

@@ -192,6 +192,7 @@ protected:
     static QString fullPythonClassName(const AbstractMetaClassCPtr &metaClass);
 
     static QString headerFileNameForContext(const GeneratorContext &context);
+    IncludeGroup baseWrapperIncludes(const GeneratorContext &classContext) const;
 
     static QString fullPythonFunctionName(const AbstractMetaFunctionCPtr &func, bool forceFunc);
 

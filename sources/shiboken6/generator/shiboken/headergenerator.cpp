@@ -128,15 +128,22 @@ void HeaderGenerator::writeWrapperClass(TextStream &s,
 
     writeWrapperClassDeclaration(s, wrapperName, classContext);
 
-    // PYSIDE-500: Use also includes for inherited wrapper classes, because
-    // without the protected hack, we sometimes need to cast inherited wrappers.
-    // But we don't use multiple include files. Instead, they are inserted as recursive
-    // headers. This keeps the file structure as simple as before the enhanced inheritance.
+    // PYSIDE-500: Use also includes for inherited wrapper classes other
+    // modules, because without the protected hack, we sometimes need to
+    // cast inherited wrappers. CppGenerator generates include statements for
+    // the classes of the current module. For other modules, we insert the
+    // declarations as recursive headers, since wrapper headers are not \
+    // installed. This keeps the file structure as simple as before the
+    // enhanced inheritance.
     if (avoidProtectedHack()) {
-        for (auto base = metaClass->baseClass(); !base.isNull(); base = base->baseClass()) {
-            const auto baseContext = contextForClass(base);
-            if (baseContext.useWrapper())
-                writeInheritedWrapperClassDeclaration(s, baseContext);
+        const auto &baseClasses = allBaseClasses(classContext.metaClass());
+        for (const auto &baseClass : baseClasses) {
+            const auto gen = baseClass->typeEntry()->codeGeneration();
+            if (gen == TypeEntry::GenerateForSubclass) { // other module
+                const auto baseContext = contextForClass(baseClass);
+                if (baseContext.useWrapper())
+                    writeInheritedWrapperClassDeclaration(s, baseContext);
+            }
         }
     }
 }
