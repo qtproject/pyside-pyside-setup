@@ -1944,6 +1944,9 @@
   <object-type name="QWidget" delete-in-main-thread="true">
     <!-- see QWindow::nativeEvent(), QAbstractNativeEventFilter::nativeEventFilter() -->
     <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp" snippet="qwidget-addaction-glue"/>
+    <inject-code class="native" position="beginning">
+    #include &lt;QtWidgets/qapplication.h&gt;
+    </inject-code>
     <modify-function signature="nativeEvent(const QByteArray &amp;,void*,qintptr*)">
       <modify-argument index="3">
         <remove-argument/>
