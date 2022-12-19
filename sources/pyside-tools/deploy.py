@@ -31,6 +31,7 @@ import sys
 from pathlib import Path
 import shutil
 import traceback
+from textwrap import dedent
 
 from deploy import Config, PythonExecutable
 
@@ -79,14 +80,26 @@ if __name__ == "__main__":
     parser.add_argument("--dry-run", action="store_true", help="show the commands to be run")
 
     parser.add_argument(
-        "--keep-deployment-files",action="store_true",
-        help="keep the generated deployment files generated",)
+        "--keep-deployment-files", action="store_true",
+        help="keep the generated deployment files generated")
 
     parser.add_argument("-f", "--force", action="store_true", help="force all input prompts")
 
     args = parser.parse_args()
     logging.basicConfig(level=args.loglevel)
-    config_file = Path(args.config_file) if args.config_file else None
+    config_file = None
+
+    if args.config_file and Path(args.config_file).exists():
+        config_file = Path(args.config_file)
+
+    if not config_file and not args.main_file.exists():
+        print(dedent("""
+            Directory does not contain main.py file
+            Please specify the main python entrypoint file or the config file
+            Run "pyside6-deploy --help" to see info about cli options
+
+            pyside6-deploy exiting..."""))
+        sys.exit(0)
 
     if args.main_file:
         if args.main_file.parent != Path.cwd():
