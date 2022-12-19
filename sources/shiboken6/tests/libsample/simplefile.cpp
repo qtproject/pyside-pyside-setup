@@ -1,8 +1,8 @@
 // Copyright (C) 2016 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 #include <fstream>
 #include "simplefile.h"
 
@@ -51,9 +51,9 @@ SimpleFile::open()
     if ((p->m_descriptor = fopen(p->m_filename, "rb")) == nullptr)
         return false;
 
-    fseek(p->m_descriptor, 0, SEEK_END);
+    std::fseek(p->m_descriptor, 0, SEEK_END);
     p->m_size = ftell(p->m_descriptor);
-    rewind(p->m_descriptor);
+    std::rewind(p->m_descriptor);
 
     return true;
 }
@@ -62,7 +62,7 @@ void
 SimpleFile::close()
 {
     if (p->m_descriptor) {
-        fclose(p->m_descriptor);
+        std::fclose(p->m_descriptor);
         p->m_descriptor = nullptr;
     }
 }

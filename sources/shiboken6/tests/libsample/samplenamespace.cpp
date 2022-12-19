@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <cstdlib>
-#include <time.h>
+#include <ctime>
 #include "samplenamespace.h"
 
 namespace SampleNamespace
@@ -51,7 +51,7 @@ getNumber(Option opt)
             retval = rand() % 100;
             break;
         case UnixTime:
-            retval = (int) time(nullptr);
+            retval = (int) std::time(nullptr);
             break;
         default:
             retval = 0;

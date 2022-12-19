@@ -201,12 +201,12 @@ static int init_phase_2(safe_globals_struc *p, PyMethodDef *methods)
 #ifndef _WIN32
 ////////////////////////////////////////////////////////////////////////////
 // a stack trace for linux-like platforms
-#include <stdio.h>
+#include <cstdio>
 #if defined(__GLIBC__)
 #  include <execinfo.h>
 #endif
 #include <signal.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <unistd.h>
 
 static void handler(int sig) {
@@ -219,7 +219,7 @@ static void handler(int sig) {
 
     // print out all the frames to stderr
 #endif
-    fprintf(stderr, "Error: signal %d:\n", sig);
+    std::fprintf(stderr, "Error: signal %d:\n", sig);
 #if defined(__GLIBC__)
     backtrace_symbols_fd(array, size, STDERR_FILENO);
 #endif

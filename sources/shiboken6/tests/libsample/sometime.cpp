@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "sometime.h"
-#include <stdio.h>
+
+#include <cstdio>
 
 void
 Time::setTime()
@@ -46,7 +47,8 @@ Time::toString() const
     if (m_is_null)
         return Str();
     char buffer[13];
-    snprintf(buffer, sizeof(buffer), "%02d:%02d:%02d.%03d", m_hour, m_minute, m_second, m_msec);
+    std::snprintf(buffer, sizeof(buffer), "%02d:%02d:%02d.%03d",
+                  m_hour, m_minute, m_second, m_msec);
     return Str(buffer);
 }
 

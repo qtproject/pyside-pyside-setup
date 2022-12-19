@@ -1516,7 +1516,6 @@ return %CONVERTTOPYTHON[QVariant](ret);
 
 // @snippet qthread_pthread_cleanup
 #ifdef Q_OS_UNIX
-#  include <stdio.h>
 #  include <pthread.h>
 static void qthread_pthread_cleanup(void *arg)
 {

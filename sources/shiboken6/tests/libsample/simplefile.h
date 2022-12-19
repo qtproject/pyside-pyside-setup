@@ -5,7 +5,6 @@
 #define SIMPLEFILE_H
 
 #include "libsamplemacros.h"
-#include <stdio.h>
 
 class SimpleFile_p;
 

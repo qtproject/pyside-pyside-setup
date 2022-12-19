@@ -10,8 +10,6 @@
 
 #include "libsamplemacros.h"
 
-#include <stddef.h>
-
 struct Event
 {
     enum EventType {

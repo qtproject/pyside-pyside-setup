@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "functions.h"
-#include <string.h>
+#include <cstring>
 #include <algorithm>
 #include <iostream>
 #include <numeric>
@@ -66,7 +66,7 @@ char*
 makeCString()
 {
     char* string = new char[strlen(__FUNCTION__) + 1];
-    strcpy(string, __FUNCTION__);
+    std::strcpy(string, __FUNCTION__);
     return string;
 }
 

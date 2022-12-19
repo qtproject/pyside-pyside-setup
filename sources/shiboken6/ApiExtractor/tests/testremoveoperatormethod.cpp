@@ -15,28 +15,29 @@ using namespace Qt::StringLiterals;
 
 void TestRemoveOperatorMethod::testRemoveOperatorMethod()
 {
-    const char cppCode[] = "\
-    #include <stdint.h>\n\
-    \n\
-    struct Char {};\n\
-    struct ByteArray {};\n\
-    struct String {};\n\
-    \n\
-    struct A {\n\
-        A& operator>>(char&);\n\
-        A& operator>>(char*);\n\
-        A& operator>>(short&);\n\
-        A& operator>>(unsigned short&);\n\
-        A& operator>>(int&);\n\
-        A& operator>>(unsigned int&);\n\
-        A& operator>>(int64_t&);\n\
-        A& operator>>(uint64_t&);\n\
-        A& operator>>(float&);\n\
-        A& operator>>(double&);\n\
-        A& operator>>(Char&);\n\
-        A& operator>>(ByteArray&);\n\
-        A& operator>>(String&);\n\
-    };\n";
+    const char cppCode[] = R"(#include <cstdint>
+
+struct Char {};
+struct ByteArray {};
+struct String {};
+
+struct A {
+    A& operator>>(char&);
+    A& operator>>(char*);
+    A& operator>>(short&);
+    A& operator>>(unsigned short&);
+    A& operator>>(int&);
+    A& operator>>(unsigned int&);
+    A& operator>>(int64_t&);
+    A& operator>>(uint64_t&);
+    A& operator>>(float&);
+    A& operator>>(double&);
+    A& operator>>(Char&);
+    A& operator>>(ByteArray&);
+    A& operator>>(String&);
+};
+)";
+
     const char xmlCode[] = "\
     <typesystem package='Foo'>\n\
         <primitive-type name='char'/>\n\

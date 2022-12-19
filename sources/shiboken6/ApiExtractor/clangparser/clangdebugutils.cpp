@@ -7,8 +7,6 @@
 #include <QtCore/QDebug>
 #include <QtCore/QString>
 
-#include <string.h>
-
 #ifndef QT_NO_DEBUG_STREAM
 
 #ifdef Q_OS_WIN
@@ -19,7 +17,7 @@ const char pathSep = '/';
 
 static const char *baseName(const char *fileName)
 {
-    const char *b = strrchr(fileName, pathSep);
+    const char *b = std::strrchr(fileName, pathSep);
     return b ? b + 1 : fileName;
 }
 

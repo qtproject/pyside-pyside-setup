@@ -19,7 +19,6 @@
 
 #include <clang-c/Index.h>
 
-#include <string.h>
 #include <algorithm>
 #include <iterator>
 
