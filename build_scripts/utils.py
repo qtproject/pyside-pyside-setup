@@ -28,7 +28,6 @@ except ModuleNotFoundError:
     # This is motivated by our CI using an old version of setuptools
     # so then the coin_build_instructions.py script is executed, and
     # import from this file, it was failing.
-    from distutils import log
     from distutils.errors import DistutilsSetupError as SetupError
 
 try:
@@ -70,7 +69,7 @@ def filter_match(name, patterns):
 def update_env_path(newpaths):
     paths = os.environ['PATH'].lower().split(os.pathsep)
     for path in newpaths:
-        if not str(path).lower() in paths:
+        if str(path).lower() not in paths:
             log.info(f"Inserting path '{path}' to environment")
             paths.insert(0, path)
             os.environ['PATH'] = f"{path}{os.pathsep}{os.environ['PATH']}"

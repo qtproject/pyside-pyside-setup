@@ -9,7 +9,6 @@ except ModuleNotFoundError:
     # import from this file, it was failing.
     from distutils.cmd import Command  # TODO: remove
 
-import os
 import sys
 import warnings
 import logging

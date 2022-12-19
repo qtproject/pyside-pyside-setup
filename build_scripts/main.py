@@ -38,7 +38,7 @@ from .options import OPTION, CommandMixin
 from .platforms.unix import prepare_packages_posix
 from .platforms.windows_desktop import prepare_packages_win32
 from .qtinfo import QtInfo
-from .utils import (copydir, copyfile, detect_clang, filter_match,
+from .utils import (copydir, copyfile, detect_clang,
                     get_numpy_location, get_python_dict,
                     linux_fix_rpaths_for_library, macos_fix_rpaths_for_library,
                     platform_cmake_options, remove_tree, run_process,
